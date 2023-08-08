@@ -34,24 +34,24 @@ public:
   virtual StatusCode safetyTest() override;
 
   virtual void compute() override {};
-  virtual bool isCentralTowerSeed() override;
-  virtual bool isBDT() override { return false; }
+  virtual bool isCentralTowerSeed() const override;
+  virtual bool isBDT() const override { return false; }
   virtual void setThresholds(std::vector<unsigned int> rHadThreshold,
                              std::vector<unsigned int> bdtThreshold,
                              unsigned int etThreshold,
                              unsigned int etThresholdForRHad) override;
 
-  virtual void getRCore(std::vector<unsigned int> & rCoreVec) override;
-  virtual unsigned int rCoreCore() override { return 0; }
-  virtual unsigned int rCoreEnv() override { return 0; }
-  virtual float getRealRCore() override;
-  virtual void getRHad(std::vector<unsigned int> &rHadVec) override;
-  virtual float getRealRHad() override;
+  virtual void getRCore(std::vector<unsigned int> & rCoreVec) const override;
+  virtual unsigned int rCoreCore() const override { return 0; }
+  virtual unsigned int rCoreEnv() const override { return 0; }
+  virtual float getRealRCore() const override;
+  virtual void getRHad(std::vector<unsigned int> &rHadVec) const override;
+  virtual float getRealRHad() const override;
   virtual void getSums(unsigned int seed, bool UnD, 
                        std::vector<unsigned int> & RcoreSums, 
                        std::vector<unsigned int> & Remums) override;
-  virtual unsigned int getBDTScore() override { return 0; }
-  virtual unsigned int getBDTCondition() override { return 0; };
+  virtual unsigned int getBDTScore() const override { return 0; }
+  virtual unsigned int getBDTCondition() const override { return 0; };
 
 protected:
   SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
@@ -64,8 +64,8 @@ protected:
   virtual void setSupercellSeed() { }
   virtual void setUnDAndOffPhi() { }
 
-  virtual bool getUnD() override { return 0; }
-  virtual unsigned int getSeed() override { return 0; }
+  virtual bool getUnD() const override { return 0; }
+  virtual unsigned int getSeed() const override { return 0; }
 
   unsigned int m_em0cells[3][3];
   unsigned int m_em1cells[12][3];

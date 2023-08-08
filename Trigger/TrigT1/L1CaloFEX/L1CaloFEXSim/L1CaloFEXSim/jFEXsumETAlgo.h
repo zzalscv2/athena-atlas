@@ -40,7 +40,7 @@ namespace LVL1 {
     /** Destructor **/
     virtual ~jFEXsumETAlgo();
 
-    virtual StatusCode safetyTest() override;
+    virtual StatusCode safetyTest() const override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) override;
     virtual int getTTowerET(unsigned int TTID=0) override; // arguments 2,2 to get the central TT from m_TTwindow[5][5]
@@ -48,7 +48,7 @@ namespace LVL1 {
     virtual void buildBarrelSumET()  override;
     virtual void buildFWDSumET()  override;
     virtual int getETlowerEta(uint bin)  override;
-    virtual int getETupperEta(uint bin)  override;   
+    virtual int getETupperEta(uint bin)  override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
 protected:

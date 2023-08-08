@@ -84,12 +84,10 @@ void LVL1::eFEXtauAlgoBase::buildLayers(int efex_id, int fpga_id,
 
 // Utility function to calculate and return jet discriminant sums for specified
 // location Intended to allow xAOD TOBs to be decorated with this information
-void LVL1::eFEXtauAlgoBase::getSums(unsigned int seed, bool UnD,
+void LVL1::eFEXtauAlgoBase::getSums(unsigned int /*seed*/, bool /*UnD*/,
                                     std::vector<unsigned int> &RcoreSums,
                                     std::vector<unsigned int> &RemSums) {
   // Set seed parameters to supplied values
-  (void)UnD;
-  (void)seed; // In this function seed has range 4-7
 
   // Now just call the 2 discriminant calculation methods
   getRCore(RcoreSums);
@@ -97,7 +95,7 @@ void LVL1::eFEXtauAlgoBase::getSums(unsigned int seed, bool UnD,
 }
 
 // Calculate the hadronic fraction isolation variable
-void LVL1::eFEXtauAlgoBase::getRHad(std::vector<unsigned int> &rHadVec) {
+void LVL1::eFEXtauAlgoBase::getRHad(std::vector<unsigned int> &rHadVec) const {
   unsigned int core = rHadCore();
   unsigned int env = rHadEnv();
 
@@ -106,7 +104,7 @@ void LVL1::eFEXtauAlgoBase::getRHad(std::vector<unsigned int> &rHadVec) {
 }
 
 // Calculate float isolation variable
-float LVL1::eFEXtauAlgoBase::getRealRCore() {
+float LVL1::eFEXtauAlgoBase::getRealRCore() const {
   unsigned int core = rCoreCore();
   unsigned int env = rCoreEnv();
 
@@ -118,7 +116,7 @@ float LVL1::eFEXtauAlgoBase::getRealRCore() {
   return out;
 }
 
-float LVL1::eFEXtauAlgoBase::getRealRHad() {
+float LVL1::eFEXtauAlgoBase::getRealRHad() const {
   unsigned int core = rHadCore();
   unsigned int env = rHadEnv();
 
@@ -130,7 +128,7 @@ float LVL1::eFEXtauAlgoBase::getRealRHad() {
   return out;
 }
 
-void LVL1::eFEXtauAlgoBase::getRCore(std::vector<unsigned int> &rCoreVec) {
+void LVL1::eFEXtauAlgoBase::getRCore(std::vector<unsigned int> &rCoreVec) const {
   unsigned int core = rCoreCore();
   unsigned int env = rCoreEnv();
 
@@ -139,7 +137,7 @@ void LVL1::eFEXtauAlgoBase::getRCore(std::vector<unsigned int> &rCoreVec) {
 }
 
 // Check if central tower qualifies as a seed tower for the tau algorithm
-bool LVL1::eFEXtauAlgoBase::isCentralTowerSeed() {
+bool LVL1::eFEXtauAlgoBase::isCentralTowerSeed() const {
   // Need layer cell ET arrays to be built
   if (m_cellsSet == false) {
     ATH_MSG_DEBUG(

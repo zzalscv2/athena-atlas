@@ -34,7 +34,7 @@
 namespace LVL1 {
     
 jTowerMakerFromJfexTowers::jTowerMakerFromJfexTowers(const std::string& name, ISvcLocator* pSvcLocator)
-    :  AthAlgorithm(name, pSvcLocator)
+    :  AthReentrantAlgorithm(name, pSvcLocator)
 {}
 
 
@@ -53,7 +53,7 @@ StatusCode jTowerMakerFromJfexTowers::initialize()
 }
 
 
-StatusCode jTowerMakerFromJfexTowers::execute() 
+StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
 {
     ATH_MSG_DEBUG("Executing " << name() << ", processing event number " );
     
@@ -61,7 +61,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
     SG::ReadHandle<xAOD::jFexTowerContainer> jDataTowerContainer;
     bool jDataTowerFilled = false;
     if(!m_isMC){
-        jDataTowerContainer = SG::ReadHandle<xAOD::jFexTowerContainer>(m_DataTowerKey);
+      jDataTowerContainer = SG::ReadHandle<xAOD::jFexTowerContainer>(m_DataTowerKey, ctx);
         if(!jDataTowerContainer.isValid()) {
             ATH_MSG_FATAL("Could not retrieve collection " << jDataTowerContainer.key() );
             return StatusCode::FAILURE;
@@ -73,7 +73,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
     SG::ReadHandle<xAOD::jFexTowerContainer> jEmulatedTowerContainer;
     
     if(m_UseEmulated){
-        jEmulatedTowerContainer = SG::ReadHandle<xAOD::jFexTowerContainer>(m_EmulTowerKey);
+      jEmulatedTowerContainer = SG::ReadHandle<xAOD::jFexTowerContainer>(m_EmulTowerKey, ctx);
         if(!jEmulatedTowerContainer.isValid()) {
             ATH_MSG_FATAL("Could not retrieve collection " << jEmulatedTowerContainer.key() );
             return StatusCode::FAILURE;
@@ -139,7 +139,7 @@ StatusCode jTowerMakerFromJfexTowers::execute()
     }
 
     // STEP 3 - Write the completed jTowerContainer into StoreGate (move the local copy in memory)
-    SG::WriteHandle<LVL1::jTowerContainer> jTowerContainerSG(m_jTowerContainerSGKey);
+    SG::WriteHandle<LVL1::jTowerContainer> jTowerContainerSG(m_jTowerContainerSGKey, ctx);
     ATH_CHECK(jTowerContainerSG.record(std::move( local_jTowerContainerRaw ) ) );
 
     // STEP 4 - Close and clean the event

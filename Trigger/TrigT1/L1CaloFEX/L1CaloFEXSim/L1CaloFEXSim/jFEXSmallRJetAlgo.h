@@ -39,13 +39,13 @@ namespace LVL1 {
 
     virtual StatusCode safetyTest() override;
     virtual void setup(int inputTable[7][7], int inputTableDisplaced[7][7]) override;
-    virtual unsigned int getTTowerET(unsigned int TTID ) override;
+    virtual unsigned int getTTowerET(unsigned int TTID ) const override;
     virtual void buildSeeds() override; 
     virtual bool isSeedLocalMaxima() override; 
-    virtual unsigned int getSmallClusterET() override;
-    virtual unsigned int getSmallETRing() override;
-    virtual unsigned int getTTIDcentre() override;
-    virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
+    virtual unsigned int getSmallClusterET() const override;
+    virtual unsigned int getSmallETRing() const override;
+    virtual unsigned int getTTIDcentre() const override;
+    virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map) override;
     
   private:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};

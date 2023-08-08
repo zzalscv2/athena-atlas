@@ -63,7 +63,7 @@ StatusCode jTowerBuilder::initialize()
 
 
 
-void jTowerBuilder::init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) {
+void jTowerBuilder::init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const {
 
     execute(jTowerContainerRaw);
     
@@ -74,12 +74,12 @@ void jTowerBuilder::init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) 
 }
 
 
-void jTowerBuilder::reset() {
+void jTowerBuilder::reset() const {
 
 }
 
 
-void jTowerBuilder::execute(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) {
+void jTowerBuilder::execute(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const {
   BuildAllTowers(jTowerContainerRaw);
 }
  
@@ -386,7 +386,6 @@ void jTowerBuilder::BuildAllTowers(std::unique_ptr<jTowerContainer> & jTowerCont
     BuildEMEjTowers(jTowerContainerRaw);
     BuildEMIEjTowers(jTowerContainerRaw);
     BuildFCALjTowers(jTowerContainerRaw);
-
 }
 
 } // end of LVL1 namespace

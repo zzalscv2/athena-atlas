@@ -270,6 +270,11 @@ def RecoSteering(flags):
             "OutputStreamAOD").MetadataItemList)
         log.info("---------- Configured AOD writing")
 
+    if flags.Output.doJiveXML:
+        from JiveXML.JiveXMLConfig import AlgoJiveXMLCfg
+        acc.merge(AlgoJiveXMLCfg(flags))
+        log.info("---------- Configured JiveXML writing")
+    
     # Set up PerfMon
     acc.flagPerfmonDomain('PerfMon')
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:

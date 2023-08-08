@@ -58,7 +58,7 @@ void LVL1::eFEXtauBDTAlgo::setup(int inputTable[3][3], int efex_id, int fpga_id,
 
 void LVL1::eFEXtauBDTAlgo::compute() { m_bdtAlgoImpl->next(); }
 
-std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauBDTAlgo::getTauTOB() {
+std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauBDTAlgo::getTauTOB() const {
   std::unique_ptr<eFEXtauTOB> tob = std::make_unique<eFEXtauTOB>();
   unsigned int et = getEt();
   tob->setEt(et);
@@ -105,7 +105,7 @@ void LVL1::eFEXtauBDTAlgo::setThresholdPointers() {
 }
 
 // Calculate reconstructed ET value
-unsigned int LVL1::eFEXtauBDTAlgo::getEt() {
+unsigned int LVL1::eFEXtauBDTAlgo::getEt() const {
   if (m_cellsSet == false) {
     ATH_MSG_DEBUG("Layers not built, cannot accurately calculate Et.");
   }
@@ -113,7 +113,7 @@ unsigned int LVL1::eFEXtauBDTAlgo::getEt() {
   return m_bdtAlgoImpl->getETEstimate();
 }
 
-unsigned int LVL1::eFEXtauBDTAlgo::rHadCore() {
+unsigned int LVL1::eFEXtauBDTAlgo::rHadCore() const {
   if (m_cellsSet == false) {
     ATH_MSG_DEBUG("Layers not built, cannot calculate rHad core value");
   }
@@ -121,7 +121,7 @@ unsigned int LVL1::eFEXtauBDTAlgo::rHadCore() {
   return m_bdtAlgoImpl->getHADETEstimate();
 }
 
-unsigned int LVL1::eFEXtauBDTAlgo::rHadEnv() {
+unsigned int LVL1::eFEXtauBDTAlgo::rHadEnv() const {
   if (m_cellsSet == false) {
     ATH_MSG_DEBUG("Layers not built, cannot calculate rHad environment value");
   }
@@ -131,7 +131,7 @@ unsigned int LVL1::eFEXtauBDTAlgo::rHadEnv() {
 
 // Return the bitwise value of the given Et
 // See eFEXtauBaseAlgo for a first attempt at this
-unsigned int LVL1::eFEXtauBDTAlgo::getBitwiseEt() {
+unsigned int LVL1::eFEXtauBDTAlgo::getBitwiseEt() const {
   if (m_cellsSet == false) {
     ATH_MSG_DEBUG("Layers not built, cannot accurately calculate Et.");
   }
@@ -139,15 +139,15 @@ unsigned int LVL1::eFEXtauBDTAlgo::getBitwiseEt() {
   return m_bdtAlgoImpl->getET();
 }
 
-unsigned int LVL1::eFEXtauBDTAlgo::getBDTScore() {
+unsigned int LVL1::eFEXtauBDTAlgo::getBDTScore() const {
   return m_bdtAlgoImpl->getBDTScore();
 }
 
-unsigned int LVL1::eFEXtauBDTAlgo::getBDTCondition() {
+unsigned int LVL1::eFEXtauBDTAlgo::getBDTCondition() const {
   return m_bdtAlgoImpl->getBDTCondition();
 }
 
-bool LVL1::eFEXtauBDTAlgo::isBDT() { return true; }
+bool LVL1::eFEXtauBDTAlgo::isBDT() const { return true; }
 
 void LVL1::eFEXtauBDTAlgo::setThresholds(
     std::vector<unsigned int> rHadThreshold,

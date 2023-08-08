@@ -139,7 +139,7 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
 
 
 
-void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO){
+void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const {
 
     int rows = twrs.size();
     int cols = twrs[0].size();
@@ -156,16 +156,16 @@ void gFEXaltMetAlgo::metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_
 
 inline void gFEXaltMetAlgo::metTotal(const int A_MET_x, const int A_MET_y,
                                      const int B_MET_x, const int B_MET_y,
-                                     int & MET_x, int & MET_y, int & MET){
+                                     int & MET_x, int & MET_y, int & MET) const {
 
   MET_x = A_MET_x + B_MET_x;
   MET_y = A_MET_y + B_MET_y;
-  MET   = sqrt((MET_x * MET_x) + (MET_y * MET_y));
+  MET   = std::sqrt((MET_x * MET_x) + (MET_y * MET_y));
 
 }
 
 //Function to calculate rho for the given set of gtowers
-int gFEXaltMetAlgo::get_rho(const gTowersCentral &twrs){
+int gFEXaltMetAlgo::get_rho(const gTowersCentral &twrs) const {
     const int rows = twrs.size();
     const int cols = twrs[0].size();
     const int n{rows*cols};
@@ -179,7 +179,7 @@ int gFEXaltMetAlgo::get_rho(const gTowersCentral &twrs){
 }
 
 //Function calculates standard deviation of the gtowers
-int gFEXaltMetAlgo::get_sigma(const gTowersCentral &twrs) {
+int gFEXaltMetAlgo::get_sigma(const gTowersCentral &twrs) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -197,8 +197,7 @@ int gFEXaltMetAlgo::get_sigma(const gTowersCentral &twrs) {
 }
 
 
-
-void gFEXaltMetAlgo::rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_y, const int rho, const int sigma) {
+void gFEXaltMetAlgo::rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_y, const int rho, const int sigma) const {
 
     int rows = twrs.size();
     int cols = twrs[0].size();
@@ -213,7 +212,7 @@ void gFEXaltMetAlgo::rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_
     }
 }
 
-int gFEXaltMetAlgo::sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO){
+int gFEXaltMetAlgo::sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short FPGA_NO) const {
 
     int partial_sumEt = 0;
     const int rows = twrs.size();
@@ -226,7 +225,7 @@ int gFEXaltMetAlgo::sumEtFPGAnc(const gTowersCentral &twrs, const unsigned short
     return partial_sumEt;
 }
 
-int gFEXaltMetAlgo::sumEtFPGArms(const gTowersCentral &twrs, const int sigma){
+int gFEXaltMetAlgo::sumEtFPGArms(const gTowersCentral &twrs, const int sigma) const {
 
     int partial_sumEt = 0;
     const int rows = twrs.size();
@@ -240,17 +239,16 @@ int gFEXaltMetAlgo::sumEtFPGArms(const gTowersCentral &twrs, const int sigma){
 }
 
 
-int gFEXaltMetAlgo::sumEt(const int A_sumEt, const int B_sumEt){
+int gFEXaltMetAlgo::sumEt(const int A_sumEt, const int B_sumEt) const {
 
   return A_sumEt + B_sumEt;
-
 }
 
 
 //----------------------------------------------------------------------------------
 // bitwise simulation of sine LUT in firmware
 //----------------------------------------------------------------------------------
-float gFEXaltMetAlgo::sinLUT(const unsigned int phiIDX, const unsigned int aw)
+float gFEXaltMetAlgo::sinLUT(const unsigned int phiIDX, const unsigned int aw) const
 {
   float c = ((float)phiIDX)/std::pow(2,aw);
   float rad = (2*M_PI) *c;
@@ -262,7 +260,7 @@ float gFEXaltMetAlgo::sinLUT(const unsigned int phiIDX, const unsigned int aw)
 //----------------------------------------------------------------------------------
 // bitwise simulation cosine LUT in firmware
 //----------------------------------------------------------------------------------
-float gFEXaltMetAlgo::cosLUT(const unsigned int phiIDX, const unsigned int aw)
+float gFEXaltMetAlgo::cosLUT(const unsigned int phiIDX, const unsigned int aw) const
 {
   float c = ((float)phiIDX)/std::pow(2,aw);
   float rad = (2*M_PI) *c;

@@ -32,9 +32,9 @@ class jTowerBuilder: public AthAlgTool, virtual public IjTowerBuilder {
         virtual ~jTowerBuilder() = default;
         virtual StatusCode initialize() override;
 
-        virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) override ;
-        virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) override ;
-        virtual void reset() override ;
+        virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override ;
+        virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override ;
+        virtual void reset() const override ;
 
 
 
@@ -56,14 +56,14 @@ class jTowerBuilder: public AthAlgTool, virtual public IjTowerBuilder {
 
         //property for jFEX mapping
         Gaudi::Property<std::string> m_PileupWeigthFile {this, "PileupWeigthFile", "Run3L1CaloSimulation/Noise/jTowerCorrection.20210308.r12406.root", "Root file for the pileup weight"};
-        Gaudi::Property<std::string> m_PileupHelperFile {this, "PileupHelperFile", "Run3L1CaloSimulation/Calibrations/jFEX_MatchedMapping.2022Mar10.r12406.root", "Root file to set the jTower coordinated (float eta/phi)"};
+        Gaudi::Property<std::string> m_PileupHelperFile {this, "PileupHelperFile", "Run3L1CaloSimulation/Calibrations/jFEX_MatchedMapping.2022Mar10.r12406.root", "Root file to set the jTower coordinates (float eta/phi)"};
 
         //histograms need to set coordinates and noise subtraction
-        TH1F* m_jTowerArea_hist;
-        TH1I* m_Firmware2BitwiseID;
-        TH1I* m_BinLayer;
-        TH1F* m_EtaCoords;
-        TH1F* m_PhiCoords;
+        TH1F* m_jTowerArea_hist = nullptr;
+        TH1I* m_Firmware2BitwiseID = nullptr;
+        TH1I* m_BinLayer = nullptr;
+        TH1F* m_EtaCoords = nullptr;
+        TH1F* m_PhiCoords = nullptr;
 
 };
 

@@ -479,6 +479,11 @@ def addHeavyIonP1Signatures(chains):
         # # 'ZDCCalib' stream
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_LHCF', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
 
+        # ZDC RPD LED streamers (ATR-26826)
+        ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ0', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ1', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ2', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
+
         # ALFA streamers for alignment (ATR-23602)
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY',     l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ELAST15', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),

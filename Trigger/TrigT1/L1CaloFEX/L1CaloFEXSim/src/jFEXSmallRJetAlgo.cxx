@@ -69,13 +69,13 @@ void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7], int inputTableDisplace
 }
 
 //Gets the ET for the TT. This ET is EM + HAD
-unsigned int LVL1::jFEXSmallRJetAlgo::getTTowerET(unsigned int TTID ) {
+unsigned int LVL1::jFEXSmallRJetAlgo::getTTowerET(unsigned int TTID ) const {
     if(TTID == 0) {
         return 0;
     }
 
     if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
-        return m_map_Etvalues[TTID][0];
+      return m_map_Etvalues.at(TTID).at(0);
     }
 
     //we shouldn't arrive here
@@ -151,7 +151,7 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
 
 
 //in this clustering func, the central TT in jet is the parameters
-unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() {
+unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() const {
 
     int SRJetClusterET = 0;
     for(int nphi = -3; nphi< 4; nphi++) {
@@ -166,19 +166,18 @@ unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() {
 }
 
 
-unsigned int LVL1::jFEXSmallRJetAlgo::getSmallETRing(){
+unsigned int LVL1::jFEXSmallRJetAlgo::getSmallETRing() const {
   int SmallETRing = getSmallClusterET() - m_jFEXalgoSearchWindowSeedET[3][3];   
   return SmallETRing;
 }
          
-unsigned int LVL1::jFEXSmallRJetAlgo::getTTIDcentre(){
+unsigned int LVL1::jFEXSmallRJetAlgo::getTTIDcentre() const {
   return m_jFEXalgoTowerID[3][3];
 }
 
 
-void LVL1::jFEXSmallRJetAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
+void LVL1::jFEXSmallRJetAlgo::setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map){
     m_map_Etvalues=et_map;
 }
 
 }// end of namespace LVL1
-

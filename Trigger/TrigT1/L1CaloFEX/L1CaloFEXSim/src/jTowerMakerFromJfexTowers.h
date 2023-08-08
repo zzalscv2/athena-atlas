@@ -9,7 +9,7 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
 #include "L1CaloFEXSim/jSuperCellTowerMapper.h"
@@ -19,7 +19,7 @@ class CaloIdManager;
 
 namespace LVL1 {
 
-class jTowerMakerFromJfexTowers : public AthAlgorithm
+class jTowerMakerFromJfexTowers : public AthReentrantAlgorithm
 {
     public:
 
@@ -27,7 +27,8 @@ class jTowerMakerFromJfexTowers : public AthAlgorithm
         ~jTowerMakerFromJfexTowers() = default;
 
         virtual StatusCode initialize() override;
-        virtual StatusCode execute() override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
+
 
     private:
         
