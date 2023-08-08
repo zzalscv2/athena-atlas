@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************//
@@ -196,7 +196,7 @@ void TileFatherMonTool::fillEvtInfo()
 
   uint32_t lvl1info = 0;
 
-  const DataHandle<xAOD::EventInfo> eventInfo;
+  const xAOD::EventInfo* eventInfo = nullptr;
 
   if (evtStore()->retrieve(eventInfo).isFailure()) {
 

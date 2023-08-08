@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -269,7 +269,7 @@ StatusCode TileMuonFitMonTool::fillHistograms() {
   std::vector<unsigned int> trigid;
   trigid.clear();
   if (m_useLVL1 && !m_trigok) {
-    const DataHandle<xAOD::TrigDecision> trigDecision;
+    const xAOD::TrigDecision* trigDecision = nullptr;
     if (evtStore()->retrieve(trigDecision).isSuccess()) { //snippet from TRT monitoring, thanks!
       std::vector<unsigned int> lvl1TAV = trigDecision->tav();
       for (unsigned int j = 0; j < 8 && j < lvl1TAV.size(); ++j) {

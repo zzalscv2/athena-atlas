@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// ********************************************************************
@@ -671,7 +671,7 @@ StatusCode TileCellMonTool::fillHistograms() {
 
   // Avoid processing events in online if there no physics streams
   if (m_skipNotPhysicsEvents && m_doOnline) {
-    const DataHandle<xAOD::EventInfo> eventInfo;
+    const xAOD::EventInfo* eventInfo = nullptr;
     if (evtStore()->retrieve(eventInfo).isSuccess()) {
       bool isNotPhysicsEvent(true);
       const std::vector<xAOD::EventInfo::StreamTag>& evtStreamTags = eventInfo->streamTags();
@@ -713,7 +713,7 @@ StatusCode TileCellMonTool::fillHistograms() {
                     << " BCID = "      << m_evtBCID
                     << " lvl1 = 0x"    << std::hex << m_lvl1info << std::dec;
 
-    const DataHandle<xAOD::EventInfo> eventInfo;
+    const xAOD::EventInfo* eventInfo = nullptr;
     if (evtStore()->retrieve(eventInfo).isSuccess()) {
       const std::vector<xAOD::EventInfo::StreamTag>& evtStreamTags = eventInfo->streamTags();
       if (!evtStreamTags.empty()) {
