@@ -358,30 +358,25 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     flags = initConfigFlags()
-    flags.fillFromArgs()
+    args = flags.fillFromArgs()
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files = defaultTestFiles.RAW_RUN3 # need to update this depending on EDMversion
-    flags.Exec.MaxEvents=5
-    log.info('Checking setup for EDMVersion %d', flags.Trigger.EDMVersion)
-    if flags.Trigger.EDMVersion==1:
-      flags.Input.Files = defaultTestFiles.RAW_RUN1
-    elif flags.Trigger.EDMVersion==2:
-      flags.Input.Files = defaultTestFiles.RAW_RUN2
-    elif flags.Trigger.EDMVersion==3:
-      flags.Input.Files = defaultTestFiles.RAW_RUN3
-      
+    if not args.filesInput:
+        from AthenaConfiguration.TestDefaults import defaultTestFiles
+        flags.Input.Files = defaultTestFiles.RAW_RUN3 # need to update this depending on EDMversion
+        flags.Exec.MaxEvents = 5
+        log.info('Checking setup for EDMVersion %d with default input files', flags.Trigger.EDMVersion)
+        if flags.Trigger.EDMVersion==1:
+            flags.Input.Files = defaultTestFiles.RAW_RUN1
+        elif flags.Trigger.EDMVersion==2:
+            flags.Input.Files = defaultTestFiles.RAW_RUN2
+        elif flags.Trigger.EDMVersion==3:
+            flags.Input.Files = defaultTestFiles.RAW_RUN3
 
     flags.lock()
 
     acc = MainServicesCfg(flags)
     acc.merge( TriggerRecoCfg(flags) )
     acc.printConfig(withDetails=True)
-    with open("TriggerReco.pkl", "wb") as file:
-        acc.store(file)
-    # TODO decide if we want to run actually
-    # sc = acc.run()
-    # if sc.isFailure():
-    #     import sys
-    #     sys.exit(-1)
 
+    import sys
+    sys.exit(acc.run().isFailure())
