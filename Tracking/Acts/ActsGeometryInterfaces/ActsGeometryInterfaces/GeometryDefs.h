@@ -34,8 +34,6 @@ namespace ActsTrk {
     inline std::string to_string(const DetectorType& type) {
         if (type == DetectorType::Pixel)
             return "Pixel";
-        else if (type == DetectorType::Pixel)
-            return "Pixel";
         else if (type == DetectorType::Sct)
             return "Sct";
         else if (type == DetectorType::Trt)
