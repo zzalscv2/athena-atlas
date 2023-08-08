@@ -216,7 +216,7 @@ namespace Muon {
 
         if (useTightCuts) ++m_segmentMatchesTight;
 
-        if (m_requireSameSide && !sameSide(entry1, entry2, useTightCuts)) {
+        if (m_requireSameSide && !sameSide(entry1, entry2, m_requireSameSide)) {
             ++m_otherSideOfPerigee;
             return false;
         } else {
@@ -266,7 +266,8 @@ namespace Muon {
 
         ATH_MSG_VERBOSE("Matching track: " << entry1.segmentNames() << " with segment: " << entry2.name);
 
-        if (m_requireSameSide && !sameSide(entry1, entry2, useTightCuts)) {
+        if (m_requireSameSide && !sameSide(entry1, entry2, m_requireSameSide)) {
+
             ++m_otherSideOfPerigeeTrk;
             return false;
         } else {

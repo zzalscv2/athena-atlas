@@ -218,6 +218,7 @@ def MuPatHitToolCfg(flags, name="MuPatHitTool",**kwargs):
     kwargs.setdefault('Printer', printer)
     result.addPublicTool( printer )
     kwargs.setdefault('edmHelper', result.getPrimaryAndMerge(MuonEDMHelperSvcCfg(flags)))
+    kwargs.setdefault("isCosmic", flags.Beam.Type is BeamType.Cosmics)
 
     result.setPrivateTools(CompFactory.Muon.MuPatHitTool(name,**kwargs))
     return result

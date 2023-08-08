@@ -24,9 +24,9 @@ StatusCode MuonLayerHoughAlg::initialize() {
     ATH_CHECK(m_keyRpc.initialize());
     ATH_CHECK(m_keyMdt.initialize());
     ATH_CHECK(m_keyTgc.initialize());
-    if (!m_keyCsc.empty()) ATH_CHECK(m_keyCsc.initialize());
-    if (!m_keysTgc.empty()) ATH_CHECK(m_keysTgc.initialize());
-    if (!m_keyMM.empty()) ATH_CHECK(m_keyMM.initialize());
+    ATH_CHECK(m_keyCsc.initialize(!m_keyCsc.empty()));
+    ATH_CHECK(m_keysTgc.initialize(!m_keysTgc.empty()));
+    ATH_CHECK(m_keyMM.initialize(!m_keyMM.empty()));
     ATH_CHECK(m_combis.initialize());
     ATH_CHECK(m_houghDataPerSectorVecKey.initialize());
 
@@ -49,7 +49,7 @@ StatusCode MuonLayerHoughAlg::execute(const EventContext& ctx) const {
         } else {
             ATH_MSG_DEBUG("Recorded MuonPatternCombinationCollection at MuonLayerHoughCombis: size " << Handle->size());
             if (m_printSummary || msgLvl(MSG::DEBUG)) {
-                ATH_MSG_DEBUG("Number of MuonPatternCombinations  " << Handle->size() << std::endl << m_printer->print(*Handle));
+                ATH_MSG_INFO("Number of MuonPatternCombinations  " << Handle->size() << std::endl << m_printer->print(*Handle));
             }
         }
     } else {

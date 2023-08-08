@@ -1828,7 +1828,7 @@ namespace Muon {
             float x = prd->globalPosition().z();
             float y = rCor(*prd);
             int sublayer = sublay(id);
-            float stripCor = 0.45;  // get from det el
+            float stripCor = prd->detectorElement()->getDesign(id)->inputPitch;
             float ymin = y - stripCor;
             float ymax = y + stripCor;
             MuonHough::HitDebugInfo* debug = new MuonHough::HitDebugInfo(technology, sector, region, layer, sublayer);
