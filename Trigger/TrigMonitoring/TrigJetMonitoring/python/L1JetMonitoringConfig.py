@@ -3,14 +3,17 @@
 class L1JetMonAlg():
   def __init__(self,
                name,
-               jetcoll,
+               jetColl,
+               jetCollKey='', # actual jet collection name to use for SG retrieval, in case different to original jet container
+                              # (as can be the case for copied containers on which jet matching applied)
                triggerChain='',
                matched=False,
                matchedOfflineJets='',
                matchedHLTJets=''):
     
     self.name           = name
-    self.L1JetContainer = jetcoll
+    self.L1JetContainer = jetColl
+    self.L1JetKey = jetColl if jetCollKey == '' else jetCollKey
     self.triggerChain   = triggerChain
     self.matched        = matched
     # self.matched        = False
@@ -80,7 +83,7 @@ class L1JetMonAlg():
     tool.do_matching = self.matched
     tool.offlineJetsToMatch = self.matchedOJ
     tool.HLTJetsToMatch = self.matchedHLTJ
-    tool.l1container = self.L1JetContainer
+    tool.l1container = self.L1JetKey
     alg.group_name = container2_monitorgroup()
     alg.filler = tool
     alg.TriggerChain = self.triggerChain
