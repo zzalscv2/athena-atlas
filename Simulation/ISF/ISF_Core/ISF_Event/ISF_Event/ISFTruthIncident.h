@@ -71,6 +71,7 @@ namespace ISF {
     /** Return the parent particle as a HepMC particle type
         (usually only called for particles that will enter the HepMC truth event) */
     HepMC::GenParticlePtr      parentParticle() override final;
+    int      parentStatus() override final;
     /** Return the barcode of the parent particle */
     Barcode::ParticleBarcode  parentBarcode() override final;
     /** Return the bunch-crossing identifier of the parent particle */

@@ -91,6 +91,7 @@ namespace ISFTesting {
     virtual double                    parentEkin() const override {return 1.0;};
     /** Return the PDG Code of the parent particle */
     virtual int                       parentPdgCode() const override {return 1;};
+    virtual int                       parentStatus() override {return 1;};
     /** Return the parent particle as a HepMC particle type
         (only called for particles that will enter the HepMC truth event) */
     virtual HepMC::GenParticlePtr      parentParticle() override {return nullptr;};

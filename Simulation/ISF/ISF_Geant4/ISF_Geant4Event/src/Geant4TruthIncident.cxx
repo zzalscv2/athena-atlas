@@ -120,6 +120,12 @@ Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() {
   return (parent) ? HepMC::barcode(parent) : Barcode::fUndefinedBarcode;
 }
 
+int iGeant4::Geant4TruthIncident::parentStatus()  {
+ auto parent = parentParticle();
+
+ return (parent) ? parent->status() : 0;
+}
+
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() {
   return m_atlasG4EvtUserInfo->GetCurrentlyTraced();
 }

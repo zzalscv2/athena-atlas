@@ -64,6 +64,8 @@ namespace iGeant4 {
       Barcode::ParticleBarcode  parentBarcode() override final;
       /** Return the bunch-crossing identifier of the parent particle */
       int                       parentBCID() const override final;
+      /** Return the status of the parent particle */
+      int  parentStatus() override final;
       /** Return a boolean whether or not the parent particle survives the incident */
       bool                      parentSurvivesIncident() const override final;
       /** Return the parent particle after the TruthIncident vertex (and give
