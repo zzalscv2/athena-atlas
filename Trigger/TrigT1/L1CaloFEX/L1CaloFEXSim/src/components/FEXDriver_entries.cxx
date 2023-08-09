@@ -45,6 +45,7 @@
 #include "L1CaloFEXSim/gFEXJwoJAlgo.h"
 #include "L1CaloFEXSim/gFEXaltMetAlgo.h"
 #include "L1CaloFEXSim/gFEXNtupleWriter.h"
+#include "L1CaloFEXSim/gTowerMakerFromGfexTowers.h"
 
 
 
@@ -98,4 +99,7 @@ DECLARE_COMPONENT(gFEXJetAlgo)
 DECLARE_COMPONENT(gFEXJwoJAlgo)
 DECLARE_COMPONENT(gFEXaltMetAlgo)
 DECLARE_COMPONENT(gFEXNtupleWriter)
+DECLARE_COMPONENT(gTowerMakerFromGfexTowers)
+
+
 

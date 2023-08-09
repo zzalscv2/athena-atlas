@@ -265,65 +265,78 @@ if __name__ == '__main__':
 
     if "gFex" in args.outputs:    
 
-        ##################################################
-        # gFEX simulation
-        ##################################################  
-        gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
-        gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
-        gFEX.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
-        gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
-        
-        #TOBs
-        gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer              = getSimHandle( gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer             )
-        gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer              = getSimHandle( gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer             )
-        gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer                = getSimHandle( gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer               )
-        gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer           = getSimHandle( gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer          )
-        gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer     = getSimHandle( gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer    )
-        gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer     = getSimHandle( gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer    )
-        gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer     = getSimHandle( gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer    )
-        gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer = getSimHandle( gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer      = getSimHandle( gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer     )
-        gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer       = getSimHandle( gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer      )
-        gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer            = getSimHandle( gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer           )
+        if "TOBs" in args.outputs:
+            ##################################################
+            # gFEX simulated TOBs
+            ##################################################  
+            gFEXInputs = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers')
+            gFEXInputs.IsMC = flags.Input.isMC
+            gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
+            gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+           
+            gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
+            gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
+            
+            #TOBs
+            gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer              = getSimHandle( gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer             )
+            gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer              = getSimHandle( gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer             )
+            gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer                = getSimHandle( gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer               )
+            gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer           = getSimHandle( gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer          )
+            gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer     = getSimHandle( gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer    )
+            gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer     = getSimHandle( gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer    )
+            gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer     = getSimHandle( gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer    )
+            gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer = getSimHandle( gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer      = getSimHandle( gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer     )
+            gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer       = getSimHandle( gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer      )
+            gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer            = getSimHandle( gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer           )
 
-        outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoISim'            )
-        outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexSRJetRoISim'          )
-        outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexLRJetRoISim'          )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarEJwojSim'          )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsJwojSim'    )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMHTComponentsJwojSim'    )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMSTComponentsJwojSim'    )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCutSim')
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCutSim'      )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERmsSim'           )                
-        outputEDM += addEDM('xAOD::gFexTowerContainer',     'L1_gFexTriggerTowers'        )                
-        
-        acc.addEventAlgo(gFEX, sequenceName='AthAlgSeq')
-        
-        
-        ##################################################       
-        # gFEX decoded TOBs
-        ##################################################       
-        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
-        gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(flags, 'gFexBSDecoder'))
-        decoderTools += [gFexTool]
-                
-        outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoI'            )
-        outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexSRJetRoI'          )
-        outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexLRJetRoI'          )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarEJwoj'          )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsJwoj'    )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMHTComponentsJwoj'    )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMSTComponentsJwoj'    )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCut')
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCut'      )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERms'           )        
+            outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoISim'            )
+            outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexSRJetRoISim'          )
+            outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexLRJetRoISim'          )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarEJwojSim'          )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsJwojSim'    )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMHTComponentsJwojSim'    )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMSTComponentsJwojSim'    )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCutSim')
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCutSim'      )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERmsSim'           )                
+            outputEDM += addEDM('xAOD::gFexTowerContainer',     'L1_gFexTriggerTowers'        )                
+            
+            acc.addEventAlgo(gFEXInputs, sequenceName='AthAlgSeq')
+            acc.addEventAlgo(gFEX, sequenceName='AthAlgSeq')
+            
+            
+            ##################################################       
+            # gFEX decoded TOBs
+            ##################################################       
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
+            gFexTool = acc.popToolsAndMerge(gFexByteStreamToolCfg(flags, 'gFexBSDecoder'))
+            decoderTools += [gFexTool]
+                    
+            outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoI'            )
+            outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexSRJetRoI'          )
+            outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexLRJetRoI'          )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarEJwoj'          )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsJwoj'    )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMHTComponentsJwoj'    )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMSTComponentsJwoj'    )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCut')
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCut'      )
+            outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERms'           )        
 
+        if "data" in args.outputs:
+            ##################################################
+            # gFEX Data Towers
+            ##################################################  
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
+            gFexInputTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoder'))
+            decoderTools += [gFexInputTool]
+            outputEDM += addEDM('xAOD::gFexTowerContainer'    , 'L1_gFexDataTowers'        )                
 
-        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
-        gFexInputTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoder'))
-        decoderTools += [gFexInputTool]
-        outputEDM += addEDM('xAOD::gFexTowerContainer'    , 'L1_gFexDataTowers'        )                
+            # Uses SCell to decorate the gTowers
+            from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloGTowerDecoratorCfg
+            DecoratorAlgo = L1CaloGTowerDecoratorCfg(flags, name = 'gFexTower2SCellDecorator')
+            acc.merge(DecoratorAlgo)
 
     if "legacy" in args.outputs:
         

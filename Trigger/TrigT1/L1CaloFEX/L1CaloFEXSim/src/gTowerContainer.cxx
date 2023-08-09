@@ -20,6 +20,7 @@ gTowerContainer::gTowerContainer(SG::OwnershipPolicy ownPolicy) :
   DataVector<LVL1::gTower>(ownPolicy)
 {
   m_map_towerID_containerIndex.clear();
+  m_map_fwID_towerID.clear();
 }
 
 void gTowerContainer::push_back(int ieta, int iphi, int nphi, int keybase, int posneg)
@@ -78,6 +79,7 @@ LVL1::gTower * gTowerContainer::findTower(int towerID)
 void gTowerContainer::clearContainerMap()
 {
   m_map_towerID_containerIndex.clear();
+  m_map_fwID_towerID.clear();
 }
 
 bool gTowerContainer::fillContainerMap(){
@@ -85,11 +87,25 @@ bool gTowerContainer::fillContainerMap(){
   size_t ntowers = size();
   for (size_t itower = 0; itower < ntowers; itower++) {
     const gTower * theTower = (*this)[itower];
-    int towerID = theTower->constid();
+    int towerID = theTower->getID();
     int container_index = itower;
     m_map_towerID_containerIndex.insert(std::pair<int,int>(towerID,container_index));
+    m_map_fwID_towerID.insert(std::pair<int,int>(theTower->getFWID(),towerID));
   }
   return true;
+}
+
+int gTowerContainer::getIDfromFWID(int fwID) const{
+  const auto it = m_map_fwID_towerID.find(fwID);
+  if (it == m_map_fwID_towerID.end()) {
+    REPORT_MESSAGE_WITH_CONTEXT (MSG::WARNING, "gTowerContainer") << "Requested firmware ID "
+                                                                  << fwID
+                                                                  << " not found in container.";
+    return -1;
+  }
+
+  const int towerID = it->second;
+  return towerID;
 }
 
 }

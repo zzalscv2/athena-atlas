@@ -34,6 +34,7 @@ namespace LVL1 {
   {
     this->clear_scIDs();
     this->clearET();
+    getEtaPhi(m_eta_float, m_phi_float, iEta(), iPhi());
   }
 
   /** Clear and resize ET value vector */
@@ -86,6 +87,14 @@ namespace LVL1 {
     const bool SCpass = noiseCut(outET);
     if (SCpass){ m_et = outET; }
     else{ m_et = 0; }
+  }
+
+  void gTower::setTotalEt(int totEt) 
+  {
+
+    m_et = totEt;
+
+    return;
   }
 
   /** Set supercell position ID **/
@@ -160,6 +169,136 @@ namespace LVL1 {
 
     return m_et_float_perlayer[1];
 
+  }
+
+  /** Return the firmware ID from the software ID */
+  //This is about assigning a unique ID to the gTowers, that reflects as much as possible 
+  //the tower identification in firmware.
+  //Some descriptions of this can be found in https://its.cern.ch/jira/browse/ATLGFEX-95.
+  //Since the indices used in firmware are the same for each FPGA (0-383), here we add a prefix 
+  //for FPGA 1 (which corresponds to FPGA-B) and for FPGA 2 (FPGA-C) of 10000 and 20000, respectively, 
+  //for differentiating the FPGAs. So we have 0-383 for FPGA 1 (FPGA-A), 10000-10383 FPGA 2 (FPGA-B), 
+  //and 20000-20383 FPGA 3 (FPGA-C).  
+  //iEta and iPhi are global indices, with iEta in 0-39 and iPhi in 0-32, and they uniquely determine 
+  //one gTower object in the simulation. We assign here a unique ID to each gTower. 
+  //The hardcoded numbers come from the definition of local FPGA IDs from global eta, phi indices.  
+
+  int gTower::getFWID() const {
+
+    int gFEXtowerID; // the firmware ID to be calculated
+
+    int iEta = this->iEta();
+    int iPhi = this->iPhi();
+    float Eta = this->eta();
+
+    bool is_central = true;
+    if (iEta <= 7 || iEta >= 32) is_central = false;
+
+    if (is_central)
+    {
+
+      if (iEta < 20)
+      {
+        // FPGA 0
+        gFEXtowerID = (iEta - 8) + (iPhi * 12);
+      } else
+      {
+        // FPGA 1
+        gFEXtowerID = 10000 + (iEta - 20) + (iPhi * 12);
+
+      }
+
+    } else
+    {
+      gFEXtowerID = 20000;
+
+      if ( Eta < 0 ){
+
+        if ( iEta == 0 ){
+          gFEXtowerID = gFEXtowerID + (iPhi*24);
+          iPhi = iPhi*2;
+          iEta = 2;
+        }
+        else if ( iEta == 1 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 12);
+          iPhi = (iPhi*2)+1;
+          iEta = 2;
+        }   
+        else if ( iEta == 2 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 1);
+          iPhi = iPhi*2;
+          iEta = 3;
+        } 
+        else if ( iEta == 3 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 13);
+          iPhi = (iPhi*2)+1;
+          iEta = 3;
+        }
+        else if ( iEta >= 4 and iEta <= 7 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*12) + (iEta -2));
+        } 
+
+      }
+
+      else if ( Eta > 0 ){
+
+        if ( iEta >= 32 and iEta <= 35){
+          gFEXtowerID = gFEXtowerID + (iPhi*12) + (iEta -32 +6);
+        }
+        else if ( iEta == 36 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 22);
+          iPhi = (iPhi*2)+1;
+          iEta = 36;
+        }   
+        else if ( iEta == 37 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 10);
+          iPhi = iPhi*2;
+          iEta = 36;
+        } 
+        else if ( iEta == 38 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 23);
+          iPhi = (iPhi*2)+1;
+          iEta = 37;
+        }
+        else if ( iEta == 39 ){
+          gFEXtowerID = gFEXtowerID + ((iPhi*24) + 11);
+          iPhi = iPhi*2;
+          iEta = 37;
+        }  
+      }
+
+    }
+    return gFEXtowerID;
+
+  }
+
+  void gTower::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const{
+    
+    float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
+    float s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi (before rearranging bins)
+
+    constexpr std::array<float, 40> s_EtaCenter = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
+                                                    -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
+                                                    -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
+                                                    1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
+                                                    3.2, 3.4, 3.7, 4.2, 4.7};
+
+    Eta = s_EtaCenter.at(iEta); 
+
+    float Phi_gFex = -99;
+    if (( iEta <= 3 ) || ( (iEta >= 36) )){
+      Phi_gFex = ( (iPhi * s_forwardPhiWidth) + s_forwardPhiWidth/2);
+    }  
+    else {
+      Phi_gFex = ( (iPhi * s_centralPhiWidth) + s_centralPhiWidth/2);
+    }
+   
+    if (Phi_gFex < M_PI) {
+      Phi = Phi_gFex;
+    }
+    else {
+      Phi = (Phi_gFex - 2*M_PI);
+    }
   }
 
 
