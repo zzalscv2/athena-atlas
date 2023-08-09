@@ -57,7 +57,7 @@ def InDetGlobalMonitoringRun3TestConfig(flags):
         from AthenaConfiguration.Enums import BeamType
         ### Change base selection to Loose and 500MeV for cosmics and <=900GeV collisions -- this should not change in Global Monitoring at P1 however
         ### as the job properties normally retrieved from metadata should be configured to defaults when reading direct from DCM 
-        if flags.Beam.Type is BeamType.Cosmics or float(flags.Beam.Energy) < 500000:
+        if flags.Beam.Type is BeamType.Cosmics or float(flags.Beam.Energy) < 500000 or flags.Reco.EnableHI:
             inDetGlobalTrackMonAlg.TrackSelectionTool = LowECM_TrackSelectionTool
         else:
             inDetGlobalTrackMonAlg.TrackSelectionTool = TrackSelectionTool
