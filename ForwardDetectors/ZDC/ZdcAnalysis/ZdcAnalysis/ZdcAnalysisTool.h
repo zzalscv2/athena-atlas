@@ -9,6 +9,7 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 
 #include "xAODForward/ZdcModuleContainer.h"
+#include "xAODForward/ZdcModuleToString.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 
@@ -113,6 +114,8 @@ private:
   std::unique_ptr<ZDCDataAnalyzer> initializepPb2016();
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2018();
   std::unique_ptr<ZDCDataAnalyzer> initializeLHCf2022();
+  std::unique_ptr<ZDCDataAnalyzer> initializepp2023();
+  std::unique_ptr<ZDCDataAnalyzer> initializePbPb2023();
 
   StatusCode configureNewRun(unsigned int runNumber);
 
