@@ -282,6 +282,191 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
 
 }
 
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
+{
+  
+  m_deltaTSample = 3.125;
+  m_numSample = 24;
+
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{0, 9, 9, 9}, {0, 9, 10, 8}}};
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
+  ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{0, 1.1, 1.1, 1.1},
+                                                {0, 1.1, 1.1, 1.1}}};
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{6, 5, 5, 5}, {5.5, 5.5, 5.5, 5.5}}};
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{0, 26.3, 26.5, 26.8}, {32, 32, 32, 32}}};
+					       
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{0, 31.1, 28.1, 27.0}, {0, 26.6, 26.3, 25.3}}};
+
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      fixTau1Arr[side][module] = true;
+      fixTau2Arr[side][module] = false;
+      
+      peak2ndDerivMinThresholdsHG[side][module] = -35;
+      peak2ndDerivMinThresholdsLG[side][module] = -16;
+      
+      deltaT0CutLow[side][module] = -10;
+      deltaT0CutHigh[side][module] = 10;
+      chisqDivAmpCut[side][module] = 20;
+    }
+  }
+  
+  ATH_MSG_DEBUG( "LHCF2022: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray LGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  
+  // For the LHCf run, use low gain samples 
+  //
+  m_lowGainOnly = true;
+
+  //  Construct the data analyzer
+  //
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
+									m_numSample, m_deltaTSample, 
+									m_presample, "FermiExpLHCf", 
+									peak2ndDerivMinSamples,
+									peak2ndDerivMinThresholdsHG, 
+									peak2ndDerivMinThresholdsLG, 
+									m_lowGainOnly)); 
+
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(2);
+  zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
+  zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+
+  zdcDataAnalyzer->SetGainFactorsHGLG(0.1, 1); // a gain adjustment of unity applied to LG ADC, 0.1 to HG ADC values
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{2, 2, 2, 2}, {2, 2, 2, 2}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{20, 20, 20, 20}, {20, 20, 20, 20}}};
+
+  zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
+
+  // Enable two-pass analysis
+  // 
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-12, -12, -12, -12},
+								   {-12, -12, -12, -12}}};
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
+								   {-8, -8, -8, -8}}};
+
+  zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
+
+  // Set the amplitude fit range limits
+  //
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
+
+
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", 4, 4, m_numSample));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", 4, 4, m_numSample));
+
+ return zdcDataAnalyzer;
+
+}
+  
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
+{
+  // Key configuration parameters needed for the data analyzer construction                                   
+  //                                                                                                          
+  m_deltaTSample = 3.125;
+  m_numSample = 24;
+  
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
+  
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      peak2ndDerivMinSamples[side][module] = 9;
+      peak2ndDerivMinThresholdsHG[side][module] = -35;
+      peak2ndDerivMinThresholdsLG[side][module] = -16;
+    }
+  }
+  
+  m_lowGainOnly = false;
+  
+  //  Construct the data analyzer                                                                             
+  //                                                                                                          
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
+									m_numSample, m_deltaTSample,
+									m_presample, "FermiExpRun3",
+									peak2ndDerivMinSamples,
+									peak2ndDerivMinThresholdsHG,
+									peak2ndDerivMinThresholdsLG,
+									m_lowGainOnly));
+  zdcDataAnalyzer->set2ndDerivStep(2);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(2);
+  zdcDataAnalyzer->SetGainFactorsHGLG(10, 1); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+  
+  // Now set cuts and default fit parameters                                                                  
+  //                                                                                                          
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
+  ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.1, 1.1, 1.1, 1.1},
+						{1.1, 1.1, 1.1, 1.1}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{27, 27, 27, 27}, {27, 27, 27, 27}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{29, 29, 29, 29}, {29, 29, 29, 29}}};
+  
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      fixTau1Arr[side][module] = true;
+      fixTau2Arr[side][module] = true;
+      
+      peak2ndDerivMinThresholdsHG[side][module] = -30;
+      peak2ndDerivMinThresholdsLG[side][module] = -12;
+      
+      deltaT0CutLow[side][module] = -m_deltaTCut;
+      deltaT0CutHigh[side][module] = m_deltaTCut;
+      chisqDivAmpCut[side][module] = m_ChisqRatioCut;
+    }
+  }
+  
+  ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{3500, 3500, 3500, 3500}}, {{3500, 3500, 3500, 3500}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray LGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  
+  zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
+  zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{2, 2, 2, 2}, {2, 2, 2, 2}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{1, 1, 1, 1}, {1, 1, 1, 1}}};
+  
+  zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
+  
+  // Enable two-pass analysis                                                                                 
+  //                                                                                                          
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-12, -12, -12, -12},
+								   {-12, -12, -12, -12}}};
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-8, -8, -8, -8},
+								   {-8, -8, -8, -8}}};
+  
+  zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
+  
+  // Set the amplitude fit range limits                                                                       
+  //                                                                                                          
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
+  
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", 4, 4, m_numSample));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", 4, 4, m_numSample));
+  
+  return zdcDataAnalyzer;
+}
+
 std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeDefault()
 {
     // We rely completely on the default parameters specified in the job properties to control:
@@ -905,6 +1090,12 @@ StatusCode ZdcAnalysisTool::initialize()
     else if (m_configuration == "LHCf2022") {
       m_zdcDataAnalyzer = initializeLHCf2022();
     }
+    else if (m_configuration == "pp2023") {
+      m_zdcDataAnalyzer = initializepp2023();
+    }
+    else if (m_configuration == "PbPb2023") {
+      m_zdcDataAnalyzer = initializePbPb2023();
+    }
     else {
         ATH_MSG_ERROR("Unknown configuration: "  << m_configuration);
         return StatusCode::FAILURE;
@@ -1024,7 +1215,11 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   ATH_MSG_DEBUG("Processing modules");
     for (const auto zdcModule : moduleContainer)
       {
+
+	ATH_MSG_DEBUG(ZdcModuleToString(*zdcModule));
+
 	if (zdcModule->zdcType() == 1) {
+	  ATH_MSG_DEBUG("RPD side " << zdcModule->zdcSide() << " chan " << zdcModule->zdcChannel() );
 	  if (m_LHCRun < 3) continue; // type == 1 -> pixel data in runs 2 and 3, skip
 
 	  //  This is RPD data in Run 3
@@ -1128,15 +1323,15 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
         int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
         int mod = zdcModule->zdcModule();
 
-        if (zdcModule->zdcType() == 1) {
+        if (zdcModule->zdcType() == 1 && m_LHCRun==3) {
           // this is the RPD
           if (m_writeAux) {
             int rpdChannel = zdcModule->zdcChannel() - 1;
             zdcModule->auxdecor<float>("RPDChannelAmplitude" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChSumADC(rpdChannel);
             zdcModule->auxdecor<unsigned int>("RPDChannelMaxSample" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
           }
-        } else {
-          // this is the ZDC
+        } else if (zdcModule->zdcType() == 0) {
+          // this is the main ZDC
           if (m_writeAux) {
               if (m_doCalib) {
                   float calibEnergy = m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod);
