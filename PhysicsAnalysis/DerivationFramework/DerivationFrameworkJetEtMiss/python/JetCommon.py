@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # Schedules all tools needed for jet/MET analyses
@@ -7,6 +7,7 @@
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkJob
 from AthenaCommon import CfgMgr
 from AthenaCommon import Logging
+from AthenaCommon.Configurable import ConfigurableCABehavior
 dfjetlog = Logging.logging.getLogger('JetCommon')
 
 ##################################################################
@@ -159,7 +160,8 @@ def addDAODJets(jetlist,sequence):
 
     for jd in jetlist:
         algs, jetdef_i = getJetAlgs(ConfigFlags, jd, True)
-        algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+        with ConfigurableCABehavior():
+            algs, ca = reOrderAlgs( [a for a in algs if a is not None])
         # ignore dangling CA instance in legacy config
         ca.wasMerged()
         for a in algs:
@@ -218,7 +220,8 @@ def addSidebandEventShape(sequence=DerivationFrameworkJob):
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
     constit_algs = getInputAlgs(cst.GPFlow, flags=ConfigFlags)
-    constit_algs, ca_list = reOrderAlgs( [a for a in constit_algs if a is not None])
+    with ConfigurableCABehavior():
+        constit_algs, ca_list = reOrderAlgs( [a for a in constit_algs if a is not None])
 
     for a in constit_algs:
         if not hasattr(sequence,a.getName()):
