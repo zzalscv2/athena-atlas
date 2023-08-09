@@ -28,11 +28,10 @@ atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( TrigMessageSvc
-                SOURCES test/test_TrigMessageSvc.cxx src/TrigMessageSvc.cxx
-                INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
-                LINK_LIBRARIES ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${TDAQ-COMMON_LIBRARIES}
-                AthenaInterprocess AthenaMonitoringKernelLib CxxUtils GaudiKernel TestTools
-                POST_EXEC_SCRIPT nopost.sh )
+                SOURCES test/test_TrigMessageSvc.cxx
+                INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils GaudiKernel
+                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TrigServicesConfig
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/TrigServicesConfig.py
