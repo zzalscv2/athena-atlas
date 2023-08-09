@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigEDMConfig )
@@ -9,12 +9,12 @@ atlas_install_scripts( test/*.sh )
 
 atlas_add_test( testEDM
    SCRIPT python/testEDM.py
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( testEDMRun3
    SCRIPT python/testEDMRun3.py
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( testEDMRun3Reproducibility
    SCRIPT testTriggerEDMRun3Reproducibility.sh
-   POST_EXEC_SCRIPT nopost.sh )
+   POST_EXEC_SCRIPT noerror.sh )
