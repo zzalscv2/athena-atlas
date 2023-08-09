@@ -91,6 +91,10 @@ int ISF::ISFTruthIncident::parentPdgCode() const {
   return m_parent.pdgCode();
 }
 
+int ISF::ISFTruthIncident::parentStatus() {
+  return m_parent.status();
+}
+
 HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
