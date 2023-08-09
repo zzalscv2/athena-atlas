@@ -24,6 +24,7 @@
 #include "../GPUClusterInfoAndMomentsCalculator.h"
 #include "../GPUToAthenaImporterWithMoments.h"
 #include "../CaloMomentsDumper.h"
+#include "../GPUKernelSizeOptimizerSvc.h"
 
 // Declare the "components".
 DECLARE_COMPONENT( CaloGPUHybridClusterProcessor )
@@ -43,4 +44,5 @@ DECLARE_COMPONENT( CaloGPUClusterAndCellDataMonitor )
 DECLARE_COMPONENT( GPUClusterInfoAndMomentsCalculator )
 DECLARE_COMPONENT( GPUToAthenaImporterWithMoments )
 DECLARE_COMPONENT( CaloMomentsDumper )
+DECLARE_COMPONENT( GPUKernelSizeOptimizerSvc )
 

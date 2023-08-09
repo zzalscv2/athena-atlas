@@ -13,11 +13,11 @@ if __name__=="__main__":
     
     Configurator.DoMonitoring = True
     
-    cfg, numevents = CaloRecGPUTesting.PrepareTest()
+    cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
 
     theKey="CaloCalTopoClustersNew"
     
-    topoAcc = CaloRecGPUTesting.HybridClusterProcessorTestConf(TestSplit = True, PlotterConfigurator = PlotterConfig)
+    topoAcc = CaloRecGPUTesting.FullTestConfiguration(Configurator, TestSplit = True, PlotterConfigurator = PlotterConfig)
 
     topoAlg = topoAcc.getPrimary()
     topoAlg.ClustersOutputName=theKey

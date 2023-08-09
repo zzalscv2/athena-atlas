@@ -272,7 +272,7 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
     }
 
   const std::filesystem::path save_file = m_savePath + "/" + StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
-											      ctx.evt(), m_fileSuffix, "txt", m_numWidth);
+                                                                                                ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);
 

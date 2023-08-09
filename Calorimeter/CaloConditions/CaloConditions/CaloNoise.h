@@ -67,7 +67,20 @@ class CaloNoise {
   boost::multi_array<float, 2>& larStorage() {return m_larNoise;}
   boost::multi_array<float, 2>& tileStorage() {return m_tileNoise;}
 
+  ///Const accessor to underlying storage for GPU data structures.
+  const boost::multi_array<float, 2>& larStorage() const {return m_larNoise;}
+  const boost::multi_array<float, 2>& tileStorage() const {return m_tileNoise;}
+
+  
   void setTileBlob(const CaloCondBlobFlt* flt, const float lumi);
+
+  //Those are needed for the GPU data conversions.
+  
+  const CaloCondBlobFlt * getTileBlob() const { return m_tileBlob; }
+
+  float getLumi() const { return m_lumi; }
+
+  NOISETYPE getNoiseType() const { return m_noiseType; }
 
  private:
   float calcSig(const IdentifierHash tilehash, const int gain, const float energy) const;

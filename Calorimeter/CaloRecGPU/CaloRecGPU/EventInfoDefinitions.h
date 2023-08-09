@@ -15,6 +15,9 @@
 #include <cmath>
 //For fabsf...
 
+#include "CaloGeoHelpers/CaloSampling.h"
+#include "CaloIdentifier/LArNeighbours.h"
+
 namespace CaloRecGPU
 {
 
@@ -190,6 +193,9 @@ namespace CaloRecGPU
     //We could use/type pun a short2,
     //but let's go for portability for the time being...
 
+    /*! GPU version of @c CaloBadCellHelper::isBad. If @p treat_L1_predicted_as_good is false,
+        has the same effect as cell->badcell() (just like @c CaloBadCellHelper::isBad).
+    */
     static constexpr bool is_bad(const bool is_tile, const QualityProvenance qp, const bool treat_L1_predicted_as_good = false)
     {
       bool ret = false;
@@ -237,6 +243,14 @@ namespace CaloRecGPU
     /*! GPU version of @c CaloBadCellHelper::isBad. If @p treat_L1_predicted_as_good is false,
         has the same effect as cell->badcell() (just like @c CaloBadCellHelper::isBad).
     */
+    constexpr bool is_bad(const int cell, const bool treat_L1_predicted_as_good = false) const
+    {
+      return is_bad(GeometryArr::is_tile(cell), qualityProvenance[cell], treat_L1_predicted_as_good);
+    }
+
+    /*! GPU version of @c CaloBadCellHelper::isBad. If @p treat_L1_predicted_as_good is false,
+        has the same effect as cell->badcell() (just like @c CaloBadCellHelper::isBad).
+    */
     constexpr bool is_bad(const GeometryArr & geom, const int cell, const bool treat_L1_predicted_as_good = false) const
     {
       return is_bad(geom.is_tile(cell), qualityProvenance[cell], treat_L1_predicted_as_good);
@@ -244,12 +258,13 @@ namespace CaloRecGPU
 
     /*! GPU equivalent of CaloTopoClusterMaker::passCellTimeCut.
     */
-    constexpr bool passes_time_cut(const GeometryArr & geom, const int cell, const float threshold) const
+    constexpr bool passes_time_cut(const GeometryArr & geom, const int cell, const float threshold,
+                                   const bool use_crosstalk, const float crosstalk_delta) const
     {
-      const int sampling = geom.caloSample[cell];
-      if (sampling == 0 ||   //CaloSampling::PreSamplerB
-          sampling == 4 ||   //CaloSampling::PreSamplerE
-          sampling == 28   ) //CaloSampling::Unknown
+      const int sampling = geom.sampling(cell);
+      if (sampling == CaloSampling::PreSamplerB ||
+          sampling == CaloSampling::PreSamplerE ||
+          sampling == CaloSampling::Unknown        )
         {
           return true;
         }
@@ -259,7 +274,40 @@ namespace CaloRecGPU
           const unsigned int mask = geom.is_tile(cell) ? 0x8080U : 0x2000U;
           if (qp.provenance() & mask)
             {
-              return fabsf(time[cell]) < threshold;
+              const float this_time = time[cell];
+              if (fabsf(this_time) < threshold)
+                {
+                  if (use_crosstalk)
+                    {
+                      const float this_energy = energy[cell];
+                      const bool eligible = (sampling == CaloSampling::EMB2 || (sampling == CaloSampling::EME2 && fabsf(geom.eta[cell]) < 2.5));
+                      if (this_energy > 0 && eligible)
+                        {
+                          int neighbours[NMaxNeighbours] = {};
+
+                          constexpr unsigned int neigh_options = LArNeighbours::neighbourOption::prevInPhi | LArNeighbours::neighbourOption::nextInPhi;
+
+                          const int num_neighs = geom.get_neighbours(neigh_options, cell, neighbours);
+
+                          for (int i = 0; i < num_neighs; ++i)
+                            {
+                              const int neigh = neighbours[i];
+                              if (is_valid(neigh) && energy[neigh] > 4 * this_energy)
+                                {
+                                  const QualityProvenance neigh_qp = qualityProvenance[neigh];
+                                  if ( !(neigh_qp.provenance() & mask) || fabsf(time[neigh]) < threshold )
+                                    {
+                                      if (this_time > -threshold && this_time < threshold + crosstalk_delta)
+                                        {
+                                          return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                  return false;
+                }
             }
         }
       return true;
@@ -275,25 +323,6 @@ namespace CaloRecGPU
   {
     tag_type clusterTag[NCaloCells]; //cluster tag
   };
-
-  struct PairsArr
-  {
-    int number;
-    int reverse_number;
-    //This is to store neighbours in the other way around...
-    //(used for some tricks in TAC and TAS)
-
-    int cellID[NMaxPairs];
-    int neighbourID[NMaxPairs];
-  };
-  //Note: this information is not, strictly speaking,
-  //      essential for arbitrary GPU-based algorithms
-  //      and could be moved to temporaries; however,
-  //      it's not inconceivable that a grower and splitter
-  //      that follow from our cellular-automaton-based implementations
-  //      might benefit from having the list of pairs
-  //      being shared between both, so we keep this
-  //      as part of the actual event informations to be kept.
 
   struct ClusterInfoArr
   {

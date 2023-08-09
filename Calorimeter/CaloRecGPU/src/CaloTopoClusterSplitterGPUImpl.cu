@@ -32,9 +32,9 @@ void GPUSplitterOptionsHolder::sendToGPU(const bool clear_CPU)
 }
 
 
-#define check_if_secondary(cell_id, d_meta, d_fullclusters) ((d_fullcalogeometry)->caloSample[(cell_id)] >= (d_meta)->m_minSecondarySampling &&\
-                                                             (d_fullcalogeometry)->caloSample[(cell_id)] <= (d_meta)->m_maxSecondarySampling &&\
-                                                             ((d_meta)->m_useSecondarySampling & (1 << ((d_fullcalogeometry)->caloSample[(cell_id)] - (d_meta)->m_minSecondarySampling))))
+#define check_if_secondary(cell_id, d_meta, d_fullclusters) ((d_fullcalogeometry)->sampling((cell_id)) >= (d_meta)->m_minSecondarySampling &&\
+                                                             (d_fullcalogeometry)->sampling((cell_id)) <= (d_meta)->m_maxSecondarySampling &&\
+                                                             ((d_meta)->m_useSecondarySampling & (1 << ((d_fullcalogeometry)->sampling((cell_id)) - (d_meta)->m_minSecondarySampling))))
 
 constexpr static int DefaultBlockSize = 512;
 
@@ -82,8 +82,8 @@ static __global__ void find_local_maximums(const Helpers::CUDA_kernel_object<Cal
       return;
     }
 
-  num_neighbours = d_fullcalogeometry->neighbours.get_number_of_neighbours(cell_id);
-  calo_sample = d_fullcalogeometry->caloSample[cell_id];
+  num_neighbours = d_fullcalogeometry->neighbours.get_total_number_of_neighbours(cell_id);
+  calo_sample = d_fullcalogeometry->sampling(cell_id);
   energy = d_cellsfulldata->energy[cell_id];
   cell_tag = ClusterTag::cluster_index(d_cellstate->clusterTag[cell_id]);
 
@@ -126,7 +126,7 @@ static __global__ void find_local_maximums(const Helpers::CUDA_kernel_object<Cal
       n_energy = d_meta->m_absOpt ? fabs(d_cellsfulldata->energy[n_id]) : d_cellsfulldata->energy[n_id];
       n_phi = d_fullcalogeometry->phi[n_id];
       n_eta = d_fullcalogeometry->eta[n_id];
-      n_sample = d_fullcalogeometry->caloSample[n_id];
+      n_sample = d_fullcalogeometry->sampling(n_id);
 
       if (energy > n_energy)
         {
@@ -289,7 +289,7 @@ __global__ void splitter_tag_propagation(const Helpers::CUDA_kernel_object<Geome
         {
           cell_id = first_q[i];
           cell_tag = ClusterTag::cluster_index(d_cellstate->clusterTag[cell_id]);
-          int num_neighbours = d_fullcalogeometry->neighbours.get_number_of_neighbours(cell_id);
+          int num_neighbours = d_fullcalogeometry->neighbours.get_total_number_of_neighbours(cell_id);
           //FUTURE TODO WARNING FIX ALERT ERROR PAY ATTENTION:
           //this is not taking into account limited neighbours!
 

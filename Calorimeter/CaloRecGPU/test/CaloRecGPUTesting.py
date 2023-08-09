@@ -96,6 +96,9 @@ def FullTestConfiguration(Configurator, TestGrow=False, TestSplit=False, TestMom
     
     result= PrevAlgorithmsConfiguration(Configurator, clustersname)
         
+    GPUKernelSvc = CompFactory.GPUKernelSizeOptimizerSvc()
+    result.addService(GPUKernelSvc)
+        
     HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor("HybridClusterProcessor")
     HybridClusterProcessor.ClustersOutputName = Configurator.ClustersOutputName
     HybridClusterProcessor.MeasureTimes = Configurator.MeasureTimes
@@ -370,6 +373,8 @@ def PrepareTest(Configurator,
         
         parser.add_argument('-uoc','--useoriginalcriteria', action = 'store_true')
         
+        parser.add_argument('-ndgn','--nodoublegaussiannoise', action = 'store_true')
+       
         parser.add_argument('-m','--perfmon', action = 'store_true')
         parser.add_argument('-fm','--fullmon', action = 'store_true')
                    
@@ -449,6 +454,7 @@ def PrepareTest(Configurator,
         Configurator.OutputCountsToFile = args.outputcounts
         Configurator.FillMissingCells = not args.notfillcells
         Configurator.UseOriginalCriteria = args.useoriginalcriteria
+        Configurator.TwoGaussianNoise = not args.nodoublegaussiannoise
         if allocate_as_many_as_threads:
             Configurator.NumPreAllocatedDataHolders = int(args.numthreads)
     
@@ -460,84 +466,84 @@ def PrepareTest(Configurator,
     if parse_command_arguments:
         return (cfg, int(args.numevents))
     else:
-        return (cfg, 10)
+        return (cfg, -1)
 
 #For pretty printing things in axes when it comes to moments:
 #<MOMENT_NAME>: <PLOT TITLE> <AXIS TITLE> <UNITS>
 name_to_moment_map =  {
-    "time"                        :  ("time",                "time",                "[#mu s]"),
-    "FIRST_PHI"                   :  ("firstPhi",            "firstPhi",            ""),
-    "FIRST_ETA"                   :  ("firstEta",            "firstEta",            ""),
-    "SECOND_R"                    :  ("secondR",             "secondR",             ""),
-    "SECOND_LAMBDA"               :  ("secondLambda",        "secondLambda",        ""),
-    "DELTA_PHI"                   :  ("deltaPhi",            "deltaPhi",            ""),
-    "DELTA_THETA"                 :  ("deltaTheta",          "deltaTheta",          ""),
-    "DELTA_ALPHA"                 :  ("deltaAlpha",          "deltaAlpha",          ""),
-    "CENTER_X"                    :  ("centerX",             "centerX",             ""),
-    "CENTER_Y"                    :  ("centerY",             "centerY",             ""),
-    "CENTER_Z"                    :  ("centerZ",             "centerZ",             ""),
-    "CENTER_MAG"                  :  ("centerMag",           "centerMag",           ""),
-    "CENTER_LAMBDA"               :  ("centerLambda",        "centerLambda",        ""),
-    "LATERAL"                     :  ("lateral",             "lateral",             ""),
-    "LONGITUDINAL"                :  ("longitudinal",        "longitudinal",        ""),
-    "ENG_FRAC_EM"                 :  ("engFracEM",           "engFracEM",           ""),
-    "ENG_FRAC_MAX"                :  ("engFracMax",          "engFracMax",          ""),
-    "ENG_FRAC_CORE"               :  ("engFracCore",         "engFracCore",         ""),
-    "FIRST_ENG_DENS"              :  ("firstEngDens",        "firstEngDens",        ""),
-    "SECOND_ENG_DENS"             :  ("secondEngDens",       "secondEngDens",       ""),
-    "ISOLATION"                   :  ("isolation",           "isolation",           ""),
-    "ENG_BAD_CELLS"               :  ("engBadCells",         "engBadCells",         ""),
-    "N_BAD_CELLS"                 :  ("nBadCells",           "nBadCells",           ""),
-    "N_BAD_CELLS_CORR"            :  ("nBadCellsCorr",       "nBadCellsCorr",       ""),
-    "BAD_CELLS_CORR_E"            :  ("badCellsCorrE",       "badCellsCorrE",       ""),
-    "BADLARQ_FRAC"                :  ("badLArQFrac",         "badLArQFrac",         ""),
-    "ENG_POS"                     :  ("engPos",              "engPos",              ""),
-    "SIGNIFICANCE"                :  ("significance",        "significance",        ""),
-    "CELL_SIGNIFICANCE"           :  ("cellSignificance",    "cellSignificance",    ""),
-    "CELL_SIG_SAMPLING"           :  ("cellSigSampling",     "cellSigSampling",     ""),
-    "AVG_LAR_Q"                   :  ("avgLArQ",             "avgLArQ",             ""),
-    "AVG_TILE_Q"                  :  ("avgTileQ",            "avgTileQ",            ""),
-    "ENG_BAD_HV_CELLS"            :  ("engBadHVCells",       "engBadHVCells",       ""),
-    "N_BAD_HV_CELLS"              :  ("nBadHVCells",         "nBadHVCells",         ""),
-    "PTD"                         :  ("PTD",                 "PTD",                 ""),
-    "MASS"                        :  ("mass",                "mass",                ""),
-    "EM_PROBABILITY"              :  ("EMProbability",       "EMProbability",       ""),
-    "HAD_WEIGHT"                  :  ("hadWeight",           "hadWeight",           ""),
-    "OOC_WEIGHT"                  :  ("OOCweight",           "OOCweight",           ""),
-    "DM_WEIGHT"                   :  ("DMweight",            "DMweight",            ""),
-    "TILE_CONFIDENCE_LEVEL"       :  ("tileConfidenceLevel", "tileConfidenceLevel", ""),
-    "SECOND_TIME"                 :  ("secondTime",          "secondTime",          ""),
-    "number_of_cells"             :  ("numCells",            "numCells",            ""),
-    "VERTEX_FRACTION"             :  ("vertexFraction",      "vertexFraction",      ""),
-    "NVERTEX_FRACTION"            :  ("nVertexFraction",     "nVertexFraction",     ""),
-    "ETACALOFRAME"                :  ("etaCaloFrame",        "etaCaloFrame",        ""),
-    "PHICALOFRAME"                :  ("phiCaloFrame",        "phiCaloFrame",        ""),
-    "ETA1CALOFRAME"               :  ("eta1CaloFrame",       "eta1CaloFrame",       ""),
-    "PHI1CALOFRAME"               :  ("phi1CaloFrame",       "phi1CaloFrame",       ""),
-    "ETA2CALOFRAME"               :  ("eta2CaloFrame",       "eta2CaloFrame",       ""),
-    "PHI2CALOFRAME"               :  ("phi2CaloFrame",       "phi2CaloFrame",       ""),
-    "ENG_CALIB_TOT"               :  ("engCalibTot",         "engCalibTot",         ""),
-    "ENG_CALIB_OUT_L"             :  ("engCalibOutL",        "engCalibOutL",        ""),
-    "ENG_CALIB_OUT_M"             :  ("engCalibOutM",        "engCalibOutM",        ""),
-    "ENG_CALIB_OUT_T"             :  ("engCalibOutT",        "engCalibOutT",        ""),
-    "ENG_CALIB_DEAD_L"            :  ("engCalibDeadL",       "engCalibDeadL",       ""),
-    "ENG_CALIB_DEAD_M"            :  ("engCalibDeadM",       "engCalibDeadM",       ""),
-    "ENG_CALIB_DEAD_T"            :  ("engCalibDeadT",       "engCalibDeadT",       ""),
-    "ENG_CALIB_EMB0"              :  ("engCalibEMB0",        "engCalibEMB0",        ""),
-    "ENG_CALIB_EME0"              :  ("engCalibEME0",        "engCalibEME0",        ""),
-    "ENG_CALIB_TILEG3"            :  ("engCalibTileG3",      "engCalibTileG3",      ""),
-    "ENG_CALIB_DEAD_TOT"          :  ("engCalibDeadTot",     "engCalibDeadTot",     ""),
-    "ENG_CALIB_DEAD_EMB0"         :  ("engCalibDeadEMB0",    "engCalibDeadEMB0",    ""),
-    "ENG_CALIB_DEAD_TILE0"        :  ("engCalibDeadTile0",   "engCalibDeadTile0",   ""),
-    "ENG_CALIB_DEAD_TILEG3"       :  ("engCalibDeadTileG3",  "engCalibDeadTileG3",  ""),
-    "ENG_CALIB_DEAD_EME0"         :  ("engCalibDeadEME0",    "engCalibDeadEME0",    ""),
-    "ENG_CALIB_DEAD_HEC0"         :  ("engCalibDeadHEC0",    "engCalibDeadHEC0",    ""),
-    "ENG_CALIB_DEAD_FCAL"         :  ("engCalibDeadFCAL",    "engCalibDeadFCAL",    ""),
-    "ENG_CALIB_DEAD_LEAKAGE"      :  ("engCalibDeadLeakage", "engCalibDeadLeakage", ""),
-    "ENG_CALIB_DEAD_UNCLASS"      :  ("engCalibDeadUnclass", "engCalibDeadUnclass", ""),
-    "ENG_CALIB_FRAC_EM"           :  ("engCalibFracEM",      "engCalibFracEM",      ""),
-    "ENG_CALIB_FRAC_HAD"          :  ("engCalibFracHad",     "engCalibFracHad",     ""),
-    "ENG_CALIB_FRAC_REST"         :  ("engCalibFracRest"     "engCalibFracRest"     "")
+   #"time"                        :  (("time",                "time",               "[#mu s]"),[]),
+    "FIRST_PHI"                   :  (("firstPhi",            "firstPhi",            ""),[(-3.2, 3.2)]),
+    "FIRST_ETA"                   :  (("firstEta",            "firstEta",            ""),[(-10.1, 10.1)]),
+    "SECOND_R"                    :  (("secondR",             "secondR",             ""),[(0, 1.25e6)]),
+    "SECOND_LAMBDA"               :  (("secondLambda",        "secondLambda",        ""),[(0, 2.5e6)]),
+    "DELTA_PHI"                   :  (("deltaPhi",            "deltaPhi",            ""),[(-3.2, 3.2)]),
+    "DELTA_THETA"                 :  (("deltaTheta",          "deltaTheta",          ""),[(-1.6, 1.6)]),
+    "DELTA_ALPHA"                 :  (("deltaAlpha",          "deltaAlpha",          ""),[(-0.1, 1.6)]),
+    "CENTER_X"                    :  (("centerX",             "centerX",             ""),[(-4000, 4000)]),
+    "CENTER_Y"                    :  (("centerY",             "centerY",             ""),[(-4000, 4000)]),
+    "CENTER_Z"                    :  (("centerZ",             "centerZ",             ""),[(-7000, 7000)]),
+    "CENTER_MAG"                  :  (("centerMag",           "centerMag",           ""),[(1000, 7500)]),
+    "CENTER_LAMBDA"               :  (("centerLambda",        "centerLambda",        ""),[(0., 25000.),(0., 5000.)]),
+    "LATERAL"                     :  (("lateral",             "lateral",             ""),[(-0.05, 1.05)]),
+    "LONGITUDINAL"                :  (("longitudinal",        "longitudinal",        ""),[(-0.05, 1.05)]),
+    "ENG_FRAC_EM"                 :  (("engFracEM",           "engFracEM",           ""),[(-0.1, 1.1)]),
+    "ENG_FRAC_MAX"                :  (("engFracMax",          "engFracMax",          ""),[(-0.1, 1.1)]),
+    "ENG_FRAC_CORE"               :  (("engFracCore",         "engFracCore",         ""),[(-0.1, 1.1)]),
+    "FIRST_ENG_DENS"              :  (("firstEngDens",        "firstEngDens",        ""),[(-0.1, 5.1)]),
+    "SECOND_ENG_DENS"             :  (("secondEngDens",       "secondEngDens",       ""),[(-0.5, 50.5)]),
+    "ISOLATION"                   :  (("isolation",           "isolation",           ""),[(-0.05, 2.05)]),
+    "ENG_BAD_CELLS"               :  (("engBadCells",         "engBadCells",         ""),[(0., 100000.)]),
+    "N_BAD_CELLS"                 :  (("nBadCells",           "nBadCells",           ""),[(-0.5, 25.5)]),
+    "N_BAD_CELLS_CORR"            :  (("nBadCellsCorr",       "nBadCellsCorr",       ""),[(-0.5, 25.5)]),
+    "BAD_CELLS_CORR_E"            :  (("badCellsCorrE",       "badCellsCorrE",       ""),[(-0.1, 25000.)]),
+    "BADLARQ_FRAC"                :  (("badLArQFrac",         "badLArQFrac",         ""),[(-2500., 2500.)]),
+    "ENG_POS"                     :  (("engPos",              "engPos",              ""),[(-0.1, 250000.)]),
+    "SIGNIFICANCE"                :  (("significance",        "significance",        ""),[(-500., 500.)]),
+    "CELL_SIGNIFICANCE"           :  (("cellSignificance",    "cellSignificance",    ""),[(-0.1, 100.)]),
+    "CELL_SIG_SAMPLING"           :  (("cellSigSampling",     "cellSigSampling",     ""),[(-0.1, 30.)]),
+    "AVG_LAR_Q"                   :  (("avgLArQ",             "avgLArQ",             ""),[(-0.1, 70000.)]),
+    "AVG_TILE_Q"                  :  (("avgTileQ",            "avgTileQ",            ""),[(-0.1, 300.)]),
+   #"ENG_BAD_HV_CELLS"            :  (("engBadHVCells",       "engBadHVCells",       ""),[]),
+   #"N_BAD_HV_CELLS"              :  (("nBadHVCells",         "nBadHVCells",         ""),[]),
+    "PTD"                         :  (("PTD",                 "PTD",                 ""),[(-0.05, 1.05)]),
+    "MASS"                        :  (("mass",                "mass",                ""),[(0., 200000.), (0., 100.)]),
+   #"EM_PROBABILITY"              :  (("EMProbability",       "EMProbability",       ""),[]),
+   #"HAD_WEIGHT"                  :  (("hadWeight",           "hadWeight",           ""),[]),
+   #"OOC_WEIGHT"                  :  (("OOCweight",           "OOCweight",           ""),[]),
+   #"DM_WEIGHT"                   :  (("DMweight",            "DMweight",            ""),[]),
+   #"TILE_CONFIDENCE_LEVEL"       :  (("tileConfidenceLevel", "tileConfidenceLevel", ""),[]),
+    "SECOND_TIME"                 :  (("secondTime",          "secondTime",          ""),[(0., 1e7)])
+   #"number_of_cells"             :  (("numCells",            "numCells",            ""),[]),
+   #"VERTEX_FRACTION"             :  (("vertexFraction",      "vertexFraction",      ""),[]),
+   #"NVERTEX_FRACTION"            :  (("nVertexFraction",     "nVertexFraction",     ""),[]),
+   #"ETACALOFRAME"                :  (("etaCaloFrame",        "etaCaloFrame",        ""),[]),
+   #"PHICALOFRAME"                :  (("phiCaloFrame",        "phiCaloFrame",        ""),[]),
+   #"ETA1CALOFRAME"               :  (("eta1CaloFrame",       "eta1CaloFrame",       ""),[]),
+   #"PHI1CALOFRAME"               :  (("phi1CaloFrame",       "phi1CaloFrame",       ""),[]),
+   #"ETA2CALOFRAME"               :  (("eta2CaloFrame",       "eta2CaloFrame",       ""),[]),
+   #"PHI2CALOFRAME"               :  (("phi2CaloFrame",       "phi2CaloFrame",       ""),[]),
+   #"ENG_CALIB_TOT"               :  (("engCalibTot",         "engCalibTot",         ""),[]),
+   #"ENG_CALIB_OUT_L"             :  (("engCalibOutL",        "engCalibOutL",        ""),[]),
+   #"ENG_CALIB_OUT_M"             :  (("engCalibOutM",        "engCalibOutM",        ""),[]),
+   #"ENG_CALIB_OUT_T"             :  (("engCalibOutT",        "engCalibOutT",        ""),[]),
+   #"ENG_CALIB_DEAD_L"            :  (("engCalibDeadL",       "engCalibDeadL",       ""),[]),
+   #"ENG_CALIB_DEAD_M"            :  (("engCalibDeadM",       "engCalibDeadM",       ""),[]),
+   #"ENG_CALIB_DEAD_T"            :  (("engCalibDeadT",       "engCalibDeadT",       ""),[]),
+   #"ENG_CALIB_EMB0"              :  (("engCalibEMB0",        "engCalibEMB0",        ""),[]),
+   #"ENG_CALIB_EME0"              :  (("engCalibEME0",        "engCalibEME0",        ""),[]),
+   #"ENG_CALIB_TILEG3"            :  (("engCalibTileG3",      "engCalibTileG3",      ""),[]),
+   #"ENG_CALIB_DEAD_TOT"          :  (("engCalibDeadTot",     "engCalibDeadTot",     ""),[]),
+   #"ENG_CALIB_DEAD_EMB0"         :  (("engCalibDeadEMB0",    "engCalibDeadEMB0",    ""),[]),
+   #"ENG_CALIB_DEAD_TILE0"        :  (("engCalibDeadTile0",   "engCalibDeadTile0",   ""),[]),
+   #"ENG_CALIB_DEAD_TILEG3"       :  (("engCalibDeadTileG3",  "engCalibDeadTileG3",  ""),[]),
+   #"ENG_CALIB_DEAD_EME0"         :  (("engCalibDeadEME0",    "engCalibDeadEME0",    ""),[]),
+   #"ENG_CALIB_DEAD_HEC0"         :  (("engCalibDeadHEC0",    "engCalibDeadHEC0",    ""),[]),
+   #"ENG_CALIB_DEAD_FCAL"         :  (("engCalibDeadFCAL",    "engCalibDeadFCAL",    ""),[]),
+   #"ENG_CALIB_DEAD_LEAKAGE"      :  (("engCalibDeadLeakage", "engCalibDeadLeakage", ""),[]),
+   #"ENG_CALIB_DEAD_UNCLASS"      :  (("engCalibDeadUnclass", "engCalibDeadUnclass", ""),[]),
+   #"ENG_CALIB_FRAC_EM"           :  (("engCalibFracEM",      "engCalibFracEM",      ""),[]),
+   #"ENG_CALIB_FRAC_HAD"          :  (("engCalibFracHad",     "engCalibFracHad",     ""),[]),
+   #"ENG_CALIB_FRAC_REST"         :  (("engCalibFracRest"     "engCalibFracRest"     ""),[])
 }
 
 class PlotterConfigurator:
@@ -747,58 +753,41 @@ class PlotterConfigurator:
                                   ]
         if DoMoments:
             for pair in PairsToPlot:
-                for mom, prettynames in name_to_moment_map.items():
-                    self.PlotsToDo += [
-                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_0",),
-                                          {'type': 'TH1F', 
-                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
-                                           'xbins': 51,
-                                           'xmin':  -1,
-                                           'xmax':  1,
-                                           'path': "EXPERT"}
-                                        ),
-                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_1",),
-                                          {'type': 'TH1F', 
-                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
-                                           'xbins': 51,
-                                           'xmin':  -0.5,
-                                           'xmax':  0.5,
-                                           'path': "EXPERT"}
-                                        ),
-                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_2",),
-                                          {'type': 'TH1F', 
-                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
-                                           'xbins': 51,
-                                           'xmin':  -0.1,
-                                           'xmax':  0.1,
-                                           'path': "EXPERT"}
-                                        ),
-                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_3",),
-                                          {'type': 'TH1F', 
-                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
-                                           'xbins': 51,
-                                           'xmin':  -0.01,
-                                           'xmax':  0.01,
-                                           'path': "EXPERT"}
-                                        ),
-                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_4",),
-                                          {'type': 'TH1F', 
-                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
-                                           'xbins': 51,
-                                           'xmin':  -0.001,
-                                           'xmax':  0.001,
-                                           'path': "EXPERT"}
-                                        ),
-                                        ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_5",),
-                                          {'type': 'TH1F', 
-                                           'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
-                                           'xbins': 51,
-                                           'xmin':  -0.0001,
-                                           'xmax':  0.0001,
-                                           'path': "EXPERT"}
-                                        )
-                                      ]
-                          
+                for mom, (prettynames, limits) in name_to_moment_map.items():
+                    for i in range(0, len(limits)):
+                      self.PlotsToDo += [ ( (pair + "_cluster_moments_" + mom + "_ref," + pair + "_cluster_moments_" + mom + "_test;" + pair + "_" + mom + "_versus_zoom_" + str(i + 1),),
+                                            {'type':  'TH2F', 
+                                             'title': prettynames[0] + " (" + str(i+1) + "); CPU " + prettynames[1] + "; GPU " + prettynames[1],
+                                             'xbins': 63,
+                                             'xmin':  limits[i][0],
+                                             'xmax':  limits[i][1],
+                                             'ybins': 63,
+                                             'ymin':  limits[i][0],
+                                             'ymax':  limits[i][1],
+                                             'path':  "EXPERT"},
+                                          ),
+                                        ]
+                      self.PlotsToDo += [ ( (pair + "_cluster_moments_" + mom + "_ref," + pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_" + mom + "_error_zoom_" + str(i + 1),),
+                                            {'type':   'TH2F', 
+                                             'title': prettynames[0] + " (" + str(i+1) + "); CPU " + prettynames[1] + "; #Delta " + prettynames[1] + " / #(){CPU " + prettynames[1] + "}",
+                                             'xbins':  63,
+                                             'xmin':   limits[i][0],
+                                             'xmax':   limits[i][1],
+                                             'ybins':  63,
+                                             'ymin':  -0.025,
+                                             'ymax':   0.025,
+                                             'path':   "EXPERT"}
+                                          ),
+                                        ]
+                      self.PlotsToDo += [ ( (pair + "_cluster_delta_moments_" + mom + "_rel_ref;" + pair + "_cluster_delta_moments_" + mom + "_rel_ref_zoom_0",),
+                                            {'type': 'TH1F', 
+                                             'title': prettynames[0] + "; #Delta " + prettynames[1] + "; Number of Clusters",
+                                             'xbins': 51,
+                                             'xmin':  -1,
+                                             'xmax':  1,
+                                             'path': "EXPERT"}
+                                           ),
+                                        ]
     def __call__(self, Plotter):
         for plotdef in self.PlotsToDo:
             Plotter.MonitoringTool.defineHistogram(*plotdef[0], **plotdef[1])

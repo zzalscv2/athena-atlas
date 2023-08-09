@@ -86,7 +86,7 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
 
       const float energy = cell_info->energy[i];
 
-      const float SNR = std::abs( energy / cell_noise->noise[gain][i] );
+      const float SNR = std::abs( energy / cell_noise->get_noise(i, gain) );
 
       const ClusterTag tag = cell_state->clusterTag[i];
 
@@ -179,7 +179,7 @@ StatusCode CaloCellsCounterGPU::execute(const EventContext & ctx, const Constant
     }
 
   const std::filesystem::path save_file = m_savePath + "/" +  StandaloneDataIO::build_filename((m_filePrefix.size() > 0 ? m_filePrefix + "_counts" : "counts"),
-											       ctx.evt(), m_fileSuffix, "txt", m_numWidth);
+                                                                                                 ctx.evt(), m_fileSuffix, "txt", m_numWidth);
 
   std::ofstream out_file(save_file);
 

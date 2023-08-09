@@ -14,6 +14,9 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 
+//#include "CaloConditions/CaloNoise.h"
+//For Two Gaussian Noise comparisons.
+
 class CaloCell_ID;
 
 /**
@@ -21,10 +24,6 @@ class CaloCell_ID;
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
  * @date 29 May 2022
  * @brief Standard tool to export cell energy and gain to the GPU.
- *
- * @warning The two gaussian noise for evaluating the seed cell cuts
- * based on out of time seeds is not implemented! We currently assume
- * noise as estimated without that flag.
  *
  */
 
@@ -73,6 +72,10 @@ class BasicEventDataGPUExporter :
   */
   const CaloCell_ID * m_calo_id {nullptr};
 
+  // /** @brief Key of the CaloNoise Conditions data object. Typical values
+  //     are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
+  //SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this, "CaloNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};
+  //For Two Gaussian Noise comparisons.
 };
 
 #endif //CALORECGPU_BASICEVENTDATAGPUEXPORTER_H

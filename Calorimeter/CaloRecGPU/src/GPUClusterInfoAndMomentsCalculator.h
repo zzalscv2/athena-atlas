@@ -4,7 +4,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
 
-
 #ifndef CALORECGPU_GPUCLUSTERINFOANDMOMENTSCALCULATOR_H
 #define CALORECGPU_GPUCLUSTERINFOANDMOMENTSCALCULATOR_H
 
@@ -13,6 +12,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "GPUClusterInfoAndMomentsCalculatorImpl.h"
+
+#include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -41,11 +42,6 @@ class GPUClusterInfoAndMomentsCalculator:
   virtual StatusCode finalize() override;
 
   virtual ~GPUClusterInfoAndMomentsCalculator();
-
-  virtual size_t size_of_temporaries() const
-  {
-    return 0;
-  };
 
  private:
 
@@ -94,15 +90,23 @@ class GPUClusterInfoAndMomentsCalculator:
    * TileCal  */
    Gaudi::Property<bool> m_twoGaussianNoise {this, "TwoGaussianNoise", false, "If set to true use 2-gaussian noise description for TileCal"};
   
+  /** @brief If @p false, do the moment calculation even for invalid clusters (which may waste computation).
+   *  Defaults to @p true.
+   */
+  Gaudi::Property<bool> m_skipInvalidClusters {this, "SkipInvalidClusters", true, "Check for and skip invalid clusters during moments calculation."};
+  
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */
-  CMCOptionsHolder m_options;
+  ClusterMomentsCalculator::CMCOptionsHolder m_options;
   
   
   /** @brief If @p true, synchronize the kernel calls to ensure accurate per-step/per-tool time measurements.
    *  Defaults to @p false.
    */
   Gaudi::Property<bool> m_measureTimes {this, "MeasureTimes", false, "Synchronize for time measurements"};
+  
+  /** @brief Handle to the CUDA kernel block and grid size optimization service. */
+  ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
 };
 
 #endif //CALORECGPU_TOPOAUTOMATONCLUSTERING_H

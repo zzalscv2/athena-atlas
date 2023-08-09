@@ -1151,13 +1151,38 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
       double d1 = (thisPos-c1).mag();
       double d2 = (thisPos-c2).mag();
       double r = (d1-d2)/m_emShowerScale;
-      if ( r > 10 ) 
-	r = exp(10);
-      else if ( r < -10 ) 
-	r = exp(-10);
-      else
-	r = exp(r);
-      pClusCell->setSharedWeight(e1/(e1+e2*r));
+      
+      if (m_useGPUCriteria) {
+	//The GPU stores the smallest weight to maintain precision,
+	//while the standard CPU implementation just uses the first cluster.
+	//This has an impact on the moments that cut based on weighted_energy > 0...
+	//As elsewhere, keeping the branches separate
+	//to be sure the CPU implementation is unchanged by default
+	//(even if the first calculation is the same for both).
+	const double real_r_exp = r > 10. ? 10. : r < -10. ? -10. : r;
+	const double real_r = exp(real_r_exp);
+	const double r_reverse = exp(-real_r_exp);
+	const double weight = e1/(e1 + e2 * real_r);
+	const double reverse_weight = e2 / (e2 + e1 * r_reverse);
+	if (weight > 0.5) {
+	  pClusCell->setSharedWeight(-reverse_weight);
+	}
+	else {
+	  pClusCell->setSharedWeight(weight);
+	}
+	  
+      }
+      else {
+	
+	if ( r > 10 ) 
+	  r = exp(10);
+	else if ( r < -10 ) 
+	  r = exp(-10);
+	else
+	  r = exp(r);
+      
+	pClusCell->setSharedWeight(e1/(e1+e2*r));
+      }
     }
 
     // loop again over all shared cells and add them to their
@@ -1211,10 +1236,27 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
 	xAOD::CaloCluster::cell_iterator itrCell = pClusCell->getCellIterator();
 	double myWeight = itrCell.weight();//pClusCell->getParentCluster()->getCellWeight(itrCell);
 	if ( pClusCell->getShared() ) {
-	  if ( pClusCell->getCaloTopoTmpHashCluster() == tmpCluster ) 
-	  myWeight *= pClusCell->getSharedWeight();
-	else  
-	  myWeight *= (1.-pClusCell->getSharedWeight());
+	  if (m_useGPUCriteria) {
+	    const double shared_weight = pClusCell->getSharedWeight();
+	    if (shared_weight < 0.) {
+	      if ( pClusCell->getCaloTopoTmpHashCluster() == tmpCluster ) 
+		myWeight *= 1.0 + shared_weight;
+	      else  
+		myWeight *= -shared_weight;
+	    }
+	    else {
+	      if ( pClusCell->getCaloTopoTmpHashCluster() == tmpCluster ) 
+		myWeight *= shared_weight;
+	      else  
+		myWeight *= 1.0 - shared_weight;
+	    }
+	  }
+	  else {
+	    if ( pClusCell->getCaloTopoTmpHashCluster() == tmpCluster ) 
+	      myWeight *= pClusCell->getSharedWeight();
+	    else  
+	      myWeight *= (1.-pClusCell->getSharedWeight());
+	  }
 	}	
 	myCluster->addCell(itrCell.index(),myWeight);
       }
