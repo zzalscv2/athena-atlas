@@ -57,8 +57,8 @@ private:
 	StatusCode loadELTXData(const EventContext& ctx, const readKey_t& readKey, const DcsTechType tech, 
 	                      writeHandleDcs_t& writeHandle, NswDcsDbData* writeCdo) const;
 
-	bool buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0, const std::string chanName, bool& isOK) const;
-	bool buildChannelIdForTDaq(Identifier& channelId, uint& elink, const DcsTechType tech0, const std::string chanName, bool& isOK) const;
+	bool buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
+	bool buildChannelIdForTDaq(Identifier& channelId, uint& elink, const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
 
 	ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
 	ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

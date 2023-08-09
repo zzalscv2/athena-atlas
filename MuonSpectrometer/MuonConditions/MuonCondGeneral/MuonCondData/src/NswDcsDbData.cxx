@@ -27,7 +27,7 @@ NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stg
 }
 
 NswDcsDbData::DcsFsmState
-NswDcsDbData::getFsmStateEnum(std::string fsmState){
+NswDcsDbData::getFsmStateEnum(const std::string& fsmState){
 	if(fsmState=="UNKNOWN"  ) return NswDcsDbData::DcsFsmState::UNKNOWN;
 	if(fsmState=="ON"       ) return NswDcsDbData::DcsFsmState::ON;
 	if(fsmState=="OFF"      ) return NswDcsDbData::DcsFsmState::OFF;

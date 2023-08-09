@@ -220,7 +220,7 @@ StatusCode NswDcsDbAlg::loadELTXData(const EventContext& ctx, const readKey_t& r
 
 // buildChannelIdForHv
 bool
-NswDcsDbAlg::buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0, const std::string chanName, bool& isOK) const {
+NswDcsDbAlg::buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0, const std::string& chanName, bool& isOK) const {
 
 	// prepare regex
 	std::regex reMMG("^([A-Za-z]{1})([0-9]{2})_ML([0-9])P([0-9])_(IP|HO)R([0-9])__HV");
@@ -335,7 +335,7 @@ NswDcsDbAlg::buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0,
 
 // buildChannelIdForTDaq
 bool
-NswDcsDbAlg::buildChannelIdForTDaq(Identifier& channelId, uint& elink ,const DcsTechType tech0, const std::string chanName, bool& isOK) const {
+NswDcsDbAlg::buildChannelIdForTDaq(Identifier& channelId, uint& elink ,const DcsTechType tech0, const std::string& chanName, bool& isOK) const {
 
 	// prepare regex
 	std::regex reMMG("^ELink-MM-(A|C)/V([0-9]{1})/L1A/Strip/S([0-9]{1,2})/L([0-9]{1})/R([0-9]{1,2})/E([0-9]{1})");

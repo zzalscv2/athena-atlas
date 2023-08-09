@@ -81,7 +81,7 @@ public:
 
     
     // helper functions
-    static DcsFsmState getFsmStateEnum(std::string fsmState);
+    static DcsFsmState getFsmStateEnum(const std::string& fsmState);
     static std::string getFsmStateStrg(DcsFsmState fsmState);
  
 private:
