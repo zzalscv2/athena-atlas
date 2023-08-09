@@ -247,7 +247,7 @@ namespace MuonGM {
     // Get frame widths
     m_tckChamber    = Tck;            // thickness (full chamber)
 
-    double yCutout  = getStationName().substr(3,0)=="QL3" ? yCutoutCathode: 0.0; // y of cutout of trapezoid (only in outermost detectors)
+    double yCutout  = getStationName().substr(0,3)=="QL3" ? yCutoutCathode: 0.0; // y of cutout of trapezoid (only in outermost detectors)
 
     // For strips:
     m_halfX        = std::vector<double>(m_nlayers);
