@@ -149,7 +149,7 @@ namespace LVL1 {
     constexpr static int centralNphi = 32;
     constexpr static int forwardNphi = 16;
     constexpr static int centralNeta = 12;
-    constexpr static int forwardNeta = 8;
+    constexpr static int forwardNeta = 6;
     constexpr static int totalNeta = 40;
 
     constexpr static int n_partial = 4;

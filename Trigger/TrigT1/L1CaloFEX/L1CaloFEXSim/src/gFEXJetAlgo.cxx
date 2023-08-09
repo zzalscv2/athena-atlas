@@ -483,17 +483,19 @@ void gFEXJetAlgo::RemotePartialCN(gTowersForward twrs, gTowersPartialSums & rps 
     for(int rcolumn = 0; rcolumn<FEXAlgoSpaceDefs::n_partial; rcolumn++){
       // start calculating right partial sums for remote column rcolumn
       rps[irow][rcolumn] = 0;
+      //lcolumn needs to be offset by 4 below, because the interFPGA comm only takes the 4 col most close to the central FPGA 
+      //note that this is different from C-sim (where offset is 2) because the twr input has different number of columns (6 in C-sim, 8 here with the first or last two empty)
       for(int lcolumn = 0; lcolumn<FEXAlgoSpaceDefs::n_partial; lcolumn++){
         // add in any energy from towers in this row
         // no need of modular arithmetic
         if ( NUpDwnR[rcolumn][lcolumn] > 0 ) {
-          rps[irow][rcolumn] = rps[irow][rcolumn] + twrs[irow][lcolumn];
+          rps[irow][rcolumn] = rps[irow][rcolumn] + twrs[irow][lcolumn+4];
         }
         // now add rup1, rup2, rup3, rup4, ldn1, ldn2, ln3, ln4 -- use a loop instead of enumeratin in firmware
         for( int rowOff = 1 ; rowOff < NUpDwnR[rcolumn][lcolumn]+1; rowOff++){
           int rowModUp =  (irow + rowOff)%32;
           int rowModDn =  (irow - rowOff + 32 )%32;
-          rps[irow][rcolumn] =  rps[irow][rcolumn] + twrs[rowModUp][lcolumn] + twrs[rowModDn][lcolumn];
+          rps[irow][rcolumn] =  rps[irow][rcolumn] + twrs[rowModUp][lcolumn+4] + twrs[rowModDn][lcolumn];
         }
       }
     }

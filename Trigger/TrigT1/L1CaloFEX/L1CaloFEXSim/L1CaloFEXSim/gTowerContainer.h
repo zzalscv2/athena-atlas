@@ -49,6 +49,9 @@ class gTowerContainer : public DataVector<LVL1::gTower>
   /** @brief utility function to help speed up accessing towers */
   bool fillContainerMap();
 
+  /** @brief given a firmware ID, it returns the simulation ID, it can be used to then find towers */
+  int getIDfromFWID(int fwID) const;
+
   /** @brief dump (obsolete) */
   void print() const;
 
@@ -67,6 +70,9 @@ class gTowerContainer : public DataVector<LVL1::gTower>
 
   //* @brief Keeps track of the towerID of each gTower associated to each MAP index *.
   std::unordered_map<int,int> m_map_towerID_containerIndex;
+
+  //* @brief A map to go from firmware ID to simulated towerID *.
+  std::unordered_map<int,int> m_map_fwID_towerID;
 };
 
 }

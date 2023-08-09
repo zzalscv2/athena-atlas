@@ -174,10 +174,23 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         acc.addEventAlgo(jFEX)
 
     if flags.Trigger.L1.dogFex:
+
+        if not flags.Input.isMC:
+            from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
+            inputgFexTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoderTool'))
+            
+            decoderTools += [inputgFexTool]
+            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool])
+            acc.addEventAlgo(decoderAlg)
+
+        gFEXInputs = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers')
+        gFEXInputs.IsMC = flags.Input.isMC
+        gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
+        gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
+
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
-        gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
-        gFEX.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
+        acc.addEventAlgo(gFEXInputs)
         acc.addEventAlgo(gFEX)
 
     if flags.Trigger.doHLT:

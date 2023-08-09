@@ -42,11 +42,7 @@ namespace LVL1 {
     virtual void GetEnergyMatrix(gTowersForward &) const override ;
 
     virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &) override ;
-    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &) override ;
-
-    virtual uint32_t getTowerIDForward ( int &iEta, int &iPhi, float Eta) const override;
-
-    virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi) const override ;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &, gTowersForward &) override ;
 
 
     /** Internal data */

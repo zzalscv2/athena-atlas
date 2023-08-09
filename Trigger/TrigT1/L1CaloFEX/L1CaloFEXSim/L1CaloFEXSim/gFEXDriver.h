@@ -41,7 +41,7 @@ class gFEXDriver : public AthAlgorithm
   int m_numberOfEvents = 0;
 
   //Declare that gFEXDriver class will write an object of type LVL1::gTowerContainer, one of type gFEXOutputCollection
-  SG::WriteHandleKey<LVL1::gTowerContainer> m_gTowerContainerSGKey {this, "MyGTowers", "gTowerContainer", "MyGTowers"};
+  SG::WriteHandleKey<LVL1::gTowerContainer> m_gTowerContainerSGKey {this, "MyGTowers", "gTowerContainerDriver", "MyGTowers"};
   SG::WriteHandleKey<gFEXOutputCollection> m_gFEXOutputCollectionSGKey {this, "MyOutputs", "gFEXOutputCollection", "MyOutputs"};
 
   ToolHandle<IgTowerBuilder> m_gTowerBuilderTool {this, "gTowerBuilderTool", "LVL1::gTowerBuilder", "Tool that builds gTowers for simulation"};
