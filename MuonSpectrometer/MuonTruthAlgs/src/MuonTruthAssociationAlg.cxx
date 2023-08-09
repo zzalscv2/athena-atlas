@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthAssociationAlg.h"
@@ -95,6 +95,8 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
         m_muonTruthParticleNTrigEtaMatched, ctx);
 
     // add link to reco muons and viceversa
+    bool saw_staco = false;
+    bool decor_staco = false;
 
     // loop over muons
     for (const xAOD::Muon* muon : *muonTruthParticleLink) {
@@ -224,9 +226,15 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
                 ATH_MSG_WARNING("Even a STACO muon should have a combined track");
                 continue;
             } else {
+              if (!saw_staco) {
+                saw_staco = true;
+                decor_staco = !dec_origin.isAvailable (*cmb_trk);
+              }
+              if (decor_staco) {
                 dec_origin(*cmb_trk) = acc_origin(*muon);
                 dec_type(*cmb_trk) = acc_type(*muon);
                 dec_link(*cmb_trk) = acc_link(*muon);
+              }
             }
         }
     }
