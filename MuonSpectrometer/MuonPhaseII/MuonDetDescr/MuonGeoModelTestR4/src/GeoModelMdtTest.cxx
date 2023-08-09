@@ -139,10 +139,10 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
 
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform {readoutEle->getMaterialGeom()->getAbsoluteTransform()};
-   m_readoutTransform.push_back(transform.translation());
-   m_readoutTransform.push_back(transform.linear()*Amg::Vector3D::UnitX());
-   m_readoutTransform.push_back(transform.linear()*Amg::Vector3D::UnitY());
-   m_readoutTransform.push_back(transform.linear()*Amg::Vector3D::UnitZ());
+   m_readoutTransform.push_back(Amg::Vector3D(transform.translation()));
+   m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitX()));
+   m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitY()));
+   m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitZ()));
    
    /// Loop over the tubes
    for (unsigned int lay = 1; lay <= readoutEle->numLayers(); ++lay) {
@@ -151,10 +151,10 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
          const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
          m_tubeLay.push_back(lay);
          m_tubeNum.push_back(tube);         
-         m_tubeTransformTran.push_back(tubeTransform.translation());
-         m_tubeTransformColX.push_back(tubeTransform.linear()*Amg::Vector3D::UnitX());
-         m_tubeTransformColY.push_back(tubeTransform.linear()*Amg::Vector3D::UnitY());
-         m_tubeTransformColZ.push_back(tubeTransform.linear()*Amg::Vector3D::UnitZ());
+         m_tubeTransformTran.push_back(Amg::Vector3D(tubeTransform.translation()));
+         m_tubeTransformColX.push_back(Amg::Vector3D(tubeTransform.linear()*Amg::Vector3D::UnitX()));
+         m_tubeTransformColY.push_back(Amg::Vector3D(tubeTransform.linear()*Amg::Vector3D::UnitY()));
+         m_tubeTransformColZ.push_back(Amg::Vector3D(tubeTransform.linear()*Amg::Vector3D::UnitZ()));
          m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
          m_tubeLength.push_back(readoutEle->tubeLength(measHash));
          m_activeTubeLength.push_back(readoutEle->activeTubeLength(measHash));
