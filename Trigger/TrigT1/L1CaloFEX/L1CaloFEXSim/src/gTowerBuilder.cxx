@@ -34,6 +34,8 @@ void gTowerBuilder::init(std::unique_ptr<gTowerContainer> & gTowerContainerRaw)
 {
 
   execute(gTowerContainerRaw);
+  gTowerContainerRaw->clearContainerMap();
+  gTowerContainerRaw->fillContainerMap();
 }
 
 

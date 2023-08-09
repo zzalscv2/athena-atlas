@@ -88,8 +88,6 @@ StatusCode gFEXDriver::initialize()
 
   // STEP 2 - Make some gTowers and fill the local container
   m_gTowerBuilderTool->init(local_gTowerContainerRaw);
-  local_gTowerContainerRaw->clearContainerMap();
-  local_gTowerContainerRaw->fillContainerMap();
 
   // STEP 3 - Do the supercell-tower mapping - put this information into the gTowerContainer
   ATH_CHECK(m_gSuperCellTowerMapperTool->AssignTriggerTowerMapper(local_gTowerContainerRaw));

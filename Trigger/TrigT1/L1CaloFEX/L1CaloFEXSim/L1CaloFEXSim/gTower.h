@@ -65,8 +65,8 @@ namespace LVL1 {
     int iEta() const;
     int iPhi() const;
 
-    float eta() const {return m_eta;};
-    float phi() const {return m_phi;};
+    float eta() const {return m_eta_float;};
+    float phi() const {return m_phi_float;};
 
     void setEta(const float thiseta){ m_eta = thiseta; }
 
@@ -88,6 +88,8 @@ namespace LVL1 {
 
     void setET();
 
+    void setTotalEt(int totEt);
+
     /** Set supercell position ID **/
     void setSCID(Identifier ID);
 
@@ -100,11 +102,19 @@ namespace LVL1 {
 
     inline int getPosNeg() const {return m_posneg;}
 
+    /** Calculates and returns the firmware ID **/
+    int getFWID() const;
+
+    /** Calculates eta and phi from ieta and iphi**/
+    void getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const;
+
     /** Internal data */
   private:
     int m_eta;
     int m_phi;
     int m_et;
+    float m_eta_float;
+    float m_phi_float;
     float m_et_float;
     std::vector<float> m_et_float_perlayer;
     std::vector<Identifier> m_scID;
@@ -112,7 +122,6 @@ namespace LVL1 {
     int m_tower_id;
     int m_posneg = 0;
     int m_noisecut = -100000; //noisecut currently not used by gFEX, leave it here in case we need it (default value is < of minimum negative energy received by gFEX)
-
   };
 
 } // end of namespace
