@@ -135,6 +135,10 @@ def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str =
   rodDecoder = CompFactory.TRT_RodDecoder(name = rodDecoderName,
                                           LoadCompressTableDB=True)
   acc.addPublicTool( rodDecoder )
+
+  if not flags.Input.isMC:
+     from IOVDbSvc.IOVDbSvcConfig import addFolders
+     acc.merge(addFolders(flags, "/TRT/Onl/ROD/Compress", "TRT_ONL", className="CondAttrListCollection"))  
   
   dataProviderTool = CompFactory.TRTRawDataProviderTool(name = providerToolName,
                                                         Decoder=rodDecoder)
