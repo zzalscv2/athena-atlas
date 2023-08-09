@@ -10,18 +10,31 @@
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "CaloRecGPU/DataHolders.h"
 
-struct ClusterInfoCalculatorTemporaries
+#include "CaloRecGPU/IGPUKernelSizeOptimizer.h"
+
+namespace BasicClusterInfoCalculator
 {
-  float seedCellPhi[CaloRecGPU::NMaxClusters];
-};
 
-void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder, CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
-                              const CaloRecGPU::ConstantDataHolder & instance_data, const bool synchronize = false,
-                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+  struct ClusterInfoCalculatorTemporaries
+  {
+    float seedCellPhi[CaloRecGPU::NMaxClusters];
+  };
 
-void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder, CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
-                                const CaloRecGPU::ConstantDataHolder & instance_data, const bool synchronize = false,
-                                const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1,
+  void register_kernels(IGPUKernelSizeOptimizer & optimizer);
+
+  void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
+                                CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+                                const CaloRecGPU::ConstantDataHolder & instance_data,
+                                const IGPUKernelSizeOptimizer & optimizer,
+                                const bool synchronize = false,
                                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
 
+  void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder, CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+                                  const CaloRecGPU::ConstantDataHolder & instance_data,
+                                  const IGPUKernelSizeOptimizer & optimizer,
+                                  const bool synchronize = false,
+                                  const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1,
+                                  CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+
+}
 #endif //CALORECGPU_BASICGPUCLUSTERINFOCALCULATORIMPL_H

@@ -19,8 +19,9 @@ void CaloRecGPU::ConstantDataHolder::sendToGPU(const bool clear_CPU)
     }
 }
 
-void CaloRecGPU::EventDataHolder::sendToGPU(const bool clear_CPU, const bool has_state,
-                                            const bool has_clusters, const bool has_pairs,
+void CaloRecGPU::EventDataHolder::sendToGPU(const bool clear_CPU,
+                                            const bool has_state,
+                                            const bool has_clusters,
                                             const bool has_moments)
 {
   m_cell_info_dev = m_cell_info;
@@ -40,14 +41,6 @@ void CaloRecGPU::EventDataHolder::sendToGPU(const bool clear_CPU, const bool has
     {
       m_clusters_dev.allocate();
     }
-  if (has_pairs)
-    {
-      m_pairs_dev = m_pairs;
-    }
-  else
-    {
-      m_pairs_dev.allocate();
-    }
   if (has_moments)
     {
       m_moments_dev = m_moments;
@@ -59,12 +52,7 @@ void CaloRecGPU::EventDataHolder::sendToGPU(const bool clear_CPU, const bool has
 
   if (!has_clusters)
     {
-      cudaMemset(&(m_clusters_dev->number), 0, sizeof(m_clusters_dev->number));
-    }
-  if (!has_pairs)
-    {
-      cudaMemset(&(m_pairs_dev->number), 0, sizeof(m_pairs_dev->number));
-      cudaMemset(&(m_pairs_dev->reverse_number), 0, sizeof(m_pairs_dev->reverse_number));
+      CUDA_ERRCHECK(cudaMemset(&(m_clusters_dev->number), 0, sizeof(m_clusters_dev->number)));
     }
   //We're not doing this through cudaMemsetAsync because it is reasonable to expect
   //the clusters to be fully sent before doing any more operations.
@@ -73,7 +61,6 @@ void CaloRecGPU::EventDataHolder::sendToGPU(const bool clear_CPU, const bool has
     {
       m_cell_info.clear();
       m_cell_state.clear();
-      m_pairs.clear();
       m_moments.clear();
     }
 }
@@ -99,7 +86,6 @@ void CaloRecGPU::EventDataHolder::returnToCPU(const bool clear_GPU,
     {
       m_cell_state_dev.clear();
       m_clusters_dev.clear();
-      m_pairs_dev.clear();
       m_cell_info_dev.clear();
       m_moments_dev.clear();
     }
@@ -110,34 +96,37 @@ void CaloRecGPU::EventDataHolder::returnToCPU(const bool clear_GPU,
 void CaloRecGPU::EventDataHolder::returnCellsToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
-  cudaMemcpyAsync((CaloRecGPU::CellStateArr *) m_cell_state,
-                  (CaloRecGPU::CellStateArr *) m_cell_state_dev,
-                  sizeof(CaloRecGPU::CellStateArr),
-                  cudaMemcpyDeviceToHost, stream_to_use);
+  CUDA_ERRCHECK( cudaMemcpyAsync((CaloRecGPU::CellStateArr *) m_cell_state,
+                                 (CaloRecGPU::CellStateArr *) m_cell_state_dev,
+                                 sizeof(CaloRecGPU::CellStateArr),
+                                 cudaMemcpyDeviceToHost, stream_to_use) );
 }
 
 void CaloRecGPU::EventDataHolder::returnClustersToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
-  cudaMemcpyAsync((CaloRecGPU::ClusterInfoArr *) m_clusters,
-                  (CaloRecGPU::ClusterInfoArr *) m_clusters_dev,
-                  sizeof(CaloRecGPU::ClusterInfoArr),
-                  cudaMemcpyDeviceToHost, stream_to_use);
+  CUDA_ERRCHECK( cudaMemcpyAsync((CaloRecGPU::ClusterInfoArr *) m_clusters,
+                                 (CaloRecGPU::ClusterInfoArr *) m_clusters_dev,
+                                 sizeof(CaloRecGPU::ClusterInfoArr),
+                                 cudaMemcpyDeviceToHost, stream_to_use) );
 }
 
 void CaloRecGPU::EventDataHolder::returnMomentsToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
-  cudaMemcpyAsync((CaloRecGPU::ClusterMomentsArr *) m_moments,
-                  (CaloRecGPU::ClusterMomentsArr *) m_moments_dev,
-                  sizeof(CaloRecGPU::ClusterMomentsArr),
-                  cudaMemcpyDeviceToHost, stream_to_use);
+  CUDA_ERRCHECK(cudaMemcpyAsync((CaloRecGPU::ClusterMomentsArr *) m_moments,
+                                (CaloRecGPU::ClusterMomentsArr *) m_moments_dev,
+                                sizeof(CaloRecGPU::ClusterMomentsArr),
+                                cudaMemcpyDeviceToHost, stream_to_use) );
 }
 
 void CaloRecGPU::EventDataHolder::returnClusterNumberToCPU(CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
-  cudaMemcpyAsync(&(m_clusters->number), &(m_clusters_dev->number), sizeof(int), cudaMemcpyDeviceToHost, stream_to_use);
+  CUDA_ERRCHECK(cudaMemcpyAsync(&(m_clusters->number),
+                                &(m_clusters_dev->number),
+                                sizeof(int),
+                                cudaMemcpyDeviceToHost, stream_to_use) );
 }
 
 
@@ -276,7 +265,6 @@ void CaloRecGPU::EventDataHolder::allocate(const bool also_GPU)
 {
   m_cell_info.allocate();
   m_cell_state.allocate();
-  m_pairs.allocate();
   m_clusters.allocate();
   m_moments.allocate();
 
@@ -284,7 +272,6 @@ void CaloRecGPU::EventDataHolder::allocate(const bool also_GPU)
     {
       m_cell_info_dev.allocate();
       m_cell_state_dev.allocate();
-      m_pairs_dev.allocate();
       m_clusters_dev.allocate();
       m_moments_dev.allocate();
     }
@@ -294,7 +281,6 @@ void CaloRecGPU::EventDataHolder::clear_GPU()
 {
   m_cell_info_dev.clear();
   m_cell_state_dev.clear();
-  m_pairs_dev.clear();
   m_clusters_dev.clear();
   m_moments_dev.clear();
 }

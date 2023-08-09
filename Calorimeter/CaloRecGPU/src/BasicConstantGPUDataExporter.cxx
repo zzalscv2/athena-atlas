@@ -72,29 +72,6 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
   const CaloCell_ID * calo_id = calo_dd_man->getCaloCell_ID();
 
-  auto neigh_option_exclude = [&](const CaloCell_ID::SUBCALO sub_detector, const Identifier cell_id,
-                                  const bool restrict_HECIWandFCal = true, const bool restrict_PS = true) -> bool
-  {
-    const bool doRestrictHECIWandFCal = restrict_HECIWandFCal;
-    const bool doRestrictPS = restrict_PS;
-    if (doRestrictHECIWandFCal && sub_detector != CaloCell_ID::LAREM)
-      {
-        if (sub_detector == CaloCell_ID::LARHEC && calo_id->region(cell_id) == 1)
-          {
-            return true;
-          }
-        if (sub_detector == CaloCell_ID::LARFCAL && calo_id->sampling(cell_id) > 1)
-          {
-            return true;
-          }
-      }
-    if (doRestrictPS && sub_detector == CaloCell_ID::LAREM && calo_id->sampling(cell_id) == 0)
-      {
-        return true;
-      }
-    return false;
-  };
-
   float min_eta_pos[NumSamplings], max_eta_pos[NumSamplings],
         min_eta_neg[NumSamplings], max_eta_neg[NumSamplings],
         min_phi_pos[NumSamplings], max_phi_pos[NumSamplings],
@@ -119,9 +96,24 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
     {
       const CaloDetDescrElement * caloElement = calo_dd_man->get_element((IdentifierHash) cell);
 
-      const int sampling = calo_id->calo_sample(calo_id->cell_id((IdentifierHash) cell));
+      const Identifier cell_identifier = calo_id->cell_id((IdentifierHash) cell);
 
-      cd.m_geometry->caloSample[cell] = sampling;
+      const int  sampling            = calo_id->calo_sample(cell_identifier);
+      const int  intra_calo_sampling = calo_id->sampling(cell_identifier);
+      const int  subcalo             = caloElement->getSubCalo();
+      const int  region              = calo_id->region(cell_identifier);
+      
+      const bool is_HECIW_or_FCAL    = ( (subcalo == CaloCell_ID::LARHEC  && region              == 1 ) ||
+                                         (subcalo == CaloCell_ID::LARFCAL && intra_calo_sampling >  1 )    );
+      
+      const bool is_PS               =   (subcalo == CaloCell_ID::LAREM   && intra_calo_sampling == 0);
+
+      cd.m_geometry->otherCellInfo[cell] = OtherCellInfo(sampling,
+                                                         ConstantEnumConversion::from_intra_calorimeter_sampling_enum(intra_calo_sampling),
+                                                         ConstantEnumConversion::from_subcalo_enum(subcalo),
+                                                         ConstantEnumConversion::from_region_enum(region),
+                                                         is_HECIW_or_FCAL,
+                                                         is_PS);
       cd.m_geometry->x[cell] = caloElement->x();
       cd.m_geometry->y[cell] = caloElement->y();
       cd.m_geometry->z[cell] = caloElement->z();
@@ -137,7 +129,6 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
       cd.m_geometry->dphi[cell] = caloElement->dphi();
 
       cd.m_geometry->volume[cell] = caloElement->volume();
-      cd.m_geometry->neighbours.total_number[cell] = 0;
       cd.m_geometry->neighbours.offsets[cell] = 0;
 
       if (caloElement->eta() >= 0)
@@ -154,8 +145,8 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
           max_eta_neg[sampling] = std::max(max_eta_neg[sampling], caloElement->eta() + caloElement->deta() / 2);
           max_phi_neg[sampling] = std::max(max_phi_neg[sampling], caloElement->phi() + caloElement->dphi() / 2);
         }
-          min_deta[sampling] = std::min(min_deta[sampling], caloElement->deta());
-          min_dphi[sampling] = std::min(min_dphi[sampling], caloElement->dphi());
+      min_deta[sampling] = std::min(min_deta[sampling], caloElement->deta());
+      min_dphi[sampling] = std::min(min_dphi[sampling], caloElement->dphi());
 
     }
 
@@ -171,25 +162,11 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
   std::vector<IdentifierHash> neighbour_vector, full_neighs, prev_neighs;
 
-  for (int neigh_bit_set = 0; neigh_bit_set < NumNeighOptions; ++neigh_bit_set)
+  for (int cell = 0; cell < NCaloCells; ++cell)
     {
-      const unsigned int curr_neigh_opt = (1U << neigh_bit_set);
-
-      for (int cell = 0; cell < NCaloCells; ++cell)
+      for (int neigh_bit_set = 0; neigh_bit_set < NumNeighOptions; ++neigh_bit_set)
         {
-          const CaloDetDescrElement * caloElement = calo_dd_man->get_element((IdentifierHash) cell);
-          CaloCell_ID::SUBCALO sub_detector = caloElement->getSubCalo();
-
-          if (neigh_option_exclude(sub_detector, calo_id->cell_id((IdentifierHash) cell), true, false))
-            //Restrict HECIW and FCal.
-            {
-              cd.m_geometry->neighbours.offsets[cell] |= NeighOffsets::limited_HECIWandFCal_bitmask();
-            }
-          if (neigh_option_exclude(sub_detector, calo_id->cell_id((IdentifierHash) cell), false, true))
-            //Restrict PS
-            {
-              cd.m_geometry->neighbours.offsets[cell] |= NeighOffsets::limited_PS_bitmask();
-            }
+          const unsigned int curr_neigh_opt = (1U << neigh_bit_set);
 
           if (curr_neigh_opt == LArNeighbours::corners2D || curr_neigh_opt == LArNeighbours::corners3D)
             //Scanning the ATLAS codebase, neighbour handling has special cases
@@ -229,12 +206,12 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
                 }
 
-              prev_neighs.resize(cd.m_geometry->neighbours.total_number[cell]);
+              prev_neighs.resize(cd.m_geometry->neighbours.get_total_number_of_neighbours(cell));
               //We want to add just the neighbours that are not part of this.
 
               for (size_t neigh = 0; neigh < prev_neighs.size(); ++neigh)
                 {
-                  prev_neighs[neigh] = cd.m_geometry->neighbours.get_neighbour(cell, neigh, false, false);
+                  prev_neighs[neigh] = cd.m_geometry->neighbours.get_neighbour(cell, neigh);
                 }
 
               std::sort(full_neighs.begin(), full_neighs.end());
@@ -253,61 +230,104 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
           std::sort(neighbour_vector.begin(), neighbour_vector.end());
 
-          const int neighs_start = cd.m_geometry->neighbours.total_number[cell];
+          const int neighs_start = cd.m_geometry->neighbours.get_total_number_of_neighbours(cell);
 
-          for (size_t neigh_num = 0; neigh_num < neighbour_vector.size() && neighs_start + neigh_num < NMaxNeighbours; ++neigh_num)
+          for (size_t neigh_num = 0; neigh_num < neighbour_vector.size(); ++neigh_num)
             {
               cd.m_geometry->neighbours.set_neighbour(cell, neighs_start + neigh_num, neighbour_vector[neigh_num]);
             }
-          cd.m_geometry->neighbours.total_number[cell] += neighbour_vector.size();
 
-          cd.m_geometry->neighbours.offsets[cell] += NeighOffsets::offset_delta(neigh_bit_set) * neighbour_vector.size();
+          cd.m_geometry->neighbours.offsets[cell] += NeighOffset::offset_delta(neigh_bit_set) * neighbour_vector.size();
 
         }
     }
 
   auto after_geo = clock_type::now();
 
+  /*
+    //Useful output for debugging and studying regularities in calorimeter geometry...
+    
+    std::cout << "ID\tCaloSample\tSampling\tRegion\tSubCalo";
+    for (int j = 0; j < NumNeighOptions; ++j)
+      {
+        std::cout << "\tn_" << j;
+      }
+    std::cout << "\tn_total\tOffset" << std::endl;
+
+    for (int cell = 0; cell < NCaloCells; ++cell)
+    {
+
+        const CaloDetDescrElement * caloElement = calo_dd_man->get_element((IdentifierHash) cell);
+        std::cout << cell                                                                << "\t"
+                  << (int) calo_id->calo_sample(calo_id->cell_id((IdentifierHash) cell)) << "\t"
+                  << (int) calo_id->sampling(calo_id->cell_id((IdentifierHash) cell))    << "\t"
+                  << (int) calo_id->region(calo_id->cell_id((IdentifierHash) cell))      << "\t"
+                  << (int) caloElement->getSubCalo();
+
+        const NeighOffset n_off = cd.m_geometry->neighbours.offsets[cell];
+
+        for (int j = 0; j < NumNeighOptions; ++j)
+          {
+            std::cout << "\t" << n_off.get_num_cells(j);
+          }
+
+        std::cout << "\t" << n_off.get_total_number() << "\t" << n_off << std::endl;
+    }
+  // */
+
   SG::ReadCondHandle<CaloNoise> noise_handle(m_noiseCDOKey, ctx);
-  CaloNoise * noise_tool ATLAS_THREAD_SAFE = const_cast<CaloNoise *>(*noise_handle);
-  //We are committing the sin of const-casting to access larStorage and tileStorage.
-  //I think const views into these could reasonably be added to the CaloNoise itself,
-  //but I don't want to change unrelated portions of the code and I promise I'll behave.
-  //Also suppress non-thread-safe complaints as we'll only be reading...
-  //(Furthermore, constant data preparation should only happen in one thread anyway.)
+  const CaloNoise * noise_tool = *noise_handle;
 
   IdentifierHash t_start, t_end;
   calo_id->calo_cell_hash_range(CaloCell_ID::TILE, t_start, t_end);
 
-  if (t_start != cd.m_geometry->s_tileStart)
+  if (t_start != TileCellStart)
     {
-      ATH_MSG_WARNING("Tile start (" << t_start << ") differs from assumed constant value (" << cd.m_geometry->s_tileStart << ")!");
+      ATH_MSG_WARNING("Tile start (" << t_start << ") differs from assumed constant value (" << TileCellStart << ")!");
     }
-  if (t_end != cd.m_geometry->s_tileEnd)
+  if (t_end != TileCellAfterEnd)
     {
-      ATH_MSG_WARNING("Tile end (" << t_end << ") differs from assumed constant value (" << cd.m_geometry->s_tileEnd << ")!");
+      ATH_MSG_WARNING("Tile end (" << t_end << ") differs from assumed constant value (" << TileCellAfterEnd << ")!");
     }
+
+  const CaloCondBlobFlt * blob = noise_tool->getTileBlob();
 
   cd.m_cell_noise.allocate();
 
-  //Were it not for the fact that the LAr noise array inside
-  //the CaloNoise has three gains while the Tile has all four,
-  //we might try to do something more memcpy-y...
-  //(Still, with hope, it's highly optimized anyway.)
-
-  for (int gain_state = 0; gain_state < CaloRecGPU::NumGainStates; ++gain_state)
+  if (!blob)
     {
-      for (int cell = 0; cell < int(t_start); ++cell)
+      cd.m_cell_noise->noise_properties = CellNoiseProperties::invalid_value();
+    }
+  else
+    {
+      cd.m_cell_noise->noise_properties = CellNoiseProperties(blob->getObjVersion(), noise_tool->getNoiseType());
+    }
+
+  cd.m_cell_noise->luminosity = noise_tool->getLumi();
+
+  for (int cell = 0; cell < int(t_start); ++cell)
+    {
+      for (int gain_state = 0; gain_state < CaloRecGPU::NumGainStates; ++gain_state)
         {
-          cd.m_cell_noise->noise[gain_state][cell] = noise_tool->larStorage()[(gain_state > 2 ? 0 : gain_state)][cell];
+          cd.m_cell_noise->noise[cell][gain_state] = noise_tool->larStorage()[(gain_state > 2 ? 0 : gain_state)][cell];
         }
-      for (int cell = t_start; cell < int(t_end); ++cell)
+    }
+  for (int cell = t_start; cell < int(t_end); ++cell)
+    {
+      for (int gain_state = 0; gain_state < CaloRecGPU::NumGainStates; ++gain_state)
         {
-          cd.m_cell_noise->noise[gain_state][cell] = noise_tool->tileStorage()[gain_state][cell - t_start];
+          cd.m_cell_noise->noise[cell][gain_state] = noise_tool->tileStorage()[gain_state][cell - t_start];
+          cd.m_cell_noise->double_gaussian_constants[0][cell - t_start][gain_state] = blob->getData(cell - t_start, gain_state, 2);
+          cd.m_cell_noise->double_gaussian_constants[1][cell - t_start][gain_state] = blob->getData(cell - t_start, gain_state, 3);
+          cd.m_cell_noise->double_gaussian_constants[2][cell - t_start][gain_state] = blob->getData(cell - t_start, gain_state, 4);
+          cd.m_cell_noise->double_gaussian_constants[3][cell - t_start][gain_state] = blob->getData(cell - t_start, gain_state, 1);
         }
-      for (int cell = t_end; cell < NCaloCells; ++cell)
+    }
+  for (int cell = t_end; cell < NCaloCells; ++cell)
+    {
+      for (int gain_state = 0; gain_state < CaloRecGPU::NumGainStates; ++gain_state)
         {
-          cd.m_cell_noise->noise[gain_state][cell] = 0;
+          cd.m_cell_noise->noise[cell][gain_state] = 0;
         }
     }
 

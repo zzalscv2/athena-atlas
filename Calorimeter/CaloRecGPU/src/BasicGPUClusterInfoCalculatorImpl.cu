@@ -8,88 +8,95 @@
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "BasicGPUClusterInfoCalculatorImpl.h"
 
-
 #include <cstring>
 #include <cmath>
 #include <iostream>
 #include <stdio.h>
 
-using namespace CaloRecGPU;
+#include "CaloRecGPU/IGPUKernelSizeOptimizer.h"
 
+using namespace CaloRecGPU;
+using namespace BasicClusterInfoCalculator;
+
+/**********************************************************************************/
 constexpr static int SeedCellPropertiesBlockSize = 512;
 
 constexpr static int CalculateClusterInfoBlockSize = 320;
 constexpr static int FinalizeClusterInfoBlockSize = 256;
 constexpr static int ClearInvalidCellsBlockSize = 512;
 
-#if defined(__CUDA_ARCH__) &&  __CUDA_ARCH__ > 350
-  #if CUDART_VERSION >= 12000
-    #define CAN_USE_TAIL_LAUNCH 1
-  #else
-    #define CAN_USE_TAIL_LAUNCH 0
-  #endif
-#elif defined(__CUDA_ARCH__)
-  #error "CUDA compute capability at least 3.5 is needed so we can have dynamic parallelism!"
-#endif
-
 /**********************************************************************************/
 
 __global__ static
-void seedCellPropertiesKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                               Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries,
-                               const Helpers::CUDA_kernel_object<GeometryArr> geometry,
-                               const int cluster_number)
+void seedCellPropertiesKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                              Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries,
+                              const Helpers::CUDA_kernel_object<GeometryArr> geometry)
 {
-  const int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if (i < cluster_number)
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  const int grid_size = gridDim.x * blockDim.x;
+  const int cluster_number = clusters_arr->number;
+  for (int cluster = index; cluster < cluster_number; cluster += grid_size)
     {
-      clusters_arr->clusterEnergy[i] = 0.f;
-      clusters_arr->clusterEt[i] = 0.f;
-      clusters_arr->clusterEta[i] = 0.f;
-      clusters_arr->clusterPhi[i] = 0.f;
-      const int seed_cell = clusters_arr->seedCellID[i];
+      clusters_arr->clusterEnergy[cluster] = 0.f;
+      clusters_arr->clusterEt[cluster] = 0.f;
+      clusters_arr->clusterEta[cluster] = 0.f;
+      clusters_arr->clusterPhi[cluster] = 0.f;
+      const int seed_cell = clusters_arr->seedCellID[cluster];
       if (seed_cell >= 0)
         {
-          temporaries->seedCellPhi[i] = geometry->phi[seed_cell];
+          temporaries->seedCellPhi[cluster] = geometry->phi[seed_cell];
         }
       else
         {
-          temporaries->seedCellPhi[i] = 0.f;
+          temporaries->seedCellPhi[cluster] = 0.f;
         }
     }
 }
 
-
 __global__ static
-void seedCellPropertiesDeferKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                                    Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries,
-                                    const Helpers::CUDA_kernel_object<GeometryArr> geometry)
+void seedCellPropertiesDeferKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                   Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries,
+                                   const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                                   const int i_dimBlock)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index == 0)
     {
       const int cluster_number = clusters_arr->number;
 
-      const int i_dimBlock = SeedCellPropertiesBlockSize;
+      //const int i_dimBlock = SeedCellPropertiesBlockSize;
       const int i_dimGrid = Helpers::int_ceil_div(cluster_number, i_dimBlock);
-      const dim3 dimBlock(i_dimBlock, 1, 1);
-      const dim3 dimGrid(i_dimGrid, 1, 1);
-#if CAN_USE_TAIL_LAUNCH
-      seedCellPropertiesKernel <<< dimGrid, dimBlock, 0, cudaStreamTailLaunch>>>(clusters_arr, temporaries, geometry, cluster_number);
+
+#if CUDA_CAN_USE_TAIL_LAUNCH
+      seedCellPropertiesKernel <<< i_dimGrid, i_dimBlock, 0, cudaStreamTailLaunch>>>(clusters_arr, temporaries, geometry);
 #else
-      seedCellPropertiesKernel <<< dimGrid, dimBlock>>>(clusters_arr, temporaries, geometry, cluster_number);
+      seedCellPropertiesKernel <<< i_dimGrid, i_dimBlock>>>(clusters_arr, temporaries, geometry);
 #endif
     }
 }
 
-void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
-                              CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
-                              const ConstantDataHolder & instance_data, const bool synchronize,
-                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+
+void BasicClusterInfoCalculator::updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
+                                                          CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+                                                          const ConstantDataHolder & instance_data,
+                                                          const IGPUKernelSizeOptimizer & optimizer,
+                                                          const bool synchronize,
+                                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
-  seedCellPropertiesDeferKernel <<< 1, 1, 0, stream_to_use>>>(holder.m_clusters_dev, temps, instance_data.m_geometry_dev);
+  const CUDAKernelLaunchConfiguration launch_config = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 0);
+
+  if (optimizer.use_minimal_kernel_sizes() && optimizer.can_use_dynamic_parallelism())
+    {
+
+      seedCellPropertiesDeferKernel <<< 1, 1, 0, stream_to_use>>>(holder.m_clusters_dev, temps, instance_data.m_geometry_dev, launch_config.block_x);
+    }
+  else
+    {
+      seedCellPropertiesKernel <<< launch_config.grid_x, launch_config.block_x, 0, stream_to_use>>>(holder.m_clusters_dev, temps, instance_data.m_geometry_dev);
+
+    }
 
   if (synchronize)
     {
@@ -102,16 +109,17 @@ void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
 /**********************************************************************************/
 
 __global__ static
-void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                                 const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                 const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                 const Helpers::CUDA_kernel_object<GeometryArr> geometry,
-                                 const Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries)
+void calculateClusterInfoKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                                const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                                const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                                const Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
-  if (index < NCaloCells)
+  const int grid_size = gridDim.x * blockDim.x;
+  for (int cell = index; cell < NCaloCells; cell += grid_size)
     {
-      const ClusterTag tag = cell_state_arr->clusterTag[index];
+      const ClusterTag tag = cell_state_arr->clusterTag[cell];
       if (tag.is_part_of_cluster())
         //By this point they all have the terminals anyway, so...
         {
@@ -123,13 +131,13 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
               const float secondary_weight = __int_as_float(tag.secondary_cluster_weight());
               const float weight = 1.0f - secondary_weight;
 
-              const float energy = cell_info_arr->energy[index];
+              const float energy = cell_info_arr->energy[cell];
               const float abs_energy = fabsf(energy);
-              const float phi_raw = geometry->phi[index];
+              const float phi_raw = geometry->phi[cell];
 
               atomicAdd(&(clusters_arr->clusterEnergy[primary_cluster]), energy * weight);
               atomicAdd(&(clusters_arr->clusterEt[primary_cluster]), abs_energy * weight);
-              atomicAdd(&(clusters_arr->clusterEta[primary_cluster]), abs_energy * geometry->eta[index] * weight);
+              atomicAdd(&(clusters_arr->clusterEta[primary_cluster]), abs_energy * geometry->eta[cell] * weight);
 
               const float primary_phi_0 = temporaries->seedCellPhi[primary_cluster];
               const float primary_phi_real = Helpers::regularize_angle(phi_raw, primary_phi_0);
@@ -137,7 +145,7 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
 
               atomicAdd(&(clusters_arr->clusterEnergy[secondary_cluster]), energy * secondary_weight);
               atomicAdd(&(clusters_arr->clusterEt[secondary_cluster]), abs_energy * secondary_weight);
-              atomicAdd(&(clusters_arr->clusterEta[secondary_cluster]), abs_energy * geometry->eta[index] * secondary_weight);
+              atomicAdd(&(clusters_arr->clusterEta[secondary_cluster]), abs_energy * geometry->eta[cell] * secondary_weight);
 
               const float secondary_phi_0 = temporaries->seedCellPhi[secondary_cluster];
               const float secondary_phi_real = Helpers::regularize_angle(phi_raw, secondary_phi_0);
@@ -146,13 +154,13 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
           else
             {
               const int cluster_index = tag.cluster_index();
-              const float energy = cell_info_arr->energy[index];
+              const float energy = cell_info_arr->energy[cell];
               const float abs_energy = fabsf(energy);
-              const float phi_raw = geometry->phi[index];
+              const float phi_raw = geometry->phi[cell];
 
               atomicAdd(&(clusters_arr->clusterEnergy[cluster_index]), energy);
               atomicAdd(&(clusters_arr->clusterEt[cluster_index]), abs_energy);
-              atomicAdd(&(clusters_arr->clusterEta[cluster_index]), abs_energy * geometry->eta[index]);
+              atomicAdd(&(clusters_arr->clusterEta[cluster_index]), abs_energy * geometry->eta[cell]);
 
               const float phi_0 = temporaries->seedCellPhi[cluster_index];
               const float phi_real = Helpers::regularize_angle(phi_raw, phi_0);
@@ -164,70 +172,72 @@ void calculateClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clu
 
 
 __global__ static
-void finalizeClusterInfoKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr, const int cluster_number,
-                                const bool cut_in_absolute_ET, const float ET_threshold                             )
+void finalizeClusterInfoKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                               const bool cut_in_absolute_ET, const float ET_threshold   )
 {
-  const int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if (i < cluster_number)
+  const int index = blockIdx.x * blockDim.x + threadIdx.x;
+  const int grid_size = gridDim.x * blockDim.x;
+  const int cluster_number = clusters_arr->number;
+  for (int cluster = index; cluster < cluster_number; cluster += grid_size)
     {
-
-      const float abs_energy = clusters_arr->clusterEt[i];
+      const float abs_energy = clusters_arr->clusterEt[cluster];
 
       if (abs_energy > 0)
         {
-          const float tempeta = clusters_arr->clusterEta[i] / abs_energy;
+          const float tempeta = clusters_arr->clusterEta[cluster] / abs_energy;
 
-          clusters_arr->clusterEta[i] = tempeta;
+          clusters_arr->clusterEta[cluster] = tempeta;
 
-          const float temp_ET = clusters_arr->clusterEnergy[i] / coshf(abs(tempeta));
+          const float temp_ET = clusters_arr->clusterEnergy[cluster] / coshf(abs(tempeta));
 
-          clusters_arr->clusterEt[i] = temp_ET;
+          clusters_arr->clusterEt[cluster] = temp_ET;
 
-          clusters_arr->clusterPhi[i] = Helpers::regularize_angle(clusters_arr->clusterPhi[i] / abs_energy, 0.f);
+          clusters_arr->clusterPhi[cluster] = Helpers::regularize_angle(clusters_arr->clusterPhi[cluster] / abs_energy, 0.f);
 
           if ( !(temp_ET > ET_threshold || (cut_in_absolute_ET && fabsf(temp_ET) > ET_threshold) ) )
             {
-              clusters_arr->seedCellID[i] = -1;
+              clusters_arr->seedCellID[cluster] = -1;
             }
         }
       else
         {
-          clusters_arr->seedCellID[i] = -1;
+          clusters_arr->seedCellID[cluster] = -1;
           //This is just a way to signal that this is an invalid cluster.
         }
     }
 }
 
 __global__ static
-void finalizeClustersDeferKernel( Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                                  const bool cut_in_absolute_ET, const float ET_threshold)
+void finalizeClustersDeferKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                 const bool cut_in_absolute_ET, const float ET_threshold,
+                                 const int i_dimBlock)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index == 0)
     {
       const int cluster_number = clusters_arr->number;
 
-      const int i_dimBlock = FinalizeClusterInfoBlockSize;
+      //const int i_dimBlock = FinalizeClusterInfoBlockSize;
       const int i_dimGrid = Helpers::int_ceil_div(cluster_number, i_dimBlock);
       const dim3 dimBlock(i_dimBlock, 1, 1);
       const dim3 dimGrid(i_dimGrid, 1, 1);
-#if CAN_USE_TAIL_LAUNCH
-      finalizeClusterInfoKernel <<< dimGrid, dimBlock, 0, cudaStreamTailLaunch>>>(clusters_arr, cluster_number, cut_in_absolute_ET, ET_threshold);
+#if CUDA_CAN_USE_TAIL_LAUNCH
+      finalizeClusterInfoKernel <<< dimGrid, dimBlock, 0, cudaStreamTailLaunch>>>(clusters_arr, cut_in_absolute_ET, ET_threshold);
 #else
-      finalizeClusterInfoKernel <<< dimGrid, dimBlock>>>(clusters_arr, cluster_number, cut_in_absolute_ET, ET_threshold);
+      finalizeClusterInfoKernel <<< dimGrid, dimBlock>>>(clusters_arr, cut_in_absolute_ET, ET_threshold);
 #endif
     }
 }
-
 
 __global__ static
 void clearInvalidCells(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                        const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
-  if (index < NCaloCells)
+  const int grid_size = gridDim.x * blockDim.x;
+  for (int cell = index; cell < NCaloCells; cell += grid_size)
     {
-      const ClusterTag tag = cell_state_arr->clusterTag[index];
+      const ClusterTag tag = cell_state_arr->clusterTag[cell];
       if (tag.is_part_of_cluster())
         //By this point they all have the terminals anyway, so...
         {
@@ -241,15 +251,15 @@ void clearInvalidCells(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
 
               if (first_seed < 0 && second_seed < 0)
                 {
-                  cell_state_arr->clusterTag[index] = ClusterTag:: make_invalid_tag();
+                  cell_state_arr->clusterTag[cell] = ClusterTag:: make_invalid_tag();
                 }
               else if (first_seed < 0)
                 {
-                  cell_state_arr->clusterTag[index] = ClusterTag::make_tag(second_cluster);
+                  cell_state_arr->clusterTag[cell] = ClusterTag::make_tag(second_cluster);
                 }
               else if (second_seed < 0)
                 {
-                  cell_state_arr->clusterTag[index] = ClusterTag::make_tag(first_cluster);
+                  cell_state_arr->clusterTag[cell] = ClusterTag::make_tag(first_cluster);
                 }
               else /*if (first_seed >= 0 && second_seed >= 0)*/
                 {
@@ -260,41 +270,68 @@ void clearInvalidCells(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
             {
               if (clusters_arr->seedCellID[tag.cluster_index()] < 0)
                 {
-                  cell_state_arr->clusterTag[index] = ClusterTag:: make_invalid_tag();
+                  cell_state_arr->clusterTag[cell] = ClusterTag:: make_invalid_tag();
                 }
             }
         }
     }
 }
 
-void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder,
-                                CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
-                                const ConstantDataHolder & instance_data, const bool synchronize,
-                                const bool cut_in_absolute_ET, const float ET_threshold,
-                                CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+void BasicClusterInfoCalculator::calculateClusterProperties(CaloRecGPU::EventDataHolder & holder,
+                                                            CaloRecGPU::Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temps,
+                                                            const ConstantDataHolder & instance_data,
+                                                            const IGPUKernelSizeOptimizer & optimizer,
+                                                            const bool synchronize,
+                                                            const bool cut_in_absolute_ET, const float ET_threshold,
+                                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
 {
   const cudaStream_t & stream_to_use = (stream != nullptr ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
 
-  const int i_dimBlock1 = CalculateClusterInfoBlockSize;
-  const int i_dimGrid1 = Helpers::int_ceil_div(NCaloCells, i_dimBlock1);
-  const dim3 dimBlock1(i_dimBlock1, 1, 1);
-  const dim3 dimGrid1(i_dimGrid1, 1, 1);
+  const CUDAKernelLaunchConfiguration cfg_calculate = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 1);
+  const CUDAKernelLaunchConfiguration cfg_finalize  = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 2);
+  const CUDAKernelLaunchConfiguration cfg_clear     = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 3);
 
-  const int i_dimBlock2 = ClearInvalidCellsBlockSize;
-  const int i_dimGrid2 = Helpers::int_ceil_div(NCaloCells, i_dimBlock2);
-  const dim3 dimBlock2(i_dimBlock2, 1, 1);
-  const dim3 dimGrid2(i_dimGrid2, 1, 1);
+  calculateClusterInfoKernel <<< cfg_calculate.grid_x, cfg_calculate.block_x, 0, stream_to_use>>>(holder.m_clusters_dev, holder.m_cell_state_dev,
+                                                                                                  holder.m_cell_info_dev, instance_data.m_geometry_dev, temps);
 
-  calculateClusterInfoKernel <<< dimGrid1, dimBlock1, 0, stream_to_use>>>(holder.m_clusters_dev, holder.m_cell_state_dev,
-                                                                          holder.m_cell_info_dev, instance_data.m_geometry_dev, temps);
-
-  finalizeClustersDeferKernel <<< 1, 1, 0, stream_to_use>>>(holder.m_clusters_dev, cut_in_absolute_ET, ET_threshold);
-
-  clearInvalidCells <<< dimGrid2, dimBlock2, 0, stream_to_use>>>(holder.m_cell_state_dev, holder.m_clusters_dev);
+  if (optimizer.use_minimal_kernel_sizes() && optimizer.can_use_dynamic_parallelism())
+    {
+      finalizeClustersDeferKernel <<< 1, 1, 0, stream_to_use>>>(holder.m_clusters_dev, cut_in_absolute_ET, ET_threshold, cfg_finalize.block_x);
+    }
+  else
+    {
+      finalizeClusterInfoKernel <<< cfg_finalize.grid_x, cfg_finalize.block_x, 0, stream_to_use>>>(holder.m_clusters_dev, cut_in_absolute_ET, ET_threshold);
+    }
+  clearInvalidCells <<< cfg_clear.block_x, cfg_clear.block_x, 0, stream_to_use>>>(holder.m_cell_state_dev, holder.m_clusters_dev);
 
   if (synchronize)
     {
       CUDA_ERRCHECK(cudaPeekAtLastError());
       CUDA_ERRCHECK(cudaStreamSynchronize(stream_to_use));
     }
+}
+
+/*******************************************************************************************************************************/
+
+void BasicClusterInfoCalculator::register_kernels(IGPUKernelSizeOptimizer & optimizer)
+{
+  void * kernels[] = { (void *) seedCellPropertiesKernel,
+                       (void *) calculateClusterInfoKernel,
+                       (void *) finalizeClusterInfoKernel,
+                       (void *) clearInvalidCells
+                     };
+
+  int blocksizes[] = { SeedCellPropertiesBlockSize,
+                       CalculateClusterInfoBlockSize,
+                       FinalizeClusterInfoBlockSize,
+                       ClearInvalidCellsBlockSize
+                     };
+
+  int  gridsizes[] = { Helpers::int_ceil_div(NMaxClusters, SeedCellPropertiesBlockSize),
+                       Helpers::int_ceil_div(NCaloCells, CalculateClusterInfoBlockSize),
+                       Helpers::int_ceil_div(NMaxClusters, FinalizeClusterInfoBlockSize),
+                       Helpers::int_ceil_div(NCaloCells, ClearInvalidCellsBlockSize)
+                     };
+
+  optimizer.register_kernels("BasicClusterInfoCalculator", 4, kernels, blocksizes, gridsizes);
 }

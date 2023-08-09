@@ -9,7 +9,8 @@
 
 from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
 import CaloRecGPUTesting
-
+from CaloRecGPUTestingChecker import check
+import sys
 
 def do_test(files):
     Configurator = CaloRecGPUConfigurator()
@@ -25,6 +26,7 @@ def do_test(files):
     Configurator.TopoClusterNeighborCutsInAbsE = False
     Configurator.SplitterUseNegativeClusters = False
     
+    Configurator.TwoGaussianNoise = False
             
     Configurator.TopoClusterSNRSeedThreshold = 4.0
     Configurator.TopoClusterSNRGrowThreshold = 2.0
@@ -41,7 +43,7 @@ def do_test(files):
     
     cfg.merge(topoAcc)
     
-    cfg.run(numevents)
+    cfg.run(100)
     
 
 if __name__=="__main__":
@@ -50,4 +52,5 @@ if __name__=="__main__":
              "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigInDetValidation/samples/mc15_13TeV.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.RDO.e3698_s2608_s2183_r7195/RDO.06752780._000003.pool.root.1" ])
 #    do_test(["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigEgammaValidation/valid3.147917.Pythia8_AU2CT10_jetjet_JZ7W.recon.RDO.e3099_s2578_r6596_tid05293007_00/RDO.05293007._000001.pool.root.1"],
 #             "jets")
+    sys.exit(check())
 

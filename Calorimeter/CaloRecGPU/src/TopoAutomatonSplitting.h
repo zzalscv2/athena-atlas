@@ -15,6 +15,8 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
+#include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
+
 /**
  * @class TopoAutomatonSplitting
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
@@ -40,11 +42,6 @@ class TopoAutomatonSplitting :
   virtual StatusCode finalize() override;
 
   virtual ~TopoAutomatonSplitting();
-
-  virtual size_t size_of_temporaries() const
-  {
-    return sizeof(TopoAutomatonSplittingTemporaries);
-  };
 
  private:
 
@@ -185,8 +182,10 @@ class TopoAutomatonSplitting :
 
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */
-  TASOptionsHolder m_options;
-
+  TASplitting::TASOptionsHolder m_options;
+  
+  /** @brief Handle to the CUDA kernel block and grid size optimization service. */
+  ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
 };
 
 #endif //CALORECGPU_TOPOAUTOMATONSPLITTING_H

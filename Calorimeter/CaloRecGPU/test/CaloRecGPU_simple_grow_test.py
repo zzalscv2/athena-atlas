@@ -5,7 +5,6 @@
 from CaloRecGPU.CaloRecGPUConfigurator import CaloRecGPUConfigurator
 import CaloRecGPUTesting
 
-    
 if __name__=="__main__":
 
     Configurator = CaloRecGPUConfigurator()

@@ -100,7 +100,9 @@ class CaloGPUClusterAndCellDataMonitor :
                              const int index_1,
                              const int index_2,
                              const std::string & prefix,
-                             const bool match_in_energy) const;
+                             const bool match_in_energy,
+                             const bool match_without_shared,
+                             const bool match_perfectly) const;
 
   /*! Returns @p true if this tool should be plotted for.
   */
@@ -161,8 +163,20 @@ class CaloGPUClusterAndCellDataMonitor :
                             const CaloRecGPU::ClusterInfoArr & cluster_info_2,
                             const CaloRecGPU::ClusterMomentsArr & /*moments_1*/,
                             const CaloRecGPU::ClusterMomentsArr & /*moments_2*/,
-                            const bool match_in_energy) const;
+                            const bool match_in_energy,
+                            const bool match_without_shared) const;
 
+  StatusCode match_clusters_perfectly(sample_comparisons_holder & sch,
+                                      const CaloRecGPU::ConstantDataHolder & constant_data,
+                                      const CaloRecGPU::CellInfoArr & cell_info,
+                                      const CaloRecGPU::CellStateArr & cell_state_1,
+                                      const CaloRecGPU::CellStateArr & cell_state_2,
+                                      const CaloRecGPU::ClusterInfoArr & cluster_info_1,
+                                      const CaloRecGPU::ClusterInfoArr & cluster_info_2,
+                                      const CaloRecGPU::ClusterMomentsArr & /*moments_1*/,
+                                      const CaloRecGPU::ClusterMomentsArr & /*moments_2*/,
+                                      const bool match_without_shared) const;
+                                    
   //--------------------------------------------------
   //
   //             GENERAL OPTIONS/SETTINGS
@@ -251,6 +265,8 @@ class CaloGPUClusterAndCellDataMonitor :
     int index_ref = -1, index_test = -1;
     std::string prefix;
     bool match_in_energy = false;
+    bool match_without_shared = false;
+    bool match_perfectly = false;
   };
 
   std::vector<pair_to_plot> m_toolCombinations;

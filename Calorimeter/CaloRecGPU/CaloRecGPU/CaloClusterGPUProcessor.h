@@ -49,7 +49,7 @@ class CaloClusterGPUProcessor : virtual public IAlgTool
   {
     return 0;
   };
-
+  
   DeclareInterfaceID( CaloClusterGPUProcessor, 1, 0);
 
 };

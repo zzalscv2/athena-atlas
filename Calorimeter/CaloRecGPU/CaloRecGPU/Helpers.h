@@ -82,6 +82,18 @@ namespace CaloRecGPU
 #define CUDA_ERRCHECK_HELPER(ans, ...) do { ::CaloRecGPU::CUDA_gpu_assert((ans), __FILE__, __LINE__, CUDA_ERRCHECK_GET_FIRST(__VA_ARGS__, true) ); } while(0)
 #define CUDA_ERRCHECK_GET_FIRST(x, ...) x
 
+
+#if defined(__CUDA_ARCH__) &&  __CUDA_ARCH__ > 350
+  #if CUDART_VERSION >= 12000
+    #define CUDA_CAN_USE_TAIL_LAUNCH 1
+  #else
+    #define CUDA_CAN_USE_TAIL_LAUNCH 0
+  #endif
+#elif defined(__CUDA_ARCH__)
+  #error "CUDA compute capability at least 3.5 is needed so we can have dynamic parallelism!"
+#endif
+
+
 #else
 
 #define CUDA_HOS_DEV
@@ -176,6 +188,22 @@ namespace CaloRecGPU
       \brief Synchronizes the \p stream. If called with no value, synchronizes with @c cudaStreamPerThread.
     */
     void GPU_synchronize(CUDAStreamPtrHolder stream = {});
+    
+    /*!
+      \brief Optimizes block and grid size according to @c cudaOccupancyMaxPotentialBlockSize.
+    */
+    void optimize_block_and_grid_size(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0);
+    
+    /*!
+      \brief Optimizes block and grid size for a cooperative launch.
+    */
+    void optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0);
+    
+    bool supports_cooperative_launches();
+    
+    bool supports_dynamic_parallelism();
+    
+    std::string GPU_name();
   }
 
   namespace Helpers
@@ -273,18 +301,90 @@ namespace CaloRecGPU
     }
 
 
-    ///! \brief Just a wapper around constants with fallback.
+    ///! \brief Just a wrapper around constants with fallback.
     namespace Constants
     {
 #ifdef __cpp_lib_math_constants
   template <class T>
   inline constexpr T pi = std::numbers::pi_v<T>;
+
+  template <class T>
+  inline constexpr T sqrt2 = std::numbers::sqrt2_v<T>
 #else
   template <class T>
   inline constexpr T pi = T(3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624L);
+
+  template <class T>
+  inline constexpr T sqrt2 = T(1.4142135623730950488016887242096980785696718753769480731766797379907324784621070388503875343276415727350138462309122970249248360558507372126441214970999358314132226659275055927557999505011527820605714701095599716059702745345968620147285174186408891986095523292304843087143214508397626036279952514079896872533965463318088296406206152583523950547457502877599617298355752203375318570113543746034084988471603868999706990048150305440277903164542478230684929369186215805784631115966687130130156185689872372352885092649L);
+#endif
+
+      template <class T>
+      inline constexpr T inv_sqrt2 = T(0.70710678118654752440084436210484903928483593768847403658833986899536623923105351942519376716382078636750692311545614851246241802792536860632206074854996791570661133296375279637789997525057639103028573505477998580298513726729843100736425870932044459930477616461524215435716072541988130181399762570399484362669827316590441482031030762917619752737287514387998086491778761016876592850567718730170424942358019344998534950240751527201389515822712391153424646845931079028923155579833435650650780928449361861764425463243L);
+      //Why is this not in the C++ constants?!
+
+    }
+
+    CUDA_HOS_DEV static inline
+    float erf_inv_wrapper (const float x)
+    {
+      using namespace std;
+#ifdef __CUDA_ARCH__
+      return erfinvf(x);
+#else
+      //Copied directly from ROOT...
+
+      int kMaxit    = 50;
+      float kEps   = 1e-14;
+      float kConst = 0.8862269254527579;     // sqrt(pi)/2.0
+
+      if (abs(x) <= kEps)
+        {
+          return kConst * x;
+        }
+
+      // Newton iterations
+      float erfi, derfi, y0, y1, dy0, dy1;
+      if (fabsf(x) < 1.0f)
+        {
+          erfi  = kConst * fabsf(x);
+          y0    = erff(0.9f * erfi);
+          derfi = 0.1 * erfi;
+          for (int iter = 0; iter < kMaxit; iter++)
+            {
+              y1  = 1. - erfc(erfi);
+              dy1 = fabsf(x) - y1;
+              if (fabsf(dy1) < kEps)
+                {
+                  if (x < 0)
+                    {
+                      return -erfi;
+                    }
+                  else
+                    {
+                      return erfi;
+                    }
+                }
+              dy0    = y1 - y0;
+              derfi *= dy1 / dy0;
+              y0     = y1;
+              erfi  += derfi;
+              if (fabsf(derfi / erfi) < kEps)
+                {
+                  if (x < 0)
+                    {
+                      return -erfi;
+                    }
+                  else
+                    {
+                      return erfi;
+                    }
+                }
+            }
+        }
+      return 0; //did not converge
 #endif
     }
-    
+
     CUDA_HOS_DEV static inline
     float regularize_angle(const float b, const float a = 0.f)
     //a. k. a. proxim in Athena code.
@@ -294,7 +394,7 @@ namespace CaloRecGPU
       const float divi = (fabsf(diff) - Helpers::Constants::pi<float>) / (2 * Helpers::Constants::pi<float>);
       return b - ceilf(divi) * ((b > a + Helpers::Constants::pi<float>) - (b < a - Helpers::Constants::pi<float>)) * 2 * Helpers::Constants::pi<float>;
     }
-    
+
     CUDA_HOS_DEV static inline
     double regularize_angle(const double b, const double a = 0.)
     //a. k. a. proxim in Athena code.
@@ -304,7 +404,7 @@ namespace CaloRecGPU
       const float divi = (fabs(diff) - Helpers::Constants::pi<double>) / (2 * Helpers::Constants::pi<double>);
       return b - ceil(divi) * ((b > a + Helpers::Constants::pi<double>) - (b < a - Helpers::Constants::pi<double>)) * 2 * Helpers::Constants::pi<double>;
     }
-    
+
     template <class T>
     CUDA_HOS_DEV static inline
     T angular_difference(const T x, const T y)
@@ -318,7 +418,7 @@ namespace CaloRecGPU
       // being a branchy thing that only
       // takes care of one factor of 2 pi...)
     }
-    
+
     CUDA_HOS_DEV static inline
     float eta_from_coordinates(const float x, const float y, const float z)
     {
@@ -331,7 +431,7 @@ namespace CaloRecGPU
         }
       else
         {
-          constexpr float s_etaMax = 22756.0; 
+          constexpr float s_etaMax = 22756.0;
           return z + ((z > 0) - (z < 0)) * s_etaMax;
         }
     }
@@ -348,11 +448,11 @@ namespace CaloRecGPU
         }
       else
         {
-          constexpr double s_etaMax = 22756.0; 
+          constexpr double s_etaMax = 22756.0;
           return z + ((z > 0) - (z < 0)) * s_etaMax;
         }
     }
-    
+
     ///! Holds dummy classes just to identify the place in which memory lives.
     namespace MemoryContext
     {

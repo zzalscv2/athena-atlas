@@ -20,6 +20,8 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
+#include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
+
 /**
  * @class TopoAutomatonClustering
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
@@ -46,11 +48,6 @@ class TopoAutomatonClustering :
   
   virtual ~TopoAutomatonClustering();
   
-  virtual size_t size_of_temporaries() const
-  {
-    return sizeof(TopoAutomatonTemporaries);
-  };
-
  private:
 
   /** 
@@ -227,11 +224,29 @@ class TopoAutomatonClustering :
    * expand the cluster in the presampler layer.  Only the next
    * sampling is used as valid neighbor source. */
   Gaudi::Property<bool> m_restrictPSNeighbors {this, "RestrictPSNeighbors",
-                                                         false, "Limit the neighbors in presampler Barrel and Endcap"};
+                                               false, "Limit the neighbors in presampler Barrel and Endcap"};
+
+  
+  /**
+   * @brief If set to true, the time window is softened 
+            in the EMB2 and EME2_OW due to crosstalk
+            from direct neighbour cells in phi. */
+  Gaudi::Property<bool> m_xtalkEM2 {this, "XTalkEM2",
+                                    false, "Relax time window (if timing is used) in EM2 when xTalk is present"};
+
+  /**
+   * @brief Additional maximum delta t added to the upper limit time window
+            in case crosstalk in EM2 should be accounted for.  */
+  Gaudi::Property<float> m_xtalkDeltaT {this, "XTalkDeltaT",
+                                        15 * CLHEP::ns, "Delta T to add to upper time threshold for EM2 cells affected by xtalk."};
+
 
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */
-  TACOptionsHolder m_options;
+  TAGrowing::TACOptionsHolder m_options;
+  
+  /** @brief Handle to the CUDA kernel block and grid size optimization service. */
+  ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
 
 };
 

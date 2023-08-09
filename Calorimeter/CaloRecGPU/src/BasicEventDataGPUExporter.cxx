@@ -29,6 +29,9 @@ BasicEventDataGPUExporter::BasicEventDataGPUExporter(const std::string & type, c
 StatusCode BasicEventDataGPUExporter::initialize()
 {
 
+  //ATH_CHECK(m_noiseCDOKey.initialize());
+  //For Two Gaussian Noise comparisons.
+  
   ATH_CHECK( m_cellsKey.value().initialize() );
 
   ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
@@ -57,7 +60,51 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
       return StatusCode::RECOVERABLE;
     }
+  
+  /*
+  SG::ReadCondHandle<CaloNoise> noise_handle(m_noiseCDOKey, ctx);
+  const CaloNoise * noise_tool = *noise_handle;
+  //For Two Gaussian Noise comparisons.
+  */
+  
+  auto export_cell = [&](const CaloCell * cell, const int cell_index)
+  {
+    const float energy = cell->energy();
+    const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
+    ed.m_cell_info->energy[cell_index] = energy;
+    ed.m_cell_info->gain[cell_index] = gain;
+    ed.m_cell_info->time[cell_index] = cell->time();
+    
+    
+    if (CaloRecGPU::GeometryArr::is_tile(cell_index))
+      {
+        const TileCell * tile_cell = (TileCell *) cell;
 
+        ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
+                                                                          tile_cell->qual2(),
+                                                                          tile_cell->qbit1(),
+                                                                          tile_cell->qbit2()};
+        
+        /*
+        //For Two Gaussian Noise comparisons.
+        
+        const float original_snr = noise_tool->getEffectiveSigma(cell->ID(),cell->gain(),cell->energy());
+        const float our_snr = cd.m_cell_noise->get_double_gaussian_noise(cell_index, gain, energy);
+        if (our_snr != original_snr)
+        {
+          std::cout << "---------------------------------------- ERR: " << cell_index << " " << our_snr << " " << original_snr << " " << our_snr - original_snr << std::endl;
+        }
+        */
+      }
+    else
+      {
+        ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
+      }
+    
+  };
+  
+  //For Two Gaussian Noise comparisons.
+  //std::cout << "-------------------------------------------------------------------------- START" << std::endl;
 
   if (cell_collection->isOrderedAndComplete())
     //Fast path: cell indices within the collection and identifierHashes match!
@@ -67,25 +114,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
       for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells, ++cell_index)
         {
           const CaloCell * cell = (*iCells);
-
-          const float energy = cell->energy();
-          const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
-          ed.m_cell_info->energy[cell_index] = energy;
-          ed.m_cell_info->gain[cell_index] = gain;
-          ed.m_cell_info->time[cell_index] = cell->time();
-          if (CaloRecGPU::GeometryArr::is_tile(cell_index))
-            {
-              const TileCell * tile_cell = (TileCell *) cell;
-
-              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
-                                                                                tile_cell->qual2(),
-                                                                                tile_cell->qbit1(),
-                                                                                tile_cell->qbit2()};
-            }
-          else
-            {
-              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
-            }
+          export_cell(cell, cell_index);
         }
     }
   else if (m_missingCellsToFill.size() > 0)
@@ -108,24 +137,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
             }
           else
             {
-              const float energy = cell->energy();
-              const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
-              ed.m_cell_info->energy[cell_index] = energy;
-              ed.m_cell_info->gain[cell_index] = gain;
-              ed.m_cell_info->time[cell_index] = cell->time();
-              if (CaloRecGPU::GeometryArr::is_tile(cell_index))
-                {
-                  const TileCell * tile_cell = (TileCell *) cell;
-
-                  ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
-                                                                                    tile_cell->qual2(),
-                                                                                    tile_cell->qbit1(),
-                                                                                    tile_cell->qbit2()};
-                }
-              else
-                {
-                  ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
-                }
+              export_cell(cell, cell_index);
             }
         }
     }
@@ -138,10 +150,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
       ATH_MSG_DEBUG("Taking slow path on event " << ctx.evt());
       for (int cell_index = 0; cell_index < NCaloCells; ++cell_index)
         {
-          //ed.m_cell_info->energy[cell_index] = 0;
           ed.m_cell_info->gain[cell_index] = GainConversion::invalid_gain();
-          //ed.m_cell_info->time[cell_index] = 0;
-          //ed.m_cell_info->qualityProvenance[cell_index] = 0;
         }
 
       for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells)
@@ -151,34 +160,18 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
           //const int cell_index = m_calo_id->calo_cell_hash(cell->ID());
           const int cell_index = cell->caloDDE()->calo_hash();
           //See calodde
+          
+          export_cell(cell, cell_index);
 
           /*
           has_cell[cell_index] = true;
           // */
 
-          const float energy = cell->energy();
-
-          const unsigned int gain = GainConversion::from_standard_gain(cell->gain());
-
-          ed.m_cell_info->energy[cell_index] = energy;
-          ed.m_cell_info->gain[cell_index] = gain;
-          ed.m_cell_info->time[cell_index] = cell->time();
-          if (CaloRecGPU::GeometryArr::is_tile(cell_index))
-            {
-              const TileCell * tile_cell = (TileCell *) cell;
-
-              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{tile_cell->qual1(),
-                                                                                tile_cell->qual2(),
-                                                                                tile_cell->qbit1(),
-                                                                                tile_cell->qbit2()};
-            }
-          else
-            {
-              ed.m_cell_info->qualityProvenance[cell_index] = QualityProvenance{cell->quality(), cell->provenance()};
-            }
         }
 
       /*
+      //Useful output for detecting missing cells in the calorimeter collection...
+      
       for (size_t i = 0; i < has_cell.size(); ++i)
         {
           if (!has_cell[i])
@@ -190,6 +183,9 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
         }
       // */
     }
+
+  //For Two Gaussian Noise comparisons.
+  //std::cout << "-------------------------------------------------------------------------- END" << std::endl;
 
   const auto post_cells = clock_type::now();
 
@@ -280,15 +276,13 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
         }
 
       ed.m_clusters->number = cluster_collection->size();
-
-      //std::cout << "Number: " << ed.m_clusters->number << std::endl;
     }
 
   const auto post_clusters = clock_type::now();
 
   const bool has_cluster_info = cluster_collection->size() > 0;
 
-  ed.sendToGPU(!m_keepCPUData, has_cluster_info, has_cluster_info, false, false);
+  ed.sendToGPU(!m_keepCPUData, has_cluster_info, has_cluster_info, false);
 
   const auto post_send = clock_type::now();
 

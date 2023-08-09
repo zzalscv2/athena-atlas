@@ -150,7 +150,7 @@ StatusCode CaloTopoClusterSplitterGPU::initialize()
   m_options.m_options->m_absOpt = m_absOpt;
   m_options.m_options->m_treatL1PredictedCellsAsGood = m_treatL1PredictedCellsAsGood;
 
-  m_options.sendToGPU(true);
+  m_options.sendToGPU();
 
   return StatusCode::SUCCESS;
 

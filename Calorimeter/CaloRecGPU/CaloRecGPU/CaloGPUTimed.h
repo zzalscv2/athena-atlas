@@ -13,6 +13,8 @@
 #include <fstream>
 #include "CxxUtils/checker_macros.h"
 
+#include <GaudiKernel/IProperty.h>
+
 /**
  * @class CaloGPUTimed
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
@@ -48,12 +50,14 @@ class CaloGPUTimed
   Gaudi::Property<std::string> m_timeFileName;
 
   //Use CaloGPUTimed(this) in the derived classes for everything to work.
+  
   template <class T>
   CaloGPUTimed(T * ptr):
   m_measureTimes(ptr, "MeasureTimes", false, "Save time measurements"),
   m_timeFileName(ptr, "TimeFileOutput", "times.txt", "File to which time measurements should be saved")
   {
   }
+  
   
  private:
 

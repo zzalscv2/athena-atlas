@@ -69,7 +69,7 @@ struct GPUSplitterOptionsHolder
   CaloRecGPU::Helpers::CUDA_object<CaloTopoClusterSplitterMetadata> m_options_dev;
 
   void allocate();
-  void sendToGPU(const bool clear_CPU = true);
+  void sendToGPU(const bool clear_CPU = false);
 };
 
 void preProcessingPreparation(CaloRecGPU::EventDataHolder & holder,

@@ -15,6 +15,8 @@ if __name__=="__main__":
     
     Configurator.DoMonitoring = True
     
+    Configurator.UseAbsEnergyMoments = True
+    
     cfg, numevents = CaloRecGPUTesting.PrepareTest(Configurator)
 
     theKey="CaloCalTopoClustersNew"

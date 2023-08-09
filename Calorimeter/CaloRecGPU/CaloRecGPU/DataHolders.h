@@ -38,7 +38,6 @@ namespace CaloRecGPU
     void sendToGPU(const bool clear_CPU = false,
                    const bool has_state = false,
                    const bool has_clusters = false,
-                   const bool has_pairs = false,
                    const bool has_moments = false);
 
     void returnToCPU(const bool clear_GPU = false,
@@ -74,7 +73,6 @@ namespace CaloRecGPU
 
     CaloRecGPU::Helpers::CUDA_pinned_CPU_object<CaloRecGPU::CellInfoArr> m_cell_info;
     CaloRecGPU::Helpers::CUDA_pinned_CPU_object<CaloRecGPU::CellStateArr> m_cell_state;
-    CaloRecGPU::Helpers::CUDA_pinned_CPU_object<CaloRecGPU::PairsArr> m_pairs;
     CaloRecGPU::Helpers::CUDA_pinned_CPU_object<CaloRecGPU::ClusterInfoArr> m_clusters;
     CaloRecGPU::Helpers::CUDA_pinned_CPU_object<CaloRecGPU::ClusterMomentsArr> m_moments;
 
@@ -82,7 +80,6 @@ namespace CaloRecGPU
 
     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> m_cell_info;
     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> m_cell_state;
-    CaloRecGPU::Helpers::CPU_object<CaloRecGPU::PairsArr> m_pairs;
     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> m_clusters;
     CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterMomentsArr> m_moments;
 
@@ -90,7 +87,6 @@ namespace CaloRecGPU
 
     CaloRecGPU::Helpers::CUDA_object<CaloRecGPU::CellInfoArr> m_cell_info_dev;
     CaloRecGPU::Helpers::CUDA_object<CaloRecGPU::CellStateArr> m_cell_state_dev;
-    CaloRecGPU::Helpers::CUDA_object<CaloRecGPU::PairsArr> m_pairs_dev;
     CaloRecGPU::Helpers::CUDA_object<CaloRecGPU::ClusterInfoArr> m_clusters_dev;
     CaloRecGPU::Helpers::CUDA_object<CaloRecGPU::ClusterMomentsArr> m_moments_dev;
 

@@ -11,6 +11,7 @@
 #include "boost/chrono/thread_clock.hpp"
 
 using namespace CaloRecGPU;
+using namespace BasicClusterInfoCalculator;
 
 BasicGPUClusterInfoCalculator::BasicGPUClusterInfoCalculator(const std::string & type, const std::string & name, const IInterface * parent):
   AthAlgTool(type, name, parent),
@@ -20,7 +21,9 @@ BasicGPUClusterInfoCalculator::BasicGPUClusterInfoCalculator(const std::string &
 }
 
 StatusCode BasicGPUClusterInfoCalculator::initialize()
-{
+{ 
+  ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  register_kernels( *(m_kernelSizeOptimizer.get()) );
   return StatusCode::SUCCESS;
 }
 
@@ -35,15 +38,17 @@ StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, cons
 
   const auto start = clock_type::now();
 
-  Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries((ClusterInfoCalculatorTemporaries *) temporary_buffer);
+  void * temp_store = (m_preserveClusterMoments ? temporary_buffer : (ClusterMomentsArr *) event_data.m_moments_dev);
+
+  Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries((ClusterInfoCalculatorTemporaries *) temp_store);
 
   const auto before_seed_properties = clock_type::now();
 
-  updateSeedCellProperties(event_data, temporaries, constant_data, m_measureTimes);
+  updateSeedCellProperties(event_data, temporaries, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes);
 
   const auto before_calculating = clock_type::now();
 
-  calculateClusterProperties(event_data, temporaries, constant_data, m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
+  calculateClusterProperties(event_data, temporaries, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
 
   const auto end = clock_type::now();
 

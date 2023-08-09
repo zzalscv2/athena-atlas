@@ -19,6 +19,7 @@
 #include "MacroHelpers.h"
 
 using namespace CaloRecGPU;
+using namespace TAGrowing;
 
 TopoAutomatonClustering::TopoAutomatonClustering(const std::string & type, const std::string & name, const IInterface * parent):
   AthAlgTool(type, name, parent),
@@ -232,15 +233,21 @@ StatusCode TopoAutomatonClustering::initialize()
 
   m_options.m_options->limit_HECIW_and_FCal_neighs = m_restrictHECIWandFCalNeighbors;
   m_options.m_options->limit_PS_neighs = m_restrictPSNeighbors;
+  
+  m_options.m_options->use_crosstalk = m_xtalkEM2;
+  m_options.m_options->crosstalk_delta = m_xtalkDeltaT;
 
-  m_options.sendToGPU(true);
+  m_options.sendToGPU();
+
+  ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  register_kernels( *(m_kernelSizeOptimizer.get()) );
 
   return StatusCode::SUCCESS;
 
 }
 
 StatusCode TopoAutomatonClustering::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
-                                            EventDataHolder & event_data, void * temporary_buffer                 ) const
+                                            EventDataHolder & event_data, void * /*temporary_buffer*/             ) const
 {
 
   using clock_type = boost::chrono::thread_clock;
@@ -249,21 +256,21 @@ StatusCode TopoAutomatonClustering::execute(const EventContext & ctx, const Cons
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
 
+  static_assert(sizeof(TopoAutomatonGrowingTemporaries) <= sizeof(ClusterMomentsArr), "We store the temporaries in the cluster moments, so the sizes must be compatible!");
+  
   const auto start = clock_type::now();
-
-  Helpers::CUDA_kernel_object<TopoAutomatonTemporaries> temporaries((TopoAutomatonTemporaries *) temporary_buffer);
-
+  
   const auto before_snr = clock_type::now();
 
-  signalToNoise(event_data, temporaries, constant_data, m_options, m_measureTimes);
+  signalToNoise(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
 
   const auto before_pairs = clock_type::now();
 
-  cellPairs(event_data, temporaries, constant_data, m_options, m_measureTimes);
+  cellPairs(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
 
   const auto before_growing = clock_type::now();
 
-  clusterGrowing(event_data, temporaries, constant_data, m_options, m_measureTimes);
+  clusterGrowing(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
 
   const auto end = clock_type::now();
 

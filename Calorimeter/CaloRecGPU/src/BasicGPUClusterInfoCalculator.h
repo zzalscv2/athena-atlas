@@ -15,6 +15,8 @@
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "BasicGPUClusterInfoCalculatorImpl.h"
 
+#include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
+
 #include "CLHEP/Units/SystemOfUnits.h"
 
 /**
@@ -46,10 +48,24 @@ class BasicGPUClusterInfoCalculator:
 
   virtual size_t size_of_temporaries() const
   {
-    return sizeof(ClusterInfoCalculatorTemporaries);
+    if (m_preserveClusterMoments)
+      {
+        return sizeof(BasicClusterInfoCalculator::ClusterInfoCalculatorTemporaries);
+      }
+    else
+      {
+        return 0;
+      }
   };
 
  private:
+
+  /**
+  * @brief If set to @p true, allocates a temporary array
+  *        to store some temporary intermediate results
+  *        instead of using cluster moments. Default is @p false.
+  */
+  Gaudi::Property<bool> m_preserveClusterMoments {this, "PreserveClusterMoments", false, "Do not use cluster moments array as temporary storage"};
 
   /**
   * @brief if set to @p true cluster cuts are on \f$|E|_\perp\f$, if @p false on \f$E_\perp\f$. Default is @p true.
@@ -65,6 +81,9 @@ class BasicGPUClusterInfoCalculator:
    * in order to be inserted into the CaloClusterContainer.  */
 
   Gaudi::Property<float> m_clusterETThreshold {this, "ClusterEtorAbsEtCut", 0.*CLHEP::MeV, "Cluster E_t or Abs E_t cut"};
+
+  /** @brief Handle to the CUDA kernel block and grid size optimization service. */
+  ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
 
 };
 
