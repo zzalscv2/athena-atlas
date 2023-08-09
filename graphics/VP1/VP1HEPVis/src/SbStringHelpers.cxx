@@ -29,6 +29,7 @@ char* SbSTRDUP(
 {
   char* p = (char*)::malloc((unsigned)::strlen(aString)+1);
   if(p==NULL) return 0;
+  //cppcheck-suppress returnDanglingLifetime
   return ::strcpy(p,aString);
 }
 //////////////////////////////////////////////////////////////////////////////
