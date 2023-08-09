@@ -90,7 +90,7 @@ def TrigSiSPSeededTrackFinderCfg(flags, name="InDetTrigSiSpTrackFinder", **kwarg
             TrigSiSpacePointsSeedMakerCfg(flags)))
 
     # Heavy-ion config (TODO the steering for the trigger)
-    kwargs.setdefault("useMBTSTimeDiff", flags.Reco.EnableHI)
+    kwargs.setdefault("useMBTSTimeDiff", False)
     kwargs.setdefault("useZvertexTool", False)
     kwargs.setdefault("useZBoundFinding",
                       flags.Tracking.ActiveConfig.doZBoundary)
