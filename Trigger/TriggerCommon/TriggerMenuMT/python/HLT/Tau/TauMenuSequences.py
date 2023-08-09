@@ -8,7 +8,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsP
 from TriggerMenuMT.HLT.Tau.TauRecoSequences import tauCaloMVASequence, tauFTFCoreSequence, tauFTFLRTSequence, tauFTFIsoSequence, tauMVASequence, tauLLPSequence, tauLRTSequence, tauPrecIsoTrackSequence, tauPrecLRTTrackSequence
 
 # ===============================================================================================
-#      Calo MVA step
+#      Calo MVA step @Migrated to MenuSequenceCA
 # ===============================================================================================
 
 def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
@@ -29,7 +29,7 @@ def tauCaloMVAMenuSeq(flags, name, is_probe_leg=False):
                           IsProbe     = is_probe_leg )
 
 # ===============================================================================================                                
-#    Fast track finder (core) + TrackRoI Updater + PassBy Hypo step (tracktwoMVA)                                             
+#    Fast track finder (core) + TrackRoI Updater + PassBy Hypo step (tracktwoMVA) @Migrated to MenuSequenceCA                                             
 # ===============================================================================================                                                   
 
 def tauFTFTauCoreSeq(flags, is_probe_leg=False):
@@ -70,7 +70,7 @@ def tauFTFTauLRTSeq(flags, is_probe_leg=False):
                           IsProbe     = is_probe_leg )
 
 # ===============================================================================================                                                           
-#   Fast track finder (iso) + Dummy Hypo step (tracktwoMVA)                                                     
+#   Fast track finder (iso) + Dummy Hypo step (tracktwoMVA) @Migrated to MenuSequenceCA                                                    
 # ===============================================================================================                                                            
 
 def tauFTFTauIsoSeq(flags, is_probe_leg=False):

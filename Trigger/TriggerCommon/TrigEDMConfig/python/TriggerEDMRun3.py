@@ -741,13 +741,13 @@ TriggerHLTListRun3 = [
 
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauIso_FTFAux.',          'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Tau_IDTrig',                 'BS ESD AODFULL', 'Tau', [InViews('TAUPrecIsoViews')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Tau_IDTrig',                 'BS ESD AODFULL', 'Tau', [InViews('PrecIsoTrackViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Tau_IDTrigAux.eProbabilityNN',          'BS ESD AODFULL', 'Tau'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_TauLRT_IDTrig',                 'BS ESD AODFULL', 'Tau', [InViews('TAUFTFLRTIdViews'), InViews('TAUPrecLRTViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauLRT_IDTrigAux.eProbabilityNN',          'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::VertexContainer#HLT_IDVertex_Tau',                  'BS ESD AODFULL', 'Tau', [InViews('TAUPrecIsoViews')]),
+    ('xAOD::VertexContainer#HLT_IDVertex_Tau',                  'BS ESD AODFULL', 'Tau', [InViews('PrecIsoTrackViews')]),
     ('xAOD::VertexAuxContainer#HLT_IDVertex_TauAux.',           'BS ESD AODFULL', 'Tau'),
 
     ('TrigRoiDescriptorCollection#HLT_Roi_Tau',              'BS ESD AODFULL',  'Tau'),
