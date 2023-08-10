@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloConditions/CaloNoise.h"
@@ -74,6 +74,12 @@ float CaloNoise::calcSig(const IdentifierHash subHash, const int dbGain, const f
 
 
 float CaloNoise::getTileEffSigma(const IdentifierHash subHash, const int gain, const float e) const {
+  // Tell clang to optimize assuming that FP exceptions can trap.
+  // Otherwise, it can vectorize the division, which can lead to
+  // spurious division-by-zero traps from unused vector lanes.
+#ifdef __clang__
+# pragma float_control(except, on)
+#endif
 
   const unsigned int dbGain = CaloCondUtils::getDbCaloGain(gain);
   if (!m_tileBlob) {
