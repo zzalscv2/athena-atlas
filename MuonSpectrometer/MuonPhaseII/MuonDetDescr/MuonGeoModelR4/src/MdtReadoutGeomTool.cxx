@@ -81,9 +81,13 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     // Get the list of full phys volumes from SQLite, and create detector
     // elements
-    std::map<std::string, GeoFullPhysVol*> mapFPV =
-        sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
-
+    
+    using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
+    using physNodeMap = IMuonGeoUtilityTool::physNodeMap;
+    using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
+    physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
+    alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
+    alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
@@ -98,19 +102,20 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 
         MdtReadoutElement::defineArgs define{};
         bool isValid{false};
-        define.detElId = idHelper.channelID(
-            key_tokens[0].substr(0, 3), atoi(key_tokens[2]),
-            atoi(key_tokens[3]) + 1, atoi(key_tokens[4]), 1, 1, isValid);
+        define.detElId = idHelper.channelID(key_tokens[0].substr(0, 3), 
+                                            atoi(key_tokens[2]),
+                                            atoi(key_tokens[3]) + 1, 
+                                            atoi(key_tokens[4]), 1, 1, isValid);
         if (!isValid) {
             ATH_MSG_FATAL("Failed to build a good identifier out of " << key);
             return StatusCode::FAILURE;
         }       
         ATH_MSG_DEBUG("Key "<<key<<" brought us "<<m_idHelperSvc->toStringDetEl(define.detElId));
-        
         /// Skip the endcap chambers
         define.physVol = pv;
-        define.chambDesign = key_tokens[1];       
-
+        define.chambDesign = key_tokens[1];
+        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);        
+ 
         /// Load first tube etc. from the parameter book table
         ParamBookTable::const_iterator book_itr = m_parBook.find(define.chambDesign);
         if (book_itr == m_parBook.end()) {

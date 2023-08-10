@@ -17,6 +17,8 @@
 #include <string>
 
 namespace MuonGMR4{
+using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
+
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
 MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::string &name,
                                        const IInterface *parent):
@@ -153,7 +155,23 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
   return sstr.str();
 }
 
-
-
-
+alignedPhysNodes MuonGeoUtilityTool::selectAlignableVolumes(const physNodeMap& publishedPhysVols, 
+                                                            const alignNodeMap& publishedAlignNodes) const {
+    alignedPhysNodes result{};
+    for(const auto& [key, trans] : publishedAlignNodes) {
+        physNodeMap::const_iterator itr = publishedPhysVols.find(key);
+        if (itr == publishedPhysVols.end()) continue;
+        PVConstLink physVol{itr->second};
+        result[physVol] = trans;
+    }
+    return result;
+}
+const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PVConstLink& physVol,
+                                                                        const alignedPhysNodes& alignNodes) const {
+    alignedPhysNodes::const_iterator itr = alignNodes.find(physVol);
+    if (itr != alignNodes.end()) return itr->second;
+    const PVConstLink parent = physVol->getParent();
+    if (parent) return findAlignableTransform(parent, alignNodes);    
+    return nullptr;
+}
 }

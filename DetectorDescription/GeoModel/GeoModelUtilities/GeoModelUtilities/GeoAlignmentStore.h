@@ -21,6 +21,9 @@ public:
     virtual ~GeoAlignmentStore() override = default;
 
     virtual void setDelta(const GeoAlignableTransform*, const GeoTrf::Transform3D&) override;
+    
+    void setDelta(const GeoAlignableTransform*, std::shared_ptr<const GeoTrf::Transform3D> trans);
+
     virtual const GeoTrf::Transform3D* getDelta(const GeoAlignableTransform*) const override;
 
     virtual void setAbsPosition(const GeoVFullPhysVol*, const GeoTrf::Transform3D&) override;

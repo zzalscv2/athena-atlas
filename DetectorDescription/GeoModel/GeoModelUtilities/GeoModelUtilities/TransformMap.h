@@ -14,6 +14,7 @@ public:
     ~TransformMap() = default;
 
     bool setTransform(const T *obj, const X &xf);
+    bool setTransform(const T *obj, std::shared_ptr<const X> xf);
     const X *getTransform(const T *obj) const;
 
     bool append(const TransformMap &other);
@@ -22,6 +23,12 @@ private:
     std::unordered_map<const T *, std::shared_ptr<const X>> m_container;
 };
 
+template <typename T, typename X> bool TransformMap<T, X>::setTransform(const T* obj, std::shared_ptr<const X> xf) {
+     std::shared_ptr<const X> &newObj = m_container[obj];
+    bool good = !newObj;
+    newObj = xf;
+    return good;
+}
 template <typename T, typename X> bool TransformMap<T, X>::setTransform(const T *obj, const X &xf) {
     std::shared_ptr<const X> &newObj = m_container[obj];
     bool good = !newObj;

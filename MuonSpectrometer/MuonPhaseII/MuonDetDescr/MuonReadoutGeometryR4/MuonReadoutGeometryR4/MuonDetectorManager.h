@@ -5,6 +5,7 @@
 #define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_H
 
 #include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
+#include "MuonReadoutGeometryR4/MuonReadoutElement.h"
 ///
 #include "AthenaKernel/CLASS_DEF.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -44,8 +45,9 @@
     StatusCode SETTER(ElementPtr<ELE_TYPE> element);
 
 #define DECLARE_ELEMENT(ELE_TYPE) \
-    DECLARE_GETTERSETTER(ELE_TYPE, get##ELE_TYPE, add##ELE_TYPE)
-
+    DECLARE_GETTERSETTER(ELE_TYPE, get##ELE_TYPE, add##ELE_TYPE)   \
+                                                                   \
+    std::vector<const ELE_TYPE*> getAll##ELE_TYPE##s() const;          
 namespace MuonGMR4 {
 class MdtReadoutElement;
 
@@ -69,9 +71,13 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     PVConstLink getTreeTop(unsigned int i) const override final;
     /// Adds a new GeoModelTree node indicating the entrance to a muon system description
     void addTreeTop(PVConstLink pv);
-    /// Returns a point to the central MuonIdHelperSvc
+    /// Returns a pointer to the central MuonIdHelperSvc
     const Muon::IMuonIdHelperSvc* idHelperSvc() const;
-
+    
+    /// Returns the list of all detector elements
+    std::vector<const MuonReadoutElement*> getAllReadoutElements() const;
+    /// Returns a list of all detector types
+    std::vector<ActsTrk::DetectorType> getDetectorTypes() const;
    private:
     /// Returns the detector Identifier Hash
     IdentifierHash buildHash(const Identifier& id,

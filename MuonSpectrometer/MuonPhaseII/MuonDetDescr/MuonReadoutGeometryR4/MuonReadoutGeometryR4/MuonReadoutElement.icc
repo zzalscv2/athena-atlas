@@ -6,6 +6,9 @@
 
 namespace MuonGMR4 {
 
+inline const GeoAlignableTransform* MuonReadoutElement::alignableTransform() const {
+    return m_args.alignTransform;
+}
 inline Identifier MuonReadoutElement::identify() const {
     return m_args.detElId;
 }

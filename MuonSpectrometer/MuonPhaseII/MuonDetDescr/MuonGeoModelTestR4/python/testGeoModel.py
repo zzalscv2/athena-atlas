@@ -125,7 +125,12 @@ def executeTest(cfg, num_events = 1):
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
-    cfg.merge(GeoModelMdtTestCfg(flags))    
+    cfg.merge(GeoModelMdtTestCfg(flags))
+    from MuonCondTest.AlignmentTester import ALineInjectorAlgCfg
+    cfg.merge(ALineInjectorAlgCfg(flags, WriteKey="InjectedALines"))
+    from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg, ActsGeomContextAlgCfg
+    cfg.merge(ActsMuonAlignCondAlgCfg(flags, ReadKey="InjectedALines"))  
+    cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=["MdtActsAlignContainer"]))  
     #### 
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     cfg.merge(GeoModelMdtTestCfg(flags, DumpTxtFile = args.outTxtFile,
