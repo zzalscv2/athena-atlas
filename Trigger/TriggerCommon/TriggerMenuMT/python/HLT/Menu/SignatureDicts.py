@@ -1169,7 +1169,7 @@ UnconventionalTrackingChainParts_Default = {
 #==========================================================
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
-    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','dRAB03','dRAB04','02dRAB','02dRAC','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     '90invmAB',# TEST
     '1invmAB5','50invmAB130', # Jpsiee, Zee/Zeg
     '25dphiAA','invmAA80', # Low-mass diphoton
