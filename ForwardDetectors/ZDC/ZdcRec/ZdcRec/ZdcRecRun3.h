@@ -28,6 +28,7 @@ class ZdcRecChannelToolLucrod;
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
+#include "ZdcTrigValid/ZdcTrigValidTool.h"
 
 /** @class ZdcRecRun3
 
@@ -64,7 +65,8 @@ private:
 
 	ToolHandle<ZdcRecChannelToolLucrod> m_ChannelTool
 	  { this, "ChannelTool", "ZdcRecChannelToolLucrod", "" };
-
+	ToolHandle<ZDC::IZdcTrigValidTool> m_trigValTool 
+	  { this, "TrigValid", "ZdcTrigValidTool",""};
 	ToolHandleArray<ZDC::IZdcAnalysisTool> m_zdcTools{ this, "ZdcAnalysisTools",{} };
 
 
