@@ -4,7 +4,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def sTgcMonitoringConfig(inputFlags):
+def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     '''Function to configures some algorithms in the monitoring system.'''
     ### STEP 1 ###
     # Define one top-level monitoring algorithm. The new configuration 
@@ -28,6 +28,7 @@ def sTgcMonitoringConfig(inputFlags):
     # Adding an algorithm to the helper.
     sTgcMonAlg = helper.addAlgorithm(CompFactory.sTgcRawDataMonAlg,'sTgcMonAlg')
     sTgcMonAlg.cutPt = 15000.
+    sTgcMonAlg.NSW_PadTriggerDataKey = NSW_PadTrigKey
 
     globalPath = 'Muon/MuonRawDataMonitoring/STG/'
 
@@ -210,6 +211,7 @@ def sTgcMonitoringConfig(inputFlags):
     acc = helper.result()
     result.merge(acc)
     return result
+
 if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import argparse
