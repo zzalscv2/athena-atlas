@@ -27,6 +27,11 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
     // Destructor
     virtual ~MuonGeoUtilityTool() override final;
 
+    alignedPhysNodes selectAlignableVolumes(const physNodeMap& publishedPhysVols, 
+                                            const alignNodeMap& publishedAlignNodes) const override final;
+
+    const GeoAlignableTransform* findAlignableTransform(const PVConstLink& physVol,
+                                                        const alignedPhysNodes& alignNodes) const override final;
     const GeoShape* extractShape(const PVConstLink& physVol) const override final;
     const GeoShape* extractShape(const GeoShape* inShape) const override final;
     

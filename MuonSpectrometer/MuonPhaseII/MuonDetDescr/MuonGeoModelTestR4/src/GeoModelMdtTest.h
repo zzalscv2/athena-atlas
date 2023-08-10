@@ -7,7 +7,7 @@
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeometryInterfaces/IActsTrackingGeometryTool.h>
+#include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonStationGeoHelpers/IMuonStationLayerSurfaceTool.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
@@ -33,8 +33,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", 
-                                                "ActsTrackingGeometryTool"};
+      SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "WriteKey", "ActsAlignment", "cond handle key"};
 
       PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
       /// Set of stations to be tested

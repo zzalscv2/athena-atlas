@@ -7,29 +7,38 @@
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
 
-#define WRITE_SETTER(ELE_TYPE, SETTER, STORAGE_VEC)                            \
-    StatusCode MuonDetectorManager::SETTER(ElementPtr<ELE_TYPE> element) {     \
-        if (!element) {                                                        \
-            ATH_MSG_FATAL(__func__ << " -- nullptr is given.");                \
-            return StatusCode::FAILURE;                                        \
-        }                                                                      \
-        ATH_CHECK(element->initElement());                                     \
-        size_t idx = static_cast<unsigned int>(element->identHash());          \
-        if (idx >= STORAGE_VEC.size())                                         \
-            STORAGE_VEC.resize(idx + 1);                                       \
-        std::unique_ptr<ELE_TYPE>& new_element = STORAGE_VEC[idx];             \
-        if (new_element) {                                                     \
-            ATH_MSG_FATAL("The detector element "                              \
-                          << m_idHelperSvc->toStringDetEl(element->identify()) \
-                          << " has already been added before "                  \
+#define WRITE_SETTER(ELE_TYPE, SETTER, STORAGE_VEC)                                 \
+    StatusCode MuonDetectorManager::SETTER(ElementPtr<ELE_TYPE> element) {          \
+        if (!element) {                                                             \
+            ATH_MSG_FATAL(__func__ << " -- nullptr is given.");                     \
+            return StatusCode::FAILURE;                                             \
+        }                                                                           \
+        ATH_CHECK(element->initElement());                                          \
+        size_t idx = static_cast<unsigned int>(element->identHash());               \
+        if (idx >= STORAGE_VEC.size())                                              \
+            STORAGE_VEC.resize(idx + 1);                                            \
+        std::unique_ptr<ELE_TYPE>& new_element = STORAGE_VEC[idx];                  \
+        if (new_element) {                                                          \
+            ATH_MSG_FATAL("The detector element "                                   \
+                          << m_idHelperSvc->toStringDetEl(element->identify())      \
+                          << " has already been added before "                      \
                           <<m_idHelperSvc->toStringDetEl(new_element->identify())); \
-            return StatusCode::FAILURE;                                        \
-        }                                                                      \
-        new_element = std::move(element);                                      \
-        return StatusCode::SUCCESS;                                            \
+            return StatusCode::FAILURE;                                             \
+        }                                                                           \
+        new_element = std::move(element);                                           \
+        return StatusCode::SUCCESS;                                                 \
     }
-#define ADD_DETECTOR(ELE_TYPE, STORAGE_VEC) \
-    WRITE_SETTER(ELE_TYPE, add##ELE_TYPE, STORAGE_VEC)
+#define ADD_DETECTOR(ELE_TYPE, STORAGE_VEC)                                         \
+    WRITE_SETTER(ELE_TYPE, add##ELE_TYPE, STORAGE_VEC)                              \
+                                                                                    \
+    std::vector<const ELE_TYPE*> MuonDetectorManager::getAll##ELE_TYPE##s() const { \
+         std::vector<const ELE_TYPE*> allElements{};                                \
+         allElements.reserve(STORAGE_VEC.size());                                   \
+         for (const std::unique_ptr<ELE_TYPE>& ele : STORAGE_VEC) {                 \
+             if (ele) allElements.push_back(ele.get());                             \
+         }                                                                          \
+         return allElements;                                                        \
+    }
 
 namespace {
     constexpr unsigned int minOne = std::numeric_limits<unsigned int>::max();
@@ -44,6 +53,12 @@ MuonDetectorManager::MuonDetectorManager()
     }
     setName("MuonR4");
 }
+ std::vector<const MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() const {
+    std::vector<const MuonReadoutElement*> allEles{};
+    std::vector<const MdtReadoutElement*> allMdts = getAllMdtReadoutElements();
+    allEles.insert(allEles.end(), allMdts.begin(), allMdts.end());
+    return allEles;
+ }
 IdentifierHash MuonDetectorManager::buildHash(const Identifier& id) const {
     if (m_idHelperSvc->isMdt(id))
         return buildHash(id, m_idHelperSvc->mdtIdHelper());
@@ -59,8 +74,8 @@ IdentifierHash MuonDetectorManager::buildHash(const Identifier& id) const {
         return buildHash(id, m_idHelperSvc->cscIdHelper());
     return IdentifierHash{minOne};
 }
-IdentifierHash MuonDetectorManager::buildHash(
-    const Identifier& id, const MuonIdHelper& idHelper) const {
+IdentifierHash MuonDetectorManager::buildHash(const Identifier& id, 
+                                              const MuonIdHelper& idHelper) const {
     IdentifierHash hash{minOne};
     if (idHelper.get_detectorElement_hash(id, hash)) {
         ATH_MSG_WARNING("Could not construct an Identifier hash from "
@@ -84,6 +99,12 @@ void MuonDetectorManager::addTreeTop(PVConstLink pv) {
 const Muon::IMuonIdHelperSvc* MuonDetectorManager::idHelperSvc() const {
     return m_idHelperSvc.get();
 }
+std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const {
+    std::vector<ActsTrk::DetectorType> types{};
+    if (!m_mdtEles.empty()) types.push_back(ActsTrk::DetectorType::Mdt);
+    return types;
+}
+
 }  // namespace MuonGMR4
 #undef WRITE_SETTER
 #undef ADD_DETECTOR

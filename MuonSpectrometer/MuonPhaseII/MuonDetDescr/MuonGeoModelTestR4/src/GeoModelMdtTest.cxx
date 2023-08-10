@@ -17,9 +17,7 @@ AthHistogramAlgorithm(name,pSvcLocator) {}
 
 StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
-    /// Disable the tracking geometry tool. We'll need it later
-    ATH_CHECK(m_trackingGeometryTool.retrieve(DisableTool{true}));
-    
+    ATH_CHECK(m_geoCtxKey.initialize());    
     ATH_CHECK(m_surfaceProvTool.retrieve());
     /// Prepare the TTree dump
     if (m_dumpTree) ATH_CHECK(m_tree.init(this));
@@ -65,7 +63,12 @@ StatusCode GeoModelMdtTest::finalize() {
 }
 StatusCode GeoModelMdtTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
-    ActsGeometryContext gctx{};
+    SG::ReadCondHandle<ActsGeometryContext> geoContextHandle{m_geoCtxKey, ctx};
+    if (!geoContextHandle.isValid()){
+      ATH_MSG_FATAL("Failed to retrieve "<<m_geoCtxKey.fullKey());
+      return StatusCode::FAILURE;
+    }
+    const ActsGeometryContext& gctx{**geoContextHandle};
 
     std::optional<std::fstream> outStream{};
     if (!m_outputTxt.empty()) {

@@ -10,8 +10,9 @@
 #include "../RpcCablingTestAlg.h"
 #include "../MMCablingTestAlg.h"
 #include "../MdtCalibFormatAlgTest.h"
+#include "../ALineInjectTestAlg.h"
 
-
+DECLARE_COMPONENT(ALineInjectTestAlg)
 DECLARE_COMPONENT(MDTConditionsTestAlgMT)
 DECLARE_COMPONENT(CSCConditionsTestAlgMT)
 DECLARE_COMPONENT(NswCondTestAlg)

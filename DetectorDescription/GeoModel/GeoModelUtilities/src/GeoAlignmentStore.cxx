@@ -6,6 +6,9 @@
 
 void GeoAlignmentStore::setDelta(const GeoAlignableTransform* axf, const GeoTrf::Transform3D& xf) { m_deltas.setTransform(axf, xf); }
 
+void GeoAlignmentStore::setDelta(const GeoAlignableTransform* axf, std::shared_ptr<const GeoTrf::Transform3D> trans) {
+    m_deltas.setTransform(axf, trans);
+}
 const GeoTrf::Transform3D* GeoAlignmentStore::getDelta(const GeoAlignableTransform* axf) const { return m_deltas.getTransform(axf); }
 
 void GeoAlignmentStore::setAbsPosition(const GeoVFullPhysVol* fpv, const GeoTrf::Transform3D& xf) { m_absPositions.setTransform(fpv, xf); }

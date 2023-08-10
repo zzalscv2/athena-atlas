@@ -24,7 +24,7 @@ public:
     virtual ~MuonAlignmentCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-
+    virtual bool isReEntrant() const override { return false; }
 
 private:
     /** Attaches the dependencies of the Alignment keys onto the A & Bline container*/

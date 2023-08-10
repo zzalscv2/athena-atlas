@@ -9,6 +9,7 @@
 #include <AthenaBaseComps/AthMessaging.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GeoModelKernel/GeoVDetectorElement.h>
+#include <GeoModelKernel/GeoAlignableTransform.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonTransformCache.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
@@ -32,6 +33,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     struct defineArgs {
         /// Pointer to the underlying physical volume in GeoModel
         GeoVFullPhysVol* physVol{nullptr};
+        /// Pointer to the alignable transformation 
+        const GeoAlignableTransform* alignTransform{nullptr};
         /// chamber design name (see below for explanation)
         std::string chambDesign{""};
         /// ATLAS identifier
@@ -39,6 +42,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
         /// Basic transformation to be applied on top in order 
         /// to reach the center of the volume from the GeoModel transform
         Amg::Transform3D toVolCenter{Amg::Transform3D::Identity()};
+
 
     };
     
@@ -51,6 +55,8 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     virtual StatusCode initElement() = 0;
     /// Cache the alignment
     virtual bool storeAlignment(ActsTrk::RawGeomAlignStore& store) const override;
+    /// Returnsthe alignable transform of the readout element
+    const GeoAlignableTransform* alignableTransform() const;
     /// Return the athena identifier.
     ///  The Identifier is identical with the first measurment channel in
     ///  readout element (E.g. Strip 1 in Layer 1 in the NSW)
@@ -145,6 +151,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
 
     const defineArgs m_args{};
+    /// Cache of the detector element hash
     IdentifierHash m_detElHash{0};
     /// Cache the station index of the identifier
     int m_stIdx{-1};
