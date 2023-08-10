@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from collections import OrderedDict
-from builtins import str
+from collections import OrderedDict, defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -27,7 +26,6 @@ def collectHypos( steps ):
     Input is top HLT sequencer.
     """
     __log.info("Collecting hypos from steps")
-    from collections import defaultdict
     hypos = defaultdict( list )
 
     for stepSeq in getSequenceChildren( steps ):
@@ -95,7 +93,6 @@ def collectFilters( steps ):
     Returns map: step name -> list of all filters of that step
     """
     __log.info("Collecting filters")
-    from collections import defaultdict
     filters = defaultdict( list )
 
     for stepSeq in getSequenceChildren( steps ):
@@ -490,25 +487,21 @@ def triggerPOOLOutputCfg(flags):
     return acc
 
 
-def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decObj, decObjHypoOut ):
+def triggerMergeViewsCfg( flags, viewMakers ):
+    """Configure the view merging algorithm"""
 
-    HLTEDMCreatorAlg, HLTEDMCreator=CompFactory.getComps("HLTEDMCreatorAlg","HLTEDMCreator",)
-    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, addExtraCollectionsToEDMList, InViews, Alias
+    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, InViews
 
-    __log.info( "Number of EDM items in triggerMergeViewsAndAddMissingEDMCfg: %d", len(TriggerHLTListRun3))
-    if flags.Trigger.ExtraEDMList:
-        __log.info( "Adding extra collections to EDM: %s", str(flags.Trigger.ExtraEDMList))
-        addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
-        __log.info( "Number of EDM items after adding extra collections: %d", len(TriggerHLTListRun3))
-
-
-    alg = HLTEDMCreatorAlg("EDMCreatorAlg")
+    acc = ComponentAccumulator()
+    mergingTool = CompFactory.HLTEDMCreator("ViewsMergingTool")
+    alg = CompFactory.HLTEDMCreatorAlg("EDMCreatorAlg",
+                                       OutputTools = [mergingTool])
 
     # configure views merging
     needMerging = [x for x in TriggerHLTListRun3 if len(x) >= 4 and
                    any(isinstance(v, InViews) for v in x[3])]
     __log.info("These collections need merging: %s", " ".join([ c[0] for c in needMerging ]))
-    mergingTool = HLTEDMCreator( "ViewsMergingTool")
+
     for coll in needMerging:
         collType, collName = coll[0].split("#")
         collType = collType.split(":")[-1]
@@ -517,11 +510,9 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
             attrView = getattr(mergingTool, collType+"Views", [])
             attrInView = getattr(mergingTool, collType+"InViews", [])
             attrName = getattr(mergingTool, collType, [])
-            #
             attrView.append( viewsColl )
             attrInView.append( collName )
             attrName.append( collName )
-            #
 
             setattr(mergingTool, collType+"Views", attrView )
             setattr(mergingTool, collType+"InViews", attrInView )
@@ -535,11 +526,25 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
                     if pr != producer[0]:
                         __log.error("Several View making algorithms produce the same output collection %s: %s", viewsColl, ' '.join([p.getName() for p in producer ]))
                         continue
-    alg.OutputTools += [mergingTool]
 
-    tool = HLTEDMCreator( "GapFiller" )
+    acc.addEventAlgo(alg)
+    return acc
+
+
+def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[] ):
+    """Configure the EDM gap filler"""
+
+    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, Alias
+
+    acc = ComponentAccumulator()
+    tool = CompFactory.HLTEDMCreator("GapFiller",
+                                     # These collections will be created after the EDMCreator runs
+                                     LateEDMKeys=["HLTNav_Summary_OnlineSlimmed",
+                                                  "HLT_RuntimeMetadata"])
+    alg = CompFactory.HLTEDMCreatorAlg("EDMCreatorAlg",
+                                       OutputTools = [tool])
+
     if len(edmSet) != 0:
-        from collections import defaultdict
         groupedByType = defaultdict( list )
 
         # scan the EDM
@@ -547,7 +552,7 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
             if not any([ outputType in el[1].split() for outputType in edmSet ]):
                 continue
             collType, collName = el[0].split("#")
-            if "Aux" in collType: # the GapFiller crates appropriate Aux objects
+            if "Aux" in collType: # the GapFiller creates appropriate Aux objects
                 continue
             if len(el) >= 4: # see if there is an alias
                 aliases = [ str(a) for a in el[3] if isinstance(a, Alias) ]
@@ -567,16 +572,14 @@ def triggerMergeViewsAndAddMissingEDMCfg( flags, edmSet, hypos, viewMakers, decO
             else:
                 __log.info("EDM collections of type %s are not going to be added to StoreGate, if not created by the HLT", collType )
 
-    __log.debug("The GapFiller is ensuring the creation of all the decision object collections: '%s'", decObj)
-    # Append and hence confirm all TrigComposite collections
+    __log.debug("GapFiller is ensuring the creation of all the decision object collections: '%s'", decObj)
     # Gap filler is also used to perform re-mapping of the HypoAlg outputs which is a sub-set of decObj
     tool.FixLinks = list(decObjHypoOut)
+    # Append and hence confirm all TrigComposite collections
     tool.TrigCompositeContainer += list(decObj)
-    alg.OutputTools += [tool]
 
-    return alg
-
-
+    acc.addEventAlgo(alg)
+    return acc
 
 
 def triggerRunCfg( flags, menu=None ):
@@ -650,10 +653,10 @@ def triggerRunCfg( flags, menu=None ):
     viewMakers = collectViewMakers( HLTSteps )
 
     # Add HLT Navigation to EDM list
-    from TrigEDMConfig import TriggerEDMRun3
-    __log.info( "Number of EDM items before adding navigation: %d", len(TriggerEDMRun3.TriggerHLTListRun3))
-    TriggerEDMRun3.addHLTNavigationToEDMList(flags, TriggerEDMRun3.TriggerHLTListRun3, decObj, decObjHypoOut)
-    __log.info( "Number of EDM items after adding navigation: %d", len(TriggerEDMRun3.TriggerHLTListRun3))
+    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, addHLTNavigationToEDMList
+    __log.info( "Number of EDM items before adding navigation: %d", len(TriggerHLTListRun3))
+    addHLTNavigationToEDMList(flags, TriggerHLTListRun3, decObj, decObjHypoOut)
+    __log.info( "Number of EDM items after adding navigation: %d", len(TriggerHLTListRun3))
 
     # Configure output writing
     outputAcc, edmSet = triggerOutputCfg( flags, hypos )
@@ -666,8 +669,14 @@ def triggerRunCfg( flags, menu=None ):
         acc.addEventAlgo(costFinalizeAlg, sequenceName="HLTFinalizeSeq" )
 
     if edmSet:
-        mergingAlg = triggerMergeViewsAndAddMissingEDMCfg( flags, [edmSet] , hypos, viewMakers, decObj, decObjHypoOut )
-        acc.addEventAlgo( mergingAlg, sequenceName="HLTFinalizeSeq" )
+        if flags.Trigger.ExtraEDMList:
+            from TrigEDMConfig.TriggerEDMRun3 import addExtraCollectionsToEDMList
+            __log.info( "Adding extra collections to EDM: %s", str(flags.Trigger.ExtraEDMList))
+            addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
+
+        # The order is important: 1) view merging, 2) gap filling
+        acc.merge( triggerMergeViewsCfg(flags, viewMakers), sequenceName="HLTFinalizeSeq" )
+        acc.merge( triggerEDMGapFillerCfg(flags, [edmSet], decObj, decObjHypoOut), sequenceName="HLTFinalizeSeq" )
 
         if flags.Trigger.doOnlineNavigationCompactification:
             from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig

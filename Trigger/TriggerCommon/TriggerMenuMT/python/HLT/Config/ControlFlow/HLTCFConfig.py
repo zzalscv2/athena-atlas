@@ -37,7 +37,7 @@ from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, append
 from DecisionHandling.DecisionHandlingConfig import TriggerSummaryAlg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TriggerJobOpts.TriggerConfig import collectHypos, collectFilters, collectViewMakers, collectDecisionObjects, \
-     triggerMonitoringCfg, triggerSummaryCfg, triggerMergeViewsAndAddMissingEDMCfg, collectHypoDecisionObjects
+     triggerMonitoringCfg, triggerSummaryCfg, collectHypoDecisionObjects
 from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -238,16 +238,21 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
 
     hltEndSeq += conf2toConfigurable( monAlg )
     appendCAtoAthena( monAcc )
-        
-    with ConfigurableCABehavior():
-        edmAlg = triggerMergeViewsAndAddMissingEDMCfg(flags, ['AOD', 'ESD'], hypos, viewMakers, decObj, decObjHypoOut)
 
     from TrigCostMonitor.TrigCostMonitorConfig import TrigCostMonitorFinalizeCfg
     costAlg = TrigCostMonitorFinalizeCfg(flags)
     if costAlg: # None if Cost Monitoring is turned off
         hltFinalizeSeq += conf2toConfigurable( costAlg )
 
-    # C) Finally, we create the EDM output
+    # Finally, we create the EDM output
+    from TriggerJobOpts.TriggerConfig import triggerMergeViewsCfg, triggerEDMGapFillerCfg
+    with ConfigurableCABehavior():
+        edmAcc = ComponentAccumulator()
+        # The order is important: 1) view merging, 2) gap filling
+        edmAcc.merge( triggerMergeViewsCfg(flags, viewMakers) )
+        edmAcc.merge( triggerEDMGapFillerCfg(flags, ['AOD','ESD'], decObj, decObjHypoOut) )
+        edmAlg = edmAcc.popEventAlgo("EDMCreatorAlg")
+    appendCAtoAthena( edmAcc )
     hltFinalizeSeq += conf2toConfigurable(edmAlg)
 
     if flags.Trigger.doOnlineNavigationCompactification:
