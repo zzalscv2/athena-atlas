@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IEFEXFPGATOWERIDPROVIDER_H
@@ -16,7 +16,7 @@ namespace LVL1 {
 
   public:
     static const InterfaceID& interfaceID() { return IID_IIeFEXFPGATowerIdProvider; };
-    virtual StatusCode setAddress(std::string) = 0;
+    virtual StatusCode setAddress(const std::string&) = 0;
     virtual StatusCode getRankedTowerIDinFPGA(int, int, int(&)[10][6]) const = 0;
     virtual StatusCode getRankedTowerIDineFEX(int, int(&)[10][18]) const = 0;
     virtual bool ifhaveinputfile() const = 0;

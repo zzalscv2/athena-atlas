@@ -17,9 +17,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eFEXFPGA.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
 
@@ -53,7 +50,7 @@ namespace LVL1 {
 
     virtual void execute() override ;
 
-    virtual int ID() override {return m_id;}
+    virtual int ID() const override {return m_id;}
     
     virtual void SetTowersAndCells_SG(int tmp[10][18]) override;
 

@@ -9,13 +9,11 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+//#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-
-class CaloIdManager;
 
 namespace LVL1 {
 

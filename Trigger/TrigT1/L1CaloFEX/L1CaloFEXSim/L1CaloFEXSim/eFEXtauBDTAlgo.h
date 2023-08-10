@@ -50,8 +50,8 @@ public:
   virtual unsigned int getBDTScore() const override;
   virtual unsigned int getBDTCondition() const override;
   virtual bool isBDT() const override;
-  virtual void setThresholds(std::vector<unsigned int> rHadThreshold,
-                             std::vector<unsigned int> bdtThreshold,
+  virtual void setThresholds(const std::vector<unsigned int>& rHadThreshold,
+                             const std::vector<unsigned int>& bdtThreshold,
                              unsigned int etThreshold,
                              unsigned int etThresholdForRHad) override;
 

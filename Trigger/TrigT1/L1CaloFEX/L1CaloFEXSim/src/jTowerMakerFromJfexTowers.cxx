@@ -79,8 +79,6 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
             return StatusCode::FAILURE;
         }           
     }
-     
-
 
 
     // STEP 0 - Make a fresh local jTowerContainer
@@ -133,6 +131,7 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
         }
     }
     else{
+        
         ATH_MSG_DEBUG("Falling into the legacy path");
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignSuperCellsToTowers(local_jTowerContainerRaw));
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignTriggerTowerMapper(local_jTowerContainerRaw));        

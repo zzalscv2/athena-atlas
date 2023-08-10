@@ -44,7 +44,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nWeightedClustersMin= [6]
   
   flags.seedFilterLevel     = 0
-  
+
   if flags.isLRT:
     flags.minClusters         = 8 if mode=="InDet" else [8]
     flags.nHolesGapMax        = 1 if mode=="InDet" else [1]
@@ -118,7 +118,8 @@ def signatureSpecificSettingOfFlags(flags,mode):
   flags.addFlag("trtExtensionType", "xf") 
   flags.addFlag("doBremRecovery", False)  #setTrue for electron once validated
   flags.addFlag("doTruth",  False)  
-    
+  flags.addFlag("perigeeExpression","BeamLine")   #always use beamline regardless of Reco.EnableHI
+  
 def createTrigTrackingPassFlags(mode="InDet"):
   def __flagsFromConfigSettings(settings, mode):
     if mode == "InDet":

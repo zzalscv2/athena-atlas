@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,7 +17,6 @@
 #define EFEXFPGATOWERIDPROVIDER_H
 
 #include "L1CaloFEXToolInterfaces/IeFEXFPGATowerIdProvider.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include <string>
 #include <unordered_map>
@@ -52,7 +51,7 @@ namespace LVL1 {
     StatusCode initialize() override;
 
     /// @brief set path to the csv file and load
-    StatusCode setAddress(std::string inputaddress) override;
+    StatusCode setAddress(const std::string& inputaddress) override;
 
     /**
      * @brief obtain ordered tower IDs in an FPGA

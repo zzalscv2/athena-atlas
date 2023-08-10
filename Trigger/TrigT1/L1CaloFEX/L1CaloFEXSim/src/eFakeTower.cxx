@@ -5,7 +5,6 @@
 #include "L1CaloFEXSim/eFakeTower.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 
 // draft code to load the test vector from the online simulation.
 // Each input file contains the ETs of all supercells in an FPGA.
@@ -242,6 +241,6 @@ std::vector<int>* LVL1::eFakeTower::loadBlock(std::string inputfile, int eventnu
   return output;
 }
 
-int LVL1::eFakeTower::getFPGAnumber(int iefex, int ifpga) {
+int LVL1::eFakeTower::getFPGAnumber(int iefex, int ifpga) const {
   return iefex * 10 + ifpga;
 }

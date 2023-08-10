@@ -33,17 +33,16 @@ namespace LVL1 {
     virtual ~eFEXFormTOBs();
 
     
-    uint32_t doFormTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-    virtual uint32_t formTauTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
-    virtual std::vector<uint32_t> formTauxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+    uint32_t doFormTauTOBWord(int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const;
+    virtual uint32_t formTauTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) const override;
+    virtual std::vector<uint32_t> formTauxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) const override;
 
+    std::vector<uint32_t>  doFormTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int) const;
+    virtual uint32_t formTauBDTTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) const override;
+    virtual std::vector<uint32_t> formTauBDTxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) const override;
 
-    std::vector<uint32_t>  doFormTauxTOBWords(int, int, int, int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int);
-    virtual uint32_t formTauBDTTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
-    virtual std::vector<uint32_t> formTauBDTxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
-
-    virtual uint32_t formEmTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
-    virtual std::vector<uint32_t> formEmxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+    virtual uint32_t formEmTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) const override;
+    virtual std::vector<uint32_t> formEmxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) const override;
 
     /** Internal data */
   private:

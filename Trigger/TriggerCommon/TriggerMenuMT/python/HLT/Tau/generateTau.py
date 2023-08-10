@@ -170,7 +170,62 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
 
 def tauFTFTauIsoSeq(flags, is_probe_leg=False):
     newflags = getInDetFlagsForSignature(flags,'tauIso')
-
     name = 'Iso'
     (selAcc , menuCA) = _ftfTauIsoSeq(newflags,name,is_probe_leg)
+    return menuCA
+
+@AccumulatorCache
+def _precTrackSeq(flags,name,is_probe_leg=False):
+    selAcc=SelectionCA('tau'+name+'Track', isProbe=is_probe_leg)
+
+    newRoITool = CompFactory.ViewCreatorPreviousROITool()
+
+    recoAcc = InViewRecoCA(name              = 'Prec'+name+'Track', 
+                           RoITool           = newRoITool,
+                           InViewRoIs        = 'FastTauIsoRoIs',
+                           RequireParentView = True,
+                           ViewFallThrough   = True,                           
+                           isProbe           = is_probe_leg)
+
+    from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
+    precTracking = trigInDetPrecisionTrackingCfg(flags, rois=recoAcc.inputMaker().InViewRoIs, signatureName='tau'+name)
+    recoAcc.mergeReco(precTracking)
+
+    ViewVerifyTrk =  CompFactory.AthViews.ViewDataVerifier(name='VDVPrecTrkTau'+name,
+                                DataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
+                                 ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
+                                 ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs) ),
+                                 ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
+                                 ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
+                                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
+                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )])    
+
+    if not flags.Input.isMC:
+      ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
+                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ) ,
+                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+    else:
+      ViewVerifyTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+
+    recoAcc.addRecoAlgo(ViewVerifyTrk)
+
+    precTracks = flags.Tracking.ActiveConfig.tracks_IDTrig
+
+    from TrigInDetConfig.TrigInDetConfig import trigInDetVertexingCfg
+    recoAcc.mergeReco(trigInDetVertexingCfg(flags,precTracks,flags.Tracking.ActiveConfig.vertex))
+
+    selAcc.mergeReco(recoAcc)
+    hypoAlg = CompFactory.TrigTrkPrecHypoAlg('TrkPrecIsoHypoAlg',
+                                                    trackparticles = precTracks, 
+                                                    RoIForIDReadHandleKey = '' )
+    selAcc.addHypoAlgo(hypoAlg)
+
+    from TrigTauHypo.TrigTauHypoTool import TrigTrkPrecHypoToolFromDict
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigTrkPrecHypoToolFromDict, isProbe=is_probe_leg)
+    return (selAcc , menuCA)
+
+def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
+    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    name = 'Iso'
+    (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
     return menuCA

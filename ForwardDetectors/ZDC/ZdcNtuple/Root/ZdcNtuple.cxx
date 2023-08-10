@@ -49,6 +49,8 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("auxSuffix",  auxSuffix = "", "comment");
   declareProperty("nsamplesZdc",  nsamplesZdc = 24, "comment");
   declareProperty("lhcf2022", lhcf2022 = true,"comment");
+  declareProperty("lhcf2022afp", lhcf2022afp = true,"comment");
+  declareProperty("lhcf2022zdc", lhcf2022zdc = true,"comment");
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
 
@@ -239,7 +241,56 @@ StatusCode ZdcNtuple :: initialize ()
       m_outputTree->Branch("edgeGapA", &t_edgeGapA, "edgeGapA/F");
       m_outputTree->Branch("edgeGapC", &t_edgeGapC, "edgeGapC/F");
 
+      m_outputTree->Branch("ntrk", &t_ntrk, "ntrk/i");
+      if (enableTracks)
+        {
+          m_outputTree->Branch("trk_pt", "vector<float>", &t_trk_pt);
+          m_outputTree->Branch("trk_eta", "vector<float>", &t_trk_eta);
+          m_outputTree->Branch("trk_theta", "vector<float>", &t_trk_theta);
+          m_outputTree->Branch("trk_phi", "vector<float>", &t_trk_phi);
+          m_outputTree->Branch("trk_e", "vector<float>", &t_trk_e);
+          m_outputTree->Branch("trk_index", "vector<int>", &t_trk_index);
+          m_outputTree->Branch("trk_d0", "vector<float>", &t_trk_d0);
+          m_outputTree->Branch("trk_z0", "vector<float>", &t_trk_z0);
+          m_outputTree->Branch("trk_vz", "vector<float>", &t_trk_vz);
+          m_outputTree->Branch("trk_vtxz", "vector<float>", &t_trk_vtxz);
+          m_outputTree->Branch("trk_pixeldEdx", "vector<float>", &t_trk_pixeldEdx);
+          m_outputTree->Branch("trk_charge", "vector<int8_t>", &t_trk_charge);
+          m_outputTree->Branch("trk_quality", "vector<int16_t>", &t_trk_quality);
+          m_outputTree->Branch("trk_nPixHits", "vector<uint8_t>", &t_trk_nPixHits);
+          m_outputTree->Branch("trk_nSctHits", "vector<uint8_t>", &t_trk_nSctHits);
+          m_outputTree->Branch("trk_nPixDead", "vector<uint8_t>", &t_trk_nPixDead);
+          m_outputTree->Branch("trk_nSctDead", "vector<uint8_t>", &t_trk_nSctDead);
+          m_outputTree->Branch("trk_nPixHoles", "vector<uint8_t>", &t_trk_nPixHoles);
+          m_outputTree->Branch("trk_nSctHoles", "vector<uint8_t>", &t_trk_nSctHoles);
+          m_outputTree->Branch("trk_nTrtHits", "vector<uint8_t>", &t_trk_nTrtHits);
+          m_outputTree->Branch("trk_nTrtOutliers", "vector<uint8_t>", &t_trk_nTrtOutliers);
+          m_outputTree->Branch("trk_inPixHits", "vector<uint8_t>", &t_trk_inPixHits);
+          m_outputTree->Branch("trk_exPixHits", "vector<uint8_t>", &t_trk_exPixHits);
+          m_outputTree->Branch("trk_ninPixHits", "vector<uint8_t>", &t_trk_ninPixHits);
+          m_outputTree->Branch("trk_nexPixHits", "vector<uint8_t>", &t_trk_nexPixHits);
+        }
+
     }
+
+    if( lhcf2022 || lhcf2022zdc || lhcf2022afp){
+      m_outputTree->Branch("nProtons", &nProtons, "nProtons/i");
+      m_outputTree->Branch("proton_pt", "vector<double>", &proton_pt);
+      m_outputTree->Branch("proton_eta", "vector<double>", &proton_eta);
+      m_outputTree->Branch("proton_phi", "vector<double>", &proton_phi);
+      m_outputTree->Branch("proton_e", "vector<double>", &proton_e);
+      m_outputTree->Branch("proton_side", "vector<int>", &proton_side);
+      m_outputTree->Branch("proton_eLoss", "vector<double>", &proton_eLoss);
+      m_outputTree->Branch("proton_t", "vector<double>", &proton_t);
+      m_outputTree->Branch("proton_track_stationID", "vector<vector<int>>", &proton_track_stationID);
+      m_outputTree->Branch("proton_track_nClusters", "vector<vector<int>>", &proton_track_nClusters);
+      m_outputTree->Branch("proton_track_xLocal", "vector<vector<float>>", &proton_track_xLocal);
+      m_outputTree->Branch("proton_track_yLocal", "vector<vector<float>>", &proton_track_yLocal);
+      m_outputTree->Branch("proton_track_zLocal", "vector<vector<float>>", &proton_track_zLocal);
+      m_outputTree->Branch("proton_track_xSlope", "vector<vector<float>>", &proton_track_xSlope);
+      m_outputTree->Branch("proton_track_ySlope", "vector<vector<float>>", &proton_track_ySlope);
+    }
+
   }
   
   ANA_MSG_DEBUG("Anti-howdy from Initialize!");
@@ -435,6 +486,10 @@ StatusCode ZdcNtuple :: execute ()
     ANA_CHECK(evtStore()->retrieve( m_truthParticleContainer, "TruthParticles"));
   }
 
+  if( lhcf2022||lhcf2022zdc||lhcf2022afp ){
+    ANA_CHECK(evtStore()->retrieve( m_afpProtons, "AFPProtonContainer"));
+    processProtons();
+  }
   // if trigger enabled, only write out events which pass one of them, unless using MC
 
   if (enableTrigger && !passTrigger && !m_isMC && writeOnlyTriggers) return StatusCode::SUCCESS;
@@ -478,6 +533,22 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcModuleFitT0[iside][imod] = 0; t_ZdcModuleBkgdMaxFraction[iside][imod] = 0; t_ZdcModuleAmpError[iside][imod] = 0;
       t_ZdcModuleMinDeriv2nd[iside][imod] = 0; t_ZdcModulePresample[iside][imod] = 0; t_ZdcModulePreSampleAmp[iside][imod] = 0;
       t_ZdcLucrodTriggerAmp[iside][imod] = 0;t_ZdcModuleMaxADC[iside][imod] = 0;
+
+      if (enableOutputSamples)
+	{
+	  for (int ig=0;ig<2;ig++)
+	    {
+	      for (int id=0;id<2;id++)
+		{
+		  for (int isamp=0;isamp<((int)nsamplesZdc);isamp++)
+		    {
+		      if (nsamplesZdc==7) t_raw7[iside][imod][ig][id][isamp]=0;
+		      if (nsamplesZdc==15) t_raw15[iside][imod][ig][id][isamp]=0;
+		      if (nsamplesZdc==24) t_raw24[iside][imod][ig][id][isamp]=0;
+		    }
+		}
+	    }
+	}
     }
   }
 
@@ -499,7 +570,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
       t_ZdcAmp[iside] = zdcSum->auxdataConst<float>("UncalibSum"+auxSuffix);
       t_ZdcAmpErr[iside] = zdcSum->auxdataConst<float>("UncalibSumErr"+auxSuffix);
-      t_ZdcLucrodTriggerSideAmp[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmp");
+      if (zdcSum->isAvailable<uint16_t>("LucrodTriggerSideAmp"))
+	t_ZdcLucrodTriggerSideAmp[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmp");
       ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
 
       t_ZdcTime[iside] = zdcSum->auxdataConst<float>("AverageTime"+auxSuffix);
@@ -537,8 +609,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
         t_ZdcModuleMinDeriv2nd[iside][imod] = zdcMod->auxdataConst<float>("MinDeriv2nd" + auxSuffix);
         t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
         t_ZdcModulePreSampleAmp[iside][imod] = zdcMod->auxdataConst<float>("PreSampleAmp" + auxSuffix);
-        t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
-        t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
+	if (zdcMod->isAvailable<uint16_t>("LucrodTriggerAmp"))
+	  t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
+	if (zdcMod->isAvailable<float>("MaxADC"))
+	  t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
 
         if (enableOutputSamples)
           {
@@ -1328,6 +1402,66 @@ void ZdcNtuple::processClusters()
   return;
 }
 
+void ZdcNtuple::processProtons(){
+
+  proton_pt.clear();
+  proton_eta.clear();
+  proton_phi.clear();
+  proton_e.clear();
+  proton_side.clear();
+  proton_eLoss.clear();
+  proton_t.clear();
+
+  proton_track_stationID.clear();
+  proton_track_nClusters.clear();
+  proton_track_xLocal.clear();
+  proton_track_yLocal.clear();
+  proton_track_zLocal.clear();
+  proton_track_xSlope.clear();
+  proton_track_ySlope.clear();
+
+  proton_track_stationID.resize(m_afpProtons->size(), std::vector<int>(2));
+  proton_track_nClusters.resize(m_afpProtons->size(), std::vector<int>(2));
+  proton_track_xLocal.resize(m_afpProtons->size(), std::vector<float>(2));
+  proton_track_yLocal.resize(m_afpProtons->size(), std::vector<float>(2));
+  proton_track_zLocal.resize(m_afpProtons->size(), std::vector<float>(2));
+  proton_track_xSlope.resize(m_afpProtons->size(), std::vector<float>(2));
+  proton_track_ySlope.resize(m_afpProtons->size(), std::vector<float>(2));
+
+  nProtons = 0;
+
+  for(const auto * proton: *m_afpProtons){
+
+    proton_pt.push_back(proton->pt());
+    proton_eta.push_back(proton->eta());
+    proton_phi.push_back(proton->phi());
+    proton_e.push_back(proton->e());
+    proton_side.push_back(proton->side());
+
+    proton_eLoss.push_back((6800.-proton->e())/6800.);
+    p_scat.SetPtEtaPhiE(proton->pt(), proton->eta(), proton->phi(), proton->e());
+    (signbit(proton->eta())) ? p_beam.SetPxPyPzE(0.0, 0.0, -6800.0, 6800.0) : p_beam.SetPxPyPzE(0.0, 0.0, 6800.0,\
+												6800.0);
+
+    proton_t.push_back( (p_beam - p_scat)*(p_beam - p_scat));
+
+    for(int i=0; i< int(proton->nTracks()); i++){
+
+      proton_track_stationID.at(nProtons).at(i) = proton->track(i)->stationID();
+      proton_track_nClusters.at(nProtons).at(i) = proton->track(i)->nClusters();
+      proton_track_xLocal.at(nProtons).at(i) = proton->track(i)->xLocal();
+      proton_track_yLocal.at(nProtons).at(i) = proton->track(i)->yLocal();
+      proton_track_zLocal.at(nProtons).at(i) = proton->track(i)->zLocal();
+      proton_track_xSlope.at(nProtons).at(i) = proton->track(i)->xSlope();
+      proton_track_ySlope.at(nProtons).at(i) = proton->track(i)->ySlope();
+
+    }
+
+    nProtons++;
+  }
+
+  return;
+}
 
 uint32_t ZdcNtuple::acceptEvent()
 {
@@ -1393,22 +1527,30 @@ void ZdcNtuple::setupTriggerHistos()
     else
       {
 	if (lhcf2022)
-	  {
-	    triggers.push_back("HLT_noalg_L1LHCF");
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");	    
-	    triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
-	    triggers.push_back("HLT_noalg_L1ZDC_OR");
-	    triggers.push_back("HLT_noalg_L1ZDC_XOR_E2");	    
-	    triggers.push_back("HLT_noalg_L1ZDC_XOR_E1_E3");	    
-	    triggers.push_back("HLT_noalg_L1ZDC_A_AND_C");	    
-	    triggers.push_back("HLT_mb_sptrk_L1ZDC_OR");
-	    triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E2");	    
-	    triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E1_E3");	    
-	    triggers.push_back("HLT_mb_sptrk_L1ZDC_A_AND_C");	    
-	    triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
-	    triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
-	    triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
-	  }
+          {
+            triggers.push_back("HLT_noalg_L1LHCF");
+          }
+	if (lhcf2022afp)
+          {
+            triggers.push_back("HLT_noalg_AFPPEB_L1AFP_A");
+            triggers.push_back("HLT_noalg_AFPPEB_L1AFP_C");
+          }
+	if (lhcf2022zdc)
+          {
+            triggers.push_back("HLT_noalg_ZDCPEB_L1ZDC_OR");
+            triggers.push_back("HLT_noalg_ZDCPEB_L1LHCF");
+            triggers.push_back("HLT_noalg_L1ZDC_OR");
+            triggers.push_back("HLT_noalg_L1ZDC_XOR_E2");
+            triggers.push_back("HLT_noalg_L1ZDC_XOR_E1_E3");
+            triggers.push_back("HLT_noalg_L1ZDC_A_AND_C");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_OR");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E2");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_XOR_E1_E3");
+            triggers.push_back("HLT_mb_sptrk_L1ZDC_A_AND_C");
+            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2");
+            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3");
+            triggers.push_back("HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C");
+          }
       }
   }
 
