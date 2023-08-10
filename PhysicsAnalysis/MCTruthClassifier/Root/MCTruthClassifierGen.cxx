@@ -2536,7 +2536,7 @@ ParticleOrigin
 MCTruthClassifier::convHadronTypeToOrig(ParticleType pType, int motherPDG)
 {
   //---------------------------------------------------------------------------------
-  if (pType == BBbarMesonPart && abs(motherPDG) == MC::JPSI)
+  if (pType == CCbarMesonPart && abs(motherPDG) == MC::JPSI)
     return JPsi;
   else if (pType == BBbarMesonPart)
     return BBbarMeson;
