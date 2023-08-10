@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonTrackCleaner.h"
 
@@ -793,6 +793,12 @@ namespace Muon {
     }
 
     void MuonTrackCleaner::init(const EventContext& ctx, const Trk::Track& track, CleaningState& state) const {
+  // Tell clang to optimize assuming that FP exceptions can trap.
+  // Otherwise, it can vectorize the division, which can lead to
+  // spurious division-by-zero traps from unused vector lanes.
+#ifdef __clang__
+# pragma float_control(except, on)
+#endif
         state.nscatterers = 0;
         state.numberOfFlippedMdts = 0;
         state.numberOfCleanedCompROTs = 0;
