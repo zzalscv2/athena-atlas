@@ -102,7 +102,7 @@ protected:
   }
 
   // the tested AthAlgTool
-  ISF::GenParticleLifetimeFilter* m_filterTool;
+  ISF::GenParticleLifetimeFilter* m_filterTool = nullptr;
 
 };  // GenParticleLifetimeFilter_test fixture
 
