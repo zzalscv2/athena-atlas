@@ -1,6 +1,4 @@
 PathResolver             WARNING Locating dev file dev/PMGTools/PMGxsecDB_mc16.txt. Do not let this propagate to a release
-PathResolver             WARNING Locating dev file dev/PileupReweighting/share/DSID410xxx/pileup_mc20e_dsid410470_FS.root. Do not let this propagate to a release
-PathResolver             WARNING Locating dev file dev/PileupReweighting/share/DSID410xxx/pileup_mc20e_dsid410470_FS.root. Do not let this propagate to a release
 ToolSvc.JVTEfficiencyToolWARNING Supplied SF file JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root doesn't seem to contain SFs for NNJvt, falling back to dummy SFs ...
     NNJVT.Network.graph.Offline.Nonprompt_All_MaxWeight.json
 

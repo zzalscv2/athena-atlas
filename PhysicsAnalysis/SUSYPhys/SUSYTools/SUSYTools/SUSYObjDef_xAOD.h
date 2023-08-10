@@ -582,6 +582,13 @@ namespace ST {
     std::string m_mcCampaign;
     int m_mcChannel;
 
+    bool m_useCommonPRWFiles;
+    std::string m_commonPRWFileMC20a;
+    std::string m_commonPRWFileMC20d;
+    std::string m_commonPRWFileMC20e;
+    std::string m_commonPRWFileMC21a;
+    std::string m_commonPRWFileMC23a;
+
     std::vector<std::string> m_prwConfFiles;
     std::vector<std::string> m_prwLcalcFiles;
     std::string m_prwActualMu2017File;

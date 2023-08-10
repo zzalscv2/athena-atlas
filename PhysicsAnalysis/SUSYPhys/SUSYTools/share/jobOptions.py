@@ -82,6 +82,7 @@ if isMC:
         susyAlg.SUSYTools.PRWConfigFiles = susyArgs.prwFiles
     else:
         susyAlg.SUSYTools.AutoconfigurePRWTool = True
+        susyAlg.SUSYTools.PRWUseCommonMCFiles = True
     # set lumicalc info based on the campaign, if running on MC
     if susyArgs.lumicalcFiles:
         susyAlg.SUSYTools.PRWLumiCalcFiles = susyArgs.lumicalcFiles

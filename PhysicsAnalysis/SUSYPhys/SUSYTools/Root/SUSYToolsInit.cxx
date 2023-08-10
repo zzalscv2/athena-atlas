@@ -124,6 +124,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     ATH_MSG_DEBUG("Will now init the PRW tool");
     std::vector<std::string> file_conf;
     for (UInt_t i = 0; i < m_prwConfFiles.size(); i++) {
+      ATH_MSG_INFO("Adding PRW file: " << m_prwConfFiles.at(i));
       file_conf.push_back(m_prwConfFiles.at(i));
     }
 
