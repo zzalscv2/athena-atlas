@@ -12,7 +12,7 @@ from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
-from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
 def ZdcRecOutputCfg(flags):
 
