@@ -345,7 +345,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     
     //FCAL region algorithm
     if(m_jfexid ==0 || m_jfexid ==5) {
-
+        
         //**********Forward Jets***********************
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->safetyTest());
         ATH_CHECK(m_jFEXForwardJetsAlgoTool->reset());
