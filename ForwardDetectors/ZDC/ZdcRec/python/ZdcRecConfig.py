@@ -14,6 +14,9 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
+from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
+from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+
 def ZdcRecOutputCfg(flags):
 
     acc = ComponentAccumulator()
@@ -43,6 +46,26 @@ def ZdcAnalysisToolCfg(flags, run, config="LHCf2022", DoCalib=False, DoTimeCalib
         DoTimeCalib = DoTimeCalib,
         DoTrigEff = DoTrigEff, 
         LHCRun = run ))
+    return acc
+
+
+def ZdcTrigValToolCfg(flags, config = 'LHCf2022'):
+    acc = ComponentAccumulator()
+    
+    acc.merge(TrigDecisionToolCfg(flags))
+    
+    trigValTool = CompFactory.ZDC.ZdcTrigValidTool(
+        name = 'ZdcTrigValTool',
+        WriteAux = True,
+        AuxSuffix = "",
+        filepath_LUT = "TrigT1ZDC/zdcRun3T1LUT_v1_30_05_2023.json")
+        
+    trigValTool.TrigDecisionTool = acc.getPublicTool('TrigDecisionTool')
+    
+    trigValTool.triggerList = [c for c in getL1MenuAccess(flags) if 'L1_ZDC_BIT' in c]
+    
+    acc.setPrivateTools(trigValTool)
+      
     return acc
 
 def ZdcRecRun2Cfg(flags):        
@@ -95,16 +118,21 @@ def ZdcRecRun3Cfg(flags):
         config = "LHCf2022"
     elif flags.Input.ProjectName == "data23_hi":
         config = "PbPb2023"
+    elif flags.Input.ProjectName == "data22_hi":
+        config = "PbPb2023"
 
     acc.merge(ByteStreamReadCfg(flags, type_names=['xAOD::TriggerTowerContainer/ZdcTriggerTowers',
                                          'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
+    trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))
+    
+    zdcTools = [] # expand list as needed
+    zdcTools += [anaTool] 
 
-    zdcTools = [anaTool] # expand list as needed
-
-    zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
+    
+    zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools, TrigValid = trigTool)
     acc.addEventAlgo(zdcAlg, primary=True)
 
     return acc

@@ -46,6 +46,9 @@ StatusCode ZdcRecRun3::initialize()
 
 	// Reconstruction Tool
 	ATH_CHECK( m_ChannelTool.retrieve() );
+  
+  // Trigger Validation Tool
+  ATH_CHECK( m_trigValTool.retrieve() );
 
 	// Reconstruction Tool
 
@@ -117,6 +120,9 @@ StatusCode ZdcRecRun3::execute()
 
   // eventually reconstruct RPD, using ML libraries
   // ATH_CHECK( m_rpdTool...)
+  
+  //Use Trigger Validaiton Tool
+  ATH_CHECK( m_trigValTool->addTrigStatus(*moduleContainer.get(), *moduleSumContainer.get()));
 
   SG::WriteHandle<xAOD::ZdcModuleContainer> moduleContainerH (m_zdcModuleContainerName, ctx);
   ATH_CHECK( moduleContainerH.record (std::move(moduleContainer),
