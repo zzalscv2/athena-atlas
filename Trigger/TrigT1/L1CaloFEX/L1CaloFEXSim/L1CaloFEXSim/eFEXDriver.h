@@ -5,18 +5,12 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXToolInterfaces/IeFEXSysSim.h"
 #include "L1CaloFEXSim/eFEXSim.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
-#include "xAODTrigger/eFexEMRoIContainer.h"
-#include "xAODTrigger/eFexTauRoIContainer.h"
-#include "L1CaloFEXSim/eFakeTower.h"
-
-class CaloIdManager;
 
 namespace LVL1 {
 
@@ -33,8 +27,6 @@ class eFEXDriver : public AthAlgorithm
   StatusCode finalize();
 
  private:
-
-  int m_numberOfEvents = 0;
 
   SG::WriteHandleKey<eFEXOutputCollection> m_eFEXOutputCollectionSGKey {this, "MyOutputs", "eFEXOutputCollection", "MyOutputs"};
 

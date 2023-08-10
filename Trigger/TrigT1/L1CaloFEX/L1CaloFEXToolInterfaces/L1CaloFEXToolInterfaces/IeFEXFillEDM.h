@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -35,8 +35,8 @@ Interface definition for eFEXFillEDM
     virtual StatusCode initialize() = 0;
     virtual StatusCode finalize() = 0;
     virtual StatusCode execute() = 0;
-    virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXegTOB>& tobObject, bool xTOB=false) = 0;
-    virtual void fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXtauTOB>& tobObject, bool xTOB=false) = 0;
+    virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXegTOB>& tobObject, bool xTOB=false) const = 0;
+    virtual void fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXtauTOB>& tobObject, bool xTOB=false) const = 0;
 
   private:
 

@@ -37,7 +37,7 @@ Interface definition for eFEXSim
     virtual void reset() = 0;
 
     virtual void execute() = 0;
-    virtual int ID() = 0;
+    virtual int ID() const = 0;
     virtual void SetTowersAndCells_SG(int tmp[10][18]) = 0;
 
     virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection) = 0;

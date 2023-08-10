@@ -41,7 +41,7 @@ Interface definition for eFEXTOBEtTool
                                    std::vector<unsigned int> &RemSums) = 0;
 
     /** Tool to find eTower identifier from an eta, phi coordinate pair */
-    virtual unsigned int eTowerID(float eta, float phi) = 0;
+    virtual unsigned int eTowerID(float eta, float phi) const = 0;
 
     /** Tool to find eFEX and FPGA numbers and eta index of a TOB within the FPGA */
     virtual void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) = 0;

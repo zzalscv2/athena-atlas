@@ -14,13 +14,9 @@
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eFEXTOBxTOBMatching.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 #include "xAODTrigger/eFexEMRoI.h"
 #include "xAODTrigger/eFexEMRoIContainer.h"
@@ -30,7 +26,6 @@
 #include "xAODTrigger/eFexTauRoIContainer.h"
 #include "xAODTrigger/eFexTauRoIAuxContainer.h"
 
-#include <ctime>
 
 namespace LVL1 {
   
@@ -89,15 +84,12 @@ namespace LVL1 {
   void eFEXSysSim::cleanup()  {
 
     m_eFEXCollection.clear();
-    //m_eTowersColl.clear();
-
   }
 
 
-  int eFEXSysSim::calcTowerID(int eta, int phi, int mod)  {
+  int eFEXSysSim::calcTowerID(int eta, int phi, int mod) const {
 
     return ((64*eta) + phi + mod);
-
   }
 
   StatusCode eFEXSysSim::execute(eFEXOutputCollection* inputOutputCollection)  {    
@@ -531,5 +523,3 @@ namespace LVL1 {
 
   }
 } // end of namespace bracket
-
-

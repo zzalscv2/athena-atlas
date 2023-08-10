@@ -2,15 +2,8 @@
     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#undef NDEBUG
-
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
-#include "xAODEventInfo/EventInfo.h"
 
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerBuilder.h"
@@ -20,17 +13,6 @@
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-
-#include <cassert>
-#include "SGTools/TestStore.h"
-
-#include <ctime>
-
-
-#include <iostream>
-#include <fstream>
-
-#define DEBUG_VHB 1
 
 
 namespace LVL1 {
@@ -44,9 +26,6 @@ namespace LVL1 {
 
 StatusCode eTowerMakerFromEfexTowers::initialize()
 {
-
-  m_numberOfEvents = 1;
-
   ATH_CHECK( m_eTowerBuilderTool.retrieve() );
   ATH_CHECK( m_eFexTowerContainerSGKey.initialize() );
   ATH_CHECK( m_eFexTowerContainer2SGKey.initialize(SG::AllowEmpty) );
@@ -65,9 +44,6 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
 
   StatusCode eTowerMakerFromEfexTowers::execute(/*const EventContext& ctx*/) //const
 {
-  ATH_MSG_DEBUG("Executing " << name() << ", processing event number " << m_numberOfEvents );
-
-
   // load noise cuts .. should really only need to do this at start of runs, not every event!
   std::map<std::pair<int, int>, int> noiseCutsMap; // key is [eta,layer]
   if(!m_noiseCutsKey.empty()) {
@@ -144,10 +120,6 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
 
   // STEP 4 - Close and clean the event
   m_eTowerBuilderTool->reset();
-
-  ATH_MSG_DEBUG("Executed " << name() << ", closing event number " << m_numberOfEvents );
-
-  m_numberOfEvents++;
 
   return StatusCode::SUCCESS;
 }

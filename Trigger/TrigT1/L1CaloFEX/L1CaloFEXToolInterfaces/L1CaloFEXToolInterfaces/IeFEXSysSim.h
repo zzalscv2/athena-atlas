@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -15,8 +15,6 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloEvent/CaloCellContainer.h"
 
 namespace LVL1 {
   
@@ -36,7 +34,7 @@ Interface definition for eFEXSysSim
 
     virtual void cleanup() = 0;
 
-    virtual int calcTowerID(int eta, int phi, int mod) = 0 ;
+    virtual int calcTowerID(int eta, int phi, int mod) const = 0 ;
 
   private:
 

@@ -37,7 +37,7 @@ Interface definition for eFEXFPGA
 
     virtual void reset() = 0;
 
-    virtual int getID() = 0;
+    virtual int getID() const = 0;
 
     virtual void SetTowersAndCells_SG(int [][6]) = 0;
     

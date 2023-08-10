@@ -149,10 +149,10 @@ unsigned int LVL1::eFEXtauBDTAlgo::getBDTCondition() const {
 
 bool LVL1::eFEXtauBDTAlgo::isBDT() const { return true; }
 
-void LVL1::eFEXtauBDTAlgo::setThresholds(
-    std::vector<unsigned int> rHadThreshold,
-    std::vector<unsigned int> bdtThreshold, unsigned int etThreshold,
-    unsigned int etThresholdForRHad) {
+void LVL1::eFEXtauBDTAlgo::setThresholds(const std::vector<unsigned int>& rHadThreshold,
+					 const std::vector<unsigned int>& bdtThreshold,
+					 unsigned int etThreshold,
+					 unsigned int etThresholdForRHad) {
   for (int i = 0; i < 3; i++) {
     m_hadFracMultipliers[i] = rHadThreshold[i];
     m_bdtThresholds[i] = bdtThreshold[i];

@@ -33,17 +33,6 @@ StatusCode LVL1::eFEXtauAlgoBase::safetyTest() {
   return StatusCode::SUCCESS;
 }
 
-void LVL1::eFEXtauAlgoBase::setThresholds(
-    std::vector<unsigned int> rHadThreshold,
-    std::vector<unsigned int> bdtThreshold, unsigned int etThreshold,
-    unsigned int etThresholdForRHad) {
-  // Suppress unused parameter warning
-  (void)rHadThreshold;
-  (void)bdtThreshold;
-  (void)etThreshold;
-  (void)etThresholdForRHad;
-}
-
 // Build arrays holding cell ETs for each layer plus entire tower
 void LVL1::eFEXtauAlgoBase::buildLayers(int efex_id, int fpga_id,
                                         int central_eta) {

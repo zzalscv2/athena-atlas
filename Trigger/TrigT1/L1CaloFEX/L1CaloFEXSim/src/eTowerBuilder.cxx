@@ -3,15 +3,10 @@
 */
 
 
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerBuilder.h"
-
 #include "L1CaloFEXSim/eTowerContainer.h"
 
 // TOWER IS A COLLECTION OF SUPER CELLS
@@ -159,10 +154,7 @@ void eTowerBuilder::BuildTRANSeTowers(std::unique_ptr<eTowerContainer> & eTowerC
 
 void eTowerBuilder::BuildSingleTower(std::unique_ptr<eTowerContainer> & eTowerContainerRaw,float eta, float phi, float keybase, int posneg) const
 {
-
   eTowerContainerRaw->push_back(eta, phi, keybase, posneg);
-
-
 }
 
 void eTowerBuilder::BuildAllTowers(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) const

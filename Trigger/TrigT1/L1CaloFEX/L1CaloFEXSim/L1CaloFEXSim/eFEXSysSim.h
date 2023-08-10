@@ -19,9 +19,6 @@
 #include "L1CaloFEXSim/eFEXSim.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
@@ -63,7 +60,7 @@ namespace LVL1 {
 
     virtual void cleanup() override;
 
-    virtual int calcTowerID(int eta, int phi, int mod) override;
+    virtual int calcTowerID(int eta, int phi, int mod) const override;
 
     /** Internal data */
   private:
