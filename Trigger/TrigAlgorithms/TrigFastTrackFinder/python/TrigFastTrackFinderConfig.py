@@ -256,8 +256,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   numberingTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF")
   
   # GPU offloading config begins - perhaps set from configure
-  useGPU = False
-  if useGPU :
+  if flags.Trigger.InDetTracking.doGPU:
     acc.addPublicTool(CompFactory.TrigInDetAccelerationTool(name = "TrigInDetAccelerationTool_FTF"))
   # GPU offloading config ends
 
@@ -320,7 +319,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
         name = name,
         useNewLayerNumberScheme = useNewLayerNumberScheme,
         LayerNumberTool = numberingTool,
-        useGPU = useGPU,
+        useGPU = flags.Trigger.InDetTracking.doGPU,
         SpacePointProviderTool=spTool,
         MinHits = 5, #Only process RoI with more than 5 spacepoints
         Triplet_MinPtFrac = 1,

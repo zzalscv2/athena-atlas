@@ -162,6 +162,8 @@ def createTrigTrackingPassFlags(mode="InDet"):
   #TBD make a function for global settings too
   flags.addFlag(f'{category}.RoiZedWidthDefault', 180.0 * Units.mm)
 
+  flags.addFlag(f'{category}.doGPU', False)
+
   return flags
 
 
