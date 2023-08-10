@@ -33,6 +33,7 @@
 #include <cstring>
 #include <regex>
 
+
 class TriggerEDMDeserialiserAlg::WritableAuxStore : public SG::AuxStoreInternal {
 public:
   WritableAuxStore() = default;
@@ -261,6 +262,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
   
   size_t fragmentCount = 0;
   PayloadIterator start = dataptr->begin();
+  std::string previousKey;
   while ( start != dataptr->end() )  {
     fragmentCount++;
     const CLID clid{ PayloadHelpers::collectionCLID( start ) };
@@ -348,6 +350,15 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
       }
 
       if ( isxAODInterfaceContainer ) {
+        // If the container of the previous iteration was supposed to have an Aux store (trackIndices)
+        // but we didn't find one, then create at least a DataLink with the correct key name.
+        // The EDMCreatorAlg will take care of creating an empty Aux store with the correct type.
+        if (xAODInterfaceContainer!=nullptr &&
+            xAODInterfaceContainer->trackIndices() && currentAuxStore==nullptr) {
+          ATH_MSG_DEBUG("Container with key " << previousKey << " is missing its Aux store");
+          xAODInterfaceContainer->setStore( DataLink<SG::IConstAuxStore>(previousKey+"Aux.") );
+        }
+
         static const RootType vbase = RootType::ByNameNoQuiet( "SG::AuxVectorBase" );
         currentAuxStore = nullptr; // the store will be following, setting it to nullptr assure we catch issue with of missing Aux
         xAODInterfaceContainer =
@@ -374,6 +385,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
       ATH_CHECK( deserialiseDynAux( transientTypeName, persistentTypeName, key, obj,
                                     currentAuxStore, xAODInterfaceContainer ) );
     }
+    previousKey = key;
   }
   return StatusCode::SUCCESS;
 }

@@ -274,7 +274,7 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
 
   StatusCode fixLinks() const;
 
-  template<typename T, typename G, typename M >
+  template<typename T, typename STORE, typename G, typename M >
     StatusCode createIfMissing( const EventContext& context, const ConstHandlesGroup<T>& handles, 
 				G& generator, M merger ) const;
 
