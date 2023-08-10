@@ -1,48 +1,42 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <string>
-
+#include "AmdcStand/GetAmdcsimrecVariable.h"
 // Fortran routines -------------------------------------------------------------
 #include "f1get.h"
 
 // Get Amdcsimrec REAL (double) Variable -------------------------------------------
 
-double       GetAmdcRealVar(std::string VarName, int I1, int I2, int I3){
-  char NAMEVAR[40];
-  int Long = VarName.size();
-  if( Long > 40 ){ Long = 40; }
-  for(int I=0; I<Long; I++){ NAMEVAR[I] = VarName[I]; }
+double
+GetAmdcRealVar(const std::string & VarName, int I1, int I2, int I3){
+  std::string NAMEVAR = VarName.substr(0,40);
+  int Long = NAMEVAR.size();
   double ToBeReturned=0.;
-  f1getramdcvar_( Long, NAMEVAR, I1, I2, I3, ToBeReturned );
+  f1getramdcvar_( Long, NAMEVAR.data(), I1, I2, I3, ToBeReturned );
   return ToBeReturned;
 }
 
 // Get Amdcsimrec INTEGER (int) Variable -------------------------------------------
 
-int          GetAmdcIntVar(std::string VarName, int I1, int I2, int I3){
-  char NAMEVAR[40];
-  int Long = VarName.size();
-  if( Long > 40 ){ Long = 40; }
-  for(int I=0; I<Long; I++){ NAMEVAR[I] = VarName[I]; }
+int
+GetAmdcIntVar(const std::string & VarName, int I1, int I2, int I3){
+  std::string NAMEVAR = VarName.substr(0,40);
+  int Long = NAMEVAR.size();
   int ToBeReturned=0;
-  f1getiamdcvar_( Long, NAMEVAR, I1, I2, I3, ToBeReturned );
+  f1getiamdcvar_( Long, NAMEVAR.data(), I1, I2, I3, ToBeReturned );
   return ToBeReturned;
 }
 
 // Get Amdcsimrec CHARACTER (std::string) Variable ---------------------------------
 
-std::string  GetAmdcCharVar(std::string VarName, int I1, int I2, int I3){
-  char NAMEVAR[40];
-  int Long = VarName.size();
-  if( Long > 40 ){ Long = 40; }
-  for(int I=0; I<Long; I++){ NAMEVAR[I] = VarName[I]; }
-  int  Lvar;
+std::string
+GetAmdcCharVar(const std::string & VarName, int I1, int I2, int I3){
+  std::string NAMEVAR = VarName.substr(0,40);
+  int Long = NAMEVAR.size();
   char CVAR[40];
-  f1getcamdcvar_( Long, NAMEVAR, I1, I2, I3, Lvar, CVAR );
-  std::string ToBeReturned=" ";
-  ToBeReturned.resize(Lvar);
-  for(int I=0; I<Lvar; I++){ ToBeReturned[I] = CVAR[I]; }
+  int Lvar{};
+  f1getcamdcvar_( Long , NAMEVAR.data(), I1, I2, I3, Lvar, CVAR );
+  std::string ToBeReturned(CVAR, CVAR+Lvar);
   return ToBeReturned;
 }
