@@ -167,37 +167,60 @@ atlas_add_citest( RecoRun4MC_DAODPHYS
 # Analysis
 #################################################################################
 atlas_add_citest( CPAlgorithmsRun2MC_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --no-physlite-broken --force-input ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --no-physlite-broken --force-input ../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root —force-output TestJobOutput-Run2MC_PHYS.root
    DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
-atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --physlite --no-physlite-broken --force-input ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITE 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --physlite --no-physlite-broken --force-input ../DerivationRun2MC_PHYSLITE/run_mc_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root —force-output TestJobOutput-Run2MC_PHYSLITE.root
    DEPENDS_SUCCESS DerivationRun2MC_PHYSLITE )
 
-atlas_add_citest( CPAlgorithmsRun2Data_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --no-physlite-broken --force-input ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun2Data_PHYS 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --no-physlite-broken --force-input ../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root —force-output TestJobOutput-Run2Data_PHYS.root
    DEPENDS_SUCCESS DerivationRun2Data_PHYS )
 
-atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --physlite --no-physlite-broken --force-input ../DerivationRun2Data_PHYSLITE/run_data_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITE 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --physlite --no-physlite-broken --force-input ../DerivationRun2Data_PHYSLITE/run_data_PHYSLITE_Run2/DAOD_PHYSLITE.myOutput.pool.root —force-output TestJobOutput-Run2Data_PHYSLITE.root
    DEPENDS_SUCCESS DerivationRun2Data_PHYSLITE )
 
-atlas_add_citest( CPAlgorithmsRun3MC_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --no-physlite-broken --force-input ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun3MC_PHYS 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --no-physlite-broken --force-input ../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root —force-output TestJobOutput-Run3MC_PHYS.root
    DEPENDS_SUCCESS DerivationRun3MC_PHYS )
 
-atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --physlite --no-physlite-broken --force-input ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITE 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type mc --physlite --no-physlite-broken --force-input ../DerivationRun3MC_PHYSLITE/run_mc_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root —force-output TestJobOutput-Run3MC_PHYSLITE.root
    DEPENDS_SUCCESS DerivationRun3MC_PHYSLITE )
 
-atlas_add_citest( CPAlgorithmsRun3Data_PHYS
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --no-physlite-broken --force-input ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun3Data_PHYS 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --no-physlite-broken --force-input ../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root —force-output TestJobOutput-Run3Data_PHYS.root 
    DEPENDS_SUCCESS DerivationRun3Data_PHYS )
 
-atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
-   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --physlite --no-physlite-broken --force-input ../DerivationRun3Data_PHYSLITE/run_data_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root
+atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE 
+   SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py - --block-config --data-type data --physlite --no-physlite-broken --force-input ../DerivationRun3Data_PHYSLITE/run_data_PHYSLITE_Run3/DAOD_PHYSLITE.myOutput.pool.root  —force-output  TestJobOutput-Run3Data_PHYSLITE.root 
    DEPENDS_SUCCESS DerivationRun3Data_PHYSLITE )
 
+atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITEcomparison 
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run3Data_PHYSLITE.root TestJobOutput-Run3Data_PHYS.root
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 900
+   DEPENDS_SUCCESS CPAlgorithmsRun3Data_PHYSLITE  CPAlgorithmsRun3Data_PHYS )
+
+atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITEcomparison
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run3MC_PHYSLITE.root TestJobOutput-Run3MC_PHYS.root
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 900
+   DEPENDS_SUCCESS CPAlgorithmsRun3MC_PHYSLITE  CPAlgorithmsRun3MC_PHYS )
+
+atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITEcomparison
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run2Data_PHYSLITE.root TestJobOutput-Run2Data_PHYS.root
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 900
+   DEPENDS_SUCCESS CPAlgorithmsRun2Data_PHYSLITE  CPAlgorithmsRun2Data_PHYS )
+
+atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITEcomparison
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run2MC_PHYSLITE.root TestJobOutput-Run2MC_PHYS.root
+   POST_EXEC_SCRIPT nopost.sh
+   PROPERTIES TIMEOUT 900
+   DEPENDS_SUCCESS CPAlgorithmsRun2MC_PHYSLITE  CPAlgorithmsRun2MC_PHYS )
 
 #################################################################################
 # Data Quality
