@@ -42,6 +42,29 @@
 #include <tuple>
 #include <algorithm>
 
+namespace {
+   template <class T_MeasurementContainer>
+   std::pair< xAOD::DetectorIDHashType, bool> getMaxHashAndCheckOrder(const T_MeasurementContainer &measurements) {
+      std::pair< xAOD::DetectorIDHashType, bool> max_hash_ordered { 0, true };
+      for (const auto &measurement :  measurements) {
+         xAOD::DetectorIDHashType id_hash = measurement->identifierHash();
+         max_hash_ordered.second =  (id_hash >= max_hash_ordered.first);
+         max_hash_ordered.first = std::max( max_hash_ordered.first, id_hash );
+      }
+      return max_hash_ordered;
+   }
+
+   void gatherGeoIds(const ActsTrk::IActsToTrkConverterTool &converter_tool,
+                     const InDetDD::SiDetectorElementCollection &detectorElements,
+                     std::vector<Acts::GeometryIdentifier> &geo_ids) {
+      for (const auto *det_el :  detectorElements) {
+         const Acts::Surface &surface =
+            converter_tool.trkSurfaceToActsSurface(det_el->surface());
+         geo_ids.push_back(surface.geometryId());
+      }
+   }
+}
+
 namespace ActsTrk
 {
   struct TrackFindingAlg::CKF_pimpl : public CKF_config
@@ -243,8 +266,37 @@ namespace ActsTrk
 
     size_t numPixelMeasurements = (pixelClusterContainer ? pixelClusterContainer->size() : 0u);
     size_t numStripMeasurements = (stripClusterContainer ? stripClusterContainer->size() : 0u);
+    std::array<xAOD::DetectorIDHashType, 3> max_hash{ };
+    {
+       std::pair< xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*pixelClusterContainer);
+       if (!max_hash_ordered.second) {
+          ATH_MSG_ERROR("Measurements " << m_pixelClusterContainerKey.key() << " not ordered by identifier hash." );
+          return StatusCode::FAILURE;
+       }
+       static_assert( static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType) < max_hash.size());
+       max_hash[static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType) ]=max_hash_ordered.first;
+    }
+    {
+       std::pair< xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*stripClusterContainer);
+       if (!max_hash_ordered.second) {
+          ATH_MSG_ERROR("Measurements " << m_stripClusterContainerKey.key() << " not ordered by identifier hash." );
+          return StatusCode::FAILURE;
+       }
+       static_assert( static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) < max_hash.size());
+       max_hash[static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType)]=max_hash_ordered.first;
+    }
+
+    // @TODO make this condition data
+    std::vector< Acts::GeometryIdentifier > geo_ids;
+    geo_ids.reserve(   max_hash[ static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType)]
+                     + max_hash[static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType)]);
+    gatherGeoIds(*m_ATLASConverterTool, *pixelDetEleColl, geo_ids);
+    gatherGeoIds(*m_ATLASConverterTool, *stripDetEleColl, geo_ids);
+    std::sort( geo_ids.begin(), geo_ids.end());
+
     TrackFindingMeasurements measurements(numPixelMeasurements + numStripMeasurements,
                                           std::max(numPixelMeasurements, numStripMeasurements),
+                                          geo_ids,
                                           !m_trackStatePrinter.empty(),
                                           sourceLinksOutHandle.ptr());
 
@@ -351,8 +403,9 @@ namespace ActsTrk
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-    UncalibSourceLinkAccessor slAccessor;
-    slAccessor.container = &measurements.sourceLinks();
+    UncalibSourceLinkAccessor slAccessor( measurements.sourceLinkVec(),
+                                          measurements.orderedGeoIds(),
+                                          measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
