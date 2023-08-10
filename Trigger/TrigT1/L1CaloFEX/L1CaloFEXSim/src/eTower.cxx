@@ -11,9 +11,6 @@
 
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eFEXCompression.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include <cmath>
 
 
@@ -334,4 +331,3 @@ namespace LVL1 {
 
   
 } // end of namespace bracket
-

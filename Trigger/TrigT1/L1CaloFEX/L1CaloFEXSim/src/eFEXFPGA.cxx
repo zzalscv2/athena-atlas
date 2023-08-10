@@ -15,19 +15,8 @@
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
 #include "L1CaloFEXSim/eFEXtauTOB.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include <vector>
-#include "TH1F.h"
-#include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "SGTools/TestStore.h"
 #include "TrigConfData/L1Menu.h"
 #include <unordered_map>
 
@@ -502,7 +491,6 @@ std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs(std::vector< std::
 
   // This copy seems to be needed - it won't let me pass m_tauTobOjects directly (to do with being a class member?)
   std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort;
-  tobsSort.clear();
   for(auto &j : tauTobObjects){
       tobsSort.push_back(std::move(j));
   }
@@ -607,4 +595,3 @@ void eFEXFPGA::SetIsoWP(std::vector<unsigned int> & CoreEnv, std::vector<unsigne
 }
 
 } // end of namespace bracket
-

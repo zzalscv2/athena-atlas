@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
@@ -30,12 +30,12 @@ void LVL1::eFEXOutputCollection::clear()
   m_emtob.clear();
 }
 
-void LVL1::eFEXOutputCollection::addValue_eg(std::string key, float value)
+void LVL1::eFEXOutputCollection::addValue_eg(const std::string& key, float value)
 {
   m_values_tem_eg.insert(std::make_pair(key, value));
 }
 
-void LVL1::eFEXOutputCollection::addValue_tau(std::string key, float value)
+void LVL1::eFEXOutputCollection::addValue_tau(const std::string& key, float value)
 {
   m_values_tem_tau.insert(std::make_pair(key, value));
 }

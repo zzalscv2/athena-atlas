@@ -6,7 +6,7 @@
  * @file eFEXOutputCollection.h
  * @brief create ntuples output
  *
- * File contains an class which stores the output of eFEX simulation
+ * File contains a class which stores the output of eFEX simulation
  *
  * @author Tong Qiu (tong.qiu@cern.ch)
  * @date 04 Jun 2021
@@ -15,7 +15,6 @@
 #pragma once
 #include "AthenaKernel/CLASS_DEF.h"
 #include <map>
-#include <iostream>
 #include <vector>
 #include <string>
 
@@ -43,7 +42,7 @@ namespace LVL1 {
      * @param value the value
      *
      */
-    void addValue_eg(std::string key, float value);
+    void addValue_eg(const std::string& key, float value);
 
     /// @brief Save all e-gamma values. Use only after finishing defining all e-gamma values for one TOB.
     void fill_eg();
@@ -55,7 +54,7 @@ namespace LVL1 {
      * @param value value
      *
      */
-    void addValue_tau(std::string key, float value);
+    void addValue_tau(const std::string& key, float value);
 
     /// @brief Save all tau values. Use only after finishing defining all tau values for one TOB.
     void fill_tau();

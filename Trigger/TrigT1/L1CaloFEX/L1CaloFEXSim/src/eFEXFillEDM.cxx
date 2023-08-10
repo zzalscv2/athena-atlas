@@ -42,7 +42,7 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
   
-  void eFEXFillEDM::fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFexNum, const std::unique_ptr<eFEXegTOB>& tobObject, bool xTOB)
+  void eFEXFillEDM::fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFexNum, const std::unique_ptr<eFEXegTOB>& tobObject, bool xTOB) const
   {   
     // Create the object and fill it
     xAOD::eFexEMRoI* myEmEDM = new xAOD::eFexEMRoI();    
@@ -70,9 +70,8 @@ namespace LVL1 {
 
   }
 
-  void eFEXFillEDM::fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFexNum, const std::unique_ptr<eFEXtauTOB>& tobObject, bool xTOB)
+  void eFEXFillEDM::fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFexNum, const std::unique_ptr<eFEXtauTOB>& tobObject, bool xTOB) const
   {
-
     // Create the object and fill it:
     xAOD::eFexTauRoI* myTauEDM = new xAOD::eFexTauRoI();
     container->push_back(myTauEDM);

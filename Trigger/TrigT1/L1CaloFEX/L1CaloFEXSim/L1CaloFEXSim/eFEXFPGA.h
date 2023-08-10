@@ -50,7 +50,7 @@ namespace LVL1 {
     virtual StatusCode init(int id, int efexid) override ;
     virtual StatusCode execute(eFEXOutputCollection* inputOutputCollection) override ;
     virtual void reset() override ;
-    virtual int getID() override {return m_id;}
+    virtual int getID() const override {return m_id;}
 
     virtual void SetTowersAndCells_SG( int [][6] ) override ;
     virtual void SetIsoWP(std::vector<unsigned int> &, std::vector<unsigned int> &, unsigned int &, unsigned int &) override ;

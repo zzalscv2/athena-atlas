@@ -13,12 +13,6 @@
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eFEXFPGA.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 namespace LVL1 {
 
@@ -47,7 +41,6 @@ namespace LVL1 {
 
   void eFEXSim::reset()
   {
-
     int rows = sizeof m_eTowersIDs / sizeof m_eTowersIDs[0];
     int cols = sizeof m_eTowersIDs[0] / sizeof m_eTowersIDs[0][0];
 
@@ -159,7 +152,6 @@ std::vector<std::unique_ptr<eFEXegTOB>> eFEXSim::getEmTOBs()
 {
 
   std::vector<std::unique_ptr<eFEXegTOB>> tobsSort;
-  tobsSort.clear();
   //bool first = true;
 
   // concatonate tobs from the fpgas
@@ -189,7 +181,6 @@ std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauTOBs(std::vector<std::ve
 {
 
   std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort;
-  tobsSort.clear();
 
   // concatenate tobs from the fpgas
   // As we're using unique_ptrs here we have to move rather than copy
@@ -273,4 +264,3 @@ void eFEXSim::SetTowersAndCells_SG(int tmp_eTowersIDs_subset[10][18]){ // METHOD
 }
 
 } // end of namespace bracket
-

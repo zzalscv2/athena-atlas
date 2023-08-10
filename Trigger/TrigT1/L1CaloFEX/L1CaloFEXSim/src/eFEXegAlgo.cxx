@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -8,7 +8,6 @@
 //     begin                : 24 02 2020
 //     email                : antonio.jacques.costa@cern.ch ulla.blumenschein@cern.ch tong.qiu@cern.ch
 //  ***************************************************************************/
-#include <iostream>
 #include <vector>
 
 #include "L1CaloFEXSim/eFEXegAlgo.h"
@@ -16,11 +15,6 @@
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eTower.h"
 
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 
 namespace LVL1 {
 
@@ -78,13 +72,12 @@ void eFEXegAlgo::setup(int inputTable[3][3], int efex_id, int fpga_id, int centr
 
 }
 
-void LVL1::eFEXegAlgo::getCoreEMTowerET(unsigned int & et) { 
+void LVL1::eFEXegAlgo::getCoreEMTowerET(unsigned int & et) {
 
   SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
   
   const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1]);
   et = tmpTower->getLayerTotalET(0) + tmpTower->getLayerTotalET(1) + tmpTower->getLayerTotalET(2) + tmpTower->getLayerTotalET(3);
-
 }
 
 void LVL1::eFEXegAlgo::getCoreHADTowerET(unsigned int & et) { 
@@ -93,7 +86,6 @@ void LVL1::eFEXegAlgo::getCoreHADTowerET(unsigned int & et) {
 
   const LVL1::eTower * tmpTower = eTowerContainer->findTower(m_eFEXegAlgoTowerID[1][1]);
   et = tmpTower->getLayerTotalET(4);
-
 }
 
 void LVL1::eFEXegAlgo::getRealPhi(float & phi) {

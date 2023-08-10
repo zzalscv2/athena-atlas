@@ -10,11 +10,6 @@
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eTowerBuilder.h"
-#include "TROOT.h"
-#include "TH1.h"
-#include "TH1F.h"
-#include "TPad.h"
-#include "TCanvas.h"
 #include "L1CaloFEXSim/eSuperCellTowerMapper.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
@@ -844,7 +839,7 @@ int eSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi)
   return;
 }
 
-std::string eSuperCellTowerMapper::DectectorName(const CaloSampling::CaloSample sample){
+std::string eSuperCellTowerMapper::DectectorName(const CaloSampling::CaloSample sample) const {
     std::string sampleName ="";
     switch (sample) {
         case CaloSampling::PreSamplerB: { sampleName = "PreSamplerB";   break; }

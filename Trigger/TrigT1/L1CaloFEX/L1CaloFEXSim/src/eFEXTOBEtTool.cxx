@@ -11,13 +11,7 @@
 #include "L1CaloFEXSim/eFEXTOBEtTool.h"
 #include "L1CaloFEXSim/eFEXegAlgo.h"
 #include "L1CaloFEXSim/eFEXtauAlgo.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/ITHistSvc.h"
 #include <vector>
-#include "StoreGate/ReadHandle.h"
 
 namespace LVL1 {
 
@@ -135,7 +129,7 @@ StatusCode eFEXTOBEtTool::gettauSums(float etaTOB, float phiTOB, int seed, int U
 
 
 // Find eTower ID from a floating point coordinate pair
-unsigned int eFEXTOBEtTool::eTowerID(float eta, float phi) 
+unsigned int eFEXTOBEtTool::eTowerID(float eta, float phi) const
 {
   // Calculate ID by hand from coordinate
   int posneg = (eta >= 0 ? 1 : -1);

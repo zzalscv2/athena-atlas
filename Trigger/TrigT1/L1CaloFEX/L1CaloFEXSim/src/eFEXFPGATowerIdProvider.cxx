@@ -3,10 +3,8 @@
 */
 
 #include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <algorithm>
 #include <string>
 #include "PathResolver/PathResolver.h"
@@ -40,7 +38,7 @@ LVL1::eFEXFPGATowerIdProvider::~eFEXFPGATowerIdProvider()
   m_hascsvfile = false;
 }
 
-StatusCode LVL1::eFEXFPGATowerIdProvider::setAddress(std::string inputaddress) 
+StatusCode LVL1::eFEXFPGATowerIdProvider::setAddress(const std::string& inputaddress) 
 {
   if (inputaddress.empty()) {
     m_hascsvfile = false;

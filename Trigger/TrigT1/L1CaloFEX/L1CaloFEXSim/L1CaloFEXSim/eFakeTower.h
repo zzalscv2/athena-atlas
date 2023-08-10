@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,9 +23,6 @@
 #include "L1CaloFEXToolInterfaces/IeFEXSysSim.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
 #include "L1CaloFEXToolInterfaces/IeFakeTower.h"
 #include "L1CaloFEXSim/eFEXCompression.h"
@@ -128,7 +125,7 @@ namespace LVL1 {
      * @return FPGA index
      * 
      */
-    int getFPGAnumber(int iefex, int ifpga);
+    int getFPGAnumber(int iefex, int ifpga) const;
 
     eTowerContainer* m_eTowerContainer; //the eTowerContainer object for which the Et will be replaced
 

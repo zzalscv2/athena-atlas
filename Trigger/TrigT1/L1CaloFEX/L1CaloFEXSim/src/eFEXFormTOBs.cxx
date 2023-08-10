@@ -31,7 +31,7 @@ StatusCode eFEXFormTOBs::initialize()
   return StatusCode::SUCCESS;
 }
 
-uint32_t eFEXFormTOBs::doFormTauTOBWord(int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int rcore, unsigned int seed, unsigned int und, unsigned int ptMinTopo, unsigned int algoVersion)
+uint32_t eFEXFormTOBs::doFormTauTOBWord(int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int rcore, unsigned int seed, unsigned int und, unsigned int ptMinTopo, unsigned int algoVersion) const
 {
 
   uint32_t tobWord = 0;
@@ -52,21 +52,21 @@ uint32_t eFEXFormTOBs::doFormTauTOBWord(int fpga, int eta, int phi, unsigned int
   return tobWord;
 }
 
-uint32_t eFEXFormTOBs::formTauTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo)
+uint32_t eFEXFormTOBs::formTauTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo) const
 {
   uint32_t tobWord = doFormTauTOBWord(fpga, eta, phi, et, rhad, rcore, seed, und, ptMinTopo, 0);
   ATH_MSG_DEBUG("Tau tobword: " << std::bitset<32>(tobWord) );
   return tobWord;
 }
 
-uint32_t eFEXFormTOBs::formTauBDTTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & bdtCondition, unsigned int & ptMinTopo)
+uint32_t eFEXFormTOBs::formTauBDTTOBWord(int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & bdtCondition, unsigned int & ptMinTopo) const
 {
   uint32_t tobWord = doFormTauTOBWord(fpga, eta, phi, et, rhad, bdtCondition, 0, 0, ptMinTopo, 1);
   ATH_MSG_DEBUG("Tau BDT tobword: " << std::bitset<32>(tobWord) );
   return tobWord;
 }
 
-std::vector<uint32_t>  eFEXFormTOBs::doFormTauxTOBWords(int efexid, int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int rcore, unsigned int seed, unsigned int und, unsigned int ptMinTopo, unsigned int algoVersion)
+std::vector<uint32_t>  eFEXFormTOBs::doFormTauxTOBWords(int efexid, int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int rcore, unsigned int seed, unsigned int und, unsigned int ptMinTopo, unsigned int algoVersion) const
 {
 
   std::vector<uint32_t> tobWords = {0, 0};
@@ -90,7 +90,7 @@ std::vector<uint32_t>  eFEXFormTOBs::doFormTauxTOBWords(int efexid, int fpga, in
   return tobWords;
 }
 
-std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo)
+std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & rcore, unsigned int & seed, unsigned int & und, unsigned int & ptMinTopo) const
 {
   std::vector<uint32_t> tobWords = doFormTauxTOBWords(efexid, fpga, eta, phi, et, rhad, rcore, seed, und, ptMinTopo, 0);
 
@@ -99,7 +99,7 @@ std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, 
   return tobWords;
 }
 
-std::vector<uint32_t>  eFEXFormTOBs::formTauBDTxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & bdtCondition, unsigned int & ptMinTopo, unsigned int & bdtScore)
+std::vector<uint32_t>  eFEXFormTOBs::formTauBDTxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & et, unsigned int & rhad, unsigned int & bdtCondition, unsigned int & ptMinTopo, unsigned int & bdtScore) const
 {
   std::vector<uint32_t> tobWords = doFormTauxTOBWords(efexid, fpga, eta, phi, et, rhad, bdtCondition, 0, 0, ptMinTopo, 1);
   if ( (tobWords[0] > 0) or (tobWords[1] > 0) ) {
@@ -111,7 +111,7 @@ std::vector<uint32_t>  eFEXFormTOBs::formTauBDTxTOBWords(int & efexid, int & fpg
   return tobWords;
 }
 
-uint32_t eFEXFormTOBs::formEmTOBWord(int & fpga, int & eta, int & phi, unsigned int & rhad, unsigned int & wstot, unsigned int & reta, unsigned int & seed, unsigned int & und, unsigned int & et, unsigned int & ptMinTopo)
+uint32_t eFEXFormTOBs::formEmTOBWord(int & fpga, int & eta, int & phi, unsigned int & rhad, unsigned int & wstot, unsigned int & reta, unsigned int & seed, unsigned int & und, unsigned int & et, unsigned int & ptMinTopo) const
 {
   uint32_t tobWord = 0;
 
@@ -134,7 +134,7 @@ uint32_t eFEXFormTOBs::formEmTOBWord(int & fpga, int & eta, int & phi, unsigned 
 }
 
 
-std::vector<uint32_t> eFEXFormTOBs::formEmxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & rhad, unsigned int & wstot, unsigned int & reta, unsigned int & seed, unsigned int & und, unsigned int & et, unsigned int & ptMinTopo)
+std::vector<uint32_t> eFEXFormTOBs::formEmxTOBWords(int & efexid, int & fpga, int & eta, int & phi, unsigned int & rhad, unsigned int & wstot, unsigned int & reta, unsigned int & seed, unsigned int & und, unsigned int & et, unsigned int & ptMinTopo) const
 {
   std::vector<uint32_t> tobWords = {0, 0};
 

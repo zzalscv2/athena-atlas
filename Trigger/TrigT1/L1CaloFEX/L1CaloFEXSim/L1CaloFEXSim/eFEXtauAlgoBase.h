@@ -36,11 +36,10 @@ public:
   virtual void compute() override {};
   virtual bool isCentralTowerSeed() const override;
   virtual bool isBDT() const override { return false; }
-  virtual void setThresholds(std::vector<unsigned int> rHadThreshold,
-                             std::vector<unsigned int> bdtThreshold,
-                             unsigned int etThreshold,
-                             unsigned int etThresholdForRHad) override;
-
+  virtual void setThresholds(const std::vector<unsigned int>& /*rHadThreshold*/,
+                             const std::vector<unsigned int>& /*bdtThreshold*/,
+                             unsigned int /*etThreshold*/,
+                             unsigned int /*etThresholdForRHad*/) override {};
   virtual void getRCore(std::vector<unsigned int> & rCoreVec) const override;
   virtual unsigned int rCoreCore() const override { return 0; }
   virtual unsigned int rCoreEnv() const override { return 0; }

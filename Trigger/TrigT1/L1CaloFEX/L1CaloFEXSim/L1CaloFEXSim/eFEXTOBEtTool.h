@@ -61,7 +61,7 @@ namespace LVL1 {
 
     /** Tool to find eTower identifier from an eta, phi coordinate pair */
     virtual
-    unsigned int eTowerID(float eta, float phi) override;
+    unsigned int eTowerID(float eta, float phi) const override;
 
     /** Tool to find eFEX and FPGA numbers and eta index of a TOB within the FPGA */
     virtual
