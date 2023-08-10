@@ -2,27 +2,11 @@
     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "L1CaloFEXSim/jSuperCellTowerMapper.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
-#include "L1CaloFEXSim/jTower.h"
-#include "L1CaloFEXSim/jTowerContainer.h"
-#include "L1CaloFEXSim/jTowerBuilder.h"
-#include "TROOT.h"
-#include "TH1.h"
-#include "TH1F.h"
-#include "TH1I.h"
-#include "TPad.h"
-#include "TCanvas.h"
-#include "L1CaloFEXSim/jSuperCellTowerMapper.h"
-#include "GaudiKernel/MsgStream.h"
-#include "AthenaKernel/errorcheck.h"
 
-//using Athena_test::URNG;
-//using Athena_test::randi_seed;
-//using Athena_test::randf_seed;
 
 // This is a class which is designed to receive in a list of supercells and a list of jTowers and match them together appropriately.
 
@@ -131,14 +115,7 @@ void jSuperCellTowerMapper::reset(){
         float et = (cell)->energy()/cosh((cell)->eta());
         int prov = (cell)->provenance();
 
-        /*
-        float eta_min = 0.0;//idHelper->eta_min(ID);
-        float eta_max = 0.0;//idHelper->eta_max(ID);
-        float eta0 = 0.0;//idHelper->eta0(ID);
-        float phi_min = 0.0;//idHelper->phi_min(ID);
-        float phi_max = 0.0;//idHelper->phi_max(ID);
-        float phi0 = 0.0;//idHelper->phi0(ID);
-        */
+       
         float eta_min = 0.0;//idHelper->eta_min(ID);
         float eta_max = idHelper->eta_max(ID);
         float eta0 = idHelper->eta0(ID);
@@ -740,10 +717,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             }
             }
 
-            //towereta = (eta_index / 4);
-            //towerphi = phi_index;
-
-            //iCell = (eta_index % 4) + 5;
+           
             iCell = 0; // By definition for jFEX since the jTower only has one big EM section
 
             break;
@@ -878,7 +852,6 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             towereta = eta_index;
             towerphi = phi_index;
 
-            //iCell = 9; // By definition
             iCell = 0; // By definition for jFEX
 
             break;
@@ -916,7 +889,11 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
         // Region 1 has 4 supercells in 2.5 < eta < 3.3, and 16 supercells in phi.  Supercells are 0.2 x 0.2.  [posneg +-2] // JFEX IMPORTANT
 
         // VERIFIED THAT I CAN SEE THESE MC IN THE MC ON 21/02/2021
+        towereta = eta_index;
+        towerphi = phi_index;
 
+        layer = 1; // By definition for jFEX
+        iCell = 1; //for all cases HEC0, HEC1, HEC2, HEC3
         switch(region) {
         case 0: {
 
@@ -924,25 +901,8 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             towerphi = phi_index;
 
             layer = 1; // By definition for jFEX
-
-            switch (sample) { // only one supercell per layer in all regions for HECX
-            case CaloSampling::HEC0: {
-                iCell = 1;/*iCell = 10;*/ break;
-            }
-            case CaloSampling::HEC1: {
-                iCell = 1;/*iCell = 11;*/ break;
-            }
-            case CaloSampling::HEC2: {
-                iCell = 1;/*iCell = 12;*/ break;
-            }
-            case CaloSampling::HEC3: {
-                iCell = 1;/*iCell = 13;*/ break;
-            }
-            default: {
-                ATH_MSG_DEBUG("CaloSampling::HECX -> invalid sample for assigning iCell value! " << sample << " (Under investigation) ");
-                break;
-            }
-            }
+            iCell = 1; //for all cases HEC0, HEC1, HEC2, HEC3
+            
             break;
 
         }
@@ -952,25 +912,8 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             towerphi = phi_index;
 
             layer = 1; // By definition for jFEX
-
-            switch (sample) { // only one supercell per layer in all regions for HECX
-            case CaloSampling::HEC0: {
-                iCell = 1;/*iCell = 10;*/ break;
-            }
-            case CaloSampling::HEC1: {
-                iCell = 1;/*iCell = 11;*/ break;
-            }
-            case CaloSampling::HEC2: {
-                iCell = 1;/*iCell = 12;*/ break;
-            }
-            case CaloSampling::HEC3: {
-                iCell = 1;/*iCell = 13;*/ break;
-            }
-            default: {
-                ATH_MSG_DEBUG("CaloSampling::HECX -> invalid sample for assigning iCell value! " << sample << " (Under investigation) ");
-                break;
-            }
-            }
+            iCell = 1; //for all cases HEC0, HEC1, HEC2, HEC3
+            
             break;
 
         }
@@ -1191,7 +1134,7 @@ int jSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi) c
 }
 
 
-std::string jSuperCellTowerMapper::DectectorName(const CaloSampling::CaloSample sample) const {
+std::string jSuperCellTowerMapper::DetectorName(const CaloSampling::CaloSample sample) const {
     std::string sampleName ="";
     switch (sample) {
         case CaloSampling::PreSamplerB: { sampleName = "PreSamplerB";   break; }
