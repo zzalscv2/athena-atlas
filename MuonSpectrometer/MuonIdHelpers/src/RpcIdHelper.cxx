@@ -8,6 +8,16 @@ RpcIdHelper::RpcIdHelper() : MuonIdHelper("RpcIdHelper") {}
 // Initialize dictionary
 int RpcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     int status = 0;
+    constexpr int detHashSize = sizeof(m_detectorElement_hashes) / sizeof(unsigned int);
+    constexpr int modHashSize = sizeof(m_module_hashes) / sizeof(unsigned int);
+    for (int h = 0; h < detHashSize ; ++h) {
+        unsigned int* e = &(m_detectorElement_hashes[0][0][0][0][0])+ h;
+        (*e) = -1;
+    }
+    for (int h = 0; h < modHashSize ; ++h) {
+        unsigned int* e = &(m_module_hashes[0][0][0][0])+ h;
+        (*e) = -1;
+    }
 
     // Check whether this helper should be reinitialized
     if (!reinitialize(dict_mgr)) {
