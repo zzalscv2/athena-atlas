@@ -5,6 +5,7 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+ComponentAccumulator.debugMode = 'trackCA'
 
 
 if __name__ == '__main__':
@@ -43,31 +44,24 @@ if __name__ == '__main__':
 
   acc1 = LArEMBSensitiveDetectorCfg(ConfigFlags)
   tool1 = cfg.popToolsAndMerge(acc1)
-  #cfg.setPrivateTools(tool1)
   
   acc2 = LArEMECSensitiveDetectorCfg(ConfigFlags)
   tool2 = cfg.popToolsAndMerge(acc2)
-  #cfg.setPrivateTools(tool2)
-
 
   acc3 = LArFCALSensitiveDetectorCfg(ConfigFlags)
   tool3 = cfg.popToolsAndMerge(acc3)
-  #cfg.setPrivateTools(tool3)
   
   acc4 = LArHECSensitiveDetectorCfg(ConfigFlags)
   tool4 = cfg.popToolsAndMerge(acc4)
-  #cfg.setPrivateTools(tool4)
 
   acc5 = LArDeadSensitiveDetectorToolCfg(ConfigFlags)
   tool5 = cfg.popToolsAndMerge(acc5)
-  #cfg.setPrivateTools(toolDeadSensitiveDetector)
 
   toolActiveSensitiveDetector = LArActiveSensitiveDetectorToolCfg(ConfigFlags)
-  #cfg.setPrivateTools(toolActiveSensitiveDetector)
+  cfg.popToolsAndMerge(toolActiveSensitiveDetector)
 
   toolInactiveSensitiveDetector = LArInactiveSensitiveDetectorToolCfg(ConfigFlags)
-  #cfg.setPrivateTools(toolInactiveSensitiveDetector)
-
+  cfg.popToolsAndMerge(toolInactiveSensitiveDetector)
 
   cfg.printConfig(withDetails=True, summariseProps = True)
   ConfigFlags.dump()
@@ -77,3 +71,4 @@ if __name__ == '__main__':
   f.close()
 
   print("-----------------finished----------------------")
+
