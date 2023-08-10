@@ -23,15 +23,15 @@ namespace PixelChargeCalib{
     }
     ///Return Time-over-threshold given charge Q
     float ToT(float Q) const{
-      if ((C + Q) != 0.0) {
+      if ((C + Q) != 0.0f) {
         return A * (E + Q) / (C + Q);
       }
       return 0.f;
     }
     //return Charge, given time-over-Threshold
     float Q(float tot) const{
-      if (std::fabs(A) != 0.0 && std::fabs(tot / A - 1.0) != 0.0) {
-        return  (C * tot / A - E) / (1.0 - tot / A);
+      if (std::fabs(A) != 0.0f && std::fabs(tot / A - 1.f) != 0.0f) {
+        return  (C * tot / A - E) / (1.f - tot / A);
       }
       return 0.f;
     }
