@@ -121,7 +121,7 @@ int main( int argc, char* argv[] ) {
   // Check if we received a file name:
   if ( argc < 2 ) {
     ANA_MSG_ERROR( "No file name received!" );
-    ANA_MSG_ERROR( "  Usage: " << APP_NAME << " [xAOD file name] [maxEvents] [isData=0/1 isAtlfast=0/1] [NoSyst=0/1] [Debug=0/1/2] [ConfigFile=<cfile.conf>] [PRWFile=<prwfile.root>] [autoconfigPRW=0/1]" );
+    ANA_MSG_ERROR( "  Usage: " << APP_NAME << " [xAOD file name] [maxEvents] [isData=0/1 isAtlfast=0/1] [NoSyst=0/1] [Debug=0/1/2] [ConfigFile=<cfile.conf>] [PRWFile=<prwfile.root>] [autoconfigPRW=0/1] [commonPRWFile=0/1]" );
     return 1;
   }
 
@@ -129,6 +129,7 @@ int main( int argc, char* argv[] ) {
   /// READ CONFIG ------------
 
   int autoconfigPRW = 1;
+  int commonPRWFile = 1;
   int isData = -1;
   int isAtlfast = -1;
   int NoSyst = 1;
@@ -159,6 +160,7 @@ int main( int argc, char* argv[] ) {
 
     ANA_MSG_INFO( "===== Processing key " << TString(key) << " with value " << TString(val) );
     if (strcmp(key, "autoconfigPRW") == 0) autoconfigPRW = atoi(val);
+    if (strcmp(key, "commonPRWFile") == 0) commonPRWFile = atoi(val);
     if (strcmp(key, "isData") == 0) isData = atoi(val);
     if (strcmp(key, "isAtlfast") == 0) isAtlfast = atoi(val);
     if (strcmp(key, "NoSyst") == 0) NoSyst = atoi(val);
@@ -174,7 +176,7 @@ int main( int argc, char* argv[] ) {
 
   if (isData < 0 || isAtlfast < 0) {
     ANA_MSG_ERROR( "One of the flags isData or isAtlfast was not set! Must provide isData or isAtlfast." );
-    ANA_MSG_ERROR( "  Usage: " << APP_NAME << " [xAOD file name] [maxEvents] [isData=0/1 isAtlfast=0/1] [NoSyst=0/1] [Debug=0/1/2] [ConfigFile=<cfile.conf>] [PRWFile=<prwfile.root>] [autoconfigPRW=0/1]");
+    ANA_MSG_ERROR( "  Usage: " << APP_NAME << " [xAOD file name] [maxEvents] [isData=0/1 isAtlfast=0/1] [NoSyst=0/1] [Debug=0/1/2] [ConfigFile=<cfile.conf>] [PRWFile=<prwfile.root>] [autoconfigPRW=0/1] [commonPRWFile=0/1]");
     return 10;
   }
   ST::ISUSYObjDef_xAODTool::DataSource datasource = (isData ? ST::ISUSYObjDef_xAODTool::Data : (isAtlfast ? ST::ISUSYObjDef_xAODTool::AtlfastII : ST::ISUSYObjDef_xAODTool::FullSim));
@@ -269,6 +271,8 @@ int main( int argc, char* argv[] ) {
   if (!isData) {
     if ( autoconfigPRW == 1 ) {
       ANA_CHECK( objTool.setBoolProperty("AutoconfigurePRWTool", true) );
+      if ( commonPRWFile == 1 )
+        ANA_CHECK( objTool.setBoolProperty("PRWUseCommonMCFiles", true) );
     } else {
       if (prw_file == "DUMMY") {
         prw_conf.push_back("dev/SUSYTools/merged_prw_mc16a_latest.root");

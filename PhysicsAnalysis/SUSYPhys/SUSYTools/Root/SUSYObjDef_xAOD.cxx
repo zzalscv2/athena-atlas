@@ -151,6 +151,12 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_autoconfigPRWRtags(""),
     m_mcCampaign(""),
     m_mcChannel(-99),
+    m_useCommonPRWFiles(false),
+    m_commonPRWFileMC20a(""),
+    m_commonPRWFileMC20d(""),
+    m_commonPRWFileMC20e(""),
+    m_commonPRWFileMC21a(""),
+    m_commonPRWFileMC23a(""),
     m_prwDataSF(-99.),
     m_prwDataSF_UP(-99.),
     m_prwDataSF_DW(-99.),
@@ -613,6 +619,12 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PRWDataScaleFactorUP", m_prwDataSF_UP);
   declareProperty( "PRWDataScaleFactorDOWN", m_prwDataSF_DW);
   declareProperty( "PRWUseRunDependentPrescaleWeight", m_runDepPrescaleWeightPRW);
+  declareProperty( "PRWUseCommonMCFiles", m_useCommonPRWFiles);
+  declareProperty( "PRWCommonFileMC20a", m_commonPRWFileMC20a);
+  declareProperty( "PRWCommonFileMC20d", m_commonPRWFileMC20d);
+  declareProperty( "PRWCommonFileMC20e", m_commonPRWFileMC20e);
+  declareProperty( "PRWCommonFileMC21a", m_commonPRWFileMC21a);
+  declareProperty( "PRWCommonFileMC23a", m_commonPRWFileMC23a);
   //LargeR uncertainties config, as from https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertainties2016PrerecLargeR#Understanding_which_configuratio
   declareProperty( "JetLargeRuncConfig",  m_fatJetUncConfig );
   declareProperty( "JetLargeRuncVars",  m_fatJetUncVars );
@@ -947,6 +959,8 @@ StatusCode SUSYObjDef_xAOD::initialize() {
 
 StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfilesDir, const std::string& PRWfileName, bool usePathResolver, bool RPVLLmode, bool Combinedmode, const std::string& /*  HFFilter */ ) {
 
+  // this will contain the path of the PRW file on /cvmfs which needs to be reverse engineered from the DSID and MC campaign
+  // the path(s) will be added to m_prwConfFiles which is later used in the configuration of the CP PRW tool
   std::string prwConfigFile("");
 
   if ( !isData() && m_autoconfigPRW ) {
@@ -1050,17 +1064,43 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
 #endif
     }
 
-    // Retrieve the input file
-    int DSID_INT = static_cast<int>(dsid);
-    prwConfigFile += "DSID" + std::to_string(DSID_INT/1000) + "xxx/pileup_" + mcCampaignMD + "_dsid" + std::to_string(DSID_INT) + "_" + simType + ".root";
+    // If requested set the PRW file to common PRW file of the processed MC campaign
+    if (m_useCommonPRWFiles) {
+      ATH_MSG_INFO( "autoconfigurePileupRWTool(): retrieving the common PRW file for MC campaign: " << mcCampaignMD );
+      if (mcCampaignMD == "mc20a") {
+        prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC20a);
+      }
+      else if (mcCampaignMD == "mc20d") {
+        prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC20d);
+      }
+      else if (mcCampaignMD == "mc20e") {
+        prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC20e);
+      }
+      else if (mcCampaignMD == "mc21a") {
+        prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC21a);
+      }
+      else if (mcCampaignMD == "mc23a") {
+        prwConfigFile = PathResolverFindCalibFile(m_commonPRWFileMC23a);
+      }
+      else {
+        ATH_MSG_ERROR( "autoconfigurePileupRWTool(): no common PRW file known for MC campaign: " << mcCampaignMD);
+        return StatusCode::FAILURE;
+      }
+    }
+    // Otherwise try finding the dedicated PRW file on /cvmfs
+    else {
+      // Retrieve the input file
+      int DSID_INT = static_cast<int>(dsid);
+      prwConfigFile += "DSID" + std::to_string(DSID_INT/1000) + "xxx/pileup_" + mcCampaignMD + "_dsid" + std::to_string(DSID_INT) + "_" + simType + ".root";
 
-    if (RPVLLmode) prwConfigFile = TString(prwConfigFile).ReplaceAll(".root","_rpvll.root").Data();
+      if (RPVLLmode) prwConfigFile = TString(prwConfigFile).ReplaceAll(".root","_rpvll.root").Data();
 
-    // PRW file specified by user
-    // e.g. DSID700xxx/pileup_mc20a_dsid700015_FS.root
-    if (!PRWfileName.empty()) {
+      // PRW file specified by user
+      // e.g. DSID700xxx/pileup_mc20a_dsid700015_FS.root
+      if (!PRWfileName.empty()) {
       prwConfigFile = PRWfilesDir + PRWfileName;
       ATH_MSG_INFO( "autoconfigurePileupRWTool(): PRW file was specifed by user: " << prwConfigFile.data() );
+      }
     }
 
     m_prwConfFiles.clear();
@@ -1071,12 +1111,18 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
         ATH_MSG_ERROR( "autoconfigurePileupRWTool(): combined mode currently onlys supported for mc20! Impossible to autoconfigure PRW. Aborting." );
         return StatusCode::FAILURE;
       }
-      prwConfigFile = TString(prwConfigFile).ReplaceAll(mcCampaignMD,"mc20a").Data();
-      m_prwConfFiles.push_back( prwConfigFile );
-      prwConfigFile = TString(prwConfigFile).ReplaceAll("mc20a","mc20d").Data();
-      m_prwConfFiles.push_back( prwConfigFile );
-      prwConfigFile = TString(prwConfigFile).ReplaceAll("mc20d","mc20e").Data();
-      m_prwConfFiles.push_back( prwConfigFile );
+      // When using the common PRW files we can directly add them
+      if (m_useCommonPRWFiles) {
+        m_prwConfFiles.push_back( m_commonPRWFileMC20a );
+        m_prwConfFiles.push_back( m_commonPRWFileMC20d );
+        m_prwConfFiles.push_back( m_commonPRWFileMC20e );
+      }
+      // Otherwise we have to replace the mc campaign in the name accordingly
+      else {
+        m_prwConfFiles.emplace_back( TString(prwConfigFile).ReplaceAll(mcCampaignMD, "mc20a").Data() );
+        m_prwConfFiles.emplace_back( TString(prwConfigFile).ReplaceAll(mcCampaignMD, "mc20d").Data() );
+        m_prwConfFiles.emplace_back( TString(prwConfigFile).ReplaceAll(mcCampaignMD, "mc20e").Data() );
+      }
       m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2017File) );
       m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2018File) );
     } else {
@@ -1091,6 +1137,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     }
     prwConfigFile = usePathResolver ? PathResolverFindCalibFile(prwConfigFile) : prwConfigFile;
 
+    // Test if file exists (i.e. was requested already to /cvmfs if the DSID-specific PRW files are used) and is usable
     TFile testF(prwConfigFile.data(),"read");
     if (testF.IsZombie()) {
       ATH_MSG_ERROR( "autoconfigurePileupRWTool(): file not found -> " << prwConfigFile.data() << " ! Impossible to autoconfigure PRW. Aborting." );
@@ -1582,6 +1629,11 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
   configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc20a:r13167,mc20d:r13144,mc20e:r13145,mc21a:r13752_r13829,mc23a:r14622");
+  configFromFile(m_commonPRWFileMC20a, "PRW.commonPRWFileMC20a", rEnv, "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root");
+  configFromFile(m_commonPRWFileMC20d, "PRW.commonPRWFileMC20d", rEnv, "PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root");
+  configFromFile(m_commonPRWFileMC20e, "PRW.commonPRWFileMC20e", rEnv, "PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root");
+  configFromFile(m_commonPRWFileMC21a, "PRW.commonPRWFileMC21a", rEnv, "PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root");
+  configFromFile(m_commonPRWFileMC23a, "PRW.commonPRWFileMC23a", rEnv, "PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
 

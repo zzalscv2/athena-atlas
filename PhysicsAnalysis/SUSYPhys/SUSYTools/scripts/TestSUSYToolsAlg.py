@@ -119,13 +119,12 @@ config.SUSYTools.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
 config.SUSYTools.PRWLumiCalcFiles = []
 config.SUSYTools.AutoconfigurePRWTool = True
+config.SUSYTools.PRWUseCommonMCFiles = True
 if options.flav == "PHYSLITE": 
    print("Running on PHYSLITE : ", inputFile)
    STconfig_lite = str(config.SUSYTools.ConfigFile).replace(".conf","_LITE.conf")
    config.SUSYTools.ConfigFile = STconfig_lite
    config.SUSYTools.IsPHYSLITE = True
-if options.type != 'data18' :
-    mcChannel = 410470
 
 # set datasource if AtlasFastII or 3
 if options.AF:
