@@ -90,12 +90,13 @@ int LVL1::jFEXForwardJetsAlgo::getEt(unsigned int TTID) {
         return -999;
     }
     
-    int TT_Et = -999;
-    if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
-        TT_Et = m_map_Etvalues[TTID][0];
+    auto itr = m_map_Etvalues.find(TTID);
+    
+    if( itr == m_map_Etvalues.end()) {
+        return -999;
     }    
 
-    return TT_Et;
+    return itr->second[0];
 }
 
 std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJetsTowerIDLists() {
@@ -144,22 +145,36 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     continue;
                 }
                 bool iAmJet = false;
+                bool bool_isLM = false;
+                bool bool_condCorr2 = false;
+                bool bool_isLMabove = false;
+                bool bool_condCorr = false;        
                 
-                //Know wich consition should satisfy
+                //Know which condition should satisfy
                 unsigned int elemCorr  = elementsCorr(myTTIDKey);
                 unsigned int elemCorr2 = elementsCorr2(myTTIDKey);
 
                 if(elemCorr == 0 and elemCorr2 == 0){
-                    iAmJet = isLM(myTTIDKey);
+                    bool_isLM = isLM(myTTIDKey);
+                    iAmJet = bool_isLM;
                 }
                 else if(elemCorr == 0 and elemCorr2 > 0){
-                    iAmJet = isLM(myTTIDKey) and condCorr2(myTTIDKey);
+                    bool_isLM = isLM(myTTIDKey);
+                    bool_condCorr2 = condCorr2(myTTIDKey);
+                    iAmJet = bool_isLM and bool_condCorr2;
                 }
                 else if(elemCorr > 0 and elemCorr2 == 0){
-                    iAmJet = isLM(myTTIDKey) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+                    bool_isLM = isLM(myTTIDKey);
+                    bool_isLMabove = isLMabove(myTTIDKey);
+                    bool_condCorr = condCorr(myTTIDKey);
+                    iAmJet = bool_isLM or (bool_isLMabove and bool_condCorr);
                 }
                 else if(elemCorr > 0 and elemCorr2 > 0){
-                    iAmJet = (isLM(myTTIDKey) and condCorr2(myTTIDKey)) or (isLMabove(myTTIDKey) and condCorr(myTTIDKey));
+                    bool_isLM = isLM(myTTIDKey);
+                    bool_condCorr2 = condCorr2(myTTIDKey);
+                    bool_isLMabove = isLMabove(myTTIDKey);
+                    bool_condCorr = condCorr(myTTIDKey);
+                    iAmJet = (bool_isLM and bool_condCorr2) or (bool_isLMabove and bool_condCorr);                   
                 }
                 
                 if(iAmJet){
@@ -233,7 +248,6 @@ int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
         ATH_MSG_FATAL("Could not find TT" << TTID << " in Jet seed file.");
         return 0;
     }
-    
     int summedEt = 0;
     for(const auto& seedTT : it_seed_map->second){
         summedEt += getEt(seedTT);  
@@ -304,7 +318,6 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
     if( (it_seed_map->second).size() == 0){
         return false;
     }
-    
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if the displaced TT is a seed
         return isLM(Gtt);       
@@ -340,11 +353,11 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
     
     int centralEt = getEt(TTID);
     int centralSeed = SumEtSeed(TTID);
-    
     for (const auto& Gtt : it_seed_map->second ){
         //Checking if central Et is always strictly greater than the previous TT Et 
         int tmpEt = getEt(Gtt);
-        if( !(centralEt > tmpEt || centralSeed == SumEtSeed(Gtt) ) ){
+        int tmpSeedEt = SumEtSeed(Gtt);
+        if( !(centralEt > tmpEt && centralSeed >= tmpSeedEt ) ){
             return false;
         }
     }
