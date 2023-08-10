@@ -6,21 +6,21 @@
 #ifndef JSUPERCELLTOWERMAPPER_H
 #define JSUPERCELLTOWERMAPPER_H
 
-// STL
-#include <string>
+
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjSuperCellTowerMapper.h"
+//
 #include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/jTower.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
-class CaloIdManager;
+// STL
+#include <string>
+#include <memory>
+
 
 namespace LVL1 {
 
@@ -52,7 +52,7 @@ class jSuperCellTowerMapper: public AthAlgTool, virtual public IjSuperCellTowerM
   virtual int FindTowerIDForSuperCell(int towereta, int towerphi) const override;
   virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit,float eta_min, float eta_max, float eta0, float phi_min, float phi_max, float phi0,bool cellValid=true) const override;
   
-  std::string DectectorName(const CaloSampling::CaloSample sample) const;
+  std::string DetectorName(const CaloSampling::CaloSample sample) const;
 
 };
 
