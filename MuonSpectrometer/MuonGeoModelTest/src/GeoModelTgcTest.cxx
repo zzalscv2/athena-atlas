@@ -115,10 +115,10 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
         for (int layer = 1 ; layer <= readoutEle->numberOfLayers(measPhi); ++layer){
             const Identifier id = idHelper.channelID(readoutEle->identify(),layer, measPhi,1);
             const Amg::Transform3D layerTransform = readoutEle->localToGlobalTransf(id);
-            m_layCenter.push_back(layerTransform.translation());
-            m_layTransColX.push_back(layerTransform.linear()*Amg::Vector3D::UnitX());
-            m_layTransColY.push_back(layerTransform.linear()*Amg::Vector3D::UnitY());
-            m_layTransColZ.push_back(layerTransform.linear()*Amg::Vector3D::UnitZ());
+            m_layCenter.push_back(Amg::Vector3D(layerTransform.translation()));
+            m_layTransColX.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitX()));
+            m_layTransColY.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitY()));
+            m_layTransColZ.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitZ()));
             m_layMeasPhi.push_back(measPhi);
             m_layNumber.push_back(layer);
         }    
