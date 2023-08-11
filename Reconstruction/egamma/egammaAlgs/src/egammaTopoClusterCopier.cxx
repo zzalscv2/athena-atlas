@@ -23,8 +23,8 @@ StatusCode egammaTopoClusterCopier::initialize() {
   ATH_CHECK(m_inputTopoCollection.initialize());
   ATH_CHECK(m_outputTopoCollection.initialize());
 
-m_doForwardClusters = !m_outputFwdTopoCollection.empty();
-ATH_CHECK(m_outputFwdTopoCollection.initialize(m_doForwardClusters));
+  m_doForwardClusters = !m_outputFwdTopoCollection.empty();
+  ATH_CHECK(m_outputFwdTopoCollection.initialize(m_doForwardClusters));
 
   ATH_CHECK(m_outputTopoCollectionShallow.initialize());
 

@@ -395,50 +395,18 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
     electron->setCharge(trackParticle->charge());
   }
   // Set DeltaEta, DeltaPhi , DeltaPhiRescaled
-  std::array<double, 4> deltaEta = egRec->deltaEta();
-  std::array<double, 4> deltaPhi = egRec->deltaPhi();
-  std::array<double, 4> deltaPhiRescaled = egRec->deltaPhiRescaled();
-
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaEta[0]),
-                                   xAOD::EgammaParameters::deltaEta0);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhi[0]),
-                                   xAOD::EgammaParameters::deltaPhi0);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[0]),
-                                   xAOD::EgammaParameters::deltaPhiRescaled0);
-
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaEta[1]),
-                                   xAOD::EgammaParameters::deltaEta1);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhi[1]),
-                                   xAOD::EgammaParameters::deltaPhi1);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[1]),
-                                   xAOD::EgammaParameters::deltaPhiRescaled1);
+  electron->setTrackCaloMatchValues(
+    egRec->deltaEta(), 
+    egRec->deltaPhi(), 
+    egRec->deltaPhiRescaled(),
+    egRec->deltaPhiLast()
+  );
 
   static const SG::AuxElement::Accessor<float> pear("deltaEta1PearDistortion");
-
-  const float pearShape = m_isTruth ? 0.0
-                                    : m_deltaEta1Pear->getDeltaEtaDistortion(
-                                        electron->caloCluster()->etaBE(2),
-                                        electron->caloCluster()->phiBE(2));
-
-  pear(*electron) = pearShape;
-
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaEta[2]),
-                                   xAOD::EgammaParameters::deltaEta2);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhi[2]),
-                                   xAOD::EgammaParameters::deltaPhi2);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[2]),
-                                   xAOD::EgammaParameters::deltaPhiRescaled2);
-
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaEta[3]),
-                                   xAOD::EgammaParameters::deltaEta3);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhi[3]),
-                                   xAOD::EgammaParameters::deltaPhi3);
-  electron->setTrackCaloMatchValue(static_cast<float>(deltaPhiRescaled[3]),
-                                   xAOD::EgammaParameters::deltaPhiRescaled3);
-
-  float deltaPhiLast = static_cast<float>(egRec->deltaPhiLast());
-  electron->setTrackCaloMatchValue(
-    deltaPhiLast, xAOD::EgammaParameters::deltaPhiFromLastMeasurement);
+  pear(*electron) = m_isTruth ?  0.0 : m_deltaEta1Pear->getDeltaEtaDistortion(
+    electron->caloCluster()->etaBE(2),
+    electron->caloCluster()->phiBE(2)
+  );
 
   return true;
 }
