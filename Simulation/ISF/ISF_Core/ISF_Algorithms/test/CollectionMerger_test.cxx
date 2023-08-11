@@ -71,7 +71,7 @@ class CollectionMerger_test : public ::testing::Test {
       ASSERT_TRUE( m_alg->mergeCollections(std::forward<Args>(args)...).isSuccess() );
     }
 
-    ISF::CollectionMerger* m_alg;
+    ISF::CollectionMerger* m_alg = nullptr;
     StoreGateSvc* m_sg{};
 };  // CollectionMerger_test fixture
 
