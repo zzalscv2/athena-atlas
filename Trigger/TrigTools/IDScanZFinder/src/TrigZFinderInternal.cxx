@@ -47,7 +47,7 @@ TrigZFinderInternal::TrigZFinderInternal( const std::string& type, const std::st
   m_weightThreshold      = 0;
 
 
-  /// to allow valiable size layers
+  /// to allow variable size layers
   m_IdScan_MaxNumLayers     = 20; // dphiEC depends on this value !!! 19 without IBL, 20 with IBL!!
   m_IdScan_LastBrlLayer     = 7;  // dphiBrl depends on this value
 
