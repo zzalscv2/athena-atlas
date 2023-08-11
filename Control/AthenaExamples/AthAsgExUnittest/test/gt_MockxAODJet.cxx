@@ -11,11 +11,6 @@ using ::testing::Return;
 using ::testing::_;
 using ::testing::SetArgReferee;
 
-// Suppress a false positive from gtest.
-#if __GNUC__ >= 12
-# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#endif
-
 
 namespace Athena_test {
 
