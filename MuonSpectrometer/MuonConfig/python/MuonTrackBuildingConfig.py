@@ -378,7 +378,7 @@ def MuonTrackSteeringCfg(flags, name="MuonTrackSteering", **kwargs):
     result.merge(acc) 
     
     kwargs.setdefault("HoleRecoveryTool",       muon_eo_recovery_tool)
-    kwargs.setdefault("SegSeedQCut", 1)
+    kwargs.setdefault("SegSeedQCut", 2 if flags.Beam.Type != BeamType.Cosmics else 1)
     kwargs.setdefault("Seg2ndQCut", 1)
    
     if "TrackBuilderTool" not in kwargs:
