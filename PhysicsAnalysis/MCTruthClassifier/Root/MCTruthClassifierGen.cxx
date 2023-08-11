@@ -755,7 +755,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
     bool isWboson = false;
     bool skipnext = false;
 
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles() - 1; ++ipOut) {
+    for (unsigned int ipOut = 0; ipOut + 1 < partOriVert->nOutgoingParticles(); ++ipOut) {
       const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
       if (!theDaug) continue;
       const xAOD::TruthParticle* theNextDaug = nullptr;
@@ -1180,7 +1180,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles() - 1; ipOut++) {
+    for (unsigned int ipOut = 0; ipOut + 1 < partOriVert->nOutgoingParticles(); ipOut++) {
       if (skipnext) {
         skipnext = false;
         continue;
@@ -1513,7 +1513,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles() - 1; ipOut++) {
+    for (unsigned int ipOut = 0; ipOut + 1 < partOriVert->nOutgoingParticles(); ipOut++) {
       if (skipnext) {
         skipnext = false;
         continue;
@@ -2022,7 +2022,7 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     bool isZboson = false;
     bool isWboson = false;
     bool skipnext = false;
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles() - 1; ipOut++) {
+    for (unsigned int ipOut = 0; ipOut + 1 < partOriVert->nOutgoingParticles(); ipOut++) {
       if (skipnext) {
         skipnext = false;
         continue;
@@ -2365,7 +2365,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
     bool isWboson = false;
     bool skipnext = false;
 
-    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles() - 1; ++ipOut) {
+    for (unsigned int ipOut = 0; ipOut + 1 < partOriVert->nOutgoingParticles(); ++ipOut) {
       const xAOD::TruthParticle* theDaug = partOriVert->outgoingParticle(ipOut);
       if (!theDaug) continue;
       const xAOD::TruthParticle* theNextDaug = nullptr;
