@@ -31,17 +31,16 @@
 #include <ROOT/RNTupleModel.hxx>
 #include <ROOT/RNTuple.hxx>
 #include <ROOT/REntry.hxx>
-#include <algorithm>
-
-#include "TInterpreter.h"
+// for version checks
 #include <TROOT.h>
+
+#include <algorithm>
 
 using RNTupleModel = ROOT::Experimental::RNTupleModel;
 using RNTupleReader = ROOT::Experimental::RNTupleReader;
 using REntry = ROOT::Experimental::REntry;
 
 using std::string;
-
 using namespace pool;
 
 static UCharDbArrayAthena  s_char_Blob ATLAS_THREAD_SAFE;
@@ -63,28 +62,6 @@ namespace {
       }
    } EHI;
    ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
-} // namespace
-
-namespace {
-   /* Parse header files with typedefs to builtin C++ types (not classes) because genreflex does not
-      allow them in rootmap files and ROOT does not know were to find them on its own
-      Hopefully a Temporary hack
-   */
-   void parseTypedefHeaders()
-   {
-      /*  typedef / header location */
-      static const std::set<std::pair<const char*, const char*> >  typedefLoader ATLAS_THREAD_SAFE {
-         {"xAOD::MissingETBase::Types::bitmask_t", "#include <xAODMissingET/versions/MissingETCompositionBase.h>" },
-         {"SG::sgkey_t", "#include <CxxUtils/sgkey_t.h>" }
-      };
-
-      DbPrint log("APR-RNTuple");
-      for( auto &el : typedefLoader ) {
-         log << DbPrintLvl::Info << "**** parsing header (for typedefs): " << el.second << DbPrint::endmsg;
-         gInterpreter->ProcessLine( el.second );
-      }
-   }
-
 } // namespace
 
 
@@ -114,16 +91,14 @@ RNTupleContainer::RNTupleContainer()
    : m_type(nullptr),
      m_dbH(POOL_StorageType), m_rootDb(nullptr),
      m_ioBytes(0), m_isDirty(false)
-{
-   // Enable typedef resolving
-   static std::once_flag onceFlag;
-   std::call_once( onceFlag, parseTypedefHeaders );
-}
+{ }
+
 
 /// Standard destructor
 RNTupleContainer::~RNTupleContainer() {
    close();
 }
+
 
 /// Ask if a given shape is supported
 DbStatus RNTupleContainer::isShapeSupported(const DbTypeInfo* typ) const  {
