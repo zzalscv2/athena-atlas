@@ -88,6 +88,7 @@ namespace EL
   const std::string Job::optGridCpuTimePerEvent = "nc_cpuTimePerEvent";
   const std::string Job::optGridMaxWalltime = "nc_maxWalltime";
   const std::string Job::optGridAvoidVP = "nc_avoidVP";
+  const std::string Job::optGridReporting = "nc_gridReporting";
   const std::string Job::optBatchSharedFileSystem = "nc_sharedFileSystem";
   const std::string Job::optBatchSlurmExtraConfigLines = "nc_SlurmExtraConfig";
   const std::string Job::optBatchSlurmWrapperExec = "nc_SlurmWrapperExec";

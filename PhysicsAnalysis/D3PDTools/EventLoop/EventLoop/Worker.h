@@ -244,14 +244,6 @@ namespace EL
   public:
     ::StatusCode gridExecute (const std::string& sampleName);
 
-
-  private:
-    void gridNotifyJobFinished(uint64_t eventsProcessed,
-                           const std::vector<std::string>& fileList);
-
-  private:
-    void gridAbort();
-
   private:    
     enum GridErrorCodes {
       EC_FAIL = 220,

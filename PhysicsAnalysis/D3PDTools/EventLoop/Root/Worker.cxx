@@ -387,6 +387,8 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::TEventModule> ());
     m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ());
     m_modules.push_back (std::make_unique<Detail::StopwatchModule> ());
+    if (metaData()->castBool (Job::optGridReporting, false))
+      m_modules.push_back (std::make_unique<Detail::GridReportingModule>());
     if (metaData()->castBool (Job::optAlgorithmTimer, false))
       m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
     m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
@@ -977,6 +979,7 @@ namespace EL
 
     const std::string location = ".";
 
+    mo->setBool (Job::optGridReporting, true);
     setMetaData (mo);
     setOutputHist (location);
     setSegmentName ("output");
@@ -1003,7 +1006,6 @@ namespace EL
 
     setJobConfig (std::move (*jobConfig));
 
-    addModule (std::make_unique<Detail::GridReportingModule> ());
     ANA_CHECK (initialize());
 
     std::vector<std::string> fileList;
@@ -1041,28 +1043,8 @@ namespace EL
     ANA_MSG_INFO ("Loop finished.");
     ANA_MSG_INFO ("Read " << nEvents << " events in " << nFiles << " files.");
 
-    gridNotifyJobFinished(eventsProcessed(), fileList);
-
     ANA_MSG_INFO ("EventLoop Grid worker finished");
     ANA_MSG_INFO ("Saving output");
     return ::StatusCode::SUCCESS;
-  }
-
-  void Worker::gridNotifyJobFinished(uint64_t eventsProcessed,
-                                     const std::vector<std::string>& fileList) {
-    // createJobSummary
-    std::ofstream summaryfile("../AthSummary.txt");
-    if (summaryfile.is_open()) {
-      unsigned int nFiles = fileList.size();
-      summaryfile << "Files read: " << nFiles << std::endl;
-      for (unsigned int i = 0; i < nFiles; i++) {
-        summaryfile << "  " << fileList.at(i) << std::endl;
-      }
-      summaryfile << "Events Read:    " << eventsProcessed << std::endl;
-      summaryfile.close();
-    }
-    else {
-      //cout << "Failed to write summary file.\n";
-    }
   }
 }
