@@ -188,11 +188,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         gFEXInputs.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
         gFEXInputs.gSuperCellTowerMapperTool.SCellMasking = not flags.Input.isMC
 
-        gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
-        
-        # The line below is a patch for (ATR-28066) - NEEDS to be cleaned up!
-        gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
-        
+        gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')    
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
         acc.addEventAlgo(gFEXInputs)
         acc.addEventAlgo(gFEX)
