@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -124,7 +124,7 @@ CaloIdMgrDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     CaloIdManager* caloIdMgr = new CaloIdManager();
 
     // Pass a pointer to the container to the Persistency service by reference.
-    pObj = StoreGateSvc::asStorable(caloIdMgr);
+    pObj = SG::asStorable(caloIdMgr);
 
     // get DetectorStore service
     StoreGateSvc * detStore = 0;
