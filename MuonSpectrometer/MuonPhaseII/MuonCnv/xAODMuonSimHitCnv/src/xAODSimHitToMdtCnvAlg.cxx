@@ -55,8 +55,12 @@ StatusCode xAODSimHitToMdtCnvAlg::execute(const EventContext& ctx) const {
                 hep_mc<<"HEP mc link invalid";
             } else {
                const HepMC::GenParticle& mc_part{*hit->genParticleLink()};
+#ifdef HEPMC3
                hep_mc<<"Valid HEP mc link: "<<mc_part.pid()<<", ";
-               hep_mc<<"Four momentum: pt:"<<mc_part.momentum().pt()*toGeV<<" [GeV], ";
+#else
+               hep_mc<<"Valid HEP mc link: "<<mc_part.pdg_id()<<", ";
+#endif
+               hep_mc<<"Four momentum: pt:"<<mc_part.momentum().perp()*toGeV<<" [GeV], ";
                hep_mc<<"eta: "<<mc_part.momentum().eta()<<", ";
                hep_mc<<"phi: "<<mc_part.momentum().phi()<<", ";
             }
