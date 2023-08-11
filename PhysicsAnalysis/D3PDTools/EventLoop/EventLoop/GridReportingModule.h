@@ -10,6 +10,7 @@
 #define EVENT_LOOP_GRID__GRID_REPORTING_MODULE_H
 
 #include <EventLoop/Module.h>
+#include <vector>
 
 namespace EL
 {
@@ -21,11 +22,19 @@ namespace EL
     class GridReportingModule final : public Module
     {
       /// the panda error code for bad input files
-    public:
       static constexpr int EC_BADINPUT = 223;
 
+      /// the list of files we processed
+      std::vector<std::string> m_files;
+
+      /// the number of events we processed
+      unsigned m_eventsProcessed = 0;
+
     public:
-      virtual void reportInputFailure (ModuleData& data);
+      virtual ::StatusCode onNewInputFile (ModuleData& data) override;
+      virtual ::StatusCode onExecute (ModuleData& data) override;
+      virtual ::StatusCode postFileClose (ModuleData& data) override;
+      virtual void reportInputFailure (ModuleData& data) override;
     };
   }
 }
