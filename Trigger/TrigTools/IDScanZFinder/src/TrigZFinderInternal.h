@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// filename: TrigZFinder.h
+// filename: TrigZFinderInternal.h
 // 
 // author: Nikos Konstantinidis <n.konstantinidis@ucl.ac.uk>
 //         
@@ -94,7 +94,6 @@ protected:  // data members
     bool   m_forcePhiBinSize = false;     // respect the config of phi bin even if below reasonable threshold
     double m_usedphiBinSize;      // the size of the phi slices 
     double m_ROIphiWidth;         // the phi width of the ROI 
-    double m_usedROIphiWidth;     // the phi width of the ROI 
     double m_minZBinSize;         // z-histo bin size: m_minZBinSize+|etaRoI|*m_zBinSizeEtaCoeff (to account for worse resolution in high eta)
     double m_zBinSizeEtaCoeff;    // z-histo bin size: m_minZBinSize+|etaRoI|*m_zBinSizeEtaCoeff (to account for worse resolution in high eta)
 
@@ -131,6 +130,7 @@ protected:  // data members
     int m_tripletMode;
     double m_tripletDZ;
     double m_tripletDK;
+    double m_halfTripletDK; // replaces m_tripletDK internally to avoid unnecessary multiplication by 2 in curvature calculation, without changing the interface
     double m_tripletDP;
 
     int    m_maxLayer;

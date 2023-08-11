@@ -1,8 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
-*/
-/*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,7 +11,7 @@
 This package contains the AlgTool IDScanZfinder that determines the z-position of the primary pp interaction
 before any track reconstruction. Full details about the algorithm used can be found in:
 
-https://twiki.cern.ch/twiki/bin/view/Atlas/IDScanHowTo
+https://twiki.cern.ch/twiki/bin/view/AtlasComputing/IDScanHowTo
 
 Some details of the parameters and how they are set can be found in:
 
@@ -37,9 +34,9 @@ http://indico.cern.ch/getFile.py/access?contribId=1&resId=0&materialId=slides&co
    - nVertexSeparation : minimum number of zbins that any two output vertices should by separated by ( default 0, set to 5 for e & mu slices by IDScan )
    - VrtxMixing : if any two output peaks are too close, use this value as a weight to average the two z-positions ( experimental feature, default 0 )
    - PreferCentralZ : If two peaks have the same height, report the one with lowest |z| first ( default false, set true for e & mu slices by IDScan )
-   - TrustSPProvider : Use all the spacepoints returned by the OnlineSpacePointTool, without apply cuts based on RoI phi width ( default true )
+   - TrustSPProvider : Use all the spacepoints returned by the OnlineSpacePointTool, without applying cuts based on RoI phi width ( default true )
    - FullScanMode : full-scan mode ( default false, used for full-scan slices )
-   - TripletMode : integer to chose triplet mode; if 0 ( default ), do not use the triplets; if 1, triplet mode is only for confirmation of pairs; if 2, each triplet contributes to the zhistos ( slower, possibly more resistant to pileup )
+   - TripletMode : integer to choose triplet mode; if 0 ( default ), do not use the triplets; if 1, triplet mode is only for confirmation of pairs; if 2, each triplet contributes to the zhistos ( slower, possibly more resistant to pileup )
    - TripletDZ, TripletDK, TripletDP : Cuts applied in confirming/creating triplets ( default values 25., 0.005, 0.05 )
 
 

@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// filename: IDScanZFinder.h
+// filename: IDScanZFinderInternal.h
 // 
 // author: Nikos Konstantinidis <n.konstantinidis@ucl.ac.uk>
 //         
@@ -148,6 +148,7 @@ protected:  // data members
   int m_tripletMode;
   double m_tripletDZ;
   double m_tripletDK;
+  double m_halfTripletDK; // replaces m_tripletDK internally to avoid unnecessary multiplication by 2 in curvature calculation, without changing the interface
   double m_tripletDP;
   
   /// to apply a hreshold to the found vertex candidates
@@ -198,6 +199,7 @@ IDScanZFinderInternal<SpacePoint>::IDScanZFinderInternal( const std::string& typ
   m_tripletMode      = 0     ;
   m_tripletDZ        = 25.   ;
   m_tripletDK        = 0.005 ;  
+  m_halfTripletDK    = 0.5*m_tripletDK;
   m_tripletDP        = 0.05  ;
   
   //  m_applyWeightThreshold = false;
@@ -223,6 +225,8 @@ IDScanZFinderInternal<SpacePoint>::IDScanZFinderInternal( const std::string& typ
 template<class SpacePoint>
 void IDScanZFinderInternal<SpacePoint>::initializeInternal(long maxLayers, long lastBarrel )
 {
+  m_halfTripletDK = 0.5*m_tripletDK;
+  
   m_IdScan_MaxNumLayers = maxLayers; 
   m_IdScan_LastBrlLayer = lastBarrel; 
   
@@ -370,7 +374,7 @@ template<class SpacePoint> long IDScanZFinderInternal<SpacePoint>::fillVectors (
   else { 
     // If we trust that all the SPs are properly input, we determine the RoI phi width
     //  using the SPs themselves.
-    //  If the RoI phi range is wider than pi) we keep everything as usual.
+    //  If the RoI phi range is wider than pi, we keep everything as usual.
     if ( m_trustSPprovider  &&  m_usedROIphiWidth < M_PI )
       {
   	double roiPhiPosMin( 9.9), roiPhiPosMax(0);
@@ -449,6 +453,7 @@ template<class SpacePoint> long IDScanZFinderInternal<SpacePoint>::fillVectors (
       /// DOES NOT span the phi=pi boundary
       for(long i=0; i<nSPs; ++i, ++SpItr) 
   	{
+      if (m_pixOnly && !(*SpItr)->isPixel()) continue;
   	  double phi2 = (*SpItr)->phi() - roiPhiMin;
   
   	  if ( phi2>=0 && phi2<dphi ) { 
@@ -466,6 +471,7 @@ template<class SpacePoint> long IDScanZFinderInternal<SpacePoint>::fillVectors (
       /// DOES span the phi=pi boundary
       for(long i=0; i<nSPs; ++i, ++SpItr) 
   	{
+      if (m_pixOnly && !(*SpItr)->isPixel()) continue;
   	  double phi2 = (*SpItr)->phi() - roiPhiMin;
   	  if( phi2<0.0) phi2+=2*M_PI;
   
@@ -582,7 +588,7 @@ std::vector<typename IDScanZFinderInternal<SpacePoint>::vertex>* IDScanZFinderIn
   for ( unsigned int sliceIndex = 0; sliceIndex < m_NumPhiSlices; sliceIndex++ )
     {
       allSlices[ sliceIndex ] = new PhiSlice( sliceIndex, ZBinSize, m_invPhiSliceSize,
-					      m_tripletDZ, m_tripletDK, m_tripletDP, zMin, zMax,
+					      m_tripletDZ, m_halfTripletDK, m_tripletDP, zMin, zMax,
 					      m_IdScan_MaxNumLayers, m_IdScan_LastBrlLayer );
     }
     
