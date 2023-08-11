@@ -96,7 +96,7 @@ class InDetTrigSequence:
 
         from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import TrigSCTRawDataProviderCfg
         acc.merge(TrigSCTRawDataProviderCfg(self.__flags,suffix=signature,RoIs=self.__rois))
-      elif self.__inView:
+      else:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         loadRDOs = [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ),
                     ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
@@ -119,6 +119,10 @@ class InDetTrigSequence:
       if self.__flags.Input.Format == Format.BS:
         from TrigInDetConfig.TrigInDetConfig import TRTDataProviderCfg
         acc.merge(TRTDataProviderCfg(self.__flags, self.__rois, self.__signature))
+      else:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        loadRDOs = [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+        acc.merge(SGInputLoaderCfg(self.__flags, Load=loadRDOs))
 
       from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
       acc.merge(TrigTRTRIOMakerCfg(self.__flags, RoIs = self.__rois))
