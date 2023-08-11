@@ -265,7 +265,7 @@ void PhiSlice::GetHistogram( std::vector<long>*    HitHistogram,
 						if ( TripletMode )
 						{
 							//Calculate some extra values
-							double kValue = 2.0 * ( outerPointPhi - innerPointPhi ) * invDeltaRho;
+							double kValue = ( outerPointPhi - innerPointPhi ) * invDeltaRho;
 							double pValue = ( outerPointPhi * innerPointRho - innerPointPhi * outerPointRho ) * invDeltaRho;
 
 
@@ -429,7 +429,7 @@ int PhiSlice::FindTriplet( int OuterFilledLayer, int OuterPointIndex,
 			}
 
 			//Calculate the k value using the outer and triplet points
-			double tripletKValue = 2.0 * ( tripletPointPhi - outerPointPhi ) * invDeltaRho;
+			double tripletKValue = ( tripletPointPhi - outerPointPhi ) * invDeltaRho;
 			if ( fabs( tripletKValue - CurrentKValue ) > m_kTolerance )
 			{
 				continue;

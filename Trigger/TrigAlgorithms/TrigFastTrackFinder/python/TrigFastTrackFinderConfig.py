@@ -49,6 +49,7 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
             montool.defineHistogram('TIME_Total',                path='EXPERT',type='TH1F',title="Total time (ms)",             xbins = 200, xmin=0.0, xmax=2000.0)
             montool.defineHistogram('TIME_PattReco',             path='EXPERT',type='TH1F',title="Pure PattReco time (ms)",     xbins = 200, xmin=0.0, xmax=1000.0)
             montool.defineHistogram('TIME_SpacePointConversion', path='EXPERT',type='TH1F',title="SP Conversion time (ms)",     xbins = 100, xmin=0.0, xmax=100.0)
+            montool.defineHistogram('TIME_ZFinder',              path='EXPERT',type='TH1F',title="ZFinder time (ms)",           xbins = 200, xmin=0.0, xmax=1000.0)
             montool.defineHistogram('TIME_Triplets',             path='EXPERT',type='TH1F',title="Triplets Making time (ms)",   xbins = 200, xmin=0.0, xmax=1000.0)
             montool.defineHistogram('TIME_CmbTrack',             path='EXPERT',type='TH1F',title="Combined Tracking time (ms)", xbins = 200, xmin=0.0, xmax=1000.0)
             montool.defineHistogram('TIME_TrackFitter',          path='EXPERT',type='TH1F',title="Track Fitter time (ms)",      xbins = 200, xmin=0.0, xmax=200.0)
@@ -223,18 +224,26 @@ def TrigZFinderCfg(flags : AthConfigFlags, numberingTool) -> ComponentAccumulato
         'TripletDZ'     : 1,
         'PhiBinSize'    : 0.1,
         'UseOnlyPixels' : True,
-        'MaxLayer'      : 3
+        'MaxLayer'      : 3,
+        'NumberOfPeaks' : 3
     }
-    
-    acc.setPrivateTools(
-        CompFactory.TrigZFinder( name="TrigZFinder",
-                                 NumberOfPeaks = 3,
-                                 LayerNumberTool=numberingTool,
-                                 FullScanMode = True, #TODO: know this from the RoI anyway - should set for every event
-                                 **zfargs
-                                )
-    )
-    return acc                
+  elif flags.Tracking.ActiveConfig.name == "jetSuper" :
+    zfargs = {
+        'TripletMode'   : 1,
+        'TripletDZ'     : 10,
+        'UseOnlyPixels' : True,
+        'MaxLayer'      : 3,  # Uses only barrel pixels
+        'NumberOfPeaks' : 1
+    }
+  
+  acc.setPrivateTools(
+      CompFactory.TrigZFinder( name="TrigZFinder",
+                               LayerNumberTool=numberingTool,
+                               FullScanMode = True, #TODO: know this from the RoI anyway - should set for every event
+                               **zfargs
+                              )
+  )
+  return acc
 
 
 def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, RoIs: str, inputTracksName:str = None) -> ComponentAccumulator:
@@ -301,9 +310,9 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   )
   theTrigInDetTrackFitter = acc.getPublicTool("TrigInDetTrackFitter_"+remapped_type)
   
-  if (config.doZFinder):
+  if (flags.Tracking.ActiveConfig.doZFinder):
     theTrigZFinder = acc.popToolsAndMerge(TrigZFinderCfg(flags,numberingTool))
-      
+  
   if not config.doZFinderOnly:
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
@@ -385,7 +394,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   if flags.Tracking.ActiveConfig.doZFinder:
     ftf.doZFinderOnly = config.doZFinderOnly
     ftf.trigZFinder = theTrigZFinder
-    ftf.zVertexResolution = 1
+    ftf.zVertexResolution = 20 if flags.Tracking.ActiveConfig.name == "jetSuper" else 1
     ftf.doFastZVertexSeeding = True
 
   if inputTracksName:

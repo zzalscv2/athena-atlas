@@ -15,8 +15,8 @@
 
 #include <stdexcept>
 
-/// NB: This was 47 for Run 2, but wit the addition of the IBL it should be 32 
-///     It was kept at 47 for all Run 2 and mogration to MT, but for Run 3 we 
+/// NB: This was 47 for Run 2, but with the addition of the IBL it should be 32 
+///     It was kept at 47 for all Run 2 and migration to MT, but for Run 3 we 
 ///     really want it changed to be 32  
 const double TrigTrackSelector::s_default_radius = 47;
 
@@ -30,8 +30,8 @@ TrigTrackSelector::TrigTrackSelector( TrackFilter* selector, double radius, int 
 
 
 /// recursive function to identify whether a particle comes from some other 
-/// ancestor particle at any point in it's history - checks it's parents and 
-/// then function calls itself to check their parents etc, until it either 
+/// ancestor particle at any point in its history - checks its parents and 
+/// then function calls itself to check their parents etc., until it either 
 /// finds the pdgid it is looking for, or it has no more ancestors
 /// if it finds an appropriate ancestor it returns the pointer to it, 
 /// otherwise it returns a nullptr 
@@ -259,7 +259,7 @@ bool TrigTrackSelector::selectTrack( const Rec::TrackParticle* track ) {
 
       // Check number of hits
       // NB: a spacepoint is two offline "hits", so a pixel spacepoint is really 
-      // 2 "hits" and an offline SCT "hit" is really a 1D cluster, so two intersetcting
+      // 2 "hits" and an offline SCT "hit" is really a 1D cluster, so two intersecting
       // stereo clusters making a spacepoint are two "hits"
       const Trk::TrackSummary *summary = track->trackSummary();
       int nBlayerHits = 2*summary->get(Trk::numberOfBLayerHits); 
