@@ -350,6 +350,7 @@ private:
   std::vector<TrigInDetTriplet> m_triplets;
 
   float m_zMinus, m_zPlus, m_minCoord, m_maxCoord;
+  float m_zMinus, m_zPlus, m_minCoord, m_maxCoord, m_zMinusEndcap, m_zPlusEndcap;
 
   int m_nInner, m_nOuter;
   std::vector<int> m_innerMarkers, m_outerMarkers;

@@ -96,12 +96,14 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty( "MinHits",               m_minHits = 5,"Minimum number of hits needed to perform tracking"  );
 
   //** Zfinder mode
-  declareProperty( "doZFinder",            m_doZFinder = true,"Use fast ZFinder to find z of primary vertices");
-  declareProperty( "doZFinderOnly",        m_doZFinderOnly = false,"stop processing after ZFinder - no tracking performed");
-  declareProperty( "VertexSeededMode",     m_vertexSeededMode = false); //** NOT USED Obsolete? ATR-24242
-  declareProperty( "doFastZVertexSeeding", m_doFastZVseeding = true,"Use ZFinder vertex information to filter seeds");
-  declareProperty( "zVertexResolution",    m_tcs.m_zvError = 10.0," Half-width (mm) in z of z region used to filter seeds when doFastZVertexSeeding enabled" );
-  declareProperty( "StoreZFinderVertices", m_storeZFinderVertices = false ); //** NOT USED - to be implemented ATR-24242
+  declareProperty( "doZFinder",               m_doZFinder = true,"Use fast ZFinder to find z of primary vertices");
+  declareProperty( "doZFinderOnly",           m_doZFinderOnly = false,"stop processing after ZFinder - no tracking performed");
+  declareProperty( "VertexSeededMode",        m_vertexSeededMode = false); //** NOT USED Obsolete? ATR-24242
+  declareProperty( "doFastZVertexSeeding",    m_doFastZVseeding = true,"Use ZFinder vertex information to filter seeds");
+  declareProperty( "zVertexResolution",       m_tcs.m_zvError = 10.0," Half-width (mm) in z of z region used to filter seeds when doFastZVertexSeeding enabled" );
+  declareProperty( "zVertexResolutionEndcap", m_tcs.m_zvErrorEndcap = -1," Half-width (mm) in z of region used to filter seeds when doFastZVertexSeeding enabled, for endcap pixels; set to m_tcs.m_zvError later if left negative" );
+  declareProperty( "StoreZFinderVertices",    m_storeZFinderVertices = false ); //** NOT USED - to be implemented ATR-24242
+
 
   /** SeedMaker */
   declareProperty("useNewLayerNumberScheme", m_useNewLayerNumberScheme = false,"Use LayerNumberTool for layer numbers");
@@ -220,6 +222,9 @@ StatusCode TrigFastTrackFinder::initialize() {
 
   if (m_doZFinder) {
     ATH_CHECK(m_trigZFinder.retrieve());
+    // If m_tcs.m_zvErrorEndcap has negative default value, it was not set by user,
+    // so set it to the same value as m_tcs.m_zvError
+    if (m_tcs.m_zvErrorEndcap < 0) m_tcs.m_zvErrorEndcap = m_tcs.m_zvError;
   } else {
     m_trigZFinder.disable();
   }
@@ -344,6 +349,7 @@ StatusCode TrigFastTrackFinder::initialize() {
   ATH_MSG_DEBUG("	m_doZFinderOnly            : " <<  m_doZFinderOnly      );
   ATH_MSG_DEBUG("	m_doFastZVseeding          : " <<  m_doFastZVseeding    );
   ATH_MSG_DEBUG("	m_tcs.m_zvError            : " <<  m_tcs.m_zvError      );
+  ATH_MSG_DEBUG("	m_tcs.m_zvErrorEndcap      : " <<  m_tcs.m_zvErrorEndcap    );
   ATH_MSG_DEBUG("	m_storeZFinderVertices     : " <<  m_storeZFinderVertices   );
   ATH_MSG_DEBUG("	m_tripletMinPtFrac         : " <<  m_tripletMinPtFrac   );
   ATH_MSG_DEBUG("	m_pTmin                    : " <<  m_pTmin              );

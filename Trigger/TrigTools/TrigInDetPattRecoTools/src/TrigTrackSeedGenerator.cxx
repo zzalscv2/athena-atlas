@@ -112,6 +112,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 
   m_zMinus = roiDescriptor->zedMinus() - m_zTol;
   m_zPlus  = roiDescriptor->zedPlus() + m_zTol;
+  m_zPlusEndcap = m_zMinus;
+  m_zMinusEndcap = m_zPlus;
   
   m_triplets.clear();
 
@@ -261,6 +263,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 
 	    m_zMinus = zVertex - m_settings.m_zvError;
 	    m_zPlus = zVertex + m_settings.m_zvError;
+      m_zPlusEndcap = zVertex + m_settings.m_zvErrorEndcap;
+      m_zMinusEndcap = zVertex - m_settings.m_zvErrorEndcap;
 
 	    for(int layerJ=0;layerJ<nLayers;layerJ++) {//loop over other layers
 
@@ -356,21 +360,21 @@ bool TrigTrackSeedGenerator::validateLayerPairNew(int layerI, int layerJ, float 
     if(refCoordJ>0) {//positive EC
       if(refCoordJ > zm) {//outer layer
 	
-	if(zm < m_zMinus) return false;
-	if(zm == m_zPlus) return false;
+	if(zm < m_zMinusEndcap) return false;
+	if(zm == m_zPlusEndcap) return false;
 	float zMax = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	if( m_zMinus > zMax) return false;
+	if( m_zMinusEndcap > zMax) return false;
 	if (rm < minB) {
 	  float zMin = (zm*minB-rm*refCoordJ)/(minB-rm);
-	  if(m_zPlus<zMin) return false;
+	  if(m_zPlusEndcap<zMin) return false;
 	}
 
-	m_minCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_maxCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlus);
+	m_minCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_maxCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
 
-	if(zm <= m_zPlus) m_maxCoord = maxB;
+	if(zm <= m_zPlusEndcap) m_maxCoord = maxB;
 	
 	if(m_minCoord > maxB) return false;
 	if(m_maxCoord < minB) return false;
@@ -379,35 +383,35 @@ bool TrigTrackSeedGenerator::validateLayerPairNew(int layerI, int layerJ, float 
       else {//inner layer
         if(minB == rm) return false;
 	float zMax = (zm*minB-rm*refCoordJ)/(minB-rm);
-	if( m_zMinus > zMax) return false;
+	if( m_zMinusEndcap > zMax) return false;
 	if (rm>maxB) {// otherwise, intersect of line from maxB through middle sp will be on the wrong side of the layer
 	  float zMin = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	  if(m_zPlus<zMin) return false;
+	  if(m_zPlusEndcap<zMin) return false;
 	}
-	if(zm == m_zPlus || zm == m_zMinus) return false;
-	m_minCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_maxCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinus);
+	if(zm == m_zPlusEndcap || zm == m_zMinusEndcap) return false;
+	m_minCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_maxCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
       }
     }
     else {//negative EC
       if(refCoordJ < zm) {//outer layer
 
-	if(zm > m_zPlus) return false;
-	if(zm == m_zMinus) return false;
+	if(zm > m_zPlusEndcap) return false;
+	if(zm == m_zMinusEndcap) return false;
 	float zMin = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	if( m_zPlus < zMin) return false;
+	if( m_zPlusEndcap < zMin) return false;
 	if (rm<minB) {// otherwise, intersect of line from minB through middle sp will be on the wrong side of the layer
 	  float zMax = (zm*minB-rm*refCoordJ)/(minB-rm);
-	  if(m_zMinus>zMax) return false;
+	  if(m_zMinusEndcap>zMax) return false;
 	}
 
-	m_minCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_maxCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinus);
-	if(zm > m_zMinus) m_maxCoord = maxB;	
+	m_minCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_maxCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
+	if(zm > m_zMinusEndcap) m_maxCoord = maxB;	
 	if(m_minCoord > maxB) return false;
 	if(m_maxCoord < minB) return false;
 
@@ -415,16 +419,16 @@ bool TrigTrackSeedGenerator::validateLayerPairNew(int layerI, int layerJ, float 
       else {//inner layer
         if(minB == rm) return false;
 	float zMin = (zm*minB-rm*refCoordJ)/(minB-rm);
-	if( m_zPlus < zMin) return false;
+	if( m_zPlusEndcap < zMin) return false;
 	if (rm>maxB) {// otherwise, intersect of line from maxB through middle sp will be on the wrong side of the layer
 	  float zMax = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	  if(m_zMinus>zMax) return false;
+	  if(m_zMinusEndcap>zMax) return false;
 	}
-	if(zm == m_zPlus || zm == m_zMinus) return false;
-	m_minCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_maxCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlus);
+	if(zm == m_zPlusEndcap || zm == m_zMinusEndcap) return false;
+	m_minCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_maxCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
 
       }
     }

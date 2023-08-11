@@ -53,6 +53,7 @@ int main()
   tcs.m_tripletDoPPS = true;
   tcs.m_tripletDtCut      = 10.0;
   tcs.m_zvError = 10.0;
+  tcs.m_zvErrorEndcap = tcs.m_zvError;
   tcs.m_maxBarrelPix    = -1;
   tcs.m_minEndcapPix    = 8;
   tcs.m_maxEndcapPix    = -1;
