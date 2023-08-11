@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,12 +16,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #define BOOST_TEST_MAIN
 #define BOOST_TEST_MODULE TEST_CORACOOL
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-
 #include <boost/test/unit_test.hpp>
-
-#pragma GCC diagnostic pop
 
 #include "CoolApplication/Application.h"
 #include "CoolKernel/IDatabaseSvc.h"
