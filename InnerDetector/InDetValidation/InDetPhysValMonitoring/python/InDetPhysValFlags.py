@@ -16,6 +16,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doValidateElectronMatchedTracks", False )
     icf.addFlag("doValidateLargeD0Tracks", False )
     icf.addFlag("doValidateMergedLargeD0Tracks", False )
+    icf.addFlag("doValidateLowPtRoITracks",False)
     icf.addFlag("doRecoOnly", False )
     icf.addFlag("doPhysValOutput", False )
     icf.addFlag("doExpertOutput", False )
