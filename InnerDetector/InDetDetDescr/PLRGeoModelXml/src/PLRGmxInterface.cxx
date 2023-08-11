@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PLRGmxInterface.h"
@@ -20,10 +20,7 @@ namespace InDetDD
 PLRGmxInterface::PLRGmxInterface(PixelDetectorManager *detectorManager,
                                  SiCommonItems *commonItems,
                                  WaferTree *moduleTree)
-  : PixelGmxInterface(detectorManager, commonItems, moduleTree),
-    m_detectorManager(detectorManager),
-    m_commonItems(commonItems),
-    m_moduleTree(moduleTree)
+  : PixelGmxInterface(detectorManager, commonItems, moduleTree)
 {}
 
 int PLRGmxInterface::sensorId(std::map<std::string, int> &index) const
