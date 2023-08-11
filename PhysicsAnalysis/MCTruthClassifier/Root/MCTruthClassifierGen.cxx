@@ -2677,21 +2677,9 @@ MCTruthClassifier::isHardScatVrtx(const xAOD::TruthVertex* pVert)
 }
 
 //---------------------------------------------------------------------------------
-bool
-MCTruthClassifier::isHadron(const xAOD::TruthParticle* thePart)
-{
-  //---------------------------------------------------------------------------------
-
-  bool isPartHadron = false;
-  if (thePart != nullptr) {
-    int pdg = thePart->pdgId();
-    isPartHadron = MC::isHadron(pdg);
-    //--exclude protons from beam
-    if (pdg == 2212 && thePart->status() == 3)
-      isPartHadron = false;
-  }
-  return isPartHadron;
-}
+bool MCTruthClassifier::isHadron(const xAOD::TruthParticle* thePart) {  
+  return (thePart && MC::isHadron(thePart) && !(thePart->pdg_id() == 2212 && thePart->status() == 4));
+} 
 
 //---------------------------------------------------------------------------------
 const xAOD::TruthParticle*
