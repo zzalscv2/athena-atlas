@@ -132,6 +132,10 @@ template<class T> inline bool isLepton(const T& p){return isLepton(p->pdg_id());
 template<> inline bool isLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 18; }
 template<> inline bool isLepton(const DecodedPID& p){ return isLepton(p.pid()); }
 
+template<class T> inline bool isSMLepton(const T& p){return isSMLepton(p->pdg_id());}
+template<> inline bool isSMLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 16; }
+template<> inline bool isSMLepton(const DecodedPID& p){ return isSMLepton(p.pid()); }
+
 /// APID: the fourth generation leptons are leptons.
 template<class T> inline bool isChLepton(const T& p){return isChLepton(p->pdg_id());}
 template<> inline bool isChLepton(const int& p){ auto sp = std::abs(p); return sp >= 11 && sp <= 18 && sp%2 == 1; }
