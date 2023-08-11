@@ -111,29 +111,29 @@ class ItemDef:
 
         # combined signals for heavy ion runs
         PHYS_VZDC_A_VZDC_C         = ZDC_comb0
-        PHYS_1TO4ZDC_A_VZDC_C      = ZDC_comb1
-        PHYS_VZDC_A_1TO4ZDC_C      = ZDC_comb2
-        PHYS_1TO4ZDC_A_1TO4ZDC_C   = ZDC_comb3
-        PHYS_5ZDC_A_VZDC_C         = ZDC_comb4
-        PHYS_VZDC_A_5ZDC_C         = ZDC_comb5
-        PHYS_ZDC_1TO4XOR5          = ZDC_comb6
-        PHYS_5ZDC_A_5ZDC_C         = ZDC_comb7
+        PHYS_1TO4ZDC_A_VZDC_C      = ZDC_comb4
+        PHYS_VZDC_A_1TO4ZDC_C      = ZDC_comb6
+        PHYS_1TO4ZDC_A_1TO4ZDC_C   = ZDC_comb1
+        PHYS_5ZDC_A_VZDC_C         = ZDC_comb5
+        PHYS_VZDC_A_5ZDC_C         = ZDC_comb7
+        PHYS_ZDC_1TO4XOR5          = ZDC_comb2
+        PHYS_5ZDC_A_5ZDC_C         = ZDC_comb3
 
-        PHYS_ZDC_A_VZDC_C          = ZDC_comb1 | ZDC_comb4
-        PHYS_VZDC_A_ZDC_C          = ZDC_comb2 | ZDC_comb5
-        PHYS_ZDC_XOR4              = ZDC_comb1 | ZDC_comb2
-        PHYS_ZDC_5XOR              = d.ZDC_2 & Not(d.ZDC_1)
+        PHYS_ZDC_A_VZDC_C          = d.ZDC_2 & Not(d.ZDC_1)
+        PHYS_VZDC_A_ZDC_C          = d.ZDC_2 & d.ZDC_1
+        PHYS_ZDC_XOR4              = d.ZDC_2 & Not(d.ZDC_0)
+        PHYS_ZDC_5XOR              = d.ZDC_2 & d.ZDC_0
 
         #ATR-26984 refine ZDC_A and ZDC_C logic
-        ZDC_A     = (d.ZDC_0 & d.ZDC_1) | (d.ZDC_0 & Not(d.ZDC_2)) | (d.ZDC_2 & Not(d.ZDC_0))
-        ZDC_C     = d.ZDC_1 | (d.ZDC_0 & d.ZDC_2)
+        ZDC_A     = ( Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 ) ) | ( d.ZDC_2 & Not(d.ZDC_1) )
+        ZDC_C     = d.ZDC_1 | (d.ZDC_0 & Not(d.ZDC_2) )
 
-        ZDC_A_C   = (d.ZDC_2 & d.ZDC_1) | (d.ZDC_1 & d.ZDC_0)
+        ZDC_A_C   = Not(d.ZDC_2) & ( d.ZDC_1 | d.ZDC_0 )
         ZDC_AND   = ZDC_A_C
         VZDC_A_C  = ZDC_comb0
-        ZDC_XOR   = (d.ZDC_0 & Not(d.ZDC_1)) | (d.ZDC_2 & Not(d.ZDC_1)) | (Not(d.ZDC_2) & d.ZDC_1 & Not(d.ZDC_0))
+        ZDC_XOR   = d.ZDC_2
         VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
-        ZDC_OR = Not(ZDC_comb0)
+        ZDCOR = Not(ZDC_comb0)
 
         # ZDC configuration for LHCf+ZDC special run in Sep. 2022
         # rename existing ZDC configuration to match request in ATR-26051
@@ -1349,10 +1349,10 @@ class ItemDef:
         MenuItem('L1_ZDC_A_C_VjTE10_EMPTY'         ).setLogic( ZDC_A_C & Not(d.jTE10) & cosmiccond)
         MenuItem('L1_ZDC_XOR_VTE10' ).setLogic(ZDC_XOR  & Not(d.TE10) & physcond)
         MenuItem('L1_ZDC_XOR_VjTE10' ).setLogic(ZDC_XOR  & Not(d.jTE10) & physcond)
-        MenuItem('L1_ZDC_OR_VTE200_UNPAIRED_ISO'         ).setLogic( ZDC_OR & Not(d.TE200) & unpaired_isocond)
-        MenuItem('L1_MBTS_1_ZDC_OR_VTE200_UNPAIRED_ISO'         ).setLogic( MBTS_1 & ZDC_OR & Not(d.TE200) & unpaired_isocond)
-        MenuItem('L1_ZDC_OR_VjTE200_UNPAIRED_ISO'         ).setLogic( ZDC_OR & Not(d.jTE200) & unpaired_isocond)
-        MenuItem('L1_MBTS_1_ZDC_OR_VjTE200_UNPAIRED_ISO'         ).setLogic( MBTS_1 & ZDC_OR & Not(d.jTE200) & unpaired_isocond)
+        MenuItem('L1_ZDC_OR_VTE200_UNPAIRED_ISO'         ).setLogic( ZDCOR & Not(d.TE200) & unpaired_isocond)
+        MenuItem('L1_MBTS_1_ZDC_OR_VTE200_UNPAIRED_ISO'         ).setLogic( MBTS_1 & ZDCOR & Not(d.TE200) & unpaired_isocond)
+        MenuItem('L1_ZDC_OR_VjTE200_UNPAIRED_ISO'         ).setLogic( ZDCOR & Not(d.jTE200) & unpaired_isocond)
+        MenuItem('L1_MBTS_1_ZDC_OR_VjTE200_UNPAIRED_ISO'         ).setLogic( MBTS_1 & ZDCOR & Not(d.jTE200) & unpaired_isocond)
 
         MenuItem('L1_TAU1_VZDC_A_VZDC_C_VTE100' ).setLogic( d.HA1 & PHYS_VZDC_A_VZDC_C & Not(d.TE100)   & physcond)
         MenuItem('L1_TAU1_ZDC_XOR4_VTE100' ).setLogic( d.HA1 & PHYS_ZDC_XOR4 & Not(d.TE100)   & physcond)

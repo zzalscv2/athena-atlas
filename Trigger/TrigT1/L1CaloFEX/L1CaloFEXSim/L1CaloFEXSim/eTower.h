@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -15,11 +15,9 @@
 
 #include <vector>
 #include "AthenaKernel/CLASS_DEF.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
-#include "xAODBase/IParticle.h"
 #include "xAODCore/AuxStoreAccessorMacros.h"
 
 namespace LVL1 {
@@ -63,14 +61,10 @@ namespace LVL1 {
     /** Get coordinates of tower */
     int iEta() const;
     int iPhi() const;
-    float eta() {return m_eta;};
-    float phi() {return m_phi;};
     float eta() const {return m_eta;};
     float phi() const {return m_phi;};
     
     void setEta(const float thiseta){ m_eta = thiseta; }
-
-    int id() {return m_tower_id;};
 
     int id() const {return m_tower_id;}
 

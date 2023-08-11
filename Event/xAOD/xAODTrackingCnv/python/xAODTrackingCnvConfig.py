@@ -191,9 +191,11 @@ def TrigTrackParticleCnvAlgCfg(flags, name="TrigTrackParticleCnvAlg",
                 flags,
                 TrackParticleCreator = kwargs["TrackParticleCreator"])))
 
-
-    if flags.Tracking.perigeeExpression == "Vertex":
+    #temporarily - move base methods to ActiveConfig
+    if flags.Tracking.ActiveConfig.perigeeExpression == "Vertex":
         kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
+    else:
+        kwargs.setdefault("PrimaryVerticesName", "")
 
     result.merge(TrackParticleCnvAlgCfg(flags, name,
                                         ClusterSplitProbabilityName,

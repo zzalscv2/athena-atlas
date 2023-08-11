@@ -37,6 +37,10 @@
 
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 
+#include "xAODForward/AFPProtonContainer.h"
+#include "xAODForward/AFPTrackContainer.h"
+#include <TLorentzVector.h>
+
 class ZdcNtuple : public EL::AnaAlgorithm
 {
 public:
@@ -67,6 +71,8 @@ public:
   std::string auxSuffix; // what to add to name the new data, when reprocessing
   size_t nsamplesZdc; // nsamples expected by ZDC tool
   bool lhcf2022;
+  bool lhcf2022zdc;
+  bool lhcf2022afp;
 
   bool doZdcCalib;
   std::string zdcConfig;
@@ -98,6 +104,7 @@ public:
   const xAOD::EnergySumRoI* m_lvl1EnergySumRoI;
   const xAOD::TruthParticleContainer* m_truthParticleContainer;
   const xAOD::TriggerTowerContainer* m_TTcontainer;
+  const xAOD::AFPProtonContainer* m_afpProtons;
 
 
   int m_nTriggers;
@@ -296,6 +303,27 @@ public:
   float t_clusetaMax;
   float t_clusphiMax;
 
+  // AFP protons                                                                                                  
+
+  int nProtons;
+  std::vector<double> proton_pt;
+  std::vector<double> proton_eta;
+  std::vector<double> proton_phi;
+  std::vector<double> proton_e;
+  std::vector<int> proton_side;
+  std::vector<double> proton_eLoss;
+  std::vector<double> proton_t;
+  std::vector<std::vector<int>> proton_track_stationID;
+  std::vector<std::vector<float>> proton_track_xLocal;
+  std::vector<std::vector<float>> proton_track_yLocal;
+  std::vector<std::vector<float>> proton_track_zLocal;
+  std::vector<std::vector<float>> proton_track_xSlope;
+  std::vector<std::vector<float>> proton_track_ySlope;
+  std::vector<std::vector<int>> proton_track_nClusters;
+
+  TLorentzVector p_beam;
+  TLorentzVector p_scat;
+
   // end of Histograms
 
   // this is a standard constructor
@@ -314,6 +342,7 @@ public:
   void reprocessZdcModule(const xAOD::ZdcModule* zdcMod, bool flipdelay=0);
   void processTriggerTowers();
   void processGaps();
+  void processProtons();
 
   double dR(const double eta1,     const double phi1,     const double eta2,     const double phi2);
 

@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,7 +10,6 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IeSuperCellTowerMapper.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -50,7 +49,7 @@ class eSuperCellTowerMapper: public AthAlgTool, virtual public IeSuperCellTowerM
   virtual int FindTowerIDForSuperCell(int towereta, int towerphi) override;
   virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit) override;
   
-  std::string DectectorName(const CaloSampling::CaloSample sample);
+  std::string DectectorName(const CaloSampling::CaloSample sample) const;
 
 };
 

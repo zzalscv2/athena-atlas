@@ -1,13 +1,7 @@
 /*
-    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#undef NDEBUG
-
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
@@ -15,22 +9,11 @@
 #include "L1CaloFEXSim/eTowerBuilder.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eTowerMakerFromSuperCells.h"
-
 #include "L1CaloFEXSim/eSuperCellTowerMapper.h"
 
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/ReadHandle.h"
 
-#include <cassert>
-#include "SGTools/TestStore.h"
-
-#include <ctime>
-
-#include <iostream>
 #include <fstream>
-
-#define DEBUG_VHB 1
-
 
 namespace LVL1 {
 
@@ -43,9 +26,6 @@ namespace LVL1 {
 
 StatusCode eTowerMakerFromSuperCells::initialize()
 {
-
-  m_numberOfEvents = 1;
-
   ATH_CHECK( m_eTowerBuilderTool.retrieve() );
 
   ATH_CHECK( m_eSuperCellTowerMapperTool.retrieve() );
@@ -53,15 +33,11 @@ StatusCode eTowerMakerFromSuperCells::initialize()
   ATH_CHECK( m_eTowerContainerSGKey.initialize() );
 
   return StatusCode::SUCCESS;
-
 }
 
 
   StatusCode eTowerMakerFromSuperCells::execute(/*const EventContext& ctx*/) //const
 {
-
-  ATH_MSG_DEBUG("Executing " << name() << ", processing event number " << m_numberOfEvents );
-
   // STEP 0 - Make a fresh local eTowerContainer
   std::unique_ptr<eTowerContainer> local_eTowerContainerRaw = std::make_unique<eTowerContainer>();
 
@@ -76,7 +52,7 @@ StatusCode eTowerMakerFromSuperCells::initialize()
 
   // STEP 2.5 - Set up a the first CSV file if necessary (should only need to be done if the mapping changes, which should never happen unless major changes to the simulation are required)
   if(false){ // CSV CODE TO BE RE-INTRODUCED VERY SOON
-    if(m_numberOfEvents == 1){
+    //if (first event){
       std::ofstream sc_tower_map;
       sc_tower_map.open("./sc_tower_map.csv");
       sc_tower_map << "#eTowerID,scID,slot,isSplit" << "\n";
@@ -93,9 +69,8 @@ StatusCode eTowerMakerFromSuperCells::initialize()
         }
       }
       sc_tower_map.close();
-      
-    }
   }
+  
 
   // STEP 3 - Write the completed eTowerContainer into StoreGate (move the local copy in memory)
   SG::WriteHandle<LVL1::eTowerContainer> eTowerContainerSG(m_eTowerContainerSGKey/*, ctx*/);
@@ -105,13 +80,8 @@ StatusCode eTowerMakerFromSuperCells::initialize()
   m_eSuperCellTowerMapperTool->reset();
   m_eTowerBuilderTool->reset();
 
-  ATH_MSG_DEBUG("Executed " << name() << ", closing event number " << m_numberOfEvents );
-
-  m_numberOfEvents++;
-
   return StatusCode::SUCCESS;
 }
 
-  
 
 } // end of LVL1 namespace
