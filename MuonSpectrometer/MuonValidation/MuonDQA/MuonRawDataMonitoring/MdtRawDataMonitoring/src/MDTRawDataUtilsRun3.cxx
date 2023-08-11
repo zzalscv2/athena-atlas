@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -370,7 +370,8 @@ StatusCode MdtRawDataMonAlg::fillMDTMaskedTubes(IdentifierHash idHash, const std
             else
                 mdtlayer += 3;
         }
-        int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+        int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+        int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * tubeMax;
         ChamberTubeNumberCorrection(mdttube, hardware_name, m_idHelperSvc->mdtIdHelper().tube(digcoll_id), mdtlayer - 1);
         h->Fill(mdttube, 1);
     }

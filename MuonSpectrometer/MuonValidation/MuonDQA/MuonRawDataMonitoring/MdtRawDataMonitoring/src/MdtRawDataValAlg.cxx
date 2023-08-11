@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1466,7 +1466,8 @@ StatusCode MdtRawDataValAlg::fillMDTHistograms(const Muon::MdtPrepData* mdtColle
         else
             mdtlayer += 3;
     }
-    int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+    int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(digcoll_id);
+    int mdttube = m_idHelperSvc->mdtIdHelper().tube(digcoll_id) + (mdtlayer - 1) * tubeMax;
     ChamberTubeNumberCorrection(mdttube, hardware_name, m_idHelperSvc->mdtIdHelper().tube(digcoll_id), mdtlayer - 1);
 
     bool isNoisy = m_masked_tubes->isNoisy(mdtCollection);
@@ -1858,12 +1859,12 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
                     Identifier newId = m_idHelperSvc->mdtIdHelper().channelID(
                         hardware_name.substr(0, 3), m_idHelperSvc->mdtIdHelper().stationEta(station_id),
                         m_idHelperSvc->mdtIdHelper().stationPhi(station_id), ML, 1, 1);
-                    int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(newId);
-                    int tubeLayerMax = m_idHelperSvc->mdtIdHelper().tubeLayerMax(newId);
+                    auto [tubeMin, tubeMax] = m_idHelperSvc->mdtIdHelper().tubeMinMax(newId);
+                    auto [tubeLayerMin, tubeLayerMax] = m_idHelperSvc->mdtIdHelper().tubeLayerMinMax(newId);
                     CorrectTubeMax(hardware_name, tubeMax);
                     CorrectLayerMax(hardware_name, tubeLayerMax);
-                    for (int i_tube = m_idHelperSvc->mdtIdHelper().tubeMin(newId); i_tube <= tubeMax; i_tube++) {
-                        for (int i_layer = m_idHelperSvc->mdtIdHelper().tubeLayerMin(newId); i_layer <= tubeLayerMax; i_layer++) {
+                    for (int i_tube = tubeMin; i_tube <= tubeMax; i_tube++) {
+                        for (int i_layer = tubeLayerMin; i_layer <= tubeLayerMax; i_layer++) {
                             const MuonGM::MdtReadoutElement* MdtRoEl = MuonDetMgr->getMdtReadoutElement(newId);
                             Identifier tubeId = m_idHelperSvc->mdtIdHelper().channelID(newId, ML, i_layer, i_tube);
                             if (m_BMGpresent && m_idHelperSvc->mdtIdHelper().stationName(newId) == m_BMGid) {
@@ -1930,7 +1931,8 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
 
                     CorrectLayerMax(hardware_name, tubeLayerMax);  // ChamberTubeNumberCorrection handles the tubeMax problem
                     int mdtlayer = ((traversed_L.at(k) - 1) + (traversed_ML.at(k) - 1) * tubeLayerMax);
-                    int ibin = traversed_tube.at(k) + mdtlayer * m_idHelperSvc->mdtIdHelper().tubeMax(newId);
+                    int tubeMax = m_idHelperSvc->mdtIdHelper().tubeMax(newId);
+                    int ibin = traversed_tube.at(k) + mdtlayer * tubeMax;
                     ChamberTubeNumberCorrection(ibin, hardware_name, traversed_tube.at(k), mdtlayer);
                     // Store info for eff calc
                     // (Here we make sure we are removing duplicates from overlapping segments by using sets)
