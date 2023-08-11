@@ -1149,6 +1149,20 @@ def extractAlgorithmsAndAppendCA(ca: ComponentAccumulator) -> list[Configurable]
         algorithms = ca.getEventAlgos()
     ca._algorithms.clear()
     ca._allSequences.clear()
+    # Special handling for SGInputLoader, which needs to be in
+    # the TopAlg only, and not in any other sequences
+    # If present, we do not return SGInputLoader with the other
+    # algs, so the list can directly be added to whichever
+    # sequence without any further sanitisation.
+    # We then explicitly merge the SGInputLoader with the
+    # global instance, to make sure the config is complete
+    sgil = None
+    for alg in algorithms:
+        if compName(alg) == "SGInputLoader":
+            sgil = alg
+    if sgil is not None:
+        algorithms.remove(sgil)
+        conf2toConfigurable(sgil)
     appendCAtoAthena(ca)
     return list(map(conf2toConfigurable, algorithms))
 
@@ -1209,8 +1223,13 @@ def appendMenuSequenceCAToAthena(msca, flags):
             if isSequence(member):
                 old += _convertSeq(member)
             else:
-                if member != msca.hypo.Alg: # removed hypo, as MenuSequence assembles it later
-                    old += conf2toConfigurable(member)
+                 # removed hypo, as MenuSequence assembles it later
+                if member != msca.hypo.Alg:
+                    member_cnv = conf2toConfigurable(member)
+                     # Skip SGInputLoader as it should only run in the top alg
+                     # But we need to ensure that it is converted and merged
+                    if not compName(member)=='SGInputLoader':
+                        old += member_cnv
         return old
 
     sequence = _convertSeq(msca.ca.topSequence())

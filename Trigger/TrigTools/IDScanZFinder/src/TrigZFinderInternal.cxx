@@ -18,7 +18,6 @@ TrigZFinderInternal::TrigZFinderInternal( const std::string& type, const std::st
   m_usedphiBinSize   = m_phiBinSize   ;
   m_pixOnly          = false ;
   m_ROIphiWidth      = 0.2   ;
-  m_usedROIphiWidth  = m_ROIphiWidth ;
   m_minZBinSize      = 0.2   ;
   m_zBinSizeEtaCoeff = 0.1   ;
   m_dphideta         = -0.02 ;
@@ -35,7 +34,8 @@ TrigZFinderInternal::TrigZFinderInternal( const std::string& type, const std::st
   m_fullScanMode     = false ;
   m_tripletMode      = 0     ;
   m_tripletDZ        = 25.   ;
-  m_tripletDK        = 0.005 ;  
+  m_tripletDK        = 0.005 ;
+  m_halfTripletDK    = 0.5*m_tripletDK; // using this in internals avoids unnecessary multiplications when calculating curvature
   m_tripletDP        = 0.05  ;
 
   m_maxLayer         = 32;
@@ -57,6 +57,7 @@ TrigZFinderInternal::TrigZFinderInternal( const std::string& type, const std::st
 
 void TrigZFinderInternal::initializeInternal(long maxLayers, long lastBarrel )
 {
+  m_halfTripletDK = 0.5*m_tripletDK;
 
   m_IdScan_MaxNumLayers = maxLayers; 
   m_IdScan_LastBrlLayer = lastBarrel; 
@@ -88,9 +89,6 @@ void TrigZFinderInternal::initializeInternal(long maxLayers, long lastBarrel )
   //  if ( extraPhi.size()==0 ) 
 
   m_extraPhi = std::vector< std::vector<long> >( m_IdScan_MaxNumLayers, std::vector<long>(m_IdScan_MaxNumLayers) ); 
-
-  if ( m_fullScanMode ) m_usedROIphiWidth = 2*M_PI;
-  else                  m_usedROIphiWidth = m_ROIphiWidth;
 
   // from TrigZFinder::initialize
   m_usedphiBinSize = m_phiBinSize;
@@ -231,8 +229,8 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
   else { 
     // If we trust that all the SPs are properly input, we determine the RoI phi width
     //  using the SPs themselves.
-    //  If the RoI phi range is wider than pi) we keep everything as usual.
-    if ( m_trustSPprovider  &&  m_usedROIphiWidth < M_PI )
+    //  If the RoI phi range is wider than pi, we keep everything as usual.
+    if ( m_trustSPprovider  &&  m_ROIphiWidth < M_PI )
     {
       double roiPhiPosMin( 9.9), roiPhiPosMax(0);
       double roiPhiNegMin(-9.9), roiPhiNegMax(0);  // least negative and most negative
@@ -276,8 +274,8 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
 
       /// get from roi now
       if ( roi.phiMinus()==roi.phiPlus() ) { 
-        roiPhiMin = roi.phi()-0.5*m_usedROIphiWidth;
-        roiPhiMax = roi.phi()+0.5*m_usedROIphiWidth;
+        roiPhiMin = roi.phi()-0.5*m_ROIphiWidth;
+        roiPhiMax = roi.phi()+0.5*m_ROIphiWidth;
         if(roiPhiMin<-M_PI) roiPhiMin+=2*M_PI;
         if(roiPhiMax>M_PI)  roiPhiMax-=2*M_PI;
       }
@@ -296,10 +294,6 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
 
   if ( dphi<0 ) dphi+=2*M_PI;
 
-  //  m_usedROIphiWidth = dphi;
-
-  //  std::cout << "m_usedROIphiWidth: " << m_usedROIphiWidth << std::endl;
-  //  m_NumPhiSlices = long (ceil( m_usedROIphiWidth*m_invPhiSliceSize ));
   numPhiSlices = long (ceil( dphi*m_invPhiSliceSize ));
 
 
@@ -312,15 +306,15 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
     /// DOES NOT span the phi=pi boundary
     for(long i=0; i<nSPs; ++i, ++SpItr) 
     {
-      if ( SpItr->layer()>m_maxLayer ) continue;
+      if ( SpItr->layer()>m_maxLayer || (m_pixOnly && !SpItr->isPixel()) ) continue;
       double phi2 = SpItr->phi() - roiPhiMin;
 
-      if ( phi2>=0 && phi2<dphi ) { 
-        phi[i] = phi2;
-        rho[i] = SpItr->r();
-        zed[i] = SpItr->z();
-        lyr[i] = m_new2old[SpItr->layer()];
-        lcount[lyr[i]]=true;
+      if ( phi2>=0 && phi2<dphi ) { // ensures space point is in ROI
+        phi[icount] = phi2;
+        rho[icount] = SpItr->r();
+        zed[icount] = SpItr->z();
+        lyr[icount] = m_new2old[SpItr->layer()];
+        lcount[lyr[icount]]=true;
         ++icount;
       }
     }
@@ -330,16 +324,15 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
     /// DOES span the phi=pi boundary
     for(long i=0; i<nSPs; ++i, ++SpItr) 
     {
-
+      if ( SpItr->layer()>m_maxLayer || (m_pixOnly && !SpItr->isPixel()) ) continue;
       double phi2 = SpItr->phi() - roiPhiMin;
       if( phi2<0.0) phi2+=2*M_PI;
-      if ( SpItr->layer()>m_maxLayer ) continue;
-      if ( phi2>=0 && phi2<dphi ) { 
-        phi[i] = phi2;
-        rho[i] = SpItr->r();
-        zed[i] = SpItr->z();
-        lyr[i] = m_new2old[SpItr->layer()];
-        lcount[lyr[i]]=true;
+      if ( phi2>=0 && phi2<dphi ) { // ensures space point is in ROI
+        phi[icount] = phi2;
+        rho[icount] = SpItr->r();
+        zed[icount] = SpItr->z();
+        lyr[icount] = m_new2old[SpItr->layer()];
+        lcount[lyr[icount]]=true;
         ++icount;
       }
     }
@@ -354,8 +347,6 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
     rho.resize(icount);
     zed.resize(icount);
     lyr.resize(icount);
-
-    nSPs = icount;
   }
 
 
@@ -364,7 +355,6 @@ long TrigZFinderInternal::fillVectors(const std::vector<TrigSiSpacePointBase>& s
   //   and filledLayers[2]=8 
   //
   long filled = 0;
-  // filled = 0;
 
   for ( long i=0; i<m_IdScan_MaxNumLayers; ++i ) {
     if ( lcount[i] ) {
@@ -454,7 +444,7 @@ TrigZFinderInternal::findZInternal( const std::vector<TrigSiSpacePointBase>& spV
   for ( unsigned int sliceIndex = 0; sliceIndex < numPhiSlices; sliceIndex++ )
   {
     allSlices[ sliceIndex ] = new PhiSlice( sliceIndex, ZBinSize, m_invPhiSliceSize,
-					    m_tripletDZ, m_tripletDK, m_tripletDP, zMin, zMax,
+					    m_tripletDZ, m_halfTripletDK, m_tripletDP, zMin, zMax,
 					    m_IdScan_MaxNumLayers, m_IdScan_LastBrlLayer );
   }
 
@@ -579,7 +569,7 @@ TrigZFinderInternal::findZInternal( const std::vector<TrigSiSpacePointBase>& spV
       
       std::vector<long>  n3( nHisto[0][0].size()-2, 0);
       
-      for( unsigned i=n.size()-2 ; i-- ;  ) n3[i] = ( n[i+2] + n[i+2] + n[i] );
+      for( unsigned i=n.size()-2 ; i-- ;  ) n3[i] = ( n[i+2] + n[i+1] + n[i] );
       std::sort( n3.begin(), n3.end() );
       
       unsigned nmax = unsigned(n3.size()*m_percentile);

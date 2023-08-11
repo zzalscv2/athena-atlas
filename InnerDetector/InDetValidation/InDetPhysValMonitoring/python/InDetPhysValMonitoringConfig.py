@@ -360,6 +360,18 @@ def InDetMergedLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
         flags, name='InDetPhysValMonitoringToolMergedLargeD0', **kwargs)))
     return acc
 
+def InDetLowPtRoIPhysValMonitoringToolCfg(flags, **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("SubFolder", 'LowPtRoI/') #Subfolder
+    kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
+        InDetRttTruthSelectionToolCfg(flags,minPt=100)))
+    kwargs.setdefault("TrackParticleContainerName",
+                     'InDetLowPtRoITrackParticles')
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(
+        flags, name='InDetPhysValMonitoringToolLowPtRoI', **kwargs)))
+
+    return acc
+
 
 def InDetPhysValMonitoringCfg(flags):
     acc = ComponentAccumulator()
@@ -377,6 +389,8 @@ def InDetPhysValMonitoringCfg(flags):
              InDetLargeD0PhysValMonitoringToolCfg),
             (flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks,
              InDetMergedLargeD0PhysValMonitoringToolCfg),
+            (flags.PhysVal.IDPVM.doValidateLowPtRoITracks,
+             InDetLowPtRoIPhysValMonitoringToolCfg),
             (flags.PhysVal.IDPVM.doValidateLooseTracks,
              InDetPhysValMonitoringToolLooseCfg),
             (flags.PhysVal.IDPVM.doValidateTightPrimaryTracks,

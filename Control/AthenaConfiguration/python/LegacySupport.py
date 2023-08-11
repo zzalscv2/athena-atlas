@@ -97,8 +97,14 @@ def _mergeSequences( currentConfigurableSeq, conf2Sequence, _log, indent="" ):
         if el.__class__.__name__ in ["AthSequencer"]:
             _mergeSequences( sequence, el, _log, _indent( indent ) )
         elif el.getGaudiType() == "Algorithm":
-            toadd = conf2toConfigurable( el, indent=_indent( indent ), suppressDupes=True)
-            if toadd is not None:
+            # We will get an error if there are duplicate algs in a sequence, indicating misconfiguration
+            # HLT requires algs to be in many sequences, cannot afford to veto them all here
+            toadd = conf2toConfigurable( el, indent=_indent( indent ))
+            if (
+                toadd is not None
+                # SGInputLoader has to be in TopAlg but doesn't have to be anywhere else
+                and not ( toadd.name()=='SGInputLoader' and sequence.name() not in ['TopAlg','HLTBeginSeq'])
+            ):  
                 sequence += toadd
                 _log.debug( "%sAlgorithm %s and added to the sequence %s",
                             _indent( indent ),  el.getFullJobOptName(), sequence.name() )

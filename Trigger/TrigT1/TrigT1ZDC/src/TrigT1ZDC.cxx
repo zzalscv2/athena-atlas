@@ -42,11 +42,11 @@ namespace LVL1 {
 
    // Will eventually obtain LUTs from COOL, for now obtain them from calibration area
    // A data member to hold the side A LUT values
-   std::array<unsigned int, 4096> sideALUT = data["LucrodLowGain"]["LUTs"]["sideA"];
+   std::array<unsigned int, 4096> sideALUT = data["LucrodHighGain"]["LUTs"]["sideA"];
    // A data member to hold the side C LUT values
-   std::array<unsigned int, 4096> sideCLUT = data["LucrodLowGain"]["LUTs"]["sideC"];
+   std::array<unsigned int, 4096> sideCLUT = data["LucrodHighGain"]["LUTs"]["sideC"];
    // A data member to hold the Combined LUT values
-   std::array<unsigned int, 256> combLUT = data["LucrodLowGain"]["LUTs"]["comb"];
+   std::array<unsigned int, 256> combLUT = data["LucrodHighGain"]["LUTs"]["comb"];
 
    // Construct Simulation Objects
    m_modInputs_p = std::make_shared<ZDCTriggerSim::ModuleAmplInputsFloat>(ZDCTriggerSim::ModuleAmplInputsFloat(convfact));

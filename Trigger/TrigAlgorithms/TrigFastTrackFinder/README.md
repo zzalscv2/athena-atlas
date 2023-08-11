@@ -1,6 +1,6 @@
 ## Overview
 This Module contains the TrigFastTrackFinder Algorithm that performs Fast Track Reconstruction for the High Level Trigger. More details are given in the [TrigFastTrackFinderOverview](docs/TrigFastTrackFinderOverview.md)
-Configured instances of TrigFastTrackFinder are provided to signatures by the [TrigInDetConfig](../../TrigTools/TrigInDetConfig/python) package. The README in that packackage gives details of how to include TrigFastTrackFinder and other Inner Detector algorithms in signature TriggerMenuMT sequences.
+Configured instances of TrigFastTrackFinder are provided to signatures by the [TrigInDetConfig](../../TrigTools/TrigInDetConfig/python) package. The README in that package gives details of how to include TrigFastTrackFinder and other Inner Detector algorithms in signature TriggerMenuMT sequences.
  
 ## Files in this Module
 * Configuration: [TrigFastTrackFinderConfig.py](python/TrigFastTrackFinderConfig.py)    

@@ -148,6 +148,10 @@ StatusCode TrigZFinder::initialize()
 
   ATH_MSG_INFO("TrigZFinder::m_weigthThreshold  = " << m_weightThreshold );
 
+  ATH_MSG_INFO("TrigZFinder::m_tripletDZ  = " << m_tripletDZ );
+  ATH_MSG_INFO("TrigZFinder::m_tripletDK  = " << m_tripletDK );
+  ATH_MSG_INFO("TrigZFinder::m_tripletDP  = " << m_tripletDP );
+
   return StatusCode::SUCCESS;
 }
 
