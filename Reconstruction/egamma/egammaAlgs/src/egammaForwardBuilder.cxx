@@ -205,13 +205,12 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     }
 
     // Set DeltaEta, DeltaPhi, DeltaPhiRescaled.
-    setAllTrackCaloMatchValues(el, s_deltaEtaParameters, egRec->deltaEta());
-    setAllTrackCaloMatchValues(el, s_deltaPhiParameters, egRec->deltaPhi());
-    setAllTrackCaloMatchValues(el, s_deltaPhiRescaledParameters,
-                               egRec->deltaPhiRescaled());
-    el->setTrackCaloMatchValue(
-        static_cast<float>(egRec->deltaPhiLast()),
-        xAOD::EgammaParameters::deltaPhiFromLastMeasurement);
+    el->setTrackCaloMatchValues(
+      egRec->deltaEta(), 
+      egRec->deltaPhi(), 
+      egRec->deltaPhiRescaled(),
+      egRec->deltaPhiLast()
+    );
 
   }//end of loop over egammaRecs
 
@@ -253,17 +252,5 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   }
 
   return StatusCode::SUCCESS;
-}
-
-void
-egammaForwardBuilder::setAllTrackCaloMatchValues(
-  xAOD::Electron *el,
-  const std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> &match_parameters,
-  const std::array<double, 4> &match_values
-) const {
-  el->setTrackCaloMatchValue(static_cast<float> (match_values[0]), match_parameters[0]);
-  el->setTrackCaloMatchValue(static_cast<float> (match_values[1]), match_parameters[1]);
-  el->setTrackCaloMatchValue(static_cast<float> (match_values[2]), match_parameters[2]);
-  el->setTrackCaloMatchValue(static_cast<float> (match_values[3]), match_parameters[3]);
 }
 

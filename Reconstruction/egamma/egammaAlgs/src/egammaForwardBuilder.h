@@ -140,26 +140,6 @@ private:
 
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_MatchedClusters {};
-  static constexpr std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> s_deltaEtaParameters = {
-    xAOD::EgammaParameters::deltaEta0,
-    xAOD::EgammaParameters::deltaEta1,
-    xAOD::EgammaParameters::deltaEta2,
-    xAOD::EgammaParameters::deltaEta3,
-  };
-
-  static constexpr std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> s_deltaPhiParameters = {
-    xAOD::EgammaParameters::deltaPhi0,
-    xAOD::EgammaParameters::deltaPhi1,
-    xAOD::EgammaParameters::deltaPhi2,
-    xAOD::EgammaParameters::deltaPhi3,
-  };
-
-  static constexpr std::array<xAOD::EgammaParameters::TrackCaloMatchType, 4> s_deltaPhiRescaledParameters = {
-    xAOD::EgammaParameters::deltaPhiRescaled0,
-    xAOD::EgammaParameters::deltaPhiRescaled1,
-    xAOD::EgammaParameters::deltaPhiRescaled2,
-    xAOD::EgammaParameters::deltaPhiRescaled3,
-  };
 
 protected:
   /** Handle to the selectors. */

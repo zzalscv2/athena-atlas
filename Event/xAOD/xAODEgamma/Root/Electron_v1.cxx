@@ -107,10 +107,32 @@ namespace xAOD {
                                             const EgammaParameters::TrackCaloMatchType information ) {
 
     const xAOD::Electron_v1::Accessor< float >* acc = trackCaloMatchAccessorV1( information );
-     if( !acc ) return false;
+    if( !acc ) return false;
     // Set the value:
     ( *acc )( *this ) = value;
     return true;
+  }
+
+  bool Electron_v1::setTrackCaloMatchValues(
+    const std::array<double, 4> &deltaEta,
+    const std::array<double, 4> &deltaPhi,
+    const std::array<double, 4> &deltaPhiRescaled,
+    const double deltaPhiLast
+  ) {
+    return 
+      setTrackCaloMatchValue(static_cast<float> (deltaEta[0]), xAOD::EgammaParameters::deltaEta0) &
+      setTrackCaloMatchValue(static_cast<float> (deltaEta[1]), xAOD::EgammaParameters::deltaEta1) &
+      setTrackCaloMatchValue(static_cast<float> (deltaEta[2]), xAOD::EgammaParameters::deltaEta2) &
+      setTrackCaloMatchValue(static_cast<float> (deltaEta[3]), xAOD::EgammaParameters::deltaEta3) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhi[0]), xAOD::EgammaParameters::deltaPhi0) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhi[1]), xAOD::EgammaParameters::deltaPhi1) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhi[2]), xAOD::EgammaParameters::deltaPhi2) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhi[3]), xAOD::EgammaParameters::deltaPhi3) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[0]), xAOD::EgammaParameters::deltaPhiRescaled0) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[1]), xAOD::EgammaParameters::deltaPhiRescaled1) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[2]), xAOD::EgammaParameters::deltaPhiRescaled2) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[3]), xAOD::EgammaParameters::deltaPhiRescaled3) &
+      setTrackCaloMatchValue(static_cast<float> (deltaPhiLast), xAOD::EgammaParameters::deltaPhiFromLastMeasurement);
   }
 
   bool Electron_v1::trackParticleSummaryValue( uint8_t& value, const SummaryType information, int index ) const {
