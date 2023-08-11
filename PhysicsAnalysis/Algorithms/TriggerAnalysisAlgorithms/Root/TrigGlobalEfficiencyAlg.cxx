@@ -264,6 +264,6 @@ StatusCode CP::TrigGlobalEfficiencyAlg::execute()
 StatusCode CP::TrigGlobalEfficiencyAlg::finalize()
 {
 
-  ANA_MSG_INFO (m_filterParams.finalize());
+  ANA_CHECK (m_filterParams.finalize());
   return StatusCode::SUCCESS;
 }
