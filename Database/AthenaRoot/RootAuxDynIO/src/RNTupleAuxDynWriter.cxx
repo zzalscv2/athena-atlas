@@ -8,15 +8,12 @@
 #include "AthContainers/normalizedTypeinfoName.h"
 
 #include "TFile.h"
-
-#include "TInterpreter.h"
-#include <sstream>
-#include <iostream>
-
 #include "Compression.h"
-
 #include "TClass.h"
 #include "TVirtualCollectionProxy.h"
+
+#include <sstream>
+#include <iostream>
 
 
 namespace RootAuxDynIO
@@ -154,11 +151,14 @@ namespace RootAuxDynIO
          ATH_MSG_DEBUG("Empty Commit");
          return 0;
       }
-      ATH_MSG_DEBUG("Commit");
+      ATH_MSG_DEBUG("Commit, row=" << m_rowN << " : " << m_ntupleName );
       if( !m_entry ) makeNewEntry();
 
       int num_bytes = 0;
+      ATH_MSG_DEBUG(m_ntupleName << " has " <<  m_attrDataMap.size() << " attributes");
+      int attrN = 0;
       for( auto& attr: m_attrDataMap ) {
+         ATH_MSG_DEBUG("  - " << ++attrN << ": " << attr.first);
          ATH_MSG_VERBOSE("Setting data ptr for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
          if( !attr.second ) {
             if( m_generatedValues.find(attr.first) == m_generatedValues.end() ) {
