@@ -55,7 +55,7 @@ def MuonTrackSteering(name="MuonTrackSteering", extraFlags=None, **kwargs):
         if "TrackRefinementTool" not in kwargs:
             kwargs["TrackRefinementTool"] = getPublicTool("MooTrackBuilderTemplate")
 
-    kwargs.setdefault("SegSeedQCut", 1)
+    kwargs.setdefault("SegSeedQCut", 2)
     kwargs.setdefault("Seg2ndQCut", 1)
     return CfgMgr.Muon__MuonTrackSteering(name,**kwargs)
 
