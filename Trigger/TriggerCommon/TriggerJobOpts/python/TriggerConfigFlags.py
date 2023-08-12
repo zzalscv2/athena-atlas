@@ -104,6 +104,9 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     # Enable ZDC System
     flags.addFlag('Trigger.doZDC', False)
+    
+    # Path to Run3 ZDC LUT
+    flags.addFlag('Trigger.ZdcLUT', 'TrigT1ZDC/zdcRun3T1LUT_v2_08_08_2023.json')
 
     # Checks the validity of each Decision Object produced by a HypoAlg, including all of its
     # parents all the way back to the HLTSeeding. Potentially CPU expensive.

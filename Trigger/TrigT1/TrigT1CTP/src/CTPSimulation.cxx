@@ -646,22 +646,23 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
       }
       else if (connName.find("CTPCAL") == 0 && m_doZDC) // ZDC simulation
       {
-         auto &conn = l1menu->connector(connName);
-         for (auto &tl : conn.triggerLines()){
-            if (tl.name().find("ZDC") == std::string::npos)
-            {
-               continue;
-            }
          auto zdcInput = SG::makeHandle(m_iKeyZDC, context);
          if (not zdcInput.isValid())
          {
             continue;
          }
          cable = static_cast<uint64_t>(zdcInput->cableWord0());
+         auto &conn = l1menu->connector(connName);
+         for (auto &tl : conn.triggerLines()){
+            if (tl.name().find("ZDC") == std::string::npos)
+            {
+               continue;
+            }
          uint flatIndex = tl.flatindex();
          uint pass = (cable & (uint64_t(0x1) << flatIndex)) == 0 ? 0 : 1;
          thrMultiMap[tl.name()] = pass;
          ATH_MSG_DEBUG(tl.name() << " MULT calculated mult for topo " << pass);
+
          }
          continue;
       }
