@@ -41,14 +41,6 @@ def LArRODMonConfigCore(helper, algoinstance,inputFlags, cellDebug=False, dspDeb
     larRODMonAlg.LArRODPartitionNames=lArDQGlobals.Partitions
     larRODMonAlg.LArRODNslots=nslots
 
-    #Adding 1MeV on request of Alexis (truncating difference) (May 2016):
-
-    larRODMonAlg.PrecisionERange0 = 2 # MeV (Precision on E is on Eoff - Eonl)
-    larRODMonAlg.PrecisionERange1 = 9
-    larRODMonAlg.PrecisionERange2 = 65
-    larRODMonAlg.PrecisionERange3 = 513
-    larRODMonAlg.PrecisionERangeMax = 8192
-
     larRODMonAlg.ADCthreshold = 0
     larRODMonAlg.peakTimeCut = 5.
     larRODMonAlg.SkipNullQT=True 
@@ -59,6 +51,9 @@ def LArRODMonConfigCore(helper, algoinstance,inputFlags, cellDebug=False, dspDeb
 
     if dspDebug:
        larRODMonAlg.DoDspTestDump=True
+
+    if inputFlags.Common.isOnline:
+       larRODMonAlg.MaxEvDump=100   
 
     #from AthenaCommon.Constants import VERBOSE
     #larRODMonAlg.OutputLevel=VERBOSE
