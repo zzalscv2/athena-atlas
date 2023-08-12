@@ -524,12 +524,10 @@ void MissingEtCollHandle::setCutAllowedPhi(const QList<VP1Interval>& allowedPhi)
 
   if (m_cut_phi_allowall) {
 	  recheckCutStatusOfAllNotVisibleHandles();
-//	  update3DObjectsOfAllHandles();
     return;
   }
   if (m_cut_phi_allwillfail) {
 	  recheckCutStatusOfAllVisibleHandles();
-//	  update3DObjectsOfAllHandles();
     return;
   }
 
