@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,6 +12,7 @@
 //
 //  Updates: 
 //  - 2022 Nov, Riccardo Maria BIANCHI - added numerical phi cuts
+//  - 2023 Mar, Riccardo Maria BIANCHI - set dynamic widget size
 //
 ////////////////////////////////////////////////////////////////
 
@@ -44,8 +45,6 @@ VP1EtaPhiCutWidget::VP1EtaPhiCutWidget(QWidget * parent,IVP1System * sys)
 
   m_d->last_allowedEta = allowedEta();
   m_d->last_allowedPhi = allowedPhi();
-
-  m_d->ui.phisectionwidget->setSystemBasePointer(sys);
 
   // -> allowedEta (a bit special due to the "force symmetric" ability)
   connect(m_d->ui.checkBox_cut_etarange,SIGNAL(toggled(bool)),this,SLOT(possibleChange_allowedEta()));
