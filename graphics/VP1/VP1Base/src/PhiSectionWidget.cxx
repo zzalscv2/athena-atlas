@@ -31,6 +31,7 @@
 //  Initial VP1 version: September 2007                                //
 //  Major update: January 2009                                         //
 //  Riccardo-Maria BIANCHI <rbianchi@cern.ch>: March 2013              //
+//  Riccardo-Maria BIANCHI <rbianchi@cern.ch>: March 2023              //
 //                                                                     //
 /////////////////////////////////////////////////////////////////////////
 
@@ -86,6 +87,7 @@ public:
   QList<VP1Interval> enabledPhiRangesNoCache(const QVector<bool>& secstatus,
 					     bool& allOn, bool& allOff) const;
   void checkForChanges();
+
 };
 
 
@@ -131,7 +133,7 @@ PhiSectionWidget::PhiSectionWidget(QWidget * parent,IVP1System * sys)
   QList<int> defaultAllowedNSectors;
   defaultAllowedNSectors <<  4 <<  5 <<  6 <<  8 << 9 << 10
 			 << 12 << 16 << 24 << 32 << 36 << 48 << 64;
-  m_d->allowedNSectors << 12;
+  m_d->allowedNSectors << 12; // default number of sectors, at start
   setNumberOfSectors(12,true);
   setAllowedNumberOfSectors(defaultAllowedNSectors,true);
 }
@@ -219,6 +221,24 @@ void PhiSectionWidget::setNumberOfSectors(int nsectors,bool forceAllEnabled)
   m_d->updateColors();
   fitInView(scene()->sceneRect());
   m_d->checkForChanges();
+
+
+  // resize the widget based on the number of sectors
+  // we need to make it larger as the number of sectors increases 
+  // otherwise the 'red dots' are difficult to see and pick with the mouse
+  // Note: numbers of sectors are not continuos: after 12, 16 comes, then 24, ... 
+  if (nsectors <= 12) { 
+      setFixedSize(60,60);
+  } else if(nsectors >= 16 && nsectors < 24) {
+      setFixedSize(120,120);
+  } else if(nsectors >= 24 && nsectors < 32) {
+      setFixedSize(200,200);
+  } else if (nsectors >= 32 && nsectors <= 36) {
+      setFixedSize(300,300);
+  } else if (nsectors > 36) { 
+      setFixedSize(400,400);
+  }
+
 
   if ( m_d->sectorstatus.isEmpty() ) {
     if(VP1Msg::debug()){

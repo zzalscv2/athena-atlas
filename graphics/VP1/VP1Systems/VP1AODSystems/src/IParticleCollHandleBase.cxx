@@ -9,6 +9,9 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: February 2008                            //
+//
+//  Updates: 
+//  - 2023, Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
@@ -298,6 +301,7 @@ void IParticleCollHandleBase::setCutAllowedPhi(const QList<VP1Interval>& allowed
     return;
   }
   recheckCutStatusOfAllHandles();
+  recheckCutStatusOfAllNotVisibleHandles(); // Redundant, but needed! TODO: check why it is needed. Without this, when disabling and then re-enabling a phi sector, the corresponding jet is not shown, as the handles were not traversed. This fixes ATLASVPONE-626, look at that ticket for details: https://its.cern.ch/jira/browse/ATLASVPONE-626
   return;
 }
 

@@ -16,40 +16,30 @@
 #include "LArRawConditions/LArADC2MeV.h"
 #include "LArRecConditions/LArBadChannelMask.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
-
+#include "LArRawEvent/LArDigitContainer.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
+#include <atomic>
 
-class LArRawChannel;
-class HWIdentifier;
-class LArOnOffIdMapping;
-class LArRawChannelContainer;
-class LArDigitContainer;
+
+class LArDigit;
 class LArFebHeaderContainer;
 
-#include <atomic>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <set>
-
-class LArEM_ID;
-class LArDigit;
 
 class LArRODMonAlg: public AthMonitorAlgorithm
 {
  public:
 
   using AthMonitorAlgorithm::AthMonitorAlgorithm;
-  //LArRODMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
   /** @brief Default destructor */
   virtual ~LArRODMonAlg();
 
   virtual StatusCode initialize() override final;
+
   virtual StatusCode finalize() override final;
 
   // Called each event
@@ -59,8 +49,8 @@ class LArRODMonAlg: public AthMonitorAlgorithm
 private:
   const LArOnlineID* m_LArOnlineIDHelper=nullptr;
 
-  enum PARTITION {EMBC=0,EMBA,EMECC,EMECA,HECC,HECA,FCALC,FCALA,N_PARTITIONS};
-  const std::vector<std::string> m_PARTNAMES{"EMBC","EMBA","EMECC","EMECA","HECC","HECA","FCalC","FCalA","UNKNOWN"};
+  enum PARTITION                                         {  EMBC=0,EMBA,  EMECC,  EMECA,  HECC,  HECA,  FCALC, FCALA,  N_PARTITIONS};
+  const std::array<std::string,N_PARTITIONS+1> m_PARTNAMES{"EMBC","EMBA","EMECC","EMECA","HECC","HECA","FCalC","FCalA","UNKNOWN"};
 
   class ERRCOUNTER {
   public:
@@ -68,9 +58,7 @@ private:
       clear();
     };
     void clear();
-    unsigned errors_E[3];
-    unsigned errors_T[3];
-    unsigned errors_Q[3];
+    std::array<unsigned,3> errors_E,errors_T,errors_Q;
   };
   
 
@@ -78,55 +66,31 @@ private:
   PARTITION getPartition(const HWIdentifier chid) const;
   const std::string & getPartitionName(const HWIdentifier chid) const;
 
-  StatusCode compareChannels(const LArOnOffIdMapping* cabling,
-                             const ILArOFC* ofcs,
-                             const ILArShape* shapes,
-                             const ILArHVScaleCorr* hvScaleCorrs,
-                             const ILArPedestal* pedestals,
-                             const LArADC2MeV* adc2mev,
-                             const HWIdentifier chid, 
-                             std::vector<unsigned> &errsPerFEB,
-                             std::vector<ERRCOUNTER> &errcounters,
-                             const LArRawChannel& rcDig, const LArRawChannel& rcBS, 
-		             std::ofstream &ofcfile,               
-		             std::ofstream &digitsfile,            
-	         	     std::ofstream &energyfile,
-                             std::ofstream &dumpfile,              
-                             const LArDigit* dig) const;
+  struct diff_t {
+    float e_on=0;
+    float e_off=0;
+    float t_on=0;
+    float t_off=0;
+    float q_on=0;
+    float q_off=0;
+  };
 
-  bool FebStatus_Check();
+  diff_t compareChannel(const LArRawChannel& rcDig, 
+                        const LArRawChannel& rcBS) const; 
 
-  /** @brief For a given cell, dump info that can be used by DspTest, into two txt files and one dat file */
-  void DumpCellEvent(int count,                            // counter
-                     ILArOFC::OFCRef_t ofc,                // vector containing OFC's
-                     ILArOFC::OFCRef_t ofcb,               // vector containing OFCb's
-		     ILArShape::ShapeRef_t ofch,           // vector containing OFCh's
-		     ILArShape::ShapeRef_t ofcd,           // vector containing OFCd's
-		     float Escale,                         // ADC2MeV factor
-		     float Ramp0,                          // ramp intercept
-		     float pedestal,                       // pedestal
-		     const std::vector<short>* digits,     // vector containing samples (digits)
-		     int E_off,                            // Energy calculated offline (i.e. fromDigits)
-		     int E_on,                             // Energy calculated online (i.e. fromBytestream)
-		     std::ofstream &ofcfile,               // output file containing ofc's
-		     std::ofstream &digitsfile,            // output file containing digits
-		     std::ofstream &energyfile,            // output file containing energies
-		     const HWIdentifier chid,              // FEB HW ID
-		     int event) const;                           // Event #
-  
-  
+
+  void detailedOutput(const LArRODMonAlg::diff_t&,
+                      const LArDigit& dig, 
+                      const EventContext& ctx) const;
+
+
   /** @brief Dump a cell's information and calculated energies into a txt file */
-  void DumpCellInfo(HWIdentifier chid,                    // Channel HW ID
-		    const std::string &partc,
-		    int gain,
-		    int event, 
-		    int E_off,                             // Energy calculated offline (i.e. fromDigits)  
-		    int E_on,                              // Energy calculated online (i.e. fromBytestream)
-		    float T_off,                             // Time calculated offline (i.e. fromDigits)  
-		    float T_on,                              // Time calculated online (i.e. fromBytestream)
-		    float Q_off,                             // Quality Factor calculated offline (i.e. fromDigits)  
-		    float Q_on,                              // Quality Factor calculated online (i.e. fromBytestream)
-		    std::ofstream &dumpfile) const;
+  void dumpCellInfo(const HWIdentifier chid,                    // Channel HW ID
+		               const int gain,
+                   const EventContext& ctx,
+                   const diff_t & comp)const;
+
+		   
   
 
   SG::ReadHandleKey<LArRawChannelContainer> m_channelKey_fromBytestream{this,"LArRawChannelKey_fromBytestream","LArRawChannels","SG key of LArRawChannels produced by teh DSP"};
@@ -173,58 +137,32 @@ private:
   Gaudi::Property<bool> m_printEnergyErrors{this, "PrintEnergyErrors", true, "energy errors printing"};
   Gaudi::Property<bool> m_removeNoiseBursts{this, "RemoveNoiseBursts", true, "removing events with noise bursts"};
 
-  // Ranges and precisions (this comes from hardware definitions)
-  Gaudi::Property<int> m_range_E_0{this, "ERange0",    8192, "Energy ranges (in MeV)"};
-  Gaudi::Property<int> m_range_E_1{this, "ERange1",   65536, "Energy ranges (in MeV)"};
-  Gaudi::Property<int> m_range_E_2{this, "ERange2",  524288, "Energy ranges (in MeV)"};
-  Gaudi::Property<int> m_range_E_3{this, "ERange3", 4194304, "Energy ranges (in MeV)"};
-
-  Gaudi::Property<int> m_range_T_0{this, "TRange0",  1000, "Time ranges (in ps)"};
-  Gaudi::Property<int> m_range_T_1{this, "TRange1",  5000, "Time ranges (in ps)"};
-  Gaudi::Property<int> m_range_T_2{this, "TRange2", 25000, "Time ranges (in ps)"};
-  Gaudi::Property<int> m_range_T_3{this, "TRange3", 50000, "Time ranges (in ps)"};
-
-  Gaudi::Property<int> m_range_Q_0{this, "QRange0", 65536, "Only 1 range for now, and Q < 2^16 anyway"};
-  Gaudi::Property<int> m_range_Q_1{this, "QRange1", 65536, "Only 1 range for now"};
-  Gaudi::Property<int> m_range_Q_2{this, "QRange2", 65536, "Only 1 range for now"};
-  Gaudi::Property<int> m_range_Q_3{this, "QRange3", 65536, "Only 1 range for now"};
-
-  Gaudi::Property<int> m_precision_E_0{this, "PrecisionERange0",   1, "Expected precision for E calculation (in MeV)"};
-  Gaudi::Property<int> m_precision_E_1{this, "PrecisionERange1",   8, "Expected precision for E calculation (in MeV)"};
-  Gaudi::Property<int> m_precision_E_2{this, "PrecisionERange2",  64, "Expected precision for E calculation (in MeV)"};
-  Gaudi::Property<int> m_precision_E_3{this, "PrecisionERange3", 512, "Expected precision for E calculation (in MeV)"};
-  Gaudi::Property<int> m_precision_E_max{this, "PrecisionERangeMax", 8192, "Expected precision for E calculation (in MeV)"};
-
-  Gaudi::Property<int> m_precision_T_0{this, "PrecisionTRange0", 340, "Expected precision for T calculation (in ps)"};
-  Gaudi::Property<int> m_precision_T_1{this, "PrecisionTRange1", 340, "Expected precision for T calculation (in ps)"};
-  Gaudi::Property<int> m_precision_T_2{this, "PrecisionTRange2", 340, "Expected precision for T calculation (in ps)"};
-  Gaudi::Property<int> m_precision_T_3{this, "PrecisionTRange3", 340, "Expected precision for T calculation (in ps)"};
-  Gaudi::Property<int> m_precision_T_max{this, "PrecisionTRangeMax", 340, "Expected precision for T calculation (in ps)"};
-
-  Gaudi::Property<int> m_precision_Q_0{this, "PrecisionQRange0", 3, "Expected precision for Q calculation"};
-  Gaudi::Property<int> m_precision_Q_1{this, "PrecisionQRange1", 3, "Expected precision for Q calculation"};
-  Gaudi::Property<int> m_precision_Q_2{this, "PrecisionQRange2", 3, "Expected precision for Q calculation"};
-  Gaudi::Property<int> m_precision_Q_3{this, "PrecisionQRange3", 3, "Expected precision for Q calculation"};
-  Gaudi::Property<int> m_precision_Q_max{this, "PrecisionQRangeMax", 3, "Expected precision for Q calculation"};
-
-  /*
-  int m_history_size;
-  int m_history_granularity;
-  int m_hsize;
-  std::vector<bool> m_hdone;
-  */
 
   Gaudi::Property<bool> m_skipKnownProblematicChannels{this, "SkipKnownProblematicChannels", false, "skipping known problems?"};
   Gaudi::Property<bool> m_skipNullPed{this, "SkipNullPed", false, "skipping no pedestal channels ?"};
   Gaudi::Property<bool> m_skipNullQT{this, "SkipNullQT", false, "skipping no quality channe4ls ?"};
 
-  Gaudi::Property<float> m_unit_online{this, "TimeOFCUnitOnline", 1.};
-  Gaudi::Property<float> m_unit_offline{this,"TimeOFCUnitOffline", 1.};
   Gaudi::Property<float> m_timeOffset{this, "TimeOffset", 0.};
   Gaudi::Property<short> m_adc_th{this, "ADCthreshold", 50, "Minimal number of ADC amplitude among samples required to compare online/offline"};
   Gaudi::Property<float> m_peakTime_cut{this, "peakTimeCut", 5., "Cut on abs(peak time) to compare online/offline (all quantities)"};
-  /*float m_nb_lb;*/
 
+  
+  // Expected precision for energy calculation, depending on energy (ranges) :
+  // Adding 1 MeV on request of Alexis (truncating difference) (May 2016)
+  // Between -213 and 213 MeV (~ 8 GeV)        2**0=1 MeV precision (range 0)
+  // Between -216 and 216 MeV (~ 64 GeV)       2**3=8 MeV precision (range 1)
+  // Between -219 and 219 MeV (~ 512 GeV)      2**6=64 MeV precision (range 2)
+  // Between -222 and 222 MeV (~ 4 TeV)        2**9=512 MeV precision (range 3)
+
+  Gaudi::Property<std::vector<std::pair<int, int>>> m_E_precision{this,"EnergyPrecisionRanges",
+                                                                 {{8192,2},{65536,9},{524288,65},{4194304,513},{std::numeric_limits<int>::max(),8193}},
+                                                                  "Energy precision ranges vector<pair<upperLimit,ExpectedPrecision>"};
+  Gaudi::Property<std::vector<std::pair<int, int>>> m_T_precision{this,"TimePrecisionRanges",
+                                                                  {{1000,340},{5000,340},{25000,340},{50000,340},{std::numeric_limits<int>::max(),340}},
+                                                                  "Time precision ranges as vector<pair<upperLImit,ExpectedPrecision"};                                                 
+  Gaudi::Property<std::vector<std::pair<int, int>>> m_Q_precision{this,"QualityPrecisionRanges",
+                                                                  {{std::numeric_limits<int>::max(),3}},
+                                                                  "Quality precision ranges as vector<pair<upperLImit,ExpectedPrecision"};       
   const float m_BC=25000; // value of 1 bunch-crossing = 25ns
 
   /* Histogram grouping (part) */
@@ -232,11 +170,16 @@ private:
 
   Gaudi::Property<std::vector<std::string> > m_streams{this, "Streams", {} };
 
-  Gaudi::Property<unsigned> m_max_dump{this, "MaxEvDump", 100, "max number of events to dump"};
+  Gaudi::Property<unsigned> m_max_dump{this, "MaxEvDump", 0, "max number of channels for detailed log-output"};
   mutable std::atomic<unsigned> m_ndump{0};
 
-  mutable std::atomic<unsigned>  m_counter{0};
-  mutable std::atomic<unsigned> m_eventsCounter{0};
+
+  //Streams for dump-files. Explicitly disabled in an MT-environment
+  mutable std::ofstream m_fai ATLAS_THREAD_SAFE;
+  mutable std::ofstream m_fdig ATLAS_THREAD_SAFE;
+  mutable std::ofstream m_fen ATLAS_THREAD_SAFE;
+  mutable std::ofstream m_fdump ATLAS_THREAD_SAFE;
+
 };
 
 
@@ -303,6 +246,5 @@ const std::string & LArRODMonAlg::getPartitionName(const HWIdentifier chid) cons
   ATH_MSG_FATAL( "Channel 0x "<< std::hex << chid.get_identifier32().get_compact() << std::dec << " neither EMB nor EMEC nor HEC nor FCAL???" );
   return m_PARTNAMES[8];
 }
-
 
 #endif
