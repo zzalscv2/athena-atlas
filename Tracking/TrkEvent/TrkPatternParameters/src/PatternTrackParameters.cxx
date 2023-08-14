@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -41,8 +41,9 @@ Trk::PatternTrackParameters::convert(bool covariance) const
 
 bool Trk::PatternTrackParameters::production(const Trk::ParametersBase<5,Trk::Charged>* T) {
 
-  if(!T) { return false;
-}
+  if (!T) {
+    return false;
+  }
   if (!T->hasSurface()) {
     return false;
   }
@@ -436,9 +437,9 @@ void Trk::PatternTrackParameters::changeDirection()
   m_parameters[ 3] =  pi-m_parameters[3];
   m_parameters[ 4] = -m_parameters[4]   ;
 
-  if( m_parameters[2] < -pi) { m_parameters[2]+=pi2;
-}
-
+  if (m_parameters[2] < -pi) {
+    m_parameters[2] += pi2;
+  }
 
   if(!dynamic_cast<const Trk::StraightLineSurface*>(m_surface.get()) &&
      !dynamic_cast<const Trk::PerigeeSurface*>     (m_surface.get())) {
@@ -502,33 +503,8 @@ Amg::Vector3D Trk::PatternTrackParameters::calculatePosition(void) const {
 
 Amg::Vector3D Trk::PatternTrackParameters::calculateMomentum(void) const {
   double p = absoluteMomentum();
-
   double Sf = std::sin(m_parameters[2]), Cf = std::cos(m_parameters[2]);
   double Se = std::sin(m_parameters[3]), Ce = std::cos(m_parameters[3]);
-
   return {p * Se * Cf, p * Se * Sf, p * Ce};
 }
 
-bool Trk::PatternTrackParameters::hasSurface() const {
-  return m_surface != nullptr;
-}
-
-Amg::RotationMatrix3D Trk::PatternTrackParameters::measurementFrame() const {
-  return associatedSurface().measurementFrame(this->position(), this->momentum());
-}
-
-Trk::PatternTrackParameters * Trk::PatternTrackParameters::clone() const {
-  return new PatternTrackParameters(*this);
-}
-
-Trk::ParametersType Trk::PatternTrackParameters::type() const {
-  return Trk::Pattern;
-}
-
-Trk::SurfaceType Trk::PatternTrackParameters::surfaceType() const {
-  return m_surface->type();
-}
-
-void Trk::PatternTrackParameters::updateParametersHelper(const AmgVector(5)& params){
-  m_parameters = params;
-}
