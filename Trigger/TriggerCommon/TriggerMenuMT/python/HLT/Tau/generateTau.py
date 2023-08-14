@@ -145,7 +145,7 @@ def _ftfTauIsoSeq(flags,name,is_probe_leg=False):
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
 
-    fastInDetReco = InViewRecoCA('FastTau'+name,RoITool           = newRoITool,
+    fastInDetReco = InViewRecoCA('tauFastTrack'+name,RoITool           = newRoITool,
                                                 RequireParentView = True,
                                                 ViewFallThrough   = True,
                                                 isProbe           = is_probe_leg)
@@ -178,11 +178,9 @@ def tauFTFTauIsoSeq(flags, is_probe_leg=False):
 def _precTrackSeq(flags,name,is_probe_leg=False):
     selAcc=SelectionCA('tau'+name+'Track', isProbe=is_probe_leg)
 
-    newRoITool = CompFactory.ViewCreatorPreviousROITool()
-
-    recoAcc = InViewRecoCA(name              = 'Prec'+name+'Track', 
-                           RoITool           = newRoITool,
-                           InViewRoIs        = 'FastTauIsoRoIs',
+    recoAcc = InViewRecoCA(name              = 'prec'+name+'Track', 
+                           RoITool           = CompFactory.ViewCreatorPreviousROITool(),
+                           InViewRoIs        = 'tauFastTrack'+name,
                            RequireParentView = True,
                            ViewFallThrough   = True,                           
                            isProbe           = is_probe_leg)
@@ -215,7 +213,7 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
     recoAcc.mergeReco(trigInDetVertexingCfg(flags,precTracks,flags.Tracking.ActiveConfig.vertex))
 
     selAcc.mergeReco(recoAcc)
-    hypoAlg = CompFactory.TrigTrkPrecHypoAlg('TrkPrecIsoHypoAlg',
+    hypoAlg = CompFactory.TrigTrkPrecHypoAlg('TrkPrec'+name+'HypoAlg',
                                                     trackparticles = precTracks, 
                                                     RoIForIDReadHandleKey = '' )
     selAcc.addHypoAlgo(hypoAlg)
@@ -228,4 +226,63 @@ def tauPrecTrackIsoSeq(flags, is_probe_leg=False):
     newflags = getInDetFlagsForSignature(flags,'tauIso')
     name = 'Iso'
     (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
+    return menuCA
+
+def tauPrecTrackLRTSeq(flags, is_probe_leg=False):
+    newflags = getInDetFlagsForSignature(flags,'tauLRT')
+    name = 'LRT'
+    (selAcc , menuCA) = _precTrackSeq(newflags,name,is_probe_leg)
+    return menuCA
+
+def _tauPrecSeq(flags,name,is_probe_leg=False):
+    selAcc=SelectionCA('tauPrec'+name, isProbe=is_probe_leg)
+
+    InViewName = 'Iso' if 'LRT' not in name else 'LRT' 
+    recoAcc = InViewRecoCA(name              = 'prec'+name+'Tau', 
+                           RoITool           = CompFactory.ViewCreatorPreviousROITool(),
+                           InViewRoIs        = 'tauFastTrack'+InViewName,
+                           RequireParentView = True,
+                           ViewFallThrough   = True,                           
+                           isProbe           = is_probe_leg)
+
+    ViewVerifyID =  CompFactory.AthViews.ViewDataVerifier(name='VDVPrecTau'+name,
+                                DataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+{}'.format(recoAcc.inputMaker().InViewRoIs)),
+                                ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing'   ),
+                                ( 'xAOD::VertexContainer', 'StoreGateSvc+'+flags.Tracking.ActiveConfig.vertex),
+                                ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
+                                ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
+                                ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_IDTrig )])
+
+    recoAcc.addRecoAlgo(ViewVerifyID)
+
+    from TrigTauRec.TrigTauRecConfig import trigTauRecMergedPrecisionMVACfg
+    tauPrecisionAlg = trigTauRecMergedPrecisionMVACfg(flags, name, inputRoIs = recoAcc.inputMaker().InViewRoIs, tracks = flags.Tracking.ActiveConfig.tracks_IDTrig)
+
+    recoAcc.mergeReco(tauPrecisionAlg)
+
+    selAcc.mergeReco(recoAcc)
+    hypoAlg = CompFactory.TrigEFTauMVHypoAlg('EFTauMVHypoAlg'+name,
+                                                    taujetcontainer = 'HLT_TrigTauRecMerged_'+name)
+    selAcc.addHypoAlgo(hypoAlg)
+
+    from TrigTauHypo.TrigTauHypoTool import TrigEFTauMVHypoToolFromDict
+    menuCA = MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEFTauMVHypoToolFromDict, isProbe=is_probe_leg)
+    return (selAcc , menuCA)
+
+def tauTrackTwoMVASeq(flags, is_probe_leg=False):
+    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    name = 'MVA'
+    (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
+    return menuCA
+
+def tauTrackTwoLLPSeq(flags, is_probe_leg=False):
+    newflags = getInDetFlagsForSignature(flags,'tauIso')
+    name = 'LLP'
+    (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
+    return menuCA
+
+def tauTrackLRTSeq(flags, is_probe_leg=False):
+    newflags = getInDetFlagsForSignature(flags,'tauLRT')
+    name = 'LRT'
+    (selAcc , menuCA) = _tauPrecSeq(newflags,name,is_probe_leg)
     return menuCA
