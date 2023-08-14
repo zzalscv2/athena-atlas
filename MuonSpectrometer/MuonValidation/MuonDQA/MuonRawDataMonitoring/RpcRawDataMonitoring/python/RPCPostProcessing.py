@@ -85,7 +85,6 @@ def make_evt_lumi(inputs):
   runs      = getRun(h_run)
 
   Dic_LBLumi = GetLBInfoFromCOOL.GetLumiInfoDic(runs[0], runs[-1]+1)
-  print ("len(Dic_LBLumi) = ", len(Dic_LBLumi))
 
   g_name   = 'NEvent_VS_Lumi'
   g_title  = 'NEvent VS Lumi'
@@ -96,16 +95,19 @@ def make_evt_lumi(inputs):
   y = []
   y_err = []
 
-  for LB, lbInfo in Dic_LBLumi.items():
-    if lbInfo['AtlasPhysics'] == 'false' or float(lbInfo['Duration'])<50.:
-      continue
+  if Dic_LBLumi is not None:
+    print ("len(Dic_LBLumi) = ", len(Dic_LBLumi))
 
-    hit_content = h_NEvt_LB.GetBinContent(LB)
-    hit_err     = h_NEvt_LB.GetBinError(LB) 
+    for LB, lbInfo in Dic_LBLumi.items():
+      if lbInfo['AtlasPhysics'] == 'false' or float(lbInfo['Duration'])<50.:
+        continue
 
-    x.append( float(lbInfo['InstLumi']) )
-    y.append( hit_content )
-    y_err.append( hit_err )
+      hit_content = h_NEvt_LB.GetBinContent(LB)
+      hit_err     = h_NEvt_LB.GetBinError(LB) 
+
+      x.append( float(lbInfo['InstLumi']) )
+      y.append( hit_content )
+      y_err.append( hit_err )
 
   x_err = [0]*len(x)
 

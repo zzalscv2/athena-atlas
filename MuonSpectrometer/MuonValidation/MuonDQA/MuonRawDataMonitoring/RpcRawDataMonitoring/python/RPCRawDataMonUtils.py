@@ -6,6 +6,9 @@ import ROOT
 
 #############################################################################
 def creatGraph(xs, ys, x_errs, y_errs, g_name, g_title, g_Xtitle, g_Ytitle):
+  if len(xs) == 0:
+    return ROOT.TGraph()
+  
   import array
   x_arr = array.array("f",xs)
   y_arr = array.array("f",ys)
