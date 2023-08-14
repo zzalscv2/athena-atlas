@@ -207,7 +207,7 @@ namespace LVL1 {
       
 
       if(false){
-	      ATH_MSG_DEBUG("CONTENTS OF eFEX " << thisEFEX << " :");
+	ATH_MSG_DEBUG("CONTENTS OF eFEX " << thisEFEX << " :");
         for (int thisRow=rows-1; thisRow>=0; thisRow--){
           for (int thisCol=0; thisCol<cols; thisCol++){
             int tmptowerid = tmp_eTowersIDs_subset[thisRow][thisCol];
@@ -228,7 +228,6 @@ namespace LVL1 {
       m_eFEXSimTool->reset();
 
       fexcounter++;
-
     }
 
     // CENTRAL EFEXs
@@ -273,7 +272,6 @@ namespace LVL1 {
           tmp_eTowersIDs_subset[thisRow][thisCol] = towerid;
 
           tmp_eTowersColl_subset.insert( std::map<int, eTower>::value_type(towerid,  *(this_eTowerContainer->findTower(towerid))));
-
         }
       }
       
@@ -300,7 +298,6 @@ namespace LVL1 {
       m_eFEXSimTool->reset();
 
       fexcounter++;
-
     }
 
     // POSITIVE EFEXs
@@ -333,48 +330,45 @@ namespace LVL1 {
         for(int thisRow=0; thisRow<rows; thisRow++){
           int towerid = initialEMB + ( (thisCol) * 64) + thisRow;
 
-	        if( (thisEFEX == 23) && (thisRow >= 7)){ towerid -= 64; };
+	  if( (thisEFEX == 23) && (thisRow >= 7)){ towerid -= 64; };
 
           tmp_eTowersIDs_subset[thisRow][thisCol] = towerid;
           tmp_eTowersColl_subset.insert( std::map<int, eTower>::value_type(towerid,  *(this_eTowerContainer->findTower(towerid))));
-
         }
       }
       // set the TRANS part
       for(int thisRow = 0; thisRow < rows; thisRow++){
         int towerid = initialTRANS + thisRow;
 
-	      if( (thisEFEX == 23) && (thisRow >= 7)){ towerid -= 64; };
+	if( (thisEFEX == 23) && (thisRow >= 7)){ towerid -= 64; };
 
         tmp_eTowersIDs_subset[thisRow][7] = towerid;
         tmp_eTowersColl_subset.insert( std::map<int, eTower>::value_type(towerid,  *(this_eTowerContainer->findTower(towerid))));
-
       }
       // set the EMEC part
       for(int thisCol=8; thisCol<cols; thisCol++){
         for(int thisRow=0; thisRow<rows; thisRow++){
           int towerid = initialEMEC + ( (thisCol-8) * 64) + thisRow;
 
-	        if( (thisEFEX == 23) && (thisRow >= 7)){ towerid -= 64; };
+	  if( (thisEFEX == 23) && (thisRow >= 7)){ towerid -= 64; };
 
           tmp_eTowersIDs_subset[thisRow][thisCol] = towerid;
           tmp_eTowersColl_subset.insert( std::map<int, eTower>::value_type(towerid,  *(this_eTowerContainer->findTower(towerid))));
-
         }
       }
 
       // Debug printout
       if(false){
-	      ATH_MSG_DEBUG("CONTENTS OF eFEX " << thisEFEX << " :");
-	      for (int thisRow=rows-1; thisRow>=0; thisRow--){
-	        for (int thisCol=0; thisCol<cols; thisCol++){
-	          int tmptowerid = tmp_eTowersIDs_subset[thisRow][thisCol];
-	          const float tmptowereta = this_eTowerContainer->findTower(tmptowerid)->eta();
-	          const float tmptowerphi = this_eTowerContainer->findTower(tmptowerid)->phi();
-	          if(thisCol != cols-1){ ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  "); }
-	          else { ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  |"); }
-	        }
-	      }
+	ATH_MSG_DEBUG("CONTENTS OF eFEX " << thisEFEX << " :");
+	for (int thisRow=rows-1; thisRow>=0; thisRow--){
+	  for (int thisCol=0; thisCol<cols; thisCol++){
+	    int tmptowerid = tmp_eTowersIDs_subset[thisRow][thisCol];
+	    const float tmptowereta = this_eTowerContainer->findTower(tmptowerid)->eta();
+	    const float tmptowerphi = this_eTowerContainer->findTower(tmptowerid)->phi();
+	    if(thisCol != cols-1){ ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  "); }
+	    else { ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  |"); }
+	  }
+	}
       }
 
       //tool use instead
@@ -386,7 +380,6 @@ namespace LVL1 {
       m_eFEXSimTool->reset();
 
       fexcounter++;
-
     }
     
     }//close the non-csv loop over eFEXes

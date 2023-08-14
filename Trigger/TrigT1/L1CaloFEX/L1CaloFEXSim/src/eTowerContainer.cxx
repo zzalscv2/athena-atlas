@@ -36,7 +36,7 @@ const LVL1::eTower * eTowerContainer::findTower(int towerID) const{
     return (*this)[container_index];
 }
 
-LVL1::eTower * eTowerContainer::findTower(int towerID){
+LVL1::eTower * eTowerContainer::findTower(int towerID) {
     const auto it = m_map_towerID_containerIndex.find(towerID);
 
     const int container_index = it->second;

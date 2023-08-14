@@ -15,10 +15,9 @@
 
 #ifndef EFAKETOWER_H
 #define EFAKETOWER_H
-#include<string>
-#include<unordered_map>
-#include<vector>
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include <string>
+#include <unordered_map>
+#include <vector>
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IeFEXSysSim.h"
 #include "L1CaloFEXSim/eTower.h"
@@ -56,7 +55,7 @@ namespace LVL1 {
     eFakeTower(const std::string& type,const std::string& name,const IInterface* parent);
 
     /// @brief initiate with the path to the test vector directory 
-    virtual StatusCode init(std::string) override;
+    virtual StatusCode init(const std::string&) override;
 
     /// @brief Destructor
     ~eFakeTower();
@@ -73,7 +72,7 @@ namespace LVL1 {
      * @return Et
      *
      */
-    virtual int getET(int FPGAid, int eta, int phi, int layer, int cell) override;
+    virtual int getET(int FPGAid, int eta, int phi, int layer, int cell) const override;
 
     /// @brief Load the test vector of the next event
     virtual StatusCode loadnext() override;
@@ -114,7 +113,7 @@ namespace LVL1 {
      * @return status code
      * 
      */
-    StatusCode changeTowerET(LVL1::eTower* inputtower, int eta, int phi, int FPGAid);
+    StatusCode changeTowerET(LVL1::eTower* inputtower, int eta, int phi, int FPGAid) const;
 
     /**
      * @brief determine the index of an FPGA
@@ -130,7 +129,7 @@ namespace LVL1 {
     eTowerContainer* m_eTowerContainer; //the eTowerContainer object for which the Et will be replaced
 
     /// @brief Load the Et or index in a block
-    std::vector<int>* loadBlock(std::string, int);
+    std::vector<int>* loadBlock(const std::string&, int) const;
 
     int m_numberofevents; ///< number of events
 

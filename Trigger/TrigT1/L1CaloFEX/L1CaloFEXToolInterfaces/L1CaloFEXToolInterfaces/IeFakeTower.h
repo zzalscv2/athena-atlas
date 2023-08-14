@@ -14,8 +14,8 @@ namespace LVL1 {
   class IeFakeTower : virtual public IAlgTool {
     public:
       static const InterfaceID& interfaceID() { return IID_IIeFakeTower; };
-      virtual StatusCode init(std::string) = 0;
-      virtual int getET(int, int, int, int, int) = 0;
+      virtual StatusCode init(const std::string&) = 0;
+      virtual int getET(int, int, int, int, int) const = 0;
       virtual StatusCode loadnext() = 0;
       virtual StatusCode execute() = 0;
       virtual StatusCode seteTowers(eTowerContainer*) = 0;

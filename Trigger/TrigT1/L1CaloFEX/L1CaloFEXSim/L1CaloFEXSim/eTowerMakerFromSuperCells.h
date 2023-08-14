@@ -1,3 +1,7 @@
+/*
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef eTowerMakerFromSuperCells_H
 #define eTowerMakerFromSuperCells_H
 
@@ -5,7 +9,7 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXSim/eTowerBuilder.h"
@@ -14,16 +18,15 @@
 
 namespace LVL1 {
 
-class eTowerMakerFromSuperCells : public AthAlgorithm
+class eTowerMakerFromSuperCells : public AthReentrantAlgorithm
 {
  public:
-  //using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   eTowerMakerFromSuperCells(const std::string& name, ISvcLocator* pSvcLocator);
   ~eTowerMakerFromSuperCells() = default;
 
-  virtual StatusCode initialize();
-  virtual StatusCode execute(/*const EventContext& ctx*/);// const;
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
 

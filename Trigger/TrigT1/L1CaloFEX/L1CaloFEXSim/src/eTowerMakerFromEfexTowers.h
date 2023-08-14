@@ -9,28 +9,24 @@
 #include <string>
 
 // Athena/Gaudi
-//#include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 namespace LVL1 {
 
-class eTowerMakerFromEfexTowers : public AthAlgorithm
+class eTowerMakerFromEfexTowers : public AthReentrantAlgorithm
 {
  public:
-  //using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   eTowerMakerFromEfexTowers(const std::string& name, ISvcLocator* pSvcLocator);
   ~eTowerMakerFromEfexTowers() = default;
 
-  virtual StatusCode initialize();
-  virtual StatusCode execute(/*const EventContext& ctx*/);// const;
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
-
-  int m_numberOfEvents = 0;
 
     SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerSGKey {this, "InputTowers", "L1_eFexDataTowers", "efexTowers (use L1_eFexEmulatedTowers for built from SC, or L1_eFexDataTowers for efex readout"};
     // the use-case for this second input tower collection is in monitoring when running in prescaled readout mode

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -36,9 +36,9 @@ Interface definition for eTowerBuilder
     virtual void BuildAllTowers(std::unique_ptr<eTowerContainer> & eTowerContainer) const = 0;
     virtual void BuildSingleTower(std::unique_ptr<eTowerContainer> & eTowerContainer,float eta, float phi, float keybase, int posneg) const = 0;
     
-    virtual void init(std::unique_ptr<eTowerContainer> & eTowerContainer) = 0;
-    virtual void execute(std::unique_ptr<eTowerContainer> & eTowerContainer) = 0;
-    virtual void reset() = 0;
+    virtual void init(std::unique_ptr<eTowerContainer> & eTowerContainer) const = 0;
+    virtual void execute(std::unique_ptr<eTowerContainer> & eTowerContainer) const = 0;
+    virtual void reset() const = 0;
 
 
   private:

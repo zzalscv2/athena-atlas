@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -33,15 +33,15 @@ Interface definition for eSuperCellTowerMapper
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual StatusCode AssignSuperCellsToTowers(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) = 0;
-    virtual StatusCode AssignTriggerTowerMapper(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) = 0;
+    virtual StatusCode AssignSuperCellsToTowers(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const = 0;
+    virtual StatusCode AssignTriggerTowerMapper(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const = 0;
     
-    virtual void reset() = 0;
+    virtual void reset() const = 0;
     
-    virtual int FindAndConnectTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint) = 0;
-    virtual void ConnectSuperCellToTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) = 0;
-    virtual int FindTowerIDForSuperCell(int towereta, int towerphi) = 0;
-    virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit) = 0;
+    virtual int FindAndConnectTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint) const = 0;
+    virtual void ConnectSuperCellToTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) const = 0;
+    virtual int FindTowerIDForSuperCell(int towereta, int towerphi) const = 0;
+    virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit) const = 0;
 
   private:
 

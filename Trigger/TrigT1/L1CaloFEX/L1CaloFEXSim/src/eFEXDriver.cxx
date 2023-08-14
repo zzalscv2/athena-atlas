@@ -4,10 +4,8 @@
 
 
 #include "L1CaloFEXSim/eFEXDriver.h"
-#include "L1CaloFEXSim/eSuperCellTowerMapper.h"
 #include "L1CaloFEXSim/eFEXSim.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"
-#include "L1CaloFEXSim/eFEXegTOB.h"
 
 #include "StoreGate/WriteHandle.h"
 
@@ -34,7 +32,6 @@ StatusCode eFEXDriver::initialize()
   ATH_CHECK( m_eFEXOutputCollectionSGKey.initialize() );
 
   return StatusCode::SUCCESS;
-
 }
 
 
@@ -68,6 +65,5 @@ StatusCode eFEXDriver::finalize()
   return StatusCode::SUCCESS;
 }
 
-  
 
 } // end of LVL1 namespace
