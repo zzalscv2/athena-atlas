@@ -220,3 +220,9 @@ StatusCode LArPedestalValidationAlg::summary(const LArOnOffIdMapping *cabling, c
                  << " Deviation:" << m_rmsGlobalVal-m_rmsGlobalRef ) ;
   return sc;
 }
+
+
+LArPedestalValidationAlg::LArCondObj LArPedestalValidationAlg::getRefObj(const HWIdentifier chid, const int gain) const{
+  return LArCondObj(m_reference->pedestal(chid,gain),m_reference->pedestalRMS(chid,gain));
+
+}
