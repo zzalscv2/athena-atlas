@@ -105,7 +105,11 @@ def TrigTRT_dEdxToolCfg(flags, name="TrigTRT_dEdxTool", **kwargs):
 def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTHTCondAlgCfg, TRTPIDNNCondAlgCfg
     acc = TRTHTCondAlgCfg(flags)
-    acc.merge(TRTPIDNNCondAlgCfg(flags))
+
+    kwargs.setdefault("CalculateNNPid", True)
+
+    if kwargs["CalculateNNPid"]:
+        acc.merge(TRTPIDNNCondAlgCfg(flags))
 
     if "TRTStrawSummaryTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
@@ -118,8 +122,6 @@ def TRT_ElectronPidToolCfg(flags, name="TRT_ElectronPidTool", **kwargs):
     
     if "TRT_ToT_dEdx_Tool" not in kwargs:
         kwargs.setdefault("TRT_ToT_dEdx_Tool", acc.popToolsAndMerge(TRT_dEdxToolCfg(flags)))
-
-    kwargs.setdefault("CalculateNNPid", True)
 
     acc.setPrivateTools(CompFactory.InDet.TRT_ElectronPidToolRun2(name, **kwargs))
     return acc
