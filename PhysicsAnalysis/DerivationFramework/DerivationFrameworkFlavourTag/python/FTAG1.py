@@ -11,6 +11,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 # Main algorithm config
@@ -70,6 +71,14 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                            "AntiKt10UFOCSSKJets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                           ]
+
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        FTAG1SlimmingHelper.SmartCollections += [
+                                                "AntiKt4EMTopoJets",
+                                                "BTagging_AntiKt4EMTopo",
+                                                "MET_Baseline_AntiKt4EMTopo",
+                                                ]
+
     if len(extra_SmartCollections)>0:
         for a_container in extra_SmartCollections:
             if a_container not in FTAG1SlimmingHelper.SmartCollections:
@@ -96,6 +105,16 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
+
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        FTAG1SlimmingHelper.AllVariables += [
+            "AntiKt4EMTopoJets",
+            "BTagging_AntiKt4EMTopo",
+            "BTagging_AntiKt4EMTopoJFVtx",
+            "BTagging_AntiKt4EMPTopoSecVtx",
+            ]
+
+
     if len(extra_AllVariables)>0:
         for a_container in extra_AllVariables:
             if a_container not in FTAG1SlimmingHelper.AllVariables:
