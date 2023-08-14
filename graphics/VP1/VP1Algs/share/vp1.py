@@ -85,7 +85,8 @@ if (vp1InputFiles == []):
 
     # Set geometry version
     if (not "DetDescrVersion" in dir()):
-        DetDescrVersion = "ATLAS-R2-2016-01-00-01" # default Run 2 geometry
+        #DetDescrVersion = "ATLAS-R2-2016-01-00-01" # default Run 2 geometry
+        DetDescrVersion = "ATLAS-R3S-2021-03-01-00" # default Run 3 geometry, with symmetric NSW
 
     globalflags.DetDescrVersion = DetDescrVersion
     
@@ -133,7 +134,9 @@ else:
 
         # Set geometry version
         if (not "DetDescrVersion" in dir()):
-            DetDescrVersion = "ATLAS-R2-2016-01-00-01" # default Run 2 geometry
+            #DetDescrVersion = "ATLAS-GEO-10-00-02" # very old tag
+            #DetDescrVersion = "ATLAS-R2-2016-01-00-01" # default Run 2 geometry
+            DetDescrVersion = "ATLAS-R3S-2021-03-01-00" # default Run 3 geometry, with symmetric NSW
         globalflags.DetDescrVersion = DetDescrVersion
             
         # Set conditions tag

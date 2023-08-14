@@ -19,6 +19,7 @@
 #include "VP1GuideLineSystems/VP1CoordinateAxes.h"
 #include "VP1GuideLineSystems/VP1Floor.h"
 #include "VP1GuideLineSystems/VP1Letters.h"
+#include "VP1GuideLineSystems/VP1People.h"
 #include "VP1GuideLineSystems/VP1EtaCone.h"
 #include "VP1GuideLineSystems/VP1CartesianGrid.h"
 #include "VP1GuideLineSystems/VP1CylindricalGrid.h"
@@ -62,6 +63,7 @@ public:
   VP1CartesianGrid * cartesiangrid;
   VP1CylindricalGrid * cylindricalgrid;
   VP1Letters * letters;
+  VP1People  * people;
   VP1EtaCone * etacone1;
   VP1EtaCone * etacone2;
   VP1EtaCone * etacone3;
@@ -166,6 +168,15 @@ void VP1GuideLineSystem::buildPermanentSceneGraph(StoreGateSvc* /*detstore*/, So
   connect(m_d->controller,SIGNAL(showLettersChanged(bool)),m_d->letters,SLOT(setShown(bool)));
   m_d->letters->setShown(m_d->controller->showLetters());
 
+  //People:
+  m_d->people = new VP1People(m_d->controller->peopleMaterial(),root,this);
+  connect(m_d->controller,SIGNAL(peopleZPosChanged(const double&)),m_d->people,SLOT(setZPos(const double&)));
+  m_d->people->setZPos(m_d->controller->peopleZPos());
+  connect(m_d->controller,SIGNAL(peopleVerticalPosChanged(const double&)),m_d->people,SLOT(setVerticalPosition(const double&)));
+  m_d->people->setVerticalPosition(m_d->controller->peopleVerticalPos());
+  connect(m_d->controller,SIGNAL(showPeopleChanged(bool)),m_d->people,SLOT(setShown(bool)));
+  m_d->people->setShown(m_d->controller->showPeople());
+  
   //Coordinate axes:
   m_d->coordinateaxes = new VP1CoordinateAxes(m_d->controller->xAxisMaterial(),
 					    m_d->controller->yAxisMaterial(),

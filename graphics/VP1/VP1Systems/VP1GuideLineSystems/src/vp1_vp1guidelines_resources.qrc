@@ -1,0 +1,7 @@
+
+<!DOCTYPE RCC><RCC version="1.0">
+  <qresource prefix="/vp1/data/models">
+    <file alias="worker1.wrl">data/models/vp1_vp1guidelinesystems_people_model_worker1.wrl</file>
+    <file alias="worker2.wrl">data/models/vp1_vp1guidelinesystems_people_model_worker2.wrl</file>
+  </qresource>
+</RCC>
