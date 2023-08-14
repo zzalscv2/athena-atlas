@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from Campaigns.Utils import Campaign, getMCCampaign
 
 
@@ -32,7 +32,7 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
         ],
         Campaign.MC23c: [
-            'GoodRunsLists/data23_13p6TeV/20230626/ilumicalc_histograms_None_451587-452872_OflLumi-Run3-003.root'
+            'GoodRunsLists/data23_13p6TeV/20230712/ilumicalc_histograms_None_451587-454322_OflLumi-Run3-003.root'
         ]
     }
 
@@ -84,6 +84,10 @@ def defaultConfigFiles(campaign):
     elif campaign in [Campaign.MC23a]:
         list.append(
             'PileupReweighting/mc23_common/mc23a.410000.physlite.prw.v2.root'
+        )
+    elif campaign in [Campaign.MC23c]:
+        list.append(
+            'PileupReweighting/mc23_common/mc23c.450000.physlite.prw.v1.root'
         )
     else:
         raise ValueError(f'Unsupported campaign {campaign}')
