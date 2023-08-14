@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NswPassivationTestAlg.h"
@@ -18,7 +18,6 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "CoralBase/Blob.h"
 #include "CoralUtilities/blobaccess.h"
-#include "GaudiKernel/StatusCode.h"
 #include "Identifier/Identifier.h"
 
 // constructor
@@ -29,10 +28,10 @@ NswPassivationTestAlg::~NswPassivationTestAlg() = default;
 
 // initialize
 StatusCode NswPassivationTestAlg::initialize() {
-	ATH_MSG_INFO("Calling initialize");
-	ATH_CHECK(m_readKey.initialize());
-	ATH_CHECK(m_idHelperSvc.retrieve());
-	return StatusCode::SUCCESS;
+    ATH_MSG_INFO("Calling initialize");
+    ATH_CHECK(m_readKey.initialize());
+    ATH_CHECK(m_idHelperSvc.retrieve());
+    return StatusCode::SUCCESS;
 }
 
 // execute
@@ -80,25 +79,25 @@ StatusCode NswPassivationTestAlg::retrieve(const EventContext& ctx, std::chrono:
     // retrieve all channels
     std::vector<Identifier> channelIds = readCdo->getChannelIds();
     ATH_MSG_INFO("Found data for " << channelIds.size() << " channels!");
-	ATH_MSG_INFO("Going to display passivation params for all channels (left, right, top, bottom)");
+    ATH_MSG_INFO("Going to display passivation params for all channels (left, right, top, bottom)");
 
-	std::ofstream fout;
-	fout.open("passivationDump.txt");
-	fout << "athenaId,PCB,stationName,stationEta,stationPhi,multiLayer,gasGap,left,right,top,bottom\n";
+    std::ofstream fout;
+    fout.open("passivationDump.txt");
+    fout << "athenaId,PCB,stationName,stationEta,stationPhi,multiLayer,gasGap,left,right,top,bottom\n";
 
     // retrieve data for the first channel
-	for(unsigned int i=0; i<channelIds.size(); ++i){
+    for(unsigned int i=0; i<channelIds.size(); ++i){
         const Identifier& channel = channelIds[i];
         NswPassivationDbData::PCBPassivation passiv = readCdo->getPassivation(channel);
-		int eta  = m_idHelperSvc->mmIdHelper().stationEta(channel);
-		int chnl = m_idHelperSvc->mmIdHelper().channel   (channel);
-		int pcb  = (chnl-1)/1024+1; // int division should round downwards
-		if(std::abs(eta)>1) pcb+=5;
+        int eta  = m_idHelperSvc->mmIdHelper().stationEta(channel);
+        int chnl = m_idHelperSvc->mmIdHelper().channel   (channel);
+        int pcb  = (chnl-1)/1024+1; // int division should round downwards
+        if(std::abs(eta)>1) pcb+=5;
         ATH_MSG_INFO("Board "<<i<<" ("<<channel.get_compact()<<"): "<<passiv.left<<", "<<passiv.right<<", "<<passiv.top<<", "<<passiv.bottom);
-		fout << channel.get_compact()<<","<<pcb<<","<<m_idHelperSvc->toString(channel)<<","<<passiv.left<<","<<passiv.right<<","<<passiv.top<<","<<passiv.bottom<<std::endl;
+        fout << channel.get_compact()<<","<<pcb<<","<<m_idHelperSvc->toString(channel)<<","<<passiv.left<<","<<passiv.right<<","<<passiv.top<<","<<passiv.bottom<<std::endl;
     }
 
-	fout.close();
+    fout.close();
 
     auto end1 = std::chrono::high_resolution_clock::now();
     timer += end1 - start1;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NswPassivationTestAlg_H
@@ -11,14 +11,10 @@
 
 // Athena
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "MuonReadoutGeometry/NswPassivationDbData.h"
+#include "MuonAlignmentData/NswPassivationDbData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
-// Forward declarations
-class ISvcLocator;
-class StatusCode;
 
 class NswPassivationTestAlg : public AthReentrantAlgorithm {
 public:
