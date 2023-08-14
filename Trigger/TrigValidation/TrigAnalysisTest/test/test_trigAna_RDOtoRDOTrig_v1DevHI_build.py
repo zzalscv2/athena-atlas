@@ -14,11 +14,10 @@ preExec = ';'.join([
   'setMenu=\'Dev_HI_run3_v1_TriggerValidation_prescale\'',
   'doWriteBS=False',
   'doWriteRDOTrigger=True',
-  'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
-  'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
-  'ConfigFlags.Trigger.enableL1CaloPhase1=False',
-  'ConfigFlags.Trigger.L1.doAlfaCtpin=True',
-  'ConfigFlags.Trigger.L1.doHeavyIonTobThresholds=True',
+  'flags.Trigger.AODEDMSet=\'AODFULL\'',
+  'flags.Trigger.enableL1CaloPhase1=False',
+  'flags.Trigger.L1.doAlfaCtpin=True',
+  'flags.Trigger.L1.doHeavyIonTobThresholds=True',
 ])
 
 ex = ExecStep.ExecStep()
