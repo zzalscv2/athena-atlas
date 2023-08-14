@@ -35,19 +35,9 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-
-
 // Google Test and Google Mock
-#if __GNUC__ >= 9
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-copy"
-#endif
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#if __GNUC__ >= 9
-# pragma GCC diagnostic pop
-#endif
-
 
 // Names for storing collections
 std::string const VIEWS_NAME = "viewVector";

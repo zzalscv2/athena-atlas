@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFillerUtils_h
@@ -137,9 +137,6 @@ namespace Monitored {
       return true;
     }
 
-    // gcc bug #94505
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wparentheses"
     /**
      * Check if any of the histogram axes will be rebinned
      *
@@ -153,8 +150,6 @@ namespace Monitored {
       return (... || (getAxis<static_cast<Axis>(a)>(hist)->CanExtend() and
                       detail::fillWillRebinHistogram(getAxis<static_cast<Axis>(a)>(hist), v)));
     }
-    #pragma GCC diagnostic pop
-
 
     /**
      * Perform (arbitrary dimension) histogram fill with weight
