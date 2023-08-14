@@ -19,7 +19,6 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
-#include <boost/container/static_vector.hpp>
 
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointForSeed.h"
 

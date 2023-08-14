@@ -15,7 +15,6 @@
 #include "xAODEgamma/Photon.h"
 
 #include <array>
-#include <boost/container/flat_set.hpp>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
