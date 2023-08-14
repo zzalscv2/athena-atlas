@@ -62,14 +62,12 @@ StatusCode eFEXFPGA::init(int id, int efexid)
   m_efexid = efexid;
 
   return StatusCode::SUCCESS;
-
 }
 
 void eFEXFPGA::reset(){
 
   m_id = -1;
   m_efexid = -1;
-
 }
 
 StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
@@ -131,12 +129,10 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       unsigned int und = (m_eFEXegAlgoTool->getUnD() ? 1 : 0);
 
       // the minimum energy to send to topo (not eta dependent yet, but keep inside loop as it will be eventually?)
-      unsigned int ptMinToTopoCounts = 0;
-      ptMinToTopoCounts = thr_eEM.ptMinToTopoCounts(); 
+      unsigned int ptMinToTopoCounts = thr_eEM.ptMinToTopoCounts();
 
       //returns a unsigned integer et value corresponding to the... eFEX EM cluster in 25 MeV internal calculation scale
-      unsigned int eEMTobEt = 0;
-      eEMTobEt = m_eFEXegAlgoTool->getET();
+      unsigned int eEMTobEt = m_eFEXegAlgoTool->getET();
             
       // thresholds from Trigger menu
       // the menu eta runs from -25 to 24
@@ -240,7 +236,6 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       // Now we've finished with that object we can move it into the class results store
       if ( (tobword != 0) && (eEMTobEt != 0) ) m_emTobObjects.push_back(std::move(tmp_tob));
 
-
     }
   }
 
@@ -277,14 +272,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       if (!m_eFEXtauAlgoTool->isCentralTowerSeed()){ continue; }
 
       // the minimum energy to send to topo (not eta dependent yet, but keep inside loop as it will be eventually?)
-      unsigned int ptTauMinToTopoCounts = 0;
-      ptTauMinToTopoCounts = thr_eTAU.ptMinToTopoCounts();
+      unsigned int ptTauMinToTopoCounts = thr_eTAU.ptMinToTopoCounts();
 
       // Get Et of eFEX tau object in internal units (25 MeV)
-      unsigned int eTauTobEt = 0;
-      unsigned int eTauBDTTobEt = 0;
-      eTauTobEt = m_eFEXtauAlgoTool->getEt();
-      eTauBDTTobEt = m_eFEXtauBDTAlgoTool->getEt();
+      unsigned int eTauTobEt = m_eFEXtauAlgoTool->getEt();
+      unsigned int eTauBDTTobEt = m_eFEXtauBDTAlgoTool->getEt();
 
       // thresholds from Trigger menu
       // the menu eta runs from -25 to 24
@@ -347,8 +339,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       bdtScore = m_eFEXtauBDTAlgoTool->getBDTScore();
       bdtCondition = m_eFEXtauBDTAlgoTool->getBDTCondition();
 
-      unsigned int seed = 0;
-      seed = m_eFEXtauAlgoTool->getSeed();
+      unsigned int seed = m_eFEXtauAlgoTool->getSeed();
       // Seed as returned is supercell value within 3x3 area, here want it within central cell
       seed = seed - 4;      
 
@@ -358,17 +349,15 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       int phi_ind = iphi - 1;
 
       // Form the tau TOB word and xTOB words
-      uint32_t tobword;
       std::vector<uint32_t> xtobwords;
-      uint32_t tobwordBDT;
       std::vector<uint32_t> xtobwordsBDT;
 
       ATH_MSG_DEBUG("m_id: " << m_id << ", eta_ind: " <<eta_ind << ", phi_ind: " 
 		      <<phi_ind << ", eTauBDTTobEt: " <<eTauBDTTobEt
 		      <<", eTauTobEt: "<<eTauTobEt << ", ptTauMinToTopoCounts: " << ptTauMinToTopoCounts<< ", maxEtCountsTau: " <<maxEtCountsTau << ", bdtScore: "<<bdtScore);
-      tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts);
+      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts);
       xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts, bdtScore);
-      tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
+      uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
       xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
 
       std::unique_ptr<eFEXtauTOB> tmp_tau_tob = m_eFEXtauAlgoTool->getTauTOB();
@@ -431,7 +420,6 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   }
 
   return StatusCode::SUCCESS;
-
 }
 
 
@@ -459,13 +447,11 @@ std::vector<std::unique_ptr<eFEXegTOB>> eFEXFPGA::getEmTOBs()
 
   // This copy seems to be needed - it won't let me pass m_emTobOjects directly (to do with being a class member?)
   std::vector<std::unique_ptr<eFEXegTOB>> tobsSort;
-  tobsSort.clear();
   for(auto &j : m_emTobObjects){
       tobsSort.push_back(std::move(j));
   }
 
   return tobsSort;
-
 }
 
 std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs(std::vector< std::unique_ptr<eFEXtauTOB> >& tauTobObjects)
@@ -496,7 +482,6 @@ std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs(std::vector< std::
   }
 
   return tobsSort;
-
 }
 
 std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauHeuristicTOBs()
@@ -554,7 +539,7 @@ void eFEXFPGA::SetTowersAndCells_SG(int tmp_eTowersIDs_subset[][6]){
 }
 
 
-void eFEXFPGA::SetIsoWP(std::vector<unsigned int> & CoreEnv, std::vector<unsigned int> & thresholds, unsigned int & workingPoint, unsigned int & bitshift) {
+void eFEXFPGA::SetIsoWP(const std::vector<unsigned int>& CoreEnv, const std::vector<unsigned int>& thresholds, unsigned int & workingPoint, unsigned int bitshift) const {
   // Working point evaluted by Core * 2^bitshift > Threshold * Environment conditions
   std::unordered_map<unsigned int, unsigned int> bsmap { {3, 8}, {5, 32}};
 

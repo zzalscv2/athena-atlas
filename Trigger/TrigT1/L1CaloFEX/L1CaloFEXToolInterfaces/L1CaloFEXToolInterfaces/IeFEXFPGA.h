@@ -41,13 +41,13 @@ Interface definition for eFEXFPGA
 
     virtual void SetTowersAndCells_SG(int [][6]) = 0;
     
-    virtual void SetIsoWP(std::vector<unsigned int> &, std::vector<unsigned int> &, unsigned int &, unsigned int &) = 0;
+    virtual void SetIsoWP(const std::vector<unsigned int>&, const std::vector<unsigned int>&, unsigned int &, unsigned int) const = 0;
 
-    virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() = 0; 
+    virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() = 0;
 
-    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() = 0; 
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() = 0;
     
-    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() = 0; 
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() = 0;
 
     // static virtual bool etSort(uint32_t &, uint32_t &) = 0;
 
