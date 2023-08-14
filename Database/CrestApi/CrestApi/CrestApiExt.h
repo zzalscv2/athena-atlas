@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2019-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2019-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -11,8 +11,6 @@
    This is a CrestClient class version with additional methods based on
    Boost Parameter Library.
  */
-
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
 
 #include <CrestApi/CrestApi.h>
 #include <boost/parameter/name.hpp>

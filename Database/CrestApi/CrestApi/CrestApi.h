@@ -16,18 +16,6 @@
 #ifndef CRESTAPI_CRESAPI_H
 #define CRESTAPI_CRESAPI_H
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Woverloaded-virtual"
-#endif
-
-// We get an unused parameter warning from within the boost parameter code.
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter"
-#endif
-
-
 #include <string>
 #include <map>
 #include <list>
@@ -1611,15 +1599,6 @@ namespace Crest {
   };
 
 } // namespace
-
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
 
 
 #endif // not CRESTAPI_CRESAPI_H
