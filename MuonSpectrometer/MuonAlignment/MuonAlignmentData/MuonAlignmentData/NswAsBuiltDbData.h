@@ -19,16 +19,23 @@ class NswAsBuiltDbData {
 public:
 #ifndef SIMULATIONBASE
     /// Storage to the micromega as built calculator
-    GeoModel::TransientConstSharedPtr<NswAsBuilt::StripCalculator> microMegaData{};
-    /// Storage to the stgc as built calculator
-    GeoModel::TransientConstSharedPtr<NswAsBuilt::StgcStripCalculator> sTgcData{};
+    using MmAsBuiltPtr  = GeoModel::TransientConstSharedPtr<NswAsBuilt::StripCalculator>;
+    using sTgcAsBuiltPtr = GeoModel::TransientConstSharedPtr<NswAsBuilt::StgcStripCalculator>;
+#else
+    /// Define a dummy pointer object if the project is AthSimulation
+    using MmAsBuiltPtr = char;
+    using sTgcAsBuiltPtr = char;
 #endif
+    MmAsBuiltPtr microMegaData{};
+    /// Storage to the stgc as built calculator
+    sTgcAsBuiltPtr sTgcData{};
+
     NswAsBuiltDbData() = default;
-    virtual ~NswAsBuiltDbData() = default;
+    ~NswAsBuiltDbData() = default;
 
 };
 
-CLASS_DEF( NswAsBuiltDbData , 163462850 , 1 )
-CLASS_DEF( CondCont<NswAsBuiltDbData> , 20792446 , 1 )
+CLASS_DEF( NswAsBuiltDbData , 163462850 , 1 );
+CONDCONT_DEF( NswAsBuiltDbData , 20792446 );
 
 #endif

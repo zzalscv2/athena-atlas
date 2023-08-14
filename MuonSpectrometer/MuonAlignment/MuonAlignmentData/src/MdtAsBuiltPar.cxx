@@ -32,8 +32,6 @@ std::ostream& operator<<(std::ostream& ostr, const MdtAsBuiltPar& par) {
 void MdtAsBuiltPar::setAlignmentParameters(multilayer_t iML, tubeSide_t iTubeSide, float y0, float z0, float alpha, float ypitch,
                                            float zpitch, int stagg) {
     AlignmentParameters& params = meas(iML, iTubeSide);
-    params.iML = iML;
-    params.iTubeSide = iTubeSide;
     params.y0 = y0;
     params.z0 = z0;
     params.alpha = alpha;

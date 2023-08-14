@@ -11,7 +11,7 @@
 #include "MuonAlignmentData/NswAsBuiltDbData.h"
 #include "MuonGeoModel/MuonDetectorTool.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/NswPassivationDbData.h"
+#include "MuonAlignmentData/NswPassivationDbData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"

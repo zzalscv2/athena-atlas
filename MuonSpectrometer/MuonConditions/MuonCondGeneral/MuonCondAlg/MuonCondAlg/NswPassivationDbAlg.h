@@ -5,23 +5,17 @@
 #ifndef MUONCONDALG_NSWPASSIVATIONDBALG_H
 #define MUONCONDALG_NSWPASSIVATIONDBALG_H
 
-// STL includes
-#include <string>
-#include <vector>
-
-// Gaudi includes
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/ReadCondHandleKey.h"
-#include "StoreGate/WriteCondHandleKey.h"
+#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <StoreGate/ReadCondHandleKey.h>
+#include <StoreGate/WriteCondHandleKey.h>
 
 // Muon includes
-#include "MuonReadoutGeometry/NswPassivationDbData.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
-
+#include <AthenaPoolUtilities/CondAttrListCollection.h>
+#include <MuonAlignmentData/NswPassivationDbData.h>
+#include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include <nlohmann/json.hpp>
 
 // Forward declarations
 class CondAttrListCollection;
@@ -31,7 +25,7 @@ class NswPassivationDbAlg: public AthReentrantAlgorithm{
 
 public:
 
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    NswPassivationDbAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~NswPassivationDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext&) const override;
@@ -39,17 +33,20 @@ public:
 
  
 private:
+    StatusCode parseData(const nlohmann::json & json,
+                         NswPassivationDbData& writeCdo) const;
 
-    typedef SG::WriteCondHandleKey<NswPassivationDbData> writeKey_t;
-    typedef SG::ReadCondHandleKey<CondAttrListCollection> readKey_t;
-
-	StatusCode loadData(const EventContext& ctx) const;
+    using writeKey_t = SG::WriteCondHandleKey<NswPassivationDbData>;
+    using readKey_t = SG::ReadCondHandleKey<CondAttrListCollection>;
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
  
     writeKey_t m_writeKey{this, "WriteKey", "NswPassivationDbData", "Key of output passivation data" };
 
     readKey_t m_readKey_data_mm{this, "ReadKey_MM", "/MDT/MM/PASSIVATION", "Key of input MM condition data"};
+
+    Gaudi::Property<std::string> m_readFromJSON{this,"readFromJSON", "",
+                                 "Reads the passivation parameters from a JSON file instead of cool"};
  
 };
 

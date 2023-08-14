@@ -51,12 +51,10 @@ public:
     double zpitch(multilayer_t iML, tubeSide_t iTubeSide) const { return meas(iML, iTubeSide).zpitch; }
     int stagg(multilayer_t iML, tubeSide_t iTubeSide) const { return meas(iML, iTubeSide).stagg; }
 
-private:
+
     // Alignment parameters
     struct AlignmentParameters {
         AlignmentParameters() = default;
-        multilayer_t iML{multilayer_t::ML1};      // ML index
-        tubeSide_t iTubeSide{tubeSide_t::POS};  // tube side
         float y0{0.f};              // y position of first wire w.r.t. reference point
         float z0{0.f};              // z position of first wire w.r.t. reference point
         float alpha{0.f};           // rotation around tube axis
@@ -64,6 +62,7 @@ private:
         float zpitch{0.f};          // z pitch
         int stagg{1};             // is tube staggering ATLAS-standard or reversed?
     };
+private:
     static constexpr unsigned int NMEAS = static_cast<unsigned int>(multilayer_t::NMLTYPES) * 
                                           static_cast<unsigned int>(tubeSide_t::NTUBESIDETYPES);
     std::array<AlignmentParameters, NMEAS>  m_meas{};  // in this order: ML1_HV, ML1_RO, ML2_HV, ML2_RO
