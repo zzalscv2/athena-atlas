@@ -125,8 +125,6 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
   //for example coaxial barrel layers should be separated by more than DR_Max
   // no simultaneous +/- or -/+ endcaps
 
-  m_innerMarkers.clear();
-  m_outerMarkers.clear();
   
   for(int layerI=1;layerI<nLayers;layerI++) {//skip layer 0 for middle spacepoint search
 
@@ -152,7 +150,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 
 	  bool isPixel2 = (m_settings.m_layerGeometry[layerJ].m_subdet == 1);
 	  
-	  if(isSct && isPixel2 && (!m_settings.m_tripletDoPSS)) continue;//no mixed PSS seeds allowed
+    bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
+	  if(checkPSS) continue;//no mixed PSS seeds allowed
 
 	  if((!isSct) && (!isPixel2)) {// i.e. xPS (or SPx)
 	    if((!m_settings.m_tripletDoConfirm) && (!m_settings.m_tripletDoPPS)) {
@@ -162,8 +161,6 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 	  }
 	  
 	  if(!validateLayerPairNew(layerI, layerJ, rm, zm)) continue; 
-	    
-	  bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
 	  
 	  const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiThreeSlices.at(phiI);
 
@@ -187,18 +184,14 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 	if(m_nInner != 0 && m_nOuter != 0) {
 	  std::vector<TrigInDetTriplet> tripletVec;
 	  
-	  if(m_settings.m_tripletDoConfirm) {
-	    if(!isSct) {
+	  if(m_settings.m_tripletDoConfirm && !isSct) {
 	      createConfirmedTriplets(spm->m_pSP, m_nInner, m_nOuter, tripletVec, roiDescriptor);
-	    }
-	    else createTripletsNew(spm->m_pSP, m_nInner, m_nOuter, tripletVec, roiDescriptor);
 	  }
 	  else createTripletsNew(spm->m_pSP, m_nInner, m_nOuter, tripletVec, roiDescriptor);
 	  
 	  if(!tripletVec.empty()) storeTriplets(tripletVec);	
 	  tripletVec.clear();
 	}
-	else continue;
       }
     }
   }
@@ -704,7 +697,7 @@ void TrigTrackSeedGenerator::createTriplets(const TrigSiSpacePointBase* pS, int 
 
 
 
-      const double dt2 = std::pow((t_inn - t_out), 2)/9.0;
+      const double dt2 = std::pow((t_inn - t_out), 2)*(1.0/9.0);
 
       
       double covdt = (t_inn*t_out*covR + covZ);
@@ -790,23 +783,25 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
 
   int nL = m_outerMarkers.size() + m_innerMarkers.size();
 
-  int nleft[64];
-  int iter[64];
-  int dirs[64];
-  int type[64];
-  double values[64];
+  // There are 32 pixel + SCT layers altogether, and 
+  // pairs of spacepoints from the same layer are not considered,
+  // so these arrays should need to contain at most 31 elements
+  int nleft[31];
+  int iter[31];
+  int dirs[31];
+  int type[31];
+  double values[31];
 
   iter[0] = m_innerMarkers[0]-1;
   nleft[0] = m_innerMarkers[0];
   dirs[0] = -1;
   type[0] = 0;//inner sp
-  int kL=1;
-  for(unsigned int k=1;k<m_innerMarkers.size();k++) {
-    iter[kL] = m_innerMarkers[k]-1;
-    nleft[kL] = m_innerMarkers[k]-m_innerMarkers[k-1];
+  unsigned int kL=1;
+  for(;kL<m_innerMarkers.size();kL++) {
+    iter[kL] = m_innerMarkers[kL]-1;
+    nleft[kL] = m_innerMarkers[kL]-m_innerMarkers[kL-1];
     dirs[kL] = -1;
     type[kL] = 0;
-    kL++;
   }
   iter[kL] = 0;
   nleft[kL] = m_outerMarkers[0];
@@ -820,7 +815,7 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
     type[kL] = 1;
     kL++;
   }
-  kL--;
+
   for(int k=0;k<nL;k++) {
     values[k] = (type[k]==0) ? m_SoA.m_ti[iter[k]] : m_SoA.m_to[iter[k]];//initialization
   }
@@ -931,7 +926,8 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
     for(int iter2=iter1+1;iter2<nSP;iter2++) {//inner loop
 
       if(type1==m_SoA.m_sorted_sp_type[iter2]) continue;
-
+      
+      // 1. rz doublet matching
       if(m_SoA.m_sorted_sp_t[iter2]-t1>tcut) break;
 
       const double t_out = m_SoA.m_t[iter2];
@@ -978,6 +974,8 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
       //5. phi0 cut
 
       if ( !fullPhi ) {
+        /// TODO: Check if uc calculation is correct; 
+        /// inconsistent with other versions of createSeeds
         const double uc = 2*d0_partial;
         const double phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
 
@@ -1132,7 +1130,7 @@ void TrigTrackSeedGenerator::createConfirmedTriplets(const TrigSiSpacePointBase*
       //1. rz doublet matching
       const double t_out = m_SoA.m_t[outIdx];
 
-      const double dt2 = std::pow((t_inn - t_out), 2)/9.0;//i.e. 3-sigma cut
+      const double dt2 = std::pow((t_inn - t_out), 2)*(1.0/9.0);//i.e. 3-sigma cut
 
 
       double covdt = (t_inn*t_out*covR + covZ);
