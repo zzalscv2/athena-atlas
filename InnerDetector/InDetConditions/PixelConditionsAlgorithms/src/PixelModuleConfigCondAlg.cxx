@@ -16,12 +16,10 @@ PixelModuleConfigCondAlg::PixelModuleConfigCondAlg(const std::string& name, ISvc
 {
 }
 
-StatusCode PixelModuleConfigCondAlg::initialize() {
+StatusCode 
+PixelModuleConfigCondAlg::initialize() {
   ATH_MSG_DEBUG("PixelModuleConfigCondAlg::initialize()");
-
-  ATH_CHECK(m_writeKey.initialize());
-
-  return StatusCode::SUCCESS;
+  return m_writeKey.initialize();
 }
 
 StatusCode PixelModuleConfigCondAlg::execute(const EventContext& ctx) const {
