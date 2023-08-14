@@ -10,6 +10,15 @@
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
+
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "Identifier/Identifier.h"
+// Event includes
+#include "InDetPrepRawData/PixelClusterContainer.h" 
+#include "TrkParameters/TrackParameters.h"
+#include "TrkPrepRawData/PrepRawData.h"
+#include "TrkTrack/Track.h"
+
 // STL
 #include <memory>
 #include <vector>
@@ -50,12 +59,37 @@ StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
   std::vector<std::unique_ptr<Trk::Track> > new_tracks;
   new_tracks.reserve((*tracks).size());
 
+  //Prepare the output for uncalibrated measurments; only used if m_doReFitFromPRD=True.
+  std::vector<const Trk::PrepRawData*> PrepRawDataSet;
+
   // Perform the fit for each input track
   for (TrackCollection::const_iterator track  = (*tracks).begin(); track < (*tracks).end(); ++track){
 
-    auto newtrack = m_actsFitter->fit(ctx, (**track));
+    if (m_doReFitFromPRD){ //Fit from PrepRawData measurments
+    const Trk::Track* trackPtr = *track;
+    const Trk::TrackParameters* trkPar_perigee =  trackPtr->perigeeParameters() ; 
 
-    if (newtrack) {
+    if (trackPtr == nullptr){
+      ATH_MSG_ERROR("Track is a nullptr");
+    }
+    for (const Trk::TrackStateOnSurface* tsos : *trackPtr->trackStateOnSurfaces() ) {
+      if (tsos == nullptr){
+       ATH_MSG_ERROR("TrackStateOnSurface is a nullptr");
+      }
+      //skipping outliers
+      if (!tsos->type(Trk::TrackStateOnSurface::Measurement)) continue;
+      const Trk::MeasurementBase* mesh = tsos->measurementOnTrack();
+      if (mesh == nullptr) continue;
+      const Trk::RIO_OnTrack* hit = dynamic_cast <const Trk::RIO_OnTrack*>(mesh);
+      if (hit == nullptr) continue;
+
+      const Trk::PrepRawData* prd = hit->prepRawData() ;
+      PrepRawDataSet.push_back(prd);
+      }//end of tsos loop
+  
+      auto newtrack = m_actsFitter->fit(ctx, PrepRawDataSet , *trkPar_perigee );
+
+      if (newtrack) {
       if (msgLvl(MSG::VERBOSE)) {
         msg(MSG::VERBOSE) << "ATLAS param : " << endmsg;
         msg(MSG::VERBOSE) << *((**track).perigeeParameters()) << endmsg;
@@ -71,17 +105,51 @@ StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
         msg(MSG::VERBOSE) << "==========================" << endmsg;
       }
       new_tracks.push_back(std::move(newtrack));
-    }
-    else if (msgLvl(MSG::DEBUG)) {  // newtrack might be equal to a nullptr
-      msg(MSG::DEBUG) << "The Acts Refitting (KF or GSF) has returned a nullptr. Below is information on the offending track." << endmsg; // TODO: solve the cases where we return a nullptr
-      msg(MSG::DEBUG) << "ATLAS param : " << endmsg;
-      msg(MSG::DEBUG) << *((**track).perigeeParameters()) << endmsg;
-      msg(MSG::DEBUG) << *((**track).perigeeParameters()->covariance()) << endmsg;
+      }
+      else if (msgLvl(MSG::DEBUG)) {  // newtrack might be equal to a nullptr
+        msg(MSG::DEBUG) << "The Acts Refitting (KF or GSF) has returned a nullptr. Below is information on the offending track." << endmsg; // TODO: solve the cases where we return a nullptr
+        msg(MSG::DEBUG) << "ATLAS param : " << endmsg;
+        msg(MSG::DEBUG) << *((**track).perigeeParameters()) << endmsg;
+        msg(MSG::DEBUG) << *((**track).perigeeParameters()->covariance()) << endmsg;
 
-      msg(MSG::DEBUG) << "ATLAS INFO : " << endmsg;
-      msg(MSG::DEBUG) << *((**track).trackSummary()) << endmsg;
-      msg(MSG::DEBUG) << "==========================" << endmsg;
+        msg(MSG::DEBUG) << "ATLAS INFO : " << endmsg;
+        msg(MSG::DEBUG) << *((**track).trackSummary()) << endmsg;
+        msg(MSG::DEBUG) << "==========================" << endmsg;
+      }
     }
+
+    else { //Fit from Rio_OnTrack measurments
+      auto newtrack = m_actsFitter->fit(ctx, (**track));
+
+      if (newtrack) {
+        if (msgLvl(MSG::VERBOSE)) {
+          msg(MSG::VERBOSE) << "ATLAS param : " << endmsg;
+          msg(MSG::VERBOSE) << *((**track).perigeeParameters()) << endmsg;
+          msg(MSG::VERBOSE) << *((**track).perigeeParameters()->covariance()) << endmsg;
+          msg(MSG::VERBOSE) << "ACTS param : " << endmsg;
+          msg(MSG::VERBOSE) << *(newtrack->perigeeParameters()) << endmsg;
+          msg(MSG::VERBOSE) << *(newtrack->perigeeParameters()->covariance()) << endmsg;
+
+          msg(MSG::VERBOSE) << "ATLAS INFO : " << endmsg;
+          msg(MSG::VERBOSE) << *((**track).trackSummary()) << endmsg;
+          msg(MSG::VERBOSE) << "ACTS INFO : " << endmsg;
+          msg(MSG::VERBOSE) << *(newtrack->trackSummary()) << endmsg;
+          msg(MSG::VERBOSE) << "==========================" << endmsg;
+        }
+        new_tracks.push_back(std::move(newtrack));
+      }
+      else if (msgLvl(MSG::DEBUG)) {  // newtrack might be equal to a nullptr
+        msg(MSG::DEBUG) << "The Acts Refitting (KF or GSF) has returned a nullptr. Below is information on the offending track." << endmsg; // TODO: solve the cases where we return a nullptr
+        msg(MSG::DEBUG) << "ATLAS param : " << endmsg;
+        msg(MSG::DEBUG) << *((**track).perigeeParameters()) << endmsg;
+        msg(MSG::DEBUG) << *((**track).perigeeParameters()->covariance()) << endmsg;
+
+        msg(MSG::DEBUG) << "ATLAS INFO : " << endmsg;
+        msg(MSG::DEBUG) << *((**track).trackSummary()) << endmsg;
+        msg(MSG::DEBUG) << "==========================" << endmsg;
+      }
+    }
+
   }
   
   // Create a new track collection with the refitted tracks

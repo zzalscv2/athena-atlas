@@ -13,8 +13,14 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 
+#include "TrkPrepRawData/PrepRawData.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
+
+
+#include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/EventContext.h"
 
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"
@@ -25,6 +31,7 @@
 #include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
+
 
 // PACKAGE
 
@@ -43,9 +50,24 @@ class EventContext;
 
 namespace Trk{
   class Track;
+  class PrepRawData;
 }
 
 namespace ActsTrk {
+
+struct PRDSourceLink{
+  const Trk::PrepRawData* prd {nullptr};
+};
+
+struct PRDSourceLinkCalibrator {
+  template <typename trajectory_t>
+  void calibrate(const Acts::GeometryContext& gctx,
+					  typename trajectory_t::TrackStateProxy trackState) const;
+
+  const Trk::IRIO_OnTrackCreator* rotCreator {nullptr};
+  const Trk::IRIO_OnTrackCreator* broadRotCreator {nullptr};
+  const ActsTrk::IActsToTrkConverterTool* converterTool {nullptr};
+};
 
 class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 
 public:
@@ -113,7 +135,10 @@ private:
   std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
           Acts::GeometryContext& tgContext, 
           ActsTrk::TrackContainer& tracks,
-          Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const;
+          Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType = false) const;
+  //parameter (bool) SourceLinkType to distinguish between ATLASSourceLink and PRDSourceLink implementation. 
+  //bool SourceLinkType = false for ATLASSourceLink
+  //bool SourceLinkType = true for PRDSourceLink
 
   ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
   ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
@@ -141,7 +166,6 @@ private:
     using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::TrackStateBackend>;
     std::unique_ptr<Fitter> m_fitter;
 
-    Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> getExtensions();
     Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> m_kfExtensions;
 
     ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
@@ -154,6 +178,12 @@ private:
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
+
+  ToolHandle<Trk::IRIO_OnTrackCreator> m_broadROTcreator {this, "BroadRotCreatorTool", "", ""};
+  ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", "", ""};
+  //Gaudi Property to choose from PRD or ROT measurment ReFit
+  Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false, "Do Refit From PRD instead of ROT"};
+
 
 }; // end of namespace
 
