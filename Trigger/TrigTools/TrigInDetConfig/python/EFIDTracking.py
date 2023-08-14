@@ -64,19 +64,8 @@ def get_idtrig_view_verifier(name):
      viewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
                                         ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() ),
                                         ]
-     topSequence.SGInputLoader.Load += [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
-                                        ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() ),
-                                        ]
-
    return viewDataVerifier
 
-
-#FIXME: temporary before we port offline cuts to config settings
-def remapToOffline( name ):
-   if name == 'cosmics':
-      return 'Cosmics'
-   else:
-       return name
 
 def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVerifier' ):
       viewAlgs = [] #list of all algs running in this module
