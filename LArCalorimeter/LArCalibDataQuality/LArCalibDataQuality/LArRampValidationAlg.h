@@ -26,7 +26,7 @@
 #include "LArCalibDataQuality/LArCalibValidationAlg.h"
 #include "CaloIdentifier/CaloCellGroup.h"
 
-typedef LArCalibValidationAlg<LArRampComplete> LArRampValidationBase;
+typedef LArCalibValidationAlg<LArRampComplete,ILArRamp> LArRampValidationBase;
 
 
 /** 
@@ -48,8 +48,10 @@ class LArRampValidationAlg: public LArRampValidationBase {
  private:
   /** @brief Method to validate the ramps single readout channels
    */
-  bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);
+  bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont) override final;
 
+  LArCondObj getRefObj(const HWIdentifier chid, const int gain) const override final;
+     
   /** @brief Summary method executed after the loop over all channels */
   StatusCode summary(const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);
   

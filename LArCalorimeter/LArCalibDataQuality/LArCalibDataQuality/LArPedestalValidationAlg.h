@@ -26,7 +26,7 @@
 #include "CaloIdentifier/CaloCellGroup.h"
 
 
-typedef LArCalibValidationAlg<LArPedestalComplete> LArPedestalValidationBase;
+typedef LArCalibValidationAlg<LArPedestalComplete,ILArPedestal> LArPedestalValidationBase;
 
 
 /** 
@@ -48,7 +48,9 @@ class LArPedestalValidationAlg: public LArPedestalValidationBase {
  private:
   /** @brief Method to validate the pedestal single readout channels
    */
-  bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling,const LArBadChannelCont *bcCont);
+  bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling,const LArBadChannelCont *bcCont) override final;
+
+  virtual LArCondObj getRefObj(const HWIdentifier chid, const int gain) const override final;
 
   /** @brief Summary method executed after the loop over all channels */
   StatusCode summary(const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);

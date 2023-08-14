@@ -598,7 +598,6 @@ if ( doLArCalibDataQuality  ) :
       thePedestalValidationAlg.ListOfDevFEBs="pedFebs.txt"
       thePedestalValidationAlg.CheckCompletness=True
       thePedestalValidationAlg.PatchMissingFEBs=True
-      thePedestalValidationAlg.CheckNumberOfCoolChannels=True
       thePedestalValidationAlg.UseCorrChannels=False #Corrections go into the regular data channels
       topSequence+=thePedestalValidationAlg
 
@@ -613,7 +612,6 @@ if ( doLArCalibDataQuality  ) :
 
       theBadPedestal.MsgLevelForDeviations=ERROR      
       theBadPedestal.CheckCompletness=False
-      theBadPedestal.CheckNumberOfCoolChannels=False
       theBadPedestal.ListOfDevFEBs="Bad_pedFebs.txt"
       topSequence+=theBadPedestal
 
@@ -629,7 +627,6 @@ if ( doLArCalibDataQuality  ) :
       theAutoCorrValidationAlg.ListOfDevFEBs="ACFebs.txt"
       theAutoCorrValidationAlg.CheckCompletness=True
       theAutoCorrValidationAlg.PatchMissingFEBs=True
-      theAutoCorrValidationAlg.CheckNumberOfCoolChannels=True
       theAutoCorrValidationAlg.UseCorrChannels=False #Corrections go into the regular data channels
       topSequence+=theAutoCorrValidationAlg
       
@@ -643,7 +640,6 @@ if ( doLArCalibDataQuality  ) :
       theBadAutoCorr.CheckFifthSample=True
       theBadAutoCorr.ListOfDevFEBs="Bad_ACFebs.txt"
       theBadAutoCorr.CheckCompletness=False
-      theBadAutoCorr.CheckNumberOfCoolChannels=False
       
       topSequence+=theBadAutoCorr
 
