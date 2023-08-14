@@ -291,6 +291,14 @@ if vp1Cavern:
 #  - Muon is ON
 #  - Major geometry version is greater than 10
 if (vp1Muon):
+    
+    # it fixes ATLASVPONE-641
+    # Details: https://its.cern.ch/jira/browse/ATLASVPONE-641
+    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+    if not hasattr(svcMgr, "MuonIdHelperSvc"):
+        from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
+        svcMgr += MuonIdHelperSvc("MuonIdHelperSvc")
+    
     from AtlasGeoModel import Agdd2Geo
     if len(vp1MuonAGDDFiles)>0:
         printfunc ("*** VP1 NOTE *** You specified custom vp1MuonAGDDFiles, configuring MuonAGDDTool to read MuonAGDD information from custom file(s) '%s' instead from built-in geometry"%(', '.join(vp1MuonAGDDFiles)))
@@ -322,6 +330,7 @@ if (vp1Muon):
                                    "servicesAtZ0",
                                    "HFTruckRail",
                                    "RUN2_Services"]
+    
     if len(vp1NSWAGDDFiles)>0:
         printfunc ("*** VP1 NOTE *** You specified custom vp1NSWAGDDFiles, configuring NSWAGDDTool to read NSWAGDD information from custom file(s) '%s' instead from built-in geometry"%(', '.join(vp1NSWAGDDFiles)))
         if hasattr(svcMgr,"AGDDtoGeoSvc"):
