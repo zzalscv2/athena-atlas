@@ -32,9 +32,10 @@
 #include "Acts/Visualization/PlyVisualization3D.hpp"
 
 
-// BOOST
-#include <boost/variant.hpp>
-#include <boost/variant/get.hpp>
+// STL
+#include <mutex>
+#include <variant>
+
 
 using Acts::Surface;
 using Acts::Transform3;

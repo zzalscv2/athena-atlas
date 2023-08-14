@@ -20,8 +20,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/IHiveWhiteBoard.h"
 
-#include <boost/lexical_cast.hpp>
-
 #include <cstdint>
 #include <string.h>
 #include <utility> // for std::pair
@@ -608,7 +606,7 @@ std::string AthMemoryAuditor::stageToString(long s)
   
   if( s >= 1E6 && s < 9E7 )
     {
-      str="Event "; str+=boost::lexical_cast<std::string>(s-1E6);
+      str="Event "; str+=std::to_string(s-1E6);
     }
   if( s == 1 )
     str="Constructorx";

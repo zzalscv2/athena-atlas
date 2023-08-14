@@ -5,7 +5,6 @@
 
 // Boost include(s):
 #include <boost/tokenizer.hpp>
-#include <boost/lexical_cast.hpp>
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
@@ -195,7 +194,7 @@ namespace D3PD {
       std::string name = m_name;
       if (name.empty()) {
         ++objectCounter;
-        name = "D3PDObject" + boost::lexical_cast< std::string >( objectCounter );
+        name = "D3PDObject" + std::to_string( objectCounter );
       }
       return name + "_" + genSuffix (name, RANDOM_NAME_POSTFIX_LENGTH);
    }
@@ -250,7 +249,7 @@ namespace D3PD {
 
       // Save the simple part of the information
       std::string result =
-         boost::lexical_cast< std::string >( SERIALIZER_VERSION ) +
+        std::to_string( SERIALIZER_VERSION ) +
          STRING_SEPARATOR + m_prefix +
          STRING_SEPARATOR + ( m_container ? "1" : "0" );
 
