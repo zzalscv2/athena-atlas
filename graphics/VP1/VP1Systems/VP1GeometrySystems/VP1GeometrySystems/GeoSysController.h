@@ -102,9 +102,10 @@ signals:
   //Signals without state:
   void adaptMuonChambersToEventData();
   void autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool);//pixel,brl,ecA,ecC,bcmA,bcmC
-  void autoAdaptMuonNSW(bool,bool,bool); // reset to full NSW geo, sTGC, MicroMegas
+  void autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool); // reset to full NSW geo, sTGC, MicroMegas, Spacer, Structure, APlate
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);
   void autoExpandByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
+  void autoIconifyByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
   void actionOnAllNonStandardVolumes(bool);//true: zap, false: expand.
   void volumeStateChangeRequested(VolumeHandle*,VP1GeoFlags::VOLSTATE);//Might not be used atm.
   void volumeResetRequested(VolumeHandle*);
@@ -128,6 +129,7 @@ private slots:
   void emit_autoAdaptPixelsOrSCT();
   void emit_autoAdaptMuonNSW();
   void emit_autoExpandByVolumeOrMaterialName();
+  void emit_autoIconifyByVolumeOrMaterialName();
   void emit_actionOnAllNonStandardVolumes();
   void emit_resetSubSystems();
   void possibleChange_labels();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -162,10 +162,17 @@ GeoSysController::GeoSysController(IVP1System * sys)
   connect(m_d->ui_misc.pushButton_nonStandardShapes_Expand,SIGNAL(clicked()),
 	  this,SLOT(emit_actionOnAllNonStandardVolumes()));
 
+  // Expand volumes based on Material
   connect(m_d->ui_misc.lineEdit_expand_vols_matname,SIGNAL(returnPressed()),this,SLOT(emit_autoExpandByVolumeOrMaterialName()));
   connect(m_d->ui_misc.pushButton_expand_vols_matname,SIGNAL(clicked()),this,SLOT(emit_autoExpandByVolumeOrMaterialName()));
+
+  // Expand volumes based on Name
   connect(m_d->ui_misc.lineEdit_expand_vols_volname,SIGNAL(returnPressed()),this,SLOT(emit_autoExpandByVolumeOrMaterialName()));
   connect(m_d->ui_misc.pushButton_expand_vols_volname,SIGNAL(clicked()),this,SLOT(emit_autoExpandByVolumeOrMaterialName()));
+
+  // Iconify/Zap volumes based on Name
+  connect(m_d->ui_misc.lineEdit_iconify_vols_volname,SIGNAL(returnPressed()),this,SLOT(emit_autoIconifyByVolumeOrMaterialName()));
+  connect(m_d->ui_misc.pushButton_iconify_vols_volname,SIGNAL(clicked()),this,SLOT(emit_autoIconifyByVolumeOrMaterialName()));
 
   connect(m_d->ui_muon.pushButton_muonadapt_adapttoevtdata,SIGNAL(clicked()),this,SLOT(emit_adaptMuonChambersToEventData()));
 
@@ -564,12 +571,30 @@ void GeoSysController::emit_autoAdaptMuonNSW()
   }
   bool stgc = m_d->ui_misc.checkBox_NSW_sTGC->isChecked();
   bool mm   = m_d->ui_misc.checkBox_NSW_MM->isChecked();
+  bool pSp   = m_d->ui_misc.checkBox_NSW_Passive_Spacer->isChecked();
+  bool pSt   = m_d->ui_misc.checkBox_NSW_Passive_Structure->isChecked();
+  bool pAP   = m_d->ui_misc.checkBox_NSW_Passive_APlate->isChecked();
 
   messageVerbose ("Emitting autoAdaptPixelsOrSCT("+str(reset)+","+str(stgc)+","+str(mm)+")");
-  emit autoAdaptMuonNSW(reset, stgc, mm);
+  emit autoAdaptMuonNSW(reset, stgc, mm, pSp, pSt, pAP);
 }
 
 
+
+//____________________________________________________________________
+void GeoSysController::emit_autoIconifyByVolumeOrMaterialName()
+{
+  bool volname(sender()==m_d->ui_misc.pushButton_iconify_vols_volname
+	       ||sender()==m_d->ui_misc.lineEdit_iconify_vols_volname);
+  
+  QString name(volname ? m_d->ui_misc.lineEdit_iconify_vols_volname->text()
+	       : "" );
+  
+  if (name.isEmpty())
+    return;
+  messageVerbose("emitting autoIconifyByVolumeOrMaterialName("+str(!volname)+", "+name+")");
+  emit autoIconifyByVolumeOrMaterialName(!volname,name);
+}
 
 //____________________________________________________________________
 void GeoSysController::emit_autoExpandByVolumeOrMaterialName()
@@ -674,6 +699,9 @@ void GeoSysController::actualSaveSettings(VP1Serialise&s) const
   // version >=6
   s.save(m_d->ui_misc.checkBox_NSW_MM);
   s.save(m_d->ui_misc.checkBox_NSW_sTGC);
+  s.save(m_d->ui_misc.checkBox_NSW_Passive_Spacer);
+  s.save(m_d->ui_misc.checkBox_NSW_Passive_Structure);
+  s.save(m_d->ui_misc.checkBox_NSW_Passive_APlate);
   
   
   s.ignoreWidget(m_d->ui_disp.matButton_lastSel);
@@ -746,6 +774,9 @@ void GeoSysController::actualRestoreSettings(VP1Deserialise& s)
   if (s.version()>=6){
     s.restore(m_d->ui_misc.checkBox_NSW_MM);
     s.restore(m_d->ui_misc.checkBox_NSW_sTGC);
+    s.restore(m_d->ui_misc.checkBox_NSW_Passive_Spacer);
+    s.restore(m_d->ui_misc.checkBox_NSW_Passive_Structure);
+    s.restore(m_d->ui_misc.checkBox_NSW_Passive_APlate);
   }
 
   s.ignoreWidget(m_d->ui_disp.matButton_lastSel);
