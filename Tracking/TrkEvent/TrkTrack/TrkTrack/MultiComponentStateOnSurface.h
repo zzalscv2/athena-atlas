@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*******************************************************************************
             MultiComponentStateOnSurface.h  -  description
             -----------------------------------------------
 begin                : Monday 20th December 2004
-author               : atkinson, amorley,anastopoulos (adapted from Moyse)
+author               : atkinson, amorley,anastopoulos
 description          : This class is a multi component adaptation of the
-                      class TrackStateOnSurface.
+                      class TrackStateOnSurface (from Moyse).
                       In that class the track state was represented
                       by a single 5 component track paramter
                       vector (a0, z0, phi0, theta0, q/p) and the associated
@@ -20,9 +20,6 @@ description          : This class is a multi component adaptation of the
                       the importance of that particular component in the
                       overall mixture of components which is used to describe
                       the track state at that surface.
-                      Instances  of this
-                      class are EDM objects. So objects passed to this class
-                      as inputs via the ctors are owned by this class instances.
 *******************************************************************************/
 
 #ifndef TrkMultiComponentStateOnSurface_H
@@ -53,15 +50,13 @@ public:
 
   /** Create a MultiComponentStateOnSurface Object. This has the same form as
      the singular version (Trk::TrackStateOnSurface) with the exception that the
-     pointer to
-      a single track paramters vector is now repleaced with a pointer to a
+     pointer to a single track paramters vector is now repleaced with a pointer to a
      multi-component state */
   MultiComponentStateOnSurface(
     const FitQualityOnSurface&,
     std::unique_ptr<const MeasurementBase>,
     MultiComponentState&&,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr,
-    double modeQoverP = 0.);
+    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr);
 
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
    * of the track parameters to be passed to the Trk::TrackStateOnSurface base
@@ -71,8 +66,7 @@ public:
     std::unique_ptr<const MeasurementBase>,
     std::unique_ptr<const TrackParameters>,
     MultiComponentState&&,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr,
-    double modeQoverP = 0.);
+    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr);
 
   /** Create TrackStateOnSurface with TrackStateOnSurfaceType. */
   MultiComponentStateOnSurface(
@@ -80,8 +74,7 @@ public:
     std::unique_ptr<const MeasurementBase>,
     MultiComponentState&&,
     std::unique_ptr<const MaterialEffectsBase>,
-    const std ::bitset<NumberOfTrackStateOnSurfaceTypes>&,
-    double modeQoverP = 0.);
+    const std ::bitset<NumberOfTrackStateOnSurfaceTypes>&);
 
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
    * of the track parameters to be passed to the base and also a
@@ -92,8 +85,7 @@ public:
     std::unique_ptr<const TrackParameters>,
     MultiComponentState&&,
     std::unique_ptr<const MaterialEffectsBase>,
-    const std ::bitset<NumberOfTrackStateOnSurfaceTypes>& types,
-    double modeQoverP = 0.);
+    const std ::bitset<NumberOfTrackStateOnSurfaceTypes>& types);
 
   /** Constructor without a FitQualityOnSurface. */
   MultiComponentStateOnSurface(std::unique_ptr<const MeasurementBase>,
@@ -113,7 +105,7 @@ public:
   /** Virtual destructor */
   virtual ~MultiComponentStateOnSurface() = default;
 
-  /** Clone method for deep copy of MultiComponentStateOnSurface - overidden*/
+  /** Clone method for deep copy of MultiComponentStateOnSurface */
   virtual MultiComponentStateOnSurface* clone() const override final;
 
   /** This is Multi, since we MultiComponent */
@@ -126,12 +118,8 @@ public:
    * overload*/
   MultiComponentState& components();
 
-  /** Method to return the mode of the multi-component state */
-  double mixtureModeQoverP() const;
-
 private:
   MultiComponentState m_multiComponentState{};
-  double m_mixtureModeQoverP{};
 };
 
 /** Overload of << operator for MsgStream for debug output */
