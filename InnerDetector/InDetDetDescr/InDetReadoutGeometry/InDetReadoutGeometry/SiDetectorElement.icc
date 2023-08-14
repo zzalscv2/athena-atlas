@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -63,6 +63,26 @@ namespace InDetDD {
   inline const SiDetectorElement * SiDetectorElement::otherSide() const
   {
     return m_otherSide;
+  }
+
+  inline bool SiDetectorElement::isPixel() const {
+    return m_isPixel;
+  }
+
+  inline bool SiDetectorElement::isSCT() const {
+    return m_isSCT;
+  }
+
+  inline bool SiDetectorElement::isPLR() const {
+    return m_isPLR;
+  }
+
+  inline bool SiDetectorElement::isDBM() const {
+    return m_isDBM;
+  }
+
+  inline bool SiDetectorElement::isBarrel() const {
+    return m_isBarrel;
   }
 
   inline bool SiDetectorElement::isEndcap() const

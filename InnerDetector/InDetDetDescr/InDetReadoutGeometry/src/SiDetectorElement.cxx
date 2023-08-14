@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -47,38 +47,7 @@ namespace InDetDD {
   }
 
   // Destructor:
-  SiDetectorElement::~SiDetectorElement()
-  = default;
-
-  bool
-  SiDetectorElement::isPixel() const
-  {
-    return m_isPixel;
-  }
-
-  bool
-  SiDetectorElement::isSCT() const
-  {
-    return m_isSCT;
-  }
-
-bool
-  SiDetectorElement::isPLR() const
-  {
-    return m_isPLR;
-  }
-
-  bool
-  SiDetectorElement::isDBM() const
-  {
-    return m_isDBM;
-  }
-
-  bool
-  SiDetectorElement::isBarrel() const
-  {
-    return m_isBarrel;
-  }
+  SiDetectorElement::~SiDetectorElement() = default;
 
   bool
   SiDetectorElement::isBlayer() const
@@ -384,7 +353,9 @@ bool
     // Set booleans for wether we are pixel/sct barrel/endcap
     m_isPixel = getIdHelper()->is_pixel(m_id);
     m_isSCT = getIdHelper()->is_sct(m_id);
-    m_isPLR = getIdHelper()->is_lumi(m_id); // we use is_lumi here instead of is_plr because is_plr is currently only setup for ExpandedIdentifiers and not Identifiers, which is what is needed here.
+    // we use is_lumi here instead of is_plr because is_plr is currently only setup 
+    // for ExpandedIdentifiers and not Identifiers, which is what is needed here.
+    m_isPLR = getIdHelper()->is_lumi(m_id);
     if (!m_isPixel && !m_isSCT && !m_isPLR) {
       ATH_MSG_WARNING("Element id is not for pixel, SCT, or PLR");
     }
