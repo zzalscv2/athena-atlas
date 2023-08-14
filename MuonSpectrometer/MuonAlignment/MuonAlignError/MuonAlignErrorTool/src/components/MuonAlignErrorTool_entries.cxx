@@ -1,5 +1,6 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 #include "../AlignmentErrorTool.h"
-#include "../MuonAlignErrorExampleAlg.h"
 
-DECLARE_COMPONENT(MuonAlign::MuonAlignErrorExampleAlg)
 DECLARE_COMPONENT(MuonAlign::AlignmentErrorTool)
