@@ -226,21 +226,6 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
     
     for(int phiI=0;phiI<m_settings.m_nMaxPhiSlice;phiI++) {
 
-	std::vector<int> phiVec;
-	phiVec.reserve(4);
-
-	phiVec.push_back(phiI);
-
-	if(phiI>0) phiVec.push_back(phiI-1);
-	else phiVec.push_back(m_settings.m_nMaxPhiSlice-1);
-
-	if(phiI<m_settings.m_nMaxPhiSlice-1) phiVec.push_back(phiI+1);
-	else phiVec.push_back(0);
-    
-	//Remove duplicates
-	std::sort(phiVec.begin(), phiVec.end());
-	phiVec.erase(std::unique(phiVec.begin(), phiVec.end()), phiVec.end());
-
 	for(auto spm : S.m_phiSlices[phiI]) {//loop over middle spacepoints
 
 	  float zm = spm->m_pSP->z();
@@ -279,18 +264,16 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 	      
 	      bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
 
-	      for(auto phiJ : phiVec) {
-		
-		const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiSlices.at(phiJ);
-		
-		if(spVec.empty()) continue;
+        // Get spacepoints from current and adjacent phi slices
+        const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiThreeSlices.at(phiI);
+        
+        if(spVec.empty()) continue;
 
-		SP_RANGE delta;
+        SP_RANGE delta;
 
-		if(!getSpacepointRange(layerJ, spVec, delta)) continue;
-	      
-		processSpacepointRangeZv(spm, checkPSS, delta, checkWidth, minTau, maxTau);
-	      }//loop over phi bins
+        if(!getSpacepointRange(layerJ, spVec, delta)) continue;
+              
+        processSpacepointRangeZv(spm, checkPSS, delta, checkWidth, minTau, maxTau);
 
 	    }//loop over inner/outer layers
 	    if(m_nInner != 0 && m_nOuter != 0) {
