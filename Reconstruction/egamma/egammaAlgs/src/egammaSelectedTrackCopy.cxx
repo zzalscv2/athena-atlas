@@ -61,14 +61,18 @@ StatusCode
 egammaSelectedTrackCopy::egammaSelectedTrackCopy::finalize()
 {
   ATH_MSG_INFO("--- egamma Selected Track Copy Statistics ---");
-  ATH_MSG_INFO("--- All Clusters: " << m_AllClusters);
-  ATH_MSG_INFO("--- Selected Clusters: " << m_SelectedClusters);
+  ATH_MSG_INFO("--- All Central Clusters: " << m_AllClusters);
+  ATH_MSG_INFO("--- Selected Central Clusters: " << m_SelectedClusters);
   ATH_MSG_INFO("--- All Tracks: " << m_AllTracks);
-  ATH_MSG_INFO("--- Selected Tracks: " << m_SelectedTracks);
+  ATH_MSG_INFO("--- Selected Central Tracks: " << m_SelectedTracks);
   ATH_MSG_INFO("--- All Si Tracks: " << m_AllSiTracks);
-  ATH_MSG_INFO("--- Selected Si Tracks: " << m_SelectedSiTracks);
+  ATH_MSG_INFO("--- Selected Central Si Tracks: " << m_SelectedSiTracks);
   ATH_MSG_INFO("--- All TRT Tracks: " << m_AllTRTTracks);
-  ATH_MSG_INFO("--- Selected TRT Tracks: " << m_SelectedTRTTracks);
+  ATH_MSG_INFO("--- Selected Central TRT Tracks: " << m_SelectedTRTTracks);
+  if (m_doForwardTracks) {
+    ATH_MSG_INFO("--- All Forward Clusters: " << m_AllFwdClusters);
+    ATH_MSG_INFO("--- Selected Forward Tracks: " << m_SelectedFwdTracks);
+  }
   ATH_MSG_INFO("---------------------------------------------");
 
   return StatusCode::SUCCESS;
@@ -118,23 +122,24 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
 
       return StatusCode::FAILURE;
     }
+    auto allFwdClusters = m_AllFwdClusters.buffer();
+    allFwdClusters += fwdClusterTES->size();
 
-    outputFwdTrkPartContainer = SG::WriteHandle<ConstDataVector<xAOD::TrackParticleContainer>> (
-      m_OutputFwdTrkPartContainerKey, 
-      ctx
-    );
+    outputFwdTrkPartContainer =
+        SG::WriteHandle<ConstDataVector<xAOD::TrackParticleContainer>>(
+            m_OutputFwdTrkPartContainerKey, ctx);
   }
 
   // Here it just needs to be a view copy , i.e the collection of selected 
   // trackParticles we create does not really own its elements.
   auto viewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
   auto fwdViewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
-
   // Local counters.
   auto allClusters = m_AllClusters.buffer();
   auto selectedClusters = m_SelectedClusters.buffer();
   auto allTracks = m_AllTracks.buffer();
   auto selectedTracks = m_SelectedTracks.buffer();
+  auto selectedFwdTracks = m_SelectedFwdTracks.buffer();
   auto allSiTracks = m_AllSiTracks.buffer();
   auto selectedSiTracks = m_SelectedSiTracks.buffer();
   auto allTRTTracks = m_AllTRTTracks.buffer();
@@ -152,7 +157,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
       passingClusters.push_back(cluster);
     }
   }
-      
+
   allClusters += clusterTES->size();
   selectedClusters += passingClusters.size();
 
@@ -176,9 +181,9 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
       ++allSiTracks;
     }
 
+    // Check if the track is selected for a central electron
+    // due to a central cluster
     for (const xAOD::CaloCluster* cluster : passingClusters) {
-      // Check if the track is selected due to this cluster and if not 
-      // continue to next cluster.
       if (!selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
         continue;
       }
@@ -189,17 +194,27 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
       } else {
         ++selectedSiTracks;
       }
-      
-      // The particular track got selected due to a cluster (any one of them will 
-      // do) break here and move to the next track.
       break;
     } // Loop on clusters.
 
-    if (m_doForwardTracks) { fwdViewCopy->push_back(track); }
-  }   // Loop on tracks.
+    // Check if the track is selected for a forwand  electron
+    // due to a forwand cluster
+    if (m_doForwardTracks) {
+      for (const xAOD::CaloCluster* cluster : *fwdClusterTES) {
+        if (!selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
+          continue;
+        }
+        fwdViewCopy->push_back(track);
+        ++selectedFwdTracks;
+        break;
+      }  // Loop on fwd cluster
+    }
+  }// Loop on tracks.
 
   ATH_CHECK(outputTrkPartContainer.record(std::move(viewCopy)));
-  if (m_doForwardTracks) { ATH_CHECK(outputFwdTrkPartContainer.record(std::move(fwdViewCopy))); }
+  if (m_doForwardTracks) {
+    ATH_CHECK(outputFwdTrkPartContainer.record(std::move(fwdViewCopy)));
+  }
 
   return StatusCode::SUCCESS;
 }
