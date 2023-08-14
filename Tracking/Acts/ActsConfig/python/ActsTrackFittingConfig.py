@@ -8,6 +8,19 @@ from ActsInterop import UnitConstants
 def ActsFitterCfg(flags, name: str = "ActsKalmanFitter", **kwargs):
     result = ComponentAccumulator()
 
+    if flags.Acts.fitFromPRD:
+        #RotCreatorTool and BroadRotCreatorTool for calibration purposes
+        if 'RotCreatorTool' not in kwargs:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+            ITkRotCreator = result.popToolsAndMerge(ITkRotCreatorCfg(flags))
+            kwargs.setdefault('RotCreatorTool', ITkRotCreator)
+
+        if 'BroadRotCreatorTool' not in kwargs:
+            from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkBroadRotCreatorCfg
+            ITkBroadRotCreator = result.popToolsAndMerge(ITkBroadRotCreatorCfg(flags))
+            kwargs.setdefault('BroadRotCreatorTool', ITkBroadRotCreator)
+
+
     # Make sure this is set correctly!
     #  /eos/project-a/acts/public/MaterialMaps/ATLAS/material-maps-Pixel-SCT.json
 
@@ -69,6 +82,7 @@ def ActsReFitterAlgCfg(flags, name="ActsReFitterAlg", **kwargs):
 
     kwargs.setdefault("ActsFitter", actsFitter)
     kwargs.setdefault("TrackName", "ResolvedTracks")
+    kwargs.setdefault("DoReFitFromPRD", flags.Acts.fitFromPRD)
 
     result.addEventAlgo(
         CompFactory.ActsTrk.ActsReFitterAlg(
@@ -82,6 +96,10 @@ def ActsReFitterAlgCfg(flags, name="ActsReFitterAlg", **kwargs):
 
     return result
 
+def forceITkActsReFitterAlgCfg(flags): #Use this flag in the --postInclude of ActsKfRefiting.sh to fit from the PRD (uncalibrated); Else to fit from the ROT (calibrated), use `(...).ActsReFitterAlgCfg` flag directly
+   flags = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                 flags.Tracking.ITkPrimaryPassConfig.value)
+   return ActsReFitterAlgCfg(flags)
 
 
 def writeAdditionalTracks(flags, trackName='ResolvedTracks', newTrackName='ReFitted_Tracks'):

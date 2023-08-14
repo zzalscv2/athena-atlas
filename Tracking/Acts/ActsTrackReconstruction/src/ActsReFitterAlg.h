@@ -44,6 +44,8 @@ private:
 
   mutable std::mutex m_writeMutex{};
 
+  //Gaudi Property to choose from PRD or ROT measurment ReFit
+  Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false, "Do Refit From PRD instead of ROT"};
 };
 
 } // namespace
