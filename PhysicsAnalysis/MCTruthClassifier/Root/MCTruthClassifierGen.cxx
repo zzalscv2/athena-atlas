@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -1032,11 +1032,9 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
         (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) {
       if (info) {
         info->mother = mother;
-        if (mother) {
-          info->motherStatus = mother->status();
-          info->motherPDG = mother->pdg_id();
-          info->motherBarcode = mother->barcode();
-        }
+        info->motherStatus = mother->status();
+        info->motherPDG = mother->pdg_id();
+        info->motherBarcode = mother->barcode();
       }
     }
   }
@@ -1049,11 +1047,9 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
 
   if (info) {
     info->mother = mother;
-    if (mother) {
-      info->motherStatus = mother->status();
-      info->motherPDG = motherPDG;
-      info->motherBarcode = mother->barcode();
-    }
+    info->motherStatus = mother->status();
+    info->motherPDG = motherPDG;
+    info->motherBarcode = mother->barcode();
   }
 
   //---
@@ -1402,17 +1398,15 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   if (abs(motherPDG) == 24 && mothOriVert != nullptr) {
     MotherParent = getMother(mother);
     long pPDG(0);
-    if (MotherParent) {
+    if (MotherParent) {//MotherParent checked here...
       pPDG = MotherParent->pdgId();
       if (abs(pPDG) == 6) {
-        mother = MotherParent;
+        mother = MotherParent; //...so mother cannot be nullptr
         if (info) {
           info->mother = mother;
-          if (mother) {
-            info->motherStatus = mother->status();
-            info->motherPDG = mother->pdg_id();
-            info->motherBarcode = mother->barcode();
-          }
+          info->motherStatus = mother->status();
+          info->motherPDG = mother->pdg_id();
+          info->motherBarcode = mother->barcode();
         }
       }
     }
@@ -1421,11 +1415,9 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
   motherPDG = mother->pdgId();
   if (info) {
     info->mother = mother;
-    if (mother) {
-      info->motherPDG = motherPDG;
-      info->motherStatus = mother->status();
-      info->motherBarcode = mother->barcode();
-    }
+    info->motherPDG = motherPDG;
+    info->motherStatus = mother->status();
+    info->motherBarcode = mother->barcode();
 }
   mothOriVert = mother->hasProdVtx() ? mother->prodVtx() : nullptr;
   partOriVert = mother->decayVtx();
@@ -2237,6 +2229,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
         }
      }
     }
+  }
+  //if mother is still nullptr, we have a problem
+  if (!mother) {
+    return NonDefined;
   }
 
   motherPDG = mother->pdgId();
