@@ -112,8 +112,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 
   m_zMinus = roiDescriptor->zedMinus() - m_zTol;
   m_zPlus  = roiDescriptor->zedPlus() + m_zTol;
-  m_zPlusEndcap = m_zMinus;
-  m_zMinusEndcap = m_zPlus;
+  m_zMinusEndcap = m_zMinus;
+  m_zPlusEndcap = m_zPlus;
   
   m_triplets.clear();
 
