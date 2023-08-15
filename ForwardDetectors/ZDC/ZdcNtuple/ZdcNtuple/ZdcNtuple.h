@@ -184,6 +184,7 @@ public:
 
   float t_RPDChannelAmplitude[2][16];
   unsigned int t_RPDChannelMaxSample[2][16];
+  unsigned int t_RPDChannelStatus[2][16];
 
   int   t_nvx;
   float t_vx[3];

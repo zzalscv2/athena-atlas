@@ -4,7 +4,7 @@
 atlas_subdir( ZdcAnalysis )
 
 # Declare the package name:
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Minuit Minuit2 HistPainter Graf )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Minuit Minuit2 HistPainter Graf Matrix )
 
 # Component(s) in the package:
 atlas_add_library( ZdcAnalysisLib
