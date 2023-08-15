@@ -480,6 +480,9 @@ namespace EL
     static const std::string optOfficial;
     static const std::string optVoms;
 
+    /// whether to use grid reporting even when not running on the grid
+    static const std::string optGridReporting;
+
     /// these options are defined in \ref SH::MetaNames
     /// \{
 
