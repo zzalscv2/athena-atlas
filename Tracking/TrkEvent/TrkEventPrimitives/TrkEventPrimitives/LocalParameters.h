@@ -175,13 +175,10 @@ namespace Trk {
       friend MsgStream& operator << ( MsgStream& sl, const LocalParameters& lp);
       friend std::ostream& operator << ( std::ostream& sl, const LocalParameters& lp);
 
-
     protected:
      friend class ::LocalParametersCnv_p1;
      int    m_parameterkey;
 
-    private:
-     static const ProjectionMatricesSet s_projectionMatrices;
   };
 
 } // end of namespace

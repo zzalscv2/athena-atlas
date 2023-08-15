@@ -13,8 +13,9 @@
 //Gaudi
 #include "GaudiKernel/MsgStream.h"
 
-
-const Trk::ProjectionMatricesSet Trk::LocalParameters::s_projectionMatrices(5);
+namespace {
+const Trk::ProjectionMatricesSet s_projectionMatrices(5);
+}
 
 Trk::LocalParameters::LocalParameters() :
   Amg::VectorX(1),
@@ -76,6 +77,24 @@ const Amg::MatrixX& Trk::LocalParameters::reductionMatrix() const {
 
 const Amg::MatrixX& Trk::LocalParameters::expansionMatrix() const {
    return s_projectionMatrices.expansionMatrix(m_parameterkey);
+}
+
+const double& Trk::LocalParameters::operator[](ParamDefs par) const
+{
+  if (m_parameterkey == 31 || m_parameterkey == 1 || m_parameterkey == 3) {
+    return Amg::VectorX::operator[](par);
+  }
+  return Amg::VectorX::operator[](
+    s_projectionMatrices.accessor(m_parameterkey, par));
+}
+
+double& Trk::LocalParameters::operator[](ParamDefs par)
+{
+  if (m_parameterkey == 31 || m_parameterkey == 1 || m_parameterkey == 3) {
+    return Amg::VectorX::operator[](par);
+  }
+  return Amg::VectorX::operator[](
+    s_projectionMatrices.accessor(m_parameterkey, par));
 }
 
 namespace Trk {
