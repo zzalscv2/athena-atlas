@@ -96,9 +96,9 @@ StatusCode HGTD_GMX_DetectorTool::create()
 StatusCode HGTD_GMX_DetectorTool::clear()
 {
     // Release manager from the detector store
-    SG::DataProxy* _proxy = detStore()->proxy(ClassID_traits< HGTD_DetectorManager >::ID(), m_detManager->getName());
-    if (_proxy) {
-        _proxy->reset();
+    SG::DataProxy* proxy = detStore()->proxy(ClassID_traits< HGTD_DetectorManager >::ID(), m_detManager->getName());
+    if (proxy) {
+        proxy->reset();
         m_detManager = nullptr;
     }
 
