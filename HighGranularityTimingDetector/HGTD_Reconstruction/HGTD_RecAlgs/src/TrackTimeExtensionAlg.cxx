@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeExtensionAlg.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -104,6 +104,8 @@ StatusCode TrackTimeExtensionAlg::execute_r(const EventContext& ctx) {
     return StatusCode::FAILURE;
   }
 
+  DecorHandles dh (*this, ctx);
+
   for (const auto* track_ptkl : *track_particles) {
 
     ATH_MSG_DEBUG("Track eta: " << track_ptkl->eta()
@@ -115,7 +117,7 @@ StatusCode TrackTimeExtensionAlg::execute_r(const EventContext& ctx) {
       ATH_MSG_DEBUG("Track out of acceptance");
       // decorate all track particle objects to avoid issues with the
       // decorations
-      ATH_CHECK(decorateTrackParticle(track_ptkl, extension, sdo_collection,
+      ATH_CHECK(decorateTrackParticle(dh, track_ptkl, extension, sdo_collection,
                                       hs_event, true));
       continue;
     }
@@ -123,7 +125,7 @@ StatusCode TrackTimeExtensionAlg::execute_r(const EventContext& ctx) {
     // this should not happen?
     if (track_ptkl->track() == nullptr) {
       ATH_MSG_DEBUG("There is no Trk::Track");
-      ATH_CHECK(decorateTrackParticle(track_ptkl, extension, sdo_collection,
+      ATH_CHECK(decorateTrackParticle(dh, track_ptkl, extension, sdo_collection,
                                       hs_event, true));
       continue;
     }
@@ -140,7 +142,7 @@ StatusCode TrackTimeExtensionAlg::execute_r(const EventContext& ctx) {
     // or shadowing info
 
     // decorate the track
-    ATH_CHECK(decorateTrackParticle(track_ptkl, extension, sdo_collection,
+    ATH_CHECK(decorateTrackParticle(dh, track_ptkl, extension, sdo_collection,
                                     hs_event, false));
 
   } // END LOOP over tracks
@@ -151,21 +153,26 @@ StatusCode TrackTimeExtensionAlg::execute_r(const EventContext& ctx) {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+TrackTimeExtensionAlg::DecorHandles::DecorHandles
+  (const TrackTimeExtensionAlg& tool, const EventContext& ctx)
+    : layerHasExtensionHandle (tool.m_layerHasExtensionKey, ctx),
+      layerExtensionChi2Handle (tool.m_layerExtensionChi2Key, ctx),
+      layerClusterRawTimeHandle (tool.m_layerClusterRawTimeKey, ctx),
+      layerClusterTimeHandle (tool.m_layerClusterTimeKey, ctx),
+      layerClusterTruthClassHandle (tool.m_layerClusterTruthClassKey, ctx),
+      layerClusterShadowedHandle (tool.m_layerClusterShadowedKey, ctx),
+      layerClusterMergedHandle (tool.m_layerClusterMergedKey, ctx),
+      layerPrimaryExpectedHandle (tool.m_layerPrimaryExpectedKey, ctx),
+      extrapXHandle (tool.m_extrapXKey, ctx),
+      extrapYHandle (tool.m_extrapYKey, ctx)
+{
+}
+
 StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
+    DecorHandles& dh,
     const xAOD::TrackParticle* track_ptkl, const HGTD::ExtensionObject& extension,
     const InDetSimDataCollection* sdo_collection,
     const HepMC::GenEvent* hs_event, bool skip_deco) const {
-
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle(m_layerHasExtensionKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle(m_layerExtensionChi2Key);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle(m_layerClusterRawTimeKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> layerClusterTruthClassHandle(m_layerClusterTruthClassKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterShadowedHandle(m_layerClusterShadowedKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterMergedHandle(m_layerClusterMergedKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerPrimaryExpectedHandle(m_layerPrimaryExpectedKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle(m_extrapXKey);
-  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey);
 
   std::vector<bool> has_cluster_vec;
   has_cluster_vec.reserve(n_hgtd_layers);
@@ -253,16 +260,16 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
 
   } // END LOOP over TrackStateOnSurface
 
-  layerHasExtensionHandle(*track_ptkl) = has_cluster_vec;
-  layerExtensionChi2Handle(*track_ptkl) = chi2_vec;
-  layerClusterRawTimeHandle(*track_ptkl) = raw_time_vec;
-  layerClusterTimeHandle(*track_ptkl) = time_vec;
-  layerClusterTruthClassHandle(*track_ptkl) = truth_vec;
-  layerClusterShadowedHandle(*track_ptkl) = is_shadowed_vec;
-  layerClusterMergedHandle(*track_ptkl) = is_merged_vec;
-  layerPrimaryExpectedHandle(*track_ptkl) = primary_exists_vec;
-  extrapXHandle(*track_ptkl) = extension.m_extrap_x;
-  extrapYHandle(*track_ptkl) = extension.m_extrap_y;
+  dh.layerHasExtensionHandle(*track_ptkl) = has_cluster_vec;
+  dh.layerExtensionChi2Handle(*track_ptkl) = chi2_vec;
+  dh.layerClusterRawTimeHandle(*track_ptkl) = raw_time_vec;
+  dh.layerClusterTimeHandle(*track_ptkl) = time_vec;
+  dh.layerClusterTruthClassHandle(*track_ptkl) = truth_vec;
+  dh.layerClusterShadowedHandle(*track_ptkl) = is_shadowed_vec;
+  dh.layerClusterMergedHandle(*track_ptkl) = is_merged_vec;
+  dh.layerPrimaryExpectedHandle(*track_ptkl) = primary_exists_vec;
+  dh.extrapXHandle(*track_ptkl) = extension.m_extrap_x;
+  dh.extrapYHandle(*track_ptkl) = extension.m_extrap_y;
 
   return StatusCode::SUCCESS;
 }
