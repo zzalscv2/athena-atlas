@@ -42,7 +42,7 @@ EMB1CellsFromCaloClusters::cells(std::vector<std::vector<const CaloCell*>>& cell
 
   
   for(const auto& cl : dvec){
-    auto cell_links = cl->getCellLinks();
+    const auto *cell_links = cl->getCellLinks();
     if (!cell_links){
       ATH_MSG_ERROR("No link from cluster to cells");
       return StatusCode::FAILURE;

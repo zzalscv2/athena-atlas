@@ -102,7 +102,7 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
 
     // make a unique_ptr, but keep hold of the bare pointer
     auto caloCluster = std::make_unique<xAOD::CaloCluster>();
-    auto ptr = caloCluster.get();
+    auto *ptr = caloCluster.get();
 
     // store the calCluster to fix up the Aux container:
     h_outputCaloClusters->push_back(std::move(caloCluster));

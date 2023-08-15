@@ -479,7 +479,7 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 	// When this happens, issue a warning, and break of search in this
 	// eta direction for cells to start the phi crawl.
 	for (const auto& ha : v_adj) {
-	  auto dde = caloMgr->get_element(m_calocell_id->cell_id(ha));
+	  const auto *dde = caloMgr->get_element(m_calocell_id->cell_id(ha));
 	  ATH_MSG_DEBUG("cell eta " << dde-> eta() << " phi " << dde->phi() <<
 			" z " << dde->z());
 	}
@@ -857,7 +857,7 @@ GepPi0Alg::neighborhood(const CaloCell* seed,
     const auto& ident = to_process.front();
     if (accept(ident)){
       ATH_MSG_DEBUG ("  accepting neigh " << ident);
-      auto dde = caloMgr->get_element(ident);
+      const auto *dde = caloMgr->get_element(ident);
       auto c_eta = dde->eta();
       auto c_phi = dde->phi();
       ATH_MSG_DEBUG("   neigh eta: " << c_eta
