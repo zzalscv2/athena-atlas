@@ -13,11 +13,9 @@ output_name_base = 'output.test_trigP1_PEB_DS'
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TrigP1Test/PEBDSTest.py'
+ex.job_options = 'TrigP1Test.PEBDSTest.run'
 ex.input = 'data'
 ex.args = '-o ' + output_name_base
-ex.args += ' -c "doL1Sim=True;"'
-ex.args += ' --dump-config-reload'
 
 test = Test.Test()
 test.art_type = 'build'
