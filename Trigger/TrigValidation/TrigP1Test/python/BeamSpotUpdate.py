@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Module to test beamspot updates using a local sqlite file. Two steps are necessary:
@@ -12,7 +12,7 @@ Module to test beamspot updates using a local sqlite file. Two steps are necessa
 
 2) Configure a job with the BeamSpotWriteAlg in the topSequence. This algorithm will
    write a new beamspot into the sqlite file one LB before the actual update is
-   triggered via the CTP fragment. See TrigP1Test/share/testHLT_beamspot.py
+   triggered via the CTP fragment. See TrigP1Test/python/BeamSpotReader.py
    for an example.
 """
 
@@ -134,6 +134,36 @@ def setup():
 
    # Create an open-ended IOV with a default beamspot
    setBeamSpot(1,0,0.06,1.06,-4.6,4)
+
+
+def run(flags):
+   """CA cfg function to be used from athenaHLT"""
+
+   from AthenaCommon.Constants import DEBUG
+   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+   from AthenaConfiguration.ComponentFactory import CompFactory
+   from IOVDbSvc.IOVDbSvcConfig import addFolders
+
+   from pathlib import Path
+
+   flags.lock()
+   cfg = ComponentAccumulator()
+
+   # addFolders requires at least an empty sqlite file
+   Path('beampos.db').touch()
+
+   # These folders are filled in Testing/condStopStart.trans
+   cfg.merge( addFolders(flags, '/Indet/Onl/Beampos <key>/Indet/Beampos</key>',
+                         detDb='beampos.db',
+                         tag='IndetBeamposOnl-HLT-UPD1-001-00',
+                         className='AthenaAttributeList',
+                         extensible=True) )
+
+   cfg.addEventAlgo( BeamSpotWriteAlg() )
+   cfg.addEventAlgo( CompFactory.InDet.InDetBeamSpotReader(VxContainer = "") )
+   cfg.addCondAlgo( CompFactory.BeamSpotCondAlg(OutputLevel = DEBUG) )
+
+   return cfg
 
 
 # For standalone running and writing a new output file
