@@ -290,7 +290,7 @@ Track* FitProcedure::constructTrack(
       alignmentEffects = std::make_unique<Trk::AlignmentEffectsOnTrack>(
           parameters.alignmentOffset(align), AEOT.sigmaDeltaTranslation(),
           parameters.alignmentAngle(align), AEOT.sigmaDeltaAngle(),
-          AEOT.vectorOfAffectedTSOS(), m->surface());
+          AEOT.vectorOfAffectedTSOS(), *m->surface());
       typePattern.set(TrackStateOnSurface::Alignment);
     }
 

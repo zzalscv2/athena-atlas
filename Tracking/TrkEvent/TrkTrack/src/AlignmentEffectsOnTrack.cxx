@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
@@ -7,12 +7,12 @@
 #include "TrkSurfaces/Surface.h"
 
 Trk::AlignmentEffectsOnTrack::AlignmentEffectsOnTrack(
-  float deltaTranslation,
-  float sigmaDeltaTranslation,
-  float deltaAngle,
-  float sigmaDeltaAngle,
+  double deltaTranslation,
+  double sigmaDeltaTranslation,
+  double deltaAngle,
+  double sigmaDeltaAngle,
   const std::vector<Identifier>& affectedTSOS,
-  const Trk::Surface* surface)
+  const Trk::Surface& surface)
   : SurfacePtrHolder(surface)
   , m_deltaTranslation(deltaTranslation)
   , m_sigmaDeltaTranslation(sigmaDeltaTranslation)

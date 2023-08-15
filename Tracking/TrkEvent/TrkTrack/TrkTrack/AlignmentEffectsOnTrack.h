@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACK_ALIGNMENTEFFECTSONTRACK_H
@@ -24,12 +24,12 @@ class AlignmentEffectsOnTrack : public SurfacePtrHolder
 {
 public:
   AlignmentEffectsOnTrack(
-    float deltaTranslation,
-    float m_sigmaDeltaTranslation,
-    float deltaAngle,
-    float sigmaDeltaAngle,
+    double deltaTranslation,
+    double m_sigmaDeltaTranslation,
+    double deltaAngle,
+    double sigmaDeltaAngle,
     const std::vector<Identifier>& identifiersOfAffectedTSOS,
-    const Trk::Surface*);
+    const Trk::Surface& surf);
 
   AlignmentEffectsOnTrack(const Trk::AlignmentEffectsOnTrack& rhs) = default;
 
@@ -45,16 +45,16 @@ public:
   ~AlignmentEffectsOnTrack() = default;
 
   /// returns the \f$ \Delta X \f$
-  float deltaTranslation() const;
+  double deltaTranslation() const;
 
   /// returns the \f$ \sigma\Delta X \f$
-  float sigmaDeltaTranslation() const;
+  double sigmaDeltaTranslation() const;
 
   /// returns the \f$ \Delta \alpha \f$
-  float deltaAngle() const;
+  double deltaAngle() const;
 
   /// returns the \f$ \sigma\Delta \alpha \f$
-  float sigmaDeltaAngle() const;
+  double sigmaDeltaAngle() const;
 
   /// Returns a vector of the affected TSOS in the track. Obviously this must
   /// not be invalidated by removing TSOS from the track.
@@ -71,10 +71,10 @@ public:
   const Trk::Surface& associatedSurface() const;
 
 private:
-  float m_deltaTranslation;
-  float m_sigmaDeltaTranslation;
-  float m_deltaAngle;
-  float m_sigmaDeltaAngle;
+  double m_deltaTranslation{0.};
+  double m_sigmaDeltaTranslation{0.};
+  double m_deltaAngle{0.};
+  double m_sigmaDeltaAngle{0.};
   std::vector<Identifier> m_affectedTSOS;
 };
 
@@ -87,25 +87,25 @@ std::ostream&
 operator<<(std::ostream& sl, const AlignmentEffectsOnTrack& tsos);
 }
 
-inline float
+inline double
 Trk::AlignmentEffectsOnTrack::deltaTranslation() const
 {
   return m_deltaTranslation;
 }
 
-inline float
+inline double
 Trk::AlignmentEffectsOnTrack::sigmaDeltaTranslation() const
 {
   return m_sigmaDeltaTranslation;
 }
 
-inline float
+inline double
 Trk::AlignmentEffectsOnTrack::deltaAngle() const
 {
   return m_deltaAngle;
 }
 
-inline float
+inline double
 Trk::AlignmentEffectsOnTrack::sigmaDeltaAngle() const
 {
   return m_sigmaDeltaAngle;
