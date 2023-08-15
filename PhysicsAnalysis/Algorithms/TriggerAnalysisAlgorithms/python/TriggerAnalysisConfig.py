@@ -63,7 +63,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.noFilter = self.noFilter
 
         for t in self.triggerChainsForSelection :
-            config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, isEventLevel=True)
+            config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, isEventLevel=True, noSys=True)
 
         # Calculate trigger prescales
         if config.dataType() == 'data' and self.prescaleLumiCalcFiles:
@@ -108,8 +108,8 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.photons, alg.photonSelection = config.readNameAndSelection(self.photons)
 
         if config.dataType != 'data' and not alg.doMatchingOnly:
-            config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF', isEventLevel=True)
-        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch', isEventLevel=True)
+            config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF', isEventLevel=True, noSys=True)
+        config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch', isEventLevel=True, noSys=True)
 
         return
 
