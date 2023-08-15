@@ -126,7 +126,11 @@ namespace ActsTrk
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.
+    // To maintain const-correctness, only use this via the accessor functions.
     struct CKF_pimpl;
+    CKF_pimpl& trackFinder();
+    const CKF_pimpl& trackFinder() const;
+
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
     // statistics
