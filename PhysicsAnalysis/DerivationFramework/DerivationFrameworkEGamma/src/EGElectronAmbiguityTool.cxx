@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -114,20 +114,26 @@ EGElectronAmbiguityTool::initialize()
   return StatusCode::SUCCESS;
 }
 
+EGElectronAmbiguityTool::DecorHandles::DecorHandles
+  (const EGElectronAmbiguityTool& tool, const EventContext& ctx)
+    : drv     (tool.m_drv, ctx),
+      dphiv   (tool.m_dphiv, ctx),
+      dmee    (tool.m_dmee, ctx),
+      dmeeVtx (tool.m_dmeeVtx, ctx),
+      dsep    (tool.m_dsep, ctx),
+      dambi   (tool.m_dambi, ctx),
+      dtrv    (tool.m_dtrv, ctx),
+      dtpv    (tool.m_dtpv, ctx),
+      dtzv    (tool.m_dtzv, ctx)
+{
+}
+
 StatusCode
 EGElectronAmbiguityTool::addBranches() const
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> drv(m_drv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dphiv(m_dphiv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmee(m_dmee, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmeeVtx(m_dmeeVtx, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dsep(m_dsep, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, int> dambi(m_dambi, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtrv(m_dtrv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtpv(m_dtpv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtzv(m_dtzv, ctx);
+  DecorHandles dh (*this, ctx);
 
   static const SG::AuxElement::ConstAccessor<char> aidCut(m_idCut);
 
@@ -155,15 +161,15 @@ EGElectronAmbiguityTool::addBranches() const
   if (!pvtx) {
     ATH_MSG_DEBUG("No primary vertex found. Setting default values.");
     for (const xAOD::Electron* iele : *eleC) {
-      drv(*iele) = -1;
-      dphiv(*iele) = -1;
-      dmee(*iele) = -1;
-      dmeeVtx(*iele) = -1;
-      dsep(*iele) = -1;
-      dambi(*iele) = -1;
-      dtrv(*iele) = -1;
-      dtpv(*iele) = -1;
-      dtzv(*iele) = -1;
+      dh.drv(*iele) = -1;
+      dh.dphiv(*iele) = -1;
+      dh.dmee(*iele) = -1;
+      dh.dmeeVtx(*iele) = -1;
+      dh.dsep(*iele) = -1;
+      dh.dambi(*iele) = -1;
+      dh.dtrv(*iele) = -1;
+      dh.dtpv(*iele) = -1;
+      dh.dtzv(*iele) = -1;
     }
     return StatusCode::SUCCESS;
   }
@@ -184,7 +190,7 @@ EGElectronAmbiguityTool::addBranches() const
 
   for (const auto* ele : *eleC) {
 
-    dambi(*ele) = -1;
+    dh.dambi(*ele) = -1;
 
     // Electron preselection
     if (ele->pt() < m_elepTCut ||
@@ -270,7 +276,7 @@ EGElectronAmbiguityTool::addBranches() const
       continue;
 
     // Henri's circles
-    if (decorateSimple(ctx, closeByTracks, ele, pvtx).isFailure()) {
+    if (decorateSimple(dh, closeByTracks, ele, pvtx).isFailure()) {
       ATH_MSG_ERROR("Cannot decorate the electron with the simple info");
       return StatusCode::FAILURE;
     }
@@ -283,21 +289,11 @@ EGElectronAmbiguityTool::addBranches() const
 
 StatusCode
 DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
-  const EventContext& ctx,
+  DecorHandles& dh,
   std::unique_ptr<ConstDataVector<xAOD::TrackParticleContainer>>& tpC,
   const xAOD::Electron* ele,
   const xAOD::Vertex* pvtx) const
 {
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> drv(m_drv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dphiv(m_dphiv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmee(m_dmee, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmeeVtx(m_dmeeVtx, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dsep(m_dsep, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, int> dambi(m_dambi, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtrv(m_dtrv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtpv(m_dtpv, ctx);
-  SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtzv(m_dtzv, ctx);
-
   // This is the GSF electron track
   const xAOD::TrackParticle* eleGSFtrkP = ele->trackParticle();
 
@@ -325,9 +321,9 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
       tpvp = truthEl->prodVtx()->phi();
       tpvz = truthEl->prodVtx()->z();
     }
-    dtrv(*ele) = tpvr;
-    dtpv(*ele) = tpvp;
-    dtzv(*ele) = tpvz;
+    dh.dtrv(*ele) = tpvr;
+    dh.dtpv(*ele) = tpvp;
+    dh.dtzv(*ele) = tpvz;
   }
 
   // Find the closest track particle with opposite charge and a minimum nb of Si
@@ -461,20 +457,20 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
         rv *= -1.;
     }
   } else {
-    dambi(*ele) = -1;
+    dh.dambi(*ele) = -1;
   }
-  drv(*ele) = rv;
-  dphiv(*ele) = pv;
-  dmee(*ele) = mee;
-  dmeeVtx(*ele) = meeAtVtx;
-  dsep(*ele) = sep;
+  dh.drv(*ele) = rv;
+  dh.dphiv(*ele) = pv;
+  dh.dmee(*ele) = mee;
+  dh.dmeeVtx(*ele) = meeAtVtx;
+  dh.dsep(*ele) = sep;
   if (goodConv && rv > m_rvECCut && meeAtVtx < m_meeAtVtxECCut)
-    dambi(*ele) = 2;
+    dh.dambi(*ele) = 2;
   else if (otrkP) {
     if (mee < m_meeICCut)
-      dambi(*ele) = 1;
+      dh.dambi(*ele) = 1;
     else
-      dambi(*ele) = 0;
+      dh.dambi(*ele) = 0;
   }
   return StatusCode::SUCCESS;
 }

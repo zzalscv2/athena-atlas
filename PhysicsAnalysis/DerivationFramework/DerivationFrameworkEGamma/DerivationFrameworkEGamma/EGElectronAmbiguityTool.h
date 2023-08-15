@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -98,8 +98,22 @@ private:
   SG::WriteDecorHandleKey<xAOD::ElectronContainer>
     m_dtzv{ this, "DFCommonProdTrueZ", "", "" };
 
+  struct DecorHandles {
+    DecorHandles (const EGElectronAmbiguityTool& tool, const EventContext& ctx);
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> drv;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dphiv;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmee;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dmeeVtx;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dsep;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, int>   dambi;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtrv;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtpv;
+    SG::WriteDecorHandle<xAOD::ElectronContainer, float> dtzv;
+  };
+  friend struct DecorHandles;
+
   StatusCode decorateSimple(
-    const EventContext& ctx,
+    DecorHandles& dh,
     std::unique_ptr<ConstDataVector<xAOD::TrackParticleContainer>>& tpC,
     const xAOD::Electron* ele,
     const xAOD::Vertex* pvtx) const;
