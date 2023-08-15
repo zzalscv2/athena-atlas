@@ -62,9 +62,11 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
                 CheckActiveAreas=False,
                 private=True)
 
-            GSFBuildPixelToTPIDTool = TrackingCommon.getInDetPixelToTPIDTool(
-                name="GSFBuildPixelToTPIDTool",
-                private=True)
+            from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+            from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPrivateToolWrapper
+            #use CA version to deal with dependencies on dEdx conditions properly
+            GSFBuildPixelToTPIDTool = CAtoLegacyPrivateToolWrapper(PixelToTPIDToolCfg)
+            
         #
         #  TRT_ElectronPidTool (private =True)
         #

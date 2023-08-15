@@ -68,30 +68,3 @@ viewSequence = seqAND("%sViewSequence"%signatureName,  [ inputMakerAlg, cosmicSe
 topSequence += viewSequence
 
 
-  # Adding vertexing
-  # from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
-  ## TODO need to change the name of the output vertex collection to something recordable
-  # vtxAlgs = makeInDetTrigVertices( "egamma", "HLT_IDTrack_FS_FTF", "HLT_xPrimVx"  )
-  # allViewAlgorithms += vtxAlgs
-
-
-  # from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
-  ## Adding precision tracking
-  # PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( "egamma", inputFTFtracks="TrigFastTrackFinder_Tracks_FS" )
-  # allViewAlgorithms += PTAlgs
-
-#
-# from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-#
-## hypo
-# beamspotHypoAlg = TrigStreamerHypoAlg("BeamspotHypoAlg")
-# beamspotHypoAlg.RuntimeValidation = False #Needed to avoid the ERROR ! Decision has no 'feature' ElementLink
-# beamspotHypoToolGen= StreamerHypoToolGenerator
-# beamspotViewsSequence = seqAND("beamspotViewsSequence", [ inputMakerAlg, beamspotSequence ])
-#
-# return  MenuSequence( Sequence    = beamspotViewsSequence,
-#                          Maker       = inputMakerAlg,
-#                          Hypo        = beamspotHypoAlg,
-#                          HypoToolGen = beamspotHypoToolGen )
-#
-#
