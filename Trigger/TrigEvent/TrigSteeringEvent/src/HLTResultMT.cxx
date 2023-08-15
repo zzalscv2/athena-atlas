@@ -253,7 +253,10 @@ const std::set<uint16_t>& HLT::HLTResultMT::getTruncatedModuleIds() const {
 }
 
 // -----------------------------------------------------------------------------
-void HLT::HLTResultMT::addTruncatedModuleId(const uint16_t moduleId) {
+void HLT::HLTResultMT::addTruncatedModuleId(const uint16_t moduleId, bool severeTruncation) {
+  // decide if event should go to the debug stream
+  m_severeTruncation |= severeTruncation;
+
   auto [itr, inserted] = m_truncatedModuleIds.insert(moduleId);
   // Also update ROB status words
   if (inserted) {
