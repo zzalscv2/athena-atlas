@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Electron_v1$
@@ -119,20 +119,22 @@ namespace xAOD {
     const std::array<double, 4> &deltaPhiRescaled,
     const double deltaPhiLast
   ) {
-    return 
-      setTrackCaloMatchValue(static_cast<float> (deltaEta[0]), xAOD::EgammaParameters::deltaEta0) &
-      setTrackCaloMatchValue(static_cast<float> (deltaEta[1]), xAOD::EgammaParameters::deltaEta1) &
-      setTrackCaloMatchValue(static_cast<float> (deltaEta[2]), xAOD::EgammaParameters::deltaEta2) &
-      setTrackCaloMatchValue(static_cast<float> (deltaEta[3]), xAOD::EgammaParameters::deltaEta3) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhi[0]), xAOD::EgammaParameters::deltaPhi0) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhi[1]), xAOD::EgammaParameters::deltaPhi1) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhi[2]), xAOD::EgammaParameters::deltaPhi2) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhi[3]), xAOD::EgammaParameters::deltaPhi3) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[0]), xAOD::EgammaParameters::deltaPhiRescaled0) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[1]), xAOD::EgammaParameters::deltaPhiRescaled1) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[2]), xAOD::EgammaParameters::deltaPhiRescaled2) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[3]), xAOD::EgammaParameters::deltaPhiRescaled3) &
-      setTrackCaloMatchValue(static_cast<float> (deltaPhiLast), xAOD::EgammaParameters::deltaPhiFromLastMeasurement);
+    bool ret = true;
+    // It's tempting, but clang warns about chaining these together with &.
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaEta[0]), xAOD::EgammaParameters::deltaEta0)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaEta[1]), xAOD::EgammaParameters::deltaEta1)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaEta[2]), xAOD::EgammaParameters::deltaEta2)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaEta[3]), xAOD::EgammaParameters::deltaEta3)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhi[0]), xAOD::EgammaParameters::deltaPhi0)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhi[1]), xAOD::EgammaParameters::deltaPhi1)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhi[2]), xAOD::EgammaParameters::deltaPhi2)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhi[3]), xAOD::EgammaParameters::deltaPhi3)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[0]), xAOD::EgammaParameters::deltaPhiRescaled0)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[1]), xAOD::EgammaParameters::deltaPhiRescaled1)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[2]), xAOD::EgammaParameters::deltaPhiRescaled2)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhiRescaled[3]), xAOD::EgammaParameters::deltaPhiRescaled3)) ret = false;
+    if (!setTrackCaloMatchValue(static_cast<float> (deltaPhiLast), xAOD::EgammaParameters::deltaPhiFromLastMeasurement)) ret = false;
+    return ret;
   }
 
   bool Electron_v1::trackParticleSummaryValue( uint8_t& value, const SummaryType information, int index ) const {
