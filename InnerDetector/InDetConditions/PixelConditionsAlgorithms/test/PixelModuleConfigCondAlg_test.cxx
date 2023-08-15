@@ -4,7 +4,7 @@
 /*
  */
 /**
- * @file PixelModuleConfigCondAlg/test/PixelModuleConfigCondAlg_test.cxx
+ * @file PixelConditionsAlgorithms/test/PixelModuleConfigCondAlg_test.cxx
  * @author Shaun Roe
  * @date Aug 2023
  * @brief Some tests for PixelModuleConfigCondAlg in the Boost framework
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_SUITE(PixelModuleConfigCondAlgTest )
     EventIDBase eid (1, 0, 0, 0, 0);
     ctx.setEventID (eid);
     BOOST_TEST(a.execute(ctx).isSuccess());
-    //no we have something in store to retrieve
+    //now we have something in store to retrieve
     BOOST_TEST( conditionStore->retrieve (cc, "PixelModuleData").isSuccess() );
     //and can extract the actual "PixelModuleData"..
     BOOST_TEST (cc->find (eid, data, &range2p));

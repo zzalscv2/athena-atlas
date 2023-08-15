@@ -87,7 +87,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  TimingTune:  [2009,2009,2009] [ N/A,2015,2015,2015] [ N/A,2018,2018,2018] [ N/A,2018,2018,2018]
     //  CrossTalk:   [0.06,0.06,0.06] [0.30,0.12,0.12,0.12] [0.30,0.12,0.12,0.12] [0.30,0.12,0.12,0.12]
     //  NoiseOcc.:   [5e-8,5e-8,5e-8] [5e-8,5e-8,5e-8,5e-8] [5e-8,5e-8,5e-8,5e-8] [5e-8,5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3] [9e-3,9e-3,9e-3,9e-3] [9e-3,9e-3,9e-3,9e-3] [9e-3,9e-3,9e-3,9e-3]
+    //  DisablePix:  [9e-3,9e-3,9e-3] [9e-3,9e-3,9e-3,9e-3] [9e-3,9e-3,9e-3,9e-3] [9e-3,9e-3,9e-3,9e-3]
     //  NoiseShape:  [2018,2018,2018] [2018,2018,2018,2018] [2018,2018,2018,2018] [2018,2018,2018,2018]
     //  BiasVoltage: [ 150, 150, 150] [  80, 350, 200, 150] [ 350, 350, 200, 150] [ 400, 400, 250, 250]
     //  Fluence(e14):[1.01,0.44,0.30] [0.80,1.61,0.71,0.48] [3.18,3.42,1.50,1.01] [5.50,5.19,2.28,1.53]
@@ -100,7 +100,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  TimingTune:  [2009,2009,2009]      [2015,2015,2015]      [2018,2018,2018]      [2018,2018,2018]
     //  CrossTalk:   [0.06,0.06,0.06]      [0.06,0.06,0.06]      [0.06,0.06,0.06]      [0.06,0.06,0.06]
     //  NoiseOcc.:   [5e-8,5e-8,5e-8]      [5e-8,5e-8,5e-8]      [5e-8,5e-8,5e-8]      [5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]
+    //  DisablePix:  [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]
     //  NoiseShape:  [2018,2018,2018]      [2018,2018,2018]      [2018,2018,2018]      [2018,2018,2018]
     //  BiasVoltage: [ 150, 150, 150]      [ 150, 150, 150]      [ 150, 150, 150]      [ 250, 250, 250]
     //  Fluence(e14):[ n/a, n/a, n/a]      [ n/a, n/a, n/a]      [ n/a, n/a, n/a]      [ n/a, n/a, n/a]
@@ -109,7 +109,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  ToT:                    [N/A]      [  -1,  -1,  -1]      [  -1,  -1,  -1]      [  -1,  -1,  -1]
     //  CrossTalk:              [N/A]      [0.06,0.06,0.06]      [0.06,0.06,0.06]      [0.06,0.06,0.06]
     //  NoiseOcc.:              [N/A]      [5e-8,5e-8,5e-8]      [5e-8,5e-8,5e-8]      [5e-8,5e-8,5e-8]
-    //  DisalbePix:             [N/A]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]
+    //  DisablePix:             [N/A]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]      [9e-3,9e-3,9e-3]
     //  BiasVoltage:            [N/A]      [ 500, 500, 500]      [ 500, 500, 500]      [ 500, 500, 500]
     //
     // IBL 3D:
@@ -133,7 +133,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  TimingTune:  [ N/A,2022,2022,2022]    [ N/A,2022,2022,2022]
     //  CrossTalk:   [0.30,0.12,0.12,0.12]    [0.30,0.12,0.12,0.12]
     //  NoiseOcc.:   [5e-8,5e-8,5e-8,5e-8]    [5e-8,5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]
+    //  DisablePix:  [9e-3,9e-3,9e-3,9e-3]    [9e-3,9e-3,9e-3,9e-3]
     //  NoiseShape:  [2018,2018,2018,2018]    [2018,2018,2018,2018]
     //  BiasVoltage: [ 450, 450, 300, 300]    [ 450, 450, 350, 350]
     //  Fluence(e14):[ 7.2, 6.8, 3.0, 2.0]    [  13, 9.2, 4.5, 3.1]
@@ -146,7 +146,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  TimingTune:  [2022,2022,2022]         [2022,2022,2022]
     //  CrossTalk:   [0.06,0.06,0.06]         [0.06,0.06,0.06]
     //  NoiseOcc.:   [5e-8,5e-8,5e-8]         [5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]
+    //  DisablePix:  [9e-3,9e-3,9e-3]         [9e-3,9e-3,9e-3]
     //  NoiseShape:  [2018,2018,2018]         [2018,2018,2018]
     //  BiasVoltage: [ 300, 300, 300]         [ 300, 300, 300]
     //  Fluence(e14):[ n/a, n/a, n/a]         [ n/a, n/a, n/a]
@@ -155,7 +155,7 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     //  ToT:         [  -1,  -1,  -1]
     //  CrossTalk:   [0.06,0.06,0.06]
     //  NoiseOcc.:   [5e-8,5e-8,5e-8]
-    //  DisalbePix:  [9e-3,9e-3,9e-3]
+    //  DisablePix:  [9e-3,9e-3,9e-3]
     //  BiasVoltage: [ 500, 500, 500]
     //
     // IBL 3D:
