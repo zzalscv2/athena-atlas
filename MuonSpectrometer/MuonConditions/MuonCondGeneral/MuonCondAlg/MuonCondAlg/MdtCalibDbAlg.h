@@ -153,8 +153,6 @@ private:
                                                                            "MdtTubeCalibContainerCollection", "MDT tube calib"};
     SG::WriteCondHandleKey<MdtCorFuncSetCollection> m_writeKeyCor{this, "MdtCorFuncSetCollection", "MdtCorFuncSetCollection",
                                                                   "MDT cor Funcs"};
-
-    const unsigned int m_regionIdThreshold{2500};
 };
 
 #endif
