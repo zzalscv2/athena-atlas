@@ -22,6 +22,7 @@ EOF
 }
 
 set -e
+LOG='gitlab_merge.sh>'   # log prefix
 
 while getopts "l:b:r:p:h" opt; do
     case $opt in
@@ -53,7 +54,7 @@ json=`curl --silent "https://gitlab.cern.ch/api/v4/projects/${project_url}/merge
 merge_requests=`echo "$json" | jq '.[]|.iid'` || { echo $json; exit 1; }
 
 if [ -z "${merge_requests}" ]; then
-    echo "No MRs matching label '${labels}' for branch '${branch}' in '${project}' found."
+    echo "$LOG No MRs matching label '${labels}' for branch '${branch}' in '${project}' found."
     exit 0
 fi
 
@@ -61,8 +62,13 @@ fi
 # Based on https://stackoverflow.com/questions/44992512
 for id in ${merge_requests}; do
     br="mr-${remote}-${id}"
-    echo "Merging ${project}!${id}"
+    echo "$LOG Merging ${project}!${id} with label matching ${labels}"
     git fetch ${remote} merge-requests/${id}/head:${br}
     git merge --commit --no-edit ${br}
     git branch -D ${br}    # delete local branch again
 done
+
+echo
+echo "$LOG Commit history of this build:"
+git --no-pager log --oneline ${remote}/${branch}..HEAD
+git --no-pager log --oneline -n1 ${remote}/${branch}
