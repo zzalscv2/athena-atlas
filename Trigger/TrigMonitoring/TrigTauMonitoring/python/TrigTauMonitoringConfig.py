@@ -583,6 +583,9 @@ class TrigTauMonAlgBuilder:
     monGroup.defineHistogram('M', title='M(#tau,#tau);M_{#tau,#tau};Nevents',xbins=50,xmin=0,xmax=250,opt='kAlwaysCreate')
     monGroup.defineHistogram('dPt', title='dPt |leading-subleading|; P_{t}; Nevents', xbins=20,xmin=0,xmax=200,opt='kAlwaysCreate')  
 
+    monGroup.defineTree('hleadEFEt,hsubleadEFEt,hleadEFEta,hsubleadEFEta,hleadEFPhi,hsubleadEFPhi,hdR,hdEta,hdPhi,Pt,Eta,Phi,M,dPt;DiTauVarsTree', treedef='hleadEFEt/F:hsubleadEFEt/F:hleadEFEta/F:hsubleadEFEta/F:hleadEFPhi/F:hsubleadEFPhi/F:hdR/F:hdEta/F:hdPhi/F:Pt/F:Eta/F:Phi/F:M/F:dPt/F')
+
+
   def bookTAndPVars(self, monAlg, trigger):
 
     monGroupName = trigger+"_TAndPVars"

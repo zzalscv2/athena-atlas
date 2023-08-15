@@ -18,7 +18,7 @@
 namespace LVL1 {
 
   eTowerMakerFromSuperCells::eTowerMakerFromSuperCells(const std::string& name, ISvcLocator* pSvcLocator)
-    :  AthAlgorithm(name, pSvcLocator)//AthReentrantAlgorithm(name, pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
   { 
   
   }
@@ -36,7 +36,7 @@ StatusCode eTowerMakerFromSuperCells::initialize()
 }
 
 
-  StatusCode eTowerMakerFromSuperCells::execute(/*const EventContext& ctx*/) //const
+  StatusCode eTowerMakerFromSuperCells::execute(const EventContext& ctx) const
 {
   // STEP 0 - Make a fresh local eTowerContainer
   std::unique_ptr<eTowerContainer> local_eTowerContainerRaw = std::make_unique<eTowerContainer>();
@@ -73,7 +73,7 @@ StatusCode eTowerMakerFromSuperCells::initialize()
   
 
   // STEP 3 - Write the completed eTowerContainer into StoreGate (move the local copy in memory)
-  SG::WriteHandle<LVL1::eTowerContainer> eTowerContainerSG(m_eTowerContainerSGKey/*, ctx*/);
+  SG::WriteHandle<LVL1::eTowerContainer> eTowerContainerSG(m_eTowerContainerSGKey, ctx);
   ATH_CHECK(eTowerContainerSG.record(std::move(/*my_eTowerContainerRaw*/local_eTowerContainerRaw)));
 
   // STEP 4 - Close and clean the event  

@@ -100,7 +100,7 @@ float LVL1::eFEXtauAlgoBase::getRealRCore() const {
   unsigned int num = core;
   unsigned int denom = core + env;
 
-  float out = denom ? (float)num / (float)denom : 0;
+  float out = denom ? static_cast<float>(num)/static_cast<float>(denom) : 0;
 
   return out;
 }
@@ -112,7 +112,7 @@ float LVL1::eFEXtauAlgoBase::getRealRHad() const {
   unsigned int num = core;
   unsigned int denom = core + env;
 
-  float out = denom ? (float)num / (float)denom : 0;
+  float out = denom ? static_cast<float>(num)/static_cast<float>(denom) : 0;
 
   return out;
 }

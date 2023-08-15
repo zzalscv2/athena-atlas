@@ -19,6 +19,8 @@ class InDetTrigSequence:
     self.__rois = rois
     self.__inView = inView
     self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_FTF 
+    self.__log = logging.getLogger("InDetTrigSequence")
+    self.__log.info(f"signature: {self.__signature} rois: {self.__rois} inview: {self.__inView}")
     
   def sequence(self, recoType : str = "FastTrackFinder") -> ComponentAccumulator:
     ca = ComponentAccumulator()
@@ -96,7 +98,7 @@ class InDetTrigSequence:
 
         from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import TrigSCTRawDataProviderCfg
         acc.merge(TrigSCTRawDataProviderCfg(self.__flags,suffix=signature,RoIs=self.__rois))
-      else:
+      elif not self.__inView:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         loadRDOs = [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ),
                     ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
@@ -119,7 +121,7 @@ class InDetTrigSequence:
       if self.__flags.Input.Format == Format.BS:
         from TrigInDetConfig.TrigInDetConfig import TRTDataProviderCfg
         acc.merge(TRTDataProviderCfg(self.__flags, self.__rois, self.__signature))
-      else:
+      elif not self.__inView:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         loadRDOs = [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
         acc.merge(SGInputLoaderCfg(self.__flags, Load=loadRDOs))

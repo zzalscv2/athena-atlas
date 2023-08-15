@@ -179,8 +179,14 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
             inputgFexTool = acc.popToolsAndMerge(gFexInputByteStreamToolCfg(flags, 'gFexInputBSDecoderTool'))
             
+            maybeMissingRobs = []
+            decoderTools = []
+
+            for module_id in inputgFexTool.ROBIDs:
+                maybeMissingRobs.append(module_id)
+
             decoderTools += [inputgFexTool]
-            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool])
+            decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=[inputgFexTool], MaybeMissingROBs=maybeMissingRobs)
             acc.addEventAlgo(decoderAlg)
 
         gFEXInputs = CompFactory.LVL1.gTowerMakerFromGfexTowers('gTowerMakerFromGfexTowers')

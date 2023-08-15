@@ -269,6 +269,7 @@ public:
 
   void changeStateOfVisibleNonStandardVolumesRecursively(VolumeHandle*,VP1GeoFlags::VOLSTATE);
   void expandVisibleVolumesRecursively(VolumeHandle*,const QRegExp&,bool bymatname);
+  void iconifyVisibleVolumesRecursively(VolumeHandle*,const QRegExp&,bool bymatname);
 
   SoSeparator* m_textSep;//!< Separator used to hold all visible labels.
 
@@ -400,9 +401,10 @@ QWidget * VP1GeometrySystem::buildController()
   connect(m_d->controller,SIGNAL(muonChamberAdaptionStyleChanged(VP1GeoFlags::MuonChamberAdaptionStyleFlags)),
 	  this,SLOT(adaptMuonChambersStyleChanged()));
   connect(m_d->controller,SIGNAL(autoExpandByVolumeOrMaterialName(bool,QString)),this,SLOT(autoExpandByVolumeOrMaterialName(bool,QString)));
+  connect(m_d->controller,SIGNAL(autoIconifyByVolumeOrMaterialName(bool,QString)),this,SLOT(autoIconifyByVolumeOrMaterialName(bool,QString)));
   connect(m_d->controller,SIGNAL(actionOnAllNonStandardVolumes(bool)),this,SLOT(actionOnAllNonStandardVolumes(bool)));
   connect(m_d->controller,SIGNAL(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)));
-  connect(m_d->controller,SIGNAL(autoAdaptMuonNSW(bool, bool,bool)),this,SLOT(autoAdaptMuonNSW(bool, bool,bool)));
+  connect(m_d->controller,SIGNAL(autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptMuonNSW(bool, bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(resetSubSystems(VP1GeoFlags::SubSystemFlags)),this,SLOT(resetSubSystems(VP1GeoFlags::SubSystemFlags)));
 
   connect(m_d->controller,SIGNAL(labelsChanged(int)),this,SLOT(setLabels(int)));
@@ -2109,6 +2111,64 @@ void VP1GeometrySystem::Imp::expandVisibleVolumesRecursively(VolumeHandle* handl
     expandVisibleVolumesRecursively(*it,selregexp,bymatname);
 }
 
+//_____________________________________________________________________________________
+void VP1GeometrySystem::Imp::iconifyVisibleVolumesRecursively(VolumeHandle* handle,const QRegExp& selregexp,bool bymatname)
+{
+  if (handle->state()==VP1GeoFlags::ZAPPED)
+    return;
+  
+  if (handle->state()==VP1GeoFlags::CONTRACTED) {
+    //See if we match -- if so, update state.
+	if( selregexp.exactMatch(bymatname?QString(handle->geoMaterial()->getName().c_str()):handle->getName())) {
+      handle->setState(VP1GeoFlags::ZAPPED);
+    }
+    return;
+  }
+  //Must be expanded: Let us call on any (initialised) children instead.
+  if (handle->nChildren()==0||!handle->childrenAreInitialised())
+    return;
+  VolumeHandle::VolumeHandleListItr it(handle->childrenBegin()), itE(handle->childrenEnd());
+  for(;it!=itE;++it)
+    iconifyVisibleVolumesRecursively(*it,selregexp,bymatname);
+}
+
+
+//_____________________________________________________________________________________
+void VP1GeometrySystem::autoIconifyByVolumeOrMaterialName(bool bymatname,QString targetname)
+{
+  if (targetname.isEmpty()) {
+	  VP1Msg::messageDebug("targetname is empty.");
+    return;
+  }
+
+  messageVerbose("Auto iconification/zapping of visible volumes requested. Target all volumes with "
+		 +str(bymatname?"material name":"name")+" matching "+targetname);
+
+  QRegExp selregexp(targetname,Qt::CaseSensitive,QRegExp::Wildcard);
+
+  std::vector<std::pair<VolumeHandle::VolumeHandleListItr,VolumeHandle::VolumeHandleListItr> > roothandles;
+  m_d->volumetreemodel->getRootHandles(roothandles);
+  VolumeHandle::VolumeHandleListItr it, itE;
+
+  bool save = m_d->sceneroot->enableNotify(false);
+  m_d->phisectormanager->largeChangesBegin();
+
+  deselectAll();
+
+  for (unsigned i = 0; i<roothandles.size();++i) {
+    it = roothandles.at(i).first;
+    itE = roothandles.at(i).second;
+    for(;it!=itE;++it)
+      m_d->iconifyVisibleVolumesRecursively(*it,selregexp,bymatname);
+  }
+
+  m_d->phisectormanager->updateRepresentationsOfVolsAroundZAxis();
+  m_d->phisectormanager->largeChangesEnd();
+  if (save) {
+    m_d->sceneroot->enableNotify(true);
+    m_d->sceneroot->touch();
+  }
+}
 #ifndef BUILDVP1LIGHT
 //_____________________________________________________________________________________
 void VP1GeometrySystem::Imp::updatePV2MuonStationMap(const MuonGM::MuonReadoutElement* elem)
@@ -2263,7 +2323,7 @@ void VP1GeometrySystem::autoAdaptPixelsOrSCT(bool pixel,bool brl, bool ecA, bool
 
 
 //_____________________________________________________________________________________
-void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm)
+void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool passiveSpacer, bool passiveStructure,bool  passiveAPlate)
 {
   VP1Msg::messageDebug("VP1GeometrySystem::autoAdaptMuonNSW()");
 
@@ -2324,7 +2384,13 @@ void VP1GeometrySystem::autoAdaptMuonNSW(bool reset, bool stgc, bool mm)
 	        } else if ( (mm) && (*itChl)->hasName("NSW_MM") ) {
 	            unzap = true;
 	            //m_d->showPixelModules(*itChl);
-	        } 
+	        } else if ( (passiveSpacer) && (*itChl)->hasName("NSW_Spacer") ) {
+	            unzap = true;
+	        } else if ( (passiveStructure) && (*itChl)->hasName("NSW_Aluminum_Structure_and_HUB") ) {
+	            unzap = true;
+	        } else if ( (passiveAPlate) && (*itChl)->hasName("A_Plate") ) {
+	            unzap = true;
+            }
         }
         if (unzap) {
 	        (*itChl)->setState(VP1GeoFlags::EXPANDED);

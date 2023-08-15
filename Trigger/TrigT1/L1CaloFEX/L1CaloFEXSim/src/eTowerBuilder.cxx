@@ -24,19 +24,18 @@ eTowerBuilder::eTowerBuilder(const std::string& type,const std::string& name,con
 }
 
 
-void eTowerBuilder::init(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) 
+void eTowerBuilder::init(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) const
 {
-
   execute(eTowerContainerRaw);
 }
 
 
-void eTowerBuilder::reset() 
+void eTowerBuilder::reset() const
 {
 }
 
 
-void eTowerBuilder::execute(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) 
+void eTowerBuilder::execute(std::unique_ptr<eTowerContainer> & eTowerContainerRaw) const
 {
   BuildAllTowers(eTowerContainerRaw);
 }

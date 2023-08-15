@@ -41,7 +41,6 @@ void LVL1::eFEXtauAlgo::setup(int inputTable[3][3], int efex_id, int fpga_id, in
   buildLayers(efex_id, fpga_id, central_eta);
   setSupercellSeed();
   setUnDAndOffPhi();
-
 }
 
 std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauAlgo::getTauTOB() const
@@ -226,11 +225,9 @@ void LVL1::eFEXtauAlgo::setUnDAndOffPhi()
     ATH_MSG_DEBUG("Layers not built, cannot accurately set phi direction.");
   }  
 
-  unsigned int upwardEt = 0;
-  upwardEt += m_em2cells[m_seed][2];
+  unsigned int upwardEt = m_em2cells[m_seed][2];
   
-  unsigned int downwardEt = 0;
-  downwardEt += m_em2cells[m_seed][0];
+  unsigned int downwardEt = m_em2cells[m_seed][0];
 
   if (downwardEt > upwardEt) {
     m_offPhi = 0;
@@ -294,4 +291,3 @@ unsigned int LVL1::eFEXtauAlgo::getSeed() const
 {
     return m_seed;
 }
-

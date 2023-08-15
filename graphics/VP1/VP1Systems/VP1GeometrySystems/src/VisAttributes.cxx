@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VisAttributes.h"
@@ -19,6 +19,7 @@ public:
 
   QMap<QString,QByteArray> currentState() const;
   QMap<QString,QByteArray> initialState;
+  
 };
 
 //____________________________________________________________________
@@ -137,6 +138,31 @@ void VisAttributes::overrideTransparencies(float transpfact)
   for (it=m_d->_map.begin();it!=itE;++it)
     it->second->transparency.set1Value( 0, transpfact );
 }
+
+float VisAttributes::getValFromRGB(const int rgb)
+{
+    return rgb/255.0;
+}
+
+void VisAttributes::setColorFromRGB(SoMaterial* mat, std::string type, const int r, const int g, const int b)
+{
+    const float fr = getValFromRGB(r);
+    const float fg = getValFromRGB(g);
+    const float fb = getValFromRGB(b);
+    if (type == "ambient")
+        mat->ambientColor.setValue(fr, fg, fb);
+    else if (type == "diffuse")
+        mat->diffuseColor.setValue(fr, fg, fb);
+    else if (type == "specular")
+        mat->specularColor.setValue(fr, fg, fb);
+    else 
+        std::cout << "ERROR! Color type not supported ==> " << type << std::endl;
+    
+    // Debug Msg
+    //std::cout << "Set color (" << r << "," << g << "," << b << ") to (" << fr << "," << fg << "," << fb << ")" << std::endl;
+    return;
+}
+
 
 //////////////////////////////// Attributes for detectors ////////////////////////////////
 
@@ -372,6 +398,7 @@ MatVisAttributes::MatVisAttributes() {
     m->specularColor.setValue(0.56, 0.55, 0.56);
     add("CO2",m);
     add("ArCO2",m);
+    add("trt::CO2",m);
   }
 
   {
@@ -382,6 +409,7 @@ MatVisAttributes::MatVisAttributes() {
     m->specularColor.setValue(0.56, 0.55, 0.56);
     m->shininess.setValue(0.13);
     add("Silicon",m);
+    add("std::Silicon",m);
   }
 
   {
@@ -392,6 +420,7 @@ MatVisAttributes::MatVisAttributes() {
     m->specularColor.setValue(0.441667, 0.441667, 0.441667);
     m->shininess.setValue(0.67);
     add("Kapton",m);
+    add("std::Kapton",m);
     add("KaptonC",m);  //used by LAr.
     add("FCalCableHarness",m);  //used by LAr.
   }
@@ -459,6 +488,25 @@ MatVisAttributes::MatVisAttributes() {
   }
 
   {
+    // Tile Glue
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 102, 161, 191); // a pale azure
+    setColorFromRGB(m, "ambient", 0, 40, 47); // a dark blue
+    setColorFromRGB(m, "specular", 234,234, 234); // a light grey
+    m->shininess.setValue(0.64);
+    add( "Glue",m);
+  }
+  
+  {
+    // Tile Scintillator
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 97, 191, 0); // a bright green 
+    setColorFromRGB(m, "ambient", 51, 51, 51); // a dark grey
+    setColorFromRGB(m, "specular", 246, 246, 246); // almost white
+    m->shininess.setValue(0.98);
+    add("tile::Scintillator",m);
+  }
+  {
     // Epoxy
     SoMaterial *m = new SoMaterial;
     m->diffuseColor.setValue (0, 0.748016, 0.176015);
@@ -484,6 +532,7 @@ MatVisAttributes::MatVisAttributes() {
     m->emissiveColor.setValue(0.45, .60, .60);
     m->shininess.setValue(0.3);
     add("LiquidArgon",m);
+    add("std::LiquidArgon",m);
   }
   {
     // Copper
@@ -637,6 +686,7 @@ MatVisAttributes::MatVisAttributes() {
     add("pix::GlueOmegaStave_BL0",m);
     add("pix::GlueOmegaStave_L10",m);
     add("pix::GlueOmegaStave_L20",m);
+    add("OmegaGlue_IBL",m);
   }
 
   {
@@ -719,6 +769,7 @@ MatVisAttributes::MatVisAttributes() {
     m->emissiveColor.setValue (0.028, 0.028, 0.028);
     m->shininess.setValue(.60);
     add("Hybrid",m);
+    add("pix::Hybrid",m);
   }
 
   {
@@ -729,25 +780,9 @@ MatVisAttributes::MatVisAttributes() {
     m->emissiveColor.setValue (0.028, 0.028, 0.028);
     m->shininess.setValue(.60);
     add("Chip",m);
-  }
-
-  {
-    SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (0.8, 0.51, 0.105);
-    m->specularColor.setValue (0.39, 0.39, 0.39);
-    m->emissiveColor.setValue (0.028, 0.028, 0.028);
-    m->shininess.setValue(.60);
     add("pix::Chip",m);
   }
 
-  {
-    SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (0.15, 0.33, 0);
-    m->specularColor.setValue (0.39, 0.39, 0.39);
-    m->emissiveColor.setValue (0.028, 0.028, 0.028);
-    m->shininess.setValue(.60);
-    add("pix::Hybrid",m);
-  }
 
   {
     SoMaterial *m = new SoMaterial;
@@ -1037,21 +1072,21 @@ MatVisAttributes::MatVisAttributes() {
     // NSW - sTGC
     SoMaterial * m = new SoMaterial;
     m->ambientColor.setValue(0.2, 0.2, 0.2);
-    m->diffuseColor.setValue(0, 0.6667, 1.0);
+    setColorFromRGB(m, "diffuse", 4, 142, 167); // #048EA7 - Blue Munsell (greenish azure)
     m->specularColor.setValue(0,0,0);
     m->shininess.setValue(0.2);
     add("Honeycomb",m);
+    add("muo::Honeycomb",m); // there's a typo in the Muon material, should be "muon::", not "muo::" ...
+
   }
   {
     // NSW - MicroMegas (MM)
     SoMaterial *m = new SoMaterial;
-    m->diffuseColor.setValue (0.765, 0.718, 0.541);
+    setColorFromRGB(m, "diffuse", 212, 194, 126); // #D4C27E - Ecru
     m->specularColor.setValue (0.5, 0.5, 0.5);
-    //m->ambientColor.setValue(0, .157811, .187004);
-    //m->diffuseColor.setValue(.98, .8, .21);
-    //m->specularColor.setValue(.915152, .915152, .915152);
     m->shininess.setValue(0.2);
     add("PCB",m);
+    add("sct::PCB",m);
   }
   {
     // NSW - Shield Steel
@@ -1060,8 +1095,22 @@ MatVisAttributes::MatVisAttributes() {
     m->specularColor.setValue(0.168, 0.168, 0.168);
     m->shininess.setValue(0.153696);
     add("ShieldSteel",m);
+    add("shield::ShieldSteel",m);
   }
-
+ 
+  /* WIP
+  {
+    // NSW - Special material for the Run3 Detector Pape
+    // The aim is to colorize the JD shield plate 
+    // in contrasting color, for the NSW images 
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 114, 83, 143); // 72538F - Royal Purple
+    //m->diffuseColor.setValue (0.424238, 0.424238, 0.424238);
+    m->specularColor.setValue(0.168, 0.168, 0.168);
+    m->shininess.setValue(0.153696);
+    add("shield::ShieldSteel",m);
+  }
+  */
 
 
 //////////////
@@ -1113,5 +1162,65 @@ VolVisAttributes::VolVisAttributes() {
     add("bcmModLog",m);
     add("bcmWallLog",m);
   }
+
+  
+  
+  {
+    // Cutout - EMEC
+    SoMaterial *m = new SoMaterial;
+    //setColorFromRGB(m, "diffuse", 255, 190, 11); // ffbe0b - Mango (lighter)
+    setColorFromRGB(m, "diffuse",245, 180, 0); // F5B400 - Selective Yellow (darker)
+    m->shininess.setValue(0.67);
+    add( "LAr::EMEC::Mother",m);
+  }
+  {
+    // Cutout - HEC
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 47, 25, 95); // 2f195f - Russian Violet (darker)
+    //setColorFromRGB(m, "diffuse",56, 30, 113); // 381E71 - Persian Indigo (lighter)
+    m->shininess.setValue(0.67);
+    add( "LAr::HEC::LiquidArgon",m);
+  }
+  {
+    // Cutout - FCAL
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 246, 247, 64); // f6f740 - Maximum Yellow
+    m->shininess.setValue(0.67);
+    add( "LAr::FCAL::LiquidArgonC",m);
+    add( "LAr::FCAL::LiquidArgonA",m);
+  }
+ 
+  {
+    // Cutout - TRT
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 114, 83, 143); // 72538F - Royal Purple
+    m->shininess.setValue(0.67);
+    add( "TRTEndcapWheelAB",m);
+    add( "TRTBarrel",m);
+  }
+  
+  {
+    // Cutout - SCT
+    SoMaterial *m = new SoMaterial;
+    //setColorFromRGB(m, "diffuse", 80, 255, 177); // 50FFB1 - Medium Spring Green
+    setColorFromRGB(m, "diffuse", 170, 255, 255); // AAFFFF - Celeste
+    m->shininess.setValue(0.67);
+    add( "SCT_Barrel",m);
+    add( "SCT_ForwardA",m);
+    add( "SCT_ForwardC",m);
+  }
+
+  // Detailed Muon View for Run3 Detector Paper
+  // RPC layers
+  {
+    SoMaterial *m = new SoMaterial;
+    setColorFromRGB(m, "diffuse", 61, 52, 139); // 3D348B - Dark Slate Blue
+    m->shininess.setValue(0.67);
+    //add( "RPC_AL_extsuppanel",m); // WIP
+    add( "Rpclayer",m);
+  }
+
+  
+  
   init();
 }

@@ -1,11 +1,9 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "L1CaloFEXSim/eTower.h"
 #include "L1CaloFEXSim/eTowerContainer.h"
@@ -13,10 +11,6 @@
 #include "L1CaloFEXSim/eSuperCellTowerMapper.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
-
-//using Athena_test::URNG;
-//using Athena_test::randi_seed;
-//using Athena_test::randf_seed;
 
 // This is a class which is designed to receive in a list of supercells and a list of eTowers and match them together appropriately.
 
@@ -52,7 +46,7 @@ StatusCode eSuperCellTowerMapper::initialize()
     
 }
 
-StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw){
+StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const {
 
   static constexpr float pi_over_32 = M_PI/32;
   
@@ -64,7 +58,7 @@ StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowe
 
 
   for(auto eachTower : *triggerTowerCollection) {
-    if(fabs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
+    if(std::abs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
       int i_phi = int(eachTower->phi()/pi_over_32);
       int etaSign{-1};
       int towerID_Modifier{100000};
@@ -94,12 +88,12 @@ StatusCode eSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<eTowe
   return StatusCode::SUCCESS;
 }
 
-void eSuperCellTowerMapper::reset(){
+void eSuperCellTowerMapper::reset() const {
   return;
 }
 
   // works for real supercells from MC
-  StatusCode eSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw)
+  StatusCode eSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const
 {
 
   bool doPrint = false;
@@ -249,8 +243,8 @@ void eSuperCellTowerMapper::reset(){
 }
 
 
-void eSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit){
-    
+void eSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) const {
+
   LVL1::eTower * tmpTower = my_eTowerContainerRaw->findTower(iETower);
   
   if(tmpTower){
@@ -259,7 +253,7 @@ void eSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<eTowerContai
 
 }
 
-  int eSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov,bool doPrint)
+  int eSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov,bool doPrint) const
 {
 
   // bool for the special case of 1.8 < eta < 2.0 only in the front layer
@@ -791,15 +785,13 @@ void eSuperCellTowerMapper::ConnectSuperCellToTower(std::unique_ptr<eTowerContai
   
   }
 
-int eSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi)
+int eSuperCellTowerMapper::FindTowerIDForSuperCell(int towereta, int towerphi) const
 {
-
   return (towerphi + (64 * towereta));
-
 }
 
   void eSuperCellTowerMapper::PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID ,bool doenergysplit)
-{
+const {
   
   std::string sampleName = "";
   

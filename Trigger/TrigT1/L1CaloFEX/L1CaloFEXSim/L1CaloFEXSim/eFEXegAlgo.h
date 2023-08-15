@@ -39,7 +39,7 @@ namespace LVL1 {
     /** Destructor */
     virtual ~eFEXegAlgo();
 
-    virtual StatusCode safetyTest() override;
+    virtual StatusCode safetyTest() const override;
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) override; 
 
     virtual void getReta(std::vector<unsigned int> & ) override;
@@ -52,9 +52,9 @@ namespace LVL1 {
     virtual unsigned int getET() override;
     virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) override;
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) override;
-    virtual bool hasSeed() override {return m_hasSeed;};
-    virtual unsigned int getSeed() override {return m_seedID;};
-    virtual unsigned int getUnD() override {return m_seed_UnD;};
+    virtual bool hasSeed() const override {return m_hasSeed;};
+    virtual unsigned int getSeed() const override {return m_seedID;};
+    virtual unsigned int getUnD() const override {return m_seed_UnD;};
     virtual void getCoreEMTowerET(unsigned int & et) override;
     virtual void getCoreHADTowerET(unsigned int & et) override;
     virtual void getSums(unsigned int seed, bool UnD, 

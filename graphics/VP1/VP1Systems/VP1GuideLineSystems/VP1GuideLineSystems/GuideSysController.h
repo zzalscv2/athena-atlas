@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,11 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: July 2008                                //
+//                                                            //
+//  Updates:                                                  //
+//  - 2021, Nov - Riccardo Maria BIANCHI <rbianchi@cern.ch>   //
+//                Added VP1People class to show people        //
+//                figures at scale                            //
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
@@ -44,6 +49,7 @@ public:
 
   //Various materials:
   SoMaterial * lettersMaterial() const;
+  SoMaterial * peopleMaterial() const;
   SoMaterial * xAxisMaterial() const;
   SoMaterial * yAxisMaterial() const;
   SoMaterial * zAxisMaterial() const;
@@ -68,6 +74,11 @@ public:
   bool showLetters() const;
   double lettersZPos() const;
   double lettersVerticalPos() const;
+
+  //People:
+  bool showPeople() const;
+  double peopleZPos() const;
+  double peopleVerticalPos() const;
 
   //Coordinate axis
   bool showAxes() const;
@@ -126,8 +137,10 @@ signals:
   void floorSpacingChanged(const double&);
   void floorHeightChanged(const double&);
   void showLettersChanged(bool);
+  void showPeopleChanged(bool);
   void lettersZPosChanged(const double&);
   void lettersVerticalPosChanged(const double&);
+  void peopleVerticalPosChanged(const double&);
   void showAxesChanged(bool);
   void axesLengthChanged(const double&);
   void axesPositionChanged(const SbVec3f&);
@@ -172,8 +185,10 @@ private slots:
   void possibleChange_floorSpacing();
   void possibleChange_floorHeight();
   void possibleChange_showLetters();
+  void possibleChange_showPeople();
   void possibleChange_lettersZPos();
   void possibleChange_lettersVerticalPos();
+  void possibleChange_peopleVerticalPos();
   void possibleChange_showAxes();
   void possibleChange_axesLength();
   void possibleChange_axesPosition();

@@ -78,9 +78,10 @@ protected slots:
   void emit_appropriateMDTProjectionsChanged();
 
   void autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool);//pixel,brl,ecA,ecC,bcmA,bcmC
-  void autoAdaptMuonNSW(bool reset, bool stgc, bool mm); // reset to full NSW geo, sTGC, MicroMegas
+  void autoAdaptMuonNSW(bool reset, bool stgc, bool mm, bool passiveSpacer, bool passiveStructure,bool  passiveAPlate); // select NSW geo: sTGC, MicroMegas, Spacer, Structure, APlate
   void resetSubSystems(VP1GeoFlags::SubSystemFlags);
   void autoExpandByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
+  void autoIconifyByVolumeOrMaterialName(bool,QString);//volname: (false,namestr), matname: (true,namestr)
   void actionOnAllNonStandardVolumes(bool);//true: zap, false: expand.
 
   void volumeStateChangeRequested(VolumeHandle*,VP1GeoFlags::VOLSTATE);
