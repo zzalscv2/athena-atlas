@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -109,19 +109,25 @@ public:
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
 private:
+  //Returned by the final smoother fit. 
+  //This is what we need to pass when forming a Trk::Track
   using GSFTrajectory = DataVector<const Trk::MultiComponentStateOnSurface>;
+  //Internally we can use a simple std::vector 
+  using GSFTrajectoryVec = std::vector<Trk::MultiComponentStateOnSurface>;
+
   /** Produces a perigee from a smoothed trajectory */
   std::unique_ptr<MultiComponentStateOnSurface> makePerigee(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectory&,
+    const GSFTrajectory& smoothedTrajectory,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Gsf smoothe trajectory*/
+  /** Gsf smoothed trajectory. This method can handle additional info like
+   * calorimeter cluster constraints. It also produces what we actually store in Trk::Tracks.*/
   GSFTrajectory smootherFit(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectory&,
+    const GSFTrajectoryVec& forwardTrajectory,
     const ParticleHypothesis particleHypothesis = nonInteracting,
     const CaloCluster_OnTrack* ccot = nullptr) const;
 
@@ -133,30 +139,30 @@ private:
     GSFTrajectory& smoothedTrajectory) const;
 
   /** Forward GSF fit using PrepRawData */
-  GSFTrajectory fitPRD(
+  GSFTrajectoryVec forwardPRDfit(
     const EventContext& ctx,
-    IMultiStateExtrapolator::Cache&,
-    const PrepRawDataSet&,
-    const TrackParameters&,
+    IMultiStateExtrapolator::Cache& cache,
+    const PrepRawDataSet& inputPrepRawDataSet,
+    const TrackParameters& estimatedTrackParametersNearOrigin,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Forward GSF fit using MeasurementSet */
-  GSFTrajectory fitMeasurements(
+  GSFTrajectoryVec forwardMeasurementFit(
     const EventContext& ctx,
-    IMultiStateExtrapolator::Cache&,
-    const MeasurementSet&,
-    const TrackParameters&,
+    IMultiStateExtrapolator::Cache& cache,
+    const MeasurementSet& inputMeasurementSet,
+    const TrackParameters& estimatedTrackParametersNearOrigin,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Progress one step along the fit */
   bool stepForwardFit(
     const EventContext& ctx,
     IMultiStateExtrapolator::Cache&,
-    GSFTrajectory&,
-    const PrepRawData*,
-    const MeasurementBase*,
-    const Surface&,
-    MultiComponentState&,
+    GSFTrajectoryVec& forwardTrajectory,
+    const PrepRawData* originalPrepRawData,
+    const MeasurementBase* originalMeasurement,
+    const Surface& surface,
+    MultiComponentState& updatedState,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
 private:

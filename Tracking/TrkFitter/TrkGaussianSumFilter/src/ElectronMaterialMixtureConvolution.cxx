@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2020-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @file ElectronMaterialMixtureConvolution.cxx
- * @begin         Julay 20 2020
- * @author        Anthony Morley
+ * @begin         July 20 2020
+ * @author        Anthony Morley, Christos Anastopoulos
  * @brief         Implementation code for GSF material mixture convolution
  */
 
