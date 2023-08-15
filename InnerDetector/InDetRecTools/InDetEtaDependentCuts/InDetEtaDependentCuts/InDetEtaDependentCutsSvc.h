@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef INDETETADEPENDENTCUTS_INDETETADEPENDENTCUTSSVC_H
 #define INDETETADEPENDENTCUTS_INDETETADEPENDENTCUTSSVC_H
@@ -63,7 +63,7 @@ namespace InDet {
     /////////////////////////////////////////////////////////////////// 
     private: 
       template <class T>
-      T getValueAtEta(const std::vector< T > cuts, const double eta) const{
+      T getValueAtEta(const std::vector< T >& cuts, const double eta) const{
         return cuts.at(getIndexByEta(eta)); // will print an info and clamp if out of range
       }
       
