@@ -57,7 +57,7 @@ ex_bs.args = f'-r {run_no+1} -t {t_future} -n 5 -o cond {input_file}'
 
 ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
-ex.job_options = 'TrigP1Test/testHLT_condStopStart.py'
+ex.job_options = 'TrigP1Test.CondReader.run'
 ex.input = ''
 ex.max_events = 5
 ex.args = '-f raw.data -i -M -ul'
