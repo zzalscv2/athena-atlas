@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_HANDLEKEYARRAY_H
@@ -7,6 +7,7 @@
 
 #include "StoreGate/VarHandleKeyArray.h"
 #include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 #include <vector>
 #include <string>
@@ -97,10 +98,10 @@ namespace SG {
      * in the array
      */
     std::vector< T_Handle > makeHandles() const {
+      const EventContext& ctx = Gaudi::Hive::currentContext();
       std::vector< T_Handle > hndl;
-      typename std::vector<T_HandleKey>::const_iterator itr;
-      for (itr = this->begin(); itr != this->end(); ++itr) {
-        hndl.push_back ( T_Handle( *itr) );
+      for (const T_HandleKey& k : *this) {
+        hndl.emplace_back ( k, ctx );
       }
       return hndl;
     }
@@ -112,9 +113,8 @@ namespace SG {
     std::vector< T_Handle > makeHandles (const EventContext& ctx) const
     {
       std::vector< T_Handle > hndl;
-      typename std::vector<T_HandleKey>::const_iterator itr;
-      for (itr = this->begin(); itr != this->end(); ++itr) {
-        hndl.push_back ( T_Handle( *itr, ctx) );
+      for (const T_HandleKey& k : *this) {
+        hndl.emplace_back ( k, ctx);
       }
       return hndl;
     }
