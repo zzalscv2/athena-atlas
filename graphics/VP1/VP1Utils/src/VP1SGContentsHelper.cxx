@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -83,7 +83,7 @@ QStringList VP1SGContentsHelper::getKeys(const CLID& id) const
 
   bool exception = true;
   try {
-    keys = m_sg->keys(id);
+    m_sg->keys(id, keys);
     exception = false;
   } catch (const std::runtime_error& e) {
     exception = true;
