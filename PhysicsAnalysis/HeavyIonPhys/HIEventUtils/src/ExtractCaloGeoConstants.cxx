@@ -53,7 +53,7 @@ StatusCode ExtractCaloGeoConstants::execute()
     towerItr->fillToken(cellToken,double(1.));
     if ( cellToken.size() == 0 ) continue;
     for(NavigationToken<CaloCell,double,CaloCellIDFcn>::const_iterator cellItr = cellToken.begin();
-	cellItr != cellToken.end(); cellItr++ )
+	cellItr != cellToken.end(); ++cellItr )
     {      
       double geoWeight = cellToken.getParameter(*cellItr); 
       int layer = (*cellItr)->caloDDE()->getSampling();
