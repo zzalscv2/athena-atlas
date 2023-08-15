@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //Gaudi Includes
@@ -75,7 +75,7 @@ StatusCode TBDetDescrLoader::initialize()
       ClassID_traits<TBDetDescrManager>::ID(),
       m_TBDetDescrManager, m_TBDetDescrManager);
 
-    sc = detStore()->createProxy(addr);
+    sc = detStore()->recordAddress(addr);
     if (sc != StatusCode::SUCCESS) {
       ATH_MSG_INFO( "unable to fill address for " << (*addr->par())
                     << " with CLID " << addr->clID()
