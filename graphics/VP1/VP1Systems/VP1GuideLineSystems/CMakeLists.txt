@@ -11,10 +11,12 @@ find_package( Qt5 COMPONENTS Core Gui Widgets )
 set( CMAKE_AUTOUIC TRUE )
 # Generate MOC files automatically:
 set( CMAKE_AUTOMOC TRUE )
+# Generate resource files automatically:
+set( CMAKE_AUTORCC TRUE )
 
 if(NOT BUILDVP1LIGHT)
 # Component(s) in the package:
-atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx
+atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx src/*.qrc
    PUBLIC_HEADERS VP1GuideLineSystems
    INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoPrimitives VP1Base VP1Utils
@@ -24,7 +26,7 @@ atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx
 endif()
 if(BUILDVP1LIGHT)
 # Component(s) in the package:
-atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx
+atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx src/*.qrc
    PUBLIC_HEADERS VP1GuideLineSystems
    INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
    LINK_LIBRARIES ${COIN3D_LIBRARIES} GeoPrimitives VP1Base VP1Utils
@@ -32,3 +34,4 @@ atlas_add_library( VP1GuideLineSystems VP1GuideLineSystems/*.h src/*.cxx
    PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
    PRIVATE_LINK_LIBRARIES VP1HEPVis )
 endif()
+

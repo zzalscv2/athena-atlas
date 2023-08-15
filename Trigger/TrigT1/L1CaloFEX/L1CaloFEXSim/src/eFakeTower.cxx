@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFakeTower.h"
@@ -28,7 +28,7 @@ LVL1::eFakeTower::~eFakeTower() {
   m_alltowers.clear();
 }
 
-StatusCode LVL1::eFakeTower::init(std::string input_fileadress) {
+StatusCode LVL1::eFakeTower::init(const std::string& input_fileadress) {
   ATH_CHECK( m_eFEXFPGATowerIdProviderTool.retrieve() );
   m_numberofevents = 0;
   m_inputfile = input_fileadress;
@@ -46,7 +46,7 @@ StatusCode LVL1::eFakeTower::init(std::string input_fileadress) {
   return StatusCode::SUCCESS;
 }
 
-int LVL1::eFakeTower::getET(int FPGAid, int eta, int phi, int layer, int cell) {
+int LVL1::eFakeTower::getET(int FPGAid, int eta, int phi, int layer, int cell) const {
   // find the ET of a supercell.
   if (eta > 5 || eta < 0) {
     ATH_MSG_ERROR( "Requested Supercell does not exist.");
@@ -68,11 +68,11 @@ int LVL1::eFakeTower::getET(int FPGAid, int eta, int phi, int layer, int cell) {
     return 0;
   }
   int id = eta * 1000 + phi * 100 + layer * 10 + cell;
-  if ((*m_alltowers[FPGAid]).find(id) == (*m_alltowers[FPGAid]).end()) {
+  if (m_alltowers.at(FPGAid)->find(id) == m_alltowers.at(FPGAid)->end()) {
     ATH_MSG_ERROR( "Trying to access uninitiated supercell.");
     return 0;
   }
-  return (*m_alltowers[FPGAid])[id];
+  return m_alltowers.at(FPGAid)->at(id);
 }
 
 StatusCode LVL1::eFakeTower::loadnext()
@@ -151,7 +151,7 @@ StatusCode LVL1::eFakeTower::changeFPGAET(int tmp_eTowersIDs_subset[][6], int FP
   return StatusCode::SUCCESS;
 }
 
-StatusCode LVL1::eFakeTower::changeTowerET(LVL1::eTower* inputtower, int eta, int phi, int FPGAid) {
+StatusCode LVL1::eFakeTower::changeTowerET(LVL1::eTower* inputtower, int eta, int phi, int FPGAid) const {
   // update the ETs of the eTower using the values of test vector.
   inputtower->clearET();
 
@@ -206,7 +206,7 @@ StatusCode LVL1::eFakeTower::loaddic(int FPGAid) {
   return StatusCode::SUCCESS;
 }
 
-std::vector<int>* LVL1::eFakeTower::loadBlock(std::string inputfile, int eventnumber) {
+std::vector<int>* LVL1::eFakeTower::loadBlock(const std::string& inputfile, int eventnumber) const {
   // load the eventnumber_th block of the input file.
   std::string eachline;
   std::ifstream myfile(inputfile);

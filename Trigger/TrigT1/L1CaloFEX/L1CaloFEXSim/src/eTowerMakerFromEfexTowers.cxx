@@ -18,7 +18,7 @@
 namespace LVL1 {
 
   eTowerMakerFromEfexTowers::eTowerMakerFromEfexTowers(const std::string& name, ISvcLocator* pSvcLocator)
-    :  AthAlgorithm(name, pSvcLocator)//AthReentrantAlgorithm(name, pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator)
   { 
   
   }
@@ -38,16 +38,15 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
   }
 
   return StatusCode::SUCCESS;
-
 }
 
 
-  StatusCode eTowerMakerFromEfexTowers::execute(/*const EventContext& ctx*/) //const
+  StatusCode eTowerMakerFromEfexTowers::execute(const EventContext& ctx) const
 {
   // load noise cuts .. should really only need to do this at start of runs, not every event!
   std::map<std::pair<int, int>, int> noiseCutsMap; // key is [eta,layer]
   if(!m_noiseCutsKey.empty()) {
-      SG::ReadCondHandle <CondAttrListCollection> noiseCuts{m_noiseCutsKey/*, ctx*/ };
+      SG::ReadCondHandle <CondAttrListCollection> noiseCuts{m_noiseCutsKey, ctx};
       if (noiseCuts.isValid()) {
           for (auto itr = noiseCuts->begin(); itr != noiseCuts->end(); ++itr) {
               if (itr->first >= 50) continue;
@@ -70,9 +69,9 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
   local_eTowerContainerRaw->clearContainerMap();
   local_eTowerContainerRaw->fillContainerMap();
 
-  SG::ReadHandle<xAOD::eFexTowerContainer> eFexTowers(m_eFexTowerContainerSGKey/*, ctx*/);
+  SG::ReadHandle<xAOD::eFexTowerContainer> eFexTowers(m_eFexTowerContainerSGKey, ctx);
   if((!eFexTowers.isValid() || eFexTowers->size() < m_minTowersRequired) && !m_eFexTowerContainer2SGKey.empty()) {
-      eFexTowers = SG::ReadHandle<xAOD::eFexTowerContainer>(m_eFexTowerContainer2SGKey);
+    eFexTowers = SG::ReadHandle<xAOD::eFexTowerContainer>(m_eFexTowerContainer2SGKey, ctx);
       // removing this to avoid breaking frozen tier0 policy
       // bug keeping commented out until sure we've replaced with a good alternative
       //const xAOD::EventInfo* ei = nullptr;
@@ -115,7 +114,7 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
 
 
     // STEP 3 - Write the completed eTowerContainer into StoreGate (move the local copy in memory)
-  SG::WriteHandle<LVL1::eTowerContainer> eTowerContainerSG(m_eTowerContainerSGKey/*, ctx*/);
+  SG::WriteHandle<LVL1::eTowerContainer> eTowerContainerSG(m_eTowerContainerSGKey, ctx);
   ATH_CHECK(eTowerContainerSG.record(std::move(/*my_eTowerContainerRaw*/local_eTowerContainerRaw)));
 
   // STEP 4 - Close and clean the event

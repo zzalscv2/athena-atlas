@@ -13,7 +13,6 @@
 
 
 #include "L1CaloFEXSim/eFEXtauBDT.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 #include <string>
 
 

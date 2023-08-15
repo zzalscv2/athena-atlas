@@ -13,7 +13,7 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 preExec = ';'.join([
   'setMenu=\'MC_pp_run3_v1\'',
-  'ConfigFlags.Trigger.AODEDMSet=\'AODSLIM\'',
+  'flags.Trigger.AODEDMSet=\'AODSLIM\'',
 ])
 
 rdo2aod = ExecStep.ExecStep()

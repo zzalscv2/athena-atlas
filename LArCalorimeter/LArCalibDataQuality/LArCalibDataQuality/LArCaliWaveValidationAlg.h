@@ -22,7 +22,7 @@
 #include "LArRawConditions/LArWaveHelper.h"
 #include "CaloIdentifier/CaloCellGroup.h"
 
-typedef LArCalibValidationAlg<LArCaliWaveContainer> LArCaliWaveValidationBase;
+typedef LArCalibValidationAlg<LArCaliWaveContainer,LArCaliWaveContainer> LArCaliWaveValidationBase;
 
 
 /** 
@@ -44,7 +44,12 @@ class LArCaliWaveValidationAlg: public LArCaliWaveValidationBase {
  private:
   /** @brief Method to validate the pedestal single readout channels
    */
-  bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);
+  bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont) override final;
+
+  LArCondObj getRefObj(const HWIdentifier chid, const int gain) const override final{
+      return m_reference->get(chid,gain);
+  }
+
 
   /** @brief Summary method executed after the loop over all channels */
   StatusCode summary(const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);

@@ -319,3 +319,10 @@ StatusCode LArRampValidationAlg::summary(const LArOnOffIdMapping *cabling, const
 
   return sc;
 }
+
+
+LArRampValidationAlg::LArCondObj LArRampValidationAlg::getRefObj(const HWIdentifier chid, const int gain) const{
+  auto ramp=m_reference->ADC2DAC(chid,gain);
+  return LArCondObj(std::vector<float>(ramp.begin(),ramp.end()));
+
+}

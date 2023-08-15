@@ -43,7 +43,7 @@
   * a @validateChannel method specific to the data type.
   */
 
-template<class CONDITIONSCONTAINER>
+template<class CONDITIONSCONTAINER, class REFCONTAINER>
 class LArCalibValidationAlg:public AthAlgorithm {
  
 public:
@@ -98,6 +98,9 @@ protected:
     */
   virtual bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling,const LArBadChannelCont *bcCont)=0;
 
+
+  virtual LArCondObj getRefObj(const HWIdentifier chid, const int gain) const=0;
+
   /**
     * @brief Method executed after the loop over all channels
     * The implementation in the base class writes out only the number of problematic channels.
@@ -127,11 +130,6 @@ private:
     */
   bool checkCoolChannelCompleteness(const LArOnOffIdMapping *cabling, const LArCalibLineMapping *clCont, const LArBadChannelCont *bcCont);
  
- /** 
-    * @brief Verify if all COOL channels in the ref container are also in val
-    * @return False if at least one incomplete COOL channel is found, true otherwise
-    */
-  bool checkNumberOfCoolChannels(const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont) const;
 
   typedef std::vector<std::pair<HWIdentifier,unsigned> > FEBANDGAIN_t;
    /** 
@@ -183,7 +181,7 @@ protected:
 
 
   /** Pointer to container with reference values */
-  const CONDITIONSCONTAINER* m_reference;  
+  const REFCONTAINER* m_reference;  
 
   /** Pointer to container to be validated */
   const CONDITIONSCONTAINER* m_validation;  
@@ -193,8 +191,9 @@ protected:
 
   /** SG key of the container to be validated (job-property) */
   std::string    m_validationKey;
+
   /** SG key of the reference container (job-property) */
-  std::string    m_referenceKey;
+  SG::ReadCondHandleKey<REFCONTAINER> m_referenceKey{this,"ReferenceKey","", "SG key of the LArConditionsContainer used as reference"};
 
   /** SG key of container for deviating channels (job-property) */
   std::string m_thinValContKey;
@@ -209,9 +208,6 @@ protected:
 
   /** wether completeness shall be checked or not (job-property) */
   bool m_checkCompleteness;
-
-  /** wether COOL channel numbers of validation and reference container shall be compared (job-property) */
-  bool m_checkNumberOfCoolChannels;
 
   /** wether missing FEBS (incomplete COOL channels) should be patched */
   bool m_patchMissingFEBs;

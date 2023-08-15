@@ -791,8 +791,6 @@ if [ "x$FLAG_HELP" != "x0" ]; then
     echo
     echo "  -cgal                       : Use CGAL boolean instead of vp1 boolean."
     echo
-    echo "  -nsw                        : Enable the Muon New Small Wheel geometry (and disable the existing small wheel)."
-    echo
     echo "  -slhc                       : Enable special configurations for SLHC studies."
     echo
     echo "  -customgeom                 : Enable a custom geometry."

@@ -120,9 +120,10 @@ def LArPedestalAutoCorrCfg(flags):
     if flags.LArCalib.doValidation:
         from IOVDbSvc.IOVDbSvcConfig import addFolders 
 
-        result.merge(addFolders(flags,"/LAR/ElecCalibOnl/Pedestal<key>PedestalRef</key>","LAR_ONL"))
-
-
+        #result.merge(addFolders(flags,"/LAR/ElecCalibOnl/Pedestal<key>PedestalRef</key>","LAR_ONL"))
+        result.merge(addFolders(flags,"/LAR/ElecCalibFlat/Pedestal<key>PedestalRefIn</key>","LAR_ONL","CondAttrListCollection"))
+        LArPedestalCondAlg = CompFactory.getComp("LArFlatConditionsAlg<LArPedestalFlat>")
+        result.addCondAlgo(LArPedestalCondAlg("LArFlatPedCondAlg",ReadKey="PedestalRefIn", WriteKey="PedestalRef"))
         from LArCalibDataQuality.Thresholds import pedThr,rmsThr, pedThrFEB,rmsThrFEB        
         from AthenaCommon.Constants import ERROR,WARNING
 
@@ -139,7 +140,6 @@ def LArPedestalAutoCorrCfg(flags):
         thePedestalValidationAlg.ListOfDevFEBs="pedFebs.txt"
         thePedestalValidationAlg.CheckCompletness=True
         thePedestalValidationAlg.PatchMissingFEBs=True
-        thePedestalValidationAlg.CheckNumberOfCoolChannels=False
         thePedestalValidationAlg.UseCorrChannels=False #Corrections go into the regular data channels
         if flags.LArCalib.isSC:
            thePedestalValidationAlg.CablingKey = "LArOnOffIdMapSC"
@@ -160,7 +160,6 @@ def LArPedestalAutoCorrCfg(flags):
 
         theBadPedestal.MsgLevelForDeviations=ERROR      
         theBadPedestal.CheckCompletness=False
-        theBadPedestal.CheckNumberOfCoolChannels=False
         theBadPedestal.ListOfDevFEBs="Bad_pedFebs.txt"
         if flags.LArCalib.isSC:
            theBadPedestal.CablingKey = "LArOnOffIdMapSC"
@@ -181,7 +180,6 @@ def LArPedestalAutoCorrCfg(flags):
         theAutoCorrValidationAlg.ListOfDevFEBs="ACFebs.txt"
         theAutoCorrValidationAlg.CheckCompletness=True
         theAutoCorrValidationAlg.PatchMissingFEBs=True
-        theAutoCorrValidationAlg.CheckNumberOfCoolChannels=False
         theAutoCorrValidationAlg.UseCorrChannels=False #Corrections go into the regular data channels
         if flags.LArCalib.isSC:
            theAutoCorrValidationAlg.CablingKey = "LArOnOffIdMapSC"
@@ -200,7 +198,6 @@ def LArPedestalAutoCorrCfg(flags):
         theBadAutoCorr.CheckFifthSample=True
         theBadAutoCorr.ListOfDevFEBs="Bad_ACFebs.txt"
         theBadAutoCorr.CheckCompletness=False
-        theBadAutoCorr.CheckNumberOfCoolChannels=False
         if flags.LArCalib.isSC:
            theBadAutoCorr.CablingKey = "LArOnOffIdMapSC"
            theBadAutoCorr.CalibLineKey = "LArCalibIdMapSC" 

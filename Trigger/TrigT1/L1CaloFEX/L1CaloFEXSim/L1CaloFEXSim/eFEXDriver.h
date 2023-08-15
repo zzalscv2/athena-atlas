@@ -6,8 +6,6 @@
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "L1CaloFEXSim/eTower.h"
-#include "L1CaloFEXSim/eTowerContainer.h"
 #include "L1CaloFEXToolInterfaces/IeFEXSysSim.h"
 #include "L1CaloFEXSim/eFEXSim.h"
 #include "L1CaloFEXSim/eFEXOutputCollection.h"

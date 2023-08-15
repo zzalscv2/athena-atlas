@@ -39,11 +39,16 @@ class VisAttributes {
   // Add a material
   void add(const std::string & name, SoMaterial *);
 
+  // set SoMaterial color from RGB values
+  void setColorFromRGB(SoMaterial* mat, std::string type, const int r, const int g, const int b);
+
  private:
 
   class Imp;
   Imp * m_d;
 
+  // convert the usual range RGB [0,255] to Coin [0,1]
+  float getValFromRGB(const int rgb);
 
 };
 

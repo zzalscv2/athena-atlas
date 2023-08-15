@@ -53,11 +53,11 @@ namespace LVL1 {
     virtual int getID() const override {return m_id;}
 
     virtual void SetTowersAndCells_SG( int [][6] ) override ;
-    virtual void SetIsoWP(std::vector<unsigned int> &, std::vector<unsigned int> &, unsigned int &, unsigned int &) override ;
+    virtual void SetIsoWP(const std::vector<unsigned int>&, const std::vector<unsigned int>&, unsigned int &, unsigned int) const override;
 
-    virtual std::vector <std::unique_ptr<eFEXegTOB>> getEmTOBs() override ;
-    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() override ;
-    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() override ;
+    virtual std::vector <std::unique_ptr<eFEXegTOB>> getEmTOBs() override;
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauHeuristicTOBs() override;
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauBDTTOBs() override;
 
   private:
     std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs(std::vector< std::unique_ptr<eFEXtauTOB> >& tauTobObjects);

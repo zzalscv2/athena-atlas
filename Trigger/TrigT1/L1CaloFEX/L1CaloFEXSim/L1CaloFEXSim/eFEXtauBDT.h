@@ -12,7 +12,7 @@
 #ifndef eFEXtauBDT_H
 #define eFEXtauBDT_H
 
-//#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXSim/eFEXBDT.h"
 #include <vector>
 

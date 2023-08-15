@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -14,7 +14,6 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "L1CaloFEXSim/eFEXegTOB.h"
-#include "L1CaloFEXSim/eTowerContainer.h"
 
 namespace LVL1 {
   
@@ -28,7 +27,7 @@ Interface definition for eFEXegAlgo
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual StatusCode safetyTest() = 0;
+    virtual StatusCode safetyTest() const = 0;
     virtual void setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) = 0;
 
     virtual void getReta(std::vector<unsigned int> & ) = 0;
@@ -41,9 +40,9 @@ Interface definition for eFEXegAlgo
     virtual unsigned int getET() = 0;
     virtual unsigned int dmCorrection(unsigned int ET, unsigned int layer) = 0;
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) = 0;
-    virtual bool hasSeed() = 0;
-    virtual unsigned int getSeed() = 0;
-    virtual unsigned int getUnD() = 0;
+    virtual bool hasSeed() const = 0;
+    virtual unsigned int getSeed() const = 0;
+    virtual unsigned int getUnD() const = 0;
     virtual void getCoreEMTowerET(unsigned int & et) = 0;
     virtual void getCoreHADTowerET(unsigned int & et) = 0;
     virtual void getSums(unsigned int seed, bool UnD, std::vector<unsigned int> & RetaSums, 

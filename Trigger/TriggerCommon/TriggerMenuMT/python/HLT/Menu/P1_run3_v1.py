@@ -504,6 +504,12 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7L1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_B7R1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_A7R1_OD_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        # For high beta* data-taking (ATR-27683)
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY_A_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_noalg_AlfaPEB_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
+
     ]
 
     # ALFA Diffractive triggers

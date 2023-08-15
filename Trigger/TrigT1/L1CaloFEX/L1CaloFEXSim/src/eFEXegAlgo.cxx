@@ -44,11 +44,10 @@ StatusCode eFEXegAlgo::initialize(){
   ATH_CHECK( m_dmCorrectionsKey.initialize(SG::AllowEmpty) );
 
   return StatusCode::SUCCESS;
-
 }
 
 
-StatusCode eFEXegAlgo::safetyTest(){
+StatusCode eFEXegAlgo::safetyTest() const {
 
   SG::ReadHandle<eTowerContainer> eTowerContainer(m_eTowerContainerKey/*,ctx*/);
   if(!eTowerContainer.isValid()){
@@ -57,7 +56,6 @@ StatusCode eFEXegAlgo::safetyTest(){
   }
   
   return StatusCode::SUCCESS;
-
 }
 
 void eFEXegAlgo::setup(int inputTable[3][3], int efex_id, int fpga_id, int central_eta) {

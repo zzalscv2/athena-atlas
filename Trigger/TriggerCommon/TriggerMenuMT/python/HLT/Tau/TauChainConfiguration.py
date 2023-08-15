@@ -14,10 +14,7 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
 
 
-from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauIsoSeq, tauFTFTauLRTSeq, tauPrecTrackIsoSeq
-
-if not isComponentAccumulatorCfg():
-    from .TauMenuSequences import tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackLRTSeq
+from .generateTau import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauIsoSeq, tauFTFTauLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq
 
 #--------------------------------------------------------
 # fragments generating config will be functions in new JO
@@ -47,13 +44,22 @@ def getFTFIsoCfg(flags, is_probe_leg=False):
        return menuSequenceCAToGlobalWrapper(tauFTFTauIsoSeq,flags, is_probe_leg=is_probe_leg)
 
 def getTrackTwoMVACfg(flags, is_probe_leg=False):
-    return tauTrackTwoMVASeq(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+       return tauTrackTwoMVASeq(flags, is_probe_leg=is_probe_leg)
+    else:
+       return menuSequenceCAToGlobalWrapper(tauTrackTwoMVASeq, flags, is_probe_leg=is_probe_leg)
 
 def getTrackTwoLLPCfg(flags, is_probe_leg=False):
-    return tauTrackTwoLLPSeq(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+       return tauTrackTwoLLPSeq(flags, is_probe_leg=is_probe_leg)
+    else:
+       return menuSequenceCAToGlobalWrapper(tauTrackTwoLLPSeq, flags, is_probe_leg=is_probe_leg)
 
 def getTrackLRTCfg(flags, is_probe_leg=False):
-    return tauTrackLRTSeq(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+       return tauTrackLRTSeq(flags, is_probe_leg=is_probe_leg)
+    else:
+       return menuSequenceCAToGlobalWrapper(tauTrackLRTSeq, flags, is_probe_leg=is_probe_leg)
 
 def getPrecTrackIsoCfg(flags, is_probe_leg=False):
     if isComponentAccumulatorCfg():
@@ -62,7 +68,10 @@ def getPrecTrackIsoCfg(flags, is_probe_leg=False):
        return menuSequenceCAToGlobalWrapper(tauPrecTrackIsoSeq,flags,is_probe_leg=is_probe_leg)
 
 def getPrecTrackLRTCfg(flags, is_probe_leg=False):
-    return tauPrecTrackLRTSeq(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+       return tauPrecTrackLRTSeq(flags,is_probe_leg=is_probe_leg)
+    else:
+       return menuSequenceCAToGlobalWrapper(tauPrecTrackLRTSeq,flags,is_probe_leg=is_probe_leg)
 
 ############################################# 
 ###  Class/function to configure muon chains 

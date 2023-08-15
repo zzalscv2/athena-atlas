@@ -60,7 +60,7 @@ StatusCode eFEXTOBEtTool::getegSums(float etaTOB, float phiTOB, int seed, int Un
       float etaTable = etaTOB + ieta*m_detaTower;
 
       // Set the tower ID if within acceptance, else 0
-      if (abs(etaTable)<2.5) tobtable[iphi+1][ieta+1] = eTowerID(etaTable, phiTable);
+      if (std::abs(etaTable)<2.5) tobtable[iphi+1][ieta+1] = eTowerID(etaTable, phiTable);
       else                   tobtable[iphi+1][ieta+1] = 0;
 
     } // eta loop
@@ -104,7 +104,7 @@ StatusCode eFEXTOBEtTool::gettauSums(float etaTOB, float phiTOB, int seed, int U
       float etaTable = etaTOB + ieta*m_detaTower;
 
       // Set the tower ID if within acceptance, else 0
-      if (abs(etaTable)<2.5) tobtable[iphi+1][ieta+1] = eTowerID(etaTable, phiTable);
+      if (std::abs(etaTable)<2.5) tobtable[iphi+1][ieta+1] = eTowerID(etaTable, phiTable);
       else                   tobtable[iphi+1][ieta+1] = 0;
 
     } // eta loop
@@ -133,7 +133,7 @@ unsigned int eFEXTOBEtTool::eTowerID(float eta, float phi) const
 {
   // Calculate ID by hand from coordinate
   int posneg = (eta >= 0 ? 1 : -1);
-  int towereta = abs(eta)/0.1;
+  int towereta = std::abs(eta)/0.1;
   if (phi < 0) phi += 2*M_PI;
   int towerphi = int(32*phi/M_PI);
   unsigned int tower_id = towerphi + 64*towereta;
@@ -205,4 +205,3 @@ void eFEXTOBEtTool::location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, i
 }
 
 } // end of namespace bracket
-

@@ -34,20 +34,20 @@ class eSuperCellTowerMapper: public AthAlgTool, virtual public IeSuperCellTowerM
   /** standard Athena-Algorithm method */
   virtual StatusCode initialize() override;
   
-  virtual StatusCode AssignSuperCellsToTowers(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) override;
-  virtual StatusCode AssignTriggerTowerMapper(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) override;
+  virtual StatusCode AssignSuperCellsToTowers(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const override;
+  virtual StatusCode AssignTriggerTowerMapper(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw) const override;
   
-  virtual void reset() override;
+  virtual void reset() const override;
 
  private:
   SG::ReadHandleKey<CaloCellContainer> m_scellsCollectionSGKey {this, "SCell", "SCell", "SCell"};
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerCollectionSGKey {this, "xODTriggerTowers", "xAODTriggerTowers", "xAODTriggerTowers"};
   ToolHandle<IeFEXSuperCellTowerIdProvider> m_eFEXSuperCellTowerIdProviderTool {this, "eFEXSuperCellTowerIdProviderTool", "LVL1::eFEXSuperCellTowerIdProvider", "Tool that provides tower-FOGA mapping"};
 
-  virtual int FindAndConnectTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint) override;
-  virtual void ConnectSuperCellToTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) override;
-  virtual int FindTowerIDForSuperCell(int towereta, int towerphi) override;
-  virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit) override;
+  virtual int FindAndConnectTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw,CaloSampling::CaloSample sample,const int region, int layer, const int pos_neg, const int eta_index, const int phi_index, Identifier ID, float et, int prov, bool doPrint) const override;
+  virtual void ConnectSuperCellToTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) const override;
+  virtual int FindTowerIDForSuperCell(int towereta, int towerphi) const override;
+  virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit) const override;
   
   std::string DectectorName(const CaloSampling::CaloSample sample) const;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,11 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: July 2008                                //
+//                                                            //
+//  Updates:                                                  //
+//  - 2021, Nov - Riccardo Maria BIANCHI <rbianchi@cern.ch>   //
+//                Added VP1People class to show people        //
+//                figures at scale                            //
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
@@ -20,6 +25,7 @@
 #include "ui_guides_settings_coordinateaxes_form.h"
 #include "ui_guides_settings_etacones_form.h"
 #include "ui_guides_settings_floorandletters_form.h"
+#include "ui_guides_settings_people_form.h"
 #include "ui_guides_settings_grid_form.h"
 #include "ui_guides_settings_idprojsurfs_form.h"
 #include "ui_guides_settings_trkvolumes_form.h"
@@ -46,6 +52,7 @@ public:
   Ui::VP1GuidesSysSettingsCoordinateAxesForm ui_axes{};
   Ui::VP1GuidesSysSettingsEtaConeForm ui_etacones{};
   Ui::VP1GuidesSysSettingsFloorAndLettersForm ui_floorandletters{};
+  Ui::VP1GuidesSysSettingsPeopleForm ui_people{};
   Ui::VP1GuidesSysSettingsGridForm ui_grid{};
   Ui::VP1GuidesSysSettingsIDProjSurfsForm ui_idprojsurfs{};
   Ui::VP1TrackingVolumesForm ui_trkvolumes{};
@@ -91,6 +98,8 @@ public:
   bool last_showLines = false;
   SbVec3f last_lineDirection;
   double last_line_eta = 0.0; // This is needed to update the display in possibleChange_lineDirection
+  bool last_showPeople = false;
+  double last_peopleVerticalPos = 0.0;
 
   InDetProjFlags::InDetProjPartsFlags last_applicablePixelProjParts;
   InDetProjFlags::InDetProjPartsFlags last_applicableSCTProjParts;
@@ -118,6 +127,7 @@ GuideSysController::GuideSysController(IVP1System * sys)
   initDialog(m_d->ui_axes, m_d->ui.pushButton_settings_coordinateAxes,m_d->ui.checkBox_coordinateAxes);
   initDialog(m_d->ui_etacones, m_d->ui.pushButton_settings_etaCones,m_d->ui.checkBox_etaCones);
   initDialog(m_d->ui_floorandletters, m_d->ui.pushButton_settings_floorAndLetters,m_d->ui.checkBox_floorAndLetters);
+  initDialog(m_d->ui_people, m_d->ui.pushButton_settings_people,m_d->ui.checkBox_people);
   initDialog(m_d->ui_grid, m_d->ui.pushButton_settings_grid,m_d->ui.checkBox_grid);
   initDialog(m_d->ui_idprojsurfs, m_d->ui.pushButton_settings_inDetProjSurfs,m_d->ui.checkBox_inDetProjSurfs);
   initDialog(m_d->ui_trkvolumes, m_d->ui.pushButton_settings_trkVolumes,m_d->ui.checkBox_trkVolumes);
@@ -161,8 +171,10 @@ GuideSysController::GuideSysController(IVP1System * sys)
 
   //Setup material buttons:
   m_d->ui_floorandletters.colorButton_floor->setColor(QColor::fromRgbF(0.5,0.5,0.5));
+  m_d->ui_people.colorButton_people->setColor(QColor::fromRgbF(0.5,0.5,0.5));
   m_d->ui_grid.colorButton_grid->setColor(QColor::fromRgbF(1.0,1.0,1.0));
   m_d->ui_floorandletters.matButton_letters->setMaterial(VP1MaterialButton::createMaterial(0.5,0.5,0.5,0.1));
+  m_d->ui_people.matButton_people->setMaterial(VP1MaterialButton::createMaterial(0.5,0.5,0.5,0.1));
   m_d->ui_axes.matButton_axes_x->setMaterial(VP1MaterialButton::createMaterial(1,0,0,0.15));
   m_d->ui_axes.matButton_axes_y->setMaterial(VP1MaterialButton::createMaterial(0,1,0,0.15));
   m_d->ui_axes.matButton_axes_z->setMaterial(VP1MaterialButton::createMaterial(0,0,2,0.15));
@@ -180,6 +192,7 @@ GuideSysController::GuideSysController(IVP1System * sys)
   //  Setup connections which monitor changes in the controller so that we may emit signals as appropriate:  //
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  // === Floor and Letters ===
   addUpdateSlot(SLOT(possibleChange_showFloor()));
   connectToLastUpdateSlot(m_d->ui.checkBox_floorAndLetters);
   connectToLastUpdateSlot(m_d->ui_floorandletters.checkBox_floorenabled);
@@ -208,6 +221,36 @@ GuideSysController::GuideSysController(IVP1System * sys)
   addUpdateSlot(SLOT(possibleChange_lettersVerticalPos()));
   connectToLastUpdateSlot(this,SIGNAL(floorHeightChanged(const double&)));
 
+  // === People ===
+  addUpdateSlot(SLOT(possibleChange_showPeople()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_people);
+  connectToLastUpdateSlot(m_d->ui_people.checkBox_peopleenabled);
+
+  addUpdateSlot(SLOT(possibleChange_peopleColourAndTransp()));
+  connectToLastUpdateSlot(m_d->ui_people.colorButton_people);
+  connectToLastUpdateSlot(m_d->ui_people.spinBox_peopletransp);
+
+  addUpdateSlot(SLOT(possibleChange_peopleExtent()));
+  connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peopleextent);
+
+  addUpdateSlot(SLOT(possibleChange_peopleSpacing()));
+  connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peoplespacing);
+
+  addUpdateSlot(SLOT(possibleChange_peopleHeight()));
+  connectToLastUpdateSlot(m_d->ui_people.doubleSpinBox_peopleheight);
+
+  addUpdateSlot(SLOT(possibleChange_showPeople()));
+  connectToLastUpdateSlot(m_d->ui.checkBox_people);
+  connectToLastUpdateSlot(m_d->ui_people.checkBox_acdesignations);
+
+  addUpdateSlot(SLOT(possibleChange_peopleZPos()));
+  connectToLastUpdateSlot(this,SIGNAL(peopleExtentChanged(const double&)));
+  connectToLastUpdateSlot(this,SIGNAL(peopleSpacingChanged(const double&)));
+
+  addUpdateSlot(SLOT(possibleChange_peopleVerticalPos()));
+  connectToLastUpdateSlot(this,SIGNAL(floorHeightChanged(const double&)));
+
+  // === Axes ===
   addUpdateSlot(SLOT(possibleChange_showAxes()));
   connectToLastUpdateSlot(m_d->ui.checkBox_coordinateAxes);
 
@@ -350,6 +393,7 @@ GuideSysController::~GuideSysController()
 //____________________________________________________________________
 //Material access methods:
 SoMaterial * GuideSysController::lettersMaterial() const { return m_d->ui_floorandletters.matButton_letters->handledMaterials().at(0); }
+SoMaterial * GuideSysController::peopleMaterial() const { return m_d->ui_people.matButton_people->handledMaterials().at(0); }
 SoMaterial * GuideSysController::xAxisMaterial() const { return m_d->ui_axes.matButton_axes_x->handledMaterials().at(0); }
 SoMaterial * GuideSysController::yAxisMaterial() const { return m_d->ui_axes.matButton_axes_y->handledMaterials().at(0); }
 SoMaterial * GuideSysController::zAxisMaterial() const { return m_d->ui_axes.matButton_axes_z->handledMaterials().at(0); }
@@ -368,6 +412,13 @@ bool GuideSysController::showFloor() const
 {
   return m_d->ui.checkBox_floorAndLetters->isChecked() &&
     m_d->ui_floorandletters.checkBox_floorenabled->isChecked();
+}
+
+//____________________________________________________________________
+bool GuideSysController::showPeople() const
+{
+  return m_d->ui.checkBox_people->isChecked() &&
+    m_d->ui_people.checkBox_peopleenabled->isChecked();
 }
 
 //____________________________________________________________________
@@ -418,6 +469,25 @@ double GuideSysController::lettersZPos() const
 double GuideSysController::lettersVerticalPos() const
 {
   return floorHeight()+1.5*SYSTEM_OF_UNITS::m;
+}
+
+//____________________________________________________________________
+double GuideSysController::peopleVerticalPos() const
+{
+  return floorHeight();
+}
+
+//____________________________________________________________________
+double GuideSysController::peopleZPos() const
+{
+
+  int nmax; double distmax;
+  if (!VP1Floor::calcParsFromExtentAndSpacing( (VP1HelperClassBase*)this, floorExtent(), floorSpacing(), VP1Floor::nMax(), nmax, distmax )) {
+    nmax = 10;
+    distmax = 10*SYSTEM_OF_UNITS::m;
+    message("lettersZPos  ERROR: Problems calculating floor nmax/distmax.");
+  }
+  return distmax*1.1;
 }
 
 //____________________________________________________________________
@@ -886,6 +956,10 @@ void GuideSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_lines.doubleSpinBox_phi);
   s.save(m_d->ui_lines.doubleSpinBox_eta);
   s.save(m_d->ui_lines.doubleSpinBox_length);
+
+  // People
+  s.save(m_d->ui.checkBox_people);
+  s.save(m_d->ui_people.matButton_people);
 }
 
 //____________________________________________________________________
@@ -1005,7 +1079,13 @@ void GuideSysController::actualRestoreSettings(VP1Deserialise& s)
     s.restore(m_d->ui_lines.doubleSpinBox_phi);
     s.restore(m_d->ui_lines.doubleSpinBox_eta);
     s.restore(m_d->ui_lines.doubleSpinBox_length);
-  } 
+  }
+
+  // People
+  if (s.version()>=3) {
+    s.restore(m_d->ui.checkBox_people);
+    s.restore(m_d->ui_people.matButton_people);
+  }
 }
 
 void GuideSysController::possibleChange_lineDirection() {	
@@ -1070,3 +1150,7 @@ POSSIBLECHANGE_IMP(showCalorimeters)
 POSSIBLECHANGE_IMP(showMuonSpectrometer)
 POSSIBLECHANGE_IMP(showLines)  
 //POSSIBLECHANGE_IMP(lineDirection) Implemented this manually so we can update eta/theta
+POSSIBLECHANGE_IMP(showPeople)
+POSSIBLECHANGE_IMP(peopleVerticalPos)
+
+

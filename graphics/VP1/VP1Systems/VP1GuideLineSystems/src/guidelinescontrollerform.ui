@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>267</width>
-    <height>182</height>
+    <height>187</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,32 +31,8 @@
      <property name="verticalSpacing">
       <number>0</number>
      </property>
-     <item row="0" column="0">
-      <widget class="QCheckBox" name="checkBox_floorAndLetters">
-       <property name="text">
-        <string>Floor &amp;&amp; Letters</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="pushButton_settings_floorAndLetters">
-       <property name="text">
-        <string>Configure</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QCheckBox" name="checkBox_coordinateAxes">
-       <property name="text">
-        <string>Coordinate axes</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="pushButton_settings_coordinateAxes">
+     <item row="2" column="1">
+      <widget class="QPushButton" name="pushButton_settings_grid">
        <property name="text">
         <string>Configure</string>
        </property>
@@ -69,20 +45,6 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QPushButton" name="pushButton_settings_grid">
-       <property name="text">
-        <string>Configure</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QCheckBox" name="checkBox_etaCones">
-       <property name="text">
-        <string>Eta Cones</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <widget class="QPushButton" name="pushButton_settings_etaCones">
        <property name="text">
@@ -90,20 +52,13 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QCheckBox" name="checkBox_inDetProjSurfs">
+     <item row="7" column="0">
+      <widget class="QCheckBox" name="checkBox_lines">
        <property name="text">
-        <string>ID projection surfaces</string>
+        <string>Line from origin</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QPushButton" name="pushButton_settings_inDetProjSurfs">
-       <property name="text">
-        <string>Configure</string>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -124,18 +79,80 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0">
-      <widget class="QCheckBox" name="checkBox_lines">
+     <item row="0" column="1">
+      <widget class="QPushButton" name="pushButton_settings_floorAndLetters">
        <property name="text">
-        <string>Line from origin</string>
+        <string>Configure</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QCheckBox" name="checkBox_inDetProjSurfs">
+       <property name="text">
+        <string>ID projection surfaces</string>
        </property>
        <property name="checked">
-        <bool>false</bool>
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="pushButton_settings_coordinateAxes">
+       <property name="text">
+        <string>Configure</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QPushButton" name="pushButton_settings_inDetProjSurfs">
+       <property name="text">
+        <string>Configure</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QCheckBox" name="checkBox_coordinateAxes">
+       <property name="text">
+        <string>Coordinate axes</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QCheckBox" name="checkBox_floorAndLetters">
+       <property name="text">
+        <string>Floor &amp;&amp; Letters</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
      <item row="7" column="1">
       <widget class="QPushButton" name="pushButton_settings_lines">
+       <property name="text">
+        <string>Configure</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="checkBox_etaCones">
+       <property name="text">
+        <string>Eta Cones</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QCheckBox" name="checkBox_people">
+       <property name="text">
+        <string>People at scale</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QPushButton" name="pushButton_settings_people">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Configure</string>
        </property>
