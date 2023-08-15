@@ -4,9 +4,6 @@
 #Heavily inspired by the offline version:
 #https://gitlab.cern.ch/atlas/athena/blob/master/InnerDetector/InDetExample/InDetRecExample/share/ConfiguredNewTrackingSiPattern.py
 
-from AthenaCommon.Include import include
-include("InDetTrigRecExample/InDetTrigRec_jobOptions.py") # this is needed to get InDetTrigFlags
-
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
@@ -64,19 +61,8 @@ def get_idtrig_view_verifier(name):
      viewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
                                         ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() ),
                                         ]
-     topSequence.SGInputLoader.Load += [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
-                                        ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() ),
-                                        ]
-
    return viewDataVerifier
 
-
-#FIXME: temporary before we port offline cuts to config settings
-def remapToOffline( name ):
-   if name == 'cosmics':
-      return 'Cosmics'
-   else:
-       return name
 
 def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVerifier' ):
       viewAlgs = [] #list of all algs running in this module

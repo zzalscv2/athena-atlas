@@ -351,11 +351,6 @@ DetFlags.overlay.all_setOff()
 
 include ("RecExCond/AllDet_detDescr.py")
 
-if flags.Trigger.doID:
-    include("InDetTrigRecExample/InDetTrigRec_jobOptions.py")
-    include("InDetRecExample/InDetRecConditionsAccess.py")
-
-
 # Only import this here to avoid we accidentally use CAs before locking
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 #-------------------------------------------------------------

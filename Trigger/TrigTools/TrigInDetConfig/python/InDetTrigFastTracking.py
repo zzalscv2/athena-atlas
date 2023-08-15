@@ -2,24 +2,11 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaCommon.Include import include
-
 from AthenaCommon.Logging import logging
 log = logging.getLogger("InDetTrigFastTracking")
 
-include("InDetTrigRecExample/InDetTrigRec_jobOptions.py")
-
 def makeInDetTrigFastTrackingNoView( inflags, config = None, rois = 'EMViewRoIs', doFTF = True, secondStageConfig = None, LRTInputCollection = None ):
 
-  from AthenaCommon.AlgSequence import AlgSequence
-  topSequence = AlgSequence()
-  from AthenaConfiguration.Enums import Format
-
-  #TODO workaround to avoid conflicting SGInputLoader instances in the event view and event context from CA to legacy
-  if inflags.Input.Format != Format.BS:
-     topSequence.SGInputLoader.Load += [( 'PixelRDO_Container' , "StoreGateSvc+PixelRDOs" ),
-                                        ( 'SCT_RDO_Container' , "StoreGateSvc+SCT_RDOs" )]
-  
   viewAlgs, viewVerify = makeInDetTrigFastTracking( inflags, config, rois, doFTF, None, secondStageConfig, LRTInputCollection)
   return viewAlgs
 

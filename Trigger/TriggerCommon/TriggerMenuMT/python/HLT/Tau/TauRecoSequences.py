@@ -148,13 +148,14 @@ def precTrackSequence( flags, RoIs , name):
     #Pass verifier as an argument and it will automatically append necessary DataObjects@NOTE: Don't provide any verifier if loaded in the same view as FTF
     PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flagsWithTrk, config = IDTrigConfig, verifier = ViewVerifyTrk, rois = RoIs )
 
-    from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
-    vtxAlg = makeInDetTrigVertices( flagsWithTrk,
-                                    whichSignature       = signatureName,
-                                    inputTrackCollection = IDTrigConfig.tracks_IDTrig(),
-                                    outputVtxCollection  = IDTrigConfig.vertex,
-                                    config               = IDTrigConfig,
-                                    adaptiveVertex       = IDTrigConfig.adaptiveVertex )
+    from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
+    from TrigInDetConfig.TrigInDetConfig import trigInDetVertexingCfg
+    vtxAlg =  algorithmCAToGlobalWrapper(
+        trigInDetVertexingCfg,
+        flagsWithTrk,
+        inputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_IDTrig,
+        outputVtx = flagsWithTrk.Tracking.ActiveConfig.vertex,
+    )
 
     trackSequence = parOR(name, [ViewVerifyTrk] + PTAlgs + vtxAlg )
 
