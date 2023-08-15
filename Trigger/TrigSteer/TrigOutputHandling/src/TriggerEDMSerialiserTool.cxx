@@ -85,12 +85,23 @@ StatusCode TriggerEDMSerialiserTool::initialize() {
 
 StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string& typeKeyAuxIDs, std::vector<Address>& addressVec) const {
   ATH_MSG_DEBUG("Parsing " << typeKeyAuxIDs);
-  const std::string typeKeyAux = typeKeyAuxIDs.substr( 0, typeKeyAuxIDs.find(';') );
+
+  // Syntax: 'collectionKeyType;module1,module2,...[;allowTruncation]'
+  std::vector<std::string> def;
+  boost::split( def, typeKeyAuxIDs, boost::is_any_of(";") );
+
+  if ( def.size() < 2 ) {
+    ATH_MSG_ERROR("Invalid EDM collection specification: " << typeKeyAuxIDs);
+    return StatusCode::FAILURE;
+  }
+
+  const std::string typeKeyAux = def[0];
   const std::string configuredType = typeKeyAux.substr( 0, typeKeyAux.find('#') );
   const std::string key = typeKeyAux.substr( typeKeyAux.find('#')+1, typeKeyAux.find('.')-typeKeyAux.find('#') );
 
   std::string transientType;
   std::string persistentType;
+  Address::Truncation truncationMode{Address::Truncation::Error};
 
   if ( configuredType.find('_') == std::string::npos ) {
     transientType = configuredType;
@@ -123,9 +134,14 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
     return StatusCode::FAILURE;
   }
 
-  const std::string moduleIDs  = typeKeyAuxIDs.substr( typeKeyAuxIDs.find(';')+1 );
+  // Set truncation mode
+  if ( def.size() > 2 && def[2].find("allowTruncation") != std::string::npos ) {
+    ATH_MSG_DEBUG("Truncation allowed for " << configuredType << "#" << key);
+    truncationMode = Address::Truncation::Allowed;
+  }
+
   std::vector<std::string> splitModuleIDs;
-  boost::split( splitModuleIDs, moduleIDs, [](const char c){ return c == ','; } );
+  boost::split( splitModuleIDs, def[1], boost::is_any_of(",") );
   std::vector<uint16_t> moduleIdVec;
   for ( const auto& module: splitModuleIDs ) moduleIdVec.push_back( std::stoi( module ) );
   std::sort(moduleIdVec.begin(), moduleIdVec.end());
@@ -153,12 +169,12 @@ StatusCode TriggerEDMSerialiserTool::addCollectionToSerialise(const std::string&
         }
         sel.selectAux( variableNames );
       }
-      addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::xAODAux, sel} );
+      addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::xAODAux, truncationMode, sel} );
     } else {
-    addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::xAODInterface} );
+      addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::xAODInterface, truncationMode} );
     }
   } else { // an old T/P type
-    addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::OldTP} );
+    addressVec.push_back( {transientType, persistentType, clid, key, moduleIdVec, Address::Category::OldTP, truncationMode} );
   }
   return StatusCode::SUCCESS;
 }
@@ -285,7 +301,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseContainer( void* data, const Addre
   if ( mem != nullptr ) delete [] static_cast<const char*>( mem );
 
 
-  ATH_MSG_DEBUG( address.transType << "#" << address.key << " Fragment size :" << fragment.size()*sizeof(uint32_t) << " bytes");
+  ATH_MSG_DEBUG( address.transType << "#" << address.key << " Fragment size: " << fragment.size()*sizeof(uint32_t) << " bytes");
   fragment[0] = fragment.size();
   buffer.insert( buffer.end(), fragment.begin(), fragment.end() );
 
@@ -436,7 +452,7 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
     for (const uint16_t id : addressActiveModuleIds) {
       // If result not yet truncated, try adding the serialised data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
-        ATH_CHECK(tryAddData(resultToFill,id,buffer));
+        ATH_CHECK(tryAddData(resultToFill, id, buffer, address.truncationMode));
       }
       // Check for truncation after adding data
       if (resultToFill.getTruncatedModuleIds().count(id)==0) {
@@ -445,7 +461,9 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
         truncationInfoMap[id].push_back({&address, thisFragmentSize, true});
       }
       else {
-        ATH_MSG_WARNING("HLTResult with module ID " << id << " truncated - could not add " << address.persTypeName());
+        ATH_MSG_WARNING("HLTResult with module ID " << id <<
+                        " truncated - could not add " << address.persTypeName() <<
+                        (address.truncationMode==Address::Truncation::Allowed ? " (truncation allowed)" : ""));
         truncationInfoMap[id].push_back({&address, thisFragmentSize, false});
       }
     }
@@ -459,7 +477,8 @@ StatusCode TriggerEDMSerialiserTool::fill( HLT::HLTResultMT& resultToFill, const
 
 StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
                                                 const uint16_t id,
-                                                const std::vector<uint32_t>& data) const {
+                                                const std::vector<uint32_t>& data,
+                                                Address::Truncation truncationMode) const {
   if (m_truncationThresholds.value().count(id)==0) {
     ATH_MSG_ERROR("Module ID " << id << " missing from TruncationThresholds map. Cannot determine if result needs truncation");
     return StatusCode::FAILURE;
@@ -475,16 +494,17 @@ StatusCode TriggerEDMSerialiserTool::tryAddData(HLT::HLTResultMT& hltResult,
   // Size to be added
   const uint32_t extraSizeBytes = data.size()*sizeof(uint32_t);
 
+  bool severeTruncation = truncationMode==Address::Truncation::Error;
   if (currentTotalSizeBytes+extraSizeBytes > m_truncationThresholds.value().at(fullResultTruncationID)) {
     // The data doesn't fit, flag the full result as truncated
     ATH_MSG_DEBUG("Skipping adding data to result with module ID " << id << " because of full-result truncation");
-    hltResult.addTruncatedModuleId(fullResultTruncationID);
-    hltResult.addTruncatedModuleId(id);
+    hltResult.addTruncatedModuleId(fullResultTruncationID, severeTruncation);
+    hltResult.addTruncatedModuleId(id, severeTruncation);
   }
   else if (currentSizeBytes+extraSizeBytes > m_truncationThresholds.value().at(id)) {
     // The data doesn't fit, flag this module's result as truncated
     ATH_MSG_DEBUG("Skipping adding data to truncated result with module ID " << id);
-    hltResult.addTruncatedModuleId(id);
+    hltResult.addTruncatedModuleId(id, severeTruncation);
   }
   else {
     // The data fits, so add it to the result
@@ -522,6 +542,7 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
       std::pair<std::string, size_t> largestDropped{"None", 0};
       moduleId(*debugInfoThisModule) = id;
       uint32_t sizeSum = 0;
+      bool severeTruncation = false;
       for (const TruncationInfo& truncationInfo : truncationInfoVec) {
         // Store typeName and size information
         sizeSum += truncationInfo.size;
@@ -534,21 +555,29 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
         if (!truncationInfo.recorded && truncationInfo.size > largestDropped.second) {
           largestDropped = {truncationInfo.addrPtr->persTypeName(), truncationInfo.size};
         }
+        // Decide if this was a severe truncation (event goes to debug stream)
+        if (!truncationInfo.recorded) {
+          severeTruncation |= (truncationInfo.addrPtr->truncationMode==Address::Truncation::Error);
+        }
       }
       totalSize(*debugInfoThisModule) = sizeSum;
-      ATH_MSG_ERROR("HLT result truncation. Module ID: " << id << ", limit: "
-                    << m_truncationThresholds.value().at(id)/1024. << " kB, total size: "
-                    << sizeSum/1024. << " kB, largest recorded collection: " << largestRecorded.first
-                    << " (" << largestRecorded.second/1024. << " kB), largest dropped collection: "
-                    << largestDropped.first << " (" << largestDropped.second/1024. << " kB).");
+      msg(severeTruncation ? MSG::ERROR : MSG::WARNING)
+        << "HLT result truncation" << (severeTruncation ? "." : " in low priority collections.")
+        << " Module ID: " << id << ", limit: "
+        << m_truncationThresholds.value().at(id)/1024. << " kB, total size: "
+        << sizeSum/1024. << " kB, largest recorded collection: " << largestRecorded.first
+        << " (" << largestRecorded.second/1024. << " kB), largest dropped collection: "
+        << largestDropped.first << " (" << largestDropped.second/1024. << " kB)."
+        << endmsg;
       // Monitoring
-      auto monModuleId = Monitored::Scalar<int>("Truncation_ModuleId", id);
-      auto monTotalSize = Monitored::Scalar<float>("Truncation_TotalSize", sizeSum/1024.);
+      const std::string prefix = severeTruncation ? "" : "Allowed";
+      auto monModuleId = Monitored::Scalar<int>(prefix+"Truncation_ModuleId", id);
+      auto monTotalSize = Monitored::Scalar<float>(prefix+"Truncation_TotalSize", sizeSum/1024.);
       auto monLargestName = Monitored::Scalar<std::string>(
-        "Truncation_LargestName",
+        prefix+"Truncation_LargestName",
         largestRecorded.second > largestDropped.second ? largestRecorded.first : largestDropped.first);
       auto monLargestSize = Monitored::Scalar<float>(
-        "Truncation_LargestSize",
+        prefix+"Truncation_LargestSize",
         largestRecorded.second > largestDropped.second ? largestRecorded.second/1024. : largestDropped.second/1024.);
       auto mon = Monitored::Group(m_monTool, monModuleId, monTotalSize, monLargestName, monLargestSize);
     }

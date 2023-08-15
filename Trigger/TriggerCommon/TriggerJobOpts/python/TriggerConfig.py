@@ -347,26 +347,23 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
     """
     from TrigEDMConfig import DataScoutingInfo
     from TrigEDMConfig.TriggerEDM import getRun3BSList
+    from TrigEDMConfig.TriggerEDMRun3 import allowTruncation
+    from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
 
     # Get list of all output collections for ByteStream (including DataScouting)
     collectionsToBS = getRun3BSList(["BS"] + DataScoutingInfo.getAllDataScoutingIdentifiers())
 
-    # Build an output dictionary with key = collection type#name, value = list of ROBFragment module IDs
-    ItemModuleDict = OrderedDict()
-    for typekey, bsfragments in collectionsToBS:
-        # Translate readable fragment names like BS, CostMonDS to ROB fragment IDs 0 (full result), 1, ... (DS results)
-        moduleIDs = [ DataScoutingInfo.getFullHLTResultID() if f == 'BS' else DataScoutingInfo.getDataScoutingResultID(f)
-                      for f in bsfragments ]
-        ItemModuleDict[typekey] = moduleIDs
-
-    from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
-
     # Tool serialising EDM objects to fill the HLT result
     serialiser = TriggerEDMSerialiserToolCfg(flags)
-    for item, modules in ItemModuleDict.items():
-        sModules = sorted(modules)
-        __log.debug('adding to serialiser list: %s, modules: %s', item, sModules)
-        serialiser.addCollection(item, sModules)
+
+    for typekey, bsfragments, props in collectionsToBS:
+        # Translate fragment names like BS, CostMonDS to ROB fragment IDs 0 (full result), 1, ... (DS results)
+        moduleIDs = sorted(DataScoutingInfo.getFullHLTResultID() if f == 'BS' else
+                           DataScoutingInfo.getDataScoutingResultID(f)
+                           for f in bsfragments)
+
+        __log.debug('adding to serialiser list: %s, modules: %s', typekey, moduleIDs)
+        serialiser.addCollection(typekey, moduleIDs, allowTruncation = allowTruncation in props)
 
     # Tools adding stream tags and trigger bits to HLT result
     stmaker = StreamTagMakerToolCfg()

@@ -54,19 +54,23 @@ def TriggerEDMSerialiserToolCfg(flags, name="Serialiser"):
 
    TriggerEDMSerialiserTool = CompFactory.TriggerEDMSerialiserTool  
    # Configuration helper methods
-   def addCollection(self, typeNameAux, moduleIds):
-      moduleIdsRepresentation = ','.join([f"{id}" for id in moduleIds])
-      self.CollectionsToSerialize.append( f"{typeNameAux};{moduleIdsRepresentation}")
+   def addCollection(self, typeNameAux, moduleIds, allowTruncation=False):
+      defs = [typeNameAux,
+              ','.join([f"{id}" for id in moduleIds])]
+      if allowTruncation:
+         defs.append('allowTruncation')
+      self.CollectionsToSerialize.append( ';'.join(defs) )
 
-   def addCollectionToMainResult(self, typeNameAux):
-      self.addCollection(typeNameAux,moduleIds=[getFullHLTResultID()])
+   def addCollectionToMainResult(self, typeNameAux, allowTruncation=False):
+      self.addCollection(typeNameAux, [getFullHLTResultID()], allowTruncation)
 
-   def addCollectionListToResults(self, typeNameAuxList, moduleIds):
+   def addCollectionListToResults(self, typeNameAuxList, moduleIds, allowTruncation=False):
       for typeNameAux in typeNameAuxList:
-         self.addCollection(typeNameAux, moduleIds)
+         self.addCollection(typeNameAux, moduleIds, allowTruncation)
 
-   def addCollectionListToMainResult(self, typeNameAuxList):
-      self.addCollectionListToResults(typeNameAuxList,moduleIds=[getFullHLTResultID()])
+   def addCollectionListToMainResult(self, typeNameAuxList, allowTruncation=False):
+      self.addCollectionListToResults(typeNameAuxList, [getFullHLTResultID()], allowTruncation)
+
    # Add the helper methods to the TriggerEDMSerialiserTool python class
    TriggerEDMSerialiserTool.addCollection = addCollection
    TriggerEDMSerialiserTool.addCollectionToMainResult = addCollectionToMainResult
@@ -86,18 +90,19 @@ def TriggerEDMSerialiserToolCfg(flags, name="Serialiser"):
 
    # Configure monitoring histograms
    serialiser.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
-   serialiser.MonTool.defineHistogram('Truncation_ModuleId', path='EXPERT', type='TH1F',
-                                      title='Module IDs of truncated HLT results;Module ID;Num of truncated results',
-                                      xbins=20, xmin=0, xmax=20)
-   serialiser.MonTool.defineHistogram('Truncation_TotalSize', path='EXPERT', type='TH1F',
-                                      title='Total size of truncated HLT result;Size [kB];Num of truncated results',
-                                      xbins=200, xmin=0, xmax=5000)
-   serialiser.MonTool.defineHistogram('Truncation_LargestName', path='EXPERT', type='TH1F',
-                                      title='Name of the largest collection;;Num of truncated results',
-                                      xbins=1, xmin=0, xmax=1)
-   serialiser.MonTool.defineHistogram('Truncation_LargestSize', path='EXPERT', type='TH1F',
-                                      title='Size of the largest collection;Size [kB];Num of truncated results',
-                                      xbins=200, xmin=0, xmax=5000)
+   for prefix in ['', 'Allowed']:  # two sets of histogram for regular and allowed truncation
+      serialiser.MonTool.defineHistogram(f'{prefix}Truncation_ModuleId', path='EXPERT', type='TH1F',
+                                         title='Module IDs of truncated HLT results;Module ID;Num of truncated results',
+                                         xbins=20, xmin=0, xmax=20)
+      serialiser.MonTool.defineHistogram(f'{prefix}Truncation_TotalSize', path='EXPERT', type='TH1F',
+                                         title='Total size of truncated HLT result;Size [kB];Num of truncated results',
+                                         xbins=200, xmin=0, xmax=5000)
+      serialiser.MonTool.defineHistogram(f'{prefix}Truncation_LargestName', path='EXPERT', type='TH1F',
+                                         title='Name of the largest collection;;Num of truncated results',
+                                         xbins=1, xmin=0, xmax=1)
+      serialiser.MonTool.defineHistogram(f'{prefix}Truncation_LargestSize', path='EXPERT', type='TH1F',
+                                         title='Size of the largest collection;Size [kB];Num of truncated results',
+                                         xbins=200, xmin=0, xmax=5000)
 
    return serialiser
 
