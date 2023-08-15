@@ -52,10 +52,10 @@ public:
    * This method is a factory, so the client has to take care
    * of management/deletion of the SCT_ClusterOnTrack.
   */
-  virtual const InDet::SCT_ClusterOnTrack* correct
-    (const Trk::PrepRawData&, const Trk::TrackParameters&) const override; 
+  virtual InDet::SCT_ClusterOnTrack* correct(
+      const Trk::PrepRawData&, const Trk::TrackParameters&) const override;
 
-private:
+ private:
 
   ///////////////////////////////////////////////////////////////////
   // Private data:

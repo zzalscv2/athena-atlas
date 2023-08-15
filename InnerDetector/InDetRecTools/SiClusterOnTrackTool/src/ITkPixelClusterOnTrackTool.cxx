@@ -115,7 +115,7 @@ PixelClusterOnTrackTool::initialize() {
 ///////////////////////////////////////////////////////////////////
 
 
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
 
@@ -149,7 +149,7 @@ PixelClusterOnTrackTool::correct
 /** The correct method produces a PixelClusterOnTrack using the
  *  measured PixelCluster and the track prediction.
  */
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correctDefault
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
   using CLHEP::micrometer;
@@ -352,12 +352,12 @@ PixelClusterOnTrackTool::correctDefault
 }
 
 
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack*
 PixelClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar,
   const ITk::PixelClusterStrategy strategy) const {
   int initial_errorStrategy;
-  const InDet::PixelClusterOnTrack *newROT;
+  InDet::PixelClusterOnTrack *newROT;
 
   switch (strategy) {
   case PixelClusterStrategy::OUTLIER: // if cluster is outlier, increase errors
@@ -374,7 +374,7 @@ PixelClusterOnTrackTool::correct
 }
 
 // GP: NEW correct() method in case of NN based calibration  */
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correctNN
   (const Trk::PrepRawData &rio,
    const Trk::TrackParameters &trackPar) const {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // IRIO_OnTrackCreator.h
@@ -44,9 +44,9 @@ namespace Trk {
     /** abstract base method for the creation of RIO_OnTrack
         it takes a RIO (PrepRawData) and the given Track Parameter
      */
-    virtual const RIO_OnTrack*
-      correct (const PrepRawData& hit, const TrackParameters& trk)
-    const =0;   // pure virtual
+    virtual RIO_OnTrack* correct(
+        const PrepRawData& hit,
+        const TrackParameters& trk) const = 0;  // pure virtual
   };
 } // end of namespace
 

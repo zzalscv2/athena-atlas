@@ -78,38 +78,44 @@ public:
       and error according to the parameters (in particular, the angle)
       of the intersecting track.
   */
-  virtual const InDet::PixelClusterOnTrack* correct(const Trk::PrepRawData&,
-                                                    const Trk::TrackParameters&) const override;
+  virtual InDet::PixelClusterOnTrack* correct(
+      const Trk::PrepRawData&, const Trk::TrackParameters&) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
   ///////////////////////////////////////////////////////////////////
 
 protected:
+ InDet::PixelClusterOnTrack* correctDefault(const Trk::PrepRawData&,
+                                            const Trk::TrackParameters&) const;
 
-  const InDet::PixelClusterOnTrack* correctDefault(const Trk::PrepRawData&,
-                                                   const Trk::TrackParameters&) const;
+ InDet::PixelClusterOnTrack* correctNN(const Trk::PrepRawData&,
+                                       const Trk::TrackParameters&) const;
 
-  const InDet::PixelClusterOnTrack* correctNN(const Trk::PrepRawData&, const Trk::TrackParameters&) const;
+ bool getErrorsDefaultAmbi(const InDet::PixelCluster*,
+                           const Trk::TrackParameters&, Amg::Vector2D&,
+                           Amg::MatrixX&) const;
 
-  bool getErrorsDefaultAmbi( const InDet::PixelCluster*, const Trk::TrackParameters&,
-                             Amg::Vector2D&,  Amg::MatrixX&) const;
+ bool getErrorsTIDE_Ambi(const InDet::PixelCluster*,
+                         const Trk::TrackParameters&, Amg::Vector2D&,
+                         Amg::MatrixX&) const;
 
-  bool getErrorsTIDE_Ambi( const InDet::PixelCluster*, const Trk::TrackParameters&,
-                           Amg::Vector2D&,  Amg::MatrixX&) const;
+ InDet::PixelClusterOnTrack* correct(const Trk::PrepRawData&,
+                                     const Trk::TrackParameters&,
+                                     const ITk::PixelClusterStrategy) const;
 
-  const InDet::PixelClusterOnTrack* correct
-    (const Trk::PrepRawData&, const Trk::TrackParameters&,
-     const ITk::PixelClusterStrategy) const;
+ const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
+ getClusterSplittingProbability(const InDet::PixelCluster* pix) const {
+   if (!pix || m_clusterSplitProbContainer.key().empty())
+     return Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
 
-  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &getClusterSplittingProbability(const InDet::PixelCluster*pix) const {
-      if (!pix || m_clusterSplitProbContainer.key().empty())  return Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
-
-      SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer(m_clusterSplitProbContainer);
-      if (!splitProbContainer.isValid()) {
-         ATH_MSG_FATAL("Failed to get cluster splitting probability container " << m_clusterSplitProbContainer);
-      }
-      return splitProbContainer->splitProbability(pix);
+   SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer(
+       m_clusterSplitProbContainer);
+   if (!splitProbContainer.isValid()) {
+     ATH_MSG_FATAL("Failed to get cluster splitting probability container "
+                   << m_clusterSplitProbContainer);
+   }
+   return splitProbContainer->splitProbability(pix);
   }
 
 private:

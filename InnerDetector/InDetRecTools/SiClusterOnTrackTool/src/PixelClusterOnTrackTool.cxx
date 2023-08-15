@@ -155,7 +155,7 @@ return StatusCode::SUCCESS;
 ///////////////////////////////////////////////////////////////////
 
 
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
 
@@ -190,7 +190,7 @@ InDet::PixelClusterOnTrackTool::correct
 /** The correct method produces a PixelClusterOnTrack using the
  *  measured PixelCluster and the track prediction.
  */
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correctDefault
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
   using CLHEP::micrometer;
@@ -535,12 +535,12 @@ InDet::PixelClusterOnTrackTool::correctBow(const Identifier &id, Amg::Vector2D &
   localpos = newpos;
 }
 
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar,
   const InDet::PixelClusterStrategy strategy) const {
   int initial_errorStrategy;
-  const InDet::PixelClusterOnTrack *newROT;
+  InDet::PixelClusterOnTrack *newROT;
 
   switch (strategy) {
   case InDet::PIXELCLUSTER_OUTLIER: // if cluster is outlier, increase errors
@@ -557,7 +557,7 @@ InDet::PixelClusterOnTrackTool::correct
 }
 
 // GP: NEW correct() method in case of NN based calibration  */
-const InDet::PixelClusterOnTrack *
+InDet::PixelClusterOnTrack *
 InDet::PixelClusterOnTrackTool::correctNN
   (const Trk::PrepRawData &rio,
    const Trk::TrackParameters &trackPar) const {

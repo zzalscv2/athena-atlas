@@ -67,7 +67,7 @@ namespace Muon {
     }
 
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const
 
     {
         MuonClusterOnTrack* MClT = nullptr;
@@ -286,17 +286,17 @@ namespace Muon {
 
 
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D&) const {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D&) const {
         return createRIO_OnTrack(RIO, GP);
     }
 
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const {
         return correct(RIO, TP.position(), TP.momentum().unit());
     }
 
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
     
         if (m_idHelperSvc->isMM(RIO.identify())) {
             // Micromegas
@@ -314,7 +314,7 @@ namespace Muon {
     
  
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
         
         // Make sure RIO has a detector element
         const MuonGM::MMReadoutElement* mmEL = static_cast<const MuonGM::MMReadoutElement*>(RIO.detectorElement());
@@ -384,7 +384,7 @@ namespace Muon {
 
 
     //================================================================================
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
 
         // Make sure RIO has a detector element
         const MuonGM::sTgcReadoutElement* stgEL = static_cast<const MuonGM::sTgcReadoutElement*>(RIO.detectorElement());

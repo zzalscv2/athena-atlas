@@ -93,7 +93,7 @@ StatusCode Trk::RIO_OnTrackCreator::initialize()
 }
 
 // The sub-detector brancher algorithm
-const Trk::RIO_OnTrack* 
+Trk::RIO_OnTrack* 
 Trk::RIO_OnTrackCreator::correct(const Trk::PrepRawData& rio,
                                  const TrackParameters& trk) const
 {
