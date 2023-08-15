@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ class SegmTrack{
 };
 
 // is equal operator, returns true if the pointers point to the same segments
-inline bool operator==(const SegmTrack a, const SegmTrack b){
+inline bool operator==(const SegmTrack& a, const SegmTrack& b){
   for(int j=0;j<4;j++){
     if(a.at(j)!=b.at(j))return false;
   }
