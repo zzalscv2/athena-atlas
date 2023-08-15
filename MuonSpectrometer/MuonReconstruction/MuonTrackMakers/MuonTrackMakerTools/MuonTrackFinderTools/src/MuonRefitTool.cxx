@@ -426,7 +426,7 @@ namespace Muon {
                       0.,
                       angleError,
                       itAli.first,
-                      &(tsit->measurementOnTrack()->associatedSurface()));
+                      tsit->measurementOnTrack()->associatedSurface());
                     std::unique_ptr<Trk::TrackStateOnSurface> tsosAEOT =
                       std::make_unique<Trk::TrackStateOnSurface>(
                         nullptr,
@@ -574,7 +574,7 @@ namespace Muon {
               m_alignmentAngle,
               m_alignmentAngleError,
               indicesOfAffectedIds,
-              &(tsos->measurementOnTrack()->associatedSurface()));
+              tsos->measurementOnTrack()->associatedSurface());
             ATH_MSG_DEBUG(" AlignmentEffectsOnTrack on surface "
                           << aEOT->associatedSurface()
                           << " nr of tsos affected "
@@ -597,7 +597,7 @@ namespace Muon {
               m_alignmentAngle,
               m_alignmentAngleError,
               indicesOfAffectedIdsInner,
-              &(tsosInner->measurementOnTrack()->associatedSurface()));
+              tsosInner->measurementOnTrack()->associatedSurface());
             tsosAEOTInner = std::make_unique<Trk::TrackStateOnSurface>(
               nullptr,
               tsosInner->trackParameters()->uniqueClone(),
