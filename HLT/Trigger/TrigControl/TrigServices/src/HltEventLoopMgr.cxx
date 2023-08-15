@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -1557,7 +1557,7 @@ HltEventLoopMgr::DrainSchedulerStatusCode HltEventLoopMgr::processFinishedEvent(
   if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
 
   // Check for result truncation
-  if (!hltResult->getTruncatedModuleIds().empty()) {sc = StatusCode::FAILURE;}
+  if (!hltResult->getTruncatedModuleIds().empty() && hltResult->severeTruncation()) {sc = StatusCode::FAILURE;}
   rc = check("HLT result truncation", HLT::OnlineErrorCode::RESULT_TRUNCATION);
   if (rc != DrainSchedulerStatusCode::SUCCESS) {return rc;}
 
