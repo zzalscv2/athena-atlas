@@ -170,6 +170,11 @@ private:
   bool m_fixTau2;
   float m_deltaTCut;
   float m_ChisqRatioCut;
+  unsigned int m_rpdNbaselineSamples;
+  unsigned int m_rpdEndSignalSample;
+  unsigned int m_rpdNominalBaseline;
+  float m_rpdPileup1stDerivThresh;
+  unsigned int m_rpdADCoverflow;
   int m_LHCRun;
 
   // The objects that carry out the analysis

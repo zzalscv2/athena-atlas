@@ -68,6 +68,12 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("DeltaTCut", m_deltaTCut = 10);
     declareProperty("ChisqRatioCut", m_ChisqRatioCut = 10);
 
+    declareProperty("RpdNbaselineSamples", m_rpdNbaselineSamples = 4);
+    declareProperty("RpdEndSignalSample", m_rpdEndSignalSample = 0); // 0 -> go to end of sample...there may be a more elegant solution
+    declareProperty("RpdNominalBaseline", m_rpdNominalBaseline = 100);
+    declareProperty("RpdPileup1stDerivThresh", m_rpdPileup1stDerivThresh = 14);
+    declareProperty("RpdADCoverflow", m_rpdADCoverflow = 4096);
+
     declareProperty("LHCRun", m_LHCRun = 3);
 
 }
@@ -275,8 +281,18 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   zdcDataAnalyzer->disableModule(0, 0);
   zdcDataAnalyzer->disableModule(1, 0);
 
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", 4, 4, m_numSample));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", 4, 4, m_numSample));
+
+  RPDConfig rpdConfig;
+  rpdConfig.nRows = 4;
+  rpdConfig.nColumns = 4;
+  rpdConfig.nSamples = m_numSample;
+  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
+  rpdConfig.endSignalSample = m_rpdEndSignalSample;
+  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
+  rpdConfig.pileup1stDerivThresh = m_rpdPileup1stDerivThresh;
+  rpdConfig.ADCoverflow = m_rpdADCoverflow;
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig));
 
  return zdcDataAnalyzer;
 
@@ -364,8 +380,17 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
 
 
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", 4, 4, m_numSample));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", 4, 4, m_numSample));
+  RPDConfig rpdConfig;
+  rpdConfig.nRows = 4;
+  rpdConfig.nColumns = 4;
+  rpdConfig.nSamples = m_numSample;
+  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
+  rpdConfig.endSignalSample = m_rpdEndSignalSample;
+  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
+  rpdConfig.pileup1stDerivThresh = m_rpdPileup1stDerivThresh;
+  rpdConfig.ADCoverflow = m_rpdADCoverflow;
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig));
 
  return zdcDataAnalyzer;
 
@@ -461,8 +486,17 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
   
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", 4, 4, m_numSample));
-  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", 4, 4, m_numSample));
+  RPDConfig rpdConfig;
+  rpdConfig.nRows = 4;
+  rpdConfig.nColumns = 4;
+  rpdConfig.nSamples = m_numSample;
+  rpdConfig.nBaselineSamples = m_rpdNbaselineSamples;
+  rpdConfig.endSignalSample = m_rpdEndSignalSample;
+  rpdConfig.nominalBaseline = m_rpdNominalBaseline;
+  rpdConfig.pileup1stDerivThresh = m_rpdPileup1stDerivThresh;
+  rpdConfig.ADCoverflow = m_rpdADCoverflow;
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig));
+  m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig));
   
   return zdcDataAnalyzer;
 }
@@ -1206,6 +1240,9 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   
   m_zdcDataAnalyzer->StartEvent(calibLumiBlock);
   
+  m_rpdDataAnalyzer.at(0)->reset();
+  m_rpdDataAnalyzer.at(1)->reset();
+
   const std::vector<unsigned short>* adcUndelayLG = 0;
   const std::vector<unsigned short>* adcUndelayHG = 0;
   
@@ -1215,35 +1252,43 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   ATH_MSG_DEBUG("Processing modules");
     for (const auto zdcModule : moduleContainer)
       {
-
-	ATH_MSG_DEBUG(ZdcModuleToString(*zdcModule));
+	int side = -1;
+	if (zdcModule->zdcSide() == -1) side =  0;
+	else if (zdcModule->zdcSide() == 1) side = 1;
+	else {
+	  // Invalid side
+	  //
+	  ATH_MSG_WARNING("Invalid side value found for module number: " << zdcModule->zdcModule() << ", side value = " << side);
+	  continue;
+	}
 
 	if (zdcModule->zdcType() == 1) {
-	  ATH_MSG_DEBUG("RPD side " << zdcModule->zdcSide() << " chan " << zdcModule->zdcChannel() );
-	  if (m_LHCRun < 3) continue; // type == 1 -> pixel data in runs 2 and 3, skip
-
 	  //  This is RPD data in Run 3
 	  //
-	  int rpdChannel = zdcModule->zdcChannel() - 1;
-	  if (rpdChannel > 15 || rpdChannel < 0) {
+	  if (m_LHCRun < 3) continue; // type == 1 -> pixel data in runs 2 and 3, skip
+	  ATH_MSG_DEBUG("RPD side " << side << " chan " << zdcModule->zdcChannel() );
+
+	  unsigned int rpdChannel = zdcModule->zdcChannel(); // channel numbers are fixed in mapping, numbered 0-15
+	  if (rpdChannel > 15) {
 	    //
 	    //  The data is somehow corrupt, spit out an error
 	    //
+	    ATH_MSG_WARNING("Invalid RPD channel found on side " << side << ", channel number = " << rpdChannel << ", skipping this module");
+	    continue;
 	  }
 	  else {
 	    const std::vector<uint16_t>* vector_p = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data"));
 	    if (!vector_p) {
 	      //  This is obviously a problem, generate a non-fatal but serious error and continue
 	      //
+	      ATH_MSG_WARNING("Could not retrieve waveform for side " << side << ", module " << zdcModule->zdcModule() << ", skipping this module");
 	      continue;
 	    }
 	    
 	    //
 	    // Pass the data to the RPD analysis tool 
 	    //
-	    unsigned int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
 	    m_rpdDataAnalyzer.at(side)->loadChannelData(rpdChannel, *vector_p);
-	    m_rpdDataAnalyzer.at(side)->analyzeData();
 	  }
 	}
 	else {
@@ -1312,6 +1357,10 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	}
       }
     
+    // analyze RPD data only once all channels have been loaded
+    m_rpdDataAnalyzer.at(0)->analyzeData();
+    m_rpdDataAnalyzer.at(1)->analyzeData();
+
     ATH_MSG_DEBUG("Finishing event processing");
     
     m_zdcDataAnalyzer->FinishEvent();
@@ -1326,9 +1375,11 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
         if (zdcModule->zdcType() == 1 && m_LHCRun==3) {
           // this is the RPD
           if (m_writeAux) {
-            int rpdChannel = zdcModule->zdcChannel() - 1;
+            int rpdChannel = zdcModule->zdcChannel(); // channel numbers are fixed in mapping, numbered 0-15
             zdcModule->auxdecor<float>("RPDChannelAmplitude" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChSumADC(rpdChannel);
+            // zdcModule->auxdecor<float>("RPDChannelAmplitudeCalib" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChSumADCcalib(rpdChannel);
             zdcModule->auxdecor<unsigned int>("RPDChannelMaxSample" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
+            zdcModule->auxdecor<unsigned int>("RPDChannelStatus" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
           }
         } else if (zdcModule->zdcType() == 0) {
           // this is the main ZDC
@@ -1388,6 +1439,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
 	zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
 	zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
+	
+  zdc_sum->auxdecor<unsigned int>("RPDStatus"+m_auxSuffix) = m_rpdDataAnalyzer.at(iside)->getSideStatus();
       }
 
     return StatusCode::SUCCESS;

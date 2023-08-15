@@ -107,6 +107,11 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	  int type = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["type"][lucrod_channel];
 	  int channel = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["channel"][lucrod_channel];
 	  int gain = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["gain"][lucrod_channel];
+	  float xpos = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["x"][lucrod_channel];
+	  float ypos = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["y"][lucrod_channel];
+	  unsigned int row = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["row"][lucrod_channel];
+	  unsigned int col = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["col"][lucrod_channel];
+	  
 	  ATH_MSG_DEBUG("Done accessing ZDC map side " << side << " module " << module << " type " << type << " channel " << channel << " gain " << gain);
 
 	  chan_id = m_zdcId->channel_id(side,module,type,channel);
@@ -127,6 +132,17 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	      (*iter).second->setZdcModule(module);
 	      (*iter).second->setZdcType(type);
 	      (*iter).second->setZdcChannel(channel);
+
+	      // RPDs are labeled as type 1
+	      //
+	      if (type == 1) {
+		//  Save the (nominal) positions of the sector relative to the RPD center
+		//
+		(*iter).second->auxdata<float_t>("xposRel") = xpos;
+		(*iter).second->auxdata<float_t>("yposRel") = ypos;
+		(*iter).second->auxdata<uint16_t>("row") = row;
+		(*iter).second->auxdata<uint16_t>("col") = col;
+	      }
 	    }
 	  
 	  if (iter != digits_map.end())
