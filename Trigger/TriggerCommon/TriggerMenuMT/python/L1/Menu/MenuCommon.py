@@ -94,5 +94,10 @@ FixedIDMap = {
         "L1_BCM_2A_UNPAIRED_ISO":486,
         "L1_BCM_2C_UNPAIRED_ISO":487,
         #
-        "L1_ZB_eEM": 508
+        "L1_ZB_eEM": 508,
+        #
+        "L1_ALFA_ELAST15": 339,
+        "L1_ALFA_ELAST18": 340,
+        "L1_ALFA_SYST17": 353,
+        "L1_ALFA_SYST18": 354
     }
