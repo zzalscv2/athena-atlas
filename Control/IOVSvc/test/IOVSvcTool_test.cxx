@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -28,11 +28,11 @@ namespace Athena_test {
 
   void IOVSvcTool_test (IIOVSvcTool *pTool) {
     assert(pTool);
-    DataProxy* pOld(new DataProxy(StoreGateSvc::asStorable(new Dooo(1)),
+    DataProxy* pOld(new DataProxy(SG::asStorable(new Dooo(1)),
 				  new TransientAddress(CLID(6666), "old")));
     assert((pTool->regProxy(pOld, "old").isSuccess()));
     assert(pTool->holdsProxy(pOld));
-    DataProxy* pNew(new DataProxy(StoreGateSvc::asStorable(new Dooo(2)),
+    DataProxy* pNew(new DataProxy(SG::asStorable(new Dooo(2)),
 				  new TransientAddress(CLID(6666), "new")));
     assert((pTool->replaceProxy(pOld, pNew).isSuccess()));
     assert(pTool->holdsProxy(pNew) );

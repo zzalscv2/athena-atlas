@@ -1,16 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
  ForwardIdCnv package
  -----------------------------------------
  ***************************************************************************/
-
-//<doc><file>	$Id:  $
-//<version>	$Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "ZdcIDDetDescrCnv.h"
 
@@ -22,15 +17,6 @@
 #include "IdDictDetDescr/IdDictManager.h"
 #include "ZdcIdentifier/ZdcID.h"
 
-//<<<<<< PRIVATE DEFINES                                                >>>>>>
-//<<<<<< PRIVATE CONSTANTS                                              >>>>>>
-//<<<<<< PRIVATE TYPES                                                  >>>>>>
-//<<<<<< PRIVATE VARIABLE DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC VARIABLE DEFINITIONS                                    >>>>>>
-//<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
-//<<<<<< PRIVATE FUNCTION DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC FUNCTION DEFINITIONS                                    >>>>>>
-//<<<<<< MEMBER FUNCTION DEFINITIONS                                    >>>>>>
 
 //--------------------------------------------------------------------
 
@@ -210,7 +196,7 @@ ZdcIDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
     
     // Pass a pointer to the container to the Persistency service by reference.
-    pObj = StoreGateSvc::asStorable(m_zdcId);
+    pObj = SG::asStorable(m_zdcId);
 
     return StatusCode::SUCCESS; 
 
