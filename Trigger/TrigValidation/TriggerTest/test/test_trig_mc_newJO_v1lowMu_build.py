@@ -9,18 +9,17 @@
 # If you create a grid version, check art-output in existing grid tests.
 
 import sys
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
-ex = ExecStep.ExecStep('athena')
-ex.type = 'other'
-ex.executable = 'runHLT_standalone_newJO.py'
+ex = ExecStep.ExecStep()
+ex.type = 'athena'
+ex.args = '--CA'
+ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'minbias'
-ex.args += ' --filesInput='+Input.get_input(ex.input).paths[0]
-ex.args += ' Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"'
-ex.args += ' Trigger.disableChains=[]'  # Do not disable any chains
-ex.args += ' Trigger.doRuntimeNaviVal=True'
-ex.args += ' Trigger.L1.doAlfaCtpin=True'
-ex.prmon = False
+ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"',
+            'Trigger.disableChains=[]',  # Do not disable any chains
+            'Trigger.doRuntimeNaviVal=True',
+            'Trigger.L1.doAlfaCtpin=True']
 
 test = Test.Test()
 test.art_type = 'build'

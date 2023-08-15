@@ -21,22 +21,20 @@
 # art-output: prmon*
 # art-output: *.check*
 
-from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps, Input
+from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 # Generate configuration run file
-run = ExecStep.ExecStep('athena')
-run.type = 'other'
+run = ExecStep.ExecStep()
+run.type = 'athena'
+run.args = '--CA'
 run.input = 'Single_mu_Run4'
-run.executable = 'runHLT_standalone_newJO.py'
-run.args += ' --filesInput='+Input.get_input(run.input).paths[0]
-run.args += ' Trigger.triggerMenuSetup="Dev_pp_run3_v1"'
-run.args += ' Trigger.doRuntimeNaviVal=True'
-run.args += ' ITk.doTruth=False'
-run.args += ' Tracking.doTruth=False'
-run.args += ' Trigger.enableL1CaloPhase1=False'
-run.args += ' Trigger.InDetTracking.doGPU=True'
-run.prmon = False
-
+run.job_options = 'TriggerJobOpts/runHLT.py'
+run.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
+             'Trigger.doRuntimeNaviVal=True',
+             'ITk.doTruth=False',
+             'Tracking.doTruth=False',
+             'Trigger.enableL1CaloPhase1=False',
+             'Trigger.InDetTracking.doGPU=True']
 
 # The full test configuration
 test = Test.Test()
