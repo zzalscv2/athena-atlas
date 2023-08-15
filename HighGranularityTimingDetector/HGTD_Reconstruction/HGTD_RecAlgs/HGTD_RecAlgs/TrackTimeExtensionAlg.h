@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/TrackTimeExtensionAlg.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -29,6 +29,7 @@
 #include "HGTD_RecToolInterfaces/IHGTD_TrackTimeExtensionTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -48,7 +49,24 @@ public:
 private:
   StatusCode execute_r (const EventContext& ctx);
 
-  StatusCode decorateTrackParticle(const xAOD::TrackParticle* track_ptkl,
+  struct DecorHandles
+  {
+    DecorHandles (const TrackTimeExtensionAlg& tool, const EventContext& ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> layerClusterTruthClassHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterShadowedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterMergedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerPrimaryExpectedHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle;
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle;
+  };
+  friend struct DecorHandles;
+
+  StatusCode decorateTrackParticle(DecorHandles& dh,
+                                   const xAOD::TrackParticle* track_ptkl,
                                    const HGTD::ExtensionObject& extension,
                                    const InDetSimDataCollection* sdo_collection,
                                    const HepMC::GenEvent* hs_event,
