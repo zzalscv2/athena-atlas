@@ -14,6 +14,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('metVars', [], type=None)
         self.addOption ('containers', {}, type=None)
         self.addOption ('treeName', 'analysis', type=str)
+        self.addOption ('metTermName', 'Final', type=str)
 
 
     def makeAlgs (self, config) :
@@ -65,6 +66,7 @@ class OutputAnalysisConfig (ConfigBlock):
             ntupleMaker = config.createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' + postfix )
             ntupleMaker.TreeName = self.treeName
             ntupleMaker.Branches = self.metVars + autoMetVars
+            ntupleMaker.termName = self.metTermName
             #ntupleMaker.OutputLevel = 2  # For output validation
 
         treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + postfix )
