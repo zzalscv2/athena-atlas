@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscClusterOnTrackCreator.h"
@@ -97,7 +97,7 @@ namespace Muon {
     StatusCode CscClusterOnTrackCreator::finalize() { return AthAlgTool::finalize(); }
 
     ////////////////////////////////////////////////////////
-    const MuonClusterOnTrack* CscClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const {
+    MuonClusterOnTrack* CscClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const {
         MuonClusterOnTrack* MClT = nullptr;
 
         // check whether PrepRawData has detector element, if not there print warning
@@ -224,7 +224,7 @@ namespace Muon {
 
     /////////////////////////////////////////////////////////////////
 
-    const MuonClusterOnTrack* CscClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP,
+    MuonClusterOnTrack* CscClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP,
                                                                           const Amg::Vector3D& GD) const {
         if (!(m_doCsc && m_idHelperSvc->isCsc(RIO.identify()))) {
             ATH_MSG_WARNING("CscClusterOnTrackCreator::createRIO_OnTrack is called by the other muon tech");
@@ -347,12 +347,12 @@ namespace Muon {
     }
 
     ///////
-    const MuonClusterOnTrack* CscClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const {
+    MuonClusterOnTrack* CscClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const {
         return createRIO_OnTrack(RIO, TP.position(), TP.momentum().unit());
     }
 
     ///////
-    const MuonClusterOnTrack* CscClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
+    MuonClusterOnTrack* CscClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
         return createRIO_OnTrack(RIO, GP, GD);
     }
                 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONCLUSTERONTRACKCREATOR_H
@@ -55,9 +55,9 @@ namespace Muon {
             @return Fully calibrated Muon::MuonClusterOnTrack.
                     The memory management of the new Muon::MuonClusterOnTrack is passed to the person calling the function.
         */
-        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override = 0;
+        virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override = 0;
 
-        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
+        virtual MuonClusterOnTrack* correct(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
     };
     
     inline const InterfaceID& IMuonClusterOnTrackCreator::interfaceID() { return IID_IMuonClusterOnTrackCreator; }

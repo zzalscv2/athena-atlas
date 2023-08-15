@@ -78,7 +78,7 @@ ITk::StripClusterOnTrackTool::initialize() {
 // Trk::ITkStripClusterOnTrack  production
 ///////////////////////////////////////////////////////////////////
 
-const InDet::SCT_ClusterOnTrack *
+InDet::SCT_ClusterOnTrack *
 ITk::StripClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
   const InDet::SCT_Cluster *cluster = nullptr;
@@ -286,12 +286,17 @@ ITk::StripClusterOnTrackTool::correct
 
     ATH_MSG_VERBOSE(" SCALING OF ENDCAP STRIP CLUSTER COVARIANCE");
     ATH_MSG_VERBOSE("sinAlpha / sinAlpha2 / cosAlpha2 / weight = " << sinAlpha << " / " << sinAlpha2 << " / " << cosAlpha2 << " / " << weight );
-    ATH_MSG_VERBOSE("dV0 = (" << cosAlpha2 * covariance(0, 0) << " + " << sinAlpha2 * covariance(1, 1) << " + " << 2. * sinAlphaCosAlpha * covariance(1, 0) << " ) * " << (weight * weight - 1.) << " = " << dV0);
-    ATH_MSG_VERBOSE("SCALED CLUSTER COVARIANCE = " << covariance(0, 0) << ", " << covariance(0, 1) );
+    ATH_MSG_VERBOSE("dV0 = (" << cosAlpha2 * covariance(0, 0) << " + "
+                              << sinAlpha2 * covariance(1, 1) << " + "
+                              << 2. * sinAlphaCosAlpha * covariance(1, 0)
+                              << " ) * " << (weight * weight - 1.) << " = "
+                              << dV0);
+    ATH_MSG_VERBOSE("SCALED CLUSTER COVARIANCE = " << covariance(0, 0) << ", "
+                                                   << covariance(0, 1));
     ATH_MSG_VERBOSE("                            " << covariance(1, 0) << ", " << covariance(1, 1) );
   }
   // final construction of clustr of track
   bool isbroad = m_option_errorStrategy == 0;
-  return new InDet::SCT_ClusterOnTrack(cluster, localParameters, covariance,
+  return new InDet::SCT_ClusterOnTrack(cluster, std::move(localParameters), std::move(covariance),
                                        detectorElement->identifyHash(), globalPosition, isbroad);
 }

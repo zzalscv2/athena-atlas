@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ namespace InDet {
       track hypothesis. See doxygen to Trk::RIO_OnTrackCreator for details.
   */
 
-  class TRT_DriftCircleOnTrackNoDriftTimeTool : 
+  class TRT_DriftCircleOnTrackNoDriftTimeTool final : 
     virtual public Trk::IRIO_OnTrackCreator,public AthAlgTool
 {
   ///////////////////////////////////////////////////////////////////
@@ -37,10 +37,10 @@ public:
 
   TRT_DriftCircleOnTrackNoDriftTimeTool(const std::string&,const std::string&,const IInterface*);
   virtual ~TRT_DriftCircleOnTrackNoDriftTimeTool ();
-  virtual StatusCode initialize();
-  virtual StatusCode finalize  ();
-  virtual const InDet::TRT_DriftCircleOnTrack* correct
-    (const Trk::PrepRawData&,const Trk::TrackParameters&) const; 
+  virtual StatusCode initialize() override;
+  virtual StatusCode finalize  () override;
+  virtual InDet::TRT_DriftCircleOnTrack* correct
+    (const Trk::PrepRawData&,const Trk::TrackParameters&) const override; 
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:

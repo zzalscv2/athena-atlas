@@ -81,8 +81,8 @@ public:
       and error according to the parameters (in particular, the angle)
       of the intersecting track.
   */
-  virtual const InDet::PixelClusterOnTrack* correct(const Trk::PrepRawData&,
-                                                    const Trk::TrackParameters&) const override;
+  virtual InDet::PixelClusterOnTrack* correct(
+      const Trk::PrepRawData&, const Trk::TrackParameters&) const override;
 
   ///////////////////////////////////////////////////////////////////
   // Private methods:
@@ -91,10 +91,11 @@ public:
 protected:
   void correctBow(const Identifier&, Amg::Vector2D& locpos, const double tanphi, const double taneta) const;
 
-  const InDet::PixelClusterOnTrack* correctDefault(const Trk::PrepRawData&,
-                                                   const Trk::TrackParameters&) const;
+  InDet::PixelClusterOnTrack* correctDefault(const Trk::PrepRawData&,
+                                             const Trk::TrackParameters&) const;
 
-  const InDet::PixelClusterOnTrack* correctNN(const Trk::PrepRawData&, const Trk::TrackParameters&) const;
+  InDet::PixelClusterOnTrack* correctNN(const Trk::PrepRawData&,
+                                        const Trk::TrackParameters&) const;
 
   bool getErrorsDefaultAmbi( const InDet::PixelCluster*, const Trk::TrackParameters&,
                              Amg::Vector2D&,  Amg::MatrixX&) const;
@@ -102,9 +103,9 @@ protected:
   bool getErrorsTIDE_Ambi( const InDet::PixelCluster*, const Trk::TrackParameters&,
                            Amg::Vector2D&,  Amg::MatrixX&) const;
 
-  const InDet::PixelClusterOnTrack* correct
-    (const Trk::PrepRawData&, const Trk::TrackParameters&,
-     const InDet::PixelClusterStrategy) const;
+  InDet::PixelClusterOnTrack* correct(const Trk::PrepRawData&,
+                                      const Trk::TrackParameters&,
+                                      const InDet::PixelClusterStrategy) const;
 
   const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &getClusterSplittingProbability(const InDet::PixelCluster*pix) const {
       if (!pix || m_clusterSplitProbContainer.key().empty())  return Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();

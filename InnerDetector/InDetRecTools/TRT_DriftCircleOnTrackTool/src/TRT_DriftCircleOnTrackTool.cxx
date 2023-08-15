@@ -67,7 +67,7 @@ StatusCode InDet::TRT_DriftCircleOnTrackTool::finalize()
 // Trk::TRT_DriftCircleOnTrack production
 ///////////////////////////////////////////////////////////////////
 
-const InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
+InDet::TRT_DriftCircleOnTrack* InDet::TRT_DriftCircleOnTrackTool::correct
 (const Trk::PrepRawData& rio,const Trk::TrackParameters& TP) const
 {
   const InDet::TRT_DriftCircle* DC = dynamic_cast<const InDet::TRT_DriftCircle*>(&rio);

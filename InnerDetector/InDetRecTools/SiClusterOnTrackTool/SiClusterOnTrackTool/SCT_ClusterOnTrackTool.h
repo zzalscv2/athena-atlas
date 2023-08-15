@@ -60,16 +60,17 @@ public:
     This method is a factory, so the client has to take care
      of management/deletion of the  SCT_ClusterOnTrack.
  */
-  virtual const InDet::SCT_ClusterOnTrack* correct
-    (const Trk::PrepRawData&, const Trk::TrackParameters&) const override; 
+  virtual InDet::SCT_ClusterOnTrack* correct(
+      const Trk::PrepRawData&, const Trk::TrackParameters&) const override;
 
-  
-/** @brief Returns a correction to be applied to the SCT cluster local x position
-    in simulated events to remove a position bias introduced by the SCT digitisation.
+  /** @brief Returns a correction to be applied to the SCT cluster local x
+     position in simulated events to remove a position bias introduced by the
+     SCT digitisation.
 
-      @param [in] phi     angle of track relative to Lorentz drift direction, in transverse plane
-      @param [in] nstrip  SCT cluster size (number of strips)
- */
+        @param [in] phi     angle of track relative to Lorentz drift direction,
+     in transverse plane
+        @param [in] nstrip  SCT cluster size (number of strips)
+   */
   static double getCorrection(double phi, int nstrip) ;
   
 

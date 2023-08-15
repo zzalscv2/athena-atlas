@@ -80,13 +80,13 @@ StatusCode InDet::TRT_DriftCircleOnTrackRecalibrateTool::finalize()
 // Trk::TRT_DriftCircleOnTrack production
 ///////////////////////////////////////////////////////////////////
 
-const Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
+Trk::RIO_OnTrack* InDet::TRT_DriftCircleOnTrackRecalibrateTool::correct
 (const Trk::PrepRawData& rio,const Trk::TrackParameters& TP) const
 {
   const InDet::TRT_DriftCircle* DC = dynamic_cast<const InDet::TRT_DriftCircle*>(&rio);
   if(!DC) return nullptr;
 
-  const Trk::RIO_OnTrack *rot=nullptr;
+  Trk::RIO_OnTrack *rot=nullptr;
 
   //recalculate driftradius using the new calibration constants
   bool isOK=false;

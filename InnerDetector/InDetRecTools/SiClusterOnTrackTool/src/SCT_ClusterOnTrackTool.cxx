@@ -112,7 +112,7 @@ InDet::SCT_ClusterOnTrackTool::finalize() {
 // Trk::SCT_ClusterOnTrack  production
 ///////////////////////////////////////////////////////////////////
 
-const InDet::SCT_ClusterOnTrack *
+InDet::SCT_ClusterOnTrack *
 InDet::SCT_ClusterOnTrackTool::correct
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar) const {
 

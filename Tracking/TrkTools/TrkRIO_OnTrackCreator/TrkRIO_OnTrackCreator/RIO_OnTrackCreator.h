@@ -66,8 +66,8 @@ namespace Trk {
     virtual StatusCode initialize() override;
 
     //! the master method for going from RIO to ROT.
-    virtual const RIO_OnTrack* correct(const PrepRawData&,
-                                       const TrackParameters&) const override;
+    RIO_OnTrack* correct(const PrepRawData&,
+                         const TrackParameters&) const override;
 
    private:
     ///////////////////////////////////////////////////////////////////
