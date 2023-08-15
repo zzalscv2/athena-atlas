@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuTagAmbiguitySolverTool.h"
@@ -360,6 +360,6 @@ std::vector<MuonCombined::MuonSegmentInfo> MuTagAmbiguitySolverTool::selectBestM
 /// What are these hardcoded constants about?
 ///  d +  a / (1 + exp())
 double MuTagAmbiguitySolverTool::Rseg(unsigned int nseg) const {
-    constexpr float a_seg{3.61883}, b_seg{20.4547}, c_seg{1. / 0.132675}, d_seg{0.102262};
+    constexpr float a_seg{3.61883f}, b_seg{20.4547f}, c_seg{1.f / 0.132675f}, d_seg{0.102262f};
     return (a_seg / (1. + std::exp(b_seg - nseg * c_seg)) + d_seg);
 }
