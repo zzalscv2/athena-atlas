@@ -184,6 +184,7 @@ namespace
   // Small holder class to keep CKF and related objects.
   // Keep a unique_ptr<CKF_pimpl> in TrackFindingAlg, so we don't have to expose the
   // Acts class definitions to in TrackFindingAlg.h.
+  // ActsTrk::TrackFindingAlg::CKF_pimpl inherits from CKF_config to prevent -Wsubobject-linkage warning.
   struct CKF_config
   {
     // CKF algorithm

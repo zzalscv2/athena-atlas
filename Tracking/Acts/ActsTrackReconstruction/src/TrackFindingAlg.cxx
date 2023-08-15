@@ -48,6 +48,9 @@ namespace ActsTrk
   {
   };
 
+  TrackFindingAlg::CKF_pimpl &TrackFindingAlg::trackFinder() { return *m_trackFinder; }
+  const TrackFindingAlg::CKF_pimpl &TrackFindingAlg::trackFinder() const { return *m_trackFinder; }
+
   TrackFindingAlg::TrackFindingAlg(const std::string &name,
                                    ISvcLocator *pSvcLocator)
       : AthReentrantAlgorithm(name, pSvcLocator)
@@ -102,12 +105,12 @@ namespace ActsTrk
 
     m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}}});
 
-    m_trackFinder->pOptions.maxSteps = m_maxPropagationStep;
+    trackFinder().pOptions.maxSteps = m_maxPropagationStep;
 
-    m_trackFinder->ckfExtensions.updater.connect<&gainMatrixUpdate>();
-    m_trackFinder->ckfExtensions.smoother.connect<&gainMatrixSmoother>();
-    m_trackFinder->ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
-    m_trackFinder->ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&m_trackFinder->measurementSelector);
+    trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
+    trackFinder().ckfExtensions.smoother.connect<&gainMatrixSmoother>();
+    trackFinder().ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
+    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&trackFinder().measurementSelector);
 
     return StatusCode::SUCCESS;
   }
@@ -359,8 +362,8 @@ namespace ActsTrk
                                mfContext,
                                calContext,
                                slAccessorDelegate,
-                               m_trackFinder->ckfExtensions,
-                               m_trackFinder->pOptions,
+                               trackFinder().ckfExtensions,
+                               trackFinder().pOptions,
                                &(*pSurface));
 
     // Perform the track finding for all initial parameters
@@ -400,7 +403,7 @@ namespace ActsTrk
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
-      auto result = m_trackFinder->ckf.findTracks(initialParameters, options, tracksContainer);
+      auto result = trackFinder().ckf.findTracks(initialParameters, options, tracksContainer);
 
       // The result for this seed
       if (not result.ok())
