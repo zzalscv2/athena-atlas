@@ -216,9 +216,11 @@ class InDetTrigSequence:
       return acc
     
   def xAODParticleCreation(self) -> ComponentAccumulator:
-
     with ConfigurableCABehavior():
-      acc = self.dataPreparationTRT()
+      if self.__flags.Tracking.ActiveConfig.doTRT:
+        acc = self.dataPreparationTRT()
+      else:
+        acc = ComponentAccumulator()
 
       from xAODTrackingCnv.xAODTrackingCnvConfig import TrigTrackParticleCnvAlgCfg
       prefix = "InDet" 

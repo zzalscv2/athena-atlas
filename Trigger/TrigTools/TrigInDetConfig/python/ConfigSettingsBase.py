@@ -65,7 +65,7 @@ class _ConfigSettingsBase() :
       #precision tracking configuration values
       #__provisional change__:
       #the following settings are incorrect but this is what is being used in the production running
-      #at the moment. Setting them explicitely here will prevent trigger count differences in
+      #at the moment. Setting them explicitly here will prevent trigger count differences in
       #https://gitlab.cern.ch/atlas/athena/-/merge_requests/56607
       self._maxRPhiImpact   = 10.
       self._maxRPhiImpactEM = 50. # mm
@@ -85,7 +85,7 @@ class _ConfigSettingsBase() :
       if hasattr(self.__class__, 'override') and callable(getattr(self.__class__, 'override')) :
          self.override()
 
-   # assign to this override method to add additioal global functionality 
+   # assign to this override method to add additional global functionality 
    # to the base class, such as to globally override any of the 
    # variables above
    # def override(self):   
