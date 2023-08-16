@@ -421,6 +421,9 @@ def createTriggerRecoFlags():
     # the minimum pT threshold to use for the muon removal
     flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)
 
+    # enables precision tracking in jet super-ROI before fast b-tagging (EMTopo jets)
+    flags.addFlag('Trigger.Jet.doJetSuperPrecisionTracking', False)
+
     # enable fast b-tagging for all fully calibrated HLT PFlow jets
     flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
 
