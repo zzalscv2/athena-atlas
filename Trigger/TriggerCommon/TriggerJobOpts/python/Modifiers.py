@@ -111,38 +111,8 @@ class rewriteLVL1(_modifier):
     # athenaHLT -c "setMenu='PhysicsP1_pp_run3_v1';rerunLVL1=True;rewriteLVL1=True;" --filesInput=input.data TriggerJobOpts/runHLT_standalone.py
 
     def preSetup(self, flags):
-        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-        from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
-        flags1=flags.clone()
-        flags1.lock()
-        CAtoGlobalWrapper(L1TriggerByteStreamEncoderCfg, flags1)
-
-    def postSetup(self, flags):
-        if not flags.Output.doWriteBS:
-            log.warning('rewriteLVL1 is True but flags.Output.doWriteBS is False')
-        if not flags.Trigger.writeBS:
-            log.warning('rewriteLVL1 is True but flags.Trigger.writeBS is False')
-
-        if flags.Trigger.Online.isPartition:
-            # online
-            from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-            svcMgr.HltEventLoopMgr.RewriteLVL1 = True
-            if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
-                svcMgr.HltEventLoopMgr.L1TriggerResultRHKey = 'L1TriggerResult'
-            if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
-                svcMgr.HltEventLoopMgr.RoIBResultRHKey = 'RoIBResult'
-        else:
-            # offline
-            from AthenaCommon.AlgSequence import AthSequencer
-            from AthenaCommon.CFElements import findAlgorithm
-            seq = AthSequencer('AthOutSeq')
-            streamBS = findAlgorithm(seq, 'BSOutputStreamAlg')
-            if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
-                streamBS.ExtraInputs += [ ('xAOD::TrigCompositeContainer', 'StoreGateSvc+L1TriggerResult') ]
-                streamBS.ItemList += [ 'xAOD::TrigCompositeContainer#L1TriggerResult' ]
-            if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
-                streamBS.ExtraInputs += [ ('ROIB::RoIBResult', 'StoreGateSvc+RoIBResult') ]
-                streamBS.ItemList += [ 'ROIB::RoIBResult#RoIBResult' ]
+        log.warning('The rewriteLVL1 modifier is deprecated. LVL1 result writing is enabled by default '
+                    'if flags.Trigger.doLVL1 (doL1Sim) is True.')
 
 
 ###############################################################
