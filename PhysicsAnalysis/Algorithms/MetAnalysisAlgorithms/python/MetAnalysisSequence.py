@@ -8,6 +8,7 @@ def makeMetAnalysisSequence( dataType, metSuffix,
                              postfix = '',
                              useFJVT = False,
                              treatPUJets = False,
+                             setMuonJetEMScale = True,
                              electronsSelection = "",
                              muonsSelection = "",
                              photonsSelection = "",
@@ -58,6 +59,7 @@ def makeMetAnalysisSequence( dataType, metSuffix,
     addPrivateTool( alg, 'makerTool', 'met::METMaker' )
     
     alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
+    alg.makerTool.DoSetMuonJetEMScale = setMuonJetEMScale
     
     if useFJVT:
         alg.makerTool.JetRejectionDec = 'passFJVT'

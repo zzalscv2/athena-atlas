@@ -13,6 +13,7 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('postfix', '', type=str)
         self.addOption ('useFJVT', False, type=bool)
         self.addOption ('treatPUJets', False, type=bool)
+        self.addOption ('setMuonJetEMScale', True, type=bool)
         self.addOption ('jets', "", type=str)
         self.addOption ('electrons', "", type=str)
         self.addOption ('muons', "", type=str)
@@ -43,6 +44,7 @@ class MetAnalysisConfig (ConfigBlock):
         config.addPrivateTool( 'makerTool', 'met::METMaker' )
 
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
+        alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale
 
         if self.useFJVT:
             alg.makerTool.JetRejectionDec = 'passFJVT'
@@ -87,6 +89,7 @@ def makeMetAnalysisConfig( seq, containerName,
                              postfix = None,
                              useFJVT = None,
                              treatPUJets = None,
+                             setMuonJetEMScale = None,
                              jets = None,
                              electrons = None,
                              muons = None,
@@ -103,6 +106,7 @@ def makeMetAnalysisConfig( seq, containerName,
       dataType -- The data type to run on ("data", "mc" or "afii")
       useFJVT -- Use FJVT decision for the calculation
       treatPUJets -- Treat pile-up jets in the MET significance calculation
+      setMuonJetEMScale -- Use consituent scale and subtract muon eloss for jets overlapping muons
     """
 
     config = MetAnalysisConfig (containerName)
@@ -112,6 +116,8 @@ def makeMetAnalysisConfig( seq, containerName,
         config.setOptionValue ('useFJVT', useFJVT)
     if treatPUJets is not None :
         config.setOptionValue ('treatPUJets', treatPUJets)
+    if setMuonJetEMScale is not None :
+        config.setOptionValue ('setMuonJetEMScale', setMuonJetEMScale)
     if jets is not None :
         config.setOptionValue ('jets', jets)
     if electrons is not None :
