@@ -130,6 +130,7 @@ runArgs.jobConfig = [JO.split('/')[-2] if '/' in JO else JO]
 runArgs.runNumber = runNumber
 runArgs.ecmEnergy = 13000.
 runArgs.randomSeed = 1234
+runArgs.generatorJobNumber = 0 # Workaround for ATLASSIM-6687
 # Set up evgenLog logger - use this one
 evgenLog=rhlog
 # Set up evgenConfig just for a holder
@@ -140,6 +141,7 @@ class dummyClass():
 evgenConfig = dummyClass()
 evgenConfig.generators = []
 evgenConfig.auxfiles = []
+evgenConfig.nEventsPerJob = athenaCommonFlags. EvtMax() # Workaround for ATLASSIM-6687
 # Set up a fake pythia8...
 genSeq = dummyClass()
 genSeq.Pythia8 = dummyClass()
