@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -95,13 +95,13 @@ Track* FitProcedure::constructTrack(
   if (leadingTSOS)
     size += leadingTSOS->size();
   trackStateOnSurfaces.reserve(size);
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffects{};
+  std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffects{};
   const FitMeasurement* fitMeasurement = measurements.front();
   const FitQualityOnSurface fitQoS{};
-  std::unique_ptr<const MaterialEffectsBase> materialEffects{};
-  std::unique_ptr<const MeasurementBase> measurementBase{};
+  std::unique_ptr<MaterialEffectsBase> materialEffects{};
+  std::unique_ptr<MeasurementBase> measurementBase{};
   const Surface* surface = nullptr;
-  std::unique_ptr<const TrackParameters> trackParameters{};
+  std::unique_ptr<TrackParameters> trackParameters{};
   std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
       defaultPattern;
   std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
@@ -110,7 +110,7 @@ Track* FitProcedure::constructTrack(
   // start with (measured) perigee
   unsigned scatter = 0;
   unsigned tsos = 0;
-  std::unique_ptr<const Perigee> perigee(parameters.perigee());
+  std::unique_ptr<Perigee> perigee(parameters.perigee());
   typePattern.set(TrackStateOnSurface::Perigee);
   trackStateOnSurfaces.push_back(new TrackStateOnSurface(
       fitQoS, std::move(measurementBase), std::move(perigee),

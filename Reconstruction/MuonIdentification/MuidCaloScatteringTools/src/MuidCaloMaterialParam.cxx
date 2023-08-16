@@ -168,10 +168,10 @@ namespace Rec {
         // find radiationThickness corresponding to surface
         // FIXME: use Surface* look-up method for execution speed
 
-        std::unique_ptr<const Trk::TrackParameters> param_clone = trackParameters.uniqueClone();
+        std::unique_ptr<Trk::TrackParameters> param_clone = trackParameters.uniqueClone();
         double thickness = radiationThickness(trackParameters.position().eta());
         auto materialEffects =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(thickness, param_clone->associatedSurface());
+            std::make_unique<Trk::MaterialEffectsOnTrack>(thickness, param_clone->associatedSurface());
 
         // create TSOS
         std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> pattern(0);

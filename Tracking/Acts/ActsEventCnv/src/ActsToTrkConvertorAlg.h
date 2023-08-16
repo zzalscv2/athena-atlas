@@ -38,7 +38,7 @@ namespace ActsTrk
                           const ActsTrk::ConstTrackContainer &tracks,
                           ::TrackCollection &tracksContainer) const;
 
-    std::unique_ptr<const Trk::MeasurementBase>
+    std::unique_ptr<Trk::MeasurementBase>
     makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
                     const Trk::TrackParameters &parm) const;
 

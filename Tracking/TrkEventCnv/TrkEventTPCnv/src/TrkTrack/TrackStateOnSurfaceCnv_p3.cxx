@@ -20,17 +20,17 @@ void TrackStateOnSurfaceCnv_p3::
 persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurface *transObj, MsgStream &log )
 {
   ITPConverterFor<Trk::MeasurementBase>	*measureCnv = nullptr;
-  const Trk::MeasurementBase* meas = createTransFromPStore( &measureCnv, persObj->m_measurementOnTrack, log );
+  Trk::MeasurementBase* meas = createTransFromPStore( &measureCnv, persObj->m_measurementOnTrack, log );
 
   ITPConverter* dummy = topConverter ()->converterForType( typeid(Trk::TrackParameters));
   if (!m_parametersCnv)  m_parametersCnv = dynamic_cast<TrackParametersCnv_p2*>(dummy); // FIXME - only in init?
-  const Trk::TrackParameters* trackParameters = dynamic_cast<const Trk::TrackParameters*>(createTransFromPStore( &m_parametersCnv, persObj->m_trackParameters, log ));
+  Trk::TrackParameters* trackParameters = dynamic_cast<Trk::TrackParameters*>(createTransFromPStore( &m_parametersCnv, persObj->m_trackParameters, log ));
 
   std::unique_ptr<const Trk::FitQuality>  fitQ(createTransFromPStore( &m_fitQCnv, persObj->m_fitQualityOnSurface, log));
   auto fitQos = fitQ ? Trk::FitQualityOnSurface(*fitQ) : Trk::FitQualityOnSurface{};
 
   ITPConverterFor<Trk::MaterialEffectsBase> *matBaseCnv = nullptr;
-  const Trk::MaterialEffectsBase* materialEffects = createTransFromPStore( &matBaseCnv, persObj->m_materialEffects, log );
+  Trk::MaterialEffectsBase* materialEffects = createTransFromPStore( &matBaseCnv, persObj->m_materialEffects, log );
 
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> types;
   std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints;
@@ -44,7 +44,7 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
   *transObj = Trk::TrackStateOnSurface(
     fitQos,
     nullptr,
-    std::unique_ptr<const Trk::TrackParameters>(trackParameters),
+    std::unique_ptr<Trk::TrackParameters>(trackParameters),
     nullptr,
     types);
   transObj->m_measurementOnTrack.reset(meas);

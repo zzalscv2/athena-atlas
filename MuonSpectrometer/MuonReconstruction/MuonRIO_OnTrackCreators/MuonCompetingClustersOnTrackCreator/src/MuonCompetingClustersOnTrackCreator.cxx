@@ -42,7 +42,7 @@ namespace Muon {
     return StatusCode::SUCCESS;
   }
   
-  std::unique_ptr<const CompetingMuonClustersOnTrack>
+  std::unique_ptr<CompetingMuonClustersOnTrack>
   MuonCompetingClustersOnTrackCreator::createBroadCluster(const std::list< const Trk::PrepRawData * > & prds, const double errorScaleFactor ) const
   {
     if (prds.empty()) return nullptr;
@@ -61,6 +61,6 @@ namespace Muon {
       rios.push_back( cluster );
       assocProbs.push_back( prob );
     }
-    return std::make_unique<const CompetingMuonClustersOnTrack>( std::move(rios), std::move(assocProbs) );
+    return std::make_unique<CompetingMuonClustersOnTrack>( std::move(rios), std::move(assocProbs) );
   }
 }

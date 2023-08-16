@@ -38,7 +38,7 @@ namespace Muon {
             @return Fully calibrated Muon::MuonClusterOnTrack.
                     The memory management of the new Muon::MuonClusterOnTrack is passed to the person calling the function.
         */
-        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& DC, const Amg::Vector3D& GP) const = 0;
+        virtual MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& DC, const Amg::Vector3D& GP) const = 0;
 
         /** @brief Calibrate a RPC, TGC or CSC PrepRawData object. The result is stored in a new Muon::MuonClusterOnTrack object
             @param DC Trk::PrepRawData object
@@ -47,7 +47,7 @@ namespace Muon {
             @return Fully calibrated Muon::MuonClusterOnTrack.
                     The memory management of the new Muon::MuonClusterOnTrack is passed to the person calling the function.
         */
-        virtual const MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
+        virtual MuonClusterOnTrack* createRIO_OnTrack(const Trk::PrepRawData& DC, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const = 0;
 
         /** @brief Calibrate a NSW PrepRawData object. The result is stored in a new Muon::MuonClusterOnTrack object
             @param DC Trk::PrepRawData object

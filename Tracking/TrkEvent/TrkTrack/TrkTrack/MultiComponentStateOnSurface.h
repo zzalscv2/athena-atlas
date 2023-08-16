@@ -54,26 +54,26 @@ public:
      multi-component state */
   MultiComponentStateOnSurface(
     const FitQualityOnSurface&,
-    std::unique_ptr<const MeasurementBase>,
+    std::unique_ptr<MeasurementBase>,
     MultiComponentState&&,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr);
+    std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack = nullptr);
 
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
    * of the track parameters to be passed to the Trk::TrackStateOnSurface base
    * class */
   MultiComponentStateOnSurface(
     const FitQualityOnSurface&,
-    std::unique_ptr<const MeasurementBase>,
-    std::unique_ptr<const TrackParameters>,
+    std::unique_ptr<MeasurementBase>,
+    std::unique_ptr<TrackParameters>,
     MultiComponentState&&,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr);
+    std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack = nullptr);
 
   /** Create TrackStateOnSurface with TrackStateOnSurfaceType. */
   MultiComponentStateOnSurface(
     const FitQualityOnSurface&,
-    std::unique_ptr<const MeasurementBase>,
+    std::unique_ptr<MeasurementBase>,
     MultiComponentState&&,
-    std::unique_ptr<const MaterialEffectsBase>,
+    std::unique_ptr<MaterialEffectsBase>,
     const std ::bitset<NumberOfTrackStateOnSurfaceTypes>&);
 
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
@@ -81,14 +81,14 @@ public:
    * TrackStateOnSurfaceType */
   MultiComponentStateOnSurface(
     const FitQualityOnSurface&,
-    std::unique_ptr<const MeasurementBase>,
-    std::unique_ptr<const TrackParameters>,
+    std::unique_ptr<MeasurementBase>,
+    std::unique_ptr<TrackParameters>,
     MultiComponentState&&,
-    std::unique_ptr<const MaterialEffectsBase>,
+    std::unique_ptr<MaterialEffectsBase>,
     const std ::bitset<NumberOfTrackStateOnSurfaceTypes>& types);
 
   /** Constructor without a FitQualityOnSurface. */
-  MultiComponentStateOnSurface(std::unique_ptr<const MeasurementBase>,
+  MultiComponentStateOnSurface(std::unique_ptr<MeasurementBase>,
                                MultiComponentState);
 
   /** Copy constructor and assignment*/

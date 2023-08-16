@@ -605,7 +605,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::segToTrack(const EventContext& ctx, co
   const AmgVector(5)& p = tS.localParameters();
   AmgSymMatrix(5) ep = AmgSymMatrix(5)(tS.localCovariance());
   auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
-  std::unique_ptr<const Trk::TrackParameters> segPar =
+  std::unique_ptr<Trk::TrackParameters> segPar =
     surf->createUniqueParameters<5, Trk::Charged>(
       p(0), p(1), p(2), p(3), p(4), std::move(ep));
   if (segPar) {

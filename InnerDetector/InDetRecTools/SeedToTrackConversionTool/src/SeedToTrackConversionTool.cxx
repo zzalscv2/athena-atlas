@@ -108,8 +108,8 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
     if (prds.second && prds.first != prds.second) prdsInSp.push_back(prds.second);
   }
   Trk::PerigeeSurface persurf;
-  std::unique_ptr<const Trk::TrackParameters> per(m_extrapolator->extrapolate(ctx,*Tp, persurf, Trk::anyDirection, false, Trk::nonInteracting));
-  std::unique_ptr<const Trk::TrackParameters> prevpar(Tp->uniqueClone());
+  std::unique_ptr<Trk::TrackParameters> per(m_extrapolator->extrapolate(ctx,*Tp, persurf, Trk::anyDirection, false, Trk::nonInteracting));
+  std::unique_ptr<Trk::TrackParameters> prevpar(Tp->uniqueClone());
   if (per) {
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
@@ -118,11 +118,11 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
     traj.push_back(pertsos);
     for (const Trk::PrepRawData* prd: prdsInSp) {
       const Trk::Surface& surf = prd->detectorElement()->surface(prd->identify());
-      std::unique_ptr<const Trk::TrackParameters> thispar(m_extrapolator->extrapolate(ctx,*prevpar, surf, Trk::alongMomentum, false, Trk::nonInteracting));
+      std::unique_ptr<Trk::TrackParameters> thispar(m_extrapolator->extrapolate(ctx,*prevpar, surf, Trk::alongMomentum, false, Trk::nonInteracting));
       if (thispar) {
         std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
         typePattern.set(Trk::TrackStateOnSurface::Measurement);
-        std::unique_ptr<const Trk::RIO_OnTrack> rot(m_rotcreator->correct(*prd, *thispar));
+        std::unique_ptr<Trk::RIO_OnTrack> rot(m_rotcreator->correct(*prd, *thispar));
         if (rot) {
           const Trk::TrackStateOnSurface* tsos = new Trk::TrackStateOnSurface(std::move(rot), thispar->uniqueClone(), nullptr, typePattern);
           traj.push_back(tsos);

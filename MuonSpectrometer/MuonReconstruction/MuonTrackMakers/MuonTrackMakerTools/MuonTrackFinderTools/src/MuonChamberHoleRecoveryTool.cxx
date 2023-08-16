@@ -32,8 +32,8 @@
 namespace {
     struct PullCluster {
         double pull{};
-        std::unique_ptr<const Trk::TrackParameters> pars;
-        std::unique_ptr<const Muon::MuonClusterOnTrack> clus;
+        std::unique_ptr<Trk::TrackParameters> pars;
+        std::unique_ptr<Muon::MuonClusterOnTrack> clus;
     };
     using ClusterLayerMap = std::map<Identifier, PullCluster>;
 
@@ -699,7 +699,7 @@ namespace Muon {
             if (layIds.count(layId)) { continue; }
             const Trk::Surface& surf = clus->detectorElement()->surface(id);
 
-            std::unique_ptr<const Trk::TrackParameters> exPars;
+            std::unique_ptr<Trk::TrackParameters> exPars;
             if (pars.associatedSurface() == surf) {
                 ATH_MSG_VERBOSE(" Same surface, cloning parameters ");
                 exPars = pars.uniqueClone();
@@ -713,7 +713,7 @@ namespace Muon {
             ATH_MSG_VERBOSE("  --- " << m_idHelperSvc->toString(id) << " error " << Amg::error(clus->localCovariance(), Trk::locX)
                                      << " measured parameters, error " << Amg::error(*exPars->covariance(), Trk::locX));
 
-            std::unique_ptr<const MuonClusterOnTrack> clusterOnTrack;
+            std::unique_ptr<MuonClusterOnTrack> clusterOnTrack;
             if (m_idHelperSvc->isTrigger(clus->identify()) || m_idHelperSvc->issTgc(clus->identify()) || m_idHelperSvc->isMM(clus->identify())) {
                 clusterOnTrack.reset(m_clusRotCreator->createRIO_OnTrack(*clus, exPars->position(), exPars->momentum().unit()));
             } else if (!m_cscRotCreator.empty()) {
@@ -781,7 +781,7 @@ namespace Muon {
 
             const Trk::Surface& surf = detEl->surface(id);
 
-            std::unique_ptr<const Trk::TrackParameters> exPars;
+            std::unique_ptr<Trk::TrackParameters> exPars;
             if (pars.associatedSurface() == surf) {
                 ATH_MSG_DEBUG(" Same surface, cloning parameters ");
                 exPars = pars.uniqueClone();
@@ -868,7 +868,7 @@ namespace Muon {
                 if (associatedHoles.count(id)) continue;
 
                 const Trk::Surface& surf = mdtPrd->detectorElement()->surface(id);
-                std::unique_ptr<const Trk::TrackParameters> exPars;
+                std::unique_ptr<Trk::TrackParameters> exPars;
                 if (pars.associatedSurface() == surf) {
                     exPars = pars.uniqueClone();
                 } else {
@@ -987,7 +987,7 @@ namespace Muon {
                 }
                 const Trk::Surface& surf = detEl->surface(hit);
 
-                std::unique_ptr<const Trk::TrackParameters> exPars;
+                std::unique_ptr<Trk::TrackParameters> exPars;
                 if (pars.associatedSurface() == surf) {
                     exPars = pars.uniqueClone();
                 } else {

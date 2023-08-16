@@ -257,7 +257,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
             measpar=(**itSet).trackParameters();
           }
         }
-        std::unique_ptr<const Trk::TrackParameters> myper;
+        std::unique_ptr<Trk::TrackParameters> myper;
         if (measpar){
           myper = m_extrapolator->extrapolate(ctx,*measpar,Trk::PerigeeSurface(),Trk::anyDirection,false, m_materialEffects ? Trk::muon : Trk::nonInteracting);
         }

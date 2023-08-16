@@ -67,7 +67,7 @@ buildFitQuality(const Trk::SmoothedTrajectory& smoothedTrajectory)
  */
 Trk::MultiComponentStateOnSurface*
 smootherHelper(Trk::MultiComponentState&& updatedState,
-               std::unique_ptr<const Trk::MeasurementBase>&& measurement,
+               std::unique_ptr<Trk::MeasurementBase>&& measurement,
                const Trk::FitQualityOnSurface& fitQuality,
                bool islast,
                bool useMode)
@@ -768,7 +768,7 @@ Trk::GaussianSumFitter::stepForwardFit(
 
   // we need to account for either measurement base input
   // or PrepRawData input.
-  std::unique_ptr<const Trk::MeasurementBase> measurement = nullptr;
+  std::unique_ptr<Trk::MeasurementBase> measurement = nullptr;
   if (originalMeasurement) { // clone original MeasurementBase object
     measurement.reset(originalMeasurement->clone());
   } else {

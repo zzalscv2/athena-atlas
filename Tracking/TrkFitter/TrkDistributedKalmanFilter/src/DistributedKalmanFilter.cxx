@@ -782,7 +782,7 @@ Trk::TrackStateOnSurface* Trk::DistributedKalmanFilter::createTrackStateOnSurfac
   TrackStateOnSurface* pTSS = nullptr;
   char type = pN->getNodeType();
 
-  std::unique_ptr<const Trk::TrackParameters> pTP {};
+  std::unique_ptr<Trk::TrackParameters> pTP {};
   if (type == 0) return pTSS;
 
   TrkTrackState* pTS = pN->getTrackState();
@@ -828,7 +828,7 @@ Trk::TrackStateOnSurface* Trk::DistributedKalmanFilter::createTrackStateOnSurfac
   }
   if (pTP == nullptr) return nullptr;
 
-  auto pRIO = std::unique_ptr<const Trk::RIO_OnTrack>(m_ROTcreator->correct(*pPRD, *pTP));
+  auto pRIO = std::unique_ptr<Trk::RIO_OnTrack>(m_ROTcreator->correct(*pPRD, *pTP));
   if (pRIO == nullptr) {
     return nullptr;
   }

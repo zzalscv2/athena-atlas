@@ -129,7 +129,7 @@ namespace Rec {
 
         void finalTrackBuild(const EventContext& ctx, std::unique_ptr<Trk::Track>& track) const;
 
-        void momentumUpdate(std::unique_ptr<const Trk::TrackParameters>& parameters, double updatedP, bool directionUpdate = false,
+        void momentumUpdate(std::unique_ptr<Trk::TrackParameters>& parameters, double updatedP, bool directionUpdate = false,
                             double deltaPhi = 0., double deltaTheta = 0.) const;
 
         // double normalizedChi2(const Trk::Track& track) const;

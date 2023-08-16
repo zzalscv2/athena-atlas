@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
             TrackStateOnSurface.h  -  description
             -------------------
 begin                : Wed Jan 21 2004
-email                : edward.moyse@cern.ch
 ***************************************************************************/
 
 #ifndef TRKTRACKSTATEONSURFACE_H
@@ -230,16 +229,16 @@ public:
    */
   explicit TrackStateOnSurface(
     const FitQualityOnSurface& fitQoS,
-    std::unique_ptr<const MeasurementBase> meas,
-    std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr,
-    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
+    std::unique_ptr<MeasurementBase> meas,
+    std::unique_ptr<TrackParameters> trackParameters,
+    std::unique_ptr<MaterialEffectsBase> materialEffects = nullptr,
+    std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   explicit TrackStateOnSurface(
-    std::unique_ptr<const MeasurementBase> meas,
-    std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr,
-    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
+    std::unique_ptr<MeasurementBase> meas,
+    std::unique_ptr<TrackParameters> trackParameters,
+    std::unique_ptr<MaterialEffectsBase> materialEffects = nullptr,
+    std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   /**
    * Full constructors
@@ -257,18 +256,18 @@ public:
    */
   explicit TrackStateOnSurface(
     const FitQualityOnSurface& fitQoS,
-    std::unique_ptr<const MeasurementBase> meas,
-    std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
+    std::unique_ptr<MeasurementBase> meas,
+    std::unique_ptr<TrackParameters> trackParameters,
+    std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack,
     const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
+    std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   explicit TrackStateOnSurface(
-    std::unique_ptr<const MeasurementBase> meas,
-    std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
+    std::unique_ptr<MeasurementBase> meas,
+    std::unique_ptr<TrackParameters> trackParameters,
+    std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack,
     const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
+    std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
  /**
    * Pseudo-constructor: needed to avoid excessive RTTI
@@ -286,30 +285,34 @@ public:
   /** destructor*/
   virtual ~TrackStateOnSurface() = default;
 
-  /** returns 0 if there is no FQOS object assigned*/
+  /** return FitQuality On Surface const overload*/
   const FitQualityOnSurface& fitQualityOnSurface() const;
+  /** return FitQuality On Surface non-const overload*/
+  FitQualityOnSurface& fitQualityOnSurface();
 
-  /**
-   * returns trackparameters of TrackStateOnSurface, or 0 if no
-   * parameter set.
-   */
+  /** return ptr to  trackparameters const overload*/
   const TrackParameters* trackParameters() const;
+  /** return ptr to  trackparameters non-const overload*/
+  TrackParameters* trackParameters();
 
-  /** returns MeasurementBase, or 0 if no RiO_OnTrack set.*/
+  /** returns MeasurementBase const overload*/
   const MeasurementBase* measurementOnTrack() const;
+  /** returns MeasurementBase non-const overload*/
+  MeasurementBase* measurementOnTrack();
 
-  /** returns 0 if there is no material effects, and the material effects
-   * otherwise*/
+  /** return material effects const overload*/
   const MaterialEffectsBase* materialEffectsOnTrack() const;
+  /** return material effects non-const overload*/
+  MaterialEffectsBase* materialEffectsOnTrack();
 
-  /** returns 0 if there is no alignment effects, and the alignment effects
-   * otherwise*/
+  /** return the the alignment effects const overload*/
   const AlignmentEffectsOnTrack* alignmentEffectsOnTrack() const;
+  /** return the the alignment effects non-const overload*/
+  AlignmentEffectsOnTrack* alignmentEffectsOnTrack();
 
   /**
    * Use this method to find out if the TSoS is of a certain type:
    * i.e. if ( tsos->type(TrackStateOnSurface::Measurement) { //etc }
-   *
    * @return true if the TrackStateOnSurface is of this type
    */
   bool type(const TrackStateOnSurfaceType type) const;
@@ -362,10 +365,10 @@ private:
   void setFlags();
 
   FitQualityOnSurface m_fitQualityOnSurface{};
-  std::unique_ptr<const TrackParameters> m_trackParameters{};
-  std::unique_ptr<const MeasurementBase> m_measurementOnTrack{};
-  std::unique_ptr<const MaterialEffectsBase> m_materialEffectsOnTrack{};
-  std::unique_ptr<const AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
+  std::unique_ptr<TrackParameters> m_trackParameters{};
+  std::unique_ptr<MeasurementBase> m_measurementOnTrack{};
+  std::unique_ptr<MaterialEffectsBase> m_materialEffectsOnTrack{};
+  std::unique_ptr<AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
 protected:
   uint16_t m_typeFlags{};
   mutable std::atomic<uint8_t> m_hints{};

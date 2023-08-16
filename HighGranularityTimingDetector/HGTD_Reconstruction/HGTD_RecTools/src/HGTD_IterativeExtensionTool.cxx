@@ -390,7 +390,7 @@ HGTD_IterativeExtensionTool::updateState(const Trk::Track* track, const Trk::Tra
       m_tof_corr_tool->correctTimeAndResolution(
           *track, *cluster, cluster->time(), cluster->timeResolution());
 
-  std::unique_ptr<const HGTD_ClusterOnTrack> cot =
+  std::unique_ptr<HGTD_ClusterOnTrack> cot =
       std::make_unique<HGTD_ClusterOnTrack>(
           cluster, Trk::LocalParameters(cluster->localPosition()),
           cluster->localCovariance(), corr_time_and_res.first,
@@ -398,7 +398,7 @@ HGTD_IterativeExtensionTool::updateState(const Trk::Track* track, const Trk::Tra
 
   Trk::FitQualityOnSurface* quality = nullptr;
 
-  std::unique_ptr<const Trk::TrackParameters> pars = m_updator->addToState(
+  std::unique_ptr<Trk::TrackParameters> pars = m_updator->addToState(
       *param, cot->localParameters(), cot->localCovariance(), quality);
   //Here one could  fix the addToState intefaces to 
   //avoid them allocating memory for  Fit Quality On Surface

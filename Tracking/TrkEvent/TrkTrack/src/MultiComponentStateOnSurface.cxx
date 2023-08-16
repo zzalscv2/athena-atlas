@@ -25,9 +25,9 @@ Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface()
 
 Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
   const Trk::FitQualityOnSurface& fitQualityOnSurface,
-  std::unique_ptr<const Trk::MeasurementBase> measurementBase,
+  std::unique_ptr<Trk::MeasurementBase> measurementBase,
   MultiComponentState&& multiComponentState,
-  std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack)
+  std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack)
   : TrackStateOnSurface(
       fitQualityOnSurface,
       std::move(measurementBase),
@@ -41,10 +41,10 @@ Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
 
 Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
   const Trk::FitQualityOnSurface& fitQualityOnSurface,
-  std::unique_ptr<const Trk::MeasurementBase> measurementBase,
-  std::unique_ptr<const Trk::TrackParameters> trackParameters,
+  std::unique_ptr<Trk::MeasurementBase> measurementBase,
+  std::unique_ptr<Trk::TrackParameters> trackParameters,
   MultiComponentState&& multiComponentState,
-  std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack)
+  std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack)
   : TrackStateOnSurface(
       fitQualityOnSurface,
       std::move(measurementBase),
@@ -58,9 +58,9 @@ Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
 
 Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
   const Trk::FitQualityOnSurface& fitQualityOnSurface,
-  std::unique_ptr<const Trk::MeasurementBase> measurementBase,
+  std::unique_ptr<Trk::MeasurementBase> measurementBase,
   MultiComponentState&& multiComponentState,
-  std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
+  std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack,
   const std::bitset<NumberOfTrackStateOnSurfaceTypes>& types)
   : TrackStateOnSurface(fitQualityOnSurface,
                         std::move(measurementBase),
@@ -73,10 +73,10 @@ Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
 
 Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
   const Trk::FitQualityOnSurface& fitQualityOnSurface,
-  std::unique_ptr<const Trk::MeasurementBase> measurementBase,
-  std::unique_ptr<const Trk::TrackParameters> trackParameters,
+  std::unique_ptr<Trk::MeasurementBase> measurementBase,
+  std::unique_ptr<Trk::TrackParameters> trackParameters,
   MultiComponentState&& multiComponentState,
-  std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
+  std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack,
   const std::bitset<NumberOfTrackStateOnSurfaceTypes>& types)
   : TrackStateOnSurface(fitQualityOnSurface,
                         std::move(measurementBase),
@@ -88,7 +88,7 @@ Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
 }
 
 Trk::MultiComponentStateOnSurface::MultiComponentStateOnSurface(
-  std::unique_ptr<const Trk::MeasurementBase> measurementBase,
+  std::unique_ptr<Trk::MeasurementBase> measurementBase,
   MultiComponentState multiComponentState)
   : TrackStateOnSurface(
       {},

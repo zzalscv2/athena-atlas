@@ -1034,9 +1034,9 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
           const Trk::Surface& surf = *(meot->associatedSurface().clone());
           Eloss_tot += energyLossNew->deltaE();
           auto meotLast =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot, scatNew, std::move(energyLossNew), surf, meotPattern);
-          std::unique_ptr<const Trk::TrackParameters> pars = m->trackParameters()->uniqueClone();
+          std::unique_ptr<Trk::TrackParameters> pars = m->trackParameters()->uniqueClone();
           //        make new TSOS
           const Trk::TrackStateOnSurface* newTSOS =
             new Trk::TrackStateOnSurface(nullptr,
@@ -1095,10 +1095,10 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
           Eloss_tot += energyLossNew->deltaE();
 //        make MaterialEffectsOnTracks
           auto meotFirst =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot / 2., scatFirst, std::move(energyLoss0), *surfFirst, meotPattern);
           auto meotLast =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot / 2., scatNew, std::move(energyLossNew), *surfLast, meotPattern);
 
           //        calculate TrackParameters at first surface
@@ -1244,12 +1244,12 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
             //          prepare for first MaterialEffectsOnTrack with X0 = X0/2
             //          Eloss = 0 and scattering2 = total2 / 2. depth = 0
             auto meotFirst =
-              std::make_unique<const Trk::MaterialEffectsOnTrack>(
+              std::make_unique<Trk::MaterialEffectsOnTrack>(
                 X0_tot / 2., scatFirst, std::move(energyLoss0), *surfFirst, meotPattern);
             //          prepare for second MaterialEffectsOnTrack with X0 = X0/2
             //          Eloss = Eloss total and scattering2 = total2 / 2. depth
             //          = 0
-            auto meotLast = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            auto meotLast = std::make_unique<Trk::MaterialEffectsOnTrack>(
                 X0_tot / 2., scatNew,
                 std::make_unique<Trk::EnergyLoss>(std::move(energyLossNew)),
                 *surfLast, meotPattern);
@@ -1278,7 +1278,7 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
                 0., 0., dir.phi(), dir.theta(), qOverPNew);
             //        prepare for first MaterialEffectsOnTrack with X0 = X0/2
             //        Eloss = 0 and scattering2 = total2 / 2. depth = 0
-            auto meotFirst = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            auto meotFirst = std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot / 2.,
               scatFirst,
               std::make_unique<Trk::EnergyLoss>(0., 0., 0., 0.),
@@ -1286,13 +1286,13 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
               meotPattern);
             //        prepare for middle MaterialEffectsOnTrack with X0 =  0
             //        Eloss = ElossNew and scattering2 = 0. depth = 0
-            auto meot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            auto meot = std::make_unique<Trk::MaterialEffectsOnTrack>(
                 0., scatZero,
                 std::make_unique<Trk::EnergyLoss>(std::move(energyLossNew)),
                 *surf, meotPattern);
             //        prepare for last MaterialEffectsOnTrack with X0 =  X0/2
             //        Eloss = 0 total and scattering2 = total2 / 2. depth = 0
-            auto meotLast = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            auto meotLast = std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot / 2.,
               scatNew,
               std::make_unique<Trk::EnergyLoss>(0., 0., 0., 0.),

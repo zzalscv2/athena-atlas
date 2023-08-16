@@ -186,12 +186,12 @@ namespace InDet {
       Amg::Vector3D perigeePosition(0., 0., 0.);
       Trk::PerigeeSurface perigeeSurface(perigeePosition);
       // --- turn parameters into perigee...
-      std::unique_ptr<const Trk::TrackParameters> tmp =
+      std::unique_ptr<Trk::TrackParameters> tmp =
         m_extrapolator->extrapolate(ctx, *segPar, perigeeSurface);
-      std::unique_ptr<const Trk::Perigee> perParm = nullptr;
+      std::unique_ptr<Trk::Perigee> perParm = nullptr;
       //pass ownership if of the right type
       if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
-        perParm.reset(static_cast<const Trk::Perigee*>(tmp.release()));
+        perParm.reset(static_cast<Trk::Perigee*>(tmp.release()));
       }
       if (perParm) {
         ATH_MSG_VERBOSE("Perigee version of Parameters : " << (*segPar));

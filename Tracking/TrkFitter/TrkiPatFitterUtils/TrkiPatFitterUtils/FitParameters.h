@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /************************************************************************************
@@ -99,9 +99,9 @@ class FitParameters {
   double sinTheta(void) const;
   Perigee* startingPerigee(void) const;
   // The following can update parameters
-  const TrackParameters* trackParameters(MsgStream& log,
-                                         const FitMeasurement& measurement,
-                                         bool withCovariance = false);
+  TrackParameters* trackParameters(MsgStream& log,
+                                   const FitMeasurement& measurement,
+                                   bool withCovariance = false);
   void update(const Amg::VectorX& differences);
   void update(Amg::Vector3D position, Amg::Vector3D direction, double qOverP,
               const Amg::MatrixX& leadingCovariance);

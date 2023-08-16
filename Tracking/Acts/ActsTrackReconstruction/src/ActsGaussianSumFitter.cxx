@@ -397,7 +397,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
 
     // We need to determine the type of state 
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-    std::unique_ptr<const Trk::TrackParameters> parm;
+    std::unique_ptr<Trk::TrackParameters> parm;
 
     // State is a hole (no associated measurement), use predicted parameters      
     if (flag.test(Acts::TrackStateFlag::HoleFlag)){
@@ -447,7 +447,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
       typePattern.set(Trk::TrackStateOnSurface::Measurement);                                           
     }
 
-    std::unique_ptr<const Trk::MeasurementBase> measState;
+    std::unique_ptr<Trk::MeasurementBase> measState;
     if (state.hasUncalibratedSourceLink()){
       auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
       measState = sl.atlasHit().uniqueClone();
@@ -466,7 +466,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
                  acts_track.parameters(), 
              acts_track.covariance());
-  std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
+  std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Perigee);
   const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);

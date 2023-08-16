@@ -33,7 +33,7 @@ namespace Muon {
             @return a pointer to a new CompetingMuonClustersOnTrack, zero if creation failed.
                     The ownership of the new object is passed to the client calling the tool
         */
-        virtual std::unique_ptr<const CompetingMuonClustersOnTrack> 
+        virtual std::unique_ptr<CompetingMuonClustersOnTrack> 
         createBroadCluster(const std::list<const Trk::PrepRawData*>& prds,
             const double errorScaleFactor) const = 0;
     };

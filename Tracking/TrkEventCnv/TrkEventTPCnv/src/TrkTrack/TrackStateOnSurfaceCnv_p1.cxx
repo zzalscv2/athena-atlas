@@ -19,15 +19,15 @@ void TrackStateOnSurfaceCnv_p1::
 persToTrans( const Trk::TrackStateOnSurface_p1 *persObj, Trk::TrackStateOnSurface *transObj, MsgStream &log )
 {
   ITPConverterFor<Trk::MeasurementBase>	*measureCnv = nullptr;
-  const Trk::MeasurementBase* meas =  createTransFromPStore( &measureCnv, persObj->m_measurementOnTrack, log );
+  Trk::MeasurementBase* meas =  createTransFromPStore( &measureCnv, persObj->m_measurementOnTrack, log );
 
   ITPConverterFor<Trk::TrackParameters>	*paramsCnv = nullptr;
-  const Trk::TrackParameters* trackParameters = dynamic_cast<const Trk::TrackParameters*>(createTransFromPStore( &paramsCnv, persObj->m_trackParameters, log ));
+  Trk::TrackParameters* trackParameters = dynamic_cast<Trk::TrackParameters*>(createTransFromPStore( &paramsCnv, persObj->m_trackParameters, log ));
 
   std::unique_ptr<const Trk::FitQuality>  fitQ(createTransFromPStore( &m_fitQCnv, persObj->m_fitQualityOnSurface, log));
   auto fitQos = fitQ ? Trk::FitQualityOnSurface(*fitQ) : Trk::FitQualityOnSurface{};
 
-  const Trk::MaterialEffectsBase* materialEffects = nullptr;
+  Trk::MaterialEffectsBase* materialEffects = nullptr;
   if (! persObj->m_scatteringAngle.isNull() ) {
     materialEffects =
       createTransFromPStore( &m_scatCnv, persObj->m_scatteringAngle, log );
@@ -42,9 +42,9 @@ persToTrans( const Trk::TrackStateOnSurface_p1 *persObj, Trk::TrackStateOnSurfac
   std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints;
   Trk::TrackStateOnSurface::splitToBitsets(persObj->m_typeFlags, types, hints);
   *transObj = Trk::TrackStateOnSurface (fitQos,
-                                        std::unique_ptr<const Trk::MeasurementBase>(meas),
-                                        std::unique_ptr<const Trk::TrackParameters>(trackParameters),
-                                        std::unique_ptr<const Trk::MaterialEffectsBase>(materialEffects),
+                                        std::unique_ptr<Trk::MeasurementBase>(meas),
+                                        std::unique_ptr<Trk::TrackParameters>(trackParameters),
+                                        std::unique_ptr<Trk::MaterialEffectsBase>(materialEffects),
                                         types);
   //Hints are atomic. Set once here if TSOS was slimmed
   //aka not 0. If 0 we want to allow setting them later on

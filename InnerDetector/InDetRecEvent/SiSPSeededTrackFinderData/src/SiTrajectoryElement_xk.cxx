@@ -912,7 +912,7 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
   }
 
   Trk::FitQualityOnSurface fq{};
-  std::unique_ptr<const Trk::MeasurementBase> ro{};
+  std::unique_ptr<Trk::MeasurementBase> ro{};
 
   if (m_status == 1) {
     fq = Trk::FitQualityOnSurface(m_xi2Forward, m_ndf);
@@ -933,7 +933,7 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
   auto sa = Trk::ScatteringAngles(
     0., 0., std::sqrt(m_noise.covarianceAzim()), std::sqrt(m_noise.covariancePola()));
 
-  auto meTemplate = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+  auto meTemplate = std::make_unique<Trk::MaterialEffectsOnTrack>(
     m_radlengthN, sa, tp->associatedSurface());
 
   pat.set(Trk::TrackStateOnSurface::Scatterer);
@@ -957,7 +957,7 @@ InDet::SiTrajectoryElement_xk::trackStateOnSurface (bool change,bool cov,bool mu
         break;
       }
       auto fqn = Trk::FitQualityOnSurface(m_linkBackward[i].xi2(),m_ndf);
-      std::unique_ptr<const Trk::MeasurementBase> ron(m_riotool->correct(
+      std::unique_ptr<Trk::MeasurementBase> ron(m_riotool->correct(
         *m_linkBackward[i].cluster(), *(sos->trackParameters())) );
       m_tsos[m_ntsos] = new Trk::TrackStateOnSurface(
         fqn, std::move(ron), std::move(tpn), meTemplate->uniqueClone(), pat);
@@ -997,7 +997,7 @@ InDet::SiTrajectoryElement_xk::trackSimpleStateOnSurface
   }
 
   IdentifierHash iH = m_detelement->identifyHash();
-  std::unique_ptr<const Trk::MeasurementBase> ro{};
+  std::unique_ptr<Trk::MeasurementBase> ro{};
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> pat(
     0);
 
