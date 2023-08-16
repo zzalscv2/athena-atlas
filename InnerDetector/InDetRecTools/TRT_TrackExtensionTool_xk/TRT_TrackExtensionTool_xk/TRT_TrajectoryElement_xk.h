@@ -101,7 +101,7 @@ namespace InDet{
       double findCloseLink(double,double);
       void  radiusCorrection(const double&);
       const Trk::RIO_OnTrack* rioOnTrack();
-      std::unique_ptr<const Trk::RIO_OnTrack> rioOnTrackSimple() const;
+      std::unique_ptr<Trk::RIO_OnTrack> rioOnTrackSimple() const;
 
       bool trajectoryGlobalPosition(Amg::Vector3D&,double&);
 

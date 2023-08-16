@@ -906,7 +906,7 @@ namespace Rec {
 
                 if (!m_idHelperSvc->isMuon(id)) continue;
 
-                std::unique_ptr<const Trk::RIO_OnTrack> updatedRot;
+                std::unique_ptr<Trk::RIO_OnTrack> updatedRot;
                 if (!m_cscRotCreator.empty() && m_idHelperSvc->isCsc(id)) {
                     updatedRot.reset(m_cscRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
                 } else if (!m_mdtRotCreator.empty() && m_idHelperSvc->isMdt(id)) {
@@ -1214,7 +1214,7 @@ namespace Rec {
         const Trk::TrackParameters* middleParameters = nullptr;
         const Trk::ScatteringAngles* outerScattering = nullptr;
         const Trk::TrackParameters* parameters = cmb_inner_tsos->trackParameters();
-        std::unique_ptr<const Trk::TrackParameters> param_owner;
+        std::unique_ptr<Trk::TrackParameters> param_owner;
         if (materialEffects && parameters && m_calorimeterVolume->inside(parameters->position())) {
             // keep scattering angles when vertex constrained
             // in r21, addVertexRegion is always true
@@ -1352,7 +1352,7 @@ namespace Rec {
         /// From this point we can be sure that the parameters down the chain orignate from some propagation
         if (innerScattering) { momentumUpdate(param_owner, pInner, true, -innerScattering->deltaPhi(), -innerScattering->deltaTheta()); }
 
-        std::unique_ptr<const Trk::TrackParameters> perigee_owner;
+        std::unique_ptr<Trk::TrackParameters> perigee_owner;
         if (param_owner) {
             perigee_owner = m_propagator->propagate(ctx, *param_owner, *m_perigeeSurface, Trk::oppositeMomentum, false,
                                                     m_magFieldProperties, Trk::nonInteracting);
@@ -1396,7 +1396,7 @@ namespace Rec {
 
         std::unique_ptr<Trk::RecVertex> mbeamAxis = std::make_unique<Trk::RecVertex>(*m_beamAxis);
         /// Create the vertex element before the perigee_owner looses ownership
-        std::unique_ptr<const Trk::PseudoMeasurementOnTrack> vertexInFit{vertexOnTrack(*perigee_owner, vertex.get(), mbeamAxis.get())};
+        std::unique_ptr<Trk::PseudoMeasurementOnTrack> vertexInFit{vertexOnTrack(*perigee_owner, vertex.get(), mbeamAxis.get())};
 
         // create perigee TSOS
         trackStateOnSurfaces.push_back(Muon::MuonTSOSHelper::createPerigeeTSOS(std::move(perigee_owner)));
@@ -2734,11 +2734,11 @@ namespace Rec {
         // add the track summary
         m_trackSummary->updateTrack(ctx, *track);
     }
-    void CombinedMuonTrackBuilder::momentumUpdate(std::unique_ptr<const Trk::TrackParameters>& parameters, double updatedP,
+    void CombinedMuonTrackBuilder::momentumUpdate(std::unique_ptr<Trk::TrackParameters>& parameters, double updatedP,
                                                   bool directionUpdate, double deltaPhi, double deltaTheta) const {
         if (!parameters) return;
 
-        std::unique_ptr<const Trk::TrackParameters> updatedParameters;
+        std::unique_ptr<Trk::TrackParameters> updatedParameters;
 
         // update for angle change
         Amg::Vector3D direction = parameters->momentum().unit();

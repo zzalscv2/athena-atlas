@@ -83,7 +83,7 @@ public:
   /// Create ATLAS TrackParameter from Acts one.
   /// Take care of unit conversion between the two.  
   virtual
-  std::unique_ptr<const Trk::TrackParameters>
+  std::unique_ptr<Trk::TrackParameters>
   actsTrackParametersToTrkParameters(const Acts::BoundTrackParameters &actsParameter, const Acts::GeometryContext& gctx) const override;
 
   /** Convert TrackCollection to Acts track container. 

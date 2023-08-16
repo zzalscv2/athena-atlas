@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackStateOnSurface.h"
@@ -14,10 +14,10 @@ TrackStateOnSurface::TrackStateOnSurface() = default;
 // partial
 TrackStateOnSurface::TrackStateOnSurface(
   const FitQualityOnSurface& fitQoS,
-  std::unique_ptr<const MeasurementBase> meas,
-  std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  std::unique_ptr<MeasurementBase> meas,
+  std::unique_ptr<TrackParameters> trackParameters,
+  std::unique_ptr<MaterialEffectsBase> materialEffects,
+  std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
   : m_fitQualityOnSurface(fitQoS)
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
@@ -29,10 +29,10 @@ TrackStateOnSurface::TrackStateOnSurface(
 }
 
 TrackStateOnSurface::TrackStateOnSurface(
-  std::unique_ptr<const MeasurementBase> meas,
-  std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  std::unique_ptr<MeasurementBase> meas,
+  std::unique_ptr<TrackParameters> trackParameters,
+  std::unique_ptr<MaterialEffectsBase> materialEffects,
+  std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
   : m_fitQualityOnSurface{}
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
@@ -46,12 +46,11 @@ TrackStateOnSurface::TrackStateOnSurface(
 // full
 TrackStateOnSurface::TrackStateOnSurface(
   const FitQualityOnSurface& fitQoS,
-  std::unique_ptr<const MeasurementBase> meas,
-  std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>&
-    typePattern,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  std::unique_ptr<MeasurementBase> meas,
+  std::unique_ptr<TrackParameters> trackParameters,
+  std::unique_ptr<MaterialEffectsBase> materialEffects,
+  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+  std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
   : m_fitQualityOnSurface(fitQoS)
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
@@ -63,12 +62,11 @@ TrackStateOnSurface::TrackStateOnSurface(
 }
 
 TrackStateOnSurface::TrackStateOnSurface(
-  std::unique_ptr<const MeasurementBase> meas,
-  std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>&
-    typePattern,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  std::unique_ptr<MeasurementBase> meas,
+  std::unique_ptr<TrackParameters> trackParameters,
+  std::unique_ptr<MaterialEffectsBase> materialEffects,
+  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+  std::unique_ptr<AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
   : m_fitQualityOnSurface{}
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
@@ -81,22 +79,20 @@ TrackStateOnSurface::TrackStateOnSurface(
 
 // copy
 TrackStateOnSurface::TrackStateOnSurface(const TrackStateOnSurface& rhs)
-  : m_fitQualityOnSurface(rhs.m_fitQualityOnSurface)
-  , m_trackParameters(rhs.m_trackParameters ? rhs.m_trackParameters->clone()
-                                            : nullptr)
-  , m_measurementOnTrack(
-      rhs.m_measurementOnTrack ? rhs.m_measurementOnTrack->clone() : nullptr)
-  , m_materialEffectsOnTrack(rhs.m_materialEffectsOnTrack
-                               ? rhs.m_materialEffectsOnTrack->clone()
-                               : nullptr)
-  , m_alignmentEffectsOnTrack(
-      rhs.m_alignmentEffectsOnTrack
-        ? std::make_unique<const AlignmentEffectsOnTrack>(
-            *rhs.m_alignmentEffectsOnTrack)
-        : nullptr)
-  , m_typeFlags(rhs.m_typeFlags)
-{
-}
+    : m_fitQualityOnSurface(rhs.m_fitQualityOnSurface),
+      m_trackParameters(rhs.m_trackParameters ? rhs.m_trackParameters->clone()
+                                              : nullptr),
+      m_measurementOnTrack(rhs.m_measurementOnTrack
+                               ? rhs.m_measurementOnTrack->clone()
+                               : nullptr),
+      m_materialEffectsOnTrack(rhs.m_materialEffectsOnTrack
+                                   ? rhs.m_materialEffectsOnTrack->clone()
+                                   : nullptr),
+      m_alignmentEffectsOnTrack(rhs.m_alignmentEffectsOnTrack
+                                    ? std::make_unique<AlignmentEffectsOnTrack>(
+                                          *rhs.m_alignmentEffectsOnTrack)
+                                    : nullptr),
+      m_typeFlags(rhs.m_typeFlags) {}
 
 // move
 TrackStateOnSurface::TrackStateOnSurface(TrackStateOnSurface&& rhs) noexcept
@@ -116,17 +112,16 @@ TrackStateOnSurface::operator=(const TrackStateOnSurface& rhs)
   if (this != &rhs) {
     m_fitQualityOnSurface = rhs.m_fitQualityOnSurface;
     m_trackParameters.reset(
-      rhs.m_trackParameters ? rhs.m_trackParameters->clone() : nullptr);
+        rhs.m_trackParameters ? rhs.m_trackParameters->clone() : nullptr);
     m_measurementOnTrack.reset(
-      rhs.m_measurementOnTrack ? rhs.m_measurementOnTrack->clone() : nullptr);
+        rhs.m_measurementOnTrack ? rhs.m_measurementOnTrack->clone() : nullptr);
     m_materialEffectsOnTrack.reset(rhs.m_materialEffectsOnTrack
-                                     ? rhs.m_materialEffectsOnTrack->clone()
-                                     : nullptr);
-    m_alignmentEffectsOnTrack =
-      rhs.m_alignmentEffectsOnTrack
-        ? std::make_unique<const AlignmentEffectsOnTrack>(
-            *rhs.m_alignmentEffectsOnTrack)
-        : nullptr;
+                                       ? rhs.m_materialEffectsOnTrack->clone()
+                                       : nullptr);
+    m_alignmentEffectsOnTrack = rhs.m_alignmentEffectsOnTrack
+                                    ? std::make_unique<AlignmentEffectsOnTrack>(
+                                          *rhs.m_alignmentEffectsOnTrack)
+                                    : nullptr;
     m_typeFlags = rhs.m_typeFlags;
     assert(isSane());
   }
@@ -208,9 +203,9 @@ bool
 TrackStateOnSurface::isSane() const
 {
   bool surfacesDiffer =
-    not Trk::consistentSurfaces(m_trackParameters.get(),
-                                m_measurementOnTrack.get(),
-                                m_materialEffectsOnTrack.get());
+    not Trk::consistentSurfaces(trackParameters(),
+                                measurementOnTrack(),
+                                materialEffectsOnTrack());
   if (surfacesDiffer) {
     std::cerr << "TrackStateOnSurface::isSane. With :" << '\n';
     std::cerr << "Types : " << types().to_string() << '\n';

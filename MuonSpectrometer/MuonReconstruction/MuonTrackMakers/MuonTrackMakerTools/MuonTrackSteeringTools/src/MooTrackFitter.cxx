@@ -2244,7 +2244,7 @@ namespace Muon {
             }
 
             // clean up previous track and create new one with fake hits
-            auto uniquePerigee = std::make_unique<const Trk::Perigee>(0, 0, phi, theta, qoverp, persurf);
+            auto uniquePerigee = std::make_unique<Trk::Perigee>(0, 0, phi, theta, qoverp, persurf);
             trackStateOnSurfaces = Trk::TrackStates();
             trackStateOnSurfaces.reserve(tsos.size() + 3);
             trackStateOnSurfaces.push_back(MuonTSOSHelper::createPerigeeTSOS(std::move(uniquePerigee)));

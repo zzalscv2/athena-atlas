@@ -45,15 +45,15 @@ public:
   const Trk::Track * trkTrack;
   void ensureInitTrkTracks();
 
-  static Trk::TrackStateOnSurface * createTSOS(const Trk::TrackParameters * pars)
+  static Trk::TrackStateOnSurface * createTSOS(Trk::TrackParameters * pars)
   {
     return pars ? new Trk::TrackStateOnSurface(
                     nullptr,
-                    std::unique_ptr<const Trk::TrackParameters>(pars),
+                    std::unique_ptr<Trk::TrackParameters>(pars),
                     nullptr)
                 : nullptr;
   }
-  static void addPars(DataVector<const Trk::TrackStateOnSurface>* dv, const Trk::TrackParameters * pars)
+  static void addPars(DataVector<const Trk::TrackStateOnSurface>* dv, Trk::TrackParameters * pars)
   {
     if (!pars)
       return;

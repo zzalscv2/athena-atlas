@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -528,7 +528,7 @@ Perigee* FitParameters::startingPerigee(void) const {
   return new Perigee(m_position, momentum, charge, m_vertex);
 }
 
-const TrackParameters* FitParameters::trackParameters(
+TrackParameters* FitParameters::trackParameters(
     MsgStream& log, const FitMeasurement& measurement, bool withCovariance) {
   // make checks necessary for the TrackParameters to be computed
   //   1) a Surface is required
@@ -636,7 +636,7 @@ const TrackParameters* FitParameters::trackParameters(
   }
 
   // finally can create the appropriate 'concrete' TrackParameters
-  const TrackParameters* parameters = nullptr;
+  TrackParameters* parameters = nullptr;
   const StraightLineSurface* line =
       dynamic_cast<const StraightLineSurface*>(measurement.surface());
   if (line) {

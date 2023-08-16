@@ -251,7 +251,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
                                     atlasParameter.charge(), cov);
 }
 
-std::unique_ptr<const Trk::TrackParameters>
+std::unique_ptr<Trk::TrackParameters>
 ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
     const Acts::BoundTrackParameters &actsParameter,
     const Acts::GeometryContext &gctx) const {
@@ -279,7 +279,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
       const Trk::ConeSurface &coneSurface =
           dynamic_cast<const Trk::ConeSurface &>(
               actsSurfaceToTrkSurface(actsSurface));
-      return std::make_unique<const Trk::AtaCone>(
+      return std::make_unique<Trk::AtaCone>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
           actsParameter.get<Acts::eBoundPhi>(),
@@ -292,7 +292,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
       const Trk::CylinderSurface &cylSurface =
           dynamic_cast<const Trk::CylinderSurface &>(
               actsSurfaceToTrkSurface(actsSurface));
-      return std::make_unique<const Trk::AtaCylinder>(
+      return std::make_unique<Trk::AtaCylinder>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
           actsParameter.get<Acts::eBoundPhi>(),
@@ -304,7 +304,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
       if (const auto *discSurface = dynamic_cast<const Trk::DiscSurface *>(
               &actsSurfaceToTrkSurface(actsSurface));
           discSurface != nullptr) {
-        return std::make_unique<const Trk::AtaDisc>(
+        return std::make_unique<Trk::AtaDisc>(
             actsParameter.get<Acts::eBoundLoc0>(),
             actsParameter.get<Acts::eBoundLoc1>(),
             actsParameter.get<Acts::eBoundPhi>(),
@@ -337,7 +337,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
             gctx, *helperSurface, freePars, covCache);
         auto targetCov = std::get<Acts::BoundSymMatrix>(varNewCov);
 
-        auto pars = std::make_unique<const Trk::AtaPlane>(
+        auto pars = std::make_unique<Trk::AtaPlane>(
             targetPars[Acts::eBoundLoc0], targetPars[Acts::eBoundLoc1],
             targetPars[Acts::eBoundPhi], targetPars[Acts::eBoundTheta],
             targetPars[Acts::eBoundQOverP] * 1_MeV, *planeSurface,
@@ -359,7 +359,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
     }
     case Acts::Surface::SurfaceType::Perigee: {
       const Trk::PerigeeSurface perSurface(actsSurface.center(gctx));
-      return std::make_unique<const Trk::Perigee>(
+      return std::make_unique<Trk::Perigee>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
           actsParameter.get<Acts::eBoundPhi>(),
@@ -372,7 +372,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
       const Trk::PlaneSurface &plaSurface =
           dynamic_cast<const Trk::PlaneSurface &>(
               actsSurfaceToTrkSurface(actsSurface));
-      return std::make_unique<const Trk::AtaPlane>(
+      return std::make_unique<Trk::AtaPlane>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
           actsParameter.get<Acts::eBoundPhi>(),
@@ -384,7 +384,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
       const Trk::StraightLineSurface &lineSurface =
           dynamic_cast<const Trk::StraightLineSurface &>(
               actsSurfaceToTrkSurface(actsSurface));
-      return std::make_unique<const Trk::AtaStraightLine>(
+      return std::make_unique<Trk::AtaStraightLine>(
           actsParameter.get<Acts::eBoundLoc0>(),
           actsParameter.get<Acts::eBoundLoc1>(),
           actsParameter.get<Acts::eBoundPhi>(),

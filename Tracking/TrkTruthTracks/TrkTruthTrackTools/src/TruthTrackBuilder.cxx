@@ -134,7 +134,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
     Trk::PerigeeSurface persurf;
     Trk::CurvilinearParameters startParams(startPos,startMom,charge);
     //minimal conversion; ideally the extrapolator would return a unique_ptr
-    auto per = std::unique_ptr<const Trk::TrackParameters>(
+    auto per = std::unique_ptr<Trk::TrackParameters>(
       m_extrapolator->extrapolate(ctx,
                                   startParams,
                                   persurf,
@@ -183,7 +183,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
         if (ispixel) params[Trk::loc2]=clusters[i]->localPosition().y();
         std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
         typePattern.set(Trk::TrackStateOnSurface::Measurement);
-        std::unique_ptr<const Trk::RIO_OnTrack> rot{m_rotcreator->correct(*clusters[i],*thispar)};        
+        std::unique_ptr<Trk::RIO_OnTrack> rot{m_rotcreator->correct(*clusters[i],*thispar)};        
         if (!rot) {
           continue;
         }
@@ -218,26 +218,37 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
    //!<  Refit a second time to add TRT hits
    Trk::Track *refittedtrack2=nullptr;
    if (refittedtrack && (int)clusters.size()-i>=9){
+     
+     //owner of measurements so they get cleaned up automatically if needs be
+     std::vector<std::unique_ptr<MeasurementBase>> meassetOwn;
+     //vector of plain ptr to the owned ones acts as a "view"
      Trk::MeasurementSet measset;
+    
      std::unique_ptr<const Trk::TrackParameters> prevpar(refittedtrack->trackParameters()->back()->uniqueClone());
      for (;i<(int)clusters.size();i++) {
        const Trk::Surface *surf=&clusters[i]->detectorElement()->surface(clusters[i]->identify());
        std::unique_ptr<const Trk::TrackParameters> thispar(m_extrapolator->extrapolate(ctx,*prevpar,*surf,Trk::alongMomentum,false,Trk::nonInteracting));
        if (!thispar) break;
-       const Trk::RIO_OnTrack *rot=m_rotcreatorbroad->correct(*clusters[i],*thispar);
-       if (rot) measset.push_back(rot);
+       Trk::RIO_OnTrack *rot=m_rotcreatorbroad->correct(*clusters[i],*thispar);
+
+       if (rot) {
+         meassetOwn.emplace_back(rot);
+         measset.push_back(meassetOwn.back().get());
+       }
        prevpar=std::move(thispar);
      }
+
      refittedtrack2=(m_trackFitter->fit(Gaudi::Hive::currentContext(),*refittedtrack,measset,false,materialInteractions)).release();
+
      if (!refittedtrack2){
        auto traj2 = DataVector<const Trk::TrackStateOnSurface>();
        for (const auto *j : *refittedtrack->trackStateOnSurfaces()) traj2.push_back(new Trk::TrackStateOnSurface(*j));
        std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern2;
        typePattern2.set(Trk::TrackStateOnSurface::Outlier);
        //measset needs to be unique_ptr before progress further
-       for (auto & j : measset) {
+       for (auto & j : meassetOwn) {
          traj2.push_back(new Trk::TrackStateOnSurface(
-           std::unique_ptr<const MeasurementBase>(j),
+           std::move(j),
            nullptr,
            nullptr,
            typePattern2));
@@ -246,7 +257,6 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
                                        std::move(traj2),
                                        refittedtrack->fitQuality()->uniqueClone());
      }
-     else for (auto & j : measset) delete j;
    } else if(!refittedtrack){
     ATH_MSG_VERBOSE("Track fit of truth trajectory NOT successful, NO track created. ");
     return nullptr;

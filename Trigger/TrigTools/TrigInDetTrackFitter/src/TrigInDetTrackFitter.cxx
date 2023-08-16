@@ -727,9 +727,9 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
 		else
 		{
       Trk::PerigeeSurface perigeeSurface;
-      std::unique_ptr<const Trk::Perigee> perigee = std::make_unique<const Trk::Perigee>(d0, z0, phi0, theta, qOverP, perigeeSurface, cov);
+      auto perigee = std::make_unique<Trk::Perigee>(d0, z0, phi0, theta, qOverP, perigeeSurface, cov);
       ATH_MSG_VERBOSE("perigee: " << *perigee);
-      std::unique_ptr<const Trk::Perigee> perigeewTP = (addTPtoTSoS) ?  std::make_unique<const Trk::Perigee>(d0, z0, phi0, theta, qOverP, perigeeSurface, cov) : nullptr;
+      std::unique_ptr<Trk::Perigee> perigeewTP = (addTPtoTSoS) ?  std::make_unique<Trk::Perigee>(d0, z0, phi0, theta, qOverP, perigeeSurface, cov) : nullptr;
 
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
@@ -812,7 +812,7 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
 {
   Trk::TrackStateOnSurface* pTSS=nullptr;
   char type=pN->getNodeType();
-  std::unique_ptr<const Trk::TrackParameters> pTP{};
+  std::unique_ptr<Trk::TrackParameters> pTP{};
   if(type==0) return pTSS;
 
 
@@ -831,7 +831,7 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
     const Trk::PlaneSurface* pPS = dynamic_cast<const Trk::PlaneSurface*>(&rS);
     if(pPS==nullptr) return pTSS;
 
-      pTP=std::make_unique<const Trk::AtaPlane>(pTS->getTrackState(0),
+      pTP=std::make_unique<Trk::AtaPlane>(pTS->getTrackState(0),
         pTS->getTrackState(1),
         pTS->getTrackState(2),
         pTS->getTrackState(3),
@@ -849,7 +849,7 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
     }
 
 
-    pTP=std::make_unique<const Trk::AtaStraightLine>(pTS->getTrackState(0),
+    pTP=std::make_unique<Trk::AtaStraightLine>(pTS->getTrackState(0),
         pTS->getTrackState(1),
         pTS->getTrackState(2),
         pTS->getTrackState(3),
@@ -858,7 +858,7 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
         std::move(pM));
   }
   if(pTP==nullptr) return nullptr;
-  std::unique_ptr<const Trk::RIO_OnTrack> pRIO{m_ROTcreator->correct(*pPRD,*pTP)};
+  std::unique_ptr<Trk::RIO_OnTrack> pRIO{m_ROTcreator->correct(*pPRD,*pTP)};
   if(pRIO==nullptr) {
     return nullptr;
   }

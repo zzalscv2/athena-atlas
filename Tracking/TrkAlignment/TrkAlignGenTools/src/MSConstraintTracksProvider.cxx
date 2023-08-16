@@ -472,7 +472,7 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
           Amg::MatrixX covFromMS( 1,1 ) ;
           covFromMS( 1, 1 )   = (*METrkMeasuredPerigee->covariance())( Trk::qOverP, Trk::qOverP ) ;
 
-          auto pmot = std::make_unique<const Trk::PseudoMeasurementOnTrack>( Trk::LocalParameters( parFromMSVec ),
+          auto pmot = std::make_unique<Trk::PseudoMeasurementOnTrack>( Trk::LocalParameters( parFromMSVec ),
 										   covFromMS, *surf) ;
 
 
@@ -487,7 +487,7 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
 
           auto IDPerigeeParametersClone =
               (IDPerigeeParameters)
-                  ? std::make_unique<const Perigee>(*IDPerigeeParameters)
+                  ? std::make_unique<Perigee>(*IDPerigeeParameters)
                   : nullptr;
 
           if(IDPerigeeParameters && IDPerigeeParametersClone ){

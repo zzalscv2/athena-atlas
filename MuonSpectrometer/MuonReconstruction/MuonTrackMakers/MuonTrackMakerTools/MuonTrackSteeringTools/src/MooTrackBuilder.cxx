@@ -670,7 +670,7 @@ namespace Muon {
                         ATH_MSG_WARNING(" Measurement with MDT identifier that is not a MdtDriftCircleOnTrack ");
                         continue;
                     }
-                    std::unique_ptr<const Trk::RIO_OnTrack> newMdt(m_mdtRotCreator->correct(*mdt->prepRawData(), *pars));
+                    std::unique_ptr<Trk::RIO_OnTrack> newMdt(m_mdtRotCreator->correct(*mdt->prepRawData(), *pars));
                     if (!newMdt) {
                         ATH_MSG_WARNING(" Failed to recalibrate MDT ");
                         continue;
@@ -819,11 +819,11 @@ namespace Muon {
 
         // now that we have the lists of prds we can create the competing rots
         if (!etaPrds.empty()) {
-            std::unique_ptr<const CompetingMuonClustersOnTrack> etaCompRot = m_compRotCreator->createBroadCluster(etaPrds, 0.);
+            std::unique_ptr<CompetingMuonClustersOnTrack> etaCompRot = m_compRotCreator->createBroadCluster(etaPrds, 0.);
             if (!etaCompRot) {
                 ATH_MSG_WARNING(" Failed to create CompetingMuonClustersOnTrack for eta hits! ");
             } else {
-                std::unique_ptr<const Trk::TrackParameters> etaPars;;
+                std::unique_ptr<Trk::TrackParameters> etaPars;;
                 // check whether original parameters are on surface, if so clone original parameters
                 if (etaCompRot->associatedSurface() == pars->associatedSurface()) {
                     etaPars = pars->uniqueClone();
@@ -845,11 +845,11 @@ namespace Muon {
         }
 
         if (!phiPrds.empty()) {
-            std::unique_ptr<const CompetingMuonClustersOnTrack> phiCompRot = m_compRotCreator->createBroadCluster(phiPrds, 0.);
+            std::unique_ptr<CompetingMuonClustersOnTrack> phiCompRot = m_compRotCreator->createBroadCluster(phiPrds, 0.);
             if (!phiCompRot) {
                 ATH_MSG_WARNING(" Failed to create CompetingMuonClustersOnTrack for phi hits! ");
             } else {
-                std::unique_ptr<const Trk::TrackParameters> phiPars;
+                std::unique_ptr<Trk::TrackParameters> phiPars;
                 // check whether original parameters are on surface, if so clone original parameters
                 if (phiCompRot->associatedSurface() == pars->associatedSurface()) {
                     phiPars = pars->uniqueClone();

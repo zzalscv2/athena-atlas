@@ -1208,7 +1208,7 @@ void Trk::TrkMaterialProviderTool::updateVectorMS(Trk::TrackStates* inputTSOS,
                                              std::move(energyLossNew),
                                              surf,
                                              meotPattern);
-           std::unique_ptr<const Trk::TrackParameters> pars{};
+           std::unique_ptr<Trk::TrackParameters> pars{};
            if ((*it)->trackParameters())
              pars = (*it)->trackParameters()->uniqueClone();
            // make new TSOS
@@ -1521,7 +1521,7 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
         Eloss_tot += caloEnergyNew->deltaE();
         const Trk::Surface& surf = meot->associatedSurface();
         auto meotLast =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(
+          std::make_unique<Trk::MaterialEffectsOnTrack>(
             X0_tot, scatNew, std::move(caloEnergyNew), surf, meotPattern);
         auto pars = m->trackParameters()->uniqueClone();
 
@@ -1568,7 +1568,7 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
           Eloss_tot += caloEnergyNew->deltaE();
           const Trk::Surface& surf = meot->associatedSurface();
           auto meotLast =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot, scatNew, std::move(caloEnergyNew), surf, meotPattern);
           auto pars = m->trackParameters()->uniqueClone();
           //        make new TSOS
@@ -1632,10 +1632,10 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
             Trk::PlaneSurface(surfaceTransformLast);
           //        make MaterialEffectsOnTracks
           auto meotFirst =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot / 2., scatFirst, std::move(energyLoss0), surfFirst, meotPattern);
           auto meotLast =
-            std::make_unique<const Trk::MaterialEffectsOnTrack>(
+            std::make_unique<Trk::MaterialEffectsOnTrack>(
               X0_tot / 2., scatNew, std::move(caloEnergyNew), surfLast, meotPattern);
 
 
@@ -1643,13 +1643,13 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
           double qOverP0 = m->trackParameters()->charge()/ (m->trackParameters()->momentum().mag()-std::abs(energyLoss->deltaE()));
           if(mprevious) qOverP0 = mprevious->trackParameters()->charge()/mprevious->trackParameters()->momentum().mag();
 
-          std::unique_ptr<const Trk::TrackParameters> parsFirst =
+          std::unique_ptr<Trk::TrackParameters> parsFirst =
             surfFirst.createUniqueParameters<5, Trk::Charged>(
               0., 0., dir.phi(), dir.theta(), qOverP0);
           //        calculate TrackParameters at second surface
           double qOverPNew = m->trackParameters()->charge() /
                              m->trackParameters()->momentum().mag();
-          std::unique_ptr<const Trk::TrackParameters> parsLast =
+          std::unique_ptr<Trk::TrackParameters> parsLast =
             surfLast.createUniqueParameters<5, Trk::Charged>(
               0., 0., dir.phi(), dir.theta(), qOverPNew);
           // make TSOS
@@ -1815,7 +1815,7 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
       std::unique_ptr<Trk::TrackParameters> parsFirst =
         surfFirst.createUniqueParameters<5, Trk::Charged>(
           0., 0., dir.phi(), dir.theta(), qOverP0);
-      std::unique_ptr<const Trk::TrackParameters> parsLast =
+      std::unique_ptr<Trk::TrackParameters> parsLast =
         surfLast.createUniqueParameters<5, Trk::Charged>(
           0., 0., dir.phi(), dir.theta(), qOverPNew);
 
@@ -1826,19 +1826,19 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
         //          prepare for first MaterialEffectsOnTrack with X0 = X0/2
         //          Eloss = 0 and scattering2 = total2 / 2. depth = 0
         auto meotFirst =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(X0_tot / 2.,
-                                          scatFirst,
-                                          nullptr,
-                                          surfFirst,
-                                          meotPattern);
+          std::make_unique<Trk::MaterialEffectsOnTrack>(X0_tot / 2.,
+                                                        scatFirst,
+                                                        nullptr,
+                                                        surfFirst,
+                                                        meotPattern);
         //          prepare for second MaterialEffectsOnTrack with X0 =  X0/2
         //          Eloss = Eloss total and scattering2 = total2 / 2. depth = 0
         auto meotLast =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(X0_tot / 2.,
-                                          scatNew,
-                                          std::move(caloEnergyNew),
-                                          surfLast,
-                                          meotPattern);
+          std::make_unique<Trk::MaterialEffectsOnTrack>(X0_tot / 2.,
+                                                        scatNew,
+                                                        std::move(caloEnergyNew),
+                                                        surfLast,
+                                                        meotPattern);
         //
         //
         const Trk::TrackStateOnSurface* newTSOSFirst =
@@ -1865,19 +1865,19 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
         //        prepare for first MaterialEffectsOnTrack with X0 = X0/2 Eloss
         //        = 0 and scattering2 = total2 / 2. depth = 0
         auto meotFirst =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(
+          std::make_unique<Trk::MaterialEffectsOnTrack>(
             X0_tot / 2., scatFirst, nullptr, surfFirst, meotPattern);
 
         //        prepare for middle MaterialEffectsOnTrack with X0 =  0 Eloss =
         //        ElossNew and scattering2 = 0. depth = 0
         auto meot =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(
+          std::make_unique<Trk::MaterialEffectsOnTrack>(
             0.,std::nullopt, std::move(caloEnergyNew), surf, meotPattern);
 
         //        prepare for last MaterialEffectsOnTrack with X0 =  X0/2 Eloss
         //        = 0 total and scattering2 = total2 / 2. depth = 0
         auto meotLast =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(
+          std::make_unique<Trk::MaterialEffectsOnTrack>(
             X0_tot / 2., scatNew, nullptr, surfLast, meotPattern);
 
 

@@ -198,7 +198,7 @@ namespace Rec {
         /// Cache the pointer for the debug message
         const CaloEnergy* calo_observer = caloEnergy.get();
         auto materialEffects =
-          std::make_unique<const Trk::MaterialEffectsOnTrack>(
+          std::make_unique<Trk::MaterialEffectsOnTrack>(
             0.,
             std::move(caloEnergy),
             middle_clone->associatedSurface(),

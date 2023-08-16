@@ -30,7 +30,7 @@ namespace Muon {
     virtual StatusCode initialize();
     
     /** method to create a CompetingMuonClustersOnTrack using the PrepRawData hits and a scaled factor for the errors */
-    std::unique_ptr<const CompetingMuonClustersOnTrack> 
+    std::unique_ptr<CompetingMuonClustersOnTrack> 
     createBroadCluster(const std::list< const Trk::PrepRawData * > &,   const double errorScaleFactor ) const;
 
 

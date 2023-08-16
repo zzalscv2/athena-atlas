@@ -778,7 +778,7 @@ namespace Muon {
             if (settings.prepareForFit && !settings.recreateStartingParameters && tsos->type(Trk::TrackStateOnSurface::Perigee)) {
                 if (pars == startPars) {
                     ATH_MSG_DEBUG("Found fit starting parameters " << m_printer->print(*pars));
-                    std::unique_ptr<const Trk::Perigee> perigee = createPerigee(*pars, ctx);
+                    std::unique_ptr<Trk::Perigee> perigee = createPerigee(*pars, ctx);
                     newStates.emplace_back(MuonTSOSHelper::createPerigeeTSOS(std::move(perigee)));
                     addedPerigee = true;
                     continue;
@@ -1060,7 +1060,7 @@ namespace Muon {
             if (settings.prepareForFit && !settings.recreateStartingParameters && tsos->type(Trk::TrackStateOnSurface::Perigee)) {
                 if (pars == startPars) {
                     ATH_MSG_DEBUG("Found fit starting parameters " << m_printer->print(*pars));
-                    std::unique_ptr<const Trk::Perigee> perigee = createPerigee(*pars, ctx);
+                    std::unique_ptr<Trk::Perigee> perigee = createPerigee(*pars, ctx);
                     newStates.emplace_back(MuonTSOSHelper::createPerigeeTSOS(std::move(perigee)));
                     addedPerigee = true;
                     continue;
@@ -1115,7 +1115,7 @@ namespace Muon {
                     bool hasT0Fit = false;
                     if (mdt->errorStrategy().creationParameter(Muon::MuonDriftCircleErrorStrategy::T0Refit)) hasT0Fit = true;
 
-                    const Trk::RIO_OnTrack* rot = nullptr;
+                    Trk::RIO_OnTrack* rot = nullptr;
                     Trk::TrackStateOnSurface::TrackStateOnSurfaceType type = tsos->type(Trk::TrackStateOnSurface::Outlier)
                                                                                  ? Trk::TrackStateOnSurface::Outlier
                                                                                  : Trk::TrackStateOnSurface::Measurement;
@@ -1128,7 +1128,7 @@ namespace Muon {
                     if (settings.broad) strat.setParameter(MuonDriftCircleErrorStrategy::BroadError, true);
                     rot = m_mdtRotCreator->updateError(*mdt, pars, &strat);
 
-                    const MdtDriftCircleOnTrack* newMdt = rot ? dynamic_cast<const MdtDriftCircleOnTrack*>(rot) : nullptr;
+                    MdtDriftCircleOnTrack* newMdt = rot ? dynamic_cast<MdtDriftCircleOnTrack*>(rot) : nullptr;
                     if (!newMdt) {
                         newMdt = mdt->clone();
                         type = Trk::TrackStateOnSurface::Outlier;
@@ -1150,7 +1150,7 @@ namespace Muon {
                         if (std::abs(newMdt->driftRadius() - mdt->driftRadius()) > 0.1)
                             ATH_MSG_DEBUG(" Bad recalibration: old r " << mdt->driftRadius());
                     }
-                    std::unique_ptr<const MdtDriftCircleOnTrack> newUniqueMdt {newMdt};
+                    std::unique_ptr<MdtDriftCircleOnTrack> newUniqueMdt {newMdt};
                     std::unique_ptr<Trk::TrackStateOnSurface> new_tsos = MuonTSOSHelper::createMeasTSOSWithUpdate(*tsos, std::move(newUniqueMdt), pars->uniqueClone(), type);
                     newStates.emplace_back(std::move(new_tsos));
                 } else if (m_idHelperSvc->isCsc(id)) {
@@ -1493,13 +1493,13 @@ namespace Muon {
         return true;
     }
 
-    std::unique_ptr<const Trk::Perigee> 
+    std::unique_ptr<Trk::Perigee> 
     MuonRefitTool::createPerigee(const Trk::TrackParameters& pars, const EventContext& ctx) const {
-        std::unique_ptr<const Trk::Perigee> perigee;
+        std::unique_ptr<Trk::Perigee> perigee;
         if (m_muonExtrapolator.empty()) { return perigee; }
         Trk::PerigeeSurface persurf(pars.position());
-        std::unique_ptr<const Trk::TrackParameters> exPars{m_muonExtrapolator->extrapolateDirectly(ctx, pars, persurf)};
-        const Trk::Perigee* pp = dynamic_cast<const Trk::Perigee*>(exPars.get());
+        std::unique_ptr<Trk::TrackParameters> exPars{m_muonExtrapolator->extrapolateDirectly(ctx, pars, persurf)};
+        Trk::Perigee* pp = dynamic_cast<Trk::Perigee*>(exPars.get());
         if (!pp) {
             ATH_MSG_WARNING(" Extrapolation to Perigee surface did not return a perigee!! ");
             return perigee;

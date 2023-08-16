@@ -35,7 +35,7 @@ TriggerChamberClusterOnTrackCreator::initialize()
     return StatusCode::SUCCESS;
 }
   
-std::unique_ptr<const CompetingMuonClustersOnTrack>
+std::unique_ptr<CompetingMuonClustersOnTrack>
 TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Trk::PrepRawData*>& prds, const double) const {
     ATH_MSG_VERBOSE("enter createBroadCluster: number of prds " << prds.size() );
 
@@ -100,7 +100,7 @@ TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Tr
     
     // return the competingMuonClusterOnTrack object containing the final parameters,
     // error matrix, surface, list of rots and weights
-    return std::make_unique<const CompetingMuonClustersOnTrack>(
+    return std::make_unique<CompetingMuonClustersOnTrack>(
      std::move(parameters), std::move(errorMatrix), surface, std::move(rots), std::move(assocProbs));
 }
 

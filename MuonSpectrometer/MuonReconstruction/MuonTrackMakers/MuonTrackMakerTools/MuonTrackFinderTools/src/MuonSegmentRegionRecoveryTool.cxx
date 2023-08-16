@@ -448,7 +448,7 @@ namespace Muon {
                 chambersInSearch.insert(ch);
 
                 const Trk::Surface& surf = detElLoc->surface(id);
-                std::unique_ptr<const Trk::TrackParameters> tubePars{
+                std::unique_ptr<Trk::TrackParameters> tubePars{
                     m_extrapolator->extrapolateDirectly(ctx, *exPars, surf, Trk::anyDirection, false, Trk::muon)};
                 if (!tubePars) {
                     ATH_MSG_WARNING("Failed to extrapolate to tube " << m_idHelperSvc->toString(id));
@@ -779,7 +779,7 @@ namespace Muon {
                         }
                         if (bestSegment) {
                             for (const Trk::MeasurementBase* hit : bestSegment->containedMeasurements()) {
-                                std::unique_ptr<const Trk::TrackParameters> hitPars{m_extrapolator->extrapolateDirectly(
+                                std::unique_ptr<Trk::TrackParameters> hitPars{m_extrapolator->extrapolateDirectly(
                                     ctx, *bestSegmentPars, hit->associatedSurface(), Trk::anyDirection, false, Trk::muon)};
                                 if (hitPars) {
                                     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;

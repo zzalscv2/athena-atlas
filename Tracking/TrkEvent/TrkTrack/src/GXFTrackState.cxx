@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -293,12 +293,12 @@ namespace Trk {
   
   std::unique_ptr<const TrackStateOnSurface>
   GXFTrackState::trackStateOnSurface() const{
-    std::unique_ptr<const TrackParameters> trackpar = unique_clone(m_trackpar.get());
-    std::unique_ptr<const MeasurementBase> measurement = unique_clone(m_measurement.get());
+    std::unique_ptr<TrackParameters> trackpar = unique_clone(m_trackpar.get());
+    std::unique_ptr<MeasurementBase> measurement = unique_clone(m_measurement.get());
 
     FitQualityOnSurface fitQual =m_fitqual;
 
-    std::unique_ptr<const MaterialEffectsBase> mateff = nullptr;
+    std::unique_ptr<MaterialEffectsBase> mateff = nullptr;
     std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     if ((m_materialEffects != nullptr) && (m_tsType.test(TrackStateOnSurface::Scatterer) or m_tsType.test(TrackStateOnSurface::BremPoint))) {
       if (m_tsType.test(TrackStateOnSurface::Scatterer)) {

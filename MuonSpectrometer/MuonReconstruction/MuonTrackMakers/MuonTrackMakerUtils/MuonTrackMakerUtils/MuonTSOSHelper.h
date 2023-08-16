@@ -51,7 +51,7 @@ namespace Muon {
 
         /** create a perigee TSOS, takes ownership of the Perigee */
         static std::unique_ptr<Trk::TrackStateOnSurface> 
-        createPerigeeTSOS(std::unique_ptr<const Trk::TrackParameters> perigee) {
+        createPerigeeTSOS(std::unique_ptr<Trk::TrackParameters> perigee) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
             typePattern.set(Trk::TrackStateOnSurface::Perigee);
             return  std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(perigee),  nullptr, typePattern);
@@ -59,8 +59,8 @@ namespace Muon {
        
         /** create a TSOS with a measurement, takes ownership of the pointers */
         static std::unique_ptr<Trk::TrackStateOnSurface> 
-        createMeasTSOS(std::unique_ptr<const Trk::MeasurementBase> meas, 
-              std::unique_ptr<const Trk::TrackParameters> pars,
+        createMeasTSOS(std::unique_ptr<Trk::MeasurementBase> meas, 
+              std::unique_ptr<Trk::TrackParameters> pars,
               Trk::TrackStateOnSurface::TrackStateOnSurfaceType type) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
             if (type == Trk::TrackStateOnSurface::Outlier) typePattern.set(Trk::TrackStateOnSurface::Measurement);
@@ -71,8 +71,8 @@ namespace Muon {
       
         /** create a TSOS with a measurement, takes ownership of the pointers */
         static std::unique_ptr<Trk::TrackStateOnSurface> 
-        createMeasTSOSWithUpdate(const Trk::TrackStateOnSurface& tsos, std::unique_ptr<const Trk::MeasurementBase> meas,
-                                                                  std::unique_ptr<const Trk::TrackParameters> pars,
+        createMeasTSOSWithUpdate(const Trk::TrackStateOnSurface& tsos, std::unique_ptr<Trk::MeasurementBase> meas,
+                                                                  std::unique_ptr<Trk::TrackParameters> pars,
                                                                   Trk::TrackStateOnSurface::TrackStateOnSurfaceType type) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern = tsos.types();
             if (type == Trk::TrackStateOnSurface::Outlier)
@@ -89,7 +89,7 @@ namespace Muon {
         }
 
         /** create a hole TSOS, takes ownership of the pointers */
-        static std::unique_ptr<Trk::TrackStateOnSurface> createHoleTSOS(std::unique_ptr<const Trk::TrackParameters> pars) {
+        static std::unique_ptr<Trk::TrackStateOnSurface> createHoleTSOS(std::unique_ptr<Trk::TrackParameters> pars) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
             typePattern.set(Trk::TrackStateOnSurface::Hole);
             return std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(pars), nullptr, typePattern);

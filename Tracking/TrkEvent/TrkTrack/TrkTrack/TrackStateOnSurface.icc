@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 inline Trk::TrackStateOnSurface*
@@ -14,8 +14,20 @@ Trk::TrackStateOnSurface::fitQualityOnSurface() const
   return m_fitQualityOnSurface;
 }
 
+inline Trk::FitQualityOnSurface&
+Trk::TrackStateOnSurface::fitQualityOnSurface()
+{
+  return m_fitQualityOnSurface;
+}
+
 inline const Trk::TrackParameters*
 Trk::TrackStateOnSurface::trackParameters() const
+{
+  return m_trackParameters.get();
+}
+
+inline Trk::TrackParameters*
+Trk::TrackStateOnSurface::trackParameters()
 {
   return m_trackParameters.get();
 }
@@ -26,14 +38,32 @@ Trk::TrackStateOnSurface::measurementOnTrack() const
   return m_measurementOnTrack.get();
 }
 
+inline Trk::MeasurementBase*
+Trk::TrackStateOnSurface::measurementOnTrack()
+{
+  return m_measurementOnTrack.get();
+}
+
 inline const Trk::MaterialEffectsBase*
 Trk::TrackStateOnSurface::materialEffectsOnTrack() const
 {
   return m_materialEffectsOnTrack.get();
 }
 
+inline Trk::MaterialEffectsBase*
+Trk::TrackStateOnSurface::materialEffectsOnTrack()
+{
+  return m_materialEffectsOnTrack.get();
+}
+
 inline const Trk::AlignmentEffectsOnTrack*
 Trk::TrackStateOnSurface::alignmentEffectsOnTrack() const
+{
+  return m_alignmentEffectsOnTrack.get();
+}
+
+inline Trk::AlignmentEffectsOnTrack*
+Trk::TrackStateOnSurface::alignmentEffectsOnTrack()
 {
   return m_alignmentEffectsOnTrack.get();
 }

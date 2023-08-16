@@ -106,7 +106,7 @@ namespace ActsTrk
 
             auto flag = state.typeFlags();
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
-            std::unique_ptr<const Trk::TrackParameters> parm;
+            std::unique_ptr<Trk::TrackParameters> parm;
 
             // State is a hole (no associated measurement), use predicted parameters
             if (flag.test(Acts::TrackStateFlag::HoleFlag))
@@ -164,7 +164,7 @@ namespace ActsTrk
               typePattern.set(Trk::TrackStateOnSurface::Measurement);
             }
 
-            std::unique_ptr<const Trk::MeasurementBase> measState;
+            std::unique_ptr<Trk::MeasurementBase> measState;
             if (state.hasUncalibratedSourceLink())
             {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
@@ -189,7 +189,7 @@ namespace ActsTrk
                                                track.parameters(),
                                                track.covariance());
 
-      std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
+      std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       auto perState = new Trk::TrackStateOnSurface(nullptr,
@@ -221,7 +221,7 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-  std::unique_ptr<const Trk::MeasurementBase> ActsToTrkConvertorAlg::makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
+  std::unique_ptr<Trk::MeasurementBase> ActsToTrkConvertorAlg::makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
 										     const Trk::TrackParameters &parm) const
   {
     const Trk::PrepRawData *rio = nullptr;
@@ -247,13 +247,13 @@ namespace ActsTrk
           return nullptr;
         }
         ATH_MSG_DEBUG("create InDet::PixelClusterOnTrack without correction");
-        return std::make_unique<const InDet::PixelClusterOnTrack>(pix,
-                                                                  Trk::LocalParameters(pix->localPosition()),
-                                                                  pix->localCovariance(),
-                                                                  element->identifyHash(),
-                                                                  pix->globalPosition(),
-                                                                  pix->gangedPixel(),
-                                                                  false);
+        return std::make_unique<InDet::PixelClusterOnTrack>(pix,
+                                                            Trk::LocalParameters(pix->localPosition()),
+                                                            pix->localCovariance(),
+                                                            element->identifyHash(),
+                                                            pix->globalPosition(),
+                                                            pix->gangedPixel(),
+                                                            false);
       }
       rio = pix;
     }
@@ -277,12 +277,12 @@ namespace ActsTrk
           return nullptr;
         }
         ATH_MSG_DEBUG("create InDet::SCT_ClusterOnTrack without correction");
-        return std::make_unique<const InDet::SCT_ClusterOnTrack>(sct,
-                                                                 Trk::LocalParameters(sct->localPosition()),
-                                                                 sct->localCovariance(),
-                                                                 element->identifyHash(),
-                                                                 sct->globalPosition(),
-                                                                 false);
+        return std::make_unique<InDet::SCT_ClusterOnTrack>(sct,
+                                                           Trk::LocalParameters(sct->localPosition()),
+                                                           sct->localCovariance(),
+                                                           element->identifyHash(),
+                                                           sct->globalPosition(),
+                                                           false);
       }
       rio = sct;
     }
@@ -295,7 +295,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("use Trk::RIO_OnTrackCreator::correct to create corrected Trk::RIO_OnTrack");
     assert(!m_RotCreatorTool.empty());
     assert(rio != nullptr);
-    return std::unique_ptr<const Trk::MeasurementBase>(m_RotCreatorTool->correct(*rio, parm));
+    return std::unique_ptr<Trk::MeasurementBase>(m_RotCreatorTool->correct(*rio, parm));
   }
 
 }

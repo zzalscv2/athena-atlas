@@ -795,7 +795,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                       << nextPar->momentum().mag() - currPar->momentum().mag() << ","
                       << eloss.deltaE());
         // use curvilinear TPs to simplify retrieval by fitters
-        std::unique_ptr<const Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
+        std::unique_ptr<Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
           nextPar->position(), nextPar->momentum(), nextPar->charge()));
         //
        if (cache.m_extrapolationCache) {
@@ -1107,7 +1107,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                       << eloss.deltaE());
 
         // use curvilinear TPs to simplify retrieval by fitters
-        std::unique_ptr<const Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
+        std::unique_ptr<Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
           nextPar->position(), nextPar->momentum(), nextPar->charge()));
 
         if (cache.m_extrapolationCache) {
@@ -1123,7 +1123,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
              ATH_MSG_DEBUG(cache.to_string(" After"));
           }
         }
-        auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+        auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
           dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)), cvlTP->associatedSurface());
 
         cache.m_matstates->push_back(new TrackStateOnSurface(
@@ -1243,7 +1243,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   *lmat, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
 
                 // use curvilinear TPs to simplify retrieval by fitters
-                std::unique_ptr<const Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
+                std::unique_ptr<Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
                   nextPar->position(), nextPar->momentum(), nextPar->charge()));
                if (cache.m_extrapolationCache) {
                   if (not cache.elossPointerOverwritten()) {
@@ -1261,7 +1261,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   }
                 }
                 auto mefot =
-                    std::make_unique<const Trk::MaterialEffectsOnTrack>(
+                    std::make_unique<Trk::MaterialEffectsOnTrack>(
                         dInX0, newsa,
                         std::make_unique<Trk::EnergyLoss>(std::move(eloss)),
                         cvlTP->associatedSurface());
@@ -1406,7 +1406,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 materialProperties, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
 
               // use curvilinear TPs to simplify retrieval by fitters
-              auto cvlTP = std::make_unique<const Trk::CurvilinearParameters>(
+              auto cvlTP = std::make_unique<Trk::CurvilinearParameters>(
                 nextPar->position(), nextPar->momentum(), nextPar->charge());
               if (cache.m_extrapolationCache) {
                 if (not cache.elossPointerOverwritten()) {
@@ -1423,7 +1423,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   ATH_MSG_DEBUG(cache.elossPointerErrorMsg(__LINE__));
                 }
               }
-              auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+              auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
                 dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)), cvlTP->associatedSurface());
               cache.m_matstates->push_back(new TrackStateOnSurface(
                 nullptr, std::move(cvlTP), std::move(mefot)));
@@ -4465,7 +4465,7 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
         ATH_MSG_DEBUG(cache.to_string(" After"));
       }
     }
-    auto meot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+    auto meot = std::make_unique<Trk::MaterialEffectsOnTrack>(
         tInX0, scatAngles, std::make_unique<Trk::EnergyLoss>(std::move(energyLoss)),
         *lay.surfaceRepresentation().baseSurface());
     // push it to the material states
@@ -5038,7 +5038,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           ATH_MSG_DEBUG(cache.to_string( " After"));
         }
       }
-      auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
+      auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
           dInX0, newsa, std::make_unique<Trk::EnergyLoss>(std::move(eloss)),
           *((nextPar->associatedSurface()).baseSurface()));
 
