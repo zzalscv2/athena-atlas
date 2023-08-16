@@ -4,6 +4,7 @@ __doc__ = """ToolFactory to instantiate  TrigEMBremCollectionBuilder
 with default configuration"""
 
 import InDetRecExample.TrackingCommon as TrackingCommon
+from TrigInDetConfig.InDetTrigCAWrappers import CAtoLegacyPrivateToolWrapper
 from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.Logging import logging
 # import base class
@@ -46,6 +47,7 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
         #
         GSFBuildTestPixelLayerTool = None
         GSFBuildPixelToTPIDTool = None
+
         if DetFlags.haveRIO.pixel_on():
             GSFPixelConditionsSummaryTool = (
                 TrackingCommon.getInDetPixelConditionsSummaryTool())
@@ -63,7 +65,6 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
                 private=True)
 
             from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
-            from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPrivateToolWrapper
             #use CA version to deal with dependencies on dEdx conditions properly
             GSFBuildPixelToTPIDTool = CAtoLegacyPrivateToolWrapper(PixelToTPIDToolCfg)
             
@@ -79,7 +80,10 @@ class TrigEgammaBremCollectionBuilder (egammaAlgsConf.EMBremCollectionBuilder):
                 TRT_DriftCircleCollection = TrigTRTKeys.DriftCircles,
                 isTrigger=True)
 
-            from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigPrdAssociationTool
+            from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
+            InDetTrigPrdAssociationTool = CAtoLegacyPrivateToolWrapper(TrigPrdAssociationToolCfg)
+           
+
             TRT_ToT_dEdx_Tool = TrackingCommon.getInDetTRT_dEdxTool(
                     TRT_LocalOccupancyTool=TRT_LocalOccupancyTool,
                     AssociationTool=InDetTrigPrdAssociationTool)

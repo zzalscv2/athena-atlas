@@ -76,7 +76,7 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
       from TrigInDetConfig.utils import getFlagsForActiveConfig
       flags = getFlagsForActiveConfig(inflags, config.input_name, log)
       
-      from InDetTrigRecExample import InDetTrigCA
+      from TrigInDetConfig import InDetTrigCA
       InDetTrigCA.InDetTrigConfigFlags = flags
       
 

@@ -21,7 +21,7 @@ def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFT
   flags = getFlagsForActiveConfig(inflags, config.input_name, log)
 
   #temporary until imports of public tools via CAtoLegacyPublicToolWrapper not needed anymore  
-  from InDetTrigRecExample import InDetTrigCA
+  from TrigInDetConfig import InDetTrigCA
   InDetTrigCA.InDetTrigConfigFlags = flags
      
   
