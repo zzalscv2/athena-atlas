@@ -599,7 +599,7 @@ def InDetTrackRecoCfg(flags):
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             TrackParticleCnvAlgNoPIDCfg)
         # get list of extensions requesting track seeds. Add always the Primary Pass.
-        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             TrackContainer = "SiSPSeedSegments"+extension
 
@@ -621,7 +621,7 @@ def InDetTrackRecoCfg(flags):
         from xAODTrackingCnv.xAODTrackingCnvConfig import (
             TrackParticleCnvAlgNoPIDCfg)
         # get list of extensions requesting track candidates. Add always the Primary Pass.
-        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
         for extension in listOfExtensionsRequesting:
             AssociationMapNameKey="PRDtoTrackMapCombinedInDetTracks"
             if extension=='Disappearing': AssociationMapNameKey = "PRDtoTrackMapDisappearingTracks"
@@ -693,14 +693,23 @@ def InDetTrackRecoCfg(flags):
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackStateOnSurfaceDecoratorCfg)
-        TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-            TrackStateOnSurfaceDecoratorCfg(
-                flags, name="TrackStateOnSurfaceDecorator"))
-        TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
+        # Setup one algorithm for each output tracking container
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        listOfAugmTools = []
+        for extension in listOfExtensionsRequesting:
+            TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
+                TrackStateOnSurfaceDecoratorCfg(
+                    flags, name = f"{extension}TrackStateOnSurfaceDecorator",
+                    ContainerName = f"InDet{extension}TrackParticles",
+                    PixelMsosName = f"{extension}Pixel_MSOSs",
+                    SctMsosName = f"{extension}SCT_MSOSs",
+                    TrtMsosName = f"{extension}TRT_MSOSs"))
+            TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
+            listOfAugmTools.append(TrackStateOnSurfaceDecorator)
         result.addEventAlgo(
             CompFactory.DerivationFramework.CommonAugmentation(
                 "InDetCommonKernel",
-                AugmentationTools=[TrackStateOnSurfaceDecorator]))
+                AugmentationTools=listOfAugmTools))
 
         if flags.Tracking.doTIDE_AmbiTrackMonitoring:
             from DerivationFrameworkInDet.InDetToolsConfig import (
@@ -725,17 +734,30 @@ def InDetTrackRecoCfg(flags):
         if flags.Tracking.doStoreSiSPSeededTracks:
             from DerivationFrameworkInDet.InDetToolsConfig import (
                 SiSPTrackStateOnSurfaceDecoratorCfg)
-            SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-                SiSPTrackStateOnSurfaceDecoratorCfg(flags))
+            # Setup one algorithm for each output tracking container
+            listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
+            listOfAugmTools = []
+            for extension in listOfExtensionsRequesting:
+                SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
+                    SiSPTrackStateOnSurfaceDecoratorCfg(flags, name = f"SiSP{extension}TrackStateOnSurfaceDecorator",
+                        ContainerName = f"SiSPSeededTracks{extension}TrackParticles",
+                        PixelMsosName = f"SiSP{extension}_Pixel_MSOSs",
+                        SctMsosName = f"SiSP{extension}_SCT_MSOSs",
+                        TrtMsosName = f"SiSP{extension}_TRT_MSOSs"))
+                listOfAugmTools.append(SiSPTrackStateOnSurfaceDecorator)
             result.addEventAlgo(
                 CompFactory.DerivationFramework.CommonAugmentation(
                     "SiSPInDetCommonKernel",
-                    AugmentationTools=[SiSPTrackStateOnSurfaceDecorator]))
+                    AugmentationTools=listOfAugmTools))
 
         if flags.Input.isMC:
+            #check if we want to add it for other passes
+            listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
                 InDetPhysHitDecoratorAlgCfg)
-            result.merge(InDetPhysHitDecoratorAlgCfg(flags))
+            for extension in listOfExtensionsRequesting:
+                result.merge(InDetPhysHitDecoratorAlgCfg(flags, name=f"InDetPhysHit{extension}DecoratorAlg", 
+                                                         TrackParticleContainerName=f"InDet{extension}TrackParticles"))
 
     # output
     result.merge(InDetTrackRecoOutputCfg(flags))
@@ -826,7 +848,7 @@ def InDetTrackRecoOutputCfg(flags):
 
     # add tracks
     if flags.Tracking.doStoreTrackSeeds:
-        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             toESD += ["TrackCollection#SiSPSeedSegments"+extension]
 
@@ -953,7 +975,7 @@ def InDetTrackRecoOutputCfg(flags):
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
     if flags.Tracking.doStoreSiSPSeededTracks:
         # get list of extensions requesting track candidates. Add always the Primary Pass.
-        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
         for extension in listOfExtensionsRequesting:
             toAOD += [f"xAOD::TrackParticleContainer#SiSPSeededTracks{extension}TrackParticles"]
             toAOD += [
@@ -961,7 +983,7 @@ def InDetTrackRecoOutputCfg(flags):
 
     if flags.Tracking.doStoreTrackSeeds:
         # get list of extensions requesting track seeds. Add always the Primary Pass.
-        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
             toAOD += [
                 f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}TrackParticles",
@@ -974,14 +996,19 @@ def InDetTrackRecoOutputCfg(flags):
             "xAOD::TrackMeasurementValidationContainer#SCT_Clusters",
             "xAOD::TrackMeasurementValidationAuxContainer#SCT_ClustersAux.",
             "xAOD::TrackMeasurementValidationContainer#TRT_DriftCircles",
-            "xAOD::TrackMeasurementValidationAuxContainer#TRT_DriftCirclesAux.",
-            "xAOD::TrackStateValidationContainer#PixelMSOSs",
-            "xAOD::TrackStateValidationAuxContainer#PixelMSOSsAux.",
-            "xAOD::TrackStateValidationContainer#SCT_MSOSs",
-            "xAOD::TrackStateValidationAuxContainer#SCT_MSOSsAux.",
-            "xAOD::TrackStateValidationContainer#TRT_MSOSs",
-            "xAOD::TrackStateValidationAuxContainer#TRT_MSOSsAux."
+            "xAOD::TrackMeasurementValidationAuxContainer#TRT_DriftCirclesAux."
         ]
+        # get list of extensions requesting track seeds. Add always the Primary Pass.
+        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+        for extension in listOfExtensionsRequesting:
+            toAOD += [
+                f"xAOD::TrackStateValidationContainer#{extension}Pixel_MSOSs",
+                f"xAOD::TrackStateValidationAuxContainer#{extension}Pixel_MSOSsAux.",
+                f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
+                f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux.",
+                f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
+                f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
+            ]
         if flags.Tracking.doTIDE_AmbiTrackMonitoring:
             toAOD += [
                 "xAOD::TrackStateValidationContainer#ObservedTrack_Pixel_MSOSs",
@@ -1000,15 +1027,18 @@ def InDetTrackRecoOutputCfg(flags):
                 "xAOD::TrackStateValidationContainer#Pseudo_TRT_MSOSs",
                 "xAOD::TrackStateValidationAuxContainer#Pseudo_TRT_MSOSsAux."
             ]
-        if flags.InDet.Tracking.doStoreSiSPSeededTracks:
-            toAOD += [
-                "xAOD::TrackStateValidationContainer#SiSP_Pixel_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#SiSP_Pixel_MSOSsAux.",
-                "xAOD::TrackStateValidationContainer#SiSP_SCT_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#SiSP_SCT_MSOSsAux.",
-                "xAOD::TrackStateValidationContainer#SiSP_TRT_MSOSs",
-                "xAOD::TrackStateValidationAuxContainer#SiSP_TRT_MSOSsAux."
-            ]
+        if flags.Tracking.doStoreSiSPSeededTracks:
+            # get list of extensions requesting track seeds. Add always the Primary Pass.
+            listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
+            for extension in listOfExtensionsRequesting:
+                toAOD += [
+                    f"xAOD::TrackStateValidationContainer#SiSP{extension}_Pixel_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_Pixel_MSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#SiSP{extension}_SCT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_SCT_MSOSsAux.",
+                    f"xAOD::TrackStateValidationContainer#SiSP{extension}_TRT_MSOSs",
+                    f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_TRT_MSOSsAux."
+                ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toESD + toAOD))
