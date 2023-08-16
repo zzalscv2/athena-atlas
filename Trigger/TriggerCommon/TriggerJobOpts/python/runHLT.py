@@ -148,11 +148,6 @@ def athenaCfg():
    flags.Output.doWriteRDO = True
    flags.Output.RDOFileName = 'RDO_TRIG.pool.root'
 
-   # TODO: These should be set via command line:
-   flags.Exec.MaxEvents = 50
-   flags.Concurrency.NumThreads = 1
-   flags.Trigger.doLVL1 = True # run L1 sim also on data
-
    # Fill flags from command line
    parser = flags.getArgumentParser()
    flags.fillFromArgs(parser=parser)
