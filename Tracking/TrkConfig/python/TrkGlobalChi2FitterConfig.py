@@ -392,22 +392,6 @@ def InDetTrigGlobalChi2FitterCfg(flags, name='InDetTrigTrackFitter', **kwargs):
     kwargs.setdefault("Acceleration", True)
     kwargs.setdefault("MaxOutliers", 10)
 
-    # TODO come back to these settings
-    # if InDetTrigFlags.useBroadClusterErrors():
-    #   InDetTrigTrackFitter.RecalibrateSilicon = False
-
-    # if InDetTrigFlags.doRefit():
-    #   InDetTrigTrackFitter.BroadRotCreatorTool = None
-    #   InDetTrigTrackFitter.RecalibrateSilicon = False
-    #   InDetTrigTrackFitter.RecalibrateTRT     = False
-    #   InDetTrigTrackFitter.ReintegrateOutliers= False
-
-    # if InDetTrigFlags.doRobustReco():
-    #   InDetTrigTrackFitter.OutlierCut         = 10.0
-    #   InDetTrigTrackFitter.TrackChi2PerNDFCut = 20
-    #   InDetTrigTrackFitter.MaxOutliers        = 99
-    #   #only switch off for cosmics InDetTrigTrackFitter.Acceleration = False
-
     acc.setPrivateTools(CompFactory.Trk.GlobalChi2Fitter(name, **kwargs))
     return acc
 

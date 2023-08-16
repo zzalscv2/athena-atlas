@@ -95,7 +95,7 @@ def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksNam
 
 
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolWrapper
+    from TrigInDetConfig.InDetTrigCAWrappers import CAtoLegacyPublicToolWrapper
     InDetTrigExtrapolator = CAtoLegacyPublicToolWrapper(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
 
     VertexFitter = CompFactory.Trk__TrkVKalVrtFitter(
