@@ -4,6 +4,7 @@
 #include "AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h"
 
 // EDM include(s):
+#include "AthContainersInterfaces/IAuxStoreIO.h"
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorBase.h"
@@ -568,8 +569,11 @@ namespace CP {
       // a standalone object.
       static const bool ALLOW_MISSING = true;
       const TClass* cl = nullptr;
-      if( getVector( key, *( evtStore() ), ALLOW_MISSING, cl,
+      if(const SG::AuxVectorData *vec = getVector( key, *( evtStore() ), ALLOW_MISSING, cl,
                      msg() ) ) {
+         // Force loading dynamic aux variables if possible
+         if (const auto *store = dynamic_cast<const SG::IAuxStoreIO *>(vec->getConstStore()))
+            store->getDynamicAuxIDs();
          bool created = false;
          ATH_CHECK( m_containers[ key ].addBranch( *m_tree,
                                                    auxName,
@@ -586,8 +590,11 @@ namespace CP {
                            << "\" from container/variable \"" << key
                            << "." << auxName << "\"" );
          }
-      } else if( getElement( key, *( evtStore() ),
+      } else if(const SG::AuxElement *ele = getElement( key, *( evtStore() ),
                               ALLOW_MISSING, msg() ) ) {
+         // Force loading dynamic aux variables if possible
+         if (const auto *store = dynamic_cast<const SG::IAuxStoreIO *>(ele->getConstStore()))
+             store->getDynamicAuxIDs();
          bool created = false;
          ATH_CHECK( m_elements[ key ].addBranch( *m_tree,
                                                  auxName,
