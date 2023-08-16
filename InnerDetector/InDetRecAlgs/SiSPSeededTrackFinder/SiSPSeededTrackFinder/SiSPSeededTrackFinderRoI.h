@@ -28,6 +28,7 @@
 #include "TrkEventUtils/PRDtoTrackMap.h"
 
 #include "xAODTracking/VertexContainer.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include <string>
 #include <atomic>
@@ -88,6 +89,7 @@ namespace InDet {
     SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{this,"PRDtoTrackMap",""};
 
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_evtKey{this, "EventInfoKey", "EventInfo"};
     //@}
 
     ///////////////////////////////////////////////////////////////////

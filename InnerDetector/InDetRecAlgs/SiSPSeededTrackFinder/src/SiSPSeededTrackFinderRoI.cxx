@@ -43,6 +43,7 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::initialize()
   ATH_CHECK( m_SpacePointsSCTKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
   ATH_CHECK( m_beamSpotKey.initialize() );
+  ATH_CHECK(m_evtKey.initialize());
   
   // Retrieve Tools
   ATH_CHECK( m_ZWindowRoISeedTool.retrieve() );
@@ -110,18 +111,16 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   //
   std::vector<InDet::IZWindowRoISeedTool::ZWindow> listRoIs;
   listRoIs =  m_ZWindowRoISeedTool->getRoIs(ctx);
-  double ZBoundary[2];
+  double ZBoundary[2] = {0.0, 0.0};
   //if no RoI found; no need to go further
   if ( listRoIs.empty() ) {
-    ATH_MSG_DEBUG("no selectedRoIs " );
-    SG::WriteHandle<xAOD::VertexContainer> vxOut_h (m_vxOutputKey, ctx);
-    CHECK( vxOut_h.record ( std::move(theVertexContainer), std::move(theVertexAuxContainer) ) );
-    return StatusCode::SUCCESS;
+    ATH_MSG_DEBUG("no selectedRoIs" );
+  } else {
+    //listRoIs[0].zReference is the midpoint
+    ZBoundary[0] = listRoIs[0].zWindow[0];
+    ZBoundary[1] = listRoIs[0].zWindow[1];
+    ATH_MSG_DEBUG("selectedRoIs " << ZBoundary[0] <<" " << ZBoundary[1]);
   }
-  ZBoundary[0] = listRoIs[0].zWindow[0];
-  ZBoundary[1] = listRoIs[0].zWindow[1];
-  //listRoIs[0].zReference is the midpoint
-  ATH_MSG_DEBUG("selectedRoIs " << ZBoundary[0] <<" " << ZBoundary[1]);
   
   //Store RoI information in a xAOD::Vertex object
   static const SG::AuxElement::Accessor<float> vtxDecor_boundaryLow("boundaryLow");
@@ -145,7 +144,7 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   //Analyses that want to run low-pt tracking with a region of interest care about the beam conditions near a collision of interest.  Validation of the beam conditions elsewhere in the beamspot (regarding low-pt tracks) will be needed to establish meaningful uncertainties.  Choosing a random position allows for this check.  Run with RAWtoESD section of postexec: ToolSvc.InDetSiSpTrackFinder_LowPtRoI.doRandomSpot = True
   double RandZBoundary[2];
   std::vector<InDet::IZWindowRoISeedTool::ZWindow> listRandRoIs;
-  if(m_doRandomSpot){
+  if(m_doRandomSpot and not listRoIs.empty()){
     //Finding Random Spot in beamspot
     listRandRoIs =  m_RandomRoISeedTool->getRoIs(ctx);
 
@@ -177,17 +176,29 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   //  
   SiSpacePointsSeedMakerEventData seedEventData;
   m_seedsmaker->newEvent(ctx, seedEventData, -1); 
-  std::list<Trk::Vertex> VZ; 
-  if(m_RoIWidth >= 0.) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, ZBoundary); 
-  //If you want to disable the RoI but still have a separate container for low-pt tracks, 
-  // make the RoI input width a negative value.  The RoI "vertex" container will still be 
-  // there in case you want to use that information for whatever reason (ie where the RoI 
-  // would have been centered).
-  if(m_RoIWidth < 0.) m_seedsmaker->find3Sp(ctx, seedEventData, VZ); 
-  if(m_doRandomSpot) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, RandZBoundary);
+  if (not listRoIs.empty()) {
+    std::list<Trk::Vertex> VZ; 
+    if(m_RoIWidth >= 0.) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, ZBoundary); 
+    //If you want to disable the RoI but still have a separate container for low-pt tracks, 
+    // make the RoI input width a negative value.  The RoI "vertex" container will still be 
+    // there in case you want to use that information for whatever reason (ie where the RoI 
+    // would have been centered).
+    if(m_RoIWidth < 0.) m_seedsmaker->find3Sp(ctx, seedEventData, VZ); 
+    if(m_doRandomSpot) m_seedsmaker->find3Sp(ctx, seedEventData, VZ, RandZBoundary);
+  }
 
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap);
   m_trackmaker->newEvent(ctx, trackEventData, PIX, SCT);
+
+
+  // Get the value of the seed maker validation ntuple writing switch
+  bool doWriteNtuple = m_seedsmaker->getWriteNtupleBoolProperty();
+  unsigned long EvNumber = 0; //Event number variable to be used for the validation ntuple 
+
+  if (doWriteNtuple) {
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtKey,ctx);
+    EvNumber = !eventInfo.isValid() ? 0 : eventInfo->eventNumber();
+  }
 
   // Loop through all seed and create track candidates
   //
@@ -202,6 +213,18 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
     for(Trk::Track* t: trackList) {
       qualitySortedTrackCandidates.insert(std::make_pair( -trackQuality(t), t ));
     }
+    if(doWriteNtuple) { 
+      // Note: determining if "pixel" or "strips" or "mixed" seed depending on innermost/outermost radii - hardcoded boundaries for Run 1-3 detector
+      ISiSpacePointsSeedMaker::seedType seedType = ISiSpacePointsSeedMaker::PixelSeed;
+      if (seed->r3() > 200.) {
+        if (seed->r1() < 200.) {
+          seedType = ISiSpacePointsSeedMaker::MixedSeed;
+        } else {
+          seedType = ISiSpacePointsSeedMaker::StripSeed;
+        }
+      }
+      m_seedsmaker->writeNtuple(seed, !trackList.empty() ? trackList.front() : nullptr, seedType, EvNumber) ; 
+    } 
     if( counter[kNSeeds] >= m_maxNumberSeeds) {
       ERR = true; 
       ++m_problemsTotal;  

@@ -85,7 +85,7 @@ void InDet::SeedToTrackConversionTool::endEvent(SeedToTrackConversionData& data)
     dump(data, msg(MSG::DEBUG));
   }
 
-  ATH_MSG_INFO(" Check SiSPSeedSegments Collection " << data.seedSegmentsCollection()->size() << " trackinfo: "
+  ATH_MSG_INFO(" Check SiSPSeedSegments Collection (" << m_seedsegmentsOutput << ") " << data.seedSegmentsCollection()->size() << " trackinfo: "
                << data.trackInfo());
   SG::WriteHandle<TrackCollection> seedsegmentsOutput{m_seedsegmentsOutput};
   if (seedsegmentsOutput.record(std::move(data.seedSegmentsCollection())).isFailure()) {
