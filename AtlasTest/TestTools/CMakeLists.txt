@@ -46,6 +46,10 @@ atlas_add_test( postsh_select_test
    SCRIPT cat "${CMAKE_CURRENT_SOURCE_DIR}/test/test_postsh_example.log"
    LOG_SELECT_PATTERN "MyAlg" )
 
+atlas_add_test( postsh_select_hyphen_test
+   SCRIPT cat "${CMAKE_CURRENT_SOURCE_DIR}/share/postsh_select_hyphen_test.ref"
+   LOG_SELECT_PATTERN "--" )
+
 atlas_add_test( postsh_select_ignore_test
    SCRIPT cat "${CMAKE_CURRENT_SOURCE_DIR}/test/test_postsh_example.log"
    LOG_SELECT_PATTERN "MyAlg"
@@ -89,6 +93,11 @@ atlas_add_test( noerror_select
 atlas_add_test( noerror_ignore
    SCRIPT "echo ERROR known error"
    LOG_IGNORE_PATTERN ".*ERROR known"
+   POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( noerror_ignore_hyphen
+   SCRIPT "echo ERROR unrecognized option '--foo'"
+   LOG_IGNORE_PATTERN "--"
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( noerror_false_positive

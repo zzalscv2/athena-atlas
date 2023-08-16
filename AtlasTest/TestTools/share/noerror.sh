@@ -54,9 +54,9 @@ fi
 
 # check log file:
 if [ -n "${ATLAS_CTEST_LOG_IGNORE_PATTERN}" ]; then
-    matches=`grep -Ea "${errors}" ${joblog} | grep -Eav "${ATLAS_CTEST_LOG_IGNORE_PATTERN}"`
+    matches=`grep -Ea -e "${errors}" ${joblog} | grep -Eav -e "${ATLAS_CTEST_LOG_IGNORE_PATTERN}"`
 else
-    matches=`grep -Ea "${errors}" ${joblog}`
+    matches=`grep -Ea -e "${errors}" ${joblog}`
 fi
 
 if [ -n "${matches}" ]; then
