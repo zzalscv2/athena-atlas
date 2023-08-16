@@ -315,8 +315,8 @@ else
            # Process/filter log and reference file
            process() {
                sed -r "$II" $1 |
-                   ( [[ "$selectpatterns" ]] && grep -Ea "$selectpatterns" || tee ) |
-                   ( [[ "$ignorepatterns" ]] && grep -Eav "$ignorepatterns" || tee ) > $2
+                   { [[ "$selectpatterns" ]] && grep -Ea -e "$selectpatterns" || cat ; } |
+                   { [[ "$ignorepatterns" ]] && grep -Eav -e "$ignorepatterns" || cat ; } > $2
            }
            process $joblog $jobdiff
            process $reflog $refdiff
