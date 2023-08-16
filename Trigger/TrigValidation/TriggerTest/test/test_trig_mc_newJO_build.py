@@ -15,6 +15,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.args = '--CA'
 ex.input = 'ttbar'
+ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.doRuntimeNaviVal=True',
