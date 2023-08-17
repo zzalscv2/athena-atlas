@@ -55,13 +55,14 @@ if '__main__' in __name__:
 
     # Parse user input
     import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--inputAODFiles', default=None, required=True,
-                        help='Input AOD file(s)')
-    parser.add_argument('--outputAODFile', default=None, required=True,
+    parser = argparse.ArgumentParser(description='Select events identified by run number (mc channel number'\
+                                     ' in case of Monte Carlo), event number from the input AOD file(s)')
+    parser.add_argument('--inputAODFiles', required=True,
+                        help='Input AOD file(s) separated with commas')
+    parser.add_argument('--outputAODFile', required=True,
                         help='Output AOD file')
-    parser.add_argument('--eventList', default=None, required=True,
-                        help='Text file containing "run event [guid]" information (one per line)')
+    parser.add_argument('--eventList', required=True,
+                        help='Text file containing <run number> <event number> [<guid>] record(s) (one per line)')
     args, _ = parser.parse_known_args()
 
     # Setup configuration logging

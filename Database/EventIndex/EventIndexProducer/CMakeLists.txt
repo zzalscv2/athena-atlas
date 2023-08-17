@@ -48,3 +48,24 @@ endif()
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} --extend-ignore=F401,E402,F821 )
 atlas_install_runtime( scripts/*.py )
+
+# Test(s) in the package:
+atlas_add_test( AODEventPicking_run2_data
+                SCRIPT test/AODEventPicking_run2_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                PROPERTIES TIMEOUT 600 )
+
+atlas_add_test( AODEventPicking_run2_mc
+                SCRIPT test/AODEventPicking_run2_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                PROPERTIES TIMEOUT 600 )
+
+atlas_add_test( AODEventPicking_run3_data
+                SCRIPT test/AODEventPicking_run3_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                PROPERTIES TIMEOUT 600 )
+
+atlas_add_test( AODEventPicking_run3_mc
+                SCRIPT test/AODEventPicking_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                PROPERTIES TIMEOUT 600 )
