@@ -387,131 +387,104 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   // The angle dependance on strip resolution goes as tan^2(angle)
   const double angle_dependency = std::hypot(m_posResIncident, m_posResAngular * tan_theta);
 
-  //// Assume spread charge follows a gaussian distribution
-  const double charge_width = CLHEP::RandGaussZiggurat::shoot(rndmEngine, m_GausMean, m_GausSigma);
-
   const double cluster_posX = posOnSurf_strip.x();
   double peak_position = CLHEP::RandGaussZiggurat::shoot(rndmEngine, cluster_posX, m_StripResolution*angle_dependency);
 
-  // each readout plane reads about half the total charge produced on the wire
-  const double norm = 0.5*total_charge/(charge_width*std::sqrt(2.*M_PI));
-  std::unique_ptr<TF1> charge_spread = std::make_unique<TF1>("fgaus", "gaus(0)", -1000., 1000.);
-  charge_spread->SetParameters(norm, peak_position, charge_width);
+  // Each readout plane reads about half the total charge produced on the wire,
+  // including a tan(theta) term to describe the increase of charge with incident angle
+  const double norm = 0.5 * total_charge * m_stripChargeScale * std::hypot(1, m_chargeAngularFactor * tan_theta);
+  // Strip cluster charge profile described by a double Gaussian.
+  // The independent parameter x is in the units of strip channel, one strip channel = 3.2 mm,
+  //   so convert position from mm to strip channel if it is not already.
+  std::unique_ptr<TF1> clusterProfile = std::make_unique<TF1>("fgaus",
+                                         "[0]*exp(-0.5*(x/[1])^2)+[2]*exp(-0.5*(x/[3])^2)",
+                                         -300., 300.);
+  clusterProfile->SetParameters(norm * m_clusterProfile[0], // normalization of 1st Gaussian
+                                m_clusterProfile[1], // sigma of 1st Gaussian
+                                norm * m_clusterProfile[2], // normalization of 2nd Gaussian
+                                m_clusterProfile[3]); // sigma of 2nd Gaussian
 
-  // Get the nominal strip width, which is 2.7 mm, while the strip pitch is 3.2 mm.
-  const double stripWidth = detEl->getDesign(newId)->inputWidth;
-
-  // Lower limit on strip charge, in pC, which has the same units as the parameter ionized_charge
+  // Lower limit on strip charge (arbitrary limit), in pC, which has the same units as the parameter ionized_charge. 
   constexpr double tolerance_charge = 0.0005;
-
-  // Position of the strip closest to the hit
-  Amg::Vector2D middleStrip_pos(0., 0.);
-  detEl->stripPosition(newId, middleStrip_pos);
-
-  // Determine the middle strips
-  // Usually, the middle strip is the strip nearest to the hit.
-  // If a hit is placed between two strips, then these two strips
-  // are considered as middle strips.
-  int middleStrip[2] = {0, 0};
-  double hitRelativeLocation = cluster_posX - middleStrip_pos.x();
-  if (std::abs(hitRelativeLocation) < (stripWidth/2)) {
-    // Only one middle strip, so add the same strip number in the array
-    middleStrip[0] = stripNumber;
-    middleStrip[1] = stripNumber;
-  } else if (hitRelativeLocation < 0.0) {
-    middleStrip[0] = stripNumber-1;
-    middleStrip[1] = stripNumber;
-  } else if (hitRelativeLocation > 0.0) {
-    middleStrip[0] = stripNumber;
-    middleStrip[1] = stripNumber+1;
-  }
-
-  /* While-loop to spread charge on the strips around the hit
-   * The strips adjacent to the hit are considered one by one until the charge
-   * to be spread on the strip is below a tolerance.
-   */
-  unsigned int neighbor = 0;
-  // Flags to stop spreading charge on neighbour strips
-  bool createNeighbor1 = true;
-  bool createNeighbor2 = true;
-  unsigned int counter_strip = 0;
-  // Set a maximum number of neighbour strips to avoid very long loop
+  // Set a maximum number of neighbour strips to avoid very long loop. This is an arbitrary number.
   constexpr unsigned int max_neighbor = 10;
-  while (createNeighbor1 || createNeighbor2) {
-    // Strip numbers to be considered
-    std::vector<int> tmpStripNumbers;
-    if (neighbor == 0) {
-      tmpStripNumbers.push_back(stripNumber);
-    } else if (neighbor > 0) {
-      if (createNeighbor1) tmpStripNumbers.push_back(stripNumber - neighbor);
-      if (createNeighbor2) tmpStripNumbers.push_back(stripNumber + neighbor);
+
+  // Spread charge on the strips that are on the upper half of the strip cluster
+  for (unsigned int iStrip = 0; iStrip <= max_neighbor; ++iStrip) {
+    int currentStrip = stripNumber + iStrip;
+    if (currentStrip > NumberOfStrips) break;
+
+    // Get the strip identifier and create the digit
+    newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, currentStrip, isValid);
+    if (isValid) {
+      Amg::Vector2D locpos(0., 0.);
+      if (!detEl->stripPosition(newId, locpos)) {
+        ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelper->print_to_string(newId) );
+      }
+
+      // Estimate the digit charge
+      // Position with respect to the peak of the charge curve
+      double x_relative = locpos.x() - peak_position;
+      // In clusterProfile curve, position should be in the units of strip channel
+      double charge = clusterProfile->Integral(x_relative/(2*stripHalfPitch) - 0.5, x_relative/(2*stripHalfPitch) + 0.5);
+      // If charge is too small, stop creating neighbor strip
+      if (charge < tolerance_charge) break;
+
+      // Estimate digit time
+      double strip_time = sDigitTimeStrip;
+      // Strip time response can be delayed due to the resistive layer.
+      // A correction would be required if the actual VMM front-end doesn't re-align the strip timing.
+      if (m_doTimeOffsetStrip) {
+        // Determine how far the current strip is from the middle strip
+        int indexFromMiddleStrip = iStrip;
+        if ((iStrip > 0) && ((x_relative + (0.75 - iStrip * 2) * stripHalfPitch) < 0))
+           indexFromMiddleStrip = iStrip - 1;
+        // Add time delay due to resistive layer
+        strip_time += getTimeOffsetStrip(indexFromMiddleStrip);
+      }
+
+      addDigit(digits.get(),newId, bctag, strip_time, charge, channelType);
+
+      ATH_MSG_VERBOSE("Created a strip digit: strip number = " << currentStrip << ", charge = " << charge
+                      << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip
+                      << ", neighbor index = " << iStrip
+                      << ", strip position = (" << locpos.x() << "," << locpos.y() << ")");
     }
-
-    // Terminate the loop if zero strip digits
-    if (tmpStripNumbers.empty()) break;
-
-    // Skip spreading charge on out-of-range strips
-    for (int stripnum: tmpStripNumbers) {
-      // Verify if strip number is valid
-      if(stripnum < 1) {
-        createNeighbor1 = false;
-        continue;
-      }
-      if(stripnum > NumberOfStrips) {
-        createNeighbor2 = false;
-        continue;
-      }
-
-      // Get the strip identifier and create the digit
-      newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, stripnum, isValid);
-      if (isValid) {
-        Amg::Vector2D locpos(0., 0.);
-        if (!detEl->stripPosition(newId, locpos)) {
-          ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelper->print_to_string(newId) );
-        }
-
-        // Estimate the digit charge
-        double xmax = locpos.x() + stripHalfPitch;
-        double xmin = locpos.x() - stripHalfPitch;
-        double charge = charge_spread->Integral(xmin, xmax);
-        // If charge is too small, stop creating neighbor strip
-        if (charge < tolerance_charge) {
-          if (stripnum <= middleStrip[0]) createNeighbor1 = false;
-          if (stripnum >= middleStrip[1]) createNeighbor2 = false;
-          continue;
-        }
-
-        // Estimate digit time
-        double strip_time = sDigitTimeStrip;
-        // Strip time response can be delayed due to the resistive layer.
-        // A correction would be required if the actual VMM front-end doesn't re-align the strip timing.
-        if (m_doTimeOffsetStrip) {
-          // Determine how far the current strip is from the middle strip
-          int indexFromMiddleStrip = std::abs(stripnum - middleStrip[0]);
-          if (std::abs(stripnum - middleStrip[1]) < indexFromMiddleStrip) {
-            indexFromMiddleStrip = std::abs(stripnum - middleStrip[1]);
-          }
-          // Add time delay due to resistive layer
-          strip_time += getTimeOffsetStrip(indexFromMiddleStrip);
-        }
-
-        addDigit(digits.get(),newId, bctag, strip_time, charge, channelType);
-
-        ATH_MSG_VERBOSE("Created a strip digit: strip number = " << stripnum << ", charge = " << charge
-                        << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip
-                        << ", neighbor index = " << neighbor
-                        << ", strip position = (" << locpos.x() << "," << locpos.y() << ")");
-
-        ++counter_strip;
-      }
-    }
-
-    // Increment neighbor parameter
-    ++neighbor;
-    if (neighbor > max_neighbor) break;
   }
-  ATH_MSG_DEBUG("Number of strip digits created = " << counter_strip);
 
+  // The lower half of the strip cluster
+  for (unsigned int iStrip = 1; iStrip <= max_neighbor; ++iStrip) {
+    int currentStrip = stripNumber - iStrip;
+    if (currentStrip < 1) break;
+
+    newId = m_idHelper->channelID(m_idHelper->parentID(layid), multiPlet, gasGap, channelType, currentStrip, isValid);
+    if (isValid) {
+      Amg::Vector2D locpos(0., 0.);
+      if (!detEl->stripPosition(newId, locpos)) {
+        ATH_MSG_WARNING("Failed to obtain local position for identifier " << m_idHelper->print_to_string(newId) );
+      }
+
+      // Estimate the digit charge
+      double x_relative = locpos.x() - peak_position;
+      double charge = clusterProfile->Integral(x_relative/(2*stripHalfPitch) - 0.5, x_relative/(2*stripHalfPitch) + 0.5);
+      if (charge < tolerance_charge) break;
+
+      // Estimate digit time
+      double strip_time = sDigitTimeStrip;
+      // Time delay due to resistive layer
+      if (m_doTimeOffsetStrip) {
+        int indexFromMiddleStrip = ((x_relative + (iStrip * 2 - 0.75) * stripHalfPitch) > 0)? iStrip - 1 : iStrip;
+        strip_time += getTimeOffsetStrip(indexFromMiddleStrip);
+      }
+
+      addDigit(digits.get(),newId, bctag, strip_time, charge, channelType);
+
+      ATH_MSG_VERBOSE("Created a strip digit: strip number = " << currentStrip << ", charge = " << charge
+                      << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip
+                      << ", neighbor index = " << iStrip
+                      << ", strip position = (" << locpos.x() << "," << locpos.y() << ")");
+    }
+  }
   // end of strip digitization
 
   if(m_channelTypes==1) {
@@ -568,11 +541,13 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
 
       // Charge sharing happens within 4mm window for pads
       // i.e. the charge is spread over a 2D gaussian of total radius about 4mm
-      // This value depends on actual width of the distribution, so lets consider 2.5*sigma
+      // This value depends on actual width of the distribution, but we don't have the
+      // width of the charge distribution for pads. So lets consider 2.5*sigma, where
+      // sigma is the width of the charge distribution for strips.
       double deltaX = halfPadWidthX - std::abs(diff.x());
       double deltaY= halfPadWidthY - std::abs(diff.y());
-      bool isNeighX = deltaX < 2.5*m_GausMean;
-      bool isNeighY = deltaY < 2.5*m_GausMean;
+      bool isNeighX = deltaX < 2.5*m_clusterProfile[3];
+      bool isNeighY = deltaY < 2.5*m_clusterProfile[3];
       // Pad width can be calculated to be very slightly larger than it should due to rounding errors
       // So if a hit falls on a given pad but is "outside" the width, just define it to be on the boundary of 2 pads.
       if (deltaX < 0.) deltaX = 0.1;
@@ -1151,12 +1126,12 @@ double sTgcDigitMaker::getTimeOffsetStrip(int neighbor_index) const {
 //+++++++++++++++++++++++++++++++++++++++++++++++
 double sTgcDigitMaker::getPadChargeFraction(double distance) const {
   // The charge fraction that is found past a distance x away from the
-  // centre of a 2D gaussian distribution of width m_GausMean is
+  // centre of a 2D gaussian distribution of width of cluster profile is
   // described by a modified error function.
 
   // The modified error function perfectly describes
   // the pad charge sharing distribution figure 16 of the sTGC
   // testbeam paper https://arxiv.org/pdf/1509.06329.pdf
 
-  return 0.5 * (1.0 - std::erf( distance / (std::sqrt(2) * m_GausMean)));
+  return 0.5 * (1.0 - std::erf( distance / (std::sqrt(2) * m_clusterProfile[3])));
 }
