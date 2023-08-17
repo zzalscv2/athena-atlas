@@ -9,6 +9,7 @@
 #include <limits> 
 #include <cstdint> 
 #include <memory>
+#include <deque>
 #include <type_traits>
 #if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
 #include "AtlasHepMC/GenEvent.h"
@@ -85,6 +86,42 @@ inline bool is_sim_descendant(const T1& p1,const T2& p2) { return p1 && p2 && (p
 template <class T1,class T2, std::enable_if_t< std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
 inline bool is_sim_descendant(const T1& p1,const T2& p2) { return p2 && (p1 % SIM_REGENERATION_INCREMENT == p2->barcode()); }
 
+template <class T> int  unique_id(const T& p1){ return p1->barcode();}
+#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
+template <>  inline int unique_id(const ConstGenParticlePtr& p1){ return p1->id();}
+template <>  inline int unique_id(const GenParticlePtr& p1){ return p1->id();}
+#endif
+
+
+template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, int direction=0) {
+  if (direction < 0) {
+    if (p->status()>SIM_STATUS_INCREMENT) {
+      auto pv = p->production_vertex();
+      if (pv) {
+        for (auto pa: pv->particles_in()) {
+          if (pa->pdg_id() != p->pdg_id()) continue;
+          out.push_front(unique_id(p));
+          get_particle_history(pa,out,-1);
+          break;
+        }
+      }
+    }
+  }
+  if (direction > 0) {
+    if (p->status()>SIM_STATUS_INCREMENT) {
+      auto pv = p->end_vertex();
+      if (pv) {
+        for (auto pa: pv->particles_out()) {
+          if (pa->pdg_id() != p->pdg_id()) continue;
+          out.push_back(unique_id(p));
+          get_particle_history(pa,out,1);
+          break;
+        }
+      }
+    }
+  }
+}
+template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(unique_id(p)); get_particle_history(p, res, direction); return res;}
 
 }
 #endif
