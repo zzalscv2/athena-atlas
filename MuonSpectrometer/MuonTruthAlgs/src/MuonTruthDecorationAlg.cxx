@@ -453,6 +453,7 @@ namespace Muon {
         std::vector<unsigned int> ntrigEtaHitsPerChamberLayer;
         ntrigEtaHitsPerChamberLayer.resize(Muon::MuonStationIndex::PhiIndexMax);
         ATH_MSG_DEBUG("addHitCounts: barcode " << barcode);
+        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1);
         // loop over detector technologies
         for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
             if (!col.isPresent()) {
@@ -463,7 +464,7 @@ namespace Muon {
             // loop over trajectories
             for (const auto& trajectory : *col) {
                 // check if gen particle same as input
-                if (!HepMC::is_sim_descendant(&trajectory.second,&truthParticle)) continue;
+                if (std::find(truthParticleHistory.begin(),truthParticleHistory.end(),trajectory.second.barcode()) == truthParticleHistory.end()) continue;
 
                 const Identifier& id = trajectory.first;
                 bool measPhi = m_idHelperSvc->measuresPhi(id);
