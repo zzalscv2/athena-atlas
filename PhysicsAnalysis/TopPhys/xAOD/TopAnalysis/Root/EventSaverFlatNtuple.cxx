@@ -2886,12 +2886,18 @@ namespace top {
 
           const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging(*jetPtr);
           if (btag) {
+	    // exception for GN2v00 tagger
+	    std::string taggerName = algo.first;
+	    if(taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
+	      taggerName = "GN2v00";
+	    }
+
             double pu = -999;
             double pc = -999;
             double pb = -999;
-            btag->pu(algo.first, pu);
-            btag->pc(algo.first, pc);
-            btag->pb(algo.first, pb);
+            btag->pu(taggerName, pu);
+            btag->pc(taggerName, pc);
+            btag->pb(taggerName, pb);
             m_jet_DLx_pb_pick[i] = pb;
             m_jet_DLx_pc_pick[i] = pc;
             m_jet_DLx_pu_pick[i] = pu;
