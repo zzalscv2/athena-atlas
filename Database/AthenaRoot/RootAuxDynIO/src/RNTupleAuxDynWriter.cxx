@@ -57,7 +57,6 @@ namespace RootAuxDynIO
    {
       const SG::auxid_set_t selection = store->getSelectedAuxIDs();
       ATH_MSG_DEBUG("Writing " << base_name << " with " << selection.size() << " Dynamic attributes");
-
       for(SG::auxid_t id : selection) {
          const std::string attr_type = SG::normalizedTypeinfoName( *store->getIOType(id) );
          const std::string attr_name = SG::AuxTypeRegistry::instance().getName(id);
@@ -158,8 +157,7 @@ namespace RootAuxDynIO
       ATH_MSG_DEBUG(m_ntupleName << " has " <<  m_attrDataMap.size() << " attributes");
       int attrN = 0;
       for( auto& attr: m_attrDataMap ) {
-         ATH_MSG_DEBUG("  - " << ++attrN << ": " << attr.first);
-         ATH_MSG_VERBOSE("Setting data ptr for field: " << attr.first << "  data=" << std::hex << attr.second << std::dec );
+         ATH_MSG_VERBOSE("Setting data ptr for field# " << ++attrN << ": " << attr.first << "  data=" << std::hex << attr.second << std::dec );
          if( !attr.second ) {
             if( m_generatedValues.find(attr.first) == m_generatedValues.end() ) {
                ATH_MSG_DEBUG("Generating default object for field: " << attr.first );
@@ -179,6 +177,8 @@ namespace RootAuxDynIO
       ATH_MSG_DEBUG("Filled RNTuple Row, bytes written: " << num_bytes);
 
       m_entry.reset();
+      // forget all values to see if any object is missing in a new commit
+      for( auto& attr: m_attrDataMap ) { attr.second = nullptr; } 
       m_needsCommit = false;
       m_rowN++;
 
