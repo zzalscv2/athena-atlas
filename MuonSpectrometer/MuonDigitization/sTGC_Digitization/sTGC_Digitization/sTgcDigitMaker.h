@@ -157,11 +157,17 @@ class sTgcDigitMaker : public AthMessaging {
 
   // Flag to enable strip time offset
   bool m_doTimeOffsetStrip{false};
-  double m_GausMean{2.27};  //mm; VMM response from Oct/Nov 2013 test beam
-  double m_GausSigma{0.1885}; //mm; VMM response from Oct/Nov 2013 test beam
-  double m_StripResolution{0.0949}; // Angular strip resolution parameter
+  // Angular strip resolution parameter
+  double m_StripResolution{0.0949};
   double m_posResIncident{1.};
   double m_posResAngular{0.305/m_StripResolution};
+  // Strip cluster charge profile: [0] = norm of inner Gaussian, [1] = sigma of inner Gaussian,
+  //   [2] = norm of outer Gaussian, [3] = sigma of outer Gaussian
+  std::array<float, 4> m_clusterProfile{0.350, 0.573, 0.186, 1.092};
+  // Dependence of energy deposited on incident angle
+  double m_chargeAngularFactor{4.0};
+  // Overall factor to scale the total strip cluster charge
+  double m_stripChargeScale{0.4};
 };
 
 #endif
