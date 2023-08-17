@@ -243,7 +243,7 @@ namespace ITk
     float m_dzdrmax0{0.};
     float m_ipt{0.};
     float m_ipt2{0.};
-    float m_COF{134 * .05 * 9};
+    float m_COF{134 * .05f * 9};
     float m_dzMaxFast   {200.};
     float m_R2MaxFast   {2500.};        
     float m_rmaxPPP     {140.};

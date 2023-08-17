@@ -188,7 +188,7 @@ namespace InDet {
     float m_dzdrmax{0.};
     float m_r3max{0.};
     float m_iptmin{0.};
-    float m_iptmax{1./400.};
+    float m_iptmax{1.f/400.f};
     float m_sF{0.};
     //@}
 
