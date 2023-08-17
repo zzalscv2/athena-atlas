@@ -160,7 +160,7 @@ class AthConfigFlags(object):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
 
     def _calculateHash(self):
-        return hash(str(self._flagdict.items()))
+        return hash(frozenset((x, repr(y)) for x, y in self._flagdict.items()))
 
     def __getattr__(self, name):
         # Avoid infinite recursion looking up our own attributes
