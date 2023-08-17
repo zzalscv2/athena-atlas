@@ -1010,9 +1010,16 @@ namespace top {
         double dl1_pb = -10.;
         double dl1_pc = -10.;
         double dl1_pu = -10.;
-        if (xAOD::BTaggingUtilities::getBTagging(*jet)->pb(algo.first, dl1_pb)
-            && xAOD::BTaggingUtilities::getBTagging(*jet)->pc(algo.first, dl1_pc)
-            && xAOD::BTaggingUtilities::getBTagging(*jet)->pu(algo.first, dl1_pu)) {
+
+	// exception for GN2v00 tagger
+	std::string taggerName = algo.first;
+	if(taggerName == "GN2v00LegacyWP" || taggerName == "GN2v00NewAliasWP"){
+	  taggerName = "GN2v00";
+	}
+
+        if (xAOD::BTaggingUtilities::getBTagging(*jet)->pb(taggerName, dl1_pb)
+            && xAOD::BTaggingUtilities::getBTagging(*jet)->pc(taggerName, dl1_pc)
+            && xAOD::BTaggingUtilities::getBTagging(*jet)->pu(taggerName, dl1_pu)) {
           if (!algo.second->getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, DL1_weight)) {
             DL1_weight = -999.; // value for errors from retrieving DL1x weight
           }
