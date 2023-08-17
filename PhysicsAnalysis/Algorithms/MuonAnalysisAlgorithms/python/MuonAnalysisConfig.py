@@ -92,6 +92,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolation', None, type=str)
         self.addOption ('qualitySelectionOutput', True, type=bool)
         self.addOption ('systematicBreakdown', False, type=bool)
+        self.addOption ('onlyRecoEffSF', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -165,7 +166,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
 
         # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and self.quality == 'HighPt':
+        if config.dataType() != 'data' and self.quality == 'HighPt' and not self.onlyRecoEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgBMVHighPt' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -182,7 +183,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'BadMuonVeto_effSF' + postfix)
 
         # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and self.isolation != 'NonIso':
+        if config.dataType() != 'data' and self.isolation != 'NonIso' and not self.onlyRecoEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -199,7 +200,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
 
         # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and not self.onlyRecoEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgTTVA' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',

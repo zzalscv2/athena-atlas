@@ -119,7 +119,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False,
                               enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True )
     vars += [
-        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+        'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select',
     ]
     if dataType != 'data' :
         vars += [
@@ -132,7 +132,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
                                   enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True, postfix='legacy' )
         vars += [
-            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select_%SYS%',
+            'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select',
         ]
         if dataType != 'data' :
             vars += [
@@ -151,6 +151,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     algSeq += jetSequence
     algSeq += jvtSequence
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
+             'OutJets_%SYS%.m   -> jet_m_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta', ]
     if dataType != 'data' :
@@ -202,8 +203,8 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
               'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%', ]
               #'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
     if dataType != 'data':
-        vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%', ]
-                  #'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
+        vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_reco_effSF_medium_%SYS%', ]
+                  #'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_reco_effSF_tight_%SYS%', ]
 
     # Include, and then set up the electron analysis sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import \
@@ -232,7 +233,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
               'OutElectrons_NOSYS.eta -> el_eta',
               'OutElectrons_NOSYS.charge -> el_charge',
               'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
-    if dataType != 'data':
+    if dataType != 'data' and not forCompare:
         vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
 
 
@@ -252,7 +253,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
               'OutPhotons_NOSYS.phi -> ph_phi',
               'OutPhotons_NOSYS.eta -> ph_eta',
               'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
-    if dataType != 'data':
+    if dataType != 'data' and not forCompare:
         vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
@@ -448,12 +449,15 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # Include, and then set up the trigger analysis sequence:
-    from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
-        makeTriggerAnalysisSequence
-    triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
-    algSeq += triggerSequence
-    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # disabling comparisons for triggers, because the config blocks do a lot
+    # more than the sequences
+    if not forCompare :
+        # Include, and then set up the trigger analysis sequence:
+        from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
+            makeTriggerAnalysisSequence
+        triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
+        algSeq += triggerSequence
+        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
 
@@ -593,6 +597,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     recomputeLikelihood=False
     configSeq += makeConfig ('Electrons', 'AnaElectrons')
     configSeq += makeConfig ('Electrons.Selection', 'AnaElectrons.loose')
+    if forCompare :
+        configSeq.setOptionValue ('.noEffSF', True)
     if likelihood:
         configSeq.setOptionValue ('.likelihoodWP', 'LooseBLayerLH')
     else:
@@ -610,6 +616,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig ('Photons', 'AnaPhotons')
     configSeq.setOptionValue ('.recomputeIsEM', False)
     configSeq += makeConfig ('Photons.Selection', 'AnaPhotons.tight')
+    if forCompare :
+        configSeq.setOptionValue ('.noEffSF', True)
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
@@ -620,6 +628,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
+    if forCompare :
+        configSeq.setOptionValue ('.onlyRecoEffSF', True)
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23
     # configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
     # configSeq.setOptionValue ('.quality', 'Tight')
@@ -723,17 +733,20 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq += makeConfig ('Output.Thinning', 'AnaTrackJets.Thinning')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
-    # Include, and then set up the trigger analysis sequence:
-    configSeq += makeConfig( 'Trigger.Chains', None )
-    configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
-    configSeq.setOptionValue ('.noFilter', True )
-    configSeq.setOptionValue ('.electronID', 'Tight' )
-    configSeq.setOptionValue ('.electronIsol', 'Tight_VarRad')
-    configSeq.setOptionValue ('.photonIsol', 'TightCaloOnly')
-    configSeq.setOptionValue ('.muonID', 'Tight')
-    configSeq.setOptionValue ('.electrons', 'AnaElectrons' )
-    configSeq.setOptionValue ('.photons', 'AnaPhotons' )
-    configSeq.setOptionValue ('.muons', 'AnaMuons' )
+    # disabling comparisons for triggers, because the config blocks do a lot
+    # more than the sequences
+    if not forCompare :
+        # Include, and then set up the trigger analysis sequence:
+        configSeq += makeConfig( 'Trigger.Chains', None )
+        configSeq.setOptionValue ('.triggerChainsPerYear', triggerChainsPerYear )
+        configSeq.setOptionValue ('.noFilter', True )
+        configSeq.setOptionValue ('.electronID', 'Tight' )
+        configSeq.setOptionValue ('.electronIsol', 'Tight_VarRad')
+        configSeq.setOptionValue ('.photonIsol', 'TightCaloOnly')
+        configSeq.setOptionValue ('.muonID', 'Tight')
+        configSeq.setOptionValue ('.electrons', 'AnaElectrons' )
+        configSeq.setOptionValue ('.photons', 'AnaPhotons' )
+        configSeq.setOptionValue ('.muons', 'AnaMuons' )
 
     configSeq += makeConfig ('Output.Simple', 'Output')
     configSeq.setOptionValue ('.treeName', 'analysis')

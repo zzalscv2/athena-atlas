@@ -129,6 +129,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeLikelihood', False, type=bool)
         self.addOption ('chargeIDSelection', False, type=bool)
+        self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
 
 
     def makeAlgs (self, config) :
@@ -236,7 +237,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
         # Set up the RECO electron efficiency correction algorithm:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -259,7 +260,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
 
         # Set up the ID electron efficiency correction algorithm:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgID' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -282,7 +283,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
 
         # Set up the ISO electron efficiency correction algorithm:
-        if config.dataType() != 'data' and self.isolationWP != 'NonIso':
+        if config.dataType() != 'data' and self.isolationWP != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
