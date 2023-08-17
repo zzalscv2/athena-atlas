@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,7 +28,7 @@ Interface definition for eFEXegAlgo
                                  const int rhoPlusThr) = 0;
 
     virtual void altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr,
-                            std::array<uint32_t, 4> & outTOB) = 0;
+                            std::array<uint32_t, 4> & outTOB) const = 0;
 
 
   };

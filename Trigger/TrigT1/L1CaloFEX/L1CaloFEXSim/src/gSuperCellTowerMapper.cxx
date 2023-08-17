@@ -53,10 +53,10 @@ StatusCode gSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<gTowe
 
   for(auto eachTower : *triggerTowerCollection) {
 
-    if(fabs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
+    if(std::abs(eachTower->eta())<1.5 && eachTower->sampling()==1) {
       int tile_iphi = int(eachTower->phi()/delta_phi);
       int tower_iphi = tile_iphi/2;
-      int tile_ieta = int(fabs(eachTower->eta())/delta_eta);
+      int tile_ieta = int(std::abs(eachTower->eta())/delta_eta);
       int tower_ieta = tile_ieta/2;
       int nphi = 32;
       int etaSign{-1};
@@ -118,7 +118,7 @@ StatusCode gSuperCellTowerMapper::AssignSuperCellsToTowers(std::unique_ptr<gTowe
     int pos_neg = idHelper->pos_neg(ID);
     int eta_index = idHelper->eta(ID);
     const int phi_index = idHelper->phi(ID);
-    float et = (cell)->energy()/cosh((cell)->eta());
+    float et = (cell)->energy()/std::cosh((cell)->eta());
     int prov = (cell)->provenance();
 
 

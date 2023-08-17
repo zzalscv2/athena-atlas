@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSysSim - Overall gFEX simulation
@@ -15,11 +15,8 @@
 
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-
-#include <ctime>
 
 namespace LVL1 {
 
@@ -80,10 +77,9 @@ namespace LVL1 {
    }
 
 
-   int gFEXSysSim::calcTowerID(int eta, int phi, int nphi, int mod)   {
+   int gFEXSysSim::calcTowerID(int eta, int phi, int nphi, int mod) const {
 
       return ((nphi*eta) + phi + mod);
-
    }
 
 
@@ -308,14 +304,10 @@ namespace LVL1 {
       auto & thr_gXE = l1Menu->thrExtraInfo().gXE();
       auto & thr_gTE = l1Menu->thrExtraInfo().gTE();
 
-      int gJ_scale = 0;
-      int gLJ_scale = 0;
-      int gXE_scale = 0;
-      int gTE_scale = 0;
-      gJ_scale = thr_gJ.resolutionMeV(); 
-      gLJ_scale = thr_gLJ.resolutionMeV(); 
-      gXE_scale = thr_gXE.resolutionMeV(); 
-      gTE_scale = thr_gTE.resolutionMeV(); 
+      int gJ_scale = thr_gJ.resolutionMeV();
+      int gLJ_scale = thr_gLJ.resolutionMeV();
+      int gXE_scale = thr_gXE.resolutionMeV();
+      int gTE_scale = thr_gTE.resolutionMeV();
 
 
       //iterate over all gRho Tobs and fill EDM with them

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJetAlgo - JetFinder algorithm for gFEX
@@ -36,13 +36,13 @@ StatusCode gFEXJetAlgo::initialize(){
 
 
 std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
-                               gTowersCentral Atwr, gTowersCentral Btwr,
-                               gTowersForward CNtwr, gTowersForward CPtwr,
+                               const gTowersCentral& Atwr, const gTowersCentral& Btwr,
+                               const gTowersForward& CNtwr, const gTowersForward& CPtwr,
                                int pucA, int pucB, int gLJ_seedThrA, int gLJ_seedThrB, 
                                int gJ_ptMinToTopoCounts1, int gJ_ptMinToTopoCounts2,
                                int jetThreshold, int gLJ_ptMinToTopoCounts1, int gLJ_ptMinToTopoCounts2,
                                std::array<uint32_t, 7> & ATOB1_dat, std::array<uint32_t, 7> & ATOB2_dat,
-                               std::array<uint32_t, 7> & BTOB1_dat, std::array<uint32_t, 7> & BTOB2_dat) {
+                               std::array<uint32_t, 7> & BTOB1_dat, std::array<uint32_t, 7> & BTOB2_dat) const {
 
   // Arrays for gJets
   // s = status (1 if above threshold)
@@ -412,7 +412,7 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
 }
 
 
-void gFEXJetAlgo::RemotePartialAB(gTowersCentral twrs, gTowersPartialSums & lps, gTowersPartialSums & rps){
+void gFEXJetAlgo::RemotePartialAB(const gTowersCentral& twrs, gTowersPartialSums & lps, gTowersPartialSums & rps) const {
 
   // Computes partial sums for FPGA A or B
   // twrs are the 32 x 12 = 284 gTowers in FPGA A or B
@@ -472,7 +472,7 @@ void gFEXJetAlgo::RemotePartialAB(gTowersCentral twrs, gTowersPartialSums & lps,
 }
 
 
-void gFEXJetAlgo::RemotePartialCN(gTowersForward twrs, gTowersPartialSums & rps ){
+void gFEXJetAlgo::RemotePartialCN(const gTowersForward& twrs, gTowersPartialSums & rps ) const {
 
   // Copied from AB
   typedef  std::array<std::array<int, 4>, 4> gTowersNeighbours;
@@ -504,7 +504,7 @@ void gFEXJetAlgo::RemotePartialCN(gTowersForward twrs, gTowersPartialSums & rps 
 }
 
 
-void gFEXJetAlgo::RemotePartialCP(gTowersForward twrs, gTowersPartialSums & lps ){
+void gFEXJetAlgo::RemotePartialCP(const gTowersForward& twrs, gTowersPartialSums & lps ) const {
 
   typedef  std::array<std::array<int, 4>, 4> gTowersNeighbours;
   gTowersNeighbours NUpDwnL = {{ {{2,0,0,0}}, {{2,3,0,0}}, {{4,3,2,0}}, {{4,4,3,2}} }};
@@ -532,7 +532,7 @@ void gFEXJetAlgo::RemotePartialCP(gTowersForward twrs, gTowersPartialSums & lps 
 }
 
 
-void gFEXJetAlgo::singleAB(gTowersCentral twrs, gTowersCentral & FPGAsum){
+void gFEXJetAlgo::singleAB(const gTowersCentral& twrs, gTowersCentral & FPGAsum) const {
   // Finds jets in a single FPGA
 
   // Number of up and down FPGAs to add
@@ -571,7 +571,7 @@ void gFEXJetAlgo::singleAB(gTowersCentral twrs, gTowersCentral & FPGAsum){
 }
 
 
-void gFEXJetAlgo::gBlockAB(gTowersCentral twrs, gTowersCentral & gBlkSum){
+void gFEXJetAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -616,11 +616,11 @@ void gFEXJetAlgo::gBlockAB(gTowersCentral twrs, gTowersCentral & gBlkSum){
 }
 
 
-void gFEXJetAlgo::blkOutAB(gTowersCentral blocks,
+void gFEXJetAlgo::blkOutAB(const gTowersCentral& blocks,
                            std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutL,
                            std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndL,
                            std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutR,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndR ){
+                           std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndR ) const {
 
   // find maximum in each jet engine for gBlocks  (not done in hardware)
   int rows = blocks.size();
@@ -649,7 +649,7 @@ void gFEXJetAlgo::blkOutAB(gTowersCentral blocks,
 }
 
 
-void gFEXJetAlgo::gBlockMax2(gTowersCentral gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi){
+void gFEXJetAlgo::gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const {
 
   //  gBlkSum are the 9 or 6 gTower sums  
   //  BjetColumn is the Block Column -- 0 for CN, 1, 2 for A 3, 4 for B and 5 for CP 
@@ -688,11 +688,11 @@ void gFEXJetAlgo::gBlockMax2(gTowersCentral gBlkSum, int BjetColumn, int localCo
 }
 
 
-void gFEXJetAlgo::gBlockMax192(  gTowersJetEngine gBlkSum,
+void gFEXJetAlgo::gBlockMax192(  const gTowersJetEngine& gBlkSum,
                                  std::array<int, 3> & gBlockVp,
                                  std::array<int, 3> & gBlockEtap,
                                  std::array<int, 3> & gBlockPhip,
-                                 int index){
+                                 int index) const {
 
   int inpv[192]{};
   int maxv1[96]{};
@@ -810,7 +810,7 @@ void gFEXJetAlgo::gBlockMax192(  gTowersJetEngine gBlkSum,
 }
 
 
-void gFEXJetAlgo::addRemoteRin(gTowersCentral &jets, const gTowersPartialSums &partial){
+void gFEXJetAlgo::addRemoteRin(gTowersCentral &jets, const gTowersPartialSums &partial) const {
 
   int rows = partial.size();
   int cols = partial[0].size();
@@ -829,7 +829,7 @@ void gFEXJetAlgo::addRemoteRin(gTowersCentral &jets, const gTowersPartialSums &p
   }
 }
 
-void gFEXJetAlgo::addRemoteLin(gTowersCentral &jets, const gTowersPartialSums &partial){
+void gFEXJetAlgo::addRemoteLin(gTowersCentral &jets, const gTowersPartialSums &partial) const {
   int rows = partial.size();
   int cols = partial[0].size();
   // add partial sums
@@ -848,7 +848,7 @@ void gFEXJetAlgo::addRemoteLin(gTowersCentral &jets, const gTowersPartialSums &p
 }
 
 
-void gFEXJetAlgo::pileUpCalculation(gTowersCentral &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) { 
+void gFEXJetAlgo::pileUpCalculation(gTowersCentral &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) const {
   // input are 50 MeV "fine" scale towers (i.e. inputScale = 1)
   // to use 200 MeV towers use inputScale = 4  
   //PUCp output is the pileup correction for 69 towers at 200 MeV energy scale 
@@ -882,7 +882,7 @@ void gFEXJetAlgo::pileUpCalculation(gTowersCentral &twrs, int rhoThreshold_Max, 
 
 
 
-void gFEXJetAlgo::pileUpCorrectionAB(gTowersCentral &jets, int puc){
+void gFEXJetAlgo::pileUpCorrectionAB(gTowersCentral &jets, int puc) const {
   int rows = jets.size();
   int cols = jets[0].size();
   for(int irow=0;irow<rows;irow++){
@@ -892,7 +892,7 @@ void gFEXJetAlgo::pileUpCorrectionAB(gTowersCentral &jets, int puc){
   }
 }
 
-void gFEXJetAlgo::gJetVetoAB( gTowersCentral &twrs ,int jet_threshold ){
+void gFEXJetAlgo::gJetVetoAB( gTowersCentral &twrs ,int jet_threshold ) const {
   int rows = twrs.size();
   int cols = twrs[0].size();
   for( int irow = 0; irow < rows; irow++ ){
@@ -905,8 +905,8 @@ void gFEXJetAlgo::gJetVetoAB( gTowersCentral &twrs ,int jet_threshold ){
 }
 
 void gFEXJetAlgo::gBlockVetoAB( gTowersCentral &twrs,
-                                gTowersCentral blocks,
-                                int seed_threshold  ){
+                                const gTowersCentral& blocks,
+                                int seed_threshold  ) const {
   int rows = twrs.size();
   int cols = twrs[0].size();
   for( int irow = 0; irow < rows; irow++ ){
@@ -919,9 +919,9 @@ void gFEXJetAlgo::gBlockVetoAB( gTowersCentral &twrs,
 }
 
 
-void gFEXJetAlgo::jetOutAB(gTowersCentral jets, gTowersCentral blocks, int seedThreshold,
+void gFEXJetAlgo::jetOutAB(const gTowersCentral& jets, const gTowersCentral& blocks, int seedThreshold,
                            std::array<int, 32> & jetOutL, std::array<int, 32> & etaIndL,
-                           std::array<int, 32> & jetOutR, std::array<int, 32> & etaIndR ){
+                           std::array<int, 32> & jetOutR, std::array<int, 32> & etaIndR ) const {
   // find maximum in each jet engine or either gJets and requires corresponding gBlock be above threhsold
   //loop over left engines
   for(int ieng=0; ieng<FEXAlgoSpaceDefs::ABCrows; ieng++){
@@ -967,7 +967,7 @@ void gFEXJetAlgo::gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows>  jetOut,
                              int TOBnum, int jetThreshold, std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBs,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBv,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBeta,
-                             std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBphi ){
+                             std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBphi ) const {
 
   int jetOutZS[FEXAlgoSpaceDefs::ABCrows]{};
   // apply the tobthreshold to the values 
@@ -1075,7 +1075,6 @@ void gFEXJetAlgo::gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows>  jetOut,
  }
 
 }
-
 
 
 } // namespace LVL1
