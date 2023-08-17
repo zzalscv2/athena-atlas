@@ -251,7 +251,7 @@ namespace InDet {
     float m_ipt{0.};    ///< inverse of 90% of the ptmin cut 
     float m_ipt2{0.};   ///< inverse square of 90% of the pt min cut 
     // static constexpr float m_COF{134*.05*9};    ///< appears to be an approximated term related to multiple-scattering of particles traversing the ID during the seed formation 
-    static constexpr float m_COF{134*.05*9};    ///< appears to be an approximated term related to multiple-scattering of particles traversing the ID during the seed formation 
+    static constexpr float m_COF{134*.05f*9};    ///< appears to be an approximated term related to multiple-scattering of particles traversing the ID during the seed formation 
 
     /// @name Binning parameters 
     ///@{
