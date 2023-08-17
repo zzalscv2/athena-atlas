@@ -8,6 +8,7 @@
 
 // Trk
 #include "TrkEventPrimitives/ParamDefs.h"
+#include "CxxUtils/trapping_fp.h"
 #include <cmath>
 // STD
 #include <limits>
@@ -32,9 +33,7 @@ ParametersT<DIM, T, S>::ParametersT(double loc1,
   // Tell clang to optimize assuming that FP exceptions can trap.
   // Otherwise, it can vectorize the division, which can lead to
   // spurious division-by-zero traps from unused vector lanes.
-#ifdef __clang__
-# pragma float_control(except, on)
-#endif
+  CXXUTILS_TRAPPING_FP;
 
   // check qoverp is physical
   double p = 0.;

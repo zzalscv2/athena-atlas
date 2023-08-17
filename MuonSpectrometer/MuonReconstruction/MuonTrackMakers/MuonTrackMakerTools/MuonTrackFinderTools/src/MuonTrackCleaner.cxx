@@ -30,6 +30,7 @@
 #include "TrkSurfaces/CylinderBounds.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/Track.h"
+#include "CxxUtils/trapping_fp.h"
 
 namespace Muon {
 
@@ -793,12 +794,11 @@ namespace Muon {
     }
 
     void MuonTrackCleaner::init(const EventContext& ctx, const Trk::Track& track, CleaningState& state) const {
-  // Tell clang to optimize assuming that FP exceptions can trap.
-  // Otherwise, it can vectorize the division, which can lead to
-  // spurious division-by-zero traps from unused vector lanes.
-#ifdef __clang__
-# pragma float_control(except, on)
-#endif
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
+
         state.nscatterers = 0;
         state.numberOfFlippedMdts = 0;
         state.numberOfCleanedCompROTs = 0;

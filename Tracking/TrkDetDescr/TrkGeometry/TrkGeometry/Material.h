@@ -9,6 +9,7 @@
 #ifndef TRKGEOMETRY_MATERIAL_H
 #define TRKGEOMETRY_MATERIAL_H
 
+#include "CxxUtils/trapping_fp.h"
 #include <climits>
 #include <iomanip>
 #include <iostream>
@@ -233,9 +234,7 @@ inline Material* Material::scale(float sf) const {
   // Tell clang to optimize assuming that FP exceptions can trap.
   // Otherwise, it can vectorize the division, which can lead to
   // spurious division-by-zero traps from unused vector lanes.
-#ifdef __clang__
-# pragma float_control(except, on)
-#endif
+  CXXUTILS_TRAPPING_FP;
   return new Material(X0 / sf, L0 / sf, sf * A, sf * Z, sf * rho);
 }
 

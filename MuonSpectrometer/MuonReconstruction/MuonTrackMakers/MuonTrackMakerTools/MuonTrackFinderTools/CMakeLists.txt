@@ -19,5 +19,5 @@ atlas_add_component( MuonTrackFinderTools
                                                       TrkDetDescrInterfaces TrkDetElementBase TrkGeometry TrkSurfaces TrkVolumes TrkEventPrimitives TrkEventUtils TrkMaterialOnTrack 
                                                       TrkMeasurementBase TrkParameters TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkRoad TrkTrack TrkSegment TrkTrackSummary TrkExInterfaces 
                                                       TrkToolInterfaces TrkDriftCircleMath MuonCondData MagFieldElements MagFieldConditions MuonSegmentMakerInterfacesLib MuonTrackMakerUtils 
-                                                      TruthUtils)
+                                                      TruthUtils CxxUtils)
 

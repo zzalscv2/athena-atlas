@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkParametersBase )
@@ -9,7 +9,7 @@ find_package( Boost  COMPONENTS unit_test_framework)
 atlas_add_library( TrkParametersBase
    INTERFACE
    PUBLIC_HEADERS TrkParametersBase
-   LINK_LIBRARIES GeoPrimitives EventPrimitives TrkEventPrimitives GaudiKernel )
+   LINK_LIBRARIES GeoPrimitives EventPrimitives TrkEventPrimitives CxxUtils GaudiKernel )
    
 atlas_add_test( ParametersBase_test
    SOURCES test/ParametersBase_test.cxx
