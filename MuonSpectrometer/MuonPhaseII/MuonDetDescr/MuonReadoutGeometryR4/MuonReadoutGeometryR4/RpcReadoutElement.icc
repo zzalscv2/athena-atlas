@@ -1,0 +1,77 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_ICC
+#define MUONREADOUTGEOMETRYR4_RPCREADOUTELEMENT_ICC
+
+
+namespace MuonGMR4 {
+    constexpr unsigned int minOne = -1;
+
+inline double RpcReadoutElement::thickness() const {return 2.* m_pars.halfZ;}
+inline unsigned int RpcReadoutElement::doubletZ() const{ return m_doubletZ; }
+inline unsigned int RpcReadoutElement::doubletR() const{ return m_doubletR; }
+inline int RpcReadoutElement::doubletPhi() const{ return m_doubletPhi; }
+inline int RpcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
+inline int RpcReadoutElement::nPhiPanels() const { return m_pars.nGapsInPhi; }
+inline unsigned int RpcReadoutElement::numEtaStrips() const { return m_pars.etaDesign.numStrips(); }
+inline unsigned int RpcReadoutElement::numPhiStrips() const { return m_pars.phiDesign.numStrips(); }
+
+
+inline IdentifierHash RpcReadoutElement::measurementHash(const Identifier& measId) const {
+    if (idHelperSvc()->detElId(measId) != identify()) {
+        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    }
+    return createHash(m_idHelper.strip(measId),
+                      m_idHelper.gasGap(measId),
+                      m_idHelper.doubletPhi(measId),
+                      m_idHelper.measuresPhi(measId));
+}
+inline IdentifierHash RpcReadoutElement::layerHash(const Identifier& measId) const {
+    if (idHelperSvc()->detElId(measId) != identify()) {
+        ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
+                        << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
+    }
+    return createHash(0, m_idHelper.gasGap(measId),
+                         m_idHelper.doubletPhi(measId),
+                         m_idHelper.measuresPhi(measId));
+}
+inline IdentifierHash RpcReadoutElement::layerHash(const IdentifierHash& measHash) const {
+    unsigned int mask = minOne <<m_hashShiftStr;
+    return IdentifierHash{static_cast<unsigned int>(measHash) & (~mask)};
+}
+inline IdentifierHash RpcReadoutElement::createHash(const int strip, const int gasGap, const int doubPhi, const bool measPhi) const {
+    /// Construct the Hash such that  (strip -1) | (gasGap -1) | (doubPhi -1) | measPhi
+    
+    const IdentifierHash hash{ strip << m_hashShiftStr | (gasGap -1) << m_hashShiftGap | 
+                           1u *std::max(doubPhi - doubletPhi(), 0) << m_hashShiftDbl | measPhi};
+    return hash;
+}
+inline unsigned int RpcReadoutElement::stripNumber(const IdentifierHash& measHash) const {
+    return static_cast<unsigned int>(measHash) >> m_hashShiftStr;
+}
+inline unsigned int RpcReadoutElement::gasGapNumber(const IdentifierHash& measHash) const {
+    const unsigned int mask = minOne << m_hashShiftStr;
+    const unsigned int stripedHash = (~mask) & static_cast<unsigned int>(measHash);
+    return ( stripedHash >> m_hashShiftGap);
+}
+inline unsigned int RpcReadoutElement::doubletPhiNumber(const IdentifierHash& measHash) const {
+    const unsigned int mask = minOne << m_hashShiftGap;
+    const unsigned int stripedMask = (~mask) & static_cast<unsigned int>(measHash);
+    return (stripedMask >> m_hashShiftDbl);
+}
+inline bool RpcReadoutElement::measuresPhi(const IdentifierHash& measHash) {
+    constexpr unsigned int measPhiBit = 1;
+    return static_cast<unsigned int>(measHash) & measPhiBit;
+}
+inline Identifier RpcReadoutElement::measurementId(const IdentifierHash& measHash) const {
+    return m_idHelper.channelID(identify(), doubletZ(), doubletPhiNumber(measHash) + doubletPhi(), 
+                                gasGapNumber(measHash) + 1, measuresPhi(measHash), stripNumber(measHash));  
+ }
+
+ inline Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+        return stripPosition(ctx, measurementHash(measId));
+ }  
+}  // namespace MuonGMR4
+#endif

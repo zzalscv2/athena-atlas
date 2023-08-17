@@ -28,15 +28,14 @@ namespace MuonGMR4{
      ATH_CHECK(detStore()->retrieve(m_detMgr));
      {
         const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-        for(auto itr = id_helper.module_begin();
-                 itr != id_helper.module_end(); ++itr){
-            const Identifier moduleID = (*itr);
-            const MdtReadoutElement* readOutMl1 = m_detMgr->getMdtReadoutElement(moduleID);
-            if (!readOutMl1) {
-              ATH_MSG_VERBOSE("Could not retrieve "<<m_idHelperSvc->toString(moduleID));
+        std::vector<const MdtReadoutElement*> readoutEles = m_detMgr->getAllMdtReadoutElements();
+        for(const MdtReadoutElement* readOutMl1 : readoutEles){
+            const Identifier moduleID = readOutMl1->identify();
+            if (readOutMl1->multilayer() == 2) {
+              ATH_MSG_VERBOSE("Element "<<m_idHelperSvc->toStringDetEl(moduleID)<<" has wrong multilayer");
               continue;
             }
-            /// Retrieve the second detector element 
+            /// Retrieve the second detector element            
             const unsigned int nMl = id_helper.numberOfMultilayers(moduleID);
             const Identifier idMl2 = id_helper.multilayerID(moduleID, nMl);
             const MdtReadoutElement* readOutMl2 = m_detMgr->getMdtReadoutElement(idMl2);

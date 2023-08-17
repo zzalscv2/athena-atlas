@@ -60,9 +60,23 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<uint8_t>& m_doubletR{m_tree.newScalar<uint8_t>("stationDoubletR")};
     MuonVal::ScalarBranch<uint8_t>& m_doubletZ{m_tree.newScalar<uint8_t>("stationDoubletZ")};
     MuonVal::ScalarBranch<uint8_t>& m_doubletPhi{m_tree.newScalar<uint8_t>("stationDoubletPhi")};
-  
+    /// Number of strips, strip pitch in eta & phi direction
+    MuonVal::ScalarBranch<uint8_t>& m_numStripsEta{m_tree.newScalar<uint8_t>("numEtaStrips")};
+    MuonVal::ScalarBranch<uint8_t>& m_numStripsPhi{m_tree.newScalar<uint8_t>("numPhiStrips")};
+    
+    /// Strip dimensions 
+    MuonVal::ScalarBranch<float>& m_stripEtaPitch{m_tree.newScalar<float>("stripEtaPitch")};
+    MuonVal::ScalarBranch<float>& m_stripPhiPitch{m_tree.newScalar<float>("stripPhiPitch")};
+    MuonVal::ScalarBranch<float>& m_stripEtaWidth{m_tree.newScalar<float>("stripEtaWidth")};
+    MuonVal::ScalarBranch<float>& m_stripPhiWidth{m_tree.newScalar<float>("stripPhiWidth")};
+    MuonVal::ScalarBranch<float>& m_stripEtaLength{m_tree.newScalar<float>("stripEtaLength")};
+    MuonVal::ScalarBranch<float>& m_stripPhiLength{m_tree.newScalar<float>("stripPhiLength")};    
+    /// Number of eta & phi gas gaps
+    MuonVal::ScalarBranch<uint8_t>& m_numGasGapsEta{m_tree.newScalar<uint8_t>("numEtaGasGaps")};
+    MuonVal::ScalarBranch<uint8_t>& m_numGasGapsPhi{m_tree.newScalar<uint8_t>("numPhiGasGaps")};
+    
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
-    MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "ElementTransform"};   
+    MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "GeoModelTransform"};
     
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
@@ -71,14 +85,22 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_ALineRotS{m_tree.newScalar<float>("ALineRotS", 0.)};
     MuonVal::ScalarBranch<float>& m_ALineRotT{m_tree.newScalar<float>("ALineRotT", 0.)};
     MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
-
     
-    MuonVal::ThreeVectorBranch m_layCenter{m_tree,"LayerCenter"};
-    MuonVal::ThreeVectorBranch m_layTransColX{m_tree, "LayerLinearCol1"};
-    MuonVal::ThreeVectorBranch m_layTransColY{m_tree, "LayerLinearCol2"};
-    MuonVal::ThreeVectorBranch m_layTransColZ{m_tree, "LayerLinearCol3"};
-    MuonVal::VectorBranch<bool>& m_layMeasPhi{m_tree.newVector<bool>("LayerMeasPhi")};
-    MuonVal::VectorBranch<uint8_t>& m_layNumber{m_tree.newVector<uint8_t>("LayerNumber")};
+    /// Rotation matrix of the respective layers
+    MuonVal::ThreeVectorBranch m_stripRotColX{m_tree, "stripRotCol0"};
+    MuonVal::ThreeVectorBranch m_stripRotColY{m_tree, "stripRotCol1"};
+    MuonVal::ThreeVectorBranch m_stripRotColZ{m_tree, "stripRotCol2"};
+    MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
+    MuonVal::VectorBranch<uint8_t>& m_stripRotDblPhi{m_tree.newVector<uint8_t>("stripRotDoubletPhi")};
+    MuonVal::VectorBranch<bool>& m_stripRotMeasPhi{m_tree.newVector<bool>("stripRotMeasPhi")};
+    
+    /// Strip positions
+    MuonVal::ThreeVectorBranch m_stripPos{m_tree, "stripPos"};
+    MuonVal::VectorBranch<bool>& m_stripPosMeasPhi{m_tree.newVector<bool>("stripPosMeasPhi")};
+    MuonVal::VectorBranch<uint8_t>& m_stripPosGasGap{m_tree.newVector<uint8_t>("stripPosGasGap")};
+    MuonVal::VectorBranch<uint8_t>& m_stripPosNum{m_tree.newVector<uint8_t>("stripPosNum")};
+    MuonVal::VectorBranch<uint8_t>& m_stripDblPhi{m_tree.newVector<uint8_t>("stripPosDoubletPhi")};
+    
 
 };
 

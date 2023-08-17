@@ -1,0 +1,88 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
+#define MUONREADOUTGEOMETRYR4_STRIPDESIGN_ICC
+
+namespace MuonGMR4 {
+    
+    inline double StripDesign::stripPitch() const { return m_stripPitch; }
+    inline double StripDesign::stripWidth() const { return m_stripWidth; }
+    inline double StripDesign::halfWidth() const { return m_halfX; }
+    inline double StripDesign::shortHalfHeight() const { return m_shortHalfY; }
+    inline double StripDesign::longHalfHeight() const { return m_longHalfY; }
+    inline int StripDesign::numStrips() const { return m_numStrips; }
+    inline bool StripDesign::hasStereoAngle() const { return m_hasStereo; }
+    inline bool StripDesign::isFlipped() const { return m_isFlipped; }
+    inline double StripDesign::stereoAngle() const {return m_stereoAngle; }
+    inline int StripDesign::firstStripNumber() const { return m_channelShift; }
+            
+    inline Amg::Vector2D StripDesign::stripPosition(int stripCh) const {
+        return m_firstStripPos + (1.*stripCh) * stripPitch() *  Amg::Vector2D::UnitX();
+    }
+    inline Amg::Vector2D StripDesign::leftInterSect(int stripCh, bool uncapped) const {
+        
+        /// Nominal strip position position
+        const Amg::Vector2D stripPos = stripPosition(stripCh);       
+        std::optional<double> lambda = MuonGM::intersect<2>(stripPos, m_stripDir, m_bottomLeft, m_dirBotEdge);
+        if (!lambda) return Amg::Vector2D::Zero();
+        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
+        /// then the bottom edge, then it's a routed strip
+        if (!uncapped && m_hasStereo && ( (*lambda) < 0. || (*lambda) > m_lenSlopEdge)) { 
+            const std::optional<double> bottom_line =MuonGM::intersect<2>(m_stripDir.x() > 0.? m_bottomLeft: m_bottomRight, Amg::Vector2D::UnitY(), 
+                                                                          stripPos, m_stripDir);            
+            return stripPos + bottom_line.value_or(0.)* m_stripDir;            
+        }
+        return m_bottomLeft + (*lambda) * m_dirBotEdge;
+    }
+
+    //============================================================================
+    inline Amg::Vector2D StripDesign::rightInterSect(int stripCh, bool uncapped) const {
+        
+        /// Nominal strip position position
+        const Amg::Vector2D stripPos = stripPosition(stripCh);       
+        /// We expect lambda to be positive
+        const std::optional<double> lambda =MuonGM::intersect<2>(stripPos, m_stripDir, m_topRight, m_dirTopEdge);
+        if (!lambda) return Amg::Vector2D::Zero();
+        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
+        /// then the bottom edge, then it's a routed strip
+        if (!uncapped && m_hasStereo && ( (*lambda) < 0  || (*lambda) > m_lenSlopEdge)) { 
+            const std::optional<double> top_line = MuonGM::intersect<2>(m_stripDir.x() >  0. ? m_topRight: m_topLeft, Amg::Vector2D::UnitY(), 
+                                                                        stripPos, m_stripDir);
+            return stripPos + top_line.value_or(0) * m_stripDir;            
+       }
+       return m_topRight + (*lambda) * m_dirTopEdge;
+    }
+    inline Amg::Vector2D StripDesign::stripCenter(int stripCh) const {
+       return 0.5 *(leftInterSect(stripCh) + rightInterSect(stripCh));      
+    }
+
+    inline std::optional<Amg::Vector2D> StripDesign::center(int stripNumber) const {
+        const int stripCh = (stripNumber - m_channelShift);
+        if (stripCh < 0 ||  stripCh > numStrips()) return std::nullopt;
+        return std::make_optional<Amg::Vector2D>(m_stereoRotMat * stripCenter(stripCh));
+    }    
+    inline std::optional<Amg::Vector2D> StripDesign::leftEdge(int stripNumber) const {
+       const int stripCh = (stripNumber - m_channelShift);
+       if (stripCh < 0 ||  stripCh > numStrips()) return std::nullopt;
+       return std::make_optional<Amg::Vector2D>(m_stereoRotMat * leftInterSect(stripCh));
+    }
+    inline std::optional<Amg::Vector2D> StripDesign::rightEdge(int stripNumber) const {
+        const int stripCh = (stripNumber - m_channelShift);
+        if (stripCh < 0 ||  stripCh > numStrips()) return std::nullopt;       
+        return std::make_optional<Amg::Vector2D>(m_stereoRotMat * rightInterSect(stripCh));
+    }
+    inline double StripDesign::distanceToStrip(const Amg::Vector2D& pos, int stripNumber) const {
+        std::optional<Amg::Vector2D> stripCent = center(stripNumber);
+        if (!stripCent) return std::numeric_limits<double>::max();
+        return (pos - (*stripCent)).x();
+    }
+    inline int StripDesign::stripNumber(const Amg::Vector2D& pos) const {
+        const Amg::Vector2D posInNominal = m_nominalRotMat*pos;
+        const double xMid = (posInNominal - m_firstStripPos).dot(m_stripNormal) / m_stripNormal.x();
+        const int chNum = static_cast<int>(std::floor( xMid  / stripPitch()));
+        if (chNum < 0 || chNum > numStrips()) return -1;
+        return chNum + m_channelShift;
+    }
+}
+#endif

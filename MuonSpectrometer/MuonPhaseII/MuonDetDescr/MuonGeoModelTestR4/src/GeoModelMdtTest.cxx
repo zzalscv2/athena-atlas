@@ -86,7 +86,7 @@ StatusCode GeoModelMdtTest::execute() {
       ATH_MSG_DEBUG("Test retrieval of Mdt detector element "<<detStr);
       const MdtReadoutElement* reElement = m_detMgr->getMdtReadoutElement(test_me);
       if (!reElement) {
-         ATH_MSG_DEBUG("Detector element is invalid");
+         ATH_MSG_WARNING ("Detector element "<<detStr<<" is invalid");
          continue;
       }
       /// Check that we retrieved the proper readout element
@@ -141,7 +141,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    m_tubePitch = readoutEle->tubePitch();
 
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform {readoutEle->getMaterialGeom()->getAbsoluteTransform()};
+   const Amg::Transform3D& transform {readoutEle->localToGlobalTrans(gctx)};
    m_readoutTransform.push_back(Amg::Vector3D(transform.translation()));
    m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitX()));
    m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitY()));

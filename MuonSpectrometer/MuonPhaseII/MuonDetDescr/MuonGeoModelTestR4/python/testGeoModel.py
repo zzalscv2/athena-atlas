@@ -49,6 +49,15 @@ def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
+def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
+    result = ComponentAccumulator()
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
+    the_alg = CompFactory.MuonGMR4.GeoModelRpcTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
+
+
 def setupGeoR4TestCfg(args):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -88,7 +97,7 @@ def setupGeoR4TestCfg(args):
     flags.Detector.GeometrysTGC = False
     flags.Detector.GeometryMM = False
     flags.Detector.GeometryTGC = False
-    flags.Detector.GeometryRPC = False
+    flags.Detector.GeometryRPC = True
     flags.Detector.GeometryMDT = True
 
     flags.Muon.setupGeoModelXML = True
@@ -125,7 +134,6 @@ def executeTest(cfg, num_events = 1):
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
-    cfg.merge(GeoModelMdtTestCfg(flags))
     from MuonCondTest.AlignmentTester import ALineInjectorAlgCfg
     cfg.merge(ALineInjectorAlgCfg(flags, WriteKey="InjectedALines"))
     from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg, ActsGeomContextAlgCfg
@@ -133,8 +141,15 @@ if __name__=="__main__":
     cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=["MdtActsAlignContainer"]))  
     #### 
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
-    cfg.merge(GeoModelMdtTestCfg(flags, DumpTxtFile = args.outTxtFile,
-                                        TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
+    if flags.Detector.GeometryMDT:
+        cfg.merge(GeoModelMdtTestCfg(flags, 
+                                     DumpTxtFile = args.outTxtFile,
+                                     TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
+
+    if flags.Detector.GeometryRPC: 
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = ["BML1A3"], writeTTree = False))
+
+
     executeTest(cfg, num_events = args.nEvents)
     
    

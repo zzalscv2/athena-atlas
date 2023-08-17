@@ -60,7 +60,11 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const 
                         << ". Continue navigation "<<shift);
             return extractShape(shift->getOp());
     }
-    ATH_MSG_WARNING(__func__<<"() MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4/src/MuonGeoUtilitiyTool.cxxshape "<<inShape->type()<<" is unknown to the method ");
+    if (inShape->typeID() == GeoShapeSubtraction::getClassTypeID()){
+      const GeoShapeSubtraction* subtract = static_cast<const GeoShapeSubtraction*>(inShape);
+      return extractShape(subtract->getOpA());
+    }
+    ATH_MSG_WARNING(__func__<<"() shape "<<inShape->type()<<" is unknown to the method ");
     return inShape;
 }   
 Amg::Transform3D MuonGeoUtilityTool::extractShifts(const PVConstLink& physVol) const { 
@@ -124,13 +128,12 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
       return sstr.str();
   }
   sstr<<"logical volume "<<physVol->getLogVol()->getName()<<", ";
-  Amg::Transform3D absTrans{Amg::Transform3D::Identity()};
   if (physVol->isShared() || !physVol->getParent()){
     sstr<<"shared volume, ";
   } else {
     const GeoVPhysVol* pv = &*physVol; // avoid clang warning
     if (typeid(*pv) == typeid(GeoFullPhysVol)){
-      absTrans = static_cast<const GeoFullPhysVol&>(*physVol).getAbsoluteTransform();
+      const Amg::Transform3D absTrans = static_cast<const GeoFullPhysVol&>(*physVol).getAbsoluteTransform();
       sstr<<"absolute pos: "<<to_string(absTrans) << ", ";
     } else{
         sstr<<"relative pos: "<<to_string(physVol->getX())<<", ";  
@@ -173,5 +176,37 @@ const GeoAlignableTransform* MuonGeoUtilityTool::findAlignableTransform(const PV
     const PVConstLink parent = physVol->getParent();
     if (parent) return findAlignableTransform(parent, alignNodes);    
     return nullptr;
+}
+
+std::vector<MuonGeoUtilityTool::physVolWithTrans> MuonGeoUtilityTool::findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const {
+  std::vector<physVolWithTrans> foundVols{};
+  GeoVolumeCursor aV(physVol);
+   while (!aV.atEnd()) {    
+    PVConstLink childVol = aV.getVolume();
+    const Amg::Transform3D childTrans{aV.getTransform()};
+    /// The logical volume has precisely the name for what we're searching for
+    if (childVol->getLogVol()->getName() == volumeName) {
+        physVolWithTrans foundNode{};
+        foundNode.physVol = childVol;
+        foundNode.transform = childTrans;
+        foundVols.push_back(std::move(foundNode));
+    }
+    /// There are no grand children of this volume. We're at a leaf node
+    if (!childVol->getNChildVols()) {
+      aV.next();
+      continue;
+    }
+    
+    std::vector<physVolWithTrans> grandChildren = findAllLeafNodesByName(childVol, volumeName);
+    std::transform(std::make_move_iterator(grandChildren.begin()),
+                   std::make_move_iterator(grandChildren.end()), std::back_inserter(foundVols),[&childTrans](physVolWithTrans&& vol){
+                      vol.transform = childTrans * vol.transform;
+                      return vol;
+                  });
+    
+    aV.next();
+  }
+
+  return foundVols;
 }
 }

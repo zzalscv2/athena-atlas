@@ -156,8 +156,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         bool m_isBarrel{m_idHelper.isBarrel(identify())};
 };
 
-std::ostream& operator<<(
-    std::ostream& ostr, const MuonGMR4::MdtReadoutElement::parameterBook& pars);
+std::ostream& operator<<(std::ostream& ostr, const MdtReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.icc>

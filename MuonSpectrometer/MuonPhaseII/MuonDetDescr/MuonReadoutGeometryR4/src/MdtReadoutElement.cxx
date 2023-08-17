@@ -11,9 +11,7 @@
 using namespace ActsTrk;
 
 namespace MuonGMR4 {
-std::ostream& operator<<(
-    std::ostream& ostr,
-    const MuonGMR4::MdtReadoutElement::parameterBook& pars) {
+std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::MdtReadoutElement::parameterBook& pars) {
     ostr << std::endl;
     ostr << " //  tube half-length (min/max): "<<pars.shortHalfX<<"/"<<pars.longHalfX
          <<", chamber width "<<pars.halfY<<", multilayer height: "<<pars.halfHeight;
@@ -31,8 +29,7 @@ MdtReadoutElement::MdtReadoutElement(defineArgs&& args)
       m_pars{std::move(args)} {
 }
 const MdtReadoutElement::parameterBook& MdtReadoutElement::getParameters() const {return m_pars;}
-Identifier MdtReadoutElement::measurementId(
-    const IdentifierHash& measHash) const {
+Identifier MdtReadoutElement::measurementId(const IdentifierHash& measHash) const {
     return m_idHelper.channelID(identify(), multilayer(),
                                 layerNumber(measHash) + 1,
                                 tubeNumber(measHash) + 1);
