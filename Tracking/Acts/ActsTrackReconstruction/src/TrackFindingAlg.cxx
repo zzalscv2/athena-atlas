@@ -255,13 +255,13 @@ namespace ActsTrk
     if (pixelClusterContainer && pixelDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
-      measurements.addMeasurements(0, ctx, pixelClusterContainer, *pixelDetEleColl, pixelSeeds,
+      measurements.addMeasurements(0, ctx, *pixelClusterContainer, *pixelDetEleColl, pixelSeeds,
                                    m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector);
     }
     if (stripClusterContainer && stripDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
-      measurements.addMeasurements(1, ctx, stripClusterContainer, *stripDetEleColl, stripSeeds,
+      measurements.addMeasurements(1, ctx, *stripClusterContainer, *stripDetEleColl, stripSeeds,
                                    m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector);
     }
 
