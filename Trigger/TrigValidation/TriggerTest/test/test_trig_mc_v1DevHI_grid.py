@@ -35,7 +35,7 @@ precommand = ''.join([
   "doWriteRDOTrigger=True;",
   "doHeavyIonTobThresholds=True;",
   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
-  "ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-09';",
+  "ConfigFlags.IOVDb.GlobalTag='OFLCOND-MC16-SDR-RUN2-11';",
   "ConfigFlags.Trigger.enableL1CaloPhase1=False;"
   "ConfigFlags.Trigger.L1.doAlfaCtpin=True;",
 ])

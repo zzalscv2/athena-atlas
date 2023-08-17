@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for mu_bphys
+# art-description: art job for bphys
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
+# art-input: valid1.801921.P8B_A14_CTEQ6L1_Bs_Jpsim3p5mu3p5_phi.recon.RDO.e8542_e8528_s4159_s4114_r14844_tid34183318_00
+# art-input-nfiles: 3
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -33,9 +35,7 @@ Events  = 6000
 Threads = 8 
 Slots   = 8
 Input   = 'Bphys_JpsiPhi'    # defined in TrigValTools/share/TrigValInputs.json
-
-preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO
-postinclude_file = 'RAWtoALL:TrigInDetValidation.TIDV_cond_fix'
+GridFiles = True
 
 ExtraAna = " -c 'parentpdgid=531' "
 
@@ -50,7 +50,3 @@ Comp = [ ( "L2bphys",             "L2bphys",    "data-hists.root",         " -c 
 
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-
-
-
- 
