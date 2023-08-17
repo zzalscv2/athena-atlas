@@ -129,7 +129,7 @@ if __name__=="__main__":
     from MuonCondTest.AlignmentTester import ALineInjectorAlgCfg
     cfg.merge(ALineInjectorAlgCfg(flags, WriteKey="InjectedALines"))
     from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg, ActsGeomContextAlgCfg
-    cfg.merge(ActsMuonAlignCondAlgCfg(flags, ReadKey="InjectedALines"))  
+    cfg.merge(ActsMuonAlignCondAlgCfg(flags, ReadKeyALines="InjectedALines"))  
     cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=["MdtActsAlignContainer"]))  
     #### 
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
