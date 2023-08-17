@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGOUTPUTHANDLING_TRIGGEREDMSERIALISERTOOL_H
 #define TRIGOUTPUTHANDLING_TRIGGEREDMSERIALISERTOOL_H
@@ -51,11 +51,12 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
   friend StatusCode tester( TriggerEDMSerialiserTool* );
   Gaudi::Property< std::vector< std::string > > m_collectionsToSerialize {
     this, "CollectionsToSerialize", {},
-    "EDM streaming configuration \'collectionKeyType;module1,module2,module3\' where collectionKeyType is a string "
+    "EDM streaming configuration \'collectionKeyType;module1,module2,...[;allowTruncation]\' where collectionKeyType is a string "
     "formatted like for AthenaOutputStream, e.g. TYPE#SG.aux1.aux2..etc. For xAOD classes the typedef type should be "
     "used and the _vN version number is automatically detected. For old T/P classes the persistent version has to be "
     "given. Module IDs following the semicolon are the HLT result ROB module IDs to which the collection should be "
-    "written. ID=0 is the main result, other IDs are used for data scouting.",
+    "written. ID=0 is the main result, other IDs are used for data scouting. The optional allowTruncation "
+    "indicates if the collection can be truncated without raising an ERROR.",
     "OrderedSet<std::string>"
   };
   Gaudi::Property<bool> m_saveDynamic {
@@ -85,13 +86,14 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
    **/
   struct Address {
     enum class Category : uint8_t { xAODInterface, xAODAux, OldTP, xAODDecoration, None };
-
+    enum class Truncation { Error, Allowed };
     std::string transType;
     std::string persType; // actual versioned type
     CLID clid;
     std::string key;
     std::vector<uint16_t> moduleIdVec{};
     Category category{Category::None};
+    Truncation truncationMode{Truncation::Error};
     xAOD::AuxSelection sel{}; //!< xAOD dynamic variables selection, relevant only for xAODAux category
 
     std::string transTypeName() const {return transType+"#"+key;}
@@ -174,7 +176,7 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
    * corresponding module ID as truncated.
    * @return FAILURE in case the truncation threshold is undefined
    */
-  StatusCode tryAddData(HLT::HLTResultMT& hltResult, const uint16_t id, const std::vector<uint32_t>& data) const;
+  StatusCode tryAddData(HLT::HLTResultMT& hltResult, const uint16_t id, const std::vector<uint32_t>& data, Address::Truncation truncationMode) const;
 
   /**
    * Parse the truncation debug information, fill monitoring histograms, fill and record the debug info collection

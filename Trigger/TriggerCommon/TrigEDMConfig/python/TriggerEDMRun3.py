@@ -43,6 +43,8 @@ class InViews(UserString):
             raise ValueError(f'Invalid view name: {value}')
         super().__init__(value)
 
+# EDM property to allow truncation for a collection
+allowTruncation = object()
 
 
 def recordable( arg ):

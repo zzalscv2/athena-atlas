@@ -165,8 +165,13 @@ namespace HLT {
     /// Getter for the truncation information
     const std::set<uint16_t>& getTruncatedModuleIds() const;
 
-    /// Add module ID to the list of truncated results
-    void addTruncatedModuleId(const uint16_t moduleId);
+    /// Add module ID to the list of truncated results.
+    /// @param moduleId          ROB module ID
+    /// @param severeTruncation  is the result severely truncated (debug stream)
+    void addTruncatedModuleId(const uint16_t moduleId, bool severeTruncation=true);
+
+    /// Truncation in at least one collection that is not allowed to be truncated
+    bool severeTruncation() const { return m_severeTruncation; }
 
     // ------------------------- Extra helper methods --------------------------
     /// If there is at least one stream tag set, it means the event is accepted
@@ -205,6 +210,8 @@ namespace HLT {
     /// It is not stored in ByteStream files.
     std::set<uint16_t> m_truncatedModuleIds;
 
+    /// Should the event be sent to the debug stream due to severe truncation?
+    bool m_severeTruncation{false};
 
     // ------------------------- Private helper methods ------------------------
 

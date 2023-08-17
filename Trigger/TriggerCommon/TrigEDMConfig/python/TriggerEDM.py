@@ -9,7 +9,7 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,varToRemoveFromAODSLIM 
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,AllowedOutputFormats,varToRemoveFromAODSLIM
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TriggerEDM')
 
@@ -157,7 +157,8 @@ def handleRun3ViewContainers( el ):
 
 def getRun3BSList(keys):
     """
-    The keys should contain BS and all the identifiers used for scouting
+    The keys should contain BS and all the identifiers used for scouting.
+    Returns list of tuples (typename#key, [keys], [properties]).
     """
 
     from TrigEDMConfig.TriggerEDMRun3 import persistent
@@ -171,7 +172,9 @@ def getRun3BSList(keys):
         collkey  = handleRun3ViewContainers( collkey )
         destination = keys & set(definition[1].split())
         if len(destination) > 0:
-            collections.append( (typename+"#"+collkey, list(destination ) ) )
+            collections.append( (typename+"#"+collkey, list(destination),
+                                 definition[3] if len(definition)>3 else []) )
+
     return collections
 
 
