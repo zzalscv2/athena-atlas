@@ -112,7 +112,7 @@ class ConfigAccumulator :
         self._algorithms = {}
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
-        self._eventLevelOutputs = {}
+        self.setSourceName ('EventInfo', 'EventInfo')
 
 
     def dataType (self) :
@@ -298,7 +298,6 @@ class ConfigAccumulator :
         self._pass = 1
         self._currentAlg = None
         self._outputContainers = {}
-        self._eventLevelOutputs = {}
 
 
     def getPreselection (self, containerName, selectionName) :
@@ -405,12 +404,9 @@ class ConfigAccumulator :
         """add an output variable for the given container to the output
         """
 
-        if not isEventLevel :
-            if containerName not in self._containerConfig :
-                raise KeyError ("container unknown: " + containerName)
-            baseConfig = self._containerConfig[containerName].outputs
-        else :
-            baseConfig = self._eventLevelOutputs
+        if containerName not in self._containerConfig :
+            raise KeyError ("container unknown: " + containerName)
+        baseConfig = self._containerConfig[containerName].outputs
         if outputName in baseConfig :
             raise KeyError ("duplicate output variable name: " + outputName)
         config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled)
@@ -419,8 +415,6 @@ class ConfigAccumulator :
 
     def getOutputVars (self, containerName) :
         """get the output variables for the given container"""
-        if containerName == '' :
-            return self._eventLevelOutputs
         if containerName in self._outputContainers :
             containerName = self._outputContainers[containerName]
         if containerName not in self._containerConfig :

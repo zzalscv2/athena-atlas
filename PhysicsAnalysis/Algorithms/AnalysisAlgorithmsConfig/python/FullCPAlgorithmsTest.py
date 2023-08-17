@@ -514,12 +514,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     configSeq = ConfigSequence ()
 
-    outputContainers = {'mu_': 'OutMuons',
-                        'el_': 'OutElectrons',
-                        'ph_': 'OutPhotons',
+    outputContainers = {'mu_' : 'OutMuons',
+                        'el_' : 'OutElectrons',
+                        'ph_' : 'OutPhotons',
                         'tau_': 'OutTauJets',
                         'jet_': 'OutJets',
-                        'met_': 'AnaMET'}
+                        'met_': 'AnaMET',
+                        ''    : 'EventInfo'}
 
     # FIXME: this should probably be run on PHYSLITE, but the test fails with:
     #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
@@ -540,8 +541,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.userPileupConfigs', prwfiles, noneAction='ignore')
         configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles, noneAction='ignore')
 
-    vars += [ 'EventInfo.runNumber     -> runNumber',
-              'EventInfo.eventNumber   -> eventNumber', ]
+    else :
+        # ideally the above block would work both for PHYS and PHYSLITE, but
+        # since we disabled it we need to add these variables manually.
+        vars += [ 'EventInfo.runNumber     -> runNumber',
+                'EventInfo.eventNumber   -> eventNumber', ]
 
 
     # Skip events with no primary vertex:
@@ -634,7 +638,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.saveCutBookkeepers', True)
         configSeq.setOptionValue ('.runNumber', 284500)
         configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
-        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
     configSeq += makeConfig ('Selection.PtEta', 'AnaElectrons')
@@ -731,11 +734,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.electrons', 'AnaElectrons' )
     configSeq.setOptionValue ('.photons', 'AnaPhotons' )
     configSeq.setOptionValue ('.muons', 'AnaMuons' )
-    if dataType != 'data':
-        vars += ['EventInfo.globalTriggerEffSF_%SYS% -> globalTriggerEffSF_%SYS%']
-    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in ['HLT_e24_lhmedium_L1EM20VH','HLT_e60_lhmedium','HLT_e120_lhloose', 'HLT_mu20_iloose_L1MU15', 'HLT_mu50', 'HLT_e26_lhtight_nod0_ivarloose', 'HLT_e60_lhmedium_nod0', 'HLT_e140_lhloose_nod0', 'HLT_mu26_ivarmedium', 'HLT_2g20_tight', 'HLT_g35_loose_g25_loose', 'HLT_g35_medium_g25_medium_L12EM20VH', 'HLT_2g22_tight_L12EM15VHI']]
-    vars += ['EventInfo.globalTriggerMatch_%SYS% -> globalTriggerMatch_%SYS%']
-
 
     configSeq += makeConfig ('Output.Simple', 'Output')
     configSeq.setOptionValue ('.treeName', 'analysis')

@@ -75,6 +75,8 @@ class PileupReweightingBlock (ConfigBlock):
             # Setting the weight decoration to the empty string disables the reweighting
             alg.pileupWeightDecoration = ""
         alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+        config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', isEventLevel=True, noSys=True)
+        config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', isEventLevel=True, noSys=True)
 
 
 
