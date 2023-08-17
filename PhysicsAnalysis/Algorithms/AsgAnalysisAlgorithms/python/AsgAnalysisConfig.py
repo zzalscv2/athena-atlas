@@ -75,8 +75,8 @@ class PileupReweightingBlock (ConfigBlock):
             # Setting the weight decoration to the empty string disables the reweighting
             alg.pileupWeightDecoration = ""
         alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
-        config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', isEventLevel=True, noSys=True)
-        config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', isEventLevel=True, noSys=True)
+        config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
+        config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
 
 
 
@@ -108,7 +108,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
-        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'generatorWeight', isEventLevel=True)
+        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'generatorWeight')
 
 
 
