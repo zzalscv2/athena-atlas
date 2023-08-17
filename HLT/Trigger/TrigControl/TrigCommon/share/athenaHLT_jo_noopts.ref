@@ -32,7 +32,7 @@
     <dontPublishIS>1</dontPublishIS>
     <finalizeTimeout>120</finalizeTimeout>
     <getNextTimeout>1000</getNextTimeout>
-    <maximumHltResultMb>32</maximumHltResultMb>
+    <maximumHltResultMb>10</maximumHltResultMb>
     <numForks>1</numForks>
     <numberOfAthenaMTThreads>1</numberOfAthenaMTThreads>
     <numberOfEventSlots>1</numberOfEventSlots>

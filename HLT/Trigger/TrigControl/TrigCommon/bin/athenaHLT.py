@@ -422,7 +422,7 @@ def main():
    g.add_argument('--preloadlib', metavar='LIB', help='preload an arbitrary library')
    g.add_argument('--unique-log-files', '-ul', action='store_true', help='add pid/timestamp to worker log files')
    g.add_argument('--debug-fork', action='store_true', help='Dump open files/threads during forking')
-   g.add_argument('--hltresult-size', metavar='MB', type=int, default=32, help='Maximum HLT result size in MB (equivalent to DcmApplication.sbaBlockSize_MiB for online running)')
+   g.add_argument('--hltresult-size', metavar='MB', type=int, default=10, help='Maximum HLT result size in MB')
    g.add_argument('--extra-l1r-robs', metavar='ROBS', type=arg_eval, default=[],
                   help='List of additional ROB IDs that are considered part of the L1 result and passed to the HLT')
    g.add_argument('--ros2rob', metavar='DICT', type=arg_ros2rob, default={},
