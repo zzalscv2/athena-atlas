@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #########################################################################
 ##
@@ -49,6 +49,7 @@
 ##         (e.g. 'aiatlas009.cern.ch,aiatlas039.cern.ch,aiatlas016.cern.ch')
 ##     14) 'skipMerge': string ('True'/'False', default: 'False')
 ##         ('True': just process input directly without merging, postprocessing, or producing output)
+##     15) 'mergeParams': string (extra arguments to pass to DQHistogramMerge)
 ##
 ## (C) N. Boelaert, L. Goossens, A. Nairz, P. Onyisi, S. Schaetzel, M. Wilson 
 ##     (April 2008 - July 2010)
@@ -86,9 +87,8 @@ def getSubFileMap(fname, nevts=0) :
     return map
 
 def publish_success_to_mq(run, ptag, stream, incr, ami, procpass, hcfg, isprod, parmap):
-  import stomp, json, ssl
+  import stomp, json
   from DataQualityUtils import stompconfig
-  import DataQualityConfigurations
   dest='/topic/atlas.dqm.progress'
   conn=stomp.Connection([('atlas-mb.cern.ch', 61013)])
   conn.connect(wait=True, **stompconfig.config())
@@ -244,6 +244,9 @@ def dq_combined_trf(jsonfile, outmap):
     # do web display
     doWebDisplay = parmap.get('doWebDisplay', 'True')
 
+    # extra parameters for merge
+    mergeParams = parmap.get('mergeParams', '')
+
     # production mode
     productionMode = parmap.get('productionMode', 'True')
     if productionMode != 'True' and incr == 'True':
@@ -302,6 +305,7 @@ def dq_combined_trf(jsonfile, outmap):
         stream = 'test_dummy'
     
     # processing pass number  
+    procnumber = 99
     MAX_XMLRPC_TRIES = 5 
     if 'procNumber' in parmap : 
       procnumber = parmap['procNumber']
@@ -330,6 +334,7 @@ def dq_combined_trf(jsonfile, outmap):
     print("  COOL uploads:    ", allowCOOLUpload)
     print("  Production mode: ", productionMode)
     print("  Skip merge:      ", skipMerge)
+    print("  Merge parameters:", mergeParams)
     if servers == []:
         print("  EOS only:    True")
 
@@ -363,6 +368,8 @@ def dq_combined_trf(jsonfile, outmap):
       else :  
         cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 0 0 %d %d"    % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
       
+      cmd += (f' {mergeParams}' if mergeParams else '')
+
       print("Histogram merging command:\n")
       print(cmd)
       print("\n##################################################################\n")
@@ -388,11 +395,11 @@ def dq_combined_trf(jsonfile, outmap):
         txt = 'DQHistogramMerge.py execution problem'
         try:
           try:
-            infilelist=open('hist_merge.list','r')
-            for infname in infilelist:
-              genmd5sum(infname.rstrip(os.linesep))
-          finally:
-              infilelist.close()
+            with open('hist_merge.list','r') as infilelist:
+              for infname in infilelist:
+                genmd5sum(infname.rstrip(os.linesep))
+          except:
+            pass
           genmd5sum(histfile)
           DQResFile="DQResourceUtilization.txt"
           if os.path.exists(DQResFile):
