@@ -77,6 +77,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
                                                 "AntiKt4EMTopoJets",
                                                 "BTagging_AntiKt4EMTopo",
                                                 "MET_Baseline_AntiKt4EMTopo",
+                                                "AntiKt4TruthJets",
                                                 ]
 
     if len(extra_SmartCollections)>0:
@@ -112,6 +113,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             "BTagging_AntiKt4EMTopo",
             "BTagging_AntiKt4EMTopoJFVtx",
             "BTagging_AntiKt4EMPTopoSecVtx",
+            "AntiKt4TruthJets",
             ]
 
 
