@@ -84,7 +84,7 @@ StatusCode HepMCReadFromFile::execute() {
   if (evt) {
     ++m_event_number;
     evt->set_event_number(m_event_number);
-    GeVToMeV(evt);
+    evt->use_units(HepMC::Units::MEV,HepMC::Units::MM);
     mcEvtColl->push_back(evt);
 
     HepMC::GenCrossSection* cs=evt->cross_section();

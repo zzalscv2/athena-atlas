@@ -26,6 +26,8 @@
 #include "LArG4ShowerLibSvc/ILArG4ShowerLibSvc.h"
 #include "IFastSimDedicatedSD.h"
 
+#include "GaudiKernel/ConcurrencyFlags.h"
+
 #undef _TRACE_FSM_
 #undef _TRACE_DOIT_
 #undef _TRACE_POSITION_
@@ -42,10 +44,31 @@ LArFastShower::LArFastShower(const std::string& name, const FastShowerConfigStru
   m_starting_points_file(),
   m_eventNum(0)
 {
+  /* Starting points, i.e. vertex coordinates, are needed to create 
+   * the Frozen Shower library, so they are saved in a hepmc file. 
+   * Frozen showers are then simulated from these starting points 
+   * in a separate job. To speed up the simulation, 
+   * showers will be read from the library instead of being simulated.*/
   m_generate_starting_points = (!m_configuration.m_generated_starting_points_file.empty());
   if (m_generate_starting_points) {
-    m_starting_points_file  =  std::shared_ptr<HepMC::IO_GenEvent> ( new HepMC::IO_GenEvent(m_configuration.m_generated_starting_points_file.c_str(),std::ios::out));
+    std::string hepmcFileName = m_configuration.m_generated_starting_points_file.c_str();
+    
+    // In multi-thread run, multiple hepmc files are created.
+    // To distinguish between them we add thread_id in their name. 
+    if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1)
+      {
+	auto threadId = std::this_thread::get_id();
+	std::stringstream ss;
+	ss << threadId;
+	hepmcFileName += "."+ss.str();
+      }
+#ifdef HEPMC3
+    m_starting_points_file  = std::make_shared<HepMC3::WriterAscii>(hepmcFileName);
+#else
+    m_starting_points_file  = std::make_shared<HepMC::IO_GenEvent> (hepmcFileName,std::ios::out);
+#endif
   }
+
   enum DETECTOR { EMB=100000, EMEC=200000, FCAL1=300000, FCAL2=400000,
                   FCAL3=500000, HECLOC=600000, HEC=700000 };
 
@@ -166,9 +189,8 @@ void LArFastShower::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastStep)
 
   if ( m_generate_starting_points ) {
     if ((float)rand()/static_cast<float>(RAND_MAX) <= m_configuration.m_generated_starting_points_ratio) {
-      HepMC::GenEvent * ge = GetGenEvent(fastTrack);
+      std::unique_ptr<const HepMC::GenEvent> ge = GetGenEvent(fastTrack);
       generateFSStartingPoint(ge);
-      delete ge;
     }
     KillParticle( fastTrack, fastStep );
     return;
@@ -332,28 +354,44 @@ G4bool LArFastShower::CheckContainment(const G4FastTrack &fastTrack)
 
 }
 
-HepMC::GenEvent * LArFastShower::GetGenEvent(const G4FastTrack &fastTrack)
+std::unique_ptr<const HepMC::GenEvent> LArFastShower::GetGenEvent(const G4FastTrack &fastTrack)
 {
-  G4ThreeVector showerPos = fastTrack.GetPrimaryTrack()->GetPosition();
-  G4ThreeVector showerMom = fastTrack.GetPrimaryTrack()->GetMomentum();
-
-  G4double energy = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
+  const G4ThreeVector showerPos = fastTrack.GetPrimaryTrack()->GetPosition();
+  const G4ThreeVector showerMom = fastTrack.GetPrimaryTrack()->GetMomentum();
+  const G4double energy = fastTrack.GetPrimaryTrack()->GetKineticEnergy();
 
   G4int pdgcode = fastTrack.GetPrimaryTrack()->GetDefinition()->GetPDGEncoding();
   if (pdgcode < 0) pdgcode = -pdgcode; // hack for positrons. let it be electrons.
 
+#ifdef HEPMC3
+  HepMC3::Units::MomentumUnit momentumUnit = HepMC3::Units::MEV;
+  HepMC3::Units::LengthUnit lengthUnit = HepMC3::Units::MM;
+#else
+  HepMC::Units::MomentumUnit momentumUnit = HepMC::Units::MEV;
+  HepMC::Units::LengthUnit lengthUnit = HepMC::Units::MM;
+#endif
   // new event. Signal processing = 0, event number "next"
-  HepMC::GenEvent* ge = new HepMC::GenEvent();
+  std::unique_ptr<HepMC::GenEvent> ge = std::make_unique<HepMC::GenEvent>(momentumUnit,lengthUnit);
+
   ge->set_event_number(++m_eventNum);
-  // vertex. Position of the shower, time = 0
+
+  // starting point from which the shower develops, time = 0. 
   HepMC::GenVertexPtr gv = HepMC::newGenVertexPtr(
       HepMC::FourVector(showerPos.x(), showerPos.y(), showerPos.z(), 0) );
   ge->add_vertex(gv);
-  // particle. FourVector of the shower, pdgcode, status = 1
-  HepMC::GenParticlePtr gp = HepMC::newGenParticlePtr(
+
+  // input particle (status=4) is always required by HepMC.
+  // make it a dummy geantino with 4-mom=0. pdg_id=999.
+  HepMC::GenParticlePtr gpi = HepMC::newGenParticlePtr(
+      HepMC::FourVector(0.,0.,0.,0.),
+      999, 4 );
+  gv->add_particle_in(gpi);
+
+  // output particle (status=1) is the FourVector of the shower.
+  HepMC::GenParticlePtr gpo = HepMC::newGenParticlePtr(
       HepMC::FourVector(showerMom.x(), showerMom.y(), showerMom.z(), energy),
       pdgcode, 1 );
-  gv->add_particle_out(gp);
+  gv->add_particle_out(gpo);
 
   // return auto_pointer. will be deleted automatically
   return ge;
@@ -406,11 +444,15 @@ double LArFastShower::maxEneToShowerLib( const G4ParticleDefinition& particleTyp
   }
   return 0.0;
 }
-bool LArFastShower::generateFSStartingPoint( const HepMC::GenEvent * ge ) const
+bool LArFastShower::generateFSStartingPoint( std::unique_ptr<const HepMC::GenEvent> &ge ) const
 {
   if (!m_generate_starting_points)
     return false;
-  m_starting_points_file->write_event(ge);
+#ifdef HEPMC3
+  m_starting_points_file->write_event(*ge);
+#else
+  m_starting_points_file->write_event(ge.get());
+#endif
   return true;
 }
 G4bool LArFastShower::ForcedAccept(const G4FastTrack & fastTrack)

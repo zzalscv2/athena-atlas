@@ -1,5 +1,5 @@
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
+ServiceMgr.MessageSvc.OutputLevel = INFO
 ## Algorithm sequence
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()

@@ -9,11 +9,14 @@ parser = OptionParser(usage = "usage: %prog", version="%prog $Id: LArG4GenerateS
 parser.add_option("--inputEvtFileList",    dest="inputevt",    action="append",                       help="select the input file name")
 parser.add_option("--inputStructFileList", dest="inputstruct", action="append",                       help="select the output file name")
 parser.add_option("--nevents",    dest="nevents",                  type=int,   help="select the number of events to generate (default: all)")
+parser.add_option("--runNumber",  dest="runNumber", default=410000, type=int, help="run number (default: %default)")
 parser.add_option("--skipevents", dest="skipevents",               type=int,   help="select the number of events to skip (default: 0)")
 parser.add_option("--geometry",   dest="geometry",                             help="select the geometry tag (default can be used)")
 parser.add_option("--condition",  dest="condition",                            help="select the condition tag (REQUIRED)")
 parser.add_option("--physlist",   dest="physlist",                             help="select the physics list (default can be used)")
-parser.set_defaults(inputevt=[],inputstruct=[],nevents=-1,skipevents=0,geometry="",condition="")
+parser.add_option("--parametrization",   dest="parametrization", type=int,     help="Choose the type of parametrisation. 0-FullSum. 2-DefaultATLAS (FrozenShowers are ON). It should be 0 for library generation.")
+parser.add_option("--FSLib",      dest="fsLibs",      default=[],      action="append",  help="path to the frozen shower libraries (separate flag for each library must be used)")
+parser.set_defaults(inputevt=[],inputstruct=[],nevents=-1,skipevents=0,geometry="",condition="",parametrization=0)
 (options, args) = parser.parse_args()
 
 if len(options.inputevt) == 0 :

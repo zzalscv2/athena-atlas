@@ -18,6 +18,9 @@
 // Forward declarations
 #include "AtlasHepMC/GenEvent_fwd.h"
 #include "AtlasHepMC/IO_GenEvent.h"
+#ifdef HEPMC3
+#include "HepMC3/WriterAscii.h"
+#endif
 
 class IFastSimDedicatedSD;
 class ILArG4ShowerLibSvc;
@@ -65,7 +68,7 @@ class LArFastShower : public G4VFastSimulationModel
     /// Function to check the containment of a shower within a regular detector region
     virtual G4bool CheckContainment(const G4FastTrack &fastTrack);
 
-    HepMC::GenEvent* GetGenEvent(const G4FastTrack &fastTrack);
+    std::unique_ptr<const HepMC::GenEvent> GetGenEvent(const G4FastTrack &fastTrack);
 
     /// get switch for frozen showers
     bool   flagToShowerLib  ( const G4ParticleDefinition& particleType ) const;
@@ -74,7 +77,7 @@ class LArFastShower : public G4VFastSimulationModel
     /// get upper energy limit for frozen showers
     double minEneToShowerLib( const G4ParticleDefinition& particleType ) const;
 
-    bool generateFSStartingPoint( const HepMC::GenEvent * ge) const;
+    bool generateFSStartingPoint( std::unique_ptr<const HepMC::GenEvent> &ge) const;
 
   private:
     const FastShowerConfigStruct m_configuration;
@@ -86,7 +89,11 @@ class LArFastShower : public G4VFastSimulationModel
 
     // data members for configuration
     bool m_generate_starting_points;
+#ifdef HEPMC3
+    std::shared_ptr<HepMC3::WriterAscii>  m_starting_points_file;
+#else
     std::shared_ptr<HepMC::IO_GenEvent>  m_starting_points_file;
+#endif
     std::string m_detector_tag_str;
     std::map<std::string,int> m_detmap;
 

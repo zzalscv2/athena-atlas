@@ -10,6 +10,7 @@ parser.add_option("--inputFile",  dest="input",       default=None, action="appe
 parser.add_option("--outputFile", dest="output",      default='StartGenEvents',           help="select the output file name (default: %default)")
 parser.add_option("--geometry",   dest="geometry",    default='',                         help="select the geometry tag (default can be used)")
 parser.add_option("--condition",  dest="condition",   default='',                         help="select the geometry tag (REQUIRED)")
+parser.add_option("--runNumber",  dest="runNumber",   default=410000, type=int,           help="run number (default: %default)")
 parser.add_option("--physlist",   dest="physlist",                                        help="select the physics list (default can be used)")
 parser.add_option("--etaMin",     dest="etaMin",      default='-3.3',                     help="particle gun: Minimum Eta (default: %default)")
 parser.add_option("--etaMax",     dest="etaMax",      default='3.3',                      help="particle gun: Maximum Eta (default: %default)")
@@ -19,6 +20,7 @@ parser.add_option("--pid",        dest="pid",         default='11',             
 parser.add_option("--skipevents",  dest="skipevents",  default=0,              type=int,   help="select the number of events to skip (default: 0)")
 parser.add_option("--nevents",    dest="nevents",     default=5000,           type=int,   help="number of events to process (default: %default)")
 parser.add_option("--spratio",    dest="spratio",     default=0.02,           type=float, help="the ratio of starting points to be saved (default: %default)")
+parser.add_option("--outputLevel", dest="outLVL",      default=3,             type=int,   help="outputLevel: 1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR" )
 (options, args) = parser.parse_args()
 
 if len(options.condition) == 0 :

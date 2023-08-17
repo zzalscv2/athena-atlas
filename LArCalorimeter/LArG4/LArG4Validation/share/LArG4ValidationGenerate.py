@@ -23,6 +23,8 @@ parser.add_option("--firstEvent", dest="firstEvent",  default=1,         type=in
 parser.add_option("--runNumber",  dest="runNumber", default=410000, type=int, help="run number (default: %default)")
 parser.add_option("--simulate",  dest="simulate", default=1, type=int, help="run simulation (default: %default)")
 parser.add_option("--FSLib",      dest="fsLibs",      default=[],      action="append",  help="path to the frozen shower libraries (separate flag for each library must be used)")
+parser.add_option("--fcalrings",  dest="fcalrings", default=None, type=float,  help="use this to fire to FCAL fron face in order to see its structure  (provide --fcalrings=4720) (default: none)")
+parser.add_option("--outputLevel", dest="outLVL",      default=3,             type=int,   help="outputLevel: 1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR" )
 (options, args) = parser.parse_args()
 
 exec = __file__.replace("LArG4ValidationGenerate.py","LArG4ValidationGenerateBody.py")

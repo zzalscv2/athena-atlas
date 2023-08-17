@@ -35,6 +35,8 @@ else :
 if len(options['physlist']) > 0 :
     simFlags.PhysicsList = options['physlist']
 
+simFlags.RunNumber = options['runNumber']
+
 ## AthenaCommon flags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 athenaCommonFlags.EvtMax = options['nevents']
@@ -44,7 +46,17 @@ athenaCommonFlags.PoolHitsOutput.set_Off()
 athenaCommonFlags.PoolEvgenInput=options['inputevt']
 
 ## Set the LAr parameterization
-simFlags.LArParameterization = 0
+simFlags.LArParameterization = options['parametrization']
+
+if options['parametrization'] == 2:
+    ## this is used when printing out showers taken from lib for debugging purposes
+    if len(options['fsLibs']) > 0 :
+        printfunc ("Setting up ShowerLib Service")
+        #from LArG4ShowerLibSvc.LArG4ShowerLibSvcConf import LArG4ShowerLibSvc
+        from LArG4ShowerLibSvc.LArG4ShowerLibSvcConfig import getLArG4ShowerLibSvc
+        if not hasattr( ServiceMgr, 'LArG4ShowerLibSvc' ):
+            ServiceMgr += getLArG4ShowerLibSvc()
+            ServiceMgr.LArG4ShowerLibSvc.FileNameList = options['fsLibs']
 
 # get service manager
 from AthenaCommon.AppMgr import ServiceMgr
@@ -55,15 +67,17 @@ include("G4AtlasApps/G4Atlas.flat.configuration.py")
 from random import randint
 simFlags.RandomSeedOffset = randint(1,443921180)
 
-#add G4 function
-
+## Adding G4 TestAaction, which creates showers.
 from G4AtlasApps.SimFlags import simFlags
 simFlags.OptionalUserActionList.addAction('G4UA::TestActionShowerLibTool')
 
+## Specifying event collection for the TestActionShowerLibTool.
 from AthenaCommon.CfgGetter import getAlgorithm
 topSeq += getAlgorithm("G4AtlasAlg",tryDefaultConfigurable=True)
 topSeq.G4AtlasAlg.InputTruthCollection = "GEN_EVENT"
 
+## Adding algorithm, which performs shower post-processing,
+## namely affine transformation, clusterisation and truncation.
 from AthenaCommon.CfgGetter import getAlgorithm
 topSeq += getAlgorithm("LArG4GenShowerLib")
 topSeq.LArG4GenShowerLib.LibStructFiles = options['inputstruct']
