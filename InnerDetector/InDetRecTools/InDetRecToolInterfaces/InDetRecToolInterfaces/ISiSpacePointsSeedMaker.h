@@ -133,7 +133,7 @@ namespace InDet {
 
       virtual bool getWriteNtupleBoolProperty() const =0;
      
-      enum seedType { StripSeed = 0, PixelSeed = 1 };
+      enum seedType { StripSeed = 0, PixelSeed = 1, MixedSeed = 2 };
  
       ///////////////////////////////////////////////////////////////////
       /// @name Print internal tool parameters and status

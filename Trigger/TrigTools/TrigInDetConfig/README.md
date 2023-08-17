@@ -1,8 +1,6 @@
 # TrigInDetConfig
 
-The code in this packages is essentially just the python code for the configuration of the Inner Detector Trigger.
+The code in this package is essentially just the Python code for the configuration of the Inner Detector Trigger.
 
-As such, the user should refer directly to the README file from the 
-[Trigger/TrigTools/TrigInDetConfig/python](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigTools/TrigInDetConfig/python) 
-directory
-
+As such, the user should refer directly to the [README file](python/README.md) from the 
+[Trigger/TrigTools/TrigInDetConfig/python](python/) directory.

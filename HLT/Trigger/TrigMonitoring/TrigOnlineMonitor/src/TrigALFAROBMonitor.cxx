@@ -39,6 +39,8 @@ TrigALFAROBMonitor::TrigALFAROBMonitor(const std::string& name, ISvcLocator* pSv
  // fill vectors with names of trigger items
  m_map_TrgNamesToHistGroups["L1_ALFA_ELAST15"] = 0;
  m_map_TrgNamesToHistGroups["L1_ALFA_ELAST18"] = 0;
+ m_map_TrgNamesToHistGroups["L1_ALFA_SYST17"] = 0;
+ m_map_TrgNamesToHistGroups["L1_ALFA_SYST18"] = 0;
 
  m_map_TrgNamesToHistGroups["L1_ALFA_ANY"] = 1;
 

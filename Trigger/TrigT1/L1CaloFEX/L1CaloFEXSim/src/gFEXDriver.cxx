@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,16 +7,8 @@
 #include "L1CaloFEXSim/gFEXOutputCollection.h"
 #include "StoreGate/WriteHandle.h"
 
-#include <cassert>
-#include "SGTools/TestStore.h"
-
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
-
-#include <ctime>
-
-#define DEBUG_VHB 1
-
 
 namespace LVL1 {
 
@@ -35,9 +27,6 @@ namespace LVL1 {
 
 StatusCode gFEXDriver::initialize()
 {
-
-  m_numberOfEvents = 1;
-
   ServiceHandle<ITHistSvc> histSvc("THistSvc","");
 
   ATH_CHECK( histSvc.retrieve() );
@@ -47,16 +36,11 @@ StatusCode gFEXDriver::initialize()
   ATH_CHECK( m_gFEXOutputCollectionSGKey.initialize() );
 
   return StatusCode::SUCCESS;
-
 }
 
 
   StatusCode gFEXDriver::execute() //const
 {
-
-  ATH_MSG_DEBUG("Executing " << name() << ", processing event number " << m_numberOfEvents );
-
-
   // STEP 1 - Do some monitoring
   gFEXOutputCollection* my_gFEXOutputCollection = new gFEXOutputCollection();
   my_gFEXOutputCollection->setdooutput(true);
@@ -71,10 +55,6 @@ StatusCode gFEXDriver::initialize()
   std::unique_ptr<gFEXOutputCollection> local_gFEXOutputCollection = std::unique_ptr<gFEXOutputCollection>(my_gFEXOutputCollection);
   SG::WriteHandle<LVL1::gFEXOutputCollection> gFEXOutputCollectionSG(m_gFEXOutputCollectionSGKey);
   ATH_CHECK(gFEXOutputCollectionSG.record(std::move(local_gFEXOutputCollection)));
-
-  ATH_MSG_DEBUG("Executed " << name() << ", closing event number " << m_numberOfEvents );
-
-  m_numberOfEvents++;
 
   return StatusCode::SUCCESS;
 }

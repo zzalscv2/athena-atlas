@@ -292,10 +292,6 @@ def CombinedMuonTrackBuilderFit( name='CombinedMuonTrackBuilderFit', **kwargs ):
     if ConfigFlags.Muon.MuonTrigger:
         kwargs.setdefault("MuonHoleRecovery"              , "" )
         trigTrackSummary = getPublicToolClone("TrigMuonTrackSummary", "MuonTrackSummaryTool")
-        if DetFlags.detdescr.ID_on():
-            from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryHelperTool
-            trigTrackSummary.InDetSummaryHelperTool = InDetTrigTrackSummaryHelperTool
-            trigTrackSummary.doHolesInDet = True
         kwargs.setdefault("TrackSummaryTool"              , trigTrackSummary )
 
         kwargs.setdefault("Propagator"                    , ToolSvc.AtlasRungeKuttaPropagator)
@@ -377,10 +373,6 @@ def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
     if ConfigFlags.Muon.MuonTrigger:
         kwargs.setdefault("MuonHoleRecovery"              , "" )
         trigTrackSummary = getPublicToolClone("TrigMuonTrackSummary", "MuonTrackSummaryTool")
-        if DetFlags.detdescr.ID_on():
-            from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryHelperTool
-            trigTrackSummary.InDetSummaryHelperTool = InDetTrigTrackSummaryHelperTool
-            trigTrackSummary.doHolesInDet = True
         kwargs.setdefault("TrackSummaryTool"              , trigTrackSummary )
 
         kwargs.setdefault("Propagator"                    , ToolSvc.AtlasRungeKuttaPropagator)

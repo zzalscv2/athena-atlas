@@ -156,6 +156,7 @@ StatusCode ZdcNtuple :: initialize ()
 
     m_outputTree->Branch("zdc_RPDChannelAmplitude",&t_RPDChannelAmplitude,"zdc_RPDChannelAmplitude[2][16]/F");
     m_outputTree->Branch("zdc_RPDChannelMaxSample",&t_RPDChannelMaxSample,"zdc_RPDChannelMaxSample[2][16]/i");
+    m_outputTree->Branch("zdc_RPDChannelStatus",&t_RPDChannelStatus,"zdc_RPDChannelStatus[2][16]/i");
 
     if (!(zdcCalib || zdcLaser || zdcOnly))
     {
@@ -271,26 +272,25 @@ StatusCode ZdcNtuple :: initialize ()
           m_outputTree->Branch("trk_nexPixHits", "vector<uint8_t>", &t_trk_nexPixHits);
         }
 
-    }
+      if( lhcf2022 || lhcf2022zdc || lhcf2022afp){
+	m_outputTree->Branch("nProtons", &nProtons, "nProtons/i");
+	m_outputTree->Branch("proton_pt", "vector<double>", &proton_pt);
+	m_outputTree->Branch("proton_eta", "vector<double>", &proton_eta);
+	m_outputTree->Branch("proton_phi", "vector<double>", &proton_phi);
+	m_outputTree->Branch("proton_e", "vector<double>", &proton_e);
+	m_outputTree->Branch("proton_side", "vector<int>", &proton_side);
+	m_outputTree->Branch("proton_eLoss", "vector<double>", &proton_eLoss);
+	m_outputTree->Branch("proton_t", "vector<double>", &proton_t);
+	m_outputTree->Branch("proton_track_stationID", "vector<vector<int>>", &proton_track_stationID);
+	m_outputTree->Branch("proton_track_nClusters", "vector<vector<int>>", &proton_track_nClusters);
+	m_outputTree->Branch("proton_track_xLocal", "vector<vector<float>>", &proton_track_xLocal);
+	m_outputTree->Branch("proton_track_yLocal", "vector<vector<float>>", &proton_track_yLocal);
+	m_outputTree->Branch("proton_track_zLocal", "vector<vector<float>>", &proton_track_zLocal);
+	m_outputTree->Branch("proton_track_xSlope", "vector<vector<float>>", &proton_track_xSlope);
+	m_outputTree->Branch("proton_track_ySlope", "vector<vector<float>>", &proton_track_ySlope);
+      }
 
-    if( lhcf2022 || lhcf2022zdc || lhcf2022afp){
-      m_outputTree->Branch("nProtons", &nProtons, "nProtons/i");
-      m_outputTree->Branch("proton_pt", "vector<double>", &proton_pt);
-      m_outputTree->Branch("proton_eta", "vector<double>", &proton_eta);
-      m_outputTree->Branch("proton_phi", "vector<double>", &proton_phi);
-      m_outputTree->Branch("proton_e", "vector<double>", &proton_e);
-      m_outputTree->Branch("proton_side", "vector<int>", &proton_side);
-      m_outputTree->Branch("proton_eLoss", "vector<double>", &proton_eLoss);
-      m_outputTree->Branch("proton_t", "vector<double>", &proton_t);
-      m_outputTree->Branch("proton_track_stationID", "vector<vector<int>>", &proton_track_stationID);
-      m_outputTree->Branch("proton_track_nClusters", "vector<vector<int>>", &proton_track_nClusters);
-      m_outputTree->Branch("proton_track_xLocal", "vector<vector<float>>", &proton_track_xLocal);
-      m_outputTree->Branch("proton_track_yLocal", "vector<vector<float>>", &proton_track_yLocal);
-      m_outputTree->Branch("proton_track_zLocal", "vector<vector<float>>", &proton_track_zLocal);
-      m_outputTree->Branch("proton_track_xSlope", "vector<vector<float>>", &proton_track_xSlope);
-      m_outputTree->Branch("proton_track_ySlope", "vector<vector<float>>", &proton_track_ySlope);
     }
-
   }
   
   ANA_MSG_DEBUG("Anti-howdy from Initialize!");
@@ -479,6 +479,10 @@ StatusCode ZdcNtuple :: execute ()
     processClusters();
     processGaps();
 
+    if( lhcf2022||lhcf2022zdc||lhcf2022afp ){
+      ANA_CHECK(evtStore()->retrieve( m_afpProtons, "AFPProtonContainer"));
+      processProtons();
+    }
   }
 
   if (m_isMC)
@@ -486,10 +490,6 @@ StatusCode ZdcNtuple :: execute ()
     ANA_CHECK(evtStore()->retrieve( m_truthParticleContainer, "TruthParticles"));
   }
 
-  if( lhcf2022||lhcf2022zdc||lhcf2022afp ){
-    ANA_CHECK(evtStore()->retrieve( m_afpProtons, "AFPProtonContainer"));
-    processProtons();
-  }
   // if trigger enabled, only write out events which pass one of them, unless using MC
 
   if (enableTrigger && !passTrigger && !m_isMC && writeOnlyTriggers) return StatusCode::SUCCESS;
@@ -540,7 +540,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	    {
 	      for (int id=0;id<2;id++)
 		{
-		  for (int isamp=0;isamp<((int)nsamplesZdc);isamp++)
+		  for (unsigned int isamp=0;isamp<nsamplesZdc;isamp++)
 		    {
 		      if (nsamplesZdc==7) t_raw7[iside][imod][ig][id][isamp]=0;
 		      if (nsamplesZdc==15) t_raw15[iside][imod][ig][id][isamp]=0;
@@ -572,6 +572,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcAmpErr[iside] = zdcSum->auxdataConst<float>("UncalibSumErr"+auxSuffix);
       if (zdcSum->isAvailable<uint16_t>("LucrodTriggerSideAmp"))
 	t_ZdcLucrodTriggerSideAmp[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmp");
+
       ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
 
       t_ZdcTime[iside] = zdcSum->auxdataConst<float>("AverageTime"+auxSuffix);
@@ -609,6 +610,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
         t_ZdcModuleMinDeriv2nd[iside][imod] = zdcMod->auxdataConst<float>("MinDeriv2nd" + auxSuffix);
         t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
         t_ZdcModulePreSampleAmp[iside][imod] = zdcMod->auxdataConst<float>("PreSampleAmp" + auxSuffix);
+
 	if (zdcMod->isAvailable<uint16_t>("LucrodTriggerAmp"))
 	  t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
 	if (zdcMod->isAvailable<float>("MaxADC"))
@@ -640,10 +642,9 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
       } else if (zdcMod->zdcType() == 1) {
         // this is the RPD
-        int rpdChannel = zdcMod->zdcChannel() - 1; // zero-based
-        t_RPDChannelAmplitude[iside][rpdChannel] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
-        t_RPDChannelMaxSample[iside][rpdChannel] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
-
+        t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
+        t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
+        t_RPDChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
       }
 
  

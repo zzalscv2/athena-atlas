@@ -4,9 +4,6 @@
 #Heavily inspired by the offline version:
 #https://gitlab.cern.ch/atlas/athena/blob/master/InnerDetector/InDetExample/InDetRecExample/share/ConfiguredNewTrackingSiPattern.py
 
-from AthenaCommon.Include import include
-include("InDetTrigRecExample/InDetTrigRec_jobOptions.py") # this is needed to get InDetTrigFlags
-
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
@@ -79,7 +76,7 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
       from TrigInDetConfig.utils import getFlagsForActiveConfig
       flags = getFlagsForActiveConfig(inflags, config.input_name, log)
       
-      from InDetTrigRecExample import InDetTrigCA
+      from TrigInDetConfig import InDetTrigCA
       InDetTrigCA.InDetTrigConfigFlags = flags
       
 

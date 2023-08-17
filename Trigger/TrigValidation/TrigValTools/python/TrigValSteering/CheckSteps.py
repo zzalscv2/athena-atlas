@@ -756,7 +756,7 @@ def default_check_steps(test):
         reco_tf_logmerge = LogMergeStep('LogMerge_Reco_tf')
         reco_tf_logmerge.warn_if_missing = False
         # FIXME: drop AODtoDAOD once test_trigAna_AODtoDAOD_run2_build.py is migrated to Derivation_tf
-        tf_names = ['HITtoRDO', 'RDOtoRDOTrigger', 'RAWtoESD', 'ESDtoAOD',
+        tf_names = ['HITtoRDO', 'Overlay', 'RDOtoRDOTrigger', 'RAWtoESD', 'ESDtoAOD',
                     'PhysicsValidation', 'RAWtoALL',
                     'BSRDOtoRAW', 'DRAWCOSTtoNTUPCOST', 'AODtoNTUPRATE', 'Derivation', 'AODtoDAOD']
         reco_tf_logmerge.log_files = ['log.'+tf_name for tf_name in tf_names]

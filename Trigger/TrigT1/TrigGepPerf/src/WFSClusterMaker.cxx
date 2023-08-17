@@ -40,7 +40,7 @@ bool Gep::WFSClusterMaker::isSeedCell (const Gep::CustomCaloCell& cell) const {
 }
 
 
-bool Gep::WFSClusterMaker::isInAllowedSampling(int sampling, std::vector<int> list_of_samplings) const {
+bool Gep::WFSClusterMaker::isInAllowedSampling(int sampling, const std::vector<int>& list_of_samplings) const {
 
   for (unsigned int i = 0; i < list_of_samplings.size(); ++i) {
 	if (list_of_samplings[i] == sampling) return true;
@@ -49,7 +49,7 @@ bool Gep::WFSClusterMaker::isInAllowedSampling(int sampling, std::vector<int> li
 }
 
 
-bool Gep::WFSClusterMaker::isNewCell(unsigned int id, std::vector<unsigned int> seenCells) const {
+bool Gep::WFSClusterMaker::isNewCell(unsigned int id, const std::vector<unsigned int>& seenCells) const {
 
   for (unsigned int i = 0; i < seenCells.size(); ++i) {
         if (id == seenCells[i]) return false;
@@ -75,7 +75,7 @@ Gep::WFSClusterMaker::clusterFromCells(const Gep::CustomCaloCell& seed,
 
   int i_shell = 1;
 
-  while (cellsNextLayer.size() > 0 && i_shell <= m_max_shells) {
+  while (!cellsNextLayer.empty() && i_shell <= m_max_shells) {
 
         cellsThisLayer = cellsNextLayer;
         cellsNextLayer.clear();
@@ -112,7 +112,7 @@ Gep::WFSClusterMaker::clusterFromCells(const Gep::CustomCaloCell& seed,
 }
 
 
-Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(std::vector<Gep::CustomCaloCell> cells) const {
+Gep::Cluster Gep::WFSClusterMaker::getClusterFromListOfCells(const std::vector<Gep::CustomCaloCell>& cells) const {
 
   Gep::Cluster cluster;
 
@@ -169,7 +169,7 @@ void Gep::WFSClusterMaker::orderClustersInEt(std::vector<Gep::Cluster> &v_cluste
         float et = v_clusters[i_cluster].et();
 
         // Fill first cluster
-        if (v_ordered.size() == 0) {
+        if (v_ordered.empty()) {
                 v_ordered.push_back(v_clusters[i_cluster]);
                 continue;
         }

@@ -16,9 +16,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/gFEXJwoJTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 
@@ -40,9 +37,9 @@ namespace LVL1 {
                                  float aFPGA_C, float bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) override;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(gTowersCentral Atwr, gTowersCentral Btwr,
-                                                               gTowersForward CNtwr, gTowersForward CPtwr,
-                                                               std::array<uint32_t, 4> & outJwojTOB) override;
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
+                                                               const gTowersForward& CNtwr, const gTowersForward& CPtwr,
+                                                               std::array<uint32_t, 4> & outJwojTOB) const override;
 
 
 

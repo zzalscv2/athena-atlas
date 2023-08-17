@@ -215,6 +215,8 @@ def getSpecialConfigurationMetadata(inputFiles, secondaryInputFiles):
             ## Handle k=v directives
             k, v = spcitem.split("=")
             if k == "preInclude" and v.endswith('.py'): # Translate old preIncludes into CA-based versions.
+                if v == 'SimulationJobOptions/preInclude.RhadronsPythia8.py':
+                    v = 'SimulationJobOptions/preInclude.RHadronsPythia8.py' # ATLASSIM-6687 Fixup for older EVNT files
                 v1 = legacyPreIncludeToCAPreInclude[v]
                 if v1 is not None:
                     specialConfigDict[k] = v1

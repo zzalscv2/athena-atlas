@@ -114,6 +114,8 @@ def checkForSpecialConfigurationMetadata():
             simFlags.specialConfiguration.get_Value().update(params)
             from AthenaCommon.Include import include
             for inc in someIncludes:
+                if inc == 'SimulationJobOptions/preInclude.RhadronsPythia8.py':
+                    inc = 'SimulationJobOptions/preInclude.RHadronsPythia8.py' # ATLASSIM-6687 Fixup for older EVNT files
                 include(inc)
     else:
         simMDlog.info("No input Evgen MetaData object available so skipping check for specialConfiguration metadata.")

@@ -14,7 +14,7 @@ from TrigValTools.TrigARTUtils import package_prefix, find_scripts, remember_cwd
 
 
 def minimal_pattern(package):
-    dict = {'TriggerTest':      '(test_trig_data_v1Dev_build|test_trig_data_newJO_build)',
+    dict = {'TriggerTest':      '(test_trig_data_v1Dev_build|test_trig_data_newJO_build|test_trig_mc_v1DevHI_build)',
             'TrigP1Test':       'test_trigP1_v1Dev_decodeBS_build',
             'TrigAnalysisTest': 'test_trigAna_RDOtoRDOTrig_v1Dev_build'}
     if package == 'ALL':
@@ -45,6 +45,9 @@ def get_parser():
     parser.add_argument('-r', '--rerun-failed',
                         action='store_true',
                         help='Run tests that failed previously')
+    parser.add_argument('-s', '--summary',
+                        action='store_true',
+                        help='Print summary of previously run tests')
     parser.add_argument('-t', '--artType',
                         metavar='type',
                         default='build',
@@ -195,11 +198,17 @@ def main():
     topdir = 'runTrigART'
     statusfile = 'results/{:s}-status.json'.format(topdir)
 
-    if args.rerun_failed:
-        with open(os.path.join(topdir,statusfile), 'r') as f:
-            all_test_results = json.load(f)[topdir]
+    # Load previous results
+    if args.rerun_failed or args.summary:
+        status_data = json.load(open(os.path.join(topdir,statusfile)))
+        all_test_results = status_data[topdir]
         failed_tests = analyse_results(all_test_results)
-        scripts = find_scripts(failed_tests)
+        if args.summary:
+            print_summary(all_test_results, failed_tests)
+            return 0
+
+    if args.rerun_failed:
+        scripts = find_scripts(get_patterns(args)+['|'.join(failed_tests)])
     else:
         scripts = find_scripts(get_patterns(args))
 

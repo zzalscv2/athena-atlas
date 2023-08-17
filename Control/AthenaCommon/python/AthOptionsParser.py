@@ -116,7 +116,7 @@ def fill_athenaCommonFlags(opts):
         athenaCommonFlags.EvtMax.set_Value_and_Lock(opts.evtMax)
 
     if opts.skipEvents is not None:
-        athenaCommonFlags.EvtMax.set_Value_and_Lock(opts.skipEvents)
+        athenaCommonFlags.SkipEvents.set_Value_and_Lock(opts.skipEvents)
 
 
 def getArgumentParser():

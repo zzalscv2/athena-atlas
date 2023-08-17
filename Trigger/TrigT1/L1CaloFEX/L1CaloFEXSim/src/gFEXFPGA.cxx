@@ -10,10 +10,6 @@
 
 #include "L1CaloFEXSim/gFEXFPGA.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include <array>
@@ -51,13 +47,11 @@ namespace LVL1 {
      m_fpgaId = id;
 
      return StatusCode::SUCCESS;
-
   }
 
   void gFEXFPGA::reset(){
 
      m_fpgaId = -1;
-
   }
 
 
@@ -67,8 +61,6 @@ namespace LVL1 {
      int cols = tmp_gTowersIDs_subset[0].size();
 
      std::copy(&tmp_gTowersIDs_subset[0][0], &tmp_gTowersIDs_subset[0][0]+(rows*cols),&m_gTowersIDs_central[0][0]);
-
-
   }
 
   void gFEXFPGA::SetTowersAndCells_SG(gTowersForward tmp_gTowersIDs_subset){
@@ -77,7 +69,6 @@ namespace LVL1 {
      int cols = tmp_gTowersIDs_subset[0].size();
 
      std::copy(&tmp_gTowersIDs_subset[0][0], &tmp_gTowersIDs_subset[0][0]+(rows*cols),&m_gTowersIDs_forward[0][0]);
-
    }
 
 
@@ -181,10 +172,6 @@ namespace LVL1 {
          }
       }
    }
-
-
-
-
 
 
 } // end of namespace bracket

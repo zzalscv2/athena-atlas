@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXaltMetAlgo - Noise cut and Rho+RMS algorithm for gFEX MET
@@ -39,7 +39,7 @@ void gFEXaltMetAlgo::setAlgoConstant(std::vector<int>&& A_thr,
 
 
 void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr,
-                                std::array<uint32_t, 4> & outTOB) {
+                                std::array<uint32_t, 4> & outTOB) const {
 
   //FPGA A observables
   int A_MET_x_nc = 0x0;
@@ -269,7 +269,4 @@ float gFEXaltMetAlgo::cosLUT(const unsigned int phiIDX, const unsigned int aw) c
 }
 
 
-
-
 } // namespace LVL1
-

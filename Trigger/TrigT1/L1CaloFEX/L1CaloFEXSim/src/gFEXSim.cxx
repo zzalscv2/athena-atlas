@@ -15,9 +15,6 @@
 #include "L1CaloFEXSim/gFEXJetAlgo.h"
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 #include "L1CaloFEXSim/gFEXOutputCollection.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ServiceHandle.h"
 
 namespace LVL1 {
 
@@ -59,7 +56,7 @@ namespace LVL1 {
 
  }
 
-StatusCode gFEXSim::executegFEXSim(gTowersIDs tmp_gTowersIDs_subset, gFEXOutputCollection* gFEXOutputs){
+StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEXOutputCollection* gFEXOutputs){
 
    // Container to save gTowers
    SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey);

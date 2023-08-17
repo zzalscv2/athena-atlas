@@ -2,12 +2,8 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaCommon.Include import include
-
 from AthenaCommon.Logging import logging
 log = logging.getLogger("InDetTrigFastTracking")
-
-include("InDetTrigRecExample/InDetTrigRec_jobOptions.py")
 
 def makeInDetTrigFastTrackingNoView( inflags, config = None, rois = 'EMViewRoIs', doFTF = True, secondStageConfig = None, LRTInputCollection = None ):
 
@@ -25,7 +21,7 @@ def makeInDetTrigFastTracking( inflags, config = None, rois = 'EMViewRoIs', doFT
   flags = getFlagsForActiveConfig(inflags, config.input_name, log)
 
   #temporary until imports of public tools via CAtoLegacyPublicToolWrapper not needed anymore  
-  from InDetTrigRecExample import InDetTrigCA
+  from TrigInDetConfig import InDetTrigCA
   InDetTrigCA.InDetTrigConfigFlags = flags
      
   

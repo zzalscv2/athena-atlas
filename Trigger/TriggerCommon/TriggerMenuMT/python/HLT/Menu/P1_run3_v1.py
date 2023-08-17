@@ -483,7 +483,8 @@ def addHeavyIonP1Signatures(chains):
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ0', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ1', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ2', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
-
+        
+        ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP15', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=['PS:Online']+SupportGroup),   
         # ALFA streamers for alignment (ATR-23602)
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ANY',     l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_AlfaPEB_L1ALFA_ELAST15', l1SeedThresholds=['FSNOSEED'], stream=['ALFACalib'], groups=MinBiasGroup+SupportGroup),
