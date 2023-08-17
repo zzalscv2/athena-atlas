@@ -19,6 +19,8 @@
 // For MC Truth information:
 #include "GeneratorObjects/McEventCollection.h"
 
+#undef _myDEBUG_
+
 namespace G4UA
 {
 
@@ -62,7 +64,7 @@ namespace G4UA
 #ifdef _myDEBUG_
     G4cout << "#########################################" << G4endl
 	   << "##    TestActionShowerLib - EndOfEvent ##" << G4endl
-	   << "##         MMM="<<m_count<<"     ###" << G4endl
+      //<< "##         MMM="<<m_count<<"     ###" << G4endl
 	   << "#########################################" << G4endl;
 #endif
 

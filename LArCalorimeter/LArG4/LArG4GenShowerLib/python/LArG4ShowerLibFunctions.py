@@ -1,6 +1,8 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
+
+import logging
 
 __author__  = 'Radist Morse radist.morse@gmail.com'
 
@@ -891,6 +893,7 @@ class FCALDistShowerLib() :
         return hits,containmentZ,containmentR
 
 class FCALDistEtaShowerLib() :
+        
     def __init__(self) :
         self.library = {} # key (float) - eta, value (dict), key - dist, value - (list) list of StoredEnergyShower objs
         self.detector= ""
@@ -910,18 +913,25 @@ class FCALDistEtaShowerLib() :
                     for hit in storedShower.shower :
                         hit.e *= scalefactor
         self.comment += " SCALED: "+str(scalefactor)
-    def truncate(self,truncate) :
+    def truncate(self,truncate,nShowersMin=0) :
+        log = logging.getLogger("FCALDistEtaShowerLib::truncate()")
         showers = []
         for eta,etabin in self.library.items():
             for dist,distbin in etabin.items():
+                log.info("Number of showers in %s %s is %d",str(eta),str(dist),len(distbin))
                 for storedShower in distbin :
                     showers += [(eta, dist, storedShower)]
+        log.info("total number of showers: %d", len(showers))
+        if nShowersMin:
+            log.info("will not remove from eta-dist bins with less then %d showers", nShowersMin)
         if len(showers) <= truncate :
-            print ("WARNING: Size of the library is already less:",truncate,"<",len(showers))
+            log.warning("Size of the library is already less: %d < %d",truncate,len(showers))
             return
         from random import randint
         while (len(showers) > truncate) :
             rand = randint(0,len(showers)-1)
+            if len(self.library[showers[rand][0]][showers[rand][1]]) < nShowersMin:
+                continue
             self.library[showers[rand][0]][showers[rand][1]].remove(showers[rand][2])
             del showers[rand]
         return
@@ -991,6 +1001,7 @@ class FCALDistEtaShowerLib() :
                     self.library[k][ki] = list(vi)
         return True
     def readFromFile(self,filename) :
+        log = logging.getLogger("FCALDistEtaShowerLib::readFromFile()")
         from ROOT import TFile
         #from sets import Set
         tfile = TFile(filename)
@@ -1021,19 +1032,40 @@ class FCALDistEtaShowerLib() :
         lastShower = False
         lastEta = False
 
+        log.debug("dector: %s", str(event.detector))
+        log.debug("particle: %s", str(event.particle))
+        log.debug("release: %s", str(event.release))
+        log.debug("geometry: %s", str(event.geometry))
+        log.debug("geant ver: %s", str(event.geantVersion))
+        log.debug("physList: %s", str(event.physicsList))
+        log.debug("comment: %s", str(event.comment))
+
         for event in libr : #this is quite unclear, but easy to implement, we change the "state" depending on what we are reading
+            log.debug("-------")
+            log.debug("x=%f, y=%f, z=%f, e=%f",event.x,event.y,event.z,event.e)
+            log.debug("beginnnig ev loop. lastShower: %s",str(lastShower))
+            log.debug("beginnnig ev loop. state: %s",str(state))
+
             if   (state == -1) : #library header (calculator parameters)
+                log.debug("in state=-1")
+
                 self.xrod_cent = event.x
                 self.yrod_cent = event.y
                 self.step = event.z
                 state = 0
             elif (state == 0) : #eta bin header
+                log.debug("in state=0")
+                log.debug("x=distsInCurEta, y=curEta")
+
                 distsInCurEta = event.x
                 curEta = round(event.y,4)
                 self.library[curEta] = {}
                 if (distsInCurEta > 0) :
                     state = 1 #go to dist header
             elif (state == 1) :
+                log.debug("in state=1")
+                log.debug("x=showersInCurDist, y=curDist")
+
                 showersInCurDist = event.x
                 curDist = round(event.y,4)
                 self.library[curEta][curDist] = []
@@ -1046,7 +1078,11 @@ class FCALDistEtaShowerLib() :
                     if (lastEta) : #special case of last eta bin being the empty one
                         lastEta = False
                         state = 0
-            elif (state == 2) : #shower header
+            elif (state == 2) :
+                # writing shower info
+                log.debug("in state=2")
+                log.debug("x=hitsInCurShower, y=curShower.rSize, z=curShower.zSize, e=curShower.genEnergy")
+
                 hitsInCurShower = event.x
                 rSize = event.y
                 zSize = event.z
@@ -1062,6 +1098,8 @@ class FCALDistEtaShowerLib() :
                 if (hitsInCurShower > 0) :
                     state = 3 #go to hits
                 else : #empty shower
+                    log.debug("Appending shower to lib pos %s %s",curEta,curDist)
+
                     self.library[curEta][curDist].append(curShower)
                     if (lastShower) : #special case of last shower in bin being the empty one
                         lastShower = False
@@ -1071,6 +1109,10 @@ class FCALDistEtaShowerLib() :
                         else :
                             state = 1 #next dist bin
             elif (state == 3) :
+                ## writing hits info
+                log.debug("in state=3")
+                log.debug("x=hit.x, y=hit.y, z=hit.z, e=hit.e")
+
                 hit = FourVector()
                 hit.e = event.e
                 hit.x = event.x
@@ -1080,6 +1122,8 @@ class FCALDistEtaShowerLib() :
                 curShower.shower.append(hit)
                 hitsInCurShower -= 1
                 if (hitsInCurShower == 0) : #last hit
+                    log.debug("Appending shower+hit to lib pos %s %s",curEta,curDist)
+
                     self.library[curEta][curDist].append(curShower)
                     if (lastShower) : # end of dist bin
                         lastShower = False
@@ -1090,6 +1134,12 @@ class FCALDistEtaShowerLib() :
                             state = 1 #next dist bin
                     else : #not yet
                         state = 2
+
+            log.debug("ending ev loop. lastShower: %s", lastShower)
+            log.debug("ending ev loop. state %s", state)
+            if log.root.level == logging.DEBUG:
+                input("Continue? Press Enter.")
+
         tfile.Close()
         if (state != 0) : #the last entry should be the last hit of the last shower in the last bin. if not - file is corrupted
             print ("FILE CORRUPTED!!")
@@ -1202,7 +1252,7 @@ class FCALDistEtaShowerLib() :
         print (self.release, self.geometry, self.geant, self.phys)
         print ("xrodcent:",self.xrod_cent,"yrodcent:",self.yrod_cent,"step:",self.step)
         print (self.comment)
-        ebins = [1,2,5,10,20,50,100,200,500,1000]
+        ebins = [1,2,3,4,5,10,20,50,100,200,500,1000]
         etas = sorted(self.library.keys())
         print ("Number of etabins:",str(len(etas)))
         fstot = 0
@@ -1273,11 +1323,16 @@ class FCALDistEtaShowerLib() :
         hits = TH3F("HITS","Hits Distrib",50,1,1000,101,-300,300,100,0,500)
         containmentZ = TH3F("CONTZ","ContZ Distrib",50,1,1000,101,-300,300,100,0,500)
         containmentR = TH3F("CONTR","ContR Distrib",50,1,1000,101,-300,300,100,0,500)
-        for distbin in self.library.values():
-            for storedShower in distbin :
-                containmentR.Fill(log10(storedShower.egen)*333,storedShower.rsize,storedShower.zsize,10)
-                containmentR.Fill(log10(storedShower.egen)*333,-storedShower.rsize,storedShower.zsize,10)
-                containmentZ.Fill(log10(storedShower.egen)*333,0,storedShower.zsize,10)
-                for hit in storedShower.shower :
-                    hits.Fill(log10(storedShower.egen)*333,copysign(sqrt(hit.x*hit.x + hit.y*hit.y),hit.x),hit.z)
+
+        etas = sorted(self.library.keys())
+        for eta in etas :
+            dists = sorted(self.library[eta].keys())
+            for distlow,disthigh in zip(dists,(dists[1:] + [4.5])) : #looping over eta bins
+                for storedShower in self.library[eta][distlow] :
+                    containmentR.Fill(log10(storedShower.egen)*333,storedShower.rsize,storedShower.zsize,10)
+                    containmentR.Fill(log10(storedShower.egen)*333,-storedShower.rsize,storedShower.zsize,10)
+                    containmentZ.Fill(log10(storedShower.egen)*333,0,storedShower.zsize,10)
+                    for hit in storedShower.shower :
+                        hits.Fill(log10(storedShower.egen)*333,copysign(sqrt(hit.x*hit.x + hit.y*hit.y),hit.x),hit.z)
+
         return hits,containmentZ,containmentR

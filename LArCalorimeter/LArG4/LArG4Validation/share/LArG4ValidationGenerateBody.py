@@ -14,7 +14,7 @@ from AthenaCommon.AppMgr import ServiceMgr
 topSequence = AlgSequence()
 
 ## Output threshold (DEBUG, INFO, WARNING, ERROR, FATAL)
-ServiceMgr.MessageSvc.OutputLevel = INFO
+ServiceMgr.MessageSvc.OutputLevel = options['outLVL']
 
 from AthenaCommon.GlobalFlags import globalflags
 if len(options['condition']) > 0 :
@@ -41,8 +41,7 @@ simFlags.CalibrationRun.set_Off()
 simFlags.SimBarcodeOffset.set_On()
 
 # Random seeds get random values
-from random import randint
-simFlags.RandomSeedOffset = randint(1,1000000000)
+simFlags.RandomSeedOffset = options['firstEvent']
 
 if len(options['geometry']) > 0 :
     simFlags.SimLayout = options['geometry']
@@ -86,6 +85,11 @@ else:
                 data.append(int(v))
         energyBins=set(data)
         topSequence.ParticleGun.sampler.mom = PG.EEtaMPhiSampler(energy=energyBins, eta=[3.8, 4.8])
+    elif options["fcalrings"] is not None:
+        topSequence.ParticleGun.sampler.mom = PG.EEtaMPhiSampler(energy=100,eta=100.)
+        topSequence.ParticleGun.sampler.pos = PG.PosSampler(x=[70,90], y=[70,90],  z=options["fcalrings"])
+        # z=4720 and 100k events should be enough to see something.
+        # One can draw full Fcal using (x=[-500,500], y=[-500,500],  z=4720), but need >10M events.
     else:
         print (options["energyMin"], options["energyMax"])
         topSequence.ParticleGun.sampler.mom = PG.EEtaMPhiSampler(energy=set([100000,200000,500000]), eta=[-5.0,-3.0, 3.0,5.0])
@@ -97,9 +101,9 @@ if (options['parameterize'] > 0):
 
     if len(options['fsLibs']) > 0 :
         printfunc ("Setting up ShowerLib Service")
-        from LArG4ShowerLibSvc.LArG4ShowerLibSvcConf import LArG4ShowerLibSvc
+        from LArG4ShowerLibSvc.LArG4ShowerLibSvcConfig import getLArG4ShowerLibSvc
         if not hasattr( ServiceMgr, 'LArG4ShowerLibSvc' ):
-             ServiceMgr += LArG4ShowerLibSvc()
+             ServiceMgr += getLArG4ShowerLibSvc()
         ServiceMgr.LArG4ShowerLibSvc.FileNameList = options['fsLibs']
 
 

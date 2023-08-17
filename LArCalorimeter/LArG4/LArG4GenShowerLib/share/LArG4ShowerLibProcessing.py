@@ -14,6 +14,7 @@ __author__  = 'Radist Morse radist.morse@gmail.com'
 __doc__     = 'Script for merging FS libs'
 
 import sys
+import logging
 from optparse import OptionParser
 from LArG4GenShowerLib.LArG4ShowerLibFunctions import \
      EtaEnergyShowerLib, TestShowerLib, FCALDistShowerLib, FCALDistEtaShowerLib
@@ -33,19 +34,23 @@ parser.add_option("--removeDist",dest="removeD", action="append", help="remove d
 parser.add_option("--removeEta",dest="removeE", action="append", help="remove eta bin")
 parser.add_option("-t","--truncate",dest="truncate", type = int, help="truncate lib")
 parser.add_option("-p","--paint",dest="draw", action="store_true", help="paint hits distribution histogram")
+parser.add_option('--log', dest="loglevel", help='Logging level. Use \"--log debug\" to debug the library content step-by-step' )
 
-parser.set_defaults(info = False, add = False, output = "", scale = 0.0, moveD = [], moveE = [], removeD = [], removeE = [], draw = False, truncate = 0)
+parser.set_defaults(info = False, add = False, output = "", scale = 0.0, moveD = [], moveE = [], removeD = [], removeE = [], draw = False, truncate = 0, loglevel="info")
 
 (options, args) = parser.parse_args()
 
+logging.basicConfig(stream=sys.stdout,level=options.loglevel.upper() )
+log=logging.getLogger("LArG4ShowerLibProcessing.py")
+
 if len(args) == 0:
-    print ("ERROR: No input specified")
+    log.error("No input specified")
     sys.exit(1)
 
 libs = []
 
 for filename in args:
-    print ("INFO: Reading file",filename)
+    log.info("Reading file %s",filename)
     tmplib = EtaEnergyShowerLib()
     if tmplib.readFromFile(filename) :
         libs.append(tmplib)

@@ -27,7 +27,7 @@ class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
  public:
   FastSimulationBase(const std::string& type, const std::string& name,
                      const IInterface *parent);
-  virtual ~FastSimulationBase() {}
+  virtual ~FastSimulationBase();
 
   /// @brief Construct and setup the fast simulation model.
   ///
@@ -58,6 +58,9 @@ class FastSimulationBase : public extends<AthAlgTool, IFastSimulation> {
 
   /// Set the current model. In hive, this gets assigned as the thread-local model
   void setFastSimModel(G4VFastSimulationModel*);
+  
+  /// Delete the current model.
+  void deleteFastSimModel();
 
 #ifdef G4MULTITHREADED
   /// Thread-to-FastSimModel concurrent map type

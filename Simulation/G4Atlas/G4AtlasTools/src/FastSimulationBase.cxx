@@ -13,6 +13,12 @@ FastSimulationBase::FastSimulationBase(const std::string& type, const std::strin
 {
 }
 
+FastSimulationBase::~FastSimulationBase()
+{
+  deleteFastSimModel();
+}
+
+
 // Athena method, used to get out the G4 geometry and set up the Fast Simulation Models
 StatusCode FastSimulationBase::initializeFastSim(){
   ATH_MSG_VERBOSE( name() << "::initializeFastSim()" );
@@ -87,5 +93,24 @@ void FastSimulationBase::setFastSimModel(G4VFastSimulationModel* fastsimmodel)
   m_fastsimmodelThreadMap.insert( std::make_pair(tid, fastsimmodel) );
 #else
   m_FastSimModel = fastsimmodel;
+#endif
+}
+
+void FastSimulationBase::deleteFastSimModel()
+{
+#ifdef G4MULTITHREADED
+  for(auto& threadMapPair : m_fastsimmodelThreadMap)
+    {
+      auto fastSimModel = threadMapPair.second;
+      if (fastSimModel)
+	delete fastSimModel;      
+    }
+  m_fastsimmodelThreadMap.clear();
+#else
+  if(m_FastSimModel)
+    {
+      delete m_FastSimModel;
+      m_FastSimModel = 0;
+    }
 #endif
 }

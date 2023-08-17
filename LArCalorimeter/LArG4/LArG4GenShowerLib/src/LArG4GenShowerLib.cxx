@@ -277,12 +277,12 @@ HepMC::ConstGenParticlePtr LArG4GenShowerLib::getParticleFromMC()
   const McEventCollection* mcEvent;
   if (evtStore()->retrieve(mcEvent,"GEN_EVENT").isFailure()) return 0;
 
-  // Return the first particle of the first event
+  // Return the last particle of the event.
   if (mcEvent)
 #ifdef HEPMC3
-    return (* mcEvent->begin())->particles().front();
+    return mcEvent->at(0)->particles().size() ? mcEvent->at(0)->particles().back() : NULL;
 #else
-    return ( * (* mcEvent->begin())->particles_begin());
+    return ( * (* mcEvent->begin())->particles_end());
 #endif
 
   return NULL;
