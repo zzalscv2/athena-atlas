@@ -38,9 +38,9 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventKey
          {this, "TruthEventKey", "TruthEvents", "SG key for the TruthEvent container"};
       /// Decor keys
-      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer> m_parentLinksDecorKeys
+      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, std::vector<ElementLink<xAOD::TruthParticleContainer> >> m_parentLinksDecorKeys
          {this, "DoNotSet_parentDecorKeys", {}, "WriteHandleKeyArray - set internally but must be property"};
-      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer> m_childLinksDecorKeys
+      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, std::vector<ElementLink<xAOD::TruthParticleContainer> >> m_childLinksDecorKeys
          {this, "DoNotSet_childDecorKeys", {}, "WriteHandleKeyArray - set internally but must be property"};
       /// Helper function for finding all the parents of a particle
       void find_parents( const xAOD::TruthParticle* part ,

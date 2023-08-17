@@ -108,17 +108,18 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches() const
   } // Loop over truth particles in the big truth collection
 
   // Now final loop over the collections and setting all the decorators
+  auto parent_decorator = m_parentLinksDecorKeys.makeHandles (ctx);
+  auto child_decorator  = m_childLinksDecorKeys.makeHandles (ctx);
   unsigned int pCntr{0};
   for (auto coll : inputParticles){
-    // Create the decorators in the loop over the particle containers; Naming to be consistent with xAOD::TruthParticle
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, std::vector<ElementLink<xAOD::TruthParticleContainer> > > 
-      parent_decorator(m_parentLinksDecorKeys.at(pCntr), ctx);
-    SG::WriteDecorHandle< xAOD::TruthParticleContainer, std::vector<ElementLink<xAOD::TruthParticleContainer> > >
-     child_decorator(m_childLinksDecorKeys.at(pCntr), ctx); 
+    if (parent_decorator.at(pCntr).isAvailable()) {
+      ++pCntr;
+      continue;
+    }
     for (size_t p=0;p<coll.ptr()->size();++p){
       if (!coll.ptr()->at(p)) continue; // Protection against null ptrs
-      parent_decorator(*coll.ptr()->at(p)) = parentMap[ coll->at(p)->barcode() ];
-      child_decorator(*coll.ptr()->at(p)) = childMap[ coll->at(p)->barcode() ];
+      parent_decorator.at(pCntr)(*coll.ptr()->at(p)) = parentMap[ coll->at(p)->barcode() ];
+      child_decorator.at(pCntr)(*coll.ptr()->at(p)) = childMap[ coll->at(p)->barcode() ];
     } // Loop over the particles in each collection
     ++pCntr;
   } // Loop over the collections

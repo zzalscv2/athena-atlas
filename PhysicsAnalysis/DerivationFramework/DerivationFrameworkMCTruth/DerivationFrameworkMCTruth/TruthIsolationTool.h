@@ -33,7 +33,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TruthParticleContainer> m_allParticlesKey
         {this, "allParticlesKey", "TruthParticles", "Name of Truthparticle key to find in iso cone"}; 
       /// Decor handle key array
-      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer> m_isoDecorKeys
+      SG::WriteDecorHandleKeyArray<xAOD::TruthParticleContainer, float> m_isoDecorKeys
         {this, "DoNotSet_isoDecorKeys", {}, "WriteDecorHandleKeyArray - set internally but must be property"}; 
       /// Parameter: Cone size for Isolation
       Gaudi::Property<std::vector<float> > m_coneSizes
