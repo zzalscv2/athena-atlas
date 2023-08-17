@@ -299,7 +299,6 @@ namespace
   class TrackFindingMeasurements
   {
   public:
-    using UncalibratedMeasurementContainerPtr = std::variant<const xAOD::PixelClusterContainer *, const xAOD::StripClusterContainer *>;
 
     TrackFindingMeasurements(size_t numMeasurements,
                              size_t maxMeasurements,
@@ -327,7 +326,7 @@ namespace
 
     void addMeasurements(size_t typeIndex,
                          const EventContext &ctx,
-                         const UncalibratedMeasurementContainerPtr &clusterContainer,
+                         const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                          const InDetDD::SiDetectorElementCollection &detElems,
                          const ActsTrk::SeedContainer *seeds,
                          const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool,
@@ -346,15 +345,12 @@ namespace
       if (!(typeIndex < m_seedOffset.size()))
         m_seedOffset.resize(typeIndex + 1);
 
-      std::visit([&](auto &&clusterContainerVar)
-                 {
-                    for (auto *measurement : *clusterContainerVar)
-                    {
-                      auto sl = ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollection);
-                      m_sourceLinks.insert(m_sourceLinks.end(), sl);
-                      m_sourceLinksVec.push_back(sl);
-                    } },
-                 clusterContainer);
+      for (auto *measurement : clusterContainer)
+      {
+        auto sl = ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollection);
+        m_sourceLinks.insert(m_sourceLinks.end(), sl);
+        m_sourceLinksVec.push_back(sl);
+      }
 
       if (seeds)
       {
