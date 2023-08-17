@@ -82,7 +82,8 @@ if __name__=="__main__":
     cfg.merge(GeoModelMdtTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else [], 
                                         DumpTxtFile = args.outTxtFile,
                                         dumpSurfaces = False ))
-    cfg.merge(GeoModelRpcTestCfg(flags))
+    cfg.merge(GeoModelRpcTestCfg(flags, DumpTxtFile = "RpcGeoDump.txt",
+                                        TestStations = [ "BML1A3"]))
     cfg.merge(GeoModelTgcTestCfg(flags))
     cfg.merge(GeoModelCscTestCfg(flags))
     

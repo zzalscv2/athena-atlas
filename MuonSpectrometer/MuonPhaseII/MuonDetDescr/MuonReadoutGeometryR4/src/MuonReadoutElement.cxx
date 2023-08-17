@@ -25,9 +25,8 @@ MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
     auto assignIdFields = [this](const MuonIdHelper& id_helper) {
         /// Ensure that the hash can be successfully assigned
         if (id_helper.get_detectorElement_hash(identify(), m_detElHash)) {
-            ATH_MSG_WARNING(
-                "setIdentifier -- collection hash Id NOT computed for id = "
-                << idHelperSvc()->toStringDetEl(identify()));
+            ATH_MSG_WARNING("setIdentifier -- collection hash Id NOT computed for id = "
+                         << idHelperSvc()->toStringDetEl(identify()));
         }
         m_stIdx = id_helper.stationName(identify());
         m_stEta = id_helper.stationEta(identify());
@@ -58,7 +57,8 @@ const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometr
 
     MuonTransformSet::const_iterator cache = m_globalToLocalCaches.find(hash);
     if (cache != m_globalToLocalCaches.end()) return (*cache)->getTransform(store);
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash<<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
+    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
+                <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
     return dummyTrans;
 }
 const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, const IdentifierHash& hash) const {
@@ -68,7 +68,8 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
 
     MuonTransformSet::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) return (*cache)->getTransform(store);
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash<<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
+    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
+               <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
     return dummyTrans;
 }
 
@@ -85,13 +86,15 @@ StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
     
     MuonTransformSet::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) {
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())<<" has already a transformation cached for hash "<<hash);
+        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
+                   <<" has already a transformation cached for hash "<<hash);
         return StatusCode::FAILURE;
     }
     m_localToGlobalCaches.insert(std::make_unique<MuonTransformCache>(hash, make));
-    m_globalToLocalCaches.insert(std::make_unique<MuonTransformCache>(hash,[make](RawGeomAlignStore* store, const IdentifierHash& hash){
-            return make(store,hash).inverse();
-    }));
+    m_globalToLocalCaches.insert(std::make_unique<MuonTransformCache>(hash,
+                                            [make](RawGeomAlignStore* store, const IdentifierHash& hash){
+                                                return make(store,hash).inverse();
+                                            }));
     return StatusCode::SUCCESS;
 }
 bool MuonReadoutElement::storeAlignment(RawGeomAlignStore& store) const{ 

@@ -40,9 +40,19 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
         virtual const GeoShape* extractShape(const PVConstLink& physVol) const = 0;
         virtual const GeoShape* extractShape(const GeoShape* inShape) const = 0;
     
-        // Navigates through the bolume to find the shifts / rotations etc.
+        // Navigates through the volume to find the shifts / rotations etc. from the geo shape
         virtual Amg::Transform3D extractShifts(const PVConstLink& physVol) const = 0;
         virtual Amg::Transform3D extractShifts(const GeoShape* inShape) const = 0;
+
+        /// Helper struct to cache a PhysVolume pointer together with the transformation to go from the volume to
+        /// the given parent node in the tree
+        struct physVolWithTrans{
+            Amg::Transform3D transform{Amg::Transform3D::Identity()};
+            PVConstLink physVol{nullptr};
+        };
+        /// Searches through all child volumes and collects the nodes where the logical volumes have the requested name
+        /// together with the transformations to go from the node to the parent physical volume
+        virtual std::vector<physVolWithTrans> findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const = 0;
 
         ///     
         virtual std::string dumpShape(const GeoShape* inShape) const = 0;

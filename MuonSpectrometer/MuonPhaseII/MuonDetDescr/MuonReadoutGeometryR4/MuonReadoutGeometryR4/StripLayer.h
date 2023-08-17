@@ -1,0 +1,35 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+#ifndef MUONREADOUTGEOMETRYR4_STRIPLAYER_H
+#define MUONREADOUTGEOMETRYR4_STRIPLAYER_H
+
+#include <MuonReadoutGeometryR4/StripDesign.h>
+namespace MuonGMR4{
+    class StripLayer {
+        public:
+          StripLayer(const Amg::Transform3D layerTransform,
+                    const StripDesignPtr design, 
+                    const IdentifierHash& hash);
+      
+          /// Returns the transformation to go from the strip layer center 
+          /// to the origin of the Strip chamber
+          const Amg::Transform3D& toOrigin() const;           
+          /// Returns the underlying strip design
+          const StripDesign& design() const;
+          /// Returns the hash of the strip layer
+          const IdentifierHash hash() const;
+
+          /// Returns the position of the strip expressed in the chamber frame
+          Amg::Vector3D stripPosition(unsigned int stripNum) const;
+     
+        private:
+           Amg::Transform3D m_transform{Amg::Transform3D::Identity()};
+           StripDesignPtr m_design{};
+           IdentifierHash m_hash{0};
+    };
+    std::ostream& operator<<(std::ostream& ostr, const StripLayer& lay);
+}
+
+#include <MuonReadoutGeometryR4/StripLayer.icc>
+#endif

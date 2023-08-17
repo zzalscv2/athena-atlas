@@ -35,9 +35,13 @@ class MuonGeoUtilityTool final : virtual public IMuonGeoUtilityTool, public AthA
     const GeoShape* extractShape(const PVConstLink& physVol) const override final;
     const GeoShape* extractShape(const GeoShape* inShape) const override final;
     
-    // Navigates through the bolume to find the shifts / rotations etc.
+    // Navigates through the volume to find the shifts / rotations etc.
     Amg::Transform3D extractShifts(const PVConstLink& physVol) const override final;
     Amg::Transform3D extractShifts(const GeoShape* inShape) const override final;
+
+
+      
+    std::vector<physVolWithTrans> findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const override final;
 
     
     /// Dumps the shape to string

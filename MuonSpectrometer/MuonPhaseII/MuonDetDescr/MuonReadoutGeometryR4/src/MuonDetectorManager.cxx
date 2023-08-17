@@ -4,6 +4,7 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
 
@@ -42,21 +43,29 @@
 
 namespace {
     constexpr unsigned int minOne = std::numeric_limits<unsigned int>::max();
+    /// Helper function to copy the radout elements from a technology into the 
+    /// vector of all readout elements.
+    template <class ReadoutEle> void insert(std::vector<const ReadoutEle*>&& tech_eles,
+                                            std::vector<const MuonGMR4::MuonReadoutElement*>& all_eles){
+        all_eles.reserve(all_eles.capacity() + tech_eles.size());
+        all_eles.insert(all_eles.end(), 
+                        std::make_move_iterator(tech_eles.begin()), 
+                        std::make_move_iterator(tech_eles.end()));
+    }
 }
 namespace MuonGMR4 {
 MuonDetectorManager::MuonDetectorManager()
     : AthMessaging{"MuonDetectorManagerR4"} {
     if (!m_idHelperSvc.retrieve().isSuccess()) {
-        ATH_MSG_FATAL(__func__
-                      << "()  -- Failed to retrieve the Identifier service");
+        ATH_MSG_FATAL(__func__<< "()  -- Failed to retrieve the Identifier service");
         throw std::runtime_error("MuonIdHelperSvc does not exists");
     }
     setName("MuonR4");
 }
  std::vector<const MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() const {
     std::vector<const MuonReadoutElement*> allEles{};
-    std::vector<const MdtReadoutElement*> allMdts = getAllMdtReadoutElements();
-    allEles.insert(allEles.end(), allMdts.begin(), allMdts.end());
+    insert(getAllMdtReadoutElements(), allEles);
+    insert(getAllRpcReadoutElements(), allEles);
     return allEles;
  }
 IdentifierHash MuonDetectorManager::buildHash(const Identifier& id) const {
@@ -84,6 +93,8 @@ IdentifierHash MuonDetectorManager::buildHash(const Identifier& id,
     return hash;
 }
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
+ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
+
 
 unsigned int MuonDetectorManager::getNumTreeTops() const {
     return m_treeTopVector.size();
@@ -102,6 +113,7 @@ const Muon::IMuonIdHelperSvc* MuonDetectorManager::idHelperSvc() const {
 std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const {
     std::vector<ActsTrk::DetectorType> types{};
     if (!m_mdtEles.empty()) types.push_back(ActsTrk::DetectorType::Mdt);
+    if (!m_rpcEles.empty()) types.push_back(ActsTrk::DetectorType::Rpc);
     return types;
 }
 

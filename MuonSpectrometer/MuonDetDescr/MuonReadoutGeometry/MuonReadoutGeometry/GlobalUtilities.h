@@ -42,13 +42,27 @@ namespace MuonGM {
         ///   -> lambda = (<A-B, dirA> - <A-B, dirB> * <dirA, dirB>) / (1- <dirA,dirB>^2)
         ///   --> mu   =  (<A-B, dirB> - <A-B, dirA> * <dirA, dirB>) / (1- <dirA,dirB>^2)
         const double dirDots = dirA.dot(dirB);
-        const double divisor = (1. - std::pow(dirDots,2));
-        /// If the two directions are paralellt to each other there's no way of intersection
+        const double divisor = (1. - dirDots * dirDots);
+        /// If the two directions are parallel to each other there's no way of intersection
         if (std::abs(divisor) < std::numeric_limits<double>::epsilon()) return std::nullopt;
         const AmgVector(N) AminusB = posA - posB;
         return (AminusB.dot(dirB) - AminusB.dot(dirA) * dirDots) / divisor;
-
     }
+    /// Returns the position of the most left bit which is set to 1
+    template <typename T> constexpr int maxBit(const T &number) {
+        for (int bit = sizeof(number) * 8 - 1; bit >= 0; --bit) {
+            if (number & (1 << bit)) return bit;
+        }
+        return -1;
+    }
+    /// Returns the position of the most right bit which is set to 1
+    template <typename T> constexpr int minBit(const T &number) {
+        for (unsigned int bit = 0; bit <= sizeof(number) * 8 - 1; ++bit) {
+          if (number & (1 << bit)) return bit;
+        }
+        return -1;
+    }
+
 }  // namespace MuonGM
 
 #endif  // MUONREADOUTGEOMETRY_GLOBALUTILITIES_H

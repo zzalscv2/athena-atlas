@@ -5,6 +5,7 @@
 #define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_ICC
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 
 #define WRITE_GETTERS(ELE_TYPE, GETTER_FUNC, STORAGE_VEC, ATTR)                                \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const Identifier& id) ATTR {        \
@@ -23,6 +24,8 @@
 
 namespace MuonGMR4 {
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
+ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
+
 }
 #undef ELEMENT_GETTERSETTER
 #undef ADD_DETECTOR
