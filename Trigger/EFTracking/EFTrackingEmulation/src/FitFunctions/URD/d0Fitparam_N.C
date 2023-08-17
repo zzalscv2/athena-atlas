@@ -1,5 +1,6 @@
 // Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 // 2D-function to describe the d0 resolution versus pT and eta. See README
+// pt is in GeV
 
 #include <iostream>
 double getd0ResParam_N(float abstrketa, float trkpt, bool debug=false) {

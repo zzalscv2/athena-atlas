@@ -1,5 +1,6 @@
 // Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 // 2D-function to describe the tracking efficiency versus pT and eta. See README
+//pt is in GeV
 
 #include <cmath>
 #include <iostream>

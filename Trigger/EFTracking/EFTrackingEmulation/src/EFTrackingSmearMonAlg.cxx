@@ -67,7 +67,11 @@ StatusCode EFTrackingSmearMonAlg::execute() {
                       <<" eta="  << part->eta()
                       <<" d0="   << part->auxdata<float>("d0")
                       <<" z0="   << part->auxdata<float>("z0")
-                      <<" pT="   << part->pt());  
+                      <<" pT="   << part->pt()
+                      <<" PDGID=" << part->pdgId()
+                      <<" status=" << part->status()                                        
+                      ); 
+      if (part->parent()) ATH_MSG_DEBUG (" parent pdgId=" << part->parent()->pdgId()); 
     }
 
   return StatusCode::SUCCESS;

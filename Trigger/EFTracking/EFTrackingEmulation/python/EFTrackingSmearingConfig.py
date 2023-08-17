@@ -7,8 +7,7 @@ _log = logging.getLogger(__name__)
 
 def EFTrackingSmearingCfg(flags, name = "EFTrackingSmearingAlg", **kwargs):
     # set common parameters
-    
-    histSvc = CompFactory.THistSvc(Output=["EFTrackingSmearingAlg DATAFILE='EFTrackingSmearingAlg.root' OPT='RECREATE'"])
+    histSvc = CompFactory.THistSvc(Output=[name +" DATAFILE='"+name+ ".root' OPT='RECREATE'"])
 
     result = ComponentAccumulator()    
     result.addService(histSvc) 
@@ -21,8 +20,8 @@ def EFTrackingSmearingCfg(flags, name = "EFTrackingSmearingAlg", **kwargs):
       SmearTruthParticle = kwargs['smearTruthParticle'],
       InputTracksPtCutGeV = kwargs['trkpTCut'],
       EnableMonitoring = kwargs['EnableMonitoring'],
-      RootStreamName = "EFTrackingSmearingAlg",
-      RootDirName      = "/EFTSmearing"
+      RootStreamName = name, 
+      RootDirName = "/EFTSmearing/"
       )
 
     
