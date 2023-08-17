@@ -124,6 +124,9 @@ class FlagAddress(object):
             raise RuntimeError( "No such flag: {}  The name is likely incomplete.".format(merged) )
         return self._flags._set( merged, value )
 
+    def __delattr__(self, name):
+        del self[name]
+
     def __cmp__(self, other):
         raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
     __eq__ = __cmp__
@@ -135,6 +138,43 @@ class FlagAddress(object):
 
     def __bool__(self):
         raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
+
+    def __getitem__(self, name):
+        merged = self._name + "." + name
+        return self._flags._get(merged)
+
+    def __delitem__(self, name):
+        merged = self._name + "." + name
+        del self._flags[merged]
+
+    def _subflag_itr(self):
+        address = self._name
+        for key in self._flags._flagdict.keys():
+            if key.startswith(address.rstrip('.') + '.'):
+                ntrim = len(address) + 1
+                remaining = key[ntrim:]
+                yield key, getattr(self, remaining)
+
+    def asdict(self):
+        """Convert to a python dictionary
+
+        Recursively convert this flag and all subflags into a
+        structure of nested dictionaries. All dynamic flags are
+        resolved in the process.
+
+        The resulting data structure should be easy to serialize as
+        json or yaml.
+
+        """
+        self._flags.loadAllDynamicFlags()
+        outdict = {}
+        for key, item in self._subflag_itr():
+            x = outdict
+            subkeys = key.split('.')
+            for subkey in subkeys[:-1]:
+                x = x.setdefault(subkey,{})
+            x[subkeys[-1]] = item
+        return outdict[self._name]
 
 
 
@@ -194,6 +234,19 @@ class AthConfigFlags(object):
             return self._set(name, value)
         raise RuntimeError( "No such flag: "+ name+". The name is likely incomplete." )
 
+    def __delattr__(self, name):
+        del self[name]
+
+    def __getitem__(self, name):
+        return getattr(self, name)
+
+    def __delitem__(self, name):
+        self._tryModify()
+        self.loadAllDynamicFlags()
+        for key in list(self._flagdict):
+            if key.startswith(name):
+                del self._flagdict[key]
+        self._categoryCache.clear()
 
     def addFlag(self, name, setDef, enum=None, help=None):
         self._tryModify()

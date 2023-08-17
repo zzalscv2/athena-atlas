@@ -59,6 +59,10 @@ class BasicTests(FlagsSetup):
             self.flags.Atest = False
         with self.assertRaises(RuntimeError):
             self.flags.addFlag("X", True)
+        with self.assertRaises(RuntimeError):
+            del self.flags.A
+        with self.assertRaises(RuntimeError):
+            del self.flags['A']
 
     def test_hash(self):
         """Test flag hashing"""
@@ -136,6 +140,30 @@ class BasicTests(FlagsSetup):
         copy.copy(self.flags)
         copy.deepcopy(self.flags)
 
+    def test_delete(self):
+        # test item delete
+        no_A = copy.deepcopy(self.flags)
+        self.assertTrue( no_A.hasCategory("A") )
+        del no_A['A']
+        with self.assertRaises(AttributeError):
+            no_A.A
+        self.assertNotEqual(self.flags, no_A)
+        self.assertFalse( no_A.hasCategory("A") )
+        # test attribute delete
+        cval = self.flags.A.B.C
+        no_C = copy.deepcopy(self.flags)
+        del no_C.A.B.C
+        with self.assertRaises(AttributeError):
+            no_C.A.B.C
+        # test adding back a flag
+        no_C.addFlag("A.B.C", cval)
+        no_C.lock()
+        self.flags.lock()
+        self.assertEqual(no_C.athHash(), self.flags.athHash())
+
+    def test_asdict(self):
+        adict = self.flags.A.asdict()
+        self.assertEqual(self.flags.A.B.C, adict['B']['C'])
 
 class TestFlagsSetupDynamic(FlagsSetup):
     def setUp(self):
