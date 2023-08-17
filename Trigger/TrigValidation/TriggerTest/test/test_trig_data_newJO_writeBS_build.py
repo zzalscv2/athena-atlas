@@ -19,8 +19,6 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run3_v1"',
             'Trigger.doLVL1=True',
             'Trigger.doRuntimeNaviVal=True',
-            'Output.doWriteRDO=False',
-            'Output.doWriteBS=True',
             'Trigger.writeBS=True']
 
 test = Test.Test()
