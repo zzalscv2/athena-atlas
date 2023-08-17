@@ -15,9 +15,6 @@
 #include "L1CaloFEXToolInterfaces/IgFEXaltMetAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 
@@ -40,7 +37,7 @@ namespace LVL1 {
                                  
 
     virtual void altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr,
-                            std::array<uint32_t, 4> & outTOB) override;
+                            std::array<uint32_t, 4> & outTOB) const override;
 
 
 

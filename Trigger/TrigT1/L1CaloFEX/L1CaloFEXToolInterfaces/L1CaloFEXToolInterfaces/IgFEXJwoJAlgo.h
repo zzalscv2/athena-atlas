@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,9 +30,9 @@ Interface definition for gFEXJwoJAlgo
                                  float aFPGA_C, float bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) = 0;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(gTowersCentral Atwr, gTowersCentral Btwr,
-                                                              gTowersForward CNtwr, gTowersForward CPtwr,
-                                                              std::array<uint32_t, 4> & outTOB) = 0;
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
+                                                              const gTowersForward& CNtwr, const gTowersForward& CPtwr,
+                                                              std::array<uint32_t, 4> & outTOB) const = 0;
 
 
 

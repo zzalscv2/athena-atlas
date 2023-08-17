@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJetAlgo - JetFinder algorithm for gFEX
@@ -16,9 +16,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "L1CaloFEXSim/gFEXJetTOB.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 
@@ -37,57 +34,57 @@ namespace LVL1 {
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
 
-    virtual void pileUpCalculation(gTowersCentral &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) override;
+    virtual void pileUpCalculation(gTowersCentral &twrs, int rhoThreshold_Max, int rhoThreshold_Min, int inputScale,  int &PUCp) const override;
     
-    virtual std::vector<std::unique_ptr<gFEXJetTOB>> largeRfinder(gTowersCentral Atwr, gTowersCentral Btwr, 
-                                                                  gTowersForward CNtwr, gTowersForward CPtwr, 
+    virtual std::vector<std::unique_ptr<gFEXJetTOB>> largeRfinder(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
+                                                                  const gTowersForward& CNtwr, const gTowersForward& CPtwr,
                                                                   int pucA, int pucB, int gLJ_seedThrA, int gLJ_seedThrB, 
                                                                   int gJ_ptMinToTopoCounts1, int gJ_ptMinToTopoCounts2, 
                                                                   int jetThreshold, int gLJ_ptMinToTopoCounts1, int gLJ_ptMinToTopoCounts2,
                                                                   std::array<uint32_t, 7> & ATOB1_dat, std::array<uint32_t, 7> & ATOB2_dat,
-                                                                  std::array<uint32_t, 7> & BTOB1_dat, std::array<uint32_t, 7> & BTOB2_dat) override;
+                                                                  std::array<uint32_t, 7> & BTOB1_dat, std::array<uint32_t, 7> & BTOB2_dat) const override;
 
   private:
 
-    virtual void RemotePartialAB(gTowersCentral twrs, gTowersPartialSums & lps, gTowersPartialSums & rps);
+    virtual void RemotePartialAB(const gTowersCentral& twrs, gTowersPartialSums & lps, gTowersPartialSums & rps) const;
 
-    virtual void RemotePartialCN(gTowersForward twrs, gTowersPartialSums & rps);
+    virtual void RemotePartialCN(const gTowersForward& twrs, gTowersPartialSums & rps) const;
 
-    virtual void RemotePartialCP(gTowersForward twrs, gTowersPartialSums & lps);
+    virtual void RemotePartialCP(const gTowersForward& twrs, gTowersPartialSums & lps) const;
 
-    virtual void singleAB(gTowersCentral twrs, gTowersCentral & FPGAsum);
+    virtual void singleAB(const gTowersCentral& twrs, gTowersCentral & FPGAsum) const;
 
-    virtual void gBlockAB(gTowersCentral twrs, gTowersCentral & gBlkSum);
+    virtual void gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const;
 
-    virtual void blkOutAB(gTowersCentral blocks,
+    virtual void blkOutAB(const gTowersCentral& blocks,
                            std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutL, std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndL,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutR, std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndR );
+                           std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutR, std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndR ) const;
 
-    virtual void gBlockMax2(gTowersCentral gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi);
+    virtual void gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const;
 
-    virtual void gBlockMax192(gTowersJetEngine gBlkSum, std::array<int, 3> & gBlockVp, std::array<int, 3> & gBlockEtap, std::array<int, 3> & gBlockPhip, int index);
+    virtual void gBlockMax192(const gTowersJetEngine& gBlkSum, std::array<int, 3> & gBlockVp, std::array<int, 3> & gBlockEtap, std::array<int, 3> & gBlockPhip, int index) const;
 
-    virtual void addRemoteRin(gTowersCentral &jets, const gTowersPartialSums &partial);
+    virtual void addRemoteRin(gTowersCentral &jets, const gTowersPartialSums &partial) const;
 
-    virtual void addRemoteLin(gTowersCentral &jets, const gTowersPartialSums &partial);
+    virtual void addRemoteLin(gTowersCentral &jets, const gTowersPartialSums &partial) const;
 
 
-    virtual void pileUpCorrectionAB(gTowersCentral &jets, int puc);
+    virtual void pileUpCorrectionAB(gTowersCentral &jets, int puc) const;
 
-    virtual void gJetVetoAB( gTowersCentral &twrs ,int jet_threshold );
+    virtual void gJetVetoAB( gTowersCentral &twrs ,int jet_threshold ) const;
 
-    virtual void gBlockVetoAB(gTowersCentral &twrs, gTowersCentral blocks, int seed_threshold) ;
+    virtual void gBlockVetoAB(gTowersCentral &twrs, const gTowersCentral& blocks, int seed_threshold) const;
 
-    virtual void jetOutAB(gTowersCentral jets, gTowersCentral blocks, int seedThreshold,
+    virtual void jetOutAB(const gTowersCentral& jets, const gTowersCentral& blocks, int seedThreshold,
                            std::array<int, 32> &jetOutL, std::array<int, 32> &etaIndL,
-                           std::array<int, 32> &jetOutR, std::array<int, 32> &etaIndR);
+                           std::array<int, 32> &jetOutR, std::array<int, 32> &etaIndR) const;
 
     virtual void gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOut,
                              std::array<int, FEXAlgoSpaceDefs::ABCrows> etaInd,
                              int TOBnum, int jetThreshold, std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBs,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBv,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBeta,
-                             std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBphi );
+                             std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBphi ) const;
 
     SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXJetAlgo_gTowerContainerKey {this, "MyGTowers", "gTowerContainer", "Input container for gTowers"};
     
