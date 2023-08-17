@@ -7,6 +7,7 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleToString.h"
@@ -37,6 +38,7 @@ class ATLAS_NOT_THREAD_SAFE ZdcAnalysisTool : public virtual IZdcAnalysisTool, p
 public:
   ZdcAnalysisTool(const std::string& name);
   virtual ~ZdcAnalysisTool() override;
+  void initializeDecorations();
 
   //interface from AsgTool
   StatusCode initialize() override;
@@ -193,6 +195,39 @@ private:
   std::shared_ptr<ZDCTriggerEfficiency> m_zdcTriggerEfficiency;
 
   static std::atomic<int> s_debugLevel;
+
+  // decoration list for ZDC modules
+  // ZDC
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmplitude{this, "ZdcModuleAmplitude", "", "ZDC module amplitude"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergy{this, "ZdcModuleCalibEnergy", "", "ZDC module calibrated energy"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibTime{this, "ZdcModuleCalibTime", "", "ZDC module calibrated time"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleStatus{this, "ZdcModuleStatus", "", "ZDC module fit status"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleTime{this, "ZdcModuleTime", "", "ZDC module time"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleChisq{this, "ZdcModuleChisq", "", "ZDC module fit chisq"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmp{this, "ZdcModuleFitAmp", "", "ZDC module fit amp"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitAmpError{this, "ZdcModuleFitAmpError", "", "ZDC module fit amp error"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleFitT0{this, "ZdcModuleFitT0", "", "ZDC module fit t0"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleBkgdMaxFraction{this, "ZdcModuleBkgdMaxFraction", "", "ZDC module background max fraction"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePreSampleAmp{this, "ZdcModulePreSampleAmp", "", "ZDC module presample amplitude"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModulePresample{this, "ZdcModulePresample", "", "ZDC module presample"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMinDeriv2nd{this, "ZdcModuleMinDeriv2nd", "", "ZDC module min 2nd derivative"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "", "ZDC module max ADC, minus pedestal"};
+  //
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitude{this, "RPDChannelAmplitude", "", "RPD Channel Amplitude"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitudeCalib{this, "RPDChannelAmplitudeCalib", "", "RPD Channel calibrated amplitude"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxSample{this, "RPDChannelMaxSample", "", "RPD Channel Max Sample"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelStatus{this, "RPDChannelStatus", "", "RPD Channel Status"};
+
+  // decoration list for sums
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumUncalibSum{this, "ZdcSumUncalibSum", "", "ZDC side uncalibrated sum"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumUncalibSumErr{this, "ZdcSumUncalibSumErr", "", "ZDC side uncalibrated sum error"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumCalibEnergy{this, "ZdcSumCalibEnergy", "", "ZDC side calibrated energy"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumCalibEnergyErr{this, "ZdcSumCalibEnergyErr", "", "ZDC side calibrated energy error"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumFinalEnergy{this, "ZdcSumFinalEnergy", "", "ZDC side final energy"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumAverageTime{this, "ZdcSumAverageTime", "", "ZDC side average time"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumStatus{this, "ZdcSumStatus", "", "ZDC side status"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumModuleMask{this, "ZdcSumModuleMask", "", "ZDC side module mask"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcSumRPDStatus{this, "ZdcSumRPDStatus", "", "RPD side level status"};
 
 };
 
