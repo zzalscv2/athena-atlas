@@ -168,12 +168,12 @@ StatusCode EFTrackingSmearingAlg::initialize() {
     TF1 *d0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->d0res_pt;
     TF1 *z0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->z0res_pt;
     TF1 *curvres_pt  = ((FakeTrackSmearer *) m_mySmearer)->curvres_pt;
-    CHECK(book(new TH1F("d0res_function_vs_eta","#eta of track",100, 0.0,4.0)));
-    CHECK(book(new TH1F("z0res_function_vs_eta","#eta of track",100, 0.0,4.0)));
-    CHECK(book(new TH1F("curvres_function_vs_eta","#eta of track",100, 0.0,4.0)));
-    CHECK(book(new TH1F("d0res_function_vs_pt","#pt of track",100, 4.0,200.0)));
-    CHECK(book(new TH1F("z0res_function_vs_pt","#pt of track",100, 4.0,200.0)));
-    CHECK(book(new TH1F("curvres_function_vs_pt","#pt of track",100, 4.0,200.0)));
+    CHECK(book(new TH1F("d0res_function_vs_eta","#eta of track (p_T=10GeV);#eta",100, 0.0,4.0)));
+    CHECK(book(new TH1F("z0res_function_vs_eta","#eta of track (p_T=10GeV);#eta",100, 0.0,4.0)));
+    CHECK(book(new TH1F("curvres_function_vs_eta","#eta of track (p_T=10GeV);#eta",100, 0.0,4.0)));
+    CHECK(book(new TH1F("d0res_function_vs_pt","#pt of track (#eta=1);p_T [GeV]",100, 1.0,200.0)));
+    CHECK(book(new TH1F("z0res_function_vs_pt","#pt of track (#eta=1);p_T [GeV]",100, 1.0,200.0)));
+    CHECK(book(new TH1F("curvres_function_vs_pt","#pt of track (#eta=1);p_T [GeV]",100, 1.0,200.0)));
     hist("d0res_function_vs_eta")->Add(d0res_eta);
     hist("z0res_function_vs_eta")->Add(z0res_eta);
     hist("curvres_function_vs_eta")->Add(curvres_eta);
@@ -238,7 +238,11 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" eta="  << part->eta()
                       <<" d0="   << part->auxdata<float>("d0")
                       <<" z0="   << part->auxdata<float>("z0")
-                      <<" pT="   << part->pt()  );        
+                      <<" pT="   << part->pt()  
+                      <<" PDGID=" << part->pdgId()
+                      <<" status=" << part->status()                       
+                      );        
+      if (part->parent()) ATH_MSG_DEBUG (" parent status=" << part->parent()->pdgId());
       
       if (std::abs(pt) > m_inputTracksPtCut)
       	{
@@ -246,12 +250,12 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
           if (m_enableMonitoring) {
       	    hist("track_input_eta")->Fill(eta);
       	    hist("track_input_theta")->Fill(theta);
-      	    hist("track_input_pt" )->Fill(pt);
+      	    hist("track_input_pt" )->Fill(pt/1000.);
       	    hist("track_input_phi")->Fill(phi);
       	    hist("track_input_z0" )->Fill(z0);
       	    hist("track_input_d0" )->Fill(d0);      	    
           }
-      	  double qoverPt = part->charge()/pt; 
+      	  double qoverPt = part->charge()*1000./pt; //this must be in GeV
           mySmearer->AddTrack(d0,z0,qoverPt,eta,phi);  // smearing here                  
       	  n_output_tracks += mySmearer->GetNTracks();
       	  
@@ -273,8 +277,10 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       <<" d0="   << newtrk->auxdata<float>("d0")
                       <<" z0="   << newtrk->auxdata<float>("z0")
                       <<" pT="   << newtrk->pt()
-                       );
-
+                      <<" PDGID=" << newtrk->pdgId()
+                      <<" status=" << newtrk->status()                      
+                  );
+                if (newtrk->parent()) ATH_MSG_DEBUG (" parent status=" << newtrk->parent()->pdgId());
                 
                 if (m_enableMonitoring) {
                   hist("track_output_eta")->Fill(otrack.eta());
@@ -286,16 +292,16 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
         
                   hist("track_outputcoll_eta")->Fill(newtrk->eta());
                   hist("track_outputcoll_theta")->Fill(newtrk->auxdata<float>("theta"));
-                  hist("track_outputcoll_pt" )->Fill(std::sin(newtrk->pt()));
+                  hist("track_outputcoll_pt" )->Fill(newtrk->pt()/1000.);
                   hist("track_outputcoll_phi")->Fill(newtrk->phi());
                   hist("track_outputcoll_z0" )->Fill(newtrk->auxdata<float>("z0"));
                   hist("track_outputcoll_d0" )->Fill(newtrk->auxdata<float>("d0"));
                 
-                  hist("track_delta_eta")->Fill(otrack.eta() - part->eta());      	      
-                  hist("track_delta_crv")->Fill(1000.0*otrack.curv()-((part->charge()*1000./part->pt())));
-                  hist("track_delta_phi")->Fill(otrack.phi() - part->phi());
-                  hist("track_delta_z0" )->Fill(otrack.z0()  - part->auxdata<float>("z0"));
-                  hist("track_delta_d0" )->Fill(otrack.d0()  - part->auxdata<float>("d0"));
+                  hist("track_delta_eta")->Fill(newtrk->eta() - part->eta());      	      
+                  hist("track_delta_crv")->Fill(newtrk->charge()*1000./newtrk->pt()-((part->charge()*1000./part->pt())));
+                  hist("track_delta_phi")->Fill(newtrk->phi() - part->phi());
+                  hist("track_delta_z0" )->Fill(newtrk->auxdata<float>("z0")  - part->auxdata<float>("z0"));
+                  hist("track_delta_d0" )->Fill(newtrk->auxdata<float>("d0")  - part->auxdata<float>("d0"));
                 }                         	                
       	    } // end of loop                      
 	      }
@@ -350,7 +356,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
       auto trkcovvec = trk->definingParametersCovMatrixVec();  
       double theta=trk->theta();
       double pt = std::sin(theta)/(trk->qOverP());// MeV
-      float qoverPt = trk->qOverP()/std::sin(theta); 
+      
       ATH_MSG_DEBUG ("===> New Track: "
                       <<" curv=" << 1./trk->pt()
                       <<" phi="  << trk->phi0()
@@ -371,7 +377,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
           if (m_enableMonitoring) {
       	    hist("track_input_eta")->Fill(trk->eta());
       	    hist("track_input_theta")->Fill(trk->theta());
-      	    hist("track_input_pt" )->Fill(pt);
+      	    hist("track_input_pt" )->Fill(pt/1000.);
       	    hist("track_input_phi")->Fill(trk->phi0());
       	    hist("track_input_z0" )->Fill(trk->z0());
       	    hist("track_input_d0" )->Fill(trk->d0());
@@ -385,7 +391,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	  
           // get Cov matrix of input track          
           auto trkcovvec = trk->definingParametersCovMatrixVec();  
-          
+          double qoverPt = trk->charge()*1000./pt; //this must be in GeV
           mySmearer->AddTrack(trk->d0(),trk->z0(),qoverPt,trk->eta(),trk->phi0());                    
       	  n_output_tracks += mySmearer->GetNTracks();
       	  

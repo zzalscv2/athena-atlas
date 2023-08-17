@@ -60,9 +60,9 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   BooleanProperty  m_EnableFakes      {this,"IncludeDuplicatesAndFakes",false,"Enable fake track production"};
   BooleanProperty  m_FakeKillerEnable {this,"FakeKillerEnable",false, "disable inclusion of broad fakes"};
   BooleanProperty  m_IncludeFakesInResolutionCalculation{this,"IncludeFakesInResolutionCalculation",false, 
-                              "modify calculation of covariance parameters to include weighted combination of core and broad RMS"};
-  BooleanProperty  m_UseCoinToss       {this,"UseCoinToss",false, 
-                              "if True, fakes are generated with flat inefficiency, else use poissonian criteria"};
+                                      "modify calculation of covariance parameters to include weighted combination of core and broad RMS"};
+  BooleanProperty  m_UseCoinToss      {this,"UseCoinToss",false, 
+                                       "if True, fakes are generated with flat inefficiency, else use poissonian criteria"};
   
   LongLongProperty m_RandomSeed{this,"RandomSeed",0};
   

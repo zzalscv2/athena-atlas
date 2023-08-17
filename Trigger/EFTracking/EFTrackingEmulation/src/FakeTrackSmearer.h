@@ -51,30 +51,30 @@ class FakeTrackSmearer
     printf("Entering Prepare\n");    
     std::string name;
 
-    name="d0res_eta"+m_baseName;
-    d0res_eta=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(x[0],p[0],0); },0.0,4.0,1);
+    name="d0res_eta"+m_baseName; //pt=10GeV
+    d0res_eta=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(x[0],p[0]=10.,0); },0.0,4.0,1);
     name="z0res_eta"+m_baseName;
-    z0res_eta=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(x[0],p[0],0); },0.0,4.0,1);
+    z0res_eta=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(x[0],p[0]=10.,0); },0.0,4.0,1);
     name="curvres_eta"+m_baseName;
-    curvres_eta=new TF1(name.c_str(),[&](double*x,double*p){return curvResFunc(x[0],p[0],0); },0.0,4.0,1);
+    curvres_eta=new TF1(name.c_str(),[&](double*x,double*p){return curvResFunc(x[0],p[0]=10.,0); },0.0,4.0,1);
     
     name="d0ref_eta"+m_baseName;
-    d0ref_eta=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(x[0],p[0],0); },0.0,4.0,1);
+    d0ref_eta=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(x[0],p[0]=10.,0); },0.0,4.0,1);
     name="z0ref_eta"+m_baseName;
-    z0ref_eta=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(x[0],p[0],0); },0.0,4.0,1);
+    z0ref_eta=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(x[0],p[0]=10.,0); },0.0,4.0,1);
 
-
-    name="d0res_pt"+m_baseName;
-    d0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(p[0],x[0],0); },1.0,200.0,1);
+    
+    name="d0res_pt"+m_baseName; //eta=1
+    d0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0ResFunc(p[0]=1.,x[0],0); },1.0,200.0,1);
     name="z0res_pt"+m_baseName;
-    z0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(p[0],x[0],0); },1.0,200.0,1);
+    z0res_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0ResFunc(p[0]=1.,x[0],0); },1.0,200.0,1);
     name="curvres_pt"+m_baseName;
-    curvres_pt=new TF1(name.c_str(),[&](double*x,double*p){return curvResFunc(p[0],x[0],0); },1.0,200.0,1);
+    curvres_pt=new TF1(name.c_str(),[&](double*x,double*p){return curvResFunc(p[0]=1.,x[0],0); },1.0,200.0,1);
 
     name="d0ref_pt"+m_baseName;
-    d0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(p[0],x[0],0); },1.0,200.0,1);
+    d0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return d0RefFunc(p[0]=1.,x[0],0); },1.0,200.0,1);
     name="z0ref_pt"+m_baseName;
-    z0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(p[0],x[0],0); },1.0,200.0,1);
+    z0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(p[0]=1.,x[0],0); },1.0,200.0,1);
    
   }
 
