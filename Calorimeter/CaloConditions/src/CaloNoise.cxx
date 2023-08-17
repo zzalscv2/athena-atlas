@@ -3,6 +3,7 @@
 */
 
 #include "CaloConditions/CaloNoise.h"
+#include "CxxUtils/trapping_fp.h"
 #include "boost/multi_array.hpp"
 #include "TMath.h"
 #include <cmath>
@@ -77,9 +78,7 @@ float CaloNoise::getTileEffSigma(const IdentifierHash subHash, const int gain, c
   // Tell clang to optimize assuming that FP exceptions can trap.
   // Otherwise, it can vectorize the division, which can lead to
   // spurious division-by-zero traps from unused vector lanes.
-#ifdef __clang__
-# pragma float_control(except, on)
-#endif
+  CXXUTILS_TRAPPING_FP;
 
   const unsigned int dbGain = CaloCondUtils::getDbCaloGain(gain);
   if (!m_tileBlob) {
