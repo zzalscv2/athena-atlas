@@ -107,10 +107,17 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	  int type = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["type"][lucrod_channel];
 	  int channel = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["channel"][lucrod_channel];
 	  int gain = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["gain"][lucrod_channel];
-	  float xpos = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["x"][lucrod_channel];
-	  float ypos = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["y"][lucrod_channel];
-	  unsigned int row = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["row"][lucrod_channel];
-	  unsigned int col = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["col"][lucrod_channel];
+	  float xpos = 0;
+	  float ypos = 0;
+	  unsigned int row = -1;
+	  unsigned int col = -1;
+	  if (type == 1) // these variables are only defined for RPD in the json file
+	    {
+	      xpos = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["x"][lucrod_channel];
+	      ypos = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["y"][lucrod_channel];
+	      row = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["row"][lucrod_channel];
+	      col = ZdcLucrodMapRun3::getInstance()->getLucrod(lucrod_id)["col"][lucrod_channel];
+	    }
 	  
 	  ATH_MSG_DEBUG("Done accessing ZDC map side " << side << " module " << module << " type " << type << " channel " << channel << " gain " << gain);
 

@@ -20,7 +20,6 @@
 #include "StoreGate/ReadHandle.h"
 
 #include "ZdcRec/ZdcRecRun3.h"
-#include "ZdcRec/ZdcRecChannelToolLucrod.h"
 #include "xAODForward/ZdcModuleToString.h"
 #include "ZdcByteStream/ZdcToString.h"
 
@@ -44,19 +43,12 @@ StatusCode ZdcRecRun3::initialize()
 {
 	MsgStream mLog(msgSvc(), name());
 
-	// Reconstruction Tool
-	ATH_CHECK( m_ChannelTool.retrieve() );
-  
-  // Trigger Validation Tool
-  ATH_CHECK( m_trigValTool.retrieve() );
-
-	// Reconstruction Tool
+	// Reconstruction Tool chain
 
 	ATH_CHECK( m_zdcTools.retrieve() );
 	
 	ATH_CHECK( m_zdcModuleContainerName.initialize() );
 	ATH_CHECK( m_zdcSumContainerName.initialize() );
-	ATH_CHECK( m_zldContainerName.initialize(SG::AllowEmpty) );
 
 	if (m_ownPolicy == SG::OWN_ELEMENTS)
 		mLog << MSG::DEBUG << "...will OWN its cells." << endmsg;
@@ -82,55 +74,15 @@ StatusCode ZdcRecRun3::execute()
                  << ctx.evt()
                  << "th event");
 
-  //Look for the container presence
-  if (m_zldContainerName.empty()) {
-    return StatusCode::SUCCESS;
-  }
 
-  ATH_MSG_DEBUG("Trying to get LUCROD DATA!");
-  SG::ReadHandle<ZdcLucrodDataContainer> zldContainer    (m_zldContainerName, ctx);
-  ATH_MSG_DEBUG("Did I get LUCROD DATA?");
-  
-  //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
-  std::unique_ptr<xAOD::ZdcModuleContainer> moduleContainer( new xAOD::ZdcModuleContainer());
-  std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
-  moduleContainer->setStore( moduleAuxContainer.get() );
-
-  //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
-  std::unique_ptr<xAOD::ZdcModuleContainer> moduleSumContainer( new xAOD::ZdcModuleContainer());
-  std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleSumAuxContainer( new xAOD::ZdcModuleAuxContainer() );
-  moduleSumContainer->setStore( moduleSumAuxContainer.get() );
-
-  ATH_MSG_DEBUG("Trying to convert!");
-
-  // rearrange ZDC channels and perform fast reco on all channels (including non-big tubes)
-  int ncha = m_ChannelTool->convertLucrod2ZM(zldContainer.get(), moduleContainer.get(), moduleSumContainer.get() );
-  ATH_MSG_DEBUG("m_ChannelTool->convertLucrod2ZM returned " << ncha << " channels");
-
-  ATH_MSG_DEBUG("Dumping modules");
-  ATH_MSG_DEBUG( ZdcModuleToString(*moduleContainer) );
-  ATH_MSG_DEBUG("Dumping module sums");
-  ATH_MSG_DEBUG( ZdcModuleToString(*moduleSumContainer) );
+  SG::ReadHandle<xAOD::ZdcModuleContainer> moduleContainer (m_zdcModuleContainerName, ctx);
+  SG::ReadHandle<xAOD::ZdcModuleContainer> moduleSumContainer (m_zdcSumContainerName, ctx);
   
   // re-reconstruct big tubes 
   for (ToolHandle<ZDC::IZdcAnalysisTool>& tool : m_zdcTools)
     {
       ATH_CHECK( tool->recoZdcModules(*moduleContainer.get(), *moduleSumContainer.get()) );
     }
-
-  // eventually reconstruct RPD, using ML libraries
-  // ATH_CHECK( m_rpdTool...)
-  
-  //Use Trigger Validaiton Tool
-  ATH_CHECK( m_trigValTool->addTrigStatus(*moduleContainer.get(), *moduleSumContainer.get()));
-
-  SG::WriteHandle<xAOD::ZdcModuleContainer> moduleContainerH (m_zdcModuleContainerName, ctx);
-  ATH_CHECK( moduleContainerH.record (std::move(moduleContainer),
-				      std::move(moduleAuxContainer)) );
-
-  SG::WriteHandle<xAOD::ZdcModuleContainer> moduleSumContainerH (m_zdcSumContainerName, ctx);
-  ATH_CHECK( moduleSumContainerH.record (std::move(moduleSumContainer),
-					 std::move(moduleSumAuxContainer)) );
 
   return StatusCode::SUCCESS;
 
