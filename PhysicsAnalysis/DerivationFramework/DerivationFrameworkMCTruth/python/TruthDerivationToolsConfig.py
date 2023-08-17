@@ -233,6 +233,24 @@ def DFCommonTruthClassificationToolCfg(flags):
     acc.merge(accMCTC)
     return acc
 
+# Hadron origin decoration tools
+def HadronOriginClassifierCfg(flags, name, **kwargs):
+    """get the hadron origin classification"""
+    acc = ComponentAccumulator()
+    HadronOriginClassifier = CompFactory.DerivationFramework.HadronOriginClassifier
+    acc.addPublicTool(HadronOriginClassifier(name = name, **kwargs),
+                      primary = True)
+    return acc
+
+def HadronOriginDecoratorCfg(flags, name, **kwargs):
+    """decorate with the hadron origin classification"""
+    acc = ComponentAccumulator()
+    HadronOriginDecorator = CompFactory.DerivationFramework.HadronOriginDecorator
+    acc.addPublicTool(HadronOriginDecorator(name = name, **kwargs),
+                      primary = True)
+    return acc
+
+
 #add the 'decoration' tools for dressing and isolation
 def DFCommonTruthElectronDressingToolCfg(flags, decorationName = "dressedPhoton"):
     """Configure the electron truth dressing tool"""

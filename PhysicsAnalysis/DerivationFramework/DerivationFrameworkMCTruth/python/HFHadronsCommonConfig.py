@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #############################################
 # Heavy flavour from tt tools
@@ -251,11 +251,14 @@ def HFHadronsCommonCfg(flags):
     mc_channel_number = int(flags.Input.RunNumber[0])
     if mc_channel_number > 0:
         if mc_channel_number in DSIDList:
-            HadronOriginClassifier = CompFactory.DerivationFramework.HadronOriginClassifier
-            DFCommonhadronorigintool = acc.getPrimaryAndMerge(HadronOriginClassifier(name="DFCommonHadronOriginClassifier",DSID=mc_channel_number))
-            HadronOriginDecorator = CompFactory.DerivationFramework.HadronOriginDecorator
-            DFCommonhadronorigindecorator = acc.getPrimaryAndMerge(HadronOriginDecorator(name     = "DFCommonHadronOriginDecorator",
-                                                                                         ToolName = DFCommonhadronorigintool))
+            from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import HadronOriginClassifierCfg
+            DFCommonhadronorigintool = acc.getPrimaryAndMerge(HadronOriginClassifierCfg(flags, 
+                                                                                        name = "DFCommonHadronOriginClassifier",
+                                                                                        DSID = mc_channel_number))
+            from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import HadronOriginDecoratorCfg
+            DFCommonhadronorigindecorator = acc.getPrimaryAndMerge(HadronOriginDecoratorCfg(flags, 
+                                                                                            name     = "DFCommonHadronOriginDecorator",
+                                                                                            ToolName = DFCommonhadronorigintool))
             CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
             acc.addEventAlgo(CommonAugmentation(name              = "HFHadronsCommonKernel",
                                                 AugmentationTools = [DFCommonhadronorigindecorator]))
