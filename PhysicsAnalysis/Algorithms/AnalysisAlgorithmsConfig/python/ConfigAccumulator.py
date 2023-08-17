@@ -400,7 +400,7 @@ class ConfigAccumulator :
 
 
     def addOutputVar (self, containerName, variableName, outputName,
-                      *, noSys=False, enabled=True, isEventLevel=False) :
+                      *, noSys=False, enabled=True) :
         """add an output variable for the given container to the output
         """
 
