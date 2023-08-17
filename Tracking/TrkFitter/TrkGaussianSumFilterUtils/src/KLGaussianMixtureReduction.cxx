@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkGaussianSumFilterUtils/KLGaussianMixtureReduction.h"
@@ -27,15 +27,10 @@ ATH_ENABLE_VECTORIZATION;
  * Implementation of KLGaussianMixtureReduction
  */
 
-namespace KLGaussianMixtureReductionImpl {
+namespace {
 
 /**
- * The methods in this namespace
- * are used once in the findMerges.
- * Typically they are getting inlined.
- * But we want to enforce that as much we can.
- * especially for he ones we want the
- * function multiversioning to be "applied".
+ * internal implementation methods
  */
 
 using namespace GSFUtils;
@@ -52,9 +47,6 @@ using namespace GSFUtils;
  * We use doubles for the intermediate calculations
  * but we store the final distance in a float
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline float
 symmetricKL(const Component1D& ATH_RESTRICT componentI,
             const Component1D& ATH_RESTRICT componentJ)
@@ -73,9 +65,6 @@ symmetricKL(const Component1D& ATH_RESTRICT componentI,
  * Kullback-Leibler approach to Gaussian mixture reduction
  * equations (2),(3),(4)
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline void
 combine(GSFUtils::Component1D& ATH_RESTRICT updated,
         GSFUtils::Component1D& ATH_RESTRICT removed)
@@ -107,11 +96,8 @@ combine(GSFUtils::Component1D& ATH_RESTRICT updated,
  * We use the CxxUtils:vec class which provides
  * a degree of portability instead of using
  * directly the intrinsics.
- * For now we target 128 bit wide vectors
+ * For now we target 128 bit wide vectors (SSE4.2 for x86_64)
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline int32_t
 findMinimumIndex(const float* distancesIn, const int n)
 {
@@ -196,15 +182,12 @@ findMinimumIndex(const float* distancesIn, const int n)
   }
   return minIndex;
 }
+
 /**
  * Given a number of components n
  * we need padding to use the
  * simd findMinimumIndex
  */
-
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 constexpr inline int32_t
 numPadded(const int32_t n)
 {
@@ -214,9 +197,6 @@ numPadded(const int32_t n)
   return ((n+15)&~15);
 }
 
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline int32_t
 numDistances(const int32_t n, float* distancesIn)
 {
@@ -314,9 +294,6 @@ struct triangularToIJ
  * from index in triangular array
  * to matrix(I,J)
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline triangularToIJ
 convert(int32_t idx)
 {
@@ -347,9 +324,6 @@ convert(int32_t idx)
  * @distancesIn is the array of distances to fill
  * @n is the number of components
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline void
 calculateAllDistances(const Component1D* componentsIn,
                       float* distancesIn,
@@ -368,6 +342,7 @@ calculateAllDistances(const Component1D* componentsIn,
     }
   }
 }
+
 /**
  * @brief update the distances wrt to the merged
  * components
@@ -377,9 +352,6 @@ calculateAllDistances(const Component1D* componentsIn,
  * @c minTo is the index of the element we merged to (keep)
  * @c n is the components before the removal
  */
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
 inline int32_t
 updateDistances(
   Component1D* ATH_RESTRICT componentsIn,
@@ -436,14 +408,10 @@ updateDistances(
   }
   return last;
 }
+
 /**
  * Return which components need to be merged.
  */
-#if HAVE_TARGET_CLONES
-#if defined(__x86_64__)
-[[gnu::target_clones("sse4.2,default")]]
-#endif // end of x86_64 versions
-#endif // HAVE_TARGET_CLONES
 MergeArray
 findMergesImpl(const Component1DArray& componentsIn,
                const int32_t n,
@@ -500,11 +468,9 @@ findMergesImpl(const Component1DArray& componentsIn,
   return result;
 }
 
-} // namespace KLGaussianMixtureReductionImpl
+} // anonymous namespace with implementation
 
 namespace GSFUtils {
-using namespace KLGaussianMixtureReductionImpl;
-
 MergeArray
 findMerges(const Component1DArray& componentsIn, const int8_t reducedSize)
 {
@@ -515,15 +481,4 @@ findMerges(const Component1DArray& componentsIn, const int8_t reducedSize)
   }
   return findMergesImpl(componentsIn, n, reducedSize);
 }
-
-// Clang15 seems to have trouble with implicit template instantiation
-// from multiversioned functions.  Need to explictly instantiate
-// this to prevent link failures.
-template struct AlignedDynArray<float, GSFConstants::alignment>;
-
 } // end namespace GSFUtils
-
-
-// Same with this.
-// We also have problems if triangularToIJ is in an anonymous namespace.
-template class std::vector<GSFUtils::triangularToIJ>;
