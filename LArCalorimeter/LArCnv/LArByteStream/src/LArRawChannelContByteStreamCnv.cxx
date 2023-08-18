@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArRawChannelContByteStreamCnv.h"
@@ -82,7 +82,7 @@ LArRawChannelContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, DataObject
     ATH_MSG_WARNING( "Conversion tool returned an error. LArRawChannelContainer might be empty." );
   }
     
-  pObj = StoreGateSvc::asStorable( channelContainer ) ; 
+  pObj = SG::asStorable( channelContainer ) ; 
 
   ATH_MSG_DEBUG( "Created a LArRawChannelContainer of size" << channelContainer->size() );
 

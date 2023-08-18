@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-//<<<<<< INCLUDES                                                       >>>>>>
 
 #include "HGTD_IDDetDescrCnv.h"
 
@@ -149,7 +148,7 @@ HGTD_IDDetDescrCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
     }
     
     // Pass a pointer to the container to the Persistency service by reference.
-    pObj = StoreGateSvc::asStorable(m_hgtdId.release());
+    pObj = SG::asStorable(m_hgtdId.release());
 
     return StatusCode::SUCCESS;
 
