@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,8 +17,8 @@ namespace Trk {
 
 // transformations
 
-alignas(16) static const Amg::Transform3D s_idTransform = Amg::Transform3D::Identity(); //!< idendity transformation
-alignas(16) static const Amg::Rotation3D s_idRotation = Amg::Rotation3D::Identity();    //!< idendity rotation
+alignas(32) static const Amg::Transform3D s_idTransform = Amg::Transform3D::Identity(); //!< idendity transformation
+alignas(32) static const Amg::Rotation3D s_idRotation = Amg::Rotation3D::Identity();    //!< idendity rotation
 
 // axis system
 
