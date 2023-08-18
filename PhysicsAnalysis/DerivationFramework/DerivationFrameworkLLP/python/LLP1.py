@@ -98,7 +98,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     cst.AntiKt4TruthJets.label = "TruthRC"
 
     AntiKt10RCEMTopo = JetDefinition(   "AntiKt",1.0,cst.AntiKt4EMTopoJets,
-                                        ghostdefs = ["Track", "TrackLRT", "LCTopo"],
+                                        ghostdefs = ["Track", "TrackLRT", "LCTopoOrigin"],
                                         modifiers = ("Sort", "Filter:200000",),
                                         standardRecoMode = True,
                                         lock = True,
@@ -354,16 +354,64 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Compute RC substructure variables from energy clusters
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
-    LLP1RCJetSubstructureAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(ConfigFlags,
-                                                                                    name                              = "LLP1RCJetSubstructureAugTool",
+    LLP1RCJetSubstructureClustTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(ConfigFlags,
+                                                                                    name                              = "LLP1RCJetSubstructureClustTrimAugTool",
                                                                                     StreamName                        = kwargs['StreamName'],
                                                                                     JetContainerKey                   = "AntiKt10EMTopoRCJets",
                                                                                     SelectionString                   = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
-                                                                                    GhostClusterName                  = "GhostLCTopo",
-                                                                                    Suffix                            = "cluster"
+                                                                                    GhostConstitNames                 = {"GhostLCTopoOrigin"},
+                                                                                    Suffix                            = "clusterTrim",
+                                                                                    Grooming                          = "Trimming",
+                                                                                    RClusTrim                         = 0.2,
+                                                                                    PtFracTrim                        = 0.05
                                                                                     ))
-    RCSubstructureAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureAug", AugmentationTools = [LLP1RCJetSubstructureAugTool])
-    acc.addEventAlgo(RCSubstructureAug)
+    RCSubstructureClusterTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterTrimAug", AugmentationTools = [LLP1RCJetSubstructureClustTrimAugTool])
+    acc.addEventAlgo(RCSubstructureClusterTrimAug)
+
+    LLP1RCJetSubstructureClustSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(ConfigFlags,
+                                                                                    name                              = "LLP1RCJetSubstructureClustSDAugTool",
+                                                                                    StreamName                        = kwargs['StreamName'],
+                                                                                    JetContainerKey                   = "AntiKt10EMTopoRCJets",
+                                                                                    SelectionString                   = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
+                                                                                    GhostConstitNames                 = {"GhostLCTopoOrigin"},
+                                                                                    Suffix                            = "clusterSoftDrop",
+                                                                                    Grooming                          = "SoftDrop",
+                                                                                    BetaSoft                          = 1.0,
+                                                                                    ZcutSoft                          = 0.1
+                                                                                    ))
+    RCSubstructureClusterSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterSDAug", AugmentationTools = [LLP1RCJetSubstructureClustSDAugTool])
+    acc.addEventAlgo(RCSubstructureClusterSDAug)
+
+    # Compute RC substructure variables from tracks
+    from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
+    LLP1RCJetSubstructureTrackTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( ConfigFlags,
+                                                                                        name                              = "LLP1RCJetSubstructureTrackTrimAugTool",
+                                                                                        StreamName                        = kwargs['StreamName'],
+                                                                                        JetContainerKey                   = "AntiKt10EMTopoRCJets",
+                                                                                        SelectionString                   = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
+                                                                                        GhostConstitNames                 = {"GhostTrack", "GhostTrackLRT"},
+                                                                                        Suffix                            = "trackTrim",
+                                                                                        Grooming                          = "Trimming",
+                                                                                        RClusTrim                         = 0.2,
+                                                                                        PtFracTrim                        = 0.05
+                                                                                        ))
+    RCSubstructureTrackTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackTrimAug", AugmentationTools = [LLP1RCJetSubstructureTrackTrimAugTool])
+    acc.addEventAlgo(RCSubstructureTrackTrimAug)
+
+    from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
+    LLP1RCJetSubstructureTrackSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( ConfigFlags,
+                                                                                        name                              = "LLP1RCJetSubstructureTrackSDAugTool",
+                                                                                        StreamName                        = kwargs['StreamName'],
+                                                                                        JetContainerKey                   = "AntiKt10EMTopoRCJets",
+                                                                                        SelectionString                   = "(AntiKt10EMTopoRCJets.pt > 200.*GeV) && (abs(AntiKt10EMTopoRCJets.eta) < 2.5)",
+                                                                                        GhostConstitNames                 = {"GhostTrack", "GhostTrackLRT"},
+                                                                                        Suffix                            = "trackSoftDrop",
+                                                                                        Grooming                          = "SoftDrop",
+                                                                                        BetaSoft                          = 1.0,
+                                                                                        ZcutSoft                          = 0.1
+                                                                                        ))
+    RCSubstructureTrackSDAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureTrackSDAug", AugmentationTools = [LLP1RCJetSubstructureTrackSDAugTool])
+    acc.addEventAlgo(RCSubstructureTrackSDAug)
 
     # Skimming
     skimmingTools = []

@@ -14,6 +14,8 @@
 #define DERIVATIONFRAMEWORK_RCJetSubstructureAug_H
 
 #include <string>
+#include "fastjet/tools/Filter.hh"
+#include "fastjet/contrib/SoftDrop.hh"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
@@ -36,19 +38,35 @@ namespace DerivationFramework {
         
         StringProperty m_streamName
             { this, "StreamName", "", "Name of the stream" };
-        StringProperty m_ghostName
-            { this, "GhostClusterName", "GhostLCTopo", "Name of the ghost clusters"};
+        Gaudi::Property< std::vector<std::string> > m_ghostNames
+            { this, "GhostConstitNames", {"GhostLCTopo"}, "Names of the ghost constituents for substructure computation"};
         StringProperty m_selectionString 
             { this, "SelectionString", "", "Selection to apply to jet"};
         StringProperty m_suffix
             { this, "Suffix", "", "Suffix for variables"};
+        StringProperty m_grooming
+            { this, "Grooming", "", "Name of gromming technic to apply (Trimming or SofDrop)"};
+        
+        Gaudi::Property<float> m_rclus  
+            {this, "RClusTrim", 0.3 , "R for reclustering (0 for none)"};
+        Gaudi::Property<float> m_ptfrac      
+            {this, "PtFracTrim", 0.03, "pT fraction for retaining subjets"};
+        Gaudi::Property<float> m_beta 
+            {this, "BetaSoft", 1. , "How much to consider angular dependence"};
+        Gaudi::Property<float> m_zcut 
+            {this, "ZcutSoft", 1. , "pT fraction for retaining subjets"};
+        Gaudi::Property<float> m_R0 
+            {this, "R0Soft", 1. , "Normalization of angular distance, usually the characteristic jet radius (default R0 = 1)"};
         
         SG::ReadHandleKey< xAOD::JetContainer > m_jetKey{ this, "JetContainerKey", ""};
 
         // Struct to hold all decorators
         struct moments_t;
-
         moments_t* m_moments;
+
+        // The filter object that will apply the grooming
+        std::unique_ptr<fastjet::Filter> m_trimmer;
+        std::unique_ptr<fastjet::contrib::SoftDrop> m_softdropper;
 
     };
 
