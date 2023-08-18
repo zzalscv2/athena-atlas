@@ -109,7 +109,8 @@ def MinBiasSPSel(flags):
     spMakingCA = seq.sequence("spacePointFormation")
 
     reco.mergeReco(spMakingCA)
-    # TODO, this should come from ID config, another method of InDetTrigSequence possibly
+    
+    # TODO, this is a dependancy of SPcounting
     vdv = CompFactory.AthViews.ViewDataVerifier( "VDVSPCountingInputs",
                                                   DataObjects = [( 'PixelID' , 'DetectorStore+PixelID' ),
                                                                  ( 'SCT_ID'  , 'DetectorStore+SCT_ID' )] )
