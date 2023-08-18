@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlg - Jets without jets algorithm for gFEX
@@ -51,9 +51,9 @@ void gFEXJwoJAlgo::setAlgoConstant(float aFPGA_A, float bFPGA_A,
 
 
 
-std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(gTowersCentral Atwr, gTowersCentral Btwr,
-                                                                 gTowersForward CNtwr, gTowersForward CPtwr,
-                                                                 std::array<uint32_t, 4> & outTOB) {
+std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersCentral& Atwr, const gTowersCentral& Btwr,
+                                                                 const gTowersForward& CNtwr, const gTowersForward& CPtwr,
+                                                                 std::array<uint32_t, 4> & outTOB) const {
 
 
   gTowersCentral Ctwr = {{{0}}};
@@ -380,7 +380,5 @@ float gFEXJwoJAlgo::cosLUT(unsigned int phiIDX, unsigned int aw) const
   float rcos = std::cos(rad);
   return rcos;
 }
-
-
 
 } // namespace LVL1

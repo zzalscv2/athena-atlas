@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,7 +7,6 @@
 #define IgTowerBuilder_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/gTower.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 
@@ -33,7 +32,7 @@ Interface definition for gTowerBuilder
 
 
     virtual void init(std::unique_ptr<gTowerContainer> & gTowerContainer) = 0;
-    virtual void execute(std::unique_ptr<gTowerContainer> & gTowerContainer) = 0;
+    virtual void execute(std::unique_ptr<gTowerContainer> & gTowerContainer) const = 0;
     virtual void reset() = 0;
 
 

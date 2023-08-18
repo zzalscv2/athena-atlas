@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTowerBuilder - Builds gTowers (readout elements of gFEX)
@@ -15,14 +15,10 @@
 #include <string>
 
 // Athena/Gaudi
-#include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgTowerBuilder.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/gTower.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
-
-class CaloIdManager;
 
 namespace LVL1 {
 
@@ -33,7 +29,7 @@ class gTowerBuilder: public AthAlgTool, virtual public IgTowerBuilder {
   virtual ~gTowerBuilder() = default;
 
   virtual void init(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) override ;
-  virtual void execute(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) override ;
+  virtual void execute(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const override;
   virtual void reset() override ;
 
  private:

@@ -9,6 +9,9 @@
         and histogram under/overflows
 '''
 import xml.etree.ElementTree as ET
+
+import datetime
+
 from AthenaCommon.Logging import logging
 log = logging.getLogger('CostAnalysisPostProcessing')
 
@@ -73,9 +76,10 @@ def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails
                 metadata[1]['Details'] += " "
             else:
                 metadata[1]['Details'] = ""
-            metadata[1]['Details'] += "Monitored time: {0} - {1} max <mu> {2} deadtime {3}".format(
+            metadata[1]['Details'] += "Monitored time {4}h: {0} - {1} max <mu> {2} deadtime {3}".format(
                 detailsPerLb["Global"]["DataRangeStart"], detailsPerLb["Global"]["DataRangeEnd"], 
-                detailsPerLb["Global"]["GlobalMaxPileup"], detailsPerLb["Global"]["GlobalMeanDeadtime"])
+                detailsPerLb["Global"]["GlobalMaxPileup"], detailsPerLb["Global"]["GlobalMeanDeadtime"],
+                detailsPerLb["Global"]["DataRangeDuration"])
         else:
             log.error("Reading lumiblock details for TRP failed!")
 
@@ -420,9 +424,13 @@ def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_eEM26M--ena
     physicsDeadtimeGlobalAvg = sum(physicsDeadtimeGlobal)/len(physicsDeadtimeGlobal) if len(physicsDeadtimeGlobal) > 0 else 1.
     pileupGlobalAvg = sum(pileupGlobal)/len(pileupGlobal) if len(pileupGlobal) > 0 else 1.
 
+    startTs = lbRangeTsDict[min(lbRangeTsDict.keys())]["start"]/1E6
+    endTs = lbRangeTsDict[max(lbRangeTsDict.keys())]["end"]/1E6
+    monitoredTime = datetime.timedelta(seconds=(int(endTs - startTs)))
     additionalDetails = {
-        "DataRangeStart" : ctime(lbRangeTsDict[min(lbRangeTsDict.keys())]["start"]/1E6),
-        "DataRangeEnd" : ctime(lbRangeTsDict[max(lbRangeTsDict.keys())]["end"]/1E6),
+        "DataRangeStart" : ctime(startTs),
+        "DataRangeEnd" : ctime(endTs),
+        "DataRangeDuration" : "{0}:{1}".format(int(monitoredTime.total_seconds()//3600), int((monitoredTime.total_seconds()%3600)//60)),
         "GlobalMeanPileup" : round(pileupGlobalAvg, 3),
         "GlobalMinPileup" : round(min(pileupGlobal), 3),
         "GlobalMaxPileup" : round(max(pileupGlobal), 3),

@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
 
 from TrigInDetConfig.utils import getFlagsForActiveConfig
-from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg, trigInDetPrecisionTrackingCfg
 from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
 from InDetUsedInVertexFitTrackDecorator.UsedInVertexFitTrackDecoratorCfg import getUsedInVertexFitTrackDecoratorAlg
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
@@ -143,10 +143,25 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
         )
     )
 
+    if flagsWithTrk.Trigger.Jet.doJetSuperPrecisionTracking:
+        acc.merge(
+            trigInDetPrecisionTrackingCfg(
+                flagsWithTrk,
+                RoIs,
+                signatureName="jetSuper",
+                in_view=False
+            )
+        )
+
+        vertexInputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_IDTrig
+
+    else:
+        vertexInputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_FTF
+
     acc.merge(
         InDetTrigPriVxFinderCfg(
             flagsWithTrk,
-            inputTracks = flagsWithTrk.Tracking.ActiveConfig.tracks_FTF,
+            inputTracks = vertexInputTracks,
             outputVtx =   flagsWithTrk.Tracking.ActiveConfig.vertex,
         )
     )
@@ -154,7 +169,8 @@ def JetRoITrackingCfg(flags, jetsIn, trkopt, RoIs):
     # make sure we output only the key,value related to tracks (otherwise, alg duplication issues)
     jetContext, trkKeys = retrieveJetContext(trkopt)
     outmap = { k:jetContext[k] for k in trkKeys }
-
+    if flags.Trigger.Jet.doJetSuperPrecisionTracking:
+        outmap["Tracks"] = vertexInputTracks
     return acc, outmap
 
 

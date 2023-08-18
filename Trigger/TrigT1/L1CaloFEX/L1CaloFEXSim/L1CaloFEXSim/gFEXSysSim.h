@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSysSim - Overall gFEX simulation
@@ -53,7 +53,7 @@ namespace LVL1 {
 
     virtual void cleanup() override;
 
-    virtual int calcTowerID(int eta, int phi, int nphi, int mod) override ;
+    virtual int calcTowerID(int eta, int phi, int nphi, int mod) const override ;
 
     /**Create and fill a new gFexJetRoI object, and return a pointer to it*/
     virtual StatusCode fillgRhoEDM(uint32_t tobWord, int scale) override ;

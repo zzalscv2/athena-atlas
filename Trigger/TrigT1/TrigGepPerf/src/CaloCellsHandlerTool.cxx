@@ -46,7 +46,7 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
   const CaloNoise* totalNoiseCDO = *totalNoiseHdl;
 
   
-  for(auto cell: cells){
+  for(const auto *cell: cells){
     Gep::CustomCaloCell caloCell; 
     
     caloCell.e          = cell->energy();

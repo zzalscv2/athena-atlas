@@ -93,7 +93,10 @@ def TrigVrtSecInclusive_VSIMonitoring(flags, name):
 
 def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksName, PrimaryVertexInputName, VxCandidatesOutputName, TrkPairOutputName):
 
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
+
+    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    from TrigInDetConfig.InDetTrigCAWrappers import CAtoLegacyPublicToolWrapper
+    InDetTrigExtrapolator = CAtoLegacyPublicToolWrapper(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
 
     VertexFitter = CompFactory.Trk__TrkVKalVrtFitter(
         name = 'VKalVrtFitter_'+name,

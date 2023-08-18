@@ -21,7 +21,7 @@ Gep::ModAntikTJetMaker::makeJets(const std::vector<Gep::Cluster> &clusters) cons
   int niter = 0;
 
   //Iterate over clusters
-  while(constituents.size() > 0 && niter < m_nIter){
+  while(!constituents.empty() && niter < m_nIter){
 
     const unsigned int n_clusters = constituents.size();
 

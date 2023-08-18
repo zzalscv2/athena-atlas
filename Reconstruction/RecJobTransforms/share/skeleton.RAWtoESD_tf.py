@@ -153,9 +153,6 @@ if hasattr(runArgs,"outputNTUP_TRKVALIDFile"):
     from InDetRecExample.InDetKeys import InDetKeys
     InDetKeys.trkValidationNtupleName.set_Value_and_Lock( runArgs.outputNTUP_TRKVALIDFile )
 
-    from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
-    InDetTrigFlags.doTrkNtuple.set_Value_and_Lock( True )
-     
 if hasattr(runArgs,"outputNTUP_MUONCALIBFile"):
     from MuonRecExample.MuonRecFlags import muonRecFlags
     muonRecFlags.doCalib = True

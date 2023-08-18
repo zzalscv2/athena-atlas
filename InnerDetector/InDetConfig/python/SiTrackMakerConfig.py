@@ -104,7 +104,10 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
     else:
         kwargs.setdefault("TrackPatternRecoInfo", 'SiSPSeededFinder')
 
-    if (flags.Tracking.doStoreTrackSeeds and
+    # Enable storing seeds if requested.
+    # Always for primary pass. Only if appropriate flag is set for other passes.
+    if (flags.Tracking.doStoreTrackSeeds and 
+            (flags.Tracking.ActiveConfig.extension == "" or flags.Tracking.ActiveConfig.storeTrackSeeds) and
             "SeedToTrackConversion" not in kwargs):
         from InDetConfig.SeedToTrackConversionToolConfig import (
             SeedToTrackConversionToolCfg)

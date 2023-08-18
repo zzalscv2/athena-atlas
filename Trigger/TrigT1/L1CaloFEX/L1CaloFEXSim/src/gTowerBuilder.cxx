@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gTowerBuilder - Builds gTowers (readout elements of gFEX)
@@ -8,8 +8,6 @@
 //     email                : cecilia.tosciri@cern.ch
 //***************************************************************************
 
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloIdentifier/CaloIdManager.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "L1CaloFEXSim/gTowerBuilder.h"
 
@@ -32,7 +30,6 @@ gTowerBuilder::gTowerBuilder(const std::string& type,const std::string& name,con
 
 void gTowerBuilder::init(std::unique_ptr<gTowerContainer> & gTowerContainerRaw)
 {
-
   execute(gTowerContainerRaw);
   gTowerContainerRaw->clearContainerMap();
   gTowerContainerRaw->fillContainerMap();
@@ -44,7 +41,7 @@ void gTowerBuilder::reset()
 }
 
 
-void gTowerBuilder::execute(std::unique_ptr<gTowerContainer> & gTowerContainerRaw)
+void gTowerBuilder::execute(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const
 {
   BuildAllTowers(gTowerContainerRaw);
 }
@@ -145,10 +142,7 @@ void gTowerBuilder::BuildFCALgTowers(std::unique_ptr<gTowerContainer> & gTowerCo
 
   void gTowerBuilder::BuildSingleTower(std::unique_ptr<gTowerContainer> & gTowerContainerRaw, int ieta, int iphi, int nphi, int keybase, int posneg) const
 {
-
   gTowerContainerRaw->push_back(ieta, iphi, nphi, keybase, posneg);
-
-
 }
 
   void gTowerBuilder::BuildAllTowers(std::unique_ptr<gTowerContainer> & gTowerContainerRaw) const
@@ -158,7 +152,6 @@ void gTowerBuilder::BuildFCALgTowers(std::unique_ptr<gTowerContainer> & gTowerCo
   BuildEMEgTowers(gTowerContainerRaw);
   BuildFwdEMECgTowers(gTowerContainerRaw);
   BuildFCALgTowers(gTowerContainerRaw);
-
 }
 
 } // end of LVL1 namespace

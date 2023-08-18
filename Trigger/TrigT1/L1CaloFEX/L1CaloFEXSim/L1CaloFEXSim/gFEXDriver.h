@@ -1,3 +1,7 @@
+/*
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef GFEXDRIVER_H
 #define GFEXDRIVER_H
 
@@ -26,8 +30,6 @@ class gFEXDriver : public AthAlgorithm
   virtual StatusCode execute() override;
 
  private:
-
-  int m_numberOfEvents = 0;
 
   //Declare that gFEXDriver class will write an object of type LVL1::gTowerContainer, one of type gFEXOutputCollection
   SG::WriteHandleKey<gFEXOutputCollection> m_gFEXOutputCollectionSGKey {this, "MyOutputs", "gFEXOutputCollection", "MyOutputs"};
