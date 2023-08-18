@@ -9,12 +9,9 @@
 //    email                 : david.reikher@gmail.com
 //*************************************************************************
 
-
-
-
 #include "L1CaloFEXSim/eFEXtauBDT.h"
+#include "L1CaloFEXSim/SCellIndexing.h"
 #include <string>
-
 
 #define ENERGY_WIDTH 16
 #define PARAM_WIDTH 8
@@ -187,10 +184,10 @@ void LVL1::eFEXtauBDT::debugPrintSCellValues() {
   std::string em2Values = "";
   std::string em3Values = "";
   std::string hadValues = "";
-  for (size_t i = 0; i < m_locMap.size(); i++) {
-    int eta = m_locMap[i][0];
-    int phi = m_locMap[i][1];
-    int layer = m_locMap[i][2];
+  for (size_t i = 0; i < LVL1::locMap.size(); i++) {
+    int eta = LVL1::locMap[i][0];
+    int phi = LVL1::locMap[i][1];
+    int layer = LVL1::locMap[i][2];
     scellValues += std::to_string(*superCellToPtr(eta, phi, layer)) + " ";
     switch (layer) {
     case 0:
