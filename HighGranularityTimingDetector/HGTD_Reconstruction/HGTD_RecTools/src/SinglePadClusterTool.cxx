@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecTools/src/SinglePadClusterTool.cxx
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -44,7 +44,7 @@ SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll) const {
   InDetDD::HGTD_DetectorElement* element =
       m_hgtd_det_mgr->getDetectorElement(identifier);
 
-  for (const auto& rdo : rdo_coll) {
+  for (const auto rdo : rdo_coll) {
 
     Identifier rdo_id = rdo->identify();
     ATH_MSG_DEBUG("Using RDO: " << rdo_id);
