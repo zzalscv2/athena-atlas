@@ -180,7 +180,10 @@ StatusCode xAODEventSelector::initialize()
   }
   
   ATH_MSG_DEBUG("Calling xAOD::Init...");
+  int old_level = gErrorIgnoreLevel;
+  gErrorIgnoreLevel = kWarning;
   xAOD::Init().ignore();
+  gErrorIgnoreLevel = old_level;
   //if using the AthROOTErrorHandlerSvc, need to initialize it once again to give back error handling control to svc
   if(serviceLocator()->existsService("AthROOTErrorHandlerSvc")) {
     ServiceHandle<IService> ehSvc("AthROOTErrorHandlerSvc",name());
