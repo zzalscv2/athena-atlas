@@ -238,7 +238,10 @@ StatusCode VertexTrackIsolation::addBranches() const {
         }
 
         const xAOD::Vertex* refVtx = vertex_h.pv(static_cast<xAOD::BPhysHelper::pv_type>(vertex_type));  // Fix the cast
-
+        if(refVtx == nullptr){
+          ATH_MSG_WARNING("Could not retrieve Vertex type " << vertex_type <<  ", check vertex type setting. Comes from container " << m_vertexContainerName);
+          continue;
+        }
         xAOD::TrackIsolation result;
 
         if (!m_doIsoPerTrk) {
