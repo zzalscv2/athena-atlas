@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -150,7 +150,7 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::stop() {
 
   // For compatibility with existing configurations, look in the detector
   // store first, then in conditions.
-  m_reference=detStore()->tryConstRetrieve<REFCONTAINER> (m_referenceKey.key());
+  m_reference=detStore()->template tryConstRetrieve<REFCONTAINER> (m_referenceKey.key());
  if (!m_reference) {
    SG::ReadCondHandle<REFCONTAINER> readHandle{m_referenceKey};
    m_reference = *readHandle;
