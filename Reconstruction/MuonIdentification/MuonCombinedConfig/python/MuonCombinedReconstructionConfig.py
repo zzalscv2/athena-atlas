@@ -787,6 +787,10 @@ def MuonCombinedReconstructionCfg(flags):
     if flags.Input.isMC:
         result.merge(CombinedMuonTrackTruthAlgsCfg(flags))
         result.merge(CombinedMuonTruthAssociationAlgsCfg(flags))
+        if 'MuonSegments' not in flags.Input.Collections:
+            # Segment truth association decorations, but only if they are not already there (e.g. when running on ESDs)
+            from MuonConfig.MuonTruthAlgsConfig import MuonSegmentTruthAssociationAlgCfg
+            result.merge(MuonSegmentTruthAssociationAlgCfg(flags))
 
     result.addEventAlgo(CompFactory.ClusterMatching.CaloClusterMatchLinkAlg(
         "MuonTCLinks", ClustersToDecorate="MuonClusterCollection"))
@@ -822,6 +826,7 @@ if __name__ == "__main__":
     flags.dump()
 
     cfg = SetupMuonStandaloneCA(args, flags)
+
     from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
     cfg.merge(MuonPrepDataConvCfg(flags))
 
