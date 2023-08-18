@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -53,10 +53,10 @@ class LArRampValidationAlg: public LArRampValidationBase {
   LArCondObj getRefObj(const HWIdentifier chid, const int gain) const override final;
      
   /** @brief Summary method executed after the loop over all channels */
-  StatusCode summary(const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);
+  virtual StatusCode summary(const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont) override;
   
   /** @brief Executed before the loop over all channels to reset global sums */
-  StatusCode preLoop();
+  virtual StatusCode preLoop() override;
 
   /** To store Gain Keys for Raw Ramps (job-Property)*/
   std::vector<std::string> m_contKey;

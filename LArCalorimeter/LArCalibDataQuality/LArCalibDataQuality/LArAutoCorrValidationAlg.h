@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -50,10 +50,10 @@ class LArAutoCorrValidationAlg: public LArAutoCorrValidationBase
 
 
   /** @brief Summary method executed after the loop over all channels */
-  StatusCode summary(const LArOnOffIdMapping *cabling,const LArBadChannelCont *bcCont);
+  virtual StatusCode summary(const LArOnOffIdMapping *cabling,const LArBadChannelCont *bcCont) override;
   
   /** @brief Executed before the loop over all channels to reset global sums */
-  StatusCode preLoop();
+  virtual StatusCode preLoop() override;
 
 
   /** Covariace tolerance of one FEB  (job-Property)*/
