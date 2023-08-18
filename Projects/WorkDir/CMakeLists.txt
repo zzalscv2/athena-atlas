@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -132,6 +132,18 @@ if( ATLAS_CPPCHECK )
       endif()
    endforeach()
    list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=*:*Dict.cxx" )
+   # Suppress a cppcheck warning from Boost.
+   # This isn't always caught by the settings above.  In a nightly,
+   # LCG_RELEASE_BASE points at trees under /cvmfs/sft-nightlies.cern.ch.
+   # But some of these are just symlinks to /cvmfs/sft.cern.ch, and those
+   # won't match the pattern.
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=preprocessorErrorDirective:*/select_stdlib_config.hpp" )
+   # It's common to use assert with side-effects in unit tests.
+   # Don't warn about those.
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=assignmentInAssert:*_test.*" )
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "--suppress=assertWithSideEffect:*_test.*" )
+   # Allow conditionalizing code on cppcheck.
+   list( APPEND CMAKE_CPPCHECK_DEFAULT "-D__CPPCHECK__" )
    # Set the cache variable(s) that CMake uses to decide how to use cppcheck.
    set( CMAKE_C_CPPCHECK "${CMAKE_CPPCHECK_DEFAULT}"
       CACHE STRING "CppCheck command to use for the C source files" )
