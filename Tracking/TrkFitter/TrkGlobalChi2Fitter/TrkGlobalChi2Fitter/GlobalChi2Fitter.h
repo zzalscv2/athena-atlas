@@ -894,7 +894,7 @@ namespace Trk {
     ToolHandle<IMultipleScatteringUpdator> m_scattool {this, "MultipleScatteringTool", "Trk::MultipleScatteringUpdator/AtlasMultipleScatteringUpdator", ""};
     ToolHandle<IEnergyLossUpdator> m_elosstool {this, "EnergyLossTool", "Trk::EnergyLossUpdator/AtlasEnergyLossUpdator", ""};
     ToolHandle<IMaterialEffectsUpdator> m_matupdator {this, "MaterialUpdateTool", "", ""};
-    ToolHandle<IPropagator> m_propagator {this, "PropagatorTool", "Trk::StraightLinePropagator/CosmicsPropagator", ""};
+    ToolHandle<IPropagator> m_propagator {this, "PropagatorTool", "", ""};
     ToolHandle<INavigator> m_navigator {this, "NavigatorTool", "Trk::Navigator/CosmicsNavigator", ""};
     ToolHandle<IResidualPullCalculator> m_residualPullCalculator {this, "ResidualPullCalculatorTool", "Trk::ResidualPullCalculator/ResidualPullCalculator", ""};
     ToolHandle<Trk::ITrkMaterialProviderTool> m_caloMaterialProvider {this, "CaloMaterialProvider", "Trk::TrkMaterialProviderTool/TrkMaterialProviderTool", ""};
