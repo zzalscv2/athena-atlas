@@ -12,11 +12,15 @@
 
 #include "DerivationFrameworkLLP/RCJetSubstructureAug.h"
 #include "xAODJet/JetContainer.h"
+#include "xAODBase/IParticle.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include <vector>
 
+#include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/JetDefinition.hh"
+#include "fastjet/contrib/SoftDrop.hh"
+#include "fastjet/tools/Filter.hh"
 #include "fastjet/contrib/Nsubjettiness.hh"
 #include "JetSubStructureUtils/Qw.h"
 #include "JetSubStructureUtils/Nsubjettiness.h"
@@ -48,6 +52,10 @@ StatusCode DerivationFramework::RCJetSubstructureAug::initialize()
 
     // Init moment struct
     m_moments = new moments_t(m_suffix);
+
+    // Define the trimmer
+    m_trimmer = std::make_unique<fastjet::Filter>(fastjet::JetDefinition(fastjet::kt_algorithm, m_rclus), fastjet::SelectorPtFractionMin(m_ptfrac));
+    m_softdropper = std::make_unique<fastjet::contrib::SoftDrop>(m_beta, m_zcut, m_R0);
 
     return StatusCode::SUCCESS;
 }
@@ -87,32 +95,46 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
         for (unsigned int i=0; i<nJets; ++i) jetToCheck.push_back((*jets)[i]);
     }
     
-    std::vector<const xAOD::CaloCluster*> clusters;
+    std::vector<const xAOD::IParticle*> mergedGhostConstits;
+    std::vector<const xAOD::IParticle*> ghosts;
     std::vector<fastjet::PseudoJet> constituents;
 
     for (const xAOD::Jet* jet : jetToCheck) {
         
-        // Get list of ghost energy clusters
-        clusters.clear();
-        ATH_CHECK(jet->getAssociatedObjects(m_ghostName, clusters));
+        // Get list of ghost constituents
+        mergedGhostConstits.clear();
+        for (std::string ghostName: m_ghostNames) {
+            ghosts.clear();
+            ATH_CHECK(jet->getAssociatedObjects(ghostName, ghosts));
+            mergedGhostConstits.insert(mergedGhostConstits.end(), ghosts.begin(), ghosts.end());
+        }
 
-        // Construct list of constituent PseudoJets from clusters and compute timing information
+        // Construct list of constituent PseudoJets from constituents and compute timing information
         constituents.clear();
         double eTot = 0;
         double time = 0;
-        for (auto cluster : clusters){
-            constituents.push_back( fastjet::PseudoJet(cluster->p4()) );
-            double eConstit = cluster->e()* cluster->e();
-            time += cluster->time()* eConstit;
-            eTot += eConstit;
+        for (auto constit : mergedGhostConstits){
+            // Filter constituents on negative energy
+            if (constit->e()<0) {ATH_MSG_INFO("################## Negative energy cluster"); continue;}
+            constituents.push_back( fastjet::PseudoJet(constit->p4()) );
+
+            // Timing info of constituent only for calo constituents
+            if (constit->type() == xAOD::Type::CaloCluster) {
+                auto caloConstit = dynamic_cast<const xAOD::CaloCluster*> (constit);
+                double eConstit = caloConstit->e()* caloConstit->e();
+                time += caloConstit->time()* eConstit;
+                eTot += eConstit;
+            }            
         }
 
+        // Fill timing info
         if (eTot==0) { 
             m_moments->dec_timing(*jet) = 0;
         } else {
             m_moments->dec_timing(*jet) = time/eTot;
         }
 
+        // Fill substructure vars with default values when no constituents in jet
         if (constituents.size()==0) {
             m_moments->dec_Qw(*jet) = -999;
 
@@ -145,21 +167,31 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
 		    return StatusCode::SUCCESS;
 	    }
 
-        // Run clustering
+        // Run clustering on constituents
         auto jet_def = fastjet::JetDefinition(fastjet::antikt_algorithm, 1.5);
         fastjet::ClusterSequence cs(constituents, jet_def);
-	    fastjet::PseudoJet LCTopo_jet = cs.inclusive_jets(0.0).front(); 
+	    fastjet::PseudoJet recluster_jet = cs.inclusive_jets(0.0).front();
 
-        // Save LCTopo jet infos
-        m_moments->dec_pT(*jet) = LCTopo_jet.pt();
-        m_moments->dec_m(*jet) = LCTopo_jet.m();
+        // Apply grooming to reclustered jet
+        fastjet::PseudoJet groomed_jet = recluster_jet;
+        if (m_grooming=="Trimming"){
+            groomed_jet = m_trimmer->result(recluster_jet);
+        }  else if (m_grooming=="SoftDrop"){
+            groomed_jet = m_softdropper->result(recluster_jet);
+        } else {
+            ATH_MSG_DEBUG(" No grooming requested or wrong one, will not apply grooming");
+        }
+        
+        // Save reclustered jet infos
+        m_moments->dec_pT(*jet) = groomed_jet.pt();
+        m_moments->dec_m(*jet) = groomed_jet.m();
         m_moments->dec_NClusts(*jet) = constituents.size();
-        m_moments->dec_eta(*jet) = LCTopo_jet.eta();
-        m_moments->dec_phi(*jet) = LCTopo_jet.phi() - M_PI;
+        m_moments->dec_eta(*jet) = groomed_jet.eta();
+        m_moments->dec_phi(*jet) = groomed_jet.phi() - M_PI;
 
         // Qw
         JetSubStructureUtils::Qw qw;
-        m_moments->dec_Qw(*jet) = qw.result(LCTopo_jet);
+        m_moments->dec_Qw(*jet) = qw.result(groomed_jet);
         
         // Nsubjetiness
         fastjet::contrib::WTA_KT_Axes wta_kt_axes;
@@ -168,10 +200,10 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
         JetSubStructureUtils::Nsubjettiness Tau2_wta(2, wta_kt_axes, normalized_measure);
         JetSubStructureUtils::Nsubjettiness Tau3_wta(3, wta_kt_axes, normalized_measure);
         JetSubStructureUtils::Nsubjettiness Tau4_wta(4, wta_kt_axes, normalized_measure);
-        float tau1_wta = Tau1_wta.result(LCTopo_jet);
-        float tau2_wta = Tau2_wta.result(LCTopo_jet);
-        float tau3_wta = Tau3_wta.result(LCTopo_jet);
-        float tau4_wta = Tau4_wta.result(LCTopo_jet);
+        float tau1_wta = Tau1_wta.result(groomed_jet);
+        float tau2_wta = Tau2_wta.result(groomed_jet);
+        float tau3_wta = Tau3_wta.result(groomed_jet);
+        float tau4_wta = Tau4_wta.result(groomed_jet);
         float tau21_wta = -999;
         float tau32_wta = -999;
 
@@ -193,9 +225,9 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
         JetSubStructureUtils::KtSplittingScale Split12(1);
         JetSubStructureUtils::KtSplittingScale Split23(2);
         JetSubStructureUtils::KtSplittingScale Split34(3);
-        float split12 = Split12.result(LCTopo_jet);
-        float split23 = Split23.result(LCTopo_jet);
-        float split34 = Split34.result(LCTopo_jet);
+        float split12 = Split12.result(groomed_jet);
+        float split23 = Split23.result(groomed_jet);
+        float split34 = Split34.result(groomed_jet);
 
         m_moments->dec_Split12(*jet) = split12;
         m_moments->dec_Split23(*jet) = split23;
@@ -206,10 +238,10 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
         JetSubStructureUtils::EnergyCorrelator ECF2(2, 1.0, JetSubStructureUtils::EnergyCorrelator::pt_R);
         JetSubStructureUtils::EnergyCorrelator ECF3(3, 1.0, JetSubStructureUtils::EnergyCorrelator::pt_R);
         JetSubStructureUtils::EnergyCorrelator ECF4(4, 1.0, JetSubStructureUtils::EnergyCorrelator::pt_R);
-        float ecf1 = ECF1.result(LCTopo_jet);
-        float ecf2 = ECF2.result(LCTopo_jet);
-        float ecf3 = ECF3.result(LCTopo_jet);
-        float ecf4 = ECF4.result(LCTopo_jet);
+        float ecf1 = ECF1.result(groomed_jet);
+        float ecf2 = ECF2.result(groomed_jet);
+        float ecf3 = ECF3.result(groomed_jet);
+        float ecf4 = ECF4.result(groomed_jet);
         float c2 = -999;
         float d2 = -999;
 
