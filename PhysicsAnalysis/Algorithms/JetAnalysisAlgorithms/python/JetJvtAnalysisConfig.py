@@ -35,6 +35,8 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             alg.scaleFactorOutputDecoration = 'jvt_effSF_%SYS%'
             alg.particles = config.readName (self.containerName)
 
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_jvt_effSF')
+
             if self.enableFJvt:
                 alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'ForwardJvtEventScaleFactorAlg' )
                 preselection = config.getPreselection (self.containerName, '')
@@ -42,6 +44,8 @@ class JetJvtAnalysisConfig (ConfigBlock) :
                 alg.scaleFactorInputDecoration = 'fjvt_effSF_%SYS%'
                 alg.scaleFactorOutputDecoration = 'fjvt_effSF_%SYS%'
                 alg.particles = config.readName (self.containerName)
+
+                config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, 'weight_fjvt_effSF')
 
         if self.runSelection:
             config.addSelection (self.containerName, 'jvt', 'jvt_selection',
