@@ -18,16 +18,6 @@ def getSecondStageBjetTracking( flags, inputRoI, inputVertex, inputJets ):
                                ( 'xAOD::VertexContainer' , 'StoreGateSvc+%s' % inputVertex ),
                                ( 'xAOD::JetContainer' , 'StoreGateSvc+%s' % inputJets )]
 
-    # Make sure the required objects are still available at whole-event level
-    if flags.Input.isMC:
-      from AthenaCommon.AlgSequence import AlgSequence
-      topSequence = AlgSequence()
-      viewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-      topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-    else:
-      viewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
-
-    viewVerify.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
 
     algSequence.append( parOR("SecondStageFastTrackingSequence",viewAlgs) )
 

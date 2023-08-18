@@ -45,18 +45,13 @@ def EFMuonCBViewDataVerifierCfg(flags, name):
         EFMuonCBViewDataVerifier.DataObjects +=[( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec' )]
 
     else:
-        if flags.Detector.GeometryITk:
-            EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
-                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_FTF )]
-        else:
-            EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
-                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_FTF ),
-                                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )
-                                                     ]
+        EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
+                                                 ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Tracking.ActiveConfig.tracks_FTF )]
 
     if flags.Input.Format is Format.BS:
         EFMuonCBViewDataVerifier.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                                                  ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
+
     if flags.Input.isMC:
         if flags.Detector.GeometryITk:
             EFMuonCBViewDataVerifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ), 

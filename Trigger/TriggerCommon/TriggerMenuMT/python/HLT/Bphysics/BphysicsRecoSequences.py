@@ -19,16 +19,6 @@ def bmumuxRecoSequence(flags, rois, muons):
     viewDataVerifier.DataObjects += [('TrigRoiDescriptorCollection', 'StoreGateSvc+%s' % rois),
                                      ('xAOD::MuonContainer', 'StoreGateSvc+%s' % muons)]
 
-    # Make sure required objects are still available at whole-event level
-    if flags.Input.isMC:
-        from AthenaCommon.AlgSequence import AlgSequence
-        topSequence = AlgSequence()
-        viewDataVerifier.DataObjects += [('TRT_RDO_Container', 'StoreGateSvc+TRT_RDOs')]
-        topSequence.SGInputLoader.Load += [('TRT_RDO_Container', 'StoreGateSvc+TRT_RDOs')]
-    else:
-        viewDataVerifier.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
-    viewDataVerifier.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
-
     for viewAlg in viewAlgs:
         recoSequence += viewAlg
 
