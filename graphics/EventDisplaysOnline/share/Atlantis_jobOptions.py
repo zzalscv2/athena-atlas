@@ -90,6 +90,7 @@ if DetFlags.detdescr.Calo_on():
     ToolSvc.CaloTileRetriever.DoTileCellDetails = True
     #Switch on pulse shapes for MBTS
     ToolSvc.CaloMBTSRetriever.DoMBTSDigits = True
+    ToolSvc.CaloMBTSRetriever.DoMBTSCellDetails = True
     #Also switch on LAR digits, but only for Calo streams
 
 if DetFlags.detdescr.Muon_on() :
