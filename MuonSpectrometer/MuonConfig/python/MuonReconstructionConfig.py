@@ -9,7 +9,6 @@ from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFindingCfg
 from MuonConfig.MuonTrackBuildingConfig import MuonTrackBuildingCfg
 from xAODTrackingCnv.xAODTrackingCnvConfig import MuonStandaloneTrackParticleCnvAlgCfg
 
-
 def StandaloneMuonOutputCfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     result = ComponentAccumulator()
@@ -174,10 +173,6 @@ def MuonReconstructionCfg(flags):
             result.addEventAlgo(CompFactory.TrackRecordFilter("TrackRecordFilterMuonExitLayer",
                                                               inputName="MuonExitLayer",
                                                               outputName="MuonExitLayerFilter"))
-
-        # Segment truth association decorations
-        result.addEventAlgo(CompFactory.Muon.MuonSegmentTruthAssociationAlg(
-            "MuonSegmentTruthAssociationAlg"))
 
         # Now tracks
         track_cols = ["MuonSpectrometerTracks"]
