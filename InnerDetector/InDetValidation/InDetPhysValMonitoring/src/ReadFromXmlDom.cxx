@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //
 //  ReadFromXmlDom.cxx
@@ -43,8 +43,10 @@ namespace {
 ReadFromXmlDom::ReadFromXmlDom() : m_source("unspecified file"), m_format("text/xml") {
 }
 
-ReadFromXmlDom::ReadFromXmlDom(const std::string& source) : m_format("text/xml") {
-  m_source = PathResolver::find_file(source, "DATAPATH");
+ReadFromXmlDom::ReadFromXmlDom(const std::string& source) :
+  m_source (PathResolver::find_file(source, "DATAPATH")),
+  m_format("text/xml")
+{
 }
 
 std::string

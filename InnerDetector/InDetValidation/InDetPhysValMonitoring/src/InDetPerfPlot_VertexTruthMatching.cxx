@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,9 +17,9 @@
 
 using namespace IDPVM;
 
-InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBase* pParent, const std::string& sDir, const int iDetailLevel) :
+InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBase* pParent, const std::string& sDir, const int detailLevel) :
     InDetPlotBase(pParent, sDir),
-    m_iDetailLevel(iDetailLevel),
+    m_detailLevel(detailLevel),
     m_vx_type_truth(nullptr),
     m_vx_hs_classification(nullptr),
     m_vx_nReco_vs_nTruth_inclusive(nullptr),
@@ -199,7 +199,7 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
     book(m_vx_type_truth,"vx_type_truth");
     book(m_vx_z_diff,"vx_z_diff");
     book(m_vx_z_diff_pull,"vx_z_diff_pull");
-    if (m_iDetailLevel >= 200) {
+    if (m_detailLevel >= 200) {
         book(m_vx_hs_classification,"vx_hs_classification");
         book(m_vx_nReco_vs_nTruth_inclusive,"vx_nReco_vs_nTruth_inclusive");
         book(m_vx_nReco_vs_nTruth_matched,"vx_nReco_vs_nTruth_matched");
@@ -572,7 +572,7 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex, const x
 
 void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter,const xAOD::VertexContainer& vertexContainer, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices, float weight) {
 
-    if (m_iDetailLevel >= 200) {
+    if (m_detailLevel >= 200) {
         // Fill our histograms
         // Inclusive:
         int nTruthVertices = (int)(truthHSVertices.size() + truthPUVertices.size());
@@ -1180,13 +1180,13 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
                 break;
             }
         }  // End of switch
-    }   // end of EXpert plots - (if (m_iDetailLevel >= 200))
+    }   // end of EXpert plots - (if (m_detailLevel >= 200))
 
 } // end InDetPerfPlot_VertexTruthMatching::fill(const xAOD::VertexContainer& vertexContainer, const std::vector<const xAOD::TruthVertex*>& truthHSVertices, const std::vector<const xAOD::TruthVertex*>& truthPUVertices)
 
 void InDetPerfPlot_VertexTruthMatching::finalizePlots() {
 
-    if (m_iDetailLevel >= 200) {
+    if (m_detailLevel >= 200) {
         
         fillResoHist(m_vx_hs_truth_long_reso, m_vx_hs_truth_long_reso_vs_PU);
         fillResoHist(m_vx_hs_truth_trans_reso, m_vx_hs_truth_trans_reso_vs_PU);
