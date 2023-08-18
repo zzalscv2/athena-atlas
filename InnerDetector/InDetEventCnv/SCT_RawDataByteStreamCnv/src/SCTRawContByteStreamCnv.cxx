@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTRawContByteStreamCnv.h"
@@ -48,7 +48,7 @@ StatusCode SCTRawContByteStreamCnv::createRepConst(DataObject* pDataObject, IOpa
 {
   // Get IDC for SCT Raw Data
   SCT_RDO_Container* sctRDOCont{nullptr};
-  StoreGateSvc::fromStorable(pDataObject, sctRDOCont);
+  SG::fromStorable(pDataObject, sctRDOCont);
   if (sctRDOCont == nullptr) {
     ATH_MSG_ERROR( " Can not cast to SCTRawContainer " );
     return StatusCode::FAILURE;
