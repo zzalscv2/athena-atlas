@@ -59,9 +59,13 @@ public:
   void initTowersPointers();
   unsigned int getETEstimate() const { return m_eTEstimate; }
   unsigned int getEMETEstimate() const { return m_EM_eTEstimate; }
-  unsigned int getEMETEstimateOverflow() const { return m_EM_eTEstimateOverflow; }
+  unsigned int getEMETEstimateOverflow() const {
+    return m_EM_eTEstimateOverflow;
+  }
   unsigned int getHADETEstimate() const { return m_HAD_eTEstimate; }
-  unsigned int getHADETEstimateOverflow() const { return m_HAD_eTEstimateOverflow; }
+  unsigned int getHADETEstimateOverflow() const {
+    return m_HAD_eTEstimateOverflow;
+  }
   std::vector<unsigned int> &getBDTVars() { return m_bdtVars; }
   std::vector<unsigned int> &getTowers() { return m_towers; }
   std::vector<unsigned int> &getEMMultipliedByFracParams() {
@@ -88,7 +92,6 @@ public:
   inline bool isOverflow(unsigned int number, int nBits);
   inline unsigned int BitLeftShift(unsigned int number, int by, int totalNBits);
   inline int flatTowerIndex(int eta, int phi);
-
 
 private:
   void initPointers(const std::vector<std::vector<int>> &scells,
@@ -141,25 +144,6 @@ private:
   bool m_bdtVarsComputed = false;
   eFEXBDT m_bdt;
   AthAlgTool *m_log;
-
-  const std::vector<std::vector<int>> m_locMap{
-      {0, 0, 0}, {1, 0, 0},  {2, 0, 0},  {0, 1, 0}, {1, 1, 0}, {2, 1, 0},
-      {0, 2, 0}, {1, 2, 0},  {2, 2, 0},  {0, 0, 1}, {1, 0, 1}, {2, 0, 1},
-      {3, 0, 1}, {4, 0, 1},  {5, 0, 1},  {6, 0, 1}, {7, 0, 1}, {8, 0, 1},
-      {9, 0, 1}, {10, 0, 1}, {11, 0, 1}, {0, 1, 1}, {1, 1, 1}, {2, 1, 1},
-      {3, 1, 1}, {4, 1, 1},  {5, 1, 1},  {6, 1, 1}, {7, 1, 1}, {8, 1, 1},
-      {9, 1, 1}, {10, 1, 1}, {11, 1, 1}, {0, 2, 1}, {1, 2, 1}, {2, 2, 1},
-      {3, 2, 1}, {4, 2, 1},  {5, 2, 1},  {6, 2, 1}, {7, 2, 1}, {8, 2, 1},
-      {9, 2, 1}, {10, 2, 1}, {11, 2, 1}, {0, 0, 2}, {1, 0, 2}, {2, 0, 2},
-      {3, 0, 2}, {4, 0, 2},  {5, 0, 2},  {6, 0, 2}, {7, 0, 2}, {8, 0, 2},
-      {9, 0, 2}, {10, 0, 2}, {11, 0, 2}, {0, 1, 2}, {1, 1, 2}, {2, 1, 2},
-      {3, 1, 2}, {4, 1, 2},  {5, 1, 2},  {6, 1, 2}, {7, 1, 2}, {8, 1, 2},
-      {9, 1, 2}, {10, 1, 2}, {11, 1, 2}, {0, 2, 2}, {1, 2, 2}, {2, 2, 2},
-      {3, 2, 2}, {4, 2, 2},  {5, 2, 2},  {6, 2, 2}, {7, 2, 2}, {8, 2, 2},
-      {9, 2, 2}, {10, 2, 2}, {11, 2, 2}, {0, 0, 3}, {1, 0, 3}, {2, 0, 3},
-      {0, 1, 3}, {1, 1, 3},  {2, 1, 3},  {0, 2, 3}, {1, 2, 3}, {2, 2, 3},
-      {0, 0, 4}, {1, 0, 4},  {2, 0, 4},  {0, 1, 4}, {1, 1, 4}, {2, 1, 4},
-      {0, 2, 4}, {1, 2, 4},  {2, 2, 4}};
 };
 
 } // namespace LVL1
