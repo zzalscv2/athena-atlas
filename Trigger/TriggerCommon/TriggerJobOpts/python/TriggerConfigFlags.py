@@ -347,9 +347,6 @@ def createTriggerFlags(doTriggerRecoFlags):
 def createTriggerRecoFlags():
     flags = AthConfigFlags()
 
-    # enables the correction for pileup in cell energy calibration (should it be moved to some place where other calo flags are defined?)
-    flags.addFlag('Trigger.calo.doOffsetCorrection', True )
-
     def __egamma():
         from TriggerMenuMT.HLT.Egamma.TrigEgammaConfigFlags import createTrigEgammaConfigFlags
         return createTrigEgammaConfigFlags()
