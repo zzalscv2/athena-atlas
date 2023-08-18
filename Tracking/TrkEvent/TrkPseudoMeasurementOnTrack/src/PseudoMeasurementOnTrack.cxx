@@ -26,7 +26,7 @@ move_ptr(T& src)
 }
 
 const double NaN(std::numeric_limits<double>::quiet_NaN());
-alignas(16) const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
+const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
 }
 
 Trk::PseudoMeasurementOnTrack::PseudoMeasurementOnTrack(
