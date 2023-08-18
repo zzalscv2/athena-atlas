@@ -109,6 +109,15 @@ def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
       setMagFieldFromPtree = flags.Trigger.Online.BFieldAutoConfig
    )
 
+   # Rewrite LVL1 result if L1 simulation and BS-writing is enabled
+   if flags.Trigger.doLVL1 and flags.Trigger.writeBS:
+      svc.RewriteLVL1 = True
+      if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
+         svc.L1TriggerResultRHKey = 'L1TriggerResult'
+      if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
+         svc.RoIBResultRHKey = 'RoIBResult'
+
+   # Monitoring
    svc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
 
    svc.MonTool.defineHistogram('TotalTime', path='EXPERT', type='TH1F',
@@ -182,6 +191,11 @@ def TrigServicesCfg(flags):
    acc.merge(ByteStreamReadCfg(flags))
    loop_mgr.EvtSel = acc.getService('EventSelectorByteStream')
    loop_mgr.OutputCnvSvc = acc.getService('ByteStreamCnvSvc')
+
+   # Rewrite LVL1 result if L1 simulation and BS-writing is enabled
+   if flags.Trigger.doLVL1 and flags.Trigger.writeBS:
+      from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
+      acc.merge(L1TriggerByteStreamEncoderCfg(flags))
 
    from TrigSteerMonitor.TrigSteerMonitorConfig import SchedulerMonSvcCfg
    acc.merge( SchedulerMonSvcCfg(flags) )

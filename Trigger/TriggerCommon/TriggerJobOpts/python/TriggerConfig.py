@@ -387,6 +387,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
     stmaker.PEBDecisionKeys = PEBKeys
 
     acc = ComponentAccumulator()
+
     if offline:
         # Create HLT result maker and alg
         from TrigOutputHandling.TrigOutputHandlingConfig import HLTResultMTMakerCfg
@@ -422,10 +423,24 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
         writingOutputs = ["HLT::HLTResultMT#HLTResultMT"]
         writingInputs = [("HLT::HLTResultMT", "HLTResultMT"),
                          ("xAOD::TrigDecision", "xTrigDecision")]
+
+        # Rewrite LVL1 result if LVL1 simulation is enabled
+        if flags.Trigger.doLVL1:
+            if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
+                writingOutputs += ['xAOD::TrigCompositeContainer#L1TriggerResult']
+                writingInputs += [('xAOD::TrigCompositeContainer', 'StoreGateSvc+L1TriggerResult')]
+            if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1:
+                writingOutputs += ['ROIB::RoIBResult#RoIBResult']
+                writingInputs += [('ROIB::RoIBResult', 'StoreGateSvc+RoIBResult')]
+
+            from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
+            acc.merge(L1TriggerByteStreamEncoderCfg(flags))
+
         writingAcc = ByteStreamWriteCfg(flags, type_names=writingOutputs, extra_inputs=writingInputs)
         writingAcc.addEventAlgo(hltResultMakerAlg)
         writingAcc.addEventAlgo(decmaker)
         acc.merge(writingAcc)
+
     else:
         from TrigServices.TrigServicesConfig import TrigServicesCfg
         onlineServicesAcc = TrigServicesCfg(flags)
