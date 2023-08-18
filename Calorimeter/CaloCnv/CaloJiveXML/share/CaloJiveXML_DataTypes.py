@@ -72,6 +72,7 @@ from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloMBTSRetriever
 theCaloMBTSRetriever = JiveXML__CaloMBTSRetriever (name = "CaloMBTSRetriever")
 theCaloMBTSRetriever.TileDigitsContainer = tileDigitsContainer
 theCaloMBTSRetriever.TileRawChannelContainer = tileRawChannelContainer
+theCaloMBTSRetriever.DoMBTSCellDetails = False
 theCaloMBTSRetriever.DoMBTSDigits = False
 
 from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloFCalRetriever

@@ -77,6 +77,7 @@ namespace JiveXML{
       double m_mbtsThreshold;
       bool m_mbts;
       bool m_mbtsdigit;
+      bool m_mbtsCellDetails;
   };
 }
 #endif

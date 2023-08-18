@@ -343,6 +343,7 @@ if doAtlantis:
 
     from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloMBTSRetriever
     theCaloMBTSRetriever = JiveXML__CaloMBTSRetriever (name = 'CaloMBTSRetriever')
+    theCaloMBTSRetriever.DoMBTSCellDetails = True
     theCaloMBTSRetriever.DoMBTSDigits = True
     ToolSvc += theCaloMBTSRetriever
     theEventData2XML.DataTypes += ['JiveXML::CaloMBTSRetriever/CaloMBTSRetriever']
