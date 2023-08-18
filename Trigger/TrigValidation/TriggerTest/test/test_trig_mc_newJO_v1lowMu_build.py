@@ -14,6 +14,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.args = '--CA'
+ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'minbias'
 ex.flags = ['Trigger.triggerMenuSetup="PhysicsP1_pp_lowMu_run3_v1"',
