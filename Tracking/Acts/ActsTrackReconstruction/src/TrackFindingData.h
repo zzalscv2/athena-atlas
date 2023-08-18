@@ -57,120 +57,39 @@ namespace
     return smoother.template operator()<ActsTrk::TrackStateBackend>(gctx, trajectory, entryIndex, logger);
   }
 
-  /// Borrowed from Acts Examples/Framework/include/ActsExamples/EventData/GeometryContainers.hpp
-
-  // extract the geometry identifier from a variety of types
-  struct GeometryIdGetter
-  {
-    // explicit geometry identifier are just forwarded
-    constexpr Acts::GeometryIdentifier operator()(
-        Acts::GeometryIdentifier geometryId) const
-    {
-      return geometryId;
-    }
-    // encoded geometry ids are converted back to geometry identifiers.
-    constexpr Acts::GeometryIdentifier operator()(
-        Acts::GeometryIdentifier::Value encoded) const
-    {
-      return Acts::GeometryIdentifier(encoded);
-    }
-    // support elements in map-like structures.
-    template <typename T>
-    constexpr Acts::GeometryIdentifier operator()(
-        const std::pair<Acts::GeometryIdentifier, T> &mapItem) const
-    {
-      return mapItem.first;
-    }
-    // support elements that implement `.geometryId()`.
-    template <typename T>
-    inline auto operator()(const T &thing) const
-        -> decltype(thing.geometryId(), Acts::GeometryIdentifier())
-    {
-      return thing.geometryId();
-    }
-    // support reference_wrappers around such types as well
-    template <typename T>
-    inline auto operator()(std::reference_wrapper<T> thing) const
-        -> decltype(thing.get().geometryId(), Acts::GeometryIdentifier())
-    {
-      return thing.get().geometryId();
-    }
-  };
-
-  struct CompareGeometryId
-  {
-    // indicate that comparisons between keys and full objects are allowed.
-    using is_transparent = void;
-    // compare two elements using the automatic key extraction.
-    template <typename Left, typename Right>
-    constexpr bool operator()(Left &&lhs, Right &&rhs) const
-    {
-      return GeometryIdGetter()(lhs) < GeometryIdGetter()(rhs);
-    }
-  };
-
-  /// Store elements that know their detector geometry id, e.g. simulation hits.
-  ///
-  /// @tparam T type to be stored, must be compatible with `CompareGeometryId`
-  ///
-  /// The container stores an arbitrary number of elements for any geometry
-  /// id. Elements can be retrieved via the geometry id; elements can be selected
-  /// for a specific geometry id or for a larger range, e.g. a volume or a layer
-  /// within the geometry hierachy using the helper functions below. Elements can
-  /// also be accessed by index that uniquely identifies each element regardless
-  /// of geometry id.
-  template <typename T>
-  using GeometryIdMultiset =
-      boost::container::flat_multiset<T, CompareGeometryId>;
-
-  /// The accessor for the GeometryIdMultiset container
-  ///
-  /// It wraps up a few lookup methods to be used in the Combinatorial Kalman
-  /// Filter
-  template <typename T>
-  struct GeometryIdMultisetAccessor
-  {
-    using Container = GeometryIdMultiset<T>;
-    using Key = Acts::GeometryIdentifier;
-    using Value = typename GeometryIdMultiset<T>::value_type;
-    using Iterator = typename GeometryIdMultiset<T>::const_iterator;
-
-    // pointer to the container
-    const Container *container = nullptr;
-
-    // get the range of elements with requested geoId
-    std::pair<Iterator, Iterator> range(const Acts::Surface &surface) const
-    {
-      assert(container != nullptr);
-      return container->equal_range(surface.geometryId());
-    }
-  };
-
-  /// Adapted from Acts Examples/Framework/include/ActsExamples/EventData/IndexSourceLink.hpp
-
-  /// Container of uncalibrated source links.
-  ///
-  /// Since the source links provide a `.geometryId()` accessor, they can be
-  /// stored in an ordered geometry container.
-  using UncalibSourceLinkMultiset =
-      GeometryIdMultiset<ATLASUncalibSourceLink>;
-
   /// Accessor for the above source link container
   ///
   /// It wraps up a few lookup methods to be used in the Combinatorial Kalman
   /// Filter
-  struct UncalibSourceLinkAccessor
-      : GeometryIdMultisetAccessor<ATLASUncalibSourceLink>
+  class  UncalibSourceLinkAccessor
   {
-    using BaseIterator = GeometryIdMultisetAccessor<ATLASUncalibSourceLink>::Iterator;
-    using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
+  private:
+    const std::vector<ATLASUncalibSourceLink>      *m_sourceLinks;
+    const std::vector<Acts::GeometryIdentifier>                  *m_orderedGeoIds;
+    const std::vector< std::pair< unsigned int , unsigned int> > *m_measurementRanges;
 
+  public:
+    using BaseIterator = std::vector<ATLASUncalibSourceLink>::const_iterator;
+    using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
+    UncalibSourceLinkAccessor(const std::vector<ATLASUncalibSourceLink> &source_links,
+                              const std::vector<Acts::GeometryIdentifier> &ordered_geoIds,
+                              const std::vector< std::pair< unsigned int , unsigned int> > &measurement_ranges)
+       : m_sourceLinks(&source_links),
+         m_orderedGeoIds(&ordered_geoIds),
+         m_measurementRanges(&measurement_ranges)
+    {}
     // get the range of elements with requested geoId
     std::pair<Iterator, Iterator> range(const Acts::Surface &surface) const
     {
-      assert(container != nullptr);
-      auto [begin, end] = container->equal_range(surface.geometryId());
-      return {Iterator{begin}, Iterator{end}};
+       std::vector<Acts::GeometryIdentifier>::const_iterator
+          geo_iter = std::lower_bound( m_orderedGeoIds->begin(),m_orderedGeoIds->end(), surface.geometryId());
+       if (geo_iter == m_orderedGeoIds->end() || *geo_iter != surface.geometryId()) {
+          return {Iterator{ m_sourceLinks->end()}, Iterator{ m_sourceLinks->end()}};
+       }
+
+       assert( geo_iter - m_measurementRanges.begin() < m_measurementRanges->size());
+       const std::pair<unsigned int, unsigned int> &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
+       return {Iterator{ m_sourceLinks->begin() + range.first}, Iterator{ m_sourceLinks->begin() + range.second}};
     }
   };
 
@@ -302,11 +221,14 @@ namespace
 
     TrackFindingMeasurements(size_t numMeasurements,
                              size_t maxMeasurements,
+                             const std::vector< Acts::GeometryIdentifier > &ordered_geo_ids,
                              bool doTrackStatePrinter,
                              std::vector<ATLASUncalibSourceLink::ElementsType> *elementsCollection)
-        : m_elementsCollection(elementsCollection)
+       : m_elementsCollection(elementsCollection),
+         m_orderedGeoIds(&ordered_geo_ids)
     {
-      m_sourceLinks.reserve(numMeasurements);
+      m_measurementRanges.resize(m_orderedGeoIds->size(), std::make_pair(std::numeric_limits<unsigned int>::max(),
+                                                                         std::numeric_limits<unsigned int>::max()) );
       m_elementsCollection->reserve(numMeasurements);
       if (doTrackStatePrinter)
       {
@@ -333,10 +255,9 @@ namespace
                          const ToolHandle<ActsTrk::ITrackStatePrinter> &trackStatePrinter,
                          DuplicateSeedDetector &duplicateSeedDetector)
     {
-      size_t measurementOffset = 0;
+      size_t measurementOffset = m_sourceLinksVec.size();
       if (!trackStatePrinter.empty())
       {
-        measurementOffset = m_sourceLinksVec.size();
         if (!(typeIndex < m_measurementOffset.size()))
           m_measurementOffset.resize(typeIndex + 1);
         m_measurementOffset[typeIndex] = measurementOffset;
@@ -345,11 +266,39 @@ namespace
       if (!(typeIndex < m_seedOffset.size()))
         m_seedOffset.resize(typeIndex + 1);
 
-      for (auto *measurement : clusterContainer)
-      {
-        auto sl = ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollection);
-        m_sourceLinks.insert(m_sourceLinks.end(), sl);
-        m_sourceLinksVec.push_back(sl);
+      xAOD::UncalibMeasType    last_measurement_type = xAOD::UncalibMeasType::Other;
+      xAOD::DetectorIDHashType last_id_hash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
+      unsigned int range_idx = m_measurementRanges.size();
+      for (auto *measurement : clusterContainer) {
+         auto sl = ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollection);
+         unsigned int sl_idx=m_sourceLinksVec.size();
+         m_sourceLinksVec.push_back( sl );
+         if (measurement->identifierHash() != last_id_hash || measurement->type() != last_measurement_type) {
+            std::vector<Acts::GeometryIdentifier>::const_iterator
+               geo_iter = std::lower_bound( m_orderedGeoIds->begin(),m_orderedGeoIds->end(), sl.geometryId());
+            if (geo_iter == m_orderedGeoIds->end() || *geo_iter != sl.geometryId()) {
+               std::stringstream msg;
+               msg << "Measurement with unexpected Acts geometryId: " << sl.geometryId()
+                   << " type = " << static_cast<unsigned int >(measurement->type())
+                   << " idHash=" << measurement->identifierHash();
+               throw std::runtime_error(msg.str());
+            }
+            range_idx = geo_iter - m_orderedGeoIds->begin();
+            if (m_measurementRanges[ range_idx ].first != std::numeric_limits<unsigned int>::max()) {
+               std::stringstream msg;
+               msg << "Measurement not clustered by identifierHash / geometryId. New measurement "
+                   << measurement->index() << " with geo Id " << sl.geometryId()
+                   << " type = " << static_cast<unsigned int>(measurement->type())
+                   << " idHash=" << measurement->identifierHash()
+                   << " but already recorded for this geo ID the range : " << m_measurementRanges[ range_idx ].first
+                   << " .. " << m_measurementRanges[ range_idx ].second;
+               throw std::runtime_error(msg.str());
+            }
+            m_measurementRanges[ range_idx ].first = sl_idx;
+            last_id_hash = measurement->identifierHash();
+            last_measurement_type = measurement->type();
+         }
+         m_measurementRanges[ range_idx ].second = sl_idx+1;
       }
 
       if (seeds)
@@ -361,23 +310,24 @@ namespace
       {
         trackStatePrinter->printSourceLinks(ctx, m_sourceLinksVec, typeIndex, measurementOffset);
       }
-      else
-      {
-        m_sourceLinksVec.clear(); // don't need any more
-      }
     }
 
-    const UncalibSourceLinkMultiset &sourceLinks() const { return m_sourceLinks; }
     const std::vector<ATLASUncalibSourceLink> &sourceLinkVec() const { return m_sourceLinksVec; }
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
     size_t seedOffset(size_t typeIndex) const { return typeIndex < m_seedOffset.size() ? m_seedOffset[typeIndex] : 0u; }
 
+    const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return *m_orderedGeoIds; }
+    const std::vector< std::pair< unsigned int , unsigned int> > &measurementRanges() const { return m_measurementRanges; }
+
   private:
-    UncalibSourceLinkMultiset m_sourceLinks;
     std::vector<ATLASUncalibSourceLink> m_sourceLinksVec;
     std::vector<ATLASUncalibSourceLink::ElementsType> *m_elementsCollection;
     std::vector<size_t> m_measurementOffset;
     std::vector<size_t> m_seedOffset;
+    const std::vector< Acts::GeometryIdentifier >  *m_orderedGeoIds;
+    std::vector< std::pair< unsigned int , unsigned int> > m_measurementRanges;
+
+
   };
 
 } // anonymous namespace
