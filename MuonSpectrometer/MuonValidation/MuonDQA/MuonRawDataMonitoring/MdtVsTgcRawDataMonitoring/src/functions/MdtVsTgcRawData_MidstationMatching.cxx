@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,7 +46,7 @@ MdtVsTgcRawDataValAlg::MidstationOnlyCheck(std::vector<const Muon::MuonSegment*>
   // Loose cut for PRD and Extrapolated
   const float dPhiCut_Loose    = M_PI/8;
   // Cut for Global Position  Efficiencies
-  const float dPhiCutGlobal[2] = {M_PI/24,M_PI/12};//[WireStrip]
+  const float dPhiCutGlobal[2] = {static_cast<float>(M_PI/24),static_cast<float>(M_PI/12)};//[WireStrip]
   const float dRhoCutGlobal[2] = {   0.08,    0.5};//[WireStrip]
   // Cut for Sector Efficiencies
   const float dPhiCutSector[2] = {    0.2,    0.1};//[WireStrip]
