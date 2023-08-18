@@ -317,10 +317,6 @@ def createTriggerFlags(doTriggerRecoFlags):
     # see https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag
     flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags))
 
-    # Deprecated. With the expanded auto-configuration of triggerConfig, the InputContainsConfigMetadata is redundant.
-    # To be removed some time after all clients are updated.
-    flags.addFlag('Trigger.InputContainsConfigMetadata', lambda prevFlags: prevFlags.Trigger.triggerConfig == 'INFILE')
-
     # name of the trigger menu
     flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale')
 
