@@ -52,7 +52,9 @@ StatusCode DoubleEventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) cons
   ATH_MSG_DEBUG("DoubleEventSelectorAthenaPool::next");
 
   std::lock_guard<CallMutex> lockGuard(m_callLock);
-
+  if (!eventStore()->clearStore().isSuccess()) {
+    ATH_MSG_WARNING("Cannot clear Store");
+  }
   for (const auto& tool : m_helperTools) {
     if (!tool->preNext().isSuccess()) {
         ATH_MSG_WARNING("Failed to preNext() " << tool->name());
