@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetPhysValMonitoring/InDetPhysValMonitoringTool.h"
 #include "../InDetPhysValTruthDecoratorAlg.h"
@@ -8,7 +8,6 @@
 #include "../TruthClassDecoratorAlg.h"
 #include "../TrackTruthSelectionTool.h"
 #include "../dRMatchingTool.h"
-#include "../TrackSelectionTool.h"
 #include "InDetPhysValMonitoring/HistogramDefinitionSvc.h"
 #include "../AthTruthSelectionTool.h"
 
@@ -22,7 +21,6 @@ DECLARE_COMPONENT( ParameterErrDecoratorAlg )
 DECLARE_COMPONENT( TruthClassDecoratorAlg )
 DECLARE_COMPONENT( TrackTruthSelectionTool )
 DECLARE_COMPONENT( dRMatchingTool )
-DECLARE_COMPONENT( TrackSelectionTool )
 DECLARE_COMPONENT( DummyTrackSlimmingTool )
 DECLARE_COMPONENT( AthTruthSelectionTool )
 
