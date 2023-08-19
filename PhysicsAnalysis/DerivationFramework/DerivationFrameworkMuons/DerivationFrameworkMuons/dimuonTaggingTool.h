@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_DIMUONTAGGINGTOOL_H
@@ -46,7 +46,7 @@ namespace DerivationFramework {
 
         /// The muon has to satisfy the pevious muon cuts + cuts on each isolation variable.
         bool passMuonCuts(const xAOD::Muon* mu, const float ptMin, const float absEtaMax, const std::vector<int>& types,
-                          const std::vector<std::string>& trigs, const std::map<int, double> muIsoCuts) const;
+                          const std::vector<std::string>& trigs, const std::map<int, double>& muIsoCuts) const;
 
         bool checkTrigMatch(const xAOD::Muon* mu, const std::vector<std::string>& Trigs) const;
 

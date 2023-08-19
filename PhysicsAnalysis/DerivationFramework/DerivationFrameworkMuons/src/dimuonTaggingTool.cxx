@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkMuons/dimuonTaggingTool.h"
@@ -164,7 +164,7 @@ namespace DerivationFramework {
     }
 
     bool dimuonTaggingTool::passMuonCuts(const xAOD::Muon* mu, const float ptMin, const float absEtaMax, const std::vector<int>& types,
-                                         const std::vector<std::string>& trigs, const std::map<int, double> muIsoCuts) const {
+                                         const std::vector<std::string>& trigs, const std::map<int, double>& muIsoCuts) const {
         if (!passMuonCuts(mu, ptMin, absEtaMax, types, trigs)) return false;
         /// isolation cuts. Mutiple cuts allowed and return the logical AND results.
         for (std::map<int, double>::const_iterator it = muIsoCuts.begin(); it != muIsoCuts.end(); ++it) {
