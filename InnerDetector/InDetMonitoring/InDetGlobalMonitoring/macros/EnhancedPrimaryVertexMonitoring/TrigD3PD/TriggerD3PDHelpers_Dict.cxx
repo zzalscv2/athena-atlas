@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -1034,7 +1034,10 @@ namespace ROOT {
       return  p ? ::new((::ROOT::TOperatorNewHelper*)p) map<string,float> : new map<string,float>;
    }
    static void *newArray_maplEstringcOfloatgR(Long_t nElements, void *p) {
-      return p ? ::new((::ROOT::TOperatorNewHelper*)p) map<string,float>[nElements] : new map<string,float>[nElements];
+     if (p)
+       return ::new((::ROOT::TOperatorNewHelper*)p) map<string,float>[nElements];
+     else
+       return new map<string,float>[nElements];
    }
    // Wrapper around operator delete
    static void delete_maplEstringcOfloatgR(void *p) {
@@ -1092,7 +1095,10 @@ namespace ROOT {
       return  p ? ::new((::ROOT::TOperatorNewHelper*)p) map<string,int> : new map<string,int>;
    }
    static void *newArray_maplEstringcOintgR(Long_t nElements, void *p) {
-      return p ? ::new((::ROOT::TOperatorNewHelper*)p) map<string,int>[nElements] : new map<string,int>[nElements];
+     if (p)
+       return ::new((::ROOT::TOperatorNewHelper*)p) map<string,int>[nElements];
+     else
+       return new map<string,int>[nElements];
    }
    // Wrapper around operator delete
    static void delete_maplEstringcOintgR(void *p) {
@@ -1150,7 +1156,10 @@ namespace ROOT {
       return  p ? ::new((::ROOT::TOperatorNewHelper*)p) map<string,string> : new map<string,string>;
    }
    static void *newArray_maplEstringcOstringgR(Long_t nElements, void *p) {
-      return p ? ::new((::ROOT::TOperatorNewHelper*)p) map<string,string>[nElements] : new map<string,string>[nElements];
+     if (p)
+       return ::new((::ROOT::TOperatorNewHelper*)p) map<string,string>[nElements];
+     else
+       return new map<string,string>[nElements];
    }
    // Wrapper around operator delete
    static void delete_maplEstringcOstringgR(void *p) {

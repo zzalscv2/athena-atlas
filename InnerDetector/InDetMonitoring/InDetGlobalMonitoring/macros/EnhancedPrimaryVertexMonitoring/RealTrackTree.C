@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define RealTrackTree_cxx
@@ -11,12 +11,14 @@
 #include <TMath.h>
 #include "TrigDecisionToolD3PD.h"
 
-RealTrackTree::RealTrackTree(TTree *tree, TTree* trigTree) : InDetTrackTree(tree), trigMetaDataTree(trigTree) 
+RealTrackTree::RealTrackTree(TTree *tree, TTree* trigTree)
+  : InDetTrackTree(tree),
+    triggerName(""),
+    m_mcAvailable(false),
+    m_maxEvents(-1),
+    trigMetaDataTree(trigTree),
+    m_outfileName("")
 {
-  m_maxEvents = -1;
-  m_mcAvailable = false;
-  triggerName = "";
-  m_outfileName = "";
 }
 
 void RealTrackTree::Loop()
