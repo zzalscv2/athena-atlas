@@ -26,6 +26,7 @@ def ITkTrackingSiPatternCfg(flags,
                   flags.Tracking.ActiveConfig.extension),
             TracksName=list(InputCollections)))
 
+    is_acts_ambi=False
     # Can use FastTrackFinder instead of SiSPSeededTrackFinder
     if flags.Tracking.useITkFTF:
 
@@ -54,6 +55,7 @@ def ITkTrackingSiPatternCfg(flags,
         from ActsConfig.TrackingComponentConfigurer import (
             TrackingComponentConfigurer)
         configuration_settings = TrackingComponentConfigurer(flags)
+        is_acts_ambi = TrackingComponentConfigurer(flags).doActsTrack and flags.Acts.doAmbiguityResolution
 
         # Athena Track
         if configuration_settings.doAthenaTrack:
@@ -93,12 +95,16 @@ def ITkTrackingSiPatternCfg(flags,
                 acc.merge(ActsAmbiguityResolutionCfg(flags))
 
         if configuration_settings.doActsToAthenaTrack:
+            if not flags.Acts.doAmbiguityResolution :
+                acts_athena_tracks_name = SiSPSeededTrackCollectionKey
+            else :
+                acts_athena_tracks_name = ResolvedTrackCollectionKey
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
-                                               TracksLocation=SiSPSeededTrackCollectionKey))
+                                               TracksLocation=acts_athena_tracks_name))
 
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-    if flags.Tracking.doTruth:
+    if flags.Tracking.doTruth and not is_acts_ambi:
         acc.merge(ITkTrackTruthCfg(
             flags,
             Tracks=SiSPSeededTrackCollectionKey,
@@ -120,8 +126,9 @@ def ITkTrackingSiPatternCfg(flags,
             CollectionName=SiSPSeededTrackCollectionKey,  # Input
             AliasName=ResolvedTrackCollectionKey))       # Output
 
-    else:
-
+    elif not is_acts_ambi:
+        # with Acts.doAmbiguityResolution the converter will directly produce
+        # tracks with the key ResolvedTrackCollectionKey
         from TrkConfig.TrkAmbiguitySolverConfig import (
             ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg)
         acc.merge(ITkTrkAmbiguityScoreCfg(
