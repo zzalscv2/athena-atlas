@@ -34,7 +34,7 @@
 
 void myLocal_resetTrack(Trk::Track& track )
 {
-  track.reset();
+  track.resetCaches();
 }
 
 // constructor

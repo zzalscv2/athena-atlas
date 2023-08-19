@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACK_H
@@ -33,37 +33,37 @@ using TrackStates = DataVector<const TrackStateOnSurface>;
  *
  * This class is designed to work as a common track class, usable in a
  * wide variety of applications, whilst remaining as simple as possible.
- * As such, it has to be both flexible and fast. This is achieved by
- * allowing a Track to be incomplete (and in general a Track WILL be
- * incomplete).
  *
- * A Track typically is constructed via
+ * A Track is typically constructed via
  *
- * - A DataVector of const Trk::TrackStateOnSurface. The usage of DataVector
- *   allows to constuct a track from a Datavector<DerivedFromTSOS>
- *   where DerivedFromTSOS is a type that derives from
- *   Trk::TrackStateOnSurface
+ * - Trk::TrackInfo which holds information for the fitter employed.
+ *
+ * - The relevant quality of the fit (Trk::FitQuality)
+ *
+ * - A DataVector of const Trk::TrackStateOnSurface (TrackStates)
+ *   representint the relevant measurements, parameters etc.
+ *
+ * The usage of DataVector allows to constuct a track from a
+ * Datavector<DerivedFromTSOS> where DerivedFromTSOS is a type that derives from
+ * Trk::TrackStateOnSurface.
+ *
+ * A Track will be valid if it holds a non empty DataVector and a non-nullpr
+ * FitQuality.
  *
  * This class provides convenient helpers to retrieve and cache
- * DataVectors (VIEW ELEMENTs) to
- * - const TrackParameters
- * - const Measurements
- * - const Outliers
- * from the const TrackStateOnSurface DataVector
- *
- * It also allows for retrieving/caching
- * the Track Parameter at perigee
+ * - DataVectors (VIEW ELEMENTs) const TrackParameters
+ * - DataVectors (VIEW ELEMENTs) const Measurements
+ * - DataVectors (VIEW ELEMENTs) const Outliers
+ * - The Track Parameter at perigee
  *
  * The above are implemented via lazy initialization of
- * the relevant cache employing  CxxUtils::CachedValue
+ * see CxxUtils::CachedValue
  *
- *  Furthermore a Track can contain
- * - Trk::TrackInfo
- * - Trk::FitQuality  - the fit quality of a track
- * - Trk::TrackSummary - used to cache the TrackSummary. Might be nullptr!
+ * If the TrackStates get modified the caches can be reset via the
+ * resetCaches method
  *
- * For the TrackSummary one typically needs
- * to use the TrackSummaryTool to create it.
+ *  Furthermore a Track can contain a Trk::TrackSummary (ptr so can be nullptr).
+ *  This is typically is created via the  TrackSummaryTool.
  *
  * @author edward.moyse@cern.ch
  * @author Kirill.Prokofiev@cern.ch
@@ -81,18 +81,13 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * It is not expected to be used in
    * production.
    */
-  Track();
+  Track() = default;
 
   /**
    * Full constructor
    *
    * Pass everything possible to form a track.
-   * The Track assumes ownership of the pointers.
    *
-   * <b>PLEASE NOTE!</b>
-   * if there is more than one Perigee in trackStateOnSurfaces
-   * (which there shouldn't be!!), only the first one will be
-   * returned by Trk::Track::perigeeParameters
    *
    * @param[in] info Information about who created this track, and its
    * properties.
@@ -120,74 +115,29 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   bool isValid() const;
 
   /**
-   * return fit quality pointer.  It will be nullptr if no FitQuality
-   * is assigned to the Track
+   * return a pointer to the fit quality const-overload
    */
   const FitQuality* fitQuality() const;
-
   /**
-   * set FitQuality. The Track takes ownership.
+   * return a pointer to the fit quality non-const overload
+   */
+  FitQuality* fitQuality();
+  /**
+   * set FitQuality.
    */
   void setFitQuality(std::unique_ptr<FitQuality> quality);
 
   /**
    * return a pointer to the const DataVector of const TrackStateOnSurfaces.
-   *	owned by a const Track
+   * owned by a const Track
    * The pointer will be nullptr if the track was created without
    * TrackStateOnSurfaces.
    */
   const DataVector<const TrackStateOnSurface>* trackStateOnSurfaces() const;
-
   /**
-   * Set the TrackStateOnSurfaces. The Trk::Track takes ownership
+   * Set the TrackStateOnSurfaces.
    */
   void setTrackStateOnSurfaces(DataVector<const TrackStateOnSurface>&& input);
-
-  /**
-   * return Perigee. Can be nullptr if no perigee parameters
-   * were assigned to the Track.
-   *
-   * This method performs lazy initialization and caches the result.
-   *
-   * Although the Perigee is just a type of TrackParameter, it has a
-   * dedicated method because of the specific physics interest
-   */
-  const Perigee* perigeeParameters() const;
-
-  /**
-   * Return a pointer to a vector of TrackParameters.
-   * It is created Lazily by this method	and then cached.
-   *
-   * The pointer will be nullptr if the track was created
-   * without parameters.
-   *
-   * In general, it will be defined and will have at least one entry
-   *
-   * @return Pointer to a DV of TrackParameters, or 0. The TrackParameters
-   *	 are not owned by the DV (they still belong to the track)
-   */
-  const DataVector<const TrackParameters>* trackParameters() const;
-
-  /**
-   * return a pointer to a vector of MeasurementBase (*NOT* including
-   * any that come from outliers). This DataVector is lazily created
-   * by this method and cached.
-   *
-   * @return Pointer to a DV of MeasurementBase. The MeasurementBases
-   *	 are not owned by the DV (they still belong to the track)
-   */
-  const DataVector<const MeasurementBase>* measurementsOnTrack() const;
-
-  /**
-   * return a pointer to a vector of MeasurementBase, which represent
-   * outliers (i.e. measurements  not used in the track fit). This
-   * DataVector is created lazily by this method and then cached.
-   *
-   * @return Pointer to a DV of MeasurementBase, representing outliers.
-   *	  The MeasurementBases are not owned by the DV (they still
-   *	  belong to the track)
-   */
-  const DataVector<const MeasurementBase>* outliersOnTrack() const;
 
   /**
    * Returns a const ref to info of a const tracks.
@@ -195,7 +145,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   const TrackInfo& info() const;
 
   /**
-   * returns a ref to the  info (non-const) for a non-const tracks.
+   * returns a ref to the  info. non-const overload
    */
   TrackInfo& info();
 
@@ -217,14 +167,58 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   Trk::TrackSummary* trackSummary();
 
   /**
-   * Set the track summary pointer. The Trk::Track takes ownership
+   * Set the track summary.
    */
   void setTrackSummary(std::unique_ptr<Trk::TrackSummary> input);
 
   /**
+   * return Perigee. Can be nullptr if no perigee parameters
+   * were assigned to the Track.
+   *
+   * This method performs lazy initialization and caches the result.
+   *
+   * <b>PLEASE NOTE!</b>
+   * if there is more than one Perigee in trackStateOnSurfaces
+   * (which there shouldn't be!!), only the first one will be
+   * returned by Trk::Track::perigeeParameters
+   * Although the Perigee is just a type of TrackParameter, it has a
+   * dedicated method because of the specific physics interest
+   */
+  const Perigee* perigeeParameters() const;
+
+  /**
+   * Return a pointer to a vector of TrackParameters.
+   * It is created Lazily by this method	and then cached.
+   *
+   * @return Pointer to a DV of TrackParameters, or 0. The TrackParameters
+   *	are not owned by the DV (it is a view)
+   */
+  const DataVector<const TrackParameters>* trackParameters() const;
+
+  /**
+   * return a pointer to a vector of MeasurementBase (*NOT* including
+   * any that come from outliers). This DataVector is lazily created
+   * by this method and cached.
+   *
+   * @return Pointer to a DV of MeasurementBase. The MeasurementBases
+   *	 are not owned by the DV (it is a view)
+   */
+  const DataVector<const MeasurementBase>* measurementsOnTrack() const;
+
+  /**
+   * return a pointer to a vector of MeasurementBase, which represent
+   * outliers (i.e. measurements  not used in the track fit). This
+   * DataVector is created lazily by this method and then cached.
+   *
+   * @return Pointer to a DV of MeasurementBase, representing outliers.
+   *	  The MeasurementBases are not owned by the DV (it is a view)
+   */
+  const DataVector<const MeasurementBase>* outliersOnTrack() const;
+
+  /**
    * reset all caches
    */
-  void reset();
+  void resetCaches();
 
  protected:
   friend class ::TrackCnv_p1;
@@ -266,7 +260,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * of m_cachedParameterVector
    */
   CxxUtils::CachedValue<DataVector<const TrackParameters>>
-      m_cachedParameterVector;
+      m_cachedParameterVector{};
 
   /**
    * A vector of MeasurementBase: these objects represent the "hits" on
@@ -277,7 +271,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * m_cachedMeasurementVector
    */
   CxxUtils::CachedValue<DataVector<const MeasurementBase>>
-      m_cachedMeasurementVector;
+      m_cachedMeasurementVector{};
 
   /**
    * These objects represent the "outliers" on the track.
@@ -286,7 +280,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * m_cachedRioVector
    */
   CxxUtils::CachedValue<DataVector<const MeasurementBase>>
-      m_cachedOutlierVector;
+      m_cachedOutlierVector{};
 
   /**
    * A pointer to the Track's Perigee parameters.
@@ -294,24 +288,23 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * This will be null if the track does not contain a Perigee
    * or MeasuredPerigee parameter
    */
-  CxxUtils::CachedValue<const Perigee*> m_perigeeParameters;
+  CxxUtils::CachedValue<const Perigee*> m_perigeeParameters{};
 
   /**
-   * A pointer to the Track's FitQuality. This is guaranteed to
-   * exist and will never be null.
+   * A pointer to the Track's FitQuality.
    */
-  std::unique_ptr<const FitQuality> m_fitQuality{nullptr};
+  std::unique_ptr<FitQuality> m_fitQuality{nullptr};
 
   /**
    * Datamember to cache the TrackSummary
    */
-  std::unique_ptr<Trk::TrackSummary> m_trackSummary;
+  std::unique_ptr<Trk::TrackSummary> m_trackSummary{nullptr};
 
   /**
-   * This is aclass which stores the identity of where the track
+   * This is a class which stores the identity of where the track
    * was created, fitted, which properties the reconstruction had
    */
-  Trk::TrackInfo m_trackInfo;
+  Trk::TrackInfo m_trackInfo{};
 
  private:
   /**
