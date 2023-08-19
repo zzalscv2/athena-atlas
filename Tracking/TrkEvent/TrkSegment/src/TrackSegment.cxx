@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 
 namespace {
 const double NaN(std::numeric_limits<double>::quiet_NaN());
-alignas(16) const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
+const Amg::Vector3D INVALID_VECTOR3D(NaN, NaN, NaN);
 }
 
 // default constructor
