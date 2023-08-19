@@ -100,6 +100,8 @@ def ZdcRecRun2Cfg(flags):
                                          'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamRawDataV2())
+    acc.addEventAlgo(CompFactory.ZdcRecV3Decode())
+
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,2,config,doCalib,doTimeCalib,doTrigEff))
 
     acc.addEventAlgo(CompFactory.ZdcRecV3("ZdcRecV3",ZdcAnalysisTool=anaTool))
@@ -125,14 +127,14 @@ def ZdcRecRun3Cfg(flags):
                                          'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
-    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
-    trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))
-    
-    zdcTools = [] # expand list as needed
-    zdcTools += [anaTool] 
+    acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
 
+    anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
+    #trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
+    zdcTools = [] # expand list as needed
+    zdcTools += [anaTool] # add trigTool after deocration migration
     
-    zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools, TrigValid = trigTool)
+    zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
     acc.addEventAlgo(zdcAlg, primary=True)
 
     return acc
@@ -198,7 +200,13 @@ if __name__ == '__main__':
     # run = flags.GeoModel.Run
     # The EDM Version should be auto configured, but is not working at the moment, so is set by hand
 
-    year = 22 # unfortunately not yet able to autoconfigure, since project name not available.
+    flags.Output.AODFileName="calibAOD.pool.root"
+    flags.Output.doWriteAOD=True
+
+    flags.fillFromArgs()
+
+    pn = flags.Input.ProjectName
+    year = int(pn.split('_')[0].split('data')[1])
 
     if (year < 20):
         flags.Trigger.EDMVersion=2
@@ -206,10 +214,6 @@ if __name__ == '__main__':
     elif (year > 20):
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
-
-    flags.Output.AODFileName="calibAOD.pool.root"
-    flags.Output.doWriteAOD=True
-    flags.fillFromArgs()
 
     flags.lock()
 

@@ -274,6 +274,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       // the minimum energy to send to topo (not eta dependent yet, but keep inside loop as it will be eventually?)
       unsigned int ptTauMinToTopoCounts = thr_eTAU.ptMinToTopoCounts();
 
+      unsigned int ptTauMinToTopoInEfexCounts = TrigConf::energyInCounts(thr_eTAU.ptMinToTopoMeV(), m_eFexStep);
+
       // Get Et of eFEX tau object in internal units (25 MeV)
       unsigned int eTauTobEt = m_eFEXtauAlgoTool->getEt();
       unsigned int eTauBDTTobEt = m_eFEXtauBDTAlgoTool->getEt();
@@ -331,7 +333,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       threshBDT.push_back(bdt_loose);
       threshBDT.push_back(bdt_medium);
       threshBDT.push_back(bdt_tight);
-      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, maxEtCountsTau, maxEtCountsTau);
+      m_eFEXtauBDTAlgoTool->setThresholds(threshRHad, threshBDT, ptTauMinToTopoInEfexCounts, maxEtCountsTau);
       // Re-compute after setting thresholds. 
       // Threshold bits in the BDT algorithm's implementation are computed inside the algorithm class
       m_eFEXtauBDTAlgoTool->compute();

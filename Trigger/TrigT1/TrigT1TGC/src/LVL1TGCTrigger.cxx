@@ -303,7 +303,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
           if (m_OutputTgcRDO.value()) recordRdoHPT(sector, tgcrdo);
 
           // EIFI trigger bits are checked if Endcap
-          if(sector->getRegionType()==Endcap && sector->getSL()) {
+          if(sector->getRegionType() == TGCRegionType::ENDCAP && sector->getSL()) {
             if((sector->hasHit())){
               // Pointers to store EIFI trigger bits for Endcap SL
               const TGCInnerTrackletSlot* innerTrackletSlots[TGCInnerTrackletSlotHolder::NUMBER_OF_SLOTS_PER_TRIGGER_SECTOR]
@@ -331,7 +331,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
 	  std::shared_ptr<LVL1TGC::TGCNSW> nsw = m_system->getNSW();
 	  int module = sector->getModuleId();
 	  int sectorId;
-          if(sector->getRegionType()==Endcap){
+          if(sector->getRegionType() == TGCRegionType::ENDCAP) {
             LVL1MUONIF::Lvl1MuEndcapSectorLogicDataPhase1 sldata;
             tgcsystem = LVL1MUONIF::Lvl1MuCTPIInputPhase1::idEndcapSystem();
             if(trackSelectorOut != 0) FillSectorLogicData(&sldata,trackSelectorOut.get());
@@ -352,7 +352,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
 	      }
 	    }
             muctpiinputPhase1->setSectorLogicData(sldata,tgcsystem,subsystem,sectoraddr_endcap++,muctpiBcId);
-          } else if(sector->getRegionType()==Forward){
+          } else if(sector->getRegionType() == TGCRegionType::FORWARD) {
             LVL1MUONIF::Lvl1MuForwardSectorLogicDataPhase1 sldata;
             tgcsystem = LVL1MUONIF::Lvl1MuCTPIInputPhase1::idForwardSystem();
             if(trackSelectorOut != 0) FillSectorLogicData(&sldata,trackSelectorOut.get());
@@ -479,7 +479,7 @@ void  LVL1TGCTrigger::fillTGCEvent(const std::map<Identifier, int>& tgcDigitIDs,
 
           TGCZDirection zdire = (subsystemNumber==1)? kZ_FORWARD : kZ_BACKWARD;
           TGCReadoutIndex index(zdire,octantNumber,moduleNumber,rNumber,layerNumber);
-          TGCSignalType signal = (wireOrStrip==1)? Strip : WireGroup;
+          TGCSignalType signal = (wireOrStrip==1)? STRIP : WIRE;
           event.NewASDOut(index,
                           signal,
                           channelNumber,
@@ -547,7 +547,7 @@ void LVL1TGCTrigger::recordRdoSLB(TGCSector * sector,
     // SLBID
     bool isAside, isEndcap; int phi, moduleType, id, phiEIFI;
     isAside = (sector->getSideId()==0  ? 1 : 0);
-    isEndcap = (sector->getRegionType()==Endcap ? 1 : 0);
+    isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP ? 1 : 0);
     int module = sector->getModuleId();
     // OnlineID moduleNumber
     //       <---- phi ----
@@ -686,7 +686,7 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
     // HPTID
     bool isAside, isEndcap, isStrip; int phi;
     isAside = (sector->getSideId()==0);
-    isEndcap = (sector->getRegionType()==Endcap);
+    isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
     int module = sector->getModuleId();
     //  sector Id = 0..47 (Endcap) 0..23 (forward)
     int sectorId;
@@ -799,7 +799,7 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
 				std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
 {
     bool isAside  = sector->getSideId()==0;
-    bool isEndcap = (sector->getRegionType()==Endcap);
+    bool isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
     if (!isEndcap) return;
     
     //  sector Id = 0..47, phi = 1..48
@@ -944,7 +944,7 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
     
   // trigger info
   // bool cand3plus = 0;
-  bool isEndcap = (sector->getRegionType() == Endcap);
+  bool isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
   bool isAside = (sector->getSideId()==0);
   bool veto=0;
   int phi=0, index=0, threshold=0, roi=0;

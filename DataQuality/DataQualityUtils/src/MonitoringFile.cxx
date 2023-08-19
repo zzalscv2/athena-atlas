@@ -20,7 +20,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 #include <TObject.h>
 #include <TSystem.h>
 
@@ -151,12 +151,12 @@ bool MonitoringFile::setHistogramRegEx(const std::string& re){
     std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
     return false;
   }
-  boost::regex *reNew=0;
+  std::regex *reNew=0;
   try{
-    reNew=new boost::regex(re);
+    reNew=new std::regex(re);
     // this should fail if there are any problems with re!
     std::string test("Test String");
-    boost::regex_match(test,*reNew);
+    std::regex_match(test,*reNew);
   }catch(std::exception& e){
     std::cerr<<__PRETTY_FUNCTION__<<"Invalid RegEx string \""<<re<<"\". Old RegEx \""<<m_mergeMatchHistoREString<<"\" is not changed"<<std::endl;
     std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
@@ -177,10 +177,10 @@ bool MonitoringFile::setDirectoryRegEx(const std::string& re){
     std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
     return false;
   }
-  boost::regex *reNew=0;
+  std::regex *reNew=0;
   try{
-    reNew=new boost::regex(re);
-    boost::regex_match("Test string",*reNew);
+    reNew=new std::regex(re);
+    std::regex_match("Test string",*reNew);
   }catch(std::exception& e){
     std::cerr<<__PRETTY_FUNCTION__<<"Invalid RegEx string \""<<re<<"\". Old RegEx \""<<m_mergeMatchDirREString<<"\" is not changed"<<std::endl;
     std::cerr<<__PRETTY_FUNCTION__<<"See http://www.boost.org/doc/libs/1_42_0/libs/regex/doc/html/boost_regex/syntax.html for allowed regular expression syntax"<<std::endl;
@@ -469,7 +469,7 @@ mergeDirectory( TDirectory* outputDir, const std::vector<TFile*>& inputFiles, bo
    //std::cout << outputDirName << std::endl;
    bool metadataInDir = false;
    bool targetDir=!m_useRE;
-   if(m_useRE && (boost::regex_search(outputDirName,*m_mergeMatchDirRE))){
+   if(m_useRE && (std::regex_search(outputDirName,*m_mergeMatchDirRE))){
      //std::cout<<"Found target dir \""<<outputDirName<<"\""<<std::endl;
      targetDir=true;
    }
@@ -559,7 +559,7 @@ mergeDirectory( TDirectory* outputDir, const std::vector<TFile*>& inputFiles, bo
             ) {
      //skip cases where regexp doesn't match object name, all directories are processed by default
      if(m_useRE){
-       if(!boost::regex_search(keyName,*m_mergeMatchHistoRE)){
+       if(!std::regex_search(keyName,*m_mergeMatchHistoRE)){
          //std::cerr<<" skipping   keyName=\""<<outputDirName+'/'+keyName<<"\""<<std::endl;
          continue; // not the histogram we want
        }
@@ -1499,8 +1499,8 @@ clearData()
   delete m_mergeMatchDirRE;
   m_mergeMatchHistoREString=".*";
   m_mergeMatchDirREString=".*";
-  m_mergeMatchHistoRE=new boost::regex(m_mergeMatchHistoREString);
-  m_mergeMatchDirRE=new boost::regex(m_mergeMatchDirREString);
+  m_mergeMatchHistoRE=new std::regex(m_mergeMatchHistoREString);
+  m_mergeMatchDirRE=new std::regex(m_mergeMatchDirREString);
   m_useRE=false;
 }
 

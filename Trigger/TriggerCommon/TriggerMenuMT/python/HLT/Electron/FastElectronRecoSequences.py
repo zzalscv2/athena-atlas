@@ -26,7 +26,7 @@ def fastElectronRecoSequence(flags, name, RoIs, variant=''):
     dataObjects = [( 'xAOD::TrigEMClusterContainer' , 'StoreGateSvc+%s' % CaloMenuDefs.L2CaloClusters ),
                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+%s' % trackParticlesName ),
                    ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
-                   ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
+                   ]
 
     fastElectronVDV.DataObjects = dataObjects                                 
     acc.addEventAlgo(fastElectronVDV)

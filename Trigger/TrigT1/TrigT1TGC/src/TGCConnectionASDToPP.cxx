@@ -42,7 +42,7 @@ void TGCConnectionASDToPP::dump() const
 #ifdef TGCCOUT
   int i;
   std::cout << "TGCConnectionASDToPP::dump "<<m_totalNumberOfChannel<< std::endl;
-  std::cout << "layerId chamberID line(WireGroup)  PPID ConnectorID" << std::endl;
+  std::cout << "layerId chamberID line(WIRE)  PPID ConnectorID" << std::endl;
   for( i=0; i<m_totalNumberOfChannel; i+=1)
     std::cout<<m_layerId[i]<<" "<<m_chamberId[i]<<" "<<m_lineId[i]<<" "<<m_PPId[i]<<" "<<m_connectorId[i]<<" "<<m_channelId[i]<< std::endl;
 #endif
@@ -76,14 +76,14 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
       int nChannel;
       line >> PPType >> nChannel;
       // find a entry matches in region and Patch Panel m_type.
-      if(((region==Endcap)&&
-          (  (PPType=="EWT"&&m_type==WTPP)||(PPType=="EWD"&&m_type==WDPP)
-           ||(PPType=="EST"&&m_type==STPP)||(PPType=="ESD"&&m_type==SDPP)
-           ||(PPType=="EWI"&&m_type==WIPP)||(PPType=="ESI"&&m_type==SIPP) ) )||
-         ((region==Forward)&&
-          (  (PPType=="FWT"&&m_type==WTPP)||(PPType=="FWD"&&m_type==WDPP)
-           ||(PPType=="FST"&&m_type==STPP)||(PPType=="FSD"&&m_type==SDPP)
-           ||(PPType=="FWI"&&m_type==WIPP)||(PPType=="FSI"&&m_type==SIPP) ) )    ){
+      if(((region == TGCRegionType::ENDCAP) &&
+          (  (PPType=="EWT"&&m_type==TGCSector::WTPP)||(PPType=="EWD"&&m_type==TGCSector::WDPP)
+           ||(PPType=="EST"&&m_type==TGCSector::STPP)||(PPType=="ESD"&&m_type==TGCSector::SDPP)
+           ||(PPType=="EWI"&&m_type==TGCSector::WIPP)||(PPType=="ESI"&&m_type==TGCSector::SIPP) ) )||
+         ((region == TGCRegionType::FORWARD) &&
+          (  (PPType=="FWT"&&m_type==TGCSector::WTPP)||(PPType=="FWD"&&m_type==TGCSector::WDPP)
+           ||(PPType=="FST"&&m_type==TGCSector::STPP)||(PPType=="FSD"&&m_type==TGCSector::SDPP)
+           ||(PPType=="FWI"&&m_type==TGCSector::WIPP)||(PPType=="FSI"&&m_type==TGCSector::SIPP) ) )    ){
         m_totalNumberOfChannel = nChannel;
 
         m_layerId = new int [m_totalNumberOfChannel]; 
@@ -97,7 +97,7 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
         //******************************************************
         // ChamberID in kmura's def. start from 1 in T1 station.
         int chamberIdBase=0;
-        if((region==Endcap)&&(PPType=="EWT"||PPType=="EST")) chamberIdBase=1;
+        if (region == TGCRegionType::ENDCAP && (PPType=="EWT"||PPType=="EST")) chamberIdBase=1;
         //******************************************************
         int lineIdBase=0;
 	// initialize array
@@ -131,7 +131,7 @@ bool TGCConnectionASDToPP::readData(TGCRegionType region, int type,
           //******************************************************
           // hitID assign for each Module in kmura's def., 
           // not for each chamber like in hasuko's def. 
-          if( (m_type==WTPP)||(m_type==WDPP)||(m_type==WIPP) ){
+          if( (m_type==TGCSector::WTPP)||(m_type==TGCSector::WDPP)||(m_type==TGCSector::WIPP) ){
             if((i!=0)&&(m_chamberId[i]!=m_chamberId[i-1])){
               if(m_layerId[i]==m_layerId[i-1])
                 lineIdBase=m_lineId[i-1]+1;

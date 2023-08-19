@@ -143,19 +143,16 @@ def athenaCfg():
    # To allow running from MC
    flags.Common.isOnline = lambda f: not f.Input.isMC
 
-   # Output configuration - currently testing offline workflow
-   flags.Trigger.writeBS = False
-   flags.Output.doWriteRDO = True
-   flags.Output.RDOFileName = 'RDO_TRIG.pool.root'
-
-   # TODO: These should be set via command line:
-   flags.Exec.MaxEvents = 50
-   flags.Concurrency.NumThreads = 1
-   flags.Trigger.doLVL1 = True # run L1 sim also on data
-
    # Fill flags from command line
    parser = flags.getArgumentParser()
    flags.fillFromArgs(parser=parser)
+
+   if flags.Trigger.writeBS:
+      flags.Output.doWriteBS = True
+   else:  # RDO writing is default in athena
+      flags.Output.doWriteRDO = True
+      if not flags.Output.RDOFileName:
+         flags.Output.RDOFileName = 'RDO_TRIG.pool.root'
 
    # Configure main services
    _allflags = flags.clone()   # copy including Concurrency flags

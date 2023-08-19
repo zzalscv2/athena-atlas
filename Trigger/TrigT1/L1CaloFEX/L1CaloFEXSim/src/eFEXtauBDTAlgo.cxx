@@ -71,6 +71,7 @@ std::unique_ptr<LVL1::eFEXtauTOB> LVL1::eFEXtauBDTAlgo::getTauTOB() const {
   tob->setSeedUnD(0);
   tob->setBDTScore(m_bdtAlgoImpl->getBDTScore());
   tob->setIsBDTAlgo(1);
+  setSCellEncoder(tob.get());
   return tob;
 }
 
@@ -149,10 +150,10 @@ unsigned int LVL1::eFEXtauBDTAlgo::getBDTCondition() const {
 
 bool LVL1::eFEXtauBDTAlgo::isBDT() const { return true; }
 
-void LVL1::eFEXtauBDTAlgo::setThresholds(const std::vector<unsigned int>& rHadThreshold,
-					 const std::vector<unsigned int>& bdtThreshold,
-					 unsigned int etThreshold,
-					 unsigned int etThresholdForRHad) {
+void LVL1::eFEXtauBDTAlgo::setThresholds(
+    const std::vector<unsigned int> &rHadThreshold,
+    const std::vector<unsigned int> &bdtThreshold, unsigned int etThreshold,
+    unsigned int etThresholdForRHad) {
   for (int i = 0; i < 3; i++) {
     m_hadFracMultipliers[i] = rHadThreshold[i];
     m_bdtThresholds[i] = bdtThreshold[i];

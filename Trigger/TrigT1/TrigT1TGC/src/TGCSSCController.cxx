@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSSCController.h"
@@ -12,8 +12,8 @@ namespace LVL1TGCTrigger {
   
 //constructor 
 TGCSSCController::TGCSSCController(const TGCArguments* tgcargs, const TGCSectorLogic* sL)
-  :m_sectorLogic(sL), m_NumberOfWireHighPtBoard(0),
-   m_region(FORWARD), m_tgcArgs(tgcargs)
+: m_sectorLogic(sL), m_NumberOfWireHighPtBoard(0),
+  m_region(TGCRegionType::FORWARD), m_tgcArgs(tgcargs)
 { 
 } 
 
@@ -87,11 +87,11 @@ TGCSSCControllerOut* TGCSSCController::distribute(TGCHighPtChipOut* wire[], TGCH
 
 int TGCSSCController::getSSCId(int nHPB, int chip, int block) const
 {
-    if(m_region==Forward){
-        return (block+chip*MaxNumberOfHPBData);
-    }else{
-        return (block+chip*MaxNumberOfHPBData+nHPB*MaxNumberOfHPBData*NumberOfChip-5);
-    }
+  if (m_region == TGCRegionType::FORWARD) {
+    return (block+chip*MaxNumberOfHPBData);
+  } else {
+    return (block+chip*MaxNumberOfHPBData+nHPB*MaxNumberOfHPBData*NumberOfChip-5);
+  }
 }
 
 int TGCSSCController::convertPhi(int /* chip */, int block, int pos) const
@@ -101,7 +101,7 @@ int TGCSSCController::convertPhi(int /* chip */, int block, int pos) const
 
 int TGCSSCController::getChamberNo(int chip, int block) const
 {
-  if(m_region==Endcap){
+  if (m_region == TGCRegionType::ENDCAP) {
     int chamber = ((block+chip*MaxNumberOfHPBData)/2);
     if(chamber==5) return (chamber-1);
     else if(chamber==4) return 0;

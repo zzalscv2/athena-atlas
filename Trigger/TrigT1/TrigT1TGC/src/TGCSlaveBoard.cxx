@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSlaveBoard.h"
@@ -17,7 +17,7 @@ TGCSlaveBoard::TGCSlaveBoard()
  : m_lengthOfCoincidenceOut(0),m_coincidenceOut(0), 
    m_slaveBoardOut(0), 
    m_id(0), m_bid(-1),m_idHighPtBoard(0),
-   m_type(0), m_region(FORWARD),
+   m_type(0), m_region(TGCRegionType::FORWARD),
    m_patchPanel(0), m_patchPanelOut(0)
 {
 }
@@ -139,11 +139,11 @@ void TGCSlaveBoard::showResult() const
       if(std::as_const(m_patchPanelOut)->getHitPattern(i)!=0){
         std::cout<<"#SB I: BID= "<<m_bid;
         if(m_patchPanelOut->getOrigin()!=0){
-          std::cout << " Typ= " <<m_patchPanelOut->getOrigin()->getType();
-          std::cout << " Rgn= " <<m_patchPanelOut->getOrigin()->getRegion();
-          std::cout << " PPID= "<<m_patchPanelOut->getOrigin()->getId()<<" ";
-          std::cout << " port= "<<i;
-          std::cout << "" <<m_id;
+          std::cout << " Typ= " << m_patchPanelOut->getOrigin()->getType();
+          std::cout << " Rgn= " << (m_patchPanelOut->getOrigin()->getRegion() == TGCRegionType::FORWARD ? "FORWARD" : "ENDCAP");
+          std::cout << " PPID= "<< m_patchPanelOut->getOrigin()->getId()<<" ";
+          std::cout << " port= "<< i;
+          std::cout << "" << m_id;
         }
         std::cout << ":";
         std::as_const(m_patchPanelOut)->getHitPattern(i)->print();
@@ -153,7 +153,7 @@ void TGCSlaveBoard::showResult() const
   if(m_slaveBoardOut!=0){
     if(m_coincidenceOut!=0){
       std::cout << "#SB O: BID= " << m_bid;
-      std::cout << " Rgn= " << m_region;
+      std::cout << " Rgn= " << (m_region == TGCRegionType::FORWARD ? "FORWARD" : "ENDCAP");
       std::cout << " Typ= " << getTypeName(m_type);
       std::cout << " ID= "  << m_id << ":";
       for( i=0; i<m_slaveBoardOut->getNumberOfData(); i++){

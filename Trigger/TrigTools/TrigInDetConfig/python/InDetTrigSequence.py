@@ -85,6 +85,47 @@ class InDetTrigSequence:
       acc.addEventAlgo(ViewDataVerifier)
       return acc
 
+    
+  def viewDataVerifierTRT(self, viewVerifier='IDViewDataVerifierTRT') -> ComponentAccumulator:
+    
+    with ConfigurableCABehavior():
+      acc = ComponentAccumulator()
+    
+      ViewDataVerifier = \
+        CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
+                                               DataObjects = [
+                                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  ),
+                                                 
+                                               ]
+                                              )
+      
+      if self.__flags.Input.Format == Format.BS:
+        ViewDataVerifier.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
+      else:        
+        ViewDataVerifier.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+
+      acc.addEventAlgo(ViewDataVerifier)
+      return acc
+
+  def viewDataVerifierAfterPattern(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:
+    
+    with ConfigurableCABehavior():
+      
+      acc = ComponentAccumulator()
+      
+      if self.__flags.Input.Format == Format.BS:
+        acc = ComponentAccumulator()
+        ViewDataVerifier = \
+          CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
+                                                 DataObjects = [
+                                                   ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
+                                                   ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+                                                 ]
+                                                )
+      
+        acc.addEventAlgo(ViewDataVerifier)
+      return acc
+
   def dataPreparation(self) -> ComponentAccumulator:
     
     signature = self.__flags.Tracking.ActiveConfig.input_name
@@ -118,6 +159,8 @@ class InDetTrigSequence:
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
 
+      acc.merge(self.viewDataVerifierTRT())
+      
       if self.__flags.Input.Format == Format.BS:
         from TrigInDetConfig.TrigInDetConfig import TRTDataProviderCfg
         acc.merge(TRTDataProviderCfg(self.__flags, self.__rois, self.__signature))
@@ -180,6 +223,9 @@ class InDetTrigSequence:
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
 
+      if self.__inView:
+        acc.merge(self.viewDataVerifierAfterPattern())
+                
       from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg
       acc.merge(
         TrkAmbiguityScore_Trig_Cfg(

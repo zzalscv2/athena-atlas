@@ -48,7 +48,7 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
   m_octantId = (idIn / NumberOfModule) % NumberOfOctant;
   m_moduleId = idIn % NumberOfModule;
 
-  if (m_region==ENDCAP) {
+  if (m_region==TGCRegionType::ENDCAP) {
     m_sectorId  = m_moduleId%3 + 2*(m_moduleId/3);
     m_sectorId += 6*m_octantId;
   } else {
@@ -64,7 +64,7 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
   m_matrix.setSideId(m_sideId);
   m_mapEIFI = db->getEIFICoincidenceMap(m_sideId);
 
-  m_useTileMu = tgcArgs()->TILE_MU() && (m_region==ENDCAP);
+  m_useTileMu = tgcArgs()->TILE_MU() && (m_region==TGCRegionType::ENDCAP);
 
   m_matrix.setCoincidenceLUT(db->getBigWheelCoincidenceLUT());
   m_tileMuLUT = db->getTileMuCoincidenceLUT();
@@ -85,7 +85,7 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
     m_innerTrackletSlots[iSlot] = 0;
   }
 
-  m_useEIFI  = tgcArgs()->USE_INNER() && (m_region==ENDCAP);
+  m_useEIFI  = tgcArgs()->USE_INNER() && (m_region==TGCRegionType::ENDCAP);
   if(m_mapEIFI == 0) m_useEIFI = false;
   m_useGoodMF = (m_mapGoodMF != nullptr);
   if(m_mapNSW == 0) tgcArgs()->set_USE_NSW(false);
@@ -238,7 +238,7 @@ void TGCSectorLogic::deleteHPBOut()
 void TGCSectorLogic::showResult()
 {
   std::cout<<"#SL O"<<" BID:"<<m_bid
-	   <<" region:"<<((m_region==FORWARD) ? "FWD" : "END")
+	   <<" region:"<<((m_region == TGCRegionType::FORWARD) ? "FWD" : "END")
 	   <<" SLid:"<<m_id<<" ";
 }
 
@@ -335,7 +335,7 @@ void TGCSectorLogic::doInnerCoincidence(int SSCId, TGCRPhiCoincidenceOut* coinci
   int pt = coincidenceOut->getpT();
   if (pt==0) return;
 
-  if(SSCId<=4 && m_region==ENDCAP){  //3 detectors are used to inner coincidnece in SSC#0~4 in Endcap;  
+  if(SSCId <= 4 && m_region == TGCRegionType::ENDCAP){  //3 detectors are used to inner coincidnece in SSC#0~4 in Endcap;  
 
       // WHICH INNER COINCIDENCE
       // select a inner station detector which is used in inner coincidence algorithm.
@@ -363,7 +363,7 @@ void TGCSectorLogic::doInnerCoincidence(int SSCId, TGCRPhiCoincidenceOut* coinci
   } else {
     //  NSW or FI are used to inner coincidnece in SSC#5~18 in Endcap and Forward region 
       int pos = 4*coincidenceOut->getR() +  coincidenceOut->getPhi();
-      bool validFI = (m_mapEIFI->getFlagROI(pos, coincidenceOut->getIdSSC(), m_sectorId) == 1) && m_region==ENDCAP;
+      bool validFI = (m_mapEIFI->getFlagROI(pos, coincidenceOut->getIdSSC(), m_sectorId) == 1) && m_region == TGCRegionType::ENDCAP;
 
       if(tgcArgs()->USE_NSW() && m_nswSide){
 	if(tgcArgs()->FORCE_NSW_COIN()){

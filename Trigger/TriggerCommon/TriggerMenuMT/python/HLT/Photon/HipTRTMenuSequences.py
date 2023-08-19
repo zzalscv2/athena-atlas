@@ -36,13 +36,6 @@ def TRTHitGeneratorSequence(flags):
     ViewVerify = CfgMgr.AthViews__ViewDataVerifier(ViewVerifyName)
     ViewVerify.DataObjects = [('TrigRoiDescriptorCollection' , 'StoreGateSvc+TRTHitGenerator'),
                              ]
-    if flags.Input.isMC:
-        ViewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-    else:
-        ViewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
-
-    ViewVerify.DataObjects += [( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
-
     from AthenaCommon.Logging import logging
     log = logging.getLogger(__name__)
     from TrigInDetConfig.utils import getFlagsForActiveConfig

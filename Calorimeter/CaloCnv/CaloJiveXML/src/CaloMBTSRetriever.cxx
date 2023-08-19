@@ -37,6 +37,7 @@ namespace JiveXML {
     declareProperty("MBTSThreshold", m_mbtsThreshold = 0.05);
     declareProperty("RetrieveMBTS" , m_mbts = true);
     declareProperty("DoMBTSDigits",  m_mbtsdigit=false);
+    declareProperty("DoMBTSCellDetails",  m_mbtsCellDetails = false);
 
     // TileDigitsContainer names: {"TileDigitsCnt","TileDigitsFlt"};
     declareProperty("TileDigitsContainer" ,m_sgKeyTileDigits = "",
@@ -46,7 +47,7 @@ namespace JiveXML {
     //                                 "TileRawChannelFitCool","TileRawChannelFit",
     //                                 "TileRawChannelCnt","TileRawChannelFlt"};
     declareProperty("TileRawChannelContainer" ,m_sgKeyTileRawChannel = "",
-        "Input collection to retrieve Tile raw channels, used when doTileCellDetails is True.");
+        "Input collection to retrieve Tile raw channels, used when DoMBTSCellDetails is True.");
   }
 
   /**
@@ -67,7 +68,7 @@ namespace JiveXML {
 
     ATH_CHECK( m_sgKeyTileDigits.initialize(m_mbtsdigit) );
 
-    ATH_CHECK( m_sgKeyTileRawChannel.initialize() );
+    ATH_CHECK( m_sgKeyTileRawChannel.initialize(m_mbtsCellDetails) );
 
     return StatusCode::SUCCESS;
   }
@@ -141,14 +142,17 @@ namespace JiveXML {
       ATH_MSG_ERROR( "in getMBTSData(), Could not retrieve TileInfo" );
     }
 
-    SG::ReadHandle<TileRawChannelContainer> RawChannelCnt(m_sgKeyTileRawChannel);
-    if (!RawChannelCnt.isValid()){
-        ATH_MSG_WARNING( "Could not retrieve TileRawChannel "  );
-    }
-    else{
-        RChUnit = RawChannelCnt->get_unit();
-        offlineRch = (RChUnit<TileRawChannelUnit::OnlineADCcounts &&
-                      RawChannelCnt->get_type() != TileFragHash::OptFilterDsp);
+    SG::ReadHandle<TileRawChannelContainer> RawChannelCnt;
+    if (m_mbtsCellDetails) {
+      RawChannelCnt = SG::makeHandle(m_sgKeyTileRawChannel);
+      if (!RawChannelCnt.isValid()){
+          ATH_MSG_WARNING( "Could not retrieve TileRawChannel "  );
+      }
+      else{
+          RChUnit = RawChannelCnt->get_unit();
+          offlineRch = (RChUnit<TileRawChannelUnit::OnlineADCcounts &&
+                        RawChannelCnt->get_type() != TileFragHash::OptFilterDsp);
+      }
     }
 
     SG::ReadHandle<TileDigitsContainer> tileDigits;
@@ -177,7 +181,7 @@ namespace JiveXML {
 
     //Loop over TileRawChannel to get Pedestal and raw amplitude and time
 
-    if (RawChannelCnt.isValid()) {
+    if (m_mbtsCellDetails && RawChannelCnt.isValid()) {
       if (offlineRch) {
 
         for (const auto rawChannel : *RawChannelCnt) {
@@ -279,7 +283,7 @@ namespace JiveXML {
       phi.push_back(DataType( phiMBTS ));
       sampling.push_back(DataType( m_tileTBID->channel(id) ));
 
-      if (RawChannelCnt.isValid()) {
+      if (m_mbtsCellDetails && RawChannelCnt.isValid()) {
 
         cellPedestal.push_back(DataType( theMbtspedestal[id.get_identifier32().get_compact()] ));
         cellRawAmplitude.push_back(DataType( theMbtsrawamp[id.get_identifier32().get_compact()] ));

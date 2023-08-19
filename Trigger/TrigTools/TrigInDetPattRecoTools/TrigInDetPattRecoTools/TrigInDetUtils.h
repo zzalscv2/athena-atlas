@@ -2,8 +2,23 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_COMMON_ALGORITHMS_H
-#define TRIGINDETPATTRECOTOOLS_COMMON_ALGORITHMS_H
+#ifndef TRIGINDETPATTRECOTOOLS_TRIG_INDET_UTILS_H
+#define TRIGINDETPATTRECOTOOLS_TRIG_INDET_UTILS_H
+
+#include "TrkTrack/Track.h"
+#include <vector>
+
+#include "BeamSpotConditionsData/BeamSpotData.h"
+
+struct trackInfo {
+  int n_hits_pix = 0; int n_hits_sct = 0; int n_hits_inner = 0; int n_hits_innermost = 0;
+  float ptGeV = 0; float a0beam = 0;float eta = 0; float phi0 = 0;
+};
+
+namespace FTF {
+    bool isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y);
+    void getBeamSpotShift(float& shift_x, float& shift_y, const InDet::BeamSpotData& beamSpotHandle);
+}
 
 typedef struct WeightedCoordinate{
   struct Comparator {

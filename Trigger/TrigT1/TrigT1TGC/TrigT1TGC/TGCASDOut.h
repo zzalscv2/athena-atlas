@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCASDOut_H
@@ -19,10 +19,8 @@ class TGCASDOut {
 
  public:
   TGCASDOut() = default;
-  TGCASDOut(TGCIndex tgcindex, int ilyr, 
-	    TGCSignalType sigtype=WIREGROUP, int id=-1, double tof=0.);
   TGCASDOut(TGCReadoutIndex tgcrindex, 
-	    TGCSignalType sigtype=WIREGROUP, int id=-1, double tof=0.);
+	    TGCSignalType sigtype=WIRE, int id=-1, double tof=0.);
 
   int operator == (const TGCASDOut& right) const { return (this==&right); }
   int operator != (const TGCASDOut& right) const { return (this!=&right); }

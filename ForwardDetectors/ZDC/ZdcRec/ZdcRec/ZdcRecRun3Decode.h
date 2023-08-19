@@ -3,11 +3,11 @@
 */
 
 ///////////////////////////////////////////////////////////////////
-// ZdcRecRun3.h, (c) ATLAS Detector software
+// ZdcRecRun3Decode.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#ifndef ZDCRECRun3_H
-#define ZDCRECRun3_H
+#ifndef ZDCRECRun3DECODE_H
+#define ZDCRECRun3DECODE_H
 
 #include <string>
 #include <map>
@@ -24,28 +24,27 @@ class Identifier;
 class StoreGateSvc;
 
 class ZdcRecChannelToolLucrod;
+#include "ZdcByteStream/ZdcLucrodDataContainer.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
-#include "ZdcTrigValid/ZdcTrigValidTool.h"
 
-/** @class ZdcRecRun3
+/** @class ZdcRecRun3Decode
 
-    Class definition for the ZDC Reconstruction class for Run 3
-
-    This class is responsible for running the ZDC signal processing and decorating the ZdcModules accordingly.  In principle, this module runs appropriately on simulation and raw.
+    Class definition for the ZDC decoder class for Run 3
+    This class is responsible for taking the ZdcLucrodData and rendering them as ZdcModules for subsequent steps, and for defining the two output ZdcModuleContainers.
 
     @author  Brian Cole and Peter Steinberg, bcole@cern.ch, steinberg@bnl.gov
 */
 
 
-class ZdcRecRun3 : public AthAlgorithm
+class ZdcRecRun3Decode : public AthAlgorithm
 {
 
 public:
 
-	ZdcRecRun3(const std::string& name, ISvcLocator* pSvcLocator);
-	~ZdcRecRun3();
+	ZdcRecRun3Decode(const std::string& name, ISvcLocator* pSvcLocator);
+	~ZdcRecRun3Decode();
 
 	StatusCode initialize() override;
 	StatusCode execute() override;
@@ -55,13 +54,18 @@ private:
 	
 	int m_ownPolicy;
 
-	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
+	SG::ReadHandleKey<ZdcLucrodDataContainer> m_zldContainerName
+          { this, "ZdcLucrodDataContainerKey", "ZdcLucrodDataContainer", "" };
+
+	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
 	  { this, "ZdcModuleContainerName", "ZdcModules", "" };
 
-	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
+	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
 	  { this, "ZdcSumContainerName", "ZdcSums", "" };
 
-	ToolHandleArray<ZDC::IZdcAnalysisTool> m_zdcTools{ this, "ZdcAnalysisTools",{} };
+	ToolHandle<ZdcRecChannelToolLucrod> m_ChannelTool
+	  { this, "ChannelTool", "ZdcRecChannelToolLucrod", "" };
+
 
 };
 

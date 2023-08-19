@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //  Table of connection between Patch Panel and Slave Board.
@@ -44,12 +44,7 @@ void TGCConnectionPPToSB::setSBIdToPP(int type, int port, int index, int idIn)
   m_SBIdToPP[port][type][index] = idIn;
 }
 
-inline TGCPatchPanelType operator++(TGCPatchPanelType &rs, int)
-{
-    return rs = (TGCPatchPanelType)(rs + 1);
-}
-
 
 } //end of namespace bracket
 
-#endif // TGCConnectionPPToSB_hh
+#endif   // TGCConnectionPPToSB_hh

@@ -13,6 +13,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.args = '--CA'
+ex.threads = 1
 ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.input = 'ttbar' # TODO restore to once HI MC has supercells 'pbpb'
 ex.flags = ['Trigger.triggerMenuSetup="Dev_HI_run3_v1_TriggerValidation_prescale"',

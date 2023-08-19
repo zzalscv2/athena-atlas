@@ -6,8 +6,8 @@
 // ZdcRec.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#ifndef ZDCRECV3_H
-#define ZDCRECV3_H
+#ifndef ZDCRECV3Decode_H
+#define ZDCRECV3Decode_H
 
 #include <string>
 #include <map>
@@ -32,24 +32,27 @@ class StatusCode;
 class Identifier;
 class StoreGateSvc;
 
-#include "ZdcAnalysis/ZdcAnalysisTool.h"
+class ZdcRecChannelToolV2;
+#include "xAODTrigL1Calo/TriggerTowerContainer.h"
+#include "xAODForward/ZdcModuleContainer.h"
+#include "xAODForward/ZdcModuleAuxContainer.h"
 
-/** @class ZdcRecV3
+/** @class ZdcRec
 
-    Class definition for the ZDC Reconstruction class (version V3, final for Run 2)
+    Class definition for the ZDC Reconstruction class
 
     @author  Brian Cole and Peter Steinberg, bcole@cern.ch, peter.steinberg@bnl.gov
              and M. Leite leite@cern.ch
 */
 
 
-class ZdcRecV3 : public AthAlgorithm
+class ZdcRecV3Decode : public AthAlgorithm
 {
 
 public:
 
-	ZdcRecV3(const std::string& name, ISvcLocator* pSvcLocator);
-	~ZdcRecV3();
+	ZdcRecV3Decode(const std::string& name, ISvcLocator* pSvcLocator);
+	~ZdcRecV3Decode();
 
 	StatusCode initialize() override;
 	StatusCode execute() override;
@@ -77,18 +80,20 @@ private:
 	/** Pointer to Zdc input "digits" data */
 	//const xAOD::TriggerTowerContainer* m_ttContainer;
 
+	SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttContainerName
+	  { this, "DigitsContainerName", "ZdcTriggerTowers", "" };
 
-	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
+	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
 	  { this, "ZdcModuleContainerName", "ZdcModules", "" };
 
-	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
+	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
 	  { this, "ZdcSumContainerName", "ZdcSums", "" };
 
 	//Include here all tools to do the job. They will be called by the algorithm execute method
 	//Another option is to use ToolHandleArray<IZdcRecTool>, where IZdcRecTool is the factory for
 	//the tools
-	ToolHandle<ZDC::IZdcAnalysisTool> m_zdcTool
-	  { this, "ZdcAnalysisTool", "ZDC::ZdcAnalysisTool/ZdcAnalysisTool", "" };
+	ToolHandle<ZdcRecChannelToolV2> m_ChannelTool
+	  { this, "ChannelTool", "ZdcRecChannelToolV2", "" };
 
 };
 
