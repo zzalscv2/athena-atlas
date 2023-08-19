@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import with_statement, print_function
 from collections import namedtuple
 
-from .oracle import atlas_runs_set
 from .sugar import RunLumi
 from .events import iov_yielder
 
@@ -68,6 +67,7 @@ def make_run_iovs(iovs):
     run_iovs = fetch_iovs("EOR", since, until, 
                              with_channel=False, what=[])
     
+    from .oracle import atlas_runs_set
     atlas_runs = atlas_runs_set()
     
     run_iovs = (iov for iov in run_iovs if iov.since.run in atlas_runs)
