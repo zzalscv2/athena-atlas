@@ -18,9 +18,9 @@ namespace LVL1TGCTrigger {
 
 const int NumberOfOctant = 8;
 const int NumberOfModule = 15; 
-const int NumberOfSignalTypes = 2; // 1=WireGroup, 2=Strip
-const int NumberOfLayers = 9;      // 0,1,2: Tpl, 3,4: Dbl, 5,6: Inner 8,9
-const int NumberOfRegions = 2;     // 1=Forward, 2=ENdcap 
+const int NumberOfSignalTypes = 2;  // 1=WIRE, 2=STRIP
+const int NumberOfLayers = 9;       // 0,1,2: Tpl, 3,4: Dbl, 5,6: Inner 8,9
+const int NumberOfRegions = 2;      // 1=Forward, 2=ENdcap 
 
 class TGCEvent;
 class TGCDatabaseManager;

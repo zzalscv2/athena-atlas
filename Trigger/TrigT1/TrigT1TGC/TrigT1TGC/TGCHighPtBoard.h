@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCHighPtBoard_hh
@@ -46,9 +46,9 @@ class TGCHighPtBoard
   int getId() const;
   void setId(int idIn);
   int getType() const;
-  void setType(int typeIn){ m_type=typeIn;};
-  int getRegion() const { return m_region;};
-  void setRegion(int regionIn){ m_region=regionIn;};
+  void setType(int typeIn){ m_type=typeIn;}
+  TGCRegionType getRegion() const { return m_region;}
+  void setRegion(const TGCRegionType regionIn){ m_region = regionIn;}
 
   void setDSB(int connector, TGCSlaveBoard* SBIn);
   void setTSB(int connector, TGCSlaveBoard* SBIn);
@@ -101,7 +101,7 @@ class TGCHighPtBoard
   int m_bid;
   int m_idSectorLogic;
   int m_type;
-  int m_region;
+  TGCRegionType m_region{TGCRegionType::FORWARD};
 
   int m_priorSign;
   int m_maxNumberOfHPBData;

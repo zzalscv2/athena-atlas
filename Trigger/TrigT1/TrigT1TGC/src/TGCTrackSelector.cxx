@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCTrackSelector.h"
@@ -11,45 +11,42 @@
 namespace LVL1TGCTrigger {
 
 
-
-  TGCTrackSelector::TGCTrackSelector(const TGCSectorLogic* sL):
-    m_numberOfCandidate_In(0),
-    m_numberOfCandidate_Out(0),
-    m_sectorLogic(sL) 
-  {
-    for(int i_track=0;i_track!=MaxNumber_of_TrackCandidate_in;i_track++){
-      m_trackPriorityRank[i_track]=0;
-    }
+TGCTrackSelector::TGCTrackSelector(const TGCSectorLogic* sL):
+  m_numberOfCandidate_In(0),
+  m_numberOfCandidate_Out(0),
+  m_sectorLogic(sL) {
+  for(int i_track=0; i_track!=MaxNumber_of_TrackCandidate_in; i_track++){
+    m_trackPriorityRank[i_track] = 0;
   }
+}
 
-  TGCTrackSelector::~TGCTrackSelector()
-  {
-  }
+TGCTrackSelector::~TGCTrackSelector()
+{
+}
 
 
-  void TGCTrackSelector::reset(){
-    m_numberOfCandidate_In=0;
-    m_numberOfCandidate_Out=0;
+void TGCTrackSelector::reset(){
+  m_numberOfCandidate_In=0;
+  m_numberOfCandidate_Out=0;
     
-    for(int i_track=0;i_track!=MaxNumber_of_TrackCandidate_in;i_track++){
-      m_trackPriorityRank[i_track]=0;
-    }
-
+  for(int i_track=0;i_track!=MaxNumber_of_TrackCandidate_in;i_track++){
+    m_trackPriorityRank[i_track]=0;
   }
+}
 
 
-  void TGCTrackSelector::input(TGCRPhiCoincidenceOut* rPhiOut){
-    if(rPhiOut!=0){
-      if(rPhiOut->getpT()!=0){
-        m_coincidenceIn[m_numberOfCandidate_In].reset(rPhiOut);
-        m_numberOfCandidate_In++;
-      }
+void TGCTrackSelector::input(TGCRPhiCoincidenceOut* rPhiOut){
+  if(rPhiOut!=0){
+    if(rPhiOut->getpT()!=0){
+      m_coincidenceIn[m_numberOfCandidate_In].reset(rPhiOut);
+      m_numberOfCandidate_In++;
     }
   }
+}
 
 
-  bool TGCTrackSelector::select(std::shared_ptr<TGCTrackSelectorOut> TrackcandidateOut){
- 
+bool TGCTrackSelector::select(std::shared_ptr<TGCTrackSelectorOut> TrackcandidateOut){
+
     if(m_numberOfCandidate_In==0){return false;}
 
 
@@ -72,7 +69,7 @@ namespace LVL1TGCTrigger {
     for(int track=0;track!=m_numberOfCandidate_In;track++){
       if(m_trackPriorityRank[track]<=3){
 
-        int R= 2*m_coincidenceIn[track]->getIdSSC()+m_coincidenceIn[track]->getR() - (m_sectorLogic->getRegion()==Endcap ? 1 : 0);
+        int R= 2*m_coincidenceIn[track]->getIdSSC()+m_coincidenceIn[track]->getR() - (m_sectorLogic->getRegion()==TGCRegionType::ENDCAP ? 1 : 0);
         TrackcandidateOut->setR(m_numberOfCandidate_Out,R);
         TrackcandidateOut->setPhi(m_numberOfCandidate_Out,m_coincidenceIn[track]->getPhi());
         TrackcandidateOut->setPtLevel(m_numberOfCandidate_Out,m_coincidenceIn[track]->getpT());
@@ -90,13 +87,9 @@ namespace LVL1TGCTrigger {
     reset();
  
     return true;
+}
 
-  }
-
-
-  bool TGCTrackSelector::compare(TGCRPhiCoincidenceOut* track1, TGCRPhiCoincidenceOut* track2){
-
-
+bool TGCTrackSelector::compare(TGCRPhiCoincidenceOut* track1, TGCRPhiCoincidenceOut* track2){
     // The definition of priority is not fixed. This function wiil be updated.
     if(track1->getpT() > track2->getpT()){return true;}
     if(track1->getpT() < track2->getpT()){return false;}
@@ -106,11 +99,7 @@ namespace LVL1TGCTrigger {
       if(track1->getIdSSC()>track2->getIdSSC()){return false;}
     }
     return true; 
-
-  }
-
-
-
-
-
 }
+
+
+}   // end of namespace

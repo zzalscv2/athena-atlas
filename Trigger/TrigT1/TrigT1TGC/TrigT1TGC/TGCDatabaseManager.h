@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCDatabaseManager_hh
@@ -117,11 +117,13 @@ inline std::shared_ptr<LVL1TGC::TGCGoodMF> TGCDatabaseManager::getGoodMFMap() co
 }
 
 inline const TGCConnectionPPToSL* TGCDatabaseManager::getConnectionPPToSL(TGCRegionType type) const {
-  return m_PPToSL[type-1];
+  int region = (type == TGCRegionType::FORWARD) ? 0 : 1;
+  return m_PPToSL[region];
 }
 
 inline const TGCConnectionASDToPP* TGCDatabaseManager::getConnectionASDToPP(TGCRegionType region, int type, TGCForwardBackwardType forwardBackward) const {
-  return m_ASDToPP[region-1][type][forwardBackward];
+  int reg = (region == TGCRegionType::FORWARD) ? 0 : 1;
+  return m_ASDToPP[reg][type][forwardBackward];
 }
 
 }   // end of LVL1TGCTrigger namespace
