@@ -25,6 +25,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('taus', "", type=str)
         self.addOption ('doTauAntiTauJetOR', False, type=bool)
         self.addOption ('antiTauLabel', '', type=str)
+        self.addOption ('antiTauBJetLabel', '', type=str)
 
 
     def makeAlgs (self, config) :
@@ -198,7 +199,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addPrivateTool( 'overlapTool.TauJetORT',
                                        'ORUtils::TauAntiTauJetOverlapTool' )
                 alg.overlapTool.TauJetORT.AntiTauLabel = self.antiTauLabel
-                alg.overlapTool.TauJetORT.BJetLabel = self.bJetLabel
+                alg.overlapTool.TauJetORT.BJetLabel = self.antiTauBJetLabel
             else:
                 config.addPrivateTool( 'overlapTool.TauJetORT',
                                        'ORUtils::DeltaROverlapTool' )
@@ -264,10 +265,12 @@ def makeOverlapAnalysisConfig( seq,
                                inputLabel = None, outputLabel = None,
                                linkOverlapObjects = None,
                                doEleEleOR = None, electrons = None,
-                               muons = None, jets = None, taus = None,
+                               muons = None, jets = None,
+                               taus = None, doTauAntiTauJetOR = None,
                                photons = None, fatJets = None,
                                enableUserPriority = None,
                                bJetLabel = None,
+                               antiTauLabel = None, antiTauBJetLabel = None,
                                boostedLeptons = None,
                                postfix = None,
                                configName = 'OverlapRemoval'):
@@ -284,12 +287,15 @@ def makeOverlapAnalysisConfig( seq,
                      objects passing the overlap removal.
       linkOverlapObjects -- Set up an element link between overlapping objects
       doEleEleOR -- Set up electron-electron overlap removal
+      doTauAntiTauJetOR -- Set up Tau-AntiTau-Jet overlap removal
       enableUserPriority -- If enabled, the Ele-, Mu-, Tau- and PhoJetOR tools
                             will respect the user priority in the inputLabel.
                             E.g. SUSYTools assigns all signal objects the
                             priority 2 and pre-selected jets the priority 1.
-      bJetLabel -- Flag to select b-jets with. If left empty, no b-jets are used
-                   in the overlap removal.
+      bJetLabel -- Flag to select b-jets with for lepton OR.
+                   If left empty, no b-jets are used in the overlap removal.
+      antiTauLabel -- Flag to select antiTau with. Required for TauAntiTauJetOR.
+      antiTauBJetLabel -- Flag to select b-jets with for Tau-AntiTau-Jet OR.
       boostedLeptons -- Set to True to enable boosted lepton overlap removal
     """
 
@@ -302,10 +308,13 @@ def makeOverlapAnalysisConfig( seq,
     config.setOptionValue ('muons', muons, noneAction='ignore')
     config.setOptionValue ('jets', jets, noneAction='ignore')
     config.setOptionValue ('taus', taus, noneAction='ignore')
+    config.setOptionValue ('doTauAntiTauJetOR', doTauAntiTauJetOR, noneAction='ignore')
     config.setOptionValue ('photons', photons, noneAction='ignore')
     config.setOptionValue ('fatJets', fatJets, noneAction='ignore')
     config.setOptionValue ('enableUserPriority', enableUserPriority, noneAction='ignore')
     config.setOptionValue ('bJetLabel', bJetLabel, noneAction='ignore')
+    config.setOptionValue ('antiTauLabel', antiTauLabel, noneAction='ignore')
+    config.setOptionValue ('antiTauBJetLabel', antiTauBJetLabel, noneAction='ignore')
     config.setOptionValue ('boostedLeptons', boostedLeptons, noneAction='ignore')
     config.setOptionValue ('postfix', postfix, noneAction='ignore')
     seq.append (config)
