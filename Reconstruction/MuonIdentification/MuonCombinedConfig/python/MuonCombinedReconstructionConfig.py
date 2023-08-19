@@ -559,6 +559,14 @@ def CombinedMuonTruthAssociationAlgsCfg(flags):
 
     return result
 
+def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
+    result = ComponentAccumulator()
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentConverterToolCfg
+    kwargs.setdefault("MuonSegmentConverterTool", result.popToolsAndMerge(MuonSegmentConverterToolCfg(flags)))
+    the_alg = CompFactory.xAODMaker.MuonSegmentCnvAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 
 def CombinedMuonOutputCfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
@@ -674,7 +682,6 @@ def CombinedMuonOutputCfg(flags):
 
 def MuonCombinedReconstructionCfg(flags):
     from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentConverterToolCfg
 
     # Many components need these services, so setup once here.
     result = MuonIdHelperSvcCfg(flags)
@@ -747,22 +754,17 @@ def MuonCombinedReconstructionCfg(flags):
 
     result.merge(MuonSegContainerMergerAlgCfg(flags))
 
-    muonSegmentCnvTool = result.popToolsAndMerge(
-        MuonSegmentConverterToolCfg(flags))
-    result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg",
-                                                                SegmentContainerName="TrkMuonSegments",
-                                                                xAODContainerName="MuonSegments",
-                                                                MuonSegmentConverterTool=muonSegmentCnvTool))
+    result.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlg",
+                                      SegmentContainerName="TrkMuonSegments",
+                                      xAODContainerName="MuonSegments"))
     if flags.MuonCombined.writeUnAssocSegments:
-        result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("UnAssocMuonSegmentCnvAlg",
-                                                                    SegmentContainerName="UnAssocMuonTrkSegments",
-                                                                    xAODContainerName="UnAssocMuonSegments",
-                                                                    MuonSegmentConverterTool=muonSegmentCnvTool))
+        result.merge(MuonSegmentCnvAlgCfg(flags, "UnAssocMuonSegmentCnvAlg",
+                                          SegmentContainerName="UnAssocMuonTrkSegments",
+                                          xAODContainerName="UnAssocMuonSegments"))
     if flags.MuonCombined.doMuGirlLowBeta:
-        result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonStauSegmentCnvAlg",
-                                                                    SegmentContainerName="TrkStauSegments",
-                                                                    xAODContainerName="StauSegments",
-                                                                    MuonSegmentConverterTool=muonSegmentCnvTool))
+        result.merge(MuonSegmentCnvAlgCfg(flags, "MuonStauSegmentCnvAlg",
+                                          SegmentContainerName="TrkStauSegments",
+                                          xAODContainerName="StauSegments"))
     if flags.Muon.runCommissioningChain:
         result.merge(EMEO_MuonCreatorAlgCfg(flags))
     # runs over outputs and create xAODMuon collection
