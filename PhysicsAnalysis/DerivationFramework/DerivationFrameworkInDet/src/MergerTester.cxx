@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,8 +30,7 @@ namespace DerivationFramework {
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     // The default goal of this merger is to create a collection combining standard and LRT tracks
-    m_inputParticleLocation = "InDetWithLRTTrackParticles"    ;
-    declareProperty("InputTrack",         m_inputParticleLocation); 
+    declareProperty("InputTrack",         m_inputParticleLocation = "InDetWithLRTTrackParticles"); 
  }
 
   ///////////////////////////////////////////////////////////////////
