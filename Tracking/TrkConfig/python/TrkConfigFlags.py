@@ -163,8 +163,8 @@ def createTrackingConfigFlags():
     # No corresponding ITk config is available yet
 
     def cutLevel(flags):
-        if flags.Reco.EnableHI:
-            return 2
+        if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
+            return 4
         elif flags.Tracking.doLowMu:
             return 3
         elif flags.Beam.Type is BeamType.Cosmics:
@@ -309,10 +309,11 @@ def createTrackingConfigFlags():
     def primaryPass(flags):
         if flags.Beam.Type is BeamType.Cosmics:
             return PrimaryPassConfig.Cosmics
-        elif flags.Reco.EnableHI:
-            return PrimaryPassConfig.HeavyIon
+        # if both HI + MinBias flags are True, the MinBias config is used
         elif flags.Tracking.doMinBias:
             return PrimaryPassConfig.MinBias
+        elif flags.Reco.EnableHI:
+            return PrimaryPassConfig.HeavyIon
         else:
             return PrimaryPassConfig.Default
 
