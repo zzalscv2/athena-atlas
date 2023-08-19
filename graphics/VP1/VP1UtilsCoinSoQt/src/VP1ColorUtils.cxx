@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -24,7 +24,7 @@ float VP1ColorUtils::getValFromRGB(const unsigned int rgb)
     return rgb/255.0;
 }
 
-void VP1ColorUtils::setMatColorFromRGB(SoMaterial* mat, std::string type, const unsigned int r, const unsigned int g, const unsigned int b)
+void VP1ColorUtils::setMatColorFromRGB(SoMaterial* mat, const std::string& type, const unsigned int r, const unsigned int g, const unsigned int b)
 {
     const float fr = getValFromRGB(r);
     const float fg = getValFromRGB(g);
