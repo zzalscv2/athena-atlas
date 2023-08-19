@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -13,6 +13,7 @@
 //****************************************************************************
 
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
+#include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "boost/io/ios_state.hpp"
 #include <sstream>
@@ -172,6 +173,10 @@ FCAL_ChannelMap::create_tileMap(int isam)
   tileMap_const_iterator tilefirst = m_tileMap[isam-1].begin();
   tileMap_const_iterator tilelast  = m_tileMap[isam-1].end();
   while (tilefirst != tilelast) {
+    // Tell clang to optimize assuming that FP exceptions can trap.
+    // Otherwise, it can vectorize the division, which can lead to
+    // spurious division-by-zero traps from unused vector lanes.
+    CXXUTILS_TRAPPING_FP;
     tileName_t tileName = tilefirst->first;
     unsigned int ntubes = (tilefirst->second).ntubes();
     float xtubes        = (float) ntubes;
