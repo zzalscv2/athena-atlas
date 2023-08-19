@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrkTrack/Track.h"
@@ -12,15 +12,6 @@
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
-
-Trk::Track::Track()
-    : Trk::ObjectCounter<Trk::Track>(),
-      m_trackStateVector{},
-      m_cachedParameterVector{},
-      m_cachedMeasurementVector{},
-      m_cachedOutlierVector{},
-      m_perigeeParameters{},
-      m_fitQuality(nullptr) {}
 
 Trk::Track::Track(const TrackInfo& info, TrackStates&& trackStateOnSurfaces,
                   std::unique_ptr<FitQuality> fitQuality)
@@ -53,15 +44,10 @@ Trk::Track& Trk::Track::operator=(const Trk::Track& rhs) {
     m_fitQuality.reset(nullptr);
     m_trackSummary.reset(nullptr);
     // Invalidate the caches
-    m_cachedParameterVector.reset();
-    m_cachedMeasurementVector.reset();
-    m_cachedOutlierVector.reset();
-    // perigee parameters set to invalid
-    m_perigeeParameters.reset();
+    resetCaches();
     // The following is a DataVector and so will delete
     // the contained objects automatically.
     m_trackStateVector.clear();
-
     // copy payload of rhs to this
     copyHelper(rhs);
   }
@@ -229,26 +215,13 @@ const DataVector<const Trk::MeasurementBase>* Trk::Track::outliersOnTrack()
          ++itTSoS) {
       if ((*itTSoS)->type(TrackStateOnSurface::Outlier)) {
         const Trk::MeasurementBase* rot = (*itTSoS)->measurementOnTrack();
-        assert(rot != 0);
+        assert(rot != nullptr);
         tmpOutlierVector.push_back(rot);
       }
     }
     m_cachedOutlierVector.set(std::move(tmpOutlierVector));
   }
   return m_cachedOutlierVector.ptr();
-}
-
-void Trk::Track::setTrackStateOnSurfaces(
-    DataVector<const Trk::TrackStateOnSurface>&& input) {
-  m_trackStateVector = std::move(input);
-  reset();  // reset caches
-}
-
-void Trk::Track::reset() {
-  m_cachedParameterVector.reset();
-  m_cachedMeasurementVector.reset();
-  m_cachedOutlierVector.reset();
-  m_perigeeParameters.reset();
 }
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug

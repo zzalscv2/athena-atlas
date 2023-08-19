@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -8,7 +8,18 @@ inline bool Track::isValid() const {
   return (m_fitQuality && !m_trackStateVector.empty());
 }
 
+inline void Track::resetCaches() {
+  m_cachedParameterVector.reset();
+  m_cachedMeasurementVector.reset();
+  m_cachedOutlierVector.reset();
+  m_perigeeParameters.reset();
+}
+
 inline const FitQuality* Track::fitQuality() const {
+  return m_fitQuality.get();
+}
+
+inline FitQuality* Track::fitQuality() {
   return m_fitQuality.get();
 }
 
@@ -21,6 +32,12 @@ Track::trackStateOnSurfaces() const {
   return &m_trackStateVector;
 }
 
+inline void Track::setTrackStateOnSurfaces(
+    DataVector<const Trk::TrackStateOnSurface>&& input) {
+  m_trackStateVector = std::move(input);
+  resetCaches();
+}
+
 inline const TrackInfo& Track::info() const {
   return m_trackInfo;
 }
@@ -28,6 +45,7 @@ inline const TrackInfo& Track::info() const {
 inline TrackInfo& Track::info() {
   return m_trackInfo;
 }
+
 inline void Track::setInfo(const TrackInfo& input) {
   m_trackInfo = input;
 }
