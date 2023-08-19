@@ -42,7 +42,6 @@
     }
 
 namespace {
-    constexpr unsigned int minOne = std::numeric_limits<unsigned int>::max();
     /// Helper function to copy the radout elements from a technology into the 
     /// vector of all readout elements.
     template <class ReadoutEle> void insert(std::vector<const ReadoutEle*>&& tech_eles,
@@ -81,11 +80,11 @@ IdentifierHash MuonDetectorManager::buildHash(const Identifier& id) const {
         return buildHash(id, m_idHelperSvc->mmIdHelper());
     else if (m_idHelperSvc->isCsc(id))
         return buildHash(id, m_idHelperSvc->cscIdHelper());
-    return IdentifierHash{minOne};
+    return IdentifierHash();
 }
 IdentifierHash MuonDetectorManager::buildHash(const Identifier& id, 
                                               const MuonIdHelper& idHelper) const {
-    IdentifierHash hash{minOne};
+    IdentifierHash hash;
     if (idHelper.get_detectorElement_hash(id, hash)) {
         ATH_MSG_WARNING("Could not construct an Identifier hash from "
                         << m_idHelperSvc->toString(id));
