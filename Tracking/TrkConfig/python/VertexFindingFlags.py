@@ -181,10 +181,15 @@ def createPriVertexingFlags():
     flags.addFlag("minNInnermostLayerHits", 0)
     # MaxTracks cuts are specific to the IterativeFinding config
     flags.addFlag("doMaxTracksCut", lambda pcf:
-                  not(pcf.Tracking.PriVertex.useBeamConstraint \
-                      or pcf.Reco.EnableHI))
+                  not(pcf.Tracking.PriVertex.useBeamConstraint or
+                      pcf.Tracking.PrimaryPassConfig is (
+                          PrimaryPassConfig.HeavyIon)))    
     flags.addFlag("maxTracks", 3000)
-    flags.addFlag("maxVertices", lambda pcf: 1 if pcf.Reco.EnableHI else 200)
+    flags.addFlag("maxVertices", lambda pcf:
+                  1 if pcf.Tracking.PrimaryPassConfig is (
+                      PrimaryPassConfig.HeavyIon)
+                  else 200)
+
     # string to store the setup for primary vertexing.
 
     def vertexSetup(pcf):
