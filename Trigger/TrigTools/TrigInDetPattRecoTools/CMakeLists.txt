@@ -8,7 +8,7 @@ atlas_add_library( TrigInDetPattRecoTools
                    src/*.cxx
                    PUBLIC_HEADERS TrigInDetPattRecoTools
                    LINK_LIBRARIES TrigInDetPattRecoEvent
-                   PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData )
+                   PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData BeamSpotConditionsData)
 
 find_package(Boost)
 
@@ -17,4 +17,5 @@ atlas_add_test( mockSeeds
                 LINK_LIBRARIES PathResolver TrigInDetEvent TrigInDetPattRecoEvent TrigInDetPattRecoTools TrigSteeringEvent IRegionSelector
                 POST_EXEC_SCRIPT nopost.sh
                 PROPERTIES TIMEOUT 300 )
+
 
