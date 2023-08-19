@@ -14,6 +14,7 @@
 #include "LArEM_region.h"
 #include "IdDict/IdDictDefs.h"
 #include "CxxUtils/StrFormat.h"
+#include "CxxUtils/trapping_fp.h"
 
 using CxxUtils::strformat;
 
@@ -953,6 +954,10 @@ int   LArEM_Base_ID::get_prevInEta(const LArEM_region* emRegion, const unsigned 
 	result = 0;
       }
       else {
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
 	short int nPhiMinus = prevEmRegion->phiN();
 	float gPhiMinus= prevEmRegion->phiGranularity();
 	unsigned int maxHashMinus = prevEmRegion->hashMax();
@@ -1005,6 +1010,10 @@ int   LArEM_Base_ID::get_nextInEta(const LArEM_region* emRegion, const unsigned 
     short int nNextEtaRegion = emRegion->nextEtaRegion();
     // no neighbour if no next region in eta
     if( nNextEtaRegion != NOT_VALID_REGION ) {
+      // Tell clang to optimize assuming that FP exceptions can trap.
+      // Otherwise, it can vectorize the division, which can lead to
+      // spurious division-by-zero traps from unused vector lanes.
+      CXXUTILS_TRAPPING_FP;
       LArEM_region* nextEmRegion = m_vecOfRegions[nNextEtaRegion];
       float gPhiPlus= nextEmRegion->phiGranularity();
       unsigned int minHashPlus = nextEmRegion->hashMin();
@@ -1064,6 +1073,10 @@ int   LArEM_Base_ID::get_prevInSamp(const LArEM_region* emRegion, const unsigned
       double maxEtaMinus =  (double)(prevEmRegion->etaMax());
       double margin = 0.25*std::min(gEta,gEtaMinus);
       if((minEtaMinus < absEta+gEta-margin) && (absEta+margin < maxEtaMinus)) {
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
 	
 	// phi granularity of previous region in sampling
 	float gPhiMinus= prevEmRegion->phiGranularity();
@@ -1126,7 +1139,11 @@ int   LArEM_Base_ID::get_nextInSamp(const LArEM_region* emRegion, const unsigned
       double maxEtaPlus = (double)(nextEmRegion->etaMax());
       double margin = 0.25*std::min(gEta,gEtaPlus);
       if((minEtaPlus < absEta+gEta-margin) && (absEta+margin < maxEtaPlus)) {
-	
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
+
 	short int nPhiPlus = nextEmRegion->phiN();
 	unsigned int minHashPlus = nextEmRegion->hashMin(); 
 	float phiMargin = 0.25*std::min(gPhi,gPhiPlus);
@@ -1187,6 +1204,10 @@ int   LArEM_Base_ID::get_prevInSubdet(const LArEM_region* emRegion, const unsign
       double maxEtaMinus =  (double)(prevEmRegion->etaMax());
       double margin = 0.25*std::min(gEta,gEtaMinus);
       if((minEtaMinus < absEta+gEta-margin) && (absEta+margin < maxEtaMinus)) {
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
 	
 	// phi granularity of previous region in sampling
 	float gPhiMinus= prevEmRegion->phiGranularity();
@@ -1249,6 +1270,10 @@ int   LArEM_Base_ID::get_nextInSubdet(const LArEM_region* emRegion, const unsign
       double maxEtaPlus = (double)(nextEmRegion->etaMax());
       double margin = 0.25*std::min(gEta,gEtaPlus);
       if((minEtaPlus < absEta+gEta-margin) && (absEta+margin < maxEtaPlus)) {
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
 	
 	short int nPhiPlus = nextEmRegion->phiN();
 	unsigned int minHashPlus = nextEmRegion->hashMin(); 
