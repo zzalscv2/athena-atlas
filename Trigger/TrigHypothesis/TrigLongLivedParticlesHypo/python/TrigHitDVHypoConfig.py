@@ -2,6 +2,7 @@
 
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from TrigInDetConfig.InDetTrigCollectionKeys import TrigPixelKeys, TrigSCTKeys
 
 # Default name of HitDV output
 hitDVName = "HLT_HitDV"
@@ -57,6 +58,33 @@ def createTrigHitDVHypoAlg(flags, name):
 
     monTool.HistPath = 'HitDVHypoAlg'
     theHitDVHypo.MonTool = monTool
+    theHitDVHypo.RecJetRoI = "HLT_RecJETRoIs"
+
+    from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigL2LayerNumberTool
+    numberingTool = TrigL2LayerNumberTool(name = "TrigL2LayerNumberTool_HitDV")
+    numberingTool.UseNewLayerScheme = False
+    from AthenaCommon.AppMgr import ToolSvc
+    ToolSvc += numberingTool
+
+    # Spacepoint conversion
+    from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigSpacePointConversionTool
+    spTool = TrigSpacePointConversionTool().clone('TrigSpacePointConversionTool_HitDV')
+    spTool.DoPhiFiltering        = False
+    spTool.UseNewLayerScheme     = False
+    spTool.UseBeamTilt           = False
+    spTool.PixelSP_ContainerName = TrigPixelKeys.SpacePoints
+    spTool.SCT_SP_ContainerName  = TrigSCTKeys.SpacePoints
+    spTool.layerNumberTool       = numberingTool
+
+    from RegionSelector.RegSelToolConfig import makeRegSelTool_Pixel
+    from RegionSelector.RegSelToolConfig import makeRegSelTool_SCT
+
+    spTool.RegSelTool_Pixel = makeRegSelTool_Pixel()
+    spTool.RegSelTool_SCT   = makeRegSelTool_SCT()
+
+    ToolSvc += spTool
+
+    theHitDVHypo.SpacePointProviderTool = spTool
 
     return theHitDVHypo
 

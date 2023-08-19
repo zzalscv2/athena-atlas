@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCInnerTrackletSlotHolder.h"
@@ -56,7 +56,7 @@ namespace LVL1TGCTrigger {
     //       [M1, M2, M3]  [EI/FI]
     if(!(moduleId==0 || moduleId==1 || 
 	 moduleId==3 || moduleId==4 || 
-	 moduleId==6 || moduleId==7)) return; // moduleId is 0,1,3,4,6,7 for Endcap. 
+	 moduleId==6 || moduleId==7)) return; // moduleId is 0,1,3,4,6,7 for ENDCAP. 
     int secId = (moduleId/3)*2+moduleId%3; // secId=0-5(EC)
     int phi = (secId+46+octId*6)%48+1; // phi=1-48(EC), 1 is just above +x-axis and 48 is just below +x-axis
     // slot23, slot24, slot01, slot02 go to A01 phi0/phi1 (phi=47/phi=48) 

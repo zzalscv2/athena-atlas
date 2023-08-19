@@ -19,45 +19,40 @@ void TGCConnectionInPP::readConnectionTable(TGCPatchPanel* PP)
 {
   enum { BufferSize = 1024 };
   char buf[BufferSize];
-  std::string label,Label;
+  std::string label;
+
+  if (PP->getRegion() == TGCRegionType::ENDCAP) {
+    label = "E";
+  } else if (PP->getRegion() == TGCRegionType::FORWARD) {
+    label = "F";
+  }
 
   bool found = true;
   // select label used in database.
-  if(PP->getRegion()==Endcap){
-    if(PP->getType()==WTPP)      label="EWT";
-    else if(PP->getType()==WDPP) label="EWD";
-    else if(PP->getType()==STPP) label="EST"; 
-    else if(PP->getType()==SDPP) label="ESD"; 
-    else if(PP->getType()==WIPP) label="EWI"; 
-    else if(PP->getType()==SIPP) label="ESI";
-    else found = false;
-  }else if(PP->getRegion()==Forward){
-    if(PP->getType()==WTPP) label="FWT";
-    else if(PP->getType()==WDPP) label="FWD";
-    else if(PP->getType()==STPP) label="FST";
-    else if(PP->getType()==SDPP) label="FSD";
-    else if(PP->getType()==WIPP) label="FWI"; 
-    else if(PP->getType()==SIPP) label="FSI";
-    else found = false;
-  }
+  if(PP->getType()==TGCSector::WTPP)      label+="WT";
+  else if(PP->getType()==TGCSector::WDPP) label+="WD";
+  else if(PP->getType()==TGCSector::STPP) label+="ST"; 
+  else if(PP->getType()==TGCSector::SDPP) label+="SD"; 
+  else if(PP->getType()==TGCSector::WIPP) label+="WI"; 
+  else if(PP->getType()==TGCSector::SIPP) label+="SI";
+  else found = false;
+
   if (!found) return;
 
+  std::string fn = TGCDatabaseManager::getFilename(1);
 
-  std::string fn, fullName ;
-//  fn = "PP.db" ;
-  fn = TGCDatabaseManager::getFilename(1);
-
-  fullName = PathResolver::find_file(fn, "PWD");
+  std::string fullName = PathResolver::find_file(fn, "PWD");
   if( fullName.length() == 0 ) 
     fullName = PathResolver::find_file(fn,"DATAPATH");
   std::ifstream file(fullName.c_str() ,std::ios::in);
 
   // find entries match in PatchPanel type.
   int oPP,oCon,oCh,i1PP,i2PP,totalCh;
+  std::string inLabel;
   while(file.getline(buf,BufferSize)){
     std::istringstream line(buf);
-    line>>Label>>totalCh;
-    if(label==Label){
+    line>>inLabel>>totalCh;
+    if(label==inLabel){
       // create arrays store entries in database.
       for( int i=0; i<NumberOfPPOutputConnector; i+=1){
         line>>m_nCh[i];

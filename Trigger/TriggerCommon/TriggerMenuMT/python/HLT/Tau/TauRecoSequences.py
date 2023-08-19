@@ -72,7 +72,7 @@ def tauCaloMVASequence(flags):
                                      ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                                      ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.actualInteractionsPerCrossing' ),
                                      ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' ),
-                                     ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
+                                     ]
     tauCaloMVAInViewSequence += tauCaloMVARecoVDV
 
     robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=tauCaloMVAViewsMaker.name())[0]
@@ -124,19 +124,7 @@ def precTrackSequence( flags, RoIs , name):
                                  ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
                                  ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
                                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+%s' % IDTrigConfig.tracks_FTF() ),
-                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
-
-    # Make sure the required objects are still available at whole-event level
-    from AthenaCommon.AlgSequence import AlgSequence
-    topSequence = AlgSequence()
-
-    if not flagsWithTrk.Input.isMC:
-      ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ) ,
-                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
-    else:
-      topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-      ViewVerifyTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+                                 ]
 
     #Precision Tracking
     PTAlgs = [] #List of precision tracking algs 

@@ -1640,6 +1640,7 @@ if doAtlantis:
 
         from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloMBTSRetriever
         theCaloMBTSRetriever = JiveXML__CaloMBTSRetriever (name = "CaloMBTSRetriever")
+        theCaloMBTSRetriever.DoMBTSCellDetails = True
         theCaloMBTSRetriever.DoMBTSDigits = ReadDigits or ('ReadESD' in dir() and ReadESD)
         theCaloMBTSRetriever.MBTSThreshold = 0.05
         ToolSvc += theCaloMBTSRetriever

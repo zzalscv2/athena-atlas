@@ -11,6 +11,7 @@
 //  *********************************************************************************/
 
 #include "L1CaloFEXSim/eFEXtauAlgoBase.h"
+#include "L1CaloFEXSim/SCellEncoder.h"
 
 LVL1::eFEXtauAlgoBase::eFEXtauAlgoBase(const std::string &type,
                                        const std::string &name,
@@ -100,7 +101,7 @@ float LVL1::eFEXtauAlgoBase::getRealRCore() const {
   unsigned int num = core;
   unsigned int denom = core + env;
 
-  float out = denom ? static_cast<float>(num)/static_cast<float>(denom) : 0;
+  float out = denom ? static_cast<float>(num) / static_cast<float>(denom) : 0;
 
   return out;
 }
@@ -112,12 +113,13 @@ float LVL1::eFEXtauAlgoBase::getRealRHad() const {
   unsigned int num = core;
   unsigned int denom = core + env;
 
-  float out = denom ? static_cast<float>(num)/static_cast<float>(denom) : 0;
+  float out = denom ? static_cast<float>(num) / static_cast<float>(denom) : 0;
 
   return out;
 }
 
-void LVL1::eFEXtauAlgoBase::getRCore(std::vector<unsigned int> &rCoreVec) const {
+void LVL1::eFEXtauAlgoBase::getRCore(
+    std::vector<unsigned int> &rCoreVec) const {
   unsigned int core = rCoreCore();
   unsigned int env = rCoreEnv();
 
@@ -163,4 +165,16 @@ bool LVL1::eFEXtauAlgoBase::isCentralTowerSeed() const {
   }
 
   return out;
+}
+
+void LVL1::eFEXtauAlgoBase::setSCellEncoder(LVL1::eFEXtauTOB *tob) const {
+  if (!m_dumpSCells) {
+    tob->setSuperCellEncoder(nullptr);
+    return;
+  }
+
+  std::unique_ptr<SCellEncoder> scellEncoder = std::make_unique<SCellEncoder>();
+  scellEncoder->setSuperCells(m_em0cells, m_em1cells, m_em2cells, m_em3cells,
+                              m_hadcells);
+  tob->setSuperCellEncoder(std::move(scellEncoder));
 }

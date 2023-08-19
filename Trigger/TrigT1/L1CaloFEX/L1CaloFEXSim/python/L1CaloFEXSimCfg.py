@@ -131,6 +131,10 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool = CompFactory.LVL1.eFEXFPGA('eFEXFPGATool')
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool = CompFactory.LVL1.eFEXegAlgo('eFEXegAlgoTool',dmCorr=deadMaterialCorrections) # only dmCorrections in data for now
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool = CompFactory.LVL1.eFEXtauAlgo("eFEXtauAlgo")
+        # To dump supercells as a decorator to the tau TOB, set 
+        #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauAlgoTool.DumpSuperCells = True
+        #       and/or
+        #     eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool.DumpSuperCells = True
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXtauBDTAlgoTool = CompFactory.LVL1.eFEXtauBDTAlgo("eFEXtauBDTAlgo")
         # load noise cuts and dm corrections when running on data
         if not flags.Input.isMC:

@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCReadoutIndex_H
 #define TrigT1TGC_TGCReadoutIndex_H
 
-#include "TrigT1TGC/TGCIndex.h"
+#include "TrigT1TGC/TGCNumbering.h"
 
 namespace LVL1TGCTrigger {
 
@@ -21,7 +21,6 @@ class TGCReadoutIndex
  public:
   TGCReadoutIndex();
   TGCReadoutIndex(TGCZDirection iz, int ioct, int imd, int ir, int ilyr);
-  TGCReadoutIndex(TGCIndex tgcindex, int ilyr);
   ~TGCReadoutIndex() { }
  
   TGCReadoutIndex(const TGCReadoutIndex& right) = default;
@@ -47,10 +46,6 @@ class TGCReadoutIndex
   {
     return (this!=&right);
   }
-
-  // set function 
-  // conversion from TGC-index and layer#
-  void SetIndex(TGCIndex tgcindex, int ilyr);
 
   // get functions
   TGCZDirection GetZDirection() const { return m_zDirection; }

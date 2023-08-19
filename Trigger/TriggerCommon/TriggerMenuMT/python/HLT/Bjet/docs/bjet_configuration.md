@@ -392,9 +392,6 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
      In case the '*Inputfile*' is not in '*bytestream*'-format, the '*TRT*' informations have to be added by hand. To make sure it is also available at whole event-level, the topSequence is loaded and the data is added
      ```python
        topSequence = AlgSequence()
-       if not globalflags.InputFormat.is_bytestream():
-      viewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-      topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
      ```
      The first set of algorithms being added to the sequence are '*Second Stage of Fast Tracking*'
      ```python

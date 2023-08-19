@@ -17,10 +17,10 @@
 #include "RooRealVar.h"
 
 #ifndef __CINT__
-#include <boost/regex_fwd.hpp>
+#include <regex>
 #else
 // good enough for CINT
-namespace boost { class regex; }
+namespace std { class regex; }
 #endif
 
 class TDirectory;
@@ -416,8 +416,8 @@ namespace dqutils {
     static int mergeLB_processRun(TDirectory*, debugLevel_t&);
 
     static Int_t getNumBins(const TH1& hist);
-    boost::regex *m_mergeMatchHistoRE;
-    boost::regex *m_mergeMatchDirRE;
+    std::regex *m_mergeMatchHistoRE;
+    std::regex *m_mergeMatchDirRE;
     std::string m_mergeMatchHistoREString;
     std::string m_mergeMatchDirREString;
     bool m_useRE;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCSector_h
@@ -28,16 +28,13 @@ class TGCHighPtBoard;
 class TGCSectorLogic;
 
 
-enum TGCPatchPanelType { NOPP=-1,
-                         WTPP=0, WDPP, STPP, SDPP, WIPP, SIPP,
-                         TotalNumPatchPanelType };
-
-
 class TGCSector
 {
  public:
-  enum{ NumberOfHighPtBoardType = 2 };
-  enum{ NumberOfPatchPanelType = 6 };
+  enum TGCHighPtBoardType { WHPB=0, SHPB, NumberOfHighPtBoardType };
+  enum TGCPatchPanelType { NOPP=-1,
+                           WTPP=0, WDPP, STPP, SDPP, WIPP, SIPP,
+                           NumberOfPatchPanelType };
 
  public:
   TGCSector(TGCArguments*,
@@ -176,6 +173,11 @@ TGCRegionType TGCSector::getRegionType() const
 inline
 int TGCSector::getId() const
 { return m_id;}
+
+inline TGCSector::TGCPatchPanelType operator++(TGCSector::TGCPatchPanelType &rs, int)
+{
+    return rs = static_cast<TGCSector::TGCPatchPanelType>(rs + 1);
+}
 
 } //end of namespace bracket
 

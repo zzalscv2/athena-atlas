@@ -18,6 +18,14 @@
 
 #include "TMVA/Reader.h"
 
+#include "TrigInDetToolInterfaces/ITrigSpacePointConversionTool.h"
+#include "TrigT1Interfaces/RecJetRoI.h"
+#include "TrigInDetEvent/TrigSiSpacePointBase.h"
+#include "TrkPrepRawData/PrepRawData.h"
+#include "TrkRIO_OnTrack/RIO_OnTrack.h"
+#include "xAODTrigger/TrigCompositeAuxContainer.h"
+#include "BeamSpotConditionsData/BeamSpotData.h"
+
 /**
  * @class TrigHitDVHypoAlg
  * @brief Implements Hypo selection on triggering displaced vertex
@@ -29,20 +37,19 @@ class TrigHitDVHypoAlg : public ::HypoBase
 public:
 
    TrigHitDVHypoAlg( const std::string& name, ISvcLocator* pSvcLocator );
-
    virtual StatusCode  initialize() override;
    virtual StatusCode  execute(const EventContext& context) const override;
 
 private:
 
+   ToolHandle<ITrigSpacePointConversionTool> m_spacePointTool;
+
    ToolHandleArray< TrigHitDVHypoTool >   m_hypoTools     {this, "HypoTools", {}, "Tools to perform selection"};
 
    // EDMs
    SG::ReadHandleKey< xAOD::JetContainer >          m_jetsKey      {this, "Jets",      "HLT_AntiKt4EMTopoJets_subjesIS", ""};
-   SG::ReadHandleKey< xAOD::TrigCompositeContainer> m_hitDVSeedKey {this, "HitDVSeed", "HLT_HitDVSeed", ""};
-   SG::ReadHandleKey< xAOD::TrigCompositeContainer> m_hitDVTrkKey  {this, "HitDVTrk",  "HLT_HitDVTrk",  ""};
-   SG::ReadHandleKey< xAOD::TrigCompositeContainer> m_hitDVSPKey   {this, "HitDVSP",   "HLT_HitDVSP",   ""};
    SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_hitDVKey     {this, "HitDV",     "HLT_HitDV",     ""};
+   SG::ReadHandleKey< TrackCollection>              m_tracksKey   {this, "HitDVTracks",   "HLT_IDTrkTrack_FS_FTF",   ""};
 
    // Luminosity related
    ToolHandle<ILumiBlockMuTool> m_lumiBlockMuTool;
@@ -93,6 +100,25 @@ private:
    // parameters
    int m_tools_lowest_jetEt;
    int m_tools_loosest_wp;
+
+   //Ctrl Flags
+   bool m_useBeamSpot;
+
+   //Vertex
+   //bool m_doHitDV;
+   bool m_doHitDV_Seeding = true;
+
+   SG::ReadHandleKey<DataVector<LVL1::RecJetRoI>> m_recJetRoiCollectionKey {this, "RecJetRoI", "", ""};
+   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+
+   StatusCode findSPSeeds( const EventContext& ctx,
+					     const std::vector<float>& v_sp_eta, const std::vector<float>& v_sp_phi,
+					     const std::vector<int>& v_sp_layer, const std::vector<int>& v_sp_usedTrkId,
+					     std::vector<float>& seeds_eta, std::vector<float>& seeds_phi ) const;
+   StatusCode findHitDV(const EventContext& ctx, const std::vector<TrigSiSpacePointBase>& convertedSpacePoints,
+					  const DataVector<Trk::Track> tracks, DataVector<xAOD::TrigComposite_v1>& hitDVSeedContainer, 
+                 DataVector<xAOD::TrigComposite_v1>& hitDVTrkContainer, 
+                 DataVector<xAOD::TrigComposite_v1>& hitDVSPContainer) const;
 };
 
 #endif //> !TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H

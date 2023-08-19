@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCSSCControllerOut_hh
@@ -16,7 +16,7 @@ class TGCSSCControllerOut
   enum {MaxNumberOfChamberInR = 5};
 
  public: 
-  TGCSSCControllerOut(TGCRegionType region=ENDCAP);
+  TGCSSCControllerOut(TGCRegionType region = TGCRegionType::ENDCAP);
   
   bool hasChamberBoundary(int ssc) const;
   bool hasUpperChamber(int ssc) const;
@@ -52,7 +52,7 @@ protected:
   int getNumberOfChamberInR() const;
   int getNumberOfSubSectorCluster() const;
 private:
-  static const int s_chamber[TotalNumTGCRegionType][LVL1TGC::kNMaxSSC];
+  static const int s_chamber[NumberOfRegionType][LVL1TGC::kNMaxSSC];
   
   TGCRegionType m_regionType;
 
@@ -70,7 +70,7 @@ private:
 inline
 bool TGCSSCControllerOut::hasChamberBoundary(int ssc) const
 {
-  if(m_regionType==ENDCAP)
+  if (m_regionType == TGCRegionType::ENDCAP)
     if(ssc==2||ssc==4||ssc==6||ssc==12) return true;
   
   return false;
@@ -105,19 +105,19 @@ int TGCSSCControllerOut::getOredChamberNumber(int ssc) const
 inline
  int TGCSSCControllerOut::getChamberNumber(int ssc) const
 {
-  if (m_regionType==FORWARD) return s_chamber[0][ssc];
+  if (m_regionType == TGCRegionType::FORWARD) return s_chamber[0][ssc];
   else  return s_chamber[1][ssc];
 }
 inline
  int TGCSSCControllerOut::getNumberOfChamberInR() const
 {
-  if (m_regionType==FORWARD) return 1;
+  if (m_regionType == TGCRegionType::FORWARD) return 1;
   else  return 5;
 }
 inline
  int TGCSSCControllerOut::getNumberOfSubSectorCluster() const
 {
-  return (m_regionType==FORWARD) ? 8 : LVL1TGC::kNMaxSSC;
+  return (m_regionType == TGCRegionType::FORWARD) ? 8 : LVL1TGC::kNMaxSSC;
 }
 inline
  int TGCSSCControllerOut::getR(int ssc) const 

@@ -50,6 +50,7 @@ include ("RecExCommission/readesd.py")
 ## Calo details:
 theCaloTileRetriever.DoTileCellDetails = True
 theCaloTileRetriever.DoTileDigit = True
+theCaloMBTSRetriever.DoMBTSCellDetails = True
 theCaloMBTSRetriever.DoMBTSDigits = True
 theCaloFCalRetriever.DoFCalCellDetails = True
 theCaloLArRetriever.DoLArCellDetails = True

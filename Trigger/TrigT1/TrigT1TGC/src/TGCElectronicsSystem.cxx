@@ -98,12 +98,12 @@ LVL1TGCTrigger::TGCRegionType TGCElectronicsSystem::getRegionType(int mod) const
   //  14     13   12    Forward
 
   if(mod<9)
-    if(mod%3==2) return LVL1TGCTrigger::Forward;
-    else return LVL1TGCTrigger::Endcap;
+    if(mod%3==2) return LVL1TGCTrigger::TGCRegionType::FORWARD;
+    else return LVL1TGCTrigger::TGCRegionType::ENDCAP;
   else if(mod<12)
-    return LVL1TGCTrigger::Endcap;
+    return LVL1TGCTrigger::TGCRegionType::ENDCAP;
   else
-    return LVL1TGCTrigger::Forward;
+    return LVL1TGCTrigger::TGCRegionType::FORWARD;
 }
 
 TGCForwardBackwardType TGCElectronicsSystem::getForwardBackward(int side, int oct, int mod) const

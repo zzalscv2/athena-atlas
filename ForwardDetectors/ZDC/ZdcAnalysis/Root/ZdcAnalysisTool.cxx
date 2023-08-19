@@ -15,6 +15,7 @@
 #include "PathResolver/PathResolver.h"
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/WriteHandle.h>
+#include <AsgDataHandles/WriteDecorHandle.h>
 
 namespace ZDC
 {
@@ -1167,12 +1168,76 @@ StatusCode ZdcAnalysisTool::initialize()
 
     ATH_CHECK( m_eventInfoKey.initialize());
 
+    // Initialize decorations
+
+    m_zdcModuleAmplitude = m_zdcModuleContainerName+".Amplitude"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleAmplitude.initialize());
+    m_zdcModuleCalibEnergy = m_zdcModuleContainerName+".CalibEnergy"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleCalibEnergy.initialize());
+    m_zdcModuleCalibTime = m_zdcModuleContainerName+".CalibTime"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleCalibTime.initialize());
+    m_zdcModuleStatus = m_zdcModuleContainerName+".Status"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleStatus.initialize());
+    m_zdcModuleTime = m_zdcModuleContainerName+".Time"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleTime.initialize());
+    m_zdcModuleChisq = m_zdcModuleContainerName+".Chisq"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleChisq.initialize());
+    m_zdcModuleFitAmp = m_zdcModuleContainerName+".FitAmp"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleFitAmp.initialize());
+    m_zdcModuleFitAmpError = m_zdcModuleContainerName+".FitAmpError"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleFitAmpError.initialize());
+    m_zdcModuleFitT0 = m_zdcModuleContainerName+".FitT0"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleFitT0.initialize());
+    m_zdcModuleBkgdMaxFraction = m_zdcModuleContainerName+".BkgdMaxFraction"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleBkgdMaxFraction.initialize());
+    m_zdcModulePreSampleAmp = m_zdcModuleContainerName+".PreSampleAmp"+m_auxSuffix;
+    ATH_CHECK( m_zdcModulePreSampleAmp.initialize());
+    m_zdcModulePresample = m_zdcModuleContainerName+".Presample"+m_auxSuffix;
+    ATH_CHECK( m_zdcModulePresample.initialize());
+    m_zdcModuleMinDeriv2nd = m_zdcModuleContainerName+".MinDeriv2nd"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleMinDeriv2nd.initialize());
+    m_zdcModuleMaxADC = m_zdcModuleContainerName+".MaxADC"+m_auxSuffix;
+    ATH_CHECK( m_zdcModuleMaxADC.initialize());
+    m_rpdChannelAmplitude = m_zdcModuleContainerName+".RPDChannelAmplitude"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelAmplitude.initialize());
+    m_rpdChannelAmplitudeCalib = m_zdcModuleContainerName+".RPDChannelAmplitudeCalib"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelAmplitudeCalib.initialize());
+    m_rpdChannelMaxSample = m_zdcModuleContainerName+".RPDChannelMaxSample"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelMaxSample.initialize());
+    m_rpdChannelStatus = m_zdcModuleContainerName+".RPDChannelStatus"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelStatus.initialize());
+
+    m_zdcSumUncalibSum = m_zdcSumContainerName+".UncalibSum"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumUncalibSum.initialize());
+    m_zdcSumCalibEnergy = m_zdcSumContainerName+".CalibEnergy"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumCalibEnergy.initialize());
+    m_zdcSumCalibEnergyErr = m_zdcSumContainerName+".CalibEnergyErr"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumCalibEnergyErr.initialize());
+    m_zdcSumUncalibSumErr = m_zdcSumContainerName+".UncalibSumErr"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumUncalibSumErr.initialize());
+    m_zdcSumFinalEnergy = m_zdcSumContainerName+".FinalEnergy"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumFinalEnergy.initialize());
+    m_zdcSumAverageTime = m_zdcSumContainerName+".AverageTime"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumAverageTime.initialize());
+    m_zdcSumStatus = m_zdcSumContainerName+".Status"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumStatus.initialize());
+    m_zdcSumModuleMask = m_zdcSumContainerName+".ModuleMask"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumModuleMask.initialize());
+    m_zdcSumRPDStatus = m_zdcSumContainerName+".RPDStatus"+m_auxSuffix;
+    ATH_CHECK( m_zdcSumRPDStatus.initialize());
+
     if (m_writeAux && m_auxSuffix != "") {
         ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);
     }
 
     m_init = true;
+
     return StatusCode::SUCCESS;
+}
+  
+void ZdcAnalysisTool::initializeDecorations()
+{
+
 }
 
 StatusCode ZdcAnalysisTool::configureNewRun(unsigned int runNumber)
@@ -1239,9 +1304,12 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
   ATH_MSG_DEBUG("LB=" << calibLumiBlock);
   
   m_zdcDataAnalyzer->StartEvent(calibLumiBlock);
-  
-  m_rpdDataAnalyzer.at(0)->reset();
-  m_rpdDataAnalyzer.at(1)->reset();
+
+  if (m_LHCRun==3)
+    {
+      m_rpdDataAnalyzer.at(0)->reset();
+      m_rpdDataAnalyzer.at(1)->reset();
+    }
 
   const std::vector<unsigned short>* adcUndelayLG = 0;
   const std::vector<unsigned short>* adcUndelayHG = 0;
@@ -1358,15 +1426,50 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
       }
     
     // analyze RPD data only once all channels have been loaded
-    m_rpdDataAnalyzer.at(0)->analyzeData();
-    m_rpdDataAnalyzer.at(1)->analyzeData();
+    if (m_LHCRun==3)
+      {
+	m_rpdDataAnalyzer.at(0)->analyzeData();
+	m_rpdDataAnalyzer.at(1)->analyzeData();
+      }
 
     ATH_MSG_DEBUG("Finishing event processing");
     
     m_zdcDataAnalyzer->FinishEvent();
     
     ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
+
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmplitude(m_zdcModuleAmplitude);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleCalibEnergy(m_zdcModuleCalibEnergy);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleCalibTime(m_zdcModuleCalibTime);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcModuleStatus(m_zdcModuleStatus);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleTime(m_zdcModuleTime);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleChisq(m_zdcModuleChisq);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitAmp(m_zdcModuleFitAmp);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitAmpError(m_zdcModuleFitAmpError);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleFitT0(m_zdcModuleFitT0);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleBkgdMaxFraction(m_zdcModuleBkgdMaxFraction);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePreSampleAmp(m_zdcModulePreSampleAmp);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePresample(m_zdcModulePresample);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMinDeriv2nd(m_zdcModuleMinDeriv2nd);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitude(m_rpdChannelAmplitude);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitudeCalib(m_rpdChannelAmplitudeCalib);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelMaxSample(m_rpdChannelMaxSample);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelStatus(m_rpdChannelStatus);
     
+    // CalibTime
+    // Status
+    // Time
+    // Chisq
+    // FitAmp
+    // FitAmpError
+    // FitT0
+    // BkgdMaxFraction
+    // PreSampleAmp
+    // Presample
+    // MinDeriv2nd
+    // MaxADC
+
     for (const auto zdcModule : moduleContainer)
     {
         int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
@@ -1376,42 +1479,42 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
           // this is the RPD
           if (m_writeAux) {
             int rpdChannel = zdcModule->zdcChannel(); // channel numbers are fixed in mapping, numbered 0-15
-            zdcModule->auxdecor<float>("RPDChannelAmplitude" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChSumADC(rpdChannel);
-            // zdcModule->auxdecor<float>("RPDChannelAmplitudeCalib" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChSumADCcalib(rpdChannel);
-            zdcModule->auxdecor<unsigned int>("RPDChannelMaxSample" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
-            zdcModule->auxdecor<unsigned int>("RPDChannelStatus" + m_auxSuffix) = m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
+	    rpdChannelAmplitude(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumADC(rpdChannel);
+	    rpdChannelAmplitudeCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumADCcalib(rpdChannel);
+	    rpdChannelMaxSample(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
+	    rpdChannelStatus(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
           }
         } else if (zdcModule->zdcType() == 0) {
           // this is the main ZDC
           if (m_writeAux) {
               if (m_doCalib) {
                   float calibEnergy = m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod);
-                  zdcModule->auxdecor<float>("CalibEnergy" + m_auxSuffix) = calibEnergy;
-                  zdcModule->auxdecor<float>("CalibTime" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleCalibTime(side, mod);
+		  zdcModuleCalibEnergy(*zdcModule) = calibEnergy;
+		  zdcModuleCalibTime(*zdcModule) = m_zdcDataAnalyzer->GetModuleCalibTime(side, mod);
               }
               else
               {
-                  zdcModule->auxdecor<float>("CalibEnergy" + m_auxSuffix) = -1000;
-                  zdcModule->auxdecor<float>("CalibTime" + m_auxSuffix) = -1000;
+		  zdcModuleCalibEnergy(*zdcModule) = -1000;
+		  zdcModuleCalibTime(*zdcModule) = -1000;
               }
 
-              zdcModule->auxdecor<unsigned int>("Status" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleStatus(side, mod);
-              zdcModule->auxdecor<float>("Amplitude" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleAmplitude(side, mod);
-              zdcModule->auxdecor<float>("Time" + m_auxSuffix) = m_zdcDataAnalyzer->GetModuleTime(side, mod);
+	      zdcModuleAmplitude(*zdcModule) = m_zdcDataAnalyzer->GetModuleAmplitude(side, mod);
+	      zdcModuleStatus(*zdcModule) = m_zdcDataAnalyzer->GetModuleStatus(side, mod);
+	      zdcModuleTime(*zdcModule) = m_zdcDataAnalyzer->GetModuleTime(side, mod);
 
               const ZDCPulseAnalyzer* pulseAna_p = m_zdcDataAnalyzer->GetPulseAnalyzer(side, mod);
-              zdcModule->auxdecor<float>("Chisq" + m_auxSuffix) = pulseAna_p->GetChisq();
-              zdcModule->auxdecor<float>("FitAmp" + m_auxSuffix) = pulseAna_p->GetFitAmplitude();
-              zdcModule->auxdecor<float>("FitAmpError" + m_auxSuffix) = pulseAna_p->GetAmpError();
-              zdcModule->auxdecor<float>("FitT0" + m_auxSuffix) = pulseAna_p->GetFitT0();
-              zdcModule->auxdecor<float>("BkgdMaxFraction" + m_auxSuffix) = pulseAna_p->GetBkgdMaxFraction();
-              zdcModule->auxdecor<float>("PreSampleAmp" + m_auxSuffix) = pulseAna_p->GetPreSampleAmp();
-              zdcModule->auxdecor<float>("Presample" + m_auxSuffix) = pulseAna_p->GetPresample();
-              zdcModule->auxdecor<float>("MinDeriv2nd" + m_auxSuffix) = pulseAna_p->GetMinDeriv2nd();
-              zdcModule->auxdecor<float>("MaxADC" + m_auxSuffix) = pulseAna_p->GetMaxADC();
+              zdcModuleChisq(*zdcModule) = pulseAna_p->GetChisq();
+	      zdcModuleFitAmp(*zdcModule) = pulseAna_p->GetFitAmplitude();
+	      zdcModuleFitAmpError(*zdcModule) =  pulseAna_p->GetAmpError();
+	      zdcModuleFitT0(*zdcModule) = pulseAna_p->GetFitT0();
+	      zdcModuleBkgdMaxFraction(*zdcModule) = pulseAna_p->GetBkgdMaxFraction();
+              zdcModulePreSampleAmp(*zdcModule) = pulseAna_p->GetPreSampleAmp();
+	      zdcModulePresample(*zdcModule) = pulseAna_p->GetPresample();
+	      zdcModuleMinDeriv2nd(*zdcModule) = pulseAna_p->GetMinDeriv2nd();
+	      zdcModuleMaxADC(*zdcModule) = pulseAna_p->GetMaxADC();
             }
-            ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
-                            << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));
+	  //ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
+          //                  << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));
         }
     }
 
@@ -1419,28 +1522,39 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     // In Run 3 - we have to assume the container already exists (since it is needed to store the per-side trigger info)
     // reprocessing will add new variables with the suffix
 
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumUncalibSum(m_zdcSumUncalibSum);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumUncalibSumErr(m_zdcSumUncalibSumErr);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumCalibEnergy(m_zdcSumCalibEnergy);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumCalibEnergyErr(m_zdcSumCalibEnergyErr);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumFinalEnergy(m_zdcSumFinalEnergy);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcSumAverageTime(m_zdcSumAverageTime);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumStatus(m_zdcSumStatus);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumModuleMask(m_zdcSumModuleMask);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> zdcSumRPDStatus(m_zdcSumRPDStatus);
+
     for (const auto zdc_sum: moduleSumContainer)
       {
 	int iside = (zdc_sum->zdcSide()==-1) ? 0 : 1;
-	
-	float calibEnergy = getCalibModuleSum(iside);
-	zdc_sum->auxdecor<float>("CalibEnergy"+m_auxSuffix) = calibEnergy;
-	float calibEnergyErr = getCalibModuleSumErr(iside);
-	zdc_sum->auxdecor<float>("CalibEnergyErr"+m_auxSuffix) = calibEnergyErr;
-	
+
 	float uncalibSum = getUncalibModuleSum(iside);
-	zdc_sum->auxdecor<float>("UncalibSum"+m_auxSuffix) = uncalibSum;
+	zdcSumUncalibSum(*zdc_sum) = uncalibSum;
 	float uncalibSumErr = getUncalibModuleSumErr(iside);
-	zdc_sum->auxdecor<float>("UncalibSumErr"+m_auxSuffix) = uncalibSumErr;
-	
+	zdcSumUncalibSumErr(*zdc_sum) = uncalibSumErr;
+
+	float calibEnergy = getCalibModuleSum(iside);
+	zdcSumCalibEnergy(*zdc_sum) = calibEnergy;
+	float calibEnergyErr = getCalibModuleSumErr(iside);
+	zdcSumCalibEnergyErr(*zdc_sum) = calibEnergyErr;
+
 	float finalEnergy = calibEnergy;
-	
-	zdc_sum->auxdecor<float>("FinalEnergy"+m_auxSuffix) = finalEnergy;
-	zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
-	zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
-	zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
-	
-  zdc_sum->auxdecor<unsigned int>("RPDStatus"+m_auxSuffix) = m_rpdDataAnalyzer.at(iside)->getSideStatus();
+	zdcSumFinalEnergy(*zdc_sum) = finalEnergy;
+	zdcSumAverageTime(*zdc_sum) = getAverageTime(iside);
+	zdcSumStatus(*zdc_sum) = !sideFailed(iside);
+	zdcSumModuleMask(*zdc_sum) = (getModuleMask() >> (4 * iside)) & 0xF;
+	if (m_LHCRun==3)
+	  {
+	    zdcSumRPDStatus(*zdc_sum) = m_rpdDataAnalyzer.at(iside)->getSideStatus();
+	  }
       }
 
     return StatusCode::SUCCESS;

@@ -86,7 +86,6 @@ def MuDataPrepViewDataVerifierCfg(flags):
                  ( 'TgcRdo_Cache' , 'StoreGateSvc+TgcRdoCache' ),
                  ( 'MdtCsm_Cache' , 'StoreGateSvc+MdtCsmRdoCache' ),
                  ( 'RpcPad_Cache' , 'StoreGateSvc+RpcRdoCache' ),
-                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  ),
                  ( 'RpcCoinDataCollection_Cache' , 'StoreGateSvc+RpcCoinCache' ),
                  ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'PriorBC' ),
                  ( 'TgcPrepDataCollection_Cache' , 'StoreGateSvc+' + MuonPrdCacheNames.TgcCache + 'NextBC' ),
@@ -378,7 +377,7 @@ def VDVEFMuCBCfg(flags, RoIs, name):
                  ( 'Muon::RpcPrepDataContainer' , 'StoreGateSvc+RPC_Measurements' ),
                  ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),
                  ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
+                 ]
   if "FS" in name:
     dataObjects +=[( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates_FS' )]
   else:
@@ -389,10 +388,6 @@ def VDVEFMuCBCfg(flags, RoIs, name):
   if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM: 
     dataObjects += [( 'Muon::MMPrepDataContainer' , 'StoreGateSvc+MM_Measurements'),
                     ( 'Muon::sTgcPrepDataContainer' , 'StoreGateSvc+STGC_Measurements') ]
-  if flags.Input.isMC:
-    dataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-  else:
-    dataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = "VDVMuEFCB_"+name,
                                                DataObjects = dataObjects)
@@ -406,13 +401,11 @@ def VDVPrecMuTrkCfg(flags, name):
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) ),
-                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' ),
-                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
-
+                 ]
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                     ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
-                    ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' ) ]
+                    ]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName,
                                                DataObjects = dataObjects)
@@ -431,13 +424,6 @@ def muEFCBRecoSequence( flags, RoIs, name ):
   muEFCBRecoSequence = parOR("efcbViewNode_"+name)
 
   muEFCBRecoSequence += algorithmCAToGlobalWrapper(VDVEFMuCBCfg,flags, RoIs, name)
-
-  from AthenaCommon.AlgSequence import AlgSequence
-  topSequence = AlgSequence()
-
-  if flags.Input.isMC:
-    topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-
 
   from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
   signatureName = 'muon{}'.format( 'FS' if 'FS' in name else 'LRT' if 'LRT' in name else '' ) 
@@ -623,16 +609,8 @@ def efmuisoRecoSequence( flags, RoIs, Muons, doMSiso=False ):
   viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
   viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+MUEFIsoRoIs'+name ),
                              ( 'xAOD::MuonContainer' , 'StoreGateSvc+IsoViewMuons'+name ),
-                             ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )]
+                             ]
 
-  # Make sure required objects are still available at whole-event level
-  if flags.Input.isMC:
-    from AthenaCommon.AlgSequence import AlgSequence
-    topSequence = AlgSequence()
-    viewVerify.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-    topSequence.SGInputLoader.Load += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
-  else:
-    viewVerify.DataObjects += [( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
 
   for viewAlg in viewAlgs:
     efmuisoRecoSequence += viewAlg

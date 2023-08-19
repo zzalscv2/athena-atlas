@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCHighPtBoardOut.h"
@@ -13,7 +13,7 @@ namespace LVL1TGCTrigger {
 
 TGCHighPtBoard::TGCHighPtBoard():
   m_highPtChipOut(0), m_highPtBoardOut(0), m_lowPtBoardOut(0),
-  m_id(-1),m_bid(-1),m_idSectorLogic(-1),m_type(-1),m_region(-1),
+  m_id(-1),m_bid(-1),m_idSectorLogic(-1),m_type(-1),
   m_priorSign(1),m_maxNumberOfHPBData(2),
   m_maxDev(0), m_maxDevOred(0),
   m_nChOfTSBOut(0), m_nChOfDSBOut(0), m_nChOfDSBHit(0), m_nChOfTSBHit(0), 
@@ -89,7 +89,7 @@ void TGCHighPtBoard::clockIn(int bidIn)
     std::cout << "#TGCHighPtBoard::clockIn  BID:" << m_bid 
 	      << " TYPE:" << ((m_type==WHPB) ? "WHPB" : "SHPB" )
 	      << " ID:" << m_id 
-	      << " REGION:" << ( (m_region==FORWARD) ? "FWD" : "END")
+	      << " REGION:" << ( (m_region==TGCRegionType::FORWARD) ? "FWD" : "END")
 	      <<std::endl;
 #endif
     createHighPtChipOut();	//Feeds to SL
@@ -422,7 +422,7 @@ void TGCHighPtBoard::showResult() const
   std::cout.width(2);
   std::cout << " type=" << ((m_type==WHPB) ? "WHPB" : "SHPB" );
   std::cout.width(2);
-  std::cout << " region=" << ( (m_region==FORWARD) ? "FWD" : "END");
+  std::cout << " region=" << ( (m_region==TGCRegionType::FORWARD) ? "FWD" : "END");
   std::cout.width(2);
   std::cout << " id=" << m_id << std::endl;
   for( j=0; j<s_NumberOfTSBOut; j+=1){
@@ -434,7 +434,7 @@ void TGCHighPtBoard::showResult() const
             std::cout.width(2);
             std::cout << "type=" << m_TSBOut[i][j]->getOrigin()->getTypeName(m_TSBOut[i][j]->getOrigin()->getType());
             std::cout.width(2);
-            std::cout << " region=" << ((m_TSBOut[i][j]->getOrigin()->getRegion()==Endcap) ? "END" : "FWD");
+            std::cout << " region=" << ((m_TSBOut[i][j]->getOrigin()->getRegion()==TGCRegionType::ENDCAP) ? "END" : "FWD");
             std::cout.width(2);
             std::cout << " id=" <<m_TSBOut[i][j]->getOrigin()->getId();
             std::cout.width(2);
@@ -455,7 +455,7 @@ void TGCHighPtBoard::showResult() const
             std::cout.width(2);
             std::cout << "type=" << m_DSBOut[i][j]->getOrigin()->getTypeName(m_DSBOut[i][j]->getOrigin()->getType());
             std::cout.width(2);
-            std::cout << " region=" <<((m_DSBOut[i][j]->getOrigin()->getRegion()==Endcap) ? "END" : "FWD");
+            std::cout << " region=" <<((m_DSBOut[i][j]->getOrigin()->getRegion()==TGCRegionType::ENDCAP) ? "END" : "FWD");
             std::cout.width(2);
             std::cout << " id=" <<m_DSBOut[i][j]->getOrigin()->getId();
             std::cout.width(2);
@@ -479,7 +479,7 @@ void TGCHighPtBoard::showResult() const
   std::cout.width(2);
   std::cout << " type=" << ((m_type==WHPB) ? "WHPB" : "SHPB" );
   std::cout.width(2);
-  std::cout << " region=" << ( (m_region==FORWARD) ? "FWD" : "END");
+  std::cout << " region=" << ( (m_region==TGCRegionType::FORWARD) ? "FWD" : "END");
   std::cout.width(2);
   std::cout << " id=" << m_id << std::endl;
   for( chip=0; chip<NumberOfChip; chip+=1){
@@ -520,7 +520,7 @@ void TGCHighPtBoard::showResult() const
   std::cout.width(2);
   std::cout << " type=" << ((m_type==WHPB) ? "WHPB" : "SHPB" );
   std::cout.width(2);
-  std::cout << " region=" << ( (m_region==FORWARD) ? "FWD" : "END");
+  std::cout << " region=" << ( (m_region==TGCRegionType::FORWARD) ? "FWD" : "END");
   std::cout.width(2);
   std::cout << " id=" << m_id << std::endl;
   for( chip=0; chip<NumberOfChip; chip+=1){

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCDoubletSB.h"
@@ -16,7 +16,7 @@ TGCDoubletSB::TGCDoubletSB()
  : TGCSlaveBoard(),
    m_priorSign(1),m_numberOfData(2),m_nChInBlock(32),
    m_maxDev(0),m_posMaxDev(0),m_negMaxDev(0),m_nChAdj(0),m_iChBase(0),
-   m_MatrixOverlap(4),m_SType(WIREGROUP)
+   m_MatrixOverlap(4), m_SType(WIRE)
 {
 }
 

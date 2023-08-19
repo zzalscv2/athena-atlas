@@ -196,14 +196,7 @@ def _precTrackSeq(flags,name,is_probe_leg=False):
                                  ( 'xAOD::TauTrackContainer' , 'StoreGateSvc+HLT_tautrack_dummy' ),
                                  ( 'xAOD::TauJetContainer' , 'StoreGateSvc+HLT_TrigTauRecMerged_CaloMVAOnly' ),
                                  ( 'xAOD::IParticleContainer' , 'StoreGateSvc+%s' % flags.Tracking.ActiveConfig.tracks_FTF ),
-                                 ( 'InDet::TRT_DriftCircleContainerCache' , 'StoreGateSvc+TRT_DriftCircleCache'  )])    
-
-    if not flags.Input.isMC:
-      ViewVerifyTrk.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ) ,
-                                 ( 'TRT_RDO_Cache' , 'StoreGateSvc+TrtRDOCache' )]
-    else:
-      ViewVerifyTrk.DataObjects += [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
+                                 ])    
 
     recoAcc.addRecoAlgo(ViewVerifyTrk)
 

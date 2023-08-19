@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCStripHighPtBoard.h"
@@ -23,7 +23,7 @@ TGCStripHighPtBoard::TGCStripHighPtBoard():
 
 void TGCStripHighPtBoard::setDecoderIn()
 {
-  if(m_region == Endcap){
+  if (m_region == TGCRegionType::ENDCAP) {
       m_decoderInDSB[ChipA][0] = m_DSBOut[ChipA][0];
       m_decoderInDSB[ChipA][1] = m_DSBOut[ChipA][1];
       m_decoderInDSB[ChipA][2] = m_DSBOut[ChipA][2];
@@ -44,7 +44,7 @@ void TGCStripHighPtBoard::setDecoderIn()
 
   }
   
-  if(m_region == Forward) {
+  if (m_region == TGCRegionType::FORWARD) {
       m_decoderInDSB[ChipA][0] = 0;
       m_decoderInDSB[ChipA][1] = m_DSBOut[ChipA][1];
       m_decoderInDSB[ChipA][2] = 0;
@@ -69,7 +69,7 @@ void TGCStripHighPtBoard::setDecoderIn()
 
 void TGCStripHighPtBoard::clearDecoderIn()
 {
-  if(m_region == Endcap){
+  if (m_region == TGCRegionType::ENDCAP) {
       if(m_decoderInTSB[ChipA][0]) delete m_decoderInTSB[ChipA][0];
       if(m_decoderInTSB[ChipA][1]) delete m_decoderInTSB[ChipA][1];
       if(m_decoderInTSB[ChipA][2]) delete m_decoderInTSB[ChipA][2];

@@ -29,8 +29,8 @@ private:
   TGCNSWCoincidenceMap() = delete;// hide default constructor
   enum {N_dEta=64,N_dPhi=16,N_Dtheta=32,N_PT_THRESH=15};//6bit eta,4bit phi,5bit Dtheta, 4bit pT
   enum ReadCW_Type{EtaPhi_CW=0,EtaDtheta_CW};
-  std::map<TGCRegionType,int> m_NumberOfEtaRaw={{ENDCAP,37},{FORWARD,16}};
-  std::map<TGCRegionType,int> m_NumberOfRoI={{ENDCAP, LVL1TGC::kNumberOfEndcapRoI},{FORWARD,64}};
+  std::map<TGCRegionType,int> m_NumberOfEtaRaw = {{TGCRegionType::ENDCAP,37}, {TGCRegionType::FORWARD,16}};
+  std::map<TGCRegionType,int> m_NumberOfRoI = {{TGCRegionType::ENDCAP, LVL1TGC::kNumberOfEndcapRoI}, {TGCRegionType::FORWARD,64}};
 
 public:
   TGCNSWCoincidenceMap(TGCArguments* tgcargs,const std::string& version,int side,int oct,int mod);

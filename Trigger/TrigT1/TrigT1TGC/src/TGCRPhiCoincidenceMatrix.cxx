@@ -75,7 +75,7 @@ TGCRPhiCoincidenceOut* TGCRPhiCoincidenceMatrix::doCoincidence()
     int chargeOut = 2;
     int CoincidenceTypeOut=-1;
 
-    if(m_sectorLogic->getRegion()==Endcap){
+    if (m_sectorLogic->getRegion() == TGCRegionType::ENDCAP) {
       subsector = 4*(2*m_SSCId+m_r-1)+m_phi[j];
     } else {
       subsector = 4*(2*m_SSCId+m_r)+m_phi[j];

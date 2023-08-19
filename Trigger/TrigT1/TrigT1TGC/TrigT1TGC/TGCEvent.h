@@ -1,13 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// ====================================================================
-/*
-        TGCEvent.h
-                                      QCJP, 1999
-*/
-// ====================================================================
 #ifndef TGC_EVENT_H
 #define TGC_EVENT_H
 
@@ -18,22 +12,14 @@ namespace LVL1TGCTrigger {
 
 class TGCASDOut;
 
-// ====================================================================
-//
-// class definition
-//
-// ====================================================================
- 
 class TGCEvent {
-protected:
-  int m_eventNumber;
+ protected:
+  int m_eventNumber{0};
   std::vector<TGCASDOut*> m_vecASDOut;
 
-public:
-//  double eta;//for test
-  TGCEvent();
-
-  ~TGCEvent();
+ public:
+  TGCEvent() = default;
+  ~TGCEvent() = default;
  
   TGCEvent(const TGCEvent& right)
   {
@@ -48,25 +34,11 @@ public:
     return *this;
   }
  
-  int operator==(const TGCEvent& right) const
-  {
-    return (this==&right);
-  }
- 
-  int operator!=(const TGCEvent& right) const
-  {
-    return (this!=&right);
-  }
-
   // set functions
   void SetEventNumber(int num) { m_eventNumber= num; }
 
-  TGCASDOut* NewASDOut(TGCIndex tgcindex, int ilyr, 
-		       TGCSignalType sigtype=WIREGROUP, int id=-1, 
-		       double tof=0);
-
   TGCASDOut* NewASDOut(TGCReadoutIndex tgcindex, 
-		       TGCSignalType sigtype=WIREGROUP, int id=-1, 
+		       TGCSignalType sigtype=WIRE, int id=-1, 
 		       double tof=0);
 
   // get functions

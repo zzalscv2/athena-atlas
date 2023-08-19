@@ -5,43 +5,52 @@
 from __future__ import print_function
 
 import DataQualityUtils.DQHistogramMergeMod as mod
-import sys, os
+import os
+import argparse
 
 ## Get usable signal handlers
 os.environ['TDAQ_ERS_NO_SIGNAL_HANDLERS'] = '1'
 
-def usage():
-  cmd = sys.argv[0].split("/")[-1]
-  print ("Usage: ", cmd, "<input_list_file_name> <merged_file_name> [run_post_processing] [is_incremental_merge] [output_file_compression_level] [debugLevel]")
-  print ("  run_post_processing False/True/0/1 default=0")
-  print ("  is_incremental_merge False/True/0/1 default=0")
-  print ("  output_file_compression_level see ROOT TFile doc. default=1")
-  print ("  debugLevel integer default=0")
-  print ("  You need to pass all preceding parameters to set a parameter.")
+def fakebool(x):
+  return bool(eval(x))
 
 ########################################
 
 if __name__ == "__main__":
-  argc = len(sys.argv)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('input_list_file_name', help='Text file containing input file list (one file per line)')
+  parser.add_argument('merged_file_name', help='Name of output merged ROOT file')
+  parser.add_argument('run_post_processing', nargs='?', type=fakebool, default=False, help='False/True/0/1 default=0')
+  parser.add_argument('is_incremental_merge', nargs='?', type=fakebool, default=False, help='False/True/0/1 default=0')
+  parser.add_argument('output_file_compression_level', nargs='?', type=int, default=1, help='see ROOT TFile doc. default=1')
+  parser.add_argument('debugLevel', nargs='?', type=int, default=0, help='integer default=0')
+  parser.add_argument('--excludeDir', help='Regex pattern for directories to exclude from merge')
+  parser.add_argument('--excludeHist', help='Regex pattern for histogram names to exclude from merge\n'
+                                            'Note that this is just the name - paths cannot be specified')
 
-  if argc < 3 or argc > 7:
-    usage()
-    sys.exit(0)
+  args = parser.parse_args()
+  print(args)
 
-  runPostProcessing = False
-  if argc >= 4:
-    runPostProcessing = sys.argv[3] in ["True", "1"]
+  runPostProcessing = args.run_post_processing
 
-  isIncremental = False
-  if argc >= 5:
-    isIncremental = sys.argv[4] in ["True", "1"]
+  isIncremental = args.is_incremental_merge
 
-  compressionLevel = 1
-  if argc >= 6:
-    compressionLevel = int(sys.argv[5])
+  compressionLevel = args.output_file_compression_level
 
-  debugLevel = 0
-  if argc >= 7:
-    debugLevel = int(sys.argv[6])
+  debugLevel = args.debugLevel
 
-  mod.DQHistogramMerge(sys.argv[1], sys.argv[2], runPostProcessing, isIncremental=isIncremental, compressionLevel=compressionLevel, debugLevel=debugLevel)
+  if args.excludeDir:
+    directoryRegularExpression = f'^((?!{args.excludeDir}).)*$'
+  else:
+    directoryRegularExpression = '.*'
+
+  if args.excludeHist:
+    histogramRegularExpression = f'^((?!{args.excludeHist}).)*$'
+  else:
+    histogramRegularExpression = '.*'
+
+  mod.DQHistogramMerge(args.input_list_file_name, args.merged_file_name, 
+                       runPostProcessing, isIncremental=isIncremental, 
+                       compressionLevel=compressionLevel, debugLevel=debugLevel,
+                       directoryRegularExpression=directoryRegularExpression,
+                       histogramRegularExpression=histogramRegularExpression)
