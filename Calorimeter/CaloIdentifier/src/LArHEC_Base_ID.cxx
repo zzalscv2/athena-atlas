@@ -15,6 +15,7 @@
 #include "IdDict/IdDictDefs.h"
 #include "LArHEC_region.h"
 #include "CxxUtils/StrFormat.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include "GaudiKernel/MsgStream.h"
 
@@ -920,6 +921,10 @@ int   LArHEC_Base_ID::get_prevInEta(const LArHEC_region* hecRegion, const unsign
     short int nPrevEtaRegion = hecRegion->prevEtaRegion();
     // no neighbour if no previous region in eta
     if( nPrevEtaRegion != NOT_VALID_HEC_REGION ) {
+      // Tell clang to optimize assuming that FP exceptions can trap.
+      // Otherwise, it can vectorize the division, which can lead to
+      // spurious division-by-zero traps from unused vector lanes.
+      CXXUTILS_TRAPPING_FP;
       LArHEC_region* prevHecRegion = m_vecOfRegions[nPrevEtaRegion];
       short int nPhiMinus = prevHecRegion->phiN();
       float gPhiMinus= prevHecRegion->phiGranularity();
@@ -971,6 +976,10 @@ int   LArHEC_Base_ID::get_nextInEta(const LArHEC_region* hecRegion, const unsign
     short int nNextEtaRegion = hecRegion->nextEtaRegion();
     // no neighbour if no next region in eta
     if( nNextEtaRegion != NOT_VALID_HEC_REGION ) {
+      // Tell clang to optimize assuming that FP exceptions can trap.
+      // Otherwise, it can vectorize the division, which can lead to
+      // spurious division-by-zero traps from unused vector lanes.
+      CXXUTILS_TRAPPING_FP;
       LArHEC_region* nextHecRegion = m_vecOfRegions[nNextEtaRegion];
       float gPhiPlus= nextHecRegion->phiGranularity();
       unsigned int minHashPlus = nextHecRegion->hashMin();
@@ -1030,7 +1039,11 @@ int   LArHEC_Base_ID::get_prevInSamp(const LArHEC_region* hecRegion, const unsig
       float granEtaMinus = prevHecRegion->etaGranularity();
       float margin = 0.25*std::min(gEta,granEtaMinus);
       if((minEtaMinus < absEta+gEta-margin) && (absEta+margin < maxEtaMinus)) {
-	
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
+
 	// max phi of previous region in sampling
 	short int nPhiMinus = prevHecRegion->phiN();
 	// first hash of previous region in sampling
@@ -1084,6 +1097,10 @@ int   LArHEC_Base_ID::get_nextInSamp(const LArHEC_region* hecRegion, const unsig
       float maxEtaPlus = nextHecRegion->etaMax();
       float margin = 0.25*std::min(gEta,granEtaPlus);
       if((minEtaPlus < absEta+gEta-margin) && (absEta+margin < maxEtaPlus)) {
+        // Tell clang to optimize assuming that FP exceptions can trap.
+        // Otherwise, it can vectorize the division, which can lead to
+        // spurious division-by-zero traps from unused vector lanes.
+        CXXUTILS_TRAPPING_FP;
 
 	short int nPhiPlus = nextHecRegion->phiN();
 	unsigned int minHashPlus = nextHecRegion->hashMin(); 
