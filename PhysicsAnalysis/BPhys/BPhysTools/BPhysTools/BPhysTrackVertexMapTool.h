@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: $
@@ -68,7 +68,7 @@ namespace xAOD {
     virtual bool doLog() const override;
 
     /// convenience method to wrap output lines by a prefix
-    static std::string wrapLines(std::string lines, std::string prefix);
+    static std::string wrapLines(const std::string& lines, const std::string& prefix);
 
   protected:
     /// @name Functions to be called by user classes

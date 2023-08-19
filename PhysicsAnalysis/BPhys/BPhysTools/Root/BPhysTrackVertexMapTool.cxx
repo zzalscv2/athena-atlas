@@ -20,8 +20,8 @@ namespace xAOD {
   //--------------------------------------------------------------------------
   // Static utility method to prefix every line by a certain string
   //--------------------------------------------------------------------------
-  std::string BPhysTrackVertexMapTool::wrapLines(std::string lines,
-						 std::string prefix) {
+  std::string BPhysTrackVertexMapTool::wrapLines(const std::string& lines,
+						 const std::string& prefix) {
     
     std::string ostr;
     std::istringstream stream(lines);
@@ -341,6 +341,7 @@ namespace xAOD {
     
     if ( m_pvNameMap.find(vtx) == m_pvNameMap.end() ) {
       boost::format f("PV%03d");
+      // cppcheck-suppress ignoredReturnValue
       f % m_pvNameMap.size();
       m_pvNameMap[vtx] = f.str();
     }
@@ -353,6 +354,7 @@ namespace xAOD {
     
     if ( m_refPVNameMap.find(vtx) == m_refPVNameMap.end() ) {
       boost::format f("RV%03d"); 
+      // cppcheck-suppress ignoredReturnValue
       f % m_refPVNameMap.size();
       m_refPVNameMap[vtx] = f.str();
     }
@@ -365,6 +367,7 @@ namespace xAOD {
     
     if ( m_svNameMap.find(vtx) == m_svNameMap.end() ) {
       boost::format f("SV%03d");
+      // cppcheck-suppress ignoredReturnValue
       f % m_svNameMap.size();
       m_svNameMap[vtx] = f.str();
     }
@@ -378,6 +381,7 @@ namespace xAOD {
     
     if ( m_idTrackNameMap.find(track) == m_idTrackNameMap.end() ) {
       boost::format f("T%04d");
+      // cppcheck-suppress ignoredReturnValue
       f % m_idTrackNameMap.size();
       m_idTrackNameMap[track] = f.str();
     }
