@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MSVertexTrackletTool.h"
@@ -13,6 +13,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
+#include "CxxUtils/trapping_fp.h"
 
 /*
   Tracklet reconstruction tool
@@ -646,6 +647,10 @@ namespace Muon {
             float s(0), sz(0), sy(0);
             // loop on the mdt hits, find the weighted center
             for (unsigned int i = 0; i < mdts.size(); ++i) {
+                // Tell clang to optimize assuming that FP exceptions can trap.
+                // Otherwise, it can vectorize the division, which can lead to
+                // spurious division-by-zero traps from unused vector lanes.
+                CXXUTILS_TRAPPING_FP;
                 const Muon::MdtPrepData* prd = mdts.at(i);
                 const float mdt_y = std::hypot(prd->globalPosition().x(), prd->globalPosition().y());
                 const float mdt_z = prd->globalPosition().z();
