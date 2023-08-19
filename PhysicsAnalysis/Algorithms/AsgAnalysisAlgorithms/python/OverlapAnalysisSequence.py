@@ -12,7 +12,8 @@ def makeOverlapAnalysisSequence( dataType,
                                  doTaus = True, doTauAntiTauJetOR = False,
                                  doPhotons = True, doFatJets = False,
                                  enableUserPriority = False,
-                                 bJetLabel = '', antiTauLabel = '',
+                                 bJetLabel = '',
+                                 antiTauLabel = '', antiTauBJetLabel = '',
                                  boostedLeptons = False,
                                  postfix = '',
                                  shallowViewOutput = True,
@@ -57,6 +58,7 @@ def makeOverlapAnalysisSequence( dataType,
                      objects passing the overlap removal.
       linkOverlapObjects -- Set up an element link between overlapping objects
       doEleEleOR -- Set up electron-electron overlap removal
+      doTauAntiTauJetOR -- Set up Tau-AntiTau-Jet overlap removal
       doXXXX     -- these flags enable/disable object types to
                     configure tools for: doElectrons, doMuons,
                     doJets, doTaus, doPhotons, doFatJets.
@@ -64,8 +66,10 @@ def makeOverlapAnalysisSequence( dataType,
                             will respect the user priority in the inputLabel.
                             E.g. SUSYTools assigns all signal objects the
                             priority 2 and pre-selected jets the priority 1.
-      bJetLabel -- Flag to select b-jets with. If left empty, no b-jets are used
-                   in the overlap removal.
+      bJetLabel -- Flag to select b-jets with for lepton OR.
+                   If left empty, no b-jets are used in the overlap removal.
+      antiTauLabel -- Flag to select antiTau with. Required for TauAntiTauJetOR.
+      antiTauBJetLabel -- Flag to select b-jets with for Tau-AntiTau-Jet OR.
       boostedLeptons -- Set to True to enable boosted lepton overlap removal
       shallowViewOutput -- Create a view container if required
       enableCutflow -- Whether or not to dump the cutflow
@@ -174,7 +178,7 @@ def makeOverlapAnalysisSequence( dataType,
             addPrivateTool( alg, 'overlapTool.TauJetORT',
                             'ORUtils::TauAntiTauJetOverlapTool' )
             alg.overlapTool.TauJetORT.AntiTauLabel = antiTauLabel
-            alg.overlapTool.TauJetORT.BJetLabel = bJetLabel
+            alg.overlapTool.TauJetORT.BJetLabel = antiTauBJetLabel
         else:
             addPrivateTool( alg, 'overlapTool.TauJetORT',
                             'ORUtils::DeltaROverlapTool' )
