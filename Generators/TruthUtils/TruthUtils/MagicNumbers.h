@@ -25,6 +25,7 @@ constexpr int SIM_BARCODE_THRESHOLD = 200000;
 constexpr int SIM_REGENERATION_INCREMENT = 1000000;
 
 constexpr int SIM_STATUS_INCREMENT = 100000;
+constexpr int SIM_STATUS_THRESHOLD = 20000;
 
 constexpr int PARTONPDGMAX = 43;
 constexpr int NPPDGMIN = 1000000;
@@ -122,6 +123,19 @@ template <class T> inline void get_particle_history(const T& p, std::deque<int>&
   }
 }
 template <class T>  inline std::deque<int> simulation_history(const T& p, int direction ) { std::deque<int> res; res.push_back(unique_id(p)); get_particle_history(p, res, direction); return res;}
+
+/// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
+
+template <class T> void old_to_new_simulation_scheme(T& evt) {
+#ifdef HEPMC3
+  for (auto p: evt->particles())  p->set_status( SIM_STATUS_INCREMENT * ( HepMC::barcode(p) / SIM_REGENERATION_INCREMENT)  + (  HepMC::barcode(p) % SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + p->status());
+  for (auto v: evt->vertices())   v->set_status( ( -HepMC::barcode(v)> SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + v->status());
+#else
+  for (auto p = evt->particles_begin(); p != evt->particles_end(); ++p)  (*p)->set_status(SIM_STATUS_INCREMENT *(  (*p)->barcode() / SIM_REGENERATION_INCREMENT)  + ( (*p)->barcode() % SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + (*p)->status());
+  for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v)    (*v)->set_id( ( -(*v)->barcode() > SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + (*v)->id());
+#endif
+}
+
 
 }
 #endif
