@@ -7,6 +7,7 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
+#include "AsgTools/CurrentContext.h"
 
 JetTruthLabelingTool::JetTruthLabelingTool(const std::string& name) :
   asg::AsgTool(name)
@@ -77,6 +78,7 @@ StatusCode JetTruthLabelingTool::initialize(){
   m_dR_H_truthKey    = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_dR_H";
   m_dR_Top_truthKey  = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_dR_Top";
   m_NB_truthKey      = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_NB";
+  m_NB_truthReadKey  = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_NB";
   m_split12_truthKey = m_truthJetCollectionName.key() + ".Split12";
   m_split23_truthKey = m_truthJetCollectionName.key() + ".Split23";
 
@@ -105,6 +107,7 @@ StatusCode JetTruthLabelingTool::initialize(){
   ATH_CHECK(m_dR_H_truthKey.initialize(m_useDRMatch));
   ATH_CHECK(m_dR_Top_truthKey.initialize(m_useDRMatch));
   ATH_CHECK(m_NB_truthKey.initialize());
+  ATH_CHECK(m_NB_truthReadKey.initialize());
   
   ATH_CHECK(m_split12_truthKey.initialize(m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" || m_truthLabelName == "R10TruthLabel_R22v1"));
   ATH_CHECK(m_split23_truthKey.initialize(m_truthLabelName == "R10TruthLabel_R21Precision" || m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" || m_truthLabelName == "R10TruthLabel_R22v1"));
@@ -155,7 +158,38 @@ void JetTruthLabelingTool::print() const {
 
 }
 
-int JetTruthLabelingTool::getTruthJetLabelDR( const xAOD::Jet &jet, std::vector<std::pair<TLorentzVector,int> > tlv_truthParts ) const {
+
+JetTruthLabelingTool::DecorHandles::DecorHandles
+  (const JetTruthLabelingTool& tool, const EventContext& ctx)
+    : nbReadHandle (tool.m_NB_truthReadKey, ctx)
+{
+  auto maybeInit = [&] (auto& h,
+                        const SG::WriteDecorHandleKey<xAOD::JetContainer>& k)
+  {
+    if (!k.key().empty()) h.emplace (k, ctx);
+  };
+  maybeInit (labelHandle,     tool.m_label_truthKey);
+  maybeInit (nbHandle,        tool.m_NB_truthKey);
+  maybeInit (labelRecoHandle, tool.m_label_recoKey);
+  maybeInit (nbRecoHandle,    tool.m_NB_recoKey);
+  maybeInit (dRWHandle,       tool.m_dR_W_truthKey);
+  maybeInit (dRZHandle,       tool.m_dR_Z_truthKey);
+  maybeInit (dRHHandle,       tool.m_dR_H_truthKey);
+  maybeInit (dRTopHandle,     tool.m_dR_Top_truthKey);
+  maybeInit (dRWRecoHandle,   tool.m_dR_W_recoKey);
+  maybeInit (dRZRecoHandle,   tool.m_dR_Z_recoKey);
+  maybeInit (dRHRecoHandle,   tool.m_dR_H_recoKey);
+  maybeInit (dRTopRecoHandle, tool.m_dR_Top_recoKey);
+  maybeInit (split23Handle,   tool.m_truthSplit23_recoKey);
+  maybeInit (split12Handle,   tool.m_truthSplit12_recoKey);
+  maybeInit (truthMassHandle, tool.m_truthJetMass_recoKey);
+  maybeInit (truthPtHandle,   tool.m_truthJetPt_recoKey);
+}
+
+int JetTruthLabelingTool::getTruthJetLabelDR( DecorHandles& dh,
+                                              const xAOD::Jet &jet,
+                                              const std::vector<std::pair<TLorentzVector,int> >& tlv_truthParts,
+                                              const EventContext& ctx) const {
 
   /// Booleans to check associated heavy particles
   bool matchW = false;
@@ -197,22 +231,19 @@ int JetTruthLabelingTool::getTruthJetLabelDR( const xAOD::Jet &jet, std::vector<
   }
 
   /// Add matching criteria decorations
-  SG::WriteDecorHandle<xAOD::JetContainer, float> dRWHandle(m_dR_W_truthKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> dRZHandle(m_dR_Z_truthKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> dRHHandle(m_dR_H_truthKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, float> dRTopHandle(m_dR_Top_truthKey);
+  (*dh.dRWHandle)(jet) = dR_W;
+  (*dh.dRZHandle)(jet) = dR_Z;
+  (*dh.dRHHandle)(jet) = dR_H;
+  (*dh.dRTopHandle)(jet) = dR_Top;
 
-  dRWHandle(jet) = dR_W;
-  dRZHandle(jet) = dR_Z;
-  dRHHandle(jet) = dR_H;
-  dRTopHandle(jet) = dR_Top;
-
-  return getLabel( jet, matchH, matchW, matchZ, matchTop );
+  return getLabel( dh, jet, matchH, matchW, matchZ, matchTop, ctx );
 
 }
 
-int JetTruthLabelingTool::getTruthJetLabelGA( const xAOD::Jet &jet ) const {
-
+int JetTruthLabelingTool::getTruthJetLabelGA( DecorHandles& dh,
+                                              const xAOD::Jet &jet,
+                                              const EventContext& ctx ) const
+{
   /// Booleans to check ghost-associated heavy particles
   bool matchW = false;
   bool matchZ = false;
@@ -247,29 +278,33 @@ int JetTruthLabelingTool::getTruthJetLabelGA( const xAOD::Jet &jet ) const {
     matchTop = true;
   }
 
-  return getLabel( jet, matchH, matchW, matchZ, matchTop );
+  return getLabel( dh, jet, matchH, matchW, matchZ, matchTop, ctx );
 
 }
 
 StatusCode JetTruthLabelingTool::decorate(const xAOD::JetContainer& jets) const {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  DecorHandles dh (*this, ctx);
 
   /// Apply label to truth jet collections
   if(m_isTruthJetCol) {
-    return labelTruthJets(jets);
+    return labelTruthJets(dh, jets, ctx);
   }
 
   /// Copy label to matched reco jets
   else {
-    ATH_CHECK( labelTruthJets() );
-    return labelRecoJets(jets);
+    ATH_CHECK( labelTruthJets(dh, ctx) );
+    return labelRecoJets(dh, jets, ctx);
   }
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode JetTruthLabelingTool::labelRecoJets(const xAOD::JetContainer& jets ) const {
+StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
+                                               const xAOD::JetContainer& jets,
+                                               const EventContext& ctx) const {
 
-  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName);
+  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName, ctx);
   for(const xAOD::Jet *jet : jets) {
 
     /// Get parent ungroomed reco jet for matching
@@ -319,76 +354,60 @@ StatusCode JetTruthLabelingTool::labelRecoJets(const xAOD::JetContainer& jets ) 
 
     if ( matchTruthJet ) {
       // WriteDecorHandles can also read
-      SG::WriteDecorHandle<xAOD::JetContainer, int> labelHandle(m_label_truthKey);
-      label = labelHandle(*matchTruthJet);
+      label = (*dh.labelHandle)(*matchTruthJet);
       if ( m_useDRMatch ) {
-        SG::WriteDecorHandle<xAOD::JetContainer, float> dRWHandle(m_dR_W_truthKey);
-        SG::WriteDecorHandle<xAOD::JetContainer, float> dRZHandle(m_dR_Z_truthKey);
-        SG::WriteDecorHandle<xAOD::JetContainer, float> dRHHandle(m_dR_H_truthKey);
-        SG::WriteDecorHandle<xAOD::JetContainer, float> dRTopHandle(m_dR_Top_truthKey);
-        if(dRWHandle.isAvailable()) dR_truthJet_W = dRWHandle(*matchTruthJet);
-        if(dRZHandle.isAvailable()) dR_truthJet_Z = dRZHandle(*matchTruthJet);
-        if(dRHHandle.isAvailable()) dR_truthJet_H = dRHHandle(*matchTruthJet);
-        if(dRTopHandle.isAvailable()) dR_truthJet_Top = dRTopHandle(*matchTruthJet);
+        if(dh.dRWHandle->isAvailable()) dR_truthJet_W = (*dh.dRWHandle)(*matchTruthJet);
+        if(dh.dRZHandle->isAvailable()) dR_truthJet_Z = (*dh.dRZHandle)(*matchTruthJet);
+        if(dh.dRHHandle->isAvailable()) dR_truthJet_H = (*dh.dRHHandle)(*matchTruthJet);
+        if(dh.dRTopHandle->isAvailable()) dR_truthJet_Top = (*dh.dRTopHandle)(*matchTruthJet);
       }
       if ( m_truthLabelName == "R10TruthLabel_R21Precision" ) {
-        SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey);
+        SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
         if(split23Handle.isAvailable()) truthJetSplit23 = split23Handle(*matchTruthJet);
       }
       if ( m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" || m_truthLabelName == "R10TruthLabel_R22v1" ) {
-        SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey);
+        SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
         if(split23Handle.isAvailable()) truthJetSplit23 = split23Handle(*matchTruthJet);
-        SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey);
+        SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
         if(split12Handle.isAvailable()) truthJetSplit12 = split12Handle(*matchTruthJet);
       }
-      SG::WriteDecorHandle<xAOD::JetContainer, int> nbHandle(m_NB_truthKey);
-      if(nbHandle.isAvailable()) truthJetNB = nbHandle(*matchTruthJet);
+      if(dh.nbHandle->isAvailable()) truthJetNB = dh.nbReadHandle(*matchTruthJet);
       truthJetMass = matchTruthJet->m();
       truthJetPt = matchTruthJet->pt();
     }
 
     /// Decorate truth label
-    SG::WriteDecorHandle<xAOD::JetContainer, int> labelHandle(m_label_recoKey);
-    labelHandle(*jet) = label;
+    (*dh.labelRecoHandle)(*jet) = label;
 
     /// Decorate additional information used for truth labeling
     if ( m_useDRMatch ) {
-      SG::WriteDecorHandle<xAOD::JetContainer, float> dRWHandle(m_dR_W_recoKey);
-      SG::WriteDecorHandle<xAOD::JetContainer, float> dRZHandle(m_dR_Z_recoKey);
-      SG::WriteDecorHandle<xAOD::JetContainer, float> dRHHandle(m_dR_H_recoKey);
-      SG::WriteDecorHandle<xAOD::JetContainer, float> dRTopHandle(m_dR_Top_recoKey);
-      dRWHandle(*jet) = dR_truthJet_W;
-      dRZHandle(*jet) = dR_truthJet_Z;
-      dRHHandle(*jet) = dR_truthJet_H;
-      dRTopHandle(*jet) = dR_truthJet_Top;
+      (*dh.dRWRecoHandle)(*jet) = dR_truthJet_W;
+      (*dh.dRZRecoHandle)(*jet) = dR_truthJet_Z;
+      (*dh.dRHRecoHandle)(*jet) = dR_truthJet_H;
+      (*dh.dRTopRecoHandle)(*jet) = dR_truthJet_Top;
     }
     if ( m_truthLabelName == "R10TruthLabel_R21Precision" ) {
-      SG::WriteDecorHandle<xAOD::JetContainer, float> split23Handle(m_truthSplit23_recoKey);
-      split23Handle(*jet) = truthJetSplit23;
+      (*dh.split23Handle)(*jet) = truthJetSplit23;
     }
 
     if ( m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" || m_truthLabelName == "R10TruthLabel_R22v1" ) {
-      SG::WriteDecorHandle<xAOD::JetContainer, float> split23Handle(m_truthSplit23_recoKey);
-      split23Handle(*jet) = truthJetSplit23;
-      SG::WriteDecorHandle<xAOD::JetContainer, float> split12Handle(m_truthSplit12_recoKey);
-      split12Handle(*jet) = truthJetSplit12;
+      (*dh.split23Handle)(*jet) = truthJetSplit23;
+      (*dh.split12Handle)(*jet) = truthJetSplit12;
     }
 
-    SG::WriteDecorHandle<xAOD::JetContainer, int> nbHandle(m_NB_recoKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, float> truthMassHandle(m_truthJetMass_recoKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, float> truthPtHandle(m_truthJetPt_recoKey);
-    nbHandle(*jet) = truthJetNB;
-    truthMassHandle(*jet) = truthJetMass;
-    truthPtHandle(*jet) = truthJetPt;
+    (*dh.nbRecoHandle)(*jet) = truthJetNB;
+    (*dh.truthMassHandle)(*jet) = truthJetMass;
+    (*dh.truthPtHandle)(*jet) = truthJetPt;
   }
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode JetTruthLabelingTool::labelTruthJets() const {
+StatusCode JetTruthLabelingTool::labelTruthJets(DecorHandles& dh,
+                                                const EventContext& ctx) const {
 
   /// Retrieve appropriate truth jet container
-  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName);
+  SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName, ctx);
 
   /// Make sure the truth jet collection has been retrieved
   if ( !truthJets.isValid() ) {
@@ -396,19 +415,19 @@ StatusCode JetTruthLabelingTool::labelTruthJets() const {
     return StatusCode::FAILURE;
   }
 
-  return labelTruthJets(*truthJets);
+  return labelTruthJets(dh, *truthJets, ctx);
 
 }
 
-StatusCode JetTruthLabelingTool::labelTruthJets( const xAOD::JetContainer &truthJets ) const {
-
+StatusCode JetTruthLabelingTool::labelTruthJets( DecorHandles& dh,
+                                                 const xAOD::JetContainer &truthJets,
+                                                 const EventContext& ctx) const
+{
   /// Make sure there is at least 1 jet in truth collection
   if ( !(truthJets.size()) ) return StatusCode::SUCCESS;
 
-  SG::WriteDecorHandle<xAOD::JetContainer, int> labelHandle(m_label_truthKey);
-
   /// Check if the truth jet collection already has labels applied
-  if(labelHandle.isAvailable()){
+  if(dh.labelHandle->isAvailable()){
     ATH_MSG_DEBUG("labelTruthJets: Truth jet collection already labelled with " << m_truthLabelName);
     return StatusCode::SUCCESS;
   }
@@ -417,7 +436,7 @@ StatusCode JetTruthLabelingTool::labelTruthJets( const xAOD::JetContainer &truth
   int channelNumber = -999;
 
   /// Get the EventInfo to identify Sherpa samples
-  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey);
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey, ctx);
   if(!eventInfo.isValid()){
     ATH_MSG_ERROR("Failed to retrieve event information.");
     return StatusCode::FAILURE;
@@ -447,13 +466,13 @@ StatusCode JetTruthLabelingTool::labelTruthJets( const xAOD::JetContainer &truth
     /// TRUTH3
     if( m_useTRUTH3 ) {
       /// Check for boson container
-      SG::ReadHandle<xAOD::TruthParticleContainer> truthPartsBoson(m_truthBosonContainerName);
+      SG::ReadHandle<xAOD::TruthParticleContainer> truthPartsBoson(m_truthBosonContainerName, ctx);
       if(!truthPartsBoson.isValid()){
         ATH_MSG_ERROR("Unable to find " << m_truthBosonContainerName.key() << ". Please check the content of your input file.");
         return StatusCode::FAILURE;
       }
       /// Check for top quark container
-      SG::ReadHandle<xAOD::TruthParticleContainer> truthPartsTop(m_truthTopQuarkContainerName);
+      SG::ReadHandle<xAOD::TruthParticleContainer> truthPartsTop(m_truthTopQuarkContainerName, ctx);
       if(!truthPartsTop.isValid()){
         ATH_MSG_ERROR("Unable to find " << m_truthTopQuarkContainerName.key() << ". Please check the content of your input file.");
         return StatusCode::FAILURE;
@@ -464,7 +483,7 @@ StatusCode JetTruthLabelingTool::labelTruthJets( const xAOD::JetContainer &truth
 
     /// TRUTH1
     else {
-      SG::ReadHandle<xAOD::TruthParticleContainer> truthParts(m_truthParticleContainerName);
+      SG::ReadHandle<xAOD::TruthParticleContainer> truthParts(m_truthParticleContainerName, ctx);
       if(!truthParts.isValid()){
         ATH_MSG_ERROR("Unable to find " << m_truthParticleContainerName << ". Please check the content of your input file.");
         return StatusCode::FAILURE;
@@ -480,15 +499,15 @@ StatusCode JetTruthLabelingTool::labelTruthJets( const xAOD::JetContainer &truth
 
     if ( m_useDRMatch ) {
       ATH_MSG_DEBUG("Getting truth label using dR matching");
-      label = getTruthJetLabelDR(*jet, tlv_truthParts);
+      label = getTruthJetLabelDR(dh, *jet, tlv_truthParts, ctx);
     }
     
     else {
       ATH_MSG_DEBUG("Getting truth label using ghost-association");
-      label = getTruthJetLabelGA(*jet);
+      label = getTruthJetLabelGA(dh, *jet, ctx);
     }
 
-    labelHandle(*jet) = label;
+    (*dh.labelHandle)(*jet) = label;
   }
 
   return StatusCode::SUCCESS;
@@ -671,12 +690,17 @@ int JetTruthLabelingTool::getNGhostParticles( const xAOD::Jet &jet, std::string 
   return nMatchPart;
 }
 
-int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matchW, bool matchZ, bool matchTop ) const {
+int JetTruthLabelingTool::getLabel( DecorHandles& dh,
+                                    const xAOD::Jet &jet,
+                                    bool matchH,
+                                    bool matchW,
+                                    bool matchZ,
+                                    bool matchTop,
+                                    const EventContext& ctx) const {
 
   // store GhostBHadronsFinal count
   int nMatchB = getNGhostParticles( jet, "GhostBHadronsFinal" );
-  SG::WriteDecorHandle<xAOD::JetContainer, int> nbHandle(m_NB_truthKey);
-  nbHandle(jet) = nMatchB;
+  (*dh.nbHandle)(jet) = nMatchB;
 
   /// Booleans for containment selections
   bool is_bb = false;
@@ -695,7 +719,7 @@ int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matc
 
   /// Use R21Precision definition
   if ( m_truthLabelName == "R10TruthLabel_R21Precision" ) {
-    SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
     is_bb = ( nMatchB > 1 );
     isTop = ( matchTop && matchW && nMatchB > 0 && jet.m() / 1000. > m_mLowTop && split23Handle(jet) / 1000. > getTopSplit23Cut( jet.pt() / 1000. ) );
     isW = matchW && nMatchB == 0 && jet.m() / 1000. > m_mLowW && jet.m() / 1000. < m_mHighW;
@@ -704,8 +728,8 @@ int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matc
 
   // Use R21Precision_2022v1 definition
   if ( m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" ) {
-    SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey);
-    SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
     is_bb = ( nMatchB > 1 );
     isTop = ( matchTop && matchW && nMatchB > 0 && jet.m() / 1000. > m_mLowTop && split23Handle(jet) / 1000. > getTopSplit23Cut( jet.pt() / 1000. ) );
     isW = matchW && nMatchB == 0 && jet.m() / 1000. > m_mLowW && split12Handle(jet) / 1000. > getWZSplit12Cut( jet.pt() / 1000. );
@@ -720,8 +744,8 @@ int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matc
       ATH_MSG_ERROR( "HadronGhostExtendedTruthLabelID not available for " + m_truthJetCollectionName.key() );
     }
 
-    SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey);
-    SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey, ctx);
+    SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
     is_bb = ( extended_GA_label == 55 );
     is_cc = ( extended_GA_label == 44 );
     isTop = ( matchTop && matchW && nMatchB > 0 && jet.m() / 1000. > m_mLowTop && split23Handle(jet) / 1000. > getTopSplit23Cut( jet.pt() / 1000. ) );
