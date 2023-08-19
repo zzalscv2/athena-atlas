@@ -24,7 +24,7 @@ TGCConnectionInPP* TGCDatabaseManager::getConnectionInPP(TGCPatchPanel* patchPan
   if(!patchPanel) return 0;
 
   PatchPanelIDs patchPanelIDs(5, -1);
-  patchPanelIDs.at(0) = patchPanel->getRegion(); 
+  patchPanelIDs.at(0) = (patchPanel->getRegion() == TGCRegionType::FORWARD ? 0 : 1);
   patchPanelIDs.at(1) = patchPanel->getType();
   patchPanelIDs.at(2) = patchPanel->getId();
   patchPanelIDs.at(3) = (patchPanel->getAdjacentPP(0) ? patchPanel->getAdjacentPP(0)->getId() : -1); 
@@ -54,7 +54,7 @@ void TGCDatabaseManager::addConnectionInPP(const TGCPatchPanel* patchPanel,
   if(!patchPanel || !connectionInPP) return; 
 
   PatchPanelIDs patchPanelIDs(5, -1);
-  patchPanelIDs.at(0) = patchPanel->getRegion(); 
+  patchPanelIDs.at(0) = (patchPanel->getRegion() == TGCRegionType::FORWARD ? 0 : 1);
   patchPanelIDs.at(1) = patchPanel->getType();
   patchPanelIDs.at(2) = patchPanel->getId();
   patchPanelIDs.at(3) = (patchPanel->getAdjacentPP(0) ? patchPanel->getAdjacentPP(0)->getId() : -1); 
@@ -102,20 +102,21 @@ TGCDatabaseManager::TGCDatabaseManager(TGCArguments* tgcargs,
   bool status = true;
 
   ATH_MSG_DEBUG("Read database for connection from ASD to PP.");
-  int i,j,k;
-  for( j=0; j<NumberOfRegionType; j+=1) {
-    for( i=0; i<TGCSector::NumberOfPatchPanelType; i+=1){
-       for( k=0; k<TotalNumForwardBackwardType; k+=1){
-	 m_ASDToPP[j][i][k] = new TGCConnectionASDToPP;
-	 status = status && 
-	   m_ASDToPP[j][i][k]->readData((TGCRegionType)(j+1),i,(TGCForwardBackwardType)k);
-       }
+
+  for(int i=0; i<TGCSector::NumberOfPatchPanelType; i+=1){
+    for(int k=0; k<TotalNumForwardBackwardType; k+=1){
+      m_ASDToPP[0][i][k] = new TGCConnectionASDToPP;
+      m_ASDToPP[1][i][k] = new TGCConnectionASDToPP;
+      status = status
+             && m_ASDToPP[0][i][k]->readData(TGCRegionType::FORWARD, i, (TGCForwardBackwardType)k)
+             && m_ASDToPP[1][i][k]->readData(TGCRegionType::ENDCAP, i, (TGCForwardBackwardType)k);
     }
   }
-  for( i=0; i<NumberOfRegionType; i+=1){
+  for(int i=0; i<NumberOfRegionType; i+=1){
     m_PPToSL[i] = new TGCConnectionPPToSL;
-    status = status && m_PPToSL[i]->readData((TGCRegionType)(i+1));
   }
+  status = status && m_PPToSL[0]->readData(TGCRegionType::FORWARD)
+                  && m_PPToSL[1]->readData(TGCRegionType::ENDCAP);
 
   // Temporary solution for Run 3 simulation (to be migrated to CONDDB
   tgcArgs()->set_USE_CONDDB(false);

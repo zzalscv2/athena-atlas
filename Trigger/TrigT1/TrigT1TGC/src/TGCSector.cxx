@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSector.h"
@@ -61,7 +61,7 @@ int TGCSector::distributeSignal(const TGCASDOut* ASDOut)
     MsgStream log(msgSvc, "LVL1TGCTrigger::TGCSector");
     if (!notFound) {
       log << MSG::DEBUG
-	    << "signalType= " << ((signalType==WireGroup) ? "Wire" : "Strip")
+	    << "signalType= " << ((signalType == WIRE) ? "Wire" : "Strip")
 	    <<" layer= " <<layer <<" rNumber= " <<rNumber <<" ch= "<< ch
 	    <<"id(PP)= " <<idPP <<" connector(PP)= " <<conPP <<" ch(PP)= " <<chPP
            <<endmsg;
@@ -79,13 +79,13 @@ int TGCSector::distributeSignal(const TGCASDOut* ASDOut)
 int TGCSector::getPatchPanelType(TGCSignalType signal, int layer) const
 {
   if((layer>=0)&&(layer<=2)){ 
-    if(signal==WireGroup) return WTPP;
+    if (signal == WIRE) return WTPP;
     else return STPP;
   } else if((layer>=3)&&(layer<=6)){
-    if(signal==WireGroup) return WDPP;
+    if (signal == WIRE) return WDPP;
     else return SDPP;
   } else if (layer<=8) {
-    if(signal==WireGroup) return WIPP;
+    if (signal == WIRE) return WIPP;
     else return SIPP;
   } else {
     return NOPP;
@@ -93,7 +93,7 @@ int TGCSector::getPatchPanelType(TGCSignalType signal, int layer) const
 }
 
 TGCSector::TGCSector()
-: m_regionType(FORWARD),
+: m_regionType(TGCRegionType::FORWARD),
   m_numberOfHit(0), 
   m_octantId(0), m_moduleId(0), 
   m_forwardBackward(ForwardSector), 
@@ -364,20 +364,20 @@ void TGCSector::connectHPBToSL(const TGCConnectionHPBToSL* connection)
 void TGCSector::connectAdjacentHPB()
 {
   switch(m_regionType){
-  case Endcap:
-    // assume there are only two WireHighPtBoards.
-    if((m_HPB[WHPB][1]) && (m_HPB[WHPB][0])){
-      m_HPB[WHPB][0]->setAdjacentHPB(1,m_HPB[WHPB][1]); //! 
-      m_HPB[WHPB][1]->setAdjacentHPB(0,m_HPB[WHPB][0]); //!
-    }
-    break;
-  case Forward:
-    if(m_HPB[WHPB][0]){
-      m_HPB[WHPB][0]->setAdjacentHPB(1,0); 
-    }
-    break;
-  default:
-    break;
+    case TGCRegionType::ENDCAP:
+      // assume there are only two WireHighPtBoards.
+      if((m_HPB[WHPB][1]) && (m_HPB[WHPB][0])){
+        m_HPB[WHPB][0]->setAdjacentHPB(1,m_HPB[WHPB][1]); //! 
+        m_HPB[WHPB][1]->setAdjacentHPB(0,m_HPB[WHPB][0]); //!
+      }
+      break;
+    case TGCRegionType::FORWARD:
+      if(m_HPB[WHPB][0]){
+        m_HPB[WHPB][0]->setAdjacentHPB(1,0); 
+      }
+      break;
+    default:
+      break;
   }
 }
 
@@ -419,8 +419,8 @@ void TGCSector::dumpModule()
     for (TGCPatchPanel* ppasic : m_PP[j]) {
       std::cout << " Type:" << ppasic->getType();
       std::cout << " Id:" << ppasic->getId();
-      std::cout << " Region:" << ppasic->getRegion();
-      std::cout << ((ppasic->getRegion() == Endcap) ? ":Endcap" : ":Forward") << std::endl;
+      std::cout << " Region:" << (ppasic->getRegion()==TGCRegionType::FORWARD ? "FWD" : "END");
+      std::cout << ((ppasic->getRegion() == TGCRegionType::ENDCAP) ? ":Endcap" : ":Forward") << std::endl;
     }
   }
 
@@ -430,8 +430,7 @@ void TGCSector::dumpModule()
     for (unsigned int i=0; i < m_SB[j].size(); i++) {  // index in a type
       std::cout << " Type:" << m_SB[j][i]->getType();
       std::cout << " Id:"   << m_SB[j][i]->getId();
-      std::cout << " Region:" << m_SB[j][i]->getRegion();
-      std::cout << ((m_SB[j][i]->getRegion() == Endcap) ? ":Endcap" : ":Forward") << std::endl;
+      std::cout << " Region: " << ((m_SB[j][i]->getRegion() == TGCRegionType::ENDCAP) ? "Endcap" : "Forward") << std::endl;
     }
   }
 
@@ -441,8 +440,7 @@ void TGCSector::dumpModule()
     for(unsigned int i=0; i < m_HPB[j].size(); i+=1) {
       std::cout << " Type:" << m_HPB[j][i]->getType();
       std::cout << " Id:"   << m_HPB[j][i]->getId();
-      std::cout << " Region:" << m_HPB[j][i]->getRegion();
-      std::cout << ((m_HPB[j][i]->getRegion()==Endcap) ? ":Endcap" : ":Forward") << std::endl;
+      std::cout << " Region:" << (m_HPB[j][i]->getRegion()==TGCRegionType::ENDCAP ? "Endcap" : "Forward") << std::endl;
     }
   }
 
@@ -450,11 +448,11 @@ void TGCSector::dumpModule()
   if (m_SL) {
     std::cout << "SL:" << m_SL << std::endl;
     std::cout << " Id:"  << m_SL->getId();
-    std::cout << " Region:" << m_SL->getRegion();
-    if(m_SL->getRegion()==Endcap){
-      std::cout << ":Endcap" << std::endl;
+    std::cout << " Region:";
+    if(m_SL->getRegion()==TGCRegionType::ENDCAP) {
+      std::cout << "Endcap" << std::endl;
     }else{
-      std::cout << ":Forward" << std::endl;
+      std::cout << "Forward" << std::endl;
     }
   } else {
     std::cout << "NO SL" << std::endl;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCWireDoubletSB_hh
@@ -16,7 +16,7 @@ public:
     m_iChBase=9;
     m_posMaxDev=7;
     m_negMaxDev=-7;
-    m_SType = WIREGROUP;
+    m_SType = WIRE;
   };
   ~TGCWireDoubletSB(){};
 

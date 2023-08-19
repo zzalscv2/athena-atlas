@@ -7,7 +7,6 @@
 
 #include "TrigT1TGC/TGCArguments.h"
 #include "TrigT1TGC/TGCNumbering.h"
-#include "TrigT1TGC/TGCEvent.h"
 #include "TrigT1TGC/TGCReadoutIndex.h"
 #include "TrigT1TGC/TGCRPhiCoincidenceMatrix.h"
 #include "TrigT1TGC/TGCSSCController.h"
@@ -153,13 +152,13 @@ private:
 inline
  int TGCSectorLogic::getNumberOfSubSectorCluster() const
 {
-  return (m_region == FORWARD) ? 8 : LVL1TGC::kNMaxSSC;
+  return (m_region == TGCRegionType::FORWARD) ? 8 : LVL1TGC::kNMaxSSC;
 }
 
 inline
  int TGCSectorLogic::getNumberOfSubSector() const
 {
-  return (m_region==FORWARD) ? 8 * LVL1TGC::kNRoiInSSC : LVL1TGC::kNumberOfEndcapRoI;
+  return (m_region == TGCRegionType::FORWARD) ? 8 * LVL1TGC::kNRoiInSSC : LVL1TGC::kNumberOfEndcapRoI;
 }
 
 inline

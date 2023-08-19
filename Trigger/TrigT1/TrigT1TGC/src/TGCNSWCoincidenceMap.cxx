@@ -199,8 +199,8 @@ namespace LVL1TGCTrigger {
     //------- Read Endcap Shift
     std::string dbname="/NSW/";
 
-    if(m_region==ENDCAP){dbname += "RoIpos_Endcap.db";}
-    if(m_region==FORWARD){dbname += "RoIpos_Forward.db";}
+    if(m_region==TGCRegionType::ENDCAP){dbname += "RoIpos_Endcap.db";}
+    if(m_region==TGCRegionType::FORWARD){dbname += "RoIpos_Forward.db";}
     std::string fullName = PathResolver::FindCalibDirectory("dev")+"/TrigT1TGC"+dbname;
 
     std::ifstream data(fullName);

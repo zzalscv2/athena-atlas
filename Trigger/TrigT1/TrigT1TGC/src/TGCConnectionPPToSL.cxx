@@ -55,8 +55,8 @@ bool TGCConnectionPPToSL::readData(TGCRegionType type)
 
     std::string region;
     line >> region ;
-    isMatched = (region == "Endcap" && type == Endcap) ||
-                (region == "Forward" && type == Forward);
+    isMatched = (region == "Endcap" && type == TGCRegionType::ENDCAP) ||
+                (region == "Forward" && type == TGCRegionType::FORWARD);
     if (isMatched) break;
   }
   if (!isMatched) return false;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSSCControllerOut.h"
@@ -7,7 +7,7 @@
 
 namespace LVL1TGCTrigger {
 
-const int TGCSSCControllerOut::s_chamber[TotalNumTGCRegionType][LVL1TGC::kNMaxSSC]
+const int TGCSSCControllerOut::s_chamber[NumberOfRegionType][LVL1TGC::kNMaxSSC]
  = {{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
     { 0, 0, 0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4 } 
    }; 

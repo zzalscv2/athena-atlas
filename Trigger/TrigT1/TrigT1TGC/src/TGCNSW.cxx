@@ -64,7 +64,7 @@ TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionType region ,int side,int TGC_Trigger
   trigNSW_output.reset(new NSWTrigOut());
   trigNSW_output->clear();
   if ( (side<0)||(side>1) ) return 0;
-  if(region==LVL1TGCTrigger::ENDCAP){
+  if (region == LVL1TGCTrigger::TGCRegionType::ENDCAP) {
     if ( TGC_TriggerSector<0 || TGC_TriggerSector>47 ) return 0;
 
     int temp=int((TGC_TriggerSector-2)/6);
@@ -102,7 +102,7 @@ TGCNSW::getOutput(LVL1TGCTrigger::TGCRegionType region ,int side,int TGC_Trigger
     return trigNSW_output;
   }
 
-  if(region==LVL1TGCTrigger::FORWARD){
+  if(region==LVL1TGCTrigger::TGCRegionType::FORWARD){
     if ( TGC_TriggerSector<0 || TGC_TriggerSector>23 ) return 0;
 
     ////NSW Large Secor Info
