@@ -98,7 +98,6 @@ class RpcReadoutElement : public MuonReadoutElement {
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
 
 
-        bool m_init{false};
         parameterBook m_pars{};
         const RpcIdHelper& m_idHelper{idHelperSvc()->rpcIdHelper()};
         /// doublet R -> 1: chamber is mounted below the Mdts 
