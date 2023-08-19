@@ -15,4 +15,4 @@ atlas_add_component( MSVertexTools
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel AthContainers StoreGateLib GeoPrimitives Identifier 
                                     EventPrimitives xAODTracking GaudiKernel MSVertexUtils MuonReadoutGeometry MuonIdHelpersLib MuonPrepRawData 
-                                    TrkParameters TrkExInterfaces MSVertexToolInterfaces FourMomUtils)
+                                    TrkParameters TrkExInterfaces MSVertexToolInterfaces FourMomUtils CxxUtils)
