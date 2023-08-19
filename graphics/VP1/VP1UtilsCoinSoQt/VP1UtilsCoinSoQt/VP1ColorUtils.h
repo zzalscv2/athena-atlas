@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -27,7 +27,7 @@ class VP1ColorUtils {
   public:
 
 // set SoMaterial color from RGB values
-  static void setMatColorFromRGB(SoMaterial* mat, std::string type, const unsigned int r, const unsigned int g, const unsigned int b);
+  static void setMatColorFromRGB(SoMaterial* mat, const std::string& type, const unsigned int r, const unsigned int g, const unsigned int b);
   static SbColor getSbColorFromRGB(const unsigned int r, const unsigned int g, const unsigned int b);
 
   // convert the usual range RGB [0,255] to Coin [0,1]
