@@ -12,6 +12,10 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "PathResolver/PathResolver.h"
 
+#include "TrigInDetPattRecoTools/TrigInDetUtils.h"
+#include "CxxUtils/phihelper.h"
+#include "TrigInDetToolInterfaces/ITrigSpacePointConversionTool.h"
+
 #include <vector>
 #include <unordered_map>
 
@@ -38,7 +42,12 @@ using xAOD::JetContainer;
 TrigHitDVHypoAlg::TrigHitDVHypoAlg( const std::string& name,
 				    ISvcLocator* pSvcLocator ) :
    ::HypoBase( name, pSvcLocator ),
-   m_lumiBlockMuTool("LumiBlockMuTool/LumiBlockMuTool") {}
+   m_spacePointTool("TrigSpacePointConversionTool"),
+   
+   m_lumiBlockMuTool("LumiBlockMuTool/LumiBlockMuTool") 
+   {
+      declareProperty( "SpacePointProviderTool", m_spacePointTool  );
+   }
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
@@ -69,13 +78,16 @@ StatusCode TrigHitDVHypoAlg::initialize()
    // tight : eta<1.0, SP seed=false, BDT eff=0.75
 
    CHECK( m_jetsKey.initialize() );
-   CHECK( m_hitDVSeedKey.initialize() );
-   CHECK( m_hitDVTrkKey.initialize() );
-   CHECK( m_hitDVSPKey.initialize() );
    CHECK( m_hitDVKey.initialize());
+   CHECK( m_tracksKey.initialize());
    CHECK( m_lumiDataKey.initialize(!m_isMC) );
+   ATH_CHECK( m_recJetRoiCollectionKey.initialize(m_doHitDV_Seeding) );
 
    if ( !m_monTool.empty() ) CHECK( m_monTool.retrieve() );
+
+   ATH_CHECK(m_beamSpotKey.initialize());
+   ATH_CHECK(m_spacePointTool.retrieve() );
+   
 
    for (auto& reader : m_tmva_reader) {
       // Create two instances with same variables
@@ -117,6 +129,14 @@ StatusCode TrigHitDVHypoAlg::initialize()
 
 StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
 {
+
+   const TrigRoiDescriptor roi = TrigRoiDescriptor(0, -4.5, 4.5, 0, -M_PI, M_PI, 0, -168.0, 168.0);
+   std::vector<TrigSiSpacePointBase> convertedSpacePoints;
+   convertedSpacePoints.reserve(5000);
+   int mnt_roi_nSPsPIX;
+   int mnt_roi_nSPsSCT;
+   ATH_CHECK(m_spacePointTool->getSpacePoints(roi, convertedSpacePoints, mnt_roi_nSPsPIX, mnt_roi_nSPsSCT, context));
+
    // monitoring
    auto mon_n_dvtrks     = Monitored::Scalar<int>( "n_dvtrks",     0 );
    auto mon_n_dvsps      = Monitored::Scalar<int>( "n_dvsps",      0 );
@@ -173,35 +193,22 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
       }
    }
 
-   // hitDV objects
-   auto hitDVSeedHandle = SG::makeHandle(m_hitDVSeedKey, context );
-   ATH_CHECK( hitDVSeedHandle.isValid() );
-   ATH_MSG_DEBUG( "hitDVSeed handle size: " << hitDVSeedHandle->size() );
+   auto tracks = SG::makeHandle( m_tracksKey, context );
+   ATH_CHECK(tracks.isValid());
 
-   auto hitDVTrkHandle = SG::makeHandle(m_hitDVTrkKey, context );
-   ATH_CHECK( hitDVTrkHandle.isValid() );
-   ATH_MSG_DEBUG( "hitDVTrk handle size: " << hitDVTrkHandle->size() );
+   auto hitDVSeedsContainer    = std::make_unique<xAOD::TrigCompositeContainer>();
+   auto hitDVSeedsContainerAux = std::make_unique<xAOD::TrigCompositeAuxContainer>();
+   hitDVSeedsContainer->setStore(hitDVSeedsContainerAux.get());
 
-   auto hitDVSPHandle = SG::makeHandle(m_hitDVSPKey, context );
-   ATH_CHECK( hitDVSPHandle.isValid() );
-   ATH_MSG_DEBUG( "hitDVSP handle size: " << hitDVSPHandle->size() );
+   auto hitDVTrksContainer    = std::make_unique<xAOD::TrigCompositeContainer>();
+   auto hitDVTrksContainerAux = std::make_unique<xAOD::TrigCompositeAuxContainer>();
+   hitDVTrksContainer->setStore(hitDVTrksContainerAux.get());
 
-   const xAOD::TrigCompositeContainer * hitDVSeedsContainer = hitDVSeedHandle.get();
-   const xAOD::TrigCompositeContainer * hitDVTrksContainer  = hitDVTrkHandle.get();
-   const xAOD::TrigCompositeContainer * hitDVSPsContainer   = hitDVSPHandle.get();
+   auto hitDVSPsContainer    = std::make_unique<xAOD::TrigCompositeContainer>();
+   auto hitDVSPsContainerAux = std::make_unique<xAOD::TrigCompositeAuxContainer>();
+   hitDVSPsContainer->setStore(hitDVSPsContainerAux.get());
 
-   if( hitDVSeedsContainer == nullptr ) {
-      ATH_MSG_ERROR( "ERROR Cannot get hitDVSeeds container" );
-      return StatusCode::FAILURE;
-   }
-   if( hitDVTrksContainer == nullptr ) {
-      ATH_MSG_ERROR( "ERROR Cannot get hitDVTrks container" );
-      return StatusCode::FAILURE;
-   }
-   if( hitDVSPsContainer == nullptr ) {
-      ATH_MSG_ERROR( "ERROR Cannot get hitDVSPs container" );
-      return StatusCode::FAILURE;
-   }
+   ATH_CHECK( findHitDV(context, convertedSpacePoints, *tracks, *hitDVSeedsContainer, *hitDVTrksContainer, *hitDVSPsContainer) );
 
    mon_n_dvtrks = hitDVTrksContainer->size();
    mon_n_dvsps  = hitDVSPsContainer->size();
@@ -231,7 +238,7 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
    std::vector<float> jetSeeds_phi;
    ATH_CHECK( findJetSeeds(jetsContainer, m_jetSeed_ptMin, m_jetSeed_etaMax, jetSeeds_pt, jetSeeds_eta, jetSeeds_phi) );
    int n_alljetseeds = jetSeeds_eta.size();
-   ATH_CHECK( selectSeedsNearby(hitDVSeedsContainer, jetSeeds_eta, jetSeeds_phi, jetSeeds_pt) );
+   ATH_CHECK( selectSeedsNearby(hitDVSeedsContainer.get(), jetSeeds_eta, jetSeeds_phi, jetSeeds_pt) );
    mon_n_jetseeds = jetSeeds_eta.size();
    mon_n_jetseedsdel = n_alljetseeds - jetSeeds_eta.size();
 
@@ -241,9 +248,9 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
    std::vector<float> void_pt;
    int n_allspseeds = 0;
    if( m_tools_loosest_wp <= 1 ) {
-      ATH_CHECK( findSPSeeds(context, hitDVSPsContainer, spSeeds_eta, spSeeds_phi) );
+      ATH_CHECK( findSPSeeds(context, hitDVSPsContainer.get(), spSeeds_eta, spSeeds_phi) );
       n_allspseeds  = spSeeds_eta.size();
-      ATH_CHECK( selectSeedsNearby(hitDVSeedsContainer, spSeeds_eta, spSeeds_phi, void_pt) );
+      ATH_CHECK( selectSeedsNearby(hitDVSeedsContainer.get(), spSeeds_eta, spSeeds_phi, void_pt) );
       mon_n_spseeds = spSeeds_eta.size();
       mon_n_spseedsdel = n_allspseeds - spSeeds_eta.size();
    }
@@ -267,12 +274,12 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
 
       int n_passed_jet = 0;
       int seed_type = SeedType::HLTJet;
-      ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, jetSeeds_pt, jetSeeds_eta, jetSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_jet) );
+      ATH_CHECK( calculateBDT(context, hitDVSPsContainer.get(), hitDVTrksContainer.get(), jetSeeds_pt, jetSeeds_eta, jetSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_jet) );
 
       int n_passed_sp = 0;
       if( m_tools_loosest_wp <= 1 ) {
 	 seed_type = SeedType::SP;
-	 ATH_CHECK( calculateBDT(context, hitDVSPsContainer, hitDVTrksContainer, void_pt, spSeeds_eta, spSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_sp) );
+	 ATH_CHECK( calculateBDT(context, hitDVSPsContainer.get(), hitDVTrksContainer.get(), void_pt, spSeeds_eta, spSeeds_phi, preselBDTthreshold, seed_type, dvContainer, n_passed_sp) );
       }
 
       ATH_MSG_DEBUG( "nr of dv container / jet-seeded / sp-seed candidates = " << dvContainer->size() << " / " << n_passed_jet << " / " << n_passed_sp );
@@ -333,13 +340,10 @@ StatusCode TrigHitDVHypoAlg::execute( const EventContext& context ) const
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
 
-float TrigHitDVHypoAlg::deltaR2(float eta_1, float phi_1, float eta_2, float phi_2) const
-{
-   float dPhi = phi_1 - phi_2;
-   if (dPhi < -TMath::Pi()) dPhi += 2*TMath::Pi();
-   if (dPhi >  TMath::Pi()) dPhi -= 2*TMath::Pi();
+float TrigHitDVHypoAlg::deltaR2(float eta_1, float phi_1, float eta_2, float phi_2) const {
+   float dPhi = CxxUtils::wrapToPi(phi_1 - phi_2);
    float dEta = eta_1 - eta_2;
-   return (dPhi*dPhi+dEta*dEta);
+   return (dPhi*dPhi)+(dEta*dEta);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -984,3 +988,503 @@ StatusCode TrigHitDVHypoAlg::selectSeedsNearby(const xAOD::TrigCompositeContaine
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------
+
+StatusCode TrigHitDVHypoAlg::findSPSeeds( const EventContext& ctx,
+					     const std::vector<float>& v_sp_eta, const std::vector<float>& v_sp_phi,
+					     const std::vector<int>& v_sp_layer, const std::vector<int>& v_sp_usedTrkId,
+					     std::vector<float>& seeds_eta, std::vector<float>& seeds_phi ) const
+{
+   const int   NBINS_ETA = 50;
+   const float ETA_MIN   = -2.5;
+   const float ETA_MAX   =  2.5;
+
+   const int   NBINS_PHI = 80;
+   const float PHI_MIN   = -4.0;
+   const float PHI_MAX   =  4.0;
+
+   char hname[64];
+
+   unsigned int slotnr    = ctx.slot();
+   unsigned int subSlotnr = ctx.subSlot();
+
+   sprintf(hname,"ftf_s%u_ss%u_ly6_h2_nsp",slotnr,subSlotnr);
+   std::unique_ptr<TH2F> ly6_h2_nsp = std::make_unique<TH2F>(hname,hname,NBINS_ETA,ETA_MIN,ETA_MAX,NBINS_PHI,PHI_MIN,PHI_MAX);
+   sprintf(hname,"ftf_s%u_ss%u_ly7_h2_nsp",slotnr,subSlotnr);
+   std::unique_ptr<TH2F> ly7_h2_nsp = std::make_unique<TH2F>(hname,hname,NBINS_ETA,ETA_MIN,ETA_MAX,NBINS_PHI,PHI_MIN,PHI_MAX);
+
+   sprintf(hname,"ftf_s%u_ss%u_ly6_h2_nsp_notrk",slotnr,subSlotnr);
+   std::unique_ptr<TH2F> ly6_h2_nsp_notrk = std::make_unique<TH2F>(hname,hname,NBINS_ETA,ETA_MIN,ETA_MAX,NBINS_PHI,PHI_MIN,PHI_MAX);
+   sprintf(hname,"ftf_s%u_ss%u_ly7_h2_nsp_notrk",slotnr,subSlotnr);
+   std::unique_ptr<TH2F> ly7_h2_nsp_notrk = std::make_unique<TH2F>(hname,hname,NBINS_ETA,ETA_MIN,ETA_MAX,NBINS_PHI,PHI_MIN,PHI_MAX);
+
+   for(unsigned int iSeed=0; iSeed<v_sp_eta.size(); ++iSeed) {
+
+      int sp_layer = v_sp_layer[iSeed];
+      float sp_eta = v_sp_eta[iSeed];
+      int ilayer = getSPLayer(sp_layer,sp_eta);
+      if( ilayer<6 ) continue;
+
+      int sp_trkid = v_sp_usedTrkId[iSeed];
+      bool isUsedByTrk = (sp_trkid != -1);
+      float sp_phi = v_sp_phi[iSeed];
+
+      bool fill_out_of_pi = false;
+      float sp_phi2 = 0;
+      if( sp_phi < 0 ) {
+	 sp_phi2 = 2*TMath::Pi() + sp_phi;
+	 if( sp_phi2 < PHI_MAX ) fill_out_of_pi = true;
+      }
+      else {
+	 sp_phi2 = -2*TMath::Pi() + sp_phi;
+	 if( PHI_MIN < sp_phi2 ) fill_out_of_pi = true;
+      }
+      if( ilayer==6 ) {
+	                      ly6_h2_nsp->Fill(sp_eta,sp_phi);
+	 if( fill_out_of_pi ) ly6_h2_nsp->Fill(sp_eta,sp_phi2);
+	 if( ! isUsedByTrk )                  ly6_h2_nsp_notrk->Fill(sp_eta,sp_phi);
+	 if( ! isUsedByTrk && fill_out_of_pi) ly6_h2_nsp_notrk->Fill(sp_eta,sp_phi2);
+      }
+      if( ilayer==7 ) {
+	                      ly7_h2_nsp->Fill(sp_eta,sp_phi);
+	 if( fill_out_of_pi ) ly7_h2_nsp->Fill(sp_eta,sp_phi2);
+	 if( ! isUsedByTrk )                  ly7_h2_nsp_notrk->Fill(sp_eta,sp_phi);
+	 if( ! isUsedByTrk && fill_out_of_pi) ly7_h2_nsp_notrk->Fill(sp_eta,sp_phi2);
+      }
+   }
+
+   ATH_MSG_VERBOSE("looking for ly6/ly6 doublet seeds");
+
+   // (idx, sort/weight, eta, phi)
+   std::vector<std::tuple<int,float,float,float>> QT;
+
+   for(int ly6_ieta=1; ly6_ieta<=NBINS_ETA; ly6_ieta++) {
+      float ly6_eta = (ly6_h2_nsp->GetXaxis()->GetBinLowEdge(ly6_ieta) + ly6_h2_nsp->GetXaxis()->GetBinUpEdge(ly6_ieta))/2.0;
+      for(int ly6_iphi=1; ly6_iphi<=NBINS_PHI; ly6_iphi++) {
+	 float ly6_phi = (ly6_h2_nsp->GetYaxis()->GetBinLowEdge(ly6_iphi) + ly6_h2_nsp->GetYaxis()->GetBinUpEdge(ly6_iphi))/2.0;
+
+	 float ly6_nsp       = ly6_h2_nsp      ->GetBinContent(ly6_ieta,ly6_iphi);
+	 float ly6_nsp_notrk = ly6_h2_nsp_notrk->GetBinContent(ly6_ieta,ly6_iphi);
+	 float ly6_frac      = ( ly6_nsp > 0 ) ? ly6_nsp_notrk / ly6_nsp : 0;
+	 if( ly6_nsp < 10 || ly6_frac < 0.85 ) continue;
+
+	 float ly7_frac_max = 0;
+	 float ly7_eta_max  = 0;
+	 float ly7_phi_max  = 0;
+	 for(int ly7_ieta=std::max(1,ly6_ieta-1); ly7_ieta<std::min(NBINS_ETA,ly6_ieta+1); ly7_ieta++) {
+	    for(int ly7_iphi=std::max(1,ly6_iphi-1); ly7_iphi<=std::min(NBINS_PHI,ly6_iphi+1); ly7_iphi++) {
+	       float ly7_nsp       = ly7_h2_nsp      ->GetBinContent(ly7_ieta,ly7_iphi);
+	       float ly7_nsp_notrk = ly7_h2_nsp_notrk->GetBinContent(ly7_ieta,ly7_iphi);
+	       float ly7_frac      = ( ly7_nsp > 0 ) ? ly7_nsp_notrk / ly7_nsp : 0;
+	       if( ly7_nsp < 10 ) continue;
+	       if( ly7_frac > ly7_frac_max ) {
+		  ly7_frac_max = ly7_frac;
+		  ly7_eta_max  = (ly7_h2_nsp->GetXaxis()->GetBinLowEdge(ly7_ieta) + ly7_h2_nsp->GetXaxis()->GetBinUpEdge(ly7_ieta))/2.0;
+		  ly7_phi_max  = (ly7_h2_nsp->GetXaxis()->GetBinLowEdge(ly7_iphi) + ly7_h2_nsp->GetXaxis()->GetBinUpEdge(ly7_iphi))/2.0;
+	       }
+	    }
+	 }
+	 if( ly7_frac_max < 0.85 ) continue;
+	 //
+	 float wsum = ly6_frac + ly7_frac_max;
+	 float weta = (ly6_eta*ly6_frac + ly7_eta_max*ly7_frac_max) / wsum;
+	 float wphi = (ly6_phi*ly6_frac + ly7_phi_max*ly7_frac_max) / wsum;
+	 float w = wsum / 2.0;
+	 QT.push_back(std::make_tuple(-1,w,weta,wphi));
+      }
+   }
+   ATH_MSG_VERBOSE("nr of ly6/ly7 doublet candidate seeds=" << QT.size() << ", doing clustering...");
+
+   // sort
+   std::sort(QT.begin(), QT.end(),
+	     [](const std::tuple<int,float,float,float>& lhs, const std::tuple<int,float,float,float>& rhs) {
+		return std::get<1>(lhs) > std::get<1>(rhs); } );
+
+   // clustering
+   const double CLUSTCUT_DIST_SQUARED = 0.04; // const double CLUSTCUT_DIST = 0.2;
+   const double CLUSTCUT_SEED_FRAC    = 0.9;
+
+   std::vector<float> seeds_wsum;
+
+   for(unsigned int i=0; i<QT.size(); i++) {
+      float phi  = std::get<3>(QT[i]);
+      float eta  = std::get<2>(QT[i]);
+      float w    = std::get<1>(QT[i]);
+      if(i==0) {
+	 seeds_eta.push_back(w*eta); seeds_phi.push_back(w*phi);
+	 seeds_wsum.push_back(w);
+	 continue;
+      }
+      const int IDX_INITIAL = 100;
+      float dist2_min = 100.0;
+      int idx_min     = IDX_INITIAL;
+      for(unsigned j=0; j<seeds_eta.size(); j++) {
+	 float ceta = seeds_eta[j]/seeds_wsum[j];
+	 float cphi = seeds_phi[j]/seeds_wsum[j];
+	 // intentionally calculate in this way as phi is defined beyond -Pi/Pi (no boundary)
+	 float deta  = std::fabs(ceta-eta);
+	 float dphi  = std::fabs(cphi-phi);
+	 float dist2 = dphi*dphi+deta*deta;
+	 if( dist2 < dist2_min ) {
+	    dist2_min = dist2;
+	    idx_min  = j;
+	 }
+      }
+      int match_idx = IDX_INITIAL;
+      if( idx_min != IDX_INITIAL ) {
+	 if( dist2_min < CLUSTCUT_DIST_SQUARED ) { match_idx = idx_min; }
+      }
+      if( match_idx == IDX_INITIAL ) {
+	 if( w > CLUSTCUT_SEED_FRAC && dist2_min > CLUSTCUT_DIST_SQUARED ) {
+	    seeds_eta.push_back(w*eta); seeds_phi.push_back(w*phi);
+	    seeds_wsum.push_back(w);
+	 }
+	 continue;
+      }
+      float new_eta   = seeds_eta[match_idx]  + w*eta;
+      float new_phi   = seeds_phi[match_idx]  + w*phi;
+      float new_wsum  = seeds_wsum[match_idx] + w;
+      seeds_eta[match_idx]   = new_eta;
+      seeds_phi[match_idx]   = new_phi;
+      seeds_wsum[match_idx]  = new_wsum;
+   }
+   QT.clear();
+   for(unsigned int i=0; i<seeds_eta.size(); i++) {
+      float eta = seeds_eta[i] / seeds_wsum[i];
+      float phi = seeds_phi[i] / seeds_wsum[i];
+      seeds_eta[i] = eta;
+      seeds_phi[i] = phi;
+      if( phi < -TMath::Pi() ) phi =  2*TMath::Pi() + phi;
+      if( phi >  TMath::Pi() ) phi = -2*TMath::Pi() + phi;
+      seeds_phi[i] = phi;
+   }
+   ATH_MSG_VERBOSE("after clustering, nr of seeds = " << seeds_eta.size());
+
+   // delete overlap (can happen at phi=-Pi/Pi bounadry)
+   std::vector<unsigned int> idx_to_delete;
+   for(unsigned int i=0; i<seeds_eta.size(); i++) {
+      if( std::find(idx_to_delete.begin(),idx_to_delete.end(),i) != idx_to_delete.end() ) continue;
+      float eta_i = seeds_eta[i];
+      float phi_i = seeds_phi[i];
+      for(unsigned int j=i+1; j<seeds_eta.size(); j++) {
+	 if( std::find(idx_to_delete.begin(),idx_to_delete.end(),j) != idx_to_delete.end() ) continue;
+	 float eta_j = seeds_eta[j];
+	 float phi_j = seeds_phi[j];
+	 float dR2 = deltaR2(eta_i,phi_i,eta_j,phi_j);
+	 if( dR2 < CLUSTCUT_DIST_SQUARED ) idx_to_delete.push_back(j);
+      }
+   }
+   ATH_MSG_VERBOSE("nr of duplicated seeds to be removed = " << idx_to_delete.size());
+   if( idx_to_delete.size() > 0 ) {
+      std::sort(idx_to_delete.begin(),idx_to_delete.end());
+      for(unsigned int j=idx_to_delete.size(); j>0; j--) {
+	 unsigned int idx = idx_to_delete[j-1];
+	 seeds_eta.erase(seeds_eta.begin()+idx);
+	 seeds_phi.erase(seeds_phi.begin()+idx);
+      }
+   }
+
+   ATH_MSG_VERBOSE("nr of ly6/ly7 seeds=" << seeds_eta.size());
+
+   // return
+   return StatusCode::SUCCESS;
+}
+
+StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vector<TrigSiSpacePointBase>& convertedSpacePoints,
+					  const DataVector<Trk::Track> tracks, DataVector<xAOD::TrigComposite_v1>& hitDVSeedsContainer, 
+                 DataVector<xAOD::TrigComposite_v1>& hitDVTrksContainer, 
+                 DataVector<xAOD::TrigComposite_v1>& hitDVSPsContainer) const
+{
+   std::vector<int>   v_dvtrk_id;
+   std::vector<float> v_dvtrk_pt;
+   std::vector<float> v_dvtrk_eta;
+   std::vector<float> v_dvtrk_phi;
+   std::vector<int>   v_dvtrk_n_hits_inner;
+   std::vector<int>   v_dvtrk_n_hits_pix;
+   std::vector<int>   v_dvtrk_n_hits_sct;
+   std::vector<float> v_dvtrk_a0beam;
+   std::unordered_map<Identifier, int> umap_fittedTrack_identifier;
+   int fittedTrack_id = -1;
+   
+   for (const auto& track: tracks) {
+      float shift_x = 0; float shift_y = 0;
+      if(m_useBeamSpot) {
+         SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
+        FTF::getBeamSpotShift(shift_x, shift_y, **beamSpotHandle);
+      }
+      trackInfo theTrackInfo;
+      bool igt = FTF::isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y);
+      if (not igt) {continue;}
+
+      fittedTrack_id++;
+      ATH_MSG_DEBUG("Selected track pT = " << theTrackInfo.ptGeV << " GeV");
+      
+
+      DataVector<const Trk::MeasurementBase>::const_iterator
+	 m  = track->measurementsOnTrack()->begin(),
+	 me = track->measurementsOnTrack()->end  ();
+      for(; m!=me; ++m ) {
+	 const Trk::PrepRawData* prd = ((const Trk::RIO_OnTrack*)(*m))->prepRawData();
+	 if( prd == nullptr ) continue;
+	 Identifier id_prd = prd->identify();
+	 if( umap_fittedTrack_identifier.find(id_prd) == umap_fittedTrack_identifier.end() ) {
+	    umap_fittedTrack_identifier.insert(std::make_pair(id_prd,fittedTrack_id));
+	 }
+      }
+      float phi = track->perigeeParameters()->parameters()[Trk::phi];
+      v_dvtrk_id.push_back(fittedTrack_id);
+      v_dvtrk_pt.push_back(theTrackInfo.ptGeV*Gaudi::Units::GeV);
+      v_dvtrk_eta.push_back(theTrackInfo.eta);
+      v_dvtrk_phi.push_back(phi);
+      v_dvtrk_n_hits_inner.push_back(theTrackInfo.n_hits_inner);
+      v_dvtrk_n_hits_pix.push_back(theTrackInfo.n_hits_pix);
+      v_dvtrk_n_hits_sct.push_back(theTrackInfo.n_hits_sct);
+      v_dvtrk_a0beam.push_back(theTrackInfo.a0beam);
+   }
+   ATH_MSG_DEBUG("Nr of selected tracks / all = " << fittedTrack_id << " / " << tracks.size());
+   ATH_MSG_DEBUG("Nr of Identifiers used by selected tracks = " << umap_fittedTrack_identifier.size());
+
+   // space points
+   int n_sp           = 0;
+   int n_sp_usedByTrk = 0;
+
+   std::unordered_map<Identifier, int> umap_sp_identifier;
+   umap_sp_identifier.reserve(1.3*convertedSpacePoints.size());//up to 2 Identifiers per spacepoint, end up with 1.3 from measurements
+
+   auto add_to_sp_map = [&](const Trk::PrepRawData* prd) {
+     if (prd) {
+       Identifier id_prd =  prd->identify();
+       if( umap_sp_identifier.find(id_prd) == umap_sp_identifier.end() ) {
+         umap_sp_identifier.insert(std::make_pair(id_prd,-1));
+       }
+     }
+   };
+
+   for(unsigned int iSp=0; iSp<convertedSpacePoints.size(); ++iSp) {
+      bool isPix = convertedSpacePoints[iSp].isPixel();
+      bool isSct = convertedSpacePoints[iSp].isSCT();
+      if( ! isPix && ! isSct ) continue;
+      const Trk::SpacePoint* sp = convertedSpacePoints[iSp].offlineSpacePoint();
+      add_to_sp_map(sp->clusterList().first);
+      add_to_sp_map(sp->clusterList().second);
+   }
+   int n_id_usedByTrack = 0;
+   for(auto it=umap_sp_identifier.begin(); it!=umap_sp_identifier.end(); ++it) {
+     Identifier id_sp = it->first;
+     if( umap_fittedTrack_identifier.find(id_sp) != umap_fittedTrack_identifier.end() ) {
+       umap_sp_identifier[id_sp] = umap_fittedTrack_identifier[id_sp];
+       ++n_id_usedByTrack;
+     }
+   }
+   ATH_MSG_DEBUG("Nr of SPs / Identifiers (all) / Identifiers (usedByTrack) = " << convertedSpacePoints.size() << " / " << umap_sp_identifier.size() << " / " << n_id_usedByTrack);
+
+   auto sp_map_used_id = [&](const Trk::PrepRawData* prd) {
+     int usedTrack_id = -1;
+     if (prd) {
+       Identifier id_prd =  prd->identify();
+       if( umap_sp_identifier.find(id_prd) != umap_sp_identifier.end() ) {
+         usedTrack_id = umap_sp_identifier[id_prd];
+       }
+     }
+     return usedTrack_id;
+   };
+
+   std::vector<float> v_sp_eta;
+   v_sp_eta.reserve(convertedSpacePoints.size());
+   std::vector<float> v_sp_r;
+   v_sp_r.reserve(convertedSpacePoints.size());
+   std::vector<float> v_sp_phi;
+   v_sp_phi.reserve(convertedSpacePoints.size());
+   std::vector<int>   v_sp_layer;
+   v_sp_layer.reserve(convertedSpacePoints.size());
+   std::vector<bool>  v_sp_isPix;
+   v_sp_isPix.reserve(convertedSpacePoints.size());
+   std::vector<bool>  v_sp_isSct;
+   v_sp_isSct.reserve(convertedSpacePoints.size());
+   std::vector<int>   v_sp_usedTrkId;
+   v_sp_usedTrkId.reserve(convertedSpacePoints.size());
+
+   for(unsigned int iSp=0; iSp<convertedSpacePoints.size(); ++iSp) {
+      bool isPix = convertedSpacePoints[iSp].isPixel();
+      bool isSct = convertedSpacePoints[iSp].isSCT();
+      if( ! isPix && ! isSct ) continue;
+      const Trk::SpacePoint* sp = convertedSpacePoints[iSp].offlineSpacePoint();
+      
+      int usedTrack_id  = -1;
+      int usedTrack_id_first = sp_map_used_id(sp->clusterList().first);
+      if (usedTrack_id_first != -1) {
+        usedTrack_id = usedTrack_id_first;
+      }
+      int usedTrack_id_second = sp_map_used_id(sp->clusterList().second);
+      if (usedTrack_id_second != -1) {
+        usedTrack_id = usedTrack_id_second;
+      }
+
+      //
+      n_sp++;
+      if( usedTrack_id != -1 ) n_sp_usedByTrk++;
+      int  layer = convertedSpacePoints[iSp].layer();
+      float sp_r = convertedSpacePoints[iSp].r();
+
+      const Amg::Vector3D& pos_sp = sp->globalPosition();
+      float sp_x = pos_sp[Amg::x];
+      float sp_y = pos_sp[Amg::y];
+      float sp_z = pos_sp[Amg::z];
+      TVector3 p3Sp(sp_x,sp_y,sp_z);
+      float sp_eta = p3Sp.Eta();
+      float sp_phi = p3Sp.Phi();
+
+      v_sp_eta.push_back(sp_eta);
+      v_sp_r.push_back(sp_r);
+      v_sp_phi.push_back(sp_phi);
+      v_sp_layer.push_back(layer);
+      v_sp_isPix.push_back(isPix);
+      v_sp_isSct.push_back(isSct);
+      v_sp_usedTrkId.push_back(usedTrack_id);
+
+      ATH_MSG_VERBOSE("+++ SP eta / phi / layer / ixPix / usedTrack_id = " << sp_eta << " / " << sp_phi << " / " << layer << " / " << isPix << " / " << usedTrack_id);
+
+   }
+   ATH_MSG_DEBUG("Nr of SPs / all = " << n_sp << " / " << convertedSpacePoints.size());
+   ATH_MSG_DEBUG("Nr of SPs used by selected tracks = " << n_sp_usedByTrk);
+
+   // Seed
+   std::vector<float>   v_seeds_eta;
+   std::vector<float>   v_seeds_phi;
+   std::vector<int16_t> v_seeds_type;
+
+   if( m_doHitDV_Seeding ) {
+
+      // add L1 Jet seeds
+      const unsigned int L1JET_ET_CUT = 30;
+
+      auto recJetRoiCollectionHandle = SG::makeHandle( m_recJetRoiCollectionKey, ctx );
+      const DataVector<LVL1::RecJetRoI> *recJetRoiCollection = recJetRoiCollectionHandle.cptr();
+      if (!recJetRoiCollectionHandle.isValid()){
+	 ATH_MSG_ERROR("ReadHandle for DataVector<LVL1::RecJetRoI> key:" << m_recJetRoiCollectionKey.key() << " isn't Valid");
+	 return StatusCode::FAILURE;
+      }
+      for (size_t size=0; size<recJetRoiCollection->size(); ++size){
+	 const LVL1::RecJetRoI* recRoI = recJetRoiCollection->at(size);
+	 if( recRoI == nullptr ) continue;
+	 bool isSeed = false;
+	 for( const unsigned int thrMapping : recRoI->thresholdsPassed()) {
+	    double thrValue = recRoI->triggerThreshold(thrMapping) * Gaudi::Units::GeV;
+	    if( thrValue >= L1JET_ET_CUT ) {
+	       isSeed = true;
+	       break;
+	    }
+	 }
+	 if( ! isSeed ) continue;
+	 // Convert to ATLAS phi convention: see RoIResultToAOD.cxx
+	 float roiPhi = recRoI->phi();
+	 if( roiPhi > TMath::Pi() ) roiPhi -= 2 * TMath::Pi();
+	 v_seeds_eta.push_back(recRoI->eta());
+	 v_seeds_phi.push_back(roiPhi);
+	 v_seeds_type.push_back(0); // L1_J:0
+      }
+      ATH_MSG_DEBUG("Nr of L1_J" << L1JET_ET_CUT << " seeds = " << v_seeds_eta.size());
+
+      // space-point based (unseeded mode)
+      std::vector<float> v_spseeds_eta;
+      std::vector<float> v_spseeds_phi;
+      ATH_CHECK( findSPSeeds(ctx, v_sp_eta, v_sp_phi, v_sp_layer, v_sp_usedTrkId, v_spseeds_eta, v_spseeds_phi) );
+      ATH_MSG_DEBUG("Nr of SP seeds = " << v_spseeds_eta.size());
+      for(size_t idx=0; idx<v_spseeds_eta.size(); ++idx) {
+	 v_seeds_eta.push_back(v_spseeds_eta[idx]);
+	 v_seeds_phi.push_back(v_spseeds_phi[idx]);
+	 v_seeds_type.push_back(1); // SP: 1
+      }
+      ATH_MSG_DEBUG("Nr of SP + L1_J" << L1JET_ET_CUT << " seeds = " << v_seeds_eta.size());
+   }
+
+   // fill objects
+
+   // seeds
+   const int N_MAX_SEEDS = 200;
+   int n_seeds = std::min(N_MAX_SEEDS,(int)v_seeds_eta.size());
+   hitDVSeedsContainer.reserve(n_seeds);
+   for(auto iSeed=0; iSeed < n_seeds; ++iSeed) {
+      xAOD::TrigComposite *hitDVSeed = new xAOD::TrigComposite();
+      hitDVSeedsContainer.push_back(hitDVSeed);
+      hitDVSeed->setDetail<float>   ("hitDVSeed_eta",  v_seeds_eta[iSeed]);
+      hitDVSeed->setDetail<float>   ("hitDVSeed_phi",  v_seeds_phi[iSeed]);
+      hitDVSeed->setDetail<int16_t> ("hitDVSeed_type", v_seeds_type[iSeed]);
+   }
+
+   // track
+   const float TRKCUT_DELTA_R_TO_SEED = 1.0;
+   hitDVTrksContainer.reserve(v_dvtrk_pt.size());
+   for(unsigned int iTrk=0; iTrk<v_dvtrk_pt.size(); ++iTrk) {
+      float trk_eta = v_dvtrk_eta[iTrk];
+      float trk_phi = v_dvtrk_phi[iTrk];
+      if( m_doHitDV_Seeding ) {
+	 bool isNearSeed = false;
+	 for (unsigned int iSeed=0; iSeed<v_seeds_eta.size(); ++iSeed) {
+	    float seed_eta = v_seeds_eta[iSeed];
+	    float seed_phi = v_seeds_phi[iSeed];
+	    float dR2 = deltaR2(trk_eta,trk_phi,seed_eta,seed_phi);
+	    if( dR2 <= TRKCUT_DELTA_R_TO_SEED*TRKCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
+	 }
+	 if( ! isNearSeed ) continue;
+      }
+      xAOD::TrigComposite *hitDVTrk = new xAOD::TrigComposite();
+      hitDVTrksContainer.push_back(hitDVTrk);
+      hitDVTrk->setDetail<int>    ("hitDVTrk_id",  v_dvtrk_id[iTrk]);
+      hitDVTrk->setDetail<float>  ("hitDVTrk_pt",  v_dvtrk_pt[iTrk]);
+      hitDVTrk->setDetail<float>  ("hitDVTrk_eta", v_dvtrk_eta[iTrk]);
+      hitDVTrk->setDetail<float>  ("hitDVTrk_phi", v_dvtrk_phi[iTrk]);
+      hitDVTrk->setDetail<int16_t>("hitDVTrk_n_hits_inner", v_dvtrk_n_hits_inner[iTrk]);
+      hitDVTrk->setDetail<int16_t>("hitDVTrk_n_hits_pix",   v_dvtrk_n_hits_pix[iTrk]);
+      hitDVTrk->setDetail<int16_t>("hitDVTrk_n_hits_sct",   v_dvtrk_n_hits_sct[iTrk]);
+      hitDVTrk->setDetail<float>  ("hitDVTrk_a0beam",       v_dvtrk_a0beam[iTrk]);
+   }
+
+   // space points
+   const float SPCUT_DELTA_R_TO_SEED = 1.0;
+   const size_t n_sp_max = std::min<size_t>(100000, v_sp_eta.size());
+   size_t n_sp_stored = 0;
+
+   // Instead of push_back we pre-allocate the container and use Accessors.
+   // In principle the same could be done everywhere else but this loop is
+   // by far the most time consuming. See ATR-27846 for details.
+   std::vector<xAOD::TrigComposite*> tmp(n_sp_max);
+   std::generate(tmp.begin(), tmp.end(), []{return new xAOD::TrigComposite();});
+   hitDVSPsContainer.reserve(n_sp_max);
+   hitDVSPsContainer.assign(tmp.begin(), tmp.end());
+
+   static const SG::AuxElement::Accessor<float> hitDVSP_eta("hitDVSP_eta");
+   static const SG::AuxElement::Accessor<float> hitDVSP_r("hitDVSP_r");
+   static const SG::AuxElement::Accessor<float> hitDVSP_phi("hitDVSP_phi");
+   static const SG::AuxElement::Accessor<int16_t> hitDVSP_layer("hitDVSP_layer");
+   static const SG::AuxElement::Accessor<bool> hitDVSP_isPix("hitDVSP_isPix");
+   static const SG::AuxElement::Accessor<bool> hitDVSP_isSct("hitDVSP_isSct");
+   static const SG::AuxElement::Accessor<int16_t> hitDVSP_usedTrkId("hitDVSP_usedTrkId");
+   for(size_t iSp=0; iSp<v_sp_eta.size(); ++iSp) {
+     if( m_doHitDV_Seeding ) {
+       const float sp_eta = v_sp_eta[iSp];
+       const float sp_phi = v_sp_phi[iSp];
+       bool isNearSeed = false;
+       for (size_t iSeed=0; iSeed<v_seeds_eta.size(); ++iSeed) {
+         const float seed_eta = v_seeds_eta[iSeed];
+         const float seed_phi = v_seeds_phi[iSeed];
+         const float dR2 = deltaR2(sp_eta, sp_phi, seed_eta, seed_phi);
+         if( dR2 <= SPCUT_DELTA_R_TO_SEED*SPCUT_DELTA_R_TO_SEED ) { isNearSeed = true; break; }
+       }
+       if( ! isNearSeed ) continue;
+     }
+     if( n_sp_stored >= n_sp_max ) break;
+     xAOD::TrigComposite& hit = *hitDVSPsContainer.at(n_sp_stored);
+     hitDVSP_eta(hit) = v_sp_eta[iSp];
+     hitDVSP_r(hit)   = v_sp_r[iSp];
+     hitDVSP_phi(hit) = v_sp_phi[iSp];
+     hitDVSP_layer(hit) = v_sp_layer[iSp];
+     hitDVSP_isPix(hit) = v_sp_isPix[iSp];
+     hitDVSP_isSct(hit) = v_sp_isSct[iSp];
+     hitDVSP_usedTrkId(hit) = v_sp_usedTrkId[iSp];
+     ++n_sp_stored;
+   }
+   ATH_MSG_DEBUG("Nr of SPs stored = " << n_sp_stored);
+   hitDVSPsContainer.resize(n_sp_stored);  // shrink container to actual size
+
+   return StatusCode::SUCCESS;
+}

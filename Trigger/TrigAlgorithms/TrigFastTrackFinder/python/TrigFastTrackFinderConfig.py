@@ -191,7 +191,6 @@ def TrigFastTrackFinderMonitoringArg(flags, name, doResMon):
         montool.defineHistogram('disCombTrk_nclone',  path='EXPERT',type='TH1F',title="Nr of disCombTrk (after clone removal)", xbins = 20, xmin=0, xmax=100)
         montool.defineHistogram('disCombTrk_ncand',   path='EXPERT',type='TH1F',title="Nr of disCombTrk (after pre-selection)", xbins = 20, xmin=0, xmax=100)
         #
-        montool.defineHistogram('TIME_HitDV',             path='EXPERT',type='TH1F',title="Hit-based DV search (ms)",          xbins = 100, xmin=0.0, xmax=400.0)
         montool.defineHistogram('TIME_dEdxTrk',           path='EXPERT',type='TH1F',title="Large dEdx search (ms)",            xbins =  20, xmin=0.0, xmax=20.0)
         montool.defineHistogram('TIME_disTrkZVertex',     path='EXPERT',type='TH1F',title="UTT z-vertexing time (ms)",         xbins =  10, xmin=0.0, xmax=10.0)
         montool.defineHistogram('TIME_disappearingTrack', path='EXPERT',type='TH1F',title="Disappearing track reco time (ms)", xbins = 100, xmin=0.0, xmax=300.0)
@@ -336,7 +335,6 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
         Triplet_nMaxPhiSlice = 53 if "cosmics" not in flags.Tracking.ActiveConfig.name else 2,
         LRT_Mode = flags.Tracking.ActiveConfig.isLRT,
         dodEdxTrk = flags.Tracking.ActiveConfig.dodEdxTrk,
-        doHitDV = flags.Tracking.ActiveConfig.doHitDV,
         doDisappearingTrk = flags.Tracking.ActiveConfig.doDisappearingTrk,
         Triplet_MaxBufferLength = 3,
         doSeedRedundancyCheck = flags.Tracking.ActiveConfig.doSeedRedundancyCheck,
@@ -376,13 +374,6 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   if config.dodEdxTrk:
     ftf.dEdxTrk = recordable("HLT_dEdxTrk")
     ftf.dEdxHit = recordable("HLT_dEdxHit")
-
-  if config.doHitDV:
-    ftf.doHitDV_Seeding = True
-    ftf.RecJetRoI = "HLT_RecJETRoIs"
-    ftf.HitDVSeed = "HLT_HitDVSeed" # not 'recordable' due to HLT truncation (ATR-23958)
-    ftf.HitDVTrk  = "HLT_HitDVTrk"  # not 'recordable' due to HLT truncation (ATR-23958)
-    ftf.HitDVSP   = "HLT_HitDVSP"   # not 'recordable' due to HLT truncation (ATR-23958)
 
   if config.doDisappearingTrk:
     ftf.DisTrkCand = recordable("HLT_DisTrkCand")

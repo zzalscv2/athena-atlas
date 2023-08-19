@@ -162,11 +162,6 @@ protected:
   SG::ReadHandleKey<Trk::PRDtoTrackMap>       m_prdToTrackMap
      {this,"PRDtoTrackMap",""};
 
-  // DataHandles for UTT
-  SG::ReadHandleKey<DataVector<LVL1::RecJetRoI>> m_recJetRoiCollectionKey {this, "RecJetRoI", "", ""};
-  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_hitDVSeedKey {this, "HitDVSeed", "", ""};
-  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_hitDVTrkKey  {this, "HitDVTrk",  "", ""};
-  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_hitDVSPKey   {this, "HitDVSP",   "", ""};
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_dEdxTrkKey   {this, "dEdxTrk",   "", ""};
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_dEdxHitKey   {this, "dEdxHit",   "", ""};
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_disTrkCandKey{this, "DisTrkCand","", ""};
@@ -207,9 +202,6 @@ protected:
   void fillMon(const TrackCollection& tracks, const TrigVertexCollection& vertices, const TrigRoiDescriptor& roi, const EventContext& ctx) const;
   void runResidualMonitoring(const Trk::Track& track, const EventContext&) const;
 
-  //Setup functions
-  void getBeamSpot(float&, float&, const EventContext&) const;
-
   // Internal bookkeeping
 
 
@@ -245,26 +237,8 @@ protected:
   StatusCode createEmptyUTTEDMs(const EventContext&) const;
 
   // Hit-based displaced vertex
-  bool m_doHitDV;
-  bool m_doHitDV_Seeding;
-  StatusCode findHitDV(const EventContext&, const std::vector<TrigSiSpacePointBase>&, const TrackCollection&) const;
-  StatusCode findSPSeeds( const EventContext&, const std::vector<float>&, const std::vector<float>&, const std::vector<int>&, 
-			  const std::vector<int>&, std::vector<float>&, std::vector<float>& ) const;
   int   getSPLayer(int, float) const;
-  float deltaR2(float, float, float, float) const;
 
-  struct trackInfo {
-    int n_hits_inner = 0;
-    int n_hits_pix = 0;
-    int n_hits_sct = 0;
-    int n_hits_innermost = 0;
-    float ptGeV = 0; 
-    float a0beam = 0;
-    float eta = 0; 
-    float phi0 = 0;
-  };
-
-  bool isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y) const;
   // dEdx calculation
   bool m_dodEdxTrk;
   StatusCode calcdEdx(const EventContext&, const TrackCollection&) const;
