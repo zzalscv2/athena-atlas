@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PARTICLEJETTOOLS_JETTRUTHLABELINGTOOL_H
@@ -9,13 +9,16 @@
 #include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "JetInterface/IJetDecorator.h"
 #include "ParticleJetTools/LargeRJetLabelEnum.h"
+#include <optional>
 
 class JetTruthLabelingTool :
   public asg::AsgTool,
@@ -68,21 +71,60 @@ protected:
   double m_mLowZ; /// Lower mass cut for Z label
   double m_mHighZ; /// Upper mass cut for Z label
 
+  struct DecorHandles {
+    DecorHandles (const JetTruthLabelingTool& tool, const EventContext& ctx);
+    SG::ReadDecorHandle<xAOD::JetContainer, int> nbReadHandle;
+
+    using IntHandle_t = SG::WriteDecorHandle<xAOD::JetContainer, int>;
+    using IntHandleOp_t = std::optional<IntHandle_t>;
+    IntHandleOp_t labelHandle;
+    IntHandleOp_t nbHandle;
+    IntHandleOp_t labelRecoHandle;
+    IntHandleOp_t nbRecoHandle;
+    using FloatHandle_t = SG::WriteDecorHandle<xAOD::JetContainer, float>;
+    using FloatHandleOp_t = std::optional<FloatHandle_t>;
+    FloatHandleOp_t dRWHandle;
+    FloatHandleOp_t dRZHandle;
+    FloatHandleOp_t dRHHandle;
+    FloatHandleOp_t dRTopHandle;
+    FloatHandleOp_t dRWRecoHandle;
+    FloatHandleOp_t dRZRecoHandle;
+    FloatHandleOp_t dRHRecoHandle;
+    FloatHandleOp_t dRTopRecoHandle;
+    FloatHandleOp_t split23Handle;
+    FloatHandleOp_t split12Handle;
+    FloatHandleOp_t truthMassHandle;
+    FloatHandleOp_t truthPtHandle;
+  };
+  friend struct DecorHandles;
+
   /// Label truth jet collection
-  StatusCode labelTruthJets() const;
-  StatusCode labelTruthJets( const xAOD::JetContainer &jets ) const;
+  StatusCode labelTruthJets( DecorHandles& dh,
+                             const EventContext& ctx ) const;
+  StatusCode labelTruthJets( DecorHandles& dh,
+                             const xAOD::JetContainer &jets,
+                             const EventContext& ctx ) const;
 
   /// Apply labels to all jets in a container
-  StatusCode labelRecoJets(const xAOD::JetContainer &jets ) const;
+  StatusCode labelRecoJets(DecorHandles& dh,
+                           const xAOD::JetContainer &jets,
+                           const EventContext& ctx) const;
 
   /// Get truth label using dR-matched particles
-  int getTruthJetLabelDR( const xAOD::Jet &jet, std::vector<std::pair<TLorentzVector,int> > tlv_truthParts ) const;
+  int getTruthJetLabelDR( DecorHandles& dh,
+                          const xAOD::Jet &jet,
+                          const std::vector<std::pair<TLorentzVector,int> >& tlv_truthParts,
+                          const EventContext& ctx ) const;
   
   /// Get truth label using ghost-associated particles
-  int getTruthJetLabelGA( const xAOD::Jet &jet ) const;
+  int getTruthJetLabelGA( DecorHandles& dh,
+                          const xAOD::Jet &jet,
+                          const EventContext& ctx ) const;
 
   /// Get label based on matching and containment criteria
-  int getLabel( const xAOD::Jet &jet, bool matchH, bool matchW, bool matchZ, bool matchTop ) const;
+  int getLabel( DecorHandles& dh,
+                const xAOD::Jet &jet, bool matchH, bool matchW, bool matchZ, bool matchTop,
+                const EventContext& ctx ) const;
 
   /// Get W/Z label Split12 cut
   float getWZSplit12Cut( float pt ) const;
@@ -116,6 +158,7 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_H_truthKey{this, "dR_H_TruthKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_Top_truthKey{this, "dR_Top_TruthKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_NB_truthKey{this, "NB_TruthKey", "", "Do not configure manually!"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_NB_truthReadKey{this, "NB_TruthReadKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split12_truthKey{this, "Split12_TruthKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split23_truthKey{this, "Split23_TruthKey", "", "Do not configure manually!"};
 
