@@ -14,9 +14,6 @@ class VertexSetup(FlagEnum):
     IVF = 'IterativeFinding'
     FastIVF = 'FastIterativeFinding'
     ActsGaussAMVF = 'ActsGaussAdaptiveMultiFinding'
-    # The following are for trigger only
-    GaussAMVF = 'GaussAdaptiveMultiFinding'
-    GaussIVF = 'GaussIterativeFinding'
     # Experimental setups, not to be used in production
     ExperimentalActsIVF = 'ExperimentalActsIterativeFinding'
 
