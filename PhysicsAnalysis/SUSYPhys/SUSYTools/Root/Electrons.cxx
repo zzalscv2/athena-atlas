@@ -74,7 +74,7 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
             ATH_MSG_DEBUG( "Adding electron to output collection (isLRT?) : ("    << static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
             ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
             ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
-            newElectron = new xAOD::Electron(*electron);
+            auto newElectron = new xAOD::Electron(*electron);
 
             if ( getOriginalObject(*electron) != nullptr ) {
               setOriginalObjectLink(*getOriginalObject(*electron), *newElectron);

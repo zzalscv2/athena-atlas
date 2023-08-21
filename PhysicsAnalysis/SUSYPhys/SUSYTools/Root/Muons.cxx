@@ -58,7 +58,7 @@ StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const 
     for (const xAOD::Muon* muon: muons) {
         // add muon into output 
         if (writeMuon.at(muon->index())){
-            newMuon = new xAOD::Muon(*muon);
+            auto newMuon = new xAOD::Muon(*muon);
 
             if ( getOriginalObject(*muon) != nullptr ) {
               setOriginalObjectLink(*getOriginalObject(*muon), *newMuon);
