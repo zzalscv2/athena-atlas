@@ -15,6 +15,7 @@
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
+#include "Acts/TrackFinding/TrackSelector.hpp"
 
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
@@ -112,6 +113,7 @@ namespace
     Acts::MeasurementSelector measurementSelector;
     Acts::PropagatorPlainOptions pOptions;
     Acts::CombinatorialKalmanFilterExtensions<ActsTrk::TrackStateBackend> ckfExtensions;
+    Acts::TrackSelector trackSelector;
   };
 
   // === DuplicateSeedDetector ================================
