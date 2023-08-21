@@ -7,6 +7,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
+
 namespace {
   struct CollectionDebugInfo {
     std::string_view name;
@@ -45,7 +47,13 @@ StatusCode TruncationAnalysisAlg::execute(const EventContext& context) const {
     //Print general information
     ss << "Info number " << counter << " / " << nInfos << std::endl;
     ss << "Module ID: " << moduleId(*info) << std::endl;
-    ss << "Total size: " << totalSize(*info)/1024. << " kB" << std::endl;
+    ss << "Total size: " << totalSize(*info)/1024. << " kB" << std::endl << std::endl;
+
+    ss << "Passing Chains IDs (look these IDs up in a menu JSON): ";
+    for (const TrigCompositeUtils::DecisionID chainID : TrigCompositeUtils::decisionIDs(info)) {
+      ss << chainID << ", ";
+    }
+    ss << std::endl << std::endl;
 
     // Collect name+size+isRecorded in one structure and sort by descending size
     std::vector<CollectionDebugInfo> collections;
