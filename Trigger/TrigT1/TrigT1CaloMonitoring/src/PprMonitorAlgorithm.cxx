@@ -73,6 +73,8 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
 
   // Error vector for global overview
   ErrorVector overview(8);
+  // Trigger tower error flag
+  bool triggerTowerHasError = false;
 
   // Loop over the trigger tower objects and fill the histograms 
  
@@ -314,6 +316,11 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
 
     //------------ SubStatus Word errors ----------------
     
+    // set maximum number of error events per lumiblock(per type) to avoid histograms with many x-bins
+    // Inspired by https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Trigger/TrigT1/TrigT1CaloMonitoring/src/CpmSimMonitorAlgorithm.cxx#L267
+    const int maxErrorsPerLB = 10;
+    auto currentLumiblock = GetEventInfo(ctx)->lumiBlock();
+
     using LVL1::DataError;
     if ( (myTower.tower)->errorWord()) {
       const LVL1::DataError err((myTower.tower)->errorWord());
@@ -325,42 +332,55 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
       auto  eventMonitor= Monitored::Scalar<std::string>("eventMonitor", std::to_string(eventNumber));
       auto y_2D = Monitored::Scalar<int>("y_2D", ypos);
       
-      for (int bit = 0; bit < 8; ++bit) {
-	auto bit_2D = Monitored::Scalar<int>("bit_2D", bit);
+      {
+	std::lock_guard<std::mutex> lock(m_mutex);
+
+
+	for (int bit = 0; bit < 8; ++bit) {
+	  auto bit_2D = Monitored::Scalar<int>("bit_2D", bit);
 	
-	if (err.get(bit + DataError::ChannelDisabled)) {
-	  if (crate < 4) fill("groupErrorField03", bit_2D, y_2D );
-	  else fill("groupErrorField47", bit_2D, y_2D );
-	  fill("groupASICErrorEventNumbers", eventMonitor, bit_2D );
-	}
+	  if (err.get(bit + DataError::ChannelDisabled)) {
+	    if (crate < 4) fill("groupErrorField03", bit_2D, y_2D );
+	    else fill("groupErrorField47", bit_2D, y_2D );
+            if (m_errorLB_tt_counter[currentLumiblock]<maxErrorsPerLB && (!triggerTowerHasError)) {
+              fill("groupASICErrorEventNumbers", eventMonitor, bit_2D );
+              m_errorLB_tt_counter[currentLumiblock]+=1;
+              triggerTowerHasError = true;
+            }
+	  }
 
-	if (err.get(bit + DataError::GLinkParity)) {
-	  if (crate < 4) fill("groupStatus03", bit_2D, y_2D );
-	  else fill("groupStatus47", bit_2D, y_2D );
-	  fill("group1DErrorSummary", bit_2D);
-	  fill("groupErrorEventNumbers", eventMonitor, bit_2D );
+	  if (err.get(bit + DataError::GLinkParity)) {
+	    if (crate < 4) fill("groupStatus03", bit_2D, y_2D );
+	    else fill("groupStatus47", bit_2D, y_2D );
+	    fill("group1DErrorSummary", bit_2D);
 
+            if ((m_errorLB_tt_counter[currentLumiblock]<maxErrorsPerLB) && (!triggerTowerHasError)) {
+              fill("groupErrorEventNumbers", eventMonitor, bit_2D );
+              m_errorLB_tt_counter[currentLumiblock]+=1;
+              triggerTowerHasError = true;
+            }
+	    
+	  }
 	}
+      
+	if (err.get(DataError::ChannelDisabled) ||
+	    err.get(DataError::MCMAbsent))
+	  overview[crate] |= 1;
+
+	if (err.get(DataError::Timeout) || err.get(DataError::ASICFull) ||
+	    err.get(DataError::EventMismatch) ||
+	    err.get(DataError::BunchMismatch) ||
+	    err.get(DataError::FIFOCorrupt) || err.get(DataError::PinParity))
+	  overview[crate] |= (1 << 1);
+
+	if (err.get(DataError::GLinkParity) ||
+	    err.get(DataError::GLinkProtocol) ||
+	    err.get(DataError::FIFOOverflow) ||
+	    err.get(DataError::ModuleError) || err.get(DataError::GLinkDown) ||
+	    err.get(DataError::GLinkTimeout) || err.get(DataError::BCNMismatch))
+	  overview[crate] |= (1 << 2);
+
       }
-      
-      if (err.get(DataError::ChannelDisabled) ||
-	  err.get(DataError::MCMAbsent))
-	overview[crate] |= 1;
-
-      if (err.get(DataError::Timeout) || err.get(DataError::ASICFull) ||
-	  err.get(DataError::EventMismatch) ||
-	  err.get(DataError::BunchMismatch) ||
-	  err.get(DataError::FIFOCorrupt) || err.get(DataError::PinParity))
-	overview[crate] |= (1 << 1);
-
-      if (err.get(DataError::GLinkParity) ||
-	  err.get(DataError::GLinkProtocol) ||
-	  err.get(DataError::FIFOOverflow) ||
-	  err.get(DataError::ModuleError) || err.get(DataError::GLinkDown) ||
-	  err.get(DataError::GLinkTimeout) || err.get(DataError::BCNMismatch))
-	overview[crate] |= (1 << 2);
-
-      
  
     }
       
