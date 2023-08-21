@@ -65,16 +65,6 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
 
     # Add calo seeded forward algorithms to produce xAOD Forward Electrons.
     if flags.Egamma.doForward:
-        if flags.Detector.GeometryITk:
-          from egammaAlgs.EMBremCollectionBuilderConfig import (
-              EMBremCollectionBuilderCfg)
-          acc.merge(EMBremCollectionBuilderCfg(
-              flags,
-              name="EMBremCollectionBuilderFwd",
-              SelectedTrackParticleContainerName=flags.Egamma.Keys.Output.FwdTrkPartContainerName,
-              OutputTrkPartContainerName=flags.Egamma.Keys.Output.FwdGSFTrackParticles,
-              OutputTrackContainerName=flags.Egamma.Keys.Output.FwdGSFTracks))
-
         from egammaAlgs.egammaForwardBuilderConfig import (
             egammaForwardBuilderCfg)
         acc.merge(egammaForwardBuilderCfg(flags))

@@ -10,6 +10,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def egammaSelectedTrackCopyCfg(flags, name="egammaSelectedTrackCopy", **kwargs):
     acc = ComponentAccumulator()
 
+    kwargs.setdefault("doFwdTracks", flags.Detector.GeometryITk)
+
     if "egammaCaloClusterSelector" not in kwargs:
         from egammaCaloTools.egammaCaloToolsConfig import (
             egammaCaloClusterSelectorGSFCfg,
@@ -31,7 +33,6 @@ def egammaSelectedTrackCopyCfg(flags, name="egammaSelectedTrackCopy", **kwargs):
     kwargs.setdefault("FwdClusterContainerName", flags.Egamma.Keys.Internal.ForwardTopoClusters)
     kwargs.setdefault("TrackParticleContainerName", flags.Egamma.Keys.Input.TrackParticles)
     kwargs.setdefault("OutputTrkPartContainerName", flags.Egamma.Keys.Output.TrkPartContainerName)
-    kwargs.setdefault("OutputFwdTrkPartContainerName", flags.Egamma.Keys.Output.FwdTrkPartContainerName)
 
     # P->T conversion extra dependencies
     if flags.Detector.GeometryITk:

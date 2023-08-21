@@ -47,12 +47,7 @@ egammaSelectedTrackCopy::initialize()
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_egammaCaloClusterSelector.retrieve());
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
-
-   m_doForwardTracks =!m_fwdClusterContainerKey.empty() &&
-                      !m_OutputFwdTrkPartContainerKey.empty();
-
-    ATH_CHECK(m_fwdClusterContainerKey.initialize(m_doForwardTracks));
-    ATH_CHECK(m_OutputFwdTrkPartContainerKey.initialize(m_doForwardTracks));
+  ATH_CHECK(m_fwdClusterContainerKey.initialize(m_doForwardTracks));
 
   return StatusCode::SUCCESS;
 }
@@ -122,12 +117,8 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
 
       return StatusCode::FAILURE;
     }
-    auto allFwdClusters = m_AllFwdClusters.buffer();
-    allFwdClusters += fwdClusterTES->size();
 
-    outputFwdTrkPartContainer =
-        SG::WriteHandle<ConstDataVector<xAOD::TrackParticleContainer>>(
-            m_OutputFwdTrkPartContainerKey, ctx);
+    m_AllFwdClusters += fwdClusterTES->size();
   }
 
   // Here it just needs to be a view copy , i.e the collection of selected 
@@ -135,8 +126,6 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
   auto viewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
   auto fwdViewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
   // Local counters.
-  auto allClusters = m_AllClusters.buffer();
-  auto selectedClusters = m_SelectedClusters.buffer();
   auto allTracks = m_AllTracks.buffer();
   auto selectedTracks = m_SelectedTracks.buffer();
   auto selectedFwdTracks = m_SelectedFwdTracks.buffer();
@@ -158,8 +147,8 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
     }
   }
 
-  allClusters += clusterTES->size();
-  selectedClusters += passingClusters.size();
+  m_AllClusters += clusterTES->size();
+  m_SelectedClusters += passingClusters.size();
 
   // Extrapolation cache.
   for (const xAOD::TrackParticle* track : *trackTES) {
@@ -184,37 +173,32 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
     // Check if the track is selected for a central electron
     // due to a central cluster
     for (const xAOD::CaloCluster* cluster : passingClusters) {
-      if (!selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
-        continue;
+      if (selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
+        viewCopy->push_back(track);
+        ++selectedTracks;
+        if (isTRT) {
+          ++selectedTRTTracks;
+        } else {
+          ++selectedSiTracks;
+        }
+        break;
       }
-      viewCopy->push_back(track);
-      ++selectedTracks;
-      if (isTRT) {
-        ++selectedTRTTracks;
-      } else {
-        ++selectedSiTracks;
-      }
-      break;
     } // Loop on clusters.
 
     // Check if the track is selected for a forwand  electron
     // due to a forwand cluster
     if (m_doForwardTracks) {
       for (const xAOD::CaloCluster* cluster : *fwdClusterTES) {
-        if (!selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
-          continue;
+        if (selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
+          viewCopy->push_back(track);
+          ++selectedFwdTracks;
+          break;
         }
-        fwdViewCopy->push_back(track);
-        ++selectedFwdTracks;
-        break;
       }  // Loop on fwd cluster
     }
   }// Loop on tracks.
 
   ATH_CHECK(outputTrkPartContainer.record(std::move(viewCopy)));
-  if (m_doForwardTracks) {
-    ATH_CHECK(outputFwdTrkPartContainer.record(std::move(fwdViewCopy)));
-  }
 
   return StatusCode::SUCCESS;
 }

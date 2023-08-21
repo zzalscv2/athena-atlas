@@ -120,13 +120,6 @@ private:
     "Output selected TrackParticles"
   };
 
-  SG::WriteHandleKey<ConstDataVector<xAOD::TrackParticleContainer>> m_OutputFwdTrkPartContainerKey {
-    this,
-    "OutputFwdTrkPartContainerName",
-    "",
-    "Output selected TrackParticles"
-  };
-
   /** @brief Broad windows. */
   Gaudi::Property<double> m_broadDeltaEta {
     this,
