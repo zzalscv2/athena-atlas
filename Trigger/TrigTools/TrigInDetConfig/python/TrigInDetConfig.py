@@ -134,13 +134,19 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   from .InDetTrigCollectionKeys import TrigPixelKeys
   if in_view:
     #TODO share setup with FTF
+
+    TRTRDOObject = ( 'TRT_RDO_Cache', InDetCacheNames.TRTRDOCacheKey )
+    # Make sure the required objects are still available at whole-event level
+    if flags.Input.isMC:
+        TRTRDOObject = ( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )
+
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.suffix,
                                                       DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
                                                                     ('InDet::PixelClusterContainerCache', InDetCacheNames.Pixel_ClusterKey),
                                                                     ('PixelRDO_Cache', InDetCacheNames.PixRDOCacheKey),
                                                                     ('InDet::TRT_DriftCircleContainerCache', InDetCacheNames.TRT_DriftCircleCacheKey),
                                                                     ('SCT_RDO_Cache', InDetCacheNames.SCTRDOCacheKey),
-                                                                    ('TRT_RDO_Cache', InDetCacheNames.TRTRDOCacheKey),
+                                                                    TRTRDOObject,
                                                                     ('SpacePointCache', InDetCacheNames.SpacePointCachePix),
                                                                     ('SpacePointCache', InDetCacheNames.SpacePointCacheSCT),
                                                                     ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),

@@ -12,7 +12,7 @@ from BTagging.BTagConfig import BTagAlgsCfg
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def getFlavourTagging( flags, inputJets, inputVertex, inputTracks, BTagName,
+def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
                        inputMuons = ""):
 
     # because Cfg functions internally re-append the 'Jets' string
@@ -58,7 +58,7 @@ def getFlavourTagging( flags, inputJets, inputVertex, inputTracks, BTagName,
 
     return acc
 
-def getFastFlavourTagging( flags, inputJets, inputVertex, inputTracks, isPFlow=False, fastDipsMinimumPt=None):
+def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=False, fastDipsMinimumPt=None):
     """
     This function tags jets directly: there is no  b-tagging object
     """
