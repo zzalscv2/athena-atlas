@@ -436,7 +436,7 @@ def createITkTrackingPassFlags():
     icf.addFlag("radMax"                  , 1100. * Units.mm)
 
     # --- min pt cut for brem
-    icf.addFlag("minPTBrem"               , [1000.0 * Units.mm])
+    icf.addFlag("minPTBrem"               , [1. * Units.GeV])
     icf.addFlag("phiWidthBrem"            , [0.3])
     icf.addFlag("etaWidthBrem"            , [0.2])
 
@@ -508,7 +508,6 @@ def createITkLargeD0TrackingPassFlags():
     icf.maxdImpactSSSSeeds       = [300.0 * Units.mm]
 
     # --- min pt cut for brem
-    icf.minPTBrem                = [1000.0 * Units.mm]
     icf.phiWidthBrem             = [0.3]
     icf.etaWidthBrem             = [0.2]
 
@@ -768,7 +767,6 @@ def createITkConversionFindingTrackingPassFlags(): #To be updated
 
     icf.Xi2max                  = [9.0]
     icf.Xi2maxNoAdd             = [25.0]
-    icf.minPTBrem               = [1000.0 * Units.mm]
     icf.phiWidthBrem            = [0.3]
     icf.etaWidthBrem            = [0.2]
 
