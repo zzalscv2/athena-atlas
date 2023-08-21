@@ -10,6 +10,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "xAODCore/AuxSelection.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "AthenaKernel/IAthenaSerializeSvc.h"
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -78,7 +79,10 @@ class TriggerEDMSerialiserTool: public extends<AthAlgTool, HLTResultMTMakerTool>
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_debugInfoWHKey {
     this, "DebugInfoWHKey", "TruncationDebugInfo"
   };
-
+  /// StoreGate key for the navigation summary object - with this we can print which chains accepted the event which truncated
+  SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer> m_debugNavigationSummaryRHKey {
+    this, "NavigationSummaryRHKey", "HLTNav_Summary"
+  };
 
   /**
    * @class Address

@@ -43,7 +43,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.nHolesGapMax        = [2]
     flags.nWeightedClustersMin= [6]
   
-  flags.seedFilterLevel     = 0
+  flags.useSeedFilter         = False
 
   if flags.isLRT:
     flags.minClusters         = 8 if mode=="InDet" else [8]
@@ -71,13 +71,13 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.Xi2maxNoAdd         = 100. if mode=="InDet" else [100.]
     flags.nWeightedClustersMin= 8
     flags.minTRTonTrk         = 20
-    flags.seedFilterLevel     = 3
+    flags.useSeedFilter       = True
     flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
     
   elif flags.input_name=="minBias":
     flags.minPT               = 0.1*Units.GeV
     flags.nClustersMin        = 5
-    flags.seedFilterLevel     = 2
+    flags.useSeedFilter       = True
     flags.maxPrimaryImpact    = 10.*Units.mm
     flags.maxRPhiImpact       = 10.*Units.mm
     flags.maxZImpact          = 150.*Units.mm

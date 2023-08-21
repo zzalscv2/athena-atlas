@@ -16,7 +16,10 @@ def LArStripsXtalkCorrCfg(flags,KeyList):
     theLArStripsCrossTalkCorrector.NoXtalkCorr=["deadReadout","deadPhys","deadCalib","almostDead"]
     #Note: The old-style config for ramp runs does not include 'deadPhys' in the DontUseForXtalkCorr list, 
     #      while the old-style calib of delay runs does contain it. I assueme a mistake in the old config
-    theLArStripsCrossTalkCorrector.DontUseForXtalkCorr=["short","peculiarCalibrationLine", "deadReadout", "deadPhys"] 
+    if len(KeyList) and KeyList[0] == "LOW":
+       theLArStripsCrossTalkCorrector.DontUseForXtalkCorr=["short","peculiarCalibrationLine", "deadReadout", "deadPhys"] 
+    else:
+       theLArStripsCrossTalkCorrector.DontUseForXtalkCorr=["short", "deadReadout", "deadPhys"] 
     theLArStripsCrossTalkCorrector.AcceptableDifference=25.0 #in per-cent
     #theLArStripsCrossTalkCorrector.PedestalKey="LArPedestal"
     result.addEventAlgo(theLArStripsCrossTalkCorrector)

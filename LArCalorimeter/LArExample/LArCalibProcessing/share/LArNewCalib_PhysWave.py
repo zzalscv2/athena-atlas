@@ -55,13 +55,20 @@ if __name__=='__main__':
 
    flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
 
+   # others flags settings
+   flags.LArCalib.isSC = args.supercells
+   flags.LArCalib.Input.SubDet=args.subdet
+
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
    flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    flags.LArCalib.BadChannelDB = args.badsql
    
    #Output of this job 
-   OutputPoolFileName = args.outprefix+"_"+args.run+"_"+args.subdet+".pool.root"
+   OutputPoolFileName = args.outprefix+"_"+args.run
+   if args.subdet != "":
+      OutputPoolFileName += "_"+args.subdet
+   OutputPoolFileName += ".pool.root"
 
    idx=OutputPoolFileName.find('.pool.root')
    if idx != -1:
@@ -89,3 +96,13 @@ if __name__=='__main__':
    #run the application
    cfg.run(1) 
 
+   #Copying the FCAL phys wave to sqlite here 
+   if "HEC" in args.subdet.upper():
+      copycmd='AtlCoolCopy "COOLOFL_LAR/CONDBR2" '+flags.IOVDb.DBConnection+' -f /LAR/ElecCalibOfl/PhysWaves/FCALFromTB -t LARElecCalibOflPhysWavesFCALFromTB-calib-01 -of /LAR/ElecCalibOfl/PhysWaves/RTM  -ot LARElecCalibOflPhysWavesRTM-RUN2-UPD3-00  -a '
+      from subprocess import getstatusoutput
+      stat,out=getstatusoutput(copycmd)
+ 
+      if (stat):
+          print("ERROR could not copy the FCAL PhysWaves")
+          print(out)
+          sys.exit(-1)

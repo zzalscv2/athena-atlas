@@ -102,10 +102,6 @@ StatusCode InDet::SiTrackMaker_xk::initialize()
     m_trackinfo.setPatternRecognitionInfo(Trk::TrackInfo::SiSPSeededFinder                  );
   }
 
-  /// this overrides the seed filter property for cosmic reco, in case it is not already set to 3 in the config.
-  /// For p-p, we usually operate either 1 (LRT, some special configs) or 2 (standard inside-out)
-  if (m_cosmicTrack) m_seedsfilter = 3;
-
   /// this is on by default in offline tracking
   ATH_CHECK(m_caloCluster.initialize(m_useBremModel && m_useCaloSeeds));
   /// useSSSfilter is on by default in offline, m_useHClusSeed is off by default.
@@ -422,7 +418,7 @@ MsgStream& InDet::SiTrackMaker_xk::dumpconditions(MsgStream& out) const
      <<std::setw(12)<<m_useassoTool
      << std::endl;
   out<<"| Magnetic field mode     | "<<fieldmode[mode]      <<s3<<std::endl;
-  out<<"| Seeds filter level      | "<<std::setw(12)<<m_seedsfilter
+  out<<"| Use seeds filter ?      | "<<std::setw(12)<<m_seedsfilter
      <<"                                                  |"<<std::endl;
   out<<"| Track length wrong cl.  | "<<std::setw(12)<<m_wrongcluster
      <<"                                                  |"<<std::endl;
@@ -496,7 +492,7 @@ void InDet::SiTrackMaker_xk::newEvent(const EventContext& ctx, SiTrackMakerEvent
   m_tracksfinder->newEvent(ctx, data.combinatorialData(), m_trackinfo, trackquality);
 
   /// Erase cluster to track association
-  /// m_seedsfilter is non-zero in the vast majority of all applications,
+  /// m_seedsfilter is true in the vast majority of all applications,
   /// so this is usually done
   if (m_seedsfilter) data.clusterTrack().clear();
 
