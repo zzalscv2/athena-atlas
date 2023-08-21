@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODEgamma/PhotonxAODHelpers.h"
@@ -7,8 +7,6 @@
 #include "ZMassConstraint/ConstraintFit.h"
 #include "ZMassConstraint/ConstraintFitInput.h"
 #include "ZMassConstraint/ConstraintFitOutput.h"
-#include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
-#include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 
 namespace ZMassConstraint 
 {
@@ -156,8 +154,8 @@ namespace ZMassConstraint
         TLorentzVector mu4vec;  // to be filled according to muon type
 
         // setup accessors for muon decorations - set in MuonCalibrationAndSmearingTool
-        static SG::AuxElement::Accessor<float> muonSpectrometerPt ("MuonSpectrometerPt");
-        static SG::AuxElement::Accessor<float> innerDetectorPt    ("InnerDetectorPt");
+        static const SG::AuxElement::ConstAccessor<float> muonSpectrometerPt ("MuonSpectrometerPt");
+        static const SG::AuxElement::ConstAccessor<float> innerDetectorPt    ("InnerDetectorPt");
 
         // For the momentum, 
         // Get the track particle according to the requested muon type for the covariance matrix
