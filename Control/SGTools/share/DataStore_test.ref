@@ -2,6 +2,7 @@ test_ctor
 test_addToStore
 test_addAlias
 test_addSymLink
+test_addSymLink2
 test_proxy_exact
 test_proxy
 test_typeCount

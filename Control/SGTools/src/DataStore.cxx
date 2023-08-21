@@ -339,14 +339,41 @@ DataStore::addSymLink(const CLID& linkid, DataProxy* dp)
     // Entry already exists pointing at the desired proxy.
     return StatusCode::SUCCESS;
   }
-  else if (exist != 0) {
-    // Entry already exists pointing at another proxy.
-    // Don't change the existing entry.
+  else if (!exist) {
+    dp->setTransientID(linkid); 
+    return addToStore(linkid, dp);
+  }
+
+  // Already an existing proxy.
+  if (exist->isValidObject()) {
+    // And it's set to something.  Ok if it's the same DataObject.
+    // Otherwise fail.
+    if (exist->object() == dp->object()) {
+      dp->setTransientID(linkid); 
+      return StatusCode::SUCCESS;
+    }
+    return StatusCode::FAILURE;
+  }
+  if (!dp->object()) {
+    return StatusCode::FAILURE;
+  }
+  if (exist->loader()) {
     return StatusCode::FAILURE;
   }
 
-  dp->setTransientID(linkid); 
-  return addToStore(linkid, dp);
+  // The existing proxy is not set to anything, and it doesn't have a loader.
+  // It may have been created by a forward-declared link to a base class.
+  // In that case, set the existing proxy to also point at the same DataObject.
+  const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (dp->clID());
+  if (bib && bib->is_base (exist->clID())) {
+    dp->setTransientID(linkid);
+    exist->setObject (dp->object(), false);
+    return StatusCode::SUCCESS;
+  }
+    
+  // Entry already exists pointing at another proxy.
+  // Don't change the existing entry.
+  return StatusCode::FAILURE;
 }
 //---------------------------------------------------------------//
 // record the alias in StoreGate

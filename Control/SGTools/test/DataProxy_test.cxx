@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataProxy_test.cxx
@@ -19,9 +19,11 @@
 #include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/IResetable.h"
 #include "AthenaKernel/BaseInfo.h"
+#include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IOpaqueAddress.h"
-#include "boost/format.hpp"
+#include <vector>
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <cstdlib>
@@ -155,7 +157,6 @@ public:
   bool set_flag;
   std::string key_string;
 };
-
 
 void test1()
 {
@@ -311,6 +312,56 @@ void test5()
 }
 
 
+// Test setObject.
+void test6()
+{
+  std::cout << "test6\n";
+
+  SG::DataProxy dp1;
+  SG::DataProxy dp2;
+
+  DataObject do1;
+  do1.addRef();
+  assert (do1.refCount() == 1);
+  DataObject do2;
+  do2.addRef();
+  assert (do2.refCount() == 1);
+
+  dp1.setObject (&do1);
+  assert (do1.refCount() == 2);
+  assert (dp1.object() == &do1);
+  assert (do1.registry() == &dp1);
+
+  dp1.setObject (&do2);
+  assert (do1.refCount() == 1);
+  assert (do2.refCount() == 2);
+  assert (dp1.object() == &do2);
+  assert (do2.registry() == &dp1);
+
+  dp1.setObject (nullptr);
+  assert (do1.refCount() == 1);
+  assert (do2.refCount() == 1);
+  assert (dp1.object() == nullptr);
+
+  dp1.setObject (&do1);
+  assert (do1.refCount() == 2);
+  assert (dp1.object() == &do1);
+  assert (do1.registry() == &dp1);
+
+  dp2.setObject (&do1);
+  assert (do1.refCount() == 3);
+  assert (dp1.object() == &do1);
+  assert (dp2.object() == &do1);
+  assert (do1.registry() == &dp2);
+
+  dp1.setObject (&do1, false);
+  assert (do1.refCount() == 3);
+  assert (dp1.object() == &do1);
+  assert (dp2.object() == &do1);
+  assert (do1.registry() == &dp2);
+}
+
+
 //***************************************************************************
 // Tests for benchmarking DataProxy pointer conversion operations.
 //
@@ -439,21 +490,18 @@ void perftest1 (const int n)
   float t_storable = time_storable<TARGET> (n, *dbb_ptr, dp);
   float t_dp = time_proxy<TARGET> (n, dp);
   float t_acc = time_access (n, dp);
-  std::cout << boost::format ("%2s -> %2s  %6.2f  %6.2f  %6.2f  %6.2f  %6.2f\n")
-    % ClassID_traits<SOURCE>::typeName()
-    % ClassID_traits<TARGET>::typeName()
-    % t_clid
-    % t_ti
-    % t_storable
-    % t_dp
-    % t_acc;
+  std::cout << CxxUtils::strformat
+    ("%2s -> %2s  %6.2f  %6.2f  %6.2f  %6.2f  %6.2f\n",
+     ClassID_traits<SOURCE>::typeName().c_str(),
+     ClassID_traits<TARGET>::typeName().c_str(),
+     t_clid,  t_ti, t_storable, t_dp, t_acc);
 }
 
 
 void perftest (const int n)
 {
-  std::cout << boost::format ("          %6s  %6s  %6s  %6s  %6s\n")
-    % "clid" % "ti" % "storab" % "proxy" % "acc";
+  std::cout << CxxUtils::strformat ("          %6s  %6s  %6s  %6s  %6s\n",
+                                    "clid", "ti", "storab", "proxy", "acc");
 
   perftest1<X1, X1> (n);
   perftest1<X2, X1> (n);
@@ -482,6 +530,7 @@ int main (int argc, char** argv)
   test3();
   test4();
   test5();
+  test6();
 
   // FIXME: INCOMPLETE!
 

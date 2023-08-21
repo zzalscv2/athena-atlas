@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm> 
@@ -386,23 +386,25 @@ bool DataProxy::requestRelease(bool force, bool hard) {
 }
 
 /// set a DataObject address
-void DataProxy::setObject(objLock_t& objLock, DataObject* dObject)
+/// If doreg is true, then call setRegistry to set the backpointer
+/// from obj to the proxt.
+void DataProxy::setObject(objLock_t& objLock, DataObject* dObject, bool doreg)
 {
   DataObject* dobj = m_dObject;
   setGaudiRef(dObject, dobj);
   m_dObject = dobj;
   if (0 != dobj) {
-    dobj->setRegistry(this);
+    if (doreg) dobj->setRegistry(this);
     if (m_const) this->lock (objLock);
   }
 }
 
 
 /// set a DataObject address
-void DataProxy::setObject(DataObject* dObject)
+void DataProxy::setObject(DataObject* dObject, bool doreg /*= true*/)
 {
   objLock_t objLock (m_objMutex);
-  setObject (objLock, dObject);
+  setObject (objLock, dObject, doreg);
 }
 
 
@@ -520,12 +522,12 @@ DataObject* DataProxy::accessDataOol()
            <<m_tAddress.clID() << '/' << m_tAddress.name() << '\n'
            <<" Returning NULL DataObject pointer  " << endmsg;
     }
-    setObject(objLock, 0);
+    setObject(objLock, 0, true);
     return 0;   
   }
 
   DataObject* obj = obju.release();
-  setObject(objLock, obj);
+  setObject(objLock, obj, true);
   DataBucketBase* bucket = dynamic_cast<DataBucketBase*>(obj);
   if (m_t2p) {
     if (bucket) {
@@ -551,7 +553,7 @@ DataObject* DataProxy::accessDataOol()
            <<m_tAddress.clID() << '/' << m_tAddress.name() << '\n'
            <<" Returning NULL DataObject pointer  " << endmsg;
       obj=0; 
-      setObject(objLock, 0);
+      setObject(objLock, 0, true);
       m_errno=T2PREGFAILED;
     }
   }
