@@ -133,16 +133,16 @@ StatusCode SUSYToolsAlg::initialize() {
   }
 
   // Systematics
-  sysInfoList.clear();
+  m_sysInfoList.clear();
   // this is the nominal set
   if (m_doSyst) {
-    sysInfoList = m_SUSYTools->getSystInfoList();
+    m_sysInfoList = m_SUSYTools->getSystInfoList();
   } else {
     ST::SystInfo infodef;
     infodef.affectsKinematics = false;
     infodef.affectsWeights = false;
     infodef.affectsType = ST::Unknown;
-    sysInfoList.push_back(infodef);
+    m_sysInfoList.push_back(infodef);
   }
   // order in object groups
   groupSysts();
@@ -280,14 +280,14 @@ StatusCode SUSYToolsAlg::finalize() {
   std::map<std::string,std::string> mapweights = {{"event","EventWeight"},{"electrons","Electron"},{"photons","Photon"},{"muons","Muon"},{"taus","Tau"},{"jets","Jet"},{"btags","BTag"}};
   for (const auto& weight : mapweights) {
      TH1* h = hist("Syst/weight_"+weight.first);
-     std::vector syslist = syst_weights[weight.second];
+     std::vector syslist = m_syst_weights[weight.second];
      for (unsigned int i=1; i < syslist.size()+1; i++) { h->GetXaxis()->SetBinLabel(i, syslist.at(i-1).c_str()); }
      h->GetXaxis()->SetLabelSize(0.05);
      // average weight
      h->Scale(1./static_cast<float>(h->GetBinContent(1)));
 
      TH2* h2 = hist2d("Syst/syst_"+weight.first);
-     syslist = syst_all[weight.second];
+     syslist = m_syst_all[weight.second];
      for (unsigned int i=1; i < syslist.size()+1; i++) { h2->GetYaxis()->SetBinLabel(syslist.size()-i+1, syslist.at(i-1).c_str()); h2->Fill(0.5,syslist.size()-i,1.); }
      h2->GetYaxis()->SetLabelSize(0.05);
   }
@@ -882,7 +882,7 @@ StatusCode SUSYToolsAlg::execute() {
   TH1* weight_btags     = hist("Syst/weight_btags");
 
   bool isNominal(true);
-  for (const auto& sysInfo : sysInfoList) {
+  for (const auto& sysInfo : m_sysInfoList) {
     CP::SystematicSet sys = sysInfo.systset;
     if (m_SUSYTools->applySystematicVariation(sys) != StatusCode::SUCCESS) {
       ATH_MSG_ERROR( "Cannot configure SUSYTools for systematic var. %s" << sys.name() );
@@ -915,8 +915,8 @@ StatusCode SUSYToolsAlg::execute() {
         prw_weight = m_SUSYTools->GetPileupWeight();
       }
       event_weight *= prw_weight;
-      size_t iwbin = find(syst_weights["EventWeight"].begin(), syst_weights["EventWeight"].end(), sys.name()) - syst_weights["EventWeight"].begin();
-      if(iwbin < syst_weights["EventWeight"].size()) {  weight_event->SetBinContent(iwbin+1, weight_event->GetBinContent(iwbin+1)+event_weight); }
+      size_t iwbin = find(m_syst_weights["EventWeight"].begin(), m_syst_weights["EventWeight"].end(), sys.name()) - m_syst_weights["EventWeight"].begin();
+      if(iwbin < m_syst_weights["EventWeight"].size()) {  weight_event->SetBinContent(iwbin+1, weight_event->GetBinContent(iwbin+1)+event_weight); }
     }
 
 
@@ -1057,8 +1057,8 @@ StatusCode SUSYToolsAlg::execute() {
         electrons_weight = electrons_weight_nominal;
       }
       else if ( sysInfo.affectsWeights ){
-        size_t iwbin = find(syst_weights["Electron"].begin(), syst_weights["Electron"].end(), sys.name()) - syst_weights["Electron"].begin();
-        if(iwbin < syst_weights["Electron"].size()) {  weight_electrons->SetBinContent(iwbin+1, weight_electrons->GetBinContent(iwbin+1)+electrons_weight); }
+        size_t iwbin = find(m_syst_weights["Electron"].begin(), m_syst_weights["Electron"].end(), sys.name()) - m_syst_weights["Electron"].begin();
+        if(iwbin < m_syst_weights["Electron"].size()) {  weight_electrons->SetBinContent(iwbin+1, weight_electrons->GetBinContent(iwbin+1)+electrons_weight); }
       }
 
       event_weight *= electrons_weight;
@@ -1090,8 +1090,8 @@ StatusCode SUSYToolsAlg::execute() {
         photons_weight = photons_weight_nominal;
       }
       else if ( sysInfo.affectsWeights ){
-        size_t iwbin = find(syst_weights["Photon"].begin(), syst_weights["Photon"].end(), sys.name()) - syst_weights["Photon"].begin();
-        if(iwbin < syst_weights["Photon"].size()) {  weight_photons->SetBinContent(iwbin+1, weight_photons->GetBinContent(iwbin+1)+photons_weight); }
+        size_t iwbin = find(m_syst_weights["Photon"].begin(), m_syst_weights["Photon"].end(), sys.name()) - m_syst_weights["Photon"].begin();
+        if(iwbin < m_syst_weights["Photon"].size()) {  weight_photons->SetBinContent(iwbin+1, weight_photons->GetBinContent(iwbin+1)+photons_weight); }
       }
 
       event_weight *= photons_weight;
@@ -1124,8 +1124,8 @@ StatusCode SUSYToolsAlg::execute() {
         muons_weight = muons_weight_nominal;
       }
       else if ( sysInfo.affectsWeights ){
-        size_t iwbin = find(syst_weights["Muon"].begin(), syst_weights["Muon"].end(), sys.name()) - syst_weights["Muon"].begin();
-        if(iwbin < syst_weights["Muon"].size()) {  weight_muons->SetBinContent(iwbin+1, weight_muons->GetBinContent(iwbin+1)+muons_weight); }
+        size_t iwbin = find(m_syst_weights["Muon"].begin(), m_syst_weights["Muon"].end(), sys.name()) - m_syst_weights["Muon"].begin();
+        if(iwbin < m_syst_weights["Muon"].size()) {  weight_muons->SetBinContent(iwbin+1, weight_muons->GetBinContent(iwbin+1)+muons_weight); }
       }
 
       event_weight *= muons_weight;
@@ -1159,8 +1159,8 @@ StatusCode SUSYToolsAlg::execute() {
         }
         else{
           btag_weight = m_SUSYTools->BtagSF(jets);
-          size_t iwbin = find(syst_weights["BTag"].begin(), syst_weights["BTag"].end(), sys.name()) - syst_weights["BTag"].begin();
-          if(iwbin < syst_weights["BTag"].size()) {  weight_btags->SetBinContent(iwbin+1, weight_btags->GetBinContent(iwbin+1)+btag_weight); }
+          size_t iwbin = find(m_syst_weights["BTag"].begin(), m_syst_weights["BTag"].end(), sys.name()) - m_syst_weights["BTag"].begin();
+          if(iwbin < m_syst_weights["BTag"].size()) {  weight_btags->SetBinContent(iwbin+1, weight_btags->GetBinContent(iwbin+1)+btag_weight); }
         }
 
         if(isNominal){ //JVT
@@ -1172,8 +1172,8 @@ StatusCode SUSYToolsAlg::execute() {
         }
         else if ( syst_affectsJets && sysInfo.affectsWeights ){
           jet_weight = m_SUSYTools->JVT_SF(jets);
-          size_t iwbin = find(syst_weights["Jet"].begin(), syst_weights["Jet"].end(), sys.name()) - syst_weights["Jet"].begin();
-          if(iwbin < syst_weights["Jet"].size()) {  weight_jets->SetBinContent(iwbin+1, weight_jets->GetBinContent(iwbin+1)+jet_weight); }
+          size_t iwbin = find(m_syst_weights["Jet"].begin(), m_syst_weights["Jet"].end(), sys.name()) - m_syst_weights["Jet"].begin();
+          if(iwbin < m_syst_weights["Jet"].size()) {  weight_jets->SetBinContent(iwbin+1, weight_jets->GetBinContent(iwbin+1)+jet_weight); }
         }
       }
       else{ //data
@@ -1207,8 +1207,8 @@ StatusCode SUSYToolsAlg::execute() {
       //disable - noJVTforfatjets }
       //disable - noJVTforfatjets   else if ( syst_affectsJets && sysInfo.affectsWeights ){
       //disable - noJVTforfatjets     fatjet_weight = m_SUSYTools->JVT_SF(fatjets);
-      //disable - noJVTforfatjets     size_t iwbin = find(syst_weights["Jet"].begin(), syst_weights["Jet"].end(), sys.name()) - syst_weights["Jet"].begin();
-      //disable - noJVTforfatjets     if(iwbin < syst_weights["Jet"].size()) {  weight_fatjets->SetBinContent(iwbin+1, weight_fatjets->GetBinContent(iwbin+1)+fatjet_weight); }
+      //disable - noJVTforfatjets     size_t iwbin = find(m_syst_weights["Jet"].begin(), m_syst_weights["Jet"].end(), sys.name()) - m_syst_weights["Jet"].begin();
+      //disable - noJVTforfatjets     if(iwbin < m_syst_weights["Jet"].size()) {  weight_fatjets->SetBinContent(iwbin+1, weight_fatjets->GetBinContent(iwbin+1)+fatjet_weight); }
       //disable - noJVTforfatjets   }
       //disable - noJVTforfatjets }
 
@@ -1236,8 +1236,8 @@ StatusCode SUSYToolsAlg::execute() {
       //disable - noJVTfortrkjets   }
       //disable - noJVTfortrkjets   else if ( syst_affectsJets && sysInfo.affectsWeights ){
       //disable - noJVTfortrkjets     trkjet_weight = 1;//m_SUSYTools->JVT_SF(trkjets);
-      //disable - noJVTfortrkjets     size_t iwbin = find(syst_weights["Jet"].begin(), syst_weights["Jet"].end(), sys.name()) - syst_weights["Jet"].begin();
-      //disable - noJVTfortrkjets     if(iwbin < syst_weights["Jet"].size()) {  weight_trkjets->SetBinContent(iwbin+1, weight_trkjets->GetBinContent(iwbin+1)+trkjet_weight); }
+      //disable - noJVTfortrkjets     size_t iwbin = find(m_syst_weights["Jet"].begin(), m_syst_weights["Jet"].end(), sys.name()) - m_syst_weights["Jet"].begin();
+      //disable - noJVTfortrkjets     if(iwbin < m_syst_weights["Jet"].size()) {  weight_trkjets->SetBinContent(iwbin+1, weight_trkjets->GetBinContent(iwbin+1)+trkjet_weight); }
       //disable - noJVTfortrkjets   }
       //disable - noJVTfortrkjets }
 
@@ -1270,8 +1270,8 @@ StatusCode SUSYToolsAlg::execute() {
         taus_weight = taus_weight_nominal;
       }
       else if ( sysInfo.affectsWeights ){
-        size_t iwbin = find(syst_weights["Tau"].begin(), syst_weights["Tau"].end(), sys.name()) - syst_weights["Tau"].begin();
-        if(iwbin < syst_weights["Tau"].size()) {  weight_taus->SetBinContent(iwbin+1, weight_taus->GetBinContent(iwbin+1)+taus_weight); }
+        size_t iwbin = find(m_syst_weights["Tau"].begin(), m_syst_weights["Tau"].end(), sys.name()) - m_syst_weights["Tau"].begin();
+        if(iwbin < m_syst_weights["Tau"].size()) {  weight_taus->SetBinContent(iwbin+1, weight_taus->GetBinContent(iwbin+1)+taus_weight); }
       }
 
       event_weight *= taus_weight;
@@ -1406,23 +1406,23 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
   //ATH_CHECK( book(TH1D("MET/met_et_tau", "MET [RefTau] (Nominal);MET [RefTau] (Nominal) [GeV];N / [10 GeV]", 50, 0, 500) ) );
   ATH_CHECK( book(TH1D("MET/met_significance", "MET Significance;MET Significance;N / [0.5]", 60, 0, 30) ) );
 
-  ATH_CHECK( book(TH1D("Syst/weight_event",     "Event weights (Nom+Systematics) [MC*PRW];Event weights (Nom+Systematics) [MC*PRW];weight",         getSize(syst_weights,"EventWeight"), 0, getSize(syst_weights,"EventWeight"))) ); //weights
-  ATH_CHECK( book(TH1D("Syst/weight_electrons", "Electron total weights (Nom+Systematics);Electron total weights (Nom+Systematics);weight",         getSize(syst_weights,"Electron")   , 0, getSize(syst_weights,"Electron")   )) ); //weights
-  ATH_CHECK( book(TH1D("Syst/weight_muons",     "Muon total weights (Nom+Systematics);Muon total weights (Nom+Systematics);weight",                 getSize(syst_weights,"Muon")       , 0, getSize(syst_weights,"Muon")       )) ); //weights
-  ATH_CHECK( book(TH1D("Syst/weight_photons",   "Photon total weights (Nom+Systematics);Photon total weights (Nom+Systematics);weight",             getSize(syst_weights,"Photon")     , 0, getSize(syst_weights,"Photon")     )) ); //weights
-  ATH_CHECK( book(TH1D("Syst/weight_taus",      "Tau total weights (Nom+Systematics);Tau total weights (Nom+Systematics);weight",                   getSize(syst_weights,"Tau")        , 0, getSize(syst_weights,"Tau")        )) ); //weights
-  ATH_CHECK( book(TH1D("Syst/weight_jets",      "Jet total weights (Nom+Systematics);Jet total weights (Nom+Systematics);weight",                   getSize(syst_weights,"Jet")        , 0, getSize(syst_weights,"Jet")        )) ); //weights
-  //ATH_CHECK( book(TH1D("Syst/weight_fatjets",   "Large R. jet total weights (Nom+Systematics);Large R. jet total weights (Nom+Systematics);weight", getSize(syst_weights,"Jet")        , 0, getSize(syst_weights,"Jet")        )) ); //weights
-  //ATH_CHECK( book(TH1D("Syst/weight_trkjets",   "Track jet total weights (Nom+Systematics);Track jet total weights (Nom+Systematics);weight",       getSize(syst_weights,"Jet")        , 0, getSize(syst_weights,"Jet")        )) ); //weights
-  ATH_CHECK( book(TH1D("Syst/weight_btags",     "Btagging total weights (Nom+Systematics);Btagging total weights (Nom+Systematics);weight",         getSize(syst_weights,"BTag")       , 0, getSize(syst_weights,"BTag")       )) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_event",     "Event weights (Nom+Systematics) [MC*PRW];Event weights (Nom+Systematics) [MC*PRW];weight",         getSize(m_syst_weights,"EventWeight"), 0, getSize(m_syst_weights,"EventWeight"))) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_electrons", "Electron total weights (Nom+Systematics);Electron total weights (Nom+Systematics);weight",         getSize(m_syst_weights,"Electron")   , 0, getSize(m_syst_weights,"Electron")   )) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_muons",     "Muon total weights (Nom+Systematics);Muon total weights (Nom+Systematics);weight",                 getSize(m_syst_weights,"Muon")       , 0, getSize(m_syst_weights,"Muon")       )) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_photons",   "Photon total weights (Nom+Systematics);Photon total weights (Nom+Systematics);weight",             getSize(m_syst_weights,"Photon")     , 0, getSize(m_syst_weights,"Photon")     )) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_taus",      "Tau total weights (Nom+Systematics);Tau total weights (Nom+Systematics);weight",                   getSize(m_syst_weights,"Tau")        , 0, getSize(m_syst_weights,"Tau")        )) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_jets",      "Jet total weights (Nom+Systematics);Jet total weights (Nom+Systematics);weight",                   getSize(m_syst_weights,"Jet")        , 0, getSize(m_syst_weights,"Jet")        )) ); //weights
+  //ATH_CHECK( book(TH1D("Syst/weight_fatjets",   "Large R. jet total weights (Nom+Systematics);Large R. jet total weights (Nom+Systematics);weight", getSize(m_syst_weights,"Jet")        , 0, getSize(m_syst_weights,"Jet")        )) ); //weights
+  //ATH_CHECK( book(TH1D("Syst/weight_trkjets",   "Track jet total weights (Nom+Systematics);Track jet total weights (Nom+Systematics);weight",       getSize(m_syst_weights,"Jet")        , 0, getSize(m_syst_weights,"Jet")        )) ); //weights
+  ATH_CHECK( book(TH1D("Syst/weight_btags",     "Btagging total weights (Nom+Systematics);Btagging total weights (Nom+Systematics);weight",         getSize(m_syst_weights,"BTag")       , 0, getSize(m_syst_weights,"BTag")       )) ); //weights
 
-  ATH_CHECK( book(TH2D("Syst/syst_event",      "Systematics list [MC+PRW];;Syst name;",  1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"EventWeight"))),0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"EventWeight"))))) ); // syst names
-  ATH_CHECK( book(TH2D("Syst/syst_electrons",  "Systematics list [Electron];Syst name;", 1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"Electron"))),   0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"Electron"))))) ); // syst names
-  ATH_CHECK( book(TH2D("Syst/syst_muons",      "Systematics list [Muon];Syst name;",     1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"Muon"))),       0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"Muon"))))) ); // syst names
-  ATH_CHECK( book(TH2D("Syst/syst_photons",    "Systematics list [Photon];Syst name;",   1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"Photon"))),     0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"Photon"))))) ); // syst names
-  ATH_CHECK( book(TH2D("Syst/syst_taus",       "Systematics list [Tau];Syst name;",      1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"Tau"))),        0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"Tau"))))) ); // syst names
-  ATH_CHECK( book(TH2D("Syst/syst_jets",       "Systematics list [Jet];Syst name;",      1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"Jet"))),        0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"Jet"))))) ); // syst names
-  ATH_CHECK( book(TH2D("Syst/syst_btags",      "Systematics list [BTag];Syst name;",     1,0,1, static_cast<int>(std::ceil(1.2*getSize(syst_all,"BTag"))),       0,static_cast<int>(std::ceil(1.2*getSize(syst_all,"BTag"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_event",      "Systematics list [MC+PRW];;Syst name;",  1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"EventWeight"))),0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"EventWeight"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_electrons",  "Systematics list [Electron];Syst name;", 1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Electron"))),   0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Electron"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_muons",      "Systematics list [Muon];Syst name;",     1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Muon"))),       0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Muon"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_photons",    "Systematics list [Photon];Syst name;",   1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Photon"))),     0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Photon"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_taus",       "Systematics list [Tau];Syst name;",      1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Tau"))),        0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Tau"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_jets",       "Systematics list [Jet];Syst name;",      1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Jet"))),        0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"Jet"))))) ); // syst names
+  ATH_CHECK( book(TH2D("Syst/syst_btags",      "Systematics list [BTag];Syst name;",     1,0,1, static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"BTag"))),       0,static_cast<int>(std::ceil(1.2*getSize(m_syst_all,"BTag"))))) ); // syst names
 
   return StatusCode::SUCCESS;
 }
@@ -1430,10 +1430,10 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
 //====================================================================================================
 // collect systematics per object (all / weight-only)
 void SUSYToolsAlg::groupSysts(void) {
-  syst_all.clear();
-  syst_weights.clear();
+  m_syst_all.clear();
+  m_syst_weights.clear();
   const std::vector<std::string> Nominal{"Nominal"};
-  for (const auto& sysInfo : sysInfoList) {
+  for (const auto& sysInfo : m_sysInfoList) {
     std::string sys_name = sysInfo.systset.name();
     std::string sys_affects = ST::testAffectsObject(sysInfo.affectsType);
     ATH_MSG_DEBUG("Syst " << sys_name << " affects " << sys_affects);
@@ -1442,12 +1442,12 @@ void SUSYToolsAlg::groupSysts(void) {
 
     // collect all syst names
     // per affected object
-    const auto & [pairPtr, inserted] = syst_all.try_emplace(sys_affects, Nominal);
+    const auto & [pairPtr, inserted] = m_syst_all.try_emplace(sys_affects, Nominal);
     pairPtr->second.push_back(sys_name);
 
     // weight related syst
     if (sys_affects_weights) {
-      const auto & [pairPtr_w, inserted_w] = syst_weights.try_emplace(sys_affects, Nominal);
+      const auto & [pairPtr_w, inserted_w] = m_syst_weights.try_emplace(sys_affects, Nominal);
       pairPtr_w->second.push_back(sys_name);
     }
   }
