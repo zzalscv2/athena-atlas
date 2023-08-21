@@ -353,19 +353,27 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
                         tag: str = 'HEAD', use_flask: bool = False,
                         flask_cool_target: str = 'oracle://ATONR_COOLOFL_GPN/ATLAS_COOLOFL_GLOBAL',
                         flask_auth: Mapping[str, str] = {},
-                        flask_db: str = 'CONDBR2'
+                        flask_db: str = 'CONDBR2',
+                        flask_uri: str = 'https://aiatlas003.cern.ch:5000/cool/multi_iovs'
                         ):
         if not use_flask:
             for defect in defect_list:
                 self._insert_iov(defect, tag)
         else:
-            self._insert_multiple_flask(defect_list, tag, flask_cool_target, flask_auth, flask_db)
+            # Allow for override from environment
+            import os
+            flask_uri = os.environ.get('DQM_COOL_FLASK_URI', flask_uri)
+
+            print(flask_uri)
+            self._insert_multiple_flask(defect_list, tag, flask_cool_target, 
+                                        flask_auth, flask_db, flask_uri)
 
     def _insert_multiple_flask(self, defect_list: Iterable[IOVType],
                                tag: str, 
                                flask_cool_target: str,
                                flask_auth: Mapping[str, str],
-                               flask_db: str):
+                               flask_db: str,
+                               flask_uri: str):
         import requests
         import json
         import urllib.parse
@@ -383,6 +391,8 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
             log.debug(f'auth succeeded {token}')
             username, password = get_authentication(flask_cool_target)
             p = urllib.parse.urlparse(flask_cool_target)
+            if not p.hostname:
+                raise ValueError(f'Cannot interpret {flask_cool_target} as a path')
             server, schema = p.hostname.upper(), p.path[1:]
 
             submit_map = {'cmd': 'addIov',
@@ -417,12 +427,12 @@ class DefectsDB(DefectsDBVirtualDefectsMixin,
                     }
                 )
                 submit_map['cool_data']['size'] += 1
-            r = requests.post('https://aiatlas003.cern.ch:5001/cool/multi_iovs',
+            r = requests.post(flask_uri,
                             headers={'Authorization': f'Bearer {token}'},
-                          files={'file': ('iov.json', 
-                                          json.dumps({'cool_multi_iov_request': submit_map}))},
-                                          verify=False
-                        )
+                            files={'file': ('iov.json', 
+                                            json.dumps({'cool_multi_iov_request': submit_map}))},
+                                            verify=False
+                            )
             log.debug(r.content)
             if not r or r.json()['code'] != 0:
                 raise RuntimeError(f'Unable to upload defects. Flask server returned error:\n{r.json()["message"]}')
