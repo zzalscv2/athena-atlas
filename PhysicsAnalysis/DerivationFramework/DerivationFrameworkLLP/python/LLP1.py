@@ -116,6 +116,11 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     acc.merge(JetRecCfg(ConfigFlags,AntiKt10RCEMTopo))
     if ConfigFlags.Input.isMC: acc.merge(JetRecCfg(ConfigFlags,AntiKt10RCTruth))
 
+    # MET with LRT in association map
+    from DerivationFrameworkJetEtMiss.METCommonConfig import METLRTCfg
+    acc.merge(METLRTCfg(ConfigFlags, "AntiKt4EMTopo"))
+    acc.merge(METLRTCfg(ConfigFlags, "AntiKt4EMPFlow"))
+
     # LRT Egamma
     from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
     acc.merge(EGammaLRTCfg(ConfigFlags))

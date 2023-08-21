@@ -48,6 +48,43 @@ def METCustomVtxCfg(ConfigFlags, vxColl, jetColl, constituentColl):
 
     return getAssocCA(cfg, METName='CustomJet')
 
+
+def METLRTCfg(ConfigFlags, jetType):
+    from METReconstruction.METAssocCfg import METAssocConfig, AssocConfig
+    from METReconstruction.METAssociatorCfg import getAssocCA
+
+    jetColl = {"AntiKt4LCTopo" : "LCJet",
+               "AntiKt4EMTopo" : "EMJet",
+               "AntiKt4EMPFlow" : "PFlowJet"}
+
+    associators = [ AssocConfig(jetColl[jetType]),
+                    AssocConfig('Muon'),
+                    AssocConfig('MuonLRT'),
+                    AssocConfig('Ele'),
+                    AssocConfig('LRTEle'),
+                    AssocConfig('Gamma'),
+                    AssocConfig('Tau'),
+                    AssocConfig('Soft')]
+
+    modConstKey = ""
+    modClusColls = {}
+    if ConfigFlags.MET.UseTracks:
+        modConstKey="OriginCorr"
+        modClusColls={
+            'LCOriginCorrClusters':'LCOriginTopoClusters',
+            'EMOriginCorrClusters':'EMOriginTopoClusters'
+            }
+    usePFlow = ('PFlow' in jetType)
+    cfg = METAssocConfig(jetType+"_LRT",
+                         ConfigFlags,
+                         buildconfigs = associators,
+                         doPFlow = usePFlow,
+                         usePFOLinks = (ConfigFlags.MET.UseFELinks if usePFlow else False),
+                         modConstKey=("" if usePFlow else modConstKey),
+                         modClusColls=({} if usePFlow else modClusColls) )
+
+    return getAssocCA(cfg, METName=jetType+'_LRT')
+
 def METRemappingCfg(ConfigFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, CompFactory
 

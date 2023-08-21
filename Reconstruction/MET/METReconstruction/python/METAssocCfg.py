@@ -15,12 +15,14 @@ import six
 
 defaultInputKey = {
    'Ele'       :'Electrons',
+   'LRTEle'    :'LRTElectrons',
    'Gamma'     :'Photons',
    'Tau'       :'TauJets',
    'LCJet'     :'AntiKt4LCTopoJets',
    'EMJet'     :'AntiKt4EMTopoJets',
    'PFlowJet'  :'AntiKt4EMPFlowJets',
    'Muon'      :'Muons',
+   'MuonLRT'   :'MuonsLRT',
    'Soft'      :'',
    'Clusters'  :'CaloCalTopoClusters',
    'Tracks'    :'InDetTrackParticles',
@@ -54,6 +56,8 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,
     # Construct tool and set defaults for case-specific configuration
     if config.objType == 'Ele':
         tool = CompFactory.getComp("met::METElectronAssociator")('MET_ElectronAssociator_'+suffix,TCMatchMethod=1)
+    if config.objType == 'LRTEle':
+        tool = CompFactory.getComp("met::METElectronAssociator")('MET_LRTElectronAssociator_'+suffix,TCMatchMethod=1)
     if config.objType == 'Gamma':
         tool = CompFactory.getComp("met::METPhotonAssociator")('MET_PhotonAssociator_'+suffix,TCMatchMethod=1)
     if config.objType == 'Tau':
@@ -68,6 +72,8 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_CustomJetAssocTool_'+suffix)
     if config.objType == 'Muon':
         tool = CompFactory.getComp("met::METMuonAssociator")('MET_MuonAssociator_'+suffix)
+    if config.objType == 'MuonLRT':
+        tool = CompFactory.getComp("met::METMuonAssociator")('MET_MuonLRTAssociator_'+suffix)
     if config.objType == 'Soft':
         tool = CompFactory.getComp("met::METSoftAssociator")('MET_SoftAssociator_'+suffix)
         tool.DecorateSoftConst = True
@@ -82,7 +88,7 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,
         tool.FlowElementCollection = modConstKey if modConstKey!="" else defaultInputKey["PFlowObj"]
     else:
         tool.UseModifiedClus = doModClus
-    tool.UseFELinks = useFELinks
+    tool.UseFELinks = False if config.objType == 'MuonLRT' or config.objType == 'LRTEle' else  useFELinks
     # set input/output key names
     if config.inputKey == '' and defaultInputKey[config.objType] != '':
         tool.InputCollection = defaultInputKey[config.objType]
