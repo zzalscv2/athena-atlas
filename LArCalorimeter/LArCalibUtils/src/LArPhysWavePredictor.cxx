@@ -389,7 +389,11 @@ StatusCode LArPhysWavePredictor::stop()
 
           ATH_MSG_DEBUG((*itVec).size() << " LArCaliWaves found for channel " << m_onlineHelper->channel_name(itVec.channelId()) << " 0x" 
 		       << std::hex << itVec.channelId().get_identifier32().get_compact() << std::dec);
-	  nchannel++ ;
+	  const HWIdentifier chid = itVec.channelId();
+
+          // Skip if it is FCAL
+          if(m_onlineHelper->isFCALchannel(chid)) continue;
+
 	  if ( nchannel < 100 || ( nchannel < 1000 && nchannel%100==0 ) || nchannel%1000==0 ) 
 	     ATH_MSG_INFO( "Processing calibration waveform number " << nchannel );
 
@@ -398,7 +402,6 @@ StatusCode LArPhysWavePredictor::stop()
 
           nTotal[gain]++; // counter of processed pulse per gain 
 
-	  const HWIdentifier chid = itVec.channelId();
           ATH_MSG_VERBOSE("Predicting physics waveform for channel 0x" << MSG::hex << chid << MSG::dec 
 			  << " (gain = " << gain << " - DAC = " << larCaliWave.getDAC() << ")");
 

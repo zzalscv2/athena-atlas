@@ -38,14 +38,14 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
                                 tag=inputShapeTag, modifiers=chanSelStr(flags)+"<key>LArShape"+keySuffix+"_unpicked</key>"))
 
     LArOFPhasePick = CompFactory.LArOFPhasePicker("LArOFPhasePicker"+keySuffix)
-    if not flags.LArCalib.isSC:
-        LArOFPhasePick.KeyPhase = "LArOFCPhase"
+    #if not flags.LArCalib.isSC:
+    #    LArOFPhasePick.KeyPhase = "LArOFCPhase"
     LArOFPhasePick.KeyOFC_new = "LArOFC"+keySuffix
     LArOFPhasePick.KeyOFC = "LArOFC"+keySuffix+"_unpicked"
     LArOFPhasePick.KeyShape_new = "LArShape"+keySuffix+"_uncorr" if flags.LArCalib.OFC.ShapeCorrection else  "LArShape"+keySuffix
     LArOFPhasePick.KeyShape = "LArShape"+keySuffix+"_unpicked"
     LArOFPhasePick.GroupingType = flags.LArCalib.GroupingType
-    LArOFPhasePick.DefaultPhase = 1
+    LArOFPhasePick.DefaultPhase = 4
     LArOFPhasePick.TimeOffsetCorrection = 0
     LArOFPhasePick.KeyPhase = ""
     LArOFPhasePick.isSC = flags.LArCalib.isSC
@@ -79,7 +79,7 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
            muSuffix=""
         OFC2Ntup=CompFactory.LArOFC2Ntuple("LArOFC2Ntuple"+keySuffix+muSuffix)
         OFC2Ntup.ContainerKey = "LArOFC"+keySuffix
-        OFC2Ntup.NtupleName   = "OFC"+keySuffix+muSuffix
+        OFC2Ntup.NtupleName   = "OFC"+muSuffix
         OFC2Ntup.AddFEBTempInfo   = False   
         OFC2Ntup.isSC = flags.LArCalib.isSC
         OFC2Ntup.BadChanKey = bcKey
@@ -87,7 +87,7 @@ def _OFPhasePickerCfg(flags, inputSuffix="4samples3bins17phases",outputSuffix="4
 
         Shape2Ntup=CompFactory.LArShape2Ntuple("LArShape2Ntuple"+keySuffix)
         Shape2Ntup.ContainerKey="LArShape"+keySuffix
-        Shape2Ntup.NtupleName="SHAPE"+keySuffix
+        Shape2Ntup.NtupleName="SHAPE"+muSuffix
         Shape2Ntup.AddFEBTempInfo   = False
         Shape2Ntup.isSC = flags.LArCalib.isSC
         Shape2Ntup.BadChanKey = bcKey
