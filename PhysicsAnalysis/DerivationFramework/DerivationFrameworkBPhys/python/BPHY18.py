@@ -14,7 +14,9 @@ streamName = "StreamDAOD_BPHY18"
 def BPHY18Cfg(ConfigFlags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
+    from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
     acc = ComponentAccumulator()
+    acc.merge(EGammaCommonCfg(ConfigFlags))
     isSimulation = ConfigFlags.Input.isMC
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
     vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
@@ -28,26 +30,13 @@ def BPHY18Cfg(ConfigFlags):
     #BPHY18TriggerSkim = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "BPHY18TriggerSkim",
 #                                                             TriggerListOR = triggerList,
 #                                                            TriggerListORHLTOnly = triggerList_unseeded )
-
-    ElectronLHSelectorLHvloose = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloose",
-            primaryVertexContainer = "PrimaryVertices",
-            ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20210514/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth.conf")
-
     
+    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0", 
+            primaryVertexContainer = "PrimaryVertices",
+            ConfigFile="ElectronPhotonSelectorTools/offline/mc20_20230321/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_NoD0_NoPix.conf")
 
-    ElectronLHSelectorLHvloose_nod0 = CompFactory.AsgElectronLikelihoodTool("ElectronLHSelectorLHvloosenod0", primaryVertexContainer = "PrimaryVertices",
-            ConfigFile="ElectronPhotonSelectorTools/offline/mc16_20190328_nod0/ElectronLikelihoodVeryLooseOfflineConfig2017_Smooth_nod0.conf")   # Still OK to use in Run3?
-
-
-    # decorate electrons with the output of LH vloose (nod0)
-    ElectronPassLHvloose = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloose",
-                                            EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose,
-                                            EGammaFudgeMCTool = "",
-                                            CutType = "",
-                                            StoreGateEntryName = "DFCommonElectronsLHVeryLoose",
-                                            ContainerName = "Electrons",
-                                            StoreTResult=False)
-
+    # decorate electrons with the output of LH
+       
     ElectronPassLHvloosenod0 = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassLHvloosenod0",
                                             EGammaElectronLikelihoodTool = ElectronLHSelectorLHvloose_nod0,
                                             EGammaFudgeMCTool = "",
@@ -55,7 +44,20 @@ def BPHY18Cfg(ConfigFlags):
                                             StoreGateEntryName = "DFCommonElectronsLHVeryLoosenod0",
                                             ContainerName = "Electrons",
                                             StoreTResult=False)
-
+    
+    from ElectronPhotonSelectorTools.AsgElectronChargeIDSelectorToolConfig import AsgElectronChargeIDSelectorToolCfg
+    ElectronChargeIDSelector = acc.popToolsAndMerge(AsgElectronChargeIDSelectorToolCfg(ConfigFlags, name="ElectronChargeIDSelectorLoose"))
+    ElectronChargeIDSelector.primaryVertexContainer = "PrimaryVertices"
+    ElectronChargeIDSelector.TrainingFile = "ElectronPhotonSelectorTools/ChargeID/ECIDS_20180731rel21Summer2018.root"
+    acc.addPublicTool(ElectronChargeIDSelector)
+    ElectronPassECIDS = CompFactory.DerivationFramework.EGElectronLikelihoodToolWrapper(name = "ElectronPassECIDS",
+                                            EGammaElectronLikelihoodTool=ElectronChargeIDSelector,
+                                            EGammaFudgeMCTool="",
+                                            CutType="",
+                                            StoreGateEntryName="DFCommonElectronsECIDS",
+                                            ContainerName="Electrons",
+                                            StoreTResult=True)
+    
     BPHY18DiElectronFinder = CompFactory.Analysis.JpsiFinder_ee(
                              name                        = "BPHY18DiElectronFinder",
                              elAndEl                     = True,
@@ -260,13 +262,16 @@ def BPHY18Cfg(ConfigFlags):
                        BPHY18_thinningTool_PV, #BPHY18_thinningTool_PV_GSF, 
                        BPHY18EgammaTPThinningTool, BPHY18MuonTPThinningTool
                      ]
-    if isSimulation:   thinningCollection += [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool]
+    
 
-    augTools = [ElectronPassLHvloose, ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,
-                          BPHY18_Select_DiElectrons,
+    augTools = [ElectronPassLHvloosenod0, ElectronPassECIDS,
+                          BPHY18DiElectronSelectAndWrite, BPHY18_Select_DiElectrons,
                           BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
                           BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK]
     skimTools = [BPHY18SkimmingAND]
+    
+    if isSimulation:
+        thinningCollection += [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool]        
 
     for t in augTools + skimTools + thinningCollection + extraTools: acc.addPublicTool(t)
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY18Kernel",
@@ -274,7 +279,11 @@ def BPHY18Cfg(ConfigFlags):
                                                     #Only skim if not MC
                                                     SkimmingTools     = skimTools,
                                                     ThinningTools     = thinningCollection))
+    
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags, object_types=("Electrons", "Muons")))
 
+    
     #====================================================================
     # Slimming 
     #====================================================================
@@ -300,8 +309,11 @@ def BPHY18Cfg(ConfigFlags):
     
     ExtraVariables += ["Muons.etaLayer1Hits.etaLayer2Hits.etaLayer3Hits.etaLayer4Hits.phiLayer1Hits.phiLayer2Hits.phiLayer3Hits.phiLayer4Hits",
                        "Muons.numberOfTriggerEtaLayers.numberOfPhiLayers",
-                       "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz",
-                       "PrimaryVertices.chiSquared.covariance", "Electrons.deltaEta1.DFCommonElectronsLHVeryLoosenod0","egammaClusters.calE.calEta.calPhi.e_sampl.eta_sampl.etaCalo.phiCalo.ETACALOFRAME.PHICALOFRAME","HLT_xAOD__ElectronContainer_egamma_ElectronsAuxDyn.charge"]
+                       "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.pixeldEdx",
+                       "PrimaryVertices.chiSquared.covariance", 
+                       "Electrons.deltaEta1.DFCommonElectronsLHVeryLoosenod0.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVA_pt1000.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500.ptvarcone40_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.ptvarcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000.DFCommonElectronsECIDS.DFCommonElectronsECIDSResult",
+                       "egammaClusters.calE.calEta.calPhi.e_sampl.eta_sampl.etaCalo.phiCalo.ETACALOFRAME.PHICALOFRAME",
+                       "HLT_xAOD__ElectronContainer_egamma_ElectronsAuxDyn.charge"]
     
     ## Jpsi candidates 
     StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY18DiElectronSelectAndWrite.OutputVtxContainerName]
