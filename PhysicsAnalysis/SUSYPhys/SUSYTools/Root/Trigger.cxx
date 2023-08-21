@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // This source file implements all of the functions related to trigger
@@ -70,13 +70,18 @@ bool SUSYObjDef_xAOD::IsMETTrigPassed(const std::string& triggerName, bool j400_
   }
   else if (L1_XE50 || L1_XE55) {
     // See if the TDT knows about this
-    if (isTrigInTDT(triggerName) ) return m_trigDecTool->isPassed(triggerName);
-    else return emulateHLT(triggerName);
+    {
+      std::scoped_lock lock (m_triggerCacheMutex);
+      if (isTrigInTDT(lock, triggerName) ) return m_trigDecTool->isPassed(triggerName);
+    }
+    return emulateHLT(triggerName);
   }
   return false;
 }
 
-bool SUSYObjDef_xAOD::isTrigInTDT(const std::string& triggerName) const {
+bool SUSYObjDef_xAOD::isTrigInTDT(std::scoped_lock<std::mutex>& /*lock*/,
+                                  const std::string& triggerName) const
+{
   auto mapItr = m_checkedTriggers.find(triggerName);
   if ( mapItr == m_checkedTriggers.end() ) {
     const auto *cg = m_trigDecTool->getChainGroup(triggerName);
@@ -89,6 +94,7 @@ bool SUSYObjDef_xAOD::isTrigInTDT(const std::string& triggerName) const {
 
 
 bool SUSYObjDef_xAOD::emulateHLT(const std::string& triggerName) const {
+  std::scoped_lock lock (m_triggerCacheMutex);
   // First, check if we've already tried using this trigger
   auto funcItr = m_metTriggerFuncs.find(triggerName);
   if (funcItr != m_metTriggerFuncs.end() )
@@ -188,7 +194,7 @@ bool SUSYObjDef_xAOD::emulateHLT(const std::string& triggerName) const {
   // We can't get the exact trigger decision :( . Look for an alternative
   std::vector<std::string> replacementTriggers({"HLT_xe110_mht_L1XE50", "HLT_xe100_mht_L1XE50", "HLT_xe90_mht_L1XE50", "HLT_xe70_mht"});
   for (const std::string& trigName : replacementTriggers) {
-    if (isTrigInTDT(trigName) ) {
+    if (isTrigInTDT(lock, trigName) ) {
       ATH_MSG_WARNING( "Trigger " << triggerName << " not available and direct emulation impossible! Will use " << trigName << " instead!");
       m_metTriggerFuncs[triggerName] = [this, trigName] () { 
         return m_trigDecTool->isPassed(trigName);
@@ -310,7 +316,7 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
 
   std::vector<std::string> SUSYObjDef_xAOD::GetTriggerOR(const std::string& trigExpr) const {
 
-    static std::string delOR = "_OR_";
+    static const std::string delOR = "_OR_";
     std::vector<std::string> trigchains = {};
     std::string newtrigExpr = TString(trigExpr).Copy().ReplaceAll("||",delOR).Data();
     newtrigExpr = TString(trigExpr).Copy().ReplaceAll(" ","").Data();
@@ -330,11 +336,11 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
 
     // e.g. SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0
 
-    static std::string del15 = "_2015_";
-    static std::string del16 = "_2016_";
-    static std::string del17 = "_2017_";
-    static std::string del18 = "_2018_";
-    static std::string del22 = "_2022_";
+    static const std::string del15 = "_2015_";
+    static const std::string del16 = "_2016_";
+    static const std::string del17 = "_2017_";
+    static const std::string del18 = "_2018_";
+    static const std::string del22 = "_2022_";
 
     size_t pos = 0;
     std::string token15, token16, token17, token18, token22;

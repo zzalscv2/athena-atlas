@@ -56,6 +56,7 @@
 // For string manipulation
 #include <regex>
 #include <cmath>
+#include <atomic>
 
 //====================================================================================================
 namespace Cut {
@@ -407,7 +408,7 @@ StatusCode SUSYToolsAlg::execute() {
     ATH_MSG_DEBUG( "Number of jets: " << jets_nominal->size() );
   }
 
-  static bool doFatJets = true;                   // only create if slice on && collection configured
+  static std::atomic<bool> doFatJets = true;                   // only create if slice on && collection configured
   if (m_FatJetCollection.empty()) doFatJets = false;
   const xAOD::JetContainer* fatjets_test(0);
   xAOD::JetContainer* fatjets_nominal(0);
@@ -425,7 +426,7 @@ StatusCode SUSYToolsAlg::execute() {
     doFatJets=false;
   }
 
-  static bool doTrkJets = true;                   // only create if slice on && collection configured
+  static std::atomic<bool> doTrkJets = true;                   // only create if slice on && collection configured
   if (m_TrkJetCollection.empty()) doTrkJets = false;
   const xAOD::JetContainer* trkjets_test(0);
   xAOD::JetContainer* trkjets_nominal(0);
