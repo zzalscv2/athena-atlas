@@ -65,7 +65,7 @@ class LArHECNoise : public AthAlgorithm  {
    SG::ReadCondHandleKey<ILArPedestal> m_pedKey{this,"PedestalKey","LArPedestal","SG Key of Pedestal obj"};
    /*Tools*/
 
-   ToolHandle< Trig::TrigDecisionTool > m_trigDec;
+  PublicToolHandle< Trig::TrigDecisionTool > m_trigDec{this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool"};
 
    /*services*/
    const LArOnlineID* m_LArOnlineIDHelper;

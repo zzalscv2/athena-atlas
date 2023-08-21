@@ -365,7 +365,7 @@ void LArLATOMEDecoder::EventProcess::decodeWord(unsigned int& word, unsigned int
 
 void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsigned int& byteshift, const uint32_t* p,
 						   MonDataType at0, MonDataType at1,
-						   unsigned int& at0Data, unsigned int& at1Data, unsigned int& satData,
+						   unsigned int& at0Data, unsigned int& at1Data, unsigned int& saturation,
 						   bool& at0val, bool& at1val){
 
   // the structure of data is always consisting of 2,3,4 or 5 bytes depending on the recipe.
@@ -379,7 +379,8 @@ void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsi
   at1val=false;
   at0Data=0;
   at1Data=0;
-  satData=0;
+  unsigned int satData=0;
+  saturation = 0;
 
   unsigned int word1=0;
   unsigned int word2=0;
@@ -405,21 +406,21 @@ void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsi
   if(at0 == MonDataType::Energy && at1 == MonDataType::SelectedEnergy){
     at0Data = (at0Data<<3) | (satData&0x7);
     at1Data = (at1Data<<3) | ((satData&0x70)>>4);
-    satData &= 0x88;
+    saturation = ((satData & 0x88) == 0x88);
   }
   else if(at1 == MonDataType::Energy && at0 == MonDataType::SelectedEnergy){
     at0Data = (at0Data<<3) | ((satData&0x70)>>4);
     at1Data = (at1Data<<3) | (satData&0x7);
-    satData &= 0x88;
+    saturation = ((satData & 0x88) == 0x88);
   }
   else{
     if(at0 == MonDataType::Energy || at0 == MonDataType::SelectedEnergy){
       at0Data = (at0Data<<3) | (satData&0x7);
-      satData &= 0xf8;
+      saturation = (satData & 0x20);
     }
     if(at1 == MonDataType::Energy || at1 == MonDataType::SelectedEnergy){
       at1Data = (at1Data<<3) | (satData&0x7);
-      satData &= 0xf8;
+      saturation = (satData & 0x20);
     }
   }
      
@@ -645,6 +646,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
       if(m_hasAdc)val.adc_bas.resize(m_nBC_ADC);
       if(m_hasE)val.et.resize(m_nBC_E);
       if(m_hasEID)val.et_id.resize(m_nBC_EID);
+      if(m_hasEID||m_hasE)val.saturation.resize(m_nBC_EID);
       val.latomeChannel = 99999;
     }
   }
@@ -729,7 +731,6 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	  if (!at0val && SCID != hwidEmpty && at0!=MonDataType::Invalid) { 
 	    ATH_MSG_DEBUG( "at0 bad quality bit for SC:" << nsc << " BC " << iBC
 				      << " latome " << robFrag->rod_source_id() );
-	    RAWValue0 = -1; 
 	  } else{
 	    //// no need to reinterpret the bits. for ADC there will be an implicit case to short
 	    RAWValue0 = at0Data;
@@ -745,9 +746,11 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	    break;
 	  case MonDataType::Energy:
 	    m_rawValuesInEvent[nsc].et[iBC] = (at0val)?signEnergy(RAWValue0):defaultEValue;
+            m_rawValuesInEvent[nsc].saturation[iBC] = satData;
 	    break;
 	  case MonDataType::SelectedEnergy:
 	    m_rawValuesInEvent[nsc].et_id[iBC] = (at0val)?signEnergy(RAWValue0):defaultEValue;
+            m_rawValuesInEvent[nsc].saturation[iBC] = satData;
 	    break;
 	  case MonDataType::Invalid:
 	    break;    
@@ -760,7 +763,6 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	  if (!at1val && SCID != hwidEmpty && at1!=MonDataType::Invalid) { 
 	    ATH_MSG_DEBUG( "at1 bad quality bit for SC:" << nsc << " BC " << iBC
 				      << " latome " << robFrag->rod_source_id() );
-	    RAWValue1 = -1; 
 	  }else{
 	    //// no need to reinterpret the bits. for ADC there will be an implicit case to short
 	    RAWValue1 = at1Data;
@@ -774,9 +776,11 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	    break;
 	  case MonDataType::Energy:
 	    m_rawValuesInEvent[nsc].et[iBC-startBC1] = (at1val)?signEnergy(RAWValue1):defaultEValue;
+            m_rawValuesInEvent[nsc].saturation[iBC-startBC1] = satData;
 	    break;
 	  case MonDataType::SelectedEnergy:
 	    m_rawValuesInEvent[nsc].et_id[iBC-startBC1] = (at1val)?signEnergy(RAWValue1):defaultEValue;
+            m_rawValuesInEvent[nsc].saturation[iBC-startBC1] = satData;
 	    break;
 	  case MonDataType::Invalid:
 	    break;
@@ -1049,36 +1053,32 @@ void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping *map) {
 
     if(m_hasE && m_et_coll){
       std::vector<unsigned short> bcid_in_event;
-      std::vector<bool> satur;
       if(m_nBC_E==(unsigned short)m_BCIDsInEvent.size()){
 	bcid_in_event=m_BCIDsInEvent;
       }
       else{
 	for(short b=m_BC_E; b<m_BC_E+m_nBC_E; ++b){
 	  bcid_in_event.push_back(m_BCIDsInEvent[b]);
-          satur.push_back(false);
 	}
       }
       LArRawSC* scDigit = new LArRawSC(SCID, m_rawValuesInEvent[ch].latomeChannel,m_nthLATOME,
-				       m_rawValuesInEvent[ch].et, bcid_in_event, satur);
+				       m_rawValuesInEvent[ch].et, bcid_in_event, m_rawValuesInEvent[ch].saturation);
       m_et_coll->push_back(scDigit);
 
     }
 
     if(m_hasEID && m_et_id_coll){
       std::vector<unsigned short> bcid_in_event;
-      std::vector<bool> satur;
       if(m_nBC_EID==(short)m_BCIDsInEvent.size()){
 	bcid_in_event=m_BCIDsInEvent;
       }
       else{
 	for(short b=m_BC_EID; b<m_BC_EID+m_nBC_EID; ++b){
 	  bcid_in_event.push_back(m_BCIDsInEvent[b]);
-          satur.push_back(false);
 	}
       }
       LArRawSC* scDigit = new LArRawSC(SCID, m_rawValuesInEvent[ch].latomeChannel,m_nthLATOME,
-				       m_rawValuesInEvent[ch].et_id, bcid_in_event,satur);
+				       m_rawValuesInEvent[ch].et_id, bcid_in_event,m_rawValuesInEvent[ch].saturation);
       m_et_id_coll->push_back(scDigit);
 
     }

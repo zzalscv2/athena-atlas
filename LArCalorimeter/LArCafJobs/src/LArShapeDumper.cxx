@@ -47,7 +47,6 @@ LArShapeDumper::LArShapeDumper(const std::string & name, ISvcLocator * pSvcLocat
   m_nPrescaledAway(0),
   m_nLArError(0),
   m_nNoDigits(0),
-  m_trigDec("Trig::TrigDecisionTool/TrigDecisionTool"),
   m_onlineHelper(nullptr),
   m_doEM(false),
   m_doHEC(false),
@@ -71,7 +70,6 @@ LArShapeDumper::LArShapeDumper(const std::string & name, ISvcLocator * pSvcLocat
   declareProperty("DoAllEvents", m_doAllEvents = true);
   declareProperty("DumpChannelInfos", m_dumpChannelInfos = false);
   declareProperty("DoRoIs", m_doRoIs = true);
-  declareProperty("TrigDecisionTool", m_trigDec, "The tool to access TrigDecision");
   declareProperty("TriggerNames", m_triggerNames);
   declareProperty("DoAllLvl1", m_doAllLvl1 = true);
   declareProperty("onlyEmptyBC",m_onlyEmptyBC=false);
@@ -104,7 +102,7 @@ StatusCode LArShapeDumper::initialize()
 
 
   if (m_doTrigger) {
-    ATH_CHECK( m_trigDec.retrieve() );
+    CHECK( m_trigDec.retrieve() );
   }
 
   ATH_CHECK( m_dumperTool.retrieve() );

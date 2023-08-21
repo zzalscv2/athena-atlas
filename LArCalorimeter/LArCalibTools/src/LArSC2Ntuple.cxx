@@ -22,6 +22,7 @@ StatusCode LArSC2Ntuple::initialize() {
 
   m_isSC = true;
   if(m_fillTType && (! m_fillLB)) m_fillLB = true;
+  if(m_fillCaloTT && (! m_fillLB)) m_fillLB = true;
 
   ATH_CHECK( LArDigits2Ntuple::initialize() );
   ATH_CHECK( m_scidtool.retrieve() );
@@ -61,6 +62,16 @@ StatusCode LArSC2Ntuple::initialize() {
 	  ATH_MSG_ERROR( "addItem 'ROD_energy' failed" );
 	  return sc;
 	}
+        sc = m_nt->addItem("ROD_time", 16, m_ROD_time);
+        if (sc.isFailure()) {
+          ATH_MSG_ERROR( "addItem 'ROD_time' failed" );
+          return sc;
+        }
+        sc = m_nt->addItem("ROD_id", 16, m_ROD_id);
+        if (sc.isFailure()) {
+          ATH_MSG_ERROR( "addItem 'ROD_id' failed" );
+          return sc;
+        }
       }
 
     }else if ( ck == "SC_ADC_BAS" ){	// SC_ADC_BAS DigitContainer
@@ -80,12 +91,6 @@ StatusCode LArSC2Ntuple::initialize() {
       sc	   = m_nt->addItem("bcidLATOMEHEAD",m_bcidLATOMEHEAD);
       if (sc.isFailure()) {
 	ATH_MSG_ERROR( "addItem 'bcidLATOMEHEAD' failed" );
-	return sc;
-      }
-
-      sc = m_nt->addItem("l1idLATOMEHEAD",m_l1idLATOMEHEAD);
-      if (sc.isFailure()) {
-	ATH_MSG_ERROR( "addItem 'l1idLATOMEHEAD' failed" );
 	return sc;
       }
       
@@ -126,14 +131,14 @@ StatusCode LArSC2Ntuple::initialize() {
     }
     
   }// end container key loop
-  ATH_MSG_DEBUG("Finished container loop");
 
   if(m_fillTType) {
      sc = m_evt_nt->addItem("TType",  m_TType);
      if (sc.isFailure()) {
         ATH_MSG_ERROR( "addItem 'TType' failed" );
         return sc;
-     }
+     } 
+
      sc = m_evt_nt->addItem("LArEventBits",  m_LArEventBits);
      if (sc.isFailure()) {
         ATH_MSG_ERROR( "addItem 'LArEventBits' failed" );
@@ -156,6 +161,34 @@ StatusCode LArSC2Ntuple::initialize() {
 
   }//m_fillTType
 
+  if(m_fillCaloTT) {
+     sc = m_evt_nt->addItem("NTT",m_ntNTT,0,20000);
+     if (sc.isFailure()) {
+       ATH_MSG_ERROR( "addItem 'Net' failed" );
+       return sc;
+     }
+     sc = m_evt_nt->addItem("TTeta",  m_ntNTT, m_TTeta);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'TTeta' failed" );
+        return sc;
+     }
+     sc = m_evt_nt->addItem("TTphi",  m_ntNTT, m_TTphi);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'TTphi' failed" );
+        return sc;
+     }
+     sc = m_evt_nt->addItem("TTEem", m_ntNTT, m_TTEem);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'TTEem' failed" );
+        return sc;
+     }
+     sc = m_evt_nt->addItem("TTEhad", m_ntNTT, m_TTEhad);
+     if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'TTEhad' failed" );
+        return sc;
+     }
+  } // end m_fillCaloTT
+
   return StatusCode::SUCCESS;
   
 }
@@ -166,8 +199,6 @@ StatusCode LArSC2Ntuple::execute()
   StatusCode	sc;
   
   const EventContext& ctx = Gaudi::Hive::currentContext();
-
-  ATH_MSG_DEBUG( "LArSC2Ntuple in execute" ); 
 
   SG::ReadHandle<xAOD::EventInfo>evt (m_eventInfoKey, ctx);
   ATH_CHECK(evt.isValid());
@@ -216,7 +247,7 @@ StatusCode LArSC2Ntuple::execute()
       ATH_MSG_WARNING( "Unable to retrieve LArDigitContainer with key SC_ADC_BAS from DetectorStore. " );
     } 
     else 
-      ATH_MSG_DEBUG( "Got LArDigitContainer with key SC_ADC_BAS " );
+      ATH_MSG_DEBUG( "Got additional LArDigitContainer with key SC_ADC_BAS " );
   }
   
   if ((std::find(m_contKeys.begin(), m_contKeys.end(), "SC_ET")  != m_contKeys.end()) ){
@@ -288,7 +319,7 @@ StatusCode LArSC2Ntuple::execute()
        return StatusCode::SUCCESS;
      }
   }
-  ATH_MSG_DEBUG("DigitContainer has size: "<<cellsno);
+  ATH_MSG_DEBUG("DigitContainer has size: "<<cellsno<<" hasDigitContainer: "<<hasDigitContainer);
 
   if (DigitContainer_next){
     if ( cellsno == 0 ){ 
@@ -315,7 +346,7 @@ StatusCode LArSC2Ntuple::execute()
 
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = ctx.evt();
-    m_LB           = thislb;
+
     if( hasDigitContainer ){
 
       const LArDigit* digi   = DigitContainer->at(c);     
@@ -367,6 +398,7 @@ StatusCode LArSC2Ntuple::execute()
 	fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
       }
     }//hasDigitContainer
+    ATH_MSG_DEBUG("After hasDigitContainer ");
     
 
     // DigitContainer 1 -> SC_ADC_BAS
@@ -401,16 +433,20 @@ StatusCode LArSC2Ntuple::execute()
 	    const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
 	    if(headmap){
 	      m_bcidLATOMEHEAD   = headmap->BCId();
-	      m_l1idLATOMEHEAD   = headmap->L1Id();
 	    }
 	  }   
 	  m_latomeChannel	   = scdigi->Channel();
-	  for( unsigned i = 0; i<scdigi->BCId().size();++i){
+	  for( unsigned i = 0; i<trueMaxSample;++i){
 	    m_bcidVec[i]	   = scdigi->BCId().at(i);
 	  }	 
 	  m_latomeSourceId	   = scdigi->SourceId();
       }
+
+      if( !hasDigitContainer && m_fillRawChan && RawChannelContainer ){
+        fillRODEnergy(digi->hardwareID(), rawChannelMap, cabling, cablingROD);
+      }
     }
+    ATH_MSG_DEBUG("After DigitContainer_next ");
     
 
     // DigitContainer 1 -> SC_ADC_BAS
@@ -448,8 +484,6 @@ StatusCode LArSC2Ntuple::execute()
            const LArLATOMEHeader*headmap   = LATOMEHeadMap[scdigi->SourceId()];
            if(headmap){
              m_bcidLATOMEHEAD	   = headmap->BCId();
-             //m_latomeidLATOMEHEAD   = headmap->LatomeId();
-             m_l1idLATOMEHEAD	   = headmap->L1Id();
            }
          }
          m_latomeChannel	   = scdigi->Channel();
@@ -535,7 +569,7 @@ StatusCode LArSC2Ntuple::execute()
      m_TType = thisttype;
      m_IEventEvt   = thisevent;
      if(m_overwriteEventNumber) m_IEventEvt   = m_event;
-     m_LB= evt->lumiBlock();
+     m_LB = thislb;
 
      for (auto const & x : m_trigNames) {
        if( ! m_trigDec->getListOfTriggers(x).empty() ){
@@ -547,13 +581,35 @@ StatusCode LArSC2Ntuple::execute()
      if(evt->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Error) m_LArInError = m_LArInError | 0x1; 
      if(evt->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Warning) m_LArInError = m_LArInError | 0x2; 
 
+  }
+  if(m_fillCaloTT){
+    const DataVector<LVL1::TriggerTower>* TTVector;
+    if ( evtStore()->retrieve(TTVector,m_triggerTowerKey).isFailure() ) {
+       ATH_MSG_WARNING("Could not get the Calo TTs, will not fill...");
+    } else {
+      unsigned count=0; 
+      ATH_MSG_INFO("Got TT vector of the sixe " <<  TTVector->size());
+      DataVector<LVL1::TriggerTower>::const_iterator x; 
+      for ( x = TTVector->begin(); x < TTVector->end(); ++x ){
+           m_TTeta[count]=(*x)->eta();
+           m_TTphi[count]=(*x)->phi();
+           m_TTEem[count]=(*x)->emEnergy();
+           m_TTEhad[count]=(*x)->hadEnergy();
+           ++count;
+           if(count==20000) break;
+      }
+      m_ntNTT=count;
+    }
+  }
 
+  if(m_fillTType || m_fillCaloTT){
      sc   = ntupleSvc()->writeRecord(m_evt_nt);
      if (sc != StatusCode::SUCCESS) {
           ATH_MSG_ERROR( "writeRecord failed" );
           return sc;
      }
   }
+
   ATH_MSG_DEBUG( "LArSC2Ntuple has finished, filled " << cellCounter << " cells");
   return StatusCode::SUCCESS;
 }// end finalize-method.
@@ -563,10 +619,14 @@ void LArSC2Ntuple::fillRODEnergy(HWIdentifier SCId, rawChanMap_t &rawChanMap, co
  const Identifier offId = cabling->cnvToIdentifier(SCId);
  const std::vector<Identifier> cellIds = m_scidtool->superCellToOfflineID(offId);
  std::fill(m_ROD_energy.begin(), m_ROD_energy.end(), 0.);
+ std::fill(m_ROD_time.begin(), m_ROD_time.end(), 0.);
+ std::fill(m_ROD_id.begin(), m_ROD_id.end(), 0.);
  for(unsigned i=0; i<cellIds.size(); ++i ) {
     const HWIdentifier hwcell=cablingROD->createSignalChannelID(cellIds[i]);
     if (hwcell.is_valid()  && (rawChanMap.count(hwcell) != 0) ) {
        m_ROD_energy[i] = rawChanMap[hwcell]->energy();
+       m_ROD_time[i] = rawChanMap[hwcell]->time();
+       m_ROD_id[i] = rawChanMap[hwcell]->hardwareID().get_identifier32().get_compact();
     } else {
        ATH_MSG_WARNING(i<<"-th cell invalid Id");
     }
