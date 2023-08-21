@@ -7,6 +7,8 @@ from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 from ..Config.MenuComponents import MenuSequence,algorithmCAToGlobalWrapper
+from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+from AthenaConfiguration.ComponentFactory import CompFactory
 # ====================================================================================================
 #    Get MenuSequences
 # ====================================================================================================
@@ -58,21 +60,24 @@ def getBJetSequence(flags, jc_name=None):
     )
 
     # Second stage of Fast Tracking and Precision Tracking
-    from TriggerMenuMT.HLT.Bjet.BjetTrackingConfiguration import getSecondStageBjetTracking
-    secondStageAlgs, PTTrackParticles = getSecondStageBjetTracking(
+    from TriggerMenuMT.HLT.Bjet.BjetTrackingConfig import secondStageBjetTrackingCfg
+    secondStageAlgs = algorithmCAToGlobalWrapper(
+        secondStageBjetTrackingCfg,
         flags,
         inputRoI=InputMakerAlg.InViewRoIs,
         inputVertex=prmVtxKey,
-        inputJets=InputMakerAlg.InViewJets
+        inputJets=str(InputMakerAlg.InViewJets)
     )
 
-    from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfiguration import getFlavourTagging
+    PTTrackParticles = bjetconfig.tracks_IDTrig() # Final output xAOD::TrackParticle collection
+
+    from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfig import flavourTaggingCfg
     flavourTaggingAlgs = algorithmCAToGlobalWrapper(
-        getFlavourTagging,
+        flavourTaggingCfg,
         flags,
         inputJets=str(InputMakerAlg.InViewJets),
         inputVertex=prmVtxKey,
-        inputTracks=PTTrackParticles[0],
+        inputTracks=PTTrackParticles,
         BTagName=BTagName,
         inputMuons=None
     )
@@ -87,20 +92,17 @@ def getBJetSequence(flags, jc_name=None):
     # Sequence
     BjetAthSequence = seqAND( f"BjetAthSequence_{jc_name}_step2",[InputMakerAlg,robPrefetchAlg,bJetBtagSequence] )
 
-    from TrigBjetHypo.TrigBjetHypoConf import TrigBjetBtagHypoAlg
-    from TrigBjetHypo.TrigBjetMonitoringConfig import TrigBjetOnlineMonitoring
-    hypo = TrigBjetBtagHypoAlg(
+    hypo = conf2toConfigurable(CompFactory.TrigBjetBtagHypoAlg(
         f"TrigBjetBtagHypoAlg_{jc_name}",
         # keys
         BTaggedJetKey = InputMakerAlg.InViewJets,
         BTaggingKey = BTagName,
-        TracksKey = PTTrackParticles[0],
+        TracksKey = PTTrackParticles,
         PrmVtxKey = InputMakerAlg.RoITool.VertexReadHandleKey,
         # links for navigation
         BTaggingLink = BTagName.replace( "HLT_","" ),
         PrmVtxLink = InputMakerAlg.RoITool.PrmVtxLink,
-        MonTool = TrigBjetOnlineMonitoring(flags)
-    )
+    ))
 
     from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
     return MenuSequence( flags,

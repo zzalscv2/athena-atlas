@@ -26,7 +26,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import parOR
 from ..CommonSequences.FullScanDefs import fs_cells
-from ..Bjet.BjetFlavourTaggingConfiguration import getFastFlavourTagging
+from ..Bjet.BjetFlavourTaggingConfig import fastFlavourTaggingCfg
 from .JetTrackingConfig import JetRoITrackingCfg
 
 from JetRecConfig import JetRecConfig
@@ -301,7 +301,7 @@ def StandardJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
 
         # Adding Fast flavor tagging
         acc.merge(
-            getFastFlavourTagging(
+            fastFlavourTaggingCfg(
                 flags,
                 jetDef.fullname(),
                 context["Vertices"],
@@ -453,7 +453,7 @@ def JetRoITrackJetTagSequenceCfg(flags,jetsIn,trkopt,RoIs):
     acc.merge( trkcfg )
 
     acc.merge(
-        getFastFlavourTagging(
+        fastFlavourTaggingCfg(
             flags,
             jetsIn,
             trkmap['Vertices'],
