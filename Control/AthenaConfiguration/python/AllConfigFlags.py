@@ -134,7 +134,7 @@ def initConfigFlags():
     acf.addFlag('MP.UseSharedWriter', False)
     acf.addFlag('MP.UseParallelCompression', True)
 
-    acf.addFlag('Common.EnableSuppression', True) # Enable suppression of printout in MessageSvc
+    acf.addFlag('Common.MsgSuppression', True) # Enable suppression of printout in MessageSvc
     acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
     acf.addFlag('Common.ShowMsgStats',False) #Print stats about WARNINGs, etc at the end of the job
 

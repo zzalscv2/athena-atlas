@@ -48,7 +48,7 @@ def initFlags():
     acf.addFlag('Exec.WarningMessageComponents',[])
     acf.addFlag('Exec.ErrorMessageComponents',[])
 
-    acf.addFlag('Common.EnableSuppression',True) # Enable suppression of printout in MessageSvc
+    acf.addFlag('Common.MsgSuppression',True) # Enable suppression of printout in MessageSvc
     acf.addFlag('Common.MsgSourceLength',50) #Length of the source-field in the format str of MessageSvc
     acf.addFlag('Common.ProductionStep', ProductionStep.Default, enum=ProductionStep, help=argparse.SUPPRESS)
     acf.addFlag('Common.isOverlay', False, help=argparse.SUPPRESS)
