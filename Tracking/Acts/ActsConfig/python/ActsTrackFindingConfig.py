@@ -72,6 +72,12 @@ def ActsTrackFindingCfg(flags,
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [10])
 
+    if flags.Acts.doTrackFindingTrackSelector:
+        # TrackSelector no tighter than createITkTrackingPassFlags() (https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L383)
+        kwargs.setdefault("absEtaMax", 4.0)
+        kwargs.setdefault("ptMin", 0.4)
+        kwargs.setdefault("minMeasurements", 7)
+
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg
     kwargs.setdefault(
         "TrackingGeometryTool",

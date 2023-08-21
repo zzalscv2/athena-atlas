@@ -91,6 +91,15 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_etaBins);
     ATH_MSG_DEBUG("   " << m_chi2CutOff);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
+    ATH_MSG_DEBUG("   " << m_phiMin);
+    ATH_MSG_DEBUG("   " << m_phiMax);
+    ATH_MSG_DEBUG("   " << m_etaMin);
+    ATH_MSG_DEBUG("   " << m_etaMax);
+    ATH_MSG_DEBUG("   " << m_absEtaMin);
+    ATH_MSG_DEBUG("   " << m_absEtaMax);
+    ATH_MSG_DEBUG("   " << m_ptMin);
+    ATH_MSG_DEBUG("   " << m_ptMax);
+    ATH_MSG_DEBUG("   " << m_minMeasurements);
 
     // Read and Write handles
     ATH_CHECK(m_pixelSeedsKey.initialize(SG::AllowEmpty));
@@ -126,7 +135,18 @@ namespace ActsTrk
     Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(),
                                                               {m_etaBins, m_chi2CutOff, m_numMeasurementsCutOff}}};
 
-    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}}});
+    Acts::TrackSelector::Config trackSelectorCfg;
+    trackSelectorCfg.phiMin = m_phiMin;
+    trackSelectorCfg.phiMax = m_phiMax;
+    trackSelectorCfg.etaMin = m_etaMin;
+    trackSelectorCfg.etaMax = m_etaMax;
+    trackSelectorCfg.absEtaMin = m_absEtaMin;
+    trackSelectorCfg.absEtaMax = m_absEtaMax;
+    trackSelectorCfg.ptMin = m_ptMin;
+    trackSelectorCfg.ptMax = m_ptMax;
+    trackSelectorCfg.minMeasurements = m_minMeasurements;
+
+    m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, trackSelectorCfg}});
 
     trackFinder().pOptions.maxSteps = m_maxPropagationStep;
 
@@ -146,6 +166,7 @@ namespace ActsTrk
     ATH_MSG_INFO("- duplicate seeds: " << m_nDuplicateSeeds);
     ATH_MSG_INFO("- failed seeds: " << m_nFailedSeeds);
     ATH_MSG_INFO("- output tracks: " << m_nOutputTracks);
+    ATH_MSG_INFO("- selected tracks: " << m_nSelectedTracks);
     ATH_MSG_INFO("- failure ratio: " << static_cast<double>(m_nFailedSeeds) / m_nTotalSeeds);
     ATH_MSG_INFO("- duplication ratio: " << static_cast<double>(m_nDuplicateSeeds) / m_nTotalSeeds);
     return StatusCode::SUCCESS;
@@ -323,7 +344,7 @@ namespace ActsTrk
 
     auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
 
-    Acts::TrackContainer trackContainer{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
+    Acts::TrackContainer tracksContainer{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
     ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
 
     // ================================================== //
@@ -341,7 +362,7 @@ namespace ActsTrk
                            duplicateSeedDetector,
                            *pixelEstimatedTrackParameters,
                            pixelSeeds,
-                           trackContainer,
+                           tracksContainer,
                            0,
                            "pixel"));
     }
@@ -353,19 +374,19 @@ namespace ActsTrk
                            duplicateSeedDetector,
                            *stripEstimatedTrackParameters,
                            stripSeeds,
-                           trackContainer,
+                           tracksContainer,
                            1,
                            "strip"));
     }
 
-    ATH_MSG_DEBUG("    \\__ Created " << trackContainer.size() << " tracks");
+    ATH_MSG_DEBUG("    \\__ Created " << tracksContainer.size() << " tracks");
 
     // ================================================== //
     // ===================== STORE OUTPUT =============== //
     // ================================================== //
     // TODO once have final version of containers, they need to have movable backends also here
-    ActsTrk::ConstTrackStateBackend trackStateBackend(trackContainer.trackStateContainer());
-    ActsTrk::ConstTrackBackend trackBackend(trackContainer.container());
+    ActsTrk::ConstTrackStateBackend trackStateBackend(tracksContainer.trackStateContainer());
+    ActsTrk::ConstTrackBackend trackBackend(tracksContainer.container());
     auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
     ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
     if (!trackContainerHandle.isValid())
@@ -419,15 +440,20 @@ namespace ActsTrk
                                trackFinder().pOptions,
                                &(*pSurface));
 
+    Acts::TrackContainer tracksContainerTemp{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
+
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
 
     m_nTotalSeeds += estimatedTrackParameters.size();
     size_t addTracks = 0;
+    size_t selTracks = 0;
 
     // Loop over the track finding results for all initial parameters
     for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
     {
+      tracksContainerTemp.clear();
+
       if (!estimatedTrackParameters[iseed])
       {
         ATH_MSG_WARNING("No " << seedType << " seed " << iseed);
@@ -456,7 +482,7 @@ namespace ActsTrk
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
 
-      auto result = trackFinder().ckf.findTracks(initialParameters, options, tracksContainer);
+      auto result = trackFinder().ckf.findTracks(initialParameters, options, tracksContainerTemp);
 
       // The result for this seed
       if (not result.ok())
@@ -465,16 +491,17 @@ namespace ActsTrk
         ++m_nFailedSeeds;
         continue;
       }
+      const auto &tracksForSeed = result.value();
 
       // Fill the track infos into the duplicate seed detector
-      ATH_CHECK(storeSeedInfo(tracksContainer, result.value(), duplicateSeedDetector));
+      ATH_CHECK(storeSeedInfo(tracksContainerTemp, tracksForSeed, duplicateSeedDetector));
 
-      size_t ntracks = result.value().size();
+      size_t ntracks = tracksForSeed.size();
       addTracks += ntracks;
 
       if (!m_trackStatePrinter.empty())
       {
-        m_trackStatePrinter->printTracks(tgContext, tracksContainer, result.value(), measurements.sourceLinkVec());
+        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, result.value(), measurements.sourceLinkVec());
       }
 
       if (ntracks == 0)
@@ -482,9 +509,27 @@ namespace ActsTrk
         ATH_MSG_WARNING("Track finding found no track candidates for " << seedType << " seed " << iseed);
         ++m_nFailedSeeds;
       }
+
+      // copy selected tracks into output tracksContainer
+      size_t itrack = 0;
+      for (auto &track : tracksForSeed)
+      {
+        if (trackFinder().trackSelector.isValidTrack(track))
+        {
+          auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
+          destProxy.copyFrom(track, true); // make sure we copy track states!
+          selTracks++;
+        }
+        else
+        {
+          ATH_MSG_DEBUG("Track " << itrack << " from " << seedType << " seed " << iseed << " failed track selection");
+        }
+        itrack++;
+      }
     }
 
     m_nOutputTracks += addTracks;
+    m_nSelectedTracks += selTracks;
 
     ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << addTracks << " track candidates.");
 

@@ -97,6 +97,18 @@ namespace ActsTrk
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
 
+    // Acts::TrackSelector cuts
+    // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
+    Gaudi::Property<double> m_phiMin{this, "phiMin", -std::numeric_limits<double>::max(), "TrackSelector: phiMin"};
+    Gaudi::Property<double> m_phiMax{this, "phiMax", std::numeric_limits<double>::max(), "TrackSelector: phiMax"};
+    Gaudi::Property<double> m_etaMin{this, "etaMin", -std::numeric_limits<double>::max(), "TrackSelector: etaMin"};
+    Gaudi::Property<double> m_etaMax{this, "etaMax", std::numeric_limits<double>::max(), "TrackSelector: etaMax"};
+    Gaudi::Property<double> m_absEtaMin{this, "absEtaMin", 0.0, "TrackSelector: absEtaMin"};
+    Gaudi::Property<double> m_absEtaMax{this, "absEtaMax", std::numeric_limits<double>::max(), "TrackSelector: absEtaMax"};
+    Gaudi::Property<double> m_ptMin{this, "ptMin", 0.0, "TrackSelector: ptMin"};
+    Gaudi::Property<double> m_ptMax{this, "ptMax", std::numeric_limits<double>::max(), "TrackSelector: ptMax"};
+    Gaudi::Property<std::size_t> m_minMeasurements{this, "minMeasurements", 0, "TrackSelector: minMeasurements"};
+
     /**
      * @brief invoke track finding procedure
      *
@@ -128,8 +140,8 @@ namespace ActsTrk
     // so we don't have to instantiate the heavily templated classes in the header.
     // To maintain const-correctness, only use this via the accessor functions.
     struct CKF_pimpl;
-    CKF_pimpl& trackFinder();
-    const CKF_pimpl& trackFinder() const;
+    CKF_pimpl &trackFinder();
+    const CKF_pimpl &trackFinder() const;
 
     std::unique_ptr<CKF_pimpl> m_trackFinder;
 
@@ -138,6 +150,7 @@ namespace ActsTrk
     mutable std::atomic<size_t> m_nFailedSeeds{0};
     mutable std::atomic<size_t> m_nDuplicateSeeds{0};
     mutable std::atomic<size_t> m_nOutputTracks{0};
+    mutable std::atomic<size_t> m_nSelectedTracks{0};
 
     /// Private access to the logger
     const Acts::Logger &logger() const
