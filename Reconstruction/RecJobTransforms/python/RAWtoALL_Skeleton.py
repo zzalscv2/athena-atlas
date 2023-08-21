@@ -111,6 +111,12 @@ def fromRunArgs(runArgs):
         flags.Output.doWriteBS = True
         log.info("---------- Configured DRAW_EGZ output")
 
+    if hasattr(runArgs, 'outputDRAW_TAULHFile'):
+        flagString = 'Output.DRAW_TAULHFileName'
+        flags.addFlag(flagString, runArgs.outputDRAW_TAULHFile)
+        flags.Output.doWriteBS = True
+        log.info("---------- Configured DRAW_TAULH output")
+
     if hasattr(runArgs, 'outputDAOD_L1CALO1File'):
         flagString = 'Output.DAOD_L1CALO1FileName'
         flags.addFlag(flagString, runArgs.outputDAOD_L1CALO1File)
@@ -210,6 +216,12 @@ def fromRunArgs(runArgs):
         from PrimaryDPDMaker.DRAW_EGZ import DRAW_EGZCfg
         cfg.merge(DRAW_EGZCfg(flags))
         log.info("---------- Configured DRAW_EGZ perfDPD")
+
+    #DRAW_TAULH
+    for flag in [key for key in flags._flagdict.keys() if ("Output.DRAW_TAULHFileName" in key)]:
+        from PrimaryDPDMaker.DRAW_TAULH import DRAW_TAULHCfg
+        cfg.merge(DRAW_TAULHCfg(flags))
+        log.info("---------- Configured DRAW_TAULH perfDPD")
 
     # L1CALO1/2
     for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_L1CALO1FileName" in key)]:

@@ -310,6 +310,19 @@ class WriteDRAW_EGZ(JobProperty):
 jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_EGZ)
 listRAWtoDPD.append(WriteDRAW_EGZ.StreamName)
 
+class WriteDRAW_TAULH(JobProperty):
+    """ Produce the DRAW for Tau Lepton-had selection."""
+    statusOn       = True
+    allowedTypes   = ['bool']
+    StoredValue    = False
+    StreamName     = "StreamDRAW_TAULH"
+    FileName       = ""
+    isVirtual      = False
+    DPDMakerScript = "PrimaryDPDMaker/DRAW_TAULH.py"
+    pass
+jobproperties.PrimaryDPDFlags.add_JobProperty(WriteDRAW_TAULH)
+listRAWtoDPD.append(WriteDRAW_TAULH.StreamName)
+
 class WriteDRAW_EMU(JobProperty):
     """ Produce the primary DPD e-mu in Byte Stream format."""
     statusOn       = True

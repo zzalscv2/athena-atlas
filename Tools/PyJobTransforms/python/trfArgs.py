@@ -264,7 +264,7 @@ def addPrimaryDPDArguments(parser, pick = None, transform = None, multipleOK=Fal
     # list* really gives just a list of DPD names
     try:
         # TODO: do we actually need all of those?
-        listRAWtoDPD = ['StreamDAOD_PIXELVALID', 'StreamDRAW_RPVLL', 'StreamDRAW_ZMUMU', 'StreamDRAW_DIMU', 'StreamDRAW_EGZ', 'StreamDRAW_EGJPSI', 'StreamDRAW_TAUMUH',
+        listRAWtoDPD = ['StreamDAOD_PIXELVALID', 'StreamDRAW_RPVLL', 'StreamDRAW_ZMUMU', 'StreamDRAW_DIMU', 'StreamDRAW_EGZ', 'StreamDRAW_TAULH', 'StreamDRAW_EGJPSI', 'StreamDRAW_TAUMUH',
                         'StreamDRAW_EMU', 'StreamDRAW_BCID1', 'StreamDRAW_BCID2', 'StreamDRAW_BCID3', 'StreamDRAW_BCID4', 'StreamDRAW_TOPSLMU', 'StreamDAOD_IDNCB', 'StreamDAOD_SCTVALID']
         listESDtoDPD = ['StreamDESDM_ALLCELLS', 'StreamDESDM_EOVERP', 'StreamDESDM_IDALIGN', 'StreamDESDM_EGAMMA', 'StreamDESDM_MCP', 'StreamDESDM_TILEMU', 'StreamDESDM_PHOJET', 'StreamDESDM_SGLEL', 'StreamDESDM_SLTTMU', 'StreamDESDM_CALJET',
                         'StreamDESDM_EXOTHIP', 'StreamDAOD_IDTRKVALID', 'StreamDAOD_IDTIDE', 'StreamDAOD_IDTRKLUMI', 'StreamDAOD_IDPIXLUMI', 'StreamDAOD_L1CALO1', 'StreamDAOD_L1CALO2', 'StreamDAOD_L1CALO3', 'StreamDAOD_L1CALO4', 'StreamDAOD_L1CALO5', 'StreamDESD_DEDX']
