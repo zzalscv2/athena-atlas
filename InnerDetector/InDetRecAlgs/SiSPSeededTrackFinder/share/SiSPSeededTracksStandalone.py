@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ###############################################################
 #
@@ -689,7 +689,7 @@ InDetSiTrackMaker = SiTrackMaker(name                      = "InDetSiTrackMaker"
                                  nClustersMin              = NewTrackingCuts.minClusters(),
                                  nHolesMax                 = NewTrackingCuts.nHolesMax(),
                                  nHolesGapMax              = NewTrackingCuts.nHolesGapMax(),
-                                 SeedsFilterLevel          = NewTrackingCuts.seedFilterLevel(),
+                                 UseSeedFilter             = NewTrackingCuts.useSeedFilter(),
                                  Xi2max                    = NewTrackingCuts.Xi2max(),
                                  Xi2maxNoAdd               = NewTrackingCuts.Xi2maxNoAdd(),
                                  nWeightedClustersMin      = NewTrackingCuts.nWeightedClustersMin(),
