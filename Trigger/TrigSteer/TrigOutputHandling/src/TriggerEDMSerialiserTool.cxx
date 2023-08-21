@@ -16,6 +16,7 @@
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
 #include "TrigSerializeResult/StringSerializer.h"
+#include "TrigCompositeUtils/HLTIdentifier.h"
 
 #include "TriggerEDMSerialiserTool.h"
 #include "TriggerEDMCLIDs.h"
@@ -37,6 +38,7 @@ StatusCode TriggerEDMSerialiserTool::initialize() {
   ATH_CHECK( m_serializerSvc.retrieve() );
   ATH_CHECK( m_clidSvc.retrieve() );
   ATH_CHECK( m_debugInfoWHKey.initialize() );
+  ATH_CHECK( m_debugNavigationSummaryRHKey.initialize() );
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   // Parse the list of collections to serialise
   for ( const std::string& typeKeyAuxIDs : m_collectionsToSerialize.value() ) {
@@ -541,6 +543,19 @@ StatusCode TriggerEDMSerialiserTool::fillDebugInfo(const TruncationInfoMap& trun
                     << sizeSum/1024. << " kB, largest recorded collection: " << largestRecorded.first
                     << " (" << largestRecorded.second/1024. << " kB), largest dropped collection: "
                     << largestDropped.first << " (" << largestDropped.second/1024. << " kB).");
+      // Give more information on the chains which accepted this event
+      using namespace TrigCompositeUtils;
+      SG::ReadHandle<DecisionContainer> navigation(m_debugNavigationSummaryRHKey); // Implicit ctx lookup - OK, rare code path 
+      const Decision* terminus = getTerminusNode(navigation);
+      if (terminus) {
+        std::stringstream ss;
+        ss << "Passing chains in this event: ";
+        for (const DecisionID chainID : decisionIDs(terminus)) {
+          ss << HLT::Identifier(chainID).name() << ", ";
+          addDecisionID(chainID, debugInfoThisModule); // Save this list also into the output, it is then accessible offline too
+        }
+        ATH_MSG_WARNING(ss.str());
+      }
       // Monitoring
       auto monModuleId = Monitored::Scalar<int>("Truncation_ModuleId", id);
       auto monTotalSize = Monitored::Scalar<float>("Truncation_TotalSize", sizeSum/1024.);
