@@ -55,13 +55,20 @@ if __name__=='__main__':
 
    flags.LArCalib.Input.Database = args.outpdir + "/" + args.insqlitefile
 
+   # others flags settings
+   flags.LArCalib.isSC = args.supercells
+   flags.LArCalib.Input.SubDet=args.subdet
+
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
    flags.LArCalib.BadChannelTag = "-RUN2-UPD3-00"
    flags.LArCalib.BadChannelDB = args.badsql
    
    #Output of this job 
-   OutputPoolFileName = args.outprefix+"_"+args.run+"_"+args.subdet+".pool.root"
+   OutputPoolFileName = args.outprefix+"_"+args.run
+   if args.subdet!="":
+      OutputPoolFileName += "_"+args.subdet
+   OutputPoolFileName += ".pool.root"
 
    idx=OutputPoolFileName.find('.pool.root')
    if idx != -1:
@@ -88,6 +95,9 @@ if __name__=='__main__':
    cfg=MainServicesCfg(flags)
    
    cfg.merge(LArRTMParamsCfg(flags))
+
+   # switch on MT
+   cfg.getEventAlgo("LArRTMParamExtractor").nThreads=0
 
    #run the application
    cfg.run(1) 

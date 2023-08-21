@@ -46,11 +46,11 @@ def LArDelay_OFCCaliCfg(flags):
        result.getEventAlgo("LArFebErrorSummaryMaker").CheckAllFEB=False
 
        if flags.LArCalib.Input.SubDet == "EM":
-          from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
-          result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
-    
           theLArCalibShortCorrector = CompFactory.LArCalibShortCorrector(KeyList = [digKey,])
           result.addEventAlgo(theLArCalibShortCorrector)
+
+          from LArCalibProcessing.LArStripsXtalkCorrConfig import LArStripsXtalkCorrCfg
+          result.merge(LArStripsXtalkCorrCfg(flags,[digKey,]))
     else:
        digKey="SC"
        theLArLATOMEDecoder = CompFactory.LArLATOMEDecoder("LArLATOMEDecoder")
@@ -86,7 +86,7 @@ def LArDelay_OFCCaliCfg(flags):
     result.addEventAlgo(theLArCaliWaveBuilder)
     
 
-    if flags.LArCalib.Input.SubDet == "HEC": 
+    if flags.LArCalib.Input.SubDet == "HEC" or flags.LArCalib.Input.SubDet == "HECFCAL": 
         theLArCaliWaveBuilder.KeyOutput="LArCaliWave_multi"
         theLArCaliWaveSelector = CompFactory.LArCaliWaveSelector("LArCaliWaveSelector")
         theLArCaliWaveSelector.KeyList         = ["LArCaliWave_multi",]
@@ -94,12 +94,15 @@ def LArDelay_OFCCaliCfg(flags):
         theLArCaliWaveSelector.GroupingType    = flags.LArCalib.GroupingType
         if flags.LArCalib.Gain==0: #HIGH gain 
             theLArCaliWaveSelector.SelectionList = [ "HEC/0/0/460","HEC/1/0/460","HEC/2/0/230","HEC/3/0/230" ] 
+            theLArCaliWaveSelector.SelectionList += [ "FCAL/0/0/500","FCAL/1/0/500","FCAL/2/0/500","FCAL/3/0/500" ]
 
         elif flags.LArCalib.Gain==1: #MEDIUM gain
             theLArCaliWaveSelector.SelectionList = [ "HEC/0/1/3600","HEC/1/1/3600","HEC/2/1/1800","HEC/3/1/1800"]
+            theLArCaliWaveSelector.SelectionList += [ "FCAL/0/1/5000","FCAL/1/1/5000","FCAL/2/1/5000","FCAL/3/1/5000" ]
    
         elif flags.LArCalib.Gain==2: #LOW gain
             theLArCaliWaveSelector.SelectionList = [ "HEC/0/2/24000","HEC/1/2/24000","HEC/2/2/18000","HEC/3/2/18000" ]
+            theLArCaliWaveSelector.SelectionList += [ "FCAL/0/2/40000","FCAL/1/2/40000","FCAL/2/2/40000","FCAL/3/2/40000" ]
       
         result.addEventAlgo(theLArCaliWaveSelector)
     pass
@@ -113,8 +116,39 @@ def LArDelay_OFCCaliCfg(flags):
         theLArCaliWavePatcher.ProblemsToPatch=[
             "deadCalib","deadReadout","deadPhys","almostDead","short",
         ]
+
         result.addEventAlgo(theLArCaliWavePatcher)
     pass
+
+    if flags.LArCalib.doValidation:
+       
+       result.merge(addFolders(flags,flags.LArCalib.CaliWave.Folder+"<key>LArCaliWaveRef</key>","LAR_OFL"))
+
+       from LArCalibDataQuality.Thresholds import cwAmpThr,cwFWHMThr,cwAmpThrFEB,cwFWHMThrFEB
+       from AthenaCommon.Constants import WARNING
+
+       theCaliWaveValidationAlg=CompFactory.LArCaliWaveValidationAlg("CaliWaveVal")
+       theCaliWaveValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
+                                                "highNoiseHG","highNoiseMG","highNoiseLG"]
+       theCaliWaveValidationAlg.ValidationKey="LArCaliWave"
+       theCaliWaveValidationAlg.ReferenceKey="LArCaliWaveRef"
+       theCaliWaveValidationAlg.MsgLevelForDeviations=WARNING
+       theCaliWaveValidationAlg.ListOfDevFEBs="caliWaveFebs.txt"
+       theCaliWaveValidationAlg.AmplitudeTolerance=cwAmpThr
+       theCaliWaveValidationAlg.CaliWaveFWHMTolerance=cwFWHMThr
+       theCaliWaveValidationAlg.AmplitudeToleranceFEB=cwAmpThrFEB
+       theCaliWaveValidationAlg.CaliWaveFWHMToleranceFEB=cwFWHMThrFEB
+       theCaliWaveValidationAlg.TimeShiftDetection=True
+       theCaliWaveValidationAlg.PatchMissingFEBs=True
+       theCaliWaveValidationAlg.UseCorrChannels=False
+       theCaliWaveValidationAlg.BadChanKey =  bcKey
+
+       if flags.LArCalib.isSC:
+          theCaliWaveValidationAlg.CablingKey = "LArOnOffIdMapSC"
+          theCaliWaveValidationAlg.CalibLineKey = "LArCalibIdMapSC"
+
+       result.addEventAlgo(theCaliWaveValidationAlg)
+
     
 
     LArCaliOFCAlg = CompFactory.LArOFCAlg("LArCaliOFCAlg")
@@ -146,7 +180,8 @@ def LArDelay_OFCCaliCfg(flags):
                                                             SaveDerivedInfo = True,
                                                             ApplyCorrection = True,
                                                             BadChanKey = bcKey,
-                                                            OffId=True
+                                                            OffId=True,
+                                                            SaveJitter=True
                                                         ))
 
         if rootfile2 == "":

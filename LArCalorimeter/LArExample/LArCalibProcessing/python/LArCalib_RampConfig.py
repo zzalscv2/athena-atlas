@@ -124,6 +124,45 @@ def LArRampCfg(flags):
         theLArRampPatcher.UseCorrChannels=True
         result.addEventAlgo(theLArRampPatcher)
 
+    # Validation + CB patching 
+    if flags.LArCalib.doValidation:
+       
+       fldr="/LAR/ElecCalibFlat/Ramp"
+       result.merge(addFolders(flags,fldr,"LAR_ONL"))
+       condLoader=result.getCondAlgo("CondInputLoader")
+       condLoader.Load.append(("CondAttrListCollection",fldr))
+
+       rmpFlt=CompFactory.getComp("LArFlatConditionsAlg<LArRampFlat>")("RampFltVal")
+       rmpFlt.ReadKey=fldr
+       rmpFlt.WriteKey="LArRampRef"
+       result.addCondAlgo(rmpFlt)
+
+       from LArCalibDataQuality.Thresholds import rampThr, rampThrFEB
+       from AthenaCommon.Constants import WARNING
+ 
+       theRampValidationAlg=CompFactory.LArRampValidationAlg("RampVal")
+       theRampValidationAlg.RampTolerance=rampThr
+       theRampValidationAlg.RampToleranceFEB=rampThrFEB
+       theRampValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
+                                            "highNoiseHG","highNoiseMG","highNoiseLG"]
+       theRampValidationAlg.KeyList=[digKey,]
+       theRampValidationAlg.PatchMissingFEBs=True
+       theRampValidationAlg.UseCorrChannels=False
+       theRampValidationAlg.ValidationKey="LArRamp"
+       theRampValidationAlg.ReferenceKey="LArRampRef"
+  
+       theRampValidationAlg.MsgLevelForDeviations=WARNING
+       theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
+       theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
+       theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
+
+       theRampValidationAlg.BadChanKey =  bcKey
+
+       if flags.LArCalib.isSC:
+          theRampValidationAlg.CablingKey = "LArOnOffIdMapSC"
+          theRampValidationAlg.CalibLineKey = "LArCalibIdMapSC"
+
+       result.addEventAlgo(theRampValidationAlg)
 
     #Output (POOL + sqlite) file writing:
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
@@ -149,6 +188,7 @@ def LArRampCfg(flags):
                                                         SaveAllSamples =  True,
                                                         BadChanKey = bcKey,
                                                         ApplyCorr=True,
+                                                        OffId=True
                                                     ))
 
         import os
