@@ -110,6 +110,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         input = jetContainer
     jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
                                            runJvtUpdate = False, runNNJvtUpdate = True,
+                                           runFJvtUpdate = True, runFJvtSelection = True, runFJvtEfficiency = True,
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
                                            runGhostMuonAssociation = not isPhyslite)
 
@@ -143,7 +144,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
 
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetJvtAnalysisSequence import makeJetJvtAnalysisSequence
-    jvtSequence = makeJetJvtAnalysisSequence( dataType, jetContainer, enableCutflow=True, shallowViewOutput = False )
+    jvtSequence = makeJetJvtAnalysisSequence( dataType, jetContainer, enableCutflow=True, shallowViewOutput = False, enableFJvt=True )
     jvtSequence.configure( inputName = { 'jets'      : 'AnaJets_%SYS%' },
                            outputName = {  } )
 
@@ -156,8 +157,8 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     if dataType != 'data' :
         vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
         vars += [
-            # 'EventInfo.jvt_effSF_%SYS% -> jvtSF_%SYS%',
-            # 'EventInfo.fjvt_effSF_%SYS% -> fjvtSF_%SYS%',
+            'EventInfo.jvt_effSF_%SYS% -> weight_jvt_effSF_%SYS%',
+            'EventInfo.fjvt_effSF_%SYS% -> weight_fjvt_effSF_%SYS%',
             # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
         ]
 
