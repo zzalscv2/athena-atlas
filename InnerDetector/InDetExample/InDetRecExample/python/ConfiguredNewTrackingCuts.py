@@ -68,7 +68,7 @@ class ConfiguredNewTrackingCuts :
     self.__nWeightedClustersMin    = 6
 
     # --- seeding
-    self.__seedFilterLevel         = 1
+    self.__useSeedFilter           = True
     self.__maxdImpactPPSSeeds      = 1.7
     self.__maxdImpactSSSSeeds      = 1000.0
     self.__maxSeedsPerSP_Pixels    = 5
@@ -157,10 +157,6 @@ class ConfiguredNewTrackingCuts :
       # --- PUTF cuts
       self.__maxdImpactPPSSeeds        = 2.0     # loosen cut on PPS seeds
       self.__maxdImpactSSSSeeds        = 20.0    # apply cut on SSS seeds
-
-    if self.__indetflags.cutLevel() >= 5:
-      # --- PUTF cuts
-      self.__seedFilterLevel           = 2       # increased seed filter level
 
     if self.__indetflags.cutLevel() >= 6:
       # --- stop using TRT outlies from failed extension fits to create BackTracks or TRT Only
@@ -276,7 +272,6 @@ class ConfiguredNewTrackingCuts :
     # --- IBL setup
     if mode == "IBL" :
       self.__extension               = "IBL"
-      self.__seedFilterLevel         = 1
       self.__minPT                   = 0.900 * Units.GeV
       self.__minClusters             = 10
       self.__maxPixelHoles           = 1
@@ -284,7 +279,6 @@ class ConfiguredNewTrackingCuts :
     # --- High pile-up setup
     if mode == "HighPileup" :
       self.__extension               = "HighPileup"
-      self.__seedFilterLevel         = 1
       self.__minPT                   = 0.900 * Units.GeV
       self.__minClusters             = 9
       self.__maxPixelHoles           = 0
@@ -326,7 +320,6 @@ class ConfiguredNewTrackingCuts :
       self.__radMax             = 600. * Units.mm
       self.__nHolesMax          = self.__maxHoles
       self.__nHolesGapMax       = self.__maxHoles # not as tight as 2*maxDoubleHoles
-      self.__seedFilterLevel   = 1
       self.__maxTracksPerSharedPRD = 2
 
     # --- mode for high-d0 tracks (re-optimisation for Run 2 by M.Danninger)
@@ -350,8 +343,7 @@ class ConfiguredNewTrackingCuts :
       self.__maxDoubleHoles     = 0  
       self.__radMax             = 600. * Units.mm
       self.__nHolesMax          = self.__maxHoles
-      self.__nHolesGapMax       = 1 
-      self.__seedFilterLevel    = 1  
+      self.__nHolesGapMax       = 1
       self.__maxTracksPerSharedPRD   = 2
       self.__Xi2max                  = 9.0  
       self.__Xi2maxNoAdd             = 25.0 
@@ -385,7 +377,6 @@ class ConfiguredNewTrackingCuts :
       self.__radMax             = 600. * Units.mm
       self.__nHolesMax          = self.__maxHoles
       self.__nHolesGapMax       = self.__maxHoles # not as tight as 2*maxDoubleHoles
-      self.__seedFilterLevel   = 1
       self.__maxTracksPerSharedPRD = 2
 
     # --- change defaults for low pt tracking
@@ -466,7 +457,6 @@ class ConfiguredNewTrackingCuts :
     # --- setup for lumi determination based on vertices
     if mode == "VtxLumi" :
       self.__extension               = "VtxLumi"
-      self.__seedFilterLevel         = 1
       self.__minPT                   = 0.900 * Units.GeV
       self.__minClusters             = 7
       self.__maxPixelHoles           = 1
@@ -478,7 +468,6 @@ class ConfiguredNewTrackingCuts :
  # --- setup for beamspot determination based on vertices
     if mode == "VtxBeamSpot" :
       self.__extension               = "VtxBeamSpot"
-      self.__seedFilterLevel         = 1
       self.__minPT                   = 0.900 * Units.GeV
       self.__minClusters             = 9
       self.__maxPixelHoles           = 0
@@ -501,7 +490,6 @@ class ConfiguredNewTrackingCuts :
       self.__minTRTonTrk      = 15
       self.__minTRTonly       = 15
       self.__roadWidth        = 60.
-      self.__seedFilterLevel  = 3
       self.__Xi2max           = 60.0
       self.__Xi2maxNoAdd      = 100.0
       self.__nWeightedClustersMin = 8
@@ -523,45 +511,39 @@ class ConfiguredNewTrackingCuts :
       self.__nHolesGapMax     = self.__maxHoles
       self.__Xi2max           = 6.
       self.__Xi2maxNoAdd      = 10.
-      if self.__indetflags.cutLevel() == 1:
-        self.__seedFilterLevel  = 1
-      elif self.__indetflags.cutLevel() == 2:
-        self.__seedFilterLevel  = 2
+      if self.__indetflags.cutLevel() == 2:
         self.__maxdImpactSSSSeeds        = 20.0 # apply cut on SSS seeds
       elif self.__indetflags.cutLevel() == 3: # This is for MB data
         self.__minPT            = 0.300 * Units.GeV
-        self.__seedFilterLevel  = 2
         self.__maxdImpactSSSSeeds        = 20.0 # apply cut on SSS seeds
         self.__useParameterizedTRTCuts   = False #Make these false on all HI cut levels >=3, since standard cut levels set it true from levels >=3
         self.__useNewParameterizationTRT = False
       elif self.__indetflags.cutLevel() == 4: # ==CutLevel 2 with loosened hole cuts and chi^2 cuts
-       self.__seedFilterLevel  = 2
-       self.__maxdImpactSSSSeeds        = 20.0 # apply cut on SSS seeds
-       self.__maxdImpactPPSSeeds      = 1.7 #set this to 1.7 for all HI cut levels >=4, since standard cut levels set it to 2.0 from levels >=4. Not sure it has any effect, since we don't usually run mixed seeds (also true for HI?)
-       self.__useParameterizedTRTCuts   = False
-       self.__useNewParameterizationTRT = False
-       self.__maxHoles               = 2
-       self.__maxPixelHoles       = 1
-       self.__maxSctHoles         = 1
-       self.__maxDoubleHoles   = 0
-       self.__Xi2max                   = 9.
-       self.__Xi2maxNoAdd        = 25.
+        self.__maxdImpactSSSSeeds        = 20.0 # apply cut on SSS seeds
+        self.__maxdImpactPPSSeeds      = 1.7 #set this to 1.7 for all HI cut levels >=4, since standard cut levels set it to 2.0 from levels >=4. Not sure it has any effect, since we don't usually run mixed seeds (also true for HI?)
+        self.__useParameterizedTRTCuts   = False
+        self.__useNewParameterizationTRT = False
+        self.__maxHoles               = 2
+        self.__maxPixelHoles       = 1
+        self.__maxSctHoles         = 1
+        self.__maxDoubleHoles   = 0
+        self.__Xi2max                   = 9.
+        self.__Xi2maxNoAdd        = 25.
       elif self.__indetflags.cutLevel() == 5: # ==CutLevel 3 with loosened hole cuts and chi^2 cuts
-       self.__minPT            = 0.300 * Units.GeV
-       self.__seedFilterLevel  = 2
-       self.__maxdImpactSSSSeeds        = 20.0 # apply cut on SSS seeds
-       self.__maxdImpactPPSSeeds      = 1.7
-       self.__useParameterizedTRTCuts   = False
-       self.__useNewParameterizationTRT = False
-       self.__maxHoles               = 2
-       self.__maxPixelHoles       = 1
-       self.__maxSctHoles         = 1
-       self.__maxDoubleHoles   = 0
-       self.__Xi2max                   = 9.
-       self.__Xi2maxNoAdd        = 25.
+        self.__minPT            = 0.300 * Units.GeV
+        self.__maxdImpactSSSSeeds        = 20.0 # apply cut on SSS seeds
+        self.__maxdImpactPPSSeeds      = 1.7
+        self.__useParameterizedTRTCuts   = False
+        self.__useNewParameterizationTRT = False
+        self.__maxHoles               = 2
+        self.__maxPixelHoles       = 1
+        self.__maxSctHoles         = 1
+        self.__maxDoubleHoles   = 0
+        self.__Xi2max                   = 9.
+        self.__Xi2maxNoAdd        = 25.
 
-      self.__radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
-      self.__useTRT           = False
+        self.__radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
+        self.__useTRT           = False
 
     # --- changes for Pixel/SCT segments
     from AthenaCommon.DetFlags    import DetFlags
@@ -581,7 +563,6 @@ class ConfiguredNewTrackingCuts :
       self.__maxDoubleHoles   = 0
       self.__minSiNotShared   = 3
       self.__maxShared        = 0
-      self.__seedFilterLevel  = 2
       self.__nHolesMax        = self.__maxHoles
       self.__nHolesGapMax     = self.__maxHoles
       self.__useSCT           = False
@@ -600,7 +581,6 @@ class ConfiguredNewTrackingCuts :
         self.__maxPixelHoles    = 0
         self.__minSiNotShared   = 3
         self.__maxShared        = 0
-        self.__seedFilterLevel  = 2
         self.__nHolesMax        = self.__maxHoles
         self.__nHolesGapMax     = self.__maxHoles
         self.__useSCT           = False
@@ -614,7 +594,6 @@ class ConfiguredNewTrackingCuts :
         self.__maxPixelHoles    = 3
         self.__maxShared        = 0    # no shared hits in cosmics
         self.__roadWidth        = 60.
-        self.__seedFilterLevel  = 3 # 2 ?
         self.__nHolesMax        = self.__maxHoles
         self.__nHolesGapMax     = self.__maxHoles
         self.__Xi2max           = 60.0
@@ -632,7 +611,6 @@ class ConfiguredNewTrackingCuts :
       self.__maxDoubleHoles   = 0
       self.__minSiNotShared   = 3
       self.__maxShared        = 0
-      self.__seedFilterLevel  = 2
       self.__nHolesMax        = self.__maxHoles
       self.__nHolesGapMax     = self.__maxHoles
       # self.__useSCT           = False
@@ -654,7 +632,6 @@ class ConfiguredNewTrackingCuts :
       self.__maxDoubleHoles   = 1
       self.__minSiNotShared   = 5
       self.__maxShared        = 0
-      self.__seedFilterLevel  = 2
       self.__nHolesMax        = self.__maxHoles
       self.__nHolesGapMax     = self.__maxHoles
       self.__usePixel         = False
@@ -675,7 +652,6 @@ class ConfiguredNewTrackingCuts :
         self.__maxSctHoles      = 3
         self.__maxShared        = 0   # no shared hits in cosmics
         self.__roadWidth        = 60.
-        self.__seedFilterLevel  = 3 # 2 ?
         self.__nHolesMax        = self.__maxHoles
         self.__nHolesGapMax     = self.__maxHoles
         self.__Xi2max           = 60.0
@@ -714,7 +690,6 @@ class ConfiguredNewTrackingCuts :
       self.__maxDoubleHoles   = 0
       self.__minSiNotShared   = 5
       self.__maxShared        = 0
-      self.__seedFilterLevel  = 2
       self.__nHolesMax        = self.__maxHoles
       self.__nHolesGapMax     = self.__maxHoles
       self.__usePixel         = False
@@ -729,7 +704,6 @@ class ConfiguredNewTrackingCuts :
         self.__maxSctHoles      = 3
         self.__maxShared        = 0   # no shared hits in cosmics
         self.__roadWidth        = 60.
-        self.__seedFilterLevel  = 3 # 2 ?
         self.__nHolesMax        = self.__maxHoles
         self.__nHolesGapMax     = self.__maxHoles
         self.__Xi2max           = 60.0
@@ -917,8 +891,8 @@ class ConfiguredNewTrackingCuts :
   def KeepAllConfirmedStripSeeds( self ) :
     return self.__keepAllConfirmedStripSeeds
 
-  def seedFilterLevel( self ) :
-    return self.__seedFilterLevel
+  def useSeedFilter( self ) :
+    return self.__useSeedFilter
 
   def radMax( self ) :
     return self.__radMax
@@ -1009,7 +983,7 @@ class ConfiguredNewTrackingCuts :
     print('* max number of SCT holes     :  ', self.__maxSctHoles)
     print('* max number of double holes  :  ', self.__maxDoubleHoles)
     print('*')
-    print('* seed filter level           :  ', self.__seedFilterLevel)
+    print('* use seed filter             :  ', self.__useSeedFilter)
     print('* maximal R of SP for seeding :  ', self.__radMax)
     print('* max holes in pattern        :  ', self.__nHolesMax)
     print('* max holes gap in pattern    :  ', self.__nHolesGapMax)

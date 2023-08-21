@@ -82,11 +82,6 @@ def Xi2maxNoAdd_ranges( inflags ):
     {'-11':  35.0,
     '12-':  25.0 } )
 
-def seedFilterLevel_ranges( inflags ):
-    return select( inflags.Tracking.cutLevel,
-    {'-4':  1,
-    '5-':  2 } )
-
 def maxdImpactPPSSeeds_ranges( inflags ):
     return select( inflags.Tracking.cutLevel,
     {'-3':  1.7,
@@ -258,7 +253,7 @@ def createTrackingPassFlags():
     icf.addFlag("nWeightedClustersMin", 6)
 
     # --- seeding
-    icf.addFlag("seedFilterLevel", seedFilterLevel_ranges )
+    icf.addFlag("useSeedFilter", True)
     icf.addFlag("maxTracksPerSharedPRD", 0)  ## is 0 ok for default??
     icf.addFlag("maxdImpactPPSSeeds", 2)
     icf.addFlag("maxdImpactSSSSeeds", lambda pcf:
@@ -406,7 +401,7 @@ def createITkTrackingPassFlags():
                 else 0.9 * Units.GeV)
     icf.addFlag("maxPrimaryImpactSeed"      , 2.0 * Units.mm)
     icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
-    icf.addFlag("seedFilterLevel"           , 2)
+    icf.addFlag("useSeedFilter"             , True)
 
     # --- cluster cuts
     icf.addFlag("minClusters"             , lambda pcf :
@@ -462,7 +457,10 @@ def createITkFastTrackingPassFlags():
 def createITkFTFPassFlags():
 
     icf = createITkFastTrackingPassFlags()
-    
+
+    icf.addFlag("doHitDV"            , False)
+    icf.addFlag("doDisappearingTrk"  , False)
+    icf.useSeedFilter         = False
     icf.minPT                 = [0.9 * Units.GeV, 0.4 * Units.GeV, 0.4 * Units.GeV]
     icf.minPTSeed             = 0.9 * Units.GeV
 
@@ -501,7 +499,6 @@ def createITkLargeD0TrackingPassFlags():
     icf.radMax             = 1100. * Units.mm
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles
-    icf.seedFilterLevel    = 1
     icf.roadWidth          = 5
 
     # --- seeding
@@ -553,7 +550,6 @@ def createITkLowPtTrackingPassFlags():
 def createHighPileupTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension               = "HighPileup"
-    icf.seedFilterLevel         = 1
     icf.minPT                   = 0.900 * Units.GeV
     icf.minClusters             = 9
     icf.maxPixelHoles           = 0
@@ -597,8 +593,6 @@ def createLowPtRoITrackingPassFlags():
     icf.radMax             = 600. * Units.mm
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles # not as tight as 2*maxDoubleHoles
-    #icf.seedFilterLevel    = 1
-    #icf.maxTracksPerSharedPRD = 2
     # Add custom flags valid for this pass only
     icf.addFlag("z0WindowRoI", 30.0) # mm
     icf.addFlag("doRandomSpot", False)
@@ -632,7 +626,6 @@ def createLargeD0TrackingPassFlags():
     icf.radMax             = 600. * Units.mm
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles # not as tight as 2*maxDoubleHoles
-    icf.seedFilterLevel    = 1
     icf.maxTracksPerSharedPRD = 2
 
     icf.RunPixelPID             = False
@@ -658,7 +651,7 @@ def createR3LargeD0TrackingPassFlags():
     icf.minSecondaryPt     = 1000.0 * Units.MeV 
     icf.minClusters        = 8                  
     icf.minSiNotShared     = 6                 
-    icf.maxShared          = 2   # cut is now on number of shared modules                                                                                  
+    icf.maxShared          = 2   # cut is now on number of shared modules
     icf.minPixel           = 0
     icf.maxHoles           = 2
     icf.maxPixelHoles      = 1
@@ -666,8 +659,7 @@ def createR3LargeD0TrackingPassFlags():
     icf.maxDoubleHoles     = 0  
     icf.radMax             = 600. * Units.mm
     icf.nHolesMax          = icf.maxHoles
-    icf.nHolesGapMax       = 1 
-    icf.seedFilterLevel    = 1  
+    icf.nHolesGapMax       = 1
     icf.maxTracksPerSharedPRD   = 2
     icf.Xi2max                  = 9.0  
     icf.Xi2maxNoAdd             = 25.0 
@@ -707,7 +699,6 @@ def createLowPtLargeD0TrackingPassFlags():
     icf.radMax             = 600. * Units.mm
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles
-    icf.seedFilterLevel    = 1
     icf.maxTracksPerSharedPRD = 2
 
     icf.RunPixelPID        = False
@@ -849,7 +840,6 @@ def createBeamGasTrackingPassFlags():
 def createVtxLumiTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension               = "VtxLumi"
-    icf.seedFilterLevel         = 1
     icf.minPT                   = 0.900 * Units.GeV
     icf.minClusters             = 7
     icf.maxPixelHoles           = 1
@@ -864,7 +854,6 @@ def createVtxLumiTrackingPassFlags():
 def createVtxBeamSpotTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension               = "VtxBeamSpot"
-    icf.seedFilterLevel         = 1
     icf.minPT                   = 0.900 * Units.GeV
     icf.minClusters             = 9
     icf.maxPixelHoles           = 0
@@ -891,7 +880,6 @@ def createCosmicsTrackingPassFlags():
     icf.minTRTonTrk      = 15
     icf.minTRTonly       = 15
     icf.roadWidth        = 60.
-    icf.seedFilterLevel  = 3
     icf.Xi2max           = 60.0
     icf.Xi2maxNoAdd      = 100.0
     icf.nWeightedClustersMin = 8
@@ -918,8 +906,7 @@ def createHeavyIonTrackingPassFlags():
     # CutLevel 3 MinBias
     # CutLevel 4  # ==CutLevel 2 with loosened hole cuts and chi^2 cuts
     # CutLevel 5 # ==CutLevel 3 with loosened hole cuts and chi^2 cuts    
-    icf.seedFilterLevel = lambda pcf: 2 if pcf.Tracking.cutLevel >= 2 else 1
-    
+
     icf.maxdImpactSSSSeeds =  lambda pcf: \
                               20. if pcf.Tracking.cutLevel >= 2 else 1000.
     
@@ -981,7 +968,6 @@ def createPixelTrackingPassFlags():
     icf.maxDoubleHoles   = 0
     icf.minSiNotShared   = 3
     icf.maxShared        = 0
-    icf.seedFilterLevel  = _pick( default = 2, hion = 2, cosmics = 3 )
     icf.nHolesMax        = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.nHolesGapMax     = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.useSCT           = False
@@ -1017,7 +1003,6 @@ def createDisappearingTrackingPassFlags():
     icf.maxDoubleHoles   = 0
     icf.minSiNotShared   = 3
     icf.maxShared        = 0
-    icf.seedFilterLevel  = 2
     icf.nHolesMax        = 0
     icf.nHolesGapMax     = 0
     icf.useSCT           = True
@@ -1072,8 +1057,6 @@ def createSCTTrackingPassFlags():
     icf.maxShared        = 0
     icf.roadWidth        = lambda pcf: 60. if pcf.Beam.Type is BeamType.Cosmics \
                            else roadWidth_ranges( pcf )
-    icf.seedFilterLevel  = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else 2
     icf.Xi2max           = lambda pcf: 60.0 if pcf.Beam.Type is BeamType.Cosmics \
                            else Xi2max_ranges( pcf )
     icf.Xi2maxNoAdd      = lambda pcf: 100.0 if pcf.Beam.Type is BeamType.Cosmics \

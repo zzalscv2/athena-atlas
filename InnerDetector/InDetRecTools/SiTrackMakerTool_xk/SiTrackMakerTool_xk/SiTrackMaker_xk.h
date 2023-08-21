@@ -133,7 +133,7 @@ namespace InDet{
 
       /// @name Properties
       //@{
-      IntegerProperty m_seedsfilter{this, "SeedsFilterLevel", 2, "Level of seeds filer"};
+      BooleanProperty m_seedsfilter{this, "UseSeedFilter", true, "Use seed filter"};
       UnsignedIntegerProperty m_wrongcluster{this, "GoodSeedClusterCount", 10, "Max lentgh of thtrack"};
       StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid", "Mode of magnetic field"};
       StringProperty m_patternName{this, "TrackPatternRecoInfo", "SiSPSeededFinder", "Name of the pattern recognition"};

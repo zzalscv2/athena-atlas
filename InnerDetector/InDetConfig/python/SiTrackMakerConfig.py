@@ -33,8 +33,8 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
     kwargs.setdefault("nClustersMin", flags.Tracking.ActiveConfig.minClusters)
     kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.nHolesMax)
     kwargs.setdefault("nHolesGapMax", flags.Tracking.ActiveConfig.nHolesGapMax)
-    kwargs.setdefault("SeedsFilterLevel",
-                      flags.Tracking.ActiveConfig.seedFilterLevel)
+    kwargs.setdefault("UseSeedFilter",
+                      flags.Tracking.ActiveConfig.useSeedFilter)
     kwargs.setdefault("Xi2max", flags.Tracking.ActiveConfig.Xi2max)
     kwargs.setdefault("Xi2maxNoAdd", flags.Tracking.ActiveConfig.Xi2maxNoAdd)
     kwargs.setdefault("nWeightedClustersMin",
@@ -145,8 +145,8 @@ def TrigSiTrackMaker_xkCfg(flags, name="TrigSiTrackMaker", **kwargs):
     kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.nHolesMax)
     kwargs.setdefault("nHolesGapMax",
                       flags.Tracking.ActiveConfig.nHolesGapMax)
-    kwargs.setdefault("SeedsFilterLevel",
-                      flags.Tracking.ActiveConfig.seedFilterLevel)
+    kwargs.setdefault("UseSeedFilter",
+                      flags.Tracking.ActiveConfig.useSeedFilter)
     kwargs.setdefault("Xi2max", flags.Tracking.ActiveConfig.Xi2max)
     kwargs.setdefault("Xi2maxNoAdd", flags.Tracking.ActiveConfig.Xi2maxNoAdd)
     kwargs.setdefault("nWeightedClustersMin",
@@ -194,8 +194,8 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", **kwargs):
     kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.nHolesMax[0])
     kwargs.setdefault("nHolesGapMax",
                       flags.Tracking.ActiveConfig.nHolesGapMax[0])
-    kwargs.setdefault("SeedsFilterLevel",
-                      flags.Tracking.ActiveConfig.seedFilterLevel)
+    kwargs.setdefault("UseSeedFilter",
+                      flags.Tracking.ActiveConfig.useSeedFilter)
     kwargs.setdefault("Xi2max", flags.Tracking.ActiveConfig.Xi2max[0])
     kwargs.setdefault("Xi2maxNoAdd", flags.Tracking.ActiveConfig.Xi2maxNoAdd[0])
     kwargs.setdefault("nWeightedClustersMin",
