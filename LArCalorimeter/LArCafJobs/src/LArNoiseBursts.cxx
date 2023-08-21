@@ -1062,11 +1062,11 @@ StatusCode LArNoiseBursts::doLArNoiseBursts(){
   else if (LArTES) {
      m_nt_cellsize = LArTES->size();
   }
-  ATH_MSG_INFO ("lar cell size = "<<int(nlarcell));
-  if(caloTES) ATH_MSG_INFO ("all cell size = "<<int(caloTES->size()));
+  ATH_MSG_DEBUG ("lar cell size = "<<int(nlarcell));
+  if(caloTES) ATH_MSG_DEBUG ("all cell size = "<<int(caloTES->size()));
   else {
-     if(LArTES_dig) ATH_MSG_INFO ("all LArRawCh. from digi size = "<<int(LArTES_dig->size()));
-     if(LArTES) ATH_MSG_INFO ("all LArRawCh. size = "<<int(LArTES->size()));
+     if(LArTES_dig) ATH_MSG_DEBUG ("all LArRawCh. from digi size = "<<int(LArTES_dig->size()));
+     if(LArTES) ATH_MSG_DEBUG ("all LArRawCh. size = "<<int(LArTES->size()));
   }
 
   //if (nlarcell > 0)

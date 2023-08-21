@@ -45,11 +45,15 @@ def LArShapeDumperCfg(flags):
     result.getService("PoolSvc").ReadCatalog += ["apcfile:poolcond/PoolCat_comcond_castor.xml"]
 
     if flags.LArShapeDump.doTrigger:
-        from TrigDecisionTool.TrigDecisionToolConfig import getTrigDecisionTool
-        result.merge(getTrigDecisionTool(flags))
 
         from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
         result.merge(L1TriggerByteStreamDecoderCfg(flags))
+
+        from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
+        result.merge(L1CaloMenuCfg(flags))
+
+        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+        result.merge(TrigDecisionToolCfg(flags))
 
     
     result.merge(addFolders(flags,'/LAR/ElecCalibOfl/AutoCorrs/AutoCorr<tag>LARElecCalibOflAutoCorrsAutoCorr-RUN2-UPD3-00</tag>','LAR_OFL'))
@@ -76,6 +80,7 @@ def LArShapeDumperCfg(flags):
     dumperAlg.LArShapeDumperTool=CompFactory.LArShapeDumperTool(DoShape=True)
     dumperAlg.FileName=flags.LArShapeDump.outputNtup
     dumperAlg.TriggerNames = flags.LArShapeDump.triggerNames
+    dumperAlg.TrigDecisionTool = result.getPublicTool('TrigDecisionTool')
     from LArConfiguration.LArConfigFlags import RawChannelSource 
     if flags.LAr.RawChannelSource == RawChannelSource.Calculated:
        dumperAlg.ChannelsKey = "LArRawChannels_FromDigits"
@@ -83,7 +88,9 @@ def LArShapeDumperCfg(flags):
     result.addEventAlgo(dumperAlg)
 
     if (flags.LArShapeDump.HECNoiseNtup!=""):
-        result.addEventAlgo(CompFactory.LArHECNoise())
+        hns=CompFactory.LArHECNoise()
+        hns.TrigDecisionTool = result.getPublicTool('TrigDecisionTool')
+        result.addEventAlgo(hns)
         result.addService(CompFactory.THistSvc(Output=["HEC DATAFILE='"+flags.LArShapeDump.HECNoiseNtup+"' OPT='RECREATE'",]))
 
     return result

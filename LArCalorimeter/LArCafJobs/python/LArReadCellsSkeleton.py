@@ -23,9 +23,11 @@ def fromRunArgs(runArgs):
     flags.LAr.ROD.forceIter=True
     flags.LAr.OFCShapeFolder="4samples3bins17phases"
     flags.Input.Files=runArgs.inputBSFile
-    flags.LArShapeDump.outputNtup="SPLASH"
+    flags.LArShapeDump.outputNtup="CELLS"
 
     #protection for LArPEB event:
+    flags.Trigger.triggerConfig = 'DB'
+    flags.Trigger.L1.doCTP=True
     flags.Trigger.L1.doMuon=False
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doTopo=False
@@ -38,7 +40,7 @@ def fromRunArgs(runArgs):
     
     cfg=MainServicesCfg(flags)
     from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addService(CompFactory.THistSvc(Output=["SPLASH DATAFILE='"+runArgs.outputNTUP_LARCELLSFile+"' OPT='RECREATE'",]))
+    cfg.addService(CompFactory.THistSvc(Output=["CELLS DATAFILE='"+runArgs.outputNTUP_LARCELLSFile+"' OPT='RECREATE'",]))
     cfg.merge(LArReadCellsCfg(flags))
 
     processPostInclude(runArgs, flags, cfg)
