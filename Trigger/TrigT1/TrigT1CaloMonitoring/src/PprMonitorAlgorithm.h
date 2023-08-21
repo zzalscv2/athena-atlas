@@ -67,5 +67,9 @@ private:
                          const std::string& groupName) const;
 
 
+  // count number of error events per lumiblock across threads
+  mutable std::mutex m_mutex{};
+  mutable std::map<uint32_t, int> m_errorLB_tt_counter ATLAS_THREAD_SAFE; 
+
 };
 #endif
