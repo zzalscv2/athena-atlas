@@ -178,7 +178,7 @@ def TRIG8Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     TRIG8SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
