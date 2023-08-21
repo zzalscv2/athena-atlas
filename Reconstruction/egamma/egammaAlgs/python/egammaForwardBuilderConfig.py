@@ -19,9 +19,7 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
 
     if flags.Detector.GeometryITk:
         kwargs["doTrackMatching"] = True
-        kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(
-                flags,
-                TrackParticlesName=flags.Egamma.Keys.Output.FwdGSFTrackParticles)))
+        kwargs.setdefault("TrackMatchBuilderTool", acc.popToolsAndMerge(EMTrackMatchBuilderCfg(flags)))
     if "forwardelectronIsEMselectors" not in kwargs:
         LooseFwdElectronSelector = AsgForwardElectronIsEMSelectorCfg(
             flags,
