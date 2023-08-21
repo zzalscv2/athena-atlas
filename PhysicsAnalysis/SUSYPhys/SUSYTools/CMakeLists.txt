@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SUSYTools )
@@ -24,10 +24,10 @@ atlas_add_library( SUSYToolsLib
    AssociationUtilsLib BoostedJetTaggersLib GoodRunsListsLib PATInterfaces TrigDecisionToolLib
    MCTruthClassifierLib JetJvtEfficiencyLib JetSubStructureUtils
    ParticleJetToolsLib PMGAnalysisInterfacesLib AnaAlgorithmLib
+   MuonAnalysisInterfacesLib EgammaAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${BOOST_LIBRARIES}
    AthContainers EventPrimitives FourMomUtils xAODBTagging xAODBase
    xAODPrimitives xAODRootAccess
-   EgammaAnalysisInterfacesLib
    EgammaAnalysisHelpersLib FTagAnalysisInterfacesLib IsolationSelectionLib
    IsolationCorrectionsLib JetAnalysisInterfacesLib JetSelectorToolsLib
    JetCPInterfaces JetCalibToolsLib JetInterface
@@ -122,7 +122,7 @@ if( XAOD_STANDALONE )
    atlas_add_test( ut_SUSYToolsTester_mc_Run3
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc21_13p6TeV.601229.FS_mc21a_p5631.PHYS.pool.root
              maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
-             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root 
+             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root
       LOG_IGNORE_PATTERN ${extra_patterns}
    )
    atlas_add_test( ut_SUSYToolsTester_mc23a_Run3

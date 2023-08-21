@@ -54,6 +54,9 @@
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 #include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
+#include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
+#include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
+#include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 
 class IJetCalibrationTool;
 class IJERTool;
@@ -64,12 +67,10 @@ class IJetUpdateJvt;
 class IJetModifier;
 
 class IAsgElectronLikelihoodTool;
-class IAsgElectronEfficiencyCorrectionTool;
 class IEGammaAmbiguityTool;
 
 class IAsgDeadHVCellRemovalTool;
 class IAsgPhotonIsEMSelector;
-class IAsgPhotonEfficiencyCorrectionTool;
 class IElectronPhotonShowerShapeFudgeTool;
 
 class IBTaggingEfficiencyTool;
@@ -85,7 +86,6 @@ namespace CP {
   class IMuonSelectionTool;
   class IMuonCalibrationAndSmearingTool;
   class IMuonEfficiencyScaleFactors;
-  class IMuonTriggerScaleFactors;
 
   class IEgammaCalibrationAndSmearingTool;
   class IEfficiencyScaleFactorTool;
@@ -454,13 +454,13 @@ namespace ST {
     std::vector<std::string> m_v_trigs17_cache_singleLep;
     std::vector<std::string> m_v_trigs18_cache_singleLep;
     std::vector<std::string> m_v_trigs22_cache_singleLep;
-    
+
     std::vector<std::string> m_v_trigs15_cache_diLep;
     std::vector<std::string> m_v_trigs16_cache_diLep;
     std::vector<std::string> m_v_trigs17_cache_diLep;
     std::vector<std::string> m_v_trigs18_cache_diLep;
     std::vector<std::string> m_v_trigs22_cache_diLep;
-    
+
     std::vector<std::string> m_v_trigs15_cache_multiLep;
     std::vector<std::string> m_v_trigs16_cache_multiLep;
     std::vector<std::string> m_v_trigs17_cache_multiLep;
@@ -981,7 +981,7 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<char> acc_isolHighPt("isolHighPt"); // use different WPs for low-pt and high-pt
   const static SG::AuxElement::ConstAccessor<char> acc_passOR("passOR");
   const static SG::AuxElement::ConstAccessor<char> acc_signal_less_JVT("signal_less_JVT"); //!< Accessor for signal jets without a JVT requirement
-  const static SG::AuxElement::ConstAccessor<char> acc_trigmatched("trigmatched"); 
+  const static SG::AuxElement::ConstAccessor<char> acc_trigmatched("trigmatched");
   const static SG::AuxElement::ConstAccessor<char> acc_lrtFilter("passLRTFilter");
 
   // more decorations that are set externally
