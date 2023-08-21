@@ -7,7 +7,6 @@
 
 #include <AthenaBaseComps/AthAlgTool.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <MuonReadoutGeometryR4/CutOutArea.h>
 
 #include <GeoModelInterfaces/IGeoDbTagSvc.h>
 #include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
@@ -45,8 +44,6 @@ class MdtReadoutGeomTool : public AthAlgTool,
   
     using ParamBookTable = std::map<std::string, parameterBook>; 
     ParamBookTable m_parBook{};
-
-    std::map<Identifier, std::vector<CutOutArea>> m_amdbCutOuts{};
 
 };
 

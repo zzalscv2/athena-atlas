@@ -157,35 +157,6 @@ StatusCode MdtReadoutGeomTool::readParameterBook() {
         ATH_MSG_DEBUG("Extracted parameters " <<pars<<" number of layers: "<<nLay<<" will be safed under key "<<key);
         m_parBook[key] = std::move(pars);
     }   
-    /// Next step... Download the AMDB cut out tables
-    paramTable = accessSvc->getRecordsetPtr("mdtCutouts", "");
-    if (paramTable->size() == 0) {
-        ATH_MSG_FATAL("Empty cutout table found");
-        return StatusCode::FAILURE;
-    }
-    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-    for (const IRDBRecord* record : *paramTable) {
-        const std::string stName{record->getString("MDTCUTOUTS_DATA_ID").substr(0,3)};
-        const int stationEta{record->getInt("etaIndex")};
-        const int stationPhi{record->getInt("phiIndex")+1};
-        /// Minor comment: May be rename it to multiLayer?
-        const int multiLayer{record->getInt("Multilayer")};
-        bool is_valid{false};
-        Identifier detElId = idHelper.channelID(stName, stationEta, stationPhi, multiLayer, 1, 1, is_valid);
-        if (!is_valid){
-            ATH_MSG_FATAL("Failed to construct Identifier from "<<stName
-                          <<" eta: "<<stationEta<<", phi: "<<stationPhi<<", ml:" <<multiLayer);
-            return StatusCode::FAILURE;
-        }
-        /// Define a new cutout
-        CutOutArea newCutOut{};
-        newCutOut.origin = Amg::Vector3D{record->getDouble("dx"),
-                                         record->getDouble("dy"), 0};
-        newCutOut.inclanation = Amg::getRotateX3D(record->getDouble("D1") * Gaudi::Units::degree) * Amg::Vector3D::UnitZ();
-        newCutOut.halfLengthX = std::max(record->getDouble("W_xS"),record->getDouble("W_xL") ) / 2.;
-        newCutOut.lengthY = record->getDouble("L_y");
-        m_amdbCutOuts[detElId].emplace_back(std::move(newCutOut));
-    }
     return StatusCode::SUCCESS;
 }
 }  // namespace MuonGMR4
