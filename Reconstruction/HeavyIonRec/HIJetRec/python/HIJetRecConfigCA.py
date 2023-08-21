@@ -135,8 +135,8 @@ def HIJetClustererCfg(flags, name="builder", jetDef=None, **kwargs):
         kwargs.setdefault("JetAlgorithm", jetDef.algorithm)
         kwargs.setdefault("JetRadius", jetDef.radius)
         kwargs.setdefault("PtMin", jetDef.ptmin)
-    kwargs.setdefault("GhostArea", 0.0)
-    kwargs.setdefault("InputPseudoJets", "PseudoJet"+flags.HeavyIon.Jet.ClusterKey)
+    kwargs.setdefault("GhostArea", 0.01)
+    kwargs.setdefault("InputPseudoJets", "PseudoJet"+flags.HeavyIon.Jet.ClusterKey+"_GhostTracks")
 
     acc.setPrivateTools(CompFactory.JetClusterer(name, **kwargs))
     return acc
@@ -372,10 +372,10 @@ def HIJetCellSubtractorCfg(flags, name="HIJetCellSubtractor", **kwargs):
     return acc
 
 
-def HIJetSubtractorCfg(flags, useCLusters, **kwargs):
+def HIJetSubtractorCfg(flags, useClusters, **kwargs):
     """Common function for clsuter and cell subtraction configuration."""
 
-    if useCLusters:
+    if useClusters:
         return HIJetClusterSubtractorCfg(flags, **kwargs)
     else:
         return HIJetCellSubtractorCfg(flags, **kwargs)
@@ -534,6 +534,25 @@ def HIJetRecCfg(flags):
     # get calo pseudojets
     acc.merge(HIPseudoJetAlgCfg(flags))
 
+    # HIJetTracks are used for GhostTracks association and later to build TrackJets seeds
+    pseudoTrkJetCont = "HIJetTracks"
+    pseudoGhostTrks = "PseudoJetGhostTracks"
+
+    acc.merge(HITrackSelAlgCfg(flags, OutputContainer=pseudoTrkJetCont))
+    acc.merge(HIPseudoTrackJetAlgCfg(
+        flags, name="GhostTrackPseudoJets", InputContainer=pseudoTrkJetCont, OutputContainer=pseudoGhostTrks, Label="GhostTrack"))
+
+    ## merge between PJHICluster and PJTracks
+
+    pjContNames = ["PseudoJet"+flags.HeavyIon.Jet.ClusterKey,pseudoGhostTrks]
+
+    mergeAlg = CompFactory.PseudoJetMerger(
+        "PJmerge_HIGhostTrack",
+        InputPJContainers = pjContNames,
+        OutputContainer = "PseudoJet"+flags.HeavyIon.Jet.ClusterKey+"_GhostTracks"
+    )
+    acc.addEventAlgo(mergeAlg)
+
     # build jets
     acc.merge(HIJetAlgCfg(flags, jetDef=jetDef2))
     for jd in jetDef:
@@ -569,16 +588,14 @@ def HIJetRecCfg(flags):
 
     # configuring track jets, seeds for second iteration
     if flags.HeavyIon.Jet.doTrackJetSeed:
-        pseudoTrkJetCont = "HIJetTracks"
         pseudoTrks = "PseudoTracks"
 
-        acc.merge(HITrackSelAlgCfg(flags, OutputContainer=pseudoTrkJetCont))
         acc.merge(HIPseudoTrackJetAlgCfg(
             flags, InputContainer=pseudoTrkJetCont, OutputContainer=pseudoTrks))
 
         jetDef_trk = HITrackJetDef(flags,
                                       jetradius=4,
-                                      modifiers=["HIJetAssoc", "Filter:{}".format(flags.HeavyIon.Jet.TrackJetPtMin)])
+                                      modifiers=["HIJetAssoc", "Filter:{}".format(flags.HeavyIon.Jet.TrackJetPtMin),"Sort"])
         trkJetSeedCont = jetDef_trk.fullname()
 
         trkJetClust = acc.popToolsAndMerge(HIJetClustererCfg(flags, 
@@ -645,11 +662,12 @@ def HIJetRecCfg(flags):
                          Subtractor=jm_dict1["Subtractor"])
 
     # configure final jets and store them
+    extramods = ["Sort","Width","CaloEnergies","LArHVCorr","CaloQuality","TrackMoments","JVF","JVT"]# adding modifiers to final jets
     for jd in jetDef:
         jetDef_final = HIJetDefCloner(flags,
                                       jetDef_in=jd,
                                       suffix="",
-                                      modifiers=["subtr1", "consmod", "HIJetCalib:{}___{}___{}".format(str(float(jd.radius)*10).replace('.0',''),calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin)])
+                                      modifiers=["subtr1", "consmod", "HIJetCalib:{}___{}___{}".format(str(float(jd.radius)*10).replace('.0',''),calib_seq, not flags.Input.isMC), "Filter:{}".format(flags.HeavyIon.Jet.RecoOutputPtMin)]+extramods)
         acc.merge(HIJetCopyAlgCfg(flags, jd, jetDef_final))
 
         output = ["xAOD::JetContainer#"+jetDef_final.fullname(),
@@ -685,6 +703,17 @@ if __name__ == "__main__":
     acc = MainServicesCfg(flags)
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     acc.merge(InDetTrackRecoCfg(flags))
+
+    ## To avoid error coming from modifiers
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+    jetInternalFlags.isRecoJob = True
+
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
+    EMjet = AntiKt4EMTopo.clone()
+    EMjet.ghostdefs = ["Track"]
+    acc.merge(JetRecCfg(flags,EMjet))
+    ##
     from HIGlobal.HIGlobalConfig import HIGlobalRecCfg
     acc.merge(HIGlobalRecCfg(flags))
 
