@@ -162,8 +162,9 @@ class InDetTrigSequence:
       acc.merge(self.viewDataVerifierTRT())
       
       if self.__flags.Input.Format == Format.BS:
-        from TrigInDetConfig.TrigInDetConfig import TRTDataProviderCfg
-        acc.merge(TRTDataProviderCfg(self.__flags, self.__rois, self.__signature))
+        from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TrigTRTRawDataProviderCfg
+        acc.merge(TrigTRTRawDataProviderCfg(self.__flags, RoIs=self.__rois))
+
       elif not self.__inView:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         loadRDOs = [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]

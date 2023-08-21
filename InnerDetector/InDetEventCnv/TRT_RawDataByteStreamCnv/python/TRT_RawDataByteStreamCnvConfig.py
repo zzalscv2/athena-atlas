@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 
 def TRT_CablingSvcCfg(flags):
@@ -18,12 +19,15 @@ def TRT_CablingSvcCfg(flags):
 def TRTRawDataProviderCfg(flags, name="TRTRawDataProvider", **kwargs):
     """Return a ComponentAccumulator for TRT raw data provider"""
     acc = TRT_CablingSvcCfg(flags)
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    acc.merge(addFolders(flags, "/TRT/Onl/ROD/Compress", "TRT_ONL", className="CondAttrListCollection"))
 
-    kwargs.setdefault("ProviderTool", CompFactory.TRTRawDataProviderTool("InDetTRTRawDataProviderTool",
-                                                                         LVL1IDKey = "TRT_LVL1ID",
-                                                                         BCIDKey = "TRT_BCID"))
+    if not flags.Input.isMC:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        acc.merge(addFolders(flags, "/TRT/Onl/ROD/Compress", "TRT_ONL", className="CondAttrListCollection"))
+
+    if 'ProviderTool' not in kwargs:
+        kwargs.setdefault("ProviderTool", CompFactory.TRTRawDataProviderTool("InDetTRTRawDataProviderTool",
+                                                                             LVL1IDKey = "TRT_LVL1ID",
+                                                                             BCIDKey = "TRT_BCID"))
 
     from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
     kwargs.setdefault("RegSelTool", acc.popToolsAndMerge(regSelTool_TRT_Cfg(flags)))
@@ -32,6 +36,19 @@ def TRTRawDataProviderCfg(flags, name="TRTRawDataProvider", **kwargs):
     acc.addEventAlgo(providerAlg)
     return acc
 
+def TrigTRTRawDataProviderCfg(flags : AthConfigFlags, RoIs : str, **kwargs):
+
+    suffix = flags.Tracking.ActiveConfig.input_name
+    providerToolName = f"TrigTRTRawDataProviderTool_{suffix}"
+    providerName = f"TrigTRTRawDataProvider_{suffix}"
+    
+    kwargs.setdefault("ProviderTool", CompFactory.TRTRawDataProviderTool(name = providerToolName))
+    kwargs.setdefault('isRoI_Seeded', True)
+    kwargs.setdefault('RoIs',         RoIs)
+    kwargs.setdefault('RDOKey',       'TRT_RDOs_TRIG')
+    kwargs.setdefault('RDOCacheKey',  'TrtRDOCache')
+    
+    return TRTRawDataProviderCfg(flags, name = providerName, **kwargs)
 
 def TRTOverlayRawDataProviderAlgCfg(flags, name="TRTRawDataProvider", **kwargs):
     """Return a ComponentAccumulator for TRT raw data provider for data overlay."""

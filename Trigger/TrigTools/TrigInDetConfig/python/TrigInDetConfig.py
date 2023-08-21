@@ -4,7 +4,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import Format
 from AthenaCommon.Logging import logging
 
@@ -119,44 +118,6 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
 ############################################################################################################################
 # precision tracking
 ############################################################################################################################
-prefix="InDetTrigMT"
-
-def TRTDataProviderCfg(flags : AthConfigFlags, rois : str, signatureName : str = None):
-  if signatureName is None:
-    suffix = flags.Tracking.ActiveConfig.input_name
-  else:
-    suffix = signatureName
-    
-  rodDecoderName =  f"TrigTRTRodDecoder{suffix}"
-  providerToolName = f"TrigTRTRawDataProviderTool{suffix}"
-  providerName = f"TrigTRTRawDataProvider{suffix}"
-    
-  acc = ComponentAccumulator()
-  rodDecoder = CompFactory.TRT_RodDecoder(name = rodDecoderName,
-                                          LoadCompressTableDB=True)
-  acc.addPublicTool( rodDecoder )
-
-  if not flags.Input.isMC:
-     from IOVDbSvc.IOVDbSvcConfig import addFolders
-     acc.merge(addFolders(flags, "/TRT/Onl/ROD/Compress", "TRT_ONL", className="CondAttrListCollection"))  
-  
-  dataProviderTool = CompFactory.TRTRawDataProviderTool(name = providerToolName,
-                                                        Decoder=rodDecoder)
-  acc.addPublicTool( dataProviderTool )
-  
-  from .InDetTrigCollectionKeys import TrigTRTKeys
-  from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
-  dataProviderAlg = CompFactory.TRTRawDataProvider(name = providerName,
-                                                   RDOKey       = TrigTRTKeys.RDOs,
-                                                   RDOCacheKey       = InDetCacheNames.TRTRDOCacheKey,
-                                                   ProviderTool = dataProviderTool,
-                                                   RegSelTool   = acc.popToolsAndMerge( regSelTool_TRT_Cfg(flags)),
-                                                   isRoI_Seeded = True,
-                                                   RoIs         = rois )
-  acc.addEventAlgo(dataProviderAlg)
-  return acc
-
-
 
 def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   if inflags.Detector.GeometryITk:
