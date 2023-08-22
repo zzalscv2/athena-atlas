@@ -20,8 +20,7 @@ hlt.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
-hlt.input = 'data'
-hlt.max_events = 50
+hlt.input = 'data_Main'
 hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;rewriteLVL1=True;"'
 hlt.args += ' -o output'
 
@@ -47,7 +46,6 @@ tlareco.threads = 4
 tlareco.concurrent_events = 4
 tlareco.input = ''
 tlareco.explicit_input = True
-tlareco.max_events = 50
 tlareco.args = '--inputBSFile=' + find_file('*.physics_TLA*._athenaHLT*.data')  # output of the previous step
 tlareco.args += ' --outputDAOD_TLAFile=DAOD_TLA.pool.root'
 tlareco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
@@ -56,7 +54,7 @@ tlareco.args += ' --CA'
 
 # The full test
 test = Test.Test()
-test.art_type = 'build'
+test.art_type = 'grid'
 test.exec_steps = [hlt, filter_bs, tlareco]
 test.check_steps = CheckSteps.default_check_steps(test)
 add_analysis_steps(test)
