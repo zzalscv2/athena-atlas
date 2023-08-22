@@ -41,24 +41,6 @@ class _modifier:
 # Detector maps and conditions
 ###############################################################
 
-class SolenoidOff(_modifier):
-    """
-    Turn solenoid field OFF
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AlgSequence import AthSequencer
-        condSeq = AthSequencer("AthCondSeq")
-        condSeq.AtlasFieldMapCondAlg.MapSoleCurrent = 0
-
-class ToroidsOff(_modifier):
-    """
-    Turn toroid fields OFF
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AlgSequence import AthSequencer
-        condSeq = AthSequencer("AthCondSeq")
-        condSeq.AtlasFieldMapCondAlg.MapToroCurrent = 0
-
 class forceConditions(_modifier):
     """
     Force all conditions (except prescales) to match run from input file
@@ -107,8 +89,6 @@ class rewriteLVL1(_modifier):
     """
     Write LVL1 results to ByteStream output, usually used together with rerunLVL1
     """
-    # Example:
-    # athenaHLT -c "setMenu='PhysicsP1_pp_run3_v1';rerunLVL1=True;rewriteLVL1=True;" --filesInput=input.data TriggerJobOpts/runHLT_standalone.py
 
     def preSetup(self, flags):
         log.warning('The rewriteLVL1 modifier is deprecated. LVL1 result writing is enabled by default '
@@ -157,22 +137,6 @@ class fpeAuditor(_modifier):
         theApp.AuditTools = True
         svcMgr.AuditorSvc += CfgMgr.FPEAuditor()
         svcMgr.AuditorSvc.FPEAuditor.NStacktracesOnFPE=1
-
-
-class enableCountAlgoMiss(_modifier):
-    """
-    Enable monitoring of non-reentrant algorithms that scheduler is waiting for
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        svcMgr.AlgResourcePool.CountAlgorithmInstanceMisses=True
-
-class doValidation(_modifier):
-    """
-    Enable validation mode (e.g. extra histograms)
-    """
-    def preSetup(self, flags):
-        flags.Trigger.doValidationMonitoring = True
 
 
 class doRuntimeNaviVal(_modifier):
