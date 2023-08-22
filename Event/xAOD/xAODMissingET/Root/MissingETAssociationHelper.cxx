@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODMissingET/MissingETAssociationHelper.h"
@@ -12,6 +12,7 @@
 
 #include <iterator>
 #include <cstdio>
+#include <climits>
 
 using namespace xAOD;
 
@@ -50,6 +51,7 @@ bool MissingETAssociationHelper::objSelected(const MissingETAssociation_v1* asso
   if(!assoc) throw std::runtime_error("MissingETAssociationHelper::objSelected received a null pointer");
   size_t index = assoc->index();
   if(index >= m_useObjectFlags.size()) return false; // No flag for this association has been set to 1 yet
+  if (objIdx >= sizeof(MissingETBase::Types::bitmask_t)*CHAR_BIT) return false;
   return bool(m_useObjectFlags.at(index) & (1<<objIdx));
 }
 
