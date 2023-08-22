@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetCalibTools/CalibrationMethods/EtaJESCorrection.h"
@@ -210,8 +210,7 @@ void EtaJESCorrection::loadSplineHists(const TString & fileName, const std::stri
   }
 
   for(int i=0 ; i<m_etaBinAxis->GetNbins(); i++){
-    //m_etajesFactors[i].reset((TH1D*)etajes_l->At(i));
-    m_etajesFactors[i].reset(static_cast<TH1D*>(etajes_l->At(i)));
+    m_etajesFactors[i].reset(dynamic_cast<TH1*>(etajes_l->At(i)));
     m_etajesFactors[i]->SetDirectory(nullptr);
   }
   tmpF->Close();
