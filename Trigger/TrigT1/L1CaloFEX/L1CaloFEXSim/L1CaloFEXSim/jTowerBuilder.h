@@ -16,6 +16,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
+#include "L1CaloFEXCond/jFEXDBCondData.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include "TH1F.h"
 #include "TH1I.h"
@@ -35,6 +37,7 @@ class jTowerBuilder: public AthAlgTool, virtual public IjTowerBuilder {
         virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override ;
         virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override ;
         virtual void reset() const override ;
+        virtual StatusCode AssignPileupAndNoiseValues (std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const override;
 
 
 
@@ -48,22 +51,11 @@ class jTowerBuilder: public AthAlgTool, virtual public IjTowerBuilder {
         void BuildAllTowers   (std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const;
         void BuildSingleTower (std::unique_ptr<jTowerContainer> & jTowerContainerRaw,float eta, float phi, int key_eta, float keybase, int posneg, float centre_eta = 0.0, float centre_phi = 0.0, int fcal_layer = -1) const;
 
-        void AssignPileupAndNoiseValues (std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const;
-
         static constexpr float m_TT_Size_phi = M_PI/32;
         static constexpr float m_TT_Size_phi_FCAL = M_PI/16;
+        
+        SG::ReadCondHandleKey<jFEXDBCondData> m_BDToolKey {this, "BDToolKey", "jFEXDBParams", "DB tool key"};
 
-
-        //property for jFEX mapping
-        Gaudi::Property<std::string> m_PileupWeigthFile {this, "PileupWeigthFile", "Run3L1CaloSimulation/Noise/jTowerCorrection.20210308.r12406.root", "Root file for the pileup weight"};
-        Gaudi::Property<std::string> m_PileupHelperFile {this, "PileupHelperFile", "Run3L1CaloSimulation/Calibrations/jFEX_MatchedMapping.2022Mar10.r12406.root", "Root file to set the jTower coordinates (float eta/phi)"};
-
-        //histograms need to set coordinates and noise subtraction
-        TH1F* m_jTowerArea_hist = nullptr;
-        TH1I* m_Firmware2BitwiseID = nullptr;
-        TH1I* m_BinLayer = nullptr;
-        TH1F* m_EtaCoords = nullptr;
-        TH1F* m_PhiCoords = nullptr;
 
 };
 

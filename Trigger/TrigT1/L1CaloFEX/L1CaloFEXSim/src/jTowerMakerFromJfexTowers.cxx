@@ -63,7 +63,7 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
     if(!m_isMC){
       jDataTowerContainer = SG::ReadHandle<xAOD::jFexTowerContainer>(m_DataTowerKey, ctx);
         if(!jDataTowerContainer.isValid()) {
-            ATH_MSG_FATAL("Could not retrieve collection " << jDataTowerContainer.key() );
+            ATH_MSG_ERROR("Could not retrieve collection " << jDataTowerContainer.key() );
             return StatusCode::FAILURE;
         }      
         jDataTowerFilled = !jDataTowerContainer->empty();
@@ -75,7 +75,7 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
     if(m_UseEmulated){
       jEmulatedTowerContainer = SG::ReadHandle<xAOD::jFexTowerContainer>(m_EmulTowerKey, ctx);
         if(!jEmulatedTowerContainer.isValid()) {
-            ATH_MSG_FATAL("Could not retrieve collection " << jEmulatedTowerContainer.key() );
+            ATH_MSG_ERROR("Could not retrieve collection " << jEmulatedTowerContainer.key() );
             return StatusCode::FAILURE;
         }           
     }
@@ -107,7 +107,13 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
 
             LVL1::jTower *targetTower;
             if( (targetTower = local_jTowerContainerRaw->findTower(TTID)) ) {
-
+                
+                targetTower->setiEta( my_jTower->globalEta() );
+                targetTower->setiPhi( my_jTower->globalPhi() );
+                targetTower->setCentreEta( my_jTower->eta() );
+                targetTower->setCentrePhi( my_jTower->phi() );
+                targetTower->setOnlineID( my_jTower->OnlineID() );
+                
                 uint8_t source = my_jTower->Calosource(); // Values: EMB:0 Tile:1 EMEC:2 HEC:3 FCAL1:4 FCAL2:5 FCAL3:6
 
                 // Set up for Tile energies
@@ -125,23 +131,30 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
                 }
             }
             else {
-                ATH_MSG_FATAL("Tower ID is officially unknown - it will be ignored. (Needs investigation).  Please report this!" );
+                ATH_MSG_ERROR("Tower ID is officially unknown - it will be ignored. (Needs investigation).  Please report this!" );
                 continue;
             }
         }
     }
     else{
+        ATH_MSG_ERROR("Falling into the legacy path. This should never happen!. Use EmulatedTowers or DataTowers - Contact L1Calo offline experts");
+        return StatusCode::FAILURE;
         
-        ATH_MSG_DEBUG("Falling into the legacy path");
+        // Prefer to keep this for debugging purposes - Experts only
+        // It does reconstruct the jTowers using eta/phi coordinates and internal parameters from the CaloCell and TriggerTower containers.
+        // EmulatedTowers and DataTowers are xAOD objects, so they can saved into an AOD file.
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignSuperCellsToTowers(local_jTowerContainerRaw));
         ATH_CHECK(m_jSuperCellTowerMapperTool->AssignTriggerTowerMapper(local_jTowerContainerRaw));        
     }
-
-    // STEP 3 - Write the completed jTowerContainer into StoreGate (move the local copy in memory)
+    
+    // STEP 3 -  Once coordinates energies and all are filled, then we fill pileup and noise values
+    ATH_CHECK(m_jTowerBuilderTool->AssignPileupAndNoiseValues(local_jTowerContainerRaw));
+    
+    // STEP 4 - Write the completed jTowerContainer into StoreGate (move the local copy in memory)
     SG::WriteHandle<LVL1::jTowerContainer> jTowerContainerSG(m_jTowerContainerSGKey, ctx);
     ATH_CHECK(jTowerContainerSG.record(std::move( local_jTowerContainerRaw ) ) );
 
-    // STEP 4 - Close and clean the event
+    // STEP 5 - Close and clean the event
     m_jTowerBuilderTool->reset();
 
     return StatusCode::SUCCESS;

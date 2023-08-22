@@ -88,6 +88,12 @@ namespace xAOD {
       
       //Returns true if the Tower belongs to the FPGA core area
       bool isCore() const;
+      
+      //Returns Online ID
+      int OnlineID() const;
+      
+      //Returns Offline ID
+      int OfflineID() const;
 
 
 

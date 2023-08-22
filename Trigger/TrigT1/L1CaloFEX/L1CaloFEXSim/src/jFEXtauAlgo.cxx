@@ -48,7 +48,7 @@ StatusCode LVL1::jFEXtauAlgo::safetyTest() {
 
     m_jTowerContainer = SG::ReadHandle<jTowerContainer>(m_jTowerContainerKey);
     if(! m_jTowerContainer.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
+        ATH_MSG_ERROR("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
         return StatusCode::FAILURE;
     }
 
@@ -105,7 +105,7 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
     //centreEt greater than ?
     auto it_map = m_SearchGMap.find(TTID);
     if(it_map == m_SearchGMap.end()) {
-         ATH_MSG_FATAL("Could not find TT" << TTID << " in the (greater than) file for Taus.");
+         ATH_MSG_ERROR("Could not find TT" << TTID << " in the (greater than) file for Taus.");
     }
     
     for(const auto& lTT : it_map->second){
@@ -119,7 +119,7 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
     //centreEt greater or equal than ?
     it_map = m_SearchGeMap.find(TTID);
     if(it_map == m_SearchGeMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the (greater or equal than) file for Taus.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the (greater or equal than) file for Taus.");
     }
     
     for(const auto& lTT : it_map->second){
@@ -136,7 +136,7 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
     m_TauIsolation = 0;
     it_map = m_IsoRingMap.find(TTID);
     if(it_map == m_IsoRingMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the isolation file for Taus.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the isolation file for Taus.");
     }
     
     for(const auto& lTT : it_map->second){
@@ -196,7 +196,7 @@ StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::un
     std::ifstream myfile(fileName);
     
     if ( !myfile.is_open() ){
-        ATH_MSG_FATAL("Could not open file:" << fileName);
+        ATH_MSG_ERROR("Could not open file:" << fileName);
         return StatusCode::FAILURE;
     }
     

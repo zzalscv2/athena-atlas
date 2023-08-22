@@ -64,7 +64,7 @@ StatusCode jTowerMakerFromSuperCells::execute() {
         sc_tower_map << "# Simulation ID, 12 Scells (EMB or EMEC or FCAL1 layer) + 1 Scell (HEC or FCAL2/3 layer)" << "\n";
 
         for(const auto & jtower : *local_jTowerContainerRaw) {
-            sc_tower_map << jtower->id() << " ";
+            sc_tower_map << jtower->OfflineID() << " ";
 
             std::vector<Identifier> vEM = jtower->getEMSCIDs();
             for(const auto& SCellID : vEM) {

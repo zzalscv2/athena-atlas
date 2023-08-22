@@ -109,7 +109,7 @@ StatusCode LVL1::jFEXNtupleWriter::initialize () {
 StatusCode LVL1::jFEXNtupleWriter::execute () {
     SG::ReadHandle<LVL1::jFEXOutputCollection> jFEXOutputCollectionobj = SG::ReadHandle<LVL1::jFEXOutputCollection>(m_jFEXOutputCollectionSGKey/*,ctx*/);
     if(!jFEXOutputCollectionobj.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve jFEXOutputCollection " << m_jFEXOutputCollectionSGKey.key());
+        ATH_MSG_ERROR("Could not retrieve jFEXOutputCollection " << m_jFEXOutputCollectionSGKey.key());
         return StatusCode::FAILURE;
     }
     if (!jFEXOutputCollectionobj->getdooutput()) {
