@@ -64,7 +64,7 @@ StatusCode jSuperCellTowerMapper::AssignTriggerTowerMapper(std::unique_ptr<jTowe
 
     SG::ReadHandle<xAOD::TriggerTowerContainer> triggerTowerCollection(m_triggerTowerCollectionSGKey/*,ctx*/);
     if(!triggerTowerCollection.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve collection " << m_triggerTowerCollectionSGKey.key() );
+        ATH_MSG_ERROR("Could not retrieve collection " << m_triggerTowerCollectionSGKey.key() );
         return StatusCode::FAILURE;
     }
     for(auto eachTower : *triggerTowerCollection) {
@@ -111,7 +111,7 @@ void jSuperCellTowerMapper::reset(){
 
     SG::ReadHandle<CaloCellContainer> scellsCollection(m_scellsCollectionSGKey/*,ctx*/);
     if(!scellsCollection.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve collection " << m_scellsCollectionSGKey.key() );
+        ATH_MSG_ERROR("Could not retrieve collection " << m_scellsCollectionSGKey.key() );
         return StatusCode::FAILURE;
     }
 

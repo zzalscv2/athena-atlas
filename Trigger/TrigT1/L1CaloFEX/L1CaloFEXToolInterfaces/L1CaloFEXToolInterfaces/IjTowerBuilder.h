@@ -34,6 +34,7 @@ Interface definition for jTowerBuilder
     virtual void init(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
     virtual void execute(std::unique_ptr<jTowerContainer> & jTowerContainer) const = 0;
     virtual void reset() const = 0;
+    virtual StatusCode AssignPileupAndNoiseValues (std::unique_ptr<jTowerContainer> & jTowerContainerRaw) const = 0;
 
 
   private:

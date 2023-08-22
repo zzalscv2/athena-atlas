@@ -587,7 +587,7 @@ StatusCode jFexRoiByteStreamTool::ReadfromFile(const std::string & fileName){
     std::ifstream myfile(fileName);
     
     if ( !myfile.is_open() ){
-        ATH_MSG_FATAL("Could not open file:" << fileName);
+        ATH_MSG_ERROR("Could not open file:" << fileName);
         return StatusCode::FAILURE;
     }
     

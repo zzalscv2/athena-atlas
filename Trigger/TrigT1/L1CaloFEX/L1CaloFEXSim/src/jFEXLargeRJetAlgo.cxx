@@ -38,14 +38,14 @@ StatusCode LVL1::jFEXLargeRJetAlgo::initialize()
    return StatusCode::SUCCESS;
 
 }
-StatusCode LVL1::jFEXLargeRJetAlgo::safetyTest(){
-  SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
-  if(! jTowerContainer.isValid()){
-    ATH_MSG_FATAL("Could not retrieve container " << m_jTowerContainerKey.key());
-    return StatusCode::FAILURE;
-  }  
-  return StatusCode::SUCCESS;
 
+StatusCode LVL1::jFEXLargeRJetAlgo::safetyTest() {
+    SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
+    if(! jTowerContainer.isValid()) {
+        ATH_MSG_ERROR("Could not retrieve container " << m_jTowerContainerKey.key());
+        return StatusCode::FAILURE;
+    }
+    return StatusCode::SUCCESS;
 }
 
 void LVL1::jFEXLargeRJetAlgo::setupCluster(int inputTable[15][15]){

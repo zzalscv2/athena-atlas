@@ -160,6 +160,11 @@ if __name__ == '__main__':
             
             # Testing, could be needed in the future
             # jFEXInputs = CompFactory.LVL1.jTowerMakerFromSuperCells('jTowerMakerFromSuperCells')
+
+            
+            from L1CaloFEXCond.L1CaloFEXCondConfig import jFexDBConfig
+            acc.merge(jFexDBConfig(flags))             
+                 
             
             jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
             jFEXInputs.IsMC = flags.Input.isMC

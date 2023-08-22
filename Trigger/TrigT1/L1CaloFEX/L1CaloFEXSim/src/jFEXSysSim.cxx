@@ -118,7 +118,7 @@ namespace LVL1 {
 
     SG::ReadHandle<LVL1::jTowerContainer> this_jTowerContainer(m_jTowerContainerSGKey/*,ctx*/);
     if(!this_jTowerContainer.isValid()){
-      ATH_MSG_FATAL("Could not retrieve jTowerContainer " << m_jTowerContainerSGKey.key());
+      ATH_MSG_ERROR("Could not retrieve jTowerContainer " << m_jTowerContainerSGKey.key());
       return StatusCode::FAILURE;
     }
 

@@ -134,17 +134,6 @@ namespace LVL1 {
       constexpr static int jTE_Sat_lowerBit = 0; 
 
 
-    // jFEX SRJet Et Calibration (Calculated by Moritz, no Et dependent, as discussed by L1Calo group)
-    constexpr static int SRJ_Calib_params[6][9] =
-    {   //<20  <30  <40  <50  <65  <80 <110 <150 <inf  GeV
-        { 197, 197, 197, 197, 197, 197, 197, 197, 197 },// jFEX 0  FCal  
-        { 222, 222, 222, 222, 222, 222, 222, 222, 222 },// jFEX 1  Central  
-        { 182, 182, 182, 182, 182, 182, 182, 182, 182 },// jFEX 2  Central   
-        { 182, 182, 182, 182, 182, 182, 182, 182, 182 },// jFEX 3  Central  
-        { 222, 222, 222, 222, 222, 222, 222, 222, 222 },// jFEX 4  Central  
-        { 197, 197, 197, 197, 197, 197, 197, 197, 197 } // jFEX 5  FCal 
-    }; 
-
    //define constants needed by gFEX Jet algorithm
     constexpr static int centralNphi = 32;
     constexpr static int forwardNphi = 16;

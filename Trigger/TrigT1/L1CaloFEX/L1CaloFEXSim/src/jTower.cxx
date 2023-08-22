@@ -28,6 +28,7 @@ namespace LVL1 {
     m_eta(0.),
     m_phi(0.),
     m_tower_id(-9999999),
+    m_tower_id_online(0xffff),
     m_posneg(0),
     m_centre_eta(0.),
     m_centre_phi(0.),
@@ -37,10 +38,11 @@ namespace LVL1 {
   }
   
   /** constructs a tower and sets the coordinates and identifier */
-  jTower::jTower(float eta, float phi, int eta_modifier_input, int id_modifier, int posneg, float centre_eta, float centre_phi, int fcal_layer):
+  jTower::jTower(float eta, float phi, int towerid, int posneg, float centre_eta, float centre_phi, int fcal_layer):
     m_eta(eta),
     m_phi(phi),
-    m_tower_id(id_modifier + phi + (64 * eta_modifier_input)),
+    m_tower_id(towerid),
+    m_tower_id_online(-9999999),
     m_posneg(posneg),
     m_centre_eta(centre_eta),
     m_centre_phi(centre_phi),
@@ -163,17 +165,12 @@ void jTower::Do_LAr_encoding(){
 }
 
 
-/** Return global eta index.
-    Should be derived from tower ID, should be corrected in the future.
-    Need to also think what index range should be (thinking ahead to Run2) */
+/** Return global eta index. */
 int jTower::iEta() const {
-    const int index = (m_eta * m_posneg);
-    return index;
+    return m_eta;
 }
 
-/** Return global phi index.
-    Should be derived from tower ID, should be corrected in the future.
-    Decision here is whether phi is signed or not */
+/** Return global phi index.*/
 int jTower::iPhi() const {
     return m_phi;
 }
@@ -302,6 +299,14 @@ void jTower::setCentreEta(float ieta){
     m_centre_eta = ieta;
 }
 
+void jTower::setiEta(float ieta){
+    m_eta = ieta;
+}
+
+void jTower::setiPhi(float iphi){
+    m_phi = iphi;
+}
+
 void jTower::setCentrePhi(float iphi){
     m_centre_phi_toPI = iphi;
     m_centre_phi = iphi;
@@ -309,12 +314,24 @@ void jTower::setCentrePhi(float iphi){
 
 }
 
-void jTower::setTTowerArea(float area,int layer){
+void jTower::setOnlineID(int tower_id_online){
+    m_tower_id_online = tower_id_online;
+}
+
+void jTower::setTTowerArea(int area,int layer){
     m_TTowerArea.at(layer)=area;
 }
 
-float jTower::getTTowerArea(int layer)const{
+int jTower::getTTowerArea(int layer)const{
     return m_TTowerArea.at(layer);
+}
+
+void jTower::setTTowerAreaInv(int area,int layer){
+    m_TTowerAreaInv.at(layer)=area;
+}
+
+int jTower::getTTowerAreaInv(int layer)const{
+    return m_TTowerAreaInv.at(layer);
 }
 
 void jTower::setNoiseForMet(int noiseVal,int layer){

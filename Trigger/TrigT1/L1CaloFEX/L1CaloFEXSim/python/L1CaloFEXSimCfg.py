@@ -162,7 +162,10 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
             acc.addEventAlgo(decoderAlg)
             
         from L1CaloFEXAlgos.FexEmulatedTowersConfig import jFexEmulatedTowersCfg
-        acc.merge(jFexEmulatedTowersCfg(flags))      
+        acc.merge(jFexEmulatedTowersCfg(flags))   
+        
+        from L1CaloFEXCond.L1CaloFEXCondConfig import jFexDBConfig
+        acc.merge(jFexDBConfig(flags))      
         
         jFEXInputs = CompFactory.LVL1.jTowerMakerFromJfexTowers('jTowerMakerFromJfexTowers')
         jFEXInputs.IsMC = flags.Input.isMC

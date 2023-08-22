@@ -101,7 +101,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     
     SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey/*,ctx*/);
     if(!jTowerContainer.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve container " << m_jTowerContainerKey.key() );
+        ATH_MSG_ERROR("Could not retrieve container " << m_jTowerContainerKey.key() );
         return StatusCode::FAILURE;
     }
     
@@ -115,12 +115,10 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     }
 
     //Calculating and sustracting pileup
-    std::vector<float> pileup_rho;
-    pileup_rho = m_jFEXPileupAndNoiseTool->CalculatePileup();
+    const std::vector<int> pileup_rho = m_jFEXPileupAndNoiseTool->CalculatePileup();
 
-    //NOT Applying pileup sustraction on jet or met - this sets the flags to false in m_jFEXPileupAndNoiseTool
-    m_jFEXPileupAndNoiseTool->ApplyPileup2Jets(false);
-    m_jFEXPileupAndNoiseTool->ApplyPileup2Met(false);
+    //From the DB
+    ATH_CHECK(m_jFEXPileupAndNoiseTool->ApplyPileup());
     
     //Noise should be always applied
     m_jFEXPileupAndNoiseTool->ApplyNoise2Jets(true);
@@ -185,7 +183,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         int hemisphere = m_id == 0 ? 1 : -1;
         
         if(m_jfexid > 0 && m_jfexid < 5) {
-
+            
             //-----------------jFEXsumETAlgo-----------------
             m_jFEXsumETAlgoTool->setup(m_jTowersIDs_Thin);
             m_jFEXsumETAlgoTool->buildBarrelSumET();
@@ -195,6 +193,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_jFEXmetAlgoTool->buildBarrelmet();
         }
         else if(m_jfexid == 0 ) {
+            
             int flipped_jTowersIDs      [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width] = {{0}};
             int max_phi_it = FEXAlgoSpaceDefs::jFEX_algoSpace_height-1;
             int max_eta_it = FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width-1;
@@ -212,6 +211,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_jFEXmetAlgoTool->buildFWDmet();
         }
         else if(m_jfexid == 5) {
+            
             //-----------------jFEXsumETAlgo-----------------
             m_jFEXsumETAlgoTool->setup(m_jTowersIDs_Wide);
             m_jFEXsumETAlgoTool->buildFWDSumET();

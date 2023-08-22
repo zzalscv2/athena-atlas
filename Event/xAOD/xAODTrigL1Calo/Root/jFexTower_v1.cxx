@@ -132,4 +132,14 @@ bool jFexTower_v1::isCore() const{
     return (module() == cal_jfex and fpga() == cal_fpga);
 }
 
+int jFexTower_v1::OnlineID() const{
+    int channelID = globalPhi() | ((0x80 + globalEta()) << 8);
+    return channelID;
+}
+
+int jFexTower_v1::OfflineID() const{
+    return jFEXtowerID();
+}
+
+
 } // namespace xAOD
