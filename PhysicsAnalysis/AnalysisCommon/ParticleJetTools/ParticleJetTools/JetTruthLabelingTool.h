@@ -73,7 +73,6 @@ protected:
 
   struct DecorHandles {
     DecorHandles (const JetTruthLabelingTool& tool, const EventContext& ctx);
-    SG::ReadDecorHandle<xAOD::JetContainer, int> nbReadHandle;
 
     using IntHandle_t = SG::WriteDecorHandle<xAOD::JetContainer, int>;
     using IntHandleOp_t = std::optional<IntHandle_t>;
@@ -158,7 +157,6 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_H_truthKey{this, "dR_H_TruthKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_dR_Top_truthKey{this, "dR_Top_TruthKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_NB_truthKey{this, "NB_TruthKey", "", "Do not configure manually!"};
-  SG::ReadDecorHandleKey<xAOD::JetContainer> m_NB_truthReadKey{this, "NB_TruthReadKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split12_truthKey{this, "Split12_TruthKey", "", "Do not configure manually!"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_split23_truthKey{this, "Split23_TruthKey", "", "Do not configure manually!"};
 

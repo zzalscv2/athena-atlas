@@ -78,7 +78,6 @@ StatusCode JetTruthLabelingTool::initialize(){
   m_dR_H_truthKey    = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_dR_H";
   m_dR_Top_truthKey  = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_dR_Top";
   m_NB_truthKey      = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_NB";
-  m_NB_truthReadKey  = m_truthJetCollectionName.key() + "." + m_truthLabelName + "_NB";
   m_split12_truthKey = m_truthJetCollectionName.key() + ".Split12";
   m_split23_truthKey = m_truthJetCollectionName.key() + ".Split23";
 
@@ -107,7 +106,6 @@ StatusCode JetTruthLabelingTool::initialize(){
   ATH_CHECK(m_dR_H_truthKey.initialize(m_useDRMatch));
   ATH_CHECK(m_dR_Top_truthKey.initialize(m_useDRMatch));
   ATH_CHECK(m_NB_truthKey.initialize());
-  ATH_CHECK(m_NB_truthReadKey.initialize());
   
   ATH_CHECK(m_split12_truthKey.initialize(m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" || m_truthLabelName == "R10TruthLabel_R22v1"));
   ATH_CHECK(m_split23_truthKey.initialize(m_truthLabelName == "R10TruthLabel_R21Precision" || m_truthLabelName == "R10TruthLabel_R21Precision_2022v1" || m_truthLabelName == "R10TruthLabel_R22v1"));
@@ -161,7 +159,6 @@ void JetTruthLabelingTool::print() const {
 
 JetTruthLabelingTool::DecorHandles::DecorHandles
   (const JetTruthLabelingTool& tool, const EventContext& ctx)
-    : nbReadHandle (tool.m_NB_truthReadKey, ctx)
 {
   auto maybeInit = [&] (auto& h,
                         const SG::WriteDecorHandleKey<xAOD::JetContainer>& k)
@@ -305,6 +302,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
                                                const EventContext& ctx) const {
 
   SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName, ctx);
+  const SG::AuxElement::Decorator<int> nbDecor (m_truthLabelName + "_NB");
   for(const xAOD::Jet *jet : jets) {
 
     /// Get parent ungroomed reco jet for matching
@@ -371,7 +369,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
         if(split12Handle.isAvailable()) truthJetSplit12 = split12Handle(*matchTruthJet);
       }
-      if(dh.nbHandle->isAvailable()) truthJetNB = dh.nbReadHandle(*matchTruthJet);
+      if(nbDecor.isAvailable(*matchTruthJet)) truthJetNB = nbDecor (*matchTruthJet);
       truthJetMass = matchTruthJet->m();
       truthJetPt = matchTruthJet->pt();
     }
