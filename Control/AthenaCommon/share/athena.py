@@ -11,14 +11,14 @@ export USETCMALLOC=0
 export USEIMF=0
 export USEEXCTRACE=0
 USECA=0
-otherargs=""
+otherargs=()
 # but use tcmalloc by default if TCMALLOCDIR is defined
 if [ -n "$TCMALLOCDIR" ]; then
     export USETCMALLOC=1
 fi
 
 # parse command line arguments
-for a in ${@}
+for a in "$@"
 do
     case "$a" in
         --leak-check*)   USETCMALLOC=0;;
@@ -31,7 +31,7 @@ do
         --preloadlib*)     export ATHENA_ADD_PRELOAD=${a#*=};;
         --drop-and-reload) ATHENA_DROP_RELOAD=1;;
         --CA)              USECA=1;;
-        *)               otherargs="$otherargs $a";;
+        *)               otherargs+=("$a");;
     esac
 done
 
@@ -42,7 +42,7 @@ source `which athena_preload.sh `
 
 if [ $USECA -eq 1 ] 
 then
-    source `which ThinCAWrapper.sh` 
+    source `which ThinCAWrapper.sh` "${otherargs[@]}"
     exit 0
 fi
 

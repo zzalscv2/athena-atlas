@@ -56,7 +56,7 @@ class TrigEgammaMonAlgBuilder:
  
 
 
-  def __init__(self, helper, runflag, emulator=None, 
+  def __init__(self, helper, runflag, moniAccess, emulator=None, 
                                       derivation=False,
                                       detailedHistograms = False,
                                       basePath = 'HLT/EgammaMon'):
@@ -69,6 +69,7 @@ class TrigEgammaMonAlgBuilder:
     self.emulator = emulator
     self.basePath = basePath
     self.detailedHistograms = detailedHistograms 
+    self.moniAccess = moniAccess
     self.configureMode()
     
 
@@ -81,7 +82,7 @@ class TrigEgammaMonAlgBuilder:
     if not self.get_monitoring_mode():
       self.__logger.warning("Error getting monitoring mode, default monitoring lists will be used.")
     else:
-      self.__logger.info("Configuring for %s", self.data_type)
+      self.__logger.info("TrigEgammaMonitoring: Configuring for %s", self.data_type)
 
     # Since we load the tools by name below 
     # Need to ensure the correct tools are configured 
@@ -104,11 +105,10 @@ class TrigEgammaMonAlgBuilder:
       self.activate_electron=True
       self.activate_photon=True
 
- 
-
   #
   # Configure everything
   #
+
   def configure(self):
     self.setProperties()
     self.configureMonitor()
@@ -164,42 +164,48 @@ class TrigEgammaMonAlgBuilder:
 
 
 
-
-
   def setDefaultProperties(self):
    
-    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import monitoring_bootstrap, monitoring_photon, monitoring_electron, monitoringTP_electron, monitoring_topo, validation_photon , validation_electron, validationTP_electron, validation_jpsi, validationTP_jpsiee, monitoring_tags, validationTP_electron_eEM, monitoring_photon_cosmic, monitoring_electron_cosmic, monitoring_bootstrap_cosmic, monitoring_photon_hi, monitoring_electron_hi, monitoring_bootstrap_hi, validationTP_electron_DNN
+    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import mongroupsCfg
+    mongroups = mongroupsCfg(self.moniAccess,self.data_type)
     
     if self.pp_mode:
-        self.electronList = monitoring_electron
-        self.photonList   = monitoring_photon
-        self.bootstrapMap = monitoring_bootstrap
-        self.tpList       = monitoringTP_electron + validationTP_electron_eEM + validationTP_electron_DNN
-        self.tagItems     = monitoring_tags 
-        self.topoList     = monitoring_topo
+        self.electronList = mongroups['monitoring_electron']
+        self.photonList   = mongroups['monitoring_photon']
+        self.bootstrapMap = mongroups['monitoring_bootstrap']
+        self.tpList       = mongroups['monitoringTP_electron'] + mongroups['validationTP_electron_eEM'] 
+        self.tagItems     = mongroups['monitoring_tags'] 
+        self.topoList     = mongroups['monitoring_topo']
     elif self.mc_mode:
-        self.electronList = validation_electron # + validation_Zee (no T&P chains yet)
-        self.photonList   = validation_photon
-        self.bootstrapMap = monitoring_bootstrap
-        self.tpList       = validationTP_electron + validationTP_electron_eEM + validationTP_electron_DNN
-        self.jpsiList     = validation_jpsi
-        self.jpsitagItems = validationTP_jpsiee
-        self.tagItems     = monitoring_tags
-        self.topoList     = monitoring_topo
+        self.electronList = mongroups['validation_electron'] 
+        self.photonList   = mongroups['validation_photon']
+        self.bootstrapMap = mongroups['monitoring_bootstrap']
+        self.tpList       = mongroups['monitoringTP_electron'] + mongroups['validationTP_electron_eEM'] 
+        self.jpsiList     = mongroups['validation_jpsi']
+        self.jpsitagItems = mongroups['validationTP_jpsiee']
+        self.tagItems     = mongroups['monitoring_tags']
+        self.topoList     = mongroups['monitoring_topo']
     elif self.cosmic_mode:
-        self.electronList = monitoring_electron_cosmic 
-        self.photonList   = monitoring_photon_cosmic
-        self.bootstrapMap = monitoring_bootstrap_cosmic
+        self.electronList = mongroups['monitoring_electron_cosmic'] 
+        self.photonList   = mongroups['monitoring_photon_cosmic']
+        self.bootstrapMap = mongroups['monitoring_bootstrap_cosmic']
     elif self.HI_mode or self.pPb_mode:
-        self.electronList = monitoring_electron_hi
-        self.photonList   = monitoring_photon_hi
-        self.bootstrapMap = monitoring_bootstrap_hi
-
+        self.electronList = mongroups['monitoring_electron_hi']
+        self.photonList   = mongroups['monitoring_photon_hi']
+        self.bootstrapMap = mongroups['monitoring_bootstrap_hi']
+    else:
+        self.electronList = mongroups['monitoring_electron']
+        self.photonList   = mongroups['monitoring_photon']
+        self.bootstrapMap = mongroups['monitoring_bootstrap']
+        self.tpList       = mongroups['monitoringTP_electron'] + mongroups['validationTP_electron_eEM'] + mongroups['validationTP_electron_DNN']
+        self.tagItems     = mongroups['monitoring_tags'] 
+        self.topoList     = mongroups['monitoring_topo']
 
 
   #
   # Create all monitor algorithms
   #
+
   def configureMonitor( self ):
    
     acc = self.helper.resobj
@@ -250,7 +256,6 @@ class TrigEgammaMonAlgBuilder:
        raise RuntimeError( '2022 (Run 3) configuration not available yet' )
 
 
-  
     elif self.runFlag == '2018':
       # cut based
       LooseElectronSelector.ConfigFile  = "ElectronPhotonSelectorTools/offline/mc15_20150712/ElectronIsEMLooseSelectorCutDefs.conf"
@@ -809,7 +814,7 @@ class TrigEgammaMonAlgBuilder:
 
   def bookInefficiencies(self, monAlg, trigger):
     
-    monGroup = self.addGroup( monAlg, trigger+'_Inefficiency', self.basePath+'/Expert/'+trigger+'/Inefficiency' )
+    monGroup = self.addGroup( monAlg, trigger+'_Inefficiency', self.basePath+'/Expert/Inefficiency/'+trigger)
     levelLabels = ["L1Calo","L2Calo","L2","EFCalo","HLT"]
     monGroup.defineHistogram("InefficiencyCounts", type='TH1F', path='', title="Inefficiency; Steps ; Count",xbins=len(levelLabels), xmin=0, xmax=len(levelLabels), xlabels=levelLabels)
     

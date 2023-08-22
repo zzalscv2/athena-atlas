@@ -42,6 +42,7 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
         TIDAminbias(  flags, key, toolkey, tools, monlevel, mcTruth )
         TIDAcosmic(   flags, key, toolkey, tools, monlevel, mcTruth )
         TIDAbphys(    flags, key, toolkey, tools, monlevel, mcTruth )
+        TIDAutt(      flags, key, toolkey, tools, monlevel, mcTruth )
 
         return tools
 
@@ -439,6 +440,39 @@ def TIDAbphys( flags, key, toolkey, tools, monlevel, mcTruth ) :
                 tidabphysics.MonTools = createMonTools( flags,  tidabphysics.SliceTag, chains )
 
                 tools += [ tidabphysics ]
+
+
+
+
+def TIDAutt( flags, key, toolkey, tools, monlevel, mcTruth ) :
+
+        #### UTT ####
+
+        if mcTruth:
+                tidautt = TrigR3Mon_builder( flags, name = "IDBjetTruth"+toolkey+"Tool", mcTruth=True )
+                tidautt.SliceTag = "HLT/TRIDT/UTT/"+key
+        else:
+                tidautt = TrigR3Mon_builder( flags, name = "IDBjet"+toolkey+"Tool" )
+                tidautt.SliceTag = "HLT/TRIDT/UTT/"+key
+
+        tidautt.AnalysisConfig = "Tier0"
+        
+        from TrigInDetMonitoring.TIDAChains import getchains
+        
+        chains = getchains( flags, 
+                            [ "HLT_j180_.*dispjet.*_L1J100:key=HLT_IDTrack_DJLRT_FTF" ], monlevel )
+
+        if len(chains)>0 : 
+                        
+                tidautt.ntupleChainNames += chains
+
+                tidautt.MonTools = createMonTools( flags,  tidautt.SliceTag, chains )
+                
+                tools += [ tidautt ]
+
+
+
+
 
 
 

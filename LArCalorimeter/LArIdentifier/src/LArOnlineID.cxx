@@ -757,5 +757,13 @@ int LArOnlineID::init_H6Hashes(void)
   return (0);
 }
 
-
-
+bool LArOnlineID::isHECchannel(const HWIdentifier id) const
+/*========================================================*/
+{
+   int ft = feedthrough(id);
+   return ( barrel_ec(id)==1 
+        && 
+        ( ft==3 || ft==10 || ft==16 || ft==22 )
+        &&
+        slot(id) > 2 );
+}

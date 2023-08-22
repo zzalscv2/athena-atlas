@@ -26,6 +26,8 @@ def fromRunArgs(runArgs):
     flags.LArShapeDump.outputNtup=runArgs.outputNTUP_SAMPLESMONFile
 
     #protection for LArPEB event:
+    flags.Trigger.triggerConfig = 'DB'
+    flags.Trigger.L1.doCTP = True
     flags.Trigger.L1.doMuon=False
     flags.Trigger.L1.doCalo=False
     flags.Trigger.L1.doTopo=False

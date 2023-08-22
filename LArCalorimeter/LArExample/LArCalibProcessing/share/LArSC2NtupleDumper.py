@@ -40,6 +40,7 @@ if __name__=='__main__':
   parser.add_argument('-w','--addROD', dest='rod', default=False, help='Add ROD energies sum to output ntuple', type=bool)
   parser.add_argument('-v','--addEvTree', dest='evtree', default=False, help='Add tree with per event info to output ntuple', type=bool)
   parser.add_argument('-q','--addNoisyRO', dest='noisyRO', default=False, help='Add reco and info from LArNoisyROSummary to output ntuple', type=bool)
+  parser.add_argument('--addTT', dest='TT', default=False, help='Add info from LArTriggerTowers to output ntuple', type=bool)
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -143,9 +144,19 @@ if __name__=='__main__':
      flags.Trigger.L1.doTopo = False
 
      flags.Trigger.enableL1CaloLegacy = True
-     flags.Trigger.enableL1CaloPhase1 = True
+     flags.Trigger.enableL1CaloPhase1 = False
+
+  if args.TT:   
+     flags.Trigger.L1.doCalo = True
+     flags.Trigger.triggerConfig = 'DB'
 
   flags.LArSCDump.fillNoisyRO=args.noisyRO
+  # in case stores needs to be debugged:
+  #from AthenaCommon.Constants import DEBUG
+  #flags.Exec.OutputLevel=DEBUG
+  #flags.Debug.DumpCondStore=True
+  #flags.Debug.DumpDetStore=True
+  #flags.Debug.DumpEvtStore=True
 
   flags.lock()
 
@@ -186,7 +197,7 @@ if __name__=='__main__':
                             FillRODEnergy = flags.LArSCDump.doRawChan,
                             FillLB=args.evtree, FillTriggerType = args.evtree,
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
-                            TrigDecisionTool=tdt,
+                            TrigDecisionTool=tdt, FillTriggerTowers = args.TT,
                             OutputLevel=args.olevel
                            ))
   # ROOT file writing

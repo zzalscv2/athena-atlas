@@ -20,12 +20,9 @@ def LArNoiseCfg(flags):
     result.merge(LArOnOffIdMappingCfg(flags))
     # setup bad chan and missing febs
     from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg,LArBadFebCfg
-    LArBadChannelCfg(flags)
-    LArBadFebCfg(flags)
+    result.merge(LArBadChannelCfg(flags))
+    result.merge(LArBadFebCfg(flags))
 
-    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    result.merge(BunchCrossingCondAlgCfg(flags))
-    
     from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
     result.merge(LArCollisionTimeCfg(flags))
 

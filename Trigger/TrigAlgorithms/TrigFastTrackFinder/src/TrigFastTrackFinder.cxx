@@ -1672,10 +1672,10 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
    ATH_MSG_VERBOSE("========== in finddEdxTrk ==========");
 
 
-   const float  TRKCUT_PTGEV_LOOSE  =  3.0;
-   const float  TRKCUT_PTGEV_TIGHT  = 10.0;
-   const float  TRKCUT_DEDX_LOOSE   =  1.25;
-   const float  TRKCUT_DEDX_TIGHT   =  1.55;
+   static constexpr float TRKCUT_PTGEV_LOOSE  =  3.0;
+   static constexpr float TRKCUT_PTGEV_TIGHT  = 10.0;
+   static constexpr float TRKCUT_DEDX_LOOSE   =  1.25;
+   static constexpr float TRKCUT_DEDX_TIGHT   =  1.55;
 
    for (const auto& track: outputTracks) {
 
@@ -1689,7 +1689,7 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
       i_track++;
 
       trackInfo theTrackInfo;
-      bool igt = FTF::isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y);
+      bool igt = FTF::isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y, TRKCUT_PTGEV_LOOSE);
       if (not igt) {continue;}
 
       ATH_MSG_VERBOSE("calculate dEdx -->");
@@ -1710,7 +1710,7 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
       xAOD::TrigComposite *dEdxTrk = new xAOD::TrigComposite();
       dEdxTrkContainer->push_back(dEdxTrk);
       dEdxTrk->setDetail<int>  ("dEdxTrk_id",     i_track);
-      dEdxTrk->setDetail<float>("dEdxTrk_pt",     theTrackInfo.ptGeV/1000);
+      dEdxTrk->setDetail<float>("dEdxTrk_pt",     theTrackInfo.ptGeV*Gaudi::Units::GeV);
       dEdxTrk->setDetail<float>("dEdxTrk_eta",    theTrackInfo.eta);
       dEdxTrk->setDetail<float>("dEdxTrk_phi",    theTrackInfo.phi0);
       dEdxTrk->setDetail<float>("dEdxTrk_a0beam", theTrackInfo.a0beam);

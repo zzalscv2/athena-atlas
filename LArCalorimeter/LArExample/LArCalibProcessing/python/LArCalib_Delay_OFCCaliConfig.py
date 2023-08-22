@@ -177,8 +177,10 @@ def LArDelay_OFCCaliCfg(flags):
         result.addEventAlgo(CompFactory.LArCaliWaves2Ntuple(KeyList = ["LArCaliWave",],
                                                             NtupleName  = "CALIWAVE",
                                                             AddFEBTempInfo = False,
+                                                            RealGeometry = True,
                                                             SaveDerivedInfo = True,
                                                             ApplyCorrection = True,
+                                                            isSC = flags.LArCalib.isSC,
                                                             BadChanKey = bcKey,
                                                             OffId=True,
                                                             SaveJitter=True

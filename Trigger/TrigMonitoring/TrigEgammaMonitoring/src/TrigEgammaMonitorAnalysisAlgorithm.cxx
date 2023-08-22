@@ -355,15 +355,15 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillInefficiency( const std::string &pi
         }
         if(pid){
             if(!isPassedL1Calo){
-                fillLabel(monGroup, "InneficiencyCounts", "L1Calo"  );
+                fillLabel(monGroup, "InefficiencyCounts", "L1Calo"  );
             }if(!isPassedL2Calo){
-                fillLabel(monGroup, "InneficiencyCounts", "L2Calo"  );
+                fillLabel(monGroup, "InefficiencyCounts", "L2Calo"  );
             }if(!isPassedL2){
-                fillLabel(monGroup, "InneficiencyCounts", "L2"      );
+                fillLabel(monGroup, "InefficiencyCounts", "L2"      );
             }if(!isPassedEFCalo){
-                fillLabel(monGroup, "InneficiencyCounts", "EFCalo"  );
+                fillLabel(monGroup, "InefficiencyCounts", "EFCalo"  );
             }if(!isPassedHLT){
-                fillLabel(monGroup, "InneficiencyCounts", "HLT"     );
+                fillLabel(monGroup, "InefficiencyCounts", "HLT"     );
             }
         }
       iObj++;

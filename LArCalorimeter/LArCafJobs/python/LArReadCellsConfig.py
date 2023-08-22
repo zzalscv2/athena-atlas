@@ -12,6 +12,12 @@ def LArReadCellsCfg(flags):
     result.merge(CaloRecoCfg(flags))
     result.getEventAlgo("LArRawChannelBuilder").TimingContainerKey="LArOFIterResult"
     
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
+    result.merge(L1TriggerByteStreamDecoderCfg(flags))
+
+    from LArCafJobs.LArSCDumperSkeleton import L1CaloMenuCfg
+    result.merge(L1CaloMenuCfg(flags))
+
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
     result.merge(BunchCrossingCondAlgCfg(flags))
     

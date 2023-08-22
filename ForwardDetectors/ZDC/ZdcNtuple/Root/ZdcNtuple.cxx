@@ -619,28 +619,30 @@ void ZdcNtuple::processZdcNtupleFromModules()
         if (enableOutputSamples)
           {
             for (unsigned int isamp = 0; isamp < nsamplesZdc; isamp++) // 7 samples
-        {
-          if (nsamplesZdc == 7)
-      {
-        t_raw7[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-        t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
-      }
-          
-          if (nsamplesZdc == 15)
-      {
-        t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-        t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
-      }
-
-          if (nsamplesZdc == 24)
-      {
-        t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-        t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
-      }
-        }
+	      {
+		if (nsamplesZdc == 7)
+		  {
+		    t_raw7[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d0Data")).at(isamp);
+		    t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d0Data")).at(isamp);
+		    t_raw7[iside][imod][0][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d1Data")).at(isamp);
+		    t_raw7[iside][imod][1][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d1Data")).at(isamp);
+		  }
+		
+		if (nsamplesZdc == 15)
+		  {
+		    t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
+		    t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+		  }
+		
+		if (nsamplesZdc == 24)
+		  {
+	      t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
+	      t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+		  }
+	      }
           }
-
-      } else if (zdcMod->zdcType() == 1) {
+	
+      } else if (zdcMod->zdcType() == 1 && nsamplesZdc == 24) {
         // this is the RPD
         t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
         t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);

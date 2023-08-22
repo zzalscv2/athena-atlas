@@ -2,11 +2,13 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "ZdcTrigValid/ZdcTrigValidTool.h"
+#include "ZdcAnalysis/ZdcTrigValidTool.h"
 #include "PathResolver/PathResolver.h"
 #include <fstream>
 #include <bitset>
 #include <stdexcept>
+#include "AsgDataHandles/ReadDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 using json = nlohmann::json;
 
@@ -17,7 +19,7 @@ ZdcTrigValidTool::ZdcTrigValidTool(const std::string& name)
  {
   
 #ifndef XAOD_STANDALONE
-  declareInterface<IZdcTrigValidTool>(this);
+  declareInterface<IZdcAnalysisTool>(this);
 #endif
   declareProperty("Message", m_msg = "");
   declareProperty("WriteAux", m_writeAux = true);
@@ -64,31 +66,36 @@ StatusCode ZdcTrigValidTool::initialize() {
   m_modInputs_p = std::make_shared<ZDCTriggerSim::ModuleAmplInputsFloat>(ZDCTriggerSim::ModuleAmplInputsFloat());
   m_simTrig = std::make_shared<ZDCTriggerSimModuleAmpls>(ZDCTriggerSimModuleAmpls(sideALUT, sideCLUT, combLUT));
   ATH_MSG_INFO(m_name<<" Initialised");
-  
+
+  m_zdcModuleMaxADC = "ZdcModules.MaxADC"+m_auxSuffix;
+  ATH_CHECK(m_zdcModuleMaxADC.initialize());
+  m_trigValStatus = "ZdcSums.TrigValStatus"+m_auxSuffix;
+  ATH_CHECK(m_trigValStatus.initialize());
+
   return StatusCode::SUCCESS;
   
 }
 
 
-StatusCode ZdcTrigValidTool::addTrigStatus(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer)
+StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer)
 { 
   std::vector<float> moduleEnergy = {0., 0., 0., 0., 0., 0., 0., 0.};
-  
+
+  SG::ReadDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+
   bool trigMatch = false;
   for (const auto zdcModule : moduleContainer) {
     if (zdcModule->zdcType() == 1) continue;
     
     // Side A
     if (zdcModule->zdcSide() > 0) {
-      moduleEnergy.at(zdcModule->zdcModule()) =
-          zdcModule->auxdataConst<float>("Amplitude" + m_auxSuffix);
+      moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleMaxADC(*zdcModule);
     }
-
-       // Side C
-        if (zdcModule->zdcSide() < 0) {
-      moduleEnergy.at(zdcModule->zdcModule() + 4) =
-          zdcModule->auxdataConst<float>("Amplitude" + m_auxSuffix);
-        }
+    
+    // Side C
+    if (zdcModule->zdcSide() < 0) {
+      moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleMaxADC(*zdcModule);
+    }
   } 
   // Get Output as an integer (0-7)
   m_modInputs_p->setData(moduleEnergy);
@@ -118,15 +125,15 @@ StatusCode ZdcTrigValidTool::addTrigStatus(const xAOD::ZdcModuleContainer& modul
       if (bin[m_triggerMap[trig]] == 1 )
         trigMatch = true;
     }
+  
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> trigValStatus(m_trigValStatus);
 
-// write 1 if decision from ZDC firmware matches CTP, 0 otherwize  
-for(const auto zdc_sum : moduleSumContainer){
-  if(m_writeAux) 
-    zdc_sum->auxdecor<unsigned int>("TrigValStatus"+m_auxSuffix) = trigMatch;
-   }
+  // write 1 if decision from ZDC firmware matches CTP, 0 otherwize  
+  for(const auto zdc_sum : moduleSumContainer){
+    if(m_writeAux) trigValStatus(*zdc_sum) = trigMatch;
+  }
 
-ATH_MSG_DEBUG("ZDC Trigger Status: "
-                 << trigMatch);
+  ATH_MSG_DEBUG("ZDC Trigger Status: "  << trigMatch);
 
 return StatusCode::SUCCESS;
 }

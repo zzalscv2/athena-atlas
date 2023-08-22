@@ -45,11 +45,9 @@ StatusCode LVL1::jFEXSmallRJetAlgo::safetyTest(){
   SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
 
   if(! jTowerContainer.isValid()){
-    ATH_MSG_FATAL("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
-
+    ATH_MSG_ERROR("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
     return StatusCode::FAILURE;
   }
-  
   return StatusCode::SUCCESS;
 }
 

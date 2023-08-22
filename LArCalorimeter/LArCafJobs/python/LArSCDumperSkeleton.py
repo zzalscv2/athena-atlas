@@ -122,6 +122,9 @@ def fromRunArgs(runArgs):
        cfg.merge(LArBadChannelCfg(flags))
        cfg.merge(LArBadFebCfg(flags))
 
+    from LArCellRec.LArTimeVetoAlgConfig import LArTimeVetoAlgCfg
+    cfg.merge(LArTimeVetoAlgCfg(flags))
+
     cfg.merge(LArSC2NtupleCfg(flags, AddBadChannelInfo=flags.LArSCDump.doBC, AddFEBTempInfo=False, isSC=True, isFlat=False,
                             OffId=flags.LArSCDump.doOfflineId, AddHash=flags.LArSCDump.doHash, AddCalib=flags.LArSCDump.doCalib, RealGeometry=flags.LArSCDump.doGeom, ExpandId=flags.LArSCDump.expandId, # from LArCond2NtupleBase 
                             NSamples=flags.LArSCDump.nSamples, FTlist={}, FillBCID=flags.LArSCDump.doBCID, ContainerKey=flags.LArSCDump.digitsKey,  # from LArDigits2Ntuple

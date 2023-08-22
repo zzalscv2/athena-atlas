@@ -61,7 +61,6 @@ LArHECNoise::LArHECNoise(const std::string& name,
   : AthAlgorithm(name, pSvcLocator),
     m_thistSvc(0),
     m_tree(0),
-    m_trigDec( "Trig::TrigDecisionTool/TrigDecisionTool" ),
     m_LArOnlineIDHelper(0),
     m_calocell_id(nullptr),
     m_nt_run(0),
@@ -95,7 +94,6 @@ LArHECNoise::LArHECNoise(const std::string& name,
  {
 
    // Trigger
-   declareProperty( "TrigDecisionTool", m_trigDec );
    
    /** switches to control the analysis through job options */
    
@@ -117,7 +115,7 @@ StatusCode LArHECNoise::initialize() {
   ATH_MSG_DEBUG ( "Initializing LArHECNoise" );
  
   // Trigger Decision Tool
-  ATH_CHECK(m_trigDec.retrieve());
+  CHECK(m_trigDec.retrieve());
   
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_pedKey.initialize() );

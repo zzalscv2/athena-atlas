@@ -41,62 +41,14 @@ class _modifier:
 # Detector maps and conditions
 ###############################################################
 
-class SolenoidOff(_modifier):
-    """
-    Turn solenoid field OFF
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AlgSequence import AthSequencer
-        condSeq = AthSequencer("AthCondSeq")
-        condSeq.AtlasFieldMapCondAlg.MapSoleCurrent = 0
-
-class ToroidsOff(_modifier):
-    """
-    Turn toroid fields OFF
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AlgSequence import AthSequencer
-        condSeq = AthSequencer("AthCondSeq")
-        condSeq.AtlasFieldMapCondAlg.MapToroCurrent = 0
-
 class forceConditions(_modifier):
     """
     Force all conditions (except prescales) to match run from input file
     """
     def postSetup(self, flags):
-        # Do not override these folders:
-        ignore = ['/TRIGGER/HLT/PrescaleKey']   # see ATR-22143
-
-        # All time-based folders (from IOVDbSvc DEBUG message, see athena!38274)
-        timebased = ['/TDAQ/OLC/CALIBRATIONS',
-                     '/TDAQ/Resources/ATLAS/SCT/Robins',
-                     '/SCT/DAQ/Config/ChipSlim',
-                     '/SCT/DAQ/Config/Geog',
-                     '/SCT/DAQ/Config/MUR',
-                     '/SCT/DAQ/Config/Module',
-                     '/SCT/DAQ/Config/ROD',
-                     '/SCT/DAQ/Config/RODMUR',
-                     '/SCT/HLT/DCS/HV',
-                     '/SCT/HLT/DCS/MODTEMP',
-                     '/MUONALIGN/Onl/MDT/BARREL',
-                     '/MUONALIGN/Onl/MDT/ENDCAP/SIDEA',
-                     '/MUONALIGN/Onl/MDT/ENDCAP/SIDEC',
-                     '/MUONALIGN/Onl/TGC/SIDEA',
-                     '/MUONALIGN/Onl/TGC/SIDEC']
-
+        from TriggerJobOpts import PostExec
         assert _run_number and _lb_number, f'Run or LB number is undefined ({_run_number}, {_lb_number})'
-
-        from TrigCommon.AthHLT import get_sor_params
-        sor = get_sor_params(_run_number)
-        timestamp = sor['SORTime'] // int(1e9)
-
-        for i,f in enumerate(svcMgr.IOVDbSvc.Folders):
-            if any(name in f for name in ignore):
-                continue
-            if any(name in f for name in timebased):
-                svcMgr.IOVDbSvc.Folders[i] += f'<forceTimestamp>{timestamp:d}</forceTimestamp>'
-            else:
-                svcMgr.IOVDbSvc.Folders[i] += f'<forceRunNumber>{_run_number:d}</forceRunNumber> <forceLumiblockNumber>{_lb_number:d}</forceLumiblockNumber>'
+        PostExec.forceConditions(_run_number, _lb_number, svcMgr.IOVDbSvc)
 
 
 ###############################################################
@@ -107,8 +59,6 @@ class rewriteLVL1(_modifier):
     """
     Write LVL1 results to ByteStream output, usually used together with rerunLVL1
     """
-    # Example:
-    # athenaHLT -c "setMenu='PhysicsP1_pp_run3_v1';rerunLVL1=True;rewriteLVL1=True;" --filesInput=input.data TriggerJobOpts/runHLT_standalone.py
 
     def preSetup(self, flags):
         log.warning('The rewriteLVL1 modifier is deprecated. LVL1 result writing is enabled by default '
@@ -157,22 +107,6 @@ class fpeAuditor(_modifier):
         theApp.AuditTools = True
         svcMgr.AuditorSvc += CfgMgr.FPEAuditor()
         svcMgr.AuditorSvc.FPEAuditor.NStacktracesOnFPE=1
-
-
-class enableCountAlgoMiss(_modifier):
-    """
-    Enable monitoring of non-reentrant algorithms that scheduler is waiting for
-    """
-    def postSetup(self, flags):
-        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        svcMgr.AlgResourcePool.CountAlgorithmInstanceMisses=True
-
-class doValidation(_modifier):
-    """
-    Enable validation mode (e.g. extra histograms)
-    """
-    def preSetup(self, flags):
-        flags.Trigger.doValidationMonitoring = True
 
 
 class doRuntimeNaviVal(_modifier):

@@ -57,7 +57,7 @@ StatusCode LVL1::jFEXForwardJetsAlgo::initialize(){
 StatusCode LVL1::jFEXForwardJetsAlgo::safetyTest() {
     m_jTowerContainer = SG::ReadHandle<jTowerContainer>(m_jFEXForwardJetsAlgo_jTowerContainerKey);
     if(! m_jTowerContainer.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve jTowerContainer " << m_jFEXForwardJetsAlgo_jTowerContainerKey.key());
+        ATH_MSG_ERROR("Could not retrieve jTowerContainer " << m_jFEXForwardJetsAlgo_jTowerContainerKey.key());
 
         return StatusCode::FAILURE;
     }
@@ -195,7 +195,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     // Seed
                     auto it_seed_map = m_SeedRingMap.find(myTTIDKey);
                     if(it_seed_map == m_SeedRingMap.end()) {
-                        ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in Jet seed file.");
+                        ATH_MSG_ERROR("Could not find TT" << myTTIDKey << " in Jet seed file.");
                     }
                     
                     for(const auto& seedTT : it_seed_map->second){
@@ -206,7 +206,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     // 1st Energy Ring!
                     it_seed_map = m_1stRingMap.find(myTTIDKey);
                     if(it_seed_map == m_1stRingMap.end()) {
-                        ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in 1st Energy ring file.");
+                        ATH_MSG_ERROR("Could not find TT" << myTTIDKey << " in 1st Energy ring file.");
                     }
                     
                     for(const auto& firstER_TT : it_seed_map->second){
@@ -219,7 +219,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     // 2nd Energy Ring!
                     it_seed_map = m_2ndRingMap.find(myTTIDKey);
                     if(it_seed_map == m_2ndRingMap.end()) {
-                        ATH_MSG_FATAL("Could not find TT" << myTTIDKey << " in 2nd Energy ring file.");
+                        ATH_MSG_ERROR("Could not find TT" << myTTIDKey << " in 2nd Energy ring file.");
                     }
                     
                     for(const auto& secondER_TT : it_seed_map->second){
@@ -245,7 +245,7 @@ int LVL1::jFEXForwardJetsAlgo::SumEtSeed(unsigned int TTID) {
     // Exists the jTower in the mapping?
     auto it_seed_map = m_SeedRingMap.find(TTID);
     if(it_seed_map == m_SeedRingMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in Jet seed file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in Jet seed file.");
         return 0;
     }
     int summedEt = 0;
@@ -263,7 +263,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
     // Exists the jTower in the seach (greater than) tower map?
     auto it_seed_map = m_SearchGMap.find(TTID);
     if(it_seed_map == m_SearchGMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the seach (>) local maxima for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the seach (>) local maxima for jets file.");
         return false;
     }
 
@@ -285,7 +285,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLM(unsigned int TTID){
     // Exists the jTower in the seach (greater or equal than) tower map?
     it_seed_map = m_SearchGeMap.find(TTID);
     if(it_seed_map == m_SearchGeMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the seach (>=) local maxima for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the seach (>=) local maxima for jets file.");
         return false;
     }
 
@@ -311,7 +311,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_CorrMap.find(TTID);
     if(it_seed_map == m_CorrMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the correction (LM above) for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the correction (LM above) for jets file.");
         return false;
     }
     // If there is not Trigger tower to correct with, then return false
@@ -329,7 +329,7 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
 unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr(unsigned int TTID){
     auto it_seed_map = m_CorrMap.find(TTID);
     if(it_seed_map == m_CorrMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
         return 0;
     }    
     
@@ -341,13 +341,13 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_CorrMap.find(TTID);
     if(it_seed_map == m_CorrMap.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
         return false;
     }
     
     // If there is no TT to check then the Et of central is always bigger :D
     if( (it_seed_map->second).size() == 0){
-        ATH_MSG_FATAL("Elements=0 in condCorr function for element"<< TTID <<". This should never happend. REPORT IT!");
+        ATH_MSG_ERROR("Elements=0 in condCorr function for element"<< TTID <<". This should never happend. REPORT IT!");
         return true;
     }
     
@@ -369,7 +369,7 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr(unsigned int TTID){
 unsigned int LVL1::jFEXForwardJetsAlgo::elementsCorr2(unsigned int TTID){
     auto it_seed_map = m_Corr2Map.find(TTID);
     if(it_seed_map == m_Corr2Map.end()) {
-        ATH_MSG_FATAL("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
+        ATH_MSG_ERROR("Could not find TT" << TTID << " in the condition (greater than) for jets file.");
         return 0;
     }    
     
@@ -381,7 +381,7 @@ bool LVL1::jFEXForwardJetsAlgo::condCorr2(unsigned int TTID){
     // Exists the jTower in the correction tower map?
     auto it_seed_map = m_Corr2Map.find(TTID);
     if(it_seed_map == m_Corr2Map.end()) {
-         ATH_MSG_FATAL("Could not find TT" << TTID << " in the correction (greater or equal) file.");
+         ATH_MSG_ERROR("Could not find TT" << TTID << " in the correction (greater or equal) file.");
         return false;
     }
     
@@ -421,7 +421,7 @@ StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName,
     std::ifstream myfile(fileName);
     
     if ( !myfile.is_open() ){
-        ATH_MSG_FATAL("Could not open file:" << fileName);
+        ATH_MSG_ERROR("Could not open file:" << fileName);
         return StatusCode::FAILURE;
     }
     

@@ -6,25 +6,16 @@
 # Might be called from athena.py
 #
 
-
-#otherargs is set if we are sourced from inside athena.py
-#if not yet set, resort of reguar CL arguments 
-if [ -z ${otherargs+x} ]
-    then
-    otherargs=${@}
-fi
-
-
-#Separate the top-level python script (ending with .py) from 
+#Separate the top-level python script (ending with .py) from
 #arguments passed to that script 
-scriptargs=""
-for a in $otherargs
+scriptargs=()
+for a in "$@"
 do
     case "$a" in
 	--config-only*)  export PICKLECAFILE=${a#*=};;
 	*.py) topscriptfile=$a;;
 	*.pkl) picklefile=$a;;
-	*) scriptargs="$scriptargs $a";;
+	*) scriptargs+=("$a");;
     esac
 done
 
@@ -50,10 +41,10 @@ fi
 
 #Finally: Execute it!
 if [ -z "${picklefile}" ]; then
-    python $topscript $scriptargs
+    python $topscript "${scriptargs[@]}"
 else
     echo "Starting from pickle file $picklefile"
-    CARunner.py $picklefile $scriptargs
+    CARunner.py $picklefile "${scriptargs[@]}"
 fi
 status=$?
 

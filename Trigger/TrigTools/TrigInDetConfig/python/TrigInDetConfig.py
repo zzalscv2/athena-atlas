@@ -131,33 +131,14 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   from TrigInDetConfig.utils import getFlagsForActiveConfig
   flags = getFlagsForActiveConfig(inflags, signatureName, log)
 
-  from .InDetTrigCollectionKeys import TrigPixelKeys
   if in_view:
-    #TODO share setup with FTF
-
-    TRTRDOObject = ( 'TRT_RDO_Cache', InDetCacheNames.TRTRDOCacheKey )
-    # Make sure the required objects are still available at whole-event level
-    if flags.Input.isMC:
-        TRTRDOObject = ( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )
 
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetPrecision'+flags.Tracking.ActiveConfig.suffix,
                                                       DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                                                                    ('InDet::PixelClusterContainerCache', InDetCacheNames.Pixel_ClusterKey),
-                                                                    ('PixelRDO_Cache', InDetCacheNames.PixRDOCacheKey),
-                                                                    ('InDet::TRT_DriftCircleContainerCache', InDetCacheNames.TRT_DriftCircleCacheKey),
-                                                                    ('SCT_RDO_Cache', InDetCacheNames.SCTRDOCacheKey),
-                                                                    TRTRDOObject,
-                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCachePix),
-                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCacheSCT),
                                                                     ('TrigRoiDescriptorCollection', flags.Tracking.ActiveConfig.roi),
                                                                     ( 'TagInfo', 'DetectorStore+ProcessingTags' ), 
-                                                                    ( 'InDet::PixelGangedClusterAmbiguities' , TrigPixelKeys.PixelClusterAmbiguitiesMap),
                                                                     ( 'TrackCollection', flags.Tracking.ActiveConfig.trkTracks_FTF )] )
 
-    if flags.Input.Format is Format.BS:
-        verifier.DataObjects += [ ('IDCInDetBSErrContainer' , 'PixelByteStreamErrs'),
-                                  ('IDCInDetBSErrContainer_Cache', 'SctBSErrCache'),
-                                  ('IDCInDetBSErrContainer_Cache', 'SctFlaggedCondCache'), ]
     acc.addEventAlgo(verifier)
 
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence

@@ -42,10 +42,9 @@ StatusCode LVL1::jFEXmetAlgo::safetyTest() {
 
     m_jTowerContainer = SG::ReadHandle<jTowerContainer>(m_jTowerContainerKey);
     if(!m_jTowerContainer.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
+        ATH_MSG_ERROR("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
         return StatusCode::FAILURE;
     }
-
     return StatusCode::SUCCESS;
 }
 
@@ -177,7 +176,7 @@ void LVL1::jFEXmetAlgo::buildFWDmet()
             m_met[iphi]+=getTTowerET(m_FPGA_fcal[iphi][ieta]);
         }
         const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(m_FPGA_fcal[iphi][0]);
-        m_met_angle[iphi]=tmpTower->phi()*(M_PI/8) + M_PI/16;
+        m_met_angle[iphi]=(tmpTower->phi()/4)*(M_PI/8) + M_PI/16;
     }
     buildMetXComponent();
     buildMetYComponent();
