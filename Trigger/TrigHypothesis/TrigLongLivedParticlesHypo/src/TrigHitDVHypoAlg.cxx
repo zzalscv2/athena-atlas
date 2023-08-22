@@ -1204,7 +1204,9 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
    std::vector<float> v_dvtrk_a0beam;
    std::unordered_map<Identifier, int> umap_fittedTrack_identifier;
    int fittedTrack_id = -1;
-   
+
+   static constexpr float TRKCUT_PTGEV_HITDV = 0.5;
+
    for (const auto& track: tracks) {
       float shift_x = 0; float shift_y = 0;
       if(m_useBeamSpot) {
@@ -1212,7 +1214,7 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
         FTF::getBeamSpotShift(shift_x, shift_y, **beamSpotHandle);
       }
       trackInfo theTrackInfo;
-      bool igt = FTF::isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y);
+      bool igt = FTF::isGoodTrackUTT(track, theTrackInfo, shift_x, shift_y, TRKCUT_PTGEV_HITDV);
       if (not igt) {continue;}
 
       fittedTrack_id++;

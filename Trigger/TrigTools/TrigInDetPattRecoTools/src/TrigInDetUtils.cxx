@@ -1,14 +1,11 @@
 //utils.cxx
 #include "TrigInDetPattRecoTools/TrigInDetUtils.h"
 
-bool FTF::isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y) {
+bool FTF::isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y, float trkcut_ptgev) {
       static constexpr int   TRKCUT_N_HITS_INNER  = 1;
       static constexpr int   TRKCUT_N_HITS_PIX    = 2;
       static constexpr float TRKCUT_A0BEAM        = 2.5;
-      static constexpr float TRKCUT_PTGEV_LOOSE   = 3.0;
       static constexpr int   TRKCUT_N_HITS        = 4;
-
-      std::unordered_map<Identifier, int> umap_fittedTrack_identifier;
 
       if ( track->perigeeParameters()==nullptr ) return false;
       if ( track->trackSummary()==nullptr )  return false;
@@ -22,7 +19,7 @@ bool FTF::isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const
       if( (theTrackInfo.n_hits_pix+theTrackInfo.n_hits_sct) < TRKCUT_N_HITS ) return false;
       theTrackInfo.eta = track->perigeeParameters()->eta();
       theTrackInfo.ptGeV = track->perigeeParameters()->pT()/Gaudi::Units::GeV;
-      if( theTrackInfo.ptGeV < TRKCUT_PTGEV_LOOSE ) return false;
+      if( theTrackInfo.ptGeV < trkcut_ptgev ) return false;
       float a0 = track->perigeeParameters()->parameters()[Trk::d0];
       theTrackInfo.phi0 = track->perigeeParameters()->parameters()[Trk::phi0];
       theTrackInfo.a0beam = a0 + shift_x*sin(theTrackInfo.phi0)-shift_y*cos(theTrackInfo.phi0);
