@@ -6,6 +6,7 @@
 //
 
 #include <stdexcept>
+#include <map>
 
 #include <boost/functional/hash.hpp>
 

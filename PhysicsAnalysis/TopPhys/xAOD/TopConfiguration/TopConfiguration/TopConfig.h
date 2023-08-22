@@ -23,6 +23,7 @@
 #include <unordered_set>
 #include <iostream>
 #include <utility>
+#include <cstdint>
 
 // Systematic include(s):
 #include "PATInterfaces/SystematicSet.h"

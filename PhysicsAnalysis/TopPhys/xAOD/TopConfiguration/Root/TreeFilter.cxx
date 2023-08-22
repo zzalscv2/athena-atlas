@@ -8,6 +8,7 @@
 #include <iostream>
 #include <regex>
 #include <sstream>
+#include <iterator>
 
 namespace top {
   
