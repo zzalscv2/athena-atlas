@@ -52,7 +52,8 @@ class FastReductionAlgToolFactory:
             'clean': [CompFactory.TrigJetConditionConfig_clean, 0],
             'all': [CompFactory.TrigJetConditionConfig_acceptAll, 0],
             'timing': [CompFactory.TrigJetConditionConfig_timing, 0],
-            }
+            'timeSig': [CompFactory.TrigJetConditionConfig_timesig, 0],            
+        }
 
         for var in jetMoments:
             self.tool_factories['mom'+var] = [

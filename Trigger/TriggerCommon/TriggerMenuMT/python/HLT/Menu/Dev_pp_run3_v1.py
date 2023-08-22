@@ -379,6 +379,9 @@ def getDevSignatures():
         ChainProp(name='HLT_j0_HT850XX0eta240_pf_ftf_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'],  groups=DevGroup+MultiJetGroup+LegacyTopoGroup),
         ChainProp(name='HLT_j0_HT850XX0eta240_L1HT190-J15s5pETA21', l1SeedThresholds=['FSNOSEED'],  groups=DevGroup+MultiJetGroup+LegacyTopoGroup),
 
+        # ATR-28103 Test chains for delayed jets, based on significance of delay
+        ChainProp(name='HLT_3j45_j45_2timeSig_roiftf_presel4c35_L14J15p0ETA25', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup), 
+
         ### END PURE TEST CHAINS
 
         # ATR-24838 Large R L1J100 jet chains with jLJ L1 items (L1J100->L1jLJ140)
