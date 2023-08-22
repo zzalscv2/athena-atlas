@@ -48,6 +48,14 @@ def ZdcAnalysisToolCfg(flags, run, config="LHCf2022", DoCalib=False, DoTimeCalib
         LHCRun = run ))
     return acc
 
+def ZdcLEDAnalysisToolCfg(flags, config = 'PbPb2023'):
+    acc = ComponentAccumulator()
+
+    print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
+    acc.setPrivateTools(CompFactory.ZDC.ZdcLEDAnalysisTool(name = 'ZdcLEDAnalysisTool'+config, 
+                                                           Configuration = config))
+    return acc
+
 
 def ZdcTrigValToolCfg(flags, config = 'LHCf2022'):
     acc = ComponentAccumulator()
@@ -115,6 +123,7 @@ def ZdcRecRun3Cfg(flags):
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
+    config = 'ppPbPb2023'
     
     if flags.Input.ProjectName == "data22_13p6TeV":
         config = "LHCf2022"
@@ -128,15 +137,47 @@ def ZdcRecRun3Cfg(flags):
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
     acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
-
+    
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
     #trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
-    zdcTools = [] # expand list as needed
+    
+    zdcTools = []
     zdcTools += [anaTool] # add trigTool after deocration migration
     
     zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
     acc.addEventAlgo(zdcAlg, primary=True)
 
+    return acc
+    
+def ZdcLEDRecCfg(flags):
+
+    acc = ComponentAccumulator()
+    
+    if flags.Input.Format is Format.BS:
+        run = flags.GeoModel.Run
+        
+        # debugging message since the metadata isn't working for calibration files yet
+        print ("ZdcRecConfig.py: run = "+run.name)
+        
+        config = 'ppPbPb2023'
+
+        acc.merge(ByteStreamReadCfg(flags, type_names=['xAOD::TriggerTowerContainer/ZdcTriggerTowers',
+                                         'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
+
+        acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
+        acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
+    
+        anaTool = acc.popToolsAndMerge(ZdcLEDAnalysisToolCfg(flags, config)) #anatool for zdcLED calibration  
+    
+        zdcTools = []
+        zdcTools += [anaTool] # add trigTool after deocration migration
+    
+        zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
+        acc.addEventAlgo(zdcAlg, primary=True)
+
+    if flags.Output.doWriteESD or flags.Output.doWriteAOD:
+        acc.merge(ZdcRecOutputCfg(flags))
+        
     return acc
 
 def ZdcRecCfg(flags):    
@@ -204,14 +245,20 @@ if __name__ == '__main__':
     flags.Output.doWriteAOD=True
 
     flags.fillFromArgs()
-
+    
+    isLED = False
+    
     pn = flags.Input.ProjectName
-    year = int(pn.split('_')[0].split('data')[1])
-
-    if (year < 20):
-        flags.Trigger.EDMVersion=2
-        flags.GeoModel.Run = LHCPeriod.Run2
-    elif (year > 20):
+    
+    if not isLED:
+        year = int(pn.split('_')[0].split('data')[1])
+        if (year < 20):
+            flags.Trigger.EDMVersion=2
+            flags.GeoModel.Run = LHCPeriod.Run2
+        elif (year > 20):
+            flags.Trigger.EDMVersion=3
+            flags.GeoModel.Run = LHCPeriod.Run3
+    else:
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
 
@@ -220,14 +267,19 @@ if __name__ == '__main__':
 
     acc=MainServicesCfg(flags)
 
-    from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfgData
-    acc.merge(TriggerRecoCfgData(flags))
+    if not isLED:
+        from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfgData
+        acc.merge(TriggerRecoCfgData(flags))
 
+    
     from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
     acc.merge(ForDetGeometryCfg(flags))
 
-    acc.merge(ZdcRecCfg(flags))
-
+    if not isLED: 
+        acc.merge(ZdcRecCfg(flags))
+    else:
+        acc.merge(ZdcLEDRecCfg(flags))
+        
     acc.printConfig(withDetails=True)
 
     with open("config.pkl", "wb") as f:
