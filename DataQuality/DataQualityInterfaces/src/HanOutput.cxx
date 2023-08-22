@@ -436,7 +436,9 @@ namespace dqi
             while ((objInResultConfig = nextElem()) != 0)
             {
               if ((strncmp(objInResultConfig->ClassName(), "TH", 2) == 0) || (strncmp(objInResultConfig->ClassName(), "TGraph", 6) == 0) ||
-                  (strncmp(objInResultConfig->ClassName(), "TProfile", 8) == 0) || (strncmp(objInResultConfig->ClassName(), "TEfficiency", 11) == 0))
+                  (strncmp(objInResultConfig->ClassName(), "TProfile", 8) == 0) || (strncmp(objInResultConfig->ClassName(), "TEfficiency", 11) == 0) ||
+                  (strncmp(objInResultConfig->GetName(), "Reference", 9) == 0)) //Sometimes (not a commoon case) 'Reference' is not a name of histogam 
+                  //directly, but a TDirectory, containing histogram
               {
                 dir->WriteTObject(objInResultConfig);
               }
@@ -502,7 +504,9 @@ namespace dqi
       // If Results (or Config) directory contatins hist - ignore it (do not write in to the file), it
       // should to be writen to the outer level before
       if ((strncmp(obj->ClassName(), "TH", 2) == 0) || (strncmp(obj->ClassName(), "TGraph", 6) == 0) ||
-          (strncmp(obj->ClassName(), "TProfile", 8) == 0) || (strncmp(obj->ClassName(), "TEfficiency", 11) == 0))
+          (strncmp(obj->ClassName(), "TProfile", 8) == 0) || (strncmp(obj->ClassName(), "TEfficiency", 11) == 0) ||
+          (strncmp(obj->GetName(), "Reference", 9) == 0))
+
       {
         continue;
       }

@@ -7,7 +7,7 @@ def TrigBjetBtagHypoAlgCfg(flags, name: str = "TrigBjetBtagHypoAlg", **kwargs) -
     acc = ComponentAccumulator()
 
     kwargs.setdefault("HypoTools", CompFactory.TrigBjetBtagHypoTool())
-    kwargs.setdefault("MonTool", CompFactory.TrigBjetOnlineMonitoring())
+    kwargs.setdefault("MonTool", CompFactory.TrigBjetOnlineMonitoring(flags))
 
     acc.addEventAlgo(CompFactory.TrigBjetBtagHypoAlg(name=name, **kwargs))
     return acc

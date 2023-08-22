@@ -115,6 +115,7 @@ LArRawCalibDataReadingAlg::LArRawCalibDataReadingAlg(const std::string& name, IS
   }//end if something set
 
   if (!m_subCaloPreselection.value().empty()) {
+    ATH_MSG_INFO("Adding list of selected subcalo"<<m_subCaloPreselection.value());
     std::set<HWIdentifier> subcaloFTs;
     if (m_subCaloPreselection.value().compare("EM")==0) {
       for (auto febid : m_onlineId->feb_range()) {
@@ -123,21 +124,22 @@ LArRawCalibDataReadingAlg::LArRawCalibDataReadingAlg(const std::string& name, IS
 	}
       }
     }
-    else if (m_subCaloPreselection.value().compare("HEC")==0) {
-      for (auto febid : m_onlineId->feb_range()) {
-	if (m_onlineId->isHECchannel(febid)) {
-	  subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
-	} 
-      }
-    }
-    else if (m_subCaloPreselection.value().compare("FCAL")==0) {
-      for (auto febid : m_onlineId->feb_range()) {
-	if (m_onlineId->isFCALchannel(febid)) {
-	  subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
-	} 
-      }
-    }
-    else {
+    else if (m_subCaloPreselection.value().find("HEC")!=std::string::npos || m_subCaloPreselection.value().find("FCAL")!=std::string::npos) {
+        if (m_subCaloPreselection.value().find("HEC")!=std::string::npos) {
+         for (auto febid : m_onlineId->feb_range()) {
+           if (m_onlineId->isHECchannel(febid)) {
+             subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
+           } 
+         }
+       }
+       if (m_subCaloPreselection.value().find("FCAL")!=std::string::npos) {
+         for (auto febid : m_onlineId->feb_range()) {
+           if (m_onlineId->isFCALchannel(febid)) {
+             subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
+           } 
+         }
+       }
+    } else {
       ATH_MSG_ERROR("Configuration problem, property 'SubCaloPreselection' set to " << m_subCaloPreselection.value() << ", expect 'EM', 'HEC' or 'FCAL'");
       return StatusCode::FAILURE;
     }

@@ -73,13 +73,15 @@ def LArPedestalAutoCorrCfg(flags):
     if rootfile != "":
         result.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = "Pedestal",
                                                             AddFEBTempInfo = False, isSC = flags.LArCalib.isSC,
-                                                            BadChanKey = bcKey
+                                                            BadChanKey = bcKey,
+                                                            OffId=True
                                                         )
                         )
 
         result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey = "LArAutoCorr",
                                                            AddFEBTempInfo  = False, isSC = flags.LArCalib.isSC,
-                                                           BadChanKey = bcKey
+                                                           BadChanKey = bcKey,
+                                                           OffId=True
                                                        )
                         )
 

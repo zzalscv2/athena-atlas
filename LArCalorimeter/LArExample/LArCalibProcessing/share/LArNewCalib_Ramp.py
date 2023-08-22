@@ -22,7 +22,7 @@ if __name__=='__main__':
    parser.add_argument('-j','--outpprefix', dest='outpprefix', default="LArRamp", help='Prefix of output ramp pool filename', type=str)
    parser.add_argument('-e','--outrdir', dest='outrdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/ntuples", help='Output root file directory', type=str)
    parser.add_argument('-k','--outpdir', dest='outpdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/poolFiles", help='Output pool file directory', type=str)
-   parser.add_argument('-u','--insqlite', dest='inpsql', default="mysql.db", help='Input sqlite file with pedestals, in pool output dir.', type=str)
+   parser.add_argument('-u','--inpsqlite', dest='inpsql', default="mysql.db", help='Input sqlite file with pedestals, in pool output dir.', type=str)
    parser.add_argument('-l','--inofcsqlite', dest='inofcsql', default="mysql_delay.db", help='Input sqlite file with ofcs, in pool output dir', type=str)
    parser.add_argument('-n','--outsqlite', dest='outsql', default="mysql_ramp.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
@@ -86,7 +86,7 @@ if __name__=='__main__':
    if not flags.LArCalib.isSC:
       if args.subdet == 'EMB' or args.subdet == 'EMEC':
          flags.LArCalib.Input.SubDet="EM"
-      else:   
+      elif args.subdet:   
          flags.LArCalib.Input.SubDet=args.subdet
  
       if not args.side:   
@@ -99,15 +99,18 @@ if __name__=='__main__':
          print("unknown side ",args.side)
          sys.exit(-1)
  
-      if args.subdet == 'EMB':
-         flags.LArCalib.Preselection.BEC = [0]
-      else:   
-         flags.LArCalib.Preselection.BEC = [1]
+      if args.subdet != "EM":
+         if args.subdet == 'EMB':
+            flags.LArCalib.Preselection.BEC = [0]
+         else:   
+            flags.LArCalib.Preselection.BEC = [1]
  
       if args.subdet == 'FCAL':
          flags.LArCalib.Preselection.FT = [6]
       elif args.subdet == 'HEC':
          flags.LArCalib.Preselection.FT = [3,10,16,22]
+      elif args.subdet == 'HECFCAL':
+         flags.LArCalib.Preselection.FT = [3,6,10,16,22]
    
    #Configure the Bad-Channel database we are reading 
    #(the AP typically uses a snapshot in an sqlite file
@@ -117,8 +120,9 @@ if __name__=='__main__':
    #Output of this job:
    OutputRampRootFileName = args.outrprefix + "_" + args.run
    OutputRampPoolFileName = args.outpprefix + "_" + args.run
-   OutputRampRootFileName += "_"+args.subdet
-   OutputRampPoolFileName += "_"+args.subdet
+   if args.subdet != "":
+      OutputRampRootFileName += "_"+args.subdet
+      OutputRampPoolFileName += "_"+args.subdet
    if flags.LArCalib.Input.SubDet=="EM":
       OutputRampRootFileName += args.side
       OutputRampPoolFileName += args.side
@@ -144,6 +148,15 @@ if __name__=='__main__':
    cfg=MainServicesCfg(flags)
    
    cfg.merge(LArRampCfg(flags))
+
+   # adding new patching, again needed in summer 2023
+   if flags.LArCalib.CorrectBadChannels:
+      if flags.LArCalib.doValidation:
+         cfg.getEventAlgo("RampVal").PatchCBs=[0x3df70000]
+
+      # block standard patching for this CB
+      cfg.getEventAlgo("LArRampPatcher").DoNotPatchCBs=[0x3df70000]
+
 
    #run the application
    cfg.run() 

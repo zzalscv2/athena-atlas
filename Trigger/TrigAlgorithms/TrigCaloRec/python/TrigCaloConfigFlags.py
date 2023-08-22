@@ -5,6 +5,9 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 def createTrigCaloConfigFlags(): 
     tccf=AthConfigFlags()
 
+    tccf.addFlag('Trigger.Calo.doOffsetCorrection', True,
+                 help='enable pileup correction in cell energy calibration')
+
     # Enable cell timing cut
     tccf.addFlag('Trigger.Calo.TopoCluster.doTimeCut', False)
     tccf.addFlag('Trigger.Calo.TopoCluster.extendTimeCut', False)

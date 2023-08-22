@@ -265,7 +265,7 @@ class  ConfiguredNewTrackingSiPattern:
                                           nClustersMin              = NewTrackingCuts.minClusters(),
                                           nHolesMax                 = NewTrackingCuts.nHolesMax(),
                                           nHolesGapMax              = NewTrackingCuts.nHolesGapMax(),
-                                          SeedsFilterLevel          = NewTrackingCuts.seedFilterLevel(),
+                                          UseSeedFilter             = NewTrackingCuts.useSeedFilter(),
                                           Xi2max                    = NewTrackingCuts.Xi2max(),
                                           Xi2maxNoAdd               = NewTrackingCuts.Xi2maxNoAdd(),
                                           nWeightedClustersMin      = NewTrackingCuts.nWeightedClustersMin(),
