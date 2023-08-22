@@ -139,10 +139,9 @@ def ZdcRecRun3Cfg(flags):
     acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
-    #trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
-    
-    zdcTools = []
-    zdcTools += [anaTool] # add trigTool after deocration migration
+    trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
+    zdcTools = [anaTool,trigTool] # expand list as needed
+    #zdcTools = [anaTool] # add trigTool after deocration migration
     
     zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
     acc.addEventAlgo(zdcAlg, primary=True)

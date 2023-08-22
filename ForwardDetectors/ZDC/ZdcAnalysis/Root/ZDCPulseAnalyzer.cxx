@@ -1116,7 +1116,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   if (m_postPulse) {
     std::ostringstream ostrm;
     ostrm << "Post pulse found, m_maxSampleEvt = " << m_maxSampleEvt;
-    (*m_msgFunc_p)(ZDCMsg::Info, ostrm.str());
+    (*m_msgFunc_p)(ZDCMsg::Debug, ostrm.str());
   }
 
   
@@ -1137,7 +1137,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   else {
     std::ostringstream ostrm;
     ostrm << "Pulse fit successful with chisquare = " << m_fitChisq;
-    (*m_msgFunc_p)(ZDCMsg::Info, ostrm.str());
+    (*m_msgFunc_p)(ZDCMsg::Debug, ostrm.str());
 
     m_fitTimeCorr = m_fitTimeSub;
 
