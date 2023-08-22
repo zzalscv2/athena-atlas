@@ -329,7 +329,7 @@ class LArOnlineID_Base : public AtlasDetectorID
   /* recommended methods */
   bool  isEMBchannel             (const HWIdentifier id) const;
   bool  isEMECchannel            (const HWIdentifier id) const;
-  bool  isHECchannel             (const HWIdentifier id) const;
+  virtual bool  isHECchannel     (const HWIdentifier id) const = 0; // differs for Maini and DT
   bool  isFCALchannel            (const HWIdentifier id) const;
   bool  isEMECIW                 (const HWIdentifier id) const;
   bool  isEMECOW                 (const HWIdentifier id) const;

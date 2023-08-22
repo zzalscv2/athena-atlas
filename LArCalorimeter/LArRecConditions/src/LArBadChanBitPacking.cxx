@@ -63,8 +63,10 @@ LArBadChanSCBitPacking::LArBadChanSCBitPacking():LArBadChanSCBitPackingBase()
   addBit( LArBadChannel::LArBadChannelSCEnum::OffOFCsBit, "OffOFCs", independent);
   addBit( LArBadChannel::LArBadChannelSCEnum::OffAmplitudeBit, "OffAmplitude", independent);
   addBit( LArBadChannel::LArBadChannelSCEnum::OffScaleBit, "OffScale", independent);
-  addBit( LArBadChannel::LArBadChannelSCEnum::unflaggedByLADIeSBit, "", independent);
-  addBit( LArBadChannel::LArBadChannelSCEnum::reflaggedByLADIeSBit, "", independent);
+  addBit( LArBadChannel::LArBadChannelSCEnum::lowLightFibreBit, "lowLightFibre", independent);
+  addBit( LArBadChannel::LArBadChannelSCEnum::transmissionErrorFibreBit, "transmissionErrorFibre", independent);
+  addBit( LArBadChannel::LArBadChannelSCEnum::unflaggedByLADIeSBit, "unflaggedByLADIeS", independent);
+  addBit( LArBadChannel::LArBadChannelSCEnum::reflaggedByLADIeSBit, "reflaggedByLADIeS", independent);
   for (unsigned int i=0; i<m_enumVec.size(); i++) {
     m_nameMap[m_nameVec[i]] = m_enumVec[i].first;
     /// Initial assignment of bit positions same as enumerator values.

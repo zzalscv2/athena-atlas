@@ -65,6 +65,8 @@ class  LArBadChannel {
        OffOFCsBit=13,
        OffAmplitudeBit=14,
        OffScaleBit=15,
+       lowLightFibreBit=16,
+       transmissionErrorFibreBit=17,
        unflaggedByLADIeSBit = 30,
        reflaggedByLADIeSBit = 31
     };
@@ -104,12 +106,12 @@ class  LArBadChannel {
   bool unstableNoiseLG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unstableNoiseLGBit);}
   bool missingFEB() const { if(m_isSC) return false; else  return statusBad( LArBadChannelEnum::missingFEBBit);}
   bool peculiarCalibrationLine() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::peculiarCalibrationLineBit);}
-  bool problematicForUnknownReason() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::problematicForUnknownReasonBit);}
-  bool sporadicBurstNoise() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::sporadicBurstNoiseBit);}
+  bool problematicForUnknownReason() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::problematicForUnknownReasonBit); else return statusBad( LArBadChannelEnum::problematicForUnknownReasonBit);}
+  bool sporadicBurstNoise() const {if(m_isSC) return statusBad( LArBadChannelSCEnum::sporadicBurstNoiseBit); else return statusBad( LArBadChannelEnum::sporadicBurstNoiseBit);}
   bool deadSCACell() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::deadSCACellBit);}
   bool badFirstSample() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::badFirstSampleBit);}
-  bool unflaggedByLADIeS() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unflaggedByLADIeSBit);}
-  bool reflaggedByLADIeS() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::reflaggedByLADIeSBit);}
+  bool unflaggedByLADIeS() const {if(m_isSC) return statusBad( LArBadChannelSCEnum::unflaggedByLADIeSBit); else return statusBad( LArBadChannelEnum::unflaggedByLADIeSBit);}
+  bool reflaggedByLADIeS() const {if(m_isSC) return statusBad( LArBadChannelSCEnum::reflaggedByLADIeSBit); else return statusBad( LArBadChannelEnum::reflaggedByLADIeSBit);}
 	
   bool reallyNoisy() const {return (highNoiseHG() || highNoiseMG() || highNoiseLG() ||
 				    unstableNoiseHG() || unstableNoiseMG() || unstableNoiseLG());}

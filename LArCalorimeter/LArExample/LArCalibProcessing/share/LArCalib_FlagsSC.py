@@ -81,8 +81,13 @@ class FolderTagResover:
           folder=self._db.getFolder(foldername);
           return folder.resolveTag(globalTag)
         except:  
-          # new folder, should "create a tag"
-          return "".join(foldername.split('/')) + '-UPD3-00'
+            # new folder, should "create a tag"
+            if "BadChannels" in foldername:
+                # we only store bad SCs in UPD4
+                print("USING BAD CHANNELS FOLDER", "".join(foldername.split('/')) + '-UPD4-00')
+                return "".join(foldername.split('/')) + '-UPD4-00'
+            else:
+                return "".join(foldername.split('/')) + '-UPD3-00'
           
             
     def getFolderTagSuffix(self,foldername,globalTag=LArCalib_Flags.globalFlagDB):

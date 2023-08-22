@@ -30,10 +30,11 @@ class LArOnline_SuperCellID : public LArOnlineID_Base
    * @brief Default destructor
    */
   ~LArOnline_SuperCellID(void);
-  
 
 
-  int  initialize_from_dictionary (const IdDictMgr& dict_mgr);
+  int  initialize_from_dictionary (const IdDictMgr& dict_mgr) override final;
+
+  bool  isHECchannel     (const HWIdentifier id) const override final; // differs for Maini and DT
 
 private:    
      

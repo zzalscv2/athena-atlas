@@ -190,12 +190,10 @@ StatusCode LArOFCCondAlg::execute() {
                 //:::::::::::::::::::::::::::::::
 
                 // get Noise autocorrelation for gain
-                int igain_autocorr=igain;
+                int igain_autocorr = 0;
                 // to use only Autocorr fro highest gain in optimization: HEC/FCAL=> medium gain    EM=>high gain
-                if (m_useHighestGainAutoCorr) {
-                    if  (!m_isSuperCell &&(larOnlineID->isHECchannel(chid) || larOnlineID->isFCALchannel(chid)) ) igain_autocorr=1;
-                    else igain_autocorr=0;
-                }
+                if (!m_isSuperCell && m_useHighestGainAutoCorr
+                          &&(larOnlineID->isHECchannel(chid) || larOnlineID->isFCALchannel(chid)) ) igain_autocorr=1;
 
                 const std::vector<double> AutoCorr = 
                     larAutoCorrTotal->autoCorrTotal(chid,igain_autocorr,m_Nminbias);

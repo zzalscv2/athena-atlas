@@ -25,7 +25,7 @@ StatusCode LArAutoCorrDecoderTool::initialize()
   }
 
 
-  if (m_alwaysHighGain)
+  if (!m_isSC && m_alwaysHighGain)
     ATH_MSG_INFO( "Will always return HIGH gain autocorrelation matrix for EM calo, MEDIUM for HEC and FCAL" );
 
   ATH_MSG_DEBUG("LArAutoCorrDecoderTool initialize() end");
@@ -44,7 +44,7 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::AutoCorr( const HWIdentifier&  Cel
 
 const Eigen::MatrixXd LArAutoCorrDecoderTool::ACDiagonal( const HWIdentifier&  CellID, int gain, unsigned nSamples=5 ) const {
 
-  if (m_alwaysHighGain) {
+  if (!m_isSC && m_alwaysHighGain) {
     if (m_onlineID->isFCALchannel(CellID) ||m_onlineID->isHECchannel(CellID))
       gain=1;
     else
@@ -93,7 +93,7 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACDiagonal( const HWIdentifier&  C
 const Eigen::MatrixXd LArAutoCorrDecoderTool::ACPhysics( const HWIdentifier&  CellID, int gain, unsigned nSamples=5 ) const {
 
 
-  if (m_alwaysHighGain) {
+  if (!m_isSC && m_alwaysHighGain) {
     if (m_onlineID->isFCALchannel(CellID) ||m_onlineID->isHECchannel(CellID))
       gain=1;
     else

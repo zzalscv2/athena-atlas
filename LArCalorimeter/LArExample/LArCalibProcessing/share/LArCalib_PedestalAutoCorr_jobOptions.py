@@ -353,8 +353,8 @@ if runAccumulator:
  if SuperCells:
    from LArByteStream.LArByteStreamConf import LArLATOMEDecoder
    theLArLATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
-   theLArLATOMEDecoder.DumpFile = SC_DumpFile
-   theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
+   #theLArLATOMEDecoder.DumpFile = SC_DumpFile
+   #theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
 
    from LArByteStream.LArByteStreamConf import LArRawSCDataReadingAlg
    larRawSCDataReadingAlg = LArRawSCDataReadingAlg() 
@@ -391,15 +391,15 @@ else:
  if SuperCells:
    from LArByteStream.LArByteStreamConf import LArLATOMEDecoder
    theLArLATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
-   theLArLATOMEDecoder.DumpFile = SC_DumpFile
-   theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
+   #theLArLATOMEDecoder.DumpFile = SC_DumpFile
+   #theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
 
    from LArByteStream.LArByteStreamConf import LArRawSCCalibDataReadingAlg
    LArRawSCCalibDataReadingAlg = LArRawSCCalibDataReadingAlg()
    LArRawSCCalibDataReadingAlg.LArSCAccDigitKey = Gain
    LArRawSCCalibDataReadingAlg.LATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
-   LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
-   LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
+   #LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
+   #LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
    LArRawSCCalibDataReadingAlg.LATOMEDecoder.ProtectSourceId = SCProtectSourceId
    LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
    LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
