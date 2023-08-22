@@ -139,16 +139,9 @@ namespace LVL1 {
       }
    }
 
-   void gFEXFPGA::FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> & gTowersContainer,
-                                       gTowersForward & output_gTower_energies) {
+   void gFEXFPGA::FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> & gTowersContainer) {
 
-      int IEta = 99;
-      int IPhi = 99;
-      float Eta = 99;
-      float Phi = 99;                                
-      int TowerEt = -99;
-      int Fpga = 99;
-      char IsSaturated = 0;
+      const char IsSaturated = 0;
 
       SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey/*,ctx*/);
       
@@ -158,17 +151,16 @@ namespace LVL1 {
             const LVL1::gTower * tmpTower = gFEXFPGA_gTowerContainer->findTower(towerID);
 
             if (tmpTower == nullptr) continue;
-            IEta = tmpTower->iEta();
-            IPhi = tmpTower->iPhi();
-            TowerEt = tmpTower->getET();
-            Eta = tmpTower->eta();
-            Phi = tmpTower->phi();
-            Fpga = m_fpgaId;
+            int IEta = tmpTower->iEta();
+            int IPhi = tmpTower->iPhi();
+            int TowerEt = tmpTower->getET();
+            float Eta = tmpTower->eta();
+            float Phi = tmpTower->phi();
+            int Fpga = m_fpgaId;
             uint32_t gFEXtowerID = tmpTower->getFWID();
             std::unique_ptr<xAOD::gFexTower> gTowerEDM (new xAOD::gFexTower());
             gTowersContainer->push_back(std::move(gTowerEDM));
             gTowersContainer->back()->initialize(IEta, IPhi, Eta, Phi, TowerEt, Fpga, IsSaturated, gFEXtowerID);
-            output_gTower_energies[IPhi][IEta] = TowerEt;
          }
       }
    }
