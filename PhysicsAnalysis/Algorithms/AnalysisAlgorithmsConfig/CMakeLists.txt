@@ -35,13 +35,24 @@ else()
 
    atlas_install_joboptions( share/*_jobOptions.py )
 
+   atlas_install_scripts( share/*_CA.py )
+
    function( add_test_job NAME DATA_TYPE )
 
       atlas_add_test( ${NAME}
          SCRIPT athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --force-output TestJobOutput-${NAME}.hist.root --data-type ${DATA_TYPE} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
          PROPERTIES TIMEOUT 900 )
-      
+
+   endfunction()
+
+   function( add_test_job_CA NAME DATA_TYPE )
+
+      atlas_add_test( ${NAME}_CA
+         SCRIPT FullCPAlgorithmsTest_CA.py --evtMax=500 --force-output TestJobOutput-${NAME}-CA.hist.root --data-type ${DATA_TYPE} ${ARGN}
+         POST_EXEC_SCRIPT nopost.sh
+         PROPERTIES TIMEOUT 900 )
+   
    endfunction()
 
    function( add_test_compare NAME DATA_TYPE NAME1 NAME2 )
@@ -53,6 +64,10 @@ else()
          DEPENDS ${NAME1} ${NAME2})
 
    endfunction()
+
+   add_test_job_CA( TestJobDataConfig   data --for-compare --block-config --no-systematics )
+   add_test_job_CA( TestJobFullSimConfig   mc --for-compare --block-config )
+   add_test_job_CA( TestJobFastSimConfig   afii --for-compare --block-config )
 
 endif()
 
@@ -69,6 +84,7 @@ add_test_compare( TestJobFullSimCompare mc TestJobFullSimSequence TestJobFullSim
 add_test_job( TestJobFastSimSequence afii --for-compare )
 add_test_job( TestJobFastSimConfig   afii --for-compare --block-config )
 add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastSimConfig )
+
 
 
 

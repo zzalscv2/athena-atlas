@@ -1,8 +1,12 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Check if we have the Athena package available. If yes, just use that code.
 try:
-    from AthenaCommon.AlgSequence import AthSequencer as AlgSequence
+    from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+    if isComponentAccumulatorCfg():
+        AlgSequence = CompFactory.AthSequencer
+    else:
+        from AthenaCommon.AlgSequence import AthSequencer as AlgSequence
 except ImportError:
 
     # If not, then we implement a standalone version of it...

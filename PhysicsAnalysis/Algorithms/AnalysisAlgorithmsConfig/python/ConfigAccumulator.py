@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
 from AthenaConfiguration.Enums import LHCPeriod
@@ -94,7 +94,6 @@ class ConfigAccumulator :
     used.
     """
 
-
     def __init__ (self, dataType, algSeq, isPhyslite=False, geometry=LHCPeriod.Run2):
         if dataType not in ["data", "mc", "afii"] :
             raise ValueError ("invalid data type: " + dataType)
@@ -113,6 +112,15 @@ class ConfigAccumulator :
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
+
+        # If we are in an Athena environment with ComponentAccumulator configuration
+        # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
+        # and we in any case want to produce an output ComponentAccumulator
+        self.CA = None
+        if DualUseConfig.useComponentAccumulator:
+            from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+            self.CA = ComponentAccumulator()
+            self.CA.addSequence(algSeq)
 
 
     def dataType (self) :
@@ -134,7 +142,10 @@ class ConfigAccumulator :
             if name in self._algorithms :
                 raise Exception ('duplicate algorithms: ' + name)
             alg = DualUseConfig.createAlgorithm (type, name)
-            self._algSeq += alg
+            if DualUseConfig.useComponentAccumulator:
+                self.CA.addEventAlgo(alg,self._algSeq.name)
+            else:
+                self._algSeq += alg
             self._algorithms[name] = alg
             self._currentAlg = alg
             return alg
@@ -151,10 +162,12 @@ class ConfigAccumulator :
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)
             tool = DualUseConfig.createPublicTool (type, name)
-            try:
-                # Try to access the ToolSvc, to see whethet we're in Athena mode:
-                from AthenaCommon.AppMgr import ToolSvc  # noqa: F401
-            except ImportError:
+            # Avoid importing AthenaCommon.AppMgr in a CA Athena job
+            # as it modifies Gaudi behaviour
+            if DualUseConfig.isAthena:
+                if DualUseConfig.useComponentAccumulator:
+                    self.CA.addPublicTool(tool)
+            else:
                 # We're not, so let's remember this as a "normal" algorithm:
                 self._algSeq += tool
             self._algorithms[name] = tool
