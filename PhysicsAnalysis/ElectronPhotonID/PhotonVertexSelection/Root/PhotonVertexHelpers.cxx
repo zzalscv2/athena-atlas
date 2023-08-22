@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -14,6 +14,9 @@
 
 // Asg tools
 #include "IsolationCorrections/ShowerDepthTool.h"
+
+// ROOT include(s).
+#include <TString.h>
 
 namespace xAOD {
 namespace PVHelpers {
@@ -51,7 +54,7 @@ getZCommonAndError(const xAOD::EventInfo* eventInfo,
   // Beam position is the base for zCommon weighted average
   double beamPosZ = eventInfo->beamPosZ();
   double beamPosSigmaZ = eventInfo->beamPosSigmaZ();
-  
+
   if( beamPosSigmaZ == 0 )
     beamPosSigmaZ = 10;
 
