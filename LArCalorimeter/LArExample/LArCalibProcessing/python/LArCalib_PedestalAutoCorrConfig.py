@@ -45,12 +45,14 @@ def LArPedestalAutoCorrCfg(flags):
           result.addEventAlgo(CompFactory.LArRawSCDataReadingAlg(adcCollKey = digKey, adcBasCollKey = "", etCollKey = "",
                                                                etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
           result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
-                                                             LArAccuDigitContainerName = "", NTriggersPerStep = 100,
-                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
+                                                               LArAccuDigitContainerName = "", NTriggersPerStep = 100,
+                                                               isSC = flags.LArCalib.isSC, DropPercentTrig = 0))
        else:   
           # this needs also legacy  maps
-          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
+          from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg,LArCalibIdMappingSCCfg,LArOnOffIdMappingSCCfg
           result.merge(LArOnOffIdMappingCfg(flags))
+          result.merge(LArCalibIdMappingSCCfg(flags))
+          result.merge(LArOnOffIdMappingSCCfg(flags))
           result.merge(LArCalibIdMappingCfg(flags))
 
           result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder))
@@ -72,9 +74,11 @@ def LArPedestalAutoCorrCfg(flags):
 
     if rootfile != "":
         result.addEventAlgo(CompFactory.LArPedestals2Ntuple(ContainerKey = "Pedestal",
-                                                            AddFEBTempInfo = False, isSC = flags.LArCalib.isSC,
-                                                            BadChanKey = bcKey,
-                                                            OffId=True
+                                                            AddFEBTempInfo = False, 
+                                                            RealGeometry = True,
+                                                            OffId = True,
+                                                            isSC = flags.LArCalib.isSC,
+                                                            BadChanKey = bcKey
                                                         )
                         )
 

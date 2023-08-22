@@ -4,7 +4,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 def LArRampCfg(flags):
-
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
     result=LArCalibBaseCfg(flags)
@@ -63,7 +62,7 @@ def LArRampCfg(flags):
                                                                etIdCollKey = "", LATOMEDecoder = theLArLATOMEDecoder))
           result.addEventAlgo(CompFactory.LArDigitsAccumulator("LArDigitsAccumulator", KeyList = [digKey], 
                                                              LArAccuDigitContainerName = "", NTriggersPerStep = 100,
-                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 20))
+                                                             isSC = flags.LArCalib.isSC, DropPercentTrig = 0))
 
 
        else:   
@@ -181,15 +180,21 @@ def LArRampCfg(flags):
 
     #ROOT ntuple writing:
     rootfile=flags.LArCalib.Output.ROOTFile
+    
+    ntupKey = digKey
+    if flags.LArCalib.isSC:
+        ntupKey = "HIGH" # Modification to avoid problems in LArRampBuilder
     if rootfile != "":
-        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
-                                                        AddFEBTempInfo = False,
-                                                        RawRamp = True,
-                                                        SaveAllSamples =  True,
-                                                        BadChanKey = bcKey,
-                                                        ApplyCorr=True,
-                                                        OffId=True
-                                                    ))
+        result.addEventAlgo(CompFactory.LArRamps2Ntuple( ContainerKey = ["LArRamp"+ntupKey], #for RawRamp
+                                                         AddFEBTempInfo = False,
+                                                         RealGeometry = True,
+                                                         OffId = True,
+                                                         RawRamp = True,
+                                                         SaveAllSamples =  True,
+                                                         BadChanKey = bcKey,
+                                                         ApplyCorr=True,
+                                                         isSC = flags.LArCalib.isSC
+                                                     ))
 
         import os
         if os.path.exists(rootfile):

@@ -27,8 +27,8 @@ if __name__=='__main__':
    parser.add_argument('-n','--outsqlite', dest='outsql', default="mysql_ramp.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
-   parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
-   parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, help='is raw data ?', type=bool)
+   parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
+   parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, action="store_true", help='is raw data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
 
    args = parser.parse_args()
@@ -40,16 +40,23 @@ if __name__=='__main__':
     if value is not None:
         print(value)
 
+   if len(args.run) < 8:
+      args.run = args.run.zfill(8)
+
    # now set flags according parsed options
    if args.indir != "":
       InputDir = args.indir
    else:
       gain=args.gain.lower().capitalize()
 
-      if args.supercells:
-         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
+      if not args.supercells:
+         partstr = args.partition
       else:
-         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-7s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-7s-"+gain+"-"+args.partition+".daq.RAW/"
+         partstr = args.partition+"-DT"
+      if args.rawdata:
+            partstr += "-RawData"
+      # here - add optional nsamples
+      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-32s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-32s-"+gain+"-"+partstr+".daq.RAW/"
 
    
    #Import the configution-method we want to use (here: Pedestal and AutoCorr)
@@ -80,6 +87,10 @@ if __name__=='__main__':
    print ("Input files to be processed:")
    for f in flags.Input.Files:
        print (f)
+
+   if len(flags.Input.Files) == 0 :
+      print("Unable to find any input files. Please check the input directory:",InputDir)
+      sys.exit(0)
    
    #Some configs depend on the sub-calo in question
    #(sets also the preselection of LArRawCalibDataReadingAlg)
@@ -120,12 +131,13 @@ if __name__=='__main__':
    #Output of this job:
    OutputRampRootFileName = args.outrprefix + "_" + args.run
    OutputRampPoolFileName = args.outpprefix + "_" + args.run
-   if args.subdet != "":
+
+   if args.subdet != "" and not flags.LArCalib.isSC:
       OutputRampRootFileName += "_"+args.subdet
       OutputRampPoolFileName += "_"+args.subdet
-   if flags.LArCalib.Input.SubDet=="EM":
-      OutputRampRootFileName += args.side
-      OutputRampPoolFileName += args.side
+      if flags.LArCalib.Input.SubDet=="EM":
+         OutputRampRootFileName += args.side
+         OutputRampPoolFileName += args.side
    OutputRampRootFileName += ".root"
    OutputRampPoolFileName += ".pool.root"
 
@@ -143,6 +155,9 @@ if __name__=='__main__':
    from AthenaCommon.Constants import INFO 
    flags.Exec.OutputLevel = INFO
    
+   from AthenaConfiguration.Enums import LHCPeriod
+   flags.GeoModel.Run = LHCPeriod.Run3
+
    flags.lock()
    
    cfg=MainServicesCfg(flags)

@@ -25,6 +25,15 @@ if not 'SCIgnoreBarrelChannels' in dir():
 if not 'SCIgnoreEndcapChannels' in dir():
   SCIgnoreEndcapChannels=False
 
+if not 'SCProtectSourceId' in dir():
+   SCProtectSourceId=True
+
+if not 'patchCalibs' in dir():
+   patchCalibs = [] 
+else:
+   print("WARNING: will patch the following calibration boards:", patchCalibs)
+
+
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
@@ -387,8 +396,8 @@ if ( runAccumulator ):
       from LArByteStream.LArByteStreamConf import LArLATOMEDecoder
 
       theLArLATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
-      theLArLATOMEDecoder.DumpFile = SC_DumpFile
-      theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
+      #theLArLATOMEDecoder.DumpFile = SC_DumpFile
+      #theLArLATOMEDecoder.RawDataFile = SC_RawDataFile
       from LArByteStream.LArByteStreamConf import LArRawSCDataReadingAlg
       larRawSCDataReadingAlg = LArRawSCDataReadingAlg() 
       larRawSCDataReadingAlg.adcCollKey = Gain
@@ -417,8 +426,8 @@ else:
       LArRawSCCalibDataReadingAlg = LArRawSCCalibDataReadingAlg()
       LArRawSCCalibDataReadingAlg.LArSCAccCalibDigitKey = Gain
       LArRawSCCalibDataReadingAlg.LATOMEDecoder = LArLATOMEDecoder("LArLATOMEDecoder")
-      LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
-      LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
+      #LArRawSCCalibDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
+      #LArRawSCCalibDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
       LArRawSCCalibDataReadingAlg.LATOMEDecoder.ProtectSourceId = SCProtectSourceId
       LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
       LArRawSCCalibDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
@@ -695,7 +704,8 @@ if CorrectBadChannels:
       theLArRampPatcher.SuperCell=True
    
    ## block standard patching for this CB
-   theLArRampPatcher.DoNotPatchCBs=[0x3e198000]
+   if len(patchCalibs) > 1:
+      theLArRampPatcher.DoNotPatchCBs=patchCalibs
    topSequence+=theLArRampPatcher
 
 if ( ApplyAdHocCorrection ):
@@ -759,7 +769,8 @@ if ( doLArCalibDataQuality  ) :
 
    ##in case of CalibBoard patching, please uncomment:
    ## adding new patching
-   theRampValidationAlg.PatchCBs=[0x3e198000]
+   if len(patchCalibs) > 1:
+      theRampValidationAlg.PatchCBs=patchCalibs
 
    topSequence+=theRampValidationAlg
 
