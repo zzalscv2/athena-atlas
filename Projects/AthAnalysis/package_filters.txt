@@ -45,6 +45,7 @@
 # Analysis Tools:
 + DataQuality/GoodRunsLists
 + ForwardDetectors/ZDC/ZdcAnalysis
++ ForwardDetectors/ZDC/ZdcUtils
 + Generators/GeneratorConfig
 + Generators/TruthUtils
 + InnerDetector/InDetRecTools/InDetTrackSelectionTool

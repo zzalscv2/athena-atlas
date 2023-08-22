@@ -13,27 +13,32 @@
 // WriteAux Property Determines if Trigger Validation Status is written to xAOD::ZdcModuleContainer
 
 #include <xAODForward/ZdcModuleAuxContainer.h>
-#include "ZdcTrigValid/IZdcTrigValidTool.h"
+#include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "AsgTools/AsgTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "ZdcUtils/ZDCTriggerSim.h"
 
 #include "nlohmann/json.hpp"
 
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
+
+
 namespace ZDC {
-class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcTrigValidTool, public asg::AsgTool 
+class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcAnalysisTool, public asg::AsgTool 
 {
-  ASG_TOOL_CLASS(ZdcTrigValidTool, ZDC::IZdcTrigValidTool)
+  ASG_TOOL_CLASS(ZdcTrigValidTool, ZDC::IZdcAnalysisTool)
 
  public:
   ZdcTrigValidTool(const std::string& name);
   virtual ~ZdcTrigValidTool() override;
   StatusCode initialize() override;
 
-  StatusCode addTrigStatus(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer) override;
+  StatusCode recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer) override;
+  StatusCode reprocessZdc(){return StatusCode::SUCCESS;}
 
  protected:
-  PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool {this, "TrigDecisionTool",""}; ///< Tool to tell whether a specific trigger is passed
+  ToolHandle<Trig::TrigDecisionTool> m_trigDecTool {this, "TrigDecisionTool",""}; ///< Tool to tell whether a specific trigger is passed
  private:  
   /* properties */
   Gaudi::Property<std::vector<std::string>> m_triggerList{
@@ -52,6 +57,9 @@ class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcTrigValidTool,
   std::string m_name;
   bool m_writeAux;
 
+
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "","ZDC module Max ADC"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_trigValStatus{this, "TrigValStatus", "","Trigger validation status"};
   
 };
 }

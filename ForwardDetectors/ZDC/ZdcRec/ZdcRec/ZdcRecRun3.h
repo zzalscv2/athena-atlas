@@ -26,8 +26,7 @@ class StoreGateSvc;
 class ZdcRecChannelToolLucrod;
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
-#include "ZdcAnalysis/ZdcAnalysisTool.h"
-#include "ZdcTrigValid/ZdcTrigValidTool.h"
+#include "ZdcAnalysis/IZdcAnalysisTool.h"
 
 /** @class ZdcRecRun3
 
