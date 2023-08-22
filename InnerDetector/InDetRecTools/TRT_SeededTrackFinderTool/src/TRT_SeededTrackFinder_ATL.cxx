@@ -1079,12 +1079,12 @@ InDet::TRT_SeededTrackFinder_ATL::cleanTrack(std::list<Trk::Track*> lTrk) const{
 
     ///Throw out any spurious pixel hits.Need to rebuild the vector of track states on surface from scratch, since it's const in EDM
     if(nPixHits==1 && (sctR-pixR)>200.){
-      auto cltsos = DataVector<const Trk::TrackStateOnSurface>();
+      auto cltsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
       auto fq = (*it)->fitQuality()->uniqueClone();
       // copy track Si states into track
       DataVector<const Trk::TrackStateOnSurface>::const_iterator p_tsos;
       for(p_tsos=newtsos->begin()+nPixHits;p_tsos!=newtsos->end();++p_tsos){
-        cltsos.push_back( (*p_tsos)->clone() );
+        cltsos->push_back( (*p_tsos)->clone() );
       }
       ///Construct the new track
       Trk::TrackInfo info;

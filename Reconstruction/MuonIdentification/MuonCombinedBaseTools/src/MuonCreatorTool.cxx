@@ -1134,7 +1134,7 @@ namespace MuonCombined {
                                                                   const Trk::Track& indetTrack) const {
         ATH_MSG_VERBOSE("Creating dummy tracks from segments...");
 
-        Trk::TrackStates trackStateOnSurfaces{};
+        auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
 
         for (const Muon::MuonSegment* seg : segments) {
             // create pars for muon and loop over hits
@@ -1149,7 +1149,7 @@ namespace MuonCombined {
                 if (!exPars) { ATH_MSG_VERBOSE("Could not propagate Track to segment surface"); }
                 Trk::TrackStateOnSurface* trackState =
                     new Trk::TrackStateOnSurface(meas->uniqueClone(), std::move(exPars), nullptr, typePattern);
-                trackStateOnSurfaces.push_back(trackState);
+                trackStateOnSurfaces->push_back(trackState);
             }  // end segment loop
         }
 

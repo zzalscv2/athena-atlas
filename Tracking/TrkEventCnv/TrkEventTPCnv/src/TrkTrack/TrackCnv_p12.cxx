@@ -20,17 +20,17 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
     std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(
       m_trackStateVectorCnv.createTransient(&persObj->m_trackState, log));
     // move copy
-    transObj->m_trackStateVector = std::move(*sink);
-    
+    transObj->m_trackStateVector = std::move(sink);
+
 //forwarding the TrackInfo from old to new version
     Trk::TrackInfo::TrackFitter  fitter = Trk::TrackInfo::Unknown;
     std::vector< unsigned int>   properties;
     std::vector< unsigned int>   patternReco;
-    
+
     switch(static_cast<TrackAuthor_old>(persObj->m_author))
     {
      case unknown_old:
-       
+
      case iPat_old:
        fitter = Trk::TrackInfo::iPatTrackFitter;
        break;
@@ -38,7 +38,7 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
        fitter = Trk::TrackInfo::iPatTrackFitter;
        properties.push_back(Trk::TrackInfo::BremFit);
        break;
-     case xKalman_old: 
+     case xKalman_old:
        fitter = Trk::TrackInfo::xKalman;
        break;
      case xKalmanBremFit_old:
@@ -59,7 +59,7 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
        break;
      case MooreLegacyCnvBremFit_old:
        properties.push_back(Trk::TrackInfo::BremFit);
-       break; 
+       break;
      case Muonboy_old:
        patternReco.push_back(Trk::TrackInfo::Muonboy);
        break;
@@ -75,7 +75,7 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
      case KalmanFitter_old:
        fitter = Trk::TrackInfo::KalmanFitter;
        break;
-     case MuidComb_old:     
+     case MuidComb_old:
        patternReco.push_back(Trk::TrackInfo::MuidComb);
        break;
      case MuidStandAlone_old:
@@ -85,17 +85,17 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
        patternReco.push_back(Trk::TrackInfo::MuidStandAlone);
        properties.push_back(Trk::TrackInfo::LowPtTrack);
        break;
-     case STACO_old: 
+     case STACO_old:
        patternReco.push_back(Trk::TrackInfo::STACO);
        break;
-     case StacoLowPt_old: 
+     case StacoLowPt_old:
        patternReco.push_back(Trk::TrackInfo::STACO);
        properties.push_back(Trk::TrackInfo::LowPtTrack);
        break;
      case TrigIDSCAN:
        patternReco.push_back(Trk::TrackInfo::TrigIDSCAN);
        break;
-     case TrigSiTrack_old: 
+     case TrigSiTrack_old:
        patternReco.push_back(Trk::TrackInfo::TrigSiTrack);
        break;
      case TrigTRTxK_old:
@@ -103,26 +103,26 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
        break;
      case TrigTRTLUT_old:
        patternReco.push_back(Trk::TrackInfo::TrigTRTLUT);
-       break;          
+       break;
      case GaussianSumFilter_old:
        fitter = Trk::TrackInfo::GaussianSumFilter;
-       break;             
+       break;
      case SiSPSeededTrackFinder_old:
        patternReco.push_back(Trk::TrackInfo::SiSPSeededFinder);
-       break;            
+       break;
      case GlobalChi2Fitter_old:
        fitter = Trk::TrackInfo::GlobalChi2Fitter;
-       break;          
-     case GlobalChi2FitterBremFit_old: 
+       break;
+     case GlobalChi2FitterBremFit_old:
        fitter = Trk::TrackInfo::GlobalChi2Fitter;
        properties.push_back(Trk::TrackInfo::BremFit);
-       break;      
+       break;
      case DistributedKalmanFilter_old:
        fitter = Trk::TrackInfo::DistributedKalmanFilter;
-       break;         
+       break;
      case DeterministicAnnealingFilter_old:
-       fitter = Trk::TrackInfo::DeterministicAnnealingFilter; 
-       break;      
+       fitter = Trk::TrackInfo::DeterministicAnnealingFilter;
+       break;
      case KalmanDNAFitter_old:
        fitter = Trk::TrackInfo::KalmanDNAFitter;
        break;
@@ -130,28 +130,28 @@ void TrackCnv_p12::persToTrans( const Trk::Track_p12 *persObj, Trk::Track *trans
        patternReco.push_back(Trk::TrackInfo::TRTSeededTrackFinder);
        break;
      case TRT_StandAlone_old:
-       patternReco.push_back(Trk::TrackInfo::TRTStandalone);             
+       patternReco.push_back(Trk::TrackInfo::TRTStandalone);
        break;
      case NumberOfTrackAuthors_old:
        break;
     }//end of switch author method
-      
+
     Trk::TrackInfo info(fitter , static_cast<Trk::ParticleHypothesis>(persObj->m_particleHypo));
 
-//setting   properties 
+//setting   properties
     unsigned int pro_size = properties.size();
     unsigned int pat_size = patternReco.size();
-    if(pro_size) for(unsigned int i = 0;i<pro_size;++i) 
+    if(pro_size) for(unsigned int i = 0;i<pro_size;++i)
       info.setTrackProperties(static_cast<Trk::TrackInfo::TrackProperties>(properties[i]));
-    
-    if(pat_size) for(unsigned int i = 0;i<pat_size;++i) 
-      info.setPatternRecognitionInfo(static_cast<Trk::TrackInfo::TrackPatternRecoInfo>(patternReco[i]));  
-      
+
+    if(pat_size) for(unsigned int i = 0;i<pat_size;++i)
+      info.setPatternRecognitionInfo(static_cast<Trk::TrackInfo::TrackPatternRecoInfo>(patternReco[i]));
+
     transObj->m_trackInfo = info;
 }
 
 
 
 void TrackCnv_p12::transToPers( const Trk::Track *, Trk::Track_p12 *, MsgStream & ){
-  throw std::runtime_error("TrackCnv_p12::transToPers is deprecated!");   
+  throw std::runtime_error("TrackCnv_p12::transToPers is deprecated!");
 }

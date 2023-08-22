@@ -43,7 +43,7 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
                                           const bool reintegrateOutliers)
 {
 
-  auto newListOfStates = DataVector<const TrackStateOnSurface>();
+  auto newListOfStates = std::make_unique<DataVector<const TrackStateOnSurface>>();
   TS_iterator itStates = inputTrk.trackStateOnSurfaces()->begin();
   for (; itStates != inputTrk.trackStateOnSurfaces()->end(); ++itStates)
     if ((*itStates)->type(Trk::TrackStateOnSurface::Measurement) ||
@@ -55,7 +55,7 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
         typePattern.set(TrackStateOnSurface::Outlier);
       else
         typePattern.set(TrackStateOnSurface::Measurement);
-      newListOfStates.push_back(new TrackStateOnSurface(
+      newListOfStates->push_back(new TrackStateOnSurface(
         (*itStates)->measurementOnTrack()->uniqueClone(),
         ((*itStates)->trackParameters()
            ? (*itStates)->trackParameters()->uniqueClone()
@@ -72,7 +72,7 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
       std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
         typePattern(0);
       typePattern.set(TrackStateOnSurface::Measurement);
-      newListOfStates.push_back(new TrackStateOnSurface(
+      newListOfStates->push_back(new TrackStateOnSurface(
         (*itSet)->uniqueClone(), nullptr, nullptr, typePattern));
     }
 
@@ -81,8 +81,8 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
       new Trk::TrackStateOnSurfaceComparisonFunction(
         (*inputTrk.trackParameters()->begin())->momentum());
     if (!__gnu_cxx::is_sorted(
-          newListOfStates.begin(), newListOfStates.end(), *CompFunc))
-      std::sort(newListOfStates.begin(), newListOfStates.end(), *CompFunc);
+          newListOfStates->begin(), newListOfStates->end(), *CompFunc))
+      std::sort(newListOfStates->begin(), newListOfStates->end(), *CompFunc);
     delete CompFunc;
   }
   TrackInfo info;
@@ -140,7 +140,7 @@ Trk::TrackFitInputPreparator::stripPrepRawData(
         if (prepRD) {
           newPrdSet.push_back(prepRD);
         }
-      } 
+      }
     }
   }
   Trk::PrepRawDataSet::const_iterator itSet = inputPrds.begin();

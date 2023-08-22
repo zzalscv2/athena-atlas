@@ -84,17 +84,10 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   Track() = default;
 
   /**
-   * Full constructor
-   *
-   * Pass everything possible to form a track.
-   *
-   *
-   * @param[in] info Information about who created this track, and its
-   * properties.
-   * @param[in] trackStateOnSurfaces Vector of TrackStateOnSurface objects.
-   * @param[in] fitQuality Fit quality of the tracks. *
+   * Full constructors
    */
-  Track(const TrackInfo& info, TrackStates&& trackStateOnSurfaces,
+  Track(const TrackInfo& info,
+        std::unique_ptr<TrackStates> trackStateOnSurfaces,
         std::unique_ptr<FitQuality> fitQuality);
 
   Track(const Track& rhs);  //!< copy constructor
@@ -128,16 +121,21 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   void setFitQuality(std::unique_ptr<FitQuality> quality);
 
   /**
-   * return a pointer to the const DataVector of const TrackStateOnSurfaces.
-   * owned by a const Track
-   * The pointer will be nullptr if the track was created without
-   * TrackStateOnSurfaces.
+   * return a pointer to a const DataVector of const TrackStateOnSurfaces.
+   * const overload
    */
   const DataVector<const TrackStateOnSurface>* trackStateOnSurfaces() const;
   /**
+   * return a pointer to a DataVector of const TrackStateOnSurfaces.
+   * non-const overload
+   */
+  DataVector<const TrackStateOnSurface>* trackStateOnSurfaces();
+
+  /**
    * Set the TrackStateOnSurfaces.
    */
-  void setTrackStateOnSurfaces(DataVector<const TrackStateOnSurface>&& input);
+  void setTrackStateOnSurfaces(
+      std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> input);
 
   /**
    * Returns a const ref to info of a const tracks.
@@ -248,7 +246,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * These objects link the various parameters related to a surface,
    * for example, TrackParameter, RIO_OnTrack and FitQualityOnSurface
    */
-  TrackStates m_trackStateVector{};
+  std::unique_ptr<TrackStates> m_trackStateVector = nullptr;
 
   /**
    * A vector of TrackParameters: these can be any of the classes that

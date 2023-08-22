@@ -88,7 +88,7 @@ namespace ActsTrk
     {
       const auto lastMeasurementIndex = track.tipIndex();
 
-      auto finalTrajectory = DataVector<const Trk::TrackStateOnSurface>();
+      auto finalTrajectory = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;
       int numberOfDeadSCT = 0;
@@ -181,7 +181,7 @@ namespace ActsTrk
                                                          typePattern);
 
             // If a state was succesfully created add it to the trajectory
-            finalTrajectory.insert(finalTrajectory.begin(), perState);
+            finalTrajectory->insert(finalTrajectory->begin(), perState);
           });
 
       // Convert the perigee state and add it to the trajectory
@@ -196,7 +196,7 @@ namespace ActsTrk
                                                    std::move(per),
                                                    nullptr,
                                                    typePattern);
-      finalTrajectory.insert(finalTrajectory.begin(), perState);
+      finalTrajectory->insert(finalTrajectory->begin(), perState);
 
       // Create the track using Athena TrackFitter::KalmanFitter and TrackPatternRecoInfo::SiSPSeededFinder algorithm enums
       Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::KalmanFitter, Trk::noHypothesis);

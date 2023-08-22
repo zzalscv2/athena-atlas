@@ -118,7 +118,7 @@ public:
     Trk::TrackInfo ti(Trk::TrackInfo::Unknown,theclass->extrapolationParticleHypothesis());
     std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(trackStateOnSurfaces);
     trkTrack = new Trk::Track(ti,
-                              std::move(*sink),
+                              std::move(sink),
                               nullptr /*fitquality*/);
 
   }
@@ -315,7 +315,7 @@ void TrackHandle_TruthTrack::Imp::ensureInitAscObjs()
   HepMC::ConstGenVertexPtr vprod{nullptr};
   HepMC::ConstGenVertexPtr vend{nullptr};
   if (genParticle) {
-   vprod=genParticle->production_vertex(); 
+   vprod=genParticle->production_vertex();
    vend=genParticle->end_vertex();
   }
   ascObjs->reserve((vprod?1:0)+(vend?1:simHitList.size()));
