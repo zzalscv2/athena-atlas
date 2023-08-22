@@ -88,7 +88,7 @@ namespace
           return {Iterator{ m_sourceLinks->end()}, Iterator{ m_sourceLinks->end()}};
        }
 
-       assert( geo_iter - m_measurementRanges.begin() < m_measurementRanges->size());
+       assert( geo_iter - m_measurementRanges->begin() < m_measurementRanges->size());
        const std::pair<unsigned int, unsigned int> &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
        return {Iterator{ m_sourceLinks->begin() + range.first}, Iterator{ m_sourceLinks->begin() + range.second}};
     }
