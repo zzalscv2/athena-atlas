@@ -14,14 +14,15 @@ from AthenaCommon.Logging import logging
 log_trigeg = logging.getLogger( 'TrigEgammaMonitorAlgorithm' )
 
 
-
 def TrigEgammaMonConfig(inputFlags, emulator=None):
     '''Function to configures some algorithms in the monitoring system.'''
 
- 
     # The following class will make a sequence, configure algorithms, and link
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'TrigEgammaAthMonitorCfg')
+
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
+    moniAccess=getHLTMonitoringAccess(inputFlags)
 
     if emulator: # add emulator as public
         acc = helper.resobj
@@ -29,11 +30,9 @@ def TrigEgammaMonConfig(inputFlags, emulator=None):
 
     # configure alg and ana tools
     from TrigEgammaMonitoring.TrigEgammaMonitoringMTConfig import TrigEgammaMonAlgBuilder
-    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', detailedHistograms=False, emulator=emulator ) # Using 2018 e/g tunings
+    monAlgCfg = TrigEgammaMonAlgBuilder( helper, '2018', moniAccess, detailedHistograms=False, emulator=emulator ) # Using 2018 e/g tunings
     # build monitor and book histograms
     monAlgCfg.configure()
-
-
 
     # Finalize. The return value should be a tuple of the ComponentAccumulator
     # and the sequence containing the created algorithms. If we haven't called
@@ -42,10 +41,6 @@ def TrigEgammaMonConfig(inputFlags, emulator=None):
     # return the componenet accumulator to the main call
     return helper.result()
     
-
-    
-
-
 
 
 if __name__=='__main__':
