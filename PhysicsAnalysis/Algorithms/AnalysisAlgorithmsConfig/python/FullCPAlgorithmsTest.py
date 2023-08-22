@@ -492,7 +492,15 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     treeFiller.TreeName = 'analysis'
     algSeq += treeFiller
 
-    pass
+    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
+    if isAthena and useComponentAccumulator:
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        ca = ComponentAccumulator()
+        ca.addSequence(algSeq)
+        return ca
+    else:
+        return None
+
 
 
 
@@ -744,6 +752,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite, geometry)
     configSeq.fullConfigure (configAccumulator)
 
+    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
+    if isAthena and useComponentAccumulator:
+        return configAccumulator.CA
+    else:
+        return None
+
+
 
 def printSequenceAlgs (sequence) :
     """print the algorithms in the sequence without the sequence structure
@@ -784,25 +799,19 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
     if not noSystematics :
         sysService.sigmaRecommended = 1
 
-    # Need to explicitly instantiate the CutFlowSvc in Athena to allow
-    # the event filters to run.  In AnalysisBase that is (currently)
-    # not necessary, but we may need a CutFlowSvc instance to report
-    # cutflows to the user.
-    try :
-        from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-        CreateCutFlowSvc( seq=algSeq )
-    except ModuleNotFoundError :
-        # must be in AnalysisBase
-        pass
-
+    ca = None
     if not useBlocks :
-        makeSequenceOld (dataType, algSeq, forCompare=forCompare,
-                         isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                         autoconfigFromFlags=autoconfigFromFlags)
+        ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
+                              isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                              autoconfigFromFlags=autoconfigFromFlags)
     else :
-        makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
-                            isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                            geometry=geometry,
-                            autoconfigFromFlags=autoconfigFromFlags)
+        ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
+                                 isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                                 geometry=geometry,
+                                 autoconfigFromFlags=autoconfigFromFlags)
 
-    return algSeq
+    if ca is not None:
+        ca.addService(sysService)
+        return ca
+    else:
+        return algSeq

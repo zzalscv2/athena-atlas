@@ -7,7 +7,7 @@ import unittest
 # ATLAS import(s):
 from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.AnaAlgorithmMeta import AnaAlgorithmMeta
-from AnaAlgorithm.DualUseConfig import createAlgorithm
+from AnaAlgorithm.DualUseConfig import createAlgorithm, isAthena
 
 def getFullName(comp):
     return f"{comp.getType()}/{comp.getName()}"
@@ -22,6 +22,14 @@ class AnaAlgSequence( AlgSequence ):
     provided centrally for analysis. The private analysis algorithms of the
     users do not need to use this sequence type.
     """
+
+    __slots__ = (
+        "_algorithmMeta",
+        "_metaConfigDefault",
+        "_isGaudiConfig2",
+        "_gaudiConfig2List",
+        "_algToDecorToolMap",
+    )
 
     def __init__( self, name = "AnalysisSequence" ):
         """Analysis algorithm sequence constructor
@@ -305,12 +313,8 @@ class AnaAlgSequence( AlgSequence ):
            tool -- The tool object to add to the sequence/job
         """
 
-        try:
-            # Try to access the ToolSvc, to see whethet we're in Athena mode:
-            from AthenaCommon.AppMgr import ToolSvc  # noqa: F401
-        except ImportError:
-
-            # We're not, so let's remember this as a "normal" algorithm:
+        if not isAthena:
+            # We're not in Athena, so let's remember this as a "normal" algorithm:
             self.append( tool, inputPropName = None, stageName = stageName )
             pass
         return

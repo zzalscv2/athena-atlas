@@ -1,11 +1,15 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#! /bin/env python3
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-# @author Nils Krumnack
+# @author Teng Jian Khoo
 
 # User options, which can be set from command line after a "-" character
 # athena FullCPAlgorithmsTest_jobOptions.py - --myOption ...
-from AthenaCommon.AthArgumentParser import AthArgumentParser
-athArgsParser = AthArgumentParser()
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+import os
+
+flags = initConfigFlags()
+athArgsParser = flags.getArgumentParser()
 athArgsParser.add_argument("--force-input", action = "store", dest = "force_input",
                            default = None,
                            help = "Force the given input file")
@@ -30,7 +34,7 @@ athArgsParser.add_argument( '--physlite', dest='physlite',
 athArgsParser.add_argument( '--no-physlite-broken', dest='no_physlite_broken',
                             action = 'store_true', default = False,
                             help = 'Configure the job to skip algorithms that fail on physlite test file' )
-athArgs = athArgsParser.parse_args()
+athArgs = flags.fillFromArgs(parser=athArgsParser)
 
 dataType = athArgs.data_type
 blockConfig = athArgs.block_config
@@ -52,46 +56,39 @@ else :
                  "afii": 'ASG_TEST_FILE_MC_AFII'}
 
 # Set up the reading of the input file:
-import AthenaPoolCnvSvc.ReadAthenaPool
-theApp.EvtMax = 500
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 testFile = os.getenv ( inputfile[dataType] )
 if athArgs.force_input :
     testFile = athArgs.force_input
-svcMgr.EventSelector.InputCollections = [testFile]
 
-from AthenaConfiguration.AllConfigFlags import initConfigFlags
-flags = initConfigFlags()
 flags.Input.Files = [testFile]
 flags.lock()
 
-
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
-algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
+cfg = MainServicesCfg(flags)
+cfg.merge(PoolReadCfg(flags))
+
+from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+cfg.merge(CutFlowSvcCfg(flags))
+
+cp_cfg = makeSequence (dataType, blockConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
                        isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
                        autoconfigFromFlags=flags)
-
-# Need to explicitly instantiate the CutFlowSvc in Athena to allow
-# the event filters to run.  In AnalysisBase that is (currently)
-# not necessary, but we may need a CutFlowSvc instance to report
-# cutflows to the user.
-from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc( seq=algSeq )
-
-print (algSeq) # For debugging
-
 # Add all algorithms from the sequence to the job.
-athAlgSeq += algSeq
+cfg.merge(cp_cfg)
 
 # Set up a histogram output file for the job:
-ServiceMgr += CfgMgr.THistSvc()
 if not blockConfig :
     outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsTest." + dataType + ".hist.root' OPT='RECREATE'"
 else :
     outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest." + dataType + ".hist.root' OPT='RECREATE'"
 if athArgs.force_output :
     outputFile = "ANALYSIS DATAFILE='" + athArgs.force_output + "' OPT='RECREATE'"
-ServiceMgr.THistSvc.Output += [ outputFile ]
+from AthenaConfiguration.ComponentFactory import CompFactory
+cfg.addService(CompFactory.THistSvc(Output=[ outputFile ]))
 
-# Reduce the printout from Athena:
-include( "AthAnalysisBaseComps/SuppressLogging.py" )
+cfg.printConfig() # For debugging
+
+cfg.run(500)
