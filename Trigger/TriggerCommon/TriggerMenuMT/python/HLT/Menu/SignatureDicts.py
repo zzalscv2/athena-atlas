@@ -299,9 +299,10 @@ JetChainParts = {
       ['010jvt', '011jvt', '015jvt', '020jvt', '050jvt', '059jvt'],
     'momCuts'       : # Generic moment cut on single jets
        ['050momemfrac100', 'momhecfrac010', '050momemfrac100XXmomhecfrac010'],
-    'timing'        : # delayed jets
+    'timing'        : # delayed jets, with absolute delay requirement [ns]
     ['2timing'],
-
+    'timeSig'       : # delayed jets, based on pT-dependent significance of delay [sigma]
+    ['1timeSig', '1p5timeSig', '2timeSig', '3timeSig'],
     'prefilters'      : # Pre-hypo jet selectors (including cleaning)
     ['CLEANlb', 'CLEANllp', 'MASK300ceta210XX300nphi10',
      # ptrangeXrY (X, Y matches regex \d+)  triggers a prehypo selection of
@@ -359,9 +360,10 @@ JetChainParts_Default = {
     'etaRange'      : '0eta320',
     'jvt'           : '',
     'momCuts'       : '',
-    'timing'       : '',
+    'timing'        : '',
+    'timeSig'       : '',
     'prefilters'    : [],
-    'bsel'         : '',
+    'bsel'          : '',
     'hypoScenario'  : 'simple',
     'exotHypo'      : [],
     'smc'           : 'nosmc',
