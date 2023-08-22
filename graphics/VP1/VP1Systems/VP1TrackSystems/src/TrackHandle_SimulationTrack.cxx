@@ -85,7 +85,7 @@ public:
     std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(trackStateOnSurfaces);
     trkTrack = new Trk::Track(
       ti,
-      std::move(*sink),
+      std::move(sink),
       nullptr /*fitquality*/);
 
     //     if (VP1Msg::verbose())
@@ -241,7 +241,7 @@ void TrackHandle_SimulationTrack::Imp::ensureInitAscObjs()
   for ( it = simHitList.begin(); it != itE; ++it )
     ascObjs->push_back(new AscObj_TruthPoint(theclass,it->second));
  }
-  { 
+  {
   std::vector<AscObj_TruthPoint*>::iterator it, itE(ascObjs->end());
   for (it=ascObjs->begin();it!=itE;++it)
     theclass->registerAssocObject(*it);

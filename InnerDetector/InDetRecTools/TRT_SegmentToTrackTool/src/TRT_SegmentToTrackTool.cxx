@@ -173,7 +173,7 @@ namespace InDet {
     }
 
     // --- create new track state on surface vector
-    auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
+    auto ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
 
     //
     // if no refit, make it a perigee
@@ -197,7 +197,7 @@ namespace InDet {
         ATH_MSG_VERBOSE("Perigee version of Parameters : " << (*segPar));
       } else {
         ATH_MSG_DEBUG("Failed to build perigee parameters.Discard...");
-        ntsos.clear();
+        ntsos->clear();
         delete segPar;
         segPar = nullptr;
         return nullptr;
@@ -210,7 +210,7 @@ namespace InDet {
       par_tsos = new Trk::TrackStateOnSurface(
         nullptr, std::move(perParm), nullptr, typePattern);
       // push new TSOS into the list
-      ntsos.push_back(par_tsos);
+      ntsos->push_back(par_tsos);
     }
 
     //
@@ -324,7 +324,7 @@ namespace InDet {
 
       // push new TSOS into the list
       if (seg_tsos)
-        ntsos.push_back(seg_tsos);
+        ntsos->push_back(seg_tsos);
     }
 
     // Construct the new track
@@ -520,7 +520,7 @@ namespace InDet {
 
           // ME: wow this is hacking the vector ...
           const Trk::MeasurementBase* firstmeas =
-            (**ntsos.begin()).measurementOnTrack();
+            (**ntsos->begin()).measurementOnTrack();
           Amg::MatrixX newcov(2, 2);
           newcov.setZero();
           newcov(0, 0) = (firstmeas->localCovariance())(0, 0);
@@ -531,8 +531,8 @@ namespace InDet {
             std::make_unique<Trk::PseudoMeasurementOnTrack>(
               newpar, newcov, firstmeas->associatedSurface());
           // hack replace first measurement with pseudomeasurement
-          ntsos.erase(ntsos.begin());
-          ntsos.insert(ntsos.begin(),
+          ntsos->erase(ntsos->begin());
+          ntsos->insert(ntsos->begin(),
                         new Trk::TrackStateOnSurface(std::move(newpseudo), nullptr));
         }
 
@@ -636,7 +636,7 @@ namespace InDet {
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(
         nullptr, std::move(per), nullptr, typePattern);
-      ntsos.insert(ntsos.begin(), seg_tsos);
+      ntsos->insert(ntsos->begin(), seg_tsos);
 
       //
       // ------------------------------------------------------- now refit the

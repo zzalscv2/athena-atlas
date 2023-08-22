@@ -667,8 +667,8 @@ namespace Muon {
         }
         if (!states.empty()) {
             // states were added, create a new track
-            auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
-            trackStateOnSurfaces.reserve(oldStates->size() + states.size());
+            auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+            trackStateOnSurfaces->reserve(oldStates->size() + states.size());
 
             std::vector<std::unique_ptr<const Trk::TrackStateOnSurface>> toBeSorted;
             toBeSorted.reserve(oldStates->size() + states.size());
@@ -679,7 +679,7 @@ namespace Muon {
 
             std::stable_sort(toBeSorted.begin(), toBeSorted.end(), SortTSOSs(&*m_edmHelperSvc, &*m_idHelperSvc));
 
-            for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : toBeSorted) { trackStateOnSurfaces.push_back(sorted.release()); }
+            for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : toBeSorted) { trackStateOnSurfaces->push_back(sorted.release()); }
             std::unique_ptr<Trk::Track> trackWithHoles = std::make_unique<Trk::Track>(
                 track.info(), std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
             // generate a track summary for this track
@@ -911,9 +911,9 @@ namespace Muon {
 
             std::stable_sort(states.begin(), states.end(), SortTSOSs(m_edmHelperSvc.get(), m_idHelperSvc.get()));
             ATH_MSG_DEBUG("Filling DataVector with TSOSs " << states.size());
-            auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
-            trackStateOnSurfaces.reserve(states.size());
-            for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : states) { trackStateOnSurfaces.push_back(sorted.release()); }
+            auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+            trackStateOnSurfaces->reserve(states.size());
+            for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : states) { trackStateOnSurfaces->push_back(sorted.release()); }
             ATH_MSG_DEBUG("Creating new Track " << states.size());
             std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
                                                                                 track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);

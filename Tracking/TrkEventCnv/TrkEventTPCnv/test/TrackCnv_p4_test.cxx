@@ -61,7 +61,7 @@ void compare (const Trk::TrackParameters& p1,
     offs = 2;
   else
     assert (typeid (*&p1) == typeid (*&p2));
-          
+
   assert (p1.parameters().size() == p2.parameters().size());
   for (int i = 0; i < offs; i++)
     assert (p2.parameters()[i] == 0);
@@ -72,7 +72,7 @@ void compare (const Trk::TrackParameters& p1,
   else
     assert (!p2.covariance());
 
-  
+
   for (int i = 0; i < 3; i++) {
     assert (Athena_test::isEqual (p1.position()[i], p2.position()[i]));
     assert (Athena_test::isEqual (p1.momentum()[i], p2.momentum()[i]));
@@ -243,8 +243,8 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                   std::make_unique<Trk::Perigee> (perigee),
                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me));
 
-  DataVector<const Trk::TrackStateOnSurface> tsvec (SG::VIEW_ELEMENTS);
-  tsvec.push_back (&tsos1);
+  auto tsvec = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(SG::VIEW_ELEMENTS);
+  tsvec->push_back (&tsos1);
 
   std::bitset<Trk::TrackInfo::NumberOfTrackProperties> properties;
   std::bitset<Trk::TrackInfo::NumberOfTrackRecoInfo> patrec;
@@ -259,7 +259,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                        patrec);
 
   Trk::Track trans1 (info,
-                     DataVector<const Trk::TrackStateOnSurface> (tsvec),
+                     std::move(tsvec),
                      std::make_unique<Trk::FitQuality>(fq));
   testit (trans1);
 }

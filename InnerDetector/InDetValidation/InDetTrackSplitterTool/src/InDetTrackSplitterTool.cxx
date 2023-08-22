@@ -155,8 +155,8 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
   Trk::ParticleHypothesis hypo = input.info().particleHypothesis();
 
   /** Get the  measurements */
-  auto uppertraj = DataVector<const Trk::TrackStateOnSurface>();
-  auto lowertraj = DataVector<const Trk::TrackStateOnSurface>();
+  auto uppertraj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto lowertraj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
   
   unsigned int totalNumberHits = 0;
 
@@ -185,8 +185,8 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
     if ((**tsosit).type(Trk::TrackStateOnSurface::Outlier)) continue;
     if (originalPerigee==(**tsosit).trackParameters()){
       perigeeseen=true;
-      uppertraj.push_back((**tsosit).clone());
-      lowertraj.push_back((**tsosit).clone());
+      uppertraj->push_back((**tsosit).clone());
+      lowertraj->push_back((**tsosit).clone());
       continue;
     }
 
@@ -195,9 +195,9 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
          (**tsosit).type(Trk::TrackStateOnSurface::BremPoint) ||
          (**tsosit).type(Trk::TrackStateOnSurface::CaloDeposit))) {
       if (!perigeeseen)
-        uppertraj.push_back((**tsosit).clone());
+        uppertraj->push_back((**tsosit).clone());
       else
-        lowertraj.push_back((**tsosit).clone());
+        lowertraj->push_back((**tsosit).clone());
       continue;
     }
     const Trk::RIO_OnTrack *rio = nullptr;
@@ -230,7 +230,7 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
 
         if (!siliconHitsOnly || m_trtid->is_sct(surfaceid) ||
             m_trtid->is_pixel(surfaceid))
-          uppertraj.push_back((**tsosit).clone());
+          uppertraj->push_back((**tsosit).clone());
       }
 
       // if( (*meas)->globalPosition().y() < 0){
@@ -246,7 +246,7 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
         if (!siliconHitsOnly || m_trtid->is_sct(surfaceid) ||
             m_trtid->is_pixel(surfaceid))
           // m_lowerHits.push_back( *meas);
-          lowertraj.push_back((**tsosit).clone());
+          lowertraj->push_back((**tsosit).clone());
       }
     } else {
       if (msgLvl(MSG::VERBOSE))
@@ -261,13 +261,13 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
           if (msgLvl(MSG::DEBUG))
             msg(MSG::DEBUG) << "Adding an upper pseudoMeasurement" << endmsg;
           ++numberUpperPseudoMeas;
-          uppertraj.push_back((**tsosit).clone());
+          uppertraj->push_back((**tsosit).clone());
         }
         if (perigeeseen || totalNumberHits == totalNumberTRTHits) {
           if (msgLvl(MSG::DEBUG))
             msg(MSG::DEBUG) << "Adding a lower pseudoMeasurement" << endmsg;
           ++numberLowerPseudoMeas;
-          lowertraj.push_back((**tsosit).clone());
+          lowertraj->push_back((**tsosit).clone());
         }
       }
 
@@ -275,9 +275,9 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
         dynamic_cast<const Trk::CompetingRIOsOnTrack*>(measb);
       if (crot) {
         if (!perigeeseen)
-          uppertraj.push_back((**tsosit).clone());
+          uppertraj->push_back((**tsosit).clone());
         else
-          lowertraj.push_back((**tsosit).clone());
+          lowertraj->push_back((**tsosit).clone());
       }
     }
   }

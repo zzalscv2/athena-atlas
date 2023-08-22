@@ -432,8 +432,8 @@ namespace Trk {
       DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
       
       // This is the list of new TSOS 
-      auto newTrackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
-      newTrackStateOnSurfaces.reserve( states->size() );
+      auto newTrackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+      newTrackStateOnSurfaces->reserve( states->size() );
       
       for (; tsit!=tsit_end ; ++tsit) {
         auto newMeas  = (*tsit)->measurementOnTrack() ? (*tsit)->measurementOnTrack()->uniqueClone() : nullptr;
@@ -470,7 +470,7 @@ namespace Trk {
                                        std::move(newPars),
                                        std::move(meb),
                                        typePattern);
-        newTrackStateOnSurfaces.push_back(newTsos);
+        newTrackStateOnSurfaces->push_back(newTsos);
       }
       
       m_trackWithoutScattering.set(std::make_unique<Trk::Track>( this->info(), std::move(newTrackStateOnSurfaces), 

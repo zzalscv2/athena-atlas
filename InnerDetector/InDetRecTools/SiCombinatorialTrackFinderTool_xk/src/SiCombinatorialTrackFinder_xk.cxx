@@ -191,7 +191,7 @@ MsgStream& InDet::SiCombinatorialTrackFinder_xk::dumpconditions(MsgStream& out) 
 // Dumps event information into the MsgStream
 ///////////////////////////////////////////////////////////////////
 
-MsgStream& InDet::SiCombinatorialTrackFinder_xk::dumpevent(SiCombinatorialTrackFinderData_xk& data, MsgStream& out) 
+MsgStream& InDet::SiCombinatorialTrackFinder_xk::dumpevent(SiCombinatorialTrackFinderData_xk& data, MsgStream& out)
 {
   out<<"|---------------------------------------------------------------------|"
      <<std::endl;
@@ -669,7 +669,7 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
   if (!data.useFastTracking() and data.simpleTrack()) itmax = 10;
   if (data.heavyIon()) itmax = 50;
 
-  // 
+  //
   bool toReturnFailedTrack = data.flagToReturnFailedTrack();
   if( toReturnFailedTrack ) data.setResultCode(SiCombinatorialTrackFinderData_xk::ResultCode::Unrecoverable);
 
@@ -834,23 +834,32 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
      }
   }
   if (!data.simpleTrack()) {
-    return new Trk::Track(data.trackinfo(),
-                          data.trajectory().convertToTrackStateOnSurface(data.cosmicTrack()),
-                          data.trajectory().convertToFitQuality());
+     return new Trk::Track(
+         data.trackinfo(),
+         std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+             data.trajectory().convertToTrackStateOnSurface(
+                 data.cosmicTrack())),
+         data.trajectory().convertToFitQuality());
   }
 
   Trk::TrackInfo info = data.trackinfo();
   info.setPatternRecognitionInfo(Trk::TrackInfo::SiSPSeededFinderSimple);
   info.setParticleHypothesis(Trk::pion);
-  if( !data.flagToReturnFailedTrack() ) {
-     return new Trk::Track(info,
-			   data.trajectory().convertToSimpleTrackStateOnSurface(data.cosmicTrack(),ctx),
-			   data.trajectory().convertToFitQuality());
-  }
-  else {
-     return new Trk::Track(info,
-			   data.trajectory().convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(data.cosmicTrack(),ctx),
-			   data.trajectory().convertToFitQuality());
+  if (!data.flagToReturnFailedTrack()) {
+     return new Trk::Track(
+         info,
+         std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+             data.trajectory().convertToSimpleTrackStateOnSurface(
+                 data.cosmicTrack(), ctx)),
+         data.trajectory().convertToFitQuality());
+  } else {
+     return new Trk::Track(
+         info,
+         std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+             data.trajectory()
+                 .convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(
+                     data.cosmicTrack(), ctx)),
+         data.trajectory().convertToFitQuality());
   }
 }
 
@@ -860,12 +869,15 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
 
 Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) const
 {
-  auto tsos = data.trajectory().convertToNextTrackStateOnSurface();
-  if (tsos.empty()) return nullptr;
+  auto tsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+      data.trajectory().convertToNextTrackStateOnSurface());
+  if (tsos->empty()){
+     return nullptr;
+  }
 
   // verify first track parameters
   const Trk::TrackParameters *param = nullptr;
-  for (const Trk::TrackStateOnSurface *a_tsos : tsos) {
+  for (const Trk::TrackStateOnSurface *a_tsos : *tsos) {
      const Trk::TrackParameters *param = a_tsos->trackParameters();
      if (param) {
         break;
@@ -901,7 +913,7 @@ void InDet::SiCombinatorialTrackFinder_xk::magneticFieldInit()
 }
 
 ///////////////////////////////////////////////////////////////////
-// Convert space points to clusters and (for Run 4) detector elements 
+// Convert space points to clusters and (for Run 4) detector elements
 ///////////////////////////////////////////////////////////////////
 
 bool InDet::SiCombinatorialTrackFinder_xk::spacePointsToClusters
@@ -994,7 +1006,7 @@ void InDet::SiCombinatorialTrackFinder_xk::detectorElementLinks
 ///////////////////////////////////////////////////////////////////
 
 void  InDet::SiCombinatorialTrackFinder_xk::getTrackQualityCuts
-(SiCombinatorialTrackFinderData_xk& data, const TrackQualityCuts& Cuts) 
+(SiCombinatorialTrackFinderData_xk& data, const TrackQualityCuts& Cuts)
 {
   // Integer cuts
   //

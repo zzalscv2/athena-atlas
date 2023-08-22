@@ -253,7 +253,7 @@ void Trk::TrkMaterialProviderTool::updateCaloTSOS(Trk::Track& track, const Trk::
   this->updateVectorMS(inputTSOS.get(),firstMS,X0ScaleMS,ElossScaleMS);
   // update the original vector
   Trk::TrkMaterialProviderTool::updateVector(inputTSOS.get(), firstCALO, firstMS, caloTSOS);
-  track.setTrackStateOnSurfaces (std::move (*inputTSOS));
+  track.setTrackStateOnSurfaces (std::move (inputTSOS));
   myLocal_resetTrack(track);
 }
 
@@ -374,7 +374,7 @@ void Trk::TrkMaterialProviderTool::updateCaloTSOS(const Trk::Track& idTrack, Trk
   // update the original vector
   Trk::TrkMaterialProviderTool::updateVector(inputTSOS_MS.get(), firstCALO, firstMS, caloTSOS);
 
-  extrapolatedTrack.setTrackStateOnSurfaces (std::move (*inputTSOS_MS));
+  extrapolatedTrack.setTrackStateOnSurfaces (std::move (inputTSOS_MS));
   myLocal_resetTrack(extrapolatedTrack);
 }
 

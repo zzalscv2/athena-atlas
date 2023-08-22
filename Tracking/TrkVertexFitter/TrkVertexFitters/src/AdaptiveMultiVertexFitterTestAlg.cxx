@@ -105,10 +105,10 @@ TrackUVec_t makeTracks (const PerigeeUVec_t& perigees)
   for (const std::unique_ptr<Trk::Perigee>& p : perigees) {
     Trk::TrackInfo info (Trk::TrackInfo::Unknown, Trk::undefined);
     auto fqual = std::make_unique<Trk::FitQuality> (0, 0);
-    auto tsos = DataVector<const Trk::TrackStateOnSurface>();
+    auto tsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
-    tsos.push_back(std::make_unique<Trk::TrackStateOnSurface>(
+    tsos->push_back(std::make_unique<Trk::TrackStateOnSurface>(
       nullptr, p->uniqueClone(), nullptr, typePattern));
     tracks.push_back(
       std::make_unique<Trk::Track>(info, std::move(tsos), std::move(fqual)));

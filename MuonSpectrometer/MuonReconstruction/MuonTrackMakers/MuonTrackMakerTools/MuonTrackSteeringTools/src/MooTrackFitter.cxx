@@ -2167,10 +2167,10 @@ namespace Muon {
         Trk::PerigeeSurface persurf(startPars.position());
         std::unique_ptr<Trk::Perigee> perigee = std::make_unique<Trk::Perigee>(0, 0, phi, theta, qoverp, persurf);
 
-        Trk::TrackStates trackStateOnSurfaces{};
-        trackStateOnSurfaces.reserve(tsos.size() + 1);
-        trackStateOnSurfaces.push_back(MuonTSOSHelper::createPerigeeTSOS(std::move(perigee)));
-        for (const Trk::TrackStateOnSurface* tsos : tsos) trackStateOnSurfaces.push_back(tsos->clone());
+        auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
+        trackStateOnSurfaces->reserve(tsos.size() + 1);
+        trackStateOnSurfaces->push_back(MuonTSOSHelper::createPerigeeTSOS(std::move(perigee)));
+        for (const Trk::TrackStateOnSurface* tsos : tsos) trackStateOnSurfaces->push_back(tsos->clone());
 
         Trk::TrackInfo trackInfo(Trk::TrackInfo::Unknown, Trk::muon);
         std::unique_ptr<Trk::Track> track = std::make_unique<Trk::Track>(trackInfo, std::move(trackStateOnSurfaces), nullptr);
@@ -2245,9 +2245,9 @@ namespace Muon {
 
             // clean up previous track and create new one with fake hits
             auto uniquePerigee = std::make_unique<Trk::Perigee>(0, 0, phi, theta, qoverp, persurf);
-            trackStateOnSurfaces = Trk::TrackStates();
-            trackStateOnSurfaces.reserve(tsos.size() + 3);
-            trackStateOnSurfaces.push_back(MuonTSOSHelper::createPerigeeTSOS(std::move(uniquePerigee)));
+            auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
+            trackStateOnSurfaces->reserve(tsos.size() + 3);
+            trackStateOnSurfaces->push_back(MuonTSOSHelper::createPerigeeTSOS(std::move(uniquePerigee)));
 
             tit = tsos.begin();
             tit_end = tsos.end();
@@ -2259,7 +2259,7 @@ namespace Muon {
                     continue;
                 }
 
-                trackStateOnSurfaces.push_back((*tit)->clone());
+                trackStateOnSurfaces->push_back((*tit)->clone());
                 if (*tit == positionFirstFake) {
                     double fakeError = 100.;
                     if (positionFirstFake->trackParameters()->covariance()) {
@@ -2272,7 +2272,7 @@ namespace Muon {
                         createFakePhiForMeasurement(*(positionFirstFake->measurementOnTrack()), &position, nullptr, fakeError);
                     if (fake) {
                         // need to clone as fake is already added to garbage collection
-                        trackStateOnSurfaces.push_back(MuonTSOSHelper::createMeasTSOSWithUpdate(
+                        trackStateOnSurfaces->push_back(MuonTSOSHelper::createMeasTSOSWithUpdate(
                             **tit, std::move(fake), positionFirstFake->trackParameters()->uniqueClone(), Trk::TrackStateOnSurface::Measurement));
                     } else {
                         ATH_MSG_WARNING(" failed to create fake at first measurement ");
@@ -2290,7 +2290,7 @@ namespace Muon {
                         createFakePhiForMeasurement(*(positionSecondFake->measurementOnTrack()), &position, nullptr, fakeError);
                     if (fake) {
                         // need to clone as fake is already added to garbage collection
-                        trackStateOnSurfaces.push_back(MuonTSOSHelper::createMeasTSOSWithUpdate(
+                        trackStateOnSurfaces->push_back(MuonTSOSHelper::createMeasTSOSWithUpdate(
                             **tit, std::move(fake), positionSecondFake->trackParameters()->uniqueClone(), Trk::TrackStateOnSurface::Measurement));
                     } else {
                         ATH_MSG_WARNING(" failed to create fake at second measurement ");

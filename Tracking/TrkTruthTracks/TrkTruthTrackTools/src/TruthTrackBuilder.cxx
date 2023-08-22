@@ -151,8 +151,8 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
     
    const Trk::TrackStateOnSurface *pertsos=new Trk::TrackStateOnSurface(nullptr,std::move(per),nullptr,typePattern);
-   auto traj = DataVector<const Trk::TrackStateOnSurface>();
-   traj.push_back(pertsos);
+   auto traj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+   traj->push_back(pertsos);
    
    
    
@@ -189,7 +189,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
         }
         // create the ROTs for the reference trajectory
         const Trk::TrackStateOnSurface *tsos=new Trk::TrackStateOnSurface(std::move(rot),thispar->uniqueClone(),nullptr,typePattern);
-        traj.push_back(tsos);
+        traj->push_back(tsos);
         prevpar=std::move(thispar);
    }
    // this is the reference trajectory to be refitted  
@@ -241,13 +241,13 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
      refittedtrack2=(m_trackFitter->fit(Gaudi::Hive::currentContext(),*refittedtrack,measset,false,materialInteractions)).release();
 
      if (!refittedtrack2){
-       auto traj2 = DataVector<const Trk::TrackStateOnSurface>();
-       for (const auto *j : *refittedtrack->trackStateOnSurfaces()) traj2.push_back(new Trk::TrackStateOnSurface(*j));
+       auto traj2 = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+       for (const Trk::TrackStateOnSurface *j : *refittedtrack->trackStateOnSurfaces()) traj2->push_back(new Trk::TrackStateOnSurface(*j));
        std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern2;
        typePattern2.set(Trk::TrackStateOnSurface::Outlier);
        //measset needs to be unique_ptr before progress further
        for (auto & j : meassetOwn) {
-         traj2.push_back(new Trk::TrackStateOnSurface(
+         traj2->push_back(new Trk::TrackStateOnSurface(
            std::move(j),
            nullptr,
            nullptr,

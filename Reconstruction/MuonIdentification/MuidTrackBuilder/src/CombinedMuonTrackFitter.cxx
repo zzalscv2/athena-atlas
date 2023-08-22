@@ -47,10 +47,10 @@
 namespace Rec {
     CombinedMuonTrackFitter::~CombinedMuonTrackFitter() = default;
     CombinedMuonTrackFitter::CombinedMuonTrackFitter(const std::string& type, const std::string& name, const IInterface* parent) :
-        AthAlgTool(type, name, parent) {      
+        AthAlgTool(type, name, parent) {
         declareInterface<ICombinedMuonTrackFitter>(this);
 
-       
+
     }
 
     StatusCode CombinedMuonTrackFitter::initialize() {
@@ -59,7 +59,7 @@ namespace Rec {
 
         if (m_allowCleanerVeto) ATH_MSG_DEBUG(" AllowCleanerVeto");
         if (!m_muonErrorOptimizer.empty()) ATH_MSG_DEBUG(" ErrorOptimisation");
-        
+
         // fill WARNING messages
         m_messageHelper->setMaxNumberOfMessagesPrinted(m_maxWarnings);
         m_messageHelper->setMessage(0, "combinedFit:: missing MeasuredPerigee for indet track");
@@ -126,7 +126,7 @@ namespace Rec {
         ATH_CHECK(m_fitter.retrieve());
         ATH_CHECK(m_fitterSL.retrieve());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        
+
         ATH_CHECK(m_trackingVolumesSvc.retrieve());
         ATH_MSG_DEBUG("Retrieved Svc " << m_trackingVolumesSvc);
         m_calorimeterVolume = std::make_unique<Trk::Volume>(m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer));
@@ -150,8 +150,8 @@ namespace Rec {
         // // summarize WARNINGs
         m_messageHelper->printSummary();
         return StatusCode::SUCCESS;
-    }  
-    std::unique_ptr<Trk::Track> CombinedMuonTrackFitter::fit(const EventContext& ctx, const Trk::Track& track, 
+    }
+    std::unique_ptr<Trk::Track> CombinedMuonTrackFitter::fit(const EventContext& ctx, const Trk::Track& track,
                                                               const Trk::RunOutlierRemoval runOutlier,
                                                               const Trk::ParticleHypothesis particleHypothesis) const {
         ATH_MSG_VERBOSE(" fit() " << m_printer->print(track) << std::endl
@@ -190,9 +190,9 @@ namespace Rec {
             // about to add the TSOS's describing calorimeter association to a combined muon;
             m_messageHelper->printWarning(30);
 
-            Trk::TrackStates combinedTSOS{};
+            auto combinedTSOS = std::make_unique<Trk::TrackStates>();
 
-            combinedTSOS.reserve(fittedTrack->trackStateOnSurfaces()->size() + 3);
+            combinedTSOS->reserve(fittedTrack->trackStateOnSurfaces()->size() + 3);
             bool caloAssociated = false;
 
             // run-2 schema, update default eloss with parametrised value
@@ -204,25 +204,25 @@ namespace Rec {
 
             for (const Trk::TrackStateOnSurface* in_tsos : *fittedTrack->trackStateOnSurfaces()) {
                 if (caloAssociated) {
-                    combinedTSOS.push_back(in_tsos->clone());
+                    combinedTSOS->push_back(in_tsos->clone());
                 } else if ((in_tsos->measurementOnTrack() && m_indetVolume->inside(in_tsos->measurementOnTrack()->globalPosition())) ||
                            (in_tsos->trackParameters() && m_indetVolume->inside(in_tsos->trackParameters()->position()))) {
-                    combinedTSOS.push_back(in_tsos->clone());
+                    combinedTSOS->push_back(in_tsos->clone());
                 } else {
                     std::unique_ptr<const Trk::TrackStateOnSurface> tsos = m_caloTSOS->innerTSOS(ctx, *fittedTrack->perigeeParameters());
                     if (tsos) {
-                        combinedTSOS.push_back(std::move(tsos));
-                        const Trk::TrackParameters* parameters = combinedTSOS.back()->trackParameters();
+                        combinedTSOS->push_back(std::move(tsos));
+                        const Trk::TrackParameters* parameters = combinedTSOS->back()->trackParameters();
                         if (in_tsos->type(Trk::TrackStateOnSurface::CaloDeposit)) {
-                            combinedTSOS.push_back(in_tsos->clone());
+                            combinedTSOS->push_back(in_tsos->clone());
                             tsos = m_caloTSOS->outerTSOS(ctx, *parameters);
-                            if (tsos) combinedTSOS.push_back(std::move(tsos));
+                            if (tsos) combinedTSOS->push_back(std::move(tsos));
                         } else {
                             tsos = m_caloTSOS->middleTSOS(ctx, *parameters);
-                            if (tsos) combinedTSOS.push_back(std::move(tsos));
+                            if (tsos) combinedTSOS->push_back(std::move(tsos));
                             tsos = m_caloTSOS->outerTSOS(ctx, *parameters);
-                            if (tsos) combinedTSOS.push_back(std::move(tsos));
-                            combinedTSOS.push_back(in_tsos->clone());
+                            if (tsos) combinedTSOS->push_back(std::move(tsos));
+                            combinedTSOS->push_back(in_tsos->clone());
                         }
                     }
                     caloAssociated = true;
@@ -257,8 +257,8 @@ namespace Rec {
         if (!fittedTrack) return nullptr;
 
 
-        if (!checkTrack("fitInterface1", fittedTrack.get())) return nullptr; 
-        
+        if (!checkTrack("fitInterface1", fittedTrack.get())) return nullptr;
+
 
         // eventually this whole tool will use unique_ptrs
         // in the meantime, this allows the MuonErrorOptimisationTool and MuonRefitTool to use them
@@ -273,7 +273,7 @@ namespace Rec {
                 std::unique_ptr<Trk::Track> optimizedTrack = m_muonErrorOptimizer->optimiseErrors(*fittedTrack, ctx);
                 if (checkTrack("fitInterface1Opt", optimizedTrack.get()) && chi2BeforeOptimizer > normalizedChi2(*optimizedTrack)) {
                     fittedTrack.swap(optimizedTrack);
-                    if (msgLevel(MSG::DEBUG)) countAEOTs(*fittedTrack, " re fit scaled errors Track ");                    
+                    if (msgLevel(MSG::DEBUG)) countAEOTs(*fittedTrack, " re fit scaled errors Track ");
                 }
             }
 
@@ -381,7 +381,7 @@ namespace Rec {
                     fittedTrack.swap(optimizedTrack);
                     if (msgLevel(MSG::DEBUG)) countAEOTs(*fittedTrack, " fit mstSet scaled errors Track ");
                 }
-                
+
             }
 
             // chi2 before clean
@@ -460,15 +460,15 @@ namespace Rec {
             ATH_MSG_VERBOSE("Updating Calorimeter TSOS in Muon Combined Fit ...");
             m_materialUpdator->updateCaloTSOS(indetTrack, extrapolatedTrack);
         }
-      
+
         // FIT
         ATH_MSG_VERBOSE(" perform combined fit... " << std::endl
                                                     << m_printer->print(indetTrack) << std::endl
                                                     << m_printer->print(extrapolatedTrack));
-        
+
         std::unique_ptr<Trk::Track> fittedTrack(fitter->fit(ctx, indetTrack, extrapolatedTrack, false, particleHypothesis));
 
-        if (!fittedTrack) return nullptr;        
+        if (!fittedTrack) return nullptr;
         // track cleaning
         if (runOutlier) {
             // fit with optimized spectrometer errors
@@ -533,7 +533,7 @@ namespace Rec {
 
         return chi2;
     }
-    
+
     bool CombinedMuonTrackFitter::loadMagneticField(const EventContext& ctx, MagField::AtlasFieldCache& fieldCache) const {
         SG::ReadCondHandle<AtlasFieldCacheCondObj> fieldCondObj{m_fieldCacheCondObjInputKey, ctx};
         if (!fieldCondObj.isValid()) {
@@ -557,7 +557,7 @@ namespace Rec {
 
         if (!muonSummary) return false;
 
-      
+
         unsigned int optimize{0},nBarrel{0}, nEndcap{0}, nSmall{0}, nLarge{0};
 
         for (const Trk::MuonTrackSummary::ChamberHitSummary& summary : muonSummary->chamberHitSummary()) {
@@ -606,7 +606,7 @@ namespace Rec {
         const DataVector<const Trk::TrackParameters>* pars = newTrack->trackParameters();
         if (!pars || pars->empty() || !newTrack->fitQuality()) { return false; }
         DataVector<const Trk::TrackParameters>::const_iterator it = pars->end() -1;
-  
+
         if ((*it)->position().dot((*it)->momentum()) < 0) {
             return false;
             ATH_MSG_DEBUG(txt <<" "<< __FILE__<<":"<<__LINE__<< " ALARM position " << (*it)->position() << " direction " << (*it)->momentum().unit());
@@ -629,7 +629,7 @@ namespace Rec {
         for (; r != rEnd; ++r) {
             const Trk::TrackStateOnSurface* tsos{*r};
             if (tsos->trackParameters() && m_calorimeterVolume->inside(tsos->trackParameters()->position())) break;
-        
+
             if (tsos->measurementOnTrack()) {
                 ++numberMS;
                 const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(tsos->measurementOnTrack());
@@ -638,7 +638,7 @@ namespace Rec {
         }
 
         ATH_MSG_VERBOSE( txt<< " "<<__FILE__<<":"<<__LINE__<<" "<< numberMS << "/"<< numberMSPrec<< " fitted MS measurements ");
-         // reject with insufficient MS measurements           
+         // reject with insufficient MS measurements
         if (numberMS < 5 || numberMSPrec < 3) {
             return false;
         }
@@ -654,7 +654,7 @@ namespace Rec {
 	  ATH_MSG_ERROR("No trackStateOnSurfaces");
 	  return naeots;
 	}
-	
+
         for (const auto* m : *trackTSOS) {
 	  if (m && m->alignmentEffectsOnTrack()) naeots++;
         }
@@ -663,7 +663,7 @@ namespace Rec {
 
         // add VEBOSE for checking TSOS order
 
-     
+
         int tsos{0}, nperigee{0};
         for ( const Trk::TrackStateOnSurface* it : *trackTSOS) {
             tsos++;

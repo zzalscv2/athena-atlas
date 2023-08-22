@@ -542,12 +542,12 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
   // fitQuality from track
   auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
-  auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
   int siHits = 0;
   // copy track Si states into track
   DataVector<const Trk::TrackStateOnSurface>::const_iterator p_stsos;
   for (p_stsos=stsos->begin(); p_stsos != stsos->end(); ++p_stsos) {
-    ntsos.push_back( (*p_stsos)->clone() );
+    ntsos->push_back( (*p_stsos)->clone() );
     if ((*p_stsos)->type(Trk::TrackStateOnSurface::Measurement)) siHits++;
   }
   // loop over segment
@@ -557,13 +557,13 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
       if (siHits < 4) {
         ATH_MSG_DEBUG ("Too few Si hits.Will keep pseudomeasurement...");
         const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr);
-        ntsos.push_back(seg_tsos);
+        ntsos->push_back(seg_tsos);
       }
     } else {
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Measurement);
       const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, typePattern);
-      ntsos.push_back(seg_tsos);
+      ntsos->push_back(seg_tsos);
     }
   }
 
@@ -604,7 +604,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::segToTrack(const EventContext& ctx, co
   }
   const AmgVector(5)& p = tS.localParameters();
   AmgSymMatrix(5) ep = AmgSymMatrix(5)(tS.localCovariance());
-  auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
   std::unique_ptr<Trk::TrackParameters> segPar =
     surf->createUniqueParameters<5, Trk::Charged>(
       p(0), p(1), p(2), p(3), p(4), std::move(ep));
@@ -624,7 +624,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::segToTrack(const EventContext& ctx, co
     } else {
       seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, typePattern);
     }
-    ntsos.push_back(seg_tsos);
+    ntsos->push_back(seg_tsos);
   }
   Trk::TrackInfo info;
   info.setPatternRecognitionInfo(Trk::TrackInfo::TRTSeededTrackFinder);
@@ -659,18 +659,18 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   // fitQuality from track
   auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
-  auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
   // copy track Si states into track
   DataVector<const Trk::TrackStateOnSurface>::const_iterator p_stsos;
   for (p_stsos = stsos->begin(); p_stsos != stsos->end(); ++p_stsos) {
-    ntsos.push_back((*p_stsos)->clone());
+    ntsos->push_back((*p_stsos)->clone());
   }
   // loop over TRT track extension
   for (auto & it : tS) {
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
     const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(it->uniqueClone(), nullptr, nullptr, typePattern);
-    ntsos.push_back(seg_tsos);
+    ntsos->push_back(seg_tsos);
   }
   ///Construct the new track
   Trk::TrackInfo info;

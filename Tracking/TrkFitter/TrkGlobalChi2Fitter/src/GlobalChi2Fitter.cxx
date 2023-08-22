@@ -7353,7 +7353,7 @@ namespace Trk {
     ParticleHypothesis matEffects
   ) const {
     // Convert internal trajectory into track
-    auto  trajectory = DataVector<const TrackStateOnSurface>();
+    auto  trajectory = std::make_unique<DataVector<const TrackStateOnSurface>>();
     
     if (m_fillderivmatrix) {
       makeTrackFillDerivativeMatrix(cache, oldtrajectory);
@@ -7369,7 +7369,7 @@ namespace Trk {
 
     tmptrajectory.addBasicState(std::move(perigee_ts), cache.m_acceleration ? 0 : tmptrajectory.numberOfUpstreamStates());
     //reserve the ouput size
-    trajectory.reserve(tmptrajectory.trackStates().size());
+    trajectory->reserve(tmptrajectory.trackStates().size());
     for (auto & hit : tmptrajectory.trackStates()) {
       if (
         hit->measurementType() == TrackState::Pseudo &&
@@ -7381,7 +7381,7 @@ namespace Trk {
       //should check hit->isSane() here with better equality check(other than ptr comparison)
       auto trackState = hit->trackStateOnSurface();
       hit->resetTrackCovariance();
-      trajectory.emplace_back(trackState.release());
+      trajectory->emplace_back(trackState.release());
     }
 
     auto qual = std::make_unique<FitQuality>(tmptrajectory.chi2(), tmptrajectory.nDOF());

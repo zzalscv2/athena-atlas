@@ -109,22 +109,23 @@ public:
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
 private:
-  //Returned by the final smoother fit. 
+  //Returned by the final smoother fit.
   //This is what we need to pass when forming a Trk::Track
-  using GSFTrajectory = DataVector<const Trk::MultiComponentStateOnSurface>;
-  //Internally we can use a simple std::vector 
+  using GSFTrajectoryPtr = std::unique_ptr<DataVector<const Trk::MultiComponentStateOnSurface>>;
+  using GSFTrajectoryDV = DataVector<const Trk::MultiComponentStateOnSurface>;
+  //Internally we can use a simple std::vector
   using GSFTrajectoryVec = std::vector<Trk::MultiComponentStateOnSurface>;
 
   /** Produces a perigee from a smoothed trajectory */
   std::unique_ptr<MultiComponentStateOnSurface> makePerigee(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectory& smoothedTrajectory,
+    const GSFTrajectoryDV& smoothedTrajectory,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Gsf smoothed trajectory. This method can handle additional info like
    * calorimeter cluster constraints. It also produces what we actually store in Trk::Tracks.*/
-  GSFTrajectory smootherFit(
+  GSFTrajectoryPtr smootherFit(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
     const GSFTrajectoryVec& forwardTrajectory,
@@ -136,7 +137,7 @@ private:
     const EventContext& ctx,
     const Trk::MultiComponentStateOnSurface* currentState,
     const Trk::CaloCluster_OnTrack* ccot,
-    GSFTrajectory& smoothedTrajectory) const;
+    GSFTrajectoryDV& smoothedTrajectory) const;
 
   /** Forward GSF fit using PrepRawData */
   GSFTrajectoryVec forwardPRDfit(

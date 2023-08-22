@@ -39,7 +39,7 @@ public:
     std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(trackStateOnSurfaces);
     const Trk::Track* trk =
       new Trk::Track(ti,
-                     std::move(*sink),
+                     std::move(sink),
                      nullptr /*fitquality*/);
     if (VP1Msg::verbose())
       VP1Msg::messageVerbose("TrackHandle_TrackParticle created track with "

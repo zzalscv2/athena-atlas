@@ -476,8 +476,8 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
 										   covFromMS, *surf) ;
 
 
-          auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
-          trackStateOnSurfaces.reserve(muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->size() + 1);
+          auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+          trackStateOnSurfaces->reserve(muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->size() + 1);
           DataVector<const Trk::TrackStateOnSurface>::const_iterator sb = muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->begin();
 
           std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type;
@@ -491,9 +491,9 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
                   : nullptr;
 
           if(IDPerigeeParameters && IDPerigeeParametersClone ){
-            trackStateOnSurfaces.push_back(new const Trk::TrackStateOnSurface(std::move(pmot), std::move(IDPerigeeParametersClone), nullptr, type));
+            trackStateOnSurfaces->push_back(new const Trk::TrackStateOnSurface(std::move(pmot), std::move(IDPerigeeParametersClone), nullptr, type));
 
-            for ( ; sb != muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->end(); ++sb)  trackStateOnSurfaces.push_back((**sb).clone());
+            for ( ; sb != muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->end(); ++sb)  trackStateOnSurfaces->push_back((**sb).clone());
 
             Trk::Track* tmpTrack = new Trk::Track(
               muon->inDetTrackParticle()->originalTrack()->info(),

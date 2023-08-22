@@ -355,7 +355,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   std::unique_ptr<Trk::Track> newtrack = nullptr;
   // Get the fit output object
   const auto& acts_track = fitResult.value();
-  auto finalTrajectory = DataVector<const Trk::TrackStateOnSurface>();
+  auto finalTrajectory = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
   // initialise the number of dead Pixel and Acts strip
   int numberOfDeadPixel = 0;
   int numberOfDeadSCT = 0;
@@ -458,7 +458,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
     // If a state was succesfully created add it to the trajectory 
     if (perState) {
       ATH_MSG_VERBOSE("State succesfully creates, adding it to the trajectory");
-      finalTrajectory.insert(finalTrajectory.begin(), perState);
+      finalTrajectory->insert(finalTrajectory->begin(), perState);
     }
   });
   
@@ -470,7 +470,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Perigee);
   const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
-  if (perState) finalTrajectory.insert(finalTrajectory.begin(), perState);
+  if (perState) finalTrajectory->insert(finalTrajectory->begin(), perState);
 
   // Create the track using the states
   Trk::TrackInfo newInfo(Trk::TrackInfo::TrackFitter::GaussianSumFilter, Trk::noHypothesis);

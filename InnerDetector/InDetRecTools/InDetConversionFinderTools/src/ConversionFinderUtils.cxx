@@ -56,7 +56,7 @@ namespace InDet {
   ConversionFinderUtils::countHits(
     const DataVector<const Trk::MeasurementBase>* mb,
     int& ntrt,
-    int& nclus) 
+    int& nclus)
   {
 
     DataVector<const Trk::MeasurementBase>::const_iterator its,
@@ -91,7 +91,7 @@ namespace InDet {
    */
   double
   ConversionFinderUtils::trRatio(
-    const DataVector<const Trk::MeasurementBase>* mb) 
+    const DataVector<const Trk::MeasurementBase>* mb)
   {
 
     DataVector<const Trk::MeasurementBase>::const_iterator itp=mb->begin(), itpe=mb->end();
@@ -119,7 +119,7 @@ namespace InDet {
    */
   double
   ConversionFinderUtils::momFraction(const Trk::TrackParameters* per1,
-                                     const Trk::TrackParameters* per2) 
+                                     const Trk::TrackParameters* per2)
   {
 
     const Amg::Vector3D& mom_pos = per1->momentum();
@@ -197,7 +197,7 @@ namespace InDet {
    * return first track parameters
    */
   const Trk::TrackParameters*
-  ConversionFinderUtils::getTrkParameters(const Trk::Track* track) 
+  ConversionFinderUtils::getTrkParameters(const Trk::Track* track)
   {
     const DataVector<const Trk::TrackStateOnSurface>* tsos = track->trackStateOnSurfaces();
     if(!tsos) return nullptr;
@@ -218,7 +218,7 @@ namespace InDet {
   /* add recalculated perigees to the track*/
   const Trk::Track*
   ConversionFinderUtils::addNewPerigeeToTrack(const Trk::Track* track,
-                                              const Trk::Perigee* mp) 
+                                              const Trk::Perigee* mp)
   {
 
     // fitQuality from track
@@ -226,7 +226,7 @@ namespace InDet {
     if(!fq) return nullptr;
 
     // output datavector of TSOS
-    auto	 ntsos = DataVector<const Trk::TrackStateOnSurface>();
+    auto	 ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
     const DataVector<const Trk::TrackStateOnSurface>* tsos = track->trackStateOnSurfaces();
     if(!tsos) {return nullptr;}
     DataVector<const Trk::TrackStateOnSurface>::const_iterator its,itse = tsos->end();
@@ -238,7 +238,7 @@ namespace InDet {
         ((*its)->type(Trk::TrackStateOnSurface::Perigee))
           ? new Trk::TrackStateOnSurface(nullptr, mp->uniqueClone(), nullptr, typePattern)
           : (*its)->clone();
-      ntsos.push_back(per_tsos);
+      ntsos->push_back(per_tsos);
     }
 
     //Construct the new track
@@ -249,7 +249,7 @@ namespace InDet {
 
   xAOD::Vertex*
   ConversionFinderUtils::correctVxCandidate(xAOD::Vertex* initVxCandidate,
-                                            Amg::Vector3D guessVertex) 
+                                            Amg::Vector3D guessVertex)
   {
     Amg::Vector3D correctVertex(initVxCandidate->position().x()+guessVertex.x(),
 			     initVxCandidate->position().y()+guessVertex.y(),

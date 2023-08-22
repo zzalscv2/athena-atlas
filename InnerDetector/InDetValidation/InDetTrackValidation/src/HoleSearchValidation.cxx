@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "InDetTrackValidation/HoleSearchValidation.h"
-// Gaudi 
+// Gaudi
 #include "GaudiKernel/MsgStream.h"
 // Trk
 #include "TrkTrack/Track.h"
@@ -74,7 +74,7 @@ HoleSearchValidation::HoleSearchValidation(const std::string& name, ISvcLocator*
 
   declareProperty("RemoveOverlapHitsOnly"  , m_removeOverlapHitsOnly, "Only remove overlap track hits");
   declareProperty("IgnoreTrackEnds"        , m_ignoreTrackEnds     , "Ignore hits at the end of the track");
-  
+
   declareProperty("RandomRemovalMode"       , m_randomRemovalMode  , "Randomly remove track hits (overwrites the other flags!)");
   declareProperty("MaximalHoles"            , m_maxNumberOfHoles   , "Number of maximal holes to be created");
 
@@ -97,21 +97,21 @@ StatusCode HoleSearchValidation::initialize() {
   }else{
      ATH_MSG_DEBUG( "Found AtlasDetectorID" ) ;
   }
-   
+
   sc = detStore()->retrieve(m_pixelID, "PixelID");
   if (sc.isFailure()) {
     ATH_MSG_WARNING(  "Could not get Pixel ID helper !" ) ;
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG(  "Initialized PixelIDHelper" ) ;
-  
+
   sc = detStore()->retrieve(m_sctID, "SCT_ID");
   if (sc.isFailure()) {
     ATH_MSG_WARNING(  "Could not get SCT ID helper !" ) ;
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG(  "Initialized SCTIDHelper" ) ;
- 
+
   sc = detStore()->retrieve(m_trtID, "TRT_ID");
   if (sc.isFailure()) {
     ATH_MSG_WARNING(  "Could not get TRT ID helper !" ) ;
@@ -132,8 +132,8 @@ StatusCode HoleSearchValidation::initialize() {
   if (sc.isFailure()) {
     ATH_MSG_FATAL(  "Could not retrieve "<< m_holeSearchTool ) ;
     return sc;
-  }  
-  
+  }
+
   if ( m_rndmGenSvc.retrieve().isFailure() ){
     ATH_MSG_FATAL( "Could not retrieve " << m_rndmGenSvc );
     return StatusCode::FAILURE;
@@ -180,12 +180,12 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
     // get all TSOS
     const Trk::Track& track = *(*trackIterator);
     const DataVector<const Trk::TrackStateOnSurface>* tsos = track.trackStateOnSurfaces();
-    ATH_MSG_DEBUG(  "Perform hole search on unmodified track (" << *trackIterator << ")" 
+    ATH_MSG_DEBUG(  "Perform hole search on unmodified track (" << *trackIterator << ")"
                     << " which contains " << tsos->size() <<" track states" ) ;
     // perform hole search
     unsigned int oldHoles = doHoleSearch( *trackIterator );
 
-    auto vecTsos = DataVector<const Trk::TrackStateOnSurface>();
+    auto vecTsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
 
     // loop over TSOS, copy TSOS and push into vector
     DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
@@ -206,28 +206,28 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
     if (m_ignoreTrackEnds || m_randomRemovalMode){
       ATH_MSG_VERBOSE(  "Parsing track first to find end layers and maximal numbers" ) ;
       for ( ; iTsos != iTsosEnd ; ++iTsos) {
-        // 
+        //
         Identifier plSurfaceID;
         const Trk::MeasurementBase* plMesb = (*iTsos)->measurementOnTrack();
         if (plMesb &&  plMesb->associatedSurface().associatedDetectorElement()){
-          plSurfaceID = plMesb->associatedSurface().associatedDetectorElement()->identify(); 
+          plSurfaceID = plMesb->associatedSurface().associatedDetectorElement()->identify();
           // to find out whether it is barrel / endcap
-          // check pixel / sct 
+          // check pixel / sct
           if ( m_idHelper->is_pixel( plSurfaceID ) ) {
             int plLayer = abs(m_pixelID->layer_disk( plSurfaceID ));
             bool isBarrel = m_pixelID->is_barrel( plSurfaceID );
             // set the maximal pixel layer: barrel / ec
             if ( isBarrel )
               maxPixelLayerBarrel = plLayer > maxPixelLayerBarrel ? plLayer : maxPixelLayerBarrel;
-            else 
+            else
               maxPixelLayerEndcap = plLayer > maxPixelLayerEndcap ? plLayer : maxPixelLayerEndcap;
           } else if (m_idHelper->is_sct( plSurfaceID ) ) {
-            int plLayer = abs(m_sctID->layer_disk(  plSurfaceID )); 
+            int plLayer = abs(m_sctID->layer_disk(  plSurfaceID ));
             bool isBarrel = m_sctID->is_barrel( plSurfaceID );
             // set the maximal pixel layer: barrel / ec
             if ( isBarrel )
               maxSctLayerBarrel = plLayer > maxSctLayerBarrel ? plLayer : maxSctLayerBarrel;
-            else 
+            else
               maxSctLayerEndcap = plLayer > maxSctLayerEndcap ? plLayer : maxSctLayerEndcap;
           }
         }
@@ -239,10 +239,10 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
       iTsos    = tsos->begin();
     }
 
-    
+
     for ( ; iTsos != iTsosEnd ; ++iTsos) {
       if ((*iTsos)->type(Trk::TrackStateOnSurface::Measurement)) {
-	
+
 	Identifier surfaceID;
 	const Trk::MeasurementBase* mesb = (*iTsos)->measurementOnTrack();
 
@@ -253,11 +253,11 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
           randomHoles = (unsigned int)(m_maxNumberOfHoles*CLHEP::RandFlat::shoot(engine));
           ATH_MSG_VERBOSE("Random mode chosen: will create " << randomHoles << " holes on the track.");
 
-          // max int pixel  
-          unsigned int maxPixel = maxPixelLayerBarrel > maxPixelLayerEndcap 
+          // max int pixel
+          unsigned int maxPixel = maxPixelLayerBarrel > maxPixelLayerEndcap
             ? maxPixelLayerBarrel : maxPixelLayerEndcap;
           // max int sct
-          unsigned int maxSct = maxSctLayerBarrel > maxSctLayerEndcap 
+          unsigned int maxSct = maxSctLayerBarrel > maxSctLayerEndcap
             ? maxSctLayerBarrel : maxSctLayerEndcap;
           // -------------------------------------------------------------------
           int maxHit 		  = maxPixel + maxSct;
@@ -304,8 +304,8 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
 
 	// hits, outliers
 	if (mesb != nullptr && mesb->associatedSurface().associatedDetectorElement() != nullptr) {
-	  surfaceID = mesb->associatedSurface().associatedDetectorElement()->identify(); 
-          // the pixel case	  
+	  surfaceID = mesb->associatedSurface().associatedDetectorElement()->identify();
+          // the pixel case
 	  if ( m_idHelper->is_pixel( surfaceID ) ) {
 	    int layer = abs(m_pixelID->layer_disk( surfaceID ));
             // check barrel / ec
@@ -334,14 +334,14 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
 		printInfoTSoS( *iTsos );
 		nRemoved++;
 		continue;
-	      } 
+	      }
 	    }
 	  } else if ( m_idHelper->is_sct( surfaceID ) ) {
             int layer = abs(m_sctID->layer_disk( surfaceID ));
             // check barrel / ec
             bool isBarrel = m_sctID->is_barrel( surfaceID );
             // counter for number of layers
-            sctHitsPerLayer[layer]++;	    
+            sctHitsPerLayer[layer]++;
             ATH_MSG_VERBOSE(  "SCT hits on layer " << layer << " : " << sctHitsPerLayer[layer] ) ;
             // steer the side to be removed
 	    int side  = m_sctID->side( surfaceID );
@@ -403,9 +403,9 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
       } // end TSoS is of type measurement
 
       const Trk::TrackStateOnSurface* newTsos = new Trk::TrackStateOnSurface(**iTsos);
-      vecTsos.push_back(newTsos);
+      vecTsos->push_back(newTsos);
     } // end loop over all TSoS
-    
+
     ATH_MSG_DEBUG(  "Removed total of " << nRemoved << " TSoS on track." ) ;
 
     Trk::Track* newTrack = new Trk::Track(track.info(), std::move(vecTsos), nullptr );
@@ -413,8 +413,8 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
     // perform hole search
     unsigned int newHoles = doHoleSearch( newTrack );
     unsigned int foundHoles = abs(static_cast<int>(newHoles) - static_cast<int>(oldHoles));
-    
-    if ( foundHoles == nRemoved ) 
+
+    if ( foundHoles == nRemoved )
       ATH_MSG_DEBUG(  "== OK      : "<< nRemoved <<" generated holes out of which all were found" ) ;
     else
       ATH_MSG_DEBUG(  "== PROBLEM : "<< nRemoved <<" generated holes out of which "<< newHoles - oldHoles << " were found" ) ;
@@ -456,7 +456,7 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
 
 StatusCode HoleSearchValidation::finalize() {
   ATH_MSG_INFO( "HoleSearchValidation finalize()" ) ;
-  
+
   ATH_MSG_INFO(  "Printing statistics for hole search validation:" ) ;
   ATH_MSG_INFO(  " # removed hits | # tracks / found holes | ... " ) ;
   for ( unsigned int nRemoved = 0; nRemoved < m_trackStats.size(); ++nRemoved) {
@@ -465,7 +465,7 @@ StatusCode HoleSearchValidation::finalize() {
     if ( nTracks == 0) continue;
     ATH_MSG_INFO(  "Removed " << nRemoved << " hits from track -- found: " ) ;
      for ( unsigned int holes = 0; holes < m_trackStats[nRemoved].size(); ++holes) {
-       ATH_MSG_INFO(  "    -- " << 100.0 * m_trackStats[nRemoved][holes]/float(nTracks) 
+       ATH_MSG_INFO(  "    -- " << 100.0 * m_trackStats[nRemoved][holes]/float(nTracks)
 		      << "% of tracks with " << holes << " holes (" <<  m_trackStats[nRemoved][holes] << " / " <<  float(nTracks) << ")") ;
      }
    }
@@ -511,7 +511,7 @@ void HoleSearchValidation::printInfoTSoS( const Trk::TrackStateOnSurface* tsos) 
   const Trk::MeasurementBase* mesb = tsos->measurementOnTrack();
   // hits, outliers
   if (mesb != nullptr && mesb->associatedSurface().associatedDetectorElement() != nullptr) {
-    surfaceID = mesb->associatedSurface().associatedDetectorElement()->identify(); 
+    surfaceID = mesb->associatedSurface().associatedDetectorElement()->identify();
     if ( m_siliconID->is_barrel( surfaceID ) ) {
       ATH_MSG_VERBOSE(  " -- Barrel:");
     } else {
@@ -521,7 +521,7 @@ void HoleSearchValidation::printInfoTSoS( const Trk::TrackStateOnSurface* tsos) 
       ATH_MSG_VERBOSE(  "    -> SCT layer = " << m_sctID->layer_disk( surfaceID )
 			<< " side = " << m_sctID->side( surfaceID ) );
       //ATH_MSG_VERBOSE(  m_sctID->show_to_string(surfaceID) ) ;
-      
+
     }
     if ( m_idHelper->is_pixel( surfaceID ) ) {
       ATH_MSG_VERBOSE(  "    -> PIXEL layer = " << m_pixelID->layer_disk( surfaceID ) );

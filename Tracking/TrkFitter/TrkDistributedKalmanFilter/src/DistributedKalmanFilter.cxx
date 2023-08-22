@@ -1120,8 +1120,7 @@ Trk::DistributedKalmanFilter::fit(
                                           << std::sin(pMP->parameters()[Trk::theta]) /
                     pMP->parameters()[Trk::qOverP]);
 
-      auto pvTS = DataVector<const TrackStateOnSurface>();
-      pvTS.clear();
+      auto pvTS = std::make_unique<DataVector<const TrackStateOnSurface>>();
 
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
       typePattern;
@@ -1129,7 +1128,7 @@ Trk::DistributedKalmanFilter::fit(
       const TrackStateOnSurface* pTSOS =
         new TrackStateOnSurface(nullptr, std::move(pMP), nullptr, typePattern);
 
-      pvTS.push_back(pTSOS);
+      pvTS->push_back(pTSOS);
 
       double chi2 = 0.0;
       int ndof = -5;
@@ -1138,7 +1137,7 @@ Trk::DistributedKalmanFilter::fit(
         if (node->isValidated()) {
           TrackStateOnSurface* pTSS = createTrackStateOnSurface(node.get());
           if (pTSS != nullptr) {
-            pvTS.push_back(pTSS);
+            pvTS->push_back(pTSS);
             chi2 += node->getChi2();
             ndof += node->getNdof();
           }
@@ -1146,7 +1145,7 @@ Trk::DistributedKalmanFilter::fit(
       }
       ATH_MSG_DEBUG("Total Chi2: " << chi2 << " DoF=" << ndof);
       auto pFQ = std::make_unique<Trk::FitQuality>(chi2, ndof);
-      ATH_MSG_DEBUG(pvTS.size() << " new RIO_OnTrack(s) created");
+      ATH_MSG_DEBUG(pvTS->size() << " new RIO_OnTrack(s) created");
       TrackInfo info(TrackInfo::DistributedKalmanFilter, matEffects);
       fittedTrack = new Track(info, std::move(pvTS), std::move(pFQ));
     } else {
