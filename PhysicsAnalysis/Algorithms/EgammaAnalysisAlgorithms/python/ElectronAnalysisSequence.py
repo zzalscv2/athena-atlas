@@ -21,7 +21,8 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
                                   ptSelectionOutput = False,
                                   trackSelection = True,
                                   enableCutflow = False,
-                                  enableKinematicHistograms = False ):
+                                  enableKinematicHistograms = False,
+                                  defineSystObjectLinks = False ):
     """Create an electron analysis algorithm sequence
 
     Keyword arguments:
@@ -74,7 +75,8 @@ def makeElectronAnalysisSequence( dataType, workingPoint,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Electron' + postfix,
                               enableCutflow = enableCutflow,
-                              enableKinematicHistograms = enableKinematicHistograms )
+                              enableKinematicHistograms = enableKinematicHistograms,
+                              defineSystObjectLinks = defineSystObjectLinks )
 
     # Return the sequence:
     return seq

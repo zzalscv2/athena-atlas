@@ -1,0 +1,116 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
+/// @author Teng Jian Khoo
+
+#include <iomanip>
+#include <set>
+
+#include <AthLinks/ElementLink.h>
+#include "AsgAnalysisAlgorithms/SystObjectUnioniserAlg.h"
+
+namespace CP
+{
+  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
+
+  template<class T, class C>
+  SystObjectUnioniserAlg<T,C> ::SystObjectUnioniserAlg(const std::string &name,
+                                  ISvcLocator *pSvcLocator)
+      : EL::AnaReentrantAlgorithm(name, pSvcLocator)
+  {
+  
+  }
+
+  template<class T, class C>
+  StatusCode SystObjectUnioniserAlg<T,C> ::initialize()
+  {
+
+    ATH_CHECK (m_inputHandle.initialize(m_systematicsList));
+    // ATH_CHECK (m_syst_link_acc.initialize(m_systematicsList, m_outputHandle));
+    ATH_CHECK (m_outputHandle.initialize(m_systematicsList));
+
+    // Intialise syst list (must come after all syst-aware inputs and outputs)
+    ATH_CHECK (m_systematicsList.initialize());
+
+    for(const auto& sys : m_systematicsList.systematicsVector()) {
+      std::string decor_name{};
+      ATH_CHECK (m_systematicsList.service().makeSystematicsName(decor_name, m_syst_decor_pattern, sys));
+      m_syst_link_acc.insert({sys.hash(),SG::AuxElement::ConstAccessor<iplink_t>(decor_name)});
+    }
+
+    return StatusCode::SUCCESS;
+  }
+
+  template<class T, class C>
+  StatusCode SystObjectUnioniserAlg<T,C> ::execute(const EventContext&) const
+  {
+
+    // Populate a map of systematics hash to container, so we
+    // can iterate safely regardless of the ordering of systs
+    // from the SystematicsSvc
+    // (mainly avoid assumption that nominal comes first)
+    std::unordered_map<std::size_t, const C*> systhash_to_container;
+    systhash_to_container.reserve(m_systematicsList.systematicsVector().size());
+    // Loop is over CP::SystematicsSet, but recommended to use auto
+    // in case this ever changes...
+    for (const auto& sys : m_systematicsList.systematicsVector()) {
+        const C* sys_container = nullptr;
+        ATH_CHECK( m_inputHandle.retrieve(sys_container, sys) );
+        systhash_to_container.insert({sys.hash(), sys_container});
+    }
+
+    // Collect the nominal objects that are in any of the
+    // filtered collections
+    std::set<const T*> passed_nominal_objects;
+    for (const auto& sys : m_systematicsList.systematicsVector()) {
+      if(sys.name().empty()) {
+        // In this case, we don't have to touch any ElementLinks
+        const C& nom_cont = *systhash_to_container[sys.hash()];
+        passed_nominal_objects.insert(nom_cont.begin(),nom_cont.end());
+        ATH_MSG_DEBUG("Gathered " << passed_nominal_objects.size() << " nominal objects");
+      } else {
+        // In this case we have to extract the nominal objects via links
+        const C& var_cont = *systhash_to_container[sys.hash()];
+        for(const T* var_obj : var_cont) {
+          ATH_MSG_VERBOSE("Locating nominal object from selection with variation " << sys.name());
+          const T* nom_obj = static_cast<const T*>(*acc_nominalObject(*var_obj));
+          auto result = passed_nominal_objects.insert(nom_obj);
+          if(result.second) {
+            ATH_MSG_VERBOSE("Added variation object with index " << var_obj->index());
+          } else {
+            ATH_MSG_VERBOSE("Object for " << sys.name() << " with index " << var_obj->index() << " is already selected");
+          }}
+        }
+      }
+
+    // Build the output containers
+    for (const auto& sys : m_systematicsList.systematicsVector()) {
+      if(sys.name().empty()) {
+        // Simply write out the set
+        auto cdv_nom = std::make_unique<ConstDataVector<C> >(
+          passed_nominal_objects.begin(),
+          passed_nominal_objects.end(),
+          SG::VIEW_ELEMENTS
+          );
+        ATH_MSG_DEBUG("Recording " << cdv_nom->size() << " objects in nominal container");
+        ATH_CHECK(m_outputHandle.record(std::move(cdv_nom),sys));
+      } else {
+        // Create a new CDV, and fill it with the variation objects
+        // corresponding to each nominal object
+        auto cdv_var = std::make_unique<ConstDataVector<C> >(
+          SG::VIEW_ELEMENTS);
+        for(const T* nom_obj : passed_nominal_objects) {
+          ATH_MSG_VERBOSE("Locating systematic object from nominal object " << nom_obj->index());
+          const T* var_obj = static_cast<const T*>(*m_syst_link_acc.at(sys.hash())(*nom_obj));
+          cdv_var->push_back(var_obj);
+        }
+        ATH_MSG_DEBUG("Recording " << cdv_var->size() << " objects in '" << sys.name() << "' container");
+        ATH_CHECK(m_outputHandle.record(std::move(cdv_var), sys));
+      }
+    }    
+
+    return StatusCode::SUCCESS;
+  }
+
+}
