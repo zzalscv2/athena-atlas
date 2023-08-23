@@ -3,7 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(flags, name = 'InDetTRT_SeedsMakerCondAlg', **kwargs):
+def TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(
+        flags, name = 'InDetTRT_SeedsMakerCondAlg', **kwargs):
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
     acc = TRT_ReadoutGeometryCfg(flags) # To produce TRT_DetElementContainer
 
@@ -20,7 +21,8 @@ def TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(flags, name = 'InDetTRT_SeedsMakerCon
         CompFactory.InDet.TRT_TrackSegmentsMakerCondAlg_ATLxk(name, **kwargs))
     return acc
 
-def TRT_TrackSegmentsMaker_BarrelCosmicsCfg(flags, name='InDetTRTSegmentsMaker', **kwargs) :
+def TRT_TrackSegmentsMaker_BarrelCosmicsCfg(
+        flags, name='InDetTRTSegmentsMaker', **kwargs) :
     acc = ComponentAccumulator()
 
     kwargs.setdefault("TrtManagerLocation", 'TRT')
@@ -31,9 +33,8 @@ def TRT_TrackSegmentsMaker_BarrelCosmicsCfg(flags, name='InDetTRTSegmentsMaker',
         CompFactory.InDet.TRT_TrackSegmentsMaker_BarrelCosmics(name, **kwargs))
     return acc
 
-def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
-                                    InputCollections = None,
-                                    **kwargs):
+def TRT_TrackSegmentsMaker_ATLxkCfg(
+        flags, name = 'InDetTRT_SeedsMaker', **kwargs):
 
     acc = TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(
         flags,
@@ -53,7 +54,6 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
             TRT_TrackExtensionToolCfg(flags)))
 
     kwargs.setdefault("TRT_ClustersContainer", 'TRT_DriftCircles')
-    kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
     kwargs.setdefault("RemoveNoiseDriftCircles", False)
     kwargs.setdefault("NumberMomentumChannel",
                       flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
@@ -68,11 +68,13 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
         CompFactory.InDet.TRT_TrackSegmentsMaker_ATLxk(name, **kwargs))
     return acc
 
-def TRT_TrackSegmentsMaker_ATLxk_Phase_Cfg(flags, name = 'InDetTRT_SeedsMaker_Phase', **kwargs):
+def TRT_TrackSegmentsMaker_ATLxk_Phase_Cfg(
+        flags, name = 'InDetTRT_SeedsMaker_Phase', **kwargs):
     kwargs.setdefault("PRDtoTrackMap", "")
     return TRT_TrackSegmentsMaker_ATLxkCfg(flags, name, **kwargs)
 
-def TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg(flags, name = 'InDetTRT_SeedsMaker_TrackSegments', **kwargs):
+def TRT_TrackSegmentsMaker_ATLxk_TrackSegmentsCfg(
+        flags, name = 'InDetTRT_SeedsMaker_TrackSegments', **kwargs):
    kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
    kwargs.setdefault("MinNumberDriftCircles", flags.Tracking.ActiveConfig.minPT)
    kwargs.setdefault("sharedFrac", flags.Tracking.ActiveConfig.maxTRTonlyShared)
