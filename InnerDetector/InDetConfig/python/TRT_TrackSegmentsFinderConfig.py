@@ -4,9 +4,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 import AthenaCommon.SystemOfUnits as Units
 
-def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
-                               InputCollections = None,
-                               **kwargs):
+def TRT_TrackSegmentsFinderCfg(
+        flags, name = 'InDetTRT_TrackSegmentsFinder', **kwargs):
 
     from MagFieldServices.MagFieldServicesConfig import (
         AtlasFieldCacheCondAlgCfg)
@@ -16,8 +15,7 @@ def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
         from InDetConfig.TRT_TrackSegmentsToolConfig import (
             TRT_TrackSegmentsMaker_ATLxkCfg)
         InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
-            TRT_TrackSegmentsMaker_ATLxkCfg(flags,
-                                            InputCollections = InputCollections))
+            TRT_TrackSegmentsMaker_ATLxkCfg(flags))
         kwargs.setdefault("SegmentsMakerTool", InDetTRT_TrackSegmentsMaker)
 
     if "RoadTool" not in kwargs:
@@ -40,7 +38,8 @@ def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
     acc.addEventAlgo(CompFactory.InDet.TRT_TrackSegmentsFinder(name, **kwargs))
     return acc
 
-def TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinder_Cosmics', **kwargs):
+def TRT_TrackSegmentsFinder_Cosmics_Cfg(
+        flags, name = 'InDetTRT_TrackSegmentsFinder_Cosmics', **kwargs):
     acc = ComponentAccumulator()
 
     if "SegmentsMakerTool" not in kwargs:
@@ -52,7 +51,8 @@ def TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name = 'InDetTRT_TrackSegmentsFin
     acc.merge(TRT_TrackSegmentsFinderCfg(flags, name, **kwargs))
     return acc
 
-def TRT_TrackSegmentsFinder_Phase_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinder_Phase', **kwargs):
+def TRT_TrackSegmentsFinder_Phase_Cfg(
+        flags, name = 'InDetTRT_TrackSegmentsFinder_Phase', **kwargs):
     acc = ComponentAccumulator()
 
     if "SegmentsMakerTool" not in kwargs:
@@ -66,7 +66,8 @@ def TRT_TrackSegmentsFinder_Phase_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinde
     acc.merge(TRT_TrackSegmentsFinderCfg(flags, name, **kwargs))
     return acc
 
-def TRT_TrackSegmentsFinder_TrackSegments_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinder_TrackSegments', **kwargs):
+def TRT_TrackSegmentsFinder_TrackSegments_Cfg(
+        flags, name = 'InDetTRT_TrackSegmentsFinder_TrackSegments', **kwargs):
     acc = ComponentAccumulator()
 
     if "SegmentsMakerTool" not in kwargs:
