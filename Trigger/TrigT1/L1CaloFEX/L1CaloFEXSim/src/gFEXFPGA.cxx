@@ -12,7 +12,6 @@
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include <array>
 #include <algorithm>
 
 
