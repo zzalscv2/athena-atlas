@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRecCorr.h"
 #include "ALFA_Geometry/ALFA_GeometryReader.h"
 
 #include "AthenaKernel/errorcheck.h"
+
+using namespace std;
 
 
 ALFA_LocRecCorr::ALFA_LocRecCorr(const string& name, ISvcLocator* pSvcLocator) :
