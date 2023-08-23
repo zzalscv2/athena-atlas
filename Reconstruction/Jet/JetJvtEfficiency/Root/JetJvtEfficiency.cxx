@@ -21,6 +21,8 @@ static const SG::AuxElement::ConstAccessor<float> acc_jetTiming("Timing");
 JetJvtEfficiency::JetJvtEfficiency( const std::string& name): asg::AsgTool( name ),
   m_appliedSystEnum(NONE),
   m_NNJvtTool_handle("", this),
+  m_jvtSelTool("", this),
+  m_jvtEffTool("", this),
   m_h_JvtHist(nullptr),
   m_h_EffHist(nullptr),
   m_passJvtDecName(""),
@@ -28,8 +30,6 @@ JetJvtEfficiency::JetJvtEfficiency( const std::string& name): asg::AsgTool( name
   m_useDummySFs(false),
   m_jvtCut(0),
   m_jvtCutBorder(0),
-  m_jetJvtMomentAcc(nullptr),
-  m_passJvtAcc(nullptr),
   m_jetEtaAcc(nullptr),
   m_passORAcc(nullptr),
   m_sfDec(nullptr),
@@ -78,10 +78,37 @@ StatusCode JetJvtEfficiency::initialize(){
     }
   #endif
 
+  asg::AsgToolConfig selToolCfg;
+  ATH_CHECK(selToolCfg.setProperty("MaxPtForJvt", m_maxPtForJvt));
+  if (m_wp != "Default")
+    ATH_CHECK(selToolCfg.setProperty("WorkingPoint", m_wp));
+  ATH_CHECK(selToolCfg.setProperty("OutputLevel", msg().level()));
+  
+  asg::AsgToolConfig effToolCfg;
+  ATH_CHECK(effToolCfg.setProperty("MaxPtForJvt", m_maxPtForJvt));
+  if (m_wp != "Default")
+    ATH_CHECK(effToolCfg.setProperty("WorkingPoint", m_wp));
+  // Setting DummySFs.root should be replaced by an empty string now
+  if (!m_file.empty() && m_file != "DummySFs.root") {
+    // This is annoying but the tool used to allow you to set a nonsensical SF file and it would
+    // just ignore it
+    if (m_taggingAlg == JvtTagger::NNJvt && m_file.find("NNJvtSFFile") == std::string::npos)
+      ATH_MSG_WARNING("Supplied SF file " << m_file << " doesn't seem to contain SFs for NNJvt, falling back to dummy SFs ...");
+    else
+      ATH_CHECK(effToolCfg.setProperty("SFFile", m_file));
+  }
+  ATH_CHECK(effToolCfg.setProperty("DoTruthReq", m_doTruthRequirement));
+  ATH_CHECK(effToolCfg.setProperty("TruthHSLabel", m_isHS_decoration_name));
+  ATH_CHECK(effToolCfg.setProperty("OutputLevel", msg().level()));
+
   // Configure for NNJvt mode
   if (m_taggingAlg == JvtTagger::NNJvt){
 
     ATH_MSG_INFO("Configuring JetJvtEfficiency tool for NNJvt algorithm.");
+    selToolCfg.setTypeAndName("CP::NNJvtSelectionTool/JvtSelTool");
+    ATH_CHECK(selToolCfg.setProperty("JvtMomentName", "NNJvt"));
+    effToolCfg.setTypeAndName("CP::NNJvtEfficiencyTool/JvtEffTool");
+    
 
     // select cut file according to WP
     if (m_wp == "Default") { m_wp = "FixedEffPt"; }
@@ -96,18 +123,6 @@ StatusCode JetJvtEfficiency::initialize(){
           ATH_MSG_ERROR("Unkown NNJvt WP " << m_wp << ", choose between FixedEffPt (Default) and TightFwd.");
           return StatusCode::FAILURE;
         }
-    }
-
-    // point to latest recommendation if not explicitly specified
-    if (m_file.empty()) {
-      // no calibration in R22 yet so leave blank for now
-      m_file = "DummySFs.root"; // for reference: should be of the form "JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root"
-    }
-
-    // verify applicability of supplied SF file
-    if (m_file.find("DummySFs") == std::string::npos && m_file.find("NNJvtSFFile") == std::string::npos) {
-      ATH_MSG_WARNING("Supplied SF file " << m_file << " doesn't seem to contain SFs for NNJvt, falling back to dummy SFs ...");
-      m_file = "DummySFs.root";
     }
 
     // set a default SF decoration name if not explicitly specified
@@ -135,39 +150,14 @@ StatusCode JetJvtEfficiency::initialize(){
 
     // NNJvt tool will decorate decision on jets that we can retrieve
     m_passJvtDecName = "NNJvtPass";
-
-    // will not be used to evaluate the decisions but for completeness we will point to the correct moment
-    m_jetJvtMomentName = "NNJvt";
-
-    // configure NNJvt systematics
-    if (!addAffectingSystematic(NNJvtEfficiencyUp,true)	|| !addAffectingSystematic(NNJvtEfficiencyDown,true)) {
-	    ATH_MSG_ERROR("failed to set up NNJvt systematics");
-	    return StatusCode::FAILURE;
-    }
   }
   // configure for fJvt mode
   else if (m_taggingAlg == JvtTagger::fJvt){
 
     ATH_MSG_INFO("Configuring JetJvtEfficiency tool for fJvt algorithm.");
-
-    // select fJvt cut according to WP
-    if (m_wp == "Default") { m_wp = "Loose"; }
-    if (m_wp == "Loose") {
-      m_jvtCut = 0.5;
-      }
-    else if (m_wp == "Tight") {
-      m_jvtCut = 0.4;
-    }
-    else {
-      ATH_MSG_ERROR("Unkown fJvt WP, choose between Loose (Default) and Tight.");
-      return StatusCode::FAILURE;
-    }
-
-    // point to latest recommendation if not explicitly specified
-    if (m_file.empty()) {
-      // point to R21 recommendations until we have calibrations available
-       m_file = "JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root";
-    }
+    selToolCfg.setTypeAndName("CP::FJvtSelectionTool/JvtSelTool");
+    ATH_CHECK(selToolCfg.setProperty("JvtMomentName", "DFCommonJets_fJvt"));
+    effToolCfg.setTypeAndName("CP::FJvtEfficiencyTool/JvtEffTool");
 
     // set a default SF decoration name if not explicitly specified
     if (m_sf_decoration_name.empty()){
@@ -176,57 +166,28 @@ StatusCode JetJvtEfficiency::initialize(){
 
     // fJvt uses mu vs pT binning
     m_useMuBinsSF = true;
-
-    // fJvt scores are calculated at derivation level
-    m_jetJvtMomentName = "DFCommonJets_fJvt";
-
-    // configure fJvt systematics
-    if (!addAffectingSystematic(fJvtEfficiencyUp,true)	|| !addAffectingSystematic(fJvtEfficiencyDown,true)) {
-	    ATH_MSG_ERROR("failed to set up fJvt systematics");
-	    return StatusCode::FAILURE;
-    }
   }
   // configure for Jvt mode (deprecated)
   else {
 
+    bool ispflow = (m_jetContainerName.find("EMPFlow") != std::string::npos);
     ATH_MSG_INFO("Configuring JetJvtEfficiency tool for Jvt algorithm.");
     ATH_MSG_WARNING("Jvt is deprecated in R22 and no calibrations will be provided, please move to NNJvt.");
-
-    // configure cuts according to WP
-    bool ispflow = (m_jetContainerName.find("EMPFlow") != std::string::npos);
-    if (m_wp=="Default" && !ispflow) m_wp = "Medium";
-    if (m_wp=="Default" && ispflow) m_wp = "Tight";
-
-    m_jvtCutBorder = -2.;
-    if (m_wp=="Loose" && !ispflow) m_jvtCut = 0.11;
-    else if (m_wp=="Medium" && ispflow) m_jvtCut = 0.2;
-    else if (m_wp=="Tight" && ispflow) m_jvtCut = 0.5;
-    else if (m_wp=="Medium"){
-      m_jvtCut = 0.59;
-      m_jvtCutBorder = 0.11;
-    }
-    else if (m_wp=="Tight") m_jvtCut = 0.91;
-    else if (m_wp=="None") {
-      m_jvtCut = -2;
-      m_maxPtForJvt = 0;
-      m_wp = "Medium";
-    }
-    else {
-      ATH_MSG_ERROR("Invalid jvt working point name");
-      return StatusCode::FAILURE;
-    }
-
-    // point to latest recommendation if not explicitly specified
-    if (m_file.empty()) {
-      // point to R21 recommendations
-      m_file = "JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root";
-    }
-
+    selToolCfg.setTypeAndName("CP::JvtSelectionTool/JvtSelTool");
+    ATH_CHECK(selToolCfg.setProperty("IsPFlow", ispflow));
+    ATH_CHECK(selToolCfg.setProperty("JvtMomentName", m_jetJvtMomentName));
+    effToolCfg.setTypeAndName("CP::JvtEfficiencyTool/JvtEffTool");
+    ATH_CHECK(effToolCfg.setProperty("IsPFlow", ispflow));
     // set a default SF decoration name if not explicitly specified
     if (m_sf_decoration_name.empty()){
       m_sf_decoration_name = "JvtSF";
     }
   }
+
+  ATH_CHECK(selToolCfg.makePrivateTool(m_jvtSelTool));
+  ATH_CHECK(effToolCfg.makePrivateTool(m_jvtEffTool));
+  addAffectingSystematics(m_jvtEffTool->affectingSystematics());
+  ATH_CHECK(addRecommendedSystematics(m_jvtEffTool->recommendedSystematics()));
 
   if (m_file.find("DummySF") != std::string::npos) {
     m_useDummySFs = true;
@@ -239,11 +200,6 @@ StatusCode JetJvtEfficiency::initialize(){
     return StatusCode::FAILURE;
   }
 
-  // configurable accessors/decorators
-  m_jetJvtMomentAcc.reset(new SG::AuxElement::ConstAccessor<float>(m_jetJvtMomentName));
-  if (!m_passJvtDecName.empty()){
-    m_passJvtAcc.reset(new SG::AuxElement::ConstAccessor<char>(m_passJvtDecName));
-  }
   m_jetEtaAcc.reset(new SG::AuxElement::ConstAccessor<float>(m_jetEtaName));
   m_sfDec.reset(new SG::AuxElement::Decorator< float>(m_sf_decoration_name));
   m_isHSDec.reset(new SG::AuxElement::Decorator<char>(m_isHS_decoration_name));
@@ -252,156 +208,15 @@ StatusCode JetJvtEfficiency::initialize(){
     m_passORAcc.reset(new SG::AuxElement::ConstAccessor<char>(m_ORdec));
   }
 
-  if (!m_doTruthRequirement) ATH_MSG_WARNING ( "No truth requirement will be performed, which is not recommended.");
-
-  if (m_file.empty() || m_useDummySFs) return StatusCode::SUCCESS;
-
-  std::string filename = PathResolverFindCalibFile(m_file);
-  if (filename.empty()){
-    ATH_MSG_WARNING ( "Could NOT resolve file name " << m_file);
-  }  else{
-    ATH_MSG_INFO(" Path found = "<<filename);
-  }
-
-  std::unique_ptr<TFile> infile(TFile::Open( filename.c_str(), "READ" ));
-
-  std::string histname = "Jvt" + m_wp;
-
-  // Retrieve histogram containing SFs and their uncertainties
-  m_h_JvtHist.reset( dynamic_cast<TH2*>(infile->Get(histname.c_str())) );
-  if(!m_h_JvtHist){
-    ATH_MSG_ERROR("SF histogram named " << histname  << " for WP " << m_wp << " does not exist! Please check recommendatations for supported WPs.");
-    return StatusCode::FAILURE;
-  }
-  m_h_JvtHist->SetDirectory(0);
-
-  // Retrieve histogram containing efficiencies and their uncertainties
-  histname.replace(0,3,"Eff");
-  m_h_EffHist.reset( dynamic_cast<TH2*>(infile->Get(histname.c_str())) );
-  if(!m_h_EffHist){
-    ATH_MSG_ERROR("Efficiency histogram named " << histname << " for WP " << m_wp << " does not exist! Please check recommendatations for supported WPs.");
-    return StatusCode::FAILURE;
-  }
-  m_h_EffHist->SetDirectory(0);
-
-  if(m_h_JvtHist.get()==nullptr || m_h_EffHist.get()==nullptr) {
-    ATH_MSG_ERROR("Failed to retrieve histograms.");
-    return StatusCode::FAILURE;
-  }
-
-  // Check consistency between calibration file and tool configuration
-  if (m_h_JvtHist->GetXaxis()->GetBinUpEdge(m_h_JvtHist->GetNbinsX()) < m_maxPtForJvt) {
-    ATH_MSG_WARNING("Supplied calibration file does not extend up to " << m_maxPtForJvt/1e3 << " GeV, please check configuration.");
-  }
-
   return StatusCode::SUCCESS;
 }
 
 CorrectionCode JetJvtEfficiency::getEfficiencyScaleFactor( const xAOD::Jet& jet,float& sf ){
-    if (!isInRange(jet)) {
-      sf = 1;
-      return CorrectionCode::OutOfValidityRange;
-    }
-    if (m_doTruthRequirement) {
-        if(!m_isHSAcc->isAvailable(jet)) {
-            ATH_MSG_ERROR("Truth tagging required but decoration not available. Please call JetJvtEfficiency::tagTruth(...) first.");
-            return CorrectionCode::Error;
-        } else {
-            if (!(*m_isHSAcc)(jet)) {
-                sf = 1;
-                return CorrectionCode::Ok;
-            }
-        }
-    }
-
-    if (m_useDummySFs){
-      float baseFactor = 1.0;
-      float errorTerm = 0.1;
-
-      if      (m_appliedSystEnum == NNJVT_EFFICIENCY_UP   || m_appliedSystEnum == FJVT_EFFICIENCY_UP   ) baseFactor += errorTerm;
-      else if (m_appliedSystEnum == NNJVT_EFFICIENCY_DOWN || m_appliedSystEnum == FJVT_EFFICIENCY_DOWN ) baseFactor -= errorTerm;
-
-      sf = baseFactor;
-      return CorrectionCode::Ok;
-    }
-
-    int jetbin = 0;
-    if( m_useMuBinsSF ){ // fJVT SFs use(pT,mu) binning
-      const xAOD::EventInfo *eventInfo = nullptr;
-      if ( evtStore()->retrieve(eventInfo, "EventInfo").isFailure() )
-	{
-	  ATH_MSG_ERROR(" Could not retrieve EventInfo ");
-	  return CorrectionCode::Error;
-	}
-      jetbin = m_h_JvtHist->FindBin(jet.pt(),eventInfo->actualInteractionsPerCrossing());
-    } else {
-      jetbin = m_h_JvtHist->FindBin(jet.pt(),std::abs((*m_jetEtaAcc)(jet)));
-    }
-
-    float baseFactor = m_h_JvtHist->GetBinContent(jetbin);
-    float errorTerm  = m_h_JvtHist->GetBinError(jetbin);
-
-    if      (m_appliedSystEnum == NNJVT_EFFICIENCY_UP   || m_appliedSystEnum == FJVT_EFFICIENCY_UP   ) baseFactor += errorTerm;
-    else if (m_appliedSystEnum == NNJVT_EFFICIENCY_DOWN || m_appliedSystEnum == FJVT_EFFICIENCY_DOWN ) baseFactor -= errorTerm;
-
-    sf = baseFactor;
-    return CorrectionCode::Ok;
+  return m_jvtEffTool->getEfficiencyScaleFactor(jet, sf);
 }
 
 CorrectionCode JetJvtEfficiency::getInefficiencyScaleFactor( const xAOD::Jet& jet,float& sf ){
-    if (!isInRange(jet)) {
-      sf = 1;
-      return CorrectionCode::OutOfValidityRange;
-    }
-    if (m_doTruthRequirement) {
-        if(!m_isHSAcc->isAvailable(jet)) {
-            ATH_MSG_ERROR("Truth tagging required but decoration not available. Please call JetJvtEfficiency::tagTruth(...) first.");
-            return CorrectionCode::Error;
-        } else {
-            if(!(*m_isHSAcc)(jet)) {
-                sf = 1;
-                return CorrectionCode::Ok;
-            }
-        }
-    }
-
-    if (m_useDummySFs){
-      float baseFactor = 1.0;
-      float errorTerm = 0.1;
-
-      if      (m_appliedSystEnum == NNJVT_EFFICIENCY_UP   || m_appliedSystEnum == FJVT_EFFICIENCY_UP   ) baseFactor += errorTerm;
-      else if (m_appliedSystEnum == NNJVT_EFFICIENCY_DOWN || m_appliedSystEnum == FJVT_EFFICIENCY_DOWN ) baseFactor -= errorTerm;
-
-      sf = baseFactor;
-      return CorrectionCode::Ok;
-    }
-
-    int jetbin = 0;
-    if( m_useMuBinsSF ){
-      const xAOD::EventInfo *eventInfo = nullptr;
-      if ( evtStore()->retrieve(eventInfo, "EventInfo").isFailure() )
-	{
-	  ATH_MSG_ERROR(" Could not retrieve EventInfo ");
-	  return CorrectionCode::Error;
-	}
-      jetbin = m_h_JvtHist->FindBin(jet.pt(),eventInfo->actualInteractionsPerCrossing());
-    } else {
-      jetbin = m_h_JvtHist->FindBin(jet.pt(),std::abs((*m_jetEtaAcc)(jet)));
-    }
-
-    float baseFactor = m_h_JvtHist->GetBinContent(jetbin);
-    float effFactor = m_h_EffHist->GetBinContent(jetbin);
-    float errorTerm  = m_h_JvtHist->GetBinError(jetbin);
-    float errorEffTerm  = m_h_EffHist->GetBinError(jetbin);
-
-    if      (m_appliedSystEnum == NNJVT_EFFICIENCY_UP   || m_appliedSystEnum == FJVT_EFFICIENCY_UP   ) baseFactor += errorTerm;
-    else if (m_appliedSystEnum == NNJVT_EFFICIENCY_DOWN || m_appliedSystEnum == FJVT_EFFICIENCY_DOWN ) baseFactor -= errorTerm;
-
-    if      (m_appliedSystEnum == NNJVT_EFFICIENCY_UP   || m_appliedSystEnum == FJVT_EFFICIENCY_UP   ) effFactor += errorEffTerm;
-    else if (m_appliedSystEnum == NNJVT_EFFICIENCY_DOWN || m_appliedSystEnum == FJVT_EFFICIENCY_DOWN ) effFactor -= errorEffTerm;
-
-    sf = (1-baseFactor*effFactor)/(1-effFactor);
-    return CorrectionCode::Ok;
+  return m_jvtEffTool->getInefficiencyScaleFactor(jet, sf);
 }
 
 CorrectionCode JetJvtEfficiency::applyEfficiencyScaleFactor(const xAOD::Jet& jet) {
@@ -477,21 +292,7 @@ StatusCode JetJvtEfficiency::recalculateScores(const xAOD::JetContainer& jets) c
 
 bool JetJvtEfficiency::passesJvtCut(const xAOD::Jet& jet) const {
   ATH_MSG_DEBUG("In JetJvtEfficiency::passesJvtCut ()");
-  if (!isInRange(jet)) return true;
-  // Jvt (deprecated)
-  if (m_taggingAlg == JvtTagger::Jvt) {
-    if (std::abs((*m_jetEtaAcc)(jet))>2.4 && std::abs((*m_jetEtaAcc)(jet))<2.5) return (*m_jetJvtMomentAcc)(jet)>m_jvtCutBorder;
-    return (*m_jetJvtMomentAcc)(jet)>m_jvtCut;
-  }
-  // NNJvt
-  else if (m_taggingAlg == JvtTagger::NNJvt) {
-    return bool((*m_passJvtAcc)(jet));
-  }
-  // fJvt
-  else {
-    return ((*m_jetJvtMomentAcc)(jet) <= m_jvtCut) && (std::abs(acc_jetTiming(jet)) <= 10.0);
-  }
-
+  return bool(m_jvtSelTool->accept(&jet));
 }
 
 bool JetJvtEfficiency::isInRange(const xAOD::Jet& jet) const {
@@ -524,24 +325,7 @@ bool JetJvtEfficiency::isInRange(const xAOD::Jet& jet) const {
 }
 
 StatusCode JetJvtEfficiency::sysApplySystematicVariation(const CP::SystematicSet& systSet){
-  m_appliedSystEnum = NONE;
-  if (systSet.size()==0) {
-    ATH_MSG_DEBUG("No affecting systematics received.");
-    return StatusCode::SUCCESS;
-  } else if (systSet.size()>1) {
-    ATH_MSG_WARNING("Tool does not support multiple systematics, returning unsupported" );
-    return StatusCode::FAILURE;
-  }
-  SystematicVariation systVar = *systSet.begin();
-  if (systVar == SystematicVariation("")) m_appliedSystEnum = NONE;
-  else if (m_taggingAlg == JvtTagger::NNJvt && systVar == NNJvtEfficiencyUp   ) m_appliedSystEnum = NNJVT_EFFICIENCY_UP;
-  else if (m_taggingAlg == JvtTagger::NNJvt && systVar == NNJvtEfficiencyDown ) m_appliedSystEnum = NNJVT_EFFICIENCY_DOWN;
-  else if (m_taggingAlg == JvtTagger::fJvt  && systVar == fJvtEfficiencyUp    ) m_appliedSystEnum = FJVT_EFFICIENCY_UP;
-  else if (m_taggingAlg == JvtTagger::fJvt  && systVar == fJvtEfficiencyDown  ) m_appliedSystEnum = FJVT_EFFICIENCY_DOWN;
-  else m_appliedSystEnum = NONE;
-
-  ATH_MSG_DEBUG("applied systematic is " << m_appliedSystEnum);
-  return StatusCode::SUCCESS;
+  return m_jvtEffTool->applySystematicVariation(systSet);
 }
 
 StatusCode JetJvtEfficiency::tagTruth(const xAOD::IParticleContainer *jets,const xAOD::IParticleContainer *truthJets) {

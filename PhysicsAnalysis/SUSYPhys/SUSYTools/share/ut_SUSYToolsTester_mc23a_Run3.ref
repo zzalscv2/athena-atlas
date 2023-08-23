@@ -11,6 +11,10 @@ ToolSvc.JVTEfficiencyToolWARNING Supplied SF file JetJvtEfficiency/Moriond2018/J
 
 
 
+ToolSvc.JVTEfficiencyT...WARNING No JetContainer set. This behaviour is deprecated
+ToolSvc.JVTEfficiencyT...WARNING No JetContainer set. This behaviour is deprecated
+ToolSvc.FJVTEfficiency...WARNING No JetContainer set. This behaviour is deprecated
+ToolSvc.FJVTEfficiency...WARNING No JetContainer set. This behaviour is deprecated
 SUSYObjDef_xAOD          WARNING *** THE ELECTRON TRIGGER SF MIXED AND SF DILEP ARE CURRENTY NOT SUPPORTED IN RUN3 ***
 SUSYObjDef_xAOD          WARNING *** THE ELECTRON CHARGE FLIP SF ARE CURRENTY NOT SUPPORTED ***
 SUSYObjDef_xAOD          WARNING No Photon trigger SF available for FixedCutTight, using TightCaloOnly instead... Use at your own risk
@@ -84,6 +88,8 @@ CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiK
 
 
 
+ToolSvc.METMaker_ST_Ti...WARNING No JetContainer set. This behaviour is deprecated
+ToolSvc.METMaker_ST_Ti...WARNING No JetContainer set. This behaviour is deprecated
 ToolSvc.metSignificanc...WARNING Setup the muon calibration tool with calib mode 1. Please consider to configure the tool via the 'MuonCalibTool' property.
 ToolSvc.TauEffTool_MediumWARNING Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (410000). Will only print this warning once.
 Warning in <CP::TPileupReweighting::Initialize>: has 0.061070% unrepresented data. This was reassigned (UnrepresentedDataAction=3)

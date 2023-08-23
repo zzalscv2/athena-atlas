@@ -281,10 +281,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         alg = createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
         addPrivateTool( alg, 'efficiencyTool', 'CP::JetJvtEfficiency' )
         if jetInput == 'EMPFlow':
-            alg.efficiencyTool.SFFile = 'JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root'
             alg.efficiencyTool.MaxPtForJvt = 60e3
         else:
-            alg.efficiencyTool.SFFile = 'JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root'
             alg.efficiencyTool.MaxPtForJvt = 120e3
         alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.NNJvt
         alg.efficiencyTool.WorkingPoint = 'FixedEffPt'

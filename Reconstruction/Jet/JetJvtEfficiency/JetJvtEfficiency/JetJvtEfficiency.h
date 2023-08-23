@@ -6,6 +6,8 @@
 #define JETJVTEFFICIENCYSCALEFACTORS_H_
 
 #include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
+#include "JetAnalysisInterfaces/IJvtEfficiencyTool.h"
+#include "PATCore/IAsgSelectionTool.h"
 #include "JetInterface/IJetDecorator.h"
 #include "PATInterfaces/SystematicsTool.h"
 #include "AsgTools/AsgTool.h"
@@ -73,6 +75,8 @@ private:
     SystApplied m_appliedSystEnum;
 
     ToolHandle<JetPileupTag::JetVertexNNTagger>  m_NNJvtTool_handle;
+    ToolHandle<IAsgSelectionTool> m_jvtSelTool;
+    ToolHandle<IJvtEfficiencyTool> m_jvtEffTool;
 
     int m_tagger;
     std::string m_wp;
@@ -100,8 +104,6 @@ private:
     float m_jvtCutBorder;
 
     // configurable accessors/decorators
-    std::unique_ptr<SG::AuxElement::ConstAccessor< float > > m_jetJvtMomentAcc;
-    std::unique_ptr<SG::AuxElement::ConstAccessor< char > > m_passJvtAcc;
     std::unique_ptr<SG::AuxElement::ConstAccessor< float > > m_jetEtaAcc;
     std::unique_ptr<SG::AuxElement::ConstAccessor< char > > m_passORAcc;
     std::unique_ptr<SG::AuxElement::Decorator< float > > m_sfDec;
