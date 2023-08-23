@@ -575,7 +575,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
     configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
-    configSeq.setOptionValue ('.noEfficiency', False)
+    configSeq.setOptionValue ('.noEffSF', False)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
@@ -583,7 +583,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
         configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
-        configSeq.setOptionValue ('.noEfficiency', False)
+        configSeq.setOptionValue ('.noEffSF', False)
         configSeq.setOptionValue ('.legacyRecommendations', True)
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)

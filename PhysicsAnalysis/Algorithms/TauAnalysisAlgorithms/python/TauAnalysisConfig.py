@@ -64,6 +64,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('postfix', None, type=str)
         self.addOption ('quality', None, type=str)
         self.addOption ('legacyRecommendations', False, type=bool)
+        self.addOption ('noEffSF', False, type=bool)
 
     def createCommonSelectionTool (self, config, tauSelectionAlg, configPath, postfix) :
 
@@ -124,7 +125,7 @@ class TauWorkingPointConfig (ConfigBlock) :
 
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlg' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
@@ -168,7 +169,8 @@ def makeTauCalibrationConfig( seq, containerName, postfix = None,
 
 
 def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                               legacyRecommendations = None):
+                               legacyRecommendations = None,
+                               noEffSF = None ):
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
@@ -177,6 +179,7 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
+      noEffSF -- Disables the calculation of efficiencies and scale factors
     """
 
     config = TauWorkingPointConfig (containerName, postfix)
@@ -186,4 +189,5 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
             raise ValueError ('working point should be of format "quality", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
     config.setOptionValue ('legacyRecommendations', legacyRecommendations, noneAction='ignore')
+    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
     seq.append (config)

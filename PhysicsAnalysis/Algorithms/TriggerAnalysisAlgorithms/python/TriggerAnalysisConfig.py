@@ -21,6 +21,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         self.addOption ('electrons', '', type=str)
         self.addOption ('muons', '', type=str)
         self.addOption ('photons', '', type=str)
+        self.addOption ('noEffSF', False, type=bool)
 
     def makeTriggerDecisionAlg(self, config):
 
@@ -78,7 +79,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         return
 
-    def makeTriggerGlobalEffCorrAlg(self, config, decisionTool, matchingTool):
+    def makeTriggerGlobalEffCorrAlg(self, config, decisionTool, matchingTool, noSF):
 
         alg = config.createAlgorithm( 'CP::TrigGlobalEfficiencyAlg', 'TrigGlobalSFAlg' )
         if config.geometry() == LHCPeriod.Run3:
@@ -94,7 +95,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.scaleFactorDecoration = 'globalTriggerEffSF_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch_%SYS%'
         alg.eventDecisionOutputDecoration = 'dontsave_%SYS%'
-        alg.doMatchingOnly = config.dataType() == 'data'
+        alg.doMatchingOnly = config.dataType() == 'data' or noSF
         alg.noFilter = self.noFilter
         alg.electronID = self.electronID
         alg.electronIsol = self.electronIsol
@@ -138,7 +139,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         # Calculate multi-lepton (electron/muon/photon) trigger efficiencies and SFs
         if self.triggerChainsPerYear:
-            self.makeTriggerGlobalEffCorrAlg(config, decisionTool, matchingTool)
+            self.makeTriggerGlobalEffCorrAlg(config, decisionTool, matchingTool, self.noEffSF)
 
         return
 
@@ -154,6 +155,7 @@ def makeTriggerAnalysisConfig( seq,
                                electrons = None,
                                muons = None,
                                photons = None,
+                               noEffSF = None,
                                configName = 'Trigger'):
     """Create a basic trigger analysis algorithm sequence
 
@@ -163,6 +165,7 @@ def makeTriggerAnalysisConfig( seq,
       triggerChainsForSelection -- a list of trigger chains to be used for trigger selection, only set it if you need a different setup than for SFs!
       prescaleLumiCalcFiles -- a list of lumicalc files to calculate trigger prescales
       noFilter -- do not apply an event filter (i.e. don't skip any events)
+      noEffSF -- Disables the calculation of efficiencies and scale factors (just matching)
     """
 
     config = TriggerAnalysisBlock (configName)
@@ -189,4 +192,5 @@ def makeTriggerAnalysisConfig( seq,
     config.setOptionValue('electrons', electrons, noneAction='ignore')
     config.setOptionValue('muons', muons, noneAction='ignore')
     config.setOptionValue('photons', photons, noneAction='ignore')
+    config.setOptionValue('noEffSF', noEffSF, noneAction='ignore')
     seq.append (config)
