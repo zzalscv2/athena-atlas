@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJet/JetAttributes.h"
@@ -159,7 +159,7 @@ StatusCode JetTagMonitoring::initialize() {
   }
 
   if (!m_use_trigdectool) {
-    m_trigDecTool.disable();
+    m_jtmTrigDecTool.disable();
   }
 
   if ( m_switch_off )
@@ -602,20 +602,20 @@ StatusCode JetTagMonitoring::fillHistograms() {
   //* Trigger container       *//
   ///////////////////////////////
 
-  if (m_use_trigdectool && m_trigDecTool != 0) { // only require trigger if m_use_trigdectool is true (false for express stream) and trigDecTool is ok
+  if (m_use_trigdectool && m_jtmTrigDecTool != 0) { // only require trigger if m_use_trigdectool is true (false for express stream) and trigDecTool is ok
 
-    ATH_MSG_DEBUG("TrigDecTool: " << m_trigDecTool);
+    ATH_MSG_DEBUG("TrigDecTool: " << m_jtmTrigDecTool);
 
-    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_trigDecTool->isPassed(" << m_ElectronTrigger_2016 << "): " << m_trigDecTool->isPassed(m_ElectronTrigger_2016));
-    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_trigDecTool->isPassed(" << m_MuonTrigger_2016 << "): " << m_trigDecTool->isPassed(m_MuonTrigger_2016));
+    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_jtmTrigDecTool->isPassed(" << m_ElectronTrigger_2016 << "): " << m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2016));
+    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_jtmTrigDecTool->isPassed(" << m_MuonTrigger_2016 << "): " << m_jtmTrigDecTool->isPassed(m_MuonTrigger_2016));
     
-    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_trigDecTool->isPassed(" << m_ElectronTrigger_2017 << "): " << m_trigDecTool->isPassed(m_ElectronTrigger_2017));
-    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_trigDecTool->isPassed(" << m_MuonTrigger_2017 << "): " << m_trigDecTool->isPassed(m_MuonTrigger_2017));
+    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_jtmTrigDecTool->isPassed(" << m_ElectronTrigger_2017 << "): " << m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2017));
+    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_jtmTrigDecTool->isPassed(" << m_MuonTrigger_2017 << "): " << m_jtmTrigDecTool->isPassed(m_MuonTrigger_2017));
 
-    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_trigDecTool->isPassed(" << m_ElectronTrigger_201X << "): " << m_trigDecTool->isPassed(m_ElectronTrigger_201X));
-    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_trigDecTool->isPassed(" << m_MuonTrigger_201X << "): " << m_trigDecTool->isPassed(m_MuonTrigger_201X));
+    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_jtmTrigDecTool->isPassed(" << m_ElectronTrigger_201X << "): " << m_jtmTrigDecTool->isPassed(m_ElectronTrigger_201X));
+    ATH_MSG_DEBUG("m_use_trigdectool: " << m_use_trigdectool << ", (m_jtmTrigDecTool->isPassed(" << m_MuonTrigger_201X << "): " << m_jtmTrigDecTool->isPassed(m_MuonTrigger_201X));
     
-    auto chainGroup = m_trigDecTool->getChainGroup(".*");
+    auto chainGroup = m_jtmTrigDecTool->getChainGroup(".*");
     for (auto & trig : chainGroup->getListOfTriggers()) {
       ATH_MSG_DEBUG("Found trigger " << trig);
     }
@@ -634,24 +634,24 @@ StatusCode JetTagMonitoring::fillHistograms() {
 	m_trigPassed->GetXaxis()->SetBinLabel(8,"");
 	m_trigPassed->GetXaxis()->SetBinLabel(9,"");
 	// 201X menu triggers
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_201X)) m_trigPassed->Fill(1.);
-	if (m_trigDecTool->isPassed(m_MuonTrigger_201X)) m_trigPassed->Fill(2.);
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_201X) || m_trigDecTool->isPassed(m_MuonTrigger_201X)) m_trigPassed->Fill(3.);
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_201X) && m_trigDecTool->isPassed(m_MuonTrigger_201X)) m_trigPassed->Fill(4.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_201X)) m_trigPassed->Fill(1.);
+	if (m_jtmTrigDecTool->isPassed(m_MuonTrigger_201X)) m_trigPassed->Fill(2.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_201X) || m_jtmTrigDecTool->isPassed(m_MuonTrigger_201X)) m_trigPassed->Fill(3.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_201X) && m_jtmTrigDecTool->isPassed(m_MuonTrigger_201X)) m_trigPassed->Fill(4.);
       }
     else
       {
 	// 2016 menu
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_2016)) m_trigPassed->Fill(1.);
-	if (m_trigDecTool->isPassed(m_MuonTrigger_2016)) m_trigPassed->Fill(2.);
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_2016) && m_trigDecTool->isPassed(m_MuonTrigger_2016)) m_trigPassed->Fill(3.);
-	if (m_trigDecTool->isPassed(m_JetTrigger_2016)) m_trigPassed->Fill(4.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2016)) m_trigPassed->Fill(1.);
+	if (m_jtmTrigDecTool->isPassed(m_MuonTrigger_2016)) m_trigPassed->Fill(2.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2016) && m_jtmTrigDecTool->isPassed(m_MuonTrigger_2016)) m_trigPassed->Fill(3.);
+	if (m_jtmTrigDecTool->isPassed(m_JetTrigger_2016)) m_trigPassed->Fill(4.);
 	
 	// 2017 menu
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_2017)) m_trigPassed->Fill(5.);
-	if (m_trigDecTool->isPassed(m_MuonTrigger_2017)) m_trigPassed->Fill(6.);
-	if (m_trigDecTool->isPassed(m_ElectronTrigger_2017) && m_trigDecTool->isPassed(m_MuonTrigger_2017)) m_trigPassed->Fill(7.);
-	if (m_trigDecTool->isPassed(m_JetTrigger_2017)) m_trigPassed->Fill(8.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2017)) m_trigPassed->Fill(5.);
+	if (m_jtmTrigDecTool->isPassed(m_MuonTrigger_2017)) m_trigPassed->Fill(6.);
+	if (m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2017) && m_jtmTrigDecTool->isPassed(m_MuonTrigger_2017)) m_trigPassed->Fill(7.);
+	if (m_jtmTrigDecTool->isPassed(m_JetTrigger_2017)) m_trigPassed->Fill(8.);
       }
   }
 
@@ -727,18 +727,18 @@ StatusCode JetTagMonitoring::fillHistograms() {
   //     double vtxProb  = vtxChiSq / vtxNDoF;
       
 
-  if (m_use_trigdectool && m_trigDecTool != 0) { // only require trigger if m_use_trigdectool is true (will be false eg for express stream) and trigDecTool is ok
+  if (m_use_trigdectool && m_jtmTrigDecTool != 0) { // only require trigger if m_use_trigdectool is true (will be false eg for express stream) and trigDecTool is ok
     // Require emu tigger to have unbiased sample of jets (and larger fraction of b-jets since many of these are ttbar events)
 
   if(m_runNumber > 343000) // 2018 data
     {
-      if (!m_trigDecTool->isPassed(m_ElectronTrigger_201X) && !m_trigDecTool->isPassed(m_MuonTrigger_201X)) // 201X menu triggers
+      if (!m_jtmTrigDecTool->isPassed(m_ElectronTrigger_201X) && !m_jtmTrigDecTool->isPassed(m_MuonTrigger_201X)) // 201X menu triggers
       return StatusCode::SUCCESS;
     }
   else
     {
-      if (!m_trigDecTool->isPassed(m_ElectronTrigger_2016) && !m_trigDecTool->isPassed(m_MuonTrigger_2016) && // 2016 menu
-	  !m_trigDecTool->isPassed(m_ElectronTrigger_2017) && !m_trigDecTool->isPassed(m_MuonTrigger_2017)) // 2017 menu
+      if (!m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2016) && !m_jtmTrigDecTool->isPassed(m_MuonTrigger_2016) && // 2016 menu
+	  !m_jtmTrigDecTool->isPassed(m_ElectronTrigger_2017) && !m_jtmTrigDecTool->isPassed(m_MuonTrigger_2017)) // 2017 menu
 	return StatusCode::SUCCESS;
     }
   }
