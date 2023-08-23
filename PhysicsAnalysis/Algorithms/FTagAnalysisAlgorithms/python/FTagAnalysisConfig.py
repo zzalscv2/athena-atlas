@@ -15,7 +15,7 @@ class FTagConfig (ConfigBlock):
         self.addOption ('btagger', "DL1r", type=str)
         self.addOption ('generator', "default", type=str)
         self.addOption ('kinematicSelection', True, type=bool)
-        self.addOption ('noEfficiency', False, type=bool)
+        self.addOption ('noEffSF', False, type=bool)
         self.addOption ('legacyRecommendations', False, type=bool)
         self.addOption ('minPt', None, type=float)
         self.addOption ('bTagCalibFile', None, type=str,
@@ -119,7 +119,7 @@ class FTagConfig (ConfigBlock):
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'ftag_quantile_' + selectionName, selectionName + '_quantile', noSys=True)
 
-        if not self.noEfficiency and config.dataType() != 'data':
+        if not self.noEffSF and config.dataType() != 'data':
             # Set up the efficiency calculation algorithm:
             alg = config.createAlgorithm( 'CP::BTaggingEfficiencyAlg',
                                           'FTagEfficiencyScaleFactorAlg' + postfix )
@@ -151,7 +151,7 @@ def makeFTagAnalysisConfig( seq, containerName,
                             btagger = None,
                             generator = None,
                             kinematicSelection = None,
-                            noEfficiency = None,
+                            noEffSF = None,
                             legacyRecommendations = None,
                             minPt = None ):
     """Create a ftag analysis algorithm config
@@ -161,7 +161,7 @@ def makeFTagAnalysisConfig( seq, containerName,
       btagger -- Flavour tagger
       generator -- Generator for MC/MC scale factors
       kinematicSelection -- Wether to run kinematic selection
-      noEfficiency -- Wether to run efficiencies calculation
+      noEffSF -- Disables efficiency and scale factor calculations
       legacyRecommendations -- Use legacy recommendations without shallow copied containers
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
@@ -175,8 +175,8 @@ def makeFTagAnalysisConfig( seq, containerName,
         config.setOptionValue ('generator', generator)
     if kinematicSelection is not None :
         config.setOptionValue ('kinematicSelection', kinematicSelection)
-    if noEfficiency is not None :
-        config.setOptionValue ('noEfficiency', noEfficiency)
+    if noEffSF is not None :
+        config.setOptionValue ('noEffSF', noEffSF)
     if legacyRecommendations is not None :
         config.setOptionValue ('legacyRecommendations', legacyRecommendations)
     if minPt is not None :

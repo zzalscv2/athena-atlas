@@ -93,6 +93,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('qualitySelectionOutput', True, type=bool)
         self.addOption ('systematicBreakdown', False, type=bool)
         self.addOption ('onlyRecoEffSF', False, type=bool)
+        self.addOption ('noEffSF', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -149,7 +150,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                  bits=1, preselection=self.qualitySelectionOutput)
 
         # Set up the reco/ID efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and (not self.noEffSF or self.onlyRecoEffSF):
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -166,7 +167,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
 
         # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and self.quality == 'HighPt' and not self.onlyRecoEffSF:
+        if config.dataType() != 'data' and self.quality == 'HighPt' and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgBMVHighPt' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -183,7 +184,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'BadMuonVeto_effSF' + postfix)
 
         # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and self.isolation != 'NonIso' and not self.onlyRecoEffSF:
+        if config.dataType() != 'data' and self.isolation != 'NonIso' and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -200,7 +201,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
 
         # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() != 'data' and not self.onlyRecoEffSF:
+        if config.dataType() != 'data' and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgTTVA' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -255,7 +256,9 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
                                 qualitySelectionOutput = None,
-                                systematicBreakdown = None):
+                                systematicBreakdown = None,
+                                noEffSF = None,
+                                onlyRecoEffSF = None ):
     """Create muon analysis algorithms for a single working point
 
     Keyword arguments:
@@ -267,6 +270,8 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
       qualitySelectionOutput -- Whether or not to apply muon quality selection
                                 when creating output containers.
       systematicBreakdown -- enables the full breakdown of eff SF systematics
+      noEffSF -- Disables the calculation of efficiencies and scale factors
+      onlyRecoEffSF -- Only enables the reconstruction scale factor
     """
 
 
@@ -279,4 +284,6 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
         config.setOptionValue ('isolation', splitWP[1])
     config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput, noneAction='ignore')
     config.setOptionValue ('systematicBreakdown', systematicBreakdown, noneAction='ignore')
+    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
+    config.setOptionValue ('onlyRecoEffSF', onlyRecoEffSF, noneAction='ignore')
     seq.append (config)

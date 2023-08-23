@@ -288,7 +288,8 @@ def makePhotonCalibrationConfig( seq, containerName,
 
 
 def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                  recomputeIsEM = None ):
+                                  recomputeIsEM = None,
+                                  noEffSF = None ):
     """Create photon analysis algorithms for a single working point
 
     Keywrod arguments:
@@ -298,6 +299,7 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
                  sequence with multiple working points to ensure all
                  names are unique.
       recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
+      noEffSF -- Disables the calculation of efficiencies and scale factors
     """
 
     config = PhotonWorkingPointConfig (containerName, postfix)
@@ -308,4 +310,5 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
         config.setOptionValue ('qualityWP',     splitWP[0])
         config.setOptionValue ('isolationWP',   splitWP[1])
     config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
+    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
     seq.append (config)

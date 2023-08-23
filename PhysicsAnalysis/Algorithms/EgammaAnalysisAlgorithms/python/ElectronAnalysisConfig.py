@@ -347,7 +347,8 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                                     postfix,
                                     recomputeLikelihood = None,
-                                    chargeIDSelection = None ):
+                                    chargeIDSelection = None,
+                                    noEffSF = None ):
     """Create electron analysis configuration blocks
 
     Keyword arguments:
@@ -358,6 +359,7 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
                  names are unique.
       recomputeLikelihood -- Whether to rerun the LH. If not, use derivation flags
       chargeIDSelection -- Whether or not to perform charge ID/flip selection
+      noEffSF -- Disables the calculation of efficiencies and scale factors
     """
 
 
@@ -370,4 +372,5 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
         config.setOptionValue ('isolationWP', splitWP[1])
     config.setOptionValue ('recomputeLikelihood', recomputeLikelihood, noneAction='ignore')
     config.setOptionValue ('chargeIDSelection', chargeIDSelection, noneAction='ignore')
+    config.setOptionValue ('noEffSF', noEffSF, noneAction='ignore')
     seq.append (config)
