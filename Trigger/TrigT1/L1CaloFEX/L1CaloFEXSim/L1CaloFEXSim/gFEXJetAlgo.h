@@ -56,10 +56,6 @@ namespace LVL1 {
 
     virtual void gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum) const;
 
-    virtual void blkOutAB(const gTowersCentral& blocks,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutL, std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndL,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutR, std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndR ) const;
-
     virtual void gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const;
 
     virtual void gBlockMax192(const gTowersJetEngine& gBlkSum, std::array<int, 3> & gBlockVp, std::array<int, 3> & gBlockEtap, std::array<int, 3> & gBlockPhip, int index) const;
@@ -79,8 +75,8 @@ namespace LVL1 {
                            std::array<int, 32> &jetOutL, std::array<int, 32> &etaIndL,
                            std::array<int, 32> &jetOutR, std::array<int, 32> &etaIndR) const;
 
-    virtual void gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOut,
-                             std::array<int, FEXAlgoSpaceDefs::ABCrows> etaInd,
+    virtual void gJetTOBgen(const std::array<int, FEXAlgoSpaceDefs::ABCrows>& jetOut,
+			     const std::array<int, FEXAlgoSpaceDefs::ABCrows>& etaInd,
                              int TOBnum, int jetThreshold, std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBs,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBv,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBeta,
