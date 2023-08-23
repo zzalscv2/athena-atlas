@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MuPlusDpstCascade_H
 #define MuPlusDpstCascade_H
@@ -8,6 +8,7 @@
 //
 // Eva Bouhova <e.bouhova@cern.ch>
 // Adam Barton <abarton@cern.ch>
+// Laily Sultanaliyeva <laily.sultanaliyeva@cern.ch>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -44,13 +45,19 @@ namespace DerivationFramework {
         MuPlusDpstCascade(const std::string& t, const std::string& n, const IInterface*  p);
         ~MuPlusDpstCascade();
         virtual StatusCode initialize() override;
-        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer ) const;
+        StatusCode performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<std::vector<Trk::VxCascadeInfo*>> *cascadeinfoContainer2 ) const;
+        StatusCode performSearchPlusTrk(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer2 ) const;
+        //static bool isContainedIn(const xAOD::TrackParticle* theTrack, std::vector<const xAOD::Vertex*>  theColl);
+        static bool isContainedIn(const xAOD::TrackParticle* theTrack, std::vector<const xAOD::TrackParticle*>  theColl);
+        static double getInvariantMass(const std::vector<const xAOD::TrackParticle*> &Tracks, const std::vector<double> &massHypotheses);
+
         virtual StatusCode addBranches() const override;
 
       private:
         std::string m_vertexContainerKey;
         std::string m_vertexD0ContainerKey;
         std::vector<std::string> m_cascadeOutputsKeys;
+        std::vector<std::string> m_cascadeOutputsKeysAdd;
 
         std::string m_VxPrimaryCandidateName;   //!< Name of primary vertex container
 
@@ -70,7 +77,6 @@ namespace DerivationFramework {
         double m_vtx1Daug1MassHypo; // mass hypothesis of 1st daughter from vertex 1
         double m_vtx1Daug2MassHypo; // mass hypothesis of 2nd daughter from vertex 1
 
-
         int    m_Dx_pid;
         bool   m_constrD0;
         bool   m_constrMuPi;
@@ -78,9 +84,11 @@ namespace DerivationFramework {
 
         ServiceHandle<IBeamCondSvc>                      m_beamSpotSvc;
         ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
+        ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter2;
         ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
         ToolHandle < Trk::V0Tools >                      m_V0Tools;
         ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+        ToolHandle < DerivationFramework::CascadeTools > m_CascadeToolsAdd;
         std::unique_ptr<InDet::InDetTrackSelectionTool>  m_trackSelectionTools;
 
         bool        m_refitPV;

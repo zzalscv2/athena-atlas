@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // MuPlusDpstCascade.cxx, (c) ATLAS Detector software
@@ -25,17 +25,21 @@ namespace DerivationFramework {
     typedef ElementLink<xAOD::VertexContainer> VertexLink;
     typedef std::vector<VertexLink> VertexLinkVector;
     typedef std::vector<const xAOD::TrackParticle*> TrackBag;
+    typedef ElementLink<xAOD::TrackParticleContainer> TrackLink;
+    typedef std::vector<TrackLink> TrackLinkVector;
 
 
     StatusCode MuPlusDpstCascade::initialize() {
         // retrieving vertex Fitter
         ATH_CHECK( m_iVertexFitter.retrieve());
-        
+        ATH_CHECK( m_iVertexFitter2.retrieve());
+
         // retrieving the V0 tools
         ATH_CHECK( m_V0Tools.retrieve());
 
         // retrieving the Cascade tools
         ATH_CHECK( m_CascadeTools.retrieve());
+        ATH_CHECK( m_CascadeToolsAdd.retrieve());
 
         // Get the beam spot service
         ATH_CHECK( m_beamSpotSvc.retrieve() );
@@ -67,10 +71,17 @@ namespace DerivationFramework {
     {
 
     std::vector<Trk::VxCascadeInfo*> cascadeinfoContainer;
+        std::vector<std::vector<Trk::VxCascadeInfo*>> cascadeinfoContainer2; //several additional cascade fits with tracks for each B candidate
+        std::vector<bool> chiPR;
       constexpr int topoN = 2;
       std::array<xAOD::VertexContainer*, topoN> Vtxwritehandles;
       std::array<xAOD::VertexAuxContainer*, topoN> Vtxwritehandlesaux;
-      if(m_cascadeOutputsKeys.size() !=topoN)  { ATH_MSG_FATAL("Incorrect number of VtxContainers"); return StatusCode::FAILURE; }
+      if(m_cascadeOutputsKeys.size() !=topoN)  { ATH_MSG_ERROR("Incorrect number of VtxContainers"); return StatusCode::FAILURE; }
+        
+        std::array<xAOD::VertexContainer*, topoN> VtxwritehandlesAdd;
+        std::array<xAOD::VertexAuxContainer*, topoN> VtxwritehandlesauxAdd;
+
+        if(m_cascadeOutputsKeysAdd.size() !=topoN)  { ATH_MSG_ERROR("Incorrect number of VtxContainers for additional cascade"); return StatusCode::FAILURE; }
 
       for(int i =0; i<topoN;i++){
          Vtxwritehandles[i] = new xAOD::VertexContainer();
@@ -78,8 +89,14 @@ namespace DerivationFramework {
          Vtxwritehandles[i]->setStore(Vtxwritehandlesaux[i]);
          ATH_CHECK(evtStore()->record(Vtxwritehandles[i]   , m_cascadeOutputsKeys[i]       ));
          ATH_CHECK(evtStore()->record(Vtxwritehandlesaux[i], m_cascadeOutputsKeys[i] + "Aux."));
+          
+          VtxwritehandlesAdd[i] = new xAOD::VertexContainer();
+          VtxwritehandlesauxAdd[i] = new xAOD::VertexAuxContainer();
+          VtxwritehandlesAdd[i]->setStore(VtxwritehandlesauxAdd[i]);
+          ATH_CHECK(evtStore()->record(VtxwritehandlesAdd[i]   , m_cascadeOutputsKeysAdd[i]       ));
+          ATH_CHECK(evtStore()->record(VtxwritehandlesauxAdd[i], m_cascadeOutputsKeysAdd[i] + "Aux."));
       }
-
+        
       //----------------------------------------------------
       // retrieve primary vertices
       //----------------------------------------------------
@@ -115,14 +132,17 @@ namespace DerivationFramework {
         }
       }
 
-      ATH_CHECK(performSearch(&cascadeinfoContainer));
-
+      ATH_CHECK(performSearch(&cascadeinfoContainer,&cascadeinfoContainer2));
       BPhysPVCascadeTools helper(&(*m_CascadeTools), &m_beamSpotSvc);
       helper.SetMinNTracksInPV(m_PV_minNTracks);
       // Decorators for the main vertex: chi2, ndf, pt and pt error, plus the D0 vertex variables
-      SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks"); 
+      SG::AuxElement::Decorator<VertexLinkVector> CascadeLinksDecor("CascadeVertexLinks");
+      SG::AuxElement::Decorator<VertexLinkVector> CascadeAddLinksDecor("CascadeVertexAddLinks");
       SG::AuxElement::Decorator<VertexLinkVector> MuPiLinksDecor("MuPiVertexLinks");
-      SG::AuxElement::Decorator<VertexLinkVector> D0LinksDecor("D0VertexLinks"); 
+      SG::AuxElement::Decorator<VertexLinkVector> D0LinksDecor("D0VertexLinks");
+      SG::AuxElement::Decorator<VertexLinkVector> MuPiTrkLinksDecor("MuPiTrkVertexLinks");
+      SG::AuxElement::Decorator<VertexLinkVector> D0AddLinksDecor("D0AddVertexLinks");
+      SG::AuxElement::Decorator<TrackLinkVector> TrackLinksDecor("TrackLinks");
       SG::AuxElement::Decorator<float> chi2_decor("ChiSquared");
       SG::AuxElement::Decorator<float> ndof_decor("NumberDoF");
       SG::AuxElement::Decorator<float> Pt_decor("Pt");
@@ -135,6 +155,17 @@ namespace DerivationFramework {
       SG::AuxElement::Decorator<float> LxyErr_svdecor("D0_LxyErr");
       SG::AuxElement::Decorator<float> Tau_svdecor("D0_Tau");
       SG::AuxElement::Decorator<float> TauErr_svdecor("D0_TauErr");
+        SG::AuxElement::Decorator<float> PtAdd_decor("PtAdd");
+        SG::AuxElement::Decorator<float> PtAddErr_decor("PtAddErr");
+        SG::AuxElement::Decorator<float> D0AddMass_svdecor("D0Add_mass");
+        SG::AuxElement::Decorator<float> D0AddMassErr_svdecor("D0Add_massErr");
+        SG::AuxElement::Decorator<float> D0AddPt_svdecor("D0Add_Pt");
+        SG::AuxElement::Decorator<float> D0AddPtErr_svdecor("D0Add_PtErr");
+        SG::AuxElement::Decorator<float> D0AddLxy_svdecor("D0Add_Lxy");
+        SG::AuxElement::Decorator<float> D0AddLxyErr_svdecor("D0Add_LxyErr");
+        SG::AuxElement::Decorator<float> D0AddTau_svdecor("D0Add_Tau");
+        SG::AuxElement::Decorator<float> D0AddTauErr_svdecor("D0Add_TauErr");
+
 
       SG::AuxElement::Decorator<float> massMuPi_decor("MuPi_mass"); //mu+pi_soft mass before fit
       SG::AuxElement::Decorator<float> MassKpi_svdecor("Kpi_mass");
@@ -151,13 +182,21 @@ namespace DerivationFramework {
       //muon contribution to chi2 of the cascade fit
       SG::AuxElement::Decorator<float> MuChi2B_decor("Mu_chi2_B");
       SG::AuxElement::Decorator<float> MunDoFB_decor("Mu_nDoF_B");
+        //chi2 and ndof for additional cascade woth track
+        SG::AuxElement::Decorator<float> Chi2Add_decor("Chi2Add");
+        SG::AuxElement::Decorator<float> ndofAdd_decor("ndofAdd");
+        SG::AuxElement::Decorator<std::vector<int>> numOfVtx_decor("numOfVtx");
 
-
-      // Get mu+pi container and identify the input mu+pi
+      // Obtaining containers for setting links to the original tracks
+      // Get mu+pi container
       const xAOD::VertexContainer  *MuPiContainer(nullptr);
       ATH_CHECK(evtStore()->retrieve(MuPiContainer   , m_vertexContainerKey       ));
+      // Get D0 container
       const xAOD::VertexContainer  *d0Container(nullptr);
       ATH_CHECK(evtStore()->retrieve(d0Container   , m_vertexD0ContainerKey       )); //"D0Vertices"
+      // Get TrackParticle container
+      const xAOD::TrackParticleContainer  *trackContainer(nullptr);
+      ATH_CHECK(evtStore()->retrieve(trackContainer   , "InDetTrackParticles"      ));
 
       for (Trk::VxCascadeInfo* x : cascadeinfoContainer) {
         if(x==nullptr) ATH_MSG_ERROR("cascadeinfoContainer is null");
@@ -186,7 +225,7 @@ namespace DerivationFramework {
         if(cascadeVertices[0] == nullptr || cascadeVertices[1] == nullptr) ATH_MSG_ERROR("Error null vertex");
         // Keep vertices (bear in mind that they come in reverse order!)
         for(int i =0;i<topoN;i++) Vtxwritehandles[i]->push_back(cascadeVertices[i]);
-        
+
         x->getSVOwnership(false); // Prevent Container from deleting vertices
         const auto mainVertex = cascadeVertices[1];   // this is the B_c+/- vertex
         const std::vector< std::vector<TLorentzVector> > &moms = x->getParticleMoms();
@@ -225,24 +264,40 @@ namespace DerivationFramework {
         if (MuPiVertex){
           if(std::abs(m_Dx_pid)==421 && (MuPiVertex->trackParticle(1)->charge()==-1)) tagD0 = false; //checking soft pion charge
         }
+          
+          //--------- mass hypo for main fit of B vertex
+          double mass_b = m_vtx0MassHypo;
+          double mass_d0 = m_vtx1MassHypo;
+          std::vector<double> massesMuPi;
+          massesMuPi.push_back(m_vtx0Daug1MassHypo); //mu
+          massesMuPi.push_back(m_vtx0Daug2MassHypo); //pi_soft
+          std::vector<double> massesD0;
+          if(tagD0){
+              massesD0.push_back(m_vtx1Daug1MassHypo); //pi
+              massesD0.push_back(m_vtx1Daug2MassHypo); //K
+          }else{ // Change the order of masses for D*-->D0bar pi-, D0bar->K+pi-
+              massesD0.push_back(m_vtx1Daug2MassHypo); //K
+              massesD0.push_back(m_vtx1Daug1MassHypo); //pi
+          }
+          std::vector<double> Masses; // masses of all particles "inside" of B
+          Masses.push_back(m_vtx0Daug1MassHypo); //mu
+          Masses.push_back(m_vtx0Daug2MassHypo); //pi_soft
+          Masses.push_back(m_vtx1MassHypo); //D0 mass
 
-        double mass_b = m_vtx0MassHypo;
-        double mass_d0 = m_vtx1MassHypo; 
-        std::vector<double> massesMuPi;
-        massesMuPi.push_back(m_vtx0Daug1MassHypo); //mu
-        massesMuPi.push_back(m_vtx0Daug2MassHypo); //pi_soft
-        std::vector<double> massesD0;
-        if(tagD0){
-          massesD0.push_back(m_vtx1Daug1MassHypo); //pi
-          massesD0.push_back(m_vtx1Daug2MassHypo); //K
-        }else{ // Change the order of masses for D*-->D0bar pi-, D0bar->K+pi-
-          massesD0.push_back(m_vtx1Daug2MassHypo); //K
-          massesD0.push_back(m_vtx1Daug1MassHypo); //pi
-        }
-        std::vector<double> Masses; // masses of all particles "inside" of B
-        Masses.push_back(m_vtx0Daug1MassHypo); //mu
-        Masses.push_back(m_vtx0Daug2MassHypo); //pi_soft
-        Masses.push_back(m_vtx1MassHypo); //D0 mass
+          //--------- mass hypo for additional fit of B vertex with track
+          std::vector<double> initialCVertexMass; // masses of all particles "inside" of B before additional fit
+          initialCVertexMass.push_back(m_vtx0Daug1MassHypo); //mu
+          initialCVertexMass.push_back(m_vtx0Daug2MassHypo); //pi_soft
+          initialCVertexMass.push_back(massesD0.at(0)); //D0's track1 mass
+          initialCVertexMass.push_back(massesD0.at(1)); //D0's track2 mass
+          
+          std::vector<double> secondCVertexMass; // masses of all particles фаеук additional fit
+          secondCVertexMass.push_back(m_vtx0Daug1MassHypo); //mu
+          secondCVertexMass.push_back(m_vtx0Daug2MassHypo); //pi_soft
+          secondCVertexMass.push_back(massesD0.at(0)); //D0's track1 mass
+          secondCVertexMass.push_back(massesD0.at(1)); //D0's track2 mass
+          secondCVertexMass.push_back(m_vtx1Daug1MassHypo); //pi (for now, might add K)
+          //---------
 
         // reset beamspot cache
         helper.GetBeamSpot(true);
@@ -333,7 +388,16 @@ namespace DerivationFramework {
         Tau_svdecor(*mainVertex) = m_CascadeTools->tau(moms[0],cascadeVertices[0],cascadeVertices[1]);
         TauErr_svdecor(*mainVertex) = m_CascadeTools->tauError(moms[0],x->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
 
-          
+          //--------------------------------------------------------------------------
+          //saving number of additional cascade veteces for each candidate
+          //vector of tsuch numbers for each one
+          std::vector<int> count;
+          for (std::vector<Trk::VxCascadeInfo*> xx : cascadeinfoContainer2) {
+              count.push_back(xx.size());
+          }
+          numOfVtx_decor(*mainVertex) = count;
+          //--------------------------------------------------------------------------
+
         // Some checks in DEBUG mode
         ATH_MSG_DEBUG("chi2 " << x->fitChi2() //DEBUG->INFO
                   << " chi2_1 " << m_V0Tools->chisq(cascadeVertices[0])
@@ -410,11 +474,161 @@ namespace DerivationFramework {
         ATH_MSG_DEBUG("Rxy1 wrt PV " << m_V0Tools->rxy(cascadeVertices[1],primaryVertex) << " RxyErr1 wrt PV " << m_V0Tools->rxyError(cascadeVertices[1],primaryVertex));
         ATH_MSG_DEBUG("number of covariance matrices " << (x->getCovariance()).size());
       } // loop over cascadeinfoContainer
-
+        
       // Deleting cascadeinfo since this won't be stored.
       // Vertices have been kept in m_cascadeOutputs and should be owned by their container
       for (auto x : cascadeinfoContainer) delete x;
 
+        //loop for the additional cascade fit
+        //result is stored in double vector format -> double loop
+        //several possible additional fits for each B candidate
+        //but we write them all together
+        //will distinguish them in NM
+        std::vector<int> count2;
+        for (std::vector<Trk::VxCascadeInfo*> xx : cascadeinfoContainer2) {
+            count2.push_back(xx.size());
+            for (auto x : xx){
+                if(x==nullptr) {
+                    ATH_MSG_DEBUG("cascadeinfoContainer is null");
+                    for(int i =0;i<topoN;i++) VtxwritehandlesAdd[i]->push_back(0);
+                }else{
+                    const std::vector<xAOD::Vertex*> &cascadeVertices = x->vertices();
+                    if(cascadeVertices.size()!=topoN)
+                        ATH_MSG_ERROR("Incorrect number of vertices");
+                    if(cascadeVertices[0] == nullptr || cascadeVertices[1] == nullptr) ATH_MSG_ERROR("Error null vertex");
+                    // Keep vertices (bear in mind that they come in reverse order!)
+                    for(int i =0;i<topoN;i++) VtxwritehandlesAdd[i]->push_back(cascadeVertices[i]);
+                    
+                    x->getSVOwnership(false); // Prevent Container from deleting vertices
+                    const auto mainVertex = cascadeVertices[1];   // this is the B_c+/- vertex
+                    const std::vector< std::vector<TLorentzVector> > &moms = x->getParticleMoms();
+                    
+                    // Set links to cascade vertices
+                    std::vector<xAOD::Vertex*> verticestoLink;
+                    verticestoLink.push_back(cascadeVertices[0]);
+                    if(VtxwritehandlesAdd[1] == nullptr) ATH_MSG_ERROR("VtxwritehandlesAdd[1] is null");
+                    if(!BPhysPVCascadeTools::LinkVertices(CascadeAddLinksDecor, verticestoLink, VtxwritehandlesAdd[0], cascadeVertices[1]))
+                        ATH_MSG_ERROR("Error decorating with cascade vertices");
+                    
+                    //Identify and decorate mu+pi+trk input
+                    //----------------------------------- trk
+                    // Identify additional track
+                    TrackBag selectedIDTracks; selectedIDTracks.clear();
+                    for(auto tp : *trackContainer){
+                        if (tp == cascadeVertices[1]->trackParticle(2)) selectedIDTracks.push_back(tp); //there is always only one muon
+                    }
+                    ATH_MSG_DEBUG("selectedIDtrack size "<<selectedIDTracks.size()); //always only one track
+                    
+                    // Create link for track
+                    // create tmp vector of preceding vertex links
+                    TrackLinkVector preTrkLinks;
+                    
+                    // loop over input precedingMuons
+                    auto trkItr = selectedIDTracks.begin();
+                    for(; trkItr != selectedIDTracks.end(); trkItr++) {
+                        // create element link
+                        TrackLink trkLink;
+                        trkLink.setElement(*trkItr);
+                        trkLink.setStorableObject(*trackContainer);
+                        
+                        // sanity check : is the link valid?
+                        if( !trkLink.isValid() ) continue;
+                        
+                        // link is OK, store it in the tmp vector
+                        preTrkLinks.push_back( trkLink );
+                        
+                    } // end of loop over preceding vertices
+                    
+                    // all OK: store preceding vertex links in the aux store
+                    TrackLinksDecor(*cascadeVertices[1]) = preTrkLinks;
+                    //----------------------------------- trk
+                    
+                    //----------------------------------- mu+pi
+                    std::vector<xAOD::Vertex*> MuPiAddVerticestoLink;
+                    xAOD::Vertex* MuPiAddVertex;
+                    
+                    for(auto vxcItr : *MuPiContainer){
+                        unsigned int NTracks = vxcItr->nTrackParticles();
+                        std::array<const xAOD::TrackParticle*, 2> a1;
+                        std::array<const xAOD::TrackParticle*, 2> a2;
+                        for(size_t i=0;i<NTracks;i++){
+                            a1[i] = vxcItr->trackParticle(i);
+                            a2[i] = cascadeVertices[1]->trackParticle(i);
+                        }
+                        std::sort(a1.begin(), a1.end());
+                        std::sort(a2.begin(), a2.end());
+                        if(a1 == a2){
+                            MuPiAddVertex = vxcItr;
+                        }
+                    }
+                    if (MuPiAddVertex) MuPiAddVerticestoLink.push_back(MuPiAddVertex);
+                    else ATH_MSG_WARNING("Could not find linking mu+pi_soft additional");
+                    if(!BPhysPVCascadeTools::LinkVertices(MuPiTrkLinksDecor, MuPiAddVerticestoLink, MuPiContainer, cascadeVertices[1]))
+                        ATH_MSG_ERROR("Error decorating with mu+pi_soft additional vertices");
+                    
+                    //----------------------------------- mu+pi
+                    //END Identify and decorate mu+pi+trk input
+                    
+                    //-----------------------------------
+                    // Identify and decorate the input D0
+                    xAOD::Vertex* d0AddVertex = BPhysPVCascadeTools::FindVertex<2>(d0Container, cascadeVertices[0]);;
+                    ATH_MSG_DEBUG("1 pt D0 (add) tracks " << cascadeVertices[0]->trackParticle(0)->pt() << ", " << cascadeVertices[0]->trackParticle(1)->pt());
+                    if (d0AddVertex) ATH_MSG_DEBUG("2 pt D0 (add) tracks " << d0AddVertex->trackParticle(0)->pt() << ", " << d0AddVertex->trackParticle(1)->pt());
+                    
+                    std::vector<xAOD::Vertex*> d0AddVerticestoLink;
+                    if (d0AddVertex) d0AddVerticestoLink.push_back(d0AddVertex);
+                    else ATH_MSG_WARNING("Could not find linking D0 (add)");
+                    if(!BPhysPVCascadeTools::LinkVertices(D0AddLinksDecor, d0AddVerticestoLink, d0Container, cascadeVertices[1]))
+                        ATH_MSG_ERROR("Error decorating with D0 (add) vertices");
+                    //-----------------------------------
+                    //--------- mass hypo for main fit of B vertex
+                    double mass_b = m_vtx0MassHypo;
+                    
+                    // reset beamspot cache
+                    helper.GetBeamSpot(true);
+                    // loop over candidates -- Don't apply PV_minNTracks requirement here
+                    // because it may result in exclusion of the high-pt PV.
+                    // get good PVs
+                    
+                    xAOD::BPhysHypoHelper vtx(m_hypoName, mainVertex);
+                    
+                    // Get refitted track momenta from all vertices, charged tracks only
+                    BPhysPVCascadeTools::SetVectorInfo(vtx, x);
+                    // Decorate main vertex
+                    //
+                    // 1.a) mass, mass error
+                    BPHYS_CHECK( vtx.setMass(m_CascadeToolsAdd->invariantMass(moms[1])) );
+                    BPHYS_CHECK( vtx.setMassErr(m_CascadeToolsAdd->invariantMassError(moms[1],x->getCovariance()[1])) );
+                    // 1.b) pt and pT error (the default pt of mainVertex is != the pt of the full cascade fit!)
+                    PtAdd_decor(*mainVertex) = m_CascadeToolsAdd->pT(moms[1]);
+                    PtAddErr_decor(*mainVertex) = m_CascadeToolsAdd->pTError(moms[1],x->getCovariance()[1]);
+                    // 1.c) chi2 and ndof (the default chi2 of mainVertex is != the chi2 of the full cascade fit!)
+                    Chi2Add_decor(*mainVertex) = x->fitChi2();
+                    ndofAdd_decor(*mainVertex) = x->nDoF();
+                    
+                    ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer, refPvContainer, &(*m_pvRefitter), m_PV_max, m_DoVertexType, x, 1, mass_b, vtx));
+                    
+                    // 4) decorate the main vertex with D0 vertex mass, pt, lifetime and lxy values (plus errors)
+                    // D0 points to the main vertex, so lifetime and lxy are w.r.t the main vertex
+                    D0AddMass_svdecor(*mainVertex) = m_CascadeToolsAdd->invariantMass(moms[0]);
+                    D0AddMassErr_svdecor(*mainVertex) = m_CascadeTools->invariantMassError(moms[0],x->getCovariance()[0]);
+                    D0AddPt_svdecor(*mainVertex) = m_CascadeToolsAdd->pT(moms[0]);
+                    D0AddPtErr_svdecor(*mainVertex) = m_CascadeToolsAdd->pTError(moms[0],x->getCovariance()[0]);
+                    D0AddLxy_svdecor(*mainVertex) = m_CascadeToolsAdd->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]);
+                    D0AddLxyErr_svdecor(*mainVertex) = m_CascadeToolsAdd->lxyError(moms[0],x->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+                    D0AddTau_svdecor(*mainVertex) = m_CascadeToolsAdd->tau(moms[0],cascadeVertices[0],cascadeVertices[1]);
+                    D0AddTauErr_svdecor(*mainVertex) = m_CascadeToolsAdd->tauError(moms[0],x->getCovariance()[0],cascadeVertices[0],cascadeVertices[1]);
+                }
+            } //loop over x
+            
+
+        }// loop over xx - additional cascadeinfoContainer
+
+        // Deleting cascadeinfo since this won't be stored.
+        // Vertices have been kept in m_cascadeOutputs and should be owned by their container
+        for (std::vector<Trk::VxCascadeInfo*> xx : cascadeinfoContainer2) {
+            for (auto x : xx) delete x;
+        }
       return StatusCode::SUCCESS;
     }
 
@@ -423,6 +637,7 @@ namespace DerivationFramework {
     m_vertexContainerKey(""),
     m_vertexD0ContainerKey(""),
     m_cascadeOutputsKeys{ "MuPlusDpstCascadeVtx1", "MuPlusDpstCascadeVtx2" },
+m_cascadeOutputsKeysAdd{"TrkPlusBCascadeVtx1","TrkPlusBCascadeVtx2"},
     m_VxPrimaryCandidateName("PrimaryVertices"),
     m_MuPiMassLower(0.0),
     m_MuPiMassUpper(10000.0),
@@ -445,9 +660,13 @@ namespace DerivationFramework {
     m_chi2cut(-1.0),
     m_beamSpotSvc("BeamCondSvc",n),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
+m_iVertexFitter2("Trk::TrkVKalVrtFitter"),
+
     m_pvRefitter("Analysis::PrimaryVertexRefitter"),
     m_V0Tools("Trk::V0Tools"),
-    m_CascadeTools("DerivationFramework::CascadeTools")
+    m_CascadeTools("DerivationFramework::CascadeTools"),
+m_CascadeToolsAdd("DerivationFramework::CascadeTools")
+
     {
        declareProperty("MuPiVertices",              m_vertexContainerKey);
        declareProperty("D0Vertices",                m_vertexD0ContainerKey);
@@ -479,20 +698,41 @@ namespace DerivationFramework {
        declareProperty("MinNTracksInPV",            m_PV_minNTracks          = 0);
        declareProperty("DoVertexType",              m_DoVertexType           = 7);
        declareProperty("TrkVertexFitterTool",       m_iVertexFitter);
+    declareProperty("TrkVertexFitterToolAdd",       m_iVertexFitter2);
        declareProperty("PVRefitter",                m_pvRefitter);
        declareProperty("V0Tools",                   m_V0Tools);
        declareProperty("CascadeTools",              m_CascadeTools);
        declareProperty("CascadeVertexCollections",  m_cascadeOutputsKeys);
+        declareProperty("AdditionalCascadeVertexCollections",  m_cascadeOutputsKeysAdd);
+
     }
 
     MuPlusDpstCascade::~MuPlusDpstCascade(){ }
+    bool MuPlusDpstCascade::isContainedIn(const xAOD::TrackParticle* theTrack, std::vector<const xAOD::TrackParticle*> theColl) {
 
-    StatusCode MuPlusDpstCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer) const
+        bool isContained(false);
+        size_t MuPiTrkNum = theColl.size();
+        for( unsigned int it=0; it<MuPiTrkNum; it++)
+            if ( theColl.at(it)->index() == theTrack->index()  ) {isContained=true; break;}
+        return isContained;
+    }
+    double MuPlusDpstCascade::getInvariantMass(const TrackBag &Tracks, const std::vector<double> &massHypotheses){
+      TLorentzVector total;
+      total.SetVectM(Tracks[0]->p4().Vect(), massHypotheses[0]);
+      TLorentzVector temp;
+      for(size_t i=1; i < Tracks.size(); i++){
+           temp.SetVectM(Tracks[i]->p4().Vect(), massHypotheses[i]);
+           total += temp;
+      }
+      return total.M();
+    }
+
+    StatusCode MuPlusDpstCascade::performSearch(std::vector<Trk::VxCascadeInfo*> *cascadeinfoContainer, std::vector<std::vector<Trk::VxCascadeInfo*>> *cascadeinfoContainer2) const
     {
 
         assert(cascadeinfoContainer!=nullptr);
 
-        // Get TrackParticle container (for setting links to the original tracks)
+        // Get TrackParticle container
         const xAOD::TrackParticleContainer  *trackContainer(nullptr);
         ATH_CHECK(evtStore()->retrieve(trackContainer   , "InDetTrackParticles"      ));
 
@@ -504,6 +744,7 @@ namespace DerivationFramework {
         const xAOD::VertexContainer  *d0Container(nullptr);
         ATH_CHECK(evtStore()->retrieve(d0Container   , m_vertexD0ContainerKey       )); //"D0Vertices"
 
+        //--------- mass hypo for main fit of B vertex
         double mass_d0 = m_vtx1MassHypo;
         std::vector<const xAOD::TrackParticle*> tracksMuPi;
         std::vector<const xAOD::TrackParticle*> tracksD0;
@@ -516,11 +757,14 @@ namespace DerivationFramework {
         std::vector<double> massesD0b; // Change the oreder of masses for D*-->D0bar pi-, D0bar->K+pi-
         massesD0b.push_back(m_vtx1Daug2MassHypo);
         massesD0b.push_back(m_vtx1Daug1MassHypo);
-        std::vector<double> Masses;
-        Masses.push_back(m_vtx0Daug1MassHypo); //mu
-        Masses.push_back(m_vtx0Daug2MassHypo); //pi
-        Masses.push_back(m_vtx1MassHypo); //D0
         
+        //--------- mass hypo for additional fit of B vertex with track
+        std::vector<double> secondCVertexMass; // masses of all particles фаеук additional fit
+        secondCVertexMass.push_back(m_vtx0Daug1MassHypo); //mu
+        secondCVertexMass.push_back(m_vtx0Daug2MassHypo); //pi_soft
+        secondCVertexMass.push_back(m_vtx1Daug1MassHypo); //pi
+        //---------
+
 
         // Select mu+pi_soft candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedMuPiCandidates;
@@ -601,6 +845,24 @@ namespace DerivationFramework {
         } //for(auto vxcItr : *d0Container)
         if(selectedD0Candidates.size()<1) return StatusCode::SUCCESS;
 
+        // Select the inner detector tracks for additional cascade fit: trk + mu+pi + D0
+        TrackBag selectedIDTracks;
+        for (auto tp : *trackContainer){
+            //checking trk not in the mu+pi_soft pair
+            //if (isContainedIn(tp, selectedMuPiCandidates)) continue;
+            
+            //checking trk not in the D0
+            //if (isContainedIn(tp, selectedD0Candidates)) continue;
+            
+            //if ( m_trkSelector->decision(*tp, NULL) ) selectedIDTracks.push_back(tp);
+            if ( !m_trackSelectionTools->accept(tp)){
+                ATH_MSG_DEBUG(" Inner detector track is rejected by the cut level - loose ");
+                continue;
+            }
+            selectedIDTracks.push_back(tp);
+        }
+        ATH_MSG_DEBUG("CUSTOM:: selected track number "<<selectedIDTracks.size());
+        
         // Select mu D*+ candidates
         // Iterate over mu+pi_soft vertices
         for(auto MuPiItr:selectedMuPiCandidates){
@@ -624,9 +886,11 @@ namespace DerivationFramework {
             for(auto d0Itr : selectedD0Candidates){
 
                 // Check identical tracks in input
-                if(std::find(tracksMuPi.cbegin(), tracksMuPi.cend(), d0Itr->trackParticle(0)) != tracksMuPi.cend()) continue;
-                if(std::find(tracksMuPi.cbegin(), tracksMuPi.cend(), d0Itr->trackParticle(1)) != tracksMuPi.cend()) continue;
-               
+                //if(std::find(tracksMuPi.cbegin(), tracksMuPi.cend(), d0Itr->trackParticle(0)) != tracksMuPi.cend()) continue;
+                //if(std::find(tracksMuPi.cbegin(), tracksMuPi.cend(), d0Itr->trackParticle(1)) != tracksMuPi.cend()) continue;
+                if (isContainedIn(d0Itr->trackParticle(0), tracksMuPi)) continue;
+                if (isContainedIn(d0Itr->trackParticle(1), tracksMuPi)) continue;
+
                 TLorentzVector p4_ka, p4_pi2;
                 if(tagD0){ // for D*+
                 p4_pi2.SetPtEtaPhiM(d0Itr->trackParticle(0)->pt(),
@@ -696,8 +960,8 @@ namespace DerivationFramework {
 
               // Do the work
               std::unique_ptr<Trk::VxCascadeInfo> result(m_iVertexFitter->fitCascade());
-
-              if (result != nullptr) {
+ 
+                if (result != nullptr) {
                 // reset links to original tracks
                 BPhysPVCascadeTools::PrepareVertexLinks(result.get(), trackContainer);
                 ATH_MSG_DEBUG("storing tracks " << ((result->vertices())[0])->trackParticle(0) << ", "
@@ -717,31 +981,192 @@ namespace DerivationFramework {
                    
                 double mass = m_CascadeTools->invariantMass(moms[1]);
                 double DstMassAft = (moms[1][1] + moms[0][0] + moms[0][1]).M(); //pi_soft + D0
+                  /*
+                  //----------------------------------------------------
+                  // retrieve primary vertices for Lxy(B)
+                  const xAOD::Vertex * primaryVertex(nullptr);
+                  const xAOD::VertexContainer *pvContainer(nullptr);
+                  ATH_CHECK(evtStore()->retrieve(pvContainer, m_VxPrimaryCandidateName));
+                  ATH_MSG_DEBUG("Found " << m_VxPrimaryCandidateName << " in StoreGate!");
 
+                  if (pvContainer->size()==0){
+                      ATH_MSG_WARNING("You have no primary vertices: " << pvContainer->size());
+                      return StatusCode::RECOVERABLE;
+                  } else {
+                      primaryVertex = (*pvContainer)[0];
+                  }
+                  //----------------------------------------------------
+                  */
                 if(chi2CutPassed) {
                   if (mass >= m_MassLower && mass <= m_MassUpper) {
                       if (m_CascadeTools->pT(moms[1]) > 9500){ //B_pT
                           if (m_CascadeTools->lxy(moms[0],cascadeVertices[0],cascadeVertices[1]) > 0){ //D0_Lxy>0
                               if (DstMassAft < m_DstMassUpperAft){
-                              
+                                  
                                   cascadeinfoContainer->push_back(result.release());
-                              
+
+                                  //---------------------------------------------------
+                                  //after the successfull cascade fit we do another cascade with additional track from InDetCollection
+                                  // only for those candidates selected for cascasdeinfoContainer
+                                  // trk  +  mu+pi + D0_tracks
+                                  //putting together tracks for initial cascade vertex and second(additional cascade vertex)
+                                  TrackBag secondCVertexTracks;
+
+                                  for(unsigned int i=0; i<tracksMuPi.size(); i++){
+                                      secondCVertexTracks.push_back(tracksMuPi.at(i));
+                                  }
+                                  //putting axtra particle in secondary tracks to "reserve" place for the additional track, which will be placed later
+                                  secondCVertexTracks.push_back(tracksMuPi.at(0));
+
+                                  if(secondCVertexTracks.size() != secondCVertexMass.size()){
+                                      ATH_MSG_INFO("Mass hypothesis not correctly set, aborting");
+                                      return StatusCode::SUCCESS;
+                                  }
+                                    if(selectedIDTracks.size()<1) {
+                                          return StatusCode::SUCCESS;
+                                      }
+
+                                  std::vector<Trk::VxCascadeInfo*> cascadeTEMPcontainer;
+                                      cascadeTEMPcontainer.clear();
+                                      for(auto newtrack : selectedIDTracks){
+                                          //Skip any track already used in vertex
+                                          //if(std::find(tracksD0.begin(), tracksD0.end(), newtrack) != tracksD0.end()) {
+                                          if (isContainedIn(newtrack, tracksD0)) {
+                                              ATH_MSG_INFO("CUSTOM:: track is already in use");
+                                              continue;
+                                          }
+                                          /*if(std::find(tracksMuPi.begin(), tracksMuPi.end(), newtrack) != tracksMuPi.end()) {
+                                              ATH_MSG_INFO("CUSTOM:: track is already in use");
+                                              continue;
+                                          }*/
+                                          if (isContainedIn(newtrack, tracksMuPi)) {
+                                              ATH_MSG_INFO("CUSTOM:: track is already in use");
+                                              continue;
+                                          }
+                                          //putting current track to the back of secondary tracks vector
+                                          secondCVertexTracks.back() = newtrack;
+
+                                          double roughmass = getInvariantMass(secondCVertexTracks, secondCVertexMass);
+                                          if(m_MassUpper > 0.0 && (roughmass < m_MassLower || roughmass > m_MassUpper+500)) continue;
+                                          
+                                          // Apply the user's settings to the fitter
+                                          // Reset
+                                          m_iVertexFitter2->setDefault();
+                                          // Robustness
+                                          m_iVertexFitter2->setRobustness(robustness);
+                                          // Build up the topology
+                                          // Vertex list
+                                          std::vector<Trk::VertexID> vrtList2;
+                                          // D0 vertex
+                                          Trk::VertexID vID2_1;
+                                          if (m_constrD0) { //ApplyD0MassConstraint = true  m_constrD0
+                                            if(tagD0) vID2_1 = m_iVertexFitter2->startVertex(tracksD0,massesD0,mass_d0);
+                                            else vID2_1 = m_iVertexFitter2->startVertex(tracksD0,massesD0b,mass_d0);
+                                          } else {
+                                            if(tagD0) vID2_1 = m_iVertexFitter2->startVertex(tracksD0,massesD0);
+                                            else vID2_1 = m_iVertexFitter2->startVertex(tracksD0,massesD0b);
+                                          }
+                                          vrtList2.push_back(vID2_1);
+                                          // B vertex including mu+pi_soft
+                                          Trk::VertexID vID2_2;
+                                          vID2_2 = m_iVertexFitter2->nextVertex(secondCVertexTracks,secondCVertexMass,vrtList2);
+                                          if (m_constrMuPi) {
+                                            std::vector<Trk::VertexID> cnstV;
+                                            cnstV.clear();
+                                            if ( !m_iVertexFitter->addMassConstraint(vID2_2,tracksMuPi,cnstV,m_vtx0MassHypo).isSuccess() ) {
+                                                ATH_MSG_WARNING("addMassConstraint failed");
+                                                //return StatusCode::FAILURE;
+                                            }
+                                          }
+
+                                          std::unique_ptr<Trk::VxCascadeInfo> result2(m_iVertexFitter2->fitCascade());
+                                          if(result2 != nullptr ){
+                                              ATH_MSG_DEBUG("Additional cascade Fit succeded");
+                                          }
+                                          if(result2 == nullptr ){
+                                              ATH_MSG_DEBUG("Additional cascade Fit failed");
+                                              continue;
+                                          }
+                                          BPhysPVCascadeTools::PrepareVertexLinks(result2.get(), trackContainer);
+                                          // necessary to prevent memory leak
+                                          result2->getSVOwnership(true);
+                                          assert(result2->vertices().size()==2);
+                                          
+                                          const std::vector< std::vector<TLorentzVector> > &momsAdd = result2->getParticleMoms();
+                                          const std::vector<xAOD::Vertex*> &cascadeVerticesAdd = result2->vertices();
+                                          //----------------------------------------------------
+                                          // retrieve primary vertices for Lxy(B)
+                                          const xAOD::Vertex * primaryVertexAdd(nullptr);
+                                          const xAOD::VertexContainer *pvContainerAdd(nullptr);
+                                          ATH_CHECK(evtStore()->retrieve(pvContainerAdd, m_VxPrimaryCandidateName));
+                                          ATH_MSG_DEBUG("Found " << m_VxPrimaryCandidateName << " in StoreGate!");
+
+                                          if (pvContainerAdd->size()==0){
+                                              ATH_MSG_WARNING("You have no primary vertices: " << pvContainerAdd->size());
+                                              return StatusCode::RECOVERABLE;
+                                          } else {
+                                              primaryVertexAdd = (*pvContainerAdd)[0];
+                                          }
+                                          //----------------------------------------------------
+                                         
+                                          // Chi2/DOF cut
+                                          //same as for the main vertex chi2/ndof = 35/7 = 5
+                                          double bChi2DOF2 = result2->fitChi2()/result2->nDoF();
+                                          //ATH_MSG_INFO("Candidate chi2/DOF for additional fit is " << bChi2DOF2<<" "<<result2->nDoF());
+                                          bool chi2CutPassed2 = (m_chi2cut <= 0.0 || bChi2DOF2 < m_chi2cut);
+                                          double massAdd = m_CascadeToolsAdd->invariantMass(momsAdd[1]);
+                                          double bLxyAdd = m_CascadeToolsAdd->lxy(momsAdd[1],cascadeVerticesAdd[1],primaryVertexAdd);
+                                          double DstAddMassAft = (momsAdd[1][1] + momsAdd[0][0] + momsAdd[0][1]).M(); //pi_soft + D0
+
+                                          if(chi2CutPassed2){
+                                              if (massAdd >= m_MassLower && massAdd <= m_MassUpper) { //same as for the main cascade
+                                                  if(bLxyAdd > 0.1){
+                                                      if (DstAddMassAft < m_DstMassUpperAft){
+                                                          //ATH_MSG_INFO("CUSTOM:: passed chi2 check");
+                                                          cascadeTEMPcontainer.push_back(result2.release());
+                                                      }
+                                                  }//B_Lxy for add fit check
+                                              }//mass check
+                                        }//chi2 check
+                                          
+                                      }//loop for additional tracks
+                                        //vector of cascades for each candidate
+                                      cascadeinfoContainer2->push_back(cascadeTEMPcontainer);
+
+                              } else {
+                                ATH_MSG_DEBUG("Candidate rejected by the mass cut on m(D^{*})" );
                               } //Dst_m < m_DstMassUpperAft
+                          } else {
+                            ATH_MSG_DEBUG("Candidate rejected by the L_{xy}(D_{0}) cut" );
                           } //D0_Lxy>0
+                      } else {
+                        ATH_MSG_DEBUG("Candidate rejected by the p_{T}(B) cut" );
                       } //B_pT
                   } else {
                     ATH_MSG_DEBUG("Candidate rejected by the mass cut: mass = "
                                   << mass << " != (" << m_MassLower << ", " << m_MassUpper << ")" );
                   } //mass Upper/Lower
+                } else {
+                  ATH_MSG_DEBUG("Candidate rejected by the chi2 cut" );
                 } //chi2CutPassed
+
+
+
               } //if (result != nullptr)
 
-           } //Iterate over D0 vertices
+            } //Iterate over D0 vertices
 
-        } //Iterate over mu+pi_soft vertices
+         } //Iterate over mu+pi_soft vertices
+         
+         
+
+
         ATH_MSG_DEBUG("cascadeinfoContainer size " << cascadeinfoContainer->size());
+        ATH_MSG_DEBUG("cascadeinfoContainer (additional) size " << cascadeinfoContainer2->size());
+
         return StatusCode::SUCCESS;
-    }
+    }//end of perform search
+
     
 }
 
