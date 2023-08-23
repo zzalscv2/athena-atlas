@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework include(s):
@@ -534,12 +534,14 @@ namespace CP
         constexpr unsigned int last_run_16 = 320000;
         constexpr unsigned int last_run_17 = 342000;
         constexpr unsigned int last_run_18 = 364485;
-        constexpr unsigned int last_run_22 = 999999;
+        constexpr unsigned int last_run_22 = 440613;
+        constexpr unsigned int last_run_23 = 999999;
 
         static const std::set<int> MCperiods1516{284500};
         static const std::set<int> MCperiods17{300000, 304000, 305000};
         static const std::set<int> MCperiods18{310000};
         static const std::set<int> MCperiods22{330000, 410000};
+        static const std::set<int> MCperiods23{450000};
 
 
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
@@ -571,6 +573,9 @@ namespace CP
             } else if (MCperiods22.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc21a / data22");
                 return MCP::DataYear::Data22;
+            } else if (MCperiods23.count(run)) {
+                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23c / data23");
+                return MCP::DataYear::Data23;
             }
 
         }
@@ -579,15 +584,18 @@ namespace CP
             if (run < last_run_16) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 15-16");
                 return MCP::DataYear::Data16;
-            } else if (run < last_run_17) {
+            } else if (run <= last_run_17) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 17");
                 return MCP::DataYear::Data17;
-            } else if (run < last_run_18) {
+            } else if (run <= last_run_18) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 18");
                 return MCP::DataYear::Data18;
-            }  else if (run < last_run_22) {
+            }  else if (run <= last_run_22) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 22");
                 return MCP::DataYear::Data22;
+            }  else if (run < last_run_23) {
+                ATH_MSG_DEBUG("The current run " << run << " is taken in data 23");
+                return MCP::DataYear::Data23;
             }
         }
         ATH_MSG_FATAL("Could not assign run-number " << run << " to a specific year of data-taking");
