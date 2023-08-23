@@ -10,7 +10,8 @@ def makeDiTauAnalysisSequence( dataType, workingPoint, postfix = '',
                              shallowViewOutput = True,
                              rerunTruthMatching = True,
                              enableCutflow = False,
-                             enableKinematicHistograms = False ):
+                             enableKinematicHistograms = False,
+                             defineSystObjectLinks = False ):
     """Create a tau analysis algorithm sequence
 
     Keyword arguments:
@@ -53,7 +54,8 @@ def makeDiTauAnalysisSequence( dataType, workingPoint, postfix = '',
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_DiTau' + postfix,
                               enableCutflow = enableCutflow,
-                              enableKinematicHistograms = enableKinematicHistograms )
+                              enableKinematicHistograms = enableKinematicHistograms,
+                              defineSystObjectLinks = defineSystObjectLinks )
 
     # Return the sequence:
     return seq

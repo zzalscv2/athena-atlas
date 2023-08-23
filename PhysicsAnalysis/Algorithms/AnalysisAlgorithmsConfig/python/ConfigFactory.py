@@ -161,6 +161,18 @@ def makeConfig (factoryName, groupName,
         config = OutputAnalysisConfig (groupName)
         configSeq.append (config)
 
+    elif factoryName == 'SystObjectLink':
+        try:
+            groupSplit = groupName.split('.')
+            assert len(groupSplit) == 2
+            assert groupSplit[0] != ''
+            containerName = groupSplit[1]
+        except AssertionError:
+            raise ValueError(f'invalid groupName for {factoryName}: {groupName}')
+            
+        from AsgAnalysisAlgorithms.SystObjectLinkConfig import makeSystObjectLinkConfig
+        makeSystObjectLinkConfig(configSeq, containerName)
+
 
     else :
         raise ValueError ('unknown factory: ' + factoryName)

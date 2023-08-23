@@ -15,7 +15,8 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
                               qualitySelectionOutput = True,
                               enableCutflow = False,
                               enableKinematicHistograms = False,
-                              isRun3Geo = False ):
+                              isRun3Geo = False,
+                              defineSystObjectLinks = False ):
     """Create a muon analysis algorithm sequence
 
     Keyword arguments:
@@ -61,7 +62,8 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Muon' + postfix,
                               enableCutflow = enableCutflow,
-                              enableKinematicHistograms = enableKinematicHistograms )
+                              enableKinematicHistograms = enableKinematicHistograms,
+                              defineSystObjectLinks = defineSystObjectLinks )
 
     # Return the sequence:
     return seq

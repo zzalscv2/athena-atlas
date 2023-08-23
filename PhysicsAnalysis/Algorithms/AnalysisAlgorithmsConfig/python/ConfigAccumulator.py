@@ -136,12 +136,16 @@ class ConfigAccumulator :
         """the LHC Run period we run on"""
         return self._geometry
 
-    def createAlgorithm (self, type, name) :
+    def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate algorithms: ' + name)
-            alg = DualUseConfig.createAlgorithm (type, name)
+            if reentrant:
+                alg = DualUseConfig.createReentrantAlgorithm (type, name)
+            else:
+                alg = DualUseConfig.createAlgorithm (type, name)
+
             if DualUseConfig.useComponentAccumulator:
                 self.CA.addEventAlgo(alg,self._algSeq.name)
             else:

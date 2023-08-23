@@ -566,6 +566,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
 
+    # Add systematic object links
+    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaJets')
+
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
     configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
@@ -589,6 +592,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
         configSeq.setOptionValue ('.postfix', 'largeR_jets' )
         outputContainers['larger_jet_'] = 'OutLargeRJets'
+
+        # Add systematic object links
+        configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaLargeRJets')
 
     if trackJets :
         configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
@@ -614,6 +620,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.isolationWP', 'NonIso')
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
 
+    # Add systematic object links
+    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaElectrons')
 
     # Include, and then set up the photon analysis algorithm sequence:
     configSeq += makeConfig ('Photons', 'AnaPhotons')
@@ -622,6 +630,9 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
+
+    # Add systematic object links
+    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaPhotons')
 
 
     # set up the muon analysis algorithm sequence:
@@ -634,11 +645,17 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # configSeq.setOptionValue ('.quality', 'Tight')
     # configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
 
+    # Add systematic object links
+    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaMuons')
+
 
     # Include, and then set up the tau analysis algorithm sequence:
     configSeq += makeConfig ('TauJets', 'AnaTauJets')
     configSeq += makeConfig ('TauJets.Selection', 'AnaTauJets.tight')
     configSeq.setOptionValue ('.quality', 'Tight')
+
+    # Add systematic object links
+    configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaTauJets')
 
 
     if dataType != 'data' :

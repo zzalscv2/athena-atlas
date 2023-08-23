@@ -25,6 +25,8 @@
    <class name="CP::PileupReweightingAlg" />
    <class name="CP::PMGTruthWeightAlg" />
    <class name="CP::SysListDumperAlg" />
+   <class name="CP::SystObjectLinkerAlg" />
+   <class name="CP::SystObjectUnioniserAlg" />
    <class name="CP::TreeFillerAlg" />
    <class name="CP::TreeMakerAlg" />
 

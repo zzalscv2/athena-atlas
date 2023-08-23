@@ -23,7 +23,8 @@ def makePhotonAnalysisSequence( dataType, workingPoint,
                                 recomputeIsEM = False,
                                 ptSelectionOutput = False,
                                 enableCutflow = False,
-                                enableKinematicHistograms = False ):
+                                enableKinematicHistograms = False,
+                                defineSystObjectLinks = False ):
     """Create a photon analysis algorithm sequence
 
     Keywrod arguments:
@@ -73,7 +74,8 @@ def makePhotonAnalysisSequence( dataType, workingPoint,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Photon' + postfix,
                               enableCutflow = enableCutflow,
-                              enableKinematicHistograms = enableKinematicHistograms )
+                              enableKinematicHistograms = enableKinematicHistograms,
+                              defineSystObjectLinks = defineSystObjectLinks )
 
     # Return the sequence:
     return seq

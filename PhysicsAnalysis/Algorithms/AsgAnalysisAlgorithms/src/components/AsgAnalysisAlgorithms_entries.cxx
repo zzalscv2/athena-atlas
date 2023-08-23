@@ -30,6 +30,8 @@
 #include <AsgAnalysisAlgorithms/SysListDumperAlg.h>
 #include <AsgAnalysisAlgorithms/TreeFillerAlg.h>
 #include <AsgAnalysisAlgorithms/TreeMakerAlg.h>
+#include "AsgAnalysisAlgorithms/SystObjectLinkerAlg.h"
+#include "AsgAnalysisAlgorithms/SystObjectUnioniserAlg.h"
 
 DECLARE_COMPONENT (CP::AsgFlagSelectionTool)
 DECLARE_COMPONENT (CP::AsgMaskSelectionTool)
@@ -57,3 +59,11 @@ DECLARE_COMPONENT (CP::PMGTruthWeightAlg)
 DECLARE_COMPONENT (CP::SysListDumperAlg)
 DECLARE_COMPONENT (CP::TreeFillerAlg)
 DECLARE_COMPONENT (CP::TreeMakerAlg)
+DECLARE_COMPONENT (CP::SystObjectLinkerAlg)
+// Concrete classes of SystObjectUnioniserAlg
+DECLARE_COMPONENT (CP::SystJetUnioniserAlg)
+DECLARE_COMPONENT (CP::SystElectronUnioniserAlg)
+DECLARE_COMPONENT (CP::SystPhotonUnioniserAlg)
+DECLARE_COMPONENT (CP::SystMuonUnioniserAlg)
+DECLARE_COMPONENT (CP::SystTauUnioniserAlg)
+DECLARE_COMPONENT (CP::SystDiTauUnioniserAlg)

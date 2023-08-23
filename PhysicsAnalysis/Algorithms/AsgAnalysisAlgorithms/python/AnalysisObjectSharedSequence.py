@@ -8,7 +8,8 @@ def makeSharedObjectSequence( seq,
                               shallowViewOutput = True,
                               postfix = '',
                               enableCutflow = False,
-                              enableKinematicHistograms = False ):
+                              enableKinematicHistograms = False,
+                              defineSystObjectLinks = False ):
     """Create an analysis algorithm sequence for shared post-processing of
     all object types
 
@@ -36,6 +37,14 @@ def makeSharedObjectSequence( seq,
     # Make sure selection options make sense
     if deepCopyOutput and shallowViewOutput:
         raise ValueError ("deepCopyOutput and shallowViewOutput can't both be true!")
+
+    # Build links between nominal and systematic objects
+    # This is useful downstream for constructing the union of all selected objects
+    if defineSystObjectLinks:
+        if deepCopyOutput:
+            raise ValueError ("Systematic object links may not work correctly on deep copy output")
+        alg = createAlgorithm('CP::SystObjectLinkerAlg', 'SystObjLinker'+postfix)
+        seq.append( alg, inputPropName = 'input', stageName = 'selection' )
 
     # Set up an algorithm used to create selection cutflow:
     if enableCutflow:

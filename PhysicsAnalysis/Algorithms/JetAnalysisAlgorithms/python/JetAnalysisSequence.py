@@ -25,6 +25,7 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
                              runGhostMuonAssociation = True,
                              enableCutflow = False,
                              enableKinematicHistograms = False,
+                             defineSystObjectLinks=False,
                              **kwargs):
     """Create a jet analysis algorithm sequence
       The jet collection is interpreted and selects the correct function to call,
@@ -110,6 +111,15 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
             raise ValueError("Untrimmed large-R jets are not supported!")
         makeLargeRJetAnalysisSequence(seq,
             dataType, jetCollection, jetInput=jetInput, postfix=postfix, **kwargs)
+
+    # Build links between nominal and systematic objects
+    # This is useful downstream for constructing the union of all selected objects
+    if defineSystObjectLinks:
+        if deepCopyOutput:
+            raise ValueError ("Systematic object links may not work correctly on deep copy output")
+        alg = createAlgorithm('CP::SystObjectLinkerAlg', 'SystObjLinker'+postfix)
+        #alg.OutputLevel=1
+        seq.append( alg, inputPropName = 'input', stageName = 'selection' )
 
     # Set up an algorithm used to create jet selection cutflow:
     if enableCutflow:
