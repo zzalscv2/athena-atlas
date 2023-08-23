@@ -19,7 +19,6 @@ def JETM12SkimmingToolCfg(ConfigFlags):
     muTriggers = TriggerLists.single_mu_Trig(ConfigFlags)
 
     #xAODStringSkimmingTool cannot handle electron trigger names, therefore need to use TriggerSkimmingTool
-
     tracks = 'InDetTrackParticles.TrkIsoPt1000_ptcone20 < 0.12*InDetTrackParticles.pt && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm'
 
     trackRequirements = '(InDetTrackParticles.pt > 6.*GeV && '+tracks+' )'
@@ -150,7 +149,7 @@ def JETM12KernelCfg(ConfigFlags, name='JETM12Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # Increased cut (w.r.t. R21) on abs(z0) for new TTVA working points
-    JETM12_thinning_expression = "( InDetTrackParticles.pt > 10*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
+    JETM12_thinning_expression = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     JETM12TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         ConfigFlags,
         name                    = "JETM12TrackParticleThinningTool",
@@ -199,9 +198,9 @@ def JETM12KernelCfg(ConfigFlags, name='JETM12Kernel', **kwargs):
                      JETM12PhotonTPThinningTool,
                      JETM12TauTPThinningTool]
 
-    #CaloClusterThinning does not support the usage of InDetTrackParticles at the moment, needs to be migrated to R22
+    #CaloClusterThinning
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
-    selectionString = "( InDetTrackParticles.pt > 10*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV) < 5.0*mm )"
+    selectionString = "( InDetTrackParticles.pt > 6*GeV && InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm )"
     JETM12CaloThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(ConfigFlags,
                                                                            name                  = "JETM12CaloClusterThinning",
                                                                            StreamName            = kwargs['StreamName'],

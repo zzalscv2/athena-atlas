@@ -213,7 +213,7 @@ def JETM6KernelCfg(ConfigFlags, name='JETM6Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, EgammaTrackParticleThinningCfg, JetTrackParticleThinningCfg, TauTrackParticleThinningCfg
 
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    JETM6_thinning_expression = "InDetTrackParticles.DFJETM6Loose && (InDetTrackParticles.pt > 0.5*GeV) && (abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 5.0*mm) && (InDetTrackParticles.d0 < 5.0*mm)"
+    JETM6_thinning_expression = "InDetTrackParticles.DFJETM6Loose && (InDetTrackParticles.pt > 0.5*GeV) && (abs(DFCommonInDetTrackZ0AtPV*sin(InDetTrackParticles.theta)) < 5.0*mm) && (abs(InDetTrackParticles.d0) < 5.0*mm)"
     JETM6TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
         ConfigFlags,
         name                    = "JETM6TrackParticleThinningTool",
