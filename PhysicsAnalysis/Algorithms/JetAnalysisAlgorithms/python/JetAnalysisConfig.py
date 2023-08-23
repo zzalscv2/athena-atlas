@@ -299,7 +299,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
     def __init__ (self, containerName, jetCollection, jetInput) :
-        super (LargeRJetAnalysisConfig, self).__init__ ()
+        super (LargeRJetAnalysisConfig, self).__init__ (containerName)
         self.containerName = containerName
         self.jetCollection = jetCollection
         self.jetInput = jetInput

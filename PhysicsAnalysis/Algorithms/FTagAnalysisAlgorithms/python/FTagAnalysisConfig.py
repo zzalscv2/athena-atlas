@@ -34,14 +34,14 @@ class FTagConfig (ConfigBlock):
             postfix = '_' + postfix
 
         # Kinematic selection depending on validity of the calibration
-        # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21
+        # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
         minPt = self.minPt
         if minPt is None:
             if "EMPFlow" in jetCollection:
                 minPt = 20e3
             elif "EMTopo" in jetCollection:
                 minPt = 20e3
-            elif "VRTrack" in jetCollection:
+            elif "VR" in jetCollection:
                 minPt = 10e3
 
         if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa228", "Sherpa2210", "Herwig7", "Herwig713", "Herwig721", "amc@NLO"]:
@@ -65,17 +65,17 @@ class FTagConfig (ConfigBlock):
             DSID = "410464"
 
         if self.legacyRecommendations:
-            # Remove b-tagging calibration from the container name
-            btIndex = jetCollection.find('_BTagging')
-            if btIndex == -1:
-                jetCollection += '_BTagging201903'
+            # The CDI file does not have PV0 in the key
+            if "VR" in jetCollection:
+                jetCollection = jetCollection.replace("PV0","")
 
         # CDI file
         if self.bTagCalibFile is not None :
             bTagCalibFile = self.bTagCalibFile
         elif self.legacyRecommendations :
-            # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21
-            bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root"
+            # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22#Latest_Rel_22_CDI_July_2022
+            # Supports DL1r on VR track jets
+            bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2021-12-02_v2.root"
         else:
             bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
 
