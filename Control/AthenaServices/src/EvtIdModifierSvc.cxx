@@ -13,6 +13,7 @@
 #include "EvtIdModifierSvc.h"
 
 // STL includes
+#include <algorithm>
 #include <set>
 
 // FrameWork includes
@@ -60,7 +61,10 @@ EvtIdModifierSvc::EvtIdModifierSvc( const std::string& name,
 
   declareProperty("SkipEvents", 
                   m_firstEvtIdx = 0,
-                  "number of events to skip before modifying EventInfos.");
+                  "Number of events to skip before modifying EventInfos.");
+  declareProperty("SkippedEvents",
+                  m_skippedEvents = 0,
+                  "Number of events skipped in the EventSelector.");
   m_allEvtsCounter = 0;
 }
 
@@ -97,14 +101,21 @@ StatusCode EvtIdModifierSvc::initialize()
       return StatusCode::FAILURE;
     }
   }
-  // free-up some memory
-  std::vector<uint64_t>(0).swap(val);
+
+  // initialize running total of nevts
+  m_numEvtTotals.clear();
+  EventID::event_number_t sum = 0;
+  for (const auto& elem : m_evtNplets) {
+    sum += elem.nevts;
+    m_numEvtTotals.push_back(sum);
+  }
+
 
   if (msgLvl(MSG::DEBUG)) {
     msg(MSG::DEBUG) << "store being modified: ["
                     << m_evtStoreName << "]" << endmsg
                     << "evtid-modifiers: [ ";
-    for (ModDb_t::iterator 
+    for (ModDb_t::iterator
            itr  = m_evtNplets.begin(), 
            iend = m_evtNplets.end();
          itr != iend;
@@ -257,8 +268,9 @@ EvtIdModifierSvc::run_number_list() const
 /** @brief modify an `EventID`'s content.
  */
 void
-EvtIdModifierSvc::modify_evtid(EventID*& evt_id, bool consume_stream)
+EvtIdModifierSvc::modify_evtid(EventID*& evt_id, EventID::event_number_t evt_index, bool consume_stream)
 {
+  // Left in to match old observable behaviour:
   // only when consuming stream is required do we check for a matching
   // current StoreGate name (ie: typically the case of being called from a T/P cnv)
   if (consume_stream) {
@@ -273,6 +285,8 @@ EvtIdModifierSvc::modify_evtid(EventID*& evt_id, bool consume_stream)
     if (evtStoreName != m_evtStoreName) {
       return;
     }
+
+    m_allEvtsCounter++;
   }
 
   ATH_MSG_DEBUG
@@ -283,41 +297,41 @@ EvtIdModifierSvc::modify_evtid(EventID*& evt_id, bool consume_stream)
       << ", " << evt_id->lumi_block()
       << ")" );
 
-  // handle skip-events
-  if (consume_stream) {
-    m_allEvtsCounter++;
-    if (m_firstEvtIdx >= m_allEvtsCounter) {
-      // we didn't reach the first event we were asked to process, yet
-      ATH_MSG_DEBUG("skip event");
-      return;
-    }
+  // event skipping
+  std::int64_t idx = std::int64_t(evt_index) + m_skippedEvents - std::int64_t(m_firstEvtIdx);
+  std::int64_t idx_looped = idx % m_numEvtTotals.back();
+  ATH_MSG_DEBUG("Got event idx " << evt_index << " --(account for skipping)--> " << idx << " --(modulo #modifiers)--> " << idx_looped);
+  if (idx < 0) {
+    ATH_MSG_DEBUG("skip event");
+    return;
   }
 
-  if (m_cursor != m_evtNplets.end()) {
-    if (consume_stream) {
-      m_current = *m_cursor;
-      m_evtCounter++;
-      if (m_evtCounter > m_current.nevts) {
-        // go to next n-uplet
-        ++m_cursor;
-        ATH_MSG_DEBUG("Moved to next ntuplet");
-        m_evtCounter = 1;
-      }
-    }
-    ATH_MSG_DEBUG("Event counter = " << m_evtCounter);
-    if (m_current.mod_bit & SHIFT_RUNNBR) {
-      evt_id->set_run_number(m_current.runnbr);
-    }
-    if (m_current.mod_bit & SHIFT_EVTNBR) {
-      evt_id->set_event_number(m_current.evtnbr);
-    }
-    if (m_current.mod_bit & SHIFT_TIMESTAMP) {
-      evt_id->set_time_stamp(m_current.timestamp);
-    }
-    if (m_current.mod_bit & SHIFT_LBKNBR) {
-      evt_id->set_lumi_block(m_current.lbknbr);
-    }
+  // Account for events skipped in
+  std::size_t mod_idx =
+      std::upper_bound(m_numEvtTotals.cbegin(), m_numEvtTotals.cend(), idx_looped) -
+      m_numEvtTotals.cbegin();
+  auto current = m_evtNplets.at(mod_idx);
+  ATH_MSG_DEBUG("Unique modifier index " << mod_idx << " (LB: " << current.lbknbr << ")");
+  if (mod_idx >= m_numEvtTotals.size()) {
+    // Shouldn't happen
+    ATH_MSG_ERROR("Somehow run out of modifiers");
+    return;
   }
+
+  if (current.mod_bit & SHIFT_RUNNBR) {
+    evt_id->set_run_number(current.runnbr);
+  }
+  if (current.mod_bit & SHIFT_EVTNBR) {
+    evt_id->set_event_number(current.evtnbr);
+  }
+  if (current.mod_bit & SHIFT_TIMESTAMP) {
+    evt_id->set_time_stamp(current.timestamp);
+  }
+  if (current.mod_bit & SHIFT_LBKNBR) {
+    evt_id->set_lumi_block(current.lbknbr);
+  }
+
+  m_current = current;
 
   ATH_MSG_DEBUG
     ( "evtid after  massaging: "
@@ -326,6 +340,4 @@ EvtIdModifierSvc::modify_evtid(EventID*& evt_id, bool consume_stream)
       << ", " << evt_id->time_stamp()
       << ", " << evt_id->lumi_block()
       << ")" );
-
-  return;
 }

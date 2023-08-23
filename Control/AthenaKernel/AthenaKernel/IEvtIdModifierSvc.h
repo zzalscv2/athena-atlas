@@ -21,11 +21,20 @@
 // FrameWork includes
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/ClassID.h"
+#include "GaudiKernel/EventIDBase.h"
 
 // AthenaKernel includes
 
 // fwd declares
 class EventID;
+
+// EventInfo type
+using event_number_t = EventIDBase::event_number_t;
+
+// Special global thread_local to pass event index to EventInfoCnv
+namespace EventInfoCnvParams {
+  inline thread_local event_number_t eventIndex{0};
+}
 
 class IEvtIdModifierSvc
   : virtual public ::IInterface
@@ -33,8 +42,8 @@ class IEvtIdModifierSvc
   /////////////////////////////////////////////////////////////////// 
   // Public typedefs: 
   /////////////////////////////////////////////////////////////////// 
- public: 
-  typedef unsigned int number_type; //FIXME: keep in synch with EventID!!
+ public:
+   using number_type = EventIDBase::number_type;
 
   /////////////////////////////////////////////////////////////////// 
   // Public methods: 
@@ -96,7 +105,7 @@ class IEvtIdModifierSvc
    */
   virtual
   void
-  modify_evtid(EventID*& evt_id, bool consume_stream=false) = 0;
+  modify_evtid(EventID*& evt_id, event_number_t eventIndex, bool consume_stream) = 0;
 
 }; 
 
