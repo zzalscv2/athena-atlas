@@ -55,14 +55,14 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
     //Reading the Scell container
     SG::ReadHandle<CaloCellContainer> ScellContainer(m_SCellKey, ctx);
     if(!ScellContainer.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve collection " << ScellContainer.key() );
+        ATH_MSG_ERROR("Could not retrieve collection " << ScellContainer.key() );
         return StatusCode::FAILURE;
     }
     
     //Reading the TriggerTower container
     SG::ReadHandle<xAOD::TriggerTowerContainer> triggerTowerContainer(m_triggerTowerKey, ctx);
     if(!triggerTowerContainer.isValid()) {
-        ATH_MSG_FATAL("Could not retrieve collection " << triggerTowerContainer.key() );
+        ATH_MSG_ERROR("Could not retrieve collection " << triggerTowerContainer.key() );
         return StatusCode::FAILURE;
     }
 
@@ -219,7 +219,7 @@ StatusCode jFexEmulatedTowers::ReadFibersfromFile(const std::string & fileName){
     std::ifstream file(fileName);
     
     if ( !file.is_open() ){
-        ATH_MSG_FATAL("Could not open file:" << fileName);
+        ATH_MSG_ERROR("Could not open file:" << fileName);
         return StatusCode::FAILURE;
     }
     
@@ -273,7 +273,7 @@ StatusCode  jFexEmulatedTowers::ReadSCfromFile(const std::string& fileName){
     std::ifstream file(fileName);
     
     if ( !file.is_open() ){
-        ATH_MSG_FATAL("Could not open file:" << fileName);
+        ATH_MSG_ERROR("Could not open file:" << fileName);
         return StatusCode::FAILURE;
     }
     
@@ -348,7 +348,7 @@ StatusCode  jFexEmulatedTowers::ReadTilefromFile(const std::string& fileName){
     std::ifstream file(fileName);
     
     if ( !file.is_open() ){
-        ATH_MSG_FATAL("Could not open file:" << fileName);
+        ATH_MSG_ERROR("Could not open file:" << fileName);
         return StatusCode::FAILURE;
     }
     

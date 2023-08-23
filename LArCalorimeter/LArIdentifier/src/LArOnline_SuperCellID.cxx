@@ -361,3 +361,12 @@ int  LArOnline_SuperCellID::initialize_from_dictionary (const IdDictMgr& dict_mg
     return 0;
 }
 
+bool LArOnline_SuperCellID::isHECchannel(const HWIdentifier id) const
+/*========================================================*/
+{
+   int ft = feedthrough(id);
+   return ( barrel_ec(id)==1 
+        && 
+        ( ft==3 || ft==10 || ft==16 || ft==22 )
+        );
+}

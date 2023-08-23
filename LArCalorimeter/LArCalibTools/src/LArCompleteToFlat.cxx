@@ -286,6 +286,13 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
       if (ofcb.size()==nSamples) {
 	for (unsigned i=0;i<nSamples;++i) {
 	  pOfcb[hs*nSamples+i]=ofcb[i];
+          // FIXME: it should be replaced by proper conditions per channel
+	  // HERE - multiplying HEC OFCb by 1.5 for SCs
+          // https://its.cern.ch/jira/browse/ATLLARONL-1784
+	  if (m_isSC && m_onlineID->isHECchannel(chid)){ 
+	    pOfcb[hs*nSamples+i]=ofcb[i]*1.5;
+	    ATH_MSG_WARNING("NOTE: this OFC for channel "<<chid<<" was multiplied by 1.5. This should be a HEC SC("<<m_onlineID->channel_name(chid)<<"). Was "<<ofcb[i]<<" now "<<pOfcb[hs*nSamples+i]);
+	  }
 	}
       }
       else {

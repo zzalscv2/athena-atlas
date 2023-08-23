@@ -13,13 +13,13 @@ atlas_add_library( L1CaloFEXSimLib
                    PUBLIC_HEADERS L1CaloFEXSim
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} TruthUtils AthContainers AthLinks AthenaBaseComps AthenaKernel CaloEvent CaloIdentifier CxxUtils GaudiKernel Identifier L1CaloFEXToolInterfaces StoreGateLib xAODBase xAODCore xAODTrigL1Calo xAODTruth xAODTrigger
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} TruthUtils AthContainers AthLinks AthenaBaseComps AthenaKernel CaloEvent CaloIdentifier CxxUtils GaudiKernel Identifier L1CaloFEXToolInterfaces StoreGateLib xAODBase xAODCore xAODTrigL1Calo xAODTruth xAODTrigger L1CaloFEXCondLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib TrigConfData SGTools xAODJet PathResolver)
 
 atlas_add_component( L1CaloFEXSim
                      src/components/*.cxx
                      LINK_LIBRARIES L1CaloFEXSimLib PathResolver)
-
+                     
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )

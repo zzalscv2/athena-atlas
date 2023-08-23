@@ -46,13 +46,7 @@ StatusCode LArDigits2Ntuple::initialize()
     ATH_MSG_ERROR( "addItem 'Nsamples' failed" );
     return sc;
   }
-  
-  sc = m_nt->addItem("Gain",m_gain,0,4);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'Gain' failed" );
-    return sc;
-  }
-  
+
   if(m_fillBCID){
     sc = m_nt->addItem("BCID",m_bcid);
     if (sc!=StatusCode::SUCCESS) {

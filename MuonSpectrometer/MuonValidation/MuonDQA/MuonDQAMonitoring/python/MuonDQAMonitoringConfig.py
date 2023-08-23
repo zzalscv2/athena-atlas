@@ -1,9 +1,10 @@
 #
-#  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def MuonDQAMonitoringConfig(flags):
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    from AthenaMonitoring.DQConfigFlags import DQDataType
 
     result = ComponentAccumulator()
 
@@ -21,7 +22,7 @@ def MuonDQAMonitoringConfig(flags):
                 result.merge(CscMonitoringESD_AlgConfig(flags))
             if flags.Detector.GeometrysTGC:
                 from StgcRawDataMonitoring.StgcMonitorAlgorithm import sTgcMonitoringConfig
-                if not flags.DQ.DataType.MC:
+                if flags.DQ.DataType is not DQDataType.MC:
                    result.merge(sTgcMonitoringConfig(flags,NSW_PadTrigKey='NSW_PadTrigger_RDO'))
                 else:
                    result.merge(sTgcMonitoringConfig(flags))

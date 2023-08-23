@@ -38,10 +38,18 @@ def LArSC2NtupleCfg(flags, **kwargs):
              from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
              cfg.merge(LArNoisyROSummaryCfg(flags))      
 
+       if 'FillTriggerTowers' in kwargs and kwargs['FillTriggerTowers']: #confiigure decoding
+          from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
+          from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
+          cfg.merge(L1TriggerByteStreamDecoderCfg(flags) )
+          cfg.merge(LVL1CaloRun2ReadBSCfg(flags))
+          from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg, HLTConfigSvcCfg, L1PrescaleCondAlgCfg, HLTPrescaleCondAlgCfg
+          cfg.merge( L1ConfigSvcCfg(flags) )
+          cfg.merge( HLTConfigSvcCfg(flags) )
+          cfg.merge( L1PrescaleCondAlgCfg(flags) )
+          cfg.merge( HLTPrescaleCondAlgCfg(flags) )
+
        alg=CompFactory.LArSC2Ntuple('LArSC2Ntuple',**kwargs)
-       # if debug is needed, uncomment:
-       #from AthenaCommon.Constants import DEBUG
-       #alg.OutputLevel=DEBUG
 
        cfg.addEventAlgo(alg)
 

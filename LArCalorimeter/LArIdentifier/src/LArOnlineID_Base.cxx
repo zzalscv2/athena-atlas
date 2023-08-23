@@ -1691,18 +1691,7 @@ bool LArOnlineID_Base::isEMBchannel(const HWIdentifier id) const
 bool LArOnlineID_Base::isFCALchannel(const HWIdentifier id) const
 /*========================================================*/
 {
-  int ft = feedthrough(id);
-  return ( barrel_ec(id)==1 && (ft == 6 || (ft > 24 && ft < 28)) );
-}
-bool LArOnlineID_Base::isHECchannel(const HWIdentifier id) const
-/*========================================================*/
-{
-  int ft = feedthrough(id);
-  return ( barrel_ec(id)==1 
-	   && 
-	   ( ft==3 || ft==10 || ft==16 || ft==22 )
-	   &&
-	   slot(id) > 2 );
+  return ( barrel_ec(id)==1 && feedthrough(id) == 6  );
 }
 bool LArOnlineID_Base::isEMECIW(const HWIdentifier id) const {
   /*======================================================*/

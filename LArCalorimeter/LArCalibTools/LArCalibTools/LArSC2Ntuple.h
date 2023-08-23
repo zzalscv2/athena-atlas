@@ -10,6 +10,7 @@
 #include "LArRawEvent/LArRawChannelContainer.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "TrigT1CaloEvent/TriggerTower.h"
 
 class LArSC2Ntuple : public LArDigits2Ntuple
 {
@@ -34,6 +35,7 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   Gaudi::Property< bool > m_fillRawChan{this, "FillRODEnergy", false, "Trying to fill corresponding cells energies"};
   Gaudi::Property< bool > m_fillTType{this, "FillTriggerType", false, "Trying to fill trigger type word"};
   Gaudi::Property< std::vector<std::string> > m_trigNames{ this, "TrigNames", {"L1_EM3","L1_EM7","L1_EM15"},"which triggers to dump"};
+  Gaudi::Property< bool > m_fillCaloTT{this, "FillTriggerTowers", false, "Trying to fill also TriggerTowers from ByteStream"};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKeyAdditional{this,"CablingKeyAdditional","LArOnOffIdMap","SG Key of LArOnOffIdMapping object for standard cells"};
   ToolHandle<ICaloSuperCellIDTool>   m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
@@ -42,16 +44,19 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo", "Key for EventInfo object"};
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", "EventInfo.larFlags"};
 
+  Gaudi::Property< std::string > m_triggerTowerKey{this, "TriggerTowerKey", "TriggerTowers", "Trigger Tower container"};
+
   NTuple::Item<short> m_latomeChannel;
 
   NTuple::Array<float>  m_ROD_energy;
+  NTuple::Array<float>  m_ROD_time;
+  NTuple::Array<float>  m_ROD_id;
 
   NTuple::Item<unsigned int> m_TType;
 
 
   // From LATOME header
   NTuple::Item<uint16_t> m_bcidLATOMEHEAD;
-  NTuple::Item<uint32_t> m_l1idLATOMEHEAD;
 
   NTuple::Item<uint32_t> m_ntNet;
 
@@ -72,6 +77,12 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   std::map<std::string,   NTuple::Item<unsigned int> > m_trigNameMap;
   NTuple::Item<uint32_t> m_LArEventBits;
   NTuple::Item<short>    m_LArInError;
+
+  NTuple::Item<uint32_t> m_ntNTT;
+  NTuple::Array<int>  m_TTEem;
+  NTuple::Array<int>  m_TTEhad;
+  NTuple::Array<double>  m_TTeta;
+  NTuple::Array<double>  m_TTphi;
 };
 
 #endif

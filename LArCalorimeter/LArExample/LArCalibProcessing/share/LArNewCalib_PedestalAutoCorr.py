@@ -31,8 +31,8 @@ if __name__=='__main__':
    parser.add_argument('-n','--outsqlite', dest='outsql', default="mysql.db", help='Output sqlite file, in pool output dir.', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
-   parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
-   parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, help='is raw data ?', type=bool)
+   parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
+   parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, action="store_true", help='is raw data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file with bad chans.', type=str)
 
    args = parser.parse_args()
@@ -44,15 +44,24 @@ if __name__=='__main__':
     if value is not None:
         log.debug(value)
 
+   if len(args.run) < 8:
+      args.run = args.run.zfill(8)
+
    # now set flags according parsed options
    if args.indir != "":
       InputDir = args.indir
    else:
       gain=args.gain.lower().capitalize()
+      
+
       if not args.supercells:
-         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+".daq.RAW/"
-      else:   
-         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+args.partition+"-DT-RawData.daq.RAW/"
+         partstr = args.partition
+      else:
+         partstr = args.partition+"-DT"
+      if args.rawdata:
+            partstr += "-RawData"
+      # here - add optional nsamples
+      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Pedestal-32s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Pedestal-32s-"+gain+"-"+partstr+".daq.RAW/"
 
    #Import the configution-method we want to use (here: Pedestal and AutoCorr)
    from LArCalibProcessing.LArCalib_PedestalAutoCorrConfig import LArPedestalAutoCorrCfg
@@ -74,6 +83,8 @@ if __name__=='__main__':
    flags.LArCalib.Input.RunNumbers = [int(args.run),]
    flags.LArCalib.Input.isRawData = args.rawdata
 
+
+
    # Input files
    flags.Input.Files=flags.LArCalib.Input.Files
    #Print the input files we found 
@@ -81,7 +92,11 @@ if __name__=='__main__':
    for f in flags.Input.Files:
        log.info(f)
    
+   if len(flags.Input.Files) == 0 :
+      print("Unable to find any input files. Please check the input directory:",InputDir)
+      sys.exit(0)
 
+   
    #Some configs depend on the sub-calo in question
    #(sets also the preselection of LArRawCalibDataReadingAlg)
    if not flags.LArCalib.isSC:
@@ -112,7 +127,7 @@ if __name__=='__main__':
    OutputPedAutoCorrRootFileName = args.outrprefix + "_" + args.run
    OutputPedAutoCorrPoolFileName = args.outpprefix + "_" + args.run
       
-   if args.subdet != "":
+   if args.subdet != "" and not flags.LArCalib.isSC:
       OutputPedAutoCorrRootFileName = OutputPedAutoCorrRootFileName + "_"+args.subdet
       OutputPedAutoCorrPoolFileName = OutputPedAutoCorrPoolFileName + "_"+args.subdet
       if flags.LArCalib.Input.SubDet=="EM":
@@ -136,7 +151,10 @@ if __name__=='__main__':
    #Define the global output Level:
    from AthenaCommon.Constants import INFO 
    flags.Exec.OutputLevel = INFO
-   
+
+   from AthenaConfiguration.Enums import LHCPeriod
+   flags.GeoModel.Run = LHCPeriod.Run3
+
    flags.lock()
    
    # create bad chan sqlite file
@@ -149,6 +167,8 @@ if __name__=='__main__':
    try:
       cp = subprocess.run(cmdline, check=True, capture_output=True )
    except Exception as e:
+      print(e)
+      print((" ").join(cmdline))
       log.error('Could not create BadChan sqlite file !!!!')
       sys.exit(-1)
  
@@ -158,9 +178,9 @@ if __name__=='__main__':
       except Exception as e:
          log.error('Could not create BadChan sqlite file !!!!')
          sys.exit(-1)
- 
-   cfg=MainServicesCfg(flags)
    
+   cfg=MainServicesCfg(flags)
+
    cfg.merge(LArPedestalAutoCorrCfg(flags))
 
    #run the application

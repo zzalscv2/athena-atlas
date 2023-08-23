@@ -112,18 +112,20 @@ class InDetTrigSequence:
     with ConfigurableCABehavior():
       
       acc = ComponentAccumulator()
-      
-      if self.__flags.Input.Format == Format.BS:
-        acc = ComponentAccumulator()
-        ViewDataVerifier = \
-          CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
-                                                 DataObjects = [
-                                                   ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                                                   ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+
+      ViewDataVerifier = \
+        CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
+                                               DataObjects = [
+                                                 ( 'InDet::PixelGangedClusterAmbiguities' , 'TrigPixelClusterAmbiguitiesMap'),
                                                  ]
-                                                )
+                                              )
+      if self.__flags.Input.Format == Format.BS:
+        ViewDataVerifier.DataObjects += [
+          ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
+          ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+        ]
       
-        acc.addEventAlgo(ViewDataVerifier)
+      acc.addEventAlgo(ViewDataVerifier)
       return acc
 
   def dataPreparation(self) -> ComponentAccumulator:

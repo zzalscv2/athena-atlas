@@ -13,7 +13,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
-ex.input = 'ttbar'
+ex.input = 'SlepSlep'
 ex.threads = 1
 ex.args = '-c "setMenu=\'Dev_pp_run3_v1\';doEmptyMenu=True;doUnconventionalTrackingSlice=True;doWriteBS=False;doWriteRDOTrigger=True;"'
 

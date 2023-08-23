@@ -43,7 +43,7 @@ namespace LVL1 {
     
     /** Constructors */
     jTower();
-    jTower(float eta, float phi, int eta_modifier_input, int id_modifier, int posneg, float centre_eta = -1.0, float centre_phi = -1.0, int fcal_layer = -1);
+    jTower(float eta, float phi, int towerid, int posneg, float centre_eta = -1.0, float centre_phi = -1.0, int fcal_layer = -1);
     
     /** Destructor */
     virtual ~jTower() = default;
@@ -64,10 +64,16 @@ namespace LVL1 {
     /** Add to eta/phi values of a specified tower */
     void setCentreEta(float ieta);
     void setCentrePhi(float iphi);
+    void setiEta(float ieta);
+    void setiPhi(float iphi);
 
     /** Add to Area values of a specified tower */
-    void setTTowerArea(float area,int layer);
-    float getTTowerArea(int layer) const;
+    void setTTowerArea(int area,int layer);
+    int getTTowerArea(int layer) const;
+    
+    /** Add to Area inverted values of a specified tower */
+    void setTTowerAreaInv(int area,int layer);
+    int getTTowerAreaInv(int layer) const;
 
     /** Add to pilup lower and upper thresholds */
     void setMinEtforPileup(int etval){m_minEt_pileup_thr=etval;};
@@ -88,9 +94,13 @@ namespace LVL1 {
     
     void setEta(const float thiseta){ m_eta = thiseta; }
 
-    int id() {return m_tower_id;};
-
-    int id() const {return m_tower_id;}
+    // jTower ID Online and Offline
+    void setOnlineID(int tower_id_online);
+    
+    int OnlineID() {return m_tower_id_online;};
+    int OnlineID() const {return m_tower_id_online;}
+    int OfflineID() {return m_tower_id;};
+    int OfflineID() const {return m_tower_id;}
 
     float constid() const {return m_tower_id;};
 
@@ -165,6 +175,7 @@ namespace LVL1 {
     float m_phi;
     
     int m_tower_id;
+    int m_tower_id_online;
     int m_posneg = 0;
     float m_centre_eta =0;
     float m_centre_phi =0;
@@ -173,7 +184,8 @@ namespace LVL1 {
     std::vector<Identifier> m_HAD_scID;
     std::vector<int> m_et; // Real energy from TILE and the decoded energy from LATOME
     std::vector<float> m_et_float_raw;  // Raw imput energy from LATOME (not encoded/decoded) and TILE.
-    std::vector<float> m_TTowerArea{ 1.0, 1.0};
+    std::vector<int> m_TTowerArea{ 1, 1};
+    std::vector<int> m_TTowerAreaInv{ 1, 1};
     int m_fcal_layer = -1;
     int m_NoiseForMet[2] = {0};
     int m_NoiseForJet[2] = {0};

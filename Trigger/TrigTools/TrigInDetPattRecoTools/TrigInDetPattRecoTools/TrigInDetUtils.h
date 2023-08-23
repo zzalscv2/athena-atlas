@@ -16,7 +16,7 @@ struct trackInfo {
 };
 
 namespace FTF {
-    bool isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y);
+    bool isGoodTrackUTT(const Trk::Track* track, trackInfo& theTrackInfo, const float shift_x, const float shift_y, float trkcut_ptgev);
     void getBeamSpotShift(float& shift_x, float& shift_y, const InDet::BeamSpotData& beamSpotHandle);
 }
 

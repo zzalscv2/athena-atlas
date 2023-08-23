@@ -67,7 +67,7 @@ def runHLTCfg(flags):
    from AthenaCommon.Logging import logging
 
    log = logging.getLogger('runHLT')
-   acc = ComponentAccumulator()
+   cfg = ComponentAccumulator()
 
    # Load these objects from StoreGate
    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
@@ -75,47 +75,47 @@ def runHLTCfg(flags):
                  ('TrigConf::HLTMenu','DetectorStore+HLTTriggerMenu')]
 
    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-   acc.merge(SGInputLoaderCfg(flags, loadFromSG))
+   cfg.merge(SGInputLoaderCfg(flags, loadFromSG))
 
    from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
-   acc.merge(TriggerHistSvcConfig(flags))
+   cfg.merge(TriggerHistSvcConfig(flags))
 
    # Menu
    from TriggerMenuMT.HLT.Config.GenerateMenuMT_newJO import generateMenuMT
    from TriggerJobOpts.TriggerConfig import triggerRunCfg
    menu = triggerRunCfg(flags, menu=generateMenuMT)
-   acc.merge(menu)
+   cfg.merge(menu)
 
    from LumiBlockComps.LumiBlockMuWriterConfig import LumiBlockMuWriterCfg
-   acc.merge(LumiBlockMuWriterCfg(flags), sequenceName="HLTBeginSeq")
+   cfg.merge(LumiBlockMuWriterCfg(flags), sequenceName="HLTBeginSeq")
 
    if flags.Trigger.doTransientByteStream and flags.Trigger.doCalo:
        from TriggerJobOpts.TriggerTransBSConfig import triggerTransBSCfg_Calo
-       acc.merge(triggerTransBSCfg_Calo(flags), sequenceName="HLTBeginSeq")
+       cfg.merge(triggerTransBSCfg_Calo(flags), sequenceName="HLTBeginSeq")
 
    # L1 simulation
    if flags.Trigger.doLVL1:
        from TriggerJobOpts.Lvl1SimulationConfig import Lvl1SimulationCfg
-       acc.merge(Lvl1SimulationCfg(flags), sequenceName="HLTBeginSeq")
+       cfg.merge(Lvl1SimulationCfg(flags), sequenceName="HLTBeginSeq")
 
    # Track overlay needs this to ensure that the collections are copied correctly
    # (due to the hardcoding of the name in the converters)
    if flags.Overlay.doTrackOverlay:
        from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg
-       acc.merge(TrkEventCnvSuperToolCfg(flags))
+       cfg.merge(TrkEventCnvSuperToolCfg(flags))
 
    if flags.Common.isOnline:
      from TrigOnlineMonitor.TrigOnlineMonitorConfig import trigOpMonitorCfg
-     acc.merge( trigOpMonitorCfg(flags) )
+     cfg.merge( trigOpMonitorCfg(flags) )
 
    # Print config and statistics
    if log.getEffectiveLevel() <= logging.DEBUG:
-       acc.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
+       cfg.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
 
    from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
    AccumulatorDecorator.printStats()
 
-   return acc
+   return cfg
 
 
 def athenaHLTCfg(flags):
@@ -127,8 +127,8 @@ def athenaHLTCfg(flags):
    lock_and_restrict(flags)
 
    # Configure HLT
-   acc = runHLTCfg(flags)
-   return acc
+   cfg = runHLTCfg(flags)
+   return cfg
 
 
 def athenaCfg():
@@ -143,9 +143,13 @@ def athenaCfg():
    # To allow running from MC
    flags.Common.isOnline = lambda f: not f.Input.isMC
 
-   # Fill flags from command line
+   # Add options to command line parser
    parser = flags.getArgumentParser()
-   flags.fillFromArgs(parser=parser)
+   parser.add_argument('--postExec', metavar='CMD',
+                       help='Commands executed after Python configuration')
+
+   # Fill flags from command line
+   args = flags.fillFromArgs(parser=parser)
 
    if flags.Trigger.writeBS:
       flags.Output.doWriteBS = True
@@ -158,7 +162,7 @@ def athenaCfg():
    _allflags = flags.clone()   # copy including Concurrency flags
    _allflags.lock()
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-   acc = MainServicesCfg(_allflags)
+   cfg = MainServicesCfg(_allflags)
    del _allflags
 
    # Lock flags
@@ -166,14 +170,18 @@ def athenaCfg():
 
    if flags.Input.Format is Format.BS:
        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-       acc.merge(ByteStreamReadCfg(flags))
+       cfg.merge(ByteStreamReadCfg(flags))
    else:
        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-       acc.merge(PoolReadCfg(flags))
+       cfg.merge(PoolReadCfg(flags))
 
    # Configure HLT
-   acc.merge(runHLTCfg(flags))
-   return acc
+   cfg.merge(runHLTCfg(flags))
+
+   if args.postExec:
+      exec(args.postExec)
+
+   return cfg
 
 
 def main(flags=None):

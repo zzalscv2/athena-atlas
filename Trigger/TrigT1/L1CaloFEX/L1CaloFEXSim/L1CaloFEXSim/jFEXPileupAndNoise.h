@@ -22,7 +22,9 @@
 #include "AthenaBaseComps/AthAlgorithm.h" 
 #include "StoreGate/StoreGateSvc.h" 
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-
+#include "L1CaloFEXCond/jFEXDBCondData.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadCondHandle.h"
 
 namespace LVL1 {
 
@@ -48,9 +50,8 @@ namespace LVL1 {
     virtual ~jFEXPileupAndNoise();
 
     
-    virtual std::vector<float> CalculatePileup()      override;
-    virtual void ApplyPileup2Jets(bool b) override;
-    virtual void ApplyPileup2Met(bool b)  override;
+    virtual std::vector<int> CalculatePileup()      override;
+    virtual StatusCode ApplyPileup() override;
     virtual void ApplyNoise2Jets(bool b)  override;
     virtual void ApplyNoise2Met(bool b)   override;
 
@@ -61,20 +62,28 @@ protected:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
         SG::ReadHandle<jTowerContainer> m_jTowerContainer;
         
+        SG::ReadCondHandleKey<jFEXDBCondData> m_BDToolKey {this, "BDToolKey", "jFEXDBParams", "DB tool key"};
+        
         int m_FPGA_central[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]={{0}};
         int m_FPGA_forward[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]={{0}};
         
-        int m_FPGA_ET_central_EM[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]={{0}};
+        int m_etaMAX=0;
+        
+        int m_FPGA_ET_central_EM [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]={{0}};
         int m_FPGA_ET_central_HAD[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]={{0}};
-        int m_FPGA_ET_forward_EM[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]={{0}};
+        int m_FPGA_ET_forward_EM [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]={{0}};
         int m_FPGA_ET_forward_HAD[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]={{0}};
         
+        std::unordered_map<int,int > m_FPGA_ET_EM;
+        std::unordered_map<int,int > m_FPGA_ET_HAD;        
+        
+        
         //rho variables for the pileup
-        float m_rho_EM   = 0; //for eta < 3.2
-        float m_rho_HAD1 = 0; //for eta < 1.5
-        float m_rho_HAD2 = 0; //for 1.5 < eta < 1.6
-        float m_rho_HAD3 = 0; //for 1.6 < eta < 3.2
-        float m_rho_FCAL = 0; //for eta > 3.1
+        int m_rho_EM   = 0; //for eta < 3.2
+        int m_rho_HAD1 = 0; //for eta < 1.5
+        int m_rho_HAD2 = 0; //for 1.5 < eta < 1.6
+        int m_rho_HAD3 = 0; //for 1.6 < eta < 3.2
+        int m_rho_FCAL = 0; //for eta > 3.1
         
         //TT counters
         int m_count_rho_EM   = 0;
@@ -93,20 +102,22 @@ protected:
         void reset_conters();
         void SubtractPileup();
         void ApplyNoiseCuts(std::unordered_map<int,std::vector<int> > & map_Etvalues, int layer);
+        int  rhoDivLUT(int ntowers);
 
 
         // SG information
-        int getTTowerEta  (unsigned int TTID ); 
-        int getTTowerET   (unsigned int TTID ); 
-        int getET_EM      (unsigned int TTID ); 
-        int getET_HAD     (unsigned int TTID ); 
-        float getTTArea_EM  (unsigned int TTID ); 
-        float getTTArea_HAD (unsigned int TTID ); 
+        int getTTowerEta     (const LVL1::jTower *tmpTower ); 
+        int getTTowerET      (const LVL1::jTower *tmpTower ); 
+        int getET_EM         (const LVL1::jTower *tmpTower ); 
+        int getET_HAD        (const LVL1::jTower *tmpTower ); 
+        int getTTArea_EM     (const LVL1::jTower *tmpTower ); 
+        int getTTArea_HAD    (const LVL1::jTower *tmpTower ); 
+        int getTTAreaINV_EM  (const LVL1::jTower *tmpTower ); 
+        int getTTAreaINV_HAD (const LVL1::jTower *tmpTower ); 
         
-        //Noise values applied
-        // It should be 0 GeV and 1 GeV in firmware LSB scale (bitwise is using MeV right now, CHANGE IF NEEDED!)
-        int m_et_low  = 100;
-        int m_et_high = 1000;
+        unsigned int m_bitshift_AreaINV = 6;
+        unsigned int m_bitshift_Area    = 11;
+        unsigned int m_bitshift_rhoLUT  = 20;
         
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues_EM;

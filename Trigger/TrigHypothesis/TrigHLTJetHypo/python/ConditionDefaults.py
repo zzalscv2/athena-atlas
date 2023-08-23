@@ -35,6 +35,7 @@ class ConditionDefaults:
             'bsel': {'min': '-inf', 'max': 'inf'},
             'momCuts': {'min': '-inf', 'max': 'inf'},
             'timing': {'min': '0', 'max': 'inf'},
+            'timeSig': {'min': '0', 'max': 'inf'},       
         }
 
         self.scale_factor = {
@@ -55,6 +56,7 @@ class ConditionDefaults:
             'jvt': 0.01,
             'momCuts': 0.01,
             'timing': 1.0,
+            'timeSig': 1.0,
         }
   
     def __call__(self, key, lo='', hi=''):

@@ -27,6 +27,7 @@ jFEXFormTOBs::~jFEXFormTOBs() {}
 
 StatusCode jFEXFormTOBs::initialize()
 {
+    ATH_CHECK( m_BDToolKey.initialize() );
     return StatusCode::SUCCESS;
 }
 
@@ -87,7 +88,13 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex, int res){
         et_range = 8;
     }
     
-    int calib = FEXAlgoSpaceDefs::SRJ_Calib_params[jfex][et_range];
+    SG::ReadCondHandle<jFEXDBCondData> myDBTool = SG::ReadCondHandle<jFEXDBCondData>( m_BDToolKey/*, ctx*/ );
+    if (!myDBTool.isValid()){
+        ATH_MSG_ERROR("Not able to read " << m_BDToolKey );
+    }
+    
+    
+    int calib = myDBTool->get_jJCalibParam(jfex,et_range);
     
     //Converting into 200MeV scale
     int et_200Mev = std::floor(1.0*Energy/res);

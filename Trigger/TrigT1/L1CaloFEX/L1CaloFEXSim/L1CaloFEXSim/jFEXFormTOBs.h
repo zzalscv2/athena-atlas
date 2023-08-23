@@ -14,6 +14,8 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h"
+#include "L1CaloFEXCond/jFEXDBCondData.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 namespace LVL1 {
 
@@ -43,6 +45,8 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
     private:
 
         int Get_calibrated_SRj_ET(int, int, int );
+        
+        SG::ReadCondHandleKey<jFEXDBCondData> m_BDToolKey {this, "BDToolKey", "jFEXDBParams", "DB tool key"};
 
 };
 
