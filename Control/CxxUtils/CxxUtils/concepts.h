@@ -74,7 +74,7 @@ concept IsHash =
   std::copy_constructible<HASHER> &&
   requires (const HASHER& h, T x)
 {
-  { h(x) } -> std::same_as<size_t>;
+  { h(x) } -> std::same_as<std::size_t>;
 };
 
 
