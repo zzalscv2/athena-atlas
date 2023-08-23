@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDVPM_XIncludeErrHandler_h
 #define IDVPM_XIncludeErrHandler_h
+#include "CxxUtils/checker_macros.h"
 #include <xercesc/dom/DOMErrorHandler.hpp>
 
 
-class XIncludeErrHandler: public xercesc::DOMErrorHandler {
+class ATLAS_NOT_THREAD_SAFE XIncludeErrHandler : public xercesc::DOMErrorHandler {
 public:
   XIncludeErrHandler();
   ~XIncludeErrHandler();
