@@ -19,6 +19,7 @@ Reco_tf.py --CA \
 --outputDESDM_ALLCELLSFile="myDESDM_ALLCELLS.pool.root" \
 --outputDAOD_L1CALO1File="myDAOD_L1CALO1.pool.root" \
 --outputDESDM_PHOJETFile="myDESDM_PHOJET.pool.root" \
+--outputDRAW_TAULHFile="myDRAW_TAULH.data" \
 --imf False
 
 rc1=$?

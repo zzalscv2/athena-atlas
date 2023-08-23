@@ -646,7 +646,10 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
       if(m_hasAdc)val.adc_bas.resize(m_nBC_ADC);
       if(m_hasE)val.et.resize(m_nBC_E);
       if(m_hasEID)val.et_id.resize(m_nBC_EID);
-      if(m_hasEID||m_hasE)val.saturation.resize(m_nBC_EID);
+      if(m_hasEID||m_hasE){
+           val.saturation.resize(std::max(m_nBC_EID,m_nBC_E));
+      }
+
       val.latomeChannel = 99999;
     }
   }

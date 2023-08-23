@@ -83,7 +83,7 @@ def tauMonitoringPrecisionMVA(flags):
    monTool.defineHistogram('track_dEta', path='EXPERT', type='TH1F', title="Precision RNN track eta - L1 RoI eta; Deta(Precision track, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
    monTool.defineHistogram('track_dPhi', path='EXPERT', type='TH1F', title="Precision RNN track phi - L1 RoI phi; Dphi(Precision track, L1 RoI); nEntries", xbins=50, xmin=-0.5, xmax=0.5)
    monTool.defineHistogram('track_d0_abs_log', path='EXPERT',type='TH1F', title="Precision RNN track d0_abs_log; Log10(Abs(track.d0()) + 1e-6); nEntries", xbins=50, xmin=-6.1, xmax=2.)
-   monTool.defineHistogram('track_z0sinThetaTJVA_abs_log', path='EXPERT', type='TH1F', title="Precision RNN track z0sinThetaTJVA_abs_log; Log10(Abs(track.z0sinThetaTJVA(tau)) + 1e-6); nEntries", xbins=50, xmin=-6.1, xmax=4.)
+   monTool.defineHistogram('track_z0sinthetaTJVA_abs_log', path='EXPERT', type='TH1F', title="Precision RNN track z0sinthetaTJVA_abs_log; Log10(Abs(track.z0sinthetaTJVA(tau)) + 1e-6); nEntries", xbins=50, xmin=-6.1, xmax=4.)
    monTool.defineHistogram('track_nPixelHitsPlusDeadSensors', path='EXPERT', type='TH1F', title="Precision RNN track nPixelHitsPlusDeadSensors; nPixelHits; nEntries", xbins=11, xmin=0., xmax=11.)
    monTool.defineHistogram('track_nSCTHitsPlusDeadSensors', path='EXPERT', type='TH1F', title="Precision RNN track nSCTHitsPlusDeadSensors; nSCTHits; nEntries", xbins=20, xmin=0., xmax=20.)
    monTool.defineHistogram('nRoI_EFTauCells', path='EXPERT', type='TH1F', title="Precision nRoI_Cells; nCells; nEntries", xbins=100, xmin=0., xmax=6000.)

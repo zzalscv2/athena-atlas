@@ -33,7 +33,6 @@ hltPrecommand = ''.join([
   "setMenu='Cosmic_run3_v1';",
   "doCosmics=True;",
   "doL1Sim=True;",
-  "rewriteLVL1=True;",
 ])
 hlt.args = f'-c "{hltPrecommand}"'
 hlt.args += ' -o output'

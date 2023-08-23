@@ -12,7 +12,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = ''  # No input file needed to generate config
-ex.args = '-c "setMenu=\'Dev_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;flags.GeoModel.AtlasVersion=\'ATLAS-R2-2016-01-00-01\';flags.IOVDb.GlobalTag=\'CONDBR2-HLTP-2018-04\'"'
+ex.args = '-c "setMenu=\'Dev_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;flags.GeoModel.AtlasVersion=\'ATLAS-R2-2016-01-00-01\';flags.IOVDb.GlobalTag=\'CONDBR2-HLTP-2018-04\'"'
 ex.args += ' -M --dump-config-exit'
 ex.perfmon = False  # Don't want PerfMon in SMK for HLT reprocessing
 ex.fpe_auditor = False  # Don't want FPEAuditor in SMK for HLT reprocessing

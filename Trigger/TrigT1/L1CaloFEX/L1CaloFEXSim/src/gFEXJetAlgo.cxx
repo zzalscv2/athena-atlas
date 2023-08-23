@@ -87,24 +87,8 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   gTowersCentral gBLKA;
   gBlockAB(Atwr, gBLKA);
 
-
   gTowersCentral gBLKB;
   gBlockAB(Btwr, gBLKB);
-
-  // sorting by jet engine -- not done in FPGA
-  std::array<int, 32> AgBlockOutL;
-  std::array<int, 32> AgBlockEtaIndL;
-  std::array<int, 32> AgBlockOutR;
-  std::array<int, 32> AgBlockEtaIndR;
-  blkOutAB( gBLKA, AgBlockOutL,AgBlockEtaIndL, AgBlockOutR, AgBlockEtaIndR);
-
-
-  std::array<int, 32> BgBlockOutL;
-  std::array<int, 32> BgBlockEtaIndL;
-  std::array<int, 32> BgBlockOutR;
-  std::array<int, 32> BgBlockEtaIndR;
-  blkOutAB( gBLKB, BgBlockOutL,BgBlockEtaIndL, BgBlockOutR, BgBlockEtaIndR);
-
 
   // sorting by 192 blocks 0 = left, 1 = right
 
@@ -616,39 +600,6 @@ void gFEXJetAlgo::gBlockAB(const gTowersCentral& twrs, gTowersCentral & gBlkSum)
 }
 
 
-void gFEXJetAlgo::blkOutAB(const gTowersCentral& blocks,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutL,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndL,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> jetOutR,
-                           std::array<int, FEXAlgoSpaceDefs::ABCrows> etaIndR ) const {
-
-  // find maximum in each jet engine for gBlocks  (not done in hardware)
-  int rows = blocks.size();
-  //loop over left engines
-  for(int ieng=0; ieng<rows; ieng++){
-    jetOutL[ieng] = 0;
-    etaIndL[ieng] = 0;
-    for(int localEta = 0; localEta<6; localEta++){
-      if( blocks[ieng][localEta] >  jetOutL[ieng]  ){
-        jetOutL[ieng] = blocks[ieng][localEta];
-        etaIndL[ieng] = localEta;
-      }
-    }
-  }
-  // loop over right engines
-  for(int ieng=0; ieng<rows; ieng++){
-    jetOutR[ieng] = 0;
-    etaIndR[ieng] = 0;
-    for(int localEta = 0; localEta<6; localEta++){
-      if(  blocks[ieng][localEta+6] >  jetOutR[ieng] ) {
-        jetOutR[ieng] = blocks[ieng][localEta+6];
-        etaIndR[ieng] = localEta;
-      }
-    }
-  }
-}
-
-
 void gFEXJetAlgo::gBlockMax2(const gTowersCentral& gBlkSum, int BjetColumn, int localColumn, std::array<int, 3> & gBlockV, std::array<int, 3> & gBlockEta, std::array<int, 3> & gBlockPhi) const {
 
   //  gBlkSum are the 9 or 6 gTower sums  
@@ -962,8 +913,8 @@ void gFEXJetAlgo::jetOutAB(const gTowersCentral& jets, const gTowersCentral& blo
 
 }
 
-void gFEXJetAlgo::gJetTOBgen(std::array<int, FEXAlgoSpaceDefs::ABCrows>  jetOut,
-                             std::array<int, FEXAlgoSpaceDefs::ABCrows>  etaInd,
+void gFEXJetAlgo::gJetTOBgen(const std::array<int, FEXAlgoSpaceDefs::ABCrows>& jetOut,
+                             const std::array<int, FEXAlgoSpaceDefs::ABCrows>&  etaInd,
                              int TOBnum, int jetThreshold, std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBs,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBv,
                              std::array<int, FEXAlgoSpaceDefs::gJetTOBfib> & gJetTOBeta,
