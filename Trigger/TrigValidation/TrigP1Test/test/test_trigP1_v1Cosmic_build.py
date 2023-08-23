@@ -26,7 +26,6 @@ precommand = ''.join([
   "setMenu='Cosmic_run3_v1';",
   "doCosmics=True;",
   "doL1Sim=True;",
-  "rewriteLVL1=True;",
 ])
 ex.args = f'-c "{precommand}"'
 ex.args += ' -o output'
