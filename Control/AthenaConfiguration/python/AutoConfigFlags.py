@@ -96,6 +96,9 @@ def DetDescrInfo(geoTag):
 
     geoTag: geometry tag (e.g. ATLAS-R2-2016-01-00-01)
     """
+    if not geoTag:
+        raise ValueError("No geometry tag specified")
+
     detDescrInfo = _initializeGeometryParameters(geoTag)
     detDescrInfo["geomTag"] = geoTag
     return detDescrInfo

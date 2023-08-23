@@ -13,8 +13,7 @@ def createGeoModelConfigFlags(analysis=False):
 
     gcf.addFlag("GeoModel.AtlasVersion", lambda flags :
                 (__getTrigTag(flags) if flags.Trigger.doLVL1 or flags.Trigger.doHLT else None) or
-                GetFileMD(flags.Input.Files).get("GeoAtlas", None) or
-                "ATLAS-R2-2016-01-00-01")
+                GetFileMD(flags.Input.Files).get("GeoAtlas", None))
 
     # Special handling of analysis releases where we only want AtlasVersion and Run
     if analysis:
@@ -22,6 +21,8 @@ def createGeoModelConfigFlags(analysis=False):
             import logging
             log = logging.getLogger("GeoModelConfigFlags")
             log.info('Deducing LHC Run period from the geometry tag name "%s" as database access is not available in analysis releases', prevFlags.GeoModel.AtlasVersion)
+            if not prevFlags.GeoModel.AtlasVersion:
+                raise ValueError('No geometry tag specified')
 
             if prevFlags.GeoModel.AtlasVersion.startswith("ATLAS-R1"):
                 period = LHCPeriod.Run1
@@ -39,9 +40,23 @@ def createGeoModelConfigFlags(analysis=False):
                     _deduct_LHCPeriod, type=LHCPeriod)
         return gcf
 
-    gcf.addFlag("GeoModel.Run",  # Run from the geometry database
-                lambda prevFlags : LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Common']['Run']),
-                type=LHCPeriod)
+    def _deduct_LHCPeriod(prevFlags):
+        if prevFlags.GeoModel.AtlasVersion:
+            return LHCPeriod(DetDescrInfo(prevFlags.GeoModel.AtlasVersion)['Common']['Run'])
+
+        if prevFlags.Input.isMC:
+            raise ValueError('No geometry tag specified')
+
+        if 2022 <= prevFlags.Input.DataYear:
+            return LHCPeriod.Run3
+        if 2015 <= prevFlags.Input.DataYear <= 2018:
+            return LHCPeriod.Run2
+        if 2010 <= prevFlags.Input.DataYear <= 2013:
+            return LHCPeriod.Run1
+
+        raise RuntimeError('Can not determine LHC period from the data project name')
+
+    gcf.addFlag("GeoModel.Run", _deduct_LHCPeriod, type=LHCPeriod)
 
     gcf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
 
