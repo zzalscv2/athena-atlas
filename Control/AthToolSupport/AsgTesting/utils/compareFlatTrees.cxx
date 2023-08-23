@@ -22,6 +22,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_set>
 
 // Intersection of two lists of vectors, needed to get the variables that are common to both samples
 std::vector<std::string> intersection(std::vector<std::string> &v1,
@@ -42,12 +43,28 @@ std::vector<std::string> intersection(std::vector<std::string> &v1,
   return v3;
 }
 
+/// list of entries in a vector that are not in another
+std::vector<std::string> remainder (const std::vector<std::string>& v1,
+                                    const std::vector<std::string>& v2)
+{
+  std::vector<std::string> result;
+
+  std::unordered_set<std::string> ignore {v2.begin(), v2.end()};
+  for (const auto& value : v1)
+  {
+    if (ignore.find (value) == ignore.end())
+      result.push_back (value);
+  }
+  return result;
+}
+
 int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
 {
   namespace po = boost::program_options;
   po::options_description poDescription("Common options");
   poDescription.add_options()
     ("help", "produce help message")
+    ("require-same-branches", "require both trees to have the same branches")
     ("tree-name", po::value<std::string>()->required(), "tree name")
     ("reference-file", po::value<std::string>()->required(), "reference file(s), wildcards supported")
     ("test-file", po::value<std::string>()->required(), "test file(s), wildcards supported")
@@ -136,6 +153,15 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   auto colNamesRefr = dataFrameRefr.GetColumnNames();
   auto colNamesTest = dataFrameTest.GetColumnNames();
   auto colNames = intersection(colNamesRefr, colNamesTest);
+
+  bool checkMissColumns = false;
+  std::vector<std::string> missColNamesRefr, missColNamesTest;
+  if (poVariablesMap.count("require-same-branches"))
+  {
+    checkMissColumns = true;
+    missColNamesRefr = remainder (colNamesRefr, colNames);
+    missColNamesTest = remainder (colNamesTest, colNames);
+  }
 
   // Loop over column names and get a list of the required columns
   std::vector<std::string> requiredColumns;
@@ -403,6 +429,19 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   std::cout << "Passed: " << requiredColumns.size() - failedCount << std::endl;
   std::cout << "Failed: " << failedCount << std::endl;
   std::cout << "========================" << std::endl;
+  if (checkMissColumns)
+  {
+    std::cout << "Columns only in reference: " << missColNamesRefr.size();
+    for (const auto& column : missColNamesRefr)
+      std::cout << " " << column;
+    std::cout << std::endl;
+    std::cout << "Columns only in test: " << missColNamesTest.size();
+    for (const auto& column : missColNamesTest)
+      std::cout << " " << column;
+    std::cout << std::endl;
+    failedCount += missColNamesRefr.size() + missColNamesTest.size();
+    std::cout << "========================" << std::endl;
+  }
 
   if (failedCount)
   {

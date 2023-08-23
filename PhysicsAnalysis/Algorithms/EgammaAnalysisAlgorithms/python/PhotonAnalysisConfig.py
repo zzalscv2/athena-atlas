@@ -143,6 +143,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('qualityWP', None, type=str)
         self.addOption ('isolationWP', None, type=str)
         self.addOption ('recomputeIsEM', False, type=bool)
+        self.addOption ('noEffSF', False, type=bool, info='disable all scale factors')
 
     def makeAlgs (self, config) :
 
@@ -203,7 +204,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
         # Set up the ID/reco photon efficiency correction algorithm:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgID' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -224,7 +225,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
 
         # Set up the ISO photon efficiency correction algorithm:
-        if config.dataType() != 'data':
+        if config.dataType() != 'data' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',

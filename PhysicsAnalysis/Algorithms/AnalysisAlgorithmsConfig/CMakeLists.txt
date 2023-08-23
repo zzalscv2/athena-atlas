@@ -24,7 +24,7 @@ if( XAOD_STANDALONE )
    function( add_test_compare NAME DATA_TYPE NAME1 NAME2 )
 
       atlas_add_test( ${NAME}
-         SCRIPT compareFlatTrees analysis submitDir-${NAME1}/data-ANALYSIS/${DATA_TYPE}.root submitDir-${NAME2}/data-ANALYSIS/${DATA_TYPE}.root
+         SCRIPT compareFlatTrees --require-same-branches analysis submitDir-${NAME1}/data-ANALYSIS/${DATA_TYPE}.root submitDir-${NAME2}/data-ANALYSIS/${DATA_TYPE}.root
          POST_EXEC_SCRIPT nopost.sh
          PROPERTIES TIMEOUT 900
          DEPENDS ${NAME1} ${NAME2})
@@ -75,14 +75,17 @@ endif()
 
 add_test_job( TestJobDataSequence data --for-compare --no-systematics )
 add_test_job( TestJobDataConfig   data --for-compare --block-config --no-systematics )
+add_test_job( TestJobDataFull     data --block-config --no-systematics )
 add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
 
 add_test_job( TestJobFullSimSequence mc --for-compare )
 add_test_job( TestJobFullSimConfig   mc --for-compare --block-config )
+add_test_job( TestJobFullSimFull     mc --block-config )
 add_test_compare( TestJobFullSimCompare mc TestJobFullSimSequence TestJobFullSimConfig )
 
 add_test_job( TestJobFastSimSequence afii --for-compare )
 add_test_job( TestJobFastSimConfig   afii --for-compare --block-config )
+add_test_job( TestJobFastSimFull     afii --block-config )
 add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastSimConfig )
 
 
@@ -94,16 +97,19 @@ add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastS
 
 add_test_job( TestJobDataSequenceLite data --for-compare --physlite --no-physlite-broken --no-systematics )
 add_test_job( TestJobDataConfigLite   data --for-compare --block-config --physlite --no-physlite-broken --no-systematics )
+add_test_job( TestJobDataFullLite     data --block-config --physlite --no-physlite-broken --no-systematics )
 #add_test_compare( TestJobDataCompareLite data TestJobDataSequenceLite TestJobDataConfigLite )
 
 if( XAOD_STANDALONE )
 
 add_test_job( TestJobFullSimSequenceLite mc --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimConfigLite   mc --for-compare --block-config --physlite --no-physlite-broken )
+add_test_job( TestJobFullSimFullLite     mc --block-config --physlite --no-physlite-broken )
 #add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
 
 add_test_job( TestJobFastSimSequenceLite afii --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimConfigLite   afii --for-compare --block-config --physlite --no-physlite-broken )
+add_test_job( TestJobFastSimFullLite     afii --block-config --physlite --no-physlite-broken )
 #add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
 endif()
