@@ -11,6 +11,7 @@
  * -- -------- -------------------------- ------------------------------------------ *
  *  1 25/06/20  First Version              I. Aizenberg                              * 
  *  1 25/06/20  Updates to work with JetCalibTools   J. Roloff     * 
+ *  1 21/08/23  Updates to be more configurable   J. Roloff     * 
 \*************************************************************************************/
 
 // System includes
@@ -48,6 +49,9 @@ StatusCode GlobalNNCalibration::initialize(){
   m_closureEtaBins = JetCalibUtils::VectorizeD( m_config->GetValue("GNNC.EtaBinsForClosure","") );
   m_NNInputs = JetCalibUtils::Vectorize( m_config->GetValue("GNNC.Inputs","") );
   m_doSplineCorr = m_config->GetValue("GNNC.UseSplineCorr", true);
+  m_doLogPtScaling = m_config->GetValue("GNNC.UseLogPtScaling", false);
+  m_maxNNCorrection = m_config->GetValue("GNNC.MaxNNCorrection", 2.0);
+  m_minNNCorrection = m_config->GetValue("GNNC.MinNNCorrection", 0.5);
 
   // This code is copied from the GlobalSequentialCorrection code,
   // so while it is hard-coded, it is consistent with how these filenames are parsed.
@@ -126,6 +130,8 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
 
   std::map<std::string, double> outputs = m_lwnns[nnEtaBin]->compute(inputs);
   double nnCalibFactor =  outputs["out_0"];
+  if(nnCalibFactor > m_maxNNCorrection) nnCalibFactor = m_maxNNCorrection;
+  if(nnCalibFactor < m_minNNCorrection) nnCalibFactor = m_minNNCorrection;
   
   double response = nnCalibFactor;
   if(m_doSplineCorr){
@@ -147,8 +153,7 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
 
 
 /// Loads the calib constants from histograms in TFile named fileName. 
-void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::string &ptCorr_name) 
-{
+void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::string &ptCorr_name) {
   std::unique_ptr<TFile> tmpF(TFile::Open( fileName ));
   TList *ptCorr_l = dynamic_cast<TList*>( tmpF->Get(ptCorr_name.c_str()));
 
@@ -237,7 +242,12 @@ std::map<std::string,double> GlobalNNCalibration::getJetFeatures(const xAOD::Jet
   // This is a list of variables that could be included in the NN.
   // This makes it simple to change the variables in the NN without complicated changes
   // to the code.
-  inputValues["jet_JESPt"] = getJESPt(jet_reco);
+  if(m_doLogPtScaling) {
+      inputValues["jet_pt"] = log10(getJESPt(jet_reco));
+  }
+  else{
+    inputValues["jet_pt"] = getJESPt(jet_reco);
+  }
   inputValues["EM0"] = EM0;
   inputValues["EM1"] = EM1;
   inputValues["EM2"] = EM2;

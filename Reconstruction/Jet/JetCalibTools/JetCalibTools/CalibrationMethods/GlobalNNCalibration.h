@@ -165,6 +165,9 @@ class GlobalNNCalibration : virtual public ::JetCalibrationStep {
   std::string m_calibAreaTag;
   bool m_dev;
   bool m_doSplineCorr;
+  bool m_doLogPtScaling;
+  double m_minNNCorrection;
+  double m_maxNNCorrection;
 
   std::vector<double> m_JPtS_MinPt_Slopes;
   std::vector<double> m_JPtS_MinPt_Pt;
