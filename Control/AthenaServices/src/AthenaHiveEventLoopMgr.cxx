@@ -1083,6 +1083,8 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     // In the case that there is no TAG information
     if (!pEvent) {
       // Secondly try to retrieve a legacy EventInfo object from the input file
+      // Again, m_nevt is incremented after executeEvent in the Hive manager so we don't need a -1
+      EventInfoCnvParams::eventIndex = ctx.evt();
       pEvent = eventStore()->tryConstRetrieve<EventInfo>();
       if ( pEvent ) {
         consume_modifier_stream = false; // stream will already have been consumed during EventInfo TP conversion
@@ -1169,7 +1171,9 @@ void AthenaHiveEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID
     // pointer for now.
     // CHECK: Update evtIdModSvc method modify_evtid
     // interface to use just a pointer or even better a reference?
-    m_evtIdModSvc->modify_evtid(new_eID, consume_modifier_stream);
+    // In Hive EventLoopMgr ctx.evt() gets set to m_nevt and *then* m_nevt is
+    // incremented later so it's zero-indexed and we don't need to subtract one
+    m_evtIdModSvc->modify_evtid(new_eID, ctx.evt(), consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
       unsigned int oldrunnr=eID.run_number();
       unsigned int oldLB=eID.lumi_block();

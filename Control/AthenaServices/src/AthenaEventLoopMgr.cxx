@@ -650,6 +650,8 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
     // In the case that there is no TAG information
     if ( pEvent == nullptr ) {
       // Secondly try to retrieve a legacy EventInfo object from the input file
+      // m_nevt - 1 because it's incremented early
+      EventInfoCnvParams::eventIndex = m_nevt - 1;
       pEvent=eventStore()->tryConstRetrieve<EventInfo>();
       if (pEvent) {
 	eventID=(*pEvent->event_ID());
@@ -1233,7 +1235,8 @@ void AthenaEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eI
     // pointer for now.
     // CHECK: Update evtIdModSvc method modify_evtid interface to
     // pointer or reference?
-    m_evtIdModSvc->modify_evtid(new_eID, consume_modifier_stream);
+    // m_nevt - 1 because it's incremented early
+    m_evtIdModSvc->modify_evtid(new_eID, m_nevt - 1, consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
       unsigned int oldrunnr=eID.run_number();
       unsigned int oldLB=eID.lumi_block();

@@ -133,6 +133,8 @@ def EvtIdModifierSvcCfg(flags, name="EvtIdModifierSvc", **kwargs):
     pileUp = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and flags.Digitization.PileUp and not flags.Overlay.FastChain
     if pileUp and not isMT:
         kwargs.setdefault("EvtStoreName", "OriginalEvent_SG")
+    elif pileUp:
+        kwargs.setdefault("SkippedEvents", flags.Exec.SkipEvents)
     else:
         kwargs.setdefault("EvtStoreName", "StoreGateSvc")
 

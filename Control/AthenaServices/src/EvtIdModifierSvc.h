@@ -129,7 +129,7 @@ class EvtIdModifierSvc
    */
   virtual
   void
-  modify_evtid(EventID*& evt_id, bool consume_stream);
+  modify_evtid(EventID*& evt_id, EventID::event_number_t evt_index, bool consume_stream);
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 
@@ -139,6 +139,8 @@ class EvtIdModifierSvc
   /// Default constructor: 
   EvtIdModifierSvc();
 
+  /// number of events skipped in the event selector
+  EventID::event_number_t m_skippedEvents;
   /// first event number at which we begin to modify event ids
   EventID::event_number_t m_firstEvtIdx;
 
@@ -159,6 +161,9 @@ class EvtIdModifierSvc
   /// db of list of ItemModifiers:
   /// (run-nbr, evt-nbr, time-stamp, lbk-nbr, nbr-of-events-per-lbk, mod-bit)
   ModDb_t m_evtNplets;
+
+  /// Running total of numEvts before each modifier
+  std::vector<EventID::event_number_t> m_numEvtTotals{};
 
   /// iterator pointing at the current n-plet describing how to massage evtid
   ModDb_t::iterator m_cursor;

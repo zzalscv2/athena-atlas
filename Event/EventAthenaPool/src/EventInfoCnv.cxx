@@ -132,7 +132,7 @@ EventInfoCnv::massageEventInfo (EventInfo* ei)
         }
         EventID* evtid = ei->event_ID();
         bool consume_stream = true;
-        m_evtIdModSvc->modify_evtid(evtid, consume_stream);
+        m_evtIdModSvc->modify_evtid(evtid, EventInfoCnvParams::eventIndex, consume_stream);
         return (ei);
     }
 

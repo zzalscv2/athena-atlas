@@ -232,7 +232,8 @@ void PileUpEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eI
     // pointer for now.
     // CHECK: Update evtIdModSvc method modify_evtid interface to
     // pointer or reference?
-    m_evtIdModSvc->modify_evtid(new_eID, consume_modifier_stream);
+    // m_nevt - 1 because the PileUpEventLoopMgr increments it rather early
+    m_evtIdModSvc->modify_evtid(new_eID, m_nevt - 1, consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
       unsigned int oldrunnr=eID.run_number();
       unsigned int oldLB=eID.lumi_block();
@@ -379,8 +380,8 @@ StatusCode PileUpEventLoopMgr::nextEvent(int maxevt)
       // Athena event.
       consume_modifier_stream = true;
     }
-    modifyEventContext(ctx, ev_id, consume_modifier_stream);
     ctx.set(m_nevt,0);
+    modifyEventContext(ctx, ev_id, consume_modifier_stream);
     /// Is this correct, or should it be set to a pileup store?
     ctx.setExtension( Atlas::ExtendedEventContext(m_evtStore->hiveProxyDict(),
                                                   ctx.eventID().run_number()) );
