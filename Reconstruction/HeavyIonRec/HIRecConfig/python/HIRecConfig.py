@@ -73,6 +73,16 @@ if __name__ == "__main__":
         from egammaConfig.egammaSteeringConfig import EGammaSteeringCfg
         acc.merge(EGammaSteeringCfg(flags))
     
+    ## To avoid error coming from jet modifiers
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+    jetInternalFlags.isRecoJob = True
+
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo
+    EMjet = AntiKt4EMTopo.clone()
+    EMjet.ghostdefs = ["Track"]
+    acc.merge(JetRecCfg(flags,EMjet))
+
     acc.merge(HIRecCfg(flags))
     
 

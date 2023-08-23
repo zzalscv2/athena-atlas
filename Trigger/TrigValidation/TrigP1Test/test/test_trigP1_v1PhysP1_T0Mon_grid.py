@@ -32,7 +32,7 @@ hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
-hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;rewriteLVL1=True;"'
+hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;"'
 hlt.args += ' -o output'
 hlt.args += ' --dump-config-reload'
 

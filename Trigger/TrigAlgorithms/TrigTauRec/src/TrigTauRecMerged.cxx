@@ -100,7 +100,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
   std::vector<float> track_pt_log(0);
   std::vector<float> track_dEta(0);
   std::vector<float> track_dPhi(0);
-  std::vector<float> track_z0sinThetaTJVA_abs_log(0);
+  std::vector<float> track_z0sinthetaTJVA_abs_log(0);
   std::vector<float> track_d0_abs_log(0);
   std::vector<float> track_nIBLHitsAndExp(0);
   std::vector<float> track_nPixelHitsPlusDeadSensors(0);
@@ -168,7 +168,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
   auto Track_pt_log = Monitored::Collection("track_pt_log", track_pt_log);
   auto Track_dEta = Monitored::Collection("track_dEta", track_dEta);
   auto Track_dPhi = Monitored::Collection("track_dPhi", track_dPhi);
-  auto Track_z0sinThetaTJVA_abs_log = Monitored::Collection("track_z0sinThetaTJVA_abs_log", track_z0sinThetaTJVA_abs_log); 
+  auto Track_z0sinthetaTJVA_abs_log = Monitored::Collection("track_z0sinthetaTJVA_abs_log", track_z0sinthetaTJVA_abs_log); 
   auto Track_d0_abs_log = Monitored::Collection("track_d0_abs_log", track_d0_abs_log);
   auto Track_nIBLHitsAndExp = Monitored::Collection("track_nIBLHitsAndExp", track_nIBLHitsAndExp);
   auto Track_nPixelHitsPlusDeadSensors = Monitored::Collection("track_nPixelHitsPlusDeadSensors", track_nPixelHitsPlusDeadSensors);
@@ -186,7 +186,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
                    innerTrkAvgDist, Ncand, EtaL1, PhiL1, EtaEF, PhiEF, mEflowApprox, ptRatioEflowApprox, pt_jetseed_log, 
                    ptDetectorAxis, etaDetectorAxis, ptDetectorAxis_log, RNN_clusternumber, RNNJetScore_0p, RNNJetScoreSigTrans_0p, 
                    RNNJetScore_1p, RNNJetScoreSigTrans_1p,RNNJetScore_mp,RNNJetScoreSigTrans_mp,Cluster_et_log, Cluster_dEta, Cluster_dPhi, Cluster_log_SECOND_R,
-                   Cluster_SECOND_LAMBDA, Cluster_CENTER_LAMBDA, RNN_tracknumber, EF_vertex_x, EF_vertex_y, EF_vertex_z, EF_calo_errors, EF_track_errors, Track_pt_log, Track_dEta, Track_dPhi, Track_z0sinThetaTJVA_abs_log, Track_d0_abs_log, Track_nIBLHitsAndExp,
+                   Cluster_SECOND_LAMBDA, Cluster_CENTER_LAMBDA, RNN_tracknumber, EF_vertex_x, EF_vertex_y, EF_vertex_z, EF_calo_errors, EF_track_errors, Track_pt_log, Track_dEta, Track_dPhi, Track_z0sinthetaTJVA_abs_log, Track_d0_abs_log, Track_nIBLHitsAndExp,
                    Track_nPixelHitsPlusDeadSensors, Track_nSCTHitsPlusDeadSensors, clustersMeanCenterLambda, clustersMeanFirstEngDens, clustersMeanEMProbability, clustersMeanSecondLambda, clustersMeanPresamplerFrac); 
 
 
@@ -577,7 +577,7 @@ StatusCode TrigTauRecMerged::execute(const EventContext& ctx) const
         track_pt_log.push_back(std::log10( track->pt()));
         track_dEta.push_back(track->eta()- p_tau->eta()); 
         track_dPhi.push_back(track->p4().DeltaPhi(p_tau->p4()));
-        track_z0sinThetaTJVA_abs_log.push_back(track->z0sinThetaTJVA(*p_tau));
+        track_z0sinthetaTJVA_abs_log.push_back(track->z0sinthetaTJVA());
         track_d0_abs_log.push_back(std::log10( std::abs(track->track()->d0()) + 1e-6));
 
         uint8_t inner_pixel_hits, inner_pixel_exp;                    

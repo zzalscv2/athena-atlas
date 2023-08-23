@@ -2,7 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco and monitoring (incl. EDM)
-# art-type: build
+# art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
 
@@ -21,7 +21,7 @@ hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data_Main'
-hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;rewriteLVL1=True;"'
+hlt.args = f'-c "setMenu=\'{triggermenu}\';doL1Sim=True;"'
 hlt.args += ' -o output'
 
 # Extract the physics_Main stream out of the BS file with many streams

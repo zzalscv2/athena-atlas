@@ -19,7 +19,6 @@ ex.concurrent_events = 4
 precommand = ''.join([
   "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",
   "doL1Sim=True;",
-  "rewriteLVL1=True;",
   "doRuntimeNaviVal=True;",
 ])
 ex.args = '-c "{:s}"'.format(precommand)

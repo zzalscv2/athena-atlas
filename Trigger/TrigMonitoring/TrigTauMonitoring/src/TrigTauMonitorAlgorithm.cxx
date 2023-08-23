@@ -966,7 +966,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
 
       auto track_dPhi = Monitored::Collection("track_dPhi", tracks, [&tau](const xAOD::TauTrack *track){return track->p4().DeltaPhi(tau->p4());}); 
 
-      auto track_z0sinThetaTJVA_abs_log = Monitored::Collection("track_z0sinThetaTJVA_abs_log", tracks, [&tau](const xAOD::TauTrack *track){return track->z0sinThetaTJVA(*tau); }); 
+      auto track_z0sinthetaTJVA_abs_log = Monitored::Collection("track_z0sinthetaTJVA_abs_log", tracks, [&tau](const xAOD::TauTrack *track){return track->z0sinthetaTJVA(); }); 
 
       auto track_d0_abs_log = Monitored::Collection("track_d0_abs_log", tracks, [](const xAOD::TauTrack *track){return  std::log10( std::abs(track->track()->d0()) + 1e-6); }); 
 
@@ -995,7 +995,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
                                                     return   detail; });
                                                   
 
-      fill(monGroup,n_track,track_pt_log,track_eta,track_phi,track_dEta,track_dPhi,track_z0sinThetaTJVA_abs_log,track_d0_abs_log,track_nIBLHitsAndExp,track_nPixelHitsPlusDeadSensors,track_nSCTHitsPlusDeadSensors);
+      fill(monGroup,n_track,track_pt_log,track_eta,track_phi,track_dEta,track_dPhi,track_z0sinthetaTJVA_abs_log,track_d0_abs_log,track_nIBLHitsAndExp,track_nPixelHitsPlusDeadSensors,track_nSCTHitsPlusDeadSensors);
     }
 
   ATH_MSG_DEBUG("After fill  RNN input Track: " << trigger);

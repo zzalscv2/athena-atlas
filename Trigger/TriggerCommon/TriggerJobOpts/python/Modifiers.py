@@ -52,23 +52,8 @@ class forceConditions(_modifier):
 
 
 ###############################################################
-# Algorithm modifiers
-###############################################################
-
-class rewriteLVL1(_modifier):
-    """
-    Write LVL1 results to ByteStream output, usually used together with rerunLVL1
-    """
-
-    def preSetup(self, flags):
-        log.warning('The rewriteLVL1 modifier is deprecated. LVL1 result writing is enabled by default '
-                    'if flags.Trigger.doLVL1 (doL1Sim) is True.')
-
-
-###############################################################
 # Monitoring and misc.
 ###############################################################
-
 
 class doCosmics(_modifier):
     """

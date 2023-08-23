@@ -87,11 +87,14 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 
   int Nchan = 0;
 
+  std::vector<uint16_t> rodBCID;
+
   for (const ZdcLucrodData* zld : *lucrodCollection)
     {
       ATH_MSG_DEBUG("Next LUCROD...");
       uint32_t lucrod_id =  zld->GetLucrodID();
-      ATH_MSG_DEBUG("Unpacking LUCROD ID " << lucrod_id);
+      ATH_MSG_DEBUG("Unpacking LUCROD ID " << lucrod_id << " with BCID=" << zld->GetBCID());
+      rodBCID.push_back(zld->GetBCID());
 
       const std::vector<uint16_t> zlt = zld->GetTrigData();
 
@@ -186,6 +189,10 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	}
     }
 
+  xAOD::ZdcModule* global_sum = new xAOD::ZdcModule();
+  zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(global_sum));
+  global_sum->setZdcSide(0); // special "global" sum
+  global_sum->auxdata<std::vector<uint16_t>>("rodBCID") = rodBCID;
 
   ATH_MSG_DEBUG("Done trying to convert!!");
   
