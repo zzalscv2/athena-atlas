@@ -99,9 +99,11 @@ class LArCaliWaveValidationAlg: public LArCaliWaveValidationBase {
   std::vector<DataPerFEB> m_vDataPerFEB;
 
   //The following is for keeping track of the global average
-  double m_ampGlobalVal,m_fwhmGlobalVal;
-  double m_ampGlobalRef,m_fwhmGlobalRef;
-  unsigned m_nEntriesGlobal;
+  double m_ampGlobalVal=0;
+  double m_fwhmGlobalVal=0;
+  double m_ampGlobalRef=0;
+  double m_fwhmGlobalRef=0;
+  unsigned m_nEntriesGlobal=0;
 
   LArWaveHelper m_waveHelper;
 

@@ -158,8 +158,6 @@ elif upper(Object)=="RAMP":
   theRampValidationAlg.ReferenceKey="RampRef"
   theRampValidationAlg.MsgLevelForDeviations=INFO
   theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
-  theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
-  theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
   theRampValidationAlg.DoFebAverages=DoFebAverages
   theRampValidationAlg.PrintFailedPattern=PrintFailedPattern
   topSequence+=theRampValidationAlg

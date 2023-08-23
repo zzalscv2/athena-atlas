@@ -87,42 +87,18 @@ class LArRampValidationAlg: public LArRampValidationBase {
   //The following is used to look for channels deviating from average
   bool deviateFromAvg(const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);
 
-  class DataPerFEB {
+  class DataPerRegion {
   public:
-    DataPerFEB () : chid(0), febid(0), gain(0),
-		   rampVal(0.),rmsVal(0.),rampRef(0.),rmsRef(0.), nEntries(0) {}
-    DataPerFEB (const HWIdentifier cid, const HWIdentifier fid, int g) : chid(cid), febid(fid), gain(g),
-		   rampVal(0.),rmsVal(0.),rampRef(0.),rmsRef(0.),nEntries(0) {}
-    HWIdentifier chid;  //We need to remember the first connected channel for the offline id conversion
-    HWIdentifier febid;
-    int          gain;
-    double       rampVal;
-    double       rmsVal;
-    double       rampRef;
-    double       rmsRef;
-    unsigned     nEntries;
+    double       rampVal=.0;
+    double       rmsVal=.0;
+    double       rampRef=.0;
+    double       rmsRef=.0;
+    unsigned     nEntries=0;
   };
   
-  class DataPerSector {
-  public:
-    DataPerSector () : pos_neg(0), region(0), layer(0), eta(0), gain(0),
-		   rampVal(0.),rmsVal(0.),rampRef(0.),rmsRef(0.), nEntries(0) {}
-    DataPerSector (int pn, int reg, int lay, int ieta, int g) :  pos_neg(pn), region(reg), layer(lay), eta(ieta), gain(g),
-		   rampVal(0.),rmsVal(0.),rampRef(0.),rmsRef(0.),nEntries(0) {}
-    int          pos_neg;
-    int          region;
-    int          layer;
-    int          eta;
-    int          gain;
-    double       rampVal;
-    double       rmsVal;
-    double       rampRef;
-    double       rmsRef;
-    unsigned     nEntries;
-  };
 
-  std::vector<DataPerFEB> m_vDataPerFEB;
-  std::vector<DataPerSector> m_vDataPerSector;
+  std::unordered_map<HWIdentifier,DataPerRegion> m_vDataPerFEB;
+  std::unordered_map<Identifier,DataPerRegion> m_vDataPerSector;
 
   LArRawRampContainer* m_rawRampContainer;
 
