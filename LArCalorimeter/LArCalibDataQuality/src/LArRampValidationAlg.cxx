@@ -61,16 +61,14 @@ StatusCode LArRampValidationAlg::preLoop() {
   m_rawRampContainer=NULL;
 
   // Retrieve Raw Ramps Container
-  std::vector<std::string>::const_iterator key_it=m_contKey.begin();
-  std::vector<std::string>::const_iterator key_it_e=m_contKey.end();
   m_hasRawRampContainer = false;
-  for (;key_it!=key_it_e;++key_it) {
-    StatusCode sc=detStore()->retrieve(m_rawRampContainer,*key_it);
+  for (const std::string& key_it : m_contKey) {
+    StatusCode sc=detStore()->retrieve(m_rawRampContainer,key_it);
     if (sc!=StatusCode::SUCCESS || !m_rawRampContainer) {
-      ATH_MSG_WARNING ( "Unable to retrieve LArRawRampContainer with key " << *key_it ) ;
+      ATH_MSG_WARNING ( "Unable to retrieve LArRawRampContainer with key " << key_it ) ;
     } 
     else {
-      ATH_MSG_DEBUG ( "Got LArRawRampContainer with key " << *key_it ) ;
+      ATH_MSG_DEBUG ( "Got LArRawRampContainer with key " << key_it ) ;
       m_hasRawRampContainer = true;
     }
   }
@@ -111,57 +109,31 @@ bool LArRampValidationAlg::validateChannel(const LArCondObj& ref, const LArCondO
 
 
   HWIdentifier febid=m_onlineHelper->feb_Id(chid);
+  HWIdentifier febAndGainId=m_onlineHelper->channel_Id(febid,gain); //mis-use channel number for the gain
   Identifier offlineID = cabling->cnvToIdentifier(chid);
 
   ++m_nEntriesGlobal;
 
   // Store average Ramp value per FEB
-  DataPerFEB* dataPerFEB=&(m_vDataPerFEB.back());
-  if (m_vDataPerFEB.size()==0 || dataPerFEB->febid!=febid) {//Got to new FEB
-    m_vDataPerFEB.push_back(DataPerFEB(chid,febid,gain)); //Need to remember chid of one connected channel
-    dataPerFEB=&(m_vDataPerFEB.back());
-  }
-  dataPerFEB->rampVal+=val.m_vRamp[1];
-  dataPerFEB->rampRef+=ref.m_vRamp[1];
-  ++(dataPerFEB->nEntries);
+  DataPerRegion& dataPerFEB=m_vDataPerFEB[febid];
+  dataPerFEB.rampVal+=val.m_vRamp[1];
+  dataPerFEB.rampRef+=ref.m_vRamp[1];
+  ++(dataPerFEB.nEntries);
 
   m_rampGlobalVal+=val.m_vRamp[1];
   m_rampGlobalRef+=ref.m_vRamp[1];
 
-  // Retrieve layer/eta 
-  int layer = 0; int pos_neg = 0; int eta = 0 ; int region = 0;
- 
-  if(m_onlineHelper->isHECchannel(chid)){
-    layer = m_hecId->sampling(offlineID);
-    pos_neg = m_hecId->pos_neg(offlineID);
-    region =  m_hecId->region(offlineID);  
-    eta = m_hecId->eta(offlineID); 
-  }
-  if(m_onlineHelper->isFCALchannel(chid)){
-    layer = m_fcalId->module(offlineID);
-    pos_neg = m_fcalId->pos_neg(offlineID) ;
-    region = 0;  
-    eta = m_fcalId->eta(offlineID); 
-  }
-  if(m_onlineHelper->isEMECchannel(chid) || m_onlineHelper->isEMBchannel(chid)){
-    layer = m_emId->sampling(offlineID);
-    pos_neg = m_emId->barrel_ec(offlineID);
-    region =  m_emId->region(offlineID);  
-    eta = m_emId->eta(offlineID); 
-  }
+  const Identifier region=m_caloId->region_id(offlineID);
+  int eta = m_caloId->eta(offlineID); 
+  //Build fake-identifier with phi=0 to identify sector:
+   //Identifier cell_id (const int subCalo, const int barec_or_posneg, const int sampling_or_fcalmodule,const int region_or_dummy,const int eta,  const int phi ) const;
+   //mis-used phi for gain:
+  const Identifier sectorId=m_caloId->cell_id(region,eta,gain);
 
   // Store avg Ramp value per sector : pos_neg/region/layer/eta (average over phi)
-  DataPerSector* dataPerSector=&(m_vDataPerSector.back());
-  if (m_vDataPerSector.size()==0 || dataPerSector->pos_neg!=pos_neg || dataPerSector->region!=region
-      || dataPerSector->layer!=layer  || dataPerSector->eta!=eta || dataPerSector->gain!=gain) {//Got to new sector
-    m_vDataPerSector.push_back(DataPerSector(pos_neg,region,layer,eta,gain));
-    dataPerSector=&(m_vDataPerSector.back());
-  }
-  dataPerSector->rampVal+=val.m_vRamp[1];
-  //dataPerSector->rampRef+=ref.m_vRamp[1];
-  ++(dataPerSector->nEntries);
-
-
+  DataPerRegion& dataPerSector=m_vDataPerSector[sectorId];
+  dataPerSector.rampVal+=val.m_vRamp[1];
+  ++(dataPerSector.nEntries);
 
   // Check individual channel for Ramp deviation
   const float& tolerance=m_tolerance.valuesForCell(offlineID)[gain];
@@ -193,24 +165,25 @@ bool LArRampValidationAlg::febSummary(const LArOnOffIdMapping *cabling, const LA
 
   // FEBs
   unsigned nBadFebs=0;
-  std::vector<DataPerFEB>::iterator it=m_vDataPerFEB.begin();
-  std::vector<DataPerFEB>::iterator it_e=m_vDataPerFEB.end();
-  for (;it!=it_e;++it) {
-    DataPerFEB& dataPerFeb=*it;
+  for(auto& dataPerFebPair : m_vDataPerFEB) {
+    DataPerRegion& dataPerFeb=dataPerFebPair.second;
+    const HWIdentifier febAndGainId=dataPerFebPair.first;
+    const int gain=m_onlineHelper->channel(febAndGainId);
+    const HWIdentifier febId=m_onlineHelper->feb_Id(febAndGainId);
     dataPerFeb.rampVal/=dataPerFeb.nEntries;
     dataPerFeb.rampRef/=dataPerFeb.nEntries;
 
     ATH_MSG_DEBUG ( " nb of channels = "  << dataPerFeb.nEntries 
-                    << " for FEB " << channelDescription(dataPerFeb.febid,cabling,bcCont) ) ;  
+                    << " for FEB " << channelDescription(febId,cabling,bcCont) ) ;  
 
     //Get offline identifier of channel 0 of this FEB, should be good enough ...
-    const Identifier id=cabling->cnvToIdentifier(dataPerFeb.febid);
-    const float& tolerance=m_toleranceFEB.valuesForCell(id)[dataPerFeb.gain];
+    const Identifier id=cabling->cnvToIdentifier(febId);
+    const float& tolerance=m_toleranceFEB.valuesForCell(id)[gain];
     
     if (fabs(dataPerFeb.rampVal-dataPerFeb.rampRef)/dataPerFeb.rampRef > tolerance){
       msg().precision(3);
       msg().setf(std::ios::fixed,std::ios::floatfield); 
-      msg() << m_myMsgLvl << "Deviating! " << channelDescription(dataPerFeb.febid,cabling,bcCont,dataPerFeb.gain,true) << "Average Ramp: " 
+      msg() << m_myMsgLvl << "Deviating! " << channelDescription(febId,cabling,bcCont,gain,true) << "Average Ramp: " 
             << dataPerFeb.rampVal << " (reference: " << dataPerFeb.rampRef << ")" << endmsg;
       ATH_MSG_DEBUG ( "Ramp FEB average tolerance: " << tolerance ) ;
       ++nBadFebs;
@@ -247,55 +220,24 @@ bool LArRampValidationAlg::febSummary(const LArOnOffIdMapping *cabling, const LA
 
 bool LArRampValidationAlg::deviateFromAvg(const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont) {
 
- Identifier offlineID = cabling->cnvToIdentifier(chid);
+  Identifier offlineID = cabling->cnvToIdentifier(chid);
+  const Identifier regId=m_caloId->region_id(offlineID);
+  const int eta = m_caloId->eta(offlineID); 
+  const Identifier sectorId=m_caloId->cell_id(regId,eta,gain);
 
-  // Retrieve layer/eta 
-  int layer = 0; int pos_neg = 0; int eta = 0 ; int region = 0;
- 
-  if(m_onlineHelper->isHECchannel(chid)){
-    layer = m_hecId->sampling(offlineID);
-    pos_neg = m_hecId->pos_neg(offlineID);
-    region =  m_hecId->region(offlineID);  
-    eta = m_hecId->eta(offlineID); 
-  }
-  if(m_onlineHelper->isFCALchannel(chid)){
-    layer = m_fcalId->module(offlineID);
-    pos_neg = m_fcalId->pos_neg(offlineID) ;
-    region = 0;  
-    eta = m_fcalId->eta(offlineID); 
-  }
-  if(m_onlineHelper->isEMECchannel(chid) || m_onlineHelper->isEMBchannel(chid)){
-    layer = m_emId->sampling(offlineID);
-    pos_neg = m_emId->barrel_ec(offlineID);
-    region =  m_emId->region(offlineID);  
-    eta = m_emId->eta(offlineID); 
-  }
-
-  // Loop over all sectors (instead of using a find() function )
-  std::vector<DataPerSector>::iterator it2=m_vDataPerSector.begin();
-  std::vector<DataPerSector>::iterator it2_e=m_vDataPerSector.end();
-  for (;it2!=it2_e;++it2) {
-    DataPerSector& dataPerSector=*it2;
-    if (dataPerSector.pos_neg!=pos_neg || 
-	dataPerSector.region!=region   || 
-	dataPerSector.layer!=layer     || 
-	dataPerSector.eta!=eta         ||
-	dataPerSector.gain!=gain) continue;
-
-    if (dataPerSector.rampVal == 0 ){
-      ATH_MSG_ERROR ( "Found Sector with Ramp Average equals to zero" ) ;
-      ATH_MSG_ERROR ( "Sector : pos_neg " <<  dataPerSector.pos_neg << " region " << dataPerSector.region
-                      << " layer " << dataPerSector.layer << " eta " << dataPerSector.eta ) ;     
+  const auto& dataPerSector=m_vDataPerSector[sectorId];
+  if (dataPerSector.rampVal == 0 ){
+    ATH_MSG_ERROR ( "Found Sector with Ramp Average equals to zero" ) ;
+    ATH_MSG_ERROR ( "Sector : pos_neg " <<  m_caloId->side(regId) << " region " << m_caloId->region(regId)
+		    << " layer " << m_caloId->sampling(regId) << " eta " << eta << " gain " << gain);     
+    return false;
+  }else{
+    float ratio = val.m_vRamp[1]/dataPerSector.rampVal;      
+    if ( ratio > 2.){
+      msg() << m_myMsgLvl << "!!! Deviating Sector channel =  " <<channelDescription(chid,cabling,bcCont,gain) << "Ramp: " << val.m_vRamp[1] << " (Average Sector Ramp: " << dataPerSector.rampRef << ")" << endmsg;
       return false;
-    }else{
-      float ratio = val.m_vRamp[1]/dataPerSector.rampVal;      
-      if ( ratio > 2.){
-	msg() << m_myMsgLvl << "!!! Deviating Sector channel =  " <<channelDescription(chid,cabling,bcCont,dataPerSector.gain) << "Ramp: " << val.m_vRamp[1] << " (Average Sector Ramp: " << dataPerSector.rampRef << ")" << endmsg;
-	return false;
-      }
     }
-  }// end sector loop
-
+  }
   return true;
 }
 
@@ -324,5 +266,5 @@ StatusCode LArRampValidationAlg::summary(const LArOnOffIdMapping *cabling, const
 LArRampValidationAlg::LArCondObj LArRampValidationAlg::getRefObj(const HWIdentifier chid, const int gain) const{
   auto ramp=m_reference->ADC2DAC(chid,gain);
   return LArCondObj(std::vector<float>(ramp.begin(),ramp.end()));
-
 }
+
