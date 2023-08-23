@@ -18,7 +18,6 @@
 #include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandle.h"
 
-#include "nlohmann/json.hpp"
 #include "lwtnn/generic/FastGraph.hh"
 #include "lwtnn/parse_json.hh"
 #include "lwtnn/Stack.hh"
@@ -72,40 +71,15 @@ namespace JetPileupTag {
             ATH_MSG_ERROR( "Are you sure that the file exists at this path?" );
             return StatusCode::FAILURE;
         }
-        nlohmann::json cut_j;
-        fcuts >> cut_j;
-        // Bin edges are read in GeV
-        m_ptbin_edges = cut_j["ptbin_edges"].get<std::vector<float> >();
-        m_etabin_edges = cut_j["etabin_edges"].get<std::vector<float> >();
-        std::map<std::string,float> cut_map_raw = cut_j["cuts"].get<std::map<std::string,float> >();
-        // Initialise 2D vector with cuts per bin
-        // Edge vectors have size Nbins+1
-        m_cut_map.resize(m_ptbin_edges.size()-1);
-        for(std::vector<float>& cuts_vs_eta : m_cut_map) {
-            cuts_vs_eta.resize(m_etabin_edges.size()-1,0.);
-        }
-        ATH_MSG_DEBUG("Extracting cut map");
-        std::regex binre("\\((\\d+),\\s*(\\d+)\\)");
-        for(const std::pair<const std::string,float>& bins_to_cut_str : cut_map_raw) {
-            ATH_MSG_DEBUG( bins_to_cut_str.first << " --> " << bins_to_cut_str.second );
-            std::smatch sm;
-            if(std::regex_match(bins_to_cut_str.first,sm,binre) && sm.size()==3) {
-                // First entry is full match, followed by sub-matches
-                size_t ptbin = std::stoi(sm[1]);
-                size_t etabin = std::stoi(sm[2]);
-                m_cut_map[ptbin][etabin] = bins_to_cut_str.second;
-            } else {
-                ATH_MSG_ERROR( "Regex match of pt/eta bins failed! Received string " << bins_to_cut_str.first );
-                ATH_MSG_ERROR( "Match size " << sm.size() );
-                return StatusCode::FAILURE;
-            }
-        }
+        m_cutMap = NNJvtCutMap::fromJSON(fcuts);
 
         m_jvfCorrKey = m_jetContainerName + "." + m_jvfCorrKey.key();
         m_sumPtTrkKey = m_jetContainerName + "." + m_sumPtTrkKey.key();
         m_jvtKey = m_jetContainerName + "." + m_jvtKey.key();
-        m_rptKey = m_jetContainerName + "." + m_rptKey.key();
-        m_passJvtKey = m_jetContainerName + "." + m_passJvtKey.key();
+        if (!m_rptKey.empty())
+            m_rptKey = m_jetContainerName + "." + m_rptKey.key();
+        if (!m_passJvtKey.empty())
+            m_passJvtKey = m_jetContainerName + "." + m_passJvtKey.key();
 
         ATH_CHECK(m_vertexContainer_key.initialize());
 #ifndef XAOD_STANDALONE
@@ -125,36 +99,13 @@ namespace JetPileupTag {
         ATH_CHECK(m_jvfCorrKey.initialize());
         ATH_CHECK(m_sumPtTrkKey.initialize());
         ATH_CHECK(m_jvtKey.initialize());
-        ATH_CHECK(m_rptKey.initialize());
-        ATH_CHECK(m_passJvtKey.initialize());
+        ATH_CHECK(m_rptKey.initialize(SG::AllowEmpty));
+        ATH_CHECK(m_passJvtKey.initialize(SG::AllowEmpty));
 
         return StatusCode::SUCCESS;
     }
 
-    // Assign jet to kinematic bins in pt,eta
-    // The network output depends on the bins, which can also be used
-    // for varying cuts to achieve flatter efficiency/rejection profiles
-    std::pair<size_t,size_t> JetVertexNNTagger::get_kinematic_bin(const xAOD::Jet& jet) const
-    {
-        // Initialise to an invalid value, check elsewhere that we are in range
-        size_t ptbin{m_ptbin_edges.size()}, etabin{m_etabin_edges.size()};
-        for(size_t iptbin{0}; iptbin<m_ptbin_edges.size()-1; ++iptbin) {
-            if(m_ptbin_edges[iptbin]*GeV < jet.pt() && jet.pt() < m_ptbin_edges[iptbin+1]*GeV) {
-                ptbin = iptbin;
-                break;
-            }
-        }
-        // For now this is a signed check
-        // Reformulating as abs eta would require retraining
-        for(size_t ietabin{0}; ietabin<m_etabin_edges.size()-1; ++ietabin) {
-            if(m_etabin_edges[ietabin] < jet.eta() && jet.eta() < m_etabin_edges[ietabin+1]) {
-                etabin = ietabin;
-                break;
-            }
-        }
 
-        return std::make_pair(ptbin,etabin);
-    }
 
     float JetVertexNNTagger::evaluateJvt(float rpt, float jvfcorr, size_t ptbin, size_t etabin) const
     {
@@ -167,29 +118,23 @@ namespace JetPileupTag {
 
     }
 
-    float JetVertexNNTagger::getJvtCut(size_t ptbin, size_t etabin) const
-    {
-        return m_cut_map[ptbin][etabin];
-    }
 
-
-    std::optional<std::reference_wrapper<const xAOD::Vertex> > JetVertexNNTagger::findHSVertex(const xAOD::VertexContainer& vertices) const
+    const xAOD::Vertex *JetVertexNNTagger::findHSVertex(const xAOD::VertexContainer& vertices) const
     {
 
         for ( const xAOD::Vertex* vertex : vertices ) {
             if(vertex->vertexType() == xAOD::VxType::PriVtx) {
                 ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " Found HS vertex at index: "<< vertex->index());
-                return std::cref(*vertex);
+                return vertex;
             }
         }
         if (vertices.size()==1) {
             ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " Found no HS vertex, return dummy");
-            if (vertices.back()->vertexType() == xAOD::VxType::NoVtx) {
-                return std::cref(*vertices.back());
-            }
+            if (vertices.back()->vertexType() == xAOD::VxType::NoVtx)
+                return vertices.back();
         }
         ATH_MSG_VERBOSE("No vertex found in container.");
-        return {};
+        return nullptr;
     }
 
     StatusCode JetVertexNNTagger::decorate(const xAOD::JetContainer& jetCont) const
@@ -200,12 +145,11 @@ namespace JetPileupTag {
         const xAOD::VertexContainer& vertices = *vertexHandle;
         ATH_MSG_DEBUG("Successfully retrieved VertexContainer: " << m_vertexContainer_key.key());
 
-        std::optional<std::reference_wrapper<const xAOD::Vertex> > HSvertex_ref = findHSVertex(vertices);
-        if(!HSvertex_ref.has_value()) {
+        const xAOD::Vertex *HSvertex = findHSVertex(vertices);
+        if(!HSvertex) {
             ATH_MSG_WARNING("Invalid primary vertex found, will not continue decorating with JVT.");
             return StatusCode::FAILURE;
         }
-        const xAOD::Vertex& HSvertex = HSvertex_ref->get();
 
         SG::ReadDecorHandle<xAOD::JetContainer, float> jvfCorrHandle(m_jvfCorrKey);
         SG::ReadDecorHandle<xAOD::JetContainer, std::vector<float> > sumPtTrkHandle(m_sumPtTrkKey);
@@ -213,49 +157,42 @@ namespace JetPileupTag {
         SG::WriteDecorHandle<xAOD::JetContainer, float> rptHandle(m_rptKey);
         SG::WriteDecorHandle<xAOD::JetContainer, char>  passJvtHandle(m_passJvtKey);
 
-        for(const xAOD::Jet* jet : jetCont) {
-            size_t ptbin, etabin;
-            std::tie(ptbin,etabin) = get_kinematic_bin(*jet);
+        static constexpr float invalidJvt = -1;
+        static constexpr float invalidRpt = 0;
+        static constexpr char invalidPassJvt = true;
 
-            if(HSvertex.vertexType()==xAOD::VxType::PriVtx) {
+
+        for(const xAOD::Jet* jet : jetCont) {
+            float jvt = invalidJvt;
+            float rpt = invalidRpt;
+            char passJvt = invalidPassJvt;
+            if (HSvertex->vertexType() == xAOD::VxType::PriVtx) {
                 // Calculate RpT and JVFCorr
                 // Default JVFcorr to -1 when no tracks are associated.
                 float jvfcorr = jvfCorrHandle(*jet);
                 std::vector<float> sumpttrk = sumPtTrkHandle(*jet);
-                float rpt = sumpttrk[HSvertex.index() - vertices[0]->index()]/jet->pt();
+                rpt = sumpttrk[HSvertex->index() - vertices[0]->index()]/jet->pt();
 
-                ATH_MSG_VERBOSE("Jet with pt " << jet->pt() << ", eta " << jet->eta() );
-                ATH_MSG_VERBOSE("  --> ptbin " << ptbin << ", etabin " << etabin);
-                ATH_MSG_VERBOSE("  --> inputs: corrJVF " << jvfcorr << ", rpt " << rpt );
-
-                // Default variable values, in case of invalid kinematic ranges
-                float jvt = -1.;
-                char jet_passjvt = false;
-                // If desired, can combine with explicit max pt, abs(eta) values
-                // Left off for now
-                if(ptbin==m_ptbin_edges.size() || etabin==m_etabin_edges.size() || jet->pt()>m_maxpt_for_cut) {
-                    ATH_MSG_VERBOSE("Jet outside kinematic ranges, setting default values and automatic pass.");
-                    jet_passjvt = true;
-                } 
-                else {
+                size_t ptbin, etabin;
+                if (jet->pt() <= m_maxpt_for_cut && m_cutMap.edges(*jet, ptbin, etabin)) {
                     jvt = evaluateJvt(rpt, jvfcorr, ptbin, etabin);
-                    float jvtcut = getJvtCut(ptbin, etabin);
-                    ATH_MSG_VERBOSE("JVT cut for ptbin " << ptbin << ", etabin " << etabin << " = " << jvtcut);
-                    jet_passjvt = jvt > jvtcut;
-                    ATH_MSG_VERBOSE("Evaluated JVT = " << jvt << ", jet " << (jet_passjvt ? "passes" :"fails") << " working point" );
+                    float jvtCut = m_cutMap(ptbin, etabin);
+                    passJvt = jvt > jvtCut;
+
+                    ATH_MSG_VERBOSE("Jet with pt " << jet->pt() << ", eta " << jet->eta() );
+                    ATH_MSG_VERBOSE("  --> ptbin " << ptbin << ", etabin " << etabin);
+                    ATH_MSG_VERBOSE("  --> inputs: corrJVF " << jvfcorr << ", rpt " << rpt );
+                    ATH_MSG_VERBOSE("JVT cut for ptbin " << ptbin << ", etabin " << etabin << " = " << jvtCut);
+                    ATH_MSG_VERBOSE("Evaluated JVT = " << jvt << ", jet " << (passJvt ? "passes" :"fails") << " working point" );
                 }
+            }
 
-                // Decorate jet
+            // Decorate jet
+            jvtHandle(*jet) = jvt;
+            if (!rptHandle.key().empty())
                 rptHandle(*jet) = rpt;
-                jvtHandle(*jet) = jvt;
-                passJvtHandle(*jet) = jet_passjvt;
-            } else {
-                // Decorate jet with dummy values
-                rptHandle(*jet) = 0.;
-                jvtHandle(*jet) = -1.;
-                passJvtHandle(*jet) = true;
-            } // No valid vertex
-
+            if (!passJvtHandle.key().empty())
+                passJvtHandle(*jet) = passJvt;
         }
 
         return StatusCode::SUCCESS;

@@ -29,6 +29,7 @@
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "JetInterface/IJetDecorator.h"
+#include "JetMomentTools/NNJvtBinning.h"
 
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/VertexContainer.h"
@@ -57,24 +58,17 @@ namespace JetPileupTag {
   
     private:
 
-      // Determine pt, eta bin of jet
-      std::pair<size_t,size_t> get_kinematic_bin(const xAOD::Jet& jet) const;
-      // Retrieve hard scatter vertex for its index
-      std::optional<std::reference_wrapper<const xAOD::Vertex> > findHSVertex(const xAOD::VertexContainer& vertices) const;
+      // Retrieve hard scatter vertex for its index. Return nullptr if one cannot be found
+      const xAOD::Vertex *findHSVertex(const xAOD::VertexContainer& vertices) const;
 
       // Evaluate JVT from Rpt and JVFcorr
       float evaluateJvt(float rpt, float jvfcorr, size_t ptbin, size_t etabin) const;
-      // Retrieve JVT cut for pt/eta bin
-      float getJvtCut(size_t ptbin, size_t etabin) const;
 
       /// Internal members for interpreting jet inputs
       /// and NN configuration
       std::unique_ptr<lwt::generic::FastGraph<double> > m_lwnn {nullptr};
-      // Discretised jet kinematic info
-      std::vector<float> m_ptbin_edges;
-      std::vector<float> m_etabin_edges;
-      // Cut value for efficiency/rejection working point vs pt,eta bin
-      std::vector<std::vector<float> > m_cut_map;
+      // The Jvt bins and cut map
+      NNJvtCutMap m_cutMap;
 
       // Generically needed for moment tools
       Gaudi::Property<std::string> m_jetContainerName{this,"JetContainer", "", "SG key for the input jet container"};

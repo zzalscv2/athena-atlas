@@ -1,6 +1,12 @@
 <lcgdict>
    <class name="CP::IJetJvtEfficiency" />
    <class name="CP::JetJvtEfficiency" />
+   <class name="CP::FJvtSelectionTool" />
+   <class name="CP::JvtSelectionTool" />
+   <class name="CP::NNJvtSelectionTool"/>
+   <class name="CP::FJvtEfficiencyTool"/>
+   <class name="CP::JvtEfficiencyTool"/>
+   <class name="CP::NNJvtEfficiencyTool"/>
 
   <!-- Suppress the unwanted classes found by ROOT 6. -->
   <!-- Hopefully we can remove these extra lines at one point... -->

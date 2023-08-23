@@ -10,5 +10,11 @@
 #endif // __GCCXML__
 
 #include "JetJvtEfficiency/JetJvtEfficiency.h"
+#include "JetJvtEfficiency/FJvtSelectionTool.h"
+#include "JetJvtEfficiency/JvtSelectionTool.h"
+#include "JetJvtEfficiency/NNJvtSelectionTool.h"
+#include "JetJvtEfficiency/FJvtEfficiencyTool.h"
+#include "JetJvtEfficiency/JvtEfficiencyTool.h"
+#include "JetJvtEfficiency/NNJvtEfficiencyTool.h"
 
 #endif /* JETJVTEFFICIENCYDICT_H_ */
