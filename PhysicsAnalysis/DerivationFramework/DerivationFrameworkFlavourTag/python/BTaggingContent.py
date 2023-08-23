@@ -16,14 +16,10 @@ JetStandardAux = \
 
 BTaggingStandardRun3Aux = \
     [
-      "DL1r_pu"
-    , "DL1r_pc"
-    , "DL1r_pb"
-
-    , "DL1dv00_pu" #“recommended r22 tagger” which is DL1dLoose20210824r22 named DL1dv00
+      "DL1dv00_pu" #“first r22 tagger” which is DL1dLoose20210824r22 named DL1dv00
     , "DL1dv00_pc"
     , "DL1dv00_pb"
-    , "DL1dv01_pu" # new recommended r22 tagger named DL1dv01 which is DL1dLoose20220509
+    , "DL1dv01_pu" # currently (summer 2023) recommended r22 tagger named DL1dv01 which is DL1dLoose20220509
     , "DL1dv01_pc"
     , "DL1dv01_pb"
 
@@ -44,7 +40,7 @@ BTaggingStandardRun3Aux = \
     , "DL1dv00Flip_pc"
     , "DL1dv00Flip_pb"
 
-    , "DL1r20210824r22Flip_pu"
+    , "DL1r20210824r22Flip_pu" # flipped version of DL1r retrained in r22
     , "DL1r20210824r22Flip_pc"
     , "DL1r20210824r22Flip_pb"
 
@@ -146,9 +142,6 @@ BTaggingHighLevelAux = [
     "maximumTrackRelativeEta",
     "minimumTrackRelativeEta",
     "averageTrackRelativeEta",
-    "rnnip_pb",
-    "rnnip_pc",
-    "rnnip_pu",
     "softMuon_pb",
     "softMuon_pc",
     "softMuon_pu",
@@ -156,10 +149,7 @@ BTaggingHighLevelAux = [
 ]
 
 BTaggingHighLevelRun3Aux = BTaggingHighLevelAux \
-                           + [ "DL1r20210519r22_pu"
-                               , "DL1r20210519r22_pc"
-                               , "DL1r20210519r22_pb"
-                               , "DL1r20210824r22_pu"
+                           + [ "DL1r20210824r22_pu"  # r22 retraining of DL1r
                                , "DL1r20210824r22_pc"
                                , "DL1r20210824r22_pb"
 
