@@ -1,8 +1,7 @@
-#2022/01/24 BPHYS22
 #====================================================================
 # BPHY22.py
 
-# B -> mu D_s+, B -> mu D+, B -> mu D*+, B -> mu Lambda_c
+# B -> mu D*+
 # It requires the reductionConf flag BPHY22 in Reco_tf.py
 #====================================================================
 
@@ -219,6 +218,8 @@ BPHY22MuDpst = DerivationFramework__MuPlusDpstCascade(
     name                     = "BPHY22MuDpst",
     HypothesisName           = "B",
     TrkVertexFitterTool      = BMuDstVertexFit,
+    TrkVertexFitterToolAdd     = BPHY22_VertexTools.TrkVKalVrtFitter,
+
     DxHypothesis             = 421, # MC PID for D0
     ApplyD0MassConstraint    = True,
     MuPiMassLowerCut         = 200.,
@@ -227,7 +228,7 @@ BPHY22MuDpst = DerivationFramework__MuPlusDpstCascade(
     D0MassUpperCut           = 1864.83 + 200.,
     DstMassLowerCut          = 2010.26 - 300.,
     DstMassUpperCut          = 2010.26 + 300.,
-    DstMassUpperCutAft       = 2010.26 + 25., #mass cut after cascade fit
+    DstMassUpperCutAft       = 2010.26 + 55., #mass cut after cascade fit old 25.
     MassLowerCut             = 0.,
     MassUpperCut             = 12500.,
     Chi2Cut                  = 5, #chi2/ndf
@@ -235,6 +236,7 @@ BPHY22MuDpst = DerivationFramework__MuPlusDpstCascade(
     RefPVContainerName       = "BPHY22RefittedPrimaryVertices",
     MuPiVertices             = "BPHY22MuPiCandidates",
     CascadeVertexCollections = ["BMuDpstCascadeSV2", "BMuDpstCascadeSV1"],
+    AdditionalCascadeVertexCollections = ["BMuDpstTrkCascadeSV2", "BMuDpstTrkCascadeSV1"],
     D0Vertices               = "BPHY22DiTrkCandidates",
     DoVertexType             = 15 )
 
@@ -243,255 +245,11 @@ print      BPHY22MuDpst
 #===============================================================================================
 
 
-#===============================================================================================
-#--------------------------------------------------------------------
-# 4/ select D_s+>K+K-pi+ and D+>K+pi-pi- candidates
-#--------------------------------------------------------------------
-## a/ setup a new vertexing tool (necessary due to use of mass constraint)
-from TrkVKalVrtFitter.TrkVKalVrtFitterConf import Trk__TrkVKalVrtFitter
-Dh3VertexFit = Trk__TrkVKalVrtFitter(
-    name                = "Dh3VertexFit",
-    Extrapolator        = BPHY22_VertexTools.InDetExtrapolator,
-    FirstMeasuredPoint  = False,
-    MakeExtendedVertex  = True)
-
-ToolSvc += Dh3VertexFit
-print      Dh3VertexFit
-
-#--------------------------------------------------------------------
-## b/ setup the Jpsi+1 track finder
-from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiPlus1Track
-BPHY22Dh3Finder = Analysis__JpsiPlus1Track(
-    name                    = "BPHY22Dh3Finder",
-    OutputLevel             = INFO,
-    pionHypothesis          = True,     #false by default
-    kaonHypothesis          = False,    #true by default
-    trkThresholdPt          = 900.0,
-    trkMaxEta               = 2.7, # is this value fine?? default would be 102.5
-    BThresholdPt            = 2000.0,
-    BMassUpper              = 2100.0, # What is this??
-    BMassLower              = 500.0,
-    TrkDeltaZ               = 20.,
-    TrkTrippletMassUpper    = 2200, #2100
-    TrkTrippletMassLower    = 500,
-    TrkQuadrupletPt         = 2000,
-    JpsiContainerKey        = "BPHY22DiTrkCandidates",
-    TrackParticleCollection = "InDetTrackParticles",
-    MuonsUsedInJpsi         = "NONE", # ?
-    ExcludeCrossJpsiTracks  = False,
-    TrkVertexFitterTool     = Dh3VertexFit,
-    TrackSelectorTool       = BPHY22_VertexTools.InDetTrackSelectorTool,
-    UseMassConstraint       = False,
-    Chi2Cut                 = 7) #Cut on chi2/Ndeg_of_freedom 5->7
- 
-ToolSvc += BPHY22Dh3Finder
-print      BPHY22Dh3Finder
-
-# do not affect cascade fit
-#--------------------------------------------------------------------
-## c/ setup the combined augmentation/skimming tool for the D(s)+
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_dimuTrk
-BPHY22Dh3SelectAndWrite = DerivationFramework__Reco_dimuTrk(
-    name                   = "BPHY22Dh3SelectAndWrite",
-    OutputLevel            = INFO,
-    Jpsi1PlusTrackName     = BPHY22Dh3Finder,
-    OutputVtxContainerName = "BPHY22Dh3Candidates",
-    PVContainerName        = "PrimaryVertices",
-    RefPVContainerName     = "SHOULDNOTBEUSED",
-    MaxPVrefit             = 1000)
-
-ToolSvc += BPHY22Dh3SelectAndWrite
-print      BPHY22Dh3SelectAndWrite
-
-#--------------------------------------------------------------------
-## d/ augment and select D_s+/- candidates
-BPHY22_Select_Ds = DerivationFramework__Select_onia2mumu(
-    name                  = "BPHY22_Select_Ds",
-    HypothesisName        = "Ds",
-    TrkMasses             = [493.677, 493.677, 139.571],
-    InputVtxContainerName = "BPHY22Dh3Candidates",
-    VtxMassHypo           = 1968.28,
-    MassMin               = 1968.28 - 300.,
-    MassMax               = 1968.28 + 200.,
-    Chi2Max               = 40, 
-    LxyMin                = 0.0,
-    DoVertexType          = 1)
-  
-ToolSvc += BPHY22_Select_Ds
-print      BPHY22_Select_Ds
-
-#--------------------------------------------------------------------
-## e/ augment and select D+ candidates
-BPHY22_Select_Dp = DerivationFramework__Select_onia2mumu(
-    name                  = "BPHY22_Select_Dp",
-    HypothesisName        = "Dp",
-    TrkMasses             = [139.571, 493.677, 139.571],
-    InputVtxContainerName = "BPHY22Dh3Candidates",
-    VtxMassHypo           = 1869.59,
-    MassMin               = 1869.59 - 180.,
-    MassMax               = 1869.59 + 250.,
-    Chi2Max               = 40,
-    LxyMin                = 0.05,
-    DoVertexType          = 1)
-  
-ToolSvc += BPHY22_Select_Dp
-print      BPHY22_Select_Dp
-#--------------------------------------------------------------------
-## f/ augment and select D- candidates
-BPHY22_Select_Dm = DerivationFramework__Select_onia2mumu(
-    name                  = "BPHY22_Select_Dm",
-    HypothesisName        = "Dm",
-    TrkMasses             = [493.677, 139.571, 139.571],
-    InputVtxContainerName = "BPHY22Dh3Candidates",
-    VtxMassHypo           = 1869.59,
-    MassMin               = 1869.59 - 180.,
-    MassMax               = 1869.59 + 250.,
-    Chi2Max               = 40,
-    LxyMin                = 0.05,
-    DoVertexType          = 1)
-  
-ToolSvc += BPHY22_Select_Dm
-print      BPHY22_Select_Dm
-#--------------------------------------------------------------------
-## g/ augment and select Lambda_c+ candidates
-BPHY22_Select_LambdaCp = DerivationFramework__Select_onia2mumu(
-    name                  = "BPHY22_Select_LambdaCp",
-    HypothesisName        = "Lambda_c",
-    TrkMasses             = [139.571, 493.677, 938.272],
-    InputVtxContainerName = "BPHY22Dh3Candidates",
-    VtxMassHypo           = 2286.46,
-    MassMin               = 2286.46 - 200.,
-    MassMax               = 2286.46 + 220.,
-    Chi2Max               = 40,
-    LxyMin                = 0.0,
-    DoVertexType          = 1)
-  
-ToolSvc += BPHY22_Select_LambdaCp
-print      BPHY22_Select_LambdaCp
-#--------------------------------------------------------------------
-## h/ augment and select Lambda_c- candidates
-BPHY22_Select_LambdaCm = DerivationFramework__Select_onia2mumu(
-    name                  = "BPHY22_Select_LambdaCm",
-    HypothesisName        = "Lambda_c",
-    TrkMasses             = [493.677, 139.571, 938.272],
-    InputVtxContainerName = "BPHY22Dh3Candidates",
-    VtxMassHypo           = 2286.46,
-    MassMin               = 2286.46 - 200.,
-    MassMax               = 2286.46 + 220.,
-    Chi2Max               = 40,
-    LxyMin                = 0.0,
-    DoVertexType          = 1)
-  
-ToolSvc += BPHY22_Select_LambdaCm
-print      BPHY22_Select_LambdaCm
-#===============================================================================================
-
-#--------------------------------------------------------------------
-# 5/ select B -> mu D+ / mu Ds / mu Lambda_c
-#--------------------------------------------------------------------
-## a/ setup the cascade vertexing tool
-BMuDxVertexFit = Trk__TrkVKalVrtFitter(
-    name                 = "BMuDxVertexFit",
-    Extrapolator         = BPHY22_VertexTools.InDetExtrapolator,
-    FirstMeasuredPoint   = False,
-    CascadeCnstPrecision = 1e-6,
-    MakeExtendedVertex   = True)
-
-ToolSvc += BMuDxVertexFit
-print      BMuDxVertexFit
-
-#--------------------------------------------------------------------
-## b/ setup the mu Ds finder
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__MuPlusDsCascade
-BPHY22MuDs = DerivationFramework__MuPlusDsCascade(
-    name                        = "BPHY22MuDs",
-    HypothesisName              = "B",
-    TrkVertexFitterTool         = BMuDxVertexFit,
-    DxHypothesis                = 431,
-    ApplyDxMassConstraint       = False,
-    DxMassLowerCut              = 1968.28 - 300.,
-    DxMassUpperCut              = 1968.28 + 200.,
-    MassLowerCut                = 1000,
-    MassUpperCut                = 12500,
-    Chi2Cut                     = 10,
-    RefitPV                     = True,
-    combOnly                    = True,
-    TrackSelectorTool           = BPHY22_VertexTools.InDetTrackSelectorTool,
-    useMCPCuts                  = False,
-    muonThresholdPt             = 2700,
-    muonCollectionKey           = "Muons",
-    useCombinedMeasurement      = False, # Only takes effect if combOnly=True
-    RefPVContainerName          = "BPHY22RefittedPrimaryVertices",
-    CascadeVertexCollections    = ["BMuDsCascadeSV2", "BMuDsCascadeSV1"],
-    DxVertices                  = "BPHY22Dh3Candidates")
-
-ToolSvc += BPHY22MuDs
-print      BPHY22MuDs
-
-#--------------------------------------------------------------------
-## c/ setup the mu D+ finder
-BPHY22MuDp = DerivationFramework__MuPlusDsCascade(
-    name                        = "BPHY22MuDp",
-    HypothesisName              = "B",
-    TrkVertexFitterTool         = BMuDxVertexFit,
-    DxHypothesis                = 411,
-    ApplyDxMassConstraint       = False,
-    DxMassLowerCut              = 1869.59 - 180.,
-    DxMassUpperCut              = 1869.59 + 250.,
-    MassLowerCut                = 1000,
-    MassUpperCut                = 12500,
-    Chi2Cut                     = 10,
-    RefitPV                     = True,
-    combOnly                    = True,
-    TrackSelectorTool           = BPHY22_VertexTools.InDetTrackSelectorTool,
-    useMCPCuts                  = False,
-    muonThresholdPt             = 2700,
-    muonCollectionKey           = "Muons",
-    useCombinedMeasurement      = False, # Only takes effect if combOnly=True
-    RefPVContainerName          = "BPHY22RefittedPrimaryVertices",
-    CascadeVertexCollections    = ["BMuDpCascadeSV2", "BMuDpCascadeSV1"],
-    DxVertices                  = "BPHY22Dh3Candidates")
-
-ToolSvc += BPHY22MuDp
-print      BPHY22MuDp
-
-#--------------------------------------------------------------------
-## d/ setup the mu Lambds_c+ finder
-BPHY22MuLambdaC = DerivationFramework__MuPlusDsCascade(
-    name                        = "BPHY22MuLambdaC",
-    HypothesisName              = "B",
-    TrkVertexFitterTool         = BMuDxVertexFit,
-    DxHypothesis                = 4122,
-    ApplyDxMassConstraint       = False,
-    DxMassLowerCut              = 2286.46 - 200,
-    DxMassUpperCut              = 2286.46 + 220,
-    MassLowerCut                = 1000,
-    MassUpperCut                = 12500,
-    Chi2Cut                     = 10,
-    RefitPV                     = True,
-    combOnly                    = True,
-    TrackSelectorTool           = BPHY22_VertexTools.InDetTrackSelectorTool,
-    useMCPCuts                  = False,
-    muonThresholdPt             = 2700,
-    muonCollectionKey           = "Muons",
-    useCombinedMeasurement      = False, # Only takes effect if combOnly=True
-    RefPVContainerName          = "BPHY22RefittedPrimaryVertices",
-    CascadeVertexCollections    = ["BMuLambdaCCascadeSV2", "BMuLambdaCCascadeSV1"],
-    DxVertices                  = "BPHY22Dh3Candidates")
-
-ToolSvc += BPHY22MuLambdaC
-print      BPHY22MuLambdaC
-
-
-#====================================================================
-
 #--------------------------------------------------------------------
 
 CascadeCollections = []
 CascadeCollections += BPHY22MuDpst.CascadeVertexCollections
-CascadeCollections += BPHY22MuDp.CascadeVertexCollections
-CascadeCollections += BPHY22MuDs.CascadeVertexCollections
-CascadeCollections += BPHY22MuLambdaC.CascadeVertexCollections
+CascadeCollections += BPHY22MuDpst.AdditionalCascadeVertexCollections
 
 #--------------------------------------------------------------------
 ## 6/ select the event. We only want to keep events that
@@ -500,8 +258,8 @@ if not isSimulation: #Only Skim Data
    from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
    BPHY22_SelectBMuDxEvent = DerivationFramework__xAODStringSkimmingTool(
      name = "BPHY22_SelectBMuDxEvent",
-     expression = "(count(BMuDpstCascadeSV1.x > -999) + count(BMuDsCascadeSV1.x > -999) + count(BMuDpCascadeSV1.x > -999) + count(BMuLambdaCCascadeSV1.x > -999) ) > 0")
-   
+     expression = "(count(BMuDpstCascadeSV1.x > -999)) > 0")
+
    ToolSvc += BPHY22_SelectBMuDxEvent
    print      BPHY22_SelectBMuDxEvent
 
@@ -533,7 +291,7 @@ BPHY22_thinningTool_Tracks = DerivationFramework__Thin_vtxTrk(
     name                       = "BPHY22_thinningTool_Tracks",
     ThinningService            = "BPHY22ThinningSvc",
     TrackParticleContainerName = "InDetTrackParticles",
-    VertexContainerNames       = ["BMuDpstCascadeSV1", "BMuDpstCascadeSV2, BMuDpCascadeSV1, BMuDpCascadeSV2, BMuDsCascadeSV1, BMuDsCascadeSV2, BMuLambdaCCascadeSV1, BMuLambdaCCascadeSV2"],
+    VertexContainerNames       = ["BMuDpstCascadeSV1", "BMuDpstCascadeSV2"],
     PassFlags                  = ["passed_B"])
 
 ToolSvc += BPHY22_thinningTool_Tracks
@@ -543,7 +301,7 @@ from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFram
 BPHY22_thinningTool_PV = DerivationFramework__BPhysPVThinningTool(
     name                 = "BPHY22_thinningTool_PV",
     ThinningService      = "BPHY22ThinningSvc",
-    CandidateCollections = ["BMuDpstCascadeSV1", "BMuDpstCascadeSV2, BMuDpCascadeSV1, BMuDpCascadeSV2, BMuDsCascadeSV1, BMuDsCascadeSV2, BMuLambdaCCascadeSV1, BMuLambdaCCascadeSV2"],
+    CandidateCollections = ["BMuDpstCascadeSV1", "BMuDpstCascadeSV2"],
     KeepPVTracks         = True)
 
 ToolSvc += BPHY22_thinningTool_PV
@@ -572,13 +330,9 @@ print thiningCollection
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY22Kernel",
-    AugmentationTools = [BPHY22MuPiSelectAndWrite, #BPHY22_Select_MuPi,
-                         BPHY22DiTrkSelectAndWrite, #BPHY22_Select_D0, BPHY22_Select_D0b,
-                         BPHY22Dh3SelectAndWrite, #BPHY22_Select_Ds, BPHY22_Select_Dp, BPHY22_Select_Dm, BPHY22_Select_LambdaCp, BPHY22_Select_LambdaCm,
+    AugmentationTools = [BPHY22MuPiSelectAndWrite,
+                         BPHY22DiTrkSelectAndWrite,
                          BPHY22MuDpst,
-                         BPHY22MuDs,
-                         BPHY22MuDp,
-                         BPHY22MuLambdaC,
                          BPHY22_AugOriginalCounts],
     #Only skim if not MC
     SkimmingTools     = [BPHY22SkimmingOR] if not isSimulation else [],
@@ -643,10 +397,6 @@ StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY22MuPi
 #StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY22DiTrkSelectAndWrite.OutputVtxContainerName]
 #StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY22DiTrkSelectAndWrite.OutputVtxContainerName]
 
-
-## D+ / Ds candidates
-#StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY22Dh3SelectAndWrite.OutputVtxContainerName]
-#StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY22Dh3SelectAndWrite.OutputVtxContainerName]
 
 ## B+>mu D_(s)+/-, mu D*+/- and mu Lambda_c+/- candidates
 for cascades in CascadeCollections:
