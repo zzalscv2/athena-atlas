@@ -21,7 +21,7 @@ ex = ExecStep.ExecStep()
 ex.type = 'athenaHLT'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data'
-ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;rewriteLVL1=True;'
+ex.args = '-c "setMenu=\'PhysicsP1_pp_run3_v1_HLTReprocessing_prescale\';doL1Sim=True;'
 ex.args += ';'.join(['flags.Trigger.L1MuonSim.NSWVetoMode=False',
                      'flags.Trigger.L1MuonSim.doMMTrigger=False',
                      'flags.Trigger.L1MuonSim.doPadTrigger=False',

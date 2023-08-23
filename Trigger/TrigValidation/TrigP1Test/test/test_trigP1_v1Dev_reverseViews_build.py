@@ -16,7 +16,6 @@ ex.max_events = 50
 precommand = ''.join([
   "setMenu='Dev_pp_run3_v1_TriggerValidation_prescale';",
   "doL1Sim=True;",
-  "rewriteLVL1=True;",
   "doRuntimeNaviVal=True;",
   "reverseViews=True;",
 ])

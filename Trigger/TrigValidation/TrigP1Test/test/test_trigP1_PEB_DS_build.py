@@ -16,7 +16,7 @@ ex.type = 'athenaHLT'
 ex.job_options = 'TrigP1Test/PEBDSTest.py'
 ex.input = 'data'
 ex.args = '-o ' + output_name_base
-ex.args += ' -c "doL1Sim=True;rewriteLVL1=True;"'
+ex.args += ' -c "doL1Sim=True;"'
 ex.args += ' --dump-config-reload'
 
 test = Test.Test()
