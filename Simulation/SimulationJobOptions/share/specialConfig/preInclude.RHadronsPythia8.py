@@ -174,9 +174,15 @@ Include.optionsPath = re.split( ',|' + os.pathsep, Include.optionsPathEnv )
 # Include the job options themselves
 include(JO)
 
+# Add param_cards.dat to the DATAPATH
+cwd_path = os.getcwd()
+cwd_sub = glob.glob(cwd_path + "/PROC*/Cards", recursive = True)
+cwd_sub_str = ' '.join(str(e)+":" for e in cwd_sub)
+os.environ["DATAPATH"] = cwd_sub_str +":"+os.environ["DATAPATH"]
+
 # Build the param card, aka SLHA file
 from MadGraphControl.MadGraphUtils import modify_param_card
-modify_param_card(param_card_input='param_card.SM.%s.%s.dat'%(gentype,decaytype),params={'MASS': masses,'DECAY':decays},output_location='SLHA_INPUT.DAT')
+modify_param_card(param_card_input='param_card.dat',params={'MASS': masses,'DECAY':decays},output_location='SLHA_INPUT.DAT')
 
 # Get the spectrum number if it's in the metadata
 spectrum = 1 if 'SPECTRUM' not in simdict else simdict['SPECTRUM']
