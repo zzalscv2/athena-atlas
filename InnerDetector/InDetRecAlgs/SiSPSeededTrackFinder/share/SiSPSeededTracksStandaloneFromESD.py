@@ -592,7 +592,6 @@ InDetSiTrackMaker = SiTrackMaker(name                      = "InDetSiTrackMaker"
                                  CombinatorialTrackFinder  = InDetSiComTrackFinder,
                                  pTmin                     = NewTrackingCuts.minPT(),
                                  pTminBrem                 = NewTrackingCuts.minPTBrem(),
-                                 pTminSSS                  = InDetFlags.pT_SSScut(),
                                  nClustersMin              = NewTrackingCuts.minClusters(),
                                  nHolesMax                 = NewTrackingCuts.nHolesMax(),
                                  nHolesGapMax              = NewTrackingCuts.nHolesGapMax(),

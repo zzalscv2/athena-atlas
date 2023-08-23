@@ -1065,12 +1065,6 @@ class doSSSfilter(InDetFlagsJobProperty):
   statusOn     = True
   allowedTypes = ['bool']
   StoredValue  = True
-
-class pT_SSScut(InDetFlagsJobProperty):
-  """ Pt cut for SSS filter [GeV]"""
-  statusOn     = True
-  allowedTypes = ['float']
-  StoredValue  = -1
   
 class ForceCoraCool(InDetFlagsJobProperty):
   """ Use old (non CoolVectorPayload) SCT Conditions """
@@ -2708,7 +2702,6 @@ _list_InDetJobProperties = [Enabled,
                             doRefitInvalidCov,
                             doRejectInvalidCov,
                             doSSSfilter,
-                            pT_SSScut,
                             ForceCoraCool,
                             ForceCoolVectorPayload,
                             doTrackSegmentsDisappearing,
