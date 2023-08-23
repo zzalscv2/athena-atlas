@@ -219,6 +219,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             if alg.scaleFactorDecoration != '' :
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
+            config.addSelection (self.containerName, 'jvt', 'jvt_selection',bits=1, preselection=False)
 
         if self.runFJvtSelection :
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
@@ -244,6 +245,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.skipBadEfficiency = 0
             alg.jets = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, 'jvt', 'fjvt_selection',bits=1, preselection=False)
 
 
 
