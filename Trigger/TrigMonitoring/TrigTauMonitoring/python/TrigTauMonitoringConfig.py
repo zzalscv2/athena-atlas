@@ -492,7 +492,7 @@ class TrigTauMonAlgBuilder:
     monGroup.defineHistogram('track_dEta',title='track_dEta;track_dEta;Events',xbins=100,xmin=-0.5,xmax=0.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_dPhi',title='track_dPhi;track_dPhi;Events',xbins=100,xmin=-0.5,xmax=0.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_d0_abs_log',title='track_d0_abs_log;track_d0_abs_log;Events',xbins=50,xmin=-7,xmax=2,opt='kAlwaysCreate')
-    monGroup.defineHistogram('track_z0sinThetaTJVA_abs_log',title='track_z0sinThetaTJVA_abs_log;track_z0sinThetaTJVA_abs_log;Events',xbins=50,xmin=-10,xmax=4,opt='kAlwaysCreate')
+    monGroup.defineHistogram('track_z0sinthetaTJVA_abs_log',title='track_z0sinthetaTJVA_abs_log;track_z0sinthetaTJVA_abs_log;Events',xbins=50,xmin=-10,xmax=4,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_nIBLHitsAndExp',title='track_nIBLHitsAndExp; track_nIBLHitsAndExp;Events',xbins=3,xmin=0,xmax=3,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_nPixelHitsPlusDeadSensors',title='track_nPixelHitsPlusDeadSensors;track_nPixelHitsPlusDeadSensors;Events',xbins=11,xmin=0,xmax=11,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_nSCTHitsPlusDeadSensors',title='track_nSCTHitsPlusDeadSensors;track_nSCTHitsPlusDeadSensors;Events',xbins=20,xmin=0,xmax=20,opt='kAlwaysCreate')
