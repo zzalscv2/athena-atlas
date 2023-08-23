@@ -17,6 +17,10 @@ namespace MCP {
 
     CalibContainer::CalibContainer(const std::string& inFileName, const std::string& histName)
     {
+
+       //Muon momentum calibrations are not yet available for 2023 dataset
+      if(!(inFileName.find("Data23") != std::string::npos)) {
+
         if (inFileName.empty()) throw std::invalid_argument("fileName arguments must be non empty");
         if (histName.empty()) throw std::invalid_argument("histName arguments must be non empty");
         
@@ -44,7 +48,7 @@ namespace MCP {
         m_maxY  = m_calibConstantHist->GetYaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
         m_minY  = m_calibConstantHist->GetYaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
 
-
+      }
     }
 
     double CalibContainer::getCalibConstant(const TrackCalibObj& trk) const

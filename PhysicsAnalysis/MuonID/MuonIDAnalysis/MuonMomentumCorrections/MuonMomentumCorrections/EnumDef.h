@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ENUMDEF_H
@@ -25,13 +25,13 @@ namespace MCP {
     enum class ExpectedResParam{ r0, r1, r2, r2tan2 }; 
 
     // Data year
-    enum class DataYear {Data16, Data17, Data18, Data22};
+    enum class DataYear {Data16, Data17, Data18, Data22, Data23};
 
     // For HighPtSmearing
     enum class MST_Categories{Undefined, Zero, One, Two, Three, Four};
         
-    // Data22 is not supported yet
-    static constexpr std::array<MCP::DataYear, 4> dataYearList{MCP::DataYear::Data16, MCP::DataYear::Data17, MCP::DataYear::Data18, MCP::DataYear::Data22};
+    // Data22 and Data23 are not supported yet
+    static constexpr std::array<MCP::DataYear, 5> dataYearList{MCP::DataYear::Data16, MCP::DataYear::Data17, MCP::DataYear::Data18, MCP::DataYear::Data22, MCP::DataYear::Data23};
 
     // Need this defined as a simple enum to not change any interface class
     namespace DetectorType { enum { MS = 1, ID = 2, CB = 3 };}
@@ -62,6 +62,7 @@ namespace MCP {
         if(year == DataYear::Data17) return "Data17";
         if(year == DataYear::Data18) return "Data18";
         if(year == DataYear::Data22) return "Data22";
+        if(year == DataYear::Data23) return "Data23";
         return "";
     }           
 
