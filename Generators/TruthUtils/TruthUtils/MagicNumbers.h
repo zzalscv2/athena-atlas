@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -127,12 +127,30 @@ template <class T>  inline std::deque<int> simulation_history(const T& p, int di
 /// @brief Function that converts the old scheme of labeling the simulation particles (barcodes) into the new scheme (statuses).
 
 template <class T> void old_to_new_simulation_scheme(T& evt) {
+  auto particle_status = [] (int barcode, int status) {
+    if ((barcode % SIM_REGENERATION_INCREMENT) > SIM_BARCODE_THRESHOLD)
+      status += SIM_STATUS_THRESHOLD;
+    status += SIM_STATUS_INCREMENT * (barcode / SIM_REGENERATION_INCREMENT);
+    return status;
+  };
+  auto vertex_status = [] (int barcode, int status) {
+    if (-barcode > SIM_BARCODE_THRESHOLD) status += SIM_STATUS_THRESHOLD;
+    return status;
+  };
 #ifdef HEPMC3
-  for (auto p: evt->particles())  p->set_status( SIM_STATUS_INCREMENT * ( HepMC::barcode(p) / SIM_REGENERATION_INCREMENT)  + (  HepMC::barcode(p) % SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + p->status());
-  for (auto v: evt->vertices())   v->set_status( ( -HepMC::barcode(v)> SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + v->status());
+  for (auto p: evt->particles())  {
+    p->set_status (particle_status (HepMC::barcode(p), p->status()));
+  }
+  for (auto v: evt->vertices()) {
+    v->set_status (vertex_status (HepMC::barcode(v), v->status()));
+  }
 #else
-  for (auto p = evt->particles_begin(); p != evt->particles_end(); ++p)  (*p)->set_status(SIM_STATUS_INCREMENT *(  (*p)->barcode() / SIM_REGENERATION_INCREMENT)  + ( (*p)->barcode() % SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + (*p)->status());
-  for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v)    (*v)->set_id( ( -(*v)->barcode() > SIM_BARCODE_THRESHOLD ) ? 0 : SIM_STATUS_THRESHOLD + (*v)->id());
+  for (auto p = evt->particles_begin(); p != evt->particles_end(); ++p) {
+    (*p)->set_status (particle_status ((*p)->barcode(), (*p)->status()));
+  }
+  for (auto v = evt->vertices_begin(); v != evt->vertices_end(); ++v)  {
+    (*v)->set_id (vertex_status ((*v)->barcode(), (*v)->id()));
+  }
 #endif
 }
 
