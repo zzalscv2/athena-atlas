@@ -315,8 +315,8 @@ int PixelModuleData::getFEI3Latency(int barrel_ec, int layer) const
 
   if (std::abs(barrel_ec) == 2 && layerIndex < m_FEI3EndcapLatency.size())
     return m_FEI3EndcapLatency[layerIndex];
-
-  throw std::range_error("PixelModuleData::getFEI3Latency array out of bounds");
+  std::string msg="PixelModuleData::getFEI3Latency(" + std::to_string(barrel_ec) +", "+std::to_string(layer)+") out of bounds";
+  throw std::range_error(msg);
 }
 
 void PixelModuleData::setFEI3BarrelHitDuplication(const std::vector<bool> &FEI3BarrelHitDuplication) { m_FEI3BarrelHitDuplication = FEI3BarrelHitDuplication; }
