@@ -45,8 +45,9 @@ def AthenaMonitoringAODRecoCfg(flags):
             for container in jet_collections & btag_jet_collections:
                 result.merge(BTagRecoSplitCfg(flags, [container]))
 
-        # MET can't be rebuilt when running over cosmics AOD as taus are missing
-        if jet_collections & met_jet_collections and flags.Beam.Type is not BeamType.Cosmics:
+        # MET can't be rebuilt when running over cosmics or HI AOD as taus are missing
+        from .DQConfigFlags import DQDataType
+        if jet_collections & met_jet_collections and flags.DQ.DataType not in (DQDataType.HeavyIon, DQDataType.Cosmics):
             info('Scheduling rebuild of standard MET')
             from METReconstruction.METAssociatorCfg import METAssociatorCfg
             from METUtilities.METMakerConfig import getMETMakerAlg
