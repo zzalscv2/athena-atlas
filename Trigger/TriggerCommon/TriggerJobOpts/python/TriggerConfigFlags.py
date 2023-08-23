@@ -35,86 +35,89 @@ def trigGeoTag(flags):
 def createTriggerFlags(doTriggerRecoFlags):
     flags = AthConfigFlags()
 
-    # enables L1 simulation
-    flags.addFlag('Trigger.doLVL1', lambda prevFlags: prevFlags.Input.isMC)
+    flags.addFlag('Trigger.doLVL1', lambda prevFlags: prevFlags.Input.isMC,
+                  help='enable L1 simulation')
 
-    # Run HLT selection algorithms
-    flags.addFlag('Trigger.doHLT', False)
+    flags.addFlag('Trigger.doHLT', False,
+                  help='run HLT selection algorithms')
 
-    # changes decoding of L1 so that allways all configured chains are enabled, testing mode
-    flags.addFlag("Trigger.HLTSeeding.forceEnableAllChains", False)
+    flags.addFlag("Trigger.HLTSeeding.forceEnableAllChains", False,
+                  help='always enable all configure chains (for testing)')
 
-    # Enable Run-3 LVL1 muon decoding
-    flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags: prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC)
+    flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags:
+                  prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC,
+                  help='enable Run-3 LVL1 muon decoding')
 
-    # Enable Phase-1 LVL1 calo simulation and/or decoding for Run-3+
     flags.addFlag('Trigger.enableL1CaloPhase1', lambda prevFlags:
-                  prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3)
+                  prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3,
+                  help='enable Phase-1 LVL1 calo simulation and/or decoding for Run-3+')
 
-    # Enable L1Topo simulation to write inputs to txt
-    flags.addFlag('Trigger.enableL1TopoDump', False)
+    flags.addFlag('Trigger.enableL1TopoDump', False,
+                  help='enable L1Topo simulation to write inputs to txt file')
 
-    # Enable L1Topo simulation to BW run
-    flags.addFlag('Trigger.enableL1TopoBWSimulation', False)
+    flags.addFlag('Trigger.enableL1TopoBWSimulation', False,
+                  help='enable bitwise L1Topo simulation')
 
-    # Enable Run-2 L1Calo simulation and/or decoding (possible even if enablePhase1 is True)
-    flags.addFlag('Trigger.enableL1CaloLegacy', True)
+    flags.addFlag('Trigger.enableL1CaloLegacy', True,
+                  help='enable Run-2 L1Calo simulation and/or decoding')
 
-    # Enable emulation tool for NSW-TGC coincidence
-    flags.addFlag('Trigger.L1MuonSim.EmulateNSW', False)
+    # L1MuonSim category
+    flags.addFlag('Trigger.L1MuonSim.EmulateNSW', False,
+                  help='enable emulation tool for NSW-TGC coincidence')
 
-    # Enable NSW MM trigger
-    flags.addFlag('Trigger.L1MuonSim.doMMTrigger', True)
+    flags.addFlag('Trigger.L1MuonSim.doMMTrigger', True,
+                  help='enable NSW MM trigger')
 
-    # Enable NSW sTGC pad trigger
-    flags.addFlag('Trigger.L1MuonSim.doPadTrigger', True)
+    flags.addFlag('Trigger.L1MuonSim.doPadTrigger', True,
+                  help='enable NSW sTGC pad trigger')
 
-    # Enable NSW sTGC strip trigger
-    flags.addFlag('Trigger.L1MuonSim.doStripTrigger', False)
+    flags.addFlag('Trigger.L1MuonSim.doStripTrigger', False,
+                  help='enable NSW sTGC strip trigger')
 
-    # Enable Storing NSW Debug Ntuple
-    flags.addFlag('Trigger.L1MuonSim.WriteNSWDebugNtuple', False)
+    flags.addFlag('Trigger.L1MuonSim.WriteNSWDebugNtuple', False,
+                  help='enable Storing NSW debug Ntuple')
 
-    # Enable Storing MM branches in NSW Debug Ntuple
-    flags.addFlag('Trigger.L1MuonSim.WriteMMBranches', False)
+    flags.addFlag('Trigger.L1MuonSim.WriteMMBranches', False,
+                  help='enable storing of Micromega branches in NSW debug Ntuple')
 
-    # Enable Storing NSW Debug Ntuple
-    flags.addFlag('Trigger.L1MuonSim.WritesTGCBranches', False)
+    flags.addFlag('Trigger.L1MuonSim.WritesTGCBranches', False,
+                  help='enable storing of TGC branches in NSW debug Ntuple')
 
-    # Enable the veto mode of the NSW-TGC coincidence
-    flags.addFlag('Trigger.L1MuonSim.NSWVetoMode', True)
+    flags.addFlag('Trigger.L1MuonSim.NSWVetoMode', True,
+                  help='enable the veto mode of the NSW-TGC coincidence')
 
-    # Enable TGC-RPC BIS78 coincidence
-    flags.addFlag('Trigger.L1MuonSim.doBIS78', True)
+    flags.addFlag('Trigger.L1MuonSim.doBIS78', True,
+                  help='enable TGC-RPC BIS78 coincidence')
 
-    # Offline CondDB tag for RPC/TGC coincidence window in rerunLVL1 on data
-    flags.addFlag('Trigger.L1MuonSim.CondDBOffline', 'OFLCOND-MC16-SDR-RUN2-04')
+    flags.addFlag('Trigger.L1MuonSim.CondDBOffline', 'OFLCOND-MC16-SDR-RUN2-04',
+                  help='offline CondDB tag for RPC/TGC coincidence window in rerunLVL1 on data')
 
-    # Enable Inner Detector
-    flags.addFlag('Trigger.doID', True)
+    # Detector flags
+    flags.addFlag('Trigger.doID', True,
+                  help='enable Inner Detector')
 
-    # Enable muon system
-    flags.addFlag('Trigger.doMuon', True)
+    flags.addFlag('Trigger.doMuon', True,
+                  help='enable muon systems')
 
-    # Enable calorimeters
-    flags.addFlag('Trigger.doCalo', True)
+    flags.addFlag('Trigger.doCalo', True,
+                  help='enable calorimeters')
 
-    # Enable additional validation histograms
-    flags.addFlag('Trigger.doValidationMonitoring', False)
+    flags.addFlag('Trigger.doZDC', False,
+                  help='enable ZDC system')
 
-    # Enable ZDC System
-    flags.addFlag('Trigger.doZDC', False)
-    
-    # Path to Run3 ZDC LUT
-    flags.addFlag('Trigger.ZdcLUT', 'TrigT1ZDC/zdcRun3T1LUT_v2_08_08_2023.json')
+    flags.addFlag('Trigger.ZdcLUT', 'TrigT1ZDC/zdcRun3T1LUT_v2_08_08_2023.json',
+                  help='path to Run3 ZDC LUT')
 
-    # Checks the validity of each Decision Object produced by a HypoAlg, including all of its
-    # parents all the way back to the HLTSeeding. Potentially CPU expensive.
-    # also enables per step decison printouts
-    flags.addFlag('Trigger.doRuntimeNaviVal', False)
+    flags.addFlag('Trigger.doValidationMonitoring', False,
+                  help='enable additional validation histograms')
 
-    # Select ROBPrefetching options, out of ROBPrefetching enum, empty list means no prefetching
-    flags.addFlag('Trigger.ROBPrefetchingOptions', [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI, ROBPrefetching.TauCoreLargeRoI])
+    flags.addFlag('Trigger.doRuntimeNaviVal', False,
+                  help=('Check validity of each Decision objects in the entire decision tree (CPU expensive). '
+                        'Also enable per-step decision printouts.'))
+
+    flags.addFlag('Trigger.ROBPrefetchingOptions',
+                  [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI, ROBPrefetching.TauCoreLargeRoI],
+                  help='select ROB prefetching types, empty list disables prefetching')
 
     # if 1, Run1 decoding version is set; if 2, Run2; if 3, Run 3
     def EDMVersion(flags):
@@ -163,83 +166,109 @@ def createTriggerFlags(doTriggerRecoFlags):
                      default_version)
         return default_version
 
-    flags.addFlag('Trigger.EDMVersion', lambda prevFlags: EDMVersion(prevFlags))
-    flags.addFlag('Trigger.doEDMVersionConversion', False)
+    flags.addFlag('Trigger.EDMVersion', lambda prevFlags: EDMVersion(prevFlags),
+                  help='Trigger EDM version (determined by input file or set to the version to be produced)')
 
-    # Flag to control the scheduling of online Run 3 trigger navigation compactification into a single collection (uses slimming framework).
-    flags.addFlag('Trigger.doOnlineNavigationCompactification', True)
+    flags.addFlag('Trigger.doEDMVersionConversion', False,
+                  help='convert Run-1&2 EDM to Run-3 EDM')
 
-    # Flag to control the scheduling of offline Run 3 trigger navigation slimming in RAWtoALL, RAWtoAOD or AODtoDAOD transforms.
-    flags.addFlag('Trigger.doNavigationSlimming', True)
+    flags.addFlag('Trigger.doOnlineNavigationCompactification', True,
+                  help='enable trigger Navigation compactification into a single collection')
 
-    # Enables collection and export of detailed monitoring data of the HLT execution
-    flags.addFlag('Trigger.CostMonitoring.doCostMonitoring', True)
-    flags.addFlag('Trigger.CostMonitoring.chain', 'HLT_noalg_CostMonDS_L1All')
-    flags.addFlag('Trigger.CostMonitoring.outputCollection', 'HLT_TrigCostContainer')
-    flags.addFlag('Trigger.CostMonitoring.monitorAllEvents', False)
-    flags.addFlag('Trigger.CostMonitoring.monitorROBs', True)
+    flags.addFlag('Trigger.doNavigationSlimming', True,
+                  help='enable Navigation slimming for RAWtoXYZ or AODtoDAOD transforms')
 
-    # enable L1Muon ByteStream conversion / simulation
-    flags.addFlag('Trigger.L1.doMuon', True)
+    # CostMonitoring category
+    flags.addFlag('Trigger.CostMonitoring.doCostMonitoring', True,
+                  help='enable cost monitoring')
 
-    # enable ByteStream conversion / simulation of MUCTPI Topo TOBs
-    flags.addFlag('Trigger.L1.doMuonTopoInputs', lambda prevFlags: prevFlags.Trigger.doLVL1)
+    flags.addFlag('Trigger.CostMonitoring.chain', 'HLT_noalg_CostMonDS_L1All',
+                  help='Cost monitoring chain name')
 
-    # enable L1Calo ByteStream conversion / simulation
-    flags.addFlag('Trigger.L1.doCalo', True)
+    flags.addFlag('Trigger.CostMonitoring.outputCollection', 'HLT_TrigCostContainer',
+                  help='Cost monitoring output collection name')
 
-    # enable L1Calo Input ([ejg]Towers) ByteStream conversion / simulation
-    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT)
+    flags.addFlag('Trigger.CostMonitoring.monitorAllEvents', False,
+                  help='enable Cost monitoring for all events')
 
-    # finer steering of phase-1 L1Calo ByteStream conversion / simulation with one flag per FEX
-    flags.addFlag('Trigger.L1.doeFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
-    flags.addFlag('Trigger.L1.dojFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
-    flags.addFlag('Trigger.L1.dogFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
-    
-    # tells the L1Calo if it is EmulatedSCell (Run2 container name) or SCells (Run3 container name)
-    flags.addFlag('Trigger.L1.L1CaloSuperCellContainerName', lambda prevFlags: "EmulatedSCell" if prevFlags.GeoModel.Run is LHCPeriod.Run2 else "SCell")
+    flags.addFlag('Trigger.CostMonitoring.monitorROBs', True,
+                  help='enable Cost monitoring of ROB accesses')
 
-    # enable L1Topo ByteStream conversion / simulation (general flag steering both legacy and phase-1 Topo)
-    flags.addFlag('Trigger.L1.doTopo', True)
+    # L1 category
+    flags.addFlag('Trigger.L1.doMuon', True,
+                  help='enable L1Muon ByteStream conversion/simulation')
 
-    # finer-grained control like for the FEXes above to disable only phase-1 Topo even when doTopo flag is True
-    flags.addFlag('Trigger.L1.doTopoPhase1', lambda prevFlags: prevFlags.Trigger.L1.doTopo and prevFlags.Trigger.enableL1CaloPhase1)
+    flags.addFlag('Trigger.L1.doMuonTopoInputs', lambda prevFlags: prevFlags.Trigger.doLVL1,
+                  help='enable ByteStream conversion/simulation of MUCTPI Topo TOBs')
 
-    # enable CTP ByteStream conversion / simulation
-    flags.addFlag('Trigger.L1.doCTP', True)
+    flags.addFlag('Trigger.L1.doCalo', True,
+                  help='enable L1Calo ByteStream conversion/simulation')
 
-    # replace Topo3 with ALFA in CTP inputs
-    flags.addFlag('Trigger.L1.doAlfaCtpin', False)
+    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags:
+                  prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT,
+                  help='enable L1Calo Input ([ejg]Towers) ByteStream conversion/simulation')
 
-    # modify min-pt-to-Topo threshold for TOBs to HI values
-    flags.addFlag('Trigger.L1.doHeavyIonTobThresholds', lambda prevFlags: 'HI' in prevFlags.Trigger.triggerMenuSetup)
+    flags.addFlag('Trigger.L1.doeFex', lambda prevFlags:
+                  prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
+                  help='enable eFEX ByteStream conversion/simulation')
 
-    # partition name used to determine online vs offline BS result writing
-    flags.addFlag('Trigger.Online.partitionName', os.getenv('TDAQ_PARTITION') or '')
+    flags.addFlag('Trigger.L1.dojFex', lambda prevFlags:
+                  prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
+                  help='enable jFEX ByteStream conversion/simulation')
 
-    # shortcut to check if job is running in a partition (i.e. partition name is not empty)
-    flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0)
+    flags.addFlag('Trigger.L1.dogFex', lambda prevFlags:
+                  prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1,
+                  help='enable gFEX ByteStream conversion/simulation')
+
+    flags.addFlag('Trigger.L1.L1CaloSuperCellContainerName', lambda prevFlags:
+                  "EmulatedSCell" if prevFlags.GeoModel.Run is LHCPeriod.Run2 else "SCell",
+                  help='name of SuperCell container')
+
+    flags.addFlag('Trigger.L1.doTopo', True,
+                  help='enable L1Topo ByteStream conversion/simulation (steering both legacy and phase-1 Topo)')
+
+    flags.addFlag('Trigger.L1.doTopoPhase1', lambda prevFlags:
+                  prevFlags.Trigger.L1.doTopo and prevFlags.Trigger.enableL1CaloPhase1,
+                  help='control Phase-I L1Topo simulation even if L1.doTopo is True')
+
+    flags.addFlag('Trigger.L1.doCTP', True,
+                  help='enable CTP ByteStream conversion/simulation')
+
+    flags.addFlag('Trigger.L1.doAlfaCtpin', False,
+                  help='replace Topo3 with ALFA in CTP inputs')
+
+    flags.addFlag('Trigger.L1.doHeavyIonTobThresholds', lambda prevFlags:
+                  'HI' in prevFlags.Trigger.triggerMenuSetup,
+                  help='modify min-pt-to-Topo threshold for TOBs to HI values')
+
+    # Online category
+    flags.addFlag('Trigger.Online.partitionName', os.getenv('TDAQ_PARTITION') or '',
+                  help='partition name used to determine online vs offline BS result writing')
+
+    flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0,
+                  help='check if job is running in a partition (i.e. partition name is not empty)')
 
     flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
-                  help='Use online THistSvc')
+                  help='use online THistSvc')
 
     flags.addFlag('Trigger.Online.BFieldAutoConfig', True,
-                  help='Auto-configure magnetic field from currents in IS')
+                  help='auto-configure magnetic field from currents in IS')
 
-    # write BS output file
-    flags.addFlag('Trigger.writeBS', False)
+    flags.addFlag('Trigger.writeBS', False,
+                  help='enable bytestream writing of trigger information')
 
-    # Write transient BS before executing HLT algorithms (for running on MC RDO with clients which require BS inputs)
-    flags.addFlag('Trigger.doTransientByteStream', lambda prevFlags: True if prevFlags.Input.Format is Format.POOL and prevFlags.Trigger.doCalo else False)
+    flags.addFlag('Trigger.doTransientByteStream', lambda prevFlags:
+                  True if prevFlags.Input.Format is Format.POOL and prevFlags.Trigger.doCalo else False,
+                  help='create transient BS (for running on MC RDO with clients that require BS inputs)')
 
-    # list of EDM objects to be written to AOD
-    flags.addFlag('Trigger.AODEDMSet', lambda flags: 'AODSLIM' if flags.Input.isMC else 'AODFULL')
+    flags.addFlag('Trigger.AODEDMSet', lambda flags: 'AODSLIM' if flags.Input.isMC else 'AODFULL',
+                  help='list of EDM objects to be written to AOD')
 
-    # list of objects to be written to ESD
-    flags.addFlag('Trigger.ESDEDMSet', 'ESD')
+    flags.addFlag('Trigger.ESDEDMSet', 'ESD',
+                  help='list of EDM objects to be written to ESD')
 
-    # to allow stroing extra EDM items via preExec
-    flags.addFlag('Trigger.ExtraEDMList', [])
+    flags.addFlag('Trigger.ExtraEDMList', [],
+                  help='list of extra EDM objects to be stored (for testing)')
 
     def __availableRecoMetadata(flags):
         systems = ['L1','HLT']
@@ -259,16 +288,17 @@ def createTriggerFlags(doTriggerRecoFlags):
         else:
             return systems if flags.Trigger.triggerConfig == 'INFILE' else []
 
-    # list of enabled trigger sub-systems in reconstruction: ['L1,'HLT']
-    flags.addFlag('Trigger.availableRecoMetadata', lambda flags: __availableRecoMetadata(flags))
+    flags.addFlag('Trigger.availableRecoMetadata', lambda flags: __availableRecoMetadata(flags),
+                  help="list of enabled trigger sub-systems in reconstruction: ['L1,'HLT']")
 
-    # Offline flag, determines if the HLT trigger decision and the HLT result should be decoded in reconstruction in jobs with Reco.EnableTrigger
-    flags.addFlag("Trigger.DecodeHLT", True)
+    flags.addFlag("Trigger.DecodeHLT", True,
+                  help='enable decoding of HLT trigger decision/result in reconstruction')
 
-    # Offline flag, controls the scheduling of the validation algorithm which performs consistency checks on the T0 extracted trigger decision data (recommended).
-    # And if the algorithm should issue a WARNING or ERROR (and Failure) on encountering issues
-    flags.addFlag("Trigger.DecisionMakerValidation.Execute", True)
-    flags.addFlag("Trigger.DecisionMakerValidation.ErrorMode", True)
+    flags.addFlag("Trigger.DecisionMakerValidation.Execute", True,
+                  help='run trigger decision validation algorithm in reconstruction')
+
+    flags.addFlag("Trigger.DecisionMakerValidation.ErrorMode", True,
+                  help='emit an ERROR (or WARNING) in case of trigger decision validation failure')
 
     # Auto configure most probable choice for trigger configuration source based on job setup
     def __triggerConfig(flags):
@@ -313,24 +343,23 @@ def createTriggerFlags(doTriggerRecoFlags):
                 _log.debug("Autoconfigured default value to read trigger configuration data from disk for MC production: 'FILE'")
                 return 'FILE'
 
-    # the configuration source
-    # see https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag
-    flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags))
+    flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags),
+                  help='Trigger configuration source (https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag)')
 
-    # name of the trigger menu
-    flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale')
+    flags.addFlag('Trigger.triggerMenuSetup', 'MC_pp_run3_v1_BulkMCProd_prescale',
+                  help='name of the trigger menu')
 
-    # debug output from control flow generation
-    flags.addFlag('Trigger.generateMenuDiagnostics', False)
+    flags.addFlag('Trigger.generateMenuDiagnostics', False,
+                  help='print debug output from control flow generation')
 
-    # avoid re-merging CAs that were already seen once
-    flags.addFlag('Trigger.fastMenuGeneration', True)
+    flags.addFlag('Trigger.fastMenuGeneration', True,
+                  help='avoid re-merging CAs that were already seen once')
 
-    # disable Consistent Prescale Sets, for testing only, useful when using selectChains (ATR-24744)
-    flags.addFlag('Trigger.disableCPS', False)
+    flags.addFlag('Trigger.disableCPS', False,
+                  help='disable coherent prescale sets (for testing with small menu)')
 
-    # Switch whether end-of-event sequence running extra algorithms for accepted events should be added
-    flags.addFlag('Trigger.endOfEventProcessing.Enabled', True)
+    flags.addFlag('Trigger.endOfEventProcessing.Enabled', True,
+                  help='enable execution of extra algorithms for accepted events')
 
     # trigger reconstruction
     # Protection against import of packages not in the analysis release
@@ -339,6 +368,7 @@ def createTriggerFlags(doTriggerRecoFlags):
         flags.join( createTriggerRecoFlags() )
 
     return flags
+
 
 def createTriggerRecoFlags():
     flags = AthConfigFlags()
@@ -358,6 +388,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.runCommissioningChain=False
         muonflags.Muon.enableErrorTuning=False
         return muonflags
+    flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)
 
     def __muon():
         from MuonConfig.MuonConfigFlags import createMuonConfigFlags
@@ -366,6 +397,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.enableErrorTuning=False
         return muonflags
+    flags.addFlagsCategory('Trigger.Offline', __muon, prefix=True)
 
     def __muonCombined():
         from MuonCombinedConfig.MuonCombinedConfigFlags import createMuonCombinedConfigFlags
@@ -376,16 +408,12 @@ def createTriggerRecoFlags():
         muonflags.MuonCombined.doMuGirl = False
         muonflags.MuonCombined.doCombinedFit = True
         return muonflags
-
-    flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)
-    flags.addFlagsCategory('Trigger.Offline', __muon, prefix=True)
     flags.addFlagsCategory('Trigger.Offline.Combined', __muonCombined, prefix=True)
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags
         return createTrigTauConfigFlags()
     flags.addFlagsCategory('Trigger.Offline.Tau', __tau )
-    #TODO come back and use systematically the same
 
     def __idTrk():
         from TrigInDetConfig.TrigTrackingPassFlags import createTrigTrackingPassFlags
@@ -402,6 +430,18 @@ def createTriggerRecoFlags():
         return createTrigCaloConfigFlags()
     flags.addFlagsCategory( 'Trigger.Calo', __trigCalo )
 
+    def __muctpiFlags():
+        from TrigT1MuctpiPhase1.TrigMUCTPIConfigFlags import createTrigMUCTPIConfigFlags
+        return createTrigMUCTPIConfigFlags()
+    flags.addFlagsCategory('Trigger.MUCTPI', __muctpiFlags )
+
+    def __fpgatracksimFlags():
+        """Additional function delays import"""
+        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createFPGATrackSimConfigFlags
+        return createFPGATrackSimConfigFlags()
+    flags.addFlagsCategory("Trigger.FPGATrackSim", __fpgatracksimFlags, prefix=True )
+
+
     # NB: Longer term it may be worth moving these into a PF set of config flags, but right now the only ones that exist do not seem to be used in the HLT.
     # When we use component accumulators for this in the HLT maybe we should revisit this
     # PFO-muon removal option for the full-scan hadronic signatures.
@@ -409,46 +449,41 @@ def createTriggerRecoFlags():
     #   "None": Do no PFO-muon removal
     #   "Calo": Use the calo-tagging tools from the muon slice
     #   "Iso" : Use the mainly isolation-based selections based on the MET associator package
-    flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo")
+    flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo",
+                  help='PFO-muon removal option: None, Calo, Iso)')
 
-    # the minimum pT threshold to use for the muon removal
-    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)
+    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV,
+                  help='minimum pT threshold to use for the muon removal')
 
-    # enables precision tracking in jet super-ROI before fast b-tagging (EMTopo jets)
-    flags.addFlag('Trigger.Jet.doJetSuperPrecisionTracking', False)
+    flags.addFlag('Trigger.Jet.doJetSuperPrecisionTracking', False,
+                  help='enable precision tracking in jet super-ROI before fast b-tagging (EMTopo jets)')
 
-    # enable fast b-tagging for all fully calibrated HLT PFlow jets
-    flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
+    flags.addFlag("Trigger.Jet.fastbtagPFlow", True,
+                  help='enable fast b-tagging for all fully calibrated HLT PFlow jets')
 
-    # enables or disables the addition the super ROI PV to the b-tagging
-    flags.addFlag("Trigger.Jet.fastbtagVertex", True)
+    flags.addFlag("Trigger.Jet.fastbtagVertex", True,
+                  help='enable the addition of the super ROI PV to the b-tagging')
 
-    # enables or disables the addition of VR track jet reconstruction sequence
-    flags.addFlag("Trigger.Jet.doVRJets", False)
+    flags.addFlag("Trigger.Jet.doVRJets", False,
+                  help='enable the addition of the VR track jet reconstruction sequence')
 
-    # chooses calibration config file for HLT small-R jets (mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py)
+    # chooses calibration config file for HLT small-R jets
+    # mapping in: Reconstruction/Jet/JetCalibTools/python/JetCalibToolsConfig.py
     # All calib keys for HLT jets have to start with "Trig" otherwise the JetCalibTool config fails!
-    flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigR22Prerec")
-    flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2")
+    flags.addFlag("Trigger.Jet.pflowCalibKey", "TrigR22Prerec",
+                  help='calibration config file for HLT small-R jets')
 
-    # Change tolerance in STEP Propagator
-    flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2)
+    flags.addFlag("Trigger.Jet.emtopoCalibKey", "TrigLS2",
+                  help='calibration config file for HLT small-R jets')
+
+    flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2,
+                  help='tolerance in STEP Propagator')
     
-    flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom") # offline default is "Nonprompt_All_MaxWeight"
-
-    def __fpgatracksimFlags():
-        """Additional function delays import"""
-        from FPGATrackSimConfTools.FPGATrackSimConfigFlags import createFPGATrackSimConfigFlags
-        return createFPGATrackSimConfigFlags() 
-    flags.addFlagsCategory("Trigger.FPGATrackSim", __fpgatracksimFlags, prefix=True )
-
-    # L1 MUCTPI trigger flags
-    def __muctpiFlags():
-        from TrigT1MuctpiPhase1.TrigMUCTPIConfigFlags import createTrigMUCTPIConfigFlags
-        return createTrigMUCTPIConfigFlags()
-    flags.addFlagsCategory('Trigger.MUCTPI', __muctpiFlags )
+    flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom", # offline default is "Nonprompt_All_MaxWeight"
+                  help='working point for the TVA algorithm')
 
     return flags
+
 
 if __name__ == "__main__":
     import unittest
