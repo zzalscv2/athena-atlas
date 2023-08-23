@@ -13,11 +13,16 @@
 
 #include <AthenaKernel/CLASS_DEF.h>
 #include <AthenaKernel/CondCont.h>
+#include "CLHEP/Units/SystemOfUnits.h"
+#include <iosfwd>
 
 
 class PixelModuleData 
 {
   public:
+    // stream insertion
+    friend std::ostream & operator << (std::ostream &out, const PixelModuleData &c);
+    friend std::istream & operator >> (std::istream &in, PixelModuleData &c);
     // Digitization parameters
     void setBunchSpace(double bunchSpace);
     double getBunchSpace() const;
@@ -200,102 +205,123 @@ class PixelModuleData
 
 
   private:
-    double m_bunchSpace{};
+    //default settings are from PixelConfigCondAlg.h
+    double m_bunchSpace{25.0};
+    //
+    std::vector<int> m_barrelNumberOfBCID{1,1,1,1};
+    std::vector<int> m_endcapNumberOfBCID{1,1,1};
+    std::vector<int> m_DBMNumberOfBCID{1,1,1};
+    //
+    std::vector<double> m_barrelTimeOffset{5.0,5.0,5.0,5.0};
+    std::vector<double> m_endcapTimeOffset{5.0,5.0,5.0};
+    std::vector<double> m_DBMTimeOffset{5.0,5.0,5.0};
+    //
+    std::vector<double> m_barrelTimeJitter{0.0,0.0,0.0,0.0};
+    std::vector<double> m_endcapTimeJitter{0.0,0.0,0.0};
+    std::vector<double> m_DBMTimeJitter{0.0,0.0,0.0};
+    //defaults are for RUN2 2015/2016
+    std::vector<int> m_defaultBarrelAnalogThreshold{-1,-1,-1,-1};
+    std::vector<int> m_defaultEndcapAnalogThreshold{-1,-1,-1};
+    std::vector<int> m_defaultDBMAnalogThreshold{-1,-1,-1};
+    //
+    std::vector<int> m_defaultBarrelAnalogThresholdSigma{45,35,30,30};
+    std::vector<int> m_defaultEndcapAnalogThresholdSigma{30,30,30};
+    std::vector<int> m_defaultDBMAnalogThresholdSigma{70,70,70};
+    //
+    std::vector<int> m_defaultBarrelAnalogThresholdNoise{130,150,160,160};
+    std::vector<int> m_defaultEndcapAnalogThresholdNoise{150,150,150};
+    std::vector<int> m_defaultDBMAnalogThresholdNoise{190,190,190};
+    //
+    std::vector<int> m_defaultBarrelInTimeThreshold{2000,5000,5000,5000};
+    std::vector<int> m_defaultEndcapInTimeThreshold{5000,5000,5000};
+    std::vector<int> m_defaultDBMInTimeThreshold{1200,1200,1200};
+    //
+    std::vector<int> m_barrelToTThreshold{-1, 5, 5, 5};
+    std::vector<int> m_endcapToTThreshold{ 5, 5, 5};
+    std::vector<int> m_DBMToTThreshold{-1,-1,-1};
+    //
+    std::vector<double> m_barrelCrossTalk{0.30,0.12,0.12,0.12}; 
+    std::vector<double> m_endcapCrossTalk{0.06,0.06,0.06}; 
+    std::vector<double> m_DBMCrossTalk{0.06,0.06,0.06};
+    //
+    std::vector<double> m_barrelThermalNoise{160.0,160.0,160.0,160.0};
+    std::vector<double> m_endcapThermalNoise{160.0,160.0,160.0};
+    std::vector<double> m_DBMThermalNoise{160.0,160.0,160.0};
+    //
+    std::vector<double> m_barrelNoiseOccupancy{5e-8,5e-8,5e-8,5e-8};
+    std::vector<double> m_endcapNoiseOccupancy{5e-8,5e-8,5e-8};
+    std::vector<double> m_DBMNoiseOccupancy{5e-8,5e-8,5e-8};
+    //
+    std::vector<double> m_barrelDisableProbability{9e-3,9e-3,9e-3,9e-3};
+    std::vector<double> m_endcapDisableProbability{9e-3,9e-3,9e-3};
+    std::vector<double> m_DBMDisableProbability{9e-3,9e-3,9e-3};
+    //
+    const  std::vector<float> m_BLayerNoiseShape{0.0, 0.0, 0.0, 0.0, 0.2204, 0.5311, 0.7493, 0.8954, 0.9980, 1.0};
+    const  std::vector<float> m_PixNoiseShape{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2418, 0.4397, 0.5858, 0.6949, 0.7737, 0.8414, 0.8959, 0.9414, 0.9828, 1.0};
+    const  std::vector<float> m_IBLNoiseShape{0.0, 0.0330, 0.0, 0.3026, 0.5019, 0.6760, 0.8412, 0.9918, 0.9918, 0.9918, 0.9918, 0.9918, 0.9918, 0.9918, 0.9918, 0.9918, 1.0};
+    std::vector<std::vector<float>> m_barrelNoiseShape{m_BLayerNoiseShape, m_PixNoiseShape ,m_PixNoiseShape} ;
+    std::vector<std::vector<float>> m_endcapNoiseShape{m_PixNoiseShape, m_PixNoiseShape, m_PixNoiseShape};
+    std::vector<std::vector<float>> m_DBMNoiseShape{m_IBLNoiseShape,m_IBLNoiseShape,m_IBLNoiseShape};
+    //
+    std::vector<int>  m_FEI3BarrelLatency{0,151,256,256};
+    std::vector<int>  m_FEI3EndcapLatency{256,256,256};
+    //
+    std::vector<bool> m_FEI3BarrelHitDuplication{false,false,false,false};
+    std::vector<bool> m_FEI3EndcapHitDuplication{false,false,false};
+    
+    std::vector<int>  m_FEI3BarrelSmallHitToT{-1,-1,-1,-1};
+    std::vector<int>  m_FEI3EndcapSmallHitToT{-1,-1,-1};
+    //
+    std::vector<int>  m_FEI3BarrelTimingSimTune{-1,2015,2015,2015};
+    std::vector<int>  m_FEI3EndcapTimingSimTune{2015,2015,2015};
+    //
+    std::vector<int>  m_FEI4BarrelHitDiscConfig{2,2,2};
+    std::vector<int>  m_FEI4EndcapHitDiscConfig{2,2,2};
 
-    std::vector<int> m_barrelNumberOfBCID;
-    std::vector<int> m_endcapNumberOfBCID;
-    std::vector<int> m_DBMNumberOfBCID;
-    std::vector<double> m_barrelTimeOffset;
-    std::vector<double> m_endcapTimeOffset;
-    std::vector<double> m_DBMTimeOffset;
-    std::vector<double> m_barrelTimeJitter;
-    std::vector<double> m_endcapTimeJitter;
-    std::vector<double> m_DBMTimeJitter;
+    float m_scaleFEI4{1.0};
+    bool m_useFEI4SpecialScalingFunction{true};
 
-    std::vector<int> m_defaultBarrelAnalogThreshold;
-    std::vector<int> m_defaultEndcapAnalogThreshold;
-    std::vector<int> m_defaultDBMAnalogThreshold;
-    std::vector<int> m_defaultBarrelAnalogThresholdSigma;
-    std::vector<int> m_defaultEndcapAnalogThresholdSigma;
-    std::vector<int> m_defaultDBMAnalogThresholdSigma;
-    std::vector<int> m_defaultBarrelAnalogThresholdNoise;
-    std::vector<int> m_defaultEndcapAnalogThresholdNoise;
-    std::vector<int> m_defaultDBMAnalogThresholdNoise;
-    std::vector<int> m_defaultBarrelInTimeThreshold;
-    std::vector<int> m_defaultEndcapInTimeThreshold;
-    std::vector<int> m_defaultDBMInTimeThreshold;
+    std::vector<double> m_FEI4ToTSigma{0.0,0.50,0.50,0.50,0.50,0.50,0.60,0.60,0.60,0.60,0.65,0.70,0.75,0.80,0.80,0.80,0.80};
 
-    std::vector<int> m_barrelToTThreshold;
-    std::vector<int> m_endcapToTThreshold;
-    std::vector<int> m_DBMToTThreshold;
-    std::vector<double> m_barrelCrossTalk; 
-    std::vector<double> m_endcapCrossTalk; 
-    std::vector<double> m_DBMCrossTalk; 
-    std::vector<double> m_barrelThermalNoise;
-    std::vector<double> m_endcapThermalNoise;
-    std::vector<double> m_DBMThermalNoise;
-    std::vector<double> m_barrelNoiseOccupancy;
-    std::vector<double> m_endcapNoiseOccupancy;
-    std::vector<double> m_DBMNoiseOccupancy;
-    std::vector<double> m_barrelDisableProbability;
-    std::vector<double> m_endcapDisableProbability;
-    std::vector<double> m_DBMDisableProbability;
+    float m_paramA{70.2f};
+    float m_paramE{-3561.25f};
+    float m_paramC{26000.0f};
+    //default should not matter, but for ITk algorithms might cause problems
+    bool m_doLinearExtrapolation{false};
 
-    std::vector<std::vector<float>> m_barrelNoiseShape;
-    std::vector<std::vector<float>> m_endcapNoiseShape;
-    std::vector<std::vector<float>> m_DBMNoiseShape;
+    std::vector<double> m_barrelLorentzAngleCorr{1.0,1.0,1.0,1.0};
+    std::vector<double> m_endcapLorentzAngleCorr{1.0,1.0,1.0};
 
-    std::vector<int>  m_FEI3BarrelLatency;
-    std::vector<int>  m_FEI3EndcapLatency;
-    std::vector<bool> m_FEI3BarrelHitDuplication;
-    std::vector<bool> m_FEI3EndcapHitDuplication;
-    std::vector<int>  m_FEI3BarrelSmallHitToT;
-    std::vector<int>  m_FEI3EndcapSmallHitToT;
-    std::vector<int>  m_FEI3BarrelTimingSimTune;
-    std::vector<int>  m_FEI3EndcapTimingSimTune;
-    std::vector<int>  m_FEI4BarrelHitDiscConfig;
-    std::vector<int>  m_FEI4EndcapHitDiscConfig;
+    float m_biasVoltage{150.f};
+    float m_temperature{-7.f};
 
-    float m_scaleFEI4{};
-    bool m_useFEI4SpecialScalingFunction{};
+    std::vector<float> m_barrelBiasVoltage{80.0,350.0,200.0,150.0};
+    std::vector<float> m_endcapBiasVoltage{150.0,150.0,150.0};
+    std::vector<float> m_DBMBiasVoltage{500.0,500.0,500.0};
 
-    std::vector<double> m_FEI4ToTSigma;
+    std::vector<double> m_fluenceLayer{0.80e14, 1.61e14, 0.71e14, 0.48e14};
+    std::vector<std::string> m_radSimFluenceMapList{"PixelDigitization/maps_IBL_PL_80V_fl0_8e14.root",
+                                    "PixelDigitization/maps_PIX_350V_fl1_61e14.root",
+                                    "PixelDigitization/maps_PIX_200V_fl0_71e14.root",
+                                    "PixelDigitization/maps_PIX_150V_fl0_48e14.root"};
 
-    float m_paramA{};
-    float m_paramE{};
-    float m_paramC{};
-    bool m_doLinearExtrapolation{};
+    std::vector<double> m_fluenceLayer3D{5.0e15};
+    std::vector<std::string> m_radSimFluenceMapList3D{"PixelDigitization/TCAD_IBL_3Dsensors_efields/phi_5e15_160V.root"};
 
-    std::vector<double> m_barrelLorentzAngleCorr;
-    std::vector<double> m_endcapLorentzAngleCorr;
+    bool        m_cablingMapToFile{false};
+    std::string m_cablingMapFileName{"PixelCabling/Pixels_Atlas_IdMapping_2016.dat"};
 
-    float m_biasVoltage{};
-    float m_temperature{};
-
-    std::vector<float> m_barrelBiasVoltage;
-    std::vector<float> m_endcapBiasVoltage;
-    std::vector<float> m_DBMBiasVoltage;
-
-    std::vector<double> m_fluenceLayer;
-    std::vector<std::string> m_radSimFluenceMapList;
-
-    std::vector<double> m_fluenceLayer3D;
-    std::vector<std::string> m_radSimFluenceMapList3D;
-
-    bool        m_cablingMapToFile{};
-    std::string m_cablingMapFileName;
-
-    int    m_distortionInputSource{};
-    int    m_distortionVersion{};
-    double m_distortionR1{};
-    double m_distortionR2{};
-    double m_distortionTwist{};
-    double m_distortionMeanR{};
-    double m_distortionRMSR{};
-    double m_distortionMeanTwist{};
-    double m_distortionRMSTwist{};
-    bool   m_distortionWriteToFile{};
-    std::string m_distortionFileName;
+    int    m_distortionInputSource{4};//database
+    int    m_distortionVersion{-1};
+    double m_distortionR1{0.1/CLHEP::meter};
+    double m_distortionR2{  0.1/CLHEP::meter};
+    double m_distortionTwist{ 0.0005};
+    double m_distortionMeanR{0.12/CLHEP::meter,};
+    double m_distortionRMSR{0.08/CLHEP::meter};
+    double m_distortionMeanTwist{-0.0005};
+    double m_distortionRMSTwist{0.0008};
+    bool   m_distortionWriteToFile{false};
+    std::string m_distortionFileName{ "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/TrackingCP/PixelDistortions/PixelDistortionsData_v2_BB.txt"};
 
 };
 
