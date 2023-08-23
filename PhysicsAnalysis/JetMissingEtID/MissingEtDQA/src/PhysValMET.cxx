@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValMET.cxx 
@@ -922,14 +922,14 @@ for(const auto& it : corrTrk_names) {
       if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Reb, jets, coreMet, metHelper, true).isFailure() ) {
     	ATH_MSG_WARNING("Failed to build jet and soft terms.");
       }
-      MissingETBase::Types::bitmask_t trksource = MissingETBase::Source::Track;
+      MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
       if((*met_Reb)["PVSoftTrk"]) trksource = (*met_Reb)["PVSoftTrk"]->source();
       if( met::buildMETSum("FinalTrk", met_Reb, trksource).isFailure() ){
     	ATH_MSG_WARNING("Building MET FinalTrk sum failed.");
       }
       MissingETBase::Types::bitmask_t clsource;
-      if (type == "AntiKt4EMTopo") clsource = MissingETBase::Source::EMTopo;
-      else clsource = MissingETBase::Source::UnknownSignal;
+      if (type == "AntiKt4EMTopo") clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::EMTopo);
+      else clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::UnknownSignal);
       
       if((*met_Reb)["SoftClus"]) clsource = (*met_Reb)["SoftClus"]->source();
       if( met::buildMETSum("FinalClus", met_Reb, clsource).isFailure() ) {

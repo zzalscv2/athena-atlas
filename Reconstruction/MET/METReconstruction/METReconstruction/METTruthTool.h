@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTruthTool.h 
@@ -76,7 +76,7 @@ namespace met{
     METTruthTool();
 
     Gaudi::Property<std::string> m_inputType{this, "InputComposition", "NonInt", "truth type"}; // NonInt, Int, IntMuons, IntOut
-    MissingETBase::Types::bitmask_t m_truth_type{};
+    MissingETBase::Source::TruthType m_truth_type{};
 
     Gaudi::Property<double> m_det_maxEta{this, "MaxEtaDet", 5., "nominal max detector eta"};
     Gaudi::Property<double> m_truthmu_minPt{this, "MinPtMu", 6e3, "nominal min muon pt"};

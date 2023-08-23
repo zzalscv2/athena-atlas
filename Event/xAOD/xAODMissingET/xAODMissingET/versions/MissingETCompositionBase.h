@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMISSINGET_VERSIONS_MISSINGETCOMPOSITIONBASE_H
@@ -14,6 +14,7 @@
 
 #include "AthContainers/ConstDataVector.h"
 #include "AthLinks/ElementLink.h"
+#include "CxxUtils/bitmask.h"
 
 #include "xAODMissingET/MissingETContainer.h"
 
@@ -69,26 +70,30 @@ namespace MissingETBase
   struct Status
   {
     /*! @brief General indicator of MET reconstruction status */
-    enum Reco { 
+    enum class Reco : Types::bitmask_t {
       Total           = 0x01000000, /*!< @brief Total MET for given composition */
       ContributedTerm = 0x02000000, /*!< @brief Contribution to total MET */
       CorrectedTerm   = 0x04000000, /*!< @brief Corrected term (replaces default contributed term */
       AlternativeTerm = 0x08000000, /*!< @brief Alternative term */
-      StandAlone      = 0x00000000  /*!< @brief Unknown/standalone reconstruction */ };
+      StandAlone      = 0x00000000, /*!< @brief Unknown/standalone reconstruction */
+      ATH_BITMASK
+    };
     /*! @brief Indicator for vertex choice in MET reconstruction */
-    enum Vertex {
+    enum class Vertex : Types::bitmask_t {
       Primary         = 0x00100000, /*!< @brief MET (term) is calculated with respect to primary vertex */
       Secondary       = 0x00200000, /*!< @brief MET (term) is calculated with respect to secondary vertex */
       Event           = 0x00010000, /*!< @brief Vertex recconstructed in event */
       Nominal         = 0x00020000, /*!< @brief Primary vertex is nominal vertex */
       Specific        = 0x00040000, /*!< @brief MET term is calculated with respect to object vertices */
-      NoVertex        = 0x00000000  /*!< @brief Unknown vertex */ };
+      NoVertex        = 0x00000000, /*!< @brief Unknown vertex */
+      ATH_BITMASK
+    };
     /*! @brief Indicator for correction
      *
      *  This is mainly applied for the MET SoftTerm and MET from hard jets, which may be subjected to a pile-up filter. These indicators are not meant to tag
      *  the fact that a contributing object has corrected kinematics.       
      */
-    enum Correction {
+    enum class Correction : Types::bitmask_t {
       Corrected       = 0x00001000, /*!< @brief Indicator for corrected MET */
       Pileup          = 0x00001100, /*!< @brief MET term is pile-up corrected*/
       PileupCalo      = 0x00001110, /*!< @brief Calorimeter signal based pile-up correction */ 
@@ -96,15 +101,17 @@ namespace MissingETBase
       PileupSTVF      = 0x00001121, /*!< @brief STVF correction is applied */
       PileupJetVertex = 0x00001122, /*!< @brief JVF based filter is applied */
       PileupJetArea   = 0x00001140, /*!< @brief Jet area based pileup correction */
-      NotCorrected    = 0x00000000  /*!< @brief No MET specific correction applied to term */ };
+      NotCorrected    = 0x00000000,  /*!< @brief No MET specific correction applied to term */
+      ATH_BITMASK
+    };
 
     /*! @name Bit pattern for overall contribution indicator */
     /*!@{*/
-    static const Types::bitmask_t clearedStatusTag   = StandAlone      | NoVertex | NotCorrected;     /*!< @brief General cleared term tag */
-    static const Types::bitmask_t generalSummedTag   = Total           | NoVertex | NotCorrected;     /*!< @brief General summed MET tag */
-    static const Types::bitmask_t generalContribTag  = StandAlone      | NoVertex | NotCorrected;     /*!< @brief General contribution tag */
-    static const Types::bitmask_t generalHardTermTag = ContributedTerm | Specific | Pileup;           /*!< @brief General hard term contribution tag */
-    static const Types::bitmask_t generalSoftTermTag = ContributedTerm | NoVertex | NotCorrected;     /*!< @brief General soft term contribution tag */
+    static const Types::bitmask_t clearedStatusTag   = Reco::StandAlone      | Vertex::NoVertex | Correction::NotCorrected;     /*!< @brief General cleared term tag */
+    static const Types::bitmask_t generalSummedTag   = Reco::Total           | Vertex::NoVertex | Correction::NotCorrected;     /*!< @brief General summed MET tag */
+    static const Types::bitmask_t generalContribTag  = Reco::StandAlone      | Vertex::NoVertex | Correction::NotCorrected;     /*!< @brief General contribution tag */
+    static const Types::bitmask_t generalHardTermTag = Reco::ContributedTerm | Vertex::Specific | Correction::Pileup;           /*!< @brief General hard term contribution tag */
+    static const Types::bitmask_t generalSoftTermTag = Reco::ContributedTerm | Vertex::NoVertex | Correction::NotCorrected;     /*!< @brief General soft term contribution tag */
     static Types::bitmask_t clearedStatus()       { return clearedStatusTag; }                        /*!< @brief Cleared term tag accessor */
     static Types::bitmask_t summedTerm()          { return generalSummedTag; }                        /*!< @brief General summed term tag accessor */
     static Types::bitmask_t contributedTerm()     { return generalContribTag; }                       /*!< @brief General contribution tag accesssor */
@@ -114,19 +121,20 @@ namespace MissingETBase
 
     struct Tags 
     {
-      static Types::bitmask_t setPattern(Types::bitmask_t rec,Types::bitmask_t vtx,Types::bitmask_t cor) { return ( rec | vtx ) | cor; }
+      static Types::bitmask_t setPattern(Reco rec, Vertex vtx, Correction cor) { return ( rec | vtx ) | cor; }
 
-      static Types::bitmask_t total(Vertex vtx=Nominal,Correction cor=NotCorrected)              { return setPattern(Total,vtx,cor); }
-      static Types::bitmask_t contributedTerm(Vertex vtx=Nominal,Correction cor=NotCorrected)    { return setPattern(ContributedTerm,vtx,cor); }
-      static Types::bitmask_t correctedTerm(Vertex vtx=Nominal,Correction cor=Corrected) { return setPattern(CorrectedTerm,vtx,cor); }
-      static Types::bitmask_t alternativeTerm(Vertex vtx=Nominal,Correction cor=NotCorrected)     { return setPattern(AlternativeTerm,vtx,cor); }
+      static Types::bitmask_t total(Vertex vtx=Vertex::Nominal,Correction cor=Correction::NotCorrected)              { return setPattern(Reco::Total,vtx,cor); }
+      static Types::bitmask_t contributedTerm(Vertex vtx=Vertex::Nominal,Correction cor=Correction::NotCorrected)    { return setPattern(Reco::ContributedTerm,vtx,cor); }
+      static Types::bitmask_t correctedTerm(Vertex vtx=Vertex::Nominal,Correction cor=Correction::Corrected) { return setPattern(Reco::CorrectedTerm,vtx,cor); }
+      static Types::bitmask_t alternativeTerm(Vertex vtx=Vertex::Nominal,Correction cor=Correction::NotCorrected)     { return setPattern(Reco::AlternativeTerm,vtx,cor); }
 
-      static bool hasPattern(Types::bitmask_t sw,Types::bitmask_t pat) { return ( sw & pat ) == pat; }
+      template<class T>
+      static bool hasPattern(Types::bitmask_t sw, T pat) { return ( sw & pat ) == static_cast<Types::bitmask_t>(pat); }
 
-      static bool isTotal(Types::bitmask_t sw)           { return hasPattern(sw,Total); }
-      static bool isContributedTerm(Types::bitmask_t sw) { return hasPattern(sw,ContributedTerm); }
-      static bool isAlternativeTerm(Types::bitmask_t sw) { return hasPattern(sw,AlternativeTerm); }
-      static bool isStandAlone(Types::bitmask_t sw)      { return hasPattern(sw,StandAlone); }
+      static bool isTotal(Types::bitmask_t sw)           { return hasPattern(sw,Reco::Total); }
+      static bool isContributedTerm(Types::bitmask_t sw) { return hasPattern(sw,Reco::ContributedTerm); }
+      static bool isAlternativeTerm(Types::bitmask_t sw) { return hasPattern(sw,Reco::AlternativeTerm); }
+      static bool isStandAlone(Types::bitmask_t sw)      { return hasPattern(sw,Reco::StandAlone); }
     }; // struct MissingETBase::Status::Tags
   }; // struct MissingETBase::Status
 

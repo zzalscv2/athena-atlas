@@ -212,7 +212,7 @@ namespace met {
       }
       signalList.reserve(trackParCont->size());
 
-      MissingETBase::Types::bitmask_t source = MissingETBase::Source::SoftEvent | MissingETBase::Source::idTrack();
+      MissingETBase::Types::bitmask_t source = MissingETBase::Source::Type::SoftEvent | MissingETBase::Source::idTrack();
       metTerm->setSource(source);
 
       MissingETComponentMap::iterator iter = MissingETComposition::find(metMap,metTerm);

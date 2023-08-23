@@ -202,11 +202,11 @@ namespace met {
   {
     // Add MET terms to the container
     // Always do this in order that the terms exist even if the method fails
-    MissingET* metCoreAllTruth = new MissingET(0.,0.,0.,"SoftTruthAllCore",MissingETBase::Source::softEvent() | MissingETBase::Source::truthInt() | MissingETBase::Source::Calo);
+    MissingET* metCoreAllTruth = new MissingET(0.,0.,0.,"SoftTruthAllCore",MissingETBase::Source::softEvent() | MissingETBase::Source::truthInt() | MissingETBase::Source::Category::Calo);
     metCont->push_back(metCoreAllTruth);
-    MissingET* metCoreChargedTruth = new MissingET(0.,0.,0.,"SoftTruthChargedCore",MissingETBase::Source::softEvent() | MissingETBase::Source::truthInt() | MissingETBase::Source::ID);
+    MissingET* metCoreChargedTruth = new MissingET(0.,0.,0.,"SoftTruthChargedCore",MissingETBase::Source::softEvent() | MissingETBase::Source::truthInt() | MissingETBase::Source::Category::ID);
     metCont->push_back(metCoreChargedTruth);
-    MissingET* metCoreChargedCentralTruth = new MissingET(0.,0.,0.,"SoftTruthChargedCentralCore",MissingETBase::Source::softEvent() | MissingETBase::Source::truthInt(MissingETBase::Source::Central) | MissingETBase::Source::ID);
+    MissingET* metCoreChargedCentralTruth = new MissingET(0.,0.,0.,"SoftTruthChargedCentralCore",MissingETBase::Source::softEvent() | MissingETBase::Source::truthInt(MissingETBase::Source::Region::Central) | MissingETBase::Source::Category::ID);
     metCont->push_back(metCoreChargedCentralTruth);
 
     ATH_MSG_VERBOSE("Added core terms.");

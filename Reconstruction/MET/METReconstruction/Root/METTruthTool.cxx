@@ -67,13 +67,13 @@ namespace met {
     ATH_MSG_VERBOSE ("Initializing " << name() << "...");
 
     if(m_inputType=="NonInt") {
-      m_truth_type = MissingETBase::Source::truthNonInt();
+      m_truth_type = MissingETBase::Source::TruthType::NonInt;
     } else if(m_inputType=="Int") {
-      m_truth_type = MissingETBase::Source::truthInt();
+      m_truth_type = MissingETBase::Source::TruthType::Int;
     } else if(m_inputType=="IntOut") {
-      m_truth_type = MissingETBase::Source::truthIntOut();
+      m_truth_type = MissingETBase::Source::TruthType::IntOut;
     } else if(m_inputType=="IntMuons") {
-      m_truth_type = MissingETBase::Source::truthMuons();
+      m_truth_type = MissingETBase::Source::TruthType::TruthMuons;
     } else {
       ATH_MSG_FATAL("Invalid input type provided");
       return StatusCode::FAILURE;
@@ -100,15 +100,15 @@ namespace met {
     const xAOD::TruthParticle* truth = static_cast<const xAOD::TruthParticle*>(object);
 
     if(truth->pt()<1e-9) return false; // reject particles with no pt
-    ATH_MSG_VERBOSE("My truth type: " << m_truth_type);
+    ATH_MSG_VERBOSE("My truth type: " << static_cast<MissingETBase::Types::bitmask_t>(m_truth_type));
     switch(m_truth_type) {
-    case MissingETBase::Source::NonInt:
+    case MissingETBase::Source::TruthType::NonInt:
       return accept_nonint(truth);
-    case MissingETBase::Source::Int:
+    case MissingETBase::Source::TruthType::Int:
       return accept_int(truth);
-    case MissingETBase::Source::IntOut:
+    case MissingETBase::Source::TruthType::IntOut:
       return accept_intout(truth);
-    case MissingETBase::Source::TruthMuons:
+    case MissingETBase::Source::TruthType::TruthMuons:
       return accept_intmuons(truth);
     default:
       return false;
@@ -174,7 +174,7 @@ namespace met {
 
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
 
-    metTerm->setSource(m_truth_type);
+    metTerm->setSource(static_cast<MissingETBase::Types::bitmask_t>(m_truth_type));
 
     // Retrieve the truth container
     SG::ReadHandle<xAOD::TruthEventContainer> truthEvents(m_truthEventKey);
@@ -208,7 +208,7 @@ namespace met {
     MissingETBase::Types::weight_t minusWeight(-1.,-1.,1.);
     vector<const IParticle*> dummyList;
     for(const auto *iPart : signalList) {
-      if(m_truth_type==MissingETBase::Source::NonInt) {
+      if(m_truth_type==MissingETBase::Source::TruthType::NonInt) {
 	// flip direction for nonint
 	this->addToMET(iPart,dummyList,metTerm,metMap,minusWeight);
       } else {

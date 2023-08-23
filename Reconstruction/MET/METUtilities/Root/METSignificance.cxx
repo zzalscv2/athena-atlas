@@ -245,7 +245,7 @@ namespace met {
       // Soft term collection
       if(MissingETBase::Source::isSoftTerm(met->source())){
 
-        if(!MissingETBase::Source::hasPattern(met->source(),MissingETBase::Source::Track)) continue;
+        if(!MissingETBase::Source::hasPattern(met->source(),MissingETBase::Source::Signal::Track)) continue;
         ATH_MSG_VERBOSE("Soft Name: " << met->name());
         // make sure the container name matches
         if(met->name()!=softTermName || nIterSoft>0){

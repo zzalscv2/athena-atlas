@@ -83,7 +83,7 @@ namespace met {
     ATH_MSG_DEBUG ("In execute: " << name() << "...");
 
     // Create the container and push back the new MET terms 
-    MissingETBase::Types::bitmask_t source = MissingETBase::Source::Calo | MissingETBase::Source::clusterEM();
+    MissingETBase::Types::bitmask_t source = MissingETBase::Source::Category::Calo | MissingETBase::Source::clusterEM();
     MissingETContainer* metCont = static_cast<MissingETContainer*>( metTerm_EMB->container() );
 
     // Push region terms to the container
@@ -107,7 +107,7 @@ namespace met {
         }
         metCont->push_back( new MissingET(0.,0.,0.) ); 
         metCont->at(REGIONS_TOTAL+i)->setName( termName );      
-        metCont->at(REGIONS_TOTAL+i)->setSource( MissingETBase::Source::Calo );      
+        metCont->at(REGIONS_TOTAL+i)->setSource( static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Category::Calo) );
       }
     }
       
