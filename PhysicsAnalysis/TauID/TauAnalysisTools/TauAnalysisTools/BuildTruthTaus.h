@@ -90,6 +90,11 @@ private:
     TLorentzVector m_vTruthVisTLV;
     TLorentzVector m_vTruthVisTLVCharged;
     TLorentzVector m_vTruthVisTLVNeutral;
+
+    // truth vertices
+    TVector3 m_vDecayVertex;
+    TVector3 m_vProdVertex; 
+
   };
 
   // Execute at each event
@@ -131,7 +136,7 @@ private:
   bool m_bWriteVisibleChargedFourMomentum;
   bool m_bWriteVisibleNeutralFourMomentum;
   bool m_bWriteDecayModeVector;
-
+  bool m_bWriteVertices;
 
 private:
 
