@@ -27,12 +27,12 @@ inline void Track::setFitQuality(std::unique_ptr<FitQuality> quality) {
   m_fitQuality = std::move(quality);
 }
 
-inline const DataVector<const TrackStateOnSurface>*
+inline const Trk::TrackStates*
 Track::trackStateOnSurfaces() const {
   return m_trackStateVector.get();
 }
 
-inline DataVector<const TrackStateOnSurface>* Track::trackStateOnSurfaces() {
+inline Trk::TrackStates* Track::trackStateOnSurfaces() {
   return m_trackStateVector.get();
 }
 

@@ -417,7 +417,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
 
   for (auto trk : trackColl) {
     // Do conversions!
-    const DataVector<const Trk::TrackStateOnSurface> *trackStates =
+    const Trk::TrackStates *trackStates =
         trk->trackStateOnSurfaces();
     if (!trackStates) {
       ATH_MSG_WARNING("No track states on surfaces found for this track.");

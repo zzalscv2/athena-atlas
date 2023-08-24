@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@ namespace Trk
 {
   class Track;
   class TrackStateOnSurface;
-
+  using TrackStates = DataVector<const Trk::TrackStateOnSurface>;
   static const InterfaceID IID_ITrackHoleSearchTool("Trk::ITrackHoleSearchTool", 1, 0);
 
   /** @brief interface for searching, counting and adding holes on
@@ -49,7 +49,7 @@ namespace Trk
 	The parthyp argument is relevant for the extrapolation steps in the hole search.
 	Attention: This is a factory, ownership of the return vector is passed to the calling method.
     */
-    virtual const DataVector<const Trk::TrackStateOnSurface>* getHolesOnTrack(
+    virtual const Trk::TrackStates* getHolesOnTrack(
 									      const Trk::Track& track, 
 									      const Trk::ParticleHypothesis partHyp = Trk::pion) const = 0;
 

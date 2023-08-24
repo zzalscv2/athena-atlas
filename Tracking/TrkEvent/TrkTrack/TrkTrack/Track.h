@@ -27,7 +27,7 @@ class TrackCnv_p4;
 class TrackCnv_p12;
 
 namespace Trk {
-using TrackStates = DataVector<const TrackStateOnSurface>;
+using TrackStates = DataVector<const Trk::TrackStateOnSurface>;
 /**
  * @brief The ATLAS Track class.
  *
@@ -103,7 +103,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   /**
    * returns true if the track has non-nullptr
    * fitQuality  and
-   * non-empty DataVector<const TrackStateOnSurface>
+   * non-empty Trk::TrackStates
    */
   bool isValid() const;
 
@@ -124,18 +124,18 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
    * return a pointer to a const DataVector of const TrackStateOnSurfaces.
    * const overload
    */
-  const DataVector<const TrackStateOnSurface>* trackStateOnSurfaces() const;
+  const Trk::TrackStates* trackStateOnSurfaces() const;
   /**
    * return a pointer to a DataVector of const TrackStateOnSurfaces.
    * non-const overload
    */
-  DataVector<const TrackStateOnSurface>* trackStateOnSurfaces();
+  Trk::TrackStates* trackStateOnSurfaces();
 
   /**
    * Set the TrackStateOnSurfaces.
    */
   void setTrackStateOnSurfaces(
-      std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> input);
+      std::unique_ptr<Trk::TrackStates> input);
 
   /**
    * Returns a const ref to info of a const tracks.
@@ -225,8 +225,7 @@ class Track : public Trk::ObjectCounter<Trk::Track> {
   friend class ::TrackCnv_p4;
   friend class ::TrackCnv_p12;
 
-  typedef DataVector<const TrackStateOnSurface>::const_iterator TSoS_iterator;
-  typedef DataVector<const TrackParameters>::const_iterator TP_iterator;
+  typedef Trk::TrackStates::const_iterator TSoS_iterator;
 
   /**
    * Find perigee in the vector of track parameters.

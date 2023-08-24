@@ -27,7 +27,7 @@
     <field name = "m_multiComponentState" transient="true" />
     <field name = "m_mixtureModeQoverP" transient="true" />
   </class>
-  <class name="TrkMultiComponentStateOnSurfaceDV" />  
+  <class name="MultiComponentStateOnSurfaceDV" />  
 
   <class name="Trk::LinkToTrack"/>
   

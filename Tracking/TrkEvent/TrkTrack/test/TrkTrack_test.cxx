@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <iostream>
@@ -20,7 +20,7 @@ int main ATLAS_NOT_THREAD_SAFE() {
   std::cout << "--> Creating Track from TSOS" << '\n';
 
   // Track from TSOS
-  auto tsvec1 = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+  auto tsvec1 = std::make_unique<Trk::TrackStates>(
       SG::OWN_ELEMENTS);
   auto* TSOS = new Trk::TrackStateOnSurface(fq, nullptr, nullptr, nullptr);
   tsvec1->push_back(TSOS);
@@ -31,7 +31,7 @@ int main ATLAS_NOT_THREAD_SAFE() {
   // Track from MTSOS
   std::cout << " --> Creating Track from MTSOS" << '\n';
   auto tsvec2 =
-      std::make_unique<DataVector<const Trk::MultiComponentStateOnSurface>>(
+      std::make_unique<MultiComponentStateOnSurfaceDV>(
           SG::OWN_ELEMENTS);
   auto* MTSOS = new Trk::MultiComponentStateOnSurface(fq, nullptr, nullptr, {},
                                                       nullptr, 0);
@@ -42,8 +42,8 @@ int main ATLAS_NOT_THREAD_SAFE() {
   std::cout << track2.isValid() << '\n';
   std::cout << "Check DV casting" << '\n';
   std::cout << track2.trackStateOnSurfaces()->at(0)->variety() << '\n';
-  const TrkMultiComponentStateOnSurfaceDV* multiStates =
-      dynamic_cast<TrkMultiComponentStateOnSurfaceDV*>(
+  const MultiComponentStateOnSurfaceDV* multiStates =
+      dynamic_cast<MultiComponentStateOnSurfaceDV*>(
           track2.trackStateOnSurfaces());
   std::cout << (multiStates->at(0) != nullptr) << '\n';
 

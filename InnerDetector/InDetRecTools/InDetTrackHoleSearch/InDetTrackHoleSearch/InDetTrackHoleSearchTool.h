@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ namespace InDet
 	  The parthyp argument is relevant for the extrapolation steps in the hole search.
 	  Attention: This is a factory, ownership of the return vector is passed to the calling method.
       */
-      virtual const DataVector<const Trk::TrackStateOnSurface>* getHolesOnTrack(const Trk::Track& track, 
+      virtual const Trk::TrackStates* getHolesOnTrack(const Trk::Track& track, 
 										const Trk::ParticleHypothesis partHyp = Trk::pion) const ;
       
       /** Input : track, parthyp

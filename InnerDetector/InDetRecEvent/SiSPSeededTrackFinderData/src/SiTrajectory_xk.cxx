@@ -39,7 +39,7 @@ void InDet::SiTrajectory_xk::erase(int n)
 // Trajectory conversion to TrackStateOnSurface  
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
@@ -52,11 +52,11 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface(int cosmic)
 // Trajectory conversion to TrackStateOnSurface  with old direction
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
 {
 
-  auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto dtsos = Trk::TrackStates();
 
   bool multi = m_tools->multiTrack();
   if (m_nclusters <= m_tools->clustersmin() ||
@@ -99,11 +99,11 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurface()
 // Trajectory conversion to TrackStateOnSurface  with new direction
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
 {
 
-  auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto dtsos = Trk::TrackStates();
 
   bool multi = m_tools->multiTrack();
   if (pTfirst() < m_tools->pTmin()) multi = false;
@@ -135,7 +135,7 @@ InDet::SiTrajectory_xk::convertToTrackStateOnSurfaceWithNewDirection()
 // Trajectory conversion to simple TrackStateOnSurface   
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(int cosmic, const EventContext& ctx)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
@@ -148,10 +148,10 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(int cosmic, const Eve
 // Trajectory conversion to simple TrackStateOnSurface  with old direction
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface> 
+Trk::TrackStates 
 InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(const EventContext& ctx)
 {
-  auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto dtsos = Trk::TrackStates();
 
   int i = m_firstElement;
   
@@ -194,10 +194,10 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(const EventContext& c
 // Trajectory conversion to simple TrackStateOnSurface with new direction
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceWithNewDirection()
 {
-  auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto dtsos = Trk::TrackStates();
 
   int i = m_lastElement;
 
@@ -227,7 +227,7 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceWithNewDirection()
 // Only for Disappearing Track Trigger that uses also failed tracks
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int cosmic, const EventContext& ctx)
 {
   if (!cosmic ||  m_elements[m_elementsMap[m_firstElement]].parametersUB().parameters()[2] < 0.) {
@@ -241,10 +241,10 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int
 // Only for Disappearing Track Trigger that uses also failed tracks
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface> 
+Trk::TrackStates 
 InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(const EventContext& ctx)
 {
-  auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
+  auto dtsos = Trk::TrackStates();
 
   int i = m_firstElement;
   
@@ -2197,7 +2197,7 @@ double InDet::SiTrajectory_xk::qualityOptimization()
 // Trajectory conversion to TrackStateOnSurface for next tracks
 ///////////////////////////////////////////////////////////////////
 
-DataVector<const Trk::TrackStateOnSurface>
+Trk::TrackStates
 InDet::SiTrajectory_xk::convertToNextTrackStateOnSurface()
 {
   int i=0;
@@ -2206,10 +2206,10 @@ InDet::SiTrajectory_xk::convertToNextTrackStateOnSurface()
     m_itos[i] = 0;
   }
   if (i==m_ntos) {
-    return DataVector<const Trk::TrackStateOnSurface>();
+    return Trk::TrackStates();
   }
 
-   auto dtsos = DataVector<const Trk::TrackStateOnSurface>();
+   auto dtsos = Trk::TrackStates();
 
   for (i=0; i!=m_ntos; ++i) {
 

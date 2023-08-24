@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_CNV_P4_H
@@ -39,14 +39,14 @@ public:
   }
 
  protected:
-  typedef T_AthenaPoolTPPtrVectorCnv<DataVector<const Trk::TrackStateOnSurface>,
+  typedef T_AthenaPoolTPPtrVectorCnv<Trk::TrackStates,
                                      std::vector<TPObjRef>,
                                      TrackStateOnSurfaceCnv_p3>
       TrackStateOSVectorCnv_p3;
 
   TrackStateOSVectorCnv_p3 m_trackStateVectorCnv;
 
-  typedef T_AthenaPoolTPPtrVectorCnv<TrkMultiComponentStateOnSurfaceDV,
+  typedef T_AthenaPoolTPPtrVectorCnv<MultiComponentStateOnSurfaceDV,
                                      std::vector<TPObjRef>,
                                      MultiComponentStateOnSurfaceCnv_p1>
       MultiStateOSVectorCnv_p1;

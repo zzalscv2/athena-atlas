@@ -85,12 +85,12 @@ void InDet::InDetTrackHoleSearchTool::countHoles(const Trk::Track& track,
   }
 
 //============================================================================================
-const DataVector<const Trk::TrackStateOnSurface>* InDet::InDetTrackHoleSearchTool::getHolesOnTrack(const Trk::Track& track,
+const Trk::TrackStates* InDet::InDetTrackHoleSearchTool::getHolesOnTrack(const Trk::Track& track,
                                                                                                    const Trk::ParticleHypothesis partHyp) const {
   std::vector<const Trk::TrackStateOnSurface*>* listOfHoles = new std::vector<const Trk::TrackStateOnSurface*>;
   searchForHoles(track, nullptr, listOfHoles,partHyp);
 
-  DataVector<const Trk::TrackStateOnSurface>* output = new DataVector<const Trk::TrackStateOnSurface>;
+  Trk::TrackStates* output = new Trk::TrackStates;
   for (const auto *listOfHole : *listOfHoles)
     output->push_back(listOfHole);
 
@@ -332,7 +332,7 @@ bool InDet::InDetTrackHoleSearchTool::getMapOfHits(const EventContext& ctx,
   bool                hasID = false;
 
   // 2nd iteration to find predictions
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator iterTSOS = track.trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator iterTSOS = track.trackStateOnSurfaces()->begin();
 
   // for cosmics: go to the first si mearsurement on track
   // for cosmics: add perigee as intermediate state, as the extrapolator does nothing if the starting layer and destination layer are the same
@@ -709,7 +709,7 @@ const Trk::TrackStateOnSurface* InDet::InDetTrackHoleSearchTool::createHoleTSOS(
 // ====================================================================================================================
 const Trk::Track*  InDet::InDetTrackHoleSearchTool::addHolesToTrack(const Trk::Track& oldTrack,
                                                                     std::vector<const Trk::TrackStateOnSurface*>* listOfHoles) const {
-  auto trackTSOS = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto trackTSOS = std::make_unique<Trk::TrackStates>();
 
   // get states from track
   for (const auto *it : *oldTrack.trackStateOnSurfaces()) {

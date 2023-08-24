@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTStrawEfficiency.cxx
@@ -189,7 +189,7 @@ StatusCode TRTStrawEfficiency::execute() {
 		}
 
 		// get TrackStateOnSurfaces
-		const DataVector<const Trk::TrackStateOnSurface>* track_states = track->trackStateOnSurfaces();
+		const Trk::TrackStates* track_states = track->trackStateOnSurfaces();
 		if (track_states) {
 			ATH_MSG_DEBUG( "  This track has " << track_states->size() << " track states on surface." );
 		} else {
@@ -236,7 +236,7 @@ StatusCode TRTStrawEfficiency::execute() {
 			}
 		}
 
-		const DataVector<const Trk::TrackStateOnSurface>* holes = m_trt_hole_finder->getHolesOnTrack(*track);
+		const Trk::TrackStates* holes = m_trt_hole_finder->getHolesOnTrack(*track);
 		if (!holes) {
 			ATH_MSG_WARNING( "  TRTTrackHoleSearchTool returned null results." );
 			continue;

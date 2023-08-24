@@ -88,7 +88,7 @@ namespace ActsTrk
     {
       const auto lastMeasurementIndex = track.tipIndex();
 
-      auto finalTrajectory = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+      auto finalTrajectory = std::make_unique<Trk::TrackStates>();
       // initialise the number of dead Pixel and Acts strip
       int numberOfDeadPixel = 0;
       int numberOfDeadSCT = 0;
