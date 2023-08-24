@@ -168,6 +168,7 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
                  'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
                 {
                     'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    **{f'GN120230331_p{x}': f'fastGN120230331_p{x}' for x in 'cub'}
                 },   
                 ]
             ]
