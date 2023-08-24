@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests on ISF_ServicesConfig.py
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 if __name__ == '__main__':
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -14,10 +14,10 @@ if __name__ == '__main__':
   #import config flags
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags = initConfigFlags()
   flags.Input.Files = defaultTestFiles.EVNT
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   flags.Sim.WorldRRange = 15000
   flags.Sim.WorldZRange = 27000 #change defaults?
