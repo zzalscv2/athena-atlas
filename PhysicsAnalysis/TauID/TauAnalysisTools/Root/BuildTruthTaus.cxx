@@ -39,6 +39,7 @@ BuildTruthTaus::BuildTruthTaus( const std::string& name )
   declareProperty( "WriteVisibleChargedFourMomentum", m_bWriteVisibleChargedFourMomentum = false);
   declareProperty( "WriteVisibleNeutralFourMomentum", m_bWriteVisibleNeutralFourMomentum = false);
   declareProperty( "WriteDecayModeVector", m_bWriteDecayModeVector = true);
+  declareProperty( "WriteVertices", m_bWriteVertices = true); 
 }
 
 //______________________________________________________________________________
@@ -351,6 +352,27 @@ StatusCode BuildTruthTaus::examineTruthTau(const xAOD::TruthParticle& xTruthPart
     decDecayModeVector(xTruthParticle) = truthInfo.m_vDecayMode;
   }
 
+  if ( m_bWriteVertices )
+  {
+    // tau decay vertex
+    static const SG::AuxElement::Decorator<double> decDecayVertexX("decay_vertex_x");
+    static const SG::AuxElement::Decorator<double> decDecayVertexY("decay_vertex_y");
+    static const SG::AuxElement::Decorator<double> decDecayVertexZ("decay_vertex_z"); 
+   
+    decDecayVertexX(xTruthParticle) = truthInfo.m_vDecayVertex.X();
+    decDecayVertexY(xTruthParticle) = truthInfo.m_vDecayVertex.Y();
+    decDecayVertexZ(xTruthParticle) = truthInfo.m_vDecayVertex.Z();
+ 
+    // tau production vertex
+    static const SG::AuxElement::Decorator<double> decProdVertexX("prod_vertex_x");
+    static const SG::AuxElement::Decorator<double> decProdVertexY("prod_vertex_y");
+    static const SG::AuxElement::Decorator<double> decProdVertexZ("prod_vertex_z");
+    
+    decProdVertexX(xTruthParticle) = truthInfo.m_vProdVertex.X();
+    decProdVertexY(xTruthParticle) = truthInfo.m_vProdVertex.Y();
+    decProdVertexZ(xTruthParticle) = truthInfo.m_vProdVertex.Z();
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -362,6 +384,15 @@ StatusCode BuildTruthTaus::examineTruthTauDecay (const xAOD::TruthParticle& xTru
   const xAOD::TruthVertex* xDecayVertex = xTruthParticle.decayVtx();
   if (!xDecayVertex)
     return StatusCode::SUCCESS;
+
+  truthInfo.m_vDecayVertex.SetXYZ(xDecayVertex->x(),xDecayVertex->y(),xDecayVertex->z());
+
+  if (xTruthParticle.hasProdVtx() ) {
+     const xAOD::TruthVertex * xProdVertex = xTruthParticle.prodVtx();
+     truthInfo.m_vProdVertex.SetXYZ(xProdVertex->x(),xProdVertex->y(),xProdVertex->z());
+  } else {
+     truthInfo.m_vProdVertex.SetXYZ(-1234,-1234,-1234);
+  }  
 
   for ( size_t iOutgoingParticle = 0; iOutgoingParticle < xDecayVertex->nOutgoingParticles(); ++iOutgoingParticle )
   {
