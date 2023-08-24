@@ -65,7 +65,7 @@ namespace CP
   {
     /// \brief The standard constructor
 public:
-    SystObjectUnioniserAlg<T,C>(const std::string &name, ISvcLocator *pSvcLocator);
+    SystObjectUnioniserAlg(const std::string &name, ISvcLocator *pSvcLocator);
 
     /// \brief Initialisation method, for setting up tools and other persistent
     /// configs
