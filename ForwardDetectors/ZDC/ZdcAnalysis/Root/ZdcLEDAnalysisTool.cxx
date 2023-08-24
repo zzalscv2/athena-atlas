@@ -253,7 +253,7 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsi
   unsigned int ADCSum = 0;
   int maxADCsub = 0;
   unsigned int maxSample = 0;
-  float avgTime = 0;
+  float avgTime = 0.f;
 
   if (startSample > m_numSamples || endSample > m_numSamples) {
     ATH_MSG_ERROR("Start or end sample number greater than number of samples");
@@ -264,7 +264,7 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsi
   
   for (unsigned int sample = startSample; sample <= endSample; sample++) {
     int FADCsub = data[sample] - preFADC;
-    float time = (sample + 0.5)*m_deltaTSample;
+    float time = (sample + 0.5f)*m_deltaTSample;
     ADCSum += FADCsub;
     if (FADCsub > maxADCsub) {
       maxADCsub = FADCsub;
@@ -273,8 +273,11 @@ ZDCLEDModuleResults ZdcLEDAnalysisTool::processModuleData(const std::vector<unsi
 
     avgTime += time*FADCsub;
   }
-
-  avgTime /= ADCSum;
+  if (ADCSum!=0){
+    avgTime /= ADCSum;
+  } else {
+    avgTime = 0.f; //used as default in the ZDCLEDModuleResults c'tor
+  }
 
   return ZDCLEDModuleResults(preFADC, ADCSum*gainScale, maxADCsub*gainScale, maxSample, avgTime);
 }

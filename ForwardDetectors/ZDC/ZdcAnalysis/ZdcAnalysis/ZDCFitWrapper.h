@@ -20,17 +20,17 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitWrapper
 private:
    std::shared_ptr<TF1> m_wrapperTF1;
 
-  float m_tmin;
-  float m_tmax;
+  float m_tmin{};
+  float m_tmax{};
 
-  float m_ampMin;
-  float m_ampMax;
+  float m_ampMin{};
+  float m_ampMax{};
 
-  float m_t0Min;
-  float m_t0Max;
+  float m_t0Min{};
+  float m_t0Max{};
 
-  bool  m_adjTLimitsEvent;
-  float m_tminAdjust;
+  bool  m_adjTLimitsEvent{};
+  float m_tminAdjust{};
 
 public:
  ZDCFitWrapper(const std::shared_ptr<TF1>& wrapperTF1) : m_wrapperTF1(wrapperTF1),
