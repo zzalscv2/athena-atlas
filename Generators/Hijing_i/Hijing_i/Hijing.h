@@ -81,6 +81,7 @@ protected:
   bool m_rand{false};
   bool m_wide{false}; // True allows particles with x,y distributions
   bool m_prand{false}; //BPK mirror event randomly
+  bool m_keepAllDecayVertices{true};
 
   // Limit settings
   double m_partonStoreMinPt{5.0};
