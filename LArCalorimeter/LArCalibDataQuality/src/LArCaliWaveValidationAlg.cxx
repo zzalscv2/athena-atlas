@@ -18,12 +18,6 @@ LArCaliWaveValidationAlg::LArCaliWaveValidationAlg(const std::string& name, ISvc
 		  "CaloCellGroup of llowed deviation of the amplitude (average over one FEB, in permills)");
   declareProperty("CaliWaveFWHMToleranceFEB",m_fwhmToleranceFEBInit,
 		  "CaloCellGroup of allowed deviation of the FWHM (average over one FEB, in permills)");
-
-  m_ampGlobalRef=0.;
-  m_fwhmGlobalRef=0.;
-  m_ampGlobalVal=0.;
-  m_fwhmGlobalVal=0.;
-  m_nEntriesGlobal=0;
 }
 
 
@@ -191,10 +185,7 @@ bool LArCaliWaveValidationAlg::febSummary(const LArOnOffIdMapping *cabling, cons
   msg().precision(3);
   msg().setf(std::ios::fixed,std::ios::floatfield); 
 
-  std::vector<DataPerFEB>::iterator it=m_vDataPerFEB.begin();
-  std::vector<DataPerFEB>::iterator it_e=m_vDataPerFEB.end();
-  for (;it!=it_e;++it) {
-    DataPerFEB& dataPerFeb=*it;
+  for (DataPerFEB& dataPerFeb : m_vDataPerFEB) {
     dataPerFeb.ampVal/=dataPerFeb.nEntries;
     dataPerFeb.ampRef/=dataPerFeb.nEntries;
     dataPerFeb.fwhmVal/=dataPerFeb.nEntries;

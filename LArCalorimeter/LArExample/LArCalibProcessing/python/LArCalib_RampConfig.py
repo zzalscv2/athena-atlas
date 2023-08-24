@@ -152,8 +152,6 @@ def LArRampCfg(flags):
   
        theRampValidationAlg.MsgLevelForDeviations=WARNING
        theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
-       theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
-       theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
 
        theRampValidationAlg.BadChanKey =  bcKey
 

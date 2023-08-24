@@ -680,8 +680,6 @@ if ( doLArCalibDataQuality  ) :
    theRampValidationAlg.ReferenceKey="LArRampRef"
    theRampValidationAlg.MsgLevelForDeviations=INFO
    theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
-   theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
-   theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
    topSequence+=theRampValidationAlg
 
    ## second instance of the validation tool to detect "bad" channel 

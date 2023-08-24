@@ -161,10 +161,8 @@ bool LArPedestalValidationAlg::febSummary(const LArOnOffIdMapping *cabling, cons
   msg().precision(3);
   msg().setf(std::ios::fixed,std::ios::floatfield); 
 
-  std::vector<DataPerFEB>::iterator it=m_vDataPerFEB.begin();
-  std::vector<DataPerFEB>::iterator it_e=m_vDataPerFEB.end();
-  for (;it!=it_e;++it) {
-    DataPerFEB& dataPerFeb=*it;
+  
+  for (DataPerFEB& dataPerFeb : m_vDataPerFEB) {
     dataPerFeb.pedVal/=dataPerFeb.nEntries;
     dataPerFeb.pedRef/=dataPerFeb.nEntries;
     dataPerFeb.rmsVal/=dataPerFeb.nEntries;
