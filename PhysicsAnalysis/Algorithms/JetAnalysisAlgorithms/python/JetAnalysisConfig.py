@@ -6,7 +6,6 @@ from __future__ import print_function
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 import re
-import ROOT
 
 
 class PreJetAnalysisConfig (ConfigBlock) :
@@ -19,6 +18,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         self.addOption ('postfix', '', type=str)
         self.addOption ('runOriginalObjectLink', False, type=bool)
         self.addOption ('runGhostMuonAssociation', None, type=bool)
+        self.addOption ('runTruthJetTagging', None, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -52,6 +52,16 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.jets = config.readName (self.containerName)
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
+
+        # NB: I'm assuming that the truth tagging is done in PHYSLITE, if not this will
+        # need to change
+        if self.runTruthJetTagging or (
+            self.runTruthJetTagging is None
+            and config.dataType() != 'data'
+        ):
+            alg = config.createAlgorithm('CP::JetTruthTagAlg', f'JetTruthTagAlg{postfix}')
+            alg.jets = config.readName(self.containerName)
+            alg.truthJets = "AntiKt4TruthDressedWZJets"
 
         # Set up shallow copy if needed and not yet done
         if config.wantCopy (self.containerName) :
@@ -180,10 +190,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if self.runFJvtUpdate :
             alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+postfix )
             config.addPrivateTool( 'modifierTool', 'JetForwardJvtTool')
-            alg.modifierTool.OutputDec = "passFJVT" #Output decoration
+            alg.modifierTool.OutputDec = "passFJVT_internal" #Output decoration
+            alg.modifierTool.FJVTName = "fJVT"
             # fJVT WPs depend on the MET WP
             # see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EtmissRecommendationsRel21p2#fJVT_and_MET
-            alg.modifierTool.UseTightOP = 1 # 1 = Tight, 0 = Loose
             alg.modifierTool.EtaThresh = 2.5 # Eta dividing central from forward jets
             alg.modifierTool.ForwardMaxPt = 120.0e3 #Max Pt to define fwdJets for JVT
             alg.RenounceOutputs = True
@@ -194,58 +204,53 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         # Set up the jet efficiency scale factor calculation algorithm
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
-            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
-            config.addPrivateTool( 'efficiencyTool', 'CP::JetJvtEfficiency' )
-            if self.jetInput == 'EMPFlow':
-                alg.efficiencyTool.MaxPtForJvt = 60e3
-            else:
-                alg.efficiencyTool.MaxPtForJvt = 120e3
-            alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.NNJvt
-            alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
-            alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
-            alg.selection = 'jvt_selection,as_char'
-            alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
-            # Disable scale factor decorations if running on data
-            # We still want to run the JVT selection
-            if not self.runJvtEfficiency or config.dataType() == 'data':
-                alg.scaleFactorDecoration = ''
-                alg.truthJetCollection = ''
-            alg.outOfValidity = 2
-            alg.outOfValidityDeco = 'no_jvt'
-            alg.skipBadEfficiency = 0
-            alg.jets = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
-            if alg.scaleFactorDecoration != '' :
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'JvtSelectionAlg{postfix}')
+            config.addPrivateTool('selectionTool', 'CP::NNJvtSelectionTool')
+            alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.WorkingPoint = "FixedEffPt"
+            alg.selectionTool.MaxPtForJvt = 60e3 if self.jetInput == "EMPFlow" else 120e3
+            alg.selectionDecoration = "jvt_selection,as_char"
+            alg.particles = config.readName(self.containerName)
+
+            if self.runJvtEfficiency and config.dataType() != "data":
+                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
+                config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
+                alg.efficiencyTool.JetContainer = config.readName(self.containerName)
+                alg.efficiencyTool.MaxPtForJvt = 60e3 if self.jetInput == "EMPFlow" else 120e3
+                alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
+                alg.selection = 'jvt_selection,as_char'
+                alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
+                alg.outOfValidity = 2
+                alg.outOfValidityDeco = 'no_jvt'
+                alg.skipBadEfficiency = False
+                alg.jets = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, '')
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
             config.addSelection (self.containerName, 'jvt', 'jvt_selection',bits=1, preselection=False)
 
         if self.runFJvtSelection :
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', f'FJvtSelectionAlg{postfix}')
+            config.addPrivateTool('selectionTool', 'CP::FJvtSelectionTool')
+            alg.selectionTool.JetContainer = config.readName(self.containerName)
+            alg.selectionTool.WorkingPoint = "Loose"
+            alg.selectionDecoration = "fjvt_selection,as_char"
+            alg.particles = config.readName(self.containerName)
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
-            config.addPrivateTool( 'efficiencyTool', 'CP::JetJvtEfficiency' )
-            if self.jetInput == 'EMPFlow':
-                alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root'
-            else:
-                alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root'
-            alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.fJvt
-            alg.efficiencyTool.WorkingPoint = 'Loose'
-            alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
-            alg.dofJVT = True
-            alg.fJVTStatus = 'passFJVT,as_char'
-            alg.selection = 'fjvt_selection,as_char'
-            alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
-            # Disable scale factor decorations if running on data
-            # We still want to run the JVT selection
-            if not self.runFJvtEfficiency or config.dataType() == 'data':
-                alg.scaleFactorDecoration = ''
-                alg.truthJetCollection = ''
-            alg.outOfValidity = 2
-            alg.outOfValidityDeco = 'no_fjvt'
-            alg.skipBadEfficiency = 0
-            alg.jets = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, 'jvt', 'fjvt_selection',bits=1, preselection=False)
 
-
+            if self.runFJvtEfficiency and self.config.dataType() != "data":
+                alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
+                config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
+                alg.efficiencyTool.JetContainer = config.readName(self.containerName)
+                alg.efficiencyTool.WorkingPoint = 'Loose'
+                alg.selection = 'fjvt_selection,as_char'
+                alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
+                alg.outOfValidity = 2
+                alg.outOfValidityDeco = 'no_fjvt'
+                alg.skipBadEfficiency = False
+                alg.jets = config.readName (self.containerName)
+                alg.preselection = config.getPreselection (self.containerName, '')
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
 
 
 

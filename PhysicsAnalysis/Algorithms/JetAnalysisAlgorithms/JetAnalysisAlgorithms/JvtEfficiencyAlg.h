@@ -9,10 +9,10 @@
 #define JET_ANALYSIS_ALGORITHMS__JVT_EFFICIENCY_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <JetAnalysisInterfaces/IJetJvtEfficiency.h>
+#include <AsgTools/PropertyWrapper.h>
+#include <JetAnalysisInterfaces/IJvtEfficiencyTool.h>
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
-#include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
@@ -26,8 +26,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    JvtEfficiencyAlg (const std::string& name, 
-                         ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
 
   public:
@@ -40,7 +39,8 @@ namespace CP
 
     /// \brief the efficiency tool
   private:
-    ToolHandle<CP::IJetJvtEfficiency> m_efficiencyTool;
+    ToolHandle<CP::IJvtEfficiencyTool> m_efficiencyTool{
+      this, "efficiencyTool", "", "the JVT efficiency tool to apply"};
 
     /// \brief the systematics list we run
   private:
@@ -56,26 +56,10 @@ namespace CP
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the truth jet collection to use
-  private:
-    std::string m_truthJetsName;
-
-    /// \brief differenciate between JVT and fJVT
-  private:
-    bool  m_dofJVT = false;
-
-    /// \brief the decoration for the fJVT selection
-  private:
-    std::string m_fJVTStatus;
-
-    /// \brief the accessor for \ref m_fJVTStatus
-  private:
-    std::unique_ptr<ISelectionReadAccessor> m_fJVTStatusAccessor;
-
     /// \brief the decoration for the JVT selection
   private:
-    SysWriteSelectionHandle m_selectionHandle {
-      this, "selection", "", "the decoration for the JVT selection"};
+    SysReadSelectionHandle m_selectionHandle {
+      this, "selection", "", "the input decoration for the JVT selection"};
 
     /// \brief the decoration for the JVT scale factor
   private:
@@ -84,7 +68,11 @@ namespace CP
 
     /// \brief whether to skip efficiency calculation if the selection failed
   private:
-    bool m_skipBadEfficiency = false;
+    Gaudi::Property<bool> m_skipBadEfficiency{
+      this,
+      "skipBadEfficiency",
+      false,
+      "Whether to skip calculating scale factors for objects that failed the JVT selection"};
 
     /// \brief the helper for OutOfValidity results
   private:
