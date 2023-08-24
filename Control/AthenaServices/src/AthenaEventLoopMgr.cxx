@@ -12,6 +12,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 #include <iostream>
 #include <fstream> /* ofstream */
 #include <iomanip>
+#include <stdexcept>
 
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -562,144 +563,9 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
         ++m_nev;
         return sc;
     }
-
-  const EventInfo* pEvent(nullptr);
-  std::unique_ptr<EventInfo> pEventPtr;
-  unsigned int conditionsRun = EventIDBase::UNDEFNUM;
-  EventID eventID;
-  bool consume_modifier_stream = false; // FIXME/CHECK: was true inside TP converter and checks for active storegate
-  if ( m_evtSelCtxt )
-  { // Deal with the case when an EventSelector is provided
-
-    // First try to build a legacy EventInfo object from the TAG information
-    // Read the attribute list
-    const AthenaAttributeList* pAttrList = eventStore()->tryConstRetrieve<AthenaAttributeList>("Input");
-    if ( pAttrList != nullptr && pAttrList->size() > 6 ) { // Try making EventID-only EventInfo object from in-file TAG
-      try {
-        unsigned int runNumber = (*pAttrList)["RunNumber"].data<unsigned int>();
-        unsigned long long eventNumber = (*pAttrList)["EventNumber"].data<unsigned long long>();
-        unsigned int eventTime = (*pAttrList)["EventTime"].data<unsigned int>();
-        unsigned int eventTimeNS = (*pAttrList)["EventTimeNanoSec"].data<unsigned int>();
-        unsigned int lumiBlock = (*pAttrList)["LumiBlockN"].data<unsigned int>();
-        unsigned int bunchId = (*pAttrList)["BunchId"].data<unsigned int>();
-
-        ATH_MSG_DEBUG ( "use TAG with runNumber=" << runNumber );
-        consume_modifier_stream = true;
-        // an option to override primary eventNumber with the secondary one in case of DoubleEventSelector
-        if ( m_useSecondaryEventNumber ) {
-            unsigned long long eventNumberSecondary{};
-            if ( !(pAttrList->exists("hasSecondaryInput") && (*pAttrList)["hasSecondaryInput"].data<bool>()) ) {
-                ATH_MSG_FATAL ( "Secondary EventNumber requested, but secondary input does not exist!" );
-                return StatusCode::FAILURE;
-            }
-            if ( pAttrList->exists("EventNumber_secondary") ) {
-                eventNumberSecondary = (*pAttrList)["EventNumber_secondary"].data<unsigned long long>();
-            }
-            else {
-                // try legacy EventInfo if secondary input did not have attribute list
-                // primary input should not have this EventInfo type
-                const EventInfo* pEventSecondary = eventStore()->tryConstRetrieve<EventInfo>();
-                if (pEventSecondary) {
-                    eventNumberSecondary = pEventSecondary->event_ID()->event_number();
-                }
-                else {
-                    ATH_MSG_FATAL ( "Secondary EventNumber requested, but it does not exist!" );
-                    return StatusCode::FAILURE;
-                }
-            }
-            if (eventNumberSecondary != 0) {
-                bool doEvtHeartbeat(m_eventPrintoutInterval.value() > 0 && 
-                                    0 == (m_nev % m_eventPrintoutInterval.value()));
-                if (doEvtHeartbeat) {
-                    ATH_MSG_INFO ( "  ===>>>  using secondary event #" << eventNumberSecondary << " instead of #" << eventNumber << "  <<<===" );
-                }
-                eventNumber = eventNumberSecondary;
-            }
-        }
-    
-        pEventPtr = std::make_unique<EventInfo>
-          (new EventID(runNumber, eventNumber, eventTime, eventTimeNS, lumiBlock, bunchId), (EventType*)nullptr);
-        pEvent = pEventPtr.get();
-
-        if (!m_evtIdModSvc.isSet() && pAttrList->exists ("ConditionsRun")) {
-          conditionsRun = (*pAttrList)["ConditionsRun"].data<unsigned int>();
-        }
-        else {
-          conditionsRun = runNumber;
-        }
-        
-	eventID=*(pEvent->event_ID());
-      } catch (...) {
-      }
-/* FIXME: PvG, not currently written
-      if ( pEvent != 0 && pAttrList->size() > 7 ) { // Try adding EventType information
-        try {
-          float eventWeight = (*pAttrList)["EventWeight"].data<float>();
-          const EventType* pType = new EventType();
-          pEvent->setEventType(pType);
-          pEvent->event_type()->set_mc_event_weight(eventWeight);
-        } catch (...) {
-          pEvent->setEventType(0);
-        }
-      }
-*/
-    } else if (m_requireInputAttributeList) {
-      ATH_MSG_FATAL ( "Valid input attribute list required but not present!" );
-      return StatusCode::FAILURE;
-    }
-    // In the case that there is no TAG information
-    if ( pEvent == nullptr ) {
-      // Secondly try to retrieve a legacy EventInfo object from the input file
-      // m_nevt - 1 because it's incremented early
-      EventInfoCnvParams::eventIndex = m_nevt - 1;
-      pEvent=eventStore()->tryConstRetrieve<EventInfo>();
-      if (pEvent) {
-	eventID=(*pEvent->event_ID());
-      }
-      else {
-        // Finally try to retrieve an xAOD::EventInfo object from the
-        // input file and build a legacy EventInfo object from that.
-	const xAOD::EventInfo* xAODEvent=
-	  eventStore()->tryConstRetrieve<xAOD::EventInfo>(); 
-	if (xAODEvent==nullptr) {
-	  ATH_MSG_ERROR ( "Failed to get EventID from input. Tried old-style and xAOD::EventInfo" );
-	  return StatusCode::FAILURE;
-	}
-        ATH_MSG_DEBUG ( "use xAOD::EventInfo with runNumber=" << xAODEvent->runNumber() );
-	// Record the old-style object for those clients that still need it
-	pEventPtr = std::make_unique<EventInfo>(new EventID(eventIDFromxAOD(xAODEvent)), new EventType(eventTypeFromxAOD(xAODEvent)));
-	pEvent = pEventPtr.get();
-	eventID=*(pEvent->event_ID());
-	StatusCode sc = eventStore()->record(std::move(pEventPtr),"");
-	if( !sc.isSuccess() )  {
-	  ATH_MSG_ERROR ( "Error declaring event data object" );
-	  return StatusCode::FAILURE;
-	}
-      }
-    }
-  }
-  else 
-  {
-    // No EventSelector is provided, so with no iterator it's up to us
-    // to create an EventInfo
-    pEventPtr = std::make_unique<EventInfo>
-      (new EventID(1,m_nevt,0), new EventType());
-    pEvent = pEventPtr.get();
-    pEventPtr->event_ID()->set_lumi_block( m_nevt );
-    eventID=*(pEvent->event_ID());
-    StatusCode sc = eventStore()->record(std::move(pEventPtr),"");
-    if( !sc.isSuccess() )  {
-      ATH_MSG_ERROR ( "Error declaring event data object" );
-      return (StatusCode::FAILURE);
-    } 
-  }
-
-  if (installEventContext (ctx, eventID, conditionsRun, consume_modifier_stream).isFailure())
-  {
-    ATH_MSG_ERROR ( "Error installing event context object" );
-    return (StatusCode::FAILURE);
-  }
-
+  
+  CHECK( installEventContext(ctx) );
+  
   /// Fire begin-Run incident if new run:
   if (m_firstRun || (m_currentRun != ctx.eventID().run_number()) ) {
     // Fire EndRun incident unless this is the first run
@@ -733,7 +599,7 @@ StatusCode AthenaEventLoopMgr::executeEvent(EventContext&& ctx)
   }
 
 
-  uint64_t evtNumber = eventID.event_number();
+  uint64_t evtNumber = ctx.eventID().event_number();
   bool doEvtHeartbeat(m_eventPrintoutInterval.value() > 0 &&
                               ( (!m_intervalInSeconds && 0 == (m_nev % m_eventPrintoutInterval.value())) ||
                                 (m_intervalInSeconds && (time(nullptr)-m_lastTime)>m_intervalInSeconds) ));
@@ -1101,32 +967,14 @@ void AthenaEventLoopMgr::handle(const Incident& inc)
     return;
   }
 
-  EventID eventID;
-  const EventInfo* pEvent=eventStore()->tryConstRetrieve<EventInfo>(); //Try getting EventInfo from old-style object
-  if (pEvent) {
-    eventID=*(pEvent->event_ID());
-  }
-  else { //Try getting xAOD::EventInfo object
-    const xAOD::EventInfo* xAODEvent=eventStore()->tryConstRetrieve<xAOD::EventInfo>();
-    if (xAODEvent==nullptr) {
-      ATH_MSG_ERROR ( "Failed to get EventID from input. Tried old-style and xAOD::EventInfo" );
-      return;
-    }
-    eventID=eventIDFromxAOD(xAODEvent);
-  }
-
-
   // Need to make sure we have a valid EventContext in place before
   // doing anything that could fire incidents.
-  unsigned int conditionsRun = eventID.run_number();
   EventContext ctx;
-  bool consume_modifier_stream = false;
   // In the case of the BeginRun incident, we just want to take the
   // next IoV from the list in the EvtIdModifierSvc, but leave it to
   // be used for the next executeEvent call. TODO CHECK
-  if (installEventContext (ctx, eventID, conditionsRun, consume_modifier_stream).isFailure()) {
-    ATH_MSG_ERROR ( "Unable to install EventContext object" );
-    return;
+  if( installEventContext(ctx).isFailure() ) {
+    throw std::runtime_error( "Error installing event context object" );
   }
 
   m_incidentSvc->fireIncident(Incident(name(),IncidentType::BeginRun,ctx));
@@ -1199,17 +1047,141 @@ AthenaEventLoopMgr::eventStore() const {
 //=========================================================================
 // Fill in our EventContext object and make it current.
 //=========================================================================
-StatusCode AthenaEventLoopMgr::installEventContext (EventContext& ctx,
-                                                    const EventID& pEvent,
-                                                    unsigned int conditionsRun,
-                                                    bool consume_modifier_stream)
-{
-  ctx.setEventID(pEvent);
+StatusCode AthenaEventLoopMgr::installEventContext(EventContext& ctx) {
+  // first get EventInfo and conditionsRun
+  std::unique_ptr<EventInfo> eventInfo;
+  EventID eventID;
+  unsigned int conditionsRun = EventIDBase::UNDEFNUM;
+  bool consume_modifier_stream = false;  // FIXME/CHECK: was true inside TP converter and checks for active storegate
+  
+  if (m_evtSelCtxt) {  // Deal with the case when an EventSelector is provided
+    // First try to build a legacy EventInfo object from the TAG information
+    // Read the attribute list
+    const AthenaAttributeList* pAttrList =
+        eventStore()->tryConstRetrieve<AthenaAttributeList>("Input");
+    if (pAttrList != nullptr && pAttrList->size() > 6) {  
+      // Try making EventID-only EventInfo object from in-file TAG
+      try {
+        unsigned int runNumber = (*pAttrList)["RunNumber"].data<unsigned int>();
+        unsigned long long eventNumber = (*pAttrList)["EventNumber"].data<unsigned long long>();
+        unsigned int eventTime = (*pAttrList)["EventTime"].data<unsigned int>();
+        unsigned int eventTimeNS = (*pAttrList)["EventTimeNanoSec"].data<unsigned int>();
+        unsigned int lumiBlock = (*pAttrList)["LumiBlockN"].data<unsigned int>();
+        unsigned int bunchId = (*pAttrList)["BunchId"].data<unsigned int>();
+
+        ATH_MSG_DEBUG("use TAG with runNumber=" << runNumber);
+        consume_modifier_stream = true;
+        // an option to override primary eventNumber with the secondary one in
+        // case of DoubleEventSelector
+        if (m_useSecondaryEventNumber) {
+          unsigned long long eventNumberSecondary{};
+          if (!(pAttrList->exists("hasSecondaryInput") &&
+                (*pAttrList)["hasSecondaryInput"].data<bool>())) {
+            ATH_MSG_FATAL("Secondary EventNumber requested, but secondary input does not exist!");
+            return StatusCode::FAILURE;
+          }
+          if (pAttrList->exists("EventNumber_secondary")) {
+            eventNumberSecondary = (*pAttrList)["EventNumber_secondary"].data<unsigned long long>();
+          } else {
+            // try legacy EventInfo if secondary input did not have attribute
+            // list primary input should not have this EventInfo type
+            const EventInfo* pEventSecondary = eventStore()->tryConstRetrieve<EventInfo>();
+            if (pEventSecondary) {
+              eventNumberSecondary = pEventSecondary->event_ID()->event_number();
+            } else {
+              ATH_MSG_FATAL("Secondary EventNumber requested, but it does not exist!");
+              return StatusCode::FAILURE;
+            }
+          }
+          if (eventNumberSecondary != 0) {
+            bool doEvtHeartbeat(m_eventPrintoutInterval.value() > 0 &&
+                                0 == (m_nev % m_eventPrintoutInterval.value()));
+            if (doEvtHeartbeat) {
+              ATH_MSG_INFO("  ===>>>  using secondary event #"
+                           << eventNumberSecondary << " instead of #"
+                           << eventNumber << "  <<<===");
+            }
+            eventNumber = eventNumberSecondary;
+          }
+        }
+
+        eventInfo = std::make_unique<EventInfo>(
+            new EventID(runNumber, eventNumber, eventTime, eventTimeNS, lumiBlock, bunchId),
+            (EventType*)nullptr);
+        eventID = *(eventInfo->event_ID());
+
+        if (!m_evtIdModSvc.isSet() && pAttrList->exists("ConditionsRun")) {
+          conditionsRun = (*pAttrList)["ConditionsRun"].data<unsigned int>();
+        } else {
+          conditionsRun = runNumber;
+        }
+
+      } catch (...) {
+      }
+      /* FIXME: PvG, not currently written
+      if( pEvent != 0 && pAttrList->size() > 7 ) {
+        // Try adding EventType information
+        try { 
+           float eventWeight = (*pAttrList)["EventWeight"].data<float>(); 
+           const EventType* pType = new EventType(); pEvent->setEventType(pType);
+           pEvent->event_type()->set_mc_event_weight(eventWeight);
+        } catch (...) {
+           pEvent->setEventType(0);
+        }
+      }
+      */
+    } else if (m_requireInputAttributeList) {
+      ATH_MSG_FATAL("Valid input attribute list required but not present!");
+      return StatusCode::FAILURE;
+    }
+    // In the case that there is no TAG information
+    if( !eventInfo ) {
+      // Secondly try to retrieve a legacy EventInfo object from the input file
+      // m_nevt - 1 because it's incremented early
+      EventInfoCnvParams::eventIndex = m_nevt - 1;
+      const EventInfo* pei = eventStore()->tryConstRetrieve<EventInfo>();
+      if( pei ) {
+        eventID = *(pei->event_ID());
+      } else {
+        // Finally try to retrieve an xAOD::EventInfo object from the
+        // input file and build a legacy EventInfo object from that.
+        const xAOD::EventInfo* xAODEvent = eventStore()->tryConstRetrieve<xAOD::EventInfo>();
+        if (xAODEvent == nullptr) {
+          ATH_MSG_ERROR("Failed to get EventID from input. Tried old-style and xAOD::EventInfo");
+          return StatusCode::FAILURE;
+        }
+        ATH_MSG_DEBUG("use xAOD::EventInfo with runNumber=" << xAODEvent->runNumber());
+        // Record the old-style object for those clients that still need it
+        eventInfo = std::make_unique<EventInfo>(
+            new EventID(eventIDFromxAOD(xAODEvent)),
+            new EventType(eventTypeFromxAOD(xAODEvent)));
+        eventID = *(eventInfo->event_ID());
+        StatusCode sc = eventStore()->record(std::move(eventInfo), "");
+        if (!sc.isSuccess()) {
+          ATH_MSG_ERROR("Error declaring event data object");
+          return StatusCode::FAILURE;
+        }
+      }
+    }
+  } else {
+    // No EventSelector is provided, so with no iterator it's up to us
+    // to create an EventInfo
+    eventInfo = std::make_unique<EventInfo>(new EventID(1, m_nevt, 0), new EventType());
+    eventInfo->event_ID()->set_lumi_block(m_nevt);
+    eventID = *(eventInfo->event_ID());
+    StatusCode sc = eventStore()->record(std::move(eventInfo), "");
+    if (!sc.isSuccess()) {
+      ATH_MSG_ERROR("Error declaring event data object");
+      return (StatusCode::FAILURE);
+    }
+  }
+
+  ctx.setEventID( eventID );
   ctx.set(m_nev,0);
   Atlas::setExtendedEventContext(ctx,
                                  Atlas::ExtendedEventContext( eventStore()->hiveProxyDict(),
                                                               conditionsRun) );
-  modifyEventContext(ctx,pEvent,consume_modifier_stream);
+  modifyEventContext(ctx, eventID, consume_modifier_stream);
   Gaudi::Hive::setCurrentContext( ctx );
 
   m_aess->reset( ctx );
