@@ -207,7 +207,6 @@ def createTrackingPassFlags():
     icf.addFlag("minPT", minPT_ranges )
     icf.addFlag("minSecondaryPt", minSecondaryPT_ranges ) #Pt cut for back tracking + segment finding for these
     icf.addFlag("minTRTonlyPt", minTRTonlyPt_ranges ) #Pt cut for TRT only
-    icf.addFlag("pT_SSScut", -1. ) # off
 
     # --- first set kinematic defaults
     icf.addFlag("maxPT", 1000.0 * Units.TeV) # off!

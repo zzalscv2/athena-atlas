@@ -29,7 +29,6 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
 
     kwargs.setdefault("pTmin",     flags.Tracking.ActiveConfig.minPT)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem)
-    kwargs.setdefault("pTminSSS",  flags.Tracking.ActiveConfig.pT_SSScut)
     kwargs.setdefault("nClustersMin", flags.Tracking.ActiveConfig.minClusters)
     kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.nHolesMax)
     kwargs.setdefault("nHolesGapMax", flags.Tracking.ActiveConfig.nHolesGapMax)

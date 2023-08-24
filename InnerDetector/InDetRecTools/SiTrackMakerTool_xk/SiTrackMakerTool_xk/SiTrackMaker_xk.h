@@ -134,7 +134,6 @@ namespace InDet{
       /// @name Properties
       //@{
       BooleanProperty m_seedsfilter{this, "UseSeedFilter", true, "Use seed filter"};
-      UnsignedIntegerProperty m_wrongcluster{this, "GoodSeedClusterCount", 10, "Max lentgh of thtrack"};
       StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid", "Mode of magnetic field"};
       StringProperty m_patternName{this, "TrackPatternRecoInfo", "SiSPSeededFinder", "Name of the pattern recognition"};
       BooleanProperty m_usePix{this, "usePixel", true, "flags to set whether to use pixel/sct cluster, irrespective of what is in event"};
@@ -154,7 +153,6 @@ namespace InDet{
       DoubleProperty m_xi2maxlink{this, "Xi2maxlink", 200., "max Xi2 for clusters"};
       DoubleProperty m_pTmin{this, "pTmin", 500., "min pT"};
       DoubleProperty m_pTminBrem{this, "pTminBrem", 1000., "min pT for Brem mode"};
-      DoubleProperty m_pTminSSS{this, "pTminSSS", 1000., "min pT for SSS filtering"};
       DoubleProperty m_distmax{this, "MaxDistanceForSCTsp", 5.};
       DoubleProperty m_xi2multitracks{this, "Xi2maxMultiTracks", 3., "max Xi2 for multi tracks"};
       IntegerProperty m_nholesmax{this, "nHolesMax", 2, "Max number holes"};

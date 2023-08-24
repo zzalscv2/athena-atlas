@@ -420,8 +420,6 @@ MsgStream& InDet::SiTrackMaker_xk::dumpconditions(MsgStream& out) const
   out<<"| Magnetic field mode     | "<<fieldmode[mode]      <<s3<<std::endl;
   out<<"| Use seeds filter ?      | "<<std::setw(12)<<m_seedsfilter
      <<"                                                  |"<<std::endl;
-  out<<"| Track length wrong cl.  | "<<std::setw(12)<<m_wrongcluster
-     <<"                                                  |"<<std::endl;
   out<<"| Min pT of track (MeV)   | "<<std::setw(12)<<std::setprecision(5)<<m_pTmin
      <<"                                                  |"<<std::endl;
   out<<"| Max Xi2 for cluster     | "<<std::setw(12)<<std::setprecision(5)<<m_xi2max
