@@ -199,11 +199,11 @@ namespace InDet {
   const Trk::TrackParameters*
   ConversionFinderUtils::getTrkParameters(const Trk::Track* track)
   {
-    const DataVector<const Trk::TrackStateOnSurface>* tsos = track->trackStateOnSurfaces();
+    const Trk::TrackStates* tsos = track->trackStateOnSurfaces();
     if(!tsos) return nullptr;
 
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator itse = tsos->end();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator itsb = tsos->begin();
+    Trk::TrackStates::const_iterator itse = tsos->end();
+    Trk::TrackStates::const_iterator itsb = tsos->begin();
 
     for(;itsb!=itse;++itsb) {
       if((*itsb)->measurementOnTrack()) {
@@ -226,10 +226,10 @@ namespace InDet {
     if(!fq) return nullptr;
 
     // output datavector of TSOS
-    auto	 ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
-    const DataVector<const Trk::TrackStateOnSurface>* tsos = track->trackStateOnSurfaces();
+    auto	 ntsos = std::make_unique<Trk::TrackStates>();
+    const Trk::TrackStates* tsos = track->trackStateOnSurfaces();
     if(!tsos) {return nullptr;}
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator its,itse = tsos->end();
+    Trk::TrackStates::const_iterator its,itse = tsos->end();
     for(its=tsos->begin();its!=itse;++its) {
 
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;

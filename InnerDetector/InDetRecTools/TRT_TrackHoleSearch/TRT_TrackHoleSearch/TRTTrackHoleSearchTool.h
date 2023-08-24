@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTTrackHoleSearchTool.h
@@ -56,7 +56,7 @@ class TRTTrackHoleSearchTool : public Trk::ITrackHoleSearchTool, public AthAlgTo
 	    The parthyp argument is relevant for the extrapolation steps in the hole search.
 	    Attention: This is a factory, ownership of the return vector is passed to the calling method.
 	*/
-	const DataVector<const Trk::TrackStateOnSurface>* getHolesOnTrack(const Trk::Track& track, 
+	const Trk::TrackStates* getHolesOnTrack(const Trk::Track& track, 
 	                                                                  const Trk::ParticleHypothesis partHyp = Trk::pion) const;
     
 	/** Input : track, parthyp
@@ -104,20 +104,20 @@ class TRTTrackHoleSearchTool : public Trk::ITrackHoleSearchTool, public AthAlgTo
 	//----------------------------------
 	int extrapolateBetweenHits(const Trk::TrackParameters* start_parameters,
 	                           const Trk::Surface& end_surf,
-	                           DataVector<const Trk::TrackStateOnSurface>* holes,
+	                           Trk::TrackStates* holes,
 	                           const Trk::ParticleHypothesis partHyp = Trk::pion) const;
 
 	void dump_bad_straw_log() const;
         
-	DataVector<const Trk::TrackStateOnSurface>::const_iterator
-		find_first_trt_hit(const DataVector<const Trk::TrackStateOnSurface>& track_states) const;
+	Trk::TrackStates::const_iterator
+		find_first_trt_hit(const Trk::TrackStates& track_states) const;
 
-	DataVector<const Trk::TrackStateOnSurface>::const_iterator
-		find_last_hit_before_trt(const DataVector<const Trk::TrackStateOnSurface>& track_states) const;
+	Trk::TrackStates::const_iterator
+		find_last_hit_before_trt(const Trk::TrackStates& track_states) const;
 
 	const Trk::Track* addHolesToTrack(
 	                                  const Trk::Track& track,
-	                                  const DataVector<const Trk::TrackStateOnSurface>* holes) const;
+	                                  const Trk::TrackStates* holes) const;
 };
 
 #endif // TRT_TrackHoleSearch_TRTTrackHoleSearchTool_h

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -11,6 +11,7 @@
 #include "TrkTrack/TrackInfo.h"
 #include "TrkEventTPCnv/TrkTrack/TrackCnv_p4.h"
 #include "TrkTrack/TrackStateOnSurface.h"
+#include "AthContainers/ConstDataVector.h"
 
 namespace {
 unsigned int
@@ -59,11 +60,11 @@ void TrackCnv_p4::persToTrans( const Trk::Track_p4 *persObj,
   }
 
   if (isMulti) {
-    std::unique_ptr<DataVector<const Trk::MultiComponentStateOnSurface>> sink(
+    std::unique_ptr<MultiComponentStateOnSurfaceDV> sink(
         m_multiStateVectorCnv.createTransient(&persObj->m_trackState, log));
     transObj->m_trackStateVector = std::move(sink);
   } else {
-    std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(
+    std::unique_ptr<Trk::TrackStates> sink(
         m_trackStateVectorCnv.createTransient(&persObj->m_trackState, log));
     transObj->m_trackStateVector = std::move(sink);
   }
@@ -116,38 +117,35 @@ TrackCnv_p4::transToPers(const Trk::Track* transObj, Trk::Track_p4* persObj, Msg
     if (n_elms != transObj->m_trackStateVector->size()) { //We need to persistify less TSOS
       if (!isMulti) {
         // Track std TSOS
-        DataVector<const Trk::TrackStateOnSurface> tsosDV(SG::VIEW_ELEMENTS);
+        ConstDataVector<Trk::TrackStates> tsosDV(SG::VIEW_ELEMENTS);
         tsosDV.reserve(n_elms);
         for (const Trk::TrackStateOnSurface* tsos : *(transObj->m_trackStateVector)) {
           if (keepTSOS(tsos)) {
             tsosDV.push_back(tsos);
           }
         }
-        m_trackStateVectorCnv.transToPers(&tsosDV, &persObj->m_trackState, log);
+        m_trackStateVectorCnv.transToPers(tsosDV.asDataVector(), &persObj->m_trackState, log);
       } else {
         // Track with Multi TSOS
-        TrkMultiComponentStateOnSurfaceDV multiDV(SG::VIEW_ELEMENTS);
+        ConstDataVector<MultiComponentStateOnSurfaceDV> multiDV(SG::VIEW_ELEMENTS);
         multiDV.reserve(n_elms);
         for (const Trk::TrackStateOnSurface* tsos : *(transObj->m_trackStateVector)) {
           if (keepTSOS(tsos)) {
             multiDV.push_back(static_cast<const Trk::MultiComponentStateOnSurface*>(tsos));
           }
         }
-        m_multiStateVectorCnv.transToPers(&multiDV, &persObj->m_trackState, log);
+        m_multiStateVectorCnv.transToPers(multiDV.asDataVector(), &persObj->m_trackState, log);
       }
     } else { // We need to persistify all TSOS
       if (!isMulti) {
         //Track with std TSOS
         m_trackStateVectorCnv.transToPers(transObj->m_trackStateVector.get(), &persObj->m_trackState, log);
       } else {
-        // Multi TSOS so we need to still "convert"
-        TrkMultiComponentStateOnSurfaceDV multiDV(SG::VIEW_ELEMENTS);
-        multiDV.reserve(transObj->m_trackStateVector->size());
-        for (const Trk::TrackStateOnSurface* tsos :
-             *(transObj->m_trackStateVector)) {
-          multiDV.push_back(static_cast<const Trk::MultiComponentStateOnSurface*>(tsos));
-        }
-        m_multiStateVectorCnv.transToPers(&multiDV, &persObj->m_trackState, log);
+        // Multi TSOS so we cast the container to the "right" type
+        const MultiComponentStateOnSurfaceDV* multiDV =
+            dynamic_cast<MultiComponentStateOnSurfaceDV*>(
+                transObj->m_trackStateVector.get());
+        m_multiStateVectorCnv.transToPers(multiDV, &persObj->m_trackState, log);
       }
     }
   } else { // empty

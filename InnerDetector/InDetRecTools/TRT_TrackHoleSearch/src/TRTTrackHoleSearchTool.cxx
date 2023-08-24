@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTTrackHoleSearchTool.cxx
@@ -96,7 +96,7 @@ void TRTTrackHoleSearchTool::countHoles(const Trk::Track& track,
                                         std::vector<int>& information ,
                                         const Trk::ParticleHypothesis partHyp) const {
 	ATH_MSG_DEBUG( "TRTTrackHoleSearchTool::countHoles" );
-	const DataVector<const Trk::TrackStateOnSurface>* holes = getHolesOnTrack(track, partHyp);
+	const Trk::TrackStates* holes = getHolesOnTrack(track, partHyp);
 	if (holes) {
 		information[Trk::numberOfTRTHoles] = holes->size();
 		delete holes;
@@ -107,7 +107,7 @@ void TRTTrackHoleSearchTool::countHoles(const Trk::Track& track,
 
 
 //____________________________________________________________________________
-const DataVector<const Trk::TrackStateOnSurface>* TRTTrackHoleSearchTool::getHolesOnTrack(
+const Trk::TrackStates* TRTTrackHoleSearchTool::getHolesOnTrack(
 	                    const Trk::Track& track,
 	                    const Trk::ParticleHypothesis partHyp) const {
 	ATH_MSG_DEBUG( "TRTTrackHoleSearchTool::getHolesOnTrack" );
@@ -129,7 +129,7 @@ const DataVector<const Trk::TrackStateOnSurface>* TRTTrackHoleSearchTool::getHol
 	}
 
 	// get TrackStateOnSurfaces
-	const DataVector<const Trk::TrackStateOnSurface>* track_states = track.trackStateOnSurfaces();
+	const Trk::TrackStates* track_states = track.trackStateOnSurfaces();
 	if (track_states) {
 		ATH_MSG_DEBUG( "  This track has " << track_states->size() << " track states on surface." );
 	} else {
@@ -143,7 +143,7 @@ const DataVector<const Trk::TrackStateOnSurface>* TRTTrackHoleSearchTool::getHol
 	}
 
 	// set beginning point of extrapolation
-	DataVector<const Trk::TrackStateOnSurface>::const_iterator beginning_track_state;
+	Trk::TrackStates::const_iterator beginning_track_state;
 	if (m_begin_at_first_trt_hit) {
 		// begin at first TRT hit
 		beginning_track_state = find_first_trt_hit(*track_states);
@@ -163,9 +163,9 @@ const DataVector<const Trk::TrackStateOnSurface>* TRTTrackHoleSearchTool::getHol
 	}
 
 	// to be returned:
-	DataVector<const Trk::TrackStateOnSurface>* holes = new DataVector<const Trk::TrackStateOnSurface>;
+	Trk::TrackStates* holes = new Trk::TrackStates;
 
-	DataVector<const Trk::TrackStateOnSurface>::const_iterator track_state = beginning_track_state;
+	Trk::TrackStates::const_iterator track_state = beginning_track_state;
 	const Trk::TrackParameters* start_parameters = (*track_state)->trackParameters();
 	++track_state;
 	// loop over TrackStateOnSurfaces (destination surfaces for extrapolation)
@@ -223,7 +223,7 @@ const DataVector<const Trk::TrackStateOnSurface>* TRTTrackHoleSearchTool::getHol
 const Trk::Track* TRTTrackHoleSearchTool::getTrackWithHoles(const Trk::Track& track,
                                                             const Trk::ParticleHypothesis partHyp) const {
 	ATH_MSG_DEBUG( "TRTTrackHoleSearchTool::getTrackWithHoles" );
-	const DataVector<const Trk::TrackStateOnSurface>* holes = getHolesOnTrack(track, partHyp);
+	const Trk::TrackStates* holes = getHolesOnTrack(track, partHyp);
 	const Trk::Track* new_track = addHolesToTrack(track, holes);
 	delete holes;
 	return new_track;
@@ -244,7 +244,7 @@ const Trk::Track* TRTTrackHoleSearchTool::getTrackWithHolesAndOutliers(const Trk
 //____________________________________________________________________________
 int TRTTrackHoleSearchTool::extrapolateBetweenHits(const Trk::TrackParameters* start_parameters,
                                                    const Trk::Surface& end_surf,
-                                                   DataVector<const Trk::TrackStateOnSurface>* holes,
+                                                   Trk::TrackStates* holes,
                                                    const Trk::ParticleHypothesis partHyp/*=Trk::pion*/) const {
 	int hole_count = 0;
 	// initialize previous id
@@ -392,11 +392,11 @@ void TRTTrackHoleSearchTool::dump_bad_straw_log() const {
 
 
 //____________________________________________________________________________
-DataVector<const Trk::TrackStateOnSurface>::const_iterator
-TRTTrackHoleSearchTool::find_first_trt_hit(const DataVector<const Trk::TrackStateOnSurface>& track_states) const {
+Trk::TrackStates::const_iterator
+TRTTrackHoleSearchTool::find_first_trt_hit(const Trk::TrackStates& track_states) const {
 	ATH_MSG_DEBUG( "TRTTrackHoleSearchTool::find_first_trt_hit" );
 	// finds the first TRT hit or returns end
-	DataVector<const Trk::TrackStateOnSurface>::const_iterator track_state = track_states.begin();
+	Trk::TrackStates::const_iterator track_state = track_states.begin();
 	for(; track_state != track_states.end(); ++track_state) {
 		// skip track states that are not measurements
 		if(!(*track_state)->type(Trk::TrackStateOnSurface::Measurement)) {
@@ -413,11 +413,11 @@ TRTTrackHoleSearchTool::find_first_trt_hit(const DataVector<const Trk::TrackStat
 
 
 //____________________________________________________________________________
-DataVector<const Trk::TrackStateOnSurface>::const_iterator
-TRTTrackHoleSearchTool::find_last_hit_before_trt(const DataVector<const Trk::TrackStateOnSurface>& track_states) const {
+Trk::TrackStates::const_iterator
+TRTTrackHoleSearchTool::find_last_hit_before_trt(const Trk::TrackStates& track_states) const {
 	ATH_MSG_DEBUG( "TRTTrackHoleSearchTool::find_last_hit_before_trt" );
 	// start at first TRT hit
-	DataVector<const Trk::TrackStateOnSurface>::const_iterator track_state = find_first_trt_hit(track_states);
+	Trk::TrackStates::const_iterator track_state = find_first_trt_hit(track_states);
 	// if there is no room to step backwards in the hits, return end
 	if(track_states.size() < 2 || track_state == track_states.begin()) {
 		return track_states.end();
@@ -439,7 +439,7 @@ TRTTrackHoleSearchTool::find_last_hit_before_trt(const DataVector<const Trk::Tra
 const Trk::Track*
 TRTTrackHoleSearchTool::addHolesToTrack(
   const Trk::Track& track,
-  const DataVector<const Trk::TrackStateOnSurface>* holes) const
+  const Trk::TrackStates* holes) const
 {
   ATH_MSG_DEBUG("TRTTrackHoleSearchTool::addHolesToTrack");
   /*
@@ -448,7 +448,7 @@ TRTTrackHoleSearchTool::addHolesToTrack(
   */
 
   // get states from track
-  auto tsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto tsos = std::make_unique<Trk::TrackStates>();
   for (const auto *it : *track.trackStateOnSurfaces()) {
     // veto old holes
     if (!it->type(Trk::TrackStateOnSurface::Hole)) {

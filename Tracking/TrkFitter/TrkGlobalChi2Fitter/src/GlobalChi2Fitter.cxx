@@ -608,7 +608,7 @@ namespace Trk {
       return nullptr;
     }
 
-    DataVector<const TrackStateOnSurface>::const_iterator tsosit =
+    Trk::TrackStates::const_iterator tsosit =
       firstismuon ? 
       muontrack->trackStateOnSurfaces()->end() : 
       muontrack->trackStateOnSurfaces()->begin();
@@ -779,12 +779,12 @@ namespace Trk {
       }
     }
 
-    DataVector<const TrackStateOnSurface>::const_iterator beginStates = intrk1.trackStateOnSurfaces()->begin();
-    DataVector<const TrackStateOnSurface>::const_iterator itStates = beginStates;
-    DataVector<const TrackStateOnSurface>::const_iterator endState = firstismuon ? tsosit + 1 : intrk1.trackStateOnSurfaces()->end();
-    DataVector<const TrackStateOnSurface>::const_iterator beginStates2 = !firstismuon ? tsosit : intrk2.trackStateOnSurfaces()->begin();
-    DataVector<const TrackStateOnSurface>::const_iterator itStates2 = beginStates2;
-    DataVector<const TrackStateOnSurface>::const_iterator endState2 = intrk2.trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator beginStates = intrk1.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator itStates = beginStates;
+    Trk::TrackStates::const_iterator endState = firstismuon ? tsosit + 1 : intrk1.trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator beginStates2 = !firstismuon ? tsosit : intrk2.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator itStates2 = beginStates2;
+    Trk::TrackStates::const_iterator endState2 = intrk2.trackStateOnSurfaces()->end();
 
     for (; itStates != endState; ++itStates) {
       if (firstismuon && (*itStates)->measurementOnTrack()->type(Trk::MeasurementBaseType::PseudoMeasurementOnTrack)) {
@@ -1297,12 +1297,12 @@ namespace Trk {
       indettrack = &intrk2;
     }
 
-    DataVector<const TrackStateOnSurface>::const_iterator beginStates = intrk1.trackStateOnSurfaces()->begin();
-    DataVector<const TrackStateOnSurface>::const_iterator itStates = beginStates;
-    DataVector<const TrackStateOnSurface>::const_iterator endState = intrk1.trackStateOnSurfaces()->end();
-    DataVector<const TrackStateOnSurface>::const_iterator beginStates2 = intrk2.trackStateOnSurfaces()->begin();
-    DataVector<const TrackStateOnSurface>::const_iterator itStates2 = beginStates2;
-    DataVector<const TrackStateOnSurface>::const_iterator endState2 = intrk2.trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator beginStates = intrk1.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator itStates = beginStates;
+    Trk::TrackStates::const_iterator endState = intrk1.trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator beginStates2 = intrk2.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator itStates2 = beginStates2;
+    Trk::TrackStates::const_iterator endState2 = intrk2.trackStateOnSurfaces()->end();
 
     const TrackParameters *firstidpar = nullptr;
     const auto *const pParametersVector = indettrack->trackParameters();
@@ -1938,8 +1938,8 @@ namespace Trk {
       cache.m_getmaterialfromtrack = false;
     }
     
-    DataVector<const TrackStateOnSurface>::const_iterator itStates = inputTrack.trackStateOnSurfaces()->begin();
-    DataVector<const TrackStateOnSurface>::const_iterator endState = inputTrack.trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator itStates = inputTrack.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator endState = inputTrack.trackStateOnSurfaces()->end();
 
     trajectory.trackStates().reserve(inputTrack.trackStateOnSurfaces()->size());
                                      
@@ -2330,8 +2330,8 @@ namespace Trk {
     MeasurementSet hitColl;
 
     // collect MBs from Track (speed: assume this method is used for extending track at end)
-    DataVector<const TrackStateOnSurface>::const_iterator itStates = inputTrack.trackStateOnSurfaces()->begin();
-    DataVector<const TrackStateOnSurface>::const_iterator endState = inputTrack.trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator itStates = inputTrack.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator endState = inputTrack.trackStateOnSurfaces()->end();
 
     bool old_reintoutl = cache.m_reintoutl;
     cache.m_reintoutl = false;
@@ -7353,7 +7353,7 @@ namespace Trk {
     ParticleHypothesis matEffects
   ) const {
     // Convert internal trajectory into track
-    auto  trajectory = std::make_unique<DataVector<const TrackStateOnSurface>>();
+    auto  trajectory = std::make_unique<Trk::TrackStates>();
     
     if (m_fillderivmatrix) {
       makeTrackFillDerivativeMatrix(cache, oldtrajectory);

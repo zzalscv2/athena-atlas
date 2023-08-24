@@ -33,7 +33,7 @@
 namespace {
 
 std::unique_ptr<Trk::FitQuality>
-buildFitQuality(const Trk::SmoothedTrajectory& smoothedTrajectory)
+buildFitQuality(const Trk::TrackStates& smoothedTrajectory)
 {
 
   /*
@@ -42,7 +42,7 @@ buildFitQuality(const Trk::SmoothedTrajectory& smoothedTrajectory)
    */
   double chiSquared = 0.;
   int numberDoF = -5;
-  Trk::SmoothedTrajectory::const_iterator stateOnSurface =
+  Trk::TrackStates::const_iterator stateOnSurface =
     smoothedTrajectory.begin();
   for (; stateOnSurface != smoothedTrajectory.end(); ++stateOnSurface) {
     if (!(*stateOnSurface)->type(Trk::TrackStateOnSurface::Measurement)) {

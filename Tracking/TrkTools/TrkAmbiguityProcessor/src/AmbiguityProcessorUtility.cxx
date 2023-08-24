@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmbiguityProcessorUtility.h"
@@ -33,11 +33,11 @@ namespace AmbiguityProcessor{
   createNewFitQualityTrack(const Trk::Track & track){
     double reXi2 = 0.; 
     int nDF = 0;
-    const DataVector<const Trk::TrackStateOnSurface>* tsos = track.trackStateOnSurfaces();
-    auto vecTsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+    const Trk::TrackStates* tsos = track.trackStateOnSurfaces();
+    auto vecTsos = std::make_unique<Trk::TrackStates>();
     // loop over TSOS, copy TSOS and push into vector
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end(); 
+    Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+    Trk::TrackStates::const_iterator iTsosEnd = tsos->end(); 
     for ( ; iTsos != iTsosEnd ; ++iTsos) {
       const Trk::TrackStateOnSurface* newTsos = new Trk::TrackStateOnSurface(**iTsos);
       vecTsos->push_back(newTsos);

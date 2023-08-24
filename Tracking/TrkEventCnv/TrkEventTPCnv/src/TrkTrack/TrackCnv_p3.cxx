@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -22,7 +22,7 @@ void TrackCnv_p3::persToTrans( const Trk::Track_p2 *persObj,
     delete info;
     transObj->m_fitQuality.reset(
       createTransFromPStore(&m_fqCnv, persObj->m_fitQuality, log));
-    std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(
+    std::unique_ptr<Trk::TrackStates> sink(
       m_trackStateVectorCnv.createTransient(&persObj->m_trackState, log));
     // move copy
     transObj->m_trackStateVector = std::move(sink);

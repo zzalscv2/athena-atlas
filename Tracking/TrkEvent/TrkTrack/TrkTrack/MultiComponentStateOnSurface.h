@@ -139,7 +139,7 @@ operator<<(std::ostream&, const MultiComponentStateOnSurface&);
 DATAVECTOR_BASE(const Trk::MultiComponentStateOnSurface,
                 const Trk::TrackStateOnSurface);
 typedef DataVector<const Trk::MultiComponentStateOnSurface>
-  TrkMultiComponentStateOnSurfaceDV;
+  MultiComponentStateOnSurfaceDV;
 
 #include "TrkTrack/MultiComponentStateOnSurface.icc"
 #endif

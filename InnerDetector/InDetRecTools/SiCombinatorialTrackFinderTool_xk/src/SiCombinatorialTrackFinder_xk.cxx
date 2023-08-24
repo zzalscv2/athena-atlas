@@ -836,7 +836,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
   if (!data.simpleTrack()) {
      return new Trk::Track(
          data.trackinfo(),
-         std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+         std::make_unique<Trk::TrackStates>(
              data.trajectory().convertToTrackStateOnSurface(
                  data.cosmicTrack())),
          data.trajectory().convertToFitQuality());
@@ -848,14 +848,14 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
   if (!data.flagToReturnFailedTrack()) {
      return new Trk::Track(
          info,
-         std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+         std::make_unique<Trk::TrackStates>(
              data.trajectory().convertToSimpleTrackStateOnSurface(
                  data.cosmicTrack(), ctx)),
          data.trajectory().convertToFitQuality());
   } else {
      return new Trk::Track(
          info,
-         std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+         std::make_unique<Trk::TrackStates>(
              data.trajectory()
                  .convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(
                      data.cosmicTrack(), ctx)),
@@ -869,7 +869,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
 
 Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) const
 {
-  auto tsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(
+  auto tsos = std::make_unique<Trk::TrackStates>(
       data.trajectory().convertToNextTrackStateOnSurface());
   if (tsos->empty()){
      return nullptr;

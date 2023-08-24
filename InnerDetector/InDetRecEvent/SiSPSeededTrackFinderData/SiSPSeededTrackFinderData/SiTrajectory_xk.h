@@ -122,31 +122,31 @@ namespace InDet{
       std::unique_ptr<Trk::TrackParameters> firstTrackParameters();
       void getClusters(std::vector<const InDet::SiCluster*>&) const;
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToTrackStateOnSurface();
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToTrackStateOnSurface(int);
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToTrackStateOnSurfaceWithNewDirection();
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToNextTrackStateOnSurface();
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToSimpleTrackStateOnSurface(const EventContext& ctx);
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToSimpleTrackStateOnSurface(int, const EventContext& ctx);
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToSimpleTrackStateOnSurfaceWithNewDirection();
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(const EventContext& ctx);
 
-      DataVector<const Trk::TrackStateOnSurface>
+      Trk::TrackStates
       convertToSimpleTrackStateOnSurfaceForDisTrackTrigger(int, const EventContext& ctx);
 
       std::unique_ptr<Trk::FitQuality> convertToFitQuality() const;

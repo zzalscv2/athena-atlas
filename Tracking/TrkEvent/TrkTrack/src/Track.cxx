@@ -71,8 +71,8 @@ void Trk::Track::copyHelper(const Trk::Track& rhs) {
     m_trackStateVector = std::make_unique<TrackStates>();
     m_trackStateVector->reserve(rhs.m_trackStateVector->size());
 
-    TSoS_iterator itTSoSEnd = rhs.m_trackStateVector->end();
-    for (TSoS_iterator itTSoS = rhs.m_trackStateVector->begin();
+    TSoS_iterator itTSoSEnd = rhs.m_trackStateVector->cend();
+    for (TSoS_iterator itTSoS = rhs.m_trackStateVector->cbegin();
          itTSoS != itTSoSEnd; ++itTSoS) {
       assert(*itTSoS != nullptr);  // check that is defined.
       // clone and store
@@ -137,9 +137,9 @@ void Trk::Track::findPerigeeImpl() const {
   if (!m_trackStateVector) {
     return;
   }
-  DataVector<const TrackStateOnSurface>::const_iterator it =
+  Trk::TrackStates::const_iterator it =
       m_trackStateVector->cbegin();
-  DataVector<const TrackStateOnSurface>::const_iterator itEnd =
+  Trk::TrackStates::const_iterator itEnd =
       m_trackStateVector->cend();
   for (; it != itEnd; ++it) {
     if ((*it)->type(TrackStateOnSurface::Perigee)) {
@@ -251,10 +251,10 @@ MsgStream& Trk::operator<<(MsgStream& sl, const Trk::Track& track) {
     // shows what the stream is set to
     if (sl.level() < MSG::INFO) {
       // loop over TrackStateOnSurfaces if verbose turned on
-      DataVector<const TrackStateOnSurface>::const_iterator it =
-          track.trackStateOnSurfaces()->begin();
+      Trk::TrackStates::const_iterator it =
+          track.trackStateOnSurfaces()->cbegin();
       int num = 0;
-      for (; it != track.trackStateOnSurfaces()->end(); ++it) {
+      for (; it != track.trackStateOnSurfaces()->cend(); ++it) {
         sl << " --------- Start of TrackStateOnSurface \t" << num << "\t-------"
            << endmsg;
         sl << (**it);
@@ -281,10 +281,10 @@ std::ostream& Trk::operator<<(std::ostream& sl, const Trk::Track& track) {
   if (track.trackStateOnSurfaces() != nullptr) {
     sl << name << "has " << (track.trackStateOnSurfaces()->size())
        << " trackStateOnSurface(s)" << std::endl;
-    DataVector<const TrackStateOnSurface>::const_iterator it =
-        track.trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator it =
+        track.trackStateOnSurfaces()->cbegin();
     int num = 0;
-    for (; it != track.trackStateOnSurfaces()->end(); ++it) {
+    for (; it != track.trackStateOnSurfaces()->cend(); ++it) {
       sl << " --------- Start of TrackStateOnSurface \t" << num << "\t-------"
          << std::endl;
       sl << (**it);
