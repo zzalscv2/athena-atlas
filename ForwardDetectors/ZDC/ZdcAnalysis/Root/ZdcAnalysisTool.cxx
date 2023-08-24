@@ -1410,10 +1410,13 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	  else {
 	    std::vector<float> HGDelayADCSamples(m_numSample);
 	    std::vector<float> LGDelayADCSamples(m_numSample);
-	    
-	    std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
-	    std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
-	    
+	    if (adcDelayLG and adcDelayHG){
+	      std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
+	      std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
+	    }else{
+	      ATH_MSG_ERROR("adcDelayLG or adcDelayHG pointers are null");
+	      return StatusCode::FAILURE;
+	    }
 	    // If the delayed channels actually come earlier (as in the pPb in 2016), we invert the meaning of delayed and undelayed
 	    //   see the initialization sections for similar inversion on the sign of the pedestal difference
 	    //
