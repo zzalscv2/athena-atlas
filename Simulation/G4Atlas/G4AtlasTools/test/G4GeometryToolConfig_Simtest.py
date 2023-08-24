@@ -15,12 +15,11 @@ if __name__ == '__main__':
   #import config flags
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import ProductionStep, Project
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags = initConfigFlags()
   flags.Common.ProductionStep = ProductionStep.Simulation
-
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
   flags.Input.Files = defaultTestFiles.EVNT
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   if flags.Common.Project is Project.AthSimulation:
     detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC'] # FwdRegion geometry not currently included in AthSimulation

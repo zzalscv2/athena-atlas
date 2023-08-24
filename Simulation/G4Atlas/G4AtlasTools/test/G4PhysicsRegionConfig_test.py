@@ -17,11 +17,11 @@ if __name__ == '__main__':
 
   #import config flags
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
-
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   inputDir = defaultTestFiles.d
   flags = initConfigFlags()
   flags.Input.Files = defaultTestFiles.EVNT
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
   # Arbitrary configuration for Twiss Files
   flags.Sim.TwissFileBeam1 = '4.0TeV/0090.00m/nominal/v01/beam1.tfs'
   flags.Sim.TwissFileBeam2 = '4.0TeV/0090.00m/nominal/v01/beam2.tfs'

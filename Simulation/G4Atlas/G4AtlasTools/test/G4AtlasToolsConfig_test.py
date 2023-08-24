@@ -15,18 +15,12 @@ if __name__ == '__main__':
   #import config flags
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import ProductionStep
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags = initConfigFlags()
   flags.Common.ProductionStep = ProductionStep.Simulation
-  flags.Sim.ISFRun = True
-
-  #Provide input
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
   flags.Input.Files = defaultTestFiles.EVNT
-
-  #flags.GeoModel.AtlasVersion = "tb_Tile2000_2003"
-  #flags.GeoModel.AtlasVersion = "ctbh8"
-  flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-03-01-00'
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+  flags.Sim.ISFRun = True
 
   # Setup detector flags
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
