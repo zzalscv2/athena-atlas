@@ -33,6 +33,7 @@ def egammaCaloClusterSelectorGSFCfg(
     kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 500.0)
     kwargs.setdefault("EMEtSplittingFraction", 0.7)
     kwargs.setdefault("EMFCut", 0.5)
+    kwargs.setdefault("CellContainerName", flags.Egamma.Keys.Input.CaloCells)
     result.setPrivateTools(
         CompFactory.egammaCaloClusterSelector(name, **kwargs)
     )

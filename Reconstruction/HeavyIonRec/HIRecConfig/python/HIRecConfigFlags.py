@@ -24,6 +24,7 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Egamma.EventShape", "HIEventShape_iter_egamma")
   flags.addFlag("HeavyIon.Egamma.SubtractedCells", "SubtractedCells")
   flags.addFlag("HeavyIon.Egamma.UncalibCaloTopoCluster", "SubtractedCaloTopoClusters")
+  flags.addFlag("HeavyIon.Egamma.EgammaTopoCluster", "SubtractedEgammaTopoClusters")
   flags.addFlag("HeavyIon.Egamma.CaloTopoCluster", lambda prevFlags: "SubtractedCaloCalTopoClusters" if prevFlags.Calo.TopoCluster.doTopoClusterLocalCalib else prevFlags.HeavyIon.Egamma.UncalibCaloTopoCluster)
 
   flags.addFlag("HeavyIon.redoTracking", True)

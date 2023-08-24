@@ -12,14 +12,12 @@ def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     kwargs.setdefault(
         "InputTopoCollection",
         flags.Egamma.Keys.Input.TopoClusters)
-
-    egtopocluster = flags.Egamma.Keys.Internal.EgammaTopoClusters
     kwargs.setdefault(
         "OutputTopoCollection",
-        egtopocluster)
+        flags.Egamma.Keys.Internal.EgammaTopoClusters)
     kwargs.setdefault(
         "OutputTopoCollectionShallow",
-        "tmp_"+egtopocluster)
+        "tmp_"+kwargs["OutputTopoCollection"])
 
     kwargs.setdefault(
         "ECut",
@@ -33,6 +31,30 @@ def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     acc.addEventAlgo(egcopierAlg)
 
     return acc
+
+
+def indetTopoClusterCopierCfg(flags, name='', **kwargs): 
+    """Create a copier to be used in tracking. 
+       If 'OutputTopoCollection' is the same as used in 
+        'egammaTopoClusterCopierCfg', these two functions will produce
+        the same tool that will be de-duplicated later, preventing 
+        duplication of the output containers. This will happen in
+        a standard pp reconstruction.
+       If 'OutputTopoCollection' is not the same, two tools will be
+        created, each with a different output container. This will
+        happen in a HI reconstruction."""
+     
+    kwargs.setdefault(
+        "InputTopoCollection",
+        flags.Tracking.TopoClusters)
+    kwargs.setdefault(
+        "OutputTopoCollection",
+        flags.Tracking.EgammaTopoClusters)
+
+    if name=='':
+        name = kwargs["OutputTopoCollection"]+'Copier'
+
+    return egammaTopoClusterCopierCfg(flags, name, **kwargs)
 
 
 if __name__ == "__main__":
