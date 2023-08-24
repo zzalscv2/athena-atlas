@@ -59,13 +59,12 @@ public:
 
  /**
    * @brief Standard initialization method.
-   * This method is currently emty 
    */
   StatusCode initialize();
 
   /**
     * @brief Standard execute method
-    * This method has to be emtpy since all the job is done in finalize
+    * This method has to be emtpy since all the job is done in stop()
     */
   StatusCode execute() {return StatusCode::SUCCESS;}
 
@@ -99,6 +98,8 @@ protected:
   virtual bool validateChannel(const LArCondObj& ref, const LArCondObj& val, const HWIdentifier chid, const int gain, const LArOnOffIdMapping *cabling,const LArBadChannelCont *bcCont)=0;
 
 
+  /** @brief Method implmented in derived class to get the reference object from ref-container
+    */
   virtual LArCondObj getRefObj(const HWIdentifier chid, const int gain) const=0;
 
   /**
@@ -173,34 +174,24 @@ protected:
 
   // Pointers to various identifier helper classes, not used her, but
   // probably useful for deriving algorithm
-  const LArOnlineID_Base* m_onlineHelper; 
-  const LArEM_ID   * m_emId;  
-  const LArHEC_ID  * m_hecId; 
-  const LArFCAL_ID * m_fcalId;
-  const CaloCell_Base_ID* m_caloId;
+  const LArOnlineID_Base* m_onlineHelper=nullptr; 
+  const CaloCell_Base_ID* m_caloId=nullptr;
 
 
   /** Pointer to container with reference values */
-  const REFCONTAINER* m_reference;  
+  const REFCONTAINER* m_reference=nullptr;  
 
   /** Pointer to container to be validated */
-  const CONDITIONSCONTAINER* m_validation;  
+  const CONDITIONSCONTAINER* m_validation=nullptr;  
 
   /** Non-const pointer to container to be validated (for FEB patching)*/
-  CONDITIONSCONTAINER* m_nc_validation;  
+  CONDITIONSCONTAINER* m_nc_validation=nullptr;  
 
   /** SG key of the container to be validated (job-property) */
   std::string    m_validationKey;
 
   /** SG key of the reference container (job-property) */
   SG::ReadCondHandleKey<REFCONTAINER> m_referenceKey{this,"ReferenceKey","", "SG key of the LArConditionsContainer used as reference"};
-
-  /** SG key of container for deviating channels (job-property) */
-  std::string m_thinValContKey;
-
-  /** SG key of container for reference of deviating channels (job-property) */
-  std::string m_thinRefContKey;
-
 
   /** Flag set to true in order to use bad-channel info for the channel description 
       as well as to ingore some types of bad-channels via the masking tool */
@@ -224,19 +215,19 @@ protected:
   //Count the various cases:
 
   /** Number of channels that where checked (grand-total)*/
-  unsigned m_nChecked;
+  unsigned m_nChecked=0;
 
   /** Number of channels for which vaildateChannel returned false */
-  unsigned m_nFailedValidation;
+  unsigned m_nFailedValidation=0;
 
   /** Number of channels for which vaildateChannel returned true */
-  unsigned m_nValidated;
+  unsigned m_nValidated=0;
 
   /** Number of channels known to be bad according to the bad-channel tool */
-  unsigned m_nBad;
+  unsigned m_nBad=0;
 
   /** Number of channels for which not reference channel could be found */
-  unsigned m_nNoReference;
+  unsigned m_nNoReference=0;
 
   /** Keeping track of channels failing the validation criteria (per gain) */
   typedef std::vector<std::pair<HWIdentifier, bool > > CHECKEDID_t;

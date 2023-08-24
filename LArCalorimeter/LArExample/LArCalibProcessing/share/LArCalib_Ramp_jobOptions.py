@@ -764,8 +764,6 @@ if ( doLArCalibDataQuality  ) :
    theRampValidationAlg.OutputLevel=INFO
    theRampValidationAlg.MsgLevelForDeviations=WARNING
    theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
-   theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
-   theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
 
    ##in case of CalibBoard patching, please uncomment:
    ## adding new patching

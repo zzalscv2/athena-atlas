@@ -11,10 +11,7 @@
 template<class CONDITIONSCONTAINER, class REFCONTAINER>
 LArCalibValidationAlg<CONDITIONSCONTAINER,REFCONTAINER>::LArCalibValidationAlg (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
-  m_myMsgLvl(MSG::ERROR),
-  m_onlineHelper(nullptr),m_emId(nullptr), m_hecId(nullptr), m_fcalId(nullptr), m_caloId(nullptr),
-  m_reference(nullptr),m_validation(nullptr),m_nc_validation(nullptr),
-  m_nChecked(0),m_nFailedValidation(0),m_nValidated(0),m_nBad(0),m_nNoReference(0) {
+  m_myMsgLvl(MSG::ERROR) {
   declareProperty("ValidationKey",m_validationKey="",
 		  "SG key of the LArConditionsContainer to be validated");
  
@@ -31,11 +28,6 @@ LArCalibValidationAlg<CONDITIONSCONTAINER,REFCONTAINER>::LArCalibValidationAlg (
 		  "File name to store list of deviating channels");
   declareProperty("ListOfDevFEBs",m_febFileName="",
 		  "File name to store list of FEBs with deviating channels");
-
-  declareProperty("ThinnedValContainer",m_thinValContKey="",
-		  "Container to store deviating values");
-  declareProperty("ThinnedRefContainer",m_thinRefContKey="",
-		  "Container to store reference for deviating values");
   
   declareProperty("PatchMissingFEBs",m_patchMissingFEBs=false,
 		  "Patch missing FEBs using values from reference container.");
@@ -98,10 +90,6 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::stop() {
      ATH_CHECK( detStore()->retrieve(cId, "CaloCell_ID") );
      m_caloId=dynamic_cast<const CaloCell_Base_ID*>(cId);
   }
-
-  ATH_CHECK( detStore()->retrieve(m_emId, "LArEM_ID") );
-  ATH_CHECK (detStore()->retrieve(m_hecId, "LArHEC_ID") );
-  ATH_CHECK( detStore()->retrieve(m_fcalId, "LArFCAL_ID") );
 
   /// Get bad-channel tool 
   if (m_useBCInfo) {
@@ -168,24 +156,6 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::stop() {
   if (m_validation==m_reference) //compare pointers
     ATH_MSG_WARNING ( "The same container is used as reference!" ) ; 
 
-  CONDITIONSCONTAINER* thinValCont=NULL;
-  CONDITIONSCONTAINER* thinRefCont=NULL;
-
-  if (m_thinValContKey.size()) {
-    thinValCont=new CONDITIONSCONTAINER;
-    thinValCont->setGroupingType(CONDITIONSCONTAINER::SingleGroup);
-    ATH_CHECK( thinValCont->initialize() );
-    ATH_CHECK( detStore()->record(thinValCont,m_thinValContKey) );
-  }
-
-  if (m_thinRefContKey.size()) {
-    thinRefCont=new CONDITIONSCONTAINER;
-    thinRefCont->setGroupingType(CONDITIONSCONTAINER::SingleGroup);
-    ATH_CHECK( thinRefCont->initialize() );
-    ATH_CHECK( detStore()->record(thinRefCont,m_thinRefContKey) );
-  }
-
-
   ATH_CHECK( preLoop() ); // Call preLoop method of derived algorithm
 
   /// Reset counters:
@@ -235,8 +205,6 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::stop() {
 	++m_nValidated;
       else {
 	++m_nFailedValidation;
-	if (thinValCont) thinValCont->setPdata(chid,val,igain); 
-	if (thinRefCont) thinRefCont->setPdata(chid,ref,igain); 
       }
     }//end loop over container
     ATH_MSG_INFO("checked "<<m_checkedIds[igain].size()<<" channels for gain "<<igain);

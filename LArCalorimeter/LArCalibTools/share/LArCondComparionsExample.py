@@ -77,8 +77,6 @@ theRampValidationAlg.ValidationKey="LArRamp"
 theRampValidationAlg.ReferenceKey="LArRampRef"
 theRampValidationAlg.MsgLevelForDeviations=INFO
 theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
-theRampValidationAlg.ThinnedValContainer="ThinRampsVal"
-theRampValidationAlg.ThinnedRefContainer="ThinRampsRef"
 topSequence+=theRampValidationAlg
 
 
