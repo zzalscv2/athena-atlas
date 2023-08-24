@@ -520,14 +520,14 @@ EMExtrapolationTools::getTRTsection(const xAOD::TrackParticle* trkPB) const
   const Trk::MeasurementBase* trkPar = nullptr;
   if (trkPB->trackLink().isValid() && trkPB->track() != nullptr) {
     ATH_MSG_DEBUG("Will get TrackParameters from Trk::Track");
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates =
+    const Trk::TrackStates* trackStates =
       trkPB->track()->trackStateOnSurfaces();
     if (!trackStates) {
       ATH_MSG_WARNING("NULL pointer to trackStateOnSurfaces");
       return 0;
     }
     // Loop over the TrkStateOnSurfaces search last valid TSOS first
-    for (DataVector<const Trk::TrackStateOnSurface>::const_reverse_iterator
+    for (Trk::TrackStates::const_reverse_iterator
            rItTSoS = trackStates->rbegin();
          rItTSoS != trackStates->rend();
          ++rItTSoS) {

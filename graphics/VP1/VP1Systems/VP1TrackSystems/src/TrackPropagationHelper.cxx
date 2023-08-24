@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -169,8 +169,8 @@ bool TrackPropagationHelper::makePointsNeutral( std::vector<Amg::Vector3D >& poi
   points.reserve(track->trackParameters()->size());
 
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = track->trackStateOnSurfaces()->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = track->trackStateOnSurfaces()->end();
+  Trk::TrackStates::const_iterator tsos_iter = track->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator tsos_end = track->trackStateOnSurfaces()->end();
   bool problems(false);
   for (; tsos_iter != tsos_end; ++tsos_iter) {
     if (!m_d->tracksanity->isSafe(*tsos_iter)) {
@@ -266,8 +266,8 @@ bool TrackPropagationHelper::makePointsCharged( std::vector<Amg::Vector3D >& poi
   points.reserve(npars);//At least we need this.
   const EventContext& ctx = Gaudi::Hive::currentContext();
     //Add a point for each parameter, and add extra points between them where appropriate.
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = track->trackStateOnSurfaces()->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = track->trackStateOnSurfaces()->end();
+  Trk::TrackStates::const_iterator tsos_iter = track->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator tsos_end = track->trackStateOnSurfaces()->end();
   const Trk::TrackParameters* prevpar(nullptr);
   const Trk::TrackParameters* trackParam(nullptr);
   bool problems(false);

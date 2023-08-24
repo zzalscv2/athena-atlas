@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -966,7 +966,7 @@ const Trk::Track* VP1BPhysSystem::getTrack(const Rec::TrackParticle* trackpartic
 	std::vector< const Trk::TrackParameters* >  trackpars;
 	trackpars = trackparticle->trackParameters();
 
-	auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+	auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
 	messageDebug("...done");
 
 	if (!trackpars.empty()) {
@@ -1037,7 +1037,7 @@ const Trk::Track* VP1BPhysSystem::getRefittedTrack(const Amg::Vector3D& position
   //TODO: check parameters safety
 
   //creates a vector of TracksStates on surface
-	auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+	auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
 	trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
 
   //create track

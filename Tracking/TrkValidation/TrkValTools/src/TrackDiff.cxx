@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -353,7 +353,7 @@ StatusCode Trk::TrackDiff::diff (
 DataVector< const Trk::TrackStateData >* Trk::TrackDiff::extractDataFromTrack( const Trk::Track& track ) const {
 
     // Get pointer to track state on surfaces
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates = track.trackStateOnSurfaces();
+    const Trk::TrackStates* trackStates = track.trackStateOnSurfaces();
     if (!trackStates) {
       ATH_MSG_ERROR ( "track containes no track states, diff impossible" );
       return nullptr;
@@ -363,7 +363,7 @@ DataVector< const Trk::TrackStateData >* Trk::TrackDiff::extractDataFromTrack( c
     DataVector< const Trk::TrackStateData >* trackStateData = new DataVector< const Trk::TrackStateData >;
 
     // track state iterator
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iter = trackStates->begin();
+    Trk::TrackStates::const_iterator iter = trackStates->begin();
     // Loop over all track states on surfaces
     //    to extract the measurements
     for (; iter != trackStates->end(); ++iter) {

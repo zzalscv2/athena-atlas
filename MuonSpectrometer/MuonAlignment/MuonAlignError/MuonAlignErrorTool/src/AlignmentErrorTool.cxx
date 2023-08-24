@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
         devSumVec.push_back(tmp);
     }
 
-    typedef DataVector<const Trk::TrackStateOnSurface> tsosc_t;
+    typedef Trk::TrackStates tsosc_t;
     const tsosc_t* tsosc = track.trackStateOnSurfaces();
 
     // LOOP ON HITS ON TRACK //

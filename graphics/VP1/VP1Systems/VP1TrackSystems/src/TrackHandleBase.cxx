@@ -379,8 +379,8 @@ void TrackHandleBase::Imp::ensureInitTSOSs()
   unsigned parindex(0);
 
   AscObj_TSOS* ascObjNeedDistToNext(nullptr);
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = pathInfo_TrkTrack->trackStateOnSurfaces()->end();
+  Trk::TrackStates::const_iterator tsos_iter = pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator tsos_end = pathInfo_TrkTrack->trackStateOnSurfaces()->end();
   const Trk::TrackParameters* trackParam(nullptr);
   for (; tsos_iter != tsos_end; ++tsos_iter) {
     trackParam = (*tsos_iter)->trackParameters();
@@ -976,8 +976,8 @@ void TrackHandleBase::Imp::ensureInitPointsRaw()
     if (pathInfo_TrkTrack->trackParameters())
       points_raw->reserve(pathInfo_TrkTrack->trackParameters()->size());
     bool unsafeparts(false);
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = pathInfo_TrkTrack->trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator tsos_iter = pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator tsos_end = pathInfo_TrkTrack->trackStateOnSurfaces()->end();
     const Trk::TrackParameters* trackParam;
     for (; tsos_iter != tsos_end; ++tsos_iter) {
       if (!VP1TrackSanity::isSafe(*tsos_iter)) {
@@ -1563,8 +1563,8 @@ std::optional<Amg::Vector3D> TrackHandleBase::startPoint() const
 {
   m_d->ensureLoadPathInfo();
   if (m_d->pathInfo_TrkTrack) {
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator tsos_iter = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator tsos_end = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->end();
     for (; tsos_iter != tsos_end; ++tsos_iter) {
       if (common()->trackSanityHelper()->isSafe(*tsos_iter)) {
         const Trk::TrackParameters* trackParam = (*tsos_iter)->trackParameters();
@@ -1583,8 +1583,8 @@ std::optional<Amg::Vector3D> TrackHandleBase::endPoint() const
 {
   m_d->ensureLoadPathInfo();
   if (m_d->pathInfo_TrkTrack) {
-    DataVector<const Trk::TrackStateOnSurface>::const_reverse_iterator tsos_iter = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->rend();
-    DataVector<const Trk::TrackStateOnSurface>::const_reverse_iterator tsos_end = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->rbegin();
+    Trk::TrackStates::const_reverse_iterator tsos_iter = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->rend();
+    Trk::TrackStates::const_reverse_iterator tsos_end = m_d->pathInfo_TrkTrack->trackStateOnSurfaces()->rbegin();
     for (; tsos_iter != tsos_end; ++tsos_iter) {
       if (common()->trackSanityHelper()->isSafe(*tsos_iter)) {
         const Trk::TrackParameters* trackParam = (*tsos_iter)->trackParameters();

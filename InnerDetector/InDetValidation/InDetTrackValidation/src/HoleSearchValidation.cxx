@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -179,17 +179,17 @@ StatusCode HoleSearchValidation::execute(const EventContext& ctx) const {
 
     // get all TSOS
     const Trk::Track& track = *(*trackIterator);
-    const DataVector<const Trk::TrackStateOnSurface>* tsos = track.trackStateOnSurfaces();
+    const Trk::TrackStates* tsos = track.trackStateOnSurfaces();
     ATH_MSG_DEBUG(  "Perform hole search on unmodified track (" << *trackIterator << ")"
                     << " which contains " << tsos->size() <<" track states" ) ;
     // perform hole search
     unsigned int oldHoles = doHoleSearch( *trackIterator );
 
-    auto vecTsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+    auto vecTsos = std::make_unique<Trk::TrackStates>();
 
     // loop over TSOS, copy TSOS and push into vector
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end();
+    Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+    Trk::TrackStates::const_iterator iTsosEnd = tsos->end();
 
     unsigned int nRemoved = 0;
 
@@ -487,11 +487,11 @@ unsigned int HoleSearchValidation::doHoleSearch( const Trk::Track* track) const
   } else {
     nHoles = holesOnTrack->size();
     ATH_MSG_DEBUG(  "found " << nHoles << " holes on track." ) ;
-    for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it=holesOnTrack->begin();
-	 it!=holesOnTrack->end();  ++it) {
+    for (Trk::TrackStates::const_iterator it=holesOnTrack->begin();
+         it!=holesOnTrack->end();  ++it) {
       if (!(*it)) {
-	ATH_MSG_WARNING(  "TrackStateOnSurface from hole search tool == Null" ) ;
-	continue;
+        ATH_MSG_WARNING(  "TrackStateOnSurface from hole search tool == Null" ) ;
+        continue;
       }
       ATH_MSG_DEBUG(  "Found hole:" ) ;
       printInfoTSoS( *it );

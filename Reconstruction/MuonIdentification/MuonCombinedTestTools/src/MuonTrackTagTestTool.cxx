@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackTagTestTool.h"
@@ -68,8 +68,8 @@ namespace MuonCombined {
             dynamic_cast<const Trk::StraightLineSurface *>(&(*idTrack.measurementsOnTrack())[6]->associatedSurface()) ||
             !dynamic_cast<const InDet::PixelClusterOnTrack *>(*idTrack.measurementsOnTrack()->begin()))
             return 0;
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator itStates = idTrack.trackStateOnSurfaces()->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator endState = idTrack.trackStateOnSurfaces()->end();
+        Trk::TrackStates::const_iterator itStates = idTrack.trackStateOnSurfaces()->begin();
+        Trk::TrackStates::const_iterator endState = idTrack.trackStateOnSurfaces()->end();
         int noutl = 0, ntrt = 0;
         for (; itStates != endState; ++itStates) {
             if ((**itStates).measurementOnTrack()) {
@@ -125,7 +125,7 @@ namespace MuonCombined {
         }
 
         const Trk::TrackParameters *mspar = nullptr;
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosit = msTrack.trackStateOnSurfaces()->begin();
+        Trk::TrackStates::const_iterator tsosit = msTrack.trackStateOnSurfaces()->begin();
 
         while (tsosit != msTrack.trackStateOnSurfaces()->end() && !mspar) {
             if ((**tsosit).type(Trk::TrackStateOnSurface::Measurement) && !(**tsosit).type(Trk::TrackStateOnSurface::Outlier)) {

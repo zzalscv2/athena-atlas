@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecAlgs/src/TrackTimeDefAndQualityAlg.cxx
  * @author Valentina Raskina <valentina.raskina@cern.ch>
@@ -313,7 +313,7 @@ void TrackTimeDefAndQualityAlg::setLayerAsInvalid(
 const Trk::TrackParameters*
 TrackTimeDefAndQualityAlg::getLastHitOnTrack(const Trk::Track& track) const {
 
-  const DataVector<const Trk::TrackStateOnSurface>* tsos =
+  const Trk::TrackStates* tsos =
       track.trackStateOnSurfaces();
   if (not tsos) {
     ATH_MSG_ERROR("Failed to retrieve track state on surfaces");
