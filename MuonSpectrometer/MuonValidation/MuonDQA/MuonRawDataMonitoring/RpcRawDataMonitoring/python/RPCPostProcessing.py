@@ -126,61 +126,64 @@ def make_hit_rate(inputs):
     print ("make_hit_rate::WARNING - Input file contain data in ", len(runs), " **runs**, which should only include 1-run and full data !!!")
     return
 
-  Dic_LBLumi = GetLBInfoFromCOOL.GetLumiInfoDic(runs[0], runs[0]+1)
-  print ("len(Dic_LBLumi) = ", len(Dic_LBLumi))
-  # GetLBInfoFromCOOL.printLumiInfo(Dic_LBLumi)
-
-  DicPanels  = readElementFromXML()
-
-  ######### Draw_Occupancy ######################
-  draw_occu = CoreClass.Draw_Occupancy(h_hit_panels)
-  draw_occu.SetPanelDic(DicPanels)
-  draw_occu.SetLumiInfoDic(Dic_LBLumi)
-  draw_occu.doNEvtScale(h_NEvt_LB)
-
-  h_name   = "NPRDHit_Panels_All"
-
-  # -----------------------------------------------------------------------
   dic_hists             = {}
-  list_hist_all         = []
-  list_hist_layer       = []
-  list_hist_subDetector = []
-  for i_var in ["p0", "p1", "chi2", "predRate", "meanRate"]:
-    ###
-    ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi
-    ### "(p0|p1|chi2|predRate|meanRate)_per_sectors_per_layers_etaAndPhiPanels",
-    list_hist1D_secLayer = draw_occu.GetHist1D_ySectorsAndLayers([h_name, i_var])
-    
-    ###
-    ### "(p0|p1|chi2|predRate|meanRate)_per_panel_(etaAndPhi｜eta|phi)View",
-    ###
-    list_hist1D_panels   = draw_occu.GetHist1D_yPanels([h_name, i_var])
-    
-    list_hist_all += list_hist1D_secLayer+list_hist1D_panels
+
+  Dic_LBLumi = GetLBInfoFromCOOL.GetLumiInfoDic(runs[0], runs[0]+1)
   
-    ###
-    ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/Layers
-    ### "Summary_layer[1-8]_(p0|p1|chi2|predRate|meanRate)", 
-    list_summary_allSectorsAndLayers  = draw_occu.GetSummary_allSectorsAndLayers([h_name, i_var])
+  if Dic_LBLumi is not None:
+    print ("len(Dic_LBLumi) = ", len(Dic_LBLumi))
+    # GetLBInfoFromCOOL.printLumiInfo(Dic_LBLumi)
 
-    ###
-    ### "(p0|p1|chi2|predRate|meanRate)_layer[1-8]_measPhi[01]",
-    ###
-    list_hist2d_EtaPhi_allLayer       = draw_occu.GetHist2D_EtaPhi_allLayer([h_name, i_var])
+    DicPanels  = readElementFromXML()
 
-    list_hist_layer += list_summary_allSectorsAndLayers+list_hist2d_EtaPhi_allLayer
+    ######### Draw_Occupancy ######################
+    draw_occu = CoreClass.Draw_Occupancy(h_hit_panels)
+    draw_occu.SetPanelDic(DicPanels)
+    draw_occu.SetLumiInfoDic(Dic_LBLumi)
+    draw_occu.doNEvtScale(h_NEvt_LB)
 
-    ###
-    ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/SubDetector
-    ### "Summary_Sector[-16...-1, 1...16]_Layer[1...8]_dbPhi[1,2]_measPhi[0,1]_(p0|p1|chi2|predRate|meanRate)",
-    if i_var in ["p0", "chi2", "predRate"]:
-      list_summary_eachSectorsAndLayers = draw_occu.GetSummary_eachSectorsAndLayers([h_name, i_var])
+    h_name   = "NPRDHit_Panels_All"
 
-      list_hist_subDetector += list_summary_eachSectorsAndLayers
+    # -----------------------------------------------------------------------
+    list_hist_all         = []
+    list_hist_layer       = []
+    list_hist_subDetector = []
+    for i_var in ["p0", "p1", "chi2", "predRate", "meanRate"]:
+      ###
+      ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi
+      ### "(p0|p1|chi2|predRate|meanRate)_per_sectors_per_layers_etaAndPhiPanels",
+      list_hist1D_secLayer = draw_occu.GetHist1D_ySectorsAndLayers([h_name, i_var])
+      
+      ###
+      ### "(p0|p1|chi2|predRate|meanRate)_per_panel_(etaAndPhi｜eta|phi)View",
+      ###
+      list_hist1D_panels   = draw_occu.GetHist1D_yPanels([h_name, i_var])
+      
+      list_hist_all += list_hist1D_secLayer+list_hist1D_panels
+    
+      ###
+      ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/Layers
+      ### "Summary_layer[1-8]_(p0|p1|chi2|predRate|meanRate)", 
+      list_summary_allSectorsAndLayers  = draw_occu.GetSummary_allSectorsAndLayers([h_name, i_var])
 
-  getHistNames(list_hist_all, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi", dic_hists)
-  getHistNames(list_hist_layer, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/Layers", dic_hists)
-  getHistNames(list_hist_subDetector, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/SubDetector", dic_hists)
+      ###
+      ### "(p0|p1|chi2|predRate|meanRate)_layer[1-8]_measPhi[01]",
+      ###
+      list_hist2d_EtaPhi_allLayer       = draw_occu.GetHist2D_EtaPhi_allLayer([h_name, i_var])
+
+      list_hist_layer += list_summary_allSectorsAndLayers+list_hist2d_EtaPhi_allLayer
+
+      ###
+      ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/SubDetector
+      ### "Summary_Sector[-16...-1, 1...16]_Layer[1...8]_dbPhi[1,2]_measPhi[0,1]_(p0|p1|chi2|predRate|meanRate)",
+      if i_var in ["p0", "chi2", "predRate"]:
+        list_summary_eachSectorsAndLayers = draw_occu.GetSummary_eachSectorsAndLayers([h_name, i_var])
+
+        list_hist_subDetector += list_summary_eachSectorsAndLayers
+
+    getHistNames(list_hist_all, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi", dic_hists)
+    getHistNames(list_hist_layer, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/Layers", dic_hists)
+    getHistNames(list_hist_subDetector, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/SubDetector", dic_hists)
 
   return dic_hists
 
