@@ -15,24 +15,17 @@ if __name__ == '__main__':
   from AthenaCommon.Constants import DEBUG
   log.setLevel(DEBUG)
 
-
-  #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  ConfigFlags.Sim.ISFRun = True
-
-  #Provide input
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
-
-  # Finalize
-  ConfigFlags.lock()
-
+  # Setup config flags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
+  flags = initConfigFlags()
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
+  flags.Sim.ISFRun = True
+  flags.Input.Files = defaultTestFiles.EVNT
+  flags.lock()
 
   ## Initialize a new component accumulator
   cfg = ComponentAccumulator()
-
-
 
   from LArG4SD.LArG4SDToolConfig import LArEMBSensitiveDetectorCfg
   from LArG4SD.LArG4SDToolConfig import LArEMECSensitiveDetectorCfg
@@ -42,29 +35,29 @@ if __name__ == '__main__':
   from LArG4SD.LArG4SDToolConfig import LArActiveSensitiveDetectorToolCfg
   from LArG4SD.LArG4SDToolConfig import LArInactiveSensitiveDetectorToolCfg
 
-  acc1 = LArEMBSensitiveDetectorCfg(ConfigFlags)
+  acc1 = LArEMBSensitiveDetectorCfg(flags)
   tool1 = cfg.popToolsAndMerge(acc1)
   
-  acc2 = LArEMECSensitiveDetectorCfg(ConfigFlags)
+  acc2 = LArEMECSensitiveDetectorCfg(flags)
   tool2 = cfg.popToolsAndMerge(acc2)
 
-  acc3 = LArFCALSensitiveDetectorCfg(ConfigFlags)
+  acc3 = LArFCALSensitiveDetectorCfg(flags)
   tool3 = cfg.popToolsAndMerge(acc3)
   
-  acc4 = LArHECSensitiveDetectorCfg(ConfigFlags)
+  acc4 = LArHECSensitiveDetectorCfg(flags)
   tool4 = cfg.popToolsAndMerge(acc4)
 
-  acc5 = LArDeadSensitiveDetectorToolCfg(ConfigFlags)
+  acc5 = LArDeadSensitiveDetectorToolCfg(flags)
   tool5 = cfg.popToolsAndMerge(acc5)
 
-  toolActiveSensitiveDetector = LArActiveSensitiveDetectorToolCfg(ConfigFlags)
+  toolActiveSensitiveDetector = LArActiveSensitiveDetectorToolCfg(flags)
   cfg.popToolsAndMerge(toolActiveSensitiveDetector)
 
-  toolInactiveSensitiveDetector = LArInactiveSensitiveDetectorToolCfg(ConfigFlags)
+  toolInactiveSensitiveDetector = LArInactiveSensitiveDetectorToolCfg(flags)
   cfg.popToolsAndMerge(toolInactiveSensitiveDetector)
 
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
   f=open("test.pkl","wb")
   cfg.store(f)

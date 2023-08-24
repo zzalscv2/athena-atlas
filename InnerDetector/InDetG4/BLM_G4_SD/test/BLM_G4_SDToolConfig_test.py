@@ -12,18 +12,13 @@ if __name__ == '__main__':
   from AthenaCommon.Constants import DEBUG
   log.setLevel(DEBUG)
 
-
-  #import config flags
+  # Setup config flags
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags = initConfigFlags()
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
   flags.Sim.ISFRun = True
-
-  #Provide input
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
   flags.Input.Files = defaultTestFiles.EVNT
-
-  # Finalize
   flags.lock()
 
   # Setup the tool

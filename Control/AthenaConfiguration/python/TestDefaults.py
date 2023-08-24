@@ -33,3 +33,13 @@ class defaultTestFiles:
     AOD_RUN2_MC = [f"{d}/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1"]
     AOD_RUN3_DATA = [f"{d}/CampaignInputs/data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"]
     AOD_RUN3_MC = [f"{d}/CampaignInputs/mc21/AOD/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_s3873_r13829/1000events.AOD.29787656._000153.pool.root.1"]
+
+
+class defaultGeometryTags:
+    RUN1_2010 = "ATLAS-R1-2010-02-00-00"
+    RUN1_2011 = "ATLAS-R1-2011-02-00-00"
+    RUN1_2012 = "ATLAS-R1-2012-03-02-00"
+    RUN2 = "ATLAS-R2-2016-01-00-01"
+    RUN2_BEST_KNOWLEDGE = "ATLAS-R2-2016-01-02-01"
+    RUN3 = "ATLAS-R3S-2021-03-02-00"
+    RUN4 = "ATLAS-P2-RUN4-03-00-00"
