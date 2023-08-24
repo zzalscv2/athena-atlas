@@ -487,22 +487,29 @@ def createTriggerRecoFlags():
 
 if __name__ == "__main__":
     import unittest
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.Enums import Project
+    flags = initConfigFlags()
 
     class Tests(unittest.TestCase):
+
+        @unittest.skipIf(flags.Common.Project is Project.AthAnalysis, "project is AthAnalysis")
         def test_recoFlags(self):
             """Check if offline reco flags can be added to trigger"""
-            from AthenaConfiguration.AllConfigFlags import initConfigFlags
-
             flags = initConfigFlags()
             flags.Trigger.Offline.Tau.doTauRec=False
             flags.Tau.doTauRec=True
-            self.assertEqual(flags.Trigger.Offline.Tau.doTauRec, False, " dependent flag setting does not work")
-            self.assertEqual(flags.Tau.doTauRec, True, " dependent flag setting does not work")
+            self.assertEqual(flags.Trigger.Offline.Tau.doTauRec, False, "dependent flag setting does not work")
+            self.assertEqual(flags.Tau.doTauRec, True, "dependent flag setting does not work")
 
             newflags = flags.cloneAndReplace('Tau', 'Trigger.Offline.Tau')
 
-            self.assertEqual(flags.Tau.doTauRec, True, " dependent flag setting does not work")
-            self.assertEqual(newflags.Tau.doTauRec, False, " dependent flag setting does not work")
-            newflags.dump()
+            self.assertEqual(flags.Tau.doTauRec, True, "dependent flag setting does not work")
+            self.assertEqual(newflags.Tau.doTauRec, False, "dependent flag setting does not work")
+
+        def test_allFlags(self):
+            """Force load all dynamic flags"""
+            flags = initConfigFlags()
+            flags.loadAllDynamicFlags()
 
     unittest.main()
