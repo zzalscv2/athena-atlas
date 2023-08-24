@@ -20,7 +20,8 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
     m_trigDecisionTool ("Trig::TrigDecisionTool/TrigDecisionTool"),
     //    m_trigMatchingTool("Trig::MatchingTool/TrigMatchingTool", this),
     m_grl ("GoodRunsListSelectionTool/grl", this),
-    m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this)
+    m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this),
+    m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this )
 {
   // Here you put any code for the base initialization of variables,
   // e.g. initialize all pointers to 0.  Note that you should only put
@@ -35,6 +36,9 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("enableOutputTree",  enableOutputTree = false, "Enable output tree");
   declareProperty("enableOutputSamples",  enableOutputSamples = false, "comment");
   declareProperty("enableTrigger",  enableTrigger = true, "comment");
+  declareProperty("enableTracks",  enableTracks = true, "comment");
+  declareProperty("trackLimit",  trackLimit = 500, "comment");
+  declareProperty("enableClusters",  enableClusters = true, "comment");
   declareProperty("writeOnlyTriggers",  writeOnlyTriggers = false, "comment");
   declareProperty("useGRL",  useGRL = true, "comment");
   declareProperty("grlFilename",  grlFilename = "$ROOTCOREBIN/data/ZdcNtuple/data16_hip8TeV.periodAllYear_DetStatus-v86-pro20-19_DQDefects-00-02-04_PHYS_HeavyIonP_All_Good.xml", "comment");
@@ -53,9 +57,12 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("lhcf2022zdc", lhcf2022zdc = true,"comment");
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
+  declareProperty("enableRPD",enableRPD = false,"enable reading RPD decorations");
+
+  declareProperty( "TrackSelectionTool", m_selTool );
 
   m_zdcAnalysisTool.declarePropertyFor (this, "zdcAnalysisTool");
-
+  
 }
 
 /*
@@ -336,6 +343,11 @@ StatusCode ZdcNtuple :: initialize ()
 
   }
 
+  if (enableTracks)
+    {
+      ANA_CHECK(m_selTool.retrieve());
+    }
+
   if (enableTrigger) // HLT related
   {
     ANA_MSG_INFO("Trying to initialize TDT");
@@ -456,20 +468,24 @@ StatusCode ZdcNtuple :: execute ()
   if (!(zdcCalib || zdcLaser || zdcOnly))
   {
 
-    // disable this for 7660
-    ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
-    ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
+    // PLEASE NOTE: the commented sections here will be restored once we have a better sense of the Run 3 HI data
+
+    // Global E_T quantities for centrality
+
+    //ANA_CHECK(evtStore()->retrieve( m_caloSums, "CaloSums") );
+    //ANA_CHECK(evtStore()->retrieve( m_eventShapes, "HIEventShape") );
 
     m_lvl1EnergySumRoI = 0;
-    ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
-    processFCal();
+    //ANA_CHECK(evtStore()->retrieve( m_lvl1EnergySumRoI, "LVL1EnergySumRoI") );
 
-    ANA_CHECK(evtStore()->retrieve( m_mbtsInfo, "MBTSForwardEventInfo") );
-    ANA_CHECK(evtStore()->retrieve( m_mbtsModules, "MBTSModules") );
+    //processFCal();
 
-    m_trigT2MbtsBits = 0;
-    ANA_CHECK(evtStore()->retrieve( m_trigT2MbtsBits, "HLT_xAOD__TrigT2MbtsBitsContainer_T2Mbts") );
-    processMBTS();
+    // MBTS quantities, but may require a derivation to be accessible (required STDM6 in pp)
+    //ANA_CHECK(evtStore()->retrieve( m_mbtsInfo, "MBTSForwardEventInfo") );
+    //ANA_CHECK(evtStore()->retrieve( m_mbtsModules, "MBTSModules") );
+    //m_trigT2MbtsBits = 0;
+    //ANA_CHECK(evtStore()->retrieve( m_trigT2MbtsBits, "HLT_xAOD__TrigT2MbtsBitsContainer_T2Mbts") );
+    //processMBTS();
 
     ANA_CHECK(evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
     processInDet();
@@ -477,7 +493,9 @@ StatusCode ZdcNtuple :: execute ()
 
     ANA_CHECK(evtStore()->retrieve( m_caloClusters, "CaloCalTopoClusters"));
     processClusters();
-    processGaps();
+
+    // Gaps will require some evaluation of Run 3 performance of the clusters
+    //processGaps();
 
     if( lhcf2022||lhcf2022zdc||lhcf2022afp ){
       ANA_CHECK(evtStore()->retrieve( m_afpProtons, "AFPProtonContainer"));
@@ -623,15 +641,17 @@ void ZdcNtuple::processZdcNtupleFromModules()
 		if (nsamplesZdc == 7)
 		  {
 		    t_raw7[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d0Data")).at(isamp);
-		    t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d0Data")).at(isamp);
 		    t_raw7[iside][imod][0][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d1Data")).at(isamp);
+		    t_raw7[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d0Data")).at(isamp);
 		    t_raw7[iside][imod][1][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d1Data")).at(isamp);
 		  }
 		
 		if (nsamplesZdc == 15)
 		  {
-		    t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-		    t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+		    t_raw15[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d0Data")).at(isamp);
+		    t_raw15[iside][imod][0][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0d1Data")).at(isamp);
+		    t_raw15[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d0Data")).at(isamp);
+		    t_raw15[iside][imod][1][1][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1d1Data")).at(isamp);
 		  }
 		
 		if (nsamplesZdc == 24)
@@ -644,9 +664,18 @@ void ZdcNtuple::processZdcNtupleFromModules()
 	
       } else if (zdcMod->zdcType() == 1 && nsamplesZdc == 24) {
         // this is the RPD
-        t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
-        t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
-        t_RPDChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
+	if (enableRPD)
+	  {
+	    t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
+	    t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
+	    t_RPDChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
+	  }
+	else
+	  {
+	    t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = 0;
+	    t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = 0;
+	    t_RPDChannelStatus[iside][zdcMod->zdcChannel()] = 0;
+	  }
       }
 
  
@@ -980,89 +1009,22 @@ void ZdcNtuple::processInDet()
 
 int ZdcNtuple::trackQuality(const xAOD::TrackParticle* track, const xAOD::Vertex* vertex)
 {
-  // Code from Soumya Mohapatra
-  if (vertex) {}
 
   if (!track) return -1;
 
-  float pt      = track->pt();
-  float eta     = track->eta();
-  float chi2    = track->chiSquared();
-  float ndof    = track->numberDoF();
-  float d0      = track->d0();
-  float z0_wrtPV = track->z0();
-  float theta   = track->theta();
-
-  uint8_t   n_Ipix_hits     = track->auxdata<uint8_t>("numberOfInnermostPixelLayerHits");
-  uint8_t   n_Ipix_expected = track->auxdata<uint8_t>("expectInnermostPixelLayerHit");
-  uint8_t   n_NIpix_hits    = track->auxdata<uint8_t>("numberOfNextToInnermostPixelLayerHits");
-  uint8_t   n_NIpix_expected = track->auxdata<uint8_t>("expectNextToInnermostPixelLayerHit");
-  uint8_t   n_sct_hits      = track->auxdata<uint8_t>("numberOfSCTHits");
-  uint8_t   n_pix_hits      = track->auxdata<uint8_t>("numberOfPixelHits");
-  uint8_t   n_sct_holes     = track->auxdata<uint8_t>("numberOfSCTHoles");
-  //uint8_t   n_pix_holes     =track->auxdata<uint8_t>("numberOfPixelHoles");
-  uint8_t   n_sct_dead      = track->auxdata<uint8_t>("numberOfSCTDeadSensors");
-  uint8_t   n_pix_dead      = track->auxdata<uint8_t>("numberOfPixelDeadSensors");
-
-  if (std::abs(eta) > 2.5) return -1;
-
-  bool pass_min_bias = true;
-  {
-    if (n_Ipix_expected > 0) {
-      if (n_Ipix_hits == 0) pass_min_bias = false;
+  bool pass_looseprimary = false;
+  if (m_selTool->accept(*track,vertex))
+    {
+      pass_looseprimary = true;      
     }
-    else {
-      if (n_NIpix_expected > 0 && n_NIpix_hits == 0) pass_min_bias = false;
-    }
-
-    int n_sct = n_sct_hits + n_sct_dead;
-    if     (pt <= 300) {if (n_sct < 2)  pass_min_bias = false;}
-    else if (pt <= 400) {if (n_sct < 4)  pass_min_bias = false;}
-    else if (pt > 400) {if (n_sct < 6)  pass_min_bias = false;}
-
-    int n_pix = n_pix_hits + n_pix_dead;
-    if (n_pix <= 0) pass_min_bias = false;
-    if (std::abs(d0) > 1.5) pass_min_bias = false;
-    if (std::abs(z0_wrtPV * sin(theta)) > 1.5) pass_min_bias = false;
-
-    if (pt > 10000 && TMath::Prob(chi2, ndof) <= 0.01) pass_min_bias = false;
-  }
-
-  bool pass_hi_loose = true;
-  {
-    if (n_Ipix_expected > 0) {
-      if (n_Ipix_hits == 0) pass_hi_loose = false;
-    }
-    else {
-      if (n_NIpix_expected > 0 && n_NIpix_hits == 0) pass_hi_loose = false;
-    }
-
-    if (n_pix_hits == 0) pass_hi_loose = false;
-    if (n_sct_hits < 6) pass_hi_loose = false;
-    if (pt > 10000 && TMath::Prob(chi2, ndof) <= 0.01) pass_hi_loose = false;
-    if (std::abs(d0) > 1.5) pass_hi_loose = false;
-    if (std::abs(z0_wrtPV * sin(theta)) > 1.5) pass_hi_loose = false;
-  }
-
-  bool pass_hi_tight = true;
-  if (!pass_hi_loose) pass_hi_tight = false;
-  else {
-    if (n_pix_hits < 2  ) pass_hi_tight = false;
-    if (n_sct_hits < 8  ) pass_hi_tight = false;
-    if (n_sct_holes > 1  ) pass_hi_tight = false;
-    if (std::abs(d0)   > 1.0) pass_hi_tight = false;
-    if (std::abs(z0_wrtPV * sin(theta)) > 1.0) pass_hi_tight = false;
-    if (ndof == 0) pass_hi_tight = false;
-    else if (chi2 / ndof > 6) pass_hi_tight = false;
-  }
 
   int quality = 0;
-  if (pass_min_bias) quality += 2;
-  if (pass_hi_loose) quality += 4;
-  if (pass_hi_tight) quality += 8;
+  if (pass_looseprimary) quality += 1;
 
   return quality;
+
 }
+
 
 
 void ZdcNtuple::writeTrack(const xAOD::TrackParticle* track, const xAOD::Vertex* vertex, int trk_index)
