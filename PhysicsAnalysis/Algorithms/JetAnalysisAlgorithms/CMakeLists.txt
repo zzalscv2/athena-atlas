@@ -8,7 +8,7 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    PUBLIC_HEADERS JetAnalysisAlgorithms
    LINK_LIBRARIES xAODJet SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib JetCalibToolsLib JetInterface
-   JetCPInterfaces JetAnalysisInterfacesLib
+   JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
 
 atlas_add_dictionary( JetAnalysisAlgorithmsDict

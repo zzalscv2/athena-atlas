@@ -9,5 +9,6 @@
    <class name="CP::JvtEfficiencyAlg" />
    <class name="CP::JvtUpdateAlg" />
    <class name="CP::JetDecoratorAlg" />
+   <class name="CP::JetTruthTagAlg" />
    
 </lcgdict>

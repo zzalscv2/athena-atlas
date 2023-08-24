@@ -6,7 +6,6 @@ from __future__ import print_function
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 import re
-import ROOT
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.
 # Jet calibration recommendations
@@ -191,6 +190,12 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
     if runNNJvtUpdate:
         assert jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
 
+    if (runJvtEfficiency or runFJvtEfficiency) and dataType != "data":
+        # Do the jet <-> truth jet matching before calibration
+        alg = createAlgorithm("CP::JetTruthTagAlg", "JetTruthTagAlg" + postfix)
+        alg.truthJets = "AntiKt4TruthDressedWZJets"
+        seq.append(alg, inputPropName = 'jets', stageName = 'calibration')
+
     # Prepare the jet calibration algorithm
     alg = createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
     addPrivateTool( alg, 'calibrationTool', 'JetCalibrationTool' )
@@ -265,65 +270,58 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
     if runFJvtUpdate :
         alg = createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+postfix )
         addPrivateTool( alg, 'modifierTool', 'JetForwardJvtTool')
-        alg.modifierTool.OutputDec = "passFJVT" #Output decoration
+        alg.modifierTool.OutputDec = "passFJVT_internal" #Output decoration
+        alg.modifierTool.FJVTName = "fJVT"
         # fJVT WPs depend on the MET WP
         # see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EtmissRecommendationsRel21p2#fJVT_and_MET
-        alg.modifierTool.UseTightOP = 1 # 1 = Tight, 0 = Loose
         alg.modifierTool.EtaThresh = 2.5 # Eta dividing central from forward jets
         alg.modifierTool.ForwardMaxPt = 120.0e3 #Max Pt to define fwdJets for JVT
         alg.modifierTool.RenounceOutputs = True
         seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'selection' )
         pass
 
-    # Set up the jet efficiency scale factor calculation algorithm
-    # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
-    if runJvtSelection :
-        alg = createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
-        addPrivateTool( alg, 'efficiencyTool', 'CP::JetJvtEfficiency' )
-        if jetInput == 'EMPFlow':
-            alg.efficiencyTool.MaxPtForJvt = 60e3
-        else:
-            alg.efficiencyTool.MaxPtForJvt = 120e3
-        alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.NNJvt
-        alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
-        alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
-        alg.selection = 'jvt_selection'
-        alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
-        # Disable scale factor decorations if running on data
-        # We still want to run the JVT selection
-        if not runJvtEfficiency or dataType == 'data':
-            alg.scaleFactorDecoration = ''
-            alg.truthJetCollection = ''
-        alg.outOfValidity = 2
-        alg.outOfValidityDeco = 'no_jvt'
-        alg.skipBadEfficiency = 0
-        seq.append( alg, inputPropName = 'jets',
-                    stageName = 'selection' )
+    if runJvtSelection:
+        alg = createAlgorithm("CP::AsgSelectionAlg", "JvtSelectionAlg"+postfix)
+        addPrivateTool(alg, "selectionTool", "CP::NNJvtSelectionTool")
+        alg.selectionTool.MaxPtForJvt = 60e3 if jetInput == "EMPFlow" else 120e3
+        alg.selectionTool.WorkingPoint = "FixedEffPt"
+        alg.selectionDecoration = 'jvt_selection'
+        seq.append( alg, inputPropName = 'particles', stageName = 'selection' )
+        # TODO: How to set the JetContainer in this version?
 
-    if runFJvtSelection :
-        alg = createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
-        addPrivateTool( alg, 'efficiencyTool', 'CP::JetJvtEfficiency' )
-        if jetInput == 'EMPFlow':
-            alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root'
-        else:
-            alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root'
-        alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.fJvt
-        alg.efficiencyTool.WorkingPoint = 'Loose'
-        alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
-        alg.dofJVT = True
-        alg.fJVTStatus = 'passFJVT,as_char'
-        alg.selection = 'fjvt_selection'
-        alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
-        # Disable scale factor decorations if running on data
-        # We still want to run the JVT selection
-        if not runFJvtEfficiency or dataType == 'data':
-            alg.scaleFactorDecoration = ''
-            alg.truthJetCollection = ''
-        alg.outOfValidity = 2
-        alg.outOfValidityDeco = 'no_fjvt'
-        alg.skipBadEfficiency = 0
-        seq.append( alg, inputPropName = 'jets',
-                    stageName = 'selection')
+        if runJvtEfficiency and dataType != "data":
+            alg = createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
+            addPrivateTool( alg, 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
+            alg.efficiencyTool.MaxPtForJvt = 60e3 if jetInput == "EMPFlow" else 120e3
+            alg.efficiencyTool.WorkingPoint = "FixedEffPt"
+            alg.selection = 'jvt_selection'
+            alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
+            alg.outOfValidity = 2
+            alg.outOfValidityDeco = 'no_jvt'
+            alg.skipBadEfficiency = 0
+            seq.append( alg, inputPropName = 'jets', stageName = 'efficiency' )
+
+    if runFJvtSelection:
+        alg = createAlgorithm("CP::AsgSelectionAlg", "FJvtSelectionAlg"+postfix)
+        addPrivateTool(alg, "selectionTool", "CP::FJvtSelectionTool")
+        alg.selectionTool.JvtMomentName = "fJVT" if runFJvtUpdate else "DFCommonJets_fJvt"
+        alg.selectionTool.WorkingPoint = "Loose"
+        alg.selectionDecoration = 'fjvt_selection'
+        seq.append( alg, inputPropName = 'particles', stageName = 'selection' )
+        # TODO: How to set the JetContainer in this version?
+
+        if runFJvtEfficiency and dataType != "data":
+            alg = createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
+            addPrivateTool( alg, 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
+            alg.efficiencyTool.WorkingPoint = "Loose"
+            alg.efficiencyTool.SFFile = f"JetJvtEfficiency/May2020/fJvtSFFile.{jetInput}.root"
+            alg.selection = 'fjvt_selection'
+            alg.scaleFactorDecoration = 'fjvt_effSF_%SYS%'
+            alg.outOfValidity = 2
+            alg.outOfValidityDeco = 'no_fjvt'
+            alg.skipBadEfficiency = 0
+            seq.append( alg, inputPropName = 'jets', stageName = 'efficiency' )
+
 
     # Return the sequence:
     return seq

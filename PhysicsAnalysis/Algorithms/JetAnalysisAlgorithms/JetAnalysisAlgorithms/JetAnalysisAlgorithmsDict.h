@@ -17,5 +17,6 @@
 #include <JetAnalysisAlgorithms/JvtEfficiencyAlg.h>
 #include <JetAnalysisAlgorithms/JvtUpdateAlg.h>
 #include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
+#include <JetAnalysisAlgorithms/JetTruthTagAlg.h>
 
 #endif
