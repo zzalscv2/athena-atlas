@@ -11,6 +11,7 @@ Usage:
   python -m TriggerJobOpts.runHLT  # not recommended (due to missing LD_PRELOADs)
 """
 
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 def lock_and_restrict(flags):
    """Deny access to a few flags and lock"""
@@ -167,6 +168,10 @@ def athenaCfg():
 
    # Lock flags
    lock_and_restrict(flags)
+
+   if flags.Input.isMC:
+      # Disable spurious warnings from HepMcParticleLink (ATR-21838)
+      cfg.addService(CompFactory.MessageSvc(setError=["HepMcParticleLink"]))
 
    if flags.Input.Format is Format.BS:
        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
