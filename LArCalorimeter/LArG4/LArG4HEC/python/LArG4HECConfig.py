@@ -1,15 +1,15 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from LArG4HEC import HECGeometryType
 
+
 # Not used???
-def LArHECLocalCalculatorCfg(ConfigFlags, name="LArHECLocalCalculator", **kwargs):
+def LArHECLocalCalculatorCfg(flags, name="LArHECLocalCalculator", **kwargs):
     return CompFactory.LArHECLocalCalculator(name, **kwargs)
 
 
-def LocalCalibrationCalculatorCfg(ConfigFlags, name="LocalCalibrationCalculator", **kwargs):
+def LocalCalibrationCalculatorCfg(flags, name="LocalCalibrationCalculator", **kwargs):
     return CompFactory.LArG4.HEC.LocalCalibrationCalculator(name, **kwargs)
 
 
@@ -17,35 +17,35 @@ def LocalHECGeometry(name="LocalHECGeometry", **kwargs):
     return CompFactory.LArG4.HEC.LocalGeometry(name, **kwargs)
 
 
-def HECWheelCalculatorCfg(ConfigFlags, name="HECWheelCalculator", **kwargs):
+def HECWheelCalculatorCfg(flags, name="HECWheelCalculator", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(HECGeometryCfg(ConfigFlags)).name)
+    kwargs.setdefault("GeometryCalculator", result.getPrimaryAndMerge(HECGeometryCfg(flags)).name)
     result.addService(CompFactory.LArHECWheelCalculator(name, **kwargs), primary = True)
     return result
 
 
-def LArHECCalibrationWheelCalculatorCfg(ConfigFlags, name="LArHECCalibrationWheelCalculator", **kwargs):
+def LArHECCalibrationWheelCalculatorCfg(flags, name="LArHECCalibrationWheelCalculator", **kwargs):
     result = ComponentAccumulator()
     result.addService( CompFactory.LArG4.HEC.LArHECCalibrationWheelCalculator(name, **kwargs), primary = True )
     return result
 
 
-def HECCalibrationWheelActiveCalculatorCfg(ConfigFlags, name="HECCalibrationWheelActiveCalculator", **kwargs):
+def HECCalibrationWheelActiveCalculatorCfg(flags, name="HECCalibrationWheelActiveCalculator", **kwargs):
     kwargs.setdefault("GeometryType", HECGeometryType.kWheelActive)
-    return LArHECCalibrationWheelCalculatorCfg(ConfigFlags, name, **kwargs)
+    return LArHECCalibrationWheelCalculatorCfg(flags, name, **kwargs)
 
 
-def HECCalibrationWheelInactiveCalculatorCfg(ConfigFlags, name="HECCalibrationWheelInactiveCalculator", **kwargs):
+def HECCalibrationWheelInactiveCalculatorCfg(flags, name="HECCalibrationWheelInactiveCalculator", **kwargs):
     kwargs.setdefault("GeometryType", HECGeometryType.kWheelInactive)
-    return LArHECCalibrationWheelCalculatorCfg(ConfigFlags, name, **kwargs)
+    return LArHECCalibrationWheelCalculatorCfg(flags, name, **kwargs)
 
 
-def HECCalibrationWheelDeadCalculatorCfg(ConfigFlags, name="HECCalibrationWheelDeadCalculator", **kwargs):
+def HECCalibrationWheelDeadCalculatorCfg(flags, name="HECCalibrationWheelDeadCalculator", **kwargs):
     kwargs.setdefault("GeometryType", HECGeometryType.kWheelDead)
-    return LArHECCalibrationWheelCalculatorCfg(ConfigFlags, name, **kwargs)
+    return LArHECCalibrationWheelCalculatorCfg(flags, name, **kwargs)
 
 
-def HECGeometryCfg(ConfigFlags, name="HECGeometry", **kwargs):
+def HECGeometryCfg(flags, name="HECGeometry", **kwargs):
     result = ComponentAccumulator()
     result.addService(CompFactory.LArG4.HEC.HECGeometry(name, **kwargs), primary = True)
     return result

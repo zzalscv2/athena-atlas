@@ -1,15 +1,12 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
-from AthenaConfiguration.ComponentFactory import CompFactory
-LArFastShowerTool = CompFactory.LArFastShowerTool
-LArG4ShowerLibSvc = CompFactory.LArG4ShowerLibSvc
-
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
-def LArG4ShowerLibSvcCfg(ConfigFlags, **kwargs):
+
+def LArG4ShowerLibSvcCfg(flags, **kwargs):
     result = ComponentAccumulator()
     fileNameList = []
-    #TODO make this configurable based on ConfigFlags?
+    #TODO make this configurable based on flags?
     # FCAL1 frozen shower libraries
     fileNameList += [ "LArG4ShowerLibData/MC23_v2/LArG4ShowerLib.FCAL1.11.root",
                       "LArG4ShowerLibData/MC23_v2/LArG4ShowerLib.FCAL1.22.root",
@@ -19,13 +16,13 @@ def LArG4ShowerLibSvcCfg(ConfigFlags, **kwargs):
                       "LArG4ShowerLibData/MC23_v2/LArG4ShowerLib.FCAL2.22.root",
                       "LArG4ShowerLibData/MC23_v2/LArG4ShowerLib.FCAL2.2112.root"]
     kwargs.setdefault("FileNameList", fileNameList)
-    result.addService(LArG4ShowerLibSvc(name="LArG4ShowerLibSvc", **kwargs))
+    result.addService(CompFactory.LArG4ShowerLibSvc(name="LArG4ShowerLibSvc", **kwargs))
     return result
 
 
-def EMBFastShowerCfg(ConfigFlags, **kwargs):
+def EMBFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    result.merge(LArG4ShowerLibSvcCfg(ConfigFlags))
+    result.merge(LArG4ShowerLibSvcCfg(flags))
     kwargs.setdefault("RegionNames",        ["EMB"])
     kwargs.setdefault("EFlagToShowerLib",   False)
     kwargs.setdefault("GFlagToShowerLib",   False)
@@ -41,13 +38,13 @@ def EMBFastShowerCfg(ConfigFlags, **kwargs):
     kwargs.setdefault("DetectorTag",        100000)
     kwargs.setdefault("SensitiveDetector",  "BarrelFastSimDedicatedSD")
     kwargs.setdefault("EMinEneShowerLib",   0.51)
-    result.setPrivateTools( LArFastShowerTool(name="EMBFastShower", **kwargs) )
+    result.setPrivateTools(CompFactory.LArFastShowerTool(name="EMBFastShower", **kwargs))
     return result
 
 
-def EMECFastShowerCfg(ConfigFlags, **kwargs):
+def EMECFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    result.merge(LArG4ShowerLibSvcCfg(ConfigFlags))
+    result.merge(LArG4ShowerLibSvcCfg(flags))
     kwargs.setdefault("RegionNames",        ["EMECPara"])
     kwargs.setdefault("EFlagToShowerLib",   False)
     kwargs.setdefault("GFlagToShowerLib",   False)
@@ -63,13 +60,13 @@ def EMECFastShowerCfg(ConfigFlags, **kwargs):
     kwargs.setdefault("DetectorTag",        200000)
     kwargs.setdefault("SensitiveDetector", "EndcapFastSimDedicatedSD")
     kwargs.setdefault("EMinEneShowerLib",   0.51)
-    result.setPrivateTools( LArFastShowerTool(name="EMECFastShower", **kwargs) )
+    result.setPrivateTools(CompFactory.LArFastShowerTool(name="EMECFastShower", **kwargs))
     return result
 
 
-def FCALFastShowerCfg(ConfigFlags, **kwargs):
+def FCALFastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    result.merge(LArG4ShowerLibSvcCfg(ConfigFlags))
+    result.merge(LArG4ShowerLibSvcCfg(flags))
     kwargs.setdefault("RegionNames",        ["FCALPara"])
     kwargs.setdefault("EFlagToShowerLib",   True)
     kwargs.setdefault("GFlagToShowerLib",   True)
@@ -82,13 +79,13 @@ def FCALFastShowerCfg(ConfigFlags, **kwargs):
     kwargs.setdefault("DetectorTag",        300000)
     kwargs.setdefault("SensitiveDetector", "FCALFastSimDedicatedSD")
     kwargs.setdefault("EMinEneShowerLib",   3.0)
-    result.setPrivateTools( LArFastShowerTool(name="FCALFastShower", **kwargs) )
+    result.setPrivateTools(CompFactory.LArFastShowerTool(name="FCALFastShower", **kwargs))
     return result
 
 
-def FCAL2FastShowerCfg(ConfigFlags, **kwargs):
+def FCAL2FastShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    result.merge(LArG4ShowerLibSvcCfg(ConfigFlags))
+    result.merge(LArG4ShowerLibSvcCfg(flags))
     kwargs.setdefault("RegionNames",        ["FCAL2Para"])
     kwargs.setdefault("EFlagToShowerLib",   True)
     kwargs.setdefault("GFlagToShowerLib",   True)
@@ -101,5 +98,5 @@ def FCAL2FastShowerCfg(ConfigFlags, **kwargs):
     kwargs.setdefault("DetectorTag",        400000)
     kwargs.setdefault("SensitiveDetector", "FCALFastSimDedicatedSD")
     kwargs.setdefault("EMinEneShowerLib",   1.0)
-    result.setPrivateTools( LArFastShowerTool(name="FCAL2FastShower", **kwargs) )
+    result.setPrivateTools(CompFactory.LArFastShowerTool(name="FCAL2FastShower", **kwargs))
     return result

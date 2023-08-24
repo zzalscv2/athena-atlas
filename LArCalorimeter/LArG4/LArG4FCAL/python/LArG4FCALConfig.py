@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import mm,deg,ns
 import math
+
 
 def FCALCalculatorBaseCfg(name="FCALCalculatorBase", **kwargs):
     result = ComponentAccumulator()
@@ -12,22 +12,22 @@ def FCALCalculatorBaseCfg(name="FCALCalculatorBase", **kwargs):
     return result
 
 
-def FCAL1CalculatorCfg(ConfigFlags, name="FCAL1Calculator", **kwargs):
+def FCAL1CalculatorCfg(flags, name="FCAL1Calculator", **kwargs):
     kwargs.setdefault("FCALSampling",1)
     return FCALCalculatorBaseCfg(name, **kwargs)
 
 
-def FCAL2CalculatorCfg(ConfigFlags, name="FCAL2Calculator", **kwargs):
+def FCAL2CalculatorCfg(flags, name="FCAL2Calculator", **kwargs):
     kwargs.setdefault("FCALSampling",2)
     return FCALCalculatorBaseCfg(name, **kwargs)
 
 
-def FCAL3CalculatorCfg(ConfigFlags, name="FCAL3Calculator", **kwargs):
+def FCAL3CalculatorCfg(flags, name="FCAL3Calculator", **kwargs):
     kwargs.setdefault("FCALSampling",3)
     return FCALCalculatorBaseCfg(name, **kwargs)
 
 
-def FCAL1CalibCalculatorCfg(ConfigFlags, name="FCAL1CalibCalculator", **kwargs):
+def FCAL1CalibCalculatorCfg(flags, name="FCAL1CalibCalculator", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FCALdeltaX",7.5*mm)
     kwargs.setdefault("FCALdeltaY",7.5*mm*math.sin(60*deg))
@@ -36,7 +36,7 @@ def FCAL1CalibCalculatorCfg(ConfigFlags, name="FCAL1CalibCalculator", **kwargs):
     return result
 
 
-def FCAL2CalibCalculatorCfg(ConfigFlags, name="FCAL2CalibCalculator", **kwargs):
+def FCAL2CalibCalculatorCfg(flags, name="FCAL2CalibCalculator", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FCALdeltaX",8.179*mm)
     kwargs.setdefault("FCALdeltaY",8.179*mm*math.sin(60*deg))
@@ -45,7 +45,7 @@ def FCAL2CalibCalculatorCfg(ConfigFlags, name="FCAL2CalibCalculator", **kwargs):
     return result
 
 
-def FCAL3CalibCalculatorCfg(ConfigFlags, name="FCAL3CalibCalculator", **kwargs):
+def FCAL3CalibCalculatorCfg(flags, name="FCAL3CalibCalculator", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("FCALdeltaX",9.0*mm)
     kwargs.setdefault("FCALdeltaY",9.0*mm*math.sin(60*deg))
