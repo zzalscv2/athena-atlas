@@ -249,7 +249,8 @@ def PRWEntries(fileName, integral=False):
             else:
                 total += rundir.Get(key.GetName()).GetEntries()
         # Was not one of our histograms
-    return total
+    # Make sure we return an int for the number of events
+    return int(total)
 
 
 ## @brief Get the size of a file via ROOT's TFile
