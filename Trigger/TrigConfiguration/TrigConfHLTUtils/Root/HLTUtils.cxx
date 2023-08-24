@@ -92,7 +92,7 @@ const std::string HLTUtils::hash2string( HLTHash hash, const std::string& catego
 void HLTUtils::hashes2file( const std::string& fileName) {
   std::ofstream fout(fileName);
 
-  for (const auto& [category, hashes] : s_hashStore.hashCat) {
+  for (const auto [category, hashes] : s_hashStore.hashCat) {
     fout << s_newCategory << std::endl << category << std::endl;
     for (const auto [hash, nameptr] : hashes.hash2name) {
       std::string name(nameptr);
