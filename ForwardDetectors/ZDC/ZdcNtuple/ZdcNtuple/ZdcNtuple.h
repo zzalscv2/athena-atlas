@@ -37,6 +37,9 @@
 
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 
+#include "boost/unordered_map.hpp"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+
 #include "xAODForward/AFPProtonContainer.h"
 #include "xAODForward/AFPTrackContainer.h"
 #include <TLorentzVector.h>
@@ -73,6 +76,7 @@ public:
   bool lhcf2022;
   bool lhcf2022zdc;
   bool lhcf2022afp;
+  bool enableRPD;
 
   bool doZdcCalib;
   std::string zdcConfig;
@@ -85,6 +89,7 @@ public:
   asg::AnaToolHandle<Trig::TrigDecisionTool>  m_trigDecisionTool;
   asg::AnaToolHandle<IGoodRunsListSelectionTool> m_grl;
   asg::AnaToolHandle<ZDC::IZdcAnalysisTool> m_zdcAnalysisTool;
+  ToolHandle< InDet::IInDetTrackSelectionTool > m_selTool;
 
 
   const xAOD::EventInfo* m_eventInfo;

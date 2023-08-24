@@ -53,16 +53,24 @@ def createEgammaConfigFlags():
                  'v12phiflip_supercluster')
     egcf.addFlag("Egamma.Calib.MVAVersion", 'egammaMVACalib/offline/v7')
 
-    # The input keys.
-    egcf.addFlag("Egamma.Keys.Input.CaloCells", 'AllCalo')
-    egcf.addFlag("Egamma.Keys.Input.TopoClusters", 'CaloTopoClusters')
+    # The input keys
+    egcf.addFlag("Egamma.Keys.Input.CaloCells",
+                 lambda prevFlags: prevFlags.HeavyIon.Egamma.SubtractedCells
+                 if prevFlags.HeavyIon.Egamma.doSubtractedClusters
+                 else 'AllCalo')
+    egcf.addFlag("Egamma.Keys.Input.TopoClusters",
+                 lambda prevFlags: prevFlags.HeavyIon.Egamma.UncalibCaloTopoCluster
+                 if prevFlags.HeavyIon.Egamma.doSubtractedClusters
+                 else 'CaloTopoClusters')
     egcf.addFlag("Egamma.Keys.Input.TruthParticles", 'TruthParticles')
     egcf.addFlag("Egamma.Keys.Input.TruthEvents", 'TruthEvents')
     egcf.addFlag("Egamma.Keys.Input.TrackParticles", 'InDetTrackParticles') # Input to GSF.
 
     # The topoclusters selected for egamma from the input topoclusters.
-    egcf.addFlag("Egamma.Keys.Internal.EgammaTopoClusters", 
-                 'egammaTopoClusters')
+    egcf.addFlag("Egamma.Keys.Internal.EgammaTopoClusters",
+                 lambda prevFlags: prevFlags.HeavyIon.Egamma.EgammaTopoCluster
+                 if prevFlags.HeavyIon.Egamma.doSubtractedClusters
+                 else 'egammaTopoClusters')
     egcf.addFlag("Egamma.Keys.Internal.ForwardTopoClusters",
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Internal.EgammaTopoClusters + 'Fwd'))

@@ -114,6 +114,9 @@ def createTrackingConfigFlags():
     # Skip ambiguity solver in hadronic ROI
     icf.addFlag("Tracking.doSkipAmbiROI", False)
 
+    # Guaranteed not-subtracted topo clusters even in heavy ions
+    icf.addFlag("Tracking.TopoClusters", "CaloTopoClusters")
+    icf.addFlag("Tracking.EgammaTopoClusters", "egammaTopoClusters")
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
