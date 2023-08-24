@@ -260,7 +260,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
     StatusCode getWeight( const xAOD::Jet& jet, bool passSel, asg::AcceptData &acceptData ) const;
 
     /// Get scale factor and efficiency
-    std::pair<double,double> getSF( const xAOD::Jet& jet, std::string truthLabelStr ) const;
+    std::pair<double,double> getSF( const xAOD::Jet& jet, const std::string& truthLabelStr ) const;
     std::string getTruthLabelStr( const xAOD::Jet& jet, asg::AcceptData &acceptData ) const;
 
     /// Print configured cuts
