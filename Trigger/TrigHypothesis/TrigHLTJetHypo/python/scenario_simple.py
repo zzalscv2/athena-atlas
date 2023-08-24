@@ -82,31 +82,33 @@ def get_condition_args_from_chainpart(cp):
                 key = 'bgnone'
                 values = v.split(key)
                 assert values[1] == '', 'bgn1 condition takes only one argument, two were given'
-                
+
                 gn1_WPs = {
                     '': float('-inf'),
-                    "95": -1.7035,
-                    "90": -0.7806,
-                    "85": 0.0764,
-                    "82": 0.5726,
-                    "80": 0.9087,
-                    "77": 1.3844,
-                    "75": 1.6777,
-                    "60": 3.6329,
+                    "95": -2.0886,
+                    "90": -0.7981,
+                    "85": 0.4462,
+                    "82": 1.0965,
+                    "80": 1.4991,
+                    "77": 2.0717,
+                    "75": 2.4110,
+                    "60": 4.5465,
                 }
 
                 assert (values[0] in gn1_WPs.keys()),f"The efficiency of the specified GN1 cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the GN1 WP dictionary."
                 
                 lo   = gn1_WPs[values[0]]
+                
                 vals = {
                     'min': str(lo),
                     'max': '',
                     'cfrac': '0.018',
-                    'namePb': 'fastGN120230327_pb', 
-                    'namePc': 'fastGN120230327_pc', 
-                    'namePu': 'fastGN120230327_pu',
+                    'namePb': 'fastGN120230331_pb', 
+                    'namePc': 'fastGN120230331_pc', 
+                    'namePu': 'fastGN120230331_pu',
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
+
                 condargs.append((k, vals))
             elif 'bdips' in v:
                 key = 'bdips'
