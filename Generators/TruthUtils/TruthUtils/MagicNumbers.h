@@ -6,8 +6,8 @@
 #ifndef ATLASHEPMC_MAGICNUMBERS_H
 #define ATLASHEPMC_MAGICNUMBERS_H
 
-#include <limits> 
-#include <cstdint> 
+#include <limits>
+#include <cstdint>
 #include <memory>
 #include <deque>
 #include <type_traits>
@@ -21,10 +21,13 @@ namespace HepMC {
 /// @brief Constant defining the barcode threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
 constexpr int SIM_BARCODE_THRESHOLD = 200000;
 
-/// @brief Constant defining the barcode threshold for regenerated particles, eg. secondary simulated particles following an interaction
+/// @brief Constant defining the barcode threshold for regenerated particles, i.e. particles surviving an interaction
 constexpr int SIM_REGENERATION_INCREMENT = 1000000;
 
+/// @brief Constant defining the barcode threshold for regenerated particles, i.e. particles surviving an interaction
 constexpr int SIM_STATUS_INCREMENT = 100000;
+
+/// @brief Constant definiting the status threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
 constexpr int SIM_STATUS_THRESHOLD = 20000;
 
 constexpr int PARTONPDGMAX = 43;
