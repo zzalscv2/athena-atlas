@@ -83,6 +83,7 @@ namespace DerivationFramework{
 	  || (m_DSID>=600737 && m_DSID<=600738) //Powheg+P8 ttbb - ATLMCPROD-9179
 	  || (m_DSID>=601226 && m_DSID<=601227) // Powheg+P8 ttbb bornzerodamp cut 5, ATLMCPROD-9694
           || (m_DSID>=407342 && m_DSID<=407344) //Powheg+P8 ttbar HT-filtered
+          || (m_DSID>=407345 && m_DSID<=407347) //Powheg+P8 ttbar MET-filtered
           || (m_DSID>=407348 && m_DSID<=407350) //aMC@NLO+P8 ttbar HT-filtered
           ||  m_DSID==504330 || m_DSID==504331 || m_DSID==504332 || m_DSID==504334 || m_DSID==504335 || m_DSID==504336 || m_DSID==504338 || m_DSID==504342 || m_DSID==504343 || m_DSID==504344 || m_DSID==504346//aMC@NLO+P8 refined ttZ
           ||  m_DSID==601491 || m_DSID==601492  //Pow+Py8 ttbar pTHard variations - ATLMCPROD-10168
@@ -136,6 +137,16 @@ namespace DerivationFramework{
       }
     }
     // the default is Pythia6, so no need to list the Pythia6 showered samples
+    // these are:
+    // 410000-410002
+    // 410007, 410009,  410120-410121
+    // 301528-301532
+    // 303722-303726
+    // 407009-407012
+    // 407029-407036
+    // 410120
+    // 426090-426097
+    // 429007
     else{
       m_GenUsed=Pythia6;
     }
