@@ -205,13 +205,12 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
         # Options for Truth Strategy : Requires full pile-up truth containers for some
         if flags.PhysVal.IDPVM.setTruthStrategy in ['All', 'PileUp']:
-            if ("xAOD::TruthPileupEventContainer#TruthPileupEvents"
-                    in flags.Input.TypedCollections):
-                kwargs.setdefault("PileupSwitch",
-                                  flags.PhysVal.IDPVM.setTruthStrategy)
-            else:
-                print('WARNING Truth Strategy for InDetPhysValMonitoring set to %s but TruthPileupEvents are missing in the input; resetting to HardScatter only' % (
-                    flags.PhysVal.IDPVM.setTruthStrategy))
+            if not("xAOD::TruthPileupEventContainer#TruthPileupEvents"
+                   in flags.Input.TypedCollections):
+                print('WARNING Truth Strategy for InDetPhysValMonitoring set to %s but TruthPileupEvents are missing in the input' % (flags.PhysVal.IDPVM.setTruthStrategy))
+            kwargs.setdefault("PileupSwitch",
+                              flags.PhysVal.IDPVM.setTruthStrategy)
+
         elif flags.PhysVal.IDPVM.setTruthStrategy != 'HardScatter':
             print('WARNING Truth Strategy for for InDetPhysValMonitoring set to invalid option %s; valid flags are ["HardScatter", "All", "PileUp"]' % (
                 flags.PhysVal.IDPVM.setTruthStrategy))
