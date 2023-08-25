@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/MuonRetriever.h"
@@ -27,8 +27,7 @@ namespace JiveXML {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "Muons";
-    declareProperty("StoreGateKey", m_sgKey, 
+    declareProperty("StoreGateKey", m_sgKey= "Muons", 
         "Collection to be first in output, shown in Atlantis without switching");
   }
    
@@ -63,7 +62,7 @@ namespace JiveXML {
 //        return StatusCode::WARNING;
     }
       
-    for (; iterator!=end; iterator++) {
+    for (; iterator!=end; ++iterator) {
       // hack to remove CaloMuons, jpt 31Mar10 
       if ((iterator.key() != m_sgKey) && (iterator.key() != "CaloMuonCollection") && 
 	  (iterator.key() != "CaloESDMuonCollection" ))  {

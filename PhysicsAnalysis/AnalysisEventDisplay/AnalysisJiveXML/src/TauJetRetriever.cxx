@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/TauJetRetriever.h"
@@ -34,8 +34,7 @@ namespace JiveXML {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "TauRecContainer";
-    declareProperty("StoreGateKey", m_sgKey);
+    declareProperty("StoreGateKey", m_sgKey = "TauRecContainer");
     declareProperty("DoWriteHLT", m_doWriteHLT = false); // ignore HLTAutoKey objects
     m_fastSimSGFlag = false; }
   /**
@@ -71,7 +70,7 @@ namespace JiveXML {
 //        return StatusCode::WARNING;
     }
 
-   for (; iterator!=end; iterator++) {
+   for (; iterator!=end; ++iterator) {
      m_fastSimSGFlag = false; //reset
       if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << " Trying TauJets from:  " << iterator.key() << endmsg;
       std::string::size_type position = iterator.key().find("HLT",0); // special case. Normally: HLTAutokey 
