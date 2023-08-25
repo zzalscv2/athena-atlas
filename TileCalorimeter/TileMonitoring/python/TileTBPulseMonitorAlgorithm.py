@@ -161,7 +161,7 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
 
     flags = initConfigFlags()
     parser = flags.getArgumentParser()
@@ -182,6 +182,7 @@ if __name__=='__main__':
     timeRange = [int(time) for time in args.timeRange]
 
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Output.HISTFileName = 'TileTBPulseMonitorOutput.root'
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False

@@ -166,8 +166,9 @@ if __name__=='__main__':
 
     fragIDs = [int(fragID, base=16) for fragID in args.fragIDs]
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Output.HISTFileName = 'TileDigitsFlxMonitorOutput.root'
     flags.DQ.useTrigger = False
     flags.DQ.enableLumiAccess = False
