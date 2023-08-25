@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibDataQuality/LArRampValidationAlg.h"
@@ -109,7 +109,6 @@ bool LArRampValidationAlg::validateChannel(const LArCondObj& ref, const LArCondO
 
 
   HWIdentifier febid=m_onlineHelper->feb_Id(chid);
-  HWIdentifier febAndGainId=m_onlineHelper->channel_Id(febid,gain); //mis-use channel number for the gain
   Identifier offlineID = cabling->cnvToIdentifier(chid);
 
   ++m_nEntriesGlobal;
