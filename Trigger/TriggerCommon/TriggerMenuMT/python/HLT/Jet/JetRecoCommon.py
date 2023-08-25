@@ -429,13 +429,9 @@ def defineVRTrackJets(Rmax, Rmin, VRMassScale, Ptmin, prefix, suffix):
 
 
 def defineHIJets(jetRecoDict,clustersKey=None,prefix='',suffix=''):
-    minpt = {
-        4:  7000,
-        10: 50000,
-    }
+    minpt = {2:7000, 3:7000, 4:7000, 6:7000, 10:50000}
     jetalg, jetradius, jetextra = interpretRecoAlg(jetRecoDict["recoAlg"])
     actualradius = float(jetradius)/10
-
     constitMods = [] # modifiers
     jetConstit = []
     jetConstit = JetInputConstitSeq( "HLT_HIConstit",xAODType.CaloCluster, constitMods, inputname=clustersKey, outputname=clustersKey,label='HI')
