@@ -192,6 +192,8 @@ StatusCode TrigCaloDataAccessSvc::loadFullCollections ( const EventContext& cont
   cont.clear();
   cont.reserve( cont_to_copy->size() );
   for( const CaloCell* c : *cont_to_copy ) cont.push_back_fast( c );
+  cont.setIsOrdered(true);
+  cont.setIsOrderedAndComplete(true);
       
   ATH_CHECK( sc == 0 );
   
