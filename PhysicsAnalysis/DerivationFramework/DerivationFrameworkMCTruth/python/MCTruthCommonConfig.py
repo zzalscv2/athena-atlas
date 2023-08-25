@@ -261,6 +261,16 @@ def AddTopQuarkAndDownstreamParticlesCfg(flags,
                                               prefix='TopQuark',
                                               rejectHadronChildren=rejectHadronChildren)
 
+def AddTauAndDownstreamParticlesCfg(flags,
+                                   generations=1,
+                                   rejectHadronChildren=False):
+    """Add tau and downstream particles"""
+    return AddParentAndDownstreamParticlesCfg(flags,
+                                              generations=generations,
+                                              parents=[15],
+                                              prefix='Taus',
+                                              rejectHadronChildren=rejectHadronChildren)
+
 # Following commented methods don't seem to be used for anything...
 
 #def addBottomQuarkAndDownstreamParticles(kernel=None, generations=1, rejectHadronChildren=False):
