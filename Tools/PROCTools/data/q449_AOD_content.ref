@@ -852,10 +852,6 @@ HLT_AntiKt4EMTopoSKJets_nojcalib
 HLT_AntiKt4EMTopoSKJets_nojcalibAux.
 HLT_AntiKt4HIJets
 HLT_AntiKt4HIJetsAux.
-HLT_AntiKt4HIJets_Unsubtracted
-HLT_AntiKt4HIJets_UnsubtractedAux.
-HLT_AntiKt4HIJets_sub_noCalib
-HLT_AntiKt4HIJets_sub_noCalibAux.
 HLT_AntiKtVR30Rmax4Rmin02PV0TrackJets
 HLT_AntiKtVR30Rmax4Rmin02PV0TrackJetsAux.
 HLT_Bmumux
