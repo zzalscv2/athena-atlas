@@ -69,11 +69,6 @@ protected:
         
         int m_etaMAX=0;
         
-        int m_FPGA_ET_central_EM [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]={{0}};
-        int m_FPGA_ET_central_HAD[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]={{0}};
-        int m_FPGA_ET_forward_EM [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]={{0}};
-        int m_FPGA_ET_forward_HAD[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]={{0}};
-        
         std::unordered_map<int,int > m_FPGA_ET_EM;
         std::unordered_map<int,int > m_FPGA_ET_HAD;        
         
