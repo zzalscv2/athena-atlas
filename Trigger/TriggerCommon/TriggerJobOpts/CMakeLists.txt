@@ -9,8 +9,8 @@ atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_add_test( TriggerConfigFlagsTest
-   SCRIPT python -m unittest TriggerJobOpts.TriggerConfigFlags
-   POST_EXEC_SCRIPT noerror.sh )
+   SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose
+   POST_EXEC_SCRIPT nopost.sh )
 
 if (NOT XAOD_ANALYSIS)
 
@@ -31,7 +31,6 @@ if (NOT XAOD_ANALYSIS)
    atlas_add_test( Lvl1MuonSimulationConfig
       SCRIPT python -m TriggerJobOpts.Lvl1MuonSimulationConfig
       PRIVATE_WORKING_DIRECTORY
-      PROPERTIES TIMEOUT 300
       POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( Run3ConfigFetchKeysTest
