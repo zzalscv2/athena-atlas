@@ -211,5 +211,5 @@ def _recoZDC(prevFlags):
         from libpyeformat_helper import SubDetector, DetectorMask
         maskbits=GetFileMD(prevFlags.Input.Files).get("detectorMask",[0x0])
         maskbits=maskbits[0] #Check the first input file
-        detMask=DetectorMask(maskbits & 0xFFFFFFFF, maskbits >> 64) #DetectorMask constructor swallows two 64bit ints
+        detMask=DetectorMask(maskbits & 0xFFFFFFFFFFFFFFFF, maskbits >> 64) #DetectorMask constructor swallows two 64bit ints
         return detMask.is_set(SubDetector.FORWARD_ZDC)
