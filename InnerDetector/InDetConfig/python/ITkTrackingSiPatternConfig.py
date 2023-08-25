@@ -26,7 +26,6 @@ def ITkTrackingSiPatternCfg(flags,
                   flags.Tracking.ActiveConfig.extension),
             TracksName=list(InputCollections)))
 
-    is_acts_ambi=False
     # Can use FastTrackFinder instead of SiSPSeededTrackFinder
     if flags.Tracking.useITkFTF:
 
@@ -55,7 +54,6 @@ def ITkTrackingSiPatternCfg(flags,
         from ActsConfig.TrackingComponentConfigurer import (
             TrackingComponentConfigurer)
         configuration_settings = TrackingComponentConfigurer(flags)
-        is_acts_ambi = TrackingComponentConfigurer(flags).doActsTrack and flags.Acts.doAmbiguityResolution
 
         # Athena Track
         if configuration_settings.doAthenaTrack:
@@ -90,21 +88,15 @@ def ITkTrackingSiPatternCfg(flags,
             from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
             acc.merge(ActsTrackFindingCfg(flags))
 
-            if flags.Acts.doAmbiguityResolution :
-                from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
-                acc.merge(ActsAmbiguityResolutionCfg(flags))
 
+        # Convert Tracks Acts -> Athena (before ambi)
         if configuration_settings.doActsToAthenaTrack:
-            if not flags.Acts.doAmbiguityResolution :
-                acts_athena_tracks_name = SiSPSeededTrackCollectionKey
-            else :
-                acts_athena_tracks_name = ResolvedTrackCollectionKey
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
-                                               TracksLocation=acts_athena_tracks_name))
-
+                                               TracksLocation=SiSPSeededTrackCollectionKey))
+            
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-    if flags.Tracking.doTruth and not is_acts_ambi:
+    if flags.Tracking.doTruth and (configuration_settings.doAthenaTrack or configuration_settings.doActsToAthenaTrack):
         acc.merge(ITkTrackTruthCfg(
             flags,
             Tracks=SiSPSeededTrackCollectionKey,
@@ -126,19 +118,32 @@ def ITkTrackingSiPatternCfg(flags,
             CollectionName=SiSPSeededTrackCollectionKey,  # Input
             AliasName=ResolvedTrackCollectionKey))       # Output
 
-    elif not is_acts_ambi:
-        # with Acts.doAmbiguityResolution the converter will directly produce
-        # tracks with the key ResolvedTrackCollectionKey
-        from TrkConfig.TrkAmbiguitySolverConfig import (
-            ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg)
-        acc.merge(ITkTrkAmbiguityScoreCfg(
-            flags,
-            SiSPSeededTrackCollectionKey=SiSPSeededTrackCollectionKey,
-            ClusterSplitProbContainer=ClusterSplitProbContainer))
+    else:
+        # If we run Athena tracking we also want CTIDE ambi
+        if configuration_settings.doAthenaAmbiguityResolution:
+            # with Acts.doAmbiguityResolution the converter will directly produce
+            # tracks with the key ResolvedTrackCollectionKey
+            from TrkConfig.TrkAmbiguitySolverConfig import (
+                ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg)
+            acc.merge(ITkTrkAmbiguityScoreCfg(
+                flags,
+                SiSPSeededTrackCollectionKey=SiSPSeededTrackCollectionKey,
+                ClusterSplitProbContainer=ClusterSplitProbContainer))
+            
+            acc.merge(ITkTrkAmbiguitySolverCfg(
+                flags,
+                ResolvedTrackCollectionKey=ResolvedTrackCollectionKey))
 
-        acc.merge(ITkTrkAmbiguitySolverCfg(
-            flags,
-            ResolvedTrackCollectionKey=ResolvedTrackCollectionKey))
+        # If we run Acts tracking we may want Acts ambi, depending on the flag
+        if configuration_settings.doActsAmbiguityResolution:
+            # Schedule ACTS ambi. resolution and eventually the track convertions  
+            from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
+            acc.merge(ActsAmbiguityResolutionCfg(flags))
+            
+        if configuration_settings.doActsToAthenaResolvedTrack:
+            from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
+            acc.merge(ActsToTrkConvertorAlgCfg(flags,
+                                               TracksLocation=ResolvedTrackCollectionKey))                
 
     if flags.Tracking.doTruth:
         acc.merge(ITkTrackTruthCfg(

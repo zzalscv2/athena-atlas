@@ -23,12 +23,14 @@ class TrackingComponentConfigurer:
         self.AthenaSpacePoint = False
         self.AthenaSeed = False
         self.AthenaTrack = False
+        self.AthenaAmbiguityResolution = False
 
         # Acts Algorithms
         self.ActsCluster = False
         self.ActsSpacePoint = False
         self.ActsSeed = False
         self.ActsTrack = False
+        self.ActsAmbiguityResolution = False
 
         # Athena -> Acts EDM Converters
         self.AthenaToActsClusterConverter = False
@@ -39,10 +41,11 @@ class TrackingComponentConfigurer:
         self.ActsToAthenaSpacePointConverter = False
         self.ActsToAthenaSeedConverter = False
         self.ActsToAthenaTrackConverter = False
+        self.ActsToAthenaResolvedTrackConverter = False
 
         # Enable the requested configurations
         for req in configuration_requests:
-            eval(f"self.{self.__configuration_setters[req]}()")
+            eval(f"self.{self.__configuration_setters[req]}(flags)")
 
         # To-Do
         # Possibly check the resulting configuration and print useful statements
@@ -57,18 +60,22 @@ class TrackingComponentConfigurer:
         message += f"    * Space Point Formation: {'ENABLED' if self.doAthenaSpacePoint else 'DISABLED'}\n"
         message += f"    * Seeding: {'ENABLED' if self.doAthenaSeed else 'DISABLED'}\n"
         message += f"    * Track Finding: {'ENABLED' if self.doAthenaTrack else 'DISABLED'}\n"
+        message += f"    * Ambiguity Resolution: {'ENABLED' if self.doAthenaAmbiguityResolution else 'DISABLED'}\n"
         message += " - Acts Algorithms:\n"
         message += f"    * Clustering: {'ENABLED' if self.doActsCluster else 'DISABLED'}\n"
         message += f"    * Space Point Formation: {'ENABLED' if self.doActsSpacePoint else 'DISABLED'}\n"
         message += f"    * Seeding: {'ENABLED' if self.doActsSeed else 'DISABLED'}\n"
         message += f"    * Track Finding: {'ENABLED' if self.doActsTrack else 'DISABLED'}\n"
+        message += f"    * Ambiguity Resolution: {'ENABLED' if self.doActsAmbiguityResolution else 'DISABLED'}\n"
         message += " - Athena -> Acts EDM Convertions:\n"
         message += f"    * Cluster: {'ENABLED' if self.doAthenaToActsCluster else 'DISABLED'}\n"
         message += f"    * Space Point: {'ENABLED' if self.doAthenaToActsSpacePoint else 'DISABLED'}\n"
         message += " - Acts -> Athena EDM Convertions:\n"
         message += f"    * Cluster: {'ENABLED' if self.doActsToAthenaCluster else 'DISABLED'}\n"
         message += f"    * Space Point: {'ENABLED' if self.doActsToAthenaSpacePoint else 'DISABLED'}\n"
-        message += f"    * Seed: {'ENABLED' if self.doActsToAthenaSeed else 'DISABLED'}"
+        message += f"    * Seed: {'ENABLED' if self.doActsToAthenaSeed else 'DISABLED'}\n"
+        message += f"    * Tracks: {'ENABLED' if self.doActsToAthenaTrack else 'DISABLED'}\n"
+        message += f"    * Resolved Tracks: {'ENABLED' if self.doActsToAthenaResolvedTrack else 'DISABLED'}"
         return message
         
     @property
@@ -127,19 +134,32 @@ class TrackingComponentConfigurer:
     def doActsToAthenaTrack(self) -> bool:
         return self.ActsToAthenaTrackConverter
 
+    @property
+    def doAthenaAmbiguityResolution(self) -> bool:
+        return self.AthenaAmbiguityResolution
+
+    @property
+    def doActsAmbiguityResolution(self) -> bool:
+        return self.ActsAmbiguityResolution
+
+    @property
+    def doActsToAthenaResolvedTrack(self) -> bool:
+        return self.ActsToAthenaResolvedTrackConverter
+
     def producesActsClusters(self) -> bool:
         return self.ActsCluster or self.AthenaToActsClusterConverter
     
     def producesActsSpacePoints(self) -> bool:
         return self.ActsSpacePoint or self.AthenaToActsSpacePointConverter
 
-    def AthenaChain(self):
+    def AthenaChain(self, flags):
         self.AthenaCluster = True
         self.AthenaSpacePoint = True
         self.AthenaSeed = True
         self.AthenaTrack = True
+        self.AthenaAmbiguityResolution = True
 
-    def ActsChain(self):
+    def ActsChain(self, flags):
         self.ActsCluster = True
         self.ActsSpacePoint = True
         self.ActsSeed = True
@@ -150,15 +170,19 @@ class TrackingComponentConfigurer:
         # Ambiguity resolution can follow if ActsTrack is 
         # enabled. Ambi. can be activated/deactivated with 
         # the flag: Acts.doAmbiguityResolution
+        # For now we always disable it!
+        if flags.Acts.doAmbiguityResolution:
+            self.ActsAmbiguityResolution = False
 
-    def ValidateActsClusters(self):
+    def ValidateActsClusters(self, flags):
         self.ActsCluster = True
         self.ActsToAthenaClusterConverter = True
         self.AthenaSpacePoint = True
         self.AthenaSeed = True
         self.AthenaTrack = True
+        self.AthenaAmbiguityResolution = True
         
-    def ValidateActsSpacePoints(self):
+    def ValidateActsSpacePoints(self, flags):
         self.AthenaCluster = True
         self.AthenaToActsClusterConverter = True
         self.ActsSpacePoint = True
@@ -166,15 +190,17 @@ class TrackingComponentConfigurer:
         # so we go for the seeding convertion (i.e. ActsTrk::SiSpacePointSeedMaker)
         self.ActsToAthenaSeedConverter = True
         self.AthenaTrack = True
+        self.AthenaAmbiguityResolution = True
 
-    def ValidateActsSeeds(self):
+    def ValidateActsSeeds(self, flags):
         self.AthenaCluster = True
         self.AthenaSpacePoint = True
         self.AthenaToActsSpacePointConverter = True
         self.ActsToAthenaSeedConverter = True
         self.AthenaTrack = True
+        self.AthenaAmbiguityResolution = True
 
-    def ValidateActsTracks(self):
+    def ValidateActsTracks(self, flags):
         # sequence is still a work in progress
         # Requires Athena cluster and cluster EDM converter 
         # for adding decoration to cluster objects
@@ -184,9 +210,18 @@ class TrackingComponentConfigurer:
         self.ActsSpacePoint = True
         self.ActsSeed = True
         self.ActsTrack = True
-        self.ActsToAthenaTrackConverter = True
+        # If we do not want acts ambi resolution, first do the track convertion
+        # and then the Athena ambi
+        # If we want acts ambi, first do the ambi and then convert the tracks
+        # without Athena ambi
+        if flags.Acts.doAmbiguityResolution:
+            self.ActsAmbiguityResolution = True
+            self.ActsToAthenaResolvedTrackConverter = True
+        else:
+            self.ActsToAthenaTrackConverter = True
+            self.AthenaAmbiguityResolution = True
 
-    def BenchmarkSpot(self):
+    def BenchmarkSpot(self, flags):
         # Very not-standard configuration
         self.AthenaCluster = True
         self.ActsCluster = True
@@ -195,4 +230,4 @@ class TrackingComponentConfigurer:
         self.ActsSeed = True
         self.ActsToAthenaSeedConverter = True
         self.AthenaTrack = True
-
+        self.AthenaAmbiguityResolution = True
