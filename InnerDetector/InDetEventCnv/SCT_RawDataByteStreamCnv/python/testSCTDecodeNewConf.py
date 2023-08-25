@@ -7,7 +7,8 @@ if __name__ == "__main__":
     flags = initConfigFlags()
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data"]
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-03"
-    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Detector.GeometrySCT = True
     flags.lock()
 

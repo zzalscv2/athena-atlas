@@ -26,7 +26,8 @@ if __name__=="__main__":
     flags.Input.RunNumber = 310000 # MC16e 2018 run number
     flags.Input.TimeStamp = 1550000000 # MC16e 2018 time stamp
     flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-01"
-    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Detector.GeometrySCT = True
     flags.lock()
 

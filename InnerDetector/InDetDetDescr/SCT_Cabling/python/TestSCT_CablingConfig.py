@@ -42,7 +42,8 @@ if __name__=="__main__":
     flags.Input.TimeStamp = 1500000000
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/ConditionsRun1RunNumbers
     flags.IOVDb.GlobalTag = "OFLCOND-RUN12-SDR-25"
-    flags.GeoModel.AtlasVersion = "ATLAS-R2-2015-03-01-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Detector.GeometrySCT = True
     flags.lock()
 

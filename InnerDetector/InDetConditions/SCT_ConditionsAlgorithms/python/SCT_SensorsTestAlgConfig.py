@@ -26,7 +26,8 @@ if __name__=="__main__":
     flags.Input.RunNumber = 142913
     flags.Input.TimeStamp = 1260630000 # During run 142913, 12/12/2009 @ 3:00pm (UTC)
     flags.IOVDb.GlobalTag = "COMCOND-BLKPA-RUN1-09"
-    flags.GeoModel.AtlasVersion = "ATLAS-R1-2012-03-02-00"
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN1_2012
     flags.Detector.GeometrySCT = True
     flags.lock()
 
