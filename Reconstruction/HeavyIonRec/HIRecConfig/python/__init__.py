@@ -2,4 +2,4 @@
 
 from .HIModeFlags import (HImode,HIPmode)
 
-__all__ = ['HImode','HIPmode']
+__all__ = ['HImode','HIPmode','UPCmode']
