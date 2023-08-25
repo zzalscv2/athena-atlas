@@ -1,12 +1,11 @@
 <lcgdict>
   <!-- Track -->
   <class name="Trk::Track" >
+    <field name="m_trackStateVector" transient="false" />
     <field name="m_cachedParameterVector" transient="true" />
     <field name="m_cachedOutlierVector" transient="true" />
     <field name="m_cachedMeasurementVector" transient="true" />
     <field name="m_perigeeParameters" transient="true" />
-    <field name="m_perigeeSearch" transient="true" />
-    <field name="m_trackStateVector" transient="false" />
     <field name="s_numberOfInstantiations" transient="true" />
   </class>
  
@@ -25,7 +24,6 @@
   <!--MTsoS -->
   <class name = "Trk::MultiComponentStateOnSurface" >
     <field name = "m_multiComponentState" transient="true" />
-    <field name = "m_mixtureModeQoverP" transient="true" />
   </class>
   <class name="MultiComponentStateOnSurfaceDV" />  
 
