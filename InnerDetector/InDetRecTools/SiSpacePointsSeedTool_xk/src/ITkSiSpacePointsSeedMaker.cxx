@@ -278,7 +278,6 @@ void SiSpacePointsSeedMaker::newEvent(const EventContext &ctx, EventData &data, 
            * This will also add the point to the l_spforseed list and update
            * the i_spforseed iterator
            **/
-
           SiSpacePointForSeed *sps = newSpacePoint(data, sp);
           /// this can occur if we fail the eta cut
           if (!sps)
@@ -1676,8 +1675,9 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
   for (; iter_centralSP != iter_endBottomCands[0]; ++iter_centralSP)
   {
     const float &R = (*iter_centralSP)->radius();
-   
-    if(R > data.RTmax) break; ///< stop if we have moved outside our radial region of interest.
+
+    if(R > data.RTmax)
+      break;
 
     /// global coordinates of the central SP
     const float &X = (*iter_centralSP)->x();
@@ -1841,7 +1841,7 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
         /// this is effectively a segment-level eta cut - exclude too shallow seed segments
         if (std::abs(tz) > dzdrmax)
           continue;
-        if (m_fastTracking && (*iter_otherSP)->radius() < 50. && std::abs(tz) > 1.5)
+        if (m_fastTracking && (*iter_otherSP)->radius() < 50. && (*iter_otherSP)->z() > 250. && std::abs(tz) > 1.5)
           continue;
 
         /// add SP to the list

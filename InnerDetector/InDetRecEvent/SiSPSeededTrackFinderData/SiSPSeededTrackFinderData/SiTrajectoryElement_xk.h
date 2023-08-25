@@ -103,7 +103,7 @@ namespace InDet{
       //@{
       // if rad_length==-1, then the private member m_radlength is used.
       void noiseProduction
-	(int,const Trk::PatternTrackParameters&,double rad_length = -1.);
+	(int,const Trk::PatternTrackParameters&,double rad_length = -1., bool useMomentum=false);
       void noiseInitiate();
 
       bool addNextClusterB();
@@ -475,6 +475,7 @@ namespace InDet{
       double                                      m_xi2multi{}    ;
       double                                      m_localTransform[13]{}      ;     /// the transform for this element
       double                                      m_localDir [ 3]{}      ;
+      double                                      m_invMoment{}   ;
 
       const InDetDD::SiDetectorElement*           m_detelement{}  ;
       const InDet::SiDetElementBoundaryLink_xk*   m_detlink{}     ;

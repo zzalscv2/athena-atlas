@@ -191,6 +191,7 @@ bool InDet::SiTrajectoryElement_xk::firstTrajectorElement(bool correction)
     if(!initiateState(m_parametersPredForward,m_parametersUpdatedForward)) return false;
   }
 
+  m_invMoment = std::abs(m_parametersUpdatedBackward.parameters()[4]);
   noiseProduction(1,m_parametersUpdatedForward);
 
   m_dist               = -10. ;
@@ -377,6 +378,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearchPreciseWithCo
     P = TE.m_parametersPredForward;
     m_dholesForward = TE.m_dholesForward;
   }
+  m_invMoment = TE.m_invMoment;
 
   // Track propagation
   //
@@ -409,7 +411,7 @@ bool InDet::SiTrajectoryElement_xk::ForwardPropagationWithoutSearchPreciseWithCo
   // Noise production
   //
   m_radlength = .04;
-  noiseProduction(1,m_parametersUpdatedBackward);
+  noiseProduction(1,m_parametersUpdatedBackward,-1, true);
   m_status       = 1;
   m_nlinksForward = 0;
   m_clusterNoAdd = nullptr;
@@ -1112,17 +1114,18 @@ InDet::SiTrajectoryElement_xk::trackParameters(bool cov, int Q)
 // Noise production
 // Dir  = +1 along momentum , -1 opposite momentum 
 // Model = 1 - muon, 2 - electron 
+// useMomentum = true - use m_invMoment instead of Tp.par()[4]
 ///////////////////////////////////////////////////////////////////
 
 void  InDet::SiTrajectoryElement_xk::noiseProduction
-(int Dir,const Trk::PatternTrackParameters& Tp,double rad_length)
+(int Dir,const Trk::PatternTrackParameters& Tp,double rad_length, bool useMomentum)
 {
 
   int Model = m_noisemodel; 
   if(Model < 1 || Model > 2) return; 
   if (rad_length<0.) rad_length=m_radlength;
 
-  double q = std::abs(Tp.parameters()[4]);   /// qoverp
+  double q = useMomentum ? m_invMoment : std::abs(Tp.parameters()[4]);   /// qoverp
 
   /// projection of direction normal to surface 
   double s = std::abs(m_localDir[0]*m_localTransform[6]+
@@ -1938,8 +1941,9 @@ InDet::SiTrajectoryElement_xk::SiTrajectoryElement_xk()
   m_xi2max            = 0.;
   m_dist              = 0.;
   m_xi2maxNoAdd       = 0.;
-  m_xi2maxlink        = 0.;  
+  m_xi2maxlink        = 0.;
   m_xi2multi          = 0.;
+  m_invMoment         = 0.;
   m_detelement        = nullptr ; 
   m_detlink           = nullptr ;
   m_surface           = nullptr ;
@@ -2022,6 +2026,7 @@ InDet::SiTrajectoryElement_xk& InDet::SiTrajectoryElement_xk::operator =
   m_tools                     = E.m_tools       ;
   m_covariance                = E.m_covariance  ;
   m_position                  = E.m_position    ;
+  m_invMoment                 = E.m_invMoment   ;
   for(int i=0; i!=m_nlinksForward; ++i) {m_linkForward[i]=E.m_linkForward[i];}
   for(int i=0; i!=m_nlinksBackward; ++i) {m_linkBackward[i]=E.m_linkBackward[i];}
   for(int i=0; i!=m_ntsos  ; ++i) {m_tsos [i]=E.m_tsos [i];}

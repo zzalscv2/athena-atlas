@@ -166,6 +166,7 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs):
 
     if flags.Tracking.doITkFastTracking:
         kwargs.setdefault("doFastTracking", True)
+        kwargs.setdefault("writeHolesFromPattern", True)
 
         if 'InDetEtaDependentCutsSvc' not in kwargs:
             from InDetConfig.InDetEtaDependentCutsConfig import (
