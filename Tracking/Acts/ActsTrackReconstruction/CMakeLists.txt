@@ -46,6 +46,7 @@ atlas_add_component( ActsTrackReconstruction
                        TrkTrackSummary
 		       xAODTracking
 		       TrkFitterInterfaces
+		       InDetRIO_OnTrack
                      )
 
 # Install files from the package:

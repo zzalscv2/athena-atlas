@@ -9,7 +9,7 @@ Global z = 32
 Global Radius = 1
 varianceR = 0.21
 varianceZ = 0.34
-measurementIndexes = [1]
+measurementIndices = 0
  --------- STRIP SPACE POINT  ------------ 
 Identifier Hash = 123485 123486
 Global Position =  1
@@ -21,7 +21,7 @@ Global z = 32
 Global Radius = 1
 varianceR = 0.21
 varianceZ = 0.34
-measurementIndexes = [1, 4]
+measurementIndices = 0, 1
 topHalfStripLength = 1.2
 bottomHalfStripLength = 0.32
 topStripDirection =    2.3

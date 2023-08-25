@@ -91,7 +91,6 @@ def ActsPixelSpacePointAnalysisAlgCfg(flags, name="ActsPixelSpacePointAnalysisAl
     result = ITkPixelReadoutGeometryCfg(flags)
 
     kwargs.setdefault("SpacePointContainerKey", "ITkPixelSpacePoints")
-    kwargs.setdefault("PixelClusterContainerKey", "ITkPixelClusters")
     kwargs.setdefault("UsePixel", True)
     kwargs.setdefault("UseOverlap", False)
 
@@ -108,7 +107,6 @@ def ActsStripSpacePointAnalysisAlgCfg(flags, name="ActsStripSpacePointAnalysisAl
     result = ITkStripReadoutGeometryCfg(flags)
 
     kwargs.setdefault("SpacePointContainerKey", "ITkStripSpacePoints")
-    kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", False)
 
@@ -125,7 +123,6 @@ def ActsStripOverlapSpacePointAnalysisAlgCfg(flags, name="ActsStripOverlapSpaceP
     result = ITkStripReadoutGeometryCfg(flags)
 
     kwargs.setdefault("SpacePointContainerKey", "ITkStripOverlapSpacePoints")
-    kwargs.setdefault("StripClusterContainerKey", "ITkStripClusters")
     kwargs.setdefault("UsePixel", False)
     kwargs.setdefault("UseOverlap", True)
 

@@ -12,7 +12,7 @@ namespace xAOD {
     AUX_VARIABLE(radius);
     AUX_VARIABLE(varianceR);
     AUX_VARIABLE(varianceZ);
-    AUX_VARIABLE(measurementIndexes);
+    AUX_VARIABLE(measurements);
   }
 }
 

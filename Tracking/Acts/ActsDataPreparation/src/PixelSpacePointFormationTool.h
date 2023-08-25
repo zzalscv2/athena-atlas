@@ -9,6 +9,7 @@
 #include "ActsToolInterfaces/IPixelSpacePointFormationTool.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 
@@ -37,9 +38,9 @@ namespace ActsTrk {
 
     /// @name Production of space points
     //@{
-    virtual StatusCode producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+    virtual StatusCode producePixelSpacePoint(const xAOD::PixelClusterContainer& clusterContainer,
+					      const xAOD::PixelCluster& cluster,
 					      xAOD::SpacePoint& sp,
-					      const std::vector<std::size_t>& measIndexes,
 					      const InDetDD::SiDetectorElement& element) const override;
     //@}
 

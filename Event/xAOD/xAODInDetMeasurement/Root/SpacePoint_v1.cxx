@@ -46,8 +46,8 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 				      varianceZ, setVarianceZ )
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< std::size_t >, 
-				   measurementIndexes, setMeasurementIndexes )
+AUXSTORE_OBJECT_SETTER_AND_GETTER( xAOD::SpacePoint_v1, std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >,
+				   measurements, setMeasurements )
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( xAOD::SpacePoint_v1, float,
 				      topHalfStripLength, setTopHalfStripLength )
@@ -103,20 +103,20 @@ xAOD::SpacePoint_v1::VectorMap xAOD::SpacePoint_v1::topStripCenter() {
 void xAOD::SpacePoint_v1::setSpacePoint(DetectorIDHashType idHash,
 					const Eigen::Matrix<float,3,1>& globPos,
 					float cov_r, float cov_z,
-					const std::vector<std::size_t>& measurementIndexes) 
+					const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurements) 
 {
   this->setElementIdList({idHash});
   this->globalPosition() = globPos;
   this->setRadius( std::sqrt( globPos(0,0) * globPos(0,0) + globPos(1,0) * globPos(1,0) ) );
   this->setVarianceR(cov_r);
   this->setVarianceZ(cov_z);
-  this->setMeasurementIndexes(measurementIndexes);
+  this->setMeasurements(measurements);
 }
 
 void xAOD::SpacePoint_v1::setSpacePoint(const std::vector<DetectorIDHashType>& idHashes,
 					const Eigen::Matrix<float,3,1>& globPos,
 					float cov_r, float cov_z,
-					const std::vector<std::size_t>& measurementIndexes,
+					const std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > >& measurements,
 					float topHalfStripLength, 
 					float bottomHalfStripLength,
 					const Eigen::Matrix<float,3,1>& topStripDirection,
@@ -129,7 +129,7 @@ void xAOD::SpacePoint_v1::setSpacePoint(const std::vector<DetectorIDHashType>& i
   this->setRadius( std::sqrt( globPos(0,0) * globPos(0,0) + globPos(1,0) * globPos(1,0) ) );
   this->setVarianceR(cov_r);
   this->setVarianceZ(cov_z);
-  this->setMeasurementIndexes(measurementIndexes);
+  this->setMeasurements(measurements);
 
   this->setTopHalfStripLength(topHalfStripLength);
   this->setBottomHalfStripLength(bottomHalfStripLength);

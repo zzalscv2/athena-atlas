@@ -12,6 +12,8 @@
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/Identifier.h"
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "AthLinks/ElementLink.h"
 
 namespace xAOD {
   /// Auxiliary store for space point
@@ -30,7 +32,7 @@ namespace xAOD {
     std::vector < float > radius;
     std::vector < float > varianceR;
     std::vector < float > varianceZ;
-    std::vector < std::vector< std::size_t > > measurementIndexes;
+    std::vector < std::vector< ElementLink< xAOD::UncalibratedMeasurementContainer > > > measurements;
 
     /// @}
   };

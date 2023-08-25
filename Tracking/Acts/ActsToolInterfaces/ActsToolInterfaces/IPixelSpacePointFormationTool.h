@@ -11,6 +11,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 namespace ActsTrk {
 
@@ -23,9 +24,9 @@ namespace ActsTrk {
 
         /// @name Production of space points
         //@{
-	virtual StatusCode producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+	virtual StatusCode producePixelSpacePoint(const xAOD::PixelClusterContainer& clusterContainer,
+						  const xAOD::PixelCluster& cluster,
 						  xAOD::SpacePoint& sp,
-						  const std::vector<std::size_t>& measIndexes,
 						  const InDetDD::SiDetectorElement& element) const = 0;
         //@}
 

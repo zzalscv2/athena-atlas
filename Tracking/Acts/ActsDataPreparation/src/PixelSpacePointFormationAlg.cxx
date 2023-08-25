@@ -80,16 +80,15 @@ namespace ActsTrk {
     /// Pixel space points are created directly from the clusters global position
     for (std::size_t idx(0); idx<inputPixelClusterContainer->size(); ++idx) {
       auto cluster = inputPixelClusterContainer->at(idx);
-      std::vector<std::size_t> measIndexes({idx});
       const InDetDD::SiDetectorElement* pixelElement = pixelElements->getDetectorElement(cluster->identifierHash());
       if (pixelElement == nullptr) {
         ATH_MSG_FATAL("Element pointer is nullptr");
         return StatusCode::FAILURE;
       }
 
-      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*cluster,
+      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*inputPixelClusterContainer,
+							       *cluster,
       							       *pixelSpacePoints->at(idx),
-      							       measIndexes,
       							       *pixelElement ) );
     }
 

@@ -71,14 +71,12 @@ namespace InDet {
     pixel_xaod_aux_container->reserve(pixel_container->size());
 
     // Conversion
-    std::size_t counter = 0;
     for (const ::SpacePointCollection *spc : *pixel_container) {
       for (const Trk::SpacePoint *sp : *spc) {
 	const InDet::PixelSpacePoint *indetSP = dynamic_cast<const InDet::PixelSpacePoint *>(sp);
 	
 	pixel_xaod_container->push_back( new xAOD::SpacePoint() );
 	ATH_CHECK( TrackingUtilities::convertTrkToXaodPixelSpacePoint(*indetSP, *pixel_xaod_container->back()) );
-	pixel_xaod_container->back()->setMeasurementIndexes({counter++});
 
 	// Add link to this space point
 	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
@@ -112,14 +110,12 @@ namespace InDet {
     strip_xaod_aux_container->reserve(strip_container->size());
     
     // Conversion
-    std::size_t counter = 0;
     for (const ::SpacePointCollection *spc : *strip_container) {
       for (const Trk::SpacePoint *sp : *spc) {
 	const InDet::SCT_SpacePoint *indetSP = dynamic_cast<const InDet::SCT_SpacePoint *>(sp);
 
 	strip_xaod_container->push_back( new xAOD::SpacePoint() );	
 	ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_xaod_container->back()) );
-	strip_xaod_container->back()->setMeasurementIndexes({counter, counter++});
 
 	 // Add link to this space point
 	ElementLink< ::SpacePointCollection > link(indetSP, *spc);
@@ -153,13 +149,12 @@ namespace InDet {
 
     // Conversion
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointOverlapCollection > > stripSpacePointLinkAcc("stripOverlapSpacePointLink");
-    std::size_t counter = 0;
+
     for (const Trk::SpacePoint *sp : *strip_overlap_container) {
       const InDet::SCT_SpacePoint *indetSP = dynamic_cast<const InDet::SCT_SpacePoint *>(sp);
       
       strip_overlap_xaod_container->push_back( new xAOD::SpacePoint() );
       ATH_CHECK( TrackingUtilities::convertTrkToXaodStripSpacePoint(*indetSP, vertex, *strip_overlap_xaod_container->back()) );
-      strip_overlap_xaod_container->back()->setMeasurementIndexes({counter, counter++});
 
       ElementLink< ::SpacePointOverlapCollection > TrkLink(sp, *strip_overlap_container);
       stripSpacePointLinkAcc( *strip_overlap_xaod_container->back() ) = TrkLink;

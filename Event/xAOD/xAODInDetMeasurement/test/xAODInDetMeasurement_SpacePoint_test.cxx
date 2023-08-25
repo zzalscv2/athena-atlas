@@ -9,6 +9,12 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
+#include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+
+#include "xAODInDetMeasurement/StripClusterContainer.h"
+#include "xAODInDetMeasurement/StripClusterAuxContainer.h"
+
 #include "GeoPrimitives/GeoPrimitives.h"
 
 template< typename T >
@@ -39,22 +45,32 @@ std::ostream& operator<< ( std::ostream& out,
   return out;
 }
 
-void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
+void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip,
+	  const xAOD::PixelClusterContainer& pixelClusters,
+	  const xAOD::StripClusterContainer& stripClusters) {
+
+  const xAOD::PixelCluster *pclus = pixelClusters.at(0);
+  const xAOD::StripCluster *sclus0 = stripClusters.at(0);
+  const xAOD::StripCluster *sclus1 = stripClusters.at(1);
   
   IdentifierHash::value_type idHashVal(123485);
   IdentifierHash idHash(idHashVal);
 
   Eigen::Matrix<float,3,1> globalPosition(1, 0, 32);
   Eigen::Matrix<float,2,1> globalVariance(0.21, 0.34);
-  std::vector<std::size_t> pixel_meas_indexes = {1};
+  std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer > > pixel_meas;
+  pixel_meas.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer>(pixelClusters, pclus->index()));    
 
   pixel.setSpacePoint( idHash,
 		       globalPosition,
 		       globalVariance(0,0),
 		       globalVariance(1,0),
-		       pixel_meas_indexes );
+		       pixel_meas);
 
-  std::vector<std::size_t> strip_meas_indexes = {1, 4};
+  std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > strip_meas;
+  strip_meas.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer>(stripClusters, sclus0->index()));
+  strip_meas.push_back(ElementLink<xAOD::UncalibratedMeasurementContainer>(stripClusters, sclus1->index()));
+  
   float topHalfStripLength = 1.20;
   float bottomHalfStripLength = 0.32;
   Eigen::Matrix<float,3,1> topStripDirection(2.3, 55.1, 0.3355);
@@ -69,7 +85,7 @@ void fill(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
 		       globalPosition,
                        globalVariance(0,0),
                        globalVariance(1,0),
-		       strip_meas_indexes,
+		       strip_meas,
 		       topHalfStripLength,
 		       bottomHalfStripLength,
 		       topStripDirection,
@@ -88,7 +104,7 @@ void print(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
   std::cout << "Global Radius = " << pixel.radius() << std::endl;
   std::cout << "varianceR = " << pixel.varianceR() << std::endl;
   std::cout << "varianceZ = " << pixel.varianceZ() << std::endl;
-  std::cout << "measurementIndexes = " << pixel.measurementIndexes() << std::endl;
+  std::cout << "measurementIndices = " << pixel.measurements().at(0).index() << std::endl;
 
   std::cout << " --------- STRIP SPACE POINT  ------------ " << std::endl;
   std::cout << "Identifier Hash = " << strip.elementIdList()[0] << " " << strip.elementIdList()[1] << std::endl;
@@ -99,7 +115,7 @@ void print(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
   std::cout << "Global Radius = " << strip.radius() << std::endl;
   std::cout << "varianceR = " << strip.varianceR() << std::endl;
   std::cout << "varianceZ = " << strip.varianceZ() << std::endl;
-  std::cout << "measurementIndexes = " << strip.measurementIndexes() <<std::endl;
+  std::cout << "measurementIndices = " << strip.measurements().at(0).index() << ", " << strip.measurements().at(1).index() <<std::endl;
   std::cout << "topHalfStripLength = " << strip.topHalfStripLength() << std::endl;
   std::cout << "bottomHalfStripLength = " << strip.bottomHalfStripLength() << std::endl;
   std::cout << "topStripDirection = " << strip.topStripDirection() << std::endl;
@@ -109,6 +125,20 @@ void print(xAOD::SpacePoint& pixel, xAOD::SpacePoint& strip) {
 }
 
 int main() {
+  // Make dummy cluster containers, sps need element links to these clusters
+  xAOD::PixelClusterContainer tpc;
+  xAOD::PixelClusterAuxContainer tpc_aux;
+  tpc.setStore(&tpc_aux);
+  // add one pixel cluster to the container
+  tpc.push_back(new xAOD::PixelCluster());
+
+  xAOD::StripClusterContainer spc;
+  xAOD::StripClusterAuxContainer spc_aux;
+  spc.setStore(&spc_aux);
+  // add two strip clusters to the container
+  spc.push_back(new xAOD::StripCluster());
+  spc.push_back(new xAOD::StripCluster());
+  
   // Create the main containers to test:
   // Pixel Space Point
   xAOD::SpacePointContainer pixel_tpc;
@@ -130,7 +160,8 @@ int main() {
   strip_tpc.push_back(strip);
 
   // Fill information
-  fill(*pixel, *strip);
+  fill(*pixel, *strip,
+       tpc, spc);
 
   // Print information
   print(*pixel, *strip);
