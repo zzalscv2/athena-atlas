@@ -101,6 +101,8 @@ namespace ORUtils
     // Remove bjets overlapping with ID taus
     for(const auto tau : taus) {
       if(!m_decHelper->isSurvivingObject(*tau)) continue;
+      // Skip anti-taus
+      if(isSurvivingAntiTau(*tau)) continue;
       for(const auto jet : jets) {
         if(!m_decHelper->isSurvivingObject(*jet)) continue;
         if(!isBJet(*jet)) continue;
