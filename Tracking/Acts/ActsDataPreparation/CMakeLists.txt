@@ -16,6 +16,7 @@ atlas_add_component( ActsDataPreparation
 		        ${EIGEN_LIBRARIES}
 			ActsCore
                      	ActsToolInterfacesLib
+			AthLinks
                      	AthenaBaseComps
                      	AthenaMonitoringKernelLib
                      	GaudiKernel

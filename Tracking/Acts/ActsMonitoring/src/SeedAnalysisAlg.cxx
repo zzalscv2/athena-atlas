@@ -31,9 +31,6 @@ namespace ActsTrk {
     ATH_CHECK( m_prdTruth.initialize(not m_prdTruth.empty()));
     ATH_CHECK( m_detEleCollKey.initialize(not m_detEleCollKey.empty()) );
 
-    ATH_CHECK( m_pixelClusterContainerKey.initialize(not m_prdTruth.empty() and m_usePixel) );
-    ATH_CHECK( m_stripClusterContainerKey.initialize(not m_prdTruth.empty() and not m_usePixel) );
-
     ATH_CHECK( m_EventInfoKey.initialize() );
 
     if (not m_prdTruth.empty()) {
@@ -231,33 +228,14 @@ namespace ActsTrk {
     auto geo_context = m_trackingGeometryTool->getNominalGeometryContext();
 
 
-
-    // Need to retrieve Clusters
-    std::variant<const xAOD::PixelClusterContainer*, const xAOD::StripClusterContainer*> input_cluster_collection;
-
-    if (m_usePixel) {
-      SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
-      ATH_CHECK( inputClusterContainer.isValid() );
-      input_cluster_collection = inputClusterContainer.cptr();
-    } else {
-      SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
-      ATH_CHECK( inputClusterContainer.isValid() );
-      input_cluster_collection = inputClusterContainer.cptr();
-    }
-
-
     // utilities
     // Used for param estimation
     auto retrieveSurfaceFunction = 
-      [this, &input_cluster_collection, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
+      [this, &detEle] (const Acts::Seed<xAOD::SpacePoint>& seed) -> const Acts::Surface& 
       { 
-	std::size_t bottom_idx = seed.sp().front()->measurementIndexes()[0];
-
-	const InDetDD::SiDetectorElement* Element = std::visit([&detEle,&bottom_idx] (const auto* collection) {
-	    const auto* cluster = collection->at(bottom_idx);
-	    return detEle->getDetectorElement(cluster->identifierHash());
-	  }, input_cluster_collection);
-	
+	const auto& els = seed.sp().front()->measurements();
+	const auto* cluster = *els[0];
+	const InDetDD::SiDetectorElement* Element = detEle->getDetectorElement(cluster->identifierHash());	
 	const Trk::Surface& atlas_surface = Element->surface();
 	return this->m_ATLASConverterTool->trkSurfaceToActsSurface(atlas_surface);
       };
@@ -292,12 +270,12 @@ namespace ActsTrk {
       for (const auto* sp : sps) {
 	int number_of_clusters = m_usePixel ? 1 : 2;
 	for (int cluster_number(0); cluster_number < number_of_clusters; cluster_number++) {
-	  int cluster_index = sp->measurementIndexes()[cluster_number];
-	  const Identifier id = std::visit([&cluster_index,this] (const auto* collection) -> const Identifier
-					   {
-					     const auto* cluster = collection->at(cluster_index);
-					     return identify(*cluster);
-					   }, input_cluster_collection);
+	  const auto& els = sp->measurements();
+	  const auto* cluster = (*els[cluster_number]);
+	  const xAOD::UncalibMeasType cluster_type = cluster->type();
+	  const Identifier id = cluster_type == xAOD::UncalibMeasType::PixelClusterType
+	    ? identify(*reinterpret_cast<const xAOD::PixelCluster*>(cluster))
+	    : identify(*reinterpret_cast<const xAOD::StripCluster*>(cluster));
 	  matchParticleToSeedClusters(prdTruth, id, truthHits);
 	}
       }

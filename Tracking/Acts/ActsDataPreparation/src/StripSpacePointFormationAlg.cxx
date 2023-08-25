@@ -73,6 +73,7 @@ namespace ActsTrk {
         ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
         return StatusCode::FAILURE;
     }
+    const xAOD::StripClusterContainer* inputClusters = inputStripClusterContainer.cptr();
 
     std::vector<StripSP> sps;
     std::vector<StripSP> osps;
@@ -80,7 +81,7 @@ namespace ActsTrk {
     osps.reserve(inputStripClusterContainer->size() * 0.5);
 
     ATH_CHECK( m_spacePointMakerTool->produceSpacePoints(ctx,
-							 *inputStripClusterContainer.cptr(),
+							 *inputClusters,
 							 *properties,
 							 *stripElements,
 							 vertex,
@@ -107,11 +108,17 @@ namespace ActsTrk {
     // fill
     for (std::size_t i(0); i<sps.size(); ++i) {
       auto& toAdd = sps.at(i);
+
+      // make ELs
+      std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > els;
+      els.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[0]));
+      els.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[1]));
+
       spacePoints->at(i)->setSpacePoint(toAdd.idHashes, 
 					toAdd.globPos,
 					toAdd.cov_r,
 					toAdd.cov_z,
-					toAdd.measurementIndexes,
+					els,
 					toAdd.topHalfStripLength,
 					toAdd.bottomHalfStripLength,
 					toAdd.topStripDirection,
@@ -140,11 +147,15 @@ namespace ActsTrk {
       
       for (std::size_t i(0); i<osps.size(); ++i) {
 	auto& toAdd = osps.at(i);
+	std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > oels;
+	oels.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[0]));
+	oels.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(*inputClusters, toAdd.measurementIndexes[1]));
+
 	overlapSpacePoints->at(i)->setSpacePoint(toAdd.idHashes, 
 						 toAdd.globPos,
 						 toAdd.cov_r,
 						 toAdd.cov_z,
-						 toAdd.measurementIndexes,
+						 oels,
 						 toAdd.topHalfStripLength,
 						 toAdd.bottomHalfStripLength,
 						 toAdd.topStripDirection,

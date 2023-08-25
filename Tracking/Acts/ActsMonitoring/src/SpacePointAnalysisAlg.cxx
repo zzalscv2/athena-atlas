@@ -18,8 +18,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
     
     ATH_CHECK( m_spacePointContainerKey.initialize() );
-    ATH_CHECK( m_pixelClusterContainerKey.initialize(m_usePixel) );
-    ATH_CHECK( m_stripClusterContainerKey.initialize(not m_usePixel) );
 
     if (m_usePixel and m_useOverlap)
       ATH_MSG_INFO("No overlap collection when enabled for pixel space points! Check your configuration if needed.");
@@ -46,94 +44,67 @@ namespace ActsTrk {
 
     auto monitor_nsp = Monitored::Scalar<int>("Nsp", inputSpacePointContainer->size());
     fill("ActsSpacePointAnalysisAlg", monitor_nsp);
-    
-    std::variant < const xAOD::PixelClusterContainer*, const xAOD::StripClusterContainer* > inputContainer;
-    
-    if (m_usePixel) {
-      SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
-      if (!inputClusterContainer.isValid()){
-	ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
-	return StatusCode::FAILURE;
-      }
-      inputContainer = inputClusterContainer.cptr();
-    } else {
-      SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
-      if (!inputClusterContainer.isValid()){
-	ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
-	return StatusCode::FAILURE;
-      }
-      inputContainer = inputClusterContainer.cptr();
-    }
-    
-    std::function<IdentifierHash(const xAOD::SpacePoint&)> mapper =
-      [inputContainer](const xAOD::SpacePoint& sp) {
-      auto& cluster_indices = sp.measurementIndexes();
-            IdentifierHash idHash =
-      std::visit([cluster_indices](auto container) -> IdentifierHash {
-	  return container->at(cluster_indices[0])->identifierHash();}, inputContainer);
-      return idHash;
-    };
 
     const xAOD::SpacePointContainer* inputSpacePointCollection = inputSpacePointContainer.cptr();
     auto monitor_barrelEndcap = Monitored::Collection("barrelEndcap", *inputSpacePointCollection,
-						      [this, &pixelID, &stripID, &mapper] (const auto* spacePoint) -> int
+						      [this, &pixelID, &stripID] (const auto* spacePoint) -> int
 						      {
-							const auto idHash = mapper(*spacePoint);
+							const auto idHash = spacePoint->elementIdList()[0];
 							const Identifier id = this->m_usePixel ? 
 							  pixelID->wafer_id(idHash) : stripID->wafer_id(idHash);
 							return this->m_usePixel ? pixelID->barrel_ec(id) : stripID->barrel_ec(id);
 						      });
     auto monitor_layerDisk = Monitored::Collection("layerDisk", *inputSpacePointCollection, 
-						   [this, &pixelID, &stripID, &mapper] (const auto* spacePoint) -> int 
+						   [this, &pixelID, &stripID] (const auto* spacePoint) -> int 
 						   {
-						     const auto idHash = mapper(*spacePoint);
+						     const auto idHash = spacePoint->elementIdList()[0];
 						     const Identifier id = this->m_usePixel ?
 						       pixelID->wafer_id(idHash) : stripID->wafer_id(idHash);
 						     return this->m_usePixel ? pixelID->layer_disk(id) : stripID->layer_disk(id);
 						   });
 
     auto monitor_phiModule = Monitored::Collection("phiModule", *inputSpacePointCollection, 
-						   [this, &pixelID, &stripID, &mapper] (const auto* spacePoint) -> int
+						   [this, &pixelID, &stripID] (const auto* spacePoint) -> int
 						   {
-						     const auto idHash = mapper(*spacePoint);
+						     const auto idHash = spacePoint->elementIdList()[0];
 						     const Identifier id = this->m_usePixel ?
 						       pixelID->wafer_id(idHash) : stripID->wafer_id(idHash);
 						     return this->m_usePixel ? pixelID->phi_module(id) : stripID->phi_module(id);
 						   });
     auto monitor_etaModule = Monitored::Collection("etaModule", *inputSpacePointCollection,
-						   [this, &pixelID, &stripID, &mapper] (const auto* spacePoint) -> int
+						   [this, &pixelID, &stripID] (const auto* spacePoint) -> int
 						   {
-						     const auto idHash = mapper(*spacePoint);
+						     const auto idHash = spacePoint->elementIdList()[0];
 						     const Identifier id = this->m_usePixel ?
 						       pixelID->wafer_id(idHash) : stripID->wafer_id(idHash);
 						     return this->m_usePixel ? pixelID->eta_module(id) : stripID->eta_module(id);
 						   });
     auto monitor_sideModule = Monitored::Collection("sideModule", *inputSpacePointCollection, 
-						    [this, &stripID, &mapper] (const auto* spacePoint) -> int
+						    [this, &stripID] (const auto* spacePoint) -> int
 						    {
 						      if (this->m_usePixel) return 0;
 
-						      const auto idHash = mapper(*spacePoint);
+						      const auto idHash = spacePoint->elementIdList()[0];
 						      const Identifier id = stripID->wafer_id(idHash);
 						      return stripID->side(id);
 						    });
 
     auto monitor_isInnermost = Monitored::Collection("isInnermost", *inputSpacePointCollection,
-						     [this, &pixelID, &mapper] (const auto* spacePoint) -> int
+						     [this, &pixelID] (const auto* spacePoint) -> int
 						     {
 						       if (not this->m_usePixel) return 0;
 
-						       const auto idHash = mapper(*spacePoint);
+						       const auto idHash = spacePoint->elementIdList()[0];
 						       const Identifier id = pixelID->wafer_id(idHash);
 						       const int layerDisk = pixelID->layer_disk(id);
 						       return int(layerDisk==0);
 						     });
     auto monitor_isNextToInnermost = Monitored::Collection("isNextToInnermost", *inputSpacePointCollection,
-							   [this, &pixelID, &mapper] (const auto* spacePoint) -> int
+							   [this, &pixelID] (const auto* spacePoint) -> int
 							   {
 							     if (not this->m_usePixel) return 0;
 							     
-							     const auto idHash = mapper(*spacePoint);
+							     const auto idHash = spacePoint->elementIdList()[0];
 							     const Identifier id = pixelID->wafer_id(idHash);
 
 							     const int brlEc = pixelID->layer_disk(id);

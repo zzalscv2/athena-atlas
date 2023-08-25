@@ -137,10 +137,7 @@ def ActsSiSpacePointsSeedMakerCfg(flags,
     # In case (2) the link xAOD -> InDet Cluster will be used to create the Trk::SpacePoints
     # If none of the above conditions are met, it means there is a misconfiguration of the algorithms
     useClusters = configuration_settings.doAthenaToActsCluster and not configuration_settings.doAthenaToActsSpacePoint
-    if useClusters and kwargs['usePixel']:
-        kwargs.setdefault('PixelClusterContainerKey', 'ITkPixelClusters')
-    if useClusters and kwargs['useStrip']:
-        kwargs.setdefault('StripClusterContainerKey', 'ITkStripClusters')
+    kwargs.setdefault('useClustersForSeedConversion', useClusters)
 
     if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!

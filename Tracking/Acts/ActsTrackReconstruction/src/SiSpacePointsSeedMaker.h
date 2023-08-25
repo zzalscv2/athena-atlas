@@ -190,9 +190,6 @@ namespace ActsTrk {
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsStrip {this, "ActsSpacePointsStripName", "ITkStripSpacePoints", "Strip space points container"};
     SG::ReadHandleKey< xAOD::SpacePointContainer > m_actsSpacepointsOverlap {this, "ActsSpacePointsOverlapName", "ITkStripOverlapSpacePoints", "Strip overlap space points container"};
 
-    SG::ReadHandleKey< xAOD::PixelClusterContainer > m_pixelClusterContainerKey {this, "PixelClusterContainerKey", "", "Key of input pixel clusters"};
-    SG::ReadHandleKey< xAOD::StripClusterContainer > m_stripClusterContainerKey {this, "StripClusterContainerKey", "", "Key of input strip clusters"};
-
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
     SG::ReadCondHandleKey< AtlasFieldCacheCondObj > m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"};
@@ -202,6 +199,7 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_useOverlap {this, "useOverlapSpCollection", true};
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
     Gaudi::Property< bool > m_doSeedConversion {this, "doSeedConversion", true, "Convert ActsTrk::Seed into ITk::SiSpacePointsProSeed"};
+    Gaudi::Property< bool > m_useClusters {this, "useClustersForSeedConversion", false};
 
   private:
     // Validation

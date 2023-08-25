@@ -65,9 +65,6 @@ namespace ActsTrk {
     ATH_CHECK( m_beamSpotKey.initialize() );
     ATH_CHECK( m_fieldCondObjInputKey.initialize() );
 
-    ATH_CHECK( m_pixelClusterContainerKey.initialize(SG::AllowEmpty) );
-    ATH_CHECK( m_stripClusterContainerKey.initialize(SG::AllowEmpty) );
-
     // Validation
     if (m_writeNtuple) 
       ATH_CHECK( InitTree() );
@@ -660,35 +657,26 @@ namespace ActsTrk {
   }
 
   bool
-  SiSpacePointsSeedMaker::convertStripSeed(const EventContext& ctx,
+  SiSpacePointsSeedMaker::convertStripSeed(const EventContext& /*ctx*/,
 					   InDet::SiSpacePointsSeedMakerEventData& data,
 					   const ActsTrk::SeedContainer& seedPtrs) const {
     // If the read handle key for clusters is not empty, that means the xAOD->InDet Cluster link is available
     // Else we can use xAOD->Trk Space Point link
     // If none of these is available, we have a JO misconfguration!
-    const bool useClusters = not m_stripClusterContainerKey.empty();
-
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("sctSpacePointLink");
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointOverlapCollection > > overlaplinkAcc("stripOverlapSpacePointLink");
     static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
 
-    const xAOD::StripClusterContainer *inputContainer = nullptr;
-    if (useClusters) {
-      SG::ReadHandle<xAOD::StripClusterContainer> inputClusterContainer( m_stripClusterContainerKey, ctx );
-      if (!inputClusterContainer.isValid()){
-	ATH_MSG_FATAL("xAOD::StripClusterContainer with key " << m_stripClusterContainerKey.key() << " is not available...");
-	return false;
-      }
-      inputContainer = inputClusterContainer.cptr();
+    if (m_useClusters) {
       data.v_StripSpacePointForSeed.clear();
     }
 
     std::array<const Trk::SpacePoint*, 3> spacePoints {};
-    std::array<ITk::SiSpacePointForSeed*, 3> stripSpacePointsForSeeds {nullptr, nullptr, nullptr};
+    std::array<ITk::SiSpacePointForSeed*, 3> stripSpacePointsForSeeds {};
 
     for (const ActsTrk::Seed* seed : seedPtrs) {
       // Retrieve/make space points
-      if (not useClusters) {
+      if (not m_useClusters) {
 	// Get the space point from the element link
 	if (not linkAcc.isAvailable(*seed->sp()[0]) and
 	    not overlaplinkAcc.isAvailable(*seed->sp()[0])) {
@@ -714,14 +702,17 @@ namespace ActsTrk {
       } 
       else {
 	// Get the clusters from the xAOD::Clusters and then make the space points
-	const auto& bottom_idx = seed->sp()[0]->measurementIndexes();
-	const auto& medium_idx = seed->sp()[1]->measurementIndexes();
-	const auto& top_idx    = seed->sp()[2]->measurementIndexes();
+	const auto& bottom_idx = seed->sp()[0]->measurements();
+	const auto& medium_idx = seed->sp()[1]->measurements();
+	const auto& top_idx    = seed->sp()[2]->measurements();
 
 	std::array<const xAOD::StripCluster*, 6> strip_cluster { 
-	  inputContainer->at(bottom_idx[0]), inputContainer->at(bottom_idx[1]),
-	    inputContainer->at(medium_idx[0]), inputContainer->at(medium_idx[1]),
-	    inputContainer->at(top_idx[0])   , inputContainer->at(top_idx[1]) 
+	  reinterpret_cast<const xAOD::StripCluster*>(*bottom_idx[0]),
+	  reinterpret_cast<const xAOD::StripCluster*>(*bottom_idx[1]),
+	  reinterpret_cast<const xAOD::StripCluster*>(*medium_idx[0]),
+	  reinterpret_cast<const xAOD::StripCluster*>(*medium_idx[1]),
+	  reinterpret_cast<const xAOD::StripCluster*>(*top_idx[0]),
+	  reinterpret_cast<const xAOD::StripCluster*>(*top_idx[1])
 	    };
 	
 	if (not stripLinkAcc.isAvailable(*strip_cluster[0]) or 
@@ -740,9 +731,9 @@ namespace ActsTrk {
 	  return false;
 	}
 
-	std::pair<std::size_t, std::size_t> key_b = std::make_pair(bottom_idx[0], bottom_idx[1]);
-	std::pair<std::size_t, std::size_t> key_m = std::make_pair(medium_idx[0], medium_idx[1]);
-	std::pair<std::size_t, std::size_t> key_t = std::make_pair(top_idx[0], top_idx[1]);
+	std::pair<std::size_t, std::size_t> key_b = std::make_pair(strip_cluster[0]->index(), strip_cluster[1]->index());
+	std::pair<std::size_t, std::size_t> key_m = std::make_pair(strip_cluster[2]->index(), strip_cluster[3]->index());
+	std::pair<std::size_t, std::size_t> key_t = std::make_pair(strip_cluster[4]->index(), strip_cluster[5]->index());
 
 	if (data.v_StripSpacePointForSeed.find(key_b) == data.v_StripSpacePointForSeed.end()) {
 	  data.v_StripSpacePointForSeed[key_b] = std::make_unique<InDet::SCT_SpacePoint>(std::make_pair<IdentifierHash, IdentifierHash>(strip_cluster[0]->identifierHash(), strip_cluster[1]->identifierHash()),
@@ -787,28 +778,17 @@ namespace ActsTrk {
   }
 
   bool 
-  SiSpacePointsSeedMaker::convertPixelSeed(const EventContext& ctx,
+  SiSpacePointsSeedMaker::convertPixelSeed(const EventContext& /*ctx*/,
 					   InDet::SiSpacePointsSeedMakerEventData& data,
 					   const ActsTrk::SeedContainer& seedPtrs) const {
     // If the read handle key for clusters is not empty, that means the xAOD->InDet Cluster link is available
     // Else we can use xAOD->Trk Space Point link
     // If none of these is available, we have a JO misconfguration!
-    bool useClusters = not m_pixelClusterContainerKey.empty();
-
     static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
     static const SG::AuxElement::Accessor< ElementLink< ::SpacePointCollection > > linkAcc("pixelSpacePointLink");
 
-    const xAOD::PixelClusterContainer *inputContainer = nullptr;
-    if (useClusters) {
-      SG::ReadHandle<xAOD::PixelClusterContainer> inputClusterContainer( m_pixelClusterContainerKey, ctx );
-      if (not inputClusterContainer.isValid()){
-	ATH_MSG_FATAL("xAOD::PixelClusterContainer with key " << m_pixelClusterContainerKey.key() << " is not available...");
-	return false;
-      }
-      inputContainer = inputClusterContainer.cptr();
-
+    if (m_useClusters) {
       data.v_PixelSpacePointForSeed.clear();
-      data.v_PixelSpacePointForSeed.resize(inputContainer->size());
     }
 
     data.v_PixelSiSpacePointForSeed.clear();
@@ -820,15 +800,19 @@ namespace ActsTrk {
 
     for (const ActsTrk::Seed* seed : seedPtrs) {
       std::array<std::size_t, 3> indexes {
-	seed->sp()[0]->measurementIndexes()[0],
-	  seed->sp()[1]->measurementIndexes()[0],
-	  seed->sp()[2]->measurementIndexes()[0]
+	seed->sp()[0]->index(),
+	  seed->sp()[1]->index(),
+	  seed->sp()[2]->index()
 	  };
 
       const auto [bottom_idx, medium_idx, top_idx] = indexes;
+      std::size_t max_index = std::max(bottom_idx, std::max(medium_idx, top_idx));
+      if (data.v_PixelSpacePointForSeed.size() < max_index + 1) {
+	data.v_PixelSpacePointForSeed.resize( max_index + 1 );
+      }
 
       // Retrieve/make the space points!
-      if (not useClusters) {
+      if (not m_useClusters) {
 	// Get the Space Point from the element link
 	if (not linkAcc.isAvailable(*seed->sp()[0])){
 	  ATH_MSG_FATAL("no pixelSpacePointLink for bottom sp!");
@@ -851,9 +835,9 @@ namespace ActsTrk {
       }
       else {
 	// Get the clusters from the xAOD::Clusters and then make the space points
-	const  xAOD::PixelCluster* bottom_cluster = inputContainer->at(bottom_idx);
-	const  xAOD::PixelCluster* medium_cluster = inputContainer->at(medium_idx);
-	const  xAOD::PixelCluster* top_cluster = inputContainer->at(top_idx);
+	const xAOD::PixelCluster* bottom_cluster = reinterpret_cast<const xAOD::PixelCluster*>(*(seed->sp()[0]->measurements()[0]));
+	const xAOD::PixelCluster* medium_cluster = reinterpret_cast<const xAOD::PixelCluster*>(*(seed->sp()[1]->measurements()[0]));
+	const xAOD::PixelCluster* top_cluster = reinterpret_cast<const xAOD::PixelCluster*>(*(seed->sp()[2]->measurements()[0]));
 
 	if (not pixelLinkAcc.isAvailable(*bottom_cluster)) {
 	  ATH_MSG_FATAL("no pixelClusterLink for cluster associated to bottom sp!");

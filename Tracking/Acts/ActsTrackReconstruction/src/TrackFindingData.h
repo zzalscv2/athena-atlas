@@ -149,8 +149,10 @@ namespace
           continue;
         for (const auto *sp : seed->sp())
         {
-          for (auto index : sp->measurementIndexes())
+	  const auto& els = sp->measurements();
+	  for (std::size_t i(0ul); i<els.size(); i++) 
           {
+	    size_t index = (*els[i])->index();
             size_t imeasurement = measurementOffset + index;
             assert(imeasurement < measurements.size());
             m_seedIndex.insert({&measurements[imeasurement].atlasHit(), m_numSeed});

@@ -33,5 +33,4 @@
 
     <class name="xAOD::ArrayFloat3"/>
     <class name="std::vector<xAOD::ArrayFloat3>"/>
-
 </lcgdict>

@@ -5,6 +5,8 @@
 #include "TrkSurfaces/Surface.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "AthLinks/ElementLink.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 #include "PixelSpacePointFormationTool.h"
 
@@ -24,9 +26,9 @@ namespace ActsTrk {
     }
 
     StatusCode
-    PixelSpacePointFormationTool::producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+    PixelSpacePointFormationTool::producePixelSpacePoint(const xAOD::PixelClusterContainer& clusterContainer,
+							 const xAOD::PixelCluster& cluster,
                                                          xAOD::SpacePoint& sp,
-                                                         const std::vector<std::size_t>& measIndexes,
                                                          const InDetDD::SiDetectorElement& element) const
     {
       // this is the width expressed in mm
@@ -43,11 +45,14 @@ namespace ActsTrk {
         float cov_z = 6.*covTerm*static_cast<float>(Tp(0, 2)*Tp(0, 2)+Tp(1, 2)*Tp(1, 2));
         float cov_r = 6.*covTerm*static_cast<float>(Tp(2, 2)*Tp(2, 2));
 
+	std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> >measLinks;
+	measLinks.push_back( ElementLink<xAOD::UncalibratedMeasurementContainer>(clusterContainer, cluster.index()) );
+	
 	sp.setSpacePoint(cluster.identifierHash(),
 			 cluster.globalPosition(),
 			 cov_r, 
 			 cov_z,
-			 measIndexes);
+			 measLinks);
 	
         return StatusCode::SUCCESS;
     }

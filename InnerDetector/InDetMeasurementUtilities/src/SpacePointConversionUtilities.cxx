@@ -35,7 +35,7 @@ namespace TrackingUtilities {
 				 globPos.cast<float>(),
 				 covr,
 				 covz,
-				 {static_cast<std::size_t>(0)});
+				 {});
 
     return StatusCode::SUCCESS;
   }
@@ -84,7 +84,7 @@ namespace TrackingUtilities {
 				 globPos.cast<float>(),
 				 covr,
 				 covz,
-				 {static_cast<std::size_t>(0), static_cast<std::size_t>(0)},
+				 {},
 				 topHalfStripLength,
 				 bottomHalfStripLength,
 				 topStripDirection.cast<float>(),

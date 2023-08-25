@@ -29,7 +29,7 @@
 
 // Instantiate all necessary types for the dictionary.
 namespace {
-    struct GCCXML_DUMMY_INSTANTIATION_XAODMEASUREMENTBASE {
+  struct GCCXML_DUMMY_INSTANTIATION_XAODINDETMEASUREMENT {
         // Type(s) needed for the dictionary generation to succeed.
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, PixelClusterContainer_v1 );
         XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, StripClusterContainer_v1 );

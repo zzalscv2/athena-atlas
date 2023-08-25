@@ -485,8 +485,10 @@ namespace ActsTrk
     for (const auto *sp : seed.sp())
     {
       size_t nom = 0;
-      for (auto index : sp->measurementIndexes())
+      const auto& els = sp->measurements();
+      for (std::size_t i(0ul); i<els.size(); ++i) 
       {
+	std::size_t index = (*els[i])->index();
         if (nom > 0)
           os << '+';
         else if (nos > 0)
@@ -608,8 +610,10 @@ namespace ActsTrk
       ATH_MSG_DEBUG("    \\__ " << handle->size() << " elements!");
       for (const auto *sp : *handle)
       {
-        for (auto imeas : sp->measurementIndexes())
-        {
+	const auto& els = sp->measurements();
+	for (std::size_t i(0ul); i<els.size(); ++i) 
+	{
+	  std::size_t imeas = (*els[i])->index();
           if (!(imeas < measurementIndex.size()))
           {
             ATH_MSG_WARNING("Invalid measurement index (" << imeas << ") for SpacePoint at ("
