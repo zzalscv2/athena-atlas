@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,7 +23,7 @@
 class TrackHandle_xAODTrackParticle::Imp {
 public:
 
-  const Trk::Track * createTrack(DataVector<const Trk::TrackStateOnSurface>* trackStateOnSurfaces) const
+  const Trk::Track * createTrack(Trk::TrackStates* trackStateOnSurfaces) const
   {
     if (!trackStateOnSurfaces) {
       VP1Msg::messageDebug("TrackHandle_xAODTrackParticle WARNING: Could not create track due to null TSOS vector");
@@ -35,7 +35,7 @@ public:
       return nullptr;
     }
     Trk::TrackInfo ti(Trk::TrackInfo::Unknown,theclass->extrapolationParticleHypothesis());
-    std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>>  sink(trackStateOnSurfaces);
+    std::unique_ptr<Trk::TrackStates>  sink(trackStateOnSurfaces);
     const Trk::Track* trk =
       new Trk::Track(ti,
                      std::move(sink),
@@ -103,7 +103,7 @@ const Trk::Track * TrackHandle_xAODTrackParticle::provide_pathInfoTrkTrack() con
     return m_d->trkTrack;
   m_d->trkTrackInit = true;
   std::vector<const Trk::TrackParameters*>  trackpars;
-  DataVector<const Trk::TrackStateOnSurface>* trackStateOnSurfaces = new DataVector<const Trk::TrackStateOnSurface>;
+  Trk::TrackStates* trackStateOnSurfaces = new Trk::TrackStates;
 
   const Trk::Perigee* peri = &(m_d->trackparticle->perigeeParameters());
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MooCandidateMatchingTool.h"
@@ -717,9 +717,9 @@ namespace Muon {
         fieldCondObj->getInitializedCache(fieldCache);
 
         // loop over TSOS
-        const DataVector<const Trk::TrackStateOnSurface>* tsoses = entry1.track().trackStateOnSurfaces();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tit = tsoses->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tit_end = tsoses->end();
+        const Trk::TrackStates* tsoses = entry1.track().trackStateOnSurfaces();
+        Trk::TrackStates::const_iterator tit = tsoses->begin();
+        Trk::TrackStates::const_iterator tit_end = tsoses->end();
         for (; tit != tit_end; ++tit) {
             const Trk::MeasurementBase* meas = (*tit)->measurementOnTrack();
 

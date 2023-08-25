@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonMeanMDTdADCFillerTool.cxx, Implementation file for class MuonMeanMDTdADCFillerTool
@@ -84,14 +84,14 @@ namespace Rec {
 
         // return mean Number of ADC counts for MDT tubes on the track
 
-        const DataVector<const Trk::TrackStateOnSurface>* states = track.trackStateOnSurfaces();
+        const Trk::TrackStates* states = track.trackStateOnSurfaces();
         if (!states) {
             ATH_MSG_INFO("Cannot get track states on surface for TrackParticle");
             return -9999.;
         }
 
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
+        Trk::TrackStates::const_iterator tsit = states->begin();
+        Trk::TrackStates::const_iterator tsit_end = states->end();
 
         int nhitsadc = 0;
         double absR = 0;

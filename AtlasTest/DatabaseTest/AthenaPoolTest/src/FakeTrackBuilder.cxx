@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FakeTrackBuilder.h"
@@ -47,7 +47,7 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
   using namespace InDet;
   //unsigned int counter=0;
   //std::cout<<counter++<<std::endl;
-  auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
   PerigeeSurface periSurf;
   auto           trackParameter = std::make_unique<Perigee>(4.0, 3.0, 2.0, 1.0, 0.001, periSurf);
   //parameters to TrackStateOnSurface are unique_ptr to: RIO_OnTrack, TrackParameters, MaterialEffectsBase

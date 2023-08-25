@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -89,7 +89,7 @@ public:
                     nullptr)
                 : nullptr;
   }
-  static void addPars(DataVector<const Trk::TrackStateOnSurface>* dv, Trk::TrackParameters * pars)
+  static void addPars(Trk::TrackStates* dv, Trk::TrackParameters * pars)
   {
     if (!pars)
       return;
@@ -98,7 +98,7 @@ public:
       dv->push_back(tsos);
   }
 
-  void createTrack(DataVector<const Trk::TrackStateOnSurface>* trackStateOnSurfaces)
+  void createTrack(Trk::TrackStates* trackStateOnSurfaces)
   {
     if (!trackStateOnSurfaces) {
       VP1Msg::messageDebug("TrackHandle_TruthTrack WARNING: Could not create track due to null TSOS vector");
@@ -116,7 +116,7 @@ public:
     }
 
     Trk::TrackInfo ti(Trk::TrackInfo::Unknown,theclass->extrapolationParticleHypothesis());
-    std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(trackStateOnSurfaces);
+    std::unique_ptr<Trk::TrackStates> sink(trackStateOnSurfaces);
     trkTrack = new Trk::Track(ti,
                               std::move(sink),
                               nullptr /*fitquality*/);
@@ -178,7 +178,7 @@ void TrackHandle_TruthTrack::Imp::ensureInitTrkTracks()
   }
   const double charge = theclass->charge();
 
-  DataVector<const Trk::TrackStateOnSurface>* trackStateOnSurfaces = new DataVector<const Trk::TrackStateOnSurface>;
+  Trk::TrackStates* trackStateOnSurfaces = new Trk::TrackStates;
 
   if (useGenParticle) {
     addPars(trackStateOnSurfaces,createTrkPerigeeFromProdVertex(genParticle,charge));

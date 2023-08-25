@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSelectorTool.h"
@@ -94,8 +94,8 @@ namespace Muon {
             double maxTime = -1e9;
 
             // loop over TSOSs
-            DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-            DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
+            Trk::TrackStates::const_iterator tsit = states->begin();
+            Trk::TrackStates::const_iterator tsit_end = states->end();
             for (; tsit != tsit_end; ++tsit) {
                 if (!(*tsit)->type(Trk::TrackStateOnSurface::Measurement)) continue;
 

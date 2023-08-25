@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSummaryHelperTool.h"
@@ -130,7 +130,7 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
     ATH_MSG_DEBUG("Adding detailed muon track summary");
     ATH_MSG_DEBUG(track.info());
     // loop over track and get chamber Identifiers
-    const DataVector<const Trk::TrackStateOnSurface>* states = track.trackStateOnSurfaces();
+    const Trk::TrackStates* states = track.trackStateOnSurfaces();
     if (!states || states->empty()) { return; }
 
     Trk::MuonTrackSummary* muonTrackSummary = new Trk::MuonTrackSummary();
@@ -140,8 +140,8 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
     const Trk::TrackParameters* currentChamberPars = nullptr;
 
     // loop over TSOSs
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
+    Trk::TrackStates::const_iterator tsit = states->begin();
+    Trk::TrackStates::const_iterator tsit_end = states->end();
     for (; tsit != tsit_end; ++tsit) {
         const Trk::TrackParameters* pars = (*tsit)->trackParameters();
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -114,9 +114,9 @@ float TRT_LocalOccupancy::LocalOccupancy(const EventContext& ctx, const Trk::Tra
 
   int track_local[NLOCAL][NLOCALPHI]= {{0}};
 
-  const DataVector<const Trk::TrackStateOnSurface>* trackStates = track.trackStateOnSurfaces();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator	tsos		=trackStates->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator	tsosEnd		=trackStates->end();
+  const Trk::TrackStates* trackStates = track.trackStateOnSurfaces();
+  Trk::TrackStates::const_iterator	tsos		=trackStates->begin();
+  Trk::TrackStates::const_iterator	tsosEnd		=trackStates->end();
   for (;tsos!=tsosEnd;++tsos) {
     const Trk::MeasurementBase* mesb = (*tsos)->measurementOnTrack();
     if (!mesb) {

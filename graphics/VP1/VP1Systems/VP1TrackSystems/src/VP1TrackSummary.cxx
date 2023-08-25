@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,8 +47,8 @@ bool VP1TrackSummary::countHits( const Trk::Track* trk,
         return false;
 
     std::set<const Trk::TrkDetElementBase*> detelems;// Need several to handle #$$%ing cROTs. EJWM
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = trk->trackStateOnSurfaces()->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = trk->trackStateOnSurfaces()->end();
+    Trk::TrackStates::const_iterator tsos_iter = trk->trackStateOnSurfaces()->begin();
+    Trk::TrackStates::const_iterator tsos_end = trk->trackStateOnSurfaces()->end();
     for (; tsos_iter != tsos_end; ++tsos_iter) {
         const Trk::MeasurementBase*       meas = *tsos_iter ? (*tsos_iter)->measurementOnTrack() : nullptr;
         VP1TrackSummary::addCounts(detelems, meas, idhelper, nPixelHits , nSCTHits , nTRTHits , nhits_muon_phi , nhits_rpc , nhits_mdt , nhits_tgc , nhits_csc);

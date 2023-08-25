@@ -1,5 +1,5 @@
  /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -1001,13 +1001,13 @@ bool IDPerfMonEoverP::fillLastMeasurement(const Trk::Track* track, const int fit
   if(!track) return false;
   const Trk::TrackParameters* trkPara =0;
 
-  const DataVector<const Trk::TrackStateOnSurface>* oldTrackStates = track->trackStateOnSurfaces();
+  const Trk::TrackStates* oldTrackStates = track->trackStateOnSurfaces();
   if (oldTrackStates == 0)
   {
     return false;
   }
 
-  for ( DataVector<const Trk::TrackStateOnSurface>::const_reverse_iterator rItTSoS = oldTrackStates->rbegin(); rItTSoS != oldTrackStates->rend(); ++rItTSoS)
+  for ( Trk::TrackStates::const_reverse_iterator rItTSoS = oldTrackStates->rbegin(); rItTSoS != oldTrackStates->rend(); ++rItTSoS)
   {
     if (trkPara!=0){
         break;

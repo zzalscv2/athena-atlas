@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExtrapolateMuonToIPTool.h"
@@ -140,8 +140,8 @@ std::unique_ptr<Trk::Track> ExtrapolateMuonToIPTool::extrapolate(const Trk::Trac
     }
 
     // create new TSOS DataVector and reserve enough space to fit all old TSOS + one new TSOS
-    const DataVector<const Trk::TrackStateOnSurface>* oldTSOT = track.trackStateOnSurfaces();
-    auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+    const Trk::TrackStates* oldTSOT = track.trackStateOnSurfaces();
+    auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
     unsigned int newSize = oldTSOT->size() + 1;
     trackStateOnSurfaces->reserve(newSize);
 
@@ -188,7 +188,7 @@ std::unique_ptr<Trk::Track> ExtrapolateMuonToIPTool::extrapolate(const Trk::Trac
 
 const Trk::TrackParameters* ExtrapolateMuonToIPTool::findMeasuredParametersClosestToIP(const Trk::Track& track) const {
     // create new TSOS DataVector and reserve enough space to fit all old TSOS + one new TSOS
-    const DataVector<const Trk::TrackStateOnSurface>* states = track.trackStateOnSurfaces();
+    const Trk::TrackStates* states = track.trackStateOnSurfaces();
     if (!states) return nullptr;
 
     Trk::PerigeeSurface persurf;

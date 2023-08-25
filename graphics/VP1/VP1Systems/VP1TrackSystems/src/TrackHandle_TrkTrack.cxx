@@ -85,8 +85,8 @@ void TrackHandle_TrkTrack::ensureTouchedMuonChambersInitialised() const
     VP1Msg::messageVerbose("TrackHandle_TrkTrack WARNING: can't init touched muon chamber list.");
     return;
   }
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_iter = m_trk->trackStateOnSurfaces()->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos_end = m_trk->trackStateOnSurfaces()->end();
+  Trk::TrackStates::const_iterator tsos_iter = m_trk->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator tsos_end = m_trk->trackStateOnSurfaces()->end();
   for (; tsos_iter != tsos_end; ++tsos_iter) {
     if (!VP1TrackSanity::isSafe(*tsos_iter)) {
       if (VP1Msg::verbose())
@@ -394,7 +394,7 @@ bool TrackHandle_TrkTrack::containsDetElement(const QString &id) const
 
   VP1Msg::messageVerbose("TrackHandle_TrkTrack::looping over TSOS ");
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator it = trkTrackPointer()->trackStateOnSurfaces()->begin(),
+  Trk::TrackStates::const_iterator it = trkTrackPointer()->trackStateOnSurfaces()->begin(),
                                                              itE = trkTrackPointer()->trackStateOnSurfaces()->end();
   for (; it != itE; ++it)
   {

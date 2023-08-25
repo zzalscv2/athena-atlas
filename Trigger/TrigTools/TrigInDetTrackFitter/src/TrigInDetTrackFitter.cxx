@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -733,8 +733,8 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
 
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
-      auto pParVec    = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
-      auto pParVecwTP = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+      auto pParVec    = std::make_unique<Trk::TrackStates>();
+      auto pParVecwTP = std::make_unique<Trk::TrackStates>();
       if (m_correctClusterPos) {
         pParVec->reserve(vpTrkNodes.size()+1);
         pParVec->push_back(new Trk::TrackStateOnSurface(nullptr, std::move(perigee),nullptr, typePattern));

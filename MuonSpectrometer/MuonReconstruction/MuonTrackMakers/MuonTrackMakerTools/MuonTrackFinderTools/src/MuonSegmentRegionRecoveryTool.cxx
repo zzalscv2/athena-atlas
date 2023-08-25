@@ -667,7 +667,7 @@ namespace Muon {
         }
         if (!states.empty()) {
             // states were added, create a new track
-            auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+            auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
             trackStateOnSurfaces->reserve(oldStates->size() + states.size());
 
             std::vector<std::unique_ptr<const Trk::TrackStateOnSurface>> toBeSorted;
@@ -911,7 +911,7 @@ namespace Muon {
 
             std::stable_sort(states.begin(), states.end(), SortTSOSs(m_edmHelperSvc.get(), m_idHelperSvc.get()));
             ATH_MSG_DEBUG("Filling DataVector with TSOSs " << states.size());
-            auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+            auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
             trackStateOnSurfaces->reserve(states.size());
             for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : states) { trackStateOnSurfaces->push_back(sorted.release()); }
             ATH_MSG_DEBUG("Creating new Track " << states.size());

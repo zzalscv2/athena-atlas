@@ -247,8 +247,8 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
                                           m_materialEffects ? Trk::muon : Trk::nonInteracting);
       }
       if(fittedTrack){
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator itSet = fittedTrack->trackStateOnSurfaces()->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator itSetEnd = fittedTrack->trackStateOnSurfaces()->end();
+        Trk::TrackStates::const_iterator itSet = fittedTrack->trackStateOnSurfaces()->begin();
+        Trk::TrackStates::const_iterator itSetEnd = fittedTrack->trackStateOnSurfaces()->end();
         const Trk::TrackParameters *measpar=nullptr;
         double mindist=9999;
         for ( ; itSet!=itSetEnd; ++itSet) {
@@ -265,7 +265,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
           fittedTrack.reset();
         }
         else {
-          auto trajectory = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+          auto trajectory = std::make_unique<Trk::TrackStates>();
           itSet = fittedTrack->trackStateOnSurfaces()->begin();
           for ( ; itSet!=itSetEnd; ++itSet) {
             if (!(**itSet).type(Trk::TrackStateOnSurface::Perigee)) {

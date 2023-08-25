@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonMomentumBalanceSignificanceTool.h"
@@ -43,7 +43,7 @@ namespace Rec {
         double energyBalance = 0.;
         const Trk::EnergyLoss* energyLoss = nullptr;
         const Trk::TrackParameters* previousParameters = nullptr;
-        for (DataVector<const Trk::TrackStateOnSurface>::const_iterator s = track.trackStateOnSurfaces()->begin();
+        for (Trk::TrackStates::const_iterator s = track.trackStateOnSurfaces()->begin();
              s != track.trackStateOnSurfaces()->end(); ++s) {
             if (!(**s).trackParameters()) continue;
             if ((**s).materialEffectsOnTrack()) {
