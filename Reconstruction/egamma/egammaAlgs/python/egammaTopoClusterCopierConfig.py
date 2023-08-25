@@ -9,12 +9,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     acc = ComponentAccumulator()
-    egtopocluster = flags.Egamma.Keys.Internal.EgammaTopoClusters
 
     kwargs.setdefault("InputTopoCollection", flags.Egamma.Keys.Input.TopoClusters)
-    kwargs.setdefault("OutputTopoCollection", egtopocluster)
+    kwargs.setdefault("OutputTopoCollection", flags.Egamma.Keys.Internal.EgammaTopoClusters)
     kwargs.setdefault("OutputFwdTopoCollection", flags.Egamma.Keys.Internal.ForwardTopoClusters)
-    kwargs.setdefault("OutputTopoCollectionShallow", "tmp_"+egtopocluster)
+    kwargs.setdefault("OutputTopoCollectionShallow", "tmp_"+kwargs["OutputTopoCollection"])
     kwargs.setdefault("ECut", 700 if not flags.Egamma.doLowMu else 300)
 
     kwargs.setdefault('hasITk', flags.Detector.GeometryITk)
