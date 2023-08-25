@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2023 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -74,7 +74,7 @@ EvtPythiaEngine::EvtPythiaEngine( std::string xmlDir, bool convertPhysCodes,
     // from EvtGen for Pythia 8.
     m_useEvtGenRandom = useEvtGenRandom;
 
-    m_evtgenRandom = std::make_unique<EvtPythiaRandom>();
+    m_evtgenRandom = std::make_shared<EvtPythiaRandom>();
 
     m_initialised = false;
 }
@@ -127,8 +127,13 @@ void EvtPythiaEngine::initialise()
 
     // Set the random number generator
     if ( m_useEvtGenRandom == true ) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+        m_genericPythiaGen->setRndmEnginePtr( m_evtgenRandom );
+        m_aliasPythiaGen->setRndmEnginePtr( m_evtgenRandom );
+#else
         m_genericPythiaGen->setRndmEnginePtr( m_evtgenRandom.get() );
         m_aliasPythiaGen->setRndmEnginePtr( m_evtgenRandom.get() );
+#endif
     }
 
     m_genericPythiaGen->init();

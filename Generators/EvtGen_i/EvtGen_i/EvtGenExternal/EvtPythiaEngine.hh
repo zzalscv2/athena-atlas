@@ -1,6 +1,6 @@
 
 /***********************************************************************
-* Copyright 1998-2022 CERN for the benefit of the EvtGen authors       *
+* Copyright 1998-2023 CERN for the benefit of the EvtGen authors       *
 *                                                                      *
 * This file is part of EvtGen.                                         *
 *                                                                      *
@@ -78,7 +78,7 @@ class EvtPythiaEngine : public EvtAbsExternalGen {
 
     bool m_convertPhysCodes, m_initialised, m_useEvtGenRandom;
 
-    std::unique_ptr<EvtPythiaRandom> m_evtgenRandom;
+    std::shared_ptr<EvtPythiaRandom> m_evtgenRandom;
 
     std::map<int, int> m_addedPDGCodes;
 };
