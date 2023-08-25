@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Pythia8_i/UserProcessFactory.h"
@@ -8,7 +8,7 @@
 
 namespace Pythia8_UserProcess{
  
-  Sigma2Process *UserProcessFactory::create(const std::string &name){
+  std::shared_ptr<Sigma2Process> UserProcessFactory::create(const std::string &name){
     std::map<std::string, const ICreator*>::const_iterator it = s_creators().find(name);
     if(it == s_creators().end()){
       //eek!

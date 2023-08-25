@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // PowhegHooksBB4L.h 
 
@@ -7,7 +7,6 @@
 // PowhegHooks.h by Richard Corke
 
 #include "Pythia8_i/UserHooksFactory.h"
-#include "Pythia8Plugins/PowhegHooks.h"
 #include "UserSetting.h"
 
 namespace Pythia8 {
@@ -199,7 +198,11 @@ public:
 		double topdechardness = getdechardness(1, e),  atopdechardness = getdechardness(-1, e);
 		if ((topdechardness > m_topresscale) or (atopdechardness > m_atopresscale)) {
 
+#if PYTHIA_VERSION_INTEGER >= 8310
+			loggerPtr->ERROR_MSG("Warning in PowhegHooksBB4L::doVetoPartonLevel: passed doVetoFSREmission veto, but wouldn't have passed veto based on the full event listing");
+#else
 			infoPtr->errorMsg("Warning in PowhegHooksBB4L::doVetoPartonLevel: passed doVetoFSREmission veto, but wouldn't have passed veto based on the full event listing");
+#endif
 		}
 //		cout << " veto scales: " << fixed << setprecision(17) << setw(30) << topresscale << setw(30) << atopresscale << endl;
 		m_topresscale = -1;
@@ -253,7 +256,11 @@ public:
 				distance ++;
 			}
 			if (iTop == 0) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+				loggerPtr->ERROR_MSG("Warning in PowhegHooksBB4L::doVetoFSREmission: emission in resonance not from top quark, not vetoing");
+#else
 				infoPtr->errorMsg("Warning in PowhegHooksBB4L::doVetoFSREmission: emission in resonance not from top quark, not vetoing");
+#endif
 				return false;
 			}
 			int iTopCharge = (e[iTop].id()>0)?1:-1;

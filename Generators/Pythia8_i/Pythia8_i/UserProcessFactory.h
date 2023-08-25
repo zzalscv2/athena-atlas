@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOR_PYTHIA8_USER_PROCESS_FACTORY_H
@@ -20,7 +20,7 @@ namespace Pythia8_UserProcess{
     
   public:
     
-    static Sigma2Process* create(const std::string &procName);
+    static std::shared_ptr<Sigma2Process> create(const std::string &procName);
     
   private:
     
@@ -28,7 +28,7 @@ namespace Pythia8_UserProcess{
     
     class ICreator{
     public:
-      virtual Sigma2Process *create() const = 0;
+      virtual std::shared_ptr<Sigma2Process> create() const = 0;
       virtual ~ICreator(){};
     };
     
@@ -49,8 +49,8 @@ namespace Pythia8_UserProcess{
         }
       }
       
-      Sigma2Process *create()const{
-        return new T;
+      std::shared_ptr<Sigma2Process> create()const{
+        return std::make_shared<T>();
       }
       
     private:

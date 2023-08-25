@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "Pythia8_i/Pythia8_i.h"
 #include "Pythia8_i/UserProcessFactory.h"
@@ -209,11 +209,15 @@ StatusCode Pythia8_i::genInitialize() {
     ATH_MSG_INFO("           THE ATHENA SERVICE AthRNGenSvc IS USED.");
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
-    m_atlasRndmEngine = std::make_unique<customRndm>();
+    m_atlasRndmEngine = std::make_shared<customRndm>();
 
     CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
     m_atlasRndmEngine->init(rndmEngine);
+#if PYTHIA_VERSION_INTEGER >= 8310
+    m_pythia->setRndmEnginePtr(m_atlasRndmEngine);
+#else
     m_pythia->setRndmEnginePtr(m_atlasRndmEngine.get());
+#endif
     s_pythia_stream = "PYTHIA8";
   }else{
     ATH_MSG_INFO(" !!!!!!!!!!!!  WARNING ON PYTHIA RANDOM NUMBERS !!!!!!!!!! ");
@@ -223,7 +227,7 @@ StatusCode Pythia8_i::genInitialize() {
   }
 
   if(m_userProcess != ""){
-    m_procPtr = std::unique_ptr<Pythia8::Sigma2Process>(Pythia8_UserProcess::UserProcessFactory::create(m_userProcess));
+    m_procPtr = Pythia8_UserProcess::UserProcessFactory::create(m_userProcess);
   }
 
 
@@ -254,9 +258,12 @@ StatusCode Pythia8_i::genInitialize() {
       m_userResonancePtrs.push_back(Pythia8_UserResonance::UserResonanceFactory::create(resonanceArgs.front(), idResIn));
     }
 
-    for(std::vector<Pythia8::ResonanceWidths*>::const_iterator resonance = m_userResonancePtrs.begin();
-        resonance != m_userResonancePtrs.end(); ++resonance){
-      m_pythia->setResonancePtr(*resonance);
+    for(std::shared_ptr<Pythia8::ResonanceWidths>& resonance : m_userResonancePtrs) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+      m_pythia->setResonancePtr(resonance);
+#else
+      m_pythia->setResonancePtr(resonance.get());
+#endif
     }
 
   }
@@ -290,7 +297,12 @@ StatusCode Pythia8_i::genInitialize() {
   }
 
   if(m_procPtr){
-    if(!m_pythia->setSigmaPtr(m_procPtr.get())) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+    if(!m_pythia->setSigmaPtr(m_procPtr))
+#else
+    if(!m_pythia->setSigmaPtr(m_procPtr.get()))
+#endif
+    {
       ATH_MSG_ERROR("Unable to set requested user process: " + m_userProcess + " !!");
       ATH_MSG_ERROR("Pythia 8 initialisation will FAIL!");
       canInit = false;

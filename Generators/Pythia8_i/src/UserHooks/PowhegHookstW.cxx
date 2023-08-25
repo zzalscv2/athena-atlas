@@ -324,7 +324,11 @@ public:
     while (iEmt >= 0 && e[iEmt].status() != 23) {
       iEmt--;
       if (iEmt < 2) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+        loggerPtr->ERROR_MSG("Error in PowhegHooks::MPIveto: Powheg emission not found");
+#else
         infoPtr->errorMsg("Error in PowhegHooks::MPIveto: Powheg emission not found");
+#endif
         exit(1);
       }
     }
