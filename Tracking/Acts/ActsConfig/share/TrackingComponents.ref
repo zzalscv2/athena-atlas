@@ -7,11 +7,13 @@ Configuration of tracking components:
     * Space Point Formation: ENABLED
     * Seeding: ENABLED
     * Track Finding: ENABLED
+    * Ambiguity Resolution: ENABLED
  - Acts Algorithms:
     * Clustering: ENABLED
     * Space Point Formation: ENABLED
     * Seeding: ENABLED
     * Track Finding: DISABLED
+    * Ambiguity Resolution: DISABLED
  - Athena -> Acts EDM Convertions:
     * Cluster: DISABLED
     * Space Point: DISABLED
@@ -19,6 +21,8 @@ Configuration of tracking components:
     * Cluster: DISABLED
     * Space Point: DISABLED
     * Seed: DISABLED
+    * Tracks: DISABLED
+    * Resolved Tracks: DISABLED
 ========================================
 ========================================
 Validation Mode - Clusters
@@ -29,11 +33,13 @@ Configuration of tracking components:
     * Space Point Formation: ENABLED
     * Seeding: ENABLED
     * Track Finding: ENABLED
+    * Ambiguity Resolution: ENABLED
  - Acts Algorithms:
     * Clustering: ENABLED
     * Space Point Formation: DISABLED
     * Seeding: DISABLED
     * Track Finding: DISABLED
+    * Ambiguity Resolution: DISABLED
  - Athena -> Acts EDM Convertions:
     * Cluster: DISABLED
     * Space Point: DISABLED
@@ -41,6 +47,8 @@ Configuration of tracking components:
     * Cluster: ENABLED
     * Space Point: DISABLED
     * Seed: DISABLED
+    * Tracks: DISABLED
+    * Resolved Tracks: DISABLED
 ========================================
 ========================================
 Validation Mode - Space Points
@@ -51,11 +59,13 @@ Configuration of tracking components:
     * Space Point Formation: DISABLED
     * Seeding: DISABLED
     * Track Finding: ENABLED
+    * Ambiguity Resolution: ENABLED
  - Acts Algorithms:
     * Clustering: DISABLED
     * Space Point Formation: ENABLED
     * Seeding: DISABLED
     * Track Finding: DISABLED
+    * Ambiguity Resolution: DISABLED
  - Athena -> Acts EDM Convertions:
     * Cluster: ENABLED
     * Space Point: DISABLED
@@ -63,6 +73,8 @@ Configuration of tracking components:
     * Cluster: DISABLED
     * Space Point: DISABLED
     * Seed: ENABLED
+    * Tracks: DISABLED
+    * Resolved Tracks: DISABLED
 ========================================
 ========================================
 Validation Mode - Seeds
@@ -73,11 +85,13 @@ Configuration of tracking components:
     * Space Point Formation: ENABLED
     * Seeding: DISABLED
     * Track Finding: ENABLED
+    * Ambiguity Resolution: ENABLED
  - Acts Algorithms:
     * Clustering: DISABLED
     * Space Point Formation: DISABLED
     * Seeding: DISABLED
     * Track Finding: DISABLED
+    * Ambiguity Resolution: DISABLED
  - Athena -> Acts EDM Convertions:
     * Cluster: DISABLED
     * Space Point: ENABLED
@@ -85,6 +99,8 @@ Configuration of tracking components:
     * Cluster: DISABLED
     * Space Point: DISABLED
     * Seed: ENABLED
+    * Tracks: DISABLED
+    * Resolved Tracks: DISABLED
 ========================================
 ========================================
 Validation Mode - Tracks
@@ -95,11 +111,13 @@ Configuration of tracking components:
     * Space Point Formation: DISABLED
     * Seeding: DISABLED
     * Track Finding: DISABLED
+    * Ambiguity Resolution: ENABLED
  - Acts Algorithms:
     * Clustering: DISABLED
     * Space Point Formation: ENABLED
     * Seeding: ENABLED
     * Track Finding: ENABLED
+    * Ambiguity Resolution: DISABLED
  - Athena -> Acts EDM Convertions:
     * Cluster: ENABLED
     * Space Point: DISABLED
@@ -107,5 +125,32 @@ Configuration of tracking components:
     * Cluster: DISABLED
     * Space Point: DISABLED
     * Seed: DISABLED
+    * Tracks: ENABLED
+    * Resolved Tracks: DISABLED
 ========================================
-
+========================================
+Validation Mode - Ambiguity Resolution
+----------------------------------------
+Configuration of tracking components:
+ - Athena Algorithms:
+    * Clustering: ENABLED
+    * Space Point Formation: DISABLED
+    * Seeding: DISABLED
+    * Track Finding: DISABLED
+    * Ambiguity Resolution: DISABLED
+ - Acts Algorithms:
+    * Clustering: DISABLED
+    * Space Point Formation: ENABLED
+    * Seeding: ENABLED
+    * Track Finding: ENABLED
+    * Ambiguity Resolution: ENABLED
+ - Athena -> Acts EDM Convertions:
+    * Cluster: ENABLED
+    * Space Point: DISABLED
+ - Acts -> Athena EDM Convertions:
+    * Cluster: DISABLED
+    * Space Point: DISABLED
+    * Seed: DISABLED
+    * Tracks: DISABLED
+    * Resolved Tracks: ENABLED
+========================================

@@ -15,6 +15,8 @@ if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    # without ambi resolution
+    flags.Acts.doAmbiguityResolution = False
 
     for (mode, request) in request_collection.items():
         print("=" * 40)
@@ -25,3 +27,13 @@ if __name__ == "__main__":
         print(configuration)
         print("=" * 40)
 
+    # with ambi resolution
+    flags.Acts.doAmbiguityResolution = True
+
+    print("=" * 40)
+    print("Validation Mode - Ambiguity Resolution")
+    print("-" * 40)
+    configuration = TrackingComponentConfigurer(flags)
+    print(configuration)
+    print("=" * 40)
+    
