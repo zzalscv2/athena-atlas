@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGTOOLS_DATAPROXY_H
@@ -176,7 +176,9 @@ class DataStore;
     bool updateAddress();
 
     /// set DataObject
-    void setObject(DataObject* obj);
+    /// If doreg is true, then call setRegistry to set the backpointer
+    /// from obj to the proxt.
+    void setObject(DataObject* obj, bool doreg = true);
 
     /// Access DataObject on-demand using conversion service
     ///@throws runtime_error when converter fails
@@ -372,7 +374,9 @@ class DataStore;
 
 
     /// set DataObject
-    void setObject (objLock_t& objLock, DataObject* obj);
+    /// If doreg is true, then call setRegistry to set the backpointer
+    /// from obj to the proxt.
+    void setObject (objLock_t& objLock, DataObject* obj, bool doreg);
 
 
     /**

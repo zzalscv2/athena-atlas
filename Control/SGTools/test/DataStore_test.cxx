@@ -17,12 +17,23 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/IAddressProvider.h"
+#include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/random.h"
 #include "boost/timer/timer.hpp"
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
+
+
+struct Base {};
+struct Derived : public Base {};
+static constexpr CLID Base_CLID = 89472398;
+static constexpr CLID Derived_CLID = 89472399;
+CLASS_DEF( Base, Base_CLID, 1 )
+CLASS_DEF( Derived, Derived_CLID, 1 )
+SG_BASES( Derived, Base );
 
 
 class TestProvider
@@ -155,6 +166,76 @@ void test_addSymLink()
   assert (store.addToStore (125, dp2).isSuccess());
   assert (store.addSymLink (125, dp1).isFailure());
   assert (!dp1->transientID(125));
+}
+
+
+// Testing handling of an existing proxy.
+void test_addSymLink2()
+{
+  std::cout << "test_addSymLink2\n";
+
+  SGTest::TestStore pool;
+  SG::DataStore store (pool);
+
+  // Existing proxy referencing the same DO.
+  {
+    auto doa = new DataObject;
+    SG::DataProxy* dpa1 = make_proxy (Base_CLID, "dpa");
+    dpa1->setObject (doa);
+    assert (store.addToStore (Base_CLID, dpa1).isSuccess());
+    SG::DataProxy* dpa2 = make_proxy (Derived_CLID, "dpa");
+    dpa2->setObject (doa);
+    assert (store.addToStore (Derived_CLID, dpa2).isSuccess());
+    assert (store.addSymLink (Base_CLID, dpa2).isSuccess());
+
+    assert (store.proxy_exact (Base_CLID, "dpa") == dpa1);
+    assert (store.proxy_exact (Derived_CLID, "dpa") == dpa2);
+    assert (dpa1->transientID(Base_CLID));
+    assert (dpa2->transientID(Base_CLID));
+    assert (dpa2->transientID(Derived_CLID));
+  }
+
+  // Existing proxy with empty new proxy.
+  {
+    auto dob = new DataObject;
+    SG::DataProxy* dpb1 = make_proxy (Base_CLID, "dpb");
+    dpb1->setObject (dob);
+    assert (store.addToStore (Base_CLID, dpb1).isSuccess());
+    SG::DataProxy* dpb2 = make_proxy (Derived_CLID, "dpb");
+    assert (store.addToStore (Derived_CLID, dpb2).isSuccess());
+    assert (store.addSymLink (Base_CLID, dpb2).isFailure());
+  }
+
+  // Empty existing proxy; new proxy with no Base/derived relation.
+  {
+    auto doc = new DataObject;
+    SG::DataProxy* dpc1 = make_proxy (Base_CLID, "dpc");
+    assert (store.addToStore (Base_CLID, dpc1).isSuccess());
+    SG::DataProxy* dpc2 = make_proxy (125, "dpc");
+    dpc2->setObject (doc);
+    assert (store.addToStore (125, dpc2).isSuccess());
+    assert (store.addSymLink (Base_CLID, dpc2).isFailure());
+  }
+
+  // Empty existing proxy; new proxy derived object.
+  {
+    auto dod = new DataObject;
+    SG::DataProxy* dpd1 = make_proxy (Base_CLID, "dpd");
+    assert (store.addToStore (Base_CLID, dpd1).isSuccess());
+    SG::DataProxy* dpd2 = make_proxy (Derived_CLID, "dpd");
+    dpd2->setObject (dod);
+    assert (store.addToStore (Derived_CLID, dpd2).isSuccess());
+    assert (store.addSymLink (Base_CLID, dpd2).isSuccess());
+
+    assert (store.proxy_exact (Base_CLID, "dpd") == dpd1);
+    assert (store.proxy_exact (Derived_CLID, "dpd") == dpd2);
+    assert (dpd1->object() == dod);
+    assert (dpd2->object() == dod);
+    assert (dod->refCount() == 2);
+    assert (dpd1->transientID(Base_CLID));
+    assert (dpd2->transientID(Base_CLID));
+    assert (dpd2->transientID(Derived_CLID));
+  }
 }
 
 
@@ -684,6 +765,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char** argv)
   test_addToStore();
   test_addAlias();
   test_addSymLink();
+  test_addSymLink2();
   test_proxy_exact();
   test_proxy();
   test_typeCount();
