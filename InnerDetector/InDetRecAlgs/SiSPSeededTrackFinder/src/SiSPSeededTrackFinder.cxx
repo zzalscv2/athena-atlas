@@ -471,6 +471,21 @@ StatusCode InDet::SiSPSeededTrackFinder::itkFastTrackingStrategy(const EventCont
   /// Save good tracks in track collection
   for (const std::pair<const double, Trk::Track*> & qualityAndTrack: qualitySortedTrackCandidates) {
     ++counter[kNTracks];
+
+    if (m_trackSummaryTool.isEnabled()) {
+      m_trackSummaryTool->computeAndReplaceTrackSummary(*qualityAndTrack.second);
+      InDet::PatternHoleSearchOutcome theOutcome;
+      /// Check if we have a hole search result for this guy
+      if (m_writeHolesFromPattern && trackEventData.combinatorialData().findPatternHoleSearchOutcome(qualityAndTrack.second,theOutcome)){
+        /// If yes: Write this information into the track summary.
+        qualityAndTrack.second->trackSummary()->update(Trk::numberOfPixelHoles, theOutcome.nPixelHoles);
+        qualityAndTrack.second->trackSummary()->update(Trk::numberOfSCTHoles, theOutcome.nSCTHoles);
+        qualityAndTrack.second->trackSummary()->update(Trk::numberOfSCTDoubleHoles, theOutcome.nSCTDoubleHoles);
+        qualityAndTrack.second->trackSummary()->update(Trk::numberOfSCTDeadSensors, theOutcome.nSCTDeads);
+        qualityAndTrack.second->trackSummary()->update(Trk::numberOfPixelDeadSensors, theOutcome.nPixelDeads);
+      }
+    }
+
     outputTracks->push_back(qualityAndTrack.second);
   }
 
@@ -844,11 +859,12 @@ void InDet::SiSPSeededTrackFinder::filterSharedTracks(std::multimap<double, Trk:
     int nClusters = 0; 
     /// loop over measurements on the track candidate 
     for (const Trk::MeasurementBase* m: *((*it_qualityAndTrack).second->measurementsOnTrack())) {
+
       /// get the PRD from the measurement
       const Trk::PrepRawData* pr = (static_cast<const Trk::RIO_OnTrack*>(m))->prepRawData();
       if (pr) {
         /// increase cluster count
-	      ++nClusters;
+        ++nClusters;
         /// and check if the cluster was already used in a previous ( = higher quality) track 
         if (clusters.find(pr)==it_clustersEnd) {
           /// if not, record as a free (not prevously used) cluster 
@@ -856,6 +872,7 @@ void InDet::SiSPSeededTrackFinder::filterSharedTracks(std::multimap<double, Trk:
         }
       }
     }
+
     /// check if the track has the minimum number of free clusters or if it has no shared clusters 
     int nFreeClusters = static_cast<int>(freeClusters.size()); 
     if (nFreeClusters >= m_nfreeCut || nFreeClusters==nClusters) {
@@ -889,7 +906,6 @@ void InDet::SiSPSeededTrackFinder::filterSharedTracksFast(std::multimap<double, 
 
     int nClusters = 0;
     int nPixels = 0;
-
     /// loop over track states on surface of the track candidate
     for (const Trk::TrackStateOnSurface* tsos: *((*it_qualityAndTrack).second->trackStateOnSurfaces())) {
 

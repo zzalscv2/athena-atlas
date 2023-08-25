@@ -160,7 +160,7 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurface(const EventContext& c
 
   if (tsos) dtsos.push_back(tsos);
   
-  tsos = m_elements[m_elementsMap[i]].trackSimpleStateOnSurface(false,false,m_tools->useFastTracking());
+  tsos = m_elements[m_elementsMap[i]].trackSimpleStateOnSurface(false,m_tools->useFastTracking(),m_tools->useFastTracking());
 
   if (tsos) dtsos.push_back(tsos);
   
@@ -1387,7 +1387,7 @@ bool InDet::SiTrajectory_xk::backwardExtension(int itmax, const EventContext& ct
     }
     else     {
       if (m_tools->useFastTracking()) En.setClusterB(  nullptr  ,10000.);
-      En.setCluster(  nullptr  );
+      else En.setCluster(  nullptr  );
     }
   } 
   return true;

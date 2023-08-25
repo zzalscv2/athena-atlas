@@ -219,6 +219,7 @@ def ITkSiCombinatorialTrackFinder_xkCfg(
                       "ITkStripDetElementBoundaryLinks_xk")
     kwargs.setdefault("ITkGeometry", True)
     kwargs.setdefault("doFastTracking", flags.Tracking.doITkFastTracking)
+    kwargs.setdefault("writeHolesFromPattern", flags.Tracking.doITkFastTracking)
 
     #
     # --- Local track finding using sdCaloSeededSSSpace point seed
