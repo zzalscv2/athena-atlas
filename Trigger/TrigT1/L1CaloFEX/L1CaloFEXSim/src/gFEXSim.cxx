@@ -125,7 +125,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    ATH_CHECK(m_gFEXFPGA_Tool->init(2));
    m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_forwardFPGA);
    m_gFEXFPGA_Tool->GetEnergyMatrix(CPtwr);
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, CPtwr);
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer);
    m_gFEXFPGA_Tool->reset();
    //FPGA C-P----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    ATH_CHECK(m_gFEXFPGA_Tool->init(2));
    m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_forwardFPGA_N);
    m_gFEXFPGA_Tool->GetEnergyMatrix(CNtwr);
-   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer, CNtwr);
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer);
    m_gFEXFPGA_Tool->reset();
    //FPGA C-N----------------------------------------------------------------------------------------------------------------------------------------------
 
