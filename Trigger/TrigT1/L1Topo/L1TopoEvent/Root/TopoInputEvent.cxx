@@ -146,6 +146,12 @@ StatusCode TopoInputEvent::setjXE(const TCS::jXETOB & jxe) {
    return StatusCode::SUCCESS;
 }
 
+StatusCode TopoInputEvent::setjXEC(const TCS::jXETOB & jxec) {
+   m_jxec.clear();
+   m_jxec.push_back(jxec);
+   return StatusCode::SUCCESS;
+}
+
 StatusCode TopoInputEvent::setjTE(const TCS::jTETOB & jte) {
    m_jte.clear();
    m_jte.push_back(jte);
@@ -460,6 +466,7 @@ TCS::TopoInputEvent::clear() {
    m_BCID  = 0;
    setMET(MetTOB(0,0,0));   // default MET
    setjXE(jXETOB(0,0,0));   // default jXE
+   setjXEC(jXETOB(0,0,0));   // default jXEC
    setjTE(jTETOB(0));       // default jTE
    setjTEC(jTETOB(0));       // default jTEC
    setjTEFWD(jTETOB(0));       // default jTEFWD

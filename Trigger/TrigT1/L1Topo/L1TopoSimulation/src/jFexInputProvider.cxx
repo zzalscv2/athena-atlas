@@ -277,6 +277,8 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
 
   int global_ExTopo = 0;
   int global_EyTopo = 0;
+  int central_ExTopo = 0;
+  int central_EyTopo = 0;
 
   for(const xAOD::jFexMETRoI* jFexRoI : *jXE_EDM){
 
@@ -294,6 +296,12 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
     global_ExTopo += ExTopo;
     global_EyTopo += EyTopo;
 
+    // jXEC
+    if( jFexNumber!=0 && jFexNumber!=5 ) {
+	    central_ExTopo += ExTopo;
+      central_EyTopo += EyTopo;
+    }
+
     ATH_MSG_DEBUG( "EDM jFex XE Number: "
                    << jFexNumber
                    << " FPGA Number: "
@@ -307,21 +315,33 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
 
   unsigned long long global_ExTopoLong = static_cast<unsigned long long>(global_ExTopo);
   unsigned long long global_EyTopoLong = static_cast<unsigned long long>(global_EyTopo);
+  unsigned long long central_ExTopoLong = static_cast<unsigned long long>(central_ExTopo);
+  unsigned long long central_EyTopoLong = static_cast<unsigned long long>(central_EyTopo);
 
   unsigned long long Et2Topo = global_ExTopoLong*global_ExTopoLong + global_EyTopoLong*global_EyTopoLong;
   unsigned int EtTopo =  std::sqrt( Et2Topo );
+  unsigned long long Et2Topo_central = central_ExTopoLong*central_ExTopoLong + central_EyTopoLong*central_EyTopoLong;
+  unsigned int EtTopo_central =  std::sqrt( Et2Topo_central );
 
   TCS::jXETOB jxe( -(global_ExTopo), -(global_EyTopo), EtTopo, TCS::JXE );
+  TCS::jXETOB jxec( -(central_ExTopo), -(central_EyTopo), EtTopo_central, TCS::JXEC );
 
   jxe.setExDouble( static_cast<double>(-global_ExTopo*m_EtDouble_conversion) );
   jxe.setEyDouble( static_cast<double>(-global_EyTopo*m_EtDouble_conversion) );
   jxe.setEtDouble( static_cast<double>(EtTopo*m_EtDouble_conversion) );
   jxe.setEt2( Et2Topo );
+  jxec.setExDouble( static_cast<double>(-central_ExTopo*m_EtDouble_conversion) );
+  jxec.setEyDouble( static_cast<double>(-central_EyTopo*m_EtDouble_conversion) );
+  jxec.setEtDouble( static_cast<double>(EtTopo_central*m_EtDouble_conversion) );
+  jxec.setEt2( Et2Topo_central );
 
   inputEvent.setjXE( jxe );
+  inputEvent.setjXEC( jxec );
   auto mon_h_jXE_Pt = Monitored::Scalar("jXETOBPt", jxe.EtDouble());
   auto mon_h_jXE_Phi = Monitored::Scalar("jXETOBPhi", atan2(jxe.Ey(),jxe.Ex()));
-  Monitored::Group(m_monTool, mon_h_jXE_Pt, mon_h_jXE_Phi); 
+  auto mon_h_jXEC_Pt = Monitored::Scalar("jXECTOBPt", jxec.EtDouble());
+  auto mon_h_jXEC_Phi = Monitored::Scalar("jXECTOBPhi", atan2(jxec.Ey(),jxec.Ex()));
+  Monitored::Group(m_monTool, mon_h_jXE_Pt, mon_h_jXE_Phi, mon_h_jXEC_Pt, mon_h_jXEC_Phi); 
 
   return StatusCode::SUCCESS;
 }

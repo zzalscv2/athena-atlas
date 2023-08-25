@@ -161,6 +161,11 @@ def configurejFexInputProviderHistograms(alg, flags):
                                 title='jXE TOB Pt;p_{T} [GeV];', xbins=200, xmin=0, xmax=2000)
     alg.MonTool.defineHistogram('jXETOBPhi', path='EXPERT', type='TH1I',
                                 title='jXE TOB Phi;#phi;', xbins=64, xmin=-3.2, xmax=3.2)
+    # jXEC
+    alg.MonTool.defineHistogram('jXECTOBPt', path='EXPERT', type='TH1I',
+                                title='jXEC TOB Pt;p_{T} [GeV];', xbins=200, xmin=0, xmax=2000)
+    alg.MonTool.defineHistogram('jXECTOBPhi', path='EXPERT', type='TH1I',
+                                title='jXEC TOB Phi;#phi;', xbins=64, xmin=-3.2, xmax=3.2)
     # jTE
     alg.MonTool.defineHistogram('jTETOBsaturation', path='EXPERT', type='TH1I',
                                 title='jTE TOB saturation;jTE TOB saturation;', xbins=3, xmin=0, xmax=3)
