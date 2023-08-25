@@ -132,21 +132,20 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
             //storing the energies
             int tmp_energy_EM  = getET_EM(tmpTower);
             int tmp_energy_HAD = getET_HAD(tmpTower);
-            int tmp_energy     = getTTowerET(tmpTower);
             int tmp_EM_AreaINV  = getTTAreaINV_EM(tmpTower);
             int tmp_HD_AreaINV  = getTTAreaINV_HAD(tmpTower);
             m_FPGA_ET_EM[TTID]  = getET_EM(tmpTower); 
             m_FPGA_ET_HAD[TTID] = getET_HAD(tmpTower);
             
-            tmp_energy_EM = (tmp_energy_EM * tmp_EM_AreaINV)/(1<<m_bitshift_AreaINV);
-            tmp_energy_HAD= (tmp_energy_HAD* tmp_HD_AreaINV)/(1<<m_bitshift_AreaINV);
-            
+            tmp_energy_EM = (tmp_energy_EM * tmp_EM_AreaINV)/(1<<FEXAlgoSpaceDefs::pu_AreaINV);
+            tmp_energy_HAD= (tmp_energy_HAD* tmp_HD_AreaINV)/(1<<FEXAlgoSpaceDefs::pu_AreaINV);
             
             //calculating rho's
             
             // EM layer ( not EM FCAL!! )
             int tmp_eta = getTTowerEta(tmpTower);
-            if(tmp_eta < 32 && TTID < FEXAlgoSpaceDefs::jFEX_FCAL_start){
+            
+            if(tmp_eta < 32 ){
                 if(tmp_energy_EM > myDBTool->get_PUThrLowEm() and tmp_energy_EM < myDBTool->get_PUThrHighEm()) {
                     m_rho_EM += tmp_energy_EM; 
                     m_count_rho_EM++;
@@ -176,24 +175,31 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
             }            
             // FCAL is treated here!
             else if(tmp_eta >= 32){
-                //Needs further  INVESTIGATION!!! 
-                //if (ieta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width) {
-                  //m_FPGA_ET_HAD[TTID] = tmp_energy; //This corrects the FCAL layer 0 (which is an EM layer)
-                //}
-                if(tmp_energy > myDBTool->get_PUThrLowFcal() and tmp_energy < myDBTool->get_PUThrHighFcal()){    
-                    m_rho_FCAL += (tmp_energy * (tmp_HD_AreaINV*tmp_EM_AreaINV))/(1<<m_bitshift_AreaINV); // FCAL is treated differently.. but when HAD layer -> EM_Area = 1 and viceversa with this we dont need to divide into FCAL layers
-                    m_count_rho_FCAL++;
+                
+                // Contributes the HAD layer (FCAL2 and FCAL3)
+                if( TTID >= FEXAlgoSpaceDefs::jFEX_FCAL2_start){
+                    if(tmp_energy_HAD > myDBTool->get_PUThrLowFcal() and tmp_energy_HAD < myDBTool->get_PUThrHighFcal()){
+                        m_rho_FCAL += tmp_energy_HAD; 
+                        m_count_rho_FCAL++;
+                    }
+                }
+                // FCAL1 is EM layer so the energy is suposed to be in the EM layer
+                else{
+                    if(tmp_energy_EM > myDBTool->get_PUThrLowFcal() and tmp_energy_EM < myDBTool->get_PUThrHighFcal()){
+                        m_rho_FCAL += tmp_energy_EM; 
+                        m_count_rho_FCAL++;
+                    }                    
                 }
             }
         }
     }//end of iphi loop
         
     //calculating rho values for each region
-    m_rho_EM    = m_count_rho_EM   > 0 ? ((m_rho_EM*rhoDivLUT(m_count_rho_EM)    )/(1<<m_bitshift_rhoLUT)) : 0;
-    m_rho_HAD1  = m_count_rho_HAD1 > 0 ? ((m_rho_HAD1*rhoDivLUT(m_count_rho_HAD1))/(1<<m_bitshift_rhoLUT)) : 0;
-    m_rho_HAD2  = m_count_rho_HAD2 > 0 ? ((m_rho_HAD2*rhoDivLUT(m_count_rho_HAD2))/(1<<m_bitshift_rhoLUT)) : 0;
-    m_rho_HAD3  = m_count_rho_HAD3 > 0 ? ((m_rho_HAD3*rhoDivLUT(m_count_rho_HAD3))/(1<<m_bitshift_rhoLUT)) : 0;
-    m_rho_FCAL  = m_count_rho_FCAL > 0 ? ((m_rho_FCAL*rhoDivLUT(m_count_rho_FCAL))/(1<<m_bitshift_rhoLUT)) : 0;
+    m_rho_EM    = m_count_rho_EM   > 0 ? ((m_rho_EM*rhoDivLUT(m_count_rho_EM)    )/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
+    m_rho_HAD1  = m_count_rho_HAD1 > 0 ? ((m_rho_HAD1*rhoDivLUT(m_count_rho_HAD1))/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
+    m_rho_HAD2  = m_count_rho_HAD2 > 0 ? ((m_rho_HAD2*rhoDivLUT(m_count_rho_HAD2))/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
+    m_rho_HAD3  = m_count_rho_HAD3 > 0 ? ((m_rho_HAD3*rhoDivLUT(m_count_rho_HAD3))/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
+    m_rho_FCAL  = m_count_rho_FCAL > 0 ? ((m_rho_FCAL*rhoDivLUT(m_count_rho_FCAL))/(1<<FEXAlgoSpaceDefs::pu_rhoLUT)) : 0;
     
     std::vector<int> rho_values {m_rho_EM,m_rho_HAD1,m_rho_HAD2,m_rho_HAD3,m_rho_FCAL};
     
@@ -205,8 +211,8 @@ std::vector<int> LVL1::jFEXPileupAndNoise::CalculatePileup(){
 int  LVL1::jFEXPileupAndNoise::rhoDivLUT(int ntowers){
     
     //This is to save one bit in the firmware (19 bit will set be set to 1 instead of the 20th bit and rest are 0) 
-    if(ntowers == 1) return ((1<<m_bitshift_rhoLUT) - 1);
-    return static_cast<int>((1.0/ntowers)*(1<<m_bitshift_rhoLUT) );
+    if(ntowers == 1) return ((1<<FEXAlgoSpaceDefs::pu_rhoLUT) - 1);
+    return static_cast<int>((1.0/ntowers)*(1<<FEXAlgoSpaceDefs::pu_rhoLUT) );
 }
 
 void LVL1::jFEXPileupAndNoise::SubtractPileup(){
@@ -230,22 +236,29 @@ void LVL1::jFEXPileupAndNoise::SubtractPileup(){
             int tmp_EM_Area = getTTArea_EM(tmpTower);
             int tmp_HD_Area = getTTArea_HAD(tmpTower);
 
-            if(tmp_eta < 32 && TTID < FEXAlgoSpaceDefs::jFEX_FCAL_start) {
-                m_FPGA_ET_EM[TTID] =m_FPGA_ET_EM[TTID] -(m_rho_EM * tmp_EM_Area)/(1<<m_bitshift_Area);
+            if(tmp_eta < 32) {
+                m_FPGA_ET_EM[TTID] =m_FPGA_ET_EM[TTID] -(m_rho_EM * tmp_EM_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
             }
 
             if(tmp_eta < 15) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD1 * tmp_HD_Area)/(1<<m_bitshift_Area);
+                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD1 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
             }
             else if(tmp_eta < 16 ) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD2 * tmp_HD_Area)/(1<<m_bitshift_Area);
-            }
-            else if(tmp_eta >= 32) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_FCAL * (tmp_HD_Area*tmp_EM_Area))/(1<<m_bitshift_Area);
+                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD2 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
             }
             else if(tmp_eta < 32 ) {
-                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD3 * tmp_HD_Area)/(1<<m_bitshift_Area);
+                m_FPGA_ET_HAD[TTID]=m_FPGA_ET_HAD[TTID]-(m_rho_HAD3 * tmp_HD_Area)/(1<<FEXAlgoSpaceDefs::pu_Area);
             }
+            else if(tmp_eta >= 32) {
+                // Contributes the HAD layer (FCAL2 and FCAL3)
+                if( TTID >= FEXAlgoSpaceDefs::jFEX_FCAL2_start){
+                    m_FPGA_ET_HAD[TTID] = m_FPGA_ET_HAD[TTID]- (m_rho_FCAL * (tmp_HD_Area))/(1<<FEXAlgoSpaceDefs::pu_Area);
+                }
+                // FCAL1 is EM layer so the energy is suposed to be in the EM layer
+                else{
+                    m_FPGA_ET_EM[TTID]  = m_FPGA_ET_EM[TTID] - (m_rho_FCAL * (tmp_EM_Area))/(1<<FEXAlgoSpaceDefs::pu_Area);        
+                }
+            }            
         }
     }
 }

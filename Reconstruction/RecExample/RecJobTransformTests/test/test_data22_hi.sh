@@ -14,7 +14,7 @@ Reco_tf.py \
 --geometryVersion="ATLAS-R3S-2021-03-01-00" \
 --conditionsTag="CONDBR2-BLKPA-2022-09" \
 --preInclude="all:HIRecConfig.HIModeFlags.HImode" \
---preExec="flags.Trigger.triggerConfig=\"DB\"" \
+--preExec="flags.Egamma.doForward=False;" \
 --outputAODFile=myAOD.pool.root \
 --maxEvents=300
 

@@ -6,6 +6,7 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
@@ -316,6 +317,17 @@ StatusCode jTowerBuilder::AssignPileupAndNoiseValues(std::unique_ptr<jTowerConta
          //TREX uses another conversion factor
         if(std::abs(jtower->centreEta()) < 1.5){
             LSBscale_HAD = 500;// cf TREX
+        }
+        
+        //Since the COOL DB for FCAL individual towers are sharing the same OnlideID ( to save space)
+        //but in reality they are different towers. we need to set the parameters to 0
+        if(jtower->OfflineID() >= FEXAlgoSpaceDefs::jFEX_FCAL2_start){
+            PileUpWeightEM  = 0;
+            InverseWeightEM = 0;
+        }
+        else if(jtower->OfflineID() >= FEXAlgoSpaceDefs::jFEX_FCAL1_start){
+            PileUpWeightHad  = 0;
+            InverseWeightHad = 0;
         }
         
         jtower->setTTowerArea(PileUpWeightEM,0);
