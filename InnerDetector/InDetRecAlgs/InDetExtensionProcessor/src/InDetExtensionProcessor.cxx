@@ -413,7 +413,7 @@ InDet::InDetExtensionProcessor::trackPlusExtension(
   const std::vector<const Trk::MeasurementBase*>& extension) const
 {
   const auto& trackStatesOnSurfaces{ *(siTrack->trackStateOnSurfaces()) };
-  auto pExtendedTrajectory = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto pExtendedTrajectory = std::make_unique<Trk::TrackStates>();
 
   pExtendedTrajectory->reserve(trackStatesOnSurfaces.size() + extension.size());
   int nSiStates = 0, nExtStates = 0;

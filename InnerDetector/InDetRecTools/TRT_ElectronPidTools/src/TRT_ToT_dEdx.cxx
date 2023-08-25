@@ -181,14 +181,14 @@ TRT_ToT_dEdx::dEdx(const EventContext& ctx,
   if (!track) {
     return 0;
   }
-  const DataVector<const Trk::TrackStateOnSurface>* vtsos = track->trackStateOnSurfaces();
+  const Trk::TrackStates* vtsos = track->trackStateOnSurfaces();
   if (!vtsos) {
     return 0;
   }
 
   EGasType gasType;
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator itr  = vtsos->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator itre = vtsos->end();
+  Trk::TrackStates::const_iterator itr  = vtsos->begin();
+  Trk::TrackStates::const_iterator itre = vtsos->end();
   size_t vtos_size = vtsos->size();
   double correctionFactor = 1.;
 
@@ -350,13 +350,13 @@ TRT_ToT_dEdx::usedHits(const EventContext& ctx,
   if (!track) {
     return 0;
   }
-  const DataVector<const Trk::TrackStateOnSurface>* vtsos = track->trackStateOnSurfaces();
+  const Trk::TrackStates* vtsos = track->trackStateOnSurfaces();
   if (!vtsos) {
     return 0;
   }
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator itr  = vtsos->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator itre = vtsos->end();
+  Trk::TrackStates::const_iterator itr  = vtsos->begin();
+  Trk::TrackStates::const_iterator itre = vtsos->end();
 
   if (m_toolScenario==kAlgStandard) {
     int nhits =0;

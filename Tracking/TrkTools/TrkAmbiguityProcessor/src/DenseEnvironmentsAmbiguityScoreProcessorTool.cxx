@@ -296,7 +296,7 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::overlappingTracks(const Track
       continue;    
     }  
     // get all prds on 'track'
-    const DataVector<const TrackStateOnSurface>* tsosVec = scoredTracksItem.first->trackStateOnSurfaces();  
+    const Trk::TrackStates* tsosVec = scoredTracksItem.first->trackStateOnSurfaces();  
     if(!tsosVec){
       ATH_MSG_WARNING("TSOS vector does not exist");
       continue;   

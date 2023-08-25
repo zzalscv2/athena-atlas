@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
     const Trk::TrackStateOnSurface* pertsos = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
-    auto traj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+    auto traj = std::make_unique<Trk::TrackStates>();
     traj->push_back(pertsos);
     for (const Trk::PrepRawData* prd: prdsInSp) {
       const Trk::Surface& surf = prd->detectorElement()->surface(prd->identify());

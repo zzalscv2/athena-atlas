@@ -145,7 +145,7 @@ SCTLorentzMonTool::fillHistograms() {
     }
 
     // Get pointer to track state on surfaces
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates{track->trackStateOnSurfaces()};
+    const Trk::TrackStates* trackStates{track->trackStateOnSurfaces()};
     if (trackStates==nullptr) {
       ATH_MSG_WARNING("for current track, TrackStateOnSurfaces == Null, no data will be written for this track");
       continue;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelToTPIDTool/PixelToTPIDTool.h"
@@ -102,10 +102,10 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
   std::multimap<float,int> dEdxMap;
 
   // Check for track states:
-  const DataVector<const Trk::TrackStateOnSurface>* recoTrackStates = track.trackStateOnSurfaces();
+  const Trk::TrackStates* recoTrackStates = track.trackStateOnSurfaces();
   if (recoTrackStates) {
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIter    = recoTrackStates->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIterEnd = recoTrackStates->end();
+    Trk::TrackStates::const_iterator tsosIter    = recoTrackStates->begin();
+    Trk::TrackStates::const_iterator tsosIterEnd = recoTrackStates->end();
 
     // Loop over track states on surfaces (i.e. generalized hits):
     for (; tsosIter != tsosIterEnd; ++tsosIter) {

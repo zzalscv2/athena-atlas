@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelAthClusterMonAlg.cxx
@@ -223,7 +223,7 @@ StatusCode PixelAthClusterMonAlg::fillHistograms(const EventContext& ctx) const 
       trackWithHolesUnique.reset(m_holeSearchTool->getTrackWithHoles(*track));
       trackWithHoles = trackWithHolesUnique.get();
     }
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates = trackWithHoles->trackStateOnSurfaces();
+    const Trk::TrackStates* trackStates = trackWithHoles->trackStateOnSurfaces();
     for (auto trackStateOnSurface: *trackStates) {
       const Trk::MeasurementBase* mesBase = trackStateOnSurface->measurementOnTrack();
 

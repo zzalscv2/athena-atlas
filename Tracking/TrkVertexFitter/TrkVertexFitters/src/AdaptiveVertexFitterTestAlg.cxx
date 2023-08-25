@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexFitters/src/AdaptiveVertexFitterTestAlg.cxx
@@ -131,7 +131,7 @@ TrackUVec_t makeTracks (PerigeeUVec_t&& perigees)
   for (std::unique_ptr<Trk::Perigee>& p : perigees) {
     Trk::TrackInfo info (Trk::TrackInfo::Unknown, Trk::undefined);
     auto fqual = std::make_unique<Trk::FitQuality> (0, 0);
-    auto tsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+    auto tsos = std::make_unique<Trk::TrackStates>();
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
     tsos->push_back(std::make_unique<Trk::TrackStateOnSurface>(

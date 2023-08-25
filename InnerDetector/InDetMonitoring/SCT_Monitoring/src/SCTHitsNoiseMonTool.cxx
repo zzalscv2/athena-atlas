@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**    @file SCTHitsNoiseMonTool.cxx
@@ -1077,7 +1077,7 @@ SCTHitsNoiseMonTool::makeVectorOfTrackRDOIdentifiers() {
   // assemble list of rdo ids associated with tracks
   for (const Trk::Track* track : *tracks) {
     // Get pointer to track state on surfaces
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates{track->trackStateOnSurfaces()};
+    const Trk::TrackStates* trackStates{track->trackStateOnSurfaces()};
     if (trackStates == nullptr) {
       ATH_MSG_WARNING("for current track is TrackStateOnSurfaces == Null, no data will be written for this track");
     } else {// Loop over all track states on surfaces

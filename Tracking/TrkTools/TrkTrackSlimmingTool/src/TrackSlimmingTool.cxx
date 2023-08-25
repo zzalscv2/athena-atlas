@@ -88,7 +88,7 @@ Trk::TrackSlimmingTool::slimConstTrack(const Trk::Track& track) const
 void
 Trk::TrackSlimmingTool::setHints(const Trk::Track& track) const
 {
-  const DataVector<const TrackStateOnSurface>* oldTrackStates =
+  const Trk::TrackStates* oldTrackStates =
     track.trackStateOnSurfaces();
   if (oldTrackStates == nullptr) {
     ATH_MSG_WARNING("Track has no TSOS vector! Skipping track, returning");
@@ -110,7 +110,7 @@ Trk::TrackSlimmingTool::setHints(const Trk::Track& track) const
   const Trk::TrackParameters* parameters = nullptr;
   bool keepParameter = false;
   // looping over all TSOS
-  DataVector<const TrackStateOnSurface>::const_iterator itTSoS =
+  Trk::TrackStates::const_iterator itTSoS =
     oldTrackStates->begin();
   for (; itTSoS != oldTrackStates->end(); ++itTSoS) {
 
@@ -220,7 +220,7 @@ Trk::TrackSlimmingTool::findLastValidTSoS(
   const TrackStateOnSurface*& lastValidMSTSOS) const
 {
 
-  for (DataVector<const TrackStateOnSurface>::const_reverse_iterator rItTSoS =
+  for (Trk::TrackStates::const_reverse_iterator rItTSoS =
          oldTrackStates->rbegin();
        rItTSoS != oldTrackStates->rend();
        ++rItTSoS) {

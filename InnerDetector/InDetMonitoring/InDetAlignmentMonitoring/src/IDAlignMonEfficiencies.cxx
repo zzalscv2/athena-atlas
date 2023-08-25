@@ -924,10 +924,10 @@ StatusCode IDAlignMonEfficiencies::fillHistograms() {
     }
 
     // loop over all hits on track
-    const DataVector<const Trk::TrackStateOnSurface>* TSOS;
+    const Trk::TrackStates* TSOS;
     TSOS = (*trksItr)->trackStateOnSurfaces();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItr = TSOS->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItrE = TSOS->end();
+    Trk::TrackStates::const_iterator TSOSItr = TSOS->begin();
+    Trk::TrackStates::const_iterator TSOSItrE = TSOS->end();
 
     ATH_MSG_VERBOSE(
       "Track #" << nTrackCount << "/" << tracks->size() << " has " << TSOS->size() << " TSOS. Starting loop over TSOS");
@@ -1308,8 +1308,8 @@ StatusCode IDAlignMonEfficiencies::fillHistograms() {
     if (m_holeSearchTool != 0) {
       std::unique_ptr<const Trk::TrackStates> HTSOS (m_holeSearchTool->getHolesOnTrack(**trksItr));
       ATH_MSG_DEBUG(" -- Hole TSOS collection has size " << HTSOS->size());
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator HTSOSItr = HTSOS->begin();
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator HTSOSItrE = HTSOS->end();
+      Trk::TrackStates::const_iterator HTSOSItr = HTSOS->begin();
+      Trk::TrackStates::const_iterator HTSOSItrE = HTSOS->end();
 
       int holeCount = 0;
       for (; HTSOSItr != HTSOSItrE; ++HTSOSItr) { // Loop on Holes on Track (HTSOS)

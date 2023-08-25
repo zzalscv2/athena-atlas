@@ -811,10 +811,10 @@ void Trk::SimpleAmbiguityProcessorTool::prdTruth(const Trk::Track* track, Trk::P
 void Trk::SimpleAmbiguityProcessorTool::tsosTruth(const Trk::Track* track){
 
   
-  const DataVector<const TrackStateOnSurface>* tsos = track->trackStateOnSurfaces();
+  const Trk::TrackStates* tsos = track->trackStateOnSurfaces();
   // loop over TSOS, copy TSOS and push into vector
-  DataVector<const TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-  DataVector<const TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end();   
+  Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+  Trk::TrackStates::const_iterator iTsosEnd = tsos->end();   
   for(; iTsos != iTsosEnd; ++iTsos){
     msg(MSG::INFO)<< "the type of " << *iTsos << " is "<< (*iTsos)->dumpType() << endmsg;
     const FitQualityOnSurface* fq = (*iTsos)->fitQualityOnSurface();

@@ -352,7 +352,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
   int isBC_B3 = 0;
   int isBC_C = 0;
 
-  const DataVector<const TrackStateOnSurface>* trackStates = track.trackStateOnSurfaces();
+  const Trk::TrackStates* trackStates = track.trackStateOnSurfaces();
   const Trk::TrackParameters* first(nullptr);
   const Trk::TrackParameters* tp(nullptr);
 
@@ -492,7 +492,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
 
     if (!m_keepFirstParameters) {
       // search last valid TSOS first
-      for (DataVector<const TrackStateOnSurface>::const_reverse_iterator rItTSoS = trackStates->rbegin();
+      for (Trk::TrackStates::const_reverse_iterator rItTSoS = trackStates->rbegin();
            rItTSoS != trackStates->rend();
            ++rItTSoS) {
         if ((*rItTSoS)->type(TrackStateOnSurface::Measurement) &&
@@ -986,7 +986,7 @@ TrackParticleCreatorTool::addPIDInformation(const EventContext& ctx, const Trk::
 }
 
 void
-TrackParticleCreatorTool::addDetailedHitInformation(const DataVector<const TrackStateOnSurface>* trackStates, xAOD::TrackParticle& tp) const
+TrackParticleCreatorTool::addDetailedHitInformation(const Trk::TrackStates* trackStates, xAOD::TrackParticle& tp) const
 {
 
   Trk::DetailedHitInfo detailedInfo;
@@ -1092,7 +1092,7 @@ TrackParticleCreatorTool::addExpectedHitInformation(const Perigee *perigee, xAOD
 }
 
 void
-TrackParticleCreatorTool::addOutlierHitInformation(const DataVector<const TrackStateOnSurface>* trackStates, xAOD::TrackParticle& tp) const
+TrackParticleCreatorTool::addOutlierHitInformation(const Trk::TrackStates* trackStates, xAOD::TrackParticle& tp) const
 {
 
   uint8_t nPixOutliers = 0, nInPixOutliers = 0, nNInPixOutliers = 0, nSCTOutliers = 0;
@@ -1110,28 +1110,36 @@ TrackParticleCreatorTool::addOutlierHitInformation(const DataVector<const TrackS
     if (mesb->type(Trk::MeasurementBaseType::RIO_OnTrack)) {
       rot = static_cast<const RIO_OnTrack*>(mesb);
     }
-    if(rot==nullptr) continue;
+    if (rot == nullptr)
+      continue;
 
     const Identifier& id = rot->identify();
 
-    if(m_pixelID->is_pixel(id)){
+    if (m_pixelID->is_pixel(id)) {
       nPixOutliers++;
       int layer = m_pixelID->layer_disk(id);
-      if(m_pixelID->is_barrel(id)){
-	if(layer==0)      nInPixOutliers++;
-	else if(layer==1) nNInPixOutliers++;
-      }else if(m_doITk){ // isITk && isEndCap -> ITk specific counters
-	if(layer==0)                  nInEndcapPixOutliers++;
-	else if(layer==1 || layer==2) nNInEndcapPixOutliers++; // L0.5 + L1 disks
+      if (m_pixelID->is_barrel(id)) {
+        if (layer == 0){
+          nInPixOutliers++;
+        }
+        else if (layer == 1){
+          nNInPixOutliers++;
+        }
+      } else if (m_doITk) {  // isITk && isEndCap -> ITk specific counters
+        if (layer == 0){
+          nInEndcapPixOutliers++;
+        }
+        else if (layer == 1 || layer == 2){
+          nNInEndcapPixOutliers++;  // L0.5 + L1 disks
+        }
       }
     }
-
-    else if(m_sctID->is_sct(id)){
+    else if (m_sctID->is_sct(id)) {
       nSCTOutliers++;
     }
 
-    // TRT outliers are already filled in the InDetTrackSummaryHelperTool as used in the ambi solver
-
+    // TRT outliers are already filled in the InDetTrackSummaryHelperTool as
+    // used in the ambi solver
   }
 
   tp.setSummaryValue(nPixOutliers,    xAOD::numberOfPixelOutliers);

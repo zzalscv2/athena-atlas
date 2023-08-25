@@ -283,7 +283,7 @@ void
 Trk::TrackSummaryTool::processTrackStates(
   const EventContext& ctx,
   const Track& track,
-  const DataVector<const TrackStateOnSurface>* tsos,
+  const Trk::TrackStates* tsos,
   std::vector<int>& information,
   std::bitset<numberOfDetectorTypes>& hitPattern,
   bool doHolesInDet,
@@ -292,8 +292,8 @@ Trk::TrackSummaryTool::processTrackStates(
   int cntAddChi2 = 0;
   float chi2Sum = 0;
   float chi2Sum2 = 0;
-  DataVector<const TrackStateOnSurface>::const_iterator it = tsos->begin();
-  DataVector<const TrackStateOnSurface>::const_iterator itEnd = tsos->end();
+  Trk::TrackStates::const_iterator it = tsos->begin();
+  Trk::TrackStates::const_iterator itEnd = tsos->end();
   for (; it != itEnd; ++it) {
     const auto& trackState = **it;
     const auto isMeasurement =
