@@ -25,10 +25,20 @@ namespace LVL1 {
     constexpr static int jFEX_wide_algoSpace_width = 45;
     constexpr static int jFEX_thin_algoSpace_width = 24;
     constexpr static int jFEX_algoSpace_height = 32; 
-    constexpr static int jFEX_FCAL_start = 700000; 
+
  
 //Array breakdown of jFEX_wide_algoSpace_width matric to indicate different eta and phi regions
 
+    constexpr static int jFEX_FCAL1_start =  700000; 
+    constexpr static int jFEX_FCAL2_start =  900000; 
+    constexpr static int jFEX_FCAL3_start = 1100000;
+
+    //Pileup bitshifts
+    constexpr static unsigned int pu_AreaINV = 6; 
+    constexpr static unsigned int pu_Area    = 11; 
+    constexpr static unsigned int pu_rhoLUT  = 20; 
+    
+    
 //A side (jFEX Module 5):
 
     //Eta space for core area 
