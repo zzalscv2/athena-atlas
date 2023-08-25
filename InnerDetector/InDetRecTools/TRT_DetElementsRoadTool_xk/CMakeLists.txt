@@ -7,4 +7,4 @@ atlas_subdir( TRT_DetElementsRoadTool_xk )
 atlas_add_component( TRT_DetElementsRoadTool_xk
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel GeoModelInterfaces InDetRecToolInterfaces MagFieldConditions MagFieldElements StoreGateLib TRT_ReadoutGeometry TrkExInterfaces TrkGeometry TrkParameters TrkSurfaces )
+                     LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel InDetRecToolInterfaces MagFieldConditions MagFieldElements StoreGateLib TRT_ReadoutGeometry TrkExInterfaces TrkGeometry TrkParameters TrkSurfaces )
