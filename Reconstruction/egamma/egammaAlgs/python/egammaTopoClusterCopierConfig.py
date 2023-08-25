@@ -9,12 +9,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     acc = ComponentAccumulator()
-    egtopocluster = flags.Egamma.Keys.Internal.EgammaTopoClusters
 
     kwargs.setdefault("InputTopoCollection", flags.Egamma.Keys.Input.TopoClusters)
-    kwargs.setdefault("OutputTopoCollection", egtopocluster)
+    kwargs.setdefault("OutputTopoCollection", flags.Egamma.Keys.Internal.EgammaTopoClusters)
     kwargs.setdefault("OutputFwdTopoCollection", flags.Egamma.Keys.Internal.ForwardTopoClusters)
-    kwargs.setdefault("OutputTopoCollectionShallow", "tmp_"+egtopocluster)
+    kwargs.setdefault("OutputTopoCollectionShallow", "tmp_"+kwargs["OutputTopoCollection"])
     kwargs.setdefault("ECut", 700 if not flags.Egamma.doLowMu else 300)
 
     kwargs.setdefault('hasITk', flags.Detector.GeometryITk)
@@ -27,6 +26,30 @@ def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     acc.addEventAlgo(egcopierAlg)
 
     return acc
+
+
+def indetTopoClusterCopierCfg(flags, name='', **kwargs): 
+    """Create a copier to be used in tracking. 
+       If 'OutputTopoCollection' is the same as used in 
+        'egammaTopoClusterCopierCfg', these two functions will produce
+        the same tool that will be de-duplicated later, preventing 
+        duplication of the output containers. This will happen in
+        a standard pp reconstruction.
+       If 'OutputTopoCollection' is not the same, two tools will be
+        created, each with a different output container. This will
+        happen in a HI reconstruction."""
+     
+    kwargs.setdefault(
+        "InputTopoCollection",
+        flags.Tracking.TopoClusters)
+    kwargs.setdefault(
+        "OutputTopoCollection",
+        flags.Tracking.EgammaTopoClusters)
+
+    if name=='':
+        name = kwargs["OutputTopoCollection"]+'Copier'
+
+    return egammaTopoClusterCopierCfg(flags, name, **kwargs)
 
 
 if __name__ == "__main__":

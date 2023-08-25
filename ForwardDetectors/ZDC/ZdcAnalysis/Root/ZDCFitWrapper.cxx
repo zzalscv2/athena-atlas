@@ -403,12 +403,13 @@ ZDCFitExpFermiLinearFixedTaus::ZDCFitExpFermiLinearFixedTaus(const std::string& 
   //
   std::string funcNameRefFunc = "ExpFermiFixedTausRefFunc" + tag;
 
-  m_expFermiFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFit, -50, 100, 4);
+  m_expFermiFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFit, -50, 100, 5);
 
   m_expFermiFunc->SetParameter(0, 1);
   m_expFermiFunc->SetParameter(1, 0);
   m_expFermiFunc->SetParameter(2, m_tau1);
   m_expFermiFunc->SetParameter(3, m_tau2);
+  m_expFermiFunc->FixParameter(4, 0);
 
   m_norm = 1. / m_expFermiFunc->GetMaximum();
   m_timeCorr = m_tau1 * std::log(m_tau2 / m_tau1 - 1.0);
@@ -443,15 +444,11 @@ void ZDCFitExpFermiLinearFixedTaus::DoInitialize(float initialAmp, float initial
   GetWrapperTF1()->SetParameter(2, 0);
   GetWrapperTF1()->SetParameter(3, 0);
 
-  std::cout << "Setting fit amplitude range to " << ampMin << " - " << ampMax << std::endl;
-
   GetWrapperTF1()->SetParLimits(0, ampMin, ampMax);
 }
 
 void ZDCFitExpFermiLinearFixedTaus::SetT0FitLimits(float t0Min, float t0Max)
 {
-  std::cout << "ZDCFitExpFermiLinearFixedTaus setting fit time ranges, min, max = " << t0Min << ", " <<  t0Max  << std::endl;
-
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
   theTF1->SetParLimits(1, t0Min, t0Max);
 }
@@ -466,12 +463,13 @@ ZDCFitExpFermiLinearPrePulse::ZDCFitExpFermiLinearPrePulse(const std::string& ta
   //
   std::string funcNameRefFunc = "ExpFermiPerPulseRefFunc" + tag;
 
-  m_expFermiFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFit, -50, 100, 4);
+  m_expFermiFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFit, -50, 100, 5);
 
   m_expFermiFunc->SetParameter(0, 1);
   m_expFermiFunc->SetParameter(1, 0);
   m_expFermiFunc->SetParameter(2, m_tau1);
   m_expFermiFunc->SetParameter(3, m_tau2);
+  m_expFermiFunc->FixParameter(4, 0);
 
   m_norm = 1. / m_expFermiFunc->GetMaximum();
   m_timeCorr = m_tau1 * std::log(m_tau2 / m_tau1 - 1.0);

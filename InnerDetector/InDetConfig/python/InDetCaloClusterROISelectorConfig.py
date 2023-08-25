@@ -7,8 +7,8 @@ import AthenaCommon.SystemOfUnits as Units
 def CaloClusterROIPhiRZContainerMakerCfg(
         flags, name="CaloClusterROIPhiRZContainerMaker", **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
-        egammaTopoClusterCopierCfg)
-    result = egammaTopoClusterCopierCfg(flags)
+        indetTopoClusterCopierCfg)
+    result = indetTopoClusterCopierCfg(flags)
 
     if "CaloSurfaceBuilder" not in kwargs:
         from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
@@ -17,7 +17,7 @@ def CaloClusterROIPhiRZContainerMakerCfg(
             CaloSurfaceBuilderEntranceCfg(flags)))
 
     kwargs.setdefault("InputClusterContainerName",
-                      flags.Egamma.Keys.Internal.EgammaTopoClusters)
+                      flags.Tracking.EgammaTopoClusters)
     kwargs.setdefault("EMEnergyOnly", True)
 
     OutputROIContainerName = []
@@ -73,8 +73,8 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(
         **kwargs):
 
     from egammaAlgs.egammaTopoClusterCopierConfig import (
-        egammaTopoClusterCopierCfg)
-    result = egammaTopoClusterCopierCfg(flags)
+        indetTopoClusterCopierCfg)
+    result = indetTopoClusterCopierCfg(flags)
 
     if "CaloSurfaceBuilder" not in kwargs:
         from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
@@ -83,7 +83,7 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(
             CaloSurfaceBuilderEntranceCfg(flags)))
 
     kwargs.setdefault("InputClusterContainerName",
-                      flags.Egamma.Keys.Internal.EgammaTopoClusters)
+                      flags.Tracking.EgammaTopoClusters)
     kwargs.setdefault("EMEnergyOnly", True)
 
     OutputROIContainerName = []
@@ -135,8 +135,8 @@ def HadCaloClusterROIPhiRZContainerMakerCfg(
         name="HadCaloClusterROIPhiRZContainerMaker",
         **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
-        egammaTopoClusterCopierCfg)
-    result = egammaTopoClusterCopierCfg(flags)
+        indetTopoClusterCopierCfg)
+    result = indetTopoClusterCopierCfg(flags)
 
     kwargs.setdefault("InputClusterContainerName",  "CaloCalTopoClusters")
 
@@ -182,8 +182,8 @@ def ITkHadCaloClusterROIPhiRZContainerMakerCfg(
         name="ITkHadCaloClusterROIPhiRZContainerMaker",
         **kwargs):
     from egammaAlgs.egammaTopoClusterCopierConfig import (
-        egammaTopoClusterCopierCfg)
-    result = egammaTopoClusterCopierCfg(flags)
+        indetTopoClusterCopierCfg)
+    result = indetTopoClusterCopierCfg(flags)
 
     kwargs.setdefault("InputClusterContainerName",  "CaloCalTopoClusters")
 

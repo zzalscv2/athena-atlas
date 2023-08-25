@@ -5,6 +5,20 @@
 # art-type: grid
 # art-include: main/Athena
 # art-include: 23.0/Athena
+# art-athena-mt: 4
+# art-output: *.txt
+# art-output: *.log
+# art-output: log.*
+# art-output: *.out
+# art-output: *.err
+# art-output: *.log.tar.gz
+# art-output: *.new
+# art-output: *.json
+# art-output: *.root
+# art-output: *.pmon.gz
+# art-output: *perfmon*
+# art-output: prmon*
+# art-output: *.check*
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigValTools.TrigValSteering.Common import find_file
