@@ -36,8 +36,11 @@ def GeoModelCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
+
     flags = initConfigFlags()
     flags.Input.Files = []
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
     flags.lock()
 
     acc = GeoModelCfg(flags)

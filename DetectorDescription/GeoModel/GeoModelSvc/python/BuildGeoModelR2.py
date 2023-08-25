@@ -3,9 +3,9 @@
 # Script for testing the initialization of GeoModel descriptions of ATLAS 
 # subsystems in Run2 geometry layout
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from Campaigns.Utils import Campaign
 
@@ -16,7 +16,7 @@ flags.Exec.MaxEvents = 1
 flags.Input.isMC = True
 flags.Input.MCCampaign = Campaign.Unknown
 
-flags.GeoModel.AtlasVersion='ATLAS-R2-2016-01-00-01'
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
 
 flags.Detector.GeometryBpipe = True
