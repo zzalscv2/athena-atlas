@@ -126,8 +126,8 @@ UseAodMetaData True
 BoostedJetTagging JSSWTopTaggerDNN:DNNTaggerTopQuarkInclusive50 JSSWTopTaggerDNN:DNNTaggerTopQuarkInclusive80 JSSWTopTaggerDNN:DNNTaggerTopQuarkContained50 JSSWTopTaggerDNN:DNNTaggerTopQuarkContained80
 
 ### B-tagging configuration
-BTaggingCaloJetWP DL1:Continuous DL1r:FixedCutBEff_77
-BTaggingTrackJetWP DL1:Continuous DL1r:FixedCutBEff_77
+BTaggingCaloJetWP DL1r:FixedCutBEff_77 DL1r:Continuous 
+BTaggingTrackJetWP DL1r:FixedCutBEff_77 DL1r:Continuous
 # Example of how to remove systematics from b-tag EV
 
 # Saving bootstrapping weights
