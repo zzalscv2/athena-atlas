@@ -27,25 +27,27 @@ def RegSelCondAlg_TileCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO
     
     # Test setup
     log.setLevel(INFO)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW_RUN2
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg.merge( ByteStreamReadCfg(ConfigFlags) )
+    cfg.merge( ByteStreamReadCfg(flags) )
 
-    cfg.merge( RegSelCondAlg_TileCfg(ConfigFlags) )
+    cfg.merge( RegSelCondAlg_TileCfg(flags) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
     cfg.store( open('RegSelCondAlg_Tile.pkl','wb') )

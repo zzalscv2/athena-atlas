@@ -76,14 +76,16 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
     inputDirectory = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TileByteStream/TileByteStream-02-00-00'
     inputFile = 'data18_tilecomm.00363899.calibration_tile.daq.RAW._lb0000._TileREB-ROS._0005-200ev.data'
 
     flags = initConfigFlags()
     flags.Input.Files = [inputDirectory + '/' + inputFile]
-    flags.Exec.MaxEvents = 3
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags.Tile.RunType = 'LAS'
+    flags.Exec.MaxEvents = 3
     flags.fillFromArgs()
     flags.lock()
 
