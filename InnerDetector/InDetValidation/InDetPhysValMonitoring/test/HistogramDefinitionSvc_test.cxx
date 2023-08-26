@@ -40,6 +40,7 @@ BOOST_AUTO_TEST_SUITE(HistogramDefinitionSvcTest)
   ServiceHandle<IHistogramDefinitionSvc> hDefSvc ("HistogramDefinitionSvc", "test");
 
   BOOST_AUTO_TEST_CASE( sanityCheck ){
+    BOOST_TEST(g.initOk);
     const bool svcLocatorIsOk=(svcLoc != nullptr);
     BOOST_TEST(svcLocatorIsOk);
   }

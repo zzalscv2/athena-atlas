@@ -23,13 +23,14 @@
 
 struct IDPVM_GaudiFixtureBase{
   ISvcLocator* svcLoc{};
+  bool initOk{};
   const std::string jobOpts{};
   IDPVM_GaudiFixtureBase(const std::string & jobOptionFile = "IDPVM_Test.txt"):jobOpts(jobOptionFile){
     CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); } );
     static std::once_flag flag;
     auto init = [&]() {
       std::string fullJobOptsName="InDetPhysValMonitoring/" + jobOpts;
-      Athena_test::initGaudi(fullJobOptsName, svcLoc);
+      initOk = Athena_test::initGaudi(fullJobOptsName, svcLoc);
     };
     std::call_once (flag, init);
   }
