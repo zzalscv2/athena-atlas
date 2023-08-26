@@ -765,8 +765,8 @@ MinBiasChainParts = {
                         'pusup200', 'pusup220', 'pusup240', 'pusup250', 'pusup260', 'pusup270', 'pusup280', 'pusup290', 'pusup300'],
     'hypoTrkInfo'    : ['trk3','trk5','trk10','trk15',  'trk20', 'trk25',  'trk30', 'trk35', 'trk40', 'trk45', 'trk50', 'trk55', 'trk60', 'trk65', 'trk70', 'trk75', 'trk80', 'trk90',
                         'trk100', 'trk110', 'trk120', 'trk130', 'trk140', 'trk150', 'trk160', 'trk180', 'trk200', 'trk220', 'trk240', 'trk260', 'trk280', 'trk290',
-                         '2trk6', '1trk4', '1trk5', '1trk2'], #ranges for exclusive tracks
-    'hypoPtInfo'     : [ 'pt05', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
+                         '2trk6', '1trk4', '1trk5', '1trk2', '0trk2'], #ranges for exclusive tracks
+    'hypoPtInfo'     : [ 'pt02', 'pt05', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
     'recoAlg'        : ['mbts', 'sptrk', 'sp', 'noalg', 'perf', 'hmt', 'hmtperf', 'idperf', 'zdcperf', 'alfaperf', 'afprec', 'afptof', 'excl'],
     'addInfo'        : ['peb'],
     'sigFolder'     : ['MinBias'],
