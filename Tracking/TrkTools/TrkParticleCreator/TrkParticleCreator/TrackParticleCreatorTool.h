@@ -40,6 +40,7 @@ changes : 11.02.04 added docu
 #include "TrkParameters/TrackParameters.h"
 #include "TrkParticleBase/TrackParticleBase.h" // for TrackParticleOrigin enum
 #include "TrkTrack/TrackInfo.h"
+#include "TrkTrack/Track.h"
 #include "TrkTrackSummary/MuonTrackSummary.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
@@ -65,8 +66,6 @@ class BeamSpotData;
 }
 
 namespace Trk {
-
-class Track;
 class VxCandidate;
 
 class TrackParticleCreatorTool final
@@ -163,13 +162,13 @@ public:
    void addPIDInformation(const EventContext& ctx, const Track *track, xAOD::TrackParticle& tp) const;
 
    /** Add extra detailed hit summary info not computed in Trk::TrkSummary */
-   void addDetailedHitInformation(const DataVector<const TrackStateOnSurface>* trackStates, xAOD::TrackParticle& tp) const;
+   void addDetailedHitInformation(const Trk::TrackStates* trackStates, xAOD::TrackParticle& tp) const;
 
    /** Add expected hit info for innermost pixel layers not computed in Trk::TrkSummary */
    void addExpectedHitInformation(const Perigee* perigee, xAOD::TrackParticle& tp) const;
 
    /** Add outlier hit info not computed in Trk::TrkSummary anymore*/
-   void addOutlierHitInformation(const DataVector<const TrackStateOnSurface>* trackStates, xAOD::TrackParticle& tp) const;
+   void addOutlierHitInformation(const Trk::TrackStates* trackStates, xAOD::TrackParticle& tp) const;
 
    /** Add shared hit info not computed in Trk::TrkSummary anymore*/
    void addSharedHitInformation(const Track *track, xAOD::TrackParticle& tp) const;

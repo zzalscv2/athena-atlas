@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file InDetGlobalTrackMonTool.cxx
@@ -996,7 +996,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
 			if ( ! track )
 			    continue;
 
-			const DataVector<const Trk::TrackStateOnSurface>* trackStates = track->trackStateOnSurfaces();
+			const Trk::TrackStates* trackStates = track->trackStateOnSurfaces();
 			if ( trackStates == nullptr ) return;
 
 			for (const auto tsos : *trackStates) {
@@ -1087,7 +1087,7 @@ void InDetGlobalTrackMonTool::FillHitMaps( const xAOD::TrackParticle *trackPart 
     const Trk::Track * track = trackPart->track();
     if ( ! track ) return;
 
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates = track->trackStateOnSurfaces();
+    const Trk::TrackStates* trackStates = track->trackStateOnSurfaces();
     if ( trackStates == nullptr ) return;
 
     for (const auto trackState : *trackStates) {
@@ -1238,7 +1238,7 @@ void InDetGlobalTrackMonTool::FillHoleMaps( const xAOD::TrackParticle *trackPart
     const Trk::Track * track = trackPart->track();
     if ( ! track ) return;
 
-    std::unique_ptr<const DataVector<const Trk::TrackStateOnSurface> > holesOnTrack( m_holes_search_tool->getHolesOnTrack(*track, track->info().particleHypothesis()) );
+    std::unique_ptr<const Trk::TrackStates > holesOnTrack( m_holes_search_tool->getHolesOnTrack(*track, track->info().particleHypothesis()) );
 
     // loop over holes
     if (!holesOnTrack) {

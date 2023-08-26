@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACKSUMMARYTOOL_H
@@ -176,7 +176,7 @@ private:
      information Fills 'information', 'eProbability', and 'hitPattern'*/
   void processTrackStates(const EventContext& ctx,
                           const Track& track,
-                          const DataVector<const TrackStateOnSurface>* tsos,
+                          const Trk::TrackStates* tsos,
                           std::vector<int>& information,
                           std::bitset<numberOfDetectorTypes>& hitPattern,
                           bool doHolesInDet,

@@ -972,7 +972,7 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
 
 double TrigFastTrackFinder::trackQuality(const Trk::Track* Tr) const {
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator
+  Trk::TrackStates::const_iterator
     m  = Tr->trackStateOnSurfaces()->begin(),
        me = Tr->trackStateOnSurfaces()->end  ();
 
@@ -1777,11 +1777,11 @@ float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_
    float dEdxValue = 0;
 
    // Check for track states:
-   const DataVector<const Trk::TrackStateOnSurface>* recoTrackStates = track->trackStateOnSurfaces();
+   const Trk::TrackStates* recoTrackStates = track->trackStateOnSurfaces();
    if (recoTrackStates) {
 
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIter    = recoTrackStates->begin();
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIterEnd = recoTrackStates->end();
+      Trk::TrackStates::const_iterator tsosIter    = recoTrackStates->begin();
+      Trk::TrackStates::const_iterator tsosIterEnd = recoTrackStates->end();
 
       int i_tsos=0;
 
@@ -2038,10 +2038,10 @@ TrigFastTrackFinder::getTrkBarrelLayerInfo(Trk::Track* t) const
    std::array<TrigFastTrackFinder::OneLayerInfo_t, TrigFastTrackFinder::N_BARREL_LAYERS> result{};
    if (not t) return result;
 
-   const DataVector<const Trk::TrackStateOnSurface>* recoTrackStates = t->trackStateOnSurfaces();
+   const Trk::TrackStates* recoTrackStates = t->trackStateOnSurfaces();
    if (recoTrackStates) {
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIter    = recoTrackStates->begin();
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIterEnd = recoTrackStates->end();
+      Trk::TrackStates::const_iterator tsosIter    = recoTrackStates->begin();
+      Trk::TrackStates::const_iterator tsosIterEnd = recoTrackStates->end();
       for ( ; tsosIter != tsosIterEnd; ++tsosIter) {
 	      const Trk::FitQualityOnSurface fq = (*tsosIter)->fitQualityOnSurface();
 	      double x2 = 0;
@@ -2090,7 +2090,7 @@ TrigFastTrackFinder::getTrkBarrelLayerInfo(Trk::Track* t) const
 
 double TrigFastTrackFinder::disTrackQuality(const Trk::Track* Tr) const
 {
-   DataVector<const Trk::TrackStateOnSurface>::const_iterator
+   Trk::TrackStates::const_iterator
       m  = Tr->trackStateOnSurfaces()->begin(),
       me = Tr->trackStateOnSurfaces()->end  ();
 
@@ -2804,10 +2804,10 @@ std::unique_ptr<Trk::Track> TrigFastTrackFinder::disTrk_refit(Trk::Track* t) con
    std::vector<const Trk::MeasurementBase*> vec;
    int n_measurements       = 0;
    int n_measurements_refit = 0;
-   const DataVector<const Trk::TrackStateOnSurface>* recoTrackStates = t->trackStateOnSurfaces();
+   const Trk::TrackStates* recoTrackStates = t->trackStateOnSurfaces();
    if (recoTrackStates) {
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIter    = recoTrackStates->begin();
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIterEnd = recoTrackStates->end();
+      Trk::TrackStates::const_iterator tsosIter    = recoTrackStates->begin();
+      Trk::TrackStates::const_iterator tsosIterEnd = recoTrackStates->end();
       for ( ; tsosIter != tsosIterEnd; ++tsosIter) {
 	 const Trk::MeasurementBase *measurement = (*tsosIter)->measurementOnTrack();
 	 if (measurement) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -515,10 +515,10 @@ fillAllHistograms (const xAOD::TrackParticle *trkP, float mass, int PCand){
   int nTRTHTHits = 0;
   int nTRTHits   = 0;
   int barrel_ec(0);
-  const DataVector<const Trk::TrackStateOnSurface>* trackStates = trkP->track()->trackStateOnSurfaces();
+  const Trk::TrackStates* trackStates = trkP->track()->trackStateOnSurfaces();
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin = trackStates->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItEnd   = trackStates->end();
+  Trk::TrackStates::const_iterator TSOSItBegin = trackStates->begin();
+  Trk::TrackStates::const_iterator TSOSItEnd   = trackStates->end();
 
   for(;TSOSItBegin!=TSOSItEnd; ++TSOSItBegin)
   {

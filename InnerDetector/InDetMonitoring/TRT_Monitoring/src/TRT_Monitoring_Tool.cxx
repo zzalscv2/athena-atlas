@@ -2475,14 +2475,14 @@ StatusCode TRT_Monitoring_Tool::fillTRTTracks(const TrackCollection& trackCollec
 
 		if (p < m_minP) continue;
 
-		const DataVector<const Trk::TrackStateOnSurface> *trackStates = (**p_trk).trackStateOnSurfaces();
+		const Trk::TrackStates *trackStates = (**p_trk).trackStateOnSurfaces();
 
 		if (trackStates == nullptr) continue;
 
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin0    = trackStates->begin();
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin     = trackStates->begin();
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBeginTemp = trackStates->begin();
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItEnd       = trackStates->end();
+		Trk::TrackStates::const_iterator TSOSItBegin0    = trackStates->begin();
+		Trk::TrackStates::const_iterator TSOSItBegin     = trackStates->begin();
+		Trk::TrackStates::const_iterator TSOSItBeginTemp = trackStates->begin();
+		Trk::TrackStates::const_iterator TSOSItEnd       = trackStates->end();
 		int n_trt_hits = summary->get(Trk::numberOfTRTHits);
 		int n_sct_hits = summary->get(Trk::numberOfSCTHits);
 		int n_pixel_hits = summary->get(Trk::numberOfPixelHits);
@@ -3565,7 +3565,7 @@ StatusCode TRT_Monitoring_Tool::fillTRTEfficiency(const TrackCollection& combTra
 			continue;
 		}
 
-		const DataVector<const Trk::TrackStateOnSurface> *track_states = (*track)->trackStateOnSurfaces();
+		const Trk::TrackStates *track_states = (*track)->trackStateOnSurfaces();
 
 		if (track_states) {
 			ATH_MSG_DEBUG("This track has " << track_states->size() << " track states on surface.");
@@ -3844,12 +3844,12 @@ StatusCode TRT_Monitoring_Tool::fillTRTHighThreshold(const TrackCollection& trac
 
 		float track_eta  = perigee->eta();
 		float track_p    = (perigee->parameters()[Trk::qOverP] != 0.) ? fabs(1. / (perigee->parameters()[Trk::qOverP])) : 10e7;
-		const DataVector<const Trk::TrackStateOnSurface> *trackStates = (**p_trk).trackStateOnSurfaces();
+		const Trk::TrackStates *trackStates = (**p_trk).trackStateOnSurfaces();
 
 		if (trackStates == nullptr) continue;
 
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin     = trackStates->begin();
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItEnd       = trackStates->end();
+		Trk::TrackStates::const_iterator TSOSItBegin     = trackStates->begin();
+		Trk::TrackStates::const_iterator TSOSItEnd       = trackStates->end();
 		std::unique_ptr<const Trk::TrackSummary> summary = m_TrackSummaryTool->summary(*(*p_trk));
 		int trt_hits = summary->get(Trk::numberOfTRTHits);
 		int sct_hits = summary->get(Trk::numberOfSCTHits);
@@ -3862,7 +3862,7 @@ StatusCode TRT_Monitoring_Tool::fillTRTHighThreshold(const TrackCollection& trac
 		if (trt_hits < 6.) continue;
 
 		//Now we have hit informations
-		const DataVector<const Trk::TrackStateOnSurface> *track_states = (*p_trk)->trackStateOnSurfaces();
+		const Trk::TrackStates *track_states = (*p_trk)->trackStateOnSurfaces();
 
 		if (track_states) {
 			ATH_MSG_DEBUG("This track has " << track_states->size() << " track states on surface.");

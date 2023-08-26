@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -476,9 +476,9 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
 										   covFromMS, *surf) ;
 
 
-          auto trackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+          auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
           trackStateOnSurfaces->reserve(muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->size() + 1);
-          DataVector<const Trk::TrackStateOnSurface>::const_iterator sb = muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->begin();
+          Trk::TrackStates::const_iterator sb = muon->inDetTrackParticle()->originalTrack()->trackStateOnSurfaces()->begin();
 
           std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type;
           type.set(Trk::TrackStateOnSurface::Measurement);

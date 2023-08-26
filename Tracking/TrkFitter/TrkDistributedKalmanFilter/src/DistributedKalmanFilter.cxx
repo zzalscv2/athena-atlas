@@ -1120,7 +1120,7 @@ Trk::DistributedKalmanFilter::fit(
                                           << std::sin(pMP->parameters()[Trk::theta]) /
                     pMP->parameters()[Trk::qOverP]);
 
-      auto pvTS = std::make_unique<DataVector<const TrackStateOnSurface>>();
+      auto pvTS = std::make_unique<Trk::TrackStates>();
 
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
       typePattern;

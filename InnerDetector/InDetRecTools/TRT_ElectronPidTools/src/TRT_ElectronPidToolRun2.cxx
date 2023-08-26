@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -238,15 +238,15 @@ InDet::TRT_ElectronPidToolRun2::electronProbability(
 
 
   // Check for track states:
-  const DataVector<const Trk::TrackStateOnSurface>* recoTrackStates = track.trackStateOnSurfaces();
+  const Trk::TrackStates* recoTrackStates = track.trackStateOnSurfaces();
   if (not recoTrackStates) {
     ATH_MSG_DEBUG("track.trackStateOnSurfaces() was zero");
     //m_timingProfile->chronoStop("Tool::electronProb");
     return PIDvalues;
   }
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIter    = recoTrackStates->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosIterEnd = recoTrackStates->end();
+  Trk::TrackStates::const_iterator tsosIter    = recoTrackStates->begin();
+  Trk::TrackStates::const_iterator tsosIterEnd = recoTrackStates->end();
 
   // Loop over track states on surfaces (i.e. generalized hits):
   for ( ; tsosIter != tsosIterEnd; ++tsosIter) {

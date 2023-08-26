@@ -1053,9 +1053,9 @@ InDet::TRT_SeededTrackFinder_ATL::cleanTrack(std::list<Trk::Track*> lTrk) const{
     double pixR = 0.;  //Radial position of last pixel PRD
     double sctR = 0.;  //Radial position of first SCT PRD
 
-    const DataVector<const Trk::TrackStateOnSurface>* newtsos = (*it)->trackStateOnSurfaces();
+    const Trk::TrackStates* newtsos = (*it)->trackStateOnSurfaces();
     if(!newtsos) continue;
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator itp, itpe=newtsos->end();
+    Trk::TrackStates::const_iterator itp, itpe=newtsos->end();
     for(itp=newtsos->begin(); itp!=itpe; ++itp){
       ///Concentrate on the Si component of the track
       const InDet::SiClusterOnTrack* clus = dynamic_cast<const InDet::SiClusterOnTrack*>((*itp)->measurementOnTrack());
@@ -1079,10 +1079,10 @@ InDet::TRT_SeededTrackFinder_ATL::cleanTrack(std::list<Trk::Track*> lTrk) const{
 
     ///Throw out any spurious pixel hits.Need to rebuild the vector of track states on surface from scratch, since it's const in EDM
     if(nPixHits==1 && (sctR-pixR)>200.){
-      auto cltsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+      auto cltsos = std::make_unique<Trk::TrackStates>();
       auto fq = (*it)->fitQuality()->uniqueClone();
       // copy track Si states into track
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator p_tsos;
+      Trk::TrackStates::const_iterator p_tsos;
       for(p_tsos=newtsos->begin()+nPixHits;p_tsos!=newtsos->end();++p_tsos){
         cltsos->push_back( (*p_tsos)->clone() );
       }

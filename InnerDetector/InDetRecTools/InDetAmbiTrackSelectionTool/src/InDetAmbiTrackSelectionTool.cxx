@@ -93,7 +93,7 @@ std::tuple<Trk::Track*,bool> InDet::InDetAmbiTrackSelectionTool::getCleanedOutTr
   }
 
   // get all TSOS the track
-  const DataVector<const Trk::TrackStateOnSurface>* tsos = ptrTrack->trackStateOnSurfaces();
+  const Trk::TrackStates* tsos = ptrTrack->trackStateOnSurfaces();
   ATH_MSG_DEBUG ("Study new Track "<< ptrTrack<<"\t , it has "<<tsos->size()<<"\t track states");
   ATH_MSG_DEBUG ("trackId "<< trackId <<", subtrackId "<<subtrackId);
 
@@ -144,8 +144,8 @@ std::tuple<Trk::Track*,bool> InDet::InDetAmbiTrackSelectionTool::getCleanedOutTr
   tsosType.resize(tsos->size());
 
   // loop over TSOS
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end();
+  Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+  Trk::TrackStates::const_iterator iTsosEnd = tsos->end();
   for (int index = 0 ; iTsos != iTsosEnd ; ++iTsos, ++index) {
 
     // init array
@@ -419,8 +419,8 @@ std::tuple<Trk::Track*,bool> InDet::InDetAmbiTrackSelectionTool::getCleanedOutTr
     int cntIns = 0;
 
     // loop over all TSOS (and types) and copy the good ones over
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end();
+    Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+    Trk::TrackStates::const_iterator iTsosEnd = tsos->end();
 
     for (int index = 0 ; iTsos != iTsosEnd ; ++iTsos,++index ) {
 
@@ -542,7 +542,7 @@ Trk::Track* InDet::InDetAmbiTrackSelectionTool::createSubTrack( const std::vecto
     return nullptr;
   }
 
-  auto vecTsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto vecTsos = std::make_unique<Trk::TrackStates>();
 
   // loop over TSOS, copy TSOS and push into vector
   for (const Trk::TrackStateOnSurface* tsosIt : tsos) {

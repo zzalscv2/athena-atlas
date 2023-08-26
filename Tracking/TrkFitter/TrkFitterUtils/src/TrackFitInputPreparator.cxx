@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
                                           const bool reintegrateOutliers)
 {
 
-  auto newListOfStates = std::make_unique<DataVector<const TrackStateOnSurface>>();
+  auto newListOfStates = std::make_unique<Trk::TrackStates>();
   TS_iterator itStates = inputTrk.trackStateOnSurfaces()->begin();
   for (; itStates != inputTrk.trackStateOnSurfaces()->end(); ++itStates)
     if ((*itStates)->type(Trk::TrackStateOnSurface::Measurement) ||

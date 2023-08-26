@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTMonitoringRun3/TRTMonitoringRun3ESD_Alg.h"
@@ -560,14 +560,14 @@ for (; p_trk != trackCollection.end(); ++p_trk) {
 
         if (p < m_minP) continue;
 
-        const DataVector<const Trk::TrackStateOnSurface> *trackStates = ((*p_trk)->track())->trackStateOnSurfaces();
+        const Trk::TrackStates *trackStates = ((*p_trk)->track())->trackStateOnSurfaces();
 
         if (trackStates == nullptr) continue;
 
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin0    = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin     = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBeginTemp = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItEnd       = trackStates->end();
+        Trk::TrackStates::const_iterator TSOSItBegin0    = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItBegin     = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItBeginTemp = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItEnd       = trackStates->end();
 
         (*p_trk)->summaryValue(tempHitsVariable, xAOD::SummaryType::numberOfTRTHits);
         int n_trt_hits = unsigned(tempHitsVariable);
@@ -1314,12 +1314,12 @@ StatusCode TRTMonitoringRun3ESD_Alg::fillTRTHighThreshold(const xAOD::TrackParti
 
         float track_eta  = perigee->eta();
         float track_p    = (perigee->parameters()[Trk::qOverP] != 0.) ? std::abs(1. / (perigee->parameters()[Trk::qOverP])) : 10e7;
-        const DataVector<const Trk::TrackStateOnSurface> *trackStates = ((*p_trk)->track())->trackStateOnSurfaces();
+        const Trk::TrackStates *trackStates = ((*p_trk)->track())->trackStateOnSurfaces();
 
         if (trackStates == nullptr) continue;
 
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin     = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItEnd       = trackStates->end();
+        Trk::TrackStates::const_iterator TSOSItBegin     = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItEnd       = trackStates->end();
 
 	uint8_t tempHitsVariable = 0;
         (*p_trk)->summaryValue(tempHitsVariable, xAOD::SummaryType::numberOfTRTHits);
@@ -1332,7 +1332,7 @@ StatusCode TRTMonitoringRun3ESD_Alg::fillTRTHighThreshold(const xAOD::TrackParti
 	if (!passed_track_preselection) continue;
 
         // Now we have hit informations
-        const DataVector<const Trk::TrackStateOnSurface> *track_states = ((*p_trk)->track())->trackStateOnSurfaces();
+        const Trk::TrackStates *track_states = ((*p_trk)->track())->trackStateOnSurfaces();
 
         if (track_states) {
             ATH_MSG_DEBUG("This track has " << track_states->size() << " track states on surface.");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -184,11 +184,11 @@ StatusCode InDet::TRT_StrawStatus::execute(){
         if ( not perigee  ) { ATH_MSG_ERROR( "Trk::Perigee missing" ); continue; }
         if ( std::abs(perigee->pT())/CLHEP::GeV < 1. ) continue; // 1 GeV pT cut
 
-        const DataVector<const Trk::TrackStateOnSurface>* trackStates = (**trackIt).trackStateOnSurfaces();
+        const Trk::TrackStates* trackStates = (**trackIt).trackStateOnSurfaces();
         if ( not trackStates  ) { ATH_MSG_ERROR( "Trk::TrackStateOnSurface empty" ); continue; }
 
         int n_pixel_hits(0), n_sct_hits(0), n_trt_hits(0);  // count hits, require minimal number of all hits
-        for ( DataVector<const Trk::TrackStateOnSurface>::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
+        for ( Trk::TrackStates::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
             if ( *trackStatesIt == nullptr ) { ATH_MSG_ERROR( "*trackStatesIt == 0" ); continue; }
 
             if ( !((*trackStatesIt)->type(Trk::TrackStateOnSurface::Measurement)) ) continue; // this skips outliers
@@ -203,7 +203,7 @@ StatusCode InDet::TRT_StrawStatus::execute(){
 
         //=== loop over all hits on track, accumulate them
 
-        for ( DataVector<const Trk::TrackStateOnSurface>::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
+        for ( Trk::TrackStates::const_iterator trackStatesIt = trackStates->begin(); trackStatesIt != trackStates->end(); ++trackStatesIt ) {
 
             if ( *trackStatesIt == nullptr ) { ATH_MSG_ERROR( "*trackStatesIt == 0" ); continue; }
 

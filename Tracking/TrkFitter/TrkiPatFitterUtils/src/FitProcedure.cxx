@@ -78,7 +78,7 @@ Track* FitProcedure::constructTrack(
     FitProcedure::Cache& cache,
     const std::vector<FitMeasurement*>& measurements, FitParameters& parameters,
     const TrackInfo& trackInfo,
-    const DataVector<const TrackStateOnSurface>* leadingTSOS) {
+    const Trk::TrackStates* leadingTSOS) {
   // debug
   if (cache.debug) {
     reportQuality(cache, measurements, parameters);
@@ -90,7 +90,7 @@ Track* FitProcedure::constructTrack(
 
   // create vector of TSOS - reserve upper limit for size (+1 as starts with
   // perigee)
-  auto trackStateOnSurfaces = std::make_unique<DataVector<const TrackStateOnSurface>>();
+  auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
   unsigned size = measurements.size() + 1;
   if (leadingTSOS)
     size += leadingTSOS->size();

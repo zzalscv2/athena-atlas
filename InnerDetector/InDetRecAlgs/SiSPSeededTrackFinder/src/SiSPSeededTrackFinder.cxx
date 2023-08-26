@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiSPSeededTrackFinder/SiSPSeededTrackFinder.h"
@@ -1092,7 +1092,7 @@ bool InDet::SiSPSeededTrackFinder::passEtaDepCuts(const Trk::Track* track,
 						  int nFreeClusters,
 						  int nPixels) const
 {
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator  m = track->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator  m = track->trackStateOnSurfaces()->begin();
   const Trk::TrackParameters* par = (*m)->trackParameters();
   if(!par) return false;
 

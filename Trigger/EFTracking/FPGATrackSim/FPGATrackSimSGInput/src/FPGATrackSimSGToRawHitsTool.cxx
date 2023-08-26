@@ -174,7 +174,7 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
     tmpOfflineTrack.setEta(trackParticle->eta());
     tmpOfflineTrack.setPhi(trackParticle->phi());
 
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates = trackParticle->track()->trackStateOnSurfaces();
+    const Trk::TrackStates* trackStates = trackParticle->track()->trackStateOnSurfaces();
     if (trackStates == nullptr) {
       ATH_MSG_ERROR("missing trackStatesOnSurface");
       return StatusCode::FAILURE;

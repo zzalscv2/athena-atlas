@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTLorentzMonAlg.h"
@@ -83,7 +83,7 @@ StatusCode SCTLorentzMonAlg::fillHistograms(const EventContext& ctx) const {
     }
 
     // Get pointer to track state on surfaces
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates{track->trackStateOnSurfaces()};
+    const Trk::TrackStates* trackStates{track->trackStateOnSurfaces()};
     if (trackStates==nullptr) {
       ATH_MSG_WARNING("for current track, TrackStateOnSurfaces == Null, no data will be written for this track");
       continue;

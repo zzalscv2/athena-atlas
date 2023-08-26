@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #define FILLEVENTNORMALIZATION(NBINS, MIN, WIDTH, VALUE, VARPASSED, VAR, HISTGROUP) \
@@ -1782,7 +1782,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTEfficiency(const TrackCollection& co
             continue;
         }
 
-        const DataVector<const Trk::TrackStateOnSurface> *track_states = (*track)->trackStateOnSurfaces();
+        const Trk::TrackStates *track_states = (*track)->trackStateOnSurfaces();
 
         if (track_states) {
             ATH_MSG_DEBUG("This track has " << track_states->size() << " track states on surface.");
@@ -2148,14 +2148,14 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const TrackCollection& trackCol
 
         if (p < m_minP) continue;
 
-        const DataVector<const Trk::TrackStateOnSurface> *trackStates = (**p_trk).trackStateOnSurfaces();
+        const Trk::TrackStates *trackStates = (**p_trk).trackStateOnSurfaces();
 
         if (trackStates == nullptr) continue;
 
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin0    = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBegin     = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItBeginTemp = trackStates->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItEnd       = trackStates->end();
+        Trk::TrackStates::const_iterator TSOSItBegin0    = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItBegin     = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItBeginTemp = trackStates->begin();
+        Trk::TrackStates::const_iterator TSOSItEnd       = trackStates->end();
 
         const bool passed_track_preselection = (static_cast<bool>(m_trackSelTool->accept(**p_trk)) || m_isCosmics) &&
                                                summary->get(Trk::numberOfTRTHits) >= m_min_trt_hits &&

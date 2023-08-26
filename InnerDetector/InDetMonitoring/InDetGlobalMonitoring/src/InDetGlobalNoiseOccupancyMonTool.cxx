@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file InDetGlobalNoiseOccupancyMonTool.cxx
@@ -418,16 +418,16 @@ StatusCode InDetGlobalNoiseOccupancyMonTool::fillHistograms( )
               break;
 	    }
 	
-	    const DataVector<const Trk::TrackStateOnSurface>*
+	    const Trk::TrackStates*
 		trackStates=track->trackStateOnSurfaces();
 	    if (trackStates == nullptr) {
 		if ( msgLvl(MSG::ERROR) ) msg(MSG::ERROR)
 		    << "for current track is TrackStateOnSurfaces == Null "
 		    << endmsg;
 	    } else {
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator
+		Trk::TrackStates::const_iterator
 		    it=trackStates->begin();
-		DataVector<const Trk::TrackStateOnSurface>::const_iterator
+		Trk::TrackStates::const_iterator
 		    it_end=trackStates->end();
 		for ( ; it != it_end ; ++it) {
 		    const Trk::TrackStateOnSurface* trackState=(*it);
