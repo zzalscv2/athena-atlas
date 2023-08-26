@@ -31,6 +31,7 @@ atlas_add_test(             testReadRawHit
   PRIVATE_WORKING_DIRECTORY
 )
 
+# The output of this test deliberatety contains ERROR messages.
 atlas_add_test(             testRawToLogical
   SCRIPT                    test/test_FPGATrackSimRawToLogicalWrapperAlg.sh 
   LOG_SELECT_PATTERN        "FPGATrackSimReadLogical"
