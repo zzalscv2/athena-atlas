@@ -88,7 +88,17 @@ stdJetModifiers.update(
                                 "HLTHICalibTool_{modspec}",
                                 JetCollection="AntiKt4HI",
                                 PrimaryVerticesContainerName="",
-                                ConfigFile='JES_MC15c_HI_Nov2016.config',
+                                ConfigFile='JES_MC16_HI_Jan2021_5TeV.config',
+                                CalibSequence=lambda _, modspec: modspec.split('___')[0],
+                                IsData=lambda _, modspec: modspec.split('___')[1] == 'True'),
+    )
+
+stdJetModifiers.update(
+    HLTHIJetSeedCalib = JetModifier("JetCalibrationTool",
+                                "HLTHISeedCalibTool_{modspec}",
+                                JetCollection="AntiKt2HI",
+                                PrimaryVerticesContainerName="",
+                                ConfigFile='JES_MC16_HI_Jan2021_5TeV.config',
                                 CalibSequence=lambda _, modspec: modspec.split('___')[0],
                                 IsData=lambda _, modspec: modspec.split('___')[1] == 'True'),
     )
@@ -161,7 +171,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     associationName = "%s_DR8Assoc" % (clustersKey)
 
-    jetsInUnsub = recordable(jetsFullName_Unsub)
+    jetsInUnsub = jetsFullName_Unsub
 
     JES_is_data=False
     calib_seq='EtaJES' #only do in situ for R=0.4 jets in data
@@ -172,6 +182,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     # Copy unsubtracted jets: seed0
     jetDef_seed0 = jetDef.clone()
     jetDef_seed0.suffix = jetDef.suffix.replace("Unsubtracted", "seed0")
+    jetDef_seed0.radius = 0.2
     jetsFullName_seed0 = jetDef_seed0.fullname()
     stdJetModifiers.update(
         # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec will come alias usage like "Filter:10000" --> PtMin=100000) 
@@ -200,7 +211,8 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     # Copy default jets: seed1
     jetDef_seed1 = jetDef.clone()
     jetDef_seed1.suffix = jetDef_seed0.suffix.replace("_seed0","_seed1")
-    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
+    jetDef_seed1.radius = 0.2
+    jetDef_seed1.modifiers=["HLTHIJetAssoc", "HLTHIJetConstSub_iter0:iter0", "HLTHIJetSeedCalib:{}___{}".format(calib_seq, JES_is_data), "Filter:25000"]
     jetsFullName_seed1 = jetDef_seed1.fullname()
     copySeed1Alg = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_seed1,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copySeed1Alg
@@ -223,17 +235,11 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     jetDef_final = jetDef.clone()
     jetDef_final.suffix = jetDef.suffix.replace("_Unsubtracted","")
-    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data),  "Filter:15000"]
+    jetDef_final.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1", "HLTHIJetCalib:{}___{}".format(calib_seq, JES_is_data), "Sort", "Filter:20000"]
     copyAlg_final= getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
     jetHIRecSeq += copyAlg_final
 
     jetsFinal = recordable(jetDef_final.fullname())
-
-    jetDef_final_noCalib = jetDef.clone()
-    jetDef_final_noCalib.suffix = jetDef.suffix.replace("_Unsubtracted","_sub_noCalib")
-    jetDef_final_noCalib.modifiers=["HLTHIJetConstSub_iter1:iter1", "HLTHIJetJetConstMod_iter1"]
-    copyAlg_final_noCalib = getJetCopyAlg(jetsin=jetsInUnsub,jetsoutdef=jetDef_final_noCalib,decorations=[],shallowcopy=False,shallowIO=False,monTool=monTool)
-    jetHIRecSeq += copyAlg_final_noCalib
 
     jetsOut = jetsFinal
     return jetHIRecSeq, jetsOut, jetDef_final

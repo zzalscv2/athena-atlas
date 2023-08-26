@@ -17,12 +17,33 @@ def HImode(flags):
 
 def HIPmode(flags):
     flags.Reco.EnableHI=True
-    flags.Reco.EnableTau=False
+    flags.Reco.EnableTau=True
     flags.Reco.EnableJet=True
     flags.Jet.WriteToAOD=True # this is to save "standard" jets and btagging to xAOD
-    flags.Reco.EnableMet=False
+    flags.Reco.EnableMet=True
+    flags.MET.WritetoAOD=True
     flags.Reco.EnableCaloRinger=False
     flags.Reco.EnableBTagging=True
+    flags.Tracking.doMinBias=True
+    flags.HeavyIon.Egamma.doSubtractedClusters=False
+    flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection=False
+    flags.HeavyIon.Jet.HarmonicsForSubtraction=[]
+    flags.HeavyIon.Jet.SeedPtMin=8000
+    flags.HeavyIon.Jet.RecoOutputPtMin=8000
+    flags.HeavyIon.Jet.TrackJetPtMin=4000
+
+def UPCmode(flags):
+    flags.Reco.EnableHI=True
+    flags.Reco.EnableTau=True
+    flags.Reco.EnableJet=True
+    flags.Jet.WriteToAOD=True # this is to save "standard" jets and btagging to xAOD
+    flags.Reco.EnableMet=True
+    flags.MET.WritetoAOD=True
+    flags.Reco.EnableCaloRinger=False
+    flags.Reco.EnableBTagging=True
+    flags.Tracking.doMinBias=True
+    flags.Egamma.doLowMu=True # only UPC
+    flags.Tracking.doTrackSegmentsPixel=True #only UPC
     flags.HeavyIon.Egamma.doSubtractedClusters=False
     flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection=False
     flags.HeavyIon.Jet.HarmonicsForSubtraction=[]

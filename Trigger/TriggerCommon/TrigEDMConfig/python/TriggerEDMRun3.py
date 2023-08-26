@@ -873,12 +873,6 @@ TriggerHLTListRun3 = [
     ('xAOD::JetAuxContainer#HLT_AntiKtVR30Rmax4Rmin02PV0TrackJetsAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
     # Heavy ion
-    ('xAOD::JetContainer#HLT_AntiKt4HIJets_Unsubtracted',                      'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4HIJets_UnsubtractedAux.'+HIJetVars,       'BS ESD AODFULL', 'Jet'),
-
-    ('xAOD::JetContainer#HLT_AntiKt4HIJets_sub_noCalib',                      'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt4HIJets_sub_noCalibAux.'+HIJetVars,       'BS ESD AODFULL', 'Jet'),
-
     ('xAOD::JetContainer#HLT_AntiKt4HIJets',                      'BS ESD AODFULL', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4HIJetsAux.'+HIJetVars,       'BS ESD AODFULL', 'Jet'),
 

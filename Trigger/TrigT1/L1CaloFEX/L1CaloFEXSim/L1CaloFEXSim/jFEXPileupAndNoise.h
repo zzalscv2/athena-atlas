@@ -77,7 +77,6 @@ protected:
         std::unordered_map<int,int > m_FPGA_ET_EM;
         std::unordered_map<int,int > m_FPGA_ET_HAD;        
         
-        
         //rho variables for the pileup
         int m_rho_EM   = 0; //for eta < 3.2
         int m_rho_HAD1 = 0; //for eta < 1.5
@@ -104,7 +103,6 @@ protected:
         void ApplyNoiseCuts(std::unordered_map<int,std::vector<int> > & map_Etvalues, int layer);
         int  rhoDivLUT(int ntowers);
 
-
         // SG information
         int getTTowerEta     (const LVL1::jTower *tmpTower ); 
         int getTTowerET      (const LVL1::jTower *tmpTower ); 
@@ -115,18 +113,9 @@ protected:
         int getTTAreaINV_EM  (const LVL1::jTower *tmpTower ); 
         int getTTAreaINV_HAD (const LVL1::jTower *tmpTower ); 
         
-        unsigned int m_bitshift_AreaINV = 6;
-        unsigned int m_bitshift_Area    = 11;
-        unsigned int m_bitshift_rhoLUT  = 20;
-        
-        
         std::unordered_map<int,std::vector<int> > m_map_Etvalues_EM;
         std::unordered_map<int,std::vector<int> > m_map_Etvalues_HAD;
-        
   };
-
-
-
 }//end of namespace
 
 
