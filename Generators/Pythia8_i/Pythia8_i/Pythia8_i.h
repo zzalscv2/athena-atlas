@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
   Author: James Monk
 */
 
@@ -91,7 +91,7 @@ protected:
   UnsignedIntegerProperty m_maxFailures{this, "MaxFailures", 10};
 
   BooleanProperty m_useRndmGenSvc{this, "useRndmGenSvc", true, "the max number of consecutive failures"};
-  std::unique_ptr<customRndm> m_atlasRndmEngine{};
+  std::shared_ptr<customRndm> m_atlasRndmEngine{};
 
   IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
 
@@ -135,7 +135,7 @@ private:
   StringProperty m_userProcess{this, "UserProcess", ""};
 
   // ptr to possible user process
-  std::unique_ptr<Pythia8::Sigma2Process> m_procPtr{};
+  std::shared_ptr<Pythia8::Sigma2Process> m_procPtr{};
 
   StringArrayProperty m_userHooks{this, "UserHooks", {} };
 
@@ -143,7 +143,7 @@ private:
 
   StringProperty m_userResonances{this, "UserResonances", ""};
 
-  std::vector<Pythia8::ResonanceWidths*> m_userResonancePtrs;
+  std::vector<std::shared_ptr<Pythia8::ResonanceWidths> > m_userResonancePtrs;
 
   BooleanProperty m_useLHAPDF{this, "UseLHAPDF", true};
 

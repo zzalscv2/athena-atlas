@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PowhegHooksBB4L.h 
@@ -9,7 +9,6 @@
 // PowhegHooks.h by Richard Corke
 
 #include "Pythia8_i/UserHooksFactory.h"
-#include "Pythia8Plugins/PowhegHooks.h"
 #include "UserSetting.h"
 
 namespace Pythia8 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PowhegHooksBB4L.h 
@@ -289,7 +289,11 @@ namespace Pythia8 {
       pTnow *= (Qsq - m2Rad);
       
       if (pTnow < 0.) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+	loggerPtr->ERROR_MSG("Warning: pTpythia was negative");
+#else
 	infoPtr->errorMsg("Warning: pTpythia was negative");
+#endif
 	return -1.;
       }
       else
@@ -427,7 +431,11 @@ namespace Pythia8 {
 	  distance ++;
 	}
 	if (iTop == 0) {
+#if PYTHIA_VERSION_INTEGER >= 8310
+	  loggerPtr->ERROR_MSG("Warning in PowhegHooksBB4L::doVetoFSREmission: emission in resonance not from top quark, not vetoing");
+#else
 	  infoPtr->errorMsg("Warning in PowhegHooksBB4L::doVetoFSREmission: emission in resonance not from top quark, not vetoing");
+#endif
 	  return doVetoFSR(false,0,0);
 	}
 	int iTopCharge = (e[iTop].id()>0)?1:-1;

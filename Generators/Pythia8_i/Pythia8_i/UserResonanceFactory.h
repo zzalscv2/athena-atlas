@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOR_PYTHIA8_USER_RESONANCE_FACTORY_H
@@ -9,6 +9,7 @@
 #include "Pythia8/Pythia.h"
 
 #include <string>
+#include <memory>
 
 namespace Pythia8_UserResonance{
  
@@ -23,7 +24,7 @@ namespace Pythia8_UserResonance{
      *  e.g. create("MyResonance", 23) will return a MyResonance instance that will be applied to the Z
      *
      */
-    static ResonanceWidths* create(const std::string &name, int pdgid);
+    static std::shared_ptr<ResonanceWidths> create(const std::string &name, int pdgid);
     
   private:
     
@@ -31,7 +32,7 @@ namespace Pythia8_UserResonance{
     
     class ICreator{
     public:
-      virtual ResonanceWidths *create(int idResIn)const = 0;
+      virtual std::shared_ptr<ResonanceWidths> create(int idResIn)const = 0;
       virtual ~ICreator(){};
     };
     
@@ -52,8 +53,8 @@ namespace Pythia8_UserResonance{
         }
       }
       
-      ResonanceWidths *create(int idResIn)const{
-        return new T(idResIn);
+      std::shared_ptr<ResonanceWidths> create(int idResIn)const{
+        return std::make_shared<T>(idResIn);
       }
       
     private:
