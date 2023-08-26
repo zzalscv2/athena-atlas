@@ -32,7 +32,7 @@ def CaloBadChanToolCfg(flags, **kwargs):
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
 
@@ -41,6 +41,7 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
+    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 
     flags.fillFromArgs()
     flags.lock()

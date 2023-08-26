@@ -37,7 +37,7 @@ def CaloBCIDLumiCondAlgCfg (flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
 
     only = ['CaloBCIDCoeffsCondAlg',
             'CaloBCIDLumiCondAlg',
@@ -47,6 +47,7 @@ if __name__ == "__main__":
     print ('--- data')
     flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW_RUN2
+    flags1.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags1.lock()
     acc1 = CaloBCIDLumiCondAlgCfg (flags1)
     acc1.printConfig(summariseProps=True, onlyComponents=only)
@@ -56,6 +57,7 @@ if __name__ == "__main__":
     print ('--- mc')
     flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.ESD
+    flags2.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
     flags2.lock()
     acc2 = CaloBCIDLumiCondAlgCfg (flags2)
     acc2.printConfig(summariseProps=True, onlyComponents=only)
