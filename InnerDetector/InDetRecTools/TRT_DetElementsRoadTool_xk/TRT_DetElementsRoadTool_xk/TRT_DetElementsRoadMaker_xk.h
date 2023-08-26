@@ -20,7 +20,6 @@
 
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GaudiKernel/AlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/MsgStream.h"
@@ -107,7 +106,6 @@ class TRT_DetElementsRoadMaker_xk final:
       SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this,"AtlasFieldCacheCondObj", "fieldCondObj",
         "Name of the Magnetic Field conditions object key"}; // Necessary only for dumpConditions method
 
-      ServiceHandle<IGeoModelSvc>           m_geoModelSvc{this, "GeoModelSvc", "GeoModelSvc"};
       ToolHandle<Trk::IPropagator>          m_proptool ;  // Propagator     tool
 
       float                                m_width{}    ;  // Width of the roadInnerDetector/InDetRecTools/
