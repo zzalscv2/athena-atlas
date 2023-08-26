@@ -412,10 +412,10 @@ class MonitorDef:
                 # XE
                 "L1_XE30", "L1_XE35", "L1_XE50", "L1_XE60",
                 # Phase-I L1Calo
-                "L1_eEM5", "L1_eEM9", "L1_eEM15",
+                "L1_eEM5", "L1_eEM9", "L1_eEM12", "L1_eEM15",
                 "L1_eEM18", "L1_eEM18L",
                 "L1_eEM26", "L1_eEM26M",
-                "L1_2eEM18L",
+                "L1_2eEM18",
                 #
                 "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
                 "L1_jJ55", "L1_jJ60", "L1_jJ90",
