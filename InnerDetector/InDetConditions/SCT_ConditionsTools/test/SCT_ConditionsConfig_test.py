@@ -4,6 +4,7 @@
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
 from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_DCSConditionsCfg, SCT_ReadCalibChipDataCfg, SCT_SiliconConditionsCfg
@@ -12,6 +13,7 @@ from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_DCSConditionsCfg, 
 log.setLevel(DEBUG)
 flags = initConfigFlags()
 flags.Input.Files = []
+flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 flags.lock()
 # call tests
 dcs_acc = SCT_DCSConditionsCfg(flags, name="DCSTest")

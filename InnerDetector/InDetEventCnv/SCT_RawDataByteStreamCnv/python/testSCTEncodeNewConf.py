@@ -8,7 +8,6 @@ if __name__ == "__main__":
     flags.Input.isMC = True
     flags.Input.Files = ["/afs/cern.ch/atlas/project/rig/referencefiles/RTTinputFiles/MC15_13TeV/valid1.110401.PowhegPythia_P2012_ttbar_nonallhad.recon.RDO.e3099_s2578_r6699_10evt.pool.root"]
     flags.IOVDb.GlobalTag = "OFLCOND-RUN12-SDR-31"
-    flags.GeoModel.AtlasVersion = "ATLAS-R2-2015-03-01-00"
     flags.Detector.GeometrySCT = True
     flags.lock()
 
