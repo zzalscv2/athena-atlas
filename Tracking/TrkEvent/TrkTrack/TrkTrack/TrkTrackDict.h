@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACKDICT_H
@@ -25,8 +25,8 @@ namespace Trk {
 	      DataVector<Identifier>                      m_identifierVector;
 	      ElementLink<DataVector<Trk::Track> >        m_Elink;   
         std::bitset< 11 >                           m_dummy1;
-        TrackCollection m_tc;
-        ElementLink<TrackCollection> m_e1;
+        TrackCollection                             m_tc;
+        ElementLink<TrackCollection>                m_e1;
         //!< really for xAOD, but exposes dependency on TrkTrack to put it there...
         std::vector<ElementLink<TrackCollection> > m_e2;
     };
