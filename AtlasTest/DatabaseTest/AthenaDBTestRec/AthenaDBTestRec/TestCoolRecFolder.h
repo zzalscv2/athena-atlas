@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENADBTESTREC_TESTCOOLRECFOLDER_H
@@ -27,7 +27,7 @@ class IOVTime;
 
 class ATLAS_NOT_THREAD_SAFE TestCoolRecFolder {
  public:
-  TestCoolRecFolder(const std::string key,const int type,
+  TestCoolRecFolder(const std::string& key,const int type,
 		    const SG::DataProxy* proxy,
 		    const int dumpchan,std::ofstream* dumpf);
   StatusCode regCallBack(StoreGateSvc* detstore);
