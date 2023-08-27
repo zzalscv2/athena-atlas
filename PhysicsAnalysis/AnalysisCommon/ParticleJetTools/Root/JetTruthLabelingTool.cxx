@@ -302,7 +302,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
                                                const EventContext& ctx) const {
 
   SG::ReadHandle<xAOD::JetContainer> truthJets(m_truthJetCollectionName, ctx);
-  const SG::AuxElement::Decorator<int> nbDecor (m_truthLabelName + "_NB");
+  const SG::AuxElement::Accessor<int> nbAcc (m_truthLabelName + "_NB");
   for(const xAOD::Jet *jet : jets) {
 
     /// Get parent ungroomed reco jet for matching
@@ -369,7 +369,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
         SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey, ctx);
         if(split12Handle.isAvailable()) truthJetSplit12 = split12Handle(*matchTruthJet);
       }
-      if(nbDecor.isAvailable(*matchTruthJet)) truthJetNB = nbDecor (*matchTruthJet);
+      if(nbAcc.isAvailable(*matchTruthJet)) truthJetNB = nbAcc (*matchTruthJet);
       truthJetMass = matchTruthJet->m();
       truthJetPt = matchTruthJet->pt();
     }
