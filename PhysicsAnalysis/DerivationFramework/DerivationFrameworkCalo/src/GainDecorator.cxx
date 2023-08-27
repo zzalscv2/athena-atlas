@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -256,7 +256,7 @@ DerivationFramework::GainDecorator::decorateObject(
   if (cellLinks) {
     CaloClusterCellLink::const_iterator it = cellLinks->begin(),
       itE = cellLinks->end();
-    for (; it != itE; it++) {
+    for (; it != itE; ++it) {
       const CaloCell *cell = *it;
       if (!cell)
         continue;
