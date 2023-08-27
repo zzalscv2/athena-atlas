@@ -6,7 +6,6 @@
 # art-include: master/Athena
 # art-architecture: '#&nvidia'
 # If you create a grid version, check art-output in existing grid tests.
-# art-athena-mt: 4
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
