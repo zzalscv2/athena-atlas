@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TestCoolRecFolder.cxx
@@ -17,7 +17,7 @@
 #include "AthenaKernel/IOVRange.h"
 #include "AthenaDBTestRec/TestCoolRecPoolDataColl.h"
 
-TestCoolRecFolder::TestCoolRecFolder(const std::string key, int type, 
+TestCoolRecFolder::TestCoolRecFolder(const std::string& key, int type, 
 				     const SG::DataProxy* proxy,
 				     const int dumpchan,std::ofstream* dumpf) :
   m_key(key), m_type(type), m_proxy(proxy),

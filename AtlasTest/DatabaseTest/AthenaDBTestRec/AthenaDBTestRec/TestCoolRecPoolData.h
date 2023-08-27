@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENADBTESTREC_TESTCOOLRECPOOLDATA_H
@@ -15,7 +15,7 @@
 class TestCoolRecPoolData {
  public:
   TestCoolRecPoolData();
-  TestCoolRecPoolData(const int run, const int chan, const std::string folder,
+  TestCoolRecPoolData(const int run, const int chan, const std::string& folder,
 		      const int size);
   ~TestCoolRecPoolData();
   // get methods
