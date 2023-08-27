@@ -9,19 +9,28 @@
  */
 
 
+#ifndef NO_TBB
+# define HAVE_TBB
+#endif
+
+
 #undef NDEBUG
 
 #include "CxxUtils/ConcurrentMap.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/expect_exception.h"
 #include "TestTools/random.h"
-#include "tbb/concurrent_unordered_map.h"
-#include "boost/timer/timer.hpp"
-#ifdef HAVE_CK
+#ifndef NO_PERF
+# ifdef HAVE_TBB
+#  include "tbb/concurrent_unordered_map.h"
+# endif
+# include "boost/timer/timer.hpp"
+# ifdef HAVE_CK
 extern "C" {
-#include "ck_ht.h"
+#  include "ck_ht.h"
 }
-#endif
+# endif
+#endif // not NO_PERF
 #include <unordered_map>
 #include <thread>
 #include <shared_mutex>
@@ -850,6 +859,7 @@ void test_threaded()
 }
 
 
+#ifndef NO_PERF
 //***************************************************************************
 // Optional performance test.
 //
@@ -919,6 +929,7 @@ private:
 };
 
 
+#ifdef HAVE_TBB
 class ConcurrentUnorderedMapAdapter
 {
 public:
@@ -950,6 +961,7 @@ public:
 private:
   map_t m_map;
 };
+#endif
 
 
 #ifdef HAVE_CK
@@ -1229,17 +1241,24 @@ void perftest()
 {
   perftest_one<ConcurrentMapAdapter>();
   perftest_one<UnorderedMapAdapter>();
+#ifdef HAVE_TBB
   perftest_one<ConcurrentUnorderedMapAdapter>();
+#endif
 #ifdef HAVE_CK
   perftest_one<CKHTAdapter>();
 #endif
 }
+#endif // not NO_PERF
 
 
 int main (int argc, char** argv)
 {
   if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
+#ifdef NO_PERF
+    std::cout << " Performance tests disabled\n";
+#else
     perftest();
+#endif
     return 0;
   }
 

@@ -9,29 +9,29 @@
  */
 
 
+#ifndef NO_TBB
+# define HAVE_TBB
+#endif
+
+
 #undef NDEBUG
 
 #include "CxxUtils/ConcurrentBitset.h"
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/random.h"
-// tbb/machine/gcc_generic.h has spurious trailing semicolons after
-// the clz() functions (as of TBB 2019 U1).
-#if defined(__GNUC__)
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wpedantic"
-#endif
-#include "tbb/concurrent_unordered_set.h"
-#if defined(__GNUC__)
-# pragma GCC diagnostic pop
-#endif
-#include "boost/timer/timer.hpp"
-#ifdef HAVE_CK
+#ifndef NO_PERF
+# ifdef HAVE_TBB
+#  include "tbb/concurrent_unordered_set.h"
+# endif
+# include "boost/timer/timer.hpp"
+# ifdef HAVE_CK
 extern "C" {
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include "ck_hs.h"
-#include "ck_bitmap.h"
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#  include "ck_hs.h"
+#  include "ck_bitmap.h"
 }
-#endif
+# endif
+#endif // not NO_PERF
 #include <mutex>
 #include <thread>
 #include <bitset>
@@ -687,6 +687,7 @@ void test_mt()
 }
 
 
+#ifndef NO_PERF
 //************************ performance testing.
 
 
@@ -751,6 +752,7 @@ public:
 };
 
 
+#ifdef HAVE_TBB
 class CUSetAdapter
   : public tbb::concurrent_unordered_set<size_t>
 {
@@ -761,6 +763,7 @@ public:
   }
   static std::string name() { return "concurrent_unordered_set"; }
 };
+#endif
 
 
 #ifdef HAVE_CK
@@ -1138,19 +1141,26 @@ void perftest (const char* setfile)
 
   perftest_one<SetAdapter> (tv);
   perftest_one<USetAdapter> (tv);
+#ifdef HAVE_TBB
   perftest_one<CUSetAdapter> (tv);
+#endif
 #ifdef HAVE_CK 
   perftest_one<CKHSAdapter> (tv);
   perftest_one<CKBitmapAdapter> (tv);
 #endif
   perftest_one<ConcurrentBitsetAdapter> (tv);
 }
+#endif // not NO_PERF
 
 
 int main (int argc, char** argv)
 {
   if (argc > 2 && strcmp (argv[1], "--perf") == 0) {
+#ifdef NO_PERF
+    std::cout << " Performance tests disabled\n";
+#else
     perftest (argv[2]);
+#endif
     return 0;
   }
 
