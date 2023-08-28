@@ -26,6 +26,8 @@ def ITkTrackingSiPatternCfg(flags,
                   flags.Tracking.ActiveConfig.extension),
             TracksName=list(InputCollections)))
 
+    runTruth = True
+
     # Can use FastTrackFinder instead of SiSPSeededTrackFinder
     if flags.Tracking.useITkFTF:
 
@@ -54,6 +56,7 @@ def ITkTrackingSiPatternCfg(flags,
         from ActsConfig.TrackingComponentConfigurer import (
             TrackingComponentConfigurer)
         configuration_settings = TrackingComponentConfigurer(flags)
+        runTruth = configuration_settings.doAthenaTrack or configuration_settings.doActsToAthenaTrack
 
         # Athena Track
         if configuration_settings.doAthenaTrack:
@@ -96,7 +99,7 @@ def ITkTrackingSiPatternCfg(flags,
                                                TracksLocation=SiSPSeededTrackCollectionKey))
             
     from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
-    if flags.Tracking.doTruth and (configuration_settings.doAthenaTrack or configuration_settings.doActsToAthenaTrack):
+    if flags.Tracking.doTruth and runTruth:
         acc.merge(ITkTrackTruthCfg(
             flags,
             Tracks=SiSPSeededTrackCollectionKey,
