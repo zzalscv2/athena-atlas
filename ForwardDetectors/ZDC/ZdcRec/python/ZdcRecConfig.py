@@ -123,7 +123,6 @@ def ZdcRecRun3Cfg(flags):
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
-    config = 'ppPbPb2023'
     
     if flags.Input.ProjectName == "data22_13p6TeV":
         config = "LHCf2022"
@@ -131,9 +130,6 @@ def ZdcRecRun3Cfg(flags):
         config = "PbPb2023"
     elif flags.Input.ProjectName == "data22_hi":
         config = "PbPb2023"
-
-    acc.merge(ByteStreamReadCfg(flags, type_names=['xAOD::TriggerTowerContainer/ZdcTriggerTowers',
-                                         'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
     acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
@@ -159,9 +155,6 @@ def ZdcLEDRecCfg(flags):
         print ("ZdcRecConfig.py: run = "+run.name)
         
         config = 'ppPbPb2023'
-
-        acc.merge(ByteStreamReadCfg(flags, type_names=['xAOD::TriggerTowerContainer/ZdcTriggerTowers',
-                                         'xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.']))
 
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
