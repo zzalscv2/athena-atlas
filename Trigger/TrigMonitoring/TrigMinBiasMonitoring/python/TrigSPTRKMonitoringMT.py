@@ -13,12 +13,13 @@ def SPTRK_chains(configFlags):
     from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
     allChains = getHLTMenuAccess(configFlags)
 
-    tokens = ['_mb_sp_', '_mb_sptrk_', '_mb_excl_', '_hmt_']
+    tokens = ['_mb_sptrk_', '_mb_excl_', '_hmt_']
 
     def isMinBias(chain):
         return any([t in chain for t in tokens])
 
-    chains = [c for c in allChains if isMinBias(c)]
+    chains = ['HLT_mb_sptrk_L1RD0_FILLED', 'HLT_mb_sp_L1RD0_FILLED']
+    chains += [c for c in allChains if isMinBias(c)]
 
     return list(set(chains))  # Remove duplicates
 
@@ -50,6 +51,7 @@ def TrigSPTRK(configFlags, highGranularity=False):
     detailed = ["HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED"]
     detailed += [c for c in allChains if 'HLT_mb_sp_pix' in c]
     detailed += [c for c in allChains if 'HLT_mb_sp_vpix' in c]
+    detailed += [c for c in allChains if 'HLT_mb_sp_nototpix' in c]
     detailed += [c for c in allChains if 'HLT_mb_sp' in c and '_hmt_' in c]
     alg.triggerListSpacePointsMon = detailed
 
