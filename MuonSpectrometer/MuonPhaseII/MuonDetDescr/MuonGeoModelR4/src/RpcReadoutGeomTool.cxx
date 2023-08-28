@@ -82,7 +82,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     define.halfX = box->getXHalfLength() * Gaudi::Units::mm;
 
     /// Navigate through the GeoModel tree to find all gas volume leaves
-    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "RpcGas");
+    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "RpcLayer");
     /// For one reason or another the x-axis points along the gasgap 
     /// and y along doublet phi
     std::sort(allGasGaps.begin(), allGasGaps.end(), [](const physVolWithTrans&a, const physVolWithTrans & b){
@@ -111,8 +111,13 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     define.nGasGaps = gasGap;
     define.nGapsInPhi = doubletPhi;
     
-    /// We need to pull in here the information about the strips pitch, width, etc.
-    double stripPitch{0.4}, stripWidth{0.05};
+    FactoryCache::ParamBookTable::const_iterator parBookItr = factoryCache.parameterBook.find(define.chambDesign);
+    if (parBookItr == factoryCache.parameterBook.end()) {
+        ATH_MSG_FATAL("The chamber "<<define.chambDesign<<" is not part of the WRPC table");
+        return StatusCode::FAILURE;
+    }
+    const wRPCTable& paramBook{parBookItr->second};
+
     for (gapVolume& gapVol : allGapsWithIdx) {
         const GeoShape* gapShape = m_geoUtilTool->extractShape(gapVol.physVol);
         if (gapShape->typeID() != GeoBox::getClassTypeID()) {
@@ -124,27 +129,34 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
 
         StripDesignPtr etaDesign = std::make_unique<StripDesign>();
         /// Define the strip layout
-        etaDesign->defineStripLayout(Amg::Vector2D{-gapBox->getXHalfLength(), 0.},
-                                     stripPitch, stripWidth, 66);
+        etaDesign->defineStripLayout(Amg::Vector2D{-gapBox->getZHalfLength() + 26.55, 0.},
+                                     paramBook.stripPitchEta,
+                                     paramBook.stripWidthEta,
+                                     paramBook.numEtaStrips);
         /// Define the box layout
         etaDesign->defineTrapezoid(gapBox->getXHalfLength(), gapBox->getXHalfLength(), gapBox->getZHalfLength());
-        gapVol.transform = gapVol.transform * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
-        StripLayer etaLayer(gapVol.transform,
-                            (*factoryCache.stripDesigns.emplace(etaDesign).first), 
+        gapVol.transform = gapVol.transform * Amg::Translation3D{0,-10, 0} * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
+        
+        etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
+        StripLayer etaLayer(gapVol.transform, etaDesign, 
                             layerHash(define, gapVol.gasGap, gapVol.doubPhi, false));
         ATH_MSG_VERBOSE("Added new eta gap at "<<etaLayer);
         define.layers.push_back(std::move(etaLayer));
-        
+        if (!define.etaDesign) define.etaDesign = etaDesign;
         StripDesignPtr phiDesign = std::make_unique<StripDesign>();
-        phiDesign->defineStripLayout(Amg::Vector2D{-gapBox->getZHalfLength(), 0.},
-                                     stripPitch, stripWidth, 66);
+        phiDesign->defineStripLayout(Amg::Vector2D{-gapBox->getXHalfLength() +22.1, 0.},
+                                     paramBook.stripPitchPhi,
+                                     paramBook.stripWidthPhi,
+                                     paramBook.numPhiStrips);
         phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getXHalfLength());
         /// Next build the phi layer
-        StripLayer phiLayer(gapVol.transform * Amg::getRotateZ3D(90. * Gaudi::Units::deg),
-                            (*factoryCache.stripDesigns.emplace(phiDesign).first),
+        phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
+        StripLayer phiLayer(gapVol.transform  * Amg::getRotateY3D(-90. * Gaudi::Units::deg),
+                            phiDesign,
                             layerHash(define, gapVol.gasGap, gapVol.doubPhi, true));
         ATH_MSG_VERBOSE("Added new phi gap at "<<phiLayer);
         define.layers.push_back(std::move(phiLayer));
+        if (!define.phiDesign) define.phiDesign = phiDesign;
     }
     std::sort(define.layers.begin(), define.layers.end(), 
              [](const StripLayer&a ,const StripLayer& b) {
@@ -166,7 +178,9 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         ATH_MSG_FATAL("Error, the tool works exclusively from sqlite geometry inputs");
         return StatusCode::FAILURE;
     }
-    ATH_CHECK(readParameterBook());
+    
+    FactoryCache facCache{};
+    ATH_CHECK(readParameterBook(facCache));
 
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
     for (auto itr = idHelper.detectorElement_begin(); itr != idHelper.detectorElement_end(); ++itr){
@@ -182,7 +196,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
     
-    FactoryCache facCache{};
+   
 
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
@@ -228,9 +242,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     }    
     return StatusCode::SUCCESS;
 }
-StatusCode RpcReadoutGeomTool::readParameterBook() {
-    if (m_parBook.size())
-        return StatusCode::SUCCESS;
+StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     ServiceHandle<IRDBAccessSvc> accessSvc(m_geoDbTagSvc->getParamSvcName(), name());
     ATH_CHECK(accessSvc.retrieve());
     IRDBRecordset_ptr paramTable = accessSvc->getRecordsetPtr("WRPC", "");
@@ -244,11 +256,15 @@ StatusCode RpcReadoutGeomTool::readParameterBook() {
     
     for (const IRDBRecord* record : *paramTable) {
         const std::string chambType = record->getString("WRPC_TYPE");
-        parameterBook& parBook = m_parBook[record->getString("WRPC_TYPE")];
-        parBook.stripPitchEta = record->getDouble("pitch_z");
-        parBook.stripPitchPhi = record->getDouble("pitch_s"); 
+        wRPCTable& parBook = cache.parameterBook[record->getString("WRPC_TYPE")];
+        parBook.stripPitchEta = record->getDouble("pitch_z") * Gaudi::Units::cm;
+        parBook.stripPitchPhi = record->getDouble("pitch_s") * Gaudi::Units::cm;
+        const double stripDeadWidth = record->getDouble("stripdeadsep") * Gaudi::Units::cm;
+        parBook.stripWidthEta = parBook.stripPitchEta - stripDeadWidth;
+        parBook.stripWidthPhi = parBook.stripPitchPhi - stripDeadWidth;
         parBook.numEtaStrips = record->getInt("n_strips_z");
         parBook.numPhiStrips = record->getInt("n_strips_s");
+
     }
     return StatusCode::SUCCESS;
 }

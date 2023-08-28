@@ -152,7 +152,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     const defineArgs m_args{};
     /// Cache of the detector element hash
-    IdentifierHash m_detElHash{0};
+    IdentifierHash m_detElHash{};
     /// Cache the station index of the identifier
     int m_stIdx{-1};
     /// Cache the station eta of the identifier

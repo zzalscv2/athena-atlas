@@ -11,12 +11,14 @@ namespace {
 /// Helper macro to facilliate the ordering
 #define ORDER_PROP(PROP)                                            \
       {                                                             \
-        if (std::abs(PROP - other.PROP)>tolerance) {                \
+        if (std::abs(PROP - other.PROP) > tolerance) {              \
             return PROP < other.PROP;                               \
         }                                                           \
       }
 
 namespace MuonGMR4{
+    StripDesign::StripDesign():
+        AthMessaging{"MuonStripDesign"} {}
     bool operator<(const StripDesignPtr&a, const StripDesignPtr& b) {
         return (*a) < (*b);
     }
@@ -31,7 +33,7 @@ namespace MuonGMR4{
         ORDER_PROP(stereoAngle());
         {
             const Amg::Vector2D dP = m_firstStripPos - other.m_firstStripPos;
-            if (std::hypot(dP.x(), dP.y()) > tolerance){
+            if (std::hypot(dP.x(), dP.y()) > tolerance) {
                 if (dP.x() > tolerance) return dP.x()< 0.;
                 return dP.y() < 0.;
             }

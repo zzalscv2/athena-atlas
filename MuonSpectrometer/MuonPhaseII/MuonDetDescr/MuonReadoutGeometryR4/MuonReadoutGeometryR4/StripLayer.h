@@ -8,9 +8,9 @@
 namespace MuonGMR4{
     class StripLayer {
         public:
-          StripLayer(const Amg::Transform3D layerTransform,
-                    const StripDesignPtr design, 
-                    const IdentifierHash& hash);
+          StripLayer(const Amg::Transform3D& layerTransform,
+                     const StripDesignPtr design, 
+                     const IdentifierHash hash);
       
           /// Returns the transformation to go from the strip layer center 
           /// to the origin of the Strip chamber
@@ -22,11 +22,13 @@ namespace MuonGMR4{
 
           /// Returns the position of the strip expressed in the chamber frame
           Amg::Vector3D stripPosition(unsigned int stripNum) const;
+          /// Returns the position of the strip expressed in the local frame
+          Amg::Vector3D localStripPos(unsigned int stripum) const;
      
         private:
            Amg::Transform3D m_transform{Amg::Transform3D::Identity()};
            StripDesignPtr m_design{};
-           IdentifierHash m_hash{0};
+           IdentifierHash m_hash{};
     };
     std::ostream& operator<<(std::ostream& ostr, const StripLayer& lay);
 }

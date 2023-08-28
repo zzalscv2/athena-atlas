@@ -9,15 +9,17 @@ namespace MuonGMR4{
     inline const StripDesign& StripLayer::design() const { return *m_design;}
     inline const IdentifierHash StripLayer::hash() const { return m_hash;}
 
+    inline Amg::Vector3D StripLayer::localStripPos(unsigned int stripNum) const {
+      Amg::Vector3D stripPos{Amg::Vector3D::Zero()};
+      std::optional<Amg::Vector2D> planePos = m_design->center(stripNum);
+      if (!planePos) {          
+        return stripPos;
+      }
+      stripPos.block<2,1>(0,0) = std::move(*planePos);
+      return stripPos;
+    }
     inline Amg::Vector3D StripLayer::stripPosition(unsigned int stripNum) const {
-        Amg::Vector3D stripPos{Amg::Vector3D::Zero()};
-        std::optional<Amg::Vector2D> planePos = m_design->center(stripNum);
-        if (!planePos) {
-          std::cout<<"Stoooonjek "<<stripNum<<std::endl;
-          return stripPos;
-        }
-        stripPos.block<2,1>(0,0) = std::move(*planePos);
-        return toOrigin() * stripPos;
+        return toOrigin() * localStripPos(stripNum);
     }
 }
 #endif

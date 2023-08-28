@@ -96,7 +96,7 @@ StatusCode GeoModelRpcTest::execute() {
       /// Check that we retrieved the proper readout element
       if (reElement->identify() != test_me) {
          ATH_MSG_FATAL("Expected to retrieve "<<m_idHelperSvc->toStringDetEl(test_me)
-                     <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
+                      <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
          return StatusCode::FAILURE;
       }
       ATH_CHECK(dumpToTree(ctx,gctx,reElement));
@@ -113,7 +113,6 @@ StatusCode GeoModelRpcTest::execute() {
          }         
       }
       const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
-      
       for (int doubPhi = 1; doubPhi <= 2; ++doubPhi) {
         for (int gasGap = 1; gasGap <= 2; ++gasGap) {
             for (bool measPhi: {false, true}) {
@@ -144,7 +143,6 @@ StatusCode GeoModelRpcTest::execute() {
                                             <<Amg::toString(reElement->stripPosition(gctx, measHash)));
                 }                
             }
-            return StatusCode::SUCCESS;
         }
     }
     if (outStream) dumpToFile(ctx, gctx, reElement, *outStream);        
@@ -164,14 +162,63 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_doubletZ   = readoutEle->doubletZ();
    m_doubletPhi = readoutEle->doubletPhi();
    
+   m_numGasGapsEta = readoutEle->nGasGaps();
+   m_numGasGapsPhi = readoutEle->nGasGaps();
 
+   ///
+   m_numStripsEta = readoutEle->nEtaStrips();
+   m_numStripsPhi = readoutEle->nPhiStrips();
+   
+   m_stripEtaPitch = readoutEle->stripEtaPitch();
+   m_stripPhiPitch = readoutEle->stripPhiPitch();
+   m_stripEtaWidth = readoutEle->stripEtaWidth();
+   m_stripPhiWidth = readoutEle->stripPhiWidth();
+   m_stripEtaLength = readoutEle->stripEtaLength(); 
+   m_stripPhiLength = readoutEle->stripPhiLength();     
+ 
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{readoutEle->localToGlobalTrans(gctx)};
    m_readoutTransform.push_back(Amg::Vector3D{transform.translation()});
    m_readoutTransform.push_back(Amg::Vector3D{transform.linear()*Amg::Vector3D::UnitX()});
    m_readoutTransform.push_back(Amg::Vector3D{transform.linear()*Amg::Vector3D::UnitY()});
    m_readoutTransform.push_back(Amg::Vector3D{transform.linear()*Amg::Vector3D::UnitZ()});
-  
+   const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
+      
+   for (int doubPhi = readoutEle->doubletPhi(); doubPhi <= readoutEle->nPhiPanels(); ++doubPhi) {
+        for (int gap = 1; gap <= readoutEle->nGasGaps(); ++gap) {   
+            for (bool measPhi : {false, true}) {
+                unsigned int numStrip =  (measPhi ? readoutEle->nPhiStrips() :
+                                                    readoutEle->nEtaStrips());
+                for (unsigned int strip = 1; strip <= numStrip ; ++strip) {
+
+                    bool isValid{false};
+                    const Identifier stripID = id_helper.channelID(readoutEle->identify(), 
+                                                                   readoutEle->doubletZ(),
+                                                                   doubPhi, gap, measPhi, strip, isValid);
+                    if (!isValid) {
+                        ATH_MSG_WARNING("Invalid Identifier detected for readout element "
+                                       <<m_idHelperSvc->toStringDetEl(readoutEle->identify())
+                                       <<" gap: "<<gap<<" strip: "<<strip<<" meas phi: "<<measPhi);
+                        continue;
+                    }
+                    m_stripPos.push_back(readoutEle->stripPosition(gctx, stripID));
+                    m_stripPosGasGap.push_back(gap);
+                    m_stripPosMeasPhi.push_back(measPhi);
+                    m_stripPosNum.push_back(strip);
+                    m_stripDblPhi.push_back(doubPhi);
+
+                    if (strip != 1) continue;
+                    const Amg::Transform3D locToGlob = readoutEle->localToGlobalTrans(gctx, stripID);
+                    m_stripRotColX.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitX()});
+                    m_stripRotColY.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitY()});
+                    m_stripRotColZ.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitZ()});
+                    m_stripRotGasGap.push_back(gap);
+                    m_stripRotMeasPhi.push_back(measPhi);
+                    m_stripRotDblPhi.push_back(doubPhi);                
+                }
+            }
+        }
+   }
    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 void GeoModelRpcTest::dumpToFile(const EventContext& /*ctx*/,

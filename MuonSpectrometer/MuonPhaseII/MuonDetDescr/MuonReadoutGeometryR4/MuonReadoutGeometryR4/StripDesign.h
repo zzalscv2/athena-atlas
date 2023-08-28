@@ -6,6 +6,7 @@
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GeoModelUtilities/TransientConstSharedPtr.h>
+#include <AthenaBaseComps/AthMessaging.h>
 #include <optional>
 
 namespace MuonGMR4{
@@ -25,9 +26,9 @@ namespace MuonGMR4{
     */ 
     class StripDesign;
     using StripDesignPtr = GeoModel::TransientConstSharedPtr<StripDesign>;
-    class StripDesign {
+    class StripDesign: public AthMessaging {
         public:
-            StripDesign() = default;
+            StripDesign();
 
             /// Distance between two adjacent strips
             double stripPitch() const;

@@ -43,7 +43,7 @@ class MuonTransformCache {
    private:
     IdentifierHash m_hash{0};
     TransformMaker m_transform{};
-    CxxUtils::CachedUniquePtr<Amg::Transform3D> m_nomCache{};
+    mutable CxxUtils::CachedUniquePtr<Amg::Transform3D> m_nomCache ATLAS_THREAD_SAFE{};
 
     
 };

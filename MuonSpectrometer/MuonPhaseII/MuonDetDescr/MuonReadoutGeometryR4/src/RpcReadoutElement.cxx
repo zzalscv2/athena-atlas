@@ -16,8 +16,8 @@ using namespace ActsTrk;
 namespace MuonGMR4 {
 using parameterBook = RpcReadoutElement::parameterBook;
 std::ostream& operator<<(std::ostream& ostr, const parameterBook& pars) {
-   ostr<<"   Eta "<<pars.etaDesign;
-   ostr<<"   Phi "<<pars.phiDesign;
+   if (pars.etaDesign) ostr<<"Eta strips: "<<(*pars.etaDesign)<<std::endl;
+   if (pars.phiDesign) ostr<<"Phi strips: "<<(*pars.phiDesign)<<std::endl;   
    return ostr;
 }
 
@@ -50,14 +50,19 @@ StatusCode RpcReadoutElement::initElement() {
 Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
    unsigned int layIdx = static_cast<unsigned int>(hash);
    if (layIdx < m_pars.layers.size()) return m_pars.layers[layIdx].toOrigin();
-   ATH_MSG_WARNING("The layer hash "<<layIdx<<" is out of range. Maximum range "<<m_pars.layers.size());
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
    return Amg::Transform3D::Identity();
 }
 
 Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
    const IdentifierHash lHash = layerHash(measHash);
    unsigned int layIdx = static_cast<unsigned int>(lHash);
-   if (layIdx < m_pars.layers.size()) return localToGlobalTrans(ctx) * m_pars.layers[layIdx].stripPosition(stripNumber(measHash));
+   if (layIdx < m_pars.layers.size()) {
+      return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripPos(stripNumber(measHash));
+   }
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
    return Amg::Vector3D::Zero();
 }
     

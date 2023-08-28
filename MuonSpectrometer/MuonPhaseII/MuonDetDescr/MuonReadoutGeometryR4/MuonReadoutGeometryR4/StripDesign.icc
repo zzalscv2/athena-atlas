@@ -25,12 +25,17 @@ namespace MuonGMR4 {
         /// Nominal strip position position
         const Amg::Vector2D stripPos = stripPosition(stripCh);       
         std::optional<double> lambda = MuonGM::intersect<2>(stripPos, m_stripDir, m_bottomLeft, m_dirBotEdge);
-        if (!lambda) return Amg::Vector2D::Zero();
+        if (!lambda) {
+            ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
+                          <<" does not intersect the left edge "<<Amg::toString(m_bottomLeft, 2)
+                          <<" + lambda "<<Amg::toString(m_dirBotEdge, 2));
+            return Amg::Vector2D::Zero();
+        }
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
         if (!uncapped && m_hasStereo && ( (*lambda) < 0. || (*lambda) > m_lenSlopEdge)) { 
-            const std::optional<double> bottom_line =MuonGM::intersect<2>(m_stripDir.x() > 0.? m_bottomLeft: m_bottomRight, Amg::Vector2D::UnitY(), 
-                                                                          stripPos, m_stripDir);            
+            const std::optional<double> bottom_line = MuonGM::intersect<2>(m_stripDir.x() > 0.? m_bottomLeft: m_bottomRight, Amg::Vector2D::UnitY(), 
+                                                                           stripPos, m_stripDir);            
             return stripPos + bottom_line.value_or(0.)* m_stripDir;            
         }
         return m_bottomLeft + (*lambda) * m_dirBotEdge;
@@ -42,8 +47,13 @@ namespace MuonGMR4 {
         /// Nominal strip position position
         const Amg::Vector2D stripPos = stripPosition(stripCh);       
         /// We expect lambda to be positive
-        const std::optional<double> lambda =MuonGM::intersect<2>(stripPos, m_stripDir, m_topRight, m_dirTopEdge);
-        if (!lambda) return Amg::Vector2D::Zero();
+        const std::optional<double> lambda = MuonGM::intersect<2>(stripPos, m_stripDir, m_topRight, m_dirTopEdge);
+        if (!lambda) {
+            ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
+                          <<" does not intersect the top edge "<<Amg::toString(m_topRight, 2)
+                          <<" + lambda "<<Amg::toString(m_dirTopEdge, 2));
+            return Amg::Vector2D::Zero();
+        }
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
         if (!uncapped && m_hasStereo && ( (*lambda) < 0  || (*lambda) > m_lenSlopEdge)) { 
@@ -59,17 +69,29 @@ namespace MuonGMR4 {
 
     inline std::optional<Amg::Vector2D> StripDesign::center(int stripNumber) const {
         const int stripCh = (stripNumber - m_channelShift);
-        if (stripCh < 0 ||  stripCh > numStrips()) return std::nullopt;
+        if (stripCh < 0 ||  stripCh > numStrips()) {
+            ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
+                         <<m_channelShift<<";"<<numStrips()<<"]");
+            return std::nullopt;
+        }
         return std::make_optional<Amg::Vector2D>(m_stereoRotMat * stripCenter(stripCh));
     }    
     inline std::optional<Amg::Vector2D> StripDesign::leftEdge(int stripNumber) const {
        const int stripCh = (stripNumber - m_channelShift);
-       if (stripCh < 0 ||  stripCh > numStrips()) return std::nullopt;
+       if (stripCh < 0 ||  stripCh > numStrips()) {
+            ATH_MSG_WARNING("leftEdge() -- Invalid strip number given "<<stripNumber<<" allowed range ["
+                          <<m_channelShift<<";"<<numStrips()<<"]");
+            return std::nullopt;
+       }
        return std::make_optional<Amg::Vector2D>(m_stereoRotMat * leftInterSect(stripCh));
     }
     inline std::optional<Amg::Vector2D> StripDesign::rightEdge(int stripNumber) const {
         const int stripCh = (stripNumber - m_channelShift);
-        if (stripCh < 0 ||  stripCh > numStrips()) return std::nullopt;       
+        if (stripCh < 0 ||  stripCh > numStrips()) {
+            ATH_MSG_WARNING("rightEdge() -- Invalid strip number given "<<stripNumber<<" allowed range ["
+                          <<m_channelShift<<";"<<numStrips()<<"]");
+            return std::nullopt;
+        }
         return std::make_optional<Amg::Vector2D>(m_stereoRotMat * rightInterSect(stripCh));
     }
     inline double StripDesign::distanceToStrip(const Amg::Vector2D& pos, int stripNumber) const {
@@ -81,7 +103,11 @@ namespace MuonGMR4 {
         const Amg::Vector2D posInNominal = m_nominalRotMat*pos;
         const double xMid = (posInNominal - m_firstStripPos).dot(m_stripNormal) / m_stripNormal.x();
         const int chNum = static_cast<int>(std::floor( xMid  / stripPitch()));
-        if (chNum < 0 || chNum > numStrips()) return -1;
+        if (chNum < 0 || chNum > numStrips()) {
+            ATH_MSG_VERBOSE("Object "<<Amg::toString(pos)<<" is not covered by any strip."
+                          <<" Virtual channel number: "<<chNum<<" max strips: "<<numStrips());
+            return -1;
+        }
         return chNum + m_channelShift;
     }
 }

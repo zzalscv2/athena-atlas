@@ -10,9 +10,9 @@ namespace MuonGMR4{
         ostr<<"Hash: "<<static_cast<unsigned int>(lay.hash());        
         return ostr;
     }
-    StripLayer::StripLayer(const Amg::Transform3D layerTransform,
-                    const StripDesignPtr design, 
-                    const IdentifierHash& hash):
+    StripLayer::StripLayer(const Amg::Transform3D& layerTransform,
+                           const StripDesignPtr design, 
+                           const IdentifierHash hash):
          m_transform{layerTransform},
          m_design{design},
          m_hash{hash} {
