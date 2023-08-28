@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -296,7 +296,7 @@ StatusCode HLTEDMCreator::fixLinks() const {
 }
 
 
-template<typename T, typename G, typename M>
+template<typename T, typename STORE, typename G, typename M>
 StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const ConstHandlesGroup<T>& handles, G& generator, M merger ) const {
 
   for (size_t i = 0; i < handles.out.size(); ++i) {
@@ -314,6 +314,19 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
       if ( readHandle.isValid() ) {
         ATH_MSG_DEBUG( "The " << writeHandleKey.key() << " already present" );
         generator.create(false, false);
+
+        // For xAOD types we need to ensure there is an Aux store. This can happen if the
+        // Aux store gets truncated for collections marked with "allowTruncation".
+        // The TriggerEDMDeserialiserAlg will already have created a DataLink to the Aux store
+        // for the interface container. Now we just need to create an empty Aux store.
+        if constexpr (!std::is_void_v<STORE>) {
+          SG::ReadHandle<STORE> readAuxHandle( writeHandleKey.key() + "Aux." );
+          if ( !readAuxHandle.isValid() ) {
+            SG::WriteHandle<STORE> writeAuxHandle( writeHandleKey.key() + "Aux." );
+            ATH_MSG_DEBUG("Creating missing Aux store for " << writeHandleKey.key());
+            ATH_CHECK( writeAuxHandle.record(std::make_unique<STORE>()) );
+          }
+        }
       } else {
         ATH_MSG_DEBUG( "The " << writeHandleKey.key() << " was absent, creating it" );
         generator.create(true, true);
@@ -332,7 +345,7 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
       } else  {
         const bool doCreate = i == 0 or handles.out.at(i-1).key() != handles.out.at(i).key();
         const bool doRecord = i == handles.out.size()-1 or handles.out.at(i+1).key() != handles.out.at(i).key();
-        ATH_MSG_DEBUG( "Instrucring generator " <<  (doCreate ? "to" : "NOT TO") <<  " create collection and " << (doRecord ? "to" : "NOT TO") << " record collection in this iteration");
+        ATH_MSG_DEBUG( "Instructing generator " <<  (doCreate ? "to" : "NOT TO") <<  " create collection and " << (doRecord ? "to" : "NOT TO") << " record collection in this iteration");
         generator.create(doCreate, doRecord);
       }
 
@@ -387,7 +400,7 @@ StatusCode HLTEDMCreator::createOutput(const EventContext& context) const {
 #define CREATE(__TYPE) \
     {                 \
       plainGenerator<__TYPE> generator;         \
-      ATH_CHECK( createIfMissing<__TYPE>( context, ConstHandlesGroup<__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ), generator, &HLTEDMCreator::noMerge<__TYPE> ) ); \
+      ATH_CHECK( (createIfMissing<__TYPE, void>( context, ConstHandlesGroup<__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ), generator, &HLTEDMCreator::noMerge<__TYPE>)) ); \
     }
 
   CREATE( TrigRoiDescriptorCollection )
@@ -397,7 +410,7 @@ StatusCode HLTEDMCreator::createOutput(const EventContext& context) const {
 #define CREATE_XAOD(__TYPE, __STORE_TYPE) \
   { \
     xAODGenerator<xAOD::__TYPE, xAOD::__STORE_TYPE> generator; \
-    ATH_CHECK( createIfMissing<xAOD::__TYPE>( context, ConstHandlesGroup<xAOD::__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ), generator, &HLTEDMCreator::viewsMerge<xAOD::__TYPE> )  ); \
+    ATH_CHECK( (createIfMissing<xAOD::__TYPE, xAOD::__STORE_TYPE>( context, ConstHandlesGroup<xAOD::__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ), generator, &HLTEDMCreator::viewsMerge<xAOD::__TYPE>))  ); \
   }
 
 
