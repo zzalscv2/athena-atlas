@@ -45,6 +45,13 @@ def SPCountHypoToolGen(chainDict):
 
 
 def TrackCountHypoToolGen(chainDict):
+    def ptToGeV(v):        
+        if "p" in v:
+            sv = v.split("p")
+            return int(sv[0])+0.1*int(sv[1])
+        else:
+            return int(v)
+
     from TrigMinBias.TrigMinBiasConf import TrackCountHypoTool
     hypo = TrackCountHypoTool(chainDict["chainName"])
     if "hmt" in chainDict["chainName"]:
@@ -56,11 +63,11 @@ def TrackCountHypoToolGen(chainDict):
         hypo.minPt = 100*Units.MeV
         hypo.maxZ0 = 401*Units.millimeter
     if "mb_sptrk_pt" in chainDict["chainName"]:
-        hypo.minPt = int(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV
+        hypo.minPt = ptToGeV(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV
         hypo.maxZ0 = 401*Units.millimeter
-    if "mb_excl" in chainDict["chainName"]:
+    if "excl" in chainDict["chainName"]:
         hypo.exclusive = True
-        hypo.minPt = int(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV
+        hypo.minPt = ptToGeV(chainDict["chainParts"][0]["hypoPtInfo"].strip("pt"))*Units.GeV
         trk = chainDict["chainParts"][0]["hypoTrkInfo"]
         # this is string of the form 4trk6 - 'number'trk'number'
         limits =  trk[0:trk.index("trk")], trk[trk.index("trk")+3:]
