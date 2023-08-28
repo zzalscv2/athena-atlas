@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkEventTPCnv/test/TrackCnv_p4_test.cxx
@@ -155,8 +155,8 @@ void compare (const Trk::TrackStateOnSurface& p1,
 }
 
 
-void compare (const DataVector<const Trk::TrackStateOnSurface>& p1,
-              const DataVector<const Trk::TrackStateOnSurface>& p2)
+void compare (const Trk::TrackStates& p1,
+              const Trk::TrackStates& p2)
 {
   assert (p1.size() == p2.size());
   for (size_t i = 0; i < p1.size(); i++)
@@ -243,7 +243,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
                                   std::make_unique<Trk::Perigee> (perigee),
                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me));
 
-  auto tsvec = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>(SG::VIEW_ELEMENTS);
+  auto tsvec = std::make_unique<Trk::TrackStates>(SG::VIEW_ELEMENTS);
   tsvec->push_back (&tsos1);
 
   std::bitset<Trk::TrackInfo::NumberOfTrackProperties> properties;

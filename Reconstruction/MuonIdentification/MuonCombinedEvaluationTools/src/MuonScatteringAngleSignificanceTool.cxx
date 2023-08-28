@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonScatteringAngleSignificanceTool.h"
@@ -118,7 +118,7 @@ namespace Rec {
         double significance = 0.;
         double totalSigma = 0.;
         double weightedRadius = 0.;
-        for (DataVector<const Trk::TrackStateOnSurface>::const_iterator s = fullTrack->trackStateOnSurfaces()->begin();
+        for (Trk::TrackStates::const_iterator s = fullTrack->trackStateOnSurfaces()->begin();
              s != fullTrack->trackStateOnSurfaces()->end(); ++s) {
             // skip leading material
             if ((**s).measurementOnTrack()) {
@@ -240,7 +240,7 @@ namespace Rec {
     }
 
     bool MuonScatteringAngleSignificanceTool::isSlimmed(const Trk::Track& track) const {
-        for (DataVector<const Trk::TrackStateOnSurface>::const_iterator s = track.trackStateOnSurfaces()->begin();
+        for (Trk::TrackStates::const_iterator s = track.trackStateOnSurfaces()->begin();
              s != track.trackStateOnSurfaces()->end(); ++s) {
             if ((**s).trackParameters()) continue;
 

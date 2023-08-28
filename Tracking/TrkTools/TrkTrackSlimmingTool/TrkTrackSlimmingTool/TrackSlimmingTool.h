@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ private:
                          bool& isMSmeas) const;
 
   void findLastValidTSoS(
-    const DataVector<const Trk::TrackStateOnSurface>* oldTrackStates,
+    const Trk::TrackStates* oldTrackStates,
     const Trk::TrackStateOnSurface*& lastValidIDTSOS,
     const TrackStateOnSurface*& lastValidMSTSOS) const;
 

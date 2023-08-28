@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RecTools/src/HGTD_IterativeExtensionTool.cxx
  * @author Noemi Calace <noemi.calace@cern.ch>
@@ -199,7 +199,7 @@ HGTD::ExtensionObject HGTD_IterativeExtensionTool::extendTrackToHGTD(
 const Trk::TrackStateOnSurface*
 HGTD_IterativeExtensionTool::getLastHitOnTrack(const Trk::Track& track) const {
 
-  const DataVector<const Trk::TrackStateOnSurface>* tsos =
+  const Trk::TrackStates* tsos =
       track.trackStateOnSurfaces();
   if (not tsos) {
     ATH_MSG_ERROR("Failed to retrieve track state on surfaces");

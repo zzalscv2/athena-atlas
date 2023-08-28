@@ -122,7 +122,7 @@ namespace JiveXML {
 			std::vector<const Trk::TrackStateOnSurface*> TSoSVec;
 
 			// loop over TrackStateOnSurfaces to extract interesting ones
-			DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos = track->trackStateOnSurfaces()->begin();
+			Trk::TrackStates::const_iterator tsos = track->trackStateOnSurfaces()->begin();
 			for (; tsos!=track->trackStateOnSurfaces()->end(); ++tsos) {
 				// include measurements AND outliers:
 				if ((*tsos)->type(Trk::TrackStateOnSurface::Measurement) ||  (*tsos)->type(Trk::TrackStateOnSurface::Outlier) ) {

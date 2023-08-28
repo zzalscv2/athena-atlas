@@ -173,7 +173,7 @@ namespace InDet {
     }
 
     // --- create new track state on surface vector
-    auto ntsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+    auto ntsos = std::make_unique<Trk::TrackStates>();
 
     //
     // if no refit, make it a perigee
@@ -903,7 +903,7 @@ namespace InDet {
       int nHits   = 0;  // Number of TRT measurements
 
       // get vector of TSOS
-      const DataVector<const Trk::TrackStateOnSurface>* tsos = (track_score.second)->trackStateOnSurfaces();
+      const Trk::TrackStates* tsos = (track_score.second)->trackStateOnSurfaces();
 
       // loop over vector of TSOS
       for ( const Trk::TrackStateOnSurface *a_tsos : *tsos) {

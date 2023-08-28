@@ -2043,10 +2043,10 @@ StatusCode IDAlignMonGenericTracks::fillHistograms() {
     int nhpixB = 0, nhpixECA = 0, nhpixECC = 0, nhsctB = 0, nhsctECA = 0, nhsctECC = 0, nhtrtB = 0, nhtrtECA = 0,
         nhtrtECC = 0;
     // loop over all hits on track
-    const DataVector<const Trk::TrackStateOnSurface>* TSOS;
+    const Trk::TrackStates* TSOS;
     TSOS = (*trksItr)->trackStateOnSurfaces();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItr = TSOS->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator TSOSItrE = TSOS->end();
+    Trk::TrackStates::const_iterator TSOSItr = TSOS->begin();
+    Trk::TrackStates::const_iterator TSOSItrE = TSOS->end();
 
     ATH_MSG_VERBOSE("  starting to loop over TSOS: " << TSOS->size());
     for (; TSOSItr != TSOSItrE; ++TSOSItr) {

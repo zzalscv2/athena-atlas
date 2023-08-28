@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -462,7 +462,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
 
   //----------------------------------------------
   // fill info about trackstates in ntuple
-  const DataVector<const Trk::TrackStateOnSurface>* trackStates=track.trackStateOnSurfaces();
+  const Trk::TrackStates* trackStates=track.trackStateOnSurfaces();
   if (trackStates == nullptr) {
     msg(MSG::WARNING) << "current track does not have any TrackStateOnSurface vector, no data will be written for this track" << endmsg;
     return StatusCode::FAILURE;

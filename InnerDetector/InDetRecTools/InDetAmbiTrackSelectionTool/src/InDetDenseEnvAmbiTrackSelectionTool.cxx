@@ -108,7 +108,7 @@ std::tuple<Trk::Track*,bool> InDet::InDetDenseEnvAmbiTrackSelectionTool::getClea
   }
 
   // get all TSOS the track
-  const DataVector<const Trk::TrackStateOnSurface>* tsos = ptrTrack->trackStateOnSurfaces();
+  const Trk::TrackStates* tsos = ptrTrack->trackStateOnSurfaces();
   ATH_MSG_DEBUG ("Study new Track "<< ptrTrack<<"\t , it has "<<tsos->size()<<"\t track states");
   
   //Create structs to hold track information
@@ -265,8 +265,8 @@ std::tuple<Trk::Track*,bool> InDet::InDetDenseEnvAmbiTrackSelectionTool::getClea
     std::vector<const Trk::TrackStateOnSurface*> newTSOS;
       
     // iterators for looping
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end(); 
+    Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+    Trk::TrackStates::const_iterator iTsosEnd = tsos->end(); 
 
     for (int index = 0 ; iTsos != iTsosEnd ; ++iTsos,++index ) {
 
@@ -478,7 +478,7 @@ void InDet::InDetDenseEnvAmbiTrackSelectionTool::fillTrackDetails(const Trk::Tra
 { 
 
   // get all TSOS the track
-  const DataVector<const Trk::TrackStateOnSurface>* tsos = ptrTrack->trackStateOnSurfaces();
+  const Trk::TrackStates* tsos = ptrTrack->trackStateOnSurfaces();
   ATH_MSG_DEBUG ("Study new Track "<< ptrTrack<<"\t , it has "<<tsos->size()<<"\t track states");
 
 
@@ -517,8 +517,8 @@ void InDet::InDetDenseEnvAmbiTrackSelectionTool::fillTrackDetails(const Trk::Tra
   // label each TSOS as Outlier, UnusedHit, SharedHit or RejectedHit (only for errors here)
   // labels are used refined in decideWhichHitsToKeep 
   ATH_MSG_VERBOSE ("--> Looping over TSOS's");
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsos    = tsos->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator iTsosEnd = tsos->end();
+  Trk::TrackStates::const_iterator iTsos    = tsos->begin();
+  Trk::TrackStates::const_iterator iTsosEnd = tsos->end();
   for (int index = 0 ; iTsos != iTsosEnd ; ++iTsos, ++index) {
 
     // get measurment from TSOS
@@ -1430,7 +1430,7 @@ Trk::Track* InDet::InDetDenseEnvAmbiTrackSelectionTool::createSubTrack( const st
     return nullptr;
   }
 
-  auto vecTsos = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto vecTsos = std::make_unique<Trk::TrackStates>();
 
   // loop over TSOS, copy TSOS and push into vector
   for (const Trk::TrackStateOnSurface* iTsos : tsos) {
@@ -1525,7 +1525,7 @@ InDet::InDetDenseEnvAmbiTrackSelectionTool::getOverlapTrackParameters(int index,
   // Get the TSOS in question from the candidate track since we know which one it is (index)
   // Do some basic checks
   //
-  const DataVector<const Trk::TrackStateOnSurface>* track1tsos = track1->trackStateOnSurfaces();
+  const Trk::TrackStates* track1tsos = track1->trackStateOnSurfaces();
 
   auto firstTsos    = track1tsos->begin();
   firstTsos += index;
@@ -1551,7 +1551,7 @@ InDet::InDetDenseEnvAmbiTrackSelectionTool::getOverlapTrackParameters(int index,
   // 
   // now, get TSOS from 2nd track which is the one already accepted 
   // we know it was fitted so this should be possible
-  const DataVector<const Trk::TrackStateOnSurface>* track2tsos = track2->trackStateOnSurfaces();
+  const Trk::TrackStates* track2tsos = track2->trackStateOnSurfaces();
 
   auto iTsos    = track2tsos->begin(); 
   auto iTsosEnd = track2tsos->end();

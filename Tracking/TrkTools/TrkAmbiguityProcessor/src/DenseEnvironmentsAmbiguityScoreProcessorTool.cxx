@@ -302,7 +302,7 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::overlappingTracks(const Track
       continue;   
     }
     ATH_MSG_VERBOSE("---> Looping over TSOS's to allow  for cluster updates: "<< tsosVec->size() );
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsos = tsosVec->begin();
+    Trk::TrackStates::const_iterator tsos = tsosVec->begin();
     for (; tsos != tsosVec->end(); ++tsos) {
       const MeasurementBase* measurement = (*tsos)->measurementOnTrack();
       if(!measurement || ! (*tsos)->trackParameters()){

@@ -215,7 +215,7 @@ Trk::TrackSlimmingTool::checkForValidMeas(const Trk::TrackStateOnSurface* tsos,
 
 void
 Trk::TrackSlimmingTool::findLastValidTSoS(
-  const DataVector<const Trk::TrackStateOnSurface>* oldTrackStates,
+  const Trk::TrackStates* oldTrackStates,
   const Trk::TrackStateOnSurface*& lastValidIDTSOS,
   const TrackStateOnSurface*& lastValidMSTSOS) const
 {

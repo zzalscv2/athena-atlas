@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ StatusCode Trk::RecMomentumQualityValidation::execute()
 
       // Getting the information if a track has TRT hits or not
       bool track_has_trthits(false);
-      const DataVector<const Trk::TrackStateOnSurface > *currentTSOSList
+      const Trk::TrackStates *currentTSOSList
         = (*trackIterator)->trackStateOnSurfaces();
       DataVector< const Trk::TrackStateOnSurface >::const_iterator itTSOS
       = currentTSOSList->begin();

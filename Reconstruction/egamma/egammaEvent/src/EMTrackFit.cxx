@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
  /********************************************************************
@@ -167,7 +167,7 @@ void EMTrackFit::fillBrems(Trk::Track *track){
   std::vector<const Trk::EstimatedBremOnTrack*> estimatedBremOnTrack;
   std::vector<const Trk::TrackStateOnSurface* >  trkStateOnSurfaceWithBrem;
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator trackStateOnSurface = track->trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator trackStateOnSurface = track->trackStateOnSurfaces()->begin();
   //For look for all of the EstimatedBremsOnTrack and add the pointers to a vector
   for (;trackStateOnSurface < track->trackStateOnSurfaces()->end(); ++trackStateOnSurface){
     const Trk::EstimatedBremOnTrack* brem = dynamic_cast<const Trk::EstimatedBremOnTrack*>((*trackStateOnSurface)->materialEffectsOnTrack());
@@ -241,13 +241,13 @@ void EMTrackFit::fillLastMeasurement(Trk::Track *track){
   }
   **/
 
-  const DataVector<const Trk::TrackStateOnSurface>* oldTrackStates = track->trackStateOnSurfaces();
+  const Trk::TrackStates* oldTrackStates = track->trackStateOnSurfaces();
   if (oldTrackStates == nullptr)
   {
     return;
   }
 
-  for ( DataVector<const Trk::TrackStateOnSurface>::const_reverse_iterator rItTSoS = oldTrackStates->rbegin(); rItTSoS != oldTrackStates->rend(); ++rItTSoS)
+  for ( Trk::TrackStates::const_reverse_iterator rItTSoS = oldTrackStates->rbegin(); rItTSoS != oldTrackStates->rend(); ++rItTSoS)
   {
 
     if ( (*rItTSoS)->type(Trk::TrackStateOnSurface::Measurement) && (*rItTSoS)->trackParameters()!=nullptr && (*rItTSoS)->measurementOnTrack()!=nullptr)

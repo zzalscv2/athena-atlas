@@ -239,7 +239,7 @@ ParticleCaloExtensionTool::caloExtension(
   ATH_MSG_DEBUG("trying to add calo layers");
   const TrackParameters* idExitParamers = nullptr;
   const TrackParameters* muonEntryParamers = nullptr;
-  DataVector<const TrackStateOnSurface>::const_iterator itTSoS =
+  Trk::TrackStates::const_iterator itTSoS =
     track.trackStateOnSurfaces()->begin();
   for (; itTSoS != track.trackStateOnSurfaces()->end(); ++itTSoS) {
     // select state with track parameters on a measurement

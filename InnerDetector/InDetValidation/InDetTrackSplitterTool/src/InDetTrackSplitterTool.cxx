@@ -155,8 +155,8 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
   Trk::ParticleHypothesis hypo = input.info().particleHypothesis();
 
   /** Get the  measurements */
-  auto uppertraj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
-  auto lowertraj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto uppertraj = std::make_unique<Trk::TrackStates>();
+  auto lowertraj = std::make_unique<Trk::TrackStates>();
   
   unsigned int totalNumberHits = 0;
 
@@ -178,8 +178,8 @@ std::pair<Trk::Track*, Trk::Track*> InDet::InDetTrackSplitterTool::splitInUpperL
   //DataVector<Trk::MeasurementBase const>::const_iterator measEnd = input.measurementsOnTrack()->end(); 
   //for(;meas != measEnd; ++meas){
   //Trk::RIO_OnTrack const* rio = dynamic_cast<Trk::RIO_OnTrack const*>(*meas);
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosit = input.trackStateOnSurfaces()->begin();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator tsosEnd = input.trackStateOnSurfaces()->end();
+  Trk::TrackStates::const_iterator tsosit = input.trackStateOnSurfaces()->begin();
+  Trk::TrackStates::const_iterator tsosEnd = input.trackStateOnSurfaces()->end();
   bool perigeeseen=false; 
   for(;tsosit != tsosEnd; ++tsosit){
     if ((**tsosit).type(Trk::TrackStateOnSurface::Outlier)) continue;

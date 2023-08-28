@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -351,12 +351,12 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::execute() {
             break;
           }
           // Get pointer to track state on surfaces
-          const DataVector<const Trk::TrackStateOnSurface>* trackStates=track->trackStateOnSurfaces();
+          const Trk::TrackStates* trackStates=track->trackStateOnSurfaces();
           if (trackStates == nullptr) {
             ATH_MSG_WARNING("for current track is TrackStateOnSurfaces == Null, no data will be written for this track");
           } else {
             // Loop over all track states on surfaces
-            for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it=trackStates->begin(); it!=trackStates->end(); ++it) {
+            for (Trk::TrackStates::const_iterator it=trackStates->begin(); it!=trackStates->end(); ++it) {
               // Get pointer to RIO of right type
               const InDet::SiClusterOnTrack *clus =
                 dynamic_cast<const InDet::SiClusterOnTrack*>((*it)->measurementOnTrack());

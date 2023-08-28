@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
     
    const Trk::TrackStateOnSurface *pertsos=new Trk::TrackStateOnSurface(nullptr,std::move(per),nullptr,typePattern);
-   auto traj = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+   auto traj = std::make_unique<Trk::TrackStates>();
    traj->push_back(pertsos);
    
    
@@ -241,7 +241,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
      refittedtrack2=(m_trackFitter->fit(Gaudi::Hive::currentContext(),*refittedtrack,measset,false,materialInteractions)).release();
 
      if (!refittedtrack2){
-       auto traj2 = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+       auto traj2 = std::make_unique<Trk::TrackStates>();
        for (const Trk::TrackStateOnSurface *j : *refittedtrack->trackStateOnSurfaces()) traj2->push_back(new Trk::TrackStateOnSurface(*j));
        std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern2;
        typePattern2.set(Trk::TrackStateOnSurface::Outlier);

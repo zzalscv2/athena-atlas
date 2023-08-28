@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKIPATFITTER_IPATFITTER_H
@@ -163,13 +163,13 @@ class iPatFitter : public AthAlgTool, virtual public ITrackFitter {
   bool addMeasurements(
       const EventContext& ctx, std::vector<FitMeasurement*>& measurements,
       const FitParameters& parameters, ParticleHypothesis particleHypothesis,
-      const DataVector<const TrackStateOnSurface>& trackTSOS) const;
+      const Trk::TrackStates& trackTSOS) const;
 
   // perform fit
   std::unique_ptr<Track> performFit(
       FitState& fitState, const ParticleHypothesis particleHypothesis,
       const TrackInfo& trackInfo,
-      const DataVector<const TrackStateOnSurface>* leadingTSOS,
+      const Trk::TrackStates* leadingTSOS,
       const FitQuality* perigeeQuality, Garbage_t& garbage) const;
 
   // print TSOS on a track (debugging aid)

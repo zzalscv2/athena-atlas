@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -651,15 +651,15 @@ namespace Trk {
 
     double materialOnTrack(0.);
     
-    const DataVector<const Trk::TrackStateOnSurface>* states = track->trackStateOnSurfaces();
+    const Trk::TrackStates* states = track->trackStateOnSurfaces();
     if ( !states ) {
       ATH_MSG_WARNING("no states");
       return 0;
     }
     
     // loop over TSOSs, find MDT hits, and mark them as outliers:
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
+    Trk::TrackStates::const_iterator tsit = states->begin();
+    Trk::TrackStates::const_iterator tsit_end = states->end();
     ATH_MSG_DEBUG("looping over TSOS");
 
     for ( ; tsit!=tsit_end ; ++tsit ) {
