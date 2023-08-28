@@ -101,8 +101,10 @@ namespace CP
             if(sys.hash()==nominal_hash) {continue;}
             const xAOD::IParticleContainer *var_cont = systhash_to_container[sys.hash()];
             if(var_cont==nullptr) {
-                ATH_MSG_WARNING("Cannot decorate syst '" << sys.name() << "' for obj " << nom_obj->index());
-                ATH_MSG_WARNING("Likely the systematics input container was empty after filtering.");
+                ATH_MSG_ERROR("Cannot decorate syst '" << sys.name() << "' for obj " << nom_obj->index());
+                ATH_MSG_ERROR("Likely the systematics input container was empty after filtering.");
+                //must return here, the var_cont pointer is dereferenced in the next line
+                return StatusCode::FAILURE;
             }
             const xAOD::IParticle* var_obj = (*var_cont)[nom_obj->index()];
             dec_nominalObject(*var_obj) = iplink_t(*nom_cont, nom_obj->index());
