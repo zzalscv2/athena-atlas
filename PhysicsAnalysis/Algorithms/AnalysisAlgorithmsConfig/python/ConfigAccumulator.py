@@ -184,10 +184,10 @@ class ConfigAccumulator :
             return self._algorithms[name]
 
 
-    def addPrivateTool (self, type, name) :
+    def addPrivateTool (self, propertyName, toolType) :
         """add a private tool to the current algorithm"""
         if self._pass == 0 :
-            DualUseConfig.addPrivateTool (self._currentAlg, type, name)
+            DualUseConfig.addPrivateTool (self._currentAlg, propertyName, toolType)
 
 
     def setSourceName (self, containerName, sourceName,

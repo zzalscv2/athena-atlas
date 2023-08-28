@@ -10,7 +10,10 @@ from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 def makeEventSelectionAnalysisSequence( dataType,
                                         runPrimaryVertexSelection = True,
                                         runEventCleaning = False,
-                                        userGRLFiles = []):
+                                        minTracksPerVertex = 2,
+                                        userGRLFiles = [],
+                                        userSelectionFlags = ['DFCommonJets_eventClean_LooseBad'],
+                                        userInvertFlags = [False]):
     """Create a basic event selection analysis algorithm sequence
 
     Keyword arguments:
@@ -42,6 +45,7 @@ def makeEventSelectionAnalysisSequence( dataType,
                                'PrimaryVertexSelectorAlg' )
         alg.VertexContainer = 'PrimaryVertices'
         alg.MinVertices = 1
+        alg.MinTracks = minTracksPerVertex
 
         seq.append( alg, inputPropName = None )
 
@@ -56,8 +60,9 @@ def makeEventSelectionAnalysisSequence( dataType,
 
         alg = createAlgorithm( 'CP::EventFlagSelectionAlg', 'EventFlagSelectionAlg' )
         alg.FilterKey = 'JetCleaning'
-        alg.FilterDescription = 'selecting events passing DFCommonJets_eventClean_LooseBad'
-        alg.selectionFlags = ['DFCommonJets_eventClean_LooseBad,as_char']
+        alg.selectionFlags = [f'{sel},as_char' for sel in userSelectionFlags]
+        alg.invertFlags = userInvertFlags
+        alg.FilterDescription = f"selecting events passing: {','.join(alg.selectionFlags)}"
 
         seq.append( alg, inputPropName = None )
 

@@ -12,6 +12,9 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('runPrimaryVertexSelection', True, type=bool)
         self.addOption ('runEventCleaning', False, type=bool)
         self.addOption ('userGRLFiles', [], type=None)
+        self.addOption ('minTracksPerVertex', 2, type=int)
+        self.addOption ('selectionFlags', ['DFCommonJets_eventClean_LooseBad'], type=None)
+        self.addOption ('invertFlags', [False], type=None)
 
 
     def makeAlgs (self, config) :
@@ -30,6 +33,7 @@ class EventCleaningBlock (ConfigBlock):
                                           'PrimaryVertexSelectorAlg' )
             alg.VertexContainer = 'PrimaryVertices'
             alg.MinVertices = 1
+            alg.MinTracks = self.minTracksPerVertex
 
         # Set up the event cleaning selection:
         if self.runEventCleaning:
@@ -40,8 +44,9 @@ class EventCleaningBlock (ConfigBlock):
 
             alg = config.createAlgorithm( 'CP::EventFlagSelectionAlg', 'EventFlagSelectionAlg' )
             alg.FilterKey = 'JetCleaning'
-            alg.FilterDescription = 'selecting events passing DFCommonJets_eventClean_LooseBad'
-            alg.selectionFlags = ['DFCommonJets_eventClean_LooseBad,as_char']
+            alg.selectionFlags = [f'{sel},as_char' for sel in self.selectionFlags]
+            alg.invertFlags = self.invertFlags
+            alg.FilterDescription = f"selecting events passing: {','.join(alg.selectionFlags)}"
 
 
 

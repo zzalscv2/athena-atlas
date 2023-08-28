@@ -97,27 +97,27 @@ class OverlapAnalysisConfig (ConfigBlock):
         if electrons :
             alg.electrons = electrons
             alg.electronsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (electrons, self.outputLabel, alg.electronsDecoration, bits=1)
+            config.addSelection (self.electrons, self.outputLabel, alg.electronsDecoration, bits=1)
         if muons :
             alg.muons = muons
             alg.muonsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (muons, self.outputLabel, alg.muonsDecoration, bits=1)
+            config.addSelection (self.muons, self.outputLabel, alg.muonsDecoration, bits=1)
         if taus :
             alg.taus = taus
             alg.tausDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (taus, self.outputLabel, alg.tausDecoration, bits=1)
+            config.addSelection (self.taus, self.outputLabel, alg.tausDecoration, bits=1)
         if jets :
             alg.jets = jets
             alg.jetsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (jets, self.outputLabel, alg.jetsDecoration, bits=1)
+            config.addSelection (self.jets, self.outputLabel, alg.jetsDecoration, bits=1)
         if photons :
             alg.photons = photons
             alg.photonsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (photons, self.outputLabel, alg.photonsDecoration, bits=1)
+            config.addSelection (self.photons, self.outputLabel, alg.photonsDecoration, bits=1)
         if fatJets :
             alg.fatJets = fatJets
             alg.fatJetsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (fatJets, self.outputLabel, alg.fatJetsDecoration, bits=1)
+            config.addSelection (self.fatJets, self.outputLabel, alg.fatJetsDecoration, bits=1)
 
         # Create its main tool, and set its basic properties:
         config.addPrivateTool( 'overlapTool', 'ORUtils::OverlapRemovalTool' )
