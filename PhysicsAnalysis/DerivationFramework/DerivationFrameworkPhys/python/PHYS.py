@@ -137,6 +137,10 @@ def PHYSCfg(ConfigFlags):
                                               "Muons.TruthLink",
                                               "Photons.TruthLink"]
 
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
+        acc.merge(AddTauAndDownstreamParticlesCfg(ConfigFlags))
+        PHYSSlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+
     ## Higgs content - 4l vertex and Higgs STXS truth variables
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
     setupHiggsSlimmingVariables(ConfigFlags, PHYSSlimmingHelper)

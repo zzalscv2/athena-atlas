@@ -48,6 +48,11 @@ def TRUTH3Cfg(ConfigFlags):
     # Add EventInfo
     TRUTH3SlimmingHelper.AllVariables = [ 'EventInfo' ]
 
+    # Add TruthTau collections
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
+    acc.merge(AddTauAndDownstreamParticlesCfg(ConfigFlags))
+    TRUTH3SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
+
     # Add standard content
     from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
     addTruth3ContentToSlimmerTool(TRUTH3SlimmingHelper)
