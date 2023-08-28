@@ -572,7 +572,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
       m_backToHG_pre = true;
       m_ExcludeEarly = true;
     }
-    else if (m_firstHGOverFlowSample >= int(m_Nsample - 2 ) ) {
+    else if (m_firstHGOverFlowSample < static_cast<int>(m_Nsample) && m_firstHGOverFlowSample >= static_cast<int>(m_Nsample - 2) ) {
       m_maxSampleEvt = m_firstHGOverFlowSample - 1;
       m_HGOverflow = false;
       m_adjTimeRangeEvent = true;
@@ -584,7 +584,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
 }
 
 bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG, const std::vector<float>&  ADCSamplesLG,
-    const std::vector<float>& ADCSamplesHGDelayed, const std::vector<float>& ADCSamplesLGDelayed)
+					  const std::vector<float>& ADCSamplesHGDelayed, const std::vector<float>& ADCSamplesLGDelayed)
 {
   if (!m_useDelayed) {
     (*m_msgFunc_p)(ZDCMsg::Fatal, "ZDCPulseAnalyzer::LoadAndAnalyzeData:: Wrong LoadAndAnalyzeData called -- expecting only undelayed samples");
@@ -706,7 +706,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
       m_fixPrePulse = true; // new 2020/01/27
     }
   }
-  if (m_firstHGOverFlowSample >= int(2 * m_Nsample - 3 )   ) {
+  if (m_firstHGOverFlowSample < static_cast<int>(m_Nsample) && m_firstHGOverFlowSample >= static_cast<int>(2 * m_Nsample - 3 )   ) {
     m_maxSampleEvt = m_firstHGOverFlowSample - 1;
     m_HGOverflow = false;
     m_adjTimeRangeEvent = true;
@@ -986,12 +986,12 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
     //    The next sample has had the pre-sample subtracted, so it represents the initial derivative
     //
     float derivPresampleSig = m_samplesSub[m_usedPresampIdx+1]/(std::sqrt(2)*noiseSig);
-    if (derivPresampleSig < -6) m_preExpTail = true;
+    if (derivPresampleSig < -5) m_preExpTail = true;
 
     // Separately, if the last sample is significantly below zero after subtraction, it is likely that
     //   the pulse of interest is on the tail of a preceeding pulse
     //
-    if (m_samplesSub.back()/(std::sqrt(2)*noiseSig) < -6) m_preExpTail = true;
+    if (m_samplesSub.back()/(std::sqrt(2)*noiseSig) < -5) m_preExpTail = true;
     
     int loopLimit = (m_havePulse ? m_minDeriv2ndIndex - 2 : m_peak2ndDerivMinSample - 2);
     
