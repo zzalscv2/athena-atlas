@@ -1,6 +1,6 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import numpy as np
 import pandas as pd
 import ROOT as R
 import argparse 
@@ -105,12 +105,12 @@ def main():
 
             vec_mu.append(pileup)
 
-        trig_graph = R.TGraphErrors(len(vec_trig), vec_mu, vec_trig, R.nullptr, vec_trig_err);
+        trig_graph = R.TGraphErrors(len(vec_trig), vec_mu, vec_trig, R.nullptr, vec_trig_err)
         trig_graph.GetHistogram().SetYTitle("Efficiency")
         trig_graph.GetHistogram().GetYaxis().SetRangeUser(ymin, 1.0)
         trig_graph.SetMarkerSize(1)
         
-        reco_graph = R.TGraphErrors(len(vec_reco), vec_mu, vec_reco, R.nullptr, vec_reco_err);
+        reco_graph = R.TGraphErrors(len(vec_reco), vec_mu, vec_reco, R.nullptr, vec_reco_err)
         reco_graph.GetHistogram().GetYaxis().SetRangeUser(ymin, 1.0)
         reco_graph.SetMarkerSize(1)
         reco_graph.SetMarkerStyle(21)

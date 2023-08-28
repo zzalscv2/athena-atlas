@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import numpy as np
 import csv
@@ -11,13 +11,13 @@ import argparse
 import math
 from DQUtils import fetch_iovs
 from DQUtils.iov_arrangement import inverse_lblb
-import tools.zlumi_alleff as dq_eff
-import tools.zlumi_mc_cf as dq_cf
+import ZLumiScripts.tools.zlumi_alleff as dq_eff
+import ZLumiScripts.tools.zlumi_mc_cf as dq_cf
 
 from DataQualityUtils import doZLumi
 
 # testing toy sampling
-import tools.toys as toys
+import ZLumiScripts.tools.toys as toys
 
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ROOT.gStyle.SetOptStat(0)
@@ -33,7 +33,7 @@ parser.add_argument('--lumifolder', type=str, help='Lumi folder', default='/TRIG
 parser.add_argument('--lumitag', type=str, help='Lumi tag', default='OflLumi-Run3-003')
 parser.add_argument('--outdir', type=str, help='Directory to dump plots', default='plots')
 parser.add_argument('--dblivetime', action='store_true', help='Look up livetime from DB')
-parser.add_argument('--campaign', type=str, help='mc16a/d/e')
+parser.add_argument('--campaign', type=str, help='mc16a/d/e, mc21')
 
 args     = parser.parse_args()
 campaign = args.campaign
