@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Run tests on G4AtlasServicesConfig
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 if __name__ == '__main__':
@@ -18,10 +18,9 @@ if __name__ == '__main__':
   flags = initConfigFlags()
   flags.Common.ProductionStep = ProductionStep.Simulation
 
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags.Input.Files = defaultTestFiles.EVNT
-  flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 
   from SimulationConfig.SimEnums import CavernBackground
   flags.Sim.CavernBackground = CavernBackground.Signal  #for it to go via atlas?

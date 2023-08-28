@@ -18,9 +18,9 @@ if __name__ == '__main__':
   flags = initConfigFlags()
   flags.Common.ProductionStep = ProductionStep.Simulation
 
-  from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
+  from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
   flags.Input.Files = defaultTestFiles.EVNT
+  flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
 
   if flags.Common.Project is Project.AthSimulation:
     detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC'] # Forward Detector geometry not currently included in AthSimulation

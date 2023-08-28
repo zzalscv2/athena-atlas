@@ -47,7 +47,7 @@ def CommonTestArgumentParser():
 def defaultTestFlags(configFlags, args):
     """Fill default FCSServices flags for testing"""
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultTestFiles
     configFlags.Input.RunNumber = [284500]
     configFlags.Input.OverrideRunNumber = True
     configFlags.Input.LumiBlockNumber = [1]
@@ -69,7 +69,7 @@ def defaultTestFlags(configFlags, args):
 
     configFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"
     configFlags.GeoModel.Align.Dynamic = False
-    configFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
+    configFlags.GeoModel.AtlasVersion = defaultGeometryTags.RUN2
 
     detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC']
     # Setup detector flags

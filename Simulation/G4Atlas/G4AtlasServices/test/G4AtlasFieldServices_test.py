@@ -16,7 +16,6 @@ if __name__ == '__main__':
   from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import Project
   from AthenaConfiguration.TestDefaults import defaultTestFiles
-  inputDir = defaultTestFiles.d
   flags = initConfigFlags()
   flags.Input.Files = defaultTestFiles.EVNT
   # Arbitrary configuration for Twiss Files

@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-
-import sys
 import unittest
 
-from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ConfigurationError
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
+
+
 class Test_generate_mergeable_collection_name(unittest.TestCase):
 
     def setUp(self):
@@ -14,10 +16,9 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         pass
 
     def test_isISFRunAndHITSMergingRequired_expectBareNameWithSuffixReturned(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = True
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
         mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
         flags.Sim.ISF.HITSMergingRequired = mergeDict
         flags.Detector.EnableBCM = False
@@ -38,10 +39,9 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         self.assertEqual(expected_collection_name, actual_collection_name)
 
     def test_isISFRunAndHITSMergingRequiredWithEmptyCollectionMergerAlgorithm_expectCollectionAddedToCollectionMergerAlgorithm(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = True
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
         mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
         flags.Sim.ISF.HITSMergingRequired = mergeDict
         flags.Detector.EnableBCM = False
@@ -68,10 +68,9 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
                          actual_collection_merger_input)
 
     def test_isISFRunAndNoHITSMergingRequired_expectBareCollectionNameReturned(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = True
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
         mergeDict = {'ID':False, 'CALO':True, 'MUON':False}
         flags.Sim.ISF.HITSMergingRequired = mergeDict
         flags.Detector.EnableBCM = False
@@ -92,10 +91,9 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         self.assertEqual(expected_collection_name, actual_collection_name)
 
     def test_isISFRunAndNoHITSMergingRequiredWithEmptyCollectionMergerAlgorithm_expectCollectionMergerAlgorithmUntouched(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = True
-        flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-03-02-00'
+        flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN3
         mergeDict = {'ID':False, 'CALO':True, 'MUON':False}
         flags.Sim.ISF.HITSMergingRequired = mergeDict
         flags.Detector.EnableBCM = False
@@ -122,7 +120,6 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
                          actual_collection_merger_input)
 
     def test_isNotISFRunAndNoHITSMergingRequired_expectBareCollectioNameReturned(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = False
         mergeDict = {'ID':False, 'CALO':True, 'MUON':False}
@@ -145,7 +142,6 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         self.assertEqual(expected_collection_name, actual_collection_name)
 
     def test_isNotISFRunAndHITSMergingRequired_expectBareCollectioNameReturned(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = False
         mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
@@ -168,7 +164,6 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
         self.assertEqual(expected_collection_name, actual_collection_name)
 
     def test_isNotISFRunAndNoHITSMergingRequired_expectCollectionMergerAlgorithmUntouched(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = False
         mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
@@ -197,7 +192,6 @@ class Test_generate_mergeable_collection_name(unittest.TestCase):
                          actual_collection_merger_input)
 
     def test_isNotISFRunAndHITSMergingRequired_expectCollectionMergerAlgorithmUntouched(self):
-        from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
         flags.Sim.ISFRun = False
         mergeDict = {'ID':True, 'CALO':True, 'MUON':True}
