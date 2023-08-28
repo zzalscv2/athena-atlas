@@ -14,6 +14,8 @@
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 #include "TrkGaussianSumFilterUtils/MultiComponentStateCombiner.h"
 //
+#include "TrkFitterUtils/TrackFitInputPreparator.h"
+//
 #include "TrkCaloCluster_OnTrack/CaloCluster_OnTrack.h"
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkEventUtils/MeasurementBaseComparisonFunction.h"
@@ -97,7 +99,6 @@ Trk::GaussianSumFitter::GaussianSumFitter(const std::string& type,
   : AthAlgTool(type, name, parent)
   , m_directionToPerigee(Trk::oppositeMomentum)
   , m_trkParametersComparisonFunction{}
-  , m_inputPreparator(nullptr)
   , m_sortingReferencePoint{ 0, 0, 0 }
   , m_FitPRD{ 0 }
   , m_FitMeasurementBase{ 0 }
@@ -134,7 +135,6 @@ Trk::GaussianSumFitter::initialize()
 
   m_trkParametersComparisonFunction =
     Trk::TrkParametersComparisonFunction(referencePosition);
-  m_inputPreparator = std::make_unique<TrackFitInputPreparator>();
 
   return StatusCode::SUCCESS;
 }
@@ -486,8 +486,8 @@ Trk::GaussianSumFitter::fit(const EventContext& ctx,
                        inputTrack.trackParameters()->end(),
                        m_trkParametersComparisonFunction));
 
-  MeasurementSet combinedMS = m_inputPreparator->stripMeasurements(
-    inputTrack, measurementSet, true, false);
+  MeasurementSet combinedMS = Trk::TrackFitInputPreparator::stripMeasurements(
+    inputTrack, measurementSet);
 
   // delegate to  measurementBase fit method
   return fit(

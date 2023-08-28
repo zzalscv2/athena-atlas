@@ -141,7 +141,6 @@ class AtlasDetectorID;
 namespace Trk {
   class Track;
   class TransportJacobian;
-  class TrackFitInputPreparator;
   class IMagneticFieldTool;
   class MeasuredPerigee;
   class PrepRawDataComparisonFunction;
