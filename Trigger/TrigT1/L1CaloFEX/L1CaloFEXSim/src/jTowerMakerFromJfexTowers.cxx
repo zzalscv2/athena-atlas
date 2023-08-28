@@ -120,6 +120,9 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
                 if(source == 1) {
                     // Always in the hadronic layer = 1
                     targetTower->set_Et(1,(my_jTower->et_count()).at(0)*500);// conversion factor of 500
+                    
+                    //setting the saturaion 
+                    if( (my_jTower->isjTowerSat()).at(0) ) targetTower->setHADSat();
                 }
                 else { //Now we do LATOME
 
@@ -128,6 +131,16 @@ StatusCode jTowerMakerFromJfexTowers::execute(const EventContext& ctx) const
 
                     // LATOME encoded Et needs to be converted to MeV
                     targetTower->set_Et(layer, jFEXCompression::Expand( (my_jTower->et_count()).at(0) )  );
+                    
+                    //Setting the saturation
+                    if( (my_jTower->isjTowerSat()).at(0) ){
+                        if( layer == 1 ){
+                            targetTower->setHADSat();
+                        }
+                        else{
+                            targetTower->setEMSat();
+                        }
+                    }
                 }
             }
             else {

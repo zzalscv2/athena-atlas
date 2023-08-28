@@ -316,8 +316,8 @@ std::array<uint32_t,4> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0
 // Unpack Bulk stream trailer
 std::array<uint16_t,2> jFexInputByteStreamTool::BulkStreamTrailer (uint32_t word0, uint32_t word1, uint32_t jfex) const {
     
-    uint16_t Satur_down = ((word1 >> jBits::BS_SATUR_1_TRAILER ) & jBits::BS_TRAILER_8b );
-    uint16_t Satur_high = ((word1 >> jBits::BS_SATUR_0_TRAILER ) & jBits::BS_TRAILER_8b );
+    uint16_t Satur_high = ((word1 >> jBits::BS_SATUR_1_TRAILER ) & jBits::BS_TRAILER_8b );
+    uint16_t Satur_down = ((word1 >> jBits::BS_SATUR_0_TRAILER ) & jBits::BS_TRAILER_8b );
     uint16_t Channel    = ((word0 >> jBits::BS_CHANNEL_TRAILER ) & jBits::BS_TRAILER_8b );
     
     //Tile fibre are decoded differently, no saturation bits are set for tile  

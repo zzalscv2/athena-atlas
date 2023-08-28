@@ -49,6 +49,7 @@ namespace LVL1 {
     virtual int GetMetXComponent()  override;
     virtual int GetMetYComponent()  override;
     virtual int getTTowerET(unsigned int TTID ) override; 
+    virtual bool getjXESat() const override; 
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
 protected:
@@ -66,6 +67,9 @@ protected:
         std::vector<int> m_met_Ycoord;
         int m_Totalmet_Xcoord = 0;
         int m_Totalmet_Ycoord = 0;
+        
+        bool getTTowerSat(unsigned int TTID );
+        bool m_saturation = false;
         
         virtual void buildMetXComponent();
         virtual void buildMetYComponent();      

@@ -32,13 +32,13 @@ StatusCode jFEXFormTOBs::initialize()
 }
 
 
-uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int IsoRing, int Resolution, int ptMinToTopo )
+uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int IsoRing, bool satTau, int Resolution, int ptMinToTopo )
 {
     uint32_t tobWord = 0;
     
     int eta = iEta-8; // needed to substract 8 to be in the FPGA core area
     int phi = iPhi-8; // needed to substract 8 to be in the FPGA core area
-    int sat = 0;
+    bool sat = satTau;
     
     // correcting C-side. mirror symmetry
     if(jFEX == 1 || jFEX == 2){
@@ -107,13 +107,13 @@ int jFEXFormTOBs::Get_calibrated_SRj_ET(int Energy, int jfex, int res){
 
 
 
-uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, int Resolution, int ptMinToTopo ) {
+uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo ) {
     uint32_t tobWord = 0;
     unsigned int eta = 0;
     unsigned int phi = 0;
     unsigned int jFEXSmallRJetTOBEt = 0;
     int Res = 0; // 11 bits reserved
-    int Sat = 0;
+    int Sat = sat;
 
     if(jFEX == 1 || jFEX == 2) {
 
@@ -171,14 +171,14 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
 
 
 
-uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, int Resolution, int ptMinToTopo ) {
+uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, bool sat, int Resolution, int ptMinToTopo ) {
     
     uint32_t tobWord = 0;
     unsigned int eta = 0;
     unsigned int phi = 0;
     unsigned int jFEXLargeRJetTOBEt = 0;
     int Res = 0; // 9 bits reserved
-    int Sat = 0;
+    int Sat = sat;
 
     if(jFEX == 1 || jFEX == 2) {
 
@@ -233,20 +233,20 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
 }
 
 
-uint32_t jFEXFormTOBs::formSumETTOB(int ETlow, int EThigh, int Resolution )
+uint32_t jFEXFormTOBs::formSumETTOB(std::tuple<int,bool> & ETlow, std::tuple<int,bool> & EThigh, int Resolution )
 {
     uint32_t tobWord = 0;
 
-    int satlow = 0;
-    int sathigh = 0;
+    bool satlow = std::get<1>(ETlow);
+    bool sathigh = std::get<1>(EThigh);
 
-    unsigned int etlow = ETlow/Resolution;
+    unsigned int etlow = std::get<0>(ETlow)/Resolution;
     if (etlow > 0x7fff) { //0x7fff is 15 bits
         ATH_MSG_DEBUG("sumEtlow saturated: " << etlow );
         etlow = 0x7fff;
     }
 
-    unsigned int ethigh = EThigh/Resolution;
+    unsigned int ethigh = std::get<0>(EThigh)/Resolution;
     if (ethigh > 0x7fff) { //0x7fff is 15 bits
         ATH_MSG_DEBUG("sumEthigh saturated: " << ethigh );
         ethigh = 0x7fff;
@@ -261,10 +261,10 @@ uint32_t jFEXFormTOBs::formSumETTOB(int ETlow, int EThigh, int Resolution )
 }
     
     
-uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, int Resolution ) {
+uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, bool sat, int Resolution ) {
     uint32_t tobWord = 0;
 
-    int sat = 0;
+    bool Sat = sat;
     int res = 0;
 
     int metX = std::floor(1.0*METX/Resolution);
@@ -283,7 +283,7 @@ uint32_t jFEXFormTOBs::formMetTOB(int METX, int METY, int Resolution ) {
     }
 
     //create basic tobword with 32 bits
-    tobWord = tobWord + (res << FEXAlgoSpaceDefs::jXE_ResBit) + ((metY & 0x7fff) << FEXAlgoSpaceDefs::jXE_Ey_Bit) + ((metX & 0x7fff) << FEXAlgoSpaceDefs::jXE_Ex_Bit) + (sat << FEXAlgoSpaceDefs::jXE_SatBit)  ;
+    tobWord = tobWord + (res << FEXAlgoSpaceDefs::jXE_ResBit) + ((metY & 0x7fff) << FEXAlgoSpaceDefs::jXE_Ey_Bit) + ((metX & 0x7fff) << FEXAlgoSpaceDefs::jXE_Ex_Bit) + (Sat << FEXAlgoSpaceDefs::jXE_SatBit)  ;
     ATH_MSG_DEBUG("tobword MET with Res, MET_Y, MET_X, Sat: " << std::bitset<32>(tobWord) );
 
     return tobWord;

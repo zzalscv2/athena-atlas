@@ -85,6 +85,7 @@ namespace LVL1 {
         int getEt(unsigned int TTID);
         bool isLM(unsigned int TTID);
         bool isLMabove(unsigned int TTID);
+        bool getTTowerSat(unsigned int TTID );
         
         //Conditions for greater
         unsigned int elementsCorr(unsigned int TTID);

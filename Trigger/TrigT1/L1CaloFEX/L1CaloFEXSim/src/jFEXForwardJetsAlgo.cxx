@@ -191,7 +191,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     
                     
                     //STEP 7: Filling energies   
-                    
+                    int saturation = 0;
                     // Seed
                     auto it_seed_map = m_SeedRingMap.find(myTTIDKey);
                     if(it_seed_map == m_SeedRingMap.end()) {
@@ -200,6 +200,7 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     
                     for(const auto& seedTT : it_seed_map->second){
                         TriggerTowerInformation.includeTTinSeed(seedTT);
+                        saturation = saturation || getTTowerSat(seedTT);
                         TriggerTowerInformation.addToSeedET(getEt(seedTT));
                     }                    
 
@@ -211,10 +212,15 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     
                     for(const auto& firstER_TT : it_seed_map->second){
                         TriggerTowerInformation.addToFirstEnergyRingET(getEt(firstER_TT));
+                        saturation = saturation || getTTowerSat(firstER_TT);
                         if(m_storeEnergyRingTTIDs) {
                             TriggerTowerInformation.includeTTIDinFirstER(firstER_TT);
                         }                        
                     }
+                    
+                    //setting saturation for jJ
+                    if(saturation) TriggerTowerInformation.setSRjetSat();
+                    
 
                     // 2nd Energy Ring!
                     it_seed_map = m_2ndRingMap.find(myTTIDKey);
@@ -224,10 +230,14 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::FcalJets
                     
                     for(const auto& secondER_TT : it_seed_map->second){
                         TriggerTowerInformation.addToSecondEnergyRingET(getEt(secondER_TT));
+                        saturation = saturation || getTTowerSat(secondER_TT);
                         if(m_storeEnergyRingTTIDs) {
                             TriggerTowerInformation.includeTTIDinSecondER(secondER_TT);
                         }
-                    }                    
+                    }
+                    
+                    //setting saturation for jLJ
+                    if(saturation) TriggerTowerInformation.setLRjetSat();                    
 
                     // Storing all jets in the same map!
                     FCALJetTowerIDLists[myTTIDKey] = TriggerTowerInformation;                    
@@ -411,6 +421,16 @@ std::unordered_map<int, jFEXForwardJetsInfo> LVL1::jFEXForwardJetsAlgo::calculat
 
 void LVL1::jFEXForwardJetsAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
     m_map_Etvalues=et_map;
+}
+
+//getter for tower saturation
+bool LVL1::jFEXForwardJetsAlgo::getTTowerSat(unsigned int TTID ) {
+    if(TTID == 0) {
+        return false;
+    } 
+    
+    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
+    return tmpTower->getTowerSat();
 }
 
 StatusCode LVL1::jFEXForwardJetsAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){

@@ -59,11 +59,14 @@ void LVL1::jFEXtauAlgo::setup(int seed[3][3]) {
 
     ATH_MSG_DEBUG(m_color.BLUE<<"---------------- jFEXtauAlgo::setup ----------------"<<m_color.END);
     
+    m_TauSaturation = false;
     for(int phi=0; phi<3; phi++) {
         for (int eta=0; eta<3; eta++) {
-            m_TTwindow[phi][eta] = seed[2-phi][eta];
+            m_TTwindow[phi][eta] = seed[2-phi][eta]; // We need to flip the matrix for an increasing phi order: [0, 2Phi]
+            m_TauSaturation = m_TauSaturation || getTTowerSat(seed[2-phi][eta]);
         }
     }
+    
 }
 
 //check if central TT is a local maxima
@@ -100,8 +103,11 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima(){
 
 bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
     
+    m_TauSaturation = false;
+    
     int centreEt = getTTowerET(TTID);
     m_ClusterEt = centreEt;
+    m_TauSaturation = m_TauSaturation || getTTowerSat(TTID);
     //centreEt greater than ?
     auto it_map = m_SearchGMap.find(TTID);
     if(it_map == m_SearchGMap.end()) {
@@ -114,6 +120,7 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
             return false;
         }
         m_ClusterEt += seachTTET;
+        m_TauSaturation = m_TauSaturation || getTTowerSat(lTT);
     }     
     
     //centreEt greater or equal than ?
@@ -128,6 +135,7 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
             return false;
         }
         m_ClusterEt += seachTTET;
+        m_TauSaturation = m_TauSaturation || getTTowerSat(lTT);
     }     
     
     // If we never returned false above.. we have a local maxima!
@@ -141,12 +149,21 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima_fwd(unsigned int TTID){
     
     for(const auto& lTT : it_map->second){
         m_TauIsolation += getTTowerET(lTT);
+        m_TauSaturation = m_TauSaturation || getTTowerSat(lTT);
     }   
                          
     return true;
 }
 
-
+//getter for tower saturation
+bool LVL1::jFEXtauAlgo::getTTowerSat(unsigned int TTID ) {
+    if(TTID == 0) {
+        return false;
+    } 
+    
+    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
+    return tmpTower->getTowerSat();
+}
 
 //Gets the ET for the TT. This ET is EM + HAD
 int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) {
@@ -154,17 +171,15 @@ int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) {
         return 0;
     } 
     
-    if(m_map_Etvalues.find(TTID) != m_map_Etvalues.end()) {
-        return m_map_Etvalues[TTID][0];
+    auto itr = m_map_Etvalues.find(TTID);
+    if( itr == m_map_Etvalues.end()) {
+        return 0;
     }
-    
-    //we shouldn't arrive here
-    ATH_MSG_WARNING("Trigger Tower (ID: "<<TTID <<") in jTau Algorithm not found in the Et map. Report this to the experts!");
-    return 0;
+    return (itr->second).at(0);
 }
 
 //Gets the seed total ET
-int LVL1::jFEXtauAlgo::getClusterEt() {
+int LVL1::jFEXtauAlgo::getClusterEt() const {
     return m_ClusterEt;
 }
 
@@ -177,16 +192,22 @@ void LVL1::jFEXtauAlgo::setFirstEtRing(int First_ETring[36]) {
     m_TauIsolation=0;
     for(int i=0; i<36; i++) {
         m_TauIsolation += getTTowerET(First_ETring[i]);
+        m_TauSaturation = m_TauSaturation || getTTowerSat(First_ETring[i]);
     }
 }
 
-int LVL1::jFEXtauAlgo::getFirstEtRing() {
+int LVL1::jFEXtauAlgo::getFirstEtRing() const {
     return m_TauIsolation;
+}
+
+bool LVL1::jFEXtauAlgo::getTauSat() const {
+    return m_TauSaturation;
 }
 
 void LVL1::jFEXtauAlgo::setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map){
     m_map_Etvalues=et_map;
 }
+
 
 StatusCode LVL1::jFEXtauAlgo::ReadfromFile(const std::string & fileName, std::unordered_map<unsigned int, std::vector<unsigned int> >& fillingMap){
     

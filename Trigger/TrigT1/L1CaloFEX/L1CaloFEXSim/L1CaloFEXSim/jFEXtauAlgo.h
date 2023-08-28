@@ -45,8 +45,9 @@ namespace LVL1 {
     virtual bool isSeedLocalMaxima() override;
     virtual bool isSeedLocalMaxima_fwd(unsigned int TTID) override;
     virtual void setFirstEtRing(int First_ETring[36])  override;
-    virtual int getClusterEt() override;
-    virtual int getFirstEtRing()  override;
+    virtual int getClusterEt() const override;
+    virtual int getFirstEtRing() const override;
+    virtual bool getTauSat() const override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
 protected:
@@ -65,10 +66,12 @@ protected:
         
         StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);  
         int getTTowerET(unsigned int TTID );  
+        bool getTTowerSat(unsigned int TTID );
         
         int m_TTwindow[3][3]={{0}};
         int m_ClusterEt = 0;
         int m_TauIsolation = 0;
+        bool m_TauSaturation = false;
           
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
 

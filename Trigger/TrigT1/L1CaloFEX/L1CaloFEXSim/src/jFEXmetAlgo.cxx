@@ -61,11 +61,13 @@ void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][
     ATH_MSG_DEBUG("---------------- jFEXmetAlgo::setup ----------------");
     
     m_hemisphere = hemisphere;
+    m_saturation = false;
     
     m_FPGA.resize(FEXAlgoSpaceDefs::jFEX_algoSpace_height);
     for(int iphi=0;iphi<FEXAlgoSpaceDefs::jFEX_algoSpace_height;iphi++){
         for(int ieta=8;ieta<16;ieta++){
             m_FPGA[iphi].push_back(FPGA[iphi][ieta]);
+            m_saturation = m_saturation || getTTowerSat(FPGA[iphi][ieta]);
         }
     }
 }
@@ -76,29 +78,31 @@ void LVL1::jFEXmetAlgo::setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][
     ATH_MSG_DEBUG("---------------- jFEXmetAlgo::setup ----------------");
     
     m_hemisphere = hemisphere;
+    m_saturation = false;
     
     m_FPGA.resize(FEXAlgoSpaceDefs::jFEX_algoSpace_height);
     for(int iphi=0;iphi<FEXAlgoSpaceDefs::jFEX_algoSpace_height;iphi++){
         for(int ieta=8;ieta<17;ieta++){
             m_FPGA[iphi].push_back(FPGA[iphi][ieta]);
+            m_saturation = m_saturation || getTTowerSat(FPGA[iphi][ieta]);
         }
     }
     m_FPGA_phi02.resize(16);
     for(int iphi=0;iphi<16;iphi++){
         for(int ieta=17;ieta<21;ieta++){
             m_FPGA_phi02[iphi].push_back(FPGA[iphi][ieta]);
+            m_saturation = m_saturation || getTTowerSat(FPGA[iphi][ieta]);
         }
     }    
     m_FPGA_fcal.resize(8);
     for(int iphi=0;iphi<8;iphi++){
         for(int ieta=21;ieta<FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width;ieta++){
             m_FPGA_fcal[iphi].push_back(FPGA[iphi][ieta]);
+            m_saturation = m_saturation || getTTowerSat(FPGA[iphi][ieta]);
         }
     }    
     
 }
-
-
 
 //this function calculates met in the central barrels
 void LVL1::jFEXmetAlgo::buildBarrelmet()
@@ -244,6 +248,20 @@ int LVL1::jFEXmetAlgo::getTTowerET(unsigned int TTID ) {
     //we shouldn't arrive here
     return 0;
     
+}
+
+bool LVL1::jFEXmetAlgo::getjXESat() const {
+    return m_saturation;
+} 
+
+//getter for tower saturation
+bool LVL1::jFEXmetAlgo::getTTowerSat(unsigned int TTID ) {
+    if(TTID == 0) {
+        return false;
+    } 
+    
+    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
+    return tmpTower->getTowerSat();
 }
 
 

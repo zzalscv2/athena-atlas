@@ -70,6 +70,8 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     
     std::string inputTower = jFexTowerContainer->empty() ? "EmulatedTowers" : "DataTowers";
     
+    const std::string LB = std::to_string(GetEventInfo(ctx)->lumiBlock());
+    
     /*************************/
     //        SR jets!
     /*************************/
@@ -83,9 +85,9 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
     }
 
-    fillHist("SimEqData" ,"jJ" ,inputTower ,0 ,jJ_data_matched  );
-    fillHist("DataNoSim" ,"jJ" ,inputTower ,1 ,jJ_data_UNmatched);
-    fillHist("SimNoData" ,"jJ" ,inputTower ,1 ,jJ_simu_UNmatched);
+    fillHist("SimEqData" ,"jJ" ,inputTower ,LB ,0 ,jJ_data_matched  );
+    fillHist("DataNoSim" ,"jJ" ,inputTower ,LB ,1 ,jJ_data_UNmatched);
+    fillHist("SimNoData" ,"jJ" ,inputTower ,LB ,1 ,jJ_simu_UNmatched);
     
     /*************************/
     //        LR jets!
@@ -100,9 +102,9 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
     }
 
-    fillHist("SimEqData" ,"jLJ" ,inputTower ,0 ,jLJ_data_matched );
-    fillHist("DataNoSim" ,"jLJ" ,inputTower ,1 ,jLJ_data_UNmatched );
-    fillHist("SimNoData" ,"jLJ" ,inputTower ,1 ,jLJ_simu_UNmatched );    
+    fillHist("SimEqData" ,"jLJ" ,inputTower ,LB ,0 ,jLJ_data_matched );
+    fillHist("DataNoSim" ,"jLJ" ,inputTower ,LB ,1 ,jLJ_data_UNmatched );
+    fillHist("SimNoData" ,"jLJ" ,inputTower ,LB ,1 ,jLJ_simu_UNmatched );    
     
     
     /*************************/
@@ -118,9 +120,9 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
     }
 
-    fillHist("SimEqData" ,"jTau" ,inputTower ,0 ,jTau_data_matched );
-    fillHist("DataNoSim" ,"jTau" ,inputTower ,1 ,jTau_data_UNmatched );
-    fillHist("SimNoData" ,"jTau" ,inputTower ,1 ,jTau_simu_UNmatched );    
+    fillHist("SimEqData" ,"jTau" ,inputTower ,LB ,0 ,jTau_data_matched );
+    fillHist("DataNoSim" ,"jTau" ,inputTower ,LB ,1 ,jTau_data_UNmatched );
+    fillHist("SimNoData" ,"jTau" ,inputTower ,LB ,1 ,jTau_simu_UNmatched );    
     
     
     /*************************/
@@ -136,9 +138,9 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
     }
 
-    fillHist("SimEqData" ,"jEM" ,inputTower ,0 ,jEM_data_matched );
-    fillHist("DataNoSim" ,"jEM" ,inputTower ,1 ,jEM_data_UNmatched );
-    fillHist("SimNoData" ,"jEM" ,inputTower ,1 ,jEM_simu_UNmatched );    
+    fillHist("SimEqData" ,"jEM" ,inputTower ,LB ,0 ,jEM_data_matched );
+    fillHist("DataNoSim" ,"jEM" ,inputTower ,LB ,1 ,jEM_data_UNmatched );
+    fillHist("SimNoData" ,"jEM" ,inputTower ,LB ,1 ,jEM_simu_UNmatched );    
     
     
     /*************************/
@@ -153,8 +155,8 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
     }
 
-    fillHistGlobals("SimEqData"   ,"jXE" ,inputTower ,0 ,jXE_data_matched );
-    fillHistGlobals("SimDiffData" ,"jXE" ,inputTower ,1 ,jXE_data_UNmatched );
+    fillHistGlobals("SimEqData"   ,"jXE" ,inputTower ,LB ,0 ,jXE_data_matched );
+    fillHistGlobals("SimDiffData" ,"jXE" ,inputTower ,LB ,1 ,jXE_data_UNmatched );
 
     
     /*************************/
@@ -169,8 +171,8 @@ StatusCode JfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         ATH_MSG_WARNING(" Simulation TOB and Data TOB matching vector do not have the same size");
     }
 
-    fillHistGlobals("SimEqData"   ,"jTE" ,inputTower ,0 ,jTE_data_matched );
-    fillHistGlobals("SimDiffData" ,"jTE" ,inputTower ,1 ,jTE_data_UNmatched );
+    fillHistGlobals("SimEqData"   ,"jTE" ,inputTower ,LB ,0 ,jTE_data_matched );
+    fillHistGlobals("SimDiffData" ,"jTE" ,inputTower ,LB ,1 ,jTE_data_UNmatched );
     
     return StatusCode::SUCCESS;
 }
@@ -220,7 +222,7 @@ template <typename T> std::vector<std::array<float,5> >  JfexSimMonitorAlgorithm
 }
 
 
-void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::string & item, const std::string & input, const bool fillError, std::vector< std::array<float,5> > & elem ) const {
+void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<float,5> > & elem ) const {
 
     auto jFexModule  = Monitored::Scalar<int>  ("jfex",  0);
     auto jFexFPGA    = Monitored::Scalar<int>  ("fpga",  0);
@@ -229,6 +231,8 @@ void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::strin
     
     auto jFexInput   = Monitored::Scalar< std::string >  ("input",input);
     auto jFexItem    = Monitored::Scalar< std::string >  ("item" , item);
+    
+    auto LBstring    = Monitored::Scalar< std::string >  ("LB" , LB);
     
     std::string package = m_Grouphist+"_"+pkg+"_"+item+"_"+input;
     
@@ -244,6 +248,7 @@ void JfexSimMonitorAlgorithm::fillHist(const std::string & pkg, const std::strin
         if(fillError){
             fill(m_Grouphist,jFexInput,jFexItem);
             genError("Sim_"+input, "TOB");
+            fill(package,LBstring);
         }
     }
 }
@@ -287,13 +292,15 @@ template <typename T> std::vector<std::array<int,3> >  JfexSimMonitorAlgorithm::
 }
 
 
-void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const bool fillError, std::vector< std::array<int,3> > & elem ) const {
+void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<int,3> > & elem ) const {
 
     auto jFexModule  = Monitored::Scalar<int>  ("jfex",  0);
     auto jFexFPGA    = Monitored::Scalar< std::string >  ("fpga",  "");
     
     auto jFexInput   = Monitored::Scalar< std::string >  ("input",input);
     auto jFexItem    = Monitored::Scalar< std::string >  ("item" , item);
+    
+    auto LBstring    = Monitored::Scalar< std::string >  ("LB" , LB);
     
     std::string fpga_name[4] = {"U1", "U2", "U3", "U4"};
     
@@ -309,6 +316,7 @@ void JfexSimMonitorAlgorithm::fillHistGlobals(const std::string & pkg, const std
         if(fillError){
             fill(m_Grouphist,jFexInput,jFexItem);
             genError("Sim_"+input, "global TOB");
+            fill(package,LBstring);
         }
     }
 }
