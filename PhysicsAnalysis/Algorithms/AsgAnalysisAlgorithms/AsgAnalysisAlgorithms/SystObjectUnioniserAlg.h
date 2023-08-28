@@ -153,4 +153,6 @@ private:
 
 }
 
+#include "AsgAnalysisAlgorithms/SystObjectUnioniserAlg.icc"
+
 #endif

@@ -12,8 +12,6 @@
 
 namespace CP
 {
-  static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
-
   template<class T, class C>
   SystObjectUnioniserAlg<T,C> ::SystObjectUnioniserAlg(const std::string &name,
                                   ISvcLocator *pSvcLocator)
@@ -45,6 +43,7 @@ namespace CP
   template<class T, class C>
   StatusCode SystObjectUnioniserAlg<T,C> ::execute(const EventContext&) const
   {
+    static const SG::AuxElement::ConstAccessor< iplink_t  > acc_nominalObject("nominalObjectLink");
 
     // Populate a map of systematics hash to container, so we
     // can iterate safely regardless of the ordering of systs
