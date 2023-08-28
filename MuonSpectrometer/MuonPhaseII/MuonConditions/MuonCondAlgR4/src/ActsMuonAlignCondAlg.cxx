@@ -21,6 +21,16 @@ ActsMuonAlignCondAlg::ActsMuonAlignCondAlg(const std::string& name, ISvcLocator*
     AthReentrantAlgorithm{name, pSvcLocator}{}
 
 StatusCode ActsMuonAlignCondAlg::initialize() {
+    
+    ATH_CHECK(m_readKeyALines.initialize(m_applyALines));
+    ATH_CHECK(m_readKeyBLines.initialize(m_applyBLines));
+    ATH_CHECK(m_readMdtAsBuiltKey.initialize(m_applyMdtAsBuilt));
+    ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
+    ATH_CHECK(m_readNswPassivKey.initialize(m_applyMmPassivation));
+    ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(detStore()->retrieve(m_detMgr));
+    ATH_CHECK(m_surfaceProvTool.retrieve());
+
     m_techs = m_detMgr->getDetectorTypes();
     if (m_techs.empty()) {
         ATH_MSG_FATAL("The detector manager does not contain any elements");
@@ -38,14 +48,7 @@ StatusCode ActsMuonAlignCondAlg::initialize() {
                                               hasDetector(ActsTrk::DetectorType::sTgc)); 
     m_applyMmPassivation = m_applyMmPassivation && hasDetector(ActsTrk::DetectorType::Mm);
 
-    ATH_CHECK(m_readKeyALines.initialize(m_applyALines));
-    ATH_CHECK(m_readKeyBLines.initialize(m_applyBLines));
-    ATH_CHECK(m_readMdtAsBuiltKey.initialize(m_applyMdtAsBuilt));
-    ATH_CHECK(m_readNswAsBuiltKey.initialize(m_applyNswAsBuilt));
-    ATH_CHECK(m_readNswPassivKey.initialize(m_applyMmPassivation));
-    ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(detStore()->retrieve(m_detMgr));
-    ATH_CHECK(m_surfaceProvTool.retrieve());
+   
 
     for (const ActsTrk::DetectorType det : m_techs) {
         m_writeKeys.emplace_back(ActsTrk::to_string(det) + m_keyToken);

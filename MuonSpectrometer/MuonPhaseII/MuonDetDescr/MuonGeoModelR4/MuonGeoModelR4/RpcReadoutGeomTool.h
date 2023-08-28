@@ -35,30 +35,39 @@ class RpcReadoutGeomTool : public AthAlgTool,
 
     PublicToolHandle<IMuonGeoUtilityTool> m_geoUtilTool{this,"GeoUtilTool", "" };
     
-    /// Temporarily
-    struct parameterBook{
+    /// Struct to cache the relevant parameters of from the WRPC tables
+    struct wRPCTable {
+       /// Eta strip pitch
        double stripPitchEta{0.};
+       /// Phi strip pitch
        double stripPitchPhi{0.};
-
-       int numEtaStrips{0};
-       int numPhiStrips{0};
+       /// Eta strip width
+       double stripWidthEta{0.};
+       /// Phi strip width
+       double stripWidthPhi{0.};
+       /// Number of eta strips
+       unsigned int numEtaStrips{0};
+       /// Number of phi strips
+       unsigned int numPhiStrips{0};
     };
-    
+
     struct FactoryCache {
+       
+      using ParamBookTable = std::map<std::string, wRPCTable>;
+      using CutOutTable = std::map<Identifier, std::vector<CutOutArea>>;
+
        std::set<StripDesignPtr, StripDesignSorter> stripDesigns{};
+       ParamBookTable parameterBook{};
+       CutOutTable cutOuts{};
+       
     };
 
     /// Retrieves the auxillary tables from the database
-    StatusCode readParameterBook();
+    StatusCode readParameterBook(FactoryCache& cache);
     /// Loads the chamber dimensions from GeoModel
     StatusCode loadDimensions(RpcReadoutElement::defineArgs& args, FactoryCache& factory );
     
     IdentifierHash layerHash(const RpcReadoutElement::defineArgs& args, const int gasGap, const int doubPhi, const bool measPhi) const;
-
-    using ParamBookTable = std::map<std::string, parameterBook>; 
-    ParamBookTable m_parBook{};
-
-    std::map<Identifier, std::vector<CutOutArea>> m_amdbCutOuts{};
 
 };
 

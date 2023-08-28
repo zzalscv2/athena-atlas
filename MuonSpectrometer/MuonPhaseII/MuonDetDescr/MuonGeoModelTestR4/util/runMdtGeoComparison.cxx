@@ -4,14 +4,16 @@
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
- *        python -m MuonGeoModelTest.runGeoModelTest
- *        python -m MuonGeoModelTestR4.runGeoModelTest 
+ *          python -m MuonGeoModelTest.runGeoModelTest
+ *          python -m MuonGeoModelTestR4.runGeoModelTest 
+ *        for the Mdt subdetectors
  *  
 */
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <MuonCablingData/MdtCablingData.h>
+#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <string>
 #include <set>
@@ -82,13 +84,6 @@ struct MdtChamber{
     }
 };
 
-std::ostream& operator<<(std::ostream& ostr, const Amg::Transform3D& trans) {
-      ostr<<"translation: "<<Amg::toString(trans.translation(),2);
-      ostr<<", rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),3)<<",";
-      ostr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),3)<<",";
-      ostr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),3)<<"}";
-      return ostr;
-}
 
 /// Translation of the station Index -> station Name. Dictionary taken from
 /// https://gitlab.cern.ch/atlas/athena/-/blob/main/DetectorDescription/IdDictParser/data/IdDictMuonSpectrometer_R.09.03.xml
@@ -115,7 +110,7 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     std::cout<<"Read the Mdt geometry tree dump from "<<inputFile<<std::endl;
     std::unique_ptr<TFile> inFile{TFile::Open(inputFile.c_str())};
     if (!inFile || !inFile->IsOpen()) {
-        std::cerr<<__FILE__<<":"<<__LINE__<<" Failed to  open "<<inputFile<<std::endl;
+        std::cerr<<__FILE__<<":"<<__LINE__<<" Failed to open "<<inputFile<<std::endl;
         return to_ret;
     }
     TTreeReader treeReader("MdtGeoModelTree", inFile.get());
@@ -299,7 +294,8 @@ int main( int argc, char** argv ) {
         if (!doesNotDeform(distortion) && 
             !(reference.id.eta < 0 && doesNotDeform(distortion* Amg::getRotateX3D(M_PI)))) {   
             std::cerr<<"The chamber coordinate systems rotate differently for  "
-                     <<reference<<". Difference in the coordinate transformation: "<<distortion<<std::endl;
+                     <<reference<<". Difference in the coordinate transformation: "
+                     <<MuonGMR4::to_string(distortion)<<std::endl;
             chamberOkay = false;            
         }
         constexpr double tolerance = 10 * Gaudi::Units::micrometer;
@@ -320,7 +316,7 @@ int main( int argc, char** argv ) {
                 if (!alignFailure && !(doesNotDeform(tubeDistortion)  || 
                                        (reference.id.eta < 0 && doesNotDeform(tubeDistortion* Amg::getRotateX3D(M_PI))) )) {
                     std::cerr<<"In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "<<tube
-                             <<") are not exactly aligned."<<tubeDistortion<<std::endl;                   
+                             <<") are not exactly aligned. "<<MuonGMR4::to_string(tubeDistortion)<<std::endl;                   
                     alignFailure = true;
                 }
                 /// Remember the tube staggering is in the (x-y) plane. Allow for

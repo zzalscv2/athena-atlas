@@ -17,11 +17,10 @@ class RpcReadoutElement : public MuonReadoutElement {
     
     /// Set of parameters to describe a RPC chamber
     struct parameterBook {
+        /// RPC panel dimensions
         double halfX{0.};
         double halfY{0.};
         double halfZ{0.};
-        
-        
         /// The number of gas gaps (along the radial direction)
         /// in the RPC chamber (2 or 3) 
         unsigned int nGasGaps{0};
@@ -32,8 +31,8 @@ class RpcReadoutElement : public MuonReadoutElement {
         bool hasPhiStrips{true};
         std::vector<StripLayer> layers{};
 
-        StripDesign etaDesign{};
-        StripDesign phiDesign{};
+        StripDesignPtr phiDesign{nullptr};
+        StripDesignPtr etaDesign{nullptr};
 
     };
 
@@ -67,9 +66,24 @@ class RpcReadoutElement : public MuonReadoutElement {
     /// Returns the number of phi panels
     int nPhiPanels() const;
 
+    /// Number of strips measuring the eta coordinate
+    unsigned int nEtaStrips() const;
+    /// Number of strips measuring the phi coordinate
+    unsigned int nPhiStrips() const;
 
-    unsigned int numEtaStrips() const;
-    unsigned int numPhiStrips() const;
+    /// Strip pitch in eta
+    double stripEtaPitch() const;
+    /// Strip pitch in phi
+    double stripPhiPitch() const;
+    /// Strip width in eta
+    double stripEtaWidth() const;
+    /// Strip width in phi
+    double stripPhiWidth() const;
+    /// Returns the length of an eta strip
+    double stripEtaLength() const;
+    /// Returns the length of a phi strip
+    double stripPhiLength() const;
+
 
 
     Amg::Vector3D stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
@@ -113,8 +127,8 @@ class RpcReadoutElement : public MuonReadoutElement {
         const unsigned int m_hashShiftDbl{m_pars.hasPhiStrips ? 1u :0u};
         const unsigned int m_hashShiftGap{m_hashShiftDbl + (nPhiPanels() <= m_doubletPhi ? 0u : 1u)};
         const unsigned int m_hashShiftStr{m_hashShiftGap + MuonGM::maxBit(nGasGaps()) + 1};
-       
-};
+        
+ };
 std::ostream& operator<<(std::ostream& ostr, const RpcReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4
 

@@ -31,6 +31,8 @@ void MuonTransformCache::storeAlignment(ActsTrk::RawGeomAlignStore& alignStore) 
         throw std::runtime_error("Transformation has already been cached. Being called twice");
     }
     alignStore.trackingAlignment->setTransform(this, m_transform(&alignStore, m_hash));
+    /// If an external alignment is given, the nominal cache can be released
+    m_nomCache.release();
 }
 IdentifierHash MuonTransformCache::hash() const {
     return m_hash;

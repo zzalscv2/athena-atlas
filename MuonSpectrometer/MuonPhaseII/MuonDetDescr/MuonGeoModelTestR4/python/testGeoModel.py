@@ -137,8 +137,8 @@ if __name__=="__main__":
     from MuonCondTest.AlignmentTester import ALineInjectorAlgCfg
     cfg.merge(ALineInjectorAlgCfg(flags, WriteKey="InjectedALines"))
     from MuonCondAlgR4.ConditionsConfig import ActsMuonAlignCondAlgCfg, ActsGeomContextAlgCfg
-    cfg.merge(ActsMuonAlignCondAlgCfg(flags, ReadKeyALines="InjectedALines"))  
-    cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=["MdtActsAlignContainer"]))  
+    cfg.merge(ActsMuonAlignCondAlgCfg(flags, ReadKeyALines="InjectedALines", applyALines = False))  
+    cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=[]))  
     #### 
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     if flags.Detector.GeometryMDT:
@@ -147,7 +147,7 @@ if __name__=="__main__":
                                      TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
 
     if flags.Detector.GeometryRPC: 
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = ["BML1A3"], writeTTree = False))
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = ["BML1A3"]))
 
 
     executeTest(cfg, num_events = args.nEvents)
