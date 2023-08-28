@@ -261,24 +261,29 @@ def update_PDG_table(input_file, pdg_table, mass_spectrum=1):
     masses = get_gluino_Rhadron_masses(input_file,mass_spectrum)
     # Get the output file ready
     # Open for appending (assume that's what was done if given a file handle)
+    lines = None
     if isinstance(pdg_table, str):
-        out_file = open(pdg_table,'a')
+        lines = open(pdg_table).readlines()
     else:
-        out_file = pdg_table
+        lines = pdg_table.readlines()
     # Add all our R-hadrons to the table!
+    pdgcodes = []
     for pid in masses:
+        pdgcodes += [pid]
         # For the PDG table, we only write positive-signed PDG ID particles
         if pid<0: continue
         # Note that we follow the Pythia6 convention of *including* fundamental SUSY particles
         # The format is VERY specific; needs mass and width (we always set the width to 0)
         # Mass is in MeV here, rather than GeV as in the dictionary
-        out_file.write('\nM %i                          %11.7E  +0.0E+00 -0.0E+00 %s       %s'%(pid,masses[pid]*1000.,offset_options[pid][2],charge(offset_options[pid][3])))
-        out_file.write('\nW %i                          %11.7E  +0.0E+00 -0.0E+00 %s       %s'%(pid,0.E+00,offset_options[pid][2],charge(offset_options[pid][3])))
+        lines.append('M %i                          %11.7E  +0.0E+00 -0.0E+00 %s       %s'%(pid,masses[pid]*1000.,offset_options[pid][2],charge(offset_options[pid][3])) + '\n')
+        lines.append('W %i                          %11.7E  +0.0E+00 -0.0E+00 %s       %s'%(pid,0.E+00,offset_options[pid][2],charge(offset_options[pid][3])) + '\n')
 
-    # Done writing all the lines!  Clean up if necessary
-    if isinstance(pdg_table, str):
-        out_file.close()
+    update = open('PDGTABLE.MeV', 'w')
+    update.write(''.join(lines))
+    update.close()
 
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
     # Nothing to return
 
 
