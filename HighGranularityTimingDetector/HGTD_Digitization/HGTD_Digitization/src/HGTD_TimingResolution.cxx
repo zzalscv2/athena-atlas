@@ -10,10 +10,11 @@
 
 #include "HGTD_TimingResolution.h"
 
-#include "CLHEP/Random/RandGaussZiggurat.h"
-#include "TMath.h"
 #include <cmath>
 #include <iostream>
+
+#include "CLHEP/Random/RandGaussZiggurat.h"
+#include "TMath.h"
 
 namespace {
 inline float remainder_1(float a, int b) {
@@ -29,50 +30,48 @@ inline float exp16(float x) {
   x = 1.0 + x / 16.0;
   return std::pow(x, 16);
 }
-} // namespace
+}  // namespace
 
-HGTD_TimingResolution::HGTD_TimingResolution(const std::string& type,
-                                             const std::string& name,
-                                             const IInterface* parent)
-  : AthAlgTool(type, name, parent),
-    m_version ("HGTD Timing three-ring layout"),
+HGTD_TimingResolution::HGTD_TimingResolution(const std::string &type,
+                                             const std::string &name,
+                                             const IInterface *parent)
+    : AthAlgTool(type, name, parent),
+      m_version("HGTD Timing three-ring layout"),
 
-    // resolution in ns
-    m_sensorResolution (std::sqrt((0.025 * 0.025) - (0.010 * 0.010))),
+      // resolution in ns
+      m_electronicJitter(std::sqrt((0.025 * 0.025) - (0.010 * 0.010))),
 
-    // Contain also the peripheral electronics region, i.e. (R>640 mm)
-    m_radii {120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230,
-             240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350,
-             360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470,
-             480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590,
-             600, 610, 620, 630, 640, 650, 660, 670, 680, 690},
+      // Contain also the peripheral electronics region, i.e. (R>640 mm)
+      m_radii{120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230,
+              240, 250, 260, 270, 280, 290, 300, 310, 320, 330, 340, 350,
+              360, 370, 380, 390, 400, 410, 420, 430, 440, 450, 460, 470,
+              480, 490, 500, 510, 520, 530, 540, 550, 560, 570, 580, 590,
+              600, 610, 620, 630, 640, 650, 660, 670, 680, 690},
 
-    m_doseInner1000 {1.995, 1.953, 1.787, 1.687, 1.608, 1.518,
-                     1.448, 1.425, 1.354, 1.328, 1.275},
+      m_doseInner1000{1.995, 1.953, 1.787, 1.687, 1.608, 1.518,
+                      1.448, 1.425, 1.354, 1.328, 1.275},
 
-    m_doseMiddle2000 {2.44,  2.355, 2.26,  2.204, 2.137, 2.081, 2.015, 1.96,
-                      1.878, 1.87,  1.809, 1.732, 1.722, 1.63,  1.588, 1.57,
-                      1.509, 1.464, 1.44,  1.38,  1.333, 1.321, 1.284, 1.271},
+      m_doseMiddle2000{2.44,  2.355, 2.26,  2.204, 2.137, 2.081, 2.015, 1.96,
+                       1.878, 1.87,  1.809, 1.732, 1.722, 1.63,  1.588, 1.57,
+                       1.509, 1.464, 1.44,  1.38,  1.333, 1.321, 1.284, 1.271},
 
-    m_doseOuter4000 {2.458, 2.4,   2.382, 2.362, 2.266, 2.207, 2.122, 2.067,
-                     2.046, 1.973, 1.94,  1.9,   1.869, 1.83,  1.711, 1.701,
-                     1.685, 1.615, 1.626, 1.565, 1.53,  1.499, 1.429},
+      m_doseOuter4000{2.458, 2.4,   2.382, 2.362, 2.266, 2.207, 2.122, 2.067,
+                      2.046, 1.973, 1.94,  1.9,   1.869, 1.83,  1.711, 1.701,
+                      1.685, 1.615, 1.626, 1.565, 1.53,  1.499, 1.429},
 
-    m_doseResolution {{0.01, 0.025}, {0.1, 0.031}, {0.3, 0.035}, {0.6, 0.040},
-                      {1.0, 0.046},  {3.0, 0.065}, {6.0, 0.065}},
+      m_doseResolution{{0.01, 0.025}, {0.1, 0.031}, {0.3, 0.035}, {0.6, 0.040},
+                       {1.0, 0.046},  {3.0, 0.065}, {6.0, 0.065}},
 
-    m_doseGain {{0.01, 39}, {0.1, 23}, {0.3, 21}, {0.6, 19},
-                {1.0, 10},  {3.0, 5},  {6.0, 4}}
-{
-
-
-}
+      m_doseGain{{0.01, 39}, {0.1, 23}, {0.3, 21}, {0.6, 19},
+                 {1.0, 10},  {3.0, 5},  {6.0, 4}} {}
 
 StatusCode HGTD_TimingResolution::initialize() {
 
   if (m_radii.size() != (m_doseInner1000.size() + m_doseMiddle2000.size() +
                          m_doseOuter4000.size())) {
-    ATH_MSG_FATAL("ERROR while initializing the HGTD timing resolution. Vector of different size.");
+    ATH_MSG_FATAL(
+        "ERROR while initializing the HGTD timing resolution. Vector of "
+        "different size.");
     return StatusCode::FAILURE;
   }
 
@@ -81,7 +80,8 @@ StatusCode HGTD_TimingResolution::initialize() {
   return StatusCode::SUCCESS;
 }
 
-// Calculate dose, resolution, and gain based on the configured integrated luminosity
+// Calculate dose, resolution, and gain based on the configured integrated
+// luminosity
 StatusCode HGTD_TimingResolution::propagateDamage() {
 
   m_dose.clear();
@@ -94,19 +94,24 @@ StatusCode HGTD_TimingResolution::propagateDamage() {
   return StatusCode::SUCCESS;
 }
 
-// get the timing resolution for a hit at a radius R (unit: mm)
-float HGTD_TimingResolution::hitTimingResolution(float radius) const {
-
+// get the sensor resolution (including the sensor intrinsic resolution and the
+// time walk effect) for a hit at a radius R (unit: mm)
+float HGTD_TimingResolution::sensorResolution(float radius) const {
+  float sigmaT = 99999.;
   if (!radiusInRange(radius))
-    return 99999.;
-  float sigmaT = 9999.;
+    return sigmaT;
   if (m_integratedLumi == 0)
     sigmaT = m_resolution[0];
   else
     sigmaT = resolution(std::fabs(radius));
+  return sigmaT;
+}
 
-  // include the effect of electronics as 25ps added in quadrature
-  float sigmaT2 = sigmaT * sigmaT + m_sensorResolution * m_sensorResolution;
+// get the timing resolution for a hit at a radius R (unit: mm)
+float HGTD_TimingResolution::hitTimingResolution(float radius) const {
+  float sigmaT = sensorResolution(radius);
+  // include the effect of electronic jitter and add in quadrature
+  float sigmaT2 = sigmaT * sigmaT + m_electronicJitter * m_electronicJitter;
   return std::sqrt(sigmaT2);
 }
 
@@ -156,8 +161,8 @@ float HGTD_TimingResolution::gain(float radius) const {
   return gain;
 }
 
-inline float HGTD_TimingResolution::sensorResolution() const {
-  return m_sensorResolution;
+inline float HGTD_TimingResolution::electronicJitter() const {
+  return m_electronicJitter;
 }
 
 // check if the request is in range:
@@ -184,10 +189,12 @@ float HGTD_TimingResolution::translateEta2R(float eta) const {
 
 void HGTD_TimingResolution::computeDose() {
   for (unsigned int i = 0; i < m_doseInner1000.size(); ++i) {
-    m_dose.push_back(remainder_1(m_integratedLumi, 1000) / 1000 * m_doseInner1000[i]);
+    m_dose.push_back(remainder_1(m_integratedLumi, 1000) / 1000 *
+                     m_doseInner1000[i]);
   }
   for (unsigned int i = 0; i < m_doseMiddle2000.size(); ++i) {
-    m_dose.push_back(remainder_1(m_integratedLumi, 2000) / 2000 * m_doseMiddle2000[i]);
+    m_dose.push_back(remainder_1(m_integratedLumi, 2000) / 2000 *
+                     m_doseMiddle2000[i]);
   }
   for (unsigned int i = 0; i < m_doseOuter4000.size(); ++i) {
     m_dose.push_back(m_integratedLumi / 4000 * m_doseOuter4000[i]);
@@ -252,7 +259,9 @@ void HGTD_TimingResolution::print() {
 
   ATH_MSG_VERBOSE("");
   for (unsigned int i = 0; i < m_resolution.size(); i++) {
-    ATH_MSG_VERBOSE("Resolution r = " << m_radii[i] << " mm " << hitTimingResolution(m_radii[i]) << " ps");
+    ATH_MSG_VERBOSE("Resolution r = " << m_radii[i] << " mm "
+                                      << hitTimingResolution(m_radii[i])
+                                      << " ps");
     ATH_MSG_VERBOSE("Gain r = " << m_radii[i] << " mm " << gain(m_radii[i]));
   }
 }
@@ -262,24 +271,24 @@ HGTD_TimingResolution::PulseWaveform HGTD_TimingResolution::simulatePulse(
 
   PulseWaveform pulseWaveform{};
   float pulseParameter[4] = {0};
-  pulseParameter[0] = 0.036; // Width (scale) parameter of Landau density
+  pulseParameter[0] = 0.036;  // Width (scale) parameter of Landau density
   pulseParameter[1] =
-      5.754; // Most Probable (MP, location) parameter of Landau density
+      5.754;  // Most Probable (MP, location) parameter of Landau density
   pulseParameter[3] = CLHEP::RandGaussZiggurat::shoot(
       rndm_engine, 0.318,
       m_sensorNoiseFactor -
-          0.1 * m_sensorNoiseFactor); // Width (sigma) of convoluted Gaussian
-                                      // function
+          0.1 * m_sensorNoiseFactor);  // Width (sigma) of convoluted Gaussian
+                                       // function
   pulseParameter[2] =
-      0.4785 + 1.4196 * pulseParameter[3]; // Total area (integral -inf to inf,
-                                           // normalization constant)
+      0.4785 + 1.4196 * pulseParameter[3];  // Total area (integral -inf to inf,
+                                            // normalization constant)
 
   // Convoluted Landau and Gaussian Fitting Function
   // Adapted to simulate a pulse in an HGTD pad
 
   // Numeric constants
-  float invsq2pi = 1 / sqrt(2 * M_PI); // 0.3989422804014;   // (2 pi)^(-1/2)
-  float mpshift = -0.22278298;         // Landau maximum location
+  float invsq2pi = 1 / sqrt(2 * M_PI);  // 0.3989422804014;   // (2 pi)^(-1/2)
+  float mpshift = -0.22278298;          // Landau maximum location
 
   // Variables
   float mpc = pulseParameter[1] - mpshift * pulseParameter[0];
@@ -308,7 +317,8 @@ HGTD_TimingResolution::PulseWaveform HGTD_TimingResolution::simulatePulse(
   return pulseWaveform;
 }
 
-void HGTD_TimingResolution::calculatePulse(const PulseWaveform& pulseWaveform,
+void HGTD_TimingResolution::calculatePulse(
+    const PulseWaveform &pulseWaveform,
     std::map<int, std::pair<float, float>> &pulsebin, const float t,
     const float E, float *max, CLHEP::HepRandomEngine *rndm_engine) const {
 
@@ -347,21 +357,26 @@ float HGTD_TimingResolution::calculateTime(
   const PulseWaveform pulse = simulatePulse(rndm_engine);
   calculatePulse(pulse, pulseBins, t, E, max_hit, rndm_engine);
   for (auto &pulse : pulseBins) {
-    if (pulse.second.second != 0) {
+    if (pulse.second.second == 0) {
+      ATH_MSG_WARNING(
+          "HGTD_TimingResolution::calculateTime -> Energy goes zero, please "
+          "have a check, energy * time = "
+          << pulse.second.first << " while energy = " << pulse.second.second);
+      // This bin will have both time and energy equal to 0 and won't affect
+      // the peak finding step afterwards
+      pulse.second.first = 0;
+    } else {
       pulse.second.first = pulse.second.first / pulse.second.second;
     }
     // We look the the time when E=Emax/2 to get the time
     if ((max_hit[1] > pulse.second.first) &&
         (max_hit[0] * m_cfdThreshold < pulse.second.second) &&
         (max_hit[3] > pulse.second.first || max_hit[3] == 0)) {
-      max_hit[2] = pulse.second.second; // Energy when E=Emax*m_cfd
-      max_hit[3] = pulse.second.first;  // Time when E=Emax*m_cfd
+      max_hit[2] = pulse.second.second;  // Energy when E=Emax*m_cfd
+      max_hit[3] = pulse.second.first;   // Time when E=Emax*m_cfd
     }
   }
-  const float electronicRes = hitTimingResolution(r);
-  const float noise = electronicRes * electronicRes - sensorResolution() * sensorResolution();
-  if (noise > 0) {
-    return max_hit[3] + CLHEP::RandGaussZiggurat::shoot(rndm_engine, 0, sqrt(noise));
-  }
-  return max_hit[3];
+
+  return max_hit[3] +
+         CLHEP::RandGaussZiggurat::shoot(rndm_engine, 0, sensorResolution(r));
 }
