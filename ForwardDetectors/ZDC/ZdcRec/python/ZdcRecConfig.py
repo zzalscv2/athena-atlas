@@ -48,7 +48,7 @@ def ZdcAnalysisToolCfg(flags, run, config="LHCf2022", DoCalib=False, DoTimeCalib
         LHCRun = run ))
     return acc
 
-def ZdcLEDAnalysisToolCfg(flags, config = 'PbPb2023'):
+def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023'):  
     acc = ComponentAccumulator()
 
     print('ZdcAnalysisToolCfg: setting up ZdcAnalysisTool with config='+config)
