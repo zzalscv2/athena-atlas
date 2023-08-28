@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration                   
 
-import sys, os, glob
-import ROOT
 import math
-from array import array
 
 def trig_tag_and_probe(h, lb_minus_one_trig_eff):
     yld    = (h[2], h[3])
@@ -27,7 +24,7 @@ def reco_tag_and_probe(hmo, hms, hno, hns, lb_minus_one_reco_eff, MC = False):
     nomatchos, nomatchoserr = extract(hno, bin1, bin2)
     nomatchss, nomatchsserr = extract(hns, bin1, bin2)
 
-    if MC == True:
+    if MC:
 
         matchss = 0
         nomatchss = 0
@@ -60,7 +57,7 @@ def template_method(hmo, hms, hno, hns, hto, hts, do_scale, lb_minus_one_reco_ef
     tbin3 = hmo.GetXaxis().FindBin(120000)
     tbin4 = hmo.GetXaxis().FindBin(250000)
 
-    if no_sign == True:
+    if no_sign:
         hmo.Add(hms)
         hno.Add(hns)
         hto.Add(hts)
@@ -82,15 +79,15 @@ def template_method(hmo, hms, hno, hns, hto, hts, do_scale, lb_minus_one_reco_ef
 
     totalos_peak = matchos_peak + nomatchos_peak
     totalos_tail = matchos_tail + nomatchos_tail
-    totalss_peak = matchss_peak + nomatchss_peak
-    totalss_tail = matchss_tail + nomatchss_tail
+    # totalss_peak = matchss_peak + nomatchss_peak
+    # totalss_tail = matchss_tail + nomatchss_tail
 
-    totalos_peakerr = pow(totalos_peak, 0.5)
-    totalss_peakerr = pow(totalss_peak, 0.5)
-    totalos_tailerr = pow(totalos_tail, 0.5)
-    totalss_tailerr = pow(totalss_tail, 0.5)
+    # totalos_peakerr = pow(totalos_peak, 0.5)
+    # totalss_peakerr = pow(totalss_peak, 0.5)
+    # totalos_tailerr = pow(totalos_tail, 0.5)
+    # totalss_tailerr = pow(totalss_tail, 0.5)
 
-    if MC == True:
+    if MC:
         n1 = matchos_peak
         d1 = totalos_peak
         sum_w_m, sum_w2_m = extract(hmo, tbin1, tbin2)
@@ -174,7 +171,7 @@ def template_method_error(hmo, hms, hno, hns, hto, hts):
         return 1
 
     verbose = False
-    if verbose == True:
+    if verbose:
         print(a, da, dva, da*dva)
         print(b, db, dvb, db*dvb)
         print(c, dc, dvc, dc*dvc)
@@ -265,7 +262,7 @@ def container_efficiency(h_photon, h_photon_total_input, h_fit, h_pass, h_tos, h
     try: 
         conteff = numer / (numer + denom)
         conteffstat = math.sqrt((da*dda)**2 + (db*ddb)**2 + (dc*ddc)**2 + (dd*ddd)**2 + (ds1*dds1)**2 + (ds2*dds2)**2 + (ds3*dds3)**2 + (ds4*dds4)**2)
-    except: 
+    except Exception: 
         conteff = 0.0
         conteffstat = 0.0
 

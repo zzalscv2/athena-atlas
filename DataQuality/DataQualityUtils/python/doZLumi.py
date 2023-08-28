@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from __future__ import print_function
 
 def getRun(fname):
@@ -96,7 +96,7 @@ def go(fname):
 
     # Temporarily comment. Run 3 version of this code will be inserted soon
     subprocess.check_call(['dqt_zlumi_pandas.py', '--infile', fname, '--dblivetime', '--outdir', '', '--campaign', 'mc21'] + grlcmd)
-    subprocess.check_call(['dqt_csv_luminosity.py', '--infile', f'run_{runno}.csv', '--outdir', '', '--absolute', '--t0'])
+    subprocess.check_call(['dqt_csv_luminosity.sh', '--infile', f'run_{runno}.csv', '--outdir', '', '--absolute', '--t0'])
     if os.path.isfile(f'run_{runno}.csv'):
         shutil.move(f'run_{runno}.csv', 'zlumi.csv')
     if os.path.isfile('zlumi.root'):
