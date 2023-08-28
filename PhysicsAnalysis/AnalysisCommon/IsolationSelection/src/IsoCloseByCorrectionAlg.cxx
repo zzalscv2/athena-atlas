@@ -11,6 +11,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
+#include "AsgTools/CurrentContext.h"
 
 namespace CP {
 
@@ -89,11 +90,7 @@ namespace CP {
         ATH_CHECK(selectLeptonsAndPhotons(ctx, photons));
 
         /// Now apply correction to close by leptons and photons
-#ifndef XAOD_ANALYSIS
         if (m_closeByCorrTool->getCloseByIsoCorrection(ctx, electrons.asDataVector(), muons.asDataVector(), photons.asDataVector()) == CorrectionCode::Error) {
-#else
-        if (m_closeByCorrTool->getCloseByIsoCorrection(electrons.asDataVector(), muons.asDataVector(), photons.asDataVector()) == CorrectionCode::Error) {
-#endif
             ATH_MSG_FATAL("Failed to do close by iso correction ");
             return StatusCode::FAILURE;
         }
