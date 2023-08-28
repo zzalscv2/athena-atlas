@@ -22,13 +22,12 @@ class TopoAlgoDefMultiplicity(object):
             'eEM24L', 
             #ATR-26979, replace original eEMSPARE1 with eEM1, replace original eEMSPARE2 with eEM2, decrement other eEMSPARE thresholds
             'eEM1', 'eEM2',
-            # spares
-            'eEMSPARE1',
+            'eEM12',
         ]
         emVarThresholds_2bits = [
             'eEM24VM',  'eEM26',  'eEM26L', 'eEM26M', 'eEM26T', 'eEM28M',
             # spares
-            'eEMSPARE2', 'eEMSPARE3', 'eEMSPARE4', 'eEMSPARE5',
+            'eEMSPARE1', 'eEMSPARE2', 'eEMSPARE3', 'eEMSPARE4',
         ]
 
         for em in emThresholds_3bits:

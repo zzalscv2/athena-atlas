@@ -8,6 +8,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
 
 def PixelNtupleMakerCfg(flags, name="PixelMonitoringTool", **kwargs):
     acc= ComponentAccumulator()
@@ -20,6 +21,7 @@ def PixelNtupleMakerCfg(flags, name="PixelMonitoringTool", **kwargs):
 
 def EventInfoPixelModuleStatusMonitoringCfg(flags, name="EventInfoPixelModuleStatusMonitoring", **kwargs):
     acc= ComponentAccumulator()
+    kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
     the_tool = CompFactory.DerivationFramework.EventInfoPixelModuleStatusMonitoring(name,**kwargs)
     acc.addPublicTool(the_tool, primary = True)
     return acc
