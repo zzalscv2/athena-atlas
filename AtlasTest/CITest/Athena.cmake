@@ -119,7 +119,7 @@ atlas_add_citest( RecoRun3Data_Express
    )
 
 atlas_add_citest( RecoRun3Data_Cosmics
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"'  --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_Calib
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25' --no-output-checks )

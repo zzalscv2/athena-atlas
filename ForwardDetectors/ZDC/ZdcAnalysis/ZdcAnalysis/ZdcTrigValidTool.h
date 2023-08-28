@@ -38,7 +38,13 @@ class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcAnalysisTool, 
   StatusCode reprocessZdc(){return StatusCode::SUCCESS;}
 
  protected:
+
+#ifdef XAOD_STANDALONE
   ToolHandle<Trig::TrigDecisionTool> m_trigDecTool {this, "TrigDecisionTool",""}; ///< Tool to tell whether a specific trigger is passed
+#else
+  PublicToolHandle<Trig::TrigDecisionTool> m_trigDecTool {this, "TrigDecisionTool",""}; ///< Tool to tell whether a specific trigger is passed
+#endif
+
  private:  
   /* properties */
   Gaudi::Property<std::vector<std::string>> m_triggerList{
