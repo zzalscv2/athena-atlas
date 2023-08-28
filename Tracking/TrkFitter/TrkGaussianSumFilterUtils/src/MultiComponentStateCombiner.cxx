@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,31 +22,27 @@ namespace {
 
 // Actual implementation method for combining
 // a multi component state.
-std::unique_ptr<Trk::ComponentParameters>
-combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
-                    const bool useMode,
-                    const double fractionPDFused)
+Trk::ComponentParameters
+combineToSingleImpl(const Trk::MultiComponentState& uncombinedState,
+                    const bool useMode)
 {
-  if (uncombinedState->empty()) {
-    return nullptr;
+  if (uncombinedState.empty()) {
+    return {};
   }
 
   const Trk::TrackParameters* firstParameters =
-    uncombinedState->front().first.get();
+    uncombinedState.front().first.get();
 
   // Check to see if first track parameters are measured or not
   const AmgSymMatrix(5)* firstMeasuredCov = firstParameters->covariance();
 
-  if (uncombinedState->size() == 1) {
-    return std::make_unique<Trk::ComponentParameters>(
-      uncombinedState->front().first->clone(), uncombinedState->front().second);
+  if (uncombinedState.size() == 1) {
+    Trk::ComponentParameters(uncombinedState.front().first->clone(),
+                             uncombinedState.front().second);
   }
 
   double sumW(0.);
-  const int dimension = (uncombinedState->front()).first->parameters().rows();
-  if (dimension != 5) {
-    return nullptr;
-  }
+  const int dimension = (uncombinedState.front()).first->parameters().rows();
 
   AmgVector(5) mean;
   mean.setZero();
@@ -56,16 +52,16 @@ combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
   AmgSymMatrix(5) covariancePart2;
   covariancePart2.setZero();
 
-  Trk::MultiComponentState::const_iterator component = uncombinedState->begin();
+  Trk::MultiComponentState::const_iterator component = uncombinedState.begin();
   double totalWeight(0.);
-  for (; component != uncombinedState->end(); ++component) {
+  for (; component != uncombinedState.end(); ++component) {
     double weight = (*component).second;
     totalWeight += weight;
   }
 
-  component = uncombinedState->begin();
+  component = uncombinedState.begin();
 
-  for (; component != uncombinedState->end(); ++component) {
+  for (; component != uncombinedState.end(); ++component) {
 
     const Trk::TrackParameters* trackParameters = (*component).first.get();
     double weight = (*component).second;
@@ -77,7 +73,7 @@ combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
     // Ensure that we don't have any problems with the cyclical nature of phi
     // Use first state as reference poin
     double deltaPhi =
-        (*uncombinedState->begin()).first->parameters()[2] - parameters[2];
+        (uncombinedState.begin())->first->parameters()[2] - parameters[2];
     if (deltaPhi > M_PI) {
       parameters[2] += 2 * M_PI;
     } else if (deltaPhi < -M_PI) {
@@ -101,7 +97,7 @@ combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
       Trk::MultiComponentState::const_iterator remainingComponentIterator =
         component;
 
-      for (; remainingComponentIterator != uncombinedState->end();
+      for (; remainingComponentIterator != uncombinedState.end();
            ++remainingComponentIterator) {
 
         if (remainingComponentIterator == component) {
@@ -121,7 +117,7 @@ combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
       } // end loop over remaining components
     }   // end clause if errors are involved
 
-    if (weight / totalWeight > fractionPDFused) {
+    if (weight / totalWeight > 1.0) {
       break;
     }
   } // end loop over all components
@@ -138,7 +134,7 @@ combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
 
     // Calculate the mode of the q/p distribution
     std::array<double, 10> modes =
-      Trk::MultiComponentStateModeCalculator::calculateMode(*uncombinedState);
+      Trk::MultiComponentStateModeCalculator::calculateMode(uncombinedState);
 
     //  Replace mean with mode if qOverP mode is not 0
     if (modes[4] != 0) {
@@ -213,27 +209,23 @@ combineToSingleImpl(const Trk::MultiComponentState* uncombinedState,
         loc1, loc2, phi, theta, qoverp, std::nullopt);
   }
 
-  return std::make_unique<Trk::ComponentParameters>(
-    std::move(combinedTrackParameters), totalWeight);
+  return {std::move(combinedTrackParameters), totalWeight};
 }
 
 } // end anonymous namespace
 
 std::unique_ptr<Trk::TrackParameters>
 Trk::MultiComponentStateCombiner::combineToSingle(
-  const Trk::MultiComponentState& uncombinedState,
-  const bool useMode,
-  const double fractionPDFused)
-{
-  std::unique_ptr<Trk::ComponentParameters> combinedComponent =
-    combineToSingleImpl(&uncombinedState, useMode, fractionPDFused);
-  return std::move(combinedComponent->first);
+const Trk::MultiComponentState& uncombinedState, const bool useMode) {
+  Trk::ComponentParameters combinedComponent =
+      combineToSingleImpl(uncombinedState, useMode);
+  return std::move(combinedComponent.first);
 }
 
 void
 Trk::MultiComponentStateCombiner::combineWithWeight(
-  Trk::ComponentParameters& mergeTo,
-  const Trk::ComponentParameters& addThis)
+Trk::ComponentParameters& mergeTo,
+const Trk::ComponentParameters& addThis)
 {
   const Trk::TrackParameters* firstTrackParameters = mergeTo.first.get();
   const AmgVector(5)& firstParameters = firstTrackParameters->parameters();
