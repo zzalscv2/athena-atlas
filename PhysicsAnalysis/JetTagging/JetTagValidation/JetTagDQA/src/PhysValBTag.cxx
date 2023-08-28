@@ -68,6 +68,7 @@ namespace JetTagDQA {
     declareProperty( "DL1dv00TaggerName", m_DL1dv00Name = "DL1dv00");
     declareProperty( "DL1dv01TaggerName", m_DL1dv01Name = "DL1dv01");
     declareProperty( "GN1TaggerName", m_GN1Name = "GN120220509");
+    declareProperty( "GN2v00TaggerName", m_GN2v00Name = "GN2v00");
 
   }
 
@@ -105,7 +106,7 @@ namespace JetTagDQA {
 				      m_JVTCutLargerEtaAntiKt4EMTopoJets,
 				      m_JVTCutAntiKt4EMPFlowJets,
 				      m_truthMatchProbabilityCut);
-      plot->setTaggerNames(m_dipsName, m_DL1dv00Name, m_DL1dv01Name, m_GN1Name);
+      plot->setTaggerNames(m_dipsName, m_DL1dv00Name, m_DL1dv01Name, m_GN1Name, m_GN2v00Name);
     }
    
     return StatusCode::SUCCESS;
