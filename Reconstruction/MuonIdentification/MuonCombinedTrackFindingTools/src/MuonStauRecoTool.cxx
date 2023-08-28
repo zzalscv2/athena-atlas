@@ -266,7 +266,7 @@ namespace MuonCombined {
         Muon::TimePointBetaFitter::HitVec hits;
 
         // loop over track and calculate residuals
-        const DataVector<const Trk::TrackStateOnSurface>* states = combinedTrack->trackStateOnSurfaces();
+        const Trk::TrackStates* states = combinedTrack->trackStateOnSurfaces();
         if (!states) {
             ATH_MSG_WARNING(" track without states, cannot extractTimeMeasurementsFromTrack ");
             return;
@@ -285,8 +285,8 @@ namespace MuonCombined {
         MdtChamberLayerData mdtDataPerChamberLayer;
 
         // loop over TSOSs
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
+        Trk::TrackStates::const_iterator tsit = states->begin();
+        Trk::TrackStates::const_iterator tsit_end = states->end();
         for (; tsit != tsit_end; ++tsit) {
             const Trk::TrackParameters* pars = (*tsit)->trackParameters();
             if (!pars) continue;

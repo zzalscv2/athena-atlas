@@ -998,9 +998,8 @@ void ITk::TrackClusterAssValidation::tracksComparison(const EventContext& ctx, I
 
     for (t=event_data.m_trackcontainer.back()->begin(); t!=te; ++t) {
 
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator
-	s  = (*t)->trackStateOnSurfaces()->begin(),
-	se = (*t)->trackStateOnSurfaces()->end  ();
+      Trk::TrackStates::const_iterator s = (*t)->trackStateOnSurfaces()->begin(),
+                                       se = (*t)->trackStateOnSurfaces()->end();
 
       int  NK  = 0;
       int  NC  = 0;

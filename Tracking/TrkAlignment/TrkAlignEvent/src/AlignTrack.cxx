@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/Track.h"
@@ -424,15 +424,15 @@ namespace Trk {
   {
     if (not m_trackWithoutScattering) {
 
-      const DataVector<const Trk::TrackStateOnSurface>* states = this->trackStateOnSurfaces();
+      const Trk::TrackStates* states = this->trackStateOnSurfaces();
       if (!states) return nullptr;
       
       // loop over TSOSs
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-      DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
+      Trk::TrackStates::const_iterator tsit = states->begin();
+      Trk::TrackStates::const_iterator tsit_end = states->end();
       
       // This is the list of new TSOS 
-      auto newTrackStateOnSurfaces = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+      auto newTrackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
       newTrackStateOnSurfaces->reserve( states->size() );
       
       for (; tsit!=tsit_end ; ++tsit) {

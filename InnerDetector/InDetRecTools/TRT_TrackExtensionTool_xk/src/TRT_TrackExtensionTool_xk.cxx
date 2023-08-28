@@ -303,7 +303,7 @@ InDet::TRT_TrackExtensionTool_xk::extendTrack(const EventContext& ctx,
   InDet::TRT_TrackExtensionTool_xk::EventData &
      event_data=InDet::TRT_TrackExtensionTool_xk::EventData::getPrivateEventData(virt_event_data);
   event_data.m_measurement.clear();
-  const DataVector<const Trk::TrackStateOnSurface>* tsos = Tr.trackStateOnSurfaces();
+  const Trk::TrackStates* tsos = Tr.trackStateOnSurfaces();
   const Trk::TrackParameters* par = tsos->back()->trackParameters(); //tsos owns this
   if(!par ) return event_data.m_measurement;
   const Trk::TrackParameters* parb = tsos->front()->trackParameters(); //tsos owns this
@@ -513,7 +513,7 @@ InDet::TRT_TrackExtensionTool_xk::newTrack(const EventContext& ctx,
   InDet::TRT_TrackExtensionTool_xk::EventData &
      event_data=InDet::TRT_TrackExtensionTool_xk::EventData::getPrivateEventData(virt_event_data);
 
-  const DataVector<const Trk::TrackStateOnSurface>* tsos = Tr.trackStateOnSurfaces();
+  const Trk::TrackStates* tsos = Tr.trackStateOnSurfaces();
 
   // Test conditions to start track extension to TRT
   //
@@ -542,8 +542,8 @@ bool
 InDet::TRT_TrackExtensionTool_xk::numberPIXandSCTclustersCut(const Trk::Track& Tr) const
 {
   if(m_minNumberSCT <=0 && m_minNumberPIX <=0) return true;
-  const DataVector<const Trk::TrackStateOnSurface>*tsos = Tr.trackStateOnSurfaces();
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator s = tsos->begin(), se = tsos->end();
+  const Trk::TrackStates*tsos = Tr.trackStateOnSurfaces();
+  Trk::TrackStates::const_iterator s = tsos->begin(), se = tsos->end();
   int npix = 0;
   int nsct = 0;
   for(; s!=se; ++s) {

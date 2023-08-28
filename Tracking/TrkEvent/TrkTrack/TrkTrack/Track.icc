@@ -37,7 +37,7 @@ inline Trk::TrackStates* Track::trackStateOnSurfaces() {
 }
 
 inline void Track::setTrackStateOnSurfaces(
-    std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> input) {
+    std::unique_ptr<Trk::TrackStates> input) {
   m_trackStateVector = std::move(input);
   resetCaches();
 }

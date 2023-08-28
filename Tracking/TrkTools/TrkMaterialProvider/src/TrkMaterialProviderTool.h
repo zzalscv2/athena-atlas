@@ -84,7 +84,7 @@ namespace Trk{
   private:      
 
     /** Internal method to retrieve Calorimeter TSOS from TG and apply corrections*/
-    DataVector<const Trk::TrackStateOnSurface>* 
+    Trk::TrackStates* 
       getCaloTSOS (const Trk::TrackParameters&	parm,
 		   const Trk::Track&            muonTrack,
 		   const Trk::Surface&		surf,
@@ -109,14 +109,14 @@ namespace Trk{
     void removeMS(std::vector<const Trk::TrackStateOnSurface*>* caloTSOS) const;
 
     /** Helper to update entries in the vector*/
-    static void updateVector(DataVector<const Trk::TrackStateOnSurface>* inputTSOS, 
-		      DataVector<const Trk::TrackStateOnSurface>::iterator lastID, 
-		      DataVector<const Trk::TrackStateOnSurface>::iterator firstMS, 
-		      DataVector<const Trk::TrackStateOnSurface>* caloTSOS) ;
+    static void updateVector(Trk::TrackStates* inputTSOS, 
+		      Trk::TrackStates::iterator lastID, 
+		      Trk::TrackStates::iterator firstMS, 
+		      Trk::TrackStates* caloTSOS) ;
 
     /** update the TSOS vector for the Muon Spectrometer applying X0 and Eloss scaling*/
-    void updateVectorMS(DataVector<const Trk::TrackStateOnSurface>* inputTSOS,
-                        const DataVector<const Trk::TrackStateOnSurface>::iterator& firstMS,
+    void updateVectorMS(Trk::TrackStates* inputTSOS,
+                        const Trk::TrackStates::iterator& firstMS,
                         double X0ScaleMS, double ElossScaleMS) const;
 
     //* Helper to indentify detector volume**/
@@ -125,13 +125,13 @@ namespace Trk{
     /* Helper to delete TSOS (data)vectors 
        Note that DataVector ownership is taken and elements deleted!*/
     static void deleteTSOS(const std::vector<const Trk::TrackStateOnSurface*>* vecTSOS) ;
-    static void deleteTSOS(DataVector<const Trk::TrackStateOnSurface>* vecTSOS) ;
+    static void deleteTSOS(Trk::TrackStates* vecTSOS) ;
 
     //** Helper to printout TSOS details*/
     void printTSOS(const Trk::TrackStateOnSurface* m, const std::string& tag) const;
            
     /** Function to modify TSOS doing repositioning, aggregation and corrections*/
-    DataVector<const Trk::TrackStateOnSurface>* 
+    Trk::TrackStates* 
       modifyTSOSvector(const std::vector<const Trk::TrackStateOnSurface*>* matvec, 
 		       double scaleX0, 
 		       double scaleEloss, 

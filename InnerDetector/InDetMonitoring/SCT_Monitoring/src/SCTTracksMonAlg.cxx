@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCTTracksMonAlg.h"
@@ -148,7 +148,7 @@ ATH_MSG_DEBUG("SCTTracksMonAlg::fillHistograms()");
       false, false, false
     }; // Define bools to check whether the track has barrel, EA/C hits
     // Get pointer to track state on surfaces
-    const DataVector<const Trk::TrackStateOnSurface>* trackStates{track->trackStateOnSurfaces()};
+    const Trk::TrackStates* trackStates{track->trackStateOnSurfaces()};
     if (not trackStates) {
       ATH_MSG_ERROR("for current track, TrackStateOnSurfaces == Null, no data will be written for this track");
       break;

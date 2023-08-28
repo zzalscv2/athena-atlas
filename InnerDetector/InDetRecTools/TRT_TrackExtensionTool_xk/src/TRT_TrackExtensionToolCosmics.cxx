@@ -233,7 +233,7 @@ InDet::TRT_TrackExtensionToolCosmics::extendTrack(const EventContext& ctx,
 
   if(not event_data.m_trtcontainer) return event_data.m_measurement;
 
-  const DataVector<const Trk::TrackStateOnSurface>* 
+  const Trk::TrackStates* 
     tsos = Tr.trackStateOnSurfaces();
 
   const Trk::TrackParameters* 

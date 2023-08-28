@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -479,9 +479,9 @@ namespace DerivationFramework {
         tsoss.push_back(trackState);
       } 
 
-      std::unique_ptr<const DataVector<const Trk::TrackStateOnSurface>>  holes; 
+      std::unique_ptr<const Trk::TrackStates>  holes; 
       if(m_storeHoles){
-        holes =  std::unique_ptr<const DataVector<const Trk::TrackStateOnSurface>>( m_holeSearchTool->getHolesOnTrack(*trkTrack, trkTrack->info().particleHypothesis()) ); 
+        holes =  std::unique_ptr<const Trk::TrackStates>( m_holeSearchTool->getHolesOnTrack(*trkTrack, trkTrack->info().particleHypothesis()) ); 
         for (const auto *hole: *holes){
           tsoss.push_back(hole);
         }
