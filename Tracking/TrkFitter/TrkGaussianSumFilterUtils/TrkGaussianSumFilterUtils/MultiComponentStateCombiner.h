@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,8 +23,7 @@ namespace MultiComponentStateCombiner {
 /** @bried Calculate combined state of many components */
 std::unique_ptr<Trk::TrackParameters>
 combineToSingle(const MultiComponentState&,
-                const bool useMode = false,
-                const double fractionPDFused = 1.0);
+                const bool useMode = false);
 
 /** @brief Combined/merge a component to another one */
 void
