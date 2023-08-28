@@ -21,8 +21,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CLHEP/Random/RandomEngine.h"
 
-class HGTD_TimingResolution: public AthAlgTool {
-public:
+class HGTD_TimingResolution : public AthAlgTool {
+ public:
   HGTD_TimingResolution(const std::string& type, const std::string& name,
                         const IInterface* parent);
 
@@ -32,15 +32,15 @@ public:
   void print();
 
   /** Return simulated CFD time */
-  float calculateTime(const float t, const float E, float r, CLHEP::HepRandomEngine* rndm_engine) const;
+  float calculateTime(const float t, const float E, float r,
+                      CLHEP::HepRandomEngine* rndm_engine) const;
 
   constexpr static float HGTDInitialLuminosity = 0.0;
   constexpr static float HGTDIntermediateLuminosity_pre_Replacement = 2000.0;
   constexpr static float HGTDIntermediateLuminosity_post_Replacement = 2001.0;
   constexpr static float HGTDFinalLuminosity = 4000.0;
 
-private:
-
+ private:
   typedef std::array<float, 400> PulseWaveform;  //<! Signal Pulse
 
   // checks
@@ -52,7 +52,8 @@ private:
 
   float resolution(float) const;
   float gain(float) const;
-  float sensorResolution() const;
+  float electronicJitter() const;
+  float sensorResolution(float radius) const;
 
   float translateR2Eta(float) const;
   float translateEta2R(float) const;
@@ -68,8 +69,9 @@ private:
 
   /** Calculate the pulse as a vector of float (400 points) */
   void calculatePulse(const PulseWaveform& pulseWaveform,
-                      std::map<int, std::pair<float, float>> &pulsebin,
-                      float t, float E, float *max, CLHEP::HepRandomEngine* rndm_engine) const;
+                      std::map<int, std::pair<float, float>>& pulsebin, float t,
+                      float E, float* max,
+                      CLHEP::HepRandomEngine* rndm_engine) const;
 
   std::string m_version{""};
 
@@ -77,9 +79,11 @@ private:
   float m_Rmax{670.};
   float m_z{3500.};
 
-  FloatProperty m_integratedLumi{this, "IntegratedLuminosity", 0., "Integrated Luminosity for smearing of LGAD timing based on amount of radiation"};
+  FloatProperty m_integratedLumi{this, "IntegratedLuminosity", 0.,
+                                 "Integrated Luminosity for smearing of LGAD "
+                                 "timing based on amount of radiation"};
 
-  float m_sensorResolution{};
+  float m_electronicJitter{};
 
   std::vector<int> m_radii{};
   // Inner ring is replaced every 1 ab-1, middle ring replaced every 2 ab-1,
@@ -96,10 +100,10 @@ private:
   std::vector<std::pair<float, float>> m_doseGain{};
 
   const float m_sensorNoiseFactor =
-      0.0229; // factor use to simulate the electronic noise (1mm*1mm)
+      0.0229;  // factor use to simulate the Landau fluctuation (1mm*1mm)
 
-  const float m_cfdThreshold = 0.5; // fraction of max amplitude at which the time is
-                                    // extracted (default: 50%)
+  const float m_cfdThreshold = 0.5;  // fraction of max amplitude at which the
+                                     // time is extracted (default: 50%)
 };
 
 #endif
