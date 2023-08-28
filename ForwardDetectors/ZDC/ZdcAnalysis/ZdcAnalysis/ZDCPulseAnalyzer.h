@@ -67,8 +67,8 @@ private:
   //
   ZDCMsg::MessageFunctionPtr m_msgFunc_p;
   std::string m_tag;
-  size_t m_Nsample;
-  size_t m_preSampleIdx;
+  unsigned int m_Nsample;
+  unsigned int m_preSampleIdx;
   float m_deltaTSample;
   int m_pedestal;
   float m_gainHG;
