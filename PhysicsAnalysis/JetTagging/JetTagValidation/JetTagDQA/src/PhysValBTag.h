@@ -115,6 +115,7 @@ namespace JetTagDQA {
     std::string m_DL1dv00Name;
     std::string m_DL1dv01Name;
     std::string m_GN1Name;
+    std::string m_GN2v00Name;
 
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
