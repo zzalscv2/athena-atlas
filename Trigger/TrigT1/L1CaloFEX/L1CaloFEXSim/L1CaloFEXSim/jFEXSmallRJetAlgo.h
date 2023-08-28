@@ -45,10 +45,17 @@ namespace LVL1 {
     virtual unsigned int getSmallClusterET() const override;
     virtual unsigned int getSmallETRing() const override;
     virtual unsigned int getTTIDcentre() const override;
+    virtual bool getSRjetSat() const override;
     virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map) override;
     
   private:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
+        SG::ReadHandle<jTowerContainer> m_jTowerContainer;
+        
+        void calcSaturation();
+        bool getTTowerSat(unsigned int TTID );
+        bool m_JetSaturation = false;
+        
         int m_jFEXalgoTowerID[7][7] = {{0}};
         int m_jFEXalgoTowerID_displaced[7][7] = {{0}};
         int m_jFEXalgoSearchWindowSeedET[5][5] = {{0}};

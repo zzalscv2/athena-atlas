@@ -34,6 +34,11 @@ class jFEXForwardJetsInfo {
         void setCentreTTPhi(float centreTTPhi);
         float getCentreTTPhi();
 
+        void setSRjetSat(){m_saturation_SR = true;};
+        void setLRjetSat(){m_saturation_LR = true;};
+        bool getSRjetSat(){return m_saturation_SR;};
+        bool getLRjetSat(){return m_saturation_LR;};
+
         void  setCentreLocalTTEta(float centreLocalTTEta);
         float getCentreLocalTTEta();
         void  setCentreLocalTTPhi(float centreLocalTTPhi);
@@ -69,6 +74,9 @@ class jFEXForwardJetsInfo {
 
         int m_centreLocalTTPhi;
         int m_centreLocalTTEta;
+        
+        bool m_saturation_SR = false;
+        bool m_saturation_LR = false;
 
         int m_seed_ET =0;
         int m_SearchWindow_ET =0;

@@ -40,11 +40,13 @@ StatusCode LVL1::jFEXLargeRJetAlgo::initialize()
 }
 
 StatusCode LVL1::jFEXLargeRJetAlgo::safetyTest() {
-    SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
-    if(! jTowerContainer.isValid()) {
-        ATH_MSG_ERROR("Could not retrieve container " << m_jTowerContainerKey.key());
+    m_jTowerContainer = SG::ReadHandle<jTowerContainer>(m_jTowerContainerKey);
+    if(! m_jTowerContainer.isValid()) {
+        ATH_MSG_ERROR("Could not retrieve jTowerContainer " << m_jTowerContainerKey.key());
+
         return StatusCode::FAILURE;
     }
+
     return StatusCode::SUCCESS;
 }
 
@@ -54,17 +56,25 @@ void LVL1::jFEXLargeRJetAlgo::setupCluster(int inputTable[15][15]){
 
 }
 
-unsigned int LVL1::jFEXLargeRJetAlgo::getRingET(){
-  int RingET =0;
-  for(int n =0; n <15; n++){
-    for(int m =0; m <15; m++){
-      if((m_largeRJetEtRing_IDs[n][m]) != 0){
-        int et = getTTowerET(m_largeRJetEtRing_IDs[n][m]);
-        RingET +=et;
-      }
+unsigned int LVL1::jFEXLargeRJetAlgo::getRingET() {
+    int RingET =0;
+    for(int n =0; n <15; n++) {
+        for(int m =0; m <15; m++) {
+            int et = getTTowerET(m_largeRJetEtRing_IDs[n][m]);
+            RingET +=et;
+        }
     }
-  }
-  return RingET;
+    return RingET;
+}
+
+bool LVL1::jFEXLargeRJetAlgo::getLRjetSat() {
+    m_saturation = false;
+    for(int n =0; n <15; n++) {
+        for(int m =0; m <15; m++) {
+            m_saturation = m_saturation || getTTowerSat(m_largeRJetEtRing_IDs[n][m]);
+        }
+    }
+    return m_saturation;
 }
 
 unsigned int LVL1::jFEXLargeRJetAlgo::getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET){
@@ -86,6 +96,16 @@ int LVL1::jFEXLargeRJetAlgo::getTTowerET(unsigned int TTID ) {
     //we shouldn't arrive here
     return 0;
     
+}
+
+//getter for tower saturation
+bool LVL1::jFEXLargeRJetAlgo::getTTowerSat(unsigned int TTID ) {
+    if(TTID == 0) {
+        return false;
+    } 
+    
+    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
+    return tmpTower->getTowerSat();
 }
 
 

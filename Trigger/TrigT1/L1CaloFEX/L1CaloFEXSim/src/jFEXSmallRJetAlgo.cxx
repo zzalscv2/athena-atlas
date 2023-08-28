@@ -42,13 +42,13 @@ StatusCode LVL1::jFEXSmallRJetAlgo::initialize()
 //calls container for TT
 StatusCode LVL1::jFEXSmallRJetAlgo::safetyTest(){
 
-  SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey);
-
-  if(! jTowerContainer.isValid()){
-    ATH_MSG_ERROR("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
+    m_jTowerContainer = SG::ReadHandle<jTowerContainer>(m_jTowerContainerKey);
+    if(! m_jTowerContainer.isValid()) {
+        ATH_MSG_ERROR("Could not retrieve  jTowerContainer " << m_jTowerContainerKey.key());
+        return StatusCode::FAILURE;
+    }
+    
+    return StatusCode::SUCCESS;
 }
 
 void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7], int inputTableDisplaced[7][7]) {
@@ -142,6 +142,7 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     ( getTTowerET(m_jFEXalgoTowerID[3][3]) > getTTowerET(m_jFEXalgoTowerID[2][4]) && m_jFEXalgoSearchWindowSeedET[2][2] == m_jFEXalgoSearchWindowSeedET[1][3]);
     
     if(isCentralLM || isDisplacedLM ){
+        calcSaturation();
         return true;
     }
     return false;
@@ -163,6 +164,22 @@ unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() const {
     return SRJetClusterET;
 }
 
+void LVL1::jFEXSmallRJetAlgo::calcSaturation() {
+
+    m_JetSaturation = false;
+    for(int nphi = -3; nphi< 4; nphi++) {
+        for(int neta = -3; neta< 4; neta++) {
+            int DeltaRSquared = std::pow(nphi,2)+std::pow(neta,2);
+            if(DeltaRSquared < 16) {
+                m_JetSaturation = m_JetSaturation || getTTowerSat(m_jFEXalgoTowerID[3+nphi][3+neta]);
+            }
+        }
+    }
+}
+
+bool LVL1::jFEXSmallRJetAlgo::getSRjetSat() const {
+    return m_JetSaturation;
+}
 
 unsigned int LVL1::jFEXSmallRJetAlgo::getSmallETRing() const {
   int SmallETRing = getSmallClusterET() - m_jFEXalgoSearchWindowSeedET[3][3];   
@@ -176,6 +193,16 @@ unsigned int LVL1::jFEXSmallRJetAlgo::getTTIDcentre() const {
 
 void LVL1::jFEXSmallRJetAlgo::setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map){
     m_map_Etvalues=et_map;
+}
+
+//getter for tower saturation
+bool LVL1::jFEXSmallRJetAlgo::getTTowerSat(unsigned int TTID ) {
+    if(TTID == 0) {
+        return false;
+    } 
+    
+    const LVL1::jTower * tmpTower = m_jTowerContainer->findTower(TTID);
+    return tmpTower->getTowerSat();
 }
 
 }// end of namespace LVL1

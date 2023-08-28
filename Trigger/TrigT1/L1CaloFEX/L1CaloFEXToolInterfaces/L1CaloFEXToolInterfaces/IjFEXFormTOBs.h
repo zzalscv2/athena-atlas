@@ -26,11 +26,11 @@ Interface definition for eFEXFormTOBs
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual uint32_t formTauTOB  (int, int, int, int, int, int, int) = 0;
-    virtual uint32_t formSRJetTOB(int, int, int, int, int, int) = 0;
-    virtual uint32_t formLRJetTOB(int, int, int, int, int, int) = 0;
-    virtual uint32_t formSumETTOB(int, int, int ) = 0;
-    virtual uint32_t formMetTOB  (int, int, int ) = 0;
+    virtual uint32_t formTauTOB  (int, int, int, int, int, bool, int, int) = 0;
+    virtual uint32_t formSRJetTOB(int, int, int, int, bool, int, int) = 0;
+    virtual uint32_t formLRJetTOB(int, int, int, int, bool, int, int) = 0;
+    virtual uint32_t formSumETTOB(std::tuple<int,bool>&, std::tuple<int,bool>&, int ) = 0;
+    virtual uint32_t formMetTOB  (int, int, bool, int ) = 0;
 
   private:
 
