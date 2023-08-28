@@ -18,6 +18,8 @@
 #include <xAODMuon/MuonContainer.h>
 #include <xAODPFlow/FlowElementContainer.h>
 
+class EventContext;
+
 namespace CP {
     class IIsolationCloseByCorrectionTool : public virtual asg::IAsgTool {
         ASG_TOOL_INTERFACE(CP::IIsolationCloseByCorrectionTool)
@@ -40,9 +42,7 @@ namespace CP {
         // writes them out as a new decoration of the particles. This requires a suffix to be specified for the new decoration, otherwise 
         // an ERROR will be returned.
         virtual CorrectionCode getCloseByIsoCorrection (
-#ifndef XAOD_ANALYSIS
                                                         const EventContext& ctx,
-#endif
                                                         const xAOD::ElectronContainer* Electrons = nullptr, 
                                                         const xAOD::MuonContainer* Muons = nullptr,
                                                         const xAOD::PhotonContainer* Photons = nullptr

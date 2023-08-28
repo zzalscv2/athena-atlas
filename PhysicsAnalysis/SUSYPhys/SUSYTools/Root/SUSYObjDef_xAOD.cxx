@@ -16,6 +16,9 @@
 // Need path resolver for initialize()
 #include "PathResolver/PathResolver.h"
 
+#include "AsgTools/CurrentContext.h"
+
+
 // Including all the abstract interfaces - for systematics functions
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
@@ -2865,7 +2868,7 @@ StatusCode SUSYObjDef_xAOD::OverlapRemoval(const xAOD::ElectronContainer *electr
 StatusCode SUSYObjDef_xAOD::NearbyLeptonCorrections(xAOD::ElectronContainer *electrons, xAOD::MuonContainer *muons) const {
   // This getCloseByIsoCorrection is computationally less expensive and actually corrects the isoaltion
   // variables from the contribution of the close by leptons
-  if (m_isoCloseByTool->getCloseByIsoCorrection(electrons,muons) != CP::CorrectionCode::Ok) {
+  if (m_isoCloseByTool->getCloseByIsoCorrection(Gaudi::Hive::currentContext(), electrons,muons) != CP::CorrectionCode::Ok) {
         return StatusCode::FAILURE;
   }
   // All done, all good :-)

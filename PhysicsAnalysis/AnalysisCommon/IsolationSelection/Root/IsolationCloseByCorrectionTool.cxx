@@ -13,6 +13,7 @@
 #include <xAODPrimitives/IsolationHelpers.h>
 #include <xAODPrimitives/tools/getIsolationAccessor.h>
 #include <xAODPrimitives/tools/getIsolationCorrectionAccessor.h>
+#include "AsgTools/CurrentContext.h"
 
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
@@ -244,21 +245,14 @@ namespace CP {
     #endif // xAOD
 
     CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection (
-#ifndef XAOD_ANALYSIS
-                                                                            const EventContext& ctx,
-#endif
-                                                                            const xAOD::ElectronContainer* electrons, 
-                                                                            const xAOD::MuonContainer* muons,
-                                                                            const xAOD::PhotonContainer* photons) const {
+     const EventContext& ctx,
+     const xAOD::ElectronContainer* electrons, 
+     const xAOD::MuonContainer* muons,
+     const xAOD::PhotonContainer* photons) const {
         if (!m_isInitialised) {
             ATH_MSG_ERROR("The IsolationCloseByCorrectionTool was not initialised!!!");
             return CorrectionCode::Error;
         }
-
-#ifdef XAOD_ANALYSIS
-        const EventContext& ctx = Gaudi::Hive::currentContext();
-#endif
-
         ObjectCache cache{};
         /// Pick up first all objects that a considerable for the close-by correction
         loadPrimaryParticles(electrons, cache);
