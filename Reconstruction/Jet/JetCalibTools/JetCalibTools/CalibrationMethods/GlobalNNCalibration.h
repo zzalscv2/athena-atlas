@@ -6,28 +6,19 @@
 #ifndef JetCalibTools_GlobalNNCalibration_H
 #define JetCalibTools_GlobalNNCalibration_H
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <map>
-#include <tuple>
 #include "TH1.h"
-#include "TList.h"
-
-//xAOD EDM classes
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODJet/JetContainer.h"
-
-
-// Other packages includes
-#include "lwtnn/LightweightNeuralNetwork.hh"
-#include "lwtnn/parse_json.hh"
+#include "TString.h"
 #include "lwtnn/LightweightGraph.hh"
 
 // Local includes
-#include "JetCalibTools/IJetCalibrationTool.h"
 #include "JetCalibTools/JetCalibrationStep.h"
+#include <string>
+#include <vector>
+#include <map>
+#include <memory>
+
+class JetEventInfo;
+class TEnv;
 
 
 /**
@@ -160,14 +151,14 @@ class GlobalNNCalibration : virtual public ::JetCalibrationStep {
   std::vector<TString> m_NNInputs;
 
   
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo;
   std::string m_calibAreaTag;
-  bool m_dev;
-  bool m_doSplineCorr;
-  bool m_doLogPtScaling;
-  double m_minNNCorrection;
-  double m_maxNNCorrection;
+  bool m_dev{};
+  bool m_doSplineCorr{true};
+  bool m_doLogPtScaling{};
+  double m_minNNCorrection{};
+  double m_maxNNCorrection{};
 
   std::vector<double> m_JPtS_MinPt_Slopes;
   std::vector<double> m_JPtS_MinPt_Pt;
