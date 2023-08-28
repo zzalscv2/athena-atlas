@@ -29,8 +29,8 @@ namespace Trk {
 
     @author Andreas.Salzburger@cern.ch
 
-     Class inheriting from HepVector for 1-5 dimensional parameter vectors.
-     It holds a  static const projection matrices set
+     Class inheriting from Amg::VectorX for 1-5 dimensional parameter vectors.
+     It uses a static const projection matrices set
      for expanding the actual dimension to 5 dimension,
      respectively reducing a 5 dimensional object to the actual dimension of
      this object.
@@ -99,8 +99,7 @@ namespace Trk {
 
     public:
       /**Default constructor used for POOL */
-      LocalParameters();
-
+      LocalParameters() = default;
       //default other operations
       LocalParameters(const LocalParameters&) = default;
       LocalParameters(LocalParameters&&) = default;
@@ -177,8 +176,7 @@ namespace Trk {
 
     protected:
      friend class ::LocalParametersCnv_p1;
-     int    m_parameterkey;
-
+     int m_parameterkey = 0;
   };
 
 } // end of namespace

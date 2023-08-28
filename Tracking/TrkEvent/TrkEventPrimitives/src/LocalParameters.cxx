@@ -17,11 +17,6 @@ namespace {
 const Trk::ProjectionMatricesSet s_projectionMatrices(5);
 }
 
-Trk::LocalParameters::LocalParameters() :
-  Amg::VectorX(1),
-  m_parameterkey(0)
-{}
-
 Trk::LocalParameters::LocalParameters(const Trk::DefinedParameter& par1)
     : Amg::VectorX(1), m_parameterkey(0) {
   Amg::VectorX::operator[](0) = par1.first;
