@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,26 +11,11 @@
 #include "TrkEventUtils/PrepRawDataComparisonFunction.h"
 #include "TrkEventUtils/TrackStateOnSurfaceComparisonFunction.h"
 #include "TrkExInterfaces/IExtrapolator.h"
-#include "TrkFitterUtils/MeasBaseIndexComparisonFunction.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkToolInterfaces/IUpdator.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackStateOnSurface.h"
-
-// using __gnu_cxx::is_sorted;
-
-Trk::TrackFitInputPreparator::TrackFitInputPreparator()
-  : m_sortingRefPoint(0., 0., 0.)
-{
-}
-
-Trk::TrackFitInputPreparator::TrackFitInputPreparator(
-  const Amg::Vector3D& gp)
-  : m_sortingRefPoint(gp)
-{
-}
-
 
 
 // fill a new track object from track+measurements using flags for sorting and
@@ -77,13 +62,12 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
     }
 
   if (doSorting) {
-    Trk::TrackStateOnSurfaceComparisonFunction* CompFunc =
-      new Trk::TrackStateOnSurfaceComparisonFunction(
-        (*inputTrk.trackParameters()->begin())->momentum());
-    if (!__gnu_cxx::is_sorted(
-          newListOfStates->begin(), newListOfStates->end(), *CompFunc))
-      std::sort(newListOfStates->begin(), newListOfStates->end(), *CompFunc);
-    delete CompFunc;
+    Trk::TrackStateOnSurfaceComparisonFunction CompFunc =
+        Trk::TrackStateOnSurfaceComparisonFunction(
+            (*inputTrk.trackParameters()->begin())->momentum());
+    if (!std::is_sorted(newListOfStates->begin(), newListOfStates->end(),
+                              CompFunc))
+      std::sort(newListOfStates->begin(), newListOfStates->end(), CompFunc);
   }
   TrackInfo info;
   return new Trk::Track(info, std::move(newListOfStates), nullptr);
@@ -94,12 +78,8 @@ Trk::TrackFitInputPreparator::copyToTrack(const Trk::Track& inputTrk,
 Trk::MeasurementSet
 Trk::TrackFitInputPreparator::stripMeasurements(
   const Trk::Track& inputTrk,
-  const Trk::MeasurementSet& inputMbs,
-  const SortInputFlag /*doSorting*/,
-  const bool /*reintegrateOutliers*/)
+  const Trk::MeasurementSet& inputMbs)
 {
-  // FIXME do sorting and outlier treatment
-
   MeasurementSet newMbSet;
   // collect MBs from Track (speed: assume use for extending track at end)
   DataVector<const MeasurementBase>::const_iterator it =
@@ -133,8 +113,12 @@ Trk::TrackFitInputPreparator::stripPrepRawData(
   for (; it != inputTrk.trackStateOnSurfaces()->end(); ++it) {
     if ((*it)->measurementOnTrack() &&
         (!((*it)->type(TrackStateOnSurface::Outlier)) || reintegrateOutliers)) {
-      const Trk::RIO_OnTrack* rot =
-        dynamic_cast<const Trk::RIO_OnTrack*>((*it)->measurementOnTrack());
+
+      const Trk::RIO_OnTrack* rot = nullptr;
+      if ((*it)->measurementOnTrack()->type(
+              Trk::MeasurementBaseType::RIO_OnTrack)) {
+        rot = static_cast<const Trk::RIO_OnTrack*>((*it)->measurementOnTrack());
+      }
       if (rot) {
         const PrepRawData* prepRD = rot->prepRawData();
         if (prepRD) {
@@ -153,7 +137,7 @@ Trk::TrackFitInputPreparator::stripPrepRawData(
       (*inputTrk.trackParameters()->begin())->position(),
       (*inputTrk.trackParameters()->begin())->momentum());
 
-    if (!is_sorted(newPrdSet.begin(), newPrdSet.end(), PRD_CompFunc))
+    if (!std::is_sorted(newPrdSet.begin(), newPrdSet.end(), PRD_CompFunc))
       std::sort(newPrdSet.begin(), newPrdSet.end(), PRD_CompFunc);
   }
   return newPrdSet;

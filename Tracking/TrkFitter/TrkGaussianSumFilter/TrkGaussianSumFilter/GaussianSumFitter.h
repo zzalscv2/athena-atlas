@@ -20,7 +20,6 @@
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkFitterUtils/FitterTypes.h"
-#include "TrkFitterUtils/TrackFitInputPreparator.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
@@ -220,7 +219,6 @@ private:
 
   PropDirection m_directionToPerigee;
   TrkParametersComparisonFunction m_trkParametersComparisonFunction;
-  std::unique_ptr<TrackFitInputPreparator> m_inputPreparator;
   std::vector<double> m_sortingReferencePoint;
 
   // Counters for fit statistics
