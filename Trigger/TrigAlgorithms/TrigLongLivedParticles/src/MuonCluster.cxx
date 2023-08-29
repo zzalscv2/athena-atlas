@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -235,7 +235,12 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     nRoIinClusters = nRoisInClu;
     nClusters = n_cl;
 
-    // cppcheck-suppress [negativeIndex] (we checked above that roiCollection->size() >=2)
+    // Should never happen (we checked above that roiCollection->size() >=2),
+    // but otherwise we get warnings from cppcheck.
+    if (sel_cl < 0) {
+      return StatusCode::FAILURE;
+    }
+
     dPhi_cluSeed = CxxUtils::wrapToPi(muonClu0[sel_cl].phi)-CxxUtils::wrapToPi(muonClu[sel_cl].phi);
     dEta_cluSeed = muonClu0[sel_cl].eta-muonClu[sel_cl].eta;
     dR_cluSeed   = DeltaR(muonClu0[sel_cl],muonClu[sel_cl]);
