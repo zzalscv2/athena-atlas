@@ -1024,13 +1024,15 @@ def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
 # Function to set the number of cores and the running mode in the run card
 def setNCores(process_dir, Ncores=None):
     my_Ncores = Ncores
+    my_runMode = 2 if 'ATHENA_PROC_NUMBER' in os.environ else 0
     if Ncores is None and 'ATHENA_PROC_NUMBER' in os.environ and int(os.environ['ATHENA_PROC_NUMBER'])>0:
         my_Ncores = int(os.environ['ATHENA_PROC_NUMBER'])
+        my_runMode = 2
     if my_Ncores is None:
         mglog.info('Setting up for serial run')
         my_Ncores = 1
 
-    modify_config_card(process_dir=process_dir,settings={'nb_core':my_Ncores,'run_mode':(0 if my_Ncores==1 else 2),'automatic_html_opening':'False'})
+    modify_config_card(process_dir=process_dir,settings={'nb_core':my_Ncores,'run_mode':my_runMode,'automatic_html_opening':'False'})
 
 
 def resetLHAPDF(origLHAPATH='',origLHAPDF_DATA_PATH=''):
