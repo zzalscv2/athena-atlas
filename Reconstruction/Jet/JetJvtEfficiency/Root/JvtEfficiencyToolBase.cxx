@@ -14,8 +14,9 @@ namespace {
         return (bin != 0 && bin != axis.GetNbins());
     }
     bool getBinContentAndError(const TH2 &h, float x, float y, float &content, float &error) {
-        int xBin, yBin;
+        int xBin{}, yBin{};
         if (!getBin(*h.GetXaxis(), x, xBin) || !getBin(*h.GetYaxis(), y, yBin)) {
+
             content = -1;
             error = -1;
             return false;
