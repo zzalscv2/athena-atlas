@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_StrawStatusSummaryTool.cxx
@@ -33,15 +33,6 @@ StatusCode TRT_StrawStatusSummaryTool::initialize()
 
   // Only require this input if not using G4 sim
   ATH_CHECK( m_statHTReadKey.initialize( !m_isGEANT4 ) );
-
-  // G4sim
-  if ( m_isGEANT4 ) {
-    // processing GEANT4 simulation - revert to old non-MT style cond access
-    if ( StatusCode::SUCCESS!=detStore()->retrieve( m_strawstatusHTG4, m_par_strawstatusHTcontainerkey ) ) {
-      ATH_MSG_FATAL( "Could not retrieve folder " << m_par_strawstatusHTcontainerkey );
-      return StatusCode::FAILURE;
-    }
-  }
 
   ATH_MSG_DEBUG("TRT_StrawStatusSummaryTool initialized successfully  ");
   return StatusCode::SUCCESS;
@@ -91,9 +82,12 @@ int TRT_StrawStatusSummaryTool::getStatusHT(Identifier offlineID, const EventCon
 								m_trtId->phi_module(offlineID),m_trtId->straw_layer(offlineID),
 								m_trtId->straw(offlineID),level );
 
-  const StrawStatusContainer* strawstatusHTcontainer;
+  const StrawStatusContainer* strawstatusHTcontainer = nullptr;
   if(m_isGEANT4) {
-    strawstatusHTcontainer=m_strawstatusHTG4.cptr();
+    if ( StatusCode::SUCCESS!=detStore()->retrieve( strawstatusHTcontainer, m_par_strawstatusHTcontainerkey ) ) {
+      ATH_MSG_FATAL( "Could not retrieve folder " << m_par_strawstatusHTcontainerkey );
+      return 0;
+    }
   }
   else {
     SG::ReadCondHandle<StrawStatusContainer> rht(m_statHTReadKey,ctx);
@@ -105,9 +99,12 @@ int TRT_StrawStatusSummaryTool::getStatusHT(Identifier offlineID, const EventCon
 
 const TRTCond::StrawStatusMultChanContainer* TRT_StrawStatusSummaryTool::getStrawStatusHTContainer() const{
 
-  const StrawStatusContainer* strawstatusHTcontainer;
+  const StrawStatusContainer* strawstatusHTcontainer = nullptr;
   if(m_isGEANT4) {
-    strawstatusHTcontainer=m_strawstatusHTG4.cptr();
+    // processing GEANT4 simulation - revert to old non-MT style cond access
+    if ( StatusCode::SUCCESS!=detStore()->retrieve( strawstatusHTcontainer, m_par_strawstatusHTcontainerkey ) ) {
+      ATH_MSG_FATAL( "Could not retrieve folder " << m_par_strawstatusHTcontainerkey );
+    }
   }
   else {
     SG::ReadCondHandle<StrawStatusContainer> rht(m_statHTReadKey,Gaudi::Hive::currentContext());
