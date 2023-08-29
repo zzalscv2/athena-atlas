@@ -113,7 +113,14 @@ StatusCode GepClusteringAlg::execute(const EventContext& ctx) const {
     ptr->setEta(gepclus.vec.Eta());
     ptr->setPhi(gepclus.vec.Phi());
     ptr->setTime(gepclus.time);
+
+    CaloClusterCellLink *cccl = new CaloClusterCellLink();
+    for (auto cell_id : gepclus.cell_id) 
+        cccl->addCell(cell_map->at(cell_id).index, 1.0);
+
+    ptr->addCellLink(cccl);
   }
+  
     
   return StatusCode::SUCCESS;
 }
