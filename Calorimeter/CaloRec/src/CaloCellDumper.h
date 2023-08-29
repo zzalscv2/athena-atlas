@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -24,8 +24,10 @@ class CaloCellDumper: public AthAlgorithm {
 
 private:
   std::ofstream m_outfile;
+  std::ifstream m_reffile;
   SG::ReadHandleKey<CaloCellContainer> m_key{this,"InputContainer","AllCalo","Input CaloCellContainer key"};
   Gaudi::Property<std::string> m_fileName{this,"FileName","CaloCells.txt","Name of the output text file"};
+  Gaudi::Property<std::string> m_refName{this,"RefName","","Name of reference file to which cells are to be compared."};
   Gaudi::Property<float> m_eCut{this,"EnergyCut",std::numeric_limits<float>::lowest(),"Energy cut for cell dumping"};
   Gaudi::Property<bool> m_compact{this,"Compact",true,"compact or detailed cell identifer"};
 

@@ -91,15 +91,12 @@ if __name__=="__main__":
     acc=CaloCellMakerCfg(flags)
     acc.getPrimary().CaloCellsOutputName="AllCaloNew"
     cfg.merge(acc)
-    
-    from AthenaCommon.SystemOfUnits import GeV
-    cfg.addEventAlgo(CompFactory.CaloCellDumper(InputContainer="AllCaloNew",EnergyCut=2*GeV),sequenceName="AthAlgSeq")
 
-    #cfg.getService("StoreGateSvc").Dump=True
+    import sys, os
+    thisdir = os.path.dirname (sys.argv[0])
+    from AthenaCommon.SystemOfUnits import GeV
+    cfg.addEventAlgo(CompFactory.CaloCellDumper(InputContainer="AllCaloNew",EnergyCut=2*GeV,
+                                                RefName=os.path.join (thisdir, '../share/CaloCells.txt.ref')),sequenceName="AthAlgSeq")
+
     cfg.run(5)
 
-    #f=open("CaloCellMaker.pkl","wb")
-    #cfg.store(f)
-    #f.close()
-
-    #flags.dump()
