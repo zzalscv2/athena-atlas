@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1TGCRECROITOOL_H
@@ -58,14 +58,14 @@ namespace LVL1 {
 			    int & wireSLBId,
 			    int & block ) const;
       
-      std::unique_ptr<TGCIdBase> getWireASDOut(TGCIdBase tgcIdBase,
+      std::unique_ptr<TGCIdBase> getWireASDOut(const TGCIdBase& tgcIdBase,
 					       unsigned int sectorID,
 					       int wireSLBId,
 					       int block,
 					       int phi ,
 					       int offset) const;
       
-      std::unique_ptr<TGCIdBase> getStripASDOut(TGCIdBase tgcIdBase,
+      std::unique_ptr<TGCIdBase> getStripASDOut(const TGCIdBase& tgcIdBase,
 						unsigned int sectorID,
 						int wireSLBId,
 						int block,
