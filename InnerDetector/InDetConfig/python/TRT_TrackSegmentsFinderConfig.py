@@ -5,7 +5,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 import AthenaCommon.SystemOfUnits as Units
 
 def TRT_TrackSegmentsFinderCfg(
-        flags, name = 'InDetTRT_TrackSegmentsFinder', **kwargs):
+        flags, name = 'InDetTRT_TrackSegmentsFinder',
+        InputCollections = None, **kwargs):
 
     from MagFieldServices.MagFieldServicesConfig import (
         AtlasFieldCacheCondAlgCfg)
@@ -15,7 +16,8 @@ def TRT_TrackSegmentsFinderCfg(
         from InDetConfig.TRT_TrackSegmentsToolConfig import (
             TRT_TrackSegmentsMaker_ATLxkCfg)
         InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
-            TRT_TrackSegmentsMaker_ATLxkCfg(flags))
+            TRT_TrackSegmentsMaker_ATLxkCfg(flags,
+                                            InputCollections = InputCollections))
         kwargs.setdefault("SegmentsMakerTool", InDetTRT_TrackSegmentsMaker)
 
     if "RoadTool" not in kwargs:
