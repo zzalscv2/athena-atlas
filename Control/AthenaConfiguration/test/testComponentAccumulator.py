@@ -378,7 +378,7 @@ class ErrorForUnmerged( unittest.TestCase ):
         with self.assertLogs(topCA._msg, level='ERROR') as cm:
             topCA.addEventAlgo(CompFactory.HelloAlg())
             del topCA
-        self.assertIn('This ComponentAccumulator was never merged', cm.output[0])
+        self.assertIn('ComponentAccumulator was never merged', cm.output[0])
 
 
 class MergeMovingAlgorithms( unittest.TestCase ):

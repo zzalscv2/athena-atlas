@@ -15,7 +15,7 @@ from AthenaConfiguration.Deduplication import deduplicate, deduplicateOne, Dedup
 from AthenaConfiguration.DebuggingContext import (Context, raiseWithCurrentContext, shortCallStack,
                                                   createContextForDeduplication)
 
-
+import atexit
 from collections import OrderedDict
 from collections.abc import Sequence
 import sys
@@ -28,6 +28,11 @@ _basicServicesToCreateOrder=("CoreDumpSvc/CoreDumpSvc",
                              "GeoModelSvc/GeoModelSvc",
                              "DetDescrCnvSvc/DetDescrCnvSvc")
 
+# Disable check of unmerged CA if we are exiting. This avoids an error on exceptions but
+# also the need to mark CAs as merged in top-level scripts (e.g. unit tests).
+def __exit():
+    ComponentAccumulator._checkUnmerged = False
+atexit.register(__exit)
 
 def printProperties(msg, c, nestLevel = 0, printDefaults=False, onlyComponentsOnly=False):
     # Iterate in sorted order.
@@ -85,6 +90,8 @@ class ComponentAccumulator:
     # trackCA - to track CA creation,
     # track[EventAlgo|CondAlgo|PublicTool|PrivateTool|Service|Sequence] - to track categories components addition
     debugMode=""
+    _checkUnmerged = True
+
     def __init__(self,sequence='AthAlgSeq'):
         # Ensure that we are not operating in the legacy Athena Configurable mode
         # where only a single global instance exists
@@ -137,7 +144,7 @@ class ComponentAccumulator:
         self._isMergable = False
 
     def _inspect(self): #Create a string some basic info about this CA, useful for debugging
-        summary = "This CA contains {0} service(s), {1} conditions algorithm(s), {2} event algorithm(s) and {3} public tool(s)\n"\
+        summary = "This CA contains {0} service(s), {1} conditions algorithm(s), {2} event algorithm(s) and {3} public tool(s):\n"\
             .format(len(self._services),len(self._conditionsAlgs),len(self._algorithms),len(self._publicTools))
 
         if self._privateTools:
@@ -171,12 +178,9 @@ class ComponentAccumulator:
                 len(self._publicTools)+len(self._theAppProps) == 0)
 
     def __del__(self):
-         if not getattr(self,'_wasMerged',True) and not self.empty() and sys.exc_info()[0] is None:
+         if self._checkUnmerged and not getattr(self,'_wasMerged',True) and not self.empty():
              log = logging.getLogger("ComponentAccumulator")
-             log.error("This ComponentAccumulator was never merged!")
-             if "trackCA" not in ComponentAccumulator.debugMode:
-                 log.error("Setting ComponentAccumulator.debugMode = 'trackCA' may help finding place of creation")
-             log.error(self._inspect().replace("\n", " "))
+             log.error("ComponentAccumulator was never merged. %s\n", self._inspect())
              import traceback
              traceback.print_stack()
          if getattr(self,'_privateTools',None) is not None:
