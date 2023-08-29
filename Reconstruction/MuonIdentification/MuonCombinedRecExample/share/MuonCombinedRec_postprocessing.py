@@ -41,9 +41,6 @@ if rec.doTruth() and muonCombinedRecFlags.doxAOD() and rec.doMuonCombined():
         colsTP+= ["CombinedMuonsLRTTrackParticles", "ExtraPolatedMuonsLRTTrackParticles"]
         cols += ["CombinedMuonsLRTTracks", "ExtraPolatedMuonsLRTTracks"]
     
-    if muonRecFlags.runCommissioningChain():
-        cols +=["EMEO_MSOnlyExtrapolatedTracks", "EMEO_ExtrapolatedMuonTracks", "EMEO_CombinedMuonTracks"]
-        colsTP += ["EMEO_MSOnlyExtrapolatedMuonTrackParticles", "EMEO_ExtrapolatedMuonTrackParticles", "EMEO_CombinedMuonTrackParticles"]
     if muonCombinedRecFlags.doMuGirl() and muonCombinedRecFlags.doMuGirlLowBeta():
         colsTP += ["CombinedStauTrackParticles", "ExtrapolatedStauTrackParticles"]
         cols += ["CombinedStauTracks", "ExtrapolatedStauTracks"]
@@ -70,11 +67,6 @@ if rec.doTruth() and muonCombinedRecFlags.doxAOD() and rec.doMuonCombined():
         topSequence += MuonTruthAssociationAlg("MuonTruthAssociationAlgLRT",
                                                 MuonContainerName="MuonsLRT",
                                                 RecoLinkName="recoMuonLinkLRT",
-                                                TrackContainers = colsTP)
-    if muonRecFlags.runCommissioningChain():
-        topSequence += MuonTruthAssociationAlg("MuonTruthAssociationAlg_EMEO",
-                                                MuonContainerName="EMEO_Muons",
-                                                RecoLinkName="", # Do not decorate the truth particle
                                                 TrackContainers = colsTP)
       
     if muonCombinedRecFlags.doMuGirl() and muonCombinedRecFlags.doMuGirlLowBeta():

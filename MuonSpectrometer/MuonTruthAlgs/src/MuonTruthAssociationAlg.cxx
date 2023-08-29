@@ -15,7 +15,6 @@
 using namespace xAOD::P4Helpers;
 namespace {
     constexpr unsigned int dummy_unsigned = 999;
-    //constexpr int com_bit = (1<<xAOD::Muon::Author::Commissioning);
     void increment_unsigned(unsigned& val) {
         if (val == dummy_unsigned)
             val = 1;
@@ -163,14 +162,7 @@ StatusCode MuonTruthAssociationAlg::execute(const EventContext& ctx) const {
                             ATH_MSG_DEBUG("Author of the decorated muon is better than the one of the new candidate");
                             continue;
                         }
-                        /// May be both muons are reconstructed by the same author but one is commissioning
-                        /*
-                        const int com_score = (muon->allAuthors() & com_bit) - (decor_muon->allAuthors() &com_bit);
-                        if (com_score > 0){
-                            ATH_MSG_DEBUG("Found two muons reconstructed by an equivalent author. But this one is from the commissioning chain");
-                            continue;
-                        }
-                        */
+
                         /// The last judge is a simple dR cut but this will hopefully never trigger
                         if (deltaR2(muon,truthParticle) >= deltaR2(muon, decor_muon)) continue; 
                     }

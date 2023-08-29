@@ -155,9 +155,6 @@ if muonRecFlags.doStandalone():
         from TrkTruthAlgs.TrkTruthAlgsConf import TrackParticleTruthAlg
         track_cols = ["MuonSpectrometerTracks"]
         track_colstp = ["MuonSpectrometerTrackParticles"]
-        if muonRecFlags.runCommissioningChain:
-            track_cols += ["EMEO_MuonSpectrometerTracks"]
-            track_colstp += ["EMEO_MuonSpectrometerTrackParticles"]
             
         topSequence += MuonDetailedTrackTruthMaker(name="MuonStandaloneDetailedTrackTruthMaker", TrackCollectionNames = track_cols,
                                                    PRD_TruthNames =["RPC_TruthMap", "TGC_TruthMap", "MDT_TruthMap"] + 
