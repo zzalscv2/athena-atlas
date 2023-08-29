@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGCRecRoiTool.h"
@@ -204,7 +204,7 @@ namespace LVL1 {
     
   }
   
-  std::unique_ptr<TGCIdBase> TrigT1TGCRecRoiTool::getWireASDOut(TGCIdBase tgcIdBase,
+  std::unique_ptr<TGCIdBase> TrigT1TGCRecRoiTool::getWireASDOut(const TGCIdBase& tgcIdBase,
 								unsigned int sectorID,
 								int wireSLBId,
 								int block,
@@ -226,7 +226,7 @@ namespace LVL1 {
     return w_asdout;
   }
   
-  std::unique_ptr<TGCIdBase> TrigT1TGCRecRoiTool::getStripASDOut(TGCIdBase tgcIdBase,
+  std::unique_ptr<TGCIdBase> TrigT1TGCRecRoiTool::getStripASDOut(const TGCIdBase& tgcIdBase,
 								 unsigned int sectorID,
 								 int wireSLBId,
 								 int block,
