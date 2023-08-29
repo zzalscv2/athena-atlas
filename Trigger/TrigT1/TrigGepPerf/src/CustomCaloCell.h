@@ -53,6 +53,10 @@ namespace Gep{
     std::vector<unsigned int> neighbours;
     
     bool isBadCell() const {return isBad;}
+
+    // Index position of this cell in the CaloCellsContainer which
+    // is needed to write the CaloCellLinks out
+    int index;
   };
 }
 

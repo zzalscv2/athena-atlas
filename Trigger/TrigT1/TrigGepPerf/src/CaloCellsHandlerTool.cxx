@@ -45,6 +45,7 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
   if (!totalNoiseHdl.isValid()) {return StatusCode::FAILURE;}
   const CaloNoise* totalNoiseCDO = *totalNoiseHdl;
 
+  int idx = 0;
   
   for(const auto *cell: cells){
     Gep::CustomCaloCell caloCell; 
@@ -122,10 +123,13 @@ StatusCode CaloCellsHandlerTool::getGepCellMap(const CaloCellContainer& cells,
     caloCell.phiMax = phimax;
     caloCell.etaGranularity = deta;
     caloCell.phiGranularity = dphi;
+
+    caloCell.index = idx;
     
     // store cells map
     gepCellsMap->insert(std::pair<unsigned int, Gep::CustomCaloCell>(caloCell.id, caloCell));
     
+    ++idx;
   }
   
   return StatusCode::SUCCESS;
