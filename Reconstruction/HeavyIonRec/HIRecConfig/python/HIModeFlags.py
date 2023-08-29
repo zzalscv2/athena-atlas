@@ -41,7 +41,7 @@ def UPCmode(flags):
     flags.MET.WritetoAOD=True
     flags.Reco.EnableCaloRinger=False
     flags.Reco.EnableBTagging=True
-    flags.Tracking.doMinBias=True
+    flags.Tracking.doUPC=True # only UPC
     flags.Egamma.doLowMu=True # only UPC
     flags.Tracking.doTrackSegmentsPixel=True #only UPC
     flags.HeavyIon.Egamma.doSubtractedClusters=False
