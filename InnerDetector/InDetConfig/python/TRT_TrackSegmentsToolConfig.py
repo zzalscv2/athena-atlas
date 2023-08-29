@@ -34,7 +34,8 @@ def TRT_TrackSegmentsMaker_BarrelCosmicsCfg(
     return acc
 
 def TRT_TrackSegmentsMaker_ATLxkCfg(
-        flags, name = 'InDetTRT_SeedsMaker', **kwargs):
+        flags, name = 'InDetTRT_SeedsMaker',
+        InputCollections = None, **kwargs):
 
     acc = TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(
         flags,
@@ -57,7 +58,8 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(
     kwargs.setdefault("RemoveNoiseDriftCircles", False)
     kwargs.setdefault("NumberMomentumChannel",
                       flags.Tracking.ActiveConfig.TRTSegFinderPtBins)
-    kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
+    if InputCollections is not None:
+        kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap')
     kwargs.setdefault("MinNumberDriftCircles",
                       flags.Tracking.ActiveConfig.minSecondaryTRTonTrk)
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minSecondaryPt)

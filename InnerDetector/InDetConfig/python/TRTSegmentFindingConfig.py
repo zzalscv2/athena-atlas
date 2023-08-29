@@ -27,7 +27,8 @@ def TRTSegmentFindingCfg(flags, InputCollections = None):
     else:
         from InDetConfig.TRT_TrackSegmentsFinderConfig import (
             TRT_TrackSegmentsFinderCfg)
-        acc.merge(TRT_TrackSegmentsFinderCfg(flags))
+        acc.merge(TRT_TrackSegmentsFinderCfg(flags,
+                                             InputCollections = InputCollections))
 
         #
         # --- load TRT validation alg

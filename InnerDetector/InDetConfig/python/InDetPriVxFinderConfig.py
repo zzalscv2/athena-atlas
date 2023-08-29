@@ -119,3 +119,4 @@ if __name__ == "__main__":
         printDefaults=True,
     )
 
+    acc.wasMerged()
