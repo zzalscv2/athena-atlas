@@ -328,8 +328,11 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
 StatusCode FPGATrackSimLogicalHitsProcessAlg::readInputs(bool & done)
 {
+
     if ( !m_hitSGInputTool.empty()) {
-        ATH_CHECK(m_hitSGInputTool->readData(&m_firstInputHeader, Gaudi::Hive::currentContext()));
+        ATH_CHECK(m_hitSGInputTool->readData(&m_eventHeader, Gaudi::Hive::currentContext()));
+        ATH_MSG_DEBUG("Loaded " << m_eventHeader.nHits() << " hits in event header from SG");
+
         return StatusCode::SUCCESS;
     }
 
