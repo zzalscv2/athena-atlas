@@ -45,6 +45,7 @@ private:
   std::vector<std::vector<float> > m_chFADCdata;
   std::vector<float> m_chSumADCvec;
   std::vector<float> m_chSumADCvecCalib;
+  std::vector<float> m_chPileupFracVec; /** OOT pileup sum as a fraction of non-pileup signal sum (zero if no OOT pileup) */
   std::vector<float> m_rowSumADCvec;
   std::vector<float> m_rowSumADCvecCalib;
   std::vector<float> m_columnSumADCvec;
@@ -62,7 +63,7 @@ public:
     // side/rpd-level status bits
     SideValidBit = 0, /** analysis is good, e.g. no channel overflow */
     SideOutOfTimePileupBit = 1, /** at least one channel has OOT pileup */
-    SideOverflowBit = 2, /** at least one channel has OOT pileup */
+    SideOverflowBit = 2, /** at least one channel has overflow */
   };
   
   RPDDataAnalyzer(ZDCMsg::MessageFunctionPtr messageFunc_p, const std::string& tag, const RPDConfig& config);
@@ -76,6 +77,7 @@ public:
   unsigned int getChMaxADCSample(unsigned int channel) const;
   float getChSumADC(unsigned int channel) const;
   float getChSumADCcalib(unsigned int channel) const;
+  float getChPileupFrac(unsigned int channel) const;
   const std::vector<float>& getChSumADCvec() const;
   const std::vector<float>& getChSumADCvecCalib() const;
   const std::vector<float>& getRowSumADCvec() const;
