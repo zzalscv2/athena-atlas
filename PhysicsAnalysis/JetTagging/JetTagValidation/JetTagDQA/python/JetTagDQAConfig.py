@@ -44,7 +44,7 @@ def PhysValBTagCfg(flags, **kwargs):
         kwargs.setdefault("DL1dv00TaggerName", "DL1drun420221017")
         kwargs.setdefault("DL1dv01TaggerName", "")
         kwargs.setdefault("GN1TaggerName",     "GN1run420221010")
-        kwargs.setdefault("GN2TaggerName", "")
+        kwargs.setdefault("GN2v00TaggerName", "")
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)
