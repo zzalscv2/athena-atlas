@@ -644,7 +644,7 @@ LVL1CTP::CTPSimulation::extractMultiplicities(std::map<std::string, unsigned int
             cable = ( (uint64_t)topoInput->cableWord2( 1 ) << 32) + topoInput->cableWord2( 0 );
          }
       }
-      else if (connName.find("CTPCAL") == 0 && m_doZDC) // ZDC simulation
+      else if (CxxUtils::starts_with (connName, "CTPCAL") && m_doZDC) // ZDC simulation
       {
          auto zdcInput = SG::makeHandle(m_iKeyZDC, context);
          if (not zdcInput.isValid())
