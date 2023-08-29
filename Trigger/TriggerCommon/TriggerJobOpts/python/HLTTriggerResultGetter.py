@@ -11,7 +11,7 @@ _log = logging.getLogger("HLTTriggerResultGetter.py")
 
 def HLTTriggerResultGetter(flags):
 
-    if flags.Input.Format is Format.BS and flags.Trigger.DecodeHLT:
+    if flags.Input.Format is Format.BS and flags.Trigger.decodeHLT:
         _log.info("Configuring BS unpacking")
         if flags.Trigger.EDMVersion in [1, 2]:
             from TriggerJobOpts.TriggerRecoConfig import Run1Run2BSExtractionCfg
@@ -121,7 +121,7 @@ def HLTTriggerResultGetter(flags):
         # Change in the future to 'if EDMVersion >= 3 or doEDMVersionConversion:'
 
         # Run 3 slimming
-        if flags.Trigger.doNavigationSlimming and flags.Trigger.DecodeHLT: 
+        if flags.Trigger.doNavigationSlimming and flags.Trigger.decodeHLT: 
             from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
             CAtoGlobalWrapper(TrigNavSlimmingMTCfg, flags)
         else:

@@ -69,9 +69,9 @@ def Run1Run2DecisionMakerCfg(flags):
     """Configures HLTNavigation(tool) -> xAODNavigation and TrigDec::TrigDecision -> xAOD::TrigDecision """
     acc = ComponentAccumulator()
     doL1=flags.Trigger.L1.doCTP
-    doL2=flags.Trigger.DecodeHLT
-    doEF=flags.Trigger.DecodeHLT
-    doHLT=flags.Trigger.DecodeHLT
+    doL2=flags.Trigger.decodeHLT
+    doEF=flags.Trigger.decodeHLT
+    doHLT=flags.Trigger.decodeHLT
 
 
     if 'HLT' not in flags.Trigger.availableRecoMetadata:
@@ -132,7 +132,7 @@ def Run3DecisionMakerCfg(flags):
     acc = ComponentAccumulator()
     tdm = CompFactory.TrigDec.TrigDecisionMakerMT()
     tdm.doL1 = flags.Trigger.L1.doCTP
-    tdm.doHLT = flags.Trigger.DecodeHLT
+    tdm.doHLT = flags.Trigger.decodeHLT
     if flags.Input.Format is not Format.BS:
         # Construct trigger bits from HLTNav_summary instead of reading from BS
         tdm.BitsMakerTool = CompFactory.TriggerBitsMakerTool()
@@ -142,7 +142,7 @@ def Run3DecisionMakerCfg(flags):
     if flags.Trigger.DecisionMakerValidation.Execute:
         tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()
         tdmv.doL1 = flags.Trigger.L1.doCTP
-        tdmv.doHLT = flags.Trigger.DecodeHLT
+        tdmv.doHLT = flags.Trigger.decodeHLT
         tdmv.samplingFrequency = 1
         tdmv.errorOnFailure = flags.Trigger.DecisionMakerValidation.ErrorMode
         tdmv.EDMVersion = flags.Trigger.EDMVersion

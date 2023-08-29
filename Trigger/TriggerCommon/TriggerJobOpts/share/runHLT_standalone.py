@@ -201,7 +201,7 @@ if 'doL1Sim' not in globals():
     log.info('Setting default doL1Sim=%s because flags.Input.isMC=%s', opt.doL1Sim, flags.Input.isMC)
 
 if flags.Input.Format is Format.BS or opt.doL1Sim:
-    flags.Trigger.HLTSeeding.forceEnableAllChains = opt.forceEnableAllChains
+    flags.Trigger.forceEnableAllChains = opt.forceEnableAllChains
 
 # Translate a few other flags
 flags.Trigger.doLVL1 = opt.doL1Sim

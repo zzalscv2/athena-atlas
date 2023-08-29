@@ -48,7 +48,7 @@ filter_bs.args = '-s TLA ' + find_file('*_HLTMPPy_output.*.data')
 # Tier-0 reco step (BS->AOD)
 tlarecoPreExec = ' '.join([
   f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
-    "flags.Trigger.DecodeHLT=False;",
+    "flags.Trigger.decodeHLT=False;",
     "flags.Trigger.doLVL1=False;",
     "flags.Trigger.L1.doCalo=False;",
     "flags.Trigger.L1.doCTP=False;",

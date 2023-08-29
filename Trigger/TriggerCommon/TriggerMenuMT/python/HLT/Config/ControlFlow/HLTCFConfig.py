@@ -191,7 +191,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
     acceptedEventChainDicts = [cd for cd in hltMenuConfig.dictsList() \
                                if 'Calib' in cd['signatures'] \
                                and 'acceptedevts' in cd['chainParts'][0]['purpose']]
-    if flags.Trigger.endOfEventProcessing.Enabled and acceptedEventChainDicts:
+    if flags.Trigger.enableEndOfEventProcessing and acceptedEventChainDicts:
         from TrigGenericAlgs.TrigGenericAlgsConfig import EndOfEventROIConfirmerAlgCfg, EndOfEventFilterAlgCfg
         endOfEventRoIMaker = conf2toConfigurable(EndOfEventROIConfirmerAlgCfg('EndOfEventROIConfirmerAlg'))
         hltFinalizeSeq += endOfEventRoIMaker

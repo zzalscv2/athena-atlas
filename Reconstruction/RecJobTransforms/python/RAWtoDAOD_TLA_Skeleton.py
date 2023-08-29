@@ -36,7 +36,7 @@ def fromRunArgs(runArgs):
 
 
     # Set non-default flags 
-    flags.Trigger.DecodeHLT = False
+    flags.Trigger.decodeHLT = False
     flags.Trigger.L1.doCTP = False
     flags.Trigger.DecisionMakerValidation.Execute = False
 

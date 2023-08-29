@@ -304,12 +304,12 @@ def HLTSeedingCfg(flags, seqName = None):
         RoIBResult = "RoIBResult" if flags.Trigger.enableL1CaloLegacy or not flags.Trigger.enableL1MuonPhase1 else "",
         L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else "",
         HLTSeedingSummaryKey = "HLTSeedingSummary", # Transient, consumed by DecisionSummaryMakerAlg
-        ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.HLTSeeding.forceEnableAllChains,
+        ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.forceEnableAllChains,
                                                     MonTool = CTPUnpackingMonitoring(flags, 512, 400) )
     )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs
-    if not flags.Trigger.HLTSeeding.forceEnableAllChains:
+    if not flags.Trigger.forceEnableAllChains:
         def checkConsistency(thrName):
             '''Filter out threshold types for which HLT doesn't read TOBs from L1 readout'''
             return thrName not in ['FSNOSEED','TE','XE','XS'] and not thrName.startswith('PROBE')
@@ -382,7 +382,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     flags = initConfigFlags()
-    flags.Trigger.HLTSeeding.forceEnableAllChains= True
+    flags.Trigger.forceEnableAllChains= True
     flags.Input.Files= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1",]
     flags.lock()
     acc = HLTSeedingCfg( flags )

@@ -181,8 +181,8 @@ def Run2Run1NavigationSlimingCfg(flags):
     """Configures legacy Run1/2 navigation slimming"""
     acc = ComponentAccumulator()
 
-    if flags.Trigger.DecodeHLT is False:
-        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.DecodeHLT is False")
+    if flags.Trigger.decodeHLT is False:
+        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.decodeHLT is False")
         return acc
 
     if flags.Trigger.doNavigationSlimming is False:
@@ -227,7 +227,7 @@ def Run1Run2BSExtractionCfg( flags ):
     # Add fictional output to ensure data dependency in AthenaMT
     extr.ExtraOutputs += [("TrigBSExtractionOutput", "StoreGateSvc+TrigBSExtractionOutput")]
 
-    if flags.Trigger.DecodeHLT:
+    if flags.Trigger.decodeHLT:
         # Run-1: add xAOD conversion tool
         if flags.Trigger.EDMVersion == 1:
             extr.BStoxAOD = acc.popToolsAndMerge( Run1xAODConversionCfg(flags) )
@@ -337,8 +337,8 @@ def Run3TriggerBSUnpackingCfg(flags):
     """Configures conversions BS -> HLTResultMT -> Collections """
     acc = ComponentAccumulator()
 
-    if flags.Trigger.DecodeHLT is False:
-        log.debug("Run3TriggerBSUnpackingCfg: Nothing to do as Trigger.DecodeHLT is False")
+    if flags.Trigger.decodeHLT is False:
+        log.debug("Run3TriggerBSUnpackingCfg: Nothing to do as Trigger.decodeHLT is False")
         return acc
 
     from AthenaCommon.CFElements import seqAND
