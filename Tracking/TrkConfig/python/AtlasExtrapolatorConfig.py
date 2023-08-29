@@ -59,6 +59,7 @@ from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
 use_old_names = False
 
 
+@AccumulatorCache
 def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     # Default "ATLAS" with some reasonable defaults
     # Rk for Global/ID STEP to be used for dense volumes.
@@ -149,6 +150,7 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     return result
 
 
+@AccumulatorCache
 def TrigPFlowExtrapolatorCfg(flags, name='HLT_PFlowExtrapolator'):
     # This is the extrapolator which is used in PFlow 
     # reconstruction at the level of HLT. It allows to
@@ -188,6 +190,7 @@ def TrigPFlowExtrapolatorCfg(flags, name='HLT_PFlowExtrapolator'):
     return result
 
 
+@AccumulatorCache
 def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
     # e/gamma mainly uses Extrapolate Directly to a particular
     # surface to the calo. We do not do "tracking"
@@ -270,6 +273,7 @@ def egammaCaloExtrapolatorCfg(flags, name='egammaCaloExtrapolator'):
     return result
 
 
+@AccumulatorCache
 def MCTruthClassifierExtrapolatorCfg(flags,
                                      name='MCTruthClassifierExtrapolator'):
     # MCTruthClassifier. Used to Extrapolate Directly
