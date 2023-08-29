@@ -44,8 +44,9 @@ namespace xAOD {
          makePrivateStore();
       }
 
-      // Invalidate the cache of the object:
-      resetCache();
+      // copy the cache
+      m_position = tp.m_position;
+      m_covariance = tp.m_covariance;
 
       // Now let the base class copy the auxiliary contents:
       SG::AuxElement::operator=( tp );
@@ -99,8 +100,10 @@ namespace xAOD {
       setY( position( 1 ) );
       setZ( position( 2 ) );
       // Reset the cache
-      m_position.store(position);
-      return;
+      // This will enforce float precision level on the values of 
+      // m_position. The effect of this float conversion has been 
+      // discussed in ATLASRECTS-7671 
+      m_position.reset();
    }
 
    const AmgSymMatrix(3)& Vertex_v1::covariancePosition() const {
@@ -109,8 +112,8 @@ namespace xAOD {
       if( ! m_covariance.isValid() ) {
          // The matrix is now cached:
         AmgSymMatrix(3) tmpCovariance;
-	      Amg::expand(covariance().begin(),covariance().end(),tmpCovariance);
-	      m_covariance.set(tmpCovariance);
+	Amg::expand(covariance().begin(),covariance().end(),tmpCovariance);
+	m_covariance.set(tmpCovariance);
       }
       // Return the cached object:
       return *(m_covariance.ptr());
@@ -124,8 +127,10 @@ namespace xAOD {
 
      // Set the persistent variable:
      setCovariance( vec );
-     m_covariance.store(cov);
-     return;
+     // This will enforce float precision level on the values of 
+     // m_covariance. The effect of this float conversion has been 
+     // discussed in ATLASRECTS-7671 
+     m_covariance.reset();
    }
 
    //
