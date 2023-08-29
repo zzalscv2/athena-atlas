@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -15,6 +15,7 @@
 #include "AthenaKernel/DefaultKey.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "SGTools/BuiltinsClids.h"
 
 
@@ -70,6 +71,16 @@ CLASS_DEF(Bar, 8107, 5)
 CLASS_DEF2( map<int,string> , 231411637 , 1 )
 
 class FooDeque : public deque<Foo> {};
+
+
+namespace Athena_test {
+class Base {};
+class Derived : public Base {};
+}
+CLASS_DEF(Athena_test::Base, 231494671, 1)
+CLASS_DEF(Athena_test::Derived, 231494672, 1)
+SG_BASES(Athena_test::Derived, Athena_test::Base);
+
 
 namespace Athena_test 
 {
@@ -310,12 +321,25 @@ namespace Athena_test
 
     cout << "*** DataLink_test StateMachine OK ***\n\n" <<endl;
   }
+
+
+  // Test creation of a forward DL to a base class.
+  void linkFwdBase(StoreGateSvc& rSG) 
+  {
+    cout << "\n\nDataLink_test testing FwdBase" <<endl;
+    DataLink<Athena_test::Base> link ("LinkFwdTest");
+    auto der = new Athena_test::Derived;
+    assert (rSG.record (der, "LinkFwdTest", false).isSuccess());
+    std::cout << "xxx " << der << " " << link.cptr() << "\n";
+    //assert (link.cptr() == der);
+    cout << "*** DataLink_test FwdBase OK ***\n\n" <<endl;
+  }
 } //end namespace
 
 
 int main() {
   ISvcLocator* pSvcLoc;
-  if (!initGaudi("DataLink_test.txt", pSvcLoc)) {
+  if (!initGaudi("ControlTest/DataLink_test.txt", pSvcLoc)) {
     cerr << "This test can not be run" << endl;
     return 0;
   }  
@@ -335,19 +359,10 @@ int main() {
   linkDataProxyStorage(*pSG);
   linkStoreGate(*pSG);
   linkStateMachine(*pSG);
+  linkFwdBase(*pSG);
 
   cout << "*** DataLink_test OK ***" <<endl;
   return 0;
 }
-
-
-
-
-
-
-
-
-
-
 
 
