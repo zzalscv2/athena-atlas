@@ -1,7 +1,7 @@
 
 //Dear emacs this is -*-c++-*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWSTATUSSUMMARYTOOL_H
@@ -26,9 +26,7 @@
 
 #include "CxxUtils/checker_macros.h"
 
-class ATLAS_NOT_THREAD_SAFE TRT_StrawStatusSummaryTool: // This class uses thread-unsafe DataHandle (m_strawstatusHTG4).
-// If bare pointer is used, GeoModelSvc.TRT_DetectorTool.TRT_StrawStatusSummaryTool
-// cannot retrieve folder 'SimStatusHTKey':/TRT/Cond/StatusHT
+class ATLAS_NOT_THREAD_SAFE TRT_StrawStatusSummaryTool:
   public extends<AthAlgTool, ITRT_StrawStatusSummaryTool>
 {  
  public:
@@ -88,9 +86,6 @@ class ATLAS_NOT_THREAD_SAFE TRT_StrawStatusSummaryTool: // This class uses threa
   // Used in simulation (GEANT4) jobs
   Gaudi::Property<bool> m_isGEANT4 {this,"isGEANT4",true};
   Gaudi::Property<std::string> m_par_strawstatusHTcontainerkey{this, "SimStatusHTKey","/TRT/Cond/StatusHT"};
-
-  const DataHandle<StrawStatusContainer> m_strawstatusHTG4{nullptr};
-
 };
 
 #endif //  TRT_STRAWSTATUSSUMMARYTOOL_H
