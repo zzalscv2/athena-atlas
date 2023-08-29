@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <boost/algorithm/string.hpp>
 
 
 // L2Calo, L2Electron, L2Photon, EFCalo, Electron and Photon trigger passed access
 template<class T>
-inline bool TrigEgammaMatchingToolMT::ancestorPassed( const TrigCompositeUtils::Decision *dec, const std::string trigger, const std::string key, 
+inline bool TrigEgammaMatchingToolMT::ancestorPassed( const TrigCompositeUtils::Decision *dec, const std::string& trigger, const std::string& key, 
                                                       unsigned int condition) const
 {
 
@@ -35,7 +35,7 @@ inline bool TrigEgammaMatchingToolMT::ancestorPassed( const TrigCompositeUtils::
 // L1Calo trigger passed access
 template<>
 inline bool TrigEgammaMatchingToolMT::ancestorPassed<TrigRoiDescriptorCollection>( const TrigCompositeUtils::Decision *dec, 
-                                                                                   const std::string trigger, const std::string /*key*/,
+                                                                                   const std::string& trigger, const std::string& /*key*/,
                                                                                    unsigned int condition ) const
 {
   if( !dec ) return false;
@@ -87,7 +87,7 @@ inline bool TrigEgammaMatchingToolMT::closestObject( const xAOD::Egamma *eg, con
 
 template<class T>
 inline std::vector<TrigCompositeUtils::LinkInfo<T>> TrigEgammaMatchingToolMT::getFeatures( const TrigCompositeUtils::Decision *dec ,
-                                                                                           std::string trigger, std::string key,
+                                                                                           const std::string& trigger, const std::string& key,
                                                                                            unsigned int condition)
 const 
 {
@@ -113,7 +113,7 @@ const
 // L1Calo
 template<>
 inline TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> TrigEgammaMatchingToolMT::getFeature<TrigRoiDescriptorCollection>( const TrigCompositeUtils::Decision *dec , 
-                                                                                                                std::string trigger, unsigned int condition)
+                                                                                                                const std::string& trigger, unsigned int condition)
 const
 {
   auto initRoi = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(dec, "initialRoI"); 
@@ -135,7 +135,7 @@ const
 // L2Calo
 template<>
 inline TrigCompositeUtils::LinkInfo<xAOD::TrigEMClusterContainer> TrigEgammaMatchingToolMT::getFeature<xAOD::TrigEMClusterContainer>( const TrigCompositeUtils::Decision *dec , 
-                                                                                                                  std::string trigger, unsigned int condition)
+                                                                                                                  const std::string& trigger, unsigned int condition)
 const
 {
   std::vector<TrigCompositeUtils::LinkInfo<xAOD::TrigEMClusterContainer>> vec = getFeatures<xAOD::TrigEMClusterContainer>(dec, trigger, key("FastCalo") , condition);
@@ -146,7 +146,7 @@ const
 // L2Electron
 template<>
 inline std::vector<TrigCompositeUtils::LinkInfo<xAOD::TrigElectronContainer>> TrigEgammaMatchingToolMT::getFeatures<xAOD::TrigElectronContainer>( 
-                                                                const TrigCompositeUtils::Decision *dec , std::string trigger, unsigned int condition)
+                                                                const TrigCompositeUtils::Decision *dec , const std::string& trigger, unsigned int condition)
 const
 {
   if(boost::contains(trigger,"lrt")){
@@ -160,7 +160,7 @@ const
 // L2Photon
 template<>
 inline TrigCompositeUtils::LinkInfo<xAOD::TrigPhotonContainer> TrigEgammaMatchingToolMT::getFeature<xAOD::TrigPhotonContainer>( 
-                                                                const TrigCompositeUtils::Decision *dec , std::string trigger, unsigned int condition)
+                                                                const TrigCompositeUtils::Decision *dec , const std::string& trigger, unsigned int condition)
 const
 {
   auto vec = getFeatures<xAOD::TrigPhotonContainer>(dec, trigger, key("FastPhotons") , condition);
@@ -171,7 +171,7 @@ const
 // EFCalo
 template<>
 inline std::vector<TrigCompositeUtils::LinkInfo<xAOD::CaloClusterContainer>> TrigEgammaMatchingToolMT::getFeatures<xAOD::CaloClusterContainer>( 
-                                                                const TrigCompositeUtils::Decision *dec , std::string trigger, unsigned int condition)
+                                                                const TrigCompositeUtils::Decision *dec , const std::string& trigger, unsigned int condition)
 const
 {
   std::vector<std::string> parts;
@@ -192,7 +192,7 @@ const
 // Electron
 template<>
 inline std::vector<TrigCompositeUtils::LinkInfo<xAOD::ElectronContainer>> TrigEgammaMatchingToolMT::getFeatures<xAOD::ElectronContainer>( 
-                                                                const TrigCompositeUtils::Decision *dec , std::string trigger, unsigned int condition)
+                                                                const TrigCompositeUtils::Decision *dec , const std::string& trigger, unsigned int condition)
 const
 {
   if (boost::contains(trigger,"gsf")){
@@ -208,7 +208,7 @@ const
 // Photon
 template<>
 inline std::vector<TrigCompositeUtils::LinkInfo<xAOD::PhotonContainer>> TrigEgammaMatchingToolMT::getFeatures<xAOD::PhotonContainer>( const TrigCompositeUtils::Decision *dec , 
-                                                                                                                  std::string trigger, unsigned int condition)
+                                                                                                                  const std::string& trigger, unsigned int condition)
 const
 {
   return getFeatures<xAOD::PhotonContainer>(dec, trigger, key("Photons"), condition );
