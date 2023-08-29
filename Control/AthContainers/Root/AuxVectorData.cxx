@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxVectorData.cxx
@@ -496,6 +496,21 @@ void AuxVectorData::Cache::clear()
 
 
 /**
+ * @brief Clear the cached pointer for a single variable.
+ * @param auxid ID of the variable to clear.
+ *
+ * Not really safe to use if another thread may be accessing
+ * the same variable.
+ */
+void AuxVectorData::Cache::clear (SG::auxid_t auxid)
+{
+  if (auxid < m_cache_len) {
+    m_cache[0][auxid] = nullptr;
+  }
+}
+
+
+/**
  * @brief Store a pointer for @c auxid in the cache.
  * @param auxid The aux data item being stored.
  * @param ptr Pointer to the start of the aux vector for @c auxid.
@@ -532,6 +547,20 @@ void AuxVectorData::Cache::store (SG::auxid_t auxid, void* ptr)
 
   // We have room in the cache vector now.  Store the pointer.
   m_cache[0][auxid] = ptr;
+}
+
+
+/**
+ * @brief Clear the cached decoration pointer for a single variable.
+ * @param auxid ID of the variable to clear.
+ *
+ * Not really safe to use if another thread may be accessing
+ * the same decoration.
+ */
+void AuxVectorData::clearDecorCache (SG::auxid_t auxid)
+{
+  guard_t guard (m_mutex);
+  m_decorCache.clear (auxid);
 }
 
 
