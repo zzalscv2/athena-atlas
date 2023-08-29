@@ -18,37 +18,33 @@ namespace MCP {
     CalibContainer::CalibContainer(const std::string& inFileName, const std::string& histName)
     {
 
-       //Muon momentum calibrations are not yet available for 2023 dataset
-      if(!(inFileName.find("Data23") != std::string::npos)) {
-
-        if (inFileName.empty()) throw std::invalid_argument("fileName arguments must be non empty");
-        if (histName.empty()) throw std::invalid_argument("histName arguments must be non empty");
-        
-        auto fileName = PathResolverFindCalibFile(inFileName);
-
-        std::unique_ptr<TFile> fmc{TFile::Open(fileName.c_str(), "READ")};
-        if (!fmc || !fmc->IsOpen()) 
+      if (inFileName.empty()) throw std::invalid_argument("fileName arguments must be non empty");
+      if (histName.empty()) throw std::invalid_argument("histName arguments must be non empty");
+      
+      auto fileName = PathResolverFindCalibFile(inFileName);
+      
+      std::unique_ptr<TFile> fmc{TFile::Open(fileName.c_str(), "READ")};
+      if (!fmc || !fmc->IsOpen()) 
         {
-            throw std::invalid_argument("Cannot open file " + fileName);
+	  throw std::invalid_argument("Cannot open file " + fileName);
         }
-
-        TH2* hist = nullptr;
-        fmc->GetObject(histName.c_str(), hist);
-        if (!hist) 
+      
+      TH2* hist = nullptr;
+      fmc->GetObject(histName.c_str(), hist);
+      if (!hist) 
         {
-            throw std::invalid_argument("Cannot find hist ("+histName+") in file " + fileName);
+	  throw std::invalid_argument("Cannot find hist ("+histName+") in file " + fileName);
         }
-        hist->SetDirectory(nullptr);
-        m_calibConstantHist.reset(hist);
-
-        // Store to check later if the input ranges are within the range of the hist
-        // subtract epsilon so that it doesn't go into the overflow bin at the highest edge
-        m_maxX  = m_calibConstantHist->GetXaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
-        m_minX  = m_calibConstantHist->GetXaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
-        m_maxY  = m_calibConstantHist->GetYaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
-        m_minY  = m_calibConstantHist->GetYaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
-
-      }
+      hist->SetDirectory(nullptr);
+      m_calibConstantHist.reset(hist);
+      
+      // Store to check later if the input ranges are within the range of the hist
+      // subtract epsilon so that it doesn't go into the overflow bin at the highest edge
+      m_maxX  = m_calibConstantHist->GetXaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
+      m_minX  = m_calibConstantHist->GetXaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
+      m_maxY  = m_calibConstantHist->GetYaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
+      m_minY  = m_calibConstantHist->GetYaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
+      
     }
 
     double CalibContainer::getCalibConstant(const TrackCalibObj& trk) const
