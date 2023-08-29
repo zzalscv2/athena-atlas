@@ -533,8 +533,8 @@ namespace CP
         // https://gitlab.cern.ch/atlas/athena/blob/21.2/PhysicsAnalysis/SUSYPhys/SUSYTools/Root/SUSYObjDef_xAOD.cxx#L2438
         constexpr unsigned int last_run_16 = 320000;
         constexpr unsigned int last_run_17 = 342000;
-        constexpr unsigned int last_run_18 = 364485;
-        constexpr unsigned int last_run_22 = 440613;
+        constexpr unsigned int last_run_18 = 370000;
+        constexpr unsigned int last_run_22 = 440614;
         constexpr unsigned int last_run_23 = 999999;
 
         static const std::set<int> MCperiods1516{284500};
@@ -542,6 +542,8 @@ namespace CP
         static const std::set<int> MCperiods18{310000};
         static const std::set<int> MCperiods22{330000, 410000};
         static const std::set<int> MCperiods23{450000};
+
+        static const std::set<int> MCperiodsRun4{350000, 350060, 350140, 350200};
 
 
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
@@ -575,6 +577,9 @@ namespace CP
                 return MCP::DataYear::Data22;
             } else if (MCperiods23.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23c / data23");
+                return MCP::DataYear::Data23;
+            } else if (MCperiodsRun4.count(run)) {
+                ATH_MSG_DEBUG("The current run " << run << " corresponds to data Run4");
                 return MCP::DataYear::Data23;
             }
 
