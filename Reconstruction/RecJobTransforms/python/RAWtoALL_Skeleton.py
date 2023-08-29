@@ -178,9 +178,6 @@ def fromRunArgs(runArgs):
     # Lock flags
     flags.lock()
 
-    log.info("Configuring according to flag values listed below")
-    flags.dump()
-
     # Main reconstruction steering
     from RecJobTransforms.RecoSteering import RecoSteering
     cfg = RecoSteering(flags)
@@ -288,6 +285,9 @@ def fromRunArgs(runArgs):
 
     timeConfig = time.time()
     log.info("configured in %d seconds", timeConfig - timeStart)
+
+    log.info("Configured according to flag values listed below")
+    flags.dump()
 
     # Print sum information about AccumulatorCache performance
     from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
