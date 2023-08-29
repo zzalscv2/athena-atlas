@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -734,7 +734,7 @@ StatusCode TrigmuCombHypoTool::chooseBestMuon(std::vector<TrigmuCombHypoTool::Co
 
 	  // monitoring
 	  const xAOD::L2CombinedMuon* CombMf = (*input[j]).muComb;
-	  mucombNrOverlapped++;
+	  ++mucombNrOverlapped;
 	  mucombOverlappedPt = CombMf->pt()* CombMf->charge() /Gaudi::Units::GeV;
 	  mucombOverlappedEta = CombMf->eta();
 	  mucombOverlappedPhi = CombMf->phi();
