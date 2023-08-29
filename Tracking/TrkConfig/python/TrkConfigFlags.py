@@ -10,6 +10,7 @@ class PrimaryPassConfig(FlagEnum):
     Cosmics = 'Tracking.CosmicsPass'
     HeavyIon = 'Tracking.HeavyIonPass'
     HighPileup = 'Tracking.HighPileupPass'
+    UPC = 'Tracking.UPCPass'
     MinBias = 'Tracking.MinBiasPass'
     RobustReco = 'Tracking.RobustRecoPass'
     Default = 'Tracking.MainPass'
@@ -42,10 +43,10 @@ class PixelClusterSplittingType(FlagEnum):
 
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
-    ActsChain = "ActsChain"  # full Acts Chain 
+    ActsChain = "ActsChain"  # full Acts Chain
     # Validation options
     ValidateActsClusters = "ValidateActsClusters"
-    ValidateActsSpacePoints = "ValidateActsSpacePoints" 
+    ValidateActsSpacePoints = "ValidateActsSpacePoints"
     ValidateActsSeeds = "ValidateActsSeeds"
     ValidateActsTracks = "ValidateActsTracks"
 
@@ -246,7 +247,7 @@ def createTrackingConfigFlags():
         not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
             prevFlags.Reco.EnableHI or
             prevFlags.Tracking.PrimaryPassConfig in [
-                PrimaryPassConfig.VtxLumi ,
+                PrimaryPassConfig.VtxLumi,
                 PrimaryPassConfig.VtxBeamSpot,
                 PrimaryPassConfig.HighPileup] or
             prevFlags.Tracking.doMinBias or
@@ -262,8 +263,11 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doLowPtLargeD0", False)
     # Switch for running LowPtRoI settings
     icf.addFlag("Tracking.doLowPtRoI", False)
-    # Switch for running MinBias settings
-    icf.addFlag("Tracking.doMinBias", False)
+    # Switch for running UPC settings (MinBias but allows brem recovery)
+    icf.addFlag("Tracking.doUPC", False)
+    # Switch for running MinBias settings (UPC turns this ON)
+    icf.addFlag("Tracking.doMinBias", lambda prevFlags:
+                True if prevFlags.Tracking.doUPC is True else False)
     # Turn running of BeamGas second pass on and off
     icf.addFlag("Tracking.doBeamGas",
                 lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
@@ -284,12 +288,12 @@ def createTrackingConfigFlags():
     # Turn running of ITk FastTracking on and off
     icf.addFlag("Tracking.doITkFastTracking", False)
     # Turn running of ConversionFinding second pass on and off
-    icf.addFlag("Tracking.doITkConversionFinding",True)
+    icf.addFlag("Tracking.doITkConversionFinding", True)
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder
     icf.addFlag("Tracking.useITkFTF", False)
 
-    # enable reco steps 
+    # enable reco steps
     icf.addFlag("Tracking.recoChain", [TrackingComponent.AthenaChain])
 
     ####################################################################
@@ -300,9 +304,10 @@ def createTrackingConfigFlags():
 
     from TrkConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
-        createMinBiasTrackingPassFlags, createLargeD0TrackingPassFlags,
-        createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
-        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags, createLowPtRoITrackingPassFlags,
+        createMinBiasTrackingPassFlags, createUPCTrackingPassFlags,
+        createLargeD0TrackingPassFlags, createR3LargeD0TrackingPassFlags,
+        createLowPtLargeD0TrackingPassFlags, createLowPtTrackingPassFlags,
+        createVeryLowPtTrackingPassFlags, createLowPtRoITrackingPassFlags,
         createForwardTracksTrackingPassFlags, createBeamGasTrackingPassFlags,
         createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
         createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
@@ -312,11 +317,15 @@ def createTrackingConfigFlags():
     def primaryPass(flags):
         if flags.Beam.Type is BeamType.Cosmics:
             return PrimaryPassConfig.Cosmics
-        # if both HI + MinBias flags are True, the MinBias config is used
-        elif flags.Tracking.doMinBias:
-            return PrimaryPassConfig.MinBias
         elif flags.Reco.EnableHI:
-            return PrimaryPassConfig.HeavyIon
+            if flags.Tracking.doUPC: #For UPC
+                return PrimaryPassConfig.UPC
+            elif flags.Tracking.doMinBias: #For HIP
+                return PrimaryPassConfig.MinBias
+            else: #For HI (default)
+                return PrimaryPassConfig.HeavyIon
+        elif flags.Tracking.doMinBias:
+             return PrimaryPassConfig.MinBias
         else:
             return PrimaryPassConfig.Default
 
@@ -328,6 +337,8 @@ def createTrackingConfigFlags():
                          createTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.HighPileupPass",
                          createHighPileupTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.UPCPass",
+                         createUPCTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.MinBiasPass",
                          createMinBiasTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.LargeD0Pass",
