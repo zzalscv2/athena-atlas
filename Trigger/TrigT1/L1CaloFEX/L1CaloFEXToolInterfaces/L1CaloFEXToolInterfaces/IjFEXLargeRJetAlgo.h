@@ -26,6 +26,7 @@ namespace LVL1{
       virtual unsigned int getRingET() = 0;
       virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) = 0;
       virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
+      virtual bool getLRjetSat() =0;
 
    private:
 

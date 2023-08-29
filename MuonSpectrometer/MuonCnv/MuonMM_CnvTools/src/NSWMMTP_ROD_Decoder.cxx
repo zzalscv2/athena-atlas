@@ -40,12 +40,12 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   const Muon::nsw::NSWTriggerCommonDecoder decoder{fragment, "MML1A"};
 
   if (decoder.has_error()) {
-    ATH_MSG_WARNING("NSW MMTP Common Decoder found exceptions while reading this MML1A fragment. Skipping. Error id: "+std::to_string(decoder.error_id()));
+    ATH_MSG_DEBUG("NSW MMTP Common Decoder found exceptions while reading this MML1A fragment. Skipping. Error id: "+std::to_string(decoder.error_id()));
     return StatusCode::SUCCESS;
   }
 
   if (decoder.get_elinks().size()!=3) {
-    ATH_MSG_WARNING("NSW MMTP Common Decoder didn't give 3 elinks in output: something off with this fragment. Skipping.");
+    ATH_MSG_DEBUG("NSW MMTP Common Decoder didn't give 3 elinks in output: something off with this fragment. Skipping.");
     return StatusCode::SUCCESS;
   }
 
@@ -69,13 +69,12 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   rdo->set_moduleID(m);
   rdo->set_ROD_L1ID(fragment.rod_lvl1_id ());
   rdo->set_ROD_BCID(fragment.rod_bc_id ());
-
     
   //TP head
   rdo->set_EC(l0->head_EC());
   rdo->set_sectID(l0->head_sectID());
-  rdo->set_L1ID(l0->head_BCID());
-  rdo->set_BCID(l0->L1ID());
+  rdo->set_L1ID(l0->L1ID());
+  rdo->set_BCID(l0->head_BCID());
 
   //TP L1A head
   rdo->set_l1a_request_BCID(l0->l1a_local_req_BCID());
@@ -91,11 +90,10 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
   rdo->set_l1a_timeout(l0->l1a_timeout());
   rdo->set_l1a_engines(l0->l1a_engine_snapshot());
 
-
   for(const auto& baseLink: decoder.get_elinks()){
     const auto l = std::dynamic_pointer_cast<Muon::nsw::NSWTriggerMML1AElink>(baseLink);
     
-    if (l->l1a_timeout()==0) {ATH_MSG_WARNING("NSW MMTP Common Decoder reporting timeout condition: unclear if current event can be trusted");}
+    if (l->l1a_timeout()==0) {ATH_MSG_DEBUG("NSW MMTP Common Decoder reporting timeout condition: unclear if current event can be trusted");}
 
     for (const auto& a: l->art_packets()) {
       for (const auto& c: a->channels()) {

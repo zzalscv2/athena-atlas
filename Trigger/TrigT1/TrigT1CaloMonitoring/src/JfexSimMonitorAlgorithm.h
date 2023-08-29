@@ -53,9 +53,9 @@ class JfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 
         
         template <typename T> std::vector<std::array<float,5> > tobMatching(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<float,5> > & unmatched ) const;
-        void fillHist(const std::string & pkg, const std::string & item, const std::string & input, const bool fillError, std::vector< std::array<float,5> > & elem ) const;
+        void fillHist(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<float,5> > & elem ) const;
         
         template <typename T> std::vector<std::array<int,3> >  tobMatchingGlobals(const SG::ReadHandleKey<T>& tobs1Key, const SG::ReadHandleKey<T>& tobs2Key, const EventContext& ctx, std::vector< std::array<int,3> > & unmatched ) const;
-        void fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const bool fillError, std::vector< std::array<int,3> > & elem ) const;
+        void fillHistGlobals(const std::string & pkg, const std::string & item, const std::string & input, const std::string & LB, const bool fillError, std::vector< std::array<int,3> > & elem ) const;
 };       
 #endif

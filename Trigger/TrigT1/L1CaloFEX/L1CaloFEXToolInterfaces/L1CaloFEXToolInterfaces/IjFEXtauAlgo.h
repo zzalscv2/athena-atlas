@@ -27,8 +27,9 @@ class IjFEXtauAlgo : virtual public IAlgTool {
         virtual bool isSeedLocalMaxima_fwd(unsigned int TTID) = 0;
         virtual void setFirstEtRing(int First_ETring[]) =0;
 
-        virtual int getClusterEt()  =0;
-        virtual int getFirstEtRing()  =0;
+        virtual int getClusterEt() const =0;
+        virtual int getFirstEtRing() const =0;
+        virtual bool getTauSat() const =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
 
     private:

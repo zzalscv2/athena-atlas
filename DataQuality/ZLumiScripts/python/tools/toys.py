@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright (C) 2023 Atlas Collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import numpy as np
 

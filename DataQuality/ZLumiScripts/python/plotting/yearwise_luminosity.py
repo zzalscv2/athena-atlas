@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Plot comparisons of Zee/Zmumu and Z/ATLAS over entire data-periods. 
@@ -14,7 +15,6 @@ import math
 from array import array
 import time
 import argparse
-import os
     
 parser = argparse.ArgumentParser()
 parser.add_argument('--year', type=str, help='15-18, all for full Run-2')
@@ -43,7 +43,7 @@ if year == "all":
     xtitle = 'Month / Year'
     date_tag = "Run 3, #sqrt{s} = 13.6 TeV"
     norm_type = "Run3"
-    if channel != None: 
+    if channel is not None: 
         xval = 0.30
         yval = 0.33
     else:
@@ -133,7 +133,6 @@ def channel_comparison(years):
             dict_zlumi[channel, run] = (zlumi, zerr, timestamp)
     
     vec_times     = array('d')
-    vec_times_err = array('d')
     vec_ratio     = array('d')
     vec_ratio_err = array('d')
     keys = [key[1] for key in dict_zlumi if "Zee" in key]
@@ -171,7 +170,6 @@ def channel_comparison(years):
     tg.GetFunction('pol0').SetLineColor(R.kRed)
 
     mean =  round(tg.GetFunction('pol0').GetParameter(0), 4)
-    err  =  round(tg.GetFunction('pol0').GetParError(0), 4)
 
     # Plot 68% percentile band
     stdev    = np.percentile(abs(vec_ratio - np.median(vec_ratio)), 68)

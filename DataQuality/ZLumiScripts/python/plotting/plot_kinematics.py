@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import ROOT as R
 import python_tools as pt
@@ -102,7 +103,7 @@ def plotter_GeV(histname, title, xlabel, xmin, xmax, ylabel):
 			pt.drawText(0.6, 0.74, "1.52 < |#eta^{e}| < 2.4")
 			pt.drawText(0.6, 0.68, "66 < m_{ee} < 116 GeV")
 
-	c1.SaveAs(outdir + histname + ".pdf")
+	c1.SaveAs(os.path.join(args.outdir, histname + ".pdf"))
 
 def plotter(histname, title, xlabel, xmin, xmax, ylabel):
 
@@ -111,7 +112,7 @@ def plotter(histname, title, xlabel, xmin, xmax, ylabel):
 	pad1.SetRightMargin
 	rfile = R.TFile(infilename)
 
-	bins = get_bins(histname)
+	get_bins(histname)
 
 	hist = rfile.Get(run_folder+"/GLOBAL/DQTGlobalWZFinder/" + histname)
 
@@ -136,7 +137,7 @@ def plotter(histname, title, xlabel, xmin, xmax, ylabel):
 		pt.drawText(0.6, 0.74, "1.52 < |#eta^{e}| < 2.4")
 		pt.drawText(0.6, 0.68, "66 < m_{ee} < 116 GeV")
 
-	c1.SaveAs(outdir + histname + ".pdf")
+	c1.SaveAs(os.path.join(args.outdir, histname + ".pdf"))
 
 def get_bins(histname):
 

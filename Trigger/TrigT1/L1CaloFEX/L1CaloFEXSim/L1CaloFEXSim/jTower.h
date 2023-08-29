@@ -54,6 +54,15 @@ namespace LVL1 {
     /** Clear and resize Identifier value vector */
     void clear_EM_scIDs();
     void clear_HAD_scIDs();
+    
+    /** set and get saturation */
+    void setEMSat(){m_EM_sat = true;};
+    bool getEMSat() const {return m_EM_sat; };
+    
+    void setHADSat(){m_HAD_sat = true;};
+    bool getHADSat() const {return m_HAD_sat;};
+    
+    bool getTowerSat() const { return (m_EM_sat || m_HAD_sat);};
 
     /** Add to ET of a specified cell in MeV */
     void addET(float et, int cell);
@@ -191,6 +200,8 @@ namespace LVL1 {
     int m_NoiseForJet[2] = {0};
     int m_minEt_pileup_thr = -999;
     int m_maxEt_pileup_thr = -999;
+    bool m_EM_sat = false;
+    bool m_HAD_sat = false;
     
     
   };

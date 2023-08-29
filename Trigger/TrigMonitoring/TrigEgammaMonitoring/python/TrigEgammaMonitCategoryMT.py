@@ -58,14 +58,14 @@ def mongroupsCfg(moniAccess, data_type):
 
         elif data_type is DQDataType.HeavyIon:
                 # Using hard-code lists until fix for _ion chains in the eg monitoring 
-                monitoring_electron_hi=['HLT_e5_etcut_L1EM3']
-                monitoring_photon_hi=['HLT_g18_etcut_L1EM10']
+                monitoring_electron_hi=['HLT_e13_etcut_ion_L1eEM12L','HLT_e15_lhmedium_nogsf_ion_L1eEM15']
+                monitoring_photon_hi=['HLT_g13_etcut_ion_L1eEM12L','HLT_g15_loose_ion_L1eEM15']
                 monitoring_bootstrap_hi = {'HLT_g18_etcut_L1EM10' : 'HLT_g18_etcut_L1EM10'}
 
-                mongroups['monitoring_electron_hi']     = monitoring_electron_hi
-                mongroups['monitoring_photon_hi']       = monitoring_photon_hi
+                mongroups['monitoring_electron_hi']     = monitoring_electron_hi + monitoring_electron
+                mongroups['monitoring_photon_hi']       = monitoring_photon_hi + monitoring_photon
                 mongroups['monitoring_bootstrap_hi']    = monitoring_bootstrap_hi
-        
+
         elif data_type is DQDataType.Cosmics:
                 monitoring_electron_cosmic=['HLT_e5_etcut_L1EM3']
                 monitoring_photon_cosmic=['HLT_g3_etcut_LArPEB_L1EM3']

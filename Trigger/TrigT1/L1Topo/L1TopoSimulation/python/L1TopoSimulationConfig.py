@@ -167,7 +167,11 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
 
     efex_provider_attr = ['eFexEMRoI','eFexTauRoI']
     jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexFwdElRoI','jFexTauRoI','jFexMETRoI','jFexSumETRoI']
-    gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI','gFexXEJWOJRoI','gFexXENCRoI','gFexXERHORoI','gFexMHTRoI','gFexTERoI']
+    gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI', 'gScalarEJwoj','gMETComponentsJwoj','gMHTComponentsJwoj', 'gMETComponentsNoiseCut', 'gMETComponentsRms']
+    #Note: Unused container outputs from gFEX are:
+    #'gFexRhoRoI', 'gMSTComponentsJwoj', 'gScalarENoiseCut', 'gScalarERms'
+    #as compared with: https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigT1/L1CaloFEX/L1CaloFEXSim/L1CaloFEXSim/gFEXSysSim.h#L128-136
+
 
     from L1TopoSimulation.L1TopoInputHistograms import configureMuonInputProviderHistograms, configureeFexInputProviderHistograms, configurejFexInputProviderHistograms, configuregFexInputProviderHistograms
 

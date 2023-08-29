@@ -1,13 +1,11 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import numpy as np
 import pandas as pd
 import ROOT as R
 import python_tools as pt
-import math
 import argparse
-import glob
-import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--year', type=str, help='15-18, all for full Run-2')

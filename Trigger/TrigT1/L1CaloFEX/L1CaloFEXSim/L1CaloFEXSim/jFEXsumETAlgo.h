@@ -40,29 +40,35 @@ namespace LVL1 {
     /** Destructor **/
     virtual ~jFEXsumETAlgo();
 
-    virtual StatusCode safetyTest() const override;
+    virtual StatusCode safetyTest() override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) override;
     virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) override;
     virtual int getTTowerET(unsigned int TTID=0) override; // arguments 2,2 to get the central TT from m_TTwindow[5][5]
 
     virtual void buildBarrelSumET()  override;
     virtual void buildFWDSumET()  override;
-    virtual int getETlowerEta(uint bin)  override;
-    virtual int getETupperEta(uint bin)  override;
+    virtual std::tuple<int, bool> getETlowerEta(uint bin)  override;
+    virtual std::tuple<int, bool> getETupperEta(uint bin)  override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
 protected:
 
   private:
         SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
+        SG::ReadHandle<jTowerContainer> m_jTowerContainer;
         std::vector<std::vector<int>> m_FPGA;
         std::vector<std::vector<int>> m_FPGA_phi02;
         std::vector<std::vector<int>> m_FPGA_fcal;
         std::vector<int> m_SumET;
-        int m_SumlowEta =0;
-        int m_SumhighEta=0;
+        std::vector<bool> m_SumETSat;
+        int  m_SumlowEta =0;
+        bool m_SumlowEtaSat =0;
+        int  m_SumhighEta=0;
+        bool m_SumhighEtaSat=0;
         
         std::unordered_map<int,std::vector<int> > m_map_Etvalues;
+        
+        bool getTTowerSat(unsigned int TTID );
         
   };
 

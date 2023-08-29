@@ -102,7 +102,7 @@ private:
   // Job properties
   //
   std::string m_name;
-  Gaudi::Property<std::string> m_configuration{this, "Configuration", "PbPb2023", "Which config files to use"};
+  Gaudi::Property<std::string> m_configuration{this, "Configuration", "ppPbPb2023", "Which config files to use"};
   unsigned int m_LHCRun;
   bool m_writeAux{false};
   Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
