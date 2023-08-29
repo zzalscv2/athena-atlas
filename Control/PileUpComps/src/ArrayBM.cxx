@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm> /*count_if,max_element*/
@@ -44,7 +44,7 @@ ArrayBM::~ArrayBM()
 
 StatusCode ArrayBM::initialize()
 {
-  if (m_seed == 0) {
+  if (m_seed == 0u) {
     // Only need AthRNGSvc if seed is set to 0
     ATH_CHECK(m_randomSvc.retrieve());
     m_rngWrapper = m_randomSvc->getEngine(this);
@@ -138,7 +138,7 @@ StatusCode ArrayBM::initialize()
   // FIXME add a check that entry 0 is zero? In data, BCID=1 is always the
   // first filled bunch.
 
-  if (m_seed == 0) {
+  if (m_seed == 0u) {
     delete m_biRandom;
     // the engine is created if not there already
     m_biRandom =
@@ -154,7 +154,7 @@ StatusCode ArrayBM::initialize()
 
 void ArrayBM::selectT0(unsigned int run, unsigned long long event)
 {
-  if (m_seed == 0) {
+  if (m_seed == 0u) {
     // Use AthRNGSvc
     const EventContext& ctx =
         Gaudi::Hive::currentContext();  // not ideal, but seems the cleanest
