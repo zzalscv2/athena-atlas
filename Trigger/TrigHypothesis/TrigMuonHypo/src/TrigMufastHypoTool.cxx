@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/SystemOfUnits.h"
@@ -748,7 +748,7 @@ StatusCode TrigMufastHypoTool::chooseBestMuon(std::vector<TrigMufastHypoTool::Mu
 
 	  // monitoring
 	  const xAOD::L2StandAloneMuon* mf = (*input[j]).muFast;
-	  mufastNrOverlapped++;
+	  ++mufastNrOverlapped;
 	  mufastOverlappedPt = mf->pt();
 	  mufastOverlappedEta = mf->etaMS();
 	  mufastOverlappedPhi = mf->phiMS();
