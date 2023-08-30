@@ -475,9 +475,23 @@ def addHeavyIonP1Signatures(chains):
     chainsP1 = ChainStore()
 
     chainsP1['Calib'] = [
-        # Disabled for now, ZDC not available
-        # # 'ZDCCalib' stream
+        # 'ZDCCalib' stream
         # ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_LHCF', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_C', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_C', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_OR_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1ZDC_A_AND_C_UNPAIRED_NONISO', l1SeedThresholds=['FSNOSEED'], stream=["ZDCCalib"], groups=['PS:Online','RATE:Calibration','BW:Detector']),
 
         # ZDC RPD LED streamers (ATR-26826)
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ0', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),

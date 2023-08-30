@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Run this file in order to print out the empty slots
 
@@ -163,16 +163,18 @@ def defineMenu():
         'L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C',
         'L1_ZDC_XOR',
         'L1_ZDC_C_VZDC_A', 'L1_ZDC_A_VZDC_C',
+        'L1_ZDC_A_EMPTY','L1_ZDC_C_EMPTY','L1_ZDC_A_C_EMPTY',
+        'L1_ZDC_A_UNPAIRED_NONISO','L1_ZDC_C_UNPAIRED_NONISO','L1_ZDC_A_C_UNPAIRED_NONISO',
 
         # Run3 ZDC items for heavy ion runs 
         'L1_VZDC_A_VZDC_C', #comb0
-        'L1_1ZDC_A_VZDC_C', #comb1
-        'L1_VZDC_A_1ZDC_C', #comb2
-        'L1_1ZDC_A_1ZDC_C', #comb3
-        'L1_5ZDC_A_VZDC_C', #comb4
-        'L1_VZDC_A_5ZDC_C', #comb5
-        'L1_ZDC_1XOR5',     #comb6
-        'L1_5ZDC_A_5ZDC_C', #comb7
+        'L1_1ZDC_A_VZDC_C', #comb4
+        'L1_VZDC_A_1ZDC_C', #comb6
+        'L1_1ZDC_A_1ZDC_C', #comb1
+        'L1_5ZDC_A_VZDC_C', #comb5
+        'L1_VZDC_A_5ZDC_C', #comb7
+        'L1_ZDC_1XOR5',     #comb2
+        'L1_5ZDC_A_5ZDC_C', #comb3
         
         #ZDC and legacy calo
         'L1_1ZDC_A_1ZDC_C_VTE200', 'L1_ZDC_1XOR5_VTE200',
@@ -228,7 +230,6 @@ def defineMenu():
         'L1_1ZDC_A_1ZDC_C_VjTE200_GAP_AANDC', 'L1_VZDC_A_VZDC_C_VjTE200_GAP_AANDC',
         'L1_ZDC_OR_VjTE200_UNPAIRED_ISO', 'L1_MBTS_1_ZDC_OR_VjTE200_UNPAIRED_ISO',
         
-        
 
         # VDM
 
@@ -245,6 +246,7 @@ def defineMenu():
         'L1_ZDC_COMB6',
         'L1_ZDC_COMB7',
 
+
         # ZDC items for LHCf+ZDC special run ATR-26051
         # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
         # They are needed for scheduled 2023 5 TeV pp runs, so not removed from the menu
@@ -258,6 +260,7 @@ def defineMenu():
         'L1_ZDC_E3_AND_E3'    ,
         'L1_ZDC_A_AND_C'      ,
         'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_NONISO',
+        'L1_ZDC_A_AND_C_EMPTY', 'L1_ZDC_A_AND_C_UNPAIRED_NONISO',
         #'L1_ZDC_OR_UNPAIRED_ISO',
         #'L1_ZDC_OR_LHCF',
 
