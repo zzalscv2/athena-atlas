@@ -340,19 +340,19 @@ StatusCode AdaptiveMultiVertexFitterTestAlg::test1()
 
   xAOD::Vertex exp_v1;
   exp_v1.makePrivateStore();
-  exp_v1.setPosition ({8.67978, 10.3569, -6.33368});
-  exp_v1.setFitQuality (0.0141012, 0.797808);
+  exp_v1.setPosition ({8.7395, 10.3699, -6.33883});
+  exp_v1.setFitQuality (0.0133323, 0.76466);
   exp_v1.setCovariance (std::vector<float>
-                        {751.563, 142.738, 950.953,
-                           -7.62904, 47.5311, 67.4557});
+                        {778.536, 138.738, 975.131,
+			    -8.67629, 48.7424, 69.3179});
 
   xAOD::Vertex exp_v2;
   exp_v2.makePrivateStore();
-  exp_v2.setPosition ({7.97404, 0.106101, -4.97333});
-  exp_v2.setFitQuality (1.74029, 1.6738);
+  exp_v2.setPosition ({7.97405, 0.106089, -4.97332});
+  exp_v2.setFitQuality (1.74032, 1.6738);
   exp_v2.setCovariance (std::vector<float>
-                        {0.348487, -0.0194744, 0.0290909,
-                           -0.00362647, 0.000706365, 0.445415});
+                        {0.34849, -0.0194732, 0.0290884,
+			    -0.00362668, 0.000706326, 0.445416});
 
   compareVertex (v1.v, exp_v1);
   compareVertex (v2.v, exp_v2);
