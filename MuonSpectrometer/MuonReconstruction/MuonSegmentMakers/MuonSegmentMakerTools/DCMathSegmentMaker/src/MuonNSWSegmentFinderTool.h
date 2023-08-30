@@ -222,13 +222,20 @@ namespace Muon {
     private:
         enum HitType { Eta = 1, Phi = 1 << 1, Wire = 1 << 2, Pad = 1 << 3 };
 
+        /// @brief  Runs the NSW segment maker by combining 4 Micromega layers to a stereo seed. Subsequentally, 
+        ///         the hits on the hit road are added to the seeed and the segment is fitted
+        /// @param ctx EventContext
+        /// @param allClusts Collection of all EventContext objects
+        /// @param singleWedge 0 (use all 4 multiplets) 2/3
+        /// @return 
         std::vector<std::unique_ptr<Muon::MuonSegment>> findStereoSegments(const EventContext& ctx,
                                                                            const std::vector<const Muon::MuonClusterOnTrack*>& allClusts,
                                                                            int singleWedge = 0) const;
 
-        // reconstruct the segments in the precision (eta) plane
-        std::vector<std::unique_ptr<Muon::MuonSegment>> findPrecisionSegments(
-            const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters, int singleWedge = 0) const;
+        /// @brief Combines 2 sTgc strip layers to find 2D segments constraining the muon in the eta direction
+        std::vector<std::unique_ptr<Muon::MuonSegment>> findStgcPrecisionSegments(const EventContext& ctx, 
+                                                                                  const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters, 
+                                                                                  int singleWedge = 0) const;
         // recontruct 3D segments
         std::vector<std::unique_ptr<Muon::MuonSegment>> find3DSegments(const EventContext& ctx,
                                                                        const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters,
@@ -242,7 +249,7 @@ namespace Muon {
         LayerMeasVec classifyByLayer(const MeasVec& clusters, int hit_sel) const;
 
         // find segment seeds
-        std::vector<NSWSeed> segmentSeed(const LayerMeasVec& orderedClusters,
+        std::vector<NSWSeed> segmentSeedFromStgc(const LayerMeasVec& orderedClusters,
                                          bool usePhi) const;
 
         std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters) const;
@@ -288,8 +295,6 @@ namespace Muon {
 
         /// @brief  Removes clusters from high activity areas in the detector
         MeasVec vetoBursts( MeasVec && clustInLay ) const;
-
-        
 
     };
 

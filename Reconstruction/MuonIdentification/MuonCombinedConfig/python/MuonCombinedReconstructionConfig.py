@@ -559,15 +559,6 @@ def CombinedMuonTruthAssociationAlgsCfg(flags):
 
     return result
 
-def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
-    result = ComponentAccumulator()
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentConverterToolCfg
-    kwargs.setdefault("MuonSegmentConverterTool", result.popToolsAndMerge(MuonSegmentConverterToolCfg(flags)))
-    the_alg = CompFactory.xAODMaker.MuonSegmentCnvAlg(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
-
-
 def CombinedMuonOutputCfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
     result = ComponentAccumulator()
@@ -753,7 +744,7 @@ def MuonCombinedReconstructionCfg(flags):
         result.merge(EMEO_MuonCombinedAlgCfg(flags))
 
     result.merge(MuonSegContainerMergerAlgCfg(flags))
-
+    from MuonConfig.MuonSegmentFindingConfig import MuonSegmentCnvAlgCfg
     result.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlg",
                                       SegmentContainerName="TrkMuonSegments",
                                       xAODContainerName="MuonSegments"))

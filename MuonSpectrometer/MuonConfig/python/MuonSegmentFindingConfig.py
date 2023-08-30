@@ -372,11 +372,13 @@ def MuonNSWSegmentFinderToolCfg(flags, name='MuonNSWSegmentFinderTool', **kwargs
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg, MuonTrackSummaryToolCfg
     result=ComponentAccumulator()
-    
+    kwargs.setdefault("IPConstraint", flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault('SegmentAmbiguityTool', result.popToolsAndMerge( MuonAmbiProcessorCfg(flags) ) ) 
     kwargs.setdefault('SLFitter', result.popToolsAndMerge( MCTBSLFitterMaterialFromTrackCfg(flags) ) ) 
     kwargs.setdefault("TrackToSegmentTool", result.popToolsAndMerge( MuonTrackToSegmentToolCfg(flags) ) )
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
+    if flags.Beam.Type is not BeamType.Collisions:
+        kwargs.setdefault("MmOccupancyBinWidth", 2048)
 
     kwargs.setdefault('TrackCleaner', result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) ) ) 
     if flags.Muon.MuonTrigger:
@@ -591,6 +593,15 @@ def MuonSegmentFilterAlgCfg(flags, name="MuonSegmentFilterAlg", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
+def MuonSegmentCnvAlgCfg(flags, name="MuonSegmentCnvAlg", **kwargs):
+    result = ComponentAccumulator()
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentConverterToolCfg
+    kwargs.setdefault("MuonSegmentConverterTool", result.popToolsAndMerge(MuonSegmentConverterToolCfg(flags)))
+    the_alg = CompFactory.xAODMaker.MuonSegmentCnvAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+
 def MuonSegmentFindingCfg(flags, cardinality=1):
     # Set up some general stuff needed by muon reconstruction
 
@@ -620,15 +631,16 @@ def MuonSegmentFindingCfg(flags, cardinality=1):
     if flags.Muon.runCommissioningChain:
         result.merge(MuonSegmentFilterAlgCfg(flags))
 
-    result.merge(MuonSegmentFinderNCBAlgCfg(flags))
-    result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg_NCB",
-                                                                    SegmentContainerName="NCB_TrackMuonSegments",
-                                                                    xAODContainerName="NCB_MuonSegments") )
+    if flags.Beam.Type is BeamType.Collisions:
+        result.merge(MuonSegmentFinderNCBAlgCfg(flags))
+        result.merge(MuonSegmentCnvAlgCfg(flags, "MuonSegmentCnvAlg_NCB",
+                                                  SegmentContainerName="NCB_TrackMuonSegments",
+                                                  xAODContainerName="NCB_MuonSegments") )
 
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
-        result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("QuadNSW_MuonSegmentCnvAlg",
-                                                                    SegmentContainerName="TrackMuonNSWSegments",
-                                                                    xAODContainerName="xAODNSWSegments"))
+        result.merge(MuonSegmentCnvAlgCfg(flags, "QuadNSW_MuonSegmentCnvAlg",
+                                                 SegmentContainerName="TrackMuonNSWSegments",
+                                                 xAODContainerName="xAODNSWSegments"))
     return result
 
 if __name__=="__main__":

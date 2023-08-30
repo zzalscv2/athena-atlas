@@ -305,7 +305,7 @@ namespace Muon {
 
         /// All segments
         {
-            std::vector<std::unique_ptr<Muon::MuonSegment>> etaSegs = findPrecisionSegments(ctx, segmentInput);
+            std::vector<std::unique_ptr<Muon::MuonSegment>> etaSegs = findStgcPrecisionSegments(ctx, segmentInput);
             std::vector<std::unique_ptr<Muon::MuonSegment>> precSegs = find3DSegments(ctx, segmentInput, etaSegs);
             out_segments.insert(out_segments.end(), std::make_move_iterator(precSegs.begin()), std::make_move_iterator(precSegs.end()));
         }
@@ -441,7 +441,7 @@ namespace Muon {
 
     //============================================================================
     // find the precision (eta) segments
-    std::vector<std::unique_ptr<Muon::MuonSegment>> MuonNSWSegmentFinderTool::findPrecisionSegments(
+    std::vector<std::unique_ptr<Muon::MuonSegment>> MuonNSWSegmentFinderTool::findStgcPrecisionSegments(
         const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters, int singleWedge) const {
         // clean the muon clusters; select only the eta hits.
         // in single-wedge mode the eta seeds are retrieved from the specific wedge
@@ -453,8 +453,8 @@ namespace Muon {
         if (orderedClusters.size() < 4) return {};  // at least four layers with eta hits (MM and sTGC)
 
         // create segment seeds
-        std::vector<NSWSeed> seeds = segmentSeed(orderedClusters, false);
-        ATH_MSG_VERBOSE("  Found " << seeds.size() << " 2D seeds");
+        std::vector<NSWSeed> seeds = segmentSeedFromStgc(orderedClusters, false);
+        ATH_MSG_DEBUG("  Found " << seeds.size() << " 2D seeds");
         // Loop on seeds: find all clusters near the seed and try to fit
         MeasVec etaHitVec, phiHitVec;
         TrackCollection segTrkColl{SG::OWN_ELEMENTS};
@@ -563,7 +563,7 @@ namespace Muon {
                 if (!triedWireSeed) {
                     // wire seeds need to be retrieved only once (they don't depend on the eta segment)
                     triedWireSeed = true;
-                    seeds_WiresSTGC = segmentSeed(orderedWireClusters, true);
+                    seeds_WiresSTGC = segmentSeedFromStgc(orderedWireClusters, true);
                 }
 
                 if (!seeds_WiresSTGC.empty()) {
@@ -764,6 +764,7 @@ namespace Muon {
             std::sort(lays.begin(),lays.end(), [this](const SeedMeasurement& a, const SeedMeasurement& b){
                 return channel(a) < channel(b);
             });
+            ATH_MSG_DEBUG("Found in layer "<<m_idHelperSvc->toStringDetEl(lays[0]->identify())<<" "<<lays.size()<<" clusters");
             
        
         }
@@ -773,13 +774,12 @@ namespace Muon {
     }
 
     //============================================================================
-    std::vector<NSWSeed> MuonNSWSegmentFinderTool::segmentSeed(
-        const LayerMeasVec& orderedClusters, bool usePhi) const {
+    std::vector<NSWSeed> MuonNSWSegmentFinderTool::segmentSeedFromStgc(const LayerMeasVec& orderedClusters, 
+                                                                       bool usePhi) const {
         std::vector<NSWSeed> seeds;
 
         // oderedClusters should contain either eta clusters (MM and sTGC)
         // or sTGC phi hits. For MM phi, use the dedicated function.
-
         if (orderedClusters.size() < 4) return seeds;
 
         // Create seeds using each pair of hits on the two most distant layers (that containing hits).
@@ -790,8 +790,10 @@ namespace Muon {
         for (unsigned int ilayerL{0}; (ilayerL < orderedClusters.size() && seedingLayersL < m_nOfSeedLayers); ++ilayerL) {
             bool usedLayerL{false};
             for (const SeedMeasurement& hitL : orderedClusters[ilayerL]) {
-                if (usePhi != m_idHelperSvc->measuresPhi(hitL->identify())) continue;
-                usedLayerL = true;
+                /// Reject 
+                if (usePhi != m_idHelperSvc->measuresPhi(hitL->identify()) ||
+                    m_idHelperSvc->isMM(hitL->identify())) continue;
+
 
                 // For the second point, loop on layers in reverse to be as far as possible from the first.
                 int seedingLayersR{0};
@@ -799,8 +801,8 @@ namespace Muon {
                      --ilayerR) {
                     bool usedLayerR{false};
                     for (const SeedMeasurement& hitR : orderedClusters[ilayerR]) {
-                        if (usePhi != m_idHelperSvc->measuresPhi(hitR->identify())) continue;
-                        usedLayerR = true;
+                        if (usePhi != m_idHelperSvc->measuresPhi(hitR->identify()) ||
+                            m_idHelperSvc->isMM(hitR->identify())) continue;
                         NSWSeed seed{this,hitL, hitR};
                         if (!usePhi && m_ipConstraint) {
                             const double eta = seed.dir().perp() > std::numeric_limits<float>::epsilon() ? std::abs(seed.dir().eta()): FLT_MAX;
@@ -808,6 +810,8 @@ namespace Muon {
                                 continue;
                             }
                         }  
+                        usedLayerR = true;
+                        usedLayerL = true;
                         getClustersOnSegment(orderedClusters, seed, {ilayerL, ilayerR});
                         seeds.emplace_back(std::move(seed));
                         
