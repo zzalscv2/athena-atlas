@@ -38,6 +38,21 @@ namespace DerivationFramework {
 
         ATH_CHECK(m_MuonPassKeys.initialize());
         ATH_CHECK(m_TrkPassKeys.initialize());
+        if (!m_MuonPassKeys.empty()) {
+            std::stringstream sstr{};
+            for (const auto& key : m_MuonPassKeys) {
+                sstr<<" *** "<<key.fullKey()<<std::endl;
+            }
+            ATH_MSG_INFO("Accept muons with upstream flag "<<std::endl<<sstr.str());
+        }
+        if (!m_TrkPassKeys.empty()) {
+            std::stringstream sstr{};
+            for (const auto& key : m_TrkPassKeys) {
+                sstr<<" *** "<<key.fullKey()<<std::endl;
+            }
+            ATH_MSG_INFO("Accept tracks with upstream flag "<<std::endl<<sstr.str());
+        }
+
         return StatusCode::SUCCESS;
     }
 

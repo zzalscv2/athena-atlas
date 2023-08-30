@@ -165,6 +165,14 @@ def TruthClassificationDecoratorCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+def MuonTruthClassifierFallbackCfg(flags, name, **kwargs):
+    """Config the MuonTruthClassifierFallback tool"""
+    acc = ComponentAccumulator()
+    MuonTruthClassifierFallback = CompFactory.DerivationFramework.MuonTruthClassifierFallback
+    acc.addPublicTool(MuonTruthClassifierFallback(name = name, **kwargs), 
+                      primary = True)
+    return acc                            
+
 def TruthDressingToolCfg(flags, name, **kwargs):
     """Configure the TruthDressingTool"""
     acc = ComponentAccumulator()
@@ -180,6 +188,14 @@ def TruthIsolationToolCfg(flags, name, **kwargs):
     acc.addPublicTool(TruthIsolationTool(name = name, **kwargs),
                       primary = True)
     return acc 
+
+def MuonTruthIsolationToolCfg(flags, name, **kwargs):
+    """Configure the MuonTruthIsolationTool"""
+    acc = ComponentAccumulator()
+    MuonTruthIsolationTool = CompFactory.DerivationFramework.MuonTruthIsolationTool
+    acc.addPublicTool(MuonTruthIsolationTool(name = name, **kwargs),
+                      primary = True)
+    return acc
 
 def TruthQGDecorationToolCfg(flags, name, **kwargs):
     """Configure the quark/gluon decoration tool"""

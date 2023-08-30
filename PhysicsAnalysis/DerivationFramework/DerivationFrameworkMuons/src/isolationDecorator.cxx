@@ -1,16 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkMuons/isolationDecorator.h"
 
-#include <string>
-#include <vector>
-
+#include "StoreGate/ReadHandle.h"
 #include "AthenaKernel/errorcheck.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODPrimitives/IsolationHelpers.h"
-#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
 
 namespace {
@@ -18,23 +15,14 @@ namespace {
 }
 // Constructor
 DerivationFramework::isolationDecorator::isolationDecorator(const std::string& t, const std::string& n, const IInterface* p) :
-    ExpressionParserUser<AthAlgTool>(t, n, p), m_trackIsolationTool(), m_caloIsolationTool(), m_decorators() {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("TrackIsolationTool", m_trackIsolationTool);
-    declareProperty("CaloIsolationTool", m_caloIsolationTool);
-    declareProperty("TargetContainer", m_containerName = "InDetTrackParticles");
-    declareProperty("SelectionString", m_selectionString = "");
-    declareProperty("SelectionFlag", m_selFlag = "");
-    declareProperty("SelectionFlagValue", m_selFlagValue = 1);
-    declareProperty("ptcones", m_ptcones);
-    declareProperty("topoetcones", m_topoetcones);
-    declareProperty("Prefix", m_prefix = "");
+    ExpressionParserUser<AthAlgTool>(t, n, p){
+    declareInterface<DerivationFramework::IAugmentationTool>(this);   
 }
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::isolationDecorator::initialize() {
     ATH_MSG_VERBOSE("initialize() ...");
-
+    ATH_CHECK(m_containerName.initialize());
     // load the matching tool
     if (!m_caloIsolationTool.empty()) {
         ATH_CHECK(m_caloIsolationTool.retrieve());
@@ -50,8 +38,6 @@ StatusCode DerivationFramework::isolationDecorator::initialize() {
     m_caloCorrList.calobitset.set(static_cast<unsigned int>(xAOD::Iso::coreCone));
     m_caloCorrList.calobitset.set(static_cast<unsigned int>(xAOD::Iso::pileupCorrection));
 
-    /// create decorator list
-    m_ptconeTypes.clear();
     for (auto c : m_ptcones) {
         xAOD::Iso::IsolationType t = static_cast<xAOD::Iso::IsolationType>(c);
         xAOD::Iso::IsolationType t_var = static_cast<xAOD::Iso::IsolationType>(c + NDIFF);
@@ -61,7 +47,6 @@ StatusCode DerivationFramework::isolationDecorator::initialize() {
         m_decorators.insert(std::make_pair(c + NDIFF, SG::AuxElement::Decorator<float>(m_prefix + xAOD::Iso::toString(t_var))));
         m_ptconeTypes.push_back(t);
     }
-    m_topoetconeTypes.clear();
     for (auto c : m_topoetcones) {
         xAOD::Iso::IsolationType t = static_cast<xAOD::Iso::IsolationType>(c);
         m_decorators.insert(std::make_pair(c, SG::AuxElement::Decorator<float>(m_prefix + xAOD::Iso::toString(t))));
@@ -83,8 +68,7 @@ StatusCode DerivationFramework::isolationDecorator::decorate(const xAOD::IPartic
 
 StatusCode DerivationFramework::isolationDecorator::addBranches() const {
     // retrieve tag (muon) container
-    const xAOD::IParticleContainer* toDecorate = nullptr;
-    ATH_CHECK(evtStore()->retrieve(toDecorate, m_containerName));
+    SG::ReadHandle<xAOD::TrackParticleContainer> toDecorate{m_containerName};
 
     // Execute the text parser and update the mask
     std::vector<int> entries(toDecorate->size(), 1);

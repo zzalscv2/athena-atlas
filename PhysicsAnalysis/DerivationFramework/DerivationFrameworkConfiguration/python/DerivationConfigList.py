@@ -116,6 +116,10 @@ from DerivationFrameworkTrigger.TRIG8 import TRIG8Cfg
 # L1CALO1 derivation - runs primarily on RAWD
 from DerivationFrameworkL1Calo.L1CALO1 import L1CALO1Cfg
 
+# Muon combined performance DAODs
+# MUON1: baseline format for T&P 
+from DerivationFrameworkMuons.MUON1 import MUON1Cfg
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
@@ -136,5 +140,6 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg',
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg',
-           'TRIG8Cfg','L1CALO1Cfg'
+           'TRIG8Cfg','L1CALO1Cfg',
+           'MUON1Cfg' 
            ]
