@@ -11,7 +11,15 @@ int main(int argc, char** argv) {
     bool processed = false;
     std::string  current;
 
-    std::ifstream myfile (argc>1?argv[1]:"share/AtlasPIDTest.ref");
+    const char* reffile_name = "\0";
+    if (argc > 1)
+      reffile_name = argv[1];
+    else {
+      reffile_name = getenv ("REFERENCE_FILE");
+      if (!reffile_name)
+        reffile_name = "share/AtlasPIDTest.ref";
+    }
+    std::ifstream myfile (reffile_name);
     std::string myline;
     if ( !myfile.is_open() )  { std::cerr<<"Cannot open the reference file"<<std::endl; return 11;}
     while ( myfile ) {
