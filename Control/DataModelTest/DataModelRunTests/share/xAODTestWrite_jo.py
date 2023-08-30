@@ -40,7 +40,9 @@ from DataModelTestDataCommon.DataModelTestDataCommonConf import \
      DMTest__xAODTestWriteCVec, \
      DMTest__xAODTestWriteCInfo, \
      DMTest__xAODTestDecor, \
-     DMTest__MetaWriterAlg
+     DMTest__MetaWriterAlg, \
+     DMTest__xAODTestWriteFwdLink1, \
+     DMTest__xAODTestWriteFwdLink2
 from DataModelTestDataWrite.DataModelTestDataWriteConf import \
      DMTest__xAODTestWriteHVec, \
      DMTest__xAODTestWriteCView, \
@@ -55,6 +57,8 @@ topSequence += DMTest__xAODTestWrite ("xAODTestWrite")
 topSequence += DMTest__xAODTestWriteCVecConst ("xAODTestWriteCVecConst")
 topSequence += DMTest__xAODTestDecor ("xAODTestDecor")
 topSequence += DMTest__xAODTestWriteSymlinks ("xAODTestWriteSymlinks")
+topSequence += DMTest__xAODTestWriteFwdLink1 ("xAODTestWriteFwdLink1")
+topSequence += DMTest__xAODTestWriteFwdLink2 ("xAODTestWriteFwdLink2")
 topSequence += DMTest__MetaWriterAlg ("MetaWriterAlg")
 
 
@@ -79,6 +83,8 @@ fullItemList+=["DMTest::HVec#hvec"]
 fullItemList+=["DMTest::HAuxContainer#hvecAux."]
 fullItemList+=["DMTest::HView#hview"]
 fullItemList+=["DMTest::S2#S2"]
+fullItemList+=["DMTest::CVec#CVecFwdLink"]
+fullItemList+=["DMTest::CAuxContainer#CVecFwdLinkAux."]
 
 fullItemList+=["xAOD::EventInfo#EventInfo"]
 fullItemList+=["xAOD::EventAuxInfo#EventInfoAux."]
