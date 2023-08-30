@@ -207,7 +207,7 @@ private:
     this,
     "useMode",
     true,
-    "Combine/Collapse the MultiComponent State using Mode rather than mean"
+    "Combine/Collapse MultiComponent State Mode rather than mean"
   };
 
   Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{

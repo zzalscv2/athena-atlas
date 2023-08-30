@@ -48,16 +48,6 @@ public:
   /** Default constructor for POOL. This should not be used! */
   MultiComponentStateOnSurface();
 
-  /** Create a MultiComponentStateOnSurface Object. This has the same form as
-     the singular version (Trk::TrackStateOnSurface) with the exception that the
-     pointer to a single track paramters vector is now repleaced with a pointer to a
-     multi-component state */
-  MultiComponentStateOnSurface(
-    const FitQualityOnSurface&,
-    std::unique_ptr<MeasurementBase>,
-    MultiComponentState&&,
-    std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack = nullptr);
-
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
    * of the track parameters to be passed to the Trk::TrackStateOnSurface base
    * class */
@@ -67,14 +57,6 @@ public:
     std::unique_ptr<TrackParameters>,
     MultiComponentState&&,
     std::unique_ptr<MaterialEffectsBase> materialEffectsOnTrack = nullptr);
-
-  /** Create TrackStateOnSurface with TrackStateOnSurfaceType. */
-  MultiComponentStateOnSurface(
-    const FitQualityOnSurface&,
-    std::unique_ptr<MeasurementBase>,
-    MultiComponentState&&,
-    std::unique_ptr<MaterialEffectsBase>,
-    const std ::bitset<NumberOfTrackStateOnSurfaceTypes>&);
 
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
    * of the track parameters to be passed to the base and also a
@@ -86,10 +68,6 @@ public:
     MultiComponentState&&,
     std::unique_ptr<MaterialEffectsBase>,
     const std ::bitset<NumberOfTrackStateOnSurfaceTypes>& types);
-
-  /** Constructor without a FitQualityOnSurface. */
-  MultiComponentStateOnSurface(std::unique_ptr<MeasurementBase>,
-                               MultiComponentState);
 
   /** Copy constructor and assignment*/
   MultiComponentStateOnSurface(const MultiComponentStateOnSurface& other);
