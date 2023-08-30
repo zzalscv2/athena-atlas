@@ -1841,7 +1841,7 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
         /// this is effectively a segment-level eta cut - exclude too shallow seed segments
         if (std::abs(tz) > dzdrmax)
           continue;
-        if (m_fastTracking && (*iter_otherSP)->radius() < 50. && (*iter_otherSP)->z() > 250. && std::abs(tz) > 1.5)
+        if (m_fastTracking && (*iter_otherSP)->radius() < 50. && std::abs(tz) > 1.5)
           continue;
 
         /// add SP to the list
