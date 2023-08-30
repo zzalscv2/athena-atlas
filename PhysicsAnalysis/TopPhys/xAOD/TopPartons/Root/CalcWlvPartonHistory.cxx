@@ -40,7 +40,20 @@ namespace top {
     // Get the Truth Particles
     const xAOD::TruthParticleContainer* truthParticles(nullptr);
 
-    ATH_CHECK(evtStore()->retrieve(truthParticles, m_config->sgKeyMCParticle()));
+    if(m_config->getDerivationStream() == "PHYS") //in DAOD_PHYS we don't have the truth particles container
+    {
+      // To obtain the W, leptons and the neutrino, we need the collections for all
+      std::vector<std::string> collections = {"HardScatterParticles", "TruthBosonsWithDecayParticles", "TruthNeutrinos"};
+      ATH_CHECK(buildContainerFromMultipleCollections(collections,"AT_WlvPartonHistory_TruthParticles"));
+      ATH_CHECK(evtStore()->retrieve(truthParticles, "AT_WlvPartonHistory_TruthParticles"));
+      
+      //we need to be able to navigate from the Ws to their decayProducts, see CalcTopPartonHistory.h for details
+      ATH_CHECK(linkBosonCollections());
+    }
+    else //otherwise we retrieve the container as usual
+    {
+      ATH_CHECK(evtStore()->retrieve(truthParticles, m_config->sgKeyMCParticle()));
+    }
 
     // Create the partonHistory xAOD object
     //cppcheck-suppress uninitvar
