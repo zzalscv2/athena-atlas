@@ -62,7 +62,8 @@ def generateChains( flags, chainDict ):
     for part in chainDict['chainParts']:
         l1Thresholds.append(part['L1threshold'])
 
-    log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
+    if log.isEnabledFor(logging.DEBUG):  # pprint.pformat is expensive
+        log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     acc.printConfig()
 

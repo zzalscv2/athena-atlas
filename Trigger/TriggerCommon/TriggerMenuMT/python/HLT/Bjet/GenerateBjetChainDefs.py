@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from .BjetChainConfiguration import BjetChainConfiguration
@@ -12,9 +12,9 @@ log.info("Importing %s",__name__)
 
 def generateChainConfigs(flags,  chainDict ):
 
-    log.debug('bjet full dictionary is: %s\n', pprint.pformat(chainDict))
+    if log.isEnabledFor(logging.DEBUG):  # pprint.pformat is expensive
+        log.debug('bjet full dictionary is: %s\n', pprint.pformat(chainDict))
 
-    
     listOfChainDicts = splitChainDict(chainDict)
     listOfChainDefs = []
 

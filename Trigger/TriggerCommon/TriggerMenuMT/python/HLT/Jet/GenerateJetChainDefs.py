@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from .JetChainConfiguration import JetChainConfiguration
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
@@ -11,7 +11,9 @@ log.info("Importing %s",__name__)
 
 
 def generateChainConfigs(flags,  chainDict ):
-    log.debug('full jet dictionary is: %s\n', pprint.pformat(chainDict))
+
+    if log.isEnabledFor(logging.DEBUG):  # pprint.pformat is expensive
+        log.debug('full jet dictionary is: %s\n', pprint.pformat(chainDict))
 
     # Jet chain is assembled always from the full dictionary (multiple legs are handled internally by the jet reco / hypo)
     theChainDef = JetChainConfiguration(chainDict)

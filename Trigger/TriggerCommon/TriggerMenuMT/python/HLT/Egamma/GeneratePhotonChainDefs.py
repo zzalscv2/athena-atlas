@@ -12,9 +12,10 @@ log.info("Importing %s",__name__)
 
 
 def generateChainConfigs(flags,  chainDict, perSig_lengthOfChainConfigs):
-    log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
-    
+    if log.isEnabledFor(logging.DEBUG):  # pprint.pformat is expensive
+        log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
+
     listOfChainDicts = splitChainDict(chainDict)
     listOfChainDefs = []
 

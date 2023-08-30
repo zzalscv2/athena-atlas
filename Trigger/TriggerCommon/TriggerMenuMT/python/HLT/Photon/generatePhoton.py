@@ -64,7 +64,8 @@ def generateChains(flags, chainDict):
     for part in chainDict['chainParts']:
         l1Thresholds.append(part['L1threshold'])
 
-    log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
+    if log.isEnabledFor(logging.DEBUG):  # pprint.pformat is expensive
+        log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     chain = Chain(chainDict['chainName'], L1Thresholds=l1Thresholds, ChainSteps=[_fastCalo(flags, chainDict), _fastPhoton(flags, chainDict)])
     return chain
