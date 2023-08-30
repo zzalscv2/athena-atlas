@@ -297,6 +297,7 @@ class ItemDef:
         MenuItem('L1_eEM1_ZDC_XOR4_VTE100' ).setLogic( d.eEM1 & PHYS_ZDC_XOR4 & Not(d.TE100)   & physcond)
         MenuItem('L1_eEM2_VZDC_A_VZDC_C_VTE100' ).setLogic( d.eEM2 & PHYS_VZDC_A_VZDC_C & Not(d.TE100)  & physcond)
         MenuItem('L1_eEM2_ZDC_XOR4_VTE100' ).setLogic( d.eEM2 & PHYS_ZDC_XOR4 & Not(d.TE100) &  physcond)
+        MenuItem('L1_eEM9_VTE200').setLogic( d.eEM9      & Not(d.TE200) & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_VjTE200_GAP_A'         ).setLogic(  Not(d.jTE200) & GAPA  & physcond).setTriggerType( TT.calo )
         MenuItem('L1_VjTE200_GAP_C'         ).setLogic(  Not(d.jTE200) & GAPC  & physcond).setTriggerType( TT.calo )
@@ -385,6 +386,7 @@ class ItemDef:
         MenuItem('L1_MU3V_TE35p24ETA49' ).setLogic( d.MU3V  & d.TE3524ETA49 & physcond).setTriggerType(TT.muon)
         MenuItem('L1_MU3V_TE40p24ETA49' ).setLogic( d.MU3V  & d.TE4024ETA49 & physcond).setTriggerType(TT.muon)
         MenuItem('L1_MU3V_VTE50' ).setLogic( d.MU3V     & Not(d.TE50) & physcond).setTriggerType(TT.muon)
+        MenuItem('L1_MU3V_VTE200' ).setLogic( d.MU3V    & Not(d.TE200) & physcond).setTriggerType(TT.muon)
         MenuItem('L1_MU5VF_VTE50').setLogic( d.MU5VF    & Not(d.TE50) & physcond).setTriggerType(TT.muon)
 
         MenuItem('L1_MU3V_UNPAIRED_ISO'   ).setLogic(d.MU3V  & unpaired_isocond   ).setTriggerType( TT.muon )

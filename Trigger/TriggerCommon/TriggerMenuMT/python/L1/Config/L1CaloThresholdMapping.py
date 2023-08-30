@@ -11,7 +11,7 @@
 threshold_mapping = {
     'eEM': { # TODO: Update when eFEX EM calibrations are applied
         # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eEM1 and eEM2
-        1:1,
+        1:1.4,
         2:2,
         5:3.5,
         7:5.5,
