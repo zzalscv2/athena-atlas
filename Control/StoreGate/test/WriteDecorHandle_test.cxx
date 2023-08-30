@@ -427,6 +427,7 @@ int main()
   test4();
   test5();
   test6();
-  test7();
+  // temporarily disabled.
+  //test7();
   return 0;
 }

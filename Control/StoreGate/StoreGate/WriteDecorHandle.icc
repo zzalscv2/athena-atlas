@@ -97,8 +97,9 @@ WriteDecorHandle<T, D>::~WriteDecorHandle()
       // be looking at this decoration yet.
       auto store_nc ATLAS_THREAD_SAFE = const_cast<IConstAuxStore*> (store);
       store_nc->lockDecoration (auxid());
-      auto avd_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*> (this->vectorData());
-      avd_nc->clearDecorCache (auxid());
+      // Temporarily disable this --- there are still more failing tests.
+      //auto avd_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*> (this->vectorData());
+      //avd_nc->clearDecorCache (auxid());
     }
   }
 }
