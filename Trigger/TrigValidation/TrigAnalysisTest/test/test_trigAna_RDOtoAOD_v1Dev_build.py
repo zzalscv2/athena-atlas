@@ -23,7 +23,7 @@ rdo2aod.threads = 1
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
 rdo2aod.args += ' --CA "default:True" "RDOtoRDOTrigger:False"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
-rdo2aod.timeout = 4200 # default = 3600 s
+rdo2aod.timeout = 5400 # default = 3600 s
 
 test = Test.Test()
 test.art_type = 'build'
