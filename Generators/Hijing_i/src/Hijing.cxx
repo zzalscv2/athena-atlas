@@ -755,6 +755,16 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     }
     //BPK-<
 
+    //ARA -- ATLHI-483, clean up unstable particles with no decay vertex
+    if(m_keepAllDecayVertices)
+    {
+      const std::vector <HepMC::GenParticlePtr> allParticles=evt->particles();
+      for(auto p : allParticles)
+      {
+	HepMC::ConstGenVertexPtr end_v=p->end_vertex();
+	if(p->status()==2 && !end_v) evt->remove_particle(p);
+      }
+    }
     return StatusCode::SUCCESS;
 }
 
