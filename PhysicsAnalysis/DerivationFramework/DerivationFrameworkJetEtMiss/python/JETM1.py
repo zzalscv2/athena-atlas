@@ -155,7 +155,7 @@ def JETM1KernelCfg(ConfigFlags, name='JETM1Kernel', **kwargs):
     from DerivationFrameworkInDet.InDetToolsConfig import InDetTrackSelectionToolWrapperCfg
     DFCommonTrackSelection = acc.getPrimaryAndMerge(InDetTrackSelectionToolWrapperCfg(
         ConfigFlags,
-        name           = "DFCommonTrackSelectionLoose",
+        name           = "DFJETM1CommonTrackSelectionLoose",
         ContainerName  = "InDetTrackParticles",
         DecorationName = "DFJETM1Loose"))
     DFCommonTrackSelection.TrackSelectionTool.CutLevel = "Loose" 
