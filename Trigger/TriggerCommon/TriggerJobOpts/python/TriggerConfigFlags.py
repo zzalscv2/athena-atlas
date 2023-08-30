@@ -437,6 +437,9 @@ def createTriggerRecoFlags():
     # Defines the working point for the TVA algorithm
     flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom") # offline default is "Nonprompt_All_MaxWeight"
 
+    # Apply low pT filter on standard reconstructed antiKt4 jets: Used for HI UPC jet reco (and other potential future use)
+    flags.addFlag("Trigger.Jet.LowPtFilter", False)
+
     def __httFlags():
         """Additional function delays import"""
         from TrigHTTConfTools.HTTConfigFlags import createHTTConfigFlags
