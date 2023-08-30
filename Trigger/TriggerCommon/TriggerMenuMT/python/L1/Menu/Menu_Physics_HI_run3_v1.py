@@ -112,7 +112,7 @@ def defineMenu():
         'L1_GAP_A', 'L1_GAP_C', 'L1_GAP_AANDC',
 
         #UPC - MU
-        'L1_MU3V_VTE50', 'L1_MU5VF_VTE50', 'L1_2MU3V_VTE50',
+        'L1_MU3V_VTE50', 'L1_MU5VF_VTE50', 'L1_2MU3V_VTE50', 'L1_MU3V_VTE200',
         
         #UPC - MU, phase-1 calo
         'L1_MU3V_VjTE50', 'L1_MU5VF_VjTE50', 'L1_2MU3V_VjTE50',
@@ -130,7 +130,7 @@ def defineMenu():
         'L1_eEM1_VjTE200', 'L1_eEM2_VjTE200', 'L1_eEM5_VjTE200', 'L1_2eEM1_VjTE200', 'L1_2eEM2_VjTE200','L1_2eEM1_VjTE200_GAP_AANDC',
         'L1_2eEM1_VjTE200_EMPTY','L1_2eEM1_VjTE200_UNPAIRED_ISO','L1_2eEM1_VjTE200_UNPAIRED_NONISO',
         'L1_eEM1_TE4_VTE200', 'L1_eEM2_TE4_VTE200', 'L1_eEM1_TE4_VTE200_EMPTY',
-        'L1_eEM1_VTE200', 'L1_2eEM1_VTE200', 'L1_2eEM2_VTE200',
+        'L1_eEM1_VTE200', 'L1_2eEM1_VTE200', 'L1_2eEM2_VTE200', 'L1_eEM9_VTE200',
         
         #UPC - calo, MBTS, calo  
         'L1_ZDC_XOR_VTE200', 'L1_VZDC_A_VZDC_C_TE5_VTE200',
