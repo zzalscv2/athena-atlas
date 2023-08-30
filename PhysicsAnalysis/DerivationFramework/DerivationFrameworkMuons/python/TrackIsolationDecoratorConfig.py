@@ -22,41 +22,49 @@ def TrackIsolationToolCfg(ConfigFlags,name= "TrackIsolationTool", **kwargs):
     acc.setPrivateTools(TrackIsoTool)
     return acc
 
-def MUON1IDTrackDecoratorCfg(ConfigFlags, name, **kwargs):
 
-    acc = ComponentAccumulator()
-    kwargs.setdefault('TrackIsolationTool',  acc.getPrimaryAndMerge(TrackIsolationToolCfg(ConfigFlags)))
+def MuonTrackIsolationDecorAlgCfg(ConfigFlags, name="MuonTrackIsolationDecorator", ttvaWP = "Nonprompt_All_MaxWeight", trackPt=500., **kwargs):
+
+    from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg, TrackIsolationToolCfg
+    from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
+    result = ComponentAccumulator()    
+    ttvaTool = result.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags, WorkingPoint=ttvaWP))
+    trackSelTool = result.popToolsAndMerge(isoTrackSelectionToolCfg(ConfigFlags, minPt=trackPt))
+    
+    wpName = "{WP}TTVA_pt{ptCut}".format(WP = ttvaWP, ptCut = trackPt)
+    kwargs.setdefault("customName", wpName)
+    ## Minimal pt cut on the ID tracks
+    kwargs.setdefault("PtMin", 2500.)
+    kwargs.setdefault("TrackIsolationTool", result.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags, 
+                                                                                          TTVATool=ttvaTool, 
+                                                                                          TrackSelectionTool=trackSelTool)))
+    theAlg = CompFactory.DerivationFramework.TrackIsolationDecorAlg(name = name, **kwargs)
+    result.addEventAlgo(theAlg, primary = True)
+    return result
+
+
+def MuonCaloIsolationDecorAlgCfg(ConfigFlags, name = "MuonCaloIsolationDecorator", **kwargs):
     from IsolationAlgs.IsoToolsConfig import MuonCaloIsolationToolCfg
-    kwargs.setdefault('CaloIsolationTool',  acc.getPrimaryAndMerge(MuonCaloIsolationToolCfg(ConfigFlags)))
-    kwargs.setdefault('TargetContainer', "InDetTrackParticles")
-    kwargs.setdefault('SelectionString', "")
-    kwargs.setdefault('SelectionFlag', "MUON1DIMU_Status")
-    kwargs.setdefault('SelectionFlagValue', 1000)
-    kwargs.setdefault('ptcones', deco_ptcones)
-    kwargs.setdefault('topoetcones', deco_topoetcones)
-    kwargs.setdefault('Prefix', deco_prefix)
+    result = ComponentAccumulator()
+    kwargs.setdefault("PtMin", 2500.)
+    kwargs.setdefault("CaloIsolationTool", result.getPrimaryAndMerge(MuonCaloIsolationToolCfg(ConfigFlags, 
+                                                                        saveOnlyRequestedCorrections=True)))
+    the_alg = CompFactory.DerivationFramework.CaloIsolationDecorAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary=True)
+    return result
 
-    MUON1IDTrackDecorator = CompFactory.DerivationFramework.isolationDecorator(name = "MUON1IDTrackDecorator", **kwargs)
-
-    acc.addPublicTool(MUON1IDTrackDecorator, primary=True)
-    return acc
-
-
-def MUON1MSTrackDecoratorCfg(ConfigFlags, name, **kwargs):
-
-    acc = ComponentAccumulator()
-    kwargs.setdefault('TrackIsolationTool',  acc.getPrimaryAndMerge(TrackIsolationToolCfg(ConfigFlags)))
-    from IsolationAlgs.IsoToolsConfig import MuonCaloIsolationToolCfg
-    kwargs.setdefault('CaloIsolationTool',  acc.getPrimaryAndMerge(MuonCaloIsolationToolCfg(ConfigFlags)))
-    kwargs.setdefault('TargetContainer', "ExtrapolatedMuonTrackParticles")
-    kwargs.setdefault('SelectionString', "")
-    kwargs.setdefault('SelectionFlag', "")
-    kwargs.setdefault('SelectionFlagValue', 1000)
-    kwargs.setdefault('ptcones', deco_ptcones)
-    kwargs.setdefault('topoetcones', deco_topoetcones)
-    kwargs.setdefault('Prefix', deco_prefix)
-
-    MUON1MSTrackDecorator = CompFactory.DerivationFramework.isolationDecorator(name = "MUON1MSTrackDecorator", **kwargs)
-
-    acc.addPublicTool(MUON1MSTrackDecorator, primary = True)
-    return acc
+def TrackIsolationCfg(ConfigFlags, TrackCollection="InDetTrackParticles", TrackSelections = []):
+    result = ComponentAccumulator()
+    for WP in ['Nonprompt_All_MaxWeight', 'Tight']:
+        for trackPt in 500, 1000:
+            result.merge(MuonTrackIsolationDecorAlgCfg(ConfigFlags,
+                                                       name = "TrackIsoDecorAlg{container}{WP}{Pt}".format(container = TrackCollection,
+                                                                                                           WP = WP, Pt = trackPt),
+                                                       ttvaWP = WP,
+                                                       trackPt = trackPt,
+                                                       TrackCollection = TrackCollection,
+                                                       TrackSelections = TrackSelections))
+    result.merge(MuonCaloIsolationDecorAlgCfg(ConfigFlags,
+                                              name = "CaloIsoDecorAlg{container}".format(container = TrackCollection),
+                                              TrackCollection = TrackCollection))
+    return result

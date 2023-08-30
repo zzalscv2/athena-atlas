@@ -70,7 +70,7 @@ namespace DerivationFramework {
 
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackSGKey{this, "TrackContainerKey", "InDetTrackParticles"};
 
-        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthSGKey{this, "TruthKey", "MuonTruthParticles"};
+        SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthSGKey{this, "TruthKey", ""};
 
         /// Keys to whitelist the muons & tracks needed for MCP studies to output
         SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonKeepKey{

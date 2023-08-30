@@ -118,7 +118,7 @@ namespace DerivationFramework {
         for (const xAOD::Muon* mu_itr1 : *muons) {
             if (truth) {
                 for (const xAOD::TruthParticle* truth_itr : * truth) {
-                    if (xAOD::P4Helpers::deltaR2(truth_itr, mu_itr1) < m_thinningConeSize2) {
+                    if (truth_itr->isMuon() && xAOD::P4Helpers::deltaR2(truth_itr, mu_itr1) < m_thinningConeSize2) {
                         muo_decor(*mu_itr1) = true;
                         break;
                    }
