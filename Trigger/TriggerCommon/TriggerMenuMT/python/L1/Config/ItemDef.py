@@ -1235,6 +1235,8 @@ class ItemDef:
         MenuItem('L1_ZDC_E2_AND_E3'    ).setLogic( ZDC_E2_AND_E3     & physcond)
         MenuItem('L1_ZDC_E3_AND_E3'    ).setLogic( ZDC_E3_AND_E3     & physcond)
         MenuItem('L1_ZDC_A_AND_C'      ).setLogic( ZDC_A_AND_C       & physcond)
+        MenuItem('L1_ZDC_A_AND_C_EMPTY'     ).setLogic( ZDC_A_AND_C  & cosmiccond)
+        MenuItem('L1_ZDC_A_AND_C_UNPAIRED_NONISO' ).setLogic( ZDC_A_AND_C   & unpaired_nonisocond)
         MenuItem('L1_ZDC_OR_EMPTY'          ).setLogic( ZDC_OR & cosmiccond)
         MenuItem('L1_ZDC_OR_UNPAIRED_ISO'   ).setLogic( ZDC_OR & unpaired_isocond)
         MenuItem('L1_ZDC_OR_UNPAIRED_NONISO').setLogic( ZDC_OR & unpaired_nonisocond)
