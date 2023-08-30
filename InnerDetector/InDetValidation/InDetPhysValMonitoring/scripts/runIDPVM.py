@@ -8,6 +8,7 @@ def GetCustomAthArgs():
     IDPVMparser = ArgumentParser(description='Parser for IDPVM configuration')
     IDPVMparser.add_argument("--filesInput", required=True)
     IDPVMparser.add_argument("--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int)
+    IDPVMparser.add_argument("--skipEvents", help="Skip this number of events. Default: no events are skipped", default=0, type=int)
     IDPVMparser.add_argument("--doLargeD0Tracks", help='also run LRT plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doLowPtRoITracks", help='also run low pt tracks', action='store_true', default=False)
     IDPVMparser.add_argument("--doMergedLargeD0Tracks", help='also run merged STD+LRT plots', action='store_true', default=False)
@@ -86,6 +87,9 @@ flags.PhysVal.IDPVM.GRL = MyArgs.GRL
 flags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
 flags.PhysVal.doActs = MyArgs.doActs
 
+flags.Exec.SkipEvents = MyArgs.skipEvents
+flags.Exec.MaxEvents = MyArgs.maxEvents
+
 flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -99,7 +103,7 @@ acc.merge(InDetPhysValMonitoringCfg(flags))
 acc.printConfig(withDetails=True)
 
 # Execute and finish
-sc = acc.run(maxEvents=MyArgs.maxEvents)
+sc = acc.run()
 
 # Success should be 0
 import sys
