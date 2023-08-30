@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDetectorFactoryH62004.h"
@@ -174,7 +174,11 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   // Add this to the list of top level physical volumes:                               //  
   //                                                                                   //  
   //-----------------------------------------------------------------------------------//  
-  
+  if (expHallPhys == nullptr){
+    //follow existing pattern for reporting errors in this class, but bail out
+    std::cout << "The expHallPhys pointer is NULL in LArGeo::LArDetectorFactoryH62004::create"<<std::endl;
+    return;
+  }
 
   // For the moment it's still hard-coded, but eventually we'll
   // read a vector for translation and rotation from the database and apply it to the
@@ -223,7 +227,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   {
      GeoVPhysVol* middle = 0;
      middle = MiddleBeamConstruction.GetEnvelope();
-     if(middle != 0 && expHallPhys !=0){
+     if(middle != 0 ){
         double ym_pos = m_tableYpos  * (z_bardm + 2160*Gaudi::Units::cm) * (1./(bttb_pos + 2160*Gaudi::Units::cm));
 	expHallPhys->add( new GeoNameTag("H62004::Middle"));
 	expHallPhys->add( new GeoTransform( GeoTrf::TranslateY3D(ym_pos) * GeoTrf::TranslateZ3D(z_bardm) ) );
@@ -235,7 +239,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
   {
      GeoVPhysVol* mov = 0;
      mov = MovableTable.GetEnvelope();
-     if(mov != 0 && expHallPhys !=0){
+     if(mov != 0 ){
 	expHallPhys->add( new GeoNameTag("H62004::Movable"));
 	expHallPhys->add( new GeoTransform( GeoTrf::TranslateY3D(m_tableYpos) *  GeoTrf::TranslateZ3D(bttb_pos) ) );
 	expHallPhys->add(mov);
@@ -262,7 +266,7 @@ void LArGeo::LArDetectorFactoryH62004::create(GeoPhysVol *world)
      GeoVPhysVol* wtc = 0;
      wtc = wtcConstruction.GetEnvelope();
      std::cout<<"WTC envelope: "<<wtc<<"/"<<expHallPhys<<std::endl;
-     if(wtc !=0 && expHallPhys !=0){
+     if(wtc !=0 ){
        expHallPhys->add( new GeoNameTag("LAr"));
        GeoTrf::RotateX3D rotTC(WTC_tild);
        expHallPhys->add( new GeoTransform( GeoTrf::Translation3D(WTC_x, WTC_y, bcry_zpos + bcry_rwarm + WTC_z + z_m) * rotTC));
