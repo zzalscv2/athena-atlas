@@ -22,7 +22,7 @@ static const InterfaceID IID_IjFEXsumETAlgo("LVL1::IjFEXsumETAlgo",1, 0);
 class IjFEXsumETAlgo : virtual public IAlgTool {
     public:
         static const InterfaceID& interfaceID ( ) ;
-        virtual StatusCode safetyTest() const = 0;
+        virtual StatusCode safetyTest() = 0;
         virtual StatusCode reset() =0;
         virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width]) = 0;
         virtual void setup(int FPGA[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width]) = 0;
@@ -30,8 +30,8 @@ class IjFEXsumETAlgo : virtual public IAlgTool {
         
         virtual void buildBarrelSumET()  =0;
         virtual void buildFWDSumET()  =0;
-        virtual int getETlowerEta(uint )  =0;
-        virtual int getETupperEta(uint )  =0;
+        virtual std::tuple<int, bool> getETlowerEta(uint )  =0;
+        virtual std::tuple<int, bool> getETupperEta(uint )  =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  =0;
         
     private:

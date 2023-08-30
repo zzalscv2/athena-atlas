@@ -42,12 +42,12 @@ namespace LVL1 {
       SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gJet_EDMKey {this, "gFexSRJetRoIKey", "L1_gFexSRJetRoI", "gFEX Jet EDM"};
       SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gLJet_EDMKey {this, "gFexLRJetRoIKey", "L1_gFexLRJetRoI", "gFEX LJet EDM"};
 
-      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXEJWOJ_EDMKey {this, "gFexXEJWOJRoIKey", "L1_gMETComponentsJwoj", "gFEX XEJWOJ EDM"};
-      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gMHT_EDMKey {this, "gFexMHTRoIKey", "L1_gMHTComponentsJwoj", "gFEX MHT EDM"};
-      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXENC_EDMKey {this, "gFexXENCRoIKey", "L1_gMETComponentsNoiseCut", "gFEX XENC EDM"};
-      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXERHO_EDMKey {this, "gFexXERHORoIKey", "L1_gMETComponentsRms", "gFEX XERHO EDM"};
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXEJWOJ_EDMKey {this, "gMETComponentsJwojKey", "L1_gMETComponentsJwoj", "gFEX XEJWOJ EDM"};
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gMHT_EDMKey {this,"gMHTComponentsJwojKey", "L1_gMHTComponentsJwoj", "gFEX MHT EDM"};
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXENC_EDMKey {this, "gMETComponentsNoiseCutKey", "L1_gMETComponentsNoiseCut", "gFEX XENC EDM"};
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXERHO_EDMKey {this, "gMETComponentsRmsKey", "L1_gMETComponentsRms", "gFEX RHO ROI EDM"};
 
-      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gTE_EDMKey {this, "gFexTERoIKey", "L1_gScalarEJwoj", "gFEX TE EDM"};
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gTE_EDMKey {this, "gScalarEJwojKey", "L1_gScalarEJwoj", "gFEX TE EDM"};
 
       // gFex to L1Topo conversion factors
       static const int m_EtJet_conversion;

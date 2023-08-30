@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import numpy as np
 import pandas as pd
-import python_tools as pt
+from . import python_tools as pt
 import ROOT as R
 import os
-import math
 from array import array
 import argparse
 import re
@@ -17,6 +17,7 @@ parser.add_argument('--outdir', type=str, help='output directory')
 parser.add_argument('--usemu', action='store_true', help='Plot vs. mu. Default == LB')
 parser.add_argument('--absolute', action='store_true', help='Use for official lumi absolute comparison')
 parser.add_argument('--t0', action='store_true', help='Modifications for t0 operation')
+parser.add_argument('--dropzero', action='store_true', help='Drop LBs with zero Z counting lumi in either channel')
 
 args = parser.parse_args()
 infilename = args.infile
@@ -52,13 +53,18 @@ def main():
 
     # Drop LBs with no Z-counting information
     dfz0 = dfz.copy()
-    dfz = dfz.drop(dfz[(dfz.ZeeLumi == 0) | (dfz.ZmumuLumi == 0)].index)
+    if args.dropzero:
+        dfz = dfz.drop(dfz[(dfz.ZeeLumi == 0) | (dfz.ZmumuLumi == 0)].index)
 
     # Calculate mean per LB against ATLAS
     for channel in ['Zee', 'Zmumu']:
         dfz = dfz.drop(dfz[(dfz['LBLive']<9) | (dfz['PassGRL']==0)].index)
-        ratio = array('d', dfz[channel+'Lumi']/dfz['OffLumi'])
-        print("mean for "+channel+": ", np.mean(ratio))
+        if len(dfz):
+            ratio = array('d', dfz[channel+'Lumi']/dfz['OffLumi'])
+            print("mean for "+channel+": ",  list(dfz[channel+'Lumi']), list(dfz['OffLumi']), np.mean(ratio))
+        else:
+            ratio = 1
+            print("No valid LBs found")
 
     dfz['OffDelLumi'] = dfz['OffLumi']*dfz['LBFull']
 
@@ -106,10 +112,8 @@ def main():
     for channel in ['Zee', 'Zmumu']: 
         if channel == "Zee": 
             channel_string = "Z #rightarrow ee counting"
-            lep = "e"
         elif channel == "Zmumu": 
             channel_string = "Z #rightarrow #mu#mu counting"
-            lep = "#mu"
             ymax = 0.6
 
         if args.usemu: 
@@ -126,21 +130,34 @@ def main():
                 outfile = filepfx+channel+"_vs_atlas_abs"
             else:
                 outfile = filepfx+channel+"_vs_atlas"
-	
-        normalisation = dfz[channel+'Lumi'].sum() / dfz['OffLumi'].sum()
-        if args.absolute:
-          normalisation = 1
 
-        arr_bins      = array('d', dfz.index)
-        arr_zlumi     = array('d', dfz[channel+'Lumi'] / dfz['LBLive'] / normalisation)
-        arr_zlumi_err = array('d', dfz[channel+'LumiErr'] / dfz['LBLive'] / normalisation)
-        arr_rat       = array('d', dfz[channel+'Lumi'] / dfz['OffLumi'] / normalisation)
-        arr_rat_err   = array('d', dfz[channel+'LumiErr'] / dfz['OffLumi'] / normalisation)
-        arr_olumi     = array('d', dfz['OffLumi'] / dfz['LBLive'])
+        normalisation = 1
+        if len(dfz) and not args.absolute:
+            normalisation = dfz[channel+'Lumi'].sum() / dfz['OffLumi'].sum()
 
-        hz = R.TGraphErrors(len(arr_bins), arr_bins, arr_zlumi, R.nullptr, arr_zlumi_err)
-        ho = R.TGraphErrors(len(arr_bins), arr_bins, arr_olumi, R.nullptr, R.nullptr)
-        hr = R.TGraphErrors(len(arr_bins), arr_bins, arr_rat, R.nullptr, arr_rat_err)
+        if len(dfz):
+            arr_bins      = array('d', dfz.index)
+            arr_zlumi     = array('d', dfz[channel+'Lumi'] / dfz['LBLive'] / normalisation)
+            arr_zlumi_err = array('d', dfz[channel+'LumiErr'] / dfz['LBLive'] / normalisation)
+            arr_rat       = array('d', dfz[channel+'Lumi'] / dfz['OffLumi'] / normalisation)
+            arr_rat_err   = array('d', dfz[channel+'LumiErr'] / dfz['OffLumi'] / normalisation)
+            arr_olumi     = array('d', dfz['OffLumi'] / dfz['LBLive'])
+
+            hz = R.TGraphErrors(len(arr_bins), arr_bins, arr_zlumi, R.nullptr, arr_zlumi_err)
+            ho = R.TGraphErrors(len(arr_bins), arr_bins, arr_olumi, R.nullptr, R.nullptr)
+            hr = R.TGraphErrors(len(arr_bins), arr_bins, arr_rat, R.nullptr, arr_rat_err)
+        else:
+            arr_bins      = array('d', [])
+            arr_zlumi     = array('d', [])
+            arr_zlumi_err = array('d', [])
+            arr_rat       = array('d', [])
+            arr_rat_err   = array('d', [])
+            arr_olumi     = array('d', [])
+
+            hz = R.TGraphErrors()
+            ho = R.TGraphErrors()
+            hr = R.TGraphErrors()
+
 
         ho.SetLineColor(R.kAzure)
         ho.SetLineWidth(3)
@@ -234,15 +251,16 @@ def main():
         pt.drawText(0.2, 0.74, "LHC Fill " + lhc_fill)
         pt.drawText(0.2, 0.68,  channel_string)
        
-        median = np.median(arr_rat)
-        hr.Fit('pol0', '0q')
-        mean = hr.GetFunction('pol0').GetParameter(0)
-        stdev = np.percentile(abs(arr_rat - np.median(arr_rat)), 68)
-        print("channel =", channel, "run =", run_number, "median =", median, "mean = ", mean, "stdev =", stdev)
+        if len(dfz):
+            median = np.median(arr_rat)
+            hr.Fit('pol0', '0q')
+            mean = hr.GetFunction('pol0').GetParameter(0)
+            stdev = np.percentile(abs(arr_rat - np.median(arr_rat)), 68)
+            print("channel =", channel, "run =", run_number, "median =", median, "mean = ", mean, "stdev =", stdev)
 
-        line4 = pt.make_bands(arr_bins, stdev, mean)
-        line4.Draw("same 3")
-        hr.Draw("same ep0")
+            line4 = pt.make_bands(arr_bins, stdev, mean)
+            line4.Draw("same 3")
+            hr.Draw("same ep0")
 
         if not args.t0:
             c1.SaveAs(os.path.join(outdirstr, outfile + ".eps"))
@@ -257,18 +275,19 @@ def main():
         # Plot ratio with fit
         c2 = R.TCanvas()
         hr.Draw('ap0')
-        hr.Fit('pol1')
-        hr.GetFunction('pol1').SetLineColor(R.kRed)
+        if len(dfz):
+            hr.Fit('pol1')
+            hr.GetFunction('pol1').SetLineColor(R.kRed)
 
-        hr.GetYaxis().SetTitle("Ratio")
-        hr.GetXaxis().SetTitle(xtitle)
-        hr.GetYaxis().SetRangeUser(0.9, 1.1)
-        hr.GetYaxis().SetNdivisions()
+            hr.GetYaxis().SetTitle("Ratio")
+            hr.GetXaxis().SetTitle(xtitle)
+            hr.GetYaxis().SetRangeUser(0.9, 1.1)
+            hr.GetYaxis().SetNdivisions()
 
-        line0 = pt.make_bands(arr_bins, stdev, mean)
-        line0.Draw("same 3")
-        hr.Draw("same ep0")
-        hr.GetFunction('pol1').Draw('same l')
+            line0 = pt.make_bands(arr_bins, stdev, mean)
+            line0.Draw("same 3")
+            hr.Draw("same ep0")
+            hr.GetFunction('pol1').Draw('same l')
 
         pt.drawAtlasLabel(0.2, 0.86, "Internal")
         if not args.t0:
@@ -291,12 +310,21 @@ def main():
    
     # Zee / Zmumu comparison
     print("Doing channel comparison!")
-    arr_bins      = array('d', dfz.index)
-    arr_rat       = array('d', dfz['ZeeLumi'] / dfz['ZmumuLumi'])
-    arr_rat_err   = array('d', (dfz['ZeeLumi'] / dfz['ZmumuLumi']) * np.sqrt(pow(dfz['ZeeLumiErr']/dfz['ZeeLumi'], 2) + pow(dfz['ZmumuLumiErr']/dfz['ZmumuLumi'], 2)))
+    if len(dfz):
+        arr_bins      = array('d', dfz.index)
+        arr_rat       = array('d', dfz['ZeeLumi'] / dfz['ZmumuLumi'])
+        arr_rat_err   = array('d', (dfz['ZeeLumi'] / dfz['ZmumuLumi']) * np.sqrt(pow(dfz['ZeeLumiErr']/dfz['ZeeLumi'], 2) + pow(dfz['ZmumuLumiErr']/dfz['ZmumuLumi'], 2)))
+
+        gr = R.TGraphErrors(len(arr_rat), arr_bins, arr_rat, R.nullptr, arr_rat_err)
+    else:
+        arr_bins      = array('d', [])
+        arr_rat       = array('d', [])
+        arr_rat_err   = array('d', [])
+
+        gr = R.TGraphErrors()
+
 
     c1 = R.TCanvas()
-    gr = R.TGraphErrors(len(arr_rat), arr_bins, arr_rat, R.nullptr, arr_rat_err)
     gr.Draw("ap")
     gr.GetXaxis().SetTitle("Luminosity Block")
     gr.GetYaxis().SetTitle("L_{Z #rightarrow ee} / L_{Z #rightarrow #mu#mu}")
@@ -304,17 +332,18 @@ def main():
         gr.GetYaxis().SetRangeUser(0.6, 1.4)
     else: 
         gr.GetYaxis().SetRangeUser(0.8, 1.2)
-    gr.Fit("pol0", "0")
-    gr.GetFunction("pol0").SetLineColor(R.kRed)
+    if len(dfz):
+        gr.Fit("pol0", "0")
+        gr.GetFunction("pol0").SetLineColor(R.kRed)
    
-    mean = gr.GetFunction("pol0").GetParameter(0)
-    stdev = np.percentile(abs(arr_rat - np.median(arr_rat)), 68)
-    print("####")
-    print("stdev =", stdev)
-    print("####")
-    line1 = pt.make_bands(arr_bins, stdev, mean)
-    line1.Draw("same 3")
-    gr.GetFunction("pol0").Draw("same l")
+        mean = gr.GetFunction("pol0").GetParameter(0)
+        stdev = np.percentile(abs(arr_rat - np.median(arr_rat)), 68)
+        print("####")
+        print("stdev =", stdev)
+        print("####")
+        line1 = pt.make_bands(arr_bins, stdev, mean)
+        line1.Draw("same 3")
+        gr.GetFunction("pol0").Draw("same l")
     gr.Draw("same ep")
 
     latex = R.TLatex()
@@ -326,22 +355,24 @@ def main():
             latex.DrawLatexNDC(0.2, 0.80, "Data 20" +year+ ", #sqrt{s} = 13.6 TeV")
     latex.DrawLatexNDC(0.2, 0.74, "LHC Fill " + lhc_fill)
 
-    chi2 = gr.GetFunction('pol0').GetChisquare()
-    ndf  = gr.GetFunction('pol0').GetNDF()
-    print ("####")
-    if ndf == 0:
-        print("NDf = 0, so cannot calculate Chi2/NDf")
-    else:
-        print ("chi2 =", chi2/ndf)
-    print ("####")
+    if len(dfz):
+        chi2 = gr.GetFunction('pol0').GetChisquare()
+        ndf  = gr.GetFunction('pol0').GetNDF()
+        print ("####")
+        if ndf == 0:
+            print("NDf = 0, so cannot calculate Chi2/NDf")
+        else:
+            print ("chi2 =", chi2/ndf)
+        print ("####")
 
     leg = R.TLegend(0.17, 0.2, 0.90, 0.3)
     leg.SetBorderSize(0)
     leg.SetTextSize(0.05)
     leg.SetNColumns(3)
     leg.AddEntry(gr, "L_{Z #rightarrow ee}/L_{Z #rightarrow #mu#mu}", "ep")
-    leg.AddEntry(gr.GetFunction("pol0"), "Mean = {:.3f}".format(round(mean, 3)), "l")
-    leg.AddEntry(line1, "68% band", "f")
+    if len(dfz):
+        leg.AddEntry(gr.GetFunction("pol0"), "Mean = {:.3f}".format(round(mean, 3)), "l")
+        leg.AddEntry(line1, "68% band", "f")
     leg.Draw()
 
     if not args.t0:

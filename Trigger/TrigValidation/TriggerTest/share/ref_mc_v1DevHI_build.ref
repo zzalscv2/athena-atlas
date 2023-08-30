@@ -1319,6 +1319,14 @@ HLT_mb_mbts_L1MBTS_3_3:
   eventCount: 0
 HLT_mb_mbts_L1MBTS_4_4:
   eventCount: 0
+HLT_mb_nototpix100_excl_0trk2_pt0p2_L1ZDC_A_C_VTE10:
+  eventCount: 0
+HLT_mb_nototpix100_excl_0trk2_pt0p2_L1ZDC_XOR_VTE10:
+  eventCount: 0
+HLT_mb_nototpix70_excl_0trk2_pt0p2_L1ZDC_A_C_VTE10:
+  eventCount: 0
+HLT_mb_nototpix70_excl_0trk2_pt0p2_L1ZDC_XOR_VTE10:
+  eventCount: 0
 HLT_mb_sp15_trk15_hmt_L1MBTS_1_VTE50:
   eventCount: 0
 HLT_mb_sp300_trk20_hmt_L1TE3_VTE50:
@@ -1457,10 +1465,6 @@ HLT_mb_sp_nototpix100_L1ZDC_A_C_VTE10_UNPAIRED_NONISO:
   eventCount: 0
 HLT_mb_sp_nototpix100_L1ZDC_XOR_VTE10:
   eventCount: 0
-HLT_mb_sp_nototpix100_excl_0trk2_pt02_L1ZDC_A_C_VTE10:
-  eventCount: 0
-HLT_mb_sp_nototpix100_excl_0trk2_pt02_L1ZDC_XOR_VTE10:
-  eventCount: 0
 HLT_mb_sp_nototpix200_L1RD0_FILLED:
   eventCount: 0
 HLT_mb_sp_nototpix200_L1ZDC_A_C_VTE10:
@@ -1496,10 +1500,6 @@ HLT_mb_sp_nototpix70_L1ZDC_A_C_VTE10_UNPAIRED_ISO:
 HLT_mb_sp_nototpix70_L1ZDC_A_C_VTE10_UNPAIRED_NONISO:
   eventCount: 0
 HLT_mb_sp_nototpix70_L1ZDC_XOR_VTE10:
-  eventCount: 0
-HLT_mb_sp_nototpix70_excl_0trk2_pt02_L1ZDC_A_C_VTE10:
-  eventCount: 0
-HLT_mb_sp_nototpix70_excl_0trk2_pt02_L1ZDC_XOR_VTE10:
   eventCount: 0
 HLT_mb_sp_pix100_L1RD0_FILLED:
   eventCount: 0

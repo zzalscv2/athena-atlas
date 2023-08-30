@@ -33,6 +33,7 @@ class IjFEXmetAlgo : virtual public IAlgTool {
         virtual int GetMetYComponent()  =0;
         virtual int getTTowerET(unsigned int TTID ) =0; 
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
+        virtual bool getjXESat() const =0; 
         
     private:
 

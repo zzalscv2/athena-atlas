@@ -476,8 +476,8 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp_pix50_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_sp_pix100_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_sp_pix200_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_mb_sp_nototpix70_excl_0trk2_pt02_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_mb_sp_nototpix100_excl_0trk2_pt02_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_nototpix70_excl_0trk2_pt0p2_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_nototpix100_excl_0trk2_pt0p2_L1ZDC_A_C_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
 
         ChainProp(name='HLT_mb_sp_pix20_L1ZDC_A_C_VTE10_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_sp_pix50_L1ZDC_A_C_VTE10_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
@@ -528,8 +528,8 @@ def getDevHISignatures():
         ChainProp(name='HLT_mb_sp_nototpix100_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_sp_nototpix200_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_sp_nototpix500_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_mb_sp_nototpix70_excl_0trk2_pt02_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_mb_sp_nototpix100_excl_0trk2_pt02_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_nototpix70_excl_0trk2_pt0p2_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_nototpix100_excl_0trk2_pt0p2_L1ZDC_XOR_VTE10', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+PrimaryLegGroup),
 
         #----------- mbts
         ChainProp(name="HLT_mb_mbts_L1MBTS_2_2", l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:NoHLTRepro']),

@@ -29,6 +29,7 @@ namespace LVL1{
       virtual unsigned int getSmallClusterET() const = 0;
       virtual unsigned int getSmallETRing() const = 0;
       virtual unsigned int getTTIDcentre() const = 0;
+      virtual bool getSRjetSat() const = 0;
       virtual void setFPGAEnergy(const std::unordered_map<int,std::vector<int> >& et_map) = 0;
 
    private:

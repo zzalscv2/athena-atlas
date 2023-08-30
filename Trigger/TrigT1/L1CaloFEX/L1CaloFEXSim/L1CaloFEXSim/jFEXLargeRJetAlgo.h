@@ -43,16 +43,18 @@ namespace LVL1 {
     virtual unsigned int getRingET() override;
     virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
+    virtual bool getLRjetSat() override;
 
   protected:
 
   private:
 
     SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "Input container for jTowers"};
+    SG::ReadHandle<jTowerContainer> m_jTowerContainer;
     ToolHandle<IjFEXSmallRJetAlgo> m_jFEXSmallRJetAlgoTool {this, "jFEXSmallRJetAlgoTool", "LVL1::jFEXSmallRJetAlgo", "Tool that runs the jFEX Small R Jet algorithm"};
 
-    
-    //int inputTable[15][15];
+    bool getTTowerSat(unsigned int TTID );
+    bool m_saturation =false;
     int m_largeRJetEtRing_IDs[15][15];
     int getTTowerET(unsigned int TTID ) ;
     std::unordered_map<int,std::vector<int> > m_map_Etvalues;
