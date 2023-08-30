@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDetectorToolH62004.h"
@@ -79,6 +79,7 @@ LArDetectorToolH62004::create()
   StatusCode sc = service ("GeoDbTagSvc",geoDbTag);
   if (StatusCode::SUCCESS != sc) {
     log << MSG::ERROR << "Could not find GeoDbTagSvc" << endmsg;
+    delete geotbopt;
     return (StatusCode::FAILURE);
   }
 
@@ -91,6 +92,7 @@ LArDetectorToolH62004::create()
     log << MSG::ERROR 
 	<< "Could not find RDBAccessSvc" 
 	<< endmsg; 
+	  delete geotbopt;
     return (StatusCode::FAILURE); 
   } 
 
@@ -113,7 +115,8 @@ LArDetectorToolH62004::create()
   if (StatusCode::SUCCESS != sc) { 
     log << MSG::ERROR 
 	<< "Could not find GeoModelExperiment ATLAS" 
-	<< endmsg; 
+	<< endmsg;
+	  delete geotbopt; 
     return (StatusCode::FAILURE); 
   } 
 
@@ -122,9 +125,7 @@ LArDetectorToolH62004::create()
   std::string geometryLayout = "Atlas";
   std::string LArTag = accessSvc->getChildTag("LAr",detectorKey,detectorNode);
 
-  //if(LArTag.find("H6")!=std::string::npos) {
-  //  geometryLayout = "H6";
-  //}
+ 
 
 
   LArGeo::LArDetectorFactoryH62004 theLArFactory(detStore().operator->());
@@ -144,6 +145,7 @@ LArDetectorToolH62004::create()
       theLArFactory.create(world);
     } catch (const std::bad_alloc&) {
       log << MSG::FATAL << "Could not create new H62004Node!" << endmsg;
+      delete geotbopt;
       return StatusCode::FAILURE; 
     }
     // Register the H62004Node instance with the Transient Detector Store
@@ -153,6 +155,7 @@ LArDetectorToolH62004::create()
     log << MSG::ERROR 
 	<< "Could not record LArFactory to DetStore" 
 	<< endmsg; 
+	  delete geotbopt;
     return (StatusCode::FAILURE); 
   } 
 
