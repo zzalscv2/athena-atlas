@@ -133,6 +133,9 @@ topSequence += DMTest__xAODTestDecor ('AuxDataTestDecor1_scopy',
                                       DecorName = 'dInt150',
                                       Offset = 300)
 
+topSequence += DMTest__xAODTestReadCVec ('xAODTestReadFwdLink',
+                                         CVecKey = 'CVecFwdLink')
+
 # Stream's output file
 Stream1_Augmented = MSMgr.NewPoolStream ('Stream1', 'xaoddata2.root',asAlg=True, noTag=True)
 Stream1 = Stream1_Augmented.GetEventStream()

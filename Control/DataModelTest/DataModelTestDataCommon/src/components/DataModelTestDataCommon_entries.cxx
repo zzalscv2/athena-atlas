@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModeltestDataCommon/src/components/DataModelTestDataCommon_entries.cxx
@@ -17,6 +17,8 @@
 #include "../xAODTestWriteCInfo.h"
 #include "../xAODTestThinCVec.h"
 #include "../xAODTestWriteCLinks.h"
+#include "../xAODTestWriteFwdLink1.h"
+#include "../xAODTestWriteFwdLink2.h"
 #include "../xAODTestReadCVec.h"
 #include "../xAODTestReadCLinks.h"
 #include "../xAODTestShallowCopy.h"
@@ -38,6 +40,8 @@ DECLARE_COMPONENT( DMTest::xAODTestWriteCVec )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCInfo )
 DECLARE_COMPONENT( DMTest::xAODTestThinCVec )
 DECLARE_COMPONENT( DMTest::xAODTestWriteCLinks )
+DECLARE_COMPONENT( DMTest::xAODTestWriteFwdLink1 )
+DECLARE_COMPONENT( DMTest::xAODTestWriteFwdLink2 )
 DECLARE_COMPONENT( DMTest::xAODTestReadCVec )
 DECLARE_COMPONENT( DMTest::xAODTestReadCLinks )
 DECLARE_COMPONENT( DMTest::xAODTestShallowCopy )
