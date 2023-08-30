@@ -81,14 +81,18 @@ smootherHelper(Trk::MultiComponentState&& updatedState,
     auto combinedLastState =
       Trk::MultiComponentStateCombiner::combineToSingle(updatedState, useMode);
     if (combinedLastState) {
-      return new Trk::MultiComponentStateOnSurface(fitQuality,
-                                                   std::move(measurement),
-                                                   std::move(combinedLastState),
-                                                   std::move(updatedState));
+      return new Trk::MultiComponentStateOnSurface(
+          fitQuality,
+          std::move(measurement),
+          std::move(combinedLastState),
+          std::move(updatedState));
     }
   }
   return new Trk::MultiComponentStateOnSurface(
-    fitQuality, std::move(measurement), std::move(updatedState));
+      fitQuality,
+      std::move(measurement),
+      updatedState.front().first->uniqueClone(),
+      std::move(updatedState));
 }
 
 } // end of anonymous namespace
@@ -809,7 +813,9 @@ Trk::GaussianSumFitter::stepForwardFit(
     std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type(0);
     type.set(TrackStateOnSurface::Outlier);
     auto multiComponentStateOnSurface = Trk::MultiComponentStateOnSurface(
-        fitQuality, std::move(measurement),
+        fitQuality,
+        std::move(measurement),
+        extrapolatedState.front().first->uniqueClone(),
         // used below for the updated state so clone
         Trk::MultiComponentStateHelpers::clone(extrapolatedState), nullptr,
         type);
@@ -819,8 +825,11 @@ Trk::GaussianSumFitter::stepForwardFit(
     updatedState = std::move(extrapolatedState);
   } else {
     auto multiComponentStateOnSurface =
-        Trk::MultiComponentStateOnSurface(fitQuality, std::move(measurement),
-                                     std::move(extrapolatedState));
+        Trk::MultiComponentStateOnSurface(
+          fitQuality,
+          std::move(measurement),
+          extrapolatedState.front().first->uniqueClone(),
+          std::move(extrapolatedState));
     forwardTrajectory.push_back(multiComponentStateOnSurface);
   }
   return true;
@@ -843,7 +852,6 @@ Trk::GaussianSumFitter::smootherFit(
       "Attempting to smooth an empty forward trajectory... Exiting!");
     return {};
   }
-
   GSFTrajectoryPtr smoothedTrajectory = std::make_unique<GSFTrajectoryDV>();
   smoothedTrajectory->reserve(forwardTrajectory.size());
   // For the smoother we start from the end and we go
@@ -893,18 +901,18 @@ Trk::GaussianSumFitter::smootherFit(
       "Not all components have covariance. Rejecting smoothed state.");
     return nullptr;
   }
-  // The last TSOS is special so we do a proper collapse
+  // The first in reverse (last in normal order)  TSOS is special so we do a proper collapse
   // of the multi component to single TrackParameter
   std::unique_ptr<Trk::TrackParameters> combinedFirstSmoothedState =
     MultiComponentStateCombiner::combineToSingle(firstSmoothedState, m_useMode);
 
   // The 1st updated/smoothed state owned  by the trajectory
   const Trk::MultiComponentStateOnSurface* updatedFirstStateOnSurface =
-    new MultiComponentStateOnSurface(
-      fitQuality,
-      std::move(firstSmootherMeasurementOnTrack),
-      std::move(combinedFirstSmoothedState),
-      MultiComponentStateHelpers::clone(firstSmoothedState));
+      new MultiComponentStateOnSurface(
+          fitQuality,
+          std::move(firstSmootherMeasurementOnTrack),
+          std::move(combinedFirstSmoothedState),
+          MultiComponentStateHelpers::clone(firstSmoothedState));
   smoothedTrajectory->push_back(updatedFirstStateOnSurface);
 
   // Generate a prediction by scaling the covariance of all components in the
@@ -972,12 +980,13 @@ Trk::GaussianSumFitter::smootherFit(
       std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type(
         0);
       type.set(TrackStateOnSurface::Outlier);
-      updatedStateOnSurface =
-        new Trk::MultiComponentStateOnSurface(FitQualityOnSurface(1, 1),
-                                              std::move(measurement),
-                                              std::move(extrapolatedState),
-                                              nullptr,
-                                              type);
+      updatedStateOnSurface = new Trk::MultiComponentStateOnSurface(
+          FitQualityOnSurface(1, 1),
+          std::move(measurement),
+          extrapolatedState.front().first->uniqueClone(),
+          std::move(extrapolatedState),
+          nullptr,
+          type);
       loopUpdatedState = &(updatedStateOnSurface->components());
       smoothedTrajectory->push_back(updatedStateOnSurface);
       continue;
@@ -990,7 +999,7 @@ Trk::GaussianSumFitter::smootherFit(
         "Could not update the multi-component state... rejecting track!");
       return nullptr;
     }
-    // last is special as we collapse to single track Parameters
+    // last in reverse (first in normal order) is special as we collapse to single track Parameters
     bool islast = (trackStateOnSurfaceItr == lasttrackStateOnSurface);
     // Optional combine smoother state with fitter state
     if (m_combineWithFitter) {
@@ -1009,14 +1018,13 @@ Trk::GaussianSumFitter::smootherFit(
       auto combinedFitQuality = Trk::GsfMeasurementUpdator::fitQuality(
         combinedfitterState, *measurement);
 
-      updatedStateOnSurface = smootherHelper(std::move(combinedfitterState),
-                                             std::move(measurement),
-                                             combinedFitQuality,
-                                             islast,
-                                             m_useMode);
-    } else { // If combination with forwards state is not done
-      updatedStateOnSurface = smootherHelper(
-        std::move(updatedState), std::move(measurement), fitQuality, islast, m_useMode);
+      updatedStateOnSurface =
+          smootherHelper(std::move(combinedfitterState), std::move(measurement),
+                         combinedFitQuality, islast, m_useMode);
+    } else {  // If combination with forwards state is not done
+      updatedStateOnSurface =
+          smootherHelper(std::move(updatedState), std::move(measurement),
+                         fitQuality, islast, m_useMode);
     }
     // For the next iteration start from last added
     loopUpdatedState = &(updatedStateOnSurface->components());
@@ -1094,6 +1102,7 @@ Trk::GaussianSumFitter::addCCOT(
   auto updatedMCSOS = std::make_unique<Trk::MultiComponentStateOnSurface>(
     fitQuality,
     std::unique_ptr<Trk::CaloCluster_OnTrack>(ccot->clone()),
+    updatedState.front().first->uniqueClone(),
     std::move(updatedState));
 
   // Now build a dummy measurement ....  we dont want to a double count the
