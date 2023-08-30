@@ -92,7 +92,7 @@ StatusCode Trk::MaterialOnTrackValidation::execute()
   for (;itTracks!=endTracks;++itTracks) {
 
     // Getting the TrackStateOnSurface for every track
-    const DataVector<const Trk::TrackStateOnSurface > *currentTSOSList =(*itTracks)->trackStateOnSurfaces();
+    const Trk::TrackStates *currentTSOSList =(*itTracks)->trackStateOnSurfaces();
 
     // Iterators for loop inside track
     DataVector< const Trk::TrackStateOnSurface >::const_iterator itTSOS = currentTSOSList->begin();
