@@ -15,6 +15,7 @@ import os, shutil, subprocess, sys
 import six
 
 from . import Herwig7Utils as hw7Utils
+from . import Herwig7JOChecker as JOChecker
 # import Herwig7Defaults as HwDefaults
 
 from AthenaCommon import Logging
@@ -273,6 +274,9 @@ def do_run(gen_config, cleanup_herwig_scratch=True):
 
   ## this is necessary to make Herwig aware of the name of the run file
   gen_config.genSeq.Herwig7.RunFile = get_runfile_name(gen_config.run_name)
+
+  ## check the options in the .in file
+  JOChecker.check_file()
 
   ## overwrite athena's seed for the random number generator
   if gen_config.runArgs.randomSeed is None:
