@@ -25,7 +25,7 @@ hit2aod.args += ' --geometryVersion="default:ATLAS-R3S-2021-03-02-00"'
 hit2aod.args += ' --autoConfiguration="everything"'
 hit2aod.args += ' --postInclude "default:PyJobTransforms.UseFrontier"'
 hit2aod.args += ' --jobNumber="1"'
-hit2aod.timeout = 4200 # default = 3600 s
+hit2aod.timeout = 5400 # default = 3600 s
 
 test = Test.Test()
 test.art_type = 'build'

@@ -37,6 +37,7 @@ rdo2rdotrig.args += ' --triggerConfig="MCRECO:MC_pp_v7_tight_mc_prescale"'
 rdo2rdotrig.args += ' --imf="all:True"'
 rdo2rdotrig.args += ' --conditionsTag="RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02"'
 rdo2rdotrig.args += ' --preInclude "all:Campaigns/MC20d.py"'
+rdo2rdotrig.timeout = 5400 # default = 3600 s
 
 # Clear AthFile cache from r21 because it is incompatible with py3 r22 (ATR-21489)
 rm_cache = ExecStep.ExecStep('ClearAthFileCache')
