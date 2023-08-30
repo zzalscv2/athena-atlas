@@ -892,7 +892,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
   const double trad = .003;
   double        rad =  0. ;
 
-  const DataVector<const Trk::TrackStateOnSurface>*
+  const Trk::TrackStates*
     tsos = Tr.trackStateOnSurfaces();
 
   if(!m_parameters.production((*(tsos->rbegin()))->trackParameters())) return nullptr;
@@ -950,7 +950,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
   if(lastTrajectory == m_firstTrajectory || m_ndf < 5 || m_xi2 > 2.*double(m_ndf)) return nullptr;
   m_lastTrajectory = lastTrajectory;
 
-  DataVector<const Trk::TrackStateOnSurface>::const_iterator
+  Trk::TrackStates::const_iterator
     s = tsos->begin(), se = tsos->end();
 
   // Change first track parameters of the track
@@ -960,7 +960,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
 
   // Fill new track information
   //
-  auto tsosn = std::make_unique<DataVector<const Trk::TrackStateOnSurface>>();
+  auto tsosn = std::make_unique<Trk::TrackStates>();
 
   tsosn->push_back(new Trk::TrackStateOnSurface(nullptr,Tp.convert(true),nullptr,(*s)->types()));
 
