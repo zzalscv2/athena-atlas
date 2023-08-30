@@ -108,7 +108,7 @@ if __name__ == "__main__":
     flags.Input.isMC = False
 
     # decoding flags for TrigDecisionMakerMT    
-    flags.Trigger.DecodeHLT = False
+    flags.Trigger.decodeHLT = False
     flags.Trigger.L1.doCTP = False
     flags.Trigger.DecisionMakerValidation.Execute = False
     

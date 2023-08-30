@@ -122,7 +122,7 @@ def set_flags(flags, options=default_options):
     flags.Trigger.enableL1MuonPhase1 = options.EnableL1MuonPhase1
     flags.Trigger.enableL1CaloPhase1 = options.EnableL1CaloPhase1
     flags.Trigger.enableL1CaloLegacy = options.EnableL1CaloLegacy
-    flags.Trigger.HLTSeeding.forceEnableAllChains = True
+    flags.Trigger.forceEnableAllChains = True
     flags.Trigger.ROBPrefetchingOptions = [] # workaround for ATR-26307
     # Disable signature-specific detector configuration parts
     flags.Trigger.doID = False

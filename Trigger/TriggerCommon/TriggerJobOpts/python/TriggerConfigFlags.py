@@ -41,8 +41,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doHLT', False,
                   help='run HLT selection algorithms')
 
-    flags.addFlag("Trigger.HLTSeeding.forceEnableAllChains", False,
-                  help='always enable all configure chains (for testing)')
+    flags.addFlag("Trigger.forceEnableAllChains", False,
+                  help='always enable all configured chains (for testing)')
 
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags:
                   prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC,
@@ -291,7 +291,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.availableRecoMetadata', lambda flags: __availableRecoMetadata(flags),
                   help="list of enabled trigger sub-systems in reconstruction: ['L1,'HLT']")
 
-    flags.addFlag("Trigger.DecodeHLT", True,
+    flags.addFlag("Trigger.decodeHLT", True,
                   help='enable decoding of HLT trigger decision/result in reconstruction')
 
     flags.addFlag("Trigger.DecisionMakerValidation.Execute", True,
@@ -358,7 +358,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.disableCPS', False,
                   help='disable coherent prescale sets (for testing with small menu)')
 
-    flags.addFlag('Trigger.endOfEventProcessing.Enabled', True,
+    flags.addFlag('Trigger.enableEndOfEventProcessing', True,
                   help='enable execution of extra algorithms for accepted events')
 
     # trigger reconstruction

@@ -222,7 +222,7 @@ if __name__ == '__main__':
     flags.Detector.GeometryMDT=False
     flags.Detector.GeometryMM=False
     flags.Detector.GeometryMuon=False
-    flags.Trigger.DecodeHLT=False
+    flags.Trigger.decodeHLT=False
     flags.Trigger.enableL1MuonPhase1=False
     flags.Trigger.L1.doMuon=False
     flags.Trigger.L1.doCalo=False

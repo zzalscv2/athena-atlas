@@ -138,8 +138,8 @@ def TrigNavSlimmingMTCfg(flags):
   ca = ComponentAccumulator()
 
   # We only run this if we are in a job which is decoding the HLT data in reconstruction, and if the slimming has not been switched off
-  if flags.Trigger.DecodeHLT is False:
-    log.debug("Nothing to do as Trigger.DecodeHLT is False")
+  if flags.Trigger.decodeHLT is False:
+    log.debug("Nothing to do as Trigger.decodeHLT is False")
     return ca
 
   if flags.Trigger.doNavigationSlimming is False:
