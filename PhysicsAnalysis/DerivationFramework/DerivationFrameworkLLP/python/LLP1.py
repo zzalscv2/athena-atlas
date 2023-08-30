@@ -153,18 +153,12 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
 
     if ConfigFlags.Input.isMC:
-        LLP1TrackFilterToolLRT = CompFactory.InDet.InclusiveTrackFilterTool(name = "LLP1TrackFilterToolLRT")
-        acc.addPublicTool(LLP1TrackFilterToolLRT)
-        LLP1TrackFilterToolSTD = CompFactory.InDet.InDetTrackTruthFilterTool(name = "LLP1TrackFilterToolSTD")
-        acc.addPublicTool(LLP1TrackFilterToolSTD)
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         TrackSystSuffix = "_TRK_EFF_LARGED0_GLOBAL__1down"
-        acc.addEventAlgo(CompFactory.InDet.TrackSystematicsAlg(
-                            name ="InDetTrackSystematicsAlg",
-                            InputTrackContainer  = MergedTrackCollection,
-                            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}",
-                            TrackFilterToolLRT      = LLP1TrackFilterToolLRT,
-                            TrackFilterToolSTD      = LLP1TrackFilterToolSTD
-                          ))
+        acc.merge(TrackSystematicsAlgCfg(
+            ConfigFlags,
+            InputTrackContainer  = MergedTrackCollection,
+            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}"))
         acc.merge(VrtSecInclusiveCfg(ConfigFlags,
                                      name = f"VrtSecInclusive{TrackSystSuffix}",
                                      AugmentingVersionString  = TrackSystSuffix,

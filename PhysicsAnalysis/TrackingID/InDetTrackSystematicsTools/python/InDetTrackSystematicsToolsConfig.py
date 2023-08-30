@@ -45,9 +45,13 @@ def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool", **kwargs
 def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
     acc = ComponentAccumulator()
 
-    if "TrackFilterTool" not in kwargs:
-        kwargs.setdefault("TrackFilterTool", acc.popToolsAndMerge(
+    if "TrackFilterToolLRT" not in kwargs:
+        kwargs.setdefault("TrackFilterToolLRT", acc.popToolsAndMerge(
             InclusiveTrackFilterToolCfg(flags)))
+
+    if "TrackFilterToolSTD" not in kwargs:
+        kwargs.setdefault("TrackFilterToolSTD", acc.popToolsAndMerge(
+            InDetTrackTruthFilterToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.InDet.TrackSystematicsAlg(name, **kwargs))
     return acc
