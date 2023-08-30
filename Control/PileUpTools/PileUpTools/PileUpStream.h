@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPSTREAM_PILEUPSTREAM_H
@@ -16,13 +16,14 @@
 #include "GaudiKernel/IEvtSelector.h"
 #include "AthenaBaseComps/AthMessaging.h"
 
-#include "xAODEventInfo/EventInfo.h"
+#include "xAODEventInfo/EventInfo.h" //typedef, cannot fwd declare
 
 // Forward declarations
 class IMessageSvc;
 class ISvcLocator;
 class StoreGateSvc;
 class PileUpMergeSvc;
+
 
 /** @class PileUpStream
  * @brief a triple selector/context/store defines a stream
