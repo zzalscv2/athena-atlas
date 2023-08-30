@@ -26,10 +26,10 @@ StatusCode IDTrackCaloDepositsDecoratorAlg::initialize() {
 
     ATH_CHECK(m_muon_key.initialize());
     ATH_CHECK(m_id_trk_key.initialize());
-
-    m_deposit_key = (m_decor_muons ? m_muon_key.key() : m_id_trk_key.key()) + ".CaloDeposits";
-    m_eloss_key = (m_decor_muons ? m_muon_key.key() : m_id_trk_key.key()) + ".CaloElosses";
-    m_type_key = (m_decor_muons ? m_muon_key.key() : m_id_trk_key.key()) + ".CaloDepType";
+    SG::AuxTypeRegistry& registry{SG::AuxTypeRegistry::instance()};
+    m_deposit_key = (m_decor_muons ? m_muon_key.key() : m_id_trk_key.key()) + "."+registry.getName(dec_deposit.auxid());
+    m_eloss_key = (m_decor_muons ? m_muon_key.key() : m_id_trk_key.key()) + "."+registry.getName(dec_eloss.auxid());
+    m_type_key = (m_decor_muons ? m_muon_key.key() : m_id_trk_key.key()) + "."+registry.getName(dec_type.auxid());
 
     ATH_CHECK(m_deposit_key.initialize());
     ATH_CHECK(m_eloss_key.initialize());

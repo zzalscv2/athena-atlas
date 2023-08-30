@@ -69,11 +69,11 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
                                   Mu2AbsEtaMax            = 9999.,
                                   UseTrackProbe           = True, # bool
                                   TrackContainerKey       = 'InDetTrackParticles', # str
-                                  OppositeCharge          = True,
+                                  OppositeCharge          = False,
                                   InvariantMassLow        = 60*Units.GeV,
                                   InvariantMassHigh       = -1,
                                   IDTrackThinningConeSize = 0.4,
-                                  BranchPrefix            = brPrefix1b))  
+                                  BranchPrefix            = brPrefix1b)) 
 
     skimmingORs.append("DIMU_pass{sel_flag}>0".format(sel_flag = brPrefix1b))
     muonThinFlags.append("Muons.pass{sel_flag}".format(sel_flag = brPrefix1b))
@@ -101,7 +101,7 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
                                   BranchPrefix            = brPrefix1c))
     skimmingORs.append("DIMU_pass{sel_flag}>0".format(sel_flag = brPrefix1c))
     muonThinFlags.append("Muons.pass{sel_flag}".format(sel_flag = brPrefix1c))
-    trkThinFlags.append("InDetTrackParticles.pass{sel_flag}".format(sel_flag = brPrefix1c))                                                  
+    trkThinFlags.append("InDetTrackParticles.pass{sel_flag}".format(sel_flag = brPrefix1c))
      
     ### Jpsi for calibration
     brPrefix1d = 'Muon1JPsiCalib' 
@@ -140,19 +140,7 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
     skimmingORs.append("DIMU_pass{sel_flag}>0".format(sel_flag = brPrefix1e))
     muonThinFlags.append("Muons.pass{sel_flag}".format(sel_flag = brPrefix1e))
 
-    ### isolation decorations
-    from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import MUON1IDTrackDecoratorCfg, MUON1MSTrackDecoratorCfg
-
-    MUON1AugmentTool2a = acc.getPrimaryAndMerge(MUON1IDTrackDecoratorCfg(ConfigFlags,
-                                                                         name               = "MUON1AugmentTool2a",
-                                                                         SelectionString    = "( {sel_str} )".format(sel_str=" || ".join(trkThinFlags)),
-                                                                         SelectionFlag      = "",
-                                                                         SelectionFlagValue = 0))
-    MUON1AugmentTools.append(MUON1AugmentTool2a)
-    MUON1AugmentTool3 = acc.getPrimaryAndMerge(MUON1MSTrackDecoratorCfg(ConfigFlags, name = "MUON1AugmentTool3"))
-    MUON1AugmentTools.append(MUON1AugmentTool3)             
-
-    # MC truth classification and isolation
+    ## MC truth classification and isolation
     if ConfigFlags.Input.isMC:        
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import MuonTruthClassifierFallbackCfg
         MUON1MuonTruthClassifierFallback = acc.getPrimaryAndMerge(MuonTruthClassifierFallbackCfg(ConfigFlags,
@@ -164,9 +152,38 @@ def MUON1KernelCfg(ConfigFlags, name='MUON1Kernel', **kwargs):
         MUON1MuonTruthIsolationTool = acc.getPrimaryAndMerge(MuonTruthIsolationToolCfg(ConfigFlags, 
                                                                                        name         = "MUON1MuonTruthIsolationTool",
                                                                                        ContainerKey = "Muons"))
-        MUON1AugmentTools.append(MUON1MuonTruthIsolationTool) 
+        MUON1AugmentTools.append(MUON1MuonTruthIsolationTool)
+        brPrefix1f = "TruthMuon" 
+        ### Accept every muon around a truth particle
+        acc.merge(DiMuonTaggingAlgCfg(ConfigFlags,
+                                      name                    = "MuonTruthTagging",
+                                      Mu1PtMin                = 2.5*Units.GeV,
+                                      Mu1Types                = [0],
+                                      Mu2PtMin                = 60.*Units.TeV, # Dummy value
+                                      UseTrackProbe           = True, # bool
+                                      TrackContainerKey       = 'InDetTrackParticles', # str
+                                      OppositeCharge          = False,
+                                      InvariantMassLow        = 60*Units.TeV, # Dummy value
+                                      InvariantMassHigh       = -1,
+                                      IDTrackThinningConeSize = 0.1,
+                                      BranchPrefix            = brPrefix1f)) 
+
+        muonThinFlags.append("Muons.pass{sel_flag}".format(sel_flag = brPrefix1f))
+        trkThinFlags.append("InDetTrackParticles.pass{sel_flag}".format(sel_flag = brPrefix1f))
 
 
+
+
+    ### isolation decorations
+    from DerivationFrameworkMuons.TrackIsolationDecoratorConfig import TrackIsolationCfg
+    acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="InDetTrackParticles", TrackSelections = trkThinFlags))
+    acc.merge(TrackIsolationCfg(ConfigFlags,TrackCollection="ExtrapolatedMuonTrackParticles"))
+    ### Calo deposits 
+    from DerivationFrameworkMuons.MuonsToolsConfig import MuonCaloDepositAlgCfg
+    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags)) ### Decorate directly the muons
+    acc.merge(MuonCaloDepositAlgCfg(ConfigFlags, name = "IdTrkCaloDepsitDecorator", 
+                                                 DecorateMuons = False)) ### Decorate the ID tracks
+    
     # --------
     # Skimming
     # --------
