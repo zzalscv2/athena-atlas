@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TruthUtils )
@@ -23,6 +23,6 @@ atlas_install_runtime( share/*.txt )
 atlas_add_test( AtlasPIDTest
                 SOURCES
                 test/testPIDs.cxx 
-                PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                LINK_LIBRARIES TruthUtils 
+                LINK_LIBRARIES TruthUtils
+                ENVIRONMENT "REFERENCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/share/AtlasPIDTest.ref"
                 POST_EXEC_SCRIPT nopost.sh )
