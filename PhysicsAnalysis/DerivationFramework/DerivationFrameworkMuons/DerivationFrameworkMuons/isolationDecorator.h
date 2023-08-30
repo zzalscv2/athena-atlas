@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_isolationDecorator_H
@@ -16,6 +16,9 @@
 #include "RecoToolInterfaces/ICaloTopoClusterIsolationTool.h"
 #include "RecoToolInterfaces/ITrackIsolationTool.h"
 
+#include <StoreGate/ReadHandleKey.h>
+#include <xAODTracking/TrackParticleContainer.h>
+
 namespace DerivationFramework {
     class isolationDecorator : public ExpressionParserUser<AthAlgTool>, public IAugmentationTool {
     public:
@@ -31,22 +34,22 @@ namespace DerivationFramework {
 
     private:
         StatusCode decorate(const xAOD::IParticle* part, const int iso_type, const float val) const;
-
-        std::string m_containerName;
-        std::string m_selectionString;
-        std::string m_prefix;
-        std::string m_selFlag;
-        int m_selFlagValue;
+ 
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_containerName{this, "TargetContainer", "InDetTrackParticles"};
+        Gaudi::Property<std::string> m_selectionString{this, "SelectionString", "" };
+        Gaudi::Property<std::string> m_prefix{this, "Prefix", "" };
+        Gaudi::Property<std::string> m_selFlag{this, "SelectionFlag", "" };
+        Gaudi::Property<int> m_selFlagValue{this, "SelectionFlagValue", 1};
 
         /// Athena configured tools
-        ToolHandle<xAOD::ITrackIsolationTool> m_trackIsolationTool;
-        ToolHandle<xAOD::ICaloTopoClusterIsolationTool> m_caloIsolationTool;
+        ToolHandle<xAOD::ITrackIsolationTool> m_trackIsolationTool{this, "TrackIsolationTool", ""};
+        ToolHandle<xAOD::ICaloTopoClusterIsolationTool> m_caloIsolationTool{this, "CaloIsolationTool" , ""};
 
-        std::vector<xAOD::Iso::IsolationType> m_ptconeTypes;
-        std::vector<int> m_ptcones;
+        std::vector<xAOD::Iso::IsolationType> m_ptconeTypes{};
+        Gaudi::Property<std::vector<int>> m_ptcones{this, "ptcones", {}};
         xAOD::TrackCorrection m_trkCorrList;
         std::vector<xAOD::Iso::IsolationType> m_topoetconeTypes;
-        std::vector<int> m_topoetcones;
+        Gaudi::Property<std::vector<int>> m_topoetcones{this, "topoetcones", {}};
         xAOD::CaloCorrection m_caloCorrList;
 
         std::map<int, SG::AuxElement::Decorator<float> > m_decorators;

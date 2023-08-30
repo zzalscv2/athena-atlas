@@ -1,5 +1,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
 def BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName, **kwargs):
     from TrkConfig.TrkVKalVrtFitterConfig import BPHY_TrkVKalVrtFitterCfg \
         as TrkVKalVrtFitterCfg
@@ -19,6 +22,12 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName):
         BPHY_InDetDetailedTrackSelectorToolCfg as \
         InDetDetailedTrackSelectorToolCfg
     return InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName+"_InDetDetailedTrackSelectorTool")
+
+def Thin_vtxTrkCfg(flags, name, **kwargs):
+    acc = ComponentAccumulator()
+    acc.addPublicTool(CompFactory.DerivationFramework.Thin_vtxTrk(name, **kwargs),
+                      primary = True)
+    return acc 
 
 def getDefaultAllVariables():
     return ["EventInfo"]

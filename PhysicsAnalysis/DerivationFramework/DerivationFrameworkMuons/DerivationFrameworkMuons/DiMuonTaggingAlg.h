@@ -10,7 +10,7 @@
 #include <vector>
 
 // Gaudi & Athena basics
-#include "AthenaBaseComps/AthAlgTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TrigMuonMatching/ITrigMuonMatching.h"
@@ -23,17 +23,17 @@
 #include "xAODTruth/TruthParticleContainer.h"
 namespace DerivationFramework {
 
-    class dimuonTaggingTool : public AthAlgTool, public IAugmentationTool {
+    class DiMuonTaggingAlg : public AthReentrantAlgorithm {
     public:
         /** Constructor with parameters */
-        dimuonTaggingTool(const std::string& t, const std::string& n, const IInterface* p);
+        DiMuonTaggingAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
         /** Destructor */
-        virtual ~dimuonTaggingTool();
+        virtual ~DiMuonTaggingAlg();
         // Athena algtool's Hooks
         StatusCode initialize() override;
 
-        virtual StatusCode addBranches() const override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
         using TrackPassDecor = SG::WriteDecorHandle<xAOD::TrackParticleContainer, bool>;
@@ -54,7 +54,7 @@ namespace DerivationFramework {
 
         void maskNearbyIDtracks(const xAOD::IParticle* mu, TrackPassDecor& decor) const;
 
-        ToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
+        PublicToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
                                                                "Tool to access the trigger decision"};
 
         Gaudi::Property<std::vector<std::string>> m_orTrigs{this, "OrTrigs", {}};
@@ -93,6 +93,7 @@ namespace DerivationFramework {
         Gaudi::Property<std::vector<int>> m_mu2Types{this, "Mu2Types", {}};
         Gaudi::Property<std::map<int, double>> m_mu2IsoCuts{this, "Mu2IsoCuts", {}};
 
+        Gaudi::Property<bool> m_isMC{this, "isMC", false};
         Gaudi::Property<bool> m_useTrackProbe{this, "UseTrackProbe", true};
 
         Gaudi::Property<std::string> m_br_prefix{this, "BranchPrefix", ""};

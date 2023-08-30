@@ -10,13 +10,13 @@
 #include "DerivationFrameworkMuons/MuonTruthClassifierFallback.h"
 #include "DerivationFrameworkMuons/MuonTruthIsolationTool.h"
 #include "DerivationFrameworkMuons/VertexDecoratorAlg.h"
-#include "DerivationFrameworkMuons/dimuonTaggingTool.h"
+#include "DerivationFrameworkMuons/DiMuonTaggingAlg.h"
 #include "DerivationFrameworkMuons/isolationDecorator.h"
 
 DECLARE_COMPONENT(DerivationFramework::MuonTruthClassifierFallback)
 DECLARE_COMPONENT(DerivationFramework::MuonTruthIsolationTool)
 DECLARE_COMPONENT(DerivationFramework::MuonJetDrTool)
-DECLARE_COMPONENT(DerivationFramework::dimuonTaggingTool)
+DECLARE_COMPONENT(DerivationFramework::DiMuonTaggingAlg)
 DECLARE_COMPONENT(DerivationFramework::isolationDecorator)
 DECLARE_COMPONENT(DerivationFramework::AnalysisMuonThinningAlg)
 DECLARE_COMPONENT(DerivationFramework::IDTrackCaloDepositsDecoratorAlg)

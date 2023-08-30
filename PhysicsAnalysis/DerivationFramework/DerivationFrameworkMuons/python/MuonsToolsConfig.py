@@ -36,4 +36,15 @@ def AnalysisMuonThinningAlgCfg(ConfigFlags, name="AnalysisMuonThinningAlg", **kw
                                                             name="MuonSelThinningTool")))
     the_alg = CompFactory.DerivationFramework.AnalysisMuonThinningAlg(name, **kwargs)
     acc.addEventAlgo(the_alg, primary = True)
-    return acc 
+    return acc
+
+### Di-muon tagging tool, for T&P studies
+def DiMuonTaggingAlgCfg(ConfigFlags, name="DiMuonTaggingTool", **kwargs):
+    acc = ComponentAccumulator()
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    kwargs.setdefault("TrigDecisionTool",  acc.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags)))
+    kwargs.setdefault("isMC", ConfigFlags.Input.isMC)
+    the_alg = CompFactory.DerivationFramework.DiMuonTaggingAlg(name, **kwargs)
+    acc.addEventAlgo(the_alg, primary = True)
+    return acc
+
