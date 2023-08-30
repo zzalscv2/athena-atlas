@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PileUpTools/PileUpStream.h"
@@ -17,7 +17,6 @@
 
 #include "SGTools/DataProxy.h"
 
-#include "xAODEventInfo/EventInfo.h"             // NEW EDM
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "PileUpTools/PileUpMergeSvc.h"
@@ -236,7 +235,7 @@ const xAOD::EventInfo* PileUpStream::nextEventPre(bool readRecord)
    }
 
    const xAOD::EventInfo* xAODEventInfo = p_mergeSvc->getPileUpEvent( p_SG, "" );
-   if (readRecord) {
+   if (readRecord and xAODEventInfo) {
       ATH_MSG_DEBUG ( "nextEventPre(): read new event " 
 		      <<  xAODEventInfo->eventNumber() 
 		      << " run " << xAODEventInfo->runNumber()
