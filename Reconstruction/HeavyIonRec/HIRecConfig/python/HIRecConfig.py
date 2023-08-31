@@ -17,7 +17,12 @@ def HIRecCfg(flags):
     if flags.HeavyIon.doJet:
         from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
         acc.merge(HIJetRecCfg(flags))
-    
+
+    if flags.HeavyIon.Egamma.doSubtractedClusters:
+        from HIJetRec.HIEgammaRecConfigCA import (
+            HIEgammaRecCfg)
+        acc.merge(HIEgammaRecCfg(flags))
+
     return acc
 
 

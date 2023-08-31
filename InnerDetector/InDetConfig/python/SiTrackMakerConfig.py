@@ -47,7 +47,7 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
     kwargs.setdefault("useBremModel",
                       flags.Tracking.doBremRecovery and
                       flags.Detector.EnableCalo and
-                      (flags.Tracking.ActiveConfig.extension in ["", "BLS"]))
+                      (flags.Tracking.ActiveConfig.extension in ["","UPC","BLS"]))
     kwargs.setdefault("doCaloSeededBrem", flags.Tracking.doCaloSeededBrem)
 
     if kwargs["useBremModel"] and kwargs["doCaloSeededBrem"]:

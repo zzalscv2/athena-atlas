@@ -76,6 +76,11 @@ def ZdcTrigValToolCfg(flags, config = 'LHCf2022'):
       
     return acc
 
+def RpdSubtractCentroidToolCfg(flags):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.ZDC.RpdSubtractCentroidTool(name = 'RpdSubtractCentroidTool'))
+    return acc
+
 def ZdcRecRun2Cfg(flags):        
     acc = ComponentAccumulator()
     config = "default"
@@ -126,17 +131,21 @@ def ZdcRecRun3Cfg(flags):
     
     if flags.Input.ProjectName == "data22_13p6TeV":
         config = "LHCf2022"
-    elif flags.Input.ProjectName == "data23_hi":
-        config = "PbPb2023"
     elif flags.Input.ProjectName == "data22_hi":
         config = "PbPb2023"
+    elif flags.Input.ProjectName == "data23_hi":
+        config = "PbPb2023"
+    elif flags.Input.ProjectName == "data23_5p36TeV":
+        config = "pp2023"
 
     acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
     acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
     trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
-    zdcTools = [anaTool,trigTool] # expand list as needed
+    centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
+
+    zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
     #zdcTools = [anaTool] # add trigTool after deocration migration
     
     zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)

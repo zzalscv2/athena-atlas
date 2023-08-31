@@ -768,7 +768,7 @@ MinBiasChainParts = {
                          '2trk6', '1trk4', '1trk5', '1trk2', '0trk2'], #ranges for exclusive tracks
     'hypoPtInfo'     : [ 'pt0p2', 'pt0p5', 'pt1', 'pt2', 'pt4', 'pt6', 'pt8', 'pt10' ],
     'recoAlg'        : ['mbts', 'sptrk', 'sp', 'noalg', 'perf', 'hmt', 'hmtperf', 'idperf', 'zdcperf', 'alfaperf', 'afprec', 'afptof', 'excl'],
-    'addInfo'        : ['peb'],
+    'addInfo'        : ['peb', 'pc'],
     'sigFolder'     : ['MinBias'],
     'subSigs'       : ['MinBias'],
     'chainPartIndex': list(range(0,10))

@@ -2,6 +2,7 @@
 
 #include "TMatrixD.h"
 #include "TVectorD.h"
+#include <limits>
 
 RPDDataAnalyzer::RPDDataAnalyzer(
   ZDCMsg::MessageFunctionPtr messageFunc_p, const std::string& tag, const RPDConfig& config
@@ -21,6 +22,7 @@ RPDDataAnalyzer::RPDDataAnalyzer(
   m_chFADCdata(m_nChannels, std::vector<float>(m_nSamples, 0)),
   m_chSumADCvec(m_nChannels, 0),
   m_chSumADCvecCalib(m_nChannels, 0),
+  m_chPileupFracVec(m_nChannels, 0),
   m_rowSumADCvec(m_nRows, 0),
   m_rowSumADCvecCalib(m_nRows, 0),
   m_columnSumADCvec(m_nColumns, 0),
@@ -75,6 +77,7 @@ void RPDDataAnalyzer::reset()
   m_nChannelsLoaded = 0;
   m_chSumADCvec.assign(m_nChannels, 0);
   m_chSumADCvecCalib.assign(m_nChannels, 0);
+  m_chPileupFracVec.assign(m_nChannels, 0);
   m_rowSumADCvec.assign(m_nRows, 0);
   m_rowSumADCvecCalib.assign(m_nRows, 0);
   m_columnSumADCvec.assign(m_nChannels, 0);
@@ -140,34 +143,47 @@ void RPDDataAnalyzer::analyzeData()
       float slope = vec_theta[1];
       // float slope_err = sqrt(mat_X_T_X[1][1]);
       
-      float adc_sum = 0;
-      float adc;
       // sum range is after baseline until end of signal
       // subtract contribution from exponential
+      float adcSum = 0;
+      float adc;
       for (unsigned int sample = m_nBaselineSamples; sample < m_endSignalSample; sample++) {
         adc = m_chFADCdata.at(channel).at(sample);
         adc -= m_nominalBaseline;
         adc -= exp(intercept + slope*sample);
-        adc_sum += adc;
+        adcSum += adc;
       }
-      m_chSumADCvec.at(channel) = adc_sum;
-      m_chSumADCvecCalib.at(channel) = adc_sum*m_chCalibFactors.at(channel);
+      // calculate sum ADC for pileup
+      float pileupAdcSum = 0;
+      for (unsigned int sample = 0; sample < m_endSignalSample; sample++) {
+        pileupAdcSum += exp(intercept + slope*sample);
+      }
+      m_chSumADCvec.at(channel) = adcSum;
+      m_chSumADCvecCalib.at(channel) = adcSum*m_chCalibFactors.at(channel);
+      if (adcSum > 0) {
+        m_chPileupFracVec.at(channel) = pileupAdcSum/adcSum;
+      } else {
+        // avoid dividing by zero or returning a negative number
+        // this should be large - why not infinity?
+        m_chPileupFracVec.at(channel) = std::numeric_limits<float>::infinity();
+      }
 
       m_chStatus.at(channel) |= 1 << ChOutOfTimePileupBit;
       m_sideStatus |= 1 << SideOutOfTimePileupBit;
     } else {
       // no OOT pileup, assume that baseline is the first sample
       float baseline = m_chFADCdata.at(channel).at(0);
-      float adc_sum = 0;
+      float adcSum = 0;
       float adc;
       // sum range is after baseline until end of signal
       for (unsigned int sample = m_nBaselineSamples; sample < m_endSignalSample; sample++) {
         adc = m_chFADCdata.at(channel).at(sample);
         adc -= baseline;
-        adc_sum += adc;
+        adcSum += adc;
       }
-      m_chSumADCvec.at(channel) = adc_sum;
-      m_chSumADCvecCalib.at(channel) = adc_sum*m_chCalibFactors.at(channel);
+      m_chSumADCvec.at(channel) = adcSum;
+      m_chSumADCvecCalib.at(channel) = adcSum*m_chCalibFactors.at(channel);
+      // fractional pileup is zero initialized, and this is what we want for no pileup
     }
 
     // check for overflow
@@ -229,6 +245,14 @@ float RPDDataAnalyzer::getChSumADC(unsigned int channel) const
 float RPDDataAnalyzer::getChSumADCcalib(unsigned int channel) const
 {
   return m_chSumADCvecCalib.at(channel);
+};
+
+/**
+ * Get OOT pileup sum as a fraction of non-pileup signal sum (zero if no OOT pileup).
+*/
+float RPDDataAnalyzer::getChPileupFrac(unsigned int channel) const
+{
+  return m_chPileupFracVec.at(channel);
 };
 
 /**

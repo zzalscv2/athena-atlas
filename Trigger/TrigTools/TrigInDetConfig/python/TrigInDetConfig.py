@@ -4,7 +4,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
 from AthenaCommon.Logging import logging
 
 class InDetCacheNames(object):
@@ -94,12 +93,6 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
                           inView = viewname)
   acc = ComponentAccumulator()
   if in_view:
-    bserr_inputs = []
-    if flags.Input.Format is Format.BS:
-      bserr_inputs += [
-        ('IDCInDetBSErrContainer' , 'PixelByteStreamErrs'),
-        ('IDCInDetBSErrContainer',  'SCT_ByteStreamErrs'),
-      ]
     acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
       name = viewname + "_" + flags.Tracking.ActiveConfig.input_name,
       DataObjects = [
@@ -108,9 +101,14 @@ def trigInDetLRTCfg(flags, LRTInputCollection, roisKey, in_view, extra_view_inpu
         ( 'SpacePointContainer' ,           'StoreGateSvc+SCT_TrigSpacePoints' ),
         ( 'InDet::PixelClusterContainer' ,  'StoreGateSvc+PixelTrigClusters' ),
         ( 'InDet::SCT_ClusterContainer' ,   'StoreGateSvc+SCT_TrigClusters' ),
-      ]+bserr_inputs+extra_view_inputs
+      ]+extra_view_inputs
     ) )
+
+    acc.merge(seq.viewDataVerifier(viewname))
+    acc.merge(seq.dataPreparation())
+    
   acc.merge(seq.fastTrackFinder(inputTracksName = LRTInputCollection))
+  
   return acc
 
 

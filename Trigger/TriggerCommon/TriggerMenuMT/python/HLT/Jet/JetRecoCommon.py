@@ -144,7 +144,7 @@ def isPFlow(jetRecoDict):
 
 # return the min jet pT in MeV for the configured recoAlg
 def getFilterCut(recoAlg):
-    return {"a4":5000, "a10":50000, "a10r": 50000, "a10t":50000, "a10sd":50000}[recoAlg]
+    return {"a4":4000, "a10":50000, "a10r": 50000, "a10t":50000, "a10sd":50000}[recoAlg]
 
 def getJetContext(jetRecoDict):
     context = StandardJetContext.jetContextDic.get(jetRecoDict["trkopt"],None) 
@@ -387,11 +387,17 @@ def defineJetConstit(jetRecoDict,clustersKey=None,pfoPrefix=None):
     
 # Arbitrary min pt for fastjet, set to be low enough for MHT(?)
 # Could/should adjust higher for large-R
-def defineJets(jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=None):
+def defineJets(flags,jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=None):
     minpt = {
+      "default": {
         4:  7000,
-        10: 50000,
+        10: 50000 },
+      "lowpt": {    # used for HI UPC jet reco, ATR-28158
+        4:  4000,
+        10: 50000 }
     }
+
+    filter_type = "lowpt" if flags.Trigger.Jet.LowPtFilter else "default"
     jetalg, jetradius, jetextra = interpretRecoAlg(jetRecoDict["recoAlg"])
     actualradius = float(jetradius)/10
     jetConstit = defineJetConstit(jetRecoDict,clustersKey,pfoPrefix)
@@ -400,7 +406,7 @@ def defineJets(jetRecoDict,clustersKey=None,prefix='',suffix='',pfoPrefix=None):
     if jetDefNeedsTracks(jetRecoDict):
         suffix += "_"+jetRecoDict["trkopt"]
 
-    jetDef = JetDefinition( "AntiKt", actualradius, jetConstit, ptmin=minpt[jetradius], prefix=prefix, suffix=suffix, context=jetRecoDict["trkopt"])
+    jetDef = JetDefinition( "AntiKt", actualradius, jetConstit, ptmin=minpt[filter_type][jetradius], prefix=prefix, suffix=suffix, context=jetRecoDict["trkopt"])
     return jetDef
 
 def defineReclusteredJets(jetRecoDict,smallRjets,inputlabel,prefix,suffix):

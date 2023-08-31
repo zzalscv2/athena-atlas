@@ -123,12 +123,14 @@ def StandardJetBuildCfg(flags, dataSource, clustersKey, **jetRecoDict):
             seqname
         )
         jetDef = defineJets(
+            flags,
             jetRecoDict,
             pfoPrefix=f"HLT_{jetRecoDict['trkopt']}",
             prefix=getHLTPrefix(),
         )
     else:
         jetDef = defineJets(
+            flags,
             jetRecoDict,
             clustersKey=clustersKey,
             prefix=getHLTPrefix(),
@@ -437,7 +439,7 @@ def FastFtaggedJetCopyAlgCfg(flags,jetsIn,jetRecoDict):
 
     acc = ComponentAccumulator()
     caloJetRecoDict = jetRecoDictFromString(jetsIn)
-    caloJetDef = defineJets(caloJetRecoDict,clustersKey=getClustersKey(caloJetRecoDict),prefix=getHLTPrefix(),suffix='fastftag')
+    caloJetDef = defineJets(flags,caloJetRecoDict,clustersKey=getClustersKey(caloJetRecoDict),prefix=getHLTPrefix(),suffix='fastftag')
     decorList = getDecorList(jetRecoDict)
     acc.addEventAlgo(JetRecConfig.getJetCopyAlg(jetsin=jetsIn,jetsoutdef=caloJetDef,decorations=decorList))
     ftaggedJetsIn = caloJetDef.fullname()

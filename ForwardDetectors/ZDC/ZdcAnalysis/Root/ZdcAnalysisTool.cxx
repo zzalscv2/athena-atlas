@@ -1213,6 +1213,8 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_CHECK( m_rpdChannelMaxSample.initialize());
     m_rpdChannelStatus = m_zdcModuleContainerName+".RPDChannelStatus"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelStatus.initialize());
+    m_rpdChannelPileupFrac = m_zdcModuleContainerName+".RPDChannelPileupFrac"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelPileupFrac.initialize());
 
     m_zdcSumUncalibSum = m_zdcSumContainerName+".UncalibSum"+m_auxSuffix;
     ATH_CHECK( m_zdcSumUncalibSum.initialize());
@@ -1466,6 +1468,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitudeCalib(m_rpdChannelAmplitudeCalib);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelMaxSample(m_rpdChannelMaxSample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelStatus(m_rpdChannelStatus);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupFrac(m_rpdChannelPileupFrac);
     
     // CalibTime
     // Status
@@ -1493,6 +1496,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    rpdChannelAmplitudeCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumADCcalib(rpdChannel);
 	    rpdChannelMaxSample(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
 	    rpdChannelStatus(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
+	    rpdChannelPileupFrac(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChPileupFrac(rpdChannel);
           }
         } else if (zdcModule->zdcType() == 0) {
           // this is the main ZDC
