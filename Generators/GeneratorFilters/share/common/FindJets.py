@@ -37,18 +37,23 @@ def CreateJets(prefiltSeq, jetR, mods=""):
     # run2-config compatibility. (run3 style would use a ComponentAccumulator).
     from JetRecConfig.JetRecConfig import getJetAlgs, reOrderAlgs
     # Initialize ConfigFlags for use by CA-based code below
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from AthenaConfiguration.Enums import BeamType           
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Beam.Type = BeamType.Collisions
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.Enums import BeamType     
+    flags = initConfigFlags()  
+    flags.Input.isMC = True
+    flags.Beam.Type = BeamType.Collisions
 
-    # Get the algs needed by the JetDefinition and schedule them with runII style
-    algs, jetdef_i = getJetAlgs(ConfigFlags, jetdef, True)
-    algs, ca = reOrderAlgs( [a for a in algs if a is not None])
+    from AthenaCommon.Configurable import ConfigurableCABehavior
+    from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+
+    with ConfigurableCABehavior():
+      # Get the algs needed by the JetDefinition and schedule them with runII style
+      algs, jetdef_i = getJetAlgs(flags, jetdef, True)
+      algs, ca = reOrderAlgs( [a for a in algs if a is not None])
     # ignore dangling CA instance in legacy config
     ca.wasMerged()
     for a in algs:
-        prefiltSeq += a
+      prefiltSeq += conf2toConfigurable(a)
 
         
 def AddJetsFilter(filtSeq,ecmEnergy, jetR, mods=""):       
