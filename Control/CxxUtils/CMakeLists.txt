@@ -139,6 +139,14 @@ atlas_add_test( exctrace2_test
    LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}"
 )
 
+
+atlas_add_test( CachedValueTiming_test
+  SOURCES test/CachedValueTiming_test.cxx
+  LINK_LIBRARIES CxxUtils
+  PROPERTIES TIMEOUT 300
+  POST_EXEC_SCRIPT noerror.sh )
+
+
 # Set up the "simple" tests:
 foreach( test sincos_test ArrayScanner_test Arrayrep_test
       Array_test PackedArray_test pointer_list_test FloatPacker_test
