@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_BCIDOFFSETCORRECTION_H
@@ -13,7 +13,7 @@
  */
 
 #include <TEnv.h>
-#include <TAxis.h>
+#include <TString.h>
 #include <TH2.h>
 
 #include "JetCalibTools/JetCalibrationStep.h"
@@ -34,25 +34,25 @@ class BcidOffsetCorrection
   
  
  private:
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo, m_calibAreaTag;
-  bool m_isData;
+  bool m_isData{};
 
-  bool m_doEMECIW2bcid;
-  bool m_doEMECIW3bcid;
-  bool m_doHEC0bcid;
-  bool m_doHEC1bcid;
-  bool m_doHEC2bcid;
-  bool m_doHEC3bcid;
-  bool m_doFCal0OuterBcid;
-  bool m_doFCal1OuterBcid;
-  bool m_doFCal2OuterBcid;
-  bool m_doFCal0bcid;
-  bool m_doFCal1bcid;
-  bool m_doFCal2bcid;
-  bool m_doFCal0InnerBcid;
-  bool m_doFCal1InnerBcid;
-  bool m_doFCal2InnerBcid;
+  bool m_doEMECIW2bcid{};
+  bool m_doEMECIW3bcid{};
+  bool m_doHEC0bcid{};
+  bool m_doHEC1bcid{};
+  bool m_doHEC2bcid{};
+  bool m_doHEC3bcid{};
+  bool m_doFCal0OuterBcid{};
+  bool m_doFCal1OuterBcid{};
+  bool m_doFCal2OuterBcid{};
+  bool m_doFCal0bcid{};
+  bool m_doFCal1bcid{};
+  bool m_doFCal2bcid{};
+  bool m_doFCal0InnerBcid{};
+  bool m_doFCal1InnerBcid{};
+  bool m_doFCal2InnerBcid{};
 
   std::unique_ptr<const TH2> m_bcid_nCells_EMECIW2;
   std::unique_ptr<const TH2> m_bcid_nCells_HEC0;

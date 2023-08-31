@@ -5,6 +5,8 @@
 #include "JetCalibTools/CalibrationMethods/EtaJESCorrection.h"
 #include "JetCalibTools/JetCalibUtils.h"
 #include "PathResolver/PathResolver.h"
+#include <TAxis.h>
+#include <TEnv.h>
 #include <utility>
 
 EtaJESCorrection::EtaJESCorrection()
@@ -210,7 +212,9 @@ void EtaJESCorrection::loadSplineHists(const TString & fileName, const std::stri
   }
 
   for(int i=0 ; i<m_etaBinAxis->GetNbins(); i++){
-    m_etajesFactors[i].reset(dynamic_cast<TH1*>(etajes_l->At(i)));
+    auto pTH1 = dynamic_cast<TH1*>(etajes_l->At(i));
+    if (not pTH1) continue;
+    m_etajesFactors[i].reset(pTH1);
     m_etajesFactors[i]->SetDirectory(nullptr);
   }
   tmpF->Close();

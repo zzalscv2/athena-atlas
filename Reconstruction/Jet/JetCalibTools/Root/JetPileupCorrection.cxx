@@ -2,7 +2,12 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <TEnv.h>
+#include "JetCalibTools/IJetCalibrationTool.h"
+
 #include "JetCalibTools/CalibrationMethods/JetPileupCorrection.h"
+#include "JetCalibTools/CalibrationMethods/ResidualOffsetCorrection.h"
+
 #include "PathResolver/PathResolver.h"
 #include "PUResidual3DCorrection.h"
 

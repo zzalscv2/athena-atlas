@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_RESIDUALOFFSETCORRECTION_H
@@ -12,12 +12,16 @@
  * Date: August 15 2013
  */
 
-#include <TEnv.h>
-#include <TAxis.h>
 
-#include "JetCalibTools/CalibrationMethods/NPVBeamspotCorrection.h"
 #include "AsgMessaging/AsgMessaging.h"
 #include "AsgMessaging/StatusCode.h"
+#include "TString.h"
+#include <vector>
+#include <string>
+
+class TEnv;
+class TAxis;
+class NPVBeamspotCorrection;
 
 class ResidualOffsetCorrection : public asg::AsgMessaging
 {
@@ -41,20 +45,20 @@ class ResidualOffsetCorrection : public asg::AsgMessaging
   double GetNPVBeamspotCorrection(double NPV) const;
  
  private:
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo, m_calibAreaTag;
-  bool m_dev;
-  bool m_isData;
+  bool m_dev{};
+  bool m_isData{};
   static constexpr float m_GeV = 1000;
 
-  NPVBeamspotCorrection * m_npvBeamspotCorr;
+  NPVBeamspotCorrection * m_npvBeamspotCorr{};
 
   TString m_resOffsetDesc;
-  TAxis * m_resOffsetBins;
-  bool m_applyNPVBeamspotCorrection;
-  double m_muSF;
-  double m_mu_ref, m_NPV_ref, m_nJet_ref;
-  bool m_useNjet;
+  TAxis * m_resOffsetBins{};
+  bool m_applyNPVBeamspotCorrection{};
+  double m_muSF{};
+  double m_mu_ref{}, m_NPV_ref{}, m_nJet_ref{};
+  bool m_useNjet{};
 
   std::vector<double> m_resOffsetMu, m_resOffsetNPV, m_resOffsetNjet;
 

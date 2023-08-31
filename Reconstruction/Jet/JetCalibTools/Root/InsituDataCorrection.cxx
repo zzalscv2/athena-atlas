@@ -5,6 +5,11 @@
 #include "JetCalibTools/CalibrationMethods/InsituDataCorrection.h"
 #include "JetCalibTools/JetCalibUtils.h"
 #include "PathResolver/PathResolver.h"
+#include <TFile.h>
+#include <TH1.h>
+#include <TEnv.h>
+#include <TAxis.h>
+
 
 InsituDataCorrection::InsituDataCorrection()
   : JetCalibrationStep::JetCalibrationStep(),

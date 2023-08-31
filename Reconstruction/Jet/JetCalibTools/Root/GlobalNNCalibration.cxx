@@ -160,7 +160,11 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
 void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::string &ptCorr_name) {
   std::unique_ptr<TFile> tmpF(TFile::Open( fileName ));
   TList *ptCorr_l = dynamic_cast<TList*>( tmpF->Get(ptCorr_name.c_str()));
-
+  if (not ptCorr_l){
+    ATH_MSG_ERROR("TList pointer is null in GlobalNNCalibration::loadSplineHists");
+    tmpF->Close();
+    return;
+  }
   m_ptCorrFactors.resize( ptCorr_l->GetSize() );
   int nBinsCorr = ptCorr_l->GetSize();
   int nEtaBins = m_closureEtaBins.size()-1;
@@ -169,7 +173,9 @@ void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::s
   }
 
   for(unsigned int i=0 ; i<m_closureEtaBins.size()-1; i++){
-    m_ptCorrFactors[i].reset(dynamic_cast<TH1*>(ptCorr_l->At(i)));
+    auto pTH1 = dynamic_cast<TH1*>(ptCorr_l->At(i));
+    if (not pTH1) continue;
+    m_ptCorrFactors[i].reset();
     m_ptCorrFactors[i]->SetDirectory(nullptr);
   }
   tmpF->Close();

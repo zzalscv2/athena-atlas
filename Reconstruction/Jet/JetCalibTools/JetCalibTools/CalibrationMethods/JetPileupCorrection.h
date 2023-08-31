@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_JETPILEUPCORRECTION_H
@@ -12,11 +12,13 @@
  * Date: June 27 2013
  */
 
-#include <TEnv.h>
 
-#include "JetCalibTools/IJetCalibrationTool.h"
 #include "JetCalibTools/JetCalibrationStep.h"
-#include "JetCalibTools/CalibrationMethods/ResidualOffsetCorrection.h"
+#include "TString.h"
+#include <string>
+#include <memory>
+class TEnv;
+class ResidualOffsetCorrection;
 
 namespace PUCorrection {
   struct PU3DCorrectionHelper;
@@ -35,27 +37,27 @@ class JetPileupCorrection
   virtual StatusCode calibrate(xAOD::Jet& jet, JetEventInfo& jetEventInfo) const override;
  
  private:
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo;
   TString m_calibAreaTag;
-  bool m_dev;
-  bool m_doResidual;
-  bool m_doJetArea;
-  bool m_doOrigin;
-  bool m_isData;
-  bool m_doMuOnly;
-  bool m_doNPVOnly;
-  bool m_doNJetOnly;
-  bool m_doSequentialResidual;
+  bool m_dev{};
+  bool m_doResidual{};
+  bool m_doJetArea{};
+  bool m_doOrigin{};
+  bool m_isData{};
+  bool m_doMuOnly{};
+  bool m_doNPVOnly{};
+  bool m_doNJetOnly{};
+  bool m_doSequentialResidual{};
 
-  bool m_do3Dcorrection;
+  bool m_do3Dcorrection{};
 
-  bool m_useFull4vectorArea;
-  ResidualOffsetCorrection * m_residualOffsetCorr;
+  bool m_useFull4vectorArea{};
+  ResidualOffsetCorrection * m_residualOffsetCorr{};
 
   std::unique_ptr<PUCorrection::PU3DCorrectionHelper> m_residual3DCorr;
 
-  bool m_doOnlyResidual;
+  bool m_doOnlyResidual{};
 
   std::string m_originScale;
 
