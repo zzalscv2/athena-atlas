@@ -2469,6 +2469,16 @@ HLT_noalg_L1eEM5_VjTE200:
   eventCount: 0
 HLT_noalg_L1eEM9:
   eventCount: 20
+HLT_noalg_L1gJ20p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gJ400p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gLJ80p0ETA25:
+  eventCount: 0
+HLT_noalg_L1gTE200:
+  eventCount: 0
+HLT_noalg_L1gXEJWOJ100:
+  eventCount: 10
 HLT_noalg_L1jJ40:
   eventCount: 20
 HLT_noalg_L1jJ50:

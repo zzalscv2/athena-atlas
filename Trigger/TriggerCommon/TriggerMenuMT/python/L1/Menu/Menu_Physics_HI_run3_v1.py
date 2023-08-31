@@ -28,6 +28,8 @@ def defineMenu():
         'L1_eEM1', 'L1_eEM2',
         'L1_eEM5', 'L1_eEM9', 'L1_eEM12', 'L1_eEM18', 'L1_eEM15',
         'L1_eEM12L', 'L1_eEM18L', 'L1_eEM26', 'L1_eEM26M',
+        # ATR-22061
+        "L1_eEM9_EMPTY",
 
         ## 
         # MU
@@ -78,6 +80,8 @@ def defineMenu():
         'L1_jJ15p31ETA49', 'L1_jJ20p31ETA49',
         'L1_jJ40p31ETA49', 'L1_jJ50p31ETA49', 'L1_jJ60p31ETA49', 'L1_jJ90p31ETA49', 'L1_jJ125p31ETA49',
 
+        # gJ - ATR-28029
+        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200","L1_gXEJWOJ100",
 
         # XE
         'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
