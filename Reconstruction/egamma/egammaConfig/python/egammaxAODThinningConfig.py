@@ -49,13 +49,8 @@ def egammaxAODThinningCfg(flags, name="EGammaxAODThinning"):
         from CaloRec.CaloThinCellsByClusterAlgConfig import (
             CaloThinCellsByClusterAlgCfg)
 
+        cellsName = flags.Egamma.Keys.Input.CaloCells
         for clus in allClusters:
-            if flags.HeavyIon.Egamma.doSubtractedClusters and (
-                    clus == outFlags.CaloClusters or clus == flags.HeavyIon.Egamma.CaloTopoCluster):
-                cellsName = flags.HeavyIon.Egamma.SubtractedCells
-            else:
-                cellsName = flags.Egamma.Keys.Input.CaloCells
-
             acc.merge(CaloThinCellsByClusterAlgCfg(
                 flags,
                 streamName="StreamAOD",
