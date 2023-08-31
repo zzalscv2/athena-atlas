@@ -28,6 +28,8 @@ from .Physics_pp_run3_v1 import (
         PrimaryLegGroup,
         PrimaryPhIGroup,
         ZeroBiasGroup,
+        JetPhaseIStreamersGroup,
+        METPhaseIStreamersGroup,
         BphysicsGroup
 )
 from . import P1_run3_v1
@@ -711,6 +713,11 @@ def getPhysicsHISignatures():
         # ChainProp(name='HLT_noalg_L1ZDC_BIT1',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoHLTRepro']+MinBiasGroup),
         # ChainProp(name='HLT_noalg_L1ZDC_BIT0',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:NoHLTRepro']+MinBiasGroup),
 
+        ChainProp(name='HLT_noalg_L1gJ20p0ETA25',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gJ400p0ETA25',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gLJ80p0ETA25',  l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=['PS:Online']+SupportPhIGroup+JetPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gTE200',        l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream]   , groups=['PS:Online']+SupportPhIGroup+METPhaseIStreamersGroup),
+        ChainProp(name='HLT_noalg_L1gXEJWOJ100',    l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=SupportPhIGroup+METPhaseIStreamersGroup, monGroups=['metMon:t0']),
     ]
 
     #---- heavy ion EB chains
