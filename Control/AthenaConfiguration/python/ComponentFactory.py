@@ -1,12 +1,15 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys
+import AthenaConfiguration.AtlasSemantics # noqa: F401 (load ATLAS-specific semantics)
+from AthenaCommon.Configurable import Configurable
+from AthenaCommon.ConfigurableDb import getConfigurable
+from GaudiConfig2 import Configurables as _cfgs
 
 
 def isComponentAccumulatorCfg():
     """Returns true if the python fragment is ComponentAccumulator-based"""
 
-    from AthenaCommon.Configurable import Configurable
     if ("AthenaCommon.Include" not in sys.modules
         or not Configurable._useGlobalInstances):
         return True
@@ -15,8 +18,6 @@ def isComponentAccumulatorCfg():
 
 #This version of CompFactory provides the RecExCommon-style configurables 
 # used by athena.py. Internally works like CfgMgr
-
-from AthenaCommon.ConfigurableDb import getConfigurable
 class _compFactory1():
     def __getattr__(self,cfgName):
         if not cfgName.startswith("__"):
@@ -29,7 +30,6 @@ class _compFactory1():
         return [getConfigurable(cfgName.replace("::","__"),assumeCxxClass=False) for cfgName in manyNames]
 
 #This version of the CompFactory provides GaudiConfig2-style Configurables
-from GaudiConfig2 import Configurables as _cfgs
 class _compFactory2():
     #Get Configurable database from Gaudi:
     def __getattr__(self,cfgName):
@@ -43,10 +43,7 @@ class _compFactory2():
         return [_cfgs.getByType(cfgName) for cfgName in manyNames]
 
 
-#extend Semantics for ATLAS-specific cases:
-import AthenaConfiguration.AtlasSemantics # noqa: F401
-
-#Dynamically switch between the two versions 
+#Dynamically switch between the two versions
 class _compFactory():
     def _getFactory(self):
 

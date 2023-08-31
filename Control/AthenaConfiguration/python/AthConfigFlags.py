@@ -191,10 +191,11 @@ class AthConfigFlags(object):
         self._args = None # user args from parser
 
     def athHash(self):
-        if self._hash is None:
+        if self._locked is False:
             raise RuntimeError("Cannot calculate hash of unlocked flag container")
-        else:
-            return self._hash
+        elif self._hash is None:
+            self._hash = self._calculateHash()
+        return self._hash
 
     def __hash__(self):
         raise DeprecationWarning("__hash__ method in AthConfigFlags is deprecated. Probably called from function decorator, use AccumulatorCache decorator instead.")
@@ -353,7 +354,6 @@ class AthConfigFlags(object):
             # before locking, parse args if a parser was defined
             if self._args is None and self._parser is not None: self.fillFromArgs()
             self._locked = True
-            self._hash = self._calculateHash()
         return
 
     def locked(self):
