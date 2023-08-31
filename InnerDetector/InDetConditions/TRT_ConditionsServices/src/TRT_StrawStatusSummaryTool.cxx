@@ -103,7 +103,7 @@ const TRTCond::StrawStatusMultChanContainer* TRT_StrawStatusSummaryTool::getStra
   if(m_isGEANT4) {
     // processing GEANT4 simulation - revert to old non-MT style cond access
     if ( StatusCode::SUCCESS!=detStore()->retrieve( strawstatusHTcontainer, m_par_strawstatusHTcontainerkey ) ) {
-      ATH_MSG_FATAL( "Could not retrieve folder " << m_par_strawstatusHTcontainerkey );
+      ATH_MSG_WARNING( "Could not retrieve folder " << m_par_strawstatusHTcontainerkey );
     }
   }
   else {
