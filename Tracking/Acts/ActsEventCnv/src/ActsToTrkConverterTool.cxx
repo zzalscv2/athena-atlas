@@ -84,6 +84,7 @@ StatusCode ActsTrk::ActsToTrkConverterTool::initialize() {
                       actsElement->upstreamDetectorElement()) != nullptr);
     if (isTRT)
       return;
+    
     auto [it, ok] = m_actsSurfaceMap.insert({actsElement->identify(), surface});
     if (!ok) {
       ATH_MSG_WARNING("ATLAS ID "
@@ -212,7 +213,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackToSourceLinks(
 
 const Acts::BoundTrackParameters
 ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
-    const Trk::TrackParameters &atlasParameter) const {
+    const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext & gctx) const {
 
   using namespace Acts::UnitLiterals;
   std::shared_ptr<const Acts::Surface> actsSurface;
@@ -226,20 +227,40 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
   }
   // no associated surface create a perigee one
   else {
+    ATH_MSG_VERBOSE("trkTrackParametersToActsParameters:: No associated surface found, creating a perigee surface.");
     actsSurface = Acts::Surface::makeShared<const Acts::PerigeeSurface>(
         Acts::Vector3(0., 0., 0.));
   }
 
   // Construct track parameters
   auto atlasParam = atlasParameter.parameters();
-  params << atlasParam[Trk::locX], atlasParam[Trk::locY], atlasParam[Trk::phi0],
-      atlasParam[Trk::theta],
-      atlasParameter.charge() / (atlasParameter.momentum().mag() * 1_MeV), 0.;
+  if (actsSurface->bounds().type() ==
+      Acts::SurfaceBounds::BoundsType::eAnnulus) {
+    // Annulus surfaces are constructed differently in Acts/Trk so we need to
+    // convert local coordinates
+    auto position = atlasParameter.position();
+    auto result =
+        actsSurface->globalToLocal(gctx, position, atlasParameter.momentum());
+    if (result.ok()) {
+      params << (*result)[0], (*result)[1], atlasParam[Trk::phi0],
+          atlasParam[Trk::theta],
+          atlasParameter.charge() / (atlasParameter.momentum().mag() * 1_MeV),
+          0.;
+    } else {
+      ATH_MSG_WARNING(
+          "Unable to convert annulus surface - globalToLocal failed");
+    }
+  } else {
+    params << atlasParam[Trk::locX], atlasParam[Trk::locY],
+        atlasParam[Trk::phi0], atlasParam[Trk::theta],
+        atlasParameter.charge() / (atlasParameter.momentum().mag() * 1_MeV), 0.;
+  }
 
   Acts::BoundSymMatrix cov = Acts::BoundSymMatrix::Identity();
   cov.topLeftCorner(5, 5) = *atlasParameter.covariance();
 
   // Convert the covariance matrix from MeV
+  // FIXME: This needs to handle the annulus case as well - currently the cov is wrong for annulus surfaces
   for (int i = 0; i < cov.rows(); i++) {
     cov(i, 4) = cov(i, 4) / 1_MeV;
   }
@@ -411,7 +432,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
     Acts::TrackContainer<Acts::VectorTrackContainer,
                          ActsTrk::MutableMultiTrajectory> &tc,
     const TrackCollection &trackColl,
-    const Acts::GeometryContext & /**gctx*/) const {
+    const Acts::GeometryContext & gctx) const {
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
                   << trackColl.size() << " tracks.");
 
@@ -462,7 +483,10 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
         ATH_MSG_VERBOSE("Converting track parameters.");
         // TODO - work out whether we should set predicted, filtered, smoothed
         const Acts::BoundTrackParameters parameters =
-            trkTrackParametersToActsParameters(*(tsos->trackParameters()));
+            trkTrackParametersToActsParameters(*(tsos->trackParameters()), gctx);
+
+        // Sanity check on positions
+        actsTrackParameterPositionCheck(parameters, *(tsos->trackParameters()), gctx);
 
         if (first_tsos) {
           // This is the first track state, so we need to set the track
@@ -473,10 +497,8 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
               parameters.referenceSurface().getSharedPtr());
           first_tsos = false;
         } else {
-          // Surfaces not yet implemented in MultiTrajectory.icc
-          // actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
-          // Since we're converting final Trk::Tracks, let's assume they're
-          // smoothed
+          actsTSOS.setReferenceSurface(parameters.referenceSurface().getSharedPtr());
+          // Since we're converting final Trk::Tracks, let's assume they're smoothed
           actsTSOS.smoothed() = parameters.parameters();
           actsTSOS.smoothedCovariance() = *parameters.covariance();
           // Not yet implemented in MultiTrajectory.icc
@@ -492,7 +514,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
         //  MultiTrajectory.icc
 
         int dim = measurement.localParameters().dimension();
-        actsTSOS.allocateCalibrated(dim);
+        actsTSOS.allocateCalibrated(dim); 
         if (dim == 1) {
           actsTSOS.calibrated<1>() = measurement.localParameters();
           actsTSOS.calibratedCovariance<1>() = measurement.localCovariance();
@@ -511,6 +533,26 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
   }
   ATH_MSG_VERBOSE("Finished converting " << trackColl.size() << " tracks.");
   ATH_MSG_VERBOSE("ACTS Track container has " << tc.size() << " tracks.");
+}
+
+void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
+    const Acts::BoundTrackParameters &parameters,
+    const Trk::TrackParameters &trkparameters,
+    const Acts::GeometryContext &gctx) const {
+  if (std::fabs(parameters.position(gctx).x() - trkparameters.position().x()) >
+          0.01 ||
+      std::fabs(parameters.position(gctx).y() - trkparameters.position().y()) >
+          0.01 ||
+      std::fabs(parameters.position(gctx).z() - trkparameters.position().z()) >
+          0.01) {
+    ATH_MSG_WARNING("Parameter position mismatch: "
+                    << parameters.position(gctx) << " vs "
+                    << trkparameters.position());
+    ATH_MSG_WARNING("Acts surface:");
+    ATH_MSG_WARNING(parameters.referenceSurface().toString(gctx));
+    ATH_MSG_WARNING("Trk surface:");
+    ATH_MSG_WARNING(trkparameters.associatedSurface());
+  }
 }
 
 // Local functions to check/debug Annulus bounds
@@ -670,3 +712,4 @@ void ActsTrk::ActsTrackParameterCheck(
     std::cout << std::endl;
   }
 }
+

@@ -78,7 +78,7 @@ public:
   /// Take care of unit conversion between the two.  
   virtual
   const Acts::BoundTrackParameters
-  trkTrackParametersToActsParameters(const Trk::TrackParameters &atlasParameter) const override;
+  trkTrackParametersToActsParameters(const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext& gctx) const override;
 
   /// Create ATLAS TrackParameter from Acts one.
   /// Take care of unit conversion between the two.  
@@ -104,12 +104,18 @@ public:
   };
 
 private:
-  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
-  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
-  std::map<Identifier, const Acts::Surface*> m_actsSurfaceMap;
+  void actsTrackParameterPositionCheck(
+     const Acts::BoundTrackParameters& actsParameter,
+     const Trk::TrackParameters& tsos, const Acts::GeometryContext& gctx) const;
 
-  Gaudi::Property<bool> m_visualDebugOutput{this, "VisualDebugOutput", 
-    false, "Print additional output for debug plots"};
+ ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{
+     this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+ std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
+ std::map<Identifier, const Acts::Surface*> m_actsSurfaceMap;
+
+ Gaudi::Property<bool> m_visualDebugOutput{
+     this, "VisualDebugOutput", false,
+     "Print additional output for debug plots"};
 };
 
 }; // namespace ActsTrk
