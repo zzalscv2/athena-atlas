@@ -13,7 +13,7 @@ namespace CP {
     class IsolationConditionCombined : public IsolationCondition {
     public:
         IsolationConditionCombined(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoType,
-                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, std::string isoDecSuffix = "");
+                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, const std::string& isoDecSuffix = "");
         virtual ~IsolationConditionCombined() = default;
 
         bool accept(const xAOD::IParticle& x) const override;

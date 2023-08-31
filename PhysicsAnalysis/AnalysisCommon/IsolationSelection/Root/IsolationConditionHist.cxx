@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // $Id: IsolationConditionHist.cxx 678002 2015-06-24 15:39:36Z morrisj $
@@ -15,11 +15,12 @@
 
 namespace CP {
     constexpr float MeVtoGeV = 1.e-3;
-    IsolationConditionHist::IsolationConditionHist(std::string name, xAOD::Iso::IsolationType isoType, const std::string& isolationFunction,
+    IsolationConditionHist::IsolationConditionHist(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& isolationFunction,
                                                    std::unique_ptr<TH3F> efficiencyHisto3D) :
-        IsolationCondition(name, isoType), m_efficiencyHisto3D(std::move(efficiencyHisto3D)) {
-        m_isolationFunction = std::make_unique<TF1>(isolationFunction.c_str(), isolationFunction.c_str(), 0.0, 1000.0);
-
+        IsolationCondition(name, isoType),
+        m_efficiencyHisto3D(std::move(efficiencyHisto3D)),
+        m_isolationFunction (std::make_unique<TF1>(isolationFunction.c_str(), isolationFunction.c_str(), 0.0, 1000.0))
+    {
         /// check if pt is using GeV as unit
         std::string xtitle(m_efficiencyHisto3D->GetXaxis()->GetTitle());
         m_ptGeV = (xtitle.find("GeV") != std::string::npos);

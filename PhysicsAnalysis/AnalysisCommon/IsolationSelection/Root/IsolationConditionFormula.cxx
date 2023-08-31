@@ -12,17 +12,19 @@
 #include <cmath>
 
 namespace CP {
-    IsolationConditionFormula::IsolationConditionFormula(std::string name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction,
-                                                         bool invertCut, std::string isoDecSuffix) :
-        IsolationCondition(name, isoType, isoDecSuffix) {
-        m_cutFunction = std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str());
-        m_invertCut = invertCut;
+    IsolationConditionFormula::IsolationConditionFormula(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction,
+                                                         bool invertCut, const std::string& isoDecSuffix) :
+        IsolationCondition(name, isoType, isoDecSuffix),
+        m_cutFunction (std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str())),
+        m_invertCut (invertCut)
+    {
     }
-    IsolationConditionFormula::IsolationConditionFormula(std::string name, std::string isoType, const std::string& cutFunction,
-                                                         bool invertCut, std::string isoDecSuffix) :
-        IsolationCondition(name, isoType, isoDecSuffix) {
-        m_cutFunction = std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str());
-        m_invertCut = invertCut;
+    IsolationConditionFormula::IsolationConditionFormula(const std::string& name, const std::string& isoType, const std::string& cutFunction,
+                                                         bool invertCut, const std::string& isoDecSuffix) :
+        IsolationCondition(name, isoType, isoDecSuffix),
+        m_cutFunction (std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str())),
+        m_invertCut (invertCut)
+    {
     }
     bool IsolationConditionFormula::accept(const xAOD::IParticle& x) const {
         const float cutVal = m_cutFunction->Eval(x.pt());

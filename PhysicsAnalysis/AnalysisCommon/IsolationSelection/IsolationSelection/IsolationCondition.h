@@ -26,10 +26,10 @@ struct strObj {
 namespace CP {
     class IsolationCondition {
     public:
-        IsolationCondition(const std::string& name, xAOD::Iso::IsolationType isoType, std::string isoDecSuffix = "");
-        IsolationCondition(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoTypes, std::string isoDecSuffix = "");
-        IsolationCondition(const std::string& name, std::string& isoType, std::string isoDecSuffix = "");
-        IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes, std::string isoDecSuffix = "");
+        IsolationCondition(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& isoDecSuffix = "");
+        IsolationCondition(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoTypes, const std::string& isoDecSuffix = "");
+        IsolationCondition(const std::string& name, const std::string& isoType, const std::string& isoDecSuffix = "");
+        IsolationCondition(const std::string& name, const std::vector<std::string>& isoTypes, const std::string& isoDecSuffix = "");
 
         IsolationCondition(const IsolationCondition& rhs) = delete;
         IsolationCondition& operator=(const IsolationCondition& rhs) = delete;

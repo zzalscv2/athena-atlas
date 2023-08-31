@@ -56,17 +56,17 @@ namespace CP {
         
         virtual StatusCode setIParticleCutsFrom(xAOD::Type::ObjectType ObjType) override;
         
-        StatusCode addWP(std::string WP, xAOD::Type::ObjectType type);
+        StatusCode addWP(const std::string& WP, xAOD::Type::ObjectType type);
         StatusCode addWP(std::unique_ptr<IsolationWP> wp, xAOD::Type::ObjectType type);
-        StatusCode addMuonWP(std::string wpname);
-        StatusCode addPhotonWP(std::string wpname);
-        StatusCode addElectronWP(std::string wpname);
-        StatusCode addUserDefinedWP(std::string WPname, xAOD::Type::ObjectType ObjType,
+        StatusCode addMuonWP(const std::string& wpname);
+        StatusCode addPhotonWP(const std::string& wpname);
+        StatusCode addElectronWP(const std::string& wpname);
+        StatusCode addUserDefinedWP(const std::string& WPname, xAOD::Type::ObjectType ObjType,
                                     std::vector<std::pair<xAOD::Iso::IsolationType, std::string>>& cuts, std::string key = "",
                                     IsoWPType type = Efficiency);
-        StatusCode addCutToWP(IsolationWP* wp, std::string key, const xAOD::Iso::IsolationType t, const std::string expression,
+        StatusCode addCutToWP(IsolationWP* wp, const std::string& key_in, const xAOD::Iso::IsolationType t, const std::string& expression,
                               const xAOD::Iso::IsolationType isoCutRemap);
-        StatusCode addCutToWP(IsolationWP* wp, std::string key, const xAOD::Iso::IsolationType t, const std::string expression);
+        StatusCode addCutToWP(IsolationWP* wp, const std::string& key, const xAOD::Iso::IsolationType t, const std::string& expression);
 
       
     private:

@@ -13,10 +13,11 @@
 
 namespace CP {
     IsolationConditionCombined::IsolationConditionCombined(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoType,
-                                                           std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, std::string isoDecSuffix) :
-        IsolationCondition(name, isoType, isoDecSuffix) {
-        m_cutFunction = std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str());
-        m_isoFunction = std::move(isoFunction);
+                                                           std::unique_ptr<TF1> isoFunction, const std::string& cutFunction, const std::string& isoDecSuffix) :
+        IsolationCondition(name, isoType, isoDecSuffix),
+        m_cutFunction (std::make_unique<TF1>(cutFunction.c_str(), cutFunction.c_str())),
+        m_isoFunction (std::move(isoFunction))
+    {
     }
     bool IsolationConditionCombined::accept(const xAOD::IParticle& x) const {
         const float cutValue = m_cutFunction->Eval(x.pt());
