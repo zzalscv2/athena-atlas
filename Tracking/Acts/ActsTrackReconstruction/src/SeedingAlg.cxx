@@ -22,6 +22,8 @@
 
 #include "SiSPSeededTrackFinderData/ITkSiSpacePointForSeed.h"
 
+#include "TableUtils.h"
+
 namespace ActsTrk {
   SeedingAlg::SeedingAlg( const std::string &name,
 			  ISvcLocator *pSvcLocator )
@@ -53,7 +55,17 @@ namespace ActsTrk {
 
     return StatusCode::SUCCESS;
   }
-  
+
+  StatusCode SeedingAlg::finalize() {
+     ATH_MSG_INFO("Seed statistics" << std::endl << makeTable(m_stat,
+                                                              std::array<std::string, kNStat>{
+                                                                 "Spacepoints",
+                                                                 "Seeds",
+                                                                 "No track parameters"
+                                                                    }).columnWidth(10));
+    return StatusCode::SUCCESS;
+  }
+
   StatusCode SeedingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Executing " << name() <<" ... " );
 
@@ -126,8 +138,9 @@ namespace ActsTrk {
         selectedSpacePoints.push_back( sp );
       }
     }
-	
+
     ATH_MSG_DEBUG( "    \\__ Total input space points: " << selectedSpacePoints.size());
+    m_stat[kNSpacepoints] += selectedSpacePoints.size();
 
     SG::ReadCondHandle< InDetDD::SiDetectorElementCollection > detEleHandle( m_detEleCollKey, ctx );
     ATH_CHECK( detEleHandle.isValid() );
@@ -162,6 +175,7 @@ namespace ActsTrk {
 					 *seedPtrs.get() ) );
     time_seedCreation.stop();
     ATH_MSG_DEBUG("    \\__ Created " << seedPtrs->size() << " seeds");
+    m_stat[kNSeeds] += seedPtrs->size();
 
     // ================================================== //   
     // ================ PARAMS ESTIMATION =============== //  
@@ -195,6 +209,7 @@ namespace ActsTrk {
 	trackParams->push_back( toAdd );
       }
     }
+    m_stat[kNSeedsWithoutParam] += (seedPtrs->size() - trackParams->size() );
     time_parameterEstimation.stop();
 
     // ================================================== //   
