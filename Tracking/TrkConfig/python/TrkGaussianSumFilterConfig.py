@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def EMGSFExtrapolatorToolCfg(flags, **kwargs):
+def GSFExtrapolatorToolCfg(flags, **kwargs):
     '''dedicated Multi Component Extrapolator
     '''
 
@@ -39,28 +39,25 @@ def EMGSFExtrapolatorToolCfg(flags, **kwargs):
 # default for refits with electron hypothesis
 # for example see
 # https://cds.cern.ch/record/1449796/files/ATLAS-CONF-2012-047.pdf
-def EMGSFTrackFitterCfg(flags, name="EMGSFTrackFitter", **kwargs):
+def GaussianSumFitterCfg(flags, name="GaussianSumFitter", **kwargs):
     ''' GSF Track Fitter Config
     '''
-
     acc = ComponentAccumulator()
 
-    if "RefitOnMeasurementBase" not in kwargs:
-        kwargs["RefitOnMeasurementBase"] = True
+    kwargs.setdefault("RefitOnMeasurementBase", True)
 
     # Note that the ROT tool for calibration
     # has an effect if we fit on PrepRawData.
     # i.e not refitting Measurements
-    kwargs["ToolForROTCreation"] = None
-    if not kwargs["RefitOnMeasurementBase"]:
+    RefitPRD = not kwargs["RefitOnMeasurementBase"]
+    if RefitPRD and "ToolForROTCreation" not in kwargs:
         from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-
         kwargs["ToolForROTCreation"] = acc.popToolsAndMerge(
             InDetRotCreatorCfg(flags)
         )
 
     if "ToolForExtrapolation" not in kwargs:
-        gsfextrap = EMGSFExtrapolatorToolCfg(flags)
+        gsfextrap = GSFExtrapolatorToolCfg(flags)
         kwargs["ToolForExtrapolation"] = acc.popToolsAndMerge(gsfextrap)
 
     kwargs.setdefault("ReintegrateOutliers", True)
@@ -68,25 +65,6 @@ def EMGSFTrackFitterCfg(flags, name="EMGSFTrackFitter", **kwargs):
     acc.setPrivateTools(CompFactory.Trk.GaussianSumFitter(**kwargs))
 
     return acc
-
-
-def GaussianSumFitterCfg(flags, name="GaussianSumFitter", **kwargs):
-    acc = ComponentAccumulator()
-
-    if "ToolForROTCreation" not in kwargs:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorCfg
-        InDetRotCreator = acc.popToolsAndMerge(InDetRotCreatorCfg(flags))
-        kwargs.setdefault("ToolForROTCreation", InDetRotCreator)
-
-    kwargs.setdefault("RefitOnMeasurementBase", True)
-
-    GaussianSumFitter = acc.popToolsAndMerge(
-        EMGSFTrackFitterCfg(flags, name, **kwargs)
-    )
-
-    acc.setPrivateTools(GaussianSumFitter)
-    return acc
-
 
 def ITkGaussianSumFitterCfg(flags, name="ITkGaussianSumFitter", **kwargs):
     acc = ComponentAccumulator()
@@ -99,7 +77,7 @@ def ITkGaussianSumFitterCfg(flags, name="ITkGaussianSumFitter", **kwargs):
     kwargs.setdefault("RefitOnMeasurementBase", True)
 
     GaussianSumFitter = acc.popToolsAndMerge(
-        EMGSFTrackFitterCfg(flags, name=name, **kwargs)
+            GaussianSumFitterCfg(flags, name=name, **kwargs)
     )
 
     acc.setPrivateTools(GaussianSumFitter)
@@ -121,17 +99,17 @@ if __name__ == "__main__":
 
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("GSFTrackFitterConfigTest")
-    mlog.info("Configuring EMGSFExtrapolatorTool :")
+    mlog.info("Configuring GSFExtrapolatorTool :")
     printProperties(
         mlog,
-        cfg.popToolsAndMerge(EMGSFExtrapolatorToolCfg(flags)),
+        cfg.popToolsAndMerge(GSFExtrapolatorToolCfg(flags)),
         nestLevel=1,
         printDefaults=True,
     )
     mlog.info("Configuring EMGSFTrackFitter :")
     printProperties(
         mlog,
-        cfg.popToolsAndMerge(EMGSFTrackFitterCfg(flags)),
+        cfg.popToolsAndMerge(GaussianSumFitterCfg(flags)),
         nestLevel=1,
         printDefaults=True,
     )

@@ -175,8 +175,8 @@ private:
   ToolHandle<IRIO_OnTrackCreator> m_rioOnTrackCreator{
     this,
     "ToolForROTCreation",
-    "Trk::RioOnTrackCreator/RIO_OnTrackCreator",
-    ""
+    "",
+    "Tool for converting Raw Data to measurements if we do not fit measurements directly"
   };
 
   Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
