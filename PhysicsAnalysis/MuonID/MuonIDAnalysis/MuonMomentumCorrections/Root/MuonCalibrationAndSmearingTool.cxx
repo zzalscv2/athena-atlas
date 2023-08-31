@@ -1262,6 +1262,15 @@ namespace CP {
             }
         }
 
+        if (m_Trel >= MCAST::Release::Recs2020_03_03) {
+            muonInfo.sel_category = m_MuonSelectionTool->getResolutionCategory(mu);
+            ATH_MSG_VERBOSE("[Direct CB Smearing] Resolution Category: " << muonInfo.sel_category);
+            if (m_extra_decorations) {
+                mu.auxdata<int>("raw_MCaST_Category") = muonInfo.sel_category;
+                mu.auxdata<int>("MCaST_Category") = ConvertToMacroCategory(muonInfo.sel_category);
+            }
+        }
+
         bool isData = false;
         if (m_expertMode)
             isData = m_expertMode_isData;
@@ -1418,14 +1427,7 @@ namespace CP {
             ATH_MSG_VERBOSE("CB stat comb " << muonInfo.ptcb << " corrected pt " << res_cbPt * MeVtoGeV);
             mu.setP4(res_cbPt, muonInfo.eta, muonInfo.phi);
         }
-        if (m_Trel >= MCAST::Release::Recs2020_03_03) {
-            muonInfo.sel_category = m_MuonSelectionTool->getResolutionCategory(mu);
-            ATH_MSG_VERBOSE("[Direct CB Smearing] Resolution Category: " << muonInfo.sel_category);
-            if (m_extra_decorations) {
-                mu.auxdata<int>("raw_MCaST_Category") = muonInfo.sel_category;
-                mu.auxdata<int>("MCaST_Category") = ConvertToMacroCategory(muonInfo.sel_category);
-            }
-        }
+
         // Special case: if the proper flags are selected (m_extra_highpt_smearing or m_2stations_highpt_smearing)
         // an ad-hoc smearing of the combined momentum has to be applied
         bool extra_smearing =
