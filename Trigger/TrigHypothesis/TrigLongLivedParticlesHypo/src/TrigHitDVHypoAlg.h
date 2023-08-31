@@ -32,6 +32,33 @@
  * @author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
  **/
 
+struct HitDVSeed {
+  float eta;
+  float phi;
+  int16_t type;
+};
+
+struct HitDVTrk {
+  int      id;
+  float    pt;
+  float    eta;
+  float    phi;
+  int16_t  n_hits_inner;
+  int16_t  n_hits_pix;
+  int16_t  n_hits_sct;
+  float    a0beam;
+};
+
+struct HitDVSpacePoint {
+   float    eta;
+   float    r;
+   float    phi;
+   int16_t  layer;
+   bool     isPix;
+   bool     isSct;
+   int16_t  usedTrkId;
+};
+
 class TrigHitDVHypoAlg : public ::HypoBase
 {
 public:
@@ -73,11 +100,11 @@ private:
    //
    float      deltaR2(float, float, float, float) const;
    int        getSPLayer(int, float) const;
-   StatusCode findSPSeeds(const EventContext&, const xAOD::TrigCompositeContainer*, std::vector<float>&, std::vector<float>&) const;
+   StatusCode findSPSeeds(const EventContext&, const std::vector<HitDVSpacePoint>&, std::vector<float>&, std::vector<float>&) const;
    StatusCode findJetSeeds(const xAOD::JetContainer*, const float, const float, std::vector<float>&, std::vector<float>&, std::vector<float>&) const;
-   StatusCode selectSeedsNearby(const xAOD::TrigCompositeContainer* hitDVSeedsContainer,
+   StatusCode selectSeedsNearby(const std::vector<HitDVSeed>& hitDVSeedsContainer,
 				std::vector<float>& jetSeeds_eta, std::vector<float>& jetSeeds_phi, std::vector<float>& jetSeeds_pt) const;
-   StatusCode calculateBDT(const EventContext&, const xAOD::TrigCompositeContainer*, const xAOD::TrigCompositeContainer*,
+   StatusCode calculateBDT(const EventContext&, const std::vector<HitDVSpacePoint>&, const std::vector<HitDVTrk>&,
 			   const std::vector<float>&, const std::vector<float>&, const std::vector<float>&,
 			   const float&, const int, xAOD::TrigCompositeContainer*, int&) const;
 
@@ -116,9 +143,9 @@ private:
 					     const std::vector<int>& v_sp_layer, const std::vector<int>& v_sp_usedTrkId,
 					     std::vector<float>& seeds_eta, std::vector<float>& seeds_phi ) const;
    StatusCode findHitDV(const EventContext& ctx, const std::vector<TrigSiSpacePointBase>& convertedSpacePoints,
-					  const DataVector<Trk::Track> tracks, DataVector<xAOD::TrigComposite_v1>& hitDVSeedContainer, 
-                 DataVector<xAOD::TrigComposite_v1>& hitDVTrkContainer, 
-                 DataVector<xAOD::TrigComposite_v1>& hitDVSPContainer) const;
+					  const DataVector<Trk::Track>& tracks, std::vector<HitDVSeed>& hitDVSeedsContainer, 
+                 std::vector<HitDVTrk>& hitDVTrksContainer,
+                 std::vector<HitDVSpacePoint>& hitDVSPContainer) const;
 };
 
 #endif //> !TRIGLONGLIVEDPARTICLESHYPO_TRIGHITDVHYPOALG_H
