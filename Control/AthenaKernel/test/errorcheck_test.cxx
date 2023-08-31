@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -253,20 +253,12 @@ StatusCode test1()
 }
 
 
-namespace errorcheck {
-std::string clean_allocator (std::string f);
-}
-
-
 void test2 (std::vector<int> = std::vector<int>(),
             const int* = 0,
             int (*)() = 0,
             int [] = 0)
 {
   REPORT_MESSAGE_WITH_CONTEXT (MSG::INFO, "test2") << "test2" << endmsg;
-
-  assert (errorcheck::clean_allocator ("void test2(std::vector<int, std::allocator<int> >, const int*, int (*)(), int*)") ==
-          "void test2(std::vector<int>, const int*, int (*)(), int*)");
 }
 
 

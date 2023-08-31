@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,6 +11,7 @@
 
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "CxxUtils/normalizeFunctionName.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/INamedInterface.h"
 #include <ctype.h>
@@ -26,107 +27,6 @@ std::atomic<bool> ReportMessage::s_hide_error_locus;
 /// If true, hide the function names in output messages.
 std::atomic<bool> ReportMessage::s_hide_function_names;
 
-
-/**
- * @brief Clean `allocator' template arguments from the function f.
- * @param f Name of the function to clean.
- */
-std::string clean_allocator (std::string f)
-{
-  std::string::size_type ipos = 0;
-  while ((ipos = f.find (", std::allocator", ipos)) != std::string::npos) {
-    const char* p = f.c_str() + ipos + 16;
-    while (isspace (*p)) ++p;
-    if (*p == '<') {
-      ++p;
-      int nest = 1;
-      while (nest > 0 && *p) {
-        if (*p == '<')
-          ++nest;
-        else if (*p == '>')
-          --nest;
-        ++p;
-      }
-      if (nest == 0) {
-        if (ipos > 0 && f[ipos-1] != '>') {
-          while (isspace (*p)) ++p;
-        }
-        f.erase (ipos, p-f.c_str()-ipos);
-        p = f.c_str() + ipos;
-      }
-    }
-    ipos = p - f.c_str();
-  }
-  return f;
-}
-
-
-std::string munge_string_name (const std::string& str_in)
-{
-  std::string s = str_in;
-
-  std::string::size_type ipos = 0;
-  while ((ipos = s.find ("std::basic_string<", ipos)) != std::string::npos) {
-    std::string::size_type beg = ipos;
-    ipos += 18;
-    int inest = 1;
-    while (inest > 0 && ipos < s.size()) {
-      if (s[ipos] == '<') ++inest;
-      else if (s[ipos] == '>') --inest;
-      ++ipos;
-    }
-    s.replace (beg, ipos-beg, "std::string");
-    ipos = beg+11;
-  }
-  
-  for (size_t i = 0; i < s.size(); i++) {
-    if ((i == 0 || (s[i-1] != ':' && !isalnum(s[i-1]))) &&
-        strncmp (s.c_str()+i, "string", 6) == 0 &&
-        !isalnum(s[i+6]))
-    {
-      s.replace (i, 6, "std::string");
-    }
-  }
-  return s;
-}
-
-
-std::string munge_punct (const std::string& str_in)
-{
-  std::string s = str_in;
-  for (size_t i = 0; i < s.size()-1; i++) {
-    if (s[i] == ' ' && (s[i+1] == '*' || s[i+1] == '&'))
-      s.erase (i, 1);
-  }
-  return s;
-}
-
-
-std::string do_replace (std::string s,
-                        const std::string& pat,
-                        const std::string& rep)
-{
-  std::string::size_type ipos = 0;
-  while ((ipos = s.find (pat, ipos)) != std::string::npos)
-    s.replace (ipos, pat.size(), rep);
-  return s;
-}
-
-
-std::string munge_names (const std::string& str_in)
-{
-  std::string s =
-    do_replace (str_in, "SG::DataProxyStorageData::pointer", "void*");
-  s = do_replace (s, "DPSD::pointer", "void*");
-  s = do_replace (s, "SG::auxid_t", "unsigned long");
-  s = do_replace (s, "auxid_t", "unsigned long");
-  s = do_replace (s, "void* ", "void*");
-  s = do_replace (s, "CLID", "unsigned int");
-
-  if (s.compare (0, 8, "virtual ") == 0)
-    s.erase (0, 8);
-  return s;
-}
 
 /**
  * @brief Shorten filename
@@ -239,8 +139,7 @@ void ReportMessage::format_common (MSG::Level level,
     *this << " (FUNC)";
   else {
     if (func && func[0] != '\0') {
-      std::string cfunc = munge_names (munge_punct (munge_string_name (clean_allocator (func))));
-      *this << " (" << cfunc << ")";
+      *this << " (" << CxxUtils::normalizeFunctionName(func) << ")";
     }
   }
 }
