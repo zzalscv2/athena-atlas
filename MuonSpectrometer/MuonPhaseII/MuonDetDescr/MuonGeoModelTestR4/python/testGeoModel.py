@@ -57,6 +57,13 @@ def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
+def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
+    result = ComponentAccumulator()
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
+    the_alg = CompFactory.MuonGMR4.GeoModelsTgcTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
 
 def setupGeoR4TestCfg(args):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -94,7 +101,7 @@ def setupGeoR4TestCfg(args):
     flags.Detector.GeometryCalo = False
     ### Muon spectrometer
     flags.Detector.GeometryCSC = False
-    flags.Detector.GeometrysTGC = False
+    flags.Detector.GeometrysTGC = True
     flags.Detector.GeometryMM = False
     flags.Detector.GeometryTGC = False
     flags.Detector.GeometryRPC = True
@@ -108,6 +115,8 @@ def setupGeoR4TestCfg(args):
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
+    flags.Detector.GeometryRPC = False
+   
 
     flags.lock()
     flags.dump()
@@ -126,6 +135,7 @@ def executeTest(cfg, num_events = 1):
     DetDescCnvSvc.IdDictFromRDB = False
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.10.00.xml"
     DetDescCnvSvc.MuonIDFileName="IdDictParser/IdDictMuonSpectrometer_R.09.03.xml"
+    cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     if not cfg.run(num_events).isSuccess():
@@ -148,7 +158,6 @@ if __name__=="__main__":
 
     if flags.Detector.GeometryRPC: 
         cfg.merge(GeoModelRpcTestCfg(flags, TestStations = ["BML1A3"]))
-
 
     executeTest(cfg, num_events = args.nEvents)
     
