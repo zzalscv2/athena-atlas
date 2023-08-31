@@ -15,6 +15,7 @@ StatusCode MM_DigitToRDO::initialize() {
     ATH_CHECK(m_rdoContainer.initialize());
     ATH_CHECK(m_digitContainer.initialize());
     ATH_CHECK(m_calibTool.retrieve());
+    ATH_CHECK(m_cablingKey.initialize(!m_cablingKey.empty()));
     return StatusCode::SUCCESS;
 }
 
@@ -23,6 +24,16 @@ StatusCode MM_DigitToRDO::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
     SG::ReadHandle<MmDigitContainer> digits(m_digitContainer, ctx);
     std::unique_ptr<MM_RawDataContainer> rdos = std::make_unique<MM_RawDataContainer>(m_idHelperSvc->mmIdHelper().module_hash_max());
+
+    const MicroMega_CablingMap* mmCablingMap{nullptr};
+    if (!m_cablingKey.empty()) {
+        SG::ReadCondHandle<MicroMega_CablingMap>  readCondHandle{m_cablingKey, ctx};
+        if(!readCondHandle.isValid()){
+          ATH_MSG_ERROR("Cannot find Micromegas cabling map!");
+          return StatusCode::FAILURE;
+        }
+        mmCablingMap = readCondHandle.cptr();
+    }
 
     if (digits.isValid()) {
         for (const MmDigitCollection* digitColl : *digits) {
@@ -85,8 +96,19 @@ StatusCode MM_DigitToRDO::execute(const EventContext& ctx) const {
                     m_calibTool->timeToTdo(ctx, digit->stripResponseTime().at(i), newId, tdo, relBcid);
                     m_calibTool->chargeToPdo(ctx, digit->stripResponseCharge().at(i), newId, pdo);
 
+                    // the cabling map is introduced here for studies of the MM strip misalignment. It does not run in standart jobs (read key is empty) 
+                    if (mmCablingMap) {
+                       std::optional<Identifier> correctedChannelId = mmCablingMap->correctChannel(newId, msgStream());
+                       if (!correctedChannelId) {
+                           ATH_MSG_DEBUG("Channel was shifted outside its connector and is therefore not decoded into and RDO");
+                           continue;
+                       }
+                       newId = (*correctedChannelId);
+                       channel = m_idHelperSvc->mmIdHelper().channel(newId);
+                    }
+
                     // Fill object
-                    MM_RawData* rdo = new MM_RawData(newId, digit->stripResponsePosition().at(i), tdo, pdo, relBcid, true);
+                    MM_RawData* rdo = new MM_RawData(newId, channel, tdo, pdo, relBcid, true);
                     coll->push_back(rdo);
                 }
             }
