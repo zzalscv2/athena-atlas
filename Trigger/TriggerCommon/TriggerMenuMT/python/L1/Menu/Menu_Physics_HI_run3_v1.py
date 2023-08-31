@@ -33,7 +33,7 @@ def defineMenu():
         # MU
         ##
         'L1_MU3V', 'L1_MU5VF', 'L1_MU8F', 'L1_MU8VF', 'L1_MU14FCH',
-        'L1_2MU3V', 'L1_2MU5VF',
+        'L1_2MU3V', 'L1_2MU5VF', 'L1_2MU8F',
         'L1_3MU3V',
 
         'L1_2MU14FCH_OVERLAY',
@@ -200,6 +200,7 @@ def defineMenu():
         'L1_TAU1_VZDC_A_VZDC_C_VTE100', 'L1_TAU1_ZDC_XOR4_VTE100',
         'L1_TAU2_VZDC_A_VZDC_C_VTE100', 'L1_TAU2_ZDC_XOR4_VTE100',
         'L1_TRT_VZDC_A_VZDC_C_VTE50', 'L1_TRT_VZDC_A_VZDC_C_VTE20',
+        'L1_TRT_VZDC_A_VZDC_C_VTE200',
 
         'L1_ZDC_A_C_VTE50',
         'L1_ZDC_XOR4_VTE200', 'L1_VZDC_A_VZDC_C_VTE50',

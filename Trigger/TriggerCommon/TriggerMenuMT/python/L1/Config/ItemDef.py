@@ -1396,6 +1396,7 @@ class ItemDef:
         MenuItem('L1_eEM2_ZDC_XOR4_VjTE100_GAP_AANDC' ).setLogic( d.eEM2 & PHYS_ZDC_XOR4 & Not(d.jTE100) & GAPAC  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VTE50' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.TE50)   & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VTE20' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.TE20)   & physcond)
+        MenuItem('L1_TRT_VZDC_A_VZDC_C_VTE200' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.TE200)   & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE50' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE20' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE20)  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE50_GAP_AANDC' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & GAPAC  & physcond)
