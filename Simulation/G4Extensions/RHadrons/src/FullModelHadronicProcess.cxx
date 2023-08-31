@@ -15,7 +15,6 @@
 #include "G4HadronicException.hh"
 #endif
 
-#include "CustomPDGParser.h"
 #include "CustomParticle.h"
 
 
