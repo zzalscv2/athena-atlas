@@ -1,11 +1,12 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TRIGL0GEPPERF_CUSTOMCALOCELL_H
 #define TRIGL0GEPPERF_CUSTOMCALOCELL_H
 
 #include <vector>
+#include <string>
 
 namespace Gep{
   struct CustomCaloCell
@@ -56,7 +57,7 @@ namespace Gep{
 
     // Index position of this cell in the CaloCellsContainer which
     // is needed to write the CaloCellLinks out
-    int index;
+    int index{};
   };
 }
 
