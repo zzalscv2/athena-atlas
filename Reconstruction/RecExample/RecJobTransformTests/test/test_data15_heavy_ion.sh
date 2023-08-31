@@ -6,7 +6,18 @@
 # art-include: main/Athena
 # art-include: 23.0/Athena
 
-Reco_tf.py  --athenaopts="--threads=8"  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data15_hi.00286711.physics_MinBiasOverlay.daq.RAW._lb0217._SFO-2._0001.data --outputESDFile=ESD.root --outputAODFile=AOD.root --maxEvents=25 --conditionsTag 'default:CONDBR2-BLKPA-RUN2-11' --geometryVersion 'default:ATLAS-R2-2015-03-01-00' --autoConfiguration 'everything' --preExec 'all:rec.doHeavyIon.set_Value_and_Lock(True);rec.doZdc.set_Value_and_Lock(False);rec.doTrigger.set_Value_and_Lock(False);'
+export ATHENA_CORE_NUMBER=8
+Reco_tf.py \
+--CA \
+--multithreaded \
+--inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data15_hi.00286711.physics_MinBiasOverlay.daq.RAW._lb0217._SFO-2._0001.data \
+--geometryVersion="ATLAS-R2-2015-03-01-00" \
+--conditionsTag="CONDBR2-BLKPA-RUN2-11" \
+--autoConfiguration 'everything' \
+--preInclude="all:HIRecConfig.HIModeFlags.HImode" \
+--preExec="flags.Egamma.doForward=False;flags.Reco.EnableZDC=False;flags.Reco.EnableTrigger=False" \
+--outputAODFile=myAOD.pool.root \
+--maxEvents=25
 
 RES=$?
 echo "art-result: $RES Reco"
