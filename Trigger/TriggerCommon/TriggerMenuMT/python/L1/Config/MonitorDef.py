@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 The CTP monitors three different types of signals. In the XML file
@@ -323,13 +323,21 @@ class MonitorDef:
                 "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
                 "L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
                 "L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
+                "L1_VZDC_A_VZDC_C", "L1_1ZDC_A_VZDC_C", "L1_VZDC_A_1ZDC_C",
+                "L1_1ZDC_A_1ZDC_C", "L1_5ZDC_A_VZDC_C", "L1_VZDC_A_5ZDC_C",
+                "L1_ZDC_1XOR5", "L1_5ZDC_A_5ZDC_C",
                 #
                 "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
-                #"L1_ZDC_AND", "L1_ZDC_A_AND_C",
-                #"L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
-                #"L1_ZDC_E1_AND_E2ORE3", 
-                #"L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_ISO",
-                #"L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
+                "L1_ZDC_A_EMPTY", "L1_ZDC_A_UNPAIRED_NONISO",
+                "L1_ZDC_C_EMPTY", "L1_ZDC_C_UNPAIRED_NONISO",
+                "L1_ZDC_A_C_EMPTY", "L1_ZDC_A_C_UNPAIRED_NONISO",
+                # ZDC items in pp
+                "L1_ZDC_A_AND_C",
+                "L1_ZDC_A_AND_C_EMPTY", "L1_ZDC_A_AND_C_UNPAIRED_NONISO",
+                "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
+                "L1_ZDC_E1_AND_E2ORE3",
+                "L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_NONISO",
+                "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
                 # Vetos
                 "L1_ZDC_A_VZDC_C_VTE200",
                 "L1_VZDC_A_ZDC_C_VTE200",

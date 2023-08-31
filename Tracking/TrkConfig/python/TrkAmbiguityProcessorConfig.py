@@ -83,7 +83,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
                       flags.Tracking.doBremRecovery and
-                      flags.Tracking.ActiveConfig.extension in ["", "BLS"])
+                      flags.Tracking.ActiveConfig.extension in ["","UPC","BLS"])
     kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
@@ -444,7 +444,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
                       flags.Tracking.doBremRecovery and
-                      flags.Tracking.ActiveConfig.extension in ["", "BLS"])
+                      flags.Tracking.ActiveConfig.extension in ["","UPC","BLS"])
     kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)

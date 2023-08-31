@@ -482,6 +482,9 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom", # offline default is "Nonprompt_All_MaxWeight"
                   help='working point for the TVA algorithm')
 
+    flags.addFlag("Trigger.Jet.LowPtFilter", False,
+                  help='apply low pT filter on antiKt4 jets (used for HI UPC jet reco)')
+
     return flags
 
 

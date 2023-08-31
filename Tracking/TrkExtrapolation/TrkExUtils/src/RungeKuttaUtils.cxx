@@ -360,18 +360,28 @@ transformGlobalToLine(const Amg::Transform3D& T,
                       double* ATH_RESTRICT Jac)
 {
   const double* Az = T.matrix().col(2).data(); // 2nd column
-
   double Bx = Az[1] * P[5] - Az[2] * P[4];
   double By = Az[2] * P[3] - Az[0] * P[5];
   double Bz = Az[0] * P[4] - Az[1] * P[3];
-  const double Bn = 1. / std::sqrt(Bx * Bx + By * By + Bz * Bz);
-  Bx *= Bn;
-  By *= Bn;
-  Bz *= Bn;
+  const double B2 = Bx * Bx + By * By + Bz * Bz;
   const double x = P[0] - T(0, 3);
   const double y = P[1] - T(1, 3);
   const double z = P[2] - T(2, 3);
-  par[0] = x * Bx + y * By + z * Bz;
+  if (B2 > 1e-14) {
+    const double Bn = 1. / std::sqrt(B2);
+    Bx *= Bn;
+    By *= Bn;
+    Bz *= Bn;
+    par[0] = x * Bx + y * By + z * Bz;
+  } else {
+    // surface and trajectory are parallel, calculate the distance
+    // of closest approach differently.
+    par[0] = std::sqrt(
+        ( std::pow(Az[1] * z - Az[2] * y, 2.)
+        + std::pow(Az[2] * x - Az[0] * z, 2.)
+        + std::pow(Az[0] * y - Az[1] * x, 2.))
+        / (Az[0] * Az[0] + Az[1] * Az[1] + Az[2] * Az[2]));
+  }
   par[1] = x * Az[0] + y * Az[1] + z * Az[2];
 
   if (!useJac) {

@@ -571,6 +571,14 @@ def createMinBiasTrackingPassFlags():
 
     return icf
 
+## UPC  mode ########################
+def createUPCTrackingPassFlags():
+    icf = createMinBiasTrackingPassFlags()
+    icf.extension                 = "UPC"
+    # --- min pt cut for brem (same as p-p default for now)
+    icf.minPTBrem                 = 1. * Units.GeV
+
+    return icf
 
 ## LowPtRoI mode ########################
 def createLowPtRoITrackingPassFlags():

@@ -226,7 +226,8 @@ JetCollections['pp'] = {
 }
 
 JetCollections['HI'] = {
-  'HLT_AntiKt4HIJets'  : {'MatchTo': 'AntiKt4HIJets'}
+  'HLT_AntiKt4HIJets'  : {'MatchTo': 'AntiKt4HIJets'},
+  'HLT_AntiKt4EMTopoJets_subjesIS' : {'MatchTo': 'AntiKt4HIJets'},
 }
 
 # set HLT jet collection, reference chain and offline jet collection
@@ -235,9 +236,60 @@ JetCollections['HI'] = {
 Chains2Monitor  = dict()
 
 Chains2Monitor['HI'] = {  # TODO: do it properly with monGroups
+
+  'HLT_j60_ion_L1J15': {'HLTColl': 'HLT_AntiKt4HIJets',
+                        'RefChain': 'NONE',
+                        'OfflineColl': 'AntiKt4HIJets'},
+
   'HLT_j75_ion_L1J30': {'HLTColl': 'HLT_AntiKt4HIJets',
                         'RefChain': 'NONE',
                         'OfflineColl': 'AntiKt4HIJets'},
+
+  'HLT_j60_ion_L1jJ40': {'HLTColl': 'HLT_AntiKt4HIJets',
+                         'RefChain': 'NONE',
+                         'OfflineColl': 'AntiKt4HIJets'},
+                        
+  'HLT_j75_ion_L1jJ60': {'HLTColl': 'HLT_AntiKt4HIJets',
+                         'RefChain': 'NONE',
+                         'OfflineColl': 'AntiKt4HIJets'},
+
+  'HLT_j85_ion_L1J30': {'HLTColl': 'HLT_AntiKt4HIJets',
+                        'RefChain': 'NONE',
+                        'OfflineColl': 'AntiKt4HIJets'},
+
+  'HLT_j150_ion_L1J50': {'HLTColl': 'HLT_AntiKt4HIJets',
+                         'RefChain': 'NONE',
+                         'OfflineColl': 'AntiKt4HIJets'},
+                        
+  'HLT_j50f_ion_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
+                                 'RefChain': 'NONE', 
+                                 'OfflineColl': 'AntiKt4HIJets'},
+
+  'HLT_j60f_ion_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
+                                 'RefChain': 'NONE', 
+                                 'OfflineColl': 'AntiKt4HIJets'},
+                        
+  'HLT_j50f_ion_L1jJ40p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
+                                  'RefChain': 'NONE',
+                                  'OfflineColl': 'AntiKt4HIJets'},
+                        
+  'HLT_j60f_ion_L1jJ40p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
+                                  'RefChain': 'NONE',
+                                  'OfflineColl': 'AntiKt4HIJets'},
+                        
+  'HLT_j20a_L1VZDC_A_VZDC_C_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
+                                          'RefChain': 'NONE',
+                                          'OfflineColl': 'AntiKt4EMPFlowJets'},
+
+  'HLT_j20a_L1ZDC_XOR_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
+                                    'RefChain': 'NONE',
+                                    'OfflineColl': 'AntiKt4EMPFlowJets'},
+                        
+                        
+  'HLT_j20a_L11ZDC_NZDC_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
+                                      'RefChain': 'NONE',
+                                      'OfflineColl': 'AntiKt4EMPFlowJets'},
+
 }
 
 Chains2Monitor['pp'] = {

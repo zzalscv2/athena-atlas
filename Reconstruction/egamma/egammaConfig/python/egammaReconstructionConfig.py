@@ -14,11 +14,11 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
     mlog.info('Starting EGamma reconstruction configuration')
 
     acc = ComponentAccumulator()
-
-    if flags.HeavyIon.Egamma.doSubtractedClusters:
-        from HIJetRec.HIEgammaRecConfigCA import (
-            HIEgammaRecCfg)
-        acc.merge(HIEgammaRecCfg(flags))
+   
+    # In case it has not be added upstream already
+    from egammaAlgs.egammaTopoClusterCopierConfig import (
+        egammaTopoClusterCopierCfg)
+    acc.merge(egammaTopoClusterCopierCfg(flags))
 
     # Add e/gamma tracking algorithms.
     if flags.Egamma.doTracking:
@@ -36,11 +36,8 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             EMVertexBuilderCfg)
         acc.merge(EMVertexBuilderCfg(flags))
 
-    from egammaAlgs.egammaTopoClusterCopierConfig import (
-        egammaTopoClusterCopierCfg)
-    acc.merge(egammaTopoClusterCopierCfg(flags))
-
-    # Add algorithms to produce xAOD Electrons and Photons.
+    # Add algorithms to produce
+    # xAOD Electrons and Photons
     if flags.Egamma.doCentral:
         from egammaAlgs.egammaRecBuilderConfig import (
             egammaRecBuilderCfg)
