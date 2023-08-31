@@ -33,7 +33,7 @@ def defineMenu():
         # MU
         ##
         'L1_MU3V', 'L1_MU5VF', 'L1_MU8F', 'L1_MU8VF', 'L1_MU14FCH',
-        'L1_2MU3V', 'L1_2MU5VF',
+        'L1_2MU3V', 'L1_2MU5VF', 'L1_2MU8F',
         'L1_3MU3V',
 
         'L1_2MU14FCH_OVERLAY',
@@ -53,6 +53,8 @@ def defineMenu():
         
         # combined mu - jet
         'L1_MU3V_J12',
+        'L1_MU3V_J20',
+        'L1_MU3V_J30',
         'L1_MU3V_jJ40',
 
         'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
