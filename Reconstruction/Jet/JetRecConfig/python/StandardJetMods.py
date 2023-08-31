@@ -125,8 +125,9 @@ try:
                                       JetContainer = _jetname),
 
         JVF =             JetModifier("JetVertexFractionTool", "jvf",
-                                       createfn=JetMomentToolsConfig.getJVFTool,
-                                       prereqs = ["mod:TrackMoments", "input:PrimaryVertices"] ,JetContainer = _jetname),
+                                      createfn=JetMomentToolsConfig.getJVFTool,
+                                      prereqs = ["input:JetTrackVtxAssoc", "mod:TrackMoments", "input:PrimaryVertices"],
+                                      JetContainer = _jetname),
         JVT =             JetModifier("JetVertexTaggerTool", "jvt",
                                        createfn=JetMomentToolsConfig.getJVTTool,
                                        prereqs = [ "mod:JVF" ],JetContainer = _jetname),
@@ -149,12 +150,14 @@ try:
 
         QGTagging =       JetModifier("JetQGTaggerVariableTool", "qgtagging",
                                       createfn=JetMomentToolsConfig.getQGTaggingTool,
-                                      prereqs = lambda _,jetdef : ["mod:JetPtAssociation", "mod:TrackMoments"] if not isMC(jetdef._cflags) else ["mod:TrackMoments"],
+                                      prereqs = lambda _,jetdef :
+                                      ["input:JetTrackVtxAssoc","mod:TrackMoments"] +
+                                      (["mod:JetPtAssociation"] if not isMC(jetdef._cflags) else []),
                                       JetContainer = _jetname),
 
         fJVT =           JetModifier("JetForwardPFlowJvtTool", "fJVT",
                                      createfn=JetMomentToolsConfig.getPFlowfJVTTool,
-                                     prereqs = ["input:EventDensity","input:PrimaryVertices","mod:NNJVT"],
+                                     prereqs = ["input:JetTrackVtxAssoc","input:EventDensity","input:PrimaryVertices","mod:NNJVT"],
                                      JetContainer = _jetname),
 
         bJVT =           JetModifier("JetBalancePFlowJvtTool", "bJVT",

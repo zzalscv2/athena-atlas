@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Contains the configuration for customs jet reconstruction + decorations
@@ -168,7 +168,8 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
       JVFCustomVtx =             JetModifier("JetVertexFractionTool", "jvfCustomVtx",
                                         createfn= lambda jdef,_ : JetMomentToolsConfig.getJVFTool(jdef.context,"CustomVtx"),
                                         modspec = "CustomVtx",
-                                        prereqs = ["mod:TrackMomentsCustomVtx", f"input:{context['Vertices']}"] ,JetContainer = CustomPFJetContainerName),
+                                        prereqs = ["input:JetTrackVtxAssocCustomVtx", "mod:TrackMomentsCustomVtx", f"input:{context['Vertices']}"] ,
+                                             JetContainer = CustomPFJetContainerName),
 
       JVTCustomVtx =             JetModifier("JetVertexTaggerTool", "jvtCustomVtx",
                                         createfn= lambda jdef,_ : JetMomentToolsConfig.getJVTTool(jdef.context,"CustomVtx"),
@@ -200,13 +201,15 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
       QGTaggingCustomVtx =       JetModifier("JetQGTaggerVariableTool", "qgtaggingCustomVtx",
                                         createfn=lambda jdef,_ :JetMomentToolsConfig.getQGTaggingTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
-                                        prereqs = lambda _,jdef : ["mod:JetPtAssociation", "mod:TrackMomentsCustomVtx"] if not ConfigFlags.Input.isMC else ["mod:TrackMomentsCustomVtx"],
+                                        prereqs = lambda _,jdef :
+                                             ["input:JetTrackVtxAssocCustomVtx","mod:TrackMomentsCustomVtx"] +
+                                             (["mod:JetPtAssociation"] if not jdef._cflags.Input.isMC else []),
                                         JetContainer = CustomPFJetContainerName),
 
       fJVTCustomVtx =            JetModifier("JetForwardPFlowJvtTool", "fJVTCustomVtx",
                                         createfn=lambda jdef,_ :JetMomentToolsConfig.getPFlowfJVTTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
-                                        prereqs = ["input:EventDensityCustomVtx",f"input:{context['Vertices']}"],
+                                        prereqs = ["input:JetTrackVtxAssocCustomVtx","input:EventDensityCustomVtx",f"input:{context['Vertices']}","mod:NNJVTCustomVtx"],
                                         JetContainer = CustomPFJetContainerName),
     )
 
