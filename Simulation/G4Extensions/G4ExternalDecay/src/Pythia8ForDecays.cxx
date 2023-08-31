@@ -240,7 +240,7 @@ void Pythia8ForDecays::Py1ent(const G4Track& aTrack, std::vector<G4DynamicPartic
 
   // Squark case
   if(isTriplet){
-    int col    = (event[idRBef].col() != 0) ? event.nextColTag() : 0;
+    const int col = (pdt.colType(idRBef) != 0) ? event.nextColTag() : 0; // NB There should be no way that this can be zero (see discussion on ATLASSIM-6687), but leaving check in there just in case something changes in the future.
     int tmpSparticleColor = id1>0 ? col : 0;
     int tmpSparticleAnticolor = id1>0 ? 0 : col;
 
