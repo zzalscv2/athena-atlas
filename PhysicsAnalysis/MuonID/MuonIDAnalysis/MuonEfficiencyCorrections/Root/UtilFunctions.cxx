@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TH1.h"
@@ -30,7 +30,7 @@ namespace CP{
     }
    std::string EraseWhiteSpaces(std::string str) {
         str.erase(std::remove(str.begin(), str.end(), '\t'), str.end());
-        if (str.find(" ") == 0) return EraseWhiteSpaces(str.substr(1, str.size()));
+        if (str.size() > 0 && str[0] == ' ') return EraseWhiteSpaces(str.substr(1, str.size()));
         if (str.size() > 0 && str.find(" ") == str.size() - 1) return EraseWhiteSpaces(str.substr(0, str.size() - 1));
         return str;
     }
