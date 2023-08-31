@@ -15,6 +15,7 @@
 """
 
 from collections import defaultdict
+from datetime import datetime
 import subprocess
 import re
 import os
@@ -108,6 +109,36 @@ def main():
             gl_project.tags.create({'tag_name':target_release, 'ref':nightly_tag, 'message':message+''})
             release = gl_project.releases.create({'name':target_release, 'tag_name':target_release, 'description':release_notes})
             print('Just created the following release:', release)
+
+    # Create a Draft sweep MR in GitLab
+    if args.sweep and args.token and gitlab_available:
+        current_branch = subprocess.check_output("git rev-parse --abbrev-ref HEAD",
+                                                 shell=True).decode('ascii').strip()
+        msg = f'Would you like me to create the sweep MR in gitlab from "{current_branch}"?'
+        if input("%s (y/N) " % msg).lower() == 'y':
+            # Get user fork (e.g. https://:@gitlab.cern.ch:8443/fwinkl/athena.git
+            userid = subprocess.check_output("git remote get-url origin",
+                                             shell=True).decode('ascii').split('/')[-2]
+            gl_fork = gl.projects.get(f"{userid}/athena")  # user fork
+            # Find the last merge commit, e.g. "Merge remote-tracking branch 'upstream/23.0' into ..."
+            last_merge = subprocess.check_output("git log --merges -n1 --pretty='format:%B'",
+                                                 shell=True).decode('ascii')
+            try:
+                source_branch = last_merge.split("'")[1].split('/')[1]
+            except IndexError:
+                source_branch = 'UNKNOWN'
+
+            title = datetime.now().strftime("%Y-%m-%d") + f": merge of {source_branch} into main"
+            mr = gl_fork.mergerequests.create({'source_branch' : current_branch,
+                                               'target_branch' : 'main',
+                                               'target_project_id' : gl_project.id,
+                                               'title' : 'Draft: '+title,
+                                               'description' : release_notes,
+                                               'remove_source_branch' : True,
+                                               'squash' : False})
+            print()
+            print('Draft MR has been created:', mr.web_url)
+
 
 def sanitize_args(target_release, nightly_tag, keep_going=False):
     if not target_release.startswith('release/'):
@@ -239,8 +270,8 @@ def parse_mrs_from_log(output, pretty_format='%b', verbose=False, gl_project=Non
 
 
 def default_template():
-    return """
-# Release notes for {target_release:s}
+    return \
+"""# Release notes for {target_release:s}
 The release {target_release_link:s}
 was built from the tag {nightly_tag_link:s}
 
@@ -252,12 +283,11 @@ Link to the full diff between {target_release_link:s} and
 {previous_release_link:s}
 is available at
 https://gitlab.cern.ch/atlas/athena/compare/{previous_release:s}...{target_release:s}
-
 """
 
 def sweep_template():
-    return """
-This sweep contains the following MRs:
+    return \
+"""This sweep contains the following MRs:
 {formatted_list_of_merge_requests:s}
 """
 
