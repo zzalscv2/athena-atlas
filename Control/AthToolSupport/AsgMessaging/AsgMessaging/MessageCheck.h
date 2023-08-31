@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -82,6 +82,7 @@
 #include <AsgMessaging/StatusCode.h>
 
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/normalizeFunctionName.h"
 #include <atomic>
 
 /// \brief for standalone code this creates a new message category
@@ -242,7 +243,7 @@ namespace asg
 
 // This is a GCC extension for getting the name of the current function.
 #if defined( __GNUC__ )
-#   define MSGSTREAM_FNAME __PRETTY_FUNCTION__
+#   define MSGSTREAM_FNAME CxxUtils::normalizeFunctionName(__PRETTY_FUNCTION__)
 #else
 #   define MSGSTREAM_FNAME ""
 #endif
@@ -250,7 +251,7 @@ namespace asg
 
 // This is a GCC extension for getting the name of the current function.
 #if defined( __GNUC__ )
-#   define ASG_TOOLS_MSGSTREAM_FNAME __PRETTY_FUNCTION__
+#   define ASG_TOOLS_MSGSTREAM_FNAME CxxUtils::normalizeFunctionName(__PRETTY_FUNCTION__)
 #else
 #   define ASG_TOOLS_MSGSTREAM_FNAME ""
 #endif

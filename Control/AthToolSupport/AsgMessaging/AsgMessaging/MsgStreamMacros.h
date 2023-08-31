@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGMESSAGING_MSGSTREAMMACROS_H
@@ -13,12 +13,14 @@
 #   include "AthenaBaseComps/AthMsgStreamMacros.h"
 #else // not XAOD_STANDALONE
 
+#include "CxxUtils/normalizeFunctionName.h"
+
 // Not sure why this is needed...
 #undef ERROR
 
 // This is a GCC extension for getting the name of the current function.
 #if defined( __GNUC__ )
-#   define MSGSTREAM_FNAME __PRETTY_FUNCTION__
+#   define MSGSTREAM_FNAME CxxUtils::normalizeFunctionName(__PRETTY_FUNCTION__)
 #else
 #   define MSGSTREAM_FNAME ""
 #endif
