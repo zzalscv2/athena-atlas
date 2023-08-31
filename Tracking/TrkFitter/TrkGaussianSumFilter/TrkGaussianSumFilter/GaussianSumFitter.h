@@ -107,39 +107,33 @@ public:
     const RunOutlierRemoval /*Not used*/,
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
-private:
-  //Returned by the final smoother fit.
-  //This is what we need to pass when forming a Trk::Track
-  using GSFTrajectoryPtr = std::unique_ptr<DataVector<const Trk::MultiComponentStateOnSurface>>;
-  using GSFTrajectoryDV = DataVector<const Trk::MultiComponentStateOnSurface>;
   //Internally we can use a simple std::vector
-  using GSFTrajectoryVec = std::vector<Trk::MultiComponentStateOnSurface>;
+  using GSFTrajectory = std::vector<Trk::MultiComponentStateOnSurface>;
+
+private:
+  std::unique_ptr<MultiComponentStateOnSurfaceDV> convertTrajToTrack(
+      GSFTrajectory& trajectory) const;
 
   /** Produces a perigee from a smoothed trajectory */
-  std::unique_ptr<MultiComponentStateOnSurface> makePerigee(
+  MultiComponentStateOnSurface makePerigee(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectoryDV& smoothedTrajectory,
+    const GSFTrajectory& smoothedTrajectory,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Gsf smoothed trajectory. This method can handle additional info like
-   * calorimeter cluster constraints. It also produces what we actually store in Trk::Tracks.*/
-  GSFTrajectoryPtr smootherFit(
+  /** Progress one step along the fit */
+  bool stepForwardFit(
     const EventContext& ctx,
-    Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectoryVec& forwardTrajectory,
-    const ParticleHypothesis particleHypothesis = nonInteracting,
-    const CaloCluster_OnTrack* ccot = nullptr) const;
-
-  /** Methof to add the CaloCluster onto the track */
-  MultiComponentState addCCOT(
-    const EventContext& ctx,
-    const Trk::MultiComponentStateOnSurface* currentState,
-    const Trk::CaloCluster_OnTrack* ccot,
-    GSFTrajectoryDV& smoothedTrajectory) const;
+    IMultiStateExtrapolator::Cache&,
+    GSFTrajectory& forwardTrajectory,
+    const PrepRawData* originalPrepRawData,
+    const MeasurementBase* originalMeasurement,
+    const Surface& surface,
+    MultiComponentState& updatedState,
+    const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Forward GSF fit using PrepRawData */
-  GSFTrajectoryVec forwardPRDfit(
+  GSFTrajectory forwardPRDfit(
     const EventContext& ctx,
     IMultiStateExtrapolator::Cache& cache,
     const PrepRawDataSet& inputPrepRawDataSet,
@@ -147,25 +141,29 @@ private:
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Forward GSF fit using MeasurementSet */
-  GSFTrajectoryVec forwardMeasurementFit(
+  GSFTrajectory forwardMeasurementFit(
     const EventContext& ctx,
     IMultiStateExtrapolator::Cache& cache,
     const MeasurementSet& inputMeasurementSet,
     const TrackParameters& estimatedTrackParametersNearOrigin,
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Progress one step along the fit */
-  bool stepForwardFit(
+  /** Gsf smoothed trajectory. This method can handle additional info like
+   * calorimeter cluster constraints. It also produces what we actually store in Trk::Tracks.*/
+  GSFTrajectory smootherFit(
     const EventContext& ctx,
-    IMultiStateExtrapolator::Cache&,
-    GSFTrajectoryVec& forwardTrajectory,
-    const PrepRawData* originalPrepRawData,
-    const MeasurementBase* originalMeasurement,
-    const Surface& surface,
-    MultiComponentState& updatedState,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const;
+    Trk::IMultiStateExtrapolator::Cache&,
+    const GSFTrajectory& forwardTrajectory,
+    const ParticleHypothesis particleHypothesis = nonInteracting,
+    const CaloCluster_OnTrack* ccot = nullptr) const;
 
-private:
+  /** Methof to add the CaloCluster onto the track */
+  MultiComponentState addCCOT(
+    const EventContext& ctx,
+    const Trk::CaloCluster_OnTrack* ccot,
+    GSFTrajectory& smoothedTrajectory) const;
+
+ private:
   ToolHandle<IMultiStateExtrapolator> m_extrapolator{
     this,
     "ToolForExtrapolation",
@@ -209,6 +207,14 @@ private:
     true,
     "Combine/Collapse MultiComponent State Mode rather than mean"
   };
+
+  Gaudi::Property<bool> m_slimTransientMTSOS{
+    this,
+    "slimTransientMTSOS",
+    true,
+    "Slim the transient MTSOS . keeping just the combined state and not all components"
+  };
+
 
   Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{
     this,
