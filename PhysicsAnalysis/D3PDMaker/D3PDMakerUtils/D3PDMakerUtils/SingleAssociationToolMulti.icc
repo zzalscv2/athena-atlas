@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/SingleAssociationToolMulti.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -10,9 +8,6 @@
  * @brief A specialization of SingleAssociationTool that can accept one
  *        of several types.
  */
-
-
-#ifndef BOOST_PP_IS_ITERATING
 
 
 //**************************************************************************
@@ -82,7 +77,15 @@ template <class T0, class TO_T>
 const std::type_info&
 SingleAssociationTool<Types<T0>, TO_T>::typeinfo() const
 {
-  return multiTypeInfo ((TO_T*)0, m_which);
+  return doTypeinfo (0);
+}
+
+
+template <class T0, class TO_T>
+const std::type_info&
+SingleAssociationTool<Types<T0>, TO_T>::doTypeinfo (size_t /*count*/) const
+{
+  return typeid (typename SelectType<TO_T, 0>::type);
 }
 
 
@@ -118,6 +121,15 @@ inline
 void
 SingleAssociationTool<Types<T0>, TO_T>::releaseObjectUntyped (const void* p)
 {
+  this->doReleaseObjectUntyped (p, 0);
+}
+
+
+template <class T0, class TO_T>
+inline
+void
+SingleAssociationTool<Types<T0>, TO_T>::doReleaseObjectUntyped (const void* p, size_t /*count*/)
+{
   this->releaseObject (reinterpret_cast<const typename SelectType<TO_T, 0>::type*> (p));
 }
 
@@ -136,7 +148,7 @@ SingleAssociationTool<Types<T0>, TO_T>::getUntyped
 {
   p = this->doConversion (p);
   if (!p) return 0;
-  return doGetUntyped (p);
+  return doGetUntyped (p, 0);
 }
 
 
@@ -153,9 +165,9 @@ SingleAssociationTool<Types<T0>, TO_T>::getUntyped
 template <class T0, class TO_T>
 inline
 const void*
-SingleAssociationTool<Types<T0>, TO_T>::doGetUntyped (const void* p)
+SingleAssociationTool<Types<T0>, TO_T>::doGetUntyped (const void* p, size_t count)
 {
-  if (this->m_which == 0)
+  if (this->m_which == count)
     return this->get (*reinterpret_cast<const T0*> (p));
   std::abort();
 }
@@ -177,103 +189,67 @@ SingleAssociationTool<Types<T0>, TO_T>::push_ti (std::vector<const std::type_inf
 }
 
 
-} // namespace D3PD
-
-
-#include "boost/preprocessor/cat.hpp"
-#include "boost/preprocessor/repetition/enum_params.hpp"
-#include "boost/preprocessor/arithmetic/inc.hpp"
-
-
-#endif // not BOOST_PP_IS_ITERATING
-
-
-
-#ifdef BOOST_PP_IS_ITERATING
-
-
-//**************************************************************************
-// Multiple-argument specializations
-//
-
-
-#define n BOOST_PP_ITERATION()
-#define nargs BOOST_PP_INC(n)
-#define Tlast BOOST_PP_CAT(T, n)
-
-
-namespace D3PD {
-
-
 /**
  * @brief A specialization of SingleAssociationTool that can accept one
  *        of several types.
  *
  * This specialization is for the case of more than one argument.
- * It is preprocessed multiple times by boost.preprocessor to generate
- * a separate specialization for each number of arguments.  We expect
- * these definitions:
- *
- *   n     - Index of the argument being defined.  >= 1.
- *   nargs - Total number of arguments for this specialization.   n+1
- *   Tlast - The name of the last template argument.   T<n>
  */
-template <BOOST_PP_ENUM_PARAMS(nargs, class T), class TO_T>
-class SingleAssociationTool<Types<BOOST_PP_ENUM_PARAMS(nargs, T)>, TO_T>
-  : public SingleAssociationTool<Types<BOOST_PP_ENUM_PARAMS(n, T)>, TO_T>
+template <class TO_T, class T0, class... TYPES>
+class SingleAssociationTool<Types<T0, TYPES...>, TO_T>
+  : public SingleAssociationTool<Types<TYPES...>, ButFirstType_t<TO_T> >
 {
 public:
-  typedef SingleAssociationTool<Types<BOOST_PP_ENUM_PARAMS(n, T)>, TO_T> Base;
-  SingleAssociationTool (const std::string& type,
-                         const std::string& name,
-                         const IInterface* parent)
-    : Base (type, name, parent)
-  {}
+  using Base = SingleAssociationTool<Types<TYPES...>, ButFirstType_t<TO_T> >;
+
+  using Base::Base;
 
   virtual void push_ti (std::vector<const std::type_info*>& tis) override
   {
-    tis.reserve (nargs);
+    tis.reserve (1 + sizeof... (TYPES));
+    tis.push_back (&typeid(T0));
     Base::push_ti (tis);
-    tis.push_back (&typeid(Tlast));
   }
 
   using Base::get;
-  virtual const typename SelectType<TO_T, n>::type* get (const Tlast& p) = 0;
+  virtual const typename SelectType<TO_T, 0>::type* get (const T0& p) = 0;
 
-  virtual const void* doGetUntyped (const void* p) override
+  virtual const void* doGetUntyped (const void* p, size_t count) override
   {
-    if (this->m_which == n)
-      return this->get (*reinterpret_cast<const Tlast*> (p));
-    return Base::doGetUntyped (p);
+    if (this->m_which == count)
+      return this->get (*reinterpret_cast<const T0*> (p));
+    return Base::doGetUntyped (p, count+1);
   }
+
 
 #ifdef __clang__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #endif
   using Base::releaseObject;
-  virtual void releaseObject (const typename SelectType<TO_T, n>::type* /*p*/) /*override*/ {}
+  virtual void releaseObject (const typename SelectType<TO_T, 0>::type* /*p*/) /*override*/ {}
 #ifdef __clang__
 #pragma GCC diagnostic pop
 #endif
 
-  virtual void releaseObjectUntyped (const void* p) override
+  virtual void doReleaseObjectUntyped (const void* p, size_t count) override
   {
-#define BODY(Z,N,DATA) if (this->m_which == N) { this->releaseObject(reinterpret_cast<const typename SelectType<TO_T, N>::type*>(p)); return; }
-    BOOST_PP_REPEAT(nargs, BODY, dum)
-#undef BODY
-    std::abort();
+    if (this->m_which == count) {
+      this->releaseObject (reinterpret_cast<const typename SelectType<TO_T, 0>::type*>(p));
+      return;
+    }
+    Base::doReleaseObjectUntyped (p, count+1);
+  }
+
+
+  virtual const std::type_info&
+  doTypeinfo (size_t count) const override
+  {
+    if (count == this->m_which)
+      return typeid (typename SelectType<TO_T, 0>::type);
+    return Base::doTypeinfo (count+1);
   }
 };
 
 
-#undef nargs
-#undef n
-#undef Tlast
-
-
 } // namespace D3PD
-
-
-#endif // BOOST_PP_IS_ITERATING
-

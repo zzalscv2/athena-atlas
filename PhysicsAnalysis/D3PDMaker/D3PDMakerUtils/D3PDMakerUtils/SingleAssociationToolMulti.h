@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/SingleAssociationToolMulti.h
  * @author scott snyder <snyder@bnl.gov>
@@ -24,7 +21,6 @@
 #include "D3PDMakerUtils/SingleAssociationTool.h"
 #endif
 
-#include "boost/preprocessor/iteration/iterate.hpp"
 #include <cstdlib>
 
 
@@ -48,8 +44,6 @@ namespace D3PD {
  * configured with more than one type.
  *
  * This specialization is for the 1-argument case.
- * Further specializations for more arguments are defined using the facilities
- * of boost.preprocessor.
  */
 template <class T0, class TO_T>
 class SingleAssociationTool<Types<T0>, TO_T>
@@ -152,7 +146,10 @@ protected:
    * @c getUntyped in the base class, but we also declare it as inline
    * so that the base class chaining can be inlined.
    */
-  virtual const void* doGetUntyped (const void* p);
+  virtual const void* doGetUntyped (const void* p, size_t count);
+
+
+  virtual void doReleaseObjectUntyped (const void* p, size_t count);
 
 
   /**
@@ -165,6 +162,9 @@ protected:
   virtual void push_ti (std::vector<const std::type_info*>& tis);
 
 
+  virtual const std::type_info& doTypeinfo (size_t count) const;
+
+
 private:
   /// @c type_info for the selected type.
   const std::type_info* m_fromTypeinfo;
@@ -175,14 +175,6 @@ private:
 
 
 #include "D3PDMakerUtils/SingleAssociationToolMulti.icc"
-
-
-// Use boost.preprocessor to generate specializations for
-// the > 1 argument cases.
-// The code is in the icc file, within BOOST_PP_IS_ITERATING.
-#define BOOST_PP_ITERATION_LIMITS (1, D3PD_MAX_TYPE_CHOICES-1)
-#define BOOST_PP_FILENAME_1  "D3PDMakerUtils/SingleAssociationToolMulti.icc"
-#include BOOST_PP_ITERATE()
 
 
 #endif // not D3PDMAKERUTILS_SINGLEASSOCIATIONTOOLMULTI_H

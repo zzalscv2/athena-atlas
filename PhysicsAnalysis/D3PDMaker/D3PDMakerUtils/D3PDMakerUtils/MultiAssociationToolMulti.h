@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/MultiAssociationToolMulti.h
  * @author scott snyder <snyder@bnl.gov>
@@ -24,7 +21,6 @@
 #include "D3PDMakerUtils/MultiAssociationTool.h"
 #endif
 
-#include "boost/preprocessor/iteration/iterate.hpp"
 #include <cstdlib>
 
 
@@ -45,8 +41,6 @@ namespace D3PD {
  * configured with more than one type.
  *
  * This specialization is for the 1-argument case.
- * Further specializations for more arguments are defined using the facilities
- * of boost.preprocessor.
  */
 template <class T0, class TO_T>
 class MultiAssociationTool<Types<T0>, TO_T>
@@ -111,7 +105,7 @@ protected:
    * @c resetUntyped in the base class, but we also declare it as inline
    * so that the base class chaining can be inlined.
    */
-  virtual StatusCode doResetUntyped (const void* p);
+  virtual StatusCode doResetUntyped (const void* p, size_t count);
 
 
   /**
@@ -136,8 +130,6 @@ private:
  *        of several types, mapping to multiple output types.
  *
  * This specialization is for the 1-argument case.
- * Further specializations for more arguments are defined using the facilities
- * of boost.preprocessor.
  */
 template <class T0, class U0>
 class MultiAssociationTool<Types<T0>, Types<U0> >
@@ -226,14 +218,6 @@ public:
 
 
 #include "D3PDMakerUtils/MultiAssociationToolMulti.icc"
-
-
-// Use boost.preprocessor to generate specializations for
-// the > 1 argument cases.
-// The code is in the icc file, within BOOST_PP_IS_ITERATING.
-#define BOOST_PP_ITERATION_LIMITS (1, D3PD_MAX_TYPE_CHOICES-1)
-#define BOOST_PP_FILENAME_1  "D3PDMakerUtils/MultiAssociationToolMulti.icc"
-#include BOOST_PP_ITERATE()
 
 
 #endif // not D3PDMAKERUTILS_MULTIASSOCIATIONTOOLMULTI_H

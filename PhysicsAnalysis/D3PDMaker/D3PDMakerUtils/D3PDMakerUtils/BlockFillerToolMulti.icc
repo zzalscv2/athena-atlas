@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/BlockFillerToolMulti.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -10,9 +8,6 @@
  * @brief A specialization of BlockFillerTool that can accept one
  *        of several types.
  */
-
-
-#ifndef BOOST_PP_IS_ITERATING
 
 
 //**************************************************************************
@@ -73,9 +68,9 @@ BlockFillerTool<Types<T0> >::configureD3PD
 template <class T0>
 inline
 StatusCode
-BlockFillerTool<Types<T0> >::doFillUntyped (const void* p, bool again)
+BlockFillerTool<Types<T0> >::doFillUntyped (const void* p, bool again, size_t count)
 {
-  if (m_which == 0) {
+  if (m_which == count) {
     if (again)
       return this->fillAgain (*reinterpret_cast<const T0*> (p));
     return this->fill (*reinterpret_cast<const T0*> (p));
@@ -118,7 +113,7 @@ BlockFillerTool<Types<T0> >::fillUntyped (const void* p, bool again /*= false*/)
   StatusCode stat = convert (p);
   if (stat.isFailure())
     return stat;
-  return doFillUntyped (p, again);
+  return doFillUntyped (p, again, 0);
 }
 
 
@@ -138,91 +133,45 @@ BlockFillerTool<Types<T0> >::push_ti (std::vector<const std::type_info*>& tis)
 }
 
 
-} // namespace D3PD
-
-
-#include "boost/preprocessor/cat.hpp"
-#include "boost/preprocessor/repetition/enum_params.hpp"
-#include "boost/preprocessor/arithmetic/inc.hpp"
-
-
-#endif // not BOOST_PP_IS_ITERATING
-
-
-
-#ifdef BOOST_PP_IS_ITERATING
-
-
-//**************************************************************************
-// Multiple-argument specializations
-//
-
-
-#define n BOOST_PP_ITERATION()
-#define nargs BOOST_PP_INC(n)
-#define Tlast BOOST_PP_CAT(T, n)
-
-
-namespace D3PD {
-
-
 /**
  * @brief A specialization of BlockFillerTool that can accept one
  *        of several types.
  *
  * This specialization is for the case of more than one argument.
- * It is preprocessed multiple times by boost.preprocessor to generate
- * a separate specialization for each number of arguments.  We expect
- * these definitions:
- *
- *   n     - Index of the argument being defined.  >= 1.
- *   nargs - Total number of arguments for this specialization.   n+1
- *   Tlast - The name of the last template argument.   T<n>
  */
-template <BOOST_PP_ENUM_PARAMS(nargs, class T)>
-class BlockFillerTool<Types<BOOST_PP_ENUM_PARAMS(nargs, T)> >
-  : public BlockFillerTool<Types<BOOST_PP_ENUM_PARAMS(n, T)> >
+template <class T0, class... TYPES>
+class BlockFillerTool<Types<T0, TYPES...> >
+  : public BlockFillerTool<Types<TYPES...> >
 {
 public:
-  typedef BlockFillerTool<Types<BOOST_PP_ENUM_PARAMS(n, T)> > Base;
-  BlockFillerTool (const std::string& type,
-                   const std::string& name,
-                   const IInterface* parent)
-    : Base (type, name, parent)
-  {}
+  using Base = BlockFillerTool<Types<TYPES...> >;
 
-  virtual void push_ti (std::vector<const std::type_info*>& tis)
+  using Base::Base;
+
+  virtual void push_ti (std::vector<const std::type_info*>& tis) override
   {
-    tis.reserve (nargs);
+    tis.reserve (1 + sizeof... (TYPES));
+    tis.push_back (&typeid(T0));
     Base::push_ti (tis);
-    tis.push_back (&typeid(Tlast));
   }
 
   using Base::fill;
-  virtual StatusCode fill (const Tlast& /*p*/) = 0;
+  virtual StatusCode fill (const T0& /*p*/) = 0;
 
   using Base::fillAgain;
-  virtual StatusCode fillAgain (const Tlast& p) { return this->fill(p); }
+  virtual StatusCode fillAgain (const T0& p) { return this->fill(p); }
 
-  virtual StatusCode doFillUntyped (const void* p, bool again)
+  virtual StatusCode doFillUntyped (const void* p, bool again, size_t count) override
   {
-    if (this->m_which == n) {
+    if (this->m_which == count) {
       if (again)
-        return this->fillAgain (*reinterpret_cast<const Tlast*> (p));
-      return this->fill (*reinterpret_cast<const Tlast*> (p));
+        return this->fillAgain (*reinterpret_cast<const T0*> (p));
+      return this->fill (*reinterpret_cast<const T0*> (p));
     }
-    return Base::doFillUntyped (p, again);
+    return Base::doFillUntyped (p, again, count+1);
   }
 };
 
 
-#undef nargs
-#undef n
-#undef Tlast
-
-
 } // namespace D3PD
-
-
-#endif // BOOST_PP_IS_ITERATING
 

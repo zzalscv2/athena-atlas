@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/MultiAssociationToolMulti.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -10,9 +8,6 @@
  * @brief A specialization of MultiAssociationTool that can accept one
  *        of several types.
  */
-
-
-#ifndef BOOST_PP_IS_ITERATING
 
 
 //**************************************************************************
@@ -89,7 +84,7 @@ MultiAssociationTool<Types<T0>, TO_T>::resetUntyped
 {
   p = this->doConversion (p);
   if (!p) return StatusCode::FAILURE;
-  return doResetUntyped (p);
+  return doResetUntyped (p, 0);
 }
 
 
@@ -106,11 +101,9 @@ MultiAssociationTool<Types<T0>, TO_T>::resetUntyped
 template <class T0, class TO_T>
 inline
 StatusCode
-MultiAssociationTool<Types<T0>, TO_T>::doResetUntyped (const void* p)
+MultiAssociationTool<Types<T0>, TO_T>::doResetUntyped (const void* p, size_t /*count*/)
 {
-  if (this->m_which == 0)
-    return this->reset (*reinterpret_cast<const T0*> (p));
-  std::abort();
+  return this->reset (*reinterpret_cast<const T0*> (p));
 }
 
 
@@ -209,7 +202,7 @@ template <class T0, class U0>
 const std::type_info&
 MultiAssociationTool<Types<T0>, Types<U0> >::elementTypeinfo() const
 {
-  return multiTypeInfo ((Types<U0>*)0, this->m_which);
+  return typeid (U0);
 }
 
 
@@ -226,35 +219,25 @@ MultiAssociationTool<Types<T0>, Types<U0> >::nextUntyped ()
 }
 
 
-} // namespace D3PD
-
-
-
-
-#include "boost/preprocessor/cat.hpp"
-#include "boost/preprocessor/repetition/enum_params.hpp"
-#include "boost/preprocessor/arithmetic/inc.hpp"
-
-
-#endif // not BOOST_PP_IS_ITERATING
-
-
-
-#ifdef BOOST_PP_IS_ITERATING
-
-
 //**************************************************************************
 // Multiple-argument specializations
 //
 
 
-#define n BOOST_PP_ITERATION()
-#define nargs BOOST_PP_INC(n)
-#define Tlast BOOST_PP_CAT(T, n)
-#define Ulast BOOST_PP_CAT(U, n)
+template <class T0, class TO_T>
+class MaybeNext
+{
+public:
+  void next (int) {}
+};
 
 
-namespace D3PD {
+template <class T0, class U0, class... TYPES>
+class MaybeNext<T0, Types<U0, TYPES...> >
+{
+public:
+  virtual const U0* next (const T0* dum) = 0;
+};
 
 
 /**
@@ -262,115 +245,37 @@ namespace D3PD {
  *        of several types.
  *
  * This specialization is for the case of more than one argument.
- * It is preprocessed multiple times by boost.preprocessor to generate
- * a separate specialization for each number of arguments.  We expect
- * these definitions:
- *
- *   n     - Index of the argument being defined.  >= 1.
- *   nargs - Total number of arguments for this specialization.   n+1
- *   Tlast - The name of the last template argument.   T<n>
  */
-template <BOOST_PP_ENUM_PARAMS(nargs, class T), class TO_T>
-class MultiAssociationTool<Types<BOOST_PP_ENUM_PARAMS(nargs, T)>, TO_T>
-  : public MultiAssociationTool<Types<BOOST_PP_ENUM_PARAMS(n, T)>, TO_T>
+template <class TO_T, class T0, class... TYPES>
+class MultiAssociationTool<Types<T0, TYPES...>, TO_T>
+  : public MultiAssociationTool<Types<TYPES...>, ButFirstType_t<TO_T> >,
+    public MaybeNext<T0, TO_T>
 {
 public:
-  typedef MultiAssociationTool<Types<BOOST_PP_ENUM_PARAMS(n, T)>, TO_T> Base;
-  MultiAssociationTool (const std::string& type,
-                        const std::string& name,
-                        const IInterface* parent)
-    : Base (type, name, parent)
-  {}
+  using Base = MultiAssociationTool<Types<TYPES...>, ButFirstType_t<TO_T> >;
 
-  virtual void push_ti (std::vector<const std::type_info*>& tis)
-  {
-    tis.reserve (nargs);
-    Base::push_ti (tis);
-    tis.push_back (&typeid(Tlast));
-  }
-
-  using Base::reset;
-  virtual StatusCode reset (const Tlast& p) = 0;
-
-  virtual StatusCode doResetUntyped (const void* p)
-  {
-    if (this->m_which == n)
-      return this->reset (*reinterpret_cast<const Tlast*> (p));
-    return Base::doResetUntyped (p);
-  }
-};
-
-
-template <BOOST_PP_ENUM_PARAMS(nargs, class T),
-          BOOST_PP_ENUM_PARAMS(nargs, class U)>
-class MultiAssociationTool<Types<BOOST_PP_ENUM_PARAMS(nargs, T)>,
-                           Types<BOOST_PP_ENUM_PARAMS(nargs, U)> >
-  : public MultiAssociationTool<Types<BOOST_PP_ENUM_PARAMS(n, T)>,
-                                Types<BOOST_PP_ENUM_PARAMS(n, U)> >
-{
-public:
-  typedef MultiAssociationTool<Types<BOOST_PP_ENUM_PARAMS(n, T)>,
-                               Types<BOOST_PP_ENUM_PARAMS(n, U)> > Base;
-  MultiAssociationTool (const std::string& type,
-                        const std::string& name,
-                        const IInterface* parent)
-    : Base (type, name, parent)
-  {}
+  using Base::Base;
 
   virtual void push_ti (std::vector<const std::type_info*>& tis) override
   {
-    tis.reserve (nargs);
+    tis.reserve (1 + sizeof... (TYPES));
+    tis.push_back (&typeid(T0));
     Base::push_ti (tis);
-    tis.push_back (&typeid(Tlast));
   }
 
   using Base::reset;
-  virtual StatusCode reset (const Tlast& p) = 0;
+  virtual StatusCode reset (const T0& p) = 0;
 
   using Base::next;
-  virtual const Ulast* next (const Tlast* dum) = 0;
+  using MaybeNext<T0, TO_T>::next;
 
-  virtual StatusCode doResetUntyped (const void* p) override
+  virtual StatusCode doResetUntyped (const void* p, size_t count) override
   {
-    if (this->m_which == n)
-      return this->reset (*reinterpret_cast<const Tlast*> (p));
-    return Base::doResetUntyped (p);
-  }
-
-  using Base::releaseElement;
-  virtual void releaseElement (const Ulast* /*p*/) {}
-
-  virtual void releaseElementUntyped (const void* p) override
-  {
-#define BODY(Z,N,DATA) if (this->m_which == N) { this->releaseElement(reinterpret_cast<const U##N*>(p)); return; }
-    BOOST_PP_REPEAT(nargs, BODY, dum)
-#undef BODY
-    std::abort();
-  }
-
-  virtual const std::type_info& elementTypeinfo() const override
-  {
-    return multiTypeInfo ((Types<BOOST_PP_ENUM_PARAMS(nargs, U)>*)0, this->m_which);
-  }
-
-  virtual const void* nextUntyped() override
-  {
-#define BODY(Z,N,DATA) if (this->m_which == N) return next((T##N*)0);
-    BOOST_PP_REPEAT(nargs, BODY, dum)
-#undef BODY
-    std::abort();
+    if (this->m_which == count)
+      return this->reset (*reinterpret_cast<const T0*> (p));
+    return Base::doResetUntyped (p, count+1);
   }
 };
 
 
-#undef nargs
-#undef n
-#undef Tlast
-#undef Ulast
-
-
 } // namespace D3PD
-
-
-#endif // BOOST_PP_IS_ITERATING
-

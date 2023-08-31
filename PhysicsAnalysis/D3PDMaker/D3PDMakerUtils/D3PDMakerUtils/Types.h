@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerUtils/Types.h
  * @author scott snyder <snyder@bnl.gov>
@@ -27,18 +24,9 @@
 #define D3PDMAKERUTILS_TYPES_H
 
 
-#include "boost/preprocessor/repetition/enum_shifted_binary_params.hpp"
-#include "boost/preprocessor/repetition/enum_params.hpp"
-#include "boost/preprocessor/repetition/repeat.hpp"
-#include "boost/preprocessor/facilities/intercept.hpp"
-#include "boost/preprocessor/iteration/iterate.hpp"
 #include <typeinfo>
 #include <cstdlib>
-
-
-#ifndef D3PD_MAX_TYPE_CHOICES
-# define D3PD_MAX_TYPE_CHOICES 5
-#endif
+#include <tuple>
 
 
 namespace D3PD {
@@ -48,6 +36,14 @@ namespace D3PD {
  * @brief Placeholder for empty type.
  */
 class NoType {};
+
+
+/// Helper so that Types<> will be an empty class.
+template <class T>
+struct WrapType
+{
+  using type = T;
+};
 
 
 /**
@@ -60,21 +56,9 @@ class NoType {};
  *@code
  *   D3PD::Types<Obj1, Obj2>
  @endcode
- *
- * The template specification expands to
- *
- *@code
- *   class T0, class T1=NoType, ... , class T<D3PD_MAX_TYPE_CHOICES-1>=NoType
- @endcode
  */
-template <class T0,
-          BOOST_PP_ENUM_SHIFTED_BINARY_PARAMS(D3PD_MAX_TYPE_CHOICES,
-                                              class T,
-                                              =NoType BOOST_PP_INTERCEPT)>
-class Types
-{
-};
-
+template <class... TYPES>
+using Types = std::tuple<WrapType<TYPES>...>;
 
 
 /**
@@ -90,21 +74,33 @@ struct SelectType
 };
 
 
+/// SelectType used of Types.
+template <int N, class... TYPES>
+struct SelectType<Types<TYPES...>, N>
+{
+  using type = typename std::tuple_element_t<N, Types<TYPES...> >::type;
+};
+
+
 /**
  * @brief Return one @c type_info from a tuple.
  *
  * If `T` is `Types<T0, ...>`, then ` multiTypeInfo (T*, which)` will
  * return `typeid(Twhich)`.  Otherwise, it will return `typeid(T)`.
  */
-template <BOOST_PP_ENUM_PARAMS(D3PD_MAX_TYPE_CHOICES, class T)>
-const std::type_info&
-multiTypeInfo (Types<BOOST_PP_ENUM_PARAMS(D3PD_MAX_TYPE_CHOICES, T)>*,
-               size_t which)
+template <class T0>
+const std::type_info& multiTypeInfo (Types<T0>*, size_t which)
 {
-#define BODY(Z,N,DATA) if (which==N) return typeid(T##N);
-  BOOST_PP_REPEAT(D3PD_MAX_TYPE_CHOICES, BODY, dum)
-#undef BODY
+  if (which == 0) return typeid (T0);
   std::abort();
+}
+
+
+template <class T0, class... TYPES>
+const std::type_info& multiTypeInfo (Types<T0, TYPES...>*, size_t which)
+{
+  if (which == 0) return typeid (T0);
+  return multiTypeInfo (static_cast<Types<TYPES...>*>(nullptr), which-1);
 }
 
 
@@ -115,12 +111,25 @@ const std::type_info& multiTypeInfo (T*, size_t /*which*/)
 }
 
 
+template <class T>
+struct ButFirstType
+{
+  using type = T;
+};
+
+
+template <class T0, class... TYPES>
+struct ButFirstType<Types<T0, TYPES...> >
+{
+  using type = Types<TYPES...>;
+};
+
+
+template <class T>
+using ButFirstType_t = typename ButFirstType<T>::type;
+
+
 } // namespace D3PD
-
-
-#define BOOST_PP_ITERATION_LIMITS (0, D3PD_MAX_TYPE_CHOICES-1)
-#define BOOST_PP_FILENAME_1  "D3PDMakerUtils/Types.icc"
-#include BOOST_PP_ITERATE()
 
 
 
