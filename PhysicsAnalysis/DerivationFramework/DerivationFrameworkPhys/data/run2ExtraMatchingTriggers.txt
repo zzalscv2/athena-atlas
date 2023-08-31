@@ -105,3 +105,10 @@ HLT_e60_lhmedium
 HLT_e60_lhvloose_nod0
 HLT_e70_lhvloose_nod0
 HLT_e80_lhvloose_nod0
+
+
+#####################
+# Photon triggers #
+#####################
+
+HLT_g45_loose_6j45_0eta240
