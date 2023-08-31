@@ -10,15 +10,14 @@
  *  Jonathan Bossio (jbossios@cern.ch) , July 2015
  */
 
-#include <TEnv.h>
-#include <TFile.h>
-#include <TAxis.h>
 #include <TH2.h>
 #include <TH3.h>
 
 #include "JetCalibTools/JetCalibrationStep.h"
-
+#include <vector>
 #include <memory>
+#include <string>
+class TEnv;
 
 class JMSCorrection 
   : virtual public ::JetCalibrationStep
@@ -61,19 +60,19 @@ class JMSCorrection
  private:
 
   //Private members set in the constructor
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo, m_calibAreaTag, m_jetOutScale;
-  bool m_dev;
+  bool m_dev{};
 
-  double m_pTMinCorr;
+  double m_pTMinCorr{};
 
-  bool m_trackAssistedJetMassCorr;
+  bool m_trackAssistedJetMassCorr{};
 
-  bool m_pTfixed; // false: pT will be corrected (large-R), if true: the energy will be corrected and pT will be fixed (small-R)
+  bool m_pTfixed{}; // false: pT will be corrected (large-R), if true: the energy will be corrected and pT will be fixed (small-R)
 
-  bool m_combination; // Mass Combination of calo mass with track-assisted mass
-  bool m_useCorrelatedWeights; 
-  bool m_onlyCombination; //mass combination using insitu calibrated inputs
+  bool m_combination{}; // Mass Combination of calo mass with track-assisted mass
+  bool m_useCorrelatedWeights{}; 
+  bool m_onlyCombination{}; //mass combination using insitu calibrated inputs
 
   // Control the binning using a private class enum
   enum class BinningParam { pt_mass_eta, e_LOGmOe_eta, e_LOGmOet_eta, e_LOGmOpt_eta, et_LOGmOet_eta };
@@ -81,7 +80,7 @@ class JMSCorrection
 
   // Check if we are reading 2D or 3D histograms
   // Defaults to false for backwards compatibility
-  bool m_use3Dhisto;
+  bool m_use3Dhisto{};
 
 
   //Private members set during initialization (if 2D histos)

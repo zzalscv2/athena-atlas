@@ -1,8 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <TEnv.h>
+#include <TAxis.h>
+
 #include "JetCalibTools/CalibrationMethods/ResidualOffsetCorrection.h"
+#include "JetCalibTools/CalibrationMethods/NPVBeamspotCorrection.h"
+
 #include "JetCalibTools/JetCalibUtils.h"
 #include "PathResolver/PathResolver.h"
 #include <utility>

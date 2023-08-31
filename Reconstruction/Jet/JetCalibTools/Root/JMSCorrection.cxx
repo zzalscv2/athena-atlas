@@ -11,6 +11,9 @@
 
 #include <cmath>
 #include <TKey.h>
+#include <TEnv.h>
+#include <TAxis.h>
+#include <TFile.h>
 
 #include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
 #include "JetCalibTools/JetCalibUtils.h"

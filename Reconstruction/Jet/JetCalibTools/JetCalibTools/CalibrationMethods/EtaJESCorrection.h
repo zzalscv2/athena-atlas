@@ -12,10 +12,13 @@
  * Date: August 19 2013
  */
 
-#include <TEnv.h>
-#include <TAxis.h>
 #include "TH1.h"
 #include "TString.h"
+#include <string>
+#include <vector>
+#include <memory>
+class TEnv;
+class TAxis;
 
 
 #include "JetCalibTools/JetCalibrationStep.h"
@@ -46,40 +49,40 @@ class EtaJESCorrection
   int getEtaBin(double eta_det) const;
 
  private:
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo;
   TString m_calibAreaTag;
-  bool m_mass;
-  bool m_dev;
-  bool m_freezeJESatHighE;
-  bool m_isSpline;
+  bool m_mass{};
+  bool m_dev{};
+  bool m_freezeJESatHighE{};
+  bool m_isSpline{};
 
   TString m_jesDesc;
-  double m_minPt_JES, m_minPt_EtaCorr, m_maxE_EtaCorr;
-  unsigned int m_lowPtExtrap;
-  double m_lowPtMinR;
-  bool m_applyMassCorrection;
-  bool m_useSecondaryminPt_JES;
-  double m_etaSecondaryminPt_JES;
-  double m_secondaryminPt_JES;
+  double m_minPt_JES{}, m_minPt_EtaCorr{}, m_maxE_EtaCorr{};
+  unsigned int m_lowPtExtrap{};
+  double m_lowPtMinR{};
+  bool m_applyMassCorrection{};
+  bool m_useSecondaryminPt_JES{};
+  double m_etaSecondaryminPt_JES{};
+  double m_secondaryminPt_JES{};
 
-  TAxis * m_etaBinAxis;
+  TAxis * m_etaBinAxis{};
 
   // 90 eta bins, and up to 9 parameter for the pol-fit
   const static unsigned int s_nEtaBins=90;
   const static unsigned int s_nParMin=7;
   const static unsigned int s_nParMax=9;
-  unsigned int m_nPar; // number of parameters in config file
-  double m_JESFactors[s_nEtaBins][s_nParMax];
-  double m_JES_MinPt_Slopes[s_nEtaBins];
-  double m_JES_MinPt_E[s_nEtaBins];
-  double m_JES_MinPt_R[s_nEtaBins];
+  unsigned int m_nPar{}; // number of parameters in config file
+  double m_JESFactors[s_nEtaBins][s_nParMax]={};
+  double m_JES_MinPt_Slopes[s_nEtaBins]={};
+  double m_JES_MinPt_E[s_nEtaBins]={};
+  double m_JES_MinPt_R[s_nEtaBins]={};
   //double m_JES_MinPt_Rmin[s_nEtaBins];
-  double m_JES_MinPt_Param1[s_nEtaBins];
+  double m_JES_MinPt_Param1[s_nEtaBins]={};
   double m_JES_MinPt_Param2[s_nEtaBins];
-  double m_etaCorrFactors[s_nEtaBins][s_nParMax];
-  double m_JMSFactors[s_nEtaBins][s_nParMax];
-  double m_energyFreezeJES[s_nEtaBins];
+  double m_etaCorrFactors[s_nEtaBins][s_nParMax]={};
+  double m_JMSFactors[s_nEtaBins][s_nParMax]={};
+  double m_energyFreezeJES[s_nEtaBins]={};
 
   // When using p-splines, the calibrations are stored as a finely binned TH1 for simplicity.
   // This avoids importing new packages into Athena.

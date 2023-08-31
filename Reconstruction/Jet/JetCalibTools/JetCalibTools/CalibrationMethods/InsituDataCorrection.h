@@ -13,13 +13,13 @@
  */
 
 #include <TROOT.h>
-#include <TEnv.h>
-#include <TFile.h>
-#include <TAxis.h>
-#include <TH1.h>
 #include <TH2.h>
-
+#include <TString.h>
 #include "JetCalibTools/JetCalibrationStep.h"
+#include <memory>
+class TEnv;
+class TH1;
+
 
 class InsituDataCorrection 
   : virtual public ::JetCalibrationStep
@@ -45,29 +45,29 @@ class InsituDataCorrection
   std::unique_ptr<const TH2> invertHistogram(const TH2* h2d);
  
  private:
-  TEnv * m_config;
+  TEnv * m_config{};
   TString m_jetAlgo, m_calibAreaTag;
-  bool m_dev;
+  bool m_dev{};
 
   std::unique_ptr<const TH2> m_insituCorr;
   std::unique_ptr<const TH2> m_insituCorr_JMS;
   std::unique_ptr<const TH2> m_insituCorr_JMS_TA;
-  double m_insituEtaMax, m_insituPtMin, m_insituPtMax, m_insituEtaMax_JMS, m_insituPtMin_JMS, m_insituPtMax_JMS, m_insituMassMin_JMS, m_insituMassMax_JMS;
-  double m_relhistoPtMax, m_abshistoPtMax;
+  double m_insituEtaMax{}, m_insituPtMin{}, m_insituPtMax{}, m_insituEtaMax_JMS{}, m_insituPtMin_JMS{}, m_insituPtMax_JMS{}, m_insituMassMin_JMS{}, m_insituMassMax_JMS{};
+  double m_relhistoPtMax{}, m_abshistoPtMax{};
   std::unique_ptr<const TH2> m_insituCorr_ResidualMCbased;
-  double m_insituEtaMax_ResidualMCbased, m_insituPtMin_ResidualMCbased, m_insituPtMax_ResidualMCbased;
+  double m_insituEtaMax_ResidualMCbased{}, m_insituPtMin_ResidualMCbased{}, m_insituPtMax_ResidualMCbased{};
 
-  bool m_applyRelativeandAbsoluteInsitu;
-  bool m_applyEtaRestrictionRelativeandAbsolute;
+  bool m_applyRelativeandAbsoluteInsitu{};
+  bool m_applyEtaRestrictionRelativeandAbsolute{};
 
-  bool m_applyResidualMCbasedInsitu;
-  bool m_applyEtaRestrictionResidualMCbased;
+  bool m_applyResidualMCbasedInsitu{};
+  bool m_applyEtaRestrictionResidualMCbased{};
 
-  bool m_applyInsituCaloTAjets;
-  bool m_applyInsituJMS;
+  bool m_applyInsituCaloTAjets{};
+  bool m_applyInsituJMS{};
 
-  unsigned int m_firstRun;
-  unsigned int m_lastRun;
+  unsigned int m_firstRun{};
+  unsigned int m_lastRun{};
 };
 
 #endif
