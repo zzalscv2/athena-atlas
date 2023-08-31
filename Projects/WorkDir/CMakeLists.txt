@@ -112,13 +112,11 @@ set( ATLAS_ALWAYS_CHECK_WILDCARDS TRUE CACHE BOOL
    "(Re-)Check wildcards in file specifications on every build" )
 
 # Set up CppCheck.
-find_program( ATLAS_CPPCHECK "cppcheck"
-   PATHS ENV PATH
-   NO_DEFAULT_PATH )
-mark_as_advanced( ATLAS_CPPCHECK )
-if( ATLAS_CPPCHECK )
+# We require version > 2.9 to avoid picking up cppcheck installed with EL9.
+find_package( Cppcheck 2.11 )
+if( CPPCHECK_FOUND )
    # Set up the default cppcheck command to use.
-   set( CMAKE_CPPCHECK_DEFAULT "${ATLAS_CPPCHECK}" "--quiet"
+   set( CMAKE_CPPCHECK_DEFAULT "${CPPCHECK_cppcheck_EXECUTABLE}" "--quiet"
       "--enable=warning,portability" "--inline-suppr" "--template=gcc" )
    foreach( ignored_path "${LCG_RELEASE_BASE}" "${TDAQ-COMMON_INCLUDE_DIR}"
                          "${TDAQ_INCLUDE_DIR}" "${AthenaExternals_INCLUDE_DIR}"
