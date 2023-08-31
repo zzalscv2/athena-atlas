@@ -1,6 +1,4 @@
-################################################################################
-# Package: MuonConfiguration
-################################################################################
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonConfig )
@@ -16,23 +14,24 @@ if( NOT SIMULATIONBASE )
      PROPERTIES TIMEOUT 600
      LOG_SELECT_PATTERN "dead tube" )
   
-
-   # Configure unit tests
    # Cache alignment will change depending on whether FRONTIER_SERVER is defined.
-   file( MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_MuonDataDecodeTest )
    atlas_add_test( MuonDataDecodeTest
                    PROPERTIES TIMEOUT 1000
-                   PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_MuonDataDecodeTest
+                   PRIVATE_WORKING_DIRECTORY
                    LOG_SELECT_PATTERN "^MdtRawDataProvi.*|^RpcRawDataProvi.*|^TgcRawDataProvi.*|^CscRawDataProvi.*|^MdtRdoTo.*|^RpcRdoTo.*|^TgcRdoTo.*|^CscRdoTo.*|^MdtROD_Decod.*|^RpcROD_Decod.*|^TgcROD_Decod.*|^CscROD_Decod.*|^MuonCache.*"
                    SCRIPT test/testMuonDataDecode.sh )
 
    # Adding an identical test for the ByteStream identifiable caches (and future RDO caches)
-   file( MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_MuonDataDecodeTest_Cache )
    atlas_add_test( MuonDataDecodeTest_Cache
                    PROPERTIES TIMEOUT 1000
-                   PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/unitTestRun_MuonDataDecodeTest_Cache
+                   PRIVATE_WORKING_DIRECTORY
                    LOG_SELECT_PATTERN "^MdtRawDataProvi.*|^RpcRawDataProvi.*|^TgcRawDataProvi.*|^CscRawDataProvi.*|^MdtRdoTo.*|^RpcRdoTo.*|^TgcRdoTo.*|^CscRdoTo.*|^MdtROD_Decod.*|^RpcROD_Decod.*|^TgcROD_Decod.*|^CscROD_Decod.*|^MuonCache.*"
                    SCRIPT test/testMuonDataDecode_Cache.sh )
+
+   atlas_add_test( MuonBytestreamDecodeConfigTest
+                   SCRIPT python -m MuonConfig.MuonBytestreamDecodeConfig
+                   PRIVATE_WORKING_DIRECTORY
+                   POST_EXEC_SCRIPT noerror.sh )
 
    atlas_add_test( MuonCablingConfigTest
                    SCRIPT python -m MuonConfig.MuonCablingConfig

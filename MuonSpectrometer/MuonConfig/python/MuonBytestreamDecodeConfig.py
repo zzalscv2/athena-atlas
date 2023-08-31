@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.Constants import DEBUG
 
 ## Small class to hold the names for cache containers, should help to avoid copy / paste errors
 class MuonCacheNames(object):
@@ -416,37 +415,30 @@ def MuonByteStreamDecodersCfg(flags):
 
 if __name__=="__main__":
     # To run this, do e.g. 
-    # python ../athena/MuonSpectrometer/MuonConfig/python/MuonBytestreamDecode.py
+    # python -m MuonConfig.MuonBytestreamDecode [--config-only] flags...
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
+    # Set some defaults (can be changed on command line)
     flags.Input.Files = defaultTestFiles.RAW_RUN2
-    # Set global tag by hand for now
     flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
     flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"#"ATLAS-R2-2015-03-01-00"
+    flags.Concurrency.NumThreads = 1
+    flags.Exec.MaxEvents = 5
 
+    args = flags.fillFromArgs()
     flags.lock()
     flags.dump()
+    if not args.config_only:
+        from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+        cfg = MainServicesCfg(flags)
+    else:
+        cfg = ComponentAccumulator()
 
-    from AthenaCommon.Logging import log 
-
-    log.setLevel(DEBUG)
-    log.info('About to setup Rpc Raw data decoding')
-
-    cfg = MuonByteStreamDecodersCfg(flags)
-
-    # Need to add POOL converter  - may be a better way of doing this?
-    from AthenaCommon import CfgMgr
-    cfg.addService( CfgMgr.AthenaPoolCnvSvc() )
-    cfg.getService("EventPersistencySvc").CnvServices += [ "AthenaPoolCnvSvc" ]
-
-    log.info('Print Config')
+    cfg.merge( MuonByteStreamDecodersCfg(flags) )
     cfg.printConfig(withDetails=True)
 
-    # Store config as pickle
-    log.info('Save Config')
-    with open('MuonBytestreamDecode.pkl','wb') as f:
-        cfg.store(f)
-        f.close()
-
+    if not args.config_only:
+        import sys
+        sys.exit(not cfg.run().isSuccess())
