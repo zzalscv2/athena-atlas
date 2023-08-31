@@ -100,7 +100,6 @@ dqm_core::Result *dqm_algorithms::TRTWeightedAverage::execute(const std::string 
    std::map<std::string, double> results; // you can set flagging thresholds on any of these result tags
        
    double mean = 0;
-   int nBins = 0;
    double sum = 0;
    double sumcontent = 0;
    double CorrectedMean= 0;
@@ -112,9 +111,6 @@ dqm_core::Result *dqm_algorithms::TRTWeightedAverage::execute(const std::string 
         
         sum += binContent*binCenter;
         sumcontent += binContent;
-        
- 
-        ++nBins; 
     }
 
 
