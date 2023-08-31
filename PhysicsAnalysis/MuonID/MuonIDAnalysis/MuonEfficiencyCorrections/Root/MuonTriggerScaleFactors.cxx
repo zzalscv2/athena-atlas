@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <sstream>
@@ -130,6 +130,7 @@ namespace CP {
         TDirectory* qualityDirectory = file->GetDirectory(m_muonquality.c_str());
         if (qualityDirectory == nullptr) {
             ATH_MSG_FATAL("MuonTriggerScaleFactors::initialize cannot find directory with selected quality");
+            return StatusCode::FAILURE;
         }
         TKey* periodKey;
         TIter nextPeriod(qualityDirectory->GetListOfKeys());
@@ -286,7 +287,7 @@ namespace CP {
     // Gets  replica index correponding to the toy.
     // Also checks if the sys_name contains "MCTOY" and if the trigger has replicas generated.
     // Returns -1 if conditions are note satisfied
-    int MuonTriggerScaleFactors::getReplica_index(std::string sysBaseName, const std::string trigStr) const{
+    int MuonTriggerScaleFactors::getReplica_index(const std::string& sysBaseName, const std::string& trigStr) const{
         if (m_replicaSet.find(trigStr) == m_replicaSet.end()) return -1; //No toys for this trigger
         std::size_t pos = sysBaseName.find("MCTOY");
         if (pos == std::string::npos) return -1; //sys variation not affected by TOYS

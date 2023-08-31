@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // Script for testing MuonTriggerScaleFactors. For example run with following command: MuonTriggerSFRootCoreTest -x AOD.11499205._000007.pool.root.1 -y 2015 -mc mc15a -t HLT_mu24 -r 278727
@@ -62,13 +62,13 @@ CP::CorrectionCode getThreshold(Int_t& threshold, const std::string& trigger) {
 class MuonTriggerSFTester{
 
 public:
-  MuonTriggerSFTester(const char* appName, const std::string& trigger){
-    m_systematics = CP::make_systematics_vector(CP::SystematicRegistry::getInstance().recommendedSystematics());
-    m_appName = appName;
-    m_errorsCount = 0;
-    m_warningsCount = 0;
-    m_trigger = trigger;
-
+  MuonTriggerSFTester(const char* appName, const std::string& trigger) :
+    m_errorsCount (0),
+    m_warningsCount (0),
+    m_systematics (CP::make_systematics_vector(CP::SystematicRegistry::getInstance().recommendedSystematics())),
+    m_appName (appName),
+    m_trigger (trigger)
+  {
   }
 
   int initialiseTools(const std::string& customFileName, const std::string& customInputFolder, int year, const std::string& period){

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONTRIGGERSCALEFACTORS_H_
@@ -55,7 +55,7 @@ namespace CP {
 
             virtual int getBinNumber(const xAOD::Muon& muon, const std::string& trigger) const;
 
-            virtual int getReplica_index(std::string sysBaseName, const std::string trigStr) const;
+            virtual int getReplica_index(const std::string& sysBaseName, const std::string& trigStr) const;
       
             /// Returns whether the trigger is supported by the tool or not. The decision depends on the present (random)RunNumber 
             virtual bool isTriggerSupported(const std::string& trigger) const;

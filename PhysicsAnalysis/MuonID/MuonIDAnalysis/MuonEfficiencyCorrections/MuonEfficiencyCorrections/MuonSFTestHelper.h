@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONEFFICIENCYCORRECTION_MUONSFTESTHELPER_H
@@ -172,6 +172,9 @@ namespace TestMuonSF {
             // Constructor for the comparisons between two releases
             MuonSFTestHelper(std::shared_ptr<TTree> Tree, const std::string& release_name = "");
             MuonSFTestHelper(TTree*Tree, const std::string& release_name = "");
+
+            MuonSFTestHelper(const MuonSFTestHelper&) = delete;
+            MuonSFTestHelper& operator=(const MuonSFTestHelper&) = delete;
 
             ~MuonSFTestHelper() = default;
 
