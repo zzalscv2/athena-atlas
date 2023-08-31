@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITIONHIST_H
@@ -22,7 +22,7 @@ class Interp3D;
 namespace CP {
     class IsolationConditionHist : public IsolationCondition {
     public:
-        IsolationConditionHist(std::string name, xAOD::Iso::IsolationType isoType, const std::string& isolationFunction,
+        IsolationConditionHist(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& isolationFunction,
                                std::unique_ptr<TH3F> efficiencyHisto3D);
         virtual ~IsolationConditionHist() = default;
 

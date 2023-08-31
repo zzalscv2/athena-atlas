@@ -108,15 +108,15 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsolationSelectionTool::addCutToWP(IsolationWP* wp, std::string key, const xAOD::Iso::IsolationType t,
-                                                  const std::string expression, const xAOD::Iso::IsolationType isoCutRemap) {
+    StatusCode IsolationSelectionTool::addCutToWP(IsolationWP* wp, const std::string& key_in, const xAOD::Iso::IsolationType t,
+                                                  const std::string& expression, const xAOD::Iso::IsolationType isoCutRemap) {
         if (!m_calibFile) {
             ATH_MSG_ERROR("Calibration File (" << m_calibFileName << ") is missing.");
             return StatusCode::FAILURE;
         }
 
         std::string varname(xAOD::Iso::toCString(isoCutRemap));
-        key += varname;
+        std::string key = key_in + varname;
 
         TH3F* calibHisto{nullptr};
         m_calibFile->GetObject(key.c_str(), calibHisto);
@@ -135,12 +135,12 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsolationSelectionTool::addCutToWP(IsolationWP* wp, std::string key, const xAOD::Iso::IsolationType t,
-                                                  const std::string expression) {
+    StatusCode IsolationSelectionTool::addCutToWP(IsolationWP* wp, const std::string& key, const xAOD::Iso::IsolationType t,
+                                                  const std::string& expression) {
         return addCutToWP(wp, key, t, expression, t);
     }
 
-    StatusCode IsolationSelectionTool::addMuonWP(std::string muWPname) {
+    StatusCode IsolationSelectionTool::addMuonWP(const std::string& muWPname) {
         std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(muWPname);
         if (muWPname == "HighPtTrackOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>(
@@ -217,7 +217,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsolationSelectionTool::addPhotonWP(std::string phWPname) {
+    StatusCode IsolationSelectionTool::addPhotonWP(const std::string& phWPname) {
         std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(phWPname);
         if (phWPname == "TightCaloOnly") {
             wp->addCut(std::make_unique<IsolationConditionFormula>("PhFixedCut_calo40", xAOD::Iso::topoetcone40, "0.022*x+2450", false, m_isoDecSuffix));
@@ -250,7 +250,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsolationSelectionTool::addElectronWP(std::string elWPname) {
+    StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
         std::unique_ptr<IsolationWP> wp = std::make_unique<IsolationWP>(elWPname);
 
         if (elWPname == "HighPtCaloOnly") {
@@ -319,7 +319,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsolationSelectionTool::addUserDefinedWP(std::string WPname, xAOD::Type::ObjectType ObjType,
+    StatusCode IsolationSelectionTool::addUserDefinedWP(const std::string& WPname, xAOD::Type::ObjectType ObjType,
                                                         std::vector<std::pair<xAOD::Iso::IsolationType, std::string>>& cuts,
                                                         std::string key, IsoWPType type) {
         std::vector<std::unique_ptr<IsolationWP>>* wps(nullptr);
@@ -359,7 +359,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode IsolationSelectionTool::addWP(std::string WP, xAOD::Type::ObjectType ObjType) {
+    StatusCode IsolationSelectionTool::addWP(const std::string& WP, xAOD::Type::ObjectType ObjType) {
         if (ObjType == xAOD::Type::Electron) {
             return addElectronWP(WP);
         } else if (ObjType == xAOD::Type::Muon) {

@@ -18,9 +18,9 @@ class TH3F;
 namespace CP {
     class IsolationConditionFormula : public IsolationCondition {
     public:
-        IsolationConditionFormula(std::string name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction,
-                                  bool invertCut = false, std::string isoDecSuffix = "");
-        IsolationConditionFormula(std::string name, std::string isoType, const std::string& cutFunction, bool invertCut = false, std::string isoDecSuffix = "");
+        IsolationConditionFormula(const std::string& name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction,
+                                  bool invertCut = false, const std::string& isoDecSuffix = "");
+        IsolationConditionFormula(const std::string& name, const std::string& isoType, const std::string& cutFunction, bool invertCut = false, const std::string& isoDecSuffix = "");
         virtual ~IsolationConditionFormula() = default;
 
         virtual bool accept(const xAOD::IParticle& x) const override;
