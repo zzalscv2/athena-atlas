@@ -21,13 +21,25 @@ def RpcReadoutGeomToolCfg(flags, name="RpcReadoutGeomTool", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+def sTgcReadoutGeomToolCfg(flags, name="sTgcReadoutGeomTool", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("GeoUtilTool", result.getPrimaryAndMerge(MuonGeoUtilityToolCfg(flags)))
+    the_tool = CompFactory.MuonGMR4.sTgcReadoutGeomTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
 def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     result = ComponentAccumulator()
     sub_detTools = []
     if flags.Detector.GeometryMDT:
         sub_detTools.append(result.popToolsAndMerge(MdtReadoutGeomToolCfg(flags)))
+
     if flags.Detector.GeometryRPC:
         sub_detTools.append(result.popToolsAndMerge(RpcReadoutGeomToolCfg(flags)))
+
+    if flags.Detector.GeometrysTGC:
+        sub_detTools.append(result.popToolsAndMerge(sTgcReadoutGeomToolCfg(flags)))
+
     kwargs.setdefault("ReadoutEleBuilders", sub_detTools)
     the_tool = CompFactory.MuonGMR4.MuonDetectorTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)

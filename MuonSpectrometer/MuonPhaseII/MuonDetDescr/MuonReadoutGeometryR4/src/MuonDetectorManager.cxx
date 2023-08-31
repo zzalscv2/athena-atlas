@@ -5,6 +5,7 @@
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
+#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
 
@@ -94,6 +95,7 @@ IdentifierHash MuonDetectorManager::buildHash(const Identifier& id,
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
 ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
 
+ADD_DETECTOR(sTgcReadoutElement, m_sTgcEles);
 
 unsigned int MuonDetectorManager::getNumTreeTops() const {
     return m_treeTopVector.size();
