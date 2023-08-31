@@ -92,21 +92,17 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
 
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
-
-  if (info) {
-    info->genPart = thePart;
-  }
-
-  // retrieve collection and get a pointer
   if (!thePart){
     return std::make_pair(partType, partOrig);
   }
+
   const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
   Info tmpinfo;
   if (!info) { info = &tmpinfo; }
+  info->genPart = thePart;
 
+  // retrieve collection and get a pointer
   SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey,ctx);
-
   if (!truthParticleContainerReadHandle.isValid()) {
     ATH_MSG_WARNING( " Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
     return std::make_pair(partType, partOrig);
@@ -164,21 +160,20 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   long motherBarcode = 0;
   int motherStatus = 0;
   int motherPDG = 0;
+  const xAOD::TruthParticle* theMoth{};
   if (partOriVert != nullptr) {
     for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ++ipIn) {
-      const xAOD::TruthParticle* theMoth = partOriVert->incomingParticle(ipIn);
+      theMoth = partOriVert->incomingParticle(ipIn);
       if (!theMoth) continue;
       motherPDG = theMoth->pdgId();
       motherStatus = theMoth->status();
       motherBarcode = theMoth->barcode();
-      if (info) {
-        info->mother = theMoth;
-        info->motherPDG = motherPDG;
-        info->motherStatus = motherStatus;
-        info->motherBarcode = motherBarcode;
-      }
     }
   }
+  info->mother = theMoth;
+  info->motherPDG = motherPDG;
+  info->motherStatus = motherStatus;
+  info->motherBarcode = motherBarcode;
 
   if (partOriVert == nullptr && HepMC::is_simulation_particle(thePart)) {
     return std::make_pair(NonPrimary, partOrig);
@@ -204,8 +199,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     return std::make_pair(UnknownPhoton, partOrig);
   } else if (partOriVert == nullptr && MC::isNeutrino(iParticlePDG)) {
     // to define neutrino outcome
-    if (info)
-      info->particleOutCome = NonInteract;
+    info->particleOutCome = NonInteract;
     return std::make_pair(Neutrino, partOrig);
   }
 
@@ -218,23 +212,19 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   if (partOriVert != nullptr && motherPDG == 0 && partOriVert->nOutgoingParticles() == 1 &&
       partOriVert->nIncomingParticles() == 0) {
     if (MC::isElectron(iParticlePDG)) {
-      if (info)
-        info->particleOutCome = defOutComeOfElectron(thePart);
+      info->particleOutCome = defOutComeOfElectron(thePart);
       return std::make_pair(IsoElectron, SingleElec);
     }
     if (MC::isMuon(iParticlePDG)) {
-      if (info)
-        info->particleOutCome = defOutComeOfMuon(thePart);
+      info->particleOutCome = defOutComeOfMuon(thePart);
       return std::make_pair(IsoMuon, SingleMuon);
     }
     if (MC::isTau(iParticlePDG)) {
-      if (info)
-        info->particleOutCome = defOutComeOfTau(thePart, info);
+      info->particleOutCome = defOutComeOfTau(thePart, info);
       return std::make_pair(IsoTau, SingleTau);
     }
     if (MC::isPhoton(iParticlePDG)) {
-      if (info)
-        info->particleOutCome = defOutComeOfPhoton(thePart);
+      info->particleOutCome = defOutComeOfPhoton(thePart);
       return std::make_pair(IsoPhoton, SinglePhot);
     }
   }
