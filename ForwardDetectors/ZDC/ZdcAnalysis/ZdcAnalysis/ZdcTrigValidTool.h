@@ -32,10 +32,10 @@ class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcAnalysisTool, 
  public:
   ZdcTrigValidTool(const std::string& name);
   virtual ~ZdcTrigValidTool() override;
-  StatusCode initialize() override;
+  virtual StatusCode initialize() override;
 
-  StatusCode recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer) override;
-  StatusCode reprocessZdc(){return StatusCode::SUCCESS;}
+  virtual StatusCode recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer) override;
+  virtual StatusCode reprocessZdc() override {return StatusCode::SUCCESS;}
 
  protected:
 
