@@ -3,7 +3,7 @@
 # @author Nils Krumnack
 
 from AnaAlgorithm.AlgSequence import AlgSequence
-from AnaAlgorithm.DualUseConfig import createAlgorithm, createService, addPrivateTool
+from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
@@ -58,10 +58,21 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, autoconfigFromFlags=None) :
+def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, noSystematics, autoconfigFromFlags=None) :
 
     vars = []
     metVars = []
+
+    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
+    if isAthena and useComponentAccumulator:
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        ca = ComponentAccumulator()
+        ca.addSequence(algSeq)
+    else:
+        ca = None
+
+    from AsgAnalysisAlgorithms.CommonServiceSequence import makeCommonServiceSequence
+    makeCommonServiceSequence (algSeq, runSystematics = not noSystematics, ca=ca)
 
     # Include, and then set up the pileup analysis sequence:
     if not isPhyslite :
@@ -496,19 +507,14 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     treeFiller.TreeName = 'analysis'
     algSeq += treeFiller
 
-    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
-    if isAthena and useComponentAccumulator:
-        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-        ca = ComponentAccumulator()
-        ca.addSequence(algSeq)
-        return ca
-    else:
-        return None
+    if ca is not None:
+        ca.addSequence (algSeq)
+    return ca
 
 
 
 
-def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, geometry=None, autoconfigFromFlags=None) :
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken, geometry=None, autoconfigFromFlags=None, noSystematics=None) :
 
     vars = []
     metVars = []
@@ -533,6 +539,10 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                         'jet_': 'OutJets',
                         'met_': 'AnaMET',
                         ''    : 'EventInfo'}
+
+    configSeq += makeConfig ('CommonServices', None)
+    if noSystematics is not None :
+        configSeq.setOptionValue ('.runSystematics', not noSystematics)
 
     # FIXME: this should probably be run on PHYSLITE, but the test fails with:
     #   overran integrated luminosity for RunNumber=363262 (0.000000 vs 0.000000)
@@ -706,6 +716,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
         configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
 
+    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaElectrons.loose')
+    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaPhotons.tight')
+    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaMuons.medium')
+    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaTauJets.tight')
+    configSeq += makeConfig ('Selection.ObjectCutFlow', 'AnaJets.jvt')
 
     # Include, and then set up the met analysis algorithm config:
     configSeq += makeConfig ('MissingET', 'AnaMET')
@@ -828,24 +843,18 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
 
     algSeq = AlgSequence()
 
-    # Set up the systematics loader/handler service:
-    sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
-    if not noSystematics :
-        sysService.sigmaRecommended = 1
-
     ca = None
     if not useBlocks :
         ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
                               isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                              autoconfigFromFlags=autoconfigFromFlags)
+                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     else :
         ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                                  isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
                                  geometry=geometry,
-                                 autoconfigFromFlags=autoconfigFromFlags)
+                                 autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
 
     if ca is not None:
-        ca.addService(sysService)
         return ca
     else:
         return algSeq

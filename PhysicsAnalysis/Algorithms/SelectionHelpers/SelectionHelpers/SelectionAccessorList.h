@@ -41,6 +41,9 @@ namespace CP
     virtual std::string label () const override;
 
   public:
+    virtual bool isBool () const override;
+
+  public:
     virtual CP::SystematicSet
     getInputAffecting (const ISystematicsSvc& svc,
                        const std::string& objectName) const override;

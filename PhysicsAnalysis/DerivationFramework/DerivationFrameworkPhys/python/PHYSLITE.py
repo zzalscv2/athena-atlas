@@ -73,9 +73,8 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     #==============================================================================
 
     # Set up the systematics loader/handler algorithm:
-    sysLoader = CompFactory.CP.SystematicsSvc( 'SystematicsSvc' )
-    sysLoader.systematicsList= ['']
-    acc.addService(sysLoader)
+    from AsgAnalysisAlgorithms.CommonServiceSequence import makeCommonServiceSequence
+    makeCommonServiceSequence (None, runSystematics = False, ca=acc)
 
     dataType = "data"
     if ConfigFlags.Input.isMC: dataType = "mc"

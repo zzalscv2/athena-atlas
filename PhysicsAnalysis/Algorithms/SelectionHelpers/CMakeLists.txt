@@ -8,13 +8,19 @@ atlas_subdir( SelectionHelpers )
 atlas_add_library( SelectionHelpersLib
    SelectionHelpers/*.h SelectionHelpers/*.icc Root/*.cxx
    PUBLIC_HEADERS SelectionHelpers
-   LINK_LIBRARIES AthContainers AsgTools CxxUtils xAODBase AnaAlgorithmLib SystematicsHandlesLib
+   LINK_LIBRARIES AthContainers AsgTools CxxUtils xAODBase AnaAlgorithmLib SystematicsHandlesLib PATCoreAcceptLib
    PRIVATE_LINK_LIBRARIES PATCoreLib PATInterfaces )
 
 atlas_add_dictionary( SelectionHelpersDict
    SelectionHelpers/SelectionHelpersDict.h
    SelectionHelpers/selection.xml
    LINK_LIBRARIES SelectionHelpersLib )
+
+if( NOT XAOD_STANDALONE )
+   atlas_add_component( SelectionHelpers
+      src/*.h src/*.cxx src/components/*.cxx
+      LINK_LIBRARIES GaudiKernel SelectionHelpersLib )
+endif()
 
 find_package( GTest )
 

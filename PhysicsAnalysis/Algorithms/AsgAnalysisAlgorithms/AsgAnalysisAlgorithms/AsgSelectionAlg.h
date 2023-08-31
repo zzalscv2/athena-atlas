@@ -11,6 +11,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <PATCore/IAsgSelectionTool.h>
+#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
@@ -86,6 +87,10 @@ namespace CP
   private:
     SysWriteSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "", "the decoration for the asg selection"};
+
+    /// \brief the ISelectionNameSvc
+  private:
+    ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "AsgSelectionAlg"};
 
     /// \brief the bits to set for an object failing the preselection
   private:

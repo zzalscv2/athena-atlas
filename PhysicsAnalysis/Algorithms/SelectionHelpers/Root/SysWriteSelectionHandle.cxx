@@ -73,6 +73,14 @@ namespace CP
 
 
   std::string SysWriteSelectionHandle ::
+  getLabel () const
+  {
+    return m_accessor->label();
+  }
+
+
+
+  std::string SysWriteSelectionHandle ::
   getNamePattern () const
   {
     // So far it is undefined what to return here.  I'll fill this in

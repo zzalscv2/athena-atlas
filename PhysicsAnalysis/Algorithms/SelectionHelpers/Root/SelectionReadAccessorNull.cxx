@@ -50,6 +50,14 @@ namespace CP
 
 
 
+  bool SelectionReadAccessorNull ::
+  isBool () const
+  {
+    return true;
+  }
+
+
+
   CP::SystematicSet SelectionReadAccessorNull ::
   getInputAffecting (const ISystematicsSvc& /*svc*/,
                      const std::string& /*objectName*/) const

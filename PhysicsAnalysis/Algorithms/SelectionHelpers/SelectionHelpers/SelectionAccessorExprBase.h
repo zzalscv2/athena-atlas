@@ -17,6 +17,9 @@ class SelectionAccessorExprBase : public ISelectionReadAccessor {
  public:
   virtual SelectionType getBits(const SG::AuxElement &element,
                                 const CP::SystematicSet *sys) const override;
+
+  public:
+    virtual bool isBool () const override;
 };
 
 }  // namespace CP

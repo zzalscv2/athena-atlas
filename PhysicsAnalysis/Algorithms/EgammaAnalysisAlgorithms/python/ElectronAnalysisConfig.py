@@ -49,8 +49,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.selectionTool.useClusterEta = True
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=(5 if self.crackVeto else 4))
+        config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Set up the track selection algorithm:
         if self.trackSelection :
@@ -61,8 +60,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.maxDeltaZ0SinTheta = 0.5
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=3)
+            config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Select electrons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' + self.postfix )
@@ -71,8 +69,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSELECTRON
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=1)
+        config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
@@ -94,7 +91,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=2, preselection=self.ptSelectionOutput)
+                             preselection=self.ptSelectionOutput)
 
         # Set up the isolation correction algorithm:
         if self.isolationCorrection:
@@ -160,7 +157,6 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                 alg.selectionTool.selectionVars = [dfVar]
                 mask = int( 0 | 0x1 << 1 | 0x1 << 2)
                 alg.selectionTool.selectionMasks = [mask]
-                algDecorCount = 1
             else:
                 if self.recomputeLikelihood:
                     # Rerun the likelihood ID
@@ -171,14 +167,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                         alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
                     elif config.geometry() == LHCPeriod.Run2:
                         alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron_Run2'
-                    algDecorCount = 7
                 else:
                     # Select from Derivation Framework flags
                     config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
                     dfFlag = "DFCommonElectronsLH" + self.likelihoodWP.split('LH')[0]
                     dfFlag = dfFlag.replace("BLayer","BL")
                     alg.selectionTool.selectionFlags = [dfFlag]
-                    algDecorCount = 1
         else:
             # Set up the DNN ID selection algorithm
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronDNNAlg' + postfix )
@@ -191,14 +185,12 @@ class ElectronWorkingPointConfig (ConfigBlock) :
                     raise ValueError ( "DNN working points are not available for Run 3 yet.")
                 else:
                     alg.selectionTool.WorkingPoint = self.likelihoodWP + 'Electron'
-                algDecorCount = 6
             else:
                 # Select from Derivation Framework flags
                 raise ValueError ( "DNN working points are not available in derivations yet.")
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             bits=algDecorCount)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
@@ -209,8 +201,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.selectionTool.ElectronWP = self.isolationWP
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                 bits=1)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         # Select electrons only if they don't appear to have flipped their charge.
         if self.chargeIDSelection:
@@ -225,8 +216,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.selectionTool.CutOnBDT = -0.337671 # Loose 97%
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                 bits=1)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         # Set up an algorithm used for decorating baseline electron selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',

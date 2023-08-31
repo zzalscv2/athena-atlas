@@ -112,7 +112,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, bits=6)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         # Set up an algorithm used for decorating baseline tau selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',

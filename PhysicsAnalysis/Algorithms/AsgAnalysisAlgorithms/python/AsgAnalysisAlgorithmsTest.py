@@ -18,6 +18,7 @@ def makeOverlapSequence (dataType) :
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     sysService.sigmaRecommended = 1
+    createService( 'CP::SelectionNameSvc', 'SelectionNameSvc', sequence = algSeq )
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
@@ -151,6 +152,7 @@ def makeEventAlgorithmsSequence (dataType) :
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     sysService.sigmaRecommended = 1
+    createService( 'CP::SelectionNameSvc', 'SelectionNameSvc', sequence = algSeq )
 
     # Include, and then set up the pileup analysis sequence:
     from AsgAnalysisAlgorithms.EventSelectionAnalysisSequence import \
@@ -186,6 +188,7 @@ def makeGeneratorAlgorithmsSequence (dataType) :
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     sysService.sigmaRecommended = 1
+    createService( 'CP::SelectionNameSvc', 'SelectionNameSvc', sequence = algSeq )
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
@@ -251,6 +254,7 @@ def makePileupSequence () :
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     sysService.sigmaRecommended = 1
+    createService( 'CP::SelectionNameSvc', 'SelectionNameSvc', sequence = algSeq )
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles("mc")

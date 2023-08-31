@@ -39,7 +39,14 @@ namespace CP
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_egammasHandle));
     ANA_CHECK (m_systematicsList.initialize());
 
-    asg::AcceptData blankAccept {&m_selectionTool->getObjAcceptInfo()};
+    if (!m_nameSvc.empty())
+    {
+      ANA_CHECK (m_nameSvc.retrieve());
+      ANA_CHECK (m_nameSvc->addAcceptInfo (m_egammasHandle.getNamePattern(), m_selectionHandle.getLabel(),
+          m_isPhoton.value() ? m_selectionTool->getPhotonAcceptInfo() : m_selectionTool->getElectronAcceptInfo()));
+    }
+
+    asg::AcceptData blankAccept {&(m_isPhoton.value() ? m_selectionTool->getPhotonAcceptInfo() : m_selectionTool->getElectronAcceptInfo())};
     m_setOnFail = selectionFromAccept(blankAccept);
 
     return StatusCode::SUCCESS;

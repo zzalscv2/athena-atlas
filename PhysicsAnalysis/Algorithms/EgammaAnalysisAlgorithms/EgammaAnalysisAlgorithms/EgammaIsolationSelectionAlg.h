@@ -10,8 +10,10 @@
 #define EGAMMA_ANALYSIS_ALGORITHMS__EGAMMA_ISOLATION_SELECTION_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <IsolationSelection/IIsolationSelectionTool.h>
 #include <EgammaAnalysisAlgorithms/CopyHelpers.h>
+#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
@@ -60,6 +62,15 @@ namespace CP
   private:
     SysWriteSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "isolated", "the decoration for the asg selection"};
+
+    /// \brief the ISelectionNameSvc
+  private:
+    ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "EgammaIsolationSelectionAlg"};
+
+    /// \brief whether this is running on photons
+  private:
+    Gaudi::Property<bool> m_isPhoton {this, "isPhoton", false,
+        "whether this is running on photons"};
 
     /// \brief the bits to set for an object failing the preselection
   private:

@@ -9,6 +9,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <MuonAnalysisInterfaces/IMuonSelectionTool.h>
+#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
@@ -62,6 +63,10 @@ namespace CP
   private:
     SysWriteSelectionHandle m_badMuonVetoHandle {
       this, "badMuonVetoDecoration", "", "the decoration for the bad muon veto"};
+
+    /// \brief the ISelectionNameSvc
+  private:
+    ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "MuonSelectionAlgV2"};
 
     /// \brief the bits to set for an object failing the preselection
   private:

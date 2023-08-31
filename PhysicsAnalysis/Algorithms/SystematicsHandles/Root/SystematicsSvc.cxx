@@ -220,6 +220,19 @@ namespace CP
 
 
 
+  std::string SystematicsSvc ::
+  getCopySource (const std::string& toName) const
+  {
+    std::lock_guard<std::mutex> lock (m_systematicsMutex);
+    auto iter = m_copies.find (toName);
+    if (iter == m_copies.end())
+      return "";
+    else
+      return iter->second;
+  }
+
+
+
   StatusCode SystematicsSvc ::
   makeSystematicsName (std::string& result,
                        const std::string& name,

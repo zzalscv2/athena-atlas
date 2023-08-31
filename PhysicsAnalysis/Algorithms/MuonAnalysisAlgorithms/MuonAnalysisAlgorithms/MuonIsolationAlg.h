@@ -11,6 +11,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <IsolationSelection/IIsolationSelectionTool.h>
+#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
@@ -59,6 +60,10 @@ namespace CP
   private:
     SysWriteSelectionHandle m_isolationHandle {
       this, "isolationDecoration", "", "the decoration for the muon isolation"};
+
+    /// \brief the ISelectionNameSvc
+  private:
+    ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "MuonIsolationAlg"};
 
     /// \brief the bits to set for an object failing the preselection
   private:

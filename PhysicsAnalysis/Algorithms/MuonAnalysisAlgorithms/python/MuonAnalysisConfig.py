@@ -37,8 +37,7 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=2)
+        config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Set up the track selection algorithm:
         if self.trackSelection :
@@ -49,8 +48,7 @@ class MuonCalibrationConfig (ConfigBlock):
             alg.maxDeltaZ0SinTheta = 0.5
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                bits=3)
+            config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Set up the muon calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
@@ -70,7 +68,7 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.selectionTool.minPt = 3e3
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=2, preselection = self.ptSelectionOutput)
+                             preselection = self.ptSelectionOutput)
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
@@ -134,7 +132,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName,
                              alg.selectionDecoration,
-                             bits=4, preselection=self.qualitySelectionOutput)
+                             preselection=self.qualitySelectionOutput)
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
@@ -147,7 +145,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName,
                                  alg.isolationDecoration,
-                                 bits=1, preselection=self.qualitySelectionOutput)
+                                 preselection=self.qualitySelectionOutput)
 
         # Set up the reco/ID efficiency scale factor calculation algorithm:
         if config.dataType() != 'data' and (not self.noEffSF or self.onlyRecoEffSF):

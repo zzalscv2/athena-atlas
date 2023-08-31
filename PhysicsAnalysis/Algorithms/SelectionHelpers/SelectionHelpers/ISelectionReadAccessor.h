@@ -59,6 +59,10 @@ namespace CP
   public:
     virtual std::string label () const = 0;
 
+    /// \brief whether this accessor returns a simple boolean
+  public:
+    virtual bool isBool () const = 0;
+
     /// \brief get the systematics when reading from the decoration
   public:
     virtual CP::SystematicSet

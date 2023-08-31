@@ -44,6 +44,14 @@ namespace CP
 
 
 
+  bool SelectionReadAccessorBits ::
+  isBool () const
+  {
+    return false;
+  }
+
+
+
   std::string SelectionReadAccessorBits ::
   label () const
   {

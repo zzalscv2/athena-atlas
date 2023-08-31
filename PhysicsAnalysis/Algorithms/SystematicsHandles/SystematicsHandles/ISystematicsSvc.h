@@ -65,6 +65,11 @@ namespace CP
     registerCopy (const std::string& fromName,
                   const std::string& toName) const = 0;
 
+    /// \brief get a source object name from which a target object has been
+    /// copied
+    virtual std::string
+    getCopySource (const std::string& toName) const = 0;
+
     /// \brief make the name for the given systematics
     virtual StatusCode
     makeSystematicsName (std::string& result,

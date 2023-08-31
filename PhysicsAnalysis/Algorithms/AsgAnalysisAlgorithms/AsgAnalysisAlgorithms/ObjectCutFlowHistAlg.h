@@ -9,6 +9,8 @@
 #define ASG_ANALYSIS_ALGORITHMS__OBJECT_CUT_FLOW_HIST_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
+#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/ISelectionReadAccessor.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
@@ -56,12 +58,17 @@ namespace CP
   private:
     std::string m_histPattern {"cutflow_%SYS%"};
 
+    /// \brief the selection name service
+  private:
+    ServiceHandle<ISelectionNameSvc> m_selectionNameSvc {"SelectionNameSvc", "ObjectCutFlowHistAlg"};
+
+    /// \brief the histogram title to use
+  private:
+    Gaudi::Property<std::string> m_histTitle {this, "histTitle", "object cut flow", "title for the created histograms"};
+
 
   private:
     std::vector<std::string> m_selection;
-
-  private:
-    std::vector<unsigned> m_selectionNCuts;
 
     /// the list of accessors and cut ignore list
   private:

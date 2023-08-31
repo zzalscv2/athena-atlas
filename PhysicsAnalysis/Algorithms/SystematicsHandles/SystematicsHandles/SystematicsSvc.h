@@ -63,6 +63,8 @@ namespace CP
     virtual StatusCode
     registerCopy (const std::string& fromName,
                   const std::string& toName) const override;
+    virtual std::string
+    getCopySource (const std::string& toName) const override;
     virtual StatusCode
     makeSystematicsName (std::string& result,
                          const std::string& name,

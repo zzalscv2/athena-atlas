@@ -86,6 +86,14 @@ namespace CP
 
 
 
+  bool SelectionAccessorList ::
+  isBool () const
+  {
+    return false;
+  }
+
+
+
   CP::SystematicSet SelectionAccessorList ::
   getInputAffecting (const ISystematicsSvc& svc,
                      const std::string& objectName) const

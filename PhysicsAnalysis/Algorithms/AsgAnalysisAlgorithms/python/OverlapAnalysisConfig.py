@@ -138,27 +138,27 @@ class OverlapAnalysisConfig (ConfigBlock):
         if electrons :
             alg.electrons = electrons
             alg.electronsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.electrons, electronsSelectionName, alg.electronsDecoration, bits=1, preselection=False)
+            config.addSelection (self.electrons, electronsSelectionName, alg.electronsDecoration, preselection=False)
         if muons :
             alg.muons = muons
             alg.muonsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.muons, muonsSelectionName, alg.muonsDecoration, bits=1, preselection=False)
+            config.addSelection (self.muons, muonsSelectionName, alg.muonsDecoration, preselection=False)
         if taus :
             alg.taus = taus
             alg.tausDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.taus, tausSelectionName, alg.tausDecoration, bits=1, preselection=False)
+            config.addSelection (self.taus, tausSelectionName, alg.tausDecoration, preselection=False)
         if jets :
             alg.jets = jets
             alg.jetsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.jets, jetsSelectionName, alg.jetsDecoration, bits=1, preselection=False)
+            config.addSelection (self.jets, jetsSelectionName, alg.jetsDecoration, preselection=False)
         if photons :
             alg.photons = photons
             alg.photonsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.photons, photonsSelectionName, alg.photonsDecoration, bits=1, preselection=False)
+            config.addSelection (self.photons, photonsSelectionName, alg.photonsDecoration, preselection=False)
         if fatJets :
             alg.fatJets = fatJets
             alg.fatJetsDecoration = self.outputLabel + '_%SYS%,as_char'
-            config.addSelection (self.fatJets, fatJetsSelectionName, alg.fatJetsDecoration, bits=1, preselection=False)
+            config.addSelection (self.fatJets, fatJetsSelectionName, alg.fatJetsDecoration, preselection=False)
 
         # Create its main tool, and set its basic properties:
         config.addPrivateTool( 'overlapTool', 'ORUtils::OverlapRemovalTool' )
