@@ -255,7 +255,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()));
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
@@ -339,7 +339,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters); 
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
   Acts::TrackContainer tracks{
     Acts::VectorTrackContainer{},
@@ -414,7 +414,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     }
     //
 
-    const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters); 
+    const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
 
     Acts::TrackContainer tracks{
@@ -488,7 +488,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   std::vector<ATLASSourceLink::ElementsType> elementCollection;
 
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack, elementCollection);
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()));
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
 
   std::vector< ATLASSourceLink::ElementsType > atlasElementCollection;
@@ -600,7 +600,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()));
+  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.

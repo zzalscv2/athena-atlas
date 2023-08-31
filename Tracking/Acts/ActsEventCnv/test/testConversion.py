@@ -28,8 +28,8 @@ if "__main__" == __name__:
                 # Since we do not necessarily expect binary identical results
                 # ... but we are a ways off of worrying about this right now
                 print('WARNING: Acts and Trk tracks differ')
-                print('We have ', len(acts), '/',
-                      len(trk), 'Acts / Trk tracks')
+                print('We have ', len(acts), '[',
+                      len(trk), '] Acts [ Trk ] tracks')
                 for i, (acts_track, trk_track) in enumerate(zip(acts, trk)):
                     if (not _dparamsEqual(acts_track['dparams'], trk_track['dparams'])):
                         print('ERROR: Acts and Trk dparams differ for track', i)

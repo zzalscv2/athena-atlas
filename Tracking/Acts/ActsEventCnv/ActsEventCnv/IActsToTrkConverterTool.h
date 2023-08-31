@@ -66,7 +66,7 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
       std::vector<ATLASSourceLink::ElementsType>& collection) const = 0;
 
   virtual const Acts::BoundTrackParameters trkTrackParametersToActsParameters(
-      const Trk::TrackParameters& atlasParameter) const = 0;
+      const Trk::TrackParameters& atlasParameter, const Acts::GeometryContext& gctx) const = 0;
 
   virtual std::unique_ptr<Trk::TrackParameters>
   actsTrackParametersToTrkParameters(

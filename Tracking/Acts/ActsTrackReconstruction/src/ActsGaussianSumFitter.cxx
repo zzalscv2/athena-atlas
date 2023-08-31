@@ -121,7 +121,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   std::vector<typename ATLASSourceLink::ElementsType> elementCollection;
 
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack,elementCollection);
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()));
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
 
   return performFit(ctx, 
 		    tgContext,
@@ -175,7 +175,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   for (auto* measSet : inputMeasSet) {
     trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet, elementCollection));
   }
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters); 
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
   return performFit(ctx,
 		    tgContext,
@@ -249,7 +249,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   std::vector< ATLASSourceLink::ElementsType > elementCollection;
 
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack, elementCollection);
-  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()));
+  const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
 
   std::vector< typename ATLASSourceLink::ElementsType > atlasElementCollection;
@@ -335,7 +335,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1, elementCollection1);
   std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2, elementCollection2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
-  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()));
+  const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
 
   return performFit(ctx,
 		    tgContext,
