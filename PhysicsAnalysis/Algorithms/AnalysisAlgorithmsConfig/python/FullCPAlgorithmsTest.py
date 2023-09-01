@@ -735,7 +735,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
     configSeq.setOptionValue ('.inputLabel',  'preselectOR')
     configSeq.setOptionValue ('.outputLabel', 'passesOR' )
-
+    if not forCompare :
+        # ask to be added to the baseline selection for all objects, and to
+        # provide a preselection for the objects in subsequent algorithms
+        configSeq.setOptionValue ('.selectionName', '')
+        configSeq.setOptionValue ('.addPreselection', True)
 
     configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
     configSeq.setOptionValue ('.selectionName', 'loose')

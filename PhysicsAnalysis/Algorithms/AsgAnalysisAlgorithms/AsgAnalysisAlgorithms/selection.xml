@@ -11,6 +11,7 @@
    <class name="CP::AsgPriorityDecorationAlg" />
    <class name="CP::AsgShallowCopyAlg" />
    <class name="CP::AsgSelectionAlg" />
+   <class name="CP::AsgUnionPreselectionAlg" />
    <class name="CP::AsgUnionSelectionAlg" />
    <class name="CP::AsgViewFromSelectionAlg" />
    <class name="CP::AsgxAODNTupleMakerAlg" />
