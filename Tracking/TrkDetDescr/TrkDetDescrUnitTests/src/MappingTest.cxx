@@ -9,12 +9,11 @@
 // Trk includes
 #include "TrkDetDescrUnitTests/MappingTest.h"
 #include "TrkDetDescrInterfaces/IGeometryProcessor.h"
-#include "TrkGeometry/TrackingGeometry.h"
+#include "TrkGeometry/Layer.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/TrackingVolume.h"
-#include "TrkGeometry/Layer.h"
-#include "TrkVolumes/CylinderVolumeBounds.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
+#include "TrkVolumes/CylinderVolumeBounds.h"
 //Root includes
 #include "TTree.h"
 #include "TString.h"
