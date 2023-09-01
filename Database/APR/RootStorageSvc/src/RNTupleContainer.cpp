@@ -62,12 +62,34 @@ namespace {
       }
    } EHI;
    ErrorHandlerFunc_t ErrorHandlerInit::m_oldHandler ATLAS_THREAD_SAFE;
+
+
+// Wrapper preventing invocation of the object d-tor
+// Needed to work around recent RNTuple RValue class changes
+//   - to be removed when the API improves
+template <typename T_>
+struct NoDTorWrapper  {
+   union { T_ value_; };
+
+   template<typename ...Args>
+   NoDTorWrapper(Args &&... args) :
+      value_(std::forward<Args>(args)...)   {}
+
+   const T_ &val() const { return value_; }
+   T_ &val() { return value_; }
+   const T_ *operator->() const { return &value_; }
+   T_ *operator->() { return &value_; }
+
+   ~NoDTorWrapper() {}
+};
+
 } // namespace
 
 
 // required for unique_ptr compilation
-RNTupleContainer::FieldDesc::~FieldDesc() {
-}
+RNTupleContainer::FieldDesc::~FieldDesc() {};
+
+
 
 const std::string RNTupleContainer::FieldDesc::typeName() {
    auto tid =  typeID();
@@ -332,7 +354,6 @@ DbStatus RNTupleContainer::writeObject( ActionList::value_type& action )
 }
 
 
-
 DbStatus
 RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
 {
@@ -361,31 +382,26 @@ RNTupleContainer::loadObject(void** obj_p, ShapeH, Token::OID_t& oid)
              p.c_str += dsc.offset();
              break;             
          }
-         REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
-         if( p.ptr ) {
-            // there already is an object that needs to be read into
-            for( auto val_i = entry->begin(); val_i != entry->end(); ++val_i ) {
-               if( val_i->GetField()->GetName() == dsc.fieldname ) {
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
+         REntry *entry = m_ntupleReader->GetModel()->GetDefaultEntry();
+         for( auto val_i = entry->begin(); val_i != entry->end(); ++val_i ) {
+            if( val_i->GetField()->GetName() == dsc.fieldname ) {
+               if( p.ptr ) {
+                  // there already is an object that needs to be read into
                   auto rfv = val_i->GetField()->BindValue( p.ptr );
                   rfv.Read( evt_id );
-#endif
-                  break;
+               } else {
+                  // need to ask ROOT to create a new object for us
+                  // and take over ownership by preventing deallocation in the d-tor.
+                  using RValue = ROOT::Experimental::Detail::RFieldBase::RValue;
+                  NoDTorWrapper<RValue> rfv( std::move(val_i->GetField()->GenerateValue()) );
+                  rfv->Read( evt_id );
+                  *obj_p = rfv->GetRawPtr();
                }
+               break;
             }
-         } else {
-            /*
-              not sure we need that
-            auto val = entry->GetValue( dsc.fieldname );
-            rfv = val.GetField()->GenerateValue();
-            val.GetField()->Read(evt_id, &rfv);
-            *obj_p = rfv.GetRawPtr();
-            */
-            DbPrint err(m_name);
-            err << DbPrintLvl::Fatal << "[RNTupleContainer] - ROOT object allocation requested" << DbPrint::endmsg;
-            return Error;
          }
-
+#endif
          numBytes += 1;
 
          // case DbColumn::BLOB:
