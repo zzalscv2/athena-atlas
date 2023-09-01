@@ -201,7 +201,7 @@ VxTrackAtVertex::~VxTrackAtVertex()
     delete m_trackOrParticleLink;
 }
 
-// copy constructor 
+// copy constructor
 VxTrackAtVertex::VxTrackAtVertex(const VxTrackAtVertex& rhs)
   : Trk::ObjectCounter<Trk::VxTrackAtVertex>(rhs)
   , m_fitQuality(rhs.m_fitQuality)
@@ -452,10 +452,16 @@ VxTrackAtVertex::dump(MsgStream& sl) const
        << endmsg;
   }
   if (this->perigeeAtVertex() != nullptr) {
-    sl << "Refitted Perigee: " << *(this->perigeeAtVertex()) << endmsg;
+    sl << "Charged Refitted Perigee: " << *(this->perigeeAtVertex()) << endmsg;
   } else {
-    sl << "Refitted Perigee was not stored in pool file." << endmsg;
+    sl << "Charged Refitted Perigee was not created/stored in pool file." << endmsg;
   }
+  if (this->neutralPerigeeAtVertex() != nullptr) {
+    sl << "Neutral Refitted Perigee: " << *(this->neutralPerigeeAtVertex()) << std::endl;
+  } else {
+    sl << "Neutral Refitted Perigee was not created/stored in pool file." << std::endl;
+  }
+
   sl << m_fitQuality << "\tWeight: " << m_trkWeight << endmsg;
   return sl;
 }
@@ -472,9 +478,14 @@ VxTrackAtVertex::dump(std::ostream& sl) const
        << std::endl;
   }
   if (this->perigeeAtVertex() != nullptr) {
-    sl << "Refitted Perigee: " << *(this->perigeeAtVertex()) << std::endl;
+    sl << "Charged Refitted Perigee: " << *(this->perigeeAtVertex()) << std::endl;
   } else {
-    sl << "Refitted Perigee was not stored in pool file." << std::endl;
+    sl << "Charged Refitted Perigee was not created/stored in pool file." << std::endl;
+  }
+  if (this->neutralPerigeeAtVertex() != nullptr) {
+    sl << "Neutral Refitted Perigee: " << *(this->neutralPerigeeAtVertex()) << std::endl;
+  } else {
+    sl << "Neutral Refitted Perigee was not created/stored in pool file." << std::endl;
   }
   sl << m_fitQuality << "\tWeight: " << m_trkWeight << std::endl;
   return sl;

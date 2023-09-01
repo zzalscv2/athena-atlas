@@ -8,7 +8,7 @@ atlas_add_library( VxVertex
                    src/*.cxx
                    PUBLIC_HEADERS VxVertex
                    LINK_LIBRARIES AthLinks AthContainers AthenaKernel GeoPrimitives
-                   EventPrimitives TrkEventPrimitives  TrkNeutralParameters 
+                   EventPrimitives TrkEventPrimitives TrkNeutralParameters TrkParameters
                    TrkTrackLink TrkParameters 
                    PRIVATE_LINK_LIBRARIES GaudiKernel )
 
