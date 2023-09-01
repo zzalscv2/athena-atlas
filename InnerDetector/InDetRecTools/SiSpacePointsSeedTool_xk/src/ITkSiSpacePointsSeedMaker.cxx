@@ -887,9 +887,9 @@ void SiSpacePointsSeedMaker::buildFrameWork()
     /// case 1: PPP seeds, if we use them
     const float radiusPixelStart = m_fastTracking ? 50. : 40.; /// approximate lowest R location of pixel hits (driven by barrel)
     const float radiusPixelEnd = m_fastTracking ? 250. : 320.; /// approximate largest R location of pixel hits (driven by endcap)
-    const float binSizePhi_PPP = m_pixel ? azimuthalStep(m_ptmin, m_maxdImpact, radiusPixelStart, radiusPixelEnd) / 3. : 0.;
+    const float binSizePhi_PPP = m_pixel ? azimuthalStep(m_ptmin, m_maxdImpact, radiusPixelStart, radiusPixelEnd) / 3.f : 1.f;
     /// case 2: SSS seeds, if we use them
-    const float binSizePhi_SSS = m_strip ? azimuthalStep(m_ptmin, m_maxdImpactSSS, m_rminSSS, m_rmaxSSS) / 3. : 0.;
+    const float binSizePhi_SSS = m_strip ? azimuthalStep(m_ptmin, m_maxdImpactSSS, m_rminSSS, m_rmaxSSS) / 3.f : 1.f;
     m_inverseBinSizePhiPPP = 1. / binSizePhi_PPP;
     m_inverseBinSizePhiSSS = 1. / binSizePhi_SSS;
   }
