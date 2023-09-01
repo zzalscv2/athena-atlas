@@ -420,15 +420,9 @@ def createTrackingConfigFlags():
     ####################################################################
 
     # Vertexing flags
-    from TrkConfig.VertexFindingFlags import (
-        createSecVertexingFlags, createEGammaPileUpSecVertexingFlags,
-        createPriVertexingFlags)
+    from TrkConfig.VertexFindingFlags import createPriVertexingFlags
     icf.addFlagsCategory("Tracking.PriVertex",
                          createPriVertexingFlags, prefix=True)
-    icf.addFlagsCategory("Tracking.SecVertex",
-                         createSecVertexingFlags, prefix=True)
-    icf.addFlagsCategory("Tracking.SecVertexEGammaPileUp",
-                         createEGammaPileUpSecVertexingFlags, prefix=True)
 
     # Turn on the primary vertex reconstruction
     icf.addFlag("Tracking.doVertexFinding",

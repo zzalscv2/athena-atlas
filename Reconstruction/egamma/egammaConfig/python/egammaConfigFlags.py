@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
-
 def createEgammaConfigFlags():
     egcf = AthConfigFlags()
 
@@ -23,6 +22,11 @@ def createEgammaConfigFlags():
     # Build photon conversion vertices.
     egcf.addFlag("Egamma.doConversionBuilding",
                  lambda prevFlags: prevFlags.Egamma.doTracking)
+
+    from egammaConfig.egammaPhotonConvFlags import (
+        createEGammaPhotonConvFlags)
+    egcf.addFlagsCategory("Egamma.PhotonConv",
+                          createEGammaPhotonConvFlags, prefix=True)
 
     # Do egamma truth association when running on MC.
     egcf.addFlag("Egamma.doTruthAssociation",

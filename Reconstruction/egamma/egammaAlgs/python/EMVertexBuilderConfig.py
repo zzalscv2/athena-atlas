@@ -14,12 +14,10 @@ def EMVertexBuilderCfg(flags, name="EMVertexBuilder", **kwargs):
         kwargs["ExtrapolationTool"] = acc.popToolsAndMerge(
             EMExtrapolationToolsCfg(flags))
     if "VertexFinderTool" not in kwargs:
-        vtxFlags = flags.cloneAndReplace(
-            "Tracking.SecVertex", "Tracking.SecVertexEGammaPileUp")
         from InDetConfig.InDetConversionFinderToolsConfig import (
             InDetConversionFinderToolsCfg)
         kwargs["VertexFinderTool"] = acc.popToolsAndMerge(
-            InDetConversionFinderToolsCfg(vtxFlags))
+            InDetConversionFinderToolsCfg(flags))
 
     alg = CompFactory.EMVertexBuilder(name, **kwargs)
     acc.addEventAlgo(alg)
