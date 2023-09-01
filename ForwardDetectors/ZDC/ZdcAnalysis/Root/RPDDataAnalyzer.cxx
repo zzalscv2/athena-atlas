@@ -134,10 +134,6 @@ void RPDDataAnalyzer::analyzeData()
       mat_X_T_X.Invert(); // now this is the covariance matrix
       TVectorD vec_theta = mat_X_T_X*mat_X_T*vec_y;
       TVectorD vec_y_pred = mat_X*vec_theta;
-      float analytic_chisqr = 0;
-      for (uint i = 0; i < m_nBaselineSamples - n_points_skipped; i++) {
-        analytic_chisqr += (vec_y[i] - vec_y_pred[i])*(vec_y[i] - vec_y_pred[i]);
-      }
       float intercept = vec_theta[0];
       // float intercept_err = sqrt(mat_X_T_X[0][0]);
       float slope = vec_theta[1];

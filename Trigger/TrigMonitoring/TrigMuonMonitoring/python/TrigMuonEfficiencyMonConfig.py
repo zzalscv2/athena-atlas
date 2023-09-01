@@ -25,7 +25,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
-    MonitoredChains = [c for c in Chains if '2mu14' not in c]
+    MonitoredChains = [c for c in Chains if '2mu' not in c]
   
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(MonitoredChains) == 0:
@@ -41,7 +41,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
         monAlg.TagTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
         monAlg.Method = 'TTbarTagAndProbe'
         monAlg.MonitoredChains = [chain]
-        threshold, level1 = regex('HLT_mu([0-9]+).*_(L1MU[0-9].*[A-Z])').match(chain).groups()
+        threshold, level1 = regex('HLT_mu([0-9]+).*_(L1MU[A-Za-z0-9_]+)').match(chain).groups()
         monAlg.L1Seeds = [regex('L1MU').sub('L1_MU', level1)]
         monAlg.Thresholds = [float(threshold)]
         monAlg.Group = 'Eff_ttbar_'+chain
@@ -63,7 +63,7 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
-    MonitoredChains = [c for c in Chains if '2mu14' not in c]
+    MonitoredChains = [c for c in Chains if '2mu' not in c]
           
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(MonitoredChains) == 0:
@@ -79,7 +79,7 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
         monAlg.TagTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
         monAlg.Method = 'ZTagAndProbe'
         monAlg.MonitoredChains = [chain]
-        threshold, level1 = regex('HLT_mu([0-9]+).*_(L1MU[0-9].*[A-Z])').match(chain).groups()
+        threshold, level1 = regex('HLT_mu([0-9]+).*_(L1MU[A-Za-z0-9_]+)').match(chain).groups()
         monAlg.L1Seeds = [regex('L1MU').sub('L1_MU', level1)]
         monAlg.Thresholds = [float(threshold)]
         monAlg.Group = 'Eff_ZTP_'+chain

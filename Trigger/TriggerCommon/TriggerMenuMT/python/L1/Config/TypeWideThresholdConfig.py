@@ -515,9 +515,9 @@ def getConfig_gLJ():
     confObj = odict()
     confObj["ptMinToTopo1"] = 6 
     confObj["ptMinToTopo2"] = 6 
-    confObj["seedThrA"] = 20
-    confObj["seedThrB"] = 20
-    confObj["seedThrC"] = 20 
+    confObj["seedThrA"] = 3
+    confObj["seedThrB"] = 3
+    confObj["seedThrC"] = 3 
     confObj["rhoTowerMinA"] = -9.6 
     confObj["rhoTowerMinB"] = -9.6 
     confObj["rhoTowerMinC"] = -9.6 

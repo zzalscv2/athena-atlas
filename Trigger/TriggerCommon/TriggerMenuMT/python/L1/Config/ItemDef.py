@@ -148,7 +148,7 @@ class ItemDef:
         ZDC_E3_AND_E3     = ZDC_comb7
         # (additional) combined ZDC signals for LHCf+ZDC special run
         ZDC_OR = Not(ZDC_VETO)
-        ZDC_A_AND_C = Not( ZDC_VETO | ZDC_XOR_E2 | ZDC_XOR_E1_E3 )
+        ZDC_A_AND_C = d.ZDC_2 | (d.ZDC_1 & d.ZDC_0)
 
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
@@ -811,6 +811,7 @@ class ItemDef:
         MenuItem('L1_MU5VF_J75'  ).setLogic( d.MU5VF & d.J75    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU3V_3J15'  ).setLogic( d.MU3V & d.J15.x(3)  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU3V_3J20'  ).setLogic( d.MU3V & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_MU3V_J20'   ).setLogic( d.MU3V & d.J20    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU3V_J30'   ).setLogic( d.MU3V & d.J30    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU3V_J50'   ).setLogic( d.MU3V & d.J50    & physcond).setTriggerType(TT.calo)
         MenuItem('L1_MU8F_3J20'    ).setLogic( d.MU8F & d.J20.x(3)  & physcond).setTriggerType(TT.calo)
@@ -1396,6 +1397,7 @@ class ItemDef:
         MenuItem('L1_eEM2_ZDC_XOR4_VjTE100_GAP_AANDC' ).setLogic( d.eEM2 & PHYS_ZDC_XOR4 & Not(d.jTE100) & GAPAC  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VTE50' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.TE50)   & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VTE20' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.TE20)   & physcond)
+        MenuItem('L1_TRT_VZDC_A_VZDC_C_VTE200' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.TE200)   & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE50' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE20' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE20)  & physcond)
         MenuItem('L1_TRT_VZDC_A_VZDC_C_VjTE50_GAP_AANDC' ).setLogic( d.NIMTRT & PHYS_VZDC_A_VZDC_C & Not(d.jTE50) & GAPAC  & physcond)

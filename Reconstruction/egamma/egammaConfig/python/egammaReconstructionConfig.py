@@ -20,7 +20,7 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
         egammaTopoClusterCopierCfg)
     acc.merge(egammaTopoClusterCopierCfg(flags))
 
-    # Add e/gamma tracking algorithms.
+    # Add e/gamma tracking algorithms
     if flags.Egamma.doTracking:
         from egammaAlgs.egammaSelectedTrackCopyConfig import (
             egammaSelectedTrackCopyCfg)
