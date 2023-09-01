@@ -149,7 +149,7 @@ private:
   Gaudi::Property<double> m_energyDepositThreshold{this,"energyDepositThreshold",300.0*CLHEP::eV,"Minimum energy deposit for hit to be digitized"};
   Gaudi::Property<double> m_limitElectronKineticEnergy{this,"limitElectronKineticEnergy",5.0*CLHEP::MeV,"Minimum kinetic energy for electron hit to be digitized"};
 
-  const float m_chargeThreshold{0.03f};
+  Gaudi::Property<float> m_chargeThreshold{this,"chargeThreshold", 0.03, "vmm charge threshold in pC, need to set useCondThresholds to false if one wants to use this threshold value otherwise the one from the conditions database is used"};
 
   const float m_timeJitterElectronicsStrip{2.f}; //ns
   const float m_timeJitterElectronicsPad{2.f}; //ns

@@ -66,6 +66,9 @@ StatusCode sTgcDigitizationTool::initialize() {
   ATH_MSG_INFO ( "InputObjectName        " << m_hitsContainerKey.key());
   ATH_MSG_INFO ( "OutputObjectName       " << m_outputDigitCollectionKey.key());
   ATH_MSG_INFO ( "OutputSDOName          " << m_outputSDO_CollectionKey.key());
+  ATH_MSG_INFO ( "HV                     " << m_runVoltage);
+  ATH_MSG_INFO ( "threshold              " << m_chargeThreshold);
+  ATH_MSG_INFO ( "useCondThresholds      " << m_useCondThresholds);
 
   if (m_hitsContainerKey.key().empty()) {
     ATH_MSG_FATAL("Property InputObjectName not set !");
