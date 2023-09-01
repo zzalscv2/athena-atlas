@@ -4,55 +4,54 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
 def ConversionPostSelectorCfg(flags, name="ConversionPostSelector", **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("MaxChi2Vtx",
-                      flags.Tracking.SecVertex.SecVtxPost.MaxChi2Vtx)
-    kwargs.setdefault("MaxInvariantMass",
-                      flags.Tracking.SecVertex.SecVtxPost.MaxInvariantMass)
     kwargs.setdefault("MaxPhiVtxTrk",
-                      flags.Tracking.SecVertex.SecVtxPost.MaxPhiVtxTrk)
-    kwargs.setdefault("MaxdR",
-                      flags.Tracking.SecVertex.SecVtxPost.MaxdR)
-    kwargs.setdefault("MinFitMomentum",
-                      flags.Tracking.SecVertex.SecVtxPost.MinFitMomentum)
-    kwargs.setdefault("MinPt",
-                      flags.Tracking.SecVertex.SecVtxPost.MinPt)
+                      flags.Egamma.PhotonConv.SecVtxPost.MaxPhiVtxTrk)
     kwargs.setdefault("MinRadius",
-                      flags.Tracking.SecVertex.SecVtxPost.MinRadius)
+                      flags.Egamma.PhotonConv.SecVtxPost.MinRadius)
+
+    kwargs.setdefault("MaxChi2Vtx", [50., 50., 50.])
+    kwargs.setdefault("MaxInvariantMass", [10000., 10000., 10000.])
+    kwargs.setdefault("MinFitMomentum", [0., 0., 0.])
+    kwargs.setdefault("MinPt", 0.)
+    kwargs.setdefault("MaxdR", -250.) # off
 
     acc.setPrivateTools(CompFactory.InDet.ConversionPostSelector(name, **kwargs))
     return acc
 
-def SingleTrackConversionToolCfg(flags, name="SingleTrackConversionTool", **kwargs):
+def SingleTrackConversionToolCfg(
+        flags, name="SingleTrackConversionTool", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("MaxBLayerHits",
-                      flags.Tracking.SecVertex.SingleTrk.MaxBLayerHits)
+                      flags.Egamma.PhotonConv.SingleTrk.MaxBLayerHits)
     kwargs.setdefault("MinInitialHitRadius",
-                      flags.Tracking.SecVertex.SingleTrk.MinInitialHitRadius)
+                      flags.Egamma.PhotonConv.SingleTrk.MinInitialHitRadius)
     kwargs.setdefault("MinInitialHitRadius_noBlay",
-                      flags.Tracking.SecVertex.SingleTrk.MinInitialHitRadius_noBlay)
+                      flags.Egamma.PhotonConv.SingleTrk.MinInitialHitRadius_noBlay)
     kwargs.setdefault("MinRatioOfHLhits",
-                      flags.Tracking.SecVertex.SingleTrk.MinRatioOfHLhits)
+                      flags.Egamma.PhotonConv.SingleTrk.MinRatioOfHLhits)
 
-    acc.setPrivateTools(CompFactory.InDet.SingleTrackConversionTool(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.SingleTrackConversionTool(name, **kwargs))
     return acc
 
 def TrackPairsSelectorCfg(flags, name="TrackPairsSelector", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("MaxDistBetweenTracks",
-                      flags.Tracking.SecVertex.TrkPairSel.MaxDistBetweenTracks)
+                      flags.Egamma.PhotonConv.TrkPairSel.MaxDistBetweenTracks)
     kwargs.setdefault("MaxEta",
-                      flags.Tracking.SecVertex.TrkPairSel.MaxEta)
-    kwargs.setdefault("MaxFirstHitRadius",
-                      flags.Tracking.SecVertex.TrkPairSel.MaxFirstHitRadius)
-    kwargs.setdefault("MaxInitDistance",
-                      flags.Tracking.SecVertex.TrkPairSel.MaxInitDistance)
+                      flags.Egamma.PhotonConv.TrkPairSel.MaxEta)
     kwargs.setdefault("MinTrackAngle",
-                      flags.Tracking.SecVertex.TrkPairSel.MinTrackAngle)
+                      flags.Egamma.PhotonConv.TrkPairSel.MinTrackAngle)
+
+    # hacky way to determine if TRT only of SI
+    kwargs.setdefault("MaxFirstHitRadius", 500)
+    kwargs.setdefault("MaxInitDistance", [10000.0, 10000.0, 10000.0])
 
     acc.setPrivateTools(CompFactory.InDet.TrackPairsSelector(name, **kwargs))
     return acc
@@ -60,24 +59,26 @@ def TrackPairsSelectorCfg(flags, name="TrackPairsSelector", **kwargs):
 def VertexPointEstimatorCfg(flags, name="VertexPointEstimator", **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("MinDeltaR", flags.Tracking.SecVertex.VtxPt.MinDeltaR)
-    kwargs.setdefault("MaxDeltaR", flags.Tracking.SecVertex.VtxPt.MaxDeltaR)
-    kwargs.setdefault("MaxPhi",    flags.Tracking.SecVertex.VtxPt.MaxPhi)
+    kwargs.setdefault("MinDeltaR", flags.Egamma.PhotonConv.VtxPt.MinDeltaR)
+    kwargs.setdefault("MaxDeltaR", flags.Egamma.PhotonConv.VtxPt.MaxDeltaR)
+    kwargs.setdefault("MaxPhi",    flags.Egamma.PhotonConv.VtxPt.MaxPhi)
 
     acc.setPrivateTools(CompFactory.InDet.VertexPointEstimator(name, **kwargs))
     return acc
 
-def BPHY_VertexPointEstimatorCfg(flags, name="BPHY_VertexPointEstimator", **kwargs):
+def BPHY_VertexPointEstimatorCfg(
+        flags, name="BPHY_VertexPointEstimator", **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("MinDeltaR", [-10000.,-10000.,-10000.])
-    kwargs.setdefault("MaxDeltaR", [10000.,10000.,10000.])
-    kwargs.setdefault("MaxPhi",    [10000., 10000., 10000.])
+    kwargs.setdefault("MinDeltaR", [-10000., -10000., -10000.])
+    kwargs.setdefault("MaxDeltaR", [ 10000.,  10000.,  10000.])
+    kwargs.setdefault("MaxPhi",    [ 10000.,  10000.,  10000.])
 
     acc.setPrivateTools(CompFactory.InDet.VertexPointEstimator(name, **kwargs))
     return acc
 
-def V0VertexPointEstimatorCfg(flags, name="InDetV0VertexPointEstimator", **kwargs):
+def V0VertexPointEstimatorCfg(
+        flags, name="InDetV0VertexPointEstimator", **kwargs):
     kwargs.setdefault("MaxTrkXYDiffAtVtx", [ 20.,   20.,   20.])
     kwargs.setdefault("MaxTrkZDiffAtVtx",  [ 100.,  100.,  100.])
     kwargs.setdefault("MaxTrkXYValue",     [ 400.,  400.,  400.])
@@ -107,27 +108,30 @@ def InDetConversionFinderToolsCfg(flags, name="ConversionFinderTool", **kwargs):
             VertexPointEstimatorCfg(flags)))
 
     if "TrackSelectorTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectorToolConfig import InDetConversionTrackSelectorToolCfg
+        from InDetConfig.InDetTrackSelectorToolConfig import (
+            InDetConversionTrackSelectorToolCfg)
         kwargs.setdefault("TrackSelectorTool", acc.popToolsAndMerge(
             InDetConversionTrackSelectorToolCfg(flags)))
 
     if "VertexFitterTool" not in kwargs:
-        from TrkConfig.TrkVKalVrtFitterConfig import SecVx_TrkVKalVrtFitterCfg
+        from TrkConfig.TrkVKalVrtFitterConfig import (
+            Conversion_TrkVKalVrtFitterCfg)
         kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(
-            SecVx_TrkVKalVrtFitterCfg(flags)))
+            Conversion_TrkVKalVrtFitterCfg(flags)))
 
     kwargs.setdefault("IsConversion", True)
 
     kwargs.setdefault("MaxDistVtxHit",
-                      flags.Tracking.SecVertex.Finder.MaxDistVtxHit)
+                      flags.Egamma.PhotonConv.Finder.MaxDistVtxHit)
     kwargs.setdefault("MinDistVtxHit",
-                      flags.Tracking.SecVertex.Finder.MinDistVtxHit)
+                      flags.Egamma.PhotonConv.Finder.MinDistVtxHit)
     kwargs.setdefault("MinFlightAngle",
-                      flags.Tracking.SecVertex.Finder.MinFlightAngle)
+                      flags.Egamma.PhotonConv.Finder.MinFlightAngle)
     kwargs.setdefault("MinInitVtxR",
-                      flags.Tracking.SecVertex.Finder.MinInitVtxR)
+                      flags.Egamma.PhotonConv.Finder.MinInitVtxR)
     kwargs.setdefault("RemoveTrtTracks",
-                      flags.Tracking.SecVertex.Finder.RemoveTrtTracks)
+                      flags.Egamma.PhotonConv.Finder.RemoveTrtTracks)
 
-    acc.setPrivateTools(CompFactory.InDet.InDetConversionFinderTools(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetConversionFinderTools(name, **kwargs))
     return acc
