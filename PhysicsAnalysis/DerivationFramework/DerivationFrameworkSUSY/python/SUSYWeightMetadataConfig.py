@@ -1,10 +1,19 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+# Sum of weights algorithm
+def SumOfWeightsAlgCfg(flags, name, **kwargs):
+    """ get the sum of weights algorithm """
+    acc = ComponentAccumulator()
+    SumOfWeightsAlg = CompFactory.SumOfWeightsAlg
+    acc.addEventAlgo( SumOfWeightsAlg(name=name, **kwargs) )
+    return acc
+
+# SUSY Event Weights
 def AddSUSYWeightsCfg(flags, pref = ""):
     """Add SUSY weights"""
- 
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.ComponentFactory import CompFactory
 
     acc = ComponentAccumulator()
 
@@ -20,7 +29,5 @@ def AddSUSYWeightsCfg(flags, pref = ""):
         acc.addPublicTool(susyWeight[i], primary = True)
         listTools.append(susyWeight[i])
 
-    sumOfWeightsAlg = CompFactory.SumOfWeightsAlg(name = pref+"SUSYSumWeightsAlg",
-                                                  WeightTools = listTools)
-    acc.addEventAlgo(sumOfWeightsAlg)
-    return(acc) 
+    acc.merge( SumOfWeightsAlgCfg(flags, name=pref+"SUSYSumWeightsAlg", WeightTools=listTools) )
+    return acc
