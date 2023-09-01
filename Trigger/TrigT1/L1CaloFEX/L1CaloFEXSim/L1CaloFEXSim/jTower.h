@@ -43,7 +43,7 @@ namespace LVL1 {
     
     /** Constructors */
     jTower();
-    jTower(float eta, float phi, int towerid, int posneg, float centre_eta = -1.0, float centre_phi = -1.0, int fcal_layer = -1);
+    jTower(int ieta, int iphi, int towerid, int posneg, float centre_eta = -1.0, float centre_phi = -1.0, int fcal_layer = -1);
     
     /** Destructor */
     virtual ~jTower() = default;
@@ -73,8 +73,16 @@ namespace LVL1 {
     /** Add to eta/phi values of a specified tower */
     void setCentreEta(float ieta);
     void setCentrePhi(float iphi);
-    void setiEta(float ieta);
-    void setiPhi(float iphi);
+    void setiEta(int ieta);
+    void setiPhi(int iphi);
+    
+    /** Get coordinates of tower */
+    int iEta() const;
+    int iPhi() const; 
+       
+    float centreEta()      const {return m_centre_eta;}
+    float centrePhi()      const {return m_centre_phi;}
+    float centrephi_toPI() const {return m_centre_phi_toPI;}    
 
     /** Add to Area values of a specified tower */
     void setTTowerArea(int area,int layer);
@@ -90,19 +98,11 @@ namespace LVL1 {
     void setMaxEtforPileup(int etval){m_maxEt_pileup_thr=etval;};
     int getMaxEtforPileup() const {return m_maxEt_pileup_thr;};
 
-    /** Get coordinates of tower */
-    int iEta() const;
-    int iPhi() const;
+
     
-    float eta() const {return m_eta;};
-    float phi() const {return m_phi;};
-    float centreEta() const {return m_centre_eta;}
-    float centrePhi() const {return m_centre_phi;}
-    float centrephi_toPI() const {return m_centre_phi_toPI;}
+
     int fcalLayer() const {return m_fcal_layer;}
     
-    void setEta(const float thiseta){ m_eta = thiseta; }
-
     // jTower ID Online and Offline
     void setOnlineID(int tower_id_online);
     
@@ -180,15 +180,16 @@ namespace LVL1 {
 
     /** Internal data */
   private:
-    float m_eta;
-    float m_phi;
-    
-    int m_tower_id;
-    int m_tower_id_online;
+        
+    int m_iEta=0;
+    int m_iPhi=0;
+    int m_tower_id = 0;
+    int m_tower_id_online = 0;
     int m_posneg = 0;
     float m_centre_eta =0;
     float m_centre_phi =0;
     float m_centre_phi_toPI=0;
+    
     std::vector<Identifier> m_EM_scID;
     std::vector<Identifier> m_HAD_scID;
     std::vector<int> m_et; // Real energy from TILE and the decoded energy from LATOME
