@@ -25,8 +25,8 @@ namespace LVL1 {
   
   // default constructor
   jTower::jTower():
-    m_eta(0.),
-    m_phi(0.),
+    m_iEta(0),
+    m_iPhi(0),
     m_tower_id(-9999999),
     m_tower_id_online(0xffff),
     m_posneg(0),
@@ -38,9 +38,9 @@ namespace LVL1 {
   }
   
   /** constructs a tower and sets the coordinates and identifier */
-  jTower::jTower(float eta, float phi, int towerid, int posneg, float centre_eta, float centre_phi, int fcal_layer):
-    m_eta(eta),
-    m_phi(phi),
+  jTower::jTower(int ieta, int iphi, int towerid, int posneg, float centre_eta, float centre_phi, int fcal_layer):
+    m_iEta(ieta),
+    m_iPhi(iphi),
     m_tower_id(towerid),
     m_tower_id_online(-9999999),
     m_posneg(posneg),
@@ -167,12 +167,12 @@ void jTower::Do_LAr_encoding(){
 
 /** Return global eta index. */
 int jTower::iEta() const {
-    return m_eta;
+    return m_iEta;
 }
 
 /** Return global phi index.*/
 int jTower::iPhi() const {
-    return m_phi;
+    return m_iPhi;
 }
 
 /** Return ET of specified supercell */
@@ -295,23 +295,22 @@ std::vector<Identifier> jTower::getLayerSCIDs(unsigned int layer) const {
 
 }
 
-void jTower::setCentreEta(float ieta){
-    m_centre_eta = ieta;
+void jTower::setCentreEta(float eta){
+    m_centre_eta = eta;
 }
 
-void jTower::setiEta(float ieta){
-    m_eta = ieta;
+void jTower::setiEta(int eta){
+    m_iEta = eta;
 }
 
-void jTower::setiPhi(float iphi){
-    m_phi = iphi;
-}
-
-void jTower::setCentrePhi(float iphi){
-    m_centre_phi_toPI = iphi;
-    m_centre_phi = iphi;
-    if(m_centre_phi<0) m_centre_phi = 2*M_PI+iphi;    
-
+void jTower::setCentrePhi(float phi){
+    m_centre_phi_toPI = phi;
+    m_centre_phi = phi;
+    if(m_centre_phi<0) m_centre_phi = 2*M_PI+phi;  
+} 
+     
+void jTower::setiPhi(int phi){
+    m_iPhi = phi;
 }
 
 void jTower::setOnlineID(int tower_id_online){
