@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -222,15 +222,17 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
         double zOfIntersect = intersectRmax.yOfX;
         // now check if the intersect is inside m_halfZ
         if (std::abs(zOfIntersect) <= m_halfZ)
-          return Trk::ObjectAccessor(
-            (choiceIndicator || zOfIntersect > 0.)
-              ? m_boundaryAccessors.tubeAccessor(Trk::TubeRincreaseZincrease)
-              : m_boundaryAccessors.tubeAccessor(Trk::TubeRincreaseZdecrease));
+          return {(choiceIndicator || zOfIntersect > 0.)
+                      ? m_boundaryAccessors.tubeAccessor(
+                            Trk::TubeRincreaseZincrease)
+                      : m_boundaryAccessors.tubeAccessor(
+                            Trk::TubeRincreaseZdecrease)};
         // if the intersect is outside
-        return Trk::ObjectAccessor(
-          (choiceIndicator || zOfIntersect > 0.)
-            ? m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRincrease)
-            : m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRincrease));
+        return {
+            (choiceIndicator || zOfIntersect > 0.)
+                ? m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRincrease)
+                : m_boundaryAccessors.tubeAccessor(
+                      Trk::TubeZdecreaseRincrease)};
       }
       // intersect the Rmin
       Trk::CylinderIntersector intersectRmin(
@@ -238,15 +240,16 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
       double zOfIntersect = intersectRmin.yOfX;
       // now check if the intersect is inside m_halfZ
       if (std::abs(zOfIntersect) <= m_halfZ)
-        return Trk::ObjectAccessor(
-          (choiceIndicator || zOfIntersect > 0.)
-            ? m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZincrease)
-            : m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZdecrease));
+        return {
+            (choiceIndicator || zOfIntersect > 0.)
+                ? m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZincrease)
+                : m_boundaryAccessors.tubeAccessor(
+                      Trk::TubeRdecreaseZdecrease)};
       // if the intersect is outside
-      return Trk::ObjectAccessor(
-        (choiceIndicator || zOfIntersect > 0.)
-          ? m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRdecrease)
-          : m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRdecrease));
+      return {
+          (choiceIndicator || zOfIntersect > 0.)
+              ? m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRdecrease)
+              : m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRdecrease)};
     }
     // =================================================================================================
 
@@ -254,17 +257,13 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
     // =========================================
     //  (a) outside cases
     if (posR < m_innerRadius && deltaR < 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideRminRdecrease));
+      return {m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideRminRdecrease)};
     if (posR > m_outerRadius && deltaR > 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideRmaxRincrease));
+      return {m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideRmaxRincrease)};
     if (posZ < -m_halfZ && deltaZ < 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideZminZdecrease));
+      return {m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideZminZdecrease)};
     if (posZ > m_halfZ && deltaZ > 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideZmaxZincrease));
+      return {m_boundaryAccessors.tubeAccessor(Trk::TubeOutsideZmaxZincrease)};
     // (b) inside cases
     // the increase R case
     if (deltaR > 0.) {
@@ -275,17 +274,13 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
       double zOfIntersect = intersectRmax.yOfX;
 
       if (std::abs(zOfIntersect) <= m_halfZ && zOfIntersect > 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeRincreaseZincrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeRincreaseZincrease)};
       if (std::abs(zOfIntersect) <= m_halfZ && zOfIntersect < 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeRincreaseZdecrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeRincreaseZdecrease)};
       if (std::abs(zOfIntersect) > m_halfZ && zOfIntersect < 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRincrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRincrease)};
       if (std::abs(zOfIntersect) > m_halfZ && zOfIntersect > 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRincrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRincrease)};
 
     } else {
       // solve the linear equation for the inner Radius with floating point
@@ -295,16 +290,12 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
       double zOfIntersect = intersectRmin.yOfX;
 
       if (std::abs(zOfIntersect) <= m_halfZ && zOfIntersect > 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZincrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZincrease)};
       if (std::abs(zOfIntersect) <= m_halfZ && zOfIntersect < 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZdecrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeRdecreaseZdecrease)};
       if (std::abs(zOfIntersect) > m_halfZ && zOfIntersect > 0.)
-        return Trk::ObjectAccessor(
-          m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRdecrease));
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRdecrease));
+        return {m_boundaryAccessors.tubeAccessor(Trk::TubeZincreaseRdecrease)};
+      return {m_boundaryAccessors.tubeAccessor(Trk::TubeZdecreaseRdecrease)};
     }
   }
   // the cylinder case
@@ -344,24 +335,19 @@ Trk::CylinderVolumeBounds::boundarySurfaceAccessor(
 
     // return the cases for going through the cylinder
     if (intersectsCylinder && zOfIntersect > 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.cylinderAccessor(Trk::CylinderZincrease));
+      return {m_boundaryAccessors.cylinderAccessor(Trk::CylinderZincrease)};
     if (intersectsCylinder && zOfIntersect <= 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.cylinderAccessor(Trk::CylinderZdecrease));
+      return {m_boundaryAccessors.cylinderAccessor(Trk::CylinderZdecrease)};
     if (deltaZ > 0.)
-      return Trk::ObjectAccessor(
-        m_boundaryAccessors.cylinderAccessor(Trk::CylinderPositiveFace));
-    return Trk::ObjectAccessor(
-      m_boundaryAccessors.cylinderAccessor(Trk::CylinderNegativeFace));
+      return {m_boundaryAccessors.cylinderAccessor(Trk::CylinderPositiveFace)};
+    return {m_boundaryAccessors.cylinderAccessor(Trk::CylinderNegativeFace)};
   }
   // the sectoral cylinder case
   if (m_innerRadius != 0. && std::abs(m_halfPhiSector - M_PI) > 10e-3)
-    return Trk::ObjectAccessor(m_boundaryAccessors.sectoralCylinderAccessor(
-      Trk::StandardSectoralCylinder));
+    return {m_boundaryAccessors.sectoralCylinderAccessor(
+        Trk::StandardSectoralCylinder)};
   // it remains the sectoral tube case
-  return Trk::ObjectAccessor(
-    m_boundaryAccessors.sectoralTubeAccessor(Trk::StandardSectoralTube));
+  return {m_boundaryAccessors.sectoralTubeAccessor(Trk::StandardSectoralTube)};
 }
 
 Trk::CylinderBounds*

@@ -9,10 +9,9 @@
 // Trk includes
 #include "TrkDetDescrUnitTests/TrackingGeometryTest.h"
 #include "TrkDetDescrInterfaces/IGeometryProcessor.h"
-#include "TrkGeometry/TrackingGeometry.h"
+#include "TrkGeometry/Layer.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/TrackingVolume.h"
-#include "TrkGeometry/Layer.h"
 
 // monitor memory usage
 #ifdef TRKDETDESCR_MEMUSAGE   

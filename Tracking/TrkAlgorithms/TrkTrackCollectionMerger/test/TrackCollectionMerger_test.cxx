@@ -58,7 +58,7 @@ class GaudiFixture {
     return m_sg;
    }
 
-   GaudiFixture(const std::string & joPath = "TrkTrackCollectionMerger/TrackCollectionMerger_test.txt") {
+   explicit GaudiFixture(const std::string & joPath = "TrkTrackCollectionMerger/TrackCollectionMerger_test.txt") {
      setUpGaudi(joPath);
    }
  

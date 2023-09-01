@@ -51,7 +51,7 @@ namespace Trk
       #endif
 
     // if no vxCandidate set, then trkPrtOrigin should be NoVtx
-        assert ((vxCandidate!=0)||(trkPrtOrigin==NoVtx));
+        assert ((vxCandidate!=nullptr)||(trkPrtOrigin==NoVtx));
 
     // Defining parameter is always last.
         m_trackParameters.push_back(definingParameter);
