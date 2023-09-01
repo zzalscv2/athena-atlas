@@ -99,17 +99,6 @@ def BPHY10Cfg(flags):
     BPHY10LambdaContainerName = "BPHY10RecoLambdaCandidates"
     BPHY10LambdabarContainerName = "BPHY10RecoLambdabarCandidates"
 
-    from InDetConfig.InDetV0FinderConfig import V0MainDecoratorCfg
-    V0Decorator = acc.popToolsAndMerge(V0MainDecoratorCfg(
-        flags,
-        name = "BPHY10V0Decorator",
-        V0Tools = V0Tools,
-        V0ContainerName = BPHY10V0ContainerName,
-        KshortContainerName = BPHY10KshortContainerName,
-        LambdaContainerName = BPHY10LambdaContainerName,
-        LambdabarContainerName = BPHY10LambdabarContainerName))
-    acc.addPublicTool(V0Decorator)
-
     BPHY10BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
                                     name                   = "BPHY10BdKstSelectAndWrite",
                                     VertexSearchTool     = BPHY10BdJpsiKst,
@@ -144,20 +133,14 @@ def BPHY10Cfg(flags):
                                    MassMax                    = 100000.0,   #no mass cuts here
                                    Chi2Max                    = 200)
 
-    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_InDetV0FinderToolCfg
-    BPHY10_Reco_V0Finder   = CompFactory.DerivationFramework.Reco_V0Finder(
-                                  name                   = "BPHY10_Reco_V0Finder",
-                                  V0FinderTool           = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(flags,BPHYDerivationName,
-                                       V0ContainerName = BPHY10V0ContainerName,
-                                       KshortContainerName = BPHY10KshortContainerName,
-                                       LambdaContainerName = BPHY10LambdaContainerName,
-                                       LambdabarContainerName = BPHY10LambdabarContainerName)),
-                                  Decorator              = V0Decorator,
-                                  V0ContainerName        = BPHY10V0ContainerName,
-                                  KshortContainerName    = BPHY10KshortContainerName,
-                                  LambdaContainerName    = BPHY10LambdaContainerName,
-                                  LambdabarContainerName = BPHY10LambdabarContainerName,
-                                  CheckVertexContainers  = ['BPHY10JpsiCandidates'])
+    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
+    BPHY10_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+        flags, derivation = BPHYDerivationName,
+        V0ContainerName = BPHY10V0ContainerName,
+        KshortContainerName = BPHY10KshortContainerName,
+        LambdaContainerName = BPHY10LambdaContainerName,
+        LambdabarContainerName = BPHY10LambdabarContainerName,
+        CheckVertexContainers = ['BPHY10JpsiCandidates']))
 
     from TrkConfig.TrkVKalVrtFitterConfig import JpsiV0VertexFitCfg
     JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))

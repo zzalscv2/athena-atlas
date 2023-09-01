@@ -66,15 +66,6 @@ def IDTR2Cfg(flags):
     IDTR2LambdaContainerName = "IDTR2RecoLambdaCandidates"
     IDTR2LambdabarContainerName = "IDTR2RecoLambdabarCandidates"
 
-    from InDetConfig.InDetV0FinderConfig import V0MainDecoratorCfg
-    V0Decorator = acc.popToolsAndMerge(V0MainDecoratorCfg(
-        flags,
-        name="IDTR2V0Decorator",
-        V0ContainerName=IDTR2V0ContainerName,
-        KshortContainerName=IDTR2KshortContainerName,
-        LambdaContainerName=IDTR2LambdaContainerName,
-        LambdabarContainerName=IDTR2LambdabarContainerName))
-
     from InDetConfig.InDetV0FinderConfig import IDTR2_V0FinderToolCfg
     V0FinderTool = acc.popToolsAndMerge(IDTR2_V0FinderToolCfg(
         flags,
@@ -85,15 +76,15 @@ def IDTR2Cfg(flags):
         LambdaContainerName=IDTR2LambdaContainerName,
         LambdabarContainerName=IDTR2LambdabarContainerName))
 
-    IDTR2_Reco_V0Finder = CompFactory.DerivationFramework.Reco_V0Finder(
-        name="IDTR2_Reco_V0Finder",
-        V0FinderTool=V0FinderTool,
-        Decorator=V0Decorator,
-        V0ContainerName=IDTR2V0ContainerName,
-        KshortContainerName=IDTR2KshortContainerName,
-        LambdaContainerName=IDTR2LambdaContainerName,
-        LambdabarContainerName=IDTR2LambdabarContainerName,
-        CheckVertexContainers=['PrimaryVertices'])
+    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
+    IDTR2_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+        flags, derivation = "IDTR2",
+        V0ContainerName = IDTR2V0ContainerName,
+        KshortContainerName = IDTR2KshortContainerName,
+        LambdaContainerName = IDTR2LambdaContainerName,
+        LambdabarContainerName = IDTR2LambdabarContainerName,
+        CheckVertexContainers = ['PrimaryVertices'],
+        V0FinderTool = V0FinderTool))
 
     from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
     acc.merge(TrackSystematicsAlgCfg(
@@ -112,15 +103,14 @@ def IDTR2Cfg(flags):
         LambdaContainerName=IDTR2LambdaContainerName + "Syst",
         LambdabarContainerName=IDTR2LambdabarContainerName + "Syst"))
 
-    IDTR2_Reco_V0FinderSyst = CompFactory.DerivationFramework.Reco_V0Finder(
-        name="IDTR2_Reco_V0Finder_Syst",
-        V0FinderTool=V0FinderToolSyst,
-        Decorator=V0Decorator,
-        V0ContainerName=IDTR2V0ContainerName + "Syst",
-        KshortContainerName=IDTR2KshortContainerName + "Syst",
-        LambdaContainerName=IDTR2LambdaContainerName + "Syst",
-        LambdabarContainerName=IDTR2LambdabarContainerName + "Syst",
-        CheckVertexContainers=['PrimaryVertices'])
+    IDTR2_Reco_V0FinderSyst = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+        flags, derivation = "IDTR2", suffix = "_Syst",
+        V0ContainerName = IDTR2V0ContainerName + "Syst",
+        KshortContainerName = IDTR2KshortContainerName + "Syst",
+        LambdaContainerName = IDTR2LambdaContainerName + "Syst",
+        LambdabarContainerName = IDTR2LambdabarContainerName + "Syst",
+        CheckVertexContainers = ['PrimaryVertices'],
+        V0FinderTool = V0FinderToolSyst))
 
     skimmingTools = []
     augmentationTools = [IDTR2_Reco_V0Finder, IDTR2_Reco_V0FinderSyst]

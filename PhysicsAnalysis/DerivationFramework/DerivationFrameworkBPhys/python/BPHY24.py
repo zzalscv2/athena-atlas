@@ -11,7 +11,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 BPHYDerivationName = "BPHY24"
 streamName = "StreamDAOD_BPHY24"
 
-def BPHY24Cfg(ConfigFlags):
+def BPHY24Cfg(flags):
 
     # Lists for better code organization
     augsList          = [] # List of active augmentation tools
@@ -27,16 +27,16 @@ def BPHY24Cfg(ConfigFlags):
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     acc = ComponentAccumulator()
-    isSimulation = ConfigFlags.Input.isMC
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    isSimulation = flags.Input.isMC
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
-    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags))
+    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
 
 
@@ -55,7 +55,7 @@ def BPHY24Cfg(ConfigFlags):
     # LRT track merge
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
     BPHY24TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
-        ConfigFlags,
+        flags,
         name                        = "BPHY24TrackParticleMergerTool",
         TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
         OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
@@ -204,29 +204,27 @@ def BPHY24Cfg(ConfigFlags):
     LambdaContainerName = "BPHY24RecoLambdaCandidates"
     LambdabarContainerName = "BPHY24RecoLambdabarCandidates"
 
-    V0Decorator = CompFactory.InDet.V0MainDecorator(name = "BPHY24V0Decorator",
-                                    V0Tools = V0Tools,
-                                    V0ContainerName = V0ContainerName,
-                                    KshortContainerName = KshortContainerName,
-                                    LambdaContainerName = LambdaContainerName,
-                                    LambdabarContainerName = LambdabarContainerName)
-    acc.addPublicTool(V0Decorator)
-    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_InDetV0FinderToolCfg
-    BPHY24_Reco_V0Finder   = CompFactory.DerivationFramework.Reco_V0Finder(
-              name                   = "BPHY24_Reco_V0Finder",
-              V0FinderTool           = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(ConfigFlags,BPHYDerivationName,
-                                           TrackParticleCollection = mainIDInput,
-                                           V0ContainerName = V0ContainerName,
-                                           KshortContainerName = KshortContainerName,
-                                           LambdaContainerName = LambdaContainerName,
-                                           LambdabarContainerName = LambdabarContainerName,
-                                           RelinkTracks =originalTrackCond)),
-              Decorator              = V0Decorator,
-              V0ContainerName        = V0ContainerName,
-              KshortContainerName    = KshortContainerName,
-              LambdaContainerName    = LambdaContainerName,
-              LambdabarContainerName = LambdabarContainerName,
-              CheckVertexContainers  = ['BPHY24_DiMuon_Candidates', 'BPHY24_DiElectron_Candidates'])
+    from DerivationFrameworkBPhys.V0ToolConfig import (
+        BPHY_InDetV0FinderToolCfg, BPHY_Reco_V0FinderCfg)
+
+    BPHY24_V0FinderTool = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(
+        flags, BPHYDerivationName,
+        TrackParticleCollection = mainIDInput,
+        V0ContainerName = V0ContainerName,
+        KshortContainerName = KshortContainerName,
+        LambdaContainerName = LambdaContainerName,
+        LambdabarContainerName = LambdabarContainerName,
+        RelinkTracks = originalTrackCond))
+
+    BPHY24_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+        flags, derivation = BPHYDerivationName,
+        V0ContainerName = V0ContainerName,
+        KshortContainerName = KshortContainerName,
+        LambdaContainerName = LambdaContainerName,
+        LambdabarContainerName = LambdabarContainerName,
+        CheckVertexContainers = ['BPHY24_DiMuon_Candidates',
+                                 'BPHY24_DiElectron_Candidates'],
+        V0FinderTool = BPHY24_V0FinderTool))
 
     augsList += [BPHY24_Reco_V0Finder]
     outVtxList += ['BPHY24RecoKshortCandidates']
@@ -237,7 +235,7 @@ def BPHY24Cfg(ConfigFlags):
     finalCandidateList += ["BPHY24RecoV0Candidates"]
     JpsiV0VertexFit = CompFactory.Trk.TrkVKalVrtFitter(
                                   name                 = "JpsiV0VertexFit",
-                                  Extrapolator         = acc.popToolsAndMerge(InDetExtrapolatorCfg(ConfigFlags)),
+                                  Extrapolator         = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)),
                                   FirstMeasuredPoint   = False,
                                   CascadeCnstPrecision = 1e-6,
                                   MakeExtendedVertex   = True)
@@ -248,7 +246,7 @@ def BPHY24Cfg(ConfigFlags):
         V0Tools                 = V0Tools,
         HypothesisName          = "Bd",
         TrkVertexFitterTool     = JpsiV0VertexFit,
-        PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Hypothesis            = 310,
         JpsiMassLowerCut        = 1.,
         JpsiMassUpperCut        = 7000.,
@@ -276,7 +274,7 @@ def BPHY24Cfg(ConfigFlags):
         V0Tools                 = V0Tools,
         HypothesisName          = "Bd",
         TrkVertexFitterTool     = JpsiV0VertexFit,
-        PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+        PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
         V0Hypothesis            = 310,
         JpsiMassLowerCut        = 100.,
         JpsiMassUpperCut        = 7000.,
@@ -302,7 +300,7 @@ def BPHY24Cfg(ConfigFlags):
     thinTrkVtxList += BPHY24JpsieeKshort.CascadeVertexCollections
 
     from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg
-    TTVATool = acc.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags,
+    TTVATool = acc.popToolsAndMerge(isoTTVAToolCfg(flags,
                                                   WorkingPoint = "Custom",
                                                   d0_cut = -1,
                                                   d0sig_cut = -1,
@@ -311,14 +309,14 @@ def BPHY24Cfg(ConfigFlags):
     acc.addPublicTool(TTVATool)
 
     from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
-    TrackSelTool = acc.popToolsAndMerge(isoTrackSelectionToolCfg(ConfigFlags,
+    TrackSelTool = acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags,
                                                                 maxZ0SinTheta= 2,
                                                                 minPt= 1000,
                                                                 CutLevel= "Loose"))
     acc.addPublicTool(TrackSelTool)
 
     from IsolationAlgs.IsoToolsConfig import TrackIsolationToolCfg
-    TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(ConfigFlags,
+    TrackIsoTool = acc.popToolsAndMerge(TrackIsolationToolCfg(flags,
                                                               TrackSelectionTool = TrackSelTool,
                                                               TTVATool = TTVATool))
     acc.addPublicTool(TrackIsoTool)
@@ -520,7 +518,7 @@ def BPHY24Cfg(ConfigFlags):
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    BPHY24SlimmingHelper = SlimmingHelper("BPHY24SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY24SlimmingHelper = SlimmingHelper("BPHY24SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from AthenaConfiguration.Enums import MetadataCategory
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
@@ -581,7 +579,7 @@ def BPHY24Cfg(ConfigFlags):
     BPHY24SlimmingHelper.StaticContent = StaticContent
     BPHY24SlimmingHelper.ExtraVariables = ExtraVariables
     BPHY24ItemList = BPHY24SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY24", ItemList=BPHY24ItemList, AcceptAlgs=["BPHY24Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY24", AcceptAlgs=["BPHY24Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY24", ItemList=BPHY24ItemList, AcceptAlgs=["BPHY24Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY24", AcceptAlgs=["BPHY24Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
