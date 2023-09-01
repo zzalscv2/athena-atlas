@@ -49,6 +49,8 @@ def createITkConfigFlags():
 
     # Turn on SCT_ModuleVetoSvc, allowing it to be configured later
     itkcf.addFlag("ITk.doStripModuleVeto", False)
+    # Path to the JSON file to mask the modules
+    itkcf.addFlag("ITk.JsonPathStripModuleVeto", "")
     # Enable check for dead modules and FEs
     itkcf.addFlag("ITk.checkDeadPixelsOnTrack", True)
     # defines if the X1X mode is used for the offline or not

@@ -115,6 +115,7 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
 
     # Condition tool
     toolArgs = {}
+    toolArgs["JsonPath"] = flags.ITk.JsonPathStripModuleVeto
     toolArgs["BadModuleIdentifiers"] = kwargs["BadModuleIdentifiers"]
     acc.setPrivateTools(CompFactory.SCT_ModuleVetoTool(name=f"{name}Tool", **toolArgs))
 
