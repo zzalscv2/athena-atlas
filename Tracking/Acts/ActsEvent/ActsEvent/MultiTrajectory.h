@@ -324,7 +324,6 @@ class MutableMultiTrajectory final
     auto el =
         sourceLink.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
     trackStates()[istate]->setUncalibratedMeasurementLink(el);
-    trackStates()[istate]->setGeometryId(sourceLink.geometryId().value());
   }
   /**
    * Implementation of uncalibrated link fetch

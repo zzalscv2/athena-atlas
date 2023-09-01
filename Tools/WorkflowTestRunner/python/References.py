@@ -22,10 +22,10 @@ references_map = {
     "d1726": "v1",
     "d1759": "v3",
     # Reco
-    "q442": "v15",
-    "q443": "v13",
+    "q442": "v17",
+    "q443": "v14",
     "q445": "v18",
-    "q449": "v17",
+    "q449": "v19",
     # Derivations
     "data_PHYS_Run2": "v10",
     "data_PHYS_Run3": "v9",

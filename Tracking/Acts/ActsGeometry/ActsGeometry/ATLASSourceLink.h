@@ -10,9 +10,11 @@
 
 #include "Acts/EventData/Measurement.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
+#include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Definitions/TrackParametrization.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
 
 // add include when finished
 
@@ -106,13 +108,18 @@ struct ATLASSourceLinkCalibrator final
   /// @param trackState The track state to calibrate
   template <typename trajectory_t, typename sourceLink_t = ATLASSourceLinkGeneric<Trk::MeasurementBase>>
   static void calibrate(const Acts::GeometryContext &gctx,
+                        const Acts::CalibrationContext & cctx,
+                        const Acts::SourceLink& sl,
                         typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState);
 };
 
 template <typename trajectory_t, typename sourceLink_t>
 void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
+            const Acts::CalibrationContext& /*cctx*/,
+            const Acts::SourceLink& sl,
 					  typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) {
-  auto sourceLink = trackState.getUncalibratedSourceLink().template get<sourceLink_t>();
+  auto sourceLink = sl.template get<sourceLink_t>();
+  trackState.setUncalibratedSourceLink(sl);
   trackState.allocateCalibrated(sourceLink.dim());
   if (sourceLink.dim() == 0)
   {
@@ -147,6 +154,18 @@ void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
                              " currently not supported.");
   }
 }
+
+struct ATLASSourceLinkSurfaceAccessor {
+  const Acts::TrackingGeometry* trackingGeometry;
+
+  template<typename sourceLink_t = ATLASSourceLinkGeneric<Trk::MeasurementBase>>
+  const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const {
+    const auto& sl = sourceLink.get<sourceLink_t>();
+    return trackingGeometry->findSurface(sl.geometryId());
+  }
+
+
+};
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( std::vector<ATLASUncalibSourceLink::ElementsType>, 127101450, 1 )

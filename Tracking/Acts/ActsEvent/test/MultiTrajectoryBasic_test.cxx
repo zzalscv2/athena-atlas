@@ -321,12 +321,11 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   auto el1 = ElementLink<xAOD::UncalibratedMeasurementContainer>(
       "hello", 7);  // EL to a fictional container & a fictional index
 
-  auto link1 = Acts::SourceLink(99, el1);  // a fictional geometry ID
+  auto link1 = Acts::SourceLink(el1);  // a fictional geometry ID
   auto ts = mtj->getTrackState(index);
   ts.setUncalibratedSourceLink(link1);  // set link at position 0
   // get it back
   auto link1Back = ts.getUncalibratedSourceLink();
-  BOOST_CHECK_EQUAL(link1.geometryId(), link1Back.geometryId());
   auto el1Back =
       link1Back.get<ElementLink<xAOD::UncalibratedMeasurementContainer>>();
   // compare them by key & index because equality, requires proper has key
@@ -851,11 +850,8 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
   // set SourceLink and get it back
   auto el = ElementLink<xAOD::UncalibratedMeasurementContainer>(
       "hello", 7);  // EL to a fictional container & a fictional index
-  auto link = Acts::SourceLink(99, el);  // a fictional geometry ID
+  auto link = Acts::SourceLink(el);  // a fictional geometry ID
   ts.setUncalibratedSourceLink(link);
-  // check that the uncalibratedSourceLink source link is set
-  BOOST_CHECK_EQUAL(ts.getUncalibratedSourceLink().geometryId(),
-                    link.geometryId());
   BOOST_CHECK_EQUAL(
       ts.getUncalibratedSourceLink()
           .get<ElementLink<xAOD::UncalibratedMeasurementContainer>>()

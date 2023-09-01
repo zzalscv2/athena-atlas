@@ -92,8 +92,13 @@ namespace ActsTrk
 
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
 
+    ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
+    spBuilderConfig->slSurfaceAccessor
+      .connect<&ATLASSourceLinkSurfaceAccessor::operator()<ATLASUncalibSourceLink>>(&surfaceAccessor);
+
     const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
     spBuilderConfig->trackingGeometry = trkGeometry;
+
     
     auto spConstructor = [this, &clusterContainer, &elements](const Acts::Vector3 &pos,
 							      const Acts::Vector2 &cov,
@@ -532,7 +537,7 @@ namespace ActsTrk
     auto paramCovAccessor = [&](const Acts::SourceLink &slink) {
       auto atlasSLink = slink.get<ATLASUncalibSourceLink>();
       Acts::BoundVector param = atlasSLink.values();
-      Acts::BoundSymMatrix cov =  atlasSLink.cov();
+      Acts::BoundSquareMatrix cov =  atlasSLink.cov();
       return std::make_pair(param, cov);
     };
     std::vector<Acts::SourceLink> slinks;

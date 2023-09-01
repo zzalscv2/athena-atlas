@@ -53,9 +53,12 @@ To use this implementation, the flag for a refitting from PRD measurment has to 
 */
 template <typename trajectory_t>
 void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
+    const Acts::CalibrationContext& /*cctx*/,
+    const Acts::SourceLink& sl,
     typename trajectory_t::TrackStateProxy trackState) const {
     
-    const Trk::PrepRawData* prd = trackState.getUncalibratedSourceLink().template get<PRDSourceLink>().prd;
+    const Trk::PrepRawData* prd = sl.template get<PRDSourceLink>().prd;
+    trackState.setUncalibratedSourceLink(sl);
 
     const Acts::BoundTrackParameters actsParam(trackState.referenceSurface().getSharedPtr(),
              trackState.predicted(),
@@ -155,6 +158,13 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
 
 }
 
+const Acts::Surface* PRDSourceLinkSurfaceAccessor::operator()(const Acts::SourceLink& sourceLink) const {
+  const auto& sl = sourceLink.get<PRDSourceLink>();
+  const auto& trkSrf = sl.prd->detectorElement()->surface(sl.prd->identify());
+  const auto& actsSrf = converterTool->trkSurfaceToActsSurface(trkSrf);
+  return &actsSrf;
+}
+
 ActsKalmanFitter::ActsKalmanFitter(const std::string& t,const std::string& n,
                                 const IInterface* p) :
   base_class(t,n,p)
@@ -236,6 +246,9 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
   kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
+  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
+  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the KalmanFitter options
@@ -259,7 +272,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
-  Acts::BoundSymMatrix scaledCov = Acts::BoundSymMatrix::Identity();
+  Acts::BoundSquareMatrix scaledCov = Acts::BoundSquareMatrix::Identity();
   for (int i=0; i<6; ++i) {
     double scale = m_option_seedCovarianceScale;
     (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);
@@ -314,6 +327,9 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
   kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
+
+  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
+  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -389,6 +405,9 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     calibrator.converterTool = m_ATLASConverterTool.get();
     kfExtensions.calibrator.connect<&PRDSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>(&calibrator);
 
+    PRDSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
+    kfExtensions.surfaceAccessor.connect<&PRDSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+
     Acts::PropagatorPlainOptions propagationOption;
     propagationOption.maxSteps = m_option_maxPropagationStep;
     // Set the KalmanFitter options
@@ -403,9 +422,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     trackSourceLinks.reserve(inputPRDColl.size());
 
     for(const Trk::PrepRawData* prd : inputPRDColl) {
-      const Trk::Surface &prdsurf = prd->detectorElement()->surface(prd->identify());
-      const Acts::Surface &surface = m_ATLASConverterTool->trkSurfaceToActsSurface(prdsurf);
-      trackSourceLinks.push_back(Acts::SourceLink{surface.geometryId(), PRDSourceLink{prd}});
+      trackSourceLinks.push_back(Acts::SourceLink{PRDSourceLink{prd}});
     }
     // protection against error in the conversion from Atlas masurement to Acts source link
     if (trackSourceLinks.empty()) {
@@ -604,7 +621,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
-  Acts::BoundSymMatrix scaledCov = Acts::BoundSymMatrix::Identity();
+  Acts::BoundSquareMatrix scaledCov = Acts::BoundSquareMatrix::Identity();
   for (int i=0; i<6; ++i) {
     double scale = m_option_seedCovarianceScale;
     (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);

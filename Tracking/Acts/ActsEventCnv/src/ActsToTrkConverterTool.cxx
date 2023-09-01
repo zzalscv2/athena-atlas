@@ -54,8 +54,8 @@ static void ActsMeasurementCheck(const Acts::GeometryContext &gctx,
 
 static void ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
-    const Acts::GeometryContext &gctx, const Acts::BoundSymMatrix &covpc,
-    const Acts::BoundVector &targetPars, const Acts::BoundSymMatrix &targetCov,
+    const Acts::GeometryContext &gctx, const Acts::BoundSquareMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundSquareMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface);
 
 }  // namespace ActsTrk
@@ -256,7 +256,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
         atlasParameter.charge() / (atlasParameter.momentum().mag() * 1_MeV), 0.;
   }
 
-  Acts::BoundSymMatrix cov = Acts::BoundSymMatrix::Identity();
+  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
   cov.topLeftCorner(5, 5) = *atlasParameter.covariance();
 
   // Convert the covariance matrix from MeV
@@ -356,7 +356,7 @@ ActsTrk::ActsToTrkConverterTool::actsTrackParametersToTrkParameters(
         Acts::CovarianceCache covCache{freePars, freeCov};
         auto [varNewCov, varNewJac] = Acts::transportCovarianceToBound(
             gctx, *helperSurface, freePars, covCache);
-        auto targetCov = std::get<Acts::BoundSymMatrix>(varNewCov);
+        auto targetCov = std::get<Acts::BoundSquareMatrix>(varNewCov);
 
         auto pars = std::make_unique<Trk::AtaPlane>(
             targetPars[Acts::eBoundLoc0], targetPars[Acts::eBoundLoc1],
@@ -595,7 +595,7 @@ static void ActsTrk::ActsMeasurementCheck(
   locxypar[4] = 1;
   locxypar[5] = 1;
   auto boundToFree = planeSurface->boundToFreeJacobian(gctx, locxypar);
-  Acts::ActsSymMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
+  Acts::ActsSquareMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
 
   Acts::BoundVector locpcpar;
   locpcpar.head<2>() = locpc;
@@ -605,8 +605,8 @@ static void ActsTrk::ActsMeasurementCheck(
   locpcpar[5] = 1;
 
   boundToFree = surface.boundToFreeJacobian(gctx, locpcpar);
-  Acts::ActsSymMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
-  Acts::ActsSymMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
+  Acts::ActsSquareMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
+  Acts::ActsSquareMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
 
   // convert cluster covariance
   Acts::ActsMatrix<2, 2> covpc = covxy;
@@ -651,8 +651,8 @@ static void ActsTrk::ActsMeasurementCheck(
 
 void ActsTrk::ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
-    const Acts::GeometryContext &gctx, const Acts::BoundSymMatrix &covpc,
-    const Acts::BoundVector &targetPars, const Acts::BoundSymMatrix &targetCov,
+    const Acts::GeometryContext &gctx, const Acts::BoundSquareMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundSquareMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface) {
 
   std::cout << "ANNULUS PAR COV: ";

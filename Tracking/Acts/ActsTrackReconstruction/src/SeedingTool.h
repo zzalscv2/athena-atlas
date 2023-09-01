@@ -143,8 +143,6 @@ namespace ActsTrk {
       "In dense environments many seeds may be found per middle space point. Only seeds with the highest weight will be kept if this limit is reached."}; // Used in SeedFilterConfig as well
     Gaudi::Property< bool > m_interactionPointCut {this, "interactionPointCut", true,
       "Enable cut on the compatibility between interaction point and SPs"};
-    Gaudi::Property< bool > m_arithmeticAverageCotTheta {this, "arithmeticAverageCotTheta", false,
-      "Use arithmetic or geometric average in the calculation of the squared error"};
     Gaudi::Property< std::vector< size_t > > m_zBinsCustomLooping {this, "zBinsCustomLooping",
       {1, 2, 3, 4, 11, 10, 9, 8, 6, 5, 7} , "defines order of z bins for looping"};
     Gaudi::Property< bool > m_useVariableMiddleSPRange {this, "useVariableMiddleSPRange", true,

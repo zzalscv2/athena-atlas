@@ -49,7 +49,6 @@ def ActsITkStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaRMaxBottomSP" , 300. * UnitConstants.mm)
     kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
     kwargs.setdefault("interactionPointCut" , False)
-    kwargs.setdefault("arithmeticAverageCotTheta" , True)
     kwargs.setdefault("zBinsCustomLooping" , [6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1])
     kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * UnitConstants.mm)
     kwargs.setdefault("deltaRMiddleMaxSPRange" , 150 * UnitConstants.mm)

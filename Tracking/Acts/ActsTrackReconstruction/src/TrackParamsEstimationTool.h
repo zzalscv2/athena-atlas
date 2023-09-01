@@ -36,7 +36,7 @@ namespace ActsTrk {
 			      const ActsTrk::Seed& seed,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::Surface& surface,
-			      const Acts::BoundSymMatrix& covariance,
+			      const Acts::BoundSquareMatrix& covariance,
 			      const Acts::Vector3& bField,
 			      double bFieldMin) const override;
     
@@ -64,7 +64,7 @@ namespace ActsTrk {
 
     /// The track parameters covariance (assumed to be the same for all estimated
     /// track parameters for the moment)
-    Acts::BoundSymMatrix m_covariance = Acts::BoundSymMatrix::Zero();
+    Acts::BoundSquareMatrix m_covariance = Acts::BoundSquareMatrix::Zero();
   };
   
 } // namespace
