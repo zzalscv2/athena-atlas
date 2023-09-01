@@ -509,5 +509,6 @@ void ActsTrk::ConstMultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* g
 }
 
 const Acts::Surface* ActsTrk::ConstMultiTrajectory::referenceSurface_impl(IndexType istate) const {
+  if ( istate >= m_surfaces.size() ) throw std::out_of_range("ConstMultiTrajectory index out of range when accessing reference surface");
   return m_surfaces[istate];
 }
