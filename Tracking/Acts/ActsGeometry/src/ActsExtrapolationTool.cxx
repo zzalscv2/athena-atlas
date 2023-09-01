@@ -168,7 +168,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
   options.maxSteps = m_maxStep;
   options.direction = navDir;
   if(particleHypo != Trk::noHypothesis){
-    options.absPdgCode = m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge());
+    options.absPdgCode = Acts::PdgParticle{m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge())};
     options.mass = Trk::ParticleMasses::mass[particleHypo] * 1_MeV;
   }
 
@@ -246,7 +246,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   options.maxSteps = m_maxStep;
   options.direction = navDir;
   if(particleHypo != Trk::noHypothesis){
-    options.absPdgCode = m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge());
+    options.absPdgCode = Acts::PdgParticle{m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge())};
     options.mass = Trk::ParticleMasses::mass[particleHypo] * 1_MeV;
   }
 
@@ -301,7 +301,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
   options.maxSteps = m_maxStep;
   options.direction = navDir;
   if(particleHypo != Trk::noHypothesis){
-    options.absPdgCode = m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge());
+    options.absPdgCode = Acts::PdgParticle{m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge())};
     options.mass = Trk::ParticleMasses::mass[particleHypo] * 1_MeV;
   }
 
@@ -372,7 +372,7 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   options.maxSteps = m_maxStep;
   options.direction = navDir;
   if(particleHypo != Trk::noHypothesis){
-    options.absPdgCode = m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge());
+    options.absPdgCode = Acts::PdgParticle{m_pdgToParticleHypothesis.convert(particleHypo, startParameters.charge())};
     options.mass = Trk::ParticleMasses::mass[particleHypo] * 1_MeV;
   }
 

@@ -101,7 +101,6 @@ ActsTrk::IterativePriVtxFinderTool::initialize()
     
   // Iterative Vertex Finder setup
   VertexFinder::Config finderConfig(fitter, std::move(linearizer), std::move(seedFinder), ipEst);
-  finderConfig.useBeamConstraint = m_useBeamConstraint;
   finderConfig.significanceCutSeeding = m_significanceCutSeeding;
   finderConfig.maximumChi2cutForSeeding = m_maximumChi2cutForSeeding;
   finderConfig.maxVertices = m_maxVertices;
@@ -256,7 +255,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
     // TODO: check if the following works as well:
     // cov->col(4) *= 1./1_MeV;
     // cov->row(4) *= 1./1_MeV;
-    Acts::BoundSymMatrix covMat;
+    Acts::BoundSquareMatrix covMat;
     covMat << cov(0,0) , cov(0,1) , cov(0,2) , cov(0,3) , cov(0,4) *1./(1_MeV), 0      
       , cov(1,0) , cov(1,1) , cov(1,2) , cov(1,3) , cov(1,4) *1./(1_MeV) , 0
       , cov(2,0) , cov(2,1) , cov(2,2) , cov(2,3) , cov(2,4) *1./(1_MeV) , 0
@@ -279,12 +278,13 @@ for(const auto& trk : allTracks){
 
   if(!m_useBeamConstraint){
     beamSpotConstraintVtx.setPosition(Acts::Vector3::Zero());
-    beamSpotConstraintVtx.setCovariance(Acts::ActsSymMatrix<3>::Zero());
+    beamSpotConstraintVtx.setCovariance(Acts::ActsSquareMatrix<3>::Zero());
   }
+  vertexingOptions.useConstraintInFit = m_useBeamConstraint;
 
   //Adding 4th dimensional timing info to vertex constraint as needed by ACTS
   Acts::Vector4 vtxConstraintPos;
-  Acts::SymMatrix4 vtxConstraintCov;
+  Acts::SquareMatrix4 vtxConstraintCov;
 
   auto beamSpotCov = beamSpotHandle->beamVtx().covariancePosition();
 
@@ -294,8 +294,8 @@ for(const auto& trk : allTracks){
     , beamSpotCov(2,0), beamSpotCov(2,1), beamSpotCov(2,2), 0.
     , 0., 0., 0., 1.;
                   
-  vertexingOptions.vertexConstraint.setFullPosition(vtxConstraintPos);
-  vertexingOptions.vertexConstraint.setFullCovariance(vtxConstraintCov);
+  vertexingOptions.constraint.setFullPosition(vtxConstraintPos);
+  vertexingOptions.constraint.setFullCovariance(vtxConstraintCov);
 
   VertexFinder::State finderState(*m_bField, magFieldContext);
 

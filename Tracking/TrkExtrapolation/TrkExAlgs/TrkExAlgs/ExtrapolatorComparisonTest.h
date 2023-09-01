@@ -100,7 +100,7 @@ namespace Trk
         /** Parameter getter */
         Acts::BoundVector parameters() const {return m_params->parameters();}
         /** Covariance getter */
-        const std::optional<Acts::BoundSymMatrix>& covariance() const {return m_params->covariance();}
+        const std::optional<Acts::BoundSquareMatrix>& covariance() const {return m_params->covariance();}
 
       private:
         /** The Acts track parameters */

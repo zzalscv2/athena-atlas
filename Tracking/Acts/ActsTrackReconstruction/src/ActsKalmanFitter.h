@@ -61,12 +61,20 @@ struct PRDSourceLink{
 
 struct PRDSourceLinkCalibrator {
   template <typename trajectory_t>
-  void calibrate(const Acts::GeometryContext& gctx,
+  void calibrate(const Acts::GeometryContext& gctx, 
+            const Acts::CalibrationContext& cctx,
+            const Acts::SourceLink& sl,
 					  typename trajectory_t::TrackStateProxy trackState) const;
 
   const Trk::IRIO_OnTrackCreator* rotCreator {nullptr};
   const Trk::IRIO_OnTrackCreator* broadRotCreator {nullptr};
   const ActsTrk::IActsToTrkConverterTool* converterTool {nullptr};
+};
+
+struct PRDSourceLinkSurfaceAccessor {
+  const ActsTrk::IActsToTrkConverterTool* converterTool {nullptr};
+
+  const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const;
 };
 
 class ActsKalmanFitter : public extends<AthAlgTool, Trk::ITrackFitter> { 

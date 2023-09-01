@@ -320,15 +320,13 @@ typename Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
     ActsTrk::IndexType istate) const {
   auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  auto geoID = trackStates()[istate]->geometryId();
-  return Acts::SourceLink(geoID, el);
+  return Acts::SourceLink(el);
 }
 Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
     ActsTrk::IndexType istate) {
   auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  auto geoID = trackStates()[istate]->geometryId();
-  return Acts::SourceLink(geoID, el);
+  return Acts::SourceLink(el);
 }
 
 
@@ -493,8 +491,7 @@ bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
 typename Acts::SourceLink
 ActsTrk::ConstMultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const {
   auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
-  auto geoID = (*m_trackStates)[istate]->geometryId();
-  return Acts::SourceLink(geoID, el);
+  return Acts::SourceLink(el);
 }
 
 

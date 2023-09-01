@@ -144,6 +144,8 @@ private:
                                                         ActsTrk::TrackStateBackend>;
   std::unique_ptr<Fitter> m_fitter;
 
+
+  ATLASSourceLinkSurfaceAccessor m_surfaceAccessor{};
   Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend> m_gsfExtensions;
 
   ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
