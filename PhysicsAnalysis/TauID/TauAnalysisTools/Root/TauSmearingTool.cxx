@@ -58,12 +58,12 @@ StatusCode TauSmearingTool::initialize()
         return StatusCode::FAILURE;
       }
 
-      if (m_sGenerator == "PoPy" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc20-prerec.root";
+      if (m_sGenerator == "PoPy" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc20-prerec_v2.root";
       if (m_sCampaign=="mc21") {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc21-prerec.root";
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc21-prerec_v2.root";
         if (m_sGenerator=="Sherpa")ATH_MSG_WARNING("No Sherpa mc21 recommendations available yet, using PoPy8!");
       }
-      if (m_sGenerator == "Sherpa" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_Sherpa2211-prerec.root";
+      if (m_sGenerator == "Sherpa" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_Sherpa2211-prerec_v2.root";
     }
     else {
       ATH_MSG_ERROR("unknown recommendation tag " << m_sRecommendationTag);
