@@ -7,7 +7,7 @@
 #include "AsgMessaging/Check.h"
 
 #include "GaudiKernel/ITHistSvc.h"
- 
+
 #include "TH1D.h"
 
 
@@ -50,7 +50,7 @@ void IsolationHistograms::fill(const xAOD::Egamma& egamma) {
     { "topoEtCone20", xAOD::Iso::topoetcone20 },
     { "topoEtCone30", xAOD::Iso::topoetcone30 },
     { "topoEtCone40", xAOD::Iso::topoetcone40 } };
-  for (auto e : mmap) {
+  for (const auto& e : mmap) {
     if (histoMap.find(e.first) == histoMap.end())
       continue;
     float x = -9e9;
