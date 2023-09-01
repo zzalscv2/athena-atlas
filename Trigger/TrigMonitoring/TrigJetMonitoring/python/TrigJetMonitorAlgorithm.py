@@ -260,7 +260,11 @@ Chains2Monitor['HI'] = {  # TODO: do it properly with monGroups
   'HLT_j150_ion_L1J50': {'HLTColl': 'HLT_AntiKt4HIJets',
                          'RefChain': 'NONE',
                          'OfflineColl': 'AntiKt4HIJets'},
-                        
+
+  'HLT_j200_ion_L1J50': {'HLTColl': 'HLT_AntiKt4HIJets',
+                         'RefChain': 'NONE',
+                         'OfflineColl': 'AntiKt4HIJets'},
+
   'HLT_j50f_ion_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
                                  'RefChain': 'NONE', 
                                  'OfflineColl': 'AntiKt4HIJets'},

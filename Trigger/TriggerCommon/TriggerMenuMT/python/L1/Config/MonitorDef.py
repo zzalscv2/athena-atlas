@@ -331,6 +331,7 @@ class MonitorDef:
                 "L1_ZDC_A_EMPTY", "L1_ZDC_A_UNPAIRED_NONISO",
                 "L1_ZDC_C_EMPTY", "L1_ZDC_C_UNPAIRED_NONISO",
                 "L1_ZDC_A_C_EMPTY", "L1_ZDC_A_C_UNPAIRED_NONISO",
+                "L1_ZDC_XOR", "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C",
                 # ZDC items in pp
                 "L1_ZDC_A_AND_C",
                 "L1_ZDC_A_AND_C_EMPTY", "L1_ZDC_A_AND_C_UNPAIRED_NONISO",
@@ -382,7 +383,6 @@ class MonitorDef:
                 # Tau
                 "L1_TAU8", "L1_TAU12IM",
                 "L1_TAU1_TE4_VTE200",
-                "L1_TAU1_TE5_VTE200",
                 "L1_2TAU1_VTE200",
                 # Jet
                 "L1_J30", "L1_J50",

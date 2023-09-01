@@ -28,12 +28,14 @@ def defineMenu():
         'L1_eEM1', 'L1_eEM2',
         'L1_eEM5', 'L1_eEM9', 'L1_eEM12', 'L1_eEM18', 'L1_eEM15',
         'L1_eEM12L', 'L1_eEM18L', 'L1_eEM26', 'L1_eEM26M',
+        # ATR-22061
+        "L1_eEM9_EMPTY",
 
         ## 
         # MU
         ##
         'L1_MU3V', 'L1_MU5VF', 'L1_MU8F', 'L1_MU8VF', 'L1_MU14FCH',
-        'L1_2MU3V', 'L1_2MU5VF',
+        'L1_2MU3V', 'L1_2MU5VF', 'L1_2MU8F',
         'L1_3MU3V',
 
         'L1_2MU14FCH_OVERLAY',
@@ -53,6 +55,8 @@ def defineMenu():
         
         # combined mu - jet
         'L1_MU3V_J12',
+        'L1_MU3V_J20',
+        'L1_MU3V_J30',
         'L1_MU3V_jJ40',
 
         'L1_TAU8', 'L1_TAU60', 'L1_TAU12IM', 'L1_TAU20IM',
@@ -76,6 +80,8 @@ def defineMenu():
         'L1_jJ15p31ETA49', 'L1_jJ20p31ETA49',
         'L1_jJ40p31ETA49', 'L1_jJ50p31ETA49', 'L1_jJ60p31ETA49', 'L1_jJ90p31ETA49', 'L1_jJ125p31ETA49',
 
+        # gJ - ATR-28029
+        "L1_gJ20p0ETA25","L1_gJ400p0ETA25","L1_gLJ80p0ETA25","L1_gTE200","L1_gXEJWOJ100",
 
         # XE
         'L1_XE35', 'L1_XE40', 'L1_XE45', 'L1_XE50', 
@@ -200,6 +206,7 @@ def defineMenu():
         'L1_TAU1_VZDC_A_VZDC_C_VTE100', 'L1_TAU1_ZDC_XOR4_VTE100',
         'L1_TAU2_VZDC_A_VZDC_C_VTE100', 'L1_TAU2_ZDC_XOR4_VTE100',
         'L1_TRT_VZDC_A_VZDC_C_VTE50', 'L1_TRT_VZDC_A_VZDC_C_VTE20',
+        'L1_TRT_VZDC_A_VZDC_C_VTE200',
 
         'L1_ZDC_A_C_VTE50',
         'L1_ZDC_XOR4_VTE200', 'L1_VZDC_A_VZDC_C_VTE50',
