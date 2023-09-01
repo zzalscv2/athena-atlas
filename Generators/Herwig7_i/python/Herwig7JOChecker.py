@@ -121,13 +121,8 @@ def check_file():
       HerwigINFile.append(file)
 
   # Check if there is only one files, as it should be
-  if len(HerwigINFile) > 1:
-    raise RuntimeError("There is more than one *.in file for Herwig7, the files are %s" % (HerwigINFile))
-  elif len(HerwigINFile) == 0:
-    raise RuntimeError("There is no *.in file for Herwig7 found")
-  else:
-    run_name = HerwigINFile[0]
-    athMsgLog.info("The Herwig7 *.in file is "+run_name)
+  run_name = HerwigINFile[0]
+  athMsgLog.info("The Herwig7 *.in file is "+run_name)
 
   # Now get the settings from the .in file
   set_commands    = [] # all commands where a setting is set
