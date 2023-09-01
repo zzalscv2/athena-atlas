@@ -819,7 +819,7 @@ Trk::TrackStateOnSurface* TrigInDetTrackFitter::createTrackStateOnSurface(Trk::T
   Trk::TrkTrackState* pTS=pN->getTrackState();
   auto pM = AmgSymMatrix(5){};
   for(int i=0;i<5;i++) {
-    for(int j=i;j<5;j++) {
+    for(int j=0;j<5;j++) {
       (pM)(i,j)=pTS->getTrackCovariance(i,j);
     }
   }
