@@ -17,14 +17,11 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonCondData/MdtCondDbData.h"
-#include "MuonCondInterface/IMDT_MapConversion.h"
 #include "MuonCondSvc/MdtStringUtils.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-// forward declarations
-class IMDT_MapConversion;
 
 class MdtCondDbAlg : public AthReentrantAlgorithm {
 public:
@@ -50,7 +47,6 @@ private:
     bool m_isRun1{false};
     bool m_checkOnSetPoint{false};
 
-    ToolHandle<IMDT_MapConversion> m_condMapTool;
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     SG::WriteCondHandleKey<MdtCondDbData> m_writeKey{this, "WriteKey", "MdtCondDbData", "Key of output MDT condition data"};
@@ -77,6 +73,9 @@ private:
                                                                                 "Key of input MDT condition data for MC dead tubes"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_mc_noisyChannels{
         this, "ReadKey_MC_NC", "/MDT/DCS/PSLVCHSTATE", "Key of input MDT condition data for MC noisy channels"};
+
+    Identifier identifyChamber(std::string chamber) const;
+    std::map<std::string, Identifier> m_chamberNames{};
 };
 
 #endif
