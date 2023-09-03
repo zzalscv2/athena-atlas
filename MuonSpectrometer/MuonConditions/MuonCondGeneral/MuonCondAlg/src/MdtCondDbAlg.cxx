@@ -5,13 +5,16 @@
 #include "MuonCondAlg/MdtCondDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
+#include "MuonReadoutGeometryR4/StringUtils.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "RDBAccessSvc/IRDBRecord.h"
+#include "RDBAccessSvc/IRDBRecordset.h"
+#include "GeoModelInterfaces/IGeoModelSvc.h"
 
 using readOutPair = CondAttrListCollection::ChanAttrListPair;
 // constructor
 MdtCondDbAlg::MdtCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator), m_condMapTool("MDT_MapConversion") {
-    declareProperty("MDT_MapConversion", m_condMapTool);
-
+    AthReentrantAlgorithm(name, pSvcLocator) {
     declareProperty("isOnline", m_isOnline);
     declareProperty("isData", m_isData);
     declareProperty("isRun1", m_isRun1);
@@ -37,7 +40,35 @@ StatusCode MdtCondDbAlg::initialize() {
     // so don't declare a dependencies on them.
     ATH_CHECK(m_readKey_folder_mc_deadElements.initialize(false /*!m_readKey_folder_mc_deadElements.empty() && !m_isData*/));
     ATH_CHECK(m_readKey_folder_mc_deadTubes.initialize(false /*!m_readKey_folder_mc_deadTubes.empty() && !m_isData*/));
+    
+    IGeoModelSvc* geoModel{nullptr};
+    ATH_CHECK(service("GeoModelSvc", geoModel));
 
+    std::string AtlasVersion = geoModel->atlasVersion();
+    std::string MuonVersion = geoModel->muonVersionOverride();
+    std::string detectorKey = MuonVersion.empty() ? AtlasVersion : MuonVersion;
+    std::string detectorNode = MuonVersion.empty() ? "ATLAS" : "MuonSpectrometer";
+
+    IRDBAccessSvc* accessSvc{nullptr};
+    ATH_CHECK(service("RDBAccessSvc", accessSvc));
+
+    IRDBRecordset_ptr switchSet = accessSvc->getRecordsetPtr("HwSwIdMapping", detectorKey, detectorNode);
+
+    if ((*switchSet).size() == 0) {
+        ATH_MSG_WARNING("Old Atlas Version : " << AtlasVersion << " Only Online Identifier. Falling back to HwSwIdMapping-00 tag");
+        switchSet = accessSvc->getRecordsetPtr("HwSwIdMapping", "HwSwIdMapping-00");
+    }
+
+    for (unsigned int irow = 0; irow < (*switchSet).size(); ++irow) {
+        const IRDBRecord* switches = (*switchSet)[irow];
+        std::string hardwareName = switches->getString("HARDNAME");
+        std::string stName = switches->getString("SOFTNAME");
+        int stPhi = switches->getInt("SOFTOCTANT");
+        int stEta = switches->getInt("SOFTIZ");
+        Identifier ChamberId = m_idHelperSvc->mdtIdHelper().elementID(stName, stEta, stPhi);
+
+        m_chamberNames[hardwareName] = ChamberId;
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -106,17 +137,17 @@ StatusCode MdtCondDbAlg::loadDataPsHv(writeHandle_t& wh, MdtCondDbData* writeCdo
 
         if (atr.size() == 1) {
             hv_name = *(static_cast<const std::string*>((atr["fsm_currentState"]).addressOfData()));
-            constexpr char delimiter = ' ';
-            auto tokens = MuonCalib::MdtStringUtils::tokenize(hv_name, delimiter);
+            
+            auto tokens = MuonGMR4::tokenize(hv_name, " ");
 
             std::string thename;
-            constexpr char delimiter2 = '_';
-            auto tokens2 = MuonCalib::MdtStringUtils::tokenize(hv_payload, delimiter2);
+            
+            auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
 
             if (tokens[0] != "ON" && tokens[0] != "STANDBY" && tokens[0] != "UNKNOWN") {
-                int multilayer = MuonCalib::MdtStringUtils::atoi(tokens2[3]);
+                int multilayer = MuonGMR4::atoi(tokens2[3]);
                 const auto  &chamber_name = tokens2[2];
-                Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+                Identifier ChamberId = identifyChamber(chamber_name);
                 if (ChamberId.is_valid()) {
                     Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
                     thename = std::string(chamber_name);
@@ -128,9 +159,9 @@ StatusCode MdtCondDbAlg::loadDataPsHv(writeHandle_t& wh, MdtCondDbData* writeCdo
                 }
             }
             if (tokens[0] == "STANDBY") {
-                int multilayer = MuonCalib::MdtStringUtils::atoi(tokens2[3]);
+                int multilayer = MuonGMR4::atoi(tokens2[3]);
                 const auto &chamber_name = tokens2[2];
-                Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+                Identifier ChamberId = identifyChamber(chamber_name);
                 if (ChamberId.is_valid()) {
                     Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
                     thename = std::string(chamber_name);
@@ -185,15 +216,15 @@ StatusCode MdtCondDbAlg::loadDataPsHv(writeHandle_t& wh, MdtCondDbData* writeCdo
 
         if (atr_v0.size() == 1) {
             setPointsV0_name = *(static_cast<const float*>((atr_v0["readBackSettings_v0"]).addressOfData()));
-            constexpr char delimiter2 = '_';
-            auto tokens2 = MuonCalib::MdtStringUtils::tokenize(setPointsV0_payload, delimiter2);
+            
+            auto tokens2 = MuonGMR4::tokenize(setPointsV0_payload, "_");
 
-            int multilayer = MuonCalib::MdtStringUtils::atoi(tokens2[3]);
+            int multilayer = MuonGMR4::atoi(tokens2[3]);
             const auto &chamber_name = tokens2[2];
             std::string thename = std::string(chamber_name);
             thename += '_';
             thename += tokens2[3];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name);
+            Identifier ChamberId = identifyChamber(chamber_name);
             Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
             chamberML_V0[MultiLayerId] = setPointsV0_name;
             mlname[MultiLayerId] = std::move(thename);
@@ -211,15 +242,15 @@ StatusCode MdtCondDbAlg::loadDataPsHv(writeHandle_t& wh, MdtCondDbData* writeCdo
         if (atr_v1.size() == 1) {
             setPointsV1_name = *(static_cast<const float*>((atr_v1["readBackSettings_v1"]).addressOfData()));
 
-            constexpr char delimiter2 = '_';
-            auto tokens2= MuonCalib::MdtStringUtils::tokenize(setPointsV1_payload, delimiter2);
+            
+            auto tokens2= MuonGMR4::tokenize(setPointsV1_payload, "_");
 
-            int multilayer = MuonCalib::MdtStringUtils::atoi(tokens2[3]);
+            int multilayer = MuonGMR4::atoi(tokens2[3]);
             const auto &chamber_name = tokens2[2];
             std::string thename = std::string(chamber_name);
             thename += '_';
             thename += tokens2[3];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name);
+            Identifier ChamberId = identifyChamber(chamber_name);
             Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
             chamberML_V1[MultiLayerId] = setPointsV1_name;
             mlname[MultiLayerId] = std::move(thename);
@@ -265,14 +296,14 @@ StatusCode MdtCondDbAlg::loadDataPsLv(writeHandle_t& wh, MdtCondDbData* writeCdo
 
         if (!atr.size()) { continue; }
         hv_name = *(static_cast<const std::string*>((atr["fsm_currentState"]).addressOfData()));
-        constexpr char delimiter = ' ';
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(hv_name, delimiter);
-        constexpr char delimiter2 = '_';
-        auto tokens2 = MuonCalib::MdtStringUtils::tokenize(hv_payload, delimiter2);
+        
+        auto tokens = MuonGMR4::tokenize(hv_name, " ");
+        
+        auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
 
         if (tokens[0] != "ON") {
             const auto &chamber_name = tokens2[2];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) { writeCdo->setDeadStation(chamber_name, ChamberId); }
         }
     }
@@ -311,13 +342,13 @@ StatusCode MdtCondDbAlg::loadDataHv(writeHandle_t& wh, MdtCondDbData* writeCdo, 
         hv_v1_ml2 = *(static_cast<const float*>((atr["v1set_ML2"]).addressOfData()));
 
         std::string thename;
-        constexpr char delimiter2 = '_';
-        auto tokens2 = MuonCalib::MdtStringUtils::tokenize(hv_payload, delimiter2);
+        
+        auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
 
         if (hv_name_ml1 != "ON" && hv_name_ml1 != "STANDBY" && hv_name_ml1 != "UNKNOWN") {
             int multilayer = 1;
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) {
                 Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
                 thename = std::string(chamber_name) + "_multilayer1";
@@ -329,7 +360,7 @@ StatusCode MdtCondDbAlg::loadDataHv(writeHandle_t& wh, MdtCondDbData* writeCdo, 
         if (hv_name_ml1 == "STANDBY" && hv_v0_ml1 != hv_v1_ml1) {
             int multilayer = 1;
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) {
                 Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
                 thename = std::string(chamber_name) + "_multilayer1";
@@ -341,7 +372,7 @@ StatusCode MdtCondDbAlg::loadDataHv(writeHandle_t& wh, MdtCondDbData* writeCdo, 
         if (hv_name_ml2 != "ON" && hv_name_ml2 != "STANDBY" && hv_name_ml2 != "UNKNOWN") {
             int multilayer = 2;
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) {
                 Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
                 thename = std::string(chamber_name) + "_multilayer2";
@@ -353,7 +384,7 @@ StatusCode MdtCondDbAlg::loadDataHv(writeHandle_t& wh, MdtCondDbData* writeCdo, 
         if (hv_name_ml2 == "STANDBY" && hv_v0_ml2 != hv_v1_ml2) {
             int multilayer = 2;
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) {
                 Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
                 thename = std::string(chamber_name) + "_multilayer2";
@@ -365,12 +396,12 @@ StatusCode MdtCondDbAlg::loadDataHv(writeHandle_t& wh, MdtCondDbData* writeCdo, 
         if (hv_name_ml2 != "ON" && hv_name_ml2 != "STANDBY" && hv_name_ml2 != "UNKNOWN" && hv_name_ml1 != "ON" &&
             hv_name_ml1 != "STANDBY" && hv_name_ml1 != "UNKNOWN") {
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) { writeCdo->setDeadStation(chamber_name, ChamberId); }
         }
         if (hv_name_ml2 == "STANDBY" && hv_v0_ml2 != hv_v1_ml2 && hv_name_ml1 == "STANDBY" && hv_v0_ml1 != hv_v1_ml1) {
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) { writeCdo->setDeadStation(chamber_name, ChamberId); }
         }
     }
@@ -401,14 +432,14 @@ StatusCode MdtCondDbAlg::loadDataLv(writeHandle_t& wh, MdtCondDbData* writeCdo, 
                             <<"May be this is related to ATLASRECTS-6920 / ATLASRECTS-6879. Skip it");
             continue;
         }
-        constexpr char delimiter = ' ';
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(hv_name, delimiter);
-        constexpr char delimiter2 = '_';
-        auto tokens2 = MuonCalib::MdtStringUtils::tokenize(hv_payload, delimiter2);
+        
+        auto tokens = MuonGMR4::tokenize(hv_name, " ");
+        
+        auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
 
         if (tokens[0] != "ON") {
             const auto &chamber_name = tokens2[0];
-            Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+            Identifier ChamberId = identifyChamber(chamber_name);
             if (ChamberId.is_valid()) { writeCdo->setDeadStation(chamber_name, ChamberId); }
         }
     }
@@ -434,12 +465,12 @@ StatusCode MdtCondDbAlg::loadDroppedChambers(writeHandle_t& wh, MdtCondDbData* w
         std::string chamber_dropped;
         chamber_dropped = *(static_cast<const std::string*>((atr["Chambers_disabled"]).addressOfData()));
 
-        constexpr char delimiter = ' ';
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(chamber_dropped, delimiter);
+        
+        auto tokens = MuonGMR4::tokenize(chamber_dropped, " ");
         for (auto & token : tokens) {
             if (token != "0") {
                 const auto &chamber_name = token;
-                Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
+                Identifier ChamberId = identifyChamber(chamber_name);
                 if (ChamberId.is_valid()) { writeCdo->setDeadStation(chamber_name, ChamberId); }
             }
         }
@@ -470,17 +501,17 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(writeHandle_t& wh, MdtCondDbData* wr
         list_tube = *(static_cast<const std::string*>((atr["Dead_tube"]).addressOfData()));
 
         std::string thename;
-        constexpr char delimiter = ' ';
-        Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name);
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(list_tube, delimiter);
-        auto tokens_mlayer = MuonCalib::MdtStringUtils::tokenize(list_mlayer, delimiter);
-        auto tokens_layer = MuonCalib::MdtStringUtils::tokenize(list_layer, delimiter);
+        
+        Identifier ChamberId = identifyChamber(chamber_name);
+        auto tokens = MuonGMR4::tokenize(list_tube, " ");
+        auto tokens_mlayer = MuonGMR4::tokenize(list_mlayer, " ");
+        auto tokens_layer = MuonGMR4::tokenize(list_layer, " ");
 
         for (auto & token : tokens) {
             if (token != "0") {
-                int ml = MuonCalib::MdtStringUtils::atoi(token.substr(0, 1));
-                int layer = MuonCalib::MdtStringUtils::atoi(token.substr(1, 2));
-                int tube = MuonCalib::MdtStringUtils::atoi(token.substr(2));
+                int ml = MuonGMR4::atoi(token.substr(0, 1));
+                int layer = MuonGMR4::atoi(token.substr(1, 2));
+                int tube = MuonGMR4::atoi(token.substr(2));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, tube);
                 thename = chamber_name;
                 thename += '_';
@@ -492,7 +523,7 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(writeHandle_t& wh, MdtCondDbData* wr
 
         for (unsigned int i = 0; i < tokens_mlayer.size(); i++) {
             if (tokens_mlayer[i] != "0") {
-                int ml = MuonCalib::MdtStringUtils::atoi(tokens_mlayer[i].substr(0));
+                int ml = MuonGMR4::atoi(tokens_mlayer[i].substr(0));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, 1, 1);
                 thename = chamber_name;
                 thename += '_';
@@ -504,8 +535,8 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(writeHandle_t& wh, MdtCondDbData* wr
 
         for (unsigned int i = 0; i < tokens_layer.size(); i++) {
             if (tokens_layer[i] != "0") {
-                int ml = MuonCalib::MdtStringUtils::atoi(tokens_layer[i].substr(0, 1));
-                int layer = MuonCalib::MdtStringUtils::atoi(tokens_layer[i].substr(1));
+                int ml = MuonGMR4::atoi(tokens_layer[i].substr(0, 1));
+                int layer = MuonGMR4::atoi(tokens_layer[i].substr(1));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, 1);
                 thename = chamber_name;
                 thename += '_';
@@ -542,14 +573,14 @@ StatusCode MdtCondDbAlg::loadMcDeadTubes(writeHandle_t& wh, MdtCondDbData* write
         chamber_name = *(static_cast<const std::string*>((atr["Chamber_Name"]).addressOfData()));
 
         std::string thename;
-        constexpr char delimiter = ' ';
-        auto tokens = MuonCalib::MdtStringUtils::tokenize(dead_tube, delimiter);
-        Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name);
+        
+        auto tokens = MuonGMR4::tokenize(dead_tube, " ");
+        Identifier ChamberId = identifyChamber(chamber_name);
 
         for (auto & token : tokens) {
-            int ml = MuonCalib::MdtStringUtils::atoi(token.substr(0, 1));
-            int layer = MuonCalib::MdtStringUtils::atoi(token.substr(1, 2));
-            int tube = MuonCalib::MdtStringUtils::atoi(token.substr(2));
+            int ml = MuonGMR4::atoi(token.substr(0, 1));
+            int layer = MuonGMR4::atoi(token.substr(1, 2));
+            int tube = MuonGMR4::atoi(token.substr(2));
             thename = chamber_name;
             thename += '_';
             thename += token;
@@ -586,17 +617,24 @@ StatusCode MdtCondDbAlg::loadMcNoisyChannels(writeHandle_t& wh, MdtCondDbData* w
 
         if (atr.size()) {
             hv_name = *(static_cast<const std::string*>((atr["fsm_currentState"]).addressOfData()));
-            constexpr char delimiter = ' ';
-            auto tokens = MuonCalib::MdtStringUtils::tokenize(hv_name, delimiter);
-            constexpr char delimiter2 = '_';
-            auto tokens2 = MuonCalib::MdtStringUtils::tokenize(hv_payload, delimiter2);
+            
+            auto tokens = MuonGMR4::tokenize(hv_name, " ");
+            
+            auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
 
             if (tokens[0] != "ON") {
                 const auto &chamber_name = tokens2[2];
-                Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name);
+                Identifier ChamberId = identifyChamber(chamber_name);
                 writeCdo->setDeadStation(chamber_name, ChamberId);
             }
         }
     }
     return StatusCode::SUCCESS;
+}
+Identifier MdtCondDbAlg::identifyChamber(std::string chamber) const {
+    if (chamber[2] == 'Y' || chamber[2] == 'X') chamber[2] = 'S';
+    auto itr = m_chamberNames.find(chamber);
+    if (itr != m_chamberNames.end()) return itr->second;
+
+    return Identifier{};
 }
