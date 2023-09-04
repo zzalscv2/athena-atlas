@@ -223,17 +223,27 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
     if augmentationTools is None:
         augmentationTools = []
     
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg
-    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg, JpsiFinderCfg
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import (
+        PrimaryVertexRefittingToolCfg, JpsiFinderCfg)
 
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, tool_name_prefix))
     acc.addPublicTool(V0Tools)
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, tool_name_prefix))        # VKalVrt vertex fitter
+
+    vkalvrt = acc.popToolsAndMerge(
+        BPHY_TrkVKalVrtFitterCfg(flags, tool_name_prefix))
     acc.addPublicTool(vkalvrt)
-    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, tool_name_prefix))
+
+    trackselect = acc.popToolsAndMerge(
+        BPHY_InDetDetailedTrackSelectorToolCfg(flags, tool_name_prefix))
     acc.addPublicTool(trackselect)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, tool_name_prefix))
+
+    vpest = acc.popToolsAndMerge(
+        BPHY_VertexPointEstimatorCfg(flags, tool_name_prefix))
     acc.addPublicTool(vpest)
+
     JpsiFinder = acc.popToolsAndMerge(JpsiFinderCfg(flags,
             name                        = tool_name_prefix+"JpsiFinder",
             muAndMu                     = True,
@@ -275,36 +285,20 @@ def V0ToolCfg(flags, augmentationTools=None, tool_name_prefix="FTAG1", container
             MassMax               = 4000.0,
             Chi2Max               = 200,
             DoVertexType =1)
+
     V0ContainerName = container_name_prefix+"RecoV0Candidates"
     KshortContainerName = container_name_prefix+"RecoKshortCandidates"
     LambdaContainerName = container_name_prefix+"RecoLambdaCandidates"
     LambdabarContainerName = container_name_prefix+"RecoLambdabarCandidates"
 
-    from InDetConfig.InDetV0FinderConfig import V0MainDecoratorCfg
-    V0Decorator = acc.popToolsAndMerge(V0MainDecoratorCfg(
-            flags,
-            name = tool_name_prefix+"V0Decorator",
-            V0Tools = V0Tools,
-            V0ContainerName = V0ContainerName,
-            KshortContainerName = KshortContainerName,
-            LambdaContainerName = LambdaContainerName,
-            LambdabarContainerName = LambdabarContainerName))
-    acc.addPublicTool(V0Decorator)
-
-    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_InDetV0FinderToolCfg
-    Reco_V0Finder   = CompFactory.DerivationFramework.Reco_V0Finder(
-            name                   = tool_name_prefix+"_Reco_V0Finder",
-            V0FinderTool           = acc.popToolsAndMerge(BPHY_InDetV0FinderToolCfg(flags,tool_name_prefix,
-                V0ContainerName = V0ContainerName,
-                KshortContainerName = KshortContainerName,
-                LambdaContainerName = LambdaContainerName,
-                LambdabarContainerName = LambdabarContainerName)),
-            Decorator              = V0Decorator,
-            V0ContainerName        = V0ContainerName,
-            KshortContainerName    = KshortContainerName,
-            LambdaContainerName    = LambdaContainerName,
-            LambdabarContainerName = LambdabarContainerName,
-            CheckVertexContainers  = [container_name_prefix+'JpsiCandidates'])
+    from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
+    Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+        flags, derivation = tool_name_prefix,
+        V0ContainerName = V0ContainerName,
+        KshortContainerName = KshortContainerName,
+        LambdaContainerName = LambdaContainerName,
+        LambdabarContainerName = LambdabarContainerName,
+        CheckVertexContainers = [container_name_prefix+'JpsiCandidates']))
 
     from TrkConfig.TrkVKalVrtFitterConfig import JpsiV0VertexFitCfg
     JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
