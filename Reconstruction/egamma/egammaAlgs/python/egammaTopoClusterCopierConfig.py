@@ -10,15 +10,20 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputTopoCollection", flags.Egamma.Keys.Input.TopoClusters)
-    kwargs.setdefault("OutputTopoCollection", flags.Egamma.Keys.Internal.EgammaTopoClusters)
-    kwargs.setdefault("OutputFwdTopoCollection", flags.Egamma.Keys.Internal.ForwardTopoClusters)
-    kwargs.setdefault("OutputTopoCollectionShallow", "tmp_"+kwargs["OutputTopoCollection"])
+    kwargs.setdefault("InputTopoCollection",
+                      flags.Egamma.Keys.Input.TopoClusters)
+    kwargs.setdefault("OutputTopoCollection",
+                      flags.Egamma.Keys.Internal.EgammaTopoClusters)
+
+    if flags.Egamma.doForward:
+        kwargs.setdefault("OutputFwdTopoCollection",
+                          flags.Egamma.Keys.Internal.ForwardTopoClusters)
+
     kwargs.setdefault("ECut", 700 if not flags.Egamma.doLowMu else 300)
 
     kwargs.setdefault('hasITk', flags.Detector.GeometryITk)
 
-    if name=='':
+    if name == '':
         name = kwargs["OutputTopoCollection"]+'Copier'
 
     egcopierAlg = CompFactory.egammaTopoClusterCopier(name, **kwargs)
@@ -28,7 +33,7 @@ def egammaTopoClusterCopierCfg(flags, name='', **kwargs):
     return acc
 
 
-def indetTopoClusterCopierCfg(flags, name='', **kwargs): 
+def indetTopoClusterCopierCfg(flags, name='', **kwargs):
     """Create a copier to be used in tracking. 
        If 'OutputTopoCollection' is the same as used in 
         'egammaTopoClusterCopierCfg', these two functions will produce
@@ -38,7 +43,7 @@ def indetTopoClusterCopierCfg(flags, name='', **kwargs):
        If 'OutputTopoCollection' is not the same, two tools will be
         created, each with a different output container. This will
         happen in a HI reconstruction."""
-     
+
     kwargs.setdefault(
         "InputTopoCollection",
         flags.Tracking.TopoClusters)
@@ -46,7 +51,7 @@ def indetTopoClusterCopierCfg(flags, name='', **kwargs):
         "OutputTopoCollection",
         flags.Tracking.EgammaTopoClusters)
 
-    if name=='':
+    if name == '':
         name = kwargs["OutputTopoCollection"]+'Copier'
 
     return egammaTopoClusterCopierCfg(flags, name, **kwargs)

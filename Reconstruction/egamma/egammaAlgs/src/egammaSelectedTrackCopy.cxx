@@ -41,13 +41,12 @@ StatusCode
 egammaSelectedTrackCopy::initialize()
 {
   ATH_CHECK(m_clusterContainerKey.initialize());
-  ATH_CHECK(m_fwdClusterContainerKey.initialize());
+  ATH_CHECK(m_fwdClusterContainerKey.initialize(m_doForwardTracks));
   ATH_CHECK(m_trackParticleContainerKey.initialize());
   ATH_CHECK(m_OutputTrkPartContainerKey.initialize());
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_egammaCaloClusterSelector.retrieve());
   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
-  ATH_CHECK(m_fwdClusterContainerKey.initialize(m_doForwardTracks));
 
   return StatusCode::SUCCESS;
 }
@@ -79,7 +78,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
   SG::ReadHandle<xAOD::CaloClusterContainer> clusterTES(m_clusterContainerKey, ctx);
   if (!clusterTES.isValid()) {
     ATH_MSG_FATAL(
-      "Failed to retrieve cluster container: " << 
+      "Failed to retrieve cluster container: " <<
       m_clusterContainerKey.key()
     );
 
@@ -89,7 +88,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
   SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_trackParticleContainerKey, ctx);
   if (!trackTES.isValid()) {
     ATH_MSG_FATAL(
-      "Failed to retrieve TrackParticle container: " << 
+      "Failed to retrieve TrackParticle container: " <<
       m_trackParticleContainerKey.key()
     );
 
@@ -97,7 +96,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
   }
 
   SG::WriteHandle<ConstDataVector<xAOD::TrackParticleContainer>> outputTrkPartContainer(
-    m_OutputTrkPartContainerKey, 
+    m_OutputTrkPartContainerKey,
     ctx
   );
 
@@ -105,13 +104,13 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
   SG::WriteHandle<ConstDataVector<xAOD::TrackParticleContainer>> outputFwdTrkPartContainer;
   if (m_doForwardTracks) {
     fwdClusterTES = SG::ReadHandle<xAOD::CaloClusterContainer>(
-      m_fwdClusterContainerKey, 
+      m_fwdClusterContainerKey,
       ctx
     );
 
     if (!fwdClusterTES.isValid()) {
       ATH_MSG_FATAL(
-        "Failed to retrieve forward cluster container: " << 
+        "Failed to retrieve forward cluster container: " <<
         m_fwdClusterContainerKey.key()
       );
 
@@ -121,7 +120,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
     m_AllFwdClusters += fwdClusterTES->size();
   }
 
-  // Here it just needs to be a view copy , i.e the collection of selected 
+  // Here it just needs to be a view copy , i.e the collection of selected
   // trackParticles we create does not really own its elements.
   auto viewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
   auto fwdViewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
@@ -229,14 +228,14 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   // Get Cluster parameters.
   const double clusterEta = xAOD::EgammaHelpers::isFCAL(cluster) ? cluster->eta() : cluster->etaBE(2);
   const bool isEndCap = !xAOD::EgammaHelpers::isBarrel(cluster);
-  
+
   // Use trkEta only if sufficient hits in the Si.
   const double Et = trkTRT ? cluster->et() : cluster->e() / cosh(trkEta);
-  
+
   // A few sanity checks.
   if (std::abs(clusterEta) > 10.0 || std::abs(trkEta) > 10.0 || Et < 10.0) {
     ATH_MSG_DEBUG(
-      "FAILS sanity checks :  Track Eta : " << trkEta << 
+      "FAILS sanity checks :  Track Eta : " << trkEta <<
       ", Cluster Eta " << clusterEta
     );
 
@@ -246,16 +245,16 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   // Calculate the eta/phi of the cluster as would be seen from the perigee
   // position of the Track.
   const Amg::Vector3D XYZClusterWrtTrackPerigee = CandidateMatchHelpers::approxXYZwrtPoint(
-    *cluster, 
-    PerigeeXYZPosition, 
+    *cluster,
+    PerigeeXYZPosition,
     isEndCap
   );
-  
+
   // Calculate the possible rotation of the track.
   // Once assuming the cluster Et being the better estimate (e.g big brem).
   const double phiRotRescaled = CandidateMatchHelpers::PhiROT(
     Et,
-    trkEta, 
+    trkEta,
     track->charge(),
     r_perigee,
     isEndCap
@@ -266,7 +265,7 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
     track->pt(),
     trkEta,
     track->charge(),
-    r_perigee, 
+    r_perigee,
     isEndCap
   );
 
@@ -274,7 +273,7 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
 
   // DeltaPhi between the track and the cluster.
   const double deltaPhiStd = P4Helpers::deltaPhi(clusterPhiCorrected, trkPhi);
-  
+
   // DeltaPhi between the track and the cluster accounting for rotation assuming
   // cluster Et is a better estimator.
   const double trkPhiRescaled = P4Helpers::deltaPhi(trkPhi, phiRotRescaled);
@@ -283,7 +282,7 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   // DeltaPhi between the track and the cluster accounting for rotation.
   const double trkPhiCorrTrack = P4Helpers::deltaPhi(trkPhi, phiRotTrack);
   const double deltaPhiTrack = P4Helpers::deltaPhi(clusterPhiCorrected, trkPhiCorrTrack);
-  
+
   // First we will see if it fails the quick match.
   // Then if it passed it will get 2 chances to be selected.
   // One if it matches from last measurement.
@@ -296,17 +295,17 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   ) {
     ATH_MSG_DEBUG(
       "FAILS broad window phi match (track phi, phirotCluster , phiRotTrack , " <<
-      "cluster phi corrected, cluster phi): ( " << 
-      trkPhi << ", " << 
-      phiRotRescaled << ", " << 
-      phiRotTrack << ", " << 
-      clusterPhiCorrected << ", " << 
+      "cluster phi corrected, cluster phi): ( " <<
+      trkPhi << ", " <<
+      phiRotRescaled << ", " <<
+      phiRotTrack << ", " <<
+      clusterPhiCorrected << ", " <<
       cluster->phi() << ")"
     );
 
     return false;
   }
-  
+
   // if TRT we can stop here , we can not check much in eta really.
   if (trkTRT) { return true; }
 
@@ -318,8 +317,8 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
     std::abs(clusterEtaCorrected - trkEta) > m_broadDeltaEta
   ) {
     ATH_MSG_DEBUG(
-      "FAILS broad window eta match (track eta, cluster eta, cluster eta corrected): ( " << 
-      trkEta << ", " << 
+      "FAILS broad window eta match (track eta, cluster eta, cluster eta corrected): ( " <<
+      trkEta << ", " <<
       cluster->etaBE(2) << ", " <<
       clusterEtaCorrected << " )"
     );
@@ -356,10 +355,10 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   // Selection in narrow eta/phi window from last measurement.
   if (
     std::abs(deltaEta[2]) < m_narrowDeltaEta &&
-    deltaPhi[2] < m_narrowDeltaPhi && 
+    deltaPhi[2] < m_narrowDeltaPhi &&
     deltaPhi[2] > -m_narrowDeltaPhiBrem
   ) {
-    ATH_MSG_DEBUG("Match from Last measurement is successful :  " << deltaPhi[2]); 
+    ATH_MSG_DEBUG("Match from Last measurement is successful :  " << deltaPhi[2]);
     return true;
   }
 
@@ -368,7 +367,7 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   // - and we have a cluster with higher Et.
   // Rescale up the track to account for radiative loses and retry.
   if (
-    std::abs(deltaEta[2]) < m_narrowDeltaEta && 
+    std::abs(deltaEta[2]) < m_narrowDeltaEta &&
     cluster->et() > track->pt()
   ) {
     // Extrapolate from Perigee Rescaled.
@@ -402,7 +401,7 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
       return true;
     }
   }
-  
+
   // Default is fail.
   return false;
 }

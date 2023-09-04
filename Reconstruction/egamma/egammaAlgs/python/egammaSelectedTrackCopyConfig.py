@@ -10,8 +10,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def egammaSelectedTrackCopyCfg(flags, name="egammaSelectedTrackCopy", **kwargs):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("doFwdTracks", flags.Detector.GeometryITk)
-
     if "egammaCaloClusterSelector" not in kwargs:
         from egammaCaloTools.egammaCaloToolsConfig import (
             egammaCaloClusterSelectorGSFCfg,
@@ -26,13 +24,22 @@ def egammaSelectedTrackCopyCfg(flags, name="egammaSelectedTrackCopy", **kwargs):
             EMExtrapolationToolsCfg,
         )
 
-        extraptool = EMExtrapolationToolsCfg(flags, name="EMExtrapolationTools")
+        extraptool = EMExtrapolationToolsCfg(
+            flags, name="EMExtrapolationTools")
         kwargs["ExtrapolationTool"] = acc.popToolsAndMerge(extraptool)
 
-    kwargs.setdefault("ClusterContainerName", flags.Egamma.Keys.Internal.EgammaTopoClusters)
-    kwargs.setdefault("FwdClusterContainerName", flags.Egamma.Keys.Internal.ForwardTopoClusters)
-    kwargs.setdefault("TrackParticleContainerName", flags.Egamma.Keys.Input.TrackParticles)
-    kwargs.setdefault("OutputTrkPartContainerName", flags.Egamma.Keys.Output.TrkPartContainerName)
+    kwargs.setdefault("ClusterContainerName",
+                      flags.Egamma.Keys.Internal.EgammaTopoClusters)
+    kwargs.setdefault("TrackParticleContainerName",
+                      flags.Egamma.Keys.Input.TrackParticles)
+    kwargs.setdefault("OutputTrkPartContainerName",
+                      flags.Egamma.Keys.Output.TrkPartContainerName)
+
+    doFwd = flags.Detector.GeometryITk and flags.Egamma.doForward
+    kwargs.setdefault("doFwdTracks", doFwd)
+    if doFwd:
+        kwargs.setdefault("FwdClusterContainerName",
+                          flags.Egamma.Keys.Internal.ForwardTopoClusters)
 
     # P->T conversion extra dependencies
     if flags.Detector.GeometryITk:
