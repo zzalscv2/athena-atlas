@@ -39,7 +39,7 @@ def egammaTrkRefitterToolCfg(flags,
     if "FitterTool" not in kwargs:
         from TrkConfig.TrkGaussianSumFilterConfig import GaussianSumFitterCfg
         kwargs["FitterTool"] = acc.popToolsAndMerge(
-            GaussianSumFitterCfg(flags, name="GSFTrackFitter"), **kwargs)
+            GaussianSumFitterCfg(flags, name="GSFTrackFitter"))
     tool = CompFactory.egammaTrkRefitterTool(name, **kwargs)
     acc.setPrivateTools(tool)
     return acc
