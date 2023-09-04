@@ -73,8 +73,8 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", **kwargs):
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",
                                                                               ReadKey="RpcCondDbData" if not flags.Common.isOnline else "",
-                                                                              RpcPrdContainerCacheKey=MuonPrdCacheNames.RpcCache if flags.Muon.MuonTrigger else "",
-                                                                              RpcCoinDataContainerCacheKey=MuonPrdCacheNames.RpcCoinCache if flags.Muon.MuonTrigger else "",
+                                                                              RpcPrdContainerCacheKey="",
+                                                                              RpcCoinDataContainerCacheKey="",
                                                                               **tool_kwargs))
 
     # add RegSelTool
@@ -102,8 +102,8 @@ def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", **kwargs):
 
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool",
-                                                                              PrdCacheString = MuonPrdCacheNames.TgcCache if flags.Muon.MuonTrigger else "",
-                                                                              CoinCacheString = MuonPrdCacheNames.TgcCoinCache if flags.Muon.MuonTrigger else ""))
+                                                                              PrdCacheString = "",
+                                                                              CoinCacheString = ""))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_TGC_Cfg
