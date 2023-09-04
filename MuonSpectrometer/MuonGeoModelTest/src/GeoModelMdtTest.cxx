@@ -27,7 +27,7 @@ StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_detMgrKey.initialize());
     ATH_CHECK(m_deadChanKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    if (m_dumpTree) ATH_CHECK(m_tree.init(this));
+    ATH_CHECK(m_tree.init(this));
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const std::string& testCham : m_selectStat) {
@@ -41,8 +41,7 @@ StatusCode GeoModelMdtTest::initialize() {
                                (testCham[4] == 'A' ? 1 : -1);
         unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
         bool is_valid{false};
-        const Identifier eleId =
-            id_helper.elementID(statName, statEta, statPhi, is_valid);
+        const Identifier eleId = id_helper.elementID(statName, statEta, statPhi, is_valid);
         if (!is_valid) {
             ATH_MSG_FATAL("Failed to deduce a station name for " << testCham);
             return StatusCode::FAILURE;
@@ -81,14 +80,6 @@ StatusCode GeoModelMdtTest::execute() {
     }
     const MdtCondDbData* deadChan{retrieveDeadChannels(ctx)};
     
-    std::optional<std::fstream> outStream{};
-    if (!m_outputTxt.empty()) {
-        outStream = std::make_optional<std::fstream>(m_outputTxt, std::ios_base::out);
-        if (!outStream->good()) {
-            ATH_MSG_FATAL("Failed to create output file " << m_outputTxt);
-            return StatusCode::FAILURE;
-        }
-    }
     for (const Identifier& test_me : m_testStations) {
         const std::string detStr = m_idHelperSvc->toStringDetEl(test_me);
         ATH_MSG_VERBOSE("Test retrieval of Mdt detector element " << detStr);
@@ -109,19 +100,14 @@ StatusCode GeoModelMdtTest::execute() {
             return StatusCode::FAILURE;
         }
         ATH_CHECK(dumpToTree(ctx, reElement));
-        if (outStream) dumpToFile(ctx, reElement, *outStream);
-        
     }
-
-   
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMdtTest::finalize() {
-    if (m_dumpTree) ATH_CHECK(m_tree.write());
+    ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadoutElement* readoutEle) {
-    if (!m_dumpTree) return StatusCode::SUCCESS;
     m_stIndex = readoutEle->getStationIndex();
     m_stEta = readoutEle->getStationEta();
     m_stPhi = readoutEle->getStationPhi();
@@ -236,65 +222,5 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
         }
     }
    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
-}
-void GeoModelMdtTest::dumpToFile(const EventContext& ctx, const MdtReadoutElement* reElement, std::ostream& sstr) {
-    const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};    
-    const MdtCondDbData* deadChan{retrieveDeadChannels(ctx)};
-    
-    sstr << "##############################################################################"<< std::endl;
-    sstr << "Found Readout element " << m_idHelperSvc->toStringDetEl(reElement->identify()) << std::endl;
-    sstr << "##############################################################################"<< std::endl;
-    const Amg::Transform3D localToGlob{reElement->getMaterialGeom()->getAbsoluteTransform()};
-    sstr << "GeoModel transformation: "<< localToGlob<< std::endl;
-    sstr << "Number of layers: " << reElement->getNLayers()
-         << ", number of tubes: " << reElement->getNtubesperlayer()
-         << std::endl;
-    for (int lay = 1; lay <= reElement->getNLayers(); ++lay) {
-        for (int tube = 1; tube <= reElement->getNtubesperlayer(); ++tube) {
-            bool is_valid{false};
-            const Identifier tube_id = id_helper.channelID(reElement->identify(), 
-                                            reElement->getMultilayer(), lay, tube, is_valid);
-            if (!is_valid) continue;
-            if (deadChan && !deadChan->isGood(tube_id)) {
-                ATH_MSG_ALWAYS("Dead dube detected "<<m_idHelperSvc->toString(tube_id));
-                continue;
-            }
-            if (tube == 1) {
-                const Amg::Transform3D layTransf{reElement->transform(tube_id)};
-                sstr << "Displacement layer:       "
-                    << Amg::toString(layTransf.translation()) << std::endl;
-                sstr << "Layer x-axis orientation: "
-                     << Amg::toString(layTransf.linear() * Amg::Vector3D::UnitX()) << std::endl;
-                sstr << "Layer y-axis orientation: "
-                     << Amg::toString(layTransf.linear() * Amg::Vector3D::UnitY()) << std::endl;
-                sstr << "Layer z-axis orientation: "
-                     << Amg::toString(layTransf.linear() * Amg::Vector3D::UnitZ()) << std::endl;                    
-            }
-            const Amg::Vector3D roPos{reElement->ROPos(tube_id)},
-                                tubePos{reElement->tubePos(tube_id)};
-                
-            const Amg::Vector3D globalDir {(tubePos - roPos).unit()};
-            sstr << " *** (" << std::setfill('0') << std::setw(2) << lay
-                 << ", " << std::setfill('0') << std::setw(3) << tube << ")    "; 
-            sstr<<Amg::toString(tubePos,2)<<" "<<reElement->transform(tube_id);
-                
-            sstr<<", activeTube: "<<reElement->getActiveTubeLength(lay,tube);
-            sstr<<", tubeLength: "<<reElement->tubeLength(tube_id);
-            sstr<<", wireLength: "<<reElement->getWireLength(lay, tube);
-            sstr<< std::endl;
-            if(m_dumpSurfaces) {
-                const Trk::SaggedLineSurface& surf{reElement->surface(lay,tube)};
-                sstr <<reElement->bounds(lay,tube)<<std::endl;
-                sstr <<surf<<std::endl;
-                for (double l = reElement->tubeLength(tube_id) /2; l > 0; l = l  -100. ) {
-                    Amg::Vector2D lPos{Amg::Vector2D::Zero()}; 
-                    surf.globalToLocal(roPos + l * globalDir,Amg::Vector3D::Zero(),lPos);
-                    sstr<<"Local position along tube: "<<Amg::toString(lPos)<<std::endl;
-                    std::unique_ptr<Trk::StraightLineSurface> sagged{surf.correctedSurface(lPos)};
-                    sstr<<"   "<<(*sagged)<<std::endl;
-                }
-            }   
-        }
-    }
 }
 }  // namespace MuonGM

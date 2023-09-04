@@ -23,7 +23,6 @@ def SetupArgParser():
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
-    parser.add_argument("--outTxtFile", default ="", help="Output txt file to dump the geometry")
     return parser
 
 def setupHistSvc(flags, out_file="MdtGeoDump.root"):
@@ -80,10 +79,8 @@ if __name__=="__main__":
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
     cfg.merge(MdtCondDbAlgCfg(flags))
     cfg.merge(GeoModelMdtTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else [], 
-                                        DumpTxtFile = args.outTxtFile,
                                         dumpSurfaces = False ))
-    cfg.merge(GeoModelRpcTestCfg(flags, DumpTxtFile = "RpcGeoDump.txt",
-                                        TestStations = [ "BML1A3"]))
+    cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ "BML1A3"]))
     cfg.merge(GeoModelTgcTestCfg(flags))
     cfg.merge(GeoModelCscTestCfg(flags))
     

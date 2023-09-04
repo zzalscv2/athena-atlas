@@ -18,13 +18,13 @@ GeoModelTgcTest::GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocat
     AthHistogramAlgorithm{name, pSvcLocator} {}
 
 StatusCode GeoModelTgcTest::finalize() {
-    if (m_dumpTree) ATH_CHECK(m_tree.write());
+    ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelTgcTest::initialize() {
     ATH_CHECK(m_detMgrKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    if (m_dumpTree) ATH_CHECK(m_tree.init(this));
+    ATH_CHECK(m_tree.init(this));
     const TgcIdHelper& id_helper{m_idHelperSvc->tgcIdHelper()};
     for (const std::string& testCham : m_selectStat) {
         if (testCham.size() != 6) {
@@ -62,14 +62,6 @@ StatusCode GeoModelTgcTest::execute() {
                       << m_detMgrKey.fullKey());
         return StatusCode::FAILURE;
     }
-    std::optional<std::fstream> outStream{};
-    if (!m_outputTxt.empty()) {
-        outStream = std::make_optional<std::fstream>(m_outputTxt, std::ios_base::out);
-        if (!outStream->good()) {
-            ATH_MSG_FATAL("Failed to create output file " << m_outputTxt);
-            return StatusCode::FAILURE;
-        }
-    }
     for (const Identifier& test_me : m_testStations) {
         ATH_MSG_VERBOSE("Test retrieval of Mdt detector element " 
                         << m_idHelperSvc->toStringDetEl(test_me));
@@ -100,7 +92,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
     m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
     m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
+    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
 
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
    if (station->hasALines()){ 

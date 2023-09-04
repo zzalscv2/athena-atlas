@@ -28,8 +28,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
    private:
     const MdtCondDbData* retrieveDeadChannels(const EventContext& ctx ) const;
     StatusCode dumpToTree(const EventContext& ctx, const MdtReadoutElement* readoutEle);
-    void dumpToFile(const EventContext& ctx, const MdtReadoutElement* readoutEle, std::ostream& sstr);
-
+  
     // MuonDetectorManager from the conditions store
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{
         this, "DetectorManagerKey", "MuonDetectorManager",
@@ -51,14 +50,10 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     Gaudi::Property<std::vector<std::string>> m_selectStat{
         this, "TestStations", {"BIL1A3"}};
 
-    Gaudi::Property<std::string> m_outputTxt{
-        this, "DumpTxtFile", "",
-        "Dump the basic informations from the Readout geometry into a txt file"};
     Gaudi::Property<bool> m_dumpSurfaces{this, "dumpSurfaces", false, "Adds the bounds and surfaces of each tube to the dump"};
 
    
     /// Write a TTree for validation purposes
-    Gaudi::Property<bool> m_dumpTree{this, "writeTTree", true};
     MuonVal::MuonTesterTree m_tree{"MdtGeoModelTree", "GEOMODELTESTER"};
 
     /// Identifier of the readout element
