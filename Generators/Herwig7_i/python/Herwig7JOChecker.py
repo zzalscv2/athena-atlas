@@ -163,11 +163,6 @@ def check_file():
     for command in read_commands:
       if file in command:
         read_files.append(snippet_path+file)
-  
-  # Check that the list of file to be read in now is the same as the number snippets, 
-  # which are declared in the .in file
-  if len(read_commands) != len(read_files):
-    raise RuntimeError("There are more files to be checked by the JOChecker than there are snippets in the %s file" % (run_name))
 
   # Now loop over the snippets
   for file in read_files:
