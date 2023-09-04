@@ -122,7 +122,8 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ATH_MSG_INFO("------- outputTracksPtCut [GeV]: "<<m_outputTracksPtCut);
   ATH_MSG_INFO("------- SmearingSigma: "<<m_SigmaScaleFactor);  
   ATH_MSG_INFO("------- trackEfficiency: "<<m_smearedTrackEfficiency);  
-  ATH_MSG_INFO("------- parameterizedEfficiency: "<<m_parameterizedTrackEfficiency);  
+  ATH_MSG_INFO("------- parameterizedEfficiency: "<<m_parameterizedTrackEfficiency);
+  ATH_MSG_INFO("------- parameterizedEfficiency LRT: "<<m_parameterizedTrackEfficiency_LRT);    
   ATH_MSG_INFO("------- UseResolutionPtCutOff: "<<m_UseResolutionPtCutOff);
   ATH_MSG_INFO("------- SetResolutionPtCutOff: "<<m_SetResolutionPtCutOff);
   ATH_MSG_INFO("------- EnableMonitoring:" <<m_enableMonitoring);
@@ -151,6 +152,7 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);
   ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency(m_parameterizedTrackEfficiency);
+  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_LRT(m_parameterizedTrackEfficiency_LRT);
   ((FakeTrackSmearer *) m_mySmearer)->SetSigmaScaleFactor(m_SigmaScaleFactor.value());
   ((FakeTrackSmearer *) m_mySmearer)->UseResolutionPtCutOff(m_UseResolutionPtCutOff.value());
   ((FakeTrackSmearer *) m_mySmearer)->SetResolutionPtCutOff(m_SetResolutionPtCutOff.value());
@@ -214,7 +216,6 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
 
   // clear the smearear
   FakeTrackSmearer *mySmearer=static_cast<FakeTrackSmearer *>(m_mySmearer);
-  //FakeTrackSmearer *mySmearer=(FakeTrackSmearer *) m_mySmearer;
   mySmearer->Clear();
 
   int n_input_tracks=0;
@@ -231,6 +232,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
       float eta = part->eta();
       float phi = part->phi();
       if (part->isNeutral()) continue;
+      if (pt <=0.) continue;
 
       ATH_MSG_DEBUG ("===> New Truth: "  
                       <<" curv=" << 1./part->pt()
@@ -244,7 +246,7 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                       );        
       if (part->parent()) ATH_MSG_DEBUG (" parent status=" << part->parent()->pdgId());
       
-      if (std::abs(pt) > m_inputTracksPtCut)
+      if (std::abs(pt)/1000. > m_inputTracksPtCut) //GeV cut
       	{
       	  n_input_tracks++;
           if (m_enableMonitoring) {
@@ -268,7 +270,8 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                 // set the decorators                  
                 d0Decorator(*newtrk) = otrack.d0();
                 z0Decorator(*newtrk) = otrack.z0();
-                ptDecorator(*newtrk) = otrack.pt();
+                ptDecorator(*newtrk) = otrack.pt()*1000.; // this does not work! why?
+                
 
                 ATH_MSG_DEBUG ("Smeared Truth: "
                       <<" curv=" << 1./newtrk->pt()
@@ -285,19 +288,20 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                 if (m_enableMonitoring) {
                   hist("track_output_eta")->Fill(otrack.eta());
                   hist("track_output_theta")->Fill(otrack.theta());
-                  hist("track_output_pt" )->Fill(otrack.pt()/1000.0 );
+                  hist("track_output_pt" )->Fill(part->charge()*otrack.pt() );
                   hist("track_output_phi")->Fill(otrack.phi());
                   hist("track_output_z0" )->Fill(otrack.z0() );
                   hist("track_output_d0" )->Fill(otrack.d0() );      
         
                   hist("track_outputcoll_eta")->Fill(newtrk->eta());
                   hist("track_outputcoll_theta")->Fill(newtrk->auxdata<float>("theta"));
-                  hist("track_outputcoll_pt" )->Fill(newtrk->pt()/1000.);
+                  hist("track_outputcoll_pt" )->Fill(part->charge()*newtrk->pt()/1000.);
                   hist("track_outputcoll_phi")->Fill(newtrk->phi());
                   hist("track_outputcoll_z0" )->Fill(newtrk->auxdata<float>("z0"));
                   hist("track_outputcoll_d0" )->Fill(newtrk->auxdata<float>("d0"));
                 
-                  hist("track_delta_eta")->Fill(newtrk->eta() - part->eta());      	      
+                  hist("track_delta_eta")->Fill(newtrk->eta() - part->eta());  
+                  hist("track_delta_pt") ->Fill((newtrk->pt() - part->pt())/1000.);      	      
                   hist("track_delta_crv")->Fill(newtrk->charge()*1000./newtrk->pt()-((part->charge()*1000./part->pt())));
                   hist("track_delta_phi")->Fill(newtrk->phi() - part->phi());
                   hist("track_delta_z0" )->Fill(newtrk->auxdata<float>("z0")  - part->auxdata<float>("z0"));
@@ -403,42 +407,36 @@ StatusCode EFTrackingSmearingAlg::execute() {
               *newtrk = *trk;
 
               double sintheta=std::sin(otrack.theta());
-              // modify the cov matrix
-              
-              trkcov = trk->definingParametersCovMatrix();      	            	      
-      	      for (int ii=0;ii<5;ii++) for (int jj=0;jj<5;jj++) if (ii!=jj) trkcov(ii,jj)=0.0;
-      	      // not sure about the position of the elements below: need to cross check 
-      	      trkcov(Trk::d0    ,Trk::d0    ) = otrack.sigma_d0()   * otrack.sigma_d0()   ; 
-      	      trkcov(Trk::z0    ,Trk::z0    ) = otrack.sigma_z0()   * otrack.sigma_z0()   ; 
-      	      trkcov(Trk::theta ,Trk::theta ) = otrack.sigma_theta()* otrack.sigma_theta(); 
-      	      trkcov(Trk::phi0  ,Trk::phi0  ) = otrack.sigma_phi()  * otrack.sigma_phi()  ; 
-      	      trkcov(Trk::qOverP,Trk::qOverP) = otrack.sigma_curv() * otrack.sigma_curv() *sintheta*sintheta; 
-              if (m_enableMonitoring) {
-      	        hist("track_outputcoll_sigma_theta") ->Fill(std::sqrt(trkcov(Trk::theta,Trk::theta)));
-      	        hist("track_outputcoll_sigma_qOverP")->Fill(std::sqrt(trkcov(Trk::qOverP,Trk::qOverP)));
-      	        hist("track_outputcoll_sigma_phi")   ->Fill(std::sqrt(trkcov(Trk::phi0,Trk::phi0)));
-      	        hist("track_outputcoll_sigma_z0")    ->Fill(std::sqrt(trkcov(Trk::z0,Trk::z0)));
-      	        hist("track_outputcoll_sigma_d0")    ->Fill(std::sqrt(trkcov(Trk::d0,Trk::d0)));
+              trkcov = trk->definingParametersCovMatrix();    
+              if (m_SigmaScaleFactor !=0) {
+                  // modify the cov matrix
+                  ATH_MSG_DEBUG ("Setting parameters in covariance vector");                     	            	      
+                  for (int ii=0;ii<5;ii++) for (int jj=0;jj<5;jj++) if (ii!=jj) trkcov(ii,jj)=0.0;
+                  // not sure about the position of the elements below: need to cross check 
+                  trkcov(Trk::d0    ,Trk::d0    ) = otrack.sigma_d0()   * otrack.sigma_d0()   ; 
+                  trkcov(Trk::z0    ,Trk::z0    ) = otrack.sigma_z0()   * otrack.sigma_z0()   ; 
+                  trkcov(Trk::theta ,Trk::theta ) = otrack.sigma_theta()* otrack.sigma_theta(); 
+                  trkcov(Trk::phi0  ,Trk::phi0  ) = otrack.sigma_phi()  * otrack.sigma_phi()  ; 
+                  trkcov(Trk::qOverP,Trk::qOverP) = otrack.sigma_curv()/1000. * otrack.sigma_curv()/1000. *sintheta*sintheta;               
+                  
+                  trkcovvec.clear();
+                  EigenHelpers::eigenMatrixToVector(trkcovvec,trkcov,"");
+                  newtrk->setDefiningParametersCovMatrixVec(trkcovvec);      
+                  ATH_MSG_DEBUG ("Setting parameters covariance");
+                  newtrk->setDefiningParametersCovMatrix(trkcov);                                               	      
+                          
+                  //(float d0, float z0, float phi0, float theta, float qOverP)
+                  newtrk->setDefiningParameters(
+                        otrack.d0(),
+                        otrack.z0(),
+                        otrack.phi(),
+                        otrack.theta(),
+                        (otrack.curv()*sintheta/1000.) //oneOverp in MeV
+                        );
               }
-
-      	      ATH_MSG_DEBUG ("Setting parameters in covariance vector"); 
-              
-      	      trkcovvec.clear();
-      	      EigenHelpers::eigenMatrixToVector(trkcovvec,trkcov,"");
-      	      newtrk->setDefiningParametersCovMatrixVec(trkcovvec);
-      
-      	      ATH_MSG_DEBUG ("Setting parameters covariance");
-      	      newtrk->setDefiningParametersCovMatrix(trkcov);                                               	      
-                      
-              //(float d0, float z0, float phi0, float theta, float qOverP)
-              newtrk->setDefiningParameters(
-      					    otrack.d0(),
-      					    otrack.z0(),
-      					    otrack.phi(),
-      					    otrack.theta(),
-      					    (otrack.curv()*sintheta)
-      					    );
               xAOD::ParametersCovMatrix_t trkcov_out = newtrk->definingParametersCovMatrix();
+              
+
               ATH_MSG_DEBUG ("Smeared Track: "
                       <<" curv=" << 1./newtrk->pt()
                       <<" phi="  << newtrk->phi()
@@ -455,23 +453,24 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	      if (m_enableMonitoring) {
       	        hist("track_output_eta")->Fill(otrack.eta());
       	        hist("track_output_theta")->Fill(otrack.theta());
-      	        hist("track_output_pt" )->Fill(otrack.pt()/1000.0 );
+      	        hist("track_output_pt" )->Fill(trk->charge()*otrack.pt() );
       	        hist("track_output_phi")->Fill(otrack.phi());
       	        hist("track_output_z0" )->Fill(otrack.z0() );
       	        hist("track_output_d0" )->Fill(otrack.d0() );      
       
       	        hist("track_outputcoll_eta")->Fill(newtrk->eta());
       	        hist("track_outputcoll_theta")->Fill(newtrk->theta());
-      	        hist("track_outputcoll_pt" )->Fill(std::sin(newtrk->theta())/(1000.0*newtrk->qOverP()));
+      	        hist("track_outputcoll_pt" )->Fill(trk->charge()*std::sin(newtrk->theta())/(1000.0*newtrk->qOverP()));
       	        hist("track_outputcoll_phi")->Fill(newtrk->phi0());
       	        hist("track_outputcoll_z0" )->Fill(newtrk->z0());
       	        hist("track_outputcoll_d0" )->Fill(newtrk->d0());
       	      
-      	        hist("track_delta_eta")->Fill(otrack.eta() - trk->eta());      	      
-      	        hist("track_delta_crv")->Fill(1000.0*otrack.curv()-((1000.0*trk->qOverP())/std::sin(theta)));
-      	        hist("track_delta_phi")->Fill(otrack.phi() - trk->phi0());
-      	        hist("track_delta_z0" )->Fill(otrack.z0()  - trk->z0());
-      	        hist("track_delta_d0" )->Fill(otrack.d0()  - trk->d0());
+      	        hist("track_delta_eta")->Fill(newtrk->eta() - trk->eta()); 
+                hist("track_delta_pt")->Fill((newtrk->pt() - trk->pt())/1000.);      	      
+      	        hist("track_delta_crv")->Fill((1000.0*newtrk->qOverP()/std::sin(theta))-((1000.0*trk->qOverP())/std::sin(theta)));
+      	        hist("track_delta_phi")->Fill(newtrk->phi() - trk->phi0());
+      	        hist("track_delta_z0" )->Fill(newtrk->z0()  - trk->z0());
+      	        hist("track_delta_d0" )->Fill(newtrk->d0()  - trk->d0());
               
       	        
       	        hist("track_outputcoll_check_sigma_theta") ->Fill(std::sqrt(trkcov_out(Trk::theta,Trk::theta)));
@@ -479,6 +478,14 @@ StatusCode EFTrackingSmearingAlg::execute() {
       	        hist("track_outputcoll_check_sigma_phi")   ->Fill(std::sqrt(trkcov_out(Trk::phi0,Trk::phi0)));
       	        hist("track_outputcoll_check_sigma_z0")    ->Fill(std::sqrt(trkcov_out(Trk::z0,Trk::z0)));
       	        hist("track_outputcoll_check_sigma_d0")    ->Fill(std::sqrt(trkcov_out(Trk::d0,Trk::d0)));
+
+                
+      	        hist("track_outputcoll_sigma_theta") ->Fill(std::sqrt(trkcov(Trk::theta,Trk::theta)));
+      	        hist("track_outputcoll_sigma_qOverP")->Fill(std::sqrt(trkcov(Trk::qOverP,Trk::qOverP)));
+      	        hist("track_outputcoll_sigma_phi")   ->Fill(std::sqrt(trkcov(Trk::phi0,Trk::phi0)));
+      	        hist("track_outputcoll_sigma_z0")    ->Fill(std::sqrt(trkcov(Trk::z0,Trk::z0)));
+      	        hist("track_outputcoll_sigma_d0")    ->Fill(std::sqrt(trkcov(Trk::d0,Trk::d0)));
+              
               }
               // do we need this hack?
       	      // hack!!!
@@ -534,14 +541,14 @@ StatusCode EFTrackingSmearingAlg::book_histograms()
 
   CHECK(book(new TH1F("track_output_eta","#eta of output tracks",50,-5,5)));
   CHECK(book(new TH1F("track_output_theta","#Theta of output tracks",50,0.0,4.0)));
-  CHECK(book(new TH1F("track_output_pt" ,"p_T  of output tracks",50,-10,10)));
+  CHECK(book(new TH1F("track_output_pt" ,"p_T  of output tracks [GeV]",50,-10,10)));
   CHECK(book(new TH1F("track_output_phi","#phi of output tracks",50,-6.28,6.28)));
   CHECK(book(new TH1F("track_output_z0" ,"z_0  of output tracks",100,-50,50)));
   CHECK(book(new TH1F("track_output_d0" ,"d_0  of output tracks",50,-5,5)));
 
   CHECK(book(new TH1F("track_outputcoll_eta","#eta of output tracks collection",50,-5,5)));
   CHECK(book(new TH1F("track_outputcoll_theta","#Theta of output tracks collection",50,0.0,4.0)));
-  CHECK(book(new TH1F("track_outputcoll_pt" ,"p_T  of output tracks collection",50,-10,10)));
+  CHECK(book(new TH1F("track_outputcoll_pt" ,"p_T  of output tracks collection [GeV]",50,-10,10)));
   CHECK(book(new TH1F("track_outputcoll_phi","#phi of output tracks collection",50,-6.28,6.28)));
   CHECK(book(new TH1F("track_outputcoll_z0" ,"z_0  of output tracks collection",100,-50,50)));
   CHECK(book(new TH1F("track_outputcoll_d0" ,"d_0  of output tracks collection",50,-5,5)));
@@ -559,10 +566,11 @@ StatusCode EFTrackingSmearingAlg::book_histograms()
   CHECK(book(new TH1F("track_outputcoll_check_sigma_d0"   ,"#sigma_{d_0}  of output tracks collection"    ,50,0.0,5    )));
 
   CHECK(book(new TH1F("track_delta_eta","tracks #Delta #eta",50,-1,1)));
+  CHECK(book(new TH1F("track_delta_pt","tracks #Delta #pt [GeV]",50,-2.,2.)));
   CHECK(book(new TH1F("track_delta_crv" ,"tracks #Delta crv",50,-1,1)));
   CHECK(book(new TH1F("track_delta_phi","tracks #Delta #phi",50,-0.5,0.5)));
-  CHECK(book(new TH1F("track_delta_z0" ,"tracks #Delta z_0 ",100,-50,50)));
-  CHECK(book(new TH1F("track_delta_d0" ,"tracks #Delta d_0 ",50,-10,10)));
+  CHECK(book(new TH1F("track_delta_z0" ,"tracks #Delta z_0 ",100,-10,10)));
+  CHECK(book(new TH1F("track_delta_d0" ,"tracks #Delta d_0 ",50,-2,2)));
   return StatusCode::SUCCESS;
 }
 

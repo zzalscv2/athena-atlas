@@ -18,7 +18,7 @@ def EFTrackingSmearingCfg(flags, name = "EFTrackingSmearingAlg", **kwargs):
       ParameterizedTrackEfficiency = kwargs['parameterizeEfficiency'],
       SmearingScaleFactor = kwargs['smearFactor'],
       SmearTruthParticle = kwargs['smearTruthParticle'],
-      InputTracksPtCutGeV = kwargs['trkpTCut'],
+      OutputTracksPtCutGeV = kwargs['trkpTCut'],
       EnableMonitoring = kwargs['EnableMonitoring'],
       RootStreamName = name, 
       RootDirName = "/EFTSmearing/"
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     
     # example to smear the truth particles with smearing factor =2 and efficiency 90%
     smearerTruth = EFTrackingSmearingCfg(flags, name="testTruth", trkpTCut=1, smearFactor=TestsmearFactor, InputTruthParticle="TruthParticles",
-                                    trackEfficiency=0.9, parameterizeEfficiency=False, smearTruthParticle=True,
+                                    trackEfficiency=0.9, parameterizeEfficiency=False, ParameterizedTrackEfficiencyLRT = True, smearTruthParticle=True,
                                     EnableMonitoring=True, OutputLevel=INFO)
     acc.merge(smearerTruth)
     
@@ -79,8 +79,10 @@ if __name__ == "__main__":
     # validation of the smeared tracks and truth particles
     validationAlg = CompFactory.EFTrackingSmearMonAlg ( name="EFTrakingSmearMonAlg",
       OutputLevel = INFO, 
-      InputTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(TestsmearFactor),
-      InputTruthParticleContainer = "TruthParticle_smeared_SF"+str(TestsmearFactor),
+      InputTrackParticleContainer = "InDetTrackParticles",
+      InputTruthParticleContainer = "TruthParticles",
+      SmearedTrackParticleContainer = "InDetTrackParticles_smeared_SF"+str(TestsmearFactor),
+      SmearedTruthParticleContainer = "TruthParticle_smeared_SF"+str(TestsmearFactor),
       )
     acc.addEventAlgo(validationAlg)
     

@@ -49,10 +49,11 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   DoubleProperty   m_SigmaScaleFactor      {this, "SmearingScaleFactor", 1, "Set the smearing SF value for the sigmas"};
   BooleanProperty  m_UseResolutionPtCutOff {this, "UseResolutionPtCutOff", false, "Apply ptCutoff on smearing"};
   DoubleProperty   m_SetResolutionPtCutOff {this, "SetResolutionPtCutOff", 0., "Set ptCutoff off for semaring"};
-  DoubleProperty   m_inputTracksPtCut      {this, "InputTracksPtCutGeV", 4.0, "Set input track pT cut"};
-  DoubleProperty   m_outputTracksPtCut     {this, "OutputTracksPtCutGeV", 4.0, "Set the output track pT cut"};
+  DoubleProperty   m_inputTracksPtCut      {this, "InputTracksPtCutGeV", 0.0, "Set input track pT cut"};
+  DoubleProperty   m_outputTracksPtCut     {this, "OutputTracksPtCutGeV", 1.0, "Set the output track pT cut"};
   DoubleProperty   m_smearedTrackEfficiency{this, "SmearedTrackEfficiency", 1.0, "Set track efficiency for smearing"};
   BooleanProperty  m_parameterizedTrackEfficiency{this, "ParameterizedTrackEfficiency", false, "Enable parameterized efficiency for smearing"};
+  BooleanProperty  m_parameterizedTrackEfficiency_LRT{this, "ParameterizedTrackEfficiencyLRT", false, "Enable parameterized efficiency for LRT smearing"};
   BooleanProperty  m_enableMonitoring      {this, "EnableMonitoring", false, "Enable debugging monitoring of the algorithm"};
   BooleanProperty  m_smearTruthParticle    {this, "SmearTruthParticle", false, "Enable smearing on truth particles, disabling the track smearing"};
  

@@ -24,11 +24,18 @@ class EFTrackingSmearMonAlg: public ::AthHistogramAlgorithm {
  private: 
 
 
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticleKey { this, "InputTrackParticleContainer", "InDetTrackParticles_tosmear",
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_inputTrackParticleKey { this, "InputTrackParticleContainer", "InDetTrackParticles",
                                                                           "key for retrieval of input TrackParticles" };
 
   
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleKey{this,"InputTruthParticleContainer","TruthParticles_tosmear",
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_inputTruthParticleKey{this,"InputTruthParticleContainer","TruthParticles",
+                                                                         "key for retrieval of input Truth particle"};
+  
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_smearedTrackParticleKey { this, "SmearedTrackParticleContainer", "InDetTrackParticles_tosmear",
+                                                                          "key for retrieval of input TrackParticles" };
+
+  
+  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_smearedTruthParticleKey{this,"SmearedTruthParticleContainer","TruthParticles_tosmear",
                                                                          "key for retrieval of input Truth particle"};
   
 
