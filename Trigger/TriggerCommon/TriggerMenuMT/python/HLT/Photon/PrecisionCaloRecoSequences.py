@@ -50,8 +50,7 @@ def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False):
     
     copier = CompFactory.egammaTopoClusterCopier('gTrigEgammaTopoClusterCopier'+  tag + RoIs,
                                                  InputTopoCollection=TrigEgammaKeys.precisionTopoClusterContainer,
-                                                 OutputTopoCollection= TrigEgammaKeys.precisionCaloTopoCollection,
-                                                 OutputTopoCollectionShallow='tmp_'+TrigEgammaKeys.precisionCaloTopoCollection)
+                                                 OutputTopoCollection= TrigEgammaKeys.precisionCaloTopoCollection)
     acc.addEventAlgo(copier)
 
     trigEgammaRec = TrigEgammaRecCfg(flags, name = 'gTrigEgammaRec'+tag + RoIs)

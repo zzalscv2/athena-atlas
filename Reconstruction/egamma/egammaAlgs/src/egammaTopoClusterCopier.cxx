@@ -12,6 +12,19 @@
 
 #include <cmath>
 
+namespace{
+// Special egamma EMFraction which includes presampler and E4 cells.
+const SG::AuxElement::Accessor<float> s_acc_emfraction {"EMFraction"};
+
+//comparison function
+bool greater(xAOD::CaloCluster const* a, xAOD::CaloCluster const* b) {
+  const double emfrac_a = s_acc_emfraction(*a);
+  const double emfrac_b = s_acc_emfraction(*b);
+  return (a->et() * emfrac_a) > (b->et() * emfrac_b);
+}
+
+}  // namespace
+
 egammaTopoClusterCopier::egammaTopoClusterCopier(const std::string& name,
                                                  ISvcLocator* pSvcLocator):
   AthReentrantAlgorithm(name, pSvcLocator)
@@ -26,6 +39,7 @@ StatusCode egammaTopoClusterCopier::initialize() {
   m_doForwardClusters = !m_outputFwdTopoCollection.empty();
   ATH_CHECK(m_outputFwdTopoCollection.initialize(m_doForwardClusters));
 
+  m_outputTopoCollectionShallow = "tmp_"+ m_outputTopoCollection.key();
   ATH_CHECK(m_outputTopoCollectionShallow.initialize());
 
   ATH_MSG_DEBUG("Initialization successful");
@@ -66,7 +80,7 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     std::move(inputShallowcopy.first),
     std::move(inputShallowcopy.second)
   ));
-  
+
   // Here it just needs to be a view copy, i.e the collection we create does not
   // really own its elements.
   auto viewCopy = std::make_unique<ConstDataVector<xAOD::CaloClusterContainer>>(SG::VIEW_ELEMENTS);
@@ -104,7 +118,7 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     );
 
     ++buff_AllClusters;
-    m_acc_emfraction(*clus) = 0.0;  // Always decorate
+    s_acc_emfraction(*clus) = 0.0;  // Always decorate
 
     const double clusterE = clus->e();
     const double aeta = std::abs(clus->eta());
@@ -173,7 +187,7 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     const double emfrac= (clus->energyBE(0) + clus->energyBE(1) +
                     clus->energyBE(2) + clus->energyBE(3) + eg_tilegap) / clusterE;
 
-    m_acc_emfraction(*clus) = emfrac;
+    s_acc_emfraction(*clus) = emfrac;
     if ((emfrac > m_EMFracCut && (clusterE * emfrac) > m_ECut) || xAOD::EgammaHelpers::isFCAL(clus)) {
       ATH_MSG_DEBUG(
         "-->Selected Cluster at eta,phi,et,EMFraction " << clus->eta() <<
@@ -194,8 +208,8 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
         ++buff_FwdPassSelection;
       }
 
-      if (valid_for_both) { 
-        ++buff_SharedPassSelection; 
+      if (valid_for_both) {
+        ++buff_SharedPassSelection;
       }
     }
   } // End loop on clusters.
@@ -226,12 +240,4 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
-bool egammaTopoClusterCopier::greater(
-  xAOD::CaloCluster const *a, 
-  xAOD::CaloCluster const *b
-) {
-  const double emfrac_a = m_acc_emfraction(*a);
-  const double emfrac_b = m_acc_emfraction(*b);
-  return (a->et() * emfrac_a) > (b->et() * emfrac_b);
-}
 

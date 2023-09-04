@@ -75,8 +75,7 @@ def _precisonCaloSeq(flags):
 
     copier = CompFactory.egammaTopoClusterCopier('TrigEgammaTopoClusterCopierPrecisionCaloRoIs',
                                                  InputTopoCollection='HLT_TopoCaloClustersRoI',
-                                                 OutputTopoCollection='HLT_CaloEMClusters_Electron',
-                                                 OutputTopoCollectionShallow='tmp_HLT_CaloEMClusters_Electron')
+                                                 OutputTopoCollection='HLT_CaloEMClusters_Electron')
     recoAcc.addRecoAlgo(copier)
 
     selAcc = SelectionCA('PrecisionCalo')

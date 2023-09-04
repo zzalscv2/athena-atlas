@@ -48,25 +48,20 @@ public:
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  
-  static bool greater(
-      xAOD::CaloCluster const *a, 
-      xAOD::CaloCluster const *b
-  );
 
 private:
 
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_inputTopoCollection {
     this,
     "InputTopoCollection",
-    "CaloTopoClusters", 
+    "CaloTopoClusters",
     "input topocluster collection"
   };
 
   SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputTopoCollectionShallow {
     this,
-    "OutputTopoCollectionShallow",
-    "tmp_egammaTopoCluster",
+    "TopoShallow_doNotConfig",
+    "",
     "Shallow copy of input collection that allows properties to be modified"
   };
 
@@ -79,48 +74,48 @@ private:
 
   SG::WriteHandleKey<ConstDataVector<xAOD::CaloClusterContainer>> m_outputFwdTopoCollection {
     this,
-    "OutputFwdTopoCollection", 
+    "OutputFwdTopoCollection",
     "",
     "View container of selected fwd topoclusters"
   };
 
   Gaudi::Property<float> m_etaCut {
-    this, 
-    "EtaCut", 
-    2.6, 
+    this,
+    "EtaCut",
+    2.6,
     "maximum |eta| of selected clusters"
   };
 
   Gaudi::Property<double> m_fwdEtaCut {
-    this, 
-    "fwdEtaCut", 
-    2.5, 
+    this,
+    "fwdEtaCut",
+    2.5,
     "minimum |eta| of selected fwd clusters"
   };
 
   Gaudi::Property<float> m_ECut {
-    this, 
-    "ECut", 
-    700, 
+    this,
+    "ECut",
+    700,
     "minimum EM energy of selected clusters"
   };
 
   Gaudi::Property<double> m_fwdETCut {
     this,
-    "fwdETCut", 
-    5. * Gaudi::Units::GeV, 
+    "fwdETCut",
+    5. * Gaudi::Units::GeV,
     "Fwd ET cut"
   };
 
   Gaudi::Property<float> m_EMFracCut {
-    this, 
-    "EMFracCut", 
-    0.5, 
+    this,
+    "EMFracCut",
+    0.5,
     "mimimum EM fraction of selected clusters"
   };
- 
+
   /** @brief Private member flag to do the track matching. */
-  Gaudi::Property<bool> m_hasITk { 
+  Gaudi::Property<bool> m_hasITk {
     this,
     "hasITk",
     false,
@@ -128,12 +123,7 @@ private:
   };
 
   /** @brief Private member flag to copy forward clusters. */
-  Gaudi::Property<bool> m_doForwardClusters { 
-    this,
-    "doFwdClusters",
-    false,
-    "Boolean to copy clusters in the forward region"
-  };
+  bool m_doForwardClusters;
 
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_PassPreSelection {};
@@ -145,8 +135,6 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_SharedPassPreSelection {};
   mutable Gaudi::Accumulators::Counter<> m_SharedPassSelection {};
 
-  // Special egamma EMFraction which includes presampler and E4 cells.
-  thread_local inline static SG::AuxElement::Accessor<float> m_acc_emfraction {"EMFraction"};
 };
 
 #endif // EGAMMATOOLS_EMCLUSTERTOOL_H
