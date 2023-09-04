@@ -14,7 +14,7 @@ def CaloThinCellsBySamplingAlgCfg (flags, streamName,
     result = ComponentAccumulator()
 
     CaloThinCellsBySamplingAlg=CompFactory.CaloThinCellsBySamplingAlg
-    alg = CaloThinCellsBySamplingAlg ('CaloThinCellsBySamplingAlg_' + '_'.join (samplings),
+    alg = CaloThinCellsBySamplingAlg ('CaloThinCellsBySamplingAlg_' + '_'.join (samplings) + '_' + streamName,
                                      StreamName = streamName,
                                      SamplingCellsName = samplings,
                                      Cells = cells)
@@ -33,7 +33,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    only = ['CaloThinCellsBySamplingAlg_TileGap3']
+    only = ['CaloThinCellsBySamplingAlg_TileGap3_StreamAOD']
 
     flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW_RUN2
