@@ -20,8 +20,26 @@ def TrackCountHypoToolGen(chainDict):
 
 def CosmicsTrkSequence(flags):
     from TrigMinBias.TrigMinBiasConf import TrackCountHypoAlg
-    from TrigInDetConfig.InDetCosmicTracking import getTrigCosmicInDetTracking
-    trkInputMakerAlg, idTrackingAlgs = getTrigCosmicInDetTracking(flags)
+    from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
+    from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
+    
+    trkInputMakerAlg = EventViewCreatorAlgorithm("IMCosmicTrkEventViewCreator")
+    trkInputMakerAlg.ViewFallThrough = True
+    trkInputMakerAlg.RoITool = ViewCreatorInitialROITool()
+    trkInputMakerAlg.InViewRoIs = "InputRoI" # contract with the consumer
+    trkInputMakerAlg.Views = "CosmicViewRoIs"
+    trkInputMakerAlg.RequireParentView = False
+
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
+
+    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+    seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                            rois = trkInputMakerAlg.InViewRoIs, inView = "VDVCosmicsIDTracking")
+
+    from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
+    idTrackingAlgs = extractAlgorithmsAndAppendCA(seq.sequence("Offline"))
+
     trackCountHypo = TrackCountHypoAlg("CosmicsTrackCountHypoAlg", 
         minPt = [100*Units.MeV],
         maxZ0 = [401*Units.mm],

@@ -18,29 +18,35 @@ class InDetTrigSequence:
     self.__signature = signature
     self.__rois = rois
     self.__inView = inView
-    self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_FTF 
+    self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_FTF
+    self.__ambiPrefix = "TrigAmbi"
     self.__log = logging.getLogger("InDetTrigSequence")
     self.__log.info(f"signature: {self.__signature} rois: {self.__rois} inview: {self.__inView}")
     
   def sequence(self, recoType : str = "FastTrackFinder") -> ComponentAccumulator:
-    ca = ComponentAccumulator()
+    with ConfigurableCABehavior():
+      ca = ComponentAccumulator()
     
-    if self.__inView:
-      ca.merge(self.viewDataVerifier(self.__inView))
+      if self.__inView:
+        ca.merge(self.viewDataVerifier(self.__inView))
 
-    ca.merge(self.dataPreparation())
-    if recoType == "dataPreparation":
-      return ca
+      ca.merge(self.dataPreparation())
+      if recoType == "dataPreparation":
+        return ca
     
-    ca.merge(self.spacePointFormation())
-    if recoType =="spacePointFormation":
-      return ca
+      ca.merge(self.spacePointFormation())
+      if recoType =="spacePointFormation":
+        return ca
 
-    ca.merge(self.fastTrackFinder())
-    if recoType =="FastTrackFinder":
-      return ca
+      if recoType =="FastTrackFinder":
+        ca.merge(self.fastTrackFinder())
+        return ca
 
-    return ca
+      if recoType =="Offline":
+        ca.merge(self.offlinePattern())
+        ca.merge(self.sequenceAfterPattern())
+    
+      return ca
 
   def sequenceAfterPattern(self, recoType : str = "PrecisionTracking") -> ComponentAccumulator:
     with ConfigurableCABehavior():
@@ -56,6 +62,21 @@ class InDetTrigSequence:
     
       return ca
     
+  def offlinePattern(self) -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+      ca = ComponentAccumulator()
+
+      from InDetConfig.SiSPSeededTrackFinderConfig import TrigSiSPSeededTrackFinderCfg
+      ca.merge(TrigSiSPSeededTrackFinderCfg(self.__flags,
+                                            name = 'EFsiSPSeededTrackFinder'+self.__flags.Tracking.ActiveConfig.input_name
+      ))
+
+      self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_IDTrig
+      self.__ambiPrefix = "EFAmbi"
+      
+      return ca
+    
+
   def viewDataVerifier(self, viewVerifier='IDViewDataVerifier') -> ComponentAccumulator:
     
     with ConfigurableCABehavior():
@@ -135,6 +156,8 @@ class InDetTrigSequence:
     with ConfigurableCABehavior():
       acc = ComponentAccumulator()
 
+      self.__log.info(f"DataPrep signature: {self.__signature} rois: {self.__rois} inview: {self.__inView}")
+
       if self.__flags.Input.Format == Format.BS:
         from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import TrigPixelRawDataProviderAlgCfg
         acc.merge(TrigPixelRawDataProviderAlgCfg(self.__flags,suffix=signature,RoIs=self.__rois))
@@ -168,6 +191,7 @@ class InDetTrigSequence:
         acc.merge(TrigTRTRawDataProviderCfg(self.__flags, RoIs=self.__rois))
 
       elif not self.__inView:
+        self.__log.info(f"DataPrepTRT signature: {self.__signature} rois: {self.__rois} inview: {self.__inView}")
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         loadRDOs = [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
         acc.merge(SGInputLoaderCfg(self.__flags, Load=loadRDOs))
@@ -233,7 +257,7 @@ class InDetTrigSequence:
       acc.merge(
         TrkAmbiguityScore_Trig_Cfg(
           self.__flags,
-          name = f"TrigAmbiScore_{self.__flags.Tracking.ActiveConfig.input_name}",
+          name = f"{self.__ambiPrefix}Score_{self.__flags.Tracking.ActiveConfig.input_name}",
           TrackInput = [self.__lastTrkCollection],
           AmbiguityScoreProcessor = None
         )
@@ -243,7 +267,7 @@ class InDetTrigSequence:
       acc.merge(
         TrkAmbiguitySolver_Trig_Cfg(
           self.__flags,
-          name = "TrigAmbiguitySolver"+self.__flags.Tracking.ActiveConfig.input_name,
+          name = f"{self.__ambiPrefix}guitySolver_{self.__flags.Tracking.ActiveConfig.input_name}",
         )
       )
     

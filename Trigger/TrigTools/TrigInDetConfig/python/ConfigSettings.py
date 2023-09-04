@@ -165,6 +165,7 @@ class ConfigSettings_minBias( _ConfigSettingsBase ):
       self._roi      = "HLT_Roi_MinBias"
       self._doFullScan      = True
       self._pTmin           = 0.1*GeV # TODO: double check
+      self._doTRT           = False      #backward compatibility with EFIDTracking.py:makeInDetPatternRecognition
       self._etaHalfWidth    = 3
       self._phiHalfWidth    = math.pi
       self._doZFinder       = True
@@ -244,6 +245,9 @@ class ConfigSettings_cosmics( _ConfigSettingsBase ):
       self._Triplet_D0_PPS_Max  = 1000.0
       self._TrackInitialD0Max   = 1000.
       self._TrackZ0Max          = 1000.
+      self._doTRT           = False      #no real reason except of backward compatibility with
+                                         #EFIDTracking.py:makeInDetPatternRecognition
+                                         #2023fix
       self._doFullScan      = True
       self._etaHalfWidth    = 3
       self._phiHalfWidth    = math.pi

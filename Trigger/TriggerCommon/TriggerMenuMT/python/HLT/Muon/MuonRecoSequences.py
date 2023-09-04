@@ -262,25 +262,22 @@ def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoads
 
   trackingSequence = parOR(viewNodeName)
 
-  from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-  IDTrigConfig = getInDetTrigConfig( "cosmics" )
-
-  #from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-  from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-  dataPreparationAlgs = algorithmCAToGlobalWrapper(trigInDetFastTrackingCfg, flags, roisKey=RoIs, signatureName=name )
-
   dataVerifier = algorithmCAToGlobalWrapper(muonIDtrackVDVCfg,flags, 'cosmics', RoIs, extraLoads, extraLoadsForl2mtmode)
-
-  from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-  trackingAlgs, _ = makeInDetPatternRecognition( flags, config  = IDTrigConfig, verifier = 'VDVCosmicIDTracking' )
-
   trackingSequence += dataVerifier
-  for alg in dataPreparationAlgs:
-      trackingSequence += alg
+
+  from TrigInDetConfig.utils import getFlagsForActiveConfig
+  flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
+
+  from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+  seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                          rois = RoIs, inView = "muCombVDVcosmics")
+
+  from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
+  trackingAlgs = extractAlgorithmsAndAppendCA(seq.sequence("Offline"))
 
   for alg in trackingAlgs:
       trackingSequence += alg
-
+  
   return trackingSequence
 
 def muCombVDVCfg( flags, postFix):
