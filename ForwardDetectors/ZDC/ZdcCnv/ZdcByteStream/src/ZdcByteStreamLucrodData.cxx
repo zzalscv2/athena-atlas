@@ -89,7 +89,9 @@ StatusCode ZdcByteStreamLucrodData::fillContainer(std::vector<const ROBFragment*
   
   for (; rob_it != rob_end; ++rob_it) {
     
-    uint32_t robid = (*rob_it)->rob_source_id();
+    // *** important: we need to use [rod] source id here ***
+    //
+    uint32_t robid = (*rob_it)->rod_source_id();
     
     ATH_MSG_DEBUG(" ROB Fragment with ID: 0x" << std::hex << robid << std::dec); 
 
