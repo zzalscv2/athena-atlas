@@ -16,18 +16,6 @@ from D3PDMakerConfig.D3PDMakerFlags import jobproperties
 from JetRec.JetRecFlags import jobproperties as jobpropjet
 jobpropjet.JetRecFlags.inputFileType = "GEN"
 
-# Build list of particles stored in D3PD
-from TruthD3PDAnalysis.truthParticleConfig import truthParticleConfig
-truthParticleConfig (topSequence)
-
-# Build list of particles used to jet building
-from TruthD3PDMaker.TruthJetFilterConfig import TruthJetFilterConfig
-TruthJetFilterConfig (topSequence, writePartons = False, writeHadrons = True,
-                      excludeWZdecays = True)
-# Build list of particles used for WZ jet building
-TruthJetFilterConfig (topSequence, sgkey = 'FilteredWZD3PDTruth', writePartons = False, writeHadrons = True,
-                      excludeWZdecays = True, photonCone=0.1, excludeLeptonsFromTau=True)
-
 # Build truth particle (hadron-level) jets
 # Flags for AOD
 from ParticleBuilderOptions.AODFlags import AODFlags
@@ -41,18 +29,6 @@ antikt4truthAlgStd = make_StandardJetGetter('AntiKt',0.4,'Truth',disable=False).
 antikt6truthAlgStd = make_StandardJetGetter('AntiKt',0.6,'Truth',disable=False).jetAlgorithmHandle()
 
 # Add truth jet collection that includes all final state particles (including muons and neutrinos)
-antikt4truthAlgWZ = make_StandardJetGetter('AntiKt',0.4,'Truth',disable=False,
-                                           inputCollectionNames=['FilteredWZD3PDTruth'],
-                                           outputCollectionName='AntiKt4TruthJets_WZ',
-                                           useInteractingOnly=False,
-                                           includeMuons=True
-                                           ).jetAlgorithmHandle()
-antikt6truthAlgWZ = make_StandardJetGetter('AntiKt',0.6,'Truth',disable=False,
-                                           inputCollectionNames=['FilteredWZD3PDTruth'],
-                                           outputCollectionName='AntiKt6TruthJets_WZ',
-                                           useInteractingOnly=False,
-                                           includeMuons=True
-                                           ).jetAlgorithmHandle()
 
 if jobproperties.D3PDMakerFlags.TruthWriteExtraJets():
     antikt6truthAlgStd = make_StandardJetGetter('AntiKt',0.6,'Truth',disable=False).jetAlgorithmHandle()
@@ -150,65 +126,6 @@ simpleParticleConfig(topSequence,sgkey='SimpleElectronContainer',pdg_id=11,min_p
 simpleParticleConfig(topSequence,sgkey='SimpleMuonContainer',pdg_id=13,min_pt=1*GeV)
 simpleParticleConfig(topSequence,sgkey='SimpleTauContainer',pdg_id=15,min_pt=1*GeV)
 simpleParticleConfig(topSequence,sgkey='SimplePhotonContainer',pdg_id=22,min_pt=3*GeV)
-
-# Set up and add the objects to the alg sequence
-from TruthD3PDMaker.TruthParticleFakerObject import simpleTruthParticleD3PDObject
-elTruth  = simpleTruthParticleD3PDObject( 'SimpleElectronContainer' , 'el_' )
-muTruth  = simpleTruthParticleD3PDObject( 'SimpleMuonContainer' , 'mu_' )
-tauTruth = simpleTruthParticleD3PDObject( 'SimpleTauContainer' , 'tau_' , skipDressing=True )
-
-# Add lepton parent association to leptons
-from TruthD3PDMaker.TruthLeptonParentAssociation import TruthLeptonParentAssociation
-for lepTruth in [elTruth,muTruth,tauTruth]:
-    ChildAssoc = TruthLeptonParentAssociation(
-                            parent = lepTruth,
-                            prefix = 'parent_',
-                            target = 'mc_',
-                            level = 0 )
-def _TruthElParentAssocHook (c, prefix, *args, **kw):
-    assoc = getattr(c, c.name() + '_child_ElParentDecayAssociation', None)
-    if assoc:
-        indexer = getattr(assoc, assoc.name() + 'Index')
-        indexer.Target = prefix
-    return
-elTruth.defineHook(_TruthElParentAssocHook)
-
-def _TruthMuParentAssocHook (c, prefix, *args, **kw):
-    assoc = getattr(c, c.name() + '_child_MuParentDecayAssociation', None)
-    if assoc:
-        indexer = getattr(assoc, assoc.name() + 'Index')
-        indexer.Target = prefix
-    return
-muTruth.defineHook(_TruthMuParentAssocHook)
-
-def _TruthTauParentAssocHook (c, prefix, *args, **kw):
-    assoc = getattr(c, c.name() + '_child_TauParentDecayAssociation', None)
-    if assoc:
-        indexer = getattr(assoc, assoc.name() + 'Index')
-        indexer.Target = prefix
-    return
-tauTruth.defineHook(_TruthTauParentAssocHook)
-
-# Add hadronic daughter association to the taus!
-from TruthD3PDMaker.TruthTauDecayAssociation import TruthTauDecayAssociation
-ChildAssoc = TruthTauDecayAssociation(
-                        parent = tauTruth,
-                        prefix = 'decay_',
-                        target = 'mc_',
-                        level = 0 )
-def _TruthTauDecayAssocHook (c, prefix, *args, **kw):
-    assoc = getattr(c, c.name() + '_child_TruthTauDecayAssociation', None)
-    if assoc:
-        indexer = getattr(assoc, assoc.name() + 'Index')
-        indexer.Target = prefix
-    return
-tauTruth.defineHook(_TruthTauDecayAssocHook)
-
-phTruth  = simpleTruthParticleD3PDObject( 'SimplePhotonContainer' , 'ph_' , skipDressing=True )
-alg += elTruth (0,'ElTruthParticle',sgkey='SimpleElectronContainer')
-alg += muTruth (0,'MuTruthParticle',sgkey='SimpleMuonContainer')
-alg += tauTruth(0,'TauTruthParticle',sgkey='SimpleTauContainer')
-alg += phTruth (0,'PhotonTruthParticle',sgkey='SimplePhotonContainer')
 
 # To explicitly list variables to keep or exclude in final D3PD
 from AthenaCommon.AppMgr import ServiceMgr
