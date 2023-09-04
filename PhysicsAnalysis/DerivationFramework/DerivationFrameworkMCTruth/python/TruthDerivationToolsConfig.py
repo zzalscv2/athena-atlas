@@ -168,6 +168,13 @@ def TruthClassificationDecoratorCfg(flags, name, **kwargs):
 def MuonTruthClassifierFallbackCfg(flags, name, **kwargs):
     """Config the MuonTruthClassifierFallback tool"""
     acc = ComponentAccumulator()
+
+    if "MCTruthClassifierTool" not in kwargs:
+        from MCTruthClassifier.MCTruthClassifierConfig import (
+            MCTruthClassifierCfg)
+        kwargs.setdefault("MCTruthClassifierTool", acc.popToolsAndMerge(
+            MCTruthClassifierCfg(flags)))
+
     MuonTruthClassifierFallback = CompFactory.DerivationFramework.MuonTruthClassifierFallback
     acc.addPublicTool(MuonTruthClassifierFallback(name = name, **kwargs), 
                       primary = True)
