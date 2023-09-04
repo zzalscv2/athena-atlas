@@ -18,13 +18,13 @@ GeoModelRpcTest::GeoModelRpcTest(const std::string& name, ISvcLocator* pSvcLocat
     AthHistogramAlgorithm{name, pSvcLocator} {}
 
 StatusCode GeoModelRpcTest::finalize() {
-    if (m_dumpTree) ATH_CHECK(m_tree.write());
+    ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelRpcTest::initialize() {
     ATH_CHECK(m_detMgrKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    if (m_dumpTree) ATH_CHECK(m_tree.init(this));
+    ATH_CHECK(m_tree.init(this));
     const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
     for (const std::string& testCham : m_selectStat) {
         if (testCham.size() != 6) {
@@ -72,14 +72,6 @@ StatusCode GeoModelRpcTest::execute() {
         ATH_MSG_FATAL("Failed to retrieve MuonDetectorManager "
                       << m_detMgrKey.fullKey());
         return StatusCode::FAILURE;
-    }
-    std::optional<std::fstream> outStream{};
-    if (!m_outputTxt.empty()) {
-        outStream = std::make_optional<std::fstream>(m_outputTxt, std::ios_base::out);
-        if (!outStream->good()) {
-            ATH_MSG_FATAL("Failed to create output file " << m_outputTxt);
-            return StatusCode::FAILURE;
-        }
     }
     for (const Identifier& test_me : m_testStations) {
         ATH_MSG_VERBOSE("Test retrieval of Mdt detector element " 

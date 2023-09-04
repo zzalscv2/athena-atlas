@@ -44,13 +44,8 @@ class GeoModelRpcTest : public AthHistogramAlgorithm {
     /// <stationName><stationEta><A/C><stationPhi>
     Gaudi::Property<std::vector<std::string>> m_selectStat{
         this, "TestStations", {}, "Constrain the stations to be tested"};
-
-    Gaudi::Property<std::string> m_outputTxt{
-        this, "DumpTxtFile", "",
-        "Dump the basic informations from the Readout geometry into a txt "};
     
-     /// Write a TTree for validation purposes
-    Gaudi::Property<bool> m_dumpTree{this, "writeTTree", true};
+    /// Write a TTree for validation purposes
     MuonVal::MuonTesterTree m_tree{"RpcGeoModelTree", "GEOMODELTESTER"};
 
     /// Identifier of the readout element
