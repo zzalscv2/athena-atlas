@@ -22,8 +22,7 @@ def InDetAmbiScoringToolBaseCfg(flags, name='InDetAmbiScoringTool', **kwargs):
         kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
             InDetTRTDriftCircleCutToolCfg(flags)))
 
-    have_calo_rois = (flags.Tracking.doBremRecovery and
-                      flags.Tracking.doCaloSeededBrem and
+    have_calo_rois = (flags.Tracking.doCaloSeededBrem and
                       kwargs.get("doEmCaloSeed", True))
 
     if have_calo_rois:
@@ -182,10 +181,7 @@ def InDetCosmicScoringTool_TRTCfg(
 def InDetNNScoringToolBaseCfg(flags, name='InDetNNScoringTool', **kwargs):
     acc = ComponentAccumulator()
 
-    have_calo_rois = (flags.Tracking.doBremRecovery and
-                      flags.Tracking.doCaloSeededBrem)
-
-    if have_calo_rois:
+    if flags.Tracking.doCaloSeededBrem:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             CaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(CaloClusterROIPhiRZContainerMakerCfg(flags))
@@ -214,7 +210,7 @@ def InDetNNScoringToolBaseCfg(flags, name='InDetNNScoringTool', **kwargs):
     kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.usePixel)
     kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useSCT)
-    kwargs.setdefault("doEmCaloSeed", have_calo_rois)
+    kwargs.setdefault("doEmCaloSeed", flags.Tracking.doCaloSeededBrem)
 
     acc.setPrivateTools(CompFactory.InDet.InDetNNScoringTool(name, **kwargs))
     return acc
@@ -306,9 +302,7 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
         kwargs.setdefault("InDetEtaDependentCutsSvc", acc.getService(
             "ITkEtaDependentCutsSvc"+flags.Tracking.ActiveConfig.extension))
 
-    have_calo_rois = (flags.Tracking.doBremRecovery and
-                      flags.Tracking.doCaloSeededBrem)
-    if have_calo_rois:
+    if flags.Tracking.doCaloSeededBrem:
         from InDetConfig.InDetCaloClusterROISelectorConfig import (
             ITkCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
@@ -320,7 +314,7 @@ def ITkAmbiScoringToolCfg(flags, name='ITkAmbiScoringTool', **kwargs):
     kwargs.setdefault("maxEta", flags.Tracking.ActiveConfig.maxEta)
     kwargs.setdefault("usePixel", flags.Tracking.ActiveConfig.useITkPixel)
     kwargs.setdefault("useSCT", flags.Tracking.ActiveConfig.useITkStrip)
-    kwargs.setdefault("doEmCaloSeed", have_calo_rois)
+    kwargs.setdefault("doEmCaloSeed", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("useITkAmbigFcn", True)
     kwargs.setdefault("minTRTonTrk", 0)
     kwargs.setdefault("minTRTPrecisionFraction", 0)

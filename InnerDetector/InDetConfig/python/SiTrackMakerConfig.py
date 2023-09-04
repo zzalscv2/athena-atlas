@@ -46,9 +46,7 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
     kwargs.setdefault("doMultiTracksProd", True)
 
     kwargs.setdefault("useBremModel",
-                      flags.Tracking.doBremRecovery and
-                      flags.Detector.EnableCalo and
-                      (flags.Tracking.ActiveConfig.extension in ["","UPC","BLS"]))
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("doCaloSeededBrem", flags.Tracking.doCaloSeededBrem)
 
     if kwargs["useBremModel"] and kwargs["doCaloSeededBrem"]:
@@ -63,8 +61,8 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
             HadCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(HadCaloClusterROIPhiRZContainerMakerCfg(flags))
 
-    kwargs.setdefault("phiWidth", flags.Tracking.ActiveConfig.phiWidthBrem)
-    kwargs.setdefault("etaWidth", flags.Tracking.ActiveConfig.etaWidthBrem)
+    kwargs.setdefault("phiWidth", flags.Tracking.phiWidthBrem)
+    kwargs.setdefault("etaWidth", flags.Tracking.etaWidthBrem)
     kwargs.setdefault("EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ0GeV")
     kwargs.setdefault("HadROIPhiRZContainer", "InDetHadCaloClusterROIPhiRZ")
     kwargs.setdefault("UseAssociationTool",
@@ -154,7 +152,8 @@ def TrigSiTrackMaker_xkCfg(flags, name="TrigSiTrackMaker", **kwargs):
     kwargs.setdefault("Xi2maxMultiTracks", flags.Tracking.ActiveConfig.Xi2max)
     kwargs.setdefault("UseAssociationTool", False)
 
-    kwargs.setdefault("useBremModel",  flags.Tracking.ActiveConfig.doBremRecovery)
+    kwargs.setdefault("useBremModel",
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
 
     kwargs.setdefault("CosmicTrack",
                       flags.Tracking.ActiveConfig.input_name == "cosmics")
@@ -207,9 +206,7 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", **kwargs):
 
     # Disabled for second passes in reco
     kwargs.setdefault("useBremModel",
-                      flags.Detector.EnableCalo and
-                      flags.Tracking.doBremRecovery and
-                      flags.Tracking.ActiveConfig.extension == "")
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("doCaloSeededBrem", flags.Tracking.doCaloSeededBrem)
 
     if kwargs["useBremModel"] and kwargs["doCaloSeededBrem"]:
@@ -224,8 +221,8 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", **kwargs):
             ITkHadCaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(ITkHadCaloClusterROIPhiRZContainerMakerCfg(flags))
 
-    kwargs.setdefault("phiWidth", flags.Tracking.ActiveConfig.phiWidthBrem[0])
-    kwargs.setdefault("etaWidth", flags.Tracking.ActiveConfig.etaWidthBrem[0])
+    kwargs.setdefault("phiWidth", flags.Tracking.phiWidthBrem)
+    kwargs.setdefault("etaWidth", flags.Tracking.etaWidthBrem)
     kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ0GeV")
     kwargs.setdefault("HadROIPhiRZContainer", "ITkHadCaloClusterROIPhiRZ")
     kwargs.setdefault("UseAssociationTool",

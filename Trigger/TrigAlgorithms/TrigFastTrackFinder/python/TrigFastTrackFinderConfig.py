@@ -302,7 +302,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   acc.addPublicTool(
       CompFactory.TrigInDetTrackFitter(
           name = "TrigInDetTrackFitter_"+remapped_type,
-          doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecovery,
+          doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
           correctClusterPos = True,  #improved err(z0) estimates in Run 2
           ROTcreator = TrigRotCreator,
       )

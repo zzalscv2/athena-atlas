@@ -84,6 +84,7 @@ def signatureSpecificSettingOfFlags(flags,mode):
     flags.roadWidth           = 20
     flags.usePrdAssociationTool = False     #for backward compatibility #2023fix?
 
+  flags.doBremRecoverySi = False  #setTrue for electron once validated
     
   def collToRecordable(flags,name):
     ret = name
@@ -116,7 +117,6 @@ def signatureSpecificSettingOfFlags(flags,mode):
 
   flags.addFlag("refitROT", True) 
   flags.addFlag("trtExtensionType", "xf") 
-  flags.addFlag("doBremRecovery", False)  #setTrue for electron once validated
   flags.addFlag("doTruth",  False)  
   flags.addFlag("perigeeExpression","BeamLine")   #always use beamline regardless of Reco.EnableHI
   
