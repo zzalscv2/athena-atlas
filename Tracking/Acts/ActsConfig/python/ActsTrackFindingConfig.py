@@ -70,7 +70,7 @@ def ActsTrackFindingCfg(flags,
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
     kwargs.setdefault("etaBins", [])
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
-    kwargs.setdefault("numMeasurementsCutOff", [10])
+    kwargs.setdefault("numMeasurementsCutOff", [3])
 
     if flags.Acts.doTrackFindingTrackSelector:
         # TrackSelector no tighter than createITkTrackingPassFlags() (https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L383)
