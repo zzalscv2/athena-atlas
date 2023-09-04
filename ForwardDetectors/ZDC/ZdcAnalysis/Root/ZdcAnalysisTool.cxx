@@ -1545,6 +1545,10 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 
     for (const auto zdc_sum: moduleSumContainer)
       {
+	ATH_MSG_DEBUG("Extracting ZDC side " << zdc_sum->zdcSide());
+
+	if (zdc_sum->zdcSide()==0) continue; // skip new global sum
+
 	int iside = (zdc_sum->zdcSide()==-1) ? 0 : 1;
 
 	float uncalibSum = getUncalibModuleSum(iside);

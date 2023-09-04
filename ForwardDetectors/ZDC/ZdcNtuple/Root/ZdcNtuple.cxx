@@ -93,6 +93,9 @@ StatusCode ZdcNtuple :: initialize ()
 
   ANA_MSG_DEBUG("Howdy from Initialize!");
 
+  ANA_CHECK(m_zdcModuleContainerName.initialize());
+  ANA_CHECK(m_zdcSumContainerName.initialize());
+
   if (enableOutputTree)
   {
 
@@ -102,6 +105,7 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("runNumber", &t_runNumber, "runNumber/i");
     m_outputTree->Branch("eventNumber", &t_eventNumber, "eventNumber/i");
     m_outputTree->Branch("lumiBlock", &t_lumiBlock, "lumiBlock/i");
+    m_outputTree->Branch("bunchGroup", &t_bunchGroup, "bunchGroup/b");
     m_outputTree->Branch("bcid", &t_bcid, "bcid/i");
     m_outputTree->Branch("avgIntPerCrossing", &t_avgIntPerCrossing, "avgIntPerCrossing/F");
     m_outputTree->Branch("actIntPerCrossing", &t_actIntPerCrossing, "actIntPerCrossing/F");
@@ -454,12 +458,6 @@ StatusCode ZdcNtuple :: execute ()
     else
       ANA_MSG_DEBUG ("No reprocessing");
 
-    m_zdcSums = 0;
-    ANA_CHECK( evtStore()->retrieve( m_zdcSums, "ZdcSums" ) );
-
-    m_zdcModules = 0;
-    ANA_CHECK(evtStore()->retrieve( m_zdcModules, "ZdcModules" ) ); // ZDC modules keep same name, but the aux data get different suffix during reprocessing
-
     processZdcNtupleFromModules(); // same model in both cases -- processZdcNtuple() goes straight to the anlaysis tool, which is good for debugging
 
  
@@ -524,20 +522,10 @@ StatusCode ZdcNtuple :: execute ()
 void ZdcNtuple::processZdcNtupleFromModules()
 {
 
+  SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules (m_zdcModuleContainerName);
+  SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums (m_zdcSumContainerName);
+
   ANA_MSG_DEBUG ("copying already processed info!");
-  if (m_zdcSums)
-  {
-
-    ANA_MSG_DEBUG ("Sum 0 = " << m_zdcSums->at(0)->auxdataConst<float>("CalibEnergy"+auxSuffix)
-                   << ", Sum 1 = " << m_zdcSums->at(1)->auxdataConst<float>("CalibEnergy"+auxSuffix));
-    ANA_MSG_DEBUG ("Final 0 = " << m_zdcSums->at(0)->auxdataConst<float>("FinalEnergy"+auxSuffix)
-                   << ", Final 1 = " << m_zdcSums->at(1)->auxdataConst<float>("FinalEnergy"+auxSuffix));
-
-  }
-  else
-  {
-    ANA_MSG_INFO( "No ZDC sums produced!");
-  }
 
   for (size_t iside = 0; iside < 2; iside++)
   {
@@ -572,11 +560,13 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
   t_ZdcModuleMask = 0;
 
-  if (m_zdcSums)
+  if (zdcSums.ptr())
   {
     ANA_MSG_DEBUG( "accessing ZdcSums" );
-    for (const auto zdcSum : *m_zdcSums)
+    for (const auto zdcSum : *zdcSums)
     {
+      if (zdcSum->zdcSide()==0) continue;
+
       int iside = 0;
       if (zdcSum->zdcSide() > 0) iside = 1;
 
@@ -600,9 +590,9 @@ void ZdcNtuple::processZdcNtupleFromModules()
   }
 
   ANA_MSG_DEBUG(  "accessing ZdcModules" );
-  if (m_zdcModules)
+  if (zdcModules.ptr())
   {
-    for (const auto zdcMod : *m_zdcModules)
+    for (const auto zdcMod : *zdcModules)
     {
       int iside = 0;
       if (zdcMod->zdcSide() > 0) iside = 1;
@@ -656,8 +646,8 @@ void ZdcNtuple::processZdcNtupleFromModules()
 		
 		if (nsamplesZdc == 24)
 		  {
-	      t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
-	      t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
+		    t_raw24[iside][imod][0][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g0data")).at(isamp);
+		    t_raw24[iside][imod][1][0][isamp] = (zdcMod->auxdataConst<std::vector<uint16_t>>("g1data")).at(isamp);
 		  }
 	      }
           }
@@ -709,6 +699,7 @@ bool ZdcNtuple::processTriggerDecision()
 
   t_trigger = 0;
   t_trigger_TBP = 0;
+
   for (int i = 0; i < 16; i++)
   {
     t_tav[i] = 0;
@@ -723,6 +714,7 @@ bool ZdcNtuple::processTriggerDecision()
 	  t_tav[i] = m_trigDecision->tav().at(i);	  
 	  ATH_MSG_DEBUG( "TD: " << i << " tbp: " << std::hex << t_tbp[i] << "\t" << t_tav[i] );
 	}
+      t_bunchGroup = m_trigDecision->bgCode();
     }
 
   if (enableTrigger)
@@ -778,6 +770,7 @@ void ZdcNtuple::processEventInfo()
   t_runNumber = m_eventInfo->runNumber();
   t_eventNumber = m_eventInfo->eventNumber();
   t_lumiBlock = m_eventInfo->lumiBlock();
+  t_bunchGroup = -1;
   t_extendedLevel1ID = m_eventInfo->extendedLevel1ID();
   t_timeStamp = m_eventInfo->timeStamp();
   t_timeStampNSOffset = m_eventInfo->timeStampNSOffset();
