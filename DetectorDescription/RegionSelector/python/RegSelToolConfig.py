@@ -10,7 +10,7 @@
 #   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration#                 
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory # CompFactory creates old or new configs depending on the enva
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 _log = logging.getLogger(__name__)
     
@@ -258,8 +258,10 @@ def regSelTool_ITkStrip_Cfg(flags):
 def regSelTool_MDT_Cfg(flags):
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
 
     conditions = ComponentAccumulator()
+    conditions.merge(MuonGeoModelCfg(flags))
     conditions.merge(MDTCablingConfigCfg(flags))
     if not flags.Common.isOnline:
         conditions.merge(MdtCondDbAlgCfg(flags))
@@ -269,54 +271,92 @@ def regSelTool_MDT_Cfg(flags):
 
 def regSelTool_RPC_Cfg(flags):
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
-    return regSelToolCfg(flags, "RPC", CompFactory.RPC_RegSelCondAlg,
-                         conditions=RPCCablingConfigCfg(flags))
-
-def regSelTool_TGC_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg, TGCCablingConfigCfg
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
 
     conditions = ComponentAccumulator()
-    conditions.merge(MDTCablingConfigCfg(flags))  # FIXME: should not depend on MDT
+    conditions.merge(MuonGeoModelCfg(flags))
+    conditions.merge(RPCCablingConfigCfg(flags))
+
+    return regSelToolCfg(flags, "RPC", CompFactory.RPC_RegSelCondAlg,
+                         conditions=conditions)
+
+def regSelTool_TGC_Cfg(flags):
+    from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+
+    conditions = ComponentAccumulator()
+    conditions.merge(MuonGeoModelCfg(flags))
     conditions.merge(TGCCablingConfigCfg(flags))
+
     return regSelToolCfg(flags, "TGC", CompFactory.TGC_RegSelCondAlg,
                          conditions=conditions)
 
 def regSelTool_CSC_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    from MuonConfig.MuonCablingConfig import CSCCablingConfigCfg
+
+    conditions = ComponentAccumulator()
+    conditions.merge(MuonGeoModelCfg(flags))
+    conditions.merge(CSCCablingConfigCfg(flags))
+
     return regSelToolCfg(flags, "CSC", CompFactory.CSC_RegSelCondAlg,
-                         conditions=MDTCablingConfigCfg(flags))  # FIXME: CSC should not depend on MDT
+                         conditions=conditions)
 
 def regSelTool_STGC_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     return regSelToolCfg(flags, "sTGC", CompFactory.sTGC_RegSelCondAlg,
-                         conditions=MDTCablingConfigCfg(flags))  # FIXME: sTGC should not depend on MDT
+                         conditions=MuonGeoModelCfg(flags))
 
 def regSelTool_MM_Cfg(flags):
-    from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     return regSelToolCfg(flags, "MM", CompFactory.MM_RegSelCondAlg,
-                         conditions=MDTCablingConfigCfg(flags))  # FIXME: MM should not depend on MDT
+                         conditions=MuonGeoModelCfg(flags))
 
 
 # calo 
 def regSelTool_TTEM_Cfg(flags):
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
+
+    conditions = ComponentAccumulator()
+    conditions.merge(LArGMCfg(flags))
+    conditions.merge(LArRoIMapCondAlgCfg(flags))
+
     return regSelToolCfg(flags, "TTEM", CompFactory.RegSelCondAlg_LAr,
-                         conditions=LArRoIMapCondAlgCfg(flags))
+                         conditions=conditions)
 
 def regSelTool_TTHEC_Cfg(flags):
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
+
+    conditions = ComponentAccumulator()
+    conditions.merge(LArGMCfg(flags))
+    conditions.merge(LArRoIMapCondAlgCfg(flags))
+
     return regSelToolCfg(flags, "TTHEC", CompFactory.RegSelCondAlg_LAr,
-                         conditions=LArRoIMapCondAlgCfg(flags))
+                         conditions=conditions)
 
 def regSelTool_FCALEM_Cfg(flags):
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
+
+    conditions = ComponentAccumulator()
+    conditions.merge(LArGMCfg(flags))
+    conditions.merge(LArRoIMapCondAlgCfg(flags))
+
     return regSelToolCfg(flags, "FCALEM", CompFactory.RegSelCondAlg_LAr,
-                         conditions=LArRoIMapCondAlgCfg(flags))
+                         conditions=conditions)
 
 def regSelTool_FCALHAD_Cfg(flags):
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
+
+    conditions = ComponentAccumulator()
+    conditions.merge(LArGMCfg(flags))
+    conditions.merge(LArRoIMapCondAlgCfg(flags))
+
     return regSelToolCfg(flags, "FCALHAD", CompFactory.RegSelCondAlg_LAr,
-                         conditions=LArRoIMapCondAlgCfg(flags))
+                         conditions=conditions)
 
 def regSelTool_TILE_Cfg(flags):
     from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
@@ -357,13 +397,14 @@ def regSelToolsCfg(flags, detNames):
 if __name__=='__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    from AthenaConfiguration import DetectorConfigFlags
+    from AthenaConfiguration import DetectorConfigFlags, TestDefaults
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     import sys
 
     flags = initConfigFlags()
-    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    flags.Input.Files = TestDefaults.defaultTestFiles.RAW_RUN3
+    flags.GeoModel.AtlasVersion = TestDefaults.defaultGeometryTags.RUN3
+    flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2023-02'
     flags.Exec.MaxEvents = 1
     flags.Concurrency.NumThreads = 1
 
@@ -372,13 +413,15 @@ if __name__=='__main__':
     flags.Scheduler.AutoLoadUnmetDependencies = False
 
     detNames = sys.argv[1:]
-    DetectorConfigFlags.disableDetectors(flags, DetectorConfigFlags.allDetectors + list(DetectorConfigFlags.allGroups.keys()), True)
-    DetectorConfigFlags.enableDetectors(flags, detNames, True)
+    # Toggle detectors. Note that we are not toggling the geometry because this would
+    # result in un-physical configurations that we are not supporting in reco anyway.
+    DetectorConfigFlags.disableDetectors(flags, DetectorConfigFlags.allDetectors +
+                                         list(DetectorConfigFlags.allGroups.keys()), toggle_geometry=False)
+    DetectorConfigFlags.enableDetectors(flags, detNames, toggle_geometry=False)
     flags.lock()
 
     acc = MainServicesCfg(flags)
     acc.merge(ByteStreamReadCfg(flags))
-    alg = CompFactory.RegSelToolTester()
 
     if 'LAr' in detNames:
         detNames.remove('LAr')
@@ -391,7 +434,8 @@ if __name__=='__main__':
         detNames.append('STGC')
 
     toolsCfg = regSelToolsCfg(flags, detNames)
-    alg.RegionSelectorTools += acc.popToolsAndMerge(toolsCfg)
+    alg = CompFactory.RegSelToolTester(
+        RegionSelectorTools = acc.popToolsAndMerge(toolsCfg) )
     acc.addEventAlgo(alg, sequenceName='AthAlgSeq')
 
     acc.run()
