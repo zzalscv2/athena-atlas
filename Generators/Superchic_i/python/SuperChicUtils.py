@@ -12,7 +12,7 @@ logger = Logging.logging.getLogger("Superchic_i")
 class SuperChicConfig:
 
     def __init__(self, runArgs):
-        self.superchicpath = os.environ['SUPERCHICPATH']
+        self.superchicpath = os.environ['SUPERCHIC_SOURCE_PATH']
         
         #SuperChic specific variables for input.DAT, see writeInputDAT function for more elaboration
         self.rts = 13000. #collision energy (GeV)
