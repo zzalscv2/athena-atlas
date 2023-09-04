@@ -7,8 +7,8 @@
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("EFIDTracking")
 
-from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
-
+from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
+  
 #Create a view verifier for necessary data collections
 def get_idtrig_view_verifier(name):
    import AthenaCommon.CfgMgr as CfgMgr
@@ -79,79 +79,15 @@ def makeInDetPatternRecognition( inflags, config, verifier = 'IDTrigViewDataVeri
       from TrigInDetConfig import InDetTrigCA
       InDetTrigCA.InDetTrigConfigFlags = flags
       
+      from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+      seq = InDetTrigSequence(flags, flags.Tracking.ActiveConfig.input_name, rois = None, inView = dataVerifier)
+      offlineTrackFinder = extractAlgorithmsAndAppendCA(seq.offlinePattern())
+      viewAlgs.extend(offlineTrackFinder)
 
-      from InDetConfig.SiSPSeededTrackFinderConfig import TrigSiSPSeededTrackFinderCfg
-      siSPSeededTrackFinder = algorithmCAToGlobalWrapper(
-         TrigSiSPSeededTrackFinderCfg,
-         flags,
-         name = 'EFsiSPSeededTrackFinder'+flags.Tracking.ActiveConfig.input_name,
-      )
+      afterPattern = extractAlgorithmsAndAppendCA(seq.sequenceAfterPattern())
+      viewAlgs.extend(afterPattern)
       
-
-      viewAlgs.extend( siSPSeededTrackFinder )
-
-      #-----------------------------------------------------------------------------
-      #                      Precision algorithms
-
-      #Verifier should not be necessary when both patt. rec. and PT runs in the same view -> None
-      #Also provides particle cnv alg inside
-      precisionAlgs = ambiguitySolverForIDPatternRecognition(flags,
-                                                             config      = config,
-                                                             inputTracks = config.trkTracks_IDTrig(), 
-                                                             verifier    = None, 
-                                                             )
-
-
-      viewAlgs += precisionAlgs
-
 
       return  viewAlgs, dataVerifier
 
 
-def ambiguitySolverForIDPatternRecognition( flags, config, inputTracks,verifier=None ):
-   ptAlgs = [] #List containing all the precision tracking algorithms hence every new added alg has to be appended to the list
-   
-   #-----------------------------------------------------------------------------
-   #                        Verifying input data for the algorithms
-   if verifier:
-     verifier.DataObjects += [ #( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+' + TrigPixelKeys.PixelClusterAmbiguitiesMap ),
-                               ( 'TrackCollection' , 'StoreGateSvc+' + inputTracks )]
-   
-   
-   #-----------------------------------------------------------------------------
-   #                        Ambiguity solving stage
-
-   from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_Trig_Cfg
-   ambiguityScore = algorithmCAToGlobalWrapper(
-      TrkAmbiguityScore_Trig_Cfg,
-      flags,
-      name = f"EFAmbiScore_{flags.Tracking.ActiveConfig.input_name}",
-      TrackInput = [inputTracks],
-      AmbiguityScoreProcessor = None,
-   )
-
-   from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguitySolver_Trig_Cfg
-   ambiguitySolver = algorithmCAToGlobalWrapper(
-      TrkAmbiguitySolver_Trig_Cfg,
-      flags,
-      name = "EFTrigAmbiguitySolver"+flags.Tracking.ActiveConfig.input_name,
-   )
-    
-   ptAlgs.extend( [ambiguityScore[0], ambiguitySolver[0]] )
-
-
-   #-----------------------------------------------------------------------------
-   #                      Track particle conversion algorithm
-
-   from xAODTrackingCnv.xAODTrackingCnvConfig import TrigTrackParticleCnvAlgCfg
-   trackParticleCnvAlg = algorithmCAToGlobalWrapper(
-      TrigTrackParticleCnvAlgCfg,
-      flags,
-      name = 'EFxAODParticleCreatorAlg_'+flags.Tracking.ActiveConfig.input_name+'_IDTrig', 
-      TrackContainerName = flags.Tracking.ActiveConfig.trkTracks_IDTrig+'_Amb',
-      xAODTrackParticlesFromTracksContainerName = flags.Tracking.ActiveConfig.tracks_IDTrig,
-   )
-
-   ptAlgs.extend( trackParticleCnvAlg )
-
-   return ptAlgs
