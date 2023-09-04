@@ -146,8 +146,8 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
     # SUSY signal decorations
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
     if IsSUSYSignalRun3(flags):
-        from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import DecorateSUSYProcessCfg
-        augmentationToolsList += DecorateSUSYProcessCfg(flags, 'MCTruthCommon')
+        from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import SUSYSignalTaggerCfg
+        augmentationToolsList += [ acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, 'MCTruthCommon')) ]
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     for i, tool in enumerate(augmentationToolsList):
