@@ -83,7 +83,7 @@ def SiSpacePointsSeedMaker_ATLxkCfg(
     kwargs.setdefault("maxZ", flags.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minZ", -flags.Tracking.ActiveConfig.maxZImpact)
 
-    if flags.Tracking.ActiveConfig.extension in ["", "Forward", "BLS"]:
+    if flags.Tracking.ActiveConfig.extension in ["", "Forward"]:
         kwargs.setdefault("maxdImpactSSS",
                           flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
         kwargs.setdefault("maxSeedsForSpacePointStrips",
