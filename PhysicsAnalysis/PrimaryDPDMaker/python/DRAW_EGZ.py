@@ -1,4 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
+
 #!/usr/bin/env python
 # ====================================================================
 # DRAW_EGZ.py
@@ -36,26 +38,19 @@ def DRAW_EGZKernelCfg(configFlags, name='DRAW_EGZKernel', **kwargs):
         'Muons.pt > 15*GeV',
         'mmMass',
         '(count(mmMass > 20*GeV && mmMass < 90*GeV) >= 1 && count(Photons.pt > 7*GeV && Photons.Tight) >= 1)']
-    DRAWEGZSel['efe'] = [
-        'Electrons.pt > 15*GeV && Electrons.LHMedium',
+    DRAWEGZSel['Zefe'] = [
+        'Electrons.pt > 20*GeV && Electrons.LHMedium',
         'eeMass3',
-        '(count(eeMass3 > 30*GeV)'\
-        ' && count(Electrons.pt > 15*GeV && Electrons.LHMedium)'\
-        ' && count(ForwardElectrons.pt > 20*GeV))',
-        'ForwardElectrons.pt > 20*GeV'] 
+        '(count(eeMass3 > 55*GeV) >=1'
+        ' && count(Electrons.pt > 20*GeV && Electrons.LHMedium)'
+        ' && count(ForwardElectrons.pt > 20*GeV && ForwardElectrons.Medium))',
+        'ForwardElectrons.pt > 20*GeV && ForwardElectrons.Medium']
     # Augmentation tools for the di-lepton mass computations
     EventSels = []
     augmentationTools = []
     for key, sel in DRAWEGZSel.items():
-        if len(sel) == 3:
-            tool = CompFactory.DerivationFramework.InvariantMassTool(
-                name=f'llmassToolFor{key}',
-                ContainerName='Electrons' if key.find('Zee') >= 0 else 'Muons',
-                ObjectRequirements=sel[0],
-                MassHypothesis=0.511 if key.find('Zee') >= 0 else 105.66,
-                StoreGateEntryName=sel[1])
-        elif len(sel) == 4:
-             tool = CompFactory.DerivationFramework.EGInvariantMassTool(
+        if key == 'Zefe':
+            tool = CompFactory.DerivationFramework.EGInvariantMassTool(
                 name=f'llmassToolFor{key}',
                 Container1Name='Electrons',
                 Container2Name='ForwardElectrons',
@@ -63,8 +58,16 @@ def DRAW_EGZKernelCfg(configFlags, name='DRAW_EGZKernel', **kwargs):
                 Object2Requirements=sel[3],
                 Mass1Hypothesis=0.511,
                 Mass2Hypothesis=0.511,
-                CheckCharge = False,
-                StoreGateEntryName=sel[1])        
+                CheckCharge=False,
+                StoreGateEntryName=sel[1])
+        else:
+            tool = CompFactory.DerivationFramework.InvariantMassTool(
+                name=f'llmassToolFor{key}',
+                ContainerName='Electrons' if key.find('Zee') >= 0 else 'Muons',
+                ObjectRequirements=sel[0],
+                MassHypothesis=0.511 if key.find('Zee') >= 0 else 105.66,
+                StoreGateEntryName=sel[1])
+
         augmentationTools.append(tool)
         acc.addPublicTool(tool)
         EventSels.append(sel[2])
