@@ -5,6 +5,7 @@ atlas_subdir( TrkNeutralParameters )
 
 # installed library
 atlas_add_library( TrkNeutralParameters
+                   src/*.cxx
                    PUBLIC_HEADERS TrkNeutralParameters
                    LINK_LIBRARIES TrkSurfaces TrkParametersBase )
 

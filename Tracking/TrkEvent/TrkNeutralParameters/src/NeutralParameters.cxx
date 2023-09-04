@@ -2,7 +2,7 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrkParameters/NeutralParameters.h"
+#include "TrkNeutralParameters/NeutralParameters.h"
 
 namespace Trk {
 
@@ -19,10 +19,10 @@ namespace Trk {
 
 }
 
-/**Overload of << operator for both, MsgStream and std::ostream for debug output*/ 
+/**Overload of << operator for both, MsgStream and std::ostream for debug output*/
 MsgStream& operator << ( MsgStream& sl, const Trk::NeutralParameters& pars)
 { return pars.dump(sl); }
 
-/**Overload of << operator for both, MsgStream and std::ostream for debug output*/ 
+/**Overload of << operator for both, MsgStream and std::ostream for debug output*/
 std::ostream& operator << ( std::ostream& sl, const Trk::NeutralParameters& pars)
 { return pars.dump(sl); }
