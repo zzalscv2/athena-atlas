@@ -20,8 +20,7 @@ from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerC
 from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
 from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesToolCfg
 from SimulationConfig.SimEnums import PixelRadiationDamageSimulationType
-
-
+from AthenaConfiguration.Enums import BeamType
 # The earliest and last bunch crossing times for which interactions will be sent
 # to the Pixel Digitization code
 def Pixel_FirstXing(flags):
@@ -112,6 +111,7 @@ def BarrelFEI4SimToolCfg(flags, name="BarrelFEI4SimTool", **kwargs):
         acc.merge(PixelChargeCalibCondAlgCfg(flags))
     kwargs.setdefault("BarrelEC", 0)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
+    kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
     FEI4SimTool = CompFactory.FEI4SimTool
@@ -129,6 +129,7 @@ def DBMFEI4SimToolCfg(flags, name="DBMFEI4SimTool", **kwargs):
         acc.merge(PixelChargeCalibCondAlgCfg(flags))
     kwargs.setdefault("BarrelEC", 4)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
+    kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
     FEI4SimTool = CompFactory.FEI4SimTool
@@ -146,6 +147,7 @@ def BarrelFEI3SimToolCfg(flags, name="BarrelFEI3SimTool", **kwargs):
         acc.merge(PixelChargeCalibCondAlgCfg(flags))
     kwargs.setdefault("BarrelEC", 0)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
+    kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
     FEI3SimTool = CompFactory.FEI3SimTool
     acc.setPrivateTools(FEI3SimTool(name, **kwargs))
@@ -162,6 +164,7 @@ def EndcapFEI3SimToolCfg(flags, name="EndcapFEI3SimTool", **kwargs):
         acc.merge(PixelChargeCalibCondAlgCfg(flags))
     kwargs.setdefault("BarrelEC", 2)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
+    kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
     FEI3SimTool = CompFactory.FEI3SimTool
     acc.setPrivateTools(FEI3SimTool(name, **kwargs))

@@ -5,6 +5,14 @@
 #include "FEI3SimTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "SiDigitization/SiChargedDiodeCollection.h"
+#include "InDetRawData/PixelRDO_Collection.h"
+#include "InDetRawData/Pixel1RawData.h"
+#include "InDetIdentifier/PixelID.h"
+//
+#include "CLHEP/Random/RandGaussZiggurat.h"
+#include "CLHEP/Random/RandFlat.h"
 
 #include <cmath>
 
@@ -155,11 +163,11 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       } 
       else {
         if (moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex) > 0) {
-          bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, moduleData->getNumberOfBCID(barrel_ec, layerIndex));
+          bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, m_numberOfBcid);
         }
       }
 
-      if (bunchSim < 0 || bunchSim > moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+      if (bunchSim < 0 || bunchSim > m_numberOfBcid) {
         SiHelper::belowThreshold(diode, true, true);
       } else {
         SiHelper::SetBunch(diode, bunchSim);
@@ -203,7 +211,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     const Identifier id_readout = chargedDiodes.element()->identifierFromCellId(cellId);
 
     // Front-End simulation
-    if (bunch >= 0 && bunch < moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+    if (bunch >= 0 && bunch < m_numberOfBcid) {
       rdoCollection.push_back(new Pixel1RawData(id_readout, nToT, bunch, 0, bunch));
     }
 
@@ -214,7 +222,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
         smallHitChk = true;
       }
 
-      if (smallHitChk && bunch > 0 && bunch <= moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+      if (smallHitChk && bunch > 0 && bunch <= m_numberOfBcid) {
         rdoCollection.push_back(new Pixel1RawData(id_readout, nToT, bunch - 1, 0, bunch - 1));
       }
     }
@@ -250,7 +258,7 @@ int FEI3SimTool::relativeBunch2009(const double threshold, const double intimeth
 
   double G4Time = getG4Time(totalCharge);
   double timing = moduleData->getTimeOffset(0, 1) + myTimeWalkEff + randomJitter + G4Time;
-  BCID = static_cast<int>(std::floor(timing / moduleData->getBunchSpace()));
+  BCID = static_cast<int>(std::floor(timing / m_bunchSpace));
   //ATH_MSG_DEBUG (  CTW << " , " << myTimeWalkEff << " , " << G4Time << " , " << timing << " , " << BCID );
 
   return BCID;
@@ -341,7 +349,7 @@ int FEI3SimTool::relativeBunch2015(const SiTotalCharge& totalCharge, int barrel_
   int BCID =
     static_cast<int>(std::floor((G4Time +
                             moduleData->getTimeOffset(barrel_ec,
-                                                      layer_disk) + timeWalk) / moduleData->getBunchSpace()));
+                                                      layer_disk) + timeWalk) / m_bunchSpace));
 
   return BCID;
 }
@@ -473,7 +481,7 @@ int FEI3SimTool::relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_
   int BCID =
     static_cast<int>(std::floor((G4Time +
                             moduleData->getTimeOffset(barrel_ec,
-                              layer_disk) + timeWalk) / moduleData->getBunchSpace()));
+                              layer_disk) + timeWalk) / m_bunchSpace));
 
   return BCID;
 }
@@ -672,6 +680,6 @@ int FEI3SimTool::relativeBunch2022(const SiTotalCharge& totalCharge, const doubl
   if (rnd < prob) {
     timeWalk = 25.0;
   }
-  int BCID = static_cast<int>(floor((G4Time+moduleData->getTimeOffset(barrel_ec,layer_disk)+timeWalk)/moduleData->getBunchSpace()));
+  int BCID = static_cast<int>(floor((G4Time+moduleData->getTimeOffset(barrel_ec,layer_disk)+timeWalk)/m_bunchSpace));
   return BCID;
 }

@@ -6,11 +6,14 @@
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
+#include "SiDigitization/SiChargedDiodeCollection.h"
+#include "InDetRawData/PixelRDO_Collection.h"
 
 #include "SiDigitization/SiHelper.h"
 #include "ReadoutGeometryBase/SiReadoutCellId.h"
-
+#include "InDetRawData/Pixel1RawData.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "CLHEP/Random/RandGaussZiggurat.h"
 
 RD53SimTool::RD53SimTool(const std::string& type, const std::string& name, const IInterface* parent) :
   FrontEndSimTool(type, name, parent) {
@@ -102,7 +105,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       if ((*i_chargedDiode).second.totalCharge().fromTrack()) {
         bunchSim =
           static_cast<int>(floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
-                                  moduleData->getTimeOffset(barrel_ec, layerIndex)) / moduleData->getBunchSpace()));
+                                  moduleData->getTimeOffset(barrel_ec, layerIndex)) / m_bunchSpace));
 	
 	//Timewalk implementation 
 	if(m_doTimeWalk){
@@ -110,14 +113,14 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 	    const int timeWalk = 25; // Here it is assumed that the maximum value of timewalk is one bunch crossing (25ns)
 	    bunchSim =
 	      static_cast<int>(floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
-				      moduleData->getTimeOffset(barrel_ec, layerIndex)+ timeWalk) / moduleData->getBunchSpace()));
+				      moduleData->getTimeOffset(barrel_ec, layerIndex)+ timeWalk) / m_bunchSpace));
 	  } 
 	}
       } else {
-        bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, moduleData->getNumberOfBCID(barrel_ec, layerIndex));
+        bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, m_numberOfBcid);
       }
 
-      if (bunchSim < 0 || bunchSim > moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+      if (bunchSim < 0 || bunchSim > m_numberOfBcid) {
         SiHelper::belowThreshold((*i_chargedDiode).second, true, true);
       } else {
         SiHelper::SetBunch((*i_chargedDiode).second, bunchSim);
@@ -170,7 +173,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     // } // RD53 copy mechanism works per FE.
 
     // Front-End simulation
-    if (bunch >= 0 && bunch < moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+    if (bunch >= 0 && bunch < m_numberOfBcid) {
       Pixel1RawData* p_rdo = new Pixel1RawData(id_readout, nToT, bunch, 0, bunch);
       //see commented code below for clarification why this is always executed
       rdoCollection.push_back(p_rdo);
