@@ -142,7 +142,12 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         }
 
         /// Fill RoIs histogram and 1D histos for eta, phi, RoI count
-        std::vector<LinkInfo<TrigRoiDescriptorCollection>> fvec = getTrigDecisionTool()->features<TrigRoiDescriptorCollection>(chain, TrigDefs::Physics, "", TrigDefs::lastFeatureOfType, initialRoIString());
+ 	Trig::FeatureRequestDescriptor featureRequestDescriptor;
+	featureRequestDescriptor.setChainGroup(chain);
+	featureRequestDescriptor.setCondition(TrigDefs::Physics);
+	featureRequestDescriptor.setLinkName(initialRoIString());
+	featureRequestDescriptor.setRestrictRequestToLeg(0); //look only at first leg in multiple-leg chains such as HLT_eX_tauX, ATR-26626
+	std::vector<LinkInfo<TrigRoiDescriptorCollection>> fvec = m_trigDecTool->features<TrigRoiDescriptorCollection>(featureRequestDescriptor);
 
         //Loop over RoIs
         for (const LinkInfo<TrigRoiDescriptorCollection>& li : fvec) {

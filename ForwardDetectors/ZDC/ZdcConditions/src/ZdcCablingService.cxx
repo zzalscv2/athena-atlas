@@ -45,9 +45,6 @@ void ZdcCablingService::fillDB()
 {
 
   if (m_dbFilled) return;
-
-  std::cout << "starting fillDB()" << std::endl;
-
   m_dbFilled = true;
 
   int side_db[16][16] = {
@@ -227,27 +224,24 @@ void ZdcCablingService::fillDB()
 
   // lookup table side/module/type/channel/gain/delay
 
-  for (int i = 0 ; i < 16 ; i++)
-    {
-      for (int j = 0 ; j < 16 ; j++)
-	{
-	  int ic = crate_index[i]; // crate index
-	  int icc = i*16+j-64*ic; // channel index
-	  //std::cout << "ic=" << ic << "  icc=" << icc << std::endl;
-	  m_side_db[ic][icc] = side_db[i][j];
-	  m_module_db[ic][icc] = module_db[i][j];
-	  m_type_db[ic][icc] = type_db[i][j];
-	  m_channel_db[ic][icc] = channel_db[i][j];
-	  m_gain_db[ic][icc] = gain_db[i][j];
-	  m_delay_db[ic][icc] = delay_db[i][j];
-	  m_hv_db[ic][icc] = hv_db[i][j];
-	  m_ppm_db[ic] = ppm_db[i];
-	  //m_crate_lookup[m_side_db[i][j]][m_module_db[i][j]][m_type_db[i][j]] = ic;
-	  //m_channel_lookup[m_side_db[i][j]][m_module_db[i][j]][m_type_db[i][j]][j][m_gain_db[i][j]][m_delay_db[i][j]] = icc;
-	}
+  for (int i = 0; i < 16; i++) {
+    for (int j = 0; j < 16; j++) {
+      int ic = crate_index[i];         // crate index
+      int icc = i * 16 + j - 64 * ic;  // channel index
+      m_side_db[ic][icc] = side_db[i][j];
+      m_module_db[ic][icc] = module_db[i][j];
+      m_type_db[ic][icc] = type_db[i][j];
+      m_channel_db[ic][icc] = channel_db[i][j];
+      m_gain_db[ic][icc] = gain_db[i][j];
+      m_delay_db[ic][icc] = delay_db[i][j];
+      m_hv_db[ic][icc] = hv_db[i][j];
+      m_ppm_db[ic] = ppm_db[i];
+      // m_crate_lookup[m_side_db[i][j]][m_module_db[i][j]][m_type_db[i][j]] =
+      // ic;
+      // m_channel_lookup[m_side_db[i][j]][m_module_db[i][j]][m_type_db[i][j]][j][m_gain_db[i][j]][m_delay_db[i][j]]
+      // = icc;
     }
-
-  std::cout << "finished fillDB()" << std::endl;
+  }
 }
 
 // destructor

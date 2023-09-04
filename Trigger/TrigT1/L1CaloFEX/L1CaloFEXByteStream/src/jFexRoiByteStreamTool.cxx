@@ -213,17 +213,17 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
         
         const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
         std::vector<uint32_t> vec_words(dataArray.begin(),dataArray.end());
-
-/*
-        int aux = 1; //delete, for debug
-        for (const uint32_t word : vec_words) {
-
-            printf("\t %3d  raw word: 0x%08x \t bits: %32s\n",aux,word, (std::bitset<32>(word).to_string()).c_str() );
-            aux++; //delete, for debug
-
-        }
-*/
         
+        std::stringstream myPrint;
+        
+        myPrint << "jFEX TOB words to decode:"<< std::endl;
+        int aux = 1;
+        for (const uint32_t word : vec_words) {
+            myPrint << aux << " raw word ---> 0x"<< std::hex << word << std::dec << std::endl;
+            aux++;
+        }     
+        ATH_MSG_DEBUG(myPrint.str());
+           
         // Starting to loop over the different jFEX blocks
         bool READ_TOBS = true;
         // jFEX to ROD trailer position after the ROD trailer
@@ -241,9 +241,73 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             continue;
         }
         
-        while(READ_TOBS){
+        //check ROD error
+        const auto [RODerror] = RODTrailer  ( vec_words.at(rob->rod_ndata()-2), vec_words.at(rob->rod_ndata()-1) );
+        
+        // if ROD errors return gracefully
+        if(RODerror != 0){
+            bool corTrailer   = ((RODerror >> jBits::ROD_ERROR_CORR_TRAILER    ) & jBits::ROD_TRAILER_1b);
+            bool payloadCRC   = ((RODerror >> jBits::ROD_ERROR_PAYLOAD_CRC     ) & jBits::ROD_TRAILER_1b);
+            bool headerCRC    = ((RODerror >> jBits::ROD_ERROR_HEADER_CRC      ) & jBits::ROD_TRAILER_1b);
+            bool reserved     = ((RODerror >> jBits::ROD_ERROR_RESERVED        ) & jBits::ROD_TRAILER_1b);
+            bool lenerror     = ((RODerror >> jBits::ROD_ERROR_LENGTH_MISMATCH ) & jBits::ROD_TRAILER_1b);
+            bool headmismatch = ((RODerror >> jBits::ROD_ERROR_HEADER_MISMATCH ) & jBits::ROD_TRAILER_1b);
+            bool processerror = ((RODerror >> jBits::ROD_ERROR_PROC_TIMEOUT    ) & jBits::ROD_TRAILER_1b);  
             
-            //printf("----------------------------------------------------------------------------------------------------------------------\n");
+            std::stringstream sdetail;
+            sdetail  << "ROD Trailer Error bits set - 7-bits error word: 0x"<< std::hex <<RODerror << std::dec<< std::endl;
+            sdetail  << "Corrective Trailer: "<< corTrailer   << std::endl;
+            sdetail  << "Payload CRC       : "<< payloadCRC   << std::endl;
+            sdetail  << "Header CRC        : "<< headerCRC    << std::endl;
+            sdetail  << "Reserved (=0)     : "<< reserved     << std::endl;
+            sdetail  << "Length Mismatch   : "<< lenerror     << std::endl;
+            sdetail  << "Header Mismatch   : "<< headmismatch << std::endl;
+            sdetail  << "Processor timeout : "<< processerror << std::endl;
+            std::stringstream slocation;
+            slocation  << "ROD Error";            
+            
+            //Returning Status code failure, it needs to go to debug stream
+            if( corTrailer ){
+                std::stringstream stitle;
+                stitle  << "Corrective Trailer" ;
+                printError(slocation.str(),stitle.str(),MSG::ERROR,stitle.str() + " - "+ sdetail.str());
+                return StatusCode::FAILURE;
+            }             
+            if( payloadCRC ){
+                std::stringstream stitle;
+                stitle  << "Payload CRC" ;
+                printError(slocation.str(),stitle.str(),MSG::ERROR,stitle.str() + " - "+ sdetail.str());
+                return StatusCode::FAILURE;
+            }             
+            if( headerCRC ){
+                std::stringstream stitle;
+                stitle  << "Header CRC" ;
+                printError(slocation.str(),stitle.str(),MSG::ERROR,stitle.str() + " - "+ sdetail.str());
+                return StatusCode::FAILURE;
+            }             
+            if( lenerror ){
+                std::stringstream stitle;
+                stitle  << "Length mismatch" ;
+                printError(slocation.str(),stitle.str(),MSG::ERROR,stitle.str() + " - "+ sdetail.str()); 
+                return StatusCode::FAILURE;                   
+            }               
+            if( headmismatch ){
+                std::stringstream stitle;
+                stitle  << "Header mismatch" ;
+                printError(slocation.str(),stitle.str(),MSG::ERROR,stitle.str() + " - "+ sdetail.str()); 
+                return StatusCode::FAILURE;                   
+            }   
+            if( processerror ){
+                std::stringstream stitle;
+                stitle  << "Processor Timeout" ;
+                printError(slocation.str(),stitle.str(),MSG::ERROR,stitle.str() + " - "+ sdetail.str()); 
+                return StatusCode::FAILURE;                   
+            }            
+            
+            return StatusCode::FAILURE;       
+        }
+        
+        while(READ_TOBS){
             
             const auto [payload, fpga, jfex, error]               = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
             const auto [n_xjJ, n_xjLJ, n_xjTau, n_xjEM]           = xTOBCounterTrailer( vec_words.at(trailers_pos-3) );    
@@ -265,40 +329,53 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
             if(error != 0){
                 
+                bool corTrailer   = ((error >> jBits::ERROR_CORR_TRAILER    ) & jBits::ROD_TRAILER_1b);
+                bool safemode     = ((error >> jBits::ERROR_SAFE_MODE       ) & jBits::ROD_TRAILER_1b);
+                bool proterror    = ((error >> jBits::ERROR_PROTOCOL_ERROR  ) & jBits::ROD_TRAILER_1b);
+                bool lenerror     = ((error >> jBits::ERROR_LENGTH_MISMATCH ) & jBits::ROD_TRAILER_1b);
+                bool headmismatch = ((error >> jBits::ERROR_HEADER_MISMATCH ) & jBits::ROD_TRAILER_1b);
+                bool processerror = ((error >> jBits::ERROR_PROC_TIMEOUT    ) & jBits::ROD_TRAILER_1b);
+                
                 std::stringstream sdetail;
-                sdetail  << "Error bit set in the jFEX to ROD trailer - 0x"<< std::hex <<error << std::dec <<" in FPGA: "<< fpga << " and jFEX: "<< jfex;
+                sdetail  << "jFEX to ROD Trailer Error bits set - 6-bits error word: 0x"<< std::hex <<error << std::dec<< std::endl;
+                sdetail  << "Corrective Trailer: "<< corTrailer << std::endl;
+                sdetail  << "Safe Mode         : "<< safemode << std::endl;
+                sdetail  << "Protocol error    : "<< proterror << std::endl;
+                sdetail  << "Length Mismatch   : "<< lenerror << std::endl;
+                sdetail  << "Header Mismatch   : "<< headmismatch << std::endl;
+                sdetail  << "Processor timeout : "<< processerror << std::endl;
                 std::stringstream slocation;
                 slocation  << "Error bit set";
                 
-                if( ((error >> jBits::ERROR_CORR_TRAILER  ) & jBits::ROD_TRAILER_1b) ){
+                if( corTrailer ){
                     std::stringstream stitle;
                     stitle  << "Corrective Trailer" ;
                     printError(slocation.str(),stitle.str(),MSG::ERROR,sdetail.str());
                     
-                    //Returning Status code failure here because the contents are unreliable and should not be decoded
+                    //Returning Status code failure needs to go to debug stream
                     return StatusCode::FAILURE;           
                 }   
-                if( ((error >> jBits::ERROR_SAFE_MODE  ) & jBits::ROD_TRAILER_1b) ){
+                if( safemode ){
                     std::stringstream stitle;
                     stitle  << "Safe Mode" ;
                     printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                    
                 }   
-                if( ((error >> jBits::ERROR_PROTOCOL_ERROR  ) & jBits::ROD_TRAILER_1b) ){
+                if( proterror ){
                     std::stringstream stitle;
                     stitle  << "Protocol error" ;
                     printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                    
                 }   
-                if( ((error >> jBits::ERROR_LENGTH_MISMATCH  ) & jBits::ROD_TRAILER_1b) ){
+                if( lenerror ){
                     std::stringstream stitle;
                     stitle  << "Length mismatch" ;
                     printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
                 }   
-                if( ((error >> jBits::ERROR_HEADER_MISMATCH  ) & jBits::ROD_TRAILER_1b) ){
+                if( headmismatch ){
                     std::stringstream stitle;
                     stitle  << "Header mismatch" ;
                     printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
                 }   
-                if( ((error >> jBits::ERROR_PROC_TIMEOUT  ) & jBits::ROD_TRAILER_1b) ){
+                if( processerror ){
                     std::stringstream stitle;
                     stitle  << "Processor Timeout" ;
                     printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
@@ -504,6 +581,16 @@ std::array<uint32_t,6> jFexRoiByteStreamTool::TOBCounterTrailer (uint32_t word) 
     uint32_t jTE   = ((word >> jBits::jTE_TOB_COUNTS ) & jBits::TOB_COUNTS_1b);
     uint32_t jXE   = ((word >> jBits::jXE_TOB_COUNTS ) & jBits::TOB_COUNTS_1b);
     //uint32_t TSM   = ((word                          ) & jBits::TOB_COUNTS_1b); // Trigger Safe Mode. Not used for now, maybe is needed in the future
+
+    std::stringstream sdetail;
+    sdetail  << "TOB Counter Trailer. Word: 0x"<< std::hex <<word << std::dec << std::endl;
+    sdetail  << "jJ Item   : "<< jJ << std::endl;
+    sdetail  << "jLJ Item  : "<< jLJ << std::endl;
+    sdetail  << "jTau Item : "<< jTau << std::endl;
+    sdetail  << "jEM Item  : "<< jEM << std::endl;
+    sdetail  << "jTE Item  : "<< jTE << std::endl;
+    sdetail  << "jXE Item  : "<< jXE << std::endl;
+    ATH_MSG_DEBUG(sdetail.str());
           
     return {jJ,jLJ,jTau,jEM,jTE,jXE};
         
@@ -516,6 +603,14 @@ std::array<uint32_t,4> jFexRoiByteStreamTool::xTOBCounterTrailer (uint32_t word)
     uint32_t xjLJ   = ((word >> jBits::jLJ_TOB_COUNTS ) & jBits::TOB_COUNTS_6b);
     uint32_t xjTau  = ((word >> jBits::jTau_TOB_COUNTS) & jBits::TOB_COUNTS_6b);
     uint32_t xjEM   = ((word >> jBits::jEM_TOB_COUNTS ) & jBits::TOB_COUNTS_6b);
+
+    std::stringstream sdetail;
+    sdetail  << "xTOB Counter Trailer. Word: 0x"<< std::hex <<word << std::dec << std::endl;
+    sdetail  << "xjJ Item   : "<< xjJ << std::endl;
+    sdetail  << "xjLJ Item  : "<< xjLJ << std::endl;
+    sdetail  << "xjTau Item : "<< xjTau << std::endl;
+    sdetail  << "xjEM Item  : "<< xjEM << std::endl;
+    ATH_MSG_DEBUG(sdetail.str());
     
     return {xjJ,xjLJ,xjTau,xjEM};
     
@@ -527,28 +622,36 @@ std::array<uint32_t,4> jFexRoiByteStreamTool::jFEXtoRODTrailer (uint32_t word0, 
     uint32_t payload    = ((word0 >> jBits::PAYLOAD_ROD_TRAILER ) & jBits::ROD_TRAILER_16b);
     uint32_t fpga       = ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b );
     uint32_t jfex       = ((word0 >> jBits::jFEX_ROD_TRAILER    ) & jBits::ROD_TRAILER_4b );
+    uint32_t ROslice    = ((word0 >> jBits::RO_ROD_TRAILER      ) & jBits::ROD_TRAILER_4b );
+    uint32_t TSN        = ((word0 >> jBits::TSN_ROD_TRAILER     ) & jBits::ROD_TRAILER_4b );
     
     uint32_t error      = ((word1 >> jBits::ERROR_ROD_TRAILER   ) & jBits::ROD_TRAILER_6b );
+    uint32_t CRC        = ((word1 >> jBits::CRC_ROD_TRAILER     ) & jBits::ROD_TRAILER_20b);
     
-    //DO NOT REMOVE, may be necessary in the future
     
-    //uint32_t ro_slice   = ((word0 >> jBits::RO_ROD_TRAILER      ) & jBits::ROD_TRAILER_4b );
-    //uint32_t trig_slice = ((word0 >> jBits::TSN_ROD_TRAILER     ) & jBits::ROD_TRAILER_4b );
+    std::stringstream sdetail;
+    sdetail  << "jFEX to ROD Trailer. Word0: 0x"<< std::hex <<word0 << " and Word1: 0x"<< word1  << std::endl;
+    sdetail  << "Payload  (from word0): "<< payload << std::endl;
+    sdetail  << "FPGA     (from word0): "<< fpga    << std::endl;
+    sdetail  << "jFEX     (from word0): "<< jfex    << std::endl;
+    sdetail  << "RO slice (from word0): "<< ROslice << std::endl;
+    sdetail  << "TSN      (from word0): "<< TSN     << std::endl;
+    sdetail  << "Error    (from word1): "<< error   << std::endl;
+    sdetail  << "CRC      (from word1): "<< CRC     << std::dec << std::endl;
     
-    //uint32_t crc        = ((word1 >> jBits::CRC_ROD_TRAILER     ) & jBits::ROD_TRAILER_20b);
-    
-
-    //std::cout << "\tWord0 PAYLO: " <<  ((word0 >> jBits::PAYLOAD_ROD_TRAILER ) & jBits::ROD_TRAILER_16b) << std::endl;
-    //std::cout << "\tWord0 FPGA : " <<  ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b ) << std::endl;   
-    //std::cout << "\tWord0 jFEX : " <<  ((word0 >> jBits::jFEX_ROD_TRAILER    ) & jBits::ROD_TRAILER_4b ) << std::endl;
-    //std::cout << "\tWord0 RO   : " <<  ((word0 >> jBits::RO_ROD_TRAILER      ) & jBits::ROD_TRAILER_4b ) << std::endl;          
-    //std::cout << "\tWord0 TSN  : " <<  ((word0 >> jBits::TSN_ROD_TRAILER     ) & jBits::ROD_TRAILER_4b ) << std::endl;
-
-    //std::cout << "\tWord1 ERROR: " <<  ((word1 >> jBits::ERROR_ROD_TRAILER   ) & jBits::ROD_TRAILER_6b ) << std::endl;
-    //std::cout << "\tWord1 CRC  : " <<  ((word1 >> jBits::CRC_ROD_TRAILER     ) & jBits::ROD_TRAILER_20b) << std::endl << std::endl;   
-    
+    ATH_MSG_DEBUG(sdetail.str());
     
     return {payload, fpga, jfex, error};
+   
+}
+
+// Unpack ROD Trailer
+std::array<uint32_t,1> jFexRoiByteStreamTool::RODTrailer (uint32_t /*word0*/, uint32_t word1) const {
+    
+    uint32_t error      = ((word1 >> jBits::ERROR_ROD_TRAILER   ) & jBits::ROD_TRAILER_7b );
+    
+    //return an array since we can implement more features in the future
+    return {error};
    
 }
 

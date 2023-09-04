@@ -6,7 +6,6 @@
 # art-include: main/Athena
 # art-include: 23.0/Athena
 
-export TRF_ECHO=True;
 export ATHENA_CORE_NUMBER=8
 
 Reco_tf.py \

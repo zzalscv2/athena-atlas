@@ -101,6 +101,19 @@ namespace LVL1::jFEXBits {
     static constexpr uint32_t ERROR_HEADER_MISMATCH = 1; // For header mismatch in the jFEX to ROD Error bits
     static constexpr uint32_t ERROR_PROC_TIMEOUT    = 0; // For processor timeout in the jFEX to ROD Error bits
     
+/************     ROD Trailer     ************/
+
+    ///Masking words
+    static constexpr uint32_t ROD_TRAILER_7b  = 0x7f;
+
+    static constexpr uint32_t ROD_ERROR_CORR_TRAILER    = 6; // For corrective trailer bit error
+    static constexpr uint32_t ROD_ERROR_PAYLOAD_CRC     = 5; // For payload CRC error
+    static constexpr uint32_t ROD_ERROR_HEADER_CRC      = 4; // For header CRC error
+    static constexpr uint32_t ROD_ERROR_RESERVED        = 3; // Does nothing for now
+    static constexpr uint32_t ROD_ERROR_LENGTH_MISMATCH = 2; // For length mismatch in the jFEX to ROD Error bits
+    static constexpr uint32_t ROD_ERROR_HEADER_MISMATCH = 1; // For header mismatch in the jFEX to ROD Error bits
+    static constexpr uint32_t ROD_ERROR_PROC_TIMEOUT    = 0; // For processor timeout in the jFEX to ROD Error bits
+    
     
 /************     Input Bulk Stream data     ************/  
 

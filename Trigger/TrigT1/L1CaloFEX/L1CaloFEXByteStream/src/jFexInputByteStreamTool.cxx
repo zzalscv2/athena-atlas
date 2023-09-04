@@ -129,45 +129,61 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             
             if(error != 0 ){
                 
+                bool corTrailer   = ((error >> jBits::ERROR_CORR_TRAILER    ) & jBits::ROD_TRAILER_1b);
+                bool safemode     = ((error >> jBits::ERROR_SAFE_MODE       ) & jBits::ROD_TRAILER_1b);
+                bool proterror    = ((error >> jBits::ERROR_PROTOCOL_ERROR  ) & jBits::ROD_TRAILER_1b);
+                bool lenerror     = ((error >> jBits::ERROR_LENGTH_MISMATCH ) & jBits::ROD_TRAILER_1b);
+                bool headmismatch = ((error >> jBits::ERROR_HEADER_MISMATCH ) & jBits::ROD_TRAILER_1b);
+                bool processerror = ((error >> jBits::ERROR_PROC_TIMEOUT    ) & jBits::ROD_TRAILER_1b);
+                
                 std::stringstream sdetail;
-                sdetail  << "Error bit set in the jFEX to ROD trailer - 0x"<< std::hex <<error << std::dec <<" in FPGA: "<< fpga << " and jFEX: "<< jfex;
+                sdetail  << "jFEX to ROD Trailer Error bits set - 6-bits error word: 0x"<< std::hex <<error << std::dec<< std::endl;
+                sdetail  << "Corrective Trailer: "<< corTrailer << std::endl;
+                sdetail  << "Safe Mode         : "<< safemode << std::endl;
+                sdetail  << "Protocol error    : "<< proterror << std::endl;
+                sdetail  << "Length Mismatch   : "<< lenerror << std::endl;
+                sdetail  << "Header Mismatch   : "<< headmismatch << std::endl;
+                sdetail  << "Processor timeout : "<< processerror << std::endl;
                 std::stringstream slocation;
                 slocation  << "Error bit set";
- 
-                if( ((error >> jBits::ERROR_CORR_TRAILER  ) & jBits::ROD_TRAILER_1b) ){
+                
+                if( corTrailer ){
                     std::stringstream stitle;
                     stitle  << "Corrective Trailer" ;
-                    printError(slocation.str(),stitle.str(),MSG::ERROR,sdetail.str());
-                    
-                    //Returning Status code failure here because the contents are unreliable and should not be decoded
-                    return StatusCode::FAILURE;           
+                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());
+                    break;
                 }   
-                if( ((error >> jBits::ERROR_SAFE_MODE  ) & jBits::ROD_TRAILER_1b) ){
+                if( safemode ){
                     std::stringstream stitle;
                     stitle  << "Safe Mode" ;
-                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                    
+                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str()); 
+                    break;                  
                 }   
-                if( ((error >> jBits::ERROR_PROTOCOL_ERROR  ) & jBits::ROD_TRAILER_1b) ){
+                if( proterror ){
                     std::stringstream stitle;
                     stitle  << "Protocol error" ;
-                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());                    
+                    printError(slocation.str(),stitle.str(),MSG::WARNING,sdetail.str());  
+                    break;                  
                 }   
-                if( ((error >> jBits::ERROR_LENGTH_MISMATCH  ) & jBits::ROD_TRAILER_1b) ){
+                if( lenerror ){
                     std::stringstream stitle;
                     stitle  << "Length mismatch" ;
-                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str()); 
+                    break;                   
                 }   
-                if( ((error >> jBits::ERROR_HEADER_MISMATCH  ) & jBits::ROD_TRAILER_1b) ){
+                if( headmismatch ){
                     std::stringstream stitle;
                     stitle  << "Header mismatch" ;
-                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());
+                    break;                    
                 }   
-                if( ((error >> jBits::ERROR_PROC_TIMEOUT  ) & jBits::ROD_TRAILER_1b) ){
+                if( processerror ){
                     std::stringstream stitle;
                     stitle  << "Processor Timeout" ;
-                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                    
+                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str()); 
+                    break;                   
                 }   
-
+                break;
             }            
             
             if(payload % jBits::DATA_BLOCKS != 0){
