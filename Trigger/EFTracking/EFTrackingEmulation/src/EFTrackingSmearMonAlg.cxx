@@ -14,6 +14,9 @@ StatusCode EFTrackingSmearMonAlg::initialize() {
   ATH_MSG_INFO ("Initializing " << name() << "...");
   ATH_CHECK( m_inputTrackParticleKey.initialize() );
   ATH_CHECK( m_inputTruthParticleKey.initialize() );
+  ATH_CHECK( m_smearedTrackParticleKey.initialize() );
+  ATH_CHECK( m_smearedTruthParticleKey.initialize() );
+  
   
   return StatusCode::SUCCESS;
 }
@@ -49,7 +52,36 @@ StatusCode EFTrackingSmearMonAlg::execute() {
                       <<" sigma_z0="  << std::sqrt(std::abs(trkcov(Trk::z0,Trk::z0))) );      
     }
     
+    ///////////////////
+  SG::ReadHandle<xAOD::TrackParticleContainer> smearedTracks_handle( m_smearedTrackParticleKey, ctx );
+  const xAOD::TrackParticleContainer* smearedTracks = smearedTracks_handle.cptr();
+  if (not smearedTracks) {
+     ATH_MSG_FATAL("Unable to retrieve smeared ID tacks");
+     return StatusCode::FAILURE;
+  }
 
+
+  ATH_MSG_DEBUG ("Found "<<smearedTracks->size()<< " smeared tracks");
+  // trakc particles
+  for ( const auto* trk : *smearedTracks ) 
+    {            
+      // get Cov matrix of input track
+      xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();  
+      auto trkcovvec = trk->definingParametersCovMatrixVec();        
+      ATH_MSG_DEBUG ("Smeared Track: "
+                      <<" curv=" << 1./trk->pt()
+                      <<" phi="  << trk->phi()
+                      <<" eta="  << trk->eta()
+                      <<" d0="   << trk->d0()
+                      <<" z0="   << trk->z0()
+                      <<" pT="   << trk->pt()
+                      <<" cov_d0=" << trkcov(Trk::d0,Trk::d0)
+                      <<" cov_z0=" << trkcov(Trk::z0,Trk::z0)
+                      <<" sigma_d0="  << std::sqrt(std::abs(trkcov(Trk::d0,Trk::d0)))
+                      <<" sigma_z0="  << std::sqrt(std::abs(trkcov(Trk::z0,Trk::z0))) );      
+    }
+
+    ///////////////////////////
     //truth
     SG::ReadHandle<xAOD::TruthParticleContainer> inputTruth_handle( m_inputTruthParticleKey, ctx );
     const xAOD::TruthParticleContainer* inputTruth = inputTruth_handle.cptr();
@@ -60,6 +92,31 @@ StatusCode EFTrackingSmearMonAlg::execute() {
 
     ATH_MSG_DEBUG ("Found "<<inputTruth->size()<< " input truth particles");
     for ( const auto* part : *inputTruth ) 
+    {          
+      ATH_MSG_DEBUG ("===> Truth : "       
+                      <<" curv=" << 1./part->pt()
+                      <<" phi="  << part->phi()
+                      <<" eta="  << part->eta()
+                      <<" d0="   << part->auxdata<float>("d0")
+                      <<" z0="   << part->auxdata<float>("z0")
+                      <<" pT="   << part->pt()
+                      <<" PDGID=" << part->pdgId()
+                      <<" status=" << part->status()                                        
+                      ); 
+      if (part->parent()) ATH_MSG_DEBUG (" parent pdgId=" << part->parent()->pdgId()); 
+    }
+
+    ///////////////////////////
+    
+    SG::ReadHandle<xAOD::TruthParticleContainer> smearedTruth_handle( m_smearedTruthParticleKey, ctx );
+    const xAOD::TruthParticleContainer* smearedTruth = smearedTruth_handle.cptr();
+    if (not smearedTruth) {
+        ATH_MSG_FATAL("Unable to retrieve input truth particle");
+        return StatusCode::FAILURE;
+    }
+
+    ATH_MSG_DEBUG ("Found "<<smearedTruth->size()<< " input truth particles");
+    for ( const auto* part : *smearedTruth ) 
     {          
       ATH_MSG_DEBUG ("===> Truth : "       
                       <<" curv=" << 1./part->pt()

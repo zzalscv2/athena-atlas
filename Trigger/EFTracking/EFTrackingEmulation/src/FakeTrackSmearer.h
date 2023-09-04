@@ -20,6 +20,7 @@ namespace FitFunctions {
   #include "FitFunctions/URD/d0Fitparam_N.C"
   #include "FitFunctions/URD/z0Fitparam_N.C"  
   #include "FitFunctions/URD/effFitparam_N.C"
+  #include "FitFunctions/URD/effFitparam_LRT.C"
   #include "FitFunctions/URD/ptqoptFitparam_N.C"
 }
  
@@ -139,8 +140,14 @@ double curvRefFunc(double eta __attribute__((unused)),double pt __attribute__((u
 
 double effFunc(double eta,double pt,int verbose)
   {
-    // add here other d0 res functions
+    // add here other efficiency functions    
     return FitFunctions::getEffParam_N(eta,pt,verbose);
+  }
+  
+double effFuncLRT(double eta,double pt, double d0, int verbose)
+  {
+    // add here other efficiency functions
+    return FitFunctions::getEffParam_LRT(eta,pt,d0,verbose);
   }
 
   void InitArray(double *a,int n,const double in[])
@@ -175,11 +182,11 @@ double effFunc(double eta,double pt,int verbose)
   void AddTrack(double d0,double z0,double curv,double eta,double phi)
   {
     // Adding one or more tracks to this input
-    // input curv is in MeV    
+    // input curv is in GeV    
     bool verbose=m_verbose;
       
     double abseta=std::abs(eta);
-    double abspt=std::abs(1.0/curv); //MeV
+    double abspt=std::abs(1.0/curv); //GeV
     if (verbose) printf("Smearer::AddTrack:  Initial track: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f (pt=%f)\n", curv, phi, eta, d0, z0, abspt);
     
  
@@ -221,7 +228,10 @@ double effFunc(double eta,double pt,int verbose)
     double eff = m_nominalEfficiency;
     if (m_parameterizedEfficiency) {
       eff = eff * effFunc(abseta,abspt,verbose);
-    }
+    } 
+    else if (m_parameterizedEfficiency_LRT) {
+      eff = eff * effFuncLRT(abseta,abspt, d0, verbose);
+    } 
     
     int ntracks=( m_myRandom->Rndm()<eff)?1:0;
     
@@ -326,6 +336,11 @@ double effFunc(double eta,double pt,int verbose)
     m_parameterizedEfficiency=param;
   }
 
+  void SetParameterizedEfficiency_LRT(bool param = false)
+  {
+    m_parameterizedEfficiency_LRT=param;
+  }
+
   std::vector<EFTrackingSmearing::FTS_Track> Tracks;
   double z0(int idx)    {return Tracks[idx].z0();};
   double d0(int idx)    {return Tracks[idx].d0();};
@@ -365,6 +380,7 @@ double effFunc(double eta,double pt,int verbose)
   double m_nominalEfficiency = 0.95;
 
   bool m_parameterizedEfficiency = false;
+  bool m_parameterizedEfficiency_LRT = false;
   bool m_includeFakesInResolutionCalculation =  false;
   bool m_fakeKillerEnable = false;
   bool m_useCoinToss = false;
@@ -373,8 +389,8 @@ double effFunc(double eta,double pt,int verbose)
   bool m_useResolutionPtCutOff = false;
   bool m_useTrackingTruth = true;
   double m_resolutionPtCutOff=0.0;
-  double m_inPtCut = 1.0;
-  double m_outPtCut = 2.0;
+  double m_inPtCut = 0.0;
+  double m_outPtCut = 1.0;
 
 };
 
