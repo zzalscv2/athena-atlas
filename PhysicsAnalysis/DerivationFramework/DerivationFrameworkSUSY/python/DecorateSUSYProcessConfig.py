@@ -49,17 +49,10 @@ def SUSYSignalTaggerCfg(flags, derivationname):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc = ComponentAccumulator()
+    if not IsSUSYSignalRun3(flags):
+        print ("SUSYSignalTaggerCfg WARNING: Trying to decorate, but sample is not SUSY signal?")
     acc.addPublicTool(CompFactory.DerivationFramework.SUSYSignalTagger(name             = derivationname + "SignalTagger",
                                                                        EventInfoName    = "EventInfo",
                                                                        MCCollectionName = "TruthParticles"),
                       primary = True)
     return acc
-
-def DecorateSUSYProcessCfg(flags,derivationname):
-    """Decorate SUSY processes"""
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    acc = ComponentAccumulator()   
-    if IsSUSYSignalRun3(flags):
-        SUSYSignalTagger = acc.getPrimaryAndMerge(SUSYSignalTaggerCfg(flags, derivationname))
-        return [SUSYSignalTagger]
-    return []
