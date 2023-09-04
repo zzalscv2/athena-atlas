@@ -4,7 +4,16 @@
 
 #include "FEI4SimTool.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
+#include "InDetRawData/Pixel1RawData.h"
+#include "InDetRawData/PixelRDO_Collection.h"
 
+#include "SiDigitization/SiChargedDiodeCollection.h"
+#include "Identifier/IdentifierHash.h"
+#include "InDetIdentifier/PixelID.h"
+//
+#include "CLHEP/Random/RandGaussZiggurat.h"
+#include "CLHEP/Random/RandFlat.h"
 #include <algorithm>
 
 
@@ -115,12 +124,12 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       if (diode.totalCharge().fromTrack()) {
         bunchSim =
           static_cast<int>(floor((getG4Time(diode.totalCharge()) +
-                                  moduleData->getTimeOffset(barrel_ec, layerIndex)) / moduleData->getBunchSpace()));
+                                  moduleData->getTimeOffset(barrel_ec, layerIndex)) / m_bunchSpace));
       } else {
-        bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, moduleData->getNumberOfBCID(barrel_ec, layerIndex));
+        bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, m_numberOfBcid);
       }
 
-      if (bunchSim < 0 || bunchSim > moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+      if (bunchSim < 0 || bunchSim > m_numberOfBcid) {
         SiHelper::belowThreshold(diode, true, true);
       } else {
         SiHelper::SetBunch(diode, bunchSim);
@@ -184,7 +193,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     } // FEI4 copy mechanism works per FE.
 
     // Front-End simulation
-    if (bunch >= 0 && bunch < moduleData->getNumberOfBCID(barrel_ec, layerIndex)) {
+    if (bunch >= 0 && bunch < m_numberOfBcid) {
       auto p_rdo = std::make_unique<Pixel1RawData>(id_readout, nToT, bunch, 0, bunch);
       if (nToT > maxFEI4SmallHit) {
         rdoCollection.push_back(p_rdo.release());
