@@ -30,6 +30,12 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
             EMBremCollectionBuilderCfg)
         acc.merge(EMBremCollectionBuilderCfg(flags))
 
+        if (flags.Tracking.writeExtendedSi_PRDInfo or
+            flags.Tracking.writeExtendedTRT_PRDInfo):
+            from DerivationFrameworkInDet.InDetToolsConfig import (
+                GSFTSOS_CommonKernelCfg)
+            acc.merge(GSFTSOS_CommonKernelCfg(flags))
+
     # Add e/gamma conversion finding
     if flags.Egamma.doConversionBuilding:
         from egammaAlgs.EMVertexBuilderConfig import (

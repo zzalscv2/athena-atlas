@@ -93,23 +93,17 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
 
     from DerivationFrameworkInDet.InDetToolsConfig import (
         TrackStateOnSurfaceDecoratorCfg)
-    from InDetConfig.TRT_ElectronPidToolsConfig import TRT_dEdxToolCfg
-    InDetTRT_dEdxTool = acc.popToolsAndMerge(TRT_dEdxToolCfg(
-        flags, name="InDetTRT_dEdxTool"))
-    acc.addPublicTool(InDetTRT_dEdxTool)
     DFTSOS = acc.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(
         flags,
         name="DFTrackStateOnSurfaceDecorator",
         ContainerName="InDetTrackParticles",
-        IsSimulation=flags.Input.isMC,
-        DecorationPrefix="",
+        StorePixel=flags.Detector.EnablePixel,
+        StoreSCT=flags.Detector.EnableSCT,
         StoreTRT=flags.Detector.EnableTRT,
         # never decorate EventInfo with TRTPhase, doubt this is useful for IDTIDE
         AddExtraEventInfo=False,
-        TRT_ToT_dEdx=InDetTRT_dEdxTool,
+        DecorationPrefix="",
         PRDtoTrackMap="",  # + InDetKeys.UnslimmedTracks() if  jobproperties.PrimaryDPDFlags.WriteDAOD_IDTRKVALIDStream.get_Value() else "",
-        StoreSCT=flags.Detector.EnableSCT,
-        StorePixel=flags.Detector.EnablePixel,
         OutputLevel=INFO)
     )
     tsos_augmentationTools.append(DFTSOS)
