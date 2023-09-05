@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
 from TrkConfig.TrackingPassFlags import printActiveConfig
 
@@ -662,93 +661,73 @@ def InDetTrackRecoCfg(flags):
     # --- Extra optional decorations
     # ---------------------------------------
 
-    if flags.Tracking.writeExtendedPRDInfo:
+    if (flags.Tracking.writeExtendedSi_PRDInfo or
+        flags.Tracking.writeExtendedTRT_PRDInfo):
 
         if (flags.Tracking.doTIDE_AmbiTrackMonitoring or
                 flags.Tracking.doPseudoTracking):
 
-            from InDetConfig.InDetPrepRawDataToxAODConfig import (
-                InDetPixelPrepDataToxAOD_ExtraTruthCfg,
-                InDetSCT_PrepDataToxAOD_ExtraTruthCfg,
-                InDetTRT_PrepDataToxAOD_ExtraTruthCfg)
-            result.merge(InDetPixelPrepDataToxAOD_ExtraTruthCfg(
-                flags,
-                ClusterSplitProbabilityName=(
-                    ClusterSplitProbabilityContainerName(flags))))
-            result.merge(InDetSCT_PrepDataToxAOD_ExtraTruthCfg(flags))
-            result.merge(InDetTRT_PrepDataToxAOD_ExtraTruthCfg(flags))
+            if flags.Tracking.writeExtendedSi_PRDInfo:
+                from InDetConfig.InDetPrepRawDataToxAODConfig import (
+                    InDetPixelPrepDataToxAOD_ExtraTruthCfg,
+                    InDetSCT_PrepDataToxAOD_ExtraTruthCfg)
+                result.merge(InDetPixelPrepDataToxAOD_ExtraTruthCfg(
+                    flags,
+                    ClusterSplitProbabilityName=(
+                        ClusterSplitProbabilityContainerName(flags))))
+                result.merge(InDetSCT_PrepDataToxAOD_ExtraTruthCfg(flags))
+
+            if flags.Tracking.writeExtendedTRT_PRDInfo:
+                from InDetConfig.InDetPrepRawDataToxAODConfig import (
+                    InDetTRT_PrepDataToxAOD_ExtraTruthCfg)
+                result.merge(InDetTRT_PrepDataToxAOD_ExtraTruthCfg(flags))
 
         else:
 
-            from InDetConfig.InDetPrepRawDataToxAODConfig import (
-                InDetPixelPrepDataToxAODCfg,
-                InDetSCT_PrepDataToxAODCfg,
-                InDetTRT_PrepDataToxAODCfg)
-            result.merge(InDetPixelPrepDataToxAODCfg(
-                flags,
-                ClusterSplitProbabilityName=(
-                    ClusterSplitProbabilityContainerName(flags))))
-            result.merge(InDetSCT_PrepDataToxAODCfg(flags))
-            result.merge(InDetTRT_PrepDataToxAODCfg(flags))
+            if flags.Tracking.writeExtendedSi_PRDInfo:
+                from InDetConfig.InDetPrepRawDataToxAODConfig import (
+                    InDetPixelPrepDataToxAODCfg,
+                    InDetSCT_PrepDataToxAODCfg)
+                result.merge(InDetPixelPrepDataToxAODCfg(
+                    flags,
+                    ClusterSplitProbabilityName=(
+                        ClusterSplitProbabilityContainerName(flags))))
+                result.merge(InDetSCT_PrepDataToxAODCfg(flags))
+
+            if flags.Tracking.writeExtendedTRT_PRDInfo:
+                from InDetConfig.InDetPrepRawDataToxAODConfig import (
+                    InDetTRT_PrepDataToxAODCfg)
+                result.merge(InDetTRT_PrepDataToxAODCfg(flags))
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
-            TrackStateOnSurfaceDecoratorCfg)
+            TSOS_CommonKernelCfg)
         # Setup one algorithm for each output tracking container
-        listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '') or (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
-        listOfAugmTools = []
-        for extension in listOfExtensionsRequesting:
-            TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-                TrackStateOnSurfaceDecoratorCfg(
-                    flags, name = f"{extension}TrackStateOnSurfaceDecorator",
-                    ContainerName = f"InDet{extension}TrackParticles",
-                    PixelMsosName = f"{extension}Pixel_MSOSs",
-                    SctMsosName = f"{extension}SCT_MSOSs",
-                    TrtMsosName = f"{extension}TRT_MSOSs"))
-            TrackStateOnSurfaceDecorator.DecorationPrefix = "Reco_"
-            listOfAugmTools.append(TrackStateOnSurfaceDecorator)
-        result.addEventAlgo(
-            CompFactory.DerivationFramework.CommonAugmentation(
-                "InDetCommonKernel",
-                AugmentationTools=listOfAugmTools))
+        listOfExtensionsRequesting = [
+            e for e in _extensions_list if (e == '') or
+            (flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks and
+             flags.Tracking.__getattr__(e+'Pass').storeSeparateContainer) ]
+        result.merge(TSOS_CommonKernelCfg(
+            flags, listOfExtensions = listOfExtensionsRequesting))
 
         if flags.Tracking.doTIDE_AmbiTrackMonitoring:
             from DerivationFrameworkInDet.InDetToolsConfig import (
-                ObserverTrackStateOnSurfaceDecoratorCfg)
-            ObserverTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-                ObserverTrackStateOnSurfaceDecoratorCfg(flags))
-            result.addEventAlgo(
-                CompFactory.DerivationFramework.CommonAugmentation(
-                    "ObserverInDetCommonKernel",
-                    AugmentationTools=[ObserverTrackStateOnSurfaceDecorator]))
+                ObserverTSOS_CommonKernelCfg)
+            result.merge(ObserverTSOS_CommonKernelCfg(flags))
 
         if flags.Tracking.doPseudoTracking:
             from DerivationFrameworkInDet.InDetToolsConfig import (
-                PseudoTrackStateOnSurfaceDecoratorCfg)
-            PseudoTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-                PseudoTrackStateOnSurfaceDecoratorCfg(flags))
-            result.addEventAlgo(
-                CompFactory.DerivationFramework.CommonAugmentation(
-                    "PseudoInDetCommonKernel",
-                    AugmentationTools=[PseudoTrackStateOnSurfaceDecorator]))
+                PseudoTSOS_CommonKernelCfg)
+            result.merge(PseudoTSOS_CommonKernelCfg(flags))
 
         if flags.Tracking.doStoreSiSPSeededTracks:
             from DerivationFrameworkInDet.InDetToolsConfig import (
-                SiSPTrackStateOnSurfaceDecoratorCfg)
+                SiSPTSOS_CommonKernelCfg)
             # Setup one algorithm for each output tracking container
-            listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks) ]
-            listOfAugmTools = []
-            for extension in listOfExtensionsRequesting:
-                SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-                    SiSPTrackStateOnSurfaceDecoratorCfg(flags, name = f"SiSP{extension}TrackStateOnSurfaceDecorator",
-                        ContainerName = f"SiSPSeededTracks{extension}TrackParticles",
-                        PixelMsosName = f"SiSP{extension}_Pixel_MSOSs",
-                        SctMsosName = f"SiSP{extension}_SCT_MSOSs",
-                        TrtMsosName = f"SiSP{extension}_TRT_MSOSs"))
-                listOfAugmTools.append(SiSPTrackStateOnSurfaceDecorator)
-            result.addEventAlgo(
-                CompFactory.DerivationFramework.CommonAugmentation(
-                    "SiSPInDetCommonKernel",
-                    AugmentationTools=listOfAugmTools))
+            listOfExtensionsRequesting = [
+                e for e in _extensions_list if (e == '') or
+                flags.Tracking.__getattr__(e+'Pass').storeSiSPSeededTracks ]
+            result.merge(SiSPTSOS_CommonKernelCfg(
+                flags, listOfExtensions = listOfExtensionsRequesting))
 
         if flags.Input.isMC:
             #check if we want to add it for other passes
@@ -804,7 +783,8 @@ def InDetTrackRecoOutputCfg(flags):
 
     # exclude IDTIDE/IDTRKVALID decorations
     excludedAuxData += '.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z'
-    if not flags.Tracking.writeExtendedPRDInfo:
+    if not (flags.Tracking.writeExtendedSi_PRDInfo or
+            flags.Tracking.writeExtendedTRT_PRDInfo):
         excludedAuxData += '.-msosLink'
 
     # exclude IDTIDE decorations
@@ -989,7 +969,8 @@ def InDetTrackRecoOutputCfg(flags):
                 f"xAOD::TrackParticleContainer#SiSPSeedSegments{extension}TrackParticles",
                 f"xAOD::TrackParticleAuxContainer#SiSPSeedSegments{extension}TrackParticlesAux."
             ]
-    if flags.Tracking.writeExtendedPRDInfo:
+    if (flags.Tracking.writeExtendedSi_PRDInfo or
+        flags.Tracking.writeExtendedTRT_PRDInfo):
         toAOD += [
             "xAOD::TrackMeasurementValidationContainer#PixelClusters",
             "xAOD::TrackMeasurementValidationAuxContainer#PixelClustersAux.",

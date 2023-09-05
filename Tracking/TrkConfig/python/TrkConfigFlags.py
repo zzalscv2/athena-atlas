@@ -152,7 +152,8 @@ def createTrackingConfigFlags():
     # Turn writing of seed validation ntuple on and off
     icf.addFlag("Tracking.writeSeedValNtuple", False)
     # Save xAOD TrackMeasurementValidation + TrackStateValidation containers
-    icf.addFlag("Tracking.writeExtendedPRDInfo", False)
+    icf.addFlag("Tracking.writeExtendedSi_PRDInfo", False)
+    icf.addFlag("Tracking.writeExtendedTRT_PRDInfo", False)
 
     # Toggle track slimming
     icf.addFlag("Tracking.doSlimming", lambda prevFlags:
