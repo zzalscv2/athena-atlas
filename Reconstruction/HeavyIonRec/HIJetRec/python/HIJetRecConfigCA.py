@@ -16,13 +16,13 @@ from AthenaCommon.Logging import logging
 __log = logging.getLogger('HIJetRecConfigCA')
 
 
-def HIClusterMakerCfg(flags, save=True, **kwargs):
+def HIClusterMakerCfg(flags, save=False, **kwargs):
     """Function to equip HI cluster builder from towers and cells, adds to output AOD stream."""
 
     acc = ComponentAccumulator()
 
     kwargs.setdefault("CaloCellContainerKey", "AllCalo")
-    kwargs.setdefault("OutputContainerKey", flags.HeavyIon.Jet.ClusterKey)
+    kwargs.setdefault("OutputContainerKey", flags.HeavyIon.Jet.Internal.ClusterKey)
 
     # get towers
     from CaloRec.CaloRecoConfig import CaloRecoCfg
@@ -48,8 +48,8 @@ def HIClusterMakerCfg(flags, save=True, **kwargs):
 def HICaloJetInputConstitSeq(flags, name="HICaloConstit", **kwargs):
     kwargs.setdefault("objtype", xAODType.CaloCluster)
     kwargs.setdefault("modifiers", [])
-    kwargs.setdefault("inputname", flags.HeavyIon.Jet.ClusterKey)
-    kwargs.setdefault("outputname", flags.HeavyIon.Jet.ClusterKey)
+    kwargs.setdefault("inputname", flags.HeavyIon.Jet.Internal.ClusterKey)
+    kwargs.setdefault("outputname", flags.HeavyIon.Jet.Internal.ClusterKey)
     kwargs.setdefault("label", "HI")
 
     jetConstit = JetInputConstitSeq(name, **kwargs)
@@ -103,9 +103,9 @@ def HIPseudoJetAlgCfg(flags, **kwargs):
     """Creates a pseudo jet algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("name", "pjcs"+flags.HeavyIon.Jet.ClusterKey)
-    kwargs.setdefault("InputContainer", flags.HeavyIon.Jet.ClusterKey)
-    kwargs.setdefault("OutputContainer", "PseudoJet"+flags.HeavyIon.Jet.ClusterKey)
+    kwargs.setdefault("name", "pjcs"+flags.HeavyIon.Jet.Internal.ClusterKey)
+    kwargs.setdefault("InputContainer", flags.HeavyIon.Jet.Internal.ClusterKey)
+    kwargs.setdefault("OutputContainer", "PseudoJet"+flags.HeavyIon.Jet.Internal.ClusterKey)
     kwargs.setdefault("Label", "LCTopo")
     kwargs.setdefault("SkipNegativeEnergy", False)
     kwargs.setdefault("TreatNegativeEnergyAsGhost", True)
@@ -136,7 +136,7 @@ def HIJetClustererCfg(flags, name="builder", jetDef=None, **kwargs):
         kwargs.setdefault("JetRadius", jetDef.radius)
         kwargs.setdefault("PtMin", jetDef.ptmin)
     kwargs.setdefault("GhostArea", 0.01)
-    kwargs.setdefault("InputPseudoJets", "PseudoJet"+flags.HeavyIon.Jet.ClusterKey+"_GhostTracks")
+    kwargs.setdefault("InputPseudoJets", "PseudoJet"+flags.HeavyIon.Jet.Internal.ClusterKey+"_GhostTracks")
 
     acc.setPrivateTools(CompFactory.JetClusterer(name, **kwargs))
     return acc
@@ -205,9 +205,9 @@ def updateStdJetModifier(flags, name, **kwargs):
         stdJetModifiers.update(
             HIJetAssoc=JetModifier("HIJetDRAssociationTool",
                                    "HIJetDRAssociation",
-                                   ContainerKey=flags.HeavyIon.Jet.ClusterKey,
+                                   ContainerKey=flags.HeavyIon.Jet.Internal.ClusterKey,
                                    DeltaR=0.8,
-                                   AssociationName=flags.HeavyIon.Jet.ClusterKey+"_DR8Assoc"))
+                                   AssociationName=flags.HeavyIon.Jet.Internal.ClusterKey+"_DR8Assoc"))
         return
 
     if name == "HIJetMaxOverMean":
@@ -405,7 +405,7 @@ def HIEventShapeJetIterationCfg(flags, suffix=None, useClusters=True, **kwargs):
         map_tool = acc.popToolsAndMerge(HIEventShapeMapToolCfg(flags))
         kwargs.setdefault("EventShapeMapTool", map_tool)
     kwargs.setdefault("OutputEventShapeKey", out_shape_name)
-    kwargs.setdefault("AssociationKey", flags.HeavyIon.Jet.ClusterKey+"_DR8Assoc")
+    kwargs.setdefault("AssociationKey", flags.HeavyIon.Jet.Internal.ClusterKey+"_DR8Assoc")
     kwargs.setdefault("ModulationScheme", 1)
     kwargs.setdefault("RemodulateUE", True)
     kwargs.setdefault("ShallowCopy", False)
@@ -482,7 +482,7 @@ def HISubtractionToClustersCfg(flags, name="HIClusterSubtraction", useClusters=T
     acc = ComponentAccumulator()
 
     kwargs.setdefault('EventShapeKey', 'EventShapeKey')
-    kwargs.setdefault('ClusterKey', flags.HeavyIon.Jet.ClusterKey)
+    kwargs.setdefault('ClusterKey', flags.HeavyIon.Jet.Internal.ClusterKey)
     kwargs.setdefault('OutClusterKey', 'ClusterKey_deep')
     kwargs.setdefault('UpdateOnly', False)
     kwargs.setdefault('ApplyOriginCorrection', True)
@@ -517,7 +517,7 @@ def HIJetRecCfg(flags):
     acc.merge(HIEventShapeMakerCfg(flags,
                                    name="HIEventShapeMaker_Weighted",
                                    doWeighted=True,
-                                   InputTowerKey=flags.HeavyIon.Jet.ClusterKey,
+                                   InputTowerKey=flags.HeavyIon.Jet.Internal.ClusterKey,
                                    OutputContainerKey=eventshapeKey))
 
     # get jet definition
@@ -544,12 +544,12 @@ def HIJetRecCfg(flags):
 
     ## merge between PJHICluster and PJTracks
 
-    pjContNames = ["PseudoJet"+flags.HeavyIon.Jet.ClusterKey,pseudoGhostTrks]
+    pjContNames = ["PseudoJet"+flags.HeavyIon.Jet.Internal.ClusterKey,pseudoGhostTrks]
 
     mergeAlg = CompFactory.PseudoJetMerger(
         "PJmerge_HIGhostTrack",
         InputPJContainers = pjContNames,
-        OutputContainer = "PseudoJet"+flags.HeavyIon.Jet.ClusterKey+"_GhostTracks"
+        OutputContainer = "PseudoJet"+flags.HeavyIon.Jet.Internal.ClusterKey+"_GhostTracks"
     )
     acc.addEventAlgo(mergeAlg)
 
@@ -625,7 +625,7 @@ def HIJetRecCfg(flags):
     acc.addEventAlgo(CompFactory.JetAlgorithm("jetalgHI_iter1_egamma", Tools=[iter1_eg]))
 
     # constituents subtraction for egamma, cell-level
-    cluster_key_eGamma_deep = flags.HeavyIon.Jet.ClusterKey+"_eGamma_deep"
+    cluster_key_eGamma_deep = flags.HeavyIon.Jet.Internal.ClusterKey+"_eGamma_deep"
     subtrToCelltool = acc.popToolsAndMerge(
         HISubtractionToCellsCfg(flags,
                                 name="HIClusterSubtraction_egamma",
@@ -642,13 +642,12 @@ def HIJetRecCfg(flags):
     updateStdJetModifier(flags, "subtr1", **jm_dict1)
 
     # constituents subtraction for jets, tower-level
-    cluster_key_final_deep = cluster_key_eGamma_deep+"_Cluster_deep"
     subtrToClusterTool = acc.popToolsAndMerge(
         HISubtractionToClustersCfg(flags,
                                    name="HIClusterSubtraction_final",
                                    EventShapeKey=jm_dict1["EventShapeKey"],
                                    ClusterKey=cluster_key_eGamma_deep,
-                                   OutClusterKey=cluster_key_final_deep,
+                                   OutClusterKey=flags.HeavyIon.Jet.ClusterKey,
                                    Modulator=jm_dict1["Modulator"],
                                    EventShapeMapTool=jm_dict1["EventShapeMapTool"],
                                    ApplyOriginCorrection=False)
@@ -658,8 +657,15 @@ def HIJetRecCfg(flags):
 
     # jet modifier from the tower-level subtraction
     updateStdJetModifier(flags, "consmod",
-                         ClusterKey=cluster_key_final_deep,
+                         ClusterKey=flags.HeavyIon.Jet.ClusterKey,
                          Subtractor=jm_dict1["Subtractor"])
+
+    # store final version of HIClusters
+    if flags.HeavyIon.Jet.WriteHIClusters:
+        output_hicluster = ["xAOD::CaloClusterContainer#"+flags.HeavyIon.Jet.ClusterKey,
+                            "xAOD::CaloClusterAuxContainer#"+flags.HeavyIon.Jet.ClusterKey+"Aux."]
+        acc.merge(addToESD(flags, output_hicluster))
+        acc.merge(addToAOD(flags, output_hicluster))
 
     # configure final jets and store them
     extramods = ["Sort","Width","CaloEnergies","LArHVCorr","CaloQuality","TrackMoments","JVF","JVT"]# adding modifiers to final jets

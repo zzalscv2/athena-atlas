@@ -129,7 +129,7 @@ int HIClusterSubtraction::execute() const
 	const auto *originalCluster = readHandleClusters.cptr();
 	// Create the new container and its auxiliary store.
 	xAOD::CaloClusterContainer* copyClusters = new xAOD::CaloClusterContainer();
-  xAOD::AuxContainerBase* copyClustersAux = new xAOD::AuxContainerBase();
+  xAOD::CaloClusterAuxContainer* copyClustersAux = new xAOD::CaloClusterAuxContainer();
   copyClusters->setStore(copyClustersAux);
   copyClusters->reserve (originalCluster->size());
 
@@ -195,7 +195,7 @@ int HIClusterSubtraction::execute() const
 
   // Make sure that memory is managed safely
   std::unique_ptr<xAOD::CaloClusterContainer> outClusters(copyClusters);
-  std::unique_ptr<xAOD::AuxContainerBase> deepAux(copyClustersAux);
+  std::unique_ptr<xAOD::CaloClusterAuxContainer> deepAux(copyClustersAux);
 
 	if(writeHandleDeepCopyClusters.record ( std::move(outClusters), std::move(deepAux)).isFailure() ){
 			ATH_MSG_ERROR("Unable to write DeepCopy Copy containers for subtracted clusters with key: " << m_outClusterKey.key());
