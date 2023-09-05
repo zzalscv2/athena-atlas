@@ -11,7 +11,7 @@
 #ifndef PIXELDIGITIZATION_FEI3SimTool_H
 #define PIXELDIGITIZATION_FEI3SimTool_H
 
-#include "PixelDigitization/FrontEndSimTool.h"
+#include "FrontEndSimTool.h"
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
 
 class SiChargedDiodeCollection;
@@ -35,16 +35,12 @@ private:
   FEI3SimTool();
 
   int relativeBunch2009(const double threshold, const double intimethreshold, const SiTotalCharge& totalCharge,
-                        const PixelModuleData* moduleData,
                         CLHEP::HepRandomEngine* rndmEngine) const;
   int relativeBunch2015(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
-                        const PixelModuleData* moduleData,
                         CLHEP::HepRandomEngine* rndmEngine) const;
   int relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
-                        const PixelModuleData* moduleData,
                         CLHEP::HepRandomEngine* rndmEngine) const;
   int relativeBunch2022(const SiTotalCharge& totalCharge, const double tot, int barrel_ec, int layer_disk, int moduleID, 
-                        const PixelModuleData* moduleData,
                         CLHEP::HepRandomEngine* rndmEngine) const;
 };
 

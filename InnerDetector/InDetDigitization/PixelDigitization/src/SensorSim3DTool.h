@@ -13,7 +13,7 @@
 #define PIXELDIGITIZATION_SensorSim3DTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "PixelDigitization/SensorSimTool.h"
+#include "SensorSimTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "RadDamageUtil.h"

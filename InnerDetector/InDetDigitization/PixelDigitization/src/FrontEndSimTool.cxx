@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "PixelDigitization/FrontEndSimTool.h"
+#include "FrontEndSimTool.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -30,6 +30,8 @@ FrontEndSimTool::initialize() {
   ATH_CHECK(m_chargeDataKey.initialize());
   if (m_cosmics){
     m_numberOfBcid = 8;
+    m_timeOffset = 100.;
+    m_timeJitter = 25.0;
   }
   
   return StatusCode::SUCCESS;

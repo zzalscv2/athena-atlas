@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "PixelDigitization/RD53SimTool.h"
+#include "RD53SimTool.h"
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
@@ -105,7 +105,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       if ((*i_chargedDiode).second.totalCharge().fromTrack()) {
         bunchSim =
           static_cast<int>(floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
-                                  moduleData->getTimeOffset(barrel_ec, layerIndex)) / m_bunchSpace));
+                                  m_timeOffset) / m_bunchSpace));
 	
 	//Timewalk implementation 
 	if(m_doTimeWalk){
@@ -113,7 +113,7 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 	    const int timeWalk = 25; // Here it is assumed that the maximum value of timewalk is one bunch crossing (25ns)
 	    bunchSim =
 	      static_cast<int>(floor((getG4Time((*i_chargedDiode).second.totalCharge()) +
-				      moduleData->getTimeOffset(barrel_ec, layerIndex)+ timeWalk) / m_bunchSpace));
+				      m_timeOffset+ timeWalk) / m_bunchSpace));
 	  } 
 	}
       } else {

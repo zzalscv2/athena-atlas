@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PixelDigitization/PixelDigitizationTool.h"
+#include "PixelDigitizationTool.h"
 #include "SiDigitization/SiChargedDiodeCollection.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"

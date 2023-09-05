@@ -3,7 +3,7 @@
  */
 
 // PixelDigitization includes
-#include "PixelDigitization/EfieldInterpolator.h"
+#include "EfieldInterpolator.h"
 
 #include "TROOT.h"
 #include "TH1.h"

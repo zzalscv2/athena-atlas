@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "PixelDigitization/RadDamageUtil.h"
+#include "RadDamageUtil.h"
 
 #include "TGraph.h"
 #include "TString.h"
@@ -27,7 +27,7 @@
 #include "TLorentzVector.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
-#include "PixelDigitization/EfieldInterpolator.h"
+#include "EfieldInterpolator.h"
 #include <fstream>
 #include <cmath>
 

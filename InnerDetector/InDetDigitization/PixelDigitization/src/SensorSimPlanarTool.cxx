@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PixelDigitization/SensorSimPlanarTool.h"
+#include "SensorSimPlanarTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SiDigitization/SiSurfaceCharge.h"

@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "PixelDigitization/FEI3SimTool.h"
+#include "FEI3SimTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -148,17 +148,17 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       int bunchSim = 0;
       if (diode.totalCharge().fromTrack()) {
         if (selectedTuneYear == 2022) {
-          bunchSim = relativeBunch2022(diode.totalCharge(), tot, barrel_ec, layerIndex, moduleIndex, moduleData, rndmEngine);
+          bunchSim = relativeBunch2022(diode.totalCharge(), tot, barrel_ec, layerIndex, moduleIndex, rndmEngine);
         } 
         else if (selectedTuneYear == 2018) {
-          bunchSim = relativeBunch2018(diode.totalCharge(), barrel_ec, layerIndex, moduleIndex, moduleData, rndmEngine);
+          bunchSim = relativeBunch2018(diode.totalCharge(), barrel_ec, layerIndex, moduleIndex,  rndmEngine);
         } 
         else if (selectedTuneYear == 2015) {
-          bunchSim = relativeBunch2015(diode.totalCharge(), barrel_ec, layerIndex, moduleIndex, moduleData, rndmEngine);
+          bunchSim = relativeBunch2015(diode.totalCharge(), barrel_ec, layerIndex, moduleIndex,  rndmEngine);
         } 
         else if (selectedTuneYear == 2009) {
           double intimethreshold = (ith0 / th0) * threshold;
-          bunchSim = relativeBunch2009(threshold, intimethreshold, diode.totalCharge(), moduleData, rndmEngine);
+          bunchSim = relativeBunch2009(threshold, intimethreshold, diode.totalCharge(), rndmEngine);
         }
       } 
       else {
@@ -231,7 +231,6 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
 int FEI3SimTool::relativeBunch2009(const double threshold, const double intimethreshold,
                                    const SiTotalCharge& totalCharge,
-                                   const PixelModuleData* moduleData,
                                    CLHEP::HepRandomEngine* rndmEngine) const {
   int BCID = 0;
   double myTimeWalkEff = 0.;
@@ -249,15 +248,13 @@ int FEI3SimTool::relativeBunch2009(const double threshold, const double intimeth
   double myTimeWalk = -p0 - p1 * std::log(1. - threshold / totalCharge.charge());
 
   myTimeWalkEff = myTimeWalk + myTimeWalk * 0.2 * CLHEP::RandGaussZiggurat::shoot(rndmEngine);
-
-  double randomJitter =
-    CLHEP::RandFlat::shoot(rndmEngine, (-moduleData->getTimeJitter(0, 1) / 2.0),
-                           (moduleData->getTimeJitter(0, 1) / 2.0));
+  const double limit = m_timeJitter * 0.5;
+  double randomJitter = CLHEP::RandFlat::shoot(rndmEngine, - limit, limit);
 
   //double G4Time	 = totalCharge.time();
 
   double G4Time = getG4Time(totalCharge);
-  double timing = moduleData->getTimeOffset(0, 1) + myTimeWalkEff + randomJitter + G4Time;
+  double timing = m_timeOffset + myTimeWalkEff + randomJitter + G4Time;
   BCID = static_cast<int>(std::floor(timing / m_bunchSpace));
   //ATH_MSG_DEBUG (  CTW << " , " << myTimeWalkEff << " , " << G4Time << " , " << timing << " , " << BCID );
 
@@ -266,7 +263,6 @@ int FEI3SimTool::relativeBunch2009(const double threshold, const double intimeth
 
 // This is the new parameterization based on the 2015 collision data.
 int FEI3SimTool::relativeBunch2015(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
-                                   const PixelModuleData* moduleData,
                                    CLHEP::HepRandomEngine* rndmEngine) const {
   /**
    * 2016.03.29  Soshi.Tsuno@cern.ch
@@ -348,14 +344,12 @@ int FEI3SimTool::relativeBunch2015(const SiTotalCharge& totalCharge, int barrel_
 
   int BCID =
     static_cast<int>(std::floor((G4Time +
-                            moduleData->getTimeOffset(barrel_ec,
-                                                      layer_disk) + timeWalk) / m_bunchSpace));
+                            m_timeOffset + timeWalk) / m_bunchSpace));
 
   return BCID;
 }
 
 int FEI3SimTool::relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_ec, int layer_disk, int moduleID,
-                                   const PixelModuleData* moduleData,
                                    CLHEP::HepRandomEngine* rndmEngine) const {
   /**
    * 2020.01.20  Minori.Fujimoto@cern.ch
@@ -480,14 +474,12 @@ int FEI3SimTool::relativeBunch2018(const SiTotalCharge& totalCharge, int barrel_
 
   int BCID =
     static_cast<int>(std::floor((G4Time +
-                            moduleData->getTimeOffset(barrel_ec,
-                              layer_disk) + timeWalk) / m_bunchSpace));
+                            m_timeOffset + timeWalk) / m_bunchSpace));
 
   return BCID;
 }
 
 int FEI3SimTool::relativeBunch2022(const SiTotalCharge& totalCharge, const double tot, int barrel_ec, int layer_disk, int moduleID,
-                                   const PixelModuleData* moduleData,
                                    CLHEP::HepRandomEngine* rndmEngine) const {
                                    
   static constexpr size_t nModules=7;
@@ -680,6 +672,6 @@ int FEI3SimTool::relativeBunch2022(const SiTotalCharge& totalCharge, const doubl
   if (rnd < prob) {
     timeWalk = 25.0;
   }
-  int BCID = static_cast<int>(floor((G4Time+moduleData->getTimeOffset(barrel_ec,layer_disk)+timeWalk)/m_bunchSpace));
+  int BCID = static_cast<int>(floor((G4Time+m_timeOffset+timeWalk)/m_bunchSpace));
   return BCID;
 }

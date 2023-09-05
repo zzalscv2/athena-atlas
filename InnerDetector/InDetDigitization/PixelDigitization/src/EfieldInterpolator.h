@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 /**
- * @file PixelDigitization/EfieldInterpolator.h
+ * @file EfieldInterpolator.h
  * @author Lennart Adam <lennart.adam@cern.ch>
  * @date January, 2020
  * @brief

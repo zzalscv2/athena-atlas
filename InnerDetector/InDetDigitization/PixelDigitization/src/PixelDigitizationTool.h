@@ -29,7 +29,7 @@
 
 #include "InDetSimData/InDetSimDataCollection.h"  //WriteHandleKey template parameter
 #include "SensorSimTool.h" //ToolHandleArray template parameter
-#include "PixelDigitization/FrontEndSimTool.h"  //ToolHandleArray template parameter
+#include "FrontEndSimTool.h"  //ToolHandleArray template parameter
 #include "EnergyDepositionTool.h"  //ToolHandle template parameter
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h" //ReadCondHandle Template parameter

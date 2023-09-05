@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "PixelDigitization/PixelDigitization.h"
+#include "PixelDigitization.h"
 
 // Constructor with parameters:
 PixelDigitization::PixelDigitization(const std::string& name,

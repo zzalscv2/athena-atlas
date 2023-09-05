@@ -16,7 +16,7 @@
 #include "Gaudi/Property.h"
 
 
-#include "PixelDigitization/EfieldInterpolator.h" //ToolHandle template argument
+#include "EfieldInterpolator.h" //ToolHandle template argument
 #include <utility> // for std::pair
 namespace InDetDD{
   class PixelModuleDesign;

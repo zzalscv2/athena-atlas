@@ -14,7 +14,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "InDetCondTools/ISiLorentzAngleTool.h" //ToolHandle template parameter
-#include "PixelDigitization/SensorSimTool.h"
+#include "SensorSimTool.h"
 #include "RadDamageUtil.h"  //ToolHandle template parameter
 #include "PixelConditionsData/PixelHistoConverter.h"
 #include <vector>
