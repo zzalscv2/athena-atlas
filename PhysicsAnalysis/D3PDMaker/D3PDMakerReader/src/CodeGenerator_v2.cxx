@@ -15,7 +15,6 @@
 
 // Boost include(s):
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
@@ -1476,7 +1475,7 @@ namespace D3PD {
                variableCounter[ itr->name() ] = 1;
             } else {
                postfix =
-                  boost::lexical_cast< std::string >( variableCounter[ itr->name() ] );
+                  std::to_string( variableCounter[ itr->name() ] );
                variableCounter[ itr->name() ]++;
             }
             source << "      if( parent." << variableName( itr->name() )
@@ -1599,7 +1598,7 @@ namespace D3PD {
                   variableCounter[ itr->name() ] = 1;
                } else {
                   postfix =
-                     boost::lexical_cast< std::string >( variableCounter[ itr->name() ] );
+                     std::to_string( variableCounter[ itr->name() ] );
                   variableCounter[ itr->name() ]++;
                }
 
@@ -1784,7 +1783,7 @@ namespace D3PD {
                variableCounter[ itr->name() ] = 1;
             } else {
                postfix =
-                  boost::lexical_cast< std::string >( variableCounter[ itr->name() ] );
+                  std::to_string( variableCounter[ itr->name() ] );
                variableCounter[ itr->name() ]++;
             }
             if( itr == metadata.variables().begin() ) {
@@ -1839,7 +1838,7 @@ namespace D3PD {
                variableCounter[ itr->name() ] = 1;
             } else {
                postfix =
-                  boost::lexical_cast< std::string >( variableCounter[ itr->name() ] );
+                  std::to_string( variableCounter[ itr->name() ] );
                variableCounter[ itr->name() ]++;
             }
             // Add the names:

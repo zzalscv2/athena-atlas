@@ -8,7 +8,6 @@
 #include "DataQualityInterfaces/PRegion.h"
 #include "DataQualityInterfaces/PResult.h"
 #include "DataQualityInterfaces/PFunctions.h"
-#include "boost/lexical_cast.hpp"
 #include "TDirectory.h"
 #include "TProcessID.h"
 #include <string>
@@ -195,7 +194,7 @@ namespace dqm_persistency {
 		  << std::endl;
 	continue;
       }
-      std::string uid(boost::lexical_cast<std::string>(subparam));
+      std::string uid = std::to_string(subparam);
       if (path == "") {
 	topmap.data[pparam->name] = uid;
       } else {
@@ -222,7 +221,7 @@ namespace dqm_persistency {
       }
     }
     WriteTreeRecurse(top_level, *paramdir, topmap, "");
-    topmap.data["top_level"] = boost::lexical_cast<std::string>(top_level.GetUniqueID());
+    topmap.data["top_level"] = std::to_string(top_level.GetUniqueID());
     topdir.WriteTObject(&top_level, "top_level");
     topdir.WriteTObject(&topmap, "object_map");
   }
@@ -255,7 +254,7 @@ namespace dqm_persistency {
     if (key == -1) {
       return dynamic_cast<PParameter*>(topdir.Get("top_level"));
     }
-    PParameter* rv = dynamic_cast<PParameter*>(topdir.Get(("Parameters/" + boost::lexical_cast<std::string>(key)).c_str()));
+    PParameter* rv = dynamic_cast<PParameter*>(topdir.Get(("Parameters/" + std::to_string(key)).c_str()));
     if (rv) { rv->SetUniqueID(rv->GetUniqueID() & 0xffffff); }
     return rv;
   }

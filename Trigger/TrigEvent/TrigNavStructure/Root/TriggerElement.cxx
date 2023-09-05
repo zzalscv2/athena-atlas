@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <iterator>
 #include <functional>
-#include <boost/lexical_cast.hpp>
 #include "TrigNavStructure/Types.h"
 #include "TrigNavStructure/TriggerElement.h"
 
@@ -239,7 +238,7 @@ TriggerElement::ObjectIndex::ObjectIndex(sub_index_type subType, index_type begi
   : m_subTypeIndex(subType), m_objIndexBegin(begin), m_objIndexEnd(end)
 {
     if (subType >= invalid_sub_index)
-	throw std::runtime_error("To many collections of one type: " + boost::lexical_cast<std::string>(subType)+" >= 0xffff" );
+	throw std::runtime_error("To many collections of one type: " + std::to_string(subType)+" >= 0xffff" );
 }
 
 
