@@ -10,6 +10,7 @@
 #include <FourMomUtils/xAODP4Helpers.h>
 
 #include "TruthClassification/TruthClassificationTool.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace
 {
@@ -43,13 +44,11 @@ StatusCode TruthClassificationTool::classify(const xAOD::IParticle &particle,
                                              Truth::Type &classification) const
 {
   const xAOD::TruthParticle *truthParticle = dynamic_cast<const xAOD::TruthParticle *> (&particle);
-  if (dynamic_cast<const xAOD::Electron *> (&particle)
-    || (truthParticle != nullptr && truthParticle->absPdgId() == 11))
+  if (dynamic_cast<const xAOD::Electron *> (&particle) || (truthParticle != nullptr && truthParticle->absPdgId() == 11))
   {
     ANA_CHECK(classifyElectron(particle, classification));
   }
-  else if (dynamic_cast<const xAOD::Muon *> (&particle)
-    || (truthParticle != nullptr && truthParticle->absPdgId() == 13))
+  else if (dynamic_cast<const xAOD::Muon *> (&particle) || (truthParticle != nullptr && truthParticle->absPdgId() == 13))
   {
     ANA_CHECK(classifyMuon(particle, classification));
   }
@@ -66,11 +65,10 @@ StatusCode TruthClassificationTool::classify(const xAOD::IParticle &particle,
 StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &electron,
                                                      Truth::Type &classification) const
 {
-  namespace MC = MCTruthPartClassifier;
+  
 
   // Check if xAOD::TruthParticle or if not if it has the TruthParticleLink
-  const xAOD::TruthParticle *truthParticle
-    = dynamic_cast<const xAOD::TruthParticle *> (&electron);
+  const xAOD::TruthParticle *truthParticle = dynamic_cast<const xAOD::TruthParticle *> (&electron);
   bool isTruthParticle{};
   if (truthParticle == nullptr)
   {
@@ -124,48 +122,48 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // gamma -> e+ e-
-  if (type == MC::BkgElectron
-    && (origin == MC::PhotonConv || origin == MC::ElMagProc)
-    && firstMotherType == MC::IsoPhoton && firstMotherOrigin == MC::PromptPhot)
+  if (type == MCTruthPartClassifier::BkgElectron
+    && (origin == MCTruthPartClassifier::PhotonConv || origin == MCTruthPartClassifier::ElMagProc)
+    && firstMotherType == MCTruthPartClassifier::IsoPhoton && firstMotherOrigin == MCTruthPartClassifier::PromptPhot)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
   }
 
   // H -> gamma gamma, gamma -> e+ e-
-  if (type == MC::BkgElectron && origin == MC::PhotonConv
-    && firstMotherType == MC::IsoPhoton && firstMotherOrigin == MC::Higgs)
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::PhotonConv
+    && firstMotherType == MCTruthPartClassifier::IsoPhoton && firstMotherOrigin == MCTruthPartClassifier::Higgs)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
   }
 
   // bkg electrons from bkg photons
-  if (type == MC::BkgElectron && origin == MC::PhotonConv
-    && firstMotherType == MC::UnknownPhoton && firstMotherOrigin == MC::NonDefined)
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::PhotonConv
+    && firstMotherType == MCTruthPartClassifier::UnknownPhoton && firstMotherOrigin == MCTruthPartClassifier::NonDefined)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
   }
 
   // bkg photon from UndrPhot; (Here there is a generator level photon (not gen electron ) that later converts)
-  if (type == MC::BkgElectron
-    && (origin == MC::PhotonConv || origin == MC::ElMagProc )
-    && firstMotherType == MC::BkgPhoton && firstMotherOrigin == MC::UndrPhot)
+  if (type == MCTruthPartClassifier::BkgElectron
+    && (origin == MCTruthPartClassifier::PhotonConv || origin == MCTruthPartClassifier::ElMagProc )
+    && firstMotherType == MCTruthPartClassifier::BkgPhoton && firstMotherOrigin == MCTruthPartClassifier::UndrPhot)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
   }
 
   // type = 16 and origin = 38 (again, this is a photon)
-  if (type == MC::BkgPhoton && origin == MC::UndrPhot)
+  if (type == MCTruthPartClassifier::BkgPhoton && origin == MCTruthPartClassifier::UndrPhot)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
   }
 
   // Is an isolated photon
-  if (type == MC::IsoPhoton && pdgId == 22)
+  if (type == MCTruthPartClassifier::IsoPhoton && pdgId == 22)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
@@ -173,14 +171,14 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
 
   // electrons from ElMagProc
   // when FSR, a better classification can be made with the fall back vars
-  if (type == MC::BkgElectron && origin == MC::ElMagProc
-    && firstMotherType == MC::UnknownPhoton && firstMotherOrigin == MC::NonDefined)
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::ElMagProc
+    && firstMotherType == MCTruthPartClassifier::UnknownPhoton && firstMotherOrigin == MCTruthPartClassifier::NonDefined)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
   }
-  if (type == MC::BkgElectron && origin == MC::ElMagProc
-    && firstMotherType == MC::NonIsoPhoton && firstMotherOrigin == MC::FSRPhot)
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::ElMagProc
+    && firstMotherType == MCTruthPartClassifier::NonIsoPhoton && firstMotherOrigin == MCTruthPartClassifier::FSRPhot)
   {
     classification = Truth::Type::PromptPhotonConversion;
     return StatusCode::SUCCESS;
@@ -192,8 +190,8 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // this photon is coming...). I would say more truth studies should be done.
   // """
   // Hence the warning message...
-  if (type == MC::BkgElectron && origin == MC::PhotonConv
-    && firstMotherType == MC::Unknown && firstMotherOrigin == MC::ZBoson)
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::PhotonConv
+    && firstMotherType == MCTruthPartClassifier::Unknown && firstMotherOrigin == MCTruthPartClassifier::ZBoson)
   {
     ANA_MSG_WARNING("Electron identified as from a PromptPhotonConversion, "
                     "but this type of electron needs further study!");
@@ -203,11 +201,11 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
 
   // when always a photon (last mum is a photon, even if the truth PDG is 11 and first mum PDG is 11 ):
   // very likely these are internal conversions;  last_mum_pdgId == 22 important as the cases with last_mum_pdgId == 11 were found to be quite often close to a true electron
-  if (type == MC::BkgElectron && firstMotherType == MC::BkgElectron
-    && origin == MC::PhotonConv && firstMotherOrigin == MC::PhotonConv
+  if (type == MCTruthPartClassifier::BkgElectron && firstMotherType == MCTruthPartClassifier::BkgElectron
+    && origin == MCTruthPartClassifier::PhotonConv && firstMotherOrigin == MCTruthPartClassifier::PhotonConv
     && std::abs(firstMotherPdgId) == 11 && std::abs(pdgId) == 11)
   {  // electron
-    if(lastMotherType == -1 || (lastMotherType == MC::GenParticle && (lastMotherPdgId == 22 || std::abs(lastMotherPdgId) == 11)))
+    if(lastMotherType == -1 || (lastMotherType == MCTruthPartClassifier::GenParticle && (lastMotherPdgId == 22 || std::abs(lastMotherPdgId) == 11)))
     {
       // lastMotherType == -1 ==>  when the last mother info is not stored in the derivations
       classification = Truth::Type::PromptPhotonConversion;
@@ -220,20 +218,20 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // Is muon reco as electron or ele radiated by muons
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if ((type == MC::NonIsoElectron || type == MC::NonIsoPhoton)
-    && (origin == MC::Mu || firstMotherOrigin == MC::Mu))
+  if ((type == MCTruthPartClassifier::NonIsoElectron || type == MCTruthPartClassifier::NonIsoPhoton)
+    && (origin == MCTruthPartClassifier::Mu || firstMotherOrigin == MCTruthPartClassifier::Mu))
   {
     classification = Truth::Type::ElectronFromMuon;
     return StatusCode::SUCCESS;
   }
 
-  if (type == MC::BkgElectron && firstMotherOrigin == MC::Mu)
+  if (type == MCTruthPartClassifier::BkgElectron && firstMotherOrigin == MCTruthPartClassifier::Mu)
   {
     classification = Truth::Type::ElectronFromMuon;
     return StatusCode::SUCCESS;
   }
 
-  if (type == MC::IsoMuon || type == MC::NonIsoMuon || type == MC::BkgMuon || type == MC::UnknownMuon) {
+  if (type == MCTruthPartClassifier::IsoMuon || type == MCTruthPartClassifier::NonIsoMuon || type == MCTruthPartClassifier::BkgMuon || type == MCTruthPartClassifier::UnknownMuon) {
     classification = Truth::Type::ElectronFromMuon;
     return StatusCode::SUCCESS;
   }
@@ -244,16 +242,16 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   // Non-isolated electron/photon from tau decay
-  if ((type == MC::NonIsoElectron || type == MC::NonIsoPhoton)
-    && origin == MC::TauLep)
+  if ((type == MCTruthPartClassifier::NonIsoElectron || type == MCTruthPartClassifier::NonIsoPhoton)
+    && origin == MCTruthPartClassifier::TauLep)
   {
     classification = Truth::Type::TauDecay;
     return StatusCode::SUCCESS;
   }
 
   // tau -> tau gamma, gamma -> e+ e-, etc
-  if ((firstMotherType == MC::NonIsoElectron || firstMotherType == MC::NonIsoPhoton)
-    && firstMotherOrigin == MC::TauLep)
+  if ((firstMotherType == MCTruthPartClassifier::NonIsoElectron || firstMotherType == MCTruthPartClassifier::NonIsoPhoton)
+    && firstMotherOrigin == MCTruthPartClassifier::TauLep)
   {
     classification = Truth::Type::TauDecay;
     return StatusCode::SUCCESS;
@@ -264,15 +262,15 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // Light hadron sources
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (type == MC::Hadron || fallbackType == MC::Hadron)
+  if (type == MCTruthPartClassifier::Hadron || fallbackType == MCTruthPartClassifier::Hadron)
   {
     classification = Truth::Type::LightFlavorDecay;
     return StatusCode::SUCCESS;
   }
 
-  if (firstMotherType == MC::BkgElectron)
+  if (firstMotherType == MCTruthPartClassifier::BkgElectron)
   {
-    if ((origin == MC::DalitzDec || origin == MC::ElMagProc)
+    if ((origin == MCTruthPartClassifier::DalitzDec || origin == MCTruthPartClassifier::ElMagProc)
       && (hasLightHadronOrigin(origin) || hasLightHadronOrigin(firstMotherOrigin)))
     {
       classification = Truth::Type::LightFlavorDecay;
@@ -280,9 +278,9 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
     }
   }
 
-  if (type == MC::BkgElectron)
+  if (type == MCTruthPartClassifier::BkgElectron)
   {
-    if (origin == MC::DalitzDec || firstMotherOrigin == MC::DalitzDec) {
+    if (origin == MCTruthPartClassifier::DalitzDec || firstMotherOrigin == MCTruthPartClassifier::DalitzDec) {
       classification = Truth::Type::LightFlavorDecay;
       return StatusCode::SUCCESS;
     }
@@ -292,7 +290,7 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
     }
   }
 
-  if (type == MC::BkgPhoton
+  if (type == MCTruthPartClassifier::BkgPhoton
     && (hasLightHadronOrigin(origin) || hasLightHadronOrigin(firstMotherOrigin)))
   {
     classification = Truth::Type::LightFlavorDecay;
@@ -314,7 +312,7 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // From C hadron
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (type != MC::IsoElectron && (hasCHadronOrigin(origin) || hasCHadronOrigin(firstMotherOrigin)))
+  if (type != MCTruthPartClassifier::IsoElectron && (hasCHadronOrigin(origin) || hasCHadronOrigin(firstMotherOrigin)))
   {
     classification = Truth::Type::CHadronDecay;
     return StatusCode::SUCCESS;
@@ -347,27 +345,27 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   // the reasons for not having origin and status codes might be complex. The
   // main idea is to weed out things we don't have a hope of classifying due to
   // missing or unknown information.
-  int status = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? truthParticle->status() : 0;
-  bool stable = (status == 1);
+  bool stable = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? MC::isStable(truthParticle) : false;
 
-  if (origin == MC::NonDefined && firstMotherOrigin == MC::NonDefined)
+
+  if (origin == MCTruthPartClassifier::NonDefined && firstMotherOrigin == MCTruthPartClassifier::NonDefined)
   {
     if (!stable)
     {
-      if ((type == MC::Unknown || type == MC::UnknownPhoton) && firstMotherType == MC::Unknown)
+      if ((type == MCTruthPartClassifier::Unknown || type == MCTruthPartClassifier::UnknownPhoton) && firstMotherType == MCTruthPartClassifier::Unknown)
       {
         classification = Truth::Type::KnownUnknown;
         return StatusCode::SUCCESS;
       }
     } else {
-      if ((type == MC::Unknown && firstMotherType == MC::Unknown)
-        || (type == MC::UnknownElectron && firstMotherType == MC::UnknownElectron))
+      if ((type == MCTruthPartClassifier::Unknown && firstMotherType == MCTruthPartClassifier::Unknown)
+        || (type == MCTruthPartClassifier::UnknownElectron && firstMotherType == MCTruthPartClassifier::UnknownElectron))
       {
         classification = Truth::Type::KnownUnknown;
         return StatusCode::SUCCESS;
       }
 
-      if (type == MC::UnknownPhoton)
+      if (type == MCTruthPartClassifier::UnknownPhoton)
       {
         classification = Truth::Type::KnownUnknown;
         return StatusCode::SUCCESS;
@@ -376,7 +374,7 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   }
 
   // non-iso photons with no info available to classify
-  if (type == MC::NonIsoPhoton && origin == MC::FSRPhot && pdgId == 22
+  if (type == MCTruthPartClassifier::NonIsoPhoton && origin == MCTruthPartClassifier::FSRPhot && pdgId == 22
     && firstMotherType == 0 && firstMotherOrigin == 0 && firstMotherPdgId == 0)
   {
     if (lastMotherType == -1 || (lastMotherType == 0 && lastMotherOrigin == 0 && lastMotherPdgId == 0))
@@ -411,7 +409,7 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
 StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
                                                  Truth::Type &classification) const
 {
-  namespace MC = MCTruthPartClassifier;
+  
 
   // Check if xAOD::TruthParticle or if not if it has the TruthParticleLink
   const xAOD::TruthParticle *truthParticle
@@ -446,7 +444,7 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   // muons from taus
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (type == MC::NonIsoMuon && origin == MC::TauLep)
+  if (type == MCTruthPartClassifier::NonIsoMuon && origin == MCTruthPartClassifier::TauLep)
   {
     classification = Truth::Type::TauDecay;
     return StatusCode::SUCCESS;
@@ -457,13 +455,13 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   // Light hadron sources
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (type == MC::BkgMuon && hasLightHadronOrigin(origin))
+  if (type == MCTruthPartClassifier::BkgMuon && hasLightHadronOrigin(origin))
   {
     classification = Truth::Type::LightFlavorDecay;
     return StatusCode::SUCCESS;
   }
 
-  if (type == MC::Hadron || fallbackType == MC::Hadron )
+  if (type == MCTruthPartClassifier::Hadron || fallbackType == MCTruthPartClassifier::Hadron )
   {
     classification = Truth::Type::LightFlavorDecay;
     return StatusCode::SUCCESS;
@@ -484,13 +482,13 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   // From C hadron
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (type != MC::IsoMuon && hasCHadronOrigin(origin))
+  if (type != MCTruthPartClassifier::IsoMuon && hasCHadronOrigin(origin))
   {
     classification = Truth::Type::CHadronDecay;
     return StatusCode::SUCCESS;
   }
   // TODO:: There is a comment in the example code about J/psi but there is a
-  // separate origin code for that: `MC::JPsi == 28.` --> this might not be in all samples/generators?
+  // separate origin code for that: `MCTruthPartClassifier::JPsi == 28.` --> this might not be in all samples/generators?
 
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -499,19 +497,19 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   // Check if the type of muon is IsoMuon(6) and whether the origin
   // of the muon is from a prompt source
   static const std::set<int> promptOrigin({
-      MC::SingleMuon,  // Single muon (origin = 2) from muon twiki
-      MC::top,
-      MC::WBoson,
-      MC::ZBoson,
-      MC::Higgs,
-      MC::HiggsMSSM,
-      MC::SUSY,
-      MC::DiBoson,
-      MC::CCbarMeson, // PromptQuarkoniumDecay
-      MC::BBbarMeson,
-      MC::HeavyBoson
+      MCTruthPartClassifier::SingleMuon,  // Single muon (origin = 2) from muon twiki
+      MCTruthPartClassifier::top,
+      MCTruthPartClassifier::WBoson,
+      MCTruthPartClassifier::ZBoson,
+      MCTruthPartClassifier::Higgs,
+      MCTruthPartClassifier::HiggsMSSM,
+      MCTruthPartClassifier::SUSY,
+      MCTruthPartClassifier::DiBoson,
+      MCTruthPartClassifier::CCbarMeson, // PromptQuarkoniumDecay
+      MCTruthPartClassifier::BBbarMeson,
+      MCTruthPartClassifier::HeavyBoson
   });
-  if (type == MC::IsoMuon && isInSet(origin, promptOrigin))
+  if (type == MCTruthPartClassifier::IsoMuon && isInSet(origin, promptOrigin))
   {
     //separate charge-flip muons
     if (m_separateChargeFlipMuons && isChargeFlipMuon(muon, isTruthParticle, truthParticle))
@@ -527,17 +525,16 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
   // Unknown & known Unknown
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (type == MC::UnknownMuon && origin == MC::NonDefined)
+  if (type == MCTruthPartClassifier::UnknownMuon && origin == MCTruthPartClassifier::NonDefined)
   {
     classification = Truth::Type::KnownUnknown;
     return StatusCode::SUCCESS;
   }
 
-  int status = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? truthParticle->status() : 0;
-  bool stable = (status == 1);
+  bool stable = (truthParticle != nullptr && truthParticle->isAvailable<int>("status")) ? MC::isStable(truthParticle) : false;
 
   if (!stable) {
-    if (type == MC::Unknown && origin == MC::NonDefined)
+    if (type == MCTruthPartClassifier::Unknown && origin == MCTruthPartClassifier::NonDefined)
     { // Data
       classification = Truth::Type::KnownUnknown;
       return StatusCode::SUCCESS;
@@ -560,7 +557,7 @@ bool TruthClassificationTool::isPromptElectron(const xAOD::IParticle &electron,
                                                bool isTruthParticle,
                                                const xAOD::TruthParticle *truthParticle) const
 {
-  namespace MC = MCTruthPartClassifier;
+  
 
   int type = isTruthParticle ? m_classifierParticleType(electron) : m_truthType(electron);
   int origin = isTruthParticle ? m_classifierParticleOrigin(electron) : m_truthOrigin(electron);
@@ -571,7 +568,7 @@ bool TruthClassificationTool::isPromptElectron(const xAOD::IParticle &electron,
   }
 
   // Electron is IsoElectron - return true
-  if (type == MC::IsoElectron)
+  if (type == MCTruthPartClassifier::IsoElectron)
   {
     return true;
   }
@@ -581,19 +578,19 @@ bool TruthClassificationTool::isPromptElectron(const xAOD::IParticle &electron,
   int firstMotherOrigin = m_firstMotherTruthOrigin(electron);
 
   // Adding these cases from ElectronEfficiencyHelpers
-  if (firstMotherType == MC::IsoElectron && std::abs(m_firstMotherPdgId(electron)) == 11)
+  if (firstMotherType == MCTruthPartClassifier::IsoElectron && std::abs(m_firstMotherPdgId(electron)) == 11)
   {
     return true;
   }
 
   // FSR photons from electrons
-  if (origin == MC::FSRPhot && type == MC::NonIsoPhoton && std::abs(pdgId) == 11)
+  if (origin == MCTruthPartClassifier::FSRPhot && type == MCTruthPartClassifier::NonIsoPhoton && std::abs(pdgId) == 11)
   {
     return true;
   }
 
-  if (type == MC::BkgElectron && origin == MC::PhotonConv
-    && firstMotherType == MC::NonIsoPhoton && firstMotherOrigin == MC::FSRPhot
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::PhotonConv
+    && firstMotherType == MCTruthPartClassifier::NonIsoPhoton && firstMotherOrigin == MCTruthPartClassifier::FSRPhot
     && std::abs(pdgId) == 11)
   {
     return true;
@@ -608,7 +605,7 @@ bool TruthClassificationTool::isChargeFlipElectron(const xAOD::IParticle &electr
                                                    bool isTruthParticle,
                                                    const xAOD::TruthParticle *truthParticle) const
 {
-  namespace MC = MCTruthPartClassifier;
+  
 
   int type = isTruthParticle ? m_classifierParticleType(electron) : m_truthType(electron);
   int origin = isTruthParticle ? m_classifierParticleOrigin(electron) : m_truthOrigin(electron);
@@ -624,20 +621,20 @@ bool TruthClassificationTool::isChargeFlipElectron(const xAOD::IParticle &electr
   int firstMotherPdgId = m_firstMotherPdgId(electron);
 
   // not consider FSR photons from electrons (the photon has no charge)
-  if (origin == MC::FSRPhot && type == MC::NonIsoPhoton && std::abs(pdgId) == 11)
+  if (origin == MCTruthPartClassifier::FSRPhot && type == MCTruthPartClassifier::NonIsoPhoton && std::abs(pdgId) == 11)
   {
     return false;
   }
-  if (type == MC::BkgElectron && origin == MC::PhotonConv
-    && firstMotherType == MC::NonIsoPhoton && firstMotherOrigin == MC::FSRPhot
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::PhotonConv
+    && firstMotherType == MCTruthPartClassifier::NonIsoPhoton && firstMotherOrigin == MCTruthPartClassifier::FSRPhot
     && std::abs(pdgId) == 11)
   {
     return false;
   }
 
   // bkg electrons with no additional info to help us classify them FSR -- not in the charge flip category
-  if (type == MC::BkgElectron && origin == MC::PhotonConv
-    && firstMotherType == MC::BkgElectron && firstMotherOrigin == MC::PhotonConv
+  if (type == MCTruthPartClassifier::BkgElectron && origin == MCTruthPartClassifier::PhotonConv
+    && firstMotherType == MCTruthPartClassifier::BkgElectron && firstMotherOrigin == MCTruthPartClassifier::PhotonConv
     && std::abs(pdgId) == 11)
   {
     return false;
@@ -685,37 +682,34 @@ bool TruthClassificationTool::isChargeFlipMuon(const xAOD::IParticle &muon,
 
 bool TruthClassificationTool::hasBHadronOrigin(int origin) const
 {
-  namespace MC = MCTruthPartClassifier;
   static const std::set<int> b_hadrons({
-    MC::BottomMeson,
-    MC::BBbarMeson,
-    MC::BottomBaryon,
+    MCTruthPartClassifier::BottomMeson,
+    MCTruthPartClassifier::BBbarMeson,
+    MCTruthPartClassifier::BottomBaryon,
   });
   return isInSet(origin, b_hadrons);
 }
 
 
 bool TruthClassificationTool::hasCHadronOrigin(int origin) const {
-  namespace MC = MCTruthPartClassifier;
   static const std::set<int> c_hadrons({
-    MC::CharmedMeson,
-    MC::CCbarMeson,
-    MC::CharmedBaryon,
+    MCTruthPartClassifier::CharmedMeson,
+    MCTruthPartClassifier::CCbarMeson,
+    MCTruthPartClassifier::CharmedBaryon,
   });
   return isInSet(origin, c_hadrons);
 }
 
 
 bool TruthClassificationTool::hasLightHadronOrigin(int origin) const {
-  namespace MC = MCTruthPartClassifier;
   static const std::set<int> light_source({
-    MC::PiZero,
-    MC::LightMeson,
-    MC::StrangeMeson,
-    MC::LightBaryon,
-    MC::StrangeBaryon,
-    MC::PionDecay,
-    MC::KaonDecay,
+    MCTruthPartClassifier::PiZero,
+    MCTruthPartClassifier::LightMeson,
+    MCTruthPartClassifier::StrangeMeson,
+    MCTruthPartClassifier::LightBaryon,
+    MCTruthPartClassifier::StrangeBaryon,
+    MCTruthPartClassifier::PionDecay,
+    MCTruthPartClassifier::KaonDecay,
   });
   return isInSet(origin, light_source);
 }
