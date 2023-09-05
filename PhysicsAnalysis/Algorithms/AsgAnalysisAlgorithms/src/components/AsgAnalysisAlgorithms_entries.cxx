@@ -15,6 +15,7 @@
 #include <AsgAnalysisAlgorithms/AsgOriginalObjectLinkAlg.h>
 #include <AsgAnalysisAlgorithms/AsgSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
+#include <AsgAnalysisAlgorithms/AsgUnionPreselectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgUnionSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgViewFromSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
@@ -44,6 +45,7 @@ DECLARE_COMPONENT (CP::AsgLeptonTrackSelectionAlg)
 DECLARE_COMPONENT (CP::AsgOriginalObjectLinkAlg)
 DECLARE_COMPONENT (CP::AsgSelectionAlg)
 DECLARE_COMPONENT (CP::AsgShallowCopyAlg)
+DECLARE_COMPONENT (CP::AsgUnionPreselectionAlg)
 DECLARE_COMPONENT (CP::AsgUnionSelectionAlg)
 DECLARE_COMPONENT (CP::AsgViewFromSelectionAlg)
 DECLARE_COMPONENT (CP::AsgxAODNTupleMakerAlg)

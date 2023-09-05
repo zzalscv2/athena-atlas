@@ -317,7 +317,7 @@ class ConfigAccumulator :
         self._outputContainers = {}
 
 
-    def getPreselection (self, containerName, selectionName) :
+    def getPreselection (self, containerName, selectionName, *, asList = False) :
 
         """get the preselection string for the given selection on the given
         container
@@ -332,7 +332,10 @@ class ConfigAccumulator :
             if (selection.name == '' or selection.name == selectionName) and \
                selection.preselection :
                 decorations += [selection.decoration]
-        return '&&'.join (decorations)
+        if asList :
+            return decorations
+        else :
+            return '&&'.join (decorations)
 
 
     def getFullSelection (self, containerName, selectionName,
