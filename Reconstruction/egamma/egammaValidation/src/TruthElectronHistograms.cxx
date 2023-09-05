@@ -52,7 +52,7 @@ StatusCode TruthElectronHistograms::initializePlots(bool reducedHistSet) {
 	new TH2D(Form("%s_%s",m_name.c_str(),"eta_qOverp_resolution"),
 		 ";#eta;(q/P_{reco})/(q/P_{truth}) -1; Events", 60, -4.5, 4.5, 60, -1, 1.5);
 
-      for (auto e : histoMap2D) {
+      for (const auto& e : histoMap2D) {
 	ATH_CHECK(m_rootHistSvc->regHist(m_folder+e.first, e.second));
       }
     }
@@ -78,7 +78,7 @@ void TruthElectronHistograms::fill(const xAOD::TruthParticle *truth, const xAOD:
   // This can happen if we use it for forwardElectron
   if (!track) return;
 
-  bool has2DHis = histoMap2D.size() > 0;
+  bool has2DHis = !histoMap2D.empty();
 
   float dphires2(0.);
   float dphi2(0.);

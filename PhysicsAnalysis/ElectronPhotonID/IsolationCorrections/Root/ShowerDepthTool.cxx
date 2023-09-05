@@ -28,9 +28,9 @@ namespace CP{
   ANA_MSG_SOURCE(ShowerDepthToolMessaging, "CP::ShowerDepthTool");
   using namespace ShowerDepthToolMessaging;
 
-  ShowerDepthTool::ShowerDepthTool() {}
+  ShowerDepthTool::ShowerDepthTool() = default;
 
-  ShowerDepthTool::~ShowerDepthTool() {}
+  ShowerDepthTool::~ShowerDepthTool() = default;
 
   bool ShowerDepthTool::initialize()
   {

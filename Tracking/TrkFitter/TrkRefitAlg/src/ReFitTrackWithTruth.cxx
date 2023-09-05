@@ -83,7 +83,7 @@ StatusCode Trk::ReFitTrackWithTruth::initialize()
   }
 
   //set seed for random-number generator
-  m_random.get()->SetSeed();
+  m_random->SetSeed();
 
   // ensure the vector is the correct size in case the user does not want to smear
   if( m_resolutionRPhi.size() < 4 ) { m_resolutionRPhi={0.,0.,0.,0.}; }
@@ -188,7 +188,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
     std::vector<const Trk::MeasurementBase*> trash;
 
     ATH_MSG_DEBUG ("Loop over measurementsOnTrack " << (*itr)->measurementsOnTrack()->size() );
-    for (auto measurement : *((*itr)->measurementsOnTrack())) {
+    for (const auto *measurement : *((*itr)->measurementsOnTrack())) {
       ATH_MSG_DEBUG ("Next Measurement: " << *measurement);
 
       // Get measurement as RIO_OnTrack
@@ -242,7 +242,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
           continue;
         } // is a real hit, just not from the particle in question -- will NOT go to next hit just yet
         if( m_fixWrongHits ) { // if fix, use highest energy truth hit
-          for( auto& siHit : matchedSiHits ) {
+          for( const auto& siHit : matchedSiHits ) {
             if (siHit.energyLoss() > maxEnergyDeposit) {
               maxEnergyDeposit = siHit.energyLoss();
               maxEDepSiHit = siHit;
@@ -263,7 +263,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
 
         // If multiple SiHits / cluster FOR THE SAME TRUTH PARTICLE, 
         // Take position of SiHit giving the most energy
-        for( auto& siHit : matchedSiHits ) {
+        for( const auto& siHit : matchedSiHits ) {
           if (siHit.energyLoss() > maxEnergyDeposit) {
             maxEnergyDeposit = siHit.energyLoss();
             maxEDepSiHit = siHit;
@@ -343,7 +343,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
     }
     catch(const std::exception& e) {
       ATH_MSG_ERROR ("Refit Logic Error. No new track. Message: " << e.what());
-      newtrack = 0;
+      newtrack = nullptr;
     }
 
     ATH_MSG_DEBUG ("Track fit is done!");
@@ -354,7 +354,7 @@ StatusCode Trk::ReFitTrackWithTruth::execute()
 
         ATH_MSG_VERBOSE ("re-fitted track:" << *newtrack);
         const Trk::Perigee* aMeasPer = newtrack->perigeeParameters();
-        if (aMeasPer==0){
+        if (aMeasPer==nullptr){
           ATH_MSG_ERROR ("Could not get Trk::MeasuredPerigee");
         } else {
           double d0 = aMeasPer->parameters()[Trk::d0];
@@ -495,7 +495,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
       }
     } // loop over matching SiHits to see if any overlap 
 
-    if( ajoiningHits.size() == 0){
+    if( ajoiningHits.empty()){
       ATH_MSG_WARNING("This should really never happen");
       continue;
     }
@@ -516,7 +516,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
     }
     time /= (float)ajoiningHits.size();
 
-    matchingHits.push_back(  SiHit(lowestXPos->localStartPosition(),
+    matchingHits.emplace_back(lowestXPos->localStartPosition(),
           highestXPos->localEndPosition(),
           energyDep,
           time,
@@ -526,7 +526,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
           (*siHitIter)->getLayerDisk(),
           (*siHitIter)->getEtaModule(),
           (*siHitIter)->getPhiModule(),
-          (*siHitIter)->getSide() ) );
+          (*siHitIter)->getSide() );
     ATH_MSG_DEBUG("Finished Merging " << ajoiningHits.size() << " SiHits together." );
   } // loop over all matching SiHits
 
@@ -535,7 +535,7 @@ std::vector<SiHit> Trk::ReFitTrackWithTruth::matchSiHitsToCluster( const int bar
 
 bool Trk::ReFitTrackWithTruth::IsClusterFromTruth( const InDet::PixelCluster* pixClus,
     const int barcodeToMatch,
-    const InDetSimDataCollection &sdoCollection) const {
+    const InDetSimDataCollection &sdoCollection) {
 
   // Should be true for all pseudotracks
   // Can be false for reco tracks - misassigned hits
@@ -550,7 +550,7 @@ bool Trk::ReFitTrackWithTruth::IsClusterFromTruth( const InDet::PixelCluster* pi
     if( pos == sdoCollection.end() ) { continue; }
 
     // get the barcode from each deposit
-    for( auto deposit : pos->second.getdeposits() ){
+    for( const auto& deposit : pos->second.getdeposits() ){
       if( !deposit.first ){ continue; } // if truthparticle(?) link doesn't exists? Energy deposit is still known
       if( (deposit.first).barcode() != barcodeToMatch ) { continue; }
       match = true;
@@ -562,7 +562,7 @@ bool Trk::ReFitTrackWithTruth::IsClusterFromTruth( const InDet::PixelCluster* pi
   return match;
 }
 
-HepGeom::Point3D<double> Trk::ReFitTrackWithTruth::smearTruthPosition( const HepGeom::Point3D<double> orig,
+HepGeom::Point3D<double> Trk::ReFitTrackWithTruth::smearTruthPosition( const HepGeom::Point3D<double>& orig,
     const int bec,
     const int layer_disk,
     const InDetDD::SiDetectorDesign* design) const { 
@@ -572,8 +572,8 @@ HepGeom::Point3D<double> Trk::ReFitTrackWithTruth::smearTruthPosition( const Hep
   smeared.setX(orig.x());
 
   if (bec == 0) {
-    double smearLocY = m_random.get()->Gaus(0, getPhiPosResolution(layer_disk));
-    double smearLocZ = m_random.get()->Gaus(0, getEtaPosResolution(layer_disk));
+    double smearLocY = m_random->Gaus(0, getPhiPosResolution(layer_disk));
+    double smearLocZ = m_random->Gaus(0, getEtaPosResolution(layer_disk));
     smeared.setY(orig.y() + smearLocY);
     smeared.setZ(orig.z() + smearLocZ);
 

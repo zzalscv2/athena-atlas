@@ -74,12 +74,7 @@ Root::TForwardElectronIsEMSelector::TForwardElectronIsEMSelector(
 }
 
 // ====================================================================
-Root::TForwardElectronIsEMSelector::~TForwardElectronIsEMSelector()
-{
-  //
-  // destructor
-  //
-}
+Root::TForwardElectronIsEMSelector::~TForwardElectronIsEMSelector() = default;
 
 //=============================================================================
 // Initialize this selector tool

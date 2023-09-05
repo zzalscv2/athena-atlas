@@ -69,11 +69,11 @@ private:
     const InDet::PixelCluster* pixClus,
     SG::ReadHandle<AtlasHitsVector<SiHit>> &siHitCollection) const;
 
-  bool IsClusterFromTruth( const InDet::PixelCluster* pixClus,
+  static bool IsClusterFromTruth( const InDet::PixelCluster* pixClus,
     const int barcodeToMatch,
-    const InDetSimDataCollection &sdoCollection) const;
+    const InDetSimDataCollection &sdoCollection) ;
 
-  HepGeom::Point3D<double> smearTruthPosition( const HepGeom::Point3D<double> orig,
+  HepGeom::Point3D<double> smearTruthPosition( const HepGeom::Point3D<double>& orig,
       const int bec,
       const int layer_disk,
       const InDetDD::SiDetectorDesign* design) const;
@@ -118,8 +118,8 @@ private:
      {this, "SummaryTool", "Trk::TrackSummaryTool/InDetTrackSummaryTool" };     	//!< the track summary tool
   ToolHandle<Trk::IPRDtoTrackMapTool>        m_assoTool
      {this, "AssociationTool", "Trk::PRDtoTrackMapTool" };              //!< Tool to create and populate PRD to track 
-  const AtlasDetectorID*                     m_idHelper;            	//!< Detector ID helper
-  const PixelID*                             m_pixelID;             	//!< Pixel ID
+  const AtlasDetectorID*                     m_idHelper = nullptr;            	//!< Detector ID helper
+  const PixelID*                             m_pixelID = nullptr;             	//!< Pixel ID
                                                             
 };
 
