@@ -282,8 +282,8 @@ namespace LVL1 {
             int tmptowerid = tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL[thisRow][thisCol];
             if(tmptowerid == 0 ) continue;
             const LVL1::jTower* tmptower = this_jTowerContainer->findTower(tmptowerid);
-            const float tmptowereta = tmptower->eta();
-            const float tmptowerphi = tmptower->phi();
+            const float tmptowereta = tmptower->iEta();
+            const float tmptowerphi = tmptower->iPhi();
             if(thisCol != cols-1) {
                 ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowerphi << "][" << tmptowereta << "])  ");
             }
@@ -379,8 +379,8 @@ namespace LVL1 {
             int tmptowerid = tmp_jTowersIDs_subset_1[thisRow][thisCol];
             if(tmptowerid == 0) continue;
             const LVL1::jTower* tmptower = this_jTowerContainer->findTower(tmptowerid);
-            const float tmptowereta = tmptower->eta();
-            const float tmptowerphi = tmptower->phi();
+            const float tmptowereta = tmptower->iEta();
+            const float tmptowerphi = tmptower->iPhi();
             if(thisCol != cols-1) {
                 ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowerphi << "][" << tmptowereta << "])  ");
             }
@@ -495,8 +495,8 @@ namespace LVL1 {
             int tmptowerid = tmp_jTowersIDs_subset_2[thisRow][thisCol];
             if(tmptowerid == 0) continue;
             const LVL1::jTower* tmptower = this_jTowerContainer->findTower(tmptowerid);
-            const float tmptowereta = tmptower->eta();
-            const float tmptowerphi = tmptower->phi();
+            const float tmptowereta = tmptower->iEta();
+            const float tmptowerphi = tmptower->iPhi();
             if(thisCol != cols-1) {
                 ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  ");
             }
@@ -612,8 +612,8 @@ namespace LVL1 {
             int tmptowerid = tmp_jTowersIDs_subset_3[thisRow][thisCol];
             if(tmptowerid == 0) continue;
             const LVL1::jTower* tmptower = this_jTowerContainer->findTower(tmptowerid);
-            const float tmptowereta = tmptower->eta();
-            const float tmptowerphi = tmptower->phi();
+            const float tmptowereta = tmptower->iEta();
+            const float tmptowerphi = tmptower->iPhi();
             if(thisCol != cols-1) {
                 ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  ");
             }
@@ -704,8 +704,8 @@ namespace LVL1 {
             int tmptowerid = tmp_jTowersIDs_subset_4[thisRow][thisCol];
             if(tmptowerid == 0) continue;
             const LVL1::jTower* tmptower = this_jTowerContainer->findTower(tmptowerid);
-            const float tmptowereta = tmptower->eta();
-            const float tmptowerphi = tmptower->phi();
+            const float tmptowereta = tmptower->iEta();
+            const float tmptowerphi = tmptower->iPhi();
             if(thisCol != cols-1) {
                 ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowereta << "][" << tmptowerphi << "])  ");
             }
@@ -862,8 +862,8 @@ namespace LVL1 {
             int tmptowerid = tmp_jTowersIDs_subset_ENDCAP_AND_EMB_AND_FCAL_2[thisRow][thisCol];
             if(tmptowerid == 0) continue;
             const LVL1::jTower* tmptower = this_jTowerContainer->findTower(tmptowerid);
-            const float tmptowereta = tmptower->eta();
-            const float tmptowerphi = tmptower->phi();
+            const float tmptowereta = tmptower->iEta();
+            const float tmptowerphi = tmptower->iPhi();
             if(thisCol != cols-1) {
                 ATH_MSG_DEBUG("|  " << tmptowerid << "([" << tmptowerphi << "][" << tmptowereta << "])  ");
             }

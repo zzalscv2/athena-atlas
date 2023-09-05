@@ -100,6 +100,7 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         std::array<uint32_t,6> TOBCounterTrailer (uint32_t word) const;
         std::array<uint32_t,4> xTOBCounterTrailer(uint32_t word) const;
         std::array<uint32_t,4> jFEXtoRODTrailer  (uint32_t word0, uint32_t word1) const;
+        std::array<uint32_t,1> RODTrailer  (uint32_t word0, uint32_t word1) const;
         void     jFEXtoRODHeader   (uint32_t word0, uint32_t word1) const;
         
         
