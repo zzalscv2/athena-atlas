@@ -22,8 +22,6 @@
 #include "./PrescaleSetLoader.h"
 #include "./DBHelper.h"
 
-#include "boost/lexical_cast.hpp"
-
 using namespace std;
 
 bool
@@ -53,7 +51,7 @@ TrigConf::PrescaleSetLoader::load( unsigned int ctpVersion, PrescaleSet& prescal
       attList.extend<int>( "L1PS_VERSION" );
       attList.extend<std::string>( "L1PS_COMMENT" );
       for (unsigned int ctpid = 0; ctpid < ctpformat.getMaxTrigItems(); ++ctpid) {
-         attList.extend<int64_t>( "L1PS_VAL" + boost::lexical_cast<string,int>(ctpid+1) );
+         attList.extend<int64_t>( "L1PS_VAL" + std::to_string(ctpid+1) );
       }
       fillQuery(q.get(),attList);
 
@@ -74,7 +72,7 @@ TrigConf::PrescaleSetLoader::load( unsigned int ctpVersion, PrescaleSet& prescal
       prescaleSet.setVersion( version );
       prescaleSet.setComment( comment );
       for (unsigned int ctpid=0; ctpid < ctpformat.getMaxTrigItems(); ++ctpid) {
-         int64_t val = row["L1PS_VAL" + boost::lexical_cast<string,unsigned int>(ctpid+1)].data<int64_t>();
+         int64_t val = row["L1PS_VAL" +std::to_string(ctpid+1)].data<int64_t>();
          if(isRun1()) {
             float prescale = L1PSNumber(val).getFloatPrescale();
             prescaleSet.setPrescale( ctpid, prescale ); 

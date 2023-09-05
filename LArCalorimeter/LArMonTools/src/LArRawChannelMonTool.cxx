@@ -31,11 +31,6 @@
 #include "LWHists/TProfile_LW.h"
 #include "LWHistFactory.h"
 
-
-// --- boost ---
-#include <boost/lexical_cast.hpp>
-
-
 // --- stl ---
 #include <algorithm>
 #include <cfloat>
@@ -58,8 +53,6 @@ using Units::MeV;
 
 using namespace LArMonTools;
 
-using boost::lexical_cast;
-using boost::bad_lexical_cast;
 using std::shared_ptr;
 
 typedef std::map<RawChHisto,std::shared_ptr<IHistoProxyBase> > map_str_th2;
@@ -483,7 +476,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
 	if ( m_monitor_quality ) {
 	  std::string title = "Perceantage of events above " +
-	    lexical_cast<std::string>( m_quality_threshold ) + " q-factor as" +
+	    std::to_string( m_quality_threshold ) + " q-factor as" +
 	    " function of " + m_data_name_base + " in ";
 	  factory_ptr.reset(new LWHist1DFactory<TH1I_LW>(title.c_str(),128,-0.5,127.5));
 	  factory_ptr->SetXTitle( "Quality Factor" );
@@ -543,7 +536,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
 	if ( m_monitor_quality ) {
 	  std::string title    = "Percentage of events above " +
-	   lexical_cast<std::string>( m_quality_threshold ) + " q-factor as a function of " +
+	   std::to_string( m_quality_threshold ) + " q-factor as a function of " +
 	    m_data_name_base + " in ";
           factory_ptr.reset(new LWHist2DFactory<TH2F_LW>(title.c_str(), 128, -0.5, 127.5, n_slots, 0.5, x_slots_max ));
           factory_ptr->SetXTitle( "Channel" );
@@ -618,7 +611,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
 	if ( m_monitor_burst){
 	  //	if ( m_monitor_positive_noise ) {
-	  std::string his_title    = "Yield of channels with +E > " + lexical_cast<std::string>( m_noise_threshold ) +" #sigma -"+ detector_str( det );
+	  std::string his_title    = "Yield of channels with +E > " + std::to_string( m_noise_threshold ) +" #sigma -"+ detector_str( det );
 	  factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),375, 0., 7.5 ));
 	  factory_ptr->SetXTitle("Percent of Channels");
 	  factory_ptr->SetYTitle("Number of Events per 0.02 %");
@@ -628,7 +621,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
 	if ( m_monitor_burst){
 	  //	if ( m_monitor_negative_noise ) {
-	  std::string his_title    = "Yield of channels with -E > " + lexical_cast<std::string>( m_noise_threshold ) +" #sigma - " + detector_str( det );
+	  std::string his_title    = "Yield of channels with -E > " + std::to_string( m_noise_threshold ) +" #sigma - " + detector_str( det );
 	  factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),375, 0., 7.5 ));
 	  factory_ptr->SetXTitle("Percent of Channels");
 	  factory_ptr->SetYTitle("Number of Events per 0.02 %");
@@ -638,7 +631,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 	// Noise fraction (Positive only) histogram when not flagged by LArNoisyROAlg_W 
 	if ( m_monitor_burst){
 	  //	if ( m_monitor_negative_noise ) {
-	  std::string his_title    = "Yield of channels with +E > " + lexical_cast<std::string>( m_noise_threshold ) +" #sigma (no LArNoisyRO_StdOpt) -"+ detector_str( det );
+	  std::string his_title    = "Yield of channels with +E > " + std::to_string( m_noise_threshold ) +" #sigma (no LArNoisyRO_StdOpt) -"+ detector_str( det );
 	  factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),375, 0., 7.5 ));
 	  factory_ptr->SetXTitle("Percent of Channels");
 	  factory_ptr->SetYTitle("Number of Events per 0.02 %");
@@ -649,7 +642,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 	// Noise fraction (Positive only) histogram when not flagged by LArNoisyROAlg
 	if ( m_monitor_burst){
 	  //	if ( m_monitor_positive_noise ) {
-	  std::string his_title    = "Yield of channels with +E > " + lexical_cast<std::string>( m_noise_threshold ) +" #sigma (no LArNoisyRO_Std) -"+ detector_str( det );
+	  std::string his_title    = "Yield of channels with +E > " + std::to_string( m_noise_threshold ) +" #sigma (no LArNoisyRO_Std) -"+ detector_str( det );
 	  factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),375, 0., 7.5 ));
 	  factory_ptr->SetXTitle("Percent of Channels");
 	  factory_ptr->SetYTitle("Number of Events per 0.02 %");
@@ -659,7 +652,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 	// Noise fraction (Positive only) histogram when flagged by LArNoisyROAlg but without time bit set (time veto)
 	if ( m_monitor_burst){
 	  //	if ( m_monitor_positive_noise ) {
-	  std::string his_title    = "Yield of channels with +E > " + lexical_cast<std::string>( m_noise_threshold ) +" #sigma (time vetoed) -"+ detector_str( det );
+	  std::string his_title    = "Yield of channels with +E > " + std::to_string( m_noise_threshold ) +" #sigma (time vetoed) -"+ detector_str( det );
 	  factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),375, 0., 7.5 ));
 	  factory_ptr->SetXTitle("Percent of Channels");
 	  factory_ptr->SetYTitle("Number of Events per 0.02 %");
@@ -697,7 +690,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 	if ( m_monitor_time ) {
 	  std::string his_title    = "Average time of " + m_data_name_base +
 	    " in each FEB of the " + detector_str(det) + " Reporting E > " +
-	    lexical_cast<std::string>( m_time_threshold ) + " #sigma";
+	    std::to_string( m_time_threshold ) + " #sigma";
           factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),101, -50.5, 50.5));
           factory_ptr->SetXTitle("<t_{FEB}> - <t_{event}> (ns)");
           factory_ptr->SetYTitle("Number of FEBs per ns");
@@ -706,7 +699,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
 	if ( m_monitor_quality ) {
 	  std::string his_title    = "Percentage of events above " +
-	    lexical_cast<std::string>( m_quality_threshold ) +" q-factor as function"+
+	    std::to_string( m_quality_threshold ) +" q-factor as function"+
 	    " of FEB and " + m_data_name_base + " in " + detector_str( det ) + " (no LArEventInfo::ERROR)";
           factory_ptr.reset(new LWHistProfile2DFactory(his_title.c_str(),n_bins,&axis[0],128,-0.5,127.5 ));
 	  factory_ptr->SetXTitle("Halfcrate (+ increasing slot)");
@@ -718,7 +711,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 
 	if ( m_monitor_quality ) {
 	  std::string his_title    = "Number of Channels in the " + detector_str( det ) +
-	    " with q-factor > " + lexical_cast<std::string>( m_quality_threshold );
+	    " with q-factor > " + std::to_string( m_quality_threshold );
           factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),50, -0.5, 49.5 ));
           factory_ptr->SetXTitle("Number of Channels");
           factory_ptr->SetYTitle("Number of Events per channel");
@@ -730,7 +723,7 @@ StatusCode LArRawChannelMonTool::bookHistograms()
 	  std::string his_title    = "Number Of Events With More Than " +
 	    std::string( Form( "%.2f", m_noise_burst_percent_thresholds[det]) ) +
 	    " % Of All Channels In The " + detector_str(det) + " Reporting q-factor > " +
-	    lexical_cast<std::string>( m_quality_threshold );
+	    std::to_string( m_quality_threshold );
           factory_ptr.reset(new LWHist1DFactory<TH1F_LW>(his_title.c_str(),m_n_lumi_blocks, 0.5, double(m_n_lumi_blocks)+0.5));
           factory_ptr->SetXTitle("Luminosity Block");
           factory_ptr->SetYTitle("Number of Events per lumi block");
@@ -1982,19 +1975,8 @@ StatusCode LArRawChannelMonTool::procHistograms()
 std::string LArRawChannelMonTool::threshold_histogram_title_snippet( const double& t)
 {
 
-
-  try {
-
-    return " of events above " + lexical_cast<std::string>( int( t / MeV ) ) +
+    return " of events above " + std::to_string( int( t / MeV ) ) +
       " MeV as a function of ";
-
-  } catch ( const bad_lexical_cast& err ) {
-
-    ATH_MSG_WARNING( "Could not include threshold for histogram titles."
-	<< err.what() );
-    return "";
-
-  }
 
 }
 
@@ -2003,17 +1985,7 @@ std::string LArRawChannelMonTool::threshold_histogram_title_snippet( const doubl
 std::string LArRawChannelMonTool::threshold_histogram_title_snippet( const int& t)
 {
 
-  try {
-
-    return lexical_cast<std::string>( t ) + " sigma total noise as a function of ";
-
-  } catch ( const bad_lexical_cast& err ) {
-
-    ATH_MSG_WARNING( "Could not include threshold for histogram titles."
-	<< err.what() );
-    return "";
-
-  }
+    return std::to_string( t ) + " sigma total noise as a function of ";
 
 }
 

@@ -15,7 +15,6 @@
 #include "eformat/SourceIdentifier.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/optional.hpp>
 #include <array>
 #include <climits>
@@ -393,8 +392,8 @@ void psc::Config::fill_enabled_dets(const ptree& r2r)
 ////////////////////////////////////////////////////////////////////////////////
 void psc::Config::updatePids()
 {
-  optmap["DF_PID"] = boost::lexical_cast<string>(getpid());
-  optmap["DF_PPID"] = boost::lexical_cast<string>(getppid());
+  optmap["DF_PID"] = std::to_string(getpid());
+  optmap["DF_PPID"] = std::to_string(getppid());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
