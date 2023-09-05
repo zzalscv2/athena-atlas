@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,7 +10,6 @@
 
 #include <JetAnalysisAlgorithms/JetGhostMuonAssociationAlg.h>
 #include <METUtilities/METHelpers.h>
-#include <xAODMuon/MuonContainer.h>
 
 //
 // method implementations
@@ -30,6 +29,7 @@ namespace CP
   initialize ()
   {
     ANA_CHECK (m_jetHandle.initialize (m_systematicsList));
+    ANA_CHECK (m_muonHandle.initialize (m_systematicsList));
     ANA_CHECK (m_systematicsList.initialize());
     return StatusCode::SUCCESS;
   }
@@ -45,7 +45,7 @@ namespace CP
 
       // associate the ghost muons to the jets (needed by MET muon-jet OR later)
       const xAOD::MuonContainer* muons = nullptr;
-      ATH_CHECK( evtStore()->retrieve(muons, "Muons") );
+      ANA_CHECK (m_muonHandle.retrieve (muons, sys));
       met::addGhostMuonsToJets(*muons, *jets);
     }
 

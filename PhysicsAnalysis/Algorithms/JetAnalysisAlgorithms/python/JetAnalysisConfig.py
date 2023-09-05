@@ -50,6 +50,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::JetGhostMuonAssociationAlg',
                                           'JetGhostMuonAssociationAlg'+postfix )
             alg.jets = config.readName (self.containerName)
+            if config.isPhyslite():
+                alg.muons = "AnalysisMuons"
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
 

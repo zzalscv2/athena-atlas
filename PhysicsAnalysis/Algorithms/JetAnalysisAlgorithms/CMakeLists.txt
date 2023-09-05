@@ -6,7 +6,7 @@ atlas_subdir( JetAnalysisAlgorithms )
 atlas_add_library( JetAnalysisAlgorithmsLib
    JetAnalysisAlgorithms/*.h JetAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS JetAnalysisAlgorithms
-   LINK_LIBRARIES xAODJet SelectionHelpersLib SystematicsHandlesLib
+   LINK_LIBRARIES xAODJet xAODMuon SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib JetCalibToolsLib JetInterface
    JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib
    PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODMuon )
