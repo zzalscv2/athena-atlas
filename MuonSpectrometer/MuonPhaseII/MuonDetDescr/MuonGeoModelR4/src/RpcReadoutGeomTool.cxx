@@ -69,23 +69,27 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         ATH_MSG_FATAL("Failed to deduce a valid shape for "<<m_idHelperSvc->toString(define.detElId));
         return StatusCode::FAILURE;
     }
-    ATH_MSG_VERBOSE("Extracted shape "<<m_geoUtilTool->dumpShape(shape));
+    ATH_MSG_DEBUG("Extracted shape "<<m_geoUtilTool->dumpShape(shape));
     /// The half sizes of the 
     if (shape->typeID() != GeoBox::getClassTypeID()) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" expect shape to be a box but it's "<<m_geoUtilTool->dumpShape(shape));
         return StatusCode::FAILURE;
     }
 
-    const GeoBox* box = static_cast<const GeoBox*>(shape);
-    define.halfZ = box->getYHalfLength() * Gaudi::Units::mm;
-    define.halfY = box->getZHalfLength() * Gaudi::Units::mm;
-    define.halfX = box->getXHalfLength() * Gaudi::Units::mm;
-
+    const GeoBox* box = static_cast<const GeoBox*>(shape);   
+    define.halfThickness = box->getXHalfLength() * Gaudi::Units::mm;
+    define.halfLength = box->getYHalfLength() * Gaudi::Units::mm;
+    define.halfWidth = box->getZHalfLength() * Gaudi::Units::mm;
+   
     /// Navigate through the GeoModel tree to find all gas volume leaves
-    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "RpcLayer");
+    std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "StripLayer");
+    if (allGasGaps.empty()) {
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern StripLayer");
+        return StatusCode::FAILURE;
+    }
     /// For one reason or another the x-axis points along the gasgap 
     /// and y along doublet phi
-    std::sort(allGasGaps.begin(), allGasGaps.end(), [](const physVolWithTrans&a, const physVolWithTrans & b){
+    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [](const physVolWithTrans&a, const physVolWithTrans & b){
          const Amg::Vector3D cA = a.transform.translation();
          const Amg::Vector3D cB = b.transform.translation();
          if (std::abs(cA.x() - cB.x()) > tolerance) return cA.x() < cB.x();
@@ -104,13 +108,13 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
             ++gasGap;
             doubletPhi = 1;
         } else ++doubletPhi;
-        prevGap = std::move(gCen);
+        ATH_MSG_DEBUG("Gas gap at "<<Amg::toString(gCen, 2)<<" is associated with gasGap: "<<gasGap<<", doubletPhi: "<<doubletPhi);
+        prevGap = std::move(gCen);        
         allGapsWithIdx.emplace_back(std::move(gapVol), gasGap, doubletPhi);
     }
     /// We know now whether we had 2 or 3 gasgaps and also whether there 2 or 1 panels in phi
     define.nGasGaps = gasGap;
-    define.nGapsInPhi = doubletPhi;
-    
+    define.nGapsInPhi = doubletPhi;    
     FactoryCache::ParamBookTable::const_iterator parBookItr = factoryCache.parameterBook.find(define.chambDesign);
     if (parBookItr == factoryCache.parameterBook.end()) {
         ATH_MSG_FATAL("The chamber "<<define.chambDesign<<" is not part of the WRPC table");
@@ -125,17 +129,17 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
             return StatusCode::FAILURE;
         }
         const GeoBox* gapBox = static_cast<const GeoBox*>(gapShape);
-        ATH_MSG_VERBOSE("Gas gap dimensions "<<m_geoUtilTool->dumpShape(gapBox));
+        ATH_MSG_DEBUG("Gas gap dimensions "<<m_geoUtilTool->dumpShape(gapBox));
 
         StripDesignPtr etaDesign = std::make_unique<StripDesign>();
         /// Define the strip layout
-        etaDesign->defineStripLayout(Amg::Vector2D{-gapBox->getZHalfLength() + 26.55, 0.},
+        etaDesign->defineStripLayout(Amg::Vector2D{-gapBox->getZHalfLength() + paramBook.firstOffSetEta, 0.},
                                      paramBook.stripPitchEta,
                                      paramBook.stripWidthEta,
                                      paramBook.numEtaStrips);
         /// Define the box layout
-        etaDesign->defineTrapezoid(gapBox->getXHalfLength(), gapBox->getXHalfLength(), gapBox->getZHalfLength());
-        gapVol.transform = gapVol.transform * Amg::Translation3D{0,-10, 0} * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
+        etaDesign->defineTrapezoid(gapBox->getYHalfLength(), gapBox->getYHalfLength(), gapBox->getZHalfLength());
+        gapVol.transform = gapVol.transform * Amg::Translation3D{-10, 0, 0} * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
         
         etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
         StripLayer etaLayer(gapVol.transform, etaDesign, 
@@ -144,14 +148,14 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         define.layers.push_back(std::move(etaLayer));
         if (!define.etaDesign) define.etaDesign = etaDesign;
         StripDesignPtr phiDesign = std::make_unique<StripDesign>();
-        phiDesign->defineStripLayout(Amg::Vector2D{-gapBox->getXHalfLength() +22.1, 0.},
+        phiDesign->defineStripLayout(Amg::Vector2D{-gapBox->getYHalfLength() + paramBook.firstOffSetPhi, 0.},
                                      paramBook.stripPitchPhi,
                                      paramBook.stripWidthPhi,
                                      paramBook.numPhiStrips);
-        phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getXHalfLength());
+        phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getYHalfLength());
         /// Next build the phi layer
         phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
-        StripLayer phiLayer(gapVol.transform  * Amg::getRotateY3D(-90. * Gaudi::Units::deg),
+        StripLayer phiLayer(gapVol.transform  * Amg::getRotateZ3D(90. * Gaudi::Units::deg),
                             phiDesign,
                             layerHash(define, gapVol.gasGap, gapVol.doubPhi, true));
         ATH_MSG_VERBOSE("Added new phi gap at "<<phiLayer);
@@ -168,8 +172,11 @@ IdentifierHash RpcReadoutGeomTool::layerHash(const RpcReadoutElement::defineArgs
     const unsigned int hashShiftDbl{args.hasPhiStrips ? 1u :0u};
     const int readOutDoubPhi = m_idHelperSvc->rpcIdHelper().doubletPhi(args.detElId);
     const unsigned int hashShiftGap{hashShiftDbl + (args.nGapsInPhi <= readOutDoubPhi ? 0u : 1u)};
-    return IdentifierHash{ (gasGap -1) << hashShiftGap | 
+    IdentifierHash idHash{ (gasGap -1) << hashShiftGap | 
                           1u * std::max(doubPhi - readOutDoubPhi,0) << hashShiftDbl | measPhi};
+    ATH_MSG_DEBUG("gasGap: "<<gasGap<<", doubletPhi: "<<doubPhi<<", measuresPhi: "<<measPhi
+                           <<" --> "<<static_cast<unsigned int>(idHash));
+    return idHash;
 }
 
 StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
@@ -183,9 +190,6 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     ATH_CHECK(readParameterBook(facCache));
 
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
-    for (auto itr = idHelper.detectorElement_begin(); itr != idHelper.detectorElement_end(); ++itr){
-        ATH_MSG_INFO("Expect detector Identifier "<<m_idHelperSvc->toString(*itr));
-    }
     // Get the list of full phys volumes from SQLite, and create detector
     // elements
     using alignNodeMap = IMuonGeoUtilityTool::alignNodeMap;    
@@ -195,9 +199,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
     alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
-    
    
-
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
@@ -217,18 +219,14 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
                                                     atoi(key_tokens[3]) + 1, 
                                                     atoi(key_tokens[4]),
                                                     atoi(key_tokens[6]),
-                                                    atoi(key_tokens[5]), isValid);
+                                                    atoi(key_tokens[5]), 
+                                                    isValid);
         if (!isValid){
             ATH_MSG_FATAL("Failed to construct the station Identifier from "<<key);
             continue;
             /// Keep it for this iteration
             // return StatusCode::FAILURE;
         }
-        /// Use for the debugging only the BML phi 3 station, eta = 1 station as it's mounted on the top
-        if (m_idHelperSvc->stationNameString(elementID) != "BML" ||
-            m_idHelperSvc->stationEta(elementID) != 1 ||
-            m_idHelperSvc->stationPhi(elementID) != 3) continue;
-
         
         defineArgs define{};
         define.physVol = pv;
@@ -245,7 +243,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     ServiceHandle<IRDBAccessSvc> accessSvc(m_geoDbTagSvc->getParamSvcName(), name());
     ATH_CHECK(accessSvc.retrieve());
-    IRDBRecordset_ptr paramTable = accessSvc->getRecordsetPtr("WRPC", "");
+    IRDBRecordset_ptr paramTable = accessSvc->getRecordsetPtr("TEST_WRPC", "");
     if (paramTable->size() == 0) {
         ATH_MSG_FATAL("Empty parameter book table found");
         return StatusCode::FAILURE;
@@ -257,14 +255,27 @@ StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     for (const IRDBRecord* record : *paramTable) {
         const std::string chambType = record->getString("WRPC_TYPE");
         wRPCTable& parBook = cache.parameterBook[record->getString("WRPC_TYPE")];
-        parBook.stripPitchEta = record->getDouble("pitch_z") * Gaudi::Units::cm;
-        parBook.stripPitchPhi = record->getDouble("pitch_s") * Gaudi::Units::cm;
-        const double stripDeadWidth = record->getDouble("stripdeadsep") * Gaudi::Units::cm;
+        parBook.stripPitchEta = record->getDouble("STRIPPITCH_Z") * Gaudi::Units::cm;
+        parBook.stripPitchPhi = record->getDouble("STRIPPITCH_S") * Gaudi::Units::cm;
+        const double stripDeadWidth = record->getDouble("STRIPDEADSEP") * Gaudi::Units::cm;
         parBook.stripWidthEta = parBook.stripPitchEta - stripDeadWidth;
         parBook.stripWidthPhi = parBook.stripPitchPhi - stripDeadWidth;
-        parBook.numEtaStrips = record->getInt("n_strips_z");
-        parBook.numPhiStrips = record->getInt("n_strips_s");
-
+        parBook.numEtaStrips = record->getInt("NSTRIPS_Z");
+        parBook.numPhiStrips = record->getInt("NSTRIPS_S");
+        parBook.firstOffSetPhi = record->getDouble("STRIPOFFSET_S") * Gaudi::Units::cm + 
+                                 0.5 * parBook.stripPitchPhi;
+        parBook.firstOffSetEta = record->getDouble("STRIPOFFSET_Z") * Gaudi::Units::cm +
+                                 record->getDouble("TCKSSU") * Gaudi::Units::cm +
+                                 0.5 * parBook.stripPitchEta;
+        
+        ATH_MSG_VERBOSE("Extracted parameters for chamber "<<chambType
+                       <<", num strips (eta/phi): "<<parBook.numEtaStrips<<"/"<<parBook.numPhiStrips
+                       <<", strip pitch (eta/phi) "<<parBook.stripPitchEta<<"/"<<parBook.stripPitchPhi
+                       <<", strip width (eta/phi): "<<parBook.stripWidthEta<<"/"<<parBook.stripWidthPhi
+                       <<", strip offset (eta/phi): "<<parBook.firstOffSetEta<<"/"<<parBook.firstOffSetPhi
+                       <<", STRIPOFFSET_Z: "<<(record->getDouble("STRIPOFFSET_Z") * Gaudi::Units::cm)
+                       <<", STRIPOFFSET_S: "<<(record->getDouble("STRIPOFFSET_S") * Gaudi::Units::cm)
+                       <<", TCKSSU: "<<(record->getDouble("TCKSSU")* Gaudi::Units::cm));
     }
     return StatusCode::SUCCESS;
 }

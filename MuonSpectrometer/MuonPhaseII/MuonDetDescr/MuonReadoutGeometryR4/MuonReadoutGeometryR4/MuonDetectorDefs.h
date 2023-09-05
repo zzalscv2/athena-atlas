@@ -22,6 +22,12 @@
 
 //// This header contains common helper utilities and definitions
 namespace MuonGMR4 {   
+    
+    /// Checks whether the linear part of the transformation rotates or stetches
+    /// any of the basis vectors. Returns false that happens
+    bool doesNotDeform(const Amg::Transform3D& trans);
+    /// Checks whether the transformation is the Identity transformation
+    bool isIdentity(const Amg::Transform3D& trans);
 
 
 }  // namespace MuonGMR4

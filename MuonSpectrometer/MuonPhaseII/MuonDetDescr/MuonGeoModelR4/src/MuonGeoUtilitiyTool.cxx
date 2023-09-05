@@ -7,6 +7,7 @@
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoShapeShift.h>
 #include <GeoModelKernel/GeoTube.h>
+#include <GeoModelKernel/GeoShapeUnion.h>
 #include <GeoModelKernel/GeoTransform.h>
 #include <GeoModelKernel/GeoShapeSubtraction.h>
 #include <GeoModelKernel/GeoSerialTransformer.h>
@@ -18,6 +19,7 @@
 
 namespace MuonGMR4{
 using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
+using geoShapeWithShift = IMuonGeoUtilityTool::geoShapeWithShift;
 
 MuonGeoUtilityTool::~MuonGeoUtilityTool() = default;
 MuonGeoUtilityTool::MuonGeoUtilityTool(const std::string &type, const std::string &name,
@@ -48,6 +50,7 @@ const GeoShape* MuonGeoUtilityTool::extractShape(const GeoShape* inShape) const 
         GeoTrd::getClassTypeID(),
         GeoBox::getClassTypeID(),
         GeoTube::getClassTypeID(),
+        GeoShapeUnion::getClassTypeID()
     };
     if (valid_types.count(inShape->typeID())) {
         ATH_MSG_VERBOSE(__FILE__<<":"<<__LINE__<<" "<<__func__<<" Found valid shape type "<<inShape->type());
@@ -106,6 +109,18 @@ std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const {
   } else if (shape->typeID() == GeoTube::getClassTypeID()){
     const GeoTube* tube = static_cast<const GeoTube*>(shape);
     sstr<<"Tube with minimal and maximal radii of "<<tube->getRMin()<<", "<<tube->getRMax()<<" and length "<<tube->getZHalfLength();
+  } else if (shape->typeID() == GeoShapeUnion::getClassTypeID()){
+      const GeoShapeUnion* unionShape = static_cast<const GeoShapeUnion*>(shape);
+      std::vector<geoShapeWithShift> constiuents = getComponents(unionShape);
+      sstr<<"Union of  <<<<";
+      for (const geoShapeWithShift& childShape: constiuents) {
+          sstr<<dumpShape(childShape.shape);
+          if (!isIdentity(childShape.transform)) {
+             sstr<<" - shifted by "<<to_string(childShape.transform);
+          }
+          sstr<<", ";
+      }
+      sstr<<" >>>>";
   } else {
       sstr<<"Cake tastes good "<<shape->type();
   }
@@ -141,8 +156,7 @@ std::string MuonGeoUtilityTool::dumpVolume(const PVConstLink& physVol, const std
   }
   sstr<<dumpShape(shape)<<", ";
   const Amg::Transform3D shift = extractShifts(physVol);
-  if (shift.translation().mag() > 0. ||
-      shift.linear() != AmgSymMatrix(3)::Identity()){
+  if (!isIdentity(shift)) {
     sstr<<" shape shifted by "<<to_string(shift);
   } 
   sstr<<"number of children "<<physVol->getNChildVols()<<", ";
@@ -206,7 +220,27 @@ std::vector<MuonGeoUtilityTool::physVolWithTrans> MuonGeoUtilityTool::findAllLea
     
     aV.next();
   }
-
   return foundVols;
 }
+std::vector<geoShapeWithShift> MuonGeoUtilityTool::getComponents(const GeoShapeUnion* unionShape) const {
+   std::vector<geoShapeWithShift> shapes{};
+   
+   auto fill_shape = [&shapes, this](const GeoShape* shape) {
+        if (shape->typeID() == GeoShapeUnion::getClassTypeID()) {
+           std::vector<geoShapeWithShift> childShapes = getComponents(static_cast<const GeoShapeUnion*>(shape));
+           shapes.insert(shapes.end(), std::make_move_iterator(childShapes.begin()),
+                                       std::make_move_iterator(childShapes.end()));
+        } else {
+          geoShapeWithShift compound{};
+          compound.shape = extractShape(shape);
+          compound.transform = extractShifts(shape);
+          shapes.push_back(std::move(compound));
+        }
+   };
+   fill_shape(unionShape->getOpA());
+   fill_shape(unionShape->getOpB());
+ 
+   return shapes;
+}
+
 }

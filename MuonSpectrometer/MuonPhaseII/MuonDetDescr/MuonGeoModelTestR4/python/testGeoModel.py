@@ -16,7 +16,6 @@ def SetupArgParser():
     parser.add_argument("--geoModelFile", default ="root://eoshome.cern.ch:1094//eos/user/c/cimuonsw/GeometryFiles/CompleteATLAS.db", help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
-    parser.add_argument("--outTxtFile", default ="MdtGeoDump.txt", help="Output txt file to dump the geometry")
     parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
     return parser
 
@@ -46,7 +45,7 @@ def GeoModelMdtTestCfg(flags, name = "GeoModelMdtTest", **kwargs):
     from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
     kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelMdtTest(name, **kwargs)
-    result.addEventAlgo(the_alg)
+    result.addEventAlgo(the_alg, primary = True)
     return result
 
 def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
@@ -54,7 +53,7 @@ def GeoModelRpcTestCfg(flags, name = "GeoModelRpcTest", **kwargs):
     from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
     kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelRpcTest(name, **kwargs)
-    result.addEventAlgo(the_alg)
+    result.addEventAlgo(the_alg, primary = True)
     return result
 
 def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
@@ -62,7 +61,15 @@ def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
     from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
     kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     the_alg = CompFactory.MuonGMR4.GeoModelsTgcTest(name, **kwargs)
-    result.addEventAlgo(the_alg)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
+    result = ComponentAccumulator()
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import ActsMuonChamberToolCfg
+    kwargs.setdefault("ChamberTool", result.getPrimaryAndMerge(ActsMuonChamberToolCfg(flags)))
+    the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)    
     return result
 
 def setupGeoR4TestCfg(args):
@@ -101,7 +108,7 @@ def setupGeoR4TestCfg(args):
     flags.Detector.GeometryCalo = False
     ### Muon spectrometer
     flags.Detector.GeometryCSC = False
-    flags.Detector.GeometrysTGC = True
+    flags.Detector.GeometrysTGC = False
     flags.Detector.GeometryMM = False
     flags.Detector.GeometryTGC = False
     flags.Detector.GeometryRPC = True
@@ -115,7 +122,6 @@ def setupGeoR4TestCfg(args):
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
-    flags.Detector.GeometryRPC = False
    
 
     flags.lock()
@@ -138,9 +144,7 @@ def executeTest(cfg, num_events = 1):
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
-    if not cfg.run(num_events).isSuccess():
-        import sys
-        sys.exit("Execution failed")
+    if not cfg.run(num_events).isSuccess(): exit(1)
 if __name__=="__main__":
     args = SetupArgParser().parse_args()
     flags, cfg = setupGeoR4TestCfg(args)
@@ -153,12 +157,12 @@ if __name__=="__main__":
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
-                                     DumpTxtFile = args.outTxtFile,
                                      TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
 
     if flags.Detector.GeometryRPC: 
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = ["BML1A3"]))
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
 
+    
     executeTest(cfg, num_events = args.nEvents)
     
    

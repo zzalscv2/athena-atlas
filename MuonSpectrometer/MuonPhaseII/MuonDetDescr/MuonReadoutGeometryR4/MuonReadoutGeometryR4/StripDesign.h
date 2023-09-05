@@ -63,6 +63,9 @@ namespace MuonGMR4{
             void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight);
             /// Defines the edges of the trapezoid with stereo angle
             void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight, double sAngle);
+            /// Flips the edges of the trapezoid boundaries by 90 degrees clockwise
+            void flipTrapezoid();
+
     
             /// Returns the distance to the strip center along x
             double distanceToStrip(const Amg::Vector2D& pos, int strip) const;
@@ -132,10 +135,14 @@ namespace MuonGMR4{
             /// Bottom right point of the trapezoid
             Amg::Vector2D m_topRight{Amg::Vector2D::Zero()};
 
-            /// Vector describing the right edge of the trapzoid
+            /// Vector describing the top edge of the trapzoid (top left -> top right)
             Amg::Vector2D m_dirTopEdge{Amg::Vector2D::Zero()};
-            /// Vector describing the left edge of the trapezoid
+            /// Vector describing the bottom edge of the trapezoid (bottom left -> bottom right)
             Amg::Vector2D m_dirBotEdge{Amg::Vector2D::Zero()};
+            /// Vector describing the left adge of the trapezoid (bottom left -> top left)
+            Amg::Vector2D m_dirLeftEdge{Amg::Vector2D::UnitY()};
+            /// Vector describing the right edge of the trapezoid (bottom right -> top right)
+            Amg::Vector2D m_dirRightEdge{Amg::Vector2D::UnitY()};
             /// Length of the edge connecting the short with the long egde 
             double m_lenSlopEdge{0.};            
             /// Trapezoid dimensions

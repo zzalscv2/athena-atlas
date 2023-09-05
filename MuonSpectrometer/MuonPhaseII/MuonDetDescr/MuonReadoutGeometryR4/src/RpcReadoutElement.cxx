@@ -32,6 +32,7 @@ StatusCode RpcReadoutElement::initElement() {
     ATH_MSG_DEBUG("Parameter book "<<parameterBook());
     if (m_pars.layers.empty()) {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
+       return StatusCode::FAILURE;
     }
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};

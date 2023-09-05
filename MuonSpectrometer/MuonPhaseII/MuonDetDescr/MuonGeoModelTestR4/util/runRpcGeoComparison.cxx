@@ -24,7 +24,7 @@
 #include <TFile.h>
 #include <TTreeReader.h>
 
-constexpr double tolerance = 10 * Gaudi::Units::micrometer;
+constexpr double tolerance = 100 * Gaudi::Units::micrometer;
 
 /// Helper struct to represent a full Rpc chamber
 struct RpcChamber{

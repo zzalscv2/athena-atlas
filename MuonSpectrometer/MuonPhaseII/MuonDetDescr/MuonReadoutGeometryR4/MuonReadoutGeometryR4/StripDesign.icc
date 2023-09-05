@@ -33,9 +33,11 @@ namespace MuonGMR4 {
         }
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
-        if (!uncapped && m_hasStereo && ( (*lambda) < 0. || (*lambda) > m_lenSlopEdge)) { 
-            const std::optional<double> bottom_line = MuonGM::intersect<2>(m_stripDir.x() > 0.? m_bottomLeft: m_bottomRight, Amg::Vector2D::UnitY(), 
-                                                                           stripPos, m_stripDir);            
+        if (!uncapped && m_hasStereo && ( (*lambda) < 0. || (*lambda) > m_lenSlopEdge)) {
+            const bool posIncl =  m_stripDir.x() >  0.; 
+            const Amg::Vector2D& edgePos{posIncl ? m_bottomLeft : m_bottomRight};
+            const Amg::Vector2D& edgeDir{posIncl ? m_dirLeftEdge : m_dirRightEdge};
+            const std::optional<double> bottom_line = MuonGM::intersect<2>(edgePos, edgeDir, stripPos, m_stripDir);            
             return stripPos + bottom_line.value_or(0.)* m_stripDir;            
         }
         return m_bottomLeft + (*lambda) * m_dirBotEdge;
@@ -56,9 +58,11 @@ namespace MuonGMR4 {
         }
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
-        if (!uncapped && m_hasStereo && ( (*lambda) < 0  || (*lambda) > m_lenSlopEdge)) { 
-            const std::optional<double> top_line = MuonGM::intersect<2>(m_stripDir.x() >  0. ? m_topRight: m_topLeft, Amg::Vector2D::UnitY(), 
-                                                                        stripPos, m_stripDir);
+        if (!uncapped && m_hasStereo && ( (*lambda) < 0  || (*lambda) > m_lenSlopEdge)) {
+            const bool posIncl =  m_stripDir.x() >  0.;
+            const Amg::Vector2D& edgePos{posIncl ? m_topRight : m_topLeft};
+            const Amg::Vector2D& edgeDir{posIncl ? m_dirRightEdge : m_dirLeftEdge};
+            const std::optional<double> top_line = MuonGM::intersect<2>(edgePos, edgeDir, stripPos, m_stripDir);
             return stripPos + top_line.value_or(0) * m_stripDir;            
        }
        return m_topRight + (*lambda) * m_dirTopEdge;
