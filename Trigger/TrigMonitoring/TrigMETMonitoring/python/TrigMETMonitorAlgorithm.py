@@ -148,8 +148,7 @@ def TrigMETMonConfig(inputFlags):
         HLTChainsVal = metChainsVal
     if len(metChainsT0) > 0:
         HLTChainsT0 = metChainsT0
-    print("L1Chains = ",L1Chains)
-    print("HLTChains = ",HLTChains)
+    
     ## Setting primary electron and muon chains for signalEl/signalMu/Expert plot selection
     HLTChainEl = ["HLT_e26_lhtight_ivarloose_L1.*","HLT_e28_lhtight_ivarloose_L1.*"]
     HLTChainMu = ["HLT_mu24_ivarmedium_L1.*"]
