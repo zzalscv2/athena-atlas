@@ -24,6 +24,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('photons', "", type=str)
         self.addOption ('taus', "", type=str)
         self.addOption ('doTauAntiTauJetOR', False, type=bool)
+        self.addOption ('antiTauIDTauLabel', '', type=str)
         self.addOption ('antiTauLabel', '', type=str)
         self.addOption ('antiTauBJetLabel', '', type=str)
 
@@ -198,6 +199,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             if self.doTauAntiTauJetOR:
                 config.addPrivateTool( 'overlapTool.TauJetORT',
                                        'ORUtils::TauAntiTauJetOverlapTool' )
+                alg.overlapTool.TauJetORT.TauLabel = self.antiTauIDTauLabel
                 alg.overlapTool.TauJetORT.AntiTauLabel = self.antiTauLabel
                 alg.overlapTool.TauJetORT.BJetLabel = self.antiTauBJetLabel
             else:
@@ -270,7 +272,8 @@ def makeOverlapAnalysisConfig( seq,
                                photons = None, fatJets = None,
                                enableUserPriority = None,
                                bJetLabel = None,
-                               antiTauLabel = None, antiTauBJetLabel = None,
+                               antiTauIDTauLabel = None, antiTauLabel = None,
+                               antiTauBJetLabel = None,
                                boostedLeptons = None,
                                postfix = None,
                                configName = 'OverlapRemoval'):
@@ -294,7 +297,8 @@ def makeOverlapAnalysisConfig( seq,
                             priority 2 and pre-selected jets the priority 1.
       bJetLabel -- Flag to select b-jets with for lepton OR.
                    If left empty, no b-jets are used in the overlap removal.
-      antiTauLabel -- Flag to select antiTau with. Required for TauAntiTauJetOR.
+      antiTauIDTauLabel -- Flag to select ID tau with for Tau-AntiTau-Jet OR.
+      antiTauLabel -- Flag to select antiTau with. Required for Tau-AntiTau-Jet OR.
       antiTauBJetLabel -- Flag to select b-jets with for Tau-AntiTau-Jet OR.
       boostedLeptons -- Set to True to enable boosted lepton overlap removal
     """
@@ -313,6 +317,7 @@ def makeOverlapAnalysisConfig( seq,
     config.setOptionValue ('fatJets', fatJets, noneAction='ignore')
     config.setOptionValue ('enableUserPriority', enableUserPriority, noneAction='ignore')
     config.setOptionValue ('bJetLabel', bJetLabel, noneAction='ignore')
+    config.setOptionValue ('antiTauIDTauLabel', antiTauIDTauLabel, noneAction='ignore')
     config.setOptionValue ('antiTauLabel', antiTauLabel, noneAction='ignore')
     config.setOptionValue ('antiTauBJetLabel', antiTauBJetLabel, noneAction='ignore')
     config.setOptionValue ('boostedLeptons', boostedLeptons, noneAction='ignore')
