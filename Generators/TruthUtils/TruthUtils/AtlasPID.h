@@ -12,7 +12,7 @@
 
 class DecodedPID: public std::pair<int,std::vector<int>> {
 public:
-inline DecodedPID(const int& p){
+  inline DecodedPID(const int& p){
     this->first=p;
     this->second.reserve(10);
     int ap = std::abs(p);
@@ -70,26 +70,22 @@ static const int PIPLUS = 211;
 static const int PIMINUS = -PIPLUS;
 static const int PI0 = 111;
 static const int K0L = 130;
-static const int LAMBDA0 = 3122;
-static const int DSPLUS = 431;
-static const int DPLUS = 411;
 
 static const int K0S = 310;
 static const int K0 = 311;
 static const int KPLUS = 321;
-
+static const int DPLUS = 411;
 static const int DSTAR = 413;
 static const int D0 = 421;
+static const int DSPLUS = 431;
 static const int JPSI = 443;
-static const int PSI2S =  20443;
-static const int PROTON = 2212;
-
-static const int BCPLUS = 541;
-
-static const int LAMBDACPLUS = 4122;
 static const int B0 = 511;
+static const int BCPLUS = 541;
+static const int PROTON = 2212;
+static const int LAMBDA0 = 3122;
+static const int LAMBDACPLUS = 4122;
 static const int LAMBDAB0 = 5122;
-
+static const int PSI2S = 20443;
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD areassigned codes 990, 9990, and 110 respectively
@@ -201,7 +197,6 @@ template<class T> inline bool isTechnicolor(const T& p){return isTechnicolor(p->
 template<class T> inline bool isExcited(const T& p){return isExcited(p->pdg_id());}
 template<class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
 template<class T> inline bool isHiddenValley(const T& p){return isHiddenValley(p->pdg_id());}
-
 template<class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template<class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
 template<class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
@@ -274,7 +269,7 @@ template<> inline bool isHiddenValley(const int& p){ auto value_digits = Decoded
 /// APID: the diquarks with top or fourth generation are not diquarks
 template<> inline bool isDiquark(const DecodedPID& p){
   if ( p.ndigits() == 4 &&  p(0) >= p(1) && p(2) == 0 &&  p.last() % 2 == 1 
-   && p.max_digit(1,3) < 6
+   && p.max_digit(1,3) <= 6
   ) return true;
   return false;
 }
@@ -355,7 +350,7 @@ template<> inline bool isBaryon(const DecodedPID& p){
 
 template<> inline bool isPentaquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && 
-  p.max_digit(1,6) < 6  && p.min_digit(1,6) > 0 && 
+  p.max_digit(1,6) <= 6  && p.min_digit(1,6) > 0 && 
   ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
 }
 /// PDG rule 14
@@ -366,8 +361,8 @@ template<> inline bool isPentaquark(const DecodedPID& p){
 /// Thenr,nL, andnJnumbers have the same meaningas for ordinary hadrons.
 template<> inline bool isTetraquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && p(5) == 0 && 
-      p.max_digit(1,3) < 6  && p.min_digit(1,3) > 0 && 
-      p.max_digit(1+3,3+3) < 6  && p.min_digit(1+3,3+3) > 0 && 
+      p.max_digit(1,3) <= 6  && p.min_digit(1,3) > 0 && 
+      p.max_digit(1+3,3+3) <= 6  && p.min_digit(1+3,3+3) > 0 && 
      ( p(3) >= p(4)  && p(6) >= p(7) ) &&  ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7)))) 
   );
 }
@@ -459,22 +454,25 @@ template<class T> inline bool hasBottom(const T& p) { return  hasQuark(p,BQUARK)
 template<class T> inline bool hasTop(const T& p) { return  hasQuark(p,TQUARK); }
 
 template<class T> inline bool isLightHadron(const T& p) { auto lq = leadingQuark(p); return  (lq == DQUARK || lq == UQUARK||lq == SQUARK) && isHadron(p); }
-template<class T> inline bool isHeavyHadron(const T& p) {  auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK) && isHadron(p); }
+template<class T> inline bool isHeavyHadron(const T& p) {  auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK || lq == TQUARK ) && isHadron(p); }
 template<class T> inline bool isStrangeHadron(const T& p) { return  leadingQuark(p) == SQUARK && isHadron(p); }
 template<class T> inline bool isCharmHadron(const T& p) { return  leadingQuark(p) == CQUARK && isHadron(p); }
 template<class T> inline bool isBottomHadron(const T& p) { return  leadingQuark(p) == BQUARK && isHadron(p); }
+template<class T> inline bool isTopHadron(const T& p) { return  leadingQuark(p) == TQUARK && isHadron(p); }
 
 template<class T> inline bool isLightMeson(const T& p) { auto lq = leadingQuark(p); return  (lq == DQUARK || lq == UQUARK||lq == SQUARK) && isMeson(p); }
-template<class T> inline bool isHeavyMeson(const T& p) { auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK) && isMeson(p); }
+template<class T> inline bool isHeavyMeson(const T& p) { auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK || lq == TQUARK) && isMeson(p); }
 template<class T> inline bool isStrangeMeson(const T& p) { return  leadingQuark(p) == SQUARK && isMeson(p); }
 template<class T> inline bool isCharmMeson(const T& p) { return  leadingQuark(p) == CQUARK && isMeson(p); }
 template<class T> inline bool isBottomMeson(const T& p) { return  leadingQuark(p) == BQUARK && isMeson(p); }
+template<class T> inline bool isTopMeson(const T& p) { return  leadingQuark(p) == TQUARK && isMeson(p); }
 
 template<class T> inline bool isLightBaryon(const T& p) { auto lq = leadingQuark(p); return  (lq == DQUARK || lq == UQUARK||lq == SQUARK) && isBaryon(p); }
-template<class T> inline bool isHeavyBaryon(const T& p) {  auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK) && isBaryon(p); }
+template<class T> inline bool isHeavyBaryon(const T& p) {  auto lq = leadingQuark(p); return  (lq == CQUARK || lq == BQUARK || lq == TQUARK) && isBaryon(p); }
 template<class T> inline bool isStrangeBaryon(const T& p) { return  leadingQuark(p) == SQUARK && isBaryon(p); }
 template<class T> inline bool isCharmBaryon(const T& p) { return  leadingQuark(p) == CQUARK && isBaryon(p); }
 template<class T> inline bool isBottomBaryon(const T& p) { return  leadingQuark(p) == BQUARK && isBaryon(p); }
+template<class T> inline bool isTopBaryon(const T& p) { return  leadingQuark(p) == TQUARK && isBaryon(p); }
 
 
 template<class T> inline int charge3( const T& p){return charge3(p->pdg_id());}
@@ -490,7 +488,7 @@ template<> inline int charge3(const DecodedPID& p) {
   if (ap < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
   if (ap == K0) return 0;
   if (ap == GEANTINO0) return 0;
-  if (ap == GEANTINOPLUS) return p.pid() > 0  ? 3 : -3;
+  if (ap == GEANTINOPLUS) return p.pid() > 0 ? 3 : -3;
   size_t nq = 0;
   int sign = 1;
   int signmult = 1;
@@ -502,9 +500,9 @@ template<> inline int charge3(const DecodedPID& p) {
   if (!classified && isTetraquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) - triple_charge.at(p(6)) - triple_charge.at(p(7)); } 
   if (!classified && isPentaquark(p)){ return triple_charge.at(p(3)) + triple_charge.at(p(4)) + triple_charge.at(p(5)) + triple_charge.at(p(6)) - triple_charge.at(p(7)); } 
   if (!classified && isNucleus(p)) { classified = true; nq=0; result = 3*(p(3)*100 + p(4)*10 + p(5)) + (-1)*p(2);}
-  if (!classified && isSUSY(p)) {  nq=0; auto apsusy = ap%1000000;  if (apsusy < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(apsusy) : -triple_charge.at(apsusy); }
-  for (auto r=p.second.rbegin()+1; r!=p.second.rbegin()+1+nq; ++r) {
-      result+=triple_charge.at(*r)*sign;
+  if (!classified && isSUSY(p)) { nq=0; auto apsusy = ap%1000000;  if (apsusy < TABLESIZE ) return p.pid() > 0 ? triple_charge.at(apsusy) : -triple_charge.at(apsusy); }
+  for (auto r = p.second.rbegin() + 1; r != p.second.rbegin() + 1 + nq; ++r) {
+      result += triple_charge.at(*r)*sign;
       sign*=signmult;
   }
   return p.pid() > 0 ? result : -result;
