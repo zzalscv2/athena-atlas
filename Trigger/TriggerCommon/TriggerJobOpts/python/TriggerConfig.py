@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+import re
 from collections import OrderedDict, defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -548,24 +549,33 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[] ):
 
     from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, Alias
 
+    # Ignore the following collections in the GapFiller. List of regular expressions
+    # that are fully matched against the EDM entry ("type#key").
+    ignore = [
+        # GapFiller always creates Aux stores
+        ".*AuxContainer#.*", ".*AuxInfo#.*",
+    ]
+    if flags.Trigger.doHLT:
+        # Online, these collections will be created after the EDMCreator runs
+        ignore += ["xAOD::TrigCompositeContainer#HLTNav_Summary_OnlineSlimmed",
+                   "xAOD::TrigCompositeContainer#HLT_RuntimeMetadata"]
+
     acc = ComponentAccumulator()
-    tool = CompFactory.HLTEDMCreator("GapFiller",
-                                     # These collections will be created after the EDMCreator runs
-                                     LateEDMKeys=["HLTNav_Summary_OnlineSlimmed",
-                                                  "HLT_RuntimeMetadata"])
+    tool = CompFactory.HLTEDMCreator("GapFiller")
     alg = CompFactory.HLTEDMCreatorAlg("EDMCreatorAlg",
                                        OutputTools = [tool])
 
     if len(edmSet) != 0:
         groupedByType = defaultdict( list )
+        re_ignore = [re.compile(x) for x in ignore]
 
         # scan the EDM
         for el in TriggerHLTListRun3:
             if not any([ outputType in el[1].split() for outputType in edmSet ]):
                 continue
-            collType, collName = el[0].split("#")
-            if "Aux" in collType: # the GapFiller creates appropriate Aux objects
+            if any(ign.fullmatch(el[0]) for ign in re_ignore):
                 continue
+            collType, collName = el[0].split("#")
             if len(el) >= 4: # see if there is an alias
                 aliases = [ str(a) for a in el[3] if isinstance(a, Alias) ]
                 if len(aliases) == 1:
@@ -584,13 +594,15 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[] ):
             else:
                 __log.info("EDM collections of type %s are not going to be added to StoreGate, if not created by the HLT", collType )
 
-    __log.debug("GapFiller is ensuring the creation of all the decision object collections: '%s'", decObj)
-    # Gap filler is also used to perform re-mapping of the HypoAlg outputs which is a sub-set of decObj
-    tool.FixLinks = list(decObjHypoOut)
-    # Append and hence confirm all TrigComposite collections
-    tool.TrigCompositeContainer += list(decObj)
+    if decObj or decObjHypoOut:
+        __log.info("GapFiller is ensuring the creation of all the decision object collections")
+        __log.debug("'%s'", decObj)
+        # Gap filler is also used to perform re-mapping of the HypoAlg outputs which is a sub-set of decObj
+        tool.FixLinks = list(decObjHypoOut)
+        # Append and hence confirm all TrigComposite collections
+        tool.TrigCompositeContainer += list(decObj)
 
-    acc.addEventAlgo(alg)
+    acc.addEventAlgo(alg, primary=True)
     return acc
 
 
@@ -688,7 +700,10 @@ def triggerRunCfg( flags, menu=None ):
 
         # The order is important: 1) view merging, 2) gap filling
         acc.merge( triggerMergeViewsCfg(flags, viewMakers), sequenceName="HLTFinalizeSeq" )
-        acc.merge( triggerEDMGapFillerCfg(flags, [edmSet], decObj, decObjHypoOut), sequenceName="HLTFinalizeSeq" )
+        # For BS output, the EDM gap-filling is done in Reco. Online we only ensure a
+        # consistent set of decision objects (TrigCompositeContainer):
+        acc.merge( triggerEDMGapFillerCfg(flags, [edmSet] if edmSet!='BS' else [],
+                                          decObj, decObjHypoOut), sequenceName="HLTFinalizeSeq" )
 
         if flags.Trigger.doOnlineNavigationCompactification:
             from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import getTrigNavSlimmingMTOnlineConfig

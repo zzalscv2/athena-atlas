@@ -370,11 +370,20 @@ def Run3TriggerBSUnpackingCfg(flags):
     from AthenaCommon.CFElements import seqAND
     decoder = CompFactory.HLTResultMTByteStreamDecoderAlg()
     deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TrigDeserialiser")
-    from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
-    deserialiser.ExtraOutputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
-    acc.addSequence(seqAND("HLTDecodingSeq"))
+
+    acc.addSequence( seqAND("HLTDecodingSeq") )
     acc.addEventAlgo( decoder, "HLTDecodingSeq")
     acc.addEventAlgo( deserialiser, "HLTDecodingSeq")
+
+    # Create empty EDM collections for types not created online
+    from TriggerJobOpts.TriggerConfig import triggerEDMGapFillerCfg
+    gapFiller = triggerEDMGapFillerCfg(flags, edmSet=['BS'])
+    # Add output dependency on Navigation to enforce ordering
+    from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
+    gapFiller.getPrimary().ExtraOutputs += [('xAOD::TrigCompositeContainer',
+                                             'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
+    acc.merge( gapFiller, "HLTDecodingSeq" )
+
     log.debug("Configured HLT result BS decoding sequence")
     return acc
 
