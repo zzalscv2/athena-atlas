@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "RD53SimTool.h"
+#include "PixelDigitization/RD53SimTool.h"
 
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
@@ -70,18 +70,18 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   // std::vector<std::vector<int> > RD53Map(maxRow + 16, std::vector<int>(maxCol + 16));
 
   // Add cross-talk
-  CrossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
+  crossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
 
   if (m_doNoise) {
     // Add thermal noise
-    ThermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
+    thermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
 
     // Add random noise
-    RandomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
+    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
   }
 
   // Add random diabled pixels
-  RandomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
+  randomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
 
   for (SiChargedDiodeIterator i_chargedDiode = chargedDiodes.begin(); i_chargedDiode != chargedDiodes.end();
        ++i_chargedDiode) {

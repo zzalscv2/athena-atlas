@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,10 +13,13 @@
 #define PIXELDIGITIZATION_SensorSimPlanarTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "InDetCondTools/ISiLorentzAngleTool.h"
-#include "SensorSimTool.h"
-#include "RadDamageUtil.h"
+#include "InDetCondTools/ISiLorentzAngleTool.h" //ToolHandle template parameter
+#include "PixelDigitization/SensorSimTool.h"
+#include "RadDamageUtil.h"  //ToolHandle template parameter
 #include "PixelConditionsData/PixelHistoConverter.h"
+#include <vector>
+#include <utility> //std::pair
+
 
 
 class SensorSimPlanarTool: public SensorSimTool {

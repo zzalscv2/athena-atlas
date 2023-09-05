@@ -15,7 +15,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #pragma GCC diagnostic pop
 
 
-#include "src/BichselData.h"
+#include "PixelDigitization/BichselData.h"
 #include <cmath> //isnan
 #include <utility> //pair
 #include <tuple>

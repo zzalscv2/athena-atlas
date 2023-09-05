@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include "FrontEndSimTool.h"
+#include "PixelDigitization/FrontEndSimTool.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
@@ -39,7 +39,7 @@ StatusCode
 FrontEndSimTool::finalize() {return StatusCode::FAILURE;}
 
 void 
-FrontEndSimTool::CrossTalk(double crossTalk, SiChargedDiodeCollection& chargedDiodes) const{
+FrontEndSimTool::crossTalk(double crossTalk, SiChargedDiodeCollection& chargedDiodes) const{
   const InDetDD::PixelModuleDesign* p_design =
     static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
   SiChargedDiodeMap oldChargedDiodes = chargedDiodes.chargedDiodes();
@@ -76,7 +76,7 @@ FrontEndSimTool::CrossTalk(double crossTalk, SiChargedDiodeCollection& chargedDi
 
 
 void 
-FrontEndSimTool::ThermalNoise(double thermalNoise, SiChargedDiodeCollection& chargedDiodes,
+FrontEndSimTool::thermalNoise(double thermalNoise, SiChargedDiodeCollection& chargedDiodes,
                     CLHEP::HepRandomEngine* rndmEngine) const{
   for (SiChargedDiodeOrderedIterator i_chargedDiode = chargedDiodes.orderedBegin();
        i_chargedDiode != chargedDiodes.orderedEnd(); ++i_chargedDiode) {
@@ -87,7 +87,7 @@ FrontEndSimTool::ThermalNoise(double thermalNoise, SiChargedDiodeCollection& cha
 }
 
 void 
-FrontEndSimTool::RandomNoise(SiChargedDiodeCollection& chargedDiodes, const PixelModuleData *moduleData,
+FrontEndSimTool::randomNoise(SiChargedDiodeCollection& chargedDiodes, const PixelModuleData *moduleData,
             const PixelChargeCalibCondData *chargeCalibData, CLHEP::HepRandomEngine* rndmEngine) const{
   const InDetDD::PixelModuleDesign* p_design =
     static_cast<const InDetDD::PixelModuleDesign*>(&(chargedDiodes.element())->design());
@@ -149,7 +149,7 @@ FrontEndSimTool::RandomNoise(SiChargedDiodeCollection& chargedDiodes, const Pixe
 }
 
 void 
-FrontEndSimTool::RandomDisable(SiChargedDiodeCollection& chargedDiodes,
+FrontEndSimTool::randomDisable(SiChargedDiodeCollection& chargedDiodes,
               const PixelModuleData *moduleData,
               CLHEP::HepRandomEngine* rndmEngine) const{
   const PixelID* pixelId = static_cast<const PixelID*>(chargedDiodes.element()->getIdHelper());

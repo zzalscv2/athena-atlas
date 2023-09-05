@@ -12,7 +12,14 @@
 #define PIXELDIGITIZATION_RD53SimTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "FrontEndSimTool.h"
+#include "PixelDigitization/FrontEndSimTool.h"
+#include "InDetRawData/PixelRDO_Collection.h" //typedef
+
+class SiChargedDiodeCollection;
+
+namespace CLHEP{
+  class HepRandomEngine;
+}
 
 class RD53SimTool: public FrontEndSimTool {
 public:

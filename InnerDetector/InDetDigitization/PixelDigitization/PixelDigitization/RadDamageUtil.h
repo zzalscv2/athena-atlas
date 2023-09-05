@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/RadDamageUtil.h
@@ -11,20 +11,20 @@
 #ifndef PIXELDIGITIZATION_RADDAMAGEUTIL_H
 #define PIXELDIGITIZATION_RADDAMAGEUTIL_H
 
-#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/Service.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "SiDigitization/SiChargedDiodeCollection.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
 
-#include "TH3.h"
-#include "TH2.h"
-#include "TH1.h"
 
-#include "EfieldInterpolator.h"
+#include "PixelDigitization/EfieldInterpolator.h" //ToolHandle template argument
+#include <utility> // for std::pair
+namespace InDetDD{
+  class PixelModuleDesign;
+}
+
+class TH3F;
+class TH2F;
+class TH1F;
 
 //====================
 //  C L A S S   D E F

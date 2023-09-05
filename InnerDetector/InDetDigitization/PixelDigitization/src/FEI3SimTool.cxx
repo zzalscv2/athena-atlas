@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "FEI3SimTool.h"
+#include "PixelDigitization/FEI3SimTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -74,18 +74,18 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
   const auto selectedTuneYear = moduleData->getFEI3TimingSimTune(barrel_ec, layerIndex);
   // Add cross-talk
-  CrossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
+  crossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
 
   if (m_doNoise) {
     // Add thermal noise
-    ThermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
+    thermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
 
     // Add random noise
-    RandomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
+    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
   }
 
   // Add random diabled pixels
-  RandomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
+  randomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
 
   for (SiChargedDiodeIterator i_chargedDiode = chargedDiodes.begin(); i_chargedDiode != chargedDiodes.end();
        ++i_chargedDiode) {

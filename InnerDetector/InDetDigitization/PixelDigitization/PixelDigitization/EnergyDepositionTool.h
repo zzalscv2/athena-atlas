@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/EnergyDepositionTool.h
@@ -17,7 +17,7 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Service.h"
 #include "HitManagement/TimedHitPtr.h"
-#include "BichselData.h"
+#include "PixelDigitization/BichselData.h"
 
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -51,10 +51,10 @@ public:
   virtual ~EnergyDepositionTool();
   StatusCode initTools();
 
-  std::vector<std::pair<double, double> > BichselSim(double BetaGamma, int ParticleType, double TotalLength,
+  std::vector<std::pair<double, double> > bichselSim(double BetaGamma, int ParticleType, double TotalLength,
                                                      double InciEnergy, CLHEP::HepRandomEngine* rndmEngine) const;   // output hit record in the format (hit position, energy loss)
 
-  std::vector<std::pair<double, double> > ClusterHits(std::vector<std::pair<double, double> >& rawHitRecord,
+  std::vector<std::pair<double, double> > clusterHits(std::vector<std::pair<double, double> >& rawHitRecord,
                                                       int n_pieces) const;         // cluster hits into n steps (there could be thousands of hit)                                                            
 
   virtual StatusCode depositEnergy(const TimedHitPtr<SiHit>& phit, const InDetDD::SiDetectorElement& Module,

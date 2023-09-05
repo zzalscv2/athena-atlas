@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,16 +14,23 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "CLHEP/Random/RandomEngine.h"
-#include "CLHEP/Random/RandGaussZiggurat.h"
+#include "InDetSimEvent/SiHit.h"
 
-#include "HitManagement/TimedHitPtr.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "HitManagement/TimedHitPtr.h" //template
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelRadiationDamageFluenceMapData.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
-#include "SiDigitization/SiChargedDiodeCollection.h"
 #include "SiPropertiesTool/ISiPropertiesTool.h"
+
+namespace InDetDD{
+  class SiDetectorElement;
+  class PixelModuleDesign;
+}
+
+namespace CLHEP{
+  class HepRandomEngine;
+}
+
+class SiChargedDiodeCollection;
 
 
 static const InterfaceID IID_ISensorSimTool("SensorSimTool", 1, 0);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelDigitization/PixelDigitizationTool.h
@@ -13,9 +13,9 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "PileUpTools/PileUpToolBase.h"
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "HitManagement/TimedHitCollection.h"
-#include "InDetSimEvent/SiHitCollection.h"
+#include "AthenaKernel/IAthRNGSvc.h" //SvcHandle template parameter
+#include "HitManagement/TimedHitCollection.h" //template
+#include "InDetSimEvent/SiHitCollection.h" //ReadHandleKey template parameter
 
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -25,14 +25,14 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "PileUpTools/PileUpMergeSvc.h"
+#include "PileUpTools/PileUpMergeSvc.h" //SvcHandle template parameter
 
-#include "InDetSimData/InDetSimDataCollection.h"
-#include "SensorSimTool.h"
-#include "FrontEndSimTool.h"
-#include "EnergyDepositionTool.h"
+#include "InDetSimData/InDetSimDataCollection.h"  //WriteHandleKey template parameter
+#include "SensorSimTool.h" //ToolHandleArray template parameter
+#include "PixelDigitization/FrontEndSimTool.h"  //ToolHandleArray template parameter
+#include "EnergyDepositionTool.h"  //ToolHandle template parameter
 
-#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h" //ReadCondHandle Template parameter
 
 
 class PixelDigitizationTool: public PileUpToolBase {
