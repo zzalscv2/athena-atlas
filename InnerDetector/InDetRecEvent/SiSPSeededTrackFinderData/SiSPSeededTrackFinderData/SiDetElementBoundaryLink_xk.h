@@ -39,10 +39,10 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
 
       const InDetDD::SiDetectorElement* detElement() const {return m_detelement;}
-      int intersect(const Trk::PatternTrackParameters&,double&) const; 
+      int intersect(const Trk::PatternTrackParameters&,double&) const;
 
     protected:
-      
+
       ///////////////////////////////////////////////////////////////////
       // Protected Data
       ///////////////////////////////////////////////////////////////////
@@ -55,6 +55,20 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
       // Methods
       ///////////////////////////////////////////////////////////////////
+
+    private:
+      enum AxisDirection {
+        PositiveX=0,
+        NegativeY,
+        NegativeX,
+        PositiveY
+      };
+
+      enum IntersectionStatus {
+        Inside=-1,
+        NotInsideNorOutside=0,
+        Outside=1
+      };
 
     };
   
