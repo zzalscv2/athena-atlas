@@ -5,7 +5,7 @@
 // Local include(s):
 #include "TauAnalysisTools/TauSelectionTool.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
-#include "TauAnalysisTools/SelectionCuts.h"
+#include "TauAnalysisTools/TauSelectionCuts.h"
 
 // Framework include(s):
 #include "PathResolver/PathResolver.h"
@@ -268,20 +268,20 @@ StatusCode TauSelectionTool::initialize()
   ATH_CHECK( m_muonContainerKey.initialize( m_iSelectionCuts & CutMuonOLR ) );
 
   // specify all available cut descriptions
-  using map_type  = std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::SelectionCut>>;
+  using map_type  = std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>>;
   using pair_type = map_type::value_type;
 
   pair_type elements[] =
   {
-   {CutPt, std::make_unique<TauAnalysisTools::SelectionCutPt>(this)},
-   {CutAbsEta, std::make_unique<TauAnalysisTools::SelectionCutAbsEta>(this)},
-   {CutAbsCharge, std::make_unique<TauAnalysisTools::SelectionCutAbsCharge>(this)},
-   {CutNTrack, std::make_unique<TauAnalysisTools::SelectionCutNTracks>(this)},
-   {CutJetRNNScoreSigTrans, std::make_unique<TauAnalysisTools::SelectionCutRNNJetScoreSigTrans>(this)},
-   {CutJetIDWP, std::make_unique<TauAnalysisTools::SelectionCutJetIDWP>(this)},
-   {CutEleRNNScore, std::make_unique<TauAnalysisTools::SelectionCutRNNEleScore>(this)},
-   {CutEleIDWP, std::make_unique<TauAnalysisTools::SelectionCutEleIDWP>(this)},
-   {CutMuonOLR, std::make_unique<TauAnalysisTools::SelectionCutMuonOLR>(this)}
+   {CutPt, std::make_unique<TauAnalysisTools::TauSelectionCutPt>(this)},
+   {CutAbsEta, std::make_unique<TauAnalysisTools::TauSelectionCutAbsEta>(this)},
+   {CutAbsCharge, std::make_unique<TauAnalysisTools::TauSelectionCutAbsCharge>(this)},
+   {CutNTrack, std::make_unique<TauAnalysisTools::TauSelectionCutNTracks>(this)},
+   {CutJetRNNScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutRNNJetScoreSigTrans>(this)},
+   {CutJetIDWP, std::make_unique<TauAnalysisTools::TauSelectionCutJetIDWP>(this)},
+   {CutEleRNNScore, std::make_unique<TauAnalysisTools::TauSelectionCutRNNEleScore>(this)},
+   {CutEleIDWP, std::make_unique<TauAnalysisTools::TauSelectionCutEleIDWP>(this)},
+   {CutMuonOLR, std::make_unique<TauAnalysisTools::TauSelectionCutMuonOLR>(this)}
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };

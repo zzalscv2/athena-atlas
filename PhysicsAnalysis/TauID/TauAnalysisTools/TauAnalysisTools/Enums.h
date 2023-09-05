@@ -51,6 +51,13 @@ namespace TauAnalysisTools
     CutJetRNNScoreSigTrans = 1<<9  // 001000000000
   };
 
+  enum DiTauSelectionCuts 
+  { 
+    NoDiTauCut           = 0,    // 000000000000
+    DiTauCutPt           = 1,    // 000000000001
+    DiTauCutAbsEta       = 1<<1, // 000000000010
+  };
+
   enum EfficiencyCorrectionType
   {
     SFRecoHadTau     = 0,

@@ -32,16 +32,16 @@ namespace TauAnalysisTools
 {
 
 /// forward declarations
-class SelectionCut;
-class SelectionCutPt;
-class SelectionCutAbsEta;
-class SelectionCutAbsCharge;
-class SelectionCutNTracks;
-class SelectionCutJetIDWP;
-class SelectionCutRNNJetScoreSigTrans;
-class SelectionCutRNNEleScore;
-class SelectionCutEleIDWP;
-class SelectionCutMuonOLR;
+class TauSelectionCut;
+class TauSelectionCutPt;
+class TauSelectionCutAbsEta;
+class TauSelectionCutAbsCharge;
+class TauSelectionCutNTracks;
+class TauSelectionCutJetIDWP;
+class TauSelectionCutRNNJetScoreSigTrans;
+class TauSelectionCutRNNEleScore;
+class TauSelectionCutEleIDWP;
+class TauSelectionCutMuonOLR;
 
 
 class TauSelectionTool : public virtual IAsgSelectionTool,
@@ -50,16 +50,16 @@ class TauSelectionTool : public virtual IAsgSelectionTool,
 {
   /// need to define cut classes to be friends to access protected variables,
   /// needed for access of cut thresholds
-  friend class SelectionCut;
-  friend class SelectionCutPt;
-  friend class SelectionCutAbsEta;
-  friend class SelectionCutAbsCharge;
-  friend class SelectionCutNTracks;
-  friend class SelectionCutJetIDWP;
-  friend class SelectionCutRNNJetScoreSigTrans;
-  friend class SelectionCutRNNEleScore;
-  friend class SelectionCutEleIDWP;
-  friend class SelectionCutMuonOLR;
+  friend class TauSelectionCut;
+  friend class TauSelectionCutPt;
+  friend class TauSelectionCutAbsEta;
+  friend class TauSelectionCutAbsCharge;
+  friend class TauSelectionCutNTracks;
+  friend class TauSelectionCutJetIDWP;
+  friend class TauSelectionCutRNNJetScoreSigTrans;
+  friend class TauSelectionCutRNNEleScore;
+  friend class TauSelectionCutEleIDWP;
+  friend class TauSelectionCutMuonOLR;
 
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( TauSelectionTool,
@@ -152,7 +152,7 @@ private:
   std::string m_sConfigPath;
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey {this, "MuonContainerName", "Muons", "Muon container read handle key"};
 
-  std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::SelectionCut>> m_cMap;
+  std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>> m_cMap;
 
   void setupCutFlowHistogram();
   int convertStrToJetIDWP(const std::string& sJetIDWP) const;

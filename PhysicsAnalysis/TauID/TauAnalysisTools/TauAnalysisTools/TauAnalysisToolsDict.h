@@ -19,6 +19,7 @@
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
 #include "TauAnalysisTools/DiTauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/DiTauTruthMatchingTool.h"
+#include "TauAnalysisTools/DiTauSelectionTool.h"
 #include "TauAnalysisTools/BuildTruthTaus.h"
 
 #endif // not TAUANALYSISTOOLS_TAUANALYSISTOOLSDICT_H

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TAUANALYSISTOOLS_SELECTIONCUTS_H
-#define TAUANALYSISTOOLS_SELECTIONCUTS_H
+#ifndef TAUANALYSISTOOLS_TAUSELECTIONCUTS_H
+#define TAUANALYSISTOOLS_TAUSELECTIONCUTS_H
 
 /*
   author: Dirk Duschinger
@@ -24,12 +24,12 @@ namespace TauAnalysisTools
 
 class TauSelectionTool;
 
-class SelectionCut
+class TauSelectionCut
 {
 
 public:
-  SelectionCut(const std::string& sName, TauAnalysisTools::TauSelectionTool* tTST);
-  virtual ~SelectionCut();
+  TauSelectionCut(const std::string& sName, TauAnalysisTools::TauSelectionTool* tTST);
+  virtual ~TauSelectionCut();
 
   void writeControlHistograms();
   void fillHistogramCutPre(const xAOD::TauJet& xTau);
@@ -62,11 +62,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const = 0;
 };
 
-class SelectionCutPt
-  : public SelectionCut
+class TauSelectionCutPt
+  : public TauSelectionCut
 {
 public:
-  SelectionCutPt(TauSelectionTool* tTST);
+  TauSelectionCutPt(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -74,11 +74,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
-class SelectionCutAbsEta
-  : public SelectionCut
+class TauSelectionCutAbsEta
+  : public TauSelectionCut
 {
 public:
-  SelectionCutAbsEta(TauSelectionTool* tTST);
+  TauSelectionCutAbsEta(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -86,11 +86,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
-class SelectionCutAbsCharge
-  : public SelectionCut
+class TauSelectionCutAbsCharge
+  : public TauSelectionCut
 {
 public:
-  SelectionCutAbsCharge(TauSelectionTool* tTST);
+  TauSelectionCutAbsCharge(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -98,11 +98,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
-class SelectionCutNTracks
-  : public SelectionCut
+class TauSelectionCutNTracks
+  : public TauSelectionCut
 {
 public:
-  SelectionCutNTracks(TauSelectionTool* tTST);
+  TauSelectionCutNTracks(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -110,11 +110,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
-class SelectionCutRNNJetScoreSigTrans
-  : public SelectionCut
+class TauSelectionCutRNNJetScoreSigTrans
+  : public TauSelectionCut
 {
 public:
-  SelectionCutRNNJetScoreSigTrans(TauSelectionTool* tTST);
+  TauSelectionCutRNNJetScoreSigTrans(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -123,11 +123,11 @@ private:
 };
 
 
-class SelectionCutJetIDWP
-  : public SelectionCut
+class TauSelectionCutJetIDWP
+  : public TauSelectionCut
 {
 public:
-  SelectionCutJetIDWP(TauSelectionTool* tTST);
+  TauSelectionCutJetIDWP(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -135,11 +135,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
-class SelectionCutRNNEleScore
-  : public SelectionCut
+class TauSelectionCutRNNEleScore
+  : public TauSelectionCut
 {
 public:
-  SelectionCutRNNEleScore(TauSelectionTool* tTST);
+  TauSelectionCutRNNEleScore(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -147,11 +147,11 @@ private:
   virtual void fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const override;
 };
 
-class SelectionCutEleIDWP
-  : public SelectionCut
+class TauSelectionCutEleIDWP
+  : public TauSelectionCut
 {
 public:
-  SelectionCutEleIDWP(TauSelectionTool* tTST);
+  TauSelectionCutEleIDWP(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -161,11 +161,11 @@ private:
 
 //added by Li-Gang Xia < ligang.xia@cern.ch >
 //to remove taus overlapping with muons satisfying pt > 2 GeV and not calo-tagged
-class SelectionCutMuonOLR
-  : public SelectionCut
+class TauSelectionCutMuonOLR
+  : public TauSelectionCut
 {
 public:
-  SelectionCutMuonOLR(TauSelectionTool* tTST);
+  TauSelectionCutMuonOLR(TauSelectionTool* tTST);
   virtual void setAcceptInfo (asg::AcceptInfo& info) const override;
   virtual bool accept(const xAOD::TauJet& xTau,
                       asg::AcceptData& accept) override;
@@ -177,4 +177,4 @@ private:
 
 }
 
-#endif // TAUANALYSISTOOLS_SELECTIONCUTS_H
+#endif // TAUANALYSISTOOLS_TAUSELECTIONCUTS_H
