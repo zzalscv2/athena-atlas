@@ -13,7 +13,8 @@ def makeOverlapAnalysisSequence( dataType,
                                  doPhotons = True, doFatJets = False,
                                  enableUserPriority = False,
                                  bJetLabel = '',
-                                 antiTauLabel = '', antiTauBJetLabel = '',
+                                 antiTauIDTauLabel = '', antiTauLabel = '',
+                                 antiTauBJetLabel = '',
                                  boostedLeptons = False,
                                  postfix = '',
                                  shallowViewOutput = True,
@@ -68,7 +69,8 @@ def makeOverlapAnalysisSequence( dataType,
                             priority 2 and pre-selected jets the priority 1.
       bJetLabel -- Flag to select b-jets with for lepton OR.
                    If left empty, no b-jets are used in the overlap removal.
-      antiTauLabel -- Flag to select antiTau with. Required for TauAntiTauJetOR.
+      antiTauIDTauLabel -- Flag to select ID tau with for Tau-AntiTau-Jet OR.
+      antiTauLabel -- Flag to select antiTau with. Required for Tau-AntiTau-Jet OR.
       antiTauBJetLabel -- Flag to select b-jets with for Tau-AntiTau-Jet OR.
       boostedLeptons -- Set to True to enable boosted lepton overlap removal
       shallowViewOutput -- Create a view container if required
@@ -177,6 +179,7 @@ def makeOverlapAnalysisSequence( dataType,
         if doTauAntiTauJetOR:
             addPrivateTool( alg, 'overlapTool.TauJetORT',
                             'ORUtils::TauAntiTauJetOverlapTool' )
+            alg.overlapTool.TauJetORT.TauLabel = antiTauIDTauLabel
             alg.overlapTool.TauJetORT.AntiTauLabel = antiTauLabel
             alg.overlapTool.TauJetORT.BJetLabel = antiTauBJetLabel
         else:

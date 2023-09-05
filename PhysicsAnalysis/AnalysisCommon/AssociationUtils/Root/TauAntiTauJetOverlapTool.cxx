@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -21,6 +21,7 @@ namespace ORUtils
   TauAntiTauJetOverlapTool::TauAntiTauJetOverlapTool(const std::string& name)
     : BaseOverlapTool(name),
       m_bJetLabel(""),
+      m_tauLabel(""),
       m_antiTauLabel(""),
       m_dR(0.2),
       m_useRapidity(true),
@@ -30,6 +31,8 @@ namespace ORUtils
   {
     declareProperty("BJetLabel", m_bJetLabel,
                     "Input b-jet flag. Disabled by default.");
+    declareProperty("TauLabel", m_tauLabel,
+                    "Decoration which labels ID-ed taus");
     declareProperty("AntiTauLabel", m_antiTauLabel,
                     "Decoration which labels anti-taus");
     declareProperty("DR", m_dR, "Maximum dR for overlap match");
@@ -50,6 +53,14 @@ namespace ORUtils
 
     // Initialize the dR matcher
     m_dRMatcher = std::make_unique<DeltaRMatcher>(m_dR, m_useRapidity);
+
+    // Initialize the IDed-tau decoration helper
+    if(!m_tauLabel.empty()) {
+      ATH_MSG_DEBUG("Configuring tau OR with label: " << m_tauLabel);
+      m_tauDecHelper =
+        std::make_unique<OverlapDecorationHelper>
+          (m_tauLabel, m_outputLabel, m_outputPassValue);
+    }
 
     // Initialize the anti-tau decoration helper
     if(!m_antiTauLabel.empty()) {
@@ -101,8 +112,8 @@ namespace ORUtils
     // Remove bjets overlapping with ID taus
     for(const auto tau : taus) {
       if(!m_decHelper->isSurvivingObject(*tau)) continue;
-      // Skip anti-taus
-      if(isSurvivingAntiTau(*tau)) continue;
+      // Only consider ID taus
+      if(!isSurvivingTau(*tau)) continue;
       for(const auto jet : jets) {
         if(!m_decHelper->isSurvivingObject(*jet)) continue;
         if(!isBJet(*jet)) continue;
@@ -124,7 +135,7 @@ namespace ORUtils
       }
     }
 
-    // Remove light jets from remaining ID taus and anti-taus.
+    // Remove light jets from remaining anti-taus.
     for(const auto tau : taus) {
       if(!m_decHelper->isSurvivingObject(*tau) &&
          !isSurvivingAntiTau(*tau) ) continue;
@@ -147,6 +158,15 @@ namespace ORUtils
   bool TauAntiTauJetOverlapTool::isBJet(const xAOD::Jet& jet) const
   {
     if(m_bJetHelper && m_bJetHelper->isBJet(jet)) return true;
+    return false;
+  }
+
+  //---------------------------------------------------------------------------
+  // Identify a user-labeled IDed-tau
+  //---------------------------------------------------------------------------
+  bool TauAntiTauJetOverlapTool::isSurvivingTau(const xAOD::TauJet& tau) const
+  {
+    if(m_tauDecHelper && m_tauDecHelper->isSurvivingObject(tau)) return true;
     return false;
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_TAU_ANTITAU_JET_OVERLAPTOOL_H
@@ -37,6 +37,9 @@ namespace ORUtils
   ///
   /// To fully utilize the above procedure you have to set the following
   /// properties:
+  ///
+  /// * TauLabel: The user-set decoration name labeling IDed taus.
+  ///   E.g., "isIDTau". Default is empty, which does not apply any selection.
   ///
   /// * AntiTauLabel: The user-set decoration name labeling anti-taus.
   ///   E.g., "isAntiTau". Default is empty, which disables anti-taus.
@@ -82,6 +85,10 @@ namespace ORUtils
       /// Does not check if the jet is "surviving" OR.
       bool isBJet(const xAOD::Jet& jet) const;
 
+      /// Is this an ID tau? Returns false if tau ID not configured.
+      /// This one does check if the tau is "surviving" OR.
+      bool isSurvivingTau(const xAOD::TauJet& tau) const;
+
       /// Is this an anti-tau? Returns false if anti-tau ID not configured.
       /// This one does check if the tau is "surviving" OR.
       bool isSurvivingAntiTau(const xAOD::TauJet& tau) const;
@@ -92,6 +99,9 @@ namespace ORUtils
 
       /// Input jet decoration which labels a bjet
       std::string m_bJetLabel;
+
+      /// Decoration labelling an IDed tau
+      std::string m_tauLabel;
 
       /// Decoration labelling an anti-tau
       std::string m_antiTauLabel;
@@ -113,8 +123,8 @@ namespace ORUtils
       /// Delta-R matcher
       std::unique_ptr<IParticleAssociator> m_dRMatcher;
 
-      /// Accessor for reading the anti-tau decoration
-      //std::unique_ptr<ort::inputAccessor_t> m_antiTauAcc;
+      /// Decoration helper for the IDed taus
+      std::unique_ptr<OverlapDecorationHelper> m_tauDecHelper;
 
       /// Decoration helper for the anti-taus
       std::unique_ptr<OverlapDecorationHelper> m_antiTauDecHelper;
