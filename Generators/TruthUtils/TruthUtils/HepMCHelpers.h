@@ -53,19 +53,18 @@ namespace MC
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
     if (isZeroEnergyPhoton<T>(p)) return false;
-    const int status = p->status();
     const auto vertex = p->end_vertex();
-    return ((status == 1) || //< Fully stable, even if marked that way by G4
-            (status == 2 && vertex && HepMC::is_simulation_vertex(vertex))); //< Gen-stable with G4 decay
+    return ( isStable<T>(p) || //< Fully stable, even if marked that way by G4
+            ( isDecayed<T>(p) && vertex && HepMC::is_simulation_vertex(vertex))); //< Gen-stable with G4 decay
   }
 
   template <class T> inline bool jettruthparticleselectortool_isInteracting(const T& p) {
       if (! jettruthparticleselectortool_isStable(p)) return false;
       const int apid = std::abs(p->pdg_id() );
-      const int status = p->status();
-      if (apid == 12 || apid == 14 || apid == 16) return false; //< neutrinos
-      if (status == 1 && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
-      if (status == 1 && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+      if ( isStable<T>(p) && (apid == 12 || apid == 14 || apid == 16)) return false; //< neutrinos
+      if ( isStable<T>(p) && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
+      if ( isStable<T>(p) && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+      if ( isStable<T>(p) && (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006)) return false; //< exotic particles from monotop model
       return true;      
     }
 
@@ -81,11 +80,11 @@ namespace MC
   template <class T> inline bool egammaTruthAlg_isGenStable_and_isGenInteracting (const T& p) {
     if (HepMC::is_simulation_particle(p)) return false;
     if (isZeroEnergyPhoton<T>(p)) return false;
-    const int status = p->status();
     const int apid = std::abs(p->pdg_id());
-    if (apid == 12 || apid == 14 || apid == 16) return false; //< neutrinos
-    if (status == 1 && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
-    if (status == 1 && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+    if ( isStable<T>(p) && (apid == 12 || apid == 14 || apid == 16)) return false; //< neutrinos
+    if ( isStable<T>(p) && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
+    if ( isStable<T>(p) && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
+    if ( isStable<T>(p) && (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006)) return false; //< exotic particles from monotop model
     return isStableOrSimDecayed<T>(p);
   }
 
