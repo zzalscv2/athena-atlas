@@ -435,7 +435,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
     const Acts::GeometryContext & gctx) const {
   ATH_MSG_VERBOSE("Calling trkTrackCollectionToActsTrackContainer with "
                   << trackColl.size() << " tracks.");
-
+  unsigned int trkCount = 0;
   for (auto trk : trackColl) {
     // Do conversions!
     const Trk::TrackStates *trackStates =
@@ -448,7 +448,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
     auto track = tc.getTrack(tc.addTrack());
     auto trackStateContainer = tc.trackStateContainer();
 
-    ATH_MSG_VERBOSE("Track has " << trackStates->size()
+    ATH_MSG_VERBOSE("Track "<<trkCount++<<" has " << trackStates->size()
                                  << " track states on surfaces.");
 
     // loop over track states on surfaces, convert and add them to the ACTS
@@ -477,14 +477,12 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
                                    << actsTSOS.index());
       track.tipIndex() = actsTSOS.index();
 
-      ATH_MSG_VERBOSE("TrackProxy has " << track.nTrackStates()
-                                 << " track states on surfaces.");
       if (tsos->trackParameters()) {
         ATH_MSG_VERBOSE("Converting track parameters.");
         // TODO - work out whether we should set predicted, filtered, smoothed
         const Acts::BoundTrackParameters parameters =
             trkTrackParametersToActsParameters(*(tsos->trackParameters()), gctx);
-
+        ATH_MSG_VERBOSE("Track parameters: "<<parameters.parameters());
         // Sanity check on positions
         actsTrackParameterPositionCheck(parameters, *(tsos->trackParameters()), gctx);
 
@@ -503,6 +501,12 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
           actsTSOS.smoothedCovariance() = *parameters.covariance();
           // Not yet implemented in MultiTrajectory.icc
           // actsTSOS.typeFlags() |= Acts::TrackStateFlag::ParameterFlag;
+          if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
+            ATH_MSG_WARNING("TrackState does not have smoothed state ["<<actsTSOS.hasSmoothed()<<"] or reference surface ["<<actsTSOS.hasReferenceSurface()<<"].");
+          } else {
+            ATH_MSG_VERBOSE("TrackState has smoothed state and reference surface.");  
+          }
+
         }
       }
       if (tsos->measurementOnTrack()) {
@@ -539,14 +543,21 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
     const Acts::BoundTrackParameters &parameters,
     const Trk::TrackParameters &trkparameters,
     const Acts::GeometryContext &gctx) const {
-  if (std::fabs(parameters.position(gctx).x() - trkparameters.position().x()) >
+  auto actsPos = parameters.position(gctx);
+  ATH_MSG_VERBOSE("Acts position: "
+                    << actsPos << " vs "
+                    << trkparameters.position());
+  ATH_MSG_VERBOSE(parameters.referenceSurface().toString(gctx));
+  ATH_MSG_VERBOSE("GeometryId "<<parameters.referenceSurface().geometryId().value());  
+
+  if (std::fabs(actsPos.x() - trkparameters.position().x()) >
           0.01 ||
-      std::fabs(parameters.position(gctx).y() - trkparameters.position().y()) >
+      std::fabs(actsPos.y() - trkparameters.position().y()) >
           0.01 ||
-      std::fabs(parameters.position(gctx).z() - trkparameters.position().z()) >
+      std::fabs(actsPos.z() - trkparameters.position().z()) >
           0.01) {
     ATH_MSG_WARNING("Parameter position mismatch: "
-                    << parameters.position(gctx) << " vs "
+                    << actsPos << " vs "
                     << trkparameters.position());
     ATH_MSG_WARNING("Acts surface:");
     ATH_MSG_WARNING(parameters.referenceSurface().toString(gctx));

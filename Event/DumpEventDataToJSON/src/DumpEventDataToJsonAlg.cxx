@@ -7,8 +7,10 @@
 #include <cmath>
 #include <fstream>
 #include <string>
+#include <algorithm>    // std::reverse
 
 #include "Acts/EventData/TrackContainer.hpp"
+#include "Acts/EventData/TrackParameters.hpp"
 #include "ActsEvent/MultiTrajectory.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Algorithm.h"
@@ -68,6 +70,9 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
   } else {
     m_extrapolator.disable();
   }
+  
+  ATH_CHECK(m_trackingGeometryTool.retrieve());
+
   return StatusCode::SUCCESS;
 }
 
@@ -75,23 +80,56 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 template <>
 nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<Acts::ConstVectorTrackContainer, ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder, true> &track) {
   nlohmann::json data;
-  
+
+  Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(getContext()).context();
+
   // ACTS units are GeV, whilst ATLAS is MeV. So we need to convert.
   data["dparams"] = {track.loc0(), track.loc1(), track.phi(), track.theta(), track.qOverP() * 0.001};
-
-  unsigned int count=0;
-  for ( auto tsos : track.trackStates() ) {
-    // Currently only converting smoothed states, but we will extend this later.
-    if (tsos.hasSmoothed()) {
-      data["pos"].push_back(tsos.smoothed().x());
-      data["pos"].push_back(tsos.smoothed().y());
-      data["pos"].push_back(tsos.smoothed().z());
-    }
-    count++;
-
-    // TODO: Add measurements etc
+  ATH_MSG_VERBOSE(" Track has dparams"<<data["dparams"][0]<<", "<<data["dparams"][1]<<", "<<data["dparams"][2]<<", "<<data["dparams"][3]<<", "<<data["dparams"][4]);
+  ATH_MSG_VERBOSE(track.referenceSurface().toString(gctx));
+  
+  // Add dparams positions to the output
+  const Acts::BoundTrackParameters trackparams(track.referenceSurface().getSharedPtr(),
+                                                         track.parameters());
+  auto trackPosition = trackparams.position(gctx);;
+  data["pos"].push_back(trackPosition.x());
+  data["pos"].push_back(trackPosition.y());
+  data["pos"].push_back(trackPosition.z());
+  
+  unsigned int nTrackStates = track.nTrackStates();
+  ATH_MSG_VERBOSE("Track has " << nTrackStates << " states.");
+  // Unfortunately actsTracks are stored in reverse order, so we need to do some gymnastics
+  // (There is certainly a more elegant way to do this, but since this will all be changed soon I don't think it matters)
+  std::vector<ActsTrk::ConstMultiTrajectory::ConstTrackStateProxy> trackStates;
+  trackStates.reserve(nTrackStates);
+  for (auto trackstate : track.trackStates()) {
+    trackStates.push_back(trackstate);
   }
-  ATH_MSG_VERBOSE("Track has " << count << " states.");
+
+  std::reverse(trackStates.begin(), trackStates.end());
+
+  unsigned int count = 0;
+  for (auto trackstate : trackStates) {
+    // Currently only converting smoothed states, but we will extend this later.
+    if (trackstate.hasSmoothed() && trackstate.hasReferenceSurface()) {
+      const Acts::BoundTrackParameters params(trackstate.referenceSurface().getSharedPtr(),
+                                                         trackstate.smoothed(),
+                                                         trackstate.smoothedCovariance());
+      ATH_MSG_VERBOSE("Track parameters: "<<params.parameters());
+
+      auto pos = params.position(gctx);
+      data["pos"].push_back(pos.x());
+      data["pos"].push_back(pos.y());
+      data["pos"].push_back(pos.z());
+      ATH_MSG_VERBOSE("TrackState "<<count<<" has smoothed state and reference surface. Position is "<<pos.x()<<", "<<pos.y()<<", "<<pos.z());  
+      ATH_MSG_VERBOSE(params.referenceSurface().toString(gctx));  
+      ATH_MSG_VERBOSE("GeometryId "<<params.referenceSurface().geometryId().value());  
+    } else {
+      ATH_MSG_WARNING("TrackState "<<count<<" does not have smoothed state ["<<trackstate.hasSmoothed()<<"] or reference surface ["<<trackstate.hasReferenceSurface()<<"]. Skipping.");
+    }
+    // TODO: Add measurements etc
+    count++;
+  }
 
   return data;
 }
@@ -145,7 +183,7 @@ StatusCode DumpEventDataToJsonAlg::execute() {
     ATH_MSG_VERBOSE("Trying to load " << vtcHandle.key() << " with " << vtcHandle->size_impl() << " tracks");
 
     auto multiTraj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&(*tsHandle), &(*pHandle), &(*jHandle), &(*mHandle));
-
+    multiTraj->fillSurfaces(m_trackingGeometryTool->trackingGeometry().get());
     Acts::TrackContainer<Acts::ConstVectorTrackContainer,
                          ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder>
         tc{*vtcHandle, *multiTraj};
@@ -362,8 +400,6 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Trk::Track &track) {
                        peri->parameters()[Trk::theta],
                        peri->parameters()[Trk::qOverP]};
 
-    data["pos"] = {peri->position().x(), peri->position().y(),
-                   peri->position().z()};
   } else {
     data["pos"] = {};
   }

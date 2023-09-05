@@ -5,8 +5,11 @@
 #ifndef DUMPEVENTDATATOJSONALG_H
 #define DUMPEVENTDATATOJSONALG_H
 
+// Core
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+//EDM
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
@@ -14,8 +17,10 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "TrkTrack/TrackCollection.h"
-#include "StoreGate/ReadHandleKey.h"
+//Tools
 #include "TrkExInterfaces/IExtrapolationEngine.h"
+#include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
+// PRDs
 #include "MuonPrepRawData/CscPrepDataContainer.h"
 #include "MuonPrepRawData/MdtPrepDataContainer.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
@@ -25,8 +30,10 @@
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
+// ACTS
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/VectorTrackContainer.hpp"
+// Misc
 #include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
@@ -99,6 +106,7 @@ protected:
   Gaudi::Property<bool> m_extrapolateTrackParticless{this, "ExtrapolateTrackParticles", false, "If true, attempt to extrapolate tracks and add additional positions."};
 
   ToolHandle<Trk::IExtrapolationEngine> m_extrapolator{this, "Extrapolator", "Trk::ExtrapolationEngine/AtlasExtrapolation"};
+  ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
   Gaudi::Property<std::string> m_outputJSON_Name{this, "OutputLocation", "EventData.json", "Default filename for "};
 
