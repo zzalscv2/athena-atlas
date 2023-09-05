@@ -1,8 +1,8 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SensorSim3DTool.h"
+#include "PixelDigitization/SensorSim3DTool.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetSimEvent/SiHit.h"
@@ -10,14 +10,12 @@
 #include "InDetIdentifier/PixelID.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "SiPropertiesTool/SiliconProperties.h"
+#include "SiDigitization/SiChargedDiodeCollection.h"
 
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/GenParticle.h"
+
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 
-#include "TLorentzVector.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "PathResolver/PathResolver.h"
 

@@ -12,10 +12,10 @@
 #include "GaudiKernel/ToolHandle.h"
 //
 //for ToolHandles, ServiceHandles:
-#include "InDetConditionsSummaryService/IInDetConditionsTool.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
-#include "PixelConditionsData/PixelModuleData.h"
-#include "PixelConditionsData/PixelChargeCalibCondData.h"
+#include "InDetConditionsSummaryService/IInDetConditionsTool.h" //ToolHandle template param
+#include "PixelReadoutGeometry/IPixelReadoutManager.h"  //SvcHandle template param
+#include "PixelConditionsData/PixelModuleData.h"  //ReadCondHandleKey template param
+#include "PixelConditionsData/PixelChargeCalibCondData.h"  //ReadCondHandleKey template param
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
 
 
@@ -43,18 +43,18 @@ public:
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                        CLHEP::HepRandomEngine* rndmEngine) = 0;
 
-  void CrossTalk(double crossTalk, SiChargedDiodeCollection& chargedDiodes) const;
+  void crossTalk(double crossTalk, SiChargedDiodeCollection& chargedDiodes) const;
   
-  void ThermalNoise(double thermalNoise, SiChargedDiodeCollection& chargedDiodes,
+  void thermalNoise(double thermalNoise, SiChargedDiodeCollection& chargedDiodes,
                     CLHEP::HepRandomEngine* rndmEngine) const;
                     
-  void RandomNoise(SiChargedDiodeCollection& chargedDiodes,
+  void randomNoise(SiChargedDiodeCollection& chargedDiodes,
                    const PixelModuleData *moduleData,
                    const PixelChargeCalibCondData *chargeCalibData,
                    CLHEP::HepRandomEngine* rndmEngine) const;
   
 
-  void RandomDisable(SiChargedDiodeCollection& chargedDiodes,
+  void randomDisable(SiChargedDiodeCollection& chargedDiodes,
                      const PixelModuleData *moduleData,
                      CLHEP::HepRandomEngine* rndmEngine) const;
  

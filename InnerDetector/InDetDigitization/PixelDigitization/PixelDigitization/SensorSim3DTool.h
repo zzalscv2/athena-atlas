@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,12 +13,25 @@
 #define PIXELDIGITIZATION_SensorSim3DTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "SensorSimTool.h"
+#include "PixelDigitization/SensorSimTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "RadDamageUtil.h"
 #include "PixelConditionsData/PixelHistoConverter.h"
+#include "PixelReadoutDefinitions/PixelReadoutDefinitions.h" //PixelReadoutTechnology enum class
+#include <vector>
+#include <map> //std::multimap, and std::pair
 
+namespace InDetDD{
+  class SiDetectorElement;
+  class PixelModuleDesign;
+}
+
+namespace CLHEP{
+  class HepRandomEngine;
+}
+
+class EventContext;
 
 class SensorSim3DTool: public SensorSimTool {
 public:

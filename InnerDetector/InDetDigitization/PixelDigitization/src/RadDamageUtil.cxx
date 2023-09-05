@@ -1,13 +1,15 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "RadDamageUtil.h"
+#include "PixelDigitization/RadDamageUtil.h"
 
 #include "TGraph.h"
 #include "TString.h"
 #include "TMath.h"
-
+#include "TH3F.h"
+#include "TH2F.h"
+#include "TH1F.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetSimEvent/SiHit.h"
@@ -19,15 +21,15 @@
 #include "AtlasHepMC/GenParticle.h"
 
 #include "PathResolver/PathResolver.h"
-#include <fstream>
-#include <cmath>
 
 #include "CLHEP/Random/RandExpZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "TLorentzVector.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
-#include "EfieldInterpolator.h"
+#include "PixelDigitization/EfieldInterpolator.h"
+#include <fstream>
+#include <cmath>
 
 using namespace std;
 
@@ -143,7 +145,7 @@ const StatusCode RadDamageUtil::generateRamoMap(TH3F* ramoPotentialMap, InDetDD:
 //Constituent of full poisson solution.
 //Last terms in eqn. 18, 19 in support note
 double RadDamageUtil::alpha(int n, int Nrep, double a) {
-  return((2 * TMath::Pi() * n) / (Nrep * a));
+  return((2 * M_PI * n) / (Nrep * a));
 }
 
 //=======================================

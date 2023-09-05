@@ -8,7 +8,7 @@
  
 #include "PixelDigitizationUtilities.h"
  
-#include "BichselData.h"
+#include "PixelDigitization/BichselData.h"
  
 #include <fstream>
  

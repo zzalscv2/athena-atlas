@@ -2,7 +2,7 @@
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
  #include "PixelDigitizationUtilities.h"
- #include "BichselData.h"
+ #include "PixelDigitization/BichselData.h"
  #include <cmath> //for pow
  #include <algorithm> //for std::clamp
  

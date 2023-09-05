@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/FEI4SimTool.h
@@ -11,8 +11,13 @@
 #ifndef PIXELDIGITIZATION_FEI4SimTool_H
 #define PIXELDIGITIZATION_FEI4SimTool_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "FrontEndSimTool.h"
+#include "PixelDigitization/FrontEndSimTool.h"
+#include "InDetRawData/PixelRDO_Collection.h" //typedef
+
+class SiChargedDiodeCollection;
+namespace CLHEP{
+  class HepRandomEngine;
+}
 
 class FEI4SimTool: public FrontEndSimTool {
 public:

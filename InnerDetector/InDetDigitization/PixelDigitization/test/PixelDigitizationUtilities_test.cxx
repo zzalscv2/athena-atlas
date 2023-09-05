@@ -17,7 +17,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "PathResolver/PathResolver.h"
 
 
-#include "src/BichselData.h"
+#include "PixelDigitization/BichselData.h"
 #include "src/PixelDigitizationUtilities.h"
 #include <tuple>
 #include <ostream>

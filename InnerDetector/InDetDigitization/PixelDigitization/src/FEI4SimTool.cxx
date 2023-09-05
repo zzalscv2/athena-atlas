@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "FEI4SimTool.h"
+#include "PixelDigitization/FEI4SimTool.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetRawData/Pixel1RawData.h"
@@ -72,18 +72,18 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   std::vector<std::vector<int> > FEI4Map(maxRow + 16, std::vector<int>(maxCol + 16));
 
   // Add cross-talk
-  CrossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
+  crossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
 
   if (m_doNoise) {
     // Add thermal noise
-    ThermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
+    thermalNoise(moduleData->getThermalNoise(barrel_ec, layerIndex), chargedDiodes, rndmEngine);
 
     // Add random noise
-    RandomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
+    randomNoise(chargedDiodes, moduleData, calibData, rndmEngine);
   }
 
   // Add random diabled pixels
-  RandomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
+  randomDisable(chargedDiodes, moduleData, rndmEngine); // FIXME How should we handle disabling pixels in Overlay jobs?
 
   for (SiChargedDiodeOrderedIterator i_chargedDiode = chargedDiodes.orderedBegin();
        i_chargedDiode != chargedDiodes.orderedEnd(); ++i_chargedDiode) {

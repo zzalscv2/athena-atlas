@@ -1,10 +1,9 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "EnergyDepositionTool.h"
+#include "PixelDigitization/EnergyDepositionTool.h"
 
-#include "TString.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -13,13 +12,9 @@
 #include "SiDigitization/SiChargedDiodeCollection.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
-#include "SiPropertiesTool/SiliconProperties.h"
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 
 #include "PathResolver/PathResolver.h"
-
 
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandExpZiggurat.h"
@@ -75,7 +70,7 @@ namespace{
   // S E T  F A I L U R E
   //==========================================
   void 
-  SetFailureFlag(std::vector<std::pair<double, double> >& rawHitRecord) {
+  setFailureFlag(std::vector<std::pair<double, double> >& rawHitRecord) {
     rawHitRecord.clear();
     std::pair<double, double> specialFlag;
     specialFlag.first = -1.;
@@ -238,7 +233,7 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
 
     int iParticleType = ParticleType;
     // begin simulation
-    std::vector<std::pair<double, double> > rawHitRecord = BichselSim(iBetaGamma, iParticleType, iTotalLength,
+    std::vector<std::pair<double, double> > rawHitRecord = bichselSim(iBetaGamma, iParticleType, iTotalLength,
                                                                       genPart ? (genPart->momentum().e() /
                                                                                  CLHEP::MeV) : (phit->energyLoss() /
                                                                                                 CLHEP::MeV),
@@ -250,7 +245,7 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
       specialHit.first = 0.;
       specialHit.second = 0.;
       trfHitRecord.push_back(specialHit);
-    } else if ((rawHitRecord.size() == 1) && (rawHitRecord[0].first == -1.) && (rawHitRecord[0].second == -1.)) { // special flag returned from BichselSim meaning it FAILs
+    } else if ((rawHitRecord.size() == 1) && (rawHitRecord[0].first == -1.) && (rawHitRecord[0].second == -1.)) { // special flag returned from bichselSim meaning it FAILs
       for (int j = 0; j < nsteps; j++) { // do the same thing as old digitization method
         std::pair<double, double> specialHit;
         specialHit.first = 1.0 * iTotalLength / nsteps * (j + 0.5);
@@ -258,7 +253,7 @@ StatusCode EnergyDepositionTool::depositEnergy(const TimedHitPtr<SiHit>& phit, c
         trfHitRecord.push_back(specialHit);
       }
     } else { // cluster thousands hits to ~20 groups
-      trfHitRecord = ClusterHits(rawHitRecord, nsteps);
+      trfHitRecord = clusterHits(rawHitRecord, nsteps);
     }
   } else { // same as old digitization method
     //////////////////////////////////////////////////////
@@ -315,9 +310,9 @@ void EnergyDepositionTool::simulateBow(const InDetDD::SiDetectorElement* element
 // instead
 //-----------------------------------------------------------
 std::vector<std::pair<double, double> > 
-EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double TotalLength, 
+EnergyDepositionTool::bichselSim(double BetaGamma, int ParticleType,double TotalLength, 
      double InciEnergy,CLHEP::HepRandomEngine* rndmEngine) const {
-  ATH_MSG_DEBUG("Begin EnergyDepositionTool::BichselSim");
+  ATH_MSG_DEBUG("Begin EnergyDepositionTool::bichselSim");
 
   // prepare hit record (output)
   std::vector<std::pair<double, double> > rawHitRecord;
@@ -325,7 +320,7 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
   double accumLength = 0.;
   
   if (BetaGamma <= std::numeric_limits<double>::min()){
-    SetFailureFlag(rawHitRecord);
+    setFailureFlag(rawHitRecord);
     return rawHitRecord;
   }
 
@@ -337,13 +332,13 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
   // upper bound
   double IntXUpperBound = iData.interpolateCrossSection(indices_BetaGammaLog10, BetaGammaLog10);
   if (IntXUpperBound <= 0.) {
-    ATH_MSG_WARNING("Negative IntXUpperBound in EnergyDepositionTool::BichselSim! (-1,-1) will be returned for log(betaGamma) = "<<BetaGammaLog10);
-    SetFailureFlag(rawHitRecord);
+    ATH_MSG_WARNING("Negative IntXUpperBound in EnergyDepositionTool::bichselSim! (-1,-1) will be returned for log(betaGamma) = "<<BetaGammaLog10);
+    setFailureFlag(rawHitRecord);
     return rawHitRecord;
   }
   
   if(IntXUpperBound<std::numeric_limits<double>::min()){
-    SetFailureFlag(rawHitRecord);
+    setFailureFlag(rawHitRecord);
     return rawHitRecord;
   }
   
@@ -354,7 +349,7 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
   // direct those hits with potential too many steps into nominal simulation
   int LoopLimit = m_LoopLimit;                         // limit assuming 1 collision per sampling
   if (std::abs(1.0 * TotalLength / lambda) > LoopLimit) {       // m_nCols is cancelled out in the formula
-    SetFailureFlag(rawHitRecord);
+    setFailureFlag(rawHitRecord);
     return rawHitRecord;
   }
 
@@ -364,10 +359,10 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
     // infinite loop protection
     if (count >= (1.0 * LoopLimit / m_nCols)) {
       ATH_MSG_WARNING(
-          "Potential infinite loop in BichselSim. Exit Loop. A special flag "
+          "Potential infinite loop in bichselSim. Exit Loop. A special flag "
           "will be returned (-1,-1). The total length is "
           << TotalLength << ". The lambda is " << lambda << ".");
-      SetFailureFlag(rawHitRecord);
+      setFailureFlag(rawHitRecord);
       break;
     }
 
@@ -400,7 +395,7 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
 
     if (((TotalEnergyLoss + TossEnergyLoss) / 1.E+6) > InciEnergy) {
       ATH_MSG_WARNING(
-        "Energy loss is larger than incident energy in EnergyDepositionTool::BichselSim! This is usually delta-ray.");
+        "Energy loss is larger than incident energy in EnergyDepositionTool::bichselSim! This is usually delta-ray.");
       TossEnergyLoss = InciEnergy * 1.E+6 - TotalEnergyLoss;
       fLastStep = true;
     }
@@ -421,7 +416,7 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
     if (fLastStep) break;
   }
 
-  ATH_MSG_DEBUG("Finish EnergyDepositionTool::BichselSim");
+  ATH_MSG_DEBUG("Finish EnergyDepositionTool::bichselSim");
 
   return rawHitRecord;
 }
@@ -429,10 +424,10 @@ EnergyDepositionTool::BichselSim(double BetaGamma, int ParticleType,double Total
 //=======================================
 // C L U S T E R   H I T S
 //=======================================
-std::vector<std::pair<double, double> > EnergyDepositionTool::ClusterHits(std::vector<std::pair<double,
+std::vector<std::pair<double, double> > EnergyDepositionTool::clusterHits(std::vector<std::pair<double,
                                                                                                 double> >& rawHitRecord,
                                                                           int n_pieces) const {
-  ATH_MSG_DEBUG("Begin EnergyDepositionTool::ClusterHits");
+  ATH_MSG_DEBUG("Begin EnergyDepositionTool::clusterHits");
   std::vector<std::pair<double, double> > trfHitRecord;
 
   if ((int) (rawHitRecord.size()) < n_pieces) { // each single collision is the most fundamental unit
@@ -472,7 +467,7 @@ std::vector<std::pair<double, double> > EnergyDepositionTool::ClusterHits(std::v
     }
   }
 
-  ATH_MSG_DEBUG("Finish EnergyDepositionTool::ClusterHits");
+  ATH_MSG_DEBUG("Finish EnergyDepositionTool::clusterHits");
 
   return trfHitRecord;
 }

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file PixelDigitization/EfieldInterpolator.h
@@ -17,7 +17,11 @@
 #define PIXELDIGITIZATION_EFIELDINTERPOLATOR_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "TH1.h"
+#include <vector>
+
+class TH1;
+class TH1D;
+class TString;
 
 // Different options to retrieve E field
 // default: interspline
