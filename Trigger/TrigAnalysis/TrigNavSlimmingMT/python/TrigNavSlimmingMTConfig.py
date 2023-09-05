@@ -49,7 +49,7 @@ def getTrigNavSlimmingMTOnlineConfig(flags):
 # which do not derive from IParticle, e.g. MET. The RoIs are similarly repacked.
 #
 # NOTE: Unlike all other levels, the content of the DAOD is not controlled by TrigEDMRun3.py
-# NOTE: We therefore also need to run AddRun3TrigNavSlimmingCollectionsToEDM to register the outputs to a SlimmingHelper
+# NOTE: We therefore also need to run AddRun3TrigNavSlimmingCollectionsToSlimmingHelper to register the outputs to a SlimmingHelper
 #
 def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
 
@@ -81,7 +81,7 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
 
   daodSlim.RepackFeaturesOutputCollection_Particle = "HLTNav_RepackedFeatures_Particle"
   daodSlim.RepackFeaturesOutputCollection_MET = "HLTNav_RepackedFeatures_MET"
-  daodSlim.EdgesToDrop = ["view"] # View element links, only useful online.
+  daodSlim.EdgesToDrop = ["view"] # "view" element links, only useful online.
   daodSlim.NodesToDrop = ["F", "CH"] # Filter nodes, only useful online. CH=ComboHypo nodes, not useful given we run here with KeepFailedBranched=False 
   daodSlim.ChainsFilter = chainsFilter
   ca.addEventAlgo(daodSlim)
@@ -93,8 +93,7 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
 
   return ca
 
-# Same as the above but adds the branches to the slimming helper. 
-# This is the component accumulator version
+# Adds the branches to the slimming helper component accumulator 
 def AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimmingHelper):
   slimmingHelper.AppendToDictionary.update({'HLTNav_Summary_DAODSlimmed':'xAOD::TrigCompositeContainer','HLTNav_Summary_DAODSlimmedAux':'xAOD::TrigCompositeAuxContainer',
                                             'HLTNav_RepackedFeatures_Particle':'xAOD::ParticleContainer','HLTNav_RepackedFeatures_ParticleAux':'xAOD::ParticleAuxContainer',

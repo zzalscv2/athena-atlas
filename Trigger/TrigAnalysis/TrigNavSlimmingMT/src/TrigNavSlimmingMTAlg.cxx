@@ -381,9 +381,26 @@ StatusCode TrigNavSlimmingMTAlg::propagateLinks(
   const TrigCompositeUtils::Decision* input, 
   TrigCompositeUtils::Decision* output) const
 {
-  // ElementLinks form the edges in the graph
+  // ElementLinks form the edges in the graph. Start by copying all of them over.
 
   output->copyAllLinksFrom( input );
+
+  // Special behaviour to save additional disk space for keepOnlyFinalFeatures mode.
+  // In keepOnlyFinalFeatures we stop at the first hypoAlgNode, hence we will drop the preceding inputMakerNode, and all prior Steps in their entirety.
+  // This means we will also drop all "roi" edges, including the final ROI.
+  // We may want to keep this final "roi", and so to do this we can copy it down one level (away from L1) to live in the hypoAlgNode along side the "feature" link.
+  // Note: If "roi" is listed in m_edgesToDrop then we will still immediately drop this new element link in the m_edgesToDrop loop below. 
+  const std::vector<ElementLink<DecisionContainer>> seeds = input->objectCollectionLinks<DecisionContainer>(seedString());
+  const Decision* const firstParent = (seeds.size() ? *seeds.at(0) : nullptr);
+  if (m_keepOnlyFinalFeatures &&
+      input->name() == hypoAlgNodeName() &&
+      firstParent &&
+      firstParent->name() == inputMakerNodeName() &&
+      firstParent->hasObjectLink(roiString()))
+  {
+    output->copyLinkFrom( firstParent, roiString() );
+  }
+
   for (const std::string& toRemove : m_edgesToDrop) {
     output->removeObjectLink(toRemove);
     output->removeObjectCollectionLinks(toRemove);

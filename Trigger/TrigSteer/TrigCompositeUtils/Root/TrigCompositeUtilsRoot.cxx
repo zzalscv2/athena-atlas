@@ -449,48 +449,47 @@ namespace TrigCompositeUtils {
     const std::vector<std::string>& nodesToDrop)
   {
 
-    // If modeKeep == true, then by default we are KEEPING the nodes as we walk the navigation,
+    // If modeKeep == true, then by default we are KEEPING the nodes as we walk up the navigation (towards L1),
     // otherwise by default we are THINNING the nodes
     bool keep = modeKeep;
 
     // The calls to node->node() here are going from the transient NavGraphNode 
-    // to the underlying const Decision* from the input collection
+    // to the underlying const Decision* from the input collection. Cache these in local stack vars for better readability.
+
+    const Decision* const me = node->node();
+    const Decision* const myFirstParent = (node->seeds().size() ? node->seeds().at(0)->node() : nullptr); 
+    const Decision* const myFirstChild = (node->children().size() ? node->children().at(0)->node() : nullptr); 
+
+    // KEEP Section: The following code blocks may override the modeKeep default by setting keep=True for this node.
 
     if (keepOnlyFinalFeatures) {
       // Check if we have reached the first feature
-      if ( modeKeep == true && node->node()->hasObjectLink(featureString()) ) {
-        // We keep this node, and its immediate parents (InputMaker nodes) as these have the ROI link which we also want
-
-        // Special BLS case: The bphys is attached exceptionally at the ComboHypo. Want to save two levels up in this case.
-        // (The two Hypo nodes at the level above, and the InputMakers at the level above that)
-        const bool specialBphysCase = (node->node()->name() == comboHypoAlgNodeName());
-        // We also want to override the ComboHypo potentially being listed in nodesToDrop node in the special case, so will make the keep explicit
-        if (specialBphysCase) node->keep();
-
+      if ( modeKeep == true && me->hasObjectLink(featureString()) ) {
+        // Just to be explicit, we keep this node
         keep = true;
 
-        // TODO - these explicit keep calls here mean we bypass the nodesToDrop check for these, any other way?
-        // > One solution here is to implement a link-move option, move the ROI
-        // > from the InputMaker node down to the HypoAlg node?
-        for (NavGraphNode* seed : node->seeds()) {
-          seed->keep();
-          if (specialBphysCase) for (NavGraphNode* secondLevelSeed : seed->seeds()) secondLevelSeed->keep();
-        }
+        // Special BLS case: The bphysics object is attached exceptionally at the ComboHypo.
+        // We want to keep going up one more level in this case to get the Feature node too (we save the 4-vec of the BPhys and both of the muons/electrons)
+        const bool specialBphysCase = (me->name() == comboHypoAlgNodeName());
 
-        // We change the default behaviour to be modeKeep = false
+        // We change the default behaviour to be modeKeep = false (unless we want to explore up one more level for BLS's special case)
         // such that by default we start to NOT flag all the parent nodes to be kept
-        modeKeep = false;
+        if (!specialBphysCase) {
+          modeKeep = false;
+        }
       }
     }
 
-    // We always by default keep the initial node from the HLTSeeding, may be override by nodesToDrop
-    if (node->node()->name() == hltSeedingNodeName()) {
+    // We always by default keep the initial node from the HLTSeeding, but this may be overridden below by nodesToDrop
+    if (me->name() == hltSeedingNodeName()) {
       keep = true;
     }
 
+    // DROP Section: The following code blocks may override both the current modeKeep default and the above KEEP section by setting keep=False for this node.
+
     // Check also against NodesToDrop
     for (const std::string& toDrop : nodesToDrop) {
-      if (node->node()->name() == toDrop) {
+      if (me->name() == toDrop) {
         keep = false;
         break;
       }
@@ -503,27 +502,18 @@ namespace TrigCompositeUtils {
     // menu alignment, or due to the legs being of different length.
     // For passed chains, there is little point keeping these CH and IM nodes on the idle legs. So we have the option of slimming them here.
     // First for the ComboHypo ...
-    if (
-      removeEmptySteps &&
-      node->node()->name() == comboHypoAlgNodeName() && // If I am a ComboHypo node
-      node->seeds().size() >= 1 && // with at least one parent
-      node->seeds().at(0)->node()->name() == inputMakerNodeName() // which (first child) is an InputMaker node
-    ) {
-      keep = false; // Then don't save me
+    if (removeEmptySteps && me->name() == comboHypoAlgNodeName() && myFirstParent && myFirstParent->name() == inputMakerNodeName()) {
+      keep = false;
     }
     // ... and also for the InputMaker, with flipped logic.
-    if (
-      removeEmptySteps &&
-      node->node()->name() == inputMakerNodeName() && // If I am a InputMaker node
-      node->children().size() >= 1 && // with at least one child
-      node->children().at(0)->node()->name() == comboHypoAlgNodeName() // which (fist child) is an ComboHypo node
-    ) {
-      keep = false; // Then don't save me
+    if (removeEmptySteps && me->name() == inputMakerNodeName() && myFirstChild && myFirstChild->name() == comboHypoAlgNodeName()) {
+      keep = false;
     }
 
-    // Inform the node that it should NOT be thinned away.
+    // APPLICATION Section:
+
     if (keep) {
-      node->keep();
+      node->keep(); // Inform the node that it should NOT be thinned away.
     }
 
     for (NavGraphNode* seed : node->seeds()) {
