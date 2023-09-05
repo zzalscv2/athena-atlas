@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/test/exceptions_test.cxx
@@ -21,7 +21,7 @@ void test1()
   std::cout << SG::ExcPointerNotInSG((char*)0x1234).what() << "\n";
   std::cout << SG::ExcCLIDMismatch(123, 456).what() << "\n";
   std::cout << SG::ExcInvalidLink (123, "key", 765).what() << "\n";
-  std::cout << SG::ExcBadForwardLink (123, 345).what() << "\n";
+  std::cout << SG::ExcBadForwardLink (123, 345, "Foo").what() << "\n";
   std::cout << SG::ExcElementNotFound ("test").what() << "\n";
   std::cout << SG::ExcInvalidIndex ("test").what() << "\n";
   std::cout << SG::ExcIndexNotFound ("test").what() << "\n";

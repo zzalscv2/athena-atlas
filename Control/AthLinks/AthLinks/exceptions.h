@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/exceptions.h
@@ -114,8 +114,9 @@ public:
    * @brief Constructor.
    * @param index Index in the link.
    * @param size Size of the referenced container.
+   * @param name Type name of the container.
    */
-  ExcBadForwardLink (size_t index, size_t size);
+  ExcBadForwardLink (size_t index, size_t size, const std::string& name);
 };
 
 
@@ -123,9 +124,10 @@ public:
  * @brief Throw a SG::ExcBadForwardLink exception.
  * @param index Index in the link.
  * @param size Size of the referenced container.
+ * @param name Type name of the container.
  */
 [[noreturn]]
-void throwExcBadForwardLink (size_t index, size_t size);
+void throwExcBadForwardLink (size_t index, size_t size, const std::string& name);
 
 
 /**

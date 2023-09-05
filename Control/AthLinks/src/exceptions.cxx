@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -121,14 +121,14 @@ void throwExcInvalidLink (CLID clid, const std::string& key, SG::sgkey_t sgkey)
 
 /// Helper: format exception error string.
 std::string
-excBadForwardLink_format (size_t index, size_t size)
+excBadForwardLink_format (size_t index, size_t size, const std::string& name)
 {
   std::ostringstream os;
   os << "SG::ExcBadForwardLink: "
-     << "ForwardIndexingPolicy: internal link state is invalid";
+     << "ForwardIndexingPolicy: internal link state of '" << name << "' is invalid";
   if (index != static_cast<size_t>(-1)) {
-    os << ": m_index =" << index 
-       << " is >=  data container size =" 
+    os << ": m_index = " << index
+       << " is >= data container size = "
        << size << std::ends;
   } 
   return os.str();
@@ -139,9 +139,10 @@ excBadForwardLink_format (size_t index, size_t size)
  * @brief Constructor.
  * @param index Index in the link.
  * @param size Size of the referenced container.
+ * @param name Type name of the container.
  */
-ExcBadForwardLink::ExcBadForwardLink (size_t index, size_t size)
-  : std::runtime_error (excBadForwardLink_format (index, size))
+ExcBadForwardLink::ExcBadForwardLink (size_t index, size_t size, const std::string& name)
+  : std::runtime_error (excBadForwardLink_format (index, size, name))
 {
   AthLinks_error();
 }
@@ -151,10 +152,11 @@ ExcBadForwardLink::ExcBadForwardLink (size_t index, size_t size)
  * @brief Throw a SG::ExcBadForwardLink exception.
  * @param index Index in the link.
  * @param size Size of the referenced container.
+ * @param name Type name of the container.
  */
-void throwExcBadForwardLink (size_t index, size_t size)
+void throwExcBadForwardLink (size_t index, size_t size, const std::string& name)
 {
-  throw ExcBadForwardLink (index, size);
+  throw ExcBadForwardLink (index, size, name);
 }
 
 

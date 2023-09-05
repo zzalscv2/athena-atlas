@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id$
 /**
  * @file AthLinks/tools/ForwardIndexingPolicy.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -66,7 +65,7 @@ typename ForwardIndexingPolicy<CONT, VALUE_TYPE>::ElementType
 ForwardIndexingPolicy<CONT, VALUE_TYPE>::lookup (index_type index, const CONT& data)
 { 
   if (!isValid(index) || (data.size() <= index)) {
-    SG::throwExcBadForwardLink (index, data.size());
+    SG::throwExcBadForwardLink (index, data.size(), ClassName<CONT>::name());
   }
 
   typedef typename CONT::const_iterator const_iterator;
