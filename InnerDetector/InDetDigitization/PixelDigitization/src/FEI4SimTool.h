@@ -11,7 +11,7 @@
 #ifndef PIXELDIGITIZATION_FEI4SimTool_H
 #define PIXELDIGITIZATION_FEI4SimTool_H
 
-#include "PixelDigitization/FrontEndSimTool.h"
+#include "FrontEndSimTool.h"
 #include "InDetRawData/PixelRDO_Collection.h" //typedef
 
 class SiChargedDiodeCollection;

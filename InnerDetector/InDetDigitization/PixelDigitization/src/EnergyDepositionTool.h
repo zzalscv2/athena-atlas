@@ -17,7 +17,7 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Service.h"
 #include "HitManagement/TimedHitPtr.h"
-#include "PixelDigitization/BichselData.h"
+#include "BichselData.h"
 
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "StoreGate/ReadCondHandleKey.h"

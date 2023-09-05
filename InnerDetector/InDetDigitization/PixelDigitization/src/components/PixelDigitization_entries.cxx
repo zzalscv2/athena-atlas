@@ -1,13 +1,13 @@
-#include "PixelDigitization/PixelDigitization.h"
-#include "PixelDigitization/PixelDigitizationTool.h"
-#include "PixelDigitization/SensorSimPlanarTool.h"
-#include "PixelDigitization/SensorSim3DTool.h"
-#include "PixelDigitization/EnergyDepositionTool.h"
-#include "PixelDigitization/RD53SimTool.h"
-#include "PixelDigitization/FEI4SimTool.h"
-#include "PixelDigitization/FEI3SimTool.h"
-#include "PixelDigitization/RadDamageUtil.h"
-#include "PixelDigitization/EfieldInterpolator.h"
+#include "src/PixelDigitization.h"
+#include "src/PixelDigitizationTool.h"
+#include "src/SensorSimPlanarTool.h"
+#include "src/SensorSim3DTool.h"
+#include "src/EnergyDepositionTool.h"
+#include "src/RD53SimTool.h"
+#include "src/FEI4SimTool.h"
+#include "src/FEI3SimTool.h"
+#include "src/RadDamageUtil.h"
+#include "src/EfieldInterpolator.h"
 
 DECLARE_COMPONENT( PixelDigitization )
 DECLARE_COMPONENT( EnergyDepositionTool )

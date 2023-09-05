@@ -2,7 +2,7 @@
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "PixelDigitization/FEI4SimTool.h"
+#include "FEI4SimTool.h"
 #include "PixelConditionsData/ChargeCalibParameters.h" //for Thresholds
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetRawData/Pixel1RawData.h"
@@ -124,7 +124,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       if (diode.totalCharge().fromTrack()) {
         bunchSim =
           static_cast<int>(floor((getG4Time(diode.totalCharge()) +
-                                  moduleData->getTimeOffset(barrel_ec, layerIndex)) / m_bunchSpace));
+                                  m_timeOffset) / m_bunchSpace));
       } else {
         bunchSim = CLHEP::RandFlat::shootInt(rndmEngine, m_numberOfBcid);
       }
