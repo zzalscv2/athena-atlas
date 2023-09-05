@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
   * Trigger Hypo Tool, that is aimed at triggering displaced vertex
   * author Kunihiro Nagano <kunihiro.nagano@cern.ch> - KEK
@@ -1294,18 +1294,18 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
    std::vector<int>   v_sp_usedTrkId;
    v_sp_usedTrkId.reserve(convertedSpacePoints.size());
 
-   for(unsigned int iSp=0; iSp<convertedSpacePoints.size(); ++iSp) {
-      bool isPix = convertedSpacePoints[iSp].isPixel();
-      bool isSct = convertedSpacePoints[iSp].isSCT();
+   for(const auto& sp : convertedSpacePoints) {
+      bool isPix = sp.isPixel();
+      bool isSct = sp.isSCT();
       if( ! isPix && ! isSct ) continue;
-      const Trk::SpacePoint* sp = convertedSpacePoints[iSp].offlineSpacePoint();
+      const Trk::SpacePoint* osp = sp.offlineSpacePoint();
       
       int usedTrack_id  = -1;
-      int usedTrack_id_first = sp_map_used_id(sp->clusterList().first);
+      int usedTrack_id_first = sp_map_used_id(osp->clusterList().first);
       if (usedTrack_id_first != -1) {
         usedTrack_id = usedTrack_id_first;
       }
-      int usedTrack_id_second = sp_map_used_id(sp->clusterList().second);
+      int usedTrack_id_second = sp_map_used_id(osp->clusterList().second);
       if (usedTrack_id_second != -1) {
         usedTrack_id = usedTrack_id_second;
       }
@@ -1313,16 +1313,12 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
       //
       n_sp++;
       if( usedTrack_id != -1 ) n_sp_usedByTrk++;
-      int  layer = convertedSpacePoints[iSp].layer();
-      float sp_r = convertedSpacePoints[iSp].r();
+      int  layer = sp.layer();
+      float sp_r = sp.r();
 
-      const Amg::Vector3D& pos_sp = sp->globalPosition();
-      float sp_x = pos_sp[Amg::x];
-      float sp_y = pos_sp[Amg::y];
-      float sp_z = pos_sp[Amg::z];
-      TVector3 p3Sp(sp_x,sp_y,sp_z);
-      float sp_eta = p3Sp.Eta();
-      float sp_phi = p3Sp.Phi();
+      const Amg::Vector3D& pos_sp = osp->globalPosition();//Go back to globalPosition to get the non-shifted spacepoint positions
+      float sp_eta = pos_sp.eta();
+      float sp_phi = pos_sp.phi();
 
       v_sp_eta.push_back(sp_eta);
       v_sp_r.push_back(sp_r);
