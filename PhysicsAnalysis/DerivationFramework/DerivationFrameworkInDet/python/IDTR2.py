@@ -86,34 +86,38 @@ def IDTR2Cfg(flags):
         CheckVertexContainers = ['PrimaryVertices'],
         V0FinderTool = V0FinderTool))
 
-    from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
-    acc.merge(TrackSystematicsAlgCfg(
-        flags,
-        InputTrackContainer="InDetWithLRTTrackParticles",
-        OutputTrackContainer=(
-            "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down")))
-
-    V0FinderToolSyst = acc.popToolsAndMerge(IDTR2_V0FinderToolCfg(
-        flags,
-        name="IDTR2_V0FinderTool_Syst",
-        TrackParticleCollection=(
-            "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down"),
-        V0ContainerName=IDTR2V0ContainerName + "Syst",
-        KshortContainerName=IDTR2KshortContainerName + "Syst",
-        LambdaContainerName=IDTR2LambdaContainerName + "Syst",
-        LambdabarContainerName=IDTR2LambdabarContainerName + "Syst"))
-
-    IDTR2_Reco_V0FinderSyst = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
-        flags, derivation = "IDTR2", suffix = "_Syst",
-        V0ContainerName = IDTR2V0ContainerName + "Syst",
-        KshortContainerName = IDTR2KshortContainerName + "Syst",
-        LambdaContainerName = IDTR2LambdaContainerName + "Syst",
-        LambdabarContainerName = IDTR2LambdabarContainerName + "Syst",
-        CheckVertexContainers = ['PrimaryVertices'],
-        V0FinderTool = V0FinderToolSyst))
-
     skimmingTools = []
-    augmentationTools = [IDTR2_Reco_V0Finder, IDTR2_Reco_V0FinderSyst]
+    augmentationTools = [IDTR2_Reco_V0Finder]
+
+    if flags.Input.isMC:
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
+        acc.merge(TrackSystematicsAlgCfg(
+            flags,
+            InputTrackContainer="InDetWithLRTTrackParticles",
+            OutputTrackContainer=(
+                "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down")))
+
+        V0FinderToolSyst = acc.popToolsAndMerge(IDTR2_V0FinderToolCfg(
+            flags,
+            name="IDTR2_V0FinderTool_Syst",
+            TrackParticleCollection=(
+                "InDetWithLRTTrackParticles_TRK_EFF_LARGED0_GLOBAL__1down"),
+            V0ContainerName=IDTR2V0ContainerName + "Syst",
+            KshortContainerName=IDTR2KshortContainerName + "Syst",
+            LambdaContainerName=IDTR2LambdaContainerName + "Syst",
+            LambdabarContainerName=IDTR2LambdabarContainerName + "Syst"))
+
+        IDTR2_Reco_V0FinderSyst = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
+            flags, derivation = "IDTR2", suffix = "_Syst",
+            V0ContainerName = IDTR2V0ContainerName + "Syst",
+            KshortContainerName = IDTR2KshortContainerName + "Syst",
+            LambdaContainerName = IDTR2LambdaContainerName + "Syst",
+            LambdabarContainerName = IDTR2LambdabarContainerName + "Syst",
+            CheckVertexContainers = ['PrimaryVertices'],
+            V0FinderTool = V0FinderToolSyst))
+
+        augmentationTools += [IDTR2_Reco_V0FinderSyst]
+
     for t in augmentationTools:
         acc.addPublicTool(t)
 
