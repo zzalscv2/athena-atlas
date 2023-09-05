@@ -162,16 +162,14 @@ def filterBS(stream_name):
     filterStep.args = '-s ' + stream_name + ' ' + find_file('*_HLTMPPy_output.*.data')
     return filterStep
 
-def decodeBS(stream_name):
+def decodeBS(stream_name, moduleID=0):
     '''Deserialise HLT data from ByteStream and save to an ESD file'''
     from TrigValTools.TrigValSteering import ExecStep
     from TrigValTools.TrigValSteering.Common import find_file
     decodeStep = ExecStep.ExecStep('DecodeBS_'+stream_name)
-    decodeStep.type = 'athena'
-    decodeStep.job_options = 'TriggerJobOpts/decodeBS.py'
+    decodeStep.type = 'other'
+    decodeStep.executable = 'python'
     decodeStep.input = ''
     decodeStep.explicit_input = True
-    decodeStep.args = '--filesInput='+find_file('*'+stream_name+'*._athenaHLT*.data')
-    decodeStep.perfmon = False  # no need to run PerfMon for this step
+    decodeStep.args = f'-m TrigP1Test.DecodeBS --moduleID={moduleID} --filesInput=' + find_file('*'+stream_name+'*._athenaHLT*.data')
     return decodeStep
-

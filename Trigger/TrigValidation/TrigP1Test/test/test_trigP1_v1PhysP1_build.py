@@ -35,8 +35,7 @@ decodeMain = decodeBS("Main")
 
 # Extract and decode calibration_CostMonitoring
 filterCost = filterBS("CostMonitoring")
-decodeCost = decodeBS("CostMonitoring")
-decodeCost.args += ' -c "ModuleID=1"'
+decodeCost = decodeBS("CostMonitoring", moduleID=1)
 
 # Check a few important job options
 checkProperties = PyStep.PyStep(check_hlt_properties, name="CheckProperties")

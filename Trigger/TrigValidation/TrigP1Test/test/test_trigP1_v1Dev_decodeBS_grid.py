@@ -48,8 +48,7 @@ decodeMain = decodeBS("Main")
 
 # Extract and decode calibration_CostMonitoring
 filterCost = filterBS("CostMonitoring")
-decodeCost = decodeBS("CostMonitoring")
-decodeCost.args += ' -c "ModuleID=1"'
+decodeCost = decodeBS("CostMonitoring", moduleID=1)
 
 # Test definition with updated CheckFile inputs
 test = Test.Test()
