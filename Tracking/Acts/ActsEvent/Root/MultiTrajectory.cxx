@@ -335,6 +335,7 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
   if ( istate >= m_surfaces.size() )                                  
     m_surfaces.resize(istate+1, nullptr);
   m_surfaces[istate] = surface.get();
+  trackStates()[istate]->setGeometryId(surface->geometryId().value());
   m_managedSurfaces.push_back(std::move(surface));
 }
 
