@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredGroup_h
@@ -161,7 +161,7 @@ namespace Monitored {
 
   /** Builds a map of indices (base case) */
   template<typename V,typename std::enable_if_t<std::is_integral_v<V>>* =nullptr>
-  std::map<std::string,int> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, std::vector<std::string> labels) {
+  std::map<std::string,int> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, const std::vector<std::string>& labels) {
     std::map<std::string,int> indexMap;
     for ( auto label : labels ) {
       std::string groupName = baseName + "_" + label;
@@ -172,7 +172,7 @@ namespace Monitored {
 
   /** Builds an N-dimensional map of indices (recursive) */
   template<typename V,typename std::enable_if_t<!std::is_integral_v<V>>* =nullptr,typename...T>
-  std::map<std::string,V> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, std::vector<std::string> labels, T... dimensions) {
+  std::map<std::string,V> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, const std::vector<std::string>& labels, T... dimensions) {
     std::map<std::string,V> indexMap;
     for ( auto label : labels ) {
       std::string groupName = baseName + "_" + label;
