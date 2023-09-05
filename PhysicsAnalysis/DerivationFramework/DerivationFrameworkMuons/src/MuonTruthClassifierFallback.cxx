@@ -77,8 +77,7 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches() const
     }
     SG::ReadHandle<xAOD::TruthPileupEventContainer> tpec{m_truthPileupSGKey, ctx};
     if (!tpec.isValid()) {
-        ATH_MSG_ERROR("No truth pileup collection with name " << m_truthPileupSGKey.fullKey() << " found in StoreGate!");
-        return StatusCode::FAILURE;
+        ATH_MSG_DEBUG("No truth pileup collection with name " << m_truthPileupSGKey.fullKey() << " found in StoreGate. Pile-up information will not be filled");
     }
 
     SG::ReadHandle<xAOD::TruthParticleContainer> truthMuons{m_truthMuonSGKey, ctx};
@@ -132,28 +131,30 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches() const
 
         minDR = FLT_MAX;
 
-        const xAOD::TruthParticle* closestPileup = nullptr;
-        for (auto event : *tpec) {
-            for (size_t parti = 0; parti < event->nTruthParticles(); parti++) {
-                const xAOD::TruthParticle* tpart = event->truthParticle(parti);
-                if (!tpart || !MC::isStable(tpart) || HepMC::is_simulation_particle(tpart) || !tpart->charge() || tpart->isMuon() ||
-                    tpart->pt() < m_minPt)
-                    continue;
-                const float dR = xAOD::P4Helpers::deltaR2(tpart, part);
-                if (dR > minDR) continue;
-                closestPileup = tpart;
-                minDR = dR;
+        if (tpec.isValid()) { 
+            const xAOD::TruthParticle* closestPileup = nullptr;
+            for (auto event : *tpec) {
+                for (size_t parti = 0; parti < event->nTruthParticles(); parti++) {
+                    const xAOD::TruthParticle* tpart = event->truthParticle(parti);
+                    if (!tpart || !MC::isStable(tpart) || HepMC::is_simulation_particle(tpart) || !tpart->charge() || tpart->isMuon() ||
+                        tpart->pt() < m_minPt)
+                        continue;
+                    const float dR = xAOD::P4Helpers::deltaR2(tpart, part);
+                    if (dR > minDR) continue;
+                    closestPileup = tpart;
+                    minDR = dR;
+                }
             }
+            decorator_pu_dR(*part) = (closestPileup ? std::sqrt(minDR) : -1);
+            int newPileupType{-1}, newPileupOrigin{-1};
+            if (closestPileup) {
+                auto res = m_mcTruthClassifier->particleTruthClassifier(closestPileup);
+                newPileupType = res.first;
+                newPileupOrigin = res.second;
+            }
+            decorator_pu_type(*part) = newPileupType;
+            decorator_pu_origin(*part) = newPileupOrigin;
         }
-        decorator_pu_dR(*part) = (closestPileup ? std::sqrt(minDR) : -1);
-        int newPileupType{-1}, newPileupOrigin{-1};
-        if (closestPileup) {
-            auto res = m_mcTruthClassifier->particleTruthClassifier(closestPileup);
-            newPileupType = res.first;
-            newPileupOrigin = res.second;
-        }
-        decorator_pu_type(*part) = newPileupType;
-        decorator_pu_origin(*part) = newPileupOrigin;
     }
 
     return StatusCode::SUCCESS;

@@ -38,7 +38,7 @@ namespace DerivationFramework {
 
     private:
         SG::ReadHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerKey", "", "Key of the container to be decorated"};
-        SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthSGKey{this, "TruthEvents", "Key of the truth event container"};
+        SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthSGKey{this, "TruthSGKey", "TruthEvents", "Key of the truth event container"};
         SG::ReadHandleKey<xAOD::TruthPileupEventContainer> m_truthPileupSGKey{this, "TruthPileupContainerKey", "TruthPileupEvents",
                                                                               "Key of the pile-up event container"};
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuonSGKey{this, "TruthMuonContainerKey", "MuonTruthParticles", ""};
