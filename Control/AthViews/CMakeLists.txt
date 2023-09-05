@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthViews )
@@ -12,7 +12,8 @@ atlas_add_library( AthViews
                    src/*.cxx
                    PUBLIC_HEADERS AthViews
                    INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${TBB_LIBRARIES} AthContainers AthLinks AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib TrigSteeringEvent SGTools )
+                   LINK_LIBRARIES ${TBB_LIBRARIES} AthContainers AthLinks AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib TrigSteeringEvent
+                   PRIVATE_LINK_LIBRARIES SGTools )
 
 atlas_add_component( AthViewsAlgs
                      src/components/*.cxx
@@ -21,7 +22,7 @@ atlas_add_component( AthViewsAlgs
 atlas_add_component( AthViewsDFlow
                      src_dflow/*.cxx
                      src_dflow/components/*.cxx
-                     LINK_LIBRARIES AthViews AthExHiveLib )
+                     LINK_LIBRARIES AthExHiveLib AthViews AthenaKernel StoreGateLib )
 
 atlas_add_dictionary( AthViewsAlgsDict
                       AthViews/AthViewsWriteDict.h
@@ -37,12 +38,12 @@ endif()
 # Tests in the package:
 atlas_add_test( ViewLinking_test
                 SOURCES test/ViewLinking_test.cxx
-                LINK_LIBRARIES AthViews TestTools )
+                LINK_LIBRARIES AthViews AthenaKernel GaudiKernel StoreGateLib TestTools )
 
 atlas_add_test( ViewCollectionMerge_test
                 SOURCES test/ViewCollectionMerge_test.cxx
-                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} AthViews CxxUtils
+                INCLUDE_DIRS ${GMOCK_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthContainers AthLinks AthViews AthenaBaseComps AthenaKernel CxxUtils GaudiKernel StoreGateLib TrigSteeringEvent
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
                 POST_EXEC_SCRIPT nopost.sh )
 
