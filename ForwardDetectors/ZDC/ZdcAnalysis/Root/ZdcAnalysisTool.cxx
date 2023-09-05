@@ -1581,6 +1581,13 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
     char name[128];
 
     std::string filename = PathResolverFindCalibFile( ("ZdcAnalysis/" + m_zdcEnergyCalibFileName).c_str() );
+
+    // Needs a smarter configuration, but run 3 will use one calibration file per run, to mesh better with the calibration loop
+    if (runNumber >= 400000)
+      {
+	filename = PathResolverFindCalibFile( ("ZdcAnalysis/ZdcCalib_Run"+TString::Itoa(runNumber,10)+".root").Data() );
+      }
+
     ATH_MSG_INFO("Opening energy calibration file " << filename);
     std::unique_ptr<TFile> fCalib (TFile::Open(filename.c_str(), "READ"));
 
