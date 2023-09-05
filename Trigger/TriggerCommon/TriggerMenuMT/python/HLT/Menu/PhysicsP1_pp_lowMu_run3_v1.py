@@ -107,13 +107,13 @@ def getLowMuPhysicsSignatures():
 
 
         #--------- legacy physics electron chains
-        ChainProp(name='HLT_e15_lhloose_L1EM12',  stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter_tag','egammaMon:shifter']),
-        ChainProp(name='HLT_e15_loose_L1EM12',    stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter_tag','egammaMon:shifter']),
+        ChainProp(name='HLT_e15_lhloose_L1EM12',  stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter']),
+        ChainProp(name='HLT_e15_loose_L1EM12',    stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:online','egammaMon:shifter']),
         ChainProp(name='HLT_e15_lhmedium_L1EM12', stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup),
         ChainProp(name='HLT_e15_medium_L1EM12',   stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup),
 
-        ChainProp(name='HLT_e18_lhloose_L1EM15',  stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter_tp','egammaMon:shifter' ]),
-        ChainProp(name='HLT_e18_loose_L1EM15',    stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter_tp','egammaMon:shifter']),
+        ChainProp(name='HLT_e18_lhloose_L1EM15',  stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_e18_loose_L1EM15',    stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_e18_lhmedium_L1EM15', stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup),
         ChainProp(name='HLT_e18_medium_L1EM15',   stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryLegGroup),
 
@@ -131,8 +131,8 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_e20_idperf_loose_L1eEM18', stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+SupportPhIGroup, monGroups=['idMon:t0']),
 
         #--------- phase-1 physics electron chains
-        ChainProp(name='HLT_e15_lhloose_L1eEM15',  stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:t0_tp','egammaMon:shifter']),
-        ChainProp(name='HLT_e15_loose_L1eEM15',    stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:t0_tp','egammaMon:shifter']),
+        ChainProp(name='HLT_e15_lhloose_L1eEM15',  stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_e15_loose_L1eEM15',    stream=[PhysicsStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_e15_lhmedium_L1eEM15', stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_e15_medium_L1eEM15',   stream=[PhysicsStream], groups=SingleElectronGroup+PrimaryPhIGroup),
 
