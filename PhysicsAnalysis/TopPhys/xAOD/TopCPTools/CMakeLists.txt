@@ -45,7 +45,6 @@ atlas_add_library( TopCPTools Root/*.cxx Root/*.h Root/*.icc
                                           ElectronEfficiencyCorrectionLib
                                           ElectronPhotonFourMomentumCorrectionLib
                                           ElectronPhotonSelectorToolsLib
-                                          ElectronPhotonShowerShapeFudgeToolLib
                                           GoodRunsListsLib
                                           JetJvtEfficiencyLib
                                           JetMomentToolsLib
