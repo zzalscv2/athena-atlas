@@ -324,15 +324,10 @@ bool LVL1::jFEXForwardJetsAlgo::isLMabove(unsigned int TTID){
         ATH_MSG_ERROR("Could not find TT" << TTID << " in the correction (LM above) for jets file.");
         return false;
     }
-    // If there is not Trigger tower to correct with, then return false
-    if( (it_seed_map->second).size() == 0){
-        return false;
-    }
-    for (const auto& Gtt : it_seed_map->second ){
-        //Checking if the displaced TT is a seed
-        return isLM(Gtt);       
-    }
     
+    // If there is not Trigger tower to correct with, then return false
+    const auto & GttVec =  it_seed_map->second;
+    if (! GttVec.empty()) return isLM(GttVec.front());
     return false;
 }
 

@@ -1548,6 +1548,10 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 
     for (const auto zdc_sum: moduleSumContainer)
       {
+	ATH_MSG_DEBUG("Extracting ZDC side " << zdc_sum->zdcSide());
+
+	if (zdc_sum->zdcSide()==0) continue; // skip new global sum
+
 	int iside = (zdc_sum->zdcSide()==-1) ? 0 : 1;
 
 	float uncalibSum = getUncalibModuleSum(iside);
@@ -1580,6 +1584,13 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
     char name[128];
 
     std::string filename = PathResolverFindCalibFile( ("ZdcAnalysis/" + m_zdcEnergyCalibFileName).c_str() );
+
+    // Needs a smarter configuration, but run 3 will use one calibration file per run, to mesh better with the calibration loop
+    if (runNumber >= 400000)
+      {
+	filename = PathResolverFindCalibFile( ("ZdcAnalysis/ZdcCalib_Run"+TString::Itoa(runNumber,10)+".root").Data() );
+      }
+
     ATH_MSG_INFO("Opening energy calibration file " << filename);
     std::unique_ptr<TFile> fCalib (TFile::Open(filename.c_str(), "READ"));
 

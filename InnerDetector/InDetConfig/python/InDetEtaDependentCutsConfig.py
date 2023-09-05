@@ -11,7 +11,6 @@ def ITkEtaDependentCutsSvcCfg(
     cuts = flags.Tracking.ActiveConfig
 
     kwargs.setdefault("etaBins",              cuts.etaBins)
-    kwargs.setdefault("etaWidthBrem",         cuts.etaWidthBrem)
     kwargs.setdefault("maxdImpactSSSSeeds",   cuts.maxdImpactSSSSeeds)
     kwargs.setdefault("maxDoubleHoles",       cuts.maxDoubleHoles)
     kwargs.setdefault("maxHoles",             cuts.maxHoles)
@@ -28,7 +27,8 @@ def ITkEtaDependentCutsSvcCfg(
     kwargs.setdefault("maxHolesGapPattern",   cuts.nHolesGapMax)
     kwargs.setdefault("maxHolesPattern",      cuts.nHolesMax)
     kwargs.setdefault("nWeightedClustersMin", cuts.nWeightedClustersMin)
-    kwargs.setdefault("phiWidthBrem",         cuts.phiWidthBrem)
+    kwargs.setdefault("phiWidthBrem",         [flags.Tracking.phiWidthBrem])
+    kwargs.setdefault("etaWidthBrem",         [flags.Tracking.etaWidthBrem])
     kwargs.setdefault("Xi2max",               cuts.Xi2max)
     kwargs.setdefault("Xi2maxNoAdd",          cuts.Xi2maxNoAdd)
 

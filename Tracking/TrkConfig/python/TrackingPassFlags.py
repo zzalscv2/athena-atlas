@@ -266,9 +266,8 @@ def createTrackingPassFlags():
     icf.addFlag("keepAllConfirmedStripSeeds", False)
 
     # --- min pt cut for brem
+    icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
     icf.addFlag("minPTBrem", 1. * Units.GeV) # off
-    icf.addFlag("phiWidthBrem", 0.3 ) # default is 0.3
-    icf.addFlag("etaWidthBrem", 0.2 ) # default is 0.3
 
     # --- Z Boundary Seeding
     icf.addFlag("doZBoundary", doZBoundary_ranges)
@@ -430,9 +429,8 @@ def createITkTrackingPassFlags():
     icf.addFlag("radMax"                  , 1100. * Units.mm)
 
     # --- min pt cut for brem
+    icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
     icf.addFlag("minPTBrem"               , [1. * Units.GeV])
-    icf.addFlag("phiWidthBrem"            , [0.3])
-    icf.addFlag("etaWidthBrem"            , [0.2])
 
     return icf
 
@@ -503,9 +501,7 @@ def createITkLargeD0TrackingPassFlags():
     # --- seeding
     icf.maxdImpactSSSSeeds       = [300.0 * Units.mm]
 
-    # --- min pt cut for brem
-    icf.phiWidthBrem             = [0.3]
-    icf.etaWidthBrem             = [0.2]
+    icf.doBremRecoverySi = False
 
     icf.Xi2max                  = [9.0]
     icf.Xi2maxNoAdd             = [25.0]
@@ -541,6 +537,7 @@ def createITkLowPtTrackingPassFlags():
     icf.extension          = "LowPt"
     icf.minPT              = [0.4 * Units.GeV]
     icf.minPTSeed          = 0.4 * Units.GeV
+    icf.doBremRecoverySi   = False
 
     return icf
 
@@ -551,6 +548,7 @@ def createHighPileupTrackingPassFlags():
     icf.minPT                   = 0.900 * Units.GeV
     icf.minClusters             = 9
     icf.maxPixelHoles           = 0
+    icf.doBremRecoverySi        = False
 
     return icf
 
@@ -568,6 +566,7 @@ def createMinBiasTrackingPassFlags():
     icf.excludeUsedTRToutliers    = False   # TRT outliers are added to the exclusion list
     icf.useTRTonlyOldLogic        = True    # turn off ole overlap logic to reduce number of hits
     icf.maxSecondaryImpact        = 100.0 * Units.mm # low lumi
+    icf.doBremRecoverySi          = False
 
     return icf
 
@@ -577,7 +576,8 @@ def createUPCTrackingPassFlags():
     icf.extension                 = "UPC"
     # --- min pt cut for brem (same as p-p default for now)
     icf.minPTBrem                 = 1. * Units.GeV
-
+    # MinBias turns off Brem Recovery, turn it on here
+    icf.doBremRecoverySi = lambda pcf: pcf.Tracking.doBremRecovery
     return icf
 
 ## LowPtRoI mode ########################
@@ -599,6 +599,7 @@ def createLowPtRoITrackingPassFlags():
     icf.radMax             = 600. * Units.mm
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles # not as tight as 2*maxDoubleHoles
+    icf.doBremRecoverySi   = False
     # Add custom flags valid for this pass only
     icf.addFlag("z0WindowRoI", 30.0) # mm
     icf.addFlag("doRandomSpot", False)
@@ -633,6 +634,7 @@ def createLargeD0TrackingPassFlags():
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles # not as tight as 2*maxDoubleHoles
     icf.maxTracksPerSharedPRD = 2
+    icf.doBremRecoverySi = False
 
     icf.RunPixelPID             = False
     icf.RunTRTPID               = False
@@ -675,6 +677,7 @@ def createR3LargeD0TrackingPassFlags():
     icf.doZBoundary             = True
     icf.keepAllConfirmedStripSeeds = True
     icf.maxSeedsPerSP_Strips = 1
+    icf.doBremRecoverySi = False
 
     icf.RunPixelPID        = False
     icf.RunTRTPID          = False
@@ -706,6 +709,7 @@ def createLowPtLargeD0TrackingPassFlags():
     icf.nHolesMax          = icf.maxHoles
     icf.nHolesGapMax       = icf.maxHoles
     icf.maxTracksPerSharedPRD = 2
+    icf.doBremRecoverySi = False
 
     icf.RunPixelPID        = False
     icf.RunTRTPID          = False
@@ -732,7 +736,10 @@ def createLowPtTrackingPassFlags():
     icf.radMax           = 600. * Units.mm
     icf.nHolesMax        = icf.maxHoles
     icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
-    icf.maxPrimaryImpact = lambda pcf: 100.0 * Units.mm if pcf.Tracking.doMinBias else maxPrimaryImpact_ranges( pcf )
+    icf.maxPrimaryImpact = lambda pcf: (
+        100.0 * Units.mm if pcf.Tracking.doMinBias else
+        maxPrimaryImpact_ranges( pcf ))
+    icf.doBremRecoverySi = False
     
     return icf
 
@@ -765,8 +772,7 @@ def createITkConversionTrackingPassFlags():
 
     icf.Xi2max                  = [9.0]
     icf.Xi2maxNoAdd             = [25.0]
-    icf.phiWidthBrem            = [0.3]
-    icf.etaWidthBrem            = [0.2]
+    icf.doBremRecoverySi        = False
 
     return icf
 
@@ -791,6 +797,7 @@ def createVeryLowPtTrackingPassFlags():
     icf.nHolesMax        = 1
     icf.nHolesGapMax     = 1 # not as tight as 2*maxDoubleHoles
     icf.radMax           = 600. * Units.mm # restrivt to pixels
+    icf.doBremRecoverySi        = False
 
     return icf
 
@@ -817,6 +824,7 @@ def createForwardTracksTrackingPassFlags():
     icf.nHolesGapMax     = icf.maxHoles
     icf.radMax           = 600. * Units.mm
     icf.useTRT           = False # no TRT for forward tracks
+    icf.doBremRecoverySi = False
 
     icf.RunPixelPID      = False
     icf.RunTRTPID        = False
@@ -838,6 +846,7 @@ def createBeamGasTrackingPassFlags():
     icf.maxDoubleHoles   = 1
     icf.nHolesMax        = 3
     icf.nHolesGapMax     = 3 # not as tight as 2*maxDoubleHoles
+    icf.doBremRecoverySi = False
 
     return icf
 
@@ -852,6 +861,7 @@ def createVtxLumiTrackingPassFlags():
     icf.nHolesMax               = 2
     icf.nHolesGapMax            = 1
     icf.useTRT                  = False
+    icf.doBremRecoverySi        = False
 
     return icf
 
@@ -866,6 +876,7 @@ def createVtxBeamSpotTrackingPassFlags():
     icf.nHolesMax               = 2
     icf.nHolesGapMax            = 1
     icf.useTRT                  = False
+    icf.doBremRecoverySi        = False
 
     return icf
 
@@ -890,6 +901,7 @@ def createCosmicsTrackingPassFlags():
     icf.nWeightedClustersMin = 8
     icf.nHolesMax        = 3
     icf.nHolesGapMax     = 3 # not as tight as 2*maxDoubleHoles
+    icf.doBremRecoverySi        = False
 
     return icf
 
@@ -934,6 +946,7 @@ def createHeavyIonTrackingPassFlags():
     icf.Xi2maxNoAdd      = lambda pcf: 25. if pcf.Tracking.cutLevel in [4, 5] else 10.
     icf.radMax           = 600. * Units.mm # restrict to pixels + first SCT layer
     icf.useTRT           = False
+    icf.doBremRecoverySi = False
 
     return icf
 
@@ -989,6 +1002,7 @@ def createPixelTrackingPassFlags():
     icf.Xi2maxNoAdd      = lambda pcf: 100.0  if pcf.Beam.Type is BeamType.Cosmics \
                            else Xi2maxNoAdd_ranges( pcf )
     icf.nWeightedClustersMin = 6
+    icf.doBremRecoverySi        = False
 
     icf.RunPixelPID      = False
     icf.RunTRTPID        = False
@@ -1014,7 +1028,7 @@ def createDisappearingTrackingPassFlags():
     icf.useTRT           = True
     icf.useSCTSeeding    = False
     icf.maxEta           = 2.2
-
+    icf.doBremRecoverySi = False
     return icf
 
 ########## SCT mode ######################
@@ -1026,7 +1040,6 @@ def createSCTTrackingPassFlags():
     icf.minSiNotShared   = 5
     icf.usePixel         = False
     icf.useTRT           = False
-
 
     def _pick( default, cosmics, minbias, hion):
         def _internal( pcf ):
@@ -1072,6 +1085,7 @@ def createSCTTrackingPassFlags():
                            else minClusters_ranges( pcf )
     icf.minSiNotShared   = lambda pcf: 4 if pcf.Beam.Type is BeamType.Cosmics \
                            else 5
+    icf.doBremRecoverySi        = False
     
     icf.RunPixelPID      = False
     icf.RunTRTPID        = False
@@ -1086,6 +1100,7 @@ def createTRTTrackingPassFlags():
     icf.minPT                   = 0.4 * Units.GeV
     icf.minTRTonly              = 15
     icf.maxTRTonlyShared        = 0.7
+    icf.doBremRecoverySi        = False
 
     icf.RunPixelPID             = False
     icf.RunTRTPID               = False
@@ -1105,6 +1120,7 @@ def createTRTStandaloneTrackingPassFlags():
     icf.TrkSel.TRTTrksMinTRTHitsThresholds     = lambda pcf: [  25,    18,    18,   18,   26,   28,   26,   24,   22,    0] if pcf.GeoModel.Run is LHCPeriod.Run3 else \
                                                  [  27,    18,    18,   18,   26,   28,   26,   24,   22,    0]  # eta-dep nTRT for TRT conversion tracks (> 15 is applied elsewhere)
     icf.TrkSel.TRTTrksMinTRTHitsMuDependencies = [ 0.2,  0.05,  0.05, 0.05, 0.15, 0.15, 0.15, 0.15, 0.15,    0]  # eta-dep nTRT, mu dependence for TRT conversion tracks
+    icf.doBremRecoverySi        = False
 
     return icf
 
