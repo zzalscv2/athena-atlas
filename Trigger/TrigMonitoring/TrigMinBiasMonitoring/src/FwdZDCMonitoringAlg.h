@@ -9,6 +9,8 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 // Input Containers
 #include "xAODForward/ZdcModuleContainer.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -30,6 +32,8 @@ private:
       this, "triggerList", {}, "Add triggers to this to be monitored"};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerKey{
       this, "ZdcModuleContainerKey", "ZdcModules", "Read handle key for ZdcModuleContainer"};
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergyKey 
+   {this, "ZdcModuleCalibEnergyKey", "ZdcModules.CalibEnergy", "ReadHandleKey for Zdc CalibEnergy AuxData"};
 };
 
 #endif // TRIGMINBIASMONITORING_FWDZDCMONITORINGALG_H
