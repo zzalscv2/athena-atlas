@@ -866,8 +866,10 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyStorage, EmptyMTJ) {
 
 BOOST_FIXTURE_TEST_CASE(InsertRefSurface, EmptyMTJ) {
   size_t ia = mtj->addTrackState(TrackStatePropMask::All);
-  auto ts = mtj->getTrackState(ia);
-  ts.setReferenceSurface(std::shared_ptr<const Acts::Surface>(nullptr));
+  auto ts = mtj->getTrackState(ia);\
+  auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(
+            Vector3::Zero(), Vector3::UnitZ());
+  ts.setReferenceSurface(std::shared_ptr<const Acts::Surface>(surf));
 }
 
 // TODO remaining tests
