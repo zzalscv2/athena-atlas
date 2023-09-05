@@ -346,7 +346,13 @@ if __name__ == "__main__":
     flags.Detector.EnableCalo = False
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.Input.Files = defaultTestFiles.RDO_RUN4
+
+    import sys
+    if "--doFTF" in sys.argv:
+       flags.Tracking.useITkFTF = True
+       flags.Tracking.doITkFastTracking = True
+
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -366,7 +372,6 @@ if __name__ == "__main__":
     top_acc.printConfig(withDetails=True, summariseProps=True)
     top_acc.store(open("ITkTrackReco.pkl", "wb"))
 
-    import sys
     if "--norun" not in sys.argv:
         sc = top_acc.run(5)
         if sc.isFailure():
