@@ -25,7 +25,8 @@ namespace LVL1 {
  StatusCode TrigT1ZDC::initialize()
  {
    ATH_CHECK(m_zdcCTPLocation.initialize());
-   ATH_CHECK(m_zdcModuleDataLocation.initialize());
+   ATH_CHECK(m_zdcModuleKey.initialize());
+   ATH_CHECK(m_zdcModuleCalibEnergyKey.initialize());
    // Find the full path to filename:
    std::string file = PathResolverFindCalibFile(m_lutFile);
    ATH_MSG_INFO("Reading file " << file);
@@ -63,33 +64,35 @@ namespace LVL1 {
  StatusCode TrigT1ZDC::execute(const EventContext &ctx) const
  {
    // access ZDC modules
-   SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModHandle = SG::makeHandle(m_zdcModuleDataLocation, ctx);
+   SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules(m_zdcModuleKey, ctx);
+   // access ZDC aux data 
+   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle( m_zdcModuleCalibEnergyKey, ctx);
+   // create vector to store module CalibEnergy
    std::vector<float> moduleEnergy = {0., 0., 0., 0., 0., 0., 0., 0.};
 
    // Read Single Modules
-   if (zdcModHandle.isValid())
+   if (zdcModules.isValid())
    {
-     const xAOD::ZdcModuleContainer *zdcSingleModules = zdcModHandle.cptr();
-     for (const auto zdcSM : *zdcSingleModules)
+     for (const auto zdcModule : *zdcModules)
      {
-       if (zdcSM->zdcType() == 0)
+       if (zdcModule->zdcType() == 0)
        { // type = 0 are big modules, type = 1 the pixels
-       ATH_MSG_DEBUG("ZDC Side " << zdcSM->zdcSide() << ", Module: " << zdcSM->zdcModule() << " and Energy: " << zdcSM->auxdataConst<float>("CalibEnergy"));
+       ATH_MSG_DEBUG("ZDC Side " << zdcModule->zdcSide() << ", Module: " << zdcModule->zdcModule() << " and Energy: " << zdcModuleCalibEnergyHandle(*zdcModule));
        // Side A
-       if (zdcSM->zdcSide() > 0)
+       if (zdcModule->zdcSide() > 0)
         {
-         moduleEnergy.at(zdcSM->zdcModule()) = zdcSM->auxdataConst<float>("CalibEnergy");
+         moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleCalibEnergyHandle(*zdcModule);
         }
 
        // Side C
-       if (zdcSM->zdcSide() < 0)
+       if (zdcModule->zdcSide() < 0)
         {
-         moduleEnergy.at(zdcSM->zdcModule() + 4) = zdcSM->auxdataConst<float>("CalibEnergy");
+         moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleCalibEnergyHandle(*zdcModule);
         }
        }
      }
    }
-
+   
    // Get Output as an integer (0-7)
    m_modInputs_p->setData(moduleEnergy);
 
@@ -111,7 +114,6 @@ namespace LVL1 {
    //record CTP object
    ATH_CHECK(zdcCTP.record(std::make_unique<ZdcCTP>(word0)));
    ATH_MSG_DEBUG("Stored ZDC CTP object with words " << std::hex << (zdcCTP->cableWord0()) << " from LUTOutput " << std::dec << wordOut);
-
    return StatusCode::SUCCESS;
   }
  }
