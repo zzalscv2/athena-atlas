@@ -1105,16 +1105,9 @@ int InDet::SiTrackMaker_xk::rapidity(const std::vector<const Trk::SpacePoint*>& 
 {
   if(Sp.size() < 2) return 0;
 
-  //std::vector<const Trk::SpacePoint*>::const_iterator s = Sp.begin();
-
-  double x = Sp[0]->globalPosition().x();
-  double y = Sp[0]->globalPosition().y();
-  double z = Sp[0]->globalPosition().z();
-  //++s;
-  x = Sp[1]->globalPosition().x()-x;
-  y = Sp[1]->globalPosition().y()-y;
-  z = Sp[1]->globalPosition().z()-z;
-  int n = int(2.*std::abs(log(tan(.5*atan2(sqrt(x*x+y*y),z)))));
+  Amg::Vector3D delta_sp = Sp[0]->globalPosition() - Sp[1]->globalPosition();
+  float eta = 2*std::abs(delta_sp.eta());
+  int n = int(eta);
   if(n > 7) n = 7;
   return n;
 }
