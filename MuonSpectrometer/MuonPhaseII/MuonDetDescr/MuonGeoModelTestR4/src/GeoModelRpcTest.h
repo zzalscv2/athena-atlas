@@ -33,7 +33,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "WriteKey", "ActsAlignment", "cond handle key"};
+      SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
       PublicToolHandle<MuonGMR4::IMuonStationLayerSurfaceTool> m_surfaceProvTool{this, "LayerGeoTool", ""};
       /// Set of stations to be tested
@@ -41,22 +41,12 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
   
       /// String should be formated like <stationName><stationEta><A/C><stationPhi>
       Gaudi::Property<std::vector<std::string>> m_selectStat{this, "TestStations", {}};
-  
-      Gaudi::Property<std::string> m_outputTxt{this, "DumpTxtFile", "", 
-            "Dump the basic informations from the Readout geometry into a txt file" };
       
       const MuonDetectorManager* m_detMgr{nullptr};
-
      
       StatusCode dumpToTree(const EventContext& ctx,
                             const ActsGeometryContext& gctx, const RpcReadoutElement* readoutEle);
-      
-      void dumpToFile(const EventContext& ctx,
-                       const ActsGeometryContext& gctx,
-                       const RpcReadoutElement* readoutEle, 
-                       std::ostream& sstr);
-       /// Write a TTree for validation purposes
-      Gaudi::Property<bool> m_dumpTree{this, "writeTTree", true};
+     
       MuonVal::MuonTesterTree m_tree{"RpcGeoModelTree", "GEOMODELTESTER"};
 
       /// Identifier of the readout element

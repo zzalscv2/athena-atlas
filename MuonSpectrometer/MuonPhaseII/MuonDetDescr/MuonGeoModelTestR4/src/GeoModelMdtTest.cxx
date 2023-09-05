@@ -20,7 +20,7 @@ StatusCode GeoModelMdtTest::initialize() {
     ATH_CHECK(m_geoCtxKey.initialize());    
     ATH_CHECK(m_surfaceProvTool.retrieve());
     /// Prepare the TTree dump
-    if (m_dumpTree) ATH_CHECK(m_tree.init(this));
+    ATH_CHECK(m_tree.init(this));
 
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
@@ -58,7 +58,7 @@ StatusCode GeoModelMdtTest::initialize() {
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMdtTest::finalize() {
-    if (m_dumpTree) ATH_CHECK(m_tree.write());
+    ATH_CHECK(m_tree.write());
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMdtTest::execute() {
@@ -69,15 +69,6 @@ StatusCode GeoModelMdtTest::execute() {
       return StatusCode::FAILURE;
     }
     const ActsGeometryContext& gctx{**geoContextHandle};
-
-    std::optional<std::fstream> outStream{};
-    if (!m_outputTxt.empty()) {
-        outStream = std::make_optional<std::fstream>(m_outputTxt, std::ios_base::out);
-        if (!outStream->good()) {
-            ATH_MSG_FATAL("Failed to create output file " << m_outputTxt);
-            return StatusCode::FAILURE;
-        }
-    }
 
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     for (const Identifier& test_me : m_testStations) {
@@ -118,17 +109,14 @@ StatusCode GeoModelMdtTest::execute() {
                return StatusCode::FAILURE;
             }
          }
-      }
-      if (outStream) dumpToFile(ctx, gctx, reElement, *outStream);        
+      }      
    }
    return StatusCode::SUCCESS;
 }
 StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
                                        const ActsGeometryContext& gctx, 
-                                       const MdtReadoutElement* readoutEle){
+                                       const MdtReadoutElement* readoutEle) {
 
-   if (!m_dumpTree) return StatusCode::SUCCESS;
-   
    m_stIndex = readoutEle->stationIndex();
    m_stEta = readoutEle->stationEta();
    m_stPhi = readoutEle->stationPhi();
@@ -167,43 +155,6 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
 
    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
-void GeoModelMdtTest::dumpToFile(const EventContext& /*ctx*/,
-                                 const ActsGeometryContext& gctx,
-                                 const MdtReadoutElement* reElement, 
-                                 std::ostream& sstr) {
-   const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
-   sstr<<"######################################################################################"<<std::endl;
-   sstr<<"Found Readout element "<<m_idHelperSvc->toStringDetEl(reElement->identify())<<std::endl;
-   sstr<<"######################################################################################"<<std::endl;
-   /// location   
-   const Amg::Transform3D localToGlob{reElement->localToGlobalTrans(gctx)};
-   sstr<<"GeoModel transformation: "<<to_string(localToGlob)<<std::endl;
-   sstr<<"Chamber center: "<<to_string(m_surfaceProvTool->chambCenterToGlobal(gctx, 
-                                                               reElement->identify()))<<std::endl;
-   
-   sstr<<reElement->getParameters()<<std::endl;
-  
-   for (unsigned int lay = 1 ; lay <= reElement->numLayers() ; ++lay ) {
-      for (unsigned int tube = 1; tube <=reElement->numTubesInLay(); ++tube ){
-         const Identifier tube_id = id_helper.channelID(reElement->identify(),reElement->multilayer(),lay,tube);
-         const IdentifierHash measHash = reElement->measurementHash(tube_id);      
-         if (tube == 1) {
-            const IdentifierHash layHash = reElement->layerHash(tube_id);
-            const Amg::Transform3D& layTrans{reElement->localToGlobalTrans(gctx, layHash)};
-            sstr<<"Layer "<<lay<<" : "<<to_string(layTrans)<<std::endl;
-         }
-         sstr<< " *** (" << std::setfill('0') << std::setw(2) << lay
-             << ", " << std::setfill('0') << std::setw(3) << tube << ")    "; 
-         sstr<<to_string(reElement->localToGlobalTrans(gctx, measHash))<<", ";
-         sstr<<Amg::toString(reElement->getParameters().tubeLayers[lay-1].tubePosInLayer(tube -1),2);
-         sstr<<", activeTube: "<<reElement->activeTubeLength(measHash);
-         sstr<<", tubeLength: "<<reElement->tubeLength(measHash);
-         sstr<<", wireLength: "<<reElement->wireLength(measHash);
-         sstr<<std::endl;            
-      }
-   }
-}
-
 
 }
 

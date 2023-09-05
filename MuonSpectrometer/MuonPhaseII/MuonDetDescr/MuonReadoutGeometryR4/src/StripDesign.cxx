@@ -69,7 +69,7 @@ namespace MuonGMR4{
     void StripDesign::defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight) {
         m_bottomLeft = Amg::Vector2D{-HalfHeight, -HalfShortY};
         m_bottomRight = Amg::Vector2D{HalfHeight, -HalfLongY};
-        m_topLeft = Amg::Vector2D{-HalfHeight, HalfShortY};        
+        m_topLeft = Amg::Vector2D{-HalfHeight, HalfShortY};
         m_topRight = Amg::Vector2D{HalfHeight, HalfLongY};
 
         m_dirBotEdge = (m_bottomRight - m_bottomLeft).unit();
@@ -80,6 +80,25 @@ namespace MuonGMR4{
         m_shortHalfY = HalfShortY;
         m_longHalfY = HalfLongY;
         m_halfX = HalfHeight;       
+    }
+    void StripDesign::flipTrapezoid() {
+        if (m_isFlipped) {
+            ATH_MSG_WARNING("It's impossible to flip a trapezoid twice. Swap short and long lengths");
+            return;
+        }
+        Eigen::Rotation2D flip{M_PI_2};
+
+        m_bottomLeft =  flip * m_bottomLeft;
+        m_bottomRight = flip * m_bottomRight;
+        m_topLeft = flip * m_topLeft;
+        m_topRight = flip * m_topRight;
+        m_dirBotEdge = (m_bottomRight - m_bottomLeft).unit();
+        m_dirTopEdge =   (m_topLeft - m_topRight);
+        m_lenSlopEdge = std::hypot(m_dirTopEdge.x(), m_dirTopEdge.y());
+        m_dirTopEdge = m_dirTopEdge.unit();
+        m_dirLeftEdge = (m_topLeft - m_bottomLeft).unit();
+        m_dirRightEdge = (m_topRight - m_bottomRight).unit();
+        m_isFlipped = true;
     }
     void StripDesign::defineStripLayout(Amg::Vector2D&& posFirst,
                                         const double stripPitch,
@@ -93,6 +112,7 @@ namespace MuonGMR4{
         m_channelShift = numFirst;
         m_firstStripPos = std::move(posFirst);
     }
+
 
 }
 #undef ORDER_PROP 

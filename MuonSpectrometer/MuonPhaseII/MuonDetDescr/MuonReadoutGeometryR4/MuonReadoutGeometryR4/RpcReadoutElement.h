@@ -18,9 +18,14 @@ class RpcReadoutElement : public MuonReadoutElement {
     /// Set of parameters to describe a RPC chamber
     struct parameterBook {
         /// RPC panel dimensions
-        double halfX{0.};
-        double halfY{0.};
-        double halfZ{0.};
+        
+        /// Elongation along the Z axis
+        double halfLength{0.};
+        /// Half thickness of the Rpc module
+        double halfThickness{0.};
+        /// Elongation within the sector        
+        double halfWidth{0.};
+        
         /// The number of gas gaps (along the radial direction)
         /// in the RPC chamber (2 or 3) 
         unsigned int nGasGaps{0};
@@ -55,16 +60,18 @@ class RpcReadoutElement : public MuonReadoutElement {
     StatusCode initElement() override final;
 
     /// Returns the doublet Z field of the MuonReadoutElement identifier
-    unsigned int doubletZ() const;
+    int doubletZ() const;
     /// Returns the doublet R field of the MuonReadoutElement identifier
-    unsigned int doubletR() const;
+    int doubletR() const;
     /// Returns the doublet Phi field of the MuonReadoutElement identifier
     int doubletPhi() const;
 
     /// Returns the number of gasgaps described by this ReadOutElement (usally 2 or 3)
     int nGasGaps() const;
-    /// Returns the number of phi panels
+    /// Returns the number of phi panels (1 or 2)
     int nPhiPanels() const;
+    /// Returns the maximum phi panel
+    int doubletPhiMax() const;
 
     /// Number of strips measuring the eta coordinate
     unsigned int nEtaStrips() const;

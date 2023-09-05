@@ -8,12 +8,13 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 /// Load the Eigen definitions.
 
-#include "GeoModelKernel/GeoFullPhysVol.h"
-#include "GeoModelKernel/GeoPhysVol.h"
-#include "GeoModelKernel/GeoShape.h"
-#include "GeoModelKernel/GeoAlignableTransform.h"
+#include <GeoModelKernel/GeoFullPhysVol.h>
+#include <GeoModelKernel/GeoPhysVol.h>
+#include <GeoModelKernel/GeoShape.h>
+#include <GeoModelKernel/GeoAlignableTransform.h>
+#include <GaudiKernel/IAlgTool.h>
 
-#include "GaudiKernel/IAlgTool.h"
+class GeoShapeUnion;
 
 namespace MuonGMR4{
 
@@ -53,6 +54,15 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
         /// Searches through all child volumes and collects the nodes where the logical volumes have the requested name
         /// together with the transformations to go from the node to the parent physical volume
         virtual std::vector<physVolWithTrans> findAllLeafNodesByName(const PVConstLink& physVol, const std::string& volumeName) const = 0;
+
+        
+        /// @brief Helper struct to cache a volume with its ShapeShift transformation
+        struct geoShapeWithShift {
+            Amg::Transform3D transform{Amg::Transform3D::Identity()};
+            const GeoShape* shape{nullptr};
+        };
+        /// Splits a union into its building blocks. If one of the objects is an Union, then this is split again
+        virtual std::vector<geoShapeWithShift> getComponents(const GeoShapeUnion* unionShape) const = 0;
 
         ///     
         virtual std::string dumpShape(const GeoShape* inShape) const = 0;

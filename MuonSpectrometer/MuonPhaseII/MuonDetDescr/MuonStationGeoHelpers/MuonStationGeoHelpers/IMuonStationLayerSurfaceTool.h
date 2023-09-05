@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONSTATIONLAYERSURFACESVC_IMuonStationLayerSurfaceSvc_H
-#define MUONSTATIONLAYERSURFACESVC_IMuonStationLayerSurfaceSvc_H
+#ifndef MUONSTATIONLAYERSURFACESVC_IMuonStationLayerSurfaceTool_H
+#define MUONSTATIONLAYERSURFACESVC_IMuonStationLayerSurfaceTool_H
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 

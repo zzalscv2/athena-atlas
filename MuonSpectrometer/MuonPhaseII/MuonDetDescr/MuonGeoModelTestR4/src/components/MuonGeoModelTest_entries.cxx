@@ -4,7 +4,10 @@
 */
 #include "../GeoModelMdtTest.h"
 #include "../GeoModelRpcTest.h"
+#include "../MuonChamberToolTest.h"
+
 
 
 DECLARE_COMPONENT(MuonGMR4::GeoModelMdtTest)
 DECLARE_COMPONENT(MuonGMR4::GeoModelRpcTest)
+DECLARE_COMPONENT(MuonGMR4::MuonChamberToolTest)

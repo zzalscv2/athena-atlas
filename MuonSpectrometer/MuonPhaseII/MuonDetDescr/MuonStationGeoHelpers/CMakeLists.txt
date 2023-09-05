@@ -10,7 +10,7 @@ atlas_subdir( MuonStationGeoHelpers )
 atlas_add_library( MuonStationGeoHelpersLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonStationGeoHelpers
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel  
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel   MuonGeoModelR4Lib
                                   ActsGeometryInterfacesLib ActsGeometryLib MuonReadoutGeometryR4 MuonIdHelpersLib 
                                   GeoModelUtilities CxxUtils)
 

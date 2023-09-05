@@ -66,6 +66,7 @@ MuonDetectorManager::MuonDetectorManager()
     std::vector<const MuonReadoutElement*> allEles{};
     insert(getAllMdtReadoutElements(), allEles);
     insert(getAllRpcReadoutElements(), allEles);
+    insert(getAllsTgcReadoutElements(), allEles);
     return allEles;
  }
 IdentifierHash MuonDetectorManager::buildHash(const Identifier& id) const {
@@ -114,6 +115,7 @@ const Muon::IMuonIdHelperSvc* MuonDetectorManager::idHelperSvc() const {
 std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const {
     std::vector<ActsTrk::DetectorType> types{};
     if (!m_mdtEles.empty()) types.push_back(ActsTrk::DetectorType::Mdt);
+    if (!m_mdtEles.empty()) types.push_back(ActsTrk::DetectorType::sTgc);
     if (!m_rpcEles.empty()) types.push_back(ActsTrk::DetectorType::Rpc);
     return types;
 }

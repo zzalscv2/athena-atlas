@@ -79,15 +79,19 @@ StatusCode MdtReadoutElement::initElement() {
       constexpr double pitchTolerance = 10. * Gaudi::Units::micrometer;
       if (prevTubePos) {
          const double dR = std::abs((tubePos - (*prevTubePos)).z());
-         if (std::abs(dR - tubePitch()) > pitchTolerance) {
+         /// BOG & few BMS chambers have a cut tube. Therefore, accept the tube staggering if
+         /// the tubes are 2 tube pitches apart
+         if (std::abs(dR - tubePitch()) > pitchTolerance &&
+             std::abs(dR - 2.* tubePitch()) > pitchTolerance) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Detected irregular tube in "<<
                           idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
                           <<". Expected tube pitch: "<<tubePitch()<<" measured tube pitch: "
                           <<dR<<" tube position: "<<Amg::toString(tubePos,2)
                           <<" previous: "<<Amg::toString((*prevTubePos), 2));
+            return StatusCode::FAILURE;
          }
       } else if (prevLayPos) {
-         const double dR = (tubePos - (*prevLayPos)).mag();
+         const double dR = (tubePos - (*prevLayPos)).mag();       
          if (std::abs(dR - tubePitch()) > pitchTolerance) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Detected irregular layer pitch in "<<
                           idHelperSvc()->toStringDetEl(identify())<<" for layer "<<lay
