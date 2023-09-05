@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -10,8 +10,10 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <SystematicsHandles/SysCopyHandle.h>
+#include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
 #include <xAODJet/JetContainer.h>
+#include <xAODMuon/MuonContainer.h>
 
 namespace CP
 {
@@ -39,6 +41,11 @@ namespace CP
   private:
     SysCopyHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};
+
+  private:
+    SysReadHandle<xAOD::MuonContainer> m_muonHandle {
+      this, "muons", "Muons", "the muon collection to run on"};
+
   };
 }
 
