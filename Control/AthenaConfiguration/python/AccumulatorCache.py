@@ -2,17 +2,27 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
-from collections.abc import Iterable
 _msg = logging.getLogger('AccumulatorCache')
 
 import functools
 import time
+from abc import ABC, abstractmethod
 from copy import deepcopy
-from collections.abc import Hashable
+from collections.abc import Hashable, Iterable
 from collections import defaultdict
 from dataclasses import dataclass
+
+
+class AccumulatorCachable(ABC):
+    """Abstract base for classes needing custom AccumulatorCache behavior."""
+
+    @abstractmethod
+    def _cacheEvict(self):
+        """This method is called by AccumulatorCache when an object is removed
+        from the cache. Implement this for custom cleanup actions."""
+        pass
+
 
 class AccumulatorDecorator:
     """Class for use in function decorators, implements memoization.
@@ -111,6 +121,10 @@ class AccumulatorDecorator:
             return hash(x)
         return None
 
+    def _evict(x):
+        if isinstance(x, AccumulatorCachable):
+            x._cacheEvict()
+
     def __get__(self, obj, objtype):
         """Support instance methods."""
         return functools.partial(self.__call__, obj)
@@ -183,6 +197,7 @@ class AccumulatorDecorator:
                         return deepcopy(res), cacheHit
                     else:
                         # shallow copied CA still needs to undergo merging
+                        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
                         if isinstance(res, ComponentAccumulator):
                             res._wasMerged=False
                         return res, cacheHit
@@ -192,8 +207,7 @@ class AccumulatorDecorator:
                     if(len(self._cache) >= self._maxSize):
                         _msg.debug("Cache limit (%d) reached for %s.%s", self._maxSize, self._func.__module__, self._func.__name__)
                         oldest = self._cache.pop(next(iter(self._cache)))
-                        if isinstance(oldest, ComponentAccumulator):
-                            oldest.wasMerged()
+                        AccumulatorDecorator._evict(oldest)
 
                     res = self._func(*args , **kwargs)
 
@@ -215,18 +229,13 @@ class AccumulatorDecorator:
             return (self._func(*args , **kwargs), None)
 
     def __del__(self):
-        # Cleanup dangling private tools of cached CAs
-        def _cleanupIfCA(something):
-            if isinstance(something, ComponentAccumulator):
-                something.popPrivateTools(quiet=True)
-                something.wasMerged()
-
-        for k, v in self._cache.items():            
+        for v in self._cache.values():
             if isinstance(v, Iterable):
                 for el in v:
-                    _cleanupIfCA(el)
+                    AccumulatorDecorator._evict(el)
             else:
-                _cleanupIfCA(v)
+                AccumulatorDecorator._evict(v)
+
 
 def AccumulatorCache(func = None, maxSize = 128,
                      verifyResult = AccumulatorDecorator.VERIFY_NOTHING, deepCopy = True):
