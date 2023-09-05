@@ -5,6 +5,7 @@ atlas_subdir( DumpEventDataToJSON )
 
 # External dependencies:
 find_package( nlohmann_json )
+find_package( Acts COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_component( DumpEventDataToJSON
