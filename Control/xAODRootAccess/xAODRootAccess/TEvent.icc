@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TEVENT_ICC
 #define XAODROOTACCESS_TEVENT_ICC
@@ -157,7 +157,7 @@ namespace xAOD {
 
       // If the record was successful, let's release the object from the unique
       // pointer:
-      obj.release();
+      (void)obj.release();
       return StatusCode::SUCCESS;
    }
 
@@ -318,7 +318,7 @@ namespace xAOD {
 
       // If the record was successful, let's release the object from the unique
       // pointer:
-      obj.release();
+      (void)obj.release();
       return StatusCode::SUCCESS;
    }
 
