@@ -3,6 +3,10 @@
 */
 
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
+
 //Standalone compilation:
 //g++ -g -o mergetest.exe `root-config --libs --cflags` -L InstallArea/i686-slc5-gcc43-opt/lib/ -l DataQualityUtils LArHistMerge.version2.cxx
 
@@ -134,7 +138,7 @@ void defaultMerge(TObject* a, const TObject* b) {
   return;
 }
 
-void weightedAverageTH1(TObject* a, const TObject* b) {
+void weightedAverageTH1 ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
   TH1* a1=(dynamic_cast<TH1*>(a));
   const TH1* b1=dynamic_cast<const TH1*>(b);
   if (!b1 || !a1)
@@ -144,7 +148,7 @@ void weightedAverageTH1(TObject* a, const TObject* b) {
   return;
 }
 
-void weightedAverageTH2(TObject* a, const TObject* b) {
+void weightedAverageTH2 ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
   TH2* a1=(dynamic_cast<TH2*>(a));
   const TH2* b1=(dynamic_cast<const TH2*>(b));
   if (!b1 || !a1)
@@ -154,7 +158,7 @@ void weightedAverageTH2(TObject* a, const TObject* b) {
   return;
 }
 
-void weightedEff(TObject* a, const TObject* b) {
+void weightedEff ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
   TH1* a1=(dynamic_cast<TH1*>(a));
   const TH1* b1=(dynamic_cast<const TH1*>(b));
   if (!b1 || !a1) 
@@ -164,7 +168,7 @@ void weightedEff(TObject* a, const TObject* b) {
   return;
 }
 
-void mergeRMS(TObject* a, const TObject* b) {
+void mergeRMS ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
   TH1* a1=(dynamic_cast<TH1*>(a));
   const TH1* b1=dynamic_cast<const TH1*>(b);
    if (!b1 || !a1) 
@@ -174,7 +178,7 @@ void mergeRMS(TObject* a, const TObject* b) {
   return;
 }
 
-void RMSpercentDeviation(TObject* a, const TObject* b) {
+void RMSpercentDeviation ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
   TH1* a1=(dynamic_cast<TH1*>(a));
   const TH1* b1=dynamic_cast<const TH1*>(b);
   if (!b1 || !a1) 
@@ -184,7 +188,7 @@ void RMSpercentDeviation(TObject* a, const TObject* b) {
   return;
 }
 
-void perBinEffPerCent(TObject* a, const TObject* b) {
+void perBinEffPerCent ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
   TH1* a1=(dynamic_cast<TH1*>(a));
   const TH1* b1=dynamic_cast<const TH1*>(b);
   if (!b1 || !a1) 
@@ -194,7 +198,7 @@ void perBinEffPerCent(TObject* a, const TObject* b) {
   return;
 }
 
-void lowerLB(TObject* a, const TObject* b) {
+void lowerLB ATLAS_NOT_THREAD_SAFE (TObject* a, const TObject* b) {
    TH1* a1=(dynamic_cast<TH1*>(a));
    const TH1* b1=dynamic_cast<const TH1*>(b);
    if (!b1 || !a1) 
