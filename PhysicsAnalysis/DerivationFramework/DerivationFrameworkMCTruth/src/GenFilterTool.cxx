@@ -178,7 +178,7 @@ namespace DerivationFramework {
         genFiltHTinclNu += tp->pt();
       }
 
-      if (!MC::DerivationFramework_isInteracting(tp) && isPrompt(tp) ) {
+      if (MC::isSpecialNonInteracting(tp) && isPrompt(tp) ) {
         ATH_MSG_VERBOSE("Found prompt nonInteracting particle with pt " << tp->pt()
                         << ", eta " << tp->eta()
                         << ", phi " << tp->phi()
