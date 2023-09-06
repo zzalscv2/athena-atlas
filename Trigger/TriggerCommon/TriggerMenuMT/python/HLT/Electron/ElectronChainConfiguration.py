@@ -9,6 +9,7 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence 
 from ..CommonSequences.CaloSequences_FWD import fastCaloMenuSequence_FWD
 from ..Electron.FastElectronMenuSequences import fastElectronMenuSequence, fastElectronMenuSequence_LRT
+from ..Electron.PrecisionCaloMenuSequences import precisionCaloMenuSequence, precisionCaloMenuSequence_LRT
 
 if isComponentAccumulatorCfg():
     def StreamerNoMuonDiElecFastComboHypoCfg() : pass
@@ -21,12 +22,12 @@ if isComponentAccumulatorCfg():
     def DiElecPrecisionGSFComboHypoCfg() : pass
 else:
     from ..Electron.FastTrackingMenuSequences import fastTrackingMenuSequence, fastTrackingMenuSequence_LRT
-    from ..Electron.PrecisionCaloMenuSequences import precisionCaloMenuSequence, precisionCaloMenuSequence_LRT
     from ..Electron.PrecisionElectronMenuSequences import precisionElectronMenuSequence, precisionElectronMenuSequence_LRT
     from ..Electron.PrecisionElectronMenuSequences_GSF import precisionElectronMenuSequence_GSF, precisionElectronMenuSequence_LRTGSF
     from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
     from ..Electron.PrecisionTracks_GSFRefittedMenuSequences   import precisionTracks_GSFRefittedMenuSequence, precisionTracks_GSFRefittedMenuSequence_LRT 
     from TrigBphysHypo.TrigMultiTrkComboHypoConfig import StreamerNoMuonDiElecFastComboHypoCfg, StreamerDiElecFastComboHypoCfg, StreamerDiElecNoringerFastComboHypoCfg, NoMuonDiElecPrecisionComboHypoCfg, DiElecPrecisionComboHypoCfg, NoMuonDiElecPrecisionGSFComboHypoCfg, DiElecPrecisionGSFComboHypoCfg, TrigMultiTrkComboHypoToolFromDict
+
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -435,4 +436,5 @@ class ElectronChainConfiguration(ChainConfigurationBase):
 
     def getEmptyRefitStep(self, flags,  is_probe_leg=False):
         return self.getEmptyStep(6,'nonGSFEmptyRefit')
+
 
