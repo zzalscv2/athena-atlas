@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -110,10 +110,10 @@ class SimplePolygonBrepVolumeBounds final: public VolumeBounds {
                  std::pair<double, double> d) const;
 
   bool InCone(int i, int j,
-              std::vector<std::pair<double, double> > inputVertices) const;
+              const std::vector<std::pair<double, double> >& inputVertices) const;
 
   bool Diagonalie(int i, int j,
-                  std::vector<std::pair<double, double> > inputVertices) const;
+                  const std::vector<std::pair<double, double> >& inputVertices) const;
 
   bool Diagonal(
       int i, int j,

@@ -366,7 +366,7 @@ bool
 Trk::SimplePolygonBrepVolumeBounds::InCone(
   int i,
   int j,
-  std::vector<std::pair<double, double>> inputVertices) const
+  const std::vector<std::pair<double, double>>& inputVertices) const
 // 	Returns true iff the diagonal (i,j) is internal to the polygon in
 //  the neighborhood of the i endpoint.
 {
@@ -390,7 +390,7 @@ bool
 Trk::SimplePolygonBrepVolumeBounds::Diagonalie(
   int i,
   int j,
-  std::vector<std::pair<double, double>> inputVertices) const
+  const std::vector<std::pair<double, double>>& inputVertices) const
 {
   // Returns TRUE iff (v_i, v_j) is a proper internal *or* external diagonal of
   // this polygon, *ignoring edges incident to v_i and v_j*.
