@@ -28,7 +28,7 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
     // iterate over all input nodes
     for (std::size_t i = 0; i < m_nr_inputs; i++) {
-      const char* input_name = m_onnxSession->GetInputName(i, m_allocator);
+      const char* input_name = m_onnxSession->GetInputNameAllocated(i, m_allocator);
 
       m_input_names.push_back(input_name);
 
@@ -37,7 +37,7 @@ ONNXWrapper::ONNXWrapper(std::string model_path) {
 
     // iterate over all output nodes
     for(std::size_t i = 0; i < m_nr_output; i++ ) {
-      const char* output_name = m_onnxSession->GetOutputName(i, m_allocator);
+      const char* output_name = m_onnxSession->GetOutputNameAllocated(i, m_allocator);
 
       m_output_names.push_back(output_name);
 
@@ -69,7 +69,7 @@ std::map<std::string, std::string> ONNXWrapper::GetMETAData() {
   // Ort::Session& session ATLAS_THREAD_SAFE = *m_onnxSession;
   auto metadata = m_onnxSession->GetModelMetadata();
   int64_t nkeys = 0;
-  char** keys = metadata.GetCustomMetadataMapKeys(m_allocator, nkeys);
+  char** keys = metadata.GetCustomMetadataMapKeysAllocated(m_allocator, nkeys);
 
   for (int64_t i = 0; i < nkeys; i++) {
     METAData_map[keys[i]]=this->GetMETADataByKey(keys[i]);
@@ -150,7 +150,7 @@ std::map<std::string, std::vector<float>> ONNXWrapper::Run(
 
 std::string ONNXWrapper::GetMETADataByKey(const char * key){
   auto metadata = m_onnxSession->GetModelMetadata();
-  return metadata.LookupCustomMetadataMap(key, m_allocator);
+  return metadata.LookupCustomMetadataMapAllocated(key, m_allocator);
 }
 
 std::vector<const char*> ONNXWrapper::getInputNames(){
