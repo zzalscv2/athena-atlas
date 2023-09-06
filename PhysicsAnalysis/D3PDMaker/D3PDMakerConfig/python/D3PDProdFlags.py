@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file D3PDMakerConfig/python/D3PDProdFlags.py
@@ -80,20 +80,6 @@ class OutputPoolRootFileNamePrefix(JobProperty):
     pass
 jobproperties.D3PDProdFlags.add_JobProperty(OutputPoolRootFileNamePrefix)
 
-
-class WriteMuonD3PD (JobProperty):
-    """Produce the MCP/muon D3PD."""
-    statusOn = True
-    allowedTypes = ['bool']
-    StoredValue = False
-    StreamName = 'StreamNTUP_MUON'
-    FileName = ''
-    isVirtual = False
-    DPDMakerScript = "MuonD3PDMaker/MuonD3PD_prodJobOFragment.py"
-    TreeNames = ['muon']
-    SubSteps = ['a2d', 'e2d']
-jobproperties.D3PDProdFlags.add_JobProperty (WriteMuonD3PD)
-listAllKnownD3PD.append (prodFlags.WriteMuonD3PD)
 
 # egamma D3PDs.
 _importFlagsFromModule ('egammaD3PDMaker.egammaD3PDProdFlags')
