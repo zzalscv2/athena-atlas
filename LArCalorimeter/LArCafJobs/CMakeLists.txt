@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArCafJobs )
@@ -47,7 +47,7 @@ atlas_add_dictionary( LArCafJobsDict
 atlas_add_executable( LArQuickHistMerge
                       src/LArQuickHistMerge.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} DataQualityUtils )
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} DataQualityUtils CxxUtils )
 
 atlas_add_executable( LArSamplesMerge
                       src/LArSamplesMerge.cxx
