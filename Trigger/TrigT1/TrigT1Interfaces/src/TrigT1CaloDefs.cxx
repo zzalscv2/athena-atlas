@@ -32,7 +32,7 @@ const std::string TrigT1CaloDefs::xAODTriggerTowerLocation="xAODTriggerTowers";
 const std::string TrigT1CaloDefs::xAODTriggerTowerRerunLocation="xAODTriggerTowers_rerun";
 const std::string TrigT1CaloDefs::JetElementLocation="JetElements";
 const std::string TrigT1CaloDefs::CPMTowerLocation="CPMTowers";
-const std::string TrigT1CaloDefs::xAODZdcMoudleLocation="ZdcModules";
+const std::string TrigT1CaloDefs::xAODZdcModuleLocation="ZdcModules";
 
 const std::string TrigT1CaloDefs::CPMHitsLocation="CPMHits";
 const std::string TrigT1CaloDefs::JEMHitsLocation="JEMHits";
