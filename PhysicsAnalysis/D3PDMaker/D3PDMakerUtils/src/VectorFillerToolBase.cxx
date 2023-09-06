@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file D3PDMakerUtils/src/VectorFillerToolBase.cxx
@@ -481,6 +481,7 @@ StatusCode VectorFillerToolBase::Var::init (IAddVariable* tree,
   m_contptr = 0;
   return tree->addVariable (prefix + m_name,
                             *m_proxy->GetCollectionClass()->GetTypeInfo(),
+                            // cppcheck-suppress nullPointer; false positive
                             m_contptr,
                             m_docstring);
 }
