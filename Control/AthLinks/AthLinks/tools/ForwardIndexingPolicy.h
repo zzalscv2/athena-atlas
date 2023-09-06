@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -20,6 +20,7 @@
 #include "AthLinks/exceptions.h"
 #include "AthLinks/tools/findInContainer.h"
 #include "AthenaKernel/tools/type_tools.h"
+#include "AthenaKernel/ClassName.h"
 #include <boost/concept_check.hpp>
 #include <cstddef>
 #include <stdint.h>
