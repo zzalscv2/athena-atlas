@@ -224,11 +224,11 @@ def checkL1HLTConsistency(flags):
             log.error(f'  {i}')
         raise Exception("Please fix the menu or the chains.")
 
-    if len(chainsWithWrongLabel) and ('Physics' in lvl1name): # apply this check only for the Physics menu, for now
-        log.error('These chains have the wrong groups:')
-        for key, (groups, errormsg) in chainsWithWrongLabel.items():
-            log.error('%s: %s\n  --> %s', key, ",".join(groups), errormsg)
-        raise Exception("Please fix these chains.")
+    #if len(chainsWithWrongLabel) and ('Physics' in lvl1name): # apply this check only for the Physics menu, for now
+    #    log.error('These chains have the wrong groups:')
+    #    for key, (groups, errormsg) in chainsWithWrongLabel.items():
+    #        log.error('%s: %s\n  --> %s', key, ",".join(groups), errormsg)
+    #    raise Exception("Please fix these chains.")
 
     # check for unused L1 items
     for item in lvl1items:

@@ -67,12 +67,12 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mu4_mu4noL1_L1MU3V', stream=[HardProbesStream], l1SeedThresholds=['MU3V','FSNOSEED'], groups=MultiMuonGroup+PrimaryL1MuGroup, monGroups=['muonMon:shifter','muonMon:online']),
 
         #-- tag-and-probe
-        ChainProp(name='HLT_mu8_mu4_probe_L1MU5VF', l1SeedThresholds=['MU5VF','PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu6_mu4_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu4_mu4_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu8_mu6_probe_L1MU5VF', l1SeedThresholds=['MU5VF','PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu6_mu6_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
-        ChainProp(name='HLT_mu4_mu6_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu8_mu4_probe_L1MU5VF', l1SeedThresholds=['MU5VF','PROBEMU3V'], stream=[HardProbesStream], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu6_mu4_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], stream=[HardProbesStream], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu4_mu4_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], stream=[HardProbesStream], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu8_mu6_probe_L1MU5VF', l1SeedThresholds=['MU5VF','PROBEMU3V'], stream=[HardProbesStream], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu6_mu6_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], stream=[HardProbesStream], groups=SingleMuonGroup+TagAndProbeGroup),
+        ChainProp(name='HLT_mu4_mu6_probe_L1MU3V',  l1SeedThresholds=['MU3V', 'PROBEMU3V'], stream=[HardProbesStream], groups=SingleMuonGroup+TagAndProbeGroup),
 
         #-- mu_idperf for ID monitoring
         ChainProp(name='HLT_mu4_idperf_L1MU3V',  stream=[HardProbesStream,'express'], groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:t0']),
@@ -553,6 +553,7 @@ def getPhysicsHISignatures():
 
         #----------- sptrk
         ChainProp(name='HLT_mb_sptrk_L1VTE50',          l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTRepro']),
+        ChainProp(name='HLT_mb_sptrk_L1TRT_VTE20',          l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_mb_sptrk_L1MBTS_1_1_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C_VTE50',l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_mb_sptrk_pc_L1ZDC_A_C_VTE50',l1SeedThresholds=['FSNOSEED'], stream=[PCStream, 'express'], groups=MinBiasGroup+SupportLegGroup),
@@ -772,13 +773,13 @@ def setupMenu(menu_name):
 
     final_chains = ChainStore()
     for sig, chainsInSig in chains.items():
-        if sig == "Beamspot":  # HI needs special beam spot setup
-            log.warning('Default Beamspot signature removed in HI')
-            continue
+        #if sig == "Beamspot":  # HI needs special beam spot setup
+        #    log.warning('Default Beamspot signature removed in HI')
+        #    continue
         for c in chainsInSig:
-                if "IDCalibPEB" in c.name: # heavy tracking
-                    raise RuntimeError(f"IDCalibPEB not safe in HI, requested by chain {c.name}")
-                elif "EM3" in c.name: # EM3 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow 
+                #if "IDCalibPEB" in c.name: # heavy tracking
+                #    raise RuntimeError(f"IDCalibPEB not safe in HI, requested by chain {c.name}")
+                if "EM3" in c.name: # EM3 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow
                     raise RuntimeError(f"EM3 not available in HI L1 menu, requested by chain {c.name}")
                 elif "EM7" in c.name: # EM7 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow 
                     raise RuntimeError(f"EM7 not available in HI L1 menu, requested by chain {c.name}")

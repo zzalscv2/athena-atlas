@@ -1767,6 +1767,8 @@ HLT_mb_sptrk_L1MBTS_1_1_VTE50:
   eventCount: 0
 HLT_mb_sptrk_L1MBTS_1_VTE5:
   eventCount: 0
+HLT_mb_sptrk_L1TRT_VTE20:
+  eventCount: 0
 HLT_mb_sptrk_L1VTE50:
   eventCount: 0
 HLT_mb_sptrk_L1ZDC_1XOR5_VTE200:
