@@ -3,49 +3,35 @@
 #
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
-from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys	  import getTrigEgammaKeys
-from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper
-from AthenaCommon.CFElements import parOR
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys    import getTrigEgammaKeys
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'CaloPhoton'
 
-
-def precisionCaloSequence(flags, ion=False):
+@AccumulatorCache
+def precisionCaloMenuSequenceCfg(flags, name=None, ion=False, is_probe_leg=False):
     """ Creates PrecisionCalo sequence """
     TrigEgammaKeys = getTrigEgammaKeys(ion=ion)
+    
+    hiInfo = 'HI' if ion else ''
     # EV creator
-    InViewRoIs="PrecisionCaloRoIs"    
-    precisionCaloViewsMaker = EventViewCreatorAlgorithm('IM' + tag(ion))
-    precisionCaloViewsMaker.ViewFallThrough = True
-    precisionCaloViewsMaker.RoIsLink = "initialRoI" # Merge inputs based on their initial L1 ROI
-    roiTool = ViewCreatorPreviousROITool()
+    InViewRoIs="PrecisionCaloRoIs"
+    roiTool = CompFactory.ViewCreatorPreviousROITool()
     # Note: This step processes Decision Objects which have followed either Electron reco, Photon reco, or both.
     # For Decision Object which have followed both, there is an ambiguity about which ROI should be used in this
     # merged step. In such cases we break the ambiguity by specifying that the Electron ROI is to be used.
     roiTool.RoISGKey = "HLT_Roi_FastElectron"
-    precisionCaloViewsMaker.RoITool = roiTool
-    precisionCaloViewsMaker.InViewRoIs = InViewRoIs
-    precisionCaloViewsMaker.Views = tag(ion) + 'Views'
-    precisionCaloViewsMaker.RequireParentView = True
-
+    
+    recoAcc = InViewRecoCA(tag(ion),InViewRoIs=InViewRoIs, RoITool = roiTool, RequireParentView = True, isProbe=is_probe_leg)
     # reco sequence
-    hiInfo = 'HI' if ion is True else ''
     from TriggerMenuMT.HLT.Photon.PrecisionCaloRecoSequences import precisionCaloRecoSequence
-    precisionCaloSequence = algorithmCAToGlobalWrapper(precisionCaloRecoSequence,flags, InViewRoIs,'gPrecisionCaloRecoSequence'+hiInfo, ion)
-   
-    precisionCaloInViewSequence = parOR("photonRoITopoRecoSequence"+hiInfo, [precisionCaloSequence])
-
-    precisionCaloViewsMaker.ViewNodeName = precisionCaloInViewSequence.name()
-
-    theSequence = seqAND(tag(ion) + 'Sequence', [])
-
-    sequenceOut = TrigEgammaKeys.precisionPhotonCaloClusterContainer
+    recoAcc.mergeReco(precisionCaloRecoSequence(flags, InViewRoIs,'gPrecisionCaloRecoSequence'+hiInfo, ion))
+       
+    selAcc = SelectionCA('gPrecisionCaloMenuSequence'+hiInfo, isProbe=is_probe_leg)
     if ion is True:
         # add UE subtraction for heavy ion e/gamma triggers
         # NOTE: UE subtraction requires an average pedestal to be calculated
@@ -53,30 +39,28 @@ def precisionCaloSequence(flags, ion=False):
         # event views in this sequence. the egammaFSRecoSequence is thus placed
         # before the precisionCaloInViewSequence.
         from TriggerMenuMT.HLT.Egamma.TrigEgammaFactoriesCfg import egammaFSCaloRecoSequenceCfg
-        egammaFSRecoSequence = algorithmCAToGlobalWrapper(egammaFSCaloRecoSequenceCfg,flags)
-        theSequence += egammaFSRecoSequence
+        selAcc.merge(egammaFSCaloRecoSequenceCfg(flags))
 
-    # connect EVC and reco
-    theSequence += [precisionCaloViewsMaker, precisionCaloInViewSequence]
-    return (theSequence, precisionCaloViewsMaker, sequenceOut)
+    selAcc.mergeReco(recoAcc)
 
+    hypoAlg = CompFactory.TrigEgammaPrecisionCaloHypoAlg(name+tag(ion) + 'Hypo')
+
+    hypoAlg.CaloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
+    
+    selAcc.addHypoAlgo(hypoAlg)
+    
+    from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
+
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigEgammaPrecisionCaloHypoToolFromDict, isProbe=is_probe_leg)
 
 
 def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
     """ Creates precisionCalo MENU sequence """
 
-    (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, flags, ion=ion)
+    if isComponentAccumulatorCfg():
+        return precisionCaloMenuSequenceCfg(flags, name = name, ion = ion, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(precisionCaloMenuSequenceCfg, flags, name, ion=ion, is_probe_leg=is_probe_leg)
 
-    #Hypo
-    from TrigEgammaHypo.TrigEgammaPrecisionCaloHypoTool import TrigEgammaPrecisionCaloHypoToolFromDict
 
-    thePrecisionCaloHypo = CompFactory.TrigEgammaPrecisionCaloHypoAlg(name+tag(ion) + 'Hypo')
-    thePrecisionCaloHypo.CaloClusters = sequenceOut
-
-    return MenuSequence( flags,
-                         Sequence    = sequence,
-                         Maker       = precisionCaloViewsMaker, 
-                         Hypo        = thePrecisionCaloHypo,
-                         HypoToolGen = TrigEgammaPrecisionCaloHypoToolFromDict,
-                         IsProbe     = is_probe_leg)
 

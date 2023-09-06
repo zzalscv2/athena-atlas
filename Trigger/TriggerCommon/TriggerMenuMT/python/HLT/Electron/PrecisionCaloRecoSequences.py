@@ -11,10 +11,23 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 log = logging.getLogger(__name__)
 
-# Dummy flag arg needed so that each reco sequence is held separately
-# in the RecoFragmentsPool -- only the RoIs are used to distinguish
-# different sequences. New convention is just to pass "None" for flags
-# taken from Jet/JetRecoSequences.py
+def precisionCaloElectronVDVCfg(name, InViewRoIs, ion=False, variant=''):
+    acc = ComponentAccumulator()
+    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+   
+    dataObjects= [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s'%InViewRoIs ),
+                  ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                  ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+    if ion:
+        dataObjects += [( 'xAOD::HIEventShapeContainer' , 'StoreGateSvc+' + TrigEgammaKeys.egEventShape ),
+                        ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                        ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
+
+    precisionCaloElectronVDV = CompFactory.AthViews.ViewDataVerifier(name)
+    precisionCaloElectronVDV.DataObjects = dataObjects
+    acc.addEventAlgo(precisionCaloElectronVDV)
+    return acc
+
 def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False, variant=''):
     acc = ComponentAccumulator()
 
@@ -22,6 +35,8 @@ def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False, variant=''):
 
     log.debug('flags = %s',flags)
     log.debug('RoIs = %s',RoIs)
+    
+    acc.merge(precisionCaloElectronVDVCfg(name+'VDV'+variant,RoIs,ion,variant=variant))
 
     from TrigCaloRec.TrigCaloRecConfig import egammaTopoClusteringCfg, egammaTopoClusteringCfg_LRT, hltCaloTopoClusteringHICfg
 
@@ -56,3 +71,4 @@ def precisionCaloRecoSequence(flags, RoIs, name = None, ion=False, variant=''):
     acc.merge(trigEgammaSuperClusterBuilder)
 
     return acc
+
