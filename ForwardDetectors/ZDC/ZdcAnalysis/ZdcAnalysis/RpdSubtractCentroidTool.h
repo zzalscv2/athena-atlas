@@ -22,7 +22,7 @@
 namespace ZDC
 {
 
-class ATLAS_NOT_THREAD_SAFE RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::AsgTool
+class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::AsgTool
 {
   ASG_TOOL_CLASS(RpdSubtractCentroidTool, ZDC::IZdcAnalysisTool)
 
@@ -80,7 +80,7 @@ private:
    * @param side side of RPD (C = 0, A = 1)
    * @return float x position in beamline coordinates
    */
-  float geometryCorrectionX(float x_rpd, float y_rpd, int side);
+  float geometryCorrectionX(float x_rpd, float y_rpd, int side) const;
   /**
    * @brief Calculate the y position in beamline coordinates from a position in RPD detector
    * coordinates using the offset of the RPD center and the rotation of the RPD plane.
@@ -90,7 +90,7 @@ private:
    * @param side side of RPD (C = 0, A = 1)
    * @return float y position in beamline coordinates
    */
-  float geometryCorrectionY(float x_rpd, float y_rpd, int side);
+  float geometryCorrectionY(float x_rpd, float y_rpd, int side) const;
 
   // Data members
   //
@@ -115,11 +115,6 @@ private:
   std::string m_auxSuffix;
   std::string m_zdcModuleContainerName;
   std::string m_zdcSumContainerName;
-
-  bool m_validInput;
-  unsigned int m_runNumber;
-  unsigned int m_lumiBlock;
-
 
   // Information from geometry
   //   as in the ZDC, we use side C = 0, side A = 1 for indexing 
@@ -152,31 +147,6 @@ private:
   //
   std::array<float, 2> m_xCentAvg;
   std::array<float, 2> m_yCentAvg;
-
-  // Analysis results
-  // ================
-  std::array<unsigned int, 2> m_status;
-  std::array<float, 2> m_ampSum; // the amplitude sum on the given side
-  std::array<float, 2> m_ampSumSub; // the subtracted amplitude sum on the given side
-  std::array<std::vector<std::vector<float> >, 2> m_ampSub; // the subtracted amplitude for each channel first index row, second column
-
-  std::array<float, 2> m_xCentUnsub;  // x centroid, average not subtracted
-  std::array<float, 2> m_yCentUnsub;  // y centroid, average not subtracted
-  std::array<float, 2> m_xCentUnsubCor;  // x centroid, average not subtracted, with geometry corrections
-  std::array<float, 2> m_yCentUnsubCor;  // y centroid, average not subtracted, with geometry corrections
-  std::array<float, 2> m_xCent;  // x centroid, subtracted
-  std::array<float, 2> m_yCent;  // y centroid, subtracted
-  std::array<float, 2> m_xCentCor;  // x centroid, subtracted, with geometry corrections
-  std::array<float, 2> m_yCentCor;  // y centroid, subtracted, with geometry corrections
-
-  std::array<std::vector<float>, 2> m_xCentRowUnsub; // the x centroid for each row, using unsubtracted amplitudes (diagnostic)
-  std::array<std::vector<float>, 2> m_yCentColUnsub; // the y centroid for each column, using unsubtracted amplitudes (diagnostic)
-  std::array<std::vector<float>, 2> m_xCentRow; // the x centroid for each row (diagnostic)
-  std::array<std::vector<float>, 2> m_yCentCol; // the y centroid for each column (diagnostic)
-
-  std::array<float, 2> m_xStdev; // x standard deviation
-  std::array<float, 2> m_yStdev; // y standard deviation
-  std::array<float, 2> m_xyCov;  // x-y covariance
   
   // read handle keys
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
