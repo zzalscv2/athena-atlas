@@ -49,6 +49,15 @@ namespace MC
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
+  template <class T> inline bool isSpecialNonInteracting(const T& p) {
+    const int apid = std::abs(p->pdg_id());
+    if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
+    if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
+    if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
+    if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
+    return false;
+  }
+
 /* The functions below should be unified */
   template <class T> inline bool jettruthparticleselectortool_isStable( const T& p) {
     if (HepMC::is_simulation_particle(p)) return false; // This particle is from G4
@@ -60,31 +69,14 @@ namespace MC
 
   template <class T> inline bool jettruthparticleselectortool_isInteracting(const T& p) {
       if (! jettruthparticleselectortool_isStable(p)) return false;
-      const int apid = std::abs(p->pdg_id() );
-      if ( isStable<T>(p) && (apid == 12 || apid == 14 || apid == 16)) return false; //< neutrinos
-      if ( isStable<T>(p) && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
-      if ( isStable<T>(p) && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
-      if ( isStable<T>(p) && (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006)) return false; //< exotic particles from monotop model
+      if ( isStable<T>(p) && isSpecialNonInteracting<T>(p)) return false;
       return true;      
     }
-
-  template <class T> inline bool DerivationFramework_isInteracting(const T& p) {
-    const int apid = std::abs(p->pdg_id());
-    if (apid == 12 || apid == 14 || apid == 16) return false; //< neutrinos
-    if (apid == 1000022 || apid == 1000024 || apid == 5100022) return false; // SUSY & KK photon and Z partners
-    if (apid == 39 || apid == 1000039 || apid == 5000039) return false; //< gravitons: standard, SUSY and KK
-    if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return false; //< exotic particles from monotop model
-    return true;
-  }
 
   template <class T> inline bool egammaTruthAlg_isGenStable_and_isGenInteracting (const T& p) {
     if (HepMC::is_simulation_particle(p)) return false;
     if (isZeroEnergyPhoton<T>(p)) return false;
-    const int apid = std::abs(p->pdg_id());
-    if ( isStable<T>(p) && (apid == 12 || apid == 14 || apid == 16)) return false; //< neutrinos
-    if ( isStable<T>(p) && (apid == 1000022 || apid == 1000024 || apid == 5100022)) return false;
-    if ( isStable<T>(p) && (apid == 39 || apid == 1000039 || apid == 5000039)) return false;
-    if ( isStable<T>(p) && (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006)) return false; //< exotic particles from monotop model
+    if ( isStable<T>(p) && isSpecialNonInteracting<T>(p)) return false;
     return isStableOrSimDecayed<T>(p);
   }
 
