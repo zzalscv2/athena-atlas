@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /* print_algorithms.cpp
@@ -62,13 +62,12 @@ int main(int argc, char ** argv)
     }
 	int count=0;
     std::map<std::string, dqm_core::Algorithm*> algslist = dqm_core::AlgorithmManager::instance().getAlgorithmMap();
-    std::map<std::string,dqm_core::Algorithm*>::iterator iter;
-    for (iter=algslist.begin();iter!=algslist.end();iter++){
+    for (const auto& p : algslist) {
         ++count;
         std::cout<<"*********************************************************************************************"<<std::endl;
-	std::cout<<"Algorithm Name '"<<iter->first<<"'"<<std::endl;
+	std::cout<<"Algorithm Name '"<<p.first<<"'"<<std::endl;
         std::cout<<"---------------------------------------------------------------------------------------------"<<std::endl;
-        iter->second->printDescription();
+        p.second->printDescription();
     }
     std::cout<<"There are "<<count<<" algorithm(s) in lib "<<library<<std::endl;
 }

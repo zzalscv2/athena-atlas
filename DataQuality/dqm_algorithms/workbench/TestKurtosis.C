@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-TestKurtosis()
+void TestKurtosis()
 {
 
     dqm_algorithms::KurtosisTest_LessThanAbs * algorithm = new dqm_algorithms::KurtosisTest_LessThanAbs();  

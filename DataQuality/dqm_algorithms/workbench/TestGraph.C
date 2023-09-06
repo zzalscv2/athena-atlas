@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-TestGraph()
+void TestGraph()
 {
   dqm_algorithms::GraphTest* algorithm = new dqm_algorithms::GraphTest();
   TFile* f=TFile::Open("../share/Test.root");//##filename##);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __CINT__
@@ -9,7 +9,7 @@
 #include "dqm_algorithms/RepeatAlgorithm.h"
 #endif
 
-TestRepeatAlgorithm_AddReference()
+void TestRepeatAlgorithm_AddReference()
 {
   TH1F* hin = new TH1F("hin","hin",100,-1,1);
   hin->FillRandom("gaus",10000);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
@@ -19,14 +19,23 @@ namespace dqm_algorithms
     {
       class DumpConfig {
 	public:
-	DumpConfig(std::string ParameterName,dqm_core::test::DummyAlgorithmConfig & config, std::string algorithmname, std::string histogramname, std::string reffilename="", std::string refhistogramname="", float weight=1.,std::string regionname="" );
+	DumpConfig(const std::string& ParameterName,
+                   dqm_core::test::DummyAlgorithmConfig & config,
+                   const std::string& algorithmname,
+                   const std::string& histogramname,
+                   const std::string& reffilename="",
+                   const std::string& refhistogramname="",
+                   float weight=1.,
+                   const std::string& regionname="" );
 	~DumpConfig();
 	
-	void DumpOnlineConfig(std::string filename,bool dumpAgent=true);
-        void DumpOfflineConfig(std::string filename);
+	void DumpOnlineConfig(const std::string& filename,bool dumpAgent=true);
+        void DumpOfflineConfig(const std::string& filename);
 
 	private:
-	void WriteThresholdFromMap(std::map<std::string,double> object,std::string ParameterName,std::string Name);
+	void WriteThresholdFromMap(const std::map<std::string,double>& object,
+                                   const std::string& ParameterName,
+                                   const std::string& Name);
 	void DumpThresholds();
 	void DumpParams();
 	void DumpRegion();

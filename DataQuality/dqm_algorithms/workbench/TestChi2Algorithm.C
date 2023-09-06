@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-TestChi2Algorithm()
+void TestChi2Algorithm()
 {
 
     dqm_algorithms::Chi2Test_Chi2 * algorithm = new dqm_algorithms::Chi2Test_Chi2();  

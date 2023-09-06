@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-TestSkewness()
+void TestSkewness()
 {
 
     dqm_algorithms::SkewnessTest_LessThan * algorithm = new dqm_algorithms::SkewnessTest_LessThan();  

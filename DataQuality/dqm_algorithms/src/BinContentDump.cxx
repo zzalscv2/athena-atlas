@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinContentDump.cxx dumps contents of all bins in a histogram (preferably char labeled TH1).  Method to store quantities in db; returns dqm_core::Result
@@ -65,7 +65,7 @@ dqm_core::Result *dqm_algorithms::BinContentDump::execute(const std::string &nam
 
         // Check if user has defined a minimum value on this bin
         const double undefined = -99999;
-        const double binThreshold = dqm_algorithms::tools::GetFirstFromMap(label.c_str(), config.getParameters(), undefined);
+        const double binThreshold = dqm_algorithms::tools::GetFirstFromMap(label, config.getParameters(), undefined);
         if ((binThreshold != undefined) && (binContent < binThreshold)) result->status_ = dqm_core::Result::Red;
 
         if (label.empty()) {

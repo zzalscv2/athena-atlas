@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
@@ -101,7 +101,7 @@ namespace dqm_algorithms
     dqm_core::Result * ExecuteNamedAlgorithm(const std::string & name, const TObject & object, 
 					     const dqm_core::AlgorithmConfig & config);
     
-    TH1* BookHistogramByExample(const TH1* histogram, const std::string& title, const std::string& name, AxisType axisType);
+    TH1* BookHistogramByExample(const TH1* histogram, const std::string& name, const std::string& title, AxisType axisType);
 	
     template <class T>
     const T & GetFromMap( const std::string & pname, const std::map<std::string,T> & params )
