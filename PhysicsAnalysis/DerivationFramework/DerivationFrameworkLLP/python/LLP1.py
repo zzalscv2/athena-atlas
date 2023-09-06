@@ -72,13 +72,15 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
         LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
             ConfigFlags,
             name = "LLP1LRTMaxCellDecoratorTool",
-            SGKey_electrons = "LRTElectrons"))
+            SGKey_electrons = "LRTElectrons",
+            SGKey_photons = ''))
     else:
         LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
             ConfigFlags,
             name = "LLP1LRTMaxCellDecoratorTool",
             SGKey_electrons = "LRTElectrons",
-            SGKey_egammaClusters   = "egammaClusters"))
+            SGKey_egammaClusters   = "egammaClusters",
+            SGKey_photons = ''))
     acc.addPublicTool(LLP1LRTMaxCellDecoratorTool)
 
     augmentationTools = [ LLP1MaxCellDecoratorTool,
