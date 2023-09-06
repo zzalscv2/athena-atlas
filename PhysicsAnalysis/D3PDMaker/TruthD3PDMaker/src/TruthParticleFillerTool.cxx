@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  */
 
 #include "TruthParticleFillerTool.h"
-#include "McParticleEvent/TruthParticle.h"
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "HepPDT/ParticleData.hh"
@@ -59,24 +58,6 @@ StatusCode TruthParticleFillerTool::book()
   CHECK( addVariable("barcode",   m_barcode) );
   CHECK( addVariable(m_PDGIDVariable,     m_pdgId) );
   CHECK( addVariable("charge",    m_charge) );
-  return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Fill one block --- type-safe version.
- * @param p The input object.
- *
- * This is called once per object.  The caller
- * is responsible for arranging that all the pointers for booked variables
- * are set appropriately upon entry.
- */
-StatusCode TruthParticleFillerTool::fill (const TruthParticle& p)
-{
-  *m_status = p.status();
-  *m_barcode = p.barcode();
-  *m_pdgId = p.pdgId();
-  *m_charge = p.charge();
   return StatusCode::SUCCESS;
 }
 

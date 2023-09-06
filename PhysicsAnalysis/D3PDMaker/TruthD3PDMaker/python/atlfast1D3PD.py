@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file TruthD3PDMaker/python/atlfast1D3PD.py
@@ -18,7 +18,6 @@ from JetD3PDMaker.JetD3PDObject                      import JetD3PDObject
 from TruthD3PDMaker.TruthJetD3PDObject               import TruthJetD3PDObject
 
 from TruthD3PDMaker.GenEventD3PDObject               import GenEventD3PDObject
-from TruthD3PDAnalysis.truthParticleConfig           import truthParticleConfig
 from TruthD3PDMaker.TruthParticleD3PDObject          import TruthParticleD3PDObject
 from TruthD3PDMaker.PartonJetConfig                  import PartonJetConfig
 from RecExConfig.RecFlags                            import rec
@@ -36,8 +35,6 @@ def atlfast1D3PD (file,
     # Configuration
     #--------------------------------------------------------------------------
     if rec.doTruth():
-        truthParticleConfig (seq)
-        #TruthJetFilterConfig (seq, excludeWZdecays = False)
         # PartonJetConfig is used to build parton-level jets
         # PartonJetConfig requires JetSimTools-00-01-22 or higher
         PartonJetConfig (doPythia = True, doHerwig = False)

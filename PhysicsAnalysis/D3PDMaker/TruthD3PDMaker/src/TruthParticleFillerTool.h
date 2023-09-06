@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -16,7 +16,6 @@
 
 
 #include "D3PDMakerUtils/BlockFillerTool.h"
-#include "McParticleEvent/TruthParticle.h"
 #include "xAODTruth/TruthParticle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
@@ -24,10 +23,10 @@
 namespace D3PD {
 
 class TruthParticleFillerTool
-  : public BlockFillerTool<Types<TruthParticle, xAOD::TruthParticle> >
+  : public BlockFillerTool<xAOD::TruthParticle>
 {
 public:
-  typedef BlockFillerTool<Types<TruthParticle, xAOD::TruthParticle> > Base;
+  typedef BlockFillerTool<xAOD::TruthParticle> Base;
 
 
   /**
@@ -47,17 +46,6 @@ public:
 
   /// Book variables for this block.
   virtual StatusCode book() final;
-
-
-  /**
-   * @brief Fill one block --- type-safe version.
-   * @param p The input object.
-   *
-   * This is called once per object.  The caller
-   * is responsible for arranging that all the pointers for booked variables
-   * are set appropriately upon entry.
-   */
-  virtual StatusCode fill (const TruthParticle& p) override;
 
 
   /**
