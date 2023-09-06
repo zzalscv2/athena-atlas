@@ -50,7 +50,7 @@ namespace LVL1 {
   private :
    /* Input handles */
    SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleKey{
-       this, "ZdcModuleLocation", TrigT1CaloDefs::xAODZdcMoudleLocation,
+       this, "ZdcModuleLocation", TrigT1CaloDefs::xAODZdcModuleLocation,
        "Read handle key for ZdcModuleContainer"};
        
    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergyKey 
