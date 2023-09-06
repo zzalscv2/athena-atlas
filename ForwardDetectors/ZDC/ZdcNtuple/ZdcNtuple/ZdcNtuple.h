@@ -43,6 +43,7 @@
 #include "xAODForward/AFPProtonContainer.h"
 #include "xAODForward/AFPTrackContainer.h"
 #include <TLorentzVector.h>
+#include "StoreGate/ReadHandleKey.h"
 
 class ZdcNtuple : public EL::AnaAlgorithm
 {
@@ -91,15 +92,17 @@ public:
   asg::AnaToolHandle<ZDC::IZdcAnalysisTool> m_zdcAnalysisTool;
   ToolHandle< InDet::IInDetTrackSelectionTool > m_selTool;
 
-
+  SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
+    { this, "ZdcModuleContainerName", "ZdcModules", "" };
+  SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
+    { this, "ZdcSumContainerName", "ZdcSums", "" };
+  
   const xAOD::EventInfo* m_eventInfo;
 
   // Containers
   const xAOD::TrigDecision* m_trigDecision;
   const xAOD::HIEventShapeContainer *m_caloSums;
   const xAOD::HIEventShapeContainer *m_eventShapes;
-  const xAOD::ZdcModuleContainer* m_zdcModules;
-  const xAOD::ZdcModuleContainer* m_zdcSums;
   const xAOD::ForwardEventInfoContainer* m_mbtsInfo;
   const xAOD::MBTSModuleContainer* m_mbtsModules;
   const xAOD::TrigT2MbtsBitsContainer* m_trigT2MbtsBits;
@@ -133,6 +136,7 @@ public:
   uint32_t t_eventNumber;
   uint32_t t_lumiBlock;
   uint32_t t_bcid;
+  uint8_t t_bunchGroup;
   uint32_t t_passBits;
   uint32_t t_extendedLevel1ID;
   uint32_t t_timeStamp;

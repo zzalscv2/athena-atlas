@@ -13,6 +13,7 @@ FwdZDCMonitoringAlg::~FwdZDCMonitoringAlg() {}
 StatusCode FwdZDCMonitoringAlg::initialize()
 {
   ATH_CHECK(m_zdcModuleContainerKey.initialize());
+  ATH_CHECK(m_zdcModuleCalibEnergyKey.initialize());
   return AthMonitorAlgorithm::initialize();
 }
 
@@ -20,12 +21,15 @@ StatusCode FwdZDCMonitoringAlg::fillHistograms(const EventContext &context) cons
 {
   const auto &trigDecTool = getTrigDecisionTool();
 
-  SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModHandle = SG::makeHandle(m_zdcModuleContainerKey, context);
+  // access ZDC modules
+  SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules(m_zdcModuleContainerKey, context);
+  // access ZDC aux data 
+  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle( m_zdcModuleCalibEnergyKey, context);
 
-  if (!zdcModHandle.isValid())
+  if (!zdcModules.isValid())
   {
-    ATH_MSG_ERROR("evtStore() does not contain Zdc Collection with name " << m_zdcModuleContainerKey);
-    return StatusCode::FAILURE;
+    ATH_MSG_DEBUG("evtStore() does not contain Zdc Collection with name " << m_zdcModuleContainerKey << ", is the Zdc present in this sample?");
+    return StatusCode::SUCCESS;
   }
 
   for (const auto &trig : m_triggerList)
@@ -47,26 +51,25 @@ StatusCode FwdZDCMonitoringAlg::fillHistograms(const EventContext &context) cons
     auto moduleNum = Monitored::Scalar<float>("moduleNum", 0.0);
 
     // read single modules
-    const xAOD::ZdcModuleContainer *zdcSingleModules = zdcModHandle.cptr();
-    for (const auto zdcSM : *zdcSingleModules)
+    for (const auto zdcModule : *zdcModules)
     {
-      if (zdcSM->zdcType() == 0)
+      if (zdcModule->zdcType() == 0)
       { // type = 0 are big modules, type = 1 the pixels
         // Side A
-        if (zdcSM->zdcSide() > 0)
+        if (zdcModule->zdcSide() > 0)
         {
-          moduleEnergy = zdcSM->auxdataConst<float>("CalibEnergy");
-          moduleNum = zdcSM->zdcModule();
-          e_A += zdcSM->auxdataConst<float>("CalibEnergy");
+          moduleEnergy = zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleNum = zdcModule->zdcModule();
+          e_A += zdcModuleCalibEnergyHandle(*zdcModule);
           fill(trig + "_expert", moduleEnergy, moduleNum);
           fill("ZDCall", moduleEnergy, moduleNum);
         }
         // Side C
-        if (zdcSM->zdcSide() < 0)
+        if (zdcModule->zdcSide() < 0)
         {
-          moduleEnergy = zdcSM->auxdataConst<float>("CalibEnergy");
-          moduleNum = zdcSM->zdcModule() + 4.;
-          e_C += zdcSM->auxdataConst<float>("CalibEnergy");
+          moduleEnergy = zdcModuleCalibEnergyHandle(*zdcModule);
+          moduleNum = zdcModule->zdcModule() + 4.;
+          e_C += zdcModuleCalibEnergyHandle(*zdcModule);
           fill(trig + "_expert", moduleEnergy, moduleNum);
           fill("ZDCall", moduleEnergy, moduleNum);
         }

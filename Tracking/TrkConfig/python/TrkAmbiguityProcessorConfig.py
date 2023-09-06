@@ -82,8 +82,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
         not flags.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit))
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
-                      flags.Tracking.doBremRecovery and
-                      flags.Tracking.ActiveConfig.extension in ["","UPC","BLS"])
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
@@ -177,8 +176,7 @@ def SimpleAmbiguityProcessorTool_Trig_Cfg(
     # kwargs.setdefault("RefitPrds", False)
     # #TODO clarify this setting False if flags.Tracking.ActiveConfig.name == 'cosmics' else True
     kwargs.setdefault("tryBremFit",
-                      flags.Tracking.ActiveConfig.input_name == 'electron' and
-                      flags.Tracking.doBremRecovery)
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("pTminBrem", 5*Units.GeV)
     kwargs.setdefault("MatEffects", 3)
 
@@ -443,8 +441,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
         not flags.Tracking.ActiveConfig.doAmbiguityProcessorTrackFit))
     kwargs.setdefault("SuppressHoleSearch", False)
     kwargs.setdefault("tryBremFit",
-                      flags.Tracking.doBremRecovery and
-                      flags.Tracking.ActiveConfig.extension in ["","UPC","BLS"])
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
@@ -536,9 +533,7 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
 
     # Disabled for second passes in reco
     kwargs.setdefault("tryBremFit",
-                      flags.Tracking.doBremRecovery and
-                      flags.Detector.EnableCalo and
-                      flags.Tracking.ActiveConfig.extension == "")
+                      flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem[0])
     kwargs.setdefault("RefitPrds", True)

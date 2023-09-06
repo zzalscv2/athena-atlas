@@ -80,9 +80,10 @@ def createTrackingConfigFlags():
              prevFlags.Tracking.doLowMu or
              prevFlags.Beam.Type is not BeamType.Collisions or
              not prevFlags.BField.solenoidOn)))
-    # Brem Recover in tracking restricted to Calo ROIs
-    icf.addFlag("Tracking.doCaloSeededBrem", lambda prevFlags:
-                prevFlags.Detector.EnableCalo)
+    icf.addFlag("Tracking.doCaloSeededBrem", lambda prevFlags: (
+        prevFlags.Detector.EnableCalo and prevFlags.Tracking.doBremRecovery))
+    icf.addFlag("Tracking.phiWidthBrem", 0.3)
+    icf.addFlag("Tracking.etaWidthBrem", 0.2)
     # Use Recover SSS to Calo ROIs
     icf.addFlag("Tracking.doHadCaloSeededSSS", False)
     # Use Calo ROIs to seed specific cuts for the ambi
