@@ -1196,7 +1196,7 @@ StatusCode TrigHitDVHypoAlg::findHitDV(const EventContext& ctx, const std::vecto
 
    static constexpr float TRKCUT_PTGEV_HITDV = 0.5;
 
-   for (const auto& track: tracks) {
+   for (const auto track: tracks) {
       float shift_x = 0; float shift_y = 0;
       if(m_useBeamSpot) {
          SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
