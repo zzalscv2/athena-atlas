@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file RootFit.h file declares the dqm_algorithms::RootFit  class.
@@ -35,9 +35,9 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
 						     const TObject & obj, 
 						     const dqm_core::AlgorithmConfig & config )
 {
+  std::unique_ptr<TGraph> newgraph;
   const TGraph* graph;
   const TGraph* refhist = 0;
-  bool ownObject=false;
   if ( obj.IsA()->InheritsFrom("TGraph") )
     {
       ERS_DEBUG(2,"Got TGraph called: "<<obj.GetName()<<" of type:"<<obj.IsA()->GetName());
@@ -46,10 +46,9 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
   else if ( obj.IsA()->InheritsFrom("TH1") )
     {
       ERS_DEBUG(2,"Got TH1: converting to TGraphErrors");
-      TGraph* newgraph = new TGraphErrors((TH1*)&obj);
+      newgraph = std::make_unique<TGraphErrors>(static_cast<const TH1*>(&obj));
       newgraph->SetNameTitle("TempG","TempG");
-      graph = const_cast<const TGraph*>(newgraph);
-      ownObject = true; // In case we are here we have to delete the graph 
+      graph = newgraph.get();
     }
   else
     {
@@ -69,12 +68,10 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
   if ( refhist ) {
     if ( ! refhist->IsA()->InheritsFrom("TGraph") )
       {
-	if ( ownObject ) delete graph;
 	throw dqm_core::BadRefHist(ERS_HERE,name,"Reference is not a TGraph");
       }
     if ( refhist->GetN() != npoints )
       {
-	if ( ownObject ) delete graph;
 	throw dqm_core::BadConfig(ERS_HERE,name,"Reference and object with different number of points");
       }
   }
@@ -109,7 +106,6 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
       {
 	std::stringstream msg;
 	msg<<"Configuration Error (Red<Green):"<<param[i]<<" G="<<grValue[i]<<" R="<<reValue[i];
-	if ( ownObject ) delete graph;
 	throw dqm_core::BadConfig(ERS_HERE,name,msg.str());
       }
   } // End of configuration retreival
@@ -140,7 +136,7 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
   Int_t yellowCounterErrorBars=0 , yellowCounterPoints=0;
   Int_t redCounterErrorBars=0 , redCounterPoints=0;
   std::stringstream errorsList;
-  dqm_core::Result* result = new dqm_core::Result;
+  auto result = std::make_unique<dqm_core::Result>();
   for ( Int_t bin = 0 ; bin < npoints ; ++bin) //Loop on all points
     {
       // Check point error bars
@@ -229,29 +225,25 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
     {
       ERS_DEBUG(1,"[Error] Result with "<<redCounterErrorBars+redCounterPoints<<" errors");
       ERS_DEBUG(2,"List of errors"<<errorsList.str());
-      if ( ownObject ) delete graph;
-	  result->status_=dqm_core::Result::Red;
+      result->status_=dqm_core::Result::Red;
       if ( redCounterErrorBars > 0 )
 	result->tags_.insert(std::make_pair("NumRedErrorBars",redCounterErrorBars));
       if ( redCounterPoints > 0 )
 	result->tags_.insert(std::make_pair("NumRedComparison",redCounterPoints));
-      return result;
+      return result.release();
     }
   if ( yellowCounterErrorBars > Ngreen || yellowCounterPoints > Ngreen )
     {
       ERS_DEBUG(1,"[YELLOW] Result with "<<yellowCounterErrorBars+yellowCounterPoints<<" errors");
       ERS_DEBUG(2,"List of errors"<<errorsList.str());
-      if ( ownObject ) delete graph;
       if ( yellowCounterErrorBars > 0 )
 	result->tags_.insert(std::make_pair("NumYellowsErrorBars",yellowCounterErrorBars));
       if ( yellowCounterPoints > 0 )
 	result->tags_.insert(std::make_pair("NumYellowsComparison",yellowCounterPoints));
       result->status_=dqm_core::Result::Yellow;
-      return result;
+      return result.release();
     }
   ERS_DEBUG(1,"[GREEN] Result");
-  if ( ownObject ) delete graph;
-  delete result;
   return new dqm_core::Result(dqm_core::Result::Green);
 }
 
