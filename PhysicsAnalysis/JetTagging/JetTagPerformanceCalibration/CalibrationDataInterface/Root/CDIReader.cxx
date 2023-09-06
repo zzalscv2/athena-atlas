@@ -20,7 +20,7 @@ Analysis::CDIReader::CDIReader(const std::string& cdipath, bool verbose) :  m_us
         std::cout << " CDI file build number: " << s->GetName() << std::endl;
     }
     TList* taggerkeys = m_CDIFile->GetListOfKeys();
-    for (const auto& tagger : *taggerkeys){
+    for (const auto tagger : *taggerkeys){
       const char* taggername = tagger->GetName();
       if(strcmp(taggername, "VersionInfo") != 0){
         // now we have the top-level tagger name, we want to add this to our overall meta data
@@ -52,7 +52,7 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
     // For each "label" stored in the working point directory,
     // we need to access the contents of the label directory
     // and construct the metadata map
-    for(const auto& label : *labelkeys){
+    for(const auto label : *labelkeys){
       std::string labelname = label->GetName();
       if(labelname == "cutvalue" || labelname == "fraction") continue;
       m_labels.insert(labelname);
@@ -63,7 +63,7 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
       if(flavourDir){
         Labels uncertainties; // flavour specific uncertainties
         TList* DSIDkeys = flavourDir->GetListOfKeys(); // this is the list of all the items in the flavour (DSID etc)
-        for(const auto& CDHistCont : *DSIDkeys){
+        for(const auto CDHistCont : *DSIDkeys){
           std::string DSIDname = CDHistCont->GetName();
           DSID_set.insert(DSIDname);
           m_DSIDs.insert(DSIDname);
@@ -104,7 +104,7 @@ void Analysis::CDIReader::crawlCDI(TDirectoryFile* parentDir, int depth, const s
     // and record the Data object
     record_metadata_map(theseData, metamap);
   } else {
-    for(const auto& coll: *keys){
+    for(const auto coll: *keys){
       std::string collname = coll->GetName();
       // track the metadata as you traverse
       record_metadata(collname, depth+1);
