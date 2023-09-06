@@ -189,7 +189,7 @@ void Analysis::CDIReader::printMetadata(int tagger, int jetcoll, int wpoint, int
   }
 }
 
-bool Analysis::CDIReader::checkConfig(const std::string& tagger, const std::string& jetcoll, const std::string& wp){
+bool Analysis::CDIReader::checkConfig(const std::string& tagger, const std::string& jetcoll, const std::string& wp, bool verbose){
   // this method checks if your config is correct or not
   // returns true if correct, false if not
   // if not correct, it will also print a helpful message
@@ -198,7 +198,7 @@ bool Analysis::CDIReader::checkConfig(const std::string& tagger, const std::stri
   // if these were each stored in a vector of strings, sorted alphanumerically
   // which happens already by default in the (ordered) map
   int tagger_ind = 0;
-  int jetcoll_ind = 0; 
+  int jetcoll_ind = 0;
   int wp_ind = 0;
 
   if(m_metadata.count(tagger) > 0){
@@ -219,8 +219,8 @@ bool Analysis::CDIReader::checkConfig(const std::string& tagger, const std::stri
           wp_ind += 1;
           if(wpoint.first == wp) break;
         }
-        std::cout << " Your configuration looks good! Available labels are : " << std::endl;
-        printMetadata(tagger_ind, jetcoll_ind, wp_ind, -1);
+        if (verbose) std::cout << " Your configuration looks good! Available labels are : " << std::endl;
+        if (verbose) printMetadata(tagger_ind, jetcoll_ind, wp_ind, -1);
         // construct vector of labels
         for(std::string flavour_label : m_metadata[tagger][jetcoll][wp]["labels"]){
           m_label_vec.push_back(flavour_label);
@@ -229,21 +229,21 @@ bool Analysis::CDIReader::checkConfig(const std::string& tagger, const std::stri
         std::sort(m_label_vec.begin(), m_label_vec.end());
         configured = true;
       } else {
-        std::cout << "Couldn't find \"" << wp << "\" for " << tagger << " / " << jetcoll << " in this CDI file!" <<  std::endl;
-        std::cout << "Here are your options :" << std::endl;
-        printMetadata(tagger_ind, jetcoll_ind, -1, 0);
+        if (verbose) std::cout << "Couldn't find \"" << wp << "\" for " << tagger << " / " << jetcoll << " in this CDI file!" <<  std::endl;
+        if (verbose) std::cout << "Here are your options :" << std::endl;
+        if (verbose) printMetadata(tagger_ind, jetcoll_ind, -1, 0);
       }
     } else {
-      std::cout << "Couldn't find \"" << jetcoll << "\" under " << tagger << " in this CDI file!" <<  std::endl;
-      std::cout << "Here are your options :" << std::endl;
-      printMetadata(tagger_ind, -1, 0, 0);
+      if (verbose) std::cout << "Couldn't find \"" << jetcoll << "\" under " << tagger << " in this CDI file!" <<  std::endl;
+      if (verbose) std::cout << "Here are your options :" << std::endl;
+      if (verbose) printMetadata(tagger_ind, -1, 0, 0);
     }
   } else {
-    std::cout << "Couldn't find \"" << tagger << "\" in this CDI file" <<  std::endl;
-    std::cout << "Here are your options :" << std::endl;
-    printMetadata(-1,0,0,0);
+    if (verbose) std::cout << "Couldn't find \"" << tagger << "\" in this CDI file" <<  std::endl;
+    if (verbose) std::cout << "Here are your options :" << std::endl;
+    if (verbose) printMetadata(-1,0,0,0);
   }
-  
+
   if(m_use_json){
     // let's make a json object from the nlohmann package and save it to file
     json json_metadata(m_metadata);
