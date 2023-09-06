@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,7 +74,7 @@ TSMethodCall::~TSMethodCall()
   // Don't try to run the TMethodCall destructor if gCling is gone.
   TInterpreter* cling ATLAS_THREAD_SAFE = gCling;
   if (!cling) {
-    m_meth.release();
+    (void)m_meth.release();
     m_tsMeth.release();
   }
 }
