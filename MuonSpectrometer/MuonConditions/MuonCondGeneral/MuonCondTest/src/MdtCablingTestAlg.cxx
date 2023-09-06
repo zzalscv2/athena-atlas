@@ -105,17 +105,15 @@ StatusCode MdtCablingTestAlg::execute(){
         ATH_MSG_DEBUG("Detector element does not exist. ");
         continue;
     }
-    const Identifier station_id = idHelper.elementID(readEle->identify());
-    
-    if (deadChan && !deadChan->isGoodStation(station_id)) {
-      ATH_MSG_ALWAYS("Dead station found "<<m_idHelperSvc->toString(station_id));
+    if (deadChan && !deadChan->isGoodChamber(readEle->identify())) {
+      ATH_MSG_ALWAYS("Dead station found "<<m_idHelperSvc->toStringChamber(readEle->identify()));
       continue;
     }
-    ATH_MSG_DEBUG("Check station "<<m_idHelperSvc->toString(station_id));
+    ATH_MSG_DEBUG("Check station "<<m_idHelperSvc->toStringChamber(readEle->identify()));
     for (int layer = 1 ; layer <= readEle->getNLayers(); ++layer){
       for (int tube = 1 ; tube <= readEle->getNtubesperlayer(); ++tube){
           bool is_valid{false};
-          const Identifier tube_id = idHelper.channelID(station_id,readEle->getMultilayer(), layer, tube, is_valid);
+          const Identifier tube_id = idHelper.channelID(readEle->identify(), readEle->getMultilayer(), layer, tube, is_valid);
           if (!is_valid){
             ATH_MSG_VERBOSE("Invalid element");
             continue;
@@ -176,7 +174,7 @@ StatusCode MdtCablingTestAlg::execute(){
              continue;
           }
           /// There might be channels sitting on the same CSM but on differnt stations
-          if (idHelper.elementID(test_id) != station_id && static_cast<const MdtCablingOnData&>(mrod_module)!=(cabling_data)) {
+          if (idHelper.elementID(test_id) != idHelper.elementID(readEle->identify()) && static_cast<const MdtCablingOnData&>(mrod_module)!=(cabling_data)) {
               ATH_MSG_ERROR("Failed to decode module "<<m_idHelperSvc->toString(tube_id)<<" got "<<m_idHelperSvc->toString(test_id) );
               failure = true;
           } else ++n_success;

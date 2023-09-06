@@ -10,7 +10,8 @@
 
 //Athena includes
 #include "AthenaKernel/CondCont.h" 
-#include "AthenaKernel/BaseInfo.h" 
+#include "AthenaKernel/BaseInfo.h"
+#include "MuonCondData/Defs.h"
 
 //forward declarations
 class Identifier;
@@ -27,43 +28,21 @@ public:
     
     
     virtual ~MdtCondDbData() = default;
-
-    void setDeadTube      (std::string_view, Identifier);
-    void setDeadLayer     (std::string_view, Identifier);
-    void setDeadMultilayer(std::string_view, Identifier);
-    void setDeadStation   (std::string_view, Identifier);
-    void setDeadChamber   (Identifier);
-
-    void setNoisyTube      (Identifier);
-    void setNoisyLayer     (Identifier);
-    void setNoisyMultilayer(Identifier);
-    void setNoisyStation   (Identifier);
-    void setNoisyChamber   (Identifier);
+    /// @brief  The indiviudal tube is dead
+    void setDeadTube      (const Identifier& ident);
+    /// @brief  All tubes in a drift layer are dead
+    void setDeadLayer     (const Identifier& ident);
+    /// @brief  All tubes in a multi layer are dead
+    void setDeadMultilayer(const Identifier& ident);
+    /// @brief All tubes in a chamber are dead
+    void setDeadChamber   (const Identifier& ident);
    
-    const std::set<std::string>& getDeadTubes      () const;
-    const std::set<std::string>& getDeadLayers     () const;
-    const std::set<std::string>& getDeadMultilayers() const;
-    const std::set<std::string>& getDeadStations   () const;
-    const std::set<std::string>& getDeadChambers   () const;
-    
+    //// Returns a list of Identifiers of dead tubes / layers / etc.
     const std::set<Identifier>& getDeadTubesId      () const;
     const std::set<Identifier>& getDeadLayersId     () const;
     const std::set<Identifier>& getDeadMultilayersId() const;
-    const std::set<Identifier>& getDeadStationsId   () const;
     const std::set<Identifier>& getDeadChambersId   () const;
-
-    const std::set<std::string>& getNoisyTubes      () const;
-    const std::set<std::string>& getNoisyLayers     () const;
-    const std::set<std::string>& getNoisyMultilayers() const;
-    const std::set<std::string>& getNoisyStations   () const;
-    const std::set<std::string>& getNoisyChambers   () const;
-    
-    const std::set<Identifier>& getNoisyTubesId      () const;
-    const std::set<Identifier>& getNoisyLayersId     () const;
-    const std::set<Identifier>& getNoisyMultilayersId() const;
-    const std::set<Identifier>& getNoisyStationsId   () const;
-    const std::set<Identifier>& getNoisyChambersId   () const;
-  
+   
     /// Returns if the identifier (tube/multiLayer/chamber) is masked
     /// in the conditions database
     bool isGood          (const Identifier & Id) const;
@@ -74,40 +53,34 @@ public:
     /// marked as bad in the database    
     bool isGoodLayer     (const Identifier & Id) const;
     bool isGoodMultilayer(const Identifier & Id) const;
-    ///  Returns true if the chamber is switched off in the 
-    ///  database
-    bool isGoodStation   (const Identifier & Id) const;
     ///  Returns true if the complete chamber has not dead channels
     bool isGoodChamber   (const Identifier & Id) const;
-   
- 
+
+    using DcsFsmState = MuonCond::DcsFsmState;
+    using DcsConstants = MuonCond::DcsConstants;
+
+    /** @brief Adds a DCS state to the conditions object
+     *       multiLayerID -> Identifier of a tube in the multilayer
+     *       state -> DCS state flag
+     *       standByVolt: voltage if system is at standby
+     *       readyVolt: Voltage if system is ready for data-taking
+    */ 
+    void setHvState(const Identifier& multiLayerID, 
+                    const DcsFsmState state,
+                    const float standByVolt,
+                    const float readyVolt);
+    
+    const DcsConstants& getHvState(const Identifier& multiLayerID) const;
+
+    const std::vector<DcsConstants>& getAllHvStates() const;
 private:
+    std::set<Identifier> m_cachedDeadTubes{};
+    std::set<Identifier> m_cachedDeadLayers{};
+    std::set<Identifier> m_cachedDeadMultilayers{};
+    std::set<Identifier> m_cachedDeadChambers{};
 
-    std::set<std::string> m_cachedDeadTubes{};
-    std::set<std::string> m_cachedDeadLayers{};
-    std::set<std::string> m_cachedDeadMultilayers{};
-    std::set<std::string> m_cachedDeadStations{};
-    std::set<std::string> m_cachedDeadChambers{};
-
-    std::set<Identifier> m_cachedDeadTubesId{};
-    std::set<Identifier> m_cachedDeadLayersId{};
-    std::set<Identifier> m_cachedDeadMultilayersId{};
-    std::set<Identifier> m_cachedDeadStationsId{};
-    std::set<Identifier> m_cachedDeadChambersId{};
- 
-    std::set<std::string> m_cachedNoisyTubes{};
-    std::set<std::string> m_cachedNoisyLayers{};
-    std::set<std::string> m_cachedNoisyMultilayers{};
-    std::set<std::string> m_cachedNoisyStations{};
-    std::set<std::string> m_cachedNoisyChambers{};
-
-    std::set<Identifier> m_cachedNoisyTubesId{};
-    std::set<Identifier> m_cachedNoisyLayersId{};
-    std::set<Identifier> m_cachedNoisyMultilayersId{};
-    std::set<Identifier> m_cachedNoisyStationsId{};
-    std::set<Identifier> m_cachedNoisyChambersId{};
-
-    const  MdtIdHelper& m_id_helper;   
+    std::vector<DcsConstants> m_dcsStates{};
+    const MdtIdHelper& m_id_helper;
 
 };
 

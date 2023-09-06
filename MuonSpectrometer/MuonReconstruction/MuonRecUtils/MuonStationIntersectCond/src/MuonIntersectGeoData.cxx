@@ -37,7 +37,7 @@ namespace Muon {
         stations.reserve(chambers.size());
         // loop over bins, retrieve geometry
         for (const Identifier& chId : chambers) {
-            if (m_dbData && !m_dbData->isGoodStation(chId)) { continue; }
+            if (m_dbData && !m_dbData->isGood(chId)) { continue; }
             std::shared_ptr<const MdtIntersectGeometry> chamb = getChamber(chId);
             if (chamb) stations.push_back(std::move(chamb));
         }

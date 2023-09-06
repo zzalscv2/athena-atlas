@@ -83,7 +83,7 @@ StatusCode GeoModelMdtTest::execute() {
     for (const Identifier& test_me : m_testStations) {
         const std::string detStr = m_idHelperSvc->toStringDetEl(test_me);
         ATH_MSG_VERBOSE("Test retrieval of Mdt detector element " << detStr);
-        if (deadChan && !deadChan->isGoodStation(test_me)) {
+        if (deadChan && !deadChan->isGoodChamber(test_me)) {
             ATH_MSG_VERBOSE("Dead station found " << detStr);
             continue;
         }

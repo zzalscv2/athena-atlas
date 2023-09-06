@@ -61,8 +61,6 @@ def MDT_DigitizationToolCommonCfg(flags, name="MdtDigitizationTool", **kwargs):
     acc = MdtCondDbAlgCfg(flags)
     calibDbTool = acc.popToolsAndMerge(MdtCalibrationDbToolCfg(flags))
     kwargs.setdefault("CalibrationDbTool", calibDbTool)
-    kwargs.setdefault("MaskedStations", [])
-    kwargs.setdefault("UseDeadChamberSvc", True)
     kwargs.setdefault("DiscardEarlyHits", True)
     kwargs.setdefault("UseTof", flags.Beam.Type is not BeamType.Cosmics)
     # "RT_Relation_DB_DigiTool" in jobproperties.Digitization.experimentalDigi() not migrated

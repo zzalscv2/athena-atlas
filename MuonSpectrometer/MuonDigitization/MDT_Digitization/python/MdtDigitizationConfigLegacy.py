@@ -23,8 +23,6 @@ def MdtDigitizationTool(name="MdtDigitizationTool",**kwargs):
    from MuonCnvExample import MuonCalibConfig
    MuonCalibConfig.setupMdtCondDB() # add MdtCalibDbAlg for MdtCalibrationDbTool
 
-   kwargs.setdefault("MaskedStations", [])
-   kwargs.setdefault("UseDeadChamberSvc", True)
    kwargs.setdefault("DiscardEarlyHits", True)
 
    kwargs.setdefault("UseTof", jobproperties.Beam.beamType != "cosmics")

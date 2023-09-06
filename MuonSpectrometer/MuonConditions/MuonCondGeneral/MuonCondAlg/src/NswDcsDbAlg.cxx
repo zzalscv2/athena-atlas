@@ -118,9 +118,9 @@ NswDcsDbAlg::loadHvData(const EventContext& ctx, const readKey_t& readKey, const
 		const coral::AttributeList& atr = itr->second;
 
 		NswDcsDbData::DcsConstants dcs_data{};
-		dcs_data.v0set     = *(static_cast<const float*>((atr["v0Set"]).addressOfData()));
-		dcs_data.v1set     = *(static_cast<const float*>((atr["v1Set"]).addressOfData()));
-		dcs_data.fsmState  = NswDcsDbData::getFsmStateEnum(*(static_cast<const std::string*>((atr["fsmCurrentState"]).addressOfData())));
+		dcs_data.standbyVolt     = *(static_cast<const float*>((atr["v0Set"]).addressOfData()));
+		dcs_data.readyVolt     = *(static_cast<const float*>((atr["v1Set"]).addressOfData()));
+		dcs_data.fsmState  = MuonCond::getFsmStateEnum(*(static_cast<const std::string*>((atr["fsmCurrentState"]).addressOfData())));
 		ATH_MSG_DEBUG("channel " << chanName << " has fsm state " << *(static_cast<const std::string*>((atr["fsmCurrentState"]).addressOfData()))<< " has v0 state " << *(static_cast<const float*>( (atr["v0Set"]).addressOfData()))<< " has v1 " << *(static_cast<const float*>((atr["v1Set"]).addressOfData())));
 		
 		writeCdo->setDataHv(tech, channelId, dcs_data);

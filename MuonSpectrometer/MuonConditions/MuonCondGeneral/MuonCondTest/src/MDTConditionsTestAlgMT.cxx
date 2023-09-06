@@ -37,7 +37,7 @@ StatusCode MDTConditionsTestAlgMT::execute() {
         for (const Identifier& dead_tube : readCdo->getDeadTubesId()) {
             sstr<<"   **** "<<m_idHelperSvc->toString(dead_tube)<<std::endl;
         }
-        ATH_MSG_INFO("Found "<<readCdo->getDeadTubes().size()<<" dead tubes"<<std::endl<<sstr.str());
+        ATH_MSG_INFO("Found "<<readCdo->getDeadTubesId().size()<<" dead tubes"<<std::endl<<sstr.str());
     }
     
     {
@@ -53,14 +53,6 @@ StatusCode MDTConditionsTestAlgMT::execute() {
             sstr<<"   **** "<<m_idHelperSvc->toString(dead_ml)<<std::endl;
         }
         ATH_MSG_INFO("Found "<<readCdo->getDeadMultilayersId().size()<<" dead multi layers"<<std::endl<<sstr.str());
-    }
-
-    {
-        std::stringstream sstr{};
-        for (const Identifier& dead_cham : readCdo->getDeadStationsId()) {
-            sstr<<"   **** "<<m_idHelperSvc->toString(dead_cham)<<std::endl;
-        }
-        ATH_MSG_INFO("Found "<<readCdo->getDeadStationsId().size()<<" dead stations"<<std::endl<<sstr.str());
     }
     {
         std::stringstream sstr{};

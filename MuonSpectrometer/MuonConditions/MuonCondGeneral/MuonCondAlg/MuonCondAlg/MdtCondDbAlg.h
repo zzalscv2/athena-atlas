@@ -1,17 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDALG_MDTCONDDBALG_H
 #define MUONCONDALG_MDTCONDDBALG_H
 
-// STL includes
-#include <string>
-#include <vector>
-
-// Gaudi includes
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -32,49 +25,55 @@ public:
     virtual bool isReEntrant() const override { return false; }
 
 private:
-    typedef SG::WriteCondHandle<MdtCondDbData> writeHandle_t;
-    StatusCode loadDataPsHv(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
-    StatusCode loadDataPsLv(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
-    StatusCode loadDataHv(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
-    StatusCode loadDataLv(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
-    StatusCode loadDroppedChambers(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx, bool isMC) const;
-    StatusCode loadMcDeadElements(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
-    StatusCode loadMcDeadTubes(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
-    StatusCode loadMcNoisyChannels(writeHandle_t& wh, MdtCondDbData* dataOut, const EventContext& ctx) const;
+    using writeHandle_t = SG::WriteCondHandle<MdtCondDbData>;
+    using dataBaseKey_t = SG::ReadCondHandleKey<CondAttrListCollection>;
 
-    bool m_isOnline{false};
-    bool m_isData{false};
-    bool m_isRun1{false};
-    bool m_checkOnSetPoint{false};
+    StatusCode loadDependencies(const EventContext& ctx, writeHandle_t& wh) const;
+    StatusCode addDependency(const EventContext& ctx, const dataBaseKey_t& key,  writeHandle_t& wh) const;
+    
+    StatusCode loadDataPsHv(const EventContext& ctx, MdtCondDbData& dataOut) const;
+    StatusCode loadDataPsLv(const EventContext& ctx, MdtCondDbData& dataOut) const;
+    StatusCode loadDataHv(const EventContext& ctx, MdtCondDbData& dataOut) const;
+    StatusCode loadDataLv(const EventContext& ctx, MdtCondDbData& dataOut) const;
+    StatusCode loadDroppedChambers(const EventContext& ctx, MdtCondDbData& dataOut, bool isMC) const;
+    StatusCode loadMcDeadElements(const EventContext& ctx, MdtCondDbData& dataOut) const;
+    StatusCode loadMcDeadTubes(const EventContext& ctx, MdtCondDbData& dataOut) const;
+    StatusCode loadMcNoisyChannels(const EventContext& ctx, MdtCondDbData& dataOut) const;
+
+    Gaudi::Property<bool> m_isOnline{this, "isOnline", false};
+    Gaudi::Property<bool> m_isData{this, "isData", false};
+    Gaudi::Property<bool> m_isRun1{this, "isRun1", false};
+    Gaudi::Property<bool> m_checkOnSetPoint{this, "useRun1SetPoints", false};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
     SG::WriteCondHandleKey<MdtCondDbData> m_writeKey{this, "WriteKey", "MdtCondDbData", "Key of output MDT condition data"};
 
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_pshv{this, "ReadKey_DataR1_HV", "/MDT/DCS/PSHVMLSTATE",
+    dataBaseKey_t m_readKey_folder_da_pshv{this, "ReadKey_DataR1_HV", "/MDT/DCS/PSHVMLSTATE",
                                                                            "Key of input MDT condition data for Run 1 data HV"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_psv0{this, "ReadKey_DataR1_V0", "/MDT/DCS/PSV0SETPOINTS",
+    dataBaseKey_t m_readKey_folder_da_psv0{this, "ReadKey_DataR1_V0", "/MDT/DCS/PSV0SETPOINTS",
                                                                            "Key of input MDT condition data for Run 1 data V0"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_psv1{this, "ReadKey_DataR1_V1", "/MDT/DCS/PSV1SETPOINTS",
+    dataBaseKey_t m_readKey_folder_da_psv1{this, "ReadKey_DataR1_V1", "/MDT/DCS/PSV1SETPOINTS",
                                                                            "Key of input MDT condition data for Run 1 data V1"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_pslv{this, "ReadKey_DataR1_LV", "/MDT/DCS/PSLVCHSTATE",
+    dataBaseKey_t m_readKey_folder_da_pslv{this, "ReadKey_DataR1_LV", "/MDT/DCS/PSLVCHSTATE",
                                                                            "Key of input MDT condition data for Run 1 data LV"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_droppedChambers{
+    dataBaseKey_t m_readKey_folder_da_droppedChambers{
         this, "ReadKey_DataR1_DC", "/MDT/DCS/DROPPEDCH", "Key of input MDT condition data for Run 1 data dropped chambers"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_hv{this, "ReadKey_DataR2_HV", "/MDT/DCS/HV",
+    dataBaseKey_t m_readKey_folder_da_hv{this, "ReadKey_DataR2_HV", "/MDT/DCS/HV",
                                                                          "Key of input MDT condition data for Run 2 data HV"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_da_lv{this, "ReadKey_DataR2_LV", "/MDT/DCS/LV",
+    dataBaseKey_t m_readKey_folder_da_lv{this, "ReadKey_DataR2_LV", "/MDT/DCS/LV",
                                                                          "Key of input MDT condition data for Run 2 data LV"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_mc_droppedChambers{
+    dataBaseKey_t m_readKey_folder_mc_droppedChambers{
         this, "ReadKey_MC_DC", "/MDT/DCS/DROPPEDCH", "Key of input MDT condition data for MC dropped chambers"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_mc_deadElements{this, "ReadKey_MC_DE", "/MDT/DQMF/DEAD_ELEMENT",
+    dataBaseKey_t m_readKey_folder_mc_deadElements{this, "ReadKey_MC_DE", "/MDT/DQMF/DEAD_ELEMENT",
                                                                                    "Key of input MDT condition data for MC dead elements"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_mc_deadTubes{this, "ReadKey_MC_DT", "/MDT/TUBE_STATUS/DEAD_TUBE",
+    dataBaseKey_t m_readKey_folder_mc_deadTubes{this, "ReadKey_MC_DT", "/MDT/TUBE_STATUS/DEAD_TUBE",
                                                                                 "Key of input MDT condition data for MC dead tubes"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKey_folder_mc_noisyChannels{
+    dataBaseKey_t m_readKey_folder_mc_noisyChannels{
         this, "ReadKey_MC_NC", "/MDT/DCS/PSLVCHSTATE", "Key of input MDT condition data for MC noisy channels"};
 
     Identifier identifyChamber(std::string chamber) const;
+
     std::map<std::string, Identifier> m_chamberNames{};
 };
 
