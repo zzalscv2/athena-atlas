@@ -13,7 +13,7 @@
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-
+#include "MuonCondData/Defs.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 class NswDcsDbData {  
@@ -24,31 +24,11 @@ public:
         MMD, // MM drift channels
         STG  // sTGC
     };
-    enum class DcsDataType{
-        HV,
-        LV
-    };
-    enum class DcsFsmState{
-        NONE,
-        UNKNOWN,
-        OFF,
-        ON,
-        STANDBY,
-        DEAD,
-        UNPLUGGED,
-        RAMP_UP,
-        RAMP_DOWN,
-        TRIP,
-        RECOVERY,
-        LOCKED
-    };
-    /// Helper struct to cache all dcs constants 
-    /// in a common place of the memory
-    struct DcsConstants{
-       float v0set{0.f};
-       float v1set{0.f};
-       DcsFsmState fsmState{DcsFsmState::NONE};
-    };
+    using DcsDataType = MuonCond::DcsDataType;
+    using DcsFsmState = MuonCond::DcsFsmState;
+    using DcsConstants = MuonCond::DcsConstants;
+    
+
     struct TDaqConstants{
         unsigned int lbSince{0};
         unsigned int lbUntil{0};
@@ -79,11 +59,6 @@ public:
     bool isGoodTDaq(const EventContext& ctx, const Identifier& channelId) const;
     bool isConnectedChannel(const Identifier& channelId) const;
 
-    
-    // helper functions
-    static DcsFsmState getFsmStateEnum(const std::string& fsmState);
-    static std::string getFsmStateStrg(DcsFsmState fsmState);
- 
 private:
     
     unsigned int identToModuleIdx(const Identifier& chan_id) const;

@@ -70,8 +70,6 @@ namespace MuonGM {
 }  // namespace MuonGM
 
 class MdtHitIdHelper;
-class MdtCondDbData;
-
 // Digitization class for MDT hits
 /*
   +DSL--------------------------------------------------------------------------
@@ -132,9 +130,9 @@ private:
 
     bool insideMatchingWindow(double time) const;
     bool insideMaskWindow(double time) const;
-    bool checkMDTSimHit(const MDTSimHit& hit) const;
+    bool checkMDTSimHit(const EventContext& ctx, const MDTSimHit& hit) const;
 
-    bool handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
+    bool handleMDTSimhit(const EventContext& ctx, const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
                          CLHEP::HepRandomEngine* toolRndmEngine);
     bool createDigits(Collections_t& collections, MuonSimDataCollection* sdoContainer, CLHEP::HepRandomEngine* rndmEngine);
 
@@ -190,37 +188,12 @@ private:
     Gaudi::Property<bool> m_useOffSet1{this, "UseOffSet1", true, ""};
     Gaudi::Property<bool> m_useOffSet2{this, "UseOffSet2", true, ""};
 
-    // Conditions Database
-    Gaudi::Property<bool> m_UseDeadChamberSvc{this, "UseDeadChamberSvc", false, ""};
+
     // B-lines
     Gaudi::Property<bool> m_useDeformations{this, "UseDeformations", false, ""};
 
     // MULTI-CHARGE PARTICLES DIGITIZATION
     Gaudi::Property<bool> m_DoQballCharge{this, "DoQballCharge", false, "dEdx for Qballs with account of electric charge"};
-
-    // STATIONS TO MASK
-    Gaudi::Property<std::vector<std::string>> m_maskedStations{this, "MaskedStations", {}, "Stations to be masked at digi level"};
-    struct maskedStation {
-        maskedStation(std::string_view n, std::string_view e, std::string_view p) :
-            maskedName(n), maskedEta(e), maskedPhi(p), imaskedEta(0), imaskedPhi(0) {
-            if (e != "*") {
-                imaskedEta = atoi(maskedEta.c_str());
-            }
-            if (p != "*") {
-                imaskedPhi = atoi(maskedPhi.c_str());
-            }
-        }
-        std::string maskedName;
-        std::string maskedEta;
-        std::string maskedPhi;
-        int imaskedEta;
-        int imaskedPhi;
-    };
-
-    std::vector<maskedStation> m_vMaskedStations;
-
-    // list of Identifiers returned by the Conditions Service to mask stations
-    std::set<Identifier> m_IdentifiersToMask;
 
     // pile-up
     std::unique_ptr<TimedHitCollection<MDTSimHit>> m_thpcMDT{};  // the hits

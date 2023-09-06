@@ -26,41 +26,10 @@ NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stg
 {
 }
 
-NswDcsDbData::DcsFsmState
-NswDcsDbData::getFsmStateEnum(const std::string& fsmState){
-	if(fsmState=="UNKNOWN"  ) return NswDcsDbData::DcsFsmState::UNKNOWN;
-	if(fsmState=="ON"       ) return NswDcsDbData::DcsFsmState::ON;
-	if(fsmState=="OFF"      ) return NswDcsDbData::DcsFsmState::OFF;
-	if(fsmState=="STANDBY"  ) return NswDcsDbData::DcsFsmState::STANDBY;
-	if(fsmState=="DEAD"     ) return NswDcsDbData::DcsFsmState::DEAD;
-	if(fsmState=="UNPLUGGED") return NswDcsDbData::DcsFsmState::UNPLUGGED;
-	if(fsmState=="RAMP_UP"  ) return NswDcsDbData::DcsFsmState::RAMP_UP;
-	if(fsmState=="RAMP_DOWN") return NswDcsDbData::DcsFsmState::RAMP_DOWN;
-	if(fsmState=="TRIP"     ) return NswDcsDbData::DcsFsmState::TRIP;
-	if(fsmState=="RECOVERY" ) return NswDcsDbData::DcsFsmState::RECOVERY;
-	if(fsmState=="LOCKED"   ) return NswDcsDbData::DcsFsmState::LOCKED;
-	return DcsFsmState::NONE;
-}
-std::string
-NswDcsDbData::getFsmStateStrg(NswDcsDbData::DcsFsmState fsmState){
-	if(fsmState==NswDcsDbData::DcsFsmState::UNKNOWN  ) return "UNKNOWN"  ;
-	if(fsmState==NswDcsDbData::DcsFsmState::ON       ) return "ON"       ;
-	if(fsmState==NswDcsDbData::DcsFsmState::OFF      ) return "OFF"      ;
-	if(fsmState==NswDcsDbData::DcsFsmState::STANDBY  ) return "STANDBY"  ;
-	if(fsmState==NswDcsDbData::DcsFsmState::DEAD     ) return "DEAD"     ;
-	if(fsmState==NswDcsDbData::DcsFsmState::UNPLUGGED) return "UNPLUGGED";
-	if(fsmState==NswDcsDbData::DcsFsmState::RAMP_UP  ) return "RAMP_UP"  ;
-	if(fsmState==NswDcsDbData::DcsFsmState::RAMP_DOWN) return "RAMP_DOWN";
-	if(fsmState==NswDcsDbData::DcsFsmState::TRIP     ) return "TRIP"     ;
-	if(fsmState==NswDcsDbData::DcsFsmState::RECOVERY ) return "RECOVERY" ;
-	if(fsmState==NswDcsDbData::DcsFsmState::LOCKED   ) return "LOCKED"   ;
-	return "NONE";
-}
-
 std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::DcsConstants& obj) {
-    ostr<<" v0set: "   <<std::setprecision(15)<<obj.v0set;
-    ostr<<" v1set: "   <<std::setprecision(15)<<obj.v1set;
-    ostr<<" fsmState: "<<NswDcsDbData::getFsmStateStrg(obj.fsmState);
+    ostr<<" standbyVolt: "   <<std::setprecision(15)<<obj.standbyVolt;
+    ostr<<" readyVolt: "   <<std::setprecision(15)<<obj.readyVolt;
+    ostr<<" fsmState: "<<MuonCond::getFsmStateStrg(obj.fsmState);
     return ostr;
 }
 

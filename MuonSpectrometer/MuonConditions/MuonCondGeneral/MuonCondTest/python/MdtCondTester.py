@@ -1,16 +1,16 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def NSWCondAlgTest(flags,alg_name="NSWCondTestAlg", **kwargs):
+def MdtConditionsTestCfg(flags, name="MdtConditionsTest", **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from MuonConfig.MuonCondAlgConfig import NswCalibDbAlgCfg
-    result.merge(NswCalibDbAlgCfg(flags))
-    the_alg = CompFactory.NswCondTestAlg(alg_name, **kwargs)
-    result.addEventAlgo(the_alg, primary=True)
+    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    result.merge(MdtCondDbAlgCfg(flags))
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    result.merge(MuonIdHelperSvcCfg(flags))
+    the_alg = CompFactory.MDTConditionsTestAlgMT(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
     return result
-    
-
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from MuonCondTest.MdtCablingTester import SetupArgParser, setupServicesCfg
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     msgService = cfg.getService('MessageSvc')
     msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
 
-    cfg.merge(NSWCondAlgTest(flags, LogName = args.LogName))
+    cfg.merge(MdtConditionsTestCfg(flags, LogName = args.LogName))
     cfg.printConfig(withDetails=True, summariseProps=True)
 
     flags.dump()
@@ -41,4 +41,3 @@ if __name__ == "__main__":
     if not sc.isSuccess():
         import sys
         sys.exit("Execution failed")
-

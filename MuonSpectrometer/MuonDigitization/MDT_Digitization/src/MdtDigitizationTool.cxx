@@ -70,8 +70,6 @@ StatusCode MdtDigitizationTool::initialize() {
     ATH_MSG_INFO("RndmSvc                " << m_rndmSvc);
     ATH_MSG_INFO("DigitizationTool       " << m_digiTool);
     ATH_MSG_INFO("MdtCalibrationDbTool    " << m_calibrationDbTool);
-    ATH_MSG_INFO("UseDeadChamberSvc      " << m_UseDeadChamberSvc);
-    if (!m_UseDeadChamberSvc) ATH_MSG_INFO("MaskedStations         " << m_maskedStations);
     ATH_MSG_INFO("OffsetTDC              " << m_offsetTDC);
     ATH_MSG_INFO("ns2TDCAMT              " << m_ns2TDCAMT);
     ATH_MSG_INFO("ns2TDCHPTDC            " << m_ns2TDCHPTDC);
@@ -143,29 +141,8 @@ StatusCode MdtDigitizationTool::initialize() {
     ATH_CHECK(m_rndmSvc.retrieve());
 
     ATH_CHECK(m_calibrationDbTool.retrieve());
-
-    // Gather masked stations
-    m_vMaskedStations.reserve(m_maskedStations.size());
-    for (unsigned int i = 0; i < m_maskedStations.size(); ++i) {
-        std::string_view mask(m_maskedStations[i]);
-        std::string_view maskedName = mask.substr(0, mask.find(':'));
-        std::string_view temps = mask.substr(maskedName.size() + 1, std::string::npos);
-        auto col = temps.find(':');
-        std::string_view maskedEta = (col !=  std::string_view::npos) ? temps.substr(0, col) : temps.substr(0);
-        std::string_view maskedPhi = temps.substr(maskedEta.size() + 1, std::string::npos);
-        m_vMaskedStations.emplace_back(maskedName, maskedEta, maskedPhi);
-        if (!m_UseDeadChamberSvc)
-            ATH_MSG_DEBUG("mask = " << mask << "  maskedName = " << maskedName << "  temps = " << temps << "  maskedEta = " << maskedEta
-                                    << "  maskedPhi = " << maskedPhi);
-    }
-
-    // Retrieve the Conditions service
-    if (m_UseDeadChamberSvc) {
-        ATH_CHECK(m_readKey.initialize());
-    } else {
-        ATH_MSG_DEBUG("Using JobOptions for masking dead/missing chambers");
-    }
-
+    
+    ATH_CHECK(m_readKey.initialize(!m_readKey.empty()));
     return StatusCode::SUCCESS;
 }
 
@@ -345,18 +322,6 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
     CLHEP::HepRandomEngine* twinRndmEngine = getRandomEngine("Twin", ctx);
     CLHEP::HepRandomEngine* toolRndmEngine = getRandomEngine(m_digiTool->name(), ctx);
 
-    // Get the list of dead/missing chambers and cache it
-    if (m_UseDeadChamberSvc) {
-        SG::ReadCondHandle<MdtCondDbData> readHandle{m_readKey, ctx};
-        const MdtCondDbData* readCdo{*readHandle};
-        if (!readHandle.isValid() || !readCdo) {
-            ATH_MSG_WARNING(readHandle.fullKey() << " is not available.");
-            return StatusCode::FAILURE;
-        }
-        m_IdentifiersToMask = readCdo->getDeadStationsId();       
-        ATH_MSG_DEBUG("Number of dead/missing stations retrieved from CondService= " << readCdo->getDeadStationsId().size());
-    }
-
     // get the iterator infos for this DetEl
     // iterate over hits and fill id-keyed drift time map
     TimedHitCollection<MDTSimHit>::const_iterator i, e;
@@ -370,7 +335,7 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
     while (m_thpcMDT->nextDetectorElement(i, e)) {
         // Loop over the hits:
         while (i != e) {
-            handleMDTSimhit(*i, twinRndmEngine, toolRndmEngine);
+            handleMDTSimhit(ctx, *i, twinRndmEngine, toolRndmEngine);
             ++i;
         }
     }
@@ -387,7 +352,8 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
     return StatusCode::SUCCESS;
 }
 
-bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
+bool MdtDigitizationTool::handleMDTSimhit(const EventContext& ctx, 
+                                          const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
                                           CLHEP::HepRandomEngine* toolRndmEngine) {
     const MDTSimHit& hit(*phit);
     MDTSimHit newSimhit(*phit);  // hit can be modified later
@@ -396,10 +362,8 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
 
     // Important checks for hits (global time, position along tube, masked chambers etc..) DO NOT SET THIS CHECK TO FALSE IF YOU DON'T KNOW
     // WHAT YOU'RE DOING !
-    if (m_checkMDTSimHits) {
-        if (!checkMDTSimHit(hit)) return false;
-    }
-
+    if (m_checkMDTSimHits && !checkMDTSimHit(ctx, hit)) return false;
+    
     const int id = hit.MDTid();
     double driftRadius = hit.driftRadius();
     ATH_MSG_DEBUG("Hit bunch time  " << globalHitTime - hit.globalTime() << " tot " << globalHitTime << " tof " << hit.globalTime()
@@ -635,7 +599,7 @@ bool MdtDigitizationTool::handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CL
     return true;
 }
 
-bool MdtDigitizationTool::checkMDTSimHit(const MDTSimHit& hit) const {
+bool MdtDigitizationTool::checkMDTSimHit(const EventContext& ctx, const MDTSimHit& hit) const {
     // get the hit Identifier and info
     const int id = hit.MDTid();
     std::string stationName = m_muonHelper->GetStationName(id);
@@ -651,48 +615,20 @@ bool MdtDigitizationTool::checkMDTSimHit(const MDTSimHit& hit) const {
                                      << " " << stationEta << " " << stationPhi);
 
     //+MASKING OF DEAD/MISSING CHAMBERS
-    if (m_UseDeadChamberSvc) {
-        for (const Identifier& Id : m_IdentifiersToMask) {
-         
-            if ((stationName == m_idHelperSvc->mdtIdHelper().stationNameString(m_idHelperSvc->mdtIdHelper().stationName(Id))) &&
-                (stationEta == m_idHelperSvc->mdtIdHelper().stationEta(Id)) &&
-                (stationPhi == m_idHelperSvc->mdtIdHelper().stationPhi(Id))) {
-                ATH_MSG_DEBUG("Hit is located in chamber that is dead/missing: Masking the hit!");
-                return false;
-            }
+    if (!m_readKey.empty()) {
+        SG::ReadCondHandle<MdtCondDbData> readCdo{m_readKey, ctx};
+        if (!readCdo.isValid()) {
+            ATH_MSG_WARNING(m_readKey.fullKey() << " is not available.");
+            return false;
         }
-    } else {
-        bool nameMasked = false;
-        bool etaMasked = false;
-        bool phiMasked = false;
-        bool masked = false;
-
-        for (unsigned int i = 0; i < m_maskedStations.size(); ++i) {
-            bool temp = true;
-
-            for (unsigned int k = 0; k < 3; ++k) {
-                char c = m_vMaskedStations[i].maskedName[k];
-                char cc = stationName[k];
-                if (c == '*') continue;
-                if (c == cc) continue;
-                temp = false;
-            }
-            if (!temp) continue;
-            nameMasked = temp;
-
-            etaMasked = m_vMaskedStations[i].maskedEta == "*" || m_vMaskedStations[i].imaskedEta == stationEta;
-            phiMasked = m_vMaskedStations[i].maskedPhi == "*" || m_vMaskedStations[i].imaskedPhi == stationPhi;
-            masked = nameMasked && etaMasked && phiMasked;
-            if (masked) { return false; }
-        }
-    }
+        if (!readCdo->isGood(DigitId)) return false;      
+    } 
     //-MASKING OF DEAD/MISSING CHAMBERS
 
     double tubeL{0.}, tubeR{0.};
-
     const MuonGM::MdtReadoutElement* element = m_MuonGeoMgr->getMdtReadoutElement(DigitId);
 
-    if (nullptr == element) {
+    if (!element) {
         ATH_MSG_ERROR("MuonGeoManager does not return valid element for given id!");
     } else {
         tubeL = element->tubeLength(DigitId);
