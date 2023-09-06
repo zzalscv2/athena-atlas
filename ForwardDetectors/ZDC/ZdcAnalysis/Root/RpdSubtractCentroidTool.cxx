@@ -27,37 +27,12 @@ RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name) :
   asg::AsgTool(name),
   m_name(name),
   m_init(false),
-  m_validInput(false),
-  m_runNumber(0),
-  m_lumiBlock(0),
   m_xCenter({0, 0}),
   m_yCenter({0, 0}),
   m_xyRotAngle({0, 0}),
   m_yzRotAngle({0, 0}),
   m_xCentAvg({0, 0}),
-  m_yCentAvg({0, 0}),
-  m_status({1 << ValidBit, 1 << ValidBit}), // calculation is valid by default
-  m_ampSum({0, 0}),
-  m_ampSumSub({0, 0}),
-  m_ampSub({
-    std::vector<std::vector<float>>(m_nRows, std::vector<float>(m_nCols)),
-    std::vector<std::vector<float>>(m_nRows, std::vector<float>(m_nCols))
-  }),
-  m_xCentUnsub({0, 0}),
-  m_yCentUnsub({0, 0}),
-  m_xCentUnsubCor({0, 0}),
-  m_yCentUnsubCor({0, 0}),
-  m_xCent({0, 0}),
-  m_yCent({0, 0}),
-  m_xCentCor({0, 0}),
-  m_yCentCor({0, 0}),
-  m_xCentRowUnsub({std::vector<float>(m_nRows, 0), std::vector<float>(m_nRows, 0)}),
-  m_yCentColUnsub({std::vector<float>(m_nCols, 0), std::vector<float>(m_nCols, 0)}),
-  m_xCentRow({std::vector<float>(m_nRows, 0), std::vector<float>(m_nRows, 0)}),
-  m_yCentCol({std::vector<float>(m_nCols, 0), std::vector<float>(m_nCols, 0)}),
-  m_xStdev({0, 0}),
-  m_yStdev({0, 0}),
-  m_xyCov({0, 0})
+  m_yCentAvg({0, 0})
 {
 #ifndef XAOD_STANDALONE
   declareInterface<IZdcAnalysisTool>(this);
@@ -168,8 +143,49 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcFinalEnergyHandle(m_ZDCFinalEnergyKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> zdcStatusHandle(m_ZDCStatusKey);
 
-  m_runNumber = eventInfo->runNumber();
-  m_lumiBlock = eventInfo->lumiBlock();
+  // unsigned int runNumber = eventInfo->runNumber();
+  unsigned int lumiBlock = eventInfo->lumiBlock();
+
+  // Analysis results
+  // ================
+  std::array<unsigned int, 2> status = {1 << ValidBit, 1 << ValidBit}; // calculation is valid by default
+  // the amplitude sum on the given side
+  std::array<float, 2> ampSum = {0, 0};
+  // the subtracted amplitude sum on the given side
+  std::array<float, 2> ampSumSub = {0, 0};
+  // the subtracted amplitude for each channel first index row, second column
+  std::array<std::vector<std::vector<float> >, 2> ampSub = {
+    std::vector<std::vector<float>>(m_nRows, std::vector<float>(m_nCols, 0)),
+    std::vector<std::vector<float>>(m_nRows, std::vector<float>(m_nCols, 0))
+  };
+  // x centroid, average not subtracted
+  std::array<float, 2> xCentUnsub = {0, 0}; 
+  // y centroid, average not subtracted
+  std::array<float, 2> yCentUnsub = {0, 0}; 
+  // x centroid, average not subtracted, with geometry corrections
+  std::array<float, 2> xCentUnsubCor = {0, 0}; 
+  // y centroid, average not subtracted, with geometry corrections
+  std::array<float, 2> yCentUnsubCor = {0, 0}; 
+  // x centroid, subtracted
+  std::array<float, 2> xCent = {0, 0}; 
+  // y centroid, subtracted
+  std::array<float, 2> yCent = {0, 0}; 
+  // x centroid, subtracted, with geometry corrections
+  std::array<float, 2> xCentCor = {0, 0}; 
+  // y centroid, subtracted, with geometry corrections
+  std::array<float, 2> yCentCor = {0, 0}; 
+  // the x centroid for each row, using unsubtracted amplitudes (diagnostic)
+  std::array<std::vector<float>, 2> xCentRowUnsub = {std::vector<float>(m_nRows, 0), std::vector<float>(m_nRows, 0)};
+  // the y centroid for each column, using unsubtracted amplitudes (diagnostic)
+  std::array<std::vector<float>, 2> yCentColUnsub = {std::vector<float>(m_nCols, 0), std::vector<float>(m_nCols, 0)};
+  // the x centroid for each row (diagnostic)
+  std::array<std::vector<float>, 2> xCentRow = {std::vector<float>(m_nRows, 0), std::vector<float>(m_nRows, 0)};
+  // the y centroid for each column (diagnostic)
+  std::array<std::vector<float>, 2> yCentCol = {std::vector<float>(m_nCols, 0), std::vector<float>(m_nCols, 0)};
+  // x standard deviation
+  std::array<float, 2> xStdev = {0, 0};
+  // y standard deviation
+  std::array<float, 2> yStdev = {0, 0};
   
   std::array<std::vector<std::vector<RpdChannelData>>, 2> rpdChannelData = {
     std::vector<std::vector<RpdChannelData>>(4, std::vector<RpdChannelData>(4)),
@@ -180,10 +196,10 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   std::array<float, 2> zdcFinalEnergy;
 
   ATH_MSG_DEBUG("Starting event processing");
-  ATH_MSG_DEBUG("LB=" << m_lumiBlock);
+  ATH_MSG_DEBUG("LB=" << lumiBlock);
   
   ATH_MSG_DEBUG("Processing modules");
-  for (const auto zdcModule : moduleContainer) {
+  for (const auto &zdcModule : moduleContainer) {
     if (zdcModule->zdcType() == 1) {
       //  This is RPD data in Run 3
       //
@@ -196,13 +212,10 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
       } else if (zdcModule->zdcSide() == 1) {
         side = 1;
       } else {
-        ATH_MSG_WARNING("Invalid side value found for module number: " << zdcModule->zdcModule() << ", side value = " << side);
         continue;
       }
       
       const unsigned int &rpdChannel = zdcModule->zdcChannel();
-
-      ATH_MSG_DEBUG("RPD side " << side << " chan " << rpdChannel);
 
       if (rpdChannel > 15) {
         //
@@ -226,58 +239,56 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
     }
   }
 
-  for (const auto zdcSum: moduleSumContainer) {
+  for (const auto &zdcSum: moduleSumContainer) {
     int side = -1;
     if (zdcSum->zdcSide() == -1) {
       side = 0;
     } else if (zdcSum->zdcSide() == 1) {
       side = 1;
     } else {
-      ATH_MSG_WARNING("Invalid side value found for module number: " << zdcSum->zdcModule() << ", side value = " << side);
       continue;
     }
     rpdSideStatus.at(side) = rpdSideStatusHandle(*zdcSum);
     zdcSideStatus.at(side) = zdcStatusHandle(*zdcSum);
     zdcFinalEnergy.at(side) = zdcFinalEnergyHandle(*zdcSum);
-
   }
 
   // check values and set status bits accordingly
   for (int side : {0, 1}) {
     if (zdcSideStatus.at(side)) {
-      m_status.at(side) |= 1 << ZDCValidBit;
+      status.at(side) |= 1 << ZDCValidBit;
     } else {
       // => centroid calculation is invalid
-      m_status.at(side) &= ~(1 << ValidBit);
+      status.at(side) &= ~(1 << ValidBit);
     }
     if (zdcFinalEnergy.at(side) > m_maxZDCEnergy.at(side)) {
-      m_status.at(side) |= 1 << ExcessiveZDCEnergyBit;
+      status.at(side) |= 1 << ExcessiveZDCEnergyBit;
       // => centroid calculation is invalid
-      m_status.at(side) &= ~(1 << ValidBit);
+      status.at(side) &= ~(1 << ValidBit);
     }
     if (zdcFinalEnergy.at(side) < m_minZDCEnergy.at(side)) {
-      m_status.at(side) |= 1 << MinimumZDCEnergyBit;
+      status.at(side) |= 1 << MinimumZDCEnergyBit;
       // => centroid calculation is invalid
-      m_status.at(side) &= ~(1 << ValidBit);
+      status.at(side) &= ~(1 << ValidBit);
     }
     bool rpdPileup = rpdSideStatus.at(side) & (1 << RPDDataAnalyzer::SideOutOfTimePileupBit);
     if (rpdPileup) {
-      m_status.at(side) |= 1 << PileupBit;
+      status.at(side) |= 1 << PileupBit;
     }
     bool rpdAnaValid = rpdSideStatus.at(side) & (1 << RPDDataAnalyzer::SideValidBit);
     if (rpdAnaValid) {
-      m_status.at(side) |= 1 << RPDValidBit;
+      status.at(side) |= 1 << RPDValidBit;
     } else {
       // => centroid calculation is invalid
-      m_status.at(side) &= ~(1 << ValidBit);
+      status.at(side) &= ~(1 << ValidBit);
     }
     // check channels of RPD
     for (int row = 0; row < m_nRows; row++) {
       for (int col = 0; col < m_nCols; col++) {
         if (rpdChannelData.at(side).at(row).at(col).pileupFrac > m_pileupMaxFrac.at(side)) {
-          m_status.at(side) |= 1 << ExcessivePileupBit;
+          status.at(side) |= 1 << ExcessivePileupBit;
           // => centroid calculation is invalid
-          m_status.at(side) &= ~(1 << ValidBit);
+          status.at(side) &= ~(1 << ValidBit);
         }
       }
     }
@@ -291,12 +302,12 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
           // top row -> nothing to subtract
           float amplitudeSubtr = rpdChannelData.at(side).at(row).at(col).amplitude;
           rpdChannelData.at(side).at(row).at(col).amplitudeSubtr = amplitudeSubtr;
-          m_ampSub.at(side).at(row).at(col) = amplitudeSubtr;
+          ampSub.at(side).at(row).at(col) = amplitudeSubtr;
         } else {
           // other rows -> subtract the tile above this one
           float amplitudeSubtr = rpdChannelData.at(side).at(row).at(col).amplitude - rpdChannelData.at(side).at(row + 1).at(col).amplitude;
           rpdChannelData.at(side).at(row).at(col).amplitudeSubtr = amplitudeSubtr;
-          m_ampSub.at(side).at(row).at(col) = amplitudeSubtr;
+          ampSub.at(side).at(row).at(col) = amplitudeSubtr;
         }
       }
     }
@@ -325,38 +336,38 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
         rowSums.at(side).at(row) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
         colSumsUnsub.at(side).at(col) += rpdChannelData.at(side).at(row).at(col).amplitude;
         colSums.at(side).at(col) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
-        m_ampSum.at(side) += rpdChannelData.at(side).at(row).at(col).amplitude;
-        m_ampSumSub.at(side) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
+        ampSum.at(side) += rpdChannelData.at(side).at(row).at(col).amplitude;
+        ampSumSub.at(side) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
       }
     }
   }
 
   // check for any zero values in sum -> avoid dividing by zero; negative total sum is also bad
   for (int side : {0, 1}) {
-    if (m_ampSum.at(side) <= 0) {
-      m_status.at(side) |= 1 << ZeroSumBit;
+    if (ampSum.at(side) <= 0) {
+      status.at(side) |= 1 << ZeroSumBit;
       // => unsub centroid calculation is invalid
-      m_status.at(side) &= ~(1 << ValidBit);
+      status.at(side) &= ~(1 << ValidBit);
     }
-    if (m_ampSumSub.at(side) <= 0) {
-      m_status.at(side) |= 1 << ZeroSumBit;
+    if (ampSumSub.at(side) <= 0) {
+      status.at(side) |= 1 << ZeroSumBit;
       // => centroid calculation is invalid
-      m_status.at(side) &= ~(1 << ValidBit);
+      status.at(side) &= ~(1 << ValidBit);
     }
     for (int row = 0; row < m_nRows; row++) {
       if (rowSumsUnsub.at(side).at(row) <= 0) {
-        m_status.at(side) |= 1 << (ZeroSumRow0Bit + row);
+        status.at(side) |= 1 << (ZeroSumRow0Bit + row);
       }
       if (rowSums.at(side).at(row) <= 0) {
-        m_status.at(side) |= 1 << (ZeroSumRow0Bit + row);
+        status.at(side) |= 1 << (ZeroSumRow0Bit + row);
       }
     }
     for (int col = 0; col < m_nCols; col++) {
       if (colSumsUnsub.at(side).at(col) <= 0) {
-        m_status.at(side) |= 1 << (ZeroSumCol0Bit + col);
+        status.at(side) |= 1 << (ZeroSumCol0Bit + col);
       }
       if (colSums.at(side).at(col) <= 0) {
-        m_status.at(side) |= 1 << (ZeroSumCol0Bit + col);
+        status.at(side) |= 1 << (ZeroSumCol0Bit + col);
       }
     }
   }
@@ -366,10 +377,10 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
     for (int row = 0; row < m_nRows; row++) {
       for (int col = 0; col < m_nCols; col++) {
         const float &amplitudeSubtr = rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
-        if (amplitudeSubtr < 0 && -amplitudeSubtr/m_ampSumSub.at(side) < m_subAmpUnderflowFrac.at(side)) {
-          m_status.at(side) |= 1 << ExcessivePileupBit;
+        if (amplitudeSubtr < 0 && -amplitudeSubtr/ampSumSub.at(side) < m_subAmpUnderflowFrac.at(side)) {
+          status.at(side) |= 1 << ExcessivePileupBit;
           // => centroid calculation is invalid
-          m_status.at(side) &= ~(1 << ValidBit);
+          status.at(side) &= ~(1 << ValidBit);
         }
       }
     }
@@ -378,21 +389,21 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   // calculate centroid
   for (int side : {0, 1}) {
     for (int col = 0; col < m_nCols; col++) {
-      if (m_ampSum.at(side) > 0) {
-        m_xCentUnsub.at(side) += colSumsUnsub.at(side).at(col)*rpdChannelData.at(side).at(0).at(col).xposRel/m_ampSum.at(side);
+      if (ampSum.at(side) > 0) {
+        xCentUnsub.at(side) += colSumsUnsub.at(side).at(col)*rpdChannelData.at(side).at(0).at(col).xposRel/ampSum.at(side);
       }
-      if (m_ampSumSub.at(side) > 0) {
-        m_xCent.at(side) += colSums.at(side).at(col)*rpdChannelData.at(side).at(0).at(col).xposRel/m_ampSumSub.at(side);
+      if (ampSumSub.at(side) > 0) {
+        xCent.at(side) += colSums.at(side).at(col)*rpdChannelData.at(side).at(0).at(col).xposRel/ampSumSub.at(side);
       }
     }  
   }
   for (int side : {0, 1}) {
     for (int row = 0; row < m_nRows; row++) {
-      if (m_ampSum.at(side) > 0) {
-        m_yCentUnsub.at(side) += rowSumsUnsub.at(side).at(row)*rpdChannelData.at(side).at(row).at(0).yposRel/m_ampSum.at(side);
+      if (ampSum.at(side) > 0) {
+        yCentUnsub.at(side) += rowSumsUnsub.at(side).at(row)*rpdChannelData.at(side).at(row).at(0).yposRel/ampSum.at(side);
       }
-      if (m_ampSumSub.at(side) > 0) {
-        m_yCent.at(side) += rowSums.at(side).at(row)*rpdChannelData.at(side).at(row).at(0).yposRel/m_ampSumSub.at(side);
+      if (ampSumSub.at(side) > 0) {
+        yCent.at(side) += rowSums.at(side).at(row)*rpdChannelData.at(side).at(row).at(0).yposRel/ampSumSub.at(side);
       }
     }  
   }
@@ -402,16 +413,16 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
     for (int row = 0; row < m_nRows; row++) {
       for (int col = 0; col < m_nCols; col++) {
         if (rowSumsUnsub.at(side).at(row) > 0) {
-          m_xCentRowUnsub.at(side).at(row) += rpdChannelData.at(side).at(row).at(col).amplitude*rpdChannelData.at(side).at(row).at(col).xposRel/rowSumsUnsub.at(side).at(row);
+          xCentRowUnsub.at(side).at(row) += rpdChannelData.at(side).at(row).at(col).amplitude*rpdChannelData.at(side).at(row).at(col).xposRel/rowSumsUnsub.at(side).at(row);
         }
         if (rowSums.at(side).at(row) > 0) {
-          m_xCentRow.at(side).at(row) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr*rpdChannelData.at(side).at(row).at(col).xposRel/rowSums.at(side).at(row);
+          xCentRow.at(side).at(row) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr*rpdChannelData.at(side).at(row).at(col).xposRel/rowSums.at(side).at(row);
         }
         if (colSumsUnsub.at(side).at(col) > 0) {
-          m_yCentColUnsub.at(side).at(col) += rpdChannelData.at(side).at(row).at(col).amplitude*rpdChannelData.at(side).at(row).at(col).yposRel/colSumsUnsub.at(side).at(col);
+          yCentColUnsub.at(side).at(col) += rpdChannelData.at(side).at(row).at(col).amplitude*rpdChannelData.at(side).at(row).at(col).yposRel/colSumsUnsub.at(side).at(col);
         }
         if (colSums.at(side).at(col) > 0) {
-          m_yCentCol.at(side).at(col) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr*rpdChannelData.at(side).at(row).at(col).yposRel/colSums.at(side).at(col);
+          yCentCol.at(side).at(col) += rpdChannelData.at(side).at(row).at(col).amplitudeSubtr*rpdChannelData.at(side).at(row).at(col).yposRel/colSums.at(side).at(col);
         }
       }
     }
@@ -419,20 +430,20 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   
   // calculate standard deviation of row x / col y centroids
   for (int side : {0, 1}) {
-    m_xStdev.at(side) = TMath::RMS(m_xCentRow.at(side).begin(), m_xCentRow.at(side).end());
-    m_yStdev.at(side) = TMath::RMS(m_yCentCol.at(side).begin(), m_yCentCol.at(side).end());
+    xStdev.at(side) = TMath::RMS(xCentRow.at(side).begin(), xCentRow.at(side).end());
+    yStdev.at(side) = TMath::RMS(yCentCol.at(side).begin(), yCentCol.at(side).end());
   }
 
   // use information from geometry (TODO: and calibration) to get centroid in beamline coordinates
   for (int side : {0, 1}) {
-    float x = m_xCentUnsubCor.at(side);
-    float y = m_yCentUnsubCor.at(side);
-    m_xCentUnsubCor.at(side) = geometryCorrectionX(x, y, side);
-    m_yCentUnsubCor.at(side) = geometryCorrectionY(x, y, side);
-    x = m_xCentCor.at(side);
-    y = m_yCentCor.at(side);
-    m_xCentCor.at(side) = geometryCorrectionX(x, y, side);
-    m_yCentCor.at(side) = geometryCorrectionY(x, y, side);
+    float x = xCentUnsubCor.at(side);
+    float y = yCentUnsubCor.at(side);
+    xCentUnsubCor.at(side) = geometryCorrectionX(x, y, side);
+    yCentUnsubCor.at(side) = geometryCorrectionY(x, y, side);
+    x = xCentCor.at(side);
+    y = yCentCor.at(side);
+    xCentCor.at(side) = geometryCorrectionX(x, y, side);
+    yCentCor.at(side) = geometryCorrectionY(x, y, side);
   }
 
   ATH_MSG_DEBUG("Finishing event processing");
@@ -456,29 +467,28 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> yDetColCentroidStdevHandle(m_yDetColCentroidStdevKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> centroidStatusHandle(m_centroidStatusKey);
   
-  for (const auto zdcSum: moduleSumContainer) {
+  for (const auto &zdcSum: moduleSumContainer) {
     int side = -1;
     if (zdcSum->zdcSide() == -1) {
       side = 0;
     } else if (zdcSum->zdcSide() == 1) {
       side = 1;
     } else {
-      ATH_MSG_WARNING("Invalid side value found for module number: " << zdcSum->zdcModule() << ", side value = " << side);
       continue;
     }
-    rpdSubAmp(*zdcSum) = m_ampSub.at(side);
-    rpdSubAmpSum(*zdcSum) = m_ampSumSub.at(side);
-    xCentroidHandle(*zdcSum) = m_xCentCor.at(side);
-    yCentroidHandle(*zdcSum) = m_yCentCor.at(side);
-    xDetCentroidHandle(*zdcSum) = m_xCent.at(side);
-    yDetCentroidHandle(*zdcSum) = m_yCent.at(side);
-    xDetCentroidUnsubHandle(*zdcSum) = m_xCentUnsub.at(side);
-    yDetCentroidUnsubHandle(*zdcSum) = m_yCentUnsub.at(side);
-    xDetRowCentroidHandle(*zdcSum) = m_xCentRow.at(side);
-    yDetColCentroidHandle(*zdcSum) = m_yCentCol.at(side);
-    xDetRowCentroidStdevHandle(*zdcSum) = m_xStdev.at(side);
-    yDetColCentroidStdevHandle(*zdcSum) = m_yStdev.at(side);
-    centroidStatusHandle(*zdcSum) = m_status.at(side);
+    rpdSubAmp(*zdcSum) = ampSub.at(side);
+    rpdSubAmpSum(*zdcSum) = ampSumSub.at(side);
+    xCentroidHandle(*zdcSum) = xCentCor.at(side);
+    yCentroidHandle(*zdcSum) = yCentCor.at(side);
+    xDetCentroidHandle(*zdcSum) = xCent.at(side);
+    yDetCentroidHandle(*zdcSum) = yCent.at(side);
+    xDetCentroidUnsubHandle(*zdcSum) = xCentUnsub.at(side);
+    yDetCentroidUnsubHandle(*zdcSum) = yCentUnsub.at(side);
+    xDetRowCentroidHandle(*zdcSum) = xCentRow.at(side);
+    yDetColCentroidHandle(*zdcSum) = yCentCol.at(side);
+    xDetRowCentroidStdevHandle(*zdcSum) = xStdev.at(side);
+    yDetColCentroidStdevHandle(*zdcSum) = yStdev.at(side);
+    centroidStatusHandle(*zdcSum) = status.at(side);
   }
 
   return StatusCode::SUCCESS;
@@ -504,7 +514,7 @@ StatusCode RpdSubtractCentroidTool::reprocessZdc()
   return StatusCode::SUCCESS;
 }
 
-float RpdSubtractCentroidTool::geometryCorrectionX(float x_rpd, float y_rpd, int side) {
+float RpdSubtractCentroidTool::geometryCorrectionX(float x_rpd, float y_rpd, int side) const {
   // correct for rotation of RPD about z axis (in xy plane)
   float x_beamline = x_rpd*TMath::Cos(m_xyRotAngle.at(side)) - y_rpd*TMath::Sin(m_xyRotAngle.at(side));
   // correct for offsest of RPD
@@ -512,7 +522,7 @@ float RpdSubtractCentroidTool::geometryCorrectionX(float x_rpd, float y_rpd, int
   return x_beamline;
 }
 
-float RpdSubtractCentroidTool::geometryCorrectionY(float x_rpd, float y_rpd, int side) {
+float RpdSubtractCentroidTool::geometryCorrectionY(float x_rpd, float y_rpd, int side) const {
   // correct for rotation of RPD about z axis (in xy plane)
   float y_beamline = x_rpd*TMath::Sin(m_xyRotAngle.at(side)) + y_rpd*TMath::Cos(m_xyRotAngle.at(side));
   // correct for rotation of RPD about x axis (in yz plane)
