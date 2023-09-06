@@ -166,6 +166,8 @@ def EGammaLRTCfg(ConfigFlags):
         egIsolationCfg(
             ConfigFlags,
             name="electronIsolationLRT",
+            # Avoid overlap with the previously-configured IsolationBuilder.
+            noCalo=True,
             ElectronCollectionContainerName="LRTElectrons",
         )
     )

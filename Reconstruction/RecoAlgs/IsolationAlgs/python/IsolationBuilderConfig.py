@@ -8,7 +8,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def egIsolationCfg(flags, name='egIsolation', **kwargs):
+def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
 
     mlog = logging.getLogger(name)
     mlog.info('Starting '+name+' configuration')
@@ -47,7 +47,7 @@ def egIsolationCfg(flags, name='egIsolation', **kwargs):
                 kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(
                     ElectronTrackIsolationToolCfg(flags))
             
-    if flags.Detector.EnableCalo:
+    if flags.Detector.EnableCalo and not noCalo:
         isoType.append(
             [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ])
         isoCor.append(
@@ -69,7 +69,7 @@ def egIsolationCfg(flags, name='egIsolation', **kwargs):
 
     return acc
 
-def muIsolationCfg(flags, name='muIsolation', **kwargs):
+def muIsolationCfg(flags, name='muIsolation', noCalo=False, **kwargs):
 
     mlog = logging.getLogger(name)
     mlog.info('Starting '+name+' configuration')
@@ -92,7 +92,7 @@ def muIsolationCfg(flags, name='muIsolation', **kwargs):
             kwargs['TrackIsolationTool'] = acc.popToolsAndMerge(
                 TrackIsolationToolCfg(flags))
         
-    if flags.Detector.EnableCalo:
+    if flags.Detector.EnableCalo and not noCalo:
         isoType.append(
             [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ])
         isoCor.append([ isoPar.coreCone, isoPar.pileupCorrection ])

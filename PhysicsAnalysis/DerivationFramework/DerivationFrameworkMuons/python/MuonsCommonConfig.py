@@ -88,6 +88,8 @@ def MuonsCommonCfg(flags, suff=""):
         from IsolationAlgs.IsolationBuilderConfig import muIsolationCfg
         acc.merge(muIsolationCfg(flags,
                                  name="muonIsolationLRT",
+                                 # Avoid overlap with the previously-configured IsolationBuilder.
+                                 noCalo=True,
                                  MuonCollectionContainerName = Container
         ))
 
