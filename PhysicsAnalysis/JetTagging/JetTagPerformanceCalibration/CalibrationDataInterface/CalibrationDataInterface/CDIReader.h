@@ -86,7 +86,7 @@ namespace Analysis
       } std::cout << std::endl;
     };
 
-    bool checkConfig(const std::string& tagger, const std::string& jetcoll, const std::string& wp);
+    bool checkConfig(const std::string& tagger, const std::string& jetcoll, const std::string& wp, bool verbose = false);
     Labels getDSIDs(const std::string& tagger = "", const std::string& jetcollection = "", const std::string& workingpoint = "");
     Labels getLabels(const std::string& tagger = "", const std::string& jetcollection = "", const std::string& workingpoint = "");
     Labels getWorkingPoints(const std::string& tagger, const std::string& jetcollection);
