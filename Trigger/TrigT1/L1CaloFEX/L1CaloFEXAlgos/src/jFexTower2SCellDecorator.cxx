@@ -22,7 +22,25 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
-#include <stdio.h> 
+#include <optional>
+#include <stdio.h>
+
+namespace {
+
+template <class T>
+std::optional<SG::WriteDecorHandle<xAOD::jFexTowerContainer, T> >
+makeOptionalKey (const SG::WriteDecorHandleKey<xAOD::jFexTowerContainer>& key,
+                 const EventContext& ctx,
+                 bool flag)
+{
+  std::optional<SG::WriteDecorHandle<xAOD::jFexTowerContainer, T> > h;
+  if (flag)
+    h.emplace (key, ctx);
+  return h;
+}
+
+
+}
 
 namespace LVL1 {
 
@@ -111,7 +129,21 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         if(std::abs(tower->eta())>1.5 || tower->sampling()!=1) continue;
         map_TileID2ptr[tower->coolId()]=tower;
     }    
-        
+
+    // FIXME: In C++20, we could do this more nicely with a templated lambda.
+    auto jTowerSCellEt   = makeOptionalKey<std::vector<float> > (m_SCellEtdecorKey, ctx, m_save_extras);
+    auto jTowerSCellEta  = makeOptionalKey<std::vector<float> > (m_SCellEtadecorKey, ctx, m_save_extras);
+    auto jTowerSCellPhi  = makeOptionalKey<std::vector<float> > (m_SCellPhidecorKey, ctx, m_save_extras);
+    auto jTowerSCellID   = makeOptionalKey<std::vector<int> >   (m_SCellIDdecorKey, ctx, m_save_extras);
+    auto jTowerSCellMask = makeOptionalKey<std::vector<bool> >  (m_SCellMaskdecorKey, ctx, m_save_extras);
+    auto jTowerTileEt    = makeOptionalKey<int>                 (m_TileEtdecorKey, ctx, m_save_extras);
+    auto jTowerTileEta   = makeOptionalKey<float>               (m_TileEtadecorKey, ctx, m_save_extras);
+    auto jTowerTilePhi   = makeOptionalKey<float>               (m_TilePhidecorKey, ctx, m_save_extras);
+
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtMeV     (m_jtowerEtMeVdecorKey , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > SCellEtMeV      (m_SCellEtMeVdecorKey  , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > TileEtMeV       (m_TileEtMeVdecorKey   , ctx);
+
     //looping over the jTowers to decorate them!
     for(const xAOD::jFexTower* jTower : *jTowerContainer){
         
@@ -242,30 +274,15 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         // Decorating the tower with the corresponding information
         //Setup Decorator Handlers
         if(m_save_extras) {
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt    (m_SCellEtdecorKey  , ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta   (m_SCellEtadecorKey , ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi   (m_SCellPhidecorKey , ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<int> >   jTowerSCellID    (m_SCellIDdecorKey  , ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<bool> >  jTowerSCellMask  (m_SCellMaskdecorKey, ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEt     (m_TileEtdecorKey   , ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta    (m_TileEtadecorKey  , ctx);
-            SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi    (m_TilePhidecorKey  , ctx);
-
-            jTowerSCellEt   (*jTower) = scEt;
-            jTowerSCellEta  (*jTower) = scEta;
-            jTowerSCellPhi  (*jTower) = scPhi;
-            jTowerSCellID   (*jTower) = scID;
-            jTowerSCellMask (*jTower) = scMask;
-            jTowerTileEt    (*jTower) = static_cast<int>( TileEt );
-            jTowerTileEta   (*jTower) = TileEta;
-            jTowerTilePhi   (*jTower) = TilePhi;
+            (*jTowerSCellEt)   (*jTower) = scEt;
+            (*jTowerSCellEta)  (*jTower) = scEta;
+            (*jTowerSCellPhi)  (*jTower) = scPhi;
+            (*jTowerSCellID)   (*jTower) = scID;
+            (*jTowerSCellMask) (*jTower) = scMask;
+            (*jTowerTileEt)    (*jTower) = static_cast<int>( TileEt );
+            (*jTowerTileEta)   (*jTower) = TileEta;
+            (*jTowerTilePhi)   (*jTower) = TilePhi;
         }
-        
-        
-        SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtMeV     (m_jtowerEtMeVdecorKey , ctx);
-        SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > SCellEtMeV      (m_SCellEtMeVdecorKey  , ctx);
-        SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > TileEtMeV       (m_TileEtMeVdecorKey   , ctx);
-                
         
         jTowerEtMeV     (*jTower) = jFexEt;
         SCellEtMeV      (*jTower) = SCellEt;
