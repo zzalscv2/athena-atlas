@@ -205,6 +205,7 @@ def ITkTrackRecoCfg(flags):
                 ITkSiSPTrackStateOnSurfaceDecoratorCfg)
             SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
                 ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
+            from AthenaConfiguration.ComponentFactory import CompFactory
             result.addEventAlgo(
                 CompFactory.DerivationFramework.CommonAugmentation(
                     "SiSPITkCommonKernel",
