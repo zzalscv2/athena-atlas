@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from TrkConfig.TrackingPassFlags import printActiveConfig
 
@@ -188,7 +187,7 @@ def ITkTrackRecoCfg(flags):
                 flags_set[0],  # Use cuts from primary pass
                 TracksLocation=StatTrackCollections))
 
-    if flags.Tracking.writeExtendedPRDInfo:
+    if flags.Tracking.writeExtendedSi_PRDInfo:
         from InDetConfig.InDetPrepRawDataToxAODConfig import (
             ITkPixelPrepDataToxAODCfg, ITkStripPrepDataToxAODCfg)
         result.merge(ITkPixelPrepDataToxAODCfg(
@@ -198,16 +197,8 @@ def ITkTrackRecoCfg(flags):
         result.merge(ITkStripPrepDataToxAODCfg(flags))
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
-            ITkTrackStateOnSurfaceDecoratorCfg)
-        TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-            ITkTrackStateOnSurfaceDecoratorCfg(
-                flags,
-                name="ITkTrackStateOnSurfaceDecorator"))
-
-        result.addEventAlgo(
-            CompFactory.DerivationFramework.CommonAugmentation(
-                "ITkCommonKernel",
-                AugmentationTools=[TrackStateOnSurfaceDecorator]))
+            ITkTSOS_CommonKernelCfg)
+        result.merge(ITkTSOS_CommonKernelCfg(flags))
 
         if flags.Tracking.doStoreSiSPSeededTracks:
             from DerivationFrameworkInDet.InDetToolsConfig import (
@@ -272,7 +263,7 @@ def ITkTrackRecoOutputCfg(flags):
 
     # exclude IDTIDE/IDTRKVALID decorations
     excludedAuxData += '.-TrkBLX.-TrkBLY.-TrkBLZ.-TrkIBLX.-TrkIBLY.-TrkIBLZ.-TrkL1X.-TrkL1Y.-TrkL1Z.-TrkL2X.-TrkL2Y.-TrkL2Z'
-    if not flags.Tracking.writeExtendedPRDInfo:
+    if not flags.Tracking.writeExtendedSi_PRDInfo:
         excludedAuxData += '.-msosLink'
 
     # Save PRD
@@ -302,7 +293,7 @@ def ITkTrackRecoOutputCfg(flags):
     toAOD += [
         f"xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux.{excludedAuxData}"]
 
-    if flags.Tracking.writeExtendedPRDInfo:
+    if flags.Tracking.writeExtendedSi_PRDInfo:
         toAOD += [
             "xAOD::TrackMeasurementValidationContainer#ITkPixelClusters",
             "xAOD::TrackMeasurementValidationAuxContainer#ITkPixelClustersAux.",
