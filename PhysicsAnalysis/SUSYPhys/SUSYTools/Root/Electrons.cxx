@@ -19,7 +19,6 @@
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
-#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
 #include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
 #include "xAODEgamma/ElectronAuxContainer.h"

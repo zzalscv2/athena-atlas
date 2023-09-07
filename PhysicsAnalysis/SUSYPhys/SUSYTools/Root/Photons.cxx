@@ -144,17 +144,8 @@ StatusCode SUSYObjDef_xAOD::FillPhoton(xAOD::Photon& input, float ptcut, float e
   bool passBaseID = false;
   if (m_acc_photonIdBaseline.isAvailable(input)) {
     passBaseID = bool(m_acc_photonIdBaseline(input));
-    //disable m_photonSelIsEM->accept(&input);
-    //disable dec_isEM(input) = bool(m_photonSelIsEM->IsemValue());
   } else {
-    ATH_MSG_VERBOSE ("DFCommonPhotonsIsEMxxx variables are not found. Calculating the ID from Photon ID tool..");
-    if (!isAtlfast() && !isData()) {
-      if ( m_electronPhotonShowerShapeFudgeTool->applyCorrection(input) != CP::CorrectionCode::Ok)
-        ATH_MSG_ERROR("FillPhoton - fudge tool: applyCorrection failed");
-    }
     passBaseID = bool(m_photonSelIsEMBaseline->accept(&input));
-    //disable m_photonSelIsEM->accept(&input);
-    //disable dec_isEM(input) = bool(m_photonSelIsEM->IsemValue());
   }
   if (!passBaseID) return StatusCode::SUCCESS;
 

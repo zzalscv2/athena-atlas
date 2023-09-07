@@ -360,7 +360,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_photonEfficiencySFTool(""),
     m_photonIsolationSFTool(""),
     m_photonTriggerSFTool(""),
-    m_electronPhotonShowerShapeFudgeTool(""),
     m_egammaAmbiguityTool(""),
     m_elecChargeIDSelectorTool(""),
     m_elecChargeEffCorrTool(""),
@@ -700,7 +699,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_photonEfficiencySFTool.declarePropertyFor( this, "PhotonEfficiencyCorrectionTool", "The PhotonEfficiencyCorrectionTool for reco SFs" );
   m_photonIsolationSFTool.declarePropertyFor( this, "PhotonIsolationCorrectionTool", "The PhotonEfficiencyCorrectionTool for iso SFs" );
   m_photonTriggerSFTool.declarePropertyFor( this, "PhotonTriggerEfficiencyCorrectionTool", "The PhotonEfficiencyCorrectionTool for trigger SFs" );
-  m_electronPhotonShowerShapeFudgeTool.declarePropertyFor( this, "PhotonShowerShapeFudgeTool", "The ElectronPhotonShowerShapeFudgeTool" );
   //
   m_egammaCalibTool.declarePropertyFor( this, "EgammaCalibrationAndSmearingTool", "The EgammaCalibrationAndSmearingTool");
   //
