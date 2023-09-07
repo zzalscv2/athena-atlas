@@ -10,6 +10,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 //Standalone compilation:
 //g++ -g -o mergetest.exe `root-config --libs --cflags` -L InstallArea/i686-slc5-gcc43-opt/lib/ -l DataQualityUtils LArHistMerge.version2.cxx
 
+// This file uses thread-unsafe classes from DataQualityUtils.
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 #include "TSystem.h"
 #include "TH1.h"
 #include "TH2.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanConfigGroup_h
@@ -15,11 +15,12 @@
 #endif // __CINT__
 
 #include "DataQualityInterfaces/HanConfigAssessor.h"
+#include "CxxUtils/checker_macros.h"
 
 
 namespace dqi {
 
-class HanConfigGroup : public HanConfigAssessor {
+class ATLAS_NOT_THREAD_SAFE HanConfigGroup : public HanConfigAssessor {
 public:
 
   HanConfigGroup();
@@ -67,7 +68,7 @@ protected:
 
 } // namespace dqi
 
-std::ostream& operator<<( std::ostream& o, const dqi::HanConfigGroup& g );
-std::ostream& operator<<( std::ostream& o, const dqi::HanConfigGroup* g );
+std::ostream& operator<< ATLAS_NOT_THREAD_SAFE ( std::ostream& o, const dqi::HanConfigGroup& g );
+std::ostream& operator<< ATLAS_NOT_THREAD_SAFE ( std::ostream& o, const dqi::HanConfigGroup* g );
 
 #endif

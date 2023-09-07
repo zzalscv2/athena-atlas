@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanOutput_h
@@ -15,6 +15,7 @@
 #include <string>
 
 #include "dqm_core/Output.h"
+#include "CxxUtils/checker_macros.h"
 
 class TDirectory;
 
@@ -34,7 +35,7 @@ namespace dqi
 
   class HanConfig;
 
-  class HanOutput : public dqm_core::Output
+  class ATLAS_NOT_THREAD_SAFE HanOutput : public dqm_core::Output
   {
   public:
     enum Version { V1 = 1, V2 = 2 };

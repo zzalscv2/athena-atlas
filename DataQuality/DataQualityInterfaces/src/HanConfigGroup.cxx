@@ -311,14 +311,14 @@ PrintIOStream( std::ostream& o ) const
 } // namespace dqi
 
 
-std::ostream& operator<<( std::ostream& o, const dqi::HanConfigGroup& g )
+std::ostream& operator<< ATLAS_NOT_THREAD_SAFE ( std::ostream& o, const dqi::HanConfigGroup& g )
 {
   g.PrintIOStream(o);
   return o;
 }
 
 
-std::ostream& operator<<( std::ostream& o, const dqi::HanConfigGroup* g )
+std::ostream& operator<< ATLAS_NOT_THREAD_SAFE ( std::ostream& o, const dqi::HanConfigGroup* g )
 {
   g->PrintIOStream(o);
   return o;
