@@ -130,12 +130,14 @@ def AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(slimmingHelper):
 def TrigNavSlimmingMTCfg(flags):
 
   log = logging.getLogger("TrigNavSlimmingMTCfg.py")
-  
-  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput, possible_keys
+
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-  
   ca = ComponentAccumulator()
 
+  if flags.Trigger.EDMVersion in [1, 2] and not flags.Trigger.doEDMVersionConversion:
+    log.debug("Not going to run Run 3 navigation slimming on a R2 input file as we are not setup to run the navigation conversion in this job")
+    return ca
+  
   # We only run this if we are in a job which is decoding the HLT data in reconstruction, and if the slimming has not been switched off
   if flags.Trigger.decodeHLT is False:
     log.debug("Nothing to do as Trigger.decodeHLT is False")
@@ -147,6 +149,8 @@ def TrigNavSlimmingMTCfg(flags):
 
   doESD = flags.Output.doWriteESD
   doAOD = flags.Output.doWriteAOD
+
+  from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput, possible_keys
 
   # NOTE: Derivations currently have a different configuration hook, see TrigNavSlimmingMTDerivationCfg above.
 
@@ -170,6 +174,11 @@ def TrigNavSlimmingMTCfg(flags):
     esdSlim.NodesToDrop = ["F"]
     esdSlim.ChainsFilter = []
     ca.addEventAlgo(esdSlim)
+    #
+    collections = [f"xAOD::TrigCompositeContainer#{esdSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{esdSlim.OutputCollection}Aux."]
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD
+    ca.merge(addToESD(flags, collections))
+    #
     log.info("Producing ESD Slimmed Trigger Navigation Collection. Reading {} and writing {}".format(esdSlim.PrimaryInputCollection, esdSlim.OutputCollection))
     if esdSlim.OutputCollection not in possible_keys:
       log.error("Producing a collection {} which is not listed in 'possible_keys'! Add this here too.".format(esdSlim.OutputCollection))
@@ -199,6 +208,11 @@ def TrigNavSlimmingMTCfg(flags):
       aodSlim.KeepOnlyFinalFeatures = True
       log.info("Producing AODSLIM Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
     ca.addEventAlgo(aodSlim)
+    #
+    collections = [f"xAOD::TrigCompositeContainer#{aodSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{aodSlim.OutputCollection}Aux."]
+    from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
+    ca.merge(addToAOD(flags, collections))
+    #
     if aodSlim.OutputCollection not in possible_keys:
       log.error("Producing a collection {} which is not listed in 'possible_keys'! Add this here too.".format(esdSlim.OutputCollection))
   else:
