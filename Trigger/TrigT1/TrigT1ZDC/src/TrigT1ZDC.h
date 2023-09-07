@@ -19,6 +19,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthContainers/DataVector.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "PathResolver/PathResolver.h"
 
@@ -47,9 +49,12 @@ namespace LVL1 {
 
   private :
    /* Input handles */
-   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleDataLocation{
-       this, "ZdcModuleLocation", TrigT1CaloDefs::xAODZdcMoudleLocation,
+   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleKey{
+       this, "ZdcModuleLocation", TrigT1CaloDefs::xAODZdcModuleLocation,
        "Read handle key for ZdcModuleContainer"};
+       
+   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergyKey 
+   {this, "ZdcModuleCalibEnergyKey", "ZdcModules.CalibEnergy", "ReadHandleKey for Zdc CalibEnergy AuxData"};
 
    /* Output handles */
    SG::WriteHandleKey<ZdcCTP> m_zdcCTPLocation{

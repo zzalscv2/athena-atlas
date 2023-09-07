@@ -101,6 +101,18 @@ def egammaOutputCfg(flags, name="EGOutputList"):
             f"xAOD::TrackParticleAuxContainer#{outFlags.GSFTrackParticles}"
             f"Aux.{outFlags.GSFTrackParticlesSuppAOD}"]
 
+        if (flags.Tracking.writeExtendedSi_PRDInfo or
+            flags.Tracking.writeExtendedTRT_PRDInfo):
+            extension = "GSF_"
+            toAOD += [
+                f"xAOD::TrackStateValidationContainer#{extension}Pixel_MSOSs",
+                f"xAOD::TrackStateValidationAuxContainer#{extension}Pixel_MSOSsAux.",
+                f"xAOD::TrackStateValidationContainer#{extension}SCT_MSOSs",
+                f"xAOD::TrackStateValidationAuxContainer#{extension}SCT_MSOSsAux.",
+                f"xAOD::TrackStateValidationContainer#{extension}TRT_MSOSs",
+                f"xAOD::TrackStateValidationAuxContainer#{extension}TRT_MSOSsAux."
+            ]
+
     if flags.Egamma.doConversionBuilding:
         toESD += [
             f"xAOD::VertexContainer#{outFlags.ConversionVertices}",
