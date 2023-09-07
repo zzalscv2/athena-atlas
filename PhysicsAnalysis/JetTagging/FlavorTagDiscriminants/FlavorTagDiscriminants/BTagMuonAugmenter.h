@@ -1,6 +1,6 @@
 // for text editors: this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAG_MUON_AUGMENTER_H
@@ -12,8 +12,6 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODMuon/MuonContainer.h"
-
-#include "MuonSelectorTools/MuonSelectionTool.h"
 
 namespace FlavorTagDiscriminants {
 
@@ -58,15 +56,11 @@ namespace FlavorTagDiscriminants {
     float m_muonMinpT;
     FlipTagConfig m_flip_config;
 
-    std::unique_ptr<CP::MuonSelectionTool> m_muonSelectionTool;
-
     AE::ConstAccessor<std::vector<ElementLink<xAOD::MuonContainer>>> m_acc_assocMuons;
     AE::ConstAccessor<ElementLink<xAOD::JetContainer>> m_acc_jetLink;
     AE::ConstAccessor<float> m_acc_muon_energyLoss;
 
     AE::Decorator<char> m_dec_muon_isDefaults;
-    AE::Decorator<char> m_dec_muon_failLowPtWorkingPoint;
-    AE::Decorator<int> m_dec_muon_quality;
     AE::Decorator<int> m_dec_nAssocMuons;
     AE::Decorator<float> m_dec_muon_dR;
     AE::Decorator<float> m_dec_muon_qOverPratio;
