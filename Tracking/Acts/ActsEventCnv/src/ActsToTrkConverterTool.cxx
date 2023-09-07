@@ -257,15 +257,18 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
   }
 
   Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
-  cov.topLeftCorner(5, 5) = *atlasParameter.covariance();
+  if (atlasParameter.covariance()) {
+    cov.topLeftCorner(5, 5) = *atlasParameter.covariance();
 
-  // Convert the covariance matrix from MeV
-  // FIXME: This needs to handle the annulus case as well - currently the cov is wrong for annulus surfaces
-  for (int i = 0; i < cov.rows(); i++) {
-    cov(i, 4) = cov(i, 4) / 1_MeV;
-  }
-  for (int i = 0; i < cov.cols(); i++) {
-    cov(4, i) = cov(4, i) / 1_MeV;
+    // Convert the covariance matrix from MeV
+    // FIXME: This needs to handle the annulus case as well - currently the cov
+    // is wrong for annulus surfaces
+    for (int i = 0; i < cov.rows(); i++) {
+      cov(i, 4) = cov(i, 4) / 1_MeV;
+    }
+    for (int i = 0; i < cov.cols(); i++) {
+      cov(4, i) = cov(4, i) / 1_MeV;
+    }
   }
 
   return Acts::BoundTrackParameters(actsSurface, params,
