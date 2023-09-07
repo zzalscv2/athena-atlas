@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
@@ -52,7 +52,7 @@ namespace pool {
     /// Templated method to set an attribute
     template< class T > bool setAttribute( const std::string& attributeName,
                                            const T& atttibuteValue,
-                                           std::string option = "" ) {
+                                           const std::string& option = "" ) {
       return this->setAttributeOfType( attributeName,
                                        static_cast< const void* >( &atttibuteValue ),
                                        typeid(T),
