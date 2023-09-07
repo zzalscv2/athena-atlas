@@ -99,13 +99,13 @@ namespace NSWL1 {
         ATH_MSG_ERROR("Cannot retrieve McEventCollection");
         return StatusCode::FAILURE;
       }
-      ptrMcEventCollection = readMcEventCollection.cptr();
+      if(m_doTruth) ptrMcEventCollection = readMcEventCollection.cptr();
       SG::ReadHandle<TrackRecordCollection> readMuonEntryLayer( m_keyMuonEntryLayer, ctx );
       if( !readMuonEntryLayer.isValid() ){
         ATH_MSG_ERROR("Cannot retrieve MuonEntryLayer");
         return StatusCode::FAILURE;
       }
-      ptrMuonEntryLayer = readMuonEntryLayer.cptr();
+      if(m_doTruth) ptrMuonEntryLayer = readMuonEntryLayer.cptr();
     }
 
     SG::ReadHandle<MmDigitContainer> readMmDigitContainer( m_keyMmDigitContainer, ctx );
