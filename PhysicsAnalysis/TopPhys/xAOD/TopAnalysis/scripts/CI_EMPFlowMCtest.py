@@ -8,7 +8,7 @@ from CI_test import CITest
 import sys
 import ROOT
 
-cutfilename = "validation-cuts.txt"
+cutfilename = "CI-validation-cuts-Run2.txt"
 cutfilepath = ROOT.PathResolver.find_file(cutfilename,
                                           "DATAPATH",
                                           ROOT.PathResolver.RecursiveSearch)

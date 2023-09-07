@@ -1,10 +1,11 @@
-#this is an example configuration file for AnalysisTop; refer to https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TopxAODStartGuideR21 for a guide on most common options in release 21 and to the https://topreco-tutorials.docs.cern.ch/ATR22migration/Intro/ tutorial for changes in release 22
+# This is an example configuration file for AnalysisTop for Run2 analyses; refer to https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AnalysisTop22 for R22 and https://twiki.cern.ch/twiki/bin/view/AtlasProtected/AnalysisTop24 for R24 (as R22 is discontinued after 22.2.113) 
+# A guide on most common options in release 24 and a tutorial can be found here: https://topreco-tutorials.docs.cern.ch/TopWorkshop2023/Intro/
 
 #IMPORTANT: THIS IS ONLY AN EXAMPLE AND NOT A RECOMMENDATION OF THE BEST CONFIGURATION TO BE USED (because there is no single configuration optimal for all cases)
 #the values used for all the possible config options are printed at the beginning of the execution of top-xaod
 #all options not explicitely configured in the file use the default values
 #all available options and their default values can be seen here https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TopPhys/xAOD/TopConfiguration/Root/ConfigurationSettings.cxx
-#(this is the default link for the HEAD version, if you're using a specific release, search e.g. "22.2.XXX" from the drop-down release menu to see the one relative to your version)
+#(this is the default link for the HEAD version, if you're using a specific release, search e.g. "24.2.XXX" from the drop-down release menu to see the one relative to your version)
 
 ############General setup###########
 #these are the libraries included for the execution. Update if you add a package (e.g. if you add MyCustomSaver, you have to add libMyCustomSaver to the list below)
