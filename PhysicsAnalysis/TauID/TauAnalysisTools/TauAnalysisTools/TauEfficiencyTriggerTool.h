@@ -45,15 +45,9 @@ public:
 
   virtual StatusCode applySystematicVariation ( const CP::SystematicSet& sSystematicSet);
 
-  virtual StatusCode setRunNumber(int iRunNumber);
-
   bool isSupportedRunNumber(int iRunNumber) const;
 
 protected:
-  std::string convertPeriodToStr() const;
-
-  DataPeriod m_ePeriod;
-  int m_ePeriodBinning;
 
   int m_iMinRunNumber;
   int m_iMaxRunNumber;

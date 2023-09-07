@@ -17,10 +17,8 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 TauEfficiencyTriggerTool::TauEfficiencyTriggerTool(const std::string& sName)
   : CommonEfficiencyTool ( sName )
-  , m_ePeriod(PeriodUnknown)
 {
   m_mSystematics = {};
-  declareProperty( "PeriodBinning", m_ePeriodBinning = (int)PeriodBinningUnknown );
   declareProperty( "MinRunNumber", m_iMinRunNumber = 0 );
   declareProperty( "MaxRunNumber", m_iMaxRunNumber = 0 );
 }
@@ -80,7 +78,7 @@ CP::CorrectionCode TauEfficiencyTriggerTool::getEfficiencyScaleFactor(const xAOD
 
   // get standard scale factor
   CP::CorrectionCode tmpCorrectionCode;
-  tmpCorrectionCode = getValue(m_sSFHistName+"_"+convertPeriodToStr()+"_"+m_sWP+sProng,
+  tmpCorrectionCode = getValue(m_sSFHistName+"_all_"+m_sWP+sProng,
                                xTau,
                                dEfficiencyScaleFactor);
   // return correction code if histogram is not available
@@ -104,7 +102,7 @@ CP::CorrectionCode TauEfficiencyTriggerTool::getEfficiencyScaleFactor(const xAOD
 
     // get uncertainty value
     double dUncertaintySyst = 0.;
-    tmpCorrectionCode = getValue(it->second+sDirection+"_"+convertPeriodToStr()+"_"+m_sWP+sProng,
+    tmpCorrectionCode = getValue(it->second+sDirection+"_all_"+m_sWP+sProng,
                                  xTau,
                                  dUncertaintySyst);
 
@@ -190,41 +188,3 @@ bool TauEfficiencyTriggerTool::isSupportedRunNumber(int iRunNumber) const
   return true;
 }
 
-//=================================PRIVATE-PART=================================
-//______________________________________________________________________________
-StatusCode TauEfficiencyTriggerTool::setRunNumber(int iRunNumber)
-{
-  if(iRunNumber>=276073 and iRunNumber<=276954)
-    m_ePeriod = PeriodD;
-  else if(iRunNumber>=278727 and iRunNumber<=279928)
-    m_ePeriod = PeriodE;
-  else if(iRunNumber>=279932 and iRunNumber<=280422)
-    m_ePeriod = PeriodF;
-  else if(iRunNumber>=280423 and iRunNumber<=281075)
-    m_ePeriod = PeriodG;
-  else if(iRunNumber>=281317 and iRunNumber<=281385)
-    m_ePeriod = PeriodH2;
-  else if(iRunNumber==281411)
-    m_ePeriod = PeriodH3;
-  else if(iRunNumber>=282625 and iRunNumber<=284484)
-    m_ePeriod = PeriodJ;
-  else
-  {
-    ATH_MSG_ERROR("Run number "<<iRunNumber<<" is currently not supported");
-    m_ePeriod = PeriodUnknown;
-    return StatusCode::FAILURE;
-  }
-  return StatusCode::SUCCESS;
-}
-
-//=================================PRIVATE-PART=================================
-//______________________________________________________________________________
-std::string TauEfficiencyTriggerTool::convertPeriodToStr() const
-{
-  if (m_ePeriodBinning == PeriodBinningAll)
-    return "all";
-  else {
-    ATH_MSG_WARNING("Period binning not supported");
-    return "";
-  }
-}

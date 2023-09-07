@@ -100,27 +100,6 @@ namespace TauAnalysisTools
     TruthHadronicDiTau = 6
   };
 
-  // FIXME: do we want to keep this?
-  enum DataPeriod
-  {
-    PeriodUnknown  = 0,
-    PeriodD  = 1,
-    PeriodE  = 2,
-    PeriodF  = 3,
-    PeriodG  = 4,
-    PeriodH2 = 5,
-    PeriodH3 = 6,
-    PeriodI  = 7,
-    PeriodJ  = 8
-  };
-
-  // FIXME: do we want to keep this?
-  enum DataPeriodBinning
-  {
-    PeriodBinningUnknown  = 0,
-    PeriodBinningAll        = 1,
-  };
-
   struct ROOT6_NamespaceAutoloadHook{};
 
 }
