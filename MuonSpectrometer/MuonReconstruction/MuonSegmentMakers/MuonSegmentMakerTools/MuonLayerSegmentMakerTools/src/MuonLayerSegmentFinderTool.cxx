@@ -7,7 +7,6 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonLayerHough/MuonLayerHough.h"
-#include "MuonPrepRawDataProviderTools/MuonPrepRawDataCollectionProviderTool.h"
 #include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonSegment/MuonSegment.h"
