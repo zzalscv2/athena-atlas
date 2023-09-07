@@ -137,44 +137,38 @@ namespace NSWL1 {
       diamond->setRoadSizeDownUV(m_diamOverlapStereoDown);
     }
 
+    // We need to extract truth info, if available
+    for (const auto &it : Event_Info) {
       double trueta = -999., truphi = -999., trutheta = -999., trupt = -999., dt = -999., tpos = -999., ppos = -999., epos = -999., tent = -999., pent = -999., eent = -999.;
-      // We need to extract truth info, if available
-	for (unsigned int j=0; j<Event_Info.size(); j++) {
-      std::pair<int, unsigned int> truth_event (event,j);
-      if (!Event_Info.empty()) {
-        auto tru_it = Event_Info.find(truth_event);
-        if (tru_it != Event_Info.end()) {
-          evInf_entry truth_info(tru_it->second);
-          trutheta = truth_info.theta_ip; // truth muon at the IP
-          truphi = truth_info.phi_ip;
-          trueta = truth_info.eta_ip;
-          trupt = truth_info.pt;
-          tpos=truth_info.theta_pos; // muEntry position
-          ppos=truth_info.phi_pos;
-          epos=truth_info.eta_pos;
-          tent=truth_info.theta_ent; // muEntry momentum
-          pent=truth_info.phi_ent;
-          eent=truth_info.eta_ent;
-          dt=truth_info.dtheta;
-          if (m_doNtuple) {
-            m_trigger_trueEtaRange->push_back(trueta);
-            m_trigger_truePtRange->push_back(trupt);
-            m_trigger_trueThe->push_back(trutheta);
-            m_trigger_truePhi->push_back(truphi);
-            m_trigger_trueDth->push_back(dt); // theta_pos-theta_ent
-            m_trigger_trueEtaPos->push_back(epos);
-            m_trigger_trueThePos->push_back(tpos);
-            m_trigger_truePhiPos->push_back(ppos);
-            m_trigger_trueEtaEnt->push_back(eent);
-            m_trigger_trueTheEnt->push_back(tent);
-            m_trigger_truePhiEnt->push_back(pent);
-          }
-        }
+      trutheta = it.second.theta_ip; // truth muon at the IP
+      truphi = it.second.phi_ip;
+      trueta = it.second.eta_ip;
+      trupt = it.second.pt;
+      tpos = it.second.theta_pos; // muEntry position
+      ppos = it.second.phi_pos;
+      epos = it.second.eta_pos;
+      tent = it.second.theta_ent; // muEntry momentum
+      pent = it.second.phi_ent;
+      eent = it.second.eta_ent;
+      dt = it.second.dtheta;
+      if (m_doNtuple) {
+        m_trigger_trueEtaRange->push_back(trueta);
+        m_trigger_truePtRange->push_back(trupt);
+        m_trigger_trueThe->push_back(trutheta);
+        m_trigger_truePhi->push_back(truphi);
+        m_trigger_trueDth->push_back(dt); // theta_pos-theta_ent
+        m_trigger_trueEtaPos->push_back(epos);
+        m_trigger_trueThePos->push_back(tpos);
+        m_trigger_truePhiPos->push_back(ppos);
+        m_trigger_trueEtaEnt->push_back(eent);
+        m_trigger_trueTheEnt->push_back(tent);
+        m_trigger_truePhiEnt->push_back(pent);
       }
-	}
-	unsigned int particles = entries.rbegin()->first.second +1,  nskip=0;
-	for (unsigned int i=0; i<particles; i++) {
-	std::pair<int, unsigned int> pair_event (event,i);
+    }
+
+    unsigned int particles = entries.rbegin()->first.second +1,  nskip=0;
+    for (unsigned int i=0; i<particles; i++) {
+      std::pair<int, unsigned int> pair_event (event,i);
 
       // Now let's switch to reco hits: firstly, extracting the station name we're working on...
       std::string station = "-";
@@ -341,18 +335,6 @@ namespace NSWL1 {
                 m_trigger_slope->push_back(hitInfo.slope);
               }
             }
-            if (reco_it->second.size() > 7 && m_doNtuple) {
-              m_trigger_trueEtaRange->push_back(trueta);
-              m_trigger_truePtRange->push_back(trupt);
-              if (station == "MML") {
-                m_trigger_large_trueEtaRange->push_back(trueta);
-                m_trigger_large_truePtRange->push_back(trupt);
-              }
-              if (station == "MMS") {
-                m_trigger_small_trueEtaRange->push_back(trueta);
-                m_trigger_small_truePtRange->push_back(trupt);
-              }
-            }
 
             ////////////////////////////////////////////////////////////////
             ////                                                          //
@@ -410,12 +392,7 @@ namespace NSWL1 {
             //                                                          //
             //////////////////////////////////////////////////////////////
 
-            if (road_fits.empty() and hitDatas.size() == 8) ATH_MSG_DEBUG( "TruthRF0 " << tpos     << " " << ppos   << " " << dt << " " << trueta );
-
             for (unsigned int i = 0; i < road_fits.size(); i++) {
-              if (road_fits[i].fit_roi == 0 and hitDatas.size() == 8) {
-                ATH_MSG_DEBUG( "TruthROI0 " << tpos     << " " << ppos   << " " << dt << " " << trueta );
-              }
               if (road_fits[i].fit_roi > 0) {
                 //For the future: how do we want these to pass on as the signal?  Some new data structure?
                 double fitTheta      = road_fits[i].fit_theta;
@@ -435,16 +412,11 @@ namespace NSWL1 {
 
                 double fitEta = -1. * std::log(std::tan(fitTheta/2.)); //VALE: trueta was filled!!!!
 
-                ATH_MSG_DEBUG( "Truth " << tpos     << " " << ppos   << " " << dt );
                 ATH_MSG_DEBUG( "FIT!! " << fitTheta << " " << fitPhi << " " << fitDeltaTheta );
                 if (m_doNtuple) {
                   m_trigger_fitThe->push_back(fitTheta);
                   m_trigger_fitPhi->push_back(fitPhi);
                   m_trigger_fitDth->push_back(fitDeltaTheta);
-
-                  m_trigger_resThe->push_back(fitTheta-tpos);
-                  m_trigger_resPhi->push_back(fitPhi-ppos);
-                  m_trigger_resDth->push_back(fitDeltaTheta-dt);
 
                   m_trigger_mx->push_back(mxmy.front().first);
                   m_trigger_my->push_back(mxmy.front().second);
@@ -454,14 +426,11 @@ namespace NSWL1 {
                   m_trigger_mv->push_back(mvGlobal);
 
                   m_trigger_fitEtaRange->push_back(fitEta);
-                  m_trigger_fitPtRange->push_back(trupt);
                   if (station == "MML") {
                     m_trigger_large_fitEtaRange->push_back(fitEta);
-                    m_trigger_large_fitPtRange->push_back(trupt);
                   }
                   if (station == "MMS") {
                     m_trigger_small_fitEtaRange->push_back(fitEta);
-                    m_trigger_small_fitPtRange->push_back(trupt);
                   }
                 }
               }

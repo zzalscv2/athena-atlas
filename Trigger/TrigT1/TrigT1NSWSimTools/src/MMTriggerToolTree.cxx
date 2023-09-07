@@ -60,38 +60,16 @@ namespace NSWL1 {
       m_trigger_trueEtaRange = new std::vector<double>();
       m_trigger_truePtRange  = new std::vector<double>();
       m_trigger_fitEtaRange  = new std::vector<double>();
-      m_trigger_fitPtRange   = new std::vector<double>();
-      m_trigger_resThe       = new std::vector<double>();
-      m_trigger_resPhi       = new std::vector<double>();
-      m_trigger_resDth       = new std::vector<double>();
 
       m_trigger_large_fitThe       = new std::vector<double>();
       m_trigger_large_fitPhi       = new std::vector<double>();
       m_trigger_large_fitDth       = new std::vector<double>();
-      m_trigger_large_trueEtaRange = new std::vector<double>();
-      m_trigger_large_truePtRange  = new std::vector<double>();
-      m_trigger_large_trueThe      = new std::vector<double>();
-      m_trigger_large_truePhi      = new std::vector<double>();
-      m_trigger_large_trueDth      = new std::vector<double>();
       m_trigger_large_fitEtaRange  = new std::vector<double>();
-      m_trigger_large_fitPtRange   = new std::vector<double>();
-      m_trigger_large_resThe       = new std::vector<double>();
-      m_trigger_large_resPhi       = new std::vector<double>();
-      m_trigger_large_resDth       = new std::vector<double>();
 
       m_trigger_small_fitThe       = new std::vector<double>();
       m_trigger_small_fitPhi       = new std::vector<double>();
       m_trigger_small_fitDth       = new std::vector<double>();
-      m_trigger_small_trueEtaRange = new std::vector<double>();
-      m_trigger_small_truePtRange  = new std::vector<double>();
-      m_trigger_small_trueThe      = new std::vector<double>();
-      m_trigger_small_truePhi      = new std::vector<double>();
-      m_trigger_small_trueDth      = new std::vector<double>();
       m_trigger_small_fitEtaRange  = new std::vector<double>();
-      m_trigger_small_fitPtRange   = new std::vector<double>();
-      m_trigger_small_resThe       = new std::vector<double>();
-      m_trigger_small_resPhi       = new std::vector<double>();
-      m_trigger_small_resDth       = new std::vector<double>();
 
       m_trigger_VMM          = new std::vector<int>();
       m_trigger_plane        = new std::vector<int>();
@@ -168,37 +146,15 @@ namespace NSWL1 {
         m_tree->Branch(TString::Format("%s_trigger_trueEtaRange",n).Data(),    &m_trigger_trueEtaRange);
         m_tree->Branch(TString::Format("%s_trigger_truePtRange",n).Data(),    &m_trigger_truePtRange);
         m_tree->Branch(TString::Format("%s_trigger_fitEtaRange",n).Data(),    &m_trigger_fitEtaRange);
-        m_tree->Branch(TString::Format("%s_trigger_fitPtRange",n).Data(),    &m_trigger_fitPtRange);
-        m_tree->Branch(TString::Format("%s_trigger_resThe",n).Data(),    &m_trigger_resThe);
-        m_tree->Branch(TString::Format("%s_trigger_resPhi",n).Data(),    &m_trigger_resPhi);
-        m_tree->Branch(TString::Format("%s_trigger_resDth",n).Data(),    &m_trigger_resDth);
         m_tree->Branch(TString::Format("%s_trigger_large_fitThe",n).Data(),&m_trigger_large_fitThe);
         m_tree->Branch(TString::Format("%s_trigger_large_fitPhi",n).Data(),    &m_trigger_large_fitPhi);
         m_tree->Branch(TString::Format("%s_trigger_large_fitDth",n).Data(),    &m_trigger_large_fitDth);
-        m_tree->Branch(TString::Format("%s_trigger_large_trueEtaRange",n).Data(),    &m_trigger_large_trueEtaRange);
-        m_tree->Branch(TString::Format("%s_trigger_large_truePtRange",n).Data(),    &m_trigger_large_truePtRange);
-        m_tree->Branch(TString::Format("%s_trigger_large_trueThe",n).Data(),    &m_trigger_large_trueThe);
-        m_tree->Branch(TString::Format("%s_trigger_large_truePhi",n).Data(),    &m_trigger_large_truePhi);
-        m_tree->Branch(TString::Format("%s_trigger_large_trueDth",n).Data(),    &m_trigger_large_trueDth);
         m_tree->Branch(TString::Format("%s_trigger_large_fitEtaRange",n).Data(),    &m_trigger_large_fitEtaRange);
-        m_tree->Branch(TString::Format("%s_trigger_large_fitPtRange",n).Data(),    &m_trigger_large_fitPtRange);
-        m_tree->Branch(TString::Format("%s_trigger_large_resThe",n).Data(),    &m_trigger_large_resThe);
-        m_tree->Branch(TString::Format("%s_trigger_large_resPhi",n).Data(),    &m_trigger_large_resPhi);
-        m_tree->Branch(TString::Format("%s_trigger_large_resDth",n).Data(),    &m_trigger_large_resDth);
 
         m_tree->Branch(TString::Format("%s_trigger_small_fitThe",n).Data(),&m_trigger_small_fitThe);
         m_tree->Branch(TString::Format("%s_trigger_small_fitPhi",n).Data(),    &m_trigger_small_fitPhi);
         m_tree->Branch(TString::Format("%s_trigger_small_fitDth",n).Data(),    &m_trigger_small_fitDth);
-        m_tree->Branch(TString::Format("%s_trigger_small_trueEtaRange",n).Data(),    &m_trigger_small_trueEtaRange);
-        m_tree->Branch(TString::Format("%s_trigger_small_truePtRange",n).Data(),    &m_trigger_small_truePtRange);
-        m_tree->Branch(TString::Format("%s_trigger_small_trueThe",n).Data(),    &m_trigger_small_trueThe);
-        m_tree->Branch(TString::Format("%s_trigger_small_truePhi",n).Data(),    &m_trigger_small_truePhi);
-        m_tree->Branch(TString::Format("%s_trigger_small_trueDth",n).Data(),    &m_trigger_small_trueDth);
         m_tree->Branch(TString::Format("%s_trigger_small_fitEtaRange",n).Data(),    &m_trigger_small_fitEtaRange);
-        m_tree->Branch(TString::Format("%s_trigger_small_fitPtRange",n).Data(),    &m_trigger_small_fitPtRange);
-        m_tree->Branch(TString::Format("%s_trigger_small_resThe",n).Data(),    &m_trigger_small_resThe);
-        m_tree->Branch(TString::Format("%s_trigger_small_resPhi",n).Data(),    &m_trigger_small_resPhi);
-        m_tree->Branch(TString::Format("%s_trigger_small_resDth",n).Data(),    &m_trigger_small_resDth);
 
         m_tree->Branch(TString::Format("%s_trigger_VMM",n).Data(),    &m_trigger_VMM);
         m_tree->Branch(TString::Format("%s_trigger_plane",n).Data(),    &m_trigger_plane);
@@ -282,38 +238,16 @@ namespace NSWL1 {
       m_trigger_trueEtaRange->clear();
       m_trigger_truePtRange->clear();
       m_trigger_fitEtaRange->clear();
-      m_trigger_fitPtRange->clear();
-      m_trigger_resThe->clear();
-      m_trigger_resPhi->clear();
-      m_trigger_resDth->clear();
 
       m_trigger_large_fitThe->clear();
       m_trigger_large_fitPhi->clear();
       m_trigger_large_fitDth->clear();
-      m_trigger_large_trueEtaRange->clear();
-      m_trigger_large_truePtRange->clear();
-      m_trigger_large_trueThe->clear();
-      m_trigger_large_truePhi->clear();
-      m_trigger_large_trueDth->clear();
       m_trigger_large_fitEtaRange->clear();
-      m_trigger_large_fitPtRange->clear();
-      m_trigger_large_resThe->clear();
-      m_trigger_large_resPhi->clear();
-      m_trigger_large_resDth->clear();
 
       m_trigger_small_fitThe->clear();
       m_trigger_small_fitPhi->clear();
       m_trigger_small_fitDth->clear();
-      m_trigger_small_trueEtaRange->clear();
-      m_trigger_small_truePtRange->clear();
-      m_trigger_small_trueThe->clear();
-      m_trigger_small_truePhi->clear();
-      m_trigger_small_trueDth->clear();
       m_trigger_small_fitEtaRange->clear();
-      m_trigger_small_fitPtRange->clear();
-      m_trigger_small_resThe->clear();
-      m_trigger_small_resPhi->clear();
-      m_trigger_small_resDth->clear();
 
       m_trigger_VMM->clear();
       m_trigger_plane->clear();
