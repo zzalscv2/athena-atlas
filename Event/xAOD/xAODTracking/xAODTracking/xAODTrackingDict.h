@@ -91,6 +91,12 @@
 #include "xAODTracking/versions/TrackBackendContainer_v1.h"
 #include "xAODTracking/versions/TrackBackendAuxContainer_v1.h"
 
+#include "xAODTracking/SurfaceBackend.h"
+#include "xAODTracking/SurfaceBackendContainer.h"
+#include "xAODTracking/SurfaceBackendAuxContainer.h"
+#include "xAODTracking/versions/SurfaceBackend_v1.h"
+#include "xAODTracking/versions/SurfaceBackendContainer_v1.h"
+#include "xAODTracking/versions/SurfaceBackendAuxContainer_v1.h"
 
 // EDM include(s).
 #include "xAODCore/tools/DictHelpers.h"

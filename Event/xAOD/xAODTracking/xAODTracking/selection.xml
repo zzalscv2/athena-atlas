@@ -179,6 +179,18 @@
           id="797432BD-DBEE-4C08-BF8E-E0556434A3F3" />
    <typedef name="xAOD::TrackStateValidationAuxContainer" />
 
+   <!-- xAOD::SurfaceBackend interface type(s). -->
+   <class name="xAOD::SurfaceBackend_v1" />
+   <class name="xAOD::SurfaceBackendContainer_v1"
+          id="649aeb61-ffb0-4eee-97e4-c232e631a6bd" />
+   <typedef name="xAOD::SurfaceBackend" />
+   <typedef name="xAOD::SurfaceBackendContainer" />
+
+   <!-- xAOD::SurfaceBackend auxiliary type(s). -->
+   <class name="xAOD::SurfaceBackendAuxContainer_v1"
+          id="54654d43-c918-42f6-840e-2b4feac21c75" />
+   <typedef name="xAOD::SurfaceBackendAuxContainer" />
+   
    <!-- xAOD::SCTRawHitValidation interface type(s). -->
    <class name="xAOD::SCTRawHitValidation_v1" />
    <class name="xAOD::SCTRawHitValidationContainer_v1"

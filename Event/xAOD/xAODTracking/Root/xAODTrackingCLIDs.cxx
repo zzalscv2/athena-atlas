@@ -25,4 +25,5 @@
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackBackendContainer.h"
 #include "xAODTracking/TrackBackendAuxContainer.h"
-
+#include "xAODTracking/SurfaceBackendContainer.h"
+#include "xAODTracking/SurfaceBackendAuxContainer.h"

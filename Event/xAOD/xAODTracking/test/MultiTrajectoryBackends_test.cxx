@@ -35,6 +35,10 @@
 #include "xAODTracking/TrackBackendContainer.h"
 #include "xAODTracking/TrackBackendAuxContainer.h"
 
+#include "xAODTracking/SurfaceBackend.h"
+#include "xAODTracking/SurfaceBackendContainer.h"
+#include "xAODTracking/SurfaceBackendAuxContainer.h"
+
 #include <any>
 
 
@@ -209,7 +213,7 @@ BOOST_AUTO_TEST_CASE(TrackJacobian_build) {
 }
 }
 
-
+// Test of TrackBackend
 BOOST_AUTO_TEST_CASE(TrackBackend_build) {
     constexpr static size_t sz = 6;
 
@@ -243,7 +247,34 @@ BOOST_AUTO_TEST_CASE(TrackBackend_build) {
             }
         }
     }
+  
+}
 
 
-    
+// Test of surfaceBackend
+BOOST_AUTO_TEST_CASE(SurfaceBackend_build) {
+
+    xAOD::SurfaceBackendContainer backend;
+    xAOD::SurfaceBackendAuxContainer aux;
+    backend.setStore(&aux);
+
+    std::vector<float> semirandoms = {0.12, 0.92, 0.33};
+   
+    auto par = new xAOD::SurfaceBackend();    
+    backend.push_back(par);
+    par->setTranslation(semirandoms);
+    par->setRotation(semirandoms);
+    par->setBoundValues(semirandoms);
+    xAOD::SurfaceType type = xAOD::SurfaceType::Cylinder;
+    par->setSurfaceType(type);
+  
+    const xAOD::SurfaceBackend* outpar = backend.at(0);
+    for ( size_t p=0; p < semirandoms.size(); ++p) {
+        const float expected = semirandoms[p];
+        BOOST_CHECK_EQUAL(outpar->translation()[p], expected);
+        BOOST_CHECK_EQUAL(outpar->rotation()[p], expected);
+        BOOST_CHECK_EQUAL(outpar->boundValues()[p], expected);
+    }
+    BOOST_CHECK_EQUAL(int(outpar->SurfaceType()), int(type));
+
 }
