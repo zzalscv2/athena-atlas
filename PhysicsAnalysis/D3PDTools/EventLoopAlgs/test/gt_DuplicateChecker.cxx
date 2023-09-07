@@ -17,6 +17,7 @@
 #include <AsgTools/StatusCode.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
+#include <RootCoreUtils/UnitTestDir.h>
 #include <SampleHandler/SampleLocal.h>
 #include <EventLoop/DirectDriver.h>
 #include <EventLoop/Job.h>
@@ -150,9 +151,9 @@ TEST (DuplicateCheckerTest, all_tests)
   xAOD::TReturnCode::enableFailure();
   xAOD::Init ().ignore();
 
-  std::string prefix = "DuplicateCheckerSubmit";
+  RCU::UnitTestDir dir ("EventLoopAlgs", "DuplicateChecker");
 
-  RCU::Shell::exec ("rm -rf " + prefix + "[123]");
+  std::string prefix = "DuplicateCheckerSubmit";
 
   if (makeXAOD ("test1.root", 1, 0).isFailure())
   {
