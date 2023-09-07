@@ -387,6 +387,7 @@ StatusCode EventSelectorAthenaPool::start() {
       }
    } else {
       m_headerIterator = &m_poolCollectionConverter->executeQuery(/*m_query.value()*/);
+      m_evtCount = 0;
    }
    delete m_endIter;   m_endIter   = nullptr;
    m_endIter = new EventContextAthenaPool(nullptr);

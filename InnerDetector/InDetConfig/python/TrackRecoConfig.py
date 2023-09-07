@@ -206,6 +206,7 @@ def InDetTrackRecoCfg(flags):
         flagsPixel = flags.cloneAndReplace("Tracking.ActiveConfig",
                                            "Tracking.PixelPass")
         PixelTrackContainer = "ResolvedPixelTracks"
+        printActiveConfig(flagsPixel)
 
         result.merge(TrackingSiPatternCfg(
             flagsPixel,
@@ -239,6 +240,7 @@ def InDetTrackRecoCfg(flags):
         flagsSCT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                          "Tracking.SCTPass")
         SCTTrackContainer = "ResolvedSCTTracks"
+        printActiveConfig(flagsSCT)
 
         result.merge(TrackingSiPatternCfg(
             flagsSCT,
@@ -264,6 +266,8 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doTrackSegmentsTRT:
         flagsTRT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                          "Tracking.TRTPass")
+        printActiveConfig(flagsTRT)
+
         from InDetConfig.TRTSegmentFindingConfig import (
             TRTSegmentFinding_TrackSegments_Cfg)
         result.merge(TRTSegmentFinding_TrackSegments_Cfg(flagsTRT))
