@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -107,12 +107,11 @@ namespace MD
       }
     }
 
-    m_hist = hist.get();
+    m_hist = hist.release();
     m_hist->SetDirectory (0);
 
     m_values.resize (m_formulas.size());
 
-    hist.release ();
     RCU_NEW_INVARIANT (this);
   }
 

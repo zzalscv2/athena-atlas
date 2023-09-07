@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -112,7 +112,7 @@ namespace MD
     if (!val_value3.empty())
       m_formulas.push_back (val_value3);
 
-    m_hist = hist.get();
+    m_hist = hist.release();
     m_hist->SetDirectory (0);
     if (dynamic_cast<TProfile*>(m_hist) != 0)
     {
@@ -139,7 +139,6 @@ namespace MD
     else
       RCU_THROW_MSG ("invalid number of formulas");
 
-    hist.release ();
     RCU_NEW_INVARIANT (this);
   }
 
