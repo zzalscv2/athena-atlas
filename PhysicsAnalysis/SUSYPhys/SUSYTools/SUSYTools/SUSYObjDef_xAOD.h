@@ -871,7 +871,6 @@ namespace ST {
     ToolHandleArray<IAsgPhotonEfficiencyCorrectionTool> m_photonTrigSFTools;
     ToolHandleArray<IAsgPhotonEfficiencyCorrectionTool> m_photonTrigEffTools;
     //
-    asg::AnaToolHandle<IElectronPhotonShowerShapeFudgeTool> m_electronPhotonShowerShapeFudgeTool;
     asg::AnaToolHandle<IEGammaAmbiguityTool> m_egammaAmbiguityTool;
     asg::AnaToolHandle<IAsgElectronLikelihoodTool> m_elecChargeIDSelectorTool;
     asg::AnaToolHandle<IAsgElectronEfficiencyCorrectionTool>      m_elecChargeEffCorrTool;

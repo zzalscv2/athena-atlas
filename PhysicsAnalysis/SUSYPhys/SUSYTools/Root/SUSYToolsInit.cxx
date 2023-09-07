@@ -33,7 +33,6 @@ using namespace ST;
 #include "EgammaAnalysisInterfaces/IAsgElectronIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
-#include "EgammaAnalysisInterfaces/IElectronPhotonShowerShapeFudgeTool.h"
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
@@ -1284,19 +1283,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
   }
   if (m_slices["ele"] || m_slices["pho"]) {
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialize the MC fudge tool
-
-    if (!m_electronPhotonShowerShapeFudgeTool.isUserConfigured()) {
-      m_electronPhotonShowerShapeFudgeTool.setTypeAndName("ElectronPhotonShowerShapeFudgeTool/ElectronPhotonShowerShapeFudgeTool");
-
-      int FFset = 22;
-      ATH_CHECK( m_electronPhotonShowerShapeFudgeTool.setProperty("Preselection", FFset) );
-      ATH_CHECK( m_electronPhotonShowerShapeFudgeTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_electronPhotonShowerShapeFudgeTool.retrieve() );
-    } else ATH_CHECK( m_electronPhotonShowerShapeFudgeTool.retrieve() );
-
-
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialize the EgammaAmbiguityTool
 
