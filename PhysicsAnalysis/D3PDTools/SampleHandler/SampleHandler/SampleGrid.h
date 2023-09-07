@@ -31,7 +31,7 @@ namespace SH
   /// the files to use within.
   ///
   /// The main purpose as such is to pass it as an input sample into
-  /// the EL::GridDriver.  However, in practice one can still use this
+  /// the @ref EL::PrunDriver.  However, in practice one can still use this
   /// like a regular sample (using direct access via FAX, or
   /// pre-loading via rucio).
   ///
