@@ -46,29 +46,12 @@ It has a similar structure to TauRecBuilder, with its own TauRecRunConfigured, u
 
 ### TauAlgorithmsHolder
 
-This module contains functions for configuring each tauRecTool.  In the case where multiple instances of a tool may be used, a flexible function is created to retrieve
-the instance you want.  For example, the [TauJetBDTEvaluator](https://gitlab.cern.ch/atlas/athena/blob/main/Reconstruction/tauRecTools/tauRecTools/TauJetBDTEvaluator.h) is used numerous times : 1p taus, 3p taus, 3 different eta bins for Electron BDT.
-
-```python
-
-def getTauJetBDTEvaluator(_n, weightsFile="", minNTracks=0, maxNTracks=10000, outputVarName="BDTJetScore", minAbsTrackEta=-1, maxAbsTrackEta=-1):
-    _name = sPrefix + _n
-    from tauRecTools.tauRecToolsConf import TauJetBDTEvaluator
-    myTauJetBDTEvaluator = TauJetBDTEvaluator(name=_name,
-                                              weightsFile=weightsFile,
-                                              minNTracks=minNTracks,
-                                              maxNTracks=maxNTracks,
-                                              minAbsTrackEta=minAbsTrackEta,
-                                              maxAbsTrackEta=maxAbsTrackEta,
-                                              outputVarName=outputVarName)
-    cached_instances[_name] = myTauJetBDTEvaluator
-    return myTauJetBDTEvaluator
-```
+This module contains functions for configuring each tauRecTool. 
 
 ### tauRecFlags
 
 In order to determine the actual settings for tools, one needs to consult both the TauAlgorithmsHolder module or the TauRecBuilder module--in cases where the
-TauAlgorithmsHolder function allows for customization of the tool (see TauJetBDTEvaluator above).  You may also see places in TauAlgorithmsHolder where
+TauAlgorithmsHolder function allows for customization of the tool.  You may also see places in TauAlgorithmsHolder where
 the 'declareProperty' is set via a 'tauFlag', as defined in [tauRecFlags](https://gitlab.cern.ch/adbailey/athena/-/blob/main/Reconstruction/tauRec/python/tauRecFlags.py). The reason for this extra level of abstraction is at least two fold:
 
 1. define a variable in one place to be used in numerous tools (e.g. cvmfs CALIBPATH folder)

@@ -23,7 +23,6 @@
 #include "tauRecTools/TauPi0ScoreCalculator.h"
 #include "tauRecTools/TauPi0Selector.h"
 #include "tauRecTools/TauWPDecorator.h"
-#include "tauRecTools/TauJetBDTEvaluator.h"
 #include "tauRecTools/TauIDVarCalculator.h"
 #include "tauRecTools/TauJetRNNEvaluator.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h"
@@ -57,7 +56,6 @@ DECLARE_COMPONENT( TauCommonCalcVars )
 DECLARE_COMPONENT( TauPi0ScoreCalculator )
 DECLARE_COMPONENT( TauPi0Selector )
 DECLARE_COMPONENT( TauWPDecorator )
-DECLARE_COMPONENT( TauJetBDTEvaluator )
 DECLARE_COMPONENT( TauIDVarCalculator )
 DECLARE_COMPONENT( TauJetRNNEvaluator )
 DECLARE_COMPONENT( TauDecayModeNNClassifier )

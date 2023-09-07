@@ -13,7 +13,6 @@
    <class name="tauRecTools::TauTrackRNNClassifier" />
    <class name="TauCombinedTES" />
    <class name="TauWPDecorator" />
-   <class name="TauJetBDTEvaluator" />
    <class name="TauIDVarCalculator" />
    <class name="TauJetRNNEvaluator" />
    <class name="TauDecayModeNNClassifier" />

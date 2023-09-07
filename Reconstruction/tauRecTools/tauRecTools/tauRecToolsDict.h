@@ -16,7 +16,6 @@
 #include "tauRecTools/TauTrackRNNClassifier.h"
 #include "tauRecTools/TauCombinedTES.h"
 #include "tauRecTools/TauWPDecorator.h"
-#include "tauRecTools/TauJetBDTEvaluator.h"
 #include "tauRecTools/TauIDVarCalculator.h"
 #include "tauRecTools/TauJetRNNEvaluator.h"
 #include "tauRecTools/TauDecayModeNNClassifier.h"
