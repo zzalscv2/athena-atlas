@@ -20,6 +20,9 @@ def NavConverterCfg(flags, chainsFilter = []):
     # chainsFilter = ['HLT_tau35_medium1_tracktwo_tau25_medium1_tracktwo_tautsf_L1DR-TAU20ITAU12I-J25'] 
     acc = ComponentAccumulator()
 
+    if flags.Trigger.EDMVersion >= 3:
+        return acc
+
     if not flags.Trigger.doEDMVersionConversion:
         return acc
 

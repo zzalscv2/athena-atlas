@@ -21,7 +21,8 @@ def TriggerRecoCfg(flags):
         return TriggerRecoCfgData(flags)
 
 def TriggerRecoCfgData(flags):
-    """ Configures trigger data decoding
+    """
+    Configures trigger data decoding
     Run 3 data:
     HLTResultMTByteStreamDecoderAlg -> TriggerEDMDeserialiserAlg
 
@@ -58,6 +59,7 @@ def TriggerRecoCfgData(flags):
         acc.merge (Run1Run2DecisionMakerCfg(flags) )
 
         acc.merge(Run2Run1NavigationSlimingCfg(flags))
+
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
 
@@ -80,26 +82,46 @@ def TriggerRecoCfgData(flags):
     return acc
 
 def TriggerRecoCfgMC(flags):
-    """ Configures trigger MC handing during reconstruction
-    Run 3 MC:
-    Propagation of HLT collections from input RDO_TRIG to output POOL files
-    Execution of reconstruction-level trigger navigation slimming
+    """
+    Configures trigger MC handing during reconstruction
+    Note that a lot of the T0 handling of the trigger output for data is bundled into
+    the RDO to RDO_TRIG sub-step for MC, hence there is much less to do here for MC.
+    Notably: the xAOD::TrigDecision and all metadata should already be in the RDO_TRIG.
 
-    RDO_TRIG containing simulation of the Run 1, Run 2 trigger:
-    Not currently supported.
+    Run 3 MC:
+    Propagation of Run 3 HLT collections from input RDO_TRIG to output POOL files.
+    Execution of Run-3 reconstruction-level trigger navigation slimming.
+
+    Run 2 MC:
+    Propagation of Run 2 HLT collections from input RDO_TRIG to output POOL files.
+    Execution of Run 2 style reconstruction-level trigger navigation slimming.
+    Optional conversion of Run 2 navigation to Run 3 navigation.
+    Optional execution of Run 3 reconstruction-level trigger navigation slimming on conversion output.
+ 
+    Run 1 MC:
+    No current workflows are able to run the Run 1 trigger MC simulation. Unsupported.
+    Work would be needed here to do the xAOD conversion (see Run1xAODConversionCfg for how this is done for data)
     """
 
-    # Check for currently unsuported operational modes, these may be supported in the future if needed
+    # Check for currently unsupported operational modes, these may be supported in the future if needed
     if flags.Input.Format is Format.BS:
         log.warning("TriggerRecoCfgMC does not currently support MC files encoded as bytestream. Switching off handling of trigger inputs.")
         return ComponentAccumulator()
-    if flags.Trigger.EDMVersion in [1, 2]:
-        log.warning("TriggerRecoCfgMC does not currently support MC files with Run 1 or Run 2 trigger payload. Switching off handling of trigger inputs.")
+    if flags.Trigger.EDMVersion == 1:
+        log.warning("TriggerRecoCfgMC does not currently support MC files with Run 1 trigger payload. Switching off handling of trigger inputs.")
         return ComponentAccumulator()
 
     log.debug("TriggerRecoCfgMC: Preparing the trigger handling of reconstruction of MC")
     acc = ComponentAccumulator()
 
+    # This will kick into action for Run 2 (Run-1 gets blocked above)
+    acc.merge(Run2Run1NavigationSlimingCfg(flags))
+
+    # This may kick into action for Run 2, based on flags.Trigger.doEDMVersionConversion
+    from TrigNavTools.NavConverterConfig import NavConverterCfg
+    acc.merge(NavConverterCfg(flags, chainsFilter = ["HLT_.*"])) # Derivations use the TriggerAPI here, but at RDO_TRIG->AOD/ESD we should probably convert everything.
+
+    # This will kick into action for Run 3, and may for Run 2 if based on the navigation conversion above
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
     acc.merge(TrigNavSlimmingMTCfg(flags))
 
@@ -187,6 +209,10 @@ def Run2Run1NavigationSlimingCfg(flags):
 
     if flags.Trigger.doNavigationSlimming is False:
         log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.doNavigationSlimming is False")
+        return acc
+
+    if flags.Trigger.EDMVersion >= 3:
+        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do for EDMVersion >= 3.")
         return acc
 
     def _flatten(edm):
