@@ -66,6 +66,11 @@ int SharedEvtQueueProvider::makePool(int maxevt, int nprocs, const std::string& 
     return -1;
   }
 
+  if(m_nChunkSize<=0) {
+    ATH_MSG_ERROR( "Non-positive chunk size requested: " << m_nChunkSize);
+    return -1;
+  }
+
   m_nEvtRequested = maxevt;
   m_nprocs = (nprocs==-1?sysconf(_SC_NPROCESSORS_ONLN):nprocs);
   m_nprocesses = m_nprocs;
