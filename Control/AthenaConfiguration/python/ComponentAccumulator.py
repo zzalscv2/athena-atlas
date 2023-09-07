@@ -10,6 +10,7 @@ from AthenaCommon.Debugging import DbgStage
 from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, flatSequencers,
                                      checkSequenceConsistency, findAllAlgorithmsByName, compName)
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCachable
 from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaConfiguration.Deduplication import deduplicate, deduplicateOne, DeduplicationFailed
 from AthenaConfiguration.DebuggingContext import (Context, raiseWithCurrentContext, shortCallStack,
@@ -85,7 +86,7 @@ def filterComponents (comps, onlyComponents = []):
     return ret
 
 
-class ComponentAccumulator:
+class ComponentAccumulator(AccumulatorCachable):
     # the debug mode is combination of the following strings:
     # trackCA - to track CA creation,
     # track[EventAlgo|CondAlgo|PublicTool|PrivateTool|Service|Sequence] - to track categories components addition
@@ -187,6 +188,11 @@ class ComponentAccumulator:
              log = logging.getLogger("ComponentAccumulator")
              log.error("Deleting a ComponentAccumulator with dangling private tool(s): %s", 
                         " ".join([t.name for t in self._privateTools]) if isinstance(self._privateTools, Sequence) else self._privateTools.name)
+
+    def _cacheEvict(self):
+        """Called by AccumulatorCache when deleting item from cache"""
+        self.popPrivateTools(quiet=True)
+        self.wasMerged()
 
     def __getstate__(self):
         state = self.__dict__.copy()
