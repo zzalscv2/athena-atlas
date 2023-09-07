@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -290,7 +290,7 @@ ClassImp(Analysis::CalibrationDataInterfaceROOT)
 #endif
 
 //________________________________________________________________________________
-Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const string& taggerName, string configname, string pathname) :
+Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const string& taggerName, const std::string& configname, const std::string& pathname) :
   m_runEigenVectorMethod(false), m_EVStrategy(SFEigen), m_useRecommendedEVExclusions(false), m_verbose(true),
   m_absEtaStrategy(GiveUp), m_otherStrategy(Flag)
 {
@@ -484,7 +484,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 								     const std::map<std::string, std::string>& SFNames,
 								     const std::map<std::string, std::vector<std::string> >& EffNames,
 								     const std::map<std::string, std::vector<std::string> >& excludeFromEV,
-								     const std::map<std::string, EVReductionStrategy> EVReductions,
+								     const std::map<std::string, EVReductionStrategy>& EVReductions,
 								     bool useEV, Uncertainty strat, bool useMCMCSF, bool useTopologyRescaling,
 								     bool useRecommendedEEVExclusions, bool verbose,
                      std::vector<std::string> flavours) :
@@ -1835,10 +1835,12 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
         std::vector<double>::iterator itcmp = mergedBoundaries[vars[t]].begin();
         // Iterate until we've found a value in the target array equal to
         // or larger than the given element
-        while ((! CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) &&
-              *itcmp < *it && itcmp != mergedBoundaries[vars[t]].end()) ++itcmp;
+        while (itcmp != mergedBoundaries[vars[t]].end() &&
+               (! CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) &&
+               *itcmp < *it) ++itcmp;
         // Nothing needs to be done if the values are "nearly identical"
-        if (CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) continue;
+        // (or if we don't find such an element).
+        if (itcmp == mergedBoundaries[vars[t]].end() && CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) continue;
         // Otherwise insert the given element (this can mean adding to the end)
         mergedBoundaries[vars[t]].insert(itcmp, *it);
       }
@@ -2289,7 +2291,7 @@ namespace {
   // Construct the covariance matrix assuming that histogram "unc" contains systematic uncertainties
   // pertaining to the "ref" results, and that the uncertainties are fully correlated from bin to bin
   // (unless option "doCorrelated" is false, in which bins are assumed uncorrelated)
-  TMatrixDSym getSystCovarianceMatrix(const TH1* ref, const TH1* unc, bool doCorrelated, string uncname, int tagWeightAxis) {
+  TMatrixDSym getSystCovarianceMatrix(const TH1* ref, const TH1* unc, bool doCorrelated, const std::string& uncname, int tagWeightAxis) {
     Int_t nbinx = ref->GetNbinsX()+2, nbiny = ref->GetNbinsY()+2, nbinz = ref->GetNbinsZ()+2;
     Int_t rows = nbinx;
     if (ref->GetDimension() > 1) rows *= nbiny;

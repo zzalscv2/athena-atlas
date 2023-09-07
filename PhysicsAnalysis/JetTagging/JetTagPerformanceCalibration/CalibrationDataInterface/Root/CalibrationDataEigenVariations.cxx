@@ -1106,7 +1106,7 @@ CalibrationDataEigenVariations::isExtrapolationVariation(unsigned int nameIndex)
 
 //________________________________________________________________________________
 bool
-CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string label, 
+CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string& label, 
 							 std::map<std::string, std::map<std::string, float>> &coefficientMap)
 {
   // Calculating eigen vector recomposition coefficient map and pass to
