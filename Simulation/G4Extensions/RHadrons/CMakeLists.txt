@@ -16,7 +16,7 @@ if( NOT GENERATIONBASE )
                        OBJECT
                        NO_PUBLIC_HEADERS
                        PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                       PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps CxxUtils G4AtlasInterfaces G4AtlasToolsLib G4ExternalDecay SimHelpers )
+                       PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps CxxUtils G4AtlasInterfaces G4AtlasToolsLib G4ExternalDecay SimHelpers TruthUtils)
 endif()
 
 # Install files from the package:

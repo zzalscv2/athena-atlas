@@ -11,7 +11,7 @@
 #include <map>
 #include <set>
 
-#include "CustomPDGParser.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "CustomParticle.h"
 #include "CustomParticleFactory.h"
 #include "G4DecayTable.hh"
@@ -75,17 +75,17 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
     }
 
     pType="custom";
-    if(CustomPDGParser::s_isRHadron(pdgCode)) pType = "rhadron";
-    if(CustomPDGParser::s_isSLepton(pdgCode)) pType = "sLepton";
-    if(CustomPDGParser::s_isMesonino(pdgCode)) pType = "mesonino";
-    if(CustomPDGParser::s_isSbaryon(pdgCode)) pType = "sbaryon";
+    if(MC::SUSY::isRHadron(pdgCode)) pType = "rhadron";
+    if(MC::SUSY::isSLepton(pdgCode)) pType = "sLepton";
+    if(MC::SUSY::isSMeson(pdgCode)) pType = "mesonino";
+    if(MC::SUSY::isSBaryon(pdgCode)) pType = "sbaryon";
 
     G4cout<<"pType: "<<pType<<G4endl;
-    G4cout<<"Charge of "<<name<<" is "<<CustomPDGParser::s_charge(pdgCode)<<G4endl;
+    G4cout<<"Charge of "<<name<<" is "<<MC::charge(pdgCode)<<G4endl;
 
     CustomParticle *particle  = new CustomParticle(
-                                                   name,           mass * CLHEP::GeV ,        0.0*CLHEP::MeV,       CLHEP::eplus* CustomPDGParser::s_charge(pdgCode),
-                                                   (int)CustomPDGParser::s_spin(pdgCode)-1,              +1,             0,
+                                                   name,           mass * CLHEP::GeV ,        0.0*CLHEP::MeV,       CLHEP::eplus* MC::charge(pdgCode),
+                                                   (int)MC::SUSY::spin(pdgCode)-1,              +1,             0,
                                                    0,              0,             0,
                                                    pType,               0,            +1, pdgCode,
                                                    true,            -1.0,          NULL );
