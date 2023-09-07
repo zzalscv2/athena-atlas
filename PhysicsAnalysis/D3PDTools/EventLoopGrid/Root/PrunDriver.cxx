@@ -8,7 +8,6 @@
 
 
 #include <EventLoopGrid/PrunDriver.h>
-#include <EventLoopGrid/GridDriver.h>
 #include <EventLoop/Algorithm.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/ManagerStep.h>
