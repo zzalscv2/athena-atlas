@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -90,7 +90,7 @@ namespace Analysis
     TMatrixD    getJacobianReductionMatrix();
 
     /** Eigenvector recomposition method.*/
-    bool EigenVectorRecomposition(const std::string label,
+    bool EigenVectorRecomposition(const std::string& label,
 				  std::map<std::string, std::map<std::string, float>> &coefficientMap);
 
   private:

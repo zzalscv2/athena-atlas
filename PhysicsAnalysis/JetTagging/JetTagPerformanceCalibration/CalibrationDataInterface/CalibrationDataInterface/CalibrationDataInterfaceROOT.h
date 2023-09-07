@@ -88,7 +88,7 @@ namespace Analysis
     {
     public:
       /** main constructor for "stand-alone" use (with information fed in from a .env configuration file read by TEnv) */
-      CalibrationDataInterfaceROOT(const std::string& taggerName, std::string configname = "BTagCalibration.env", std::string pathname = "");
+      CalibrationDataInterfaceROOT(const std::string& taggerName, const std::string& configname = "BTagCalibration.env", const std::string& pathname = "");
 
       /** alternative constructor passing configuration information explicitly (so that no .env file is needed) */
       CalibrationDataInterfaceROOT(const std::string& taggerName,
@@ -97,7 +97,7 @@ namespace Analysis
 				   const std::map<std::string, std::string>& SFNames,
 				   const std::map<std::string, std::vector<std::string> >& EffNames,
 				   const std::map<std::string, std::vector<std::string> >& excludeFromEV,
-				   const std::map<std::string, Analysis::EVReductionStrategy> EVReductions,
+				   const std::map<std::string, Analysis::EVReductionStrategy>& EVReductions,
 				   bool useEV = true, Uncertainty strat = SFEigen, bool useMCMCSF = true,
 				   bool useTopologyRescaling = false, bool useRecommendedEVExclusions = false,
 				   bool verbose = true, std::vector<std::string> flavours = {"B", "C", "Light", "T"}
