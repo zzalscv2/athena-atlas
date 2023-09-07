@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionUtilities/CollectionPool.h"
@@ -20,7 +20,7 @@ CollectionPool::CollectionPool( unsigned maxOpen, unsigned cacheSize)  {
 CollectionPool::~CollectionPool() {
    flushing_iterator i( this );
    while( i.isValid() ) {
-      ICollection *coll = &*i;
+      ICollection *coll = i.ptr();
       ++i;
       // order important - delete after moving to the next
       delete coll;

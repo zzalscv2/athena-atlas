@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONUTILITIES_COLLECTIONPOOL_H
@@ -49,6 +49,7 @@ namespace pool
        bool		isValid()	{ return m_iter != m_end; }
        ICollection& 	operator * ()	{ return *operator->(); }
        ICollection* 	operator -> ();
+       ICollection* 	ptr () { return operator->(); }
 
     protected:
        CollectionPool* 	m_cpool;
