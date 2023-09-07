@@ -4,38 +4,28 @@
 #include "xAODTracking/versions/TrackBackend_v1.h"
 
 #include "xAODCore/AuxStoreAccessorMacros.h"
+#include "xAODTracking/AuxAccessorMacro.h"
 
-#define DEFINE_API(__TYPE, __GETTER, __SETTER)                            \
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackBackend_v1, __TYPE, __GETTER, \
-                                       __SETTER)                          \
-  __TYPE* TrackBackend_v1::__GETTER##Ptr() {                              \
-    static const SG::AuxElement::Accessor<__TYPE> acc(#__GETTER);         \
-    return &(acc(*this));                                                 \
-  }                                                                       \
-  const __TYPE* TrackBackend_v1::__GETTER##Ptr() const {                  \
-    static const SG::AuxElement::ConstAccessor<__TYPE> acc(#__GETTER);    \
-    return &(acc(*this));                                                 \
-  }
 
 namespace xAOD {
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1, std::vector<double>, params,
-                                  setParams)
+AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1, std::vector<double>, 
+                                  params, setParams)
 
 AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackBackend_v1, std::vector<double>,
                                   covParams, setCovParams)
 
-DEFINE_API(unsigned int, nMeasurements, setnMeasurements)
+DEFINE_API(TrackBackend_v1, unsigned int, nMeasurements, setnMeasurements)
 
-DEFINE_API(unsigned int, nHoles, setnHoles)
+DEFINE_API(TrackBackend_v1, unsigned int, nHoles, setnHoles)
 
-DEFINE_API(float, chi2, setChi2)
+DEFINE_API(TrackBackend_v1, float, chi2, setChi2)
 
-DEFINE_API(unsigned int, ndf, setNdf)
+DEFINE_API(TrackBackend_v1, unsigned int, ndf, setNdf)
 
-DEFINE_API(unsigned int, nOutliers, setnOutliers)
+DEFINE_API(TrackBackend_v1, unsigned int, nOutliers, setnOutliers)
 
-DEFINE_API(unsigned int, nSharedHits, setnSharedHits)
+DEFINE_API(TrackBackend_v1, unsigned int, nSharedHits, setnSharedHits)
 
 const SG::AuxElement::Accessor<std::vector<double> >
     xAOD::TrackBackend_v1::s_paramsAcc{"params"};

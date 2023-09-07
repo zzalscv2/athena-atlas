@@ -546,6 +546,22 @@ namespace xAOD {
     rejectReason_full,
   };
 
+
+  /// @enum SurfaceType
+  ///
+  /// This enumerator simplifies the persistency & calculations,
+  /// by saving a dynamic_cast, e.g. for persistency
+  enum SurfaceType {
+    Cone = 0,
+    Cylinder = 1,
+    Disc = 2,
+    Perigee = 3,
+    Plane = 4,
+    Straw = 5,
+    Curvilinear = 6,
+    Other = 7
+  };
+
   /// A convenience namespace to make the client code easier to understand
   namespace VxType {
     /// Vertex types
