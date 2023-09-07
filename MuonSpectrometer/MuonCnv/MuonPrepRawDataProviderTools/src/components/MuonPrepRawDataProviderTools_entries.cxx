@@ -1,10 +1,8 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
 #include "MuonPrepRawDataProviderTools/MuonLayerHashProviderTool.h"
-#include "MuonPrepRawDataProviderTools/MuonPrepRawDataCollectionProviderTool.h"
 #include "../MuonPRDSelectionTool.h"
 
-using namespace Muon;
-
-DECLARE_COMPONENT( MuonLayerHashProviderTool )
-DECLARE_COMPONENT( MuonPrepRawDataCollectionProviderTool )
-DECLARE_COMPONENT( MuonPRDSelectionTool )
-
+DECLARE_COMPONENT( Muon::MuonPRDSelectionTool )
+DECLARE_COMPONENT( Muon::MuonLayerHashProviderTool )
