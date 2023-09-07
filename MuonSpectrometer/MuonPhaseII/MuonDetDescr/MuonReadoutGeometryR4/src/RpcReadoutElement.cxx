@@ -45,6 +45,8 @@ StatusCode RpcReadoutElement::initElement() {
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
     }
+    m_gasThickness = (chamberStripPos(createHash(1, 2, 1, false)) - 
+                      chamberStripPos(createHash(1, 1, 1, false))).mag();
     return StatusCode::SUCCESS;
 }
 
@@ -61,6 +63,16 @@ Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, c
    unsigned int layIdx = static_cast<unsigned int>(lHash);
    if (layIdx < m_pars.layers.size()) {
       return localToGlobalTrans(ctx, lHash) * m_pars.layers[layIdx].localStripPos(stripNumber(measHash));
+   }
+   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
+                 <<" is out of range. Maximum range "<<m_pars.layers.size());
+   return Amg::Vector3D::Zero();
+}
+Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash) const {
+   const IdentifierHash lHash = layerHash(measHash);
+   unsigned int layIdx = static_cast<unsigned int>(lHash);
+   if (layIdx < m_pars.layers.size()) {
+      return  m_pars.layers[layIdx].stripPosition(stripNumber(measHash));
    }
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.layers.size());

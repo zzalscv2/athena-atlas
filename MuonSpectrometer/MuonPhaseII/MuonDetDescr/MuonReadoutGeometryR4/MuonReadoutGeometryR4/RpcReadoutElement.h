@@ -90,6 +90,8 @@ class RpcReadoutElement : public MuonReadoutElement {
     double stripEtaLength() const;
     /// Returns the length of a phi strip
     double stripPhiLength() const;
+    /// Returns the thickness of a RPC gasgap
+    double gasGapThickness() const;
 
 
 
@@ -117,6 +119,9 @@ class RpcReadoutElement : public MuonReadoutElement {
         static bool measuresPhi(const IdentifierHash& measHash);
 
         Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
+        /// Returns the local strip position w.r.t. to the chamber origin
+        Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
+
 
 
         parameterBook m_pars{};
@@ -134,6 +139,9 @@ class RpcReadoutElement : public MuonReadoutElement {
         const unsigned int m_hashShiftDbl{m_pars.hasPhiStrips ? 1u :0u};
         const unsigned int m_hashShiftGap{m_hashShiftDbl + (nPhiPanels() <= m_doubletPhi ? 0u : 1u)};
         const unsigned int m_hashShiftStr{m_hashShiftGap + MuonGM::maxBit(nGasGaps()) + 1};
+
+        /// Distance between 2 gas gaps (Radial direction)
+        double m_gasThickness{0.};
         
  };
 std::ostream& operator<<(std::ostream& ostr, const RpcReadoutElement::parameterBook& pars);
