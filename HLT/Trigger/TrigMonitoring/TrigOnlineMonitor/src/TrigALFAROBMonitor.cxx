@@ -793,7 +793,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[0]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[7]);
                          auto pax_x = Monitored::Scalar<float>(name1,-x_Rec[2]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[2] - x_Rec[0]))/dist);
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[2] - x_Rec[0]))/dist);
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast15"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -808,7 +808,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[0]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[7]);
                          auto pay_x = Monitored::Scalar<float>(name1,y_Rec[2]);
-                         auto pay_y = Monitored::Scalar<float>("y", (1000000.*(y_Rec[0] - y_Rec[2]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay", (1000000.*(y_Rec[0] - y_Rec[2]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast15"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -823,7 +823,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[2]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[5]);
                          auto pax_x = Monitored::Scalar<float>(name1,-x_Rec[5]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[5] - x_Rec[7]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[5] - x_Rec[7]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast15"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -838,7 +838,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[2]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[5]);
                          auto pay_x = Monitored::Scalar<float>(name1,y_Rec[5]);
-                         auto pay_y = Monitored::Scalar<float>("y",  (1000000.*(y_Rec[7] - y_Rec[5]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay",  (1000000.*(y_Rec[7] - y_Rec[5]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast15"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast15_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -860,7 +860,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[1]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[6]);
                          auto pax_x = Monitored::Scalar<float>(name1,-x_Rec[3]);
-                         auto pax_y = Monitored::Scalar<float>("y",  (1000000.*(x_Rec[3] - x_Rec[1]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay",  (1000000.*(x_Rec[3] - x_Rec[1]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast18"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -875,7 +875,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[1]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[6]);
                          auto pay_x = Monitored::Scalar<float>(name1,y_Rec[3]);
-                         auto pay_y = Monitored::Scalar<float>("y",  (1000000.*(y_Rec[1] - y_Rec[3]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay",  (1000000.*(y_Rec[1] - y_Rec[3]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast18"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -890,7 +890,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[3]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[4]);
                          auto pax_x = Monitored::Scalar<float>(name1,-x_Rec[4]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[4] - x_Rec[6]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[4] - x_Rec[6]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast18"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -905,7 +905,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[3]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[4]);
                          auto pay_x = Monitored::Scalar<float>(name1,y_Rec[4]);
-                         auto pay_y = Monitored::Scalar<float>("y",  (1000000.*(y_Rec[6] - y_Rec[4]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay",  (1000000.*(y_Rec[6] - y_Rec[4]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundElast18"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundElast18_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -927,7 +927,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[0]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[2]);
                          auto pax_x = Monitored::Scalar<float>(name1,-x_Rec[2]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[2] - x_Rec[0]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[2] - x_Rec[0]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -942,7 +942,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[0]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[2]);
                          auto pay_x = Monitored::Scalar<float>(name1, y_Rec[2]);
-                         auto pay_y = Monitored::Scalar<float>("y",  (1000000.*(y_Rec[0] - y_Rec[2]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay",  (1000000.*(y_Rec[0] - y_Rec[2]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -957,7 +957,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[6]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[4]);
                          auto pax_x = Monitored::Scalar<float>(name1, -x_Rec[4]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[4] - x_Rec[6]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[4] - x_Rec[6]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -972,7 +972,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[6]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[4]);
                          auto pay_x = Monitored::Scalar<float>(name1, y_Rec[4]);
-                         auto pay_y = Monitored::Scalar<float>("y",  (1000000.*(y_Rec[6] - y_Rec[4]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay",  (1000000.*(y_Rec[6] - y_Rec[4]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst17_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -994,7 +994,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[1]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[3]);
                          auto pax_x = Monitored::Scalar<float>(name1, -x_Rec[3]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[3] - x_Rec[1]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[3] - x_Rec[1]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -1009,7 +1009,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[1]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[3]);
                          auto pay_x = Monitored::Scalar<float>(name1, y_Rec[3]);
-                         auto pay_y = Monitored::Scalar<float>("y",  (1000000.*(y_Rec[1] - y_Rec[3]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay",  (1000000.*(y_Rec[1] - y_Rec[3]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_10LB"], pcy_x, pcy_y, pay_x, pay_y);
@@ -1024,7 +1024,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcx_x = Monitored::Scalar<float>(name,-x_Rec[7]);
                          auto pcx_y = Monitored::Scalar<float>("y", -x_Rec[5]);
                          auto pax_x = Monitored::Scalar<float>(name1, -x_Rec[5]);
-                         auto pax_y = Monitored::Scalar<float>("y", (1000000.*(x_Rec[5] - x_Rec[7]))/dist );
+                         auto pax_y = Monitored::Scalar<float>("ay", (1000000.*(x_Rec[5] - x_Rec[7]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_1LB"], pcx_x, pcx_y, pax_x, pax_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_10LB"], pcx_x, pcx_y, pax_x, pax_y);
@@ -1039,7 +1039,7 @@ void TrigALFAROBMonitor::findALFATracks( const ROIB::RoIBResult* roIBResult,
                          auto pcy_x = Monitored::Scalar<float>(name,y_Rec[7]);
                          auto pcy_y = Monitored::Scalar<float>("y", y_Rec[5]);
                          auto pay_x = Monitored::Scalar<float>(name1, y_Rec[5]);
-                         auto pay_y = Monitored::Scalar<float>("y", (1000000.*(y_Rec[7] - y_Rec[5]))/dist );
+                         auto pay_y = Monitored::Scalar<float>("ay", (1000000.*(y_Rec[7] - y_Rec[5]))/dist );
                          auto monGroup = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_1LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_1LB"], pcy_x, pcy_y, pay_x, pay_y);
                          auto monGroup_10LB = Monitored::Group ( *m_monTools["MonTool_backgroundSyst18_10LB"], pcy_x, pcy_y, pay_x, pay_y);
