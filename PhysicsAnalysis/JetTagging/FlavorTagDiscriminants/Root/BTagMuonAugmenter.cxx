@@ -19,13 +19,10 @@ namespace FlavorTagDiscriminants {
         m_muonMaxDR(muonMaxDR),
         m_muonMinpT(muonMinpT),
         m_flip_config(flipConfig),
-        m_muonSelectionTool(nullptr),
         m_acc_assocMuons(muonAssociationName),
         m_acc_jetLink("jetLink"),
         m_acc_muon_energyLoss("EnergyLoss"),
         m_dec_muon_isDefaults("softMuon_isDefaults"),
-        m_dec_muon_failLowPtWorkingPoint("softMuon_failLowPtWorkingPoint"),
-        m_dec_muon_quality("softMuon_quality"),
         m_dec_nAssocMuons("softMuon_nAssocMuons"),
         m_dec_muon_dR("softMuon_dR"),
         m_dec_muon_qOverPratio("softMuon_qOverPratio"),
@@ -66,17 +63,6 @@ namespace FlavorTagDiscriminants {
                                       "numberOfSCTHoles",
                                       "expectInnermostPixelLayerHit",
                                       "expectNextToInnermostPixelLayerHit"}) {
-    // you probably have to initialize something here
-    using namespace FlavorTagDiscriminants;
-    m_muonSelectionTool.reset(new CP::MuonSelectionTool("BTaggingMuonSelectionTool"));
-    StatusCode sc_init = m_muonSelectionTool->initialize();
-    if (!sc_init.isSuccess()) {
-      throw std::runtime_error("Failed to initialize MuonSelectionTool");
-    }
-    StatusCode sc_prop = m_muonSelectionTool->setProperty("TurnOffMomCorr", true);
-    if (!sc_prop.isSuccess()) {
-      throw std::runtime_error("Failed to TurnOffMomCorr for MuonSelectionTool");
-    }
     // Fill vectors holding objects that have the const accessors
     // and decorators available as members for each variable
     // that is decorated only.
@@ -97,8 +83,6 @@ namespace FlavorTagDiscriminants {
 
     // set defaults for new variables
     char muon_isDefaults = 1;
-    char muon_failLowPtWorkingPoint = 1;
-    int muon_quality = -1;
     int nAssocMuons = -1;
     float muon_dR = -1;
     float muon_qOverPratio = -1;
@@ -181,10 +165,6 @@ namespace FlavorTagDiscriminants {
             smtMu->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
 
         muon_isDefaults = 0;
-        muon_quality = m_muonSelectionTool->getQuality(*smtMu);
-        if (m_muonSelectionTool->passedLowPtEfficiencyCuts(*smtMu)) {
-          muon_failLowPtWorkingPoint = 0;
-        }
         muon_dR = dR_closest_muon;
         muon_qOverPratio = IDMuTrack->qOverP() / MSMuTrack->qOverP();
 
@@ -223,8 +203,6 @@ namespace FlavorTagDiscriminants {
     }
     // Decorate btagging object
     m_dec_muon_isDefaults(btag) = muon_isDefaults;
-    m_dec_muon_failLowPtWorkingPoint(btag) = muon_failLowPtWorkingPoint;
-    m_dec_muon_quality(btag) = muon_quality;
     m_dec_nAssocMuons(btag) = nAssocMuons;
     m_dec_muon_dR(btag) = muon_dR;
     m_dec_muon_qOverPratio(btag) = muon_qOverPratio;
