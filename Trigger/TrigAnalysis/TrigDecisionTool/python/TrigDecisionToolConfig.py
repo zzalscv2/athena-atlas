@@ -2,17 +2,11 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-
-# List of all possible keys of the Run 3 navigation summary collection
-# in order of verbosity. Want to take the most verbose which is available.
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaCommon.Logging import logging
 
-def getTrigDecisionTool(flags):
-    msg = logging.getLogger('getTrigDecisionTool')
-    msg.warning("This function is becoming obsolete. Use: TrigDecisionToolCfg(flags) - imported from the same package")
-    return TrigDecisionToolCfg(flags)
 
-
+@AccumulatorCache
 def TrigDecisionToolCfg(flags):
     '''
     @brief Configures and returns the TrigDecisionTool (TDT) for use in Athena-MT. 
@@ -66,6 +60,8 @@ def TrigDecisionToolCfg(flags):
     return acc
 
 
+# List of all possible keys of the Run 3 navigation summary collection
+# in order of verbosity. Want to take the most verbose which is available.
 possible_keys = [
     'HLTNav_Summary', # Produced initially online (only the final nodes, all other nodes spread out over many many collections created by trigger framework algs)
     'HLTNav_Summary_OnlineSlimmed', # Produced online, all nodes in one container. Accessible during RAWtoALL, good for T0 monitoring.
@@ -75,7 +71,7 @@ possible_keys = [
     'HLTNav_R2ToR3Summary' # Output of Run 2 to Run 3 navigation conversion procedure. Somewhat equivalent to AODFULL level. Designed to be further reduced to DAODSlimmed level before analysis use.
     ]
 
-
+@AccumulatorCache
 def getRun3NavigationContainerFromInput(flags):
     # What to return if we cannot look in the file
     default_key = 'HLTNav_Summary_OnlineSlimmed' if flags.Trigger.doOnlineNavigationCompactification else 'HLTNav_Summary'
@@ -89,13 +85,12 @@ def getRun3NavigationContainerFromInput(flags):
                 to_return = key
                 break
 
-    from AthenaCommon.Logging import logging
     msg = logging.getLogger('getRun3NavigationContainerFromInput')
-    msg.info('Returning {} as the Run 3 trigger navigation colletion to read in this job.'.format(to_return))
+    msg.info('Returning %s as the Run 3 trigger navigation colletion to read in this job.', to_return)
 
     # Double check 'possible_keys' is kept up to date
     if to_return not in possible_keys:
-        msg.error('Must add {} to the "possible_keys" array!'.format(to_return))
+        msg.error('Must add %s to the "possible_keys" array!', to_return)
 
     return to_return
 

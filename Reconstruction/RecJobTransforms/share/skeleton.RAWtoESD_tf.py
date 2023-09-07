@@ -84,8 +84,10 @@ if hasattr(runArgs,"inputRDO_TRIGFile"):
     DQMonFlags.useTrigger = False
     DQMonFlags.doLVL1CaloMon = False
     # Configure HLT output
+    locked_flags = ConfigFlags.clone()  # cannot lock yet because RecExCommon modifies them
+    locked_flags.lock()
     from TriggerJobOpts.HLTTriggerResultGetter import HLTTriggerResultGetter
-    hltOutput = HLTTriggerResultGetter(ConfigFlags)
+    hltOutput = HLTTriggerResultGetter(locked_flags)
     # Add Trigger menu metadata
     from RecExConfig.ObjKeyStore import objKeyStore
     if rec.doFileMetaData():
