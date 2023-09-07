@@ -58,6 +58,9 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
         event_range_channel = jp.AthenaMPFlags.EventRangeChannel()
 
         chunk_size = getChunkSize()
+        if chunk_size < 1:
+            msg.warning('Nonpositive ChunkSize (%i) caught, setting it to 1', chunk_size)
+            chunk_size = 1
         
         debug_worker = jp.ConcurrencyFlags.DebugWorkers()
         use_shared_reader = jp.AthenaMPFlags.UseSharedReader()

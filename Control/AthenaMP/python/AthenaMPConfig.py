@@ -74,6 +74,9 @@ def AthenaMPCfg(flags):
 
     # Compute event chunk size
     chunk_size = getChunkSize(flags)
+    if chunk_size < 1:
+        msg.warning('Nonpositive ChunkSize (%i) caught, setting it to 1', chunk_size)
+        chunk_size = 1
 
     # Configure Strategy
     debug_worker = flags.Concurrency.DebugWorkers
