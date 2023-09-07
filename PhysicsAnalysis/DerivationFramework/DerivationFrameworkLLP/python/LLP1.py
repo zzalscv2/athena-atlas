@@ -19,6 +19,7 @@ LLP1VrtSecInclusiveSuffixes = []
 
 # Main algorithm config
 def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
+
     """Configure the derivation framework driving algorithm (kernel) for LLP1"""
     acc = ComponentAccumulator()
 
@@ -433,7 +434,6 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
 
 def LLP1Cfg(ConfigFlags):
-
     acc = ComponentAccumulator()
     # Get the lists of triggers needed for trigger matching.
     # This is needed at this scope (for the slimming) and further down in the config chain
@@ -450,7 +450,7 @@ def LLP1Cfg(ConfigFlags):
     ## Must set useSelTools to set elLHVLoose and phIsEMLoose with tools - not already set in LLP1 derivation
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
     contNames = [ "Muons", "Electrons", "Photons", "LRTElectrons", "MuonsLRT" ]
-    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
 
     # ============================
     # Define contents of the format

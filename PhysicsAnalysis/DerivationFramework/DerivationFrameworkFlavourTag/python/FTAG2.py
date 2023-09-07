@@ -76,7 +76,6 @@ def FTAG2KernelCfg(ConfigFlags, name='FTAG2Kernel', **kwargs):
 
 
 def FTAG2Cfg(ConfigFlags):
-
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.

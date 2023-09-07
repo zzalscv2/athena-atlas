@@ -26,7 +26,7 @@ def IsoCloseByCorrectionToolCfg(flags, name="IsoCloseByCorrectionTool", ttva_wp 
     return acc
 
 
-def IsoCloseByCorrSkimmingAlgCfg(flags, name="IsoCloseByCorrSkimmingAlg", ttva_wp = 'Nonprompt_All_MaxWeight',  **kwargs):
+def IsoCloseByCorrSkimmingAlgCfg(flags, suff = "", name="IsoCloseByCorrSkimmingAlg", ttva_wp = 'Nonprompt_All_MaxWeight',  **kwargs):
     result = ComponentAccumulator()
     from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
     from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import  electronLHmenu
@@ -48,11 +48,11 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, name="IsoCloseByCorrSkimmingAlg", ttva_w
     ### Photon selection needs to be still defined
     # kwargs.setdefault("PhotonSelectionTool", <blah>)   
     kwargs.setdefault("PhotContainer", "")
-    the_alg = CompFactory.CP.IsoCloseByCorrectionTrkSelAlg(name+ttva_wp, **kwargs)
+    the_alg = CompFactory.CP.IsoCloseByCorrectionTrkSelAlg(name+ttva_wp+suff, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, **kwargs):
+def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, **kwargs):
 
     result = ComponentAccumulator()
     # Configure the CloseBy isolation correction alg - only need two WPs each for all iso variables
@@ -82,43 +82,40 @@ def IsoCloseByCorrAlgCfg(flags, name="IsoCloseByCorrAlg", isPhysLite = False, co
                                                                 MuQuality     = 2, ### Select the loose working point
                                                                 )))  
 
-    # For PhysLite, add in electron and photon selection tools for el LH very loose and ph isEM loose
+    # For PHYS, one can use accessors. Otherwise, add in electron and photon selection tools for el LH very loose and ph isEM loose
     if isPhysLite or useSelTools:
         from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
         from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import  electronLHmenu
         from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
         from AthenaConfiguration.Enums import LHCPeriod
         kwargs.setdefault("ElectronSelectionTool", result.popToolsAndMerge(AsgElectronLikelihoodToolCfg(flags,
-                                                                           name= "ElectronSelTool",
-                                                                           quality = LikeEnum.VeryLoose,
-                                                                           menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
+                                                                            name= "ElectronSelTool",
+                                                                            quality = LikeEnum.VeryLoose,
+                                                                            menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
 
         from ElectronPhotonSelectorTools.AsgPhotonIsEMSelectorsConfig import AsgPhotonIsEMSelectorCfg
         from ROOT import egammaPID
         kwargs.setdefault("PhotonSelectionTool", result.popToolsAndMerge(AsgPhotonIsEMSelectorCfg(flags,
-                                                                         name= "PhotonSelTool",
-                                                                         quality = egammaPID.PhotonIDLoose)))
-
+                                                                            name= "PhotonSelTool",
+                                                                            quality = egammaPID.PhotonIDLoose)))
+    else:
+        kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLoose")
+        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
 
     # Set selection for muons, electrons and photons to contribute to overlap
     kwargs.setdefault("ParticleContainerKeys",    containerNames)
     
-    # For Phys, use the already defined DFCommon id variables for electron and photon, for loose muons, use tool above
-    # For PhysLite, the tools above are used
-    if not isPhysLite and not useSelTools:
-        kwargs.setdefault("ElecSelectionKey",  "Electrons.DFCommonElectronsLHVeryLoose")
-        kwargs.setdefault("PhotSelectionKey",  "Photons.DFCommonPhotonsIsEMLoose")
     # No default pt cuts for the moment
     kwargs.setdefault("MinElecPt", 0.)
     kwargs.setdefault("MinMuonPt", 0.)
     kwargs.setdefault("MinPhotPt", 0.)
 
       
-    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name, **kwargs)
+    the_alg = CompFactory.CP.IsoCloseByCorrectionAlg(name + suff, **kwargs)
     result.addEventAlgo(the_alg)
     return result
 
-def IsoCloseByCaloDecorCfg(flags, name="IsoCloseByCaloDecor", containers =[], **kwargs):
+def IsoCloseByCaloDecorCfg(flags, name="IsoCloseByCaloDecor", suff = "", containers =[], **kwargs):
     result = ComponentAccumulator()
     ## Configure the tool such that the calo & pflow clusters are decorated
     ## https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/AnalysisCommon/IsolationSelection/IsolationSelection/IsolationCloseByCorrectionTool.h#L35-39
@@ -127,12 +124,12 @@ def IsoCloseByCaloDecorCfg(flags, name="IsoCloseByCaloDecor", containers =[], **
                                                   CaloCorrectionModel = -1
                                                   )))    
     for cont in containers:
-        result.addEventAlgo(CompFactory.CP.IsoCloseByCaloDecorAlg(name = name + cont, 
+        result.addEventAlgo(CompFactory.CP.IsoCloseByCaloDecorAlg(name = name + cont + suff, 
                                                                   PrimaryContainer = cont,
                                                                   **kwargs))
     return result
     
-def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", **kwargs):
+def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", suff = "", **kwargs):
     result = ComponentAccumulator()
     from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
     from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import  electronLHmenu
@@ -149,11 +146,11 @@ def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", **kwargs):
                                                                 DisablePtCuts=True,
                                                                 MuQuality=2, ### Select the loose working point
                                                                 )))  
-    the_alg = CompFactory.CP.TestIsolationCloseByCorrAlg(name, **kwargs)
+    the_alg = CompFactory.CP.TestIsolationCloseByCorrAlg(name + suff, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def IsoCloseByAlgsCfg(flags, isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], useSelTools = False, stream_name="", ttva_wp = "Nonprompt_All_MaxWeight"):
+def IsoCloseByAlgsCfg(flags, suff = "", isPhysLite = False, containerNames = [ "Muons", "Electrons", "Photons"], stream_name="", ttva_wp = "Nonprompt_All_MaxWeight", useSelTools = False):
 
     # Add in two ways to do IsoCloseBy correction:
     #   - use IsoCloseByCorrAlg to modify the <iso_value>s for close by lepton/photon. 
@@ -164,21 +161,22 @@ def IsoCloseByAlgsCfg(flags, isPhysLite = False, containerNames = [ "Muons", "El
     # information on PhysLite.
     acc = ComponentAccumulator()
 
+    ## Temporarily comment out for parent/child augmentation tests
     # Add additional information to derivation output to be able to run IsoCloseByCorrectionTool on it 
     if not isPhysLite:
         from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
         ### Add the tracks that potentially polute the isolation cones of others to the collection. 
         ### Question: Is the list of recommended TTVA working points used for isolation available somewhere?
-        acc.merge(IsoCloseByCorrSkimmingAlgCfg(flags, ttva_wp = "Nonprompt_All_MaxWeight",
+        acc.merge(IsoCloseByCorrSkimmingAlgCfg(flags, suff = suff, ttva_wp = "Nonprompt_All_MaxWeight",
                                                             OutputStream = stream_name))
         
         ### Associate the close-by pflow objects and the calorimeter clusters
-        acc.merge(IsoCloseByCaloDecorCfg(flags,
+        acc.merge(IsoCloseByCaloDecorCfg(flags, suff = suff,
                                          containers = containerNames ))
 
     # Setup the isolation close-by correction algorithm sequence to correct the isolation of near-by el, mu, ph
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrAlgCfg
-    acc.merge(IsoCloseByCorrAlgCfg(flags, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools))
+    acc.merge(IsoCloseByCorrAlgCfg(flags, suff = suff, isPhysLite = isPhysLite, containerNames = containerNames, useSelTools = useSelTools))
 
 
     return acc

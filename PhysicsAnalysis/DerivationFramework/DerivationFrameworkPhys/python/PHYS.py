@@ -47,6 +47,11 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
 
 
 def PHYSCfg(ConfigFlags):
+
+    from AthenaCommon.Logging import logging
+    logPHYS = logging.getLogger('PHYS')
+    logPHYS.info('****************** STARTING PHYS *****************')
+
     stream_name = 'StreamDAOD_PHYS'
     acc = ComponentAccumulator()
 
@@ -67,7 +72,7 @@ def PHYSCfg(ConfigFlags):
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = False, stream_name = stream_name))
+    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_PHYS", isPhysLite = False, stream_name = stream_name))
 
     # ============================
     # Define contents of the format
