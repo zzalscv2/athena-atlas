@@ -113,7 +113,13 @@ def _vecdiff (v1, v2, nan_equal):
 @acmdlib.argument('--exact-branches',
                   action='store_true',
                   default=False,
+                  mutual=True,
                   help="""Only allow exact list of branches present""")
+@acmdlib.argument('--inexact-branches',
+                  action='store_true',
+                  default=False,
+                  mutual=True,
+                  help="""Allow inexact list of branches present""")
 @acmdlib.argument('--mode',
                   choices=g_ALLOWED_MODES,
                   default='detailed',
@@ -186,6 +192,7 @@ def main(args):
     msg.info('error mode:           %s', args.error_mode)
     msg.info('order trees:          %s', args.order_trees)
     msg.info('exact branches:       %s', args.exact_branches)
+    msg.info('inexact branches:       %s', args.inexact_branches)
 
     import PyUtils.Helpers as H
     with H.ShutUp() :
@@ -318,6 +325,8 @@ def main(args):
                 msg.error('the following variables exist only in the old file !')
                 for l in old_leaves_list:
                     msg.error(' - [%s]', l)
+            elif args.inexact_branches:
+                pass
             else:
                 msg.warning('the following variables exist only in the old file !')
                 for l in old_leaves_list:
@@ -332,6 +341,8 @@ def main(args):
                 msg.error('the following variables exist only in the new file !')
                 for l in new_leaves_list:
                     msg.error(' - [%s]', l)
+            elif args.inexact_branches:
+                pass
             else:
                 msg.warning('the following variables exist only in the new file !')
                 for l in new_leaves_list:

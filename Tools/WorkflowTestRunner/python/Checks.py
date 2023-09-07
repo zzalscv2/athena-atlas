@@ -173,14 +173,14 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"diff-root-{test.ID}.{self.format}.log"
         diff_root_list = " ".join(diff_root_list)
-        diff_root_mode = "--branches-of-interest" if branches_of_interest else "--ignore-leaves"
+        diff_root_mode = "--inexact-branches --branches-of-interest" if branches_of_interest else "--exact-branches --ignore-leaves"
 
         # TODO: temporary due to issues with some tests
         extra_args = ""
         if test.type != WorkflowType.AF3:
             extra_args = "--order-trees"
 
-        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --exact-branches --mode semi-detailed --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
+        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --mode semi-detailed --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
         output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         output, error = output.decode("utf-8"), error.decode("utf-8")
 
