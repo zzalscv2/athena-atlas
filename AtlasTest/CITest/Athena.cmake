@@ -267,7 +267,8 @@ atlas_add_citest( ACTS_ActsGSFRefitting
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh 8 100
+   PROPERTIES PROCESSOR 8)
 
 #################################################################################
 # Trigger
