@@ -116,11 +116,21 @@ class Command(object):
         parser = node.add_parser(**kwargs)
         return parser
 
+    def add_mutually_exclusive_group(self, **kwargs):
+        return self.parser.add_mutually_exclusive_group(**kwargs)
+
     def _init_arguments(self):
         if hasattr(self.fct, '_acmdlib_arguments'):
             while self.fct._acmdlib_arguments:
                 args, kwargs = self.fct._acmdlib_arguments.pop()
                 self.add_argument(*args, **kwargs)
+        
+        if hasattr(self.fct,'_acmdlib_arguments_mutual'):
+            if not hasattr(self, '_acmdlib_mutual_group'):
+                self._acmdlib_mutual_group = self.add_mutually_exclusive_group()
+            while self.fct._acmdlib_arguments_mutual:
+                args, kwargs = self.fct._acmdlib_arguments_mutual.pop()
+                self._acmdlib_mutual_group.add_argument(*args, **kwargs)
         
     pass # Command
 
@@ -170,15 +180,24 @@ def command(*args, **kwargs):
 
 def argument(*args, **kwargs):
     """Decorator to add an argument to a command.
+    Use the `mutual=True` keyword to specify that the argument should belong to a mutual exclusion group.
     """
+    is_mutual = kwargs.pop('mutual', False)
+
     def deco(fct):
         if isinstance(fct, Command):
             cmd = fct
-            cmd.add_argument(*args, **kwargs)
+            if is_mutual:
+                if not hasattr(cmd, '_acmdlib_mutual_group'):
+                    cmd._acmdlib_mutual_group = cmd.add_mutually_exclusive_group()
+                cmd._acmdlib_mutual_group.add_argument(*args, **kwargs)
+            else:
+                cmd.add_argument(*args, **kwargs)
         else:
-            if not hasattr(fct, '_acmdlib_arguments'):
-                fct._acmdlib_arguments = []
-            fct._acmdlib_arguments.append((args, kwargs))
+            store_as = '_acmdlib_arguments_mutual' if is_mutual else '_acmdlib_arguments'
+            if not hasattr(fct, store_as):
+                setattr(fct, store_as, [])
+            getattr(fct, store_as).append((args, kwargs))
         #print "===",args,kwargs,type(fct),fct
         return fct
     return deco
