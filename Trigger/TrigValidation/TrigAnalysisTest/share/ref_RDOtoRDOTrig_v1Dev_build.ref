@@ -134,7 +134,7 @@ HLT_2e5_lhvloose_bBeeM6000_L14J15:
     3: 3
     4: 3
     5: 3
-    6: 3
+    6: 2
 HLT_2e5_lhvloose_bBeeM6000_L1All:
   eventCount: 0
   stepCounts:
@@ -151,7 +151,7 @@ HLT_2e5_lhvloose_bBeeM6000_L1All:
     3: 3
     4: 3
     5: 3
-    6: 3
+    6: 2
 HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled:
   eventCount: 0
   stepCounts:
@@ -168,7 +168,7 @@ HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled:
     3: 3
     4: 3
     5: 3
-    6: 3
+    6: 2
 HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary:
   eventCount: 0
   stepCounts:
@@ -185,7 +185,7 @@ HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary:
     3: 3
     4: 3
     5: 3
-    6: 3
+    6: 2
 HLT_2e5_lhvloose_bBeeM6000_L1BPH-0M9-EM7-EM5_MU5VF:
   eventCount: 0
 HLT_2e5_lhvloose_bBeeM6000_L1eEM26M:
@@ -213,7 +213,7 @@ HLT_2e5_lhvloose_noringer_bBeeM6000_L14J15:
     3: 36
     4: 36
     5: 36
-    6: 6
+    6: 5
 HLT_2e5_lhvloose_noringer_bBeeM6000_L1All:
   eventCount: 0
   stepCounts:
@@ -230,7 +230,7 @@ HLT_2e5_lhvloose_noringer_bBeeM6000_L1All:
     3: 39
     4: 39
     5: 39
-    6: 6
+    6: 5
 HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled:
   eventCount: 0
   stepCounts:
@@ -247,7 +247,7 @@ HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled:
     3: 39
     4: 39
     5: 39
-    6: 6
+    6: 5
 HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary:
   eventCount: 0
   stepCounts:
@@ -264,7 +264,7 @@ HLT_2e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary:
     3: 39
     4: 39
     5: 39
-    6: 6
+    6: 5
 HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
   stepCounts:
@@ -7118,7 +7118,7 @@ HLT_e5_lhvloose_bBeeM6000_L14J15:
     3: 13
     4: 13
     5: 13
-    6: 8
+    6: 7
 HLT_e5_lhvloose_bBeeM6000_L1All:
   eventCount: 0
   stepCounts:
@@ -7135,7 +7135,7 @@ HLT_e5_lhvloose_bBeeM6000_L1All:
     3: 15
     4: 15
     5: 15
-    6: 8
+    6: 7
 HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled:
   eventCount: 0
   stepCounts:
@@ -7152,7 +7152,7 @@ HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled:
     3: 14
     4: 14
     5: 14
-    6: 8
+    6: 7
 HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary:
   eventCount: 0
   stepCounts:
@@ -7169,7 +7169,7 @@ HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary:
     3: 15
     4: 15
     5: 15
-    6: 8
+    6: 7
 HLT_e5_lhvloose_bBeeM6000_L1BPH-0DR3-EM7J15_MU5VF:
   eventCount: 0
   stepCounts:
@@ -7186,7 +7186,7 @@ HLT_e5_lhvloose_bBeeM6000_L1BPH-0DR3-EM7J15_MU5VF:
     3: 5
     4: 5
     5: 5
-    6: 5
+    6: 4
 HLT_e5_lhvloose_bBeeM6000_L1eEM26M:
   eventCount: 0
   stepCounts:
@@ -7267,7 +7267,7 @@ HLT_e5_lhvloose_noringer_bBeeM6000_L14J15:
     3: 41
     4: 41
     5: 41
-    6: 9
+    6: 8
 HLT_e5_lhvloose_noringer_bBeeM6000_L1All:
   eventCount: 0
   stepCounts:
@@ -7284,7 +7284,7 @@ HLT_e5_lhvloose_noringer_bBeeM6000_L1All:
     3: 48
     4: 48
     5: 48
-    6: 11
+    6: 9
 HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled:
   eventCount: 0
   stepCounts:
@@ -7301,7 +7301,7 @@ HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrescaled:
     3: 44
     4: 44
     5: 44
-    6: 9
+    6: 8
 HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary:
   eventCount: 0
   stepCounts:
@@ -7318,7 +7318,7 @@ HLT_e5_lhvloose_noringer_bBeeM6000_L1BKeePrimary:
     3: 46
     4: 46
     5: 46
-    6: 10
+    6: 9
 HLT_e5_nopid_L1eEM5:
   eventCount: 20
   stepCounts:
@@ -7780,15 +7780,6 @@ HLT_e9_lhvloose_L1eEM5_mu20_mu8noL1_L1MU14FCH:
     3: 2
     4: 1
     5: 1
-HLT_e9_lhvloose_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0M9-EM7-EM5:
-  eventCount: 0
-  stepCounts:
-    0: 3
-    1: 3
-  stepFeatures:
-    0: 21
-    1: 15
-    2: 23
 HLT_e9_lhvloose_mu20_mu8noL1_L1MU14FCH:
   eventCount: 0
   stepCounts:
@@ -7829,6 +7820,15 @@ HLT_e9_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15:
     3: 10
     4: 10
     5: 7
+HLT_e9_lhvloose_nogsf_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0M9-EM7-EM5:
+  eventCount: 0
+  stepCounts:
+    0: 3
+    1: 3
+  stepFeatures:
+    0: 21
+    1: 15
+    2: 23
 HLT_fslrt0_L14J15:
   eventCount: 0
 HLT_fslrt0_L1All:

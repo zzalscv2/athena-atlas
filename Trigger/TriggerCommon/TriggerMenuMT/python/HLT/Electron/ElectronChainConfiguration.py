@@ -407,10 +407,10 @@ class ElectronChainConfiguration(ChainConfigurationBase):
             signatures = self.chainDict['signatures']
             if signatures.count(signatures[0]) == len(signatures):
                 stepName = "noMuon_precision_electron_bBee_GSF"+str(isocut)
-                return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionElectronSequenceCfg], comboHypoCfg=NoMuonDiElecPrecisionGSFComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
+                return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionGSFElectronSequenceCfg], comboHypoCfg=NoMuonDiElecPrecisionGSFComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
             else:
                 stepName = "precision_electron_bBee_GSF"+str(isocut)
-                return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionElectronSequenceCfg], comboHypoCfg=DiElecPrecisionGSFComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
+                return self.getStep(flags,7,stepName,sequenceCfgArray=[precisionGSFElectronSequenceCfg], comboHypoCfg=DiElecPrecisionGSFComboHypoCfg, comboTools=[TrigMultiTrkComboHypoToolFromDict], is_probe_leg=is_probe_leg)
         else:
             stepName = "precision_electron_GSF"+str(isocut)
             return self.getStep(flags,7,stepName,[ precisionGSFElectronSequenceCfg], is_probe_leg=is_probe_leg)

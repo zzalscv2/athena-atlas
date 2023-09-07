@@ -2716,10 +2716,6 @@ HLT_e9_lhtight_e4_idperf_tight_probe_1invmAB5_L1JPSI-1M5-eEM9:
   eventCount: 0
 HLT_e9_lhvloose_L1eEM5_mu20_mu8noL1_L1MU14FCH:
   eventCount: 0
-HLT_e9_lhvloose_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0M9-EM7-EM5:
-  eventCount: 0
-  stepFeatures:
-    0: 2
 HLT_e9_lhvloose_mu20_mu8noL1_L1MU14FCH:
   eventCount: 0
 HLT_e9_lhvloose_mu23_mu8noL1_L1MU18VFCH:
@@ -2738,6 +2734,10 @@ HLT_e9_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15:
     2: 4
     3: 1
     4: 1
+HLT_e9_lhvloose_nogsf_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0M9-EM7-EM5:
+  eventCount: 0
+  stepFeatures:
+    0: 2
 HLT_fslrt0_L14J15:
   eventCount: 0
 HLT_fslrt0_L1All:
