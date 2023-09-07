@@ -9,6 +9,7 @@ namespace MuonGMR4 {
     constexpr unsigned int minOne = -1;
 
 inline double RpcReadoutElement::thickness() const { return 2.* m_pars.halfThickness; }
+inline double  RpcReadoutElement::gasGapThickness() const {return m_gasThickness; }
 inline int RpcReadoutElement::doubletZ() const{ return m_doubletZ; }
 inline int RpcReadoutElement::doubletR() const{ return m_doubletR; }
 inline int RpcReadoutElement::doubletPhi() const{ return m_doubletPhi; }

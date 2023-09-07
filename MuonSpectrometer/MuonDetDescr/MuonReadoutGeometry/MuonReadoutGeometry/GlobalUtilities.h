@@ -48,6 +48,18 @@ namespace MuonGM {
         const AmgVector(N) AminusB = posA - posB;
         return (AminusB.dot(dirB) - AminusB.dot(dirA) * dirDots) / divisor;
     }
+    /// Intersects a line parametrized as A + lambda * B with the (N-1) dimensional
+    /// hyperplane that's given in the Jordan normal form <P, N> - C = 0 
+    template <int N>
+    std::optional<double> intersect(const AmgVector(N)& pos, const AmgVector(N)& dir, 
+                                    const AmgVector(N)& planeNorm, const double offset) {
+        ///  <P, N> - C = 0
+        /// --> <A + lambda *B , N> - C = 0
+        /// --> lambda = (C - <A,N> ) / <N, B>
+        const double normDot = planeNorm.dot(dir); 
+        if (std::abs(normDot) < std::numeric_limits<double>::epsilon()) return std::nullopt;
+        return (offset - pos.dot(planeNorm)) / normDot;
+    }
     /// Returns the position of the most left bit which is set to 1
     template <typename T> constexpr int maxBit(const T &number) {
         for (int bit = sizeof(number) * 8 - 1; bit >= 0; --bit) {

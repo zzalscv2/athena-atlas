@@ -35,11 +35,11 @@ if __name__=="__main__":
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     cfg.merge(G4AtlasAlgCfg(flags))
     ### Keep the Volume debugger commented for the moment
-    #from G4DebuggingTools.PostIncludes import VolumeDebuggerAtlas
-    #cfg.merge(VolumeDebuggerAtlas(flags, name="G4UA::UserActionSvc", 
-    #                                     PrintGeometry = True,
-    #                                     TargetVolume="BMS7_MDT04_1_3_2"
-    #                                    ))
+    from G4DebuggingTools.PostIncludes import VolumeDebuggerAtlas
+    cfg.merge(VolumeDebuggerAtlas(flags, name="G4UA::UserActionSvc", 
+                                         PrintGeometry = True,
+                                         TargetVolume="BIS7_RPC26_7_0_1_1_1"
+                                        ))
     
     ## xAOD TruthParticle conversion
     from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
