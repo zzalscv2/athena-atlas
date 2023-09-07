@@ -4,7 +4,7 @@
 
 #include "G4ProcessHelper.hh"
 #include "CustomParticle.h"
-#include "CustomPDGParser.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "G4ParticleTable.hh"
 #include "G4DecayTable.hh"
 #include "CLHEP/Random/RandFlat.h"
@@ -183,10 +183,10 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
 
   if(!reggemodel){
       //Flat cross section
-      if(CustomPDGParser::s_isRGlueball(thePDGCode)) {
+      if(MC::SUSY::isRGlueball(thePDGCode)) {
         theXsec = 24 * CLHEP::millibarn;
       } else {
-        std::vector<G4int> nq=CustomPDGParser::s_containedQuarks(thePDGCode);
+        std::vector<G4int> nq=MC::SUSY::containedQuarks(thePDGCode);
         for (std::vector<G4int>::iterator it = nq.begin();
              it != nq.end();
              ++it)
@@ -205,17 +205,17 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
     double P = Pom(boost);
     if(thePDGCode>0)
       {
-        if(CustomPDGParser::s_isMesonino(thePDGCode)) theXsec=(P+R)*CLHEP::millibarn;
-        if(CustomPDGParser::s_isSbaryon(thePDGCode)) theXsec=2*P*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRMeson(thePDGCode)||CustomPDGParser::s_isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
+        if(MC::SUSY::isSMeson(thePDGCode)) theXsec=(P+R)*CLHEP::millibarn;
+        if(MC::SUSY::isSBaryon(thePDGCode)) theXsec=2*P*CLHEP::millibarn;
+        if(MC::SUSY::isRMeson(thePDGCode)||MC::SUSY::isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
+        if(MC::SUSY::isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
       }
     else
       {
-        if(CustomPDGParser::s_isMesonino(thePDGCode)) theXsec=P*CLHEP::millibarn;
-        if(CustomPDGParser::s_isSbaryon(thePDGCode)) theXsec=(2*(P+R)+30/sqrt(boost))*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRMeson(thePDGCode)||CustomPDGParser::s_isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
-        if(CustomPDGParser::s_isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
+        if(MC::SUSY::isSMeson(thePDGCode)) theXsec=P*CLHEP::millibarn;
+        if(MC::SUSY::isSBaryon(thePDGCode)) theXsec=(2*(P+R)+30/sqrt(boost))*CLHEP::millibarn;
+        if(MC::SUSY::isRMeson(thePDGCode)||MC::SUSY::isRGlueball(thePDGCode)) theXsec=(R+2*P)*CLHEP::millibarn;
+        if(MC::SUSY::isRBaryon(thePDGCode)) theXsec=3*P*CLHEP::millibarn;
       }
   }
 
@@ -286,7 +286,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   G4int theIncidentPDG = aDynamicParticle->GetDefinition()->GetPDGEncoding();
 
   if(reggemodel
-     &&CustomPDGParser::s_isMesonino(theIncidentPDG)
+     &&MC::SUSY::isSMeson(theIncidentPDG)
      &&CLHEP::RandFlat::shoot()*mixing>0.5
      &&aDynamicParticle->GetDefinition()->GetPDGCharge()==0.
      )
@@ -302,9 +302,9 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
      && reggemodel
      && CLHEP::RandFlat::shoot()>0.9
      && (
-        (CustomPDGParser::s_isMesonino(theIncidentPDG)&&theIncidentPDG>0)
+        (MC::SUSY::isSMeson(theIncidentPDG)&&theIncidentPDG>0)
         ||
-        CustomPDGParser::s_isRMeson(theIncidentPDG)
+        MC::SUSY::isRMeson(theIncidentPDG)
         )
      ){
     baryonise=true;
@@ -339,9 +339,9 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
           ||
           (!baryonise&&!ReactionGivesBaryon(prod))
           ||
-          (CustomPDGParser::s_isSbaryon(theIncidentPDG))
+          (MC::SUSY::isSBaryon(theIncidentPDG))
           ||
-          (CustomPDGParser::s_isRBaryon(theIncidentPDG))
+          (MC::SUSY::isRBaryon(theIncidentPDG))
           ||!reggemodel
           )
        )
@@ -480,7 +480,7 @@ G4bool G4ProcessHelper::ReactionIsPossible(const ReactionProduct& aReaction,cons
 
 G4bool G4ProcessHelper::ReactionGivesBaryon(const ReactionProduct& aReaction) const{
   for (ReactionProduct::const_iterator it = aReaction.begin();it!=aReaction.end();++it)
-    if(CustomPDGParser::s_isSbaryon(*it)||CustomPDGParser::s_isRBaryon(*it)) return true;
+    if(MC::SUSY::isSBaryon(*it)||MC::SUSY::isRBaryon(*it)) return true;
   return false;
 }
 
