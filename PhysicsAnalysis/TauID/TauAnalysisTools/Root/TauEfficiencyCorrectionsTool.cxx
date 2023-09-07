@@ -46,7 +46,6 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   declareProperty( "UseHighPtUncert",              m_bUseHighPtUncert              = false );
   declareProperty( "JetIDLevel",                   m_iJetIDLevel                   = (int)JETIDNONE );
   declareProperty( "EleIDLevel",                   m_iEleIDLevel                   = (int)ELEIDNONE );
-  declareProperty( "TriggerPeriodBinning",         m_iTriggerPeriodBinning         = (int)PeriodBinningAll );
   declareProperty( "MCCampaign",                   m_sMCCampaign                   = "" ); // MC16a, MC16d or MC16e
   declareProperty( "isAFII",	                   m_sAFII	                   = false );
   declareProperty( "SkipTruthMatchCheck",          m_bSkipTruthMatchCheck          = false );
@@ -287,7 +286,6 @@ void TauEfficiencyCorrectionsTool::printConfig() const
   ATH_MSG_DEBUG( "  UseHighPtUncert " << m_bUseHighPtUncert );
   ATH_MSG_DEBUG( "  JetIDLevel " << m_iJetIDLevel );
   ATH_MSG_DEBUG( "  EleIDLevel " << m_iEleIDLevel );
-  ATH_MSG_DEBUG( "  TriggerPeriodBinning " << m_iTriggerPeriodBinning );
   ATH_MSG_DEBUG( "  MCCampaign " << m_sMCCampaign );
   ATH_MSG_DEBUG( "  isAFII " << m_sAFII );
 }
@@ -537,7 +535,6 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
       ATH_CHECK(tTool->setProperty("VarName", m_sVarNameTriggerHadTau));
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
-      ATH_CHECK(tTool->setProperty("PeriodBinning", (int)m_iTriggerPeriodBinning));
     }
     else {
       ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);
@@ -677,7 +674,6 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2019_summer()
       ATH_CHECK(tTool->setProperty("VarName", m_sVarNameTriggerHadTau));
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
       ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
-      ATH_CHECK(tTool->setProperty("PeriodBinning", (int)m_iTriggerPeriodBinning));
     }
     else {
       ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);

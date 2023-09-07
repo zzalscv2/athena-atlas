@@ -122,7 +122,6 @@ private:
   bool m_bReadRandomRunNumber;
   int m_iJetIDLevel;
   int m_iEleIDLevel;
-  int m_iTriggerPeriodBinning;
   std::string m_sMCCampaign;
   bool m_sAFII;
   bool m_firstEvent = false;
