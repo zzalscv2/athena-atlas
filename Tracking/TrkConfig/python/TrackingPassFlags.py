@@ -772,7 +772,7 @@ def createITkConversionTrackingPassFlags():
 
     icf.Xi2max                  = [9.0]
     icf.Xi2maxNoAdd             = [25.0]
-    icf.doBremRecoverySi        = False
+    icf.doBremRecoverySi        = True
 
     return icf
 
