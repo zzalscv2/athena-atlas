@@ -50,7 +50,7 @@ def InDetExtensionProcessorCfg(flags, name="InDetExtensionProcessor", **kwargs):
             InDetTrackSummaryToolCfg(flags)))
 
     kwargs.setdefault("suppressHoleSearch", False)
-    kwargs.setdefault("tryBremFit", flags.Tracking.doBremRecovery)
+    kwargs.setdefault("tryBremFit", flags.Tracking.ActiveConfig.doBremRecoverySi)
     kwargs.setdefault("caloSeededBrem", flags.Tracking.doCaloSeededBrem)
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem)
     kwargs.setdefault("RefitPrds", False)
