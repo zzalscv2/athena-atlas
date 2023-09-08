@@ -9,7 +9,6 @@
 #ifndef TRKGEOMETRY_MATERIALINTERACTION_H
 #define TRKGEOMETRY_MATERIALINTERACTION_H
 
-#include "EventPrimitives/EventPrimitives.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkGeometry/Material.h"
 
