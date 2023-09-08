@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibDataQuality/LArBadChannelHunter.h"
@@ -379,12 +379,12 @@ StatusCode LArBadChannelHunter::stop ATLAS_NOT_THREAD_SAFE () {
 
 
       const std::vector<HWIdentifier>& cLids=clCont->calibSlotLine(chid);
-      for (unsigned i=0;i<cLids.size();i++) {
-	goodAndBad_t& gb=calibLineMap[cLids[i]];
+      for (const HWIdentifier& hwid : cLids) {
+	goodAndBad_t& gb=calibLineMap[hwid];
 	if (problem.deadReadout()||problem.distorted())
 	  gb.second.push_back(badChanVec.size()); /// index of bc
 	else
-	  gb.first++;
+	  ++gb.first;
       }
       if (!problem.good()) badChanVec.push_back(std::make_pair(chid,problem));
 
