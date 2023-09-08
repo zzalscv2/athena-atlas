@@ -11,12 +11,14 @@
 #define RungeKuttaUtils_H
 
 #include "CxxUtils/restrict.h"
-#include "GaudiKernel/AlgTool.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/BoundaryCheck.h"
+#include "EventPrimitives/EventPrimitives.h"
+
 #include <map>
 #include <vector>
+#include <utility>
 
 namespace Trk {
 
