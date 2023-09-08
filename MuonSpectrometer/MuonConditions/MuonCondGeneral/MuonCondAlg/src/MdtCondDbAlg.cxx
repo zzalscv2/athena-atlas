@@ -70,7 +70,7 @@ StatusCode MdtCondDbAlg::initialize() {
 
     return StatusCode::SUCCESS;
 }
-StatusCode MdtCondDbAlg::addDependency(const EventContext& ctx, const dataBaseKey_t& key,  writeHandle_t& wh) const {
+StatusCode MdtCondDbAlg::addDHDependency(const EventContext& ctx, const dataBaseKey_t& key,  writeHandle_t& wh) const {
     if (key.empty()) {
         ATH_MSG_VERBOSE("Key is empty");
         return StatusCode::SUCCESS;
@@ -84,17 +84,17 @@ StatusCode MdtCondDbAlg::addDependency(const EventContext& ctx, const dataBaseKe
     return StatusCode::SUCCESS;
 }
  StatusCode MdtCondDbAlg::loadDependencies(const EventContext& ctx, writeHandle_t& wh) const {
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_pshv, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_psv0, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_psv1, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_pslv, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_hv, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_lv, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_da_droppedChambers, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_mc_droppedChambers, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_mc_noisyChannels, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_mc_deadElements, wh));
-    ATH_CHECK(addDependency(ctx, m_readKey_folder_mc_deadTubes, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_pshv, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_psv0, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_psv1, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_pslv, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_hv, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_lv, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_da_droppedChambers, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_mc_droppedChambers, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_mc_noisyChannels, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_mc_deadElements, wh));
+    ATH_CHECK(addDHDependency(ctx, m_readKey_folder_mc_deadTubes, wh));
     return StatusCode::SUCCESS;
  }
 
