@@ -274,8 +274,14 @@ TGraphErrors * h_RejvEff(TH1 *hsig, TH1 *hbkg, bool isSV1, bool drawCtag=false) 
 
 TGraphErrors* h_EffvsVar(TH1* histo, TH1* histo_WPcuts) {
 
-  if(!histo) {cout << "histo does not exist or is broken. " << histo->GetName(); }
-  if(!histo_WPcuts) {cout << "histo does not exist or is broken. " << histo_WPcuts->GetName();} 
+  if(!histo) {
+    cout << "histo does not exist or is broken.\n";
+    return nullptr;
+  }
+  if(!histo_WPcuts) {
+    cout << "histo_WPcuts does not exist or is broken.\n";
+    return nullptr;
+  } 
 
   // test if the histos are healty and stuff
   if (!histo || !histo_WPcuts || histo->GetNbinsX() != histo_WPcuts->GetNbinsX() || histo->Integral() == 0) return NULL;
@@ -314,8 +320,14 @@ TGraphErrors* h_EffvsVar(TH1* histo, TH1* histo_WPcuts) {
 
 TGraphErrors* h_EffvsVar_debug(TH1* histo, TH1* histo_WPcuts) {
 
-  if(!histo) {cout << "histo does not exist or is broken. " << histo->GetName(); }
-  if(!histo_WPcuts) {cout << "histo does not exist or is broken. " << histo_WPcuts->GetName();} 
+  if(!histo) {
+    cout << "histo does not exist or is broken.\n";
+    return nullptr;
+  }
+  if(!histo_WPcuts) {
+    cout << "histo_WPcuts does not exist or is broken.\n";
+    return nullptr;
+  }
 
   // test if the histos are healty and stuff
   if (!histo || !histo_WPcuts || histo->GetNbinsX() != histo_WPcuts->GetNbinsX() || histo->Integral() == 0) return NULL;
