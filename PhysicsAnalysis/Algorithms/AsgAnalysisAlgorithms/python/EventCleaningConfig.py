@@ -14,7 +14,9 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('userGRLFiles', [], type=None)
         self.addOption ('minTracksPerVertex', 2, type=int)
         self.addOption ('selectionFlags', ['DFCommonJets_eventClean_LooseBad'], type=None)
-        self.addOption ('invertFlags', [False], type=None)
+        # This is a vector<bool>, so parsing True/False is not handled
+        # in AnalysisBase, but we can evade this with numerical values
+        self.addOption ('invertFlags', [0], type=None)
 
 
     def makeAlgs (self, config) :
