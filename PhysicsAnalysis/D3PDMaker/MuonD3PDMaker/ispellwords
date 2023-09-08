@@ -228,7 +228,6 @@ rpc
 MuonFixedId
 tgc
 OffDiaCovMatElements
-McParticleEvent
 PDMakerConf
 SaveIDMuonHitSummary
 TrkCovOffDiag

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -93,16 +93,6 @@ StatusCode MuonTruthHitsFillerTool::book()
 StatusCode MuonTruthHitsFillerTool::fill (const TrackRecord& p)
 {
   CHECK( fillHitCounts (p.GetBarCode()) );
-  return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Fill one block --- type-safe version.
- */
-StatusCode MuonTruthHitsFillerTool::fill (const TruthParticle& p)
-{
-  CHECK( fillHitCounts (p.barcode()) );
   return StatusCode::SUCCESS;
 }
 

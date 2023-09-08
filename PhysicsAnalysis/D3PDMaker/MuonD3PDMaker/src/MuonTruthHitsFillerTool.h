@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,7 +18,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "D3PDMakerUtils/BlockFillerToolMulti.h"
 #include "TrackRecord/TrackRecord.h"
-#include "McParticleEvent/TruthParticle.h"
 #include "xAODTruth/TruthParticle.h"
 
 #include <vector>
@@ -29,10 +28,10 @@ namespace D3PD {
  * @brief Fill truth hit information for muons.
  */
 class MuonTruthHitsFillerTool
-  : public BlockFillerTool<Types<TrackRecord, TruthParticle, xAOD::TruthParticle> >
+  : public BlockFillerTool<Types<TrackRecord, xAOD::TruthParticle> >
 {
 public:
-  typedef BlockFillerTool<Types<TrackRecord, TruthParticle, xAOD::TruthParticle> > Base;
+  typedef BlockFillerTool<Types<TrackRecord, xAOD::TruthParticle> > Base;
 
 
   /**
@@ -58,12 +57,6 @@ public:
    * @brief Fill one block --- type-safe version.
    */
   virtual StatusCode fill (const TrackRecord& p);
-
-
-  /**
-   * @brief Fill one block --- type-safe version.
-   */
-  virtual StatusCode fill (const TruthParticle& p);
 
 
   /**
