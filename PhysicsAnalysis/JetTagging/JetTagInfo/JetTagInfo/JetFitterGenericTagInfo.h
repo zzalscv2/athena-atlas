@@ -118,10 +118,10 @@ public:
   IntMap::const_iterator getIntsEnd() const; 
 
   //** returns true if the value is already set */
-  bool setDouble(std::string, double); 
-  bool setTemporaryDouble(std::string, double); 
-  bool setInt(std::string, int); 
-  bool setTemporaryInt(std::string, int); 
+  bool setDouble(const std::string&, double); 
+  bool setTemporaryDouble(const std::string&, double); 
+  bool setInt(const std::string&, int); 
+  bool setTemporaryInt(const std::string&, int); 
     
   /** Set-methods for the private data members of the class. */
   void setnVTX(int nVTX);
