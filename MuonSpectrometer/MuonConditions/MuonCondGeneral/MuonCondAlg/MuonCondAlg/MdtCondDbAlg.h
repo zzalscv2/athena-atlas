@@ -29,7 +29,7 @@ private:
     using dataBaseKey_t = SG::ReadCondHandleKey<CondAttrListCollection>;
 
     StatusCode loadDependencies(const EventContext& ctx, writeHandle_t& wh) const;
-    StatusCode addDependency(const EventContext& ctx, const dataBaseKey_t& key,  writeHandle_t& wh) const;
+    StatusCode addDHDependency(const EventContext& ctx, const dataBaseKey_t& key,  writeHandle_t& wh) const;
     
     StatusCode loadDataPsHv(const EventContext& ctx, MdtCondDbData& dataOut) const;
     StatusCode loadDataPsLv(const EventContext& ctx, MdtCondDbData& dataOut) const;
