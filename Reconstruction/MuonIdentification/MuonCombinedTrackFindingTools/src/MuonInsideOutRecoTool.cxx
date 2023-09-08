@@ -301,22 +301,22 @@ namespace MuonCombined {
         for (const Muon::MuonStationIndex::TechnologyIndex& it : technologiesInStation) {
             // get collections, keep track of failures
             if (it == Muon::MuonStationIndex::MDT)
-                isok |= getLayerDataTech<Muon::MdtPrepDataCollection>(it, surf, prdData.mdtPrds, layerPrepRawData.mdts);
+                isok |= getLayerDataTech<Muon::MdtPrepData>(it, surf, prdData.mdtPrds, layerPrepRawData.mdts);
 
             else if (it == Muon::MuonStationIndex::RPC)
-                isok |= getLayerDataTech<Muon::RpcPrepDataCollection>(it, surf, prdData.rpcPrds, layerPrepRawData.rpcs);
+                isok |= getLayerDataTech<Muon::RpcPrepData>(it, surf, prdData.rpcPrds, layerPrepRawData.rpcs);
 
             else if (it == Muon::MuonStationIndex::TGC)
-                isok |= getLayerDataTech<Muon::TgcPrepDataCollection>(it, surf, prdData.tgcPrds, layerPrepRawData.tgcs);
+                isok |= getLayerDataTech<Muon::TgcPrepData>(it, surf, prdData.tgcPrds, layerPrepRawData.tgcs);
 
             else if (it == Muon::MuonStationIndex::CSCI)
-                isok |= getLayerDataTech<Muon::CscPrepDataCollection>(it, surf, prdData.cscPrds, layerPrepRawData.cscs);
+                isok |= getLayerDataTech<Muon::CscPrepData>(it, surf, prdData.cscPrds, layerPrepRawData.cscs);
 
             else if (it == Muon::MuonStationIndex::STGC)
-                isok |= getLayerDataTech<Muon::sTgcPrepDataCollection>(it, surf, prdData.stgcPrds, layerPrepRawData.stgcs);
+                isok |= getLayerDataTech<Muon::sTgcPrepData>(it, surf, prdData.stgcPrds, layerPrepRawData.stgcs);
 
             else if (it == Muon::MuonStationIndex::MM)
-                isok |= getLayerDataTech<Muon::MMPrepDataCollection>(it, surf, prdData.mmPrds, layerPrepRawData.mms);
+                isok |= getLayerDataTech<Muon::MMPrepData>(it, surf, prdData.mmPrds, layerPrepRawData.mms);
         }
 
         if (msgLvl(MSG::DEBUG)) {
@@ -335,7 +335,8 @@ namespace MuonCombined {
 
     template <class COL>
     bool MuonInsideOutRecoTool::getLayerDataTech(Muon::MuonStationIndex::TechnologyIndex technology, const Muon::MuonLayerSurface& surf,
-                                                 const Muon::MuonPrepDataContainer<COL>* input, std::vector<const COL*>& output) const {
+                                                 const Muon::MuonPrepDataContainerT<COL>* input, 
+                                                 std::vector<const Muon::MuonPrepDataCollection<COL>*>& output) const {
         if (!input || input->size() == 0) return false;
         // get technologies in the given layer
         unsigned int sectorLayerHash = Muon::MuonStationIndex::sectorLayerHash(surf.regionIndex, surf.layerIndex);

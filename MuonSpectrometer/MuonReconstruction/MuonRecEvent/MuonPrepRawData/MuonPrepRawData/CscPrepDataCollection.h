@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,9 +11,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 namespace Muon {
-    
-    typedef MuonPrepDataCollection< CscPrepData > CscPrepDataCollection;
-
     /**Overload of << operator for MsgStream for debug output*/
     MsgStream& operator << ( MsgStream& sl, const CscPrepDataCollection& coll);
 

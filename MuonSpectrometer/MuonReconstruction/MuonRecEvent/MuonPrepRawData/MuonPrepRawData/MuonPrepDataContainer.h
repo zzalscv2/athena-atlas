@@ -56,14 +56,14 @@ public:
   MuonPrepDataContainer(EventContainers::IdentifiableCache<CollectionT> * cache);
 
   // Destructor:
-  virtual ~MuonPrepDataContainer();
+  virtual ~MuonPrepDataContainer() = default;
 
    /** return class ID */
    static const CLID& classID() 
    {
      //	static CLID id = CLID_T ; 
      //	return id; 
-     return ClassID_traits< MuonPrepDataContainer <CollectionT> > ::ID();
+     return ClassID_traits< MuonPrepDataContainer <CollectionT> >::ID();
    }
 
    /** return class ID */
@@ -90,22 +90,15 @@ private:
 ///////////////////////////////////////////////////////////////////
 // Inline methods:
 /////////////////////////////////////////////////////////////////// 
+template <class PrdType> using MuonPrepDataContainerT = MuonPrepDataContainer<MuonPrepDataCollection<PrdType>>;
 
-typedef MuonPrepDataCollection< MdtPrepData > MdtPrepDataCollection;
-typedef MuonPrepDataContainer< MdtPrepDataCollection > MdtPrepDataContainer;
- 
-typedef MuonPrepDataCollection< RpcPrepData > RpcPrepDataCollection;
-typedef MuonPrepDataContainer< RpcPrepDataCollection > RpcPrepDataContainer;
- 
-typedef MuonPrepDataCollection< TgcPrepData > TgcPrepDataCollection;
-typedef MuonPrepDataContainer< TgcPrepDataCollection > TgcPrepDataContainer;
-
-// New Small Wheel
-typedef MuonPrepDataCollection< sTgcPrepData > sTgcPrepDataCollection;
-typedef MuonPrepDataContainer< sTgcPrepDataCollection > sTgcPrepDataContainer;
-
-typedef MuonPrepDataCollection< MMPrepData > MMPrepDataCollection;
-typedef MuonPrepDataContainer< MMPrepDataCollection > MMPrepDataContainer;
+using MdtPrepDataContainer = MuonPrepDataContainerT<MdtPrepData>;
+using RpcPrepDataContainer = MuonPrepDataContainerT<RpcPrepData>;
+using TgcPrepDataContainer = MuonPrepDataContainerT<TgcPrepData>;
+using CscPrepDataContainer = MuonPrepDataContainerT<CscPrepData>;
+using CscStripPrepDataContainer = MuonPrepDataContainerT<CscStripPrepData>;
+using MMPrepDataContainer = MuonPrepDataContainerT<MMPrepData>;
+using sTgcPrepDataContainer = MuonPrepDataContainerT<sTgcPrepData>;
 
 // member functions that use Collection T
 #include "MuonPrepRawData/MuonPrepDataContainer.icc"
@@ -114,6 +107,7 @@ typedef MuonPrepDataContainer< MMPrepDataCollection > MMPrepDataContainer;
 }
 
 #include "MuonPrepRawData/CscPrepDataContainer.h"
+#include "MuonPrepRawData/CscStripPrepDataContainer.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "MuonPrepRawData/MdtPrepDataContainer.h"

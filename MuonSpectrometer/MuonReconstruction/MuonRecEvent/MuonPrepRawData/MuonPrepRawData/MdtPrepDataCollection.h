@@ -11,9 +11,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 namespace Muon {
-    
-    /** @brief Muon::MuonPrepDataCollection to hold the Muon::MdtPrepData*/
-typedef MuonPrepDataCollection< MdtPrepData > MdtPrepDataCollection;
 
     /**Overload of << operator for MsgStream for debug output*/
     MsgStream& operator << ( MsgStream& sl, const MdtPrepDataCollection& coll);

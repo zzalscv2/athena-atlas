@@ -27,6 +27,16 @@
 // Needed class
 #include "TrkPrepRawData/PrepRawData.h"
 
+//Needed Classes
+#include "MuonPrepRawData/CscStripPrepData.h"
+#include "MuonPrepRawData/CscPrepData.h"
+#include "MuonPrepRawData/MdtPrepData.h"
+#include "MuonPrepRawData/RpcPrepData.h"
+#include "MuonPrepRawData/TgcPrepData.h"
+// New Small Wheel
+#include "MuonPrepRawData/MMPrepData.h"
+#include "MuonPrepRawData/sTgcPrepData.h"
+
 namespace Muon{
 
 /**@brief Template to hold collections of MuonPrepRawData objects. 
@@ -93,6 +103,14 @@ private:
 ///////////////////////////////////////////////////////////////////
 // Inline methods:
 ///////////////////////////////////////////////////////////////////
+using MdtPrepDataCollection = MuonPrepDataCollection<MdtPrepData>;
+using RpcPrepDataCollection = MuonPrepDataCollection<RpcPrepData>;
+using TgcPrepDataCollection = MuonPrepDataCollection<TgcPrepData>;
+using CscPrepDataCollection = MuonPrepDataCollection<CscPrepData>;
+
+using CscStripPrepDataCollection = MuonPrepDataCollection<CscStripPrepData>;
+using sTgcPrepDataCollection = MuonPrepDataCollection<sTgcPrepData>;
+using MMPrepDataCollection = MuonPrepDataCollection<MMPrepData>;
 
 }
 

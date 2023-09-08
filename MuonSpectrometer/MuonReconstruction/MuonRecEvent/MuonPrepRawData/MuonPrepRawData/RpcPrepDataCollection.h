@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-
 #ifndef MUONPREPRAWDATA_RPCPREPDATACOLLECTION_H
 #define MUONPREPRAWDATA_RPCPREPDATACOLLECTION_H
 
@@ -11,9 +9,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 namespace Muon {
-    
-    /** @brief Muon::MuonPrepDataCollection to hold the Muon::RpcPrepData*/
-    typedef MuonPrepDataCollection< RpcPrepData > RpcPrepDataCollection;
    
     /**Overload of << operator for MsgStream for debug output*/
     MsgStream& operator << ( MsgStream& sl, const RpcPrepDataCollection& coll);
