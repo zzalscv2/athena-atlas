@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: CaloClusterCorrection/python/common.py
@@ -746,13 +746,14 @@ def makecorr (flags,
     if suffix is not None:
         name = name + suffix
 
-    # If we're not writing to pool, we need to make sure the name's unique.
-    if source != CALOCORR_TOPOOL and name in _alltools:
-        nsuff = 2
-        while (name + str (nsuff)) in _alltools:
-            nsuff += 1
-        name = name + str (nsuff)
-    _alltools[name] = (folder, fulltag, sgkey)
+    # If this tool was defined earlier, check consistency.
+    if name in _alltools:
+        if _alltools[name] != (folder, fulltag, sgkey):
+            raise CaloCorrectionConfigError ( #pragma: NO COVER
+                  "Inconsistent configuration of tool %s.  Old (folder,tag,sgkey)=%s; new=%s" % #pragma: NO COVER
+                   (name, _alltools[name], (folder, fulltag, sgkey))) #pragma: NO COVER
+    else:
+        _alltools[name] = (folder, fulltag, sgkey)
 
     # If no class was explicitly specified, take it from the table.
     if confclass is None:

@@ -662,7 +662,7 @@ def test10 (flags_in):
 def test11 (flags_in):
     common._poolfiles_seen = {}
     common._folders_used = {}
-    common._alltools = {'gapb2_GLOBAL_ele35' : 1}
+    common._alltools = {'gapb2_GLOBAL_ele35' : ('/CALO/CaloSwClusterCorrections/gap', '@GLOBAL', None)}
     
     flags = flags_in.clone()
     flags.lock()
@@ -685,7 +685,7 @@ def test11 (flags_in):
                    None, # confclass
                    CALOCORR_SW)
     tools = ca.popPrivateTools()
-    exp = CaloSwGap_v3 ('gapb2_GLOBAL_ele352',
+    exp = CaloSwGap_v3 ('gapb2_GLOBAL_ele35',
                         prefix='ele35b2.',
                         DBHandleKey='/CALO/CaloSwClusterCorrections/gap')
     exp.check (tools)
@@ -703,7 +703,7 @@ def test11 (flags_in):
                    None, # confclass
                    CALOCORR_SW)
     tools = ca.popPrivateTools()
-    exp = CaloSwGap_v3 ('gapb2_GLOBAL_ele353',
+    exp = CaloSwGap_v3 ('gapb2_GLOBAL_ele35',
                         prefix='ele35b2.',
                         DBHandleKey='/CALO/CaloSwClusterCorrections/gap')
     exp.check (tools)
@@ -1026,6 +1026,7 @@ def test21 (flags_in):
 
 # writing to pool
 def test22 (flags_in):
+    common._alltools = {}
     flags = flags_in.clone()
     flags.lock()
 
