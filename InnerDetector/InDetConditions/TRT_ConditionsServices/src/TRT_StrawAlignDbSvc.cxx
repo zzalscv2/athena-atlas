@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_StrawAlignDbSvc.cxx
@@ -75,26 +75,15 @@ StatusCode TRT_StrawAlignDbSvc::initialize()
     
     // create, record and update data handle
     msg(MSG::INFO) << "Creating new dx container" << endmsg ;
-    const StrawDxContainer* dxcontainer = new StrawDxContainer() ;
+    auto dxcontainer = std::make_unique<StrawDxContainer>();
 
-    if( (m_detStore->record(dxcontainer,m_par_dxcontainerkey))!=StatusCode::SUCCESS ) {
-      msg(MSG::ERROR) << "Could not record StrawDxContainer for key " << m_par_dxcontainerkey << endmsg;
-    }
-
-    if(StatusCode::SUCCESS!=m_detStore->retrieve(m_dxcontainer,m_par_dxcontainerkey)) {
-      msg(MSG::FATAL) << "Could not retrieve data handle for StrawDxContainer " << endmsg;
-      return StatusCode::FAILURE ;
-    }
-    
-    msg(MSG::INFO) << "Created StrawDxContainer in detstore" << endmsg;
-    
     // reading from file 
     if( !m_par_strawtextfile.empty() ) {
-      if(StatusCode::SUCCESS!=this->readTextFile(m_par_strawtextfile)) {
-	msg(MSG::FATAL) << "Could not read objects from text file" << m_par_strawtextfile << endmsg;
-	return StatusCode::FAILURE ;
-      }
+      ATH_CHECK( this->readTextFile(dxcontainer.get(),
+                                    m_par_strawtextfile) );
     }
+
+    ATH_CHECK( m_detStore->record(std::move(dxcontainer), m_par_dxcontainerkey) );
   }
 
   return StatusCode::SUCCESS;
@@ -117,7 +106,8 @@ StatusCode TRT_StrawAlignDbSvc::writeTextFile(const std::string& filename) const
   // getDxContainer()->crunch() ;
 
   StrawDxContainer::FlatContainer packedstrawdata ;
-  m_dxcontainer->getall( packedstrawdata ) ;
+  const StrawDxContainer* dxcontainer = getConstDxContainer();
+  dxcontainer->getall( packedstrawdata ) ;
   
   // now, we store the entries
   msg(MSG::INFO) << "Number of entries in flatcontainer: " 
@@ -126,9 +116,9 @@ StatusCode TRT_StrawAlignDbSvc::writeTextFile(const std::string& filename) const
   for(auto & it : packedstrawdata) {
     const TRTCond::ExpandedIdentifier& calid = it.first ;
     // get the end point corrections. if not the right type, store zeros.
-    float dx1=m_dxcontainer->getDx1(calid) ; 
-    float dx2=m_dxcontainer->getDx2(calid) ; 
-    float dxerr=m_dxcontainer->getDxErr(calid) ;
+    float dx1=dxcontainer->getDx1(calid) ; 
+    float dx2=dxcontainer->getDx2(calid) ; 
+    float dxerr=dxcontainer->getDxErr(calid) ;
     outfile << calid << " " 
 	    << std::setprecision(5)
 	    << std::setw(12) << dx1 << " " 
@@ -141,11 +131,17 @@ StatusCode TRT_StrawAlignDbSvc::writeTextFile(const std::string& filename) const
  
  
 
-StatusCode TRT_StrawAlignDbSvc::readTextFile(const std::string& filename) 
+StatusCode TRT_StrawAlignDbSvc::readTextFile(const std::string& filename)
+{
+  return readTextFile( getDxContainer(), filename );
+}
+
+
+StatusCode TRT_StrawAlignDbSvc::readTextFile(StrawDxContainer* dxcontainer,
+                                             const std::string& filename) 
 {
   msg(MSG::INFO) << "Reading straw alignment data from text file " << filename << endmsg ;
 
-  StrawDxContainer* dxcontainer = getDxContainer() ;
   if(!dxcontainer) {
     msg(MSG::WARNING) << " Could not find the container " << endmsg;
     return StatusCode::FAILURE;
@@ -245,8 +241,8 @@ StatusCode TRT_StrawAlignDbSvc::IOVCallBack(IOVSVC_CALLBACK_ARGS_P(I,keys))
 	 itr=keys.begin(); itr!=keys.end(); ++itr) 
     msg(MSG::INFO) << " IOVCALLBACK for key " << *itr << " number " << I << endmsg;
   
-  // if constants need to be read from textfile, we sue the call back routine to refill the IOV objects
-  if(!m_par_strawtextfile.empty()) return readTextFile( m_par_strawtextfile ) ;
+  // if constants need to be read from textfile, we use the call back routine to refill the IOV objects
+  if(!m_par_strawtextfile.empty()) return readTextFile( getDxContainer(), m_par_strawtextfile ) ;
   
   return StatusCode::SUCCESS;
 }

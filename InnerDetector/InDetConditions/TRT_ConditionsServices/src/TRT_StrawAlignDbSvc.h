@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_STRAWALIGNDBSVC_H
@@ -65,7 +65,9 @@ class TRT_StrawAlignDbSvc: public AthService, virtual public ITRT_StrawAlignDbSv
   StatusCode writeTextFile(const std::string& file) const;
   
   /// read calibration from text file into TDS
-  StatusCode readTextFile(const std::string& file);
+  virtual StatusCode readTextFile(const std::string& file);
+  StatusCode readTextFile(StrawDxContainer* dxcontainer,
+                          const std::string& file);
 
   /// write the calibration objects to output, after cleaning
   StatusCode streamOutObjects () const;
@@ -76,6 +78,7 @@ class TRT_StrawAlignDbSvc: public AthService, virtual public ITRT_StrawAlignDbSv
 
   /// access to containers
   StrawDxContainer* getDxContainer() const ;
+  const StrawDxContainer* getConstDxContainer() const ;
 
   /// IOV call back for dx objects. normally this doesn't do anything.
   StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS);
@@ -110,7 +113,22 @@ class TRT_StrawAlignDbSvc: public AthService, virtual public ITRT_StrawAlignDbSv
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 inline TRT_StrawAlignDbSvc::StrawDxContainer* TRT_StrawAlignDbSvc::getDxContainer() const {
-  const StrawDxContainer* rc = &(*m_dxcontainer) ;
+  const StrawDxContainer* rc = getConstDxContainer();
+  return const_cast<StrawDxContainer*>(rc) ; 
+}
+
+inline const TRT_StrawAlignDbSvc::StrawDxContainer*
+TRT_StrawAlignDbSvc::getConstDxContainer() const
+{
+  const StrawDxContainer* rc = nullptr;
+  if (m_dxcontainer.isValid())
+    rc = m_dxcontainer.cptr();
+  else {
+    if (m_detStore->retrieve (rc, m_par_dxcontainerkey).isFailure()) {
+      ATH_MSG_ERROR("Cannot retrieve " << m_par_dxcontainerkey);
+    }
+  }
+  return rc;
   return const_cast<StrawDxContainer*>(rc) ; 
 }
 
