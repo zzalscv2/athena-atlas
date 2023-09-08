@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FSRUTILS_FsrPhotonTool_H
@@ -73,8 +73,8 @@ namespace FSR {
         /// @}
     private:
         /// Need for the FSR search
-        std::vector<FsrCandidate>* sortFsrCandidates( std::vector< std::pair <const xAOD::IParticle*, double> > FsrCandList,
-                                                      std::string option="ET");
+        std::vector<FsrCandidate>* sortFsrCandidates( const std::vector< std::pair <const xAOD::IParticle*, double> >& FsrCandList,
+                                                      const std::string& option="ET");
         bool isOverlap(const xAOD::Electron_v1* electron, std::vector< std::pair <const xAOD::IParticle*, double> > phfsr,
                        unsigned int nofPhFsr);
         double deltaR(float muonEta, float muonPhi, float phEta, float phPhi) const;
