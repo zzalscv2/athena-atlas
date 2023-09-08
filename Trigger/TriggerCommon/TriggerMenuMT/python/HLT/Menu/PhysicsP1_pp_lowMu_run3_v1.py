@@ -200,17 +200,17 @@ def getLowMuPhysicsSignatures():
 
         #ATR-27744
         #-------- legacy
-        ChainProp(name='HLT_j40_L1J15', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
+        ChainProp(name='HLT_j40_L1J15', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j50_L1J15', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j60_L1J20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j75_L1J20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
-        ChainProp(name='HLT_j85_L1J20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
+        ChainProp(name='HLT_j85_L1J20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j100_L1J20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j100_L1J30', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
-        ChainProp(name='HLT_j120_L1J30', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
+        ChainProp(name='HLT_j120_L1J30', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j140_L1J50', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j175_L1J50', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
-        ChainProp(name='HLT_j260_L1J75', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
+        ChainProp(name='HLT_j260_L1J75', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=SingleJetGroup+LowMuGroupLeg),
 
         ChainProp(name='HLT_j15f_L1TE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
         ChainProp(name='HLT_j25f_L1TE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupLeg),
@@ -276,14 +276,14 @@ def getLowMuPhysicsSignatures():
         #performace chains
         ChainProp(name="HLT_j30_0eta290_020jvt_boffperf_pf_ftf_L1TE50", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
         ChainProp(name="HLT_j45_0eta290_020jvt_boffperf_pf_ftf_L1J15", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
-        ChainProp(name="HLT_j60_0eta290_020jvt_boffperf_pf_ftf_L1J20", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
+        ChainProp(name="HLT_j60_0eta290_020jvt_boffperf_pf_ftf_L1J20", l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=PrimaryLegGroup+SingleBjetGroup),
         ChainProp(name="HLT_j80_0eta290_020jvt_boffperf_pf_ftf_L1J30", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
         ChainProp(name="HLT_j100_0eta290_020jvt_boffperf_pf_ftf_L1J30", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
 
         #bjet chains
         ChainProp(name="HLT_j30_0eta290_020jvt_bgn160_pf_ftf_L1TE50", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
         ChainProp(name="HLT_j45_0eta290_020jvt_bgn160_pf_ftf_L1J15", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
-        ChainProp(name="HLT_j60_0eta290_020jvt_bgn160_pf_ftf_L1J20", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
+        ChainProp(name="HLT_j60_0eta290_020jvt_bgn160_pf_ftf_L1J20", l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream, 'express'], groups=PrimaryLegGroup+SingleBjetGroup),
         ChainProp(name="HLT_j80_0eta290_020jvt_bgn160_pf_ftf_L1J30", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
         ChainProp(name="HLT_j100_0eta290_020jvt_bgn160_pf_ftf_L1J30", l1SeedThresholds=['FSNOSEED'], groups=PrimaryLegGroup+SingleBjetGroup),
 
@@ -317,7 +317,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mu4_j60_L1MU3V_J20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[PhysicsStream], groups=SingleBjetGroup+LowMuGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mu4_j50_dRAB05_L1MU3V_J20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[PhysicsStream], groups=SingleBjetGroup+LowMuGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mu4_j50_L1MU3V_J20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[PhysicsStream], groups=SingleBjetGroup+LowMuGroup+PrimaryLegGroup),
-        ChainProp(name='HLT_mu4_j40_dRAB05_L1MU3V_J20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[PhysicsStream], groups=SingleBjetGroup+LowMuGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mu4_j40_dRAB05_L1MU3V_J20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[PhysicsStream, 'express'], groups=SingleBjetGroup+LowMuGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mu4_j40_L1MU3V_J20', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[PhysicsStream], groups=SingleBjetGroup+LowMuGroup+PrimaryLegGroup),
 
     ]
@@ -429,7 +429,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mb_sp600_trk50_hmt_L1TE3',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=MinBiasGroup+LowMuGroup+LowMuGroupLeg),
         ChainProp(name='HLT_mb_sp600_trk50_hmt_L1MBTS_2',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp600_trk50_hmt_L1MBTS_2_2',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
-        ChainProp(name='HLT_mb_sp600_trk50_hmt_L1MBTS_3_3',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
+        ChainProp(name='HLT_mb_sp600_trk50_hmt_L1MBTS_3_3',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias', 'express'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp600_trk60_hmt_L1MBTS_2',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp600_trk60_hmt_L1MBTS_4_4',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
         ChainProp(name='HLT_mb_sp800_trk60_hmt_L1RD0_FILLED',          l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+LowMuGroup),
