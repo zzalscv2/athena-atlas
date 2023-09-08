@@ -95,10 +95,14 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
 
 
     # Skip events with no primary vertex:
-    algSeq += createAlgorithm( 'CP::VertexSelectionAlg',
-                               'PrimaryVertexSelectorAlg' )
-    algSeq.PrimaryVertexSelectorAlg.VertexContainer = 'PrimaryVertices'
-    algSeq.PrimaryVertexSelectorAlg.MinVertices = 1
+    from AsgAnalysisAlgorithms.EventSelectionAnalysisSequence import makeEventSelectionAnalysisSequence
+    eventCleaningSequence = makeEventSelectionAnalysisSequence(
+        dataType,
+        runPrimaryVertexSelection=True,
+        runEventCleaning=True,
+    )
+    eventCleaningSequence.configure( inputName = {}, outputName = {} )
+    algSeq += eventCleaningSequence
 
 
     # Include, and then set up the jet analysis algorithm sequence:
@@ -560,9 +564,10 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                 'EventInfo.eventNumber   -> eventNumber', ]
 
 
-    # Skip events with no primary vertex:
+    # Skip events with no primary vertex,
+    # and perform loose jet cleaning
     configSeq += makeConfig ('Event.Cleaning', None)
-
+    configSeq.setOptionValue ('.runEventCleaning', True)
 
     # Include, and then set up the jet analysis algorithm sequence:
     configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')

@@ -13,7 +13,7 @@ def makeEventSelectionAnalysisSequence( dataType,
                                         minTracksPerVertex = 2,
                                         userGRLFiles = [],
                                         userSelectionFlags = ['DFCommonJets_eventClean_LooseBad'],
-                                        userInvertFlags = [False]):
+                                        userInvertFlags = [0]):
     """Create a basic event selection analysis algorithm sequence
 
     Keyword arguments:
