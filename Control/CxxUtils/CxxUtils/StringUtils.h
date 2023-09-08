@@ -118,10 +118,6 @@ namespace CxxUtils {
                                    StringUtils::SPECIALSCRIPT scripttype,
                                    size_type pos = 0);
 
-    StringUtils::FORMAT guessFormat(const std::string& input);
-    std::string convertText(const std::string& input, StringUtils::FORMAT inputFormat, StringUtils::FORMAT outputFormat);
-    std::string convertText(const std::string& input, StringUtils::FORMAT outputFormat);
-
     std::string stripUnprintableCharacters(const std::string& str, bool allowNonAscii = true);
     std::string replaceSpecialScript(const std::string& str, StringUtils::SPECIALSCRIPT inputType, StringUtils::SPECIALSCRIPT outputType);
 
