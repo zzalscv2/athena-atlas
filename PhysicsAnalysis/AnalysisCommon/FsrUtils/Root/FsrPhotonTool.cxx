@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -369,7 +369,7 @@ namespace FSR {
     }  // end of getFsrPhotons
 
 
-    std::vector<FsrCandidate>* FsrPhotonTool::sortFsrCandidates(std::vector< std::pair <const xAOD::IParticle*, double> > FsrCandList, std::string option)
+    std::vector<FsrCandidate>* FsrPhotonTool::sortFsrCandidates(const std::vector< std::pair <const xAOD::IParticle*, double> >& FsrCandList, const std::string& option)
     {
    
         m_fsrPhotons.clear();
