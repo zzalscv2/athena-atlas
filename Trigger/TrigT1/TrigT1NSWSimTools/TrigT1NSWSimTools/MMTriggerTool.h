@@ -67,6 +67,7 @@ namespace NSWL1 {
     SG::ReadHandleKey<TrackRecordCollection> m_keyMuonEntryLayer{this,"MuonEntryLayer","MuonEntryLayer","Location of MuonEntryLayer"};
     SG::ReadHandleKey<MmDigitContainer> m_keyMmDigitContainer{this,"MmDigitContainer","MM_DIGITS","Location of MmDigitContainer"};
     Gaudi::Property<bool>  m_isMC            {this, "IsMC",         true, "This is MC"};
+    Gaudi::Property<bool>  m_doTruth         {this, "DoTruth",     false, "Process truth information. Disabled by default"};
 
     // Parameters for Diamond Road algorithms
     Gaudi::Property<bool>  m_trapShape            {this, "TrapezoidalShape",         true, "Consider the quadruplet as a trapezoid"};
@@ -141,38 +142,16 @@ namespace NSWL1 {
     std::vector<double>* m_trigger_trueEtaRange ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_truePtRange ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_fitEtaRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_fitPtRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_resThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_resPhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_resDth ATLAS_THREAD_SAFE;
 
     std::vector<double>* m_trigger_large_fitThe ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_large_fitPhi ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_large_fitDth ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_trueEtaRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_truePtRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_trueThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_truePhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_trueDth ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_large_fitEtaRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_fitPtRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_resThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_resPhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_large_resDth ATLAS_THREAD_SAFE;
 
     std::vector<double>* m_trigger_small_fitThe ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_small_fitPhi ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_small_fitDth ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_trueEtaRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_truePtRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_trueThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_truePhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_trueDth ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_small_fitEtaRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_fitPtRange ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_resThe ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_resPhi ATLAS_THREAD_SAFE;
-    std::vector<double>* m_trigger_small_resDth ATLAS_THREAD_SAFE;
 
     std::vector<int>* m_trigger_VMM ATLAS_THREAD_SAFE;
     std::vector<int>* m_trigger_plane ATLAS_THREAD_SAFE;
