@@ -73,6 +73,16 @@ def InDetTrigPriVxFinderCfg(flags, inputTracks, outputVtx, name="InDetTrigPriVxF
 def primaryVertexFindingCfg(flags, **kwargs):
     acc = InDetPriVxFinderCfg(flags)
 
+    if flags.Tracking.perigeeExpression == "Vertex":
+        from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
+        from InDetConfig.TrackRecoConfig import (
+            ClusterSplitProbabilityContainerName)
+        acc.merge(TrackParticleCnvAlgCfg(
+            flags,
+            ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
+                flags),
+            AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
+
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 
     excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"

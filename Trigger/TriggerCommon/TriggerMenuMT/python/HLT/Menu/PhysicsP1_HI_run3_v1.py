@@ -773,12 +773,7 @@ def setupMenu(menu_name):
 
     final_chains = ChainStore()
     for sig, chainsInSig in chains.items():
-        #if sig == "Beamspot":  # HI needs special beam spot setup
-        #    log.warning('Default Beamspot signature removed in HI')
-        #    continue
         for c in chainsInSig:
-                #if "IDCalibPEB" in c.name: # heavy tracking
-                #    raise RuntimeError(f"IDCalibPEB not safe in HI, requested by chain {c.name}")
                 if "EM3" in c.name: # EM3 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow
                     raise RuntimeError(f"EM3 not available in HI L1 menu, requested by chain {c.name}")
                 elif "EM7" in c.name: # EM7 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow 
