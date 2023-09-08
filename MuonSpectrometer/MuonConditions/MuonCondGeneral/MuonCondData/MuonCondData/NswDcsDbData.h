@@ -84,7 +84,9 @@ private:
 
 };
 
-std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::DcsConstants& obj);
+namespace MuonCond {
+std::ostream& operator<<(std::ostream& ostr, const DcsConstants& obj);
+}
 std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::TDaqConstants& obj);
 
 
