@@ -68,30 +68,6 @@ MuonDetectorManager::MuonDetectorManager()
     insert(getAllRpcReadoutElements(), allEles);
     insert(getAllsTgcReadoutElements(), allEles);
     return allEles;
- }
-IdentifierHash MuonDetectorManager::buildHash(const Identifier& id) const {
-    if (m_idHelperSvc->isMdt(id))
-        return buildHash(id, m_idHelperSvc->mdtIdHelper());
-    else if (m_idHelperSvc->isRpc(id))
-        return buildHash(id, m_idHelperSvc->rpcIdHelper());
-    else if (m_idHelperSvc->isTgc(id))
-        return buildHash(id, m_idHelperSvc->tgcIdHelper());
-    else if (m_idHelperSvc->issTgc(id))
-        return buildHash(id, m_idHelperSvc->stgcIdHelper());
-    else if (m_idHelperSvc->isMM(id))
-        return buildHash(id, m_idHelperSvc->mmIdHelper());
-    else if (m_idHelperSvc->isCsc(id))
-        return buildHash(id, m_idHelperSvc->cscIdHelper());
-    return IdentifierHash();
-}
-IdentifierHash MuonDetectorManager::buildHash(const Identifier& id, 
-                                              const MuonIdHelper& idHelper) const {
-    IdentifierHash hash;
-    if (idHelper.get_detectorElement_hash(id, hash)) {
-        ATH_MSG_WARNING("Could not construct an Identifier hash from "
-                        << m_idHelperSvc->toString(id));
-    }
-    return hash;
 }
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
 ADD_DETECTOR(RpcReadoutElement, m_rpcEles);

@@ -75,6 +75,12 @@ namespace Muon {
         /** @brief returns whether this is a sMDT Identifier or not */
         virtual bool issMdt(const Identifier& id) const = 0;
 
+        /** @brief Returns the module hash associated to an Identifier */
+        virtual IdentifierHash moduleHash(const Identifier& id) const = 0;
+        /** @brief Returns the detector element hash associated to an Identifier */
+        virtual IdentifierHash detElementHash(const Identifier& id) const = 0;
+        
+
         /** @brief returns whether this Identifier belongs to an MDT with HPTDC or not
             NOTE that in Run4, no HPTDCs at all are planned to be present any more,
             so this function should be obsolete from Run4 onwards */

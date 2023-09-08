@@ -155,29 +155,11 @@ namespace MuonGM {
             ATH_MSG_FATAL("The Identifier "<<m_idHelperSvc->toString(id)<<" is not a muon one.");
             throw std::runtime_error("Invalid Identifier set");
         }
-        auto loadIdFields = [this](const MuonIdHelper& idHelper) {
-            if (idHelper.get_detectorElement_hash(m_id, m_detectorElIdhash) || 
-                static_cast<unsigned int>(m_detectorElIdhash) >= idHelper.detectorElement_hash_max()){
-                 ATH_MSG_FATAL("Failed to get a valid detector Element hash for "<<m_idHelperSvc->toStringDetEl(identify())
-                                <<". Extracted hash "<<m_detectorElIdhash<<". Maximum allowed "<<idHelper.detectorElement_hash_max());
-                 throw std::runtime_error("Invalid Detector Element Hash");
-            }
-            if (idHelper.get_module_hash(m_id, m_idhash) || 
-                static_cast<unsigned int>(m_idhash) >= idHelper.module_hash_max()){
-                 ATH_MSG_FATAL("Failed to get a valid module hash for "<<m_idHelperSvc->toStringDetEl(identify())
-                                <<". Extracted hash "<<m_idhash<<". Maximum allowed "<<idHelper.module_hash_max());
-                 throw std::runtime_error("Invalid Module Hash");
-            }
-            m_stIdx = idHelper.stationName(identify());
-            m_eta = idHelper.stationEta(identify());
-            m_phi = idHelper.stationPhi(identify());
-        };
-        if (m_idHelperSvc->isMdt(identify())) loadIdFields(m_idHelperSvc->mdtIdHelper());
-        else if (m_idHelperSvc->isRpc(identify())) loadIdFields(m_idHelperSvc->rpcIdHelper());
-        else if (m_idHelperSvc->isTgc(identify())) loadIdFields(m_idHelperSvc->tgcIdHelper());
-        else if (m_idHelperSvc->isCsc(identify())) loadIdFields(m_idHelperSvc->cscIdHelper());
-        else if (m_idHelperSvc->issTgc(identify())) loadIdFields(m_idHelperSvc->stgcIdHelper());
-        else if (m_idHelperSvc->isMM(identify())) loadIdFields(m_idHelperSvc->mmIdHelper());
+        m_stIdx = m_idHelperSvc->stationIndex(id);
+        m_eta = m_idHelperSvc->stationEta(id);
+        m_phi = m_idHelperSvc->stationPhi(id);
+        m_idhash = m_idHelperSvc->moduleHash(id);
+        m_detectorElIdhash = m_idHelperSvc->detElementHash(id);
     }
     void MuonReadoutElement::setTechnologyName(const std::string& str) { m_techname = str; }
     void MuonReadoutElement::setStationName(const std::string& str) { m_statname = str; }
