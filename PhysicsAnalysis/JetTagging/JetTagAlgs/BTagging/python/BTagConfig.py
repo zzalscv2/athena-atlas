@@ -16,6 +16,7 @@ from FlavorTagDiscriminants.FlavorTagNNConfig import FlavorTagNNCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
+from TrackHitAssignement.TrackHitAssignementAlgCfg import TrackHitAssignementAlg
 
 # this is where you add the new trainings!
 def GetTaggerTrainingMap(inputFlags, jet_collection_list):
@@ -184,15 +185,18 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     # Invoking the alhorithm saving hits in the vicinity of jets, with proper flags
     if inputFlags.BTagging.Trackless:
         result.merge(JetHitAssociationCfg(inputFlags))
+        result.merge(TrackHitAssignementAlg(inputFlags))
         BTaggingAODList = _track_measurement_list('JetAssociatedPixelClusters')
         BTaggingAODList += _track_measurement_list('JetAssociatedSCTClusters')
         result.merge(addToAOD(inputFlags, BTaggingAODList))
 
     if inputFlags.BTagging.savePixelHits:
         result.merge(JetHitAssociationCfg(inputFlags))
+        result.merge(TrackHitAssignementAlg(inputFlags))
         result.merge(addToAOD(inputFlags, _track_measurement_list("PixelClusters")))
     if inputFlags.BTagging.saveSCTHits:
         result.merge(JetHitAssociationCfg(inputFlags))
+        result.merge(TrackHitAssignementAlg(inputFlags))
         result.merge(addToAOD(inputFlags, _track_measurement_list("SCT_Clusters")))
 
     return result
