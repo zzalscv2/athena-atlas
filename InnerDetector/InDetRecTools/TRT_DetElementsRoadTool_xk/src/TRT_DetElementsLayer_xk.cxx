@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 #include <iomanip>
 #include <utility>
 #include "TRT_DetElementsRoadTool_xk/TRT_DetElementsLayer_xk.h"
+#include "CxxUtils/trapping_fp.h"
 
 ///////////////////////////////////////////////////////////////////
 // Set detector elements layer
@@ -57,6 +58,10 @@ void InDet::TRT_DetElementsLayer_xk::getBarrelDetElementsATL
  std::vector<std::pair<const InDet::TRT_DetElementLink_xk*, float> >& lDE,
  std::vector<InDet::TRT_DetElementLink_xk::Used_t> &used) const
 {
+  // Tell clang to optimize assuming that FP exceptions can trap.
+  // Otherwise, it can vectorize the division, which can lead to
+  // spurious division-by-zero traps from unused vector lanes.
+  CXXUTILS_TRAPPING_FP;
   float a    = (A[0]*P[0]+A[1]*P[1])*2.; 
   float s    = 0. ;
   if(a!=0.) {
