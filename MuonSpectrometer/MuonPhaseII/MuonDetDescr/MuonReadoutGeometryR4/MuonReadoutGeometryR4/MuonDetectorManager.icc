@@ -10,7 +10,7 @@
 
 #define WRITE_GETTERS(ELE_TYPE, GETTER_FUNC, STORAGE_VEC, ATTR)                                \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const Identifier& id) ATTR {        \
-        return GETTER_FUNC(buildHash(id));                                                     \
+        return GETTER_FUNC(m_idHelperSvc->detElementHash(id));                                                     \
     }                                                                                          \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const IdentifierHash& hash) ATTR {  \
         const size_t idx = static_cast<unsigned int>(hash);                                    \

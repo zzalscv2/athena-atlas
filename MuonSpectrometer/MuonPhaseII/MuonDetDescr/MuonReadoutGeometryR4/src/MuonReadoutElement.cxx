@@ -21,30 +21,10 @@ MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
     if (!m_idHelperSvc.retrieve().isSuccess()) {
         ATH_MSG_FATAL("Failed to retrieve the MuonIdHelperSvc");
     }
-
-    auto assignIdFields = [this](const MuonIdHelper& id_helper) {
-        /// Ensure that the hash can be successfully assigned
-        if (id_helper.get_detectorElement_hash(identify(), m_detElHash)) {
-            ATH_MSG_WARNING("setIdentifier -- collection hash Id NOT computed for id = "
-                         << idHelperSvc()->toStringDetEl(identify()));
-        }
-        m_stIdx = id_helper.stationName(identify());
-        m_stEta = id_helper.stationEta(identify());
-        m_stPhi = id_helper.stationPhi(identify());
-    };
-    if (idHelperSvc()->isMdt(identify()))
-        assignIdFields(idHelperSvc()->mdtIdHelper());
-    else if (idHelperSvc()->isRpc(identify()))
-        assignIdFields(idHelperSvc()->rpcIdHelper());
-    else if (idHelperSvc()->isTgc(identify()))
-        assignIdFields(idHelperSvc()->tgcIdHelper());
-    else if (idHelperSvc()->isCsc(identify()))
-        assignIdFields(idHelperSvc()->cscIdHelper());
-    else if (idHelperSvc()->issTgc(identify()))
-        assignIdFields(idHelperSvc()->stgcIdHelper());
-    else if (idHelperSvc()->isMM(identify()))
-        assignIdFields(idHelperSvc()->mmIdHelper());
-    
+    m_stIdx = m_idHelperSvc->stationIndex(identify());
+    m_stEta = m_idHelperSvc->stationEta(identify());
+    m_stPhi = m_idHelperSvc->stationPhi(identify());
+    m_detElHash = m_idHelperSvc->detElementHash(identify());
     insertTransform(stationHash,[this](RawGeomAlignStore* store, const IdentifierHash&){
             return toStation(store);
     }).ignore();

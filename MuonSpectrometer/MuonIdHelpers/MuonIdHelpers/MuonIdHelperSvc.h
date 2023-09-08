@@ -162,8 +162,17 @@ namespace Muon {
         bool hasCSC() const override;
         bool hasSTGC() const override;
         bool hasMM() const override;
+
+        /** @brief Returns the module hash associated to an Identifier */
+        virtual IdentifierHash moduleHash(const Identifier& id) const override;
+        /** @brief Returns the detector element hash associated to an Identifier */
+        virtual IdentifierHash detElementHash(const Identifier& id) const override;
+
         
     private:
+        IdentifierHash moduleHash(const MuonIdHelper& idHelper, const Identifier& id) const;
+        IdentifierHash detElementHash(const MuonIdHelper& idHelper, const Identifier& id) const;
+        
         /// Sub detector specific IdHelpers
         const RpcIdHelper* m_rpcIdHelper{nullptr};
         const TgcIdHelper* m_tgcIdHelper{nullptr};

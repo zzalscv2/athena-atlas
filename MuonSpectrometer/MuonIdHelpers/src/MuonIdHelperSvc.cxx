@@ -150,8 +150,8 @@ namespace Muon {
         // now, let's check if we are in the inner barrel layer, and if there are RPCs installed
         // if yes, the MDT chambers must be sMDTs
         if (m_mdtIdHelper && m_rpcIdHelper) {
-            m_BIS_stat = mdtIdHelper().stationNameIndex("BIS");
-            for (int eta = mdtIdHelper().stationEtaMin(true); eta <= mdtIdHelper().stationEtaMax(true); ++eta) {
+            m_BIS_stat = m_mdtIdHelper->stationNameIndex("BIS");
+            for (int eta = m_mdtIdHelper->stationEtaMin(true); eta <= m_mdtIdHelper->stationEtaMax(true); ++eta) {
                 for (int phi = 1; phi <= 8; ++phi) {
                     // now, let's check if we are in the inner barrel layer, and if there are RPCs installed
                     // if yes, the MDT chambers must be sMDTs
@@ -161,7 +161,7 @@ namespace Muon {
                     // last 4 arguments are: doubletR, check, isValid
                     // there is a BI RPC in the same station, thus, this station was already upgraded and sMDTs are present
                     if (!isValid) continue;
-                    m_smdt_stat.emplace(mdtIdHelper().elementID(m_BIS_stat, eta, phi));
+                    m_smdt_stat.emplace(m_mdtIdHelper->elementID(m_BIS_stat, eta, phi));
                 }
             }
         }
@@ -218,7 +218,7 @@ namespace Muon {
         if (!isMdt(id))
             return false;
         if (stationName(id) == m_BIS_stat) {
-            return m_smdt_stat.find(mdtIdHelper().elementID(id)) != m_smdt_stat.end();
+            return m_smdt_stat.find(m_mdtIdHelper->elementID(id)) != m_smdt_stat.end();
         }
         return m_mdtIdHelper->isBME(id) || m_mdtIdHelper->isBMG(id);
     }
@@ -281,17 +281,17 @@ namespace Muon {
         MuonStationIndex::PhiIndex index = MuonStationIndex::PhiUnknown;
         MuonStationIndex::StIndex stIndex = stationIndex(id);
         if (stIndex == MuonStationIndex::BI) {
-            if (rpcIdHelper().doubletR(id) == 1)
+            if (m_rpcIdHelper->doubletR(id) == 1)
                 index = MuonStationIndex::BI1;
             else
                 index = MuonStationIndex::BI2;
         } else if (stIndex == MuonStationIndex::BM) {
-            if (rpcIdHelper().doubletR(id) == 1)
+            if (m_rpcIdHelper->doubletR(id) == 1)
                 index = MuonStationIndex::BM1;
             else
                 index = MuonStationIndex::BM2;
         } else if (stIndex == MuonStationIndex::BO) {
-            if (rpcIdHelper().doubletR(id) == 1)
+            if (m_rpcIdHelper->doubletR(id) == 1)
                 index = MuonStationIndex::BO1;
             else
                 index = MuonStationIndex::BO2;
@@ -751,5 +751,42 @@ namespace Muon {
         else if (issTgc(id)) return m_stgcIdHelper->stationNameString(station);   
         else if (isCsc(id)) return m_cscIdHelper->stationNameString(station);
         return "UNKNOWN";
-     }
+    }
+    inline IdentifierHash MuonIdHelperSvc::moduleHash(const MuonIdHelper& idHelper, const Identifier& id) const{
+        IdentifierHash hash{};
+        if (idHelper.get_module_hash(id, hash) ||
+            static_cast<unsigned int>(hash) >= idHelper.module_hash_max()){
+            ATH_MSG_WARNING("Failed to deduce module hash "<<toString(id));            
+        }
+        return hash;
+    }
+    inline IdentifierHash MuonIdHelperSvc::detElementHash(const MuonIdHelper& idHelper, const Identifier& id) const{
+        IdentifierHash hash{};
+        if (idHelper.get_detectorElement_hash(id, hash) ||
+            static_cast<unsigned int>(hash)>= idHelper.detectorElement_hash_max()) {
+            ATH_MSG_WARNING("Failed to deduce detector element hash "<<toString(id));
+        }
+        return hash;
+    }
+    IdentifierHash MuonIdHelperSvc::moduleHash(const Identifier& id) const {
+        if (isMdt(id)) return moduleHash(*m_mdtIdHelper, id);
+        else if (isRpc(id)) return moduleHash(*m_rpcIdHelper, id);
+        else if (isTgc(id)) return moduleHash(*m_tgcIdHelper, id);
+        else if (isMM(id)) return moduleHash(*m_mmIdHelper, id);
+        else if (issTgc(id)) return moduleHash(*m_stgcIdHelper, id);
+        else if (isCsc(id)) return moduleHash(*m_cscIdHelper, id);
+        ATH_MSG_WARNING("No muon Identifier "<<id);
+        return IdentifierHash{};
+    }
+    IdentifierHash MuonIdHelperSvc::detElementHash(const Identifier& id) const {
+        if (isMdt(id)) return detElementHash(*m_mdtIdHelper, id);
+        else if (isRpc(id)) return detElementHash(*m_rpcIdHelper, id);
+        else if (isTgc(id)) return detElementHash(*m_tgcIdHelper, id);
+        else if (isMM(id)) return detElementHash(*m_mmIdHelper, id);
+        else if (issTgc(id)) return detElementHash(*m_stgcIdHelper, id);
+        else if (isCsc(id)) return detElementHash(*m_cscIdHelper, id);
+        ATH_MSG_WARNING("No muon Identifier "<<id);
+        return IdentifierHash{};
+    }
+
 }  // namespace Muon

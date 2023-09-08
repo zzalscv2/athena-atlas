@@ -83,11 +83,6 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     /// Returns a list of all detector types
     std::vector<ActsTrk::DetectorType> getDetectorTypes() const;
    private:
-    /// Returns the detector Identifier Hash
-    IdentifierHash buildHash(const Identifier& id,
-                             const MuonIdHelper& idHelper) const;
-    IdentifierHash buildHash(const Identifier& id) const;
-
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
 
