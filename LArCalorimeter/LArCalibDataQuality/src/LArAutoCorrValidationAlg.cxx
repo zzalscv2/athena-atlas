@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibDataQuality/LArAutoCorrValidationAlg.h"
@@ -90,8 +90,8 @@ if (gain<0 || gain>2) {
 
   
   HWIdentifier febid=m_onlineHelper->feb_Id(chid);
-  DataPerFEB* dataPerFEB=&(m_vDataPerFEB.back());
-  if (m_vDataPerFEB.size()==0 || dataPerFEB->febid!=febid) {//Got to new FEB
+  DataPerFEB* dataPerFEB = m_vDataPerFEB.empty() ? nullptr : &(m_vDataPerFEB.back());
+  if (!dataPerFEB || dataPerFEB->febid!=febid) {//Got to new FEB
     m_vDataPerFEB.push_back(DataPerFEB(chid,febid,gain));
     dataPerFEB=&(m_vDataPerFEB.back());
   }

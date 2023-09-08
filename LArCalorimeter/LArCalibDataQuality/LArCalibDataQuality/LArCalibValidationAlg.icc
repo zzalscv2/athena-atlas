@@ -288,11 +288,12 @@ void LArCalibValidationAlg<CONDITIONSCONTAINER, REFCONTAINER>::findFailedPattern
 	     
       //Fill channel status per calibLine
       const std::vector<HWIdentifier>& calibIdvec=clCont->calibSlotLine(chid);
-      for (std::vector<HWIdentifier>::const_iterator itc=calibIdvec.begin(); itc!=calibIdvec.end();itc++) 
+      for (const HWIdentifier& hwid : calibIdvec) {
 	if (isGood)
-	  statiPerCalibLine[*itc].first++;
+	  statiPerCalibLine[hwid].first++;
 	else
-	  statiPerCalibLine[*itc].second++;
+	  statiPerCalibLine[hwid].second++;
+      }
     }//end loop over identifiers of suspicious channels
     //Check fraction of failed channels per FEBs
     //Reminder: second.first -> good second.second -> bad
