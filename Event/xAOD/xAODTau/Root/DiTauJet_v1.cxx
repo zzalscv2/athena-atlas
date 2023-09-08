@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DiTauJet_v1.cxx 631921 2015-09-23 23:30:59Z dkirchme $
@@ -12,6 +12,7 @@
 #include "xAODTau/versions/DiTauJet_v1.h"
 // #include "xAODDiTau/versions/TauJetCalibMapper_v1.h"
 #include "DiTauJetAccessors_v1.h"
+#include <stdexcept>
 
 namespace xAOD {
   
@@ -370,13 +371,22 @@ namespace xAOD {
   // Set int detail via enum
   //-------------------------------------------------------------------------
   void DiTauJet_v1::setDetail( DiTauJetParameters::Detail detail, int value ) {
-    ( *( xAODDiTau::detailsAccessorV1<int>( detail ) ) )( *this ) = value;
+    const SG::AuxElement::Accessor< int >* acc = xAODDiTau::detailsAccessorV1<int>( detail );
+    if (!acc) {
+      throw std::runtime_error ("DiTauJet_v1::setDetail: bad detail code");
+    }
+    (*acc)(*this) = value;
   }
 
   //-------------------------------------------------------------------------
   // Set float detail via enum
   //-------------------------------------------------------------------------
   void DiTauJet_v1::setDetail( DiTauJetParameters::Detail detail, float value ) {
+    const SG::AuxElement::Accessor< float >* acc = xAODDiTau::detailsAccessorV1<float>( detail );
+    if (!acc) {
+      throw std::runtime_error ("DiTauJet_v1::setDetail: bad detail code");
+    }
+    (*acc)(*this) = value;
     ( *( xAODDiTau::detailsAccessorV1<float>( detail ) ) )( *this ) = value;
   }
 
