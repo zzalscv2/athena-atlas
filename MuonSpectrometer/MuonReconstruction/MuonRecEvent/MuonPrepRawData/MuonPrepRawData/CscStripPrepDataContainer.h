@@ -9,13 +9,6 @@
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonPrepRawData/CscStripPrepDataCollection.h"
 #include "AthenaKernel/CLASS_DEF.h"
- 
-namespace Muon {
-
-/** @brief Muon::MuonPrepDataContainer to hold the Muon::CscStripPrepDataCollection*/    
-typedef MuonPrepDataContainer< CscStripPrepDataCollection > CscStripPrepDataContainer;
-
-}
 
 CLASS_DEF(Muon::CscStripPrepDataContainer,  1240951609, 1)
 

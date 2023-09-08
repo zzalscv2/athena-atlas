@@ -71,7 +71,7 @@ namespace Muon {
                                   const std::vector<const MMPrepDataCollection*>& mmCols,
                                   const MuonSegmentCombinationCollection* cscSegmentCombis) const;
        
-        template <class T> std::vector<const T*> stdVec(const MuonPrepDataContainer<T>* cont) const;
+        template <class T> std::vector<const MuonPrepDataCollection<T>*> stdVec(const MuonPrepDataContainerT<T>* cont) const;
 
         /** retrieves all hits and converts them into internal EDM */
         std::unique_ptr<MuonHoughHitContainer> getAllHits(

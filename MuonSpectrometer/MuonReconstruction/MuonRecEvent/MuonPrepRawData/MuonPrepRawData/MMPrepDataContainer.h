@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,13 +10,6 @@
 #include "MuonPrepRawData/MMPrepDataCollection.h"
 #include "AthLinks/DeclareIndexingPolicy.h"
 #include "AthenaKernel/CLASS_DEF.h"
-
-namespace Muon {
-  
-/** @brief Muon::MuonPrepDataContainer to hold the Muon::MMPrepDataCollection*/  
-typedef MuonPrepDataContainer< MMPrepDataCollection > MMPrepDataContainer;
-
-}
 
 CLASS_DEF(Muon::MMPrepDataContainer,  1115503214, 1)
 CONTAINER_IS_IDENTCONT(Muon::MMPrepDataContainer)

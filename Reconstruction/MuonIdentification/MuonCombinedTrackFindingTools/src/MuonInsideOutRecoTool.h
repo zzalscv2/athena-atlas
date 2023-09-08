@@ -84,7 +84,8 @@ namespace MuonCombined {
         /** access data in layer for a given technology */
         template <class COL>
         bool getLayerDataTech(Muon::MuonStationIndex::TechnologyIndex technology, const Muon::MuonLayerSurface& surf,
-                              const Muon::MuonPrepDataContainer<COL>* input, std::vector<const COL*>& output) const;
+                              const Muon::MuonPrepDataContainerT<COL>* input, 
+                              std::vector<const Muon::MuonPrepDataCollection<COL>*>& output) const;
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         ServiceHandle<Muon::IMuonEDMHelperSvc> m_edmHelperSvc{this, "edmHelper", "Muon::MuonEDMHelperSvc/MuonEDMHelperSvc",

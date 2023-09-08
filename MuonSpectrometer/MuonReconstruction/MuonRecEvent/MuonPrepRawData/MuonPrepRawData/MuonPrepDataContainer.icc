@@ -1,27 +1,16 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// MuonPrepDataContainer.icc
-//   Implementation file for class MuonPrepDataContainer
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-// Version 1.0 15/07/2003 Veronique Boisvert
-///////////////////////////////////////////////////////////////////
-
-
 /// constructor for POOL with no parameters
 template< class CollectionT>
-MuonPrepDataContainer< CollectionT>::MuonPrepDataContainer() :
+MuonPrepDataContainer<CollectionT>::MuonPrepDataContainer() :
   IdentifiableContainer<CollectionT>(0)
 {
 }
 
 template< class CollectionT>
 // Constructor with parameters:
-MuonPrepDataContainer< CollectionT>::MuonPrepDataContainer(unsigned int max) :
+MuonPrepDataContainer<CollectionT>::MuonPrepDataContainer(unsigned int max) :
   IdentifiableContainer<CollectionT>(max)
 {}
 
@@ -30,10 +19,3 @@ template< class CollectionT>
 MuonPrepDataContainer<CollectionT>::MuonPrepDataContainer(EventContainers::IdentifiableCache<CollectionT> * cache):
   IdentifiableContainer<CollectionT>(cache)
 {}
-
-template< class CollectionT>
-// Destructor
-MuonPrepDataContainer< CollectionT>::~MuonPrepDataContainer()
-{
-}
-

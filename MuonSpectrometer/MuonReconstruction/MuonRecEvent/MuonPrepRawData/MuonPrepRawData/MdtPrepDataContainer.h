@@ -11,13 +11,6 @@
 #include "AthLinks/DeclareIndexingPolicy.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
-namespace Muon {
-
-/** @brief MdtPrepDataContainer Muon::MuonPrepDataContainer to hold the Muon::MdtPrepDataCollection*/    
-typedef MuonPrepDataContainer< MdtPrepDataCollection > MdtPrepDataContainer;
-
-}
-
 CLASS_DEF(Muon::MdtPrepDataContainer,  1153454201, 1)
 CONTAINER_IS_IDENTCONT(Muon::MdtPrepDataContainer)
 

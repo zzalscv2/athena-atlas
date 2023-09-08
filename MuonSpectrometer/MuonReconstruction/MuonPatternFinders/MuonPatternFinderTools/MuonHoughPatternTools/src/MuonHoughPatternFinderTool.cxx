@@ -101,11 +101,12 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    template <class T> std::vector<const T*> MuonHoughPatternFinderTool::stdVec(const MuonPrepDataContainer<T>* cont) const {
+    template <class T> std::vector<const MuonPrepDataCollection<T>*> MuonHoughPatternFinderTool::stdVec(const MuonPrepDataContainerT<T>* cont) const {
         if (!cont) return {};
-        std::vector<const T*> vec;
+        std::vector<const MuonPrepDataCollection<T>*> vec;
         vec.reserve(cont->size());
-        std::transform(cont->begin(), cont->end(), std::back_inserter(vec), [](const T* ptr){return ptr;});
+        std::transform(cont->begin(), cont->end(), std::back_inserter(vec), 
+                       [](const MuonPrepDataCollection<T>* ptr){return ptr;});
         return vec;
     }
     MuonPatternHoughPair MuonHoughPatternFinderTool::find(
