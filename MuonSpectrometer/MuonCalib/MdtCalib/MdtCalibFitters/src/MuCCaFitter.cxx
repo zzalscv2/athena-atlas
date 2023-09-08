@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/MuCCaFitter.h"
@@ -152,8 +152,8 @@ namespace MuonCalib {
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "fit() fit done" << endmsg;
         return true;
     }
-    void MuCCaFitterImplementation::Computeparam3(int number_of_hits, std::vector<double> x, std::vector<double> y, std::vector<double> r,
-                                                  std::vector<double> sr) {
+    void MuCCaFitterImplementation::Computeparam3(int number_of_hits, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& r,
+                                                  const std::vector<double>& sr) {
         /***************************************/
         /* Fit a line to n=number_of_hits hits */
         /***************************************/
@@ -464,8 +464,8 @@ namespace MuonCalib {
             m_angularcoefficient[i] = angularcoefficient[i];
         }
     }
-    void MuCCaFitterImplementation::Computehitpsemes(int nhit, std::vector<double> xcirc, std::vector<double> ycirc,
-                                                     std::vector<double> rcirc, double a, double b) {
+    void MuCCaFitterImplementation::Computehitpsemes(int nhit, const std::vector<double>& xcirc, const std::vector<double>& ycirc,
+                                                     const std::vector<double>& rcirc, double a, double b) {
         /************************/
         /* Compute TRACK POINTS */
         /************************/
