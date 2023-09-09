@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ namespace MagField {
     // Calculate magnetic induction value / gradient from K*L values
     double kLToB(double kL, double lenght, double momentum);
 
-    void InitMagDataFromTwiss(std::vector<std::vector<std::string> > loadedTwissFile, int beam, double momentum);
+    void InitMagDataFromTwiss(const std::vector<std::vector<std::string> >& loadedTwissFile, int beam, double momentum);
 
     // property configuration
     FWDMg_CONFIGURATION m_Config;

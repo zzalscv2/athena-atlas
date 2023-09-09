@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionFieldSvc.h"
@@ -248,7 +248,7 @@ void MagField::ForwardRegionFieldSvc::InitMagData()
     }
 }
 
-void MagField::ForwardRegionFieldSvc::InitMagDataFromTwiss(std::vector<std::vector<std::string> > loadedTwissFile, int beam, double momentum)
+void MagField::ForwardRegionFieldSvc::InitMagDataFromTwiss(const std::vector<std::vector<std::string> >& loadedTwissFile, int beam, double momentum)
 {
     int textIndex = 0;
     int lengthIndex = 4;
