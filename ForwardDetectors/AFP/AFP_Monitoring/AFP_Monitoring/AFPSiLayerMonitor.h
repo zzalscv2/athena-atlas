@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_MONITORING_AFPSILAYERMONITOR_H
@@ -51,7 +51,7 @@ public:
   void setParentMonitor (AFPHitsMonitorTool* parent) override {m_parentMonitor = parent;}
 
   /// @copybrief IAFPSiLayerMonitor::bookHistograms()
-  void bookHistograms(ManagedMonitorToolBase* toolToStoreHistograms, std::string histsDirName = "") override;
+  void bookHistograms(ManagedMonitorToolBase* toolToStoreHistograms, const std::string& histsDirName = "") override;
 
   /// @copybrief IAFPSiLayerMonitor::fillHistograms()
   ///
