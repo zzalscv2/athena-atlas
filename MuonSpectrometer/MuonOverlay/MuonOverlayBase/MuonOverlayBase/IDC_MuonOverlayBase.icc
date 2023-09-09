@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Generic overlaying code for Muon Identifiable Containers.
@@ -52,7 +52,7 @@ StatusCode IDC_MuonOverlayBase::overlayContainerBase(const IDC_Container *bkgCon
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        signalCollection.release();
+        (void)signalCollection.release();
       }
     }
 
@@ -80,7 +80,7 @@ StatusCode IDC_MuonOverlayBase::overlayContainerBase(const IDC_Container *bkgCon
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        bkgCollection.release();
+        (void)bkgCollection.release();
       }
     } else {
       // Flip the overlap flag
@@ -118,7 +118,7 @@ StatusCode IDC_MuonOverlayBase::overlayContainerBase(const IDC_Container *bkgCon
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        signalCollection.release();
+        (void)signalCollection.release();
       }
     }
   }
