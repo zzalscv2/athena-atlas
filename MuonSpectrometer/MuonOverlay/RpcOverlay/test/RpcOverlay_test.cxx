@@ -98,12 +98,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> sigCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -132,12 +132,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> sigCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -173,12 +173,12 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> sigDigit = std::make_unique<RpcDigit>(Identifier(12),sigTime);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -215,7 +215,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> sigDigit = std::make_unique<RpcDigit>(Identifier(12),sigTime);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
@@ -223,7 +223,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> bkgDigit = std::make_unique<RpcDigit>(Identifier(12),bkgTime);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -266,7 +266,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> sigDigit = std::make_unique<RpcDigit>(Identifier(12),sigTime);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
@@ -274,7 +274,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> bkgDigit = std::make_unique<RpcDigit>(Identifier(13),bkgTime);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -314,7 +314,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> sigDigit = std::make_unique<RpcDigit>(Identifier(12),sigTime);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
@@ -322,7 +322,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> bkgDigit = std::make_unique<RpcDigit>(Identifier(12),bkgTime);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -362,7 +362,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> sigDigit = std::make_unique<RpcDigit>(Identifier(12),sigTime);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
@@ -370,7 +370,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> bkgDigit = std::make_unique<RpcDigit>(Identifier(12),bkgTime);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
@@ -410,7 +410,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> sigDigit = std::make_unique<RpcDigit>(Identifier(12),sigTime);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<RpcDigitContainer> inputBkgDataHandle{"StoreGateSvc+RPC_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<RpcDigitContainer>(containerSize);
     std::unique_ptr<RpcDigitCollection> bkgCollection = std::make_unique<RpcDigitCollection>(Identifier(1234),bkgElementHash);
@@ -418,7 +418,7 @@ namespace OverlayTesting {
     std::unique_ptr<RpcDigit> bkgDigit = std::make_unique<RpcDigit>(Identifier(12),bkgTime);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+RPC_DIGITS_SIG'";
