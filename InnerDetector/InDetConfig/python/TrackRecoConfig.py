@@ -567,17 +567,13 @@ def InDetTrackRecoCfg(flags):
                 DetailedTruth="ObservedTracksCollectionDetailedTruth",
                 TracksTruth="ObservedTracksCollectionTruthCollection"))
 
-    # by default, the main TrackParticleCnvAlg will run before
-    # "primaryVertexFindingCfg"; in case perigeeExpression is set to "Vertex",
-    # this will run after "primaryVertexFindingCfg";
-    # the scheduler will always take care of the precedency
-
-    from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
-    result.merge(TrackParticleCnvAlgCfg(
-        flags,
-        ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
-            flags),
-        AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
+    if flags.Tracking.perigeeExpression == "BeamLine":
+        from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
+        result.merge(TrackParticleCnvAlgCfg(
+            flags,
+            ClusterSplitProbabilityName=ClusterSplitProbabilityContainerName(
+                flags),
+            AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
 
     if (flags.Tracking.doPseudoTracking or
         flags.Tracking.doIdealPseudoTracking):
