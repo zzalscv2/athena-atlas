@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -324,7 +324,7 @@ void BCM_DigitizationTool::addNoise(int iMod, std::vector<float> &analog, CLHEP:
 //----------------------------------------------------------------------
 // ApplyThreshold method:
 //----------------------------------------------------------------------
-std::bitset<64> BCM_DigitizationTool::applyThreshold(int iChan, std::vector<float> analog)
+std::bitset<64> BCM_DigitizationTool::applyThreshold(int iChan, const std::vector<float>& analog)
 {
   std::bitset<64> digital;
   digital.reset();
@@ -355,7 +355,7 @@ void BCM_DigitizationTool::applyFilter(std::bitset<64> &digital)
 //----------------------------------------------------------------------
 // FindPulses method:
 //----------------------------------------------------------------------
-void BCM_DigitizationTool::findPulses(std::bitset<64> digital, int &p1x, int &p1w, int &p2x, int &p2w)
+void BCM_DigitizationTool::findPulses(const std::bitset<64>& digital, int &p1x, int &p1w, int &p2x, int &p2w)
 {
   p1x = 0; p1w = 0; p2x = 0; p2w = 0;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCM_DIGITIZATION_BCM_DIGITIZATIONTOOL_H
@@ -65,13 +65,13 @@ class BCM_DigitizationTool : public PileUpToolBase {
   void addNoise(int mod, std::vector<float> &analog, CLHEP::HepRandomEngine *randomEngine);
 
   /** Do ToT digitization */
-  std::bitset<64> applyThreshold(int chan, std::vector<float> analog);
+  std::bitset<64> applyThreshold(int chan, const std::vector<float>& analog);
 
   /** Apply hole and spike filter to digital waveform */
   static void applyFilter(std::bitset<64> &digital);
 
   /** Find first two pulses on digital waveform */
-  static void findPulses(std::bitset<64> digital, int &p1x, int &p1w, int &p2x, int &p2w);
+  static void findPulses(const std::bitset<64>& digital, int &p1x, int &p1w, int &p2x, int &p2w);
 
   /** Create raw data object and put it in the container */
   void fillRDO(unsigned int chan, int p1x, int p1w, int p2x, int p2w);
