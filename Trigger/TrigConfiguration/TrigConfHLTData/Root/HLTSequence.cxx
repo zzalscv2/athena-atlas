@@ -10,8 +10,6 @@
 #include <sstream>
 #include <fstream>
 
-#include "boost/lexical_cast.hpp"
-
 using namespace std;
 using namespace TrigConf;
 
@@ -99,7 +97,7 @@ TrigConf::HLTSequence::compareTo(const HLTSequence* o) const {
    ds->check("number_inputs", (unsigned int)inputTEs().size(), (unsigned int)o->inputTEs().size() );
    if(algorithms().size()==o->algorithms().size()) {
       for(size_t i=0; i<algorithms().size(); ++i)
-         ds->check("alg_" + boost::lexical_cast<string,size_t>(i), algorithms()[i], o->algorithms()[i] );
+         ds->check("alg_" + std::to_string(i), algorithms()[i], o->algorithms()[i] );
    }
    if(ds->empty()) {
       delete ds; ds=0;
