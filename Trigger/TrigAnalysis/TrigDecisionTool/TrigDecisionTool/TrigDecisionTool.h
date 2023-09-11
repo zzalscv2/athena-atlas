@@ -33,6 +33,7 @@
 #include "EventInfo/EventInfo.h"
 #include "TrigConfInterfaces/ITrigConfigSvc.h" 
 #include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 
 #ifndef XAOD_ANALYSIS
 #include "TrigNavigation/Navigation.h"
@@ -117,9 +118,9 @@ namespace Trig {
     SG::SlotSpecificObj< std::atomic<bool> > m_forceConfigUpdate; //!< Cache for registering new input files.
 
     #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Athena: Do not set a Config Tool by default (this tool is not thread safe, the service should be used in Athena)
-    ToolHandle<TrigConf::ITrigConfigTool> m_configTool{this, "ConfigTool", ""}; 
+    PublicToolHandle<TrigConf::ITrigConfigTool> m_configTool{this, "ConfigTool", ""};
     #else // AnalysisBase: Do set a Config Tool by default for analysis convienience 
-    ToolHandle<TrigConf::ITrigConfigTool> m_configTool{this, "ConfigTool", "TrigConf::xAODConfigTool/xAODConfigTool"};
+    ToolHandle<TrigConf::ITrigConfigTool> m_configTool{this, "ConfigTool", "TrigConf::xAODConfigTool/xAODConfigTool"}; // Use a public tool here in AnalysisBase, and create it first (before the TrigDecisionTool)
     #endif
 
     #ifndef XAOD_STANDALONE
@@ -161,7 +162,7 @@ namespace Trig {
       "Allowed tokens are 'TriggerElement' or 'TrigComposite'"}; //!< Note: Temporary property
 
     SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer> m_HLTSummaryKeyIn {this, "HLTSummary",
-      "HLTNav_Summary_OnlineSlimmed", "HLT summary container Key"};
+      "HLTNav_Summary_DAODSlimmed", "HLT summary container Key"};
 
     SG::ReadHandleKey<xAOD::TrigDecision> m_decisionKey {this, "TrigDecisionKey", "xTrigDecision",
       "Storegate key of Trigger Decision"};
