@@ -101,11 +101,20 @@ TCS::JetHT::process( const std::vector<TCS::TOBArray const *> & input,
 
    unsigned int sumET = 0;
 
+   if (p_NumberLeading1 < input[0]->size()) { output[0]->setAmbiguityFlag(false); }
+
    // loop over  jets
    for( TOBArray::const_iterator tob = input[0]->begin(); 
            tob != input[0]->end() && distance(input[0]->begin(), tob) < p_NumberLeading1;
            ++tob)
          {
+
+      if (input[0]->size() >= p_NumberLeading1+1) {
+         TCS::TOBArray::const_iterator tob2 = tob; ++tob2;
+         if ((*tob)->Et() == (*tob2)->Et() && distance(input[0]->begin(), tob) == p_NumberLeading1 - 1) {
+            output[0]->setAmbiguityFlag(true); 
+         }
+      }
 
       if( parType_t(std::abs((*tob)->eta())) > p_EtaMax ) continue; // Eta cut
       if( parType_t(std::abs((*tob)->eta())) < p_EtaMin ) continue; // Eta cut

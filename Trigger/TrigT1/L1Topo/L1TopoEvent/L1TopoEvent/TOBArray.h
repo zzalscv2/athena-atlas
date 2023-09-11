@@ -34,9 +34,15 @@ namespace TCS {
 
       void sort(sort_fnc);
 
+      bool ambiguityFlag() const { return m_ambiguityFlag; }
+
+      void setAmbiguityFlag(bool ambiguityFlag) { m_ambiguityFlag = ambiguityFlag; }
+
    private:
       // print method (can be invoked via <<)
       virtual void print(std::ostream&) const;
+
+      bool m_ambiguityFlag = false;
    };
    
 } // end of namespace TCS

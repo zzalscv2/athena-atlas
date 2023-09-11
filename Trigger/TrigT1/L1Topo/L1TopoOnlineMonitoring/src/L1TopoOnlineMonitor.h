@@ -54,6 +54,7 @@ private:
     std::optional<std::bitset<s_nTopoCTPOutputs>> overflowBits;
     std::optional<std::bitset<s_nTopoCTPOutputs>> triggerBitsSim;
     std::optional<std::bitset<s_nTopoCTPOutputs>> overflowBitsSim;
+    std::optional<std::bitset<s_nTopoCTPOutputs>> ambiguityBitsSim;
     std::optional<std::bitset<s_nTopoCTPOutputs>> triggerBitsCtp;
     /// Helper method to create a new bitset and get a reference to it
     static std::bitset<s_nTopoCTPOutputs>& createBits(std::optional<std::bitset<s_nTopoCTPOutputs>>& opt) {

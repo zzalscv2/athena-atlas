@@ -153,6 +153,9 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
     alg.MonTool.defineHistogram('TopoSim_overflows', path='EXPERT', type='TH1I',
                                     title='Overflow Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+    alg.MonTool.defineHistogram('TopoSim_ambiguity', path='EXPERT', type='TH1I',
+                                    title='Ambiguity Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                    xmin=0, xmax=128)
 
     if doHwMonCtp:
         alg.MonTool.defineHistogram('TopoCTP', path='EXPERT', type='TH1I',
@@ -166,6 +169,14 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp, doMultComp):
                                     xmin=0, xmax=128)
         alg.MonTool.defineHistogram('HdwNotSimL1TopoResult', path='EXPERT', type='TH1I',
                                     title='L1Topo events with hardware accept and simulation fail',
+                                    xbins=128, xlabels=label_topo_all,
+                                    xmin=0, xmax=128)
+        alg.MonTool.defineHistogram('Ambiguity_SimANDHdwDecisions', path='EXPERT', type='TH1I',
+                                    title='L1Topo ambiguity events with simulation accept and hardware accept',
+                                    xbins=128, xlabels=label_topo_all,
+                                    xmin=0, xmax=128)
+        alg.MonTool.defineHistogram('Ambiguity_DecisionMismatches', path='EXPERT', type='TH1I',
+                                    title='L1Topo ambiguity events with mismatches between simulation and hardware',
                                     xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
 

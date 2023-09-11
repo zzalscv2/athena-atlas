@@ -90,6 +90,10 @@ TCS::MuonSort::sort(const InputTOBArray & input, TOBArray & output) {
    unsigned int maxNumberOfMuons = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfMuons>0) {
       while( output.size()> maxNumberOfMuons ) {
+         if (output.size() == (maxNumberOfMuons+1)) {
+            bool isAmbiguous = output[maxNumberOfMuons-1].EtDouble() == output[maxNumberOfMuons].EtDouble();
+            if (isAmbiguous) { output.setAmbiguityFlag(true); }
+         }
          output.pop_back();
       }
    }

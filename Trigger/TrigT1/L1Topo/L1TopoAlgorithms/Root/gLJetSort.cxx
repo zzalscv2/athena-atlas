@@ -64,6 +64,10 @@ TCS::gLJetSort::sort(const InputTOBArray & input, TOBArray & output) {
    unsigned int maxNumberOfJets = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfJets>0) {
       while( output.size()> maxNumberOfJets ) {
+         if (output.size() == (maxNumberOfJets+1)) {
+            bool isAmbiguous = output[maxNumberOfJets-1].EtDouble() == output[maxNumberOfJets].EtDouble();
+            if (isAmbiguous) { output.setAmbiguityFlag(true); }
+         }
          output.pop_back();
       }
    }   

@@ -51,6 +51,7 @@ TCS::Connector::reset() {
    // clear the output data
    sc &= clearOutput();
    m_hasInputOverflow = false;
+   m_hasAmbiguity = false;
 
    // reset the algorithm
    if(m_algorithm)
@@ -77,6 +78,10 @@ void TCS::Connector::toggleInputOverflow(const bool value)
     m_hasInputOverflow = value;
 }
 
+void TCS::Connector::toggleAmbiguity(const bool value)
+{
+    m_hasAmbiguity = value;
+}
 
 ostream &
 operator<<(ostream &o, const TCS::Connector & conn) {

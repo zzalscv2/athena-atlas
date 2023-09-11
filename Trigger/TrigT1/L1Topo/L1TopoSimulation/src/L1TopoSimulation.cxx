@@ -276,6 +276,8 @@ L1TopoSimulation::execute() {
        topoOverflow2CTP->setCableWord2( clock, globalOutput.overflow_field( conn2, clock) );  // TOPO 1
        WriteEDM_Overflow(outputHandle,"Overflow"+conn2,clock,globalOutput.overflow_field( conn2, clock));
 
+       WriteEDM(outputHandle,"Ambiguity"+conn1,clock,globalOutput.ambiguity_field( conn1, clock));
+       WriteEDM(outputHandle,"Ambiguity"+conn2,clock,globalOutput.ambiguity_field( conn2, clock));
      }    
 
      // set optical connectors

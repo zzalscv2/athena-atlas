@@ -107,7 +107,32 @@ GlobalOutput::overflow_field(const std::string& l1connName, unsigned int clock) 
   }
 }
 
+uint64_t 
+GlobalOutput::ambiguity_field(const std::string& l1connName) const {
+  if (m_ambiguity.find(l1connName) != m_ambiguity.end()) {
+    return m_ambiguity.find(l1connName)->second;
+  }else{
+    TRG_MSG_WARNING("Connector name " << l1connName << " unknown");
+    return 0;
+  }
+}
 
+uint32_t
+GlobalOutput::ambiguity_field(const std::string& l1connName, unsigned int clock) const {
+   if (m_ambiguity.find(l1connName) != m_ambiguity.end()) {
+      if(clock==0) {
+         // lower 32 bit
+         return static_cast<uint32_t>(m_ambiguity.find(l1connName)->second & 0xffffffff);
+      } else {
+         // upper 32 bit
+         uint64_t clock1 = m_ambiguity.find(l1connName)->second & 0xffffffff00000000;
+         return static_cast<uint32_t>(clock1 >> 32);
+      }
+   }else{
+    TRG_MSG_WARNING("Connector name " << l1connName << " unknown");
+    return 0;
+  }
+}
 
 GlobalOutput::GlobalOutput(const std::string &name) :
    TrigConfMessaging(name)
@@ -135,12 +160,15 @@ GlobalOutput::collectOutput(const set<DecisionConnector*> & outConn, const set<C
 
          uint64_t & l1connectorDec = m_decision[trigger.connName()];
          uint64_t & l1connectorOvf = m_overflow[trigger.connName()];
+         uint64_t & l1connectorAmb = m_ambiguity[trigger.connName()];
          uint64_t mask(0x1);
 
          if( dec.bit(pos++) )  // bit set?
             l1connectorDec |= (mask << position);
          if( dec.overflow())
             l1connectorOvf |= (mask << position);
+         if( dec.ambiguity())
+            l1connectorAmb |= (mask << position);
       }
 
    }
@@ -166,6 +194,7 @@ TCS::StatusCode
 GlobalOutput::resetOutput() {
   m_decision.clear();
   m_overflow.clear();
+  m_ambiguity.clear();
   m_count.clear();
   
   m_valid = false;

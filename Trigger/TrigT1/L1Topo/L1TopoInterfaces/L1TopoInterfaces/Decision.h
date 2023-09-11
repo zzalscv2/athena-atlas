@@ -35,6 +35,7 @@ namespace TCS {
       void setFirstBit(unsigned int startBit) { m_firstBit = startBit; }
       void setNBits(unsigned int nBits) { m_nBits = nBits; }
       void setOverflow(bool value) { m_overflow = value; }
+      void setAmbiguity(bool value) { m_ambiguity = value; }
       // getters
       bool bit(unsigned int index) const { return (m_decision & (0x1<<index)) != 0; }
       uint64_t decision() const { return m_decision; }
@@ -42,12 +43,14 @@ namespace TCS {
       unsigned int lastBit() const { return m_firstBit + m_nBits - 1; }
       unsigned int nBits() const { return m_nBits; }
       bool overflow() const { return m_overflow; }
+      bool ambiguity() const { return m_ambiguity; }
 
    private:
       uint32_t     m_decision {0};
       unsigned int m_firstBit {0};
       unsigned int m_nBits {1};
       bool         m_overflow;
+      bool         m_ambiguity = false;
 
    };
    

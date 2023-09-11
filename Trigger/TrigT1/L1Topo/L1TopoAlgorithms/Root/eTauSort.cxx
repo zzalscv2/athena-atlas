@@ -69,6 +69,10 @@ TCS::eTauSort::sort(const InputTOBArray & input, TOBArray & output) {
    unsigned int maxNumberOfeTaus = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfeTaus>0) {
       while( output.size()> maxNumberOfeTaus ) {
+         if (output.size() == (maxNumberOfeTaus+1)) {
+            bool isAmbiguous = output[maxNumberOfeTaus-1].EtDouble() == output[maxNumberOfeTaus].EtDouble();
+            if (isAmbiguous) { output.setAmbiguityFlag(true); }
+         }
          output.pop_back();
       }
    }

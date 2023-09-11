@@ -71,6 +71,10 @@ TCS::eEmSort::sort(const InputTOBArray & input, TOBArray & output) {
    unsigned int maxNumberOfeEms = std::clamp(par, 0, std::abs(par));
    if(maxNumberOfeEms>0) {
       while( output.size()> maxNumberOfeEms ) {
+         if (output.size() == (maxNumberOfeEms+1)) {
+            bool isAmbiguous = output[maxNumberOfeEms-1].EtDouble() == output[maxNumberOfeEms].EtDouble();
+            if (isAmbiguous) { output.setAmbiguityFlag(true); }
+         }
          output.pop_back();
       }
    }

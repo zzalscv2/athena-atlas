@@ -47,6 +47,9 @@ namespace TCS {
       uint32_t overflow_field(const std::string& l1connName, unsigned int clock) const;
       bool overflowed(const std::string& l1connName, unsigned int bit) const { return ( ( (uint64_t)0x1 << bit) & m_overflow.find(l1connName)->second) != 0; }
 
+      uint64_t ambiguity_field(const std::string& l1connName) const;
+      uint32_t ambiguity_field(const std::string& l1connName, unsigned int clock) const;
+
       std::bitset<128> count_field(const std::string& l1connName) const;
 
       const Decision & decision(const std::string & algName) const;
@@ -69,6 +72,8 @@ namespace TCS {
       std::map<std::string,uint64_t> m_decision;
       // 64 bit overflow bit field - map L1Connector name-overflow field
       std::map<std::string,uint64_t> m_overflow;
+      // 64 bit ambiguity bit field - map L1Connector name-ambiguity field
+      std::map<std::string,uint64_t> m_ambiguity;
 
       // 128 bit multiplicity bit field - map L1Connector name-multiplicity field
       std::map<std::string,std::bitset<128>> m_count;

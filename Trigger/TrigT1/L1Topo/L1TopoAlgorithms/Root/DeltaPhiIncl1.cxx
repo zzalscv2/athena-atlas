@@ -96,6 +96,14 @@ TCS::DeltaPhiIncl1::processBitCorrect( const std::vector<TCS::TOBArray const *> 
              tob1 != input[0]->end() && distance( input[0]->begin(), tob1) < nLeading;
              ++tob1) 
             {
+                if (nLeading < input[0]->size()) { 
+                    TCS::TOBArray::const_iterator tob1_plus1 = tob1; ++tob1_plus1;
+                    if ((*tob1)->Et() == (*tob1_plus1)->Et() && distance(input[0]->begin(), tob1) == nLeading - 1) { 
+                        for(unsigned int i=0; i<numberOutputBits(); ++i) {
+                            output[i]->setAmbiguityFlag(true); 
+                        }
+                    }
+                }
                 TCS::TOBArray::const_iterator tob2 = tob1; ++tob2;      
                 for( ;
                      tob2 != input[0]->end() && distance( input[0]->begin(), tob2) < nLeading2;
@@ -147,6 +155,14 @@ TCS::DeltaPhiIncl1::process( const std::vector<TCS::TOBArray const *> & input,
              tob1 != input[0]->end() && distance( input[0]->begin(), tob1) < nLeading;
              ++tob1) 
             {
+                if (nLeading < input[0]->size()) { 
+                    TCS::TOBArray::const_iterator tob1_plus1 = tob1; ++tob1_plus1;
+                    if ((*tob1)->Et() == (*tob1_plus1)->Et() && distance(input[0]->begin(), tob1) == nLeading - 1) { 
+                        for(unsigned int i=0; i<numberOutputBits(); ++i) {
+                            output[i]->setAmbiguityFlag(true); 
+                        }
+                    }
+                }
                 TCS::TOBArray::const_iterator tob2 = tob1; ++tob2;      
                 for( ;
                      tob2 != input[0]->end() && distance( input[0]->begin(), tob2) < nLeading2;

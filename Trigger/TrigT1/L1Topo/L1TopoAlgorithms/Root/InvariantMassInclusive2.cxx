@@ -132,8 +132,14 @@ TCS::InvariantMassInclusive2::processBitCorrect( const std::vector<TCS::TOBArray
            tob1 != input[0]->end() && distance(input[0]->begin(), tob1) < p_NumberLeading1;
            ++tob1)
          {
-
-
+            if (p_NumberLeading1 < input[0]->size()) { 
+               TCS::TOBArray::const_iterator tob1_plus1 = tob1; ++tob1_plus1;
+               if ((*tob1)->Et() == (*tob1_plus1)->Et() && distance(input[0]->begin(), tob1) == p_NumberLeading1 - 1) { 
+                  for(unsigned int i=0; i<numberOutputBits(); ++i) {
+                     output[i]->setAmbiguityFlag(true); 
+                  }
+               }
+            }
             for( TCS::TOBArray::const_iterator tob2 = input[1]->begin();
                  tob2 != input[1]->end() && distance(input[1]->begin(), tob2) < p_NumberLeading2;
                  ++tob2) {
@@ -190,6 +196,14 @@ TCS::InvariantMassInclusive2::process( const std::vector<TCS::TOBArray const *> 
            tob1 != input[0]->end() && distance(input[0]->begin(), tob1) < p_NumberLeading1;
            ++tob1)
          {
+            if (p_NumberLeading1 < input[0]->size()) { 
+               TCS::TOBArray::const_iterator tob1_plus1 = tob1; ++tob1_plus1;
+               if ((*tob1)->Et() == (*tob1_plus1)->Et() && distance(input[0]->begin(), tob1) == p_NumberLeading1 - 1) { 
+                  for(unsigned int i=0; i<numberOutputBits(); ++i) {
+                     output[i]->setAmbiguityFlag(true); 
+                  }
+               }
+            }
             for( TCS::TOBArray::const_iterator tob2 = input[1]->begin();
                  tob2 != input[1]->end() && distance(input[1]->begin(), tob2) < p_NumberLeading2;
                  ++tob2) {
