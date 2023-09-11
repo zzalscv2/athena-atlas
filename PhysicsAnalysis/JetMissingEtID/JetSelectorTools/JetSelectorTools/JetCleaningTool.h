@@ -109,7 +109,7 @@ public:
     bool containsHotCells( const xAOD::Jet& jet, const unsigned int runNumber) const;
 
     /** Helpers for cut names */
-    CleaningLevel getCutLevel( const std::string ) const;
+    CleaningLevel getCutLevel( const std::string& ) const;
     std::string   getCutName( const CleaningLevel ) const;
 
   private:
