@@ -17,6 +17,7 @@
 //          - this fixed bug #30991 for release 13.1.0 and for HepMC 2.3.0 where the 'set's comparison operates
 //            on the barcode rather than on the pointer.
 //     2008-Jul Borut Kersevan:  randomizing the left<->right direction by mirroring momenta settable in jobOpts for beamgas
+//     2023-Aug Aaron Angerami: adding keepAllDecayVertices option to keep decay vertices for strong decays (default=true) 
 
 #include "Hijing_i/Hijing.h"
 #include "Hijing_i/VertexShift.h"
@@ -78,6 +79,7 @@ Hijing::Hijing(const std::string& name,
   declareProperty("z", m_z);
   declareProperty("keepSpectators", m_spec);
   declareProperty("randomizeP", m_prand); //BPK randomizes the left<->right direction by mirroring momenta for beam gas
+  declareProperty("keepAllDecayVertices", m_keepAllDecayVertices);
 }
 
 StatusCode Hijing::genInitialize()
@@ -472,7 +474,6 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
              //  Now compare the distance between the vertex FROM which the parent originates and the
              //    start of this particle
              //
-
              HepGeom::Point3D<double> vertex_pos(vertexPtrVec[parentOriginIndex]->position().x(),
                                       vertexPtrVec[parentOriginIndex]->position().y(),
                                       vertexPtrVec[parentOriginIndex]->position().z());
@@ -503,12 +504,12 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                 particleVertexIndex = parentOriginIndex;
                 //std::cout << "ML-> case 2 distane = " << distance <<"  particleVertexIndex = "<<particleVertexIndex<< std::endl;
               }
-             if(distance > m_vertexOffsetCut || parentOriginIndex !=0)
+             if( parentIndex!=-1 && ((distance > m_vertexOffsetCut || parentOriginIndex !=0) || m_keepAllDecayVertices ) )
               {
                 // We need to create a new vertex
                 //
                 HepMC::GenVertexPtr newVertex_p = HepMC::newGenVertexPtr(HepMC::FourVector(particleStart.x(),particleStart.y(),particleStart.z(),particleStart.t()));
-                  evt->add_vertex(newVertex_p);
+		evt->add_vertex(newVertex_p);
                 vertexPtrVec.push_back(newVertex_p);
                 particleVertexIndex = vertexPtrVec.size() - 1;
 
@@ -518,6 +519,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
 
                 //  Now tell the vertex about the particle that created it
                 //
+
                 newVertex_p->add_particle_in(particleHepPartPtr_vec[parentIndex]);
               }
              else {
