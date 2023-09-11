@@ -164,6 +164,7 @@ def defineMenu():
         
         #LUCID
         'L1_LUCID_A', 'L1_LUCID_C',
+        'L1_LUCID_A_BGRP11', 'L1_LUCID_C_BGRP11',
 
         # ZDC
         'L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C',
@@ -308,6 +309,7 @@ def defineMenu():
         'L1_MBTS_1_EMPTY', 'L1_MBTS_1_1_EMPTY', 'L1_MBTS_2_EMPTY',
         #'L1_MBTS_1_UNPAIRED', 'L1_MBTS_2_UNPAIRED',
         'L1_MBTS_1_UNPAIRED_ISO', 'L1_MBTS_1_1_UNPAIRED_ISO', 'L1_MBTS_2_UNPAIRED_ISO',
+        'L1_MBTS_2_BGRP11',
         'L1_MBTS_A', 'L1_MBTS_C',
         # extra MBTS
         #'L1_MBTSA0', 'L1_MBTSA1', 'L1_MBTSA2', 'L1_MBTSA3', 'L1_MBTSA4', 'L1_MBTSA5', 'L1_MBTSA6', 'L1_MBTSA7', 'L1_MBTSA8', 'L1_MBTSA9', 'L1_MBTSA10', 'L1_MBTSA11', 'L1_MBTSA12', 'L1_MBTSA13', 'L1_MBTSA14', 'L1_MBTSA15',
