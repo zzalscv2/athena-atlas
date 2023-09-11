@@ -91,7 +91,9 @@ private:
   // Provide methods
   //
   void initialize_ppPbPb2023();
-
+  void initialize_ppALFA2023();
+  void initialize_zdcStandalone();
+  
   ZDCLEDModuleResults processZDCModule(const xAOD::ZdcModule& module);
   ZDCLEDModuleResults processRPDModule(const xAOD::ZdcModule& module);
   ZDCLEDModuleResults processModuleData(const std::vector<unsigned short>& data,

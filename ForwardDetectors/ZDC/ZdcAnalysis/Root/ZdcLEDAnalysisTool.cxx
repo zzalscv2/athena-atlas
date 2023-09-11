@@ -36,6 +36,12 @@ StatusCode ZdcLEDAnalysisTool::initialize()
   if (m_configuration == "ppPbPb2023") {
     initialize_ppPbPb2023();
   }
+  else if (m_configuration == "ppALFA2023") {
+    initialize_ppALFA2023();
+  }
+  else if (m_configuration == "zdcStandalone") {
+    initialize_zdcStandalone();
+  }
   else {
     ATH_MSG_ERROR("Unknown configuration: "  << m_configuration);
     return StatusCode::FAILURE;
@@ -107,7 +113,7 @@ StatusCode ZdcLEDAnalysisTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-void ZdcLEDAnalysisTool::initialize_ppPbPb2023()
+void ZdcLEDAnalysisTool::initialize_zdcStandalone()
 {
   // Use the defaults for now except for sampleAnaStart values and the BCIDs
   //
@@ -115,6 +121,28 @@ void ZdcLEDAnalysisTool::initialize_ppPbPb2023()
   m_sampleAnaStartRPD = 5;
 
   m_LEDBCID = {1, 1108, 1110};
+  m_LEDCalreqIdx = {1, 2, 3};
+}
+
+void ZdcLEDAnalysisTool::initialize_ppPbPb2023()
+{
+  // Use the defaults for now except for sampleAnaStart values and the BCIDs
+  //
+  m_sampleAnaStartZDC = 5;
+  m_sampleAnaStartRPD = 5;
+
+  m_LEDBCID = {3482, 3485, 3488};
+  m_LEDCalreqIdx = {1, 2, 3};
+}
+
+void ZdcLEDAnalysisTool::initialize_ppALFA2023()
+{
+  // Use the defaults for now except for sampleAnaStart values and the BCIDs
+  //
+  m_sampleAnaStartZDC = 5;
+  m_sampleAnaStartRPD = 5;
+
+  m_LEDBCID = {3485, 3488, 3491};
   m_LEDCalreqIdx = {1, 2, 3};
 }
   
@@ -126,7 +154,7 @@ StatusCode ZdcLEDAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& mo
   }
 
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-  if (!eventInfo.isValid()) return StatusCode::FAILURE;
+  ATH_CHECK(eventInfo.isValid());
 
   //
   // only do something on calibration events
