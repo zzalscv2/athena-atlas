@@ -231,6 +231,13 @@ def ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
             name, **kwargs), primary=True)
     return acc
 
+def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel"):
+    acc = ComponentAccumulator()
+    ITkTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+        ITkTrackStateOnSurfaceDecoratorCfg(flags))
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        name, AugmentationTools=[ITkTrackStateOnSurfaceDecorator]))
+    return acc
 
 def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
         flags, name="SiSPTrackStateOnSurfaceDecorator", **kwargs):
@@ -242,12 +249,12 @@ def ITkSiSPTrackStateOnSurfaceDecoratorCfg(
     kwargs.setdefault("StoreHoles", False)
     return ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs)
 
-def ITkTSOS_CommonKernelCfg(flags, name="ITkTSOS_CommonKernel"):
+def ITkSiSPTSOS_CommonKernelCfg(flags, name="ITkSiSPTSOS_CommonKernel"):
     acc = ComponentAccumulator()
-    ITkTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
-        ITkTrackStateOnSurfaceDecoratorCfg(flags))
+    ITkSiSPTrackStateOnSurfaceDecorator = acc.getPrimaryAndMerge(
+        ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
-        name, AugmentationTools=[ITkTrackStateOnSurfaceDecorator]))
+        name, AugmentationTools=[ITkSiSPTrackStateOnSurfaceDecorator]))
     return acc
 
 # Expression of Z0 at the primary vertex

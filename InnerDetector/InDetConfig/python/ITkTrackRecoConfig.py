@@ -202,14 +202,8 @@ def ITkTrackRecoCfg(flags):
 
         if flags.Tracking.doStoreSiSPSeededTracks:
             from DerivationFrameworkInDet.InDetToolsConfig import (
-                ITkSiSPTrackStateOnSurfaceDecoratorCfg)
-            SiSPTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(
-                ITkSiSPTrackStateOnSurfaceDecoratorCfg(flags))
-            from AthenaConfiguration.ComponentFactory import CompFactory
-            result.addEventAlgo(
-                CompFactory.DerivationFramework.CommonAugmentation(
-                    "SiSPITkCommonKernel",
-                    AugmentationTools=[SiSPTrackStateOnSurfaceDecorator]))
+                ITkSiSPTSOS_CommonKernelCfg)
+            result.merge(ITkSiSPTSOS_CommonKernelCfg(flags))
 
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
