@@ -164,7 +164,9 @@ def CaloFwdTopoTowerCfg(flags,**kwargs):
     toAOD=[f"xAOD::CaloClusterContainer#{towerContainerKey}",AODAuxItems]
 
     result.merge(addToESD(flags, toESD))
-    result.merge(addToAOD(flags, toAOD))
+
+    if flags.Calo.FwdTower.WriteToAOD:
+        result.merge(addToAOD(flags, toAOD))
 
     return result
 
