@@ -22,30 +22,34 @@ if( XAOD_STANDALONE )
       SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver
       PROPERTIES TIMEOUT 600 )
 
-   atlas_add_test( testJobDataConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver --block-config
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFullSimConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver --block-config
-      PROPERTIES TIMEOUT 600 )
-   atlas_add_test( testJobFastSimConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver --block-config
-      PROPERTIES TIMEOUT 600 )
+   # disable these tests because the block config is no longer supported in 21.2
+               
+   # atlas_add_test( testJobDataConfig
+   #    SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver --block-config
+   #    PROPERTIES TIMEOUT 600 )
+   # atlas_add_test( testJobFullSimConfig
+   #    SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver --block-config
+   #    PROPERTIES TIMEOUT 600 )
+   # atlas_add_test( testJobFastSimConfig
+   #    SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver --block-config
+   #    PROPERTIES TIMEOUT 600 )
 
 else()
 
    atlas_install_joboptions( share/*_jobOptions.py )
 
-   atlas_add_test( testJobDataCompare
-      SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh data
-      PROPERTIES TIMEOUT 600 )
+   # disable these tests because the block config is no longer supported in 21.2
 
-   atlas_add_test( testJobFullSimCompare
-      SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh mc
-      PROPERTIES TIMEOUT 600 )
+   # atlas_add_test( testJobDataCompare
+   #    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh data
+   #    PROPERTIES TIMEOUT 600 )
 
-   atlas_add_test( testJobFastSimCompare
-      SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh afii
-      PROPERTIES TIMEOUT 600 )
+   # atlas_add_test( testJobFullSimCompare
+   #    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh mc
+   #    PROPERTIES TIMEOUT 600 )
+
+   # atlas_add_test( testJobFastSimCompare
+   #    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh afii
+   #    PROPERTIES TIMEOUT 600 )
 
 endif()
