@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to configure beam effects with the ComponentAccumulator"""
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -63,6 +63,7 @@ def VertexBeamCondPositionerCfg(flags, name="VertexBeamCondPositioner", **kwargs
     acc = ComponentAccumulator()
 
     kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    kwargs.setdefault("SimpleTimeSmearing", flags.Sim.VertexTimeSmearing)
 
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
@@ -91,6 +92,7 @@ def LongBeamspotVertexPositionerCfg(flags, name="LongBeamspotVertexPositioner", 
     """Return a long beamspot vertex positioner tool"""
     # todo needs LParameter and RandomSvc
     acc = ComponentAccumulator()
+    kwargs.setdefault("SimpleTimeSmearing", flags.Sim.VertexTimeSmearing)
     acc.setPrivateTools(CompFactory.Simulation.LongBeamspotVertexPositioner(name, **kwargs))
     return acc
 

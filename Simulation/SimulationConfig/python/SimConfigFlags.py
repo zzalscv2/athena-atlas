@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.Enums import LHCPeriod
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
     LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
 from AthenaCommon.SystemOfUnits import m
@@ -128,6 +129,8 @@ def createSimConfigFlags():
 
     # BeameffectsAlg
     scf.addFlag("Sim.VertexSource", VertexSource.CondDB, enum=VertexSource)
+    scf.addFlag("Sim.VertexTimeSmearing", lambda prevFlags:
+                prevFlags.GeoModel.Run >= LHCPeriod.Run4)
 
     # G4UserActions
     scf.addFlag("Sim.NRRThreshold", False)
