@@ -247,8 +247,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 
 	    m_zMinus = std::max(zVertex - m_settings.m_zvError, roiZMinus);
 	    m_zPlus = std::min(zVertex + m_settings.m_zvError, roiZPlus);
-      m_zPlusEndcap = std::min(zVertex + m_settings.m_zvErrorEndcap, roiZPlus);
-      m_zMinusEndcap = std::max(zVertex - m_settings.m_zvErrorEndcap, roiZMinus);
+	    m_zPlusEndcap = std::min(zVertex + m_settings.m_zvErrorEndcap, roiZPlus);
+	    m_zMinusEndcap = std::max(zVertex - m_settings.m_zvErrorEndcap, roiZMinus);
 
 	    for(int layerJ=0;layerJ<nLayers;layerJ++) {//loop over other layers
 
@@ -261,7 +261,7 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 
 	      if(!validateLayerPairNew(layerI, layerJ, rm, zm)) continue; 
 	      
-	      bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
+        bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
 
         // Get spacepoints from current and adjacent phi slices
         const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiThreeSlices.at(phiI);

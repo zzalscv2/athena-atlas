@@ -101,7 +101,7 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty( "VertexSeededMode",        m_vertexSeededMode = false); //** NOT USED Obsolete? ATR-24242
   declareProperty( "doFastZVertexSeeding",    m_doFastZVseeding = true,"Use ZFinder vertex information to filter seeds");
   declareProperty( "zVertexResolution",       m_tcs.m_zvError = 10.0," Half-width (mm) in z of z region used to filter seeds when doFastZVertexSeeding enabled" );
-  declareProperty( "zVertexResolutionEndcap", m_tcs.m_zvErrorEndcap = -1," Half-width (mm) in z of region used to filter seeds when doFastZVertexSeeding enabled, for endcap pixels; set to m_tcs.m_zvError later if left negative" );
+  declareProperty( "zVertexResolutionEndcap", m_tcs.m_zvErrorEndcap = -1," Half-width (mm) in z of region used to filter seeds when doFastZVertexSeeding enabled, for endcap pixels; set to zVertexResolution value later if left negative" );
   declareProperty( "StoreZFinderVertices",    m_storeZFinderVertices = false ); //** NOT USED - to be implemented ATR-24242
 
 
