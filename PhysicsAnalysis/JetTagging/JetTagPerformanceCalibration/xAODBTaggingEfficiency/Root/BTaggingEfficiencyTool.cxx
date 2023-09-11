@@ -255,14 +255,16 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 
   // Now that we know the CDI file location, let's check if the configuration provided is correct
   Analysis::CDIReader Reader(m_SFFileFull);
-  if(!Reader.checkConfig(m_taggerName, m_jetAuthor, m_OP)){
+  if(!Reader.checkConfig(m_taggerName, m_jetAuthor, m_OP, msgLvl(MSG::INFO))){
     ATH_MSG_ERROR( "BTaggingEfficiencyTool configuration is invalid - follow the above suggestions to correct your config!");
     return StatusCode::FAILURE;
   };
-  ATH_MSG_INFO( " --- Calibration file configuration options ---" );
-  Reader.printTaggers();
-  Reader.printJetCollections();
-  Reader.printWorkingPoints();
+  if (msgLvl(MSG::INFO)) {
+    ATH_MSG_INFO( " --- Calibration file configuration options ---" );
+    Reader.printTaggers();
+    Reader.printJetCollections();
+    Reader.printWorkingPoints();
+  }
 
   std::vector<std::string> config_labels = Reader.getLabels(); // the labels compatible with this configuration
   std::vector<std::string> flavours;

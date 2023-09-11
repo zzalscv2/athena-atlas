@@ -47,7 +47,7 @@ namespace Analysis
   public:
 
     /** normal constructor. The second argument, if true, will attempt to retrieve a 'recommended' set of uncertainties to be excluded from EV decomposition */
-    CDIReader(const std::string& cdipath); 
+    CDIReader(const std::string& cdipath, bool verbose = false);
     ~CDIReader() = default;
 
     void printTaggers(){
