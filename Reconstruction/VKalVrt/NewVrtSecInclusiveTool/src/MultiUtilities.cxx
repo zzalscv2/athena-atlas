@@ -249,7 +249,7 @@ namespace Rec{
    }
 
 
-   bool NewVrtSecInclusiveTool::isPart( std::deque<long int> test, std::deque<long int> base)
+   bool NewVrtSecInclusiveTool::isPart( const std::deque<long int>& test, std::deque<long int> base)
    const
    {
       for (long int trk : test)
