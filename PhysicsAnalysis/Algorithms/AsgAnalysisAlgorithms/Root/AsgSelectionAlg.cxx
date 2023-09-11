@@ -54,6 +54,13 @@ namespace CP
       // time. This only calls reset on the bitset
       blankAccept.clear();
       m_setOnFail = selectionFromAccept(blankAccept);
+
+      if (!m_nameSvc.empty())
+      {
+        ANA_CHECK (m_nameSvc.retrieve());
+        ANA_CHECK (m_nameSvc->addAcceptInfo (m_particlesHandle.getNamePattern(), m_selectionHandle.getLabel(),
+            m_selectionTool->getAcceptInfo()));
+      }
     }
 
     return StatusCode::SUCCESS;

@@ -55,6 +55,14 @@ namespace CP
 
 
 
+  bool SelectionReadAccessorInvert ::
+  isBool () const
+  {
+    return true;
+  }
+
+
+
   CP::SystematicSet SelectionReadAccessorInvert ::
   getInputAffecting (const ISystematicsSvc& svc,
                      const std::string& objectName) const

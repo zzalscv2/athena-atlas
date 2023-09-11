@@ -4,6 +4,32 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 
+class CommonServicesConfig (ConfigBlock) :
+    """the ConfigBlock for common services
+
+    The idea here is that all algorithms need some common services, and I should
+    provide configuration blocks for those.  For now there is just a single
+    block, but in the future I might break out e.g. the systematics service.
+    """
+
+    def __init__ (self) :
+        super (CommonServicesConfig, self).__init__ ('CommonServices')
+        self.addOption ('runSystematics', None, type=bool)
+
+    def makeAlgs (self, config) :
+
+        sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
+
+        if self.runSystematics is not None :
+            runSystematics = self.runSystematics
+        else :
+            runSystematics = config.dataType() != 'data'
+        if runSystematics :
+            sysService.sigmaRecommended = 1
+        config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
+
+
+
 class PileupReweightingBlock (ConfigBlock):
     """the ConfigBlock for pileup reweighting"""
 
@@ -137,20 +163,40 @@ class PtEtaSelectionBlock (ConfigBlock):
 
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PtEtaSelectionAlg' + self.containerName + postfix )
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        bits = 0
         if self.minPt is not None :
             alg.selectionTool.minPt = self.minPt
-            bits += 1
         if self.maxEta is not None :
             alg.selectionTool.maxEta = self.maxEta
-            bits += 1
-        if not self.selectionDecoration.find (',as_bits') :
-            bits = 1
         alg.selectionDecoration = self.selectionDecoration
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             bits=bits)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
+
+
+
+class ObjectCutFlowBlock (ConfigBlock):
+    """the ConfigBlock for an object cutflow"""
+
+    def __init__ (self, containerName, selectionName) :
+        groupName = containerName
+        if selectionName != '' :
+            groupName += '.' + selectionName
+        super (ObjectCutFlowBlock, self).__init__ (groupName)
+        self.containerName = containerName
+        self.selectionName = selectionName
+        self.addOption ('postfix', '', type=str)
+
+    def makeAlgs (self, config) :
+
+        postfix = self.postfix
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
+
+        alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
+        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
+        alg.selection = config.getSelectionCutFlow (self.containerName, self.selectionName)
+        alg.input = config.readName (self.containerName)
+        alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
 
 
 
@@ -195,6 +241,13 @@ class OutputThinningBlock (ConfigBlock):
         else :
             alg.selection = []
         alg.deepCopy = False
+
+
+
+def makeCommonServicesConfig( seq ):
+    """Create the common services config"""
+
+    seq.append (CommonServicesConfig ())
 
 
 
@@ -257,6 +310,25 @@ def makePtEtaSelectionConfig( seq, containerName,
     config.setOptionValue ('minPt',minPt, noneAction='ignore')
     config.setOptionValue ('maxEta',maxEta, noneAction='ignore')
     config.setOptionValue ('selectionDecoration',selectionDecoration, noneAction='ignore')
+    seq.append (config)
+
+
+
+def makeObjectCutFlowConfig( seq, containerName,
+                              *, postfix = None, selectionName):
+    """Create a pt-eta kinematic selection config
+
+    Keyword arguments:
+      containerName -- name of the container
+      postfix -- a postfix to apply to decorations and algorithm
+                 names.  this is mostly used/needed when using this
+                 sequence with multiple working points to ensure all
+                 names are unique.
+      selectionName -- the name of the selection to do the cutflow for
+    """
+
+    config = ObjectCutFlowBlock (containerName, selectionName)
+    config.setOptionValue ('postfix',postfix, noneAction='ignore')
     seq.append (config)
 
 

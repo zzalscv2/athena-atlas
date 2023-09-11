@@ -12,6 +12,14 @@ SelectionType SelectionAccessorExprBase::getBits(
   return getBool(element,sys) ? selectionAccept() : selectionReject();
 }
 
+
+
+bool SelectionAccessorExprBase ::
+isBool () const
+{
+  return true;
+}
+
 }  // namespace CP
 
 

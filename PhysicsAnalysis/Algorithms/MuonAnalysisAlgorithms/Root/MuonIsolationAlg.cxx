@@ -41,6 +41,13 @@ namespace CP
     ANA_CHECK (m_isolationHandle.initialize (m_systematicsList, m_preselection));
     ANA_CHECK (m_systematicsList.initialize());
 
+    if (!m_nameSvc.empty())
+    {
+      ANA_CHECK (m_nameSvc.retrieve());
+      ANA_CHECK (m_nameSvc->addAcceptInfo (m_muonHandle.getNamePattern(), m_isolationHandle.getLabel(),
+          m_isolationTool->getMuonAcceptInfo()));
+    }
+
     asg::AcceptData blankAccept {&m_isolationTool->getObjAcceptInfo()};
     m_setOnFail = selectionFromAccept(blankAccept);
 

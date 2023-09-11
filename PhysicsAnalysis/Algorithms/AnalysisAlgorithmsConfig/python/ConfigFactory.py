@@ -142,6 +142,20 @@ def makeConfig (factoryName, groupName,
                                   selectionName=selection)
 
 
+    elif factoryName == 'Selection.ObjectCutFlow' :
+        groupSplit = groupName.split ('.')
+        if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
+            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
+
+        if len (groupSplit) == 2 :
+            selection = groupSplit[1]
+        else :
+            selection = ''
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeObjectCutFlowConfig
+        makeObjectCutFlowConfig (configSeq, groupSplit[0],
+                                  selectionName=selection)
+
+
     elif factoryName == 'Output.Thinning' :
         groupSplit = groupName.split ('.')
         if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
@@ -160,6 +174,10 @@ def makeConfig (factoryName, groupName,
         from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
         config = OutputAnalysisConfig (groupName)
         configSeq.append (config)
+
+    elif factoryName == 'CommonServices' :
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeCommonServicesConfig
+        makeCommonServicesConfig (configSeq)
 
     elif factoryName == 'SystObjectLink':
         try:

@@ -12,6 +12,7 @@ def makeSequence (dataType) :
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     sysService.sigmaRecommended = 1
+    createService( 'CP::SelectionNameSvc', 'SelectionNameSvc', sequence = algSeq )
 
     # Include, and then set up the tau analysis algorithm sequence:
     from TauAnalysisAlgorithms.TauAnalysisSequence import makeTauAnalysisSequence

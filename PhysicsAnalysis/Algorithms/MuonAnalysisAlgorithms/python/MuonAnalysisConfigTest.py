@@ -15,6 +15,7 @@ def makeSequence (dataType) :
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     sysService.sigmaRecommended = 1
+    createService( 'CP::SelectionNameSvc', 'SelectionNameSvc', sequence = algSeq )
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)

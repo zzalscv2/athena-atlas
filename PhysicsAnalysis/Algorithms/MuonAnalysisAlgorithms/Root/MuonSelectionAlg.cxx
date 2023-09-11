@@ -43,6 +43,13 @@ namespace CP
     asg::AcceptData blankAccept {&selectionTool->getAcceptInfo()};
     m_setOnFail = selectionFromAccept(blankAccept);
 
+    if (!m_nameSvc.empty())
+    {
+      ANA_CHECK (m_nameSvc.retrieve());
+      ANA_CHECK (m_nameSvc->addAcceptInfo (m_muonsHandle.getNamePattern(), m_selectionHandle.getLabel(),
+          m_selectionTool->getAcceptInfo()));
+    }
+
     return StatusCode::SUCCESS;
   }
 

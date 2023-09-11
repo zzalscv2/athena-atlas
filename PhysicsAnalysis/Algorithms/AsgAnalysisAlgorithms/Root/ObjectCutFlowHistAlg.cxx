@@ -11,6 +11,7 @@
 
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
 
+#include <PATCore/AcceptInfo.h>
 #include <RootCoreUtils/StringUtil.h>
 #include <TH1.h>
 
@@ -28,7 +29,6 @@ namespace CP
     declareProperty ("histPattern", m_histPattern, "the pattern for histogram names");
 
     declareProperty ("selection", m_selection, "the list of selection decorations");
-    declareProperty ("selectionNCuts", m_selectionNCuts, "the number of cuts for each selection decoration");
   }
 
 
@@ -39,37 +39,41 @@ namespace CP
     ANA_CHECK (m_inputHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_inputHandle, SG::AllowEmpty));
     ANA_CHECK (m_systematicsList.initialize());
-
-    if (m_selectionNCuts.size() != m_selection.size())
-    {
-      ANA_MSG_ERROR ("selection and selectionNCuts properties need to be the same size");
-      return StatusCode::FAILURE;
-    }
+    ANA_CHECK (m_selectionNameSvc.retrieve());
 
     // Total label
     m_labels.push_back ("total");
 
     for (std::size_t iter = 0, end = m_selection.size(); iter != end; ++ iter)
     {
-      const unsigned ncuts = m_selectionNCuts[iter];
-      if (ncuts == 0)
-      {
-        ANA_MSG_ERROR ("all entries of selectionNCuts need to be greater than 0");
-        return StatusCode::FAILURE;
-      }
-      if (ncuts > 8 * sizeof (SelectionType))
-      {
-        ANA_MSG_ERROR ("entries in selectionNCuts need to be less or equal to " << (8 * sizeof (SelectionType)));
-        return StatusCode::FAILURE;
-      }
+      unsigned ncuts = 0u;
       std::unique_ptr<ISelectionReadAccessor> accessor;
       ANA_CHECK (makeSelectionReadAccessor (m_selection[iter], accessor));
-      m_accessors.push_back (std::make_pair (std::move (accessor), ncuts));
-      for (unsigned i = 1; i <= ncuts; i++)
+
+      if (accessor->isBool())
       {
-        m_labels.push_back (m_accessors.back().first->label() + std::to_string(i));
+        ANA_MSG_DEBUG ("selection " << m_selection[iter] << " is a bool, using 1 cut");
+        ncuts = 1;
+        m_labels.push_back (accessor->label());
+      } else if (const asg::AcceptInfo *acceptInfo = m_selectionNameSvc->getAcceptInfo (m_inputHandle.getNamePattern(), accessor->label());
+          acceptInfo != nullptr)
+      {
+        ANA_MSG_DEBUG ("found accept info for " << m_inputHandle.getNamePattern() << " " << accessor->label());
+        ncuts = acceptInfo->getNCuts();
+        for (unsigned i = 0; i != ncuts; i++)
+        {
+          ANA_MSG_DEBUG ("using cut name from accept info: " << acceptInfo->getCutName (i));
+          m_labels.push_back (acceptInfo->getCutName (i));
+        }
+      } else
+      {
+        ANA_MSG_ERROR ("could not find accept info for " << m_inputHandle.getNamePattern() << " " << accessor->label());
+        return StatusCode::FAILURE;
       }
+
+      m_accessors.push_back (std::make_pair (std::move (accessor), ncuts));
       m_allCutsNum += ncuts;
+      assert (m_allCutsNum+1 == m_labels.size());
     }
 
     return StatusCode::SUCCESS;
@@ -91,7 +95,10 @@ namespace CP
         std::string name;
         ANA_CHECK (m_systematicsList.service().makeSystematicsName (name, m_histPattern, sys));
 
-        ANA_CHECK (book (TH1F (name.c_str(), "object cut flow", m_allCutsNum+1, 0, m_allCutsNum+1)));
+        std::string title = m_histTitle.value();
+        if (!sys.empty())
+          title += " (" + sys.name() + ")";
+        ANA_CHECK (book (TH1F (name.c_str(), title.c_str(), m_allCutsNum+1, 0, m_allCutsNum+1)));
 
         m_hist.insert (std::make_pair (sys, hist (name)));
         histIter = m_hist.find (sys);

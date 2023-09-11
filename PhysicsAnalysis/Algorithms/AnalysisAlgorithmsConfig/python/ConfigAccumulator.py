@@ -14,12 +14,14 @@ def mapUserName (name) :
 
 
 class SelectionConfig :
-    """all the data for a given selection that has been registered"""
+    """all the data for a given selection that has been registered
+
+    the bits argument is for backward compatibility, does nothing, and will be
+    removed in the future."""
 
     def __init__ (self, selectionName, decoration,
-                  *, bits, preselection=None) :
+                  *, bits=0, preselection=None) :
         self.name = selectionName
-        self.bits = bits
         self.decoration = decoration
         if preselection is not None :
             self.preselection = preselection
@@ -156,6 +158,30 @@ class ConfigAccumulator :
         else :
             if name not in self._algorithms :
                 raise Exception ('unknown algorithm requested: ' + name)
+            self._currentAlg = self._algorithms[name]
+            return self._algorithms[name]
+
+
+    def createService (self, type, name) :
+        '''create a new service and register it as the "current algorithm"'''
+        if self._pass == 0 :
+            if name in self._algorithms :
+                raise Exception ('duplicate service: ' + name)
+            service = DualUseConfig.createService (type, name)
+            # Avoid importing AthenaCommon.AppMgr in a CA Athena job
+            # as it modifies Gaudi behaviour
+            if DualUseConfig.isAthena:
+                if DualUseConfig.useComponentAccumulator:
+                    self.CA.addService(service)
+            else:
+                # We're not, so let's remember this as a "normal" algorithm:
+                self._algSeq += service
+            self._algorithms[name] = service
+            self._currentAlg = service
+            return service
+        else :
+            if name not in self._algorithms :
+                raise Exception ('unknown service requested: ' + name)
             self._currentAlg = self._algorithms[name]
             return self._algorithms[name]
 
@@ -341,7 +367,7 @@ class ConfigAccumulator :
     def getFullSelection (self, containerName, selectionName,
                           *, skipBase = False) :
 
-        """get the preselection string for the given selection on the given
+        """get the selection string for the given selection on the given
         container
 
         This can handle both individual selections or selection
@@ -394,13 +420,39 @@ class ConfigAccumulator :
         return '&&'.join (decorations)
 
 
+    def getSelectionCutFlow (self, containerName, selectionName) :
+
+        """get the individual selections as a list for producing the cutflow for
+        the given selection on the given container
+
+        This can only handle individual selections, not selection
+        expressions (e.g. `loose||tight`).
+
+        """
+        if containerName not in self._containerConfig :
+            return []
+
+        # Check if this is actually a selection expression,
+        # e.g. `A||B` and if so translate it into a complex expression
+        # for the user.  I'm not trying to do any complex syntax
+        # recognition, but instead just produce an expression that the
+        # C++ parser ought to be able to read.
+        if selectionName != '' and \
+           not self._selectionNameExpr.fullmatch (selectionName) :
+            raise ValueError ('not allowed to do cutflow on selection expression: ' + selectionName)
+
+        config = self._containerConfig[containerName]
+        decorations = []
+        for selection in config.selections :
+            if (selection.name == '' or selection.name == selectionName) :
+                decorations += [selection.decoration]
+        return decorations
+
+
     def addSelection (self, containerName, selectionName, decoration,
                       **kwargs) :
         """add another selection decoration to the selection of the given
-        name for the given container
-
-        This also takes the number of bits in the selection decoration,
-        which is needed to make object cut flows."""
+        name for the given container"""
         if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
             raise ValueError ('invalid selection name: ' + selectionName)
         if containerName not in self._containerConfig :

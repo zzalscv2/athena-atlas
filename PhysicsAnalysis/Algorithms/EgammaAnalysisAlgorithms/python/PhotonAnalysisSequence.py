@@ -287,6 +287,7 @@ def makePhotonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
         alg.selectionDecoration = 'isolated' + postfix + ',as_bits'
         addPrivateTool( alg, 'selectionTool', 'CP::IsolationSelectionTool' )
         alg.selectionTool.PhotonWP = isolationWP
+        alg.isPhoton = True
         seq.append( alg, inputPropName = 'egammas',
                     stageName = 'selection',
                     metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],

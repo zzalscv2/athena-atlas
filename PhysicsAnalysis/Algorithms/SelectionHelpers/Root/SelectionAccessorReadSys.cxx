@@ -62,6 +62,17 @@ namespace CP
 
 
 
+  bool SelectionAccessorReadSys ::
+  isBool () const
+  {
+    for (auto& item : m_dataCache)
+      if (!std::get<1>(item.second)->isBool())
+        return false;
+    return true;
+  }
+
+
+
   CP::SystematicSet SelectionAccessorReadSys ::
   getInputAffecting (const ISystematicsSvc& svc,
                      const std::string& objectName) const

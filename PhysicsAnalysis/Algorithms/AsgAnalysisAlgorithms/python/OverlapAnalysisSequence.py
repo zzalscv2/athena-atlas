@@ -294,10 +294,8 @@ def makeOverlapAnalysisSequence( dataType,
                 if inputLabel:
                     alg.selection = [ '%s,as_char' % inputLabel,
                                       '%s,as_char' % outputLabel ]
-                    alg.selectionNCuts = [1, 1]
                 else:
                     alg.selection = [ '%s,as_char' % outputLabel ]
-                    alg.selectionNCuts = [1]
                 seq.append( alg, inputPropName = { container[ 0 ] : 'input' } )
 
             # Set up a view container for the type.

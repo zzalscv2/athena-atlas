@@ -133,4 +133,5 @@ if options.direct_driver :
     # the limit on the number of events.
     driver = ROOT.EL.DirectDriver()
 
+print ("submitting job now", flush=True)
 driver.submit( job, submitDir )

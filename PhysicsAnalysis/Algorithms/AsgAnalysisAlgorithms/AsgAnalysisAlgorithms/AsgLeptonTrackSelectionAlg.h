@@ -11,6 +11,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <PATCore/IAsgSelectionTool.h>
+#include <SelectionHelpers/ISelectionNameSvc.h>
 #include <SelectionHelpers/SysWriteSelectionHandle.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
@@ -81,6 +82,10 @@ namespace CP
   private:
     SysWriteSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "trackSelection", "the decoration for the asg selection"};
+
+    /// \brief the ISelectionNameSvc
+  private:
+    ServiceHandle<ISelectionNameSvc> m_nameSvc {"SelectionNameSvc", "AsgLeptonTrackSelectionAlg"};
 
 
     /// \brief the \ref asg::AcceptInfo we are using

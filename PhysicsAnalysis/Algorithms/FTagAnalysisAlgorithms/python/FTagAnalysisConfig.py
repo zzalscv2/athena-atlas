@@ -89,7 +89,7 @@ class FTagConfig (ConfigBlock):
             alg.preselection = config.getPreselection (self.containerName, selectionName)
             config.addSelection (self.containerName, selectionName,
                                  alg.selectionDecoration,
-                                 bits=1, preselection=True)
+                                 preselection=True)
             alg.particles = config.readName (self.containerName)
 
         # Set up the ftag selection algorithm(s):

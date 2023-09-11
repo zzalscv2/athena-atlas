@@ -70,6 +70,14 @@ namespace CP
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_particlesHandle, SG::AllowEmpty));
     ANA_CHECK (m_selectionHandle.initialize (m_systematicsList, m_particlesHandle));
     ANA_CHECK (m_systematicsList.initialize());
+
+    if (!m_nameSvc.empty())
+    {
+      ANA_CHECK (m_nameSvc.retrieve());
+      ANA_CHECK (m_nameSvc->addAcceptInfo (m_particlesHandle.getNamePattern(), m_selectionHandle.getLabel(),
+          m_accept));
+    }
+
     return StatusCode::SUCCESS;
   }
 

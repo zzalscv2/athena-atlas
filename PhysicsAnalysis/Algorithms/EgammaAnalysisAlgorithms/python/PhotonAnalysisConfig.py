@@ -55,8 +55,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.selectionTool.useClusterEta = True
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=(5 if self.crackVeto else 4))
+        config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Setup shower shape fudge
         if self.recomputeIsEM and config.dataType() == 'mc':
@@ -77,8 +76,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSPHOTON
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=1)
+        config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Select clean photons
         if self.enableCleaning:
@@ -88,8 +86,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.selectionTool.selectionFlags = ['DFCommonPhotonsCleaning' + cleaningWP]
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
-            config.addSelection (self.containerName, '', alg.selectionDecoration,
-                                 bits=1)
+            config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Do calibration
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg',
@@ -111,7 +108,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             bits=2, preselection=self.ptSelectionOutput)
+                             preselection=self.ptSelectionOutput)
 
         # Set up the isolation correction algorithm.
         alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
@@ -180,8 +177,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.selectionTool.selectionFlags = [ dfFlag ]
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             bits=(32 if self.recomputeIsEM else 1))
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
@@ -190,10 +186,10 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.selectionDecoration = 'isolated' + postfix + ',as_bits'
             config.addPrivateTool( 'selectionTool', 'CP::IsolationSelectionTool' )
             alg.selectionTool.PhotonWP = self.isolationWP
+            alg.isPhoton = True
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                 bits=1)
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration)
 
         # Set up an algorithm used for decorating baseline photon selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
