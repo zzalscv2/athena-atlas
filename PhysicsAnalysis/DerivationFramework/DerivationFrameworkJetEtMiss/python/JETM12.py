@@ -263,13 +263,12 @@ def JETM12Cfg(ConfigFlags):
     JETM12SlimmingHelper.SmartCollections = ["EventInfo",
                                              "Electrons", "Photons", "Muons", "TauJets",
                                              "InDetTrackParticles", "PrimaryVertices",
-                                             "MET_Baseline_AntiKt4EMTopo",
                                              "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
+                                             "AntiKt4EMPFlowJets",
                                              "BTagging_AntiKt4EMPFlow"]
 
     JETM12SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","CaloCalTopoClusters"]
+                                         "Kt4EMPFlowEventShape","CaloCalTopoClusters"]
 
     JETM12SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TrkIsoPt1000_ptcone40.TrkIsoPt1000_ptcone30.TrkIsoPt1000_ptcone20.TrkIsoPt500_ptcone40.TrkIsoPt500_ptcone30.TrkIsoPt500_ptcone20"]
 
