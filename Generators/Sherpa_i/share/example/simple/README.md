@@ -2,7 +2,7 @@
 
 Event generation jobs in ATLAS are steered using jobOption files and run using the `Gen_tf.py` transform as described in [PmgMcSoftware#Production_transforms_and_job_op](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware#Production_transforms_and_job_op).
 
-A simple example JO for running Sherpa on-the-fly within Athena is contained in this directory and will be explained below:
+A simple example JO for running Sherpa v2 on-the-fly within Athena is contained in this directory and will be explained below:
 
 ```
 include("Sherpa_i/Base_Fragment.py")
@@ -37,7 +37,7 @@ genSeq.Sherpa_i.NCores = 1
 ```
 
 Features from top to bottom:
-* Common include files containing all the default settings, which can be found in the [Sherpa_i interface package of Athena](https://gitlab.cern.ch/atlas/athena/tree/21.6/Generators/Sherpa_i/share/common)
+* Common include files containing all the default settings, which can be found in the [Sherpa_i interface package of Athena](https://gitlab.cern.ch/atlas/athena/tree/main/Generators/Sherpa_i/share/common)
 * Evgen metadata
 * A Sherpa run card containing the process-specific settings, e.g. hard scattering setup, ME level cuts, model settings. For details on how to write this part of the JO file, please refer to the [Sherpa manual](https://sherpa-team.gitlab.io/)
 * All Sherpa parameters can also be set/overwritten later within the JO file by adding to the `genSeq.Sherpa_i.Parameters` array. Every Sherpa setting of the type parameter=value entered here will be treated in the same way as on the Sherpa command line (spaces are not allowed). Example:```

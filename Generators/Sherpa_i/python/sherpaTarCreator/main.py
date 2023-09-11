@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys,os
 from argparse import ArgumentParser
@@ -56,7 +56,7 @@ def main():
     # Load information from JO file
     from . import readjo
     readjo.readJO(options)
-    
+
     from . import jobDefinitions
 
     for jodir in options.jobOptionDir:
@@ -83,34 +83,34 @@ def main():
             if not os.path.islink(os.path.join(folder,"libSherpa_iPlugin.so")):
                 if options.Sherpa_i.PluginCode != "":
                     os.symlink(os.path.join(options.jobOptionDir[0],"libSherpa_iPlugin.so"), os.path.join(folder,"libSherpa_iPlugin.so"))
-    
+
     prevJob = None
     getOpenLoopsJob = jobDefinitions.mkGetOpenLoopsJob(options)
     if getOpenLoopsJob:
         prevJob = getOpenLoopsJob
-    
+
     createLibsJob = jobDefinitions.mkCreateLibsJob(options, prevJob)
     if createLibsJob:
         prevJob = createLibsJob
-    
+
     makelibsJob = jobDefinitions.mkMakelibsJob(options, prevJob)
     if makelibsJob:
         prevJob = makelibsJob
-    
+
     for ecm in options.ecm:
-    
+
         ecmPrevJob = prevJob
         integrationJob = jobDefinitions.mkIntegrateJob(options, ecm, ecmPrevJob)
         if integrationJob:
             ecmPrevJob = integrationJob
-    
+
         tarballmakerJob = jobDefinitions.mkTarballmakerJob(options, ecm, ecmPrevJob)
         if tarballmakerJob:
             ecmPrevJob = tarballmakerJob
-    
+
         for jodir in options.jobOptionDir:
             jobDefinitions.mkEvntGenTestJob(options, ecm, jodir, ecmPrevJob)
-    
+
     options.batchSystemModule.finalizeJobs(options.dryRun)
 
 if __name__ == "__main__":

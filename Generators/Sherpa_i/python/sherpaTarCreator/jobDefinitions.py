@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os,glob,shutil,re
 
@@ -28,7 +28,7 @@ def mkGetOpenLoopsJob(options):
         shutil.rmtree("Process/OpenLoops")
 
     job = options.batchSystemModule.batchJob("0.getOpenLoops", hours=2, nCores=options.ncoresScons, memMB=1, basedir=options.jobOptionDir[0])
-    
+
     job.cmds += ["source $AtlasSetup/scripts/asetup.sh "+options.athenaVersion]
     job.cmds += ["set -e"]
 
@@ -58,19 +58,24 @@ def mkCreateLibsJob(options, prevJob):
         return None
 
     job = options.batchSystemModule.batchJob("1.createLibs", hours=48, nCores=1, memMB=options.createLibsRAM, basedir=options.jobOptionDir[0])
-    
+
     if prevJob:
         job.dependsOnOk.append(prevJob.id)
-    
+
     job.cmds += ["source $AtlasSetup/scripts/asetup.sh "+options.athenaVersion]
     job.cmds += ["set -e"]
 
-    job.cmds += ["rm -rf Process/Amegic.db Process/Comix.db Process/Sherpa.db Process/Amegic"]
     if os.environ["SHERPAVER"].startswith('2.'):
+      job.cmds += ["rm -rf Process/Amegic.db Process/Comix.db Process/Sherpa.db Process/Amegic"]
       job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"INIT_ONLY=1\", \"EVENTS=0\", \"FRAGMENTATION=Off\", \"MI_HANDLER=None\", \"LOG_FILE=\"]\n' > events.py"]
+    else:
+      job.cmds += ["rm -rf Process/Amegic.zip Process/Comix.zip Process/Sherpa.zip Process/Amegic"]
     job.cmds += ["outputEVNTFile=$(mktemp -u /tmp/XXXXXXXX.pool.root)"]
     job.cmds += ["returncode=0"]
-    job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
+    if os.environ["SHERPAVER"].startswith('2.'):
+      job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
+    else:
+      job.cmds += ["Gen_tf.py --ecmEnergy="+str(options.ecm[0]*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+options.jobOptionDir[0]+" --outputEVNTFile=${outputEVNTFile} || returncode=$?"]
     job.cmds += ["echo Pasting log.generate ==============="]
     job.cmds += ["cat log.generate"]
     job.cmds += ["echo Gen_tf exited with return code $returncode"]
@@ -93,7 +98,7 @@ def mkCreateLibsJob(options, prevJob):
     job.cmds += ["  exit 1"]
     job.cmds += ["fi"]
 
-    job.cmds += ["rm -rf ${outputEVNTFile} _joproxy* AtRndmGenSvc.out AthenaSummary_Generate.txt Generate_messageSvc_jobOptions.py Generate_runathena PoolFileCatalog.xml PoolFileCatalog.xml.BAK TransformTimer_Generate.pickle athfile-cache.ascii.gz config.pickle dmesg_trf.txt hostnamelookup.tmp inputDictionary.pickle jobInfo.xml jobInfo_Generate.xml jobReport* last.Generate last.runargs.gpickle runargs.Generate.gpickle runargs.Generate.py metadata_Generate.xml metadata.xml Sherpa_References.tex ntuple.pmon.stream setupevprod.sh share ntuple.pmon.gz testHepMC.root events.py Bdecays0.dat Bs2Jpsiphi.DEC DECAY.DEC G4particle_whitelist.txt PDGTABLE.MeV pdt.table runargs.generate.py runwrapper.generate.sh eventLoopHeartBeat.txt susyParticlePdgid.txt TestHepMC.root log.generate mem.full.generate mem.summary.generate.json env.txt Run.dat"]
+    job.cmds += ["rm -rf ${outputEVNTFile} _joproxy* AtRndmGenSvc.out AthenaSummary_Generate.txt Generate_messageSvc_jobOptions.py Generate_runathena PoolFileCatalog.xml PoolFileCatalog.xml.BAK TransformTimer_Generate.pickle athfile-cache.ascii.gz config.pickle dmesg_trf.txt hostnamelookup.tmp inputDictionary.pickle jobInfo.xml jobInfo_Generate.xml jobReport* last.Generate last.runargs.gpickle runargs.Generate.gpickle runargs.Generate.py metadata_Generate.xml metadata.xml Sherpa_References.tex ntuple.pmon.stream setupevprod.sh share ntuple.pmon.gz testHepMC.root events.py Bdecays0.dat Bs2Jpsiphi.DEC DECAY.DEC G4particle_whitelist.txt PDGTABLE.MeV pdt.table runargs.generate.py runwrapper.generate.sh eventLoopHeartBeat.txt susyParticlePdgid.txt TestHepMC.root log.generate mem.full.generate mem.summary.generate.json env.txt Run.dat Sherpa.yaml"]
 
     job.write()
     job.submit(dryRun=options.dryRun)
@@ -108,7 +113,7 @@ def mkMakelibsJob(options, prevJob):
         return None
 
     job = options.batchSystemModule.batchJob("2.makelibs", hours=48, nCores=options.ncoresMakelibs, memMB=1, basedir=options.jobOptionDir[0])
-    
+
     if prevJob:
         job.dependsOnOk.append(prevJob.id)
 
@@ -139,7 +144,8 @@ def mkIntegrateJob(options, ecm, prevJob):
     if not ("integrate" in options.performOnly or "all" in options.performOnly):
         return None
 
-    if os.path.isfile(ecmfolder+"/Results.db") and os.path.isfile(ecmfolder+"/3.integrate.log"):
+    resname = "Results.db" if os.environ["SHERPAVER"].startswith('2.') else "Results.zip"
+    if os.path.isfile(ecmfolder+"/"+resname) and os.path.isfile(ecmfolder+"/3.integrate.log"):
         return None
 
     # calculate integration time
@@ -160,18 +166,26 @@ def mkIntegrateJob(options, ecm, prevJob):
     job.cmds += ["set -e"]
 
     #write rundata into Run.dat file for integration
-    job.cmds += ["cat > Run.dat <<EOL"]
+    configname = "Run.dat" if os.environ["SHERPAVER"].startswith('2.') else "Sherpa.yaml"
+    job.cmds += ["cat > "+configname+" <<EOL"]
     job.cmds += [options.Sherpa_i.RunCard]
     job.cmds += ["EOL"]
     #append infos in options
-    ecmopt = ["BEAM_ENERGY_1="+str(ecm/2.*1000), "BEAM_ENERGY_2="+str(ecm/2.*1000)]
+    ecmopt = ["BEAM_ENERGY_1="+str(ecm/2.*1000), "BEAM_ENERGY_2="+str(ecm/2.*1000)] \
+             if os.environ["SHERPAVER"].startswith('2.') else ["BEAM_ENERGIES: "+str(ecm/2.*1000)]
     ignoreopt = ["RUNDATA","LOG_FILE","NNPDF_GRID_PATH","RESULT_DIRECTORY"]
     totopt = options.Sherpa_i.Parameters + ecmopt
     if options.Sherpa_i.PluginCode != "":
-        totopt.append("SHERPA_LDADD=Sherpa_iPlugin")
+        if os.environ["SHERPAVER"].startswith('2.'):
+            totopt.append("SHERPA_LDADD=Sherpa_iPlugin")
+        else:
+            totopt.append("SHERPA_LDADD: Sherpa_iPlugin")
     for s in totopt:
         if not (re.split(r'\W',s)[0] in ignoreopt):
-            job.cmds += [r"sed '/.*\}(run).*/i\ \ "+s+"' -i Run.dat"]
+            if os.environ["SHERPAVER"].startswith('2.'):
+                job.cmds += [r"sed '/.*\}(run).*/i\ \ "+s+"' -i Run.dat"]
+            else:
+                job.cmds += [r"sed '/.*PROCESSES:.*/i"+s+"\\n' -i Sherpa.yaml"]
 
     olpath = str(os.environ['OPENLOOPSPATH'])
     lcglayer = olpath[olpath.find("LCG_"):olpath.find("/MCGenerators")]
@@ -201,7 +215,10 @@ def mkIntegrateJob(options, ecm, prevJob):
     job.cmds += ["export OPAL_PREFIX="+opal_prefix]
     job.cmds += ["export LD_LIBRARY_PATH="+ld_library_path+":"+sftbase+"/sqlite/*/${LCG_PLATFORM}/lib:"+sftbase+"/HepMC/*/${LCG_PLATFORM}/lib:"+sftlayer+"/MCGenerators/lhapdf/*/${LCG_PLATFORM}/lib:"+sftlayer+"/fastjet/*/${LCG_PLATFORM}/lib:"+olpath+"/lib:"+olpath+"/proclib:"+options.sherpaInstallPath+"/lib/SHERPA-MC:$LD_LIBRARY_PATH"]
 
-    job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa EVENTS=0 FRAGMENTATION=Off MI_HANDLER=None BEAM_ENERGY_1="+str(ecm/2.*1000)+" BEAM_ENERGY_2="+str(ecm/2.*1000)]
+    if os.environ["SHERPAVER"].startswith('2.'):
+        job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa EVENTS=0 FRAGMENTATION=Off MI_HANDLER=None BEAM_ENERGY_1="+str(ecm/2.*1000)+" BEAM_ENERGY_2="+str(ecm/2.*1000)]
+    else:
+        job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa EVENTS=0 BEAM_ENERGIES="+str(ecm/2.*1000)]
 
     job.write(extraDirs=[options.jobOptionDir[0]])
     job.submit(dryRun=options.dryRun)
@@ -224,7 +241,8 @@ def mkTarballmakerJob(options, ecm, prevJob):
     if prevJob:
         job.dependsOnOk.append(prevJob.id)
 
-    job.cmds += ["tar czhf "+options.jobOptionDir[0]+"/"+tarballname+" $(ls -d Results.db Process 3.integrate.log 2>/dev/null) "+" ".join(options.Sherpa_i.ExtraFiles)]
+    resname = "Results.db" if os.environ["SHERPAVER"].startswith('2.') else "Results.zip"
+    job.cmds += ["tar czhf "+options.jobOptionDir[0]+"/"+tarballname+" $(ls -d "+resname+" Process 3.integrate.log 2>/dev/null) "+" ".join(options.Sherpa_i.ExtraFiles)]
     for jodir in options.jobOptionDir[1:]:
         job.cmds += ["ln -s "+options.jobOptionDir[0]+"/"+tarballname+" "+jodir]
 
@@ -256,7 +274,10 @@ def mkEvntGenTestJob(options, ecm, jodir, prevJob):
     if os.environ["SHERPAVER"].startswith('2.'):
       job.cmds += ["echo 'genSeq.Sherpa_i.Parameters += [ \"LOG_FILE=\" ]' > events.py"]
     job.cmds += ["outputEVNTFile=$(mktemp -u /tmp/XXXXXXXX.pool.root)"]
-    job.cmds += ["Gen_tf.py --ecmEnergy="+str(ecm*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+jodir+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} --maxEvents="+str(options.nEvts)]
+    if os.environ["SHERPAVER"].startswith('2.'):
+      job.cmds += ["Gen_tf.py --ecmEnergy="+str(ecm*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+jodir+" --postInclude=events.py --outputEVNTFile=${outputEVNTFile} --maxEvents="+str(options.nEvts)]
+    else:
+      job.cmds += ["Gen_tf.py --ecmEnergy="+str(ecm*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+jodir+" --outputEVNTFile=${outputEVNTFile} --maxEvents="+str(options.nEvts)]
     job.cmds += ["cat log.generate"]
 
     ## set min events

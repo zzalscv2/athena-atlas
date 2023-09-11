@@ -88,14 +88,14 @@ if process specific libraries not available, i.e. no file "Process/*.db" exists:
 
 next steps happen per center of mass energy (Ecm):
 
-if there is no file "Results.db" for that Ecm, i.e. file "ecmXX/Results.db" does not exist:
+if there is no file "Results.db"/"Results.zip" for that Ecm, e.g. file "ecmXX/Results.db" does not exist:
 * job: _integrate_ (run Sherpa multicore)
-   * performs the integration producing "Results.db"
+   * performs the integration producing "Results.db"/"Results.zip"
 
 always:
 * job: _makeTarball_
    * creates the tarball, including:
-      * Results.db
+      * Results.db (Results.zip in Sherpa3)
       * "Process/" folder
       * logfile "integrate.log" from the integration
 * job: _evgen_
