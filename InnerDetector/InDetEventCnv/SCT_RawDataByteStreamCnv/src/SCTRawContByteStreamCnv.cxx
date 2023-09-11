@@ -48,8 +48,7 @@ StatusCode SCTRawContByteStreamCnv::createRepConst(DataObject* pDataObject, IOpa
 {
   // Get IDC for SCT Raw Data
   SCT_RDO_Container* sctRDOCont{nullptr};
-  SG::fromStorable(pDataObject, sctRDOCont);
-  if (sctRDOCont == nullptr) {
+  if (not SG::fromStorable(pDataObject, sctRDOCont)) {
     ATH_MSG_ERROR( " Can not cast to SCTRawContainer " );
     return StatusCode::FAILURE;
   }
