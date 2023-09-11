@@ -308,7 +308,7 @@ namespace Rivet {
     /// @{
     
     /// @brief Return bin index of x given the provided bin edges. 0=first bin, -1=underflow bin.
-    int getBin(double x, std::vector<double> bins) const {
+    int getBin(double x, const std::vector<double>& bins) const {
       if (bins.size()==0||x<bins[0]) return -1; // should not happen!
       for (size_t i=1;i<bins.size();++i)
         if (x<bins[i]) return i-1;
