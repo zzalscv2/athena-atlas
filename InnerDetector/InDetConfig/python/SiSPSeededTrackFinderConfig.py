@@ -30,31 +30,27 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
         kwargs.setdefault("SeedsTool", acc.popToolsAndMerge(
             SiSpacePointsSeedMakerCfg(flags)))
 
-    # Heavy-ion config
-    kwargs.setdefault("useMBTSTimeDiff", flags.Reco.EnableHI)
-
     if flags.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
         kwargs.setdefault("PRDtoTrackMap", (
             'InDetPRDtoTrackMap' + flags.Tracking.ActiveConfig.extension))
 
-    if flags.Tracking.ActiveConfig.extension == "Forward":
-        kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI)
-        kwargs.setdefault("useZBoundFinding", False)
-    else:
-        kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI)
-        kwargs.setdefault("useZBoundFinding",
-                          flags.Tracking.ActiveConfig.doZBoundary)
+    kwargs.setdefault("useZBoundFinding",
+                      flags.Tracking.ActiveConfig.doZBoundary)
 
-    # Z-coordinates primary vertices finder (only for collisions)
-    if kwargs["useZvertexTool"] and "ZvertexTool" not in kwargs:
-        from InDetConfig.SiZvertexToolConfig import SiZvertexMaker_xkCfg
-        kwargs.setdefault("ZvertexTool", acc.popToolsAndMerge(
-            SiZvertexMaker_xkCfg(flags)))
-
-    if flags.Reco.EnableHI:
-        # Heavy Ion optimization from Igor
+    # Heavy-ion config
+    kwargs.setdefault("useZvertexTool",
+                      flags.Tracking.ActiveConfig.extension == "HeavyIon")
+    if flags.Tracking.ActiveConfig.extension == "HeavyIon":
+        # Optimization from Igor
         kwargs.setdefault("FreeClustersCut", 2)
+        kwargs.setdefault("useMBTSTimeDiff", True)
+
+        # Z-coordinates primary vertices finder (only for collisions)
+        if "ZvertexTool" not in kwargs:
+            from InDetConfig.SiZvertexToolConfig import SiZvertexMaker_xkCfg
+            kwargs.setdefault("ZvertexTool", acc.popToolsAndMerge(
+                SiZvertexMaker_xkCfg(flags)))
 
     acc.addEventAlgo(CompFactory.InDet.SiSPSeededTrackFinder(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
