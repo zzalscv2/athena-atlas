@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISOLATIONCORRECTION_ISOLATIONCORRECTION_H
@@ -170,8 +170,8 @@ class IsolationCorrection : public asg::AsgMessaging{
     int GetEtaBinFine(float eta) const;
     int GetEtaBinCoarse(float eta) const;
 
-    float GetPtCorrectionFactor(float eta, std::vector<float> mc_leakage_corrections_ptr =std::vector<float>(),
-				                        std::vector<float> data_leakage_corrections_ptr= std::vector<float>()) const;
+    float GetPtCorrectionFactor(float eta, const std::vector<float>& mc_leakage_corrections_ptr =std::vector<float>(),
+				                        const std::vector<float>& data_leakage_corrections_ptr= std::vector<float>()) const;
     static float GetPtCorrectionValue(float energy, float etaPointing, float etaCluster, float scale_factor) ;
     float GetPtCorrection_FromGraph(float energy,float etaS2,float etaPointing,float etaCluster,float radius,bool isConversion,ParticleType parttype) const;
     float GetPtCorrection_FromGraph_2015(float energy, float etaS2, float radius, int conversion_flag, int author, float conv_radius, float conv_ratio, ParticleType parttype) const;

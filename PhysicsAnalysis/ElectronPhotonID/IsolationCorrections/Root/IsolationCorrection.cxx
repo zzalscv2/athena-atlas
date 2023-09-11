@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for the ROOT tool of this package
@@ -1158,8 +1158,8 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
   // Returns the appropriate corrections value
   //
   float IsolationCorrection::GetPtCorrectionFactor(float eta,
-						   std::vector<float> mc_leakage_corrections_ptr,
-						   std::vector<float> data_leakage_corrections_ptr) const {
+						   const std::vector<float>& mc_leakage_corrections_ptr,
+						   const std::vector<float>& data_leakage_corrections_ptr) const {
     if(mc_leakage_corrections_ptr.empty() && data_leakage_corrections_ptr.empty())
       return 0.;
 
