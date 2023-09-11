@@ -1122,10 +1122,6 @@ def make_lite(meta_dict):
             for item in list(meta_dict[filename]['/TagInfo']):
                 if item not in keys_to_keep:
                     meta_dict[filename]['/TagInfo'].pop(item)
-
-            # default values:
-            if 'mc_campaign' not in meta_dict[filename]['/TagInfo']:
-                meta_dict[filename]['/TagInfo']['mc_campaign'] = ''
     return meta_dict
 
 
