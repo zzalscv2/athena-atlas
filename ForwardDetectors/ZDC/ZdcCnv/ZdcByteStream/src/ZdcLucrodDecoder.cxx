@@ -74,7 +74,7 @@ StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragme
   // There should be 32 words per bunch crossing: 1/2 word for each of eight samples * 8 channels
   //
   if (nwordsNoTrig % 32 != 0) {
-    msg(MSG::ERROR) << " ERROR: incorrect number of words in ROD data: " << ROD_ndata << endreq;
+    msg(MSG::WARNING) << " WARNING: incorrect number of words in ROD data: " << ROD_ndata << endreq;
     return StatusCode::FAILURE;
   }
 
