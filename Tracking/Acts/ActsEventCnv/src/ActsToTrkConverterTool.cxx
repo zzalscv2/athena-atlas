@@ -525,7 +525,6 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
         if (dim == 1) {
           actsTSOS.calibrated<1>() = measurement.localParameters();
           actsTSOS.calibratedCovariance<1>() = measurement.localCovariance();
-          ;
         } else if (dim == 2) {
           actsTSOS.calibrated<2>() = measurement.localParameters();
           actsTSOS.calibratedCovariance<2>() = measurement.localCovariance();
