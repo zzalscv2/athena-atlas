@@ -1,10 +1,13 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MDTDATA_H
 #define  TRIGL2MUONSA_MDTDATA_H
+
+#include <array>
 #include "Identifier/Identifier.h"
+#include "MuonReadoutGeometry/MdtReadoutElement.h"
 
 namespace TrigL2MuonSA {
 
@@ -13,38 +16,39 @@ namespace TrigL2MuonSA {
 
   struct MdtHitData
   {
-    unsigned int name;
-    int StationEta;
-    int StationPhi;
-    int Multilayer;
-    int Layer;
-    int TubeLayer;
-    int Tube;
-    int Chamber;
+    unsigned int name{0};
+    int StationEta{0};
+    int StationPhi{0};
+    int Multilayer{0};
+    int Layer{0};
+    int TubeLayer{0};
+    int Tube{0};
+    int Chamber{0};
     //
-    double cYmid;
-    double cXmid;
-    double cAmid;
-    double cPhip;
-    double cInCo;
-    double cPhi0;
-    char   cType[4];
+    double cYmid{0.};
+    double cXmid{0.};
+    double cAmid{0.};
+    double cPhip{0.};
+    double cInCo{0.};
+    double cPhi0{0.};
+    std::array<char,4>   cType{};
     //
-    double Z;
-    double R;
-    double DriftTime;
-    double DriftSpace;
-    double DriftSigma;
-    uint32_t OnlineId;
-    uint16_t Adc;
-    uint16_t LeadingCoarseTime;
-    uint16_t LeadingFineTime;
-    uint16_t TrailingCoarseTime;
-    uint16_t TrailingFineTime;
+    double Z{0.};
+    double R{0.};
+    double DriftTime{0.};
+    double DriftSpace{0.};
+    double DriftSigma{0.};
+    uint32_t OnlineId{0};
+    uint16_t Adc{0};
+    uint16_t LeadingCoarseTime{0};
+    uint16_t LeadingFineTime{0};
+    uint16_t TrailingCoarseTime{0};
+    uint16_t TrailingFineTime{0};
     //
-    double Residual;
-    int    isOutlier;
-    Identifier Id;
+    double Residual{0.};
+    int    isOutlier{0};
+    Identifier Id{};
+    const MuonGM::MdtReadoutElement* readEle{nullptr};
 };
   
 // --------------------------------------------------------------------------------
