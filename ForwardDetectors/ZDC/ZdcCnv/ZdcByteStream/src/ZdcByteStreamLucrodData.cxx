@@ -78,7 +78,7 @@ StatusCode ZdcByteStreamLucrodData::fillContainer(std::vector<const ROBFragment*
   
   ATH_MSG_DEBUG(" ZdcByteStreamLucrodData::fillContainer ");
  
-  int nFragments = listOfRobf.size();
+  size_t nFragments = listOfRobf.size();
     
   ATH_MSG_DEBUG(" Number of ROB fragments: " << nFragments);
   
@@ -107,7 +107,11 @@ StatusCode ZdcByteStreamLucrodData::fillContainer(std::vector<const ROBFragment*
 
   for (auto zld : *zdcLucrodDataContainer) {zld->str();}
 
-  return StatusCode::SUCCESS;
+  if (zdcLucrodDataContainer->size() == nFragments)
+    return StatusCode::SUCCESS;
+  else
+    return StatusCode::FAILURE;
+
 }
 
 StatusCode ZdcByteStreamLucrodData::finalize() { 
