@@ -9,6 +9,7 @@ def HImode(flags):
     flags.Reco.EnableBTagging=True
     flags.Jet.WriteToAOD=True # this is to save btagging to xAOD
     flags.Egamma.doForward=False
+    flags.Calo.FwdTower.WriteToAOD=False
     flags.HeavyIon.Egamma.doSubtractedClusters=True
     flags.HeavyIon.Jet.ApplyTowerEtaPhiCorrection=True
     flags.HeavyIon.Jet.HarmonicsForSubtraction=[2,3,4]
@@ -38,5 +39,4 @@ def UPCmode(flags):
     #UPC dedicated flags
     flags.Tracking.doUPC=True
     flags.Egamma.doLowMu=True
-    flags.Tracking.doTrackSegmentsPixel=True
     flags.HeavyIon.Jet.WriteHIClusters = False

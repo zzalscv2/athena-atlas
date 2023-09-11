@@ -95,6 +95,7 @@ def createCaloConfigFlags():
     # Flags from Forward Towers:
     ccf.addFlag('Calo.FwdTower.prepareLCW', True)
     ccf.addFlag('Calo.FwdTower.clusterRange', 2.5)
+    ccf.addFlag('Calo.FwdTower.WriteToAOD', True)
     
     # Flag for thinning negative energy clusters
     ccf.addFlag('Calo.Thin.NegativeEnergyCaloClusters', True)
