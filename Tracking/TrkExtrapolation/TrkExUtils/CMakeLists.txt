@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkExUtils )
@@ -13,6 +13,12 @@ atlas_add_library( TrkExUtils
 		           TrkSurfaces TrkEventPrimitives TrkMaterialOnTrack TrkNeutralParameters TrkParameters CxxUtils
                    TrkPatternParameters )
 
+atlas_install_python_modules( python/*.py)
+
+atlas_add_test( MaterialInteraction_pdg_comparison
+    SCRIPT python -m TrkExUtils.pdg_comparison
+)
+
 atlas_add_test( MaterialInteraction
    SOURCES test/MaterialInteractionTest.cxx
    LINK_LIBRARIES
@@ -22,3 +28,5 @@ atlas_add_test( MaterialInteraction
    GTest::gtest_main
    POST_EXEC_SCRIPT noerror.sh
 )
+
+
