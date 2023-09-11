@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonClusterSegmentFinder.h"
@@ -401,9 +401,9 @@ namespace Muon {
         }
     }
 
-    void MuonClusterSegmentFinder::resolveCollections(std::map<int, bool> themap, candEvent* theEvent) const {
+    void MuonClusterSegmentFinder::resolveCollections(const std::map<int, bool>& themap, candEvent* theEvent) const {
         for (unsigned int i = 0; i < theEvent->keyVector().size(); i++) {
-            if (themap[i] == true) {
+            if (themap.at(i) == true) {
                 theEvent->resolvedTrackSeeds().push_back(std::make_pair(theEvent->trackSeeds()[i].first, theEvent->trackSeeds()[i].second));
                 theEvent->resolvedhits().push_back(theEvent->hits()[i]);
                 theEvent->resolvedTracks()->push_back(new Trk::Track(*(theEvent->segTrkColl()->at(i))));
