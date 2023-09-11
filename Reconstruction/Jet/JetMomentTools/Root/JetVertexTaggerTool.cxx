@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- ////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexTaggerTool.cxx
@@ -211,7 +211,7 @@ float JetVertexTaggerTool::updateJvt(const xAOD::Jet& jet) const {
   else
   {
     HSvertex = jet.getAssociatedObject<xAOD::Vertex>("OriginVertex");
-    if (!HSvertex) // nullptr if the attribute doesn't exist, nothing to do as behaviour is same as other method, checked below and return -1
+    if (HSvertex) // nullptr if the attribute doesn't exist, nothing to do as behaviour is same as other method, checked below and return -1
       ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
   }
   
