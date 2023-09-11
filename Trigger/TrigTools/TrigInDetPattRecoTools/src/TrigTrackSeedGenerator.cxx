@@ -204,6 +204,12 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 
   if(vZv.empty()) return;
 
+  // With the vertex z information, there is no need to use the same z restriction as the ROI,
+  // but reasonable minimum and maximum bounds which should not be exceeded regardless of the
+  // z position of the vertex should still be set.
+  float roiZMinus = -225;
+  float roiZPlus  = 225;
+
   int nLayers = (int) m_settings.m_layerGeometry.size();
 
  
@@ -239,10 +245,10 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 	    m_nInner = 0;
 	    m_nOuter = 0;
 
-	    m_zMinus = zVertex - m_settings.m_zvError;
-	    m_zPlus = zVertex + m_settings.m_zvError;
-      m_zPlusEndcap = zVertex + m_settings.m_zvErrorEndcap;
-      m_zMinusEndcap = zVertex - m_settings.m_zvErrorEndcap;
+	    m_zMinus = std::max(zVertex - m_settings.m_zvError, roiZMinus);
+	    m_zPlus = std::min(zVertex + m_settings.m_zvError, roiZPlus);
+      m_zPlusEndcap = std::min(zVertex + m_settings.m_zvErrorEndcap, roiZPlus);
+      m_zMinusEndcap = std::max(zVertex - m_settings.m_zvErrorEndcap, roiZMinus);
 
 	    for(int layerJ=0;layerJ<nLayers;layerJ++) {//loop over other layers
 
