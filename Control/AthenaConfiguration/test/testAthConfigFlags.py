@@ -23,6 +23,9 @@ class BasicTests(FlagsSetup):
         self.assertFalse( self.flags.A.B.C, "Can't read A.B.C flag")
         self.flags.A.B.C = True
         self.assertTrue( self.flags.A.B.C, "Flag value not changed")
+        # test setitem
+        self.flags['A'].B['C'] = False
+        self.assertFalse( self.flags.A.B.C, "Flag value not chenged")
 
     def test_wrongAccess(self):
         """Access to the flag that are missnames should give an exception"""
@@ -164,6 +167,14 @@ class BasicTests(FlagsSetup):
     def test_asdict(self):
         adict = self.flags.A.asdict()
         self.assertEqual(self.flags.A.B.C, adict['B']['C'])
+        full_dict = self.flags.asdict()
+        self.assertEqual(self.flags.A.B.C, full_dict['A']['B']['C'])
+
+    def test_iterator(self):
+        self.assertTrue('A' in self.flags)
+        self.assertFalse('Z' in self.flags)
+        self.assertTrue('B' in self.flags.A)
+        self.assertFalse('Z' in self.flags.A)
 
 class TestFlagsSetupDynamic(FlagsSetup):
     def setUp(self):

@@ -99,6 +99,23 @@ class CfgFlag(object):
             except TypeError:
                 return False
 
+
+def _asdict(iterator):
+    """Flags to dict converter
+
+    Used by both FlagAddress and AthConfigFlags. The input must be an
+    iterator over flags to be included in the dict.
+
+    """
+    outdict = {}
+    for key, item in iterator:
+        x = outdict
+        subkeys = key.split('.')
+        for subkey in subkeys[:-1]:
+            x = x.setdefault(subkey,{})
+        x[subkeys[-1]] = item
+    return outdict
+
 class FlagAddress(object):
     def __init__(self, f, name):
         if isinstance(f, AthConfigFlags):
@@ -143,11 +160,30 @@ class FlagAddress(object):
         merged = self._name + "." + name
         return self._flags._get(merged)
 
+    def __setitem__(self, name, value):
+        print(f"setting {name} to {value}")
+        setattr(self, name, value)
+
     def __delitem__(self, name):
         merged = self._name + "." + name
         del self._flags[merged]
 
+    def __iter__(self):
+        self._flags.loadAllDynamicFlags()
+        used = set()
+        for flag in self._flags._flagdict.keys():
+            if flag.startswith(self._name.rstrip('.') + '.'):
+                ntrim = len(self._name) + 1
+                remaining = flag[ntrim:].split('.',1)[0]
+                if remaining not in used:
+                    yield remaining
+                    used.add(remaining)
+
     def _subflag_itr(self):
+        """Subflag iterator specialized for this address
+
+        """
+        self._flags.loadAllDynamicFlags()
         address = self._name
         for key in self._flags._flagdict.keys():
             if key.startswith(address.rstrip('.') + '.'):
@@ -166,16 +202,7 @@ class FlagAddress(object):
         json or yaml.
 
         """
-        self._flags.loadAllDynamicFlags()
-        outdict = {}
-        for key, item in self._subflag_itr():
-            x = outdict
-            subkeys = key.split('.')
-            for subkey in subkeys[:-1]:
-                x = x.setdefault(subkey,{})
-            x[subkeys[-1]] = item
-        return outdict[self._name]
-
+        return _asdict(self._subflag_itr())[self._name]
 
 
 class AthConfigFlags(object):
@@ -241,6 +268,9 @@ class AthConfigFlags(object):
     def __getitem__(self, name):
         return getattr(self, name)
 
+    def __setitem__(self, name, value):
+        setattr(self, name, value)
+
     def __delitem__(self, name):
         self._tryModify()
         self.loadAllDynamicFlags()
@@ -248,6 +278,43 @@ class AthConfigFlags(object):
             if key.startswith(name):
                 del self._flagdict[key]
         self._categoryCache.clear()
+
+    def __iter__(self):
+        self.loadAllDynamicFlags()
+        used = set()
+        for flag in self._flagdict:
+            first = flag.split('.',1)[0]
+            if first not in used:
+                yield first
+                used.add(first)
+
+    def asdict(self):
+        """Convert to a python dictionary
+
+        This is identical to the `asdict` in FlagAddress, but for all
+        the flags.
+
+        """
+        return _asdict(self._subflag_itr())
+
+    def _subflag_itr(self):
+        """Subflag iterator for all flags
+
+        This is used by the asdict() function.
+        """
+        self.loadAllDynamicFlags()
+        for key in self._flagdict.keys():
+            # Lots of modules are missing in analysis releases. I
+            # tried to prevent imports using the _addFlagsCategory
+            # function which checks if some module exists, but this
+            # turned in to quite a rabbit hole. Catching and ignoring
+            # the missing module exception seems to work, even if it's
+            # not pretty.
+            try:
+                yield key, getattr(self, key)
+            except ModuleNotFoundError as err:
+                _msg.debug(f'missing module: {err}')
+                pass
 
     def addFlag(self, name, setDef, enum=None, help=None):
         self._tryModify()
