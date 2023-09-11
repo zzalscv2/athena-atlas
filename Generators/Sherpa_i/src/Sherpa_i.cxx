@@ -81,16 +81,16 @@ StatusCode Sherpa_i::genInitialize(){
   #ifdef IS_SHERPA_3
   ATH_MSG_DEBUG("... adapting output level");
   if( msg().level()==MSG::FATAL || msg().level()==MSG::ERROR || msg().level()==MSG::WARNING ){
-    m_inputfiles["Base.yaml"] += "EVT_OUTPUT: 0 \n";
+    m_inputfiles["Base.yaml"] += "\nEVT_OUTPUT: 0 \n";
   }
   else if(msg().level()==MSG::INFO){
-    m_inputfiles["Base.yaml"] += "EVT_OUTPUT: 2 \n";
+    m_inputfiles["Base.yaml"] += "\nEVT_OUTPUT: 2 \n";
   }
   else if(msg().level()==MSG::DEBUG){
-    m_inputfiles["Base.yaml"] += "EVT_OUTPUT: 15 \n";
+    m_inputfiles["Base.yaml"] += "\nEVT_OUTPUT: 15 \n";
   }
   else{
-    m_inputfiles["Base.yaml"] += "EVT_OUTPUT: 15 \n";
+    m_inputfiles["Base.yaml"] += "\nEVT_OUTPUT: 15 \n";
   }
 
   ATH_MSG_DEBUG("... writing input files to directory");

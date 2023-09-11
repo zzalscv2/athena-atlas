@@ -1,5 +1,10 @@
 evgenConfig.tune = "NNPDF3.0 NNLO"
 
+import os
+if os.environ["SHERPAVER"].startswith('3.'):
+
+  raise Exception("Please use the PDF4LHC21 base fragment for Sherpa v3.")
+
 genSeq.Sherpa_i.Parameters += [
     "PDF_LIBRARY=LHAPDFSherpa",
     "USE_PDF_ALPHAS=1",

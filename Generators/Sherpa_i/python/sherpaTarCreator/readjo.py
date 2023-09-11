@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys, os, glob
 
@@ -55,7 +55,8 @@ def readJO(options):
     #some input variables which effect genSeq.Sherpa_i.Parameters
     global runArgs
     global pdfgridpath
-    runArgs = dotdict({"jobConfig":["Run.dat"],"ecmEnergy":1000.*float(options.ecm[0])})
+    configname = "Sherpa.yaml" if os.environ["SHERPAVER"].startswith('3.') else "Run.dat"
+    runArgs = dotdict({"jobConfig":[configname],"ecmEnergy":1000.*float(options.ecm[0])})
     pdfgridpath = "todo"
 
     #some dummy variables

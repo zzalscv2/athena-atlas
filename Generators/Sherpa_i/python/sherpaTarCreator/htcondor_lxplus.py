@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import subprocess,sys,os
 
@@ -47,7 +47,7 @@ def finalizeJobs(dryRun):
         for child in children:
             dagfile += " "+child
         dagfile += "\n"
-    
+
     #save file
     with open("dagfile.dag", 'w') as f:
         f.write(dagfile)

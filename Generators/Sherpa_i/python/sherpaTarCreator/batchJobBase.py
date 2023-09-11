@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os, stat
 
 class batchJobBase:
   """A class containing all information necessary to run given bash commands in an arbitrary batch system."""
-  
+
   def __init__(self, name, hours=0, nCores=1, memMB=0, basedir=""):
     self.name = name
     self.cmds = []
