@@ -65,7 +65,7 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
 {
     // Initialize read variables
     vector<int> layerCounts((int)SiliconTech::nTechs * static_cast<int>(DetectorZone::nZones)); // pixel_barrel, pixel_EC, SCT_barrel, SCT_EC
-    std::string line, silicon, detReg, layerKey, geoKey;
+    string line, silicon, detReg, layerKey, geoKey;
     bool ok = true;
 
     // Read Geometry Version
@@ -73,11 +73,9 @@ void FPGATrackSimPlaneMap::allocateMap(ifstream & fin, uint32_t stage)
     ANA_MSG_VERBOSE(line);
     istringstream sline(line);
     ok = ok && (sline >> geoKey);
-    if (geoKey == "ATLAS-P2-ITK-22-02-00") {
-        m_diskIndex = {0, 15, 21, 44, 50, 61, 69, 77, 86};
-        // this is hack, the idices above are for "ATLAS-P2-RUN4-03-00-00" m_diskIndex = {0,17,47,58,66};
-    } else if (geoKey == "ATLAS-P2-ITK-23-00-01") {m_diskIndex = {0,15,44,50,61,69,77,86};
-    } else {ANA_MSG_ERROR("Bad geometry version " << geoKey); }
+    if (geoKey == "ATLAS-P2-ITK-22-02-00") m_diskIndex = {0,17,47,58,66};
+    else if (geoKey == "ATLAS-P2-ITK-23-00-01") m_diskIndex = {0,15,44,50,61,69,77,86};
+    else ANA_MSG_ERROR("Bad geometry version " << geoKey);
 
     ANA_MSG_INFO("Allocating map for geometry " << geoKey <<" diskIndex size="<<m_diskIndex.size());
 
