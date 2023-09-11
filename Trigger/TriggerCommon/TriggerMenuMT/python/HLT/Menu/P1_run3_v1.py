@@ -606,6 +606,11 @@ def addCosmicP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBNoise_L1EM3_EMPTY',  l1SeedThresholds=['EM3'],  stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_EMPTY',  l1SeedThresholds=['EM7'], stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_FIRSTEMPTY',  l1SeedThresholds=['EM7'],  stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
+
+        # ZDC RPD LED streamers (ATR-26826)
+        ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ0', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ1', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
+        ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ2', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
     ]
 
     chainsP1['Streaming'] = [
