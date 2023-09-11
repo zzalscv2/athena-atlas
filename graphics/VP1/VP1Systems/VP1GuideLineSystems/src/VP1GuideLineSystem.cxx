@@ -56,23 +56,23 @@ public:
 			       lastemit_pixel(InDetProjFlags::NoProjections),
 			       lastemit_sct(InDetProjFlags::NoProjections),
 			       lastemit_trt(InDetProjFlags::NoProjections) {}
-  VP1GuideLineSystem *theclass;
-  GuideSysController * controller;
-  VP1CoordinateAxes * coordinateaxes;
-  VP1Floor * floor;
-  VP1CartesianGrid * cartesiangrid;
-  VP1CylindricalGrid * cylindricalgrid;
-  VP1Letters * letters;
-  VP1People  * people;
-  VP1EtaCone * etacone1;
-  VP1EtaCone * etacone2;
-  VP1EtaCone * etacone3;
-  VP1TrackingVolumes * trackingVolumes;
+  VP1GuideLineSystem *theclass{};
+  GuideSysController * controller{};
+  VP1CoordinateAxes * coordinateaxes{};
+  VP1Floor * floor{};
+  VP1CartesianGrid * cartesiangrid{};
+  VP1CylindricalGrid * cylindricalgrid{};
+  VP1Letters * letters{};
+  VP1People  * people{};
+  VP1EtaCone * etacone1{};
+  VP1EtaCone * etacone2{};
+  VP1EtaCone * etacone3{};
+  VP1TrackingVolumes * trackingVolumes{};
   VP1Lines * lines = nullptr;
 
-  ProjectionSurfacesHelper * projsurfhelper_pixel;
-  ProjectionSurfacesHelper * projsurfhelper_sct;
-  ProjectionSurfacesHelper * projsurfhelper_trt;
+  ProjectionSurfacesHelper * projsurfhelper_pixel{};
+  ProjectionSurfacesHelper * projsurfhelper_sct{};
+  ProjectionSurfacesHelper * projsurfhelper_trt{};
   InDetProjFlags::InDetProjPartsFlags lastemit_pixel;
   InDetProjFlags::InDetProjPartsFlags lastemit_sct;
   InDetProjFlags::InDetProjPartsFlags lastemit_trt;
