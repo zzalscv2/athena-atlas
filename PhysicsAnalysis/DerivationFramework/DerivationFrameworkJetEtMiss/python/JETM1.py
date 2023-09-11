@@ -225,7 +225,7 @@ def JETM1ExtraContentCfg(ConfigFlags):
     from JetRecConfig.JetRecConfig import JetRecCfg, getModifier
     from JetRecConfig.JetConfigFlags import jetInternalFlags
     from JetRecConfig.StandardJetMods import stdJetModifiers
-    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4UFOCSSKNoPtCut
+    from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut
 
     #=======================================
     # Schedule additional jet decorations
@@ -247,9 +247,14 @@ def JETM1ExtraContentCfg(ConfigFlags):
         jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoNoPtCut]
 
     #=======================================
-    # CSSK R = 0.4 EMPFlow and UFO jets
+    # CSSK R = 0.4 UFO jets
     #=======================================
-    jetList += [AntiKt4EMPFlowCSSKNoPtCut, AntiKt4UFOCSSKNoPtCut]
+    if ConfigFlags.Input.isMC:
+        from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut
+        jetList += [AntiKt4UFOCSSKNoPtCut]
+    else:
+        from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
+        jetList += [AntiKt4UFOCSSK]
 
     jetInternalFlags.isRecoJob = True
 
@@ -367,7 +372,9 @@ def JETM1Cfg(ConfigFlags):
     JETM1SlimmingHelper.IncludeBPhysTriggerContent = False
     JETM1SlimmingHelper.IncludeMinBiasTriggerContent = False
 
-    jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKNoPtCutJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"] 
+    jetOutputList = ["AntiKt4PV0TrackJets", "AntiKt4UFOCSSKJets"]
+    if ConfigFlags.Input.isMC:
+        jetOutputList = ["AntiKt4PV0TrackJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoNoPtCutJets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM1SlimmingHelper, jetOutputList, JETM1SlimmingHelper.SmartCollections)
 
