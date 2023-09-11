@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PhotonVertexSelection_IPhotonVertexSelectionTool_h
@@ -56,7 +56,7 @@ namespace CP {
 
     /// Given a list of photons, return the MLPs of all vertices in the event 
     /// sorted in descending order
-    virtual std::vector< std::pair<const xAOD::Vertex*, float> > getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv = false, yyVtxType* vtxCase = nullptr, FailType* failType = nullptr) const = 0;
+    virtual std::vector< std::pair<const xAOD::Vertex*, float> > getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv = false, bool noDecorate = false, yyVtxType* vtxCase = nullptr, FailType* failType = nullptr) const = 0;
 
     /// Return the last case treated:
     /// 0=conv track associated to vertex,

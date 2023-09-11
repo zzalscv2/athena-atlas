@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -105,7 +105,7 @@ StatusCode DerivationFramework::DiphotonVertexDecorator::addBranches() const
   
   if (ph1 and ph2)
   {
-    vxResult = m_photonVertexSelectionTool->getVertex( *( vertexPhotons.asDataVector()) , m_ignoreConv, &yyvertexVtxType, &vertexFailType );
+    vxResult = m_photonVertexSelectionTool->getVertex( *( vertexPhotons.asDataVector()) , m_ignoreConv, true, &yyvertexVtxType, &vertexFailType );
     if(!vxResult.empty()) {
       newPV = vxResult[0].first; //output of photon vertex selection tool must be sorted according to score
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -158,13 +158,13 @@ namespace CP {
 
   //____________________________________________________________________________
   std::vector<std::pair<const xAOD::Vertex*, float> >
-  PhotonVertexSelectionTool::getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv, yyVtxType* vtxCasePtr, FailType* failTypePtr) const
+  PhotonVertexSelectionTool::getVertex(const xAOD::EgammaContainer &egammas, bool ignoreConv, bool noDecorate, yyVtxType* vtxCasePtr, FailType* failTypePtr) const
   {
     const xAOD::Vertex *vertex = nullptr;
     std::vector<std::pair<const xAOD::Vertex*, float> > vertexMLP;
     yyVtxType vtxCase = yyVtxType::Unknown; 
     FailType failType = FailType::NoFail;
-    if (getVertexImp( egammas, vertex, ignoreConv, vertexMLP, vtxCase, failType ).isSuccess()) {
+    if (getVertexImp( egammas, vertex, ignoreConv, noDecorate, vertexMLP, vtxCase, failType ).isSuccess()) {
       std::sort(vertexMLP.begin(), vertexMLP.end(), sortMLP);
     }
     if(vtxCasePtr!=nullptr)
@@ -183,12 +183,13 @@ namespace CP {
     std::vector<std::pair<const xAOD::Vertex*, float> > vertexMLP;
     yyVtxType vtxcase = yyVtxType::Unknown; 
     FailType failType = FailType::NoFail;
-    return getVertexImp( egammas, prime_vertex, ignoreConv, vertexMLP, vtxcase, failType );
+    return getVertexImp( egammas, prime_vertex, ignoreConv, false, vertexMLP, vtxcase, failType );
   } 
 
   StatusCode PhotonVertexSelectionTool::getVertexImp(const xAOD::EgammaContainer &egammas, 
                                                      const xAOD::Vertex* &prime_vertex, 
-                                                     bool ignoreConv, 
+                                                     bool ignoreConv,
+                                                     bool noDecorate,
                                                      std::vector<std::pair<const xAOD::Vertex*, float> >&  vertexMLP, yyVtxType& vtxCase, FailType& fail) const
   {
     vtxCase = yyVtxType::Unknown;
@@ -202,7 +203,7 @@ namespace CP {
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer);
 
 
-    if (!decorateInputs(egammas).isSuccess()){   
+    if (!noDecorate && !decorateInputs(egammas).isSuccess()){   
       return StatusCode::FAILURE;
     }
 
