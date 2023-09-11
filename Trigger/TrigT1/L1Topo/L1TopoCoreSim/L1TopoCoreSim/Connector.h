@@ -69,6 +69,9 @@ namespace TCS {
       void toggleInputOverflow(const bool value);
       bool hasInputOverflow() const { return m_hasInputOverflow; }
 
+      void toggleAmbiguity(const bool value);
+      bool hasAmbiguity() const { return m_hasAmbiguity; }
+
    protected: // functions
 
       friend class TopoSteering;
@@ -106,6 +109,8 @@ namespace TCS {
          @brief whether the input data came with an overflow bit
        */
       bool m_hasInputOverflow;
+
+      bool m_hasAmbiguity;
 
    private:
 

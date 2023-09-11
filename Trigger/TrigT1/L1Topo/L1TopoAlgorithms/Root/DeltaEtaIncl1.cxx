@@ -108,6 +108,7 @@ TCS::DeltaEtaIncl1::processBitCorrect( const std::vector<TCS::TOBArray const *> 
    if(input.size() == 1) {
        unsigned int nLeading = p_NumberLeading1;
        unsigned int nLeading2 = p_NumberLeading2;
+       if (nLeading < input[0]->size() && nLeading2 < input[0]->size()) { output[0]->setAmbiguityFlag(false); }
        for( TOBArray::const_iterator tob1 = input[0]->begin();
             tob1 != input[0]->end() && distance( input[0]->begin(), tob1) < nLeading;
             ++tob1)
@@ -117,6 +118,12 @@ TCS::DeltaEtaIncl1::processBitCorrect( const std::vector<TCS::TOBArray const *> 
                     tob2 != input[0]->end() && distance( input[0]->begin(), tob2) < nLeading2;
                     ++tob2) {
                    for(unsigned int i=0; i < numberOutputBits(); ++i) {
+                   if (input[0]->size() >= nLeading2+1) {
+                        TCS::TOBArray::const_iterator tob3 = tob2; ++tob3;
+                        if ((*tob2)->Et() == (*tob3)->Et() && distance(input[0]->begin(), tob2) == nLeading2 - 1) { 
+                            output[0]->setAmbiguityFlag(true); 
+                        }
+                   }
                    bool accept = false;
                    if( parType_t((*tob1)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
                    if( parType_t((*tob2)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
@@ -162,6 +169,7 @@ TCS::DeltaEtaIncl1::process( const std::vector<TCS::TOBArray const *> & input,
        //LOG << "input size     : " << input[0]->size() << endl;
        unsigned int nLeading = p_NumberLeading1;
        unsigned int nLeading2 = p_NumberLeading2;
+       if (nLeading < input[0]->size() && nLeading2 < input[0]->size()) { output[0]->setAmbiguityFlag(false); }
        for( TOBArray::const_iterator tob1 = input[0]->begin();
             tob1 != input[0]->end() && distance( input[0]->begin(), tob1) < nLeading;
             ++tob1)
@@ -171,6 +179,12 @@ TCS::DeltaEtaIncl1::process( const std::vector<TCS::TOBArray const *> & input,
                     tob2 != input[0]->end() && distance( input[0]->begin(), tob2) < nLeading2;
                     ++tob2) {
                    for(unsigned int i=0; i < numberOutputBits(); ++i) {
+                   if (input[0]->size() >= nLeading2+1) {
+                        TCS::TOBArray::const_iterator tob3 = tob2; ++tob3;
+                        if ((*tob2)->Et() == (*tob3)->Et() && distance(input[0]->begin(), tob2) == nLeading2 - 1) { 
+                            output[0]->setAmbiguityFlag(true); 
+                        }
+                   }
                    bool accept = false;
                    if( parType_t((*tob1)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut
                    if( parType_t((*tob2)->Et()) <= std::min(p_MinET1[i],p_MinET2[i])) continue; // ET cut

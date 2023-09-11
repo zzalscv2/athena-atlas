@@ -265,6 +265,8 @@ TopoSteering::executeSortingConnector(TCS::SortingConnector *conn) {
 
    sc &= executeSortingAlgorithm(alg, conn->inputConnector(), sortedOutput);
 
+   conn->toggleAmbiguity(sortedOutput->ambiguityFlag());
+
    TRG_MSG_DEBUG("  ... executing sorting connector '" << conn->name() << "' -> attaching '" << sortedOutput->name() << "' of size " << sortedOutput->size());
 
    conn->attachOutputData(sortedOutput);
@@ -288,7 +290,8 @@ TopoSteering::executeDecisionConnector(TCS::DecisionConnector *conn) {
       sc &= executeConnector(inputConn);
       conn->toggleInputOverflow(conn->hasInputOverflow() ||
                                 inputConn->hasInputOverflow());
-
+      conn->toggleAmbiguity(conn->hasAmbiguity() ||
+                                inputConn->hasAmbiguity());
    }
    // execute
    TCS::DecisionAlg* alg = conn->decisionAlgorithm();
@@ -298,14 +301,17 @@ TopoSteering::executeDecisionConnector(TCS::DecisionConnector *conn) {
    // the output is one TOBArray per output line
    vector<TOBArray *> output( alg->numberOutputBits() );
 
-   for(unsigned int i=0; i<alg->numberOutputBits(); ++i)
+   for(unsigned int i=0; i<alg->numberOutputBits(); ++i) {
       output[i] = new TOBArray(conn->triggers()[i].name());
+      output[i]->setAmbiguityFlag(conn->hasAmbiguity());
+   }
 
    sc &= executeDecisionAlgorithm(alg, conn->inputConnectors(), output, conn->m_decision);
 
    TRG_MSG_DEBUG("  ... executing decision connector '" << conn->name() << "' -> attaching output data:");
    for(TOBArray const * outarr : output) {
       TRG_MSG_DEBUG("           data '" << outarr->name() << "' of size " << outarr->size());
+      conn->toggleAmbiguity(outarr->ambiguityFlag());
    }
 
    conn->attachOutputData(output);
@@ -323,6 +329,7 @@ TopoSteering::executeDecisionConnector(TCS::DecisionConnector *conn) {
        }
    }
    conn->m_decision.setOverflow(conn->hasInputOverflow() || sortOverflow);
+   conn->m_decision.setAmbiguity(conn->hasAmbiguity());
    return sc;
 }
 

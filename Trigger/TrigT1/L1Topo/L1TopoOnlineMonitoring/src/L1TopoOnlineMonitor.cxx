@@ -178,6 +178,7 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
 
   std::bitset<s_nTopoCTPOutputs>& triggerBitsSim = DecisionBits::createBits(decisionBits.triggerBitsSim);
   std::bitset<s_nTopoCTPOutputs>& overflowBitsSim = DecisionBits::createBits(decisionBits.overflowBitsSim);
+  std::bitset<s_nTopoCTPOutputs>& ambiguityBitsSim = DecisionBits::createBits(decisionBits.ambiguityBitsSim);
   std::unordered_map<unsigned,std::bitset<s_nTopoCTPOutputs>> multWeightsMap;
   for(const auto l1topo_dec : * cont){
     ATH_MSG_DEBUG( "Reading L1Topo EDM:: Connection ID: " << l1topo_dec->connectionId() << " Clock: " << l1topo_dec->clock() << " Bit-length: " << l1topo_dec->bitWidth() << " Word: " << l1topo_dec->topoWord() << " Word64: " << l1topo_dec->topoWord64() );
@@ -188,9 +189,15 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
       for(unsigned int i=0; i<32; ++i) {
         uint32_t mask = 0x1; mask <<= i;
         if ((l1topo_dec->topoWord() & mask) !=0) {
-          topoword.push_back(32*l1topo_dec->clock()+i);
-          uint32_t pos = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==2 ? 0 : 2))+i;
-          triggerBitsSim[pos] = ((!decisionBits.triggerBits.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
+          if (l1topo_dec->connectionId()==2 || l1topo_dec->connectionId()==3) { // TOPO2EL and TOPO3EL (L1TopoCommon/Types.h)
+            topoword.push_back(32*l1topo_dec->clock()+i);
+            uint32_t pos = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==2 ? 0 : 2))+i;
+            triggerBitsSim[pos] = ((!decisionBits.triggerBits.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
+          }
+          if (l1topo_dec->connectionId()==22 || l1topo_dec->connectionId()==23) { // AMBIGUITYTOPO2EL and AMBIGUITYTOPO3EL
+            uint32_t pos_ambiguity = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==22 ? 0 : 2))+i;
+            ambiguityBitsSim[pos_ambiguity] = ((!decisionBits.ambiguityBitsSim.has_value() || m_forceCTPasHdw) && m_ctpIds[pos_ambiguity]>=512) ? false : true;
+          }
 	}
 	if ((l1topo_dec->topoWordOverflow() & mask) !=0) {
 	  topowordOverflow.push_back(32*l1topo_dec->clock()+i);
@@ -241,10 +248,13 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vecto
   
   std::vector<size_t> triggerBitIndicesSim = bitsetIndices(triggerBitsSim);
   std::vector<size_t> overflowBitIndicesSim = bitsetIndices(overflowBitsSim);
+  std::vector<size_t> ambiguityBitIndicesSim = bitsetIndices(ambiguityBitsSim);
   auto monTopoSim = Monitored::Collection("TopoSim", triggerBitIndicesSim);
   auto monTopoSimOverflow = Monitored::Collection("TopoSim_overflows", overflowBitIndicesSim);
+  auto monTopoSimAmbiguity = Monitored::Collection("TopoSim_ambiguity", ambiguityBitIndicesSim);
   Monitored::Group(m_monTool,monTopoSim);
   Monitored::Group(m_monTool,monTopoSimOverflow);
+  Monitored::Group(m_monTool,monTopoSimAmbiguity);
   
   return StatusCode::SUCCESS;
 }
@@ -476,12 +486,20 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
   std::bitset<s_nTopoCTPOutputs> overflowBitsHdwSim = overflowBitsHdw & overflowBitsSim;
   std::bitset<s_nTopoCTPOutputs> overflowBitsAny = overflowBitsHdw | overflowBitsSim;
 
+  std::bitset<s_nTopoCTPOutputs>& ambiguityBitsSim = decisionBits.ambiguityBitsSim.value();
+  std::bitset<s_nTopoCTPOutputs> ambiguitySimANDHdw = ambiguityBitsSim & triggerBitsHdwSim;
+  std::bitset<s_nTopoCTPOutputs> ambiguityMismatch = ambiguityBitsSim & (triggerBitsSimNotHdw | triggerBitsHdwNotSim);
+
   std::vector<size_t> triggerBitIndicesSimNotHdw = bitsetIndices(triggerBitsSimNotHdw);
   std::vector<size_t> triggerBitIndicesHdwNotSim = bitsetIndices(triggerBitsHdwNotSim);
+  std::vector<size_t> ambiguitySimANDHdwBitIndices = bitsetIndices(ambiguitySimANDHdw);
+  std::vector<size_t> ambiguityMismatchBitIndices = bitsetIndices(ambiguityMismatch);
   auto monSimNotHdw = Monitored::Collection("SimNotHdwL1TopoResult", triggerBitIndicesSimNotHdw);
   auto monHdwNotSim = Monitored::Collection("HdwNotSimL1TopoResult", triggerBitIndicesHdwNotSim);
+  auto monAmbiguitySimANDHdw = Monitored::Collection("Ambiguity_SimANDHdwDecisions", ambiguitySimANDHdwBitIndices);
+  auto monAmbiguityMismatch = Monitored::Collection("Ambiguity_DecisionMismatches", ambiguityMismatchBitIndices);
 
-  Monitored::Group(m_monTool, monSimNotHdw, monHdwNotSim);
+  Monitored::Group(m_monTool, monSimNotHdw, monHdwNotSim, monAmbiguitySimANDHdw, monAmbiguityMismatch);
 
   float rate=0;
   float rate_overflow=0;
@@ -491,78 +509,80 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
     auto mon_weight = Monitored::Scalar<float>("Phase1TopoWeight_"+std::to_string(i));
     auto mon_OFweight = Monitored::Scalar<float>("Phase1TopoOFWeight_"+std::to_string(i));
     for (size_t j=0;j<32;j++) {
-      mon_trig = static_cast<unsigned>(j);
-      if (overflowBitsHdw[32*i+j] == 1 || overflowBitsSim[32*i+j] == 1) {
-        m_overflow_countHdwNotSim[32*i+j]+=overflowBitsHdwNotSim[32*i+j];
-        m_overflow_countSimNotHdw[32*i+j]+=overflowBitsSimNotHdw[32*i+j];
-        m_overflow_countHdwSim[32*i+j]+=overflowBitsHdwSim[32*i+j];
-        m_overflow_countHdw[32*i+j]+=overflowBitsHdw[32*i+j];
-        m_overflow_countSim[32*i+j]+=overflowBitsSim[32*i+j];
-        m_overflow_countAny[32*i+j]+=overflowBitsAny[32*i+j];
-      }
-      else {
-        m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
-        m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];
-        m_countHdwSim[32*i+j]+=triggerBitsHdwSim[32*i+j];
-        m_countHdw[32*i+j]+=triggerBitsHdw[32*i+j];
-        m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
-        m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
-      }     
-      rate = m_countHdw[32*i+j]>0 ? m_countHdwNotSim[32*i+j]/m_countHdw[32*i+j] : 0;
-      if (rate != m_rateHdwNotSim[32*i+j]) {
-        mon_match = 0;
-        mon_weight = rate-m_rateHdwNotSim[32*i+j];
-        m_rateHdwNotSim[32*i+j] = rate;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
-      }
-      rate_overflow = m_overflow_countHdw[32*i+j]>0 ? m_overflow_countHdwNotSim[32*i+j]/m_overflow_countHdw[32*i+j] : 0;
-      if (rate_overflow != m_overflow_rateHdwNotSim[32*i+j]) {
-        mon_match = 0;
-        mon_OFweight = rate_overflow-m_overflow_rateHdwNotSim[32*i+j];
-        m_overflow_rateHdwNotSim[32*i+j] = rate_overflow;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
-      }
-      rate = m_countSim[32*i+j]>0 ? m_countSimNotHdw[32*i+j]/m_countSim[32*i+j] : 0;
-      if (rate != m_rateSimNotHdw[32*i+j]) {
-        mon_match = 1;
-        mon_weight = rate-m_rateSimNotHdw[32*i+j];
-        m_rateSimNotHdw[32*i+j] = rate;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
-      }
-      rate_overflow = m_overflow_countSim[32*i+j]>0 ? m_overflow_countSimNotHdw[32*i+j]/m_overflow_countSim[32*i+j] : 0;
-      if (rate_overflow != m_overflow_rateSimNotHdw[32*i+j]) {
-        mon_match = 1;
-        mon_OFweight = rate_overflow-m_overflow_rateSimNotHdw[32*i+j];
-        m_overflow_rateSimNotHdw[32*i+j] = rate_overflow;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
-      }
-      rate = m_countAny[32*i+j]>0 ? m_countHdwSim[32*i+j]/m_countAny[32*i+j] : 0;
-      if (rate != m_rateHdwAndSim[32*i+j]) {
-        mon_match = 2;
-        mon_weight = rate-m_rateHdwAndSim[32*i+j];
-        m_rateHdwAndSim[32*i+j] = rate;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
-      }
-      rate_overflow = m_overflow_countAny[32*i+j]>0 ? m_overflow_countHdwSim[32*i+j]/m_overflow_countAny[32*i+j] : 0;
-      if (rate_overflow != m_overflow_rateHdwAndSim[32*i+j]) {
-        mon_match = 2;
-        mon_OFweight = rate_overflow-m_overflow_rateHdwAndSim[32*i+j];
-        m_overflow_rateHdwAndSim[32*i+j] = rate_overflow;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
-      }
-      rate = m_countSim[32*i+j]>0 ? m_countHdw[32*i+j]/m_countSim[32*i+j] : 0;
-      if (rate != m_rateHdwSim[32*i+j]) {
-        mon_match = 3;
-        mon_weight = rate-m_rateHdwSim[32*i+j];
-        m_rateHdwSim[32*i+j] = rate;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
-      }
-      rate_overflow = m_overflow_countSim[32*i+j]>0 ? m_overflow_countHdw[32*i+j]/m_overflow_countSim[32*i+j] : 0;
-      if (rate_overflow != m_overflow_rateHdwSim[32*i+j]) {
-        mon_match = 3;
-        mon_OFweight = rate_overflow-m_overflow_rateHdwSim[32*i+j];
-        m_overflow_rateHdwSim[32*i+j] = rate_overflow;
-        Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
+      if (ambiguityBitsSim[32*i+j] == 0) {
+        mon_trig = static_cast<unsigned>(j);
+        if (overflowBitsHdw[32*i+j] == 1 || overflowBitsSim[32*i+j] == 1) {
+          m_overflow_countHdwNotSim[32*i+j]+=overflowBitsHdwNotSim[32*i+j];
+          m_overflow_countSimNotHdw[32*i+j]+=overflowBitsSimNotHdw[32*i+j];
+          m_overflow_countHdwSim[32*i+j]+=overflowBitsHdwSim[32*i+j];
+          m_overflow_countHdw[32*i+j]+=overflowBitsHdw[32*i+j];
+          m_overflow_countSim[32*i+j]+=overflowBitsSim[32*i+j];
+          m_overflow_countAny[32*i+j]+=overflowBitsAny[32*i+j];
+        }
+        else {
+          m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
+          m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];
+          m_countHdwSim[32*i+j]+=triggerBitsHdwSim[32*i+j];
+          m_countHdw[32*i+j]+=triggerBitsHdw[32*i+j];
+          m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
+          m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
+        }     
+        rate = m_countHdw[32*i+j]>0 ? m_countHdwNotSim[32*i+j]/m_countHdw[32*i+j] : 0;
+        if (rate != m_rateHdwNotSim[32*i+j]) {
+          mon_match = 0;
+          mon_weight = rate-m_rateHdwNotSim[32*i+j];
+          m_rateHdwNotSim[32*i+j] = rate;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        }
+        rate_overflow = m_overflow_countHdw[32*i+j]>0 ? m_overflow_countHdwNotSim[32*i+j]/m_overflow_countHdw[32*i+j] : 0;
+        if (rate_overflow != m_overflow_rateHdwNotSim[32*i+j]) {
+          mon_match = 0;
+          mon_OFweight = rate_overflow-m_overflow_rateHdwNotSim[32*i+j];
+          m_overflow_rateHdwNotSim[32*i+j] = rate_overflow;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
+        }
+        rate = m_countSim[32*i+j]>0 ? m_countSimNotHdw[32*i+j]/m_countSim[32*i+j] : 0;
+        if (rate != m_rateSimNotHdw[32*i+j]) {
+          mon_match = 1;
+          mon_weight = rate-m_rateSimNotHdw[32*i+j];
+          m_rateSimNotHdw[32*i+j] = rate;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        }
+        rate_overflow = m_overflow_countSim[32*i+j]>0 ? m_overflow_countSimNotHdw[32*i+j]/m_overflow_countSim[32*i+j] : 0;
+        if (rate_overflow != m_overflow_rateSimNotHdw[32*i+j]) {
+          mon_match = 1;
+          mon_OFweight = rate_overflow-m_overflow_rateSimNotHdw[32*i+j];
+          m_overflow_rateSimNotHdw[32*i+j] = rate_overflow;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
+        }
+        rate = m_countAny[32*i+j]>0 ? m_countHdwSim[32*i+j]/m_countAny[32*i+j] : 0;
+        if (rate != m_rateHdwAndSim[32*i+j]) {
+          mon_match = 2;
+          mon_weight = rate-m_rateHdwAndSim[32*i+j];
+          m_rateHdwAndSim[32*i+j] = rate;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        }
+        rate_overflow = m_overflow_countAny[32*i+j]>0 ? m_overflow_countHdwSim[32*i+j]/m_overflow_countAny[32*i+j] : 0;
+        if (rate_overflow != m_overflow_rateHdwAndSim[32*i+j]) {
+          mon_match = 2;
+          mon_OFweight = rate_overflow-m_overflow_rateHdwAndSim[32*i+j];
+          m_overflow_rateHdwAndSim[32*i+j] = rate_overflow;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
+        }
+        rate = m_countSim[32*i+j]>0 ? m_countHdw[32*i+j]/m_countSim[32*i+j] : 0;
+        if (rate != m_rateHdwSim[32*i+j]) {
+          mon_match = 3;
+          mon_weight = rate-m_rateHdwSim[32*i+j];
+          m_rateHdwSim[32*i+j] = rate;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+        }
+        rate_overflow = m_overflow_countSim[32*i+j]>0 ? m_overflow_countHdw[32*i+j]/m_overflow_countSim[32*i+j] : 0;
+        if (rate_overflow != m_overflow_rateHdwSim[32*i+j]) {
+          mon_match = 3;
+          mon_OFweight = rate_overflow-m_overflow_rateHdwSim[32*i+j];
+          m_overflow_rateHdwSim[32*i+j] = rate_overflow;
+          Monitored::Group(m_monTool, mon_trig, mon_match, mon_OFweight);
+        }
       }
     }
   }
