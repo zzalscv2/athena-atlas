@@ -51,14 +51,13 @@ if __name__ == "__main__":
     flags.Output.ESDFileName = "myESD.pool.root"
     
     flags.Trigger.triggerConfig = "DB"
-    flags.Reco.EnableHI = True
+
+    from HIRecConfig.HIModeFlags import HImode
+    HImode(flags)
     
-    flags.HeavyIon.Jet.doTrackJetSeed = True
-    flags.HeavyIon.doJet=True
-    flags.HeavyIon.doGlobal=True
-    
-    flags.fillFromArgs() # enable unit tests to switch only parts of reco such as (note the absence of spaces around equal sign): 
-                         ### python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal="False" GeoModel.AtlasVersion="ATLAS-R3S-2021-03-01-00"
+# enables unit tests to switch only parts of reco such as (note the absence of spaces around equal signs): 
+### python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal="False" GeoModel.AtlasVersion="ATLAS-R3S-2021-03-01-00"
+    flags.fillFromArgs() 
     
     flags.lock()
 

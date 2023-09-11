@@ -370,6 +370,10 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     result.addEventAlgo(CaloTopoCluster,primary=True)
 
+    if CaloTopoCluster.ClustersOutputName in flags.Calo.TopoCluster.skipWriteList:
+        # don't add these clusters to ESD and AOD
+        return result
+    
 
     #Output config:
     AODMoments=[ "SECOND_R" 
