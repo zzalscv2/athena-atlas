@@ -33,13 +33,11 @@ def FPGATrackSimEventSelectionCfg(flags, name="FPGATrackSimEventSelectionSvc", s
 def FPGATrackSimMappingCfg(flags):
     result=ComponentAccumulator()
     pathMapping = '/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/'
-    versionOverride="ATLAS-P2-ITK-22-02-00" # TODO prepare to switch to flags.GeoModel.AtlasVersion
-
     FPGATrackSimMapping = CompFactory.FPGATrackSimMappingSvc()
     FPGATrackSimMapping.mappingType = "FILE"
-    FPGATrackSimMapping.rmap = f'{pathMapping}map_file/rmaps/eta0103phi0305_{versionOverride}.rmap'
-    FPGATrackSimMapping.subrmap = f'{pathMapping}zslicemaps/{versionOverride}/eta0103phi0305_KeyLayer-strip_barrel_2_extra03_trim_0_001_NSlices-6.rmap'
-    FPGATrackSimMapping.pmap = f'{pathMapping}map_file/{versionOverride}.pmap'
+    FPGATrackSimMapping.rmap = f'{pathMapping}map_file/rmaps/eta0103phi0305_ATLAS-P2-ITK-22-02-00.rmap'
+    FPGATrackSimMapping.subrmap = f'{pathMapping}zslicemaps/ATLAS-P2-ITK-22-02-00/eta0103phi0305_KeyLayer-strip_barrel_2_extra03_trim_0_001_NSlices-6.rmap'
+    FPGATrackSimMapping.pmap = f'{pathMapping}map_file/ATLAS-P2-ITK-22-02-00.pmap'
     FPGATrackSimMapping.modulemap = f'{pathMapping}map_file/ITk.global-to-local.moduleidmap'
     FPGATrackSimMapping.NNmap = f'{pathMapping}map_file/NN_DNN_Region_0p1_0p3_HTTFake_HTTTrueMu_SingleP_8L_Nom_v6.json'
     FPGATrackSimMapping.layerOverride = {}
@@ -49,7 +47,7 @@ def FPGATrackSimMappingCfg(flags):
 def FPGATrackSimBankSvcCfg(flags):
     result=ComponentAccumulator()
     FPGATrackSimBankSvc = CompFactory.FPGATrackSimBankSvc()
-    pathBankSvc = f'/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/{flags.GeoModel.AtlasVersion}/21.9.16/eta0103phi0305/SectorBanks/'
+    pathBankSvc = '/eos/atlas/atlascerngroupdisk/det-htt/HTTsim/ATLAS-P2-ITK-22-02-00/21.9.16/eta0103phi0305/SectorBanks/'
     FPGATrackSimBankSvc.constantsNoGuess_1st = [
         f'{pathBankSvc}corrgen_raw_8L_skipPlane0.gcon', 
         f'{pathBankSvc}corrgen_raw_8L_skipPlane1.gcon', 
