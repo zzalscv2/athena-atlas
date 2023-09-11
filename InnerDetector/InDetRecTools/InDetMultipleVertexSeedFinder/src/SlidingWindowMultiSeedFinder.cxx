@@ -100,13 +100,14 @@ namespace InDet
 
   Trk::Vertex* beamVertex=&beamRecVertex;
   
+  Trk::Vertex myVertex;
   if (m_ignoreBeamSpot)
   {
-   Trk::Vertex* myVertex=new Trk::Vertex(m_vtxSeedFinder->findSeed(tracks));
-   ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
-		 " vtx seed y: " << myVertex->position().y() <<
-		 " vtx seed z: " << myVertex->position().z());
-   beamVertex=myVertex;
+   myVertex = Trk::Vertex(m_vtxSeedFinder->findSeed(tracks));
+   ATH_MSG_DEBUG(" vtx seed x: " << myVertex.position().x() <<
+		 " vtx seed y: " << myVertex.position().y() <<
+		 " vtx seed z: " << myVertex.position().z());
+   beamVertex = &myVertex;
   }
 
   //output container
@@ -133,7 +134,6 @@ namespace InDet
    if(exPerigee) { lastTrackZ0 = exPerigee->parameters()[Trk::z0]; delete exPerigee; }
    else {
     ATH_MSG_WARNING("Impossible to extrapolate the first track; returning 0 container for this event");
-    if (m_ignoreBeamSpot) delete beamVertex;
     return result;
    }          	 	 
 	 	   	   
@@ -180,7 +180,6 @@ namespace InDet
   
   }//end of check for successfull preselection
    
-  if (m_ignoreBeamSpot) delete beamVertex;
   return result;
  }//end of seeding method
 
@@ -192,13 +191,13 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
     std::vector<const xAOD::TrackParticle*> preselectedTracks(0);
     
     //selecting with respect to the beam spot
-    xAOD::Vertex * beamposition = new xAOD::Vertex(); 
+    xAOD::Vertex beamposition;
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-    beamposition->setPosition(beamSpotHandle->beamVtx().position());
-    beamposition->setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
+    beamposition.setPosition(beamSpotHandle->beamVtx().position());
+    beamposition.setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
 
     for (const auto *track : tracks) {
-      if (m_trkFilter->decision(*track,beamposition)) preselectedTracks.push_back(track);
+      if (m_trkFilter->decision(*track,&beamposition)) preselectedTracks.push_back(track);
     }
     
     std::vector<const Trk::TrackParameters*> perigeeList;
@@ -209,15 +208,15 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
 	perigeeList.push_back(&((*trackIter)->perigeeParameters()));
       }
  
-    Trk::RecVertex* myVertex=new Trk::RecVertex(m_vtxSeedFinder->findSeed(perigeeList));
+    Trk::RecVertex myVertex (m_vtxSeedFinder->findSeed(perigeeList));
    
     if (m_ignoreBeamSpot)
       {
-	ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
-		      " vtx seed y: " << myVertex->position().y() <<
-		      " vtx seed z: " << myVertex->position().z());
-	beamposition->setPosition(myVertex->position());
-	beamposition->setCovariancePosition(myVertex->covariancePosition());
+	ATH_MSG_DEBUG(" vtx seed x: " << myVertex.position().x() <<
+		      " vtx seed y: " << myVertex.position().y() <<
+		      " vtx seed z: " << myVertex.position().z());
+	beamposition.setPosition(myVertex.position());
+	beamposition.setCovariancePosition(myVertex.covariancePosition());
       }
     
     //step 2: sorting in z0
@@ -225,13 +224,13 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
     std::vector< std::vector<const Trk::TrackParameters *> > result(0);
     if(!preselectedTracks.empty())
       {
-	std::vector<int> indexOfSorted = m_sortingTool->sortedIndex(preselectedTracks, beamposition);
+	std::vector<int> indexOfSorted = m_sortingTool->sortedIndex(preselectedTracks, &beamposition);
 	
 	std::vector<const Trk::TrackParameters *> tmp_cluster(0); 
 	
 	//extrapolating the tracks to the actual beam spot   
 	const Trk::TrackParameters * exPerigee(nullptr);
-	Trk::PerigeeSurface perigeeSurface(beamposition->position());
+	Trk::PerigeeSurface perigeeSurface(beamposition.position());
 	
 	exPerigee = m_extrapolator->extrapolate(ctx, preselectedTracks[indexOfSorted[0]]->perigeeParameters(),
 						perigeeSurface,Trk::anyDirection,true, Trk::pion).release();
@@ -241,8 +240,6 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
 	else
 	  {
 	    ATH_MSG_WARNING("Impossible to extrapolate the first track; returning 0 container for this event");
-	    delete beamposition; 
-	    delete myVertex;
 	    return result;
 	  }          	   
 	
@@ -299,8 +296,6 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
       }//end of preselection size check
     
     ATH_MSG_DEBUG("Returning number of clusters: "<< result.size());
-    delete beamposition;
-    delete myVertex;
     return result;
 
   }

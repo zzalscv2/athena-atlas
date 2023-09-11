@@ -107,14 +107,15 @@ namespace InDet
   for(;tr!=tre;++tr) if(m_trkFilter->decision(**tr,&beamrecposition)) preselectedTracks.push_back(*tr);
   ATH_MSG_DEBUG("Beam spot position is: "<< beamrecposition.position());
   Trk::Vertex* beamposition=&beamrecposition;
-  
+
+  Trk::Vertex myVertex;
   if (m_ignoreBeamSpot)
   {
-    Trk::Vertex* myVertex=new Trk::Vertex(m_vtxSeedFinder->findSeed(tracks));
-    ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
-		  " vtx seed y: " << myVertex->position().y() <<
-		  " vtx seed z: " << myVertex->position().z());
-    beamposition=myVertex;
+    myVertex = Trk::Vertex(m_vtxSeedFinder->findSeed(tracks));
+    ATH_MSG_DEBUG(" vtx seed x: " << myVertex.position().x() <<
+		  " vtx seed y: " << myVertex.position().y() <<
+		  " vtx seed z: " << myVertex.position().z());
+    beamposition = &myVertex;
   }
 
   //step 2: sorting in z0
@@ -142,7 +143,6 @@ namespace InDet
    else
    {
      ATH_MSG_WARNING("Impossible to extrapolate the first track; returning 0 container for this event");
-     if (m_ignoreBeamSpot) delete beamposition;
      return result;
    }
 
@@ -233,7 +233,6 @@ namespace InDet
    }//end of loop over all the clusters
   }//end of preselection size check
 
-  if (m_ignoreBeamSpot) delete beamposition;
   return result;  
  }//end of clustering method
  
@@ -245,13 +244,13 @@ namespace InDet
   std::vector<const xAOD::TrackParticle*> preselectedTracks(0);
   
   //selecting with respect to the beam spot
-  xAOD::Vertex * beamposition = new xAOD::Vertex();
+  xAOD::Vertex beamposition;
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey,ctx };
-  beamposition->setPosition(beamSpotHandle->beamVtx().position());
-  beamposition->setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
+  beamposition.setPosition(beamSpotHandle->beamVtx().position());
+  beamposition.setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
 
   for (const auto *track : tracks) {
-   if (m_trkFilter->decision(*track,beamposition)) preselectedTracks.push_back(track);
+   if (m_trkFilter->decision(*track,&beamposition)) preselectedTracks.push_back(track);
   }
 
   std::vector<const Trk::TrackParameters*> perigeeList;
@@ -261,21 +260,21 @@ namespace InDet
    perigeeList.push_back(&((*trackIter)->perigeeParameters()));
   }
 
-  Trk::RecVertex* myVertex=new Trk::RecVertex(m_vtxSeedFinder->findSeed(perigeeList));
+  Trk::RecVertex myVertex (m_vtxSeedFinder->findSeed(perigeeList));
 
   if (m_ignoreBeamSpot) {
-   ATH_MSG_DEBUG(" vtx seed x: " << myVertex->position().x() <<
-		 " vtx seed y: " << myVertex->position().y() <<
-		 " vtx seed z: " << myVertex->position().z());
-   beamposition->setPosition(myVertex->position());
-   beamposition->setCovariancePosition(myVertex->covariancePosition());
+   ATH_MSG_DEBUG(" vtx seed x: " << myVertex.position().x() <<
+		 " vtx seed y: " << myVertex.position().y() <<
+		 " vtx seed z: " << myVertex.position().z());
+   beamposition.setPosition(myVertex.position());
+   beamposition.setCovariancePosition(myVertex.covariancePosition());
   }
 
   //step 2: sorting in z0
   //output container
   std::vector< std::vector<const Trk::TrackParameters *> > result(0);
   if(!preselectedTracks.empty()){
-   std::vector<int> indexOfSorted =  m_sortingTool->sortedIndex(preselectedTracks, beamposition);
+   std::vector<int> indexOfSorted =  m_sortingTool->sortedIndex(preselectedTracks, &beamposition);
 
    //need new sort method, either for xAODTrackParticles, or TrackParameters. Neither currently supported...
 
@@ -285,7 +284,7 @@ namespace InDet
    //left-handed track position
    std::vector<const xAOD::TrackParticle *> tmp_cluster(0); 
    
-   Trk::PerigeeSurface perigeeSurface(beamposition->position());
+   Trk::PerigeeSurface perigeeSurface(beamposition.position());
    const Trk::TrackParameters* exPerigee =
      m_extrapolator
        ->extrapolate(ctx, preselectedTracks[indexOfSorted[0]]->perigeeParameters(), 
@@ -298,8 +297,6 @@ namespace InDet
    }
    else{
     ATH_MSG_WARNING("Impossible to extrapolate the first track; returning 0 container for this event");
-    delete beamposition;
-    delete myVertex;
     return result;
    }
 
@@ -349,7 +346,7 @@ namespace InDet
      bool clean_again = false;
      do{
       std::pair<std::vector<const Trk::TrackParameters *>, 
-		std::vector<const xAOD::TrackParticle *> > clusterAndOutl = m_cleaningTool->clusterAndOutliers(tracks_to_clean, beamposition);
+		std::vector<const xAOD::TrackParticle *> > clusterAndOutl = m_cleaningTool->clusterAndOutliers(tracks_to_clean, &beamposition);
 
       //if core size is miningfull, storing it
       std::vector<const Trk::TrackParameters *> core_cluster = clusterAndOutl.first;
@@ -392,8 +389,6 @@ namespace InDet
     }//end of cluster size check
    }//end of loop over all the clusters
   }//end of preselection size check 
-  delete beamposition; 
-  delete myVertex;
   return result;
     
  }
