@@ -1775,6 +1775,8 @@ HLT_mb_sptrk_L1ZDC_1XOR5_VTE200:
   eventCount: 0
 HLT_mb_sptrk_L1ZDC_A_C_VTE50:
   eventCount: 0
+HLT_mb_sptrk_L1ZDC_A_C_VTE50_OVERLAY:
+  eventCount: 0
 HLT_mb_sptrk_L1ZDC_OR_VTE200_UNPAIRED_ISO:
   eventCount: 0
 HLT_mb_sptrk_L1ZDC_XOR_VTE200:
