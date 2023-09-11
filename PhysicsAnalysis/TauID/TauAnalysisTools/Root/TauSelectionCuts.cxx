@@ -299,32 +299,38 @@ bool TauSelectionCutRNNJetScoreSigTrans::accept(const xAOD::TauJet& xTau,
 TauSelectionCutJetIDWP::TauSelectionCutJetIDWP(TauSelectionTool* tTST)
   : TauSelectionCut("CutJetIDWP", tTST)
 {
-  m_hHistCutPre = CreateControlPlot("hJetIDWP_pre","JetIDWP_pre;; events",6,-.5,5.5);
-  m_hHistCut = CreateControlPlot("hJetIDWP_cut","JetIDWP_cut;; events",6,-.5,5.5);
+  m_hHistCutPre = CreateControlPlot("hJetIDWP_pre","JetIDWP_pre;; events",8,-.5,7.5);
+  m_hHistCut = CreateControlPlot("hJetIDWP_cut","JetIDWP_cut;; events",8,-.5,7.5);
   // only proceed if histograms are defined
   if (!m_hHistCutPre or !m_hHistCut)
     return;
-  m_hHistCutPre->GetXaxis()->SetBinLabel(1,"!Loose");
-  m_hHistCutPre->GetXaxis()->SetBinLabel(2,"Loose");
-  m_hHistCutPre->GetXaxis()->SetBinLabel(3,"!Medium");
-  m_hHistCutPre->GetXaxis()->SetBinLabel(4,"Medium");
-  m_hHistCutPre->GetXaxis()->SetBinLabel(5,"!Tight");
-  m_hHistCutPre->GetXaxis()->SetBinLabel(6,"Tight");
-  m_hHistCut->GetXaxis()->SetBinLabel(1,"!Loose");
-  m_hHistCut->GetXaxis()->SetBinLabel(2,"Loose");
-  m_hHistCut->GetXaxis()->SetBinLabel(3,"!Medium");
-  m_hHistCut->GetXaxis()->SetBinLabel(4,"Medium");
-  m_hHistCut->GetXaxis()->SetBinLabel(5,"!Tight");
-  m_hHistCut->GetXaxis()->SetBinLabel(6,"Tight");
+
+  m_hHistCutPre->GetXaxis()->SetBinLabel(1,"!VeryLoose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(2,"VeryLoose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(3,"!Loose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(4,"Loose");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(5,"!Medium");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(6,"Medium");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(7,"!Tight");
+  m_hHistCutPre->GetXaxis()->SetBinLabel(8,"Tight");
+  m_hHistCut->GetXaxis()->SetBinLabel(1,"!VeryLoose");
+  m_hHistCut->GetXaxis()->SetBinLabel(2,"VeryLoose");
+  m_hHistCut->GetXaxis()->SetBinLabel(3,"!Loose");
+  m_hHistCut->GetXaxis()->SetBinLabel(4,"Loose");
+  m_hHistCut->GetXaxis()->SetBinLabel(5,"!Medium");
+  m_hHistCut->GetXaxis()->SetBinLabel(6,"Medium");
+  m_hHistCut->GetXaxis()->SetBinLabel(7,"!Tight");
+  m_hHistCut->GetXaxis()->SetBinLabel(8,"Tight");
 }
 
 //______________________________________________________________________________
 void TauSelectionCutJetIDWP::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
   // FIXME: should this be extended to deepset ID?
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose));
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+2);
-  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+4);
+  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)); 
+  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigLoose)+2);
+  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigMedium)+4);
+  hHist.Fill(xTau.isTau(xAOD::TauJetParameters::JetRNNSigTight)+6);
 }
 
 //______________________________________________________________________________
