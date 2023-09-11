@@ -12,11 +12,11 @@
 
 using json = nlohmann::json;
 
-Analysis::CDIReader::CDIReader(const std::string& cdipath) :  m_use_json(true), m_cdipath(cdipath), m_CDIFile(TFile::Open(m_cdipath.c_str(), "READ"))
+Analysis::CDIReader::CDIReader(const std::string& cdipath, bool verbose) :  m_use_json(true), m_cdipath(cdipath), m_CDIFile(TFile::Open(m_cdipath.c_str(), "READ"))
 {
     TObjString* s;
     m_CDIFile->GetObject("VersionInfo/BuildNumber", s);
-    if (s){
+    if (s && verbose){
         std::cout << " CDI file build number: " << s->GetName() << std::endl;
     }
     TList* taggerkeys = m_CDIFile->GetListOfKeys();
