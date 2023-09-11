@@ -10,8 +10,7 @@
 #include "TrigConfL1Data/DiffStruct.h"
 #include "TrigConfL1Data/HelperFunctions.h"
 
-#include "boost/algorithm/string/erase.hpp"
-
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -282,7 +281,9 @@ TrigConf::HLTChain::stream_prescale(const std::string& streamName) const {
 namespace {
    string orderLowerChainNames(const string& vstr) {
       if(vstr.find(',')==string::npos) return vstr;
-      vector<string> splstr = split( boost::erase_all_copy(vstr," "), "," );
+      string vstr_loc = vstr;
+      vstr_loc.erase(remove(vstr_loc.begin(),vstr_loc.end(), ' '), vstr_loc.end()); 
+      vector<string> splstr = split(vstr_loc, "," );
       sort(splstr.begin(),splstr.end());
       string out("");
       for(const string& s : splstr)
