@@ -58,6 +58,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
   declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
   declareProperty("enableRPD",enableRPD = false,"enable reading RPD decorations");
+  declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations");
 
   declareProperty( "TrackSelectionTool", m_selTool );
 
@@ -165,9 +166,23 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("zdc_ZdcLucrodTriggerAmp",&t_ZdcLucrodTriggerAmp,"zdc_ZdcLucrodTriggerAmp[2][4]/S");
     m_outputTree->Branch("zdc_ZdcModuleMaxADC",&t_ZdcModuleMaxADC,"zdc_ZdcModuleMaxADC[2][4]/F");
 
-    m_outputTree->Branch("zdc_RPDChannelAmplitude",&t_RPDChannelAmplitude,"zdc_RPDChannelAmplitude[2][16]/F");
-    m_outputTree->Branch("zdc_RPDChannelMaxSample",&t_RPDChannelMaxSample,"zdc_RPDChannelMaxSample[2][16]/i");
-    m_outputTree->Branch("zdc_RPDChannelStatus",&t_RPDChannelStatus,"zdc_RPDChannelStatus[2][16]/i");
+    m_outputTree->Branch("zdc_RpdChannelAmplitude",&t_RpdChannelAmplitude,"zdc_RpdChannelAmplitude[2][16]/F");
+    m_outputTree->Branch("zdc_RpdChannelMaxSample",&t_RpdChannelMaxSample,"zdc_RpdChannelMaxSample[2][16]/i");
+    m_outputTree->Branch("zdc_RpdChannelStatus",&t_RpdChannelStatus,"zdc_RpdChannelStatus[2][16]/i");
+
+    m_outputTree->Branch("zdc_RpdSubAmp",&t_RpdSubAmp,"zdc_RpdSubAmp[2][4][4]/F");
+    m_outputTree->Branch("zdc_RpdSubAmpSum",&t_RpdSubAmpSum,"zdc_RpdSubAmpSum[2]/F");
+    m_outputTree->Branch("zdc_RpdXcentroid",&t_RpdXcentroid,"zdc_RpdXcentroid[2]/F");
+    m_outputTree->Branch("zdc_RpdYcentroid",&t_RpdYcentroid,"zdc_RpdYcentroid[2]/F");
+    m_outputTree->Branch("zdc_RpdXdetCentroid",&t_RpdXdetCentroid,"zdc_RpdXdetCentroid[2]/F");
+    m_outputTree->Branch("zdc_RpdYdetCentroid",&t_RpdYdetCentroid,"zdc_RpdYdetCentroid[2]/F");
+    m_outputTree->Branch("zdc_RpdXdetCentroidUnsub",&t_RpdXdetCentroidUnsub,"zdc_RpdXdetCentroidUnsub[2]/F");
+    m_outputTree->Branch("zdc_RpdYdetCentroidUnsub",&t_RpdYdetCentroidUnsub,"zdc_RpdYdetCentroidUnsub[2]/F");
+    m_outputTree->Branch("zdc_RpdXdetRowCentroid",&t_RpdXdetRowCentroid,"zdc_RpdXdetRowCentroid[2][4]/F");
+    m_outputTree->Branch("zdc_RpdYdetColCentroid",&t_RpdYdetColCentroid,"zdc_RpdYdetColCentroid[2][4]/F");
+    m_outputTree->Branch("zdc_RpdXdetRowCentroidStdev",&t_RpdXdetRowCentroidStdev,"zdc_RpdXdetRowCentroidStdev[2]/F");
+    m_outputTree->Branch("zdc_RpdYdetColCentroidStdev",&t_RpdYdetColCentroidStdev,"zdc_RpdYdetColCentroidStdev[2]/F");
+    m_outputTree->Branch("zdc_RpdCentroidStatus",&t_RpdCentroidStatus,"zdc_RpdCentroidStatus[2]/i");
 
     if (!(zdcCalib || zdcLaser || zdcOnly))
     {
@@ -565,8 +580,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
     ANA_MSG_DEBUG( "accessing ZdcSums" );
     for (const auto zdcSum : *zdcSums)
     {
-      if (zdcSum->zdcSide()==0) continue;
-
+      if (zdcSum->zdcSide()==0) continue; // skip new global sum
       int iside = 0;
       if (zdcSum->zdcSide() > 0) iside = 1;
 
@@ -586,6 +600,54 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcTime[iside] = zdcSum->auxdataConst<float>("AverageTime"+auxSuffix);
       t_ZdcStatus[iside] = zdcSum->auxdataConst<unsigned int>("Status"+auxSuffix);
       t_ZdcModuleMask += (zdcSum->auxdataConst<unsigned int>("ModuleMask"+auxSuffix) << 4 * iside);
+
+      if (nsamplesZdc == 24) {
+        if (enableCentroid) {
+          for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+              t_RpdSubAmp[iside][row][col] = zdcSum->auxdataConst<std::vector<std::vector<float>>>("rpdSubAmp" + auxSuffix).at(row).at(col);
+            }
+          }
+          t_RpdSubAmpSum[iside] = zdcSum->auxdataConst<float>("rpdSubAmpSum" + auxSuffix);
+          t_RpdXcentroid[iside] = zdcSum->auxdataConst<float>("xCentroid" + auxSuffix);
+          t_RpdYcentroid[iside] = zdcSum->auxdataConst<float>("yCentroid" + auxSuffix);
+          t_RpdXdetCentroid[iside] = zdcSum->auxdataConst<float>("xDetCentroid" + auxSuffix);
+          t_RpdYdetCentroid[iside] = zdcSum->auxdataConst<float>("yDetCentroid" + auxSuffix);
+          t_RpdXdetCentroidUnsub[iside] = zdcSum->auxdataConst<float>("xDetCentroidUnsub" + auxSuffix);
+          t_RpdYdetCentroidUnsub[iside] = zdcSum->auxdataConst<float>("yDetCentroidUnsub" + auxSuffix);
+          for (int row = 0; row < 4; row++) {
+            t_RpdXdetRowCentroid[iside][row] = zdcSum->auxdataConst<std::vector<float>>("xDetRowCentroid" + auxSuffix).at(row);
+          }
+          for (int col = 0; col < 4; col++) {
+            t_RpdYdetColCentroid[iside][col] = zdcSum->auxdataConst<std::vector<float>>("yDetColCentroid" + auxSuffix).at(col);
+          }
+          t_RpdXdetRowCentroidStdev[iside] = zdcSum->auxdataConst<float>("xDetRowCentroidStdev" + auxSuffix);
+          t_RpdYdetColCentroidStdev[iside] = zdcSum->auxdataConst<float>("yDetColCentroidStdev" + auxSuffix);
+          t_RpdCentroidStatus[iside] = zdcSum->auxdataConst<unsigned int>("centroidStatus" + auxSuffix);
+        } else {
+          for (int row = 0; row < 4; row++) {
+            for (int col = 0; col < 4; col++) {
+              t_RpdSubAmp[iside][row][col] = 0;
+            }
+          }
+          t_RpdSubAmpSum[iside] = 0;
+          t_RpdXcentroid[iside] = 0;
+          t_RpdYcentroid[iside] = 0;
+          t_RpdXdetCentroid[iside] = 0;
+          t_RpdYdetCentroid[iside] = 0;
+          t_RpdXdetCentroidUnsub[iside] = 0;
+          t_RpdYdetCentroidUnsub[iside] = 0;
+          for (int row = 0; row < 4; row++) {
+            t_RpdXdetRowCentroid[iside][row] = 0;
+          }
+          for (int col = 0; col < 4; col++) {
+            t_RpdYdetColCentroid[iside][col] = 0;
+          }
+          t_RpdXdetRowCentroidStdev[iside] = 0;
+          t_RpdYdetColCentroidStdev[iside] = 0;
+          t_RpdCentroidStatus[iside] = 0;
+        }
+      }
     }
   }
 
@@ -656,15 +718,15 @@ void ZdcNtuple::processZdcNtupleFromModules()
         // this is the RPD
 	if (enableRPD)
 	  {
-	    t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
-	    t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
-	    t_RPDChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
+	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<float>("RPDChannelAmplitude" + auxSuffix);
+	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelMaxSample" + auxSuffix);
+	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = zdcMod->auxdataConst<unsigned int>("RPDChannelStatus" + auxSuffix);
 	  }
 	else
 	  {
-	    t_RPDChannelAmplitude[iside][zdcMod->zdcChannel()] = 0;
-	    t_RPDChannelMaxSample[iside][zdcMod->zdcChannel()] = 0;
-	    t_RPDChannelStatus[iside][zdcMod->zdcChannel()] = 0;
+	    t_RpdChannelAmplitude[iside][zdcMod->zdcChannel()] = 0;
+	    t_RpdChannelMaxSample[iside][zdcMod->zdcChannel()] = 0;
+	    t_RpdChannelStatus[iside][zdcMod->zdcChannel()] = 0;
 	  }
       }
 

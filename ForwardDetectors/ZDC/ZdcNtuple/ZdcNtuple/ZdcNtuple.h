@@ -78,6 +78,7 @@ public:
   bool lhcf2022zdc;
   bool lhcf2022afp;
   bool enableRPD;
+  bool enableCentroid;
 
   bool doZdcCalib;
   std::string zdcConfig;
@@ -191,9 +192,23 @@ public:
   unsigned short t_ZdcLucrodTriggerAmp[2][4];
   float t_ZdcModuleMaxADC[2][4];
 
-  float t_RPDChannelAmplitude[2][16];
-  unsigned int t_RPDChannelMaxSample[2][16];
-  unsigned int t_RPDChannelStatus[2][16];
+  float t_RpdChannelAmplitude[2][16];
+  unsigned int t_RpdChannelMaxSample[2][16];
+  unsigned int t_RpdChannelStatus[2][16];
+
+  float t_RpdSubAmp[2][4][4];
+  float t_RpdSubAmpSum[2];
+  float t_RpdXcentroid[2];
+  float t_RpdYcentroid[2];
+  float t_RpdXdetCentroid[2];
+  float t_RpdYdetCentroid[2];
+  float t_RpdXdetCentroidUnsub[2];
+  float t_RpdYdetCentroidUnsub[2];
+  float t_RpdXdetRowCentroid[2][4];
+  float t_RpdYdetColCentroid[2][4];
+  float t_RpdXdetRowCentroidStdev[2];
+  float t_RpdYdetColCentroidStdev[2];
+  unsigned int t_RpdCentroidStatus[2];
 
   int   t_nvx;
   float t_vx[3];
