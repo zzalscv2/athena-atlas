@@ -100,12 +100,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> sigCollection = std::make_unique<PixelRDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG1"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG1'";
@@ -134,12 +134,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> sigCollection = std::make_unique<PixelRDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG2"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG2'";
@@ -176,12 +176,12 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(12),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG3"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG3'";
@@ -221,7 +221,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(12),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG4"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
@@ -229,7 +229,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> bkgDigit = std::make_unique<Pixel1RawData>(Identifier(12),bkgToT,bkgBCID-1,0,bkgBCID-1);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG4'";
@@ -276,7 +276,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(12),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG5"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
@@ -284,7 +284,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> bkgDigit = std::make_unique<Pixel1RawData>(Identifier(13),bkgToT,bkgBCID-1,0,bkgBCID-1);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG5'";
@@ -328,7 +328,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(12),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG6"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
@@ -336,7 +336,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> bkgDigit = std::make_unique<Pixel1RawData>(Identifier(12),bkgToT,bkgBCID-1,0,bkgBCID-1);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG6'";
@@ -377,7 +377,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(12),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG7"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
@@ -385,7 +385,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> bkgDigit = std::make_unique<Pixel1RawData>(Identifier(12),bkgToT,bkgBCID-1,0,bkgBCID-1);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG7'";
@@ -425,7 +425,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(12),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG8"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
@@ -433,7 +433,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> bkgDigit = std::make_unique<Pixel1RawData>(Identifier(12),bkgToT,bkgBCID-1,0,bkgBCID-1);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG8'";
@@ -473,7 +473,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> sigDigit = std::make_unique<Pixel1RawData>(Identifier(13),sigToT,sigBCID-1,0,sigBCID-1);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<PixelRDO_Container> inputBkgDataHandle{"StoreGateSvc+PixelRDOs_BKG9"};
     inputBkgDataHandle = std::make_unique<PixelRDO_Container>(containerSize);
     std::unique_ptr<PixelRDO_Collection> bkgCollection = std::make_unique<PixelRDO_Collection>(bkgElementHash);
@@ -481,7 +481,7 @@ namespace OverlayTesting {
     std::unique_ptr<Pixel1RawData> bkgDigit = std::make_unique<Pixel1RawData>(Identifier(12),bkgToT,bkgBCID-1,0,bkgBCID-1);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+PixelRDOs_SIG9'";

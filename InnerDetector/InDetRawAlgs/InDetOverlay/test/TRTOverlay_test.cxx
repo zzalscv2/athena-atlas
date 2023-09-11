@@ -375,12 +375,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> sigCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     initTRTStrawStatusHT();
@@ -409,12 +409,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> sigCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     initTRTStrawStatusHT();
@@ -467,12 +467,12 @@ namespace OverlayTesting {
     const auto sigDriftTimeBin=sigDigit->driftTimeBin();
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     initTRTStrawStatusHT();
@@ -524,7 +524,7 @@ namespace OverlayTesting {
     const auto sigDriftTimeBin=sigDigit->driftTimeBin();
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     const IdentifierHash bkgElementHash(10027);
     const Identifier::value_type bkgValue = 0x16122ce000000000;
@@ -549,7 +549,7 @@ namespace OverlayTesting {
     const auto bkgDriftTimeBin=bkgDigit->driftTimeBin();
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
     inputSigSDODataHandle = std::make_unique<InDetSimDataCollection>();
     initTRTStrawStatusHT();
@@ -608,7 +608,7 @@ namespace OverlayTesting {
     const auto sigDriftTimeBin=sigDigit->driftTimeBin();
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
@@ -616,7 +616,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,sigWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     std::vector<HepMC::GenParticlePtr> genPartList;
     initMcEventCollection(genPartList);
@@ -687,7 +687,7 @@ namespace OverlayTesting {
     const auto sigHT=sigDigit->highLevel();
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
@@ -695,7 +695,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,bkgWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     std::vector<unsigned int> outBits(32,0);
     for(unsigned int i=0; i<32; ++i) {
@@ -782,7 +782,7 @@ namespace OverlayTesting {
     const auto sigHT=sigDigit->highLevel();
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
@@ -790,7 +790,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,bkgWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     initTRTStrawStatusHT();
 
     std::vector<unsigned int> outBits(32,0);
@@ -878,7 +878,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> sigDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,sigWord);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<TRT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+TRT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> bkgCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
@@ -886,7 +886,7 @@ namespace OverlayTesting {
     std::unique_ptr<TRT_LoLumRawData> bkgDigit = std::make_unique<TRT_LoLumRawData>(sigStrawID,bkgWord);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),sigElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
     initTRTStrawStatusHT();
 
     std::vector<HepMC::GenParticlePtr> genPartList;

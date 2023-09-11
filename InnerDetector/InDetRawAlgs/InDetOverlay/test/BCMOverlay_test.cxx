@@ -99,12 +99,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> sigCollection = std::make_unique<BCM_RDO_Collection>();
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG1"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG1'";
@@ -137,12 +137,12 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG2"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG2'";
@@ -175,7 +175,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG3"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -183,7 +183,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG3'";
@@ -216,7 +216,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG4"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -224,7 +224,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG4'";
@@ -270,7 +270,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG5"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -278,7 +278,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG5'";
@@ -324,7 +324,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG6"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -332,7 +332,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG6'";
@@ -378,7 +378,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG7"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -386,7 +386,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG7'";
@@ -432,7 +432,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG8"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -440,7 +440,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG8'";
@@ -486,7 +486,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG9"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -494,7 +494,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG9'";
@@ -540,7 +540,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG10"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -548,7 +548,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG10'";
@@ -594,7 +594,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG11"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -602,7 +602,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG11'";
@@ -648,7 +648,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> sigDigit = std::make_unique<BCM_RawData>(sigChannel,sigPulse1Position,sigPulse1Width,sigPulse2Position,sigPulse2Width,0,0,0,0);
     sigCollection->push_back(sigDigit.release());
     inputSigDataHandle->push_back(sigCollection.get());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<BCM_RDO_Container> inputBkgDataHandle{"StoreGateSvc+BCM_RDOs_BKG12"};
     inputBkgDataHandle = std::make_unique<BCM_RDO_Container>();
     std::unique_ptr<BCM_RDO_Collection> bkgCollection = std::make_unique<BCM_RDO_Collection>();
@@ -656,7 +656,7 @@ namespace OverlayTesting {
     std::unique_ptr<BCM_RawData> bkgDigit = std::make_unique<BCM_RawData>(bkgChannel,bkgPulse1Position,bkgPulse1Width,bkgPulse2Position,bkgPulse2Width,0,0,0,0);
     bkgCollection->push_back(bkgDigit.release());
     inputBkgDataHandle->push_back(bkgCollection.get());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+BCM_RDOs_SIG12'";

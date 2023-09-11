@@ -177,7 +177,7 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        signalCollection.release();
+        (void)signalCollection.release();
       }
     }
 
@@ -223,7 +223,7 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        bkgCollection.release();
+        (void)bkgCollection.release();
       }
     } else {
       // Flip the overlap flag
@@ -275,7 +275,7 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        signalCollection.release();
+        (void)signalCollection.release();
       }
     }
   }

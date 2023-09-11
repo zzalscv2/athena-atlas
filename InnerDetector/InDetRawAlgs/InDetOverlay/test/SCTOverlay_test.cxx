@@ -116,12 +116,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> sigCollection = std::make_unique<SCT_RDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
@@ -144,12 +144,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> sigCollection = std::make_unique<SCT_RDO_Collection>(sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
@@ -184,12 +184,12 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> sigDigit = std::make_unique<SCT3_RawData>(Identifier(12),sigWord, &sigErrorVect);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
@@ -231,7 +231,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> sigDigit = std::make_unique<SCT3_RawData>(Identifier(12),sigWord, &sigErrorVect);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
@@ -239,7 +239,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> bkgDigit = std::make_unique<SCT3_RawData>(Identifier(12),bkgWord,&bkgErrorVect);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
@@ -288,7 +288,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> sigDigit = std::make_unique<SCT3_RawData>(Identifier(12),sigWord,&sigErrorVect);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
@@ -296,7 +296,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> bkgDigit = std::make_unique<SCT3_RawData>(Identifier(13),bkgWord,&bkgErrorVect);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
@@ -338,7 +338,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> sigDigit = std::make_unique<SCT3_RawData>(Identifier(12),sigWord,&sigErrorVect);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
@@ -346,7 +346,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> bkgDigit = std::make_unique<SCT3_RawData>(Identifier(13),bkgWord,&bkgErrorVect);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
@@ -396,7 +396,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> sigDigit = std::make_unique<SCT3_RawData>(Identifier(12),sigWord,&sigErrorVect);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<SCT_RDO_Container> inputBkgDataHandle{"StoreGateSvc+SCT_RDOs_BKG"};
     inputBkgDataHandle = std::make_unique<SCT_RDO_Container>(containerSize);
     std::unique_ptr<SCT_RDO_Collection> bkgCollection = std::make_unique<SCT_RDO_Collection>(bkgElementHash);
@@ -404,7 +404,7 @@ namespace OverlayTesting {
     std::unique_ptr<SCT3_RawData> bkgDigit = std::make_unique<SCT3_RawData>(Identifier(40),bkgWord,&bkgErrorVect);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     configureSCTOverlay();
     ASSERT_TRUE( m_alg->initialize().isSuccess() );
