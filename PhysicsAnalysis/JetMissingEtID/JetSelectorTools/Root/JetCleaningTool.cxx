@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -42,12 +42,11 @@ class HotCell : public asg::AsgMessaging
         virtual ~HotCell() {}
         bool jetAffectedByHotCell(const xAOD::Jet& jet) const;
     private:
-        HotCell();
-        const int m_layer{-1};
-        const float m_etaMin{10};
-        const float m_etaMax{10};
-        const float m_phiMin{10};
-        const float m_phiMax{10};
+        const int m_layer;
+        const float m_etaMin;
+        const float m_etaMax;
+        const float m_phiMin;
+        const float m_phiMax;
         SG::AuxElement::ConstAccessor< std::vector<float> > m_ePerSamp{"EnergyPerSampling"};
 };
 
@@ -58,9 +57,6 @@ HotCell::HotCell(const int layer, const float etaMin, const float etaMax, const 
     , m_etaMax(etaMax)
     , m_phiMin(phiMin)
     , m_phiMax(phiMax) { }
-
-HotCell::HotCell()
-    : asg::AsgMessaging("HotCell"){}
 
 bool HotCell::jetAffectedByHotCell(const xAOD::Jet& jet) const
 {
@@ -394,7 +390,7 @@ bool JetCleaningTool::containsHotCells( const xAOD::Jet& jet, const unsigned int
 }
 
 /** Helpers for cut names */
-JetCleaningTool::CleaningLevel JetCleaningTool::getCutLevel( const std::string s ) const
+JetCleaningTool::CleaningLevel JetCleaningTool::getCutLevel( const std::string& s ) const
 {
   if (s=="VeryLooseBadLLP") return VeryLooseBadLLP;
   if (s=="LooseBad")     return LooseBad;
