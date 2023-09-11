@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -172,6 +172,10 @@ struct IdentTest
   {
     return m_vec.end();
   }
+  bool empty() const
+  {
+    return m_vec.empty();
+  }
 
   void fill (const std::string& prefix);
   
@@ -286,7 +290,8 @@ void testit (SGTest::TestStore& store,
              const typename ElementLink<CONT>::index_type& index1b,
              const typename ElementLink<CONT>::index_type& index2,
              const typename ElementLink<CONT>::index_type& index2b,
-             const typename ElementLink<CONT>::index_type& null_index)
+             const typename ElementLink<CONT>::index_type& null_index,
+             const typename ElementLink<CONT>::index_type& invalid_index)
 {
   typedef ElementLink<CONT> Link;
   typedef typename Link::ElementType element_t;
@@ -581,6 +586,16 @@ void testit (SGTest::TestStore& store,
   assert (el12.dataID() == "");
   assert (el12.key() == 0);
   assert (el12.source() == 0);
+
+  // Using an invalid index throws in isValid()
+  Link el14 (key, invalid_index);
+  EXPECT_EXCEPTION (std::runtime_error, el14.isValid());
+
+  // except if the container is empty
+  store.record(new CONT, "emptycont");
+  Link el15 ("emptycont", invalid_index);
+  assert (!el15.isValid());
+  EXPECT_EXCEPTION (std::runtime_error, *el15);
 }
 
 
@@ -605,7 +620,7 @@ void test1 (SGTest::TestStore& store)
   testit<FooCont> (store,
                    "foocont", foocont,
                    "foocont2", foocont2,
-                   1, 1, 2, 2, -1);
+                   1, 1, 2, 2, -1, 9);
 }
 
 
@@ -990,7 +1005,7 @@ void test8 (SGTest::TestStore& store)
   testit<StrVec> (store,
                   "strvec", strvec,
                   "strvec2", strvec2,
-                  1, 1, 2, 2, -1);
+                  1, 1, 2, 2, -1, 9);
 
   ElementLink<StrVec> el2 ("strvec", 2);
   assert (el2->size() == 1);
@@ -1019,7 +1034,7 @@ void test9 (SGTest::TestStore& store)
   testit<StrSet> (store,
                   "strset", strset,
                   "strset2", strset2,
-                  "1", "11", "2", "12", "");
+                  "1", "11", "2", "12", "", "9");
 
   ElementLink<StrVec> el2 ("strvec", 2);
   assert (el2->size() == 1);
@@ -1048,7 +1063,7 @@ void test10 (SGTest::TestStore& store)
   testit<StrMap> (store,
                   "strmap", strmap,
                   "strmap2", strmap2,
-                  "1", "11", "2", "12", "");
+                  "1", "11", "2", "12", "", "9");
 }
 
 
@@ -1072,7 +1087,8 @@ void test11 (SGTest::TestStore& store)
                      IdentContIndex(1,1).hashAndIndex(),
                      IdentContIndex(2,2).hashAndIndex(),
                      IdentContIndex(2,2).hashAndIndex(),
-                     IdentContIndex().hashAndIndex());
+                     IdentContIndex().hashAndIndex(),
+                     IdentContIndex(9,9).hashAndIndex());
 }
 
 
