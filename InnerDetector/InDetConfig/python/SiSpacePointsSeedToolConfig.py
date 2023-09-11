@@ -147,10 +147,10 @@ def SiSpacePointsSeedMakerCfg(flags, **kwargs):
     #
     if flags.Beam.Type is BeamType.Cosmics:
         return SiSpacePointsSeedMaker_CosmicCfg(flags, **kwargs)
-    elif flags.Reco.EnableHI:
-        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     elif flags.Tracking.ActiveConfig.isLowPt:
         return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.extension == "HeavyIon":
+        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     elif flags.Tracking.ActiveConfig.extension == "BeamGas":
         return SiSpacePointsSeedMaker_BeamGasCfg(flags, **kwargs)
     else:

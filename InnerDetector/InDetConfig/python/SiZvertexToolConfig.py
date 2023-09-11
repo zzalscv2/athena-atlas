@@ -16,7 +16,7 @@ def SiZvertexMaker_xkCfg(flags, name="InDetZvertexMaker", **kwargs) :
         kwargs.setdefault("SeedMakerTool", acc.popToolsAndMerge(
             SiSpacePointsSeedMakerCfg(flags)))
 
-    if flags.Reco.EnableHI:
+    if flags.Tracking.ActiveConfig.extension == "HeavyIon":
         kwargs.setdefault("HistSize", 2000)
         kwargs.setdefault("minContent", 30)
 
