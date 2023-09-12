@@ -63,7 +63,7 @@ public:
     double pathcorrection,
     PropDirection dir = alongMomentum,
     ParticleHypothesis particle = pion,
-    bool usePDGformula = false) const = 0;
+    bool useMPV = false) const = 0;
 
   /** Method to recalculate Eloss values for the fit setting an elossFlag using
      as an input the detailed Eloss information Calorimeter energy, error

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// MaterialInteraction.h, (c) ATLAS Detector software
+// MaterialInteraction.h, ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
 #ifndef TRKGEOMETRY_MATERIALINTERACTION_H
@@ -15,27 +15,27 @@
 namespace Trk {
 
 /** @class MaterialInteraction
-
  Collection of parametrizations used in the Tracking realm
-
  @author sarka.todorova@cern.ch
+ @author Christos Anastopoulos (Athena MT)
 */
 
 struct MaterialInteraction
 {
   /** dE/dl ionization energy loss per path unit */
   static double dEdl_ionization(double p,
-                                const Material* mat,
+                                const Material& mat,
                                 ParticleHypothesis particle,
                                 double& sigma,
                                 double& kazL);
-  /** ionization energy loss from PDG */
-  static double PDG_energyLoss_ionization(double p,
-                                          const Trk::Material* mat,
-                                          Trk::ParticleHypothesis particle,
-                                          double& sigma,
-                                          double& kazL,
-                                          double path);
+
+  /** Most Propable dE ionization energly loss */
+  static double dE_MPV_ionization(double p,
+                                  const Trk::Material& mat,
+                                  Trk::ParticleHypothesis particle,
+                                  double& sigma,
+                                  double& kazL,
+                                  double path);
 
   /** dE/dl radiation energy loss per path unit */
   static double dEdl_radiation(double p,
@@ -44,7 +44,9 @@ struct MaterialInteraction
                                double& sigma);
 
   /** multiple scattering as function of dInX0 */
-  static double sigmaMS(double dInX0, double p, double beta);
+  static double sigmaMS(double dInX0,
+                        double p,
+                        double beta);
 };
 } // namespace Trk
 

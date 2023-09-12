@@ -323,7 +323,6 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::runTestT(
 
 template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepInformationT(
   Trk::ExtrapolationCell < T >& ecc, int fwdBwd, std::vector < const Trk::Surface* >& stepSurfaces) {
-  Trk::MaterialInteraction materialInteraction;
 
   // loop over the collected information
   for (auto& es : ecc.extrapolationSteps) {
@@ -362,23 +361,23 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
       // check this
       if (ip == 0 && m_collectSensitive) {
         // fill the layer index and the local variables
-        int idx = parameters->associatedSurface().associatedLayer() ? 
+        int idx = parameters->associatedSurface().associatedLayer() ?
             parameters->associatedSurface().associatedLayer()->layerIndex().value() : -1;
         m_sensitiveLayerIndex->push_back(idx);
         int type = int(parameters->associatedSurface().type());
         m_sensitiveSurfaceType->push_back(type);
         m_sensitiveLocalPosX->push_back(parameters->localPosition()[Trk::loc1]);
-        m_sensitiveLocalPosY->push_back(parameters->localPosition()[Trk::loc2]); 
-           
+        m_sensitiveLocalPosY->push_back(parameters->localPosition()[Trk::loc2]);
+
         if (parameters->associatedSurface().associatedDetectorElement()) {
           Identifier id = parameters->associatedSurface().associatedDetectorElement()->identify();
-          
+
           m_sensitiveCenterPosX->push_back(parameters->associatedSurface().associatedDetectorElement()->center().x());
           m_sensitiveCenterPosY->push_back(parameters->associatedSurface().associatedDetectorElement()->center().y());
           m_sensitiveCenterPosZ->push_back(parameters->associatedSurface().associatedDetectorElement()->center().z());
           m_sensitiveCenterPosR->push_back(parameters->associatedSurface().associatedDetectorElement()->center().perp());
           m_sensitiveCenterPosPhi->push_back(parameters->associatedSurface().associatedDetectorElement()->center().phi());
-          
+
           bool isHGTD = false;
           if (m_idHelper->is_pixel(id)) {
             // save pixel info
@@ -391,7 +390,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
             m_sensitivePhiModule->push_back(m_pixel_ID->phi_module(id));
             m_sensitiveSide->push_back(0);
           } else if (m_idHelper->is_sct(id)) {
-            // save sct info 
+            // save sct info
             m_sensitiveDetector->push_back(1);
             m_sensitiveIsInnermost->push_back(0);
             m_sensitiveIsNextToInnermost->push_back(0);
@@ -401,7 +400,7 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
             m_sensitivePhiModule->push_back(m_sct_ID->phi_module(id));
             m_sensitiveSide->push_back(m_sct_ID->side(id));
           } else if (m_useHGTD and m_idHelper->is_hgtd(id)) {
-            // save hgtd info 
+            // save hgtd info
             m_sensitiveDetector->push_back(2);
             m_sensitiveIsInnermost->push_back(0);
             m_sensitiveIsNextToInnermost->push_back(0);
@@ -412,10 +411,10 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
             m_sensitiveSide->push_back(0);
             isHGTD = true;
           }
-          
+
           if (not isHGTD) {
             const InDetDD::SiDetectorElement* siElement = dynamic_cast<const InDetDD::SiDetectorElement*> (parameters->associatedSurface().associatedDetectorElement());
-            double phitol = 2.5; double etatol = 5.0;               
+            double phitol = 2.5; double etatol = 5.0;
             bool nearGap = siElement->nearBondGap(parameters->localPosition(), etatol);
             InDetDD::SiIntersect siIn = siElement->inDetector(parameters->localPosition(), phitol, etatol);
             bool isInside = siIn.in();
@@ -446,12 +445,12 @@ template < class T, class P > StatusCode Trk::ExtrapolationEngineTest::fillStepI
         double path = es.materialScaling * es.material->thickness();
         double sigma = 0.;
         double kazl = 0.;
-        float mean = materialInteraction.PDG_energyLoss_ionization(parameters->momentum().mag(),
-                                                                   &(es.material->material()),
-                                                                   Trk::muon,
-                                                                   sigma,
-                                                                   kazl,
-                                                                   path);
+        float mean = Trk::MaterialInteraction::dE_MPV_ionization(parameters->momentum().mag(),
+                                                                 (es.material->material()),
+                                                                 Trk::muon,
+                                                                 sigma,
+                                                                 kazl,
+                                                                 path);
         // sample the energy loss  - m_tRandom.Landau(fabs(mpv),sigma);
         // fabs(energyLoss)+energyLossSigma*CLHEP::RandLandau::shoot(m_randomEngine);
         double eloss = mean - sigma * Trk::TrkExUnitTestBase::m_landauDist->shoot();
