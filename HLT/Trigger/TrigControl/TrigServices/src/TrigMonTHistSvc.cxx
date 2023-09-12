@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMonTHistSvc.h"
@@ -212,6 +212,9 @@ StatusCode TrigMonTHistSvc::deReg(TObject* optr)
 
 StatusCode TrigMonTHistSvc::deReg(const std::string& id)
 {
+  // This lock should not be needed but the MonSvc implementation in the
+  // HLTMMPPU is not thread-safe (maybe related to ATR-28222).
+  std::scoped_lock lock(m_svcMut);
   hltinterface::IInfoRegister::instance()->releaseTObject(name(), id);
   ATH_MSG_DEBUG("Deregistration of " << id << " done");
   return StatusCode::SUCCESS;
