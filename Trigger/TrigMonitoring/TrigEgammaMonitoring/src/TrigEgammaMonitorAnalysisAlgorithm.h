@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TrigEgammaMonitorAnalysisAlgorithm_H
 #define TrigEgammaMonitorAnalysisAlgorithm_H
@@ -24,14 +24,14 @@ class TrigEgammaMonitorAnalysisAlgorithm: public TrigEgammaMonitorBaseAlgorithm
     void fillEfficiencies( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo& ) const;
     void fillDistributions( const std::vector< std::pair<const xAOD::Egamma*, const TrigCompositeUtils::Decision*> >& , const TrigInfo& ) const;
     void fillResolutions( const std::vector< std::pair< const xAOD::Egamma*, const TrigCompositeUtils::Decision * >>& pairObjs, const TrigInfo& info ) const;
-    void fillInefficiency(  const std::string &pidword, const TrigInfo& info, const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs, std::vector< asg::AcceptData > acceptObjs) const;
+    void fillInefficiency(  const std::string &pidword, const TrigInfo& info, const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs, const std::vector< asg::AcceptData >& acceptObjs) const;
 
   private:
 
     // Efficiency monitoring
     void fillEfficiency( const std::string &subgroup, const std::string &level, const std::string &pidword, const TrigInfo& info, 
                          const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs,
-                         std::vector< asg::AcceptData > acceptObjs, const std::string& dirname ) const;
+                         const std::vector< asg::AcceptData >& acceptObjs, const std::string& dirname ) const;
 
     // Disribution monitoring
     void fillL1Calo( const std::string &trigger, const std::vector< const xAOD::EmTauRoI* >& l1_vec ) const; 

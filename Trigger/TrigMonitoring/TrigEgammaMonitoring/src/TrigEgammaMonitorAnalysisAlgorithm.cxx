@@ -154,7 +154,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                                                          const std::string &pidword,
                                                          const TrigInfo& info,
                                                          const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs,
-                                                         std::vector< asg::AcceptData > acceptObjs ,
+                                                         const std::vector< asg::AcceptData >& acceptObjs ,
                                                          const std::string& dirname ) const
 {
     const float etthr = info.etthr;
@@ -331,7 +331,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillInefficiency( const std::string &pi
                                                          const TrigInfo& info,
                                                          const std::vector< std::pair< const xAOD::Egamma *, 
                                                          const TrigCompositeUtils::Decision* >>& pairObjs,
-                                                         std::vector< asg::AcceptData > acceptObjs ) const
+                                                         const std::vector< asg::AcceptData >& acceptObjs ) const
 {
     auto monGroup = getGroup(info.trigger+"_Inefficiency");
     unsigned iObj=0;
