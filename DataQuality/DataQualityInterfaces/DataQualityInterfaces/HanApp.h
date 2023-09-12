@@ -22,10 +22,10 @@ class ATLAS_NOT_THREAD_SAFE HanApp : public TObject {
 public:
 
   HanApp();
-  HanApp( std::string configName_, std::string inputName_, std::string outputName_, std::string path_ = "" );
+  HanApp( const std::string& configName, const std::string& inputName, const std::string& outputName, const std::string& path = "" );
   virtual ~HanApp();
   
-  virtual int Analyze( std::string configName_, std::string inputName_, std::string outputName_, std::string path_ = "" );
+  virtual int Analyze( const std::string& configName_, const std::string& inputName_, const std::string& outputName_, const std::string& path_ = "" );
   
   virtual TFile*  OpenResultsFile() const;
   

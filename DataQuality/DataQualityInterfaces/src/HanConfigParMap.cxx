@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -50,7 +50,7 @@ HanConfigParMap::
 
 void
 HanConfigParMap::
-SetName( const std::string name_ )
+SetName( const std::string& name_ )
 {
   m_name.SetString( name_.c_str() );
 }
@@ -66,7 +66,7 @@ GetName() const
 
 void
 HanConfigParMap::
-SetValue( const std::string value_ )
+SetValue( const std::string& value_ )
 {
   m_value.SetString( value_.c_str() );
 }

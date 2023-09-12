@@ -71,6 +71,8 @@ namespace dqi
     {
     public:
       Result(TDirectory* dir);
+      Result(const Result&) = delete;
+      Result& operator=(const Result&) = delete;
       virtual ~Result();
       virtual void fill(const dqm_core::Result& result);
       virtual void write();
