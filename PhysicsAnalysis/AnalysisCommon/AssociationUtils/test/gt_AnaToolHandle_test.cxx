@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Unit tests for AssociationUtils tools in StandaloneToolHandle
  */
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "AsgTesting/UnitTest.h"
 #include "AsgMessaging/MessageCheck.h"

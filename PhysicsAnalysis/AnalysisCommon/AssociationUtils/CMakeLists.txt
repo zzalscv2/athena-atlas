@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # The name of the package:
 atlas_subdir( AssociationUtils )
@@ -49,7 +49,7 @@ macro( _add_gtest name )
    atlas_add_test( ${name}
       SOURCES test/${name}.cxx
       INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-      LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTools AsgTestingLib AssociationUtilsLib
+      LINK_LIBRARIES ${GTEST_LIBRARIES} AsgTools AsgTestingLib AssociationUtilsLib CxxUtils
       ${extra_libs}
       POST_EXEC_SCRIPT nopost.sh )
 endmacro( _add_gtest )
