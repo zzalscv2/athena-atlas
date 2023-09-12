@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanConfigParMap_h
@@ -22,10 +22,10 @@ public:
   HanConfigParMap(const HanConfigParMap& other);
   virtual ~HanConfigParMap();
   
-  virtual void         SetName( const std::string name_ );
+  virtual void         SetName( const std::string& name_ );
   virtual const char*  GetName() const;
   
-  virtual void         SetValue( const std::string value_ );
+  virtual void         SetValue( const std::string& value_ );
   virtual const char*  GetValue() const;
   
   virtual void         PrintIOStream( std::ostream& o ) const;

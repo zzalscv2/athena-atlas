@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -40,9 +40,8 @@ CompositeAlgorithm( const CompositeAlgorithm& other )
 
 CompositeAlgorithm::
 CompositeAlgorithm( HanConfigCompAlg& compAlgConfig )
+  : m_name (compAlgConfig.GetName())
 {
-  m_name = compAlgConfig.GetName();
-  
   TObjString* libStr;
   TIter libIter( compAlgConfig.GetAllLib() );
   while( (libStr = dynamic_cast<TObjString*>( libIter() )) != 0 ){

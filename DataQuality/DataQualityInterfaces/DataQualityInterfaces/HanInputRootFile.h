@@ -19,7 +19,7 @@ namespace dqi {
 class HanInputRootFile: public dqm_core::InputRootFile {
 public:
 
-  HanInputRootFile( std::string& rootFileName, const std::string& path = "" );
+  HanInputRootFile( const std::string& rootFileName, const std::string& path = "" );
   ~HanInputRootFile();
 
   virtual void addListener( const boost::regex& regex, dqm_core::InputListener* listener ) override;

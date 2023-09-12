@@ -25,7 +25,7 @@ TDirectory* changeInputDir( TDirectory* dir, const std::string& path );
 namespace dqi {
 
 HanInputRootFile::
-HanInputRootFile( std::string& rootFileName, const std::string& path )
+HanInputRootFile( const std::string& rootFileName, const std::string& path )
   : dqm_core::InputRootFile::InputRootFile(rootFileName)
   , m_basedir(0)
   , m_histNamesBuilt(false)

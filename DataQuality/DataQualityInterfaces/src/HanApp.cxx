@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -69,9 +69,9 @@ HanApp()
 
 
 HanApp::
-HanApp( std::string configName_, std::string inputName_, std::string outputName_, std::string path_ )
+HanApp( const std::string& configName, const std::string& inputName, const std::string& outputName, const std::string& path )
 {
-  Analyze( std::move(configName_), std::move(inputName_), std::move(outputName_), std::move(path_) );
+  HanApp::Analyze( configName, inputName, outputName, path );
 }
 
 
@@ -83,7 +83,7 @@ HanApp::
 
 int
 HanApp::
-Analyze( std::string configName_, std::string inputName_, std::string outputName_, std::string path_ )
+Analyze( const std::string& configName_, const std::string& inputName_, const std::string& outputName_, const std::string& path_ )
 {
   DisableMustClean disabled;
   
