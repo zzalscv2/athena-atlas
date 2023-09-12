@@ -4,8 +4,6 @@
 
 #include "SUSYTools/SUSYObjDef_xAOD.h"
 
-using namespace ST;
-
 // For the data types to be used in configuring tools
 #include "PATCore/PATCoreEnums.h"
 
@@ -75,6 +73,9 @@ using namespace ST;
 #include "ParticleJetTools/JetTruthLabelingTool.h"
 
 #include "InDetTrackSystematicsTools/IInclusiveTrackFilterTool.h"
+
+using namespace ST;
+
 
 
 #define CONFIG_EG_EFF_TOOL( TOOLHANDLE, TOOLNAME, CORRFILE )                \
