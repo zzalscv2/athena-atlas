@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,6 +19,7 @@
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/starts_with.h"
 
 // D3PD include(s):
 #include "D3PDMakerUtils/ObjectMetadata.h"
@@ -79,9 +80,9 @@ namespace {
       //
       ok = true;
       std::string result = type;
-      if( result.find( "std::vector<" ) == 0 ) {
+      if( CxxUtils::starts_with (result , "std::vector<" ) ) {
          result.replace( 0, 12, "" );
-      } else if( result.find( "vector<" ) == 0 ) {
+      } else if( CxxUtils::starts_with( result, "vector<" ) ) {
          result.replace( 0, 7, "" );
       } else {
          ok = false;
