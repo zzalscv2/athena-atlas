@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYANALYSISEXAMPLES_MYDETOBJ_H
@@ -14,7 +14,7 @@ namespace AthPyEx {
 class MyDetObj
 {
 public:
-  MyDetObj (const std::string &name) { m_name = name; }
+  MyDetObj (const std::string &name) : m_name(name) {  }
   virtual ~MyDetObj () {}
 
   const std::string name () { return m_name; }
