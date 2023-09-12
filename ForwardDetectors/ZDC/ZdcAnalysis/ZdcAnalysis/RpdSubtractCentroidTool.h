@@ -143,10 +143,6 @@ private:
   std::array<float, 2> m_xyRotAngle; // The rotation of the RPD in the x-y plane about its center (in radians)
   std::array<float, 2> m_yzRotAngle; // The rotation of the RPD in the y-z plane about its center (in radians)
     
-  // Average x and y centroid positions - obtained from calibration file - to be subtracted from the per-event results
-  //
-  std::array<float, 2> m_xCentAvg;
-  std::array<float, 2> m_yCentAvg;
   
   // read handle keys
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
