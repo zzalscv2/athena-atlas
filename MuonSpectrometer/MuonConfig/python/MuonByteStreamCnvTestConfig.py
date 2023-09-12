@@ -192,7 +192,7 @@ def CscDigitToCscRDOToolCfg(flags, name="CscDigitToCscRDOTool", **kwargs):
     if flags.Common.isOverlay:
         kwargs.setdefault("InputObjectName", f"{flags.Overlay.SigPrefix}CSC_DIGITS")
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.SigPrefix}CSCRDO")
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+    elif flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}CSCRDO")
     else:
         kwargs.setdefault("OutputObjectName", "CSCRDO")

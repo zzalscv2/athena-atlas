@@ -19,12 +19,6 @@ from InDetOverlay.TRTOverlayConfig import TRTOverlayCfg
 from InDetOverlay.PLR_OverlayConfig import PLR_OverlayCfg
 from HGTD_Overlay.HGTD_OverlayConfig import HGTD_OverlayCfg
 from LArDigitization.LArDigitizationConfig import LArOverlayCfg, LArSuperCellOverlayCfg
-from MuonConfig.CSC_OverlayConfig import CSC_OverlayCfg
-from MuonConfig.MDT_OverlayConfig import MDT_OverlayCfg
-from MuonConfig.MM_OverlayConfig import MM_OverlayCfg
-from MuonConfig.RPC_OverlayConfig import RPC_OverlayCfg
-from MuonConfig.sTGC_OverlayConfig import sTGC_OverlayCfg
-from MuonConfig.TGC_OverlayConfig import TGC_OverlayCfg
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg
@@ -109,19 +103,9 @@ def OverlayMainContentCfg(configFlags):
                 acc.merge(TileOverlayTriggerDigitizationCfg(configFlags))
 
     # Muon system
-    if configFlags.Detector.EnableCSC:
-        acc.merge(CSC_OverlayCfg(configFlags))
-    if configFlags.Detector.EnableMDT:
-        acc.merge(MDT_OverlayCfg(configFlags))
-    if configFlags.Detector.EnableRPC:
-        acc.merge(RPC_OverlayCfg(configFlags))
-    if configFlags.Detector.EnableTGC:
-        acc.merge(TGC_OverlayCfg(configFlags))
-    if configFlags.Detector.EnablesTGC:
-        acc.merge(sTGC_OverlayCfg(configFlags))
-    if configFlags.Detector.EnableMM:
-        acc.merge(MM_OverlayCfg(configFlags))
-
+    from MuonConfig.MuonOverlayConfig import MuonOverlayCfg
+    acc.merge(MuonOverlayCfg(configFlags))
+    
     # Add MT-safe PerfMon
     if configFlags.PerfMon.doFastMonMT or configFlags.PerfMon.doFullMonMT:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
