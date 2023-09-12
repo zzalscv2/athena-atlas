@@ -20,6 +20,7 @@
 #include <vector>
 #include <climits>
 #include <new>
+#include <cmath>
 
 #if __cpp_lib_math_constants
   #include <numbers>

@@ -56,7 +56,6 @@ constexpr static int CleanUpSecondariesBlockSize = 512;
 
 constexpr static int ClusterSplittingMainPropagationBlockSize = 1024;
 constexpr static int PropagateSplitTagsBlockSize = 256;
-constexpr static int HandleSplitIndexChangesBlockSize = 256;
 constexpr static int HandleSplitTagChangesBlockSize = 256;
 
 constexpr static int SumCellsBlockSize = 320;
@@ -104,17 +103,20 @@ void fillNeighboursKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemp
     {
       const ClusterTag this_tag = cell_state_arr->clusterTag[cell];
 
+      int neighbours[NMaxNeighbours];
+      int num_normal = 0, num_extra = 0, num_next = 0, num_prev = 0, num_limited = 0, total_neighs = 0;
+
+      constexpr int non_neighbour_mark = 0x100000;
+      //Will mark neighbours that are not part of the same cluster;
+
+      const bool is_limited = ( opts->limit_HECIW_and_FCal_neighs && geometry->is_HECIW_or_FCal(cell) )  ||
+                              ( opts->limit_PS_neighs             && geometry->is_PS(cell)            );
+      //The cells that have limited neighbours, for the split cluster growing part.
+      //WARNING: the CPU version of the code does not limit PS neighbours ever, but we give additional freedom
+      //         (even if it is disabled by default).
+
       if (this_tag.is_part_of_cluster())
         {
-          const bool is_limited = ( opts->limit_HECIW_and_FCal_neighs && geometry->is_HECIW_or_FCal(cell) )  ||
-                                  ( opts->limit_PS_neighs             && geometry->is_PS(cell)            );
-
-          //The cells that have limited neighbours, for the split cluster growing part.
-          //WARNING: the CPU version of the code does not limit PS neighbours ever, but we give additional freedom
-          //         (even if it is disabled by default).
-
-          int neighbours[NMaxNeighbours];
-
           const unsigned int limited_flags   = LArNeighbours::neighbourOption::nextInSamp & opts->neighbour_options;
 
           const unsigned int pre_next_flags  = LArNeighbours::neighbourOption::nextSuperCalo & opts->neighbour_options;
@@ -126,20 +128,15 @@ void fillNeighboursKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemp
 
           const unsigned int remaining_flags = (~covered_flags) & opts->neighbour_options;
 
-          const int num_limited = geometry->get_neighbours(limited_flags, cell, neighbours);
+          num_limited = geometry->get_neighbours(limited_flags, cell, neighbours);
 
-          const int num_next = num_limited + geometry->get_neighbours(pre_next_flags, cell, neighbours + num_limited);
+          num_next = num_limited + geometry->get_neighbours(pre_next_flags, cell, neighbours + num_limited);
 
-          const int num_prev = geometry->get_neighbours(prev_flags, cell, neighbours + num_next);
+          num_prev = geometry->get_neighbours(prev_flags, cell, neighbours + num_next);
 
           const int num_rest = geometry->get_neighbours(remaining_flags, cell, neighbours + num_next + num_prev);
 
-          const int total_neighs = num_next + num_prev + num_rest;
-
-          constexpr int non_neighbour_mark = 0x100000;
-          //Will mark neighbours that are not part of the same cluster;
-
-          int main_neighbours = 0, extra_neighbours = 0;
+          total_neighs = num_next + num_prev + num_rest;
 
           for (int i = 0; i < total_neighs; ++i)
             {
@@ -149,11 +146,11 @@ void fillNeighboursKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemp
                 {
                   if (is_limited && i >= num_limited)
                     {
-                      ++extra_neighbours;
+                      ++num_extra;
                     }
                   else
                     {
-                      ++main_neighbours;
+                      ++num_normal;
                     }
                 }
               else
@@ -161,105 +158,154 @@ void fillNeighboursKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemp
                   neighbours[i] |= non_neighbour_mark;
                 }
             }
-
-          const int normal_offset = atomicAdd(&(temporaries->pairs.number_normal), main_neighbours);
-          const int next_offset   = atomicAdd(&(temporaries->pairs.number_next),   num_next);
-          const int prev_offset   = atomicAdd(&(temporaries->pairs.number_prev),   num_prev);
-          const int extra_offset  = atomicAdd(&(temporaries->pairs.number_extra),  extra_neighbours);
-
-          int normal_pair_index = normal_offset;
-          int next_pair_index   = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark - next_offset - num_next;
-          int prev_pair_index   = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark + prev_offset;
-          int extra_pair_index  = TopoAutomatonSplittingTemporaries::PairsArr::s_size - extra_offset - extra_neighbours;
-
-          for (int i = 0; i < num_limited; ++i)
-            {
-              const int neigh = neighbours[i];
-              if (neigh < non_neighbour_mark)
-                {
-                  temporaries->pairs.cellID[normal_pair_index] = neigh;
-                  temporaries->pairs.neighbourID[normal_pair_index] = cell;
-                  ++normal_pair_index;
-                }
-              temporaries->pairs.cellID[next_pair_index] = neigh & (~non_neighbour_mark);
-              temporaries->pairs.neighbourID[next_pair_index] = cell;
-              ++next_pair_index;
-            }
-          for (int i = num_limited; i < num_next; ++i)
-            {
-              const int neigh = neighbours[i];
-              if (neigh < non_neighbour_mark)
-                {
-                  int & pair_index = (is_limited ? extra_pair_index : normal_pair_index);
-                  temporaries->pairs.cellID[pair_index] = neigh;
-                  temporaries->pairs.neighbourID[pair_index] = cell;
-                  ++pair_index;
-                }
-              temporaries->pairs.cellID[next_pair_index] = neigh & (~non_neighbour_mark);
-              temporaries->pairs.neighbourID[next_pair_index] = cell;
-              ++next_pair_index;
-            }
-          for (int i = num_next; i < num_next + num_prev; ++i)
-            {
-              const int neigh = neighbours[i];
-              if (neigh < non_neighbour_mark)
-                {
-                  int & pair_index = (is_limited ? extra_pair_index : normal_pair_index);
-                  temporaries->pairs.cellID[pair_index] = neigh;
-                  temporaries->pairs.neighbourID[pair_index] = cell;
-                  ++pair_index;
-                }
-              temporaries->pairs.cellID[prev_pair_index] = neigh & (~non_neighbour_mark);
-              temporaries->pairs.neighbourID[prev_pair_index] = cell;
-              ++prev_pair_index;
-            }
-          for (int i = num_next + num_prev; i < total_neighs; ++i)
-            {
-              const int neigh = neighbours[i];
-              if (neigh < non_neighbour_mark)
-                {
-                  int & pair_index = (is_limited ? extra_pair_index : normal_pair_index);
-                  temporaries->pairs.cellID[pair_index] = neigh;
-                  temporaries->pairs.neighbourID[pair_index] = cell;
-                  ++pair_index;
-                }
-            }
-
-          temporaries->get_cells_extra_array<LocalMaximaDetection, int>(cell) = main_neighbours + extra_neighbours;
         }
       else
         {
-          int neighbours[NMaxNeighbours];
-
           const unsigned int next_flags = ( LArNeighbours::neighbourOption::nextSuperCalo |
                                             LArNeighbours::neighbourOption::nextInSamp      ) & opts->neighbour_options;
 
           const unsigned int prev_flags = ( LArNeighbours::neighbourOption::prevSuperCalo |
                                             LArNeighbours::neighbourOption::prevInSamp      ) & opts->neighbour_options;
 
-          const int num_next = geometry->get_neighbours(next_flags, cell, neighbours);
-          const int num_prev = geometry->get_neighbours(prev_flags, cell, neighbours + num_next);
+          num_next = geometry->get_neighbours(next_flags, cell, neighbours);
+          num_prev = geometry->get_neighbours(prev_flags, cell, neighbours + num_next);
+          total_neighs = num_next + num_prev;
 
-          const int next_offset = atomicAdd(&(temporaries->pairs.number_next), num_next);
-          const int prev_offset = atomicAdd(&(temporaries->pairs.number_prev), num_prev);
-
-          int next_pair_index   = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark - next_offset - num_next;
-          int prev_pair_index   = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark + prev_offset;
-
-          for (int i = 0; i < num_next; ++i)
+          for (int i = 0; i < total_neighs; ++i)
             {
-              const int neigh = neighbours[i];
-              temporaries->pairs.cellID[next_pair_index] = neigh;
-              temporaries->pairs.neighbourID[next_pair_index] = cell;
-              ++next_pair_index;
+              neighbours[i] |= non_neighbour_mark;
             }
-          for (int i = num_next; i < num_next + num_prev; ++i)
+        }
+
+      constexpr int WarpSize = 32;
+      constexpr unsigned int full_mask = 0xFFFFFFFFU;
+      const int intra_warp_index = threadIdx.x % WarpSize;
+
+      int normal_prefix = num_normal;
+      int next_prefix   = num_next;
+      int prev_prefix   = num_prev;
+      int extra_prefix  = num_extra;
+
+      for (int i = 1; i < WarpSize; i *= 2)
+        {
+          const int other_normal = __shfl_down_sync (full_mask, normal_prefix, i) * (intra_warp_index + i < WarpSize);
+          const int other_next   = __shfl_down_sync (full_mask, next_prefix,   i) * (intra_warp_index + i < WarpSize);
+          const int other_prev   = __shfl_up_sync   (full_mask, prev_prefix,   i) * (intra_warp_index >= i);
+          const int other_extra  = __shfl_up_sync   (full_mask, extra_prefix,  i) * (intra_warp_index >= i);
+
+          normal_prefix += other_normal;
+          next_prefix   += other_next;
+          prev_prefix   += other_prev;
+          extra_prefix  += other_extra;
+        }
+
+
+      int real_next_prefix = 0;
+      int real_prev_prefix = 0;
+
+      if (intra_warp_index <= 1)
+        {
+          real_next_prefix = __shfl_sync(0x00000003U, next_prefix, 0);
+        }
+      else if (intra_warp_index >= WarpSize - 2)
+        {
+          real_prev_prefix = __shfl_sync(0xC0000000U, prev_prefix, WarpSize - 1);
+        }
+
+      int base_normal_offset = 0;
+      int base_next_offset   = 0;
+      int base_prev_offset   = 0;
+      int base_extra_offset  = 0;
+
+      switch (intra_warp_index)
+        {
+          case 0:
+            base_normal_offset = atomicAdd(&(temporaries->pairs.number_normal), normal_prefix);
+            break;
+          case 1:
+            base_next_offset   = atomicAdd(&(temporaries->pairs.number_next),   real_next_prefix);
+            break;
+          case WarpSize - 2:
+            base_prev_offset   = atomicAdd(&(temporaries->pairs.number_prev),   real_prev_prefix);
+            break;
+          case WarpSize - 1:
+            base_extra_offset  = atomicAdd(&(temporaries->pairs.number_extra),  extra_prefix);
+            break;
+          default:
+            break;
+
+        }
+
+      const int normal_offset = __shfl_sync(full_mask, base_normal_offset,            0) + normal_prefix - num_normal;
+      const int next_offset   = __shfl_sync(full_mask, base_next_offset,              1) + next_prefix   - num_next;
+      const int prev_offset   = __shfl_sync(full_mask, base_prev_offset,   WarpSize - 2) + prev_prefix   - num_prev;
+      const int extra_offset  = __shfl_sync(full_mask, base_extra_offset,  WarpSize - 1) + extra_prefix  - num_extra;
+
+      int normal_pair_index   = normal_offset;
+      int next_pair_index     = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark - next_offset - num_next;
+      int prev_pair_index     = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark + prev_offset;
+      int extra_pair_index    = TopoAutomatonSplittingTemporaries::PairsArr::s_size - extra_offset - num_extra;
+
+      for (int i = 0; i < num_limited; ++i)
+        {
+          const int neigh = neighbours[i];
+          if (neigh < non_neighbour_mark)
             {
-              const int neigh = neighbours[i];
-              temporaries->pairs.cellID[prev_pair_index] = neigh;
-              temporaries->pairs.neighbourID[prev_pair_index] = cell;
-              ++prev_pair_index;
+              temporaries->pairs.cellID[normal_pair_index] = neigh;
+              temporaries->pairs.neighbourID[normal_pair_index] = cell;
+              ++normal_pair_index;
             }
+          temporaries->pairs.cellID[next_pair_index] = neigh & (~non_neighbour_mark);
+          temporaries->pairs.neighbourID[next_pair_index] = cell;
+          ++next_pair_index;
+        }
+      for (int i = num_limited; i < num_next; ++i)
+        {
+          const int neigh = neighbours[i];
+          if (neigh < non_neighbour_mark)
+            {
+              int & pair_index = (is_limited ? extra_pair_index : normal_pair_index);
+              temporaries->pairs.cellID[pair_index] = neigh;
+              temporaries->pairs.neighbourID[pair_index] = cell;
+              ++pair_index;
+            }
+          temporaries->pairs.cellID[next_pair_index] = neigh & (~non_neighbour_mark);
+          temporaries->pairs.neighbourID[next_pair_index] = cell;
+          ++next_pair_index;
+        }
+      for (int i = num_next; i < num_next + num_prev; ++i)
+        {
+          const int neigh = neighbours[i];
+          if (neigh < non_neighbour_mark)
+            {
+              int & pair_index = (is_limited ? extra_pair_index : normal_pair_index);
+              temporaries->pairs.cellID[pair_index] = neigh;
+              temporaries->pairs.neighbourID[pair_index] = cell;
+              ++pair_index;
+            }
+          temporaries->pairs.cellID[prev_pair_index] = neigh & (~non_neighbour_mark);
+          temporaries->pairs.neighbourID[prev_pair_index] = cell;
+          ++prev_pair_index;
+        }
+      for (int i = num_next + num_prev; i < total_neighs; ++i)
+        {
+          const int neigh = neighbours[i];
+          if (neigh < non_neighbour_mark)
+            {
+              int & pair_index = (is_limited ? extra_pair_index : normal_pair_index);
+              temporaries->pairs.cellID[pair_index] = neigh;
+              temporaries->pairs.neighbourID[pair_index] = cell;
+              ++pair_index;
+            }
+        }
+
+      if (this_tag.is_part_of_cluster())
+        {
+
+          temporaries->get_cells_extra_array<LocalMaximaDetection, int>(cell) = num_normal + num_extra;
+        }
+      else
+        {
 
           temporaries->get_cells_extra_array<LocalMaximaDetection, int>(cell) = -NMaxNeighbours;
         }
@@ -414,7 +460,6 @@ void findLocalMaximaKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_
                            const Helpers::CUDA_kernel_object<TopoAutomatonSplittingOptions> opts )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
-
   const int grid_size = gridDim.x * blockDim.x;
 
   for (int cell = index; cell < NCaloCells; cell += grid_size)
@@ -552,7 +597,6 @@ void fixClustersWithoutMaximaKernel(Helpers::CUDA_kernel_object<CellStateArr> ce
           temporaries->cell_to_cluster_map[cell] = -1;
         }
     }
-
 }
 
 void TASplitting::findLocalMaxima(EventDataHolder & holder,
@@ -623,6 +667,7 @@ void propagate_secondary_maxima_pair(const int pair,
                        temporaries->tertiary_array    );
 
   const TASTag this_tag = array[this_ID];
+  const TASTag neigh_tag = array[neigh_ID];
 
   if (this_tag.is_secondary_maxima_eliminator() || this_tag.is_secondary_maximum_seed())
     {
@@ -649,7 +694,7 @@ void secondaryMaximaCooperativeKernel(Helpers::CUDA_kernel_object<TopoAutomatonS
   const int pair_start  = TopoAutomatonSplittingTemporaries::PairsArr::s_intermediate_mark - next_number;
   const int pair_number = temporaries->pairs.number_prev + next_number;
 
-  //const int counter = 0;
+  //int counter = 0;
 
   while (!temporaries->stop_flag)
     {
@@ -678,7 +723,10 @@ void secondaryMaximaCooperativeKernel(Helpers::CUDA_kernel_object<TopoAutomatonS
       //++counter;
     }
 
-  //printf("COUNTS: %16d\n", counter);
+  //if (index == 0)
+  //  {
+  //    printf("SECONDARY SPLITTING: %16d\n", counter);
+  //  }
 
 }
 
@@ -694,7 +742,7 @@ void propagateForMaximaExclusionKernel( Helpers::CUDA_kernel_object<TopoAutomato
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const int i_dimBlock, const int i_dimGrid
 #endif
-                                )
+                                      )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -767,7 +815,7 @@ void excludeSecondaryMaximaDefer(Helpers::CUDA_kernel_object<TopoAutomatonSplitt
 #if CUDA_CAN_USE_TAIL_LAUNCH
       propagateForMaximaExclusionKernel <<< i_dimGrid, i_dimBlock, 0, cudaStreamTailLaunch>>>(temporaries, i_dimBlock, i_dimGrid);
 #else
-      //const int counter = 0;
+      //int counter = 0;
 
       while (!temporaries->stop_flag)
         {
@@ -777,15 +825,15 @@ void excludeSecondaryMaximaDefer(Helpers::CUDA_kernel_object<TopoAutomatonSplitt
           //++counter;
         }
 
-      //printf("COUNTS: %16d\n", counter);
+      //printf("SECONDARY SPLITTING: %16d\n", counter);
 #endif
     }
 }
 
 __global__ static
 void cleanUpSecondariesKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                        Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                        Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries)
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                              Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -844,6 +892,7 @@ void TASplitting::excludeSecondaryMaxima(EventDataHolder & holder,
 
       if (optimizer.can_use_cooperative_groups())
         {
+
           const CUDAKernelLaunchConfiguration cfg_secprop = optimizer.get_launch_configuration("TopoAutomatonSplitting", 4);
           void * propagate_args[] = { &temps };
 
@@ -896,6 +945,7 @@ __device__ static
 void propagate_main_pair(const int pair,
                          Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                          const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                         const bool counter_select,
                          const bool share_cells)
 {
   const int this_ID = temporaries->pairs.cellID[pair];
@@ -910,7 +960,28 @@ void propagate_main_pair(const int pair,
 
   TASTag prop_tag = neigh_tag.propagate();
 
-  if (neigh_tag.is_shared() && !neigh_tag.is_primary() && neigh_tag.counter() > 0x7FF)
+  const TASTag old_tag = cell_state_arr->clusterTag[this_ID];
+
+  if ( share_cells                           &&
+       old_tag.is_part_of_splitter_cluster() &&
+       !old_tag.is_shared()                  &&
+       !old_tag.is_primary()                 &&
+       !neigh_tag.is_shared()                    )
+    {
+      const int old_cluster = temporaries->cell_to_cluster_map[this_ID];
+      const int new_cluster = temporaries->cell_to_cluster_map[neigh_ID];
+
+      const int old_counter = old_tag.counter();
+      const int new_counter = prop_tag.counter();
+
+      if (old_counter == new_counter && old_cluster != new_cluster)
+        {
+          prop_tag = old_tag.prepare_for_sharing(prop_tag);
+          atomicMax(&(temporaries->reset_counters[counter_select]), new_counter);
+          temporaries->continue_flag = 1;
+        }
+    }
+  else if (neigh_tag.is_shared() && !neigh_tag.is_primary() && neigh_tag.counter() > 0x7FF)
     {
       prop_tag = prop_tag.update_counter(0x7FF);
       //Shared cells after the original ones
@@ -920,115 +991,75 @@ void propagate_main_pair(const int pair,
       //before making a shared cell seems safe-ish?
     }
 
-  const TASTag old_tag = cell_state_arr->clusterTag[this_ID];
-  if (share_cells && !neigh_tag.is_shared() && old_tag.is_part_of_splitter_cluster() && !old_tag.is_shared() && !old_tag.is_primary())
+  if (old_tag < prop_tag && (!old_tag.is_part_of_splitter_cluster()          ||
+                             prop_tag.counter() > old_tag.counter()          ||
+                             prop_tag.is_primary()                           ||
+                             (!prop_tag.is_shared() && old_tag.is_shared())     ))
     {
-      const int old_count = old_tag.counter();
-      const int new_count = prop_tag.counter();
-      const int old_cell = old_tag.index();
-      const int new_cell = prop_tag.index();
-      if (old_count == new_count && old_cell != new_cell)
-        //Note that, in the CPU implementation,
-        //cells are only shared if they are in the to-grow list.
-        {
-          const int old_index = temporaries->cell_to_cluster_map[old_cell];
-          const int new_index = temporaries->cell_to_cluster_map[new_cell];
-          if (old_index != new_index)
-            {
-              prop_tag = old_tag.prepare_for_sharing(prop_tag);
-              atomicMax(&(temporaries->reset_counter), old_count);
-            }
-        }
-    }
-
-  atomicMax(&(temporaries->secondary_array[this_ID]), prop_tag);
-}
-
-
-__device__ static
-void handle_index_changes(const int cell,
-                          Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                          Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries)
-{
-  TASTag old_tag = cell_state_arr->clusterTag[cell];
-  TASTag new_tag = temporaries->secondary_array[cell];
-
-  if (!new_tag.is_part_of_splitter_cluster() || new_tag.counter() == TASTag::max_counter())
-    {
-      return;
-    }
-
-  const uint32_t new_cluster_index = temporaries->cell_to_cluster_map[new_tag.index()];
-  const int desired_counter = temporaries->reset_counter;
-
-  if ( new_tag.counter() < desired_counter /*|| (old_tag.is_part_of_splitter_cluster() && old_tag.counter() < desired_counter)*/ )
-    {
-      const int original_cluster_index = temporaries->original_cluster_map[new_cluster_index & 0xFFFFU];
-
-      new_tag = TASTag::make_cluster_cell_tag(original_cluster_index);
-      temporaries->cell_to_cluster_map[cell] = original_cluster_index;
-
+      atomicMax(&(temporaries->secondary_array[this_ID]), prop_tag);
       temporaries->continue_flag = 1;
-
-      cell_state_arr->clusterTag[cell] = new_tag;
-      temporaries->secondary_array[cell] = new_tag;
-    }
-  else if (!new_tag.is_primary())
-    {
-      temporaries->cell_to_cluster_map[cell] = new_cluster_index;
     }
 }
 
-
 __device__ static
-void handle_tag_changes(const int cell,
-                        Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                        Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                        const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr)
+void update_cell_tag(const int cell,
+                     Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                     Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                     const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                     const bool counter_select)
 {
-  TASTag old_tag = cell_state_arr->clusterTag[cell];
   TASTag new_tag = temporaries->secondary_array[cell];
 
-  if (!new_tag.is_part_of_splitter_cluster() || old_tag == new_tag)
+  if (!new_tag.is_part_of_splitter_cluster())
     {
       return;
     }
 
-  const uint32_t old_cluster_index = temporaries->cell_to_cluster_map[old_tag.index()];
-  const uint32_t new_cluster_index = temporaries->cell_to_cluster_map[new_tag.index()];
+  const int desired_counter = temporaries->reset_counters[counter_select];
 
-  if (old_cluster_index == new_cluster_index)
+  const TASTag old_tag = cell_state_arr->clusterTag[cell];
+
+  const int cell_from = new_tag.index();
+  const int new_cluster = temporaries->cell_to_cluster_map[cell_from];
+
+  if (new_tag.counter() < desired_counter ||
+      (old_tag.is_part_of_splitter_cluster() && old_tag.counter() < desired_counter) )
     {
-      const float cell_energy = cell_info_arr->energy[cell];
-      new_tag = new_tag.update_cell(cell, __float_as_uint(cell_energy));
-      if (new_tag != old_tag)
-        {
-          temporaries->continue_flag = 1;
-        }
+      const int original_cluster = temporaries->original_cluster_map[new_cluster & 0xFFFFU];
+
+      new_tag = TASTag::make_cluster_cell_tag(original_cluster);
+      temporaries->cell_to_cluster_map[cell] = original_cluster;
+
       cell_state_arr->clusterTag[cell] = new_tag;
       temporaries->secondary_array[cell] = new_tag;
       return;
     }
 
-  if ( old_tag.is_part_of_splitter_cluster() && !old_tag.is_shared() &&
-       new_tag.is_shared() && new_tag.is_primary()                        )
+  if (new_tag == old_tag)
     {
-      new_tag = new_tag.update_counter(old_tag.counter() /*+ 1*/);
-      const int min_index = min(new_cluster_index, old_cluster_index);
-      const int max_index = max(new_cluster_index, old_cluster_index);
+      return;
+    }
+
+
+  if ( new_tag.is_shared() &&  new_tag.is_primary() &&
+       !old_tag.is_shared() && !old_tag.is_primary()    )
+    {
+      new_tag = new_tag.update_counter(old_tag.counter());
+      const int old_cluster = temporaries->cell_to_cluster_map[cell];
+      const unsigned int min_index = min(new_cluster, old_cluster);
+      const unsigned int max_index = max(new_cluster, old_cluster);
       temporaries->cell_to_cluster_map[cell] = (max_index << 16) | min_index;
-      const float cell_energy = cell_info_arr->energy[cell];
-      new_tag = new_tag.update_cell(cell, __float_as_uint(cell_energy));
     }
   else
     {
-      const float cell_energy = cell_info_arr->energy[cell];
-      new_tag = new_tag.update_cell(cell, __float_as_uint(cell_energy));
+      temporaries->cell_to_cluster_map[cell] = new_cluster;
     }
-  temporaries->continue_flag = 1;
+
+  const float cell_energy = cell_info_arr->energy[cell];
+  new_tag = new_tag.update_cell(cell, __float_as_uint(cell_energy));
+
   cell_state_arr->clusterTag[cell] = new_tag;
   temporaries->secondary_array[cell] = new_tag;
-
 }
 
 __global__ static
@@ -1047,96 +1078,77 @@ void clusterSplittingMainCooperativeKernel(Helpers::CUDA_kernel_object<CellState
   //Using the "legacy" version for the time being
   //due to CUDA toolkit version availability...
 
+  bool counter_select = false;
+
   //int counter = 0;
 
   while (!temporaries->stop_flag)
     {
       for (int pair = index; pair < num_pairs; pair += grid_size)
         {
-          propagate_main_pair(pair, temporaries, cell_state_arr, share_cells);
+          propagate_main_pair(pair, temporaries, cell_state_arr, counter_select, share_cells);
         }
 
       grid.sync();
 
       for (int cell = index; cell < NCaloCells; cell += grid_size)
         {
-          handle_index_changes(cell, cell_state_arr, temporaries);
+          update_cell_tag(cell, cell_state_arr, temporaries, cell_info_arr, counter_select);
         }
-
-      grid.sync();
-
-      for (int cell = index; cell < NCaloCells; cell += grid_size)
-        {
-          handle_tag_changes(cell, cell_state_arr, temporaries, cell_info_arr);
-        }
-
-      grid.sync();
 
       if (index == 0)
         {
-          temporaries->reset_counter = 0;
           if (!temporaries->continue_flag)
             {
               temporaries->stop_flag = 1;
             }
           else
             {
+              temporaries->reset_counters[!counter_select] = 0;
               temporaries->continue_flag = 0;
             }
         }
 
+      //++counter;
+      
+      counter_select = !counter_select;
+
       grid.sync();
 
-      //++counter;
     }
-  //printf("COUNTS: %16d\n", counter);
+
+  //if (index == 0)
+  //  {
+  //    printf("SPLITTING: %16d\n", counter);
+  //  }
 
 }
-
 
 namespace
 {
   struct kernel_sizes
   {
-    int main_prop, index_change, tag_change;
+    int main_prop, tag_change;
   };
 }
 
 
 __global__ static
-void handleSplitterIndexChangesKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                      Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                      const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                      const bool share_cells
+void handleSplitterTagChangesAndTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                                                  Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                                                  const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                                                  const bool counter_select,
+                                                  const bool share_cells
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                                     );
-
-__global__ static
-void handleSplitterTagChangesKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                    Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                    const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                    const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                   );
-
-__global__ static
-void checkForTagPropagationTermination(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                       Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                       const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                       const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                      );
+                                                 );
 
 __global__ static
 void propagateSplitterTagsKernel(const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
                                  Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
                                  const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                                 const bool counter_select,
                                  const bool share_cells
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
@@ -1149,94 +1161,45 @@ void propagateSplitterTagsKernel(const Helpers::CUDA_kernel_object<CellStateArr>
 
   for (int pair = index; pair < num_pairs; pair += grid_size)
     {
-      propagate_main_pair(pair, temporaries, cell_state_arr, share_cells);
+      propagate_main_pair(pair, temporaries, cell_state_arr, counter_select, share_cells);
     }
 
 #if CUDA_CAN_USE_TAIL_LAUNCH
   if (index == grid_size - 1)
     {
 
-      handleSplitterIndexChangesKernel <<< grids.index_change, block.index_change, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                                              temporaries,
-                                                                                                              cell_info_arr,
-                                                                                                              share_cells,
-                                                                                                              blocks, grids);
+      handleSplitterTagChangesAndTerminationKernel <<< grids.tag_change, block.tag_change, 0, cudaStreamTailLaunch>>>(cell_state_arr,
+                                                                                                                      temporaries,
+                                                                                                                      cell_info_arr,
+                                                                                                                      counter_select,
+                                                                                                                      share_cells,
+                                                                                                                      blocks, grids);
     }
 #endif
 }
 
 __global__ static
-void handleSplitterIndexChangesKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                      Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                      const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                      const bool share_cells
+void handleSplitterTagChangesAndTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                                                  Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                                                  const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                                                  const bool counter_select,
+                                                  const bool share_cells
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                                     )
+                                                 )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
   for (int cell = index; cell < NCaloCells; cell += grid_size)
     {
-      handle_index_changes(cell, cell_state_arr, temporaries);
+      update_cell_tag(cell, cell_state_arr, temporaries, cell_info_arr, counter_select);
     }
 
-#if CUDA_CAN_USE_TAIL_LAUNCH
   if (index == grid_size - 1)
-    {
-      handleSplitterTagChangesKernel <<< grids.tag_change, blocks.tag_change, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                                         temporaries,
-                                                                                                         cell_info_arr,
-                                                                                                         share_cells,
-                                                                                                         blocks, grids);
-    }
-#endif
-}
-
-
-__global__ static
-void handleSplitterTagChangesKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                    Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                    const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                    const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                   )
-{
-  const int index = blockIdx.x * blockDim.x + threadIdx.x;
-  const int grid_size = gridDim.x * blockDim.x;
-  for (int cell = index; cell < NCaloCells; cell += grid_size)
-    {
-      handle_tag_changes(cell, cell_state_arr, temporaries, cell_info_arr);
-    }
-
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  if (index == grid_size - 1)
-    {
-      checkForTagPropagationTermination <<< 1, 1, 0, cudaStreamTailLaunch>>>(cell_state_arr, temporaries,
-                                                                             cell_info_arr, share_cells,
-                                                                             blocks, grids);
-    }
-#endif
-}
-
-__global__ static
-void checkForTagPropagationTermination(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                       Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                       const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                                       const bool share_cells
-#if CUDA_CAN_USE_TAIL_LAUNCH
-  , const kernel_sizes blocks, const kernel_sizes grids
-#endif
-                                      )
-{
-  const int index = blockIdx.x * blockDim.x + threadIdx.x;
-  if (index == 0)
     //Will be called with just 1 thread, but...
     {
-      temporaries->reset_counter = 0;
+      temporaries->reset_counters[!counter_select] = 0;
       if (temporaries->continue_flag)
         {
           temporaries->continue_flag = 0;
@@ -1245,6 +1208,7 @@ void checkForTagPropagationTermination(Helpers::CUDA_kernel_object<CellStateArr>
           propagateSplitterTagsKernel <<< grids.main_prop, blocks.main_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
                                                                                                         temporaries,
                                                                                                         cell_info_arr,
+                                                                                                        !counter_select,
                                                                                                         share_cells,
                                                                                                         blocks, grids);
 #endif
@@ -1257,6 +1221,7 @@ void checkForTagPropagationTermination(Helpers::CUDA_kernel_object<CellStateArr>
 #endif
     }
 }
+
 
 
 __global__ static
@@ -1281,37 +1246,33 @@ void clusterSplittingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_st
       propagateSplitterTagsKernel <<< grids.main_prop, blocks.main_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
                                                                                                     temporaries,
                                                                                                     cell_info_arr,
+                                                                                                    0,
                                                                                                     share_cells,
                                                                                                     blocks, grids);
 #else
 
       //int counter = 0;
 
+      bool counter_select = false;
 
       while (!temporaries->stop_flag)
         {
           propagateSplitterTagsKernel <<< grids.main_prop, blocks.main_prop>>>(cell_state_arr,
                                                                                temporaries,
                                                                                cell_info_arr,
+                                                                               counter_select,
                                                                                share_cells);
 
-          handleSplitterIndexChangesKernel <<< grids.index_change, blocks.index_change>>>(cell_state_arr,
-                                                                                          temporaries,
-                                                                                          cell_info_arr,
-                                                                                          share_cells);
+          handleSplitterTagChangesAndTerminationKernel <<< grids.tag_change, blocks.tag_change>>>(cell_state_arr,
+                                                                                                  temporaries,
+                                                                                                  cell_info_arr,
+                                                                                                  counter_select,
+                                                                                                  share_cells);
 
-          handleSplitterTagChangesKernel <<< grids.tag_change, blocks.tag_change>>>(cell_state_arr,
-                                                                                    temporaries,
-                                                                                    cell_info_arr,
-                                                                                    share_cells);
-
-          checkForTagPropagationTermination <<< 1, 1>>>(cell_state_arr,
-                                                        temporaries,
-                                                        cell_info_arr,
-                                                        share_cells);
+          counter_select = !counter_select;
           //++counter;
         }
-      //printf("COUNTS: %16d\n", counter);
+      //printf("SPLITTING: %16d\n", counter);
 #endif
     }
 }
@@ -1328,9 +1289,9 @@ void TASplitting::splitClusterGrowing(EventDataHolder & holder,
 
   TopoAutomatonSplittingTemporaries * temps = TASHacks::get_temporaries(holder);
 
-  cudaMemsetAsync((&temps->reset_counter), 0, sizeof(int), stream_to_use);
-  cudaMemsetAsync((&temps->continue_flag), 0, sizeof(int), stream_to_use);
-  cudaMemsetAsync((&temps->stop_flag), 0, sizeof(int), stream_to_use);
+  cudaMemsetAsync(&(temps->continue_flag),  0, sizeof(int),     stream_to_use);
+  cudaMemsetAsync(&(temps->reset_counters), 0, sizeof(int) * 2, stream_to_use);
+  cudaMemsetAsync(&(temps->stop_flag),      0, sizeof(int),     stream_to_use);
 
   if (optimizer.can_use_cooperative_groups())
     {
@@ -1349,17 +1310,14 @@ void TASplitting::splitClusterGrowing(EventDataHolder & holder,
   else if (optimizer.can_use_dynamic_parallelism())
     {
       const CUDAKernelLaunchConfiguration cfg_mainprop    = optimizer.get_launch_configuration("TopoAutomatonSplitting", 8);
-      const CUDAKernelLaunchConfiguration cfg_indexchange = optimizer.get_launch_configuration("TopoAutomatonSplitting", 9);
-      const CUDAKernelLaunchConfiguration cfg_tagchange   = optimizer.get_launch_configuration("TopoAutomatonSplitting", 10);
+      const CUDAKernelLaunchConfiguration cfg_tagchange   = optimizer.get_launch_configuration("TopoAutomatonSplitting", 9);
 
       kernel_sizes blocks, grids;
 
       blocks.main_prop    = cfg_mainprop.block_x;
-      blocks.index_change = cfg_indexchange.block_x;
       blocks.tag_change   = cfg_tagchange.block_x;
 
       grids.main_prop    = optimizer.use_minimal_kernel_sizes() ? -1 : cfg_mainprop.grid_x;
-      grids.index_change = cfg_indexchange.grid_x;
       grids.tag_change   = cfg_tagchange.grid_x;
 
       clusterSplittingMainDefer <<< 1, 1, 0, stream_to_use>>>(holder.m_cell_state_dev,
@@ -1409,9 +1367,9 @@ namespace
 
 __global__ static
 void sumCellsForCentroidKernel( Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                          const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                          const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
-                          const Helpers::CUDA_kernel_object<GeometryArr> geometry)
+                                const Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
+                                const Helpers::CUDA_kernel_object<CellInfoArr> cell_info_arr,
+                                const Helpers::CUDA_kernel_object<GeometryArr> geometry)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -1443,7 +1401,7 @@ void sumCellsForCentroidKernel( Helpers::CUDA_kernel_object<TopoAutomatonSplitti
 
 __global__ static
 void calculateCentroidsKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                        const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
+                              const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
 {
 
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1471,8 +1429,8 @@ void calculateCentroidsKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplitting
 
 __global__ static
 void calculateCentroidsKernelDeferKernel(Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                                   const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                                   const int i_dimBlock)
+                                         const Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                                         const int i_dimBlock)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index == 0)
@@ -1490,10 +1448,10 @@ void calculateCentroidsKernelDeferKernel(Helpers::CUDA_kernel_object<TopoAutomat
 
 __global__ static
 void assignFinalCellsKernel( Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                       const Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
-                       const Helpers::CUDA_kernel_object<GeometryArr> geometry,
-                       const Helpers::CUDA_kernel_object<TopoAutomatonSplittingOptions> opts )
+                             Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                             const Helpers::CUDA_kernel_object<TopoAutomatonSplittingTemporaries> temporaries,
+                             const Helpers::CUDA_kernel_object<GeometryArr> geometry,
+                             const Helpers::CUDA_kernel_object<TopoAutomatonSplittingOptions> opts )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -1643,13 +1601,13 @@ void TASplitting::cellWeightingAndFinalization(EventDataHolder & holder,
     {
       cudaMemsetAsync(temps->secondary_array, 0, sizeof(tag_type) * NCaloCells, cudaStreamPerThread);
 
-      const CUDAKernelLaunchConfiguration cfg_sumcells = optimizer.get_launch_configuration("TopoAutomatonSplitting", 11);
-      const CUDAKernelLaunchConfiguration cfg_centroid = optimizer.get_launch_configuration("TopoAutomatonSplitting", 12);
+      const CUDAKernelLaunchConfiguration cfg_sumcells = optimizer.get_launch_configuration("TopoAutomatonSplitting", 10);
+      const CUDAKernelLaunchConfiguration cfg_centroid = optimizer.get_launch_configuration("TopoAutomatonSplitting", 11);
 
       sumCellsForCentroidKernel <<< cfg_sumcells.grid_x, cfg_sumcells.block_x, 0, stream_to_use>>>(temps,
-                                                                                             holder.m_cell_state_dev,
-                                                                                             holder.m_cell_info_dev,
-                                                                                             instance_data.m_geometry_dev);
+                                                                                                   holder.m_cell_state_dev,
+                                                                                                   holder.m_cell_info_dev,
+                                                                                                   instance_data.m_geometry_dev);
       if (optimizer.use_minimal_kernel_sizes())
         {
           calculateCentroidsKernelDeferKernel <<< 1, 1, 0, stream_to_use>>>(temps, holder.m_clusters_dev, cfg_centroid.block_x);
@@ -1661,13 +1619,13 @@ void TASplitting::cellWeightingAndFinalization(EventDataHolder & holder,
 
     }
 
-  const CUDAKernelLaunchConfiguration cfg_finalize = optimizer.get_launch_configuration("TopoAutomatonSplitting", 13);
+  const CUDAKernelLaunchConfiguration cfg_finalize = optimizer.get_launch_configuration("TopoAutomatonSplitting", 12);
 
   assignFinalCellsKernel <<< cfg_finalize.grid_x, cfg_finalize.block_x, 0, stream_to_use>>>(holder.m_cell_state_dev,
-                                                                                      holder.m_clusters_dev,
-                                                                                      temps,
-                                                                                      instance_data.m_geometry_dev,
-                                                                                      options.m_options_dev);
+                                                                                            holder.m_clusters_dev,
+                                                                                            temps,
+                                                                                            instance_data.m_geometry_dev,
+                                                                                            options.m_options_dev);
 
   if (synchronize)
     {
@@ -1690,8 +1648,7 @@ void TASplitting::register_kernels(IGPUKernelSizeOptimizer & optimizer)
                        (void *) cleanUpSecondariesKernel,
                        (void *) clusterSplittingMainCooperativeKernel,
                        (void *) propagateSplitterTagsKernel,
-                       (void *) handleSplitterIndexChangesKernel,
-                       (void *) handleSplitterTagChangesKernel,
+                       (void *) handleSplitterTagChangesAndTerminationKernel,
                        (void *) sumCellsForCentroidKernel,
                        (void *) calculateCentroidsKernel,
                        (void *) assignFinalCellsKernel
@@ -1706,7 +1663,6 @@ void TASplitting::register_kernels(IGPUKernelSizeOptimizer & optimizer)
                        CleanUpSecondariesBlockSize,
                        ClusterSplittingMainPropagationBlockSize,
                        PropagateSplitTagsBlockSize,
-                       HandleSplitIndexChangesBlockSize,
                        HandleSplitTagChangesBlockSize,
                        SumCellsBlockSize,
                        CalculateCentroidsBlockSize,
@@ -1722,13 +1678,27 @@ void TASplitting::register_kernels(IGPUKernelSizeOptimizer & optimizer)
                        Helpers::int_ceil_div(NCaloCells, CleanUpSecondariesBlockSize),
                        IGPUKernelSizeOptimizer::SpecialSizeHints::CooperativeLaunch,
                        Helpers::int_ceil_div(NMaxPairs, PropagateSplitTagsBlockSize),
-                       Helpers::int_ceil_div(NCaloCells, HandleSplitIndexChangesBlockSize),
                        Helpers::int_ceil_div(NCaloCells, HandleSplitTagChangesBlockSize),
                        Helpers::int_ceil_div(NCaloCells, SumCellsBlockSize),
                        Helpers::int_ceil_div(NMaxClusters, CalculateCentroidsBlockSize),
                        Helpers::int_ceil_div(NCaloCells, FinalCellsBlockSize)
                      };
 
-  optimizer.register_kernels("TopoAutomatonSplitting", 14, kernels, blocksizes, gridsizes);
+  int   maxsizes[] = { NCaloCells,
+                       NMaxPairs + NMaxPairs / 2,
+                       NCaloCells,
+                       NCaloCells,
+                       NMaxPairs,
+                       NMaxPairs,
+                       NCaloCells,
+                       std::max(NMaxPairs, NCaloCells),
+                       NMaxPairs,
+                       NCaloCells,
+                       NCaloCells,
+                       NMaxClusters,
+                       NCaloCells
+                     };
+
+  optimizer.register_kernels("TopoAutomatonSplitting", 13, kernels, blocksizes, gridsizes, maxsizes);
 
 }

@@ -930,7 +930,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::match_clusters(sample_comparisons_h
   for (size_t i = 0; i < sch.r2t_table.size(); ++i)
     {
       const int match = sch.r2t_table[i];
-      if (sch.r2t_table[i] < 0)
+      if (match < 0)
         {
           sch.unmatched_ref_list.push_back(i);
         }
@@ -1910,7 +1910,6 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
 
   if (m_doCombinedCells)
     {
-
       for (int cell = 0; cell < NCaloCells; ++cell)
         {
           if (!cell_info_1.is_valid(cell) || !cell_info_2.is_valid(cell))
@@ -2011,7 +2010,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
 
               const ClusterTag ref_tag = cell_state_1.clusterTag[cell];
               const ClusterTag test_tag = cell_state_2.clusterTag[cell];
-              int ref_c1 = -2, ref_c2 = -2, test_c1 = -2, test_c2 = -2;
+              int ref_c1 = -3, ref_c2 = -3, test_c1 = -3, test_c2 = -3;
               if (ref_tag.is_part_of_cluster())
                 {
                   ref_c1 = ref_tag.cluster_index();
@@ -2024,8 +2023,8 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                   test_c2 = test_tag.is_shared_between_clusters() ? test_tag.secondary_cluster_index() : -2;
                 }
 
-              const int match_1 = test_c1 < 0 ? -2 : sch.t2r(test_c1);
-              const int match_2 = test_c2 < 0 ? -2 : sch.t2r(test_c2);
+              const int match_1 = test_c1 < 0 ? -1 : sch.t2r(test_c1);
+              const int match_2 = test_c2 < 0 ? -1 : sch.t2r(test_c2);
 
               const float ref_rev_weight = float_unhack(ref_tag.secondary_cluster_weight());
               const float test_rev_weight = float_unhack(test_tag.secondary_cluster_weight());
@@ -2039,7 +2038,11 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                 {
                   ref_size_vec[ref_c1] += 1;
                   ref_weighted_size_vec[ref_c1] += ref_weight;
+#if CALORECGPU_DISABLE_STRICT_MATCHING
                   if (!(ref_c1 == match_1 || ref_c1 == match_2 || (match_1 < 0 || match_2 < 0)))
+#else
+                  if (!(ref_c1 == match_1 || ref_c1 == match_2))
+#endif
                     {
                       cell_is_diff = true;
                       ref_diff_cells[ref_c1] += 1;
@@ -2051,7 +2054,11 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                 {
                   ref_size_vec[ref_c2] += 1;
                   ref_weighted_size_vec[ref_c2] += ref_rev_weight;
+#if CALORECGPU_DISABLE_STRICT_MATCHING
                   if (!(ref_c2 == match_1 || ref_c2 == match_2 || (match_1 < 0 || match_2 < 0)))
+#else
+                  if (!(ref_c2 == match_1 || ref_c2 == match_2))
+#endif
                     {
                       cell_is_diff = true;
                       ref_diff_cells[ref_c2] += 1;
@@ -2063,7 +2070,11 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                 {
                   test_size_vec[test_c1] += 1;
                   test_weighted_size_vec[test_c1] += test_weight;
+#if CALORECGPU_DISABLE_STRICT_MATCHING
                   if (match_1 >= 0 && !(match_1 == ref_c1 || match_1 == ref_c2 || (ref_c1 < 0 || ref_c2 < 0)))
+#else
+                  if (match_1 < 0 || !(match_1 == ref_c1 || match_1 == ref_c2))
+#endif
                     {
                       cell_is_diff = true;
                       test_diff_cells[test_c1] += 1;
@@ -2075,7 +2086,11 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                 {
                   test_size_vec[test_c2] += 1;
                   test_weighted_size_vec[test_c2] += test_rev_weight;
+#if CALORECGPU_DISABLE_STRICT_MATCHING
                   if (match_2 >= 0 && !(match_2 == ref_c1 || match_2 == ref_c2 || (ref_c1 < 0 || ref_c2 < 0)))
+#else
+                  if (match_2 < 0 || !(match_2 == ref_c1 || match_2 == ref_c2))
+#endif
                     {
                       cell_is_diff = true;
                       test_diff_cells[test_c2] += 1;
@@ -2089,6 +2104,14 @@ StatusCode CaloGPUClusterAndCellDataMonitor::add_combination(const EventContext 
                 }
               else if (cell_is_diff)
                 {
+                  char message_buffer[256];
+                  snprintf(message_buffer, 256,
+                           "%7d | %18f || %6d | %6d | %6d | %6d || %6d | %6d || %016llX | %016llX",
+                           cell, this_energy_1 / protect_from_zero(constant_data.m_cell_noise->get_noise(cell, cell_info_1.gain[cell])),
+                           ref_c1, ref_c2, test_c1, test_c2,
+                           match_1, match_2,
+                           static_cast<tag_type>(ref_tag), static_cast<tag_type>(test_tag));
+                  ATH_MSG_DEBUG(message_buffer);
                   ++diff_cluster_cells_count;
                 }
 

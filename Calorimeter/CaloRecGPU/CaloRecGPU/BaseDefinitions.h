@@ -33,7 +33,8 @@ namespace CaloRecGPU
   //(Or, in general, for N cells not part of a cluster,
   // an average number of cells per cluster lower than 2.863 - N/65536...)
 
-  constexpr inline int NMaxPairs = 0x400000U;
+  constexpr inline int NMaxPairs   = 0x400000U;
+  constexpr inline int NExactPairs =   2560816;
   //The actual (measured) value is 2560816, we rounded to the next power of two...
 
   constexpr inline int NumGainStates = 4;

@@ -34,13 +34,15 @@ class IGPUKernelSizeOptimizer
     CooperativeLaunch = -1
   };
 
-  /** @brief Register a kernel with a specific name. */
+  /** @brief Register a kernel with a specific name.  */
+  
   virtual void register_kernel(const std::string & kernel_name,
                                void * kernel,
                                const int blocksize_hint,
-                               const int gridsize_hint)
+                               const int gridsize_hint,
+                               const int max_total_threads)
   {
-    this->register_kernels(kernel_name, 1, &kernel, &blocksize_hint, &gridsize_hint, 0);
+    this->register_kernels(kernel_name, 1, &kernel, &blocksize_hint, &gridsize_hint, &max_total_threads, 0);
   }
 
   /** @brief Register a set of kernels that can be referred back to with a name and a number.
@@ -54,6 +56,7 @@ class IGPUKernelSizeOptimizer
                                 void ** kernels,
                                 const int * blocksize_hints,
                                 const int * gridsize_hints,
+                                const int * max_total_threads,
                                 const int offset = 0) = 0;
 
   /** @brief Retrieve the (hopefully optimal) kernel launch configuration.*/

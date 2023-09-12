@@ -237,20 +237,21 @@ namespace TASplitting
       return tag.is_non_assigned_part_of_split_cluster();
     }
 
-    [[nodiscard]] constexpr carrier propagate() const
-    {
-      return (value - s_tag_propagation_delta) & (~s_first_flag_mask);
-    }
-
-    [[nodiscard]] static constexpr carrier propagate(const TASTag tag)
-    {
-      return tag.propagate();
-    }
-
-    [[nodiscard]] constexpr carrier update_cell(const uint32_t new_index, const uint32_t new_energy)
+    [[nodiscard]] constexpr carrier update_cell(const uint32_t new_index, const uint32_t new_energy) const
     {
       return make_generic_tag(new_index, energy_to_storage(new_energy), 0, 0, 0) | (value & ~(s_18_bit_mask | s_32_bit_mask));
     }
+
+    [[nodiscard]] constexpr carrier update_energy(const uint32_t new_energy) const
+    {
+      return (value & ~s_32_bit_mask) | (energy_to_storage(new_energy) << s_32_bit_offset);
+    }
+
+    [[nodiscard]] constexpr carrier clear_energy() const
+    {
+      return (value & ~s_32_bit_mask);
+    }
+
 
     [[nodiscard]] constexpr carrier update_index(const uint32_t new_index) const
     {
@@ -279,7 +280,7 @@ namespace TASplitting
 
    protected:
 
-    static constexpr carrier s_eliminated_secondary_tag = 0xFFFFFFFFFFFFFFFFULL;
+    static constexpr carrier s_secondary_maxima_eliminator_tag = 0xFFFFFFFFFFFFFFFFULL;
 
    public:
 
@@ -297,17 +298,27 @@ namespace TASplitting
 
     [[nodiscard]] static constexpr carrier secondary_maxima_eliminator()
     {
-      return s_eliminated_secondary_tag;
+      return s_secondary_maxima_eliminator_tag;
     }
 
     [[nodiscard]] constexpr bool is_secondary_maxima_eliminator() const
     {
-      return value == s_eliminated_secondary_tag;
+      return value == s_secondary_maxima_eliminator_tag;
     }
 
     [[nodiscard]] static constexpr bool is_secondary_maxima_eliminator(const TASTag tag)
     {
       return tag.is_secondary_maxima_eliminator();
+    }
+
+    [[nodiscard]] constexpr carrier propagate() const
+    {
+          return (value - s_tag_propagation_delta) & (~s_first_flag_mask);
+    }
+
+    [[nodiscard]] static constexpr carrier propagate(const TASTag tag)
+    {
+      return tag.propagate();
     }
 
   };
@@ -318,9 +329,9 @@ namespace TASplitting
 
     CaloRecGPU::tag_type tertiary_array[CaloRecGPU::NCaloCells];
 
-    int cell_to_cluster_map[CaloRecGPU::NCaloCells];
-
     int original_cluster_map[CaloRecGPU::NMaxClusters];
+
+    int cell_to_cluster_map[CaloRecGPU::NCaloCells];
 
     struct PairsArr
     {
@@ -353,13 +364,12 @@ namespace TASplitting
 
     PairsArr pairs;
 
-    int reset_counter;
+    int reset_counters[2];
 
     int continue_flag;
 
-#if !CUDA_CAN_USE_TAIL_LAUNCH
     int stop_flag;
-#endif
+
 
     //While somewhat distasteful,
     //all of this casting is safe
@@ -371,7 +381,7 @@ namespace TASplitting
     constexpr const Type * get_cells_extra_array() const
     {
       static_assert((i + 1) * sizeof(Type) * CaloRecGPU::NCaloCells <= sizeof(TopoAutomatonSplittingTemporaries),
-                    "Cannot access outside of secondaryArray bounds...");
+                    "Cannot access outside of temporary bounds...");
 
       return ((Type *) ((void *) secondary_array)) + i * CaloRecGPU::NCaloCells;
     }
@@ -401,7 +411,7 @@ namespace TASplitting
     constexpr const Type * get_cluster_extra_array() const
     {
       static_assert((i + 1) * sizeof(Type) * CaloRecGPU::NMaxClusters <= sizeof(TopoAutomatonSplittingTemporaries),
-                    "Cannot access outside of secondaryArray bounds...");
+                    "Cannot access outside of temporary bounds...");
 
       return ((Type *) ((void *) secondary_array)) + i * CaloRecGPU::NMaxClusters;
     }
@@ -474,7 +484,7 @@ namespace TASplitting
   };
 
   void register_kernels(IGPUKernelSizeOptimizer & optimizer);
-  
+
   void fillNeighbours(CaloRecGPU::EventDataHolder & holder,
                       const CaloRecGPU::ConstantDataHolder & instance_data,
                       const TASOptionsHolder & options,

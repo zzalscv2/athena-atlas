@@ -202,15 +202,16 @@ public:
                              const carrier intra_calo_sampling,
                              const carrier subcalo,
                              const carrier region,
-                             const bool HECIW_or_FCal,
-                             const bool PS):
+                             const bool PS,
+                             const bool HECIW_or_FCal):
       value(0)
     {
       value  = ( sampling            << s_sampling_offset       ) |
                ( intra_calo_sampling << s_intra_sampling_offset ) |
                ( subcalo             << s_subcalo_offset        ) |
                ( region              << s_region_offset         ) |
-               ( s_is_PS_flag * PS) | (s_is_HECIW_FCal_flag * HECIW_or_FCal);
+               ( s_is_PS_flag * PS                              ) |
+               ( s_is_HECIW_FCal_flag * HECIW_or_FCal           );
     }
   };
 
@@ -233,6 +234,10 @@ public:
     float volume[NCaloCells];
 
     NeighArr neighbours;
+    
+#if CALORECGPU_ADD_FULL_PAIRS_LIST_TO_CONSTANT_INFORMATION
+    NeighPairsArr neighPairs;
+#endif
 
     EtaPhiToCellMap etaPhiToCell;
 
