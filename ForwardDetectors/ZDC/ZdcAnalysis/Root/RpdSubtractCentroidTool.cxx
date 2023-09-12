@@ -30,9 +30,7 @@ RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name) :
   m_xCenter({0, 0}),
   m_yCenter({0, 0}),
   m_xyRotAngle({0, 0}),
-  m_yzRotAngle({0, 0}),
-  m_xCentAvg({0, 0}),
-  m_yCentAvg({0, 0})
+  m_yzRotAngle({0, 0})
 {
 #ifndef XAOD_STANDALONE
   declareInterface<IZdcAnalysisTool>(this);
