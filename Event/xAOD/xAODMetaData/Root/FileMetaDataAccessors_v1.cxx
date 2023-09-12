@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: FileMetaDataAccessors_v1.cxx 685184 2015-07-23 20:25:43Z cranshaw $
 
 // System include(s):
 #include <iostream>
@@ -15,6 +13,14 @@
    case FileMetaData_v1::TYPE:                                       \
    do {                                                              \
       static const SG::AuxElement::Accessor< std::string > acc( #TYPE ); \
+      return &acc;                                                   \
+   } while( 0 )
+
+/// Helper macro for implementing the accessor function
+#define DECLARE_UINT_ACCESSOR( TYPE )                                \
+   case FileMetaData_v1::TYPE:                                       \
+   do {                                                              \
+      static const SG::AuxElement::Accessor< uint32_t > acc( #TYPE ); \
       return &acc;                                                   \
    } while( 0 )
 
@@ -55,6 +61,23 @@ namespace xAOD {
 
       default:
          std::cerr << "xAOD::FileMetaData_v1    ERROR No string accessor for "
+                   << "type: " << type << std::endl;
+         return nullptr;
+      }
+
+      // Just to make sure the compiler doesn't complain:
+      return nullptr;
+   }
+
+   const SG::AuxElement::Accessor< uint32_t >*
+   metaDataTypeUIntAccessorV1( FileMetaData_v1::MetaDataType type ) {
+
+      switch( type ) {
+
+         DECLARE_UINT_ACCESSOR( dataYear );
+
+      default:
+         std::cerr << "xAOD::FileMetaData_v1    ERROR No uint32_t accessor for "
                    << "type: " << type << std::endl;
          return nullptr;
       }

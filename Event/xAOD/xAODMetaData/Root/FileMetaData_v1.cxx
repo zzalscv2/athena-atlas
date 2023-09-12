@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -56,6 +56,7 @@ namespace xAOD {
             continue;
          }
          if( ( *ti != typeid( std::string ) ) &&
+             ( *ti != typeid( uint32_t ) ) &&
              ( *ti != typeid( float ) ) &&
              ( *ti != typeid( char ) ) &&
              ( *ti != typeid( std::vector< uint32_t > ) ) ) {
@@ -71,12 +72,22 @@ namespace xAOD {
          // The variable name:
          const std::string name = reg.getName( auxid );
 
-         // Treat the string and float options separately:
+         // Treat different types separately:
          if( *ti == typeid( std::string ) ) {
 
             // Retrieve the values:
             const std::string& value1 = this->auxdata< std::string >( name );
             const std::string& value2 = rhs.auxdata< std::string >( name );
+            // And simply compare them:
+            if( value1 != value2 ) {
+               return false;
+            }
+
+         } else if( *ti == typeid( uint32_t ) ) {
+
+            // Retrieve the values:
+            const uint32_t& value1 = this->auxdata< uint32_t >( name );
+            const uint32_t& value2 = rhs.auxdata< uint32_t >( name );
             // And simply compare them:
             if( value1 != value2 ) {
                return false;
@@ -235,6 +246,71 @@ namespace xAOD {
 
       // Create the accessor object:
       const Accessor< std::string > acc( type );
+
+      // Set the value:
+      acc( *this ) = val;
+
+      // We were successful:
+      return true;
+   }
+
+   bool FileMetaData_v1::value( MetaDataType type, uint32_t& val ) const {
+
+      // Get the accessor for this type:
+      const Accessor< uint32_t >* acc = metaDataTypeUIntAccessorV1( type );
+      if( ! acc ) {
+         return false;
+      }
+
+      // Check if the variable is available:
+      if( ! acc->isAvailable( *this ) ) {
+         return false;
+      }
+
+      // Read the value:
+      val = ( *acc )( *this );
+
+      // We were successful:
+      return true;
+   }
+
+   bool FileMetaData_v1::value( const std::string& type,
+                                uint32_t& val ) const {
+
+      // Create an accessor object:
+      const Accessor< uint32_t > acc( type );
+
+      // Check if this variable is available:
+      if( ! acc.isAvailable( *this ) ) {
+         return false;
+      }
+
+      // Read the value:
+      val = acc( *this );
+
+      // We were successful:
+      return true;
+   }
+
+   bool FileMetaData_v1::setValue( MetaDataType type, uint32_t val ) {
+
+      // Get the accessor for this type:
+      const Accessor< uint32_t >* acc = metaDataTypeUIntAccessorV1( type );
+      if( ! acc ) {
+         return false;
+      }
+
+      // Set the value:
+      ( *acc )( *this ) = val;
+
+      // We were successful:
+      return true;
+   }
+
+   bool FileMetaData_v1::setValue( const std::string& type, uint32_t val ) {
+
+      // Create the accessor object:
+      const Accessor< uint32_t > acc( type );
 
       // Set the value:
       acc( *this ) = val;
@@ -434,6 +510,7 @@ std::ostream& operator<< ( std::ostream& out,
       PRINT_TYPE( isDataOverlay );
       PRINT_TYPE( mcCampaign );
       PRINT_TYPE( generatorsInfo );
+      PRINT_TYPE( dataYear );
 
    default:
       out << "UNKNOWN (" << static_cast< int >( type ) << ")";

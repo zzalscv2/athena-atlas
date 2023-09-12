@@ -274,6 +274,10 @@ def fromRunArgs(runArgs):
             },
         )
     )
+    if not flags.Input.isMC and flags.Input.DataYear > 0:
+        cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={
+            "data_year": str(flags.Input.DataYear)
+        }))
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg

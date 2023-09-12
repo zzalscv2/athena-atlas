@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMETADATACNV_FILEMETADATACREATORTOOL_H
 #define XAODMETADATACNV_FILEMETADATACREATORTOOL_H
@@ -145,6 +145,7 @@ class FileMetaDataCreatorTool
 
   /// helper method to update FileMetaDataProperty with some checks
   void set(const xAOD::FileMetaData::MetaDataType, bool);
+  void set(const xAOD::FileMetaData::MetaDataType, uint32_t);
   void set(const xAOD::FileMetaData::MetaDataType, float);
   void set(const xAOD::FileMetaData::MetaDataType, const std::string&);
 

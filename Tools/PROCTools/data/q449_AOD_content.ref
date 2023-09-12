@@ -273,6 +273,7 @@ FileMetaDataAuxDyn.amiTag
 FileMetaDataAuxDyn.beamEnergy
 FileMetaDataAuxDyn.beamType
 FileMetaDataAuxDyn.conditionsTag
+FileMetaDataAuxDyn.dataYear
 FileMetaDataAuxDyn.geometryVersion
 FileMetaDataAuxDyn.mcProcID
 ForwardElectronClusters

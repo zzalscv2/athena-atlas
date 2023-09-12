@@ -1155,6 +1155,7 @@ def make_peeker(meta_dict):
                 'mc_campaign',
                 'hepmc_version',
                 'generators',
+                'data_year',
             ]
             for item in list(meta_dict[filename]['/TagInfo']):
                 if item not in keys_to_keep:
@@ -1249,6 +1250,9 @@ def promote_keys(meta_dict, mode):
 
                 if 'mcCampaign' in md[key]:
                     md['mc_campaign'] = md[key]['mcCampaign']
+
+                if 'dataYear' in md[key]:
+                    md['data_year'] = int(md[key]['dataYear'])
 
                 if 'lumiBlocks' in md[key]:
                     md['lumiBlockNumbers'] = md[key]['lumiBlocks']

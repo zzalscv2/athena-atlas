@@ -126,6 +126,13 @@ def fromRunArgs(runArgs):
         from GeneratorConfig.Versioning import GeneratorVersioningFixCfg
         cfg.merge(GeneratorVersioningFixCfg(flags))
 
+    # Write TagInfo if needed
+    if not flags.Input.isMC and flags.Input.DataYear > 0:
+        from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+        cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={
+            "data_year": str(flags.Input.DataYear)
+        }))
+
     # Set EventPrintoutInterval to 100 events
     #  (in run interactive mode there's no loop manager service, do nothing in this case)
     if flags.Exec.Interactive != 'run' :
