@@ -84,15 +84,16 @@ namespace DerivationFramework {
                 }
             }
             if (passAll) keepEvent = 100;
-        }
-        if (!keepEvent) {
-            MuonPassDecor muo_decor{m_muonKeepKey, ctx};
-            /// Ensure that the first object is written anyway
-            if (!muo_decor->empty()) muo_decor(*muo_decor->at(0)) = false;
-            if (m_trkKeepKey.empty()) return StatusCode::SUCCESS;
-            TrackPassDecor trk_decor{m_trkKeepKey, ctx};
-            if (!trk_decor->empty()) trk_decor(*trk_decor->at(0)) = false;
-            return StatusCode::SUCCESS;
+            
+            if (!keepEvent) {
+              MuonPassDecor muo_decor{m_muonKeepKey, ctx};
+              /// Ensure that the first object is written anyway
+              if (!muo_decor->empty()) muo_decor(*muo_decor->at(0)) = false;
+              if (m_trkKeepKey.empty()) return StatusCode::SUCCESS;
+              TrackPassDecor trk_decor{m_trkKeepKey, ctx};
+              if (!trk_decor->empty()) trk_decor(*trk_decor->at(0)) = false;
+              return StatusCode::SUCCESS;
+            }
         }
 
         /// muon selection
