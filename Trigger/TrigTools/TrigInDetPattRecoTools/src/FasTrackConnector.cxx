@@ -122,7 +122,7 @@ FasTrackConnector::FasTrackConnector(std::ifstream& inFile) {
 	cIt = lConns.erase(cIt);
 	continue;
       }
-      cIt++;
+      ++cIt;
     }
     newConnMap.insert(std::make_pair(stageCounter, theStage));
     stageCounter++;
