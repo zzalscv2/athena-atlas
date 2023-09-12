@@ -6,7 +6,7 @@
  * @file CxxUtils/trapping_fp.h
  * @author scott snyder <snyder@bnl.gov>
  * @date Aug, 2023
- * @brief Tell the compiler to opimized assuming that FP may trap.
+ * @brief Tell the compiler to optimize assuming that FP may trap.
  */
 
 
@@ -14,7 +14,7 @@
 #define CXXUTILS_TRAPPING_FP_H
 
 
-// Tell the compiler to opimize the containing block assuming that
+// Tell the compiler to optimize the containing block assuming that
 // FP may trap.  This is sometimes needed with clang to avoid spurious FPEs
 // resulting from auto-vectorization.
 #if defined(__clang__) && defined(__x86_64__)
