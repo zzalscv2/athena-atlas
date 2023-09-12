@@ -335,7 +335,8 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    ConfigFlags = initConfigFlags()
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
     #ConfigFlags.Input.Files = defaultTestFiles.ESD
     # to test tier0 workflow:
@@ -356,8 +357,9 @@ if __name__=='__main__':
     ConfigFlags.Exec.OutputLevel=WARNING
     ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.FILLPARAMS
     #ConfigFlags.Beam.BunchStructureSource=BunchStructureSource.Lumi
+    import sys
+    ConfigFlags.fillFromArgs(sys.argv[1:])
     ConfigFlags.lock()
-
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
@@ -383,4 +385,4 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
 
-    cfg.run(100) #use cfg.run() to run on all events
+    cfg.run()
