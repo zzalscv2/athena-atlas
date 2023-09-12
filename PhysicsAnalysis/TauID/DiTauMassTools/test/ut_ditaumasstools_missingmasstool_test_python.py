@@ -60,7 +60,7 @@ def main():
     # default values are specified in the c++ constructor
     missingmass_tool.setProperty(bool)('Decorate', 1).ignore()
     missingmass_tool.setProperty(int)('UseVerbose', 1).ignore()
-    missingmass_tool.setProperty('std::string')('CalibSet', '2012').ignore()
+    missingmass_tool.setProperty('std::string')('CalibSet', '2015').ignore()
     missingmass_tool.setProperty(int)('alg_version', 3).ignore()
     missingmass_tool.setProperty(int)('UseTailCleanup', 0).ignore()
     missingmass_tool.setProperty(int)('NiterFit2', 30).ignore()

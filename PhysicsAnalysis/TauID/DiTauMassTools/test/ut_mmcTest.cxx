@@ -90,22 +90,6 @@ const std::string caseName[nCase]={ "ll", "hl", "lh", "hh"};
   double fitSolV[nCS][nCase][nJet][nAlg]={
 #ifndef TAUESCAN
     // without tau scanning 
-                    {{{0 , 0 , 113.442}, // CS MMC2011 case ll njet 0
-                    {0 , 0 , 113.442}}, // CS MMC2011 case ll njet 1
-                    {{0 , 0 , 104.943}, // CS MMC2011 case hl njet 0
-                    {0 , 0 , 100.58}}, // CS MMC2011 case hl njet 1
-                    {{0 , 0 , 104.943}, // CS MMC2011 case lh njet 0
-                    {0 , 0 , 100.58}}, // CS MMC2011 case lh njet 1
-                    {{0 , 0 , 86.7538}, // CS MMC2011 case hh njet 0
-                    {0 , 0 , 90.5832}}}, // CS MMC2011 case hh njet 1
-                    {{{0 , 0 , 117.643}, // CS MMC2012 case ll njet 0
-                    {0 , 0 , 116.771}}, // CS MMC2012 case ll njet 1
-                    {{0 , 0 , 100.596}, // CS MMC2012 case hl njet 0
-                    {0 , 0 , 105.698}}, // CS MMC2012 case hl njet 1
-                    {{0 , 0 , 100.596}, // CS MMC2012 case lh njet 0
-                    {0 , 0 , 105.698}}, // CS MMC2012 case lh njet 1
-                    {{0 , 0 , 85.6864}, // CS MMC2012 case hh njet 0
-                    {0 , 0 , 88.9267}}}, // CS MMC2012 case hh njet 1
                     {{{0 , 0 , 120.936}, // CS MMC2015 case ll njet 0
                     {0 , 0 , 114.274}}, // CS MMC2015 case ll njet 1
                     {{0 , 0 , 100.596}, // CS MMC2015 case hl njet 0
