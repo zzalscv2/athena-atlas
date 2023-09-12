@@ -149,8 +149,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 	for(int layerJ=0;layerJ<nLayers;layerJ++) {
 
 	  bool isPixel2 = (m_settings.m_layerGeometry[layerJ].m_subdet == 1);
-	  
-    bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
+
+	  bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
 	  if(checkPSS) continue;//no mixed PSS seeds allowed
 
 	  if((!isSct) && (!isPixel2)) {// i.e. xPS (or SPx)
@@ -262,16 +262,16 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 	      if(!validateLayerPairNew(layerI, layerJ, rm, zm)) continue; 
 	      
         bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
-
+	      
         // Get spacepoints from current and adjacent phi slices
         const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiThreeSlices.at(phiI);
-        
+	      
         if(spVec.empty()) continue;
-
+	      
         SP_RANGE delta;
-
+	      
         if(!getSpacepointRange(layerJ, spVec, delta)) continue;
-              
+	      
         processSpacepointRangeZv(spm, checkPSS, delta, checkWidth, minTau, maxTau);
 
 	    }//loop over inner/outer layers
