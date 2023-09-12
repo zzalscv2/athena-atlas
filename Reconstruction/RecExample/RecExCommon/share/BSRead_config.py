@@ -9,7 +9,7 @@
 
 from AthenaCommon.Logging import logging
 from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
-
+    
 logBSRead = logging.getLogger( 'BSRead_config' )
 
 
@@ -29,9 +29,6 @@ from RecExConfig.RecFlags import rec
 from AthenaCommon.DetFlags import DetFlags
 if rec.doInDet():
     include ("InDetRecExample/InDetReadBS_jobOptions.py")
-
-if rec.doMuon():
-    include("MuonCnvExample/MuonReadBS_jobOptions.py")
 
 if DetFlags.readRDOBS.LAr_on():
     from LArByteStream.LArByteStreamConf import LArRawDataReadingAlg 

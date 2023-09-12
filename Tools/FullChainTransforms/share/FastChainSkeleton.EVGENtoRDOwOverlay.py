@@ -578,8 +578,12 @@ if DetFlags.overlay.LAr_on() or DetFlags.overlay.Tile_on():
 
 # Muon overlay
 if (MuonGeometryFlags.hasCSC() and DetFlags.overlay.CSC_on()) or DetFlags.overlay.MDT_on() or DetFlags.overlay.RPC_on() or DetFlags.overlay.TGC_on() or (MuonGeometryFlags.hasSTGC() and DetFlags.overlay.sTGC_on()) or (MuonGeometryFlags.hasMM() and DetFlags.overlay.MM_on()):
-    include ( "EventOverlayJobTransforms/MuonOverlay_jobOptions.py" )
-
+    from AthenaConfiguration.OldFlags2NewFlags import getNewConfigFlags
+    ConfigFlags = getNewConfigFlags()
+    from MuonConfig.MuonOverlayConfig import MuonOverlayCfg
+    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+    CAtoGlobalWrapper(MuonOverlayCfg, ConfigFlags)
+   
 # Level1 overlay
 if DetFlags.overlay.LVL1_on():
    include ( "EventOverlayJobTransforms/Level1Overlay_jobOptions.py" )

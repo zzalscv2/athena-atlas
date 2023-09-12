@@ -478,6 +478,11 @@ if rec.doTrigger:
 AODFix.AODFix_postTrigger()
 
 if globalflags.InputFormat.is_bytestream():
+    if rec.doMuon():
+        from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
+        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+        CAtoGlobalWrapper(MuonByteStreamDecodersCfg, ConfigFlags)
+
     logRecExCommon_topOptions.info("BS file : storing in objKeyStore the list of input object from ByteStreamAddressProviderSvc.TypeNames. Unsafe ! ")
     newTN=[]
     for a in svcMgr.ByteStreamAddressProviderSvc.TypeNames:

@@ -140,7 +140,7 @@ def CSCCablingConfigCfg(flags):
 
     return acc
 
-def MicroMegaCablingCfg(flags, name = "MMCabling_Alg", **kwargs):
+def MicroMegaCablingCfg(flags, name = "MuonMM_CablingAlg", **kwargs):
     result = ComponentAccumulator()
     #### Only setup the MM Cabling algorithm for data
     if flags.Input.isMC or not flags.Detector.GeometryMM: 

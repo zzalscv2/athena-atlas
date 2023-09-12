@@ -17,26 +17,26 @@ from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 
 # ================= MDT ===========================
 if DetFlags.readRDOBS.MDT_on() and muonRecFlags.makePRDs():
-    topSequence += getAlgorithm("MuonMdtRawDataProvider")
+    topSequence += getAlgorithm("MdtRawDataProvider")
     
 # ================= RPC ===========================
 if DetFlags.readRDOBS.RPC_on() and muonRecFlags.makePRDs():
-    topSequence += getAlgorithm("MuonRpcRawDataProvider")
+    topSequence += getAlgorithm("RpcRawDataProvider")
 
 # ================= TGC ===========================
 if DetFlags.readRDOBS.TGC_on() and muonRecFlags.makePRDs():
-    topSequence += getAlgorithm("MuonTgcRawDataProvider")
+    topSequence += getAlgorithm("TgcRawDataProvider")
 
 # ================= CSC ===========================
 if MuonGeometryFlags.hasCSC():
     if DetFlags.readRDOBS.CSC_on() and muonRecFlags.makePRDs():
-        topSequence += getAlgorithm("MuonCscRawDataProvider")
+        topSequence += getAlgorithm("CscRawDataProvider")
 
 # ================= NSW ===========================
 if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
     if DetFlags.readRDOBS.MM_on() and muonRecFlags.makePRDs():
-        topSequence += getAlgorithm("MuonMmRawDataProvider")
+        topSequence += getAlgorithm("MmRawDataProvider")
 
     if DetFlags.readRDOBS.sTGC_on() and muonRecFlags.makePRDs():
-        topSequence += getAlgorithm("MuonsTgcRawDataProvider")
-        topSequence += getAlgorithm("MuonsTgcPadTriggerRawDataProvider")
+        topSequence += getAlgorithm("sTgcRawDataProvider")
+        topSequence += getAlgorithm("sTgcPadTriggerRawDataProvider")

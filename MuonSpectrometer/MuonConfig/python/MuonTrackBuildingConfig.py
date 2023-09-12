@@ -126,9 +126,8 @@ def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", doSegme
 def MuonSegmentInOverlapResolvingToolCfg(flags, name="MuonSegmentInOverlapResolvingTool", **kwargs):
     from MuonConfig.MuonRecToolsConfig import MuonEDMHelperSvcCfg
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
-
-    result = MuonEDMHelperSvcCfg(flags)
-    kwargs.setdefault("edmHelper", result.getPrimary() )
+    result = ComponentAccumulator()
+    kwargs.setdefault("edmHelper", result.getPrimaryAndMerge(MuonEDMHelperSvcCfg(flags)) )
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
     kwargs.setdefault("AtlasRungeKuttaPropagator", result.popToolsAndMerge(
         RungeKuttaPropagatorCfg(flags)))

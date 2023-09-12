@@ -208,7 +208,7 @@ def sTgcRODDecoderCfg(flags, name = "sTgcROD_Decoder", **kwargs):
     result.setPrivateTools(STGCRodDecoder)
     return result
 
-def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider", **kwargs):
+def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider", **kwargs):
 
     acc = ComponentAccumulator()
 
@@ -269,7 +269,7 @@ def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProvider", **kwargs):
+def sTgcPadTriggerBytestreamDecodeCfg(flags, name="sTgcPadTriggerRawDataProvider", **kwargs):
 
     acc = ComponentAccumulator()
 

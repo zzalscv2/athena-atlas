@@ -20,10 +20,10 @@ def MuonEDMPrinterToolCfg(flags, name="MuonEDMPrinterTool", **kwargs):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
     
-def MuonEDMHelperSvcCfg(flags, name = "MuonEDMHelperSvc"):
+def MuonEDMHelperSvcCfg(flags, name = "MuonEDMHelperSvc", **kwargs):
     result = ComponentAccumulator()
-    flags.Beam.Type ### Dummy call
-    result.addService(CompFactory.Muon.MuonEDMHelperSvc(name), primary = True)
+    the_svc = CompFactory.Muon.MuonEDMHelperSvc(name, **kwargs)
+    result.addService(the_svc, primary = True)
     return result
        
 def MuonTrackToSegmentToolCfg(flags,name="MuonTrackToSegmentTool", **kwargs):
