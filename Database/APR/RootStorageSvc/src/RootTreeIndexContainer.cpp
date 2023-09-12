@@ -46,7 +46,7 @@ long long int RootTreeIndexContainer::nextRecordId()
 void RootTreeIndexContainer::useNextRecordId(long long int nextID)
 {
    // Find out how this TTree index is behind the master index in the DB
-   m_indexBump = m_indexBranch? nextID - m_indexBranch->GetEntries() : nextID;
+   m_indexBump = m_indexBranch? nextID - m_rootDb->indexSize(m_indexBranch) : nextID;
    if( m_indexBump < 0 ) {
       // Seems this index is ahead of the master, cannot sync
       m_indexBump = 0;
@@ -63,11 +63,12 @@ DbStatus RootTreeIndexContainer::writeObject(ActionList::value_type& action)
          m_indexBranch = m_tree->Branch("index_ref", &m_index);
       }
    }
-   if( m_indexBranch && m_index_entries >= m_indexBranch->GetEntries() ) {
+   if( m_indexBranch && m_index_entries >= m_rootDb->indexSize(m_indexBranch) ) {
       // need to update the index branch
       m_index = action.link.second;
       m_indexBranch->SetAddress(&m_index);
       if (isBranchContainer() && !m_treeFillMode) m_indexBranch->Fill();
+      m_rootDb->indexSizeInc(m_indexBranch);
    }
    m_index_entries++;
 

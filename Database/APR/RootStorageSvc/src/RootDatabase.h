@@ -90,6 +90,9 @@ namespace pool  {
     /// nextID of the master index
     long long     m_indexMasterID;
 
+    /// Keep index sizes here, because Branches are emptied when fast merged by SharedWriter
+    std::map<TBranch*, int64_t>   m_indexSizeMap;
+
     /// marks if the index (for index Containers) was rebuilt for given TTree
     std::set< std::string > m_indexRebuilt;
 
@@ -148,6 +151,13 @@ namespace pool  {
     void        registerBranchContainer(RootTreeContainer*);
 
     long long   currentIndexMasterID() const   { return m_indexMasterID; }
+
+    /// get index size for indexed containers
+    int64_t    indexSize(TBranch *branch) { return m_indexSizeMap[branch]; }
+
+    /// increase index size counter for indexed containers (by 1)
+    int64_t     indexSizeInc(TBranch *branch) { return ++m_indexSizeMap[branch]; }
+
 
     /// Check if a given TTree had its index rebuilt
     bool	wasIndexRebuilt(const std::string& treeName)   { return m_indexRebuilt.count(treeName)!=0; }
@@ -211,8 +221,9 @@ namespace pool  {
     /// Execute Database Transaction action
     virtual DbStatus transAct(Transaction::Action action);
 
-    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader> getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name);
-    RNTupleReader*      getNTupleReader(std::string ntuple_name);
+    std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
+                     getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name);
+    RNTupleReader*   getNTupleReader(std::string ntuple_name);
 
     /// return NTupleWriter for a given ntuple_name
     /// create a new one if needed when create==true
