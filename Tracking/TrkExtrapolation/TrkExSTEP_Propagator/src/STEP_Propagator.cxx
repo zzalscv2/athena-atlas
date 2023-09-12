@@ -248,7 +248,7 @@ dEds(Cache& cache, double p)
     return 0.;
 
   cache.m_delIoni =
-    Trk::MaterialInteraction::dEdl_ionization(p, cache.m_material, cache.m_particle, cache.m_sigmaIoni, cache.m_kazL);
+    Trk::MaterialInteraction::dEdl_ionization(p, *(cache.m_material), cache.m_particle, cache.m_sigmaIoni, cache.m_kazL);
 
   cache.m_delRad = Trk::MaterialInteraction::dEdl_radiation(p, cache.m_material, cache.m_particle, cache.m_sigmaRad);
 
@@ -705,9 +705,9 @@ rungeKuttaStep(Cache& cache,
         // POINT 1
         const Amg::Vector3D initialjPos(P[i], P[i + 1], P[i + 2]);
         const Amg::Vector3D initialjDir(P[i + 3], P[i + 4], P[i + 5]);
-        
+
         if (!Amg::saneVector(initialjPos) || !Amg::saneVector(initialjDir)) return false;
- 
+
         Amg::Vector3D jPos = initialjPos;
         Amg::Vector3D jDir = initialjDir;
 

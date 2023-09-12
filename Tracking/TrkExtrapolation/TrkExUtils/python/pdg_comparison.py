@@ -327,7 +327,7 @@ for i in range(len(p)):
         * conv
     )
     atlas_mop_ion.append(
-        -ROOT.Trk.MaterialInteraction.PDG_energyLoss_ionization(
+        -ROOT.Trk.MaterialInteraction.dE_MPV_ionization(
             p[i], mat, particle, sigma, kazL, centimeter
         )
         / rho

@@ -77,7 +77,7 @@ Trk::ExtrapolationCode Trk::MaterialEffectsEngine::handleMaterial(Trk::ExCellNeu
         const Trk::MaterialProperties* materialProperties = layer->layerMaterialProperties()->fullMaterial(eCell.leadParameters->position());
         // and let's check if there's acutally something to do
         if (materialProperties && std::abs(pathCorrection)>0.){
-            // thickness in X0 
+            // thickness in X0
             double thicknessInX0          = materialProperties->thicknessInX0();
             // check if material filling was requested
             if (eCell.checkConfigurationMode(Trk::ExtrapolationMode::CollectMaterial)){
@@ -135,9 +135,9 @@ Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(Trk::Tra
     // get the actual material bin
     const Trk::MaterialProperties* materialProperties = layer->layerMaterialProperties()->fullMaterial(parameters.position());
     // and let's check if there's acutally something to do
-    if (materialProperties && std::abs(pathCorrection)>0. && 
+    if (materialProperties && std::abs(pathCorrection)>0. &&
 	( m_eLossCorrection || m_mscCorrection || eCell.checkConfigurationMode(Trk::ExtrapolationMode::CollectMaterial)) ){
-        // and add them 
+        // and add them
         int sign = int(eCell.materialUpdateMode);
         // a simple cross-check if the parameters are the initial ones
         AmgVector(5)      uParameters = parameters.parameters();
@@ -159,7 +159,7 @@ Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(Trk::Tra
             double sigmaP = 0.;
             double kazl   = 0.;
             /** dE/dl ionization energy loss per path unit */
-            double dEdl = sign*dir*Trk::MaterialInteraction::dEdl_ionization(p, &material, eCell.pHypothesis, sigmaP, kazl);
+            double dEdl = sign*dir*Trk::MaterialInteraction::dEdl_ionization(p, material, eCell.pHypothesis, sigmaP, kazl);
             double dE   = thickness*pathCorrection*dEdl;
             sigmaP *= thickness*pathCorrection;
             // calcuate the new momentum
@@ -195,7 +195,7 @@ Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(Trk::Tra
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on non-initial parameters.");
             if (uCovariance)
               parameters.updateParameters(uParameters,*uCovariance);
-            else 
+            else
               parameters.updateParameters(uParameters);
         } else {
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on initial parameters, creating new ones.");

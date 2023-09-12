@@ -11,7 +11,7 @@
 
 TEST(MaterialInteraction, dEdl_ionization) {
   double p = 42.0;
-  auto mat = new Trk::Material {424.35, 707.43, 11.16, 5.61, 0.001};// Scintillator/Glue (G4 def.)
+  auto mat = Trk::Material {424.35, 707.43, 11.16, 5.61, 0.001};// Scintillator/Glue (G4 def.)
   auto particle = Trk::electron;
   double sigma = 0;
   double kazL = 0;
@@ -22,15 +22,15 @@ TEST(MaterialInteraction, dEdl_ionization) {
   EXPECT_FLOAT_EQ(kazL, 0);
 }
 
-TEST(MaterialInteraction, PDG_energyLoss_ionization) {
+TEST(MaterialInteraction, dE_MPV_ionization) {
   double p = 42.0;
-  auto mat = new Trk::Material {424.35, 707.43, 11.16, 5.61, 0.001};// Scintillator/Glue (G4 def.)
+  auto mat = Trk::Material {424.35, 707.43, 11.16, 5.61, 0.001};// Scintillator/Glue (G4 def.)
   auto particle = Trk::electron;
   double sigma = 0;
   double kazL = 0;
   double path = 42.0;
 
-  double energy_loss = Trk::MaterialInteraction::PDG_energyLoss_ionization(p, mat, particle, sigma, kazL, path);
+  double energy_loss = Trk::MaterialInteraction::dE_MPV_ionization(p, mat, particle, sigma, kazL, path);
   EXPECT_FLOAT_EQ(energy_loss, -6.7087164);
   EXPECT_FLOAT_EQ(sigma, 0.54986054);
   EXPECT_FLOAT_EQ(kazL, 0.32421023);

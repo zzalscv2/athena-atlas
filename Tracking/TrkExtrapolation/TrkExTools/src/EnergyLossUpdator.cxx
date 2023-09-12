@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
                                    double pathcorrection,
                                    PropDirection dir,
                                    ParticleHypothesis particle,
-                                   bool usePDGformula) const
+                                   bool useMPV) const
 {
   if (particle == Trk::undefined) {
     ATH_MSG_WARNING(
@@ -172,7 +172,7 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
     return {};
   }
 
-  if (usePDGformula) {
+  if (useMPV) {
     return ionizationEnergyLoss(mat, p, pathcorrection, dir, particle);
   }
 
@@ -186,7 +186,7 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
   double sigRad = 0.;
   double kazL = 0.;
   double meanIoni = Trk::MaterialInteraction::dEdl_ionization(
-    p, &(mat.material()), particle, sigIoni, kazL);
+    p, (mat.material()), particle, sigIoni, kazL);
   double meanRad = Trk::MaterialInteraction::dEdl_radiation(
     p, &(mat.material()), particle, sigRad);
 
@@ -542,8 +542,8 @@ Trk::EnergyLossUpdator::ionizationEnergyLoss(const MaterialProperties& mat,
   double kazL = 0.;
 
   double meanIoni =
-    sign * Trk::MaterialInteraction::PDG_energyLoss_ionization(
-             p, &(mat.material()), particle, sigIoni, kazL, pathLength);
+    sign * Trk::MaterialInteraction::dE_MPV_ionization(
+             p, (mat.material()), particle, sigIoni, kazL, pathLength);
 
   return (!m_detailedEloss
             ? Trk::EnergyLoss(meanIoni, sigIoni)
