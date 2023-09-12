@@ -15,7 +15,8 @@
 using namespace pool;
 
 RootTreeIndexContainer::RootTreeIndexContainer() :
-   m_indexBranch(nullptr), m_index_entries(0), m_index_multi( getpid() ), m_index(0), m_indexBump(0),
+   m_indexBranch(nullptr), m_index_entries(0),
+   m_index_multi( getpid() ), m_index(0), m_indexBump(0),
    m_firstRead(true)
 { }
 
@@ -33,7 +34,7 @@ DbStatus RootTreeIndexContainer::open( DbDatabase& dbH,
 
 long long int RootTreeIndexContainer::nextRecordId()
 {
-   long long int s = m_index_multi;
+   int64_t  s = m_index_multi;
    s = s << 32;
    if (m_indexBranch == nullptr ) {
       s += RootTreeContainer::nextRecordId();
@@ -89,7 +90,7 @@ DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID
          }
          m_firstRead = false;
       }
-      long long int evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
+      auto evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       if (evt_id == -1) {
          delete m_tree->GetTreeIndex();
          m_tree->BuildIndex("index_ref");
