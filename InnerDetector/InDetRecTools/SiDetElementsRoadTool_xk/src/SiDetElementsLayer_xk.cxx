@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 
 #include "SiDetElementsRoadTool_xk/SiDetElementsComparison.h"
 #include "SiDetElementsRoadTool_xk/SiDetElementsLayer_xk.h"
+#include "CxxUtils/trapping_fp.h"
 
 ///////////////////////////////////////////////////////////////////
 // Get barrel detector elements
@@ -33,6 +34,10 @@ void InDet::SiDetElementsLayer_xk::getBarrelDetElements
  std::vector<InDet::SiDetElementLink_xk::ElementWay> &lDE,
  std::vector<bool>   &used) const
 {
+  // Tell clang to optimize assuming that FP exceptions can trap.
+  // Otherwise, it can vectorize the division, which can lead to
+  // spurious division-by-zero traps from unused vector lanes.
+  CXXUTILS_TRAPPING_FP;
 
   /// In the following, identify where we cross the layer in r
   /// by solving the quadratic equation 

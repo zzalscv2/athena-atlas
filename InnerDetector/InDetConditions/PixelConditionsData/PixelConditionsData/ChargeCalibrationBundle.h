@@ -15,6 +15,7 @@
 #include "PixelReadoutDefinitions/PixelReadoutDefinitions.h" //diode types
 #include "PixelConditionsData/ChargeCalibParameters.h" //Thresholds, LegacyFitParameters etc
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
+#include "CxxUtils/trapping_fp.h"
 #include <vector>
 #include <map> //also has std::pair
  
@@ -64,6 +65,10 @@ namespace PixelChargeCalib{
     
     void
     insertLinearParams(InDetDD::PixelDiodeType type, int idxLimit){
+      // Tell clang to optimize assuming that FP exceptions can trap.
+      // Otherwise, it can vectorize the division, which can lead to
+      // spurious division-by-zero traps from unused vector lanes.
+      CXXUTILS_TRAPPING_FP;
       auto &targetArray = (type == InDetDD::PixelDiodeType::NORMAL) ? lin : linGanged;
       if (idxLimit <= 0){ //duplicates original logic
         targetArray.emplace_back(0.f,0.f);

@@ -21,6 +21,7 @@
 
 #include "StoreGate/ReadCondHandle.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/trapping_fp.h"
 #include <iomanip>
 #include <ostream>
 
@@ -1340,6 +1341,11 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::fillLists(EventData& data) const
 
 float InDet::SiSpacePointsSeedMaker_ATLxk::azimuthalStep(const float pTmin,const float maxd0,const float Rmin,const float Rmax) 
 {
+  // Tell clang to optimize assuming that FP exceptions can trap.
+  // Otherwise, it can vectorize the division, which can lead to
+  // spurious division-by-zero traps from unused vector lanes.
+  CXXUTILS_TRAPPING_FP;
+
   /// here we approximate the largest curvature
   /// that can be expected for the seeds we build
   /// using R[mm] ~ pT[MeV] / (0.3 * B[T]), with B == 2T
@@ -2284,6 +2290,10 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newOneSeedWithCurvaturesComparison
     float originalSeedQuality   = seedQuality;
 
     if(m_maxdImpact > 50){      //This only applies to LRT
+      // Tell clang to optimize assuming that FP exceptions can trap.
+      // Otherwise, it can vectorize the division, which can lead to
+      // spurious division-by-zero traps from unused vector lanes.
+      CXXUTILS_TRAPPING_FP;
 
       float topR=(*it_commonTopSP).second->radius();
       float topZ=(*it_commonTopSP).second->z();
