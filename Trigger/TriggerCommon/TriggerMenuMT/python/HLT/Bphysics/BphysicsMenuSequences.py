@@ -1,75 +1,49 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, algorithmCAToGlobalWrapper, SelectionCA, InEventRecoCA
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaCommon.CFElements import seqAND
-from TrigEDMConfig.TriggerEDMRun3 import recordable
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, SelectionCA, InEventRecoCA, InViewRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from TrigEDMConfig.TriggerEDMRun3 import recordable
 
-def bmumuxAlgSequence(flags):
-    from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-    from DecisionHandling.DecisionHandlingConf import  ViewCreatorCentredOnIParticleROITool, ViewCreatorMuonSuperROITool 
+
+@AccumulatorCache
+def bmumuxSequence(flags):
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    IDConfig = getInDetTrigConfig( "bphysics" )
+    IDConfig = getInDetTrigConfig('bmumux')
 
-    log.debug("TrigBPhysMenuSequence: eta half width %s ", IDConfig.etaHalfWidth)
-    log.debug("TrigBPhysMenuSequence: phi half width %s ", IDConfig.phiHalfWidth)
-    log.debug("TrigBPhysMenuSequence: zed half width %s ", IDConfig.zedHalfWidth)
-    log.debug("TrigBphysMenuSequence: superRoI %s ", IDConfig.SuperRoI)
+    RoIToolCreator = CompFactory.ViewCreatorMuonSuperROITool if IDConfig.SuperRoI else CompFactory.ViewCreatorCentredOnIParticleROITool
 
-    if IDConfig.SuperRoI:
-        viewCreatorROITool = ViewCreatorMuonSuperROITool(
-            RoIEtaWidth = IDConfig.etaHalfWidth,
-            RoIPhiWidth = IDConfig.phiHalfWidth,
-            RoIZedWidth = IDConfig.zedHalfWidth,
-            RoisWriteHandleKey = recordable(IDConfig.roi))
-    else:
-        viewCreatorROITool = ViewCreatorCentredOnIParticleROITool(
-            RoIEtaWidth = IDConfig.etaHalfWidth,
-            RoIPhiWidth = IDConfig.phiHalfWidth,
-            RoIZedWidth = IDConfig.zedHalfWidth,
-            RoisWriteHandleKey = recordable(IDConfig.roi))
+    roiToolOptions = {
+        'RoIEtaWidth' : IDConfig.etaHalfWidth,
+        'RoIPhiWidth' : IDConfig.phiHalfWidth,
+        'RoIZedWidth' : IDConfig.zedHalfWidth,
+        'RoisWriteHandleKey' : recordable(IDConfig.roi) }
 
+    viewMakerOptions = {
+        'RoITool' : RoIToolCreator(**roiToolOptions),
+        'mergeUsingFeature' : True,
+        'PlaceMuonInView' : True,
+        'InViewMuonCandidates' : 'BmumuxMuonCandidates',
+        'InViewMuons' : 'HLT_Muons_Bmumux' }
 
-    viewMaker = EventViewCreatorAlgorithm(
-        name = 'IMbmumux',
-        mergeUsingFeature = True,
-        RoITool = viewCreatorROITool,
-        Views = 'BmumuxViews',
-        InViewRoIs = 'BmumuxViewRoIs',
-        ViewFallThrough = True,
-        PlaceMuonInView = True,
-        InViewMuonCandidates = 'BmumuxMuonCandidates',
-        InViewMuons = 'HLT_Muons_Bmumux')
+    reco = InViewRecoCA('Bmumux', **viewMakerOptions)
+    from .BphysicsRecoSequences import bmumuxRecoSequenceCfg
+    reco.mergeReco(bmumuxRecoSequenceCfg(flags, reco.inputMaker().InViewRoIs, reco.inputMaker().InViewMuons))
 
-    from .BphysicsRecoSequences import bmumuxRecoSequence
-    recoSequence = bmumuxRecoSequence(flags, viewMaker.InViewRoIs, viewMaker.InViewMuons)
-
-    viewMaker.ViewNodeName = recoSequence.name()
+    selAcc = SelectionCA('bmumuxSequence')
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=viewMaker.name())[0]
+    selAcc.mergeReco(reco, robPrefetchCA=ROBPrefetchingAlgCfg_Si(flags, nameSuffix=reco.name))
 
-    sequence = seqAND('bmumuxSequence', [viewMaker, robPrefetchAlg, recoSequence])
+    hypoAlg = CompFactory.TrigBphysStreamerHypo('BmumuxStreamerHypoAlg')
+    selAcc.addHypoAlgo(hypoAlg)
 
-    return (sequence, viewMaker)
-
-
-def bmumuxSequence(flags):
-    from TrigBphysHypo.TrigBphysHypoConf import TrigBphysStreamerHypo
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
-
-    sequence, viewMaker = RecoFragmentsPool.retrieve(bmumuxAlgSequence, flags)
-    hypo = TrigBphysStreamerHypo('BmumuxStreamerHypoAlg')
-
-    return MenuSequence(flags,
-        Sequence = sequence,
-        Maker = viewMaker,
-        Hypo = hypo,
-        HypoToolGen = TrigBphysStreamerHypoToolFromDict)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen=TrigBphysStreamerHypoToolFromDict)
 
 
 def dimuL2Sequence(flags):
@@ -91,6 +65,7 @@ def dimuL2Sequence(flags):
         HypoToolGen = TrigBphysStreamerHypoToolFromDict)
 
 
+@AccumulatorCache
 def dimuEFSequence(flags):
     selAcc = SelectionCA('dimuSequence')
 

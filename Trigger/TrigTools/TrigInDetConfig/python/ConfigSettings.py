@@ -525,7 +525,6 @@ ConfigSettingsInstances = {
 
     "cosmics"     : ConfigSettings_cosmics(),
     "bmumux"      : ConfigSettings_bmumux(),
-    "bphysics"    : ConfigSettings_bmumux(),
     "minBias"     : ConfigSettings_minBias(),
 
     "electronLRT"    : ConfigSettings_electronLRT(),
