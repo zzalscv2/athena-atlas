@@ -272,7 +272,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                             continue
 
                     if not isGaudiEnv():
-                        branch.SetStatus(True)
+                        metadata_tree.SetBranchStatus(f"{name}*", True)
 
                     # assign the corresponding persistent class based of the name of the metadata container
                     if regexEventStreamInfo.match(class_name):
