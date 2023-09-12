@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TruthD3PDAnalysis )
@@ -11,8 +11,8 @@ atlas_add_library( TruthD3PDAnalysisLib
                    src/*.cxx
                    PUBLIC_HEADERS TruthD3PDAnalysis
                    PRIVATE_INCLUDE_DIRS  ${HEPPDT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib AtlasHepMCsearchLib D3PDMakerUtils GaudiKernel McParticleKernel MCTruthClassifierLib
-                   PRIVATE_LINK_LIBRARIES TruthUtils ${HEPPDT_LIBRARIES} AthenaKernel EventKernel xAODEgamma xAODJet xAODMuon GeneratorObjects McParticleEvent Particle ParticleJetToolsLib ParticleTruth StoreGateLib TrkParticleBase VxVertex )
+                   LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib AtlasHepMCsearchLib D3PDMakerUtils GaudiKernel MCTruthClassifierLib
+                   PRIVATE_LINK_LIBRARIES TruthUtils ${HEPPDT_LIBRARIES} AthenaKernel EventKernel xAODEgamma xAODJet xAODMuon GeneratorObjects Particle ParticleJetToolsLib ParticleTruth StoreGateLib TrkParticleBase VxVertex )
 
 atlas_add_component( TruthD3PDAnalysis
                      src/components/*.cxx
