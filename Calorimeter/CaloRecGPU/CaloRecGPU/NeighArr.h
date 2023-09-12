@@ -228,7 +228,77 @@ namespace CaloRecGPU
       return ret;
     }
   };
+  
+  struct NeighPairsArr
+  {
+    int cell_A[NExactPairs];
+    int cell_B[NExactPairs];
+
+    constexpr int get_option(const int pair) const
+    {
+      //Number of pairs at the end of each neighbour option.
+      //Hardcoded for performance reasons.
+      //Since (CPU) geometry description
+      //might end up seeing some changes
+      //in the not so distant future
+      //to harmonize with our data structures,
+      //we could consider some sort of code generation...
+      constexpr int s_pairs_end[NumNeighOptions] = {184128, 368256, 551424, 733312, 1483056, 1960492, 2437928, 2438824, 2439720, 2500008, 2530412, 2560816};
+      for (int i = 0; i < NumNeighOptions; ++i)
+        {
+          if (pair < s_pairs_end[i])
+            {
+              return i;
+            }
+        }
+      return -1;
+    }
+
+    constexpr bool is_valid(const int pair, const unsigned int options, const bool limited_PS, const bool limited_HECIW_FCal) const
+    {
+      const int opt_idx = get_option(pair);
+      if (opt_idx < 0 || !(options & (1U << opt_idx)) )
+        {
+          return false;
+        }
+
+      //nextInSampl, the neighbour option used
+      //for the PS and HECIW_FCal limited cells.
+      constexpr int limited_option = 6;
+
+      //Number of pairs within each neighbour option
+      //above which the neighbours contain
+      //PS and HECIW_FCal limited cells.
+      //Hardcoded for performance reasons.
+      //Since (CPU) geometry description
+      //might end up seeing some changes
+      //in the not so distant future
+      //to harmonize with our data structures,
+      //we could consider some sort of code generation...
+      constexpr int s_PS_start[NumNeighOptions] = {173888, 358016, 541056, 723584, 1432784, 1954480, 2364410, 2438696, 2439336, 2500008, 2529160, 2559756};
+      constexpr int s_HECIW_FCal_start[NumNeighOptions] = {183232, 367360, 550272, 732672, 1469392, 1954480, 2435450, 2438824, 2439720, 2500008, 2529160, 2559756};
+      
+      if (limited_PS && opt_idx != limited_option)
+        {
+          if (pair >= s_PS_start[opt_idx] && pair < s_HECIW_FCal_start[opt_idx])
+            {
+              return false;
+            }
+        }
+
+      if (limited_HECIW_FCal && opt_idx != limited_option)
+        {
+          if (pair >= s_HECIW_FCal_start[opt_idx])
+            {
+              return false;
+            }
+        }
+
+      return true;
+
+    }
+
+  };
 
 }
-
 #endif //CALORECGPU_NEIGHARR_H

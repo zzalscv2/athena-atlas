@@ -333,5 +333,11 @@ void BasicClusterInfoCalculator::register_kernels(IGPUKernelSizeOptimizer & opti
                        Helpers::int_ceil_div(NCaloCells, ClearInvalidCellsBlockSize)
                      };
 
-  optimizer.register_kernels("BasicClusterInfoCalculator", 4, kernels, blocksizes, gridsizes);
+  int   maxsizes[] = { NMaxClusters,
+                       NCaloCells,
+                       NMaxClusters,
+                       NCaloCells
+                     };
+
+  optimizer.register_kernels("BasicClusterInfoCalculator", 4, kernels, blocksizes, gridsizes, maxsizes);
 }

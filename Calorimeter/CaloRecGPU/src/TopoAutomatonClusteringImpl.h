@@ -227,10 +227,7 @@ namespace TAGrowing
     PairsArr seedgrow_pairs, term_pairs;
 
     int continue_flag;
-
-#if !CUDA_CAN_USE_TAIL_LAUNCH
     int stop_flag;
-#endif
   };
 
   struct TopoAutomatonOptions

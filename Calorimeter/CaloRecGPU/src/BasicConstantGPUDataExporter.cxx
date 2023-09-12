@@ -103,17 +103,17 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
       const int  subcalo             = caloElement->getSubCalo();
       const int  region              = calo_id->region(cell_identifier);
       
+      const bool is_PS               =   (subcalo == CaloCell_ID::LAREM   && intra_calo_sampling == 0);
+      
       const bool is_HECIW_or_FCAL    = ( (subcalo == CaloCell_ID::LARHEC  && region              == 1 ) ||
                                          (subcalo == CaloCell_ID::LARFCAL && intra_calo_sampling >  1 )    );
       
-      const bool is_PS               =   (subcalo == CaloCell_ID::LAREM   && intra_calo_sampling == 0);
-
       cd.m_geometry->otherCellInfo[cell] = OtherCellInfo(sampling,
                                                          ConstantEnumConversion::from_intra_calorimeter_sampling_enum(intra_calo_sampling),
                                                          ConstantEnumConversion::from_subcalo_enum(subcalo),
                                                          ConstantEnumConversion::from_region_enum(region),
-                                                         is_HECIW_or_FCAL,
-                                                         is_PS);
+                                                         is_PS,
+                                                         is_HECIW_or_FCAL);
       cd.m_geometry->x[cell] = caloElement->x();
       cd.m_geometry->y[cell] = caloElement->y();
       cd.m_geometry->z[cell] = caloElement->z();
@@ -241,6 +241,72 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
         }
     }
+
+#if CALORECGPU_ADD_FULL_PAIRS_LIST_TO_CONSTANT_INFORMATION
+
+//Note: the commented out code is used to output the hard-coded numbers
+//in NeighPairsArr. For the time being, it should remain here until
+//a more definitive solution for the geometry is found.
+
+    {
+      int num_pairs = 0;
+
+      auto add_neighbours = [&](const int cell, const unsigned int curr_neigh_opt)
+      {
+        int neighbours[NMaxNeighbours];
+
+        const int num_neighs = cd.m_geometry->neighbours.get_neighbours(curr_neigh_opt, cell, neighbours);
+
+        for (int neigh = 0; neigh < num_neighs; ++neigh)
+          {
+            cd.m_geometry->neighPairs.cell_A[num_pairs] = cell;
+            cd.m_geometry->neighPairs.cell_B[num_pairs] = neighbours[neigh];
+            ++num_pairs;
+          }
+      };
+
+      for (int neigh_bit_set = 0; neigh_bit_set < NumNeighOptions; ++neigh_bit_set)
+        {
+          const unsigned int curr_neigh_opt = (1U << neigh_bit_set);
+
+          for (int cell = 0; cell < NCaloCells; ++cell)
+            {
+              if (cd.m_geometry->is_PS(cell) || cd.m_geometry->is_HECIW_or_FCal(cell))
+                {
+                  continue;
+                }
+
+              add_neighbours(cell, curr_neigh_opt);
+            }
+
+          //const int PS_start = num_pairs;
+
+          for (int cell = 0; cell < NCaloCells; ++cell)
+            {
+              if (!cd.m_geometry->is_PS(cell))
+                {
+                  continue;
+                }
+
+              add_neighbours(cell, curr_neigh_opt);
+            }
+
+          //const int HECIW_FCal_start = num_pairs;
+
+          for (int cell = 0; cell < NCaloCells; ++cell)
+            {
+              if (!cd.m_geometry->is_HECIW_or_FCal(cell))
+                {
+                  continue;
+                }
+
+              add_neighbours(cell, curr_neigh_opt);
+            }
+
+          //std::cout << neigh_bit_set << " " << num_pairs << " " << PS_start << " " << HECIW_FCal_start << std::endl;
+        }
+    }
+#endif
 
   auto after_geo = clock_type::now();
 

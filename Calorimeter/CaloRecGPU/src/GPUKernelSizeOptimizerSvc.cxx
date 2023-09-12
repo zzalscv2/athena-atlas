@@ -19,6 +19,7 @@ void GPUKernelSizeOptimizerSvc::register_kernels(const std::string & tool_name,
                                                  void ** kernels,
                                                  const int * /*blocksize_hints*/,
                                                  const int * gridsize_hints,
+                                                 const int * max_total_threads,
                                                  const int offset)
 {
   ATH_MSG_INFO("Registering " << number << " kernels under: " << tool_name);
@@ -41,6 +42,7 @@ void GPUKernelSizeOptimizerSvc::register_kernels(const std::string & tool_name,
         {
           CaloRecGPU::CUDA_Helpers::optimize_block_and_grid_size(kernels[i], cfg.block_x, cfg.grid_x);
         }
+      cfg.grid_x = std::min(cfg.grid_x, CaloRecGPU::Helpers::int_ceil_div(max_total_threads[i], cfg.block_x));
       vect[i + offset].add_configuration(cfg);
     }
 }

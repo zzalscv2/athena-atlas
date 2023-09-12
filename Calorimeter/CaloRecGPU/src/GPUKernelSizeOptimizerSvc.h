@@ -42,6 +42,7 @@ class GPUKernelSizeOptimizerSvc : public extends <AthService, IGPUKernelSizeOpti
                                 void ** kernels,
                                 const int * blocksize_hints,
                                 const int * gridsize_hints,
+                                const int * max_total_threads,
                                 const int offset = 0);
 
   /** @brief Retrieve the (hopefully optimal) kernel launch configuration.*/

@@ -51,9 +51,6 @@ namespace TACHacks
   }
 }
 
-
-//constexpr static int DefaultBlockSize = 256;
-
 constexpr static int SignalToNoiseBlockSize = 512;
 
 constexpr static int CellPairsBlockSize = 256;
@@ -88,14 +85,14 @@ void signalToNoiseKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_ar
 
   for (int cell = index; cell < NCaloCells; cell += grid_size)
     {
-      const int cell_sampling = geometry->sampling(index);
+      const int cell_sampling = geometry->sampling(cell);
       const float cellEnergy = cell_info_arr->energy[cell];
 
       if (!cell_info_arr->is_valid(cell) || !opts->uses_calorimeter_by_sampling(cell_sampling))
         {
           cell_state_arr->clusterTag[cell] = TACTag::make_invalid_tag();
           temporaries->secondary_array[cell] = TACTag::make_invalid_tag();
-          return;
+          continue;
         }
 
       float sigNoiseRatio = 0.00001f;
@@ -238,12 +235,17 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries
     {
       const TACTag this_tag = cell_state_arr->clusterTag[cell];
 
+      int neighbours[NMaxNeighbours];
+
+      int num_seedgrow_neighs = 0, num_term_neighs = 0, num_total_neighs = 0;
+
+      constexpr unsigned int grow_seed_neighbour_mark = 0x100000;
+      constexpr unsigned int term_neighbour_mark      = 0x200000;
+      //Mark growing or terminal neighbours.
+      constexpr unsigned int clear_flags_mask = ~(grow_seed_neighbour_mark | term_neighbour_mark);
+
       if (this_tag.is_grow_or_seed())
         {
-          int neighbours[NMaxNeighbours];
-
-          int num_grow_neighs = 0, num_term_neighs = 0;
-
           const bool is_limited = ( opts->limit_HECIW_and_FCal_neighs && geometry->is_HECIW_or_FCal(cell) ) ||
                                   ( opts->limit_PS_neighs             && geometry->is_PS(cell)            );
 
@@ -251,20 +253,16 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries
 
           const unsigned int neighbour_option = (is_limited ? limited_flags : opts->neighbour_options);
 
-          const int num_neighs = geometry->get_neighbours(neighbour_option, cell, neighbours);
+          num_total_neighs = geometry->get_neighbours(neighbour_option, cell, neighbours);
 
-          constexpr int grow_seed_neighbour_mark = 0x100000;
-          constexpr int term_neighbour_mark      = 0x200000;
-          //Mark growing or terminal neighbours.
-
-          for (int i = 0; i < num_neighs; ++i)
+          for (int i = 0; i < num_total_neighs; ++i)
             {
               const int neigh_ID = neighbours[i];
               const TACTag neigh_tag = cell_state_arr->clusterTag[neigh_ID];
               if (neigh_tag.is_grow_or_seed())
                 {
                   neighbours[i] |= grow_seed_neighbour_mark;
-                  ++num_grow_neighs;
+                  ++num_seedgrow_neighs;
                 }
               else if (neigh_tag.is_non_assigned_terminal())
                 {
@@ -272,31 +270,71 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries
                   ++num_term_neighs;
                 }
             }
+        }
 
-          int seedgrow_pair_index = atomicAdd(&(temporaries->seedgrow_pairs.number), num_grow_neighs);
-          int term_pair_index = atomicAdd(&(temporaries->term_pairs.number), num_term_neighs);
-          constexpr int clear_flags_mask = ~(grow_seed_neighbour_mark | term_neighbour_mark);
+      constexpr int WarpSize = 32;
+      constexpr unsigned int full_mask = 0xFFFFFFFFU;
 
-          for (int i = 0; i < num_neighs; ++i)
+      int seedgrow_prefix = num_seedgrow_neighs;
+      int term_prefix = num_term_neighs;
+
+      const int intra_warp_index = threadIdx.x % WarpSize;
+
+      for (int i = 1; i < WarpSize; i *= 2)
+        {
+          const int other_seedgrow = __shfl_down_sync(full_mask, seedgrow_prefix, i) * (intra_warp_index + i < WarpSize);
+          const int other_term     = __shfl_down_sync(full_mask, term_prefix,     i) * (intra_warp_index + i < WarpSize);
+
+          seedgrow_prefix += other_seedgrow;
+          term_prefix     += other_term;
+        }
+
+      int real_term_prefix = 0;
+
+      if (intra_warp_index <= 1)
+        {
+          real_term_prefix = __shfl_sync(0x00000003U, term_prefix, 0);
+        }
+
+      int base_seedgrow_index = 0;
+      int base_term_index = 0;
+
+      switch (intra_warp_index)
+        {
+          case 0:
+            base_seedgrow_index = atomicAdd(&(temporaries->seedgrow_pairs.number), seedgrow_prefix);
+            break;
+          case 1:
+            base_term_index     = atomicAdd(&(temporaries->term_pairs.number), real_term_prefix);
+            break;
+          default:
+            break;
+        }
+
+      const int seedgrow_offset = __shfl_sync(full_mask, base_seedgrow_index, 0) + seedgrow_prefix - num_seedgrow_neighs;
+      const int term_offset     = __shfl_sync(full_mask, base_term_index,     1) + term_prefix     - num_term_neighs;
+
+      int seedgrow_pair_index   = seedgrow_offset;
+      int term_pair_index       = term_offset;
+
+      for (int i = 0; i < num_total_neighs; ++i)
+        {
+          const int neigh = neighbours[i];
+          if (neigh & grow_seed_neighbour_mark)
             {
-              const int neigh = neighbours[i];
-              if (neigh & grow_seed_neighbour_mark)
-                {
-                  temporaries->seedgrow_pairs.cellID[seedgrow_pair_index] = neigh & clear_flags_mask;
-                  temporaries->seedgrow_pairs.neighbourID[seedgrow_pair_index] = cell;
-                  ++seedgrow_pair_index;
-                }
-              else if (neigh & term_neighbour_mark)
-                {
-                  temporaries->term_pairs.cellID[term_pair_index] = neigh & clear_flags_mask;
-                  temporaries->term_pairs.neighbourID[term_pair_index] = cell;
-                  ++term_pair_index;
-                }
+              temporaries->seedgrow_pairs.cellID[seedgrow_pair_index] = neigh & clear_flags_mask;
+              temporaries->seedgrow_pairs.neighbourID[seedgrow_pair_index] = cell;
+              ++seedgrow_pair_index;
+            }
+          else if (neigh & term_neighbour_mark)
+            {
+              temporaries->term_pairs.cellID[term_pair_index] = neigh & clear_flags_mask;
+              temporaries->term_pairs.neighbourID[term_pair_index] = cell;
+              ++term_pair_index;
             }
         }
     }
 }
-
 
 void TAGrowing::cellPairs(EventDataHolder & holder,
                           const ConstantDataHolder & instance_data,
@@ -310,7 +348,7 @@ void TAGrowing::cellPairs(EventDataHolder & holder,
   TopoAutomatonGrowingTemporaries * temps = TACHacks::get_temporaries(holder);
 
   cudaMemsetAsync(&(temps->seedgrow_pairs.number), 0, sizeof(int), stream_to_use);
-  cudaMemsetAsync(&(temps->term_pairs.number), 0, sizeof(int), stream_to_use);
+  cudaMemsetAsync(&(temps->term_pairs.number),     0, sizeof(int), stream_to_use);
 
   const CUDAKernelLaunchConfiguration config = optimizer.get_launch_configuration("TopoAutomatonGrowing", 1);
 
@@ -448,7 +486,10 @@ void clusterGrowingMainCooperativeKernel(Helpers::CUDA_kernel_object<CellStateAr
       grid.sync();
     }
 
-  //printf("COUNTS: %16d\n", counter);
+  //if (index == 0)
+  //  {
+  //    printf("GROWING: %16d\n", counter);
+  //  }
 
   for (int pair = index; pair < num_pairs_term; pair += grid_size)
     {
@@ -459,7 +500,7 @@ void clusterGrowingMainCooperativeKernel(Helpers::CUDA_kernel_object<CellStateAr
 
 __global__ static
 void assignSeedCellsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                     const Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
+                           const Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int clusters_number = clusters_arr->number;
@@ -467,15 +508,15 @@ void assignSeedCellsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_
 
   for (int cluster = index; cluster < clusters_number; cluster += grid_size)
     {
-      const unsigned long long int SNR_and_cell = temporaries->seed_cell_table[index];
+      const unsigned long long int SNR_and_cell = temporaries->seed_cell_table[cluster];
       const int cell = SNR_and_cell & 0xFFFFFU;
-      clusters_arr->seedCellID[index] = cell;
+      clusters_arr->seedCellID[cluster] = cell;
     }
 }
 
 __global__ static
 void finalizeClusterAttributionKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                const Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
+                                      const Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -507,39 +548,39 @@ namespace
 
 __global__ static
 void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                         Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                         Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
+                               Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                        );
+                              );
 
 __global__ static
 void propagateTerminalsKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                        Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                        Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
+                              Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                       );
+                             );
 
 __global__ static
 void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                 Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                                 Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
+                                       Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                                );
+                                      );
 
 __global__ static
 void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                         Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                         Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
+                               Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                               Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                        )
+                              )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -553,9 +594,9 @@ void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_st
   if (index == grid_size - 1)
     {
       copyTagsAndCheckTerminationKernel <<< grids.copy_and_check, blocks.copy_and_check, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                                              temporaries,
-                                                                                                              clusters_arr,
-                                                                                                              blocks, grids);
+                                                                                                                    temporaries,
+                                                                                                                    clusters_arr,
+                                                                                                                    blocks, grids);
     }
 #endif
 }
@@ -563,12 +604,12 @@ void propagateNeighboursKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_st
 
 __global__ static
 void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                                 Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                                 Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
+                                       Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                                       Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                                )
+                                      )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -585,17 +626,17 @@ void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr>
           temporaries->continue_flag = 0;
 
           propagateNeighboursKernel <<< grid.neigh_prop, block.neigh_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                                temporaries,
-                                                                                                clusters_arr,
-                                                                                                blocks, grids);
+                                                                                                      temporaries,
+                                                                                                      clusters_arr,
+                                                                                                      blocks, grids);
         }
       else
         {
 
           propagateTerminalsKernel <<< grid.term_prop, block.term_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                             temporaries,
-                                                                                             clusters_arr,
-                                                                                             blocks, grids);
+                                                                                                   temporaries,
+                                                                                                   clusters_arr,
+                                                                                                   blocks, grids);
 
         }
 #else
@@ -614,12 +655,12 @@ void copyTagsAndCheckTerminationKernel(Helpers::CUDA_kernel_object<CellStateArr>
 
 __global__ static
 void propagateTerminalsKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                        Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                        Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
+                              Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                              Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr
 #if CUDA_CAN_USE_TAIL_LAUNCH
   , const kernel_sizes blocks, const kernel_sizes grids
 #endif
-                       )
+                             )
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
@@ -638,9 +679,9 @@ void propagateTerminalsKernel(Helpers::CUDA_kernel_object<CellStateArr> cell_sta
 
 __global__ static
 void clusterGrowingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_state_arr,
-                         Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
-                         Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
-                         const kernel_sizes blocks, kernel_sizes grids)
+                             Helpers::CUDA_kernel_object<TopoAutomatonGrowingTemporaries> temporaries,
+                             Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
+                             const kernel_sizes blocks, kernel_sizes grids)
 {
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   if (index == 0)
@@ -657,9 +698,9 @@ void clusterGrowingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_stat
 #if CUDA_CAN_USE_TAIL_LAUNCH
 
       propagateNeighboursKernel <<< grids.neigh_prop, blocks.neigh_prop, 0, cudaStreamTailLaunch>>>(cell_state_arr,
-                                                                                              temporaries,
-                                                                                              clusters_arr,
-                                                                                              blocks, grids);
+                                                                                                    temporaries,
+                                                                                                    clusters_arr,
+                                                                                                    blocks, grids);
 
 #else
 
@@ -668,23 +709,22 @@ void clusterGrowingMainDefer(Helpers::CUDA_kernel_object<CellStateArr> cell_stat
       while (!temporaries->stop_flag)
         {
           propagateNeighboursKernel <<< grids.neigh_prop, blocks.neigh_prop>>>(cell_state_arr,
-                                                                         temporaries,
-                                                                         clusters_arr);
+                                                                               temporaries,
+                                                                               clusters_arr);
 
           copyTagsAndCheckTerminationKernel <<< grids.copy_and_check, blocks.copy_and_check>>>(cell_state_arr,
-                                                                                         temporaries,
-                                                                                         clusters_arr);
-
+                                                                                               temporaries,
+                                                                                               clusters_arr);
 
           //++counter;
 
         }
 
-      //printf("COUNTS: %16d\n", counter);
+      //printf("GROWING: %16d\n", counter);
 
       propagateTerminalsKernel <<< grids.term_prop, blocks.term_prop>>>(cell_state_arr,
-                                                                  temporaries,
-                                                                  clusters_arr);
+                                                                        temporaries,
+                                                                        clusters_arr);
       assignSeedCellsKernel <<< grids.seed_assign, blocks.seed_assign>>>(clusters_arr, temporaries);
 
 #endif
@@ -717,7 +757,7 @@ void TAGrowing::clusterGrowing(EventDataHolder & holder,
       cudaLaunchCooperativeKernel((void *) clusterGrowingMainCooperativeKernel,
                                   cfg_iter.grid_x, cfg_iter.block_x,
                                   main_args, 0, stream_to_use);
-                                  
+
       assignSeedCellsKernel <<< cfg_seed.grid_x, cfg_seed.block_x, 0, stream_to_use>>>(holder.m_clusters_dev, temps);
 
     }
@@ -812,5 +852,15 @@ void TAGrowing::register_kernels(IGPUKernelSizeOptimizer & optimizer)
                        Helpers::int_ceil_div(NCaloCells, ClusterGrowingFinalizationBlockSize)
                      };
 
-  optimizer.register_kernels("TopoAutomatonGrowing", 8, kernels, blocksizes, gridsizes);
+  int   maxsizes[] = { NCaloCells,
+                       NCaloCells,
+                       std::max(NMaxPairs, NCaloCells),
+                       NMaxClusters,
+                       NMaxPairs,
+                       NCaloCells,
+                       NMaxPairs,
+                       NCaloCells
+                     };
+
+  optimizer.register_kernels("TopoAutomatonGrowing", 8, kernels, blocksizes, gridsizes, maxsizes);
 }

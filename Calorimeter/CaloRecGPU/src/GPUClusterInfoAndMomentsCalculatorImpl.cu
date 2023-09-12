@@ -2204,14 +2204,24 @@ void ClusterMomentsCalculator::register_kernels(IGPUKernelSizeOptimizer & optimi
                      };
 
   int  gridsizes[] = { Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
-                       Helpers::int_ceil_div(NCaloCells, Helpers::int_floor_div(CellPassBlockSize, WarpSize)),
+                       Helpers::int_ceil_div(NCaloCells,   Helpers::int_floor_div(CellPassBlockSize,    WarpSize)),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
-                       Helpers::int_ceil_div(NCaloCells, Helpers::int_floor_div(CellPassBlockSize, WarpSize)),
+                       Helpers::int_ceil_div(NCaloCells,   Helpers::int_floor_div(CellPassBlockSize,    WarpSize)),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
-                       Helpers::int_ceil_div(NCaloCells, Helpers::int_floor_div(CellPassBlockSize, WarpSize)),
+                       Helpers::int_ceil_div(NCaloCells,   Helpers::int_floor_div(CellPassBlockSize,    WarpSize)),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
                        Helpers::int_ceil_div(NMaxClusters, Helpers::int_floor_div(ClusterPassBlockSize, WarpSize)),
                      };
 
-  optimizer.register_kernels("ClusterMomentsCalculator", 8, kernels, blocksizes, gridsizes);
+  int   maxsizes[] = { NMaxClusters * WarpSize,
+                       NCaloCells   * WarpSize,
+                       NMaxClusters * WarpSize,
+                       NCaloCells   * WarpSize,
+                       NMaxClusters * WarpSize,
+                       NCaloCells   * WarpSize,
+                       NMaxClusters * WarpSize,
+                       NMaxClusters * WarpSize
+                     };
+                     
+  optimizer.register_kernels("ClusterMomentsCalculator", 8, kernels, blocksizes, gridsizes, maxsizes);
 }
