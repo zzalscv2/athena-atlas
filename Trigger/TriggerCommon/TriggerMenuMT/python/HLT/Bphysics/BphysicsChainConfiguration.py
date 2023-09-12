@@ -48,7 +48,10 @@ def dimuEFSequenceCfg(flags):
         return menuSequenceCAToGlobalWrapper(dimuEFSequence, flags)
 
 def bmumuxSequenceCfg(flags):
-    return bmumuxSequence(flags)
+    if isComponentAccumulatorCfg():
+        return bmumuxSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(bmumuxSequence, flags)
 
 #############################################
 ###  Class/function to configure muon chains
