@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONMONITORING_L2OVERLAPREMOVERMON_H
@@ -39,8 +39,8 @@ class L2OverlapRemoverMon : public TrigMuonMonitorAlgorithm{
    * @param featureCont vector of LinkInfo
    * @param muResult vector of number assigned to each muon to make overlap judgment
    */ 
-  StatusCode chooseBestMuon(const std::string &chain, std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> > featureCont, std::vector<unsigned int> muResult) const;
-  StatusCode chooseBestMuon(const std::string &chain, std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer> > featureCont, std::vector<unsigned int> muResult) const;
+  StatusCode chooseBestMuon(const std::string &chain, const std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> >& featureCont, const std::vector<unsigned int>& muResult) const;
+  StatusCode chooseBestMuon(const std::string &chain, const std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer> >& featureCont, const std::vector<unsigned int>& muResult) const;
 
   static float calcinvMass(double m1, double pt1, double eta1, double phi1, double m2, double pt2, double eta2, double phi2) ;
   static inline std::tuple<float,float,float> L2ORPosForMatchFunc(const xAOD::L2StandAloneMuon *trig);
