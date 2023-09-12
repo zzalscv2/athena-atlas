@@ -1340,19 +1340,6 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
     //        {
     //          input_metX=-mht_vec.X();
     //          input_metY=-mht_vec.Y();
-    //          // dPhi(l-t) dependence of misHt-trueMET
-    //          if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2011){
-    //            if(met_det<20.0) mht_offset=InputInfo.DelPhiTT>1.8 ?
-    //            -161.9+235.5*InputInfo.DelPhiTT-101.6*pow(InputInfo.DelPhiTT,2)+13.57*pow(InputInfo.DelPhiTT,3)
-    //            : 12.0; else
-    //            mht_offset=115.5-78.1*InputInfo.DelPhiTT+12.83*pow(InputInfo.DelPhiTT,2);
-
-    //          } else if (m_mmcCalibrationSet==MMCCalibrationSet::MMC2012){
-    //            if(met_det<20.0)
-    //            mht_offset=132.1-79.26*InputInfo.DelPhiTT+11.77*pow(InputInfo.DelPhiTT,2);
-    //            else
-    //            mht_offset=51.28-23.56*InputInfo.DelPhiTT+2.637*pow(InputInfo.DelPhiTT,2);
-    //          }
     //        }
     //       else // use MET (for 0-jet and 1-jet events)
     //        {
@@ -2087,10 +2074,8 @@ int MissingMassCalculatorV2::TailCleanUp(const TLorentzVector &vis1,
   if (preparedInput.m_tauTypes == TauTypes::lh) // lepton-hadron channel
   {
 
-    if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2012 ||
-        m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015 ||
+    if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015 ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
-        m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
       return pass_code; // don't use TailCleanup for 8 & 13 TeV data
@@ -3043,8 +3028,8 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
   // check that the calibration set has been chosen explicitly, otherwise abort
   if (m_mmcCalibrationSet == MMCCalibrationSetV2::MAXMMCCALIBRATIONSET) {
     Error("DiTauMassTools", "MMCCalibrationSet has not been set !. Please use "
-                            "fMMC.SetCalibrationSet(MMCCalibrationSetV2::MMC2011)"
-                            " or MMC2012. Abort now. ");
+                            "fMMC.SetCalibrationSet(MMCCalibrationSetV2::MMC2015)"
+                            ". Abort now. ");
     throw; // stop job
   }
   //----------- Re-ordering input info, to make sure there is no dependence of
@@ -3167,10 +3152,10 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   // the future, need to check if lepton Pt needs to be subtracted for both ele
   // and muon
   if (preparedInput.m_METsigmaP < 0.1 || preparedInput.m_METsigmaL < 0.1) {
-    // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
-    // electron
-    if ((m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
-         m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019) &&
+   
+      // T. Davidek: hack for lep-lep -- subtract lepton pT both for muon and
+      //  electron
+      if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 &&
         preparedInput.m_vistau1.M() < 0.12 && preparedInput.m_vistau2.M() < 0.12) { // lep-lep channel
       if (preparedInput.m_SumEt > preparedInput.m_vistau1.Pt())
         preparedInput.m_SumEt -= preparedInput.m_vistau1.Pt();
@@ -3210,7 +3195,6 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   // change Beam Energy for different running conditions
   if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015 ||
       m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
-      m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2016MC15C ||
       m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
       m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
     preparedInput.m_beamEnergy = 6500.0; // 13 TeV running
@@ -3244,25 +3228,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
     } else {
 
       // FIXME the condition is really on MET non on HT ?
-      if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2011) {
-        if (preparedInput.m_MetVec.Mod() < 20.0)
-          HtOffset = preparedInput.m_DelPhiTT > 1.8 ? -161.9 + 235.5 * preparedInput.m_DelPhiTT -
-                                                        101.6 * pow(preparedInput.m_DelPhiTT, 2) +
-                                                        13.57 * pow(preparedInput.m_DelPhiTT, 3)
-                                                  : 12.0;
-        else
-          HtOffset = 115.5 - 78.1 * preparedInput.m_DelPhiTT + 12.83 * pow(preparedInput.m_DelPhiTT, 2);
-
-      } else if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2012) {
-        if (preparedInput.m_MetVec.Mod() < 20.0)
-          HtOffset = 132.1 - 79.26 * preparedInput.m_DelPhiTT +
-                     11.77 * pow(preparedInput.m_DelPhiTT,
-                                 2); // updated for HCP-2012, 8 TeV
-        else
-          HtOffset = 51.28 - 23.56 * preparedInput.m_DelPhiTT +
-                     2.637 * pow(preparedInput.m_DelPhiTT,
-                                 2); // updated for HCP-2012, 8 TeV
-      } else if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015) {
+      if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015) {
         if (preparedInput.m_MetVec.Mod() < 20.0)
           HtOffset = 132.1 - 79.26 * preparedInput.m_DelPhiTT +
                      11.77 * pow(preparedInput.m_DelPhiTT,

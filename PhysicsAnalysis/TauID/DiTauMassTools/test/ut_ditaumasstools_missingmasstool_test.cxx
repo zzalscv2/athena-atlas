@@ -50,7 +50,7 @@ int main() {
    MissingMassTool missingmassTool("missingmass_tool");
    ANA_CHECK( missingmassTool.setProperty("Decorate", true)) ;
    ANA_CHECK( missingmassTool.setProperty("UseVerbose", 1)) ;
-   ANA_CHECK( missingmassTool.setProperty("CalibSet", "2012"));
+   ANA_CHECK( missingmassTool.setProperty("CalibSet", "2015"));
    ANA_CHECK( missingmassTool.setProperty("alg_version", 3));
    ANA_CHECK( missingmassTool.setProperty("UseTailCleanup", 0));
    ANA_CHECK( missingmassTool.setProperty("NiterFit2", 30));

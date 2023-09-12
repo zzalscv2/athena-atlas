@@ -14,7 +14,7 @@ MissingMassTool::MissingMassTool(const std::string& name) : asg::AsgTool(name)
 
 {
   declareProperty("Decorate",			m_decorate=false, "Activate EventInfo decoration");
-  declareProperty("CalibSet",			m_calib_set="2016MC15C", "Calibration: 2016MC15C/2015/2012/2011");
+  declareProperty("CalibSet",			m_calib_set="2015", "Calibration: 2015");
   // default negative. Only set parameter if positive
   // so that the default are in MissingMassCalculator code
   declareProperty("alg_version",		m_alg_version=-1, "Algorithm Version");
@@ -64,16 +64,10 @@ StatusCode MissingMassTool::initialize()
     m_MMC->SetCalibrationSet(MMCCalibrationSet::MMC2015);
   } else if (m_calib_set == "2015HIGHMASS") {
     m_MMC->SetCalibrationSet(MMCCalibrationSet::MMC2015HIGHMASS);
-  } else if (m_calib_set == "2012") {
-    m_MMC->SetCalibrationSet(MMCCalibrationSet::MMC2012);
-  } else if (m_calib_set == "2011") {
-    m_MMC->SetCalibrationSet(MMCCalibrationSet::MMC2011);
   } else if (m_calib_set == "UPGRADE") {
     m_MMC->SetCalibrationSet(MMCCalibrationSet::UPGRADE);
   } else if (m_calib_set == "LFV") {
     m_MMC->SetCalibrationSet(MMCCalibrationSet::LFVMMC2012);
-  } else if (m_calib_set == "2016MC15C") {
-    m_MMC->SetCalibrationSet(MMCCalibrationSet::MMC2016MC15C);
   }else {
     return StatusCode::FAILURE;
   }
