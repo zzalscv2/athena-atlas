@@ -64,6 +64,12 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
     # Check the value of mode parameter
     if mode not in ('tiny', 'lite', 'full', 'peeker', 'iov'):
         raise NameError('Allowed values for "mode" parameter are: "tiny", "lite", "peeker", "iov" or "full"')
+
+    # Disable 'full' and 'iov' in non-Gaudi environments
+    if not isGaudiEnv():
+        if mode in ('full', 'iov'):
+            raise NameError('The following modes are not available in AnalysisBase: "iov" and "full"')
+
     msg.info('Current mode used: {0}'.format(mode))
     msg.info('Current filenames: {0}'.format(filenames))
 
@@ -1257,7 +1263,7 @@ def promote_keys(meta_dict, mode):
                     md['AMITag'] = md[key]['amiTag']
 
                 if 'beamEnergy' in md[key]:
-                    md['beam_energy'] = md[key]['beamEnergy']
+                    md['beam_energy'] = int(md[key]['beamEnergy'])
 
                 if 'geometryVersion' in md[key]:
                     md['GeoAtlas'] = md[key]['geometryVersion']
@@ -1273,9 +1279,11 @@ def promote_keys(meta_dict, mode):
                     md['eventTypes'].append('IS_DATA')
 
                 if 'GeoAtlas' in md and 'ATLAS' in md['GeoAtlas']:
-                  md['eventTypes'].append('IS_ATLAS')
+                    md['eventTypes'].append('IS_ATLAS')
+                    # this is probably safe to assume for all files used in AnalysisBase
+                    md['eventTypes'].append('IS_PHYSICS')
                 else:
-                  md['eventTypes'].append('IS_TESTBEAM')
+                    md['eventTypes'].append('IS_TESTBEAM')
 
                 if 'dataType' in md[key]:
                     md['processingTags'] = [md[key]['dataType']]
