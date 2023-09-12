@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_AlignDbSvc.cxx
@@ -175,7 +175,7 @@ StatusCode TRT_AlignDbSvc::initialize()
   /** This is the text files whence the constants.
   */
   bool alignTextFileExists = !m_par_alitextfile.empty();
-  
+
   if( alignFolderExists ) {    
     
     /** register the callback */
@@ -409,7 +409,7 @@ StatusCode TRT_AlignDbSvc::readAlignTextFile(const std::string & file) {
   /** first clean the alignment container: loop over all
    AlignableTransforms and empty them.
   */
-  const AlignableTransformContainer* container= m_aligncontainerhandle ;
+  const AlignableTransformContainer* container= getContainer();
   if(container) {
     AlignableTransformContainer* nccontainer = const_cast<AlignableTransformContainer*>(container) ;
 
@@ -1387,31 +1387,17 @@ StatusCode TRT_AlignDbSvc::createAlignObjects() const{
     return StatusCode::FAILURE;
   }
   
-  /** Create the appropiate (empty) AlignableTransforms for this geometry */
-  AlignableTransformContainer* patc = new AlignableTransformContainer();
+  /** Create the appropriate (empty) AlignableTransforms for this geometry */
+  auto patc = std::make_unique<AlignableTransformContainer>();
 
-  /**  record it */
-  if (StatusCode::SUCCESS!=m_detStore->record(patc,m_alignroot)) {
-    msg(MSG::ERROR) << "Could not record AlignableTransformContainer " << endmsg;
-    return StatusCode::FAILURE;
-  } else {
-    msg(MSG::INFO) << "Created and recorded in new AlignableTransformContainer" << endmsg;
-  }
-
-  /** set the data handle (can probably be done more efficiently). it
-      is also not clear who is the owner now ...
-  */
-  if (StatusCode::SUCCESS!=m_detStore->retrieve(m_aligncontainerhandle,m_alignroot)) {
-    msg(MSG::ERROR) << "Could not retrieve data handle for AlignableTransformContainer " << endmsg;
-    return StatusCode::FAILURE;
-  }
-  
   for (unsigned int i=0;i<m_alignobjs.size();++i) {
-    AlignableTransform* pat=new AlignableTransform(m_alignobjs[i]);
-    patc->push_back(pat);
+    patc->push_back(std::make_unique<AlignableTransform>(m_alignobjs[i]));
     patc->add(m_alignchans[i]);
     msg(MSG::INFO) << " added empty AlignableTransform for key " << m_alignobjs[i] << endmsg;
   }
+
+  /**  record it */
+  ATH_CHECK( m_detStore->record(std::move(patc),m_alignroot) );
 
   msg(MSG::DEBUG) << "Leaving createAlignObjects" << endmsg;
   return StatusCode::SUCCESS;
@@ -1433,11 +1419,7 @@ StatusCode TRT_AlignDbSvc::createAlignObjectsWhichDoNotAlreadyExist(){
   }
   
   /** Get the alignabletransformcontainer */
-  const AlignableTransformContainer* patc= m_aligncontainerhandle;
-  if (StatusCode::SUCCESS!=m_detStore->retrieve(patc,m_alignroot)) {
-    msg(MSG::ERROR) << "Could not retrieve data handle for AlignableTransformContainer " << endmsg;
-    return StatusCode::FAILURE;
-  }
+  const AlignableTransformContainer* patc= getContainer();
 
   /** Need to cost cast b/c were are chaning it, Ugly but so be it.*/
   AlignableTransformContainer* patc_NonConst = const_cast<AlignableTransformContainer*>(patc);
@@ -1498,7 +1480,7 @@ const AlignableTransform* TRT_AlignDbSvc::cgetTransPtr(const std::string& key) c
 
   // Retrieve AlignableTransform pointer for a given key - const version
   const AlignableTransform* pat=nullptr;
-  const AlignableTransformContainer* patc= m_aligncontainerhandle ;
+  const AlignableTransformContainer* patc= getContainer();
   // the retrieve is unnecessary. in fact, if patc==0, retrieve should
   // fail as well.
 
@@ -1707,4 +1689,16 @@ StatusCode TRT_AlignDbSvc::tweakGlobalFolder(Identifier ident, const Amg::Transf
 
   if (result) return StatusCode::SUCCESS;
   else return StatusCode::FAILURE;
+}
+
+
+const AlignableTransformContainer* TRT_AlignDbSvc::getContainer() const
+{
+  if (m_aligncontainerhandle.isValid())
+    return m_aligncontainerhandle.cptr();
+  const AlignableTransformContainer* ptr = nullptr;
+  if (m_detStore->retrieve (ptr, m_alignroot).isFailure()) {
+    ATH_MSG_ERROR ("Cannot retrieve " << m_alignroot << " from detStore ");
+  }
+  return ptr;
 }
