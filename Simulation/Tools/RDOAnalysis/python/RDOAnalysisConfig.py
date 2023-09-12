@@ -123,6 +123,29 @@ def ITkStripRDOAnalysisCfg(flags, name="ITkStripRDOAnalysis", **kwargs):
 
     return result
 
+def HGTD_RDOAnalysisCfg(flags, name="HGTD_RDOAnalysis", **kwargs):
+    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
+    result = ITkPixelReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("NtuplePath", "/RDOAnalysis/ntuples/")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/HGTD/")
+    kwargs.setdefault("SharedHistPath", "/RDOAnalysis/histos/")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("CollectionName", f"{flags.Overlay.BkgPrefix}ITkPixelRDOs")
+        kwargs.setdefault("SDOCollectionName", f"{flags.Overlay.BkgPrefix}ITkPixelSDO_Map")
+        kwargs.setdefault("McEventCollectionName", f"{flags.Overlay.BkgPrefix}TruthEvent")
+    else:
+        kwargs.setdefault("CollectionName", "ITkPixelRDOs")
+        kwargs.setdefault("SDOCollectionName", "ITkPixelSDO_Map")
+        kwargs.setdefault("McEventCollectionName", "TruthEvent")
+
+    result.addEventAlgo(CompFactory.HGTD_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
 
 def PLR_RDOAnalysisCfg(flags, name="PLR_RDOAnalysis", **kwargs):
     from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
@@ -166,6 +189,9 @@ def RDOAnalysisCfg(flags):
     
     if flags.Detector.EnableITkStrip:
         acc.merge(ITkStripRDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableHGTD:
+        acc.merge(HGTD_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnablePLR:
         acc.merge(PLR_RDOAnalysisCfg(flags))

@@ -14,6 +14,7 @@
 #include "../SCT_FastRDOAnalysis.h"
 #include "../ITkPixelRDOAnalysis.h"
 #include "../StripRDOAnalysis.h"
+#include "../HGTD_RDOAnalysis.h"
 
 DECLARE_COMPONENT( EventInfoRDOAnalysis )
 DECLARE_COMPONENT( TRT_RDOAnalysis )
@@ -31,4 +32,4 @@ DECLARE_COMPONENT( PixelFastRDOAnalysis )
 DECLARE_COMPONENT( SCT_FastRDOAnalysis )
 DECLARE_COMPONENT( ITk::StripRDOAnalysis )
 DECLARE_COMPONENT( ITk::PixelRDOAnalysis )
-
+DECLARE_COMPONENT( HGTD_RDOAnalysis )
