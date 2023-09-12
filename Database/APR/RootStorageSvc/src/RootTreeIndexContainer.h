@@ -1,11 +1,13 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #ifndef POOL_ROOTTREEINDEXCONTAINER_H
 #define POOL_ROOTTREEINDEXCONTAINER_H 1
 
 #include "RootTreeContainer.h"
+
+#include <cstdint>
 
 // Forward declarations
 class TTree;
@@ -63,20 +65,21 @@ namespace pool {
 
    private:
       /// Pointer to index branch
-      TBranch* m_indexBranch;
-      long long int m_index_entries;
+      TBranch*          m_indexBranch;
+
+      int64_t           m_index_entries;
+
       /// Index multiplier (e.g. pid - ppid), fill in c'tor
-      const int m_index_multi;
-      /// Index (64 bit)
-      long long int m_index;
+      const int32_t     m_index_multi;
+
+      /// Index (64 bit) - using ROOT type that matches the earlier 'long long'
+      Long64_t          m_index;
 
       /// How much to increase nextRecordID to keep index values synced with other containers
-      long long int m_indexBump;
+      int64_t           m_indexBump;
 
       /// first object retrieval attempt flag (to rebuild index)
-      bool          m_firstRead;
+      bool              m_firstRead;
    };
 }
 #endif //POOL_ROOTTREEINDEXCONTAINER_H
-
-
