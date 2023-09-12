@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/MultiElectronFilter.h"
@@ -21,7 +21,7 @@ StatusCode MultiElectronFilter::filterEvent() {
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = (*itr);
     for (const auto& part: *genEvt) {
-      if ( MC::isStable(part)) continue;
+      if ( !MC::isStable(part)) continue;
       if ( std::abs(part->pdg_id()) != 11) continue;
 	  if ( (part->momentum().perp() >= m_Ptmin) && std::abs(part->momentum().pseudoRapidity()) <= m_EtaRange) {
 	    numElectrons++;
