@@ -8,6 +8,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "GoodRunsLists/TGRLCollection.h"
+#include "CxxUtils/starts_with.h"
 
 namespace {
   // Cut values on pt bein exploited throughout the monitoring
@@ -91,17 +92,17 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
 	std::string sysItem = monElement->At(j)->GetName();
 	if(sysItem.empty())continue;
 	std::string item = sysItem.substr(4,sysItem.size());// remove "Tit:", "CTP:", "HLT:", "RPC:", "TGC:"
-	if(sysItem.find("Tit")==0){
+	if(CxxUtils::starts_with (sysItem, "Tit")){
 	  monObj.title = item;
-	}else if(sysItem.find("Mul")==0){
+	}else if(CxxUtils::starts_with (sysItem, "Mul")){
 	  monObj.multiplicity = std::atoi(item.data());
-	}else if(sysItem.find("CTP")==0 || sysItem.find("HLT")==0){
+	}else if(CxxUtils::starts_with (sysItem, "CTP")|| CxxUtils::starts_with (sysItem, "HLT")){
 	  monObj.trigItem = item;
-	}else if(sysItem.find("RPC")==0){
+	}else if(CxxUtils::starts_with (sysItem, "RPC")){
 	  monObj.rpcThr = std::atoi(item.data());
 	  monObj.rpcR = (item.find('R')!=std::string::npos);
 	  monObj.rpcM = (item.find('M')!=std::string::npos);
-	}else if(sysItem.find("TGC")==0){
+	}else if(CxxUtils::starts_with (sysItem, "TGC")){
 	  monObj.tgcThr = std::atoi(item.data());
 	  monObj.tgcF = (item.find('F')!=std::string::npos);
 	  monObj.tgcC = (item.find('C')!=std::string::npos);
@@ -118,7 +119,7 @@ StatusCode TgcRawDataMonitorAlgorithm::initialize() {
     std::unique_ptr<TObjArray> arr( Str.Tokenize(",") );
     for(int i = 0 ; i < arr->GetEntries() ; i++){
       std::string name = arr->At(i)->GetName();
-      if(name.find("MU")!=0)continue;
+      if(!CxxUtils::starts_with (name, "MU"))continue;
       m_thrMonList.insert(name);
     }
   }
@@ -771,7 +772,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       ctpMonVariables.push_back(val_roi_inOk_outOk);
       ctpMonVariables.push_back(val_roi_inOk_outNg);
       ctpMonVariables.push_back(val_roi_inNg_outOk);
-      fill(m_packageName + monObj.title.data(), ctpMonVariables);
+      fill(m_packageName + monObj.title, ctpMonVariables);
     }
     ATH_MSG_DEBUG("End filling histograms for MuonRoIs after trigger decision");
   }

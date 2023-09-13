@@ -12,7 +12,7 @@ atlas_add_component( TgcRawDataMonitoring
                      src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthenaMonitoringLib
-                     StoreGateLib MuonReadoutGeometry MuonIdHelpersLib MuonPrepRawData MuonTrigCoinData MuonDQAUtilsLib Identifier xAODEventInfo xAODTracking xAODMuon xAODTrigger MuonRDO AnalysisTriggerEvent muonEvent TrigSteeringEvent TrkExInterfaces FourMomUtils MuonAnalysisInterfacesLib GoodRunsListsLib)
+                     StoreGateLib MuonReadoutGeometry MuonIdHelpersLib MuonPrepRawData MuonTrigCoinData MuonDQAUtilsLib Identifier xAODEventInfo xAODTracking xAODMuon xAODTrigger MuonRDO AnalysisTriggerEvent muonEvent TrigSteeringEvent TrkExInterfaces FourMomUtils MuonAnalysisInterfacesLib GoodRunsListsLib CxxUtils )
 
 
 # Install files from the package:
