@@ -51,3 +51,8 @@ atlas_add_component( ActsTrackReconstruction
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
+
+atlas_add_test( TableUtils_test
+   SOURCES src/TableUtils.cxx test/TableUtils_test.cxx
+   POST_EXEC_SCRIPT nopost.sh
+)

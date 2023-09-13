@@ -45,6 +45,7 @@ namespace ActsTrk {
 
     
     virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
@@ -67,6 +68,16 @@ namespace ActsTrk {
 
     Gaudi::Property< bool > m_fastTracking {this, "useFastTracking", false};
     bool skipSpacePoint(float x, float y, float z) const;
+
+  public:
+    enum EStat {
+       kNSpacepoints,
+       kNSeeds,
+       kNSeedsWithoutParam,
+       kNStat
+    };
+  private:
+     mutable std::array<std::atomic<unsigned int>, kNStat> m_stat ATLAS_THREAD_SAFE {};
   };
 
   inline bool SeedingAlg::skipSpacePoint(float x, float y, float z) const {

@@ -99,6 +99,11 @@ def ActsTrackFindingCfg(flags,
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
+    kwargs.setdefault("SeedLabels",["PPP","SSS"])
+    # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
+    # if all eta bins are >=0. the counter will be categorized qby abs(eta) otherwise eta
+    kwargs.setdefault("StatisticEtaBins",[ eta/10. for eta in range(5,40,5)]) # eta 0.0 - 4.0 in steps of 0.5
+    kwargs.setdefault("DumpEtaBinsForAll",False)
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc

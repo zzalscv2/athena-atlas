@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "src/TrackFindingAlg.h"
 #include "src/TrackFindingData.h"
 
@@ -36,6 +35,7 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsInterop/Logger.h"
 
+#include "TableUtils.h"
 // Other
 #include <sstream>
 #include <functional>
@@ -155,20 +155,210 @@ namespace ActsTrk
     trackFinder().ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
     trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&trackFinder().measurementSelector);
 
+    if (!m_statEtaBins.empty()) {
+       m_useAbsEtaForStat=(m_statEtaBins[0]>0.);
+       float last_eta=m_statEtaBins[0];
+       for (float eta : m_statEtaBins ) {
+          if (eta<last_eta) {
+             ATH_MSG_FATAL("Eta bins for statistics counter not in ascending order." );
+          }
+          last_eta=eta;
+       }
+    }
+    m_stat.resize(nSeedCollections()*seedCollectionStride(), std::array< std::size_t, kNStat >{});
+    if (!m_seedLables.empty() && m_seedLables.size() != nSeedCollections()) {
+       ATH_MSG_FATAL("SeedLabels should be an empty vector or a vector with " << nSeedCollections()
+                     << " enries. But it is a vector with " << m_seedLables.size() << " entries." );
+    }
     return StatusCode::SUCCESS;
+  }
+
+  namespace {
+     std::string makeEtaBinLabel(const std::vector<float> &eta_bins,
+                                 unsigned int eta_bin_i,
+                                 bool abs_eta=false) {
+        std::stringstream eta_range_label;
+        eta_range_label << std::fixed << std::setprecision(1);
+        if (eta_bin_i==eta_bins.size()+1) {
+           eta_range_label << " All eta";
+        }
+        else {
+           if (eta_bin_i==0) {
+              eta_range_label << std::setw(4) <<  (abs_eta ? "0.0" : "-inf") << "-";
+           }
+           else {
+              eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i-1) <<"-";
+           }
+           if (eta_bin_i>=eta_bins.size()) {
+              eta_range_label << std::setw(4) << "+inf";
+           }
+           else {
+              eta_range_label << std::setw(4) << eta_bins.at(eta_bin_i);
+           }
+        }
+        return eta_range_label.str();
+     }
+
   }
 
   // finalize
   StatusCode TrackFindingAlg::finalize()
   {
-    ATH_MSG_INFO(name() << " statistics:");
-    ATH_MSG_INFO("- total seeds: " << m_nTotalSeeds);
-    ATH_MSG_INFO("- duplicate seeds: " << m_nDuplicateSeeds);
-    ATH_MSG_INFO("- failed seeds: " << m_nFailedSeeds);
-    ATH_MSG_INFO("- output tracks: " << m_nOutputTracks);
-    ATH_MSG_INFO("- selected tracks: " << m_nSelectedTracks);
-    ATH_MSG_INFO("- failure ratio: " << static_cast<double>(m_nFailedSeeds) / m_nTotalSeeds);
-    ATH_MSG_INFO("- duplication ratio: " << static_cast<double>(m_nDuplicateSeeds) / m_nTotalSeeds);
+    if (msgLvl(MSG::INFO)) {
+       std::vector<std::string> stat_labels = TableUtils::makeLabelVector(kNStat,{
+             std::make_pair(kNTotalSeeds,     "Input seeds"),
+             std::make_pair(kNoTrackParam,    "No track parameters"),
+             std::make_pair(kNUsedSeeds,      "Used   seeds"),
+             std::make_pair(kNoTrack,         "Cannot find track"),
+             std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
+             std::make_pair(kNOutputTracks,   "CKF tracks"),
+             std::make_pair(kNSelectedTracks, "selected tracks"),
+          });
+       assert( stat_labels.size() == kNStat);
+       std::vector<std::string> categories {
+          m_seedLables.empty() ? m_pixelEstimatedTrackParametersKey.key() : m_seedLables.value().at(0),
+          m_seedLables.empty() ? m_stripEstimatedTrackParametersKey.key() : m_seedLables.value().at(1),
+          "ALL"
+       };
+
+       std::vector<std::string> eta_labels;
+       eta_labels.reserve(m_statEtaBins.size()+2);
+       for (unsigned int eta_bin_i=0; eta_bin_i < m_statEtaBins.size()+2; ++eta_bin_i) {
+          eta_labels.push_back( makeEtaBinLabel( m_statEtaBins, eta_bin_i, m_useAbsEtaForStat));
+       }
+
+       // vector used as 3D array stat[ eta_bin ][ stat_i ][ seed_type]
+       // stat_i = [0, kNStat)
+       // eta_bin = [0, m_statEtaBins.size()+2 ); eta_bin == m_statEtaBinsSize()+1 means sum of all etaBins
+       // seed_type = [0, nSeedCollections()+1)  seed_type == nSeedCollections() means sum of all seed collections
+       std::vector<std::size_t> stat = TableUtils::createCounterArrayWithProjections<std::size_t>(nSeedCollections(),
+                                                                                                  m_statEtaBins.size()+1,
+                                                                                                  m_stat);
+
+       // the extra columns and rows for the projections are addeded internally:
+       unsigned int stat_stride=TableUtils::counterStride(nSeedCollections(),
+                                                          m_statEtaBins.size()+1,
+                                                          static_cast<std::size_t>(kNStat));
+       unsigned int eta_stride=TableUtils::subCategoryStride(nSeedCollections(),
+                                                             m_statEtaBins.size()+1,
+                                                             static_cast<std::size_t>(kNStat));
+       std::stringstream table_out;
+
+       if (m_dumpAllStatEtaBins.value()) {
+          // dump for each counter a table with one row per eta bin
+          unsigned int max_label_width = TableUtils::maxLabelWidth(stat_labels) + TableUtils::maxLabelWidth(eta_labels);
+          for (unsigned int stat_i=0; stat_i<kNStat; ++stat_i) {
+             unsigned int dest_idx_offset = stat_i * stat_stride;
+             table_out << makeTable(stat, dest_idx_offset, eta_stride,
+                                    eta_labels,
+                                    categories)
+                .columnWidth(10)
+                 // only dump the footer for the last eta bin i.e. total
+                .dumpHeader(stat_i==0)
+                .dumpFooter(stat_i+1 == kNStat)
+                .separateLastRow(true) // separate the sum of all eta bins
+                .minLabelWidth(max_label_width)
+                .labelPrefix(stat_labels.at(stat_i));
+          }
+       }
+       else {
+          // dump one table with one row per counter showing the total eta range
+          for (unsigned int eta_bin_i=(m_dumpAllStatEtaBins.value() ? 0 : m_statEtaBins.size()+1);
+               eta_bin_i<m_statEtaBins.size()+2;
+               ++eta_bin_i) {
+             unsigned int dest_idx_offset = eta_bin_i * eta_stride;
+             table_out << makeTable(stat, dest_idx_offset,stat_stride,
+                                    stat_labels,
+                                    categories,
+                                    eta_labels.at(eta_bin_i))
+                .columnWidth(10)
+                // only dump the footer for the last eta bin i.e. total
+                .dumpFooter(!m_dumpAllStatEtaBins.value() || eta_bin_i==m_statEtaBins.size()+1);
+          }
+       }
+       ATH_MSG_INFO("statistics:" << std::endl << table_out.str() );
+       table_out.str("");
+
+       // define retios first element numerator, second element denominator
+       // each element contains a vector of counter and a multiplier e.g. +- 1
+       // ratios are computed as  (sum_i stat[stat_i] *  multiplier_i ) / (sum_j stat[stat_j] *  multiplier_j )
+       auto [ratio_labels, ratio_def] = TableUtils::splitRatioDefinitionsAndLabels( {
+             TableUtils::makeRatioDefinition("failed / seeds ",
+                                             std::vector< std::pair<unsigned int, int> > {
+                                                TableUtils::defineSummand(kNTotalSeeds,      1),
+                                                TableUtils::defineSummand(kNUsedSeeds,      -1),
+                                                TableUtils::defineSummand(kNDuplicateSeeds, -1),
+                                                // no track counted  as used but want to include it as failed
+                                                TableUtils::defineSummand(kNoTrack,          1),
+                                             },   // failed seeds i.e. seeds which are not duplicates but did not produce a track
+                                             std::vector< std::pair<unsigned int, int> >{ TableUtils::defineSummand(kNTotalSeeds,1) }),
+             TableUtils::defineSimpleRatio("duplication / seeds",          kNDuplicateSeeds, kNTotalSeeds),
+             TableUtils::defineSimpleRatio("selected / CKF tracks",        kNSelectedTracks, kNOutputTracks),
+             TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds)
+          });
+
+       std::vector<float> ratio = TableUtils::computeRatios(ratio_def,
+                                                            nSeedCollections()+1,
+                                                            m_statEtaBins.size()+2,
+                                                            stat);
+
+       // the extra columns and rows for the projections are _not_ added internally
+       unsigned int ratio_stride=TableUtils::ratioStride(nSeedCollections()+1,
+                                                         m_statEtaBins.size()+2,
+                                                         ratio_def);
+       unsigned int ratio_eta_stride=TableUtils::subCategoryStride(nSeedCollections()+1,
+                                                                   m_statEtaBins.size()+2,
+                                                                   ratio_def);
+
+       unsigned int max_label_width = TableUtils::maxLabelWidth(ratio_labels) + TableUtils::maxLabelWidth(eta_labels);
+       if (m_dumpAllStatEtaBins.value()) {
+          // show for each ratio a table with one row per eta bin
+          for (unsigned int ratio_i=0; ratio_i<ratio_labels.size(); ++ratio_i) {
+             table_out << makeTable(ratio,
+                                    ratio_i*ratio_stride,
+                                    ratio_eta_stride,
+                                    eta_labels,
+                                    categories)
+                .columnWidth(10)
+                // only dump the footer for the last eta bin i.e. total
+                .dumpHeader(ratio_i==0)
+                .dumpFooter(ratio_i+1==ratio_labels.size())
+                .separateLastRow(true) // separate the sum of las
+                .minLabelWidth(max_label_width)
+                .labelPrefix(ratio_labels.at(ratio_i));
+          }
+       }
+       else {
+          // dump one table with one row per ratio showing  the total eta range
+          table_out << makeTable(ratio,
+                                 (m_statEtaBins.size()+1)*ratio_eta_stride+0*ratio_stride,
+                                 ratio_stride,
+                                 ratio_labels,
+                                 categories)
+             .columnWidth(10)
+             // only dump the footer for the last eta bin i.e. total
+             .minLabelWidth(max_label_width)
+             .dumpFooter(false);
+
+          // also dump a table for final tracks over seeds (ratio_i==3) showing one row per eta bin
+          eta_labels.erase( eta_labels.end() - 1); // drop last line of table which shows again all eta bins summed.
+          unsigned int ratio_i = 3;
+          table_out << makeTable(ratio,
+                                 ratio_i*ratio_stride,
+                                 ratio_eta_stride,
+                                 eta_labels,
+                                 categories)
+             .columnWidth(10)
+             .dumpHeader(false)
+             // only dump the footer for the last eta bin i.e. total
+             .dumpFooter(!m_dumpAllStatEtaBins.value() || ratio_i+1==ratio_labels.size())
+             .separateLastRow(false)
+             .minLabelWidth(max_label_width)
+             .labelPrefix(ratio_labels.at(ratio_i));
+       }
+
+      ATH_MSG_INFO("Ratios:" << std::endl << table_out.str());
+    }
     return StatusCode::SUCCESS;
   }
 
@@ -350,6 +540,8 @@ namespace ActsTrk
     // ================================================== //
     // ===================== COMPUTATION ================ //
     // ================================================== //
+    std::vector< std::array<unsigned int, kNStat> > event_stat;
+    event_stat.resize( m_stat.size(), std::array<unsigned int, kNStat>{});
 
     // Perform the track finding for all initial parameters.
     // Until the CKF can do a backward search, start with the pixel seeds
@@ -364,7 +556,8 @@ namespace ActsTrk
                            pixelSeeds,
                            tracksContainer,
                            0,
-                           "pixel"));
+                           "pixel",
+                           event_stat));
     }
 
     if (stripEstimatedTrackParameters && !stripEstimatedTrackParameters->empty())
@@ -376,11 +569,26 @@ namespace ActsTrk
                            stripSeeds,
                            tracksContainer,
                            1,
-                           "strip"));
+                           "strip",
+                           event_stat));
     }
 
     ATH_MSG_DEBUG("    \\__ Created " << tracksContainer.size() << " tracks");
 
+    // copy statistics
+    {
+       std::lock_guard<std::mutex> lock(m_mutex);
+       unsigned int category_i=0;
+       for (const std::array<unsigned int, kNStat> &src_stat : event_stat) {
+          std::array<std::size_t, kNStat> &dest_stat= m_stat[category_i];
+          for (unsigned int i=0;i<kNStat; ++i) {
+             assert(i < m_stat[category_i].size() );
+             dest_stat[i] += src_stat[i];
+          }
+          ++category_i;
+       }
+    }
+    
     // ================================================== //
     // ===================== STORE OUTPUT =============== //
     // ================================================== //
@@ -406,7 +614,8 @@ namespace ActsTrk
                               const ActsTrk::SeedContainer *seeds,
                               ActsTrk::TrackContainer &tracksContainer,
                               size_t typeIndex,
-                              const char *seedType) const
+                              const char *seedType,
+                              std::vector< std::array<unsigned int, kNStat> > &event_stat) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
@@ -445,23 +654,23 @@ namespace ActsTrk
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
 
-    m_nTotalSeeds += estimatedTrackParameters.size();
-    size_t addTracks = 0;
-    size_t selTracks = 0;
-
     // Loop over the track finding results for all initial parameters
     for (std::size_t iseed = 0; iseed < estimatedTrackParameters.size(); ++iseed)
     {
+      unsigned int category_i=typeIndex * (m_statEtaBins.size()+1);
       tracksContainerTemp.clear();
 
       if (!estimatedTrackParameters[iseed])
       {
         ATH_MSG_WARNING("No " << seedType << " seed " << iseed);
-        ++m_nFailedSeeds;
+        ++event_stat[category_i][kNoTrackParam];
         continue;
       }
 
       const Acts::BoundTrackParameters &initialParameters = *estimatedTrackParameters[iseed];
+
+      category_i = getStatCategory(typeIndex, -std::log(std::tan( initialParameters.theta() / 2))  );
+      ++event_stat[category_i][kNTotalSeeds];
 
       if (!m_trackStatePrinter.empty() && seeds)
       {
@@ -475,12 +684,13 @@ namespace ActsTrk
       if (duplicateSeedDetector.isDuplicate(measurements.seedOffset(typeIndex) + iseed))
       {
         ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-        ++m_nDuplicateSeeds;
+        ++event_stat[category_i][kNDuplicateSeeds];
         continue;
       }
 
       // Get the Acts tracks, given this seed
       // Result here contains a vector of TrackProxy objects
+      ++event_stat[category_i][kNUsedSeeds];
 
       auto result = trackFinder().ckf.findTracks(initialParameters, options, tracksContainerTemp);
 
@@ -488,7 +698,6 @@ namespace ActsTrk
       if (not result.ok())
       {
         ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
-        ++m_nFailedSeeds;
         continue;
       }
       const auto &tracksForSeed = result.value();
@@ -497,7 +706,7 @@ namespace ActsTrk
       ATH_CHECK(storeSeedInfo(tracksContainerTemp, tracksForSeed, duplicateSeedDetector));
 
       size_t ntracks = tracksForSeed.size();
-      addTracks += ntracks;
+      event_stat[category_i][kNOutputTracks] += ntracks;
 
       if (!m_trackStatePrinter.empty())
       {
@@ -507,7 +716,7 @@ namespace ActsTrk
       if (ntracks == 0)
       {
         ATH_MSG_WARNING("Track finding found no track candidates for " << seedType << " seed " << iseed);
-        ++m_nFailedSeeds;
+        ++event_stat[category_i][kNoTrack];
       }
 
       // copy selected tracks into output tracksContainer
@@ -518,7 +727,7 @@ namespace ActsTrk
         {
           auto destProxy = tracksContainer.getTrack(tracksContainer.addTrack());
           destProxy.copyFrom(track, true); // make sure we copy track states!
-          selTracks++;
+          ++event_stat[category_i][kNSelectedTracks];
         }
         else
         {
@@ -528,10 +737,8 @@ namespace ActsTrk
       }
     }
 
-    m_nOutputTracks += addTracks;
-    m_nSelectedTracks += selTracks;
+    ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << computeStatSum(typeIndex, kNOutputTracks, event_stat) << " track candidates.");
 
-    ATH_MSG_DEBUG("Completed " << seedType << " track finding with " << addTracks << " track candidates.");
 
     return StatusCode::SUCCESS;
   }
