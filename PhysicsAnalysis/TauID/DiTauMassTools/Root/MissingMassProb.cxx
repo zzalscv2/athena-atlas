@@ -1051,7 +1051,6 @@ double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput
     {
       if(m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
          || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012
-         || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015
          || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
         myDelThetaParam[i]=dTheta3Dparam(i,tau_code,P_tau,s_fit_param[1][tau_code][i]);
     }
@@ -1088,8 +1087,7 @@ double MissingMassProb::myDelThetaHadFunc(double *x, double *par)
   const double mpv=par[3];
   const double sigmaL=par[4];
 
-  if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
+  if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
              || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
              || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
     const double norm=sqrt(2.0*TMath::Pi());
@@ -1133,16 +1131,14 @@ double MissingMassProb::dTheta3Dparam(const int & parInd, const int & tau_type, 
 
 
   if(parInd==0) {
-    if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
+    if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
              || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
              || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
       return (par[0]+par[1]*P_tau+par[2]*pow(P_tau,2)+par[3]*pow(P_tau,3)+par[4]*pow(P_tau,4))*0.00125;
     }
   }
   else { // parInd==0
-    if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015
-             || m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
+    if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS
              || m_mmcCalibrationSet==MMCCalibrationSetV2::UPGRADE
              || m_mmcCalibrationSet==MMCCalibrationSetV2::LFVMMC2012){
       if(tau_type==0) return par[0]*(exp(-par[1]*P_tau)+par[2]/P_tau)+par[3]+par[4]*P_tau;
@@ -1360,57 +1356,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
 		  //0-jet
                   if(preparedInput.m_Njet25==0)//0-jet
                     {
-                      // placeholder for 2015 tune; for now 2015 settings are the same as 2012, to be changed int he future;
-                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015){
-                        if(preparedInput.m_MetVec.Mod()<20.0) // 0-jet low MET case
-                          {
-                            //--------- tag-00-00-10 modifications, for HCP-2012 analysis on 8 TeV data
-                            if(std::abs(preparedInput.m_DelPhiTT)>2.95 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.95
-                              {
-                                m_UseHT = true;
-                                // giving priority to external settings
-                                if(preparedInput.m_MHtSigma1<0.0) preparedInput.m_MHtSigma1 = 4.822;
-                                if(preparedInput.m_MHtSigma2<0.0) preparedInput.m_MHtSigma2 = 10.31;
-                                if(preparedInput.m_MHtGaussFr<0.0) preparedInput.m_MHtGaussFr = 6.34E-5;
-                              }
-                            else
-                              {
-                                m_UseHT = false;
-                                double sigmaSyst = 0.10; // 10% systematics for now (be conservative)
-                                double METresScale = 0.32*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                                double METoffset = 5.38*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                                double sigma =  preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : METoffset;
-                                preparedInput.m_METsigmaP = sigma;
-                                preparedInput.m_METsigmaL = sigma;
-                              }
-                          }
-                        else // 0-jet high MET case
-                          {
-                            //--------- tag-00-00-10 modifications, for HCP-2012 analysis on 8 TeV data
-                            if(std::abs(preparedInput.m_DelPhiTT)>2.8 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.8
-                              {
-                                m_UseHT = true;
-                                // giving priority to external settings
-                                if(preparedInput.m_MHtSigma1<0.0) preparedInput.m_MHtSigma1 = 7.5;
-                                if(preparedInput.m_MHtSigma2<0.0) preparedInput.m_MHtSigma2 = 13.51;
-                                if(preparedInput.m_MHtGaussFr<0.0) preparedInput.m_MHtGaussFr = 6.81E-4;
-                                preparedInput.m_METsigmaP = preparedInput.m_MHtSigma2; // sigma of 2nd Gaussian for missing Ht resolution
-                                preparedInput.m_METsigmaL = preparedInput.m_MHtSigma2;
-                              }
-                            else
-                              {
-                                m_UseHT = false;
-                                double sigmaSyst = 0.10; // 10% systematics for now (be conservative)
-                                double METresScale = 0.87*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                                double METoffset = 4.16*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                                double sigma =  preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : METoffset;
-                                preparedInput.m_METsigmaP = sigma;
-                                preparedInput.m_METsigmaL = sigma;
-                              }
-                          } // high MET
-                      } // MMC2015
                       // placeholder for 2019 tune
-                      else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019){
+                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2019){
                         if(preparedInput.m_MetVec.Mod()<20.0) // 0-jet low MET case
                           {
                             if(std::abs(preparedInput.m_DelPhiTT)>2.95 && m_allowUseHT) // use mHt only if dPhi(lep-tau)>2.95
@@ -1473,16 +1420,8 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                     {
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
                       double sigma=0.;
-                      // placeholder for 2015 tune; for now 2015 settings are the same as 2012, to be changed int he future;
-                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015)
-                        {
-                          double METresScale=0.85*(1.0+preparedInput.m_METresSyst*sigmaSyst); // for events with jets & analysis cuts for winter 2012 => updated for HCP 2012
-                          double METoffset=5.94*(1.0+preparedInput.m_METresSyst*sigmaSyst); // for events with jets & analysis cuts for winter 2012 => updated for HCP 2012
-                          // MET resolution can't be perfect in presence of other objects (i.e., electrons, jets, taus), so assume minSumEt=5.0 for now
-                          sigma= preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : METoffset;
-                        }
                       // 2015 high-mass tune; average MET resolution for Mh=400,600 mass points (they look consistent);
-                      else if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
+                      if (m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS)
                         {
                           double METresScale=0.86*(1.0+preparedInput.m_METresSyst*sigmaSyst);
                           double METoffset=3.0*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1559,13 +1498,7 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
                       double sigmaSyst=0.10; // 10% systematics for now (be conservative)
 
                       // previous value in trunk
-                      // double METresScale=0.56*(1.0+preparedInput.METresSyst*sigmaSyst); // for events with jets & analysis cuts for winter 2012
-                      //double METoffset=3.73*(1.0+preparedInput.METresSyst*sigmaSyst); // for events with jets & analysis cuts for winter 2012
-                      if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015) {
-                        // placeholder for 2015 tune; same as 2012 tune for now
-                        METresScale = 0.5*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                        METoffset = 6.14*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                      } else if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS) {
+                      if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS) {
                         // 2015 high-mass tune; average of all mass points
                         METresScale = 1.1*(1.0+preparedInput.m_METresSyst*sigmaSyst);
                         METoffset = -5.0*(1.0+preparedInput.m_METresSyst*sigmaSyst);
@@ -1591,40 +1524,6 @@ void MissingMassProb::MET(MissingMassInput& preparedInput){
 	      //LEP-LEP
               else if(preparedInput.m_tauTypes==TauTypes::ll) // setup for LEP-LEP channel
                 {
-                  if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015) // placeholder for 2015 tune; for now it is the same as 2012
-                    {
-                      m_UseHT=false;
-                      double sigmaSyst=0.10; // 10% systematics for now (be conservative)
-                      double METresScale=-1.0;
-                      double METoffset=-1.0;
-                      double sigma=5.0;
-                      // tune is based on cuts for Run-1 paper analysis
-                      if(preparedInput.m_Njet25==0)
-                        {
-                          // use tune for emebedding
-                          METresScale=-0.4307*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          METoffset=7.06*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          double METresScale2=0.07693*(1.0+preparedInput.m_METresSyst*sigmaSyst); // quadratic term
-                          // this is a tune for Higgs125
-                          //                      METresScale=-0.5355*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          //                      METoffset=11.5*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          //                      double METresScale2=0.07196*(1.0+preparedInput.m_METresSyst*sigmaSyst); // quadratic term
-                          sigma= preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt)+METresScale2*preparedInput.m_SumEt : METoffset;
-                        }
-                      if(preparedInput.m_Njet25>0)
-                        {
-                          // use tune for embedding
-                          METresScale=0.8149*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          METoffset=5.343*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          // this is a tune for Higgs125
-                          //                      METresScale=0.599*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          //                      METoffset=8.223*(1.0+preparedInput.m_METresSyst*sigmaSyst);
-                          sigma= preparedInput.m_SumEt>0.0 ? METoffset+METresScale*sqrt(preparedInput.m_SumEt) : METoffset;
-                        }
-                      preparedInput.m_METsigmaP=sigma;
-                      preparedInput.m_METsigmaL=sigma;
-                    } // end of MMC2015
-
                   if(m_mmcCalibrationSet==MMCCalibrationSetV2::MMC2015HIGHMASS) // placeholder for 2015 high-mass tune; for now it is the same as 2012
                     {
                       m_UseHT = false;

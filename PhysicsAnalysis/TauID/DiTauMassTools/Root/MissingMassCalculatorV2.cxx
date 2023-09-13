@@ -2074,8 +2074,7 @@ int MissingMassCalculatorV2::TailCleanUp(const TLorentzVector &vis1,
   if (preparedInput.m_tauTypes == TauTypes::lh) // lepton-hadron channel
   {
 
-    if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015 ||
-        m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
+    if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
         m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
       return pass_code; // don't use TailCleanup for 8 & 13 TeV data
@@ -3028,7 +3027,7 @@ void MissingMassCalculatorV2::FinalizeSettings(const xAOD::IParticle *part1,
   // check that the calibration set has been chosen explicitly, otherwise abort
   if (m_mmcCalibrationSet == MMCCalibrationSetV2::MAXMMCCALIBRATIONSET) {
     Error("DiTauMassTools", "MMCCalibrationSet has not been set !. Please use "
-                            "fMMC.SetCalibrationSet(MMCCalibrationSetV2::MMC2015)"
+                            "fMMC.SetCalibrationSet(MMCCalibrationSetV2::MMC2019)"
                             ". Abort now. ");
     throw; // stop job
   }
@@ -3193,8 +3192,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   }
 
   // change Beam Energy for different running conditions
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015 ||
-      m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
+  if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
       m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
       m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
     preparedInput.m_beamEnergy = 6500.0; // 13 TeV running
@@ -3225,20 +3223,8 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
       // hh
       double x = preparedInput.m_DelPhiTT;
       HtOffset = 87.5 - 27.0 * x;
-    } else {
+    } 
 
-      // FIXME the condition is really on MET non on HT ?
-      if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015) {
-        if (preparedInput.m_MetVec.Mod() < 20.0)
-          HtOffset = 132.1 - 79.26 * preparedInput.m_DelPhiTT +
-                     11.77 * pow(preparedInput.m_DelPhiTT,
-                                 2); // updated for HCP-2012, 8 TeV
-        else
-          HtOffset = 51.28 - 23.56 * preparedInput.m_DelPhiTT +
-                     2.637 * pow(preparedInput.m_DelPhiTT,
-                                 2); // updated for HCP-2012, 8 TeV
-      }
-    }
     preparedInput.m_HtOffset = HtOffset;
 
     // if use HT, replace MET with HT
