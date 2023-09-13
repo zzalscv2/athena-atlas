@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigMessageSvc.h"
 #include "GaudiKernel/IAppMgrUI.h"
@@ -287,6 +287,7 @@ void TrigMessageSvc::i_reportMessage(const Message& msg, int outputLevel)
 
   const Message* cmsg = &msg;
   bool doPrint = true;
+  std::unique_ptr<Message> newMessage;
 
   if (m_doSuppress || m_stats.value()) {
 
@@ -301,7 +302,8 @@ void TrigMessageSvc::i_reportMessage(const Message& msg, int outputLevel)
         if (nmsg == msgLimit) {
           std::string txt = levelNames[key] + " message limit (" + std::to_string(msgLimit) +
                             ") reached for " + msg.getSource() + ". Suppressing further output.";
-          cmsg = new Message(msg.getSource(), MSG::WARNING, std::move(txt));
+          newMessage = std::make_unique<Message>(msg.getSource(), MSG::WARNING, std::move(txt));
+          cmsg = newMessage.get();
         }
       }
     }
@@ -320,14 +322,16 @@ void TrigMessageSvc::i_reportMessage(const Message& msg, int outputLevel)
         std::ostringstream os;
         os << msg.getMessage() << " [Message limit (" << abs(msgLimit)
            << ") reached. Log-suppression of further output.]";
-        cmsg = new Message(msg.getSource(), msg.getType(), os.str());
+        newMessage = std::make_unique<Message>(msg.getSource(), msg.getType(), os.str());
+        cmsg = newMessage.get();
       }
       else if (nmsg > abs(msgLimit)) {
         const int everyNth = (int)exp10((int)log10(nmsg));
         if ((nmsg % everyNth) == 0) {
           std::ostringstream os;
           os << msg.getMessage() << " [suppressed " << everyNth << " similar messages]";
-          cmsg = new Message(msg.getSource(), msg.getType(), os.str());
+          newMessage = std::make_unique<Message>(msg.getSource(), msg.getType(), os.str());
+          cmsg = newMessage.get();
         }
       }
     }
@@ -362,10 +366,6 @@ void TrigMessageSvc::i_reportMessage(const Message& msg, int outputLevel)
     else {
       m_msgCountSrcHist->Fill(key-m_publishLevel, msg.getSource().c_str(), 1);
     }
-  }
-
-  if (cmsg != &msg) {
-    delete cmsg;
   }
 }
 
