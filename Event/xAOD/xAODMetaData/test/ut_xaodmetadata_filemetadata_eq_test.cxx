@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-/// $Id: ut_xaodmetadata_filemetadata_eq_test.cxx 683694 2015-07-17 09:03:52Z krasznaa $
 ///
 /// @file Unit test for the equality operator of xAOD::FileMetaData
 ///
@@ -47,6 +46,8 @@ int main() {
                                   "Cond-1"s ) == true );
    SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::beamEnergy,
                                   123.456f ) == true );
+   SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::dataYear,
+                                  2023u ) == true );     
 
    SIMPLE_ASSERT( meta2.setValue( xAOD::FileMetaData::productionRelease,
                                   "1.2.3"s ) == true );
@@ -54,6 +55,8 @@ int main() {
                                   "Cond-1"s ) == true );
    SIMPLE_ASSERT( meta2.setValue( xAOD::FileMetaData::beamEnergy,
                                   123.456f ) == true );
+   SIMPLE_ASSERT( meta2.setValue( xAOD::FileMetaData::dataYear,
+                                  2023u ) == true );  
 
    // And then check their equivalency:
    SIMPLE_ASSERT( meta1 == meta2 );
@@ -66,6 +69,13 @@ int main() {
    // Now check that a difference is also found:
    SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::productionRelease,
                                   "1.2.4"s ) == true );
+   SIMPLE_ASSERT( meta1 != meta2 );
+
+   // Now check that a difference is also found with integers:
+   SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::productionRelease,
+                                  "1.2.3"s ) == true );
+   SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::dataYear,
+                                  2022u ) == true );  
    SIMPLE_ASSERT( meta1 != meta2 );
 
    // Clear out the two objects:
@@ -81,6 +91,8 @@ int main() {
                                   "Cond-1"s ) == true );
    SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::beamEnergy,
                                   123.456f ) == true );
+   SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::dataYear,
+                                  2023u ) == true );  
 
    SIMPLE_ASSERT( meta2.setValue( xAOD::FileMetaData::productionRelease,
                                   "1.2.3"s ) == true );
@@ -88,6 +100,8 @@ int main() {
                                   "Cond-1"s ) == true );
    SIMPLE_ASSERT( meta2.setValue( xAOD::FileMetaData::beamType,
                                   "Collision"s ) == true );
+   SIMPLE_ASSERT( meta1.setValue( xAOD::FileMetaData::dataYear,
+                                  2022u ) == true );  
 
    // Check that they are not equivalent:
    SIMPLE_ASSERT( meta1 != meta2 );

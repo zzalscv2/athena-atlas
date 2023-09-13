@@ -1,17 +1,18 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMETADATA_VERSIONS_FILEMETADATA_V1_H
 #define XAODMETADATA_VERSIONS_FILEMETADATA_V1_H
 
 // System include(s):
+#include <cstdint>
 #include <iosfwd>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
@@ -79,8 +80,10 @@ namespace xAOD {
          mcCampaign = 12,
          /// Generators information [string]
          generatorsInfo = 13,
+         /// Data year [uint32_t]
+         dataYear = 14,
          /// End marker
-         END = 14
+         END = 15
       }; // enum MetaDataType
 
       /// Get a pre-defined string value out of the object
@@ -92,6 +95,16 @@ namespace xAOD {
       bool setValue( MetaDataType type, const std::string& val );
       /// Set a generic string value on the object
       bool setValue( const std::string& type, const std::string& val );
+
+      /// Get a pre-defined uint32_t value out of the object
+      bool value( MetaDataType type, uint32_t& val ) const;
+      /// Get a generic uint32_t value out of the object
+      bool value( const std::string& type, uint32_t& val ) const;
+
+      /// Set a pre-defined uint32_t value on the object
+      bool setValue( MetaDataType type, uint32_t val );
+      /// Set a generic uint32_t value on the object
+      bool setValue( const std::string& type, uint32_t val );
 
       /// Get a pre-defined float value out of the object
       bool value( MetaDataType type, float& val ) const;

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -9,6 +9,7 @@
 #define XAODMETADATA_FILEMETADATAACCESSORS_V1_H
 
 // System include(s):
+#include <cstdint>
 #include <string>
 
 // EDM include(s):
@@ -22,6 +23,10 @@ namespace xAOD {
    /// Helper function for getting an accessor for a pre-defined property
    const SG::AuxElement::Accessor< std::string >*
    metaDataTypeStringAccessorV1( FileMetaData_v1::MetaDataType type );
+
+   /// Helper function for getting an accessor for a pre-defined property
+   const SG::AuxElement::Accessor< uint32_t >*
+   metaDataTypeUIntAccessorV1( FileMetaData_v1::MetaDataType type );
 
    /// Helper function for getting an accessor for a pre-defined property
    const SG::AuxElement::Accessor< float >*

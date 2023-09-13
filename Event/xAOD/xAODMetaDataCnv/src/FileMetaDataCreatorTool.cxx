@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -237,6 +237,18 @@ StatusCode
         ATH_MSG_DEBUG("converted beam energy value (\"" << beamEnergy << "\") outside float range");
       }
 
+      std::string dataYear = m_tagInfoMgr->findTag("data_year");
+      if (!dataYear.empty()) {
+        try {
+          set(xAOD::FileMetaData::dataYear,
+              static_cast<uint32_t>(std::stoul(dataYear)));
+        } catch (std::invalid_argument& e) {
+          ATH_MSG_DEBUG("data year \"" << dataYear << "\" tag could not be converted to unsigned long");
+        } catch (std::out_of_range& e) {
+          ATH_MSG_DEBUG("converted data year value (\"" << dataYear << "\") outside unsigned long range");
+        }
+      }
+
       // Read simulation parameters
       const IOVMetaDataContainer * simInfo = nullptr;
       StatusCode sc = StatusCode::FAILURE;
@@ -332,6 +344,21 @@ void
         else
           ATH_MSG_DEBUG("error setting " << key << " to " << std::boolalpha << value
                         << std::noboolalpha);
+      } catch (std::exception&) {
+        // Processing data not generated events
+        ATH_MSG_DEBUG("Failed to set " << key);
+      }
+    }
+
+void
+    FileMetaDataCreatorTool::set(
+            const xAOD::FileMetaData::MetaDataType key,
+            uint32_t value) {
+      try {
+        if (m_info->setValue(key, value))
+          ATH_MSG_DEBUG("setting " << key << " to " << value);
+        else
+          ATH_MSG_DEBUG("error setting " << key << " to " << value);
       } catch (std::exception&) {
         // Processing data not generated events
         ATH_MSG_DEBUG("Failed to set " << key);
