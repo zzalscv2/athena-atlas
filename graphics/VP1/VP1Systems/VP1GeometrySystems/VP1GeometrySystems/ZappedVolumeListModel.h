@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZAPPEDVOLUMELISTMODEL_H
@@ -30,7 +30,7 @@ public:
   inline void addToZappedVolumes( VolumeHandle * );//Assumes that the handle is known not to be zapped before.
   inline void removeFromZappedVolumes( VolumeHandle * );//Assumes that the handle is known to be zapped before.
 
-public slots:
+public Q_SLOTS:
   void activated(const QModelIndex&);
 
 private:
