@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -15,6 +15,11 @@
 #define TILEMUONFITMONTOOL_H
 
 #include "TileFatherMonTool.h"
+#include <vector>
+#include <cstdint>
+class TH1F;
+class TH2F;
+class TProfile;
 
 class TileCosmicMuon;
 
@@ -28,14 +33,10 @@ class ATLAS_NOT_THREAD_SAFE TileMuonFitMonTool: public TileFatherMonTool {  // d
 
     TileMuonFitMonTool(const std::string & type, const std::string & name, const IInterface* parent);
 
-    ~TileMuonFitMonTool();
+    virtual ~TileMuonFitMonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
-    //pure virtual methods
-    //  StatusCode bookHists();
-    //  StatusCode fillHists();
-    //  StatusCode finalHists();
     StatusCode checkHists(bool fromFinalize);
 
     StatusCode bookHistograms();
@@ -68,7 +69,6 @@ class ATLAS_NOT_THREAD_SAFE TileMuonFitMonTool: public TileFatherMonTool {  // d
     std::vector<TH1F*> m_tileMuonFitTime;
     std::vector<TH2F*> m_tileMuonFitDirPos;
     std::vector<TH1F*> m_tileMuonFitEnergy;
-    //std::vector<TH1F*> m_tileMuonFitEnergyRebin;
     std::vector<TH1F*> m_tileMuonFitPath;
     std::vector<TH1F*> m_tileMuonFitNCells;
     std::vector<TH1F*> m_tileMuonFitEnergyDensity;

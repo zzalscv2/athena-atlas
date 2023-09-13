@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -15,6 +15,11 @@
 #define TILEL2MONTOOL_H
 
 #include "TileFatherMonTool.h"
+#include <vector>
+#include <cstdint>
+class TH1F;
+class TH2F;
+class TProfile;
 
 /** @class TileL2MonTool
  *  @brief Class for TileL2 based monitoring
@@ -26,9 +31,9 @@ class ATLAS_NOT_THREAD_SAFE TileL2MonTool: public TileFatherMonTool {  // deprec
 
     TileL2MonTool(const std::string & type, const std::string & name, const IInterface* parent);
 
-    ~TileL2MonTool();
+    virtual ~TileL2MonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
     //pure virtual methods
     StatusCode bookHistograms();

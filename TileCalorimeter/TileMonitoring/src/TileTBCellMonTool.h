@@ -15,6 +15,11 @@
 #define TILETBMONTOOL_H
 
 #include "TileFatherMonTool.h"
+#include <cstdint>
+#include <vector>
+
+class TH1F;
+class TH2F;
 
 class ITileBadChanTool;
 class TileCell;
@@ -29,9 +34,9 @@ class ATLAS_NOT_THREAD_SAFE TileTBCellMonTool: public TileFatherMonTool {  // de
 
     TileTBCellMonTool(const std::string & type, const std::string & name, const IInterface* parent);
 
-    ~TileTBCellMonTool();
+    virtual ~TileTBCellMonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
     //pure virtual methods
     StatusCode bookHistograms();

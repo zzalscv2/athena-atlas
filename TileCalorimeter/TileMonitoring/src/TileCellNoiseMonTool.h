@@ -34,9 +34,9 @@ class ATLAS_NOT_THREAD_SAFE TileCellNoiseMonTool: public TileFatherMonTool {  //
     TileCellNoiseMonTool(const std::string & type, const std::string & name,
         const IInterface* parent);
 
-    ~TileCellNoiseMonTool();
+    virtual ~TileCellNoiseMonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
     //pure virtual methods
     StatusCode bookHistograms();
@@ -60,9 +60,7 @@ class ATLAS_NOT_THREAD_SAFE TileCellNoiseMonTool: public TileFatherMonTool {  //
     ToolHandle<ITileBadChanTool> m_tileBadChanTool; //!< Tile Bad Channel tool
 
     bool m_doOnline{};
-    //int32_t m_TileCellTrig;
-    //int32_t m_oldLumiblock;
-    //int32_t m_delta_lumiblock;
+   
     std::string m_cellsContName;
 
     bool m_isFirstEvent{};
