@@ -316,7 +316,12 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags, name="ActsSeedingAlgorithmAnalysis
         MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
 
         from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerCfg
-        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsSiSpacePointsSeedMakerCfg(flags))
+        # The default Acts pixel seeding tool performs by default a seed selection after the seed finding
+        # We have to disable it or a fair comparison with the other seed computations
+        from ActsConfig.ActsSeedingConfig import ActsITkPixelSeedingToolCfg
+        seedToolPixel = result.popToolsAndMerge(ActsITkPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
+        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerCfg so that we pick this one
+        ActsITkSiSpacePointsSeedMaker = result.popToolsAndMerge(ActsSiSpacePointsSeedMakerCfg(flags, SeedToolPixel=seedToolPixel))
         ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
         MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
 
