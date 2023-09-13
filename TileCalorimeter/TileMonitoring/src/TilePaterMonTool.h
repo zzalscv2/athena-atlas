@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -58,9 +58,9 @@ class TilePaterMonTool: public ManagedMonitorToolBase
 		  const IInterface* parent);
     
 
-  ~TilePaterMonTool();
+  virtual  ~TilePaterMonTool();
 
-  StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   enum TileFragStatus {ALL_OK=0, CRC_ERR=1, ALL_FF=0x10, ALL_00=0x20, NO_FRAG=0x40, NO_ROB=0x80};
 

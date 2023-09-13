@@ -20,12 +20,16 @@
 #include "TileConditions/ITileDCSTool.h"
 #include "StoreGate/ReadHandleKey.h"
 
+
+#include <vector>
+#include <array>
+#include <cstdint>
+#include <utility> //for std::pair
+
 class TileRawChannelTime;
 class ITileBadChanTool;
 class TileDQstatus;
 
-#include <vector>
-#include <array>
 
 /** @class TileRawChannelTimeMonTool
  *  @brief Class for TileCal monitoring at channel level
@@ -37,9 +41,9 @@ class ATLAS_NOT_THREAD_SAFE TileRawChannelTimeMonTool: public TileFatherMonTool 
 
     TileRawChannelTimeMonTool(const std::string & type, const std::string & name, const IInterface* parent);
 
-    ~TileRawChannelTimeMonTool();
+    virtual ~TileRawChannelTimeMonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
     //pure virtual methods
     StatusCode bookHists();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -17,6 +17,12 @@
 #include "TileFatherMonTool.h"
 
 #include <array>
+#include <vector>
+#include <cstdint>
+
+class TH1F;
+class TProfile;
+class TH2F;
 
 /** @class TileClusterMonTool
  *  @brief Class for TileCluster based monitoring
@@ -28,9 +34,9 @@ class ATLAS_NOT_THREAD_SAFE TileClusterMonTool: public TileFatherMonTool {  // d
 
     TileClusterMonTool(const std::string & type, const std::string & name, const IInterface* parent);
 
-    ~TileClusterMonTool();
+    virtual ~TileClusterMonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
     //pure virtual methods
     StatusCode bookHistograms();
@@ -51,14 +57,9 @@ class ATLAS_NOT_THREAD_SAFE TileClusterMonTool: public TileFatherMonTool {  // d
     std::vector<TH1F*> m_TilenClusters;
     std::vector<TH1F*> m_TileClusternCells;
     std::vector<TH1F*> m_TileClusterEnergy[NPartHisto];
-    //std::vector<TH1F*> m_TileClusterEnergyRebin[NPartHisto];
-    //std::vector<TProfile*> m_TileClusterEneTim;
     std::vector<TProfile*> m_TileClusterEneLumi;
-    //std::vector<TH1F*> m_TileClusterTime;
     std::vector<TH1F*> m_TileClusterEt;
     std::vector<TH2F*> m_TileClusterEtaPhi;
-    //std::vector<TH1F*> m_TileClusterEta;
-    //std::vector<TH1F*> m_TileClusterPhi;
     std::vector<TProfile*> m_TileClusterEneEta;
     std::vector<TProfile*> m_TileClusterEnePhi;
     std::vector<TProfile2D*> m_TileClusterEneEtaPhi;
@@ -67,13 +68,9 @@ class ATLAS_NOT_THREAD_SAFE TileClusterMonTool: public TileFatherMonTool {  // d
     std::vector<TH1F*> m_TileClusterEneDiff;
     std::vector<TH1F*> m_TileClusterTimeDiff;
     std::vector<TH1F*> m_TileAllClusterEnergy;
-    //std::vector<TH1F*> m_TileClusterEnergyOvThr;
     std::vector<TH1F*> m_TileClusterSumEt;
     std::vector<TH1F*> m_TileClusterSumPx;
     std::vector<TH1F*> m_TileClusterSumPy;
-
-    //  TH2D* m_test;
-
     std::array<TProfile*, 5> m_partitionTimeLB;
     std::array<TProfile*, 5> m_paritionTimeOnlineLB;
 

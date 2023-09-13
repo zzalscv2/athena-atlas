@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -15,6 +15,11 @@
 #define TILETOWERMONTOOL_H
 
 #include "TileFatherMonTool.h"
+#include <cstdint>
+#include <vector>
+
+class TH2F;
+class TH1F;
 
 /** @class TileTowerMonTool
  *  @brief Class for TileTower based monitoring
@@ -26,9 +31,9 @@ class ATLAS_NOT_THREAD_SAFE TileTowerMonTool: public TileFatherMonTool {  // dep
 
     TileTowerMonTool(const std::string & type, const std::string & name, const IInterface* parent);
 
-    ~TileTowerMonTool();
+    virtual ~TileTowerMonTool();
 
-    StatusCode initialize();
+    virtual StatusCode initialize() final;
 
     //pure virtual methods
     StatusCode bookHistograms();
@@ -46,21 +51,11 @@ class ATLAS_NOT_THREAD_SAFE TileTowerMonTool: public TileFatherMonTool {  // dep
     int32_t m_TileTowerTrig;
     double m_Threshold;
     std::string m_towersContName;
-
     std::vector<TH2F*> m_TileTowerEtaPhi;
-    //std::vector<TH1F*> m_TileTowerEta;
-    //std::vector<TH1F*> m_TileTowerPhi;
     std::vector<TH2F*> m_TileTowerEtaPhiDiff;
     std::vector<TH1F*> m_TileTowerEneDiff;
     std::vector<TH1F*> m_TileAllTowerEnergy[NPartHisto];
-    //std::vector<TH1F*> m_TilenTowers[NPartHisto];
-    //std::vector<TH1F*> m_TileTowernCells[NPartHisto];
-    //std::vector<TH1F*> m_TileTowerEnergy[NPartHisto];
-    //std::vector<TH1F*> m_TileTowerEnergyRebin[NPartHisto];
-    //std::vector<TProfile*> m_TileTowerEneTim;
-    //std::vector<TProfile*> m_TileTowerEneLumi;
     std::vector<TH1F*> m_TileTowerEt[NPartHisto];
-    //  TH2D* m_test;
 };
 
 #endif

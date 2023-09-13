@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -38,9 +38,9 @@ class ATLAS_NOT_THREAD_SAFE TileFatherMonTool: public TilePaterMonTool  // depre
 		  const IInterface* parent);
     
 
-  ~TileFatherMonTool();
+  virtual ~TileFatherMonTool();
 
-  StatusCode initialize();
+  virtual StatusCode initialize() override;
     
   int getPartition( const CaloCell* cell );
 
