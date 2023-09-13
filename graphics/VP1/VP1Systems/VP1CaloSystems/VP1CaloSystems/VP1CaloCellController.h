@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1CALOSYSTEMS_VP1CALOCELLCONTROLLER_H
@@ -129,7 +129,7 @@ class VP1CaloCellController : public VP1Controller
 //		     const TileRawChannelContainer* rawchannel_cont,
 //		     size_t digitsize);
 
- private slots:
+ private Q_SLOTS:
   void possibleChange_selectionIntervals();
   void possibleChange_scale();
   void possibleChange_selectionMbts();

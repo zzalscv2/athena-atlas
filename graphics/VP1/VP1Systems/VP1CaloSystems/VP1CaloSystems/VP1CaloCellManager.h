@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1CALOSYSTEMS_VP1CALOCELLMANAGER_H
@@ -52,7 +52,7 @@ class VP1CaloCellManager : public QObject
   // Add new VP1CaloCell to the appropriate container
   void add(VP1CaloCell* cell);
 
-  public slots:
+  public Q_SLOTS:
     void selectionUpdated(const VP1CCIntervalMap&);
     void scaleUpdated(const QPair<bool,double>&);
     void outlineUpdated(const bool&);
