@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -89,7 +89,7 @@ private:
 //   //For verbose output:
 //   template <class T> static QString toString( const T& t ) { return VP1Controller::toString(t); }//unhide base methods
 //   static QString toString( const QPair<bool,double>& par );
-private slots:
+private Q_SLOTS:
   void possibleChange_cutAllowedEta();
   void possibleChange_cutAllowedPhi();
   void possibleChange_showVolumeOutLines();

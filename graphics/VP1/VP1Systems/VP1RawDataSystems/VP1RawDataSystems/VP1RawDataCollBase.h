@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,7 +41,7 @@ public:
 
   virtual bool usesInDetPartsCuts() { return false; }//Override if InDet
 
-public slots:
+public Q_SLOTS:
   void setAllowedEta(const VP1Interval&);
   void setAllowedPhi(const QList<VP1Interval>&);
   void setEnabledInDetParts(VP1RawDataFlags::InDetPartsFlags);
@@ -64,7 +64,7 @@ protected:
 
   std::vector<VP1RawDataHandleBase*>& getHandles();
 
-private slots:
+private Q_SLOTS:
   void collVisibilityChanged(bool);
 
 private:
