@@ -67,11 +67,12 @@ namespace monAlg {
 
     class TubeTraversedBySegment {
     public:
-        TubeTraversedBySegment(const std::string& hn, int tb, bool ih, IdentifierHash idh) {
-            hardware_name = hn;
-            tubeBin = tb;
-            isHit = ih;
-            idHash = idh;
+        TubeTraversedBySegment(const std::string& hn, int tb, bool ih, IdentifierHash idh) :
+          hardware_name(hn),
+          tubeBin(tb),
+          isHit(ih),
+          idHash(idh)
+        {
         }
         std::string hardware_name;
         int tubeBin;

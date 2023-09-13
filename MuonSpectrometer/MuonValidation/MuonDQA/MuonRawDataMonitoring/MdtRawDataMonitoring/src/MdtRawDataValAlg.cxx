@@ -64,7 +64,7 @@ namespace {
 MdtRawDataValAlg::MdtRawDataValAlg(const std::string& type, const std::string& name, const IInterface* parent) :
     ManagedMonitorToolBase(type, name, parent),
     m_muonSelectionTool(this, "MuonSelectionTool", "CP::MuonSelectionTool/MuonSelectionTool"),
-    m_DQFilterTools(this) {
+    m_MdtDQFilterTools(this) {
     //  Declare the properties
     declareProperty("DoMdtEsd", m_doMdtESD = false);
     declareProperty("DoChamber2DHist", m_chamber_2D = true);
@@ -80,7 +80,7 @@ MdtRawDataValAlg::MdtRawDataValAlg(const std::string& type, const std::string& n
     declareProperty("Eff_nHits", m_nb_hits = 5.);
     declareProperty("Eff_roadWidth", m_road_width = 2.);
     declareProperty("Eff_chi2Cut", m_chi2_cut = 10.);
-    declareProperty("AtlasFilterTool", m_DQFilterTools);
+    declareProperty("AtlasFilterTool", m_MdtDQFilterTools);
     declareProperty("Title", m_title);
     // Global Histogram controls
     declareProperty("do_mdtChamberHits", m_do_mdtChamberHits = true);
@@ -171,7 +171,7 @@ StatusCode MdtRawDataValAlg::initialize()
     // MuonDetectorManager from the conditions store
     ATH_CHECK(m_DetectorManagerKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
-    ATH_CHECK(m_DQFilterTools.retrieve());
+    ATH_CHECK(m_MdtDQFilterTools.retrieve());
     ATH_CHECK(m_muonSelectionTool.retrieve());
     ATH_CHECK(detStore()->retrieve(m_detMgr));
 
@@ -327,12 +327,9 @@ StatusCode MdtRawDataValAlg::fillHistograms()
         if (muonRoIs.isPresent() && muonRoIs.isValid()) {
             // sroe: was verbose
             ATH_MSG_VERBOSE("Retrieved LVL1MuonRoIs object with key: " << m_l1RoiKey.key());
-            xAOD::MuonRoIContainer::const_iterator mu_it = muonRoIs->begin();
-            xAOD::MuonRoIContainer::const_iterator mu_it_end = muonRoIs->end();
-
-            for (; mu_it != mu_it_end; mu_it++) {
-                if ((*mu_it)->getSource() == xAOD::MuonRoI::RoISource::Barrel) StoreTriggerType(L1_BARREL);
-                if ((*mu_it)->getSource() == xAOD::MuonRoI::RoISource::Endcap) StoreTriggerType(L1_ENDCAP);
+            for (const xAOD::MuonRoI_v1* roi : *muonRoIs) {
+                if (roi->getSource() == xAOD::MuonRoI::RoISource::Barrel) StoreTriggerType(L1_BARREL);
+                if (roi->getSource() == xAOD::MuonRoI::RoISource::Endcap) StoreTriggerType(L1_ENDCAP);
             }
         }
     } catch (SG::ExcNoAuxStore& excpt) { ATH_MSG_INFO("SG::ExcNoAuxStore caught, " << m_l1RoiKey.key() << " not available."); }
@@ -1759,7 +1756,7 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
                 float adc = mrot->prepRawData()->adc();
                 if (chambername.compare(0, 3, "BMG") == 0) adc /= 4.;
                 if (m_overalladc_segm_Lumi) m_overalladc_segm_Lumi->Fill(adc);
-                if (store_ROTs.find(tmpid) == store_ROTs.end()) {  // Let's not double-count hits belonging to multiple segments
+                if (store_ROTs.insert(tmpid).second) {  // Let's not double-count hits belonging to multiple segments
                     store_ROTs.insert(tmpid);
 
                     double tdc = mrot->prepRawData()->tdc() * 25.0 / 32.0;
