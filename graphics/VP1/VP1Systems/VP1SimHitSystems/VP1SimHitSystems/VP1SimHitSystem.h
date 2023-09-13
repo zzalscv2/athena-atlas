@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1SIMHITSYSTEM_H
@@ -24,7 +24,7 @@ class VP1SimHitSystem: public IVP13DSystemSimple
   void systemcreate(StoreGateSvc* detstore);
   void buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root);
 
-  protected slots:
+  protected Q_SLOTS:
     void checkboxChanged();
 
  private:
