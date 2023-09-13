@@ -801,7 +801,7 @@ vector< vector<double> > LArSamples::TimingClass::readTimingFiles(const std::str
 
 
 // ********************************************************************************************************************************************** //
-double LArSamples::TimingClass::getTimeWeightedMedian(std::vector<double> time, std::vector<double> time2, std::vector<double> weight, double totalW)
+double LArSamples::TimingClass::getTimeWeightedMedian(std::vector<double> time, const std::vector<double>& time2, const std::vector<double>& weight, double totalW)
 // ********************************************************************************************************************************************* //
 { 
   

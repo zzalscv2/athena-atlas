@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -33,8 +33,8 @@ namespace LArSamples {
 
       void GetLimits_EqLB(const char* inputfile, int& lbmin, int& lbmax, int& emin, int& emax, int& qmin, int& qmax, int& runNumber, const std::vector<int, std::allocator<int> >& BadLBList);
       std::vector<int, std::allocator<int> >  ReadBadLBList(const TString& LBfile);
-      std::vector<int, std::allocator<int> >  GetBadLBList(const char* inputfile, int lbmin, int lbmax, double nsigma, int nlb, std::vector<int, std::allocator<int> >  DQLBList);
-      bool CheckBadLBList(int lumiBlock, std::vector<int, std::allocator<int> > BadLBList);
+      std::vector<int, std::allocator<int> >  GetBadLBList(const char* inputfile, int lbmin, int lbmax, double nsigma, int nlb, const std::vector<int, std::allocator<int> >&  DQLBList);
+      bool CheckBadLBList(int lumiBlock, const std::vector<int, std::allocator<int> >& BadLBList);
       void GetMeanCellHits(const char* inputfile, int nlb, int lbmin, int lbmax, int nsigma, const std::vector<int, std::allocator<int> >& BadLBList, double& MeanHits, double& rmsHits, int& nlb_corr);
       bool CheckEventSelectionCriteria(int lumiBlock, int nsigma, double energy, Float_t noise, int lbmin, int lbmax);
       int CheckCellSelectionCriteria(int EventCount, int nsigmaHits, double MeanHits, double rmsHits, int nEvents_E_gt_ecut, double EventEnergySum, int nBadLBs, int nlb) const;
