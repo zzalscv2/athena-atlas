@@ -138,9 +138,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   if (abs(iParticlePDG) > 1000000000) {
     return std::make_pair(NuclFrag, partOrig);
   }
-  // Note: MC::isLepton includes BSM leptons
-  if (abs(iParticlePDG) != 11 && abs(iParticlePDG) != 13 && abs(iParticlePDG) != 15 && abs(iParticlePDG) != 12 &&
-      abs(iParticlePDG) != 14 && abs(iParticlePDG) != 16 && !MC::isPhoton(iParticlePDG) && !isPartHadr) {
+  if ( ! MC::isSMLepton(iParticlePDG) && !MC::isPhoton(iParticlePDG)  && !isPartHadr) {
     return std::make_pair(partType, partOrig);
   }
   // don't consider  generator particles
@@ -767,12 +765,7 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
             NumOfEleLoop++;
           if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 12)
             NumOfEleNeuLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 11 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 12 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 13 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 14 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 15 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16)
+          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut)))
             NumOfLepLoop++;
         }
       }
@@ -1147,12 +1140,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
             NumOfMuLoop++;
           if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 14)
             NumOfMuNeuLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 11 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 12 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 13 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 14 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 15 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16)
+          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut)))
             NumOfLepLoop++;
         }
       }
@@ -1437,12 +1425,7 @@ MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer* mcTruthTES,
             NumOfTauLoop++;
           if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16)
             NumOfTauNeuLoop++;
-          if (std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 11 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 12 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 13 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 14 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 15 ||
-              std::abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 16)
+          if (MC::isSMLepton(partOriVert->outgoingParticle(ipOut)))
             NumOfLepLoop++;
         }
       }
