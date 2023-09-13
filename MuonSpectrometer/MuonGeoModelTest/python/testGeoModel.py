@@ -53,6 +53,13 @@ def GeoModelTgcTestCfg(flags, name = "GeoModelTgcTest", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
+def GeoModelMmTestCfg(flags,name = "GeoModelMmTest", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometryMM: return result
+    the_alg = CompFactory.MuonGM.GeoModelMmTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
+
 def GeoModelCscTestCfg(flags, name = "GeoModelCscTest", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryCSC: return result
@@ -85,6 +92,7 @@ if __name__=="__main__":
     cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
     cfg.merge(GeoModelTgcTestCfg(flags))
     cfg.merge(GeoModelCscTestCfg(flags))
+    cfg.merge(GeoModelMmTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
