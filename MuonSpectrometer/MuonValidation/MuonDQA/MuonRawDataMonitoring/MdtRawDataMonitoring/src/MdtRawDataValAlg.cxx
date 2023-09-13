@@ -1757,7 +1757,6 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
                 if (chambername.compare(0, 3, "BMG") == 0) adc /= 4.;
                 if (m_overalladc_segm_Lumi) m_overalladc_segm_Lumi->Fill(adc);
                 if (store_ROTs.insert(tmpid).second) {  // Let's not double-count hits belonging to multiple segments
-                    store_ROTs.insert(tmpid);
 
                     double tdc = mrot->prepRawData()->tdc() * 25.0 / 32.0;
                     // Note: the BMG is digitized with 200ps which is not same as other MDT chambers with 25/32=781.25ps
