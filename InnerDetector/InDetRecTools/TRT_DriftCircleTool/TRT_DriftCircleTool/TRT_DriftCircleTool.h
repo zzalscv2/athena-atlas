@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -83,12 +83,11 @@ public:
 
   ToolHandle< ITRT_DriftFunctionTool > m_driftFunctionTool; //!< DriftFunctionTool
   ToolHandle<ITRT_StrawStatusSummaryTool> m_ConditionsSummary; //!< The ConditionsSummaryTool
-//  ServiceHandle<ITRT_ConditionsSvc> m_ConditionsSummary; //!< The ConditionsSummaryTool
-//  ServiceHandle< IInDetConditionsSvc> m_ConditionsSummary; //!< The ConditionsSummaryTool
+
   bool                                 m_useConditionsStatus;     //!< Shall the ConditionsSummaryTool be used?
   bool                                 m_useConditionsHTStatus;     //!< Shall the ConditionsSummaryTool be used for HT to find argon straws?
-  bool				                   m_useToTCorrection;  //!< Shall the Time over Threshold correction be used?
-  bool				                   m_useHTCorrection;  //!< Shall the High Threshold correction be used?
+  bool				       m_useToTCorrection;  //!< Shall the Time over Threshold correction be used?
+  bool				       m_useHTCorrection;  //!< Shall the High Threshold correction be used?
   const TRT_ID                       * m_trtid            ; //!< ID helper
   bool                                 m_reject_if_first_bit; //!< If true, reject this DC if first bit high
   bool                                 m_reject_if_first_bit_argon; //!< If true, reject this DC if first bit high

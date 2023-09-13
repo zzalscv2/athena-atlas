@@ -140,26 +140,32 @@ class ConfiguredInDetPreProcessingTRT:
                                                                TRTDriftFunctionTool            = InDetTRT_DriftFunctionTool,
                                                                ConditionsSummaryTool           = InDetTRTStrawStatusSummaryTool,
                                                                UseConditionsStatus             = True,
-                                                               UseConditionsHTStatus           = True,
-                                                               SimpleOutOfTimePileupSupression = False,
-                                                               RejectIfFirstBit                = False, # fixes 50 nsec issue 
-                                                               MinTrailingEdge                 = MinTrailingEdge,
-                                                               MaxDriftTime                    = MaxDriftTime,
-                                                               ValidityGateSuppression         =  InDetFlags.InDet25nsec(),
-                                                               LowGate                         = LowGate,
-                                                               HighGate                        = HighGate,
-                                                               SimpleOutOfTimePileupSupressionArgon = False,
-                                                               RejectIfFirstBitArgon                = False, # fixes 50 nsec issue 
-                                                               MinTrailingEdgeArgon                 = MinTrailingEdge,
-                                                               MaxDriftTimeArgon                    = MaxDriftTime,
-                                                               ValidityGateSuppressionArgon         = InDetFlags.InDet25nsec(),
-                                                               LowGateArgon                         = LowGate, # see discussion in MR !45402 why these are not Argon specific settings
-                                                               HighGateArgon                        = HighGate,
                                                                useDriftTimeHTCorrection        = True,
                                                                useDriftTimeToTCorrection       = True)
+
          if not usePhase:
             from InDetRecExample import TrackingCommon
             InDetTRT_DriftCircleTool.LumiDataKey = TrackingCommon.getLumiCondDataKeyForTRTMuScaling()
+            InDetTRT_DriftCircleTool.UseConditionsHTStatus = True
+
+            # fixes 50 nsec issue
+            InDetTRT_DriftCircleTool.RejectIfFirstBit  = False
+            InDetTRT_DriftCircleTool.RejectIfFirstBitArgon = False
+
+            InDetTRT_DriftCircleTool.MinTrailingEdge = MinTrailingEdge
+            InDetTRT_DriftCircleTool.MinTrailingEdgeArgon = MinTrailingEdge
+            InDetTRT_DriftCircleTool.MaxDriftTime = MaxDriftTime
+            InDetTRT_DriftCircleTool.MaxDriftTimeArgon = MaxDriftTime
+            InDetTRT_DriftCircleTool.SimpleOutOfTimePileupSupression = False
+            InDetTRT_DriftCircleTool.SimpleOutOfTimePileupSupressionArgon = False
+            InDetTRT_DriftCircleTool.ValidityGateSuppression = InDetFlags.InDet25nsec()
+            InDetTRT_DriftCircleTool.ValidityGateSuppressionArgon = InDetFlags.InDet25nsec()
+            InDetTRT_DriftCircleTool.LowGate = LowGate
+            InDetTRT_DriftCircleTool.HighGate = HighGate
+            # see discussion in MR !45402 why these are not Argon specific settings
+            InDetTRT_DriftCircleTool.LowGateArgon = LowGate
+            InDetTRT_DriftCircleTool.HighGateArgon = HighGate
+
 
          ToolSvc += InDetTRT_DriftCircleTool
          if (InDetFlags.doPrintConfigurables()):
