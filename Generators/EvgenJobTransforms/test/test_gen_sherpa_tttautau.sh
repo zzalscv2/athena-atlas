@@ -39,7 +39,7 @@ PARTICLE_DATA:
 
 PROCESSES:
 - 93 93 -> 6 -6 15 -15:
-  Order: {QCD: 0, EW: 2}
+    Order: {QCD: 2, EW: 2}
 
 SELECTORS:
 - [Mass, 15, -15,  5, E_CMS]
