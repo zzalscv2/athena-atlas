@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTCONTAINERS_IDENTIFIABLECONTAINERMT_H
@@ -238,6 +238,11 @@ public:
     /// return const_iterator for end of container
     const_iterator end() const {
         return const_iterator(m_link->cend());
+    }
+
+    /// return true if container is empty
+    bool empty() const {
+        return numberOfCollections()==0;
     }
 
     [[nodiscard]] IDC_WriteHandle getWriteHandle(IdentifierHash hash)

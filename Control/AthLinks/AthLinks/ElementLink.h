@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -49,6 +49,8 @@
  * However, it is possible to customize the policy used, if needed.
  * See the macros in DeclareIndexingPolicy.h; the interface
  * required of an indexing policy is summarized in tools/ElementLinkTraits.h.
+ *
+ * Regardless of the indexing policy, all container types must support empty().
  *
  * Forward declarations:
  *
@@ -445,6 +447,9 @@ public:
 
   /**
    * @brief Test to see if the link can be dereferenced.
+   *
+   * Will throw an exception if the container is not empty and the
+   * referenced element cannot be retrieved.
    */
   bool isValid() const;
 

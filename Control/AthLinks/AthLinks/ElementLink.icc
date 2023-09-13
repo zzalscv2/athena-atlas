@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/ElementLink.h
@@ -437,6 +437,9 @@ ElementLink<STORABLE>::operator ElementConstPointer () const
 
 /**
  * @brief Test to see if the link can be dereferenced.
+ *
+ * Will throw an exception if the container is not empty and the
+ * referenced element cannot be retrieved.
  */
 template <class STORABLE>
 inline
@@ -449,7 +452,7 @@ bool ElementLink<STORABLE>::isValid() const
   if (this->hasCachedElement()) return true;
 
   const STORABLE* ptr = this->getDataPtr();
-  if (ptr && IndexingPolicy::isValid(this->storedIndex())) {
+  if (ptr && !ptr->empty() && IndexingPolicy::isValid(this->storedIndex())) {
     this->setCachedElement (IndexingPolicy::lookup(this->storedIndex(), *ptr));
     return true;
   }
