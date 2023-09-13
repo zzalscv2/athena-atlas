@@ -12,8 +12,6 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "GeneratorObjects/McEventCollection.h"
-#include "InDetRawData/InDetRawDataCLASS_DEF.h"
-#include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
 
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
