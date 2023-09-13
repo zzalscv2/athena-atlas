@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -60,11 +60,11 @@ protected:
   //FIXME: We need something like this for the trackparticles too:
 signals:
   void tracksFromVertexChanged(QList< std::pair<const SoMaterial*, QList< const Trk::Track*> > >&);  
-private slots:
+private Q_SLOTS:
   void colourByComboBoxItemChanged();
   void collVisibilityChanged(bool vis);
   void rerandomiseRandomVertexColours();
-public slots:
+public Q_SLOTS:
 
   void recheckAllCuts();
   void updateAllShapes();

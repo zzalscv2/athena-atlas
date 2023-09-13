@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,7 +51,7 @@ protected:
 signals:
   void tracksFromVertexChanged(QList< std::pair<const SoMaterial*, QList< const Trk::Track*> > >&);  
 
-private slots:
+private Q_SLOTS:
   void recheckAllCuts();
   void updateAllShapes();
 

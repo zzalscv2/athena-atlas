@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1VERTEXSYSTEM_H
@@ -27,7 +27,7 @@ public:
   QByteArray saveState();
   void restoreFromState(QByteArray ba);
 
-public slots:
+public Q_SLOTS:
   void updateVertexToTracks(QList<std::pair<const SoMaterial*,QList<const Trk::Track*> > >&);
 
 //FIXME: We need something like this for the trackparticles too:

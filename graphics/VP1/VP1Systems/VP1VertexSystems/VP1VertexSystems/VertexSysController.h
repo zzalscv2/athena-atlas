@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -85,7 +85,7 @@ private:
   static QString toString( const QPair<VertexCommonFlags::QUANTITY,VP1Interval>& );
   static QString toString( const QPair<VertexCommonFlags::QUANTITY,double>& );
 
-private slots:
+private Q_SLOTS:
   void emitRerandomise();
   void possibleChange_truthCutAllowedEta();
   void possibleChange_truthCutAllowedPhi();
