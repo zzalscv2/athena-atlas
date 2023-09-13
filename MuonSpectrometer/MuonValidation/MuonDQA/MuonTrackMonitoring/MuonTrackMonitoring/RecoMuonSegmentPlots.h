@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKMONITORING_RECOMUONSEGMENTPLOTS_H
@@ -18,6 +18,9 @@
 class RecoMuonSegmentPlots:public PlotBase {
  public:
       RecoMuonSegmentPlots(PlotBase* pParent, const std::string& sDir, bool detail=false);
+
+      RecoMuonSegmentPlots(const RecoMuonSegmentPlots&) = delete;
+      RecoMuonSegmentPlots& operator= (const RecoMuonSegmentPlots&) = delete;
 
       //fill methods
       void fill(const xAOD::MuonContainer& muContainer);

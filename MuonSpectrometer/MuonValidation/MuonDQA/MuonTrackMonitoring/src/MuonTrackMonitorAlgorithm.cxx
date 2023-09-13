@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
     2020 Matthias Schott - Uni Mainz
 */
 
@@ -23,11 +23,11 @@ StatusCode MuonTrackMonitorAlgorithm::initialize()
     ATH_CHECK(m_MuonContainerKey.initialize());
     ATH_CHECK(m_MuonIsoDecorKey.initialize());
     ATH_CHECK(m_VertexContainerKey.initialize(!m_VertexContainerKey.empty()));
-    ATH_CHECK(m_EventInfoKey.initialize());
+    ATH_CHECK(m_derEventInfoKey.initialize());
     /// https://gitlab.cern.ch/atlas/athena/-/blob/master/Event/xAOD/xAODEventInfoCnv/src/EventInfoBeamSpotDecoratorAlg.h#L64-78
     
     for (const std::string beam : {"beamPosSigmaX", "beamPosSigmaY", "beamPosSigmaZ", "beamPosSigmaXY"}) {
-        m_beamSpotKey.emplace_back(m_EventInfoKey.key() + "."+beam);
+        m_beamSpotKey.emplace_back(m_derEventInfoKey.key() + "."+beam);
     }
     ATH_CHECK(m_beamSpotKey.initialize(m_useBeamSpot));
     return StatusCode::SUCCESS;
@@ -641,8 +641,8 @@ StatusCode MuonTrackMonitorAlgorithm::fillHistograms(const EventContext& ctx) co
     using namespace Monitored;
 
     /// Get the EventInfo
-    if ((!m_EventInfoKey.empty()) &&  (!m_MuonContainerKey.empty()) && (!m_VertexContainerKey.empty())) {
-        SG::ReadHandle<xAOD::EventInfo> EventInfo{m_EventInfoKey, ctx};
+    if ((!m_derEventInfoKey.empty()) &&  (!m_MuonContainerKey.empty()) && (!m_VertexContainerKey.empty())) {
+        SG::ReadHandle<xAOD::EventInfo> EventInfo{m_derEventInfoKey, ctx};
         if (ATH_UNLIKELY(! EventInfo.isValid())) {
             ATH_MSG_ERROR("Unable to retrieve Event Info " << m_MuonContainerKey);
             return StatusCode::FAILURE;
