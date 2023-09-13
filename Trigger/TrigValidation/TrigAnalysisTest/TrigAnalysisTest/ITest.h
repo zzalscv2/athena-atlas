@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -28,7 +28,7 @@ namespace TrigAnalysisTest {
 		inline void setEventStore(EventPtr_t store) { m_eventStore = store; }
 		inline EventPtr_t eventStore() { return m_eventStore; }
 	private:
- 		EventPtr_t m_eventStore;
+ 		EventPtr_t m_eventStore = nullptr;
   };
 
 }
