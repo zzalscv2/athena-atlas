@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,7 +51,7 @@ protected:
   QString provideSection() const;
 signals:
   void highestVisibleClusterEnergyChanged();
-private slots:
+private Q_SLOTS:
   void setConsiderTransverseEnergies(bool);
   void setScale(const QPair<bool,double>&);
   void setAllowedEnergies(const VP1Interval&);
