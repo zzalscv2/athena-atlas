@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -159,8 +159,8 @@ namespace dqutils {
   
   void MonitoringFile::HLTTauPostProcess( TFile* f, TDirectory* dir, 
 					  TString pathApp, TString pathAppEff, 
-					  std::vector<TString> lvlN, std::vector<TString> varN,
-					  std::vector< std::pair< int, int > > ratioIndex, int nameStyle,
+					  const std::vector<TString>& lvlN, const std::vector<TString>& varN,
+					  const std::vector< std::pair< int, int > >& ratioIndex, int nameStyle,
                                           TString nameApp){
 
     std::string path = getPath(dir);

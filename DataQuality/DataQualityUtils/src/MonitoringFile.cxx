@@ -396,7 +396,7 @@ void MonitoringFile::mergeObjsMultiCycles(const std::string& keyname,
    if (h && !histOKToMerge(h)) {
      // histogram is damaged goods; even deleting it may be dangerous
      std::cerr << "WARNING: HISTOGRAM " << h->GetName() << " IS INTERNALLY INCONSISTENT, NOT MERGING" << std::endl;
-     nextObj.release();
+     (void)nextObj.release();
      continue;
    }
    // next: if current "target" histogram exists, but is empty, reset it to the next object.
