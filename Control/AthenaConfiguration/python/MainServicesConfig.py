@@ -99,6 +99,21 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     return cfg
 
+def AthenaMpEventLoopMgrCfg(flags):
+    cfg = ComponentAccumulator()
+    if flags.Common.isOverlay:
+        if not flags.Overlay.DataOverlay:
+            elmgr = CompFactory.AthenaEventLoopMgr()
+            elmgr.RequireInputAttributeList = True
+            elmgr.UseSecondaryEventNumber = True
+            cfg.addService( elmgr )
+
+    from AthenaMP.AthenaMPConfig import AthenaMPCfg
+    mploop = AthenaMPCfg(flags)
+    cfg.merge( mploop )
+
+    return cfg
+
 
 def AthenaMtesEventLoopMgrCfg(flags, mtEs=False, channel=''):
     cfg = ComponentAccumulator()
@@ -274,9 +289,7 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     cfg.interactive=flags.Exec.Interactive
 
     if flags.Concurrency.NumProcs > 0:
-        from AthenaMP.AthenaMPConfig import AthenaMPCfg
-        mploop = AthenaMPCfg(flags)
-        cfg.merge(mploop)
+        cfg.merge(AthenaMpEventLoopMgrCfg(flags))
 
     # Additional components needed for threaded jobs only:
     if flags.Concurrency.NumThreads > 0:
