@@ -38,7 +38,7 @@ TEST(MaterialInteraction, dE_MPV_ionization) {
 
 TEST(MaterialInteraction, dEdl_radiation) {
   double p = 420000.0;
-  auto mat = new Trk::Material {424.35, 707.43, 11.16, 5.61, 0.001};// Scintillator/Glue (G4 def.)
+  auto mat = Trk::Material {424.35, 707.43, 11.16, 5.61, 0.001};// Scintillator/Glue (G4 def.)
   auto particle = Trk::muon;
   double sigma = 0;
 

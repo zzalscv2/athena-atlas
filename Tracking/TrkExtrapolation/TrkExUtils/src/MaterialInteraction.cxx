@@ -30,13 +30,15 @@
  *   is \lamda = \Delta - Delta_mp / \xi
  *   \xi is what referred as kazL in the code below
  *   The FWHM of the landau is 4 * \xi or 4 * kazL
+ *
  *   We additonally can define a sigmaL ~ FWHM /2.355 ~ 0.424 * FWHM
  *   so sigmaL = 0.424 * 4 * kazL
  *
- * - The ATLAS tracking (since circa 2013) also employs
- *   an approximation to the Landau see as an example
- *   https://indico.cern.ch/event/261427/contributions/580495/attachments/461615/639740/ElossTracking.pdf
- *   This leads to these relations :
+ * - The ATLAS tracking (since circa 2014) employs
+ *   some further approximations see as an example :
+ *   https://indico.cern.ch/event/322522/contributions/748336/attachments/623794/858386/ElossConcept.pdf
+ *   which describes the ideas behind them.
+ *   The relavant relations used here are:
  *   sigma = (MPV - mean)/3.59524
  *   sigmaL =  sigma - kazL*log(pathlength)
  */
@@ -161,10 +163,10 @@ double Trk::MaterialInteraction::dE_MPV_ionization(
 
 /** dE/dl radiation energy loss per path unit */
 double Trk::MaterialInteraction::dEdl_radiation(
-    double p, const Trk::Material* mat, Trk::ParticleHypothesis particle,
+    double p, const Trk::Material& mat, Trk::ParticleHypothesis particle,
     double& sigma) {
   sigma = 0.;
-  if (mat->x0() == 0.)
+  if (mat.x0() == 0.)
     return 0.;
 
   // preparation of kinetic constants
@@ -193,9 +195,9 @@ double Trk::MaterialInteraction::dEdl_radiation(
     }
   }
 
-  sigma = sigma / mat->x0();
+  sigma = sigma / mat.x0();
 
-  return Radiation / mat->x0();
+  return Radiation / mat.x0();
 }
 
 /** multiple scattering as function of dInX0 */

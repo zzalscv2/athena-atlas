@@ -188,7 +188,7 @@ Trk::EnergyLossUpdator::energyLoss(const MaterialProperties& mat,
   double meanIoni = Trk::MaterialInteraction::dEdl_ionization(
     p, (mat.material()), particle, sigIoni, kazL);
   double meanRad = Trk::MaterialInteraction::dEdl_radiation(
-    p, &(mat.material()), particle, sigRad);
+    p, (mat.material()), particle, sigRad);
 
   meanIoni = sign * pathLength * meanIoni;
   meanRad = sign * pathLength * meanRad;
