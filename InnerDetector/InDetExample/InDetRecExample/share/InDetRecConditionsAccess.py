@@ -115,7 +115,7 @@ if DetFlags.pixel_on():
             condSeq += PixelChargeLUTCalibCondAlg(name="PixelChargeLUTCalibCondAlg", ReadKey="/PIXEL/ChargeCalibration")
     else:
         PixCalibFolder = 'ChargeCalibration'
-        if not conddb.folderRequested("/PIXEL/"+PixCalibFolder):
+        if not conddb.folderRequested("/PIXEL/"+PixCalibFolder) and commonGeoFlags.Run() != "RUN1":
             conddb.addFolderSplitOnline("PIXEL", "/PIXEL/Onl/"+PixCalibFolder, "/PIXEL/"+PixCalibFolder, className="CondAttrListCollection")
         if not hasattr(condSeq, 'PixelChargeCalibCondAlg'):
             from PixelConditionsAlgorithms.PixelConditionsAlgorithmsConf import PixelChargeCalibCondAlg
