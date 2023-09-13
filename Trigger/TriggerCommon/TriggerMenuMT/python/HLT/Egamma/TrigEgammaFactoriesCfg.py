@@ -3,7 +3,6 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def TrigEgammaRecCfg(flags, name= "trigEgammaRec"):
     acc = ComponentAccumulator()
@@ -19,10 +18,6 @@ def TrigEgammaRecCfg(flags, name= "trigEgammaRec"):
     acc.addEventAlgo(egammaRec)
     return acc
 
-# NOTE: Adding AccumulatorCache is a work around until we resolve egammaSwToolCfg related issue
-# described in JIRA: ATLASRECTS-7730
-
-@AccumulatorCache
 def TrigEgammaSuperClusterBuilderCfg(flags, name, calibrationType, superClusterCollectionName, superegammaRecCollectionName):
         acc = ComponentAccumulator()
         TrigEgammaKeys = getTrigEgammaKeys()
