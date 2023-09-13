@@ -78,7 +78,7 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   
   auto lb = GetEventInfo(ctx)->lumiBlock();
   ATH_MSG_DEBUG("Lumi Block" << lb); 
-  const int eventNumber =  ctx.eventID().event_number();
+  const long long eventNumber =  ctx.eventID().event_number();
   ATH_MSG_DEBUG("Event Number" << eventNumber); 
 
   
@@ -323,18 +323,19 @@ StatusCode PPMSimBSMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 
     
     // scope for mutable error event per lumi block tt counter
-    std::lock_guard<std::mutex> lock(m_mutex);	
-    if (!error_tt) {
-      m_errorLB_tt_counter[lb]+=1;
-      error_tt = true;
-    }
-    
+    	
+   
     
     if (mismatch == 1) {
+      std::lock_guard<std::mutex> lock(m_mutex);
       const L1CaloCoolChannelId coolId((myTower.tower)->coolId());
       const int crate  = coolId.crate();
       const int module = coolId.module();
       crateError[crate] = 1;
+      if (!error_tt) {
+        m_errorLB_tt_counter[lb]+=1;
+        error_tt = true;
+      }
       if (!((moduleError[crate] >> module) & 0x1)) {
 	const int y = module + 16 * (crate % 2);
 	auto y_2D = Monitored::Scalar<int>("y_2D", y);

@@ -253,7 +253,7 @@ StatusCode CpmSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
 	cpmError=err;
 	fill(m_packageName,cpmErrorLoc,cpmError);
       }
-      const int eventNumber = ctx.eventID().event_number();
+      const long long eventNumber = ctx.eventID().event_number();
       if ((errorsCPM[loc + cpmBins] >> err) & 0x1) {
 	cpmErrorLoc_SimNeData=loc;
 	cpmError_SimNeData=err;
