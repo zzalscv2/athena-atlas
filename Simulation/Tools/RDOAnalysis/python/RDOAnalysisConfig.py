@@ -131,12 +131,12 @@ def HGTD_RDOAnalysisCfg(flags, name="HGTD_RDOAnalysis", **kwargs):
     kwargs.setdefault("HistPath", "/RDOAnalysis/HGTD/")
     kwargs.setdefault("SharedHistPath", "/RDOAnalysis/histos/")
     if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
-        kwargs.setdefault("CollectionName", f"{flags.Overlay.BkgPrefix}ITkPixelRDOs")
-        kwargs.setdefault("SDOCollectionName", f"{flags.Overlay.BkgPrefix}ITkPixelSDO_Map")
+        kwargs.setdefault("CollectionName", f"{flags.Overlay.BkgPrefix}HGTD_RDOs")
+        kwargs.setdefault("SDOCollectionName", f"{flags.Overlay.BkgPrefix}HGTD_SDO_Map")
         kwargs.setdefault("McEventCollectionName", f"{flags.Overlay.BkgPrefix}TruthEvent")
     else:
-        kwargs.setdefault("CollectionName", "ITkPixelRDOs")
-        kwargs.setdefault("SDOCollectionName", "ITkPixelSDO_Map")
+        kwargs.setdefault("CollectionName", "HGTD_RDOs")
+        kwargs.setdefault("SDOCollectionName", "HGTD_SDO_Map")
         kwargs.setdefault("McEventCollectionName", "TruthEvent")
 
     result.addEventAlgo(CompFactory.HGTD_RDOAnalysis(name, **kwargs))
