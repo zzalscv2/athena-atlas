@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ public:
   Type type() const { return NUMBERS; };//Fixme: Need better type for this kind of system. Maybe an OTHER type?
   void create();
 
-protected slots:
+protected Q_SLOTS:
   void entriesChanged(const QStringList& entry_key,const QStringList& entry_type,const QStringList& entry_id);
 
 private:
