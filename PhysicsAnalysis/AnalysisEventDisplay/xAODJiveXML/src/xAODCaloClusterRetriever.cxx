@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODCaloClusterRetriever.h"
@@ -19,12 +19,13 @@ namespace JiveXML {
    **/
   xAODCaloClusterRetriever::xAODCaloClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("Cluster"){
+    m_typeName("Cluster"),
+    m_sgKeyFavourite("egammaClusters") // new SGKey in rel.20
+  {
 
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
     
-    m_sgKeyFavourite = "egammaClusters"; // new SGKey in rel.20
     declareProperty("FavouriteClusterCollection" ,m_sgKeyFavourite,
         "Collection to be first in output, shown in Atlantis without switching");
     declareProperty("OtherClusterCollections" ,m_otherKeys,
@@ -66,7 +67,7 @@ namespace JiveXML {
 //        return false;
       }
       
-      for (; iterator!=end; iterator++) {
+      for (; iterator!=end; ++iterator) {
        	     if ((iterator.key().find("HLT",0) != std::string::npos) && (!m_doWriteHLT)){
 	          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Ignoring HLT collection: " << iterator.key() << endmsg;
 	         continue;  }

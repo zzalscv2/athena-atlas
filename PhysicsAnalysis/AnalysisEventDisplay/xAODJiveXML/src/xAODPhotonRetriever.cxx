@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODPhotonRetriever.h"
@@ -26,12 +26,13 @@ namespace JiveXML {
    *
    **/
   xAODPhotonRetriever::xAODPhotonRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("Photon"){
+    AthAlgTool(type,name,parent), m_typeName("Photon"),
+    m_sgKey("Photons") // is xAOD name
 
+  {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "Photons"; // is xAOD name
     declareProperty("StoreGateKey", m_sgKey, 
         "Collection to be first in output, shown in Atlantis without switching");
     declareProperty("OtherCollections" ,m_otherKeys,
@@ -72,7 +73,7 @@ namespace JiveXML {
 //        return false;
       }
       
-      for (; iterator!=end; iterator++) {
+      for (; iterator!=end; ++iterator) {
 	  if (iterator.key()!=m_sgKey) {
        	     if ((iterator.key().find("HLT",0) != std::string::npos) && (!m_doWriteHLT)){
 	          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Ignoring HLT-AutoKey collection " << iterator.key() << endmsg;

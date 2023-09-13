@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMissingETRetriever.h"
@@ -67,7 +67,7 @@ namespace JiveXML {
 //        return false;
       }
       
-      for (; iterator!=end; iterator++) {
+      for (; iterator!=end; ++iterator) {
 	  if (iterator.key()!=m_sgKeyFavourite) {
              ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
              DataMap data = getData(&(*iterator));
