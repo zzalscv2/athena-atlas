@@ -39,7 +39,7 @@ struct MaterialInteraction
 
   /** dE/dl radiation energy loss per path unit */
   static double dEdl_radiation(double p,
-                               const Material* mat,
+                               const Material& mat,
                                ParticleHypothesis particle,
                                double& sigma);
 

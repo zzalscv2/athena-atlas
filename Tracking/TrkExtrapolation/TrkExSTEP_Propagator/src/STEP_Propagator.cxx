@@ -250,7 +250,7 @@ dEds(Cache& cache, double p)
   cache.m_delIoni =
     Trk::MaterialInteraction::dEdl_ionization(p, *(cache.m_material), cache.m_particle, cache.m_sigmaIoni, cache.m_kazL);
 
-  cache.m_delRad = Trk::MaterialInteraction::dEdl_radiation(p, cache.m_material, cache.m_particle, cache.m_sigmaRad);
+  cache.m_delRad = Trk::MaterialInteraction::dEdl_radiation(p, *(cache.m_material), cache.m_particle, cache.m_sigmaRad);
 
   double eLoss = cache.m_MPV ? 0.9 * cache.m_delIoni + 0.15 * cache.m_delRad : cache.m_delIoni + cache.m_delRad;
 
