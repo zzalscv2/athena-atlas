@@ -351,7 +351,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   //
   std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
 									m_numSample, m_deltaTSample, 
-									m_presample, "FermiExpRun3", 
+									m_presample, "FermiExpLHCf", 
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG, 
 									peak2ndDerivMinThresholdsLG, 
@@ -450,7 +450,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //                                                                                                          
   std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
 									m_numSample, m_deltaTSample,
-									m_presample, "FermiExpRun3",
+									m_presample, "FermiExpLHCf",
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG,
 									peak2ndDerivMinThresholdsLG,
