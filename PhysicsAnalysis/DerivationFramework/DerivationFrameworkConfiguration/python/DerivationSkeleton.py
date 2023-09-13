@@ -76,6 +76,16 @@ def fromRunArgs(runArgs):
             flags.addFlag(f'Output.doWrite{runArg.removeprefix("output").removesuffix("File")}', True)
             flags.Output.doWriteDAOD = True
 
+    # Fix campaign metadata
+    from Campaigns.Utils import Campaign, campaign_runs
+    if flags.Input.isMC and flags.Input.MCCampaign is Campaign.Unknown:
+        if flags.Input.RunNumber:
+            mc_campaign = campaign_runs.get(flags.Input.RunNumber[0], Campaign.Unknown)
+
+            if mc_campaign is not Campaign.Unknown:
+                flags.Input.MCCampaign = mc_campaign
+                logDerivation.info('Will recover MC campaign to: %s', mc_campaign.value)
+
     # Pre-include
     processPreInclude(runArgs, flags)
 
@@ -126,12 +136,15 @@ def fromRunArgs(runArgs):
         from GeneratorConfig.Versioning import GeneratorVersioningFixCfg
         cfg.merge(GeneratorVersioningFixCfg(flags))
 
-    # Write TagInfo if needed
+    # Write TagInfo
     if not flags.Input.isMC and flags.Input.DataYear > 0:
         from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
         cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={
             "data_year": str(flags.Input.DataYear)
         }))
+    else:
+        from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+        cfg.merge(TagInfoMgrCfg(flags))
 
     # Set EventPrintoutInterval to 100 events
     #  (in run interactive mode there's no loop manager service, do nothing in this case)

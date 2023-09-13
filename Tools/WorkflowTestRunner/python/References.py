@@ -29,6 +29,6 @@ references_map = {
     # Derivations
     "data_PHYS_Run2": "v11",
     "data_PHYS_Run3": "v10",
-    "mc_PHYS_Run2": "v13",
-    "mc_PHYS_Run3": "v13",
+    "mc_PHYS_Run2": "v14",
+    "mc_PHYS_Run3": "v14",
 }
