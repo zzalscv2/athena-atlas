@@ -8,6 +8,8 @@
 #include "AthContainers/AuxElement.h"
 #include "AthLinks/ElementLink.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "xAODTracking/SurfaceBackendContainer.h"
+
 namespace xAOD {
     using TrackStateIndexType=uint32_t; // TODO move this declaration to one location
     /**
@@ -207,6 +209,18 @@ namespace xAOD {
          * @brief set geometry ID associated with uncalibrated measurement
          */
         void setGeometryId(uint64_t);
+
+        /**
+         * @brief obtains link to the surface representation
+         */
+        ElementLink<xAOD::SurfaceBackendContainer> surfaceLink() const;
+
+        /**
+         * @brief sets link to the surface representation
+         */
+        void setSurfaceLink(ElementLink<xAOD::SurfaceBackendContainer>);
+
+
     };
 }
 

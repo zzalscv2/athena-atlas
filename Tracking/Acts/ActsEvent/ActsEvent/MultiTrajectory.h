@@ -4,6 +4,7 @@
 #ifndef ActsEvent_MultiTrajectory_h
 #define ActsEvent_MultiTrajectory_h
 #include <type_traits>
+#include <variant>
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
@@ -11,6 +12,7 @@
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/Utilities/HashedString.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "Acts/Surfaces/Surface.hpp"
 #include "CxxUtils/concepts.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
@@ -22,6 +24,9 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
+#include "xAODTracking/SurfaceBackendAuxContainer.h"
+#include "xAODTracking/SurfaceBackendContainer.h"
+
 
 #include "ActsEvent/Decoration.h"
 
@@ -54,6 +59,8 @@ namespace ActsTrk {
 
 using IndexType = std::uint32_t;
 
+using StoredSurface = std::variant<const Acts::Surface*, std::shared_ptr<const Acts::Surface>>;
+
 
 /**
  * @brief Athena implementation of ACTS::MultiTrajectory (ReadWrite version)
@@ -61,7 +68,7 @@ using IndexType = std::uint32_t;
  * Backends lifetime are not maintained by this class.
  * except when objects are default constructed (this functionality will be removed). 
  * This class is meant to be used in track finding algorithms (e.g. CKF) and then converted
- * ConstMultiTrajectory varaiant. Thes conversion is meant to be costless. 
+ * ConstMultiTrajectory variant. These conversion is meant to be costless. 
  */
 class MutableMultiTrajectory final
     : public Acts::MultiTrajectory<ActsTrk::MutableMultiTrajectory> {
@@ -86,7 +93,8 @@ class MutableMultiTrajectory final
   MutableMultiTrajectory(xAOD::TrackStateContainer* states,
                          xAOD::TrackParametersContainer* parameters,
                          xAOD::TrackJacobianContainer* jacobians,
-                         xAOD::TrackMeasurementContainer* measurements);
+                         xAOD::TrackMeasurementContainer* measurements,
+                         xAOD::SurfaceBackendContainer* surfaces);
   /**
    * @brief Copy-Construct a new Multi Trajectory object other one
    * Warning, default constructed MTJ can not be copied (runtime error)
@@ -290,6 +298,7 @@ class MutableMultiTrajectory final
     m_trackParameters->clear();
     m_trackJacobians->clear();
     m_trackMeasurements->clear();
+    m_surfaceBackend->clear();
   }
 
   /**
@@ -379,17 +388,19 @@ class MutableMultiTrajectory final
     return *m_trackMeasurements;
   }
 
+  xAOD::SurfaceBackendContainer* m_surfaceBackend = nullptr;
+  xAOD::SurfaceBackendAuxContainer* m_surfaceBackendAux = nullptr;
+
+
   std::vector<ActsTrk::detail::Decoration> m_decorations;
   //!< decoration accessors, one per type
   template <typename T>
   std::any decorationSetter(ActsTrk::IndexType, const std::string&);
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
-
-  std::vector<const Acts::Surface*> m_surfaces;
-  std::vector<std::shared_ptr<const Acts::Surface>> m_managedSurfaces;
-  const std::vector<const Acts::Surface*>& surfaces() const { return m_surfaces; }
-
+  std::vector<StoredSurface> m_surfaces;
+  const std::vector<StoredSurface>& surfaces() const { return m_surfaces; }
+  ActsGeometryContext m_geoContext;
 };
 
 /**
@@ -447,24 +458,27 @@ class ConstMultiTrajectory
   const Acts::Surface* referenceSurface_impl(IndexType) const;
 
   /**
-   * Cache Surface pointers for every state.
+   * Fill surfaces either from persistency or from geometry
    * If the surfaces are already there it means that the container is trainsient and this is void operation
    */
-  void fillSurfaces(const Acts::TrackingGeometry* geo );
+  void fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext );
+  /**
+   * reuse surfaces from MutableMultiTrajectory
+   */
   void fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj);
 
  private:
-  // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
+  // TODO these 5 DATA links will be replaced by a reference to storable object that would contain those
   DataLink<xAOD::TrackStateContainer> m_trackStates;
   DataLink<xAOD::TrackParametersContainer> m_trackParameters;
   DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;
   DataLink<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+
   std::vector<ActsTrk::detail::Decoration> m_decorations;
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
 
-  std::vector<const Acts::Surface*> m_surfaces;
-
+  std::vector<StoredSurface> m_surfaces;
 };
 
 }  // namespace ActsTrk

@@ -15,6 +15,7 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/SurfaceBackendContainer.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/MultiTrajectory.h"
 
@@ -37,10 +38,12 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
       "Keys for Track Containers"};
   
   SG::WriteHandleKey<Acts::ConstVectorTrackContainer> m_vectorTrackContainer {this, "VectorTrackContainerLocation", "ConvertedVectorTrackContainer", "Location of the converted VectorTrackContainer"};
-  SG::WriteHandleKey<xAOD::TrackStateContainer> m_trackStatesKey {this, "TrackStatesLocation", "ConvertedTrackStates", "Location of the converted TrackStates"}; 
+  // TODO replace all this by MultiTrajectoryHandle
+  SG::WriteHandleKey<xAOD::TrackStateContainer> m_trackStatesKey {this, "TrackStatesLocation", "ConvertedTrackStates", "Location of the converted TrackStates"};   
   SG::WriteHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey {this, "TrackJacobiansLocation", "ConvertedTrackJacobians", "Location of the converted TrackJacobians"};
   SG::WriteHandleKey<xAOD::TrackMeasurementContainer> m_measurementsKey {this, "TrackMeasurementsLocation", "ConvertedTrackMeasurements", "Location of the converted TrackMeasurements"};
   SG::WriteHandleKey<xAOD::TrackParametersContainer> m_parametersKey {this, "TrackParametersLocation", "ConvertedTrackParameters", "Location of the converted TrackParameters"};
+  SG::WriteHandleKey<xAOD::SurfaceBackendContainer> m_surfacesKey {this, "SurfaceBackendLocation", "ConvertedSurfaceBackend", "Location of the surfaces for converted tracks"};
 
 
 };

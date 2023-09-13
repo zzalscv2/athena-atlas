@@ -10,6 +10,8 @@
 #include "xAODCore/AuxContainerBase.h"
 #include "AthLinks/ElementLink.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "xAODTracking/SurfaceBackendContainer.h"
+
 
 namespace xAOD {
  using TrackStateIndexType=uint32_t;    
@@ -27,6 +29,8 @@ namespace xAOD {
         std::vector<TrackStateIndexType> measDim;
         std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > uncalibratedMeasurementLink;
         std::vector< uint64_t > geometryId;
+        std::vector< ElementLink<xAOD::SurfaceBackendContainer> > surfaceLink;
+
     };
 }
 

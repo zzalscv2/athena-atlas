@@ -17,6 +17,8 @@ namespace xAOD {
     AUX_VARIABLE(measDim);
     AUX_VARIABLE(uncalibratedMeasurementLink);
     AUX_VARIABLE(geometryId);
+    AUX_VARIABLE(surfaceLink);
+
   }
 }
 
