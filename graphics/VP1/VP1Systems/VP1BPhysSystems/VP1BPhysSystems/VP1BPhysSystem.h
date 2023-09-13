@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1BPhysSystem_H
@@ -169,7 +169,7 @@ private:
 	class Clockwork;
 	Clockwork* m_c;
 
-private slots:
+private Q_SLOTS:
 
   void loadFile();
   void displayVerticesChanged ( int state );
