@@ -72,17 +72,17 @@ StatusCode HGTD_RDOAnalysis::initialize() {
 
 StatusCode HGTD_RDOAnalysis::execute() {
   ATH_MSG_DEBUG(" In HGTD_RDOAnalysis::execute()" );
-  m_rdo_hit_module_layer->clear();
-  m_rdo_hit_module_x->clear();
-  m_rdo_hit_module_y->clear();
-  m_rdo_hit_module_z->clear();
-  m_rdo_hit_x->clear();
-  m_rdo_hit_y->clear();
-  m_rdo_hit_z->clear();
-  m_rdo_hit_raw_time->clear();
-  m_rdo_hit_sdoraw_time->clear();
-  m_rdo_hit_bcid->clear();
-  m_rdo_hit_truth->clear();
+  m_rdo_hit_module_layer.clear();
+  m_rdo_hit_module_x.clear();
+  m_rdo_hit_module_y.clear();
+  m_rdo_hit_module_z.clear();
+  m_rdo_hit_x.clear();
+  m_rdo_hit_y.clear();
+  m_rdo_hit_z.clear();
+  m_rdo_hit_raw_time.clear();
+  m_rdo_hit_sdoraw_time.clear();
+  m_rdo_hit_bcid.clear();
+  m_rdo_hit_truth.clear();
 
   // Raw HGTD Data
   SG::ReadHandle<HGTD_RDO_Container> p_HGTD_RDO_cont (m_inputKey_HGTD);
@@ -109,23 +109,23 @@ StatusCode HGTD_RDOAnalysis::execute() {
       InDetDD::SiLocalPosition localPos = element->rawLocalPositionOfCell(HGTD_rdoIDColl);
       Amg::Vector3D globalPos = element->globalPosition(localPos);
 
-      m_rdo_hit_module_x->push_back(globalPos[Amg::x]);
-      m_rdo_hit_module_y->push_back(globalPos[Amg::y]);
-      m_rdo_hit_module_z->push_back(globalPos[Amg::z]);
-      m_rdo_hit_module_layer->push_back(m_HGTD_ID->layer(HGTD_rdoIDColl));
+      m_rdo_hit_module_x.push_back(globalPos[Amg::x]);
+      m_rdo_hit_module_y.push_back(globalPos[Amg::y]);
+      m_rdo_hit_module_z.push_back(globalPos[Amg::z]);
+      m_rdo_hit_module_layer.push_back(m_HGTD_ID->layer(HGTD_rdoIDColl));
 
       for ( HGTD_RDO_Collection::const_iterator hgtd_rdo_itr= p_HGTD_RDO_coll->begin(); hgtd_rdo_itr != p_HGTD_RDO_coll->end(); ++hgtd_rdo_itr ) {
 
-        m_rdo_hit_bcid->push_back((*hgtd_rdo_itr)->getBCID());
+        m_rdo_hit_bcid.push_back((*hgtd_rdo_itr)->getBCID());
         const Identifier HGTD_rdoID((*hgtd_rdo_itr)->identify());
         
         const InDetDD::HGTD_DetectorElement *rdo_element = m_HGTD_Manager->getDetectorElement(HGTD_rdoID);
         InDetDD::SiLocalPosition localPos_hit = rdo_element->rawLocalPositionOfCell(HGTD_rdoID);
         Amg::Vector3D globalPos_hit = rdo_element->globalPosition(localPos_hit);
 
-        m_rdo_hit_x->push_back(globalPos_hit[Amg::x]);
-		    m_rdo_hit_y->push_back(globalPos_hit[Amg::y]);
-        m_rdo_hit_z->push_back(globalPos_hit[Amg::z]);
+        m_rdo_hit_x.push_back(globalPos_hit[Amg::x]);
+		    m_rdo_hit_y.push_back(globalPos_hit[Amg::y]);
+        m_rdo_hit_z.push_back(globalPos_hit[Amg::z]);
 
         // float pixelRadius = sqrt(globalPos[Amg::x]*globalPos[Amg::x]+globalPos[Amg::y]*globalPos[Amg::y]);
 
@@ -165,10 +165,10 @@ StatusCode HGTD_RDOAnalysis::execute() {
             std::sort(sdo_times.begin(), sdo_times.end());
             std::sort(sdo_info.begin(),  sdo_info.end());
             if (sdo_times.size() > 0) 
-              m_rdo_hit_sdoraw_time->push_back(sdo_times.at(0));
+              m_rdo_hit_sdoraw_time.push_back(sdo_times.at(0));
             if (sdo_info.size() > 0) {
-              m_rdo_hit_raw_time->push_back(sdo_info.at(0).time);
-              m_rdo_hit_truth->push_back(sdo_info.at(0).truth);
+              m_rdo_hit_raw_time.push_back(sdo_info.at(0).time);
+              m_rdo_hit_truth.push_back(sdo_info.at(0).truth);
             }
           }
         }

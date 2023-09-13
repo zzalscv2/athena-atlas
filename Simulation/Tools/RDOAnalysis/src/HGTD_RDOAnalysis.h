@@ -72,17 +72,17 @@ private:
   ServiceHandle<ITHistSvc> m_thistSvc {this, "HistSvc", "THistSvc", ""};
 
   TTree* m_tree{};
-  std::vector<int>*   m_rdo_hit_module_layer; //0, 1, 2, 3
-  std::vector<float>* m_rdo_hit_module_x;  //in mm
-  std::vector<float>* m_rdo_hit_module_y;  //in mm
-  std::vector<float>* m_rdo_hit_module_z;  //in mm
-	std::vector<float>* m_rdo_hit_x;  //in mm
-  std::vector<float>* m_rdo_hit_y;  //in mm
-  std::vector<float>* m_rdo_hit_z;  //in mm
-  std::vector<float>* m_rdo_hit_raw_time;  //in ns
-  std::vector<float>* m_rdo_hit_sdoraw_time;  //in ns
-  std::vector<int>*   m_rdo_hit_bcid;
-  std::vector<int>*   m_rdo_hit_truth; // signal=0, signal-secondary=1, pileup=2, delta=3
+  std::vector<int>   m_rdo_hit_module_layer; //0, 1, 2, 3
+  std::vector<float> m_rdo_hit_module_x;  //in mm
+  std::vector<float> m_rdo_hit_module_y;  //in mm
+  std::vector<float> m_rdo_hit_module_z;  //in mm
+  std::vector<float> m_rdo_hit_x;  //in mm
+  std::vector<float> m_rdo_hit_y;  //in mm
+  std::vector<float> m_rdo_hit_z;  //in mm
+  std::vector<float> m_rdo_hit_raw_time;  //in ns
+  std::vector<float> m_rdo_hit_sdoraw_time;  //in ns
+  std::vector<int>   m_rdo_hit_bcid;
+  std::vector<int>   m_rdo_hit_truth; // signal=0, signal-secondary=1, pileup=2, delta=3
 
 };
 

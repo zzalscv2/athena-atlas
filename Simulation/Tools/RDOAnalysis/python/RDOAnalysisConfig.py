@@ -124,8 +124,8 @@ def ITkStripRDOAnalysisCfg(flags, name="ITkStripRDOAnalysis", **kwargs):
     return result
 
 def HGTD_RDOAnalysisCfg(flags, name="HGTD_RDOAnalysis", **kwargs):
-    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    result = ITkPixelReadoutGeometryCfg(flags)
+    from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    result = HGTD_ReadoutGeometryCfg(flags)
 
     kwargs.setdefault("NtuplePath", "/RDOAnalysis/ntuples/")
     kwargs.setdefault("HistPath", "/RDOAnalysis/HGTD/")
