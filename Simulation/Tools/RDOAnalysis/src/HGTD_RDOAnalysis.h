@@ -36,7 +36,7 @@ class HGTD_RDOAnalysis : public AthAlgorithm
 
 struct SdoInfo {
   float time;
-  int truth; // signal=0, pileup=1
+  int truth = -1; // signal=0, delta = 1; pileup=2
   bool operator<(const SdoInfo& rhs) const { return time < rhs.time; }
 };
 
@@ -79,9 +79,7 @@ private:
   std::vector<float> m_rdo_hit_z;  //in mm
   std::vector<float> m_rdo_hit_raw_time;  //in ns
   std::vector<float> m_rdo_hit_sdoraw_time;  //in ns
-  std::vector<int>   m_rdo_hit_bcid;
   std::vector<int>   m_rdo_hit_truth; // signal=0, signal-secondary=1, pileup=2, delta=3
-
 };
 
 #endif // HGTD_RDO_ANALYSIS_H

@@ -52,7 +52,6 @@ StatusCode HGTD_RDOAnalysis::initialize() {
     m_tree->Branch("m_rdo_hit_z", &m_rdo_hit_z);
     m_tree->Branch("m_rdo_hit_raw_time", &m_rdo_hit_raw_time);
     m_tree->Branch("m_rdo_hit_sdoraw_time", &m_rdo_hit_sdoraw_time);
-    m_tree->Branch("m_rdo_hit_bcid", &m_rdo_hit_bcid);
     m_tree->Branch("m_rdo_hit_truth", &m_rdo_hit_truth);
   }
   else {
@@ -81,7 +80,6 @@ StatusCode HGTD_RDOAnalysis::execute() {
   m_rdo_hit_z.clear();
   m_rdo_hit_raw_time.clear();
   m_rdo_hit_sdoraw_time.clear();
-  m_rdo_hit_bcid.clear();
   m_rdo_hit_truth.clear();
 
   // Raw HGTD Data
@@ -116,7 +114,6 @@ StatusCode HGTD_RDOAnalysis::execute() {
 
       for ( HGTD_RDO_Collection::const_iterator hgtd_rdo_itr= p_HGTD_RDO_coll->begin(); hgtd_rdo_itr != p_HGTD_RDO_coll->end(); ++hgtd_rdo_itr ) {
 
-        m_rdo_hit_bcid.push_back((*hgtd_rdo_itr)->getBCID());
         const Identifier HGTD_rdoID((*hgtd_rdo_itr)->identify());
         
         const InDetDD::HGTD_DetectorElement *rdo_element = m_HGTD_Manager->getDetectorElement(HGTD_rdoID);
@@ -126,6 +123,8 @@ StatusCode HGTD_RDOAnalysis::execute() {
         m_rdo_hit_x.push_back(globalPos_hit[Amg::x]);
 		    m_rdo_hit_y.push_back(globalPos_hit[Amg::y]);
         m_rdo_hit_z.push_back(globalPos_hit[Amg::z]);
+
+        auto time_deposit = (*hgtd_rdo_itr)->getTOA();
 
         // float pixelRadius = sqrt(globalPos[Amg::x]*globalPos[Amg::x]+globalPos[Amg::y]*globalPos[Amg::y]);
 
@@ -137,27 +136,19 @@ StatusCode HGTD_RDOAnalysis::execute() {
             if ( iter != (*simDataMapHGTD).end() ) {
               const InDetSimData& sdo = iter->second;
               const std::vector< InDetSimData::Deposit >& deposits = sdo.getdeposits();
-
-              for( std::vector< InDetSimData::Deposit >::const_iterator nextdeposit = deposits.begin() ; nextdeposit!=deposits.end(); ++nextdeposit) {
-
-                sdo_times.push_back(nextdeposit->second);
-
-	              const HepMcParticleLink& particleLink = nextdeposit->first;
+              for( std::vector< InDetSimData::Deposit >::const_iterator nextdeposit = deposits.begin() ; nextdeposit!=deposits.end(); ++nextdeposit) {                
+                const HepMcParticleLink& particleLink = nextdeposit->first;
                 if(particleLink.isValid()){
+                  size_valid_deposits += 1;       
+                  sdo_times.push_back(time_deposit);
                   HepMC::ConstGenParticlePtr genPart(particleLink.cptr());
+                  // if (HepMC::barcode(genPart) == 0) sdoi.truth = 2;
                   if(IsGoodParticle(genPart)){
-                    if(genPart->parent_event() == hardScatterEvent){
-                      SdoInfo sdoi;
-                      sdoi.time = nextdeposit->second;
-                      sdoi.truth = 0;
-                      sdo_info.push_back(sdoi);
-                    }
-                    else {
-                      SdoInfo sdoi;
-                      sdoi.time = nextdeposit->second;
-                      sdoi.truth = 1;
-                      sdo_info.push_back(sdoi);
-                    }
+                    SdoInfo sdoi;
+                    sdoi.time = time_deposit;
+                    if(genPart->parent_event() == hardScatterEvent) sdoi.truth = 0; // signal
+                    else sdoi.truth = 1; // pile-up
+                  sdo_info.push_back(sdoi);
                   }
                 }
               }
