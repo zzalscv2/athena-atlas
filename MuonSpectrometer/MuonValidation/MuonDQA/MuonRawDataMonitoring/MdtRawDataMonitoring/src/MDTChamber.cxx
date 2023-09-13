@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDTChamber.h"
@@ -41,6 +41,12 @@ MDTChamber::MDTChamber(std::string_view name) :
     mdttubenoise(nullptr),
     mdttdctube(nullptr),
     m_hardware_name(std::string(name)),
+    m_barrel_region(0),
+    m_layer_region(0),
+    m_station_eta(0),
+    m_station_phi(0),
+    m_crate(0),
+    m_crate_str("XXXX"),
     m_mdthitsperchamber_InnerMiddleOuterLumi_bin(0),
     m_mdthitsperchamber_InnerMiddleOuterLumi_binx(0),
     m_mdthitsperchamber_InnerMiddleOuterLumi_biny(0),
@@ -53,13 +59,8 @@ MDTChamber::MDTChamber(std::string_view name) :
     m_mdthitsperML_byLayer_bin_m2(0),
     m_binx(0),
     m_biny_m1(0),
-    m_biny_m2(0) {
-    m_barrel_region = 0;
-    m_layer_region = 0;
-    m_station_phi = 0;
-    m_station_eta = 0;
-    m_crate = 0;
-    m_crate_str = "XXXX";
+    m_biny_m2(0)
+    {
     if (name.size() >= 7) {
         // BOS6A16
         // 0123456

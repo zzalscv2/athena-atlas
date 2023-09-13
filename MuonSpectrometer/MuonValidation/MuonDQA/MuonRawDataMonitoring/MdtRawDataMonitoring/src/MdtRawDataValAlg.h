@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -63,11 +63,12 @@ enum { L1_UNKNOWN, L1_BARREL, L1_ENDCAP };
 
 class TubeTraversedBySegment {
 public:
-    TubeTraversedBySegment(const std::string& hn, int tb, bool ih, IdentifierHash idh) {
-        hardware_name = hn;
-        tubeBin = tb;
-        isHit = ih;
-        idHash = idh;
+    TubeTraversedBySegment(const std::string& hn, int tb, bool ih, IdentifierHash idh) :
+      hardware_name(hn),
+      tubeBin(tb),
+      isHit(ih),
+      idHash(idh)
+    {
     }
     std::string hardware_name;
     int tubeBin;
@@ -164,7 +165,7 @@ private:
     StatusCode GetEventNum();
     void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
 
-    ToolHandleArray<IDQFilterTool> m_DQFilterTools;
+    ToolHandleArray<IDQFilterTool> m_MdtDQFilterTools;
     int m_lumiblock{0};
     int m_eventNum{0};
     int m_firstEvent{0};

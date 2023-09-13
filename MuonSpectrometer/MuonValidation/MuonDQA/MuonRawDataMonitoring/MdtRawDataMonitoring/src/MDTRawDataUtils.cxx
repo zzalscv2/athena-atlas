@@ -1156,8 +1156,8 @@ void MdtRawDataValAlg::StoreTriggerType(int type) {
 
 void MdtRawDataValAlg::setIsATLASReady() {
     bool filterresult(true);
-    if (!m_DQFilterTools.empty()) {
-        ToolHandleArray<IDQFilterTool>::const_iterator ifilter(m_DQFilterTools.begin()), filterend(m_DQFilterTools.end());
+    if (!m_MdtDQFilterTools.empty()) {
+        ToolHandleArray<IDQFilterTool>::const_iterator ifilter(m_MdtDQFilterTools.begin()), filterend(m_MdtDQFilterTools.end());
         for (; filterresult && (ifilter != filterend); ++ifilter) { filterresult = (filterresult && (*ifilter)->accept()); }
     }
     m_atlas_ready = filterresult;
