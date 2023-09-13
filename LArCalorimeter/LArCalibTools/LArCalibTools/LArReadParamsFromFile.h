@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -70,51 +70,51 @@ class LArReadParamsFromFile : public AthAlgorithm
   // define 'set' method for each foreseen data class:
   //---------------------------------------------------
 
-  StatusCode set(LArCaliPulseParamsComplete* complete, HWIdentifier chid, int gain, std::vector<float> data) {
+  StatusCode set(LArCaliPulseParamsComplete* complete, HWIdentifier chid, int gain, const std::vector<float>& data) {
     complete->set(chid, gain, data[0], data[1], data[2], data[3], (short)data[4]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArDetCellParamsComplete* complete,   HWIdentifier chid, int gain, std::vector<float> data) {
+  StatusCode set(LArDetCellParamsComplete* complete,   HWIdentifier chid, int gain, const std::vector<float>& data) {
     complete->set(chid, gain, data[0], data[1]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArPhysCaliTdiffComplete* complete,   HWIdentifier chid, int gain, std::vector<float> data) {
+  StatusCode set(LArPhysCaliTdiffComplete* complete,   HWIdentifier chid, int gain, const std::vector<float>& data) {
     complete->set(chid, gain, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArTdriftComplete* complete,          HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArTdriftComplete* complete,          HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArMphysOverMcalComplete* complete,   HWIdentifier chid, int gain, std::vector<float> data) {
+  StatusCode set(LArMphysOverMcalComplete* complete,   HWIdentifier chid, int gain, const std::vector<float>& data) {
     complete->set(chid, gain, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArRinjComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArRinjComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArTshaperComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArTshaperComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArEMEC_CphiComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArEMEC_CphiComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArEMEC_HValphaComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArEMEC_HValphaComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArEMEC_HVbetaComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArEMEC_HVbetaComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArCableLengthComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArCableLengthComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
-  StatusCode set(LArCableAttenuationComplete* complete,   HWIdentifier chid, int /*gain*/, std::vector<float> data) {
+  StatusCode set(LArCableAttenuationComplete* complete,   HWIdentifier chid, int /*gain*/, const std::vector<float>& data) {
     complete->set(chid, data[0]) ;
     return StatusCode::SUCCESS ;
   } ;
