@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -158,12 +158,12 @@ protected:
   QByteArray      extraWidgetsState() const;
   void            setExtraWidgetsState(const QByteArray&);
 
-private slots:
+private Q_SLOTS:
   void colourByComboBoxItemChanged();
   void collVisibilityChanged(bool);
   virtual void resetCachedValuesCuts() = 0; // must be implemented in inherited classes, according to the relevant physics cuts and the related user input form
   
-public slots:
+public Q_SLOTS:
 //  void rerandomiseRandomTrackColours();
 
   // setters

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ protected:
 	virtual QColor defaultColor() const { return QColor::fromRgbF(1.0f, 1.0f, 0.5f); } // light yellow
 	//virtual QString matButtonToolTip() const { return "Edit the material, properties and cuts of "+text(); }
 
-private slots:
+private Q_SLOTS:
 	void showParametersChanged(bool);
 	void setScale(const double& s);
 	double scale() const;
