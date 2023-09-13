@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  2020 Matthias Schott - Uni Mainz
 */
 
@@ -34,7 +34,7 @@ class MuonTrackMonitorAlgorithm : public AthMonitorAlgorithm
     SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey{this, "MuonContainerKey", "Muons", "Key for Muon Containers" };
     SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonIsoDecorKey{this, "MuonIsoDecorKey", "Muons.ptcone30" };
     SG::ReadHandleKey<xAOD::VertexContainer> m_VertexContainerKey{this, "PrimaryVerticesKey", "PrimaryVertices", "Key for primary VertexContainers"};
-    SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this, "EventInfo", "EventInfo", ""};
+    SG::ReadHandleKey<xAOD::EventInfo> m_derEventInfoKey{this, "EventInfo", "EventInfo", ""};
     SG::ReadDecorHandleKeyArray<xAOD::EventInfo> m_beamSpotKey{this, "BeamSpotKeys" ,{}, "Add the scheduler dependencies on the beamspot information"};
     
     Gaudi::Property<bool> m_useBeamSpot{this, "RequireBeamSpot", true, "Ensure that the dependency on the beamspot variables is established."};
