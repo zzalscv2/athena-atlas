@@ -11,6 +11,7 @@ class PrimaryPassConfig(FlagEnum):
     HeavyIon = 'Tracking.HeavyIonPass'
     HighPileup = 'Tracking.HighPileupPass'
     UPC = 'Tracking.UPCPass'
+    HIP = 'Tracking.HIPPass'
     MinBias = 'Tracking.MinBiasPass'
     RobustReco = 'Tracking.RobustRecoPass'
     Default = 'Tracking.MainPass'
@@ -132,6 +133,8 @@ def createTrackingConfigFlags():
                          [BeamType.SingleBeam, BeamType.Cosmics]) or
                         flags.Tracking.PrimaryPassConfig in [
                             PrimaryPassConfig.HeavyIon,
+                            PrimaryPassConfig.UPC,
+                            PrimaryPassConfig.HIP,
                             PrimaryPassConfig.VtxLumi,
                             PrimaryPassConfig.VtxBeamSpot,
                             PrimaryPassConfig.HighPileup])
@@ -268,11 +271,13 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doLowPtLargeD0", False)
     # Switch for running LowPtRoI settings
     icf.addFlag("Tracking.doLowPtRoI", False)
-    # Switch for running UPC settings (MinBias but allows brem recovery)
+    # Switch for running UPC settings
     icf.addFlag("Tracking.doUPC", False)
-    # Switch for running MinBias settings (UPC turns this ON)
+    # Switch for running HIP settings
+    icf.addFlag("Tracking.doHIP", False)
+    # Switch for running MinBias settings (UPC or HIP turn this ON)
     icf.addFlag("Tracking.doMinBias", lambda prevFlags:
-                prevFlags.Tracking.doUPC)
+                prevFlags.Tracking.doUPC or prevFlags.Tracking.doHIP)
     # Turn running of BeamGas second pass on and off
     icf.addFlag("Tracking.doBeamGas",
                 lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
@@ -310,13 +315,15 @@ def createTrackingConfigFlags():
     from TrkConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createUPCTrackingPassFlags,
-        createLargeD0TrackingPassFlags, createR3LargeD0TrackingPassFlags,
-        createLowPtLargeD0TrackingPassFlags, createLowPtTrackingPassFlags,
-        createVeryLowPtTrackingPassFlags, createLowPtRoITrackingPassFlags,
-        createForwardTracksTrackingPassFlags, createBeamGasTrackingPassFlags,
-        createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
-        createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
-        createSCTTrackingPassFlags, createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
+        createHIPTrackingPassFlags, createLargeD0TrackingPassFlags,
+        createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
+        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
+        createLowPtRoITrackingPassFlags, createForwardTracksTrackingPassFlags,
+        createBeamGasTrackingPassFlags, createVtxLumiTrackingPassFlags,
+        createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
+        createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags,
+        createDisappearingTrackingPassFlags, createSCTTrackingPassFlags,
+        createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
         createRobustRecoTrackingPassFlags)
 
     def primaryPass(flags):
@@ -325,8 +332,8 @@ def createTrackingConfigFlags():
         elif flags.Reco.EnableHI:
             if flags.Tracking.doUPC: #For UPC
                 return PrimaryPassConfig.UPC
-            elif flags.Tracking.doMinBias: #For HIP
-                return PrimaryPassConfig.MinBias
+            elif flags.Tracking.doHIP: #For HIP
+                return PrimaryPassConfig.HIP
             else: #For HI (default)
                 return PrimaryPassConfig.HeavyIon
         elif flags.Tracking.doMinBias:
@@ -344,6 +351,8 @@ def createTrackingConfigFlags():
                          createHighPileupTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.UPCPass",
                          createUPCTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.HIPPass",
+                         createHIPTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.MinBiasPass",
                          createMinBiasTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.LargeD0Pass",

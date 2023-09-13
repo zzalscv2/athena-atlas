@@ -557,7 +557,7 @@ def createHighPileupTrackingPassFlags():
 def createMinBiasTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension                 = "MinBias"
-    icf.minPT = lambda pcf: (0.3 if  pcf.Tracking.doHIP300 else 0.1) * Units.GeV
+    icf.minPT =                   0.1 * Units.GeV
 
     icf.minClusters               = 5
     icf.minSecondaryPt            = 0.4 * Units.GeV  # Pt cut for back tracking + segment finding for these
@@ -575,11 +575,19 @@ def createMinBiasTrackingPassFlags():
 def createUPCTrackingPassFlags():
     icf = createMinBiasTrackingPassFlags()
     icf.extension                 = "UPC"
-    # --- min pt cut for brem (same as p-p default for now)
-    icf.minPTBrem                 = 1. * Units.GeV
+    # --- min pt cut for brem
+    icf.minPTBrem                 = 0.8 * Units.GeV
     # MinBias turns off Brem Recovery, turn it on here
     icf.doBremRecoverySi = lambda pcf: pcf.Tracking.doBremRecovery
     return icf
+
+## HIP  mode ########################
+def createHIPTrackingPassFlags():
+    icf = createMinBiasTrackingPassFlags()
+    icf.extension                 = "HIP"
+    icf.minPT = lambda pcf: (0.3 if  pcf.Tracking.doHIP300 else 0.1) * Units.GeV
+    return icf
+
 
 ## LowPtRoI mode ########################
 def createLowPtRoITrackingPassFlags():
