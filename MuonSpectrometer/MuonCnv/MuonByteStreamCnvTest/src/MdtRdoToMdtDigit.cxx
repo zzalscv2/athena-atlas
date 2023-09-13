@@ -28,68 +28,48 @@ StatusCode MdtRdoToMdtDigit::execute(const EventContext& ctx) const {
     ATH_CHECK(wh_mdtDigit.record(std::make_unique<MdtDigitContainer>(m_idHelperSvc->mdtIdHelper().module_hash_max())));
     ATH_MSG_DEBUG("Decoding MDT RDO into MDT Digit");
 
-    // retrieve the collection of RDO
-    Identifier oldId;
-    MdtDigitCollection* collection = nullptr;
     // now decode RDO into digits
-    MdtCsmContainer::const_iterator mdtCSM = rdoContainer->begin();
-    for (; mdtCSM != rdoContainer->end(); ++mdtCSM) { ATH_CHECK(this->decodeMdt(*mdtCSM, wh_mdtDigit.ptr(), collection, oldId)); }
-
+    std::unordered_map<IdentifierHash, std::unique_ptr<MdtDigitCollection>> digitMap{};
+    for (const MdtCsm* csmColl : *rdoContainer) { 
+        ATH_CHECK(decodeMdt(*csmColl, digitMap)); 
+    }
+    
+    for (auto& [hash, collection]: digitMap) {
+        ATH_CHECK(wh_mdtDigit->addCollection(collection.release(), hash));
+    }
     return StatusCode::SUCCESS;
 }
 
-StatusCode MdtRdoToMdtDigit::decodeMdt(const MdtCsm* rdoColl, MdtDigitContainer* mdtContainer, MdtDigitCollection*& collection,
-                                       Identifier& oldId) const {
-    const IdContext mdtContext = m_idHelperSvc->mdtIdHelper().module_context();
+StatusCode MdtRdoToMdtDigit::decodeMdt(const MdtCsm& rdoColl, DigitCollection& digitMap) const {
+    if (rdoColl.size() == 0) {
+        return StatusCode::SUCCESS;
+    }
+    ATH_MSG_DEBUG(" Number of AmtHit in this Csm " << rdoColl.size());
 
-    if (rdoColl->size() > 0) {
-        ATH_MSG_DEBUG(" Number of AmtHit in this Csm " << rdoColl->size());
+    uint16_t subdetId = rdoColl.SubDetId();
+    uint16_t mrodId = rdoColl.MrodId();
+    uint16_t csmId = rdoColl.CsmId();
 
-        uint16_t subdetId = rdoColl->SubDetId();
-        uint16_t mrodId = rdoColl->MrodId();
-        uint16_t csmId = rdoColl->CsmId();
+    
+    // for each Csm, loop over AmtHit, converter AmtHit to digit
+    // retrieve/create digit collection, and insert digit into collection
+    for (const MdtAmtHit* amtHit : rdoColl) {
+        std::unique_ptr<MdtDigit> newDigit{m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId)};
 
-        // for each Csm, loop over AmtHit, converter AmtHit to digit
-        // retrieve/create digit collection, and insert digit into collection
-        for (const MdtAmtHit* amtHit : *rdoColl) {
-            std::unique_ptr<MdtDigit> newDigit{m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId)};
-
-            if (!newDigit) {
-                ATH_MSG_WARNING("Error in MDT RDO decoder");
-                continue;
-            }
-
-            // find here the Proper Digit Collection identifier, using the rdo-hit id
-            // (since RDO collections are not in a 1-to-1 relation with digit collections)
-            const Identifier elementId = m_idHelperSvc->mdtIdHelper().elementID(newDigit->identify());
-            IdentifierHash coll_hash;
-            if (m_idHelperSvc->mdtIdHelper().get_hash(elementId, coll_hash, &mdtContext)) {
-                ATH_MSG_WARNING("Unable to get MDT digit collection hash id "
-                                << "context begin_index = " << mdtContext.begin_index()
-                                << " context end_index  = " << mdtContext.end_index() << " the identifier is ");
-                elementId.show();
-            }
-
-            if (oldId != elementId) {
-                MdtDigitCollection* coll = nullptr;
-                auto sc ATLAS_THREAD_SAFE = mdtContainer->naughtyRetrieve(coll_hash, coll);
-                if (sc.isFailure()) return StatusCode::FAILURE;
-                if (!coll) {
-                    MdtDigitCollection* newCollection = new MdtDigitCollection(elementId, coll_hash);
-                    newCollection->push_back(std::move(newDigit));
-                    collection = newCollection;
-                    if (mdtContainer->addCollection(newCollection, coll_hash).isFailure())
-                        ATH_MSG_WARNING("Couldn't record MdtDigitCollection with key=" << coll_hash << " in StoreGate!");
-                } else {
-                    MdtDigitCollection* oldCollection = coll;
-                    oldCollection->push_back(std::move(newDigit));
-                    collection = oldCollection;
-                }
-                oldId = elementId;
-            } else {
-                collection->push_back(std::move(newDigit));
-            }
+        if (!newDigit) {
+            ATH_MSG_WARNING("Error in MDT RDO decoder");
+            continue;
         }
+
+        // find here the Proper Digit Collection identifier, using the rdo-hit id
+        // (since RDO collections are not in a 1-to-1 relation with digit collections)
+        const Identifier elementId = m_idHelperSvc->mdtIdHelper().elementID(newDigit->identify());
+        const IdentifierHash coll_hash = m_idHelperSvc->moduleHash(newDigit->identify());
+        std::unique_ptr<MdtDigitCollection>& outCollection = digitMap[coll_hash];
+        if(!outCollection) {
+            outCollection = std::make_unique<MdtDigitCollection>(elementId, coll_hash);
+        }
+        outCollection->push_back(std::move(newDigit));
     }
     return StatusCode::SUCCESS;
 }
