@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMakerAlg.h
@@ -59,10 +59,10 @@ namespace met {
     /// Default constructor:
     METMakerAlg();
 
-    bool accept(const xAOD::Electron* el);
-    bool accept(const xAOD::Photon* ph);
-    bool accept(const xAOD::TauJet* tau);
-    bool accept(const xAOD::Muon* muon);
+    virtual bool accept(const xAOD::Electron* el);
+    virtual bool accept(const xAOD::Photon* ph);
+    virtual bool accept(const xAOD::TauJet* tau);
+    virtual bool accept(const xAOD::Muon* muon);
 
     std::string m_softclname;
     std::string m_softtrkname;
