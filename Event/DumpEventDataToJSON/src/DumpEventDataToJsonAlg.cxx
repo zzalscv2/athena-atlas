@@ -183,7 +183,9 @@ StatusCode DumpEventDataToJsonAlg::execute() {
     ATH_MSG_VERBOSE("Trying to load " << vtcHandle.key() << " with " << vtcHandle->size_impl() << " tracks");
 
     auto multiTraj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&(*tsHandle), &(*pHandle), &(*jHandle), &(*mHandle));
-    multiTraj->fillSurfaces(m_trackingGeometryTool->trackingGeometry().get());
+    multiTraj->fillSurfaces(m_trackingGeometryTool->trackingGeometry().get(),
+                            m_trackingGeometryTool->getGeometryContext(getContext()));
+    ATH_MSG_VERBOSE("Surfaces restored");
     Acts::TrackContainer<Acts::ConstVectorTrackContainer,
                          ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder>
         tc{*vtcHandle, *multiTraj};

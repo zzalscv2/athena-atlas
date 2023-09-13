@@ -49,7 +49,13 @@ struct PopulateSG {
     auto measurementsBackendAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
     measurementsBackend->setStore(measurementsBackendAux.get());
 
-    ActsTrk::MutableMultiTrajectory mmtj(trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(), measurementsBackend.get() );
+    auto surfacesBackend = std::make_unique<xAOD::SurfaceBackendContainer>();
+    auto surfacesBackendAux = std::make_unique<xAOD::SurfaceBackendAuxContainer>();
+    surfacesBackend->setStore(surfacesBackendAux.get());
+
+
+    ActsTrk::MutableMultiTrajectory mmtj(trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(), measurementsBackend.get(), 
+      surfacesBackend.get() );
     // TODO add some content to fill backends here
 
     BOOST_CHECK(sg->record(trackStateBackend.release(), "trackState").isSuccess());

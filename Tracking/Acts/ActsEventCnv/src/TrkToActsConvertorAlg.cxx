@@ -19,6 +19,8 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_jacobiansKey.initialize());
   ATH_CHECK(m_measurementsKey.initialize());
   ATH_CHECK(m_parametersKey.initialize());
+  ATH_CHECK(m_surfacesKey.initialize());
+
   ATH_CHECK(m_convertorTool.retrieve());
   return StatusCode::SUCCESS;
 }
@@ -51,9 +53,15 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
       m_parametersKey, ctx);
   ATH_CHECK(parameters.record(std::make_unique<xAOD::TrackParametersContainer>(),
                         std::make_unique<xAOD::TrackParametersAuxContainer>()));
-  
+
+  SG::WriteHandle<xAOD::SurfaceBackendContainer> surfaces(
+      m_surfacesKey, ctx);
+  ATH_CHECK(surfaces.record(std::make_unique<xAOD::SurfaceBackendContainer>(),
+                        std::make_unique<xAOD::SurfaceBackendAuxContainer>()));
+
+
   ATH_MSG_VERBOSE("About to create multiTraj");
-  auto multiTraj = std::make_unique<MutableMultiTrajectory>(&(*states), &(*parameters), &(*jacobians), &(*measurements));
+  auto multiTraj = std::make_unique<MutableMultiTrajectory>(&(*states), &(*parameters), &(*jacobians), &(*measurements), &(*surfaces));
   Acts::VectorTrackContainer vecTrk;
   Acts::TrackContainer<Acts::VectorTrackContainer,
                        ActsTrk::MutableMultiTrajectory>
