@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -20,6 +20,8 @@ namespace TrigAnalysisTest {
   class Run1BStoxAODTrigger : public ITest {
   public:
     Run1BStoxAODTrigger();
+    Run1BStoxAODTrigger(const Run1BStoxAODTrigger&) = delete;
+    Run1BStoxAODTrigger& operator=(const Run1BStoxAODTrigger&) = delete;
 
     void processEvent(Trig::TrigDecisionTool &trigDecTool);
     int finalize();
