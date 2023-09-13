@@ -46,21 +46,7 @@ InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics(const std::string&
   m_trtid(nullptr),
   m_global_offset(0),
   m_useToTCorrection(false),
-  m_useHTCorrection(false),
-  m_reject_if_first_bit(false),
-  m_reject_if_first_bit_argon(true),
-  m_min_trailing_edge(11.0*CLHEP::ns),
-  m_min_trailing_edge_argon(11.0*CLHEP::ns),
-  m_max_drift_time(60*CLHEP::ns),
-  m_max_drift_time_argon(60*CLHEP::ns),
-  m_out_of_time_supression(false),
-  m_out_of_time_supression_argon(false),
-  m_validity_gate_suppression(false),
-  m_validity_gate_suppression_argon(false),
-  m_low_gate(18.0*CLHEP::ns),
-  m_low_gate_argon(18.0*CLHEP::ns),
-  m_high_gate(38.0*CLHEP::ns),
-  m_high_gate_argon(38.0*CLHEP::ns)
+  m_useHTCorrection(false)
 
 {
   declareInterface<ITRT_DriftCircleTool>(this);
@@ -68,23 +54,8 @@ InDet::TRT_DriftCircleToolCosmics::TRT_DriftCircleToolCosmics(const std::string&
   declareProperty("ConditionsSummaryTool",m_ConditionsSummary);
   declareProperty("UseConditionsStatus",m_useConditionsStatus);
 
-  declareProperty("UseConditionsHTStatus",m_useConditionsHTStatus);
   declareProperty("useDriftTimeToTCorrection",m_useToTCorrection);
   declareProperty("useDriftTimeHTCorrection",m_useHTCorrection);
-  declareProperty("RejectIfFirstBit",m_reject_if_first_bit);
-  declareProperty("RejectIfFirstBitArgon",m_reject_if_first_bit_argon);
-  declareProperty("MinTrailingEdge",m_min_trailing_edge);
-  declareProperty("MinTrailingEdgeArgon",m_min_trailing_edge_argon);
-  declareProperty("MaxDriftTime",m_max_drift_time);
-  declareProperty("MaxDriftTimeArgon",m_max_drift_time_argon);
-  declareProperty("SimpleOutOfTimePileupSupression",m_out_of_time_supression);
-  declareProperty("SimpleOutOfTimePileupSupressionArgon",m_out_of_time_supression_argon);
-  declareProperty("ValidityGateSuppression",m_validity_gate_suppression);
-  declareProperty("ValidityGateSuppressionArgon",m_validity_gate_suppression_argon);
-  declareProperty("LowGate",m_low_gate);
-  declareProperty("LowGateArgon",m_low_gate_argon);
-  declareProperty("HighGate",m_high_gate);
-  declareProperty("HighGateArgon",m_high_gate_argon);
   declareProperty("GlobalPhaseOffset",m_global_offset);
 }
 

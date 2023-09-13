@@ -287,7 +287,7 @@ InDet::TRT_DriftCircleTool::convert(
       }
 
       // Require good straw status
-      if (getTRTBadChannel) {
+      if (m_useConditionsStatus && getTRTBadChannel) {
         if (m_ConditionsSummary->getStatus(id,ctx) != TRTCond::StrawStatus::Good)
           continue;
       }
