@@ -17,7 +17,7 @@ MissingMassToolV2::MissingMassToolV2(const std::string& name) : asg::AsgTool(nam
 {
   declareProperty("Decorate",			m_decorate=false, "Activate EventInfo decoration");
   declareProperty("FloatStoppingCrit",		m_float_stop=true, "Activate floating stopping criterion");
-  declareProperty("CalibSet",			m_calib_set="2019", "Calibration: 2015");
+  declareProperty("CalibSet",			m_calib_set="2019", "Calibration: 2019");
   // default negative. Only set parameter if positive
   // so that the default are in MissingMassCalculator code
   declareProperty("NsigmaMET",			m_n_sigma_met=-1);
@@ -45,9 +45,7 @@ StatusCode MissingMassToolV2::initialize()
 
   MMCCalibrationSetV2::e aset;
 
-  if (m_calib_set == "2015") {
-    aset = MMCCalibrationSetV2::MMC2015;
-  } else if (m_calib_set == "2015HIGHMASS") {
+  if (m_calib_set == "2015HIGHMASS") {
     aset = MMCCalibrationSetV2::MMC2015HIGHMASS;
   } else if (m_calib_set == "UPGRADE") {
     aset = MMCCalibrationSetV2::UPGRADE;
