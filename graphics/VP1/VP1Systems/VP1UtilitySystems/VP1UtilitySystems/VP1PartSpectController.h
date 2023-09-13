@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1PARTSPECTCONTROLLER_H
@@ -42,7 +42,7 @@ class VP1PartSpectController : public VP1Controller
   //For verbose output:
   template <class T> static QString toString( const T& t ) { return VP1Controller::toString(t); } //unhide base methods
 
- private slots:
+ private Q_SLOTS:
   void openFile();
   void particleType();
 };

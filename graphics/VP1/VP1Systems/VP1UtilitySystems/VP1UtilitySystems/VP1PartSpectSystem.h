@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1PARTSPECTSYSTEM_H
@@ -35,7 +35,7 @@ public:
   QByteArray saveState();
   void restoreFromState(QByteArray);
 
-public slots:
+public Q_SLOTS:
   void plotSpectrum(QStack<QString>&, int copyNumber=-1);
   void particleType();
   void fileUpdated(const QString&);
