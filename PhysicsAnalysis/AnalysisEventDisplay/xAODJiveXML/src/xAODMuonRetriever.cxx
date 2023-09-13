@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMuonRetriever.h"
@@ -29,12 +29,13 @@ namespace JiveXML {
    *
    **/
   xAODMuonRetriever::xAODMuonRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("Muon"){
+    AthAlgTool(type,name,parent), m_typeName("Muon"),
+    m_sgKey("Muons") // is xAOD name
+  {
 
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "Muons"; // is xAOD name
     declareProperty("StoreGateKey", m_sgKey, 
         "Collection to be first in output, shown in Atlantis without switching");
     declareProperty("OtherCollections" ,m_otherKeys,
@@ -75,7 +76,7 @@ namespace JiveXML {
 //        return false;
       }
       
-      for (; iterator!=end; iterator++) {
+      for (; iterator!=end; ++iterator) {
 	  if (iterator.key()!=m_sgKey) {
              if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
              DataMap data = getData(&(*iterator));

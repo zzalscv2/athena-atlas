@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "xAODJiveXML/xAODJetRetriever.h"
@@ -89,7 +89,7 @@ namespace JiveXML {
         //        return false;
       }
 
-      for (; iterator!=end; iterator++) {
+      for (; iterator!=end; ++iterator) {
 
         std::string::size_type position = iterator.key().find("HLT",0);
         if ( m_doWriteHLT ){ position = 99; } // override SG key find

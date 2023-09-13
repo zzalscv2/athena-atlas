@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODTauRetriever.h"
@@ -29,13 +29,13 @@ namespace JiveXML {
    *     https://svnweb.cern.ch/trac/atlasoff/browser/Event/xAOD
    **/
   xAODTauRetriever::xAODTauRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("TauJet"){
-
+    AthAlgTool(type,name,parent), m_typeName("TauJet"),
+    m_sgKey("TauJets")
+  {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
     //In xAOD: AntiKt6TopoEMTaus, AntiKt6LCTopoTaus,  AntiKt4TopoEMTaus, AntiKt4LCTopoTaus
-    m_sgKey = "TauJets"; // 
     declareProperty("StoreGateKey", m_sgKey, 
         "Collection to be first in output, shown in Atlantis without switching");
     declareProperty ( "TracksName",  m_tracksName = "InDetTrackParticles_xAOD" );
