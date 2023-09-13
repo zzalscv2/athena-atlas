@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ORMETMakerAlg.h
@@ -40,7 +40,6 @@ namespace TauAnalysisTools {
 }
 
 namespace met {
-  //class ORMETMakerAlg : public AthAlgorithm {
   class ORMETMakerAlg : public METMakerAlg {
 
   public: 
@@ -61,26 +60,14 @@ namespace met {
     /// Default constructor:
     ORMETMakerAlg();
 
-    bool accept(const xAOD::Electron* el);
-    bool accept(const xAOD::Photon* ph);
-    bool accept(const xAOD::TauJet* tau);
-    bool accept(const xAOD::Muon* muon);
+    virtual bool accept(const xAOD::Electron* el) final;
+    virtual bool accept(const xAOD::Photon* ph) final;
+    virtual bool accept(const xAOD::TauJet* tau) final;
+    virtual bool accept(const xAOD::Muon* muon) final;
 
-    //std::string m_softclname;
-    //std::string m_softtrkname;
+    
     std::string m_soft;
 
-    //In release 21 need to replace the names of the containers by the appropriate data handles
-    /*SG::ReadHandleKey<xAOD::ElectronContainer>      m_ElectronContainerKey;
-    SG::ReadHandleKey<xAOD::PhotonContainer>        m_PhotonContainerKey;
-    SG::ReadHandleKey<xAOD::TauJetContainer>        m_TauJetContainerKey;
-    SG::ReadHandleKey<xAOD::MuonContainer>          m_MuonContainerKey;
-    SG::ReadHandleKey<xAOD::JetContainer>           m_JetContainerKey;
-
-    SG::ReadHandleKey<xAOD::MissingETContainer>           m_CoreMetKey;
-
-    SG::WriteHandleKey<xAOD::MissingETContainer> m_metKey;
-    SG::ReadHandleKey<xAOD::MissingETAssociationMap> m_metMapKey;*/
     SG::ReadHandleKey<xAOD::MissingETAssociationMap> m_ORMetMapKey;
 
     SG::WriteHandleKey<xAOD::PFOContainer> m_chargedPFOContainerWriteHandleKey{this,"PFOChargedOutputName","OverlapRemovedCHSChargedParticleFlowObjects","WriteHandleKey for charged PFO"}; //jetOR
@@ -91,11 +78,6 @@ namespace met {
 SG::ReadHandleKey<xAOD::PFOContainer> m_inPFOKey{this, "InPFOKey", "", "ReadHandleKey for modified  PFlow Objects"};
 SG::WriteHandleKey<xAOD::PFOContainer> m_outPFOKey{this, "OutPFOKey", "", "WriteHandleKey for modified PFlow Objects"};
 
-
-
-
-
-    //bool m_doTruthLep;
     bool m_doRetrieveORconstit;
     bool m_retainMuonConstit;
     bool m_doORMet;
@@ -111,23 +93,10 @@ SG::WriteHandleKey<xAOD::PFOContainer> m_outPFOKey{this, "OutPFOKey", "", "Write
     double m_photonETA;
     double m_tauETA;
 
-    //bool m_selectElectrons;
-
-    //bool m_usePromptElectrons;
-
-    //bool m_doBadMuon;
+  
     bool m_useUnmatched;
     bool m_doJVT;
-
-    
-    /// Athena configured tools
-    /*ToolHandle<IMETMaker> m_metmaker;
-
-    ToolHandle<CP::IMuonSelectionTool> m_muonSelTool;
-    ToolHandle<IAsgElectronLikelihoodTool> m_elecSelLHTool;
-    ToolHandle<IAsgPhotonIsEMSelector>     m_photonSelIsEMTool;
-    ToolHandle<TauAnalysisTools::ITauSelectionTool> m_tauSelTool;*/
-
+   
   }; 
 
 }
