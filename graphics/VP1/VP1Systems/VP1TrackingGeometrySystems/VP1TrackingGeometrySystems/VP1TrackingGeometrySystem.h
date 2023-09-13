@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRACKINGGEOMETRYSYSTEM_H
@@ -42,7 +42,7 @@ public:
   void buildEventSceneGraph(StoreGateSvc*, SoSeparator *){};
   QWidget * buildController();
 
-private slots:
+private Q_SLOTS:
   void changeTopLevelView();
   void retrieveTrackingGeometry();
   
