@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -34,7 +34,7 @@ namespace asg
 
     ++ instance_counts (name());
 
-    ANA_MSG_INFO ("create UnitTestTool1 " << this);
+    ANA_MSG_DEBUG ("create UnitTestTool1 " << this);
   }
 
 
@@ -42,7 +42,7 @@ namespace asg
   UnitTestTool1 ::
   ~UnitTestTool1 ()
   {
-    ANA_MSG_INFO ("destroy UnitTestTool1 " << this);
+    ANA_MSG_DEBUG ("destroy UnitTestTool1 " << this);
 
     -- instance_counts (name());
   }
