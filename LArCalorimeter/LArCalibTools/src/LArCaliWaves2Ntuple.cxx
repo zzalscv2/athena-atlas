@@ -197,12 +197,12 @@ StatusCode LArCaliWaves2Ntuple::stop ATLAS_NOT_THREAD_SAFE ()
 	for(;itUndo!=itUndo_e;itUndo++) {
 	  const HWIdentifier chid(itUndo->first);
 	  const LArCaliWaveVec& cwv = itUndo->second;
-	  m_gain  = (long)igain;
-	  m_corrUndo = 1;
 	  LArCaliWaveVec::const_iterator cwv_it=cwv.begin();
 	  LArCaliWaveVec::const_iterator cwv_it_e=cwv.end();
 	  for (;cwv_it!=cwv_it_e;++cwv_it) {
 	    const LArCaliWave& wave=*cwv_it;
+	    m_gain  = (long)igain;
+	    m_corrUndo = 1;
 	    bool skip=writeEntry(chid,igain,wave,clCont);
 	    if (skip) continue;
 	    sc=ntupleSvc()->writeRecord(m_nt);

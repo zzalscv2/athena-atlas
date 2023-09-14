@@ -134,6 +134,14 @@ LArWave LArWave::operator*(const double& aScale) const{
 }
 
 
+LArWave& LArWave::operator*=(const double& aScale) {
+  for (double& a : m_amplitudes) {
+    a*=aScale;
+  }
+  return *this ;
+}
+
+
 
 unsigned LArWave::getIndex(const double aTime)  const 
 { return (aTime>=0 && m_dt>0) ? (unsigned)(aTime/m_dt) : getSize()+1 ; } 

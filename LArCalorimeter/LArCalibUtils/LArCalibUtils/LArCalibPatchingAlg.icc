@@ -3,6 +3,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <tuple>
 
 template<class CONDITIONSCONTAINER>
 LArCalibPatchingAlg<CONDITIONSCONTAINER>::LArCalibPatchingAlg (const std::string& name, ISvcLocator* pSvcLocator) : 
@@ -223,16 +224,16 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::patch(const HWIdentifier chid, co
 	    ATH_MSG_ERROR ( "Failed to insert correction for channel 0x" << MSG::hex << chid.get_compact() 
                             << MSG::dec << ", gain " << gain << "." );
 	  }
-	  else
+	  else {
 	    ATH_MSG_INFO ( "Replaced channel 0x" << MSG::hex << chid.get_compact() 
                            <<  " by it's right FEB neighbor 0x" << chid_patch.get_compact() << MSG::dec );
-	  return true;
-	}
-      }//end if patch connected and good
-    }//end if chan<max
+	    return true;
+	  }
+	}//end if patch connected and good
+      }//end if chan<max
+    }
     ATH_MSG_ERROR ( "None of the FEB neighbors is good!" );
     return false;
-
   } else if (m_patchMethod==PhiNeighbor) {
     //    (*m_log) << MSG::ERROR << "Patching Method 'Phi-neighbor' not yet implemented." << endmsg;
     try {
@@ -246,9 +247,9 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::patch(const HWIdentifier chid, co
       phi_max =m_caloId->phi_max(regionID);
       phi_range=phi_max-phi_min+1;
       if (eta==CaloCell_ID::NOT_VALID || phi==CaloCell_ID::NOT_VALID ||  phi_min==CaloCell_ID::NOT_VALID ||  phi_max==CaloCell_ID::NOT_VALID) {
-	ATH_MSG_ERROR ( "CaloCell_ID returned NOT_VALID for offline id 0x"<< std::hex << id.get_compact() 
-                        <<", online id 0x" << chid.get_compact() << std::dec );
-	return false;
+	        ATH_MSG_ERROR ( "CaloCell_ID returned NOT_VALID for offline id 0x"<< std::hex << id.get_compact() 
+                          <<", online id 0x" << chid.get_compact() << std::dec );
+	        return false;
       }
       ATH_MSG_VERBOSE ( "Problem channel has phi="<< phi << " eta=" << eta );
       //Try both phi-neighbors
@@ -455,6 +456,7 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
     ATH_MSG_ERROR ( "No symmetry cells found!" );
     return false;
   }
+
   const size_t nPhases=m_contIn->get(symCells[0],gain).m_vOFC_a.size();
   if (!nPhases) {
     ATH_MSG_ERROR ( "OFC of neighbor nPhase=0!" );
@@ -525,121 +527,92 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
 template<class CONDITIONSCONTAINER>
 bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chid, const int gain, LArCaliWaveVec& patch,const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool /*isphi*/) {
 
-  std::vector<HWIdentifier>& symCells=getPhiRing(chid, bcCont, cabling);  
+  const std::vector<HWIdentifier>& symCells=getPhiRing(chid, bcCont, cabling);  
+  
 
   if (symCells.empty()) {
     ATH_MSG_ERROR ( "No symmetry cells found!" );
     return false;
   }
-  ATH_MSG_DEBUG ( "Averaging for " << symCells.size() << " cells" );
-  size_t s=m_contIn->get(symCells[0],gain).size();
-  if (s == 0) {
-    ATH_MSG_WARNING ( "No CaliWaves for channel 0x"<<std::hex<<chid.get_compact() << std::dec << ", not patched" );
-    return false;
-  }
-  ATH_MSG_DEBUG ( "Averaging for " << s << " DACs" );
   patch.clear();
-//  patch.resize(s);
-  std::vector<LArWave> patch_wave; // Vector of Waves for averaging...
-//  patch_wave.resize(s);
-  std::vector<double> patch_max; // Vector of reference maxima positions for patched waves
-//  patch_max.resize(s);
-  std::vector<unsigned int> patch_nadd; // Vector of number af added waves for each DAC
-//  patch_nadd.resize(s);
-  unsigned nCells=0;
-  unsigned int idx=0;
+
+  struct perDAC_t {
+    std::vector<std::tuple<HWIdentifier,double,const LArCaliWave*> > tmax_wave; //Identifier, tmax and ptr to wave, all neighbors
+    double tmaxAvg=0; //average peak time of all neighbors
+  };
+
   LArWaveHelper wHelper;
-  double tmax;
+ 
+  // Organize waves per DAC and calculate tmax (peaking time)
+  std::map<int,perDAC_t> neighbors_per_dac; //In most cases, there is only one DAC, eg one entry in this map
 
-  // first compute average tmax for each DAC
   for (HWIdentifier hwid : symCells) {
     for (const LArCaliWave& cwave : m_contIn->get(hwid,gain)) {
-       // Check if we have such DAC in our patched vector
-       int ourDAC = cwave.getDAC();
-       for(idx=0; idx<patch.size(); ++idx) {
-          if(patch[idx].getDAC() == ourDAC) {
-              break;
-          }
-       }
-       if(idx == patch.size()) { // New DAC
-         if(idx >= s) {
-           ATH_MSG_ERROR ( "Why more DAC's in cell 0x"<< std::hex << hwid.get_compact() << std::dec );
-           continue;
-         }
-         patch.push_back(cwave);
-         /*dmax =*/ wHelper.getDMax(cwave, tmax);
-         // (*m_log) << MSG::DEBUG <<tmax<<endmsg;
-         patch_max.push_back(tmax);
-         patch_nadd.push_back(1);
-       }else { // We have such DAC already, add
-         /*dmax =*/ wHelper.getDMax(cwave, tmax);
-         // (*m_log) << MSG::DEBUG <<tmax<<endmsg;
-         tmax = tmax * (1. / patch_nadd[idx]);
-         patch_max[idx]  = (patch_max[idx] + tmax) * (patch_nadd[idx] / (patch_nadd[idx] + 1.));
-         // (*m_log) << MSG::DEBUG <<" Current average: "<<patch_max[idx]<<endmsg;
-       }
-       ++patch_nadd[idx]; 
-     }
+      const int ourDAC = cwave.getDAC();
+      double tmax=-1;
+      wHelper.getDMax(cwave, tmax);
+      if (tmax > 0 ) {  
+	auto& dacWave=neighbors_per_dac[ourDAC];
+	dacWave.tmax_wave.emplace_back(hwid,tmax,&cwave);
+	dacWave.tmaxAvg+=tmax;
+      }
+      else {
+	ATH_MSG_WARNING("Ignoring wave with peak-time=" << tmax << ", DAC=" << ourDAC << " found in channel " << m_onlineHelper->channel_name(hwid) << ", gain " << gain);
+      }
+    }//end loop over DACs
+  }// end loop over sym-cells
+  
+  for (auto& dacWave : neighbors_per_dac) {
+    dacWave.second.tmaxAvg/=dacWave.second.tmax_wave.size();
+    ATH_MSG_DEBUG("Average tmax computed " << dacWave.second.tmaxAvg << " for DAC=" << dacWave.first << ", to patch channel " << m_onlineHelper->channel_name(chid) << ", gain " << gain);
   }
-  ATH_MSG_DEBUG ( "Averaged tmax computed: "<<patch_max[idx]<<" starting to add waves");
+  
+  //Align waves accoring to their peak-time and sum them
+  std::vector<std::pair<LArCaliWave,unsigned> > alignedWaveSums;
+  
+  for (const auto& dacWave : neighbors_per_dac) {//loop over DAC values
+    const int& dac=dacWave.first;
+    const perDAC_t& neighbors=dacWave.second;
+    const double& tmaxAvg=neighbors.tmaxAvg;
+    bool first=true;
 
-  patch_nadd.clear();
-  patch.clear();
-       
-  for (HWIdentifier hwid : symCells) {
-    ATH_MSG_DEBUG ( "Adding ch. "<<hwid<<", layer: "<<m_caloId->sampling(cabling->cnvToIdentifier(hwid))<<", region: "<<m_caloId->region(cabling->cnvToIdentifier(hwid))<<" eta: "<<m_caloId->eta(cabling->cnvToIdentifier(hwid))<<", phi: "<<m_caloId->phi(cabling->cnvToIdentifier(hwid)));
-
-    for (const LArCaliWave& cwave : m_contIn->get(hwid,gain)) {
-       // Check if we have such DAC in our patched vector
-       int ourDAC = cwave.getDAC();
-       ATH_MSG_DEBUG ( "Checking DAC: " << ourDAC );
-       for(idx=0; idx<patch.size(); ++idx) {
-          if(patch[idx].getDAC() == ourDAC) {
-              break;
-          } 
-       }
-       if(idx == patch.size()) { // New DAC
-         if(idx >= s) {
-           ATH_MSG_ERROR ( "Why more DAC's in cell 0x"<< std::hex << hwid.get_compact() << std::dec );
-            continue;
-         }
-         patch.push_back(cwave);
-         /*dmax =*/ wHelper.getDMax(cwave, tmax); 
-         LArWave wtrans = wHelper.Dtranslate(cwave, patch_max[idx] - tmax);
-         patch_wave.push_back(LArWave(wtrans.getWave(), wtrans.getDt()));
-         ATH_MSG_DEBUG ( "New DAC " );
-//         (*m_log) << MSG::DEBUG << "size of first wave: "<<patch_wave.back().getSize()<<endmsg;
-         ATH_MSG_DEBUG ( " shifted by: "<< patch_max[idx] - tmax );
-         ATH_MSG_DEBUG (tmax);
-         patch_nadd.push_back(1);
-       } else { // We have such DAC already, shift and add
-         /*dmax =*/ wHelper.getDMax(cwave, tmax); 
-         ATH_MSG_DEBUG ( "Adding cell 0x"<< std::hex << hwid.get_compact() << std::dec );
-         ATH_MSG_DEBUG ( " shifted by: "<< patch_max[idx] - tmax );
-         //(*m_log) << MSG::DEBUG <<tmax<<endmsg;
-         if(tmax < 0 || fabs(patch_max[idx] - tmax) > cwave.getWave().size()*cwave.getDt()) {
-           ATH_MSG_WARNING ( "Wrong patch_max[idx]-tmax:"<<patch_max[idx]-tmax<<" for cell 0x" << std::hex << hwid.get_compact() << std::dec <<", not added in average");
-             continue;
-         }
-         LArWave wtrans = wHelper.Dtranslate(cwave, patch_max[idx] - tmax);
-         wtrans = wtrans * (1. / patch_nadd[idx]);
-         patch_wave[idx]  = (patch_wave[idx] + wtrans) * (patch_nadd[idx] / (patch_nadd[idx] + 1.));
-         ++patch_nadd[idx]; 
-         ATH_MSG_DEBUG ( patch_nadd[idx] << " cells added ");
-//         (*m_log) << MSG::DEBUG << "size after adding: "<<patch_wave[idx].getSize()<<endmsg;
-       }
-       nCells++;
+    for (const auto& [hwid, tmax, wave] : neighbors.tmax_wave) {
+      if (std::fabs(tmaxAvg-tmax) > wave->getWave().size()*wave->getDt()/2.0) {//Don't allow very long time shifts  
+	ATH_MSG_WARNING("Peaking time of symmetric channel " << m_onlineHelper->channel_name(hwid) 
+			<< ", DAC=" << dac << ", gain=" << gain << " is too far off the average (" << std::fabs(tmaxAvg-tmax) << "). Ignoring.");
+	continue;
+      }
+      if (first) {
+	//First (useable) wave for this DAC value. Initialize a LArCaliWave object for it
+	alignedWaveSums.emplace_back(LArCaliWave(wHelper.Dtranslate(*wave, tmaxAvg - tmax).getWave(),wave->getDt(),wave->getDAC(),wave->getIsPulsedInt(),wave->getFlag()),1);
+	ATH_MSG_DEBUG("Adding wave of symmetric channel " << m_onlineHelper->channel_name(hwid) 
+			<< ", DAC=" << dac << ", gain=" << gain << " shifted by " << tmaxAvg-tmax);
+	first=false;
+      }
+      else {
+	//Subsequent waves fro this DAC value: Add them. 
+	alignedWaveSums.back().first+=wHelper.Dtranslate(*wave, tmaxAvg - tmax);
+	alignedWaveSums.back().second++;
+	ATH_MSG_DEBUG("Summing wave of symmetric channel " << m_onlineHelper->channel_name(hwid) 
+		      << ", DAC=" << dac << ", gain=" << gain << " shifted by " << tmaxAvg-tmax);
+      }
+    }//end loop over symmetic waves for one dac value
+    if (first) {
+      ATH_MSG_ERROR("Cannot calculate patch wave for channel " <<  m_onlineHelper->channel_name(chid)  << ", gain="<< gain << ", DAC=" << dac << ", no usable neighbors found");
+      return false;
     }
-    for(idx=0; idx<patch.size(); ++idx) {
-      patch[idx] = LArCaliWave( patch_wave[idx].getWave(), patch[idx].getDt(), patch[idx].getDAC(), patch[idx].getIsPulsedInt(), patch[idx].getFlag());
-    }
-  }
-  if (nCells==0) {
-    ATH_MSG_ERROR ( "No good CaliWaves with same phi found!" );
-    return false;
-  }
+    
+  }//end loop over DAC values
 
- return true;
+  //Final loop to divide wave by number-of-waves to get the average, then push-back into return container
+  for (auto& waveSum : alignedWaveSums) { //Loop over DAC values
+    LArCaliWave& wave=waveSum.first;
+    wave*=(1./waveSum.second);
+    ATH_MSG_INFO("Calculated average wave for channel " <<  m_onlineHelper->channel_name(chid)  << ", gain="<< gain << ", DAC=" << waveSum.first.getDAC() 
+		 << ", based on " << waveSum.second << " neighbors");
+    patch.push_back(wave);
+  }
+  return true;
 }
 
 #ifdef LARRAWCONDITIONS_LARMPHYSOVERMCALP
