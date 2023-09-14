@@ -39,6 +39,7 @@ public:
     m_maxTripletBufferLength = 3;
 
     m_zvError = 10.0;
+    m_zvErrorEndcap = m_zvError;
     m_LRTmode=false;
     m_layerGeometry.clear();
     m_useTrigSeedML = 0;
@@ -67,6 +68,7 @@ public:
   unsigned int m_maxTripletBufferLength;
 
   float m_zvError;
+  float m_zvErrorEndcap;
   bool m_LRTmode;
   bool m_useEtaBinning;
 

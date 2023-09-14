@@ -112,6 +112,8 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 
   m_zMinus = roiDescriptor->zedMinus() - m_zTol;
   m_zPlus  = roiDescriptor->zedPlus() + m_zTol;
+  m_zMinusEndcap = m_zMinus;
+  m_zPlusEndcap = m_zPlus;
   
   m_triplets.clear();
 
@@ -123,8 +125,6 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
   //for example coaxial barrel layers should be separated by more than DR_Max
   // no simultaneous +/- or -/+ endcaps
 
-  m_innerMarkers.clear();
-  m_outerMarkers.clear();
   
   for(int layerI=1;layerI<nLayers;layerI++) {//skip layer 0 for middle spacepoint search
 
@@ -149,8 +149,9 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 	for(int layerJ=0;layerJ<nLayers;layerJ++) {
 
 	  bool isPixel2 = (m_settings.m_layerGeometry[layerJ].m_subdet == 1);
-	  
-	  if(isSct && isPixel2 && (!m_settings.m_tripletDoPSS)) continue;//no mixed PSS seeds allowed
+
+	  bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
+	  if(checkPSS) continue;//no mixed PSS seeds allowed
 
 	  if((!isSct) && (!isPixel2)) {// i.e. xPS (or SPx)
 	    if((!m_settings.m_tripletDoConfirm) && (!m_settings.m_tripletDoPPS)) {
@@ -160,8 +161,6 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 	  }
 	  
 	  if(!validateLayerPairNew(layerI, layerJ, rm, zm)) continue; 
-	    
-	  bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
 	  
 	  const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiThreeSlices.at(phiI);
 
@@ -185,18 +184,14 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor) {
 	if(m_nInner != 0 && m_nOuter != 0) {
 	  std::vector<TrigInDetTriplet> tripletVec;
 	  
-	  if(m_settings.m_tripletDoConfirm) {
-	    if(!isSct) {
+	  if(m_settings.m_tripletDoConfirm && !isSct) {
 	      createConfirmedTriplets(spm->m_pSP, m_nInner, m_nOuter, tripletVec, roiDescriptor);
-	    }
-	    else createTripletsNew(spm->m_pSP, m_nInner, m_nOuter, tripletVec, roiDescriptor);
 	  }
 	  else createTripletsNew(spm->m_pSP, m_nInner, m_nOuter, tripletVec, roiDescriptor);
 	  
 	  if(!tripletVec.empty()) storeTriplets(tripletVec);	
 	  tripletVec.clear();
 	}
-	else continue;
       }
     }
   }
@@ -208,6 +203,12 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
   m_triplets.clear();
 
   if(vZv.empty()) return;
+
+  // With the vertex z information, there is no need to use the same z restriction as the ROI,
+  // but reasonable minimum and maximum bounds which should not be exceeded regardless of the
+  // z position of the vertex should still be set.
+  float roiZMinus = -225;
+  float roiZPlus  = 225;
 
   int nLayers = (int) m_settings.m_layerGeometry.size();
 
@@ -223,21 +224,6 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
     bool checkWidth = isBarrel && (!isSct) && (m_settings.m_useTrigSeedML > 0);
     
     for(int phiI=0;phiI<m_settings.m_nMaxPhiSlice;phiI++) {
-
-	std::vector<int> phiVec;
-	phiVec.reserve(4);
-
-	phiVec.push_back(phiI);
-
-	if(phiI>0) phiVec.push_back(phiI-1);
-	else phiVec.push_back(m_settings.m_nMaxPhiSlice-1);
-
-	if(phiI<m_settings.m_nMaxPhiSlice-1) phiVec.push_back(phiI+1);
-	else phiVec.push_back(0);
-    
-	//Remove duplicates
-	std::sort(phiVec.begin(), phiVec.end());
-	phiVec.erase(std::unique(phiVec.begin(), phiVec.end()), phiVec.end());
 
 	for(auto spm : S.m_phiSlices[phiI]) {//loop over middle spacepoints
 
@@ -259,8 +245,10 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 	    m_nInner = 0;
 	    m_nOuter = 0;
 
-	    m_zMinus = zVertex - m_settings.m_zvError;
-	    m_zPlus = zVertex + m_settings.m_zvError;
+	    m_zMinus = std::max(zVertex - m_settings.m_zvError, roiZMinus);
+	    m_zPlus = std::min(zVertex + m_settings.m_zvError, roiZPlus);
+	    m_zPlusEndcap = std::min(zVertex + m_settings.m_zvErrorEndcap, roiZPlus);
+	    m_zMinusEndcap = std::max(zVertex - m_settings.m_zvErrorEndcap, roiZMinus);
 
 	    for(int layerJ=0;layerJ<nLayers;layerJ++) {//loop over other layers
 
@@ -273,20 +261,18 @@ void TrigTrackSeedGenerator::createSeeds(const IRoiDescriptor* roiDescriptor, co
 
 	      if(!validateLayerPairNew(layerI, layerJ, rm, zm)) continue; 
 	      
-	      bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
-
-	      for(auto phiJ : phiVec) {
-		
-		const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiSlices.at(phiJ);
-		
-		if(spVec.empty()) continue;
-
-		SP_RANGE delta;
-
-		if(!getSpacepointRange(layerJ, spVec, delta)) continue;
+        bool checkPSS = (!m_settings.m_tripletDoPSS) && (isSct && isPixel2);
 	      
-		processSpacepointRangeZv(spm, checkPSS, delta, checkWidth, minTau, maxTau);
-	      }//loop over phi bins
+        // Get spacepoints from current and adjacent phi slices
+        const std::vector<const INDEXED_SP*>& spVec = m_pStore->m_layers[layerJ].m_phiThreeSlices.at(phiI);
+	      
+        if(spVec.empty()) continue;
+	      
+        SP_RANGE delta;
+	      
+        if(!getSpacepointRange(layerJ, spVec, delta)) continue;
+	      
+        processSpacepointRangeZv(spm, checkPSS, delta, checkWidth, minTau, maxTau);
 
 	    }//loop over inner/outer layers
 	    if(m_nInner != 0 && m_nOuter != 0) {
@@ -356,21 +342,21 @@ bool TrigTrackSeedGenerator::validateLayerPairNew(int layerI, int layerJ, float 
     if(refCoordJ>0) {//positive EC
       if(refCoordJ > zm) {//outer layer
 	
-	if(zm < m_zMinus) return false;
-	if(zm == m_zPlus) return false;
+	if(zm < m_zMinusEndcap) return false;
+	if(zm == m_zPlusEndcap) return false;
 	float zMax = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	if( m_zMinus > zMax) return false;
+	if( m_zMinusEndcap > zMax) return false;
 	if (rm < minB) {
 	  float zMin = (zm*minB-rm*refCoordJ)/(minB-rm);
-	  if(m_zPlus<zMin) return false;
+	  if(m_zPlusEndcap<zMin) return false;
 	}
 
-	m_minCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_maxCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlus);
+	m_minCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_maxCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
 
-	if(zm <= m_zPlus) m_maxCoord = maxB;
+	if(zm <= m_zPlusEndcap) m_maxCoord = maxB;
 	
 	if(m_minCoord > maxB) return false;
 	if(m_maxCoord < minB) return false;
@@ -379,35 +365,35 @@ bool TrigTrackSeedGenerator::validateLayerPairNew(int layerI, int layerJ, float 
       else {//inner layer
         if(minB == rm) return false;
 	float zMax = (zm*minB-rm*refCoordJ)/(minB-rm);
-	if( m_zMinus > zMax) return false;
+	if( m_zMinusEndcap > zMax) return false;
 	if (rm>maxB) {// otherwise, intersect of line from maxB through middle sp will be on the wrong side of the layer
 	  float zMin = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	  if(m_zPlus<zMin) return false;
+	  if(m_zPlusEndcap<zMin) return false;
 	}
-	if(zm == m_zPlus || zm == m_zMinus) return false;
-	m_minCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_maxCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinus);
+	if(zm == m_zPlusEndcap || zm == m_zMinusEndcap) return false;
+	m_minCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_maxCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
       }
     }
     else {//negative EC
       if(refCoordJ < zm) {//outer layer
 
-	if(zm > m_zPlus) return false;
-	if(zm == m_zMinus) return false;
+	if(zm > m_zPlusEndcap) return false;
+	if(zm == m_zMinusEndcap) return false;
 	float zMin = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	if( m_zPlus < zMin) return false;
+	if( m_zPlusEndcap < zMin) return false;
 	if (rm<minB) {// otherwise, intersect of line from minB through middle sp will be on the wrong side of the layer
 	  float zMax = (zm*minB-rm*refCoordJ)/(minB-rm);
-	  if(m_zMinus>zMax) return false;
+	  if(m_zMinusEndcap>zMax) return false;
 	}
 
-	m_minCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_maxCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinus);
-	if(zm > m_zMinus) m_maxCoord = maxB;	
+	m_minCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_maxCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
+	if(zm > m_zMinusEndcap) m_maxCoord = maxB;	
 	if(m_minCoord > maxB) return false;
 	if(m_maxCoord < minB) return false;
 
@@ -415,16 +401,16 @@ bool TrigTrackSeedGenerator::validateLayerPairNew(int layerI, int layerJ, float 
       else {//inner layer
         if(minB == rm) return false;
 	float zMin = (zm*minB-rm*refCoordJ)/(minB-rm);
-	if( m_zPlus < zMin) return false;
+	if( m_zPlusEndcap < zMin) return false;
 	if (rm>maxB) {// otherwise, intersect of line from maxB through middle sp will be on the wrong side of the layer
 	  float zMax = (zm*maxB-rm*refCoordJ)/(maxB-rm);
-	  if(m_zMinus>zMax) return false;
+	  if(m_zMinusEndcap>zMax) return false;
 	}
-	if(zm == m_zPlus || zm == m_zMinus) return false;
-	m_minCoord = (refCoordJ-m_zMinus)*rm/(zm-m_zMinus);
-	m_maxCoord = (refCoordJ-m_zPlus)*rm/(zm-m_zPlus);
-	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinus);
-	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlus);
+	if(zm == m_zPlusEndcap || zm == m_zMinusEndcap) return false;
+	m_minCoord = (refCoordJ-m_zMinusEndcap)*rm/(zm-m_zMinusEndcap);
+	m_maxCoord = (refCoordJ-m_zPlusEndcap)*rm/(zm-m_zPlusEndcap);
+	m_minCoord -= deltaRefCoord*rm/std::fabs(zm-m_zMinusEndcap);
+	m_maxCoord += deltaRefCoord*rm/std::fabs(zm-m_zPlusEndcap);
 
       }
     }
@@ -717,7 +703,7 @@ void TrigTrackSeedGenerator::createTriplets(const TrigSiSpacePointBase* pS, int 
 
 
 
-      const double dt2 = std::pow((t_inn - t_out), 2)/9.0;
+      const double dt2 = std::pow((t_inn - t_out), 2)*(1.0/9.0);
 
       
       double covdt = (t_inn*t_out*covR + covZ);
@@ -803,23 +789,25 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
 
   int nL = m_outerMarkers.size() + m_innerMarkers.size();
 
-  int nleft[64];
-  int iter[64];
-  int dirs[64];
-  int type[64];
-  double values[64];
+  // There are 32 pixel + SCT layers altogether, and 
+  // pairs of spacepoints from the same layer are not considered,
+  // so these arrays should need to contain at most 31 elements
+  int nleft[31];
+  int iter[31];
+  int dirs[31];
+  int type[31];
+  double values[31];
 
   iter[0] = m_innerMarkers[0]-1;
   nleft[0] = m_innerMarkers[0];
   dirs[0] = -1;
   type[0] = 0;//inner sp
-  int kL=1;
-  for(unsigned int k=1;k<m_innerMarkers.size();k++) {
-    iter[kL] = m_innerMarkers[k]-1;
-    nleft[kL] = m_innerMarkers[k]-m_innerMarkers[k-1];
+  unsigned int kL=1;
+  for(;kL<m_innerMarkers.size();kL++) {
+    iter[kL] = m_innerMarkers[kL]-1;
+    nleft[kL] = m_innerMarkers[kL]-m_innerMarkers[kL-1];
     dirs[kL] = -1;
     type[kL] = 0;
-    kL++;
   }
   iter[kL] = 0;
   nleft[kL] = m_outerMarkers[0];
@@ -833,7 +821,7 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
     type[kL] = 1;
     kL++;
   }
-  kL--;
+
   for(int k=0;k<nL;k++) {
     values[k] = (type[k]==0) ? m_SoA.m_ti[iter[k]] : m_SoA.m_to[iter[k]];//initialization
   }
@@ -944,7 +932,8 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
     for(int iter2=iter1+1;iter2<nSP;iter2++) {//inner loop
 
       if(type1==m_SoA.m_sorted_sp_type[iter2]) continue;
-
+      
+      // 1. rz doublet matching
       if(m_SoA.m_sorted_sp_t[iter2]-t1>tcut) break;
 
       const double t_out = m_SoA.m_t[iter2];
@@ -991,6 +980,8 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
       //5. phi0 cut
 
       if ( !fullPhi ) {
+        /// TODO: Check if uc calculation is correct; 
+        /// inconsistent with other versions of createSeeds
         const double uc = 2*d0_partial;
         const double phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
 
@@ -1145,7 +1136,7 @@ void TrigTrackSeedGenerator::createConfirmedTriplets(const TrigSiSpacePointBase*
       //1. rz doublet matching
       const double t_out = m_SoA.m_t[outIdx];
 
-      const double dt2 = std::pow((t_inn - t_out), 2)/9.0;//i.e. 3-sigma cut
+      const double dt2 = std::pow((t_inn - t_out), 2)*(1.0/9.0);//i.e. 3-sigma cut
 
 
       double covdt = (t_inn*t_out*covR + covZ);

@@ -385,6 +385,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
     ftf.doZFinderOnly = config.doZFinderOnly
     ftf.trigZFinder = theTrigZFinder
     ftf.zVertexResolution = 20 if flags.Tracking.ActiveConfig.name == "jetSuper" else 1
+    ftf.zVertexResolutionEndcap = 150 if flags.Tracking.ActiveConfig.name == "jetSuper" else ftf.zVertexResolution
     ftf.doFastZVertexSeeding = True
 
   if inputTracksName:

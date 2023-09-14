@@ -84,7 +84,7 @@ StatusCode IDScanZFinder::initialize()
 
   ATH_CHECK( m_numberingTool.retrieve() );
 
-  /// get first endcap layer, so we know how
+  /// get first endcap layer, so we know how many
   /// barrel layers there are 
   int offsetEndcapPixels = m_numberingTool->offsetEndcapPixels();
   int maxSiliconLayerNum = m_numberingTool->maxSiliconLayerNum(); 
