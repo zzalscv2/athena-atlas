@@ -10,10 +10,18 @@
 #include <cmath>
 
 /**
- * This code follows the notation from the PDG
- * https://pdg.lbl.gov/2022/reviews/rpp2022-rev-passage-particles-matter.pdf
+ * References :
+ * [1] https://pdg.lbl.gov/2022/reviews/rpp2022-rev-passage-particles-matter.pdf
  * equations will refer to this
- *
+ * [2] MUON STOPPING POWER AND RANGE TABLES 10 MeV–100 TeV
+ * https://www.sciencedirect.com/science/article/pii/S0092640X01908617
+ * [3] https://pdg.lbl.gov/2022/AtomicNuclearProperties/ (tables)
+ * [4] Treatment of energy loss and multiple scattering in the context of track
+ * parameter and covariance matrix propagation in continuous material in the
+ * ATLAS experiment
+ * https://cds.cern.ch/record/1114577/files/soft-pub-2008-003.pdf
+ * [5] Approximations to multiple Coulomb scattering
+ * https://www.sciencedirect.com/science/article/pii/0168583X9195671Y?via%3Dihub
  *
  * - The mean ionization energy loss <-dE/dX> follow the bethe formula  Eq 34.5
  *
@@ -35,7 +43,7 @@
  *   so sigmaL = 0.424 * 4 * kazL
  *
  * - The ATLAS tracking (since circa 2014) employs
- *   some further approximations see as an example :
+ *   some further approximations see :
  *   https://indico.cern.ch/event/322522/contributions/748336/attachments/623794/858386/ElossConcept.pdf
  *   which describes the ideas behind them.
  *   The relavant relations used here are:
@@ -177,13 +185,14 @@ double Trk::MaterialInteraction::dEdl_radiation(
 
   // Bremsstrahlung - Bethe-Heitler
   double Radiation = -E * mfrac * mfrac;
-  // sigma is rms of steep exponential part of radiation
+  // sigma the rms of steep exponential
   sigma = -Radiation;
 
   // Add e+e- pair production and photonuclear effect for muons at energies
   // above 8 GeV
-  //    Radiation gives mean Eloss including the long tail from 'catastrophic'
-  //    Eloss sigma the rms of steep exponential
+  // Radiation gives mean Eloss including the long tail from 'catastrophic'
+  // Eloss sigma the rms of steep exponential
+  // For the parametrization see section 2.3 of Ref [4]
   if ((particle == Trk::muon) && (E > 8000.)) {
     if (E < 1.e6) {
       Radiation += 0.5345 - 6.803e-5 * E - 2.278e-11 * E * E +
@@ -207,8 +216,8 @@ double Trk::MaterialInteraction::sigmaMS(double dInX0, double p, double beta) {
     return 0.;
   }
 
-  // Highland formula - projected sigma_s
-  // PDG 2022 34.16
+  // Improved (See [5] Lynch & Dahl) Highland formula
+  // projected sigma_s PDG 2022 34.16
   return 13.6 * std::sqrt(dInX0) / (beta * p) *
          (1. + 0.038 * std::log(dInX0 / (beta * beta)));
 }
