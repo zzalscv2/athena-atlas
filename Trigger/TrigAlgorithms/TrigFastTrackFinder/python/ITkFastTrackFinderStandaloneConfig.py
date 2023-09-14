@@ -66,7 +66,7 @@ def ITkFastTrackFinderStandaloneCfg(flags, SiSPSeededTrackCollectionKey = None):
                                             doTrackRefit             = False,
                                             FreeClustersCut          = 1,
                                             MonTool                  = monTool,
-                                            DoubletDR_Max            = 400.0)
+                                            DoubletDR_Max            = 150.0)
 
     acc.addEventAlgo( ftf, primary=True )
     

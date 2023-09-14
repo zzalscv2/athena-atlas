@@ -27,7 +27,7 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
 
   const float zTolerance = 3.0; 
   const float maxEta = dSettings->m_maxEta;
-  const float maxDoubletLength = 200.0;
+  const float maxDoubletLength = dSettings->m_maxDoubletLength;
   const float minDoubletLength = dSettings->m_minDoubletLength;
   const float maxOuterRadius = 550.0;
   
@@ -52,6 +52,12 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
   const bool NoPPS = !dSettings->m_tripletDoPPS;
   const float minOuterZ = dSettings->m_zedMinus - maxOuterRadius*maxCtg - zTolerance; 
   const float maxOuterZ = dSettings->m_zedPlus + maxOuterRadius*maxCtg + zTolerance; 
+
+  const double ptCoeff = 0.29997*dSettings->m_magFieldZ/2.0;// ~0.3*B/2 - assumes nominal field of 2*T
+  const float tripletPtMin = dSettings->m_tripletPtMin; // Retrieve from settings
+  const float minR_squ = tripletPtMin*tripletPtMin/std::pow(ptCoeff,2);
+  const float maxKappa_high_eta          = 0.8/minR_squ;
+  const float maxKappa_low_eta           = 0.6/minR_squ;
 
   //1. get a tile of middle spacepoints
 
@@ -151,14 +157,35 @@ __global__ static void doubletMakingKernel(TrigAccel::SEED_FINDER_SETTINGS* dSet
 	  }
           
 	  float dz = zsp - zm;
-	  float t = dz/dr;
+	  float tau = dz/dr;
 
-	  if(fabs(t)>maxCtg) continue;
-          //if(dr > 0) {//outer doublet
-            float outZ = zsp + (maxOuterRadius-rsp)*t; 
-            if(outZ < minOuterZ || outZ > maxOuterZ) continue;
-          //}
-	  if(dr > 0) {
+	  if(fabs(tau)>maxCtg) continue;
+    float outZ = zsp + (maxOuterRadius-rsp)*tau; 
+    if(outZ < minOuterZ || outZ > maxOuterZ) continue;
+
+    // Cut on curvature
+    float xm = dSpacepoints->m_x[spmIdx];
+    float ym = dSpacepoints->m_y[spmIdx];
+    float xsp = dSpacepoints->m_x[spIdx];
+    float ysp = dSpacepoints->m_y[spIdx];
+
+    float dx = xsp - xm;
+    float dy = ysp - ym;
+    float L2 = 1/(dx*dx+dy*dy);
+    float D = (ysp*xm - ym*xsp)/(rm*rsp);
+    float kappa = D*D*L2;
+
+    if (fabs(tau) < 4.0) {//eta = 2.1
+      if (kappa > maxKappa_low_eta) {
+        continue;
+      }
+    } else {
+      if (kappa > maxKappa_high_eta) {
+        continue;
+      }
+    }
+
+	  if(dr > 0) { //outer doublet
 	    int k = atomicAdd(&outerPos[threadIdx.x],1);
 	    d_Storage->m_outer[k] = spIdx;
 	  }

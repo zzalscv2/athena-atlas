@@ -72,8 +72,9 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
   sfs.m_minEndcapPix = tcs.m_minEndcapPix;
   sfs.m_maxEndcapPix = tcs.m_maxEndcapPix;
   sfs.m_maxSiliconLayer = tcs.m_maxSiliconLayer;
-  sfs.m_maxEta = tcs.m_doublet_dR_Max/100;
+  sfs.m_maxEta = roi->etaPlus();
   sfs.m_minDoubletLength = tcs.m_seedRadBinWidth;
+  sfs.m_maxDoubletLength = tcs.m_doublet_dR_Max;
   
   sfs.m_magFieldZ = tcs.m_magFieldZ;
 
@@ -115,9 +116,13 @@ size_t TrigInDetAccelerationTool::exportSeedMakingJob(const TrigCombinatorialSet
     short layerId = -1;
     if(sp.isPixel()) {
       layerId = pixelLayers[hashId];
-    } else {
+    } else if (sfs.m_maxEta < 3) { // Run 3 geometry
       layerId = sctLayers[hashId];
+    } else {
+      // Ignore SPs from Strips for ITk Track Seeding
+      continue;
     }
+
     int phiIdx = (sp.phi()+M_PI)/phiSliceWidth; 
     if (phiIdx >= tcs.m_nMaxPhiSlice) { 
       phiIdx %= tcs.m_nMaxPhiSlice; 

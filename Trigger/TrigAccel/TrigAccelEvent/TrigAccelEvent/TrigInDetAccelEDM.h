@@ -16,7 +16,7 @@ namespace TrigAccel {
   constexpr unsigned int MAX_NUMBER_SCT_MODULES       = 24600;
   constexpr unsigned int MAX_NUMBER_SPACEPOINTS       = 300000;
   constexpr unsigned int MAX_PHI_SLICES               = 100;
-  constexpr unsigned int MAX_NUMBER_OUTPUT_SEEDS      = 100000;
+  constexpr unsigned int MAX_NUMBER_OUTPUT_SEEDS      = 500000;
   
   typedef struct SiliconLayer {
   public:
@@ -75,7 +75,7 @@ namespace TrigAccel {
     unsigned int m_maxTripletBufferLength; 
     int m_isFullScan;
     float m_zedMinus, m_zedPlus;
-    float m_maxEta, m_minDoubletLength;
+    float m_maxEta, m_minDoubletLength, m_maxDoubletLength;
     
   } SEED_FINDER_SETTINGS;
 

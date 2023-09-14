@@ -5,8 +5,8 @@
 #ifndef TRIGINDETCUDA_SEEDMAKINGDATASTRUCTURES_H
 #define TRIGINDETCUDA_SEEDMAKINGDATASTRUCTURES_H
 
-constexpr unsigned int MAX_MIDDLE_SP             = 100000;
-constexpr unsigned int MAX_DOUBLET               = 10000000;
+constexpr unsigned int MAX_MIDDLE_SP             = 300000;
+constexpr unsigned int MAX_DOUBLET               = 50000000;
 constexpr unsigned int NUM_MIDDLE_THREADS        = 32;
 constexpr unsigned int OUTER_THREADS_MULTIPLIER  = 4; // i.e thread block is 32 x 4*192/32
 constexpr unsigned int MAX_NUMBER_DOUBLETS       = 1500;
