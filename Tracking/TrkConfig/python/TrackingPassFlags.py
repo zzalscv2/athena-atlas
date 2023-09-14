@@ -585,7 +585,6 @@ def createUPCTrackingPassFlags():
 def createHIPTrackingPassFlags():
     icf = createMinBiasTrackingPassFlags()
     icf.extension                 = "HIP"
-    icf.minPT = lambda pcf: (0.3 if  pcf.Tracking.doHIP300 else 0.1) * Units.GeV
     return icf
 
 
@@ -971,11 +970,10 @@ def createPixelTrackingPassFlags():
             return 0.5 * Units.GeV
         if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.UPC:
             return 0.05 * Units.GeV
+        if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.HIP:
+            return 0.05 * Units.GeV
         if pcf.Tracking.doMinBias:
-            if pcf.Tracking.doHIP300:
-                return 0.3 * Units.GeV
-            else:
-                return 0.05 * Units.GeV
+            return 0.05 * Units.GeV
         return 0.1 * Units.GeV
     
     icf.minPT            = _minPt
@@ -1052,21 +1050,17 @@ def createSCTTrackingPassFlags():
     icf.usePixel         = False
     icf.useTRT           = False
 
-    def _pick( default, cosmics, minbias, hion):
+    def _pick( default, cosmics, minbias):
         def _internal( pcf ):
             if pcf.Beam.Type is BeamType.Cosmics:
                 return cosmics
             if pcf.Tracking.doMinBias:
-                if pcf.Tracking.doHIP300:
-                    return hion
-                else:
-                    return minbias
+                return minbias
             return default
         return _internal
 
     icf.minPT            = _pick( default = 0.1 * Units.GeV,
                                   minbias=0.1 * Units.GeV,
-                                  hion=0.3* Units.GeV,
                                   cosmics = 0.5* Units.GeV )
     icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
                            else maxPrimaryImpact_ranges( pcf )
