@@ -715,7 +715,7 @@ StatusCode TileHitVecToCntTool::processBunchXing(int bunchXing
         //**
         //* Get TileHits from TileHitVector
         //**
-        const TileHitVector * inputHits;
+        const TileHitVector * inputHits = nullptr;
 	if (!(m_mergeSvc->retrieveSingleSubEvtData(hitVectorName, inputHits, bunchXing, iEvt))){
 	  ATH_MSG_ERROR(" Tile Hit container not found for event key " << hitVectorName);
 	}
