@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsStatusFlagCOOL_h
@@ -49,7 +49,7 @@ public:
                                        cool::RecordSpecification& spec);
    
     // Constructors and Destructors.
-    StatusFlagCOOL(std::string dbStr, std::string folderStr, int runS, int lumiS, int runU, int lumiU);
+    StatusFlagCOOL(const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU);
     StatusFlagCOOL(int runS, int lumiS, int runU, int lumiU);
     StatusFlagCOOL();
     virtual ~StatusFlagCOOL () {};

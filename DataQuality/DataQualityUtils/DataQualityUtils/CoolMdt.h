@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************
@@ -92,15 +92,15 @@ private:
 public:
 
     // Connects to the database. Throws a "DatabaseDoesNotExis" exception if database does not exist.
-    cool::IDatabasePtr coolDbInstance(std::string dbStr, bool readOnly);
+    cool::IDatabasePtr coolDbInstance(const std::string& dbStr, bool readOnly);
         
     
     // Browses the COOL folder. Throws a "FolderNotFound" exception if folder does not exist.
-    cool::IFolderPtr coolFolderInstance(std::string folderStr);
+    cool::IFolderPtr coolFolderInstance(const std::string& folderStr);
     // Various methods to set and print the intervall of validity.
     
     void initialize();
-    void coolDbFolder(std::string dbStr, std::string folderStr);
+    void coolDbFolder(const std::string& dbStr, const std::string& folderStr);
     void setSince(cool::Int64 run, cool::Int64 lumi);
     void setUntil(cool::Int64 run, cool::Int64 lumi);
     void printIOV();
@@ -110,11 +110,23 @@ public:
     // Methods needed to come up to COOL framework.
     cool::RecordSpecification createSpecDataDead();
     cool::RecordSpecification createSpecDataNoisy();
-    coral::AttributeList  createPayloadDataNoisy(std::string ChamberName, std::string  NoisyMultilayer, std::string NoisyLayer, std::string NoisyMezz, std::string NoisyAsd, std::string NoisyTube, const cool::RecordSpecification& spec); 
-    coral::AttributeList  createPayloadDataDead(std::string ChamberName, std::string  DeadMultilayer, std::string DeadLayer, std::string DeadMezz, std::string DeadAsd, std::string DeadTube, const cool::RecordSpecification& spec); 
+    coral::AttributeList  createPayloadDataNoisy(const std::string& ChamberName,
+                                                 const std::string&  NoisyMultilayer,
+                                                 const std::string& NoisyLayer,
+                                                 const std::string& NoisyMezz,
+                                                 const std::string& NoisyAsd,
+                                                 const std::string& NoisyTube,
+                                                 const cool::RecordSpecification& spec); 
+    coral::AttributeList  createPayloadDataDead(const std::string& ChamberName,
+                                                const std::string&  DeadMultilayer,
+                                                const std::string& DeadLayer,
+                                                const std::string& DeadMezz,
+                                                const std::string& DeadAsd,
+                                                const std::string& DeadTube,
+                                                const cool::RecordSpecification& spec); 
 
     // Constructors and Destructors.
-    void CoolOpen(std::string dbStr);
+    void CoolOpen(const std::string& dbStr);
 
     //CoolMdt();
     virtual ~CoolMdt ();
@@ -122,15 +134,45 @@ public:
 
     void dump(cool::ChannelSelection selection);
     std::string dumpField(cool::ChannelId channelId, std::string field);
-    int dumpCode(std::string channelName);
+    int dumpCode(const std::string& channelName);
     
     void dumpall();
 
-    void insertNoisyFlag(cool::Int64 run, cool::ChannelId channelId,std::string ChamberName, std::string  NoisyMultilayer, std::string NoisyLayer, std::string NoisyMezz, std::string NoisyAsd, std::string NoisyTube);
-    void insertNoisyFlag_withTag(cool::Int64 run, cool::ChannelId channelId, std::string ChamberName, std::string  NoisyMultilayer, std::string NoisyLayer, std::string NoisyMezz, std::string NoisyAsd, std::string NoisyTube, std::string cool_tag);
+    void insertNoisyFlag(cool::Int64 run,
+                         cool::ChannelId channelId,
+                         const std::string& ChamberName,
+                         const std::string& NoisyMultilayer,
+                         const std::string& NoisyLayer,
+                         const std::string& NoisyMezz,
+                         const std::string& NoisyAsd,
+                         const std::string& NoisyTube);
+    void insertNoisyFlag_withTag(cool::Int64 run,
+                                 cool::ChannelId channelId,
+                                 const std::string& ChamberName,
+                                 const std::string&  NoisyMultilayer,
+                                 const std::string& NoisyLayer,
+                                 const std::string& NoisyMezz,
+                                 const std::string& NoisyAsd,
+                                 const std::string& NoisyTube,
+                                 const std::string& cool_tag);
 
-    void insertDeadFlag(cool::Int64 run, cool::ChannelId channelId, std::string ChamberName, std::string  DeadMultilayer, std::string DeadLayer, std::string DeadMezz, std::string DeadAsd, std::string DeadTube);
-    void insertDeadFlag_withTag(cool::Int64 run, cool::ChannelId channelId, std::string ChamberName, std::string  DeadMultilayer, std::string DeadLayer, std::string DeadMezz, std::string DeadAsd, std::string DeadTube, std::string cool_tag);
+    void insertDeadFlag(cool::Int64 run,
+                        cool::ChannelId channelId,
+                        const std::string& ChamberName,
+                        const std::string& DeadMultilayer,
+                        const std::string& DeadLayer,
+                        const std::string& DeadMezz,
+                        const std::string& DeadAsd,
+                        const std::string& DeadTube);
+    void insertDeadFlag_withTag(cool::Int64 run,
+                                cool::ChannelId channelId,
+                                const std::string& ChamberName,
+                                const std::string& DeadMultilayer,
+                                const std::string& DeadLayer,
+                                const std::string& DeadMezz,
+                                const std::string& DeadAsd,
+                                const std::string& DeadTube,
+                                const std::string& cool_tag);
 
     cool::IFolderPtr getCoolFolder();
     cool::IDatabasePtr getCoolDb();

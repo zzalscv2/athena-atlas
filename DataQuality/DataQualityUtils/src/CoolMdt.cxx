@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************
@@ -30,7 +30,7 @@ namespace dqutils{
 
  cool::IDatabasePtr
  CoolMdt::
- coolDbInstance(std::string dbStr, bool readOnly) {
+ coolDbInstance(const std::string& dbStr, bool readOnly) {
      try {
        // 	 std::cout << "Opening database '" << dbStr << "'...";
  	 cool::IDatabaseSvc& dbSvc = this->databaseService();
@@ -45,7 +45,7 @@ namespace dqutils{
 
  cool::IFolderPtr
  CoolMdt::
- coolFolderInstance(std::string folderStr) {
+ coolFolderInstance(const std::string& folderStr) {
      try {
  	 cool::IFolderPtr folder = m_coolDb->getFolder(folderStr.c_str());
  	// std::cout << "Browsing objects of '" << folderStr << "'" << std::endl;
@@ -59,7 +59,7 @@ namespace dqutils{
 
 
 void
- CoolMdt::coolDbFolder(std::string dbStr, std::string folderStr) {
+ CoolMdt::coolDbFolder(const std::string& dbStr, const std::string& folderStr) {
    m_coolDb = this->coolDbInstance(dbStr, false); 
    m_coolFolder=this->coolFolderInstance(folderStr);  
  }
@@ -107,7 +107,7 @@ void
 
  void
  CoolMdt::
- CoolOpen(std::string dbStr) {
+ CoolOpen(const std::string& dbStr) {
      m_coolDb = this->coolDbInstance(dbStr, false);
  
  }
@@ -148,7 +148,13 @@ void
 
  coral::AttributeList
  CoolMdt::
- createPayloadDataDead(std::string ChamberName, std::string  DeadMultilayer, std::string DeadLayer, std::string DeadMezz, std::string DeadAsd, std::string DeadTube, const cool::RecordSpecification& spec) {
+ createPayloadDataDead(const std::string& ChamberName,
+                       const std::string&  DeadMultilayer,
+                       const std::string& DeadLayer,
+                       const std::string& DeadMezz,
+                       const std::string& DeadAsd,
+                       const std::string& DeadTube,
+                       const cool::RecordSpecification& spec) {
   //  std::cout << "createPayloadData "<< std::endl;
 
      coral::AttributeList payload = cool::Record( spec ).attributeList();
@@ -193,7 +199,13 @@ void
 
  coral::AttributeList
  CoolMdt::
- createPayloadDataNoisy(std::string ChamberName, std::string  NoisyMultilayer, std::string NoisyLayer, std::string NoisyMezz, std::string NoisyAsd, std::string NoisyTube, const cool::RecordSpecification& spec) {
+ createPayloadDataNoisy(const std::string& ChamberName,
+                        const std::string&  NoisyMultilayer,
+                        const std::string& NoisyLayer,
+                        const std::string& NoisyMezz,
+                        const std::string& NoisyAsd,
+                        const std::string& NoisyTube,
+                        const cool::RecordSpecification& spec) {
   //  std::cout << "createPayloadData "<< std::endl;
 
      coral::AttributeList payload = cool::Record( spec ).attributeList();
@@ -247,7 +259,7 @@ void
 
  int
  CoolMdt::
- dumpCode(std::string channelName) {
+ dumpCode(const std::string& channelName) {
      std::string result = this->dumpField(this->getCoolFolder()->channelId(channelName.c_str()), "Code");
      return atoi(result.c_str());
  
@@ -263,7 +275,15 @@ void
 
  void
  CoolMdt::
- insertDeadFlag_withTag(cool::Int64 run, cool::ChannelId channelId, std::string ChamberName, std::string  DeadMultilayer, std::string DeadLayer, std::string DeadMezz, std::string DeadAsd, std::string DeadTube, std::string cool_tag) {
+ insertDeadFlag_withTag(cool::Int64 run,
+                        cool::ChannelId channelId,
+                        const std::string& ChamberName,
+                        const std::string& DeadMultilayer,
+                        const std::string& DeadLayer,
+                        const std::string& DeadMezz,
+                        const std::string& DeadAsd,
+                        const std::string& DeadTube,
+                        const std::string& cool_tag) {
 
      try {
   
@@ -283,7 +303,14 @@ void
 
  void
  CoolMdt::
- insertDeadFlag(cool::Int64 run, cool::ChannelId channelId,std::string ChamberName, std::string  DeadMultilayer, std::string DeadLayer, std::string DeadMezz, std::string DeadAsd, std::string DeadTube) {
+ insertDeadFlag(cool::Int64 run,
+                cool::ChannelId channelId,
+                const std::string& ChamberName,
+                const std::string& DeadMultilayer,
+                const std::string& DeadLayer,
+                const std::string& DeadMezz,
+                const std::string& DeadAsd,
+                const std::string& DeadTube) {
    std::cout << "Trying to store payload [channel " << std::endl;
      try {
   
@@ -305,7 +332,15 @@ void
 
  void
  CoolMdt::
- insertNoisyFlag_withTag(cool::Int64 run, cool::ChannelId channelId, std::string ChamberName, std::string  NoisyMultilayer, std::string NoisyLayer, std::string NoisyMezz, std::string NoisyAsd, std::string NoisyTube, std::string cool_tag) {
+ insertNoisyFlag_withTag(cool::Int64 run,
+                         cool::ChannelId channelId,
+                         const std::string& ChamberName,
+                         const std::string& NoisyMultilayer,
+                         const std::string& NoisyLayer,
+                         const std::string& NoisyMezz,
+                         const std::string& NoisyAsd,
+                         const std::string& NoisyTube,
+                         const std::string& cool_tag) {
 
      try {
   
@@ -325,7 +360,14 @@ void
 
  void
  CoolMdt::
- insertNoisyFlag(cool::Int64 run, cool::ChannelId channelId,std::string ChamberName, std::string  NoisyMultilayer, std::string NoisyLayer, std::string NoisyMezz, std::string NoisyAsd, std::string NoisyTube) {
+ insertNoisyFlag(cool::Int64 run,
+                 cool::ChannelId channelId,
+                 const std::string& ChamberName,
+                 const std::string& NoisyMultilayer,
+                 const std::string& NoisyLayer,
+                 const std::string& NoisyMezz,
+                 const std::string& NoisyAsd,
+                 const std::string& NoisyTube) {
    std::cout << "Trying to store payload [channel " << std::endl;
      try {
   

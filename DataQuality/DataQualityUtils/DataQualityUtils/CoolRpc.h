@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************
@@ -91,16 +91,16 @@ private:
 public:
 
     // Connects to the database. Throws a "DatabaseDoesNotExis" exception if database does not exist.
-    cool::IDatabasePtr coolDbInstance(std::string dbStr, bool readOnly);
+    cool::IDatabasePtr coolDbInstance(const std::string& dbStr, bool readOnly);
     //cool::IDatabasePtr write(std::string stringa);
     //cool::IDatabasePtr coolDbInstance(std::string dbStr);
     
     
     // Browses the COOL folder. Throws a "FolderNotFound" exception if folder does not exist.
-    cool::IFolderPtr coolFolderInstance(std::string folderStr);
+    cool::IFolderPtr coolFolderInstance(const std::string& folderStr);
     // Various methods to set and print the intervall of validity.
     
-    void coolDbFolder(std::string dbStr, std::string folderStr);
+    void coolDbFolder(const std::string& dbStr, const std::string& folderStr);
     void setSince(cool::Int64 run, cool::Int64 lumi);
     void setUntil(cool::Int64 iovmax, cool::Int64 lumi);
     void printIOV();
@@ -109,13 +109,19 @@ public:
 
     // Methods needed to come up to COOL framework.
     cool::RecordSpecification createSpecData();
-    coral::AttributeList  createPayloadData(std::string recEta, std::string DetEta, std::string recPhi1, std::string recPhi2, std::string detPhi1, std::string detPhi2, const cool::RecordSpecification& spec); 
+    coral::AttributeList  createPayloadData(const std::string& recEta,
+                                            const std::string& DetEta,
+                                            const std::string& recPhi1,
+                                            const std::string& recPhi2,
+                                            const std::string& detPhi1,
+                                            const std::string& detPhi2,
+                                            const cool::RecordSpecification& spec); 
  
     cool::RecordSpecification createSpecDataCondDB();
-    coral::AttributeList  createPayloadDataCondDB(std::string PanelRes, std::string StripStatus, const cool::RecordSpecification& spec); 
+    coral::AttributeList  createPayloadDataCondDB(const std::string& PanelRes, const std::string& StripStatus, const cool::RecordSpecification& spec); 
 
     // Constructors and Destructors.
-    void CoolOpen(std::string dbStr);
+    void CoolOpen(const std::string& dbStr);
 
     //CoolRpc();
     virtual ~CoolRpc ();
@@ -123,13 +129,32 @@ public:
 
     void dump(cool::ChannelSelection selection);
     std::string dumpField(cool::ChannelId channelId, std::string field);
-    int dumpCode(std::string channelName);
+    int dumpCode(const std::string& channelName);
     
     void dumpall();
 
-    void insert(cool::Int64 run, cool::ChannelId channelId,std::string recEta, std::string DetEta, std::string recPhi1, std::string recPhi2, std::string detPhi1, std::string detPhi2);
-    void insert_withTag(cool::Int64 run, cool::ChannelId channelId,std::string recEta, std::string DetEta, std::string recPhi1, std::string recPhi2, std::string detPhi1, std::string detPhi2, std::string cool_tag);
-    void insertCondDB_withTag(cool::Int64 run, cool::ChannelId channelId, std::string PanelRes,std::string StringStatus, std::string cool_tag);
+    void insert(cool::Int64 run,
+                cool::ChannelId channelId,
+                const std::string& recEta,
+                const std::string& DetEta,
+                const std::string& recPhi1,
+                const std::string& recPhi2,
+                const std::string& detPhi1,
+                const std::string& detPhi2);
+    void insert_withTag(cool::Int64 run,
+                        cool::ChannelId channelId,
+                        const std::string& recEta,
+                        const std::string& DetEta,
+                        const std::string& recPhi1,
+                        const std::string& recPhi2,
+                        const std::string& detPhi1,
+                        const std::string& detPhi2,
+                        const std::string& cool_tag);
+    void insertCondDB_withTag(cool::Int64 run,
+                              cool::ChannelId channelId,
+                              const std::string& PanelRes,
+                              const std::string& StringStatus,
+                              const std::string& cool_tag);
 
     cool::IFolderPtr getCoolFolder();
     cool::IDatabasePtr getCoolDb();

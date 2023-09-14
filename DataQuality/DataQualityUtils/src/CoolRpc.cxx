@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************
@@ -28,7 +28,7 @@ namespace dqutils{
 
  cool::IDatabasePtr
  CoolRpc::
- coolDbInstance(std::string dbStr, bool readOnly) {
+ coolDbInstance(const std::string& dbStr, bool readOnly) {
      try {
  	 //std::cout << "Opening database '" << dbStr << "'...";
  	 cool::IDatabaseSvc& dbSvc = this->databaseService();
@@ -43,7 +43,7 @@ namespace dqutils{
 
  cool::IFolderPtr
  CoolRpc::
- coolFolderInstance(std::string folderStr) {
+ coolFolderInstance(const std::string& folderStr) {
      try {
  	 cool::IFolderPtr folder = m_coolDb->getFolder(folderStr.c_str());
  	// std::cout << "Browsing objects of '" << folderStr << "'" << std::endl;
@@ -57,7 +57,7 @@ namespace dqutils{
 
 
 void
- CoolRpc::coolDbFolder(std::string dbStr, std::string folderStr) {
+ CoolRpc::coolDbFolder(const std::string& dbStr, const std::string& folderStr) {
    m_coolDb = this->coolDbInstance(dbStr, false); 
    m_coolFolder=this->coolFolderInstance(folderStr);  
  }
@@ -105,7 +105,7 @@ void
 
  void
  CoolRpc::
- CoolOpen(std::string dbStr) {
+ CoolOpen(const std::string& dbStr) {
      m_coolDb = this->coolDbInstance(dbStr, false);
  
  }
@@ -154,7 +154,13 @@ void
 
  coral::AttributeList
  CoolRpc::
- createPayloadData(std::string recEta, std::string detEta, std::string recPhi1, std::string recPhi2, std::string detPhi1, std::string detPhi2, const cool::RecordSpecification& spec) {
+ createPayloadData(const std::string& recEta,
+                   const std::string& detEta,
+                   const std::string& recPhi1,
+                   const std::string& recPhi2,
+                   const std::string& detPhi1,
+                   const std::string& detPhi2,
+                   const cool::RecordSpecification& spec) {
   //  std::cout << "createPayloadData "<< std::endl;
 
      coral::AttributeList payload = cool::Record( spec ).attributeList();
@@ -175,7 +181,7 @@ void
 
  coral::AttributeList
  CoolRpc::
- createPayloadDataCondDB(std::string PanelRes,std::string StripStatus,  const cool::RecordSpecification& spec) {
+ createPayloadDataCondDB(const std::string& PanelRes,const std::string& StripStatus,  const cool::RecordSpecification& spec) {
   //  std::cout << "createPayloadData "<< std::endl;
 
      coral::AttributeList payload = cool::Record( spec ).attributeList();
@@ -223,7 +229,7 @@ void
 
  int
  CoolRpc::
- dumpCode(std::string channelName) {
+ dumpCode(const std::string& channelName) {
      std::string result = this->dumpField(this->getCoolFolder()->channelId(channelName.c_str()), "Code");
      return atoi(result.c_str());
  
@@ -241,7 +247,15 @@ void
 
  void
  CoolRpc::
- insert_withTag(cool::Int64 run, cool::ChannelId channelId, std::string recEta, std::string detEta, std::string recPhi1, std::string recPhi2, std::string detPhi1, std::string detPhi2 , std::string cool_tag) {
+ insert_withTag(cool::Int64 run,
+                cool::ChannelId channelId,
+                const std::string& recEta,
+                const std::string& detEta,
+                const std::string& recPhi1,
+                const std::string& recPhi2,
+                const std::string& detPhi1,
+                const std::string& detPhi2 ,
+                const std::string& cool_tag) {
   // std::cout << "Trying to store payload [channel " << std::endl;
      try {
   
@@ -260,7 +274,11 @@ void
 
  void
  CoolRpc::
- insertCondDB_withTag(cool::Int64 run, cool::ChannelId channelId, std::string PanelRes, std::string StripStatus, std::string cool_tag) {
+ insertCondDB_withTag(cool::Int64 run,
+                      cool::ChannelId channelId,
+                      const std::string& PanelRes,
+                      const std::string& StripStatus,
+                      const std::string& cool_tag) {
   // std::cout << "Trying to store payload [channel " << std::endl;
      try {
   
@@ -279,7 +297,14 @@ void
 
  void
  CoolRpc::
- insert(cool::Int64 run, cool::ChannelId channelId, std::string recEta, std::string detEta, std::string recPhi1, std::string recPhi2, std::string detPhi1, std::string detPhi2) {
+ insert(cool::Int64 run,
+        cool::ChannelId channelId,
+        const std::string& recEta,
+        const std::string& detEta,
+        const std::string& recPhi1,
+        const std::string& recPhi2,
+        const std::string& detPhi1,
+        const std::string& detPhi2) {
    std::cout << "Trying to store payload [channel " << std::endl;
      try {
   

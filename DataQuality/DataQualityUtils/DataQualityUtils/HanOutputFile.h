@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsHanOutputFile_h
@@ -34,7 +34,7 @@ namespace dqutils
   public:
     HanOutputFile();
 
-    HanOutputFile(std::string fileName);
+    HanOutputFile(const std::string& fileName);
 
     virtual ~HanOutputFile();
 
@@ -57,14 +57,14 @@ namespace dqutils
     /**
      * @brief Print path - and name of Assessment, represented as JSON TObjString
      */
-    static void printDQGroupJSON(nlohmann::json j, std::string location, const char* path_to_file);
+    static void printDQGroupJSON(nlohmann::json j, const std::string& location, const char* path_to_file);
 
     static std::string getStringName(std::string location, int file_version);
     static std::string getInfo(std::string location, int file_version);
     static std::string getInfo(std::string JSON_str);
     static std::string processJSON_ingetInfo(nlohmann::ordered_json j);
 
-    static std::string getIndentation(std::string pathName, std::string leadingSpace = "");
+    static std::string getIndentation(const std::string& pathName, const std::string& leadingSpace = "");
 
     /**
      * Clears all previous data and opens the file with the given name for
@@ -72,7 +72,7 @@ namespace dqutils
      * successfully or not.
      */
 
-    virtual bool setFile(std::string fileName);
+    virtual bool setFile(const std::string& fileName);
 
     virtual int getFileVersion();  // V1 or V2
 
@@ -109,7 +109,7 @@ namespace dqutils
      * @return "None" if PathInJSON does not exist inJSON, or the  whole JSON string is absent
      */
     static std::optional<std::string> containsKeyInJSON(
-      std::string pathInJSON, std::string jsonName, std::string path_to_JSON);
+      const std::string& pathInJSON, const std::string& jsonName, const std::string& path_to_JSON);
 
     virtual bool saveHistogramToFile(std::string nameHis, std::string location, TDirectory* groupDir, bool drawRefs,
       std::string run_min_LB, std::string pathName, int cnvsType = 1);

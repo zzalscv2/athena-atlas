@@ -341,6 +341,8 @@ namespace dqutils {
     class CopyHistogram : public HistogramOperation {
     public:
       CopyHistogram(TDirectory* target, const std::string & dirName);
+      CopyHistogram(const CopyHistogram&) = delete;
+      CopyHistogram& operator= (const CopyHistogram&) = delete;
       virtual ~CopyHistogram();
       virtual bool execute(TH1* hist);
       virtual bool execute(TGraph* graph);
@@ -426,7 +428,7 @@ namespace dqutils {
     static std::atomic<int> m_debugLevel;
     static std::atomic<int> m_fileCompressionLevel;
   public:
-    static int mergeLBintervals(std::string, std::string debugLevel = "none");
+    static int mergeLBintervals(const std::string&, const std::string& debugLevel = "none");
     static int getDebugLevel();
     static void setDebugLevel(int level);
     static int getCompressionLevel(){return m_fileCompressionLevel;}
