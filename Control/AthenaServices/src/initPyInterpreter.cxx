@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // initPyInterpreter.cxx 
@@ -67,6 +67,7 @@ initPyInterpreter()
    * The GIL is initialized by Py_Initialize() since Python 3.7."
    */
 
+#if PY_MAJOR_VERSION == 3 && PY_MINOR_VERSION < 11
   Py_Initialize();
 
   if (!Py_IsInitialized()) {
@@ -75,9 +76,6 @@ initPyInterpreter()
   }
 
   // init the sys.argv...
-#if PY_MAJOR_VERSION < 3
-  PySys_SetArgv(System::argc(), System::argv());
-#else
   auto wargsinit = 
     []() { std::vector<std::wstring> wargs;
            int argc = System::argc();
@@ -106,6 +104,24 @@ initPyInterpreter()
   // Bleh --- python takes non-const argv pointers.
   wchar_t** wargv_nc ATLAS_THREAD_SAFE = const_cast<wchar_t**> (wargv.data());
   PySys_SetArgv(System::argc(), wargv_nc);
+#else
+  PyConfig config;
+  PyConfig_InitPythonConfig (&config);
+  PyStatus status = PyConfig_SetBytesArgv (&config, System::argc(),
+                                           System::argv());
+  if (PyStatus_Exception (status)) {
+    report_py_exception();
+    PyConfig_Clear (&config);
+    return StatusCode::FAILURE;
+  }
+
+  status = Py_InitializeFromConfig (&config);
+  if (PyStatus_Exception (status)) {
+    report_py_exception();
+    PyConfig_Clear (&config);
+    return StatusCode::FAILURE;
+  }
+  PyConfig_Clear (&config);
 #endif
   return StatusCode::SUCCESS;
 }
