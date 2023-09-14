@@ -11,8 +11,10 @@ from AthenaCommon.SystemOfUnits import millimeter, centimeter
 ROOT.gInterpreter.ProcessLine('#include "TrkExUtils/MaterialInteraction.h"')
 ROOT.gSystem.Load("libTrkExUtils.so")
 
-# Values for silicon from https://pdg.lbl.gov/2022/AtomicNuclearProperties/HTML/silicon_Si.html
-# PDG values for the mean energy loss are in [MeV cm^2/g]
+# Values for silicon from 
+# https://pdg.lbl.gov/2022/AtomicNuclearProperties/HTML/silicon_Si.html
+
+# Momentum MeV
 p = [
     92.85,
     100.3,
@@ -107,6 +109,8 @@ p = [
     9000000.0,
     10000000.0,
 ]
+
+# PDG values for the radiation energy loss [MeV cm^2/g]
 pdg_rad = [
     6.158e-05,
     6.377e-05,
@@ -201,6 +205,7 @@ pdg_rad = [
     46.9,
     52.27,
 ]
+# PDG values for the mean energy loss [MeV cm^2/g]
 pdg_mean_ion = [
     2.796,
     2.608,
