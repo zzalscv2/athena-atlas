@@ -34,7 +34,7 @@
 
 #include <string>
 #include <ostream>
-#include <boost/regex.hpp>
+#include <regex>
 
 namespace CxxUtils {
 
@@ -59,10 +59,10 @@ namespace CxxUtils {
     const std::string letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const std::string whitespace = " \t\n\r";
     
-    const boost::regex generic_latex_regex("\\\\([abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)[ ]*");
-    const boost::regex generic_xml_regex("<\\s*([abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)([^>])*>");
-    const boost::regex generic_html_entity_regex("&[abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+;");
-    
+    const std::regex generic_latex_regex("\\\\([abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)[ ]*");
+    const std::regex generic_xml_regex("<\\s*([abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+)([^>])*>");
+    const std::regex generic_html_entity_regex("&[abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]+;");
+
     enum SPECIALSCRIPT {
       NORMALSCRIPT = 0,
       SUPERSCRIPT = 1,
