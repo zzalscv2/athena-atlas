@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -85,7 +85,7 @@ namespace dqutils
 
   HanOutputFile::HanOutputFile() : m_file(0), m_style(0)
   {
-    clearData();
+    HanOutputFile::clearData();
     TPluginHandler* h;
     if ((h = gROOT->GetPluginManager()->FindHandler("TVirtualPS", "image")))
     {
@@ -94,10 +94,10 @@ namespace dqutils
     }
   }
 
-  HanOutputFile::HanOutputFile(std::string fileName) : m_file(0), m_style(0)
+  HanOutputFile::HanOutputFile(const std::string& fileName) : m_file(0), m_style(0)
   {
-    clearData();
-    setFile(fileName);
+    HanOutputFile::clearData();
+    HanOutputFile::setFile(fileName);
     TPluginHandler* h;
     if ((h = gROOT->GetPluginManager()->FindHandler("TVirtualPS", "image")))
     {
@@ -111,7 +111,7 @@ namespace dqutils
     //   bool useRecursiveDelete = gROOT->MustClean();
     //   gROOT->SetMustClean(false);
 
-    clearData();
+    HanOutputFile::clearData();
 
     //   gROOT->SetMustClean(useRecursiveDelete);
   }
@@ -278,7 +278,7 @@ namespace dqutils
     }
   }
 
-  void HanOutputFile::printDQGroupJSON(nlohmann::json j, std::string location, const char* path_to_file)
+  void HanOutputFile::printDQGroupJSON(nlohmann::json j, const std::string& location, const char* path_to_file)
   {
     // Parse our JSON and get all nested Assessments
     nlohmann::json valuestring;
@@ -384,7 +384,7 @@ namespace dqutils
   {
     while (dirname.size() > 0 && dirname[dirname.size() - 1] == '/')
     {
-      dirname = dirname.substr(0, dirname.size() - 2);
+      dirname.erase (dirname.size()-2, dirname.size());
     }
     while (dirname.size() > 0 && dirname[0] == '/')
     {
@@ -420,7 +420,7 @@ namespace dqutils
   }
 
   std::optional<std::string> HanOutputFile::containsKeyInJSON(
-    std::string pathInJSON, std::string jsonName, std::string path_to_JSON)
+    const std::string& pathInJSON, const std::string& jsonName, const std::string& path_to_JSON)
   {
     gROOT->cd(path_to_JSON.c_str());
     TKey* key = gDirectory->FindKey(jsonName.c_str());
@@ -718,7 +718,7 @@ namespace dqutils
     return value;
   }
 
-  std::string HanOutputFile::getIndentation(std::string pathName, std::string leadingSpace)
+  std::string HanOutputFile::getIndentation(const std::string& pathName, const std::string& leadingSpace)
   {
     std::string space = leadingSpace;
     std::string::size_type i = pathName.find_first_of('/');
@@ -731,7 +731,7 @@ namespace dqutils
     return space;
   }
 
-  bool HanOutputFile::setFile(std::string fileName)
+  bool HanOutputFile::setFile(const std::string& fileName)
   {
     clearData();
     if (fileName == "") return false;

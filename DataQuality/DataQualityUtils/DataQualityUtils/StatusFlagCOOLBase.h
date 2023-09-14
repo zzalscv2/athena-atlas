@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsStatusFlagCOOLBase_h
@@ -64,15 +64,15 @@ protected:
     void insert_helper(cool::ChannelId channelId, 
 		       coral::AttributeList& payload,
 		       std::string& tag_name);
-    void Initialize(std::string dbStr, std::string folderStr, 
+    void Initialize(const std::string& dbStr, const std::string& folderStr, 
 		    int runS, int lumiS, int runU, int lumiU);
 
 public:
     // Connects to the database. Throws a "DatabaseDoesNotExist" exception if database does not exist.
-    cool::IDatabasePtr coolDbInstance(std::string dbStr, bool readOnly);
+    cool::IDatabasePtr coolDbInstance(const std::string& dbStr, bool readOnly);
     
     // Browses the COOL folder. Throws a "FolderNotFound" exception if folder does not exist.
-    cool::IFolderPtr coolFolderInstance(std::string folderStr);
+    cool::IFolderPtr coolFolderInstance(const std::string& folderStr);
 
     // Various methods to set and print the intervall of validity.
     void setSince(cool::Int64 run, cool::Int64 lumi);
@@ -85,7 +85,7 @@ public:
     void flush();
    
     // Constructors and Destructors.
-    StatusFlagCOOLBase(std::string dbStr, std::string folderStr, int runS, int lumiS, int runU, int lumiU);
+    StatusFlagCOOLBase(const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU);
     StatusFlagCOOLBase(int runS, int lumiS, int runU, int lumiU);
     StatusFlagCOOLBase();
     virtual ~StatusFlagCOOLBase ();
@@ -93,8 +93,8 @@ public:
     // Methods of "interest". To insert a status flag you can use either ChannelId or ChannelName.
     void dump(cool::ChannelSelection selection, std::string tag_name);
     std::string dumpField(cool::ChannelId channelId, std::string field, std::string tag_name);
-    int dumpCode(std::string channelName, std::string tag_name);
-    void dumpall(std::string tag_name);
+    int dumpCode(const std::string& channelName, const std::string& tag_name);
+    void dumpall(const std::string& tag_name);
 
     // Some further getters.
     cool::IFolderPtr getCoolFolder();

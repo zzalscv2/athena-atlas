@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -50,7 +50,7 @@ namespace dqutils{
 
 cool::IDatabasePtr 
 HistogramDataCOOL::
-coolDbInstance(std::string dbStr, bool readOnly) {
+coolDbInstance(const std::string& dbStr, bool readOnly) {
     try {
         std::cout << "Opening database '" << dbStr << "'...";
         cool::IDatabaseSvc& dbSvc = this->databaseService();
@@ -65,7 +65,7 @@ coolDbInstance(std::string dbStr, bool readOnly) {
 
 cool::IFolderPtr 
 HistogramDataCOOL::
-coolFolderInstance(std::string folderStr) {
+coolFolderInstance(const std::string& folderStr) {
     try {
         cool::IFolderPtr folder = m_coolDb->getFolder(folderStr.c_str());
         std::cout << "Browsing objects of '" << folderStr << "'" << std::endl;
@@ -117,7 +117,7 @@ printIOV(){
 }
 
 HistogramDataCOOL::
-HistogramDataCOOL (std::string dbStr, std::string folderStr, int runS, int lumiS, int runU, int lumiU) {
+HistogramDataCOOL (const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU) {
     m_coolDb = this->coolDbInstance(dbStr, false);
     m_coolFolder = this->coolFolderInstance(folderStr);
     m_coolFolderH = this->coolFolderInstance(folderStr);
@@ -196,7 +196,9 @@ createSpecH() {
 
 coral::AttributeList 
 HistogramDataCOOL::
-createPayloadH(int colourCode, std::string algo, int entries, float par1, float par2, float par3, float par4, float par5, const cool::RecordSpecification& specH) {
+createPayloadH(int colourCode,
+               const std::string& algo,
+               int entries, float par1, float par2, float par3, float par4, float par5, const cool::RecordSpecification& specH) {
     coral::AttributeList payloadH = cool::Record( specH ).attributeList();
     payloadH["Code"].data<cool::Int32>() = colourCode;
     payloadH["Algo"].data<cool::String255>() = algo;
@@ -237,14 +239,14 @@ dump(cool::ChannelSelection selection, std::string tag_name) {
 
 int 
 HistogramDataCOOL::
-dumpCode(std::string channelName, std::string tag_name) {
+dumpCode(const std::string& channelName, const std::string& tag_name) {
     std::string result = this->dumpHisto(this->getCoolFolderH()->channelId(channelName.c_str()), "Code", tag_name);
     return atoi(result.c_str());
 }
 
 void 
 HistogramDataCOOL::
-dumpall(std::string tag_name) {      
+dumpall(const std::string& tag_name) {      
   this->dump(cool::ChannelSelection::all(), tag_name);
 }
 
@@ -270,7 +272,10 @@ dumpHisto(cool::ChannelId channelId, std::string field, std::string tag_name) {
 
 void 
 HistogramDataCOOL::
-insertH(cool::ChannelId channelId, int code, std::string algo, int entries, float par1, float par2, float par3, float par4, float par5, std::string tag_name) {
+insertH(cool::ChannelId channelId, int code,
+        const std::string& algo,
+        int entries, float par1, float par2, float par3, float par4, float par5,
+        const std::string& tag_name) {
     try {
       cool::RecordSpecification specH = this->createSpecH();
       coral::AttributeList payloadH = this->createPayloadH(code, algo, entries, par1, par2, par3, par4, par5, specH);	
@@ -1137,7 +1142,7 @@ historyDB(  int HistoId, std::string nameHisto, std::string tag_name  )
 
 std::string 
 HistogramDataCOOL::
-defParName(std::string algo, std::string nameHisto, int i)
+defParName(const std::string& algo, const std::string& nameHisto, int i)
 {
   std::string Algorithm = algo;
   std::string nameh = nameHisto;

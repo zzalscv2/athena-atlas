@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -28,7 +28,7 @@ namespace dqutils{
 
 cool::IDatabasePtr 
 StatusFlagCOOLBase::
-coolDbInstance(std::string dbStr, bool readOnly) {
+coolDbInstance(const std::string& dbStr, bool readOnly) {
     try {
         std::cout << "Opening database '" << dbStr << "'...";
         cool::IDatabaseSvc& dbSvc = this->databaseService();
@@ -43,7 +43,7 @@ coolDbInstance(std::string dbStr, bool readOnly) {
 
 cool::IFolderPtr 
 StatusFlagCOOLBase::
-coolFolderInstance(std::string folderStr) {
+coolFolderInstance(const std::string& folderStr) {
     try {
         cool::IFolderPtr folder = m_coolDb->getFolder(folderStr.c_str());
         std::cout << "Browsing objects of '" << folderStr << "'" << std::endl;
@@ -103,7 +103,7 @@ flush() {
 
 void
 StatusFlagCOOLBase::
-Initialize(std::string dbStr, std::string folderStr, int runS, int lumiS, int runU, int lumiU) {
+Initialize(const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU) {
   m_coolDb = this->coolDbInstance(dbStr, false);
   m_coolFolder = this->coolFolderInstance(folderStr);
   this->setIOV(runS, lumiS, runU, lumiU);
@@ -111,7 +111,7 @@ Initialize(std::string dbStr, std::string folderStr, int runS, int lumiS, int ru
 
   
 StatusFlagCOOLBase::
-StatusFlagCOOLBase (std::string dbStr, std::string folderStr, int runS, int lumiS, int runU, int lumiU) {
+StatusFlagCOOLBase (const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU) {
   Initialize(dbStr, folderStr, runS, lumiS, runU, lumiU);
 }
 
@@ -169,7 +169,7 @@ dumpField(cool::ChannelId channelId, std::string field, std::string tag_name) {
 
 int
 StatusFlagCOOLBase::
-dumpCode(std::string channelName, std::string tag_name) {
+dumpCode(const std::string& channelName, const std::string& tag_name) {
     std::string result = this->dumpField(this->getCoolFolder()->channelId(channelName.c_str()), "Code", tag_name);
     if (result == "") {
       return INT_MAX;
@@ -180,7 +180,7 @@ dumpCode(std::string channelName, std::string tag_name) {
 
 void 
 StatusFlagCOOLBase::
-dumpall(std::string tag_name) {      
+dumpall(const std::string& tag_name) {      
   this->dump(cool::ChannelSelection::all(), tag_name);
 }
 

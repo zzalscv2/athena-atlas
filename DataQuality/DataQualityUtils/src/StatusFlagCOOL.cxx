@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -26,7 +26,7 @@ ClassImp(dqutils::StatusFlagCOOL)
 namespace dqutils{
 
 StatusFlagCOOL::
-StatusFlagCOOL (std::string dbStr, std::string folderStr, int runS, int lumiS, int runU, int lumiU)
+StatusFlagCOOL (const std::string& dbStr, const std::string& folderStr, int runS, int lumiS, int runU, int lumiU)
   : StatusFlagCOOLBase(dbStr, folderStr, runS, lumiS, runU, lumiU)
 {
 }

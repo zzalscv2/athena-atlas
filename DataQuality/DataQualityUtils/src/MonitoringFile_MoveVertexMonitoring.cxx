@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -94,11 +94,11 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
 				out_inStem = run_dir+"/"+lb_dir+"/InDetGlobal/PrimaryVertexMultiplicity/nVx";
                                 out_outStem = "nVx_"+lb_dir;
 				if (writeEOS==0){
-				    writeEOS = updateHists(inFilename.c_str(),out_inStem,out_EOS,out_outStem);
-				    if(writeEOS!=0 && IsFirstTime) writeLOCAL = updateHists(inFilename.c_str(),out_inStem,out_LOCAL,out_outStem);
+				    writeEOS = updateHists(inFilename,out_inStem,out_EOS,out_outStem);
+				    if(writeEOS!=0 && IsFirstTime) writeLOCAL = updateHists(inFilename,out_inStem,out_LOCAL,out_outStem);
 				}
                                 else{
-                                    writeLOCAL = updateHists(inFilename.c_str(),out_inStem,out_LOCAL,out_outStem);
+                                    writeLOCAL = updateHists(inFilename,out_inStem,out_LOCAL,out_outStem);
                                 }
 				
                                 if(writeEOS != 0 && !IsFirstTime && writeLOCAL != 0){

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -119,7 +119,7 @@ MonitoringFile()
 {
   m_debugLevel=0;
   m_fileCompressionLevel=1;
-  clearData();
+  MonitoringFile::clearData();
 }
 
 
@@ -130,8 +130,8 @@ MonitoringFile( const std::string & fileName )
 {
   m_debugLevel=0;
   m_fileCompressionLevel=1;
-  clearData();
-  setFile( fileName );
+  MonitoringFile::clearData();
+  MonitoringFile::setFile( fileName );
 }
 
 
@@ -2239,7 +2239,7 @@ int MonitoringFile::mergeLB_processRun(TDirectory *dir_run, debugLevel_t& debugL
    return 0;
 }
 
-int MonitoringFile::mergeLBintervals(std::string inFilename, std::string inDebugLevel) {
+int MonitoringFile::mergeLBintervals(const std::string& inFilename, const std::string& inDebugLevel) {
    // open merged file, call mergeLB_processRun for each "run_" directory
    // in file, close file
    std::string name("mergeLBintervals");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -157,9 +157,9 @@ namespace dqutils {
 	delete metadata_overview_tr;
 	return;
       }
-      metadata_overview.fill(h1->GetName(), intervalData_.c_str(), chainData_.c_str(), mergeData_.c_str());
-      if(h2) metadata_overview.fill(h2->GetName(), intervalData_.c_str(), chainData_.c_str(), mergeData_.c_str());
-      if(h3) metadata_overview.fill(h3->GetName(), intervalData_.c_str(), chainData_.c_str(), mergeData_.c_str());
+      metadata_overview.fill(h1->GetName(), intervalData_, chainData_, mergeData_);
+      if(h2) metadata_overview.fill(h2->GetName(), intervalData_, chainData_, mergeData_);
+      if(h3) metadata_overview.fill(h3->GetName(), intervalData_, chainData_, mergeData_);
       //set new hists to 0 dir
       TDirectory* tempDir = gDirectory;
       targetDir->cd();
@@ -169,7 +169,7 @@ namespace dqutils {
     else {
       TTree*  metadata_overview_tr = new TTree( "metadata", "Monitoring Metadata" );
       OutputMetadata metadata_overview(metadata_overview_tr);      
-      if(h1) metadata_overview.fill( h1->GetName(), intervalData_.c_str(), chainData_.c_str(), mergeData_.c_str());
+      if(h1) metadata_overview.fill( h1->GetName(), intervalData_, chainData_, mergeData_);
       TDirectory* tempDir = gDirectory;
       targetDir->cd();
       h1->SetDirectory(0);
