@@ -121,12 +121,8 @@ StatusCode TileHitVecToNtuple::execute()
 {
   
   // step1: read TileHits from TDS
-  const TileHitVector * inputHits;
+  const TileHitVector * inputHits = nullptr;
   CHECK( evtStore()->retrieve(inputHits, m_hitVector) );
-  
-  // step2: put items in ntuple
-  TileHitVecConstIterator it = inputHits->begin();
-  TileHitVecConstIterator end = inputHits->end();
   
   m_nchan = 0;
   m_tolE = 0.0;
@@ -136,15 +132,14 @@ StatusCode TileHitVecToNtuple::execute()
   m_tolE3 = 0.0;
   m_tolE4 = 0.0;
   int n_hit = 0;
-  for (; it != end; ++it) {
+  for (const TileHit& cinp : *inputHits) {
 
-    const TileHit * cinp = &(*it);
-    Identifier id = cinp->identify();
+    Identifier id = cinp.identify();
 
-    int size = cinp->size();
+    int size = cinp.size();
     for (int i = 0; i < size; ++i) {
-      float time=cinp->time(i);
-      double ene=cinp->energy(i);
+      float time=cinp.time(i);
+      double ene=cinp.energy(i);
       m_tolE += ene;
       if (time<49.99) {
 	m_tolE4 += ene;
@@ -161,8 +156,8 @@ StatusCode TileHitVecToNtuple::execute()
 	  }
 	}
       }
-      m_energy[m_nchan] = cinp->energy(i);
-      m_time[m_nchan] = cinp->time(i);
+      m_energy[m_nchan] = cinp.energy(i);
+      m_time[m_nchan] = cinp.time(i);
 
       m_detector[m_nchan] = m_tileID->section(id);
       m_side[m_nchan] = m_tileID->side(id);
@@ -181,11 +176,11 @@ StatusCode TileHitVecToNtuple::execute()
           << m_tileID->to_string(id, -1) << " ener=";
 
       for (int i = 0; i < size; ++i)
-        msg(MSG::VERBOSE) << cinp->energy(i) << " ";
+        msg(MSG::VERBOSE) << cinp.energy(i) << " ";
 
       msg(MSG::VERBOSE) << "time=";
       for (int i = 0; i < size; ++i)
-        msg(MSG::VERBOSE) << cinp->time(i) << " ";
+        msg(MSG::VERBOSE) << cinp.time(i) << " ";
 
       msg(MSG::VERBOSE)  << endmsg;
     }
