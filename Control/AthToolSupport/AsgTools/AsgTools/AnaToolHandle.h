@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,6 +15,7 @@
 #include <AsgTools/AsgTool.h>
 #include <AsgTools/AsgToolConfig.h>
 #include <AsgTools/ToolHandle.h>
+#include <type_traits>
 #include <atomic>
 #include <list>
 #include <map>
@@ -308,13 +309,17 @@ namespace asg
     /// \pre !isInitialized()
     /// \{
   public:
+    // ToolHandle and ToolHandleArray have ctors that can accept a single int,
+    // so use enable_if to avoid ambiguities.
     template <class T2> StatusCode
     setProperty (const std::string& property, const T2& value);
-    template <class T2> StatusCode
+    template <class T2>
+    typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
     setProperty (const std::string& property, const ToolHandle<T2>& value);
     template <class T2> StatusCode
     setProperty (const std::string& property, const AnaToolHandle<T2>& value);
-    template <class T2> StatusCode
+    template <class T2>
+    typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
     setProperty (const std::string& property, const ToolHandleArray<T2>& value);
     /// \}
 
