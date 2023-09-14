@@ -313,7 +313,7 @@ def NullModulatorCfg():
     """Provides modulator tool without any modulations."""
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.HIUEModulatorTool('NullUEModulator',
-                                                      EventShapeKey='NULL',
+                                                      EventShapeKey='',
                                                       DoV2=False,
                                                       DoV3=False,
                                                       DoV4=False))

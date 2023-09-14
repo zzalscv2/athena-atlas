@@ -35,9 +35,9 @@ private:
 
   //Attempt to move to data handlers
   //std::string m_shape_key;
-  //key attribute set to NULL to have consistency with previously set m_shape_key
-  SG::ReadHandleKey< xAOD::HIEventShapeContainer > m_shape_key { this, "EventShapeKey", "NULL", "The input HI Event Shape"};
-
+  //key attribute set to "empty string" to have consistency with previously set m_shape_key (NULLModifier)
+  SG::ReadHandleKey< xAOD::HIEventShapeContainer > m_shape_key { this, "EventShapeKey", "", "The input HI Event Shape"};
+ 
   const xAOD::HIEventShape* m_shape;
   std::vector<unsigned int> m_nh_vector;
 

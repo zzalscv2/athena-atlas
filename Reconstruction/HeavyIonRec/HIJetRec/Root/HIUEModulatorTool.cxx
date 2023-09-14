@@ -21,16 +21,19 @@ HIUEModulatorTool::HIUEModulatorTool(const std::string& n) : asg::AsgTool(n),
 
 StatusCode HIUEModulatorTool::initialize()
 {
-	//First we initialize keys - after initialization they are frozen
-  ATH_CHECK( m_shape_key.initialize( !m_shape_key.key().empty()) );
+  //First we initialize keys - after initialization they are frozen
 
-	m_nh_vector.reserve(3);
+  ATH_CHECK( m_shape_key.initialize( !m_shape_key.key().empty() ) );
+
+  m_nh_vector.reserve(3);
   if(m_do_v2) m_nh_vector.push_back(2);
   if(m_do_v3) m_nh_vector.push_back(3);
   if(m_do_v4) m_nh_vector.push_back(4);
-  if(m_nh_vector.size()!=0 && (m_shape_key.key().compare("NULL") == 0))
+  if( m_nh_vector.size()!=0 && m_shape_key.key().empty() )
     ATH_MSG_WARNING("Requested modulation, but provided no name for HIEventShapeContainer, no modulation will be applied");
+
   ATH_MSG_DEBUG("Equipping " << m_do_v2 << "\t" << m_do_v3 << "\t" << m_do_v4);
+
   return StatusCode::SUCCESS;
 }
 
@@ -61,7 +64,11 @@ float HIUEModulatorTool::getModulation(float phi,
 StatusCode HIUEModulatorTool::getShape(const xAOD::HIEventShape* & shape) const
 {
   shape = 0;
-  if( m_shape_key.key().compare("NULL") == 0) return StatusCode::SUCCESS;
+  if( m_shape_key.key().empty() )
+  { 
+	ATH_MSG_DEBUG("ShapeKey empty, no modulation, returning shape =" << shape);
+	return StatusCode::SUCCESS;
+  }
 
 	SG::ReadHandle<xAOD::HIEventShapeContainer>  read_handle_evtShape ( m_shape_key );
 	if (!read_handle_evtShape.isValid()) {
@@ -100,6 +107,7 @@ float HIUEModulatorTool::modulate(const std::vector<unsigned int>& nh_vector, co
     }
     modulation/=et;
   }
+
   return modulation+1;
 }
 
@@ -120,3 +128,4 @@ StatusCode HIUEModulatorTool::checkCompatibility() const
   }
   return StatusCode::SUCCESS;
 }
+
