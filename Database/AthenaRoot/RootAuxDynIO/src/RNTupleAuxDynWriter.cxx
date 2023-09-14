@@ -28,6 +28,7 @@ namespace RootAuxDynIO
          m_entry = std::make_unique<REntry>();
 #endif
          m_opts.SetCompression( compression );
+         m_opts.SetUseBufferedWrite( false );
          m_model->SetDescription( ntupleName );
       }
 
