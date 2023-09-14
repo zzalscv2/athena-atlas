@@ -1899,8 +1899,6 @@ namespace Muon {
                     }
                     // get the pad width from the detector design
                     chWidth = 0.5 * design->channelWidth(prd->localPosition(), true);
-                    ATH_MSG_DEBUG(" sPadWidth " << design->sPadWidth << " lPadWidth " << design->lPadWidth << " inputRowWidth "
-                                                << design->inputRowWidth);
                     ATH_MSG_DEBUG(" Pad chWidth " << chWidth << " phi global " << prd->globalPosition().phi());
                 } else if (m_idHelperSvc->stgcIdHelper().channelType(id) == 2) {
                     const MuonGM::MuonChannelDesign* design = prd->detectorElement()->getDesign(id);
