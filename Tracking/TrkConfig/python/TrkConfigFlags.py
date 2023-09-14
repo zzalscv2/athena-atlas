@@ -281,8 +281,6 @@ def createTrackingConfigFlags():
     # Turn running of BeamGas second pass on and off
     icf.addFlag("Tracking.doBeamGas",
                 lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
-    # Switch for running MinBias settings with a 300 MeV pT cut (for Heavy Ion Proton)
-    icf.addFlag("Tracking.doHIP300", False)
     # Special reconstruction for BLS physics
     icf.addFlag("Tracking.doBLS", False)
 
