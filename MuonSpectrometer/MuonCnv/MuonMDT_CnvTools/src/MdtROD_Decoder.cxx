@@ -1,6 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+
+// The data format is described in ATL-DAQ-2003-023 / ATL-COM-MUON-2003-011
+// https://cds.cern.ch/record/685552
+// http://www.nikhef.nl/pub/experiments/atlas/daq/mrod/mrodprr/daq-2003-023.pdf
 
 #include "MdtROD_Decoder.h"
 
@@ -44,6 +48,7 @@ StatusCode MdtROD_Decoder::finalize() {
 }
 
 StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, MdtCsmContainer& rdoIDC) const {
+#define ERROR_WITH_LINE(msg) ATH_MSG_ERROR(__FILE__ << ":" << __LINE__<< " " << msg)
     //  m_debug = (m_log.level() <= MSG::DEBUG); // use to control if output debug info.
     //  decoding classes
     MdtCsmReadOut csmReadOut;
@@ -58,7 +63,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
     try {
         robFrag.check();
     } catch (const eformat::Issue& ex) {
-        ATH_MSG_DEBUG(ex.what());
+        ERROR_WITH_LINE(ex.what());
         return StatusCode::FAILURE;  // error in fragment - we search for no collection
     }
 
@@ -71,7 +76,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
         robFrag.status(it);
 
         if (*it) {
-            ATH_MSG_DEBUG("Error in ROB status word: 0x" << std::hex << *it << std::dec);
+            ERROR_WITH_LINE("Error in ROB status word: 0x" << std::hex << *it << std::dec);
 
             // the status word analysis in case of eformat version > 3.0
             // if ( (robFrag.version() >> 16) > 0x0300 ) {
@@ -124,7 +129,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
         ATH_MSG_DEBUG("The size of this ROD-read is ");
         for (unsigned int i = 0; i < size; i++) ATH_MSG_DEBUG("word " << i << " = " << MSG::hex << vint[i] << MSG::dec);
     } else {
-        ATH_MSG_DEBUG(" Buffer size 0 ! ");
+        ERROR_WITH_LINE("Buffer size 0 ! ");
         return StatusCode::FAILURE;
     }
 
@@ -140,10 +145,22 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
                                                  << MSG::dec);
     }
 
+    if (size < 2) {
+      ERROR_WITH_LINE("Too few ROD words: " << size);
+      return StatusCode::FAILURE;
+    }
+    ++wordPos;
+    csmReadOut.decodeWord(vint[wordPos]);
+    if (csmReadOut.is_EOB()) {
+      ATH_MSG_WARNING("No CSM data ROD ID: 0x" << MSG::hex << cabling_data.subdetectorId <<
+                      ", 0x" << static_cast<unsigned int>(cabling_data.mrod) << MSG::dec);
+      return StatusCode::SUCCESS;
+    }
+
     SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey};
     const MuonMDT_CablingMap* readCdo{*readHandle};
     if (!readCdo) {
-        ATH_MSG_ERROR("Null pointer to the read conditions object");
+        ERROR_WITH_LINE("Null pointer to the read conditions object");
         return StatusCode::FAILURE;
     }
     auto& msg = msgStream();
@@ -151,7 +168,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
         while ((!csmReadOut.is_BOL()) && (!csmReadOut.is_EOB())) {
             wordPos += 1;
             if (wordPos >= size) {
-                ATH_MSG_DEBUG("Error: data corrupted");
+                ERROR_WITH_LINE("Error: data corrupted");
                 return StatusCode::FAILURE;
             }
             csmReadOut.decodeWord(vint[wordPos]);
@@ -160,7 +177,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
         if (csmReadOut.is_BOL()) {
             ATH_MSG_DEBUG("Found the Beginnning of Link ");
         } else if (csmReadOut.is_EOB()) {
-            ATH_MSG_DEBUG("Error: collection not found ");
+            ERROR_WITH_LINE(" Error: collection not found");
             return StatusCode::FAILURE;
         }
 
@@ -237,7 +254,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
 
             wordPos += 1;
             if (wordPos >= size) {
-                ATH_MSG_DEBUG("Error: data corrupted");
+                ERROR_WITH_LINE("Error: data corrupted");
                 return StatusCode::FAILURE;
             }
             csmReadOut.decodeWord(vint[wordPos]);
@@ -246,7 +263,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
             // Loop on the TDCs blocks, if present
             wordPos += 1;
             if (wordPos >= size) {
-                ATH_MSG_DEBUG("Error: data corrupted");
+                ERROR_WITH_LINE("Error: data corrupted");
                 return StatusCode::FAILURE;
             }
             isHpTdc ? hptdcReadOut.decodeWord(vint[wordPos]) : amtReadOut.decodeWord(vint[wordPos]);
@@ -259,7 +276,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
                 // increase word count by one
                 wordPos += 1;
                 if (wordPos >= size) {
-                    ATH_MSG_DEBUG("Error: data corrupted");
+                    ERROR_WITH_LINE("Error: data corrupted");
                     return StatusCode::FAILURE;
                 }
 
@@ -330,7 +347,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
                     // increase word count by one
                     wordPos += 1;
                     if (wordPos >= size) {
-                        ATH_MSG_DEBUG("Error: data corrupted");
+                        ERROR_WITH_LINE("Error: data corrupted");
                         return StatusCode::FAILURE;
                     }
 
@@ -350,7 +367,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
                 if ((isHpTdc ? hptdcReadOut.is_EOT() : amtReadOut.is_EOT())) {
                     wordPos += 1;
                     if (wordPos >= size) {
-                        ATH_MSG_ERROR("Error: data corrupted");
+                        ERROR_WITH_LINE("Error: data corrupted");
                         return StatusCode::FAILURE;
                     }
                 }
@@ -363,7 +380,7 @@ StatusCode MdtROD_Decoder::fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::RO
         }  // Check for the chamber offline id = collection offline id
         wordPos += 1;
         if (wordPos >= size) {
-            ATH_MSG_ERROR("Data corrupted");
+            ERROR_WITH_LINE("Data corrupted");
             return StatusCode::FAILURE;
         }
         csmReadOut.decodeWord(vint[wordPos]);
