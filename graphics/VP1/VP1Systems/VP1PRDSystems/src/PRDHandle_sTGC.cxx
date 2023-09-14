@@ -79,7 +79,7 @@ void PRDHandle_sTGC::buildShapes(SoNode*&shape_simple, SoNode*&shape_detailed)
 
   const MuonGM::sTgcReadoutElement* detEl = prd->detectorElement();
 
-  if (idhelper->channelType(id)==0) {     // pads
+  if (idhelper->channelType(id)==sTgcIdHelper::Pad) {     // pads
     VP1Msg::messageDebug("Building sTgc pad...");
     const MuonGM::MuonPadDesign* pad_design = detEl->getPadDesign( id );
     
@@ -87,13 +87,15 @@ void PRDHandle_sTGC::buildShapes(SoNode*&shape_simple, SoNode*&shape_detailed)
 //    shape_simple = common()->nodeManager()->getShapeNode_Strip(0.); // FIXME: ORIGINAL FROM SHARKA. Works perfectly but the STGC elements are point-like until very very very close...
     
     // local position of the pad 
-    Amg::Vector2D locPad;
-    if (!detEl->stripPosition(id,locPad) ) return;
     if (!pad_design) return;
     
-    double etaWidth=pad_design->inputRowWidth;
-    double phiMinWidth=pad_design->channelWidth(Amg::Vector2D(locPad.x(),locPad.y()-0.5*etaWidth),true);
-    double phiMaxWidth=pad_design->channelWidth(Amg::Vector2D(locPad.x(),locPad.y()+0.5*etaWidth),true);
+    using padCorners = MuonGM::MuonPadDesign::padCorners;
+    using CornerArray = MuonGM::MuonPadDesign::CornerArray;
+    CornerArray padEdges{};
+    pad_design->channelCorners(idhelper->channel(id), padEdges);
+    double etaWidth = padEdges[padCorners::topRight].x() - padEdges[padCorners::botRight].x();
+    double phiMinWidth = padEdges[padCorners::botLeft].y();
+    double phiMaxWidth = padEdges[padCorners::topLeft].y();
     
     shape_simple = common()->nodeManager()->getShapeNode_Pad(etaWidth,phiMinWidth,phiMaxWidth,0.01); // fixme: now shape_simple == shape_detailed
 

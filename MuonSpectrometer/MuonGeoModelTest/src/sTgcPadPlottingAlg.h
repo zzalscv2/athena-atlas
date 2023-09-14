@@ -12,7 +12,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 class TGraph;
-class TH1;
+class TH2;
 /**
  *  Simple algorithm to plot the sTGC pad positions
 */
@@ -27,8 +27,9 @@ class sTgcPadPlottingAlg : public AthHistogramAlgorithm {
   unsigned int cardinality() const override final { return 1; }
 
  private:
+  
   int layerId(const Identifier& id) const;
-
+  std::string padName(const Identifier& padId) const;
   StatusCode initSTgcs();
 
   // MuonDetectorManager from the conditions store
@@ -42,7 +43,7 @@ class sTgcPadPlottingAlg : public AthHistogramAlgorithm {
   
   /// Map containing each PCB of the NSW seperately
   std::map<Identifier, std::unique_ptr<TGraph>> m_nswPads{};
-  
+  std::map<Identifier, std::unique_ptr<TH2>> m_nswPadDist{};
   bool m_alg_run{false};
 };
 

@@ -3,13 +3,13 @@
 */
 
 #include "MuonReadoutGeometry/MuonPadDesign.h"
-
-
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "MuonReadoutGeometry/GlobalUtilities.h"
 #include <ext/alloc_traits.h>
 #include <stdexcept>
-#include <TString.h>
 using MuonGM::MuonPadDesign;
 
+MuonPadDesign::MuonPadDesign(): AthMessaging{"MuonPadDesign"}{}
 bool MuonPadDesign::withinSensitiveArea(const Amg::Vector2D& pos) const {
     double top_H1 = maxSensitiveY();
     double bot_H2 = minSensitiveY();
@@ -88,14 +88,16 @@ std::pair<int, int> MuonPadDesign::channelNumber(const Amg::Vector2D& pos) const
       bool iphi_out_of_range = (padPhi < 0 || padPhi > nPadColumns + 1);
       bool index_out_of_range = ieta_out_of_range or iphi_out_of_range;
       if (index_out_of_range) {
-          if (ieta_out_of_range)
-              throw std::runtime_error(
-                  Form("File: %s, Line: %d\nMuonPadDesign::channelNumber() - eta out of range (x,y)=(%.2f, %.2f) (ieta, iphi)=(%d, %d)",
-                       __FILE__, __LINE__, pos.x(), pos.y(), padEta, padPhi));
-          else
-              throw std::runtime_error(
-                  Form("File: %s, Line: %d\nMuonPadDesign::channelNumber() - phi out of range (x,y)=(%.2f, %.2f) (ieta, iphi)=(%d, %d)",
-                       __FILE__, __LINE__, pos.x(), pos.y(), padEta, padPhi));
+          std::stringstream sstr{};
+          if (ieta_out_of_range){
+            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() eta out of range "
+                <<Amg::toString(pos, 2)<<" (ieta, iphi) = ("<<padEta<<","<<padPhi<<").";
+          } else {
+            sstr<<__FILE__<<":"<<__LINE__<<" "<<__func__<<"() phi out of range "
+                <<Amg::toString(pos, 2)<<" (ieta, iphi) = ("<<padEta<<","<<padPhi<<").";
+          }
+          throw std::runtime_error(sstr.str());
+      
       } else {
           result = std::make_pair(padEta, padPhi);
       }
@@ -104,18 +106,55 @@ std::pair<int, int> MuonPadDesign::channelNumber(const Amg::Vector2D& pos) const
 }
 
 //----------------------------------------------------------
+bool MuonPadDesign::channelPosition(const int channel, Amg::Vector2D& pos) const {
+    return channelPosition(etaPhiId(channel), pos);
+}
 bool MuonPadDesign::channelPosition(const std::pair<int, int>& pad, Amg::Vector2D& pos) const {
-    std::array<Amg::Vector2D, 4> corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
+    CornerArray corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
     channelCorners(pad, corners);
-    // double yCenter = 0.5*(corners.at(0)[1]+corners.at(3)[1]);
-    double yCenter = 0.5 * (0.5 * (corners.at(0)[1] + corners.at(1)[1]) + 0.5 * (corners.at(2)[1] + corners.at(3)[1]));
-    double xCenter = 0.5 * (0.5 * (corners.at(0)[0] + corners.at(1)[0]) + 0.5 * (corners.at(2)[0] + corners.at(3)[0]));
-    pos[0] = xCenter;
-    pos[1] = yCenter;
+    pos = 0.25 * (corners[botLeft] + corners[botRight] + corners[topLeft] + corners[topRight]); 
     return true;
 }
+Amg::Vector2D MuonPadDesign::distanceToPad(const Amg::Vector2D& pos, int channel) const {
+    CornerArray corners{make_array<Amg::Vector2D, 4>(Amg::Vector2D::Zero())};
+    channelCorners(channel, corners);
+
+    Amg::Vector2D leftEdge = corners[topLeft] - corners[botLeft];
+    const double lenLeft = std::hypot(leftEdge.x(), leftEdge.y());
+    leftEdge /= lenLeft;
+    const double leftIsect = MuonGM::intersect<2>(pos, Amg::Vector2D::UnitX(),
+                                                 corners[botLeft], leftEdge).value_or(1.e9);
+
+    const Amg::Vector2D leftPad = corners[botLeft] + leftIsect * leftEdge;
+    const Amg::Vector2D rightPad = corners[botRight] + leftIsect * (corners[topRight] - corners[botRight]).unit();
+    const double deltaX = pos.x() - leftPad.x();
+    const double lenX = rightPad.x() - leftPad.x();
+       
+    /// In terms of y the hit could be in the pad
+    if (leftIsect >= 0.  && leftIsect <= lenLeft) {
+       /// Hit is inside the pad
+       if (deltaX >= 0. && deltaX < lenX) {
+            return Amg::Vector2D::Zero();
+       } else if (deltaX < 0.) {
+            return deltaX * Amg::Vector2D::UnitX();
+       }
+       return (deltaX - lenX) * Amg::Vector2D::UnitX();
+    }
+    if (deltaX > 0.  && deltaX < lenX) {
+        return (leftIsect < 0 ? corners[botRight].y() - pos.y() 
+                              : pos.y() - corners[topRight].y())* Amg::Vector2D::UnitY();
+    }
+    return (leftIsect < 0 ? corners[botRight].y() - pos.y() 
+                              : pos.y() - corners[topRight].y())* Amg::Vector2D::UnitY() +
+           (deltaX < 0. ? deltaX  : (deltaX - lenX) )* Amg::Vector2D::UnitX();
+
+}
+
 //----------------------------------------------------------
-bool MuonPadDesign::channelCorners(const std::pair<int, int>& pad, std::array<Amg::Vector2D, 4>& corners) const {
+bool MuonPadDesign::channelCorners(const int channel, CornerArray& corners) const {
+    return channelCorners(etaPhiId(channel), corners);
+}
+bool MuonPadDesign::channelCorners(const std::pair<int, int>& pad, CornerArray& corners) const {
     // DG-2015-11-30: todo check whether the offset subtraction is still needed
     int iEta = pad.first;   // -1 + padEtaMin;
     int iPhi = pad.second;  //  -1 + padPhiMin;
@@ -189,11 +228,22 @@ bool MuonPadDesign::channelCorners(const std::pair<int, int>& pad, std::array<Am
             if (yBot > 0) xBotLeft = -1.0 * cutoutXpos;
         }
     }
-
-    corners[0] = Amg::Vector2D(xBotLeft, yBot);
-    corners[1] = Amg::Vector2D(xBotRight, yBot);
-    corners[2] = Amg::Vector2D(xTopLeft, yTop);
-    corners[3] = Amg::Vector2D(xTopRight, yTop);
+    if (yBot > yTop) {
+        ATH_MSG_VERBOSE("Swap top and bottom side "<<pad.first<<"/"<<pad.second);
+        std::swap(yBot, yTop);
+    }
+    if (xBotLeft > xBotRight) {
+        ATH_MSG_VERBOSE("Swap bottom left and right points "<<pad.first<<"/"<<pad.second);
+        std::swap(xBotLeft, xBotRight);
+    }
+    if (xTopLeft > xTopRight) {
+        ATH_MSG_VERBOSE("Swap top left and right points "<<pad.first<<"/"<<pad.second);
+        std::swap(xTopLeft, xTopRight);
+    }
+    corners[botLeft] = Amg::Vector2D(xBotLeft, yBot);
+    corners[botRight] = Amg::Vector2D(xBotRight, yBot);
+    corners[topLeft] = Amg::Vector2D(xTopLeft, yTop);
+    corners[topRight] = Amg::Vector2D(xTopRight, yTop);
     return true;
 }
 //----------------------------------------------------------

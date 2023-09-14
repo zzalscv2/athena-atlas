@@ -17,7 +17,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "MuonReadoutGeometry/ArrayHelper.h"
-
+#include "MuonIdHelpers/sTgcIdHelper.h"
+#include "AthenaBaseComps/AthMessaging.h"
 namespace MuonGM {
 
     /// Parameters defining the design of the readout sTGC pads
@@ -33,18 +34,14 @@ namespace MuonGM {
        - for each sim hit position identify the pad (channel)
        - for each channel determine the center position
     */
-    struct MuonPadDesign {
+    struct MuonPadDesign: public AthMessaging {
     public:
+        MuonPadDesign();
         int padEtaMin{0};
         int padEtaMax{0};
-        double sAngle{0.};  //
+
         double inputRowPitch{0.};
-        double inputRowWidth{0.};
         double inputPhiPitch{0.};
-        double inputPhiWidth{0.};
-        double deadI{0.};
-        double deadO{0.};
-        double deadS{0.};
         double signY{0.};
         double firstRowPos{0.};
         double firstPhiPos{0.};
@@ -72,14 +69,14 @@ namespace MuonGM {
         static constexpr double largeSectorOpeningAngle{28.0};
         static constexpr double smallSectorOpeningAngle{17.0};
 
-        /** channel transform */
-        // HepGeom::Transform3D  channelTransform( int channel ) const;
+        std::pair<int, int> etaPhiId(const int channel) const;
+        int channelId(const std::pair<int, int>& padId) const;
 
-        /** distance to readout */
-        double distanceToReadout(/*const Amg::Vector2D& pos*/) const;
 
         /** distance to channel - residual */
         double distanceToChannel(const Amg::Vector2D& pos, bool measPhi, int channel = 0) const;
+        
+        Amg::Vector2D distanceToPad(const Amg::Vector2D& pos, int channel) const;
 
         /// whether pos is within the sensitive area of the module
         bool withinSensitiveArea(const Amg::Vector2D& pos) const;
@@ -95,18 +92,15 @@ namespace MuonGM {
 
         /** calculate local channel position for a given channel number */
         bool channelPosition(const std::pair<int, int>& pad, Amg::Vector2D& pos) const;
+        bool channelPosition(const int channel, Amg::Vector2D& pos) const;
 
         /** calculate local channel corners for a given channel number */
-        bool channelCorners(const std::pair<int, int>& pad, std::array<Amg::Vector2D, 4>& corners) const;
-
+        using CornerArray = std::array<Amg::Vector2D, 4>;   
+        enum  padCorners{ botLeft=0, botRight, topLeft, topRight };
+        bool channelCorners(const std::pair<int, int>& pad, CornerArray& corners) const;
+        bool channelCorners(const int channel, CornerArray& corners) const;
         /** calculate local channel width */
         double channelWidth(const Amg::Vector2D& pos, bool measPhi, bool preciseMeas = false) const;
-
-        /** calculate local stereo angle */
-        double stereoAngle(/*int channel*/) const;
-
-        /** calculate channel length for a given channel number */
-        double channelLength(/*int channel*/) const;
 
         /** thickness of gas gap */
         double gasGapThickness() const;
@@ -115,19 +109,21 @@ namespace MuonGM {
         void setR(double R) { this->radialDistance = R; }
     };
 
-    inline double MuonPadDesign::distanceToReadout(/*const Amg::Vector2D& pos*/) const { return 0.; }
+    inline std::pair<int, int> MuonPadDesign::etaPhiId(const int channel) const {        
+        return std::make_pair( ((channel -1) % 18) + 1, ( (channel -1) / 18) + 1);
+    }
+    inline int MuonPadDesign::channelId(const std::pair<int, int>& padId) const {
+        return 1 + (padId.first - 1)  + (padId.second - 1 ) * 18;
+    }
 
     inline double MuonPadDesign::distanceToChannel(const Amg::Vector2D& pos, bool measPhi, int channel) const {
         // if channel number not provided, get the nearest channel ( mostly for validation purposes )
 
-        std::pair<int, int> pad{0, 0};
-
+        std::pair<int, int> pad{};
         if (channel < 1) {  // retrieve nearest pad indices
             pad = channelNumber(pos);
-
         } else {  // hardcode - or add a member saving idHelper max
-            pad.first = ((channel - 1) % 13) + 1;
-            pad.second = ((channel - 1) / 13) + 1;
+            pad = etaPhiId(channel);
         }
 
         Amg::Vector2D chPos{Amg::Vector2D::Zero()};
@@ -139,20 +135,6 @@ namespace MuonGM {
 
         return (pos.x() - chPos.x());
     }
-
-    inline double MuonPadDesign::stereoAngle(/*int st*/) const {
-        // to be coded for TGC wire gangs and sTGC pads
-
-        // if (sin(sAngle)>0.5) {
-        //  double yUp = -0.5*maxYSize + (st-0.5) * maxYSize/nch;
-        //  double yDn = -0.5*minYSize + (st-0.5) * minYSize/nch;
-        //  return atan((yUp-yDn)/xSize);
-        //}
-
-        return sAngle;
-    }
-
-    inline double MuonPadDesign::channelLength(/*int st*/) const { return 0.; }
 
     inline double MuonPadDesign::channelWidth(const Amg::Vector2D& pos, bool measPhi, bool preciseMeas) const {
         // get Eta and Phi indices, and corner positions of given pad
