@@ -345,7 +345,7 @@ def HLTGetNullModulator() :
     tname='NullUEModulator'
     HIUEModulatorTool=CompFactory.HIUEModulatorTool
     mod=HIUEModulatorTool(tname)
-    mod.EventShapeKey='NULL'
+    mod.EventShapeKey=''
     for n in [2,3,4] : setattr(mod,'DoV%d' % n,False)
     return mod
 
