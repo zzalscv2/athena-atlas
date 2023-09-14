@@ -103,6 +103,7 @@ class LArWave {
 
     LArWave& operator+=(const LArWave& bWave);
     LArWave& operator-=(const LArWave& bWave);
+    LArWave& operator*=(const double& aScale);
     //@}
 
  protected:
