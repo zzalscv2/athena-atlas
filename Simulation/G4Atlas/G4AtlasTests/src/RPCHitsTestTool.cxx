@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RPCHitsTestTool.h"
@@ -76,19 +76,19 @@ StatusCode RPCHitsTestTool::processEvent() {
 
   if (m_DoRPCTest) {
 
-    const RPCSimHitCollection* p_collection;
+    const RPCSimHitCollection* p_collection = nullptr;
     if (evtStore()->retrieve(p_collection,"RPC_Hits") == StatusCode::SUCCESS) {
-      for (RPCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
+      for (const RPCSimHit& hit : *p_collection) {
         // Check the Hits identifiers, access the functions that give:
         // Station name, station eta, station phi, doublet Z, doublet phi, doublet R, GasGap, Measures Phi.
-        HitID rpchit= (*i_hit).RPCid();
+        HitID rpchit= (hit).RPCid();
         Identifier offid= getIdentifier(rpchit);
         CHECK(checkIdentifier(offid));
        
         // Check Hits
         // For every hit within the event, get the global position Amg::Vector3D u and then retrieve all releveant info
         // either from the Amg::Vector3D or from the MC vector (direction)
-        GeoRPCHit ghit(*i_hit);
+        GeoRPCHit ghit(hit);
 
         if (!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();

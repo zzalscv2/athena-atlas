@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiHitsTestTool.h"
@@ -89,11 +89,10 @@ StatusCode SiHitsTestTool::initialize()
 
 StatusCode SiHitsTestTool::processEvent() {
 
-  const SiHitCollection* p_collection;
+  const SiHitCollection* p_collection = nullptr;
   if (evtStore()->retrieve(p_collection,m_collection).isSuccess())  {
-    for (SiHitConstIterator i_hit = p_collection->begin(); 
-	                    i_hit != p_collection->end(); ++i_hit) {
-      GeoSiHit ghit(*i_hit);
+    for (const SiHit& hit : *p_collection) {
+      GeoSiHit ghit(hit);
       HepGeom::Point3D<double> u = ghit.getGlobalPosition();
       if (m_hits_xy) {
 	m_hits_xy->Fill(u.x(),u.y());
@@ -102,27 +101,27 @@ StatusCode SiHitsTestTool::processEvent() {
       m_indetBarrel->Fill(u.x(),u.y());
       m_indetLongView->Fill(u.z(),u.perp());
 
-      m_hits_time->Fill(i_hit->meanTime(),i_hit->energyLoss());
-      m_hits_edep->Fill(i_hit->energyLoss());
-      m_hits_log_edep->Fill( log(i_hit->energyLoss()) );
-      m_hits_edep_zr->Fill(u.z(),u.perp(),i_hit->energyLoss());
-      int barcode = i_hit->particleLink().barcode();
+      m_hits_time->Fill(hit.meanTime(),hit.energyLoss());
+      m_hits_edep->Fill(hit.energyLoss());
+      m_hits_log_edep->Fill( log(hit.energyLoss()) );
+      m_hits_edep_zr->Fill(u.z(),u.perp(),hit.energyLoss());
+      int barcode = hit.particleLink().barcode();
       m_hits_log_barcode->Fill( barcode > 0 ? log(barcode) : -1 );
-      double step_length = ( i_hit->localStartPosition()-i_hit->localEndPosition() ).mag();
+      double step_length = ( hit.localStartPosition()-hit.localEndPosition() ).mag();
       m_hits_step_length->Fill(step_length);
       m_hits_log_step_length->Fill( log(step_length));
 
-      if (i_hit->getBarrelEndcap()==0) {
+      if (hit.getBarrelEndcap()==0) {
 	// barrel
-	m_hits_edep_z->Fill(u.z(),i_hit->energyLoss());
+	m_hits_edep_z->Fill(u.z(),hit.energyLoss());
       }
       else {
 	// discs
-	m_hits_edep_r->Fill(u.perp(),i_hit->energyLoss());
+	m_hits_edep_r->Fill(u.perp(),hit.energyLoss());
       }
 
       // debuging only:
-      //i_hit->print();
+      //hit.print();
       /*
           *** SCT Hit 
           Barrel/ EndCap Number -2

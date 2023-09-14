@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LucidHitsTestTool.h"
@@ -65,24 +65,24 @@ StatusCode LucidHitsTestTool::initialize()
 StatusCode LucidHitsTestTool::processEvent() {
 
   double etot = 0;
-  const LUCID_SimHitCollection* iter;
+  const LUCID_SimHitCollection* iter = nullptr;
   CHECK(evtStore()->retrieve(iter));
-  for (LUCID_SimHitCollection::const_iterator hi=(*iter).begin(); hi != (*iter).end(); ++hi) {
-    m_x_v_y_edep->Fill( hi->GetX() , hi->GetY() , hi->GetEnergy() );
-    m_x_v_y_hits->Fill( hi->GetX() , hi->GetY() );
-    m_R_v_z_edep->Fill( std::sqrt( hi->GetX()*hi->GetX() + hi->GetY()*hi->GetY() ) , std::abs( hi->GetZ() ) , hi->GetEnergy() );
-    m_R_v_z_hits->Fill( std::sqrt( hi->GetX()*hi->GetX() + hi->GetY()*hi->GetY() ) , std::abs( hi->GetZ() ) );
-    m_x_v_y_post->Fill( hi->GetEPX() , hi->GetEPY() );
-    m_R_v_z_post->Fill( std::sqrt( hi->GetEPX()*hi->GetEPX() + hi->GetEPY()*hi->GetEPY() ) , std::abs( hi->GetEPZ() ) );
+  for (const LUCID_SimHit& hit : *iter) {
+    m_x_v_y_edep->Fill( hit.GetX() , hit.GetY() , hit.GetEnergy() );
+    m_x_v_y_hits->Fill( hit.GetX() , hit.GetY() );
+    m_R_v_z_edep->Fill( std::sqrt( hit.GetX()*hit.GetX() + hit.GetY()*hit.GetY() ) , std::abs( hit.GetZ() ) , hit.GetEnergy() );
+    m_R_v_z_hits->Fill( std::sqrt( hit.GetX()*hit.GetX() + hit.GetY()*hit.GetY() ) , std::abs( hit.GetZ() ) );
+    m_x_v_y_post->Fill( hit.GetEPX() , hit.GetEPY() );
+    m_R_v_z_post->Fill( std::sqrt( hit.GetEPX()*hit.GetEPX() + hit.GetEPY()*hit.GetEPY() ) , std::abs( hit.GetEPZ() ) );
 
-    m_pdgid->Fill( hi->GetPdgCode() );
-    m_time_edep->Fill( hi->GetPreStepTime() , hi->GetPostStepTime() , hi->GetEnergy() );
-    m_tubeid->Fill( hi->GetTubeID() );
-    m_gen_volume->Fill( hi->GetGenVolume() );
-    m_wavelength->Fill( hi->GetWavelength() );
-    m_hit_edep->Fill( hi->GetEnergy() );
+    m_pdgid->Fill( hit.GetPdgCode() );
+    m_time_edep->Fill( hit.GetPreStepTime() , hit.GetPostStepTime() , hit.GetEnergy() );
+    m_tubeid->Fill( hit.GetTubeID() );
+    m_gen_volume->Fill( hit.GetGenVolume() );
+    m_wavelength->Fill( hit.GetWavelength() );
+    m_hit_edep->Fill( hit.GetEnergy() );
 
-    etot+=hi->GetEnergy();
+    etot+=hit.GetEnergy();
   }
   m_total_e->Fill( etot );
 

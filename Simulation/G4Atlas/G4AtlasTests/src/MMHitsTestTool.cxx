@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MMHitsTestTool.h"
@@ -40,15 +40,15 @@ StatusCode MMHitsTestTool::processEvent() {
   CHECK(executeCheckEventInfo());
 
   if (m_DoMMTest) {
-    const MMSimHitCollection* p_collection;
+    const MMSimHitCollection* p_collection = nullptr;
     CHECK(evtStore()->retrieve(p_collection,"MM_Hits"));
-    for (MMSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
-      Amg::Vector3D u = (*i_hit).globalPosition();
+    for (const MMSimHit& hit : *p_collection) {
+      Amg::Vector3D u = (hit).globalPosition();
       CHECK(executeFillHistos(u));
       //Useful link on how to retrieve variables: http://acode-browser.usatlas.bnl.gov/lxr/source/atlas/MuonSpectrometer/MuonValidation/MuonPRDTest/src/MMSimHitVariables.cxx
       //Get station names and make plots for each wedge
       const MicromegasHitIdHelper* hitHelper = MicromegasHitIdHelper::GetHelper();
-      int simId = (*i_hit).MMId();
+      int simId = (hit).MMId();
       std::string sim_stationName = hitHelper->GetStationName(simId);
       //Declare station name strings
       static const std::string s_m1s1("M1S1");
@@ -163,7 +163,7 @@ StatusCode MMHitsTestTool::processEvent() {
       //-----------------------------------------------Wedge 2 Histos end-----------------------------------------------------------
 
 
-      // GeoMMHit ghit(*i_hit);
+      // GeoMMHit ghit(hit);
       //       if (!ghit) continue;
       //       Amg::Vector3D u = ghit.getGlobalPosition();
       //       CHECK(executeFillHistos(u));

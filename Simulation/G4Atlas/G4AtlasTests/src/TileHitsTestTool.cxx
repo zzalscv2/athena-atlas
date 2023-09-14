@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileHitsTestTool.h"
@@ -66,13 +66,13 @@ StatusCode TileHitsTestTool::processEvent() {
   // make sure we still have a TileMgr (SimFlags.ReleaseGeoModel=False)
   CHECK(detStore()->retrieve(m_tileMgr));
 
-  const TileHitVector* hitVec;
+  const TileHitVector* hitVec = nullptr;
 
   double etot=0.;
   if (evtStore()->retrieve(hitVec,"TileHitVec") == StatusCode::SUCCESS) {
-    for (TileHitVecConstIterator i_hit=hitVec->begin() ; i_hit!=hitVec->end() ; ++i_hit) {
+    for (const TileHit& hit : *hitVec) {
 
-      Identifier pmt_id = (*i_hit).identify();
+      Identifier pmt_id = hit.identify();
       Identifier cell_id = m_tileID->cell_id(pmt_id);
 
       const CaloDetDescrElement *ddElement = m_tileMgr->get_cell_element(cell_id);
@@ -88,12 +88,12 @@ StatusCode TileHitsTestTool::processEvent() {
 
           // loop over subhits
           double energy=0;
-          //    ATH_MSG(INFO) << "TileHit size :" <<(*i_hit).size()<<endmsg;
-          for (int i=0; i<(*i_hit).size();++i) {
-            energy+=(*i_hit).energy(i);
-            m_tile_energy->Fill((*i_hit).energy(i));
-            m_tile_log_energy->Fill( std::log((*i_hit).energy(i)) );
-            m_tile_time->Fill((*i_hit).time(i));
+          //    ATH_MSG(INFO) << "TileHit size :" <<hit.size()<<endmsg;
+          for (int i=0; i<hit.size();++i) {
+            energy+=hit.energy(i);
+            m_tile_energy->Fill(hit.energy(i));
+            m_tile_log_energy->Fill( std::log(hit.energy(i)) );
+            m_tile_time->Fill(hit.time(i));
           }
           etot+=energy;
 
@@ -107,14 +107,14 @@ StatusCode TileHitsTestTool::processEvent() {
     }
   }
   //Check the Hit container with postfix _Fast which generated with FastCaloSim
-  const TileHitVector *hitVec_fast;
+  const TileHitVector *hitVec_fast = nullptr;
   if(  evtStore()->contains<TileHitVector>("TileHitVec_Fast") &&
        (evtStore()->retrieve(hitVec_fast,"TileHitVec_Fast")).isSuccess())
     {
       ATH_MSG_DEBUG ( "Retrieve FastCaloSim container TileHitVec_Fast." );
-      for(TileHitVecConstIterator i_hit=hitVec_fast->begin();i_hit!=hitVec_fast->end();++i_hit)
+      for (const TileHit& hit : *hitVec_fast)
         {
-          Identifier pmt_id=i_hit->identify();
+          Identifier pmt_id=hit.identify();
           Identifier cell_id=m_tileID->cell_id(pmt_id);
           const CaloDetDescrElement *ddElement=m_tileMgr->get_cell_element(cell_id);
           if(ddElement) // skip E4' cells which are not yet described in TileDetDescrManager.
@@ -127,12 +127,12 @@ StatusCode TileHitsTestTool::processEvent() {
               int pmt=m_tileID->pmt(pmt_id);
               if(pmt>0) phi+=ddElement->dphi()/2.;
               double energy=0;
-              for(int i=0;i<(*i_hit).size();++i)
+              for(int i=0;i<hit.size();++i)
                 {
-                  energy+=(*i_hit).energy(i);
-                  m_tile_energy->Fill((*i_hit).energy(i));
-                  m_tile_log_energy->Fill( std::log((*i_hit).energy(i))) ;
-                  m_tile_time->Fill((*i_hit).time(i));
+                  energy+=hit.energy(i);
+                  m_tile_energy->Fill(hit.energy(i));
+                  m_tile_log_energy->Fill( std::log(hit.energy(i))) ;
+                  m_tile_time->Fill(hit.time(i));
                 }
               etot+=energy;
 
@@ -148,8 +148,8 @@ StatusCode TileHitsTestTool::processEvent() {
 
   if(m_testMBTS) {
     if (evtStore()->retrieve(hitVec,"MBTSHits") == StatusCode::SUCCESS) {
-      for (TileHitVecConstIterator i_hit=hitVec->begin() ; i_hit!=hitVec->end() ; ++i_hit) {
-        Identifier mbts_id = (*i_hit).identify();
+      for (const TileHit& hit : *hitVec) {
+        Identifier mbts_id = hit.identify();
         double side = m_tileTBID->side(mbts_id); // -1 or +1
         double ieta = m_tileTBID->eta(mbts_id);  // 0 for inner cell, 1 for outer cell
         double iphi = m_tileTBID->phi(mbts_id);  // 0-7, cell 0 at phi=0

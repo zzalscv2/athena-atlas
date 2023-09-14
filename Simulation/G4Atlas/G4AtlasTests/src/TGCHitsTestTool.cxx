@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCHitsTestTool.h"
@@ -86,15 +86,15 @@ StatusCode TGCHitsTestTool::processEvent() {
   // Enter the main algorithm loop
   if (m_DoTGCTest) {
 
-    const TGCSimHitCollection* p_collection;
+    const TGCSimHitCollection* p_collection = nullptr;
     if (evtStore()->retrieve(p_collection,"TGC_Hits") == StatusCode::SUCCESS) {
-      for (TGCSimHitCollection::const_iterator i_hit=p_collection->begin(); i_hit!=p_collection->end(); ++i_hit) {
+      for (const TGCSimHit& hit : *p_collection) {
         /** Check the Hits identifiers, access the functions that give:
             Station name, station eta, station phi, doublet Z, doublet phi, doublet R, GasGap, Measures Phi.
             The values of these variables are written out to the AANtuple (variable content and range explained in the code section where AANTuple variables are
             registered)
         */
-        HitID tgchit= (*i_hit).TGCid();
+        HitID tgchit= hit.TGCid();
         Identifier offid= getIdentifier(tgchit);
         CHECK(checkIdentifier(offid));
 
@@ -102,7 +102,7 @@ StatusCode TGCHitsTestTool::processEvent() {
         /**For every hit within the event, get the global position Amg::Vector3D u and then retrieve all releveant info
            either from the Amg::Vector3D or from the MC vector (direction)
         */
-        GeoTGCHit ghit(*i_hit);
+        GeoTGCHit ghit(hit);
         if (!ghit) continue;
         Amg::Vector3D u = ghit.getGlobalPosition();
         CHECK(executeFillHistos(u));

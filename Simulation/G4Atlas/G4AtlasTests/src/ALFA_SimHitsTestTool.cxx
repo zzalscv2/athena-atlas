@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_SimHitsTestTool.h"
@@ -79,23 +79,22 @@ StatusCode ALFA_SimHitsTestTool::processEvent() {
   }
 
 
-  ALFA_HitConstIter iter;
-  const ALFA_HitCollection* coll_handle;
+  const ALFA_HitCollection* coll_handle = nullptr;
   CHECK( evtStore()->retrieve(coll_handle,"ALFA_HitCollection") );
 
 
-  for (iter=(*coll_handle).begin(); iter != (*coll_handle).end(); ++iter) {
+  for (const ALFA_Hit& hit : *coll_handle) {
 
-    station = (*iter).GetStationNumber();
-    plate   = (*iter).GetPlateNumber();
-    fiber   = (*iter).GetFiberNumber();
-    sign    = (*iter).GetSignFiber();
+    station = hit.GetStationNumber();
+    plate   = hit.GetPlateNumber();
+    fiber   = hit.GetFiberNumber();
+    sign    = hit.GetSignFiber();
     if (plate==100) {
       // Treat hits in GVS separately.
-      m_E_gvs->Fill(station,((*iter).GetEnergyDeposit()));
+      m_E_gvs->Fill(station,(hit.GetEnergyDeposit()));
       continue;
     }
-    E_fiber_sum[station-1][plate-1][fiber-1][(1-sign)/2] += ((*iter).GetEnergyDeposit());
+    E_fiber_sum[station-1][plate-1][fiber-1][(1-sign)/2] += (hit.GetEnergyDeposit());
   }
 
   for ( int l = 0; l < station_max; l++ ) {

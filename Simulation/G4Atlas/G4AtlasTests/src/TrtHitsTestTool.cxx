@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrtHitsTestTool.h"
@@ -62,31 +62,31 @@ StatusCode TrtHitsTestTool::initialize()
 
 StatusCode TrtHitsTestTool::processEvent() {
  
-  const TRTUncompressedHitCollection* p_collection;
+  const TRTUncompressedHitCollection* p_collection = nullptr;
   if (evtStore()->retrieve(p_collection,m_collection).isSuccess()) {
-    for (TRTUncompressedHitConstIter i_hit=p_collection->begin() ; i_hit!=p_collection->end() ; ++i_hit) {
-      GeoTRTUncompressedHit ghit(*i_hit);
+    for (const TRTUncompressedHit& hit : *p_collection) {
+      GeoTRTUncompressedHit ghit(hit);
       HepGeom::Point3D<double> u = ghit.getGlobalPosition();
       m_indetBarrel->Fill(u.x(),u.y());
       m_indetLongView->Fill(u.z(),u.perp());
       m_hits_xy->Fill(u.x(),u.y());
       m_hits_zr->Fill(u.z(),u.perp());
-      int barcode = i_hit->particleLink().barcode();
+      int barcode = hit.particleLink().barcode();
       m_hits_log_barcode->Fill( barcode > 0 ? log(barcode) : -1);
-      int particleId(i_hit->GetParticleEncoding());
+      int particleId(hit.GetParticleEncoding());
       if (particleId == 22 || static_cast<int>(abs(particleId)/100000) == 41 ||  static_cast<int>(abs(particleId)/10000000) == 1)
 	{
 	  //criteria set to match TRT_HitCollectionCnv_p3.cxx
 	  //only photon energy is persistified properly.
-	  m_hits_time_photons->Fill(i_hit->GetGlobalTime(),i_hit->GetEnergyDeposit());
-	  m_hits_edep_photons->Fill(i_hit->GetEnergyDeposit());
-	  m_hits_edep_zr_photons->Fill(u.z(),u.perp(),i_hit->GetEnergyDeposit());
+	  m_hits_time_photons->Fill(hit.GetGlobalTime(),hit.GetEnergyDeposit());
+	  m_hits_edep_photons->Fill(hit.GetEnergyDeposit());
+	  m_hits_edep_zr_photons->Fill(u.z(),u.perp(),hit.GetEnergyDeposit());
 	}
       else
 	{
-	  m_hits_time_nonphotons->Fill(i_hit->GetGlobalTime(),i_hit->GetEnergyDeposit());
-	  m_hits_edep_nonphotons->Fill(i_hit->GetEnergyDeposit());
-	  m_hits_edep_zr_nonphotons->Fill(u.z(),u.perp(),i_hit->GetEnergyDeposit());
+	  m_hits_time_nonphotons->Fill(hit.GetGlobalTime(),hit.GetEnergyDeposit());
+	  m_hits_edep_nonphotons->Fill(hit.GetEnergyDeposit());
+	  m_hits_edep_zr_nonphotons->Fill(u.z(),u.perp(),hit.GetEnergyDeposit());
 	}
     }
   }
