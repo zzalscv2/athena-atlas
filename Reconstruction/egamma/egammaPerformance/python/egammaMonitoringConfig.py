@@ -13,6 +13,7 @@ def egammaMonitoringConfig(flags):
         result.merge(MonitorElectronConfig(flags))
         result.merge(MonitorPhotonConfig(flags))
         result.merge(MonitorTnPConfig(flags))
-        result.merge(MonitorForwardElectronConfig(flags))
+        if flags.Egamma.doForward:
+            result.merge(MonitorForwardElectronConfig(flags))
 
     return result
