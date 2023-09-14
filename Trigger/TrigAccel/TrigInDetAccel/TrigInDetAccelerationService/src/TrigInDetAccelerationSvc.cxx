@@ -172,16 +172,9 @@ const std::vector<short>& TrigInDetAccelerationSvc::getLayerInformation(int i) c
 bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::tuple<short,short, int, int>,std::vector<PhiEtaHash> >& hashMap) const {
   
   const InDetDD::PixelDetectorManager * pix_mgr = nullptr;
-  const InDetDD::SCT_DetectorManager *  sct_mgr = nullptr;
-
 
   if (m_detStore->retrieve(pix_mgr,"ITkPixel").isFailure()) {
     ATH_MSG_WARNING("failed to get ITkPixel Manager");
-    return false;
-  } 
-
-  if (m_detStore->retrieve(sct_mgr, "ITkStrip").isFailure()) {
-    ATH_MSG_WARNING("failed to get ITkStrip Manager");
     return false;
   } 
 
@@ -209,10 +202,9 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
   for(std::map<std::tuple<short,short, int, int>,std::vector<PhiEtaHash> >::const_iterator it = hashMap.begin();it!=hashMap.end();++it, layerIdx++) {
     
     short barrel_ec = std::get<0>((*it).first);
-    short subdetid = std::get<1>((*it).first);
     int vol_id = std::get<2>((*it).first);
     int lay_id = std::get<3>((*it).first);
-    int globalLayerId = static_cast<int>(vol_id)*1000 + lay_id;
+    int globalLayerId = vol_id*1000 + lay_id;
 
     pArray->m_layers[layerIdx].m_nElements = 0;
     pArray->m_layers[layerIdx].m_subdet = globalLayerId;
@@ -252,7 +244,7 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
       for(std::vector<PhiEtaHash>::const_iterator hIt = vStops[iStops-1];hIt!=vStops[iStops];++hIt, nPhiModules++) {
 
         pArray->m_hashArray[pArray->m_nModules] = (*hIt).m_hash;
-        const InDetDD::SiDetectorElement *p = (subdetid==1) ? pix_mgr->getDetectorElement((*hIt).m_hash) : sct_mgr->getDetectorElement((*hIt).m_hash);
+        const InDetDD::SiDetectorElement *p = pix_mgr->getDetectorElement((*hIt).m_hash);
 
         if (first) {
           first = false;
@@ -300,15 +292,9 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
 bool TrigInDetAccelerationSvc::extractITkGeometryInformation(std::map<std::tuple<short,short,int,int>, std::vector<PhiEtaHash> >& hashMap) {
 
   const PixelID* pixelId = nullptr;
-  const SCT_ID* sctId = nullptr;
 
   if (m_detStore->retrieve(pixelId, "PixelID").isFailure()) {
     ATH_MSG_WARNING("Could not get Pixel ID helper");
-    return false;
-  }
-  
-  if (m_detStore->retrieve(sctId, "SCT_ID").isFailure()) { 
-    ATH_MSG_WARNING("Could not get SCT ID helper");
     return false;
   }
 
@@ -350,38 +336,11 @@ bool TrigInDetAccelerationSvc::extractITkGeometryInformation(std::map<std::tuple
     else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
   }
 
-
-  subdetid = 2;
-  for(int hash = 0; hash<(int)sctId->wafer_hash_max(); hash++) {
-
-    Identifier offlineId = sctId->wafer_id(hash);
-
-    if(offlineId==0) continue;
- 
-    short barrel_ec = sctId->barrel_ec(offlineId);
-    short layer_disk = sctId->layer_disk(offlineId);
-    short phi_index = sctId->phi_module(offlineId);
-    short eta_index = sctId->eta_module(offlineId);
-
-    // Calculate new volume and layer id for ITk
-    int vol_id = 13;
-    if(barrel_ec) vol_id = 12;
-    if(barrel_ec>0) vol_id = 14;
-    
-    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, vol_id, layer_disk);
-    std::map<std::tuple<short,short,int,int>,std::vector<PhiEtaHash> >::iterator it = hashMap.find(t);
-    if(it==hashMap.end())
-      hashMap.insert(std::pair<std::tuple<short,short,int,int>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash) )));
-    else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
-  }
-
   m_layerInfo[0].clear();
   m_layerInfo[1].clear();
-  m_layerInfo[2].clear();
 
   m_layerInfo[0].resize(hashMap.size()); // Mapping from layerId to barrel_ec
   m_layerInfo[1].resize(pixelId->wafer_hash_max(), -1); // Mapping from layerId to the module hash
-  m_layerInfo[2].resize(sctId->wafer_hash_max(), -1);
 
   // Map layer geometry details to module hash id
   int layerId=0;
@@ -390,15 +349,9 @@ bool TrigInDetAccelerationSvc::extractITkGeometryInformation(std::map<std::tuple
     short barrel_ec = std::get<0>((*it).first);
     short subdetId = std::get<1>((*it).first);
 
-    m_layerInfo[0].push_back(barrel_ec);
+    m_layerInfo[0][layerId] = barrel_ec;
 
     if(subdetId == 1) {//pixel
-      for(std::vector<PhiEtaHash>::iterator hIt = (*it).second.begin();hIt != (*it).second.end();++hIt) {
-        m_layerInfo[subdetId][(*hIt).m_hash] = layerId;
-      }
-    }
-
-    if(subdetId == 2) {//SCT
       for(std::vector<PhiEtaHash>::iterator hIt = (*it).second.begin();hIt != (*it).second.end();++hIt) {
         m_layerInfo[subdetId][(*hIt).m_hash] = layerId;
       }
