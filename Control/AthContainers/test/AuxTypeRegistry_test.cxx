@@ -68,7 +68,7 @@ struct Payload
   Payload (const Payload&) = default;
   Payload& operator= (const Payload&) = default;
   int m_x;
-  bool operator== (const Payload& other)
+  bool operator== (const Payload& other) const
   { return m_x == other.m_x; }
 };
 
@@ -76,7 +76,8 @@ struct Payload
 template <class T>
 T makeT(int x=0) { return T(x); }
 
-bool makeT(int x=0) { return (x&1) != 0; }
+template<>
+bool makeT<bool>(int x) { return (x&1) != 0; }
 
 
 template <class T>
@@ -84,6 +85,8 @@ void test_type(const std::string& typname,
                const std::string& name,
                const std::string& clsname = "")
 {
+  auto makeT = [] (int x = 0)  { return ::makeT<T>(x); };
+
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   assert (SG::null_auxid == r.findAuxID (name, clsname));
   SG::auxid_t auxid = r.getAuxID<T> (name, clsname);
@@ -178,6 +181,8 @@ void test_type(const std::string& typname,
 template <class T>
 void test_makeVector (const std::string& name)
 {
+  auto makeT = [] (int x = 0)  { return ::makeT<T>(x); };
+
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = r.getAuxID<T> (name);
 
