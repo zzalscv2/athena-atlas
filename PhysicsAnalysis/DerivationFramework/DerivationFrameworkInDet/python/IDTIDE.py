@@ -10,13 +10,23 @@
 # ====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from AthenaCommon.AlgSequence import AthSequencer as LegacyAthSequencer
+
 from AthenaConfiguration.Enums import MetadataCategory
-from AthenaCommon.CFElements import seqAND
+from AthenaCommon.CFElements import seqAND,_append
 from AthenaCommon.Constants import INFO
 
 # Main algorithm config
-
+def parSeq(name, subs=[]):
+    """ parallel sequencer """
+    seq = CompFactory.AthSequencer( name ) if isComponentAccumulatorCfg() else LegacyAthSequencer( name )
+    seq.ModeOR = False
+    seq.Sequential = False
+    seq.StopOverride = True
+    for s in subs:
+        _append(seq, s)
+    return seq
 
 def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for IDTIDE"""
@@ -26,7 +36,9 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
     # Sequence for skimming kernel (if running on data) -> PrepDataToxAOD -> IDTIDE kernel
     # sequence to be used for algorithm which should run before the IDTIDEPresel
     # Disabled as currently blocks decoration of Z0 and thus crashes thinning
-    acc.addSequence(seqAND('IDTIDESequence'))
+    IDTIDEPreselSequenceName='IDTIDEPreselSequence'
+    acc.addSequence(seqAND(IDTIDEPreselSequenceName))
+
     # sequence for algorithms which should run after the preselection but which can run in parallel
     # acc.addSequence( parOR('IDTIDESeqAfterPresel'), parentName = 'IDTIDESequence')
     # Sequence for skimming after pre-selection
@@ -228,7 +240,10 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
 
     IDTIDEKernelPresel = DerivationKernel("IDTIDEKernelPresel",
                                           SkimmingTools=skimmingTools)
-    acc.addEventAlgo(IDTIDEKernelPresel, sequenceName="IDTIDESequence")
+    acc.addEventAlgo(IDTIDEKernelPresel, sequenceName=IDTIDEPreselSequenceName)
+
+    IDTIDEPreselAlgSequenceName='IDTIDEPreselAlgSequence'
+    acc.addSequence(parSeq(IDTIDEPreselAlgSequenceName), parentName=IDTIDEPreselSequenceName)
 
     # Setup decorators tools
     # if flags.Detector.EnableTRT:
@@ -238,7 +253,7 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
         flags, name="xAOD_TRT_PrepDataToxAOD",
         OutputLevel=INFO,
         WriteSDOs=False,
-        UseTruthInfo=flags.Input.isMC))
+        UseTruthInfo=flags.Input.isMC),sequenceName=IDTIDEPreselAlgSequenceName)
     # if flags.Detector.EnableSCT:
     from InDetConfig.InDetPrepRawDataToxAODConfig import (
         InDetSCT_PrepDataToxAODCfg)
@@ -247,7 +262,7 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
         OutputLevel=INFO,
         WriteSiHits=False,
         WriteSDOs=False,
-        UseTruthInfo=flags.Input.isMC))
+        UseTruthInfo=flags.Input.isMC),sequenceName=IDTIDEPreselAlgSequenceName)
 
     # if flags.Detector.EnablePixel:
     #  #if need_pix_ToTList : # What to do with this flag?
@@ -267,7 +282,7 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
         OutputLevel=INFO,
         ClusterSplitProbabilityName=(
             ClusterSplitProbabilityContainerName(flags)),
-        UseTruthInfo=flags.Input.isMC))
+        UseTruthInfo=flags.Input.isMC),sequenceName=IDTIDEPreselAlgSequenceName)
 
     # ====================================================================
     # THINNING TOOLS
@@ -337,7 +352,11 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
         SkimmingTools=skimmingTools,
         ThinningTools=[],
         RunSkimmingFirst=True,
-        OutputLevel=INFO), sequenceName="IDTIDESequence")
+        OutputLevel=INFO),sequenceName=IDTIDEPreselSequenceName)
+
+    IDTIDEPostProcSequenceName='IDTIDEPostProcSequence'
+    acc.addSequence(parSeq(IDTIDEPostProcSequenceName),parentName=IDTIDEPreselSequenceName)
+
     # sequenceName = "IDTIDESkimmingSequence" )
 
     # shared between IDTIDE and IDTRKVALID
@@ -345,16 +364,15 @@ def IDTIDEKernelCfg(flags, name='IDTIDEKernel', **kwargs):
         name="DFTSOSKernel",
         AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
-        OutputLevel=INFO), sequenceName="IDTIDESequence")
-    # sequenceName = "IDTIDEPostProcSequence" )
+        OutputLevel=INFO),
+        sequenceName=IDTIDEPostProcSequenceName)
 
     acc.addEventAlgo(DerivationKernel(
         name="IDTIDEThinningKernel",
         AugmentationTools=[],
         ThinningTools=thinningTools,
-        OutputLevel=INFO), sequenceName="IDTIDESequence")
-    # sequenceName = "IDTIDEPostProcSequence")
-
+        OutputLevel=INFO),
+        sequenceName=IDTIDEPostProcSequenceName)
     return acc
 
 # Main config
