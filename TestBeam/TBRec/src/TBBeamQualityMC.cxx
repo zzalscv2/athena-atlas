@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBBeamQualityMC.h"
@@ -95,7 +95,7 @@ StatusCode TBBeamQualityMC::execute() {
      std::vector<bool> has_energy (m_scint_prim.size());
      for(int ll=0; ll<(int)m_scint_prim.size(); ++ll) has_energy[ll]=false;
 
-     const LArG4H6FrontHitCollection *frontcoll;
+     const LArG4H6FrontHitCollection *frontcoll = nullptr;
      ATH_CHECK( evtStore()->retrieve(frontcoll,"Front::Hits") );
 
      int scnum;
@@ -111,7 +111,7 @@ StatusCode TBBeamQualityMC::execute() {
          }
      }
 
-     const LArG4H6FrontHitCollection *movecoll;
+     const LArG4H6FrontHitCollection *movecoll = nullptr;
      ATH_CHECK( evtStore()->retrieve(movecoll,"Movable::Hits") );
      for (const LArG4H6FrontHit* hit : *movecoll) {
          scnum = hit->GetSC();
@@ -135,7 +135,7 @@ StatusCode TBBeamQualityMC::execute() {
 
   if(m_check_veto) { // check if there is a hit in veto scint.
      int scnum;
-     const LArG4H6FrontHitCollection *movecoll;
+     const LArG4H6FrontHitCollection *movecoll = nullptr;
      ATH_CHECK( evtStore()->retrieve(movecoll,"Movable::Hits") );
      for (const LArG4H6FrontHit* hit : *movecoll) {
          scnum = hit->GetSC();
