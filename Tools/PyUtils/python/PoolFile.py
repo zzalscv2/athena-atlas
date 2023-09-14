@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @author: Sebastien Binet <binet@cern.ch>
 # @date:   March 2007
@@ -407,8 +407,7 @@ class PoolOpts(object):
 
     @classmethod
     def isData(cls, name):
-        return ( len(name) >= len("##") and name[:2] != "##" ) and \
-               ( name != PoolOpts.POOL_HEADER )
+        return not name.startswith("##") and not name.startswith(PoolOpts.POOL_HEADER)
 
     @classmethod
     def isDataHeader(cls, name):
@@ -417,10 +416,25 @@ class PoolOpts(object):
 
     @classmethod
     def isEventData(cls, name):
-        return len(name) >= len(PoolOpts.EVENT_DATA) and \
-               name[:len(PoolOpts.EVENT_DATA)] == PoolOpts.EVENT_DATA
+        return name.startswith(PoolOpts.EVENT_DATA)
+
+    @classmethod
+    def isAugmentation(cls, name):
+        return "_DAOD_" in name
+
+    @classmethod
+    def augmentationName(cls, name):
+        s = (name+"__").split('_')[2]
+        if s.endswith("Form"):
+            s = s[:-4]
+        return s
+
+    @classmethod
+    def isAugmentedHeader(cls, name):
+        return name.startswith(PoolOpts.POOL_HEADER) and cls.isAugmentation(name)
 
     pass # class PoolOpts
+
 
 def _get_total_size (branch):
    if PoolOpts.FAST_MODE:
@@ -516,6 +530,7 @@ class PoolRecord(object):
         self.nEntries      = nEntries
         self.dirType       = dirType
         self.details       = detailedInfos
+        self.augName       = ''
         return
 
 class PoolFile(object):
@@ -535,8 +550,10 @@ class PoolFile(object):
         self.dataHeader = PoolRecord("DataHeader", 0, 0, 0,
                                      nEntries = 0,
                                      dirType = "T")
+        self.augNames   = set()
+        self.dataHeaderA = {}
         self.data       = []
-        self.verbose = verbose
+        self.verbose    = verbose
 
         # get the "final" file name (handles all kind of protocols)
         try:
@@ -628,12 +645,18 @@ class PoolFile(object):
         keys = []
         containers = []
         for k in self.poolFile.GetListOfKeys():
+            treename = k.GetName()
             containerName = k.ReadObj().GetName()
             if containerName not in containers:
                 keys.append(k)
                 containers.append(containerName)
                 pass
-            pass
+            if treename.startswith(PoolOpts.POOL_HEADER) and not treename.endswith('Form'):
+                self.dataHeaderA[PoolOpts.augmentationName(k.GetName())] = \
+                    PoolRecord("DataHeader", 0, 0, 0,
+                               nEntries = k.ReadObj().GetEntries(),
+                               dirType = "T")
+
         keys.sort (key = lambda x: x.GetName())
         self.keys = keys
         del containers
@@ -641,9 +664,8 @@ class PoolFile(object):
         for k in keys:
             tree = k.ReadObj()
             name = tree.GetName()
-            
-            if not PoolOpts.isDataHeader(name) and \
-               not PoolOpts.isData(name) :
+
+            if not PoolOpts.isDataHeader(name) and not PoolOpts.isData(name) :
                 continue
 
             if PoolOpts.isDataHeader(name):
@@ -698,6 +720,8 @@ class PoolFile(object):
                     ## if dirType == "T":
                     ##     poolRecord.name = name.replace( PoolOpts.EVENT_DATA,
                     ##                                     "" )
+                    poolRecord.augName = PoolOpts.augmentationName(name)
+                    self.augNames.add(poolRecord.augName)
                     self.data += [ poolRecord ]
             else:
                 print("WARNING: Don't know how to deal with branch [%s]" % \
@@ -718,6 +742,10 @@ class PoolFile(object):
     def checkFile(self, sorting = PoolRecord.Sorter.DiskSize):
         if self.verbose is True:
             print(self.fileInfos())
+            if len(self.augNames) > 1:
+                for aug in self.augNames:
+                    if len(aug) > 0:
+                        print( "Nbr %s Events: %i" % (aug, self.dataHeaderA[aug].nEntries) )
 
         ## sorting data
         data = self.data
@@ -757,10 +785,15 @@ class PoolFile(object):
                 ))
             print("-"*80)
 
+        totMemSizeA = {}
+        totDiskSizeA = {}
         for d in data:
             totMemSize  += 0. if PoolOpts.FAST_MODE else d.memSize
             totDiskSize += d.diskSize
             memSizeNoZip = d.memSizeNoZip/d.memSize if d.memSize != 0. else 0.
+            aug = d.augName
+            totMemSizeA[aug]  = totMemSizeA.get(aug,0.) + d.memSize
+            totDiskSizeA[aug] = totDiskSizeA.get(aug,0.) + d.diskSize
             if self.verbose is True:
                 print(PoolOpts.ROW_FORMAT % (
                     _get_val (d.memSize),
@@ -773,12 +806,21 @@ class PoolFile(object):
 
         if self.verbose is True:
             print("="*80)
+            if len(self.augNames) > 1:
+                augs = sorted(self.augNames)
+                for a in augs:
+                    print(PoolOpts.ROW_FORMAT % (
+                        totMemSizeA[a], totDiskSizeA[a],
+                        _safe_div(totDiskSizeA[a], float(self.dataHeaderA[a].nEntries)),
+                        0.0,
+                        self.dataHeaderA[a].nEntries,
+                        "Aug Stream: " + ('MAIN' if a=='' else a)
+                        ))
+                print("-"*80)
             print(PoolOpts.ROW_FORMAT % (
-                totMemSize,
-                totDiskSize,
+                totMemSize, totDiskSize,
                 _safe_div(totDiskSize, float(self.dataHeader.nEntries)),
-                0.0,
-                self.dataHeader.nEntries,
+                0.0, self.dataHeader.nEntries,
                 "TOTAL (POOL containers)"
                 ))
             print("="*80)
