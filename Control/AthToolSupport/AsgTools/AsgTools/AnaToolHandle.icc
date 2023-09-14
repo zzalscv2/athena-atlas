@@ -409,7 +409,8 @@ namespace asg
 
 
   template<typename T> template<typename T2>
-  StatusCode AnaToolHandle<T> ::
+  typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
+  AnaToolHandle<T> ::
   setProperty (const std::string& property,
                const ToolHandle<T2>& value)
   {
@@ -495,7 +496,8 @@ namespace asg
 
 
   template<typename T> template<typename T2>
-  StatusCode AnaToolHandle<T> ::
+  typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
+  AnaToolHandle<T> ::
   setProperty (const std::string& property,
                const ToolHandleArray<T2>& value)
   {
