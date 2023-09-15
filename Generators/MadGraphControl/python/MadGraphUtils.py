@@ -153,6 +153,10 @@ def error_check(errors_a, return_code):
                 continue
             if 'Error: Symbol' in err and 'has no IMPLICIT type' in err:
                 bad_variables += [ err.split('Symbol ')[1].split(' at ')[0] ]
+            # error output from tqdm (progress bar)
+            if 'it/s' in err:
+                mglog.info(err)
+                continue
             mglog.error(err)
             unmasked_error = True
     # This is a bit clunky, but needed because we could be several places when we get here
