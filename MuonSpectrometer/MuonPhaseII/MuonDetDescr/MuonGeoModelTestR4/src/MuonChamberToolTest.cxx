@@ -37,7 +37,7 @@ StatusCode MuonChamberToolTest::execute(const EventContext& ctx) const {
             return StatusCode::FAILURE;
         }
         const MuonChamber& chamber{*itr};
-        ATH_MSG_INFO("Muon chamber "<<m_idHelperSvc->mdtIdHelper().stationNameString(chamber.stationIndex())
+        ATH_MSG_INFO("Muon chamber "<<m_idHelperSvc->mdtIdHelper().stationNameString(chamber.stationName())
                                     <<", eta: "<<chamber.stationEta()<<", phi: "<<chamber.stationPhi()
                                     <<" "<<m_idHelperSvc->toStringChamber(readOut->identify()));
         

@@ -6,58 +6,37 @@
 
 namespace MuonGMR4 {
 
-inline const GeoAlignableTransform* MuonReadoutElement::alignableTransform() const {
-    return m_args.alignTransform;
-}
-inline Identifier MuonReadoutElement::identify() const {
-    return m_args.detElId;
-}
-inline IdentifierHash MuonReadoutElement::identHash() const {
-    return m_detElHash;
-}
-inline std::string MuonReadoutElement::chamberDesign() const {
-    return m_args.chambDesign;
-}
-inline const Muon::IMuonIdHelperSvc* MuonReadoutElement::idHelperSvc() const {
-    return m_idHelperSvc.get();
-}
-inline const Amg::Transform3D& MuonReadoutElement::toCenterTrans() const  {
-    return m_args.toVolCenter;
-}
+inline const GeoAlignableTransform* MuonReadoutElement::alignableTransform() const { return m_args.alignTransform; }
+inline Identifier MuonReadoutElement::identify() const { return m_args.detElId; }
+inline IdentifierHash MuonReadoutElement::identHash() const { return m_detElHash;}
+inline std::string MuonReadoutElement::chamberDesign() const { return m_args.chambDesign; }
+inline const Muon::IMuonIdHelperSvc* MuonReadoutElement::idHelperSvc() const { return m_idHelperSvc.get(); }
 
-inline int MuonReadoutElement::stationIndex() const {
-    return m_stIdx;
-}
-inline int MuonReadoutElement::stationEta() const {
-    return m_stEta;
-}
-inline int MuonReadoutElement::stationPhi() const {
-    return m_stPhi;
-}
-
+inline const Amg::Transform3D& MuonReadoutElement::toCenterTrans() const { return m_args.toVolCenter; }
+inline Muon::MuonStationIndex::ChIndex MuonReadoutElement::chamberIndex() const { return m_chIdx; }
+inline int MuonReadoutElement::stationName() const { return m_stName; }
+inline int MuonReadoutElement::stationEta() const { return m_stEta; }
+inline int MuonReadoutElement::stationPhi() const { return m_stPhi; }
 
 /// Returns the detector center (Which is the same as the detector center of the
 /// first measurement layer)
-inline Amg::Vector3D MuonReadoutElement::center(
-    const ActsGeometryContext& ctx) const {
+inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx) const {
     return localToGlobalTrans(ctx).translation();
 }
 inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx,
                                                 const Identifier& id) const {
     return localToGlobalTrans(ctx, id).translation();
 }
-inline Amg::Vector3D MuonReadoutElement::center(
-    const ActsGeometryContext& ctx, const IdentifierHash& hash) const {
+inline Amg::Vector3D MuonReadoutElement::center(const ActsGeometryContext& ctx, 
+                                                const IdentifierHash& hash) const {
     return localToGlobalTrans(ctx, hash).translation();
 }
-
-
-inline const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(
-    const ActsGeometryContext& ctx, const Identifier& id) const {
+inline const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
+                                                                      const Identifier& id) const {
     return globalToLocalTrans(ctx, layerHash(id));
 }
-inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(
-    const ActsGeometryContext& ctx, const Identifier& id) const {
+inline const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
+                                                                      const Identifier& id) const {
     return localToGlobalTrans(ctx, layerHash(id));
 }
 

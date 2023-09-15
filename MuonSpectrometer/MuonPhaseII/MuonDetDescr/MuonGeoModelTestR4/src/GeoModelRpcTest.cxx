@@ -147,7 +147,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
                                        const ActsGeometryContext& gctx, 
                                        const RpcReadoutElement* reElement){
    
-   m_stIndex    = reElement->stationIndex();
+   m_stIndex    = reElement->stationName();
    m_stEta      = reElement->stationEta();
    m_stPhi      = reElement->stationPhi();
    m_doubletR   = reElement->doubletR();

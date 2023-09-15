@@ -66,11 +66,14 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /// detElHash from the id_helper class
     IdentifierHash identHash() const;
     /// Returns the stationName (BIS, BOS, etc) encoded into the integer
-    int stationIndex() const;
+    int stationName() const;
     /// Returns the stationEta (positive A site, negative O site)
     int stationEta() const;
     /// Returns the stationPhi (1-8) -> sector (2*phi - (isSmall))
     int stationPhi() const;
+    /// Returns the chamber index of the Identifier (MMS & STS) have the same
+    /// chamber Index (EIS)
+    Muon::MuonStationIndex::ChIndex chamberIndex() const;
 
     /// Constructs the identifier hash from the full measurement Identifier. The
     /// hash is always defined w.r.t the specific detector element and used to
@@ -153,8 +156,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     const defineArgs m_args{};
     /// Cache of the detector element hash
     IdentifierHash m_detElHash{};
-    /// Cache the station index of the identifier
-    int m_stIdx{-1};
+    /// Cache the chamber index of the Identifier
+    Muon::MuonStationIndex::ChIndex m_chIdx{Muon::MuonStationIndex::ChIndex::ChUnknown};
+    /// Cache the station name of the identifier
+    int m_stName{-1};
     /// Cache the station eta of the identifier
     int m_stEta{-1};
     /// Cache the station phi of the identifier

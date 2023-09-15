@@ -65,10 +65,10 @@ Identifier ActsMuonAlignCondAlg::alignmentId(const MuonGMR4::MuonReadoutElement*
     } else if (re->detectorType() == ActsTrk::DetectorType::Rpc) {
         /// The BML eta 7 stations have their own alignment. 
         if (std::abs(re->stationEta()) == 7 && m_idHelperSvc->stationNameString(re->identify()) == "BML") {
-            return m_idHelperSvc->rpcIdHelper().elementID(re->stationIndex(), re->stationEta(), re->stationPhi(), 1);
+            return m_idHelperSvc->rpcIdHelper().elementID(re->stationName(), re->stationEta(), re->stationPhi(), 1);
         /// The rest shares the same alignmnet constants with the Mdts
         } else {
-            return m_idHelperSvc->mdtIdHelper().elementID(re->stationIndex(), re->stationEta(), re->stationPhi());
+            return m_idHelperSvc->mdtIdHelper().elementID(re->stationName(), re->stationEta(), re->stationPhi());
         }
     }
     /// For the NSW, the alignment parameters are stored under the same key as the RE

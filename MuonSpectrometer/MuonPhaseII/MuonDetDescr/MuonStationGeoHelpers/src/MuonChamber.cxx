@@ -10,7 +10,8 @@ using ReadoutSet = MuonChamber::ReadoutSet;
 
 MuonChamber::MuonChamber(defineArgs&& args):
     m_args{std::move(args)} {}
-int MuonChamber::stationIndex() const { return m_args.readoutEles[0]->stationIndex(); }
+Muon::MuonStationIndex::ChIndex MuonChamber::chamberIndex() const { return m_args.readoutEles[0]->chamberIndex(); }
+int MuonChamber::stationName() const { return m_args.readoutEles[0]->stationName(); }
 int MuonChamber::stationPhi() const { return m_args.readoutEles[0]->stationPhi(); }
 int MuonChamber::stationEta() const { return m_args.readoutEles[0]->stationEta(); }
 const ReadoutSet& MuonChamber::readOutElements() const{ return m_args.readoutEles; }
@@ -28,8 +29,8 @@ std::shared_ptr<Acts::Volume> MuonChamber::boundingVolume(const ActsGeometryCont
 
 
 #define CHAMBER_SORTING(a, b)                             \
-    if (a.stationIndex() != b.stationIndex()) {           \
-        return a.stationIndex() < b.stationIndex();       \
+    if (a.chamberIndex() != b.chamberIndex()) {           \
+        return a.chamberIndex() < b.chamberIndex();       \
     }                                                     \
     if (a.stationEta() != b.stationEta()) {               \
         return a.stationEta() < b.stationEta();           \

@@ -37,8 +37,11 @@ namespace MuonGMR4 {
             };
 
             MuonChamber(defineArgs&& args);
-            // Returns the station index of the chamber
-            int stationIndex() const;
+            /// Returns the chamber index
+            Muon::MuonStationIndex::ChIndex chamberIndex() const;
+            // Returns the station name of the chamber
+            int stationName() const;
+            
             /// Returns the station eta of the chamber
             int stationEta() const;
             /// Returns the station phi of the chamber
