@@ -67,7 +67,7 @@ public:
     std::unique_ptr<TrackParameters>,
     MultiComponentState&&,
     std::unique_ptr<MaterialEffectsBase>,
-    const std ::bitset<NumberOfTrackStateOnSurfaceTypes>& types);
+    const std::bitset<NumberOfTrackStateOnSurfaceTypes>& types);
 
   /** Copy constructor and assignment*/
   MultiComponentStateOnSurface(const MultiComponentStateOnSurface& other);
@@ -86,13 +86,13 @@ public:
   /** Clone method for deep copy of MultiComponentStateOnSurface */
   virtual MultiComponentStateOnSurface* clone() const override final;
 
-  /** This is Multi, since we MultiComponent */
+  /** This is Multi */
   virtual TrackStateOnSurface::Variety variety() const override final;
 
-  /** Method to return a pointer to the multi-component state  const overload*/
+  /** Method to return a referenceto the multi-component state  const overload*/
   const MultiComponentState& components() const;
 
-  /** Method to return a pointer to the multi-component state non const
+  /** Method to return a reference to the multi-component state non const
    * overload*/
   MultiComponentState& components();
 
