@@ -850,6 +850,9 @@ protected:
 	    /// check this is not a spurious TDT match
 	    if ( roi_key!="" && roi_link.dataID()!=rgex ) continue;
 
+        /// invalid feature links can happen for missing (or truncated) Aux containers
+        if ( !roi_link.isValid() ) continue;
+
 	    const TrigRoiDescriptor* const* roiptr = roi_link.cptr();
 
 	    if ( roiptr == 0 ) continue;
