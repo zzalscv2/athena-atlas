@@ -20,9 +20,11 @@
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
 #include <EventLoop/AlgorithmStateModule.h>
 #include <EventLoop/AlgorithmTimerModule.h>
+#include <EventLoop/BatchInputModule.h>
 #include <EventLoop/BatchJob.h>
 #include <EventLoop/BatchSample.h>
 #include <EventLoop/BatchSegment.h>
+#include <EventLoop/DirectInputModule.h>
 #include <EventLoop/Driver.h>
 #include <EventLoop/EventCountModule.h>
 #include <EventLoop/EventRange.h>
@@ -422,6 +424,20 @@ namespace EL
 
 
   ::StatusCode Worker ::
+  processInputs ()
+  {
+    using namespace msgEventLoop;
+
+    RCU_CHANGE_INVARIANT (this);
+
+    for (auto& module : m_modules)
+      ANA_CHECK (module->processInputs (*this, *this));
+    return ::StatusCode::SUCCESS;
+  }
+
+
+
+  ::StatusCode Worker ::
   finalize ()
   {
     using namespace msgEventLoop;
@@ -546,7 +562,7 @@ namespace EL
 
 
   ::StatusCode Worker ::
-  openInputFile (std::string inputFileUrl)
+  openInputFile (const std::string& inputFileUrl)
   {
     using namespace msgEventLoop;
 
@@ -765,47 +781,20 @@ namespace EL
       ANA_CHECK (addOutputStream (out->label(), std::move (data)));
     }
 
-    ANA_CHECK (initialize ());
-
-    Long64_t maxEvents
-      = metaData()->castDouble (Job::optMaxEvents, -1);
-    Long64_t skipEvents
-      = metaData()->castDouble (Job::optSkipEvents, 0);
-
-    std::vector<std::string> files = sample->makeFileList();
-    for (const std::string& fileName : files)
     {
-      EventRange eventRange;
-      eventRange.m_url = fileName;
-      if (skipEvents == 0 && maxEvents == -1)
-      {
-        ANA_CHECK (processEvents (eventRange));
-      } else
-      {
-        // just open the input file to inspect it
-        ANA_CHECK (openInputFile (fileName));
-        eventRange.m_endEvent = inputFileNumEntries();
-
-        if (skipEvents != 0 && skipEvents >= eventRange.m_endEvent)
-        {
-          skipEvents -= eventRange.m_endEvent;
-          continue;
-        }
-        eventRange.m_beginEvent = skipEvents;
-        skipEvents = 0;
-
-        if (maxEvents != -1)
-        {
-          if (eventRange.m_endEvent > eventRange.m_beginEvent + maxEvents)
-            eventRange.m_endEvent = eventRange.m_beginEvent + maxEvents;
-          maxEvents -= eventRange.m_endEvent - eventRange.m_beginEvent;
-          assert (maxEvents >= 0);
-        }
-        ANA_CHECK (processEvents (eventRange));
-        if (maxEvents == 0)
-          break;
-      }
+      auto module = std::make_unique<Detail::DirectInputModule> ();
+      module->fileList = sample->makeFileList();
+      Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
+      if (maxEvents != -1)
+        module->maxEvents = maxEvents;
+      Long64_t skipEvents = metaData()->castDouble (Job::optSkipEvents, 0);
+      if (skipEvents != 0)
+        module->skipEvents = skipEvents;
+      addModule (std::move (module));
     }
+
+    ANA_CHECK (initialize ());
+    ANA_CHECK (processInputs ());
     ANA_CHECK (finalize ());
     return ::StatusCode::SUCCESS;
   }
@@ -871,25 +860,15 @@ namespace EL
         ANA_CHECK (addOutputStream (out->label(), std::move (data)));
       }
 
-      Long64_t beginFile = segment->begin_file;
-      Long64_t endFile   = segment->end_file;
-      Long64_t lastFile  = segment->end_file;
-      RCU_ASSERT (beginFile <= endFile);
-      Long64_t beginEvent = segment->begin_event;
-      Long64_t endEvent   = segment->end_event;
-      if (endEvent > 0) endFile += 1;
+      {
+        auto module = std::make_unique<Detail::BatchInputModule> ();
+        module->sample = sample;
+        module->segment = segment;
+        addModule (std::move (module));
+      }
 
       ANA_CHECK (initialize ());
-
-      for (Long64_t file = beginFile; file != endFile; ++ file)
-      {
-        RCU_ASSERT (std::size_t(file) < sample->files.size());
-        EventRange eventRange;
-        eventRange.m_url = sample->files[file];
-        eventRange.m_beginEvent = (file == beginFile ? beginEvent : 0);
-        eventRange.m_endEvent = (file == lastFile ? endEvent : EventRange::eof);
-        ANA_CHECK (processEvents (eventRange));
-      }
+      ANA_CHECK (processInputs ());
       ANA_CHECK (finalize ());
 
       std::ostringstream job_name;
@@ -1006,10 +985,8 @@ namespace EL
 
     setJobConfig (std::move (*jobConfig));
 
-    ANA_CHECK (initialize());
-
-    std::vector<std::string> fileList; 
     {
+      auto module = std::make_unique<Detail::DirectInputModule> ();
       std::ifstream infile("input.txt");
       while (infile) {
         std::string sLine;
@@ -1018,30 +995,23 @@ namespace EL
         while (ssLine) {
           std::string sFile;
           if (!getline(ssLine, sFile, ',')) break;
-          fileList.push_back(sFile);
+          module->fileList.push_back(sFile);
         }
       }
-    } 
-    if (fileList.size() == 0) {
-      ANA_MSG_ERROR ("no input files provided");
-      //User was expecting input after all.
-      gSystem->Exit(EC_BADINPUT);
+      if (module->fileList.size() == 0) {
+        ANA_MSG_ERROR ("no input files provided");
+        //User was expecting input after all.
+        gSystem->Exit(EC_BADINPUT);
+      }
     }
 
-    for (const std::string& file : fileList)
-    {
-      EventRange eventRange;
-      eventRange.m_url = file;
-
-      ANA_CHECK (processEvents (eventRange));
-    }
-
+    ANA_CHECK (initialize());
+    ANA_CHECK (processInputs ());
     ANA_CHECK (finalize ());
 
     int nEvents = eventsProcessed();
-    int nFiles = fileList.size();
     ANA_MSG_INFO ("Loop finished.");
-    ANA_MSG_INFO ("Read " << nEvents << " events in " << nFiles << " files.");
+    ANA_MSG_INFO ("Read/processed " << nEvents << " events.");
 
     ANA_MSG_INFO ("EventLoop Grid worker finished");
     ANA_MSG_INFO ("Saving output");
