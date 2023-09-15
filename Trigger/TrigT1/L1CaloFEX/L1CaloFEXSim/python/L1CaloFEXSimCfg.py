@@ -140,9 +140,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
         if not flags.Input.isMC:
             from IOVDbSvc.IOVDbSvcConfig import addFolders#, addFoldersSplitOnline
             acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts","TRIGGER_ONL",className="CondAttrListCollection"))
-            # don't use db for data for data22 ... but due to bugs in athenaHLT tests they're tests have it has data17
-            # so will assume not to use noisecuts in that case as well!
-            if len(eFexTowerInputs)>0 and "data17" not in flags.Input.ProjectName and "data22" not in flags.Input.ProjectName: eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
+            eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
             acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib","TRIGGER_ONL",className="CondAttrListCollection")) # dmCorr from DB!
             eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
 

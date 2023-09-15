@@ -103,7 +103,7 @@ namespace LVL1 {
     /** Get vector of all ET values in MeV FLOAT VERSION */
     std::vector<float> getETs_float() const {return m_et_float;};
 
-    void setET(int cell, float et, int layer);
+    void setET(int cell, float et, int layer, bool ignoreDisable=false);
 
     /** Set supercell position ID **/
     void setSCID(Identifier ID, int cell, float et, int layer, bool doenergysplit);

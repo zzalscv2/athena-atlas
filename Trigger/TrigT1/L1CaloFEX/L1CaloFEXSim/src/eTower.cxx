@@ -95,14 +95,14 @@ namespace LVL1 {
     return;
 
   }
-  void eTower::setET(int cell, float et, int layer) {
+  void eTower::setET(int cell, float et, int layer, bool ignoreDisable) {
     /// Check cell index in range for layer
     if (cell < 0  || cell > 13){ return; }
       
     addET(et, cell);
     
     //multi linear digitisation encoding ... except in tile (indicated by passing layer=5) .. just convert to 25 MeV steps
-    unsigned int outET = (layer==5) ? std::round(m_et_float[cell]/25) : eFEXCompression::decode(std::round(m_et_float[cell]),layer);
+    unsigned int outET = (layer==5) ? std::round(m_et_float[cell]/25) : eFEXCompression::decode(std::round(m_et_float[cell]),layer, ignoreDisable);
     m_et[cell] = outET;
   }
 
