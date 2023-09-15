@@ -16,7 +16,6 @@
 
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
 #include "HGTD_RawData/HGTD_RDO_Container.h"
-// #include "HGTD_ReadoutGeometry/HGTD_ModuleDesign.h" // see if this is needed
 
 #include <string>
 #include <vector>
@@ -48,16 +47,16 @@ public:
 
 private:
 
-  bool IsGoodParticle(HepMC3::ConstGenParticlePtr particlePtr, float min_pt_cut = 1000.);
+  bool IsHSGoodParticle(HepMC3::ConstGenParticlePtr particlePtr, const HepMC::GenEvent* hardScatterEvent, float min_pt_cut = 1000.);
 
+  SG::ReadHandleKey<HGTD_RDO_Container> m_inputKey {this, "CollectionName", "HGTD_RDOs", "Input HGTD RDO collection name"}; 
+  SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey {this, "SDOCollectionName", "HGTD_SDO_Map", "Input HGTD SDO collection name"};
   SG::ReadHandleKey<McEventCollection> m_inputMcEventCollectionKey {this, "McEventCollectionName", "TruthEvent", "Input McEventCollection name"};
 
-  SG::ReadHandleKey<HGTD_RDO_Container> m_inputKey_HGTD {this, "CollectionName", "HGTD_RDOs", "Input HGTD RDO collection name"}; 
-  SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey_HGTD {this, "SDOCollectionName", "HGTD_SDO_Map", "Input HGTD SDO collection name"};
-  const HGTD_ID *m_HGTD_ID{};
   const HGTD_DetectorManager *m_HGTD_Manager{};
   Gaudi::Property<std::string> m_HGTD_Name
   {this, "DetectorName", "HGTD", "HGTD detector name"};
+  const HGTD_ID *m_HGTD_ID{};
   Gaudi::Property<std::string> m_HGTDID_Name
   {this, "PixelIDName", "HGTD_ID", "HGTD ID name"};
 
@@ -77,9 +76,9 @@ private:
   std::vector<float> m_rdo_hit_x;  //in mm
   std::vector<float> m_rdo_hit_y;  //in mm
   std::vector<float> m_rdo_hit_z;  //in mm
-  std::vector<float> m_rdo_hit_raw_time;  //in ns
-  std::vector<float> m_rdo_hit_sdoraw_time;  //in ns
-  std::vector<int>   m_rdo_hit_truth; // signal=0, signal-secondary=1, pileup=2, delta=3
+  std::vector<float> m_rdo_hit_toa;  //in ns
+  std::vector<float> m_rdo_hit_sdo_deposit_time;  //in ns
+  std::vector<int>   m_rdo_hit_truth; // signal=1, pileup=2, secondary=3
 };
 
 #endif // HGTD_RDO_ANALYSIS_H
