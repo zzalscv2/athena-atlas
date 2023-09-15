@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -68,7 +68,7 @@ VP1Trig::VP1TriggerSystem::~VP1TriggerSystem() {log_verbose("destructor");}
 
 //Load Trigger Data from StoreGate (once new event loaded)
 //_____________________________________________________________________________________________
-bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* m_storeGate, QString triglvl)
+bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, QString triglvl)
 {
   log_verbose("loadTriggerHandles()");
   
@@ -97,14 +97,14 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* m_storeGate, QS
     }
     
     //Loading entire ChainGroup information via TrigDecisionTool
-    const Trig::ChainGroup* m_all = m_trigDec->getChainGroup(".*"); //all triggers
-    if(!m_all) {
-      log_fatal("ChainGroup <m_all> could not be loaded!");
+    const Trig::ChainGroup* allChains = m_trigDec->getChainGroup(".*"); //all triggers
+    if(!allChains) {
+      log_fatal("ChainGroup could not be loaded!");
       return false; //ref: daqstatus
     }
     
     //Retrieve list of valid triggers associated with ChainGroup
-    std::vector<std::string> trigList = m_all->getListOfTriggers();
+    std::vector<std::string> trigList = allChains->getListOfTriggers();
     std::vector<std::string>::iterator trigItr; //Iterator over trigList
     
     //Loop over list of triggers
@@ -145,7 +145,7 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* m_storeGate, QS
     bool runL2=false;
 
     while(runL2==false) {
-      if(m_storeGate->retrieve(mfdContainer,lastmfdContainer).isSuccess())
+      if(storeGate->retrieve(mfdContainer,lastmfdContainer).isSuccess())
 	log_verbose("MuonFeatureDetailsContainer retrieved");
       
       if(!mfdContainer) {
@@ -186,14 +186,14 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* m_storeGate, QS
     const DataHandle<TrigMuonEFInfoContainer> lastTrigMuon;
     unsigned int muonCounter=0;
     
-    if(m_storeGate->retrieve(trigMuon,lastTrigMuon).isSuccess()) {            
+    if(storeGate->retrieve(trigMuon,lastTrigMuon).isSuccess()) {
       for(int i=0; trigMuon!=lastTrigMuon; ++trigMuon, ++i) {
 	TrigMuonEFInfoContainer::const_iterator MuonItr  = trigMuon->begin(); //Iterators over top-level EDM
 	TrigMuonEFInfoContainer::const_iterator MuonItrE = trigMuon->end();   //objects (TrigMuonEFInfoContainer)
 	
 	for(int j=0; MuonItr!=MuonItrE; ++MuonItr, ++j ) { //looping over TrigMuonEFInfo objects
-	  TrigMuonEFInfo* muonInfo = (*MuonItr);
-	  std::vector<std::string> chains = m_trigMatch->chainsPassedByObject<TrigMuonEFInfo>(muonInfo);
+	  const TrigMuonEFInfo* muonInfo = (*MuonItr);
+      std::vector<std::string> chains = m_trigMatch->chainsPassedByObject<TrigMuonEFInfo>(muonInfo);
 	  std::vector<std::string>::iterator itChain; //iterator over chains
 	  QList<QString> chainIDs;
 	  

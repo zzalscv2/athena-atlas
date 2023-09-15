@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -47,8 +47,8 @@ const int TIDIDX = 2; //h_id index
 int count_mef=0, count_mg=0;
 
 //Muon Track Info: Instant holders
-TrigMuonEFTrack* muonEFTrack;
-TrigMuonEFCbTrack* muonEFCbTrack;
+const TrigMuonEFTrack* muonEFTrack;
+const TrigMuonEFCbTrack* muonEFCbTrack;
 
 //Muon Track Info: Names
 std::string muonTrackName[18] =
@@ -157,7 +157,7 @@ bool VP1Trig::VP1TriggerHandleEF::loadTrackContainer()
     TrigMuonEFInfoTrackContainer::const_iterator TrackItr;
     
     for(TrackItr = tc->begin(); TrackItr!=tc->end(); ++TrackItr) {
-      TrigMuonEFInfoTrack* muonInfo = (*TrackItr);
+      const TrigMuonEFInfoTrack* muonInfo = (*TrackItr);
       mt = int(muonInfo->MuonType()); //<1> MuonEF, <2> MuGirl
       
       //Safety check

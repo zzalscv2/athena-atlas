@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERPROCESSOR_H
@@ -70,7 +70,7 @@ namespace VP1Trig {
     void processData();
     
     //*************** TRIGGER DATA ***************
-    QTreeWidgetItem * L1_QData, * L2_QData, * EF_QData;
+    QTreeWidgetItem * m_L1_QData, * m_L2_QData, * m_EF_QData;
     QList<QTreeWidgetItem *> m_trigLvlDataSet;
     //--------------------------------------------------------<
   };

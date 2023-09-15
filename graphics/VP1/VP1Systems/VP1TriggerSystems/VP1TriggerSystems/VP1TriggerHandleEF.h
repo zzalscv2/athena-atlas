@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERHANDLEEF_H
@@ -30,7 +30,7 @@ namespace VP1Trig {
   class VP1TriggerHandleEF : public virtual Logger 
   {
   public:
-    VP1TriggerHandleEF(TrigMuonEFInfo* containerEF, QString trigID, QList<QString> chainIDs)
+    VP1TriggerHandleEF(const TrigMuonEFInfo* containerEF, QString trigID, QList<QString> chainIDs)
       : Logger("TriggerHandleEF"),
 	m_containerEF(containerEF),
 	m_trigID(trigID),
@@ -46,7 +46,7 @@ namespace VP1Trig {
     
     //EF Handle data -------------------------------->
     //++ Note: Set by VP1TriggerSystem ++
-    TrigMuonEFInfo* m_containerEF;
+    const TrigMuonEFInfo* m_containerEF;
     QString m_trigID;
     QList<QString> m_chainIDs;
     //-----------------------------------------------<
