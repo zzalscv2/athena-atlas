@@ -78,13 +78,13 @@ class LArWave {
     inline double&             operator[](const unsigned int i) {return m_amplitudes[i];}
 
     /// resize the number of time bin samples
-    void setSize     (const unsigned& nSize);
+    void setSize     (const unsigned nSize);
 
     /// set the delta time
     void setDt       (const double dt);
 
     /// set the amplitude for time bin i
-    void setSample   (const unsigned& i, const double& aVal) { m_amplitudes[i] = aVal ; } 
+    void setSample   (const unsigned i, const double aVal) { m_amplitudes[i] = aVal ; } 
 
     /// set flag
     void setFlag     (const unsigned flag);
@@ -98,12 +98,12 @@ class LArWave {
     LArWave operator* (const LArWave& bWave) const ; // point-to-point *
     LArWave operator/ (const LArWave& bWave) const ; // point-to-point /
     LArWave operator% (const LArWave& bWave) const ; // convolution
-    LArWave operator+ (const double& aBias) const ;   // add a constant 
-    LArWave operator* (const double& aScale) const ;  // multiply by a constant
+    LArWave operator+ (const double aBias) const ;   // add a constant 
+    LArWave operator* (const double aScale) const ;  // multiply by a constant
 
     LArWave& operator+=(const LArWave& bWave);
     LArWave& operator-=(const LArWave& bWave);
-    LArWave& operator*=(const double& aScale);
+    LArWave& operator*=(const double aScale);
     //@}
 
  protected:
@@ -185,7 +185,7 @@ LArWave::isEmpty()               const
 
 inline
 void	
-LArWave::setSize(const unsigned& nSize)           
+LArWave::setSize(const unsigned nSize)           
 { m_amplitudes.resize(nSize,0) ; } 
 
 inline

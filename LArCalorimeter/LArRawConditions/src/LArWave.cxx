@@ -112,7 +112,7 @@ LArWave LArWave::operator%(const LArWave& bWave) const
 }
 
 
-LArWave LArWave::operator+(const double& aBias) const {
+LArWave LArWave::operator+(const double aBias) const {
   LArWave result(*this) ;
   std::vector<double>::iterator it=result.m_amplitudes.begin();
   std::vector<double>::iterator it_e=result.m_amplitudes.end();
@@ -123,7 +123,7 @@ LArWave LArWave::operator+(const double& aBias) const {
 }
 
 
-LArWave LArWave::operator*(const double& aScale) const{
+LArWave LArWave::operator*(const double aScale) const{
   LArWave result(*this) ;
   std::vector<double>::iterator it=result.m_amplitudes.begin();
   std::vector<double>::iterator it_e=result.m_amplitudes.end();
@@ -134,7 +134,7 @@ LArWave LArWave::operator*(const double& aScale) const{
 }
 
 
-LArWave& LArWave::operator*=(const double& aScale) {
+LArWave& LArWave::operator*=(const double aScale) {
   for (double& a : m_amplitudes) {
     a*=aScale;
   }
