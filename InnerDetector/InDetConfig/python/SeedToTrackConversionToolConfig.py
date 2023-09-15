@@ -20,8 +20,11 @@ def SeedToTrackConversionToolCfg(
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 
+    extension = flags.Tracking.ActiveConfig.extension
+    if extension == flags.Tracking.PrimaryPassConfig.value:
+        extension = ""
     kwargs.setdefault("OutputName",
-                      f"SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}")
+                      f"SiSPSeedSegments{extension}")
 
     acc.setPrivateTools(
         CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))
@@ -44,8 +47,11 @@ def ITkSeedToTrackConversionToolCfg(
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 
+    extension = flags.Tracking.ActiveConfig.extension
+    if extension == flags.Tracking.PrimaryPassConfig.value:
+        extension = ""
     kwargs.setdefault("OutputName",
-                      f"SiSPSeedSegments{flags.Tracking.ActiveConfig.extension}")
+                      f"SiSPSeedSegments{extension}")
 
     acc.setPrivateTools(
         CompFactory.InDet.SeedToTrackConversionTool(name, **kwargs))

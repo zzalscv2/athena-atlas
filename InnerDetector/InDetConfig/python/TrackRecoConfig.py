@@ -16,8 +16,9 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                  flags.Tracking.PrimaryPassConfig.value)
+    flags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
     flags_set += [flags]
 
     # LRT pass
@@ -206,6 +207,7 @@ def InDetTrackRecoCfg(flags):
         flagsPixel = flags.cloneAndReplace("Tracking.ActiveConfig",
                                            "Tracking.PixelPass")
         PixelTrackContainer = "ResolvedPixelTracks"
+        _extensions_list.append(flagsPixel.Tracking.ActiveConfig.extension)
         printActiveConfig(flagsPixel)
 
         result.merge(TrackingSiPatternCfg(
@@ -240,6 +242,7 @@ def InDetTrackRecoCfg(flags):
         flagsSCT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                          "Tracking.SCTPass")
         SCTTrackContainer = "ResolvedSCTTracks"
+        _extensions_list.append(flagsSCT.Tracking.ActiveConfig.extension)
         printActiveConfig(flagsSCT)
 
         result.merge(TrackingSiPatternCfg(
@@ -266,6 +269,7 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doTrackSegmentsTRT:
         flagsTRT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                          "Tracking.TRTPass")
+        _extensions_list.append(flagsTRT.Tracking.ActiveConfig.extension)
         printActiveConfig(flagsTRT)
 
         from InDetConfig.TRTSegmentFindingConfig import (
