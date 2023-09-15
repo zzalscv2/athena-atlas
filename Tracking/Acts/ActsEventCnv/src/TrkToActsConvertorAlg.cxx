@@ -15,13 +15,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());
   ATH_CHECK(m_vectorTrackContainer.initialize());
-  ATH_CHECK(m_trackStatesKey.initialize());
-  ATH_CHECK(m_jacobiansKey.initialize());
-  ATH_CHECK(m_measurementsKey.initialize());
-  ATH_CHECK(m_parametersKey.initialize());
-  ATH_CHECK(m_surfacesKey.initialize());
-
+  ATH_CHECK(m_mtjHandle.initialize());
   ATH_CHECK(m_convertorTool.retrieve());
+  ATH_CHECK(m_constMTJKey.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -34,39 +30,12 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   }
   ATH_MSG_VERBOSE("create containers");
 
-  SG::WriteHandle<xAOD::TrackStateContainer> states(
-      m_trackStatesKey, ctx);
-  ATH_CHECK(states.record(std::make_unique<xAOD::TrackStateContainer>(),
-                        std::make_unique<xAOD::TrackStateAuxContainer>()));
-
-  SG::WriteHandle<xAOD::TrackJacobianContainer> jacobians(
-      m_jacobiansKey, ctx);
-  ATH_CHECK(jacobians.record(std::make_unique<xAOD::TrackJacobianContainer>(),
-                        std::make_unique<xAOD::TrackJacobianAuxContainer>()));
-
-  SG::WriteHandle<xAOD::TrackMeasurementContainer> measurements(
-      m_measurementsKey, ctx);
-  ATH_CHECK(measurements.record(std::make_unique<xAOD::TrackMeasurementContainer>(),
-                        std::make_unique<xAOD::TrackMeasurementAuxContainer>()));
-  
-  SG::WriteHandle<xAOD::TrackParametersContainer> parameters(
-      m_parametersKey, ctx);
-  ATH_CHECK(parameters.record(std::make_unique<xAOD::TrackParametersContainer>(),
-                        std::make_unique<xAOD::TrackParametersAuxContainer>()));
-
-  SG::WriteHandle<xAOD::SurfaceBackendContainer> surfaces(
-      m_surfacesKey, ctx);
-  ATH_CHECK(surfaces.record(std::make_unique<xAOD::SurfaceBackendContainer>(),
-                        std::make_unique<xAOD::SurfaceBackendAuxContainer>()));
-
-
   ATH_MSG_VERBOSE("About to create multiTraj");
-  auto multiTraj = std::make_unique<MutableMultiTrajectory>(&(*states), &(*parameters), &(*jacobians), &(*measurements), &(*surfaces));
+  auto multiTraj = std::make_unique<MutableMultiTrajectory>();
   Acts::VectorTrackContainer vecTrk;
   Acts::TrackContainer<Acts::VectorTrackContainer,
                        ActsTrk::MutableMultiTrajectory>
       tc{vecTrk, *multiTraj};
-  // auto constMultiTraj = multiTraj->convertToReadOnly(); 
   Acts::GeometryContext tgContext = m_convertorTool->trackingGeometryTool()
                                             ->getGeometryContext(ctx)
                                             .context();
@@ -82,11 +51,16 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
     ATH_MSG_VERBOSE("multiTraj has  " << multiTraj->size() << " states");
   }
 
-  // Let's dump some information for debugging (will be removed later)
-  ATH_MSG_VERBOSE("TrackStateContainer has  " << states->size() << " states");
-  ATH_MSG_VERBOSE("TrackParametersContainer has  " << parameters->size() << " parameters");
-
+  // // Let's dump some information for debugging (will be removed later)
+  ATH_MSG_VERBOSE("TrackStateContainer has  " << multiTraj->trackStates().size() << " states");
+  ATH_MSG_VERBOSE("TrackParametersContainer has  " << multiTraj->trackParameters().size() << " parameters");
   // TODO the TrackContainer should be constructed with ConstMTJ
+  std::unique_ptr<ActsTrk::ConstMultiTrajectory> constMultiTraj = m_mtjHandle.convertToConst(multiTraj.get(), ctx);
+  SG::WriteHandle<ActsTrk::ConstMultiTrajectory> mtjHandle(m_constMTJKey, ctx);
+  ATH_CHECK(mtjHandle.record(std::move(constMultiTraj)));  
+
+
+
   // Store the VectorTrackContainer
   auto constVecTrackCont = std::make_unique<Acts::ConstVectorTrackContainer>(std::move(vecTrk)); 
   SG::WriteHandle<Acts::ConstVectorTrackContainer> wh_vtc(m_vectorTrackContainer, ctx);

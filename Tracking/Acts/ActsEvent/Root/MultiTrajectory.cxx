@@ -6,83 +6,34 @@
 
 constexpr uint64_t InvalidGeoID = std::numeric_limits<uint64_t>::max();
 
-ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(
-    xAOD::TrackStateContainer* states,
-    xAOD::TrackParametersContainer* parameters,
-    xAOD::TrackJacobianContainer* jacobians,
-    xAOD::TrackMeasurementContainer* measurements,
-    xAOD::SurfaceBackendContainer* surfaces)
-    : m_trackStates(states),
-      m_trackParameters(parameters),
-      m_trackJacobians(jacobians),
-      m_trackMeasurements(measurements),
-      m_surfaceBackend(surfaces) {
-  addColumn_impl<IndexType>("calibratedSourceLink");
-}
-
-ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory(
-    const ActsTrk::MutableMultiTrajectory& other)
-    : m_trackStates(other.m_trackStates),
-      m_trackParameters(other.m_trackParameters),
-      m_trackJacobians(other.m_trackJacobians),
-      m_trackMeasurements(other.m_trackMeasurements),
-      m_surfaceBackend(other.m_surfaceBackend) {
-  if (other.m_trackStatesAux or other.m_trackParametersAux or
-      other.m_trackJacobiansAux or other.m_trackMeasurementsAux) {
-    throw std::runtime_error(
-        "MutableMultiTrajectory that was default constructed can not be "
-        "copied");
-  }
-  for (auto& decoration : other.m_decorations) {
-    m_decorations.push_back(decoration);
-  }
-}
 
 ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory() {
-  m_trackStates = new xAOD::TrackStateContainer;
-  m_trackStatesAux = new xAOD::TrackStateAuxContainer;
-  m_trackStates->setStore(m_trackStatesAux);
+  m_trackStates = std::make_unique<xAOD::TrackStateContainer>();
+  m_trackStatesAux = std::make_unique<xAOD::TrackStateAuxContainer>();
+  m_trackStates->setStore(m_trackStatesAux.get());
 
-  m_trackParameters = new xAOD::TrackParametersContainer;
-  m_trackParametersAux = new xAOD::TrackParametersAuxContainer;
-  m_trackParameters->setStore(m_trackParametersAux);
+  m_trackParameters = std::make_unique<xAOD::TrackParametersContainer>();
+  m_trackParametersAux = std::make_unique<xAOD::TrackParametersAuxContainer>();
+  m_trackParameters->setStore(m_trackParametersAux.get());
 
-  m_trackJacobians = new xAOD::TrackJacobianContainer;
-  m_trackJacobiansAux = new xAOD::TrackJacobianAuxContainer;
-  m_trackJacobians->setStore(m_trackJacobiansAux);
+  m_trackJacobians = std::make_unique<xAOD::TrackJacobianContainer>();
+  m_trackJacobiansAux = std::make_unique<xAOD::TrackJacobianAuxContainer>();
+  m_trackJacobians->setStore(m_trackJacobiansAux.get());
 
-  m_trackMeasurements = new xAOD::TrackMeasurementContainer;
-  m_trackMeasurementsAux = new xAOD::TrackMeasurementAuxContainer;
-  m_trackMeasurements->setStore(m_trackMeasurementsAux);
+  m_trackMeasurements = std::make_unique<xAOD::TrackMeasurementContainer>();
+  m_trackMeasurementsAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
+  m_trackMeasurements->setStore(m_trackMeasurementsAux.get());
 
-  m_surfaceBackend = new xAOD::SurfaceBackendContainer;
-  m_surfaceBackendAux = new xAOD::SurfaceBackendAuxContainer;
-  m_surfaceBackend->setStore(m_surfaceBackendAux);
-
-}
-
-ActsTrk::MutableMultiTrajectory::~MutableMultiTrajectory() {
-  // this is MTJ owning backends
-  if (m_trackStatesAux or m_trackParametersAux or m_trackJacobiansAux or
-      m_trackMeasurementsAux) {
-    delete m_trackStatesAux;
-    delete m_trackParametersAux;
-    delete m_trackJacobiansAux;
-    delete m_trackMeasurementsAux;
-    delete m_surfaceBackendAux;
-    delete m_trackStates;
-    delete m_trackParameters;
-    delete m_trackJacobians;
-    delete m_trackMeasurements;
-    delete m_surfaceBackend;
-
-  }
+  m_surfacesBackend = std::make_unique<xAOD::SurfaceBackendContainer>();
+  m_surfacesBackendAux = std::make_unique<xAOD::SurfaceBackendAuxContainer>();
+  m_surfacesBackend->setStore(m_surfacesBackendAux.get());
+  addColumn_impl<IndexType>("calibratedSourceLink");
 }
 
 bool ActsTrk::MutableMultiTrajectory::has_backends() const {
   return m_trackStates != nullptr and m_trackParameters != nullptr and
          m_trackJacobians != nullptr and m_trackMeasurements != nullptr
-         and m_surfaceBackend != nullptr;
+         and m_surfacesBackend != nullptr;
 }
 
 
@@ -333,6 +284,22 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
   }
 }
 
+bool ActsTrk::MutableMultiTrajectory::has_impl(
+    Acts::HashedString key, ActsTrk::IndexType istate) const {
+  const auto& trackStates = *(m_trackStates.get());
+  std::optional<bool> inTrackState =
+      ActsTrk::details::has_impl(trackStates, key, istate);
+  if (inTrackState.has_value())
+    return inTrackState.value();
+  for (auto& d : m_decorations) {
+    if (d.hash == key) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 typename Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
     ActsTrk::IndexType istate) const {
@@ -356,9 +323,9 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
   if (surface->geometryId().value() == 0) { // free surface, needs recording of properties
     m_surfaces[istate] = std::move(surface); // and memory management
     auto surfaceBackend = new xAOD::SurfaceBackend();
-    m_surfaceBackend->push_back(surfaceBackend);
+    m_surfacesBackend->push_back(surfaceBackend);
     encodeSurface(surfaceBackend, surface.get(), m_geoContext); // TODO
-    auto el = ElementLink<xAOD::SurfaceBackendContainer>(*m_surfaceBackend, m_surfaceBackend->size()-1);
+    auto el = ElementLink<xAOD::SurfaceBackendContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
     trackStates()[istate]->setSurfaceLink(el);
 
   } else {
@@ -396,7 +363,8 @@ ActsTrk::ConstMultiTrajectory::ConstMultiTrajectory(
       for ( auto id : m_trackStates->getConstStore()->getAuxIDs() ) {
 
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
-        if ( hasColumn_impl(Acts::hashString(name)) ) { // already known coulmns
+        std::cerr << " found aux " << name  << std::endl;
+        if ( hasColumn_impl(Acts::hashString(name)) ) { // already known columns
           continue;
         }
         const std::type_info* typeInfo = SG::AuxTypeRegistry::instance().getType(id);
@@ -527,7 +495,7 @@ ActsTrk::ConstMultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType
 }
 
 void ActsTrk::ConstMultiTrajectory::fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
-  m_surfaces = mtj->surfaces();
+  m_surfaces = std::move(mtj->m_surfaces);
 }
 
 

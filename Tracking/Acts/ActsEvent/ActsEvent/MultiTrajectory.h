@@ -85,27 +85,11 @@ class MutableMultiTrajectory final
   MutableMultiTrajectory();
 
   /**
-   * @brief Construct a new Multi Trajectory object given backends
-   * @note the MTJ does claim ownership over the data in the backend
-   * @param state, parametrs, jacobians, measuremnts - pointers to xAOD
-   * interface backend containers
+   * @brief disallow copies
    */
-  MutableMultiTrajectory(xAOD::TrackStateContainer* states,
-                         xAOD::TrackParametersContainer* parameters,
-                         xAOD::TrackJacobianContainer* jacobians,
-                         xAOD::TrackMeasurementContainer* measurements,
-                         xAOD::SurfaceBackendContainer* surfaces);
-  /**
-   * @brief Copy-Construct a new Multi Trajectory object other one
-   * Warning, default constructed MTJ can not be copied (runtime error)
-   */
-  MutableMultiTrajectory(const ActsTrk::MutableMultiTrajectory& other);
-
-  /**
-   * @brief Destructor needed for MTJ owing backends
-   */
-  ~MutableMultiTrajectory();
-
+  MutableMultiTrajectory(const ActsTrk::MutableMultiTrajectory& other)  = delete;
+  MutableMultiTrajectory& operator=(const ActsTrk::MutableMultiTrajectory& other) = delete;
+  
   /**
    * @brief Add state with stograge for data that depends on the mask
    *
@@ -136,8 +120,7 @@ class MutableMultiTrajectory final
    * @return true
    * @return false
    */
-
-  constexpr bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
+  bool has_impl(Acts::HashedString key, ActsTrk::IndexType istate) const;
 
   /**
    * @brief checks if MTJ has requested column (irrespectively of the state)
@@ -298,7 +281,7 @@ class MutableMultiTrajectory final
     m_trackParameters->clear();
     m_trackJacobians->clear();
     m_trackMeasurements->clear();
-    m_surfaceBackend->clear();
+    m_surfacesBackend->clear();
   }
 
   /**
@@ -346,20 +329,11 @@ class MutableMultiTrajectory final
                                 std::shared_ptr<const Acts::Surface>);
   const Acts::Surface* referenceSurface_impl(IndexType ) const;
 
-
- private:
-  // bare pointers to the backend (need to be fast and we do not claim ownership
-  // anyways)
-  xAOD::TrackStateContainer* m_trackStates = nullptr;
-  xAOD::TrackStateAuxContainer* m_trackStatesAux = nullptr;
-
+  // access to some backends (for debugging purposes)
   inline const xAOD::TrackStateContainer& trackStates() const {
     return *m_trackStates;
   }
   inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
-
-  xAOD::TrackParametersContainer* m_trackParameters = nullptr;
-  xAOD::TrackParametersAuxContainer* m_trackParametersAux = nullptr;
 
   inline const xAOD::TrackParametersContainer& trackParameters() const {
     return *m_trackParameters;
@@ -368,18 +342,12 @@ class MutableMultiTrajectory final
     return *m_trackParameters;
   }
 
-  xAOD::TrackJacobianContainer* m_trackJacobians = nullptr;
-  xAOD::TrackJacobianAuxContainer* m_trackJacobiansAux = nullptr;
-
   inline const xAOD::TrackJacobianContainer& trackJacobians() const {
     return *m_trackJacobians;
   }
   inline xAOD::TrackJacobianContainer& trackJacobians() {
     return *m_trackJacobians;
   }
-
-  xAOD::TrackMeasurementContainer* m_trackMeasurements = nullptr;
-  xAOD::TrackMeasurementAuxContainer* m_trackMeasurementsAux = nullptr;
 
   inline const xAOD::TrackMeasurementContainer& trackMeasurements() const {
     return *m_trackMeasurements;
@@ -388,9 +356,26 @@ class MutableMultiTrajectory final
     return *m_trackMeasurements;
   }
 
-  xAOD::SurfaceBackendContainer* m_surfaceBackend = nullptr;
-  xAOD::SurfaceBackendAuxContainer* m_surfaceBackendAux = nullptr;
 
+  template<typename X>
+  friend class MutableMultiTrajectoryHandle;
+
+ private:
+
+  std::unique_ptr<xAOD::TrackStateContainer> m_trackStates;
+  std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
+
+  std::unique_ptr<xAOD::TrackParametersContainer> m_trackParameters;
+  std::unique_ptr<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
+
+  std::unique_ptr<xAOD::TrackJacobianContainer> m_trackJacobians;
+  std::unique_ptr<xAOD::TrackJacobianAuxContainer> m_trackJacobiansAux;
+
+  std::unique_ptr<xAOD::TrackMeasurementContainer> m_trackMeasurements;
+  std::unique_ptr<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
+
+  std::unique_ptr<xAOD::SurfaceBackendContainer> m_surfacesBackend;
+  std::unique_ptr<xAOD::SurfaceBackendAuxContainer> m_surfacesBackendAux;
 
   std::vector<ActsTrk::detail::Decoration> m_decorations;
   //!< decoration accessors, one per type
@@ -398,8 +383,8 @@ class MutableMultiTrajectory final
   std::any decorationSetter(ActsTrk::IndexType, const std::string&);
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
+
   std::vector<StoredSurface> m_surfaces;
-  const std::vector<StoredSurface>& surfaces() const { return m_surfaces; }
   ActsGeometryContext m_geoContext;
 };
 
@@ -468,7 +453,7 @@ class ConstMultiTrajectory
   void fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj);
 
  private:
-  // TODO these 5 DATA links will be replaced by a reference to storable object that would contain those
+  // TODO these 4 DATA links will be replaced by a reference to storable object that would contain those
   DataLink<xAOD::TrackStateContainer> m_trackStates;
   DataLink<xAOD::TrackParametersContainer> m_trackParameters;
   DataLink<xAOD::TrackJacobianContainer> m_trackJacobians;

@@ -449,7 +449,7 @@ void ActsTrk::ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(
     }
 
     auto track = tc.getTrack(tc.addTrack());
-    auto trackStateContainer = tc.trackStateContainer();
+    auto& trackStateContainer = tc.trackStateContainer();
 
     ATH_MSG_VERBOSE("Track "<<trkCount++<<" has " << trackStates->size()
                                  << " track states on surfaces.");
