@@ -999,6 +999,7 @@ def createPixelTrackingPassFlags():
     icf.nHolesMax        = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.nHolesGapMax     = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.useSCT           = False
+    icf.useSCTSeeding    = False
     icf.useTRT           = False
     icf.minSecondaryPt   = 3 * Units.GeV
     icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
@@ -1050,6 +1051,7 @@ def createSCTTrackingPassFlags():
     icf.maxDoubleHoles   = 1
     icf.minSiNotShared   = 5
     icf.usePixel         = False
+    icf.usePixelSeeding  = False
     icf.useTRT           = False
 
     def _pick( default, cosmics, minbias, hion):
