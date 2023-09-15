@@ -16,7 +16,11 @@
 #===
 #=============================================================
 
-include( "TileCalibAlgs/jobOptions_TileInfoDump.py" )
+from AthenaCommon.GlobalFlags import globalflags
+globalflags.DetGeo.set_Value_and_Lock('atlas')
+globalflags.DataSource.set_Value_and_Lock('data')
+globalflags.DatabaseInstance="CONDBR2"
+
 from TileConditions.TileCoolMgr import tileCoolMgr
 
 #========================================================
@@ -69,8 +73,10 @@ else:
     print('Use Tag = "some_tag" to dump specific tag, otherwise UPD1 tag is used')
     exit(2)
 
-if Tag in dir() and len(Tag)>0:
-    tileCoolMgr.setTag("oflStatAdc",tag)
+if 'Tag' in dir() and len(Tag)>0:
+    tileCoolMgr.setTag("oflStatAdc",Tag)
+
+include( "TileCalibAlgs/jobOptions_TileInfoDump.py" )
 
 tileInfoDump.PrintEmscale           = False
 tileInfoDump.PrintEmscaleOnl        = False
