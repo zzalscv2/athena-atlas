@@ -6,7 +6,7 @@ from typing import List
 from AthenaCommon.CFElements import parOR
 from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from .HLTInputConfig import HLTInputConfigRegistry
+from .ConfigHelpers import AlgConfig, stringToMETRecoDict
 from ..CommonSequences.FullScanDefs import caloFSRoI, trkFSRoI
 from ..Config.MenuComponents import extractAlgorithmsAndAppendCA
 
@@ -47,18 +47,21 @@ def getMETRecoSequences(flags, purposes: List[str]):
         ]
     seqname = f"{''.join(purposes)}EndOfEventRecoSequence"
     with ConfigurableCABehavior():
-        registry = HLTInputConfigRegistry()
-        step_cas, _ = registry.build_steps(flags, ef_reco_algs, return_ca=True)
         merged_ca = ComponentAccumulator()
-        merged_ca.addSequence(parOR(seqname),primary=True)
-        for ca in step_cas:
-            merged_ca.merge(ca,seqname)
+        merged_ca.addSequence(parOR(seqname), primary=True)
+        max_step_idx = 0
+        for alg in ef_reco_algs:
+            cfg = AlgConfig.fromRecoDict(flags, **stringToMETRecoDict(alg))
+            step_output = cfg.make_reco_algs(flags, **cfg.interpret_reco_dict())
+            max_step_idx = max(max_step_idx, step_output.max_step_idx)
+            for ca in step_output.steps:
+                merged_ca.merge(ca, seqname)
 
     rois = [caloFSRoI]
-    if len(step_cas) > 2:
+    if max_step_idx > 2:
         # If we have more than two steps then we also need the FS tracking RoI
         rois.append(trkFSRoI)
     algorithms = extractAlgorithmsAndAppendCA(merged_ca)
-    
+
     streams = ["Main", "VBFDelayed"]
     return algorithms[0], rois, streams

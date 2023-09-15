@@ -3,23 +3,19 @@
 """ Helper functions for configuring MET chains"""
 
 from __future__ import annotations
-from typing import Any
-from collections.abc import Iterable
+from typing import Any, Optional
 
-from AthenaCommon.CFElements import seqAND
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from ..Menu.SignatureDicts import METChainParts_Default, METChainParts
-from ..MET.AlgInputConfig import InputConfigRegistry
 from ..Config.MenuComponents import (
     RecoFragmentsPool,
     ChainStep,
-    MenuSequence,
     InEventRecoCA,
     SelectionCA,
     MenuSequenceCA,
 )
+from .StepOutput import StepOutput
 from copy import copy
 from ..CommonSequences.FullScanDefs import trkFSRoI
 from AthenaCommon.Logging import logging
@@ -117,18 +113,12 @@ class AlgConfig(ABC):
         """
         raise NotImplementedError("algType not implemented by subclass!")
 
-    def __init__(self, inputs: Iterable[str] = [], inputRegistry:InputConfigRegistry | None=None, **recoDict: str):
+    def __init__(self, **recoDict: str):
         """Initialise the base class
 
         =========
         Arguments
         =========
-        inputs: The nicknames of the inputs that this FEX uses
-        inputRegistry:
-            The InputConfigRegistry instance to use. Usually this can be left
-            as None and then METRecoSequences.default_inputs will be used.
-            However, this parameter is provided in case a FEX requires a vastly
-            different set of input objects
         recoDict: Pass *all* the keys required for the recoDict
         """
 
@@ -141,29 +131,6 @@ class AlgConfig(ABC):
         )
         self.recoDict = copy(recoDict)
         self._suffix = metRecoDictToString(recoDict)
-        if inputRegistry is None:
-            from .METRecoSequences import default_inputs
-
-            inputRegistry = default_inputs
-        self._registry = inputRegistry
-        self._inputs = tuple(inputs)
-
-    def make_fex(self, flags: AthConfigFlags, name: str, inputs: dict[str, Any]) -> Any:
-        """Create the fex from its name and the inputs dict"""
-
-        return conf2toConfigurable(self.make_fex_accumulator(flags, name, inputs))
-
-    # TODO: Should this return a CA not a component?
-
-    @abstractmethod
-    def make_fex_accumulator(self, flags: AthConfigFlags, name: str, inputs: dict[str, Any]) -> Any:
-        """Create the CA for the fex from its name and the inputs dict"""
-        pass
-
-    @property
-    def inputRegistry(self) -> InputConfigRegistry:
-        """The InputConfigRegistry object used to build the input sequences"""
-        return self._registry
 
     @property
     def outputKey(self) -> str:
@@ -177,99 +144,34 @@ class AlgConfig(ABC):
         """The name of the algorithm made by this configuration"""
         return "EFMET_{}".format(self._suffix)
 
+    def interpret_reco_dict(self) -> dict[str, Any]:
+        """Return a version of the reco dict with any necessary post-processing"""
+        return self.recoDict
+
     def getMonTool(self, flags):
-        """ Create the monitoring tool """
+        """Create the monitoring tool"""
         return getMETMonTool(flags)
-
-    def recoAlgorithms(self, flags):
-        """Get the reconstruction algorithms (split by step) without the input makers"""
-        if hasattr(self, "_recoAlgorithms"):
-            return self._recoAlgorithms
-        # Retrieve the inputss
-        log.verbose("Create inputs for %s", self._suffix)
-        steps, inputs = self.inputRegistry.build_steps(
-            flags, self._inputs, metFSRoIs, self.recoDict
-        )
-        fex = self.make_fex(flags, self.fexName, inputs)
-        fex.MonTool = self.getMonTool(flags)
-        fex.METContainerKey = self.outputKey
-        # Add the FEX to the last list
-        steps[-1].append(fex)
-        self._recoAlgorithms = steps
-        return self._recoAlgorithms
-
-    def athSequences(self, flags):
-        """Get the reco sequences (split by step)"""
-        if hasattr(self, "_athSequences"):
-            return self._athSequences
-
-        inputMakers = self.inputMakers()
-        reco = self.recoAlgorithms(flags)
-        # Put the input makers at the start
-        sequences = [
-            []
-            if step == []
-            else seqAND(
-                f"METAthSeq_step{idx}_{self._suffix}", [inputMakers[idx]] + step
-            )
-            for idx, step in enumerate(reco)
-        ]
-        self._athSequences = sequences
-        return self._athSequences
-
-    def menuSequences(self, flags):
-
-        """Get the menu sequences (split by step)"""
-        if hasattr(self, "_menuSequences"):
-            return self._menuSequences
-
-        sequences = []
-        inputMakers = self.inputMakers()
-        ath_sequences = self.athSequences(flags)
-        for idx, seq in enumerate(ath_sequences):
-            if idx == len(ath_sequences) - 1:
-                hypo = conf2toConfigurable(self.make_hypo_alg())
-                hypo_tool = TrigMETHypoToolFromDict
-            else:
-                hypo = conf2toConfigurable(self.make_passthrough_hypo_alg(idx))
-                hypo_tool = streamer_hypo_tool
-            sequences.append(
-                MenuSequence(
-                    flags,
-                    Sequence=seq,
-                    Maker=inputMakers[idx],
-                    Hypo=hypo,
-                    HypoToolGen=hypo_tool,
-                )
-                if seq != []
-                else []
-            )
-        self._menuSequences = sequences
-        return self._menuSequences
 
     def name_step(self, idx) -> str:
         return f"step{ascii_uppercase[idx]}_{self._suffix}"
 
-    def make_steps(self, flags, chainDict):
-        """Create the actual chain steps"""
-        # NB - we index the steps using uppercase letters 'A', 'B', etc
-        # This technically means that there is an upper limit of 26 on the
-        # number of different steps that can be provided this way, but it seems
-        # unlikely that we'll actually run into this limit. If we do, it
-        # shouldn't be a problem to change it
-        steps = []
+    @abstractmethod
+    def make_reco_algs(self, flags, **recoDict) -> StepOutput:
+        """Create the reconstruction sequences including the FEX
 
-        for idx, seq in enumerate(self.menuSequences(flags)):
-            steps += [
-                ChainStep(
-                    self.name_step(idx),
-                    [seq] if seq != [] else [],
-                    multiplicity=[1] if seq != [] else [],
-                    chainDicts=[chainDict],
-                )
-            ]
+        Returns a list of CAs split by step
+        """
 
-        return steps
+    def _append_fex(self, flags, fex, inputs: Optional[StepOutput] = None) -> None:
+        """Append the FEX to the output object
+        
+        Finalizes the FEX by setting the monitoring tool and output name.
+        """
+        fex.MonTool = self.getMonTool(flags)
+        fex.METContainerKey = self.outputKey
+        acc = ComponentAccumulator()
+        acc.addEventAlgo(fex, primary=True)
+        return StepOutput.create(acc, inputs, MET=self.outputKey)
 
     def make_reco_ca(self, flags):
         """Make the reconstruction sequences for the new JO style"""
@@ -293,8 +195,9 @@ class AlgConfig(ABC):
         # a GaudiConfig2 ComboHypo. So we disable the combo creation when
         # making the CA, and then enable it when making a legacy ChainStep.
 
+
         # Get the reco sequences
-        reco_sequences = self.make_reco_ca(flags)
+        reco_sequences = self.make_reco_algs(flags, **self.interpret_reco_dict()).steps
         output_steps = []
         # build up the output steps
         # We have to merge together the CAs containing the reconstruction sequences
@@ -316,10 +219,10 @@ class AlgConfig(ABC):
                     hypo_tool = streamer_hypo_tool
 
                 # Now merge the reco sequence into the InEventRecoCA
-                reco_acc.merge(reco_sequence)
+                reco_acc.mergeReco(reco_sequence)
 
                 # Create a selection CA
-                sel_acc = SelectionCA('METAthSeq_'+self.name_step(step_idx))
+                sel_acc = SelectionCA("METAthSeq_" + self.name_step(step_idx))
                 # Merge in the reconstruction sequence
                 sel_acc.mergeReco(reco_acc)
                 # Add its hypo alg
@@ -382,15 +285,6 @@ class AlgConfig(ABC):
         else:
             raise KeyError(f"No input maker for step {idx}")
 
-    def inputMakers(self):
-        """The input makers for each step"""
-        if hasattr(self, "_inputMakers"):
-            return self._inputMakers
-        from ..Jet.JetMenuSequencesConfig import getCaloInputMaker, getTrackingInputMaker
-
-        self._inputMakers = [getCaloInputMaker(), None, getTrackingInputMaker("ftf")]
-        return self._inputMakers
-
     @classmethod
     def _get_subclasses(cls):
         """Provides a way to iterate over all subclasses of this class"""
@@ -400,7 +294,7 @@ class AlgConfig(ABC):
             yield subcls
 
     @classmethod
-    def _makeCls(cls, flags, **kwargs):
+    def _makeCls(cls, flags, **kwargs) -> AlgConfig:
         """This is a rather horrible work-around.
 
         The RecoFragmentsPool approach wants a function that takes a set of
@@ -411,7 +305,7 @@ class AlgConfig(ABC):
         return cls(**kwargs)
 
     @classmethod
-    def fromRecoDict(cls, flags, EFrecoAlg, **recoDict):
+    def fromRecoDict(cls, flags, EFrecoAlg, **recoDict) -> AlgConfig:
         for subcls in cls._get_subclasses():
             if subcls.algType() == EFrecoAlg:
                 return RecoFragmentsPool.retrieve(
