@@ -50,8 +50,10 @@ def main():
     parser.add_argument('nightly', nargs='?', help='Nightly tag to use')
     args = parser.parse_args()
 
-    if args.token and not gitlab_available:
-        print('WARNING - passing a token but was not able to import gitlab. You probably need to setup python-gitlab first (i.e. lsetup gitlab) or install it locally (see https://python-gitlab.readthedocs.io)')
+    if args.token:
+        if not gitlab_available:
+            print('WARNING - passing a token but was not able to import gitlab. You probably need to setup python-gitlab first (i.e. lsetup gitlab) or install it locally (see https://python-gitlab.readthedocs.io)')
+            exit(1)
 
     if args.sweep:
         target_release = ''         # not used
@@ -78,11 +80,19 @@ def main():
     if (output_log['returncode'] > 0):
         print("Git failed with: {}".format(output_log['stderr']))
         print('Are you running this script from within the athena/ directory?')
-        quit(999)
+        exit(1))
     # If possible, use Gitlab
     gl_project = None
     if args.token and gitlab_available:
+        print('Trying to connect to gitlab using the supplied token')
         gl = gitlab.Gitlab("https://gitlab.cern.ch", args.token)
+        # Check that the token is valid before we get further
+        try:
+            gl.auth()
+            print('Authentication to gitlab was successful')
+        except Exception as err:
+            print(f"Authentication failed. {err=}, {type(err)=}")
+            exit(1))
         gl_project = gl.projects.get("atlas/athena")
 
     print('About to parse the MRs. Depending on the number, this could take a few minutes (run with --verbose to get more output while this is happening).')
@@ -96,7 +106,7 @@ def main():
 
     print()
     if not args.sweep and args.token and gitlab_available:
-        msg = 'Would you like me to create the release for you in gitlab (i.e. make the tag and fill in the release notes)?'
+        msg = 'Would you like to create the release in gitlab (i.e. make the tag and fill in the release notes)?'
         if input("%s (y/N) " % msg).lower() == 'y':
             print('Is there a ticket associated with the release build request e.g. ATLINFR-XXXX? (press return to skip)')
             ticket = input(': ')
@@ -106,8 +116,12 @@ def main():
             message = input(': ')
             if ticket:
                 message = message + '\nRelease request ticket: '+ticket
-            gl_project.tags.create({'tag_name':target_release, 'ref':nightly_tag, 'message':message+''})
-            release = gl_project.releases.create({'name':target_release, 'tag_name':target_release, 'description':release_notes})
+            try:
+                gl_project.tags.create({'tag_name':target_release, 'ref':nightly_tag, 'message':message+''})
+                release = gl_project.releases.create({'name':target_release, 'tag_name':target_release, 'description':release_notes})
+            except Exception as err:
+                print(f"Failed to create tag or release. {err=}, {type(err)=}")
+                exit(1)
             print('Just created the following release:', release)
 
     # Create a Draft sweep MR in GitLab
