@@ -219,33 +219,6 @@ def generateCFChains(flags, opt):
             makeChain(flags, name='HLT_tau35_mediumRNN_tracktwoMVA_L1TAU12IM', L1Thresholds=["TAU20IM"], ChainSteps=[step1MVA, step2PT])
         ]
 
-
-    ##################################################################
-    # MET chains
-    ##################################################################
-    if opt.doMETSlice is True:
-        from TriggerMenuMT.HLT.MET.METChainConfiguration import extractMETRecoDict
-        from TriggerMenuMT.HLT.MET.ConfigHelpers import AlgConfig
-
-        cellRecoDict = extractMETRecoDict({'EFrecoAlg': "cell"})
-        metCellConf = AlgConfig.fromRecoDict(flags, **cellRecoDict)
-        metCellSeqs = metCellConf.menuSequences(flags)
-
-        pufitRecoDict = extractMETRecoDict({'EFrecoAlg': "tcpufit"})
-        metClusterPufitConf = AlgConfig.fromRecoDict(flags, **pufitRecoDict)
-        metClusterPufitSeqs = metClusterPufitConf.menuSequences(flags)
-        
-        metCellStep = makeChainStep("Step1_met_cell", metCellSeqs)
-        metClusterPufitStep          = makeChainStep("Step1_met_clusterpufit", metClusterPufitSeqs)
-        comboStep_cell_clusterpufit  = makeChainStep("Step1_combo_cell_clusterpufit", metCellSeqs + metClusterPufitSeqs, multiplicity=[1,1])
-
-        menu.chainsInMenu['MET'] = [
-            makeChain(flags, name="HLT_xe65_L1XE50",         L1Thresholds=["FSNOSEED"], ChainSteps=[metCellStep]),
-            makeChain(flags, name="HLT_xe30_L1XE30",         L1Thresholds=["FSNOSEED"], ChainSteps=[metCellStep]),
-            makeChain(flags, name="HLT_xe30_tcpufit_L1XE30", L1Thresholds=["FSNOSEED"], ChainSteps=[metClusterPufitStep]),
-            makeChain(flags, name='HLT_xe30_cell_xe30_tcpufit_L1XE30',  L1Thresholds=["FSNOSEED","FSNOSEED"], ChainSteps=[comboStep_cell_clusterpufit ])
-            ]
-
     ##################################################################
     # B-physics and light states chains
     ##################################################################
