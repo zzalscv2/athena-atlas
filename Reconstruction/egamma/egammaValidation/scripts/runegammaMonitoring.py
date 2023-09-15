@@ -16,6 +16,9 @@ parser.add_argument("-p", "--particleType", default='electron', type=str,
                     help="The particle type. electron or gamma")
 parser.add_argument("-fwd", "--addFwd", default='False', type=str,
                     help="Also run on fwd electrons")
+parser.add_argument("-o", "--outputFileName", default='Nightly-monitoring.hist', type=str,
+                    help="The output file name")
+
 args = parser.parse_args()
 
 addFwd = True if args.addFwd == 'True' else False
@@ -48,7 +51,10 @@ acc.merge(TileGMCfg(flags))
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 acc.merge(PoolReadCfg(flags))
 from egammaValidation.egammaMonitoringConfig import egammaMonitoringCfg
-acc.merge(egammaMonitoringCfg(flags, particleType = args.particleType, addFwd = addFwd))
+acc.merge(egammaMonitoringCfg(flags,\
+                                  particleType = args.particleType, \
+                                  outputFileName = args.outputFileName, \
+                                  addFwd = addFwd))
 
 # Execute and finish
 sc = acc.run(maxEvents=args.maxEvents)
