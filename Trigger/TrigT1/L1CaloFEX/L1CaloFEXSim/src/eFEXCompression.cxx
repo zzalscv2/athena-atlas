@@ -65,11 +65,11 @@ int eFEXCompression::expand(unsigned int code) {
   return Et;
 }
 
-bool eFEXCompression::noiseCut(unsigned int code, int layer) {
+bool eFEXCompression::noiseCut(unsigned int code, int layer, bool ignoreDisable) {
     // Check if noise cut is passed - one cut per layer  
     bool pass=true;
 
-    if(s_disableNoiseCuts) return pass;
+    if(!ignoreDisable && s_disableNoiseCuts) return pass;
 
     switch(layer){
     case 0: 
@@ -125,14 +125,14 @@ unsigned int eFEXCompression::linearize(unsigned int code, int threshold) {
   return eFexET;
 }
 
-unsigned int eFEXCompression::decode(int EtVal, int layer) {
+unsigned int eFEXCompression::decode(int EtVal, int layer, bool ignoreDisable) {
 
   // Calculate code
   unsigned int tcode = eFEXCompression::compress(EtVal);
 
   /// Check if noise cut is passed
   unsigned int code = 0; // corresponds to 0 GeV
-  if (eFEXCompression::noiseCut(tcode,layer)) {
+  if (eFEXCompression::noiseCut(tcode,layer,ignoreDisable)) {
     code = tcode;
   }
 

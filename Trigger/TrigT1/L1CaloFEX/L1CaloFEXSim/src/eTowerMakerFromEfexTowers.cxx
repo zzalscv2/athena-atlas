@@ -45,19 +45,25 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
 {
   // load noise cuts .. should really only need to do this at start of runs, not every event!
   std::map<std::pair<int, int>, int> noiseCutsMap; // key is [eta,layer]
+  bool useHardcodedCuts = false;
   if(!m_noiseCutsKey.empty()) {
-      SG::ReadCondHandle <CondAttrListCollection> noiseCuts{m_noiseCutsKey, ctx};
-      if (noiseCuts.isValid()) {
-          for (auto itr = noiseCuts->begin(); itr != noiseCuts->end(); ++itr) {
-              if (itr->first >= 50) continue;
-              noiseCutsMap[std::pair(itr->first, 0)] = itr->second["EmPS"].data<int>();
-              noiseCutsMap[std::pair(itr->first, 1)] = itr->second["EmFR"].data<int>();
-              noiseCutsMap[std::pair(itr->first, 2)] = itr->second["EmMD"].data<int>();
-              noiseCutsMap[std::pair(itr->first, 3)] = itr->second["EmBK"].data<int>();
-              noiseCutsMap[std::pair(itr->first, 4)] = (itr->first >= 10 && itr->first < 35)
-                                                       ? itr->second["Tile"].data<int>()
-                                                       : itr->second["HEC"].data<int>();
-          }
+      // check timestamp of event is not *before* date when started using database
+      if (ctx.eventID().time_stamp() < 1672531200) { //start of 2023
+        useHardcodedCuts = true;
+      } else {
+        SG::ReadCondHandle <CondAttrListCollection> noiseCuts{m_noiseCutsKey, ctx};
+        if (noiseCuts.isValid()) {
+            for (auto itr = noiseCuts->begin(); itr != noiseCuts->end(); ++itr) {
+                if (itr->first >= 50) continue;
+                noiseCutsMap[std::pair(itr->first, 0)] = itr->second["EmPS"].data<int>();
+                noiseCutsMap[std::pair(itr->first, 1)] = itr->second["EmFR"].data<int>();
+                noiseCutsMap[std::pair(itr->first, 2)] = itr->second["EmMD"].data<int>();
+                noiseCutsMap[std::pair(itr->first, 3)] = itr->second["EmBK"].data<int>();
+                noiseCutsMap[std::pair(itr->first, 4)] = (itr->first >= 10 && itr->first < 35)
+                                                        ? itr->second["Tile"].data<int>()
+                                                        : itr->second["HEC"].data<int>();
+            }
+        }
       }
   }
 
@@ -99,14 +105,15 @@ StatusCode eTowerMakerFromEfexTowers::initialize()
 
           // apply noise cut ... for runs up to 14th April 2023 was killing with <, then from run 449180 onwards kills with <=
           // since long-term behaviour is latter, will use that
-          if(counts.at(i) <= noiseCutsMap[std::pair( int( (eFexTower->eta() + 2.525)/0.1 ), layer)]) continue;
+          //if(useHardcodedCuts && !eFEXCompression::noiseCut(counts.at(i),layer,true)) continue;
+          if(!useHardcodedCuts && counts.at(i) <= noiseCutsMap[std::pair( int( (eFexTower->eta() + 2.525)/0.1 ), layer)]) continue;
 
           // checking we haven't already filled this tower (happens when using efexDataTowers ... multiple towers per loc for different modules)
           // this is ugly as ...
           if(!tower->getET_float(layer,cell-(layer==1)*1-(layer==2)*5-(layer==3)*9-(layer==4)*10)) {
               // if tile then count is in steps of 500 MeV, not in latome multilinear encoding
               bool isTile = (std::abs(eFexTower->eta()+0.025)<1.5 && layer==4);
-              tower->setET(cell,isTile ? (counts.at(i)*500.) : eFEXCompression::expand(counts.at(i)),layer + isTile);
+              tower->setET(cell,isTile ? (counts.at(i)*500.) : eFEXCompression::expand(counts.at(i)),layer + isTile, useHardcodedCuts);
           }
       }
   }
