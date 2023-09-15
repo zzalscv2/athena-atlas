@@ -183,6 +183,12 @@ AntiKt4Truth = JetDefinition("AntiKt",0.4, cst.Truth,
                              lock = True,
 )
 
+AntiKt2Truth = JetDefinition("AntiKt",0.2, cst.Truth,
+                             ghostdefs = flavourghosts,
+                             modifiers = ("Sort", "Width")+truthmods,
+                             lock = True,
+)
+
 AntiKt4TruthWZ = JetDefinition("AntiKt",0.4, cst.TruthWZ,
                                ghostdefs = flavourghosts,
                                modifiers = ("Sort", "Width")+truthmods,

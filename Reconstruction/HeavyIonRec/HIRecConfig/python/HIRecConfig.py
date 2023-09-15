@@ -17,6 +17,14 @@ def HIRecCfg(flags):
     if flags.HeavyIon.doJet:
         from HIJetRec.HIJetRecConfigCA import HIJetRecCfg
         acc.merge(HIJetRecCfg(flags))
+        if flags.Input.isMC:
+            from JetRecConfig.JetRecConfig import JetRecCfg
+            from JetRecConfig.JetRecoSteering import addJetsToOutputCfg
+            from JetRecConfig.StandardSmallRJets import AntiKt4Truth, AntiKt2Truth
+            jetdefs = [AntiKt4Truth,AntiKt2Truth]
+            for jd in jetdefs:
+                acc.merge(JetRecCfg(flags, jd))
+            acc.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=True, toESD=False))
 
     if flags.HeavyIon.Egamma.doSubtractedClusters:
         from HIJetRec.HIEgammaRecConfigCA import (
