@@ -279,8 +279,12 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
                           flags.Tracking.pixelClusterSplitProb1)
         kwargs.setdefault("sharedProbCut2",
                           flags.Tracking.pixelClusterSplitProb2)
+
+        extension = flags.Tracking.ActiveConfig.extension
+        if extension == flags.Tracking.PrimaryPassConfig.value:
+            extension = ""
         kwargs.setdefault("SplitClusterMap_new", (
-            f"SplitClusterAmbiguityMap{flags.Tracking.ActiveConfig.extension}"))
+            f"SplitClusterAmbiguityMap{extension}"))
 
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       ClusterSplitProbContainer)
@@ -346,8 +350,13 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
 
     kwargs.setdefault("sharedProbCut", flags.Tracking.pixelClusterSplitProb1)
     kwargs.setdefault("sharedProbCut2", flags.Tracking.pixelClusterSplitProb2)
+
+    extension = flags.Tracking.ActiveConfig.extension
+    if extension == flags.Tracking.PrimaryPassConfig.value:
+        extension = ""
     kwargs.setdefault("SplitClusterMap_new", (
-        'SplitClusterAmbiguityMap' + flags.Tracking.ActiveConfig.extension))
+        'SplitClusterAmbiguityMap' + extension))
+
     kwargs.setdefault("AssociationMapName", (
         'ITkPRDToTrackMap' + flags.Tracking.ActiveConfig.extension))
     kwargs.setdefault("InputClusterSplitProbabilityName", (

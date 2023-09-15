@@ -5,22 +5,22 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
 
 
 class PrimaryPassConfig(FlagEnum):
-    VtxLumi = 'Tracking.VtxLumiPass'
-    VtxBeamSpot = 'Tracking.VtxBeamSpotPass'
-    Cosmics = 'Tracking.CosmicsPass'
-    HeavyIon = 'Tracking.HeavyIonPass'
-    HighPileup = 'Tracking.HighPileupPass'
-    UPC = 'Tracking.UPCPass'
-    HIP = 'Tracking.HIPPass'
-    MinBias = 'Tracking.MinBiasPass'
-    RobustReco = 'Tracking.RobustRecoPass'
-    Default = 'Tracking.MainPass'
+    VtxLumi = 'VtxLumi'
+    VtxBeamSpot = 'VtxBeamSpot'
+    Cosmics = 'Cosmics'
+    HeavyIon = 'HeavyIon'
+    HighPileup = 'HighPileup'
+    UPC = 'UPC'
+    HIP = 'HIP'
+    MinBias = 'MinBias'
+    RobustReco = 'RobustReco'
+    Default = 'Main'
 
 
 class ITkPrimaryPassConfig(FlagEnum):
-    FTF = 'Tracking.ITkFTFPass'
-    FastTracking = 'Tracking.ITkFastPass'
-    Default = 'Tracking.ITkMainPass'
+    FTF = 'ITkFTF'
+    FastTracking = 'ITkFast'
+    Default = 'ITkMain'
 
 
 class TrackFitterType(FlagEnum):
