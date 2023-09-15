@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -350,7 +350,7 @@ double TrackTools::getPath(const CaloCell* cell, const Trk::TrackParameters *ent
     bool compute = true;
     int lBC(0);
     while(compute){
-        if ((sampleID == 13) && (m_tileID->tower(cell->ID()) == 8)) break; // B9
+        if ((lBC == 1) && (sampleID == 13) && (m_tileID->tower(cell->ID()) == 8)) break; // B9
         int np = 0;
         if(std::sqrt((layer1X - layer2X) * (layer1X - layer2X) + (layer1Y - layer2Y) * (layer1Y - layer2Y)) < 3818.5){
             if(sampleID == 13){
