@@ -1,3 +1,5 @@
+include ("GeneratorFilters/CreatexAODSlimContainers.py")
+
 if not hasattr(filtSeq, "xAODParticleFilter"):
     from GeneratorFilters.GeneratorFiltersConf import xAODParticleFilter
     filtSeq += xAODParticleFilter("xAODParticleFilter")
