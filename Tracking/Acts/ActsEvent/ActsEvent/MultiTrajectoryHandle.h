@@ -46,19 +46,12 @@ class MutableMultiTrajectoryHandle {
   StatusCode initialize();
 
   /**
-   * builds MutableMTJ and registers backends in SG
-   */
-  std::unique_ptr<ActsTrk::MutableMultiTrajectory> build(
-      const EventContext& context) const;
-  /**
-   * builds ConstMTJ pointing to the same backends as MutableMTJ and saves it in
-   * SG
+   * builds ConstMTJ pointing to the same backends as MutableMTJ
    * @warning this call should happen last e.g. once MutableMTJ is not altered
-   * anymore
+   * anymore, the MutableMTJ is actually purged in this operation
    */
-  StatusCode storeConst(const ActsTrk::MutableMultiTrajectory* mmtj,
-                        const ActsGeometryContext& geoContext,
-                        const EventContext& context) const;
+  std::unique_ptr<ActsTrk::ConstMultiTrajectory> convertToConst(
+      ActsTrk::MutableMultiTrajectory* mmtj, const EventContext& context) const;
 
  private:
   SG::WriteHandleKey<xAOD::TrackStateContainer> m_statesKey;
@@ -66,7 +59,6 @@ class MutableMultiTrajectoryHandle {
   SG::WriteHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
   SG::WriteHandleKey<xAOD::TrackMeasurementContainer> m_measurementsKey;
   SG::WriteHandleKey<xAOD::SurfaceBackendContainer> m_surfacesKey;
-  SG::WriteHandleKey<ActsTrk::ConstMultiTrajectory> m_constMTJKey;
 };
 
 /**
@@ -93,16 +85,15 @@ class ConstMultiTrajectoryHandle {
    * if geo pointer is a nullptr and the surfaces are not in the original
    * collection an exception is thrown
    */
-  const ActsTrk::ConstMultiTrajectory* build(const Acts::TrackingGeometry* geo,
-                                             const EventContext& context) const;
+  std::unique_ptr<const ActsTrk::ConstMultiTrajectory> build(
+      const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext,
+      const EventContext& context) const;
 
  private:
   SG::ReadHandleKey<xAOD::TrackStateContainer> m_statesKey;
   SG::ReadHandleKey<xAOD::TrackParametersContainer> m_parametersKey;
   SG::ReadHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
   SG::ReadHandleKey<xAOD::TrackMeasurementContainer> m_measurementsKey;
-  SG::ReadHandleKey<xAOD::SurfaceBackendContainer> m_surfacesKey;
-  SG::WriteHandleKey<ActsTrk::ConstMultiTrajectory> m_constMTJKey;
 };
 
 /// implementations
@@ -119,10 +110,8 @@ MutableMultiTrajectoryHandle<C>::MutableMultiTrajectoryHandle(
                      namePrefix + "TrackJacobians"),
       m_measurementsKey(algorithm, propertyNamePrefix + "TrackMeasurementsKey",
                         namePrefix + "TrackMeasurements"),
-      m_surfacessKey(algorithm, propertyNamePrefix + "SurfacesBaackendKey",
-                     namePrefix + "SurfacesBackend"),
-      m_constMTJKey(algorithm, propertyNamePrefix + "MultiTrajectoryKey",
-                    namePrefix + "MultiTrajectory") {}
+      m_surfacesKey(algorithm, propertyNamePrefix + "SurfacesBaackendKey",
+                    namePrefix + "SurfacesBackend") {}
 
 template <class C>
 StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
@@ -131,48 +120,19 @@ StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
   ATH_CHECK(m_jacobiansKey.initialize());
   ATH_CHECK(m_measurementsKey.initialize());
   ATH_CHECK(m_surfacesKey.initialize());
-  ATH_CHECK(m_constMTJKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
 template <class C>
-std::unique_ptr<ActsTrk::MutableMultiTrajectory>
-MutableMultiTrajectoryHandle<C>::build(const ActsGeometryContext& geoContext,
-                                       const EventContext& context) const {
-
-  auto statesBackend = std::make_unique<xAOD::TrackStateContainer>();
-  auto statesBackendAux = std::make_unique<xAOD::TrackStateAuxContainer>();
-  statesBackend->setStore(statesBackendAux.get());
-
-  auto parametersBackend = std::make_unique<xAOD::TrackParametersContainer>();
-  auto parametersBackendAux =
-      std::make_unique<xAOD::TrackParametersAuxContainer>();
-  parametersBackend->setStore(parametersBackendAux.get());
-
-  auto jacobiansBackend = std::make_unique<xAOD::TrackJacobianContainer>();
-  auto jacobiansBackendAux =
-      std::make_unique<xAOD::TrackJacobianAuxContainer>();
-  jacobiansBackend->setStore(jacobiansBackendAux.get());
-
-  auto measurementsBackend =
-      std::make_unique<xAOD::TrackMeasurementContainer>();
-  auto measurementsBackendAux =
-      std::make_unique<xAOD::TrackMeasurementAuxContainer>();
-  measurementsBackend->setStore(measurementsBackendAux.get());
-
-  auto surfacesBackend = std::make_unique<xAOD::SurfaceBackendContainer>();
-  auto surfacesBackendAux =
-      std::make_unique<xAOD::SurfaceBackendAuxContainer>();
-  surfacesBackend->setStore(surfacesBackendAux.get());
-
-  auto mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>(
-      statesBackend.get(), parametersBackend.get(), jacobiansBackend.get(),
-      measurementsBackend.get(), surfaceBackend.get());
+std::unique_ptr<ActsTrk::ConstMultiTrajectory>
+MutableMultiTrajectoryHandle<C>::convertToConst(
+    ActsTrk::MutableMultiTrajectory* mmtj, const EventContext& context) const {
 
   auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
   if (statesBackendHandle
-          .record(std::move(statesBackend), std::move(statesBackendAux))
+          .record(std::move(mmtj->m_trackStates),
+                  std::move(mmtj->m_trackStatesAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record TrackStates "
@@ -181,7 +141,8 @@ MutableMultiTrajectoryHandle<C>::build(const ActsGeometryContext& geoContext,
 
   auto parametersBackendHandle = SG::makeHandle(m_parametersKey, context);
   if (parametersBackendHandle
-          .record(std::move(parametersBackend), std::move(parametersBackendAux))
+          .record(std::move(mmtj->m_trackParameters),
+                  std::move(mmtj->m_trackParametersAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record TrackParameters "
@@ -190,7 +151,8 @@ MutableMultiTrajectoryHandle<C>::build(const ActsGeometryContext& geoContext,
 
   auto jacobiansBackendHandle = SG::makeHandle(m_jacobiansKey, context);
   if (jacobiansBackendHandle
-          .record(std::move(jacobiansBackend), std::move(jacobiansBackendAux))
+          .record(std::move(mmtj->m_trackJacobians),
+                  std::move(mmtj->m_trackJacobiansAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record TrackJacobians "
@@ -199,41 +161,33 @@ MutableMultiTrajectoryHandle<C>::build(const ActsGeometryContext& geoContext,
 
   auto measurementsBackendHandle = SG::makeHandle(m_measurementsKey, context);
   if (measurementsBackendHandle
-          .record(std::move(measurementsBackend),
-                  std::move(measurementsBackendAux))
+          .record(std::move(mmtj->m_trackMeasurements),
+                  std::move(mmtj->m_trackMeasurementsAux))
           .isFailure()) {
     throw std::runtime_error(
-        "MutableMultiTrajectoryHandle::build, can't record TrackMeasurements "
+        "MutableMultiTrajectoryHandle::build, can't record "
+        "TrackMeasurements "
         "backend");
   }
 
   auto surfacesBackendHandle = SG::makeHandle(m_surfacesKey, context);
   if (surfacesBackendHandle
-          .record(std::move(surfacesBackend), std::move(surfacesBackendAux))
+          .record(std::move(mmtj->m_surfacesBackend),
+                  std::move(mmtj->m_surfacesBackendAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record Surfaces "
         "backend");
   }
 
-  return mtj;
-}
-
-template <class C>
-StatusCode MutableMultiTrajectoryHandle<C>::storeConst(
-    const ActsTrk::MutableMultiTrajectory* mmtj,
-    const ActsGeometryContext& geoContext, const EventContext& context) const {
   auto cmtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
       DataLink<xAOD::TrackStateContainer>(m_statesKey.key(), context),
       DataLink<xAOD::TrackParametersContainer>(m_parametersKey.key(), context),
       DataLink<xAOD::TrackJacobianContainer>(m_jacobiansKey.key(), context),
       DataLink<xAOD::TrackMeasurementContainer>(m_measurementsKey.key(),
-                                                context),
-      DataLink<xAOD::SurfaceBackendContainer>(m_surfacesKey.key(), context));
+                                                context));
   cmtj->fillSurfaces(mmtj);
-  auto handle = SG::makeHandle(m_constMTJKey, context);
-  ATH_CHECK(handle.record(std::move(cmtj)));
-  return StatusCode::SUCCESS;
+  return cmtj;
 }
 
 /**
@@ -253,9 +207,7 @@ ConstMultiTrajectoryHandle<C>::ConstMultiTrajectoryHandle(
       m_jacobiansKey(algorithm, propertyNamePrefix + "TrackJacobiansKey",
                      namePrefix + "TrackJacobians"),
       m_measurementsKey(algorithm, propertyNamePrefix + "TrackMeasurementsKey",
-                        namePrefix + "TrackMeasurements"),
-      m_surfacesKey(algorithm, propertyNamePrefix + "SurfaceBackendKey",
-                        namePrefix + "SurfaceBackend") {}
+                        namePrefix + "TrackMeasurements") {}
 
 template <class C>
 StatusCode ConstMultiTrajectoryHandle<C>::initialize() {
@@ -263,33 +215,26 @@ StatusCode ConstMultiTrajectoryHandle<C>::initialize() {
   ATH_CHECK(m_parametersKey.initialize());
   ATH_CHECK(m_jacobiansKey.initialize());
   ATH_CHECK(m_measurementsKey.initialize());
-  ATH_CHECK(m_surfacesKey.initialize());
-  ATH_CHECK(m_constMTJKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
 template <class C>
-const ActsTrk::ConstMultiTrajectory* ConstMultiTrajectoryHandle<C>::build(
-    const Acts::TrackingGeometry* geo, const EventContext& context) const {
+std::unique_ptr<const ActsTrk::ConstMultiTrajectory>
+ConstMultiTrajectoryHandle<C>::build(const Acts::TrackingGeometry* geo,
+                                     const ActsGeometryContext& geoContext,
+                                     const EventContext& context) const {
   // we need to build it from backends
   auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
   auto parametersBackendHandle = SG::makeHandle(m_parametersKey, context);
   auto jacobiansBackendHandle = SG::makeHandle(m_jacobiansKey, context);
   auto measurementsBackendHandle = SG::makeHandle(m_measurementsKey, context);
-  auto surfacesBackendHandle = SG::makeHandle(m_surfacesKey, context);
 
   auto mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
       *statesBackendHandle, *parametersBackendHandle, *jacobiansBackendHandle,
-      *measurementsBackendHandle, *surfacesBackendHandle);
-  if (geo != nullptr)
-    mtj->fillSurfaces(geo);
-
-  auto mtjHandle = SG::makeHandle(m_constMTJKey, context);
-  if (mtjHandle.record(std::move(mtj)).isFailure()) {
-    return nullptr;
-  }
-  return mtjHandle.ptr();
+      *measurementsBackendHandle);
+  mtj->fillSurfaces(geo, geoContext);
+  return mtj;
 }
 
 }  // namespace ActsTrk

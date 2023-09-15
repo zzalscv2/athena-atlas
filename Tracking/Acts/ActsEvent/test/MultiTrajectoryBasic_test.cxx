@@ -176,16 +176,13 @@ struct EmptyMTJ {  // setup empty MTJ
     surfacesBackend->setStore(surfacesBackendAux.get());
 
 
-    mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>(
-        trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
-        measurementsBackend.get(), surfacesBackend.get());
+    mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>();
     // backends can be shared
-    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
-        trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
-        measurementsBackend.get());
-    // construction below should not work
+    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&mtj->trackStates(), &mtj->trackParameters(), 
+                                &mtj->trackJacobians(), &mtj->trackMeasurements());
+    // constructions below should not work
     // ActsTrk::MutableMultiTrajectory mtest(*ro_mtj.get());
-    ActsTrk::MutableMultiTrajectory mtest1(*mtj.get());
+    // ActsTrk::MutableMultiTrajectory mtest1(*mtj.get());
   }
   std::unique_ptr<xAOD::TrackStateContainer> trackStateBackend;
   std::unique_ptr<xAOD::TrackStateAuxContainer> trackStateBackendAux;
@@ -295,9 +292,9 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
   // RO MTJ needs to be remade now because only at construction it can recognise
   // the dynamic columns
-  ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(
-      trackStateBackend.get(), parametersBackend.get(), jacobianBackend.get(),
-      measurementsBackend.get());
+  ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&mtj->trackStates(), &mtj->trackParameters(), 
+                                &mtj->trackJacobians(), &mtj->trackMeasurements());
+
 
   BOOST_CHECK_EQUAL(ro_mtj->hasColumn("author"_hash),
                     true);  // dynamic column present now in const version too

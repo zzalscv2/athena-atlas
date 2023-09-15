@@ -41,21 +41,6 @@ constexpr std::optional<bool> has_impl(
 }  // namespace details
 }  // namespace ActsTrk
 
-constexpr bool ActsTrk::MutableMultiTrajectory::has_impl(
-    Acts::HashedString key, ActsTrk::IndexType istate) const {
-  const auto& trackStates = *m_trackStates;
-  std::optional<bool> inTrackState =
-      ActsTrk::details::has_impl(trackStates, key, istate);
-  if (inTrackState.has_value())
-    return inTrackState.value();
-  for (auto& d : m_decorations) {
-    if (d.hash == key) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
