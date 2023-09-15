@@ -163,16 +163,11 @@ class TrackingComponentConfigurer:
         self.ActsCluster = True
         self.ActsSpacePoint = True
         self.ActsSeed = True
-        # ActsTrack can be turned on and will work.
-        # However memory consumption is still a
-        # concern, so this is disabled in this workflow
-        self.ActsTrack = False
+        self.ActsTrack = True
         # Ambiguity resolution can follow if ActsTrack is 
         # enabled. Ambi. can be activated/deactivated with 
         # the flag: Acts.doAmbiguityResolution
-        # For now we always disable it!
-        if flags.Acts.doAmbiguityResolution:
-            self.ActsAmbiguityResolution = False
+        self.ActsAmbiguityResolution = flags.Acts.doAmbiguityResolution
 
     def ValidateActsClusters(self, flags):
         self.ActsCluster = True

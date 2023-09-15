@@ -36,7 +36,7 @@ run () {
 }
 
 export ATHENA_CORE_NUMBER=8
-
+ignore_patter="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propapation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
 run "Reconstruction" \
     Reco_tf.py --CA \
     --inputRDOFile ${rdo_23p0} \
@@ -45,6 +45,7 @@ run "Reconstruction" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsArtFlags" \
     --postInclude "ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
+    --ignorePatterns "${ignore_patter}" \
     --maxEvents 20 \
     --perfmon fullmonmt \
     --multithreaded

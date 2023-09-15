@@ -12,7 +12,7 @@ Configuration of tracking components:
     * Clustering: ENABLED
     * Space Point Formation: ENABLED
     * Seeding: ENABLED
-    * Track Finding: DISABLED
+    * Track Finding: ENABLED
     * Ambiguity Resolution: DISABLED
  - Athena -> Acts EDM Convertions:
     * Cluster: DISABLED

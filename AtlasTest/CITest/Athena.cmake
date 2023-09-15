@@ -234,7 +234,8 @@ atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
 atlas_add_citest( ACTS_Workflow
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh )
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh
+   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propapation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateClusters.sh )

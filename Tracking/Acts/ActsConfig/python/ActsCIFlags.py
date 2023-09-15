@@ -9,6 +9,7 @@ def actsWorkflowFlags(flags):
     flags.DQ.useTrigger = False
     flags.Acts.doAnalysis = True
     flags.Acts.doMonitoring = True
+    flags.Acts.doAmbiguityResolution = True
     flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
                                 TrackingComponent.ActsChain]
     flags.Output.HISTFileName = "ActsMonitoringOutput.root" 
