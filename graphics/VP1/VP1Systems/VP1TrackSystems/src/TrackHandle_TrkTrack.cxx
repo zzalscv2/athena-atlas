@@ -9,6 +9,9 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: February 2008                            //
+//
+//  Updates:
+//  - 2023 Sep, Riccardo Maria BIANCHI @ cern.ch, added Pt to track item in the browser
 //                                                            //
 ////////////////////////////////////////////////////////////////
 
@@ -303,8 +306,15 @@ SoNode* TrackHandle_TrkTrack::zoomToTSOS(unsigned int index)
 
 QString TrackHandle_TrkTrack::shortInfo() const
 {
-  QString l("|P|="+VP1Msg::str(momentum().mag()/CLHEP::GeV)+" [GeV], ");
-  l+= "Pix["+QString::number(getNPixelHits())+"], SCT["+QString::number(getNSCTHits())+"], TRT["+QString::number(getNTRTHits())
+  // get the track's momentum
+  Amg::Vector3D mom = momentum();
+  mom /= CLHEP::GeV;
+  
+  // format info string 
+  QString l;
+  l += "|Pt|="+VP1Msg::str(mom.perp())+" [GeV], ";
+  l += "|P|="+VP1Msg::str(mom.mag())+" [GeV], ";
+  l += "Pix["+QString::number(getNPixelHits())+"], SCT["+QString::number(getNSCTHits())+"], TRT["+QString::number(getNTRTHits())
    +"], MDT["+QString::number(getNMDTHits())+"], RPC["+QString::number(getNRPCHits())+"], TGC["+QString::number(getNTGCHits())+"], CSC["+QString::number(getNCSCHits())+"]";
   return l;
 }
