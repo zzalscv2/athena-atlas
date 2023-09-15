@@ -53,21 +53,21 @@ namespace MuonGMR4{
     }
 
     bool StationCenterCache::operator<(const StationCenterCache& other) const {
-        if (other.stationIndex() != stationIndex()) return stationIndex() < other.stationIndex();
+        if (other.stationName() != stationName()) return stationName() < other.stationName();
         if (other.stationEta() != stationEta()) return stationEta() < other.stationEta();
         return stationPhi() < other.stationPhi();
     }
 
     bool operator<(const Identifier& a, const StationCenterCache& b){
-        const int stIdxA = b.idHelperSvc()->stationIndex(a);
-        if (stIdxA != b.stationIndex()) return stIdxA < b.stationIndex();
+        const int stIdxA = b.idHelperSvc()->stationName(a);
+        if (stIdxA != b.stationName()) return stIdxA < b.stationName();
         const int stEtaA = b.idHelperSvc()->stationEta(a);
         if (stEtaA != b.stationEta()) return stEtaA < b.stationEta();
         return b.idHelperSvc()->stationPhi(a) < b.stationPhi();
     }
     bool operator<(const StationCenterCache& a, const Identifier& b){
-        const int stIdxB = a.idHelperSvc()->stationIndex(b);
-        if (stIdxB != a.stationIndex()) return a.stationIndex() < stIdxB;
+        const int stIdxB = a.idHelperSvc()->stationName(b);
+        if (stIdxB != a.stationName()) return a.stationName() < stIdxB;
         const int stEtaB = a.idHelperSvc()->stationEta(b);
         if (stEtaB != a.stationEta()) return a.stationEta() < stEtaB;
         return a.stationPhi() < a.idHelperSvc()->stationPhi(b);

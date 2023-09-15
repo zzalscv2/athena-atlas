@@ -85,14 +85,22 @@ if __name__=="__main__":
     cfg.merge(setupHistSvc(flags, out_file = args.outRootFile))
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
     cfg.merge(MdtCondDbAlgCfg(flags))
-    cfg.merge(GeoModelMdtTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else [], 
-                                        dumpSurfaces = False ))
-
     
-    cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
-    cfg.merge(GeoModelTgcTestCfg(flags))
-    cfg.merge(GeoModelCscTestCfg(flags))
-    cfg.merge(GeoModelMmTestCfg(flags))
+    if flags.Detector.GeometryMDT:
+        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else [], 
+                                            dumpSurfaces = False ))
+
+    if flags.Detector.GeometryRPC:
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
+    
+    if flags.Detector.GeometryTGC:
+        cfg.merge(GeoModelTgcTestCfg(flags))
+    
+    if flags.Detector.GeometryCSC:
+        cfg.merge(GeoModelCscTestCfg(flags))
+    
+    if flags.Detector.GeometryMM:
+        cfg.merge(GeoModelMmTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()

@@ -65,12 +65,24 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
 
     
-    MuonVal::ThreeVectorBranch m_layCenter{m_tree,"LayerCenter"};
-    MuonVal::ThreeVectorBranch m_layTransColX{m_tree, "LayerLinearCol1"};
-    MuonVal::ThreeVectorBranch m_layTransColY{m_tree, "LayerLinearCol2"};
-    MuonVal::ThreeVectorBranch m_layTransColZ{m_tree, "LayerLinearCol3"};
-    MuonVal::VectorBranch<bool>& m_layMeasPhi{m_tree.newVector<bool>("LayerMeasPhi")};
-    MuonVal::VectorBranch<uint8_t>& m_layNumber{m_tree.newVector<uint8_t>("LayerNumber")};
+    MuonVal::ThreeVectorBranch m_stripCenter{m_tree,"stripCenter"};
+    MuonVal::VectorBranch<uint8_t>& m_stripGasGap{m_tree.newVector<uint8_t>("stripGasGap")};
+    MuonVal::VectorBranch<unsigned int>& m_stripNum{m_tree.newVector<unsigned int>("stripNumber")};
+    
+    MuonVal::ThreeVectorBranch m_gangCenter{m_tree, "gangCenter"};
+    MuonVal::VectorBranch<uint8_t>& m_gangGasGap{m_tree.newVector<uint8_t>("gangGasGap")};
+    MuonVal::VectorBranch<unsigned int>& m_gangNum{m_tree.newVector<unsigned int>("gangNumber")};
+    MuonVal::VectorBranch<uint8_t>& m_gangNumWires{m_tree.newVector<uint8_t>("gangNumWires")};
+    MuonVal::VectorBranch<float>& m_gangLength{m_tree.newVector<float>("gangLength")};
+   
+
+      
+    MuonVal::ThreeVectorBranch m_layCenter{m_tree,"layerCenter"};
+    MuonVal::ThreeVectorBranch m_layTransColX{m_tree, "layerLinearCol1"};
+    MuonVal::ThreeVectorBranch m_layTransColY{m_tree, "layerLinearCol2"};
+    MuonVal::ThreeVectorBranch m_layTransColZ{m_tree, "layerLinearCol3"};
+    MuonVal::VectorBranch<bool>& m_layMeasPhi{m_tree.newVector<bool>("layerMeasPhi")};
+    MuonVal::VectorBranch<uint8_t>& m_layNumber{m_tree.newVector<uint8_t>("layerNumber")};
 
 };
 

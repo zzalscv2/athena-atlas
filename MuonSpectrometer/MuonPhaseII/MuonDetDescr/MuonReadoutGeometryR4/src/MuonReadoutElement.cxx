@@ -21,16 +21,18 @@ MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
     if (!m_idHelperSvc.retrieve().isSuccess()) {
         ATH_MSG_FATAL("Failed to retrieve the MuonIdHelperSvc");
     }
-    m_stIdx = m_idHelperSvc->stationIndex(identify());
+    m_stName = m_idHelperSvc->stationName(identify());
     m_stEta = m_idHelperSvc->stationEta(identify());
     m_stPhi = m_idHelperSvc->stationPhi(identify());
     m_detElHash = m_idHelperSvc->detElementHash(identify());
+    m_chIdx = m_idHelperSvc->chamberIndex(identify());
     insertTransform(stationHash,[this](RawGeomAlignStore* store, const IdentifierHash&){
             return toStation(store);
     }).ignore();
 }
 
-const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, const IdentifierHash& hash) const {
+const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
+                                                               const IdentifierHash& hash) const {
     SubDetAlignments::const_iterator map_itr = ctx.alignmentStores.find(detectorType());
     const ActsTrk::AlignmentStore* store = map_itr != ctx.alignmentStores.end() ? 
                                                         map_itr->second.get() : nullptr;
@@ -41,7 +43,8 @@ const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometr
                 <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
     return dummyTrans;
 }
-const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, const IdentifierHash& hash) const {
+const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
+                                                               const IdentifierHash& hash) const {
     SubDetAlignments::const_iterator map_itr = ctx.alignmentStores.find(detectorType());
     const ActsTrk::AlignmentStore* store = map_itr != ctx.alignmentStores.end() ? 
                                                         map_itr->second.get() : nullptr;

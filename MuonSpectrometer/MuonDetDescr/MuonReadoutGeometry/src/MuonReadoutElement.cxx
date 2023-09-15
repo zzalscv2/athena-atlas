@@ -155,7 +155,7 @@ namespace MuonGM {
             ATH_MSG_FATAL("The Identifier "<<m_idHelperSvc->toString(id)<<" is not a muon one.");
             throw std::runtime_error("Invalid Identifier set");
         }
-        m_stIdx = m_idHelperSvc->stationIndex(id);
+        m_stIdx = m_idHelperSvc->stationName(id);
         m_eta = m_idHelperSvc->stationEta(id);
         m_phi = m_idHelperSvc->stationPhi(id);
         m_idhash = m_idHelperSvc->moduleHash(id);

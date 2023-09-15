@@ -82,11 +82,12 @@ StatusCode GeoModelTgcTest::execute() {
     return StatusCode::SUCCESS;
 }
 StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadoutElement* readoutEle) {
-   m_stIndex    = readoutEle->getStationIndex();
-   m_stEta      = readoutEle->getStationEta();
-   m_stPhi      = readoutEle->getStationPhi();
+    m_stIndex = readoutEle->getStationIndex();
+    m_stEta   = readoutEle->getStationEta();
+    m_stPhi   = readoutEle->getStationPhi();
+    ATH_MSG_DEBUG("Dump readout element "<<m_idHelperSvc->toString(readoutEle->identify()));
 
-   const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
 
     const Amg::Transform3D& trans{readoutEle->transform()};
     m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
@@ -103,16 +104,38 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
         m_ALineRotT   = station->getALine_rotz();
         m_ALineRotZ   = station->getALine_rott();
     }
-    for (bool measPhi : {false, true}) {
+
+    for (bool measPhi : {false, true}) {        
         for (int layer = 1 ; layer <= readoutEle->numberOfLayers(measPhi); ++layer){
-            const Identifier id = idHelper.channelID(readoutEle->identify(),layer, measPhi,1);
-            const Amg::Transform3D layerTransform = readoutEle->localToGlobalTransf(id);
+
+            const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, measPhi,1);
+            const Amg::Transform3D layerTransform = readoutEle->localToGlobalTransf(layerId);
             m_layCenter.push_back(Amg::Vector3D(layerTransform.translation()));
             m_layTransColX.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitX()));
             m_layTransColY.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitY()));
             m_layTransColZ.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitZ()));
             m_layMeasPhi.push_back(measPhi);
-            m_layNumber.push_back(layer);
+            m_layNumber.push_back(layer);            
+            
+            if (measPhi) {
+                for (int strip = 1; strip<= readoutEle->getNStrips(layer); ++strip) {
+                    bool is_valid{false};
+                    const Identifier stripId = idHelper.channelID(readoutEle->identify(), layer, measPhi, strip, is_valid);
+                    if (!is_valid) continue;
+                    Amg::Vector3D globStripPos = readoutEle->channelPos(stripId);
+                    m_stripCenter.push_back(globStripPos);
+                    m_stripGasGap.push_back(layer);
+                    m_stripNum.push_back(strip);
+                }
+            } else {                
+                for (int gang = 1; gang <= readoutEle->nGangs(layer); ++gang) {
+                       m_gangCenter.push_back(readoutEle->gangPos(layer, gang));
+                       m_gangGasGap.push_back(layer);
+                       m_gangNum.push_back(gang);
+                       m_gangNumWires.push_back(readoutEle->getNWires(layer, gang));
+                       m_gangLength.push_back(readoutEle->gangLength(layer,gang));
+                }
+            }
         }    
    }
    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;

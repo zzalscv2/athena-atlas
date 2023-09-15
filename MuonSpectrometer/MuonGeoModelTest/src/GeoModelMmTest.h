@@ -34,13 +34,15 @@ class GeoModelMmTest : public AthHistogramAlgorithm {
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detMgrKey{
         this, "DetectorManagerKey", "MuonDetectorManager",
         "Key of input MuonDetectorManager condition data"};
+    
+    /// Set of stations to be tested
+    std::set<Identifier> m_testStations{};
 
     // handling (like data access) for the service of related to handling muon identifiers (like MicroMegas)
      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
    
     StatusCode dumpToTree(const EventContext& ctx, const MuonGM::MMReadoutElement* detEl);
-    Identifier gasGapId(const MuonGM::MMReadoutElement* detEl, int gasGap) const;
 
     MuonVal::MuonTesterTree m_tree{"MmGeoModelTree", "GEOMODELTESTER"};
 

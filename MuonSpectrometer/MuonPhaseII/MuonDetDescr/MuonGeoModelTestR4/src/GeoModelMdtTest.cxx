@@ -117,7 +117,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
                                        const ActsGeometryContext& gctx, 
                                        const MdtReadoutElement* readoutEle) {
 
-   m_stIndex = readoutEle->stationIndex();
+   m_stIndex = readoutEle->stationName();
    m_stEta = readoutEle->stationEta();
    m_stPhi = readoutEle->stationPhi();
    m_stML = readoutEle->multilayer();

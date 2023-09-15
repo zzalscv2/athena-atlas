@@ -26,8 +26,8 @@ namespace MuonGMR4{
             const Amg::Transform3D& globalToLocal(const ActsGeometryContext& gctx) const;
             
             /// @brief Returns the station index of the associated detector element
-            inline int stationIndex() const {
-                return m_elA->stationIndex();
+            inline int stationName() const {
+                return m_elA->stationName();
             }
             /// @brief Returns the station eta of the associated detector element  
             inline int stationEta() const {
