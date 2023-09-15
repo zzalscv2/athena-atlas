@@ -81,6 +81,12 @@ namespace EL
     }
 
     ::StatusCode Module ::
+    processInputs (ModuleData& /*data*/, IInputModuleActions& /*actions*/)
+    {
+      return ::StatusCode::SUCCESS;
+    }
+
+    ::StatusCode Module ::
     onFinalize (ModuleData& /*data*/)
     {
       return ::StatusCode::SUCCESS;
