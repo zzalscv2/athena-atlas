@@ -38,7 +38,8 @@ StatusCode EFTrackingSmearMonAlg::execute() {
     {            
       // get Cov matrix of input track
       xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();  
-      auto trkcovvec = trk->definingParametersCovMatrixVec();        
+      auto trkcovvec = trk->definingParametersCovMatrixVec(); 
+      if (trk->pt() == 0.) continue;      
       ATH_MSG_DEBUG ("Track: "
                       <<" curv=" << 1./trk->pt()
                       <<" phi="  << trk->phi()
@@ -67,7 +68,8 @@ StatusCode EFTrackingSmearMonAlg::execute() {
     {            
       // get Cov matrix of input track
       xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();  
-      auto trkcovvec = trk->definingParametersCovMatrixVec();        
+      auto trkcovvec = trk->definingParametersCovMatrixVec(); 
+      if (trk->pt() == 0.) continue;          
       ATH_MSG_DEBUG ("Smeared Track: "
                       <<" curv=" << 1./trk->pt()
                       <<" phi="  << trk->phi()
@@ -93,6 +95,7 @@ StatusCode EFTrackingSmearMonAlg::execute() {
     ATH_MSG_DEBUG ("Found "<<inputTruth->size()<< " input truth particles");
     for ( const auto* part : *inputTruth ) 
     {          
+      if (part->pt() == 0.) continue;   
       ATH_MSG_DEBUG ("===> Truth : "       
                       <<" curv=" << 1./part->pt()
                       <<" phi="  << part->phi()
@@ -115,16 +118,17 @@ StatusCode EFTrackingSmearMonAlg::execute() {
         return StatusCode::FAILURE;
     }
 
-    ATH_MSG_DEBUG ("Found "<<smearedTruth->size()<< " input truth particles");
+    ATH_MSG_DEBUG ("Found "<<smearedTruth->size()<< " smeared truth particles");
     for ( const auto* part : *smearedTruth ) 
     {          
+      if (part->pt() == 0.) continue;   
       ATH_MSG_DEBUG ("===> Truth : "       
-                      <<" curv=" << 1./part->pt()
+                      <<" curv=" << 1./part->auxdata<float>("pt")
                       <<" phi="  << part->phi()
                       <<" eta="  << part->eta()
                       <<" d0="   << part->auxdata<float>("d0")
                       <<" z0="   << part->auxdata<float>("z0")
-                      <<" pT="   << part->pt()
+                      <<" pT="   << part->auxdata<float>("pt")
                       <<" PDGID=" << part->pdgId()
                       <<" status=" << part->status()                                        
                       ); 
