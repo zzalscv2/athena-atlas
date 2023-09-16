@@ -302,17 +302,12 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
   for (size_t i = 0; i < handles.out.size(); ++i) {
     SG::WriteHandleKey<T> writeHandleKey = handles.out.at(i);
 
-    // Special case. The slimmed navigation container is exceptionally created _after_ the HLTEDMCreator as it reads remapped navigation data.
-    if (std::find(m_keysToSkip.begin(), m_keysToSkip.end(), writeHandleKey.key()) != m_keysToSkip.end()) {
-      continue;
-    }
-
     if ( handles.views.empty() ) { // no merging will be needed
       // Note: This is correct. We are testing if we can read, and if we cannot then we write.
       // What we write will either be a dummy (empty) container, or be populated from N in-View collections.
       SG::ReadHandle<T> readHandle( writeHandleKey.key() );
       if ( readHandle.isValid() ) {
-        ATH_MSG_DEBUG( "The " << writeHandleKey.key() << " already present" );
+        ATH_MSG_VERBOSE( writeHandleKey.key() << " is already present" );
         generator.create(false, false);
 
         // For xAOD types we need to ensure there is an Aux store. This can happen if the
@@ -328,7 +323,7 @@ StatusCode HLTEDMCreator::createIfMissing( const EventContext& context, const Co
           }
         }
       } else {
-        ATH_MSG_DEBUG( "The " << writeHandleKey.key() << " was absent, creating it" );
+        ATH_MSG_DEBUG( writeHandleKey.key() << " is missing, creating it" );
         generator.create(true, true);
       }
 

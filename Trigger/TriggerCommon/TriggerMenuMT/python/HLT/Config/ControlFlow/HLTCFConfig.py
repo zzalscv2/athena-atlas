@@ -250,7 +250,9 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
         edmAcc = ComponentAccumulator()
         # The order is important: 1) view merging, 2) gap filling
         edmAcc.merge( triggerMergeViewsCfg(flags, viewMakers) )
-        edmAcc.merge( triggerEDMGapFillerCfg(flags, ['AOD','ESD'], decObj, decObjHypoOut) )
+        # For RDO output, we run the GapFiller. Otherwise it is done in Reco.
+        edmSet = ['AOD','ESD'] if flags.Output.doWriteRDO else []
+        edmAcc.merge( triggerEDMGapFillerCfg(flags, edmSet, decObj, decObjHypoOut) )
         edmAlg = edmAcc.popEventAlgo("EDMCreatorAlg")
     appendCAtoAthena( edmAcc )
     hltFinalizeSeq += conf2toConfigurable(edmAlg)
