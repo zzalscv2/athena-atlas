@@ -28,8 +28,10 @@ atlas_add_library(
         xAODEventInfo
         xAODForward
         xAODHIEvent
-        ZdcAnalysisLib 
+        ZdcUtilsLib
+        ZdcAnalysisLib
 )
+
 
 atlas_add_component(
     ZdcMonitoring

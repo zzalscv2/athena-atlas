@@ -8,14 +8,17 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
+#include "xAODEventInfo/EventInfo.h"
+
+#include "ZdcUtils/ZdcEventInfo.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "ZdcAnalysis/ZDCMsg.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "CxxUtils/checker_macros.h"
 
 namespace ZDC
 {
@@ -23,8 +26,8 @@ namespace ZDC
 class ZDCLEDModuleResults
 {
   unsigned int m_presampleADC;
-  unsigned int m_ADCsum;
-  unsigned int m_maxADC;
+  int m_ADCsum;
+  int m_maxADC;
   unsigned int m_maxSample;
   float m_avgTime;
 
@@ -46,8 +49,8 @@ public:
     {}
 
   unsigned int getPresampleADC() const {return m_presampleADC;}
-  unsigned int getADCSum() const {return m_ADCsum;}
-  unsigned int getMaxADC() const {return m_maxADC;}
+  int getADCSum() const {return m_ADCsum;}
+  int getMaxADC() const {return m_maxADC;}
   unsigned int getMaxSample() const {return m_maxSample;}
   float getAvgTime() const {return m_avgTime;}
     
@@ -83,9 +86,6 @@ public:
     return ZDCMsg::MessageFunctionPtr(new ZDCMsg::MessageFunction(msgFunction));
   }
 
-  enum LEDType {Blue1 = 0, Green = 1, Blue2 = 2, NumLEDs, LEDNone};    
-  enum DAQMode {DAQModeUndef = 0, Standalone, CombinedPhysics, numDAQModes};
-  
 private:
 
   // Provide methods
@@ -106,13 +106,14 @@ private:
   std::string m_name;
   Gaudi::Property<std::string> m_configuration{this, "Configuration", "ppPbPb2023", "Which config files to use"};
   bool m_writeAux{false};
+
   Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
 
   // Configuration settings based on mConfiguration
   //
-  Gaudi::Property<unsigned int> m_daqMode{this, "daqMode", Standalone, "Which DAQ mode are we running in"};
   Gaudi::Property<bool> m_doRPD{this, "doRPD", true, "Process RPD Data?"};
   Gaudi::Property<bool> m_doZDC{this, "doZDC", true, "Process ZDC Data?"};
+
   // Configuration for LED identification
   //
   std::vector<unsigned int> m_LEDCalreqIdx;
@@ -141,9 +142,17 @@ private:
 
   // Storegate keys
   //
-    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
-    this, "EventInfoKey", "EventInfo",
-      "Location of the event info."};
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
+    this, "EventInfoKey", "EventInfo", "Location of the event info."};
+
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_eventTypeKey {
+    this, "ZdcEventTypeKey", "", "ZDC Event type"};
+
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_robBCIDKey {
+    this, "ROBBCIDKey", "", "BCID from LUCROD ROB headers"};
+
+  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_DAQModeKey {
+    this, "ZdcDAQModeKey", "", "ZDC DAQ mode"};
 
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcLEDType{this, "ZdcLEDType", "", "ZDC LED Type (0-Blue1, 1-Green, 2-Blue2}"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcLEDPresampleADC{this, "ZdcLEDPresampleADC", "", "ZDC LED presample"};

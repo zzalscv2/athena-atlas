@@ -94,16 +94,16 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     if run_type == "lhcf":
         print ("looking at 2022 lhcf data")
         energy_sum_xmax = 3000
-        energy_sum_zoomin_xmax = 0
+        energy_sum_zoomin_xmax = 3000
         amp_sum_xmax = 3000
         module_amp_xmax = 2000
         module_calib_amp_xmax = 5000
 
     elif run_type == "pp":
         print ("looking at pp reference run")
-        energy_sum_xmax = 2000
-        energy_sum_zoomin_xmax = 0
-        amp_sum_xmax = 2000
+        energy_sum_xmax = 3000
+        energy_sum_zoomin_xmax = 3000
+        amp_sum_xmax = 3000
         module_amp_xmax = 2000
         module_calib_amp_xmax = 5000
 
@@ -142,13 +142,13 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     # C vs fCalETC
 
     # vars: x vs y
-    genZdcMonTool.defineHistogram('lumiBlock', title=';lumi block;Events', # as a sanity check - see if lumi block can be plotted
-                            xbins=500,xmin=0.0,xmax=lumi_block_max)
+    # genZdcMonTool.defineHistogram('lumiBlock', title=';lumi block;Events', # as a sanity check - see if lumi block can be plotted
+                            # xbins=2000,xmin=0.0,xmax=lumi_block_max)
     genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumA', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            xbins=500,xmin=0.0,xmax=lumi_block_max,
+                            xbins=2000,xmin=0.0,xmax=lumi_block_max,
                             ybins=200,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumC', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            xbins=400,xmin=0.0,xmax=lumi_block_max,
+                            xbins=2000,xmin=0.0,xmax=lumi_block_max,
                             ybins=200,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC', type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
                             xbins=200,xmin=0.0,xmax=energy_sum_xmax,
@@ -167,39 +167,56 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
 # --------------------------------------------------------------------------------------------------
 
-    zdcModuleToolArr = helper.addArray([2,4],zdcMonAlg,'ZdcModuleMonitor')
-    zdcModuleToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
+    zdcModuleMonToolArr = helper.addArray([2,4],zdcMonAlg,'ZdcModuleMonitor')
+    zdcModuleMonToolArr.defineHistogram('zdcModuleAmp',title=';Module Amplitude [ADC Counts];Events',
                             xbins=200,xmin=0.0,xmax=module_amp_xmax)
-    zdcModuleToolArr.defineHistogram('zdcModuleAmpFract',title=';Module Amplitude Fraction;Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                             xbins=50,xmin=0.0,xmax=1.)
-    zdcModuleToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleAmpFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
+    zdcModuleMonToolArr.defineHistogram('zdcEnergySumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             xbins=200,xmin=0.0,xmax=5000,
                             ybins=50,ymin=0.0,ymax=1.)
 
 
-    # zdcModuleToolArr.defineHistogram('zdcModuleAmpFract, zdcUncalibSumCurrentSide',type='TH2F',title=';Module Amplitude Fraction;E_{side} [GeV]',
+    # zdcModuleMonToolArr.defineHistogram('zdcModuleFract, zdcEnergySumCurrentSide',type='TH2F',title=';Module Amplitude Fraction;E_{side} [GeV]',
     #                         xbins=50,xmin=0.0,xmax=1.,
     #                         ybins=200,ymin=0.0,ymax=8000)
-    zdcModuleToolArr.defineHistogram('zdcModuleCalibAmp',title=';Module Calibrated Amplitude [GeV];Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleCalibAmp',title=';Module Calibrated Amplitude [GeV];Events',
                             xbins=200,xmin=0.0,xmax=module_calib_amp_xmax) # 2.5TeV * 40
-    zdcModuleToolArr.defineHistogram('zdcModuleTime',title=';Module Time [ns];Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleTime',title=';Module Time [ns];Events',
                             xbins=40,xmin=-10.0,xmax=10.0)
-    zdcModuleToolArr.defineHistogram('zdcModuleCalibTime',title=';Module Calibrated Time [ns];Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleCalibTime',title=';Module Calibrated Time [ns];Events',
                             xbins=40,xmin=-10.0,xmax=10.0)
-    zdcModuleToolArr.defineHistogram('zdcModuleChisq',title=';Module Chi-square;Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleChisq',title=';Module Chi-square;Events',
                             xbins=create_log_bins(module_chisq_min, module_chisq_max, 80))
-    zdcModuleToolArr.defineHistogram('zdcModuleChisqOverAmp',title=';Module Chi-square / Amplitude;Events',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleChisqOverAmp',title=';Module Chi-square / Amplitude;Events',
                             xbins=create_log_bins(module_chisq_over_amp_min, module_chisq_over_amp_max, 80))
 
 # --------------------------------------------------------------------------------------------------
 
-    rpdChannelToolArr = helper.addArray([2,16],zdcMonAlg,'RPDMonitor')
+    rpdChannelMonToolArr = helper.addArray([2,16],zdcMonAlg,'RPDChannelMonitor')
 
     # to be modified with RPD analysis
     # each tool has to define at least one histogram
     # defining a space filler for now
-    rpdChannelToolArr.defineHistogram('rpdChannelAmp',title=';Channel Amplitude [ADC Counts];Events',
-                            xbins=40960,xmin=0.0,xmax=40960.0)
+    rpdChannelMonToolArr.defineHistogram('rpdChannelAmp',title=';Channel Amplitude [ADC Counts];Events',
+                            xbins=200,xmin=0.0,xmax=40960.0)
+# --------------------------------------------------------------------------------------------------
+
+    zdcModLEDMonToolArr = helper.addArray([3,2,4],zdcMonAlg,'ZdcModLEDMonitor')
+    rpdChanLEDMonToolArr = helper.addArray([3,2,16],zdcMonAlg,'RPDChanLEDMonitor')
+
+    zdcModLEDMonToolArr.defineHistogram('lumiBlock, zdcLEDADCSum', type='TH2F', title=';lumi block;LED ADC Sum [ADC Counts]',
+                            xbins=2000,xmin=0.0,xmax=lumi_block_max,
+                            ybins=200,ymin=0.0,ymax=4096.0)
+    zdcModLEDMonToolArr.defineHistogram('lumiBlock, zdcLEDMaxADC', type='TH2F', title=';lumi block;LED Max ADC [ADC Counts]',
+                            xbins=2000,xmin=0.0,xmax=lumi_block_max,
+                            ybins=200,ymin=0.0,ymax=2048.0)
+    rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDADCSum', type='TH2F', title=';lumi block;LED ADC Sum [ADC Counts]',
+                            xbins=2000,xmin=0.0,xmax=lumi_block_max,
+                            ybins=200,ymin=0.0,ymax=4096.0)
+    rpdChanLEDMonToolArr.defineHistogram('lumiBlock, rpdLEDMaxADC', type='TH2F', title=';lumi block;LED Max ADC [ADC Counts]',
+                            xbins=2000,xmin=0.0,xmax=lumi_block_max,
+                            ybins=200,ymin=0.0,ymax=2048.0)
 
 
     ### STEP 6 ###
@@ -224,10 +241,11 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     import sys
     directory = ''
-    inputfile = 'myAOD.pool.root'
+    inputfile = 'calibAOD_led.pool.root'
+    # inputfile = 'myAOD.pool.root'
     ConfigFlags.Input.Files = [directory+inputfile]
     ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'ZdcMonitorOutput_try_readdecorhandle.root'
+    ConfigFlags.Output.HISTFileName = 'ZdcMonitorOutput_led.root'
     ConfigFlags.fillFromArgs(sys.argv[1:])
     
     ConfigFlags.lock()
@@ -244,10 +262,10 @@ if __name__=='__main__':
     cfg.merge(zdcMonitorAcc)
 
     # If you want to turn on more detailed messages ...
-    # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # DEBUG
+    zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 2 # DEBUG
     # If you want fewer messages ...
-    zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 4 # WARNING
+    # zdcMonitorAcc.getEventAlgo('ZdcMonAlg').OutputLevel = 4 # WARNING
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    # cfg.run() #use cfg.run(20) to only run on first 20 events
-    cfg.run(20)
+    cfg.run() #use cfg.run(20) to only run on first 20 events
+    # cfg.run(20)
