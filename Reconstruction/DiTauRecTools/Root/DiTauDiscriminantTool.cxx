@@ -56,54 +56,49 @@ StatusCode DiTauDiscriminantTool::initialize()
      };
 
      m_mIDVariables = {
-       {"f_core_lead", new float(0)},
-       {"f_core_subl", new float(0)},
+       {"f_core_lead", new float(0)}, // used 
+       {"f_core_subl", new float(0)}, // used
        {"f_subjet_lead", new float(0)},
-       {"f_subjet_subl", new float(0)},
-       {"f_subjets", new float(0)},
+       {"f_subjet_subl", new float(0)}, // used 
+       {"f_subjets", new float(0)}, // used
        {"f_track_lead", new float(0)},
        {"f_track_subl", new float(0)},
-       {"R_max_lead", new float(0)},
-       {"R_max_subl", new float(0)},
+       {"R_max_lead", new float(0)}, // used 
+       {"R_max_subl", new float(0)}, // used
        {"n_Subjets", new float(0)},
-       {"n_track", new float(0)},
-       {"n_tracks_lead", new float(0)},
+       {"n_track", new float(0)}, // used 
+       {"n_tracks_lead", new float(0)}, // used
        {"n_tracks_subl", new float(0)},
        {"n_isotrack", new float(0)},
        {"R_track", new float(0)},
        {"R_track_core", new float(0)},
        {"R_track_all", new float(0)},
-       {"R_isotrack", new float(0)},
+       {"R_isotrack", new float(0)}, // used 
        {"R_core_lead", new float(0)},
        {"R_core_subl", new float(0)},
        {"R_tracks_lead", new float(0)},
-       {"R_tracks_subl", new float(0)},
+       {"R_tracks_subl", new float(0)}, // used
        {"m_track", new float(0)},
        {"m_track_core", new float(0)},
        {"m_core_lead", new float(0)},
-       {"log(m_core_lead)", new float(0)},
+       {"log(m_core_lead)", new float(0)}, // used
        {"m_core_subl", new float(0)},
-       {"log(m_core_subl)", new float(0)},
+       {"log(m_core_subl)", new float(0)}, // used
        {"m_track_all", new float(0)},
        {"m_tracks_lead", new float(0)},
-       {"log(m_tracks_lead)", new float(0)},
+       {"log(m_tracks_lead)", new float(0)}, // used
        {"m_tracks_subl", new float(0)},
-       {"log(m_tracks_subl)", new float(0)},
+       {"log(m_tracks_subl)", new float(0)}, // used
        {"E_frac_subl", new float(0)},
        {"E_frac_subsubl", new float(0)},
        {"R_subjets_subl", new float(0)},
        {"R_subjets_subsubl", new float(0)},
        {"d0_leadtrack_lead", new float(0)},
-       {"log(abs(d0_leadtrack_lead))", new float(0)},
+       {"log(abs(d0_leadtrack_lead))", new float(0)}, // used
        {"d0_leadtrack_subl", new float(0)},
-       {"log(abs(d0_leadtrack_subl))", new float(0)},
+       {"log(abs(d0_leadtrack_subl))", new float(0)}, // used 
        {"f_isotracks", new float(0)},
-       {"log(f_isotracks)", new float(0)},
-       {"n_iso_ellipse", new float(0)},
-       {"n_antikt_subjets", new float(0)},
-       {"n_ca_subjets", new float(0)},
-       {"mu_massdrop", new float(0)},
-       {"y_massdrop", new float(0)}
+       {"log(f_isotracks)", new float(0)}, // used
      };
      
      break;
@@ -216,11 +211,6 @@ void DiTauDiscriminantTool::setIDVariables(const xAOD::DiTauJet& xDiTau)
     setVar("log(abs(d0_leadtrack_subl))") = log(fabs(*m_mIDVariables["d0_leadtrack_subl"]));
     setVar("f_isotracks") = xDiTau.auxdata<float>("f_isotracks");
     setVar("log(f_isotracks)") = log(*m_mIDVariables["f_isotracks"]);
-    setVar("n_iso_ellipse") = (float) xDiTau.auxdata<int>("n_iso_ellipse");
-    setVar("n_antikt_subjets") = (float) xDiTau.auxdata<int>("n_antikt_subjets");
-    setVar("n_ca_subjets") = (float) xDiTau.auxdata<int>("n_ca_subjets");
-    setVar("mu_massdrop") = xDiTau.auxdata<float>("mu_massdrop");
-    setVar("y_massdrop") = xDiTau.auxdata<float>("y_massdrop");
     break;
   default:
     ATH_MSG_ERROR("Invalid DecayMode.");
