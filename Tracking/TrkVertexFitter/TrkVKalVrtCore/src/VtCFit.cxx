@@ -717,7 +717,7 @@ namespace Trk {
   {
 
   int NTRK=vk->TrackList.size();
-  double dScale=1.e10, dScaleMax=1.e12;
+  double dScale=1.e8, dScaleMax=1.e10;
   double alfLowLim=0.03;
   double alfUppLim=1.1;  //Should be compatible with vkalAllowedPtChange - not causing 1/p shift up to zero.
   double xyzt[3],chi2t[10]={0.};
@@ -726,7 +726,8 @@ namespace Trk {
   double ContribC[10]={0.};
 //
   int NCNST = vk->ConstraintList.size();
-  int PostFitIteration=4; if (NCNST) PostFitIteration=7; double ValForChk;
+  int PostFitIteration=4; if (NCNST) PostFitIteration=4; double ValForChk; // Now PostFit=4 works better than default PostFit=7. 
+                                                                           // Reason is unclear
 
     for (j = 1; j <= PostFitIteration; ++j) {
 	int jm1=j-1;
