@@ -665,6 +665,10 @@ def InDetTrackRecoCfg(flags):
     # --- Extra optional decorations
     # ---------------------------------------
 
+    if flags.Tracking.doV0Finder:
+        from InDetConfig.InDetV0FinderConfig import InDetV0FinderCfg
+        result.merge(InDetV0FinderCfg(flags))
+
     if (flags.Tracking.writeExtendedSi_PRDInfo or
         flags.Tracking.writeExtendedTRT_PRDInfo):
 
@@ -1024,6 +1028,16 @@ def InDetTrackRecoOutputCfg(flags):
                     f"xAOD::TrackStateValidationContainer#SiSP{extension}_TRT_MSOSs",
                     f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_TRT_MSOSsAux."
                 ]
+
+    if flags.Tracking.doV0Finder:
+        excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+        V0Vertices = ["V0UnconstrVertices", "V0KshortVertices",
+                      "V0LambdaVertices", "V0LambdabarVertices"]
+        for v0 in V0Vertices:
+            toAOD += [
+                f"xAOD::VertexContainer#{v0}",
+                f"xAOD::VertexAuxContainer#{v0}Aux.{excludedVtxAuxData}",
+            ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toESD + toAOD))
