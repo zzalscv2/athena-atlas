@@ -46,17 +46,23 @@ def GeoModelRpcTestCfg(flags,name = "GeoModelRpcTest", **kwargs):
     result.addEventAlgo(the_alg)
     return result
 
-def GeoModelTgcTestCfg(flags, name = "GeoModelTgcTest", **kwargs):
+def GeoModelTgcTestCfg(flags,name = "GeoModelTgcTest", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return result
     the_alg = CompFactory.MuonGM.GeoModelTgcTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result
-
 def GeoModelMmTestCfg(flags,name = "GeoModelMmTest", **kwargs):
     result = ComponentAccumulator()
     if not flags.Detector.GeometryMM: return result
     the_alg = CompFactory.MuonGM.GeoModelMmTest(name, **kwargs)
+    result.addEventAlgo(the_alg)
+    return result
+
+def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.GeometrySTGC: return result
+    the_alg = CompFactory.MuonGM.GeoModelsTgcTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result
 
@@ -85,22 +91,15 @@ if __name__=="__main__":
     cfg.merge(setupHistSvc(flags, out_file = args.outRootFile))
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
     cfg.merge(MdtCondDbAlgCfg(flags))
-    
-    if flags.Detector.GeometryMDT:
-        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else [], 
-                                            dumpSurfaces = False ))
+    cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [], 
+                                        dumpSurfaces = False ))
 
-    if flags.Detector.GeometryRPC:
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
     
-    if flags.Detector.GeometryTGC:
-        cfg.merge(GeoModelTgcTestCfg(flags))
-    
-    if flags.Detector.GeometryCSC:
-        cfg.merge(GeoModelCscTestCfg(flags))
-    
-    if flags.Detector.GeometryMM:
-        cfg.merge(GeoModelMmTestCfg(flags))
+    cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
+    cfg.merge(GeoModelMmTestCfg(flags))
+    cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
+    cfg.merge(GeoModelTgcTestCfg(flags))
+    cfg.merge(GeoModelCscTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
