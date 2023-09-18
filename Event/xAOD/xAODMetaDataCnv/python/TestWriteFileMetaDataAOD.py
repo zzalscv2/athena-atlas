@@ -8,17 +8,20 @@ produced file for xAOD::FileMetaData metadata items.
     Typical usage example
         python -m xAODMetaDataCnv.TestWriteFileMetaDataAOD |tee log
 """
+import sys
 from AthenaConfiguration import AllConfigFlags, Enums, TestDefaults, MainServicesConfig
 from AthenaCommon import Constants, Logging
 from OutputStreamAthenaPool import OutputStreamConfig
 from PyUtils import MetaReader
 from xAODEventInfoCnv import xAODEventInfoCnvConfig
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
 
 
 def writeFileMetaData(flags):
     """set up an output stream and xAOD::EventInfo"""
     accumulator = OutputStreamConfig.OutputStreamCfg(flags, streamName="AOD")
+    accumulator.merge(SetupMetaDataForStreamCfg(flags, streamName="AOD"))
 
     accumulator.merge(
         xAODEventInfoCnvConfig.EventInfoCnvAlgCfg(
@@ -70,4 +73,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
