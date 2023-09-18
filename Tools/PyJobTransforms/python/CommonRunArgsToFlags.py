@@ -31,7 +31,7 @@ def commonRunArgsToFlags(runArgs,configFlags):
         configFlags.Beam.Type=BeamType(runArgs.beamType)
 
     # Read the input entries for some common types
-    for ftype in ["BS", "HITS", "RDO", "ESD", "AOD"]:
+    for ftype in ["BS", "EVNT", "HITS", "RDO", "ESD", "AOD"]:
         if hasattr(runArgs, f"input{ftype}FileNentries"):
             configFlags.Input.FileNentries = getattr(runArgs, f"input{ftype}FileNentries")
 
