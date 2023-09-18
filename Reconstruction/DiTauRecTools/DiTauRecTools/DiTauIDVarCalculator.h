@@ -92,22 +92,11 @@ private:
   float R_subjets(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float d0_leadtrack(const xAOD::DiTauJet& xDiTau, int iSubjet) const;
   float f_isotracks(const xAOD::DiTauJet& xDiTau) const;
-  int n_iso_ellipse(const xAOD::DiTauJet& xDiTau) const;
-  std::vector<fastjet::PseudoJet> getClusters(const xAOD::DiTauJet& xDiTau) const;
-  int n_antikt_subjets(std::vector<fastjet::PseudoJet> vClusters);
-  int n_ca_subjets(std::vector<fastjet::PseudoJet> vClusters);
-  void mass_drop(const xAOD::DiTauJet& xDiTau, std::vector<fastjet::PseudoJet> vClusters) const;
-  float f_clusters(const xAOD::DiTauJet& xDiTau, std::vector<fastjet::PseudoJet> vClusters) const;
-  int subjetLeadElectronID(const xAOD::DiTauJet& XDiTau, int iSubjet) const;
 
   // steering variables
   // float m_dMaxDeltaR;
   std::string m_sDiTauContainerName;
   std::string m_DiTauContainerNameAux;
-  bool m_bCalcCluserVariables;
-  bool m_bMuonTrackRemoval;
-  bool m_bRecalcStandardID;
-  bool m_bCalcSubjetLeadElectronID;
   std::string m_sTruthTauContainerName;
   std::string m_sDecayChannel;
   enum DecayChannel{ HadHad, HadEl, HadMu, Default };
