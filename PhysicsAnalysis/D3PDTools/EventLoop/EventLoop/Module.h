@@ -17,6 +17,9 @@ namespace EL
 {
   namespace Detail
   {
+    class IInputModuleActions;
+
+
     /// \brief the base class for EventLoop instrumentation module
     ///
     /// These are **internal** modules for EventLoop that allow to
@@ -69,6 +72,15 @@ namespace EL
       /// to do.
     public:
       virtual ::StatusCode onInitialize (ModuleData& data);
+
+
+      /// \brief process all input files
+      ///
+      /// This deviates slightly from the usual pattern for module functions in
+      /// that I pass in the possible actions as an argument.  See @ref
+      /// IInputModuleActions for details.
+    public:
+      virtual StatusCode processInputs (ModuleData& data, IInputModuleActions& actions);
 
 
       /// \brief action after processing first event
