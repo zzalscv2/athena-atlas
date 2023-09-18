@@ -274,6 +274,8 @@ def ITkStripOutputCfg(flags):
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
+        if flags.ITk.saveStripSiHits:
+            ItemList += ["SiHitCollection#ITkStripHits"]
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
 

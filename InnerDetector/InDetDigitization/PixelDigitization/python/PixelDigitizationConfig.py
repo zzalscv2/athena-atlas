@@ -305,6 +305,8 @@ def PixelOutputCfg(flags):
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
+        if flags.InDet.savePixelSiHits:
+            ItemList += ["SiHitCollection#PixelHits"]
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
 

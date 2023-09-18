@@ -43,4 +43,12 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.PixelDumpMode", 1)
     icf.addFlag("InDet.DRAWZSelection", False)
 
+    # Save SiHitCollections to RDO
+    icf.addFlag("InDet.savePixelSiHits", lambda prevFlags:
+                prevFlags.BTagging.Trackless or
+                prevFlags.BTagging.savePixelHits)
+    icf.addFlag("InDet.saveSCTSiHits", lambda prevFlags:
+                prevFlags.BTagging.Trackless or
+                prevFlags.BTagging.saveSCTHits)
+
     return icf
