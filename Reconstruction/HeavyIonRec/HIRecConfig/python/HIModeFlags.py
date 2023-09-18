@@ -3,8 +3,10 @@
 def HImode(flags):
     flags.Reco.EnableHI = True
     flags.Reco.EnableTau = False
+    flags.DQ.Steering.doTauMon = False
     flags.Reco.EnableJet = False
     flags.Reco.EnableMet = False
+    flags.DQ.Steering.doMissingEtMon = False
     flags.Reco.EnableCaloRinger = False
     flags.Reco.EnableBTagging = True
     flags.Jet.WriteToAOD = True  # this is to save btagging to xAOD
