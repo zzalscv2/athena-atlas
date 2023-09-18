@@ -95,10 +95,10 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
    extractPoolAttributes(m_inputPoolAttrPerEvent, &m_inputAttrPerEvent, &m_inputAttrPerEvent, &m_inputAttrPerEvent);
+   // Setup incident for EndEvent to print out attributes each event
+   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
+   long int pri = 1000;
    if (!m_inputPoolAttrPerEvent.value().empty()) {
-      // Setup incident for EndEvent to print out attributes each event
-      ServiceHandle<IIncidentSvc> incSvc("IncidentSvc", name());
-      long int pri = 1000;
       // Set to be listener for EndEvent
       incSvc->addListener(this, "EndEvent", pri);
       ATH_MSG_DEBUG("Subscribed to EndEvent for printing out input file attributes.");
@@ -107,6 +107,10 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       ATH_MSG_DEBUG("setInputAttribute failed setting POOL domain attributes.");
    }
 
+   if (!m_outputStreamingTool.empty()) {
+      incSvc->addListener(this, "StoreCleared", pri);
+      ATH_MSG_DEBUG("Subscribed to StoreCleared");
+   }
    // Load these dictionaries now, so we don't need to try to do so
    // while multiple threads are running.
    TClass::GetClass ("TLeafI");
@@ -400,11 +404,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       if (streamClient >= m_outputStreamingTool.size()) {
          streamClient = 0;
       }
-      StatusCode sc = m_outputStreamingTool[streamClient]->lockObject("release");
-      while (sc.isRecoverable()) {
-         usleep(100);
-         sc = m_outputStreamingTool[streamClient]->lockObject("release");
-      }
+      m_outputStreamingTool[streamClient]->lockObject("wait").ignore();
       if (!this->cleanUp(outputConnection).isSuccess()) {
          ATH_MSG_ERROR("commitOutput FAILED to cleanup converters.");
          return(StatusCode::FAILURE);
@@ -446,7 +446,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
          IConverter* DHcnv = converter(ClassID_traits<DataHeader>::ID());
          bool dataHeaderSeen = false;
          std::string dataHeaderID;
-         while (num > 0 && strncmp(placementStr, "release", 7) != 0) {
+         while (num > 0) {
             std::string objName = "ALL";
             if (m_useDetailChronoStat.value()) {
                std::string objName(placementStr); //FIXME, better descriptor
@@ -1251,6 +1251,9 @@ StatusCode AthenaPoolCnvSvc::abortSharedWrClients(int client_n)
 
 //______________________________________________________________________________
 void AthenaPoolCnvSvc::handle(const Incident& incident) {
+   if (incident.type() == "StoreCleared" && m_outputStreamingTool[0]->isClient() && !m_parallelCompression) {
+      m_outputStreamingTool[m_streamServer]->lockObject("release").ignore();
+   }
    if (incident.type() == "EndEvent") {
       if (!processPoolAttributes(m_inputAttrPerEvent, m_lastInputFileName, IPoolSvc::kInputStream).isSuccess()) {
          ATH_MSG_DEBUG("handle EndEvent failed process POOL database attributes.");

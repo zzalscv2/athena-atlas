@@ -62,6 +62,7 @@ private:
    const size_t m_maxSize;
    const int m_maxDataClients;
    int m_num;
+   int m_lastClient;
    std::set<int> m_dataClients;
    boost::interprocess::mapped_region* m_payload;
    boost::interprocess::mapped_region* m_status;
