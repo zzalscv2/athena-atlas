@@ -87,6 +87,7 @@ def getPFCellLevelSubtractionTool(inputFlags,toolName):
     if inputFlags.PF.useMLEOverP:
         PFEnergyPredictorTool = CompFactory.PFEnergyPredictorTool("PFCellLevelEnergyPredcictorTool",ModelPath = inputFlags.PF.EOverP_NN_Model)
         PFCellLevelSubtractionTool.NNEnergyPredictorTool = PFEnergyPredictorTool
+    PFCellLevelSubtractionTool.addCPData = inputFlags.PF.addCPData
 
     return PFCellLevelSubtractionTool
 
@@ -158,6 +159,8 @@ def getChargedFlowElementCreatorAlgorithm(inputFlags,chargedFlowElementOutputNam
     if(inputFlags.PF.EOverPMode):
         FlowElementChargedCreatorAlgorithm.FlowElementOutputName="EOverPChargedParticleFlowObjects"
         FlowElementChargedCreatorAlgorithm.EOverPMode = True
+    if inputFlags.PF.addCPData:
+        FlowElementChargedCreatorAlgorithm.addCPData = True
 
     return FlowElementChargedCreatorAlgorithm
 
@@ -171,6 +174,8 @@ def getNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputNam
         FlowElementNeutralCreatorAlgorithm.FlowElementOutputName="EOverPNeutralParticleFlowObjects"
     if(inputFlags.PF.useCalibHitTruthClusterMoments and inputFlags.PF.addClusterMoments):
         FlowElementNeutralCreatorAlgorithm.useCalibHitTruth=True
+    if inputFlags.PF.addCPData:
+        FlowElementNeutralCreatorAlgorithm.addCPData = True
 
     return FlowElementNeutralCreatorAlgorithm
 

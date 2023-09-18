@@ -90,6 +90,9 @@ private:
   /** Parameter that controls whether to use retain remaining calorimeter energy in track-cluster system, after charged shower subtraction */
   Gaudi::Property<double> m_subtractionSigmaCut{this, "SubtractionSigmaCut", 1.5, "Parameter that controls whether to use retain remaining calorimeter energy in track-cluster system, after charged shower subtraction"};
 
+  /** Toggle whether to decorate eflowRecTrack with addutional data for Combined Performance studies */
+  Gaudi::Property<bool> m_addCPData{this,"addCPData",false,"Toggle whether to decorate FlowElements with addutional data for Combined Performance studies "};
+
   //Helpers
   PFCalcRadialEnergyProfiles m_pfCalc{};
   PFSubtractionStatusSetter m_pfSubtractionStatusSetter{};

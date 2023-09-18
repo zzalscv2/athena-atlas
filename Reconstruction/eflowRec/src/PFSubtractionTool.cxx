@@ -107,6 +107,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
     }
 
     std::vector<eflowTrackClusterLink*> bestClusters;
+    std::vector<float> deltaRPrime;
 
     if (!m_recoverSplitShowers){
       /** Add cluster matches needed for pull calculation (in eflowCaloObject::simulateShowers) which is used to determine whether to run the charged shower subtraction or not.
@@ -130,7 +131,10 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
 
       //This matching scheme is used to match the calorimeter cluster(s) to be used in the charged showers subtraction for this track.
       std::vector<std::pair<eflowRecCluster *, float>> matchedClusters = m_theMatchingTool->doMatches(thisEfRecTrack, data.clusters,m_nClusterMatchesToUse);    
-      for (auto thePair : matchedClusters) bestClusters.push_back(eflowTrackClusterLink::getInstance(thisEfRecTrack, thePair.first, ctx));     
+      for (auto thePair : matchedClusters) {
+        bestClusters.push_back(eflowTrackClusterLink::getInstance(thisEfRecTrack, thePair.first, ctx));     
+        if (m_addCPData) deltaRPrime.push_back(std::sqrt(thePair.second));
+      }
     }
     else {
       const std::vector<eflowTrackClusterLink*>* matchedClusters_02 = thisEfRecTrack->getAlternativeClusterMatches("cone_02");
@@ -151,20 +155,25 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
     nMatches++;
 
     //loop over the matched calorimeter clusters and associate tracks and clusters to each other as needed.
+    unsigned int linkIndex = 0;
     for (auto *trkClusLink : bestClusters){
 
       eflowRecCluster *thisEFRecCluster = trkClusLink->getCluster();
 
       if (m_recoverSplitShowers){
         // Look up whether this cluster is intended for recovery
-        if (std::find(data.clusters.begin(), data.clusters.end(), trkClusLink->getCluster()) == data.clusters.end()) continue;       
+        if (std::find(data.clusters.begin(), data.clusters.end(), trkClusLink->getCluster()) == data.clusters.end()) {
+          linkIndex++;
+          continue;       
+        }
       }
 
       eflowTrackClusterLink *trackClusterLink = eflowTrackClusterLink::getInstance(thisEfRecTrack, thisEFRecCluster, ctx);
       thisEfRecTrack->addClusterMatch(trackClusterLink);
+      if (m_addCPData) thisEfRecTrack->addDeltaRPrime(deltaRPrime[linkIndex]);
       thisEFRecCluster->addTrackMatch(trackClusterLink);
     }
-
+    linkIndex++;
   }
 
   /* Create 3 types eflowCaloObjects: track-only, cluster-only, track-cluster-link */

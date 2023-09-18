@@ -56,6 +56,7 @@ public:
 
   ElementLink<xAOD::TrackParticleContainer> getTrackElemLink() const { return m_trackElemLink; }
   void addClusterMatch(eflowTrackClusterLink* clusterMatch) { m_clusterMatches.push_back(clusterMatch); }
+  void addDeltaRPrime(const float& dRPrime){ m_deltaRPrimes.push_back(dRPrime);}
   void addAlternativeClusterMatch(eflowTrackClusterLink* clusterMatch, std::string key) { m_alternativeClusterMatches[key].push_back(clusterMatch); }
 
   eflowRingSubtractionManager& getCellSubtractionManager() { return m_ringSubtractionManager; }
@@ -63,7 +64,9 @@ public:
   int getType() const { return m_type; }
 
   const std::vector<eflowTrackClusterLink*>& getClusterMatches() const { return m_clusterMatches; }
-  void clearClusterMatches() { m_clusterMatches.clear(); }
+  const std::vector<float>& getDRPrimes() const { return m_deltaRPrimes;}
+  //This must also clear deltaRPrime, which corresponds to dRPrime between the track and each cluster
+  void clearClusterMatches() { m_clusterMatches.clear(); m_deltaRPrimes.clear(); }
 
   const std::vector<eflowTrackClusterLink*>* getAlternativeClusterMatches(const std::string& key) const;// { return m_alternativeClusterMatches.at(key); }
 
@@ -112,6 +115,9 @@ public:
   
   bool isInDenseEnvironment() const { return m_isInDenseEnvironment;}
   void setIsInDenseEnvironment() { m_isInDenseEnvironment = true; }
+
+  bool isRecovered() const { return m_isRecovered;}
+  void setIsRecovered() { m_isRecovered= true; }
   
   void setpull15(double pull15){ m_pull15 = pull15; }
   double getpull15() const { return m_pull15; }
@@ -134,6 +140,8 @@ private:
 
   bool m_isInDenseEnvironment;
   bool m_isSubtracted;
+  /** Tells us whether this track underwent split shower revovery */
+  bool m_isRecovered;
   bool m_hasBin;
 
   std::vector<double> m_caloDepthArray;
@@ -141,6 +149,8 @@ private:
   std::unique_ptr<eflowTrackCaloPoints> m_trackCaloPoints;
   eflowRingSubtractionManager m_ringSubtractionManager;
   std::vector<eflowTrackClusterLink*> m_clusterMatches;
+  /** List of distance measurements between track and cluster used in first pass matching - i.e dRPrime */
+  std::vector<float> m_deltaRPrimes;
   std::map<std::string,std::vector<eflowTrackClusterLink*> > m_alternativeClusterMatches;
 
   IMessageSvc* m_msgSvc{};

@@ -25,6 +25,7 @@
 #include "../PFTrackMuonCaloTaggingAlg.h"
 #include "../PFTrackMuonIsoTaggingAlg.h"
 #include "eflowRec/PFEnergyPredictorTool.h"
+#include "../PFClusterWidthDecorator.h"
 
 DECLARE_COMPONENT( PFLeptonSelector )
 DECLARE_COMPONENT( PFClusterSelectorTool )
@@ -49,3 +50,4 @@ DECLARE_COMPONENT( PFTrackPreselAlg )
 DECLARE_COMPONENT( PFTrackMuonCaloTaggingAlg )
 DECLARE_COMPONENT( PFTrackMuonIsoTaggingAlg )
 DECLARE_COMPONENT( PFEnergyPredictorTool )
+DECLARE_COMPONENT( PFClusterWidthDecorator )

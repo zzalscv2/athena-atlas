@@ -27,6 +27,7 @@ eflowRecTrack::eflowRecTrack(
     m_varEExpect(0.0), 
     m_isInDenseEnvironment(false),
     m_isSubtracted(false),
+    m_isRecovered(false),
     m_hasBin(true),
     m_trackCaloPoints(theTrackExtrapolatorTool->execute(m_track))
 {
@@ -47,6 +48,7 @@ eflowRecTrack::eflowRecTrack(const eflowRecTrack& eflowRecTrack)
     m_varEExpect (eflowRecTrack.m_varEExpect),
     m_isInDenseEnvironment (eflowRecTrack.m_isInDenseEnvironment),
     m_isSubtracted (eflowRecTrack.m_isSubtracted),
+    m_isRecovered (eflowRecTrack.m_isRecovered),
     m_hasBin (eflowRecTrack.m_hasBin),
     m_trackCaloPoints (std::make_unique<eflowTrackCaloPoints>(*eflowRecTrack.m_trackCaloPoints))
 {
@@ -69,6 +71,7 @@ eflowRecTrack& eflowRecTrack::operator = (const eflowRecTrack& originalEflowRecT
     m_varEExpect = originalEflowRecTrack.m_varEExpect;
     m_isInDenseEnvironment = originalEflowRecTrack.m_isInDenseEnvironment;
     m_isSubtracted = originalEflowRecTrack.m_isSubtracted;
+    m_isRecovered = originalEflowRecTrack.m_isRecovered;
     m_hasBin = originalEflowRecTrack.m_hasBin;
     m_trackCaloPoints = std::make_unique<eflowTrackCaloPoints>(*originalEflowRecTrack.m_trackCaloPoints);
     ISvcLocator* svcLoc = Gaudi::svcLocator();

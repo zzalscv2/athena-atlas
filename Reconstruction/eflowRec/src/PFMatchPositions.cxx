@@ -13,6 +13,7 @@
 #include <iostream>
 
 #include "eflowRec/PFMatchPositions.h"
+#include "eflowRec/PFClusterWidthCalculator.h"
 
 namespace PFMatch {
 
@@ -47,54 +48,23 @@ EtaPhiWithVariance ClusterGeometricalCenterProvider::getPosition(ICluster* clust
   }
   cluster->setCalVarianceStatus();
 
+  
   unsigned int nCells = cluster->nCells();
 
-  /* Catch empty clusters */
-  if (nCells == 0){
-    cluster->etaVariance(m_etaPhiLowerLimit);
-    cluster->phiVariance(m_etaPhiLowerLimit);
-    return {eflowEtaPhiPosition(cluster->eta(), cluster->phi()), cluster->etaVariance(), cluster->phiVariance()};;
+  PFClusterWidthCalculator widthCalc;
+  std::pair<double,double> width = widthCalc.getPFClusterCoordinateWidth(cluster->cellEta(),cluster->cellPhi(),cluster->eta(),cluster->phi(),nCells);
+
+  if (nCells > 1){
+    cluster->etaMean(widthCalc.getEtaMean());
+    cluster->phiMean(widthCalc.getPhiMean());
   }
-  assert(nCells > 0);
-
-  /* Deal with 1 cell cluster */
-  if (1 == nCells){
-    cluster->etaVariance(m_etaPhiLowerLimit);
-    cluster->phiVariance(m_etaPhiLowerLimit);
-    return {eflowEtaPhiPosition(cluster->eta(), cluster->phi()), cluster->etaVariance(), cluster->phiVariance()};
-  }
+  cluster->etaVariance(width.first);
+  cluster->phiVariance(width.second);
+  
+  return {eflowEtaPhiPosition(widthCalc.getEtaMean(),widthCalc.getPhiMean()), width.first, width.second};
 
 
-  /* Sum eta, eta^2, phi and phi^2 of all cells */
-  double sumeta = 0;
-  double sumeta2 = 0;
-  double sumphi = 0;
-  double sumphi2 = 0;
-  double thisCellPhi;
-  const std::vector<double>& cellEta = cluster->cellEta();
-  const std::vector<double>& cellPhi = cluster->cellPhi();
-  for(unsigned int iCell = 0; iCell < nCells; ++iCell) {
-    sumeta  += cellEta[iCell];
-    sumeta2 += cellEta[iCell]*cellEta[iCell];
-    thisCellPhi = eflowAzimuth(cellPhi[iCell]).cycle(cluster->phi());
-    sumphi  += thisCellPhi;
-    sumphi2 += thisCellPhi*thisCellPhi;
-  }
 
-  /* Calculate mean eta and phi */
-  double etaMean = sumeta/((double)nCells);
-  double phiMean = sumphi/((double)nCells);
-
-  /* Calculate variance of eta and phi (but don't let them go below the lower limit) */
-  double varianceCorrection = (double)nCells / (double)(nCells-1);
-  double etaVariance = std::max(m_etaPhiLowerLimit, (sumeta2/(double)nCells - etaMean*etaMean) * varianceCorrection);
-  double phiVariance = std::max(m_etaPhiLowerLimit, (sumphi2/(double)nCells - phiMean*phiMean) * varianceCorrection);
-
-  cluster->etaMean(etaMean);
-  cluster->phiMean(phiMean);
-  cluster->etaVariance(etaVariance);
-  cluster->phiVariance(phiVariance);
-  return {eflowEtaPhiPosition(etaMean, phiMean), cluster->etaVariance(), cluster->phiVariance()};
 }
 
 }

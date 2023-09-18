@@ -37,6 +37,9 @@ private:
     "Toggle usage of calibration hit truth - false by default"
   };
 
+  /** Toggle whether to decorate FlowElements with addutional data for Combined Performance studies */
+  Gaudi::Property<bool> m_addCPData{this,"addCPData",false,"Toggle whether to decorate FlowElements with addutional data for Combined Performance studies "};
+
   /** ReadHandleKey for eflowCaloObjectContainer */
   SG::ReadHandleKey<eflowCaloObjectContainer>
     m_eflowCaloObjectContainerReadHandleKey{

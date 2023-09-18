@@ -430,9 +430,12 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
     if flags.Calo.TopoCluster.addCalibrationHitDecoration: #Add calib hit deco if requried 
         AODMoments.append("."+flags.Calo.TopoCluster.CalibrationHitDecorationName)
 
-        
+    if flags.Calo.TopoCluster.addCPData:
+        AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
+
     auxItems = f"xAOD::CaloClusterAuxContainer#{CaloTopoCluster.ClustersOutputName}Aux."
-    auxItems+= ".".join(AODMoments)
+    auxItems+= ".".join(AODMoments)    
+
     toAOD.append(auxItems)
  
     result.merge(addToESD(flags, toESD))

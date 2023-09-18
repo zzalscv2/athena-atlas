@@ -105,6 +105,15 @@ def PFCfg(inputFlags,**kwargs):
       toESDAndAOD += ["xAOD::FlowElementContainer#JetETMissNeutralParticleFlowObjects","xAOD::FlowElementAuxContainer#JetETMissNeutralParticleFlowObjectsAux.-FEShowerSubtractedClusterLink."]
       toESDAndAOD += ["xAOD::FlowElementContainer#JetETMissLCNeutralParticleFlowObjects","xAOD::ShallowAuxContainer#JetETMissLCNeutralParticleFlowObjectsAux."]
 
+    if inputFlags.PF.addCPData:
+      #if CPData mode, then add PFCaloCluster to ESD and AOD
+      #PFCaloCluster are the clusters modified by the PFlow algorithm
+      toESDAndAOD += ["xAOD::CaloClusterContainer#PFCaloCluster","xAOD::CaloClusterAuxContainer#PFCaloClusterAux."]
+      #also schedule an algoroithm to decorate each calo cluster with the cluster width in eta and phi
+      #this allows clients of the AOD to calculate deltaRPrime for track-calocluster pairs.
+      PFClusterWidthDecorator = CompFactory.PFClusterWidthDecorator()
+      result.addEventAlgo(PFClusterWidthDecorator)
+
     result.merge(addToESD(inputFlags, toESDAndAOD))
     result.merge(addToAOD(inputFlags, toESDAndAOD))
 

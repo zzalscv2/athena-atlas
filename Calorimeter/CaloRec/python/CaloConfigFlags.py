@@ -38,6 +38,7 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.doCalibHitMoments",False)
     ccf.addFlag("Calo.TopoCluster.writeCalibHitClusterMoments",False)
     ccf.addFlag("Calo.TopoCluster.doCellWeightCalib", False)
+    ccf.addFlag("Calo.TopoCluster.addCPData",False)
 
     #### Cluster correction flags:
     # If true, then reweight cells to prevent double-counting between clusters.
