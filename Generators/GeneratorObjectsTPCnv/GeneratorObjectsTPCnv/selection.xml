@@ -30,4 +30,14 @@
   <class name="std::vector<GenParticle_p6>" />
   <class name="GenParticle_p6" />
 
+  
+  <class name="McEventCollection_p7" id="A3A04C74-A278-4E35-ACF8-4C6B8C32FC56" />
+  <class name="std::vector<GenEvent_p7>" />
+  <class name="GenEvent_p7" />
+  <class name="std::vector<GenVertex_p7>" />
+  <class name="GenVertex_p7" />
+  <class name="std::vector<GenParticle_p7>" />
+  <class name="GenParticle_p7" />
+
+  
 </lcgdict>

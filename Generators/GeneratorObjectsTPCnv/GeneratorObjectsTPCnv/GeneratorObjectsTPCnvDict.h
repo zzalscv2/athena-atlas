@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// File: GeneratorObjectsTPCnv/GeneratorObjectsTPCnvDict.h
@@ -45,6 +45,11 @@
 #include "GeneratorObjectsTPCnv/GenVertex_p6.h"
 #include "GeneratorObjectsTPCnv/GenEvent_p6.h"
 #include "GeneratorObjectsTPCnv/McEventCollection_p6.h"
+
+#include "GeneratorObjectsTPCnv/GenParticle_p7.h"
+#include "GeneratorObjectsTPCnv/GenVertex_p7.h"
+#include "GeneratorObjectsTPCnv/GenEvent_p7.h"
+#include "GeneratorObjectsTPCnv/McEventCollection_p7.h"
 
 #endif // GENERATOROBJECTSTPCNV_GENERATOROBJECTSTPCNVDICT_H
 

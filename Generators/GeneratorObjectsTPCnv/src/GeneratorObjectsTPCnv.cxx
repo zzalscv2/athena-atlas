@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -44,6 +44,11 @@
 #include "GeneratorObjectsTPCnv/McEventCollection_p6.h"
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p6.h"
 
+#include "GeneratorObjectsTPCnv/GenParticle_p7.h"
+#include "GeneratorObjectsTPCnv/GenVertex_p7.h"
+#include "GeneratorObjectsTPCnv/GenEvent_p7.h"
+#include "GeneratorObjectsTPCnv/McEventCollection_p7.h"
+#include "GeneratorObjectsTPCnv/McEventCollectionCnv_p7.h"
 
 DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p1,
                       McEventCollection,
@@ -74,3 +79,8 @@ DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p6,
                       McEventCollection,
                       McEventCollection_p6,
                       Athena::TPCnvVers::Current)
+
+DECLARE_TPCNV_FACTORY(McEventCollectionCnv_p7,
+                      McEventCollection,
+                      McEventCollection_p7,
+                      Athena::TPCnvVers::Old)
