@@ -58,6 +58,8 @@ class CpmSimMonitorAlgorithm : public AthMonitorAlgorithm {
   Gaudi::Property<int> m_maxSlices{this,"s_maxSlices", 5,  "Maximum number of slices"};
   Gaudi::Property<int> m_cmxs{this,"s_cmxs", 2,  "Number of CMXs"};
 
+  Gaudi::Property<bool> m_legacyCpHadInputsDisabled{this,"s_legacyCpHadInputsDisabled", false,  "Status of the L1Calo Legacy CP hadronic inputs"};
+
   // CPM overlap tower container present
   bool m_overlapPresent;
 

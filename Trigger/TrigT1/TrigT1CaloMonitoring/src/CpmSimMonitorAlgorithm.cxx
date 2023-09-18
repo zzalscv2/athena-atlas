@@ -50,7 +50,7 @@ StatusCode CpmSimMonitorAlgorithm::initialize() {
   ATH_MSG_DEBUG("m_modules"<<m_modules ); 
   ATH_MSG_DEBUG("m_maxSlices"<<m_maxSlices );
   ATH_MSG_DEBUG("m_cmxs"<<m_cmxs ); 
-
+  ATH_MSG_DEBUG("m_legacyCpHadInputsDisabled"<<m_legacyCpHadInputsDisabled );
 
   
   return AthMonitorAlgorithm::initialize();
@@ -688,7 +688,11 @@ bool CpmSimMonitorAlgorithm::compareHad(const TriggerTowerMapHad &ttMap,
       }
       // check if the TriggerTower is in EM or HAD layer
       if (layer == 1) { // HAD
-        ttHad = tt->cpET();
+        if(m_legacyCpHadInputsDisabled){
+          ttHad = 0;
+        }else{
+          ttHad = tt->cpET();
+        }
       }
       key = ttKey;
 
@@ -717,8 +721,11 @@ bool CpmSimMonitorAlgorithm::compareHad(const TriggerTowerMapHad &ttMap,
       phi = tt->phi();
       // check if the TriggerTower is in EM or HAD layer
       if (layer == 1) { // HAD
-        ttHad = tt->cpET();
-        ;
+        if(m_legacyCpHadInputsDisabled){
+          ttHad = 0;
+        }else{
+          ttHad = tt->cpET();
+        }
       }
       cpHad = cp->hadEnergy();
       key = ttKey;
