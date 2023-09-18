@@ -372,13 +372,15 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
 
   // check for negative amplitudes as a fraction of total sum
   for (int side : {0, 1}) {
-    for (int row = 0; row < m_nRows; row++) {
-      for (int col = 0; col < m_nCols; col++) {
-        const float &amplitudeSubtr = rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
-        if (amplitudeSubtr < 0 && -amplitudeSubtr/ampSumSub.at(side) < m_subAmpUnderflowFrac.at(side)) {
-          status.at(side) |= 1 << ExcessivePileupBit;
-          // => centroid calculation is invalid
-          status.at(side) &= ~(1 << ValidBit);
+    if (ampSumSub.at(side) > 0) {
+      for (int row = 0; row < m_nRows; row++) {
+        for (int col = 0; col < m_nCols; col++) {
+          const float &amplitudeSubtr = rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
+          if (amplitudeSubtr < 0 && -amplitudeSubtr/ampSumSub.at(side) < m_subAmpUnderflowFrac.at(side)) {
+            status.at(side) |= 1 << ExcessivePileupBit;
+            // => centroid calculation is invalid
+            status.at(side) &= ~(1 << ValidBit);
+          }
         }
       }
     }
