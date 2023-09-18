@@ -133,7 +133,8 @@ if( XAOD_STANDALONE )
    )
 
    else()
-   atlas_add_test( ut_SUSYToolsAlg_data
+     set( extra_patterns "${extra_patterns}|The ParticleCaloExtensionTool was not configured." )
+     atlas_add_test( ut_SUSYToolsAlg_data
       SCRIPT "athena SUSYTools/jobOptions.py --evtMax 500 - --testCampaign data18"
       PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN ${extra_patterns}

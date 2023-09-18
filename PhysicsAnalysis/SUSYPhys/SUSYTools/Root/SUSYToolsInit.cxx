@@ -1915,6 +1915,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_isoCloseByTool.setProperty("IsolationSelectionDecorator", "isol") );
 
       ATH_CHECK( m_isoCloseByTool.setProperty("OutputLevel", this->msg().level()) );
+#ifndef XAOD_ANALYSIS
+      ATH_CHECK( m_isoCloseByTool.setProperty("ParticleCaloExtensionTool", "") );
+#endif
       ATH_CHECK( m_isoCloseByTool.retrieve() );
     } else  ATH_CHECK( m_isoCloseByTool.retrieve() );
   }
