@@ -5,6 +5,7 @@
 #include "egammaSuperClusterBuilder.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "xAODCaloEvent/CaloCluster.h"
@@ -62,10 +63,9 @@ egammaSuperClusterBuilder::execute(const EventContext& ctx) const
   // Have to register cluster container in order to properly get cluster links.
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
     m_outputegammaSuperClustersKey, ctx);
-  ATH_CHECK(outputClusterContainer.record(
-    std::make_unique<xAOD::CaloClusterContainer>(),
-    std::make_unique<xAOD::CaloClusterAuxContainer>()));
 
+  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
+  
   // Create the new egamma Super Cluster based EgammaRecContainer
   SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
     m_egammaSuperRecCollectionKey, ctx);
@@ -78,9 +78,7 @@ egammaSuperClusterBuilder::execute(const EventContext& ctx) const
   std::optional<SG::WriteHandle<xAOD::CaloClusterContainer>> precorrClustersH;
   if (!m_precorrClustersKey.empty()) {
     precorrClustersH.emplace(m_precorrClustersKey, ctx);
-    ATH_CHECK(precorrClustersH->record(
-      std::make_unique<xAOD::CaloClusterContainer>(),
-      std::make_unique<xAOD::CaloClusterAuxContainer>()));
+    ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(*precorrClustersH));
     precorrClustersH->ptr()->reserve(inputSize);
   }
 

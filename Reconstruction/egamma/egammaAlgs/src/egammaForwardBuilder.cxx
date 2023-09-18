@@ -8,6 +8,7 @@
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
 
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/ElectronAuxContainer.h"
@@ -97,11 +98,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     ctx
   );
 
-  ATH_CHECK(outClusterContainer.record(
-    std::make_unique<xAOD::CaloClusterContainer>(),
-    std::make_unique<xAOD::CaloClusterAuxContainer>()
-  ));
-
+  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outClusterContainer));
   SG::WriteHandle<CaloClusterCellLinkContainer> outClusterContainerCellLink(
     m_outClusterContainerCellLinkKey,
     ctx

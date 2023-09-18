@@ -5,6 +5,7 @@
 #include "electronSuperClusterBuilder.h"
 //
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODEgamma/Egamma.h"
@@ -70,9 +71,7 @@ electronSuperClusterBuilder::execute(const EventContext& ctx) const
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
     m_outputElectronSuperClustersKey, ctx);
 
-  ATH_CHECK(outputClusterContainer.record(
-    std::make_unique<xAOD::CaloClusterContainer>(),
-    std::make_unique<xAOD::CaloClusterAuxContainer>()));
+  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
 
   // Create the new Electron Super Cluster based EgammaRecContainer
   SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
@@ -86,9 +85,7 @@ electronSuperClusterBuilder::execute(const EventContext& ctx) const
   std::optional<SG::WriteHandle<xAOD::CaloClusterContainer>> precorrClustersH;
   if (!m_precorrClustersKey.empty()) {
     precorrClustersH.emplace(m_precorrClustersKey, ctx);
-    ATH_CHECK(precorrClustersH->record(
-      std::make_unique<xAOD::CaloClusterContainer>(),
-      std::make_unique<xAOD::CaloClusterAuxContainer>()));
+    ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(*precorrClustersH));
     precorrClustersH->ptr()->reserve(inputSize);
   }
 
