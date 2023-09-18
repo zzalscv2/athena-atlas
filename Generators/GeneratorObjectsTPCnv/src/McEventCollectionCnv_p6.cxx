@@ -131,11 +131,11 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
     if (!persEvt.m_crossSection.empty()) {
       auto cs = std::make_shared<HepMC3::GenCrossSection>();
       const std::vector<double>& xsection = persEvt.m_crossSection;
+      genEvt->set_cross_section(cs);
       if( static_cast<bool>(xsection[0]) )
         cs->set_cross_section(xsection[2],xsection[1]);
       else
         cs->set_cross_section(-1.0, -1.0);
-      genEvt->set_cross_section(cs);
     }
 
     // heavyIon restore

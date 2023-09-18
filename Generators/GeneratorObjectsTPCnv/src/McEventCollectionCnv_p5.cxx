@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p5.cxx
@@ -109,11 +109,11 @@ void McEventCollectionCnv_p5::persToTrans( const McEventCollection_p5* persObj,
     if (!persEvt.m_crossSection.empty()) {
       auto cs = std::make_shared<HepMC3::GenCrossSection>();
       const std::vector<double>& xsection = persEvt.m_crossSection;
+      genEvt->set_cross_section(cs);
       if( static_cast<bool>(xsection[0]) )
         cs->set_cross_section(xsection[2],xsection[1]);
       else
         cs->set_cross_section(-1.0, -1.0);
-      genEvt->set_cross_section(cs);
     }
 
     // heavyIon restore
