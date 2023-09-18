@@ -5,6 +5,7 @@
 #include "photonSuperClusterBuilder.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloUtils/CaloClusterStoreHelper.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "xAODEgamma/EgammaEnums.h"
@@ -62,9 +63,7 @@ photonSuperClusterBuilder::execute(const EventContext& ctx) const
   // Have to register cluster container in order to properly get cluster links.
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
     m_outputPhotonSuperClustersKey, ctx);
-  ATH_CHECK(outputClusterContainer.record(
-    std::make_unique<xAOD::CaloClusterContainer>(),
-    std::make_unique<xAOD::CaloClusterAuxContainer>()));
+  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
 
   // Create the new Photon Super Cluster based EgammaRecContainer
   SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
@@ -78,9 +77,7 @@ photonSuperClusterBuilder::execute(const EventContext& ctx) const
   std::optional<SG::WriteHandle<xAOD::CaloClusterContainer>> precorrClustersH;
   if (!m_precorrClustersKey.empty()) {
     precorrClustersH.emplace(m_precorrClustersKey, ctx);
-    ATH_CHECK(precorrClustersH->record(
-      std::make_unique<xAOD::CaloClusterContainer>(),
-      std::make_unique<xAOD::CaloClusterAuxContainer>()));
+    ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(*precorrClustersH));
     precorrClustersH->ptr()->reserve(inputSize);
   }
 

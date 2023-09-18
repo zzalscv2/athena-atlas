@@ -54,9 +54,7 @@ EMClusterTool::contExecute(const EventContext& ctx,
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
     m_outputClusterContainerKey, ctx);
 
-  ATH_CHECK(outputClusterContainer.record(
-    std::make_unique<xAOD::CaloClusterContainer>(),
-    std::make_unique<xAOD::CaloClusterAuxContainer>()));
+  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
 
   SG::WriteHandle<CaloClusterCellLinkContainer> outputClusterContainerCellLink(
     m_outputClusterContainerCellLinkKey, ctx);
