@@ -12,13 +12,14 @@ set( extra_libs )
 
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( Acts COMPONENTS Core )
 
 atlas_add_library( MuonReadoutGeometryR4
                    src/*.cxx
                    PUBLIC_HEADERS MuonReadoutGeometryR4
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel  
-                                  ActsGeometryInterfacesLib ActsGeometryLib MuonReadoutGeometry MuonIdHelpersLib 
+                                  ActsGeometryInterfacesLib ActsGeometryLib ActsCore MuonReadoutGeometry MuonIdHelpersLib 
                                   StoreGateLib GeoModelUtilities CxxUtils ${extra_libs})
 
 # we also add unit tests. 
