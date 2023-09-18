@@ -75,11 +75,18 @@ private:
 	"",
 	"Monitoring tool"
     };
-    BooleanProperty m_checkBadModules{
-	this,
+    Gaudi::Property<bool> m_checkBadModules {
+        this,
 	"checkBadModules",
 	true,
 	"Check bad modules using the conditions summary tool"
+    };
+
+    Gaudi::Property<unsigned int> m_maxFiredStrips {
+        this, 
+	"maxFiredStrips", 
+	384u, 
+	"Threshold of number of fired strips per wafer. 0 disables the per-wafer cut."
     };
 
     // expected number of clusters for RDO
