@@ -10,6 +10,9 @@
 // includes
 //
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 #include <AsgTools/AsgToolConfig.h>
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgTesting/UnitTest.h>

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -48,7 +48,7 @@ namespace asg
     StatusCode initialize () override;
 
   public:
-    void runTest () override;
+    void runTest ATLAS_NOT_THREAD_SAFE () override;
 
   public:
 #ifndef SIMULATIONBASE
