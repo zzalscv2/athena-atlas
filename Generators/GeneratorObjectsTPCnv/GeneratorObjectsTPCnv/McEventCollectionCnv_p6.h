@@ -28,6 +28,9 @@
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+#ifdef HEPMC3
+#include "HepMC3/Data/GenRunInfoData.h"
+#endif
 #include "GeneratorObjects/McEventCollection.h"
 
 // AthenaPoolCnvSvc includes

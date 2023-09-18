@@ -121,11 +121,18 @@ void McEventCollectionCnv_p6::persToTrans( const McEventCollection_p6* persObj,
                       static_cast<HepMC3::Units::LengthUnit>(persEvt.m_lengthUnit));
 
     //restore weight names from the dedicated svc (which was keeping them in metadata for efficiency)
-    if(!genEvt->run_info()) genEvt->set_run_info(std::make_shared<HepMC3::GenRunInfo>());
-    genEvt->run_info()->set_weight_names(m_hepMCWeightSvc->weightNameVec(ctx));
-    for (unsigned int i = 0; i < persEvt.m_r_attribute_name.size(); ++i) {
-      genEvt->run_info()->add_attribute(persEvt.m_r_attribute_name[i], std::make_shared<HepMC3::StringAttribute>(persEvt.m_r_attribute_string[i]));
-    }
+    if(!genEvt->run_info()) {
+       HepMC3::GenRunInfoData ri_read;
+       ri_read.weight_names = m_hepMCWeightSvc->weightNameVec(ctx);
+       ri_read.tool_name = std::vector<std::string>();
+       ri_read.tool_version = std::vector<std::string>();
+       ri_read.tool_description = std::vector<std::string>();
+       ri_read.attribute_name = persEvt.m_r_attribute_name;
+       ri_read.attribute_string = persEvt.m_r_attribute_string;
+       auto ri = std::make_shared<HepMC3::GenRunInfo>();
+       ri->read_data(ri_read);
+       genEvt->set_run_info(ri);
+     }
     // cross-section restore
 
     if (!persEvt.m_crossSection.empty()) {
@@ -375,9 +382,12 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
     const HepMC::GenEvent* genEvt = *itr;
 #ifdef HEPMC3
    //save the weight names to metadata via the HepMCWeightSvc
-      if (genEvt->run_info()) {
-        if (!genEvt->run_info()->weight_names().empty()) {
-          m_hepMCWeightSvc->setWeightNames(  names_to_name_index_map(genEvt->weight_names()), ctx ).ignore();
+      auto ri = genEvt->run_info();
+      HepMC3::GenRunInfoData ri_data;
+      if (ri) {
+        ri->write_data(ri_data);
+        if (!ri_data.weight_names.empty()) {
+          m_hepMCWeightSvc->setWeightNames(  names_to_name_index_map(ri_data.weight_names), ctx ).ignore();
         } else {
           //AV : This to be decided if one would like to have default names.
           //std::vector<std::string> names{"0"};
@@ -442,18 +452,15 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
      }
      persEvt.m_r_attribute_name.clear();
      persEvt.m_r_attribute_string.clear();
-     auto ri = genEvt->run_info();
      if (ri) {
-         std::map< std::string, std::shared_ptr<HepMC3::Attribute> > r_atts = ri->attributes();
-         for (auto& att: r_atts) {
-           persEvt.m_r_attribute_name.push_back(att.first);
-           std::string st;
-           att.second->to_string(st);
-           ///bool status = att.second->to_string(st);
-           /// One can add here checks for the status
-           persEvt.m_r_attribute_string.push_back(st);
-         }
-    }
+       persEvt.m_r_attribute_string = std::move(ri_data.attribute_string);
+       persEvt.m_r_attribute_name = std::move(ri_data.attribute_name);
+       /*** This is for the future
+       persEvt.m_r_tool_name = ri_data.tool_name;
+       persEvt.m_r_tool_version = ri_data.tool_version;
+       persEvt.m_r_tool_description = ri_data.tool_description;
+       */ 
+     } 
     //Actually, with this piece there is no need to treat the CS and HI separately.
     }
     //HepMC::GenCrossSection encoding
