@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def InDetV0FinderToolCfg(flags, name, **kwargs):
+def InDetV0FinderToolCfg(flags, name="InDetV0FinderTool", **kwargs):
     
     acc = ComponentAccumulator()
 
@@ -107,3 +107,39 @@ def V0MainDecoratorCfg(flags, name="V0Decorator", **kwargs):
     acc.setPrivateTools(CompFactory.InDet.V0MainDecorator(name, **kwargs))
     return acc
 
+def InDetV0FinderCfg(flags, name="InDetV0Finder",
+                     V0ContainerName="V0UnconstrVertices",
+                     KshortContainerName="V0KshortVertices",
+                     LambdaContainerName="V0LambdaVertices",
+                     LambdabarContainerName="V0LambdabarVertices",
+                     **kwargs):
+    acc = ComponentAccumulator()
+
+    if "InDetV0FinderToolName" not in kwargs:
+        from InDetConfig.InDetV0FinderConfig import InDetV0FinderToolCfg
+        kwargs.setdefault("InDetV0FinderToolName", acc.popToolsAndMerge(
+            InDetV0FinderToolCfg(
+                flags,
+                V0ContainerName = V0ContainerName,
+                KshortContainerName = KshortContainerName,
+                LambdaContainerName = LambdaContainerName,
+                LambdabarContainerName = LambdabarContainerName)))
+
+    if "Decorator" not in kwargs:
+        from InDetConfig.InDetV0FinderConfig import V0MainDecoratorCfg
+        kwargs.setdefault("Decorator", acc.popToolsAndMerge(
+            V0MainDecoratorCfg(
+                flags,
+                V0ContainerName = V0ContainerName,
+                KshortContainerName = KshortContainerName,
+                LambdaContainerName = LambdaContainerName,
+                LambdabarContainerName = LambdabarContainerName)))
+
+    acc.addEventAlgo(CompFactory.InDet.InDetV0Finder(
+        name,
+        V0ContainerName        = V0ContainerName,
+        KshortContainerName    = KshortContainerName,
+        LambdaContainerName    = LambdaContainerName,
+        LambdabarContainerName = LambdabarContainerName,
+        **kwargs))
+    return acc

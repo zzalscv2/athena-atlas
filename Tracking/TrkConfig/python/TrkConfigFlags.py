@@ -440,5 +440,7 @@ def createTrackingConfigFlags():
     # Turn on the primary vertex reconstruction
     icf.addFlag("Tracking.doVertexFinding",
                 lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
+    # Turn on the secondary vertex V0 finder
+    icf.addFlag("Tracking.doV0Finder", False)
 
     return icf
