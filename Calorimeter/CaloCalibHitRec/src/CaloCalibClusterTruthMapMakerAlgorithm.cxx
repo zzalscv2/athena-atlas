@@ -17,7 +17,6 @@ StatusCode CaloCalibClusterTruthMapMakerAlgorithm::initialize(){
   ATH_CHECK(m_truthParticleReadHandleKey.initialize());
 
   ATH_CHECK(m_mapIdentifierToCalibHitsWriteHandleKey.initialize());
-  ATH_CHECK(m_mapTruthBarcodeToTruthParticleWriteHandleKey.initialize());
 
   return StatusCode::SUCCESS;
 
@@ -28,10 +27,6 @@ StatusCode CaloCalibClusterTruthMapMakerAlgorithm::execute(const EventContext& c
   SG::WriteHandle<std::map<Identifier,std::vector<const CaloCalibrationHit*> > > mapIdentifierToCalibHitsWriteHandle(m_mapIdentifierToCalibHitsWriteHandleKey,ctx);
   ATH_CHECK(mapIdentifierToCalibHitsWriteHandle.record(std::make_unique<std::map<Identifier,std::vector<const CaloCalibrationHit*> > >()));
   fillIdentifierToCaloHitMap(*mapIdentifierToCalibHitsWriteHandle, ctx);
-
-  SG::WriteHandle<std::map<unsigned int,const xAOD::TruthParticle* >> mapTruthBarcodeToTruthParticleWriteHandle(m_mapTruthBarcodeToTruthParticleWriteHandleKey,ctx);
-  ATH_CHECK(mapTruthBarcodeToTruthParticleWriteHandle.record(std::make_unique<std::map<unsigned int,const xAOD::TruthParticle* > >()));
-  fillTruthBarcodeToTruthParticleMap(*mapTruthBarcodeToTruthParticleWriteHandle, ctx);
   
   return StatusCode::SUCCESS;
 }
@@ -86,26 +81,5 @@ void CaloCalibClusterTruthMapMakerAlgorithm::fillIdentifierToCaloHitMap(std::map
       
     }//loop on calibration hits in a container
   }//loop over calibration hit containers
-  
-}
-
-void CaloCalibClusterTruthMapMakerAlgorithm::fillTruthBarcodeToTruthParticleMap(std::map<unsigned int,const xAOD::TruthParticle*>& truthBarcodeToTruthParticleMap, const EventContext& ctx) const{
-
-  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleReadHandle(m_truthParticleReadHandleKey, ctx);
-
-  if (!truthParticleReadHandle.isValid()){
-    ATH_MSG_WARNING("Invalid ReadHandle to TruthParticles with key " << truthParticleReadHandle.key());
-    return;
-  }
-
-  for ( const auto *thisTruthParticle : *truthParticleReadHandle){       
-
-    if (!thisTruthParticle){
-      ATH_MSG_WARNING("Got invalid pointer to TruthParticle");
-      continue;
-    }
-          
-    truthBarcodeToTruthParticleMap[thisTruthParticle->barcode()] = thisTruthParticle;    
-  }//truth particle loop
   
 }
