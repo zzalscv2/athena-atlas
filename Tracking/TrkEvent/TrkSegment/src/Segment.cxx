@@ -94,9 +94,7 @@ Trk::Segment::operator=(Trk::Segment&& seg) noexcept
   return (*this);
 }
 
-std::string
-Trk::Segment::dumpAuthor() const
-{
+std::string Trk::Segment::dumpAuthor() const {
   std::string author;
   switch (m_author) {
     case AuthorUnknown:
@@ -129,9 +127,24 @@ Trk::Segment::dumpAuthor() const
     case TRT_SegmentMaker:
       author = "TRT_SegmentMaker";
       break;
+    case NswStereoSeeded:
+      author = "Nsw MM stereo seeded";
+      break;    
+    case NswStgcSeeded:
+      author = "Nsw sTgc seeded";
+      break;    
+    case NswQuadAlign:
+      author = "Nsw single quad";
+      break;
+    case NswPadSeeded:
+      author = "Nsw single quad";
+      break;
     default:
       author = "Unrecognised author, enum = " + std::to_string(m_author);
       break;
   }
   return author;
+}
+void Trk::Segment::setAuthor(Author a) {
+   m_author = a;
 }

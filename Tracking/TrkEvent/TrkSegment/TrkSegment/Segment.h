@@ -73,7 +73,11 @@ public:
     TRT_SegmentMaker = 9,
     CTBTracking = 10,
     DCMathSegmentMakerCurved = 11,
-    NumberOfAuthors = 12
+    NswStereoSeeded = 12,
+    NswStgcSeeded = 13,
+    NswPadSeeded = 14,
+    NswQuadAlign = 15,
+    NumberOfAuthors = 16
   };
 
   /** Default Constructor for POOL */
@@ -131,6 +135,8 @@ public:
     - extends Trk::MeasurementBase */
   const FitQuality* fitQuality() const;
 
+  /** sets the segment author */
+  void setAuthor(Author a);
   /** return segment author */
   Author author() const;
 
