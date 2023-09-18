@@ -247,7 +247,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
   ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
-  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::trkMeasurementBase>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -329,7 +329,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
   ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
-  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
+  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::trkMeasurementBase>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;

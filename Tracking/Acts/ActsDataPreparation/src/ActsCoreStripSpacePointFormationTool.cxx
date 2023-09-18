@@ -94,7 +94,7 @@ namespace ActsTrk
 
     ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
     spBuilderConfig->slSurfaceAccessor
-      .connect<&ATLASSourceLinkSurfaceAccessor::operator()<ATLASUncalibSourceLink>>(&surfaceAccessor);
+      .connect<&ATLASSourceLinkSurfaceAccessor::uncalibratedMeasurement>(&surfaceAccessor);
 
     const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
     spBuilderConfig->trackingGeometry = trkGeometry;
