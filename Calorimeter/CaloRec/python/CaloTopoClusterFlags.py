@@ -146,12 +146,47 @@ class xtalkEM2(JobProperty):
     allowedTypes=['bool']
     StoredValue=False
 
+class xtalkEM2n(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['bool']
+    StoredValue=False
+
+class xtalkEM3(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['bool']
+    StoredValue=False
+
 class xtalkDeltaT(JobProperty):
     """
     """
     statusOn=True
     allowedTypes=['float']
     StoredValue=15.0
+
+class xtalk2Eratio1(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['float']
+    StoredValue=4.0
+
+class xtalk2Eratio2(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['float']
+    StoredValue=25.
+
+class xtalk3Eratio(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['float']
+    StoredValue=10.
 
 
 # add the flags container to the top container 
@@ -179,7 +214,12 @@ list_jobproperties = [
     ,useUpperLimitForTimeCut
     ,timeCutUpperLimit
     ,xtalkEM2
+    ,xtalkEM2n
+    ,xtalkEM3
     ,xtalkDeltaT
+    ,xtalk2Eratio1
+    ,xtalk2Eratio2
+    ,xtalk3Eratio
     ]
 
 for i in list_jobproperties:
