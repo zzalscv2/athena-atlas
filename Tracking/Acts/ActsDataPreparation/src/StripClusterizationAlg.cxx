@@ -95,6 +95,17 @@ StatusCode StripClusterizationAlg::execute(const EventContext& ctx) const {
       continue;
     }
 
+    // If more than a certain number of RDOs set module to bad
+    // in this cas ewe skip clusterization
+    if (m_maxFiredStrips != 0u) {
+      unsigned int nFiredStrips = 0u;
+      for (const SCT_RDORawData* rdo : *rdos) {
+	nFiredStrips += rdo->getGroupSize();
+      }
+      if (nFiredStrips > m_maxFiredStrips)
+	continue;
+    }
+
     ATH_CHECK(m_clusteringTool->clusterize(
         *rdos, *m_idHelper, stripDetEle->getDetectorElement(idHash),
         m_stripDetElStatus.empty() ? nullptr : status.cptr(),
