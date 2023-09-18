@@ -166,9 +166,7 @@ scattering(GsfMaterial::Scattering& cache,
     pathcorrection = pathLength / materialProperties.thickness();
   }
   const double t = pathcorrection * materialProperties.thicknessInX0();
-  // We were/are using muon here,
-  // not sure is what we want 100%.
-  const double m = Trk::ParticleMasses::mass[Trk::muon];
+  constexpr double m = Trk::ParticleMasses::mass[Trk::electron];
   const double E = sqrt(p * p + m * m);
   const double beta = p / E;
   const double sigma = Trk::MaterialInteraction::sigmaMS(t, p, beta);
