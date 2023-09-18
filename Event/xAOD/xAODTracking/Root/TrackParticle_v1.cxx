@@ -81,7 +81,29 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST(TrackParticle_v1,float,double,phi)
 
   double TrackParticle_v1::m() const {
-    return 139.570; /// @todo Get value from somewhere. Also, the TrackParticle took the Pion mass - do we really want to do this? We have ParticleHypo?
+    // Codes using a fitter set a hypothesis, and the
+    // particular fitter that was employed..
+    // A  mass is never set/stored.
+    //
+    // In the past we were returning the mass of a charged pion always
+    //
+    // This created a confusion on why TrackParticles created by
+    // specific lepton fitter have a pion mass (the leptons per se have the
+    // correct mass). Lets try to remedy this.
+    uint8_t hypo = particleHypothesis();
+    if (hypo == xAOD::electron) {
+       // Since GX2 also set sometimes the hypo to electron
+       // lets also check for GSF.
+       uint8_t fitter = trackFitter();
+       if (fitter == xAOD::GaussianSumFilter) {
+         return 0.510998;
+       }
+    }
+    if (hypo == xAOD::muon) {
+       return 105.658367;
+    }
+    // default charged pion
+    return 139.570;
   }
 
   double TrackParticle_v1::e() const {
@@ -390,7 +412,12 @@ namespace xAOD {
     unsigned int size = offDiagCompr ? COVMATRIX_OFFDIAG_VEC_COMPR_SIZE : uncompr_size;
 
     if( !(vec.size() == size || vec.size() == uncompr_size) ){ //If off-diagonal elements are already compressed, can either set with uncompressed or compressed vector
-      throw std::runtime_error("Setting track definingParametersCovMatrixOffDiag with vector of size "+std::to_string(vec.size())+" instead of expected "+std::to_string(size)+" or "+std::to_string(uncompr_size)+" is not supported");
+      throw std::runtime_error(
+          "Setting track definingParametersCovMatrixOffDiag with vector of "
+          "size " +
+          std::to_string(vec.size()) + " instead of expected " +
+          std::to_string(size) + " or " + std::to_string(uncompr_size) +
+          " is not supported");
     }
 
     accCovMatrixOffDiag( *this ) = vec;
@@ -661,10 +688,21 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST(TrackParticle_v1, uint8_t, xAOD::TrackProperties,trackProperties)
   AUXSTORE_PRIMITIVE_SETTER_WITH_CAST(TrackParticle_v1, uint8_t, xAOD::TrackProperties,trackProperties, setTrackProperties)
 
-  AUXSTORE_PRIMITIVE_GETTER_WITH_CAST(TrackParticle_v1, uint8_t, xAOD::TrackFitter,trackFitter)
-  AUXSTORE_PRIMITIVE_SETTER_WITH_CAST(TrackParticle_v1, uint8_t, xAOD::TrackFitter,trackFitter, setTrackFitter)
+  void TrackParticle_v1::setTrackFitter(xAOD::TrackFitter value) {
+    static const Accessor<uint8_t> acc("trackFitter");
+    acc(*this) = static_cast<uint8_t>(value);
+  }
 
-  std::bitset<xAOD::NumberOfTrackRecoInfo>   TrackParticle_v1::patternRecoInfo() const {
+  xAOD::TrackFitter TrackParticle_v1::trackFitter() const {
+    static const Accessor<uint8_t> acc("trackFitter");
+    if (!acc.isAvailable(*this)) {
+      return xAOD::NumberOfTrackFitters;
+    }
+    return static_cast<xAOD::TrackFitter>(acc(*this));
+  }
+
+  std::bitset<xAOD::NumberOfTrackRecoInfo> TrackParticle_v1::patternRecoInfo()
+      const {
     static const Accessor< uint64_t > acc( "patternRecoInfo" );
     std::bitset<xAOD::NumberOfTrackRecoInfo> tmp(acc(*this));
     return tmp;
@@ -680,8 +718,18 @@ namespace xAOD {
     acc( *this ) = patternReco.to_ullong();
   }
 
-  AUXSTORE_PRIMITIVE_SETTER_WITH_CAST(TrackParticle_v1, uint8_t, xAOD::ParticleHypothesis, particleHypothesis, setParticleHypothesis)
-  AUXSTORE_PRIMITIVE_GETTER_WITH_CAST(TrackParticle_v1, uint8_t, xAOD::ParticleHypothesis, particleHypothesis)
+  void TrackParticle_v1::setParticleHypothesis(xAOD::ParticleHypothesis value) {
+    static const Accessor<uint8_t> acc("particleHypothesis");
+    acc(*this) = static_cast<uint8_t>(value);
+  }
+
+  xAOD::ParticleHypothesis TrackParticle_v1::particleHypothesis() const {
+    static const Accessor<uint8_t> acc("particleHypothesis");
+    if (!acc.isAvailable(*this)) {
+      return xAOD::pion;
+    }
+    return static_cast<xAOD::ParticleHypothesis>(acc(*this));
+  }
 
   bool TrackParticle_v1::summaryValue(uint8_t& value, const SummaryType &information)  const {
     const xAOD::TrackParticle_v1::Accessor< uint8_t >* acc = trackSummaryAccessorV1<uint8_t>( information );
