@@ -407,7 +407,7 @@ class PoolOpts(object):
 
     @classmethod
     def isData(cls, name):
-        return not name.startswith("##") and not name.startswith(PoolOpts.POOL_HEADER)
+        return not name.startswith("##") and name != PoolOpts.POOL_HEADER
 
     @classmethod
     def isDataHeader(cls, name):
