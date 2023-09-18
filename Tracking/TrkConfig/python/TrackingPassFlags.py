@@ -576,7 +576,7 @@ def createUPCTrackingPassFlags():
     icf = createMinBiasTrackingPassFlags()
     icf.extension                 = "UPC"
     # --- min pt cut for brem
-    icf.minPTBrem                 = 0.8 * Units.GeV
+    icf.minPTBrem                 = 0.75 * Units.GeV
     # MinBias turns off Brem Recovery, turn it on here
     icf.doBremRecoverySi = lambda pcf: pcf.Tracking.doBremRecovery
     return icf
