@@ -10,7 +10,6 @@
 StatusCode CaloCalibClusterDecoratorAlgorithm::initialize(){
 
   ATH_CHECK(m_mapIdentifierToCalibHitsReadHandleKey.initialize());
-  ATH_CHECK(m_mapTruthBarcodeToTruthParticleReadHandleKey.initialize());
 
   ATH_CHECK(m_caloClusterWriteDecorHandleKeyNLeadingTruthParticles.initialize());
 
@@ -25,13 +24,7 @@ StatusCode CaloCalibClusterDecoratorAlgorithm::execute(const EventContext& ctx) 
   if(!mapIdentifierToCalibHitsReadHandle.isValid()){
     ATH_MSG_WARNING("Could not retrieve map between Identifier and calibraiton hits from Storegae");
     return StatusCode::FAILURE;
-  }
-
-  SG::ReadHandle<std::map<unsigned int,const xAOD::TruthParticle* > > mapTruthBarcodeToTruthParticleReadHandle(m_mapTruthBarcodeToTruthParticleReadHandleKey, ctx);
-  if(!mapTruthBarcodeToTruthParticleReadHandle.isValid()){
-    ATH_MSG_WARNING("Could not retrieve map between truth barcode and truth particle from Storegate");
-    return StatusCode::FAILURE;
-  }
+  }  
 
   SG::WriteDecorHandle<xAOD::CaloClusterContainer, std::vector< std::pair<unsigned int, double> > > caloClusterWriteDecorHandleNLeadingTruthParticles(m_caloClusterWriteDecorHandleKeyNLeadingTruthParticles, ctx);
   StatusCode sc;
@@ -39,7 +32,7 @@ StatusCode CaloCalibClusterDecoratorAlgorithm::execute(const EventContext& ctx) 
   for (const auto *thisCaloCluster : *caloClusterWriteDecorHandleNLeadingTruthParticles){
 
     std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs;
-    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *mapIdentifierToCalibHitsReadHandle, *mapTruthBarcodeToTruthParticleReadHandle, newBarCodeTruthPairs);
+    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *mapIdentifierToCalibHitsReadHandle, newBarCodeTruthPairs);
     if (sc == StatusCode::FAILURE) return sc;
     
     for (const auto& thisPair : newBarCodeTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with barcode " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());

@@ -20,8 +20,7 @@ public:
   /** This calculates the truth energies of N leading truth particles in a topocluster */
   virtual StatusCode calculateTruthEnergies(const xAOD::CaloCluster& theCaloCluster
 					    , unsigned int numTruthParticles
-					    , const std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap
-					    , const std::map<unsigned int,const xAOD::TruthParticle*>& truthBarcodeToTruthParticleMap
+					    , const std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap					    
 					    , std::vector<std::pair<unsigned int, double > >& barcodeTrueCalHitEnergy) const override;
 
 private:

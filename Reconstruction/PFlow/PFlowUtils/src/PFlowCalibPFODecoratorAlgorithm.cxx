@@ -10,7 +10,6 @@
 StatusCode PFlowCalibPFODecoratorAlgorithm::initialize(){
 
   ATH_CHECK(m_mapIdentifierToCalibHitsReadHandleKey.initialize());
-  ATH_CHECK(m_mapTruthBarcodeToTruthParticleReadHandleKey.initialize());
 
   ATH_CHECK(m_pfoWriteDecorHandleKeyNLeadingTruthParticles.initialize());
 
@@ -21,8 +20,7 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::initialize(){
 
 StatusCode PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO(
 							    SG::WriteDecorHandle<xAOD::FlowElementContainer, std::vector< std::pair<unsigned int, double> > >& pfoWriteDecorHandle,
-							    SG::ReadHandle<std::map<Identifier,std::vector<const CaloCalibrationHit*> > >& CalibHitReadHandle,
-							    SG::ReadHandle<std::map<unsigned int,const xAOD::TruthParticle* > >& TruthParticleHandle)const
+							    SG::ReadHandle<std::map<Identifier,std::vector<const CaloCalibrationHit*> > >& CalibHitReadHandle)const
 {
   
   StatusCode sc;
@@ -32,7 +30,7 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO(
     const xAOD::CaloCluster* thisCaloCluster = dynamic_cast<const xAOD::CaloCluster*>(FE_Iparticle);
     
     std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs;
-    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, *TruthParticleHandle, newBarCodeTruthPairs);
+    sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, newBarCodeTruthPairs);
     if (sc == StatusCode::FAILURE) return sc;
     
     for (const auto& thisPair : newBarCodeTruthPairs) ATH_MSG_DEBUG("Cluster Final loop: Particle with barcode " << thisPair.first << " has truth energy of " <<  thisPair.second << " for cluster with e, eta " << thisCaloCluster->e() << " and " << thisCaloCluster->eta());
@@ -49,19 +47,13 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::execute(const EventContext& ctx) con
     ATH_MSG_WARNING("Could not retrieve map between Identifier and calibraiton hits from Storegate");
     return StatusCode::FAILURE;
   }
-
-  SG::ReadHandle<std::map<unsigned int,const xAOD::TruthParticle* > > mapTruthBarcodeToTruthParticleReadHandle(m_mapTruthBarcodeToTruthParticleReadHandleKey, ctx);
-  if(!mapTruthBarcodeToTruthParticleReadHandle.isValid()){
-    ATH_MSG_WARNING("Could not retrieve map between truth barcode and truth particle from Storegate");
-    return StatusCode::FAILURE;
-  }
+  
   // pfo linker alg
   SG::WriteDecorHandle<xAOD::FlowElementContainer, std::vector< std::pair<unsigned int, double> > > pfoWriteDecorHandleNLeadingTruthParticles(m_pfoWriteDecorHandleKeyNLeadingTruthParticles, ctx);
 
   ATH_CHECK(this->LinkCalibHitPFO(
 				      pfoWriteDecorHandleNLeadingTruthParticles,
-				      mapIdentifierToCalibHitsReadHandle,
-				      mapTruthBarcodeToTruthParticleReadHandle)); // end of check block 
+				      mapIdentifierToCalibHitsReadHandle)); // end of check block 
   
   return StatusCode::SUCCESS;
 }

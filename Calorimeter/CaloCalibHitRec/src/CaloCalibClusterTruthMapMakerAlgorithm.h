@@ -40,9 +40,6 @@ private:
   /** This fills a map between calorimeter cell identifiers and calibration hits for a fast lookup */
   void fillIdentifierToCaloHitMap(std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap, const EventContext& ctx) const;
 
-  /** This fills a map between the truth barcode and the pdg Id for a fast lookup */
-  void fillTruthBarcodeToTruthParticleMap(std::map<unsigned int,const xAOD::TruthParticle*>& truthBarcodeToTruthParticleMap, const EventContext& ctx) const;
-
    /** ReadHandleKey for Active Tile Calibration Hits */
   SG::ReadHandleKey<CaloCalibrationHitContainer> m_tileActiveCaloCalibrationHitReadHandleKey{this,"tileActiveCaloCalibrationHitsName","TileCalibHitActiveCell","ReadHandleKey for Active Tile Calibration Hits"};
 
@@ -67,8 +64,5 @@ private:
   /** WriteHandleKey for the map between Identifiers and sets of calibration hits */
   SG::WriteHandleKey<std::map<Identifier,std::vector<const CaloCalibrationHit*> > > m_mapIdentifierToCalibHitsWriteHandleKey{this,"IdentifierToCalibHitsMapName","IdentifierToCalibHitsMap","WriteHandleKey for the map between Identifiers and sets of calibration hits"};
 
-  /** WriteHandleKey for the map between truth particle barcode and the pdg Id */
-  SG::WriteHandleKey<std::map<unsigned int,const xAOD::TruthParticle* > > m_mapTruthBarcodeToTruthParticleWriteHandleKey{this,"TruthBarcodeToTruthParticleMapName","TruthBarcodeTruthParticleMap","WriteHandleKey for the map between truth particle barcode and the pdg Id"};
-  
 };
 #endif

@@ -48,9 +48,6 @@ private:
   /** ReadHandleKey for the map between Identifiers and sets of calibration hits */
   SG::ReadHandleKey<std::map<Identifier,std::vector<const CaloCalibrationHit*> > > m_mapIdentifierToCalibHitsReadHandleKey{this,"IdentifierToCalibHitsMapName","IdentifierToCalibHitsMap","ReadHandleKey for the map between Identifieirs and sets of calibration hits"};
 
-  /** ReadHandleKey for the map between truth particle barcode and the pdg Id */
-  SG::ReadHandleKey<std::map<unsigned int,const xAOD::TruthParticle* > > m_mapTruthBarcodeToTruthParticleReadHandleKey{this,"TruthBarcodeToTruthParticleMapName","TruthBarcodeTruthParticleMap","ReadHandleKey for the map between truth particle barcode and the pdg Id"};
-
   /** Write handle key to decorate PFO with threeN leading truth particle barcode and energy */
   SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_pfoWriteDecorHandleKeyNLeadingTruthParticles{this,"PFOWriteDecorHandleKey_NLeadingTruthParticles","JetETMissNeutralParticleFlowObjects.calpfo_NLeadingTruthParticleBarcodeEnergyPairs"};
   
@@ -58,13 +55,12 @@ private:
   ToolHandle<ICaloCalibClusterTruthAttributerTool> m_truthAttributerTool{this,"TruthAttributerTool",""," ToolHandle to a tool to create the calibration hit truth information that we need for the decoration"};
 
   /** Allow user to set the number of truth particles per clusterCaloCluster or PFO, in descending pt order, for which to store calibration hit enery */
-  Gaudi::Property<unsigned int> m_numTruthParticles{this,"NumTruthParticles",3,"Set number of truth particles per CaloCluster/PFO for which we store calibration hit energy"};
+  Gaudi::Property<unsigned int> m_numTruthParticles{this,"NumTruthParticles",20,"Set number of truth particles per CaloCluster/PFO for which we store calibration hit energy"};
 
   // functions to do the links between either PFO or FlowElements
   StatusCode LinkCalibHitPFO(
 			     SG::WriteDecorHandle<xAOD::FlowElementContainer, std::vector< std::pair<unsigned int, double> > >& pfoWriteDecorHandle,
-			     SG::ReadHandle<std::map<Identifier,std::vector<const CaloCalibrationHit*> > >& CalibHitHandle,
-			     SG::ReadHandle<std::map<unsigned int,const xAOD::TruthParticle* > >& TruthParticleHandle) const;
+			     SG::ReadHandle<std::map<Identifier,std::vector<const CaloCalibrationHit*> > >& CalibHitHandle) const;
   
 };
 #endif
