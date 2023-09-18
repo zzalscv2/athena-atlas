@@ -369,7 +369,12 @@ class CaloClusterTopoGetter ( Configured )  :
         TopoMaker.UseTimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.useUpperLimitForTimeCut()
         TopoMaker.TimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.timeCutUpperLimit()
         TopoMaker.XTalkEM2 = jobproperties.CaloTopoClusterFlags.xtalkEM2()
+        TopoMaker.XTalkEM2n = jobproperties.CaloTopoClusterFlags.xtalkEM2n()
+        TopoMaker.XTalkEM3 = jobproperties.CaloTopoClusterFlags.xtalkEM3()
         TopoMaker.XTalkDeltaT = jobproperties.CaloTopoClusterFlags.xtalkDeltaT()
+        TopoMaker.XTalk2Eratio1 = jobproperties.CaloTopoClusterFlags.xtalk2Eratio1()
+        TopoMaker.XTalk2Eratio2 = jobproperties.CaloTopoClusterFlags.xtalk2Eratio2()
+        TopoMaker.XTalk3Eratio  = jobproperties.CaloTopoClusterFlags.xtalk3Eratio()
 
         # note E or AbsE 
         #

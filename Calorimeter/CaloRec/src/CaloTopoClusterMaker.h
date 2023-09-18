@@ -140,6 +140,18 @@ private:
    * additional max. delta t added to the upper limit time window in case of xtalk in EM2 should be accounted for */
   float m_xtalkDeltaT;
 
+   /**
+    *  cut on Eneighbor/E to revover out of time cell close to energetic first phi neighbor cell */
+   float m_xtalk2Eratio1;
+
+   /**
+    *  cut on Eneighbor/E to revover out of time cell close to energetic second phi neighbor cell */
+   float m_xtalk2Eratio2;
+
+   /**
+    *  cut on Eneighbor/E to revover out of time layer 3cell close to energetic previous sampling neighbor */
+   float m_xtalk3Eratio;
+
 
   /** @brief Key of the CaloNoise Conditions data object. Typical values 
       are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
@@ -259,6 +271,17 @@ private:
    * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from direct neighbour cells in phi
    */
   bool m_xtalkEM2;
+
+  /**                                                                                              
+   * if set to true (together with m_xtalkEM2) we also extend the time window for 2nd phi neighbors
+   */
+  bool m_xtalkEM2n;
+
+  /**                                                                                              
+
+   * if set to true  we extend the time window for direct layer 3 neighbors of high energy layer 2 cells
+   */
+  bool m_xtalkEM3;
 
   /** 
    * @brief vector of names of the calorimeter samplings to consider

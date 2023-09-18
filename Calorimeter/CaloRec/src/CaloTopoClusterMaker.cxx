@@ -62,6 +62,9 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_seedThresholdOnTAbs              (  12.5*ns),
     m_timeCutUpperLimit                (    20.),
     m_xtalkDeltaT                      (  15.*ns),
+    m_xtalk2Eratio1                    ( 4.),
+    m_xtalk2Eratio2                    ( 25.),
+    m_xtalk3Eratio                     ( 10.),
     m_neighborOption                   ("super3D"),
     m_nOption                          (LArNeighbours::super3D),
     m_restrictHECIWandFCalNeighbors    (false),
@@ -76,6 +79,8 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_cutOOTseed                       (false),
     m_useTimeCutUpperLimit             (false),
     m_xtalkEM2                         (false),
+    m_xtalkEM2n                        (false),
+    m_xtalkEM3                         (false),
     m_minSampling                      (0),
     m_maxSampling                      (0),
     m_hashMin                          (999999),
@@ -117,8 +122,18 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
   declareProperty("UseTimeCutUpperLimit",m_useTimeCutUpperLimit);
   //relax time window (if timing is used) in EM2 when xTalk is present
   declareProperty("XTalkEM2",m_xtalkEM2);
+  //relax time window (if timing is used) in EM2 when xTalk is present also for 2nd phi neighbors (if XTalkEM2 is also set)
+  declareProperty("XTalkEM2n",m_xtalkEM2n);
+  //relax time window (if timing is used) in EM3 when xTalk is present for layer 3 neighbor of high energy layer 2 cells
+  declareProperty("XTalkEM3",m_xtalkEM3);
   //delta T to add to upper time threshold for EM2 cells affected by xtalk
   declareProperty("XTalkDeltaT",m_xtalkDeltaT);
+  //Eratio for first phi neighbor in layer2
+  declareProperty("XTalk2Eratio1",m_xtalk2Eratio1);
+  //Eratio for second phi neighbor in layer2
+  declareProperty("XTalk2Eratio2",m_xtalk2Eratio2);
+  //Eratio for previous sampling neighbor in layer 3
+  declareProperty("XTalk3Eratio",m_xtalk3Eratio);
 
   // Neighbor cuts are in E or Abs E
   declareProperty("NeighborCutsInAbsE",m_neighborCutsInAbsE);
@@ -705,7 +720,7 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
 	for (IdentifierHash nId : theNeighbors) {
 	  const CaloCell * pNCell = cellColl->findCell(nId);
 	  if ( pNCell ) {
-	    if ( pNCell->energy() > 4*pCell->energy() ) {
+	    if ( pNCell->energy() > m_xtalk2Eratio1*pCell->energy() ) {
 	      if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
 		isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
 		if ( isInTime ) {
@@ -715,9 +730,49 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
 		}
 	      }
 	    }
-	  }
-	}
-      }
+
+            // check second neighbor
+            if (m_xtalkEM2n) {
+             std::vector<IdentifierHash> theNextNeighbors;
+             m_calo_id->get_neighbours(nId,opt,theNextNeighbors);
+             for (IdentifierHash n2Id : theNextNeighbors) {
+              if (n2Id != hashid) {
+                const CaloCell * p2NCell = cellColl->findCell(n2Id);
+                if (p2NCell) {
+                  if (p2NCell->energy() > m_xtalk2Eratio2*pCell->energy()) {
+                      if ( (!(p2NCell->provenance() & pmask)) || std::abs(p2NCell->time()) < m_seedThresholdOnTAbs) {
+                          isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                          if (isInTime) break;
+                      }
+                  }
+                }
+              }
+             }    // loop over 2nd neighbors
+            }
+	  }      // if (pNcell)
+	}        // loop over first neighbors
+      }          // special case for layer 2
+
+      // relax also time constraint for EMB3 and EME2_OW
+      if ( m_xtalkEM3 && (!isInTime) && (pCell->energy() > 0 && (sam == CaloSampling::EMB3 || (sam == CaloSampling::EME3 && std::abs(pCell->eta()) < 2.5)))) {
+         // check previous sampling cell, should be >10 times more (TBC)
+         IdentifierHash hashid = pCell->caloDDE()->calo_hash();
+         std::vector<IdentifierHash> theNeighbors;
+         LArNeighbours::neighbourOption opt = LArNeighbours::prevInSamp;
+         m_calo_id->get_neighbours(hashid,opt,theNeighbors);
+         for (IdentifierHash nId : theNeighbors) {
+           const CaloCell * pNCell = cellColl->findCell(nId);
+           if ( pNCell ) {
+            if ( pNCell->energy() > m_xtalk3Eratio*pCell->energy() ) {
+              if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
+                 isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                 if (isInTime) break;
+              }   
+            }  // Eratio cut at 10
+           }
+         }     // loop over neighors
+      }        // cell is layer 3 EM
+
     }
   }
   return isInTime;
