@@ -57,6 +57,14 @@ def createITkConfigFlags():
     itkcf.addFlag("ITk.selectStripIntimeHits", lambda prevFlags:
                   not(prevFlags.Beam.Type is BeamType.Cosmics))
 
+    # Save SiHitCollections to RDO
+    itkcf.addFlag("ITk.savePixelSiHits", lambda prevFlags:
+                  prevFlags.BTagging.Trackless or
+                  prevFlags.BTagging.savePixelHits)
+    itkcf.addFlag("ITk.saveStripSiHits", lambda prevFlags:
+                  prevFlags.BTagging.Trackless or
+                  prevFlags.BTagging.saveSCTHits)
+
     # config flags for tracking geometry configuration
     from InDetConfig.TrackingGeometryFlags import createITkTrackingGeometryFlags
     itkcf.addFlagsCategory("ITk.trackingGeometry",

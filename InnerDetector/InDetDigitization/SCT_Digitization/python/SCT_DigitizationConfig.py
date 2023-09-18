@@ -271,6 +271,8 @@ def SCT_OutputCfg(flags):
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
+        if flags.InDet.saveSCTSiHits:
+            ItemList += ["SiHitCollection#SCT_Hits"]
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
 

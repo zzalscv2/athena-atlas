@@ -224,6 +224,8 @@ def ITkPixelOutputCfg(flags):
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
+        if flags.ITk.savePixelSiHits:
+            ItemList += ["SiHitCollection#ITkPixelHits"]
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
     return acc
 
