@@ -7,6 +7,11 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/ITHistSvc.h"
 
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TH3D.h"
+#include "TProfile.h"
+
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
@@ -29,28 +34,44 @@ StatusCode EgammaMonitoring::initialize() {
   showerShapes10GeV = std::make_unique<egammaMonitoring::ShowerShapesHistograms>(
     "showerShapes10GeV","Shower Shapes - 10 GeV", "/MONITORING/showerShapes10GeV/", rootHistSvc);
 
-  clusterAll = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clustersAll","Clusters", "/MONITORING/clusterAll/", rootHistSvc);
-
-  cluster10GeV= std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clusters10GeV","Clusters - 10 GeV", "/MONITORING/cluster10GeV/", rootHistSvc);
-
-  clusterPromptAll = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clustersPromptAll","Clusters from Prompt", "/MONITORING/clusterPromptAll/", rootHistSvc);
-
-  clusterPrompt10GeV = std::make_unique<egammaMonitoring::ClusterHistograms>(
-    "clustersPrompt10GeV","Clusters from Prompt - 10 GeV", "/MONITORING/clusterPrompt10GeV/", rootHistSvc);
-
   isolationAll = std::make_unique<egammaMonitoring::IsolationHistograms>(
     "isolationAll","Isolation ", "/MONITORING/isolationAll/", rootHistSvc);
 
   ATH_CHECK(showerShapesAll->initializePlots());
   ATH_CHECK(showerShapes10GeV->initializePlots());
-  ATH_CHECK(clusterAll->initializePlots());
-  ATH_CHECK(cluster10GeV->initializePlots());
-  ATH_CHECK(clusterPromptAll->initializePlots());
-  ATH_CHECK(clusterPrompt10GeV->initializePlots());
   ATH_CHECK(isolationAll->initializePlots(m_sampleType == "electron"));
+
+  if ("dataZ" != m_sampleType) {
+    clusterAll = std::make_unique<egammaMonitoring::ClusterHistograms>(
+      "clustersAll","Clusters", "/MONITORING/clusterAll/", rootHistSvc);
+
+    cluster10GeV= std::make_unique<egammaMonitoring::ClusterHistograms>(
+      "clusters10GeV","Clusters - 10 GeV", "/MONITORING/cluster10GeV/", rootHistSvc);
+
+    clusterPromptAll = std::make_unique<egammaMonitoring::ClusterHistograms>(
+      "clustersPromptAll","Clusters from Prompt", "/MONITORING/clusterPromptAll/", rootHistSvc);
+
+    clusterPrompt10GeV = std::make_unique<egammaMonitoring::ClusterHistograms>(
+      "clustersPrompt10GeV","Clusters from Prompt - 10 GeV", "/MONITORING/clusterPrompt10GeV/", rootHistSvc);
+
+    ATH_CHECK(clusterAll->initializePlots());
+    ATH_CHECK(cluster10GeV->initializePlots());
+    ATH_CHECK(clusterPromptAll->initializePlots());
+    ATH_CHECK(clusterPrompt10GeV->initializePlots());
+  } else {
+    m_clusterReco = std::make_unique<egammaMonitoring::RecoClusterHistograms>(
+      "clustersReco","Clusters from Z->ee candidates in data", "/MONITORING/recoCluster/", rootHistSvc);
+    recoElectronAll = std::make_unique<egammaMonitoring::RecoElectronHistograms>(
+      "recoElectronAll","Reco electrons from Z->ee candidates in data",
+      "/MONITORING/recoZElectron/", rootHistSvc);
+    m_diElectron = std::make_unique<egammaMonitoring::DiObjectHistograms>(
+      "diElectrons","Z->ee candidates in data",
+      "/MONITORING/diElectrons/", rootHistSvc);
+    ATH_CHECK(m_clusterReco->initializePlots());
+    recoElectronAll->isData();
+    ATH_CHECK(recoElectronAll->initializePlots());
+    ATH_CHECK(m_diElectron->initializePlots());
+  }
 
   if ("electron" == m_sampleType) {
 
@@ -292,15 +313,18 @@ StatusCode EgammaMonitoring::initialize() {
 
   } // gamma Hists
 
+  if (m_sampleType != "gamma") {
+    ATH_CHECK(m_ElectronsKey.initialize());
+    ATH_CHECK(m_GSFTrackParticlesKey.initialize());
+  }
+
   if ("electron" == m_sampleType) {
     //*****************ID selectors (3 levels)********************
     ATH_CHECK(m_LooseLH.retrieve());
     ATH_CHECK(m_MediumLH.retrieve());
     ATH_CHECK(m_TightLH.retrieve());
 
-    ATH_CHECK(m_ElectronsKey.initialize());
     ATH_CHECK(m_FwdElectronsKey.initialize(!m_FwdElectronsKey.empty()));
-    ATH_CHECK(m_GSFTrackParticlesKey.initialize());
   }
 
   if ("gamma" == m_sampleType) {
@@ -316,14 +340,17 @@ StatusCode EgammaMonitoring::initialize() {
     ATH_CHECK(m_PhotonsKey.initialize());
   }
 
-  //*****************MC Truth Classifier Requirement********************
-  ATH_CHECK(m_mcTruthClassifier.retrieve());
-
   //***************** The handles used whatever the sample********************
   ATH_CHECK(m_eventInfoKey.initialize());
-  ATH_CHECK(m_egTruthParticlesKey.initialize());
-  ATH_CHECK(m_truthParticlesKey.initialize());
   ATH_CHECK(m_InDetTrackParticlesKey.initialize());
+
+  if (m_sampleType != "dataZ") {
+    ATH_CHECK(m_egTruthParticlesKey.initialize());
+    ATH_CHECK(m_truthParticlesKey.initialize());
+
+    //*****************MC Truth Classifier Requirement********************
+    ATH_CHECK(m_mcTruthClassifier.retrieve());
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -336,14 +363,18 @@ StatusCode EgammaMonitoring::execute() {
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
   const float mu = eventInfo->averageInteractionsPerCrossing();
 
+  // Retrieve indet track particles
+  SG::ReadHandle<xAOD::TrackParticleContainer > InDetTPs(m_InDetTrackParticlesKey, ctx);
+
+  if ("dataZ" == m_sampleType) {
+    return this->ZeeSelection(mu,ctx);
+  }
+
   // Retrieve egamma truth particles
   SG::ReadHandle<xAOD::TruthParticleContainer> egTruthParticles (m_egTruthParticlesKey, ctx);
 
   // Retrieve truth particles
   SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_truthParticlesKey, ctx);
-
-  // Retrieve indet track particles
-  SG::ReadHandle<xAOD::TrackParticleContainer > InDetTPs(m_InDetTrackParticlesKey, ctx);
 
   if ("electron" == m_sampleType) {
 
@@ -824,7 +855,7 @@ StatusCode EgammaMonitoring::finalize() {
 
   }
 
-  if ("gamma" == m_sampleType) {
+  else if ("gamma" == m_sampleType) {
 
     egammaMonitoring::EfficiencyPlot truthPhotonRecoPhotonEfficiency("truthPhotonRecoPhotonEfficiency", "/MONITORING/truthPhotonRecoPhotonEfficiency/", rootHistSvc );
     ATH_CHECK(truthPhotonRecoPhotonEfficiency.divide(truthPhotonRecoPhoton.get(),truthPhotonAll.get()));
@@ -912,6 +943,8 @@ StatusCode EgammaMonitoring::finalize() {
     ATH_CHECK(truthPhotonUnconvRecoConvWidth.fill(truthPhotonUnconvRecoConv.get()));
     egammaMonitoring::WidthPlot truthPhotonUnconvRecoUnconvWidth("truthPhotonUnconvRecoUnconvWidth", "/MONITORING/truthPhotonUnconvRecoUnconvWidth/", rootHistSvc);
     ATH_CHECK(truthPhotonUnconvRecoUnconvWidth.fill(truthPhotonUnconvRecoUnconv.get()));
+  } else if ("dataZ" == m_sampleType) {
+    ATH_CHECK(ZeePostProc());
   }
 
   return StatusCode::SUCCESS;
@@ -933,4 +966,99 @@ bool EgammaMonitoring::matchedToPion(const xAOD::TrackParticle& tp) {
 bool EgammaMonitoring::notMatchedToTruth(const xAOD::TrackParticle& tp) {
   const xAOD::TruthParticle *truth = xAOD::TruthHelpers::getTruthParticle(tp);
   return !truth;
+}
+
+StatusCode EgammaMonitoring::ZeeSelection(float mu, const EventContext& ctx) {
+  SG::ReadHandle<xAOD::ElectronContainer > RecoEl(m_ElectronsKey, ctx);
+  SG::ReadHandle<xAOD::TrackParticleContainer > GSFTracks(m_GSFTrackParticlesKey, ctx);
+
+  const xAOD::Electron *e1 = nullptr, *e2 = nullptr;
+  double pTL = -9e9, pTSL = -9e9;
+  for (const auto *el : *RecoEl) {
+    double pt = el->pt();
+    if (pt < 15e3)
+      continue;
+    if (pt > pTL) {
+      e2   = e1;
+      pTSL = pTL;
+      e1   = el;
+      pTL  = pt;
+    } else if (pt > pTSL) {
+      e2   = el;
+      pTSL = pt;
+    }
+  }
+
+  if (!e2)
+    return StatusCode::SUCCESS;
+
+  m_diElectron->fill(*e1,*e2,mu);
+
+  m_clusterReco->fill(*e1);
+  m_clusterReco->fill(*e2);
+  recoElectronAll->fill(*e1);
+  recoElectronAll->fill(*e2);
+
+  showerShapesAll->fill(*e1);
+  showerShapesAll->fill(*e2);
+  if (e1->pt() > 10*Gaudi::Units::GeV)
+    showerShapes10GeV->fill(*e1);
+  if (e2->pt() > 10*Gaudi::Units::GeV)
+    showerShapes10GeV->fill(*e2);
+  isolationAll->fill(*e1);
+  isolationAll->fill(*e2);
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode EgammaMonitoring::ZeePostProc() {
+
+  TH1D *hRef = (TH1D*)m_diElectron->histoMap["mass"];
+  double xmi = 66, xma = 116, eps = 0.01;
+  int ib1 = hRef->FindBin(xmi+eps);
+  int ib2 = hRef->FindBin(xma-eps);
+  TH1D *hmee = new TH1D("mee",";m_{ee} [GeV];Events / 0.5 GeV",ib2-ib1+1,xmi,xma);
+  for (int ib = ib1; ib <= ib2; ib++) {
+    double c  = hRef->GetBinContent(ib);
+    double ec = hRef->GetBinError(ib);
+    hmee->SetBinContent(ib-ib1+1,c);
+    hmee->SetBinError(ib-ib1+1,ec);
+  }
+  ATH_CHECK(rootHistSvc->regHist("/MONITORING/Data/mee",hmee));
+
+  TString vsX[3] = { "Et", "Etetale0p8", "Eta" };
+  TString coo[3] = { "x", "x", "y" };
+  for (int iL = 0; iL < 5; iL++) {
+    TH3D *nRef;
+    if (iL < 4)
+      nRef = m_clusterReco->m_histo3DMap[Form("hNcellsvseteta_Lr%i",iL)];
+    else
+      nRef = recoElectronAll->histo3DMap["eteta_eop"];
+    for (int iX = 0; iX < 3; iX++) {
+      if (iL == 4 && iX == 2)
+	continue;
+      // nCells vs eta
+      if (iX == 1) {
+	int ieta08 = nRef->GetYaxis()->FindBin(0.79);
+	nRef->GetYaxis()->SetRange(1,ieta08);
+      } else if (iX == 2) {
+	nRef->GetYaxis()->SetRange(1,25);
+      }
+      TH2D *nRefvsX = (TH2D*)nRef->Project3D(Form("z%s",coo[iX].Data()));
+      TString pN;
+      if (iL < 4)
+	pN = Form("pn%ivs%s",iL,vsX[iX].Data());
+      else
+	pN = Form("pEopvs%s",vsX[iX].Data());
+      TProfile *pRefvsX = nRefvsX->ProfileX(pN.Data());
+      pRefvsX->SetTitle(pN.Data());
+      pRefvsX->GetXaxis()->SetTitle(iX < 2 ? "E_{T} [GeV]" : "|#eta|");
+      pRefvsX->GetYaxis()->SetTitle(iL < 4 ? Form("nCells_Lr%i",iL) : "E/p");
+      ATH_CHECK(rootHistSvc->regHist(
+	Form("/MONITORING/Data/%s",pRefvsX->GetName()),pRefvsX));
+      delete nRefvsX;
+    }
+  }
+  return StatusCode::SUCCESS;
+
 }

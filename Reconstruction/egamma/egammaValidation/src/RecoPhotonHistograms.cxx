@@ -19,20 +19,33 @@ StatusCode RecoPhotonHistograms::initializePlots() {
   ATH_CHECK(ParticleHistograms::initializePlots());
 
   histoMap["convRadius"] = new TH1D(Form("%s_%s",m_name.c_str(),"convRadius"), ";Conversion Radius [mm]; Events", 14, m_cR_bins);
+  histoMap["truthType"] = new TH1D(Form("%s_%s",m_name.c_str(),"truthType"),";truth type; Events",41,-1,40);
+  histoMap["truthOrigin"] = new TH1D(Form("%s_%s",m_name.c_str(),"truthOrigin"),";truth origin; Events",51,-1,50);
 
   ATH_CHECK(m_rootHistSvc->regHist(m_folder+"convRadius", histoMap["convRadius"]));
+  ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthType", histoMap["truthType"]));
+  ATH_CHECK(m_rootHistSvc->regHist(m_folder+"truthOrigin", histoMap["truthOrigin"]));
 
   return StatusCode::SUCCESS;
 }
 
 void RecoPhotonHistograms::fill(const xAOD::Photon& phrec) {
-
-  double trueR(-999);
   
   ParticleHistograms::fill(phrec);
- 
-  const xAOD::TruthParticle *tmp = xAOD::TruthHelpers::getTruthParticle(phrec);
 
+  static const SG::AuxElement::ConstAccessor<int> accType("truthType");
+  static const SG::AuxElement::ConstAccessor<int> accOrigin("truthOrigin");
+  if (accOrigin.isAvailable(phrec))
+    histoMap["truthOrigin"]->Fill(accOrigin(phrec));
+  else
+    histoMap["truthOrigin"]->Fill(-1);
+  if (accType.isAvailable(phrec))
+    histoMap["truthType"]->Fill(accType(phrec));
+  else
+    histoMap["truthType"]->Fill(-1);
+ 
+  double trueR(-999);
+  const xAOD::TruthParticle *tmp = xAOD::TruthHelpers::getTruthParticle(phrec);
   if (tmp) {
     if (tmp->pdgId() == 22 && tmp->hasDecayVtx()) {
 
@@ -42,7 +55,6 @@ void RecoPhotonHistograms::fill(const xAOD::Photon& phrec) {
 
     }
   }
-
   histoMap["convRadius"]->Fill(trueR);
 
   

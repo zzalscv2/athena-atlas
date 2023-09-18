@@ -22,13 +22,15 @@
 #include "IsolationSelection/IIsolationSelectionTool.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 
-#include "ClusterHistograms.h"
 #include "EfficiencyPlot.h"
 #include "IHistograms.h"
+#include "DiObjectHistograms.h"
 #include "RecoElectronHistograms.h"
 #include "RecoPhotonHistograms.h"
+#include "RecoClusterHistograms.h"
 #include "ShowerShapesHistograms.h"
 #include "TrackHistograms.h"
+#include "ClusterHistograms.h"
 #include "TruthElectronHistograms.h"
 #include "TruthPhotonHistograms.h"
 #include "WidthPlot.h"
@@ -46,16 +48,21 @@ public:
   /// Tools and services ///
   ITHistSvc* rootHistSvc = nullptr;
 
-  // Whatever samples
+  // samples from simulation
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterAll;
   std::unique_ptr<egammaMonitoring::ClusterHistograms> cluster10GeV;
 
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterPromptAll;
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterPrompt10GeV;
 
+  // Whatever samples
   std::unique_ptr<egammaMonitoring::ShowerShapesHistograms> showerShapesAll;
   std::unique_ptr<egammaMonitoring::ShowerShapesHistograms> showerShapes10GeV;
   std::unique_ptr<egammaMonitoring::IsolationHistograms> isolationAll;
+
+  // di-electron data
+  std::unique_ptr<egammaMonitoring::RecoClusterHistograms> m_clusterReco;
+  std::unique_ptr<egammaMonitoring::DiObjectHistograms> m_diElectron;
 
   // electrons
   std::unique_ptr<egammaMonitoring::RecoElectronHistograms> recoElectronAll;
@@ -88,7 +95,7 @@ public:
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterConvPhotonSiTRT;
   std::unique_ptr<egammaMonitoring::ClusterHistograms> clusterUnconvPhoton;
 
-  std::unique_ptr<egammaMonitoring::IHistograms> recoPhotonAll;
+  std::unique_ptr<egammaMonitoring::RecoPhotonHistograms> recoPhotonAll;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAll;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAllUnconv;
   std::unique_ptr<egammaMonitoring::IHistograms> truthPhotonAllConv;
@@ -169,17 +176,17 @@ private:
 
   // Truth classifier
   ToolHandle<IMCTruthClassifier> m_mcTruthClassifier
-    { this, "MCTruthClassifier", "MCTruthClassifier/MCTruthClassifier", "" };
+    { this, "MCTruthClassifier", "", "" };
 
   // Collections to read
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
     { this, "EventInfoKey", "EventInfo", "" };
 
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_egTruthParticlesKey
-    { this, "egammaTruthParticlesKey", "egammaTruthParticles", "" };
+    { this, "egammaTruthParticlesKey", "", "" };
 
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey
-    { this, "truthParticlesKey", "TruthParticles", "" };
+    { this, "truthParticlesKey", "", "" };
 
   SG::ReadHandleKey<xAOD::ElectronContainer> m_ElectronsKey
     { this, "ElectronsKey", "", "" };
@@ -199,6 +206,9 @@ private:
   static bool matchedToElectron(const xAOD::TrackParticle& tp);
   static bool matchedToPion(const xAOD::TrackParticle& tp);
   static bool notMatchedToTruth(const xAOD::TrackParticle& tp);
+
+  StatusCode ZeeSelection(float mu, const EventContext& ctx);
+  StatusCode ZeePostProc();
 
   int m_CenFwdOverlap[2] = { 0, 0 };
 };

@@ -19,6 +19,10 @@ def egammaMonitoringCfg(flags, particleType = 'electron',
 
     kwarg = {}
 
+    if particleType == 'electron' or particleType == 'dataZ':
+        kwarg['ElectronsKey'] = 'Electrons'
+        kwarg['GSFTrackParticlesKey'] = 'GSFTrackParticles'
+
     if particleType == 'electron':
         from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import (
             AsgElectronLikelihoodToolCfg)
@@ -26,8 +30,6 @@ def egammaMonitoringCfg(flags, particleType = 'electron',
             t = AsgElectronLikelihoodToolCfg(flags, k+'LHSelector', w)
             kwarg[k+'LH'] = t.popPrivateTools()
             acc.merge(t)
-        kwarg['ElectronsKey'] = 'Electrons'
-        kwarg['GSFTrackParticlesKey'] = 'GSFTrackParticles'
         if addFwd:
             kwarg['FwdElectronsKey'] = 'ForwardElectrons'
 
@@ -48,8 +50,13 @@ def egammaMonitoringCfg(flags, particleType = 'electron',
         kwarg['PhotonsKey'] = 'Photons'
 
     # a Truth classifier
-    from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
-    MCClassifier = acc.popToolsAndMerge(MCTruthClassifierCfg(flags))
+    if particleType != 'dataZ':
+        from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
+        MCClassifier = acc.popToolsAndMerge(MCTruthClassifierCfg(flags))
+        kwarg['egammaTruthParticlesKey'] = 'egammaTruthParticles'
+        kwarg['truthParticlesKey'] = 'TruthParticles'
+    else:
+        MCClassifier = None
 
     # The monitoring alg
     egMon = CompFactory.EgammaMonitoring(

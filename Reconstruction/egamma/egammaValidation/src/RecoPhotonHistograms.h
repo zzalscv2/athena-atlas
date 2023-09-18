@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EGAMMAVALIDATION_RECOPHOTONHISTOGRAMS_H
@@ -7,25 +7,24 @@
 
 #include "xAODEgamma/Photon.h"
 #include "ParticleHistograms.h"
-class StatusCode;
+
+class TH1D;
 
 namespace egammaMonitoring {
 
   class RecoPhotonHistograms : public ParticleHistograms {
-  public:
 
+  public:
     using ParticleHistograms::ParticleHistograms;
-    using ParticleHistograms::initializePlots;
 
     StatusCode initializePlots();
 
     using ParticleHistograms::fill;
-
-    void fill(const xAOD::Photon&);
+    void fill(const xAOD::Photon& phrec);
 
   private:
-
-    float m_cR_bins[15] = {0, 50, 89, 123, 170, 210, 250, 299, 335, 371, 443, 514, 554, 800, 1085};
+    float m_cR_bins[15] =
+      {0, 50, 89, 123, 170, 210, 250, 299, 335, 371, 443, 514, 554, 800, 1085};
 
   };
 
