@@ -73,7 +73,7 @@ StatusCode ActsGaussianSumFitter::initialize() {
   m_gsfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
   m_surfaceAccessor.trackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
-  m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);
+  m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::trkMeasurementBase>(&m_surfaceAccessor);
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::TrackStateBackend>>(&m_outlierFinder);

@@ -158,9 +158,13 @@ void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
 struct ATLASSourceLinkSurfaceAccessor {
   const Acts::TrackingGeometry* trackingGeometry;
 
-  template<typename sourceLink_t = ATLASSourceLinkGeneric<Trk::MeasurementBase>>
-  const Acts::Surface* operator()(const Acts::SourceLink& sourceLink) const {
-    const auto& sl = sourceLink.get<sourceLink_t>();
+  const Acts::Surface* trkMeasurementBase(const Acts::SourceLink& sourceLink) const {
+    const auto& sl = sourceLink.get<ATLASSourceLink>();
+    return trackingGeometry->findSurface(sl.geometryId());
+  }
+
+  const Acts::Surface* uncalibratedMeasurement(const Acts::SourceLink& sourceLink) const {
+    const auto& sl = sourceLink.get<ATLASUncalibSourceLink>();
     return trackingGeometry->findSurface(sl.geometryId());
   }
 
