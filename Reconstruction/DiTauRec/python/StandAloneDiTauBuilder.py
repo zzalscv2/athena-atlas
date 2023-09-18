@@ -1,135 +1,79 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from __future__ import print_function
-
-import os
-
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-from AthenaCommon.GlobalFlags import globalflags
-from AthenaCommon.Include import include
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 
+def DiTauOutputCfg(flags):
 
-# ----------------------------------------------------------------------------
-# inputs files (in locations of lxpus)
-# ----------------------------------------------------------------------------
-isData = False
-if isData:
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00202740.00204265.00204564/"
+   from OutputStreamAthenaPool.OutputStreamConfig import addToESD,addToAOD
+   result=ComponentAccumulator()
 
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00202740.txt.v30_ESD.16770327/"
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00204240.txt.v33_ESD.16770897/"
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00204265.txt.v34_ESD.16771185/"
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00204564.txt.v35_ESD.16771782/"
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00204910.txt.v36_ESD.16772030/"
-    folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00204910.txt.v36_ESD.16829861/"
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00205112.txt.v37_ESD.16772152/"
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00205112.txt.v37_ESD.16775485/";
-    # folder = "/ZIH.fast/users/kirchmeier/high_pt_data/user.dkirchme.data12_8TeV.00205112.txt.v37_ESD.16777014/"
+   DiTauOutputList  = [ "xAOD::DiTauJetContainer#DiTauJets" ]
+   DiTauOutputList += [ "xAOD::DiTauJetAuxContainer#DiTauJetsAux." ]
 
-    files = []
-    for (dirpath, dirnames, filenames) in os.walk(folder):
-        files.extend(filenames)
-        break
+   result.merge(addToESD(flags,DiTauOutputList))
+   result.merge(addToAOD(flags,DiTauOutputList))
+   return result
 
-    athenaCommonFlags.FilesInput = [folder+f for f in files]
+def DiTauReconstructionCfg(flags):
 
-    globalflags.DataSource = 'data'
+    result = ComponentAccumulator()
 
-else:
-    # r.20 MC (Drell Yan)
-    folder = "/ZIH.fast/users/kirchmeier/ESD_r20/mc15_13TeV.301057.PowhegPythia8EvtGen_AZNLOCTEQ6L1_DYtautau_4500M5000.recon.ESD.e3649_s2650_s2183_r6771_tid05570837_00/"
+    from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
+    result.merge(DiTauBuilderCfg(flags))
 
-    files = []
-    for (dirpath, dirnames, filenames) in os.walk(folder):
-        files.extend(filenames)
-        break
-    athenaCommonFlags.FilesInput += [folder+f for f in files]
+    if (flags.Output.doWriteESD or flags.Output.doWriteAOD):
+        result.merge(DiTauOutputCfg(flags))
+
+    return result
 
 
+if __name__=="__main__":
 
-# ----------------------------------------------------------------------------
-# RecEx Flags
-# ----------------------------------------------------------------------------
-from RecExConfig.RecFlags import rec
-rec.doCBNT.set_Value_and_Lock(False)
-rec.doESD.set_Value_and_Lock(False)
-rec.doAOD.set_Value_and_Lock(False)
-rec.doTrigger.set_Value_and_Lock(True)  # set true just for testing ... default: False
-rec.doWriteTAG.set_Value_and_Lock(False)
-rec.doWriteAOD.set_Value_and_Lock(False)  # TODO: remove this options and write AODs as output
-rec.doWriteESD.set_Value_and_Lock(False)
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+
+    from AthenaCommon.AlgSequence import AlgSequence
+    topSequence = AlgSequence()
+
+    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
 
 
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-#athenaCommonFlags.SkipEvents=4
-athenaCommonFlags.EvtMax = 100
+    # Use latest MC21 tag to pick up latest muon folders apparently needed
+    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-10"
+    ConfigFlags.Output.ESDFileName = "ESD.pool.root"
+    ConfigFlags.Output.AODFileName = "AOD.pool.root"
 
-from PyUtils.MetaReaderPeeker import metadata
-globalflags.DetDescrVersion = metadata['GeoAtlas']
+    nThreads=1
+    ConfigFlags.Concurrency.NumThreads = nThreads
+    if nThreads>0:
+        ConfigFlags.Scheduler.ShowDataDeps = True
+        ConfigFlags.Scheduler.ShowDataFlow = True
+        ConfigFlags.Scheduler.ShowControlFlow = True
+        ConfigFlags.Concurrency.NumConcurrentEvents = nThreads
 
-include("RecExCond/AllDet_detDescr.py")
-include("RecExCommon/RecExCommon_topOptions.py")
+    from AthenaCommon.AlgScheduler import AlgScheduler
+    AlgScheduler.ShowControlFlow( True )
+    AlgScheduler.ShowDataDependencies( True )
+    AlgScheduler.setDataLoaderAlg('SGInputLoader')
 
-# ----------------------------------------------------------------------------
-# Athena algorithm sequence
-# ----------------------------------------------------------------------------
-from AthenaCommon.AlgSequence import AlgSequence
-topSequence = AlgSequence()
+    ConfigFlags.lock()
 
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-# ----------------------------------------------------------------------------
-# Tools
-# ----------------------------------------------------------------------------
-_jet_container = "AntiKt10LCTopoJets"
-_R_jet = 1.0                # seed jet radius  ... TODO check correct implementation in tools
-_R_subjet = 0.2             # subjet radius  ... TODO check correct implementation in tools
-_R_core = 0.1               # subjet core radius  ... TODO check correct implementation in tools
-_do_cell_finding = True     # enable cell finder
-_write_jet_cells = True     # write seed jet cell information in xAOD
-_write_subjet_cells = True  # write subjet cell information in xAOD
-_use_cells = True           # use cells in ID variable calculations
+    cfg=MainServicesCfg(ConfigFlags)
+    cfg.merge(PoolReadCfg(ConfigFlags))
 
-import DiTauRec.DiTauAlgorithmsHolder as DiTauAlgs
+    StoreGateSvc=CompFactory.StoreGateSvc
+    cfg.addService(StoreGateSvc("DetectorStore"))
 
-tools = []
-tools.append(DiTauAlgs.getSeedJetBuilder(_jet_container))
-tools.append(DiTauAlgs.getElMuFinder())
-tools.append(DiTauAlgs.getSubjetBuilder())
-tools.append(DiTauAlgs.getVertexFinder())
-tools.append(DiTauAlgs.getDiTauTrackFinder())
-if _do_cell_finding:
-    tools.append(DiTauAlgs.getCellFinder(_write_jet_cells, _write_subjet_cells))
-tools.append(DiTauAlgs.getIDVarCalculator(_use_cells))
+    # this delcares to the scheduler that EventInfo object comes from the input
+    loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
+                  ( 'AthenaAttributeList' , 'StoreGateSvc+Input' ),
+                  ( 'CaloCellContainer' , 'StoreGateSvc+AllCalo' )]
+    cfg.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
 
+    cfg.merge(DiTauReconstructionCfg(ConfigFlags))
 
-# ----------------------------------------------------------------------------
-# add DiTauBuilder to Algorithm Sequence
-# ----------------------------------------------------------------------------
-from DiTauRec.DiTauRecConf import DiTauBuilder
-DiTauBuilder = DiTauBuilder(
-    name="DiTauBuilder",
-    DiTauContainer="DiTau",
-    DiTauAuxContainer="DiTauAux.",  # the dot is important
-    Tools=tools,
-    SeedJetName=_jet_container,
-    minPt=15000,
-    maxEta=2.5,
-    OutputLevel=2,
-    Rjet=_R_jet,
-    Rsubjet=_R_subjet,
-    Rcore=_R_core)
-
-topSequence += DiTauBuilder
-print (topSequence)
-
-
-# ----------------------------------------------------------------------------
-# xAOD output stream
-# ----------------------------------------------------------------------------
-from OutputStreamAthenaPool.MultipleStreamManager import MSMgr
-outStream = MSMgr.NewPoolRootStream("DiTauXAODStream", "DiTauXAOD.pool.root")
-# outStream.AddItem(['xAOD::JetContainer#GoodJets'])
-# outStream.AddItem(['xAOD::JetAuxContainer#GoodJetsAux.'])
-outStream.AddItem(['xAOD::DiTauJetContainer#DiTau'])
-outStream.AddItem(['xAOD::DiTauJetAuxContainer#DiTauAux.'])
+    cfg.run(1000)
