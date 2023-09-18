@@ -27,6 +27,9 @@ class PFChargedFlowElementCreatorAlgorithm : public  AthReentrantAlgorithm {
     /** Toggle EOverP algorithm mode, whereby no charged shower subtraction is performed */
     Gaudi::Property<bool> m_eOverPMode{this,"EOverPMode",false,"Toggle EOverP algorithm mode, whereby no charged shower subtraction is performed"};
 
+    /** Toggle whether to decorate FlowElements with addutional data for Combined Performance studies */
+    Gaudi::Property<bool> m_addCPData{this,"addCPData",false,"Toggle whether to decorate FlowElements with addutional data for Combined Performance studies "};
+
     /** ReadHandleKey for eflowCaloObjectContainer */
     SG::ReadHandleKey<eflowCaloObjectContainer> m_eflowCaloObjectContainerReadHandleKey{this,"eflowCaloObjectContainerName","eflowCaloObjects","ReadHandleKey for eflowCaloObjectContainer"};
   

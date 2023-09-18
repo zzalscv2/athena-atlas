@@ -18,4 +18,5 @@ def createPFConfigFlags():
     pfConfigFlags.addFlag("PF.useMLEOverP",False) #Toggle whether to use the Machine Learning based EOverP inference or not
     pfConfigFlags.addFlag("PF.EOverP_NN_Model",'/afs/cern.ch/user/m/mhodgkin/onnx_15_03_23.onnx') #Model to use in EOverP inference
     
+    pfConfigFlags.addFlag("PF.addCPData",False)
     return pfConfigFlags

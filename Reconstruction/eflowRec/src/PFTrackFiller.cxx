@@ -37,6 +37,8 @@ void PFTrackFiller::fillTracksToRecover(PFData &data)
       //remove existing matched CaloCluster and add this track to our list that we want to consider
       //for charged hadron subtraction
       thisEfRecTrack->clearClusterMatches();
+      //flag that this track underwent split showers recovery
+      thisEfRecTrack->setIsRecovered();
       data.tracks.push_back(thisEfRecTrack);
     }//loop on tracks in thisEflowCaloObject
 

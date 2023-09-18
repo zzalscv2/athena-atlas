@@ -1,5 +1,6 @@
 #include "eflowRec/PFNeutralFlowElementCreatorAlgorithm.h"
 #include "eflowRec/eflowRecCluster.h"
+#include "eflowRec/PFClusterWidthCalculator.h"
 #include "xAODCore/ShallowCopy.h"
 #include "xAODPFlow/FlowElementAuxContainer.h"
 #include "xAODPFlow/FEHelpers.h"
@@ -74,15 +75,21 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
     neutralFEContainer->push_back(thisFE);    
 
     ATH_MSG_VERBOSE("Get original cluster link");
-    ElementLink<xAOD::CaloClusterContainer> theOriginalClusterLink = thisEfRecCluster->getOriginalClusElementLink();
+
+    //if we are using the CP data, we want to use the modified cluster link,
+    //given by getClusElementLink and not the non-modified cluster link
+    //given by getOriginalClusElementLink
+    ElementLink<xAOD::CaloClusterContainer> theOriginalClusterLink;
+    if (m_addCPData) theOriginalClusterLink = thisEfRecCluster->getClusElementLink();
+    else theOriginalClusterLink = thisEfRecCluster->getOriginalClusElementLink();
     
     ATH_MSG_VERBOSE("Cluster link valid? "<<theOriginalClusterLink.isValid()<<"");
     ATH_MSG_VERBOSE("Get sister cluster link");
     ElementLink<xAOD::CaloClusterContainer> theSisterClusterLink = (*theOriginalClusterLink)->getSisterClusterLink();
     ATH_MSG_VERBOSE("Sister cluster link valid? "<<theSisterClusterLink.isValid()<<"");
 
-    std::vector<ElementLink<xAOD::IParticleContainer>> theClusters;
-    if (theSisterClusterLink.isValid()){
+    std::vector<ElementLink<xAOD::IParticleContainer>> theClusters;    
+    if (theSisterClusterLink.isValid() && !m_addCPData){
       theClusters.emplace_back(theSisterClusterLink);
     }
     else{
@@ -129,6 +136,23 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
 
     const static SG::AuxElement::Accessor<float> accFloatTiming("TIMING");
     accFloatTiming(*thisFE) = cluster->time();
+
+    if (m_addCPData){
+      PFClusterWidthCalculator widthCalc;
+      const CaloClusterCellLink* theCellLinks = cluster->getCellLinks();
+      std::vector<double> eta,phi;
+      for (CaloClusterCellLink::const_iterator it=theCellLinks->begin(); it!=theCellLinks->end(); ++it){
+        const CaloCell* cell = *it;
+        eta.push_back(cell->eta());
+        phi.push_back(cell->phi());
+      }
+
+      std::pair<double,double> width = widthCalc.getPFClusterCoordinateWidth(eta,phi,cluster->eta(),cluster->phi(),theCellLinks->size());
+      const static SG::AuxElement::Accessor<float> accFloatWidthEta("ClusterWidthEta");
+      accFloatWidthEta(*thisFE) = width.first;
+      const static SG::AuxElement::Accessor<float> accFloatWidthPhi("ClusterWidthPhi");
+      accFloatWidthPhi(*thisFE) = width.second;
+    }
  
   }//cluster loop
   return StatusCode::SUCCESS;

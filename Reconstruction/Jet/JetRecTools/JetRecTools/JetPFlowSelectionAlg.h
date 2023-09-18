@@ -53,6 +53,9 @@ private:
   SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_chargedFETausReadDecorKey {this, "ChargedFETausReadDecorKey", "JetETMissChargedParticleFlowObjects.FE_TauLinks", "Key for links from charged FE to taus"};
   SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_neutralFETausReadDecorKey {this, "NeutralFETausReadDecorKey", "JetETMissNeutralParticleFlowObjects.FE_TauLinks", "Key for links from neutral FE to taus"};
 
+  /** Toggle whether to decorate FlowElements with addutional data for Combined Performance studies */
+  Gaudi::Property<bool> m_addCPData{this,"addCPData",false,"Toggle whether to decorate FlowElements with addutional data for Combined Performance studies "};
+
 };
 
 #endif

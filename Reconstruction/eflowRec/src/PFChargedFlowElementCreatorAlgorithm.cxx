@@ -165,6 +165,25 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
 
     }//if we add clusters
 
+    //Add detailed CP data
+    if (m_addCPData){
+      const static SG::AuxElement::Accessor<float> accEtaEM2("EtaEM2");
+      accEtaEM2(*thisFE) = efRecTrack->getTrackCaloPoints().getEM2etaPhi().first;
+
+      const static SG::AuxElement::Accessor<float> accPhiEM2("PhiEM2");
+      accPhiEM2(*thisFE) = efRecTrack->getTrackCaloPoints().getEM2etaPhi().second;
+
+      const static SG::AuxElement::Accessor<char> accIsRecovered("isRecovered");
+      accIsRecovered(*thisFE) = efRecTrack->isRecovered();
+
+      const static SG::AuxElement::Accessor<unsigned int>  accNumMatchedClusters("numMatchedClusters");
+      accNumMatchedClusters(*thisFE) = efRecTrack->getClusterMatches().size();
+
+      const static SG::AuxElement::Accessor<std::vector<float> > accDRPrimes("dRPrimes");
+      accDRPrimes(*thisFE) = efRecTrack->getDRPrimes();
+
+    }
+
   }//loop over eflowRecTracks
 
 }
