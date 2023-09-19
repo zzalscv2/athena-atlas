@@ -25,11 +25,6 @@
 - graphics/VP1/VP1Plugins/VP1MCPlugin
 + graphics/VP1/.*
 
-# Disable some packages until we are sure we can remove them completely
-- Generators/MCTester_i
-- Generators/QGSJet_i
-- Generators/CavernBkgGenerator
-
 # Some analysis packages that are not part of Athena
 - Control/AthLinksSA
 - PhysicsAnalysis/Algorithms/StandaloneAnalysisAlgorithms
