@@ -1683,7 +1683,7 @@ StatusCode TrigFastTrackFinder::finddEdxTrk(const EventContext& ctx, const Track
    static constexpr float TRKCUT_DEDX_LOOSE   =  1.25;
    static constexpr float TRKCUT_DEDX_TIGHT   =  1.55;
 
-   for (const auto& track: outputTracks) {
+   for (const auto track: outputTracks) {
 
       float shift_x = 0; float shift_y = 0;
       if(m_useBeamSpot) {
