@@ -21,7 +21,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.associateLRT", False)
     tau_cfg.addFlag("Tau.isStandalone", False)
     # Classify Large Radius Tracks in tau track classifier
-    tau_cfg.addFlag("Tau.clasifyLRT", False)
+    tau_cfg.addFlag("Tau.classifyLRT", False)
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
