@@ -199,6 +199,42 @@ class ObjectCutFlowBlock (ConfigBlock):
         alg.histTitle = "Object Cutflow: " + self.containerName + "." + self.selectionName
 
 
+class EventCutFlowBlock (ConfigBlock):
+    """the ConfigBlock for an event-level cutflow"""
+
+    def __init__ (self, containerName, selectionName) :
+        groupName = containerName
+        if selectionName != '' :
+            groupName += '.' + selectionName
+        super (EventCutFlowBlock, self).__init__ (groupName)
+        self.containerName = containerName
+        self.selectionName = selectionName
+        self.addOption ('customSelections', [], type=None)
+        self.addOption ('postfix', '', type=str)
+
+    def makeAlgs (self, config) :
+
+        postfix = self.postfix
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
+
+        alg = config.createAlgorithm( 'CP::EventCutFlowHistAlg', 'CutFlowDumperAlg_' + self.containerName + '_' + self.selectionName + postfix )
+        alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + postfix + '_%SYS%'
+        # find out which selection decorations to use
+        if isinstance(self.customSelections, str):
+            # user provides a dynamic reference to selections, corresponding to an EventSelection alg
+            alg.selections = config.getEventCutFlow(self.customSelections)
+        elif len(self.customSelections) > 0:
+            # user provides a list of hardcoded selections
+            alg.selections = self.customSelections
+        else:
+            # user provides nothing: get all available selections from EventInfo directly
+            alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
+        if self.selectionName:
+            alg.preselection = self.selectionName + '_%SYS%'
+        alg.eventInfo = config.readName (self.containerName)
+        alg.histTitle = "Event Cutflow: " + self.containerName + "." + self.selectionName
+
 
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
@@ -331,6 +367,22 @@ def makeObjectCutFlowConfig( seq, containerName,
     config.setOptionValue ('postfix',postfix, noneAction='ignore')
     seq.append (config)
 
+
+def makeEventCutFlowConfig( seq, containerName,
+                              *, postfix = None, selectionName, customSelections = None):
+    """Create an event-level cutflow config
+
+    Keyword arguments:
+      containerName -- name of the container
+      postfix -- a postfix to apply to decorations and algorithm names.
+      selectionName -- the name of the selection to do the cutflow for
+      customSelections -- a list of decorations to use in the cutflow, to override the retrieval of all decorations
+    """
+
+    config = EventCutFlowBlock (containerName, selectionName)
+    config.setOptionValue ('postfix', postfix, noneAction='ignore')
+    config.setOptionValue ('customSelections', customSelections, noneAction='ignore')
+    seq.append (config)
 
 
 def makeOutputThinningConfig( seq, containerName,

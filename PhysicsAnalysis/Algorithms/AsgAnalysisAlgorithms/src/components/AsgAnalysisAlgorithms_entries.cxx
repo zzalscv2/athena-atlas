@@ -25,6 +25,7 @@
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
 #include <AsgAnalysisAlgorithms/KinematicHistAlg.h>
 #include <AsgAnalysisAlgorithms/ObjectCutFlowHistAlg.h>
+#include <AsgAnalysisAlgorithms/EventCutFlowHistAlg.h>
 #include <AsgAnalysisAlgorithms/OverlapRemovalAlg.h>
 #include <AsgAnalysisAlgorithms/PileupReweightingAlg.h>
 #include <AsgAnalysisAlgorithms/PMGTruthWeightAlg.h>
@@ -55,6 +56,7 @@ DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)
 DECLARE_COMPONENT (CP::KinematicHistAlg)
 DECLARE_COMPONENT (CP::ObjectCutFlowHistAlg)
+DECLARE_COMPONENT (CP::EventCutFlowHistAlg)
 DECLARE_COMPONENT (CP::OverlapRemovalAlg)
 DECLARE_COMPONENT (CP::PileupReweightingAlg)
 DECLARE_COMPONENT (CP::PMGTruthWeightAlg)

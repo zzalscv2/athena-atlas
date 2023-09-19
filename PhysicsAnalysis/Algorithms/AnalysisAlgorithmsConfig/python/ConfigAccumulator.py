@@ -114,6 +114,7 @@ class ConfigAccumulator :
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
+        self._eventcutflow = {}
 
         # If we are in an Athena environment with ComponentAccumulator configuration
         # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
@@ -447,6 +448,26 @@ class ConfigAccumulator :
             if (selection.name == '' or selection.name == selectionName) :
                 decorations += [selection.decoration]
         return decorations
+
+
+    def addEventCutFlow (self, selection, decorations) :
+
+        """register a new event cutflow, adding it to the dictionary with key 'selection'
+        and value 'decorations', a list of decorated selections
+        """
+        if self._pass == 0:
+            if selection in self._eventcutflow.keys():
+                raise ValueError ('the event cutflow dictionary already contains an entry ' + selection)
+            else:
+                self._eventcutflow[selection] = decorations
+
+
+    def getEventCutFlow (self, selection) :
+
+        """get the list of decorated selections for an event cutflow,  corresponding to
+        key 'selection'
+        """
+        return self._eventcutflow[selection]
 
 
     def addSelection (self, containerName, selectionName, decoration,
