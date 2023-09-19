@@ -86,9 +86,9 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       std::string channelName = moduleName[gain] + "_channel";
       auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
-      std::string summaryName = moduleName[gain] + "_Summary_Legacy";
-      auto summaryRawChannel = Monitored::Scalar<float>(summaryName, rawChannel->amplitude());
-      fill("TileRawChannelLegacySummary", monitoredChannel, summaryRawChannel);
+      std::string amplitudeName = moduleName[gain] + "_amplitude";
+      auto monitoredAmplitude = Monitored::Scalar<float>(amplitudeName, rawChannel->amplitude());
+      fill("TileRawChannelAmpLegacy", monitoredChannel, monitoredAmplitude);
     }
 
     // FELIX amplitudes
@@ -105,32 +105,32 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       std::string channelName = moduleName[gain] + "_channel";
       auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
-      std::string summaryName = moduleName[gain] + "_Summary_Felix";
-      auto summaryRawChannel = Monitored::Scalar<float>(summaryName, rawChannel->amplitude());
-      fill("TileRawChannelFlxSummary", monitoredChannel, summaryRawChannel);
+      std::string amplitudeName = moduleName[gain] + "_amplitude";
+      auto monitoredAmplitude = Monitored::Scalar<float>(amplitudeName, rawChannel->amplitude());
+      fill("TileRawChannelAmpFlx", monitoredChannel, monitoredAmplitude);
     }
 
     // Compare amplitude and amplitudeFlx arrays and put results into histograms
     for(unsigned int gain = 0; gain<TileCalibUtils::MAX_GAIN; ++gain) {
 
       std::string channelName = moduleName[gain] + "_channel";
-      std::string diffName    = moduleName[gain] + "_Diff";
-      std::string legacyName  = moduleName[gain] + "_Legacy";
+      std::string amplitudeName  = moduleName[gain] + "_amplitude";
+      std::string amplitudeDiffName = moduleName[gain] + "_amplitude_diff";
 
       auto monitoredChannel = Monitored::Scalar<float>(channelName, 0.0F);
-      auto rawChannelDiff = Monitored::Scalar<float>(diffName, 0.0F);
-      auto rawChannelLegacyAmp = Monitored::Scalar<float>(legacyName, 0.0F);
+      auto monitoredAmplitude = Monitored::Scalar<float>(amplitudeName, 0.0F);
+      auto monitoredAmplitudeDiff = Monitored::Scalar<float>(amplitudeDiffName, 0.0F);
 
       for(unsigned int channel = 0; channel<TileCalibUtils::MAX_CHAN; ++channel) {
 
         if (found[channel][gain] == 3) {
 
           monitoredChannel = channel;
-          rawChannelLegacyAmp = amplitude[channel][gain];
-          rawChannelDiff = amplitudeFlx[channel][gain] - amplitude[channel][gain]*m_felixScale;
+          monitoredAmplitude = amplitude[channel][gain];
+          monitoredAmplitudeDiff = amplitudeFlx[channel][gain] - amplitude[channel][gain] * m_felixScale;
 
-          fill("TileRawChannelDiffLegacyFlx", monitoredChannel, rawChannelDiff);
-          fill("TileRawChannelDiffLegacyFlx_Legacy", rawChannelLegacyAmp, rawChannelDiff);
+          fill("TileRawChannelAmpDiff", monitoredChannel, monitoredAmplitudeDiff);
+          fill("TileRawChannelAmpDiffVsLegacy", monitoredAmplitude, monitoredAmplitudeDiff);
         }
       }
     }

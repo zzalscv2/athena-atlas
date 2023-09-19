@@ -12,7 +12,9 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
 
     kwargs.setdefault('TileRawChannelContainerLegacy', 'TileRawChannelFit')
     kwargs.setdefault('TileRawChannelContainerFlx', 'TileRawChannelFlxFit')
-    kwargs.setdefault('FelixScale', 1)
+    kwargs.setdefault('FelixScale', 4)
+
+    felixScale = kwargs['FelixScale']
     
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
@@ -51,41 +53,41 @@ def TileRawChannelFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             for drawer in range(0, Tile.MAX_DRAWER):
                 modules += [Tile.getDrawerString(ros, drawer)]
 
-    channelLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelLegacySummary', 'Tile/Legacy/RawChannel')
+    channelLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpLegacy', 'Tile/Legacy/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
-            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude from channel ;Channel;Amplitude'
-            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_Summary_Legacy;{moduleName}_Summary_Legacy_{gainName}'
+            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude (Legacy);Channel;Amplitude'
+            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_amplitude;{moduleName}_{gainName}_amplitude_legacy'
             path = moduleName
             channelLegacyGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                                xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelFelixGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelFlxSummary', 'Tile/Felix/RawChannel')
+    channelFelixGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpFlx', 'Tile/Felix/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
-            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude from channel-FELIX;Channel;Amplitude'
-            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_Summary_Felix;{moduleName}_Felix_{gainName}'
+            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude (FELIX);Channel;Amplitude'
+            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_amplitude;{moduleName}_{gainName}_amplitude_felix'
             path = moduleName
             channelFelixGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                               xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelCompareGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelDiffLegacyFlx', 'Tile/Compare/RawChannel')
+    channelCompareGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpDiff', 'Tile/Compare/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
-            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude difference ;Channel;Amplitude'
-            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_Diff;{moduleName}_Diff_{gainName}'
+            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude difference (FELIX-Legacy*{felixScale});Channel;Amplitude difference [ADC]'
+            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_amplitude_diff;{moduleName}_{gainName}_amplitude_diff'
             path = moduleName
             channelCompareGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                                 xbins = 48, xmin = -0.5, xmax = 47.5)
     
-    channelCompareGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelDiffLegacyFlx_Legacy', 'Tile/Compare/RawChannel')
+    channelCompareVsLegacyGroup = helper.addGroup(tileRawChannelFlxMonAlg, 'TileRawChannelAmpDiffVsLegacy', 'Tile/Compare/RawChannel')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
-            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude difference_Legacy ;Channel;Amplitude'
-            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_Diff;{moduleName}_Diff_{gainName}'
+            title = f'Run {str(runNumber)} {moduleName} {gainName}: Amplitude difference (FELIX-Legacy*{felixScale});Amplitude (Legacy) [ADC];Amplitude difference [ADC]'
+            name = f'{moduleName}_{gainName}_amplitude,{moduleName}_{gainName}_amplitude_diff;{moduleName}_{gainName}_amplitude_diff_vs_legacy'
             path = moduleName
-            channelCompareGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
-                                                xbins = 48, xmin = -0.5, xmax = 47.5)
+            channelCompareVsLegacyGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
+                                                        xbins = 1024, xmin = -0.5, xmax = 1023.5)
 
     accumalator = helper.result()
     result.merge(accumalator)
@@ -102,7 +104,6 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN2
@@ -129,10 +130,10 @@ if __name__=='__main__':
     from AthenaConfiguration.ComponentFactory import CompFactory
     cfg.addPublicTool( CompFactory.TileROD_Decoder(fullTileMode = runNumber) )
 
-    cfg.merge( TileRawChannelFlxMonitoringConfig(flags,
-                                              TileRawChannelContainerLegacy='TileRawChannelFit',
-                                              TileRawChannelContainerFlx='TileRawChannelFlxFit',
-                                              fillHistogramsForDSP=True) )
+    cfg.merge(TileRawChannelFlxMonitoringConfig(flags,
+                                                TileRawChannelContainerLegacy='TileRawChannelFit',
+                                                TileRawChannelContainerFlx='TileRawChannelFlxFit',
+                                                fillHistogramsForDSP=True))
 
     flags.dump()
 

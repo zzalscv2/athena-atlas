@@ -194,12 +194,10 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
     for(unsigned int gain = 0; gain<TileCalibUtils::MAX_GAIN; ++gain) {
 
       std::string channelName      = moduleName[gain] + "_channel";
-      std::string moduleSampleName = moduleName[gain] + "_samples";
-      std::string moduleProfName   = moduleName[gain] + "_Profile";
+      std::string moduleSampleName = moduleName[gain] + "_samples_diff";
 
       auto monitoredChannel = Monitored::Scalar<float>(channelName, 0.0F);
-      auto moduleSample = Monitored::Scalar<float>(moduleSampleName, 0.0F);
-      auto profile = Monitored::Scalar<float>(moduleProfName, 0.0F);
+      auto moduleSampleDiff = Monitored::Scalar<float>(moduleSampleName, 0.0F);
 
       for(unsigned int channel = 0; channel<TileCalibUtils::MAX_CHAN; ++channel) {
 
@@ -207,20 +205,19 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
 
           monitoredChannel = channel;
 
-          std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples";
-          auto channelSample = Monitored::Scalar<float>(sampleName, 0.0F);
+          std::string sampleName = module + "_ch_" + std::to_string(channel) + gainName[gain] +  "_samples_diff";
+          auto channelSampleDiff = Monitored::Scalar<float>(sampleName, 0.0F);
 
           for (auto it1=digitsLegacy[channel][gain].begin(), it2=digitsFlx[channel][gain].begin();
                it1!=digitsLegacy[channel][gain].end() && it2!=digitsFlx[channel][gain].end(); ++it1, ++it2) {
 
             float diff = (*it2)- (*it1)*m_felixScale;
-            channelSample = diff;
-            moduleSample = diff;
-            profile = diff;
+            channelSampleDiff = diff;
+            moduleSampleDiff = diff;
 
-            fill("TileDigitsDiffLegacyFlx", channelSample);
-            fill("TileDigitsDiffModule", moduleSample);
-            fill("TileFlxMonProf", monitoredChannel, profile);
+            fill("TileChannelAllSamplesDiff", channelSampleDiff);
+            fill("TileModuleAllSamplesDiff", moduleSampleDiff);
+            fill("TileModuleSamplesDiff", monitoredChannel, moduleSampleDiff);
           }
         }
       }
