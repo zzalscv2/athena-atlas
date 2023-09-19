@@ -149,12 +149,11 @@ void ZdcLEDAnalysisTool::initialize_ppPbPb2023()
 void ZdcLEDAnalysisTool::initialize_ppALFA2023()
 {
   // Use the defaults for now except for sampleAnaStart values and the BCIDs
-  //
   m_sampleAnaStartZDC = 5;
   m_sampleAnaStartRPD = 5;
 
   m_LEDBCID = {3479, 3482, 3485};
-  m_LEDCalreqIdx = {0, 1, 2};
+  m_LEDCalreqIdx = {0 ,1 ,2};
 }
   
 StatusCode ZdcLEDAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, 
