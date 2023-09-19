@@ -353,6 +353,11 @@ SCTErrMonAlg::fillByteStreamErrors(const EventContext& ctx) const {
     float psTripModules{0.};
     psTripDCSSCT(sctHash[psTripDCS], psTripModules);
 
+    sctHash[summary].clear();
+    sctHash[summary].insert(sctHash[disabled].begin(),sctHash[disabled].end()); // disabled
+    sctHash[summary].insert(sctHash[badError].begin(),sctHash[badError].end()); // bad error = bad link error + bad rod error
+    sctHash[summary].insert(sctHash[psTripDCS].begin(),sctHash[psTripDCS].end()); // pstrip
+
     for (int iProblem{0}; iProblem<numberOfProblemForCoverage; iProblem++) {
       for (const IdentifierHash& hash: sctHash[iProblem]) {
         fillWafer(m_geo[hash], ent->m_mapSCT[iProblem]);
