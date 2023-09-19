@@ -6,7 +6,6 @@
 #include <sstream>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/format.hpp>
 
 #include "ByteStreamDataWriter.h"
 
