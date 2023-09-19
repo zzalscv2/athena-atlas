@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -72,6 +72,13 @@ StatusCode CountHepMC::execute() {
       ATH_MSG_ERROR("Event number " << newnum << " exceeds 32bit limit. In HepMC2 it is not allowed.");
       return StatusCode::FAILURE;
   }
+#else
+// Temporary solution to suppress the Warnings from HepMC3 printed for every event. 
+// Will be removed when generators authors fix the way they fill the x-section or when we switch to a new HepMC3 version , where the printout is limited.
+   if (newnum == 100) {
+      ATH_MSG_INFO("After " << newnum << " events we switch off HepMC3 warings to avoid blowing up logs.");
+      HepMC3::Setup::set_print_warnings(false);
+      }
 #endif
 
   if (m_corHepMC) {
