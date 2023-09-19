@@ -38,6 +38,7 @@ AthenaSharedMemoryTool::AthenaSharedMemoryTool(const std::string& type,
 		m_maxSize(64 * 1024 * 1024),
 		m_maxDataClients(256),
 		m_num(-1),
+		m_lastClient(-1),
 		m_dataClients(),
 		m_payload(nullptr),
 		m_status(nullptr),
@@ -390,20 +391,23 @@ StatusCode AthenaSharedMemoryTool::clearObject(const char** tokenString, int& nu
 
    if (!m_multipleSegments.value()) {
       for (int i = 1; i <= m_num; i++) { // FIXME: PvG, do round robin
-         void* status = static_cast<char*>(m_status->get_address()) + i * sizeof(ShareEventHeader);
-         ShareEventHeader* evtH = static_cast<ShareEventHeader*>(status);
-         ShareEventHeader::ProcessStatus evtStatus = evtH->evtProcessStatus; // read only once
-         if (evtStatus == ShareEventHeader::FILLED || evtStatus == ShareEventHeader::SHARED) {
-            ATH_MSG_DEBUG("Waiting for UNFILL clearObject, client = " << i);
-            return(StatusCode::RECOVERABLE);
-         } else if (i == num && evtStatus != ShareEventHeader::LOCKED) {
-            ATH_MSG_DEBUG("Waiting for LOCK clearObject, client = " << i);
-            return(StatusCode::RECOVERABLE);
-         } else if ((i == num || num < 0) && evtStatus == ShareEventHeader::LOCKED) {
-            *tokenString = evtH->token;
-            num = i;
-            ATH_MSG_DEBUG("Setting LOCK clearObject, for client = " << num << ": " << evtH->token);
-            break;
+         if (m_lastClient < 0 || m_lastClient == i) { // If Writer is not yet released, only consider last client
+            void* status = static_cast<char*>(m_status->get_address()) + i * sizeof(ShareEventHeader);
+            ShareEventHeader* evtH = static_cast<ShareEventHeader*>(status);
+            ShareEventHeader::ProcessStatus evtStatus = evtH->evtProcessStatus; // read only once
+            if (evtStatus == ShareEventHeader::FILLED || evtStatus == ShareEventHeader::SHARED) {
+               ATH_MSG_DEBUG("Waiting for UNFILL clearObject, client = " << i);
+               return(StatusCode::RECOVERABLE);
+            } else if (i == num && evtStatus != ShareEventHeader::LOCKED) {
+               ATH_MSG_DEBUG("Waiting for LOCK clearObject, client = " << i);
+               return(StatusCode::RECOVERABLE);
+            } else if ((i == num || num < 0) && evtStatus == ShareEventHeader::LOCKED) {
+               *tokenString = evtH->token;
+               num = i;
+               ATH_MSG_DEBUG("Setting LOCK clearObject, for client = " << num << ": " << evtH->token);
+               m_lastClient = -1;
+               break;
+            }
          }
       }
 
@@ -419,20 +423,31 @@ StatusCode AthenaSharedMemoryTool::clearObject(const char** tokenString, int& nu
       }
    } else {
       for (int i = 1; i <= m_num; i++) { // FIXME: PvG, do round robin
-         void* status = static_cast<char*>(m_status->get_address()) + i * sizeof(ShareEventHeader);
-         ShareEventHeader* evtH = static_cast<ShareEventHeader*>(status);
-         if (evtH->evtProcessStatus == ShareEventHeader::LOCKED) {
-            *tokenString = evtH->token;
-            num = i;
-            ATH_MSG_DEBUG("Setting LOCK clearObject, for client = " << num << ": " << evtH->token);
-            break;
+         if (m_lastClient < 0 || m_lastClient == i) { // If Writer is not yet released, only consider last client
+            void* status = static_cast<char*>(m_status->get_address()) + i * sizeof(ShareEventHeader);
+            ShareEventHeader* evtH = static_cast<ShareEventHeader*>(status);
+            if (evtH->evtProcessStatus == ShareEventHeader::LOCKED) {
+               *tokenString = evtH->token;
+               num = i;
+               ATH_MSG_DEBUG("Setting LOCK clearObject, for client = " << num << ": " << evtH->token);
+               m_lastClient = -1;
+               break;
+            }
          }
       }
    }
 
    if (num > 0 && *tokenString != nullptr) {
+      m_lastClient = -1; // Release Writer from last client
       void* status = static_cast<char*>(m_status->get_address()) + num * sizeof(ShareEventHeader);
       ShareEventHeader* evtH = static_cast<ShareEventHeader*>(status);
+      if (strncmp(*tokenString, "wait", 4) == 0) {
+         ATH_MSG_INFO("Server clearObject() got wait, client = " << num);
+         evtH->evtProcessStatus = ShareEventHeader::UNLOCKED;
+         m_lastClient = num; // Keep Writer allocated
+         num = -1;
+         return(StatusCode::SUCCESS);
+      }
       if (strncmp(*tokenString, "release", 7) == 0) {
          ATH_MSG_INFO("Server clearObject() got release, client = " << num);
          evtH->evtProcessStatus = ShareEventHeader::UNLOCKED;
