@@ -12,7 +12,6 @@
 #include "lwtnn/NanReplacer.hh"
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // Needed to silence Boost pragma message
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/exceptions.hpp>
 

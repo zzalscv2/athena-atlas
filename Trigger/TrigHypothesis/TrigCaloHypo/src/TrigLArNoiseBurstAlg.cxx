@@ -10,8 +10,6 @@
 #include "hltinterface/IInfoRegister.h"
 #include "hltinterface/ContainerFactory.h"
 
-#include <boost/property_tree/ptree.hpp>
-
 using namespace TrigCompositeUtils;
 
 TrigLArNoiseBurstAlg::TrigLArNoiseBurstAlg( const std::string& name, 

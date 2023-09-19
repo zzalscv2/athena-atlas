@@ -17,7 +17,6 @@
 #include <stdexcept>
 #include <cassert>
 #include <limits> 
-#include <boost/format.hpp>
 
 namespace Analysis
 {
