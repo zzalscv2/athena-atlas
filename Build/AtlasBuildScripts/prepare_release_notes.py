@@ -80,7 +80,7 @@ def main():
     if (output_log['returncode'] > 0):
         print("Git failed with: {}".format(output_log['stderr']))
         print('Are you running this script from within the athena/ directory?')
-        exit(1))
+        exit(1)
     # If possible, use Gitlab
     gl_project = None
     if args.token and gitlab_available:
@@ -92,7 +92,7 @@ def main():
             print('Authentication to gitlab was successful')
         except Exception as err:
             print(f"Authentication failed. {err=}, {type(err)=}")
-            exit(1))
+            exit(1)
         gl_project = gl.projects.get("atlas/athena")
 
     print('About to parse the MRs. Depending on the number, this could take a few minutes (run with --verbose to get more output while this is happening).')
