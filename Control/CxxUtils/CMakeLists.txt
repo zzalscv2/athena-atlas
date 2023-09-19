@@ -4,7 +4,7 @@
 atlas_subdir( CxxUtils )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex timer )
+find_package( Boost )
 find_package( TBB )
 
 # The main library of the package:
@@ -142,7 +142,7 @@ atlas_add_test( exctrace2_test
 
 atlas_add_test( CachedValueTiming_test
   SOURCES test/CachedValueTiming_test.cxx
-  LINK_LIBRARIES CxxUtils
+  LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES}
   PROPERTIES TIMEOUT 300
   POST_EXEC_SCRIPT noerror.sh )
 
