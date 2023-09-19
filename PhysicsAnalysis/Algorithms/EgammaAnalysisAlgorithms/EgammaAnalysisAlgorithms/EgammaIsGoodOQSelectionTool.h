@@ -8,6 +8,8 @@
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
 #include "PATCore/IAsgSelectionTool.h"
+#include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
+#include "AsgTools/AnaToolHandle.h"
 
 namespace CP {
 
@@ -63,6 +65,15 @@ namespace CP {
       asg::AcceptInfo m_accept{ "EgammaOQ" };
       /// Index of the object quality cut
       int m_oqCutIndex{ -1 };
+
+      /// The tool that selects on dead HV from the 2016 run, acc. to https://twiki.cern.ch/twiki/bin/view/AtlasProtected/EGammaIdentificationRun2#Removal_of_Electron_Photon_clust
+  private:
+      asg::AnaToolHandle<IAsgDeadHVCellRemovalTool> m_deadHVTool;
+
+      /// Index of this quality cut
+  private:
+      int m_deadHVCutIndex{-1};
+
 
    }; // class EgammaIsGoodOQSelectionTool
 
