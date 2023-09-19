@@ -3,6 +3,9 @@
 # Short script to compare ATLAS material radiation/ionization losses with PDG tables
 
 import matplotlib.pyplot as plt
+
+plt.style.use("tableau-colorblind10")
+
 import ROOT
 import ctypes
 
@@ -11,7 +14,7 @@ from AthenaCommon.SystemOfUnits import millimeter, centimeter
 ROOT.gInterpreter.ProcessLine('#include "TrkExUtils/MaterialInteraction.h"')
 ROOT.gSystem.Load("libTrkExUtils.so")
 
-# Values for silicon from 
+# Values for silicon from
 # https://pdg.lbl.gov/2022/AtomicNuclearProperties/HTML/silicon_Si.html
 
 # Momentum MeV
@@ -352,21 +355,20 @@ for i in range(len(p)):
         )
     )
 
-
-plt.plot(p, pdg_rad, label="PDG rad")
-plt.plot(p, atlas_rad, label="ATLAS rad")
+plt.plot(p, pdg_rad, label="PDG rad", marker=".")
+plt.plot(p, atlas_rad, label="ATLAS rad", marker="x")
 plt.xlabel("p [MeV]")
 plt.ylabel("-<dE/dx> [MeV cm^2/g]")
 plt.legend()
-plt.savefig("dEdx_rad_vs_p.png")
+plt.savefig("dEdx_rad_vs_p.png", dpi=300)
 plt.clf()
 
-plt.plot(p, pdg_mean_ion, label="PDG mean ion")
-plt.plot(p, atlas_mean_ion, label="ATLAS mean ion")
-plt.plot(p, atlas_mop_ion, label="ATLAS mop ion")
+plt.plot(p, pdg_mean_ion, label="PDG mean ion", marker=".", markersize=4)
+plt.plot(p, atlas_mean_ion, label="ATLAS mean ion", marker="x", markersize=4)
+plt.plot(p, atlas_mop_ion, label="ATLAS mpv ion", marker="+", markersize=4)
 plt.ylabel("-<dE/dx> [MeV cm^2/g]")
 plt.xlabel("p [MeV]")
 plt.legend()
 plt.xscale("log")
 plt.ylim(0, 5)
-plt.savefig("dEdx_ion_vs_p_all.png")
+plt.savefig("dEdx_ion_vs_p_all.png", dpi=300)
