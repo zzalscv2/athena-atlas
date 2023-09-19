@@ -7,7 +7,6 @@ from AthenaConfiguration.Enums import BeamType
 from AthenaConfiguration.Enums import LHCPeriod
 from TrkConfig.TrkConfigFlags import PrimaryPassConfig
 
-
 def select( selInd, valuesmap ):
     for k,v in valuesmap.items():    
         ranges = [int(x) for x in k.split('-') if x != '']
@@ -557,7 +556,7 @@ def createHighPileupTrackingPassFlags():
 def createMinBiasTrackingPassFlags():
     icf = createTrackingPassFlags()
     icf.extension                 = "MinBias"
-    icf.minPT = lambda pcf: (0.3 if  pcf.Tracking.doHIP300 else 0.1) * Units.GeV
+    icf.minPT =                   0.1 * Units.GeV
 
     icf.minClusters               = 5
     icf.minSecondaryPt            = 0.4 * Units.GeV  # Pt cut for back tracking + segment finding for these
@@ -575,11 +574,18 @@ def createMinBiasTrackingPassFlags():
 def createUPCTrackingPassFlags():
     icf = createMinBiasTrackingPassFlags()
     icf.extension                 = "UPC"
-    # --- min pt cut for brem (same as p-p default for now)
-    icf.minPTBrem                 = 1. * Units.GeV
+    # --- min pt cut for brem
+    icf.minPTBrem                 = 0.75 * Units.GeV
     # MinBias turns off Brem Recovery, turn it on here
     icf.doBremRecoverySi = lambda pcf: pcf.Tracking.doBremRecovery
     return icf
+
+## HIP  mode ########################
+def createHIPTrackingPassFlags():
+    icf = createMinBiasTrackingPassFlags()
+    icf.extension                 = "HIP"
+    return icf
+
 
 ## LowPtRoI mode ########################
 def createLowPtRoITrackingPassFlags():
@@ -826,6 +832,7 @@ def createForwardTracksTrackingPassFlags():
     icf.radMax           = 600. * Units.mm
     icf.useTRT           = False # no TRT for forward tracks
     icf.doBremRecoverySi = False
+    icf.doZBoundary      = False
 
     icf.RunPixelPID      = False
     icf.RunTRTPID        = False
@@ -960,16 +967,10 @@ def createPixelTrackingPassFlags():
     def _minPt( pcf ):
         if pcf.Beam.Type is BeamType.Cosmics:
             return 0.5 * Units.GeV
-        if pcf.Reco.EnableHI:
-            if pcf.Tracking.doUPC:
-                return 0.05 * Units.GeV
-            elif pcf.Tracking.doMinBias: #for HIP (doHIP soon)
-                if pcf.Tracking.doHIP300:
-                    return 0.3 * Units.GeV
-                else:
-                    return 0.05 * Units.GeV
-            else: #standard Heavy Ion
-                return 0.1 * Units.GeV
+        if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.UPC:
+            return 0.05 * Units.GeV
+        if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.HIP:
+            return 0.05 * Units.GeV
         if pcf.Tracking.doMinBias:
             return 0.05 * Units.GeV
         return 0.1 * Units.GeV
@@ -979,7 +980,7 @@ def createPixelTrackingPassFlags():
 
     def _pick( default, hion, cosmics):
         def _internal( pcf ):
-            if pcf.Tracking.PrimaryPassConfig is (PrimaryPassConfig.HeavyIon):
+            if pcf.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon:
                 return hion
             if pcf.Beam.Type is BeamType.Cosmics:
                 return cosmics
@@ -995,9 +996,10 @@ def createPixelTrackingPassFlags():
     icf.nHolesMax        = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.nHolesGapMax     = _pick( default = 1, hion = 0, cosmics = 3 )
     icf.useSCT           = False
+    icf.useSCTSeeding    = False
     icf.useTRT           = False
     icf.minSecondaryPt   = 3 * Units.GeV
-    icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is (BeamType.Cosmics) \
+    icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
                            else 10. * Units.mm if pcf.Tracking.doUPC \
                            else 5. * Units.mm
     icf.roadWidth        = lambda pcf: 60.0 if pcf.Beam.Type is BeamType.Cosmics \
@@ -1046,23 +1048,20 @@ def createSCTTrackingPassFlags():
     icf.maxDoubleHoles   = 1
     icf.minSiNotShared   = 5
     icf.usePixel         = False
+    icf.usePixelSeeding  = False
     icf.useTRT           = False
 
-    def _pick( default, cosmics, minbias, hion):
+    def _pick( default, cosmics, minbias):
         def _internal( pcf ):
             if pcf.Beam.Type is BeamType.Cosmics:
                 return cosmics
             if pcf.Tracking.doMinBias:
-                if pcf.Tracking.doHIP300:
-                    return hion
-                else:
-                    return minbias
+                return minbias
             return default
         return _internal
 
     icf.minPT            = _pick( default = 0.1 * Units.GeV,
                                   minbias=0.1 * Units.GeV,
-                                  hion=0.3* Units.GeV,
                                   cosmics = 0.5* Units.GeV )
     icf.maxPrimaryImpact = lambda pcf: 1000. * Units.mm if pcf.Beam.Type is BeamType.Cosmics \
                            else maxPrimaryImpact_ranges( pcf )

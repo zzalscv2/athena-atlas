@@ -29,7 +29,8 @@ def TrackParticleCellAssociationAlgCfg(flags,
         flags,
         streamName="StreamAOD",
         clusters="InDetTrackParticlesAssociatedClusters",
-        samplings=["TileGap1", "TileGap2", "TileGap3", "TileBar0", "TileExt0", "HEC0"]))
+        samplings=["TileGap1", "TileGap2", "TileGap3", "TileBar0", "TileExt0", "HEC0"],
+        cells=flags.Egamma.Keys.Input.CaloCells))
     result.merge(addToESD(flags, toAOD))
     result.merge(addToAOD(flags, toAOD))
 

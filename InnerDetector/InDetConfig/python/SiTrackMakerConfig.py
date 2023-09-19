@@ -71,10 +71,6 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_Cosmic')
 
-    elif flags.Reco.EnableHI:
-        kwargs.setdefault("TrackPatternRecoInfo",
-                          'SiSpacePointsSeedMaker_HeavyIon')
-
     elif flags.Tracking.ActiveConfig.extension == "LowPt":
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_LowMomentum')
@@ -84,6 +80,10 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
            flags.Tracking.doMinBias)):
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_VeryLowMomentum')
+
+    elif flags.Tracking.ActiveConfig.extension == "HeavyIon":
+        kwargs.setdefault("TrackPatternRecoInfo",
+                          'SiSpacePointsSeedMaker_HeavyIon')
 
     elif flags.Tracking.ActiveConfig.extension == "BeamGas":
         kwargs.setdefault("TrackPatternRecoInfo",

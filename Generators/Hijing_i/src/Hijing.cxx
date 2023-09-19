@@ -772,8 +772,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
       for (HepMC::GenParticle* p : *evt) {
         HepMC::ConstGenVertexPtr end_v = p->end_vertex();
         if (p->status() == 2 && !end_v) p->production_vertex()->remove_particle(p);
-}
-
+      }
     }
 #endif
     return StatusCode::SUCCESS;

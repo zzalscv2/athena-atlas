@@ -54,7 +54,7 @@ from AtlasGeoModel import GeoModelInit
 #=== set global tag
 #=============================================================
 from IOVDbSvc.CondDB import conddb
-conddb.setGlobalTag("CONDBR2-BLKPA-2023-01")
+conddb.setGlobalTag("CONDBR2-BLKPA-2023-02")
 
 #=============================================================
 #=== setup TileCablingSvc

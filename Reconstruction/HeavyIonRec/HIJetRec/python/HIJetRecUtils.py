@@ -371,7 +371,7 @@ def GetNullModulator() :
     if hasattr(jtm,tname) : return getattr(jtm,tname)
     HIUEModulatorTool=CompFactory.HIUEModulatorTool
     mod=HIUEModulatorTool(tname)
-    mod.EventShapeKey='NULL'
+    mod.EventShapeKey=''
     for n in [2,3,4] : setattr(mod,'DoV%d' % n,False)
     jtm.add(mod)
     return mod

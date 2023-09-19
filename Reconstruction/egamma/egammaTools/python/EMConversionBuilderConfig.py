@@ -17,8 +17,10 @@ def EMConversionBuilderCfg(flags, name='EMConversionBuilder', **kwargs):
     EMConversionBuilder = CompFactory.EMConversionBuilder
 
     if "ExtrapolationTool" not in kwargs:
-        extraptool = EMExtrapolationToolsCfg(flags)
-        kwargs["ExtrapolationTool"] = extraptool.popToolsAndMerge(extraptool)
+        kwargs["ExtrapolationTool"] = acc.popToolsAndMerge(
+            EMExtrapolationToolsCfg(flags)
+        )
+
     kwargs.setdefault("ConversionContainerName",
                       flags.Egamma.Keys.Output.ConversionVertices)
 

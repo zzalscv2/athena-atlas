@@ -12,10 +12,10 @@
 
 /**
    @class egammaCheckEnergyDepositTool
-   Tool to check in each sampling that fraction of energy 
+   Tool to check in each sampling that fraction of energy
    reconstructed is not greater than a certain threshold.
    Also make sure there is some minimal energy in the 2nd
-   sampling.  
+   sampling.
 
    @authors Frederic Derue
 */

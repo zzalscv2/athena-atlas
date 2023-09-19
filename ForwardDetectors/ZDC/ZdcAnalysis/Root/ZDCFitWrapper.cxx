@@ -127,10 +127,10 @@ ZDCFitExpFermiVariableTausLHCf::ZDCFitExpFermiVariableTausLHCf(const std::string
   theTF1->SetParLimits(1, tmin, tmax);
   theTF1->SetParLimits(2, 0.5, 2);
   theTF1->SetParLimits(3, 4, 12);
-  theTF1->SetParLimits(5, 6, 8);
-  theTF1->SetParLimits(6, 0, 0.25);
-  //  theTF1->SetParLimits(7, 1, 5);
-  //theTF1->FixParameter(5, 7);
+  //theTF1->SetParLimits(5, 6, 8);
+  theTF1->SetParLimits(6, -1e-4, 0.25);
+
+  theTF1->FixParameter(5, 5.75);
   theTF1->FixParameter(7, 1.5);
 
   if (m_fixTau1) theTF1->FixParameter(2, m_tau1);
@@ -144,7 +144,7 @@ void ZDCFitExpFermiVariableTausLHCf::DoInitialize(float initialAmp, float initia
   theTF1->SetParameter(0, initialAmp);
   theTF1->SetParameter(1, initialT0);
   theTF1->SetParameter(4, 0);
-  theTF1->SetParameter(5, 5);
+  //theTF1->SetParameter(5, 6);
   theTF1->SetParameter(6, 0.1);
 
   theTF1->SetParLimits(0, ampMin, ampMax);

@@ -3,6 +3,7 @@
 */
 
 #include <ZdcNtuple/ZdcNtuple.h>
+#include <ZdcNtuple/ZdcLEDNtuple.h>
 
 #ifdef __CINT__
 
@@ -15,5 +16,7 @@
 
 #ifdef __CINT__
 #pragma link C++ class ZdcNtuple+;
+#pragma link C++ class ZdcLEDNtuple+;
+
 #endif
 

@@ -21,6 +21,8 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Jet.ClusterKey", "HIClusters")
   flags.addFlag("HeavyIon.Jet.Internal.ClusterKey", "HIClusters_temp")
   flags.addFlag("HeavyIon.Jet.WriteHIClusters", True)
+  flags.addFlag("HeavyIon.Jet.RValues", [2,4])#this are the R's we want to reconstruct
+  flags.addFlag("HeavyIon.Jet.CaliRValues", ["2","3","4","10"])#this are the R's that are supported for calibration, if not listed then cali R=0.4 is picked
 
   flags.addFlag("HeavyIon.Egamma.doSubtractedClusters", lambda prevFlags: prevFlags.Reco.EnableHI)
   flags.addFlag("HeavyIon.Egamma.EventShape", "HIEventShape_iter_egamma")

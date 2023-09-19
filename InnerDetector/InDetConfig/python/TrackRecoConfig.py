@@ -16,8 +16,9 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                  flags.Tracking.PrimaryPassConfig.value)
+    flags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.PrimaryPassConfig.value}Pass")
     flags_set += [flags]
 
     # LRT pass
@@ -206,6 +207,7 @@ def InDetTrackRecoCfg(flags):
         flagsPixel = flags.cloneAndReplace("Tracking.ActiveConfig",
                                            "Tracking.PixelPass")
         PixelTrackContainer = "ResolvedPixelTracks"
+        _extensions_list.append(flagsPixel.Tracking.ActiveConfig.extension)
         printActiveConfig(flagsPixel)
 
         result.merge(TrackingSiPatternCfg(
@@ -240,6 +242,7 @@ def InDetTrackRecoCfg(flags):
         flagsSCT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                          "Tracking.SCTPass")
         SCTTrackContainer = "ResolvedSCTTracks"
+        _extensions_list.append(flagsSCT.Tracking.ActiveConfig.extension)
         printActiveConfig(flagsSCT)
 
         result.merge(TrackingSiPatternCfg(
@@ -266,6 +269,7 @@ def InDetTrackRecoCfg(flags):
     if flags.Tracking.doTrackSegmentsTRT:
         flagsTRT = flags.cloneAndReplace("Tracking.ActiveConfig",
                                          "Tracking.TRTPass")
+        _extensions_list.append(flagsTRT.Tracking.ActiveConfig.extension)
         printActiveConfig(flagsTRT)
 
         from InDetConfig.TRTSegmentFindingConfig import (
@@ -661,6 +665,10 @@ def InDetTrackRecoCfg(flags):
     # --- Extra optional decorations
     # ---------------------------------------
 
+    if flags.Tracking.doV0Finder:
+        from InDetConfig.InDetV0FinderConfig import InDetV0FinderCfg
+        result.merge(InDetV0FinderCfg(flags))
+
     if (flags.Tracking.writeExtendedSi_PRDInfo or
         flags.Tracking.writeExtendedTRT_PRDInfo):
 
@@ -1020,6 +1028,16 @@ def InDetTrackRecoOutputCfg(flags):
                     f"xAOD::TrackStateValidationContainer#SiSP{extension}_TRT_MSOSs",
                     f"xAOD::TrackStateValidationAuxContainer#SiSP{extension}_TRT_MSOSsAux."
                 ]
+
+    if flags.Tracking.doV0Finder:
+        excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+        V0Vertices = ["V0UnconstrVertices", "V0KshortVertices",
+                      "V0LambdaVertices", "V0LambdabarVertices"]
+        for v0 in V0Vertices:
+            toAOD += [
+                f"xAOD::VertexContainer#{v0}",
+                f"xAOD::VertexAuxContainer#{v0}Aux.{excludedVtxAuxData}",
+            ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toESD + toAOD))

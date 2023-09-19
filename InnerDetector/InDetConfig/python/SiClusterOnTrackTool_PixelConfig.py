@@ -41,9 +41,13 @@ def InDetPixelClusterOnTrackToolBaseCfg(
                       flags.Tracking.doPixelClusterSplitting and
                       flags.Tracking.pixelClusterSplittingType == (
                           PixelClusterSplittingType.NeuralNet))
+
+    extension = flags.Tracking.ActiveConfig.extension
+    if extension == flags.Tracking.PrimaryPassConfig.value:
+        extension = ""
     split_cluster_map_extension = (
-        flags.Tracking.ActiveConfig.extension
-        if flags.Tracking.ActiveConfig.useTIDE_Ambi else "")
+        extension if flags.Tracking.ActiveConfig.useTIDE_Ambi else "")
+
     kwargs.setdefault("SplitClusterAmbiguityMap",
                       f"SplitClusterAmbiguityMap{split_cluster_map_extension}")
     kwargs.setdefault("RunningTIDE_Ambi", flags.Tracking.doTIDE_Ambi)

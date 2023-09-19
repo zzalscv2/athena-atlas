@@ -249,7 +249,7 @@ def updateStdJetModifier(flags, name, **kwargs):
         stdJetModifiers.update(
             HIJetCalib=JetModifier("JetCalibrationTool",
                                    "HICalibTool_{modspec}",
-                                   JetCollection=lambda _, modspec: "AntiKt{}HI".format(modspec.split('___')[0]),
+                                   JetCollection=lambda _, modspec: "AntiKt{}HI".format(modspec.split('___')[0]) if modspec.split('___')[0] in flags.HeavyIon.Jet.CaliRValues else "AntiKt4HI",
                                    PrimaryVerticesContainerName="",
                                    ConfigFile='JES_MC16_HI_Jan2021_5TeV.config', # JES_MC16_HI_Jan2021_5TeV.config JES_MC15c_HI_Nov2016.config
                                    CalibSequence=lambda _, modspec: modspec.split('___')[1],
@@ -313,7 +313,7 @@ def NullModulatorCfg():
     """Provides modulator tool without any modulations."""
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.HIUEModulatorTool('NullUEModulator',
-                                                      EventShapeKey='NULL',
+                                                      EventShapeKey='',
                                                       DoV2=False,
                                                       DoV3=False,
                                                       DoV4=False))
@@ -526,7 +526,7 @@ def HIJetRecCfg(flags):
 
     # get jet definitions for physics
     jetDef = []
-    jetRlist = [2, 3, 4, 10] #[2, 3, 4, 6, 10]
+    jetRlist = flags.HeavyIon.Jet.RValues #Default [0.2,0.4], Others R's should be build in Derivations or pass in preExec
     for jetR in jetRlist:
         jetDef.append(HICaloJetDef(flags, jetradius=jetR, suffix="_Unsubtracted"))
         __log.info("HI Jet Collection for Reco: "+jetDef[-1].fullname())
