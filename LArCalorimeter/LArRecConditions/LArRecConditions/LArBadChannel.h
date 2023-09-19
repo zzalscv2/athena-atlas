@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArBadChannel_H
@@ -78,7 +78,7 @@ class  LArBadChannel {
 	
   /// Returns true if corresponding status bit its set		
   bool statusBad(PosType  pb) const {
-    BitWord mask = 1 << pb;
+    BitWord mask = 1u << pb;
     return ((m_word & mask) != 0);
   }
 
