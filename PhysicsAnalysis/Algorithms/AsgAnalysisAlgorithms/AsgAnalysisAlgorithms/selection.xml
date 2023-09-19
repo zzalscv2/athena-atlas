@@ -2,7 +2,6 @@
 
    <class name="CP::AsgFlagSelectionTool" />
    <class name="CP::AsgPtEtaSelectionTool" />
-
    <class name="CP::AsgClassificationDecorationAlg" />
    <class name="CP::AsgCutBookkeeperAlg" />
    <class name="CP::AsgEventScaleFactorAlg" />
@@ -22,6 +21,7 @@
    <class name="CP::IsolationCloseByCorrectionAlg" />
    <class name="CP::KinematicHistAlg" />
    <class name="CP::ObjectCutFlowHistAlg" />
+   <class name="CP::EventCutFlowHistAlg" />
    <class name="CP::OverlapRemovalAlg" />
    <class name="CP::PileupReweightingAlg" />
    <class name="CP::PMGTruthWeightAlg" />

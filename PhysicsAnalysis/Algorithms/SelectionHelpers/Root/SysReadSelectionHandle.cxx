@@ -80,6 +80,11 @@ namespace CP
     return "";
   }
 
+  std::string SysReadSelectionHandle ::
+  getSelectionName () const
+  {
+    return m_selection;
+  }
 
 
   CP::SystematicSet SysReadSelectionHandle ::

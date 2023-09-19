@@ -73,7 +73,9 @@ namespace CP
     bool getBool (const SG::AuxElement& element,
                   const CP::SystematicSet& sys) const;
 
-
+    /// \brief get the name of the selection
+  public:
+    std::string getSelectionName() const;
 
     /// Inherited Members
     /// =================
