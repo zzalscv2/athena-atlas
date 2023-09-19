@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( GeneratorObjectsTPCnv )
@@ -55,13 +55,6 @@ atlas_add_test( HepMcParticleLinkCnv_p2_test
 atlas_add_test( McEventCollectionCnv_p6_test
                 SOURCES
                 test/McEventCollectionCnv_p6_test.cxx
-                INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools 
-                LOG_IGNORE_PATTERN "HepMCWeightSvc +INFO|No run info" )
-
-atlas_add_test( McEventCollectionCnv_p7_test
-                SOURCES
-                test/McEventCollectionCnv_p7_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                 LINK_LIBRARIES ${CLHEP_LIBRARIES} GeneratorObjectsTPCnv TestTools 
                 LOG_IGNORE_PATTERN "HepMCWeightSvc +INFO|No run info" )

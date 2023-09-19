@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv.cxx 
@@ -19,7 +19,6 @@
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p4.h"
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p5.h"
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p6.h"
-#include "GeneratorObjectsTPCnv/McEventCollectionCnv_p7.h"
 
 // GeneratorObjectsAthenaPool includes
 #include "McEventCollectionCnv.h"
@@ -49,7 +48,7 @@ McEventCollection* McEventCollectionCnv::createTransient()
    static const pool::Guid p4_guid("C517102A-94DE-407C-B07F-09BD81F6172E");
    static const pool::Guid p5_guid("D52391A4-F951-46BF-A0D5-E407698D2917");
    static const pool::Guid p6_guid("6B78A751-B31A-4597-BFB6-DDCE62646CF9");
-   static const pool::Guid p7_guid("A3A04C74-A278-4E35-ACF8-4C6B8C32FC56");
+
    // Hook to disable datapool if we are doing pileup
    bool isPileup(false);
    if(serviceLocator()->existsService("PileUpEventLoopMgr")) {
@@ -93,12 +92,6 @@ McEventCollection* McEventCollectionCnv::createTransient()
 
       std::unique_ptr<McEventCollection_p6> persObj( poolReadObject<McEventCollection_p6>() );
       McEventCollectionCnv_p6 cnv;
-      if(isPileup) cnv.setPileup();
-      transObj = cnv.createTransient( persObj.get(), msg );
-   } else if ( compareClassGuid(p7_guid) ) {
-
-      std::unique_ptr<McEventCollection_p7> persObj( poolReadObject<McEventCollection_p7>() );
-      McEventCollectionCnv_p7 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
   } else {
