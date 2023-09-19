@@ -85,14 +85,16 @@ def find_W_prepare_DRXhack(mfile,bindex,windex,redefine_twidth,which_DR):
 #-------------------------------------
 def do_DR1_hacks(mfile,tmpfile):
     drlog.info("performing DR1 for file "+mfile)
+    dr1Hack_done = False
     with open(tmpfile,"r") as mytmp:
         for line in fileinput.input(mfile, inplace=True):
             # fileinput redirects the print output to mfile
-            if "JAMP(1)=" in line:
+            if re.search(r'TMP_JAMP\(\d+\) =', line) and not dr1Hack_done:
                 print("\nC     DR hack")
                 for hackline in mytmp:
                     print(hackline)
                 print("C     End DR hack. \n")
+                dr1Hack_done = True
             print(line)
 
 #-------------------------------
