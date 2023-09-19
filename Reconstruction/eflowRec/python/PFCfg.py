@@ -415,9 +415,12 @@ def getOfflinePFAlgorithm(inputFlags):
     PFAlgorithm=CompFactory.PFAlgorithm
     PFAlgorithm = PFAlgorithm("PFAlgorithm")
     
-    topoClustersName="CaloTopoClusters"
-
-    PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(topoClustersName,"CaloCalTopoClusters","PFClusterSelectorTool")    
+    
+    if inputFlags.HeavyIon.Egamma.doSubtractedClusters: 
+        PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(inputFlags.HeavyIon.Egamma.UncalibCaloTopoCluster,inputFlags.HeavyIon.Egamma.CaloTopoCluster,"PFClusterSelectorTool")
+    else:
+        topoClustersName="CaloTopoClusters"
+        PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(topoClustersName,"CaloCalTopoClusters","PFClusterSelectorTool")
     
     PFAlgorithm.SubtractionToolList = [getPFCellLevelSubtractionTool(inputFlags,"PFCellLevelSubtractionTool")]
 
