@@ -51,7 +51,7 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
   uint32_t bunchCrossing = 0;
   bunchCrossing = ctx.eventID().bunch_crossing_id();
   ATH_MSG_DEBUG("BCID: " << bunchCrossing);
-  const int eventNumber =  ctx.eventID().event_number();
+  const long long eventNumber =  ctx.eventID().event_number();
   ATH_MSG_DEBUG("Event Number" << eventNumber); 
   
   

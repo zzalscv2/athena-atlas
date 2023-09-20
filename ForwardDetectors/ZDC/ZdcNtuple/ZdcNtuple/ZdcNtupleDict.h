@@ -6,5 +6,6 @@
 #define ZDCNTUPLE_ZDCNTUPLE_DICT_H
 
 #include <ZdcNtuple/ZdcNtuple.h>
+#include <ZdcNtuple/ZdcLEDNtuple.h>
 
 #endif

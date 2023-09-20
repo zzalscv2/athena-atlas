@@ -39,6 +39,8 @@ def CpmSimMonitoringConfig(inputFlags):
         CpmSimMonAlg.TrigConfigSvc = ca.getPrimary()
         helper.result().merge(ca)
 
+    # Enable/Disable legacy hadronic CP inputs in the simulation. This should be True for heavy ion running
+    CpmSimMonAlg.s_legacyCpHadInputsDisabled = inputFlags.Reco.EnableHI
 
     # add any steering
     groupName = 'CpmSimMonitor' # the monitoring group name is also used for the package name

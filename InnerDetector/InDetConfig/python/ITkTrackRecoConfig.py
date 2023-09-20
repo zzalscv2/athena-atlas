@@ -18,8 +18,9 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                  flags.Tracking.ITkPrimaryPassConfig.value)
+    flags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")
     flags_set += [flags]
 
     # LRT

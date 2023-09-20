@@ -5,21 +5,22 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
 
 
 class PrimaryPassConfig(FlagEnum):
-    VtxLumi = 'Tracking.VtxLumiPass'
-    VtxBeamSpot = 'Tracking.VtxBeamSpotPass'
-    Cosmics = 'Tracking.CosmicsPass'
-    HeavyIon = 'Tracking.HeavyIonPass'
-    HighPileup = 'Tracking.HighPileupPass'
-    UPC = 'Tracking.UPCPass'
-    MinBias = 'Tracking.MinBiasPass'
-    RobustReco = 'Tracking.RobustRecoPass'
-    Default = 'Tracking.MainPass'
+    VtxLumi = 'VtxLumi'
+    VtxBeamSpot = 'VtxBeamSpot'
+    Cosmics = 'Cosmics'
+    HeavyIon = 'HeavyIon'
+    HighPileup = 'HighPileup'
+    UPC = 'UPC'
+    HIP = 'HIP'
+    MinBias = 'MinBias'
+    RobustReco = 'RobustReco'
+    Default = 'Main'
 
 
 class ITkPrimaryPassConfig(FlagEnum):
-    FTF = 'Tracking.ITkFTFPass'
-    FastTracking = 'Tracking.ITkFastPass'
-    Default = 'Tracking.ITkMainPass'
+    FTF = 'ITkFTF'
+    FastTracking = 'ITkFast'
+    Default = 'ITkMain'
 
 
 class TrackFitterType(FlagEnum):
@@ -122,16 +123,20 @@ def createTrackingConfigFlags():
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
     icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
-                "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")
+                "Vertex" if (prevFlags.Tracking.PrimaryPassConfig is
+                             PrimaryPassConfig.HeavyIon)
+                else "BeamLine")
 
     # Tracking passes/configurations scheduled
 
     def doLargeD0(flags):
         if flags.GeoModel.Run <= LHCPeriod.Run3:
             return not ((flags.Beam.Type in
-                        [BeamType.SingleBeam, BeamType.Cosmics]) or
-                        flags.Reco.EnableHI or
+                         [BeamType.SingleBeam, BeamType.Cosmics]) or
                         flags.Tracking.PrimaryPassConfig in [
+                            PrimaryPassConfig.HeavyIon,
+                            PrimaryPassConfig.UPC,
+                            PrimaryPassConfig.HIP,
                             PrimaryPassConfig.VtxLumi,
                             PrimaryPassConfig.VtxBeamSpot,
                             PrimaryPassConfig.HighPileup])
@@ -231,26 +236,26 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doBackTracking", lambda prevFlags: (
         prevFlags.Detector.EnableTRT and
         not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
-            prevFlags.Reco.EnableHI or
             prevFlags.Tracking.PrimaryPassConfig in [
+                PrimaryPassConfig.HeavyIon,
                 PrimaryPassConfig.VtxLumi,
                 PrimaryPassConfig.VtxBeamSpot,
                 PrimaryPassConfig.HighPileup])))
     # control TRT Standalone
     icf.addFlag("Tracking.doTRTStandalone", lambda prevFlags: (
         prevFlags.Detector.EnableTRT and
-        not(prevFlags.Reco.EnableHI or
-            prevFlags.Tracking.PrimaryPassConfig in [
-                PrimaryPassConfig.VtxLumi,
-                PrimaryPassConfig.VtxBeamSpot,
-                PrimaryPassConfig.HighPileup])))
+        not(prevFlags.Tracking.PrimaryPassConfig in [
+            PrimaryPassConfig.HeavyIon,
+            PrimaryPassConfig.VtxLumi,
+            PrimaryPassConfig.VtxBeamSpot,
+            PrimaryPassConfig.HighPileup])))
 
     # Turn running of doForwardTracks pass on and off
     icf.addFlag("Tracking.doForwardTracks", lambda prevFlags: (
         prevFlags.Detector.EnablePixel and
         not(prevFlags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or
-            prevFlags.Reco.EnableHI or
             prevFlags.Tracking.PrimaryPassConfig in [
+                PrimaryPassConfig.HeavyIon,
                 PrimaryPassConfig.VtxLumi,
                 PrimaryPassConfig.VtxBeamSpot,
                 PrimaryPassConfig.HighPileup] or
@@ -258,7 +263,8 @@ def createTrackingConfigFlags():
             prevFlags.Tracking.doLowMu)))
     icf.addFlag("Tracking.doTrackSegmentsDisappearing",
                 lambda prevFlags: (
-                    not(prevFlags.Reco.EnableHI or
+                    not((prevFlags.Tracking.PrimaryPassConfig is
+                         PrimaryPassConfig.HeavyIon) or
                         prevFlags.Beam.Type is BeamType.Cosmics)))
 
     # Turn running of doVeryLowPt third pass on and off
@@ -267,16 +273,16 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doLowPtLargeD0", False)
     # Switch for running LowPtRoI settings
     icf.addFlag("Tracking.doLowPtRoI", False)
-    # Switch for running UPC settings (MinBias but allows brem recovery)
+    # Switch for running UPC settings
     icf.addFlag("Tracking.doUPC", False)
-    # Switch for running MinBias settings (UPC turns this ON)
+    # Switch for running HIP settings
+    icf.addFlag("Tracking.doHIP", False)
+    # Switch for running MinBias settings (UPC or HIP turn this ON)
     icf.addFlag("Tracking.doMinBias", lambda prevFlags:
-                True if prevFlags.Tracking.doUPC is True else False)
+                prevFlags.Tracking.doUPC or prevFlags.Tracking.doHIP)
     # Turn running of BeamGas second pass on and off
     icf.addFlag("Tracking.doBeamGas",
                 lambda prevFlags: prevFlags.Beam.Type is BeamType.SingleBeam)
-    # Switch for running MinBias settings with a 300 MeV pT cut (for Heavy Ion Proton)
-    icf.addFlag("Tracking.doHIP300", False)
     # Special reconstruction for BLS physics
     icf.addFlag("Tracking.doBLS", False)
 
@@ -312,13 +318,15 @@ def createTrackingConfigFlags():
     from TrkConfig.TrackingPassFlags import (
         createTrackingPassFlags, createHighPileupTrackingPassFlags,
         createMinBiasTrackingPassFlags, createUPCTrackingPassFlags,
-        createLargeD0TrackingPassFlags, createR3LargeD0TrackingPassFlags,
-        createLowPtLargeD0TrackingPassFlags, createLowPtTrackingPassFlags,
-        createVeryLowPtTrackingPassFlags, createLowPtRoITrackingPassFlags,
-        createForwardTracksTrackingPassFlags, createBeamGasTrackingPassFlags,
-        createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
-        createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
-        createSCTTrackingPassFlags, createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
+        createHIPTrackingPassFlags, createLargeD0TrackingPassFlags,
+        createR3LargeD0TrackingPassFlags, createLowPtLargeD0TrackingPassFlags,
+        createLowPtTrackingPassFlags, createVeryLowPtTrackingPassFlags,
+        createLowPtRoITrackingPassFlags, createForwardTracksTrackingPassFlags,
+        createBeamGasTrackingPassFlags, createVtxLumiTrackingPassFlags,
+        createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
+        createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags,
+        createDisappearingTrackingPassFlags, createSCTTrackingPassFlags,
+        createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
         createRobustRecoTrackingPassFlags)
 
     def primaryPass(flags):
@@ -327,8 +335,8 @@ def createTrackingConfigFlags():
         elif flags.Reco.EnableHI:
             if flags.Tracking.doUPC: #For UPC
                 return PrimaryPassConfig.UPC
-            elif flags.Tracking.doMinBias: #For HIP
-                return PrimaryPassConfig.MinBias
+            elif flags.Tracking.doHIP: #For HIP
+                return PrimaryPassConfig.HIP
             else: #For HI (default)
                 return PrimaryPassConfig.HeavyIon
         elif flags.Tracking.doMinBias:
@@ -346,6 +354,8 @@ def createTrackingConfigFlags():
                          createHighPileupTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.UPCPass",
                          createUPCTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.HIPPass",
+                         createHIPTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.MinBiasPass",
                          createMinBiasTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.LargeD0Pass",
@@ -429,5 +439,7 @@ def createTrackingConfigFlags():
     # Turn on the primary vertex reconstruction
     icf.addFlag("Tracking.doVertexFinding",
                 lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
+    # Turn on the secondary vertex V0 finder
+    icf.addFlag("Tracking.doV0Finder", False)
 
     return icf

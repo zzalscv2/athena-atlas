@@ -602,6 +602,9 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_excl_1trk5_pt1_L1eEM1_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup+['PS:NoHLTRepro']),
         ChainProp(name='HLT_mb_excl_1trk5_pt2_L1eEM1_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportPhIGroup+['PS:NoHLTRepro']),
 
+        #OVERLAY
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_A_C_VTE50_OVERLAY', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportLegGroup),
+
         # ALFA perf
         ChainProp(name='HLT_mb_alfaperf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),
         ChainProp(name='HLT_mb_alfaperf_L1RD0_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'],     groups=LowMuGroup+MinBiasGroup),

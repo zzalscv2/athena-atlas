@@ -305,7 +305,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   m_deltaTSample = 3.125;
   m_numSample = 24;
 
-  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{9, 9, 9, 9}, {9, 9, 9, 9}}};
+  ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples = {{{12, 12, 12, 12}, {12, 12, 12, 12}}};
 
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
   ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
@@ -316,9 +316,9 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
 
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{27, 27, 27, 27}, {27, 27, 27, 27}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{36, 36, 36, 36}, {36, 36, 36, 36}}};
 					       
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{29, 29, 29, 29}, {29, 29, 29, 29}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{36, 36, 36, 36}, {36, 36, 36, 36}}};
 
   const int deriv2ndThreshDSHG = -35;
   const int deriv2ndThreshDSLG = -10;
@@ -351,18 +351,18 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   //
   std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
 									m_numSample, m_deltaTSample, 
-									m_presample, "FermiExpRun3", 
+									m_presample, "FermiExpLHCf", 
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG, 
 									peak2ndDerivMinThresholdsLG, 
 									m_lowGainOnly)); 
 
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(2);
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
   zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
   zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
 
-  zdcDataAnalyzer->SetGainFactorsHGLG(0.1, 1); // a gain adjustment of unity applied to LG ADC, 0.1 to HG ADC values
+  zdcDataAnalyzer->SetGainFactorsHGLG(1, 10); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{0.5, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{2, 2, 2, 2}, {2, 2, 2, 2}}};
@@ -409,7 +409,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   const int deriv2ndThreshDSHG = -35;
   const int deriv2ndThreshDSLG = -10;
-  const unsigned int peakSample = 9;
+  const unsigned int peakSample = 12;
 
   const float deltaTcutLow = -10;
   const float deltaTcutHigh = 10;
@@ -426,8 +426,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{27, 27, 27, 27}, {27, 27, 27, 27}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{29, 29, 29, 29}, {29, 29, 29, 29}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{36, 36, 36, 36}, {36, 36, 36, 36}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{36, 36, 36, 36}, {36, 36, 36, 36}}};
     
   ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
 
@@ -450,14 +450,14 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //                                                                                                          
   std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
 									m_numSample, m_deltaTSample,
-									m_presample, "FermiExpRun3",
+									m_presample, "FermiExpLHCf",
 									peak2ndDerivMinSamples,
 									peak2ndDerivMinThresholdsHG,
 									peak2ndDerivMinThresholdsLG,
 									m_lowGainOnly));
   zdcDataAnalyzer->set2ndDerivStep(2);
-  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(2);
-  zdcDataAnalyzer->SetGainFactorsHGLG(10, 1); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
+  zdcDataAnalyzer->SetGainFactorsHGLG(1, 10); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{0.5, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{1, 1, 1, 1}, {1, 1, 1, 1}}};

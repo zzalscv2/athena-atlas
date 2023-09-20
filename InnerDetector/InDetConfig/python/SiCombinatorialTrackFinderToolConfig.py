@@ -133,6 +133,10 @@ def SiCombinatorialTrackFinder_xkCfg(
     else:
         kwargs.setdefault("SctSummaryTool", "")
 
+    # Protection against FPEs
+    kwargs.setdefault("MinFinalPtCut",
+                      min(flags.Tracking.ActiveConfig.minPT, 100))
+
     acc.setPrivateTools(CompFactory.InDet.SiCombinatorialTrackFinder_xk(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
     return acc
@@ -262,6 +266,10 @@ def ITkSiCombinatorialTrackFinder_xkCfg(
             ITkStripConditionsSummaryToolCfg(flags)))
     else:
         kwargs.setdefault("SctSummaryTool", None)
+
+    # Protection against FPEs
+    kwargs.setdefault("MinFinalPtCut",
+                      min(min(flags.Tracking.ActiveConfig.minPT), 100))
 
     acc.setPrivateTools(CompFactory.InDet.SiCombinatorialTrackFinder_xk(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))

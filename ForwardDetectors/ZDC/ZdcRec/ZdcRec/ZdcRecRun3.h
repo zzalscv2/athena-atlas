@@ -24,9 +24,13 @@ class Identifier;
 class StoreGateSvc;
 
 class ZdcRecChannelToolLucrod;
+
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
+#include "xAODEventInfo/EventInfo.h"
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
+#include "ZdcUtils/ZdcEventInfo.h"
+
 
 /** @class ZdcRecRun3
 
@@ -50,15 +54,38 @@ public:
 	StatusCode execute() override;
 	StatusCode finalize() override;
 
+
 private:
 	
-	int m_ownPolicy;
+	Gaudi::Property<std::string> m_configuration{this, "Configuration", "none", "ZDC reconstruction configuration"};
+
+        Gaudi::Property<unsigned int> m_DAQMode{this, "DAQMode", static_cast<unsigned int>(ZdcEventInfo::CombinedPhysics), "DAQ mode"};
+
+        Gaudi::Property<unsigned int> m_forcedEventType{this, "ForcedEventType", static_cast<unsigned int>(ZdcEventInfo::ZdcEventUnknown), 
+	  "if not ZdcEventUnknown, Use forced event type true/false"};
+
+        Gaudi::Property<int> m_ownPolicy{this, "OwnPolicy", static_cast<int> (SG::OWN_ELEMENTS), "Ownership policy"};
 
 	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
 	  { this, "ZdcModuleContainerName", "ZdcModules", "" };
 
 	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
 	  { this, "ZdcSumContainerName", "ZdcSums", "" };
+
+        SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
+	  this, "EventInfoKey", "EventInfo",
+	  "Location of the event info."};
+
+        // SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_robBCIDKey {
+	//   this, "ROBBCIDKey", "", "BCID from LUCROD ROB headers"};
+  
+	SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcEventType{this, "ZdcEventTypeKey", "", "ZDC event Type"};
+
+	SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcDAQMode{this, "ZdcDAQModeKey", "", "ZDC DAQ mode"};
+
+        // Override bad BCID in standalone data using BCID from ROB header(s)
+        //
+        SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcBCIDOverride{this, "ZdcBCIDOverride", "", "BCID with override"};
 
 	ToolHandleArray<ZDC::IZdcAnalysisTool> m_zdcTools{ this, "ZdcAnalysisTools",{} };
 
