@@ -27,10 +27,16 @@ LVL1::eFEXtauBDTAlgo::eFEXtauBDTAlgo(const std::string &type,
 LVL1::eFEXtauBDTAlgo::~eFEXtauBDTAlgo() {}
 
 StatusCode LVL1::eFEXtauBDTAlgo::initialize() {
-  m_bdtAlgoImpl = std::make_unique<eFEXtauBDT>(
-      this, PathResolver::find_file(m_bdtJsonConfigPath, "DATAPATH",
-                                    PathResolver::RecursiveSearch));
   ATH_CHECK(m_eTowerContainerKey.initialize());
+  std::string configPath = PathResolver::find_file(
+      m_bdtJsonConfigPath, "DATAPATH", PathResolver::RecursiveSearch);
+  if (configPath.size() == 0) {
+    ATH_MSG_ERROR("Cannot locate BDT config file " << m_bdtJsonConfigPath);
+    return StatusCode::FAILURE;
+  }
+
+  m_bdtAlgoImpl = std::make_unique<eFEXtauBDT>(this, configPath);
+
   try {
     setSCellPointers();
     setThresholdPointers();

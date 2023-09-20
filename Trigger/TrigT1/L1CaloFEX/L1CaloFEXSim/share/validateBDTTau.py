@@ -30,19 +30,25 @@ bdt_algo_lines = [l for l in out_log_content.split('\n') if re.findall("eFEXDriv
 
 # Get supercells used to compute the variables, as appears in the test output. Check that they're the same as in the bdt config file
 rgx_vartitle = re.compile("DEBUG\s+([0-9]+) is (l[0-4]_d[0-9_pld]*), sum of supercells$")
+rgx_coretitle = re.compile("DEBUG\s+([0-9]+) is CORE, sum of supercells$")
 rgx_etaphilayer = re.compile("DEBUG\s+eta=([0-9]+)\s+phi=([0-9]+)\s+layer=([0-9]+)$")
 variables = OrderedDict()
 last_var_line = [i for i,x in enumerate(bdt_algo_lines) if "Will use sum of supercells" in x][0]
 for l in bdt_algo_lines[:last_var_line]:
     vartitle = rgx_vartitle.findall(l)
+    coretitle = rgx_coretitle.findall(l)
     etaphilayer = rgx_etaphilayer.findall(l)
     if len(vartitle) > 0:
         variables[vartitle[0][1]] = []
         vt = vartitle[0][1]
+    elif len(coretitle) > 0:
+        vt="CORE"
+        variables[vt] = []
     elif len(etaphilayer) > 0:
         variables[vt].append([int(x) for x in etaphilayer[0]])
 
 bdt_config=json.load(open(bdt_config_file, "r"))
+
 assert set(v['name'] for v in bdt_config['variables']) == set(variables.keys()), "Variables as read from this test's log file are not as they appear in the data/bdt_config.json. They must be consistent with each other."
 
 for v in bdt_config['variables']:
