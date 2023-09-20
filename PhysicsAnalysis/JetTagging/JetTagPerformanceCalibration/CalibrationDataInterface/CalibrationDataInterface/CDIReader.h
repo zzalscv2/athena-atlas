@@ -142,7 +142,7 @@ namespace Analysis
     // this function defines how we identify the working point directory
     bool isWPdirectory(TList* list){
       // check the directory (TList) contents
-      for(const auto& label : *list){
+      for(const auto label : *list){
         const char* labelname = label->GetName();
         if(strcmp(labelname, "B") == 0 || strcmp(labelname, "C") == 0
         || strcmp(labelname, "Light") == 0 || strcmp(labelname, "T") == 0
