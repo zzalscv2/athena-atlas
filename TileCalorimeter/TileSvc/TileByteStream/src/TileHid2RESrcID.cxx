@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -387,8 +387,10 @@ uint32_t TileHid2RESrcID::getRodID(int frag_id) const
 
   FRAGRODMAP::const_iterator it = m_frag2ROD.find(frag_id); 
   if(it == m_frag2ROD.end()){
-    std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
-    assert(0);
+    if (frag_id < 0x1000) {
+      std::cout <<" TileHid2RESrcID invalid FRAG ID 0x"<<std::hex<<frag_id<<std::dec<<std::endl;
+      assert(0);
+    }
     return 0;
   }	
 

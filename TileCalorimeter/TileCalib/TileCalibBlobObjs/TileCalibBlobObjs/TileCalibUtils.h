@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBBLOBOBJS_TILECALIBUTILS_H
@@ -152,6 +152,8 @@ class TileCalibUtils{
   static const unsigned int BADTIMING_DEFINITION_CHAN = 3;   /**< @brief Channel used for storing of bad timing channel definitions */
   static const unsigned int WRONGBCID_DEFINITION_CHAN = 4;   /**< @brief Channel used for storing of wrong BCID channel definitions */
   static const unsigned int TIMINGDMUBCOFFSET_DEFINITION_CHAN = 5;   /**< @brief Channel used for storing of affected timing channel definitions */
+  static const unsigned int MAX_MINIDRAWER = 4;  /**< @brief Number of minidrawers */
+  static const unsigned int MAX_MINIDRAWER_CHAN = 12;  /**< @brief Number of channels in minidrawer*/
 };
 
 #endif

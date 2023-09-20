@@ -1078,13 +1078,26 @@ std::vector<uint32_t> TileROD_Decoder::get_correct_data(const uint32_t* p) const
 
   std::vector<uint32_t> data;
   data.reserve(size);
+  const uint32_t* data_end = p + size;
 
-  // The first 4 words are correct (just copy)
-  std::copy_n(p, 4, std::back_inserter(data));
+  // The first 2 words (size and fragmentID with type) are correct (just copy)
+  data.push_back(*p);
+  data.push_back(*(++p));
 
-  std::for_each(p + 4, p + size, [&data] (uint32_t p) {
-                                   data.push_back((ntohs(p >> 16) << 16) | (ntohs(p & 0xFFFF)));
-                                 });
+  ++p;
+  while (p < data_end) {
+    uint32_t ppr_size = (*p) - 2; // The size of PPr packet
+    // The first 2 words (FELIX header) of each MD fragment are correct (just copy)
+    data.push_back(*(p));
+    data.push_back(*(++p));
+
+    ++p;
+    std::for_each(p, p + ppr_size, [&data] (uint32_t p) {
+      data.push_back((ntohs(p >> 16) << 16) | (ntohs(p & 0xFFFF)));
+    });
+
+    p += ppr_size;
+  }
 
   return data;
 }
@@ -1128,74 +1141,145 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
     return; // nothing reasonable found
   }
 
-  unsigned int moduleID[4] = {0};
-  unsigned int runType[4] = {0};
+  using Tile = TileCalibUtils;
+  unsigned int moduleID[Tile::MAX_MINIDRAWER] = {0};
+  unsigned int runType[Tile::MAX_MINIDRAWER] = {0};
 
-  unsigned int runNumber[4] = {0};
+  unsigned int runNumber[Tile::MAX_MINIDRAWER] = {0};
 
-  unsigned int pedestalHi[4] = {0};
-  unsigned int pedestalLo[4] = {0};
+  unsigned int pedestalHi[Tile::MAX_MINIDRAWER] = {0};
+  unsigned int pedestalLo[Tile::MAX_MINIDRAWER] = {0};
 
-  unsigned int chargeInjected[4] = {0};
-  unsigned int timeInjected[4] = {0};
-  unsigned int capacitor[4] = {0};
+  unsigned int chargeInjected[Tile::MAX_MINIDRAWER] = {0};
+  unsigned int timeInjected[Tile::MAX_MINIDRAWER] = {0};
+  unsigned int capacitor[Tile::MAX_MINIDRAWER] = {0};
 
-  uint32_t bcid[4] = {0};
-  uint32_t l1id[4] = {0};
+  uint32_t bcid[Tile::MAX_MINIDRAWER] = {0};
+  uint32_t l1id[Tile::MAX_MINIDRAWER] = {0};
 
-  int sampleNumber = (size-40)/48;
-  int delta = size - (sampleNumber*48+40);
-  if (delta!=0) {
-    ATH_MSG_WARNING( "FRAG6: Unexpected fragment size " << size << " => "<< sampleNumber << " samples will be unpacked and last "
-                     << delta << " words will be ignored ");
-  }
-  std :: vector< std :: vector< std :: vector< float > > > samples(2, std ::vector<std::vector<float>>(48,std::vector<float>(sampleNumber)));
+  uint32_t ecr[Tile::MAX_MINIDRAWER] = {0};
+  uint32_t bcr[Tile::MAX_MINIDRAWER] = {0};
+
+  uint32_t fragmentID[Tile::MAX_MINIDRAWER] = {0};
+  uint32_t packetVersion[Tile::MAX_MINIDRAWER] = {0};
+
+  int version = 0;
+
+  int mdFragmentSize = (*data) & 0xFFFF;
+  int sampleNumber = mdFragmentSize / Tile::MAX_MINIDRAWER_CHAN;
+
+  std::vector<std::vector<std::vector<float>>> samples(Tile::MAX_GAIN,
+                                                       std::vector<std::vector<float>>(Tile::MAX_CHAN,
+                                                                                       std::vector<float>(sampleNumber)));
 
   const uint32_t* const end_data = data + size; 
   while (data < end_data) {
     if (*data == 0x12345678 ) {
-      unsigned int miniDrawer = *(data+5) & 0xFF;
+      mdFragmentSize = (*(data - 2)) & 0xFFFF;
+
       if ((++data < end_data)) {
-        int fragSize   = *data & 0xFF;
-        unsigned int paramsSize = (*data >> 8 ) & 0xFF;
-        moduleID[miniDrawer]    = (*data >> 16) & 0xFF;
-        runType[miniDrawer]     = (*data >> 24) & 0xFF;
-        if (fragSize != sampleNumber * 12) {
-          ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
-                          << "] has unexpected fragment size: " << fragSize
-                          << " correct value for " << sampleNumber
-                          << " samples is " << sampleNumber * 12);
+
+        version = (((*data >> 16) & 0xFFFF) == 0) ? 1 : 0;
+        int mdSizeOverhead = (version == 0) ? 10 : 11;
+        int delta = mdFragmentSize - (sampleNumber * Tile::MAX_MINIDRAWER_CHAN + mdSizeOverhead);
+        if (delta != 0) {
+          ATH_MSG_WARNING( "FRAG6: Unexpected MD fragment size " << mdFragmentSize << " => "
+                           << sampleNumber << " samples will be unpacked and last "
+                           << delta << " words will be ignored ");
         }
 
+        unsigned int miniDrawer = -1;
+
         // check trailer
-        const uint32_t* trailer = data + (size/4)-4; 
+        const uint32_t* trailer = data + mdFragmentSize - 4;
         if (trailer < end_data && *trailer == 0x87654321) {
 
-          if (paramsSize == 3){
-            runNumber[miniDrawer]  = *(++data);
+          unsigned int paramsSize = 3;
+          if (version == 0) {
+            unsigned int fragSize   = *data & 0xFF;
+            paramsSize = (*data >> 8 ) & 0xFF;
 
-            pedestalHi[miniDrawer] = *(++data)      & 0xFFF;
-            pedestalLo[miniDrawer] = (*data >> 12 ) & 0xFFF;
+            miniDrawer = *(data + 4) & 0xFF;
+
+            moduleID[miniDrawer]    = (*data >> 16) & 0xFF;
+            runType[miniDrawer]     = (*data >> 24) & 0xFF;
+            if (fragSize != sampleNumber * Tile::MAX_MINIDRAWER_CHAN) {
+              ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
+                              << "] has unexpected fragment size: " << fragSize
+                              << " correct value for " << sampleNumber
+                              << " samples is " << sampleNumber * Tile::MAX_MINIDRAWER_CHAN);
+            }
+
+            if (paramsSize == 3){
+              runNumber[miniDrawer]  = *(++data);
+
+              pedestalLo[miniDrawer] = *(++data)      & 0xFFF;
+              pedestalHi[miniDrawer] = (*data >> 12 ) & 0xFFF;
+
+              chargeInjected[miniDrawer] = *(++data)     & 0xFFF;
+              timeInjected[miniDrawer]   = (*data >> 12) & 0xFF;
+              capacitor[miniDrawer]      = (*data >> 20) & 0x1;
+            } else {
+
+              ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
+                              << "] has unexpected number of parameter words: " << paramsSize
+                              << " => ignore them !!!");
+              data += paramsSize;
+            }
+
+            bcid[miniDrawer] = (*(++data) >> 16) & 0xFFFF;
+            l1id[miniDrawer] = *(++data) & 0xFFFFFF;
+            ecr[miniDrawer] = (*data >> 24) & 0xFF;
+
+          } else {
+
+            miniDrawer = *(data + 1) & 0xFF;
+
+            packetVersion[miniDrawer] = (*data) & 0xFF;
+            fragmentID[miniDrawer] = (*data >> 8) & 0xFF;
+
+            bcid[miniDrawer] = (*(++data) >> 8) & 0xFFF;
+            moduleID[miniDrawer] = (*data >> 20) & 0xFFF;
+
+            l1id[miniDrawer] = *(++data) & 0xFFFFFF;
+            ecr[miniDrawer] = (*data >> 24) & 0xFF;
+
+            bcr[miniDrawer] = *(++data);
+
+
+            if (packetVersion[miniDrawer] == 1) {
+              pedestalLo[miniDrawer] = *(++data)      & 0xFFF;
+              pedestalHi[miniDrawer] = (*data >> 12 ) & 0xFFF;
+              runType[miniDrawer]    = (*data >> 24) & 0xFF;
+
+              runNumber[miniDrawer]  = *(++data);
+            } else {
+              runNumber[miniDrawer]  = *(++data);
+
+              pedestalLo[miniDrawer] = *(++data)      & 0xFFF;
+              pedestalHi[miniDrawer] = (*data >> 12 ) & 0xFFF;
+              runType[miniDrawer]    = (*data >> 24) & 0xFF;
+            }
 
             chargeInjected[miniDrawer] = *(++data)     & 0xFFF;
             timeInjected[miniDrawer]   = (*data >> 12) & 0xFF;
             capacitor[miniDrawer]      = (*data >> 20) & 0x1;
-          } else {
-
-            ATH_MSG_WARNING("FRAG6: Minidrawer [" << miniDrawer
-                            << "] has unexpected number of parameter words: " << paramsSize
-                            << " => ignore them !!!");
-            data += paramsSize;
           }
 
-          bcid[miniDrawer] = (*(++data) >> 16) & 0xFFFF;
-          l1id[miniDrawer] = *(++data);
           if (msgLvl(MSG::VERBOSE)) {
             msg(MSG::VERBOSE) << "FRAG6: Found MD[" << miniDrawer << "] fragment"
                               << ", Run type: " << runType[miniDrawer]
                               << ", Module ID: " << moduleID[miniDrawer]
                               << ", BCID: " << bcid[miniDrawer]
-                              << ", L1ID: " << l1id[miniDrawer]  << endmsg;
+                              << ", L1ID: " << l1id[miniDrawer]
+                              << ", ECR: " << ecr[miniDrawer];
+            if (version) {
+              msg(MSG::VERBOSE) << ", BCR: " << bcr[miniDrawer]
+                                << ", Packet version: " << packetVersion[miniDrawer]
+                                << ", Fragment ID: " << fragmentID[miniDrawer];
+            }
+
+            msg(MSG::VERBOSE) << endmsg;
 
             if (paramsSize == 3) {
               msg(MSG::VERBOSE) << "FRAG6: MD[" << miniDrawer << "] Parameters:"
@@ -1211,8 +1295,8 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
           const uint16_t* sample = (const uint16_t *) (++data);
 
           for (int gain = 1; gain > -1; --gain) { // HG seems to be first
-            int start_channel(miniDrawer * 12);
-            int end_channel(start_channel + 12);
+            int start_channel(miniDrawer * Tile::MAX_MINIDRAWER_CHAN);
+            int end_channel(start_channel + Tile::MAX_MINIDRAWER_CHAN);
             for (int channel = start_channel; channel < end_channel; ++channel) {
 
               for (int samplesIdx = 0; samplesIdx<sampleNumber; ++samplesIdx) {
@@ -1234,12 +1318,12 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
     }
   }
 
-  pDigits.reserve(96);
+  pDigits.reserve(Tile::MAX_GAIN * Tile::MAX_CHAN);
 
   // always two gains
-  for (int gain = 0; gain < 2; ++gain) {
+  for (unsigned int gain = 0; gain < Tile::MAX_GAIN; ++gain) {
     // always 48 channels
-    for (int channel = 0; channel < 48; ++channel) {
+    for (unsigned int channel = 0; channel < Tile::MAX_CHAN; ++channel) {
       int ch1 = (remap) ? chmap[channel] : channel;
      
       adcID = m_tileHWID->adc_id(drawerID, ch1, gain);
@@ -1248,19 +1332,25 @@ void TileROD_Decoder::unpack_frag6(uint32_t /*version*/,
       
       ATH_MSG_VERBOSE("FRAG6: " << (std::string) *(pDigits.back()));
     }
-    if (remap) std::sort(pDigits.end()-48,pDigits.end(),chan_order);
+    if (remap) std::sort(pDigits.end() - Tile::MAX_CHAN, pDigits.end(), chan_order);
   }
 
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &l1id[0], &l1id[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &bcid[0], &bcid[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &moduleID[0], &moduleID[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &runType[0], &runType[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &runNumber[0], &runNumber[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &pedestalLo[0], &pedestalLo[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &pedestalHi[0], &pedestalHi[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &chargeInjected[0], &chargeInjected[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &timeInjected[0], &timeInjected[4]);
-  digitsMetaData[1].insert(digitsMetaData[1].end(), &capacitor[0], &capacitor[4]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &l1id[0], &l1id[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &bcid[0], &bcid[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &moduleID[0], &moduleID[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &runType[0], &runType[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &runNumber[0], &runNumber[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &pedestalLo[0], &pedestalLo[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &pedestalHi[0], &pedestalHi[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &chargeInjected[0], &chargeInjected[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &timeInjected[0], &timeInjected[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &capacitor[0], &capacitor[Tile::MAX_MINIDRAWER]);
+  digitsMetaData[1].insert(digitsMetaData[1].end(), &ecr[0], &ecr[Tile::MAX_MINIDRAWER]);
+  if (version) {
+    digitsMetaData[1].insert(digitsMetaData[1].end(), &bcr[0], &bcr[Tile::MAX_MINIDRAWER]);
+    digitsMetaData[1].insert(digitsMetaData[1].end(), &packetVersion[0], &packetVersion[Tile::MAX_MINIDRAWER]);
+    digitsMetaData[1].insert(digitsMetaData[1].end(), &fragmentID[0], &fragmentID[Tile::MAX_MINIDRAWER]);
+  }
 }
 
 void TileROD_Decoder::unpack_fragA(uint32_t /* version */,
@@ -4362,7 +4452,7 @@ void TileROD_Decoder::fillCollection_FELIX_Digi(const ROBData* rob , TileDigitsC
   const uint32_t* data = get_data(rob);
   const uint32_t* const end_data = data + size;
 
-while (data < end_data) { // iterator over all words for a robid   
+  while (data < end_data) { // iterator over all words for a robid
     // first word is the start of the tile subfragment in v3format it is 0xff1234ff
     if ((*data) == 0xff1234ff) {
       uint32_t count = *(data + 1); // first word is frag size
