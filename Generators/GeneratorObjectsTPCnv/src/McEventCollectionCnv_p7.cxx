@@ -124,9 +124,9 @@ void McEventCollectionCnv_p7::persToTrans( const McEventCollection_p7* persObj,
     if(!genEvt->run_info()) {
        HepMC3::GenRunInfoData ri_read;
        ri_read.weight_names = m_hepMCWeightSvc->weightNameVec(ctx);
-       ri_read.tool_name = std::vector<std::string>();
-       ri_read.tool_version = std::vector<std::string>();
-       ri_read.tool_description = std::vector<std::string>();
+       ri_read.tool_name = persEvt.m_r_tool_name;
+       ri_read.tool_version = persEvt.m_r_tool_version;
+       ri_read.tool_description = persEvt.m_r_tool_description;
        ri_read.attribute_name = persEvt.m_r_attribute_name;
        ri_read.attribute_string = persEvt.m_r_attribute_string;
        auto ri = std::make_shared<HepMC3::GenRunInfo>();
@@ -455,11 +455,9 @@ void McEventCollectionCnv_p7::transToPers( const McEventCollection* transObj,
      if (ri) {
        persEvt.m_r_attribute_string = std::move(ri_data.attribute_string);
        persEvt.m_r_attribute_name = std::move(ri_data.attribute_name);
-       /*** This is for the future
-       persEvt.m_r_tool_name = ri_data.tool_name;
-       persEvt.m_r_tool_version = ri_data.tool_version;
-       persEvt.m_r_tool_description = ri_data.tool_description;
-       */ 
+       persEvt.m_r_tool_name = std::move(ri_data.tool_name);
+       persEvt.m_r_tool_version = std::move(ri_data.tool_version);
+       persEvt.m_r_tool_description = std::move(ri_data.tool_description);
      }
     //Actually, with this piece there is no need to treat the CS and HI separately.
     }
