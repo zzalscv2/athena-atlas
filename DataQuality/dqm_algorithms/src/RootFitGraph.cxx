@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file RootFitGraph.cxx fits TGraph and returns dqm_core::Result
@@ -45,7 +45,7 @@ dqm_algorithms::RootFitGraph::RootFitGraph( const std::string & name )
 dqm_algorithms::RootFitGraph::~RootFitGraph()
 {
   // totally defeats the purpose of unique_ptr, but fixes a segfault in 5.34 ...
-  m_func.release();
+  (void)m_func.release();
 }
 
 dqm_algorithms::RootFitGraph * 
