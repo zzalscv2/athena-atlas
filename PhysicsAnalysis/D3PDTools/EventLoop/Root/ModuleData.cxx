@@ -14,6 +14,7 @@
 
 #include <EventLoop/OutputStreamData.h>
 #include <RootCoreUtils/Assert.h>
+#include <TTree.h>
 
 //
 // method implementations
@@ -23,6 +24,12 @@ namespace EL
 {
   namespace Detail
   {
+    ModuleData :: ModuleData () noexcept = default;
+
+    ModuleData :: ~ModuleData () noexcept = default;
+
+
+
     void ModuleData ::
     addOutput (std::unique_ptr<TObject> output)
     {

@@ -107,6 +107,11 @@ namespace EL
 
 
 
+      /// \brief explicit constructor for dependency reduction
+      ModuleData () noexcept;
+
+      /// \brief explicit destructor for dependency reduction
+      ~ModuleData () noexcept;
 
       /// \brief add the given output object to the histogram output stream
       /// \par Guarantee
