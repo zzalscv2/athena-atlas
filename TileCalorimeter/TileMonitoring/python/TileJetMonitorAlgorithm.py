@@ -101,6 +101,11 @@ def TileJetMonitoringConfig(flags, **kwargs):
         tileJetMonAlg.DoEventCleaning = False
         tileJetMonAlg.DoJetCleaning = False
 
+        if flags.Reco.EnableHI:
+            if flags.Tracking.doUPC:
+                tileJetMonAlg.JetContainer = 'AntiKt4EMPFlowJets'
+            else:
+                tileJetMonAlg.JetContainer = 'AntiKt4HIJets'
 
     # 1) Configure histogram with TileJetMonAlg algorithm execution time
     executeTimeGroup = helper.addGroup(tileJetMonAlg, 'TileJetMonExecuteTime', 'Tile/')
