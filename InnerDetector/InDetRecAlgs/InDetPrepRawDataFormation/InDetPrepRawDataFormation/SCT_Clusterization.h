@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -114,7 +114,7 @@ private:
    * @name Flags to configure SCT_Clusterization
    */
   //@{
-  UnsignedIntegerProperty m_maxFiredStrips{this, "maxFiredStrips", 384, "Threshold of number of fired strips per wafer. 0 disables the per-wafer cut."};
+  UnsignedIntegerProperty m_maxFiredStrips{this, "maxFiredStrips", 384, "Threshold of number of fired strips per wafer, to mask noisy modules. 0 disables the per-wafer cut."};
   UnsignedIntegerProperty m_maxTotalOccupancyPercent{this, "maxTotalOccupancyInPercent", 100, "Threshold of percentage of fired strips for the whole SCT. 100 disables the whole SCT cut."};
   BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
   BooleanProperty m_checkBadModules{this, "checkBadModules", true, "Flag to check bad modules using InDetSCT_ConditionsSummaryTool"};
