@@ -229,15 +229,20 @@ def standardJetMonitoring(inputFlags):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'JetMonitoring')
 
-
     # create a list of JetMonitoringAlg specifications
-    jetAlgConfs = [
+    jetAlgConfs = []
+
+    if inputFlags.Reco.EnableHI:
+        if inputFlags.Tracking.doUPC:
+            jetAlgConfs.append(jetMonAlgConfig( "AntiKt4EMPFlowJets", inputFlags))
+        else:
+            jetAlgConfs.append(jetMonAlgConfig( "AntiKt4HIJets", inputFlags))
+    else:
         # use the helper function defined above :
         #jetMonAlgConfig( "AntiKt4LCTopoJets", truthJetName="AntiKt4TruthJets"),     #How can we make sure truth jets are available ??
-        jetMonAlgConfig( "AntiKt4LCTopoJets", inputFlags),
-        jetMonAlgConfig( "AntiKt4EMTopoJets", inputFlags),
-        jetMonAlgConfig( "AntiKt4EMPFlowJets", inputFlags),
-        ]
+        jetAlgConfs.append(jetMonAlgConfig( "AntiKt4LCTopoJets", inputFlags))
+        jetAlgConfs.append(jetMonAlgConfig( "AntiKt4EMTopoJets", inputFlags))
+        jetAlgConfs.append(jetMonAlgConfig( "AntiKt4EMPFlowJets", inputFlags))
     
     # Configure filter tools 
     from AthenaMonitoring.EventFlagFilterToolConfig import EventFlagFilterToolCfg
