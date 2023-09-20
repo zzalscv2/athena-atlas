@@ -69,6 +69,9 @@ public:
                ,const std::vector<std::string>& e_attribute_string = std::vector<std::string>()
                ,const std::vector<std::string>& r_attribute_name = std::vector<std::string>()
                ,const std::vector<std::string>& r_attribute_string = std::vector<std::string>()
+               ,const std::vector<std::string>& r_tool_name = std::vector<std::string>()
+               ,const std::vector<std::string>& r_tool_version = std::vector<std::string>()
+               ,const std::vector<std::string>& r_tool_description = std::vector<std::string>()
                );
 
   ///////////////////////////////////////////////////////////////////
@@ -173,6 +176,9 @@ protected:
   std::vector<std::string> m_e_attribute_string; ///< Attribute serialized as string for event
   std::vector<std::string> m_r_attribute_name;   ///< Attribute name for run info
   std::vector<std::string> m_r_attribute_string; ///< Attribute serialized as string for run info
+  std::vector<std::string> m_r_tool_name; ///< Name of the used tool
+  std::vector<std::string> m_r_tool_version; ///< Version of the used tool
+  std::vector<std::string> m_r_tool_description; ///< Description of the used tool
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -209,6 +215,9 @@ inline GenEvent_p7::GenEvent_p7():
   ,m_e_attribute_string(    )
   ,m_r_attribute_name  (    )
   ,m_r_attribute_string(    )
+  ,m_r_tool_name(    )
+  ,m_r_tool_version(    )
+  ,m_r_tool_description(    )
 {}
 
 inline GenEvent_p7::GenEvent_p7( int signalProcessId,
@@ -241,6 +250,9 @@ inline GenEvent_p7::GenEvent_p7( int signalProcessId,
                                  ,const std::vector<std::string>& e_attribute_string
                                  ,const std::vector<std::string>& r_attribute_name
                                  ,const std::vector<std::string>& r_attribute_string
+                                 ,const std::vector<std::string>& r_tool_name
+                                 ,const std::vector<std::string>& r_tool_version
+                                 ,const std::vector<std::string>& r_tool_description
                                  ) :
   m_signalProcessId  ( signalProcessId ),
   m_eventNbr         ( eventNbr ),
@@ -272,6 +284,9 @@ inline GenEvent_p7::GenEvent_p7( int signalProcessId,
   ,m_e_attribute_string( e_attribute_string )
   ,m_r_attribute_name  ( r_attribute_name )
   ,m_r_attribute_string( r_attribute_string )
+  ,m_r_tool_name( r_tool_name )
+  ,m_r_tool_version( r_tool_version )
+  ,m_r_tool_description( r_tool_description )
 {}
 
 #endif //> GENERATOROBJECTSTPCNV_GENEVENT_p7_H
