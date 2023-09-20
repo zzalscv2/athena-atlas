@@ -1,4 +1,4 @@
-#Copyright(C) 2002 - 2022 CERN for the benefit of the ATLAS collaboration
+# Copyright(C) 2002 - 2023 CERN for the benefit of the ATLAS collaboration
 
 #Declare the package name:
 atlas_subdir( ISF_FastCaloSimEvent )
@@ -9,6 +9,7 @@ find_package( CLHEP )
 find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore MathMore Hist RIO Matrix Physics )
 find_package( lwtnn REQUIRED )
+find_package( onnxruntime REQUIRED )
 find_package( LibXml2 )
 
 option(USE_GPU "whether to run FCS on GPU or not" OFF)
@@ -17,13 +18,14 @@ if(USE_GPU AND CMAKE_CUDA_COMPILER)
   add_definitions( -DUSE_GPU)
 endif()
 
-#Remove the-- as - needed linker flags:
+#Remove the --as-needed linker flags:
 atlas_disable_as_needed()
 
 #Component(s) in the package:
 atlas_add_root_dictionary( ISF_FastCaloSimEvent _dictSource
                            ROOT_HEADERS ISF_FastCaloSimEvent/IntArray.h
                            ISF_FastCaloSimEvent/DoubleArray.h
+                           ISF_FastCaloSimEvent/MLogging.h
                            ISF_FastCaloSimEvent/TFCSFunction.h
                            ISF_FastCaloSimEvent/TFCS1DFunction.h
                            ISF_FastCaloSimEvent/TFCS1DFunctionHistogram.h
@@ -90,26 +92,38 @@ atlas_add_root_dictionary( ISF_FastCaloSimEvent _dictSource
                            ISF_FastCaloSimEvent/TFCSSimulationState.h
                            ISF_FastCaloSimEvent/TFCSTruthState.h
                            ISF_FastCaloSimEvent/TFCSVoxelHistoLateralCovarianceFluctuations.h
+                           ISF_FastCaloSimEvent/VNetworkBase.h
+                           ISF_FastCaloSimEvent/VNetworkLWTNN.h
+                           ISF_FastCaloSimEvent/TFCSSimpleLWTNNHandler.h
+                           ISF_FastCaloSimEvent/TFCSONNXHandler.h
+                           ISF_FastCaloSimEvent/TFCSNetworkFactory.h
 			   ISF_FastCaloSimEvent/LinkDef.h
 			   EXTERNAL_PACKAGES HepPDT)
 
+set(ALL_ONNX_LIBS ${onnxruntime_LIBRARY} ${onnxruntime_LIBRARIES} ${ONNXRUNTIME_LIBRARIES})
+message(NOTICE "-- ISF_FastCaloSimEvent/CMakeLists: Using onnx libs=${ALL_ONNX_LIBS}")
+set(ALL_ONNX_INCS ${onnxruntime_INCLUDE_DIR} ${ONNXRUNTIME_INCLUDE_DIRS})
+message(NOTICE "-- ISF_FastCaloSimEvent/CMakeLists: Using onnx incs=${ALL_ONNX_INCS}")
+
+
 if(USE_GPU AND CMAKE_CUDA_COMPILER)
+
   message("compiling ISF_FastCaoSimEvent using cuda")
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
     PUBLIC_HEADERS ISF_FastCaloSimEvent
-    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
+    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
-    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES}
+    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${ALL_ONNX_LIBS}
     CaloGeoHelpers CxxUtils TileSimEvent ISF_FastCaloGpuLib
     PRIVATE_LINK_LIBRARIES GaudiKernel )
 else()
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
     PUBLIC_HEADERS ISF_FastCaloSimEvent
-    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
+    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
-    LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES}
+    LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES} ${ALL_ONNX_LIBS}
     CaloGeoHelpers CxxUtils TileSimEvent
     PRIVATE_LINK_LIBRARIES GaudiKernel )
 endif()
@@ -118,3 +132,20 @@ atlas_add_dictionary( ISF_FastCaloSimEventDict
    ISF_FastCaloSimEvent/ISF_FastCaloSimEventDict.h
    ISF_FastCaloSimEvent/selection.xml
    LINK_LIBRARIES ISF_FastCaloSimEvent )
+
+
+atlas_add_test( GenericNetwork_test
+                SOURCES test/GenericNetwork_test.cxx 
+                INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
+                LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ALL_ONNX_LIBS} ISF_FastCaloSimEvent )
+
+atlas_add_test( TFCSEnergyAndHitGANV2_test
+                SOURCES test/TFCSEnergyAndHitGANV2_test.cxx 
+                INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS}
+                LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ALL_ONNX_LIBS} ISF_FastCaloSimEvent )
+
+atlas_add_test( TFCSPredictExtrapWeights_test
+                SOURCES test/TFCSPredictExtrapWeights_test.cxx
+                INCLUDE_DIRS ${LWTNN_INCLUDE_DIRS} ${ALL_ONNX_INCS} 
+                LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ALL_ONNX_LIBS} ISF_FastCaloSimEvent )
+
