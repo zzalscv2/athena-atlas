@@ -60,6 +60,8 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
   m_nsigma_METscan_ll = 3.0; // number of sigmas for MET scan
   m_nsigma_METscan_lh = 3.0; // number of sigmas for MET scan
   m_nsigma_METscan_hh = 4.0; // number of sigmas for MET scan (4 for hh 2013)
+  m_nsigma_METscan_lfv_ll = 5.0; // number of sigmas for MET scan (LFV leplep)
+  m_nsigma_METscan_lfv_lh = 5.0; // number of sigmas for MET scan (LFV lephad)
 
   m_meanbinStop = -1;     // meanbin stopping criterion (-1 if not used)
   m_proposalTryMEt = -1;  // loop on METproposal disable // FIXME should be cleaner
@@ -92,6 +94,7 @@ MissingMassCalculatorV2::MissingMassCalculatorV2(
   m_nCallprobCalculatorV9fast = 0;
   m_iterTheta3d = 0;
   m_debugThisIteration = false;
+  m_lfvLeplepRefit = true;
 
   m_nsolmax = 4;
   m_nsolfinalmax = m_nsolmax * m_nsolmax;
@@ -277,7 +280,7 @@ int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *par
     preparedInput.PrintInputInfo();
   }
 
-  if (preparedInput.m_LFVmode <= 0) {
+  if (preparedInput.m_LFVmode < 0) {
     // remove argument DiTauMassCalculatorV9Walk work directly on preparedInput
     OutputInfo.m_FitStatus = DitauMassCalculatorV9walk();
 
@@ -315,7 +318,7 @@ int MissingMassCalculatorV2::RunMissingMassCalculator(const xAOD::IParticle *par
     if (preparedInput.m_fUseVerbose == 1) {
       Info("DiTauMassTools", "Calling DitauMassCalculatorV9lfv");
     }
-    OutputInfo.m_FitStatus = DitauMassCalculatorV9lfv();
+    OutputInfo.m_FitStatus = DitauMassCalculatorV9lfv(false);
   }
 #ifdef SAVELIKELIHOODHISTO
   TFile *outFile = TFile::Open("MMC_likelihoods.root", "UPDATE");
@@ -1075,7 +1078,7 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9walk() {
   return fit_code;
 }
 
-int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
+int MissingMassCalculatorV2::DitauMassCalculatorV9lfv(bool refit) {
 
   // debugThisIteration=false;
   m_debugThisIteration = true;
@@ -1100,9 +1103,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
 
   //-------- end of Settings
   if (preparedInput.m_tauTypes == TauTypes::ll) { // both tau's are leptonic
-    m_nsigma_METscan = m_nsigma_METscan_ll;
+      m_nsigma_METscan = m_nsigma_METscan_lfv_ll;
   } else if (preparedInput.m_tauTypes == TauTypes::lh) { // lep had
-    m_nsigma_METscan = m_nsigma_METscan_lh;
+      m_nsigma_METscan = m_nsigma_METscan_lfv_lh;
   }
 
   double N_METsigma = m_nsigma_METscan; // number of sigmas for MET scan
@@ -1152,6 +1155,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
   m_iter3 = 0;
   m_iter4 = 0;
 
+  const double m_met_coscovphi = cos(preparedInput.m_METcovphi);
+  const double m_met_sincovphi = sin(preparedInput.m_METcovphi);
+
   m_iang1low = 0;
   m_iang1high = 0;
 
@@ -1177,8 +1183,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
 
     if (preparedInput.m_LFVmode == 1) // muon case: H->mu+tau(->ele) decays
     {
-      if (preparedInput.m_vistau1.M() > 0.05 &&
-          preparedInput.m_vistau2.M() < 0.05) // chosing lepton from Higgs decay
+      if ((preparedInput.m_vistau1.M() > 0.05 &&
+          preparedInput.m_vistau2.M() < 0.05) != refit) // choosing lepton from Higgs decay
+      //When the mass calculator is rerun with refit==true the alternative lepton ordering is used
       {
         tau_tmp = preparedInput.m_vistau2;
         lep_tmp = preparedInput.m_vistau1;
@@ -1193,8 +1200,9 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
     }
     if (preparedInput.m_LFVmode == 0) // electron case: H->ele+tau(->mu) decays
     {
-      if (preparedInput.m_vistau1.M() < 0.05 &&
-          preparedInput.m_vistau2.M() > 0.05) // chosing lepton from Higgs decay
+      if ((preparedInput.m_vistau1.M() < 0.05 &&
+          preparedInput.m_vistau2.M() > 0.05) != refit) // choosing lepton from Higgs decay
+      //When the mass calculator is rerun with refit=true the alternative lepton ordering is used
       {
         tau_tmp = preparedInput.m_vistau2;
         lep_tmp = preparedInput.m_vistau1;
@@ -1235,8 +1243,8 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
           met_smearP = METresY_binSize * i5 - N_METsigma * METresY;
           if (pow(met_smearL / METresX, 2) + pow(met_smearP / METresY, 2) > pow(N_METsigma, 2))
             continue; // use ellipse instead of square
-          met_smear_x = met_smearL * m_metCovPhiCos - met_smearP * m_metCovPhiSin;
-          met_smear_y = met_smearL * m_metCovPhiSin + met_smearP * m_metCovPhiCos;
+          met_smear_x = met_smearL * m_met_coscovphi - met_smearP * m_met_sincovphi;
+          met_smear_y = met_smearL * m_met_sincovphi + met_smearP * m_met_coscovphi;
           metvec_tmp.Set(input_metX + met_smear_x, input_metY + met_smear_y);
 
           solution = NuPsolutionLFV(metvec_tmp, tau_tmp, M_nu, nu_vec);
@@ -1518,6 +1526,12 @@ int MissingMassCalculatorV2::DitauMassCalculatorV9lfv() {
     m_fDitauStuffHisto.nutau1 = nu1_tmp - preparedInput.m_vistau1;
     m_fDitauStuffHisto.nutau2 = nu2_tmp - preparedInput.m_vistau2;
   }
+  if (m_lfvLeplepRefit && fit_code==0 && !refit)  {
+    fit_code = DitauMassCalculatorV9lfv(true);
+    return fit_code;
+  }
+  
+
 
   if (preparedInput.m_fUseVerbose == 1) {
     if (fit_code == 0) {
@@ -3093,7 +3107,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   // one prong
   //   // checking input mass of hadronic tau-1
   // DRMERGE LFV addition
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::LFVMMC2012) {
+  if (m_mmcCalibrationSet == MMCCalibrationSetV2::LFVMMC2012 ) {
     if ((preparedInput.m_type_visTau1 >= 0 && preparedInput.m_type_visTau1 <= 2) &&
         preparedInput.m_vistau1.M() != 1.1) {
       preparedInput.m_vistau1.SetPtEtaPhiM(preparedInput.m_vistau1.Pt(), preparedInput.m_vistau1.Eta(),
@@ -3192,10 +3206,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
   }
 
   // change Beam Energy for different running conditions
-  if (m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2015HIGHMASS ||
-      m_mmcCalibrationSet == MMCCalibrationSetV2::MMC2019 ||
-      m_mmcCalibrationSet == MMCCalibrationSetV2::UPGRADE)
-    preparedInput.m_beamEnergy = 6500.0; // 13 TeV running
+  preparedInput.m_beamEnergy = m_beamEnergy;
 
   //--------------------- pre-set defaults for Run-2. To disable pre-set
   // defaults set fUseDefaults=0
@@ -3213,6 +3224,7 @@ Nprong_tau2==3) type_visTau2=3; // set to 3p0n for now, see above
       Prob->SetUseMnuProbability(false);
     }
   }
+
   // compute HTOffset if relevant
   if (Prob->GetUseHT()) // use missing Ht for Njet25=0 events
   {

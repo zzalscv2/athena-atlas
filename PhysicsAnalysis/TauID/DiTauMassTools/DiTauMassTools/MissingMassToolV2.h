@@ -91,6 +91,8 @@ class MissingMassToolV2 : virtual public IMissingMassTool, virtual public asg::A
   bool m_use_mnu_probability;
   bool m_use_met_param_dphiLL;
   std::string m_param_file_path;
+  double m_beam_energy;
+  bool m_lfv_leplep_refit;
 
 };
 } // namespace DiTauMassTools  

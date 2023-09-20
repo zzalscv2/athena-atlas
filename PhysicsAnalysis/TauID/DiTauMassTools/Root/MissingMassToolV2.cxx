@@ -32,6 +32,8 @@ MissingMassToolV2::MissingMassToolV2(const std::string& name) : asg::AsgTool(nam
   declareProperty("UseEfficiencyRecovery",	m_use_efficiency_recovery=-1);
   declareProperty("UseMETDphiLL",		m_use_met_param_dphiLL = false);
   declareProperty("ParamFilePath",		m_param_file_path = "MMC_params_v1_fixed.root");
+  declareProperty("BeamEnergy",     m_beam_energy = 6500.0);
+  declareProperty("LFVLeplepRefit", m_lfv_leplep_refit = true);
 }
 
 // Copy constructor
@@ -69,6 +71,8 @@ StatusCode MissingMassToolV2::initialize()
   if (m_use_efficiency_recovery>=0) m_MMC->SetUseEfficiencyRecovery(m_use_efficiency_recovery);
   if (m_use_met_param_dphiLL) m_MMC->Prob->SetUseDphiLL(m_use_met_param_dphiLL);
   if (m_use_mnu_probability) m_MMC->Prob->SetUseMnuProbability(m_use_mnu_probability);
+  if (m_beam_energy) m_MMC->SetBeamEnergy(m_beam_energy);
+  if (!m_lfv_leplep_refit) m_MMC->SetLFVLeplepRefit(false);
 
   // could be made a property but maybe not with the enum
   // What about a string argument ?

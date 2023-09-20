@@ -86,11 +86,11 @@ class MissingMassCalculatorV2 {
 
   TLorentzVector m_tautau_tmp;
 
-  bool m_debugThisIteration;
+  bool m_debugThisIteration, m_lfvLeplepRefit;
   
   int m_nCallprobCalculatorV9fast;
   
-  double m_nsigma_METscan,m_nsigma_METscan2,m_nsigma_METscan_ll,m_nsigma_METscan_lh,m_nsigma_METscan_hh; // number of sigmas for MET-scan
+  double m_nsigma_METscan,m_nsigma_METscan2,m_nsigma_METscan_ll,m_nsigma_METscan_lh,m_nsigma_METscan_hh,m_nsigma_METscan_lfv_ll,m_nsigma_METscan_lfv_lh, m_beamEnergy; // number of sigmas for MET-scan
 
   int m_iter1,m_iter2,m_iter3,m_iter4,m_iter5,m_iang1low,m_iang1high,m_iang2low,m_iang2high;
   int m_iterTheta3d;
@@ -302,7 +302,7 @@ class MissingMassCalculatorV2 {
 
   // Calculates mass of lep+tau system in LFV X->lep+tau decays
   // It is based on DitauMassCalculatorV9, not optimized for speed yet, simple phase-space scan   
-  inline int DitauMassCalculatorV9lfv();
+  inline int DitauMassCalculatorV9lfv(bool refit);
 
 
   
@@ -394,6 +394,8 @@ public:
   void SetNsigmaMETscan(const double val) { m_nsigma_METscan=val; } // number of sigma's for MET-scan
 
   void SetUseFloatStopping(const bool val) { m_fUseFloatStopping=val; } // switch for floating stopping criterion
+  void SetBeamEnergy(const double val) { m_beamEnergy=val; }
+  void SetLFVLeplepRefit(const bool val) { m_lfvLeplepRefit=val; }
 
   double GetmMaxError() const {return m_PrintmMaxError;}
   double GetmMeanError() const { return m_PrintmMeanError;}
