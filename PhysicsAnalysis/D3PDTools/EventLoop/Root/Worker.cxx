@@ -1003,6 +1003,7 @@ namespace EL
         //User was expecting input after all.
         gSystem->Exit(EC_BADINPUT);
       }
+      addModule (std::move (module));
     }
 
     ANA_CHECK (initialize());

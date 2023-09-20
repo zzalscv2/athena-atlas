@@ -44,8 +44,14 @@ atlas_add_test (EventLoop_gt_OutputStreamData
       LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop AsgTestingLib
       POST_EXEC_SCRIPT nopost.sh)
 
-atlas_add_test (EventLoop_gt_SubmitDirManager
+      atlas_add_test (EventLoop_gt_SubmitDirManager
       SOURCES test/gt_SubmitDirManager.cxx
+      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
+      POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test (EventLoop_gt_DirectInputModule
+      SOURCES test/gt_DirectInputModule.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib
       POST_EXEC_SCRIPT nopost.sh)

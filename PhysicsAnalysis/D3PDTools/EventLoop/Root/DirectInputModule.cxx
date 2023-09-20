@@ -14,6 +14,7 @@
 #include <EventLoop/IInputModuleActions.h>
 #include <EventLoop/EventRange.h>
 #include <EventLoop/MessageCheck.h>
+#include <RootCoreUtils/Assert.h>
 
 //
 // method implementations
@@ -27,7 +28,7 @@ namespace EL
     processInputs (ModuleData& /*data*/, IInputModuleActions& actions)
     {
       using namespace msgEventLoop;
-      Long64_t toSkip = this->skipEvents.has_value() ? this->skipEvents.value() : 0u;
+      Long64_t toSkip = this->skipEvents.value_or (0);
       std::optional<Long64_t> toProcess;
       if (this->maxEvents.has_value())
         toProcess = this->maxEvents.value();
@@ -35,21 +36,23 @@ namespace EL
       {
         // open the input file to inspect it
         ANA_CHECK (actions.openInputFile (fileName));
+        ANA_MSG_DEBUG ("Opened input file: " << fileName);
 
         EventRange eventRange;
         eventRange.m_url = fileName;
         eventRange.m_endEvent = actions.inputFileNumEntries();
 
-        // this has to be `>` not `>=` to ensure that we don't accidentally skip
-        // empty files.
-        if (toSkip > eventRange.m_endEvent)
+        if (toSkip > 0)
         {
-          toSkip -= eventRange.m_endEvent;
-          continue;
+          if (toSkip >= eventRange.m_endEvent)
+          {
+            toSkip -= eventRange.m_endEvent;
+            ANA_MSG_INFO ("File " << fileName << " has only " << eventRange.m_endEvent << " events, skipping it.");
+            continue;
+          }
+          eventRange.m_beginEvent = toSkip;
+          toSkip = 0u;
         }
-
-        eventRange.m_beginEvent = toSkip;
-        toSkip = 0;
 
         if (toProcess.has_value())
         {
@@ -60,12 +63,14 @@ namespace EL
           } else
           {
             toProcess.value() -= eventRange.m_endEvent - eventRange.m_beginEvent;
-            continue;
           }
         }
         ANA_CHECK (actions.processEvents (eventRange));
         if (toProcess.has_value() && toProcess.value() == 0u)
+        {
+          ANA_MSG_INFO ("Reached maximum number of events, stopping.");
           break;
+        }
       }
       return StatusCode::SUCCESS;
     }
