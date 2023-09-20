@@ -187,6 +187,8 @@ def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
     kwargs.setdefault("DataObjectName", 'ITkStripRDOs')
     kwargs.setdefault("ClustersName", 'ITkStripClusters')
     kwargs.setdefault("SCT_FlaggedCondData", "ITkStripFlaggedCondData")
+    # Disable noisy modules suppression
+    kwargs.setdefault("maxFiredStrips", 0)
 
     acc.addEventAlgo( CompFactory.InDet.SCT_Clusterization(name, **kwargs))
     return acc

@@ -52,6 +52,8 @@ def ActsITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationA
     kwargs.setdefault("StripClusteringTool", acc.popToolsAndMerge(ActsITkStripClusteringToolCfg(flags)))
     kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
     kwargs.setdefault("checkBadModules", True)
+    # Disable noisy modules suppression
+    kwargs.setdefault("maxFiredStrips", 0)
 
     if flags.Acts.doMonitoring:
         from ActsConfig.ActsMonitoringConfig import ActsITkStripClusterizationMonitoringToolCfg
