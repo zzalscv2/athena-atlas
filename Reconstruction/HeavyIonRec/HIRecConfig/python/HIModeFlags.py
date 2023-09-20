@@ -1,14 +1,22 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-def HImode(flags):
+def _HIcommon(flags):
     flags.Reco.EnableHI = True
+    flags.Reco.EnableCaloRinger = False
+    flags.Reco.EnableBTagging = True
+    # disable TopoCluster out of time pileup cut
+    flags.Calo.TopoCluster.doTimeCut = False
+    flags.Calo.TopoCluster.extendTimeCut = False
+    flags.Calo.TopoCluster.useUpperLimitForTimeCut = False
+
+
+def HImode(flags):
+    _HIcommon(flags)
     flags.Reco.EnableTau = False
     flags.DQ.Steering.doTauMon = False
     flags.Reco.EnableJet = False
     flags.Reco.EnableMet = False
     flags.DQ.Steering.doMissingEtMon = False
-    flags.Reco.EnableCaloRinger = False
-    flags.Reco.EnableBTagging = True
     flags.Jet.WriteToAOD = True  # this is to save btagging to xAOD
     flags.Calo.TopoCluster.skipWriteList = [
         "CaloCalTopoClusters", "CaloTopoClusters"]
@@ -23,12 +31,10 @@ def HImode(flags):
 
 
 def _HIP_UPC_common(flags):
-    flags.Reco.EnableHI = True
+    _HIcommon(flags)
     flags.Reco.EnableTau = True
     flags.Reco.EnableJet = True
     flags.Reco.EnableMet = True
-    flags.Reco.EnableCaloRinger = False
-    flags.Reco.EnableBTagging = True
     flags.Jet.WriteToAOD = True  # this is to save "standard" jets and btagging to xAOD
     flags.MET.WritetoAOD = True
     flags.HeavyIon.Egamma.doSubtractedClusters = False
