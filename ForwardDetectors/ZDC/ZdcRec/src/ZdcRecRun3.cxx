@@ -25,6 +25,7 @@
 #include "xAODForward/ZdcModuleAuxContainer.h"
 #include "xAODForward/ZdcModuleToString.h"
 #include "ZdcByteStream/ZdcToString.h"
+#include "ZdcUtils/ZdcEventInfo.h"
 
 //==================================================================================================
 ZdcRecRun3::ZdcRecRun3(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -69,6 +70,7 @@ StatusCode ZdcRecRun3::initialize()
   // initialize eventInfo access
   //
   ATH_CHECK( m_eventInfoKey.initialize());
+  ATH_CHECK( m_eventInfoDecorKey.initialize() );
   
   // Initialize writedecor keys
   //
@@ -99,6 +101,15 @@ StatusCode ZdcRecRun3::execute()
   //
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
   if (!eventInfo.isValid()) return StatusCode::FAILURE;
+
+  if (eventInfo->errorState(xAOD::EventInfo::ForwardDet)==xAOD::EventInfo::Error)
+    {
+      if (eventInfo->isEventFlagBitSet(xAOD::EventInfo::ForwardDet, ZdcEventInfo::DECODINGERROR ))
+	{
+	  ATH_MSG_WARNING("Error in LUCROD decoding");
+	  return StatusCode::SUCCESS;
+	}
+    }
 
   ATH_MSG_DEBUG("Event info type=IS_CALIBRATION:" << eventInfo->eventType(xAOD::EventInfo::IS_CALIBRATION));
 
@@ -155,6 +166,7 @@ StatusCode ZdcRecRun3::execute()
       DAQModeHandle(*modSum) = m_DAQMode;
     }
   }
+
   
   // Loop over all tools and perform the "reco" 
   //
