@@ -15,7 +15,9 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
     kwargs.setdefault('FirstSample', 0)
     kwargs.setdefault('LastSample', 15)
     kwargs.setdefault('FelixOffset', 0)
-    kwargs.setdefault('FelixScale', 1)
+    kwargs.setdefault('FelixScale', 4)
+
+    felixScale = kwargs['FelixScale']
 
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
@@ -90,54 +92,54 @@ def TileDigitsFlxMonitoringConfig(flags, fragIDs=[0x201, 0x402], **kwargs):
             channelPedGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
                                             xbins = 48, xmin = -0.5, xmax = 47.5)
 
-    channelSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonSamples', 'Tile/Felix/Digits')
+    channelSamplesFlxGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonSamples', 'Tile/Felix/Digits')
     for moduleName in modules:
         for channel in range(0, Tile.MAX_CHAN):
             for gainName in ['HG', 'LG']:
                 title = (f'Run {runNumber} {moduleName} channel {channel} {gainName}: Samples-FELIX;Sample [ADC];N')
                 name = f'{moduleName}_ch_{str(channel)}_{gainName}_samples'
                 path = moduleName
-                channelSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
-                                                    xbins = 1024, xmin = -0.5, xmax = 1023.5)
+                channelSamplesFlxGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
+                                                       xbins = 4096, xmin = -0.5, xmax = 4095.5)
 
 
-    channelSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonSamples', 'Tile/Legacy/Digits')
+    channelSamplesLegacyGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileLegacyMonSamples', 'Tile/Legacy/Digits')
     for moduleName in modules:
         for channel in range(0, Tile.MAX_CHAN):
             for gainName in ['HG', 'LG']:
                 title = (f'Run {runNumber} {moduleName} channel {channel} {gainName}: Samples;Sample [ADC];N')
                 name = f'{moduleName}_ch_{str(channel)}_{gainName}_samples'
                 path = moduleName
-                channelSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
-                                                    xbins = 4096, xmin = -0.5, xmax = 4095.5)
+                channelSamplesLegacyGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
+                                                          xbins = 1024, xmin = -0.5, xmax = 1023.5)
 
-    channelSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileDigitsDiffLegacyFlx', 'Tile/Compare/Digits/Channel')
+    channelAllSamplesDiffGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileChannelAllSamplesDiff', 'Tile/Compare/Digits')
     for moduleName in modules:
         for channel in range(0, Tile.MAX_CHAN):
             for gainName in ['HG', 'LG']:
-                title = (f'Run {runNumber} {moduleName} channel {channel} {gainName}: Samples;Sample [ADC];N')
-                name = f'{moduleName}_ch_{str(channel)}_{gainName}_samples'
+                title = (f'Run {runNumber} {moduleName} channel {channel} {gainName}: Samples difference (FELIX-Legacy*{felixScale});Sample [ADC];N')
+                name = f'{moduleName}_ch_{str(channel)}_{gainName}_samples_diff'
                 path = moduleName
-                channelSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
-                                                    xbins = 2000, xmin = -1000, xmax = 1000)
+                channelAllSamplesDiffGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
+                                                           xbins = 200, xmin = -100, xmax = 100)
 
-    channelSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileDigitsDiffModule', 'Tile/Compare/Digits/Module')
+    moduleAllSamplesGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileModuleAllSamplesDiff', 'Tile/Compare/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
-            title = (f'Run {runNumber} {moduleName} {gainName}: Samples;Sample [ADC];N')
-            name = f'{moduleName}_{gainName}_samples'
+            title = (f'Run {runNumber} {moduleName} {gainName}: All channels samples difference (FELIX-Legacy*{felixScale});Sample [ADC];N')
+            name = f'{moduleName}_{gainName}_samples_diff;{moduleName}_{gainName}_all_channels_samples_diff'
             path = moduleName
-            channelSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
-                                                xbins = 4096, xmin = -1000, xmax = 1000)
+            moduleAllSamplesGroup.defineHistogram(name, title = title, path = path, type = 'TH1F',
+                                                  xbins = 200, xmin = -100, xmax = 100)
 
-    channelProfileGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileFlxMonProf', 'Tile/Compare/Digits/Profile')
+    moduleSamplesDiffGroup = helper.addGroup(tileDigitsFlxMonAlg, 'TileModuleSamplesDiff', 'Tile/Compare/Digits')
     for moduleName in modules:
         for gainName in ['HG', 'LG']:
-            title = f'Run {runNumber} {moduleName} {gainName}: channel, sample;Channel;ADC'
-            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_Profile;{moduleName}_Profile_{gainName}'
+            title = f'Run {runNumber} {moduleName} {gainName}: Samples difference (FELIX-Legacy*{felixScale});Channel;ADC'
+            name = f'{moduleName}_{gainName}_channel,{moduleName}_{gainName}_samples_diff;{moduleName}_{gainName}_samples_diff'
             path = moduleName
-            channelProfileGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
-                                                xbins = 48, xmin = -0.5, xmax = 47.5)
+            moduleSamplesDiffGroup.defineHistogram(name, title = title, path = path, type = 'TProfile',
+                                                   xbins = 48, xmin = -0.5, xmax = 47.5)
 
 
     accumalator = helper.result()
