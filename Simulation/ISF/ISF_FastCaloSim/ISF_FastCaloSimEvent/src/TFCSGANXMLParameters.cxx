@@ -124,15 +124,15 @@ void TFCSGANXMLParameters::Print() const {
 
     // If only one bin in r means layer is empty, no value should be added
     if (xBinNum == 1) {
-      ATH_MSG_INFO("layer " << layer << " not used");
+      ATH_MSG_DEBUG("layer " << layer << " not used");
       continue;
     }
-    ATH_MSG_INFO("Binning along r for layer " << layer);
-    ATH_MSG(INFO) << "0,";
+    ATH_MSG_DEBUG("Binning along r for layer " << layer);
+    ATH_MSG(DEBUG) << "0,";
     // First fill energies
     for (int ix = 1; ix <= xBinNum; ++ix) {
-      ATH_MSG(INFO) << x->GetBinUpEdge(ix) << ",";
+      ATH_MSG(DEBUG) << x->GetBinUpEdge(ix) << ",";
     }
-    ATH_MSG(INFO) << END_MSG(INFO);
+    ATH_MSG(DEBUG) << END_MSG(DEBUG);
   }
 }

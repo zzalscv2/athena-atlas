@@ -1,0 +1,64 @@
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+ISF_FastCaloSim...SUCCESS Running TFCSPredictExtrapWeights
+
+ISF_FastCaloSim...SUCCESS Testing net path ...TNNPredExtrapSample/ and norm path ...ormPredExtrapSample/
+
+ISF_FastCaloSim...SUCCESS True energy 5.24288e+08 pdgId 22 eta -0
+
+ISF_FastCaloSim...SUCCESS etaBin = 0_5
+
+ISF_FastCaloSim...SUCCESS Filename ends in glob.
+
+ISF_FastCaloSim...SUCCESS Succedeed in creating LWTNN nn from string starting /cvmfs/atl
+
+ISF_FastCaloSim...SUCCESS  Have pid2 = 22
+
+ISF_FastCaloSim...SUCCESS computing with m_nn
+
+TFile**		FCSNNtest.root	
+ TFile*		FCSNNtest.root	
+  KEY: TFCSPredictExtrapWeights	NN;1	NN
+ISF_FastCaloSim...   INFO Ebin=-1 E=511853 #cells=0
+ISF_FastCaloSim...   INFO   E0(PreSamplerB)=1028.77 E0/E=0.0020099
+ISF_FastCaloSim...   INFO   E1(EMB1)=68199.1 E1/E=0.13324
+ISF_FastCaloSim...   INFO   E2(EMB2)=438271 E2/E=0.856244
+ISF_FastCaloSim...   INFO   E3(EMB3)=3024.03 E3/E=0.00590801
+ISF_FastCaloSim...   INFO   E12(TileBar0)=1330.1 E12/E=0.0025986
+ISF_FastCaloSim...   INFO   AuxInfo has 6 elements
+ISF_FastCaloSim...SUCCESS Testing net path ...NNXPredExtrapSample/ and norm path ...ormPredExtrapSample/
+
+ISF_FastCaloSim...SUCCESS True energy 5.24288e+08 pdgId 22 eta -0
+
+ISF_FastCaloSim...SUCCESS etaBin = 0_5
+
+ISF_FastCaloSim...SUCCESS Filename ends in glob.
+
+ISF_FastCaloSim...SUCCESS Creating ONNX network from file ...N_0_5.onnx
+
+ISF_FastCaloSim...   INFO Setting up from inputFile.
+ISF_FastCaloSim...   INFO Reading bytes from text file.
+ISF_FastCaloSim...   INFO Setting up ONNX session.
+ISF_FastCaloSim...WARNING Found symbolic dimension -1 in node named dense_input. Will treat this as dimension 1.
+ISF_FastCaloSim...WARNING Found symbolic dimension -1 in node named dense_2. Will treat this as dimension 1.
+ISF_FastCaloSim...SUCCESS  Have pid2 = 22
+
+ISF_FastCaloSim...  ERROR Normalization information not found for layer 4
+ISF_FastCaloSim...SUCCESS computing with m_nn
+
+ISF_FastCaloSim...   INFO Writing buffer in TFCSONNXHandler 
+TFile**		FCSNNtest.root	
+ TFile*		FCSNNtest.root	
+  KEY: TFCSPredictExtrapWeights	NN;1	NN
+ISF_FastCaloSim...   INFO Reading buffer in TFCSONNXHandler 
+ISF_FastCaloSim...   INFO Setting up ONNX session.
+ISF_FastCaloSim...WARNING Found symbolic dimension -1 in node named dense_input. Will treat this as dimension 1.
+ISF_FastCaloSim...WARNING Found symbolic dimension -1 in node named dense_2. Will treat this as dimension 1.
+ISF_FastCaloSim...   INFO Ebin=-1 E=511853 #cells=0
+ISF_FastCaloSim...   INFO   E0(PreSamplerB)=1028.77 E0/E=0.0020099
+ISF_FastCaloSim...   INFO   E1(EMB1)=68199.1 E1/E=0.13324
+ISF_FastCaloSim...   INFO   E2(EMB2)=438271 E2/E=0.856244
+ISF_FastCaloSim...   INFO   E3(EMB3)=3024.03 E3/E=0.00590801
+ISF_FastCaloSim...   INFO   E12(TileBar0)=1330.1 E12/E=0.0025986
+ISF_FastCaloSim...   INFO   AuxInfo has 6 elements
+ISF_FastCaloSim...SUCCESS Program ends
+
