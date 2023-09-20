@@ -43,11 +43,8 @@ case $ArtProcess in
 
 	echo  "art-result: $? athena_job"
 
-	#EgammaARTmonitoring_plotsMaker.py /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/ref_main/Nightly-monitoring_electron.hist.root Nightly-monitoring.hist.root electron
+	$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/dataZee.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_data22DRAWEGZ_run439911.f1310_m2151_rel24_0_12.hist.root Nightly-monitoring.hist.root
 
-	echo  "art-result: $? final_comparison"
-
-	#$ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p -x dcube -c /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/DCube_Config/electron.xml -r /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/egammaValidation/Nightly_Files/Nightly-monitoring_electron.hist.root  Nightly-monitoring.hist.root
 	echo  "art-result: $? plot"
 
 	;;

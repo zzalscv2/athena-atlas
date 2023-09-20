@@ -16,6 +16,8 @@ parser.add_argument("-p", "--particleType", default='electron', type=str,
                     help="The particle type. electron or gamma")
 parser.add_argument("-fwd", "--addFwd", default='False', type=str,
                     help="Also run on fwd electrons")
+parser.add_argument("-i", "--inputFiles", default='Nightly_AOD.pool.root',
+                    help='Comma separated list of input AOD files')
 parser.add_argument("-o", "--outputFileName", default='Nightly-monitoring.hist', type=str,
                     help="The output file name")
 
@@ -31,7 +33,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import ProductionStep
 flags = initConfigFlags()
 flags.Common.ProductionStep = ProductionStep.Simulation
-flags.Input.Files = ['Nightly_AOD.pool.root']
+flags.Input.Files = [ f for f in args.inputFiles.split(',') ]
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(flags, ['LAr','Tile'], use_metadata=True, toggle_geometry=True)
 # to be checked. Without this, I got
