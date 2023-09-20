@@ -1,9 +1,20 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "AFP_Digitization/AFP_PileUpTool.h"
+#include "AFP_SimEv/AFP_TDSimHit.h"
+#include "AFP_SimEv/AFP_SIDSimHit.h"
+#include "xAODForward/AFPSiHit.h"
+#include "xAODForward/AFPToFHit.h"
+#include "xAODForward/AFPToFHitAuxContainer.h"
+#include "xAODForward/AFPSiHitAuxContainer.h"
+#include "AthenaKernel/RNGWrapper.h"
+#include "CLHEP/Random/RandomEngine.h"
+#include "CLHEP/Random/RandFlat.h"
+#include "CLHEP/Random/RandGaussQ.h"
+#include "CLHEP/Random/RandPoissonQ.h"
 
 AFP_PileUpTool::AFP_PileUpTool(const std::string& type,
                                const std::string& name,
@@ -528,6 +539,11 @@ void AFP_PileUpTool::createTDDigi(int Station, int Detector, int SensitiveElemen
   {
     const int train = Detector/10 - 1;
     const int bar = Detector%10-1;
+    //check index value against array extent
+    if (train<0 or train >3 or bar<0 or bar>3){
+      ATH_MSG_ERROR ( "Wrong train or bar; allowed values are 0-3, actual values "<<train<<", "<<bar);
+      return;
+    }
         
     double photoelectronTime = GlobalTime - m_TimeOffset - m_TDC_offsets[Station][train][bar];
     addPhotoconvTimeSmear( photoelectronTime, rndEngine );

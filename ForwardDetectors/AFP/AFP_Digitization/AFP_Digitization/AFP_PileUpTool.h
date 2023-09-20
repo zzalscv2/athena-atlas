@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_DIGITIZATION_TOOL_H
@@ -12,35 +12,28 @@
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
-#include "AFP_SimEv/AFP_TDSimHitCollection.h"
-#include "AFP_SimEv/AFP_SIDSimHitCollection.h"
-#include "HitManagement/TimedHitCollection.h"
-#include "AFP_SimEv/AFP_TDSimHit.h"
-#include "AFP_SimEv/AFP_SIDSimHit.h"
-#include "AFP_DigiEv/AFP_TDDigiCollection.h"
-#include "AFP_DigiEv/AFP_SiDigiCollection.h"
-#include "xAODForward/AFPSiHit.h"
-#include "xAODForward/AFPToFHit.h"
-#include "xAODForward/AFPToFHitContainer.h"
-#include "xAODForward/AFPToFHitAuxContainer.h"
-#include "xAODForward/AFPSiHitContainer.h"
-#include "xAODForward/AFPSiHitAuxContainer.h"
+#include "AFP_SimEv/AFP_TDSimHitCollection.h" //readhandle template param
+#include "AFP_SimEv/AFP_SIDSimHitCollection.h" //readhandle template param
+#include "AFP_DigiEv/AFP_TDDigiCollection.h" //unique_ptr template param
+#include "AFP_DigiEv/AFP_SiDigiCollection.h" //unique_ptr template param
+#include "xAODForward/AFPToFHitContainer.h" //writehandle template param
 
-#include "AthenaKernel/IAthRNGSvc.h"
-#include "AthenaKernel/RNGWrapper.h"
-#include "CLHEP/Random/RandomEngine.h"
-#include "CLHEP/Random/RandFlat.h"
-#include "CLHEP/Random/RandGaussQ.h"
-#include "CLHEP/Random/RandPoissonQ.h"
+#include "xAODForward/AFPSiHitContainer.h"  //writehandle template param
+#include "HitManagement/TimedHitCollection.h" //template
 
-#include "TH1F.h"
-#include "TF1.h"
+#include "AthenaKernel/IAthRNGSvc.h" //svc handle template param
+
+
+#include "TH1F.h" //array member
+#include "TF1.h"  //member
 
 #include <string>
 #include <vector>
 #include <utility> /* pair */
 #include <memory> /* unique_ptr */
 
+class AFP_TDSimHit;
+class AFP_SIDSimHit;
 
 namespace CLHEP {
   class HepRandomEngine;
