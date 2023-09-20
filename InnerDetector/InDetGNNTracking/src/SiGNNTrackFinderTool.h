@@ -53,8 +53,8 @@ namespace InDet{
     ///////////////////////////////////////////////////////////////////
     // Print internal tool parameters and status
     ///////////////////////////////////////////////////////////////////
-    MsgStream&    dump(MsgStream&    out) const;
-    std::ostream& dump(std::ostream& out) const;
+    virtual MsgStream&    dump(MsgStream&    out) const override;
+    virtual std::ostream& dump(std::ostream& out) const override;
 
     protected:
 
