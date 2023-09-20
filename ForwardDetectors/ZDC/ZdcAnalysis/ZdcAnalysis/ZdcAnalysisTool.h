@@ -176,7 +176,7 @@ private:
   unsigned int m_rpdEndSignalSample;
   unsigned int m_rpdNominalBaseline;
   float m_rpdPileup1stDerivThresh;
-  unsigned int m_rpdADCoverflow;
+  unsigned int m_rpdAdcOverflow;
   int m_LHCRun;
 
   // The objects that carry out the analysis
@@ -213,8 +213,12 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMinDeriv2nd{this, "ZdcModuleMinDeriv2nd", "", "ZDC module min 2nd derivative"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleMaxADC{this, "ZdcModuleMaxADC", "", "ZDC module max ADC, minus pedestal"};
   //
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelBaseline{this, "RpdChannelBaseline", "", "RPD Channel Baseline"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupFitParams{this, "RpdChannelPileupFitParams", "", "RPD Channel Pileup Fit Parameters: exp([0] + [1]*sample)"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitude{this, "RPDChannelAmplitude", "", "RPD Channel Amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelAmplitudeCalib{this, "RPDChannelAmplitudeCalib", "", "RPD Channel calibrated amplitude"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxAdc{this, "RPDChannelMaxADC", "", "RPD Channel max ADC"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxAdcCalib{this, "RPDChannelMaxADCCalib", "", "RPD Channel calibrated max ADC"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelMaxSample{this, "RPDChannelMaxSample", "", "RPD Channel Max Sample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelStatus{this, "RPDChannelStatus", "", "RPD Channel Status"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_rpdChannelPileupFrac{this, "RPDChannelPileupFrac", "", "RPD Channel Pileup as Fraction of Sum"};
