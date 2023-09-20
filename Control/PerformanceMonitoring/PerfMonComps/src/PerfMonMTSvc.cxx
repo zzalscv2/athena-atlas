@@ -440,9 +440,6 @@ void PerfMonMTSvc::report2Log_Description() const {
   ATH_MSG_INFO("=======================================================================================");
   ATH_MSG_INFO("                                 PerfMonMTSvc Report                                   ");
   ATH_MSG_INFO("=======================================================================================");
-  ATH_MSG_INFO("IMPORTANT : PLEASE NOTE THAT THIS SERVICE IS CURRENTLY IN R&D PHASE.");
-  ATH_MSG_INFO("            FOR FURTHER INFORMATION/QUERIES PLEASE GET IN TOUCH WITH THE SPOT TEAM.");
-  ATH_MSG_INFO("=======================================================================================");
   if (m_reportResultsToJSON) {
     ATH_MSG_INFO("*** Full set of information can also be found in: " << m_jsonFileName.toString());
     ATH_MSG_INFO("*** In order to make plots using the results run the following commands:");
