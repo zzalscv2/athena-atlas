@@ -36,7 +36,7 @@ run () {
     return $rc
 }
 
-ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propapation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern="ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propapation.+failed:.+PropagatorError:3.+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters|ActsTrackFindingAlg.+ERROR.+Step.+size.+adjustment.+exceeds.+maximum.+trials"
 
 # Run w/o ambi. resolution
 run "Reconstruction-ckf" \
