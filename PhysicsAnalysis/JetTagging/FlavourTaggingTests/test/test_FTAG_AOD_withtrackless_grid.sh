@@ -2,6 +2,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # art-description: RDO to AOD step with trackless b-tagging for Run 3 MC 
+# art-type: grid
 # art-include: main/Athena
 # art-output: *.pool.root
 # art-output: *.log
