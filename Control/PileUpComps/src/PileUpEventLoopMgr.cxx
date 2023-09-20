@@ -233,7 +233,7 @@ void PileUpEventLoopMgr::modifyEventContext(EventContext& ctx, const EventID& eI
     // CHECK: Update evtIdModSvc method modify_evtid interface to
     // pointer or reference?
     // m_nevt - 1 because the PileUpEventLoopMgr increments it rather early
-    m_evtIdModSvc->modify_evtid(new_eID, m_nevt - 1, consume_modifier_stream);
+    m_evtIdModSvc->modify_evtid(new_eID, m_ncurevt - 1, consume_modifier_stream);
     if (msgLevel(MSG::DEBUG)) {
       unsigned int oldrunnr=eID.run_number();
       unsigned int oldLB=eID.lumi_block();
