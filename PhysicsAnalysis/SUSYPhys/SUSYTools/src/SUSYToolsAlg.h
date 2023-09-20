@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.h
@@ -83,8 +83,8 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
 
     // systematics
     bool m_doSyst;
-    std::vector<ST::SystInfo> sysInfoList;
-    std::map<std::string,std::vector<std::string>> syst_all, syst_weights;
+    std::vector<ST::SystInfo> m_sysInfoList;
+    std::map<std::string,std::vector<std::string>> m_syst_all, m_syst_weights;
 
     // timing
     TStopwatch m_clock0;
