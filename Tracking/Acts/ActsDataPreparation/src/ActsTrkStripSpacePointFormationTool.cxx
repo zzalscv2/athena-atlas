@@ -587,17 +587,9 @@ namespace ActsTrk {
         minStrip = minCellId.strip();
         maxStrip = maxCellId.strip();
 
-        // re-evaluate min and max in polar coordinate from the strip index
-        min = design->localPositionOfCellPC(minCellId).xPhi();
-        max = design->localPositionOfCellPC(maxCellId).xPhi();
-
-        // depends on how the reference frame is oriented. If needed swap min and max
-        if (min>max)
-            std::swap(min, max);
-
-        min -= 0.5*design->phiPitchPhi();
-        max += 0.5*design->phiPitchPhi();
-
+        // re-evaluate min and max in polar coordinate
+	min = std::atan2(min, radius);
+	max = std::atan2(max, radius);
     }
 
     std::pair<Amg::Vector3D, Amg::Vector3D >
