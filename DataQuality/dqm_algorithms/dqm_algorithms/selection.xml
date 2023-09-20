@@ -157,5 +157,6 @@
   <class name="dqm_algorithms::TileDQAction"/>
   <class name="dqm_algorithms::TRTCheckPeakSimple"/>
   <class name="dqm_algorithms::TRTHistogramHasNonZeroEntries"/>
+  <class name="dqm_algorithms::TRTWeightedAverage"/>
   <class name="dqm_algorithms::TripleGaussCollFit"/>
 </lcgdict>
