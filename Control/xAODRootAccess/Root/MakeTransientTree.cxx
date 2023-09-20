@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
 // System include(s):
@@ -121,11 +121,11 @@ namespace {
             // If ROOT is already deleted, then at least some of the objects
             // are probably also deleted by now.
             if( ! ROOT::Internal::gROOTLocal ) {
-               m_obj.release();
+               (void)m_obj.release();
             }
             // If we're in global cleanup, then they may also have been deleted.
             if (TTransObjectHolder::s_inCleanup)
-              m_obj.release();
+              (void)m_obj.release();
          }
       private:
          std::unique_ptr< T > m_obj;

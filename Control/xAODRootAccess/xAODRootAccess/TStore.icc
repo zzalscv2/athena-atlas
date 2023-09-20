@@ -110,7 +110,7 @@ namespace xAOD {
 
       // In case of success, give up ownership of the object:
       if( result.isSuccess() ) {
-         obj.release();
+         (void)obj.release();
       }
       return result;
    }
@@ -134,7 +134,7 @@ namespace xAOD {
 
       // In case of success, give up ownership of the object:
       if( result.isSuccess() ) {
-         obj.release();
+         (void)obj.release();
       }
       return result;
    }
