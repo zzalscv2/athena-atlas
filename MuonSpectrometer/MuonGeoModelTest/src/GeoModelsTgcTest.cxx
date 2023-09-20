@@ -103,12 +103,8 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
     m_stPhi = stPhi;
     m_stML = stML;
 
-    const Identifier genWireID =id_helper.channelID(stIndex, stEta, stPhi, 
-                    stML, 1, sTgcIdHelper::sTgcChannelTypes::Wire, 1);
     const Identifier genStripID =id_helper.channelID(stIndex, stEta, stPhi, 
                     stML, 1, sTgcIdHelper::sTgcChannelTypes::Strip, 1);
-    const Identifier genPadID =id_helper.channelID(stIndex, stEta, stPhi, 
-                    stML, 1, sTgcIdHelper::sTgcChannelTypes::Pad, 1);
 
 //// Chamber Details from sTGCDetectorDescription 
     int numLayers = readoutEle->numberOfLayers(true); 
