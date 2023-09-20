@@ -14,8 +14,10 @@ from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 
+# FIXME: removing for MC
 from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
-from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+# added getRun3NavigationContainerFromInput as per Tim Martin's suggestions
+from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
 
 def ZdcRecOutputCfg(flags):
 
@@ -124,35 +126,100 @@ def ZdcRecRun2Cfg(flags):
 def ZdcRecRun3Cfg(flags):
 
     acc = ComponentAccumulator()
-    config = "LHCf2022"
+    config = "pp2023"
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
     
     if flags.Input.ProjectName == "data22_13p6TeV":
         config = "LHCf2022"
-    elif flags.Input.ProjectName == "data22_hi":
-        config = "PbPb2023"
-    elif flags.Input.ProjectName == "data23_hi":
-        config = "PbPb2023"
+    elif flags.Input.ProjectName == "data23_900GeV":
+        config = "pp2023"
+    elif flags.Input.ProjectName == "data23_comm":
+        config = "pp2023"
+    elif flags.Input.ProjectName == "data23_13p6TeV":
+        config = "pp2023"
     elif flags.Input.ProjectName == "data23_5p36TeV":
         config = "pp2023"
+    elif flags.Input.ProjectName == "data23_hi":
+        config = "PbPb2023"
 
-    acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
-    acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
+    print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
+    
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
-    trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
     centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
 
-    zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
-    #zdcTools = [anaTool] # add trigTool after deocration migration
-    
+    if (not flags.Input.isMC):
+        trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
+        zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
+        #zdcTools = [anaTool,centroidTool] # expand list as needed
+    else:
+        zdcTools = [anaTool] # expand list as needed
+        
+    if flags.Input.Format is Format.BS:
+        acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
+        acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
+    if flags.Input.isMC:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+        acc.merge(PoolReadCfg(flags))
+
     zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
     acc.addEventAlgo(zdcAlg, primary=True)
 
     return acc
+
+def ZdcNtupleCfg(flags):
     
+    acc = ComponentAccumulator()
+    run = flags.GeoModel.Run
+
+    if (run == LHCPeriod.Run2):
+        print ('ZdcRecConfig.py: setting up Run 2 ntuple!')
+        acc.merge(ZdcNtupleRun2Cfg(flags))
+    elif (run == LHCPeriod.Run3):
+        print ('ZdcRecConfig.py: setting up Run 3 ntuples!')
+        acc.merge(ZdcNtupleRun3Cfg(flags))
+    else:
+        print ('ZdcRecConfig.py: setting up no ntuple!')
+
+    return acc
+
+def ZdcNtupleRun2Cfg(flags):
+
+    acc = ComponentAccumulator()
+    zdcNtuple = CompFactory.ZdcNtuple("ZdcNtuple")
+    zdcNtuple.useGRL  = False
+    zdcNtuple.zdcOnly = True
+    zdcNtuple.enableTrigger = False
+    zdcNtuple.enableOutputSamples = True
+    zdcNtuple.enableOutputTree = True
+    zdcNtuple.writeOnlyTriggers = False
+    zdcNtuple.nsamplesZdc = 7
+    acc.addEventAlgo(zdcNtuple)
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='zdctree.root' OPT='RECREATE'"]))
+    acc.setAppProperty("HistogramPersistency","ROOT")
+    return acc
+
+def ZdcNtupleRun3Cfg(flags):
+    
+    acc = ComponentAccumulator()
+    zdcNtuple = CompFactory.ZdcNtuple("ZdcNtuple")
+    zdcNtuple.useGRL  = False
+    zdcNtuple.zdcOnly = True
+    zdcNtuple.lhcf2022 = True
+    zdcNtuple.lhcf2022zdc = True
+    zdcNtuple.enableTrigger = False if flags.Input.isMC else True
+    zdcNtuple.enableOutputSamples = True
+    zdcNtuple.enableOutputTree = True
+    zdcNtuple.writeOnlyTriggers = False
+    zdcNtuple.enableRPD = True
+    zdcNtuple.enableCentroid = True
+    acc.addEventAlgo(zdcNtuple)
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
+    #acc.setAppProperty("HistogramPersistency","ROOT")
+    return acc
+
 def ZdcLEDRecCfg(flags):
 
     acc = ComponentAccumulator()
@@ -164,21 +231,41 @@ def ZdcLEDRecCfg(flags):
         print ("ZdcRecConfig.py: run = "+run.name)
         
         config = 'ppPbPb2023'
+        #config = 'ppALFA2023'
 
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
         acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
-    
+
         anaTool = acc.popToolsAndMerge(ZdcLEDAnalysisToolCfg(flags, config)) #anatool for zdcLED calibration  
     
         zdcTools = []
         zdcTools += [anaTool] # add trigTool after deocration migration
     
-        zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",ZdcAnalysisTools=zdcTools)
+        # FIXME these are dependent on !65768
+        zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",DAQMode=2, ForcedEventType=2, ZdcAnalysisTools=zdcTools) # DAQMode set to PhysicsPEB, event type set to ZdcEventLED
         acc.addEventAlgo(zdcAlg, primary=True)
+
+        zdcLEDNtuple = CompFactory.ZdcLEDNtuple("ZdcLEDNtuple")
+        zdcLEDNtuple.enableOutputTree = True
+        acc.addEventAlgo(zdcLEDNtuple)
+        acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
 
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
         
+    return acc
+
+def ZdcLEDTrigCfg(flags):
+
+    acc = ComponentAccumulator()
+
+    # suggested by Tim Martin
+    tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()			 
+    tdmv.errorOnFailure = True
+    tdmv.TrigDecisionTool = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+    tdmv.NavigationKey = getRun3NavigationContainerFromInput(flags)
+    acc.addEventAlgo( tdmv )
+    # end of Tim's suggestions
     return acc
 
 def ZdcRecCfg(flags):    
@@ -188,20 +275,19 @@ def ZdcRecCfg(flags):
 
     acc = ComponentAccumulator()
  
-    if flags.Input.Format is Format.BS:
-        run = flags.GeoModel.Run
+    run = flags.GeoModel.Run
 
-        # debugging message since the metadata isn't working for calibration files yet
-        print ("ZdcRecConfig.py: run = "+run.name)
+    # debugging message since the metadata isn't working for calibration files yet
+    print ("ZdcRecConfig.py: run = "+run.name)
 
-        if (run == LHCPeriod.Run2):
-            print ('ZdcRecConfig.py: setting up Run 2!')
-            acc.merge(ZdcRecRun2Cfg(flags))
-        elif (run == LHCPeriod.Run3):
-            print ('ZdcRecConfig.py: setting up Run 3!')
-            acc.merge(ZdcRecRun3Cfg(flags))
-        else:
-            print ('ZdcRecConfig.py: setting up nothing (problem)!')
+    if (run == LHCPeriod.Run2):
+        print ('ZdcRecConfig.py: setting up Run 2!')
+        acc.merge(ZdcRecRun2Cfg(flags))
+    elif (run == LHCPeriod.Run3):
+        print ('ZdcRecConfig.py: setting up Run 3!')
+        acc.merge(ZdcRecRun3Cfg(flags))
+    else:
+        print ('ZdcRecConfig.py: setting up nothing (problem)!')
 
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(ZdcRecOutputCfg(flags))
@@ -242,15 +328,21 @@ if __name__ == '__main__':
     # run = flags.GeoModel.Run
     # The EDM Version should be auto configured, but is not working at the moment, so is set by hand
 
-    flags.Output.AODFileName="calibAOD.pool.root"
+    flags.Output.AODFileName="AOD.pool.root"
+    flags.Output.HISTFileName="HIST.root"
     flags.Output.doWriteAOD=True
 
     flags.fillFromArgs()
     
+    # check for LED running, and configure appropriately    
     isLED = False
-    
+    if (flags.Input.TriggerStream == "calibration_ZDCLEDCalib"):
+       isLED = True
+    if (isLED):
+       print('ZdcRecConfig: Running LED data!')
+
+    # supply missing metadata based on project name
     pn = flags.Input.ProjectName
-    
     if not isLED:
         year = int(pn.split('_')[0].split('data')[1])
         if (year < 20):
@@ -263,24 +355,32 @@ if __name__ == '__main__':
         flags.Trigger.EDMVersion=3
         flags.GeoModel.Run = LHCPeriod.Run3
 
-    flags.lock()
+    if (flags.Input.isMC):
+        print('ZdcRecConfig: Overriding MC run to be Run 3!')
+        flags.GeoModel.Run = LHCPeriod.Run3
 
+    flags.lock()
 
     acc=MainServicesCfg(flags)
 
-    if not isLED:
-        from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfgData
-        acc.merge(TriggerRecoCfgData(flags))
-
-    
     from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
     acc.merge(ForDetGeometryCfg(flags))
 
-    if not isLED: 
-        acc.merge(ZdcRecCfg(flags))
-    else:
+    if not flags.Input.isMC:
+        from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfgData
+        acc.merge(TriggerRecoCfgData(flags))
+
+    if isLED:
+        #acc.merge(ZdcLEDTrigCfg(flags))
         acc.merge(ZdcLEDRecCfg(flags))
-        
+    else:
+        acc.merge(ZdcRecCfg(flags))
+
+    if not flags.Input.isMC:
+       from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
+       acc.merge(ZdcMonitoringConfig(flags,'pp'))
+       acc.merge(ZdcNtupleCfg(flags))
+
     acc.printConfig(withDetails=True)
 
     with open("config.pkl", "wb") as f:

@@ -23,6 +23,8 @@
 #include "ZdcRec/ZdcRecChannelToolLucrod.h"
 #include "xAODForward/ZdcModuleToString.h"
 #include "ZdcByteStream/ZdcToString.h"
+#include "ZdcUtils/ZdcEventInfo.h"
+
 
 //==================================================================================================
 ZdcRecRun3Decode::ZdcRecRun3Decode(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -52,6 +54,8 @@ StatusCode ZdcRecRun3Decode::initialize()
 	ATH_CHECK( m_zdcModuleContainerName.initialize() );
 	ATH_CHECK( m_zdcSumContainerName.initialize() );
 	ATH_CHECK( m_zldContainerName.initialize(SG::AllowEmpty) );
+	ATH_CHECK( m_eventInfoKey.initialize() );
+	ATH_CHECK( m_eventInfoDecorKey.initialize() );
 
 	if (m_ownPolicy == SG::OWN_ELEMENTS)
 		mLog << MSG::DEBUG << "...will OWN its cells." << endmsg;
@@ -85,7 +89,20 @@ StatusCode ZdcRecRun3Decode::execute()
   ATH_MSG_DEBUG("Trying to get LUCROD DATA!");
   SG::ReadHandle<ZdcLucrodDataContainer> zldContainer    (m_zldContainerName, ctx);
   ATH_MSG_DEBUG("Did I get LUCROD DATA?");
-  
+
+  if (zldContainer->size() < m_nFragments)
+    {
+      SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
+      if (!eventInfo->updateErrorState(xAOD::EventInfo::ForwardDet,xAOD::EventInfo::Error))
+	{
+	  ATH_MSG_WARNING( " cannot set EventInfo error state for ForwardDet "  );
+	}
+      if (!eventInfo->updateEventFlagBit(xAOD::EventInfo::ForwardDet,ZdcEventInfo::DECODINGERROR)) 
+	{
+	  ATH_MSG_WARNING( " cannot set flag bit for ForwardDet "  );      
+	} 
+    }
+
   //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
   std::unique_ptr<xAOD::ZdcModuleContainer> moduleContainer( new xAOD::ZdcModuleContainer());
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
