@@ -13,8 +13,29 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
-# MC16 setup
-# ATLAS-R2-2016-01-00-01 and OFLCOND-MC16-SDR-14
+mkdir -p OLD && cd OLD
+Sim_tf.py \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --simulator 'FullG4MT_QS' \
+    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23cSimulationMultipleIoV.py' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/Rhadrons.EVNT.34227998._000001.pool.root.1" \
+    --outputHITSFile 'test.CG.HITS.pool.root' \
+    --maxEvents '50' \
+    --jobNumber 1 \
+    --imf False
+
+rc2=$?
+status=$rc2
+mv PDGTABLE.MeV ../PDGTABLE.MeV.CG
+mv log.EVNTtoHITS ../log.EVNTtoHITS.CG
+mv test.CG.HITS.pool.root ../test.CG.HITS.pool.root
+cd ../
+echo  "art-result: $rc2 simOLD"
+
+mkdir -p CA && cd CA
+cp ../OLD/SLHA_INPUT.DAT ../OLD/PhysicsConfiguration.txt ../OLD/PYTHIA8_COMMANDS.TXT ./
 Sim_tf.py \
     --CA True \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
@@ -30,41 +51,13 @@ Sim_tf.py \
     --imf False
 
 rc=$?
-mv PDGTABLE.MeV PDGTABLE.MeV.CA
-mv log.EVNTtoHITS log.EVNTtoHITS.CA
+mv PDGTABLE.MeV ../PDGTABLE.MeV.CA
+mv log.EVNTtoHITS ../log.EVNTtoHITS.CA
+mv ConfigSimCA.pkl ../ConfigSimCA.pkl
+mv test.CA.HITS.pool.root ../test.CA.HITS.pool.root
+cd ../
 echo  "art-result: $rc simCA"
 status=$rc
-
-Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23cSimulationMultipleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/Rhadrons.EVNT.34227998._000001.pool.root.1" \
-    --outputHITSFile 'test.CA.HITS.pool.root' \
-    --maxEvents '50' \
-    --jobNumber 1 \
-    --imf False \
-    --athenaopts '"--config-only=ConfigSimCG.pkl"'
-
-Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23cSimulationMultipleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/Rhadrons.EVNT.34227998._000001.pool.root.1" \
-    --outputHITSFile 'test.CG.HITS.pool.root' \
-    --maxEvents '50' \
-    --jobNumber 1 \
-    --imf False
-
-rc2=$?
-status=$rc2
-mv PDGTABLE.MeV PDGTABLE.MeV.CG
-mv log.EVNTtoHITS log.EVNTtoHITS.CG
-echo  "art-result: $rc2 simOLD"
 
 rc3=-9999
 if [ $rc -eq 0 ] && [ $rc2 -eq 0 ]

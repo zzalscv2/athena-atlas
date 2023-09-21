@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // local
@@ -40,6 +40,7 @@ LucidPhysicsTool::LucidPhysicsTool( const std::string& type,
                                     const std::string& nam,const IInterface* parent )
   : G4VPhysicsConstructor(nam), AthAlgTool ( type, nam , parent )
 {
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::GlobalProcesses;
   ATH_MSG_INFO("LucidPhysicsTool "<<type<<" "<<nam);
   declareInterface< IPhysicsOptionTool >( this ) ;
 }

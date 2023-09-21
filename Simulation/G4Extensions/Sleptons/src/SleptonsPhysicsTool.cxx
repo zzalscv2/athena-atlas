@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -60,6 +60,7 @@ SleptonsPhysicsTool::SleptonsPhysicsTool( const std::string& type,
   , m_theSTau2Minus(nullptr)
   , m_theSTau2Plus(nullptr)
 {
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
   declareProperty("G4SElectronLMinusMass",m_G4SElectronLMinusMass=100.00*CLHEP::GeV,"G4SElectronLMinus Mass");
   declareProperty("G4SElectronLMinusWidth",m_G4SElectronLMinusWidth=0.0*CLHEP::MeV,"G4SElectronLMinus Width");
   declareProperty("G4SElectronLMinusCharge",m_G4SElectronLMinusCharge=-1.*CLHEP::eplus,"G4SElectronLMinus charge");

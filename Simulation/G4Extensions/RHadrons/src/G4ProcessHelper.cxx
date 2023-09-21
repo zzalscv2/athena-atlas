@@ -19,15 +19,16 @@ G4ProcessHelper::G4ProcessHelper()
   : theRmesoncloud(0)
   , theRbaryoncloud(0)
 {
+  G4cout << "G4ProcessHelper constructor: start" << G4endl;
   particleTable = G4ParticleTable::GetParticleTable();
   theProton = particleTable->FindParticle("proton");
   theNeutron = particleTable->FindParticle("neutron");
 
-  G4String line;
 
   // I opted for string based read-in, as it would make physics debugging easier later on
 
   std::ifstream process_stream ("ProcessList.txt");
+  G4String line;
   while(getline(process_stream,line)){
     std::vector<G4String> tokens;
 
@@ -36,13 +37,13 @@ G4ProcessHelper::G4ProcessHelper()
 
     //Important info
     G4String incident = tokens[0];
-    G4cout<<"Incident: "<<incident<<G4endl;
+    // G4cout << "Incident particle: " << incident << G4endl;
     G4ParticleDefinition* incidentDef = particleTable->FindParticle(incident);
     G4int incidentPDG = incidentDef->GetPDGEncoding();
     known_particles[incidentDef]=true;
 
     G4String target = tokens[1];
-    //    G4cout<<"Target: "<<target<<G4endl;
+    // G4cout << "Target particle: " << target << G4endl;
 
     // Making a ReactionProduct
     ReactionProduct prod;
@@ -68,34 +69,14 @@ G4ProcessHelper::G4ProcessHelper()
   }
 
   process_stream.close();
+  G4cout << "Found " << pReactionMap.size() << " proton interactions and " << nReactionMap.size() << " neutron interactions in ProcessList.txt." << G4endl;
 
-  parameters["Resonant"]=0.;
-  parameters["ResonanceEnergy"]=0.;
-  parameters["XsecMultiplier"]=1.;
-  parameters["Gamma"]=0.;
-  parameters["Amplitude"]=0.;
-  parameters["ReggeSuppression"]=0.;
-  parameters["HadronLifeTime"]=0.;
-  parameters["ReggeModel"]=0.;
-  parameters["Mixing"]=0.;
-  parameters["DoDecays"]=0;
-
-  std::ifstream physics_stream ("PhysicsConfiguration.txt");
-  char** endptr=0;
-  while(getline(physics_stream,line))
-    {
-      std::vector<G4String> tokens;
-      //Getting a line
-      ReadAndParse(line,tokens,"=");
-      G4String key = tokens[0];
-      G4double val = strtod(tokens[1],endptr);
-      parameters[key]=val;
-    }
-  physics_stream.close();
+  std::map<G4String,G4double> parameters;
+  ReadInPhysicsParameters(parameters);
 
   resonant = false;
   reggemodel = false;
-  if(parameters["Resonant"]!=0.) resonant=true;
+  if (parameters["Resonant"]!=0.) resonant=true;
   ek_0 = parameters["ResonanceEnergy"]*CLHEP::GeV;
   gamma = parameters["Gamma"]*CLHEP::GeV;
   amplitude = parameters["Amplitude"]*CLHEP::millibarn;
@@ -152,15 +133,45 @@ G4ProcessHelper::G4ProcessHelper()
     G4cout << "Done with particle " << name << G4endl;
   }
   theParticleIterator->reset();
-
+  G4cout << "G4ProcessHelper constructor: end" << G4endl;
   return;
 }
+
+
+void G4ProcessHelper::ReadInPhysicsParameters(std::map<G4String,G4double>&  parameters) const
+  {
+    parameters["Resonant"]=0.;
+    parameters["ResonanceEnergy"]=0.;
+    parameters["XsecMultiplier"]=1.;
+    parameters["Gamma"]=0.;
+    parameters["Amplitude"]=0.;
+    parameters["ReggeSuppression"]=0.;
+    parameters["HadronLifeTime"]=0.;
+    parameters["ReggeModel"]=0.;
+    parameters["Mixing"]=0.;
+    parameters["DoDecays"]=0;
+
+    std::ifstream physics_stream ("PhysicsConfiguration.txt");
+    G4String line;
+    char** endptr=0;
+    while (getline(physics_stream,line)) {
+      std::vector<G4String> tokens;
+      //Getting a line
+      ReadAndParse(line,tokens,"=");
+      G4String key = tokens[0];
+      G4double val = strtod(tokens[1],endptr);
+      parameters[key]=val;
+    }
+    physics_stream.close();
+  }
+
 
 const G4ProcessHelper* G4ProcessHelper::Instance()
 {
   static const G4ProcessHelper instance;
   return &instance;
 }
+
 
 G4bool G4ProcessHelper::ApplicabilityTester(const G4ParticleDefinition& aPart) const {
   try {
@@ -493,7 +504,7 @@ G4double G4ProcessHelper::PhaseSpace(const ReactionProduct& aReaction,const G4Pa
 
 void G4ProcessHelper::ReadAndParse(const G4String& str,
                                    std::vector<G4String>& tokens,
-                                   const G4String& delimiters)
+                                   const G4String& delimiters) const
 {
   // Skip delimiters at beginning.
   G4String::size_type lastPos = str.find_first_not_of(delimiters, 0);

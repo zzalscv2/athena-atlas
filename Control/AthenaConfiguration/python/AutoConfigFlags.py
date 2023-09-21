@@ -182,7 +182,7 @@ def getSpecialConfigurationMetadata(inputFiles, secondaryInputFiles):
                                         'SimulationJobOptions/preInclude.SleptonsLLP.py' : 'Sleptons.SleptonsConfig.SleptonsLLPCfg',
                                         'SimulationJobOptions/preInclude.GMSB.py' : 'Sleptons.SleptonsConfig.GMSB_Cfg',
                                         'SimulationJobOptions/preInclude.Qball.py' : 'Monopole.MonopoleConfig.QballCfg',
-                                        'SimulationJobOptions/preInclude.RHadronsPythia8.py' : None, # FIXME
+                                        'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsCfg',
                                         'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpCfg' }
     legacyPreIncludeToCAPreInclude = { 'SimulationJobOptions/preInclude.AMSB.py' : None,
                                        'SimulationJobOptions/preInclude.Monopole.py' :  'Monopole.MonopoleConfig.MonopolePreInclude',
@@ -190,7 +190,7 @@ def getSpecialConfigurationMetadata(inputFiles, secondaryInputFiles):
                                        'SimulationJobOptions/preInclude.SleptonsLLP.py' : None,
                                        'SimulationJobOptions/preInclude.GMSB.py' : None,
                                        'SimulationJobOptions/preInclude.Qball.py' : 'Monopole.MonopoleConfig.QballPreInclude',
-                                       'SimulationJobOptions/preInclude.RHadronsPythia8.py' : None, # FIXME
+                                       'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsPreInclude',
                                        'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpPreInclude' }
     specialConfigString = ''
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
