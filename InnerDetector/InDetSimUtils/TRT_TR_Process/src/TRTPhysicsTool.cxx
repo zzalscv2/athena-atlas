@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTPhysicsTool.h"
@@ -36,6 +36,8 @@ TRTPhysicsTool::TRTPhysicsTool( const std::string& type,
                                 const std::string& nam,const IInterface* parent )
   : G4VPhysicsConstructor(nam), base_class ( type, nam , parent )
 {
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::GlobalProcesses;
+
   declareProperty("XMLFile", m_xmlFile="TRgeomodelgeometry.xml");
 }
 
@@ -70,7 +72,7 @@ void TRTPhysicsTool::ConstructParticle()
 //=============================================================================
 void TRTPhysicsTool::ConstructProcess()
 {
-  ATH_MSG_DEBUG("TRTPhysicsTool::ConstructProcess()");
+  ATH_MSG_DEBUG("TRTPhysicsTool::ConstructProcess() - start");
 
   // Use the Geant4 garbage collection mechanism to clean this up.
   // It's just a convenient way to clean up in multi-threading.
@@ -87,4 +89,5 @@ void TRTPhysicsTool::ConstructProcess()
       pmanager->AddDiscreteProcess(trProc);
     }
   }
+  ATH_MSG_DEBUG("TRTPhysicsTool::ConstructProcess() - end");
 }

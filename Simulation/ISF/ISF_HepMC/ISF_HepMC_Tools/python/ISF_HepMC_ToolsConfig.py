@@ -2,6 +2,7 @@
 
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV, mm
@@ -33,6 +34,7 @@ def GenParticleSimQuasiStableFilterCfg(flags, name="ISF_GenParticleSimQuasiStabl
     return result
 
 
+@AccumulatorCache
 def ParticleSimWhiteList_ExtraParticlesCfg(flags, name="ISF_ParticleSimWhiteList_ExtraParticles", **kwargs):
     result = ComponentAccumulator()
     whiteLists = ["G4particle_whitelist.txt"]

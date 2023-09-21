@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -38,6 +38,7 @@ MonopolePhysicsTool::MonopolePhysicsTool( const std::string& type,
                                           const std::string& nam,const IInterface* parent )
   : base_class ( type, nam , parent )
 {
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
 }
 
 //=============================================================================

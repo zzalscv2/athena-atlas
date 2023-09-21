@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -31,6 +31,8 @@ GauginosPhysicsTool::GauginosPhysicsTool( const std::string& type,
                                           const std::string& nam,const IInterface* parent )
   : base_class ( type, nam , parent )
 {
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
+
   declareProperty("GravitinoMass",m_GravitinoMass=0.108E-04*CLHEP::GeV,"Gravitino Mass");
   declareProperty("GravitinoWidth",m_GravitinoWidth=0.*CLHEP::GeV,"Gravitino Width");
   declareProperty("GravitinoCharge",m_GravitinoCharge=0,"Gravitino charge");

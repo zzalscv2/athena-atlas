@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
@@ -42,6 +42,7 @@ CharginosPhysicsTool::CharginosPhysicsTool( const std::string& type,
   , m_theCharginoPlus(nullptr)
   , m_theNeutralino(nullptr)
 {
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
   declareProperty("CharginoPlusMass",m_CharginoPlusMass= 101.0*CLHEP::GeV,"CharginoPlus Mass");
   declareProperty("CharginoPlusWidth",m_CharginoPlusWidth=0.0*CLHEP::MeV,"CharginoPlus Width");
   declareProperty("CharginoPlusCharge",m_CharginoPlusCharge=+1.*CLHEP::eplus,"CharginoPlus charge");
