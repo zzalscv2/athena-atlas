@@ -13,9 +13,8 @@ atlas_add_library( xAODEgammaCnvLib
 atlas_add_component( xAODEgammaCnv
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel FourMom GaudiKernel Particle ParticleEvent egammaEvent xAODEgamma xAODTracking xAODTruth )
+                     LINK_LIBRARIES AthContainers AthenaBaseComps AthenaKernel 
+                                    FourMom GaudiKernel Particle ParticleEvent 
+                                    egammaEvent xAODEgamma xAODTracking xAODTruth )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
 
