@@ -9,6 +9,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/StatusCode.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
+#include "CaloEvent/CaloClusterCellLinkContainer.h"
 #include "StoreGate/WriteHandle.h"
 #include "AthLinks/DataLink.h"
 #include <memory>
@@ -80,17 +81,14 @@ public:
    */ 
   static StatusCode AddContainerWriteHandle(SG::WriteHandle<xAOD::CaloClusterContainer> &clusColl);
 
-  ////////////////////
-  // finalize Clusters //
-  ////////////////////
-	 
- 
-  /*! \brief Finalize clusters (move CaloClusterCellLink to separate container*/
+  /** @brief Finalize clusters (move CaloClusterCellLink to a separate container). */
   static StatusCode finalizeClusters(SG::WriteHandle<CaloClusterCellLinkContainer>& h,
 				     xAOD::CaloClusterContainer* pClusterColl);
 
-
-
+  static void finalizeClusters(
+    const EventContext& ctx,
+    SG::WriteHandle<xAOD::CaloClusterContainer>& outClusterContainer,
+    SG::WriteHandle<CaloClusterCellLinkContainer>& outClusterContainerCellLink);
 
   /**
    * @brief Deep copy of a cluster container.

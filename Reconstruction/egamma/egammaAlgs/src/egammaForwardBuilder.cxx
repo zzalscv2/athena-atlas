@@ -211,10 +211,10 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 
   }//end of loop over egammaRecs
 
-  // Now finalize the cluster: based on code in CaloClusterStoreHelper::finalizeClusters.
-  for (xAOD::CaloCluster* cl : *outClusterContainer) {
-    cl->setLink(outClusterContainerCellLink.ptr(), ctx);
-  }
+  CaloClusterStoreHelper::finalizeClusters(
+    ctx, 
+    outClusterContainer, 
+    outClusterContainerCellLink);
 
   return StatusCode::SUCCESS;
 }
