@@ -199,6 +199,19 @@ public:
 
 
   /**
+   * @brief Clear a range of objects.
+   * @param dst Pointer to the start of vector's data.
+   * @param index Index of the first element to clear.
+   * @param n Number of objects to clear.
+   *
+   * Objects of class type are cleared by assigning to them
+   * a default-constructed object.  Other objects types are cleared
+   * by filling with 0.
+   */
+  void clearRange (void* dst, size_t index, size_t n) const;
+
+
+  /**
    * @brief Clear an object in a vector.
    * @param dst Pointer to the start of the vector's data.
    * @param index Index of the object in the vector.
