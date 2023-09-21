@@ -3,66 +3,69 @@
 #
 
 # menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool,algorithmCAToGlobalWrapper
-from AthenaCommon.CFElements import parOR, seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-
-def fastTrackingSequence(flags, variant=''):
+def fastTrackingSequenceCfg(flags, variant='', is_probe_leg = False):
     """ second step:  tracking....."""
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys(variant)
-    IDTrigConfig = TrigEgammaKeys.IDTrigConfig
-    RoIs = "EMIDRoIs"+variant
-    # EVCreator:
-    fastTrackingViewsMaker = EventViewCreatorAlgorithm("IMfastTracking"+variant)
-    fastTrackingViewsMaker.mergeUsingFeature=True
-    fastTrackingViewsMaker.RoIsLink = "initialRoI" # Merge inputs based on their initial L1 ROI
-    # Spawn View on SuperRoI encompassing all clusters found within the L1 RoI
+    inViewRoIs = "EMIDRoIs"+variant
+    
+    # calling the fastTracking Reco algo
+    from TriggerMenuMT.HLT.Electron.FastTrackingRecoSequences import fastTracking
+    fastTrackingReco, recoFlags = fastTracking(flags, inViewRoIs, variant)
+    
+    # preparing roiTool
+    ViewCreatorCentredOnClusterROITool=CompFactory.ViewCreatorCentredOnClusterROITool
     roiTool = ViewCreatorCentredOnClusterROITool()
     roiTool.AllowMultipleClusters = False # If True: SuperROI mode. If False: highest eT cluster in the L1 ROI
     roiTool.RoisWriteHandleKey = TrigEgammaKeys.fastTrackingRoIContainer
-    roiTool.RoIEtaWidth = IDTrigConfig.etaHalfWidth
-    roiTool.RoIPhiWidth = IDTrigConfig.phiHalfWidth
-    if IDTrigConfig.zedHalfWidth > 0 :
-        roiTool.RoIZedWidth = IDTrigConfig.zedHalfWidth
-    fastTrackingViewsMaker.RoITool = roiTool
-    fastTrackingViewsMaker.InViewRoIs = RoIs
-    fastTrackingViewsMaker.Views = "EMFastTrackingViews"+variant
-    fastTrackingViewsMaker.ViewFallThrough = True
-    fastTrackingViewsMaker.RequireParentView = True
+    roiTool.RoIEtaWidth = recoFlags.Tracking.ActiveConfig.etaHalfWidth
+    roiTool.RoIPhiWidth = recoFlags.Tracking.ActiveConfig.phiHalfWidth
+    if recoFlags.Tracking.ActiveConfig.zedHalfWidth > 0 :
+        roiTool.RoIZedWidth = recoFlags.Tracking.ActiveConfig.zedHalfWidth
+    viewName="EMFastTracking"+variant    
+    fastInDetReco = InViewRecoCA(viewName,
+                                 RoITool=roiTool, # view maker args
+                                 RequireParentView=True,
+                                 InViewRoIs=inViewRoIs,
+                                 isProbe=is_probe_leg)
 
-    # calling fast tracking
-    from TriggerMenuMT.HLT.Electron.FastTrackingRecoSequences import fastTracking
-    fastTrackingInViewSequence, trackParticles = fastTracking(flags,RoIs,variant)
-
-    fastTrackingInViewAlgs = parOR("fastTrackingInViewAlgs"+variant, [fastTrackingInViewSequence])
-    fastTrackingViewsMaker.ViewNodeName = "fastTrackingInViewAlgs"+variant
-
-    # connect EVC and reco
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si,flags,nameSuffix=fastTrackingViewsMaker.name())[0]
-    theSequence = seqAND("fastTrackingSequence"+variant, [fastTrackingViewsMaker, robPrefetchAlg, fastTrackingInViewAlgs] )
-    return (theSequence,fastTrackingViewsMaker,trackParticles)
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Si(flags, nameSuffix='IM_'+fastInDetReco.name)
 
-
-def fastTrackingMenuSequence(flags, name, is_probe_leg=False, variant=''):
-    """ Creates precisionCalo MENU sequence """
-    (sequence, fastTrackingViewsMaker, trackParticles) = RecoFragmentsPool.retrieve(fastTrackingSequence, flags , variant=variant)
-
-    from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg, TrigStreamerHypoTool
-    theFastTrackingHypo = TrigStreamerHypoAlg(name + "fastTrackingHypo"+variant)
-    theFastTrackingHypo.FeatureIsROI = False
+    fastInDetReco.mergeReco(fastTrackingReco)
+    selAcc=SelectionCA('ElectronFTF'+variant, isProbe=is_probe_leg)
+    selAcc.mergeReco(fastInDetReco, robPrefetchCA=robPrefetchAlg)
+    fastElectronHypoAlg = CompFactory.TrigStreamerHypoAlg("ElectronfastTrackingHypo"+variant)
+    fastElectronHypoAlg.FeatureIsROI = False
+    selAcc.addHypoAlgo(fastElectronHypoAlg)
     def acceptAllHypoToolGen(chainDict):
-        return TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
-    return MenuSequence( flags,
-                         Sequence    = sequence,
-                         Maker       = fastTrackingViewsMaker, 
-                         Hypo        = theFastTrackingHypo,
-                         HypoToolGen = acceptAllHypoToolGen,
-                         IsProbe     = is_probe_leg)
+        return CompFactory.TrigStreamerHypoTool(chainDict["chainName"], Pass = True)
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=acceptAllHypoToolGen,isProbe=is_probe_leg)
 
 
-def fastTrackingMenuSequence_LRT(flags, name, is_probe_leg=False):
-   return fastTrackingMenuSequence(flags, name, is_probe_leg=is_probe_leg, variant='_LRT')
+def fastTrackingSequenceCfg_lrt(flags, is_probe_leg=False):
+    # This is to call fastElectronMenuSequence for the _LRT variant
+    return fastTrackingSequenceCfg(flags, variant='_LRT', is_probe_leg=is_probe_leg)
+
+
+def fastTrackingMenuSequence(flags, is_probe_leg=False):
+    """Creates second step electron sequence"""
+
+    if isComponentAccumulatorCfg():
+        return fastTrackingSequenceCfg(flags, is_probe_leg=is_probe_leg)
+    else: 
+        return menuSequenceCAToGlobalWrapper(fastTrackingSequenceCfg, flags, is_probe_leg=is_probe_leg)
+
+
+def fastTrackingMenuSequence_LRT(flags, is_probe_leg=False):
+    """Creates secpond step photon sequence"""
+
+    if isComponentAccumulatorCfg():
+        return fastTrackingSequenceCfg_lrt(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(fastTrackingSequenceCfg_lrt, flags, is_probe_leg=is_probe_leg)
+

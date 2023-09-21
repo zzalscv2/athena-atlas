@@ -9,6 +9,7 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..CommonSequences.CaloSequences import fastCaloMenuSequence 
 from ..CommonSequences.CaloSequences_FWD import fastCaloMenuSequence_FWD
 from ..Electron.FastElectronMenuSequences import fastElectronMenuSequence, fastElectronMenuSequence_LRT
+from ..Electron.FastTrackingMenuSequences import fastTrackingMenuSequence, fastTrackingMenuSequence_LRT
 from ..Electron.PrecisionCaloMenuSequences import precisionCaloMenuSequence, precisionCaloMenuSequence_LRT
 
 if isComponentAccumulatorCfg():
@@ -21,7 +22,6 @@ if isComponentAccumulatorCfg():
     def NoMuonDiElecPrecisionGSFComboHypoCfg() : pass
     def DiElecPrecisionGSFComboHypoCfg() : pass
 else:
-    from ..Electron.FastTrackingMenuSequences import fastTrackingMenuSequence, fastTrackingMenuSequence_LRT
     from ..Electron.PrecisionElectronMenuSequences import precisionElectronMenuSequence, precisionElectronMenuSequence_LRT
     from ..Electron.PrecisionElectronMenuSequences_GSF import precisionElectronMenuSequence_GSF, precisionElectronMenuSequence_LRTGSF
     from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
@@ -38,10 +38,10 @@ def electronFastCaloCfg( flags, is_probe_leg=False ):
     return fastCaloMenuSequence(flags, "Electron", is_probe_leg=is_probe_leg)
 
 def fastTrackingSequenceCfg( flags, is_probe_leg=False ):
-    return fastTrackingMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg)
+    return fastTrackingMenuSequence(flags, is_probe_leg=is_probe_leg)
 
 def fastTrackingSequenceCfg_lrt( flags, is_probe_leg=False ):
-    return fastTrackingMenuSequence_LRT(flags, 'Electron', is_probe_leg=is_probe_leg)
+    return fastTrackingMenuSequence_LRT(flags, is_probe_leg=is_probe_leg)
 
 def fastElectronSequenceCfg( flags, is_probe_leg=False ):
     return fastElectronMenuSequence(flags, is_probe_leg=is_probe_leg)
