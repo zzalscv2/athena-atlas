@@ -40,6 +40,8 @@ def addCommonP1Signatures(chains):
         # ATR-20650
         ChainProp(name='HLT_mu0_muoncalib_L1MU3V_EMPTY', stream=['Muon_Calibration'], groups=['PS:Online','RATE:Muon_Calibration','BW:Muon']),
         ChainProp(name='HLT_mu0_muoncalib_L1MU14FCH', stream=['Muon_Calibration'], groups=['PS:Online','RATE:Muon_Calibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU3V', stream=['Muon_Calibration'], groups=['PS:Online','RATE:Muon_Calibration','BW:Muon']),
+        ChainProp(name='HLT_mu0_muoncalib_L1MU5VF', stream=['Muon_Calibration'], groups=['PS:Online','RATE:Muon_Calibration','BW:Muon']),
     ]
     
     chainsP1['Egamma'] = [
@@ -111,10 +113,6 @@ def addCommonP1Signatures(chains):
         ChainProp(name='HLT_larnoiseburst_L1All', l1SeedThresholds=['FSNOSEED'], stream=['LArNoiseBurst'], groups=['PS:Online','PS:NoHLTRepro','RATE:Calibration','BW:Detector']), # Temporary for testing, high CPU cost
         ChainProp(name='HLT_acceptedevts_larnoiseburst_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD','BW:DISCARD']),
 
-        # End of event chains for MET
-        ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
-        ChainProp(name='HLT_acceptedevts_mettrk_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
-        
         ## larpsall/em*FIRSTEMPTY
         ChainProp(name='HLT_larpsall_L1J12_FIRSTEMPTY', l1SeedThresholds=['J12'], stream=['LArNoiseBurst'], groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_larpsall_L1J30_FIRSTEMPTY', l1SeedThresholds=['J30'], stream=['LArNoiseBurst'], groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
@@ -351,6 +349,11 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_LArPEBNoise_L1EM7_FIRSTEMPTY',  l1SeedThresholds=['EM7'],  stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportLegGroup),
         ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM15_EMPTY',  l1SeedThresholds=['eEM15'], stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportPhIGroup),
         #ChainProp(name='HLT_noalg_LArPEBNoise_L1eEM9_FIRSTEMPTY',  l1SeedThresholds=['eEM9'],  stream=['LArCellsEmpty'],groups=['PS:Online','RATE:Calibration','BW:Detector']+SupportPhIGroup),
+
+        # End of event chains for MET
+        ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
+        ChainProp(name='HLT_acceptedevts_mettrk_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
+        
     ]
 
     chainsP1['Streaming'] = [
@@ -458,6 +461,10 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ1', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ2', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
 
+        # End of event chains for MET
+        ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
+        ChainProp(name='HLT_acceptedevts_mettrk_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
+        
     ]
 
     # Intentionally commented -- may be used specifically for low-mu MBTS validation
@@ -503,6 +510,11 @@ def addLowMuP1Signatures(chains):
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_J15']+SupportLegGroup),
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_jJ40']+SupportPhIGroup),
     ]
+    chainsP1['Jet'] = [
+        # BeamspotPEB chains -- only run preselection without tracking, write PEB data
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1J15' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_J15']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
+    ]
 
     addP1Signatures(chains,chainsP1)
 
@@ -515,6 +527,20 @@ def addHeavyIonP1Signatures(chains):
     chainsP1['Beamspot'] = [
         ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J12_VTE200',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
         ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L1J12_VTE100',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
+        ChainProp(name='HLT_j0_ftf_beamspotVtx_L1J12_VTE100',  l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['PS:Online', 'RATE:BeamSpot',  'BW:BeamSpot']+SupportLegGroup),
+
+        # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1VZDC_A_VZDC_C_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_VZDC_A_VZDC_C_TE5_VTE200']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L1ZDC_XOR_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_ZDC_XOR_TE5_VTE200']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L11ZDC_NZDC_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_1ZDC_NZDC_TE5_VTE200']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_beamspotVtx_L15ZDC_A_5ZDC_C_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_5ZDC_A_5ZDC_C_TE5_VTE200']+SupportLegGroup),
+    ]
+    chainsP1['Jet'] = [
+        # BeamspotPEB chains -- only run preselection without tracking, write PEB data
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1VZDC_A_VZDC_C_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_VZDC_A_VZDC_C_TE5_VTE200']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L1ZDC_XOR_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_ZDC_XOR_TE5_VTE200']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L11ZDC_NZDC_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_1ZDC_NZDC_TE5_VTE200']+SupportLegGroup),
+        ChainProp(name='HLT_j0_pf_jes_ftf_preselj20_BeamSpotPEB_L15ZDC_A_5ZDC_C_TE5_VTE200' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot', 'RATE:CPS_5ZDC_A_5ZDC_C_TE5_VTE200']+SupportLegGroup),
     ]
 
     chainsP1['Calib'] = [
@@ -628,6 +654,11 @@ def addCosmicP1Signatures(chains):
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ0', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ1', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
         ChainProp(name='HLT_noalg_ZDCPEB_L1CALREQ2', l1SeedThresholds=['FSNOSEED'], stream=['ZDCLEDCalib'], groups=['PS:Online', 'RATE:Calibration', 'BW:Detector']),
+
+        # End of event chains for MET
+        ChainProp(name='HLT_acceptedevts_metcalo_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
+        ChainProp(name='HLT_acceptedevts_mettrk_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:Online','RATE:DISCARD', 'BW:DISCARD']),
+        
     ]
 
     chainsP1['Streaming'] = [
