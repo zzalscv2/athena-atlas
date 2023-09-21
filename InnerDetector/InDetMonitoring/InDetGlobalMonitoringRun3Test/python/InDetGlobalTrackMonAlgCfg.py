@@ -16,11 +16,11 @@ def InDetGlobalTrackMonAlgCfg(helper, alg, **kwargs):
     # values
     m_nBinsEta = 50
     m_nBinsPhi = 50
-    m_trackBin = 75
+    m_trackBin = 150
     m_c_etaRange = 2.5
     m_c_etaRangeTRT = 2.0
     m_c_range_LB = 3000
-    m_trackMax = 75
+    m_trackMax = 150
 
     # this creates a "trackGroup" called "alg" which will put its histograms into the subdirectory "Track"
     trackGroup = helper.addGroup(alg, 'Track')
