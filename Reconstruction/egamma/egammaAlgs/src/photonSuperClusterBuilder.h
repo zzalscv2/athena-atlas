@@ -34,7 +34,7 @@
  *
  * Output containers:
  * - \ref photonSuperClusterBuilder.m_photonSuperRecCollectionKey
- * "SuperPhotonRecCollectionName" (default=PhotonSuperRecCollection): collection
+ * "OutputEgammaRecContainerKey" (default=PhotonSuperRecCollection): collection
  * of EgammaRec objects with the cluster set to be the supercluster
  * - \ref photonSuperClusterBuilder.m_outputPhotonSuperClustersKey
  * "SuperClusterCollectionName" (default=PhotonSuperClusters): collection of
@@ -115,45 +115,6 @@ private:
   bool matchesVtxTrack(
     const std::vector<const xAOD::TrackParticle*>& seedVertexTracks,
     const egammaRec* egRec) const;
-
-  // internal variables
-  /** @brief Key for input egammaRec container */
-  SG::ReadHandleKey<EgammaRecContainer> m_inputEgammaRecContainerKey{
-    this,
-    "InputEgammaRecContainerName",
-    "egammaRecCollection",
-    "input egammaRec container"
-  };
-
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
-    this,
-    "CaloDetDescrManager",
-    "CaloDetDescrManager",
-    "SG Key for CaloDetDescrManager in the Condition Store"
-  };
-
-  /** @brief Key for output egammaRec container */
-  SG::WriteHandleKey<EgammaRecContainer> m_photonSuperRecCollectionKey{
-    this,
-    "SuperPhotonRecCollectionName",
-    "PhotonSuperRecCollection",
-    "output egammaRec container"
-  };
-
-  /** @brief Key for output clusters */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputPhotonSuperClustersKey{
-    this,
-    "SuperClusterCollectionName",
-    "PhotonSuperClusters",
-    "output calo cluster container"
-  };
-
-  /** @brief Optional key for pre-correction clusters */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer>
-    m_precorrClustersKey{ this,
-                          "precorrClustersName",
-                          "",
-                          "optional pre-correction clusters" };
 
   /** @brief Tool to retrieve the conversions*/
   ToolHandle<IEMConversionBuilder> m_conversionBuilder{

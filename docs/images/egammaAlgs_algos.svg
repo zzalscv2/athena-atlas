@@ -238,13 +238,13 @@
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="170"
        y="757.63098"
-       id="text63">+SuperElectronRecCollectionName: EgammaRecContainer = ElectronSuperRecCollection</text>
+       id="text63">+OutputEgammaRecContainerKey: EgammaRecContainer = ElectronSuperRecCollection</text>
     <text
        font-size="12.8px"
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="170"
        y="773.63098"
-       id="text65">+SuperPhotonRecCollectionName: EgammaRecContainer = PhotonSuperRecCollection</text>
+       id="text65">+OutputEgammaRecContainerKey: EgammaRecContainer = PhotonSuperRecCollection</text>
     <text
        font-size="12.8px"
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
@@ -300,7 +300,7 @@
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="515"
        y="653.38098"
-       id="text83">+SuperPhotonRecCollectionName: EgammaRecContainer = PhotonSuperRecCollection</text>
+       id="text83">+OutputEgammaRecContainerKey: EgammaRecContainer = PhotonSuperRecCollection</text>
     <text
        font-size="12.8px"
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
@@ -350,7 +350,7 @@
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"
        x="-144"
        y="652.48102"
-       id="text99">+SuperElectronRecCollectionName: EgammaRecContainer = ElectronSuperRecCollection</text>
+       id="text99">+OutputEgammaRecContainerKey: EgammaRecContainer = ElectronSuperRecCollection</text>
     <text
        font-size="12.8px"
        style="font-style:normal;font-weight:normal;font-family:monospace;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none"

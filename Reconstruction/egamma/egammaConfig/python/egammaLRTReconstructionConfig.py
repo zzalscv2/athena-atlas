@@ -69,10 +69,12 @@ def egammaLRTReconstructionCfg(flags, name="egammaLRTReconstruction"):
         acc.merge(electronSuperClusterBuilderCfg(
             flags,
             name='LRTelectronSuperClusterBuilder',
-            InputEgammaRecContainerName='LRT'+flags.Egamma.Keys.Internal.EgammaRecs,
-            SuperElectronRecCollectionName='LRT' +
-            flags.Egamma.Keys.Internal.ElectronSuperRecs,
-            SuperClusterCollectionName='LRTElectronSuperClusters',
+            InputEgammaRecContainerName='LRT' +
+              flags.Egamma.Keys.Internal.EgammaRecs,
+            OutputEgammaRecContainerKey='LRT' +
+              flags.Egamma.Keys.Internal.ElectronSuperRecs,
+            SuperClusterCollectionName = 'LRT' + 
+              flags.Egamma.Keys.Internal.ElectronSuperClusters,
             TrackMatchBuilderTool=lrtemtrackmatch)
         )
 

@@ -155,6 +155,45 @@ protected:
     "The minimum EM Et required of SEED clusters (not applied to secondaries)"
   };
 
+  /** @brief Key for input egammaRec container */
+  SG::ReadHandleKey<EgammaRecContainer> m_inputEgammaRecContainerKey{
+    this,
+    "InputEgammaRecContainerName",
+    "egammaRecCollection",
+    "input egammaRec container"
+  };
+
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
+    this,
+    "CaloDetDescrManager",
+    "CaloDetDescrManager",
+    "SG Key for CaloDetDescrManager in the Condition Store"
+  };
+
+  /** @brief Key for output egammaRec container */
+  SG::WriteHandleKey<EgammaRecContainer> m_outputEgammaRecContainerKey {
+    this,
+    "OutputEgammaRecContainerKey",
+    "egammaSuperRecContainer",
+    "output egammaRec container"
+  };
+
+  /** @brief Key for output clusters */
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputSuperClusterCollectionName {
+    this,
+    "SuperClusterCollectionName",
+    "egammaSuperClusters",
+    "output calo cluster container"
+  };
+
+  /** @brief Optional key for pre-correction clusters */
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_precorrClustersKey{ 
+    this,
+    "precorrClustersName",
+    "",
+    "optional pre-correction clusters"
+  };
+
   // these are calculated search window values
   // half of search window size, converted to units of eta,phi
   float m_searchWindowEtaBarrel;

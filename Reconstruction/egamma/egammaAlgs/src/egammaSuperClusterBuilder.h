@@ -34,7 +34,7 @@
  *
  * Output containers:
  * - \ref egammaSuperClusterBuilder.m_egammaSuperRecCollectionKey
- * "SuperegammaRecCollectionName" (default=egammaSuperRecCollection): collection
+ * "OutputEgammaRecContainerKey" (default=egammaSuperRecCollection): collection
  * of EgammaRec objects with the cluster set to be the supercluster
  * - \ref egammaSuperClusterBuilder.m_outputegammaSuperClustersKey
  * "SuperClusterCollectionName" (default=egammaSuperClusters): collection of
@@ -86,52 +86,12 @@ private:
 
   xAOD::EgammaParameters::EgammaType m_egTypeForCalibration;
 
-  
   /** @brief type to be assumed for calibration */
   Gaudi::Property<std::string> m_calibrationType{
     this,
     "CalibrationType",
     "electron",
     "type to be assumed for calibration: electron , photon"
-  };
-
-  /** @brief Key for input egammaRec container */
-  SG::ReadHandleKey<EgammaRecContainer> m_inputEgammaRecContainerKey{
-    this,
-    "InputEgammaRecContainerName",
-    "egammaRecCollection",
-    "input egammaRec container"
-  };
-
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{
-    this,
-    "CaloDetDescrManager",
-    "CaloDetDescrManager",
-    "SG Key for CaloDetDescrManager in the Condition Store"
-  };
-
-  /** @brief Key for output egammaRec container */
-  SG::WriteHandleKey<EgammaRecContainer> m_egammaSuperRecCollectionKey{
-    this,
-    "SuperegammaRecCollectionName",
-    "egammaSuperRecCollection",
-    "output egammaRec container"
-  };
-
-  /** @brief Key for output clusters */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputegammaSuperClustersKey{
-    this,
-    "SuperClusterCollectionName",
-    "egammaSuperClusters",
-    "output calo cluster container"
-  };
-
-  /** @brief Optional key for pre-correction clusters */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_precorrClustersKey{
-    this,
-    "precorrClustersName",
-    "",
-    "optional pre-correction clusters"
   };
 };
 

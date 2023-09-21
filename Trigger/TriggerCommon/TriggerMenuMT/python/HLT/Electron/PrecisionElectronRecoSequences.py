@@ -142,7 +142,7 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     #online monitoring for TrigElectronSuperClusterBuilder_GSF
     from TriggerMenuMT.HLT.Electron.TrigElectronFactories import PrecisionElectronSuperClusterMonitorCfg
     PrecisionElectronSuperClusterMonAlgo_GSF = PrecisionElectronSuperClusterMonitorCfg(flags, "PrecisionElectronSuperClusterBuilder"+tag)
-    PrecisionElectronSuperClusterMonAlgo_GSF.InputEgammaRecContainerName = TrigSuperElectronAlgo_GSF.SuperElectronRecCollectionName
+    PrecisionElectronSuperClusterMonAlgo_GSF.InputEgammaRecContainerName = TrigSuperElectronAlgo_GSF.OutputEgammaRecContainerKey
     thesequence_GSF += PrecisionElectronSuperClusterMonAlgo_GSF
 
     return (thesequence_GSF, collectionOut_GSF, collectionOut_GSF_dummy)

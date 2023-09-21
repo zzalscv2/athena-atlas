@@ -30,11 +30,6 @@ egammaSuperClusterBuilder::initialize()
   ATH_MSG_DEBUG(" Initializing egammaSuperClusterBuilder");
 
   // the data handle keys
-  ATH_CHECK(m_inputEgammaRecContainerKey.initialize());
-  ATH_CHECK(m_egammaSuperRecCollectionKey.initialize());
-  ATH_CHECK(m_outputegammaSuperClustersKey.initialize());
-  ATH_CHECK(m_precorrClustersKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
   if (m_calibrationType == "electron") {
     m_egTypeForCalibration = xAOD::EgammaParameters::electron;
   } else if (m_calibrationType == "photon") {
@@ -43,6 +38,7 @@ egammaSuperClusterBuilder::initialize()
     ATH_MSG_ERROR("Unsupported calibration for " << m_calibrationType);
     return StatusCode::FAILURE;
   }
+
   return egammaSuperClusterBuilderBase::initialize();
 }
 
@@ -62,13 +58,13 @@ egammaSuperClusterBuilder::execute(const EventContext& ctx) const
 
   // Have to register cluster container in order to properly get cluster links.
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
-    m_outputegammaSuperClustersKey, ctx);
+    m_outputSuperClusterCollectionName, ctx);
 
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
   
   // Create the new egamma Super Cluster based EgammaRecContainer
   SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
-    m_egammaSuperRecCollectionKey, ctx);
+    m_outputEgammaRecContainerKey, ctx);
   ATH_CHECK(newEgammaRecs.record(std::make_unique<EgammaRecContainer>()));
 
   size_t inputSize = egammaRecs->size();
