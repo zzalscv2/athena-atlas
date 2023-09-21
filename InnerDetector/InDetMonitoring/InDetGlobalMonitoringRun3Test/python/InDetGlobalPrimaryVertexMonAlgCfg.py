@@ -42,11 +42,11 @@ def InDetGlobalPrimaryVertexMonAlgCfg(helper, alg, **kwargs):
     
     varName = 'm_PvErrX;pvErrX'  #done
     title   = 'Primary vertex: #sigma_{x}; #sigma_{x} (mm);Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=0., xmax=0.015)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=200, xmin=0., xmax=0.03)
   
     varName = 'm_PvErrY;pvErrY'  #done
     title   = 'Primary vertex: #sigma_{y}; #sigma_{y} (mm);Events'
-    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=100, xmin=0., xmax=0.015)
+    pvGroup.defineHistogram(varName, type='TH1F', path=pathpv, title=title, xbins=200, xmin=0., xmax=0.03)
 
     varName = 'm_PvErrZ;pvErrZ'   #done
     title   = 'Primary vertex: #sigma_{z}; #sigma_{z} (mm);Events'
