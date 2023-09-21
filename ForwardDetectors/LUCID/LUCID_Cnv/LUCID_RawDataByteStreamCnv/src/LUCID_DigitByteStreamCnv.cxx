@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_DigitByteStreamCnv.h"
@@ -39,8 +39,8 @@ StatusCode LUCID_DigitByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddress*
    RawEventWrite*        re = m_ByteStreamEventAccess->getRawEvent();
    LUCID_DigitContainer* RDO_container = nullptr;
 
-// dynmanic cast of the pObj to RDO_container based in clid of pObj
-   StoreGateSvc::fromStorable(pObj, RDO_container);
+// dynamic cast of the pObj to RDO_container based in clid of pObj
+   SG::fromStorable(pObj, RDO_container);
 
    if (!RDO_container) {
 

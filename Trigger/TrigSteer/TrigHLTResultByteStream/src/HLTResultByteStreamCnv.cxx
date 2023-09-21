@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTResultByteStreamCnv.h"
@@ -164,7 +164,7 @@ StatusCode HLT::HLTResultByteStreamCnv::createObj(IOpaqueAddress* pAddr, DataObj
     return sc;
   }
 
-  pObj = StoreGateSvc::asStorable(result);
+  pObj = SG::asStorable(result);
   return sc;
 }
 
@@ -175,7 +175,7 @@ StatusCode HLT::HLTResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddre
 {
 
    HLTResult* result = 0;
-   StoreGateSvc::fromStorable(pObj, result);
+   SG::fromStorable(pObj, result);
 
    if (!result) {
      (*m_log) << MSG::ERROR << " Cannot cast to HLTResult " << endmsg ;
