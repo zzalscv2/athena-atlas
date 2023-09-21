@@ -76,6 +76,16 @@ CaloClusterStoreHelper::finalizeClusters (SG::WriteHandle<CaloClusterCellLinkCon
   return h.record (std::move (cellLinks));
 }
 
+void
+CaloClusterStoreHelper::finalizeClusters(
+  const EventContext& ctx,
+  SG::WriteHandle<xAOD::CaloClusterContainer>& outClusterContainer,
+  SG::WriteHandle<CaloClusterCellLinkContainer>& outClusterContainerCellLink)
+{
+  for (xAOD::CaloCluster* cl : *outClusterContainer) {
+    cl->setLink(outClusterContainerCellLink.ptr(), ctx);
+  }
+}
 
  //Moved to here from CaloRunClusterCorrection
 void CaloClusterStoreHelper::copyContainer (const xAOD::CaloClusterContainer* oldColl, xAOD::CaloClusterContainer* newColl) {

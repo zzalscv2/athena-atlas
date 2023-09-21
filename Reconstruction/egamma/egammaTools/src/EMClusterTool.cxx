@@ -75,11 +75,11 @@ EMClusterTool::contExecute(const EventContext& ctx,
       setNewCluster(ctx, photon, outputClusterContainer.ptr());
     }
   }
-  // Now finalize the cluster: based on code in
-  // CaloClusterStoreHelper::finalizeClusters
-  for (xAOD::CaloCluster* cl : *outputClusterContainer) {
-    cl->setLink(outputClusterContainerCellLink.ptr(), ctx);
-  }
+
+  CaloClusterStoreHelper::finalizeClusters(
+    ctx, 
+    outputClusterContainer, 
+    outputClusterContainerCellLink);
 
   return StatusCode::SUCCESS;
 }
