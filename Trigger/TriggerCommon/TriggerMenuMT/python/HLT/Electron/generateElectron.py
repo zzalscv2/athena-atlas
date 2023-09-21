@@ -171,7 +171,7 @@ def _precisionElectronSeq(flags):
         from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
         superClusterBuilder = CompFactory.electronSuperClusterBuilder( 'TrigElectronSuperClusterBuilder_noGSF',
                                                                         InputEgammaRecContainerName = TrigEgammaKeys.precisionCaloEgammaRecCollection,
-                                                                        SuperElectronRecCollectionName = TrigEgammaKeys.precisionElectronSuperClusterCollection,
+                                                                        OutputEgammaRecContainerKey = TrigEgammaKeys.precisionElectronSuperClusterCollection,
                                                                         ClusterCorrectionTool = recoAcc.popToolsAndMerge(egammaSwToolCfg(flags)),
                                                                         MVACalibSvc = recoAcc.getPrimaryAndMerge(egammaMVASvcCfg(flags)),
                                                                         EtThresholdCut = 1000,

@@ -34,14 +34,6 @@ StatusCode
 electronSuperClusterBuilder::initialize()
 {
   ATH_MSG_DEBUG(" Initializing electronSuperClusterBuilder");
-  // Call initialize of base
-  ATH_CHECK(egammaSuperClusterBuilderBase::initialize());
-  // the data handle keys
-  ATH_CHECK(m_inputEgammaRecContainerKey.initialize());
-  ATH_CHECK(m_electronSuperRecCollectionKey.initialize());
-  ATH_CHECK(m_outputElectronSuperClustersKey.initialize());
-  ATH_CHECK(m_precorrClustersKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
 
   // Additional Window we search in
   m_maxDelPhi = m_maxDelPhiCells * s_cellPhiSize * 0.5;
@@ -51,7 +43,8 @@ electronSuperClusterBuilder::initialize()
   if (m_doTrackMatching) {
     ATH_CHECK(m_trackMatchBuilder.retrieve());
   }
-  return StatusCode::SUCCESS;
+
+  return egammaSuperClusterBuilderBase::initialize();
 }
 
 StatusCode
@@ -69,13 +62,13 @@ electronSuperClusterBuilder::execute(const EventContext& ctx) const
   // Have to register cluster container in order to properly get cluster
   // links.
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
-    m_outputElectronSuperClustersKey, ctx);
+    m_outputSuperClusterCollectionName, ctx);
 
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
 
   // Create the new Electron Super Cluster based EgammaRecContainer
   SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
-    m_electronSuperRecCollectionKey, ctx);
+    m_outputEgammaRecContainerKey, ctx);
   ATH_CHECK(newEgammaRecs.record(std::make_unique<EgammaRecContainer>()));
 
   size_t inputSize = egammaRecs->size();

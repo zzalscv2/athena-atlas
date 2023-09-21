@@ -83,6 +83,10 @@ def createEgammaConfigFlags():
                  'PhotonSuperRecCollection')
     egcf.addFlag("Egamma.Keys.Internal.ElectronSuperRecs",
                  'ElectronSuperRecCollection')
+    egcf.addFlag("Egamma.Keys.Internal.PhotonSuperClusters",
+                 'PhotonSuperClusters')
+    egcf.addFlag("Egamma.Keys.Internal.ElectronSuperClusters",
+                 'ElectronSuperClusters')
 
     egcf.addFlag("Egamma.Keys.Output.ConversionVertices",
                  'GSFConversionVertices')

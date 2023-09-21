@@ -28,7 +28,7 @@ def TrigEgammaSuperClusterBuilderCfg(flags, name, calibrationType, superClusterC
                                name = name,
                                InputEgammaRecContainerName  = TrigEgammaKeys.precisionCaloEgammaRecCollection,
                                SuperClusterCollectionName   = superClusterCollectionName,
-                               SuperegammaRecCollectionName = superegammaRecCollectionName, # output,
+                               OutputEgammaRecContainerKey = superegammaRecCollectionName, # output,
                                ClusterCorrectionTool        = acc.popToolsAndMerge(egammaSwToolCfg(flags)),   
                                MVACalibSvc                  = acc.getPrimaryAndMerge(egammaMVASvcCfg(flags,name="trigPrecCaloEgammaMVASvc",folder = trigMVAfolder)),
                                CalibrationType              = calibrationType,

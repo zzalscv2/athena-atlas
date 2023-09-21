@@ -31,13 +31,6 @@ photonSuperClusterBuilder::initialize()
 {
   ATH_MSG_DEBUG(" Initializing photonSuperClusterBuilder");
 
-  // the data handle keys
-  ATH_CHECK(m_inputEgammaRecContainerKey.initialize());
-  ATH_CHECK(m_photonSuperRecCollectionKey.initialize());
-  ATH_CHECK(m_outputPhotonSuperClustersKey.initialize());
-  ATH_CHECK(m_precorrClustersKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
-
   // retrieve conversion builder
   if (m_doConversions) {
     ATH_CHECK(m_conversionBuilder.retrieve());
@@ -62,12 +55,12 @@ photonSuperClusterBuilder::execute(const EventContext& ctx) const
 
   // Have to register cluster container in order to properly get cluster links.
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
-    m_outputPhotonSuperClustersKey, ctx);
+    m_outputSuperClusterCollectionName, ctx);
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
 
   // Create the new Photon Super Cluster based EgammaRecContainer
   SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
-    m_photonSuperRecCollectionKey, ctx);
+    m_outputEgammaRecContainerKey, ctx);
   ATH_CHECK(newEgammaRecs.record(std::make_unique<EgammaRecContainer>()));
 
   size_t inputSize = egammaRecs->size();

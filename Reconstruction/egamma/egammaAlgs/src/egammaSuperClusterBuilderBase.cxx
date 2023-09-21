@@ -308,11 +308,16 @@ egammaSuperClusterBuilderBase::egammaSuperClusterBuilderBase(
   ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
 {
+}
 
-  m_searchWindowPhiBarrel = m_searchWindowPhiCellsBarrel * s_cellPhiSize * 0.5;
-  m_searchWindowEtaBarrel = m_searchWindowEtaCellsBarrel * s_cellEtaSize * 0.5;
-  m_searchWindowPhiEndcap = m_searchWindowPhiCellsEndcap * s_cellPhiSize * 0.5;
-  m_searchWindowEtaEndcap = m_searchWindowEtaCellsEndcap * s_cellEtaSize * 0.5;
+StatusCode
+egammaSuperClusterBuilderBase::initialize()
+{
+  ATH_CHECK(m_inputEgammaRecContainerKey.initialize());
+  ATH_CHECK(m_precorrClustersKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
+  ATH_CHECK(m_outputEgammaRecContainerKey.initialize());
+  ATH_CHECK(m_outputSuperClusterCollectionName.initialize());
 
   m_addCellsWindowEtaBarrel =
     m_addCellsWindowEtaCellsBarrel * s_cellEtaSize * 0.5;
@@ -322,11 +327,7 @@ egammaSuperClusterBuilderBase::egammaSuperClusterBuilderBase(
   m_extraL3EtaSize = m_extraL3EtaSizeCells * s_cellEtaSize * 0.5;
   // the + is to account for different L0/L1 phi granularity
   m_extraL0L1PhiSize = m_extraL0L1PhiSizeCells * s_cellPhiSize;
-}
 
-StatusCode
-egammaSuperClusterBuilderBase::initialize()
-{
   m_searchWindowPhiBarrel = m_searchWindowPhiCellsBarrel * s_cellPhiSize * 0.5;
   m_searchWindowEtaBarrel = m_searchWindowEtaCellsBarrel * s_cellEtaSize * 0.5;
   m_searchWindowPhiEndcap = m_searchWindowPhiCellsEndcap * s_cellPhiSize * 0.5;

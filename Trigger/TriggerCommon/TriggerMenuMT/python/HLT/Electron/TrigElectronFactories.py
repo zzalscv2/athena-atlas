@@ -41,7 +41,7 @@ def TrigElectronSuperClusterBuilderCfg(flags, name = 'TrigElectronSuperClusterBu
     """Configuring electronSuperClusterBuilder"""
     builder = AlgFactory( egammaAlgsConf.electronSuperClusterBuilder, name = name,
                           InputEgammaRecContainerName = TrigEgammaKeys.precisionEgammaRecCollection,
-                          SuperElectronRecCollectionName = TrigEgammaKeys.precisionElectronSuperClusterRecCollection,
+                          OutputEgammaRecContainerKey = TrigEgammaKeys.precisionElectronSuperClusterRecCollection,
                           SuperClusterCollectionName = TrigEgammaKeys.precisionElectronSuperClusterCollection,
                           ClusterCorrectionTool=egammaSwSuperClusterTool,
                           MVACalibSvc=trigPrecEgammaMVASvc(flags),

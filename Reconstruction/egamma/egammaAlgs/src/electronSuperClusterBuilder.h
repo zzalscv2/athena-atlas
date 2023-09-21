@@ -34,7 +34,7 @@
  *
  * Output containers:
  * - \ref electronSuperClusterBuilder.m_electronSuperRecCollectionKey
- * "SuperElectronRecCollectionName" (default=ElectronSuperRecCollection):
+ * "OutputEgammaRecContainerKey" (default=ElectronSuperRecCollection):
  * collection of EgammaRec objects with the cluster set to be the supercluster
  * - \ref electronSuperClusterBuilder.m_outputElectronSuperClustersKey
  * "SuperClusterCollectionName" (default=ElectronSuperClusters): collection of
@@ -135,43 +135,6 @@ private:
     7,
     "Number of required silicon hits for electrons"
   };
-
-  /** @brief Key for input egammaRec container */
-  SG::ReadHandleKey<EgammaRecContainer> m_inputEgammaRecContainerKey{
-    this,
-    "InputEgammaRecContainerName",
-    "egammaRecCollection",
-    "input egammaRec container"
-  };
-
-  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey {
-    this,
-    "CaloDetDescrManager",
-    "CaloDetDescrManager",
-    "SG Key for CaloDetDescrManager in the Condition Store"
-  };
-
-  /** @brief Key for output egammaRec container */
-  SG::WriteHandleKey<EgammaRecContainer> m_electronSuperRecCollectionKey{
-    this,
-    "SuperElectronRecCollectionName",
-    "ElectronSuperRecCollection",
-    "output egammaRec container"
-  };
-
-  /** @brief Key for output clusters */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer>
-    m_outputElectronSuperClustersKey{ this,
-                                      "SuperClusterCollectionName",
-                                      "ElectronSuperClusters",
-                                      "output calo cluster container" };
-
-  /** @brief Optional key for pre-correction clusters */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer>
-    m_precorrClustersKey{ this,
-                          "precorrClustersName",
-                          "",
-                          "optional pre-correction clusters" };
 
   /** @brief Tool to perform track matching*/
   ToolHandle<IEMTrackMatchBuilder> m_trackMatchBuilder{
