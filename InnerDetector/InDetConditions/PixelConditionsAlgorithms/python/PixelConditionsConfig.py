@@ -137,12 +137,12 @@ def PixelChargeCalibCondAlgCfg(flags, name="PixelChargeCalibCondAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(PixelConfigCondAlgCfg(flags))
     PixCalibFolder = 'ChargeCalibration'
-    acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/"+PixCalibFolder, "/PIXEL/"+PixCalibFolder, className="CondAttrListCollection"))
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
     acc.merge(PixelReadoutGeometryCfg(flags))
     kwargs.setdefault("PixelDetEleCollKey", "PixelDetectorElementCollection")
     kwargs.setdefault("PixelModuleData", "PixelModuleData")
     if flags.GeoModel.Run is LHCPeriod.Run2:
+        acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/"+PixCalibFolder, "/PIXEL/"+PixCalibFolder, className="CondAttrListCollection"))
         kwargs.setdefault("ReadKey", "/PIXEL/"+PixCalibFolder)
     else:
         kwargs.setdefault("ReadKey", "")  # FIXME: temporarily disabling DB access for Run 1 due to crashes
