@@ -854,6 +854,9 @@ TriggerHLTListRun3 = [
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgsc_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
+    
+    ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_jes_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_jes_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
