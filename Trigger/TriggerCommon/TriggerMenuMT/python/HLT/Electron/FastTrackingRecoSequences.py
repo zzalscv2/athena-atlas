@@ -2,19 +2,20 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaCommon.Logging import logging
 
+def fastTracking(inflags, RoIs, variant=''):
+    acc = ComponentAccumulator()
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+    log = logging.getLogger("trigElectron"+variant+"InDetFastTrackingCfg")
+    signatureName = 'electronLRT' if variant  else 'electron'
+    flags = getFlagsForActiveConfig(inflags, signatureName, log)
 
-def fastTracking(flags, RoIs, variant=''):
-    TrigEgammaKeys = getTrigEgammaKeys(variant)
-    IDTrigConfig = TrigEgammaKeys.IDTrigConfig
-    from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking( flags, config = IDTrigConfig, rois = RoIs )
-    viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
-
-    TrackParticlesName = ""
-    for viewAlg in viewAlgs:
-        if "InDetTrigTrackParticleCreatorAlg" in viewAlg.name():
-            TrackParticlesName = viewAlg.TrackParticlesName
+    seq = InDetTrigSequence(flags, flags.Tracking.ActiveConfig.input_name, rois = RoIs, inView = "fastTracking"+variant+'VDV')
     
-    return viewAlgs, TrackParticlesName
+    acc = seq.sequence("FastTrackFinder")
+      
+    return acc, flags
+
