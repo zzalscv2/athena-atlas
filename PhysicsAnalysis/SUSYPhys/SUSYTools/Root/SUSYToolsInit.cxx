@@ -1492,7 +1492,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_MSG_WARNING("  *** HACK *** Treating LCTopoJets jets as EMTopo -- use at your own risk!");
       jetcollBTag = "AntiKt4EMTopoJets";
     }
-
+    //See --> https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagRecommendationsRelease22
+    
+    if(m_bTaggingCalibrationFilePath.find(!m_isRun3 ? "MC20" : "MC21") == std::string::npos) {
+      ATH_MSG_ERROR( "You are using a "<<(!m_isRun3 ? "Run3":"Run2")<<" CDI file while running on "<<(!m_isRun3 ? "Run2":"Run3")<<" sample; Please updates your CDI file to the correct version for "<<(!m_isRun3 ? "Run2":"Run3"));
+      return StatusCode::FAILURE;
+    }
     if (m_useBtagging && !m_btagSelTool.isUserConfigured() && !m_BtagWP.empty()) {
       if (jetcollBTag.find("AntiKt4EMTopoJets") == std::string::npos && jetcollBTag.find("AntiKt4EMPFlowJets")==std::string::npos) {
         ATH_MSG_WARNING("** Only AntiKt4EMTopoJets and AntiKt4EMPFlowJets are supported with FTAG scale factors!");
@@ -1558,29 +1563,31 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       } else if (m_btagSelTool_trkJet.isUserConfigured()) ATH_CHECK( m_btagSelTool_trkJet.retrieve() );
     }
 
-
-    // Set MCshowerType for FTAG MC/MC SFs
+   // Set MCshowerType for FTAG MC/MC SFs
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21#MC_MC_Scale_Factors_for_Analysis
-    std::string MCshowerID = "410470";                 // Powheg+Pythia8 (default)  - PhPy8EG_A14
-    if (m_showerType == 1) MCshowerID = "410558";      // Powheg+Herwig 7.0.4       - PowhegHerwig7EvtGen_H7UE
-    else if (m_showerType == 2) MCshowerID = "426131"; // Sherpa 2.1                - Sherpa_CT10
-    else if (m_showerType == 3) MCshowerID = "410250"; // Sherpa 2.2.1 or 2.2.2     - Sherpa_221
-    else if (m_showerType == 4) MCshowerID = "410464"; // aMC@NLO+Pythia8           - aMcAtNloPy8EvtGen_MEN30NLO_A14N23LO
-    else if (m_showerType == 5) MCshowerID = "421152"; // Sherpa 2.2.8              - Sh_N30NNLO
-    else if (m_showerType == 6) MCshowerID = "700122"; // Sherpa 2.2.10             - Sh_2210
-
+    std::string MCshowerID;
+    if(!m_isRun3){
+      MCshowerID= "410470";                              // Powheg+Pythia8 (default)  - PhPy8EG_A14
+      if (m_showerType == 1)      MCshowerID = "411233"; // PowhegHerwig7 
+      else if (m_showerType == 2) MCshowerID = "600666"; // PhH7EG_H7UE - 601414
+      else if (m_showerType == 3) MCshowerID = "410250"; // Sherpa_221
+      else if (m_showerType == 4) MCshowerID = "700122"; // Sh_2210
+      else if (m_showerType == 5) MCshowerID = "700122"; // Sh_2211
+      else if (m_showerType == 6) MCshowerID = "700660"; // Sh_2212 - 700660
+      else if (m_showerType == 7) MCshowerID = "410464"; // aMcAtNloPy8
+      else if (m_showerType == 8) MCshowerID = "412116"; // aMcAtNloHerwig7
+    }
+    else{
+      MCshowerID= "601229";                               // Powheg+Pythia8 (default) - PhPy8EG_A14
+      if (m_showerType == 2)      MCshowerID = "601414";  // POWHEG+Herwig721         - PhH7EG_A14
+      else if (m_showerType == 7) MCshowerID = "700660";  // Sherpa 2.2.12            - Sh_2212
+    }
 
     // btagEfficiencyTool
     if (m_useBtagging && !m_btagEffTool.isUserConfigured() && !m_BtagWP.empty()) {
       if (jetcoll != "AntiKt4EMTopoJets" && jetcoll != "AntiKt4EMPFlowJets") {
         ATH_MSG_WARNING("** Only AntiKt4EMTopoJets and AntiKt4EMPFlowJets are supported with FTAG scale factors!");
           return StatusCode::FAILURE;
-      }
-
-      // AntiKt4EMPFlowJets MC/MC SF isn't complete yet
-      if (jetcollBTag == "AntiKt4EMPFlowJets" && MCshowerID == "426131") { // sherpa 2.1 isn't available
-        ATH_MSG_WARNING ("MC/MC SFs for AntiKt4EMPFlowJets are not available yet! Falling back to AntiKt4EMTopoJets for the SFs.");
-        jetcollBTag = "AntiKt4EMTopoJets";
       }
 
       toolName = "BTagSF_" + jetcollBTag + m_BtagTagger + m_BtagWP;
@@ -1610,7 +1617,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         toolName = "BTagSF_" + trkjetcoll;
         m_btagEffTool_trkJet.setTypeAndName("BTaggingEfficiencyTool/"+toolName);
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("TaggerName",     m_BtagTagger_trkJet ) );
-        ATH_CHECK( m_btagEffTool_trkJet.setProperty("ScaleFactorFileName",  m_bTaggingCalibrationFilePath) );
+        ATH_CHECK( m_btagEffTool_trkJet.setProperty("ScaleFactorFileName",   m_bTaggingCalibrationFilePath) );
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("OperatingPoint", m_BtagWP_trkJet ) );
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("JetAuthor",      BTagColl_TrkJet ) );
         ATH_CHECK( m_btagEffTool_trkJet.setProperty("MinPt",          m_BtagMinPt_trkJet ) );

@@ -313,8 +313,7 @@ int main( int argc, char* argv[] ) {
   // ============================================================================================
   // Guess shower type for btagging MC/MC SFs
   if(!isData){
-    //unsigned int ishower = objTool.getMCShowerType("mc15_13TeV.Sherpa_blabla"); //
-    int ishower = objTool.getMCShowerType("mc15_13TeV.PowhegPythia8EvtGen_blabla"); //get your sample name here!
+    int ishower = objTool.getMCShowerType("PhPy8EG"); //get your sample name here!
     ANA_CHECK( objTool.setProperty("ShowerType", (int)ishower) );
   }
 
