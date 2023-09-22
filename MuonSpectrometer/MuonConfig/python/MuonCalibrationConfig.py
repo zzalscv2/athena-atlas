@@ -79,11 +79,10 @@ def _setupMdtCondDB(flags):
     return result, mdt_folder_name_appendix
 # end of function setupMdtCondDB()
 
-def MdtCalibrationToolCfg(flags, **kwargs):
-    result=MdtCalibrationDbToolCfg(flags)
-    mdt_calibration_db_tool = result.getPrimary()
-    
-    kwargs.setdefault("CalibrationDbTool", mdt_calibration_db_tool)
+def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
+    result=ComponentAccumulator()
+    result.merge(MdtCalibDbAlgCfg(flags))
+
     kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     kwargs.setdefault("DoTemperatureCorrection", flags.Muon.Calib.applyRtScaling)
     kwargs.setdefault("DoWireSagCorrection", flags.Muon.Calib.correctMdtRtWireSag)
@@ -93,30 +92,15 @@ def MdtCalibrationToolCfg(flags, **kwargs):
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtCalibWindowNumber
         kwargs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_G4'))
 
-    acc = AtlasFieldCacheCondAlgCfg(flags)
-    result.merge(acc)
+    result.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    MdtCalibrationTool = CompFactory.MdtCalibrationTool
-    mdt_calibration_tool = MdtCalibrationTool(**kwargs)
+    mdt_calibration_tool = CompFactory.MdtCalibrationTool(name= name, **kwargs)
     result.setPrivateTools(mdt_calibration_tool)
     return result
 
-def MdtCalibrationDbToolCfg(flags, **kwargs):
-    # We need the conditions objects to have been created.
-    result = MdtCalibDbAlgCfg(flags, **kwargs)
-        
-    kwargs.setdefault("CreateBFieldFunctions", flags.Muon.Calib.correctMdtRtForBField)
-    kwargs.setdefault("CreateWireSagFunctions", flags.Muon.Calib.correctMdtRtWireSag)
-    kwargs.setdefault("CreateSlewingFunctions", flags.Muon.Calib.correctMdtRtForTimeSlewing)
-    kwargs.setdefault("WasConfigured", True)
-
-    MdtCalibrationDbTool = CompFactory.MdtCalibrationDbTool
-    mdt_calibration_db_tool = MdtCalibrationDbTool(**kwargs)
-    result.setPrivateTools(mdt_calibration_db_tool)
-    return result
-    
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
-    result = MuonGeoModelCfg(flags)
+    result = ComponentAccumulator()
+    result.merge(MuonGeoModelCfg(flags))
 
     # setup COOL folders
     acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
@@ -129,7 +113,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     else:
        kwargs.setdefault("ReadKeyTube", "/MDT/T0"+ mdt_folder_name_appendix)
        kwargs.setdefault("ReadKeyRt", "/MDT/RT"+ mdt_folder_name_appendix)
-    kwargs.setdefault("RT_InputFiles" , ["Muon_RT_default.data"])
+    kwargs.setdefault("RT_InputFile" , "Muon_RT_default.data")
     if flags.Input.isMC is False: # Should be " if flags.Input.isMC=='data' " ?
         kwargs.setdefault("defaultT0", 40)
     else:
@@ -148,7 +132,7 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     kwargs.setdefault("UseR4DetMgr", flags.Muon.setupGeoModelXML)
     alg = CompFactory.MdtCalibDbAlg (name, **kwargs)
 
-    result.addCondAlgo (alg)
+    result.addCondAlgo (alg, primary = True)
     return result
 
 def NSWCalibToolCfg(flags, name="NSWCalibTool", **kwargs):

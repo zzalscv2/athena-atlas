@@ -1,6 +1,6 @@
 """Define methods to construct configured MDT Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,7 +9,6 @@ from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
 from MuonConfig.MuonByteStreamCnvTestConfig import MdtDigitToMdtRDOCfg
 from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
-from MuonConfig.MuonCalibrationConfig import MdtCalibrationDbToolCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
 from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
@@ -38,10 +37,7 @@ def MDT_RangeCfg(flags, name="MDT_Range", **kwargs):
 def RT_Relation_DB_DigiToolCfg(flags, name="RT_Relation_DB_DigiTool", **kwargs):
     """Return an RT_Relation_DB_DigiTool"""
     acc = ComponentAccumulator()
-    RT_Relation_DB_DigiTool = CompFactory.RT_Relation_DB_DigiTool
-    calibDbTool = acc.popToolsAndMerge(MdtCalibrationDbToolCfg(flags))
-    kwargs.setdefault("CalibrationDbTool", calibDbTool)
-    acc.setPrivateTools(RT_Relation_DB_DigiTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.RT_Relation_DB_DigiTool(name, **kwargs))
     return acc
 
 
@@ -58,14 +54,16 @@ def MDT_Response_DigiToolCfg(flags, name="MDT_Response_DigiTool",**kwargs):
 def MDT_DigitizationToolCommonCfg(flags, name="MdtDigitizationTool", **kwargs):
     """Return ComponentAccumulator with common MdtDigitizationTool config"""
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg # MT-safe conditions access
-    acc = MdtCondDbAlgCfg(flags)
-    calibDbTool = acc.popToolsAndMerge(MdtCalibrationDbToolCfg(flags))
-    kwargs.setdefault("CalibrationDbTool", calibDbTool)
+    from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg
+
+    acc = ComponentAccumulator()
+    acc.merge(MdtCondDbAlgCfg(flags))
+    acc.merge(MdtCalibDbAlgCfg(flags))
+
     kwargs.setdefault("DiscardEarlyHits", True)
     kwargs.setdefault("UseTof", flags.Beam.Type is not BeamType.Cosmics)
     # "RT_Relation_DB_DigiTool" in jobproperties.Digitization.experimentalDigi() not migrated
-    digiTool = acc.popToolsAndMerge(MDT_Response_DigiToolCfg(flags))
-    kwargs.setdefault("DigitizationTool", digiTool)
+    kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(MDT_Response_DigiToolCfg(flags)))
     QballConfig = (flags.Input.SpecialConfiguration.get("MDT_QballConfig", "False") == "True")
     kwargs.setdefault("DoQballCharge", QballConfig)
     if flags.Digitization.DoXingByXingPileUp:
@@ -133,6 +131,8 @@ def MDT_DigitizationBasicCfg(flags, **kwargs):
 def MDT_OverlayDigitizationBasicCfg(flags, **kwargs):
     """Return ComponentAccumulator with MDT Overlay digitization"""
     acc = MuonGeoModelCfg(flags)
+    from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg
+    acc.merge(MdtCalibDbAlgCfg(flags))
 
     if flags.Common.ProductionStep != ProductionStep.FastChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg

@@ -76,38 +76,41 @@ def MdtDriftCircleOnTrackCreator(name="MdtDriftCircleOnTrackCreator",**kwargs):
     MuonCalibConfig.setupMdtCondDB()
     from MuonCnvExample.MuonCalibFlags import mdtCalibFlags
     mdtCalibFlags.setDefaults()
-    
-    kwargs.setdefault("DoMagneticFieldCorrection", mdtCalibFlags.correctMdtRtForBField())
-    kwargs.setdefault("DoWireSag", muonRecFlags.useWireSagCorrections())
-    kwargs.setdefault("DoSlewingCorrection", mdtCalibFlags.correctMdtRtForTimeSlewing())
-    kwargs.setdefault("CalibrationTool", MuonCalibConfig.MdtCalibrationTool())
-    kwargs.setdefault("CalibrationDbTool", MuonCalibConfig.MdtCalibrationDbTool())
 
-    if beamFlags.beamType() == 'cosmics' or beamFlags.beamType() == 'singlebeam' :
-        kwargs.setdefault("DoTofCorrection", False)
-        kwargs.setdefault("ApplyToF", False)
+    margs = dict()
+    margs.setdefault("DoMagneticFieldCorrection", mdtCalibFlags.correctMdtRtForBField())
+    margs.setdefault("DoWireSagCorrection", muonRecFlags.useWireSagCorrections())
+    margs.setdefault("DoSlewingCorrection", mdtCalibFlags.correctMdtRtForTimeSlewing())
+
+
+    if beamFlags.beamType() == 'cosmics' or beamFlags.beamType() == 'singlebeam':
+        margs.setdefault("DoTofCorrection", False)
         kwargs.setdefault("DoFixedError", True)
         kwargs.setdefault("TimingMode", 1)
         kwargs.setdefault("UseParametrisedError", True)
+        kwargs.setdefault("ApplyToF", False)
+
     else: # collisions simulation/data settings
-        kwargs.setdefault("DoTofCorrection", True)
+        margs.setdefault("DoTofCorrection", True)
         kwargs.setdefault("DoFixedError", False)
         kwargs.setdefault("DoErrorScaling", False)
-        kwargs.setdefault("TimeWindowSetting", mdtCalibWindowNumber('Collision_data'))  # MJW: should this be Collision_G4 ???
+        margs.setdefault("TimeWindowSetting", mdtCalibWindowNumber('Collision_data'))  # MJW: should this be Collision_G4 ???
         kwargs.setdefault("UseParametrisedError", False)
 
         if globalflags.DataSource() == 'data': # collisions real data or simulated first data
             kwargs.setdefault("CreateTubeHit", True)  # BroadErrors
             kwargs.setdefault("UseLooseErrors", muonRecFlags.useLooseErrorTuning())  # LooseErrors on data
+       
+    calibSettings = ["DoTofCorrection", "TimeWindowSetting"]
+    for cSett in calibSettings:
+        if cSett in kwargs: 
+          margs[cSett] =  kwargs.pop(cSett)
 
-    if globalflags.DataSource() == 'data':
-        kwargs.setdefault("IsMC", False)
-    else:
-        kwargs.setdefault("IsMC", True)
-
-    if ConfigFlags.Muon.MuonTrigger:
-        kwargs.setdefault("doMDT", True)
-
+    kwargs.setdefault("CalibrationTool",    getPrivateToolClone (name+"MdtCalibTool", 
+                                                                 MuonCalibConfig.MdtCalibrationTool(), **margs))
+ 
+ 
+    kwargs.setdefault("IsMC", globalflags.DataSource() != 'data')
     return CfgMgr.Muon__MdtDriftCircleOnTrackCreator(name, WasConfigured=True, **kwargs)
 # end of factory function MdtDriftCircleOnTrackCreator
 
@@ -330,7 +333,6 @@ def MdtSegmentT0Fitter(name="MdtSegmentT0Fitter",**kwargs):
     from MuonRecExample import MuonAlignConfig  # noqa: F401
     from MuonCnvExample import MuonCalibConfig  # noqa: F401
     MuonCalibConfig.setupMdtCondDB()
-    kwargs.setdefault("CalibrationDbTool", MuonCalibConfig.MdtCalibrationDbTool())
     ### Enable floating of segments in the case of cosmic reconstruction
     kwargs.setdefault("FloatSegDirection", beamFlags.beamType() != 'collisions')
     return CfgMgr.TrkDriftCircleMath__MdtSegmentT0Fitter(name,**kwargs)

@@ -69,7 +69,6 @@ StatusCode MdtDigitizationTool::initialize() {
     ATH_MSG_INFO("Configuration  MdtDigitizationTool");
     ATH_MSG_INFO("RndmSvc                " << m_rndmSvc);
     ATH_MSG_INFO("DigitizationTool       " << m_digiTool);
-    ATH_MSG_INFO("MdtCalibrationDbTool    " << m_calibrationDbTool);
     ATH_MSG_INFO("OffsetTDC              " << m_offsetTDC);
     ATH_MSG_INFO("ns2TDCAMT              " << m_ns2TDCAMT);
     ATH_MSG_INFO("ns2TDCHPTDC            " << m_ns2TDCHPTDC);
@@ -122,7 +121,8 @@ StatusCode MdtDigitizationTool::initialize() {
     ATH_MSG_DEBUG("Input objects in container : '" << m_inputObjectName << "'");
 
     // Initialize ReadHandleKey
-    ATH_CHECK(m_hitsContainerKey.initialize(true));
+    ATH_CHECK(m_hitsContainerKey.initialize());
+    ATH_CHECK(m_calibDbKey.initialize());
 
     // initialize the output WriteHandleKeys
     ATH_CHECK(m_outputObjectKey.initialize());
@@ -139,9 +139,6 @@ StatusCode MdtDigitizationTool::initialize() {
     ATH_MSG_DEBUG("Retrieved digitization tool!" << m_digiTool);
 
     ATH_CHECK(m_rndmSvc.retrieve());
-
-    ATH_CHECK(m_calibrationDbTool.retrieve());
-    
     ATH_CHECK(m_readKey.initialize(!m_readKey.empty()));
     return StatusCode::SUCCESS;
 }
@@ -341,7 +338,7 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collecti
     }
 
     // loop over drift time map entries, convert to tdc value and construct/store the digit
-    createDigits(collections, sdoContainer, rndmEngine);
+    createDigits(ctx, collections, sdoContainer, rndmEngine);
 
     // reset hits
     m_hits.clear();
@@ -660,7 +657,8 @@ bool MdtDigitizationTool::checkMDTSimHit(const EventContext& ctx, const MDTSimHi
     return ok;
 }
 
-bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCollection* sdoContainer,
+bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& collections, 
+                                       MuonSimDataCollection* sdoContainer,
                                        CLHEP::HepRandomEngine* rndmEngine) {
     Identifier currentDigitId{0}, currentElementId{0};
 
@@ -686,6 +684,11 @@ bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCo
     }
     //-ForCosmics
 
+    SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> mdtCalibConstants{m_calibDbKey, ctx};
+    if (!mdtCalibConstants.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve set of calibration constants "<<mdtCalibConstants.fullKey());
+        return false;
+    }
     for (; it != m_hits.end(); ++it) {
         Identifier idDigit = it->id;
         Identifier elementId = m_idHelperSvc->mdtIdHelper().elementID(idDigit);
@@ -749,19 +752,14 @@ bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCo
         if (insideMatch || insideMask) {
             // get calibration constants from DbTool
             double t0 = m_offsetTDC;
-            const MuonCalib::MdtFullCalibData data = m_calibrationDbTool->getCalibration(geo->identifyHash(), geo->detectorElementHash());
-            if (data.tubeCalib) {
-                int ml = m_idHelperSvc->mdtIdHelper().multilayer(idDigit) - 1;
-                int layer = m_idHelperSvc->mdtIdHelper().tubeLayer(idDigit) - 1;
-                int tube = m_idHelperSvc->mdtIdHelper().tube(idDigit) - 1;
-                if (ml >= 0 && layer >= 0 && tube >= 0) {
-                    // extract calibration constants for single tube
-                    const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib* singleTubeData = data.tubeCalib->getCalib(ml, layer, tube);
-                    if (singleTubeData) { 
-                        ATH_MSG_DEBUG("Extracted the following calibration constant for "<<m_idHelperSvc->toString(idDigit)<<" "<<singleTubeData->t0);
-                        t0 = singleTubeData->t0 + m_t0ShiftTuning; 
-                    } else  ATH_MSG_WARNING("No calibration data found, using t0=" << m_offsetTDC<<" "<<m_idHelperSvc->toString(idDigit));
-                }
+            const MuonCalib::MdtFullCalibData* data{mdtCalibConstants->getCalibData(idDigit, msgStream())};
+            if (data && data->tubeCalib) {
+                // extract calibration constants for single tube
+                const MuonCalib::MdtTubeCalibContainer::SingleTubeCalib* singleTubeData = data->tubeCalib->getCalib(idDigit);
+                if (singleTubeData) { 
+                    ATH_MSG_DEBUG("Extracted the following calibration constant for "<<m_idHelperSvc->toString(idDigit)<<" "<<singleTubeData->t0);
+                    t0 = singleTubeData->t0 + m_t0ShiftTuning; 
+                } else  ATH_MSG_WARNING("No calibration data found, using t0=" << m_offsetTDC<<" "<<m_idHelperSvc->toString(idDigit));
             } else {
                 ATH_MSG_WARNING("No calibration data found, using t0=" << m_offsetTDC<<" for "<<m_idHelperSvc->toString(idDigit));
             }

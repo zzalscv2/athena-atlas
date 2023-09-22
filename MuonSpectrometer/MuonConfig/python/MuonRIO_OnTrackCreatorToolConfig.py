@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
-from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg, MdtCalibrationDbToolCfg
+from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
 
 ### Simple function holding connecting names to the different calibration window options
 # The window values themselves are defined in C++ in MdtCalibSvc/MdtCalibrationSvcSettings.h
@@ -61,37 +61,36 @@ def CscClusterOnTrackCreatorCfg(flags,name="CscClusterOnTrackCreator", **kwargs)
 
 def MdtDriftCircleOnTrackCreatorCfg(flags,name="MdtDriftCircleOnTrackCreator", **kwargs):
     result=ComponentAccumulator()
-    
-    # setup dependencies missing in C++. TODO: fix in C++
-    #
-    # acc = MdtCalibrationDbSvcCfg(flags)
-    # result.merge(acc)
-    
-    kwargs.setdefault("CalibrationDbTool", result.popToolsAndMerge( MdtCalibrationDbToolCfg(flags)))
-    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge( MdtCalibrationToolCfg(flags)) )
+    margs = dict()
+    margs.setdefault("DoMagneticFieldCorrection", flags.Muon.Calib.correctMdtRtForBField)
+    margs.setdefault("DoWireSagCorrection", flags.Muon.useWireSagCorrections)
+    margs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
 
-    kwargs.setdefault("DoMagneticFieldCorrection", flags.Muon.Calib.correctMdtRtForBField)
-    kwargs.setdefault("DoWireSag", flags.Muon.useWireSagCorrections)
-    kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
 
     if flags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]:
-        kwargs.setdefault("DoTofCorrection", False)
+        margs.setdefault("DoTofCorrection", False)
         kwargs.setdefault("DoFixedError", True)
         kwargs.setdefault("TimingMode", 1)
         kwargs.setdefault("UseParametrisedError", True)
         kwargs.setdefault("ApplyToF", False)
 
     else: # collisions simulation/data settings
-        kwargs.setdefault("DoTofCorrection", True)
+        margs.setdefault("DoTofCorrection", True)
         kwargs.setdefault("DoFixedError", False)
         kwargs.setdefault("DoErrorScaling", False)
-        kwargs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_data'))  # MJW: should this be Collision_G4 ???
+        margs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_data'))  # MJW: should this be Collision_G4 ???
         kwargs.setdefault("UseParametrisedError", False)
 
         if not flags.Input.isMC : 
             kwargs.setdefault("CreateTubeHit", True)  # BroadErrors
             kwargs.setdefault("UseLooseErrors", flags.Muon.useLooseErrorTuning)  # LooseErrors on data                          
     
+    calibSettings = ["DoTofCorrection", "TimeWindowSetting"]
+    for cSett in calibSettings:
+        if cSett in kwargs: 
+          margs[cSett] =  kwargs.pop(cSett)
+    
+    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge( MdtCalibrationToolCfg(flags, **margs)) )
     kwargs.setdefault("IsMC", flags.Input.isMC)
 
     result.setPrivateTools(CompFactory.Muon.MdtDriftCircleOnTrackCreator(name, WasConfigured=True, **kwargs))

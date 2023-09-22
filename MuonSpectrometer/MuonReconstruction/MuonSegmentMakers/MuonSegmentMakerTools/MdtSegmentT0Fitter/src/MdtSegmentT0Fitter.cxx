@@ -4,9 +4,9 @@
 
 #include "MdtSegmentT0Fitter/MdtSegmentT0Fitter.h"
 
-#include "MdtCalibSvc/MdtCalibrationSvcSettings.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "StoreGate/ReadCondHandle.h"
 
 #include "MdtCalibData/IRtRelation.h"
 #include "MdtCalibData/IRtResolution.h"
@@ -171,7 +171,7 @@ namespace TrkDriftCircleMath {
   }
 
   StatusCode MdtSegmentT0Fitter::initialize() {
-    ATH_CHECK(m_calibrationDbTool.retrieve());
+    ATH_CHECK(m_calibDbKey.initialize());
     return StatusCode::SUCCESS;
   }
 
@@ -191,9 +191,26 @@ namespace TrkDriftCircleMath {
 
   bool MdtSegmentT0Fitter::fit( Segment& result, const Line& line, const DCOnTrackVec& dcs, const HitSelection& selection, double t0Seed ) const {
     ++m_ntotalCalls;
-
+    const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
     ATH_MSG_DEBUG("New seg: ");
-
+    const EventContext& ctx{Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibData{m_calibDbKey, ctx};
+    if (!calibData.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve Mdt calibration object "<<m_calibDbKey.fullKey());
+      return false;
+    }
+    std::array<const MuonCalib::MdtRtRelation*, 2> rtRelations{};
+    {
+      unsigned int nRel{0};
+      for (unsigned int i = 0; i < dcs.size() ; ++i) {        
+        const Identifier id = dcs[i].rot()->identify();
+        const int mlIdx = id_helper.multilayer(id) -1;
+        if (rtRelations[mlIdx]) continue;
+        rtRelations[mlIdx] = calibData->getCalibData(id, msgStream())->rtRelation.get();
+        ++nRel;
+        if (nRel == 2) break;
+      }
+    }
     const DCOnTrackVec& dcs_keep = dcs;
 
     unsigned int N = dcs_keep.size();
@@ -243,7 +260,8 @@ namespace TrkDriftCircleMath {
           dcs_new.push_back( dc_new );
           if( selection[i] == 0 ){
             double t = ds->rot()->driftTime();
-            const MuonCalib::MdtRtRelation *rtInfo = m_calibrationDbTool->getRtCalibration(ds->rot()->identify());
+            const unsigned int mlIdx = id_helper.multilayer(ds->rot()->identify()) - 1;
+            const MuonCalib::MdtRtRelation *rtInfo = rtRelations[mlIdx];
             
             double tUp = rtInfo->rt()->tUpper();
             double tLow = rtInfo->rt()->tLower();
@@ -287,7 +305,8 @@ namespace TrkDriftCircleMath {
       unsigned int ii{0};
       for(const DCOnTrack& keep_me : dcs_keep ){
         const Muon::MdtDriftCircleOnTrack *roto = keep_me.rot();
-        const MuonCalib::MdtRtRelation *rtInfo = m_calibrationDbTool->getRtCalibration(roto->identify());
+        const unsigned int mlIdx = id_helper.multilayer(roto->identify()) - 1;
+        const MuonCalib::MdtRtRelation *rtInfo = rtRelations[mlIdx];
 
         const double newerror = m_scaleErrors ? keep_me.drPrecise() : keep_me.dr();
         const double w = newerror >0. ? sq(1./newerror) : 0.;
@@ -419,7 +438,8 @@ namespace TrkDriftCircleMath {
         dcs_new.push_back( std::move(dc_new) );
         if( selection[i] == 0 ){
           double t = ds->rot()->driftTime();
-          const MuonCalib::MdtRtRelation *rtInfo = m_calibrationDbTool->getRtCalibration(ds->rot()->identify());
+          const unsigned int mlIdx = id_helper.multilayer(ds->rot()->identify()) - 1;
+          const MuonCalib::MdtRtRelation *rtInfo = rtRelations[mlIdx];
           double tUp = rtInfo->rt()->tUpper();
           double tLow = rtInfo->rt()->tLower();
           if(t<tLow) chi2p += sq(t-tLow)*0.1;

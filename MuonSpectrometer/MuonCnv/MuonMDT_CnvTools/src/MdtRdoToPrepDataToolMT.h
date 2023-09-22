@@ -10,8 +10,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "MdtCalibSvc/MdtCalibrationSvcSettings.h"
-#include "MdtCalibSvc/MdtCalibrationTool.h"
+#include "MdtCalibInterfaces/IMdtCalibrationTool.h"
 #include "MuonCablingData/MuonMDT_CablingMap.h"
 #include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
@@ -64,9 +63,6 @@ namespace Muon {
     protected:
         void printPrepDataImpl(const Muon::MdtPrepDataContainer* mdtPrepDataContainer) const;
 
-        Muon::MdtDriftCircleStatus getMdtDriftRadius(const MdtDigit& digit, double& radius, double& errRadius,
-                                                     const MuonGM::MdtReadoutElement* descriptor,
-                                                     const MuonGM::MuonDetectorManager* muDetMgr) const;
         /// method to get the twin tube 2nd coordinate
         Muon::MdtDriftCircleStatus getMdtTwinPosition(const MdtDigit& prompt_digit, const MdtDigit& twin_digit, double& radius,
                                                       double& errRadius, double& zTwin, double& errZTwin, bool& twinIsPrompt,
@@ -94,12 +90,16 @@ namespace Muon {
             PrdCollMap addedCols{};
         };
 
-        StatusCode processCsm(ModfiablePrdColl& mdtPrepDataContainer, const MdtCsm* rdoColl,
+        StatusCode processCsm(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, const MdtCsm* rdoColl,
                               const MuonGM::MuonDetectorManager* muDetMgr) const;
 
-        StatusCode processCsmTwin(ModfiablePrdColl& mdtPrepDataContainer, const MdtCsm* rdoColll,
+        StatusCode processCsmTwin(const EventContext& ctx, ModfiablePrdColl& mdtPrepDataContainer, const MdtCsm* rdoColll,
                                   const MuonGM::MuonDetectorManager* muDetMgr) const;
-
+        
+        /// Creates the Prepdata container
+        std::unique_ptr<MdtPrepData> createPrepData(const MdtCalibInput& calibInput,
+                                                    const MdtCalibOutput& calibOutput) const;
+        
         /// Creates the prep data container to be written
         ModfiablePrdColl setupMdtPrepDataContainer(const EventContext& ctx) const;
         /// Is the identifier disabled due to BMG cut outs
@@ -116,8 +116,7 @@ namespace Muon {
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         /// MDT calibration service
-        ToolHandle<MdtCalibrationTool> m_calibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
-        std::unique_ptr<MdtCalibrationSvcSettings> m_mdtCalibSvcSettings{std::make_unique<MdtCalibrationSvcSettings>()};
+        ToolHandle<IMdtCalibrationTool> m_calibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
 
         /// MdtPrepRawData containers
         SG::WriteHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepDataContainerKey{this, "OutputCollection", "MDT_DriftCircles"};
@@ -125,6 +124,8 @@ namespace Muon {
         SG::ReadHandleKey<MdtCsmContainer> m_rdoContainerKey{this, "RDOContainer", "MDTCSM"};
 
         /** member variables for algorithm properties: */
+        Gaudi::Property<int>  m_adcCut{this, "AdcCut", 50, 
+                                        "Minimal cut on the adc to convert it into a prepdata object"};
         Gaudi::Property<bool> m_calibratePrepData{this, "CalibratePrepData", true};  //!< toggle on/off calibration of MdtPrepData
         Gaudi::Property<bool> m_decodeData{this, "DecodeData", true};  //!< toggle on/off the decoding of MDT RDO into MdtPrepData
         bool m_sortPrepData = false;                                   //!< Toggle on/off the sorting of the MdtPrepData
@@ -137,14 +138,13 @@ namespace Muon {
         // + TWIN TUBE
         Gaudi::Property<bool> m_useTwin{this, "UseTwin", true};
         Gaudi::Property<bool> m_useAllBOLTwin{this, "UseAllBOLTwin", false};
-        Gaudi::Property<bool> m_use1DPrepDataTwin{this, "Use1DPrepDataTwin", false};
         Gaudi::Property<bool> m_twinCorrectSlewing{this, "TwinCorrectSlewing", false};
         Gaudi::Property<bool> m_discardSecondaryHitTwin{this, "DiscardSecondaryHitTwin", false};
         int m_twin_chamber[2][3][36]{};
         int m_secondaryHit_twin_chamber[2][3][36]{};
         // - TWIN TUBE
 
-        std::map<Identifier, std::vector<Identifier>> m_DeadChannels;
+        std::map<Identifier, std::set<Identifier>> m_DeadChannels{};
         void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
 
         SG::ReadCondHandleKey<MuonMDT_CablingMap> m_readKey{this, "ReadKey", "MuonMDT_CablingMap", "Key of MuonMDT_CablingMap"};
@@ -152,7 +152,9 @@ namespace Muon {
         SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey{this, "DetectorManagerKey", "MuonDetectorManager",
                                                                          "Key of input MuonDetectorManager condition data"};
         /// This is the key for the cache for the MDT PRD containers, can be empty
-        SG::UpdateHandleKey<MdtPrepDataCollection_Cache> m_prdContainerCacheKey;
+        SG::UpdateHandleKey<MdtPrepDataCollection_Cache> m_prdContainerCacheKey{this, "MdtPrdContainerCacheKey", "",
+                                                                                "Optional external cache for the MDT PRD container"};
+
     };
 }  // namespace Muon
 

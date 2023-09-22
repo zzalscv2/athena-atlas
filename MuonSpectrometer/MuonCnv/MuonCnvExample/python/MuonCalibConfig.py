@@ -167,7 +167,7 @@ def setupMdtCondDB():
     else:
         condSequence.MdtCalibDbAlg.ReadKeyTube = "/MDT/T0" + mdt_folder_name_appendix
         condSequence.MdtCalibDbAlg.ReadKeyRt = "/MDT/RT" + mdt_folder_name_appendix
-    condSequence.MdtCalibDbAlg.RT_InputFiles = ["Muon_RT_default.data"]
+    condSequence.MdtCalibDbAlg.RT_InputFile = "Muon_RT_default.data"
     if globalflags.DataSource == 'data':
         condSequence.MdtCalibDbAlg.defaultT0 = 40
     elif globalflags.DataSource == 'geant4':
@@ -197,19 +197,8 @@ def MdtCalibrationTool(name="MdtCalibrationTool", **kwargs):
             kwargs.setdefault("TimeWindowSetting", mdtCalibWindowNumber('Collision_G4'))
     else: # cosmics or single beam
         kwargs.setdefault("DoTofCorrection", False)
-    
-    kwargs.setdefault("CalibrationDbTool", MdtCalibrationDbTool())
 
     return MdtCalibrationTool(name, **kwargs)
-
-def MdtCalibrationDbTool(name="MdtCalibrationDbTool", **kwargs):
-    from MdtCalibSvc.MdtCalibSvcConf import MdtCalibrationDbTool
-    kwargs.setdefault("CreateBFieldFunctions", mdtCalibFlags.correctMdtRtForBField())
-    kwargs.setdefault("CreateWireSagFunctions", mdtCalibFlags.correctMdtRtWireSag())
-    kwargs.setdefault("CreateSlewingFunctions", mdtCalibFlags.correctMdtRtForTimeSlewing())
-    kwargs.setdefault("WasConfigured", True)
-
-    return MdtCalibrationDbTool(name, **kwargs)
 
 
 # return a list of dictionaires containing the calib config info (keys etc)

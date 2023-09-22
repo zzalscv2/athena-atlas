@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MdtCalibSvc/MdtCalibrationTMaxShiftTool.h"
+#include "MdtCalibrationTMaxShiftTool.h"
 
 // TRandom2 for random smearing
 // should later be replaced with std
 #include "TRandom2.h"
 
 MdtCalibrationTMaxShiftTool::MdtCalibrationTMaxShiftTool(const std::string& type, const std::string& name, const IInterface* parent) :
-  MdtCalibrationShiftMapBase(type, name, parent),
-  m_tUpper(688.1818) {
-}
+  MdtCalibrationShiftMapBase(type, name, parent) {}
 
 StatusCode MdtCalibrationTMaxShiftTool::initializeMap() {
   if (m_mapIsInitialized) {

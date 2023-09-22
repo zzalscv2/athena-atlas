@@ -28,7 +28,7 @@ class MdtDriftCircleOnTrackCnv_p1
                                         Muon::MdtDriftCircleOnTrack_p1 >
 {
 public:
-    MdtDriftCircleOnTrackCnv_p1() : m_RIOCnv(0), m_surfCnv(0) {}
+    MdtDriftCircleOnTrackCnv_p1() =default;
 
     void persToTrans( const Muon :: MdtDriftCircleOnTrack_p1 *persObj,
         Muon :: MdtDriftCircleOnTrack    *transObj,
@@ -38,8 +38,8 @@ public:
         MsgStream                          &log );
 
 protected:
-    RIO_OnTrackCnv_p1*              m_RIOCnv;
-    StraightLineSurfaceCnv_p1*      m_surfCnv;
+    RIO_OnTrackCnv_p1*              m_RIOCnv{nullptr};
+    StraightLineSurfaceCnv_p1*      m_surfCnv{nullptr};
     ElementLinkCnv_p1< ElementLinkToIDC_MDT_Container >     m_elCnv;     
 };
 

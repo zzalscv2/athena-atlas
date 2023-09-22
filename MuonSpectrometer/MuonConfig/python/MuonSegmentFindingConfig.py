@@ -21,7 +21,6 @@ from AthenaConfiguration.Enums import BeamType, Format
 # Csc2dSegmentMaker, Csc4dSegmentMaker=CompFactory.getComps("Csc2dSegmentMaker","Csc4dSegmentMaker",)
 
 #Local
-from MuonConfig.MuonCalibrationConfig import MdtCalibrationDbToolCfg
 from TrkConfig.TrkGlobalChi2FitterConfig import MCTBFitterCfg, MCTBSLFitterCfg, MCTBSLFitterMaterialFromTrackCfg
 from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg, MuonTrackCleanerCfg, MuonEDMPrinterToolCfg
 from MuonConfig.MuonCondAlgConfig import MuonStationIntersectCondAlgCfg
@@ -116,9 +115,7 @@ def MuonSegmentFittingToolCfg(flags, name = "MuonSegmentFittingTool",  **kwargs)
     return result
 
 def MdtSegmentT0FitterCfg(flags, name="MdtSegmentT0Fitter", **kwargs):
-    result = MdtCalibrationDbToolCfg(flags) # Needed by MdtSegmentT0Fitter
-    kwargs.setdefault("CalibrationDbTool", result.popPrivateTools())
-    
+    result = ComponentAccumulator()    
     kwargs.setdefault("FloatSegDirection", flags.Beam.Type is BeamType.Cosmics)
     result.setPrivateTools(CompFactory.TrkDriftCircleMath.MdtSegmentT0Fitter(name, **kwargs))    
     return result

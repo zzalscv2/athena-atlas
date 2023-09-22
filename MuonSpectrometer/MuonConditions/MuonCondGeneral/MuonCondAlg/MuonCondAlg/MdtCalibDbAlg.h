@@ -16,11 +16,8 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CoralBase/Blob.h"
 #include "CoralUtilities/blobaccess.h"
-#include "MdtCalibData/MdtCorFuncSetCollection.h"
-#include "MdtCalibData/MdtRtRelationCollection.h"
-#include "MdtCalibData/MdtTubeCalibContainerCollection.h"
+#include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MdtCalibData/RtResolutionLookUp.h"
-#include "MdtCalibSvc/MdtCalibrationRegionSvc.h"
 #include "MuonCalibITools/IIdToFixedIdTool.h"
 #include "MuonCalibMath/SamplePoint.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -45,13 +42,18 @@ public:
     virtual bool isReEntrant() const override { return false;}
 
 private:
-    std::unique_ptr<MuonCalib::MdtTubeCalibContainer> buildMdtTubeCalibContainer(const Identifier& id) const;
-
-    StatusCode loadRt(const EventContext& ctx) const;
-    StatusCode loadTube(const EventContext& ctx) const;
+    StatusCode declareDependency(const EventContext& ctx, 
+                                 SG::WriteCondHandle<MuonCalib::MdtCalibDataContainer>& writeHandle) const;
+    StatusCode loadRt(const EventContext& ctx, MuonCalib::MdtCalibDataContainer& writeCdo) const;
+    StatusCode loadTube(const EventContext& ctx, MuonCalib::MdtCalibDataContainer& writeCdo) const;
     
-    StatusCode defaultT0s(MdtTubeCalibContainerCollection& writeCdoTube) const;
-    StatusCode defaultRt(MdtRtRelationCollection& writeCdoRt) const;
+    StatusCode defaultT0s(MuonCalib::MdtCalibDataContainer& writeCdoTube) const;
+    
+    using RtRelationPtr = MuonCalib::MdtFullCalibData::RtRelationPtr;
+    using LoadedRtMap = std::map<Identifier, RtRelationPtr>;
+
+    StatusCode defaultRt(MuonCalib::MdtCalibDataContainer& writeCdoRt,
+                         LoadedRtMap& loadedRts) const;
 
     std::optional<double> getInnerTubeRadius(const Identifier& id) const;
 
@@ -63,28 +65,12 @@ private:
     
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     ToolHandle<MuonCalib::IIdToFixedIdTool> m_idToFixedIdTool{this, "IdToFixedIdTool", "MuonCalib::IdToFixedIdTool"};
-    ServiceHandle<MdtCalibrationRegionSvc> m_regionSvc{this, "MdtCalibrationRegionSvc", "MdtCalibrationRegionSvc"};
-
+ 
     const MuonGM::MuonDetectorManager* m_detMgr{nullptr}; 
     const MuonGMR4::MuonDetectorManager* m_r4detMgr{nullptr};
 
     Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
-                                    "Switch between the legacy and the new geometry"};
-
-    /// Helper struct to parse the number of total tubes around
-    struct chamberDim{
-        unsigned int tubes{0};
-        unsigned int layers{0};
-        unsigned int multilayers{0};
-        /// Object is valid if all three quantities are set
-        operator bool() const { 
-            return tubes > 0 && layers >0 && multilayers > 0;
-        }
-    };
-
-    chamberDim getChamberDimension(const Identifier& moduleId) const;
-
-    
+                                     "Switch between the legacy and the new geometry"};
 
     /// only needed to retrieve information on number of tubes etc. (no alignment needed)
 
@@ -94,15 +80,12 @@ private:
 
     // like MdtCalibrationDbSvc
     // for corData in loadRt
-    Gaudi::Property<bool> m_create_b_field_function{
-        this, "CreateBFieldFunctions", false,
+    Gaudi::Property<bool> m_create_b_field_function{this, "CreateBFieldFunctions", false,
         "If set to true, the B-field correction functions are initialized for each rt-relation that is loaded."};
 
-    Gaudi::Property<bool> m_createWireSagFunction{
-        this, "CreateWireSagFunctions", false,
+    Gaudi::Property<bool> m_createWireSagFunction{this, "CreateWireSagFunctions", false,
         "If set to true, the wire sag correction functions are initialized for each rt-relation that is loaded."};
-    Gaudi::Property<bool> m_createSlewingFunction{
-        this, "CreateSlewingFunctions", false,
+    Gaudi::Property<bool> m_createSlewingFunction{this, "CreateSlewingFunctions", false,
         "If set to true, the slewing correction functions are initialized for each rt-relation that is loaded."};
 
     void initialize_B_correction(MuonCalib::MdtCorFuncSet& funcSet, const MuonCalib::MdtRtRelation& rt) const;
@@ -117,7 +100,7 @@ private:
     // have TS-correction. In the default reco-jobs however, this is
     // configured by one muonRecFlag, that will be used to set this job-option.
     Gaudi::Property<bool> m_TimeSlewingCorrection{this, "TimeSlewingCorrection", false};
-    Gaudi::Property<bool> m_UseMLRt{this, "UseMLRt", true, "Enable use of ML-RTs from COOL"};
+    Gaudi::Property<bool> m_UseMLRt{this, "UseMLRt", false, "Enable use of ML-RTs from COOL"};
 
     Gaudi::Property<std::vector<float>> m_MeanCorrectionVsR{this, "MeanCorrectionVsR", {}};
 
@@ -135,24 +118,16 @@ private:
     StringProperty m_randomStream{this, "RandomStream", "MDTCALIBDBALG"};
     ATHRNG::RNGWrapper* m_RNGWrapper{nullptr};
 
-    StringArrayProperty m_RTfileNames{this,
-                                      "RT_InputFiles",
-                                      {"DC2_rt_default.dat"},
-                                      "single input ascii file for default RT to be applied in absence of DB information"};  // temporary!!!
+    StringProperty m_RTfileName{this, "RT_InputFile", "DC2_rt_default.dat",
+                                 "single input ascii file for default RT to be applied in absence of DB information"};  // temporary!!!
 
-    static  std::unique_ptr<MuonCalib::RtResolutionLookUp> getRtResolutionInterpolation(const std::vector<MuonCalib::SamplePoint>& sample_points);
-    
-    StatusCode extractString(std::string& input, std::string& output, const std::string& separator) const;
+    static std::unique_ptr<MuonCalib::RtResolutionLookUp> getRtResolutionInterpolation(const std::vector<MuonCalib::SamplePoint>& sample_points);
 
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyRt{this, "ReadKeyRt", "/MDT/RTBLOB", "DB folder containing the RT calibrations"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyTube{this, "ReadKeyTube", "/MDT/T0BLOB",
-                                                                "DB folder containing the tube constants"};
-    SG::WriteCondHandleKey<MdtRtRelationCollection> m_writeKeyRt{this, "MdtRtRelationCollection", "MdtRtRelationCollection",
-                                                                 "MDT RT relations"};
-    SG::WriteCondHandleKey<MdtTubeCalibContainerCollection> m_writeKeyTube{this, "MdtTubeCalibContainerCollection",
-                                                                           "MdtTubeCalibContainerCollection", "MDT tube calib"};
-    SG::WriteCondHandleKey<MdtCorFuncSetCollection> m_writeKeyCor{this, "MdtCorFuncSetCollection", "MdtCorFuncSetCollection",
-                                                                  "MDT cor Funcs"};
+    SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyTube{this, "ReadKeyTube", "/MDT/T0BLOB", "DB folder containing the tube constants"};
+    SG::WriteCondHandleKey<MuonCalib::MdtCalibDataContainer> m_writeKey{this, "WriteKey",  "MdtCalibConstants",
+                                                                       "Conditions object containing the calibrations"};
+
 };
 
 #endif

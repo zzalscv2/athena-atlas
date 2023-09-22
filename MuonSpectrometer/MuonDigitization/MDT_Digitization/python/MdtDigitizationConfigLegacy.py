@@ -21,7 +21,7 @@ def MDT_LastXing():
 def MdtDigitizationTool(name="MdtDigitizationTool",**kwargs):
    import MuonCondAlg.MdtCondDbAlgConfig # noqa: F401 MT-safe conditions access 
    from MuonCnvExample import MuonCalibConfig
-   MuonCalibConfig.setupMdtCondDB() # add MdtCalibDbAlg for MdtCalibrationDbTool
+   MuonCalibConfig.setupMdtCondDB() # add MdtCalibDbAlg 
 
    kwargs.setdefault("DiscardEarlyHits", True)
 
@@ -56,13 +56,8 @@ def MdtDigitizationTool(name="MdtDigitizationTool",**kwargs):
    else:
       kwargs.setdefault("OutputSDOName", "MDT_SDO")
    
-   kwargs.setdefault("CalibrationDbTool", MuonCalibConfig.MdtCalibrationDbTool()) 
 
    return CfgMgr.MdtDigitizationTool(name,**kwargs)
-      #return CfgMgr.MDT_PileUpTool(name,**kwargs)
-   #else:
-   #   return CfgMgr.MdtDigitizationTool(name,**kwargs)
-
 
 def getMdtRange(name="MdtRange", **kwargs):
     # bunch crossing range in ns

@@ -210,7 +210,9 @@ def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", **kwargs):
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool",
                                                                               UseTwin=True,
-                                                                              CalibrationTool=acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2))))
+                                                                              CalibrationTool=acc.popToolsAndMerge(MdtCalibrationToolCfg(flags,
+                                                                                                                                         TimeWindowSetting = 2,
+                                                                                                                                         DoPropagationCorrection = False))))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg

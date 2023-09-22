@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMDTDRIFTCIRCLEONTRACKCREATOR_H
@@ -13,8 +13,7 @@
 #include "TrkEventPrimitives/DriftCircleSide.h"
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
 
-static const InterfaceID IID_IMdtDriftCircleOnTrackCreator("Muon::IMdtDriftCircleOnTrackCreator", 1, 0);
-
+#include <memory>
 namespace Muon {
 
     class MdtPrepData;
@@ -22,10 +21,12 @@ namespace Muon {
     /** @brief Interface for tools calibrating MdtPrepData, turning them into Muon::MdtDriftCircleOnTrack object.
                The interface inherits from Trk::IRIO_OnTrackCreator.
     */
-    class IMdtDriftCircleOnTrackCreator : virtual public Trk::IRIO_OnTrackCreator {
+    class IMdtDriftCircleOnTrackCreator : public Trk::IRIO_OnTrackCreator {
     public:
-        static const InterfaceID& interfaceID();
-
+        using MdtRotPtr = MdtDriftCircleOnTrack*;
+        /** @brief Default desructor*/
+        virtual ~IMdtDriftCircleOnTrackCreator() = default;
+        DeclareInterfaceID(Muon::IMdtDriftCircleOnTrackCreator, 1, 0);
         /** @brief Calibrate a MdtPrepData object. The result is stored in a new MdtDriftCircleOnTrack object.
             Included calibrations:
                 - Conversion t->r using MdtCalibrationSvc
@@ -36,9 +37,13 @@ namespace Muon {
             @param strategy optional drift circle error strategy to override the default
             @return Fully calibrated MdtDriftCircleOnTrack (the user must delete this object when it is no longer needed).
         */
-        virtual MdtDriftCircleOnTrack* createRIO_OnTrack(const MdtPrepData& DC, const Amg::Vector3D& GP, const Amg::Vector3D* GD = 0,
-                                                         float t0Shift = 0, const MuonDriftCircleErrorStrategy* strategy = 0,
-                                                         const double beta = 1, const double tTrack = 0) const = 0;
+        virtual MdtRotPtr createRIO_OnTrack(const MdtPrepData& DC, 
+                                            const Amg::Vector3D& GP, 
+                                            const Amg::Vector3D* GD = nullptr,
+                                            const double t0Shift = 0, 
+                                            const MuonDriftCircleErrorStrategy* strategy = nullptr,
+                                            const double beta = 1, 
+                                            const double tTrack = 0) const = 0;
 
         /** @brief Update of the sign of the drift radius.
         @param DCT reference to the Muon::MdtDriftCircleOnTrack of which the sign should be updated.
@@ -52,17 +57,9 @@ namespace Muon {
         @param strategy optional drift circle error strategy to override the default
         @return New ROT with updated error. (the user must delete this object when it is no longer needed).
         */
-        virtual MdtDriftCircleOnTrack* updateError(const MdtDriftCircleOnTrack& DCT, const Trk::TrackParameters* pars = 0,
-                                                   const MuonDriftCircleErrorStrategy* strategy = 0) const = 0;
-
-        /** @brief Update error of a ROT without changing the drift radius
-        @param DCT reference to the Muon::MdtDriftCircleOnTrack of which the sign should be updated.
-        @param tp Reference to the extrapolated/predicted TrackParameters at this MdtPrepData (not used)
-        @param errorlist holds the identifier of the chamber/det element and the error to be applied on the DCTs inside
-        @return New ROT with updated error. (the user must delete this object when it is no longer needed).
-        */
-        virtual MdtDriftCircleOnTrack* updateErrorExternal(const MdtDriftCircleOnTrack& DCT, const Trk::TrackParameters* pars = 0,
-                                                           const std::map<Identifier, double>* errorlist = 0) const = 0;
+        virtual MdtRotPtr updateError(const MdtDriftCircleOnTrack& DCT, 
+                                      const Trk::TrackParameters* pars = nullptr,
+                                      const MuonDriftCircleErrorStrategy* strategy = nullptr) const = 0;
 
         /** @brief Returns calibrated MdtDriftCircleOnTrack.
         Overrides the IRIO_OnTrackCreator method to add an error strategy object.
@@ -70,23 +67,16 @@ namespace Muon {
         @param tp Reference to the extrapolated/predicted TrackParameters at this MdtPrepData
         @return calibrated MdtDriftCircleOnTrack. Memory management is passed to user.
         */
-        virtual MdtDriftCircleOnTrack* correct(const Trk::PrepRawData& prd, const Trk::TrackParameters& tp,
-                                               const MuonDriftCircleErrorStrategy* strategy, const double beta = 1,
-                                               const double tTrack = 0) const = 0;
-
-        /** @brief Keep base class version of correct for use with default error strategy object */
-        virtual MdtDriftCircleOnTrack* correct(const Trk::PrepRawData& prd, const Trk::TrackParameters& tp) const = 0;
-
-        /** @brief Returns the MdtDriftCircleStatus for a Muon::MdtDriftCircleOnTrack by comparing its time with the range of the RT
-         * relation. */
-        virtual MdtDriftCircleStatus driftCircleStatus(const MdtDriftCircleOnTrack& DCT) const = 0;
+        using Trk::IRIO_OnTrackCreator::correct;
+        virtual MdtRotPtr correct(const MdtPrepData& prd, 
+                                  const Trk::TrackParameters& tp,
+                                  const MuonDriftCircleErrorStrategy* strategy, 
+                                  const double beta = 1,
+                                  const double tTrack = 0) const = 0;
 
         /** @brief Returns the default error strategy object */
         virtual const MuonDriftCircleErrorStrategy& errorStrategy() const = 0;
     };
-
-    inline const InterfaceID& IMdtDriftCircleOnTrackCreator::interfaceID() { return IID_IMdtDriftCircleOnTrackCreator; }
-
 }  // namespace Muon
 
 #endif  // MUON_IMDTDRIFTCIRCLEONTRACKCREATOR_H

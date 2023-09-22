@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastPatternFinder.h"
-
-#include "MuonCalibEvent/MdtCalibHit.h"
 #include "xAODTrigMuon/TrigMuonDefs.h"
 #include "MdtRegionDefiner.h"
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -52,37 +51,22 @@ void TrigL2MuonSA::MuFastPatternFinder::doMdtCalibration(TrigL2MuonSA::MdtHitDat
 
    double R    = mdtHit.R;
    //   double InCo = mdtHit.cInCo;
-   double InCo = std::cos(std::abs(track_phi - phi0))!=0 ? 1./(std::cos(std::abs(track_phi - phi0))): 0;
+   const double cosDphi = std::cos(std::abs(track_phi - phi0)); 
+   double InCo = cosDphi ? 1./ cosDphi: 0;
    double X    = (isEndcap)? R*std::cos(track_phi): R*InCo*std::cos(track_phi);
    double Y    = (isEndcap)? R*std::sin(track_phi): R*InCo*std::sin(track_phi);
    double Z    = mdtHit.Z;
    const Amg::Vector3D point(X,Y,Z);
-   const Amg::Vector3D point0(0.,0.,0.);
-
-   MdtCalibHit calHit(id, tdcCounts, adcCounts, point, 0 );
-   // Need to overwrite uninitialised variables
-   calHit.setLocalPos(point0);
-   calHit.setLocalPointOfClosestApproach(point0);
-   calHit.setGlobalPointOfClosestApproach(point0);
-   calHit.setDriftTime(0.);
-   calHit.setDriftRadius(0., 0.);
-   calHit.setDistanceToTrack(0., 0.);
-   calHit.setTimeFromTrackDistance(0., 0.);
-   calHit.setDistanceToReadout(0.);
-   calHit.setBFieldPerp(0.);
-   calHit.setBFieldPara(0.);
-   calHit.setTemperature(0.);
-   calHit.setLocXtwin(0.);
-   calHit.setSigma2LocXtwin(0.);
-
+   
+   MdtCalibInput calHit{id, adcCounts,tdcCounts, point};
    ATH_MSG_DEBUG("... MDT hit raw digit tdcCounts/adcCounts=" << tdcCounts << "/" << adcCounts);
 
    ATH_MSG_DEBUG("... MDT hit position X/Y/Z/track_phi/Multilayer/Layer/Tube="
-		 << X << "/" << Y << "/" << Z << "/" << track_phi << "/" << Multilayer << "/" << Layer << "/" << Tube);
+		 << Amg::toString(point, 2) << "/" << track_phi << "/" << Multilayer << "/" << Layer << "/" << Tube);
 
-   m_mdtCalibrationTool->driftRadiusFromTime( calHit, point.mag() );
-   double driftSpace = calHit.driftRadius();
-   double driftSigma = calHit.sigmaDriftRadius();
+   MdtCalibOutput calibOut = m_mdtCalibrationTool->calibrate(Gaudi::Hive::currentContext(), calHit,  false);
+   double driftSpace = calibOut.driftRadius();
+   double driftSigma = calibOut.driftRadiusUncert();
 
    ATH_MSG_DEBUG("... MDT hit calibrated driftSpace/driftSigma=" << driftSpace << "/" << driftSigma);
 

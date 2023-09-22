@@ -22,7 +22,7 @@ StatusCode RT_Relation_DB_DigiTool::initialize() {
     const MuonGM::MuonDetectorManager* detMgr{nullptr};
     ATH_CHECK(detStore()->retrieve(detMgr));    
     m_maxRadius = detMgr->getGenericMdtDescriptor()->innerRadius;
-   
+    ATH_CHECK(m_calibDbKey.initialize());
     return StatusCode::SUCCESS;
 }
 
@@ -42,20 +42,27 @@ MdtDigiToolOutput RT_Relation_DB_DigiTool::digitize(const MdtDigiToolInput &inpu
 
 double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP::HepRandomEngine *rndmEngine) const {
     // Get RT relation from DB
-    const MuonCalib::MdtRtRelation *data = m_calibrationDbTool->getRtCalibration(DigitId);
+    SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibConstants{m_calibDbKey};
+
+    if (!calibConstants.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve calib constants "<<m_calibDbKey.fullKey());
+        throw std::runtime_error("No Mdt calibration constants");
+    }
+    using RtRelationPtr = MuonCalib::MdtCalibDataContainer::RtRelationPtr;
+    const RtRelationPtr& data{calibConstants->getCalibData(DigitId, msgStream())->rtRelation};
 
     double time = 0.0;
     double t = 0.0;
     bool outOfBound = false;
 
-    if (data != nullptr) {
+    if (data) {
         // get RT relation and resolution function
         const MuonCalib::IRtRelation *rtRelation = data->rt();
         const MuonCalib::IRtResolution *rtResolution = data->rtRes();
 
         // get inverse rt and calculate time resolution
         const MuonCalib::TrRelation *trRelation = data->tr();
-        time = trRelation->tFromR(fabs(r), outOfBound);
+        time = trRelation->tFromR(std::abs(r), outOfBound);
 
         if (time < 0.0) {
             time = 0.0;
@@ -88,8 +95,8 @@ double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP
                 trRelation->tFromR(m_maxRadius, outOfBound2);  // tmax = tUp+tLow; //means: tmax  = (tmax of rt relation) + (one binwidth )
 
         double gaussian;
-        const double sqrt_one_over_two_pi = 0.39894228;
-        double p1r = 0.8480 * exp(-0.5879 * r);
+        constexpr double sqrt_one_over_two_pi = 0.39894228;
+        double p1r = 0.8480 * std::exp(-0.5879 * r);
         int flag = 0;
         int cutoff = 0;
 
@@ -114,23 +121,23 @@ double RT_Relation_DB_DigiTool::getDriftTime(double r, Identifier DigitId, CLHEP
 
 double RT_Relation_DB_DigiTool::getAdcResponse(double radius, CLHEP::HepRandomEngine *rndmEngine) const {
     // parametrization of the average adc value with respect to radius
-    const double p0 = 57.38141;
-    const double p1 = 8.616943;
-    const double p2 = 2.497827;
-    const double p3 = -1.625900;
-    const double p4 = 0.3125281;
-    const double p5 = -0.02929554;
-    const double p6 = 0.001367115;
-    const double p7 = -0.00002541936;
+    constexpr double p0 = 57.38141;
+    constexpr double p1 = 8.616943;
+    constexpr double p2 = 2.497827;
+    constexpr double p3 = -1.625900;
+    constexpr double p4 = 0.3125281;
+    constexpr double p5 = -0.02929554;
+    constexpr double p6 = 0.001367115;
+    constexpr double p7 = -0.00002541936;
 
     double adcfunc = p0 + p1 * radius + p2 * std::pow(radius, 2) + p3 * std::pow(radius, 3) + p4 * std::pow(radius, 4) +
                      p5 * std::pow(radius, 5) + p6 * std::pow(radius, 6) + p7 * std::pow(radius, 7);
 
     // now the resolution function
-    const double g0 = 10.27808;
-    const double g1 = -0.3774593;
-    const double g2 = 0.02751001;
-    const double g3 = -0.0005994742;
+    constexpr double g0 = 10.27808;
+    constexpr double g1 = -0.3774593;
+    constexpr double g2 = 0.02751001;
+    constexpr double g3 = -0.0005994742;
 
     double adcWidth = g0 + g1 * radius + g2 * std::pow(radius, 2) + g3 * std::pow(radius, 3);
 

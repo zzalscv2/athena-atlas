@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -12,7 +12,6 @@
 #include "MuonRIO_OnTrack/MuonDriftCircleErrorStrategy.h"
 #include "MuonEventTPCnv/MuonRIO_OnTrack/MdtDriftCircleOnTrackCnv_p1.h"
 
-//nclude "TrkEventTPCnv/helpers/CLHEPHelpers.h"
 #include <iostream>
 
 void MdtDriftCircleOnTrackCnv_p1::
@@ -30,7 +29,7 @@ persToTrans( const Muon::MdtDriftCircleOnTrack_p1 *persObj,
    if (persObj->m_rotCreationParameters&0x200) errorStrategy.setParameter(Muon::MuonDriftCircleErrorStrategy::WireSagTimeCorrection, true); 
 
    ElementLinkToIDC_MDT_Container rio;
-   m_elCnv.persToTrans(&persObj->m_prdLink,&rio,log);  
+   m_elCnv.persToTrans(&persObj->m_prdLink, &rio, log);  
 
    *transObj = Muon::MdtDriftCircleOnTrack (rio,
                                             Trk::LocalParameters(),
@@ -41,10 +40,7 @@ persToTrans( const Muon::MdtDriftCircleOnTrack_p1 *persObj,
                                             static_cast<Trk::DriftCircleStatus>( persObj->m_status ),
                                             persObj->m_positionAlongWire,
                                             persObj->m_localAngle,
-                                            errorStrategy,
-                                            this->createTransFromPStore( &m_surfCnv, persObj->m_saggedSurface, log )
-                                            );
-
+                                            errorStrategy);
    fillTransFromPStore( &m_RIOCnv, persObj->m_RIO,  transObj, log );
 }
 

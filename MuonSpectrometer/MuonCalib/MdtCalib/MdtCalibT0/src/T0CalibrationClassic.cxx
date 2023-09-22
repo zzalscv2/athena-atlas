@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0CalibrationClassic.h"
@@ -67,12 +67,14 @@ namespace MuonCalib {
             bool ROside = distanceToRO < 130000.;  // this means that there is no selection along the tube
             if (ROside) {
                 const MuonFixedId &id = hit->identify();
-
+                const MdtIdHelper& idHelper{m_result->idHelperSvc()->mdtIdHelper()};
                 // get the T0 originally subtracted for this hit
                 int nML = id.mdtMultilayer();
                 int nL = id.mdtTubeLayer();
                 int nT = id.mdtTube();
-                const MdtTubeFitContainer::SingleTubeCalib *stc = m_result->getCalib(nML - 1, nL - 1, nT - 1);
+                const Identifier tubeId = idHelper.channelID(id.stationNameString(), id.eta(), id.phi(), 
+                                                             nML, nL, nT);
+                const MdtTubeFitContainer::SingleTubeCalib *stc = m_result->getCalib(tubeId);
                 if (!stc) {
                     MsgStream log(Athena::getMessageSvc(), "T0ClassicSettings");
                     log << MSG::WARNING << "no Single Tube Calib info found for ML=" << nML << " L=" << nL << " T=" << nT << endmsg;
@@ -119,6 +121,7 @@ namespace MuonCalib {
         MsgStream log(Athena::getMessageSvc(), "T0ClassicSettings");
         if (log.level() <= MSG::INFO) log << MSG::INFO << "T0CalibrationClassic::analyse iteration " << m_currentItnum << endmsg;
 
+        const MdtIdHelper& idHelper{m_result->idHelperSvc()->mdtIdHelper()};
         // loop over m_histos histograms
         for (std::unique_ptr<T0ClassicHistos> &hist : m_histos) {
             if (m_settings->fitTime()) {
@@ -132,10 +135,12 @@ namespace MuonCalib {
                     int nML = fId.mdtMultilayer();
                     int nL = fId.mdtTubeLayer();
                     int nT = fId.mdtTube();
-
-                    bool setInfo = m_result->setCalib(nML - 1, nL - 1, nT - 1, st);
+                    const Identifier tubeId = idHelper.channelID(fId.stationNameString(), fId.eta(), fId.phi(), 
+                                                                nML, nL, nT);
+               
+                    bool setInfo = m_result->setCalib(std::move(st), tubeId, log);
                     if (!setInfo) log << MSG::WARNING << "T0CalibrationClassic::PROBLEM! could not set SingleTubeCalib info " << endmsg;
-                    setInfo = m_result->setFit(nML - 1, nL - 1, nT - 1, full);
+                    setInfo = m_result->setFit(std::move(full), tubeId, log);
                     if (!setInfo) log << MSG::WARNING << "T0CalibrationClassic::PROBLEM! could not set SingleTubeFullInfo info " << endmsg;
                 }
             }

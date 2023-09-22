@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibDbOperations/CalibT0DbOperations.h"
 
-#include "AthenaKernel/getMessageSvc.h"
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/AttributeSpecification.h"
 #include "CoralKernel/Context.h"
-#include "GaudiKernel/MsgStream.h"
 #include "MdtCalibData/MdtTubeFitContainer.h"
 #include "MuonCalibDbOperations/CalibDbConnection.h"
 #include "MuonCalibDbOperations/IConditionsStorage.h"
@@ -33,7 +31,10 @@
 
 namespace MuonCalib {
 
-    CalibT0DbOperations::CalibT0DbOperations(CalibDbConnection &db_conn) : m_db_conn(db_conn), m_query(nullptr) {}
+    CalibT0DbOperations::CalibT0DbOperations(CalibDbConnection &db_conn) : 
+        AthMessaging{"CalibT0DbOperations"}, m_db_conn(db_conn) {
+        m_idHelperSvc.retrieve().ignore();
+    }
 
     MdtStationT0Container *CalibT0DbOperations::LoadT0Calibration(const NtupleStationId &id, int head_id, std::string &site_name) {
         try {
@@ -64,21 +65,20 @@ namespace MuonCalib {
                 count++;
             }
             if (count == 0) {
-                MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-                log << MSG::WARNING << "No tubes found for " << id.regionId() << " Header " << site_name << head_id << endmsg;
+                ATH_MSG_WARNING( "No tubes found for " << id.regionId() << " Header " << site_name << head_id );
                 delete ret;
                 return nullptr;
             }
             return ret;
         }  // try
-        catch (coral::SchemaException &e) {
-            MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-            log << MSG::WARNING << "Schema exception : " << e.what() << endmsg;
+        catch (coral::SchemaException &e) {            
+            ATH_MSG_WARNING( "Schema exception : " << e.what() );
             return nullptr;
         }
     }
 
     MdtTubeFitContainer *CalibT0DbOperations::LoadT0Validation(const NtupleStationId &id, int head_id, std::string & /*site_name*/) {
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
         try {
             m_db_conn.OpenTransaction();
             m_query = m_db_conn.GetQuery();
@@ -164,22 +164,24 @@ namespace MuonCalib {
                     str_set = true;
                 }
             }
+
             // create output class
-            MdtTubeFitContainer *ret = new MdtTubeFitContainer(id.regionId(), n_ml, n_layers, n_tubes);
-            for (std::map<MuonFixedId, MdtTubeFitContainer::SingleTubeFit>::const_iterator it = fits.begin(); it != fits.end(); ++it) {
-                int ml = it->first.mdtMultilayer() - 1;
-                int ly = it->first.mdtTubeLayer() - 1;
-                int tb = it->first.mdtTube() - 1;
-                ret->setFit(ml, ly, tb, it->second);
-                ret->setCalib(ml, ly, tb, calibs[it->first]);
+            const Identifier moduleID = idHelper.elementID(id.GetStation(), id.GetEta(), id.GetPhi());
+            MdtTubeFitContainer *ret = new MdtTubeFitContainer(m_idHelperSvc.get(), moduleID);
+            for (auto& [tubeId, tubeFit] : fits) {
+                const Identifier id = idHelper.channelID(moduleID, 
+                                                         tubeId.mdtMultilayer(),
+                                                         tubeId.mdtTubeLayer(),
+                                                         tubeId.mdtTube());
+                ret->setFit(std::move(tubeFit), id, msg());
+                ret->setCalib(std::move(calibs[tubeId]), id, msg());
             }
             ret->setGroupBy(tb_grp);
             ret->setImplementation(alg_flg);
             return ret;
         }  // try
-        catch (coral::SchemaException &e) {
-            MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-            log << MSG::WARNING << "Schema exception : " << e.what() << endmsg;
+        catch (coral::SchemaException &e) {           
+            ATH_MSG_WARNING( "Schema exception : " << e.what() );
             return nullptr;
         }
     }
@@ -188,10 +190,9 @@ namespace MuonCalib {
                                              int head_id, const std::string &site_name) {
         try {
             m_db_conn.OpenTransaction();
-            if (!checkTubesPresent(head_id, site_name, id, validation_flag)) {
-                MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-                log << MSG::WARNING << "Trying to insert data for chamber " << id.regionId() << " header " << head_id << site_name
-                    << "  which already exists!" << endmsg;
+            if (!checkTubesPresent(head_id, site_name, id, validation_flag)) {               
+                ATH_MSG_WARNING( "Trying to insert data for chamber " << id.regionId() << " header " << head_id << site_name
+                    << "  which already exists!" );
                 m_db_conn.Rollback();
                 return false;
             }
@@ -243,14 +244,14 @@ namespace MuonCalib {
             fixId.setStationName(id.GetStation());
             fixId.setStationEta(id.GetEta());
             fixId.setStationPhi(id.GetPhi());
-            for (unsigned int ml = 0; ml < nml; ml++) {
-                for (unsigned int ly = 0; ly < nly; ly++) {
-                    for (unsigned int tb = 0; tb < ntb; tb++) {
-                        int tb_index = tb + ntb * ly + ntb * nly * ml;
+            for (unsigned int ml = 1; ml <= nml; ml++) {
+                for (unsigned int ly = 1; ly <= nly; ly++) {
+                    for (unsigned int tb = 1; tb <= ntb; tb++) {
+                        int tb_index = (tb -1) + ntb * (ly -1) + ntb * nly * (ml -1);
                         if (validation_flag[tb_index] == 3) continue;
-                        fixId.setMdtTube(tb + 1);
-                        fixId.setMdtTubeLayer(ly + 1);
-                        fixId.setMdtMultilayer(ml + 1);
+                        fixId.setMdtTube(tb);
+                        fixId.setMdtTubeLayer(ly);
+                        fixId.setMdtMultilayer(ml);
                         // new tubes or tubes that are validated bad are inserted
                         int rowsUpdated;
                         if (validation_flag[tb_index] == 5)
@@ -259,9 +260,8 @@ namespace MuonCalib {
                             rowsUpdated = setValidFlag(site_name, head_id, fixId.getIdInt(), 1, *editor[0]);
 
                         if (rowsUpdated != 1) {
-                            MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-                            log << MSG::WARNING << id.regionId() << " tb=" << tb << " ly=" << ly << " ml=" << ml << " head_id=" << head_id
-                                << ": " << rowsUpdated << " Rows to be updated! This is wrong! Check database!" << endmsg;
+                            ATH_MSG_WARNING( id.regionId() << " tb=" << tb << " ly=" << ly << " ml=" << ml << " head_id=" << head_id
+                                << ": " << rowsUpdated << " Rows to be updated! This is wrong! Check database!" );
                             m_db_conn.Rollback();
                             return false;
                         }
@@ -292,8 +292,7 @@ namespace MuonCalib {
             return true;
         }  // try
         catch (coral::SchemaException &e) {
-            MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-            log << MSG::WARNING << "Schema exception : " << e.what() << endmsg;
+            ATH_MSG_WARNING( "Schema exception : " << e.what() );
             m_db_conn.Rollback();
             return false;
         }
@@ -360,14 +359,13 @@ namespace MuonCalib {
             if (!storage.StoreT0Chamber(old_chamber_id, rows_of_a_chamber)) { return false; }
             return true;
         } catch (coral::SchemaException &e) {
-            MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-            log << MSG::WARNING << "Schema exception : " << e.what() << endmsg;
+            ATH_MSG_WARNING( "Schema exception : " << e.what() );
             return false;
         }
     }
 
     inline void CalibT0DbOperations::initRowBuffer(std::vector<coral::AttributeList> &rowBuffer, const NtupleStationId &id,
-                                                   const int &head_id, const std::string & /*site_name*/, const MdtTubeFitContainer *t0) {
+                                                   const int head_id, const std::string & /*site_name*/, const MdtTubeFitContainer *t0) {
         for (unsigned int i = 0; i < 3; i++) {
             rowBuffer[i].extend<int>("TUBE_ID");
             rowBuffer[i].extend<int>("HEAD_ID");
@@ -417,14 +415,20 @@ namespace MuonCalib {
     }
 
     inline void CalibT0DbOperations::fillRowBuffer(std::vector<coral::AttributeList> &rowBuffer, const MdtTubeFitContainer *t0,
-                                                   const int &ml, const int &ly, const int &tb, const MuonFixedId &fixId) {
+                                                   const int ml, const int ly, const int tb, const MuonFixedId &fixId) {
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+        const Identifier channelID = idHelper.channelID(fixId.stationName(),
+                                                        fixId.eta(),
+                                                        fixId.phi(), 
+                                                        ml, ly, tb);
+        
         for (unsigned int i = 0; i < 3; i++) { rowBuffer[i]["TUBE_ID"].data<int>() = fixId.getIdInt(); }
-        rowBuffer[1]["ENTRIES"].data<int>() = t0->getFit(ml, ly, tb)->statistics;
-        rowBuffer[1]["CHISQUARE_1"].data<float>() = t0->getFit(ml, ly, tb)->chi2Tdc;
-        rowBuffer[1]["CHISQUARE_2"].data<float>() = t0->getFit(ml, ly, tb)->chi2TdcEnd;
-        rowBuffer[1]["TUBE_GROUPING"].data<std::string>() = t0->getFit(ml, ly, tb)->group_by;
+        rowBuffer[1]["ENTRIES"].data<int>() = t0->getFit(channelID)->statistics;
+        rowBuffer[1]["CHISQUARE_1"].data<float>() = t0->getFit(channelID)->chi2Tdc;
+        rowBuffer[1]["CHISQUARE_2"].data<float>() = t0->getFit(channelID)->chi2TdcEnd;
+        rowBuffer[1]["TUBE_GROUPING"].data<std::string>() = t0->getFit(channelID)->group_by;
         for (int i = 0; i < 8; i++) {
-            double val = t0->getFit(ml, ly, tb)->par[i];
+            double val = t0->getFit(channelID)->par[i];
             if (std::isnan(val)) val = -99999.;
             std::ostringstream ostr2;
             ostr2 << "P" << i;
@@ -433,7 +437,7 @@ namespace MuonCalib {
             else
                 rowBuffer[1][ostr2.str()].data<float>() = val;
             ostr2 << "_ERR";
-            val = t0->getFit(ml, ly, tb)->cov[i];
+            val = t0->getFit(channelID)->cov[i];
             if (std::isnan(val)) val = -99999.;
             if (i > 3 && i < 7)
                 rowBuffer[1][ostr2.str()].data<float>() = val;
@@ -443,19 +447,19 @@ namespace MuonCalib {
         for (int i = 0; i < 4; i++) {
             std::ostringstream ostr2;
             ostr2 << "ADC_" << i;
-            rowBuffer[0][ostr2.str()].data<float>() = t0->getFit(ml, ly, tb)->adc_par[i];
+            rowBuffer[0][ostr2.str()].data<float>() = t0->getFit(channelID)->adc_par[i];
             ostr2 << "_ERR";
-            rowBuffer[2][ostr2.str()].data<float>() = t0->getFit(ml, ly, tb)->adc_err[i];
+            rowBuffer[2][ostr2.str()].data<float>() = t0->getFit(channelID)->adc_err[i];
         }
-        rowBuffer[2]["ADC_CHISQUARE"].data<float>() = t0->getFit(ml, ly, tb)->adc_chi2;
-        rowBuffer[0]["NHITS"].data<int>() = t0->getFit(ml, ly, tb)->n_hits;
-        if (t0->getFit(ml, ly, tb)->n_hits > 999999) rowBuffer[0]["NHITS"].data<int>() = 999999;
-        rowBuffer[0]["NHITS_ABOVE_ADC_CUT"].data<int>() = t0->getFit(ml, ly, tb)->n_hits_above_adc_cut;
-        if (t0->getFit(ml, ly, tb)->n_hits_above_adc_cut > 999999) rowBuffer[0]["NHITS_ABOVE_ADC_CUT"].data<int>() = 999999;
+        rowBuffer[2]["ADC_CHISQUARE"].data<float>() = t0->getFit(channelID)->adc_chi2;
+        rowBuffer[0]["NHITS"].data<int>() = t0->getFit(channelID)->n_hits;
+        if (t0->getFit(channelID)->n_hits > 999999) rowBuffer[0]["NHITS"].data<int>() = 999999;
+        rowBuffer[0]["NHITS_ABOVE_ADC_CUT"].data<int>() = t0->getFit(channelID)->n_hits_above_adc_cut;
+        if (t0->getFit(channelID)->n_hits_above_adc_cut > 999999) rowBuffer[0]["NHITS_ABOVE_ADC_CUT"].data<int>() = 999999;
     }
 
-    bool CalibT0DbOperations::setValidFlag(const std::string & /*site_name*/, const int &head_id, const int &tube_id,
-                                           const int &new_validflag, coral::ITableDataEditor &editor) {
+    bool CalibT0DbOperations::setValidFlag(const std::string & /*site_name*/, const int head_id, const int tube_id,
+                                           const int new_validflag, coral::ITableDataEditor &editor) {
         std::string updateAction = "validflag = :newval";
         std::string updateCondition = "head_id=:hid and tube_id=:tid and validflag=0";
         coral::AttributeList updateData;
@@ -482,10 +486,13 @@ namespace MuonCalib {
         unsigned int ntb = t0->numTubes();
         // do not insert completely dead chambers
         bool all_dead(true);
-        for (unsigned int ml = 0; ml < nml; ml++) {
-            for (unsigned int ly = 0; ly < nly; ly++) {
-                for (unsigned int tb = 0; tb < ntb; tb++) {
-                    if (t0->getFit(ml, ly, tb)->statistics > 0) {
+        const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+        const Identifier elementID = idHelper.elementID(id.GetStation(), id.GetEta(), id.GetPhi());
+        for (unsigned int ml = 1; ml <= nml; ml++) {
+            for (unsigned int ly = 1; ly <= nly; ly++) {
+                for (unsigned int tb = 1; tb <= ntb; tb++) {
+                    const Identifier channelID = idHelper.channelID(elementID, ml, ly, tb);
+                    if (t0->getFit(channelID)->statistics > 0) {
                         all_dead = false;
                         break;
                     }
@@ -493,8 +500,7 @@ namespace MuonCalib {
             }
         }
         if (all_dead) {
-            MsgStream log(Athena::getMessageSvc(), "CalibT0DbOperations");
-            log << MSG::WARNING << "Refusing to insert completely dead chamber" << endmsg;
+            ATH_MSG_WARNING( "Refusing to insert completely dead chamber" );
             return false;
         }
         MuonFixedId fixId(0);
@@ -502,13 +508,13 @@ namespace MuonCalib {
         fixId.setStationName(id.GetStation());
         fixId.setStationEta(id.GetEta());
         fixId.setStationPhi(id.GetPhi());
-        for (unsigned int ml = 0; ml < nml; ml++) {
-            for (unsigned int ly = 0; ly < nly; ly++) {
-                for (unsigned int tb = 0; tb < ntb; tb++) {
-                    int tb_index = tb + ntb * ly + ntb * nly * ml;
-                    fixId.setMdtTube(tb + 1);
-                    fixId.setMdtTubeLayer(ly + 1);
-                    fixId.setMdtMultilayer(ml + 1);
+        for (unsigned int ml = 1; ml <= nml; ml++) {
+            for (unsigned int ly = 1; ly <= nly; ly++) {
+                for (unsigned int tb = 1; tb <= ntb; tb++) {
+                    int tb_index = (tb -1) + ntb * (ly -1) + ntb * nly * (ml -1);
+                    fixId.setMdtTube(tb);
+                    fixId.setMdtTubeLayer(ly);
+                    fixId.setMdtMultilayer(ml);
                     int v_flag = 0;
                     if (static_cast<int>(validation_flag.size()) > tb_index) { v_flag = validation_flag[tb_index]; }
                     if (!row_buffer_initialized) {
@@ -551,7 +557,7 @@ namespace MuonCalib {
         return (rowsUpdated <= 432);
     }
 
-    inline bool CalibT0DbOperations::checkTubesPresent(const int &head_id, const std::string & /*site_name*/, const NtupleStationId &id,
+    inline bool CalibT0DbOperations::checkTubesPresent(const int head_id, const std::string & /*site_name*/, const NtupleStationId &id,
                                                        const std::vector<int> &validflag) {
         m_query = m_db_conn.GetQuery();
         // select count(MDT_TUBE.TUBE_ID) as  N_TUBES, MDT_TUBE.VALIDFLAG as VALIDFLAG from MDT_TUBE where MDT_TUBE.HEAD_ID = :hid and

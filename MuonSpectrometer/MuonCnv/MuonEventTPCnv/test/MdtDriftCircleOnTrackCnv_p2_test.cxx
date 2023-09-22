@@ -151,8 +151,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
                                       Trk::DECIDED,
                                       3.5,
                                       4.5,
-                                      strategy,
-                                      nullptr); // surface
+                                      strategy); // surface
 
   testit (trans1);
   Athena_test::Leakcheck check;

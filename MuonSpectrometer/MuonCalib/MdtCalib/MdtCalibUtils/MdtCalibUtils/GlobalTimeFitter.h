@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include "MdtCalibData/IRtRelation.h"
-#include "MdtCalibData/MdtCalibrationFactory.h"
 #include "MdtCalibInterfaces/IMdtSegmentFitter.h"
 #include "MuonCalibEvent/MdtCalibHit.h"
 #include "MuonCalibEventBase/MuonCalibSegment.h"
@@ -24,7 +23,7 @@ namespace MuonCalib {
     public:
         GlobalTimeFitter(const IMdtSegmentFitter *fitter) : m_fitter(fitter) {}
         GlobalTimeFitter(const IMdtSegmentFitter *fitter, const IRtRelation *rtRel) : m_fitter(fitter), m_rtRel(rtRel) {}
-        ~GlobalTimeFitter() {}
+        ~GlobalTimeFitter() = default;
 
         double GTFit(MuonCalibSegment *seg);
         double GTFit2(MuonCalibSegment *seg);
