@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibData/RtScaleFunction.h"
 
 #include "MdtCalibData/IRtRelation.h"
-
+#include <array>
 namespace MuonCalib {
 
-    static const double RtScaleFunction_p[] = {-0.00102327, 0.00582117, -0.00676815, 0.00167504, -8.67371e-05, 1.66509e-06};
+    static constexpr std::array<double, 6> RtScaleFunction_p{-0.00102327, 0.00582117, -0.00676815, 0.00167504, -8.67371e-05, 1.66509e-06};
 
-    float RtScalePolynomial(const float &r) {
+    float RtScalePolynomial(const float r) {
         // calculate polynomial
         float p = 0;
         for (int i = 5; i >= 0; i--) { p = RtScaleFunction_p[i] + r * p; }
         return p;
     }
 
-    float RtScaleFunction(const float &t, const bool ml2, const IRtRelation &rt) {
+    float RtScaleFunction(const float t, const bool ml2, const IRtRelation &rt) {
         if (t < rt.tLower() || !rt.HasTmaxDiff()) return 0.0;
         // apply linear scale and calculate r as input to the polinomial
         float rt_length = rt.tUpper() - rt.tLower();

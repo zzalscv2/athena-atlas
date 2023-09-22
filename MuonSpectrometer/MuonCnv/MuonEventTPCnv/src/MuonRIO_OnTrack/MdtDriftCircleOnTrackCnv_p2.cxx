@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -13,7 +13,6 @@
 #include "MuonEventTPCnv/MuonRIO_OnTrack/MdtDriftCircleOnTrackCnv_p2.h"
 #include "TrkEventTPCnv/helpers/EigenHelpers.h"
 
-//nclude "TrkEventTPCnv/helpers/CLHEPHelpers.h"
 #include <iostream>
 
 void MdtDriftCircleOnTrackCnv_p2::
@@ -42,16 +41,10 @@ persToTrans( const Muon::MdtDriftCircleOnTrack_p2 *persObj,
                                            static_cast<Trk::DriftCircleStatus>( persObj->m_status ),
                                            persObj->m_positionAlongWire,
                                            persObj->m_localAngle,
-                                           Muon::MuonDriftCircleErrorStrategy (persObj->m_muonDriftCircleErrorStrategy),
-                                           nullptr // surface
-                                           );
-
+                                           Muon::MuonDriftCircleErrorStrategy (persObj->m_muonDriftCircleErrorStrategy));
   // Attempt to call supertool to fill in detElements
   m_eventCnvTool->recreateRIO_OnTrack(transObj);
-  if (transObj->detectorElement()==nullptr) 
-    log << MSG::WARNING<<"Unable to reset DetEl for this RIO_OnTrack, "
-        << "probably because of a problem with the Identifier/IdentifierHash : ("
-        << transObj->identify()<<"/"<<transObj->idDE()<<endmsg;
+
 }
 
 void MdtDriftCircleOnTrackCnv_p2::

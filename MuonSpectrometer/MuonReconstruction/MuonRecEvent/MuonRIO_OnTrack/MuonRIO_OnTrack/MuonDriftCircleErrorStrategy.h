@@ -33,8 +33,8 @@ public:
                           Segment, //!< Treating a segment or a track
                           FirstCalibWindowBit //!< First bit recording the calibration configuration
                         };
-  static const std::size_t nCalibWindowBits = 4; //!< Allows up to 16 configurations to be recorded
-
+  static constexpr std::size_t nCalibWindowBits = 4; //!< Allows up to 16 configurations to be recorded
+  MuonDriftCircleErrorStrategy() = default;
   MuonDriftCircleErrorStrategy(const MuonDriftCircleErrorStrategyInput& bits):m_bits(bits){} //!< first 3 bits are Strategy, then come CreationParameter, last four are calib window bits
   void setStrategy(Strategy); //!< Select the strategy to be used - only one can be set at a time
   void setParameter(CreationParameter, bool value);
@@ -47,7 +47,7 @@ public:
   const MuonDriftCircleErrorStrategyInput getBits() const { return m_bits; }
   
 private:
-  MuonDriftCircleErrorStrategyInput m_bits; //!< 0,1,2 are reserved for Strategy, 3-16 are Creation parameters, 17-20 are calib window bits
+  MuonDriftCircleErrorStrategyInput m_bits{}; //!< 0,1,2 are reserved for Strategy, 3-16 are Creation parameters, 17-20 are calib window bits
 };
 }
 

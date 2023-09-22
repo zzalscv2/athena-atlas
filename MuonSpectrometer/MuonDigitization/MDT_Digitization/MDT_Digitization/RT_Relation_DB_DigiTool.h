@@ -22,7 +22,7 @@ Adopted from RT_Relation_DigiTool
 #include "MdtCalibData/MdtFullCalibData.h"
 #include "MdtCalibData/MdtRtRelation.h"
 #include "MdtCalibData/TrRelation.h"
-#include "MdtCalibSvc/MdtCalibrationDbTool.h"
+#include "MdtCalibData/MdtCalibDataContainer.h"
 
 namespace MuonGM {
     class MuonDetectorManager;
@@ -46,7 +46,8 @@ private:
     // Data members
     double m_maxRadius{0.};
 
-    ToolHandle<MdtCalibrationDbTool> m_calibrationDbTool{this, "CalibrationDbTool", "MdtCalibrationDbTool"};
+    SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_calibDbKey{this, "CalibDataKey", "MdtCalibConstants",
+                                                                       "Conditions object containing the calibrations"};
     Gaudi::Property<double> m_effRadius{this, "EffectiveRadius", 14.4275};
 };
 

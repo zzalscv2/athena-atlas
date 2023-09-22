@@ -59,7 +59,7 @@ namespace MuonCombined {
         ATH_CHECK(m_mdtCreatorStau.retrieve());
         ATH_CHECK(m_insideOutRecoTool.retrieve());
         ATH_CHECK(m_updator.retrieve());
-        ATH_CHECK(m_calibrationDbTool.retrieve());
+        ATH_CHECK(m_calibDbKey.initialize());
         ATH_CHECK(m_houghDataPerSectorVecKey.initialize(!m_houghDataPerSectorVecKey.empty()));
 
         if (m_doTruth) {
@@ -253,7 +253,12 @@ namespace MuonCombined {
         return !candidates.empty();
     }
 
-    void MuonStauRecoTool::extractTimeMeasurementsFromTrack(MuonStauRecoTool::Candidate& candidate) const {
+    void MuonStauRecoTool::extractTimeMeasurementsFromTrack(const EventContext& ctx, MuonStauRecoTool::Candidate& candidate) const {
+        SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> mdtCalibConstants{m_calibDbKey, ctx};
+        if (!mdtCalibConstants.isValid()) {
+            ATH_MSG_FATAL("Failed to retrieve calibration constants "<<m_calibDbKey.fullKey());
+            throw std::runtime_error("Failed to retrieve calibration constants");
+        }
         ATH_MSG_VERBOSE("extractTimeMeasurementsFromTrack for candidate: beta seed " << candidate.betaSeed.beta);
         Trk::Track* combinedTrack = candidate.combinedTrack.get();
         if (!combinedTrack) return;
@@ -331,9 +336,8 @@ namespace MuonCombined {
                     float driftTime = mdt->driftTime();  // we need to add beta seed as it was subtracted when calibrating the hits
                     float locR = pars->parameters()[Trk::locR];
                     float errR = pars->covariance() ? Amg::error(*pars->covariance(), Trk::locR) : 0.3;
-                    const auto* detEl = mdt->detectorElement();
-                    auto data = m_calibrationDbTool->getCalibration(detEl->identifyHash(), detEl->detectorElementHash());
-                    const auto* rtRelation = data.rtRelation;
+                    auto data = mdtCalibConstants->getCalibData(id, msgStream());
+                    const auto& rtRelation = data->rtRelation;
                     bool out_of_bound_flag = false;
                     float drdt = rtRelation->rt()->driftvelocity(driftTime);
                     float rres = rtRelation->rtRes()->resolution(driftTime);
@@ -624,9 +628,8 @@ namespace MuonCombined {
                 float driftTime = calibratedMdt->driftTime();  // we need to add beta seed as it was subtracted when calibrating the hits
                 float locR = rline;
                 float errR = dc.errorTrack();
-                const auto* detEl = mdt->detectorElement();
-                auto data = m_calibrationDbTool->getCalibration(detEl->identifyHash(), detEl->detectorElementHash());
-                const auto* rtRelation = data.rtRelation;
+                auto data = mdtCalibConstants->getCalibData(id, msgStream());
+                const auto& rtRelation = data->rtRelation;
                 bool out_of_bound_flag = false;
                 float drdt = rtRelation->rt()->driftvelocity(driftTime);
                 float rres = rtRelation->rtRes()->resolution(driftTime);
@@ -803,7 +806,7 @@ namespace MuonCombined {
                 candidate->combinedTrack = std::move(result.second);
 
                 // extract times form track
-                extractTimeMeasurementsFromTrack(*candidate);
+                extractTimeMeasurementsFromTrack(ctx, *candidate);
                 combinedCandidates.push_back(candidate);
                 if (!m_recoValidationTool.empty()) m_recoValidationTool->addTimeMeasurements(indetTrackParticle, candidate->stauHits);
             }

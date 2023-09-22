@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MdtCalibSvc/MdtCalibrationShiftMapBase.h"
+#include "MdtCalibrationShiftMapBase.h"
 #include "PathResolver/PathResolver.h"
 
 #include <sys/stat.h>
@@ -33,7 +33,7 @@ StatusCode MdtCalibrationShiftMapBase::dumpMapAsFile() {
     if (!file.is_open()) {
       ATH_MSG_FATAL(
           "Cannot open map output file for writing. Tried accessing file at \"./"
-          << m_mapFileName.value().c_str() << "\"");
+          << m_mapFileName << "\"");
       return StatusCode::FAILURE;
     }
 

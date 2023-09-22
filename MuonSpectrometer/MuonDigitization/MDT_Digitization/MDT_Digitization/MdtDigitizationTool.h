@@ -49,14 +49,13 @@
 #include "MDT_Digitization/IMDT_DigitizationTool.h"
 #include "MDT_Digitization/MDT_SortedHitVector.h"
 #include "MDT_Response/MDT_Response.h"
-#include "MdtCalibSvc/MdtCalibrationDbTool.h"
 #include "MuonCondData/MdtCondDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonSimEvent/MDTSimHit.h"
+#include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MuonSimEvent/MDTSimHitCollection.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 #include "PileUpTools/PileUpToolBase.h"
-#include "xAODEventInfo/EventAuxInfo.h"  // NEW EDM
 #include "xAODEventInfo/EventInfo.h"     // NEW EDM
 
 // Outputs
@@ -134,7 +133,7 @@ private:
 
     bool handleMDTSimhit(const EventContext& ctx, const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
                          CLHEP::HepRandomEngine* toolRndmEngine);
-    bool createDigits(Collections_t& collections, MuonSimDataCollection* sdoContainer, CLHEP::HepRandomEngine* rndmEngine);
+    bool createDigits(const EventContext& ctx, Collections_t& collections, MuonSimDataCollection* sdoContainer, CLHEP::HepRandomEngine* rndmEngine);
 
     // calculate local hit position in local sagged wire frame, also returns whether the hit passed above or below the wire
     GeoCorOut correctGeometricalWireSag(const MDTSimHit& hit, const Identifier& id, const MuonGM::MdtReadoutElement* element) const;
@@ -223,7 +222,9 @@ protected:
 
     ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  // Random number service
 
-    ToolHandle<MdtCalibrationDbTool> m_calibrationDbTool{this, "CalibrationDbTool", "MdtCalibrationDbTool", ""};
+    SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_calibDbKey{this, "CalibDataKey", "MdtCalibConstants",
+                                                                       "Conditions object containing the calibrations"};
+
     SG::ReadCondHandleKey<MdtCondDbData> m_readKey{this, "ReadKey", "MdtCondDbData", "Key of MdtCondDbData"};
 };
 

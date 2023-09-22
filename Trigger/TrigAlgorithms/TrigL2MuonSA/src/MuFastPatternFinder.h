@@ -10,7 +10,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
-#include "MdtCalibSvc/MdtCalibrationTool.h"
+#include "MdtCalibInterfaces/IMdtCalibrationTool.h"
 #include "MuonRoad.h"
 #include "MdtData.h"
 #include "TrackData.h"
@@ -65,7 +65,7 @@ class MuFastPatternFinder: public AthAlgTool
       ToolHandle<NswPatternFinder>  m_nswPatternFinder {this, "NswPatternFinder", "TrigL2MuonSA::NswPatternFinder"};
 
       // MDT calibration service
-      ToolHandle<MdtCalibrationTool> m_mdtCalibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
+      ToolHandle<IMdtCalibrationTool> m_mdtCalibrationTool{this, "CalibrationTool", "MdtCalibrationTool"};
 
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 };

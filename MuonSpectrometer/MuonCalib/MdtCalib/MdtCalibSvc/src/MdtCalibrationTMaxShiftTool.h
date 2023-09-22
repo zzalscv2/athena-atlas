@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDTCALIBSVC_MDTCALIBRATIONTMAXSHIFTTOOL_H
 #define MDTCALIBSVC_MDTCALIBRATIONTMAXSHIFTTOOL_H
 
-#include "MdtCalibSvc/MdtCalibrationShiftMapBase.h"
+#include "MdtCalibrationShiftMapBase.h"
 
 /*
    @class MdtCalibrationTMaxShiftTool
@@ -30,7 +30,7 @@ public:
   float getTUpper() const { return m_tUpper; }
 
 private:
-  float m_tUpper;
+   float m_tUpper{688.1818};
 };
 
 #endif

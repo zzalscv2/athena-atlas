@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSTAURECOTOOL_H
@@ -13,7 +13,7 @@
 #include "GaudiKernel/PhysicalConstants.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "MdtCalibSvc/MdtCalibrationDbTool.h"
+#include "MdtCalibData/MdtCalibDataContainer.h"
 #include "MuidInterfaces/ICombinedMuonTrackBuilder.h"
 #include "MuonClusterization/RpcHitClustering.h"
 #include "MuonCombinedEvent/MuGirlLowBetaTag.h"
@@ -60,14 +60,14 @@ namespace MuonCombined {
 
         struct BetaSeed {
             BetaSeed(float beta_, float error_) : beta(beta_), error(error_) {}
-            float beta;
-            float error;
+            float beta{0.f};
+            float error{0.f};
         };
 
         struct RpcTimeMeasurement {
             std::vector<std::shared_ptr<const Muon::RpcClusterOnTrack>> rpcClusters;
-            float time;
-            float error;
+            float time{0.f};
+            float error{0.f};
         };
         typedef std::vector<RpcTimeMeasurement> RpcTimeMeasurementVec;
 
@@ -196,7 +196,7 @@ namespace MuonCombined {
                     Trk::SegmentCollection* segments) const;
 
         /** extract time measurements from the track associated with the candidate */
-        void extractTimeMeasurementsFromTrack(Candidate& candidate) const;
+        void extractTimeMeasurementsFromTrack(const EventContext& ctx, Candidate& candidate) const;
 
         /** extract truth from the indetTrackParticle */
         TruthInfo* getTruth(const xAOD::TrackParticle& indetTrackParticle) const;
@@ -251,7 +251,8 @@ namespace MuonCombined {
         ToolHandle<MuonCombined::MuonInsideOutRecoTool> m_insideOutRecoTool{this, "MuonInsideOutRecoTool",
                                                                             "MuonCombined::MuonInsideOutRecoTool/MuonInsideOutRecoTool"};
         ToolHandle<Trk::IUpdator> m_updator{this, "Updator", "Trk::KalmanUpdator/KalmanUpdator"};
-        ToolHandle<MdtCalibrationDbTool> m_calibrationDbTool{this, "MdtCalibrationDbTool", "MdtCalibrationDbTool"};
+        SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_calibDbKey{this, "CalibDataKey", "MdtCalibConstants",
+                                                                       "Conditions object containing the calibrations"};
 
         Muon::MuonSectorMapping m_muonSectorMapping;
 

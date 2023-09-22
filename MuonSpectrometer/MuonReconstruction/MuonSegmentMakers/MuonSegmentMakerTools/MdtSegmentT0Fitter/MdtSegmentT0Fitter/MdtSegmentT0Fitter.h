@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Fitting for in situ calibration of segments
@@ -13,7 +13,8 @@
 #include "TrkDriftCircleMath/DCSLFitter.h"
 #include "MuonSegmentMakerInterfaces/IDCSLFitProvider.h"
 
-#include "MdtCalibSvc/MdtCalibrationDbTool.h"
+#include "MdtCalibData/MdtCalibDataContainer.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include <atomic>
 #include <vector>
@@ -35,8 +36,12 @@ namespace TrkDriftCircleMath {
       virtual const DCSLFitter* getFitter() const override { return this; }
 
     private:
-      ToolHandle<MdtCalibrationDbTool> m_calibrationDbTool{this,"CalibrationDbTool","MdtCalibrationDbTool"};
+      
+      SG::ReadCondHandleKey<MuonCalib::MdtCalibDataContainer> m_calibDbKey{this, "CalibDataKey", "MdtCalibConstants",
+                                                                       "Conditions object containing the calibrations"};
 
+      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+      
       Gaudi::Property<bool> m_rejectWeakTopologies{this,"RejectWeakTopologies",true,"reject topolgies that do not have at least one +- combination in one multilayer"};
       Gaudi::Property<bool> m_scaleErrors{this,"RescaleErrors",true,"rescale errors in fit"};
       Gaudi::Property<bool> m_propagateErrors{this,"PropagateErrors",true,"propagate errors"};

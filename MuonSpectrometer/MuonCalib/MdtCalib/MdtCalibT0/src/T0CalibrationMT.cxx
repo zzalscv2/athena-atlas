@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0CalibrationMT.h"
@@ -74,7 +74,12 @@ namespace MuonCalib {
             NtupleStationId sid(id);
             sid.SetMultilayer(0);
             std::map<NtupleStationId, MdtTubeFitContainer *>::const_iterator res_it(m_result.find(sid));
-            if (res_it != m_result.end()) stc = res_it->second->getCalib(nML - 1, nL - 1, nT - 1);
+            if (res_it != m_result.end()) {
+                const MdtIdHelper& idHelper{res_it->second->idHelperSvc()->mdtIdHelper()};
+                const Identifier tubeId = idHelper.channelID(id.stationNameString(), 
+                                                             id.eta(), id.phi(), nML, nL, nT);
+                stc = res_it->second->getCalib(tubeId);
+            }
             double oldT0 = 0;
             if (stc)
                 oldT0 = stc->t0;
@@ -99,6 +104,7 @@ namespace MuonCalib {
     }
 
     bool T0CalibrationMT::analyse() {
+        MsgStream log(Athena::getMessageSvc(), "T0CalibrationMT");            
         std::map<int, MdtTubeFitContainer::SingleTubeFit> full;
         std::map<int, MdtTubeFitContainer::SingleTubeCalib> st;
         std::map<int, std::string> fit_by;
@@ -117,14 +123,17 @@ namespace MuonCalib {
             int nML = fId.mdtMultilayer();
             int nL = fId.mdtTubeLayer();
             int nT = fId.mdtTube();
-            bool setInfo = m_result[sid]->setCalib(nML - 1, nL - 1, nT - 1, stc);
+            const MdtIdHelper& idHelper{m_result[sid]->idHelperSvc()->mdtIdHelper()};
+            const Identifier tubeId = idHelper.channelID(fId.stationNameString(), 
+                                                         fId.eta(), fId.phi(), nML, nL, nT);
+                 
+            bool setInfo = m_result[sid]->setCalib(std::move(stc), tubeId, log);
             if (!setInfo) {
-                MsgStream log(Athena::getMessageSvc(), "T0CalibrationMT");
                 log << MSG::WARNING << "T0CalibrationMT::PROBLEM! could not set SingleTubeCalib info" << endmsg;
             }
             fi.n_hits = m_nhits_per_tube[fId.getIdInt()];
             fi.n_hits_above_adc_cut = m_nhits_per_tube[fId.getIdInt()];
-            setInfo = m_result[sid]->setFit(nML - 1, nL - 1, nT - 1, fi);
+            setInfo = m_result[sid]->setFit(std::move(fi), tubeId, log);
             if (!setInfo) {
                 MsgStream log(Athena::getMessageSvc(), "T0CalibrationMT");
                 log << MSG::WARNING << "T0CalibrationMT::PROBLEM! could not set SingleTubeFit info" << endmsg;

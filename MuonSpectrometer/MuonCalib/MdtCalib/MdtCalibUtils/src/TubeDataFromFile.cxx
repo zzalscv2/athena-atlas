@@ -22,67 +22,54 @@ namespace MuonCalib {
         }
 
         os << "v0.0 " << m_regions << " ";
-
-        for (unsigned int i = 0; i < m_tubeData.size(); ++i) {
-            int eta = 0;
-            int phi = 0;
-            int technology = 0;
-            if (m_tubeData[i]) {
-                unsigned int nml = m_tubeData[i]->numMultilayers();
-                unsigned int nl = m_tubeData[i]->numLayers();
-                unsigned int nt = m_tubeData[i]->numTubes();
-                std::string datatype = m_tubeData[i]->name();
-                std::string implementation = m_tubeData[i]->implementation();
-                // unpack regionKey
-                std::string chamberName = m_tubeData[i]->regionKey();
-                std::string stnName(chamberName, 0, 3);
-                int separator1 = chamberName.find_first_of('_');
-                int separator2 = chamberName.find_last_of('_');
-                if ((separator2 - separator1) <= 3) {
-                    std::string stnPhi(chamberName, separator1 + 1, separator2 - separator1 - 1);
-                    std::string stnEta(chamberName, separator2 + 1, chamberName.size() - separator2 - 1);
-                    std::istringstream is1, is2;
-                    is1.str(stnEta);
-                    is1 >> eta;
-                    is2.str(stnPhi);
-                    is2 >> phi;
-                } else {
-                    MsgStream log(Athena::getMessageSvc(), "MdtTubeFitContainer");
-                    log << MSG::WARNING << "TubeDataFromFile: can't unpack string " << chamberName << endmsg;
-                }
-
-                os << datatype << " " << implementation << " " << i << " " << nml * nl * nt << std::endl;
-                for (unsigned int km = 0; km < nml; ++km) {
-                    for (unsigned int kl = 0; kl < nl; ++kl) {
-                        for (unsigned int kt = 0; kt < nt; ++kt) {
-                            const MdtTubeFitContainer::SingleTubeCalib* stc = m_tubeData[i]->getCalib(km, kl, kt);
-                            const MdtTubeFitContainer::SingleTubeFit* stf = m_tubeData[i]->getFit(km, kl, kt);
-                            double t0 = 999.;
-                            if (stc) {
-                                t0 = stc->t0;
-                                if (isnan(t0) != 0) t0 = -99999.;
-                            }
-                            os << "  " << stnName << "  " << phi << "  " << eta << "  " << technology << "  " << km + 1 << "  " << kl + 1
-                               << "  " << kt + 1;
-                            if (stc)
-                                os
-                                    //<< " " << stc->t0
-                                    << " " << t0 << " " << stc->adcCal << " " << stc->statusCode;
-                            else
-                                os << " " << 0 << " " << 0 << " " << 0;
-                            if (stf)
-                                os << " " << stf->statistics << " " << stf->chi2Tdc << " " << stf->cov[4]  // stf->t0Err
-                                   << " " << stf->par[5]                                                   // stf->tMax
-                                   << " " << stf->cov[5]                                                   // stf->tMaxErr
-                                   << " " << stf->par[0]                                                   // stf->noise
-                                   << " " << stf->cov[0]                                                   // stf->noiseErr
-                                   << " " << stf->par[6]                                                   // stf->slope
-                                   << " " << stf->cov[6];                                                  // stf->slopeErr;
-                            else
-                                os << " " << -1 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " "
-                                   << 0;
-                            os << std::endl;
+        unsigned int counter{0};
+        for (const MdtTubeFitContainer* container : m_tubeData) {
+            if (!container) continue;
+            const unsigned int nml = container->numMultilayers();
+            const unsigned int nl = container->numLayers();
+            const unsigned int nt = container->numTubes();
+            const std::string datatype = container->name();
+            const std::string implementation = container->implementation();
+            const int stnEta = container->idHelperSvc()->stationEta(container->identify());
+            const int stnPhi = container->idHelperSvc()->stationPhi(container->identify());
+            const std::string stnName = container->idHelperSvc()->stationNameString(container->identify());
+            os << datatype << " " << implementation << " " << counter << " " << container->size() << std::endl;
+            ++counter;
+            const MdtIdHelper& id_helper{container->idHelperSvc()->mdtIdHelper()};
+            for (unsigned int km = 1; km <= nml; ++km) {
+                for (unsigned int kl = 1; kl <= nl; ++kl) {
+                    for (unsigned int kt = 1; kt <= nt; ++kt) {
+                        const Identifier chId{id_helper.channelID(container->identify(),km ,kl ,kt)};
+                        const MdtTubeFitContainer::SingleTubeCalib* stc = container->getCalib(chId);
+                        const MdtTubeFitContainer::SingleTubeFit* stf = container->getFit(chId);
+                        double t0 = 999.;
+                        if (stc) {
+                            t0 = stc->t0;
+                            if (std::isnan(t0) != 0) t0 = -99999.;
                         }
+                        constexpr int technology = 0;
+                        os << "  " << stnName << "  " << stnPhi << "  " << stnEta 
+                           << "  " << technology << "  " << km  << "  " << kl << "  " << kt;
+                        if (stc) {
+                            os << " " << t0 << " " << stc->adcCal << " " << stc->statusCode;
+                        } else{
+                            os << " " << 0 << " " << 0 << " " << 0;
+                           
+                        }
+                        if (stf)
+                            os << " " << stf->statistics << " " << stf->chi2Tdc << " " << stf->cov[4]  // stf->t0Err
+                               << " " << stf->par[5]                                                   // stf->tMax
+                               << " " << stf->cov[5]                                                   // stf->tMaxErr
+                               << " " << stf->par[0]                                                   // stf->noise
+                               << " " << stf->cov[0]                                                   // stf->noiseErr
+                               << " " << stf->par[6]                                                   // stf->slope
+                               << " " << stf->cov[6];                                                  // stf->slopeErr;
+                        else {
+                            os << " " << -1 << " " << 0 << " " << 0 << " " << 0 << " " 
+                                      << 0 << " " << 0 << " " << 0 << " " << 0 << " "
+                                      << 0;
+                        }
+                        os << std::endl;
                     }
                 }
             }
@@ -90,7 +77,8 @@ namespace MuonCalib {
         return os;
     }
 
-    void TubeDataFromFile::write_forDB(FILE* ftube, int mdt_head, int lowrun, int uprun) const {
+
+    std::ostream& TubeDataFromFile::write_forDB(std::ostream& ftube, int mdt_head, int lowrun, int uprun) const {
         //////////////////////////////////////////////
         // write out ascii files for Calibration DB //
         //////////////////////////////////////////////
@@ -99,56 +87,43 @@ namespace MuonCalib {
             log << MSG::WARNING << "TubeDataFromFile::write_forDB: <inconsistent count>" << endmsg;
         }
 
-        MuonFixedId fixId;
-        //    char * station;
-        int tech, ml, l, t, sc, stat;
-        double t0, adcm, chi2tdc, t0err, tmax, tmaxerr, noise, noiseerr, slope, sloperr;
-        int tube_id, runflag = 0, validflag = 0;
+        for (const MdtTubeFitContainer* container : m_tubeData) {
+            if (!container) continue;
+            const unsigned int nml = container->numMultilayers();
+            const unsigned int nl = container->numLayers();
+            const unsigned int nt = container->numTubes();
+            const std::string datatype = container->name();
+            const std::string implementation = container->implementation();
+            const int stnEta = container->idHelperSvc()->stationEta(container->identify());
+            const int stnPhi = container->idHelperSvc()->stationPhi(container->identify());
+            const std::string stnName = container->idHelperSvc()->stationNameString(container->identify());
 
-        for (const auto *i : m_tubeData) {
-            int eta = 0;
-            int phi = 0;
-            int technology = 0;
-            if (i) {
-                unsigned int nml = i->numMultilayers();
-                unsigned int nl = i->numLayers();
-                unsigned int nt = i->numTubes();
-                std::string datatype = i->name();
-                std::string implementation = i->implementation();
-                // unpack regionKey
-                std::string chamberName = i->regionKey();
-                std::string stnName(chamberName, 0, 3);
-                int separator1 = chamberName.find_first_of('_');
-                int separator2 = chamberName.find_last_of('_');
-                if ((separator2 - separator1) <= 3) {
-                    std::string stnPhi(chamberName, separator1 + 1, separator2 - separator1 - 1);
-                    std::string stnEta(chamberName, separator2 + 1, chamberName.size() - separator2 - 1);
-                    std::istringstream is1, is2;
-                    is1.str(stnEta);
-                    is1 >> eta;
-                    is2.str(stnPhi);
-                    is2 >> phi;
-                } else {
-                    MsgStream log(Athena::getMessageSvc(), "MdtTubeFitContainer");
-                    log << MSG::WARNING << "TubeDataFromFile: can't unpack string " << chamberName << endmsg;
-                }
+            const MdtIdHelper& id_helper{container->idHelperSvc()->mdtIdHelper()};
+            for (unsigned int km = 1; km <= nml; ++km) {
+                for (unsigned int kl = 1; kl <= nl; ++kl) {
+                    for (unsigned int kt = 1; kt <= nt; ++kt) {
+                        const Identifier chId{id_helper.channelID(container->identify(),km ,kl ,kt)};
+                        const MdtTubeFitContainer::SingleTubeCalib* stc = container->getCalib(chId);
+                        const MdtTubeFitContainer::SingleTubeFit* stf = container->getFit(chId);
+                        constexpr int technology = 0;
 
-                for (unsigned int km = 0; km < nml; ++km) {
-                    for (unsigned int kl = 0; kl < nl; ++kl) {
-                        for (unsigned int kt = 0; kt < nt; ++kt) {
-                            const MdtTubeFitContainer::SingleTubeCalib* stc = i->getCalib(km, kl, kt);
-                            const MdtTubeFitContainer::SingleTubeFit* stf = i->getFit(km, kl, kt);
-                            tech = technology;
-                            ml = km + 1;
-                            l = kl + 1;
-                            t = kt + 1;
+                        MuonFixedId fixId{};
+                        int sc{0}, stat{-1};
+                        double t0{0.}, adcm{0.}, chi2tdc{0.}, t0err{0.}, 
+                               tmax{0.}, tmaxerr{0.}, noise{0.}, noiseerr{0.}, 
+                               slope{0.}, sloperr{0.};
+                        int tube_id{0}, runflag{0}, validflag{0};
 
-                            if (!fixId.setTechnology(tech) || !fixId.setStationName(fixId.stationStringToFixedStationNumber(stnName)) ||
-                                !fixId.setStationEta(eta) || !fixId.setStationPhi(phi) || !fixId.setMdtTube(t) ||
-                                !fixId.setMdtTubeLayer(l) || !fixId.setMdtMultilayer(ml)) {
-                                throw std::runtime_error(
-                                    Form("File: %s, Line: %d\nTubeDataFromFile::write_forDB() - Setting identifier failed!", __FILE__,
-                                         __LINE__));
+                        if (!fixId.setTechnology(technology) || 
+                            !fixId.setStationName(fixId.stationStringToFixedStationNumber(stnName)) ||
+                            !fixId.setStationEta(stnEta) || 
+                            !fixId.setStationPhi(stnPhi) || 
+                            !fixId.setMdtTube(kt) ||
+                            !fixId.setMdtTubeLayer(kl) || 
+                            !fixId.setMdtMultilayer(km)) {
+                                std::stringstream except{};
+                                except<<__FILE__<<":"<<__LINE__<<"nTubeDataFromFile::write_forDB() - Setting identifier failed!";
+                                throw std::runtime_error(except.str());
                             }
                             tube_id = fixId.getIdInt();
 
@@ -156,11 +131,7 @@ namespace MuonCalib {
                                 t0 = stc->t0;
                                 adcm = stc->adcCal;
                                 sc = stc->statusCode;
-                            } else {
-                                t0 = 0.;
-                                adcm = 0;
-                                sc = 0;
-                            }
+                            } 
                             if (stf) {
                                 stat = stf->statistics;
                                 chi2tdc = stf->chi2Tdc;
@@ -171,57 +142,45 @@ namespace MuonCalib {
                                 noiseerr = stf->cov[0];
                                 slope = stf->par[6];
                                 sloperr = stf->cov[6];
-                            } else {
-                                stat = -1;
-                                chi2tdc = 0;
-                                t0err = 0;
-                                tmax = 0;
-                                tmaxerr = 0;
-                                noise = 0;
-                                noiseerr = 0;
-                                slope = 0;
-                                sloperr = 0;
-                            }
+                            } 
 
-                            if (isnan(t0) != 0) t0 = -99999.;
+                            if (std::isnan(t0) != 0) t0 = -99999.;
 
-                            fprintf(ftube, " %d,%d,%u,%d,%d,%d,%d,%d,%d,", mdt_head, tube_id, fixId.mdtChamberId().getIdInt(), lowrun,
-                                    uprun, runflag, sc, validflag, stat);
+                            ftube<<mdt_head<<","<<tube_id<<","<<fixId.mdtChamberId().getIdInt()<<","
+                                 <<","<<lowrun<<","<<uprun<<","<<runflag<<","<<sc
+                                 <<validflag<<","<<stat<<",";
 
                             for (int ii = -2; ii < 35; ii++) {
                                 if (ii == -2) {
-                                    fprintf(ftube, "%f,", chi2tdc);
+                                   ftube<<chi2tdc<<",";
                                 } else if (ii == 0) {
-                                    fprintf(ftube, "%f,", noise);
+                                    ftube<<noise<<",";
                                 } else if (ii == 4) {
-                                    fprintf(ftube, "%f,", t0);
+                                    ftube<<t0<<",";
                                 } else if (ii == 5) {
-                                    fprintf(ftube, "%f,", tmax);
+                                    ftube<<tmax<<",";
                                 } else if (ii == 6) {
-                                    fprintf(ftube, "%f,", slope);
+                                    ftube<<slope<<",";
                                 } else if (ii == 10) {
-                                    fprintf(ftube, "%f,", t0err);
+                                    ftube<<t0err<<",";
                                 } else if (ii == 11) {
-                                    fprintf(ftube, "%f,", tmaxerr);
+                                    ftube<<tmaxerr<<",";
                                 } else if (ii == 12) {
-                                    fprintf(ftube, "%f,", noiseerr);
+                                    ftube<<noiseerr<<",";
                                 } else if (ii == 13) {
-                                    fprintf(ftube, "%f,", sloperr);
+                                    ftube<<sloperr<<",";
                                 } else if (ii == 14) {
-                                    fprintf(ftube, "%f,", adcm);
+                                    ftube<<adcm<<",";
                                 } else {
-                                    fprintf(ftube, "%f,", 0.0);
+                                    ftube<<0.0<<",";
                                 }
                             }
-                            fprintf(ftube, "%d,%d,", 0, 0);
-                            fprintf(ftube, "algoflag,");
-                            fprintf(ftube, "tubegrpgr\n");
+                            ftube<<"0,0,algoflag,tubegrpgr"<<std::endl;
                         }
                     }
                 }
-            }
         }
-        return;
+        return ftube;
     }
 
 }  // namespace MuonCalib

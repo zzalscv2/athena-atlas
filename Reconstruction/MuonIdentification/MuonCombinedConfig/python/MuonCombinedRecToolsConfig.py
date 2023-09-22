@@ -1081,23 +1081,20 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     from MuonConfig.MuonSegmentFindingConfig import DCMathSegmentMakerCfg, MuonPRDSelectionToolCfg
     from MuonConfig.MuonTrackBuildingConfig import MuonChamberHoleRecoveryToolCfg
     from MuonConfig.MuonRecToolsConfig import MuonAmbiProcessorCfg, MuonSeededSegmentFinderCfg
-    from MuonConfig.MuonCalibrationConfig import MdtCalibrationDbToolCfg
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg
     from MuonConfig.MuonSegmentFindingConfig import MuonLayerHoughAlgCfg
     kwargs.setdefault("DoSummary", flags.Muon.printSummary)
     kwargs.setdefault("ConsideredPDGs", [13, -13, 1000015, -1000015])
     kwargs.setdefault("DoTruth", flags.Input.isMC)
 
-    result = MuonEDMPrinterToolCfg(flags)
+    result = ComponentAccumulator() 
     result.merge(MuonLayerHoughAlgCfg(flags))
     # Not setting up MuonIdHelperSvc nor MuonEDMHelperSvc
-    kwargs.setdefault("MuonEDMPrinterTool", result.getPrimary())
-    kwargs.setdefault("MuonPRDSelectionTool", result.popToolsAndMerge(
-        MuonPRDSelectionToolCfg(flags)))
+    kwargs.setdefault("MuonEDMPrinterTool", result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags)))
+    kwargs.setdefault("MuonPRDSelectionTool", result.popToolsAndMerge(MuonPRDSelectionToolCfg(flags)))
 
     # This is going to be used in a few tools below
-    staurotcreator = result.popToolsAndMerge(
-        MdtDriftCircleOnTrackCreatorStauCfg(flags))
+    staurotcreator = result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorStauCfg(flags))
     kwargs.setdefault("MuonPRDSelectionToolStau",
                       result.popToolsAndMerge(MuonPRDSelectionToolCfg(flags,
                                                                       "MuonPRDSelectionToolStau",
@@ -1147,9 +1144,6 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     kwargs.setdefault("MuonInsideOutRecoTool", result.popToolsAndMerge(
         MuonInsideOutRecoToolCfg(flags, name='MuonStauInsideOutRecoTool', MuonCandidateTrackBuilderTool=muoncandidatetrackbuilder)))
     # Rest
-
-    kwargs.setdefault("MdtCalibrationDbTool", result.popToolsAndMerge(
-        MdtCalibrationDbToolCfg(flags)))
 
     tool = CompFactory.MuonCombined.MuonStauRecoTool(name, **kwargs)
     result.setPrivateTools(tool)

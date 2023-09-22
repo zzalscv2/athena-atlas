@@ -23,10 +23,10 @@ namespace MuonCalib {
 
     class TubeDataFromFile {
     public:
-        typedef std::vector<const MdtTubeFitContainer*> TubeData;
+        using TubeData = std::vector<const MdtTubeFitContainer*>;
 
     public:
-        TubeDataFromFile() : m_regions(0) {}
+        TubeDataFromFile() = default;
         ~TubeDataFromFile() = default;
 
         /** return number of regions */
@@ -38,7 +38,7 @@ namespace MuonCalib {
                 MsgStream log(Athena::getMessageSvc(), "MdtTubeFitContainer");
                 log << MSG::WARNING << "TubeDataFromFile::getTubes: <regionId out of range> " << regionId << " size " << m_regions
                     << endmsg;
-                return 0;
+                return nullptr;
             }
             return m_tubeData[regionId];
         }
@@ -70,11 +70,11 @@ namespace MuonCalib {
 
         std::ostream& write(std::ostream& os) const;
 
-        void write_forDB(FILE* ftube, int mdt_head, int lowrun, int uprun) const;
+        std::ostream& write_forDB(std::ostream& ftube, int mdt_head, int lowrun, int uprun) const;
 
     private:
         /** total number of regions */
-        unsigned int m_regions;
+        unsigned int m_regions{0};
 
         /** data */
         TubeData m_tubeData;

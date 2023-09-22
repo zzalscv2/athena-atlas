@@ -8,5 +8,8 @@ atlas_subdir( MdtDriftCircleOnTrackCreator )
 atlas_add_component( MdtDriftCircleOnTrackCreator
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel MuonRIO_OnTrack MuonRecToolInterfaces TrkEventPrimitives TrkSpaceTimePoint Identifier EventPrimitives MdtCalibData MdtCalibSvcLib MuonCalibEvent MuonReadoutGeometry MuonIdHelpersLib MuonPrepRawData TrkDistortedSurfaces TrkSurfaces TrkParameters )
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel MuonRIO_OnTrack MuonRecToolInterfaces 
+                                    TrkEventPrimitives TrkSpaceTimePoint Identifier EventPrimitives 
+                                    MuonReadoutGeometry MdtCalibInterfacesLib TrkParameters MdtCalibData
+                                    MuonIdHelpersLib MuonPrepRawData TrkDistortedSurfaces TrkSurfaces)
 
