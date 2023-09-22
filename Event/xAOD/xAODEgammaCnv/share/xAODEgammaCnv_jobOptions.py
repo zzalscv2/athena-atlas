@@ -1,9 +1,0 @@
-from egammaRec.Factories import instantiateAll
-from xAODEgammaCnv import xAODEgammaCnvFactories 
-
-xAODEgammaCnvFactories.egClusterCnvAlg()
-xAODEgammaCnvFactories.GSFTrackParticleCnvAlg()
-xAODEgammaCnvFactories.GSFTrackParticleMapCnvAlg()
-xAODEgammaCnvFactories.VertexCnvAlg()
-xAODEgammaCnvFactories.ElectronCnvAlg()
-xAODEgammaCnvFactories.PhotonCnvAlg()
