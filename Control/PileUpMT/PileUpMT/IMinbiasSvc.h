@@ -6,25 +6,32 @@
 #ifndef IMINBIASSVC_H
 #define IMINBIASSVC_H
 
-#include "GaudiKernel/IService.h"
-#include "StoreGate/StoreGateSvc.h"
-
 #include <cstdint>
 #include <vector>
 
+#include "GaudiKernel/IService.h"
+#include "StoreGate/StoreGateSvc.h"
+
 class IMinbiasSvc : virtual public IService {
-  public:
-    virtual StatusCode beginHardScatter(std::uint64_t hs_id) = 0; /// Tell IMinbiasSvc we're
-                                                                  /// starting a hard scatter
-    virtual StoreGateSvc* getMinbias(std::uint64_t hs_id,
-                                     std::uint64_t mb_id) = 0;  /// Get a minbias event
-    virtual StatusCode endHardScatter(std::uint64_t hs_id) = 0; /// Tell IMinbiasSvc we're done with
-                                                                /// a hard scatter
+ public:
+  virtual StatusCode beginHardScatter(
+      const EventContext& ctx) = 0;  /// Tell IMinbiasSvc we're
+                                     /// starting a hard scatter
+  virtual StoreGateSvc* getMinbias(
+      const EventContext& ctx,
+      std::uint64_t mb_id) = 0;  /// Get a minbias event
+  virtual std::size_t getNumForBunch(
+      const EventContext& ctx,
+      int bunch) const = 0;  /// Return number of minbias events
+                             /// to use for a specific bunch crossing
 
-    virtual const std::vector<std::uint64_t>& indexList() = 0;
+  virtual std::int64_t get_hs_id(const EventContext& ctx) const = 0;
+  virtual StatusCode endHardScatter(
+      const EventContext& ctx) = 0;  /// Tell IMinbiasSvc we're done with
+                                     /// a hard scatter
 
-    /// Create InterfaceID
-    DeclareInterfaceID(IMinbiasSvc, 1, 0);
+  /// Create InterfaceID
+  DeclareInterfaceID(IMinbiasSvc, 1, 1);
 };
 
-#endif // IMINBIASSVC_H
+#endif  // IMINBIASSVC_H

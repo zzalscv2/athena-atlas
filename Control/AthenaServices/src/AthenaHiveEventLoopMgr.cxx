@@ -2,6 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <GaudiKernel/DataIncident.h>
 #define  ATHENASERVICES_ATHENAHIVEEVENTLOOPMGR_CPP
 
 #include <cassert>
@@ -810,6 +811,8 @@ StatusCode AthenaHiveEventLoopMgr::seek (int evt)
   //cppcheck-suppress nullPointerRedundantCheck
   StatusCode sc = is->seek (*m_evtContext, evt);
   if (sc.isSuccess()) {
+    m_incidentSvc->fireIncident(ContextIncident<std::tuple<int, int>>(
+        name(), "SkipEvents", std::tuple<int, int>(m_nevt, evt)));
     m_nevt = evt;
   }
   else {
