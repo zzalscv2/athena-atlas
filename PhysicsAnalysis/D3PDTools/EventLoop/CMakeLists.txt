@@ -28,7 +28,7 @@ atlas_add_root_dictionary( EventLoop
    EventLoop/LLDriver.h EventLoop/LSFDriver.h EventLoop/LocalDriver.h
    EventLoop/OutputStream.h EventLoop/MetricsSvc.h EventLoop/SoGEDriver.h
    EventLoop/StatusCode.h EventLoop/TorqueDriver.h
-   EventLoop/VomsProxySvc.h EventLoop/SlurmDriver.h
+   EventLoop/VomsProxySvc.h EventLoop/SlurmDriver.h EventLoop/WorkerConfig.h
    Root/LinkDef.h
    EXTERNAL_PACKAGES ROOT )
 
@@ -53,10 +53,15 @@ atlas_add_test (EventLoop_gt_OutputStreamData
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop AsgTestingLib )
 
-atlas_add_test (EventLoop_gt_SubmitDirManager
+      atlas_add_test (EventLoop_gt_SubmitDirManager
       SOURCES test/gt_SubmitDirManager.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} EventLoop AsgTestingLib )
+
+atlas_add_test (EventLoop_gt_DirectInputModule
+      SOURCES test/gt_DirectInputModule.cxx
+      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} EventLoop AsgTestingLib )
 
 # Install files from the package:
 atlas_install_scripts( scripts/el_retrieve scripts/el_resubmit scripts/el_wait scripts/el_build_docker )

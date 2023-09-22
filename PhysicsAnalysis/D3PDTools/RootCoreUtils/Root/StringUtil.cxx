@@ -28,8 +28,10 @@ namespace RCU
 
     std::string result = str;
     std::string::size_type pos;
-    while ((pos = result.find (pattern)) != std::string::npos)
+    while ((pos = result.find (pattern)) != std::string::npos) {
+      // cppcheck-suppress uselessCallsSubstr
       result = result.substr (0, pos) + with + result.substr (pos + pattern.size());
+    }
     return result;
   }
 

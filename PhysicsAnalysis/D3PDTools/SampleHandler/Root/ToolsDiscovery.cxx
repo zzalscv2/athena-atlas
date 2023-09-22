@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //          Copyright Nils Krumnack 2011.
@@ -282,7 +282,7 @@ namespace SH
               std::string url = entry.replica;
               const auto split = url.find (from);
               if (split != std::string::npos)
-                url = url.substr (0, split) + to + url.substr (split + from.size());
+                url.replace(split, from.size(), to);
               usedFiles[entry.name] = url;
             }
           }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -16,6 +16,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TH3.h>
+#include <TEfficiency.h>
 #include <stdexcept>
 
 #ifdef XAOD_STANDALONE
@@ -68,7 +69,16 @@ namespace EL
 
 
 
-  AnaAlgorithm::MetaStorePtr_t AnaAlgorithm::inputMetaStore() const
+  AnaAlgorithm::ConstMetaStorePtr_t AnaAlgorithm::inputMetaStore() const
+  {
+#ifdef XAOD_STANDALONE
+     return &m_inputMetaStore;
+#else
+     return m_inputMetaStore;
+#endif // XAOD_STANDALONE
+  }
+
+  AnaAlgorithm::MetaStorePtr_t AnaAlgorithm::inputMetaStore()
   {
 #ifdef XAOD_STANDALONE
      return &m_inputMetaStore;
@@ -79,7 +89,16 @@ namespace EL
 
 
 
-  AnaAlgorithm::MetaStorePtr_t AnaAlgorithm::outputMetaStore() const
+  AnaAlgorithm::ConstMetaStorePtr_t AnaAlgorithm::outputMetaStore() const
+  {
+#ifdef XAOD_STANDALONE
+     return &m_outputMetaStore;
+#else
+     return m_outputMetaStore;
+#endif // XAOD_STANDALONE
+  }
+
+  AnaAlgorithm::MetaStorePtr_t AnaAlgorithm::outputMetaStore()
   {
 #ifdef XAOD_STANDALONE
      return &m_outputMetaStore;
@@ -110,8 +129,17 @@ namespace EL
 
 
 
-  TH1 *AnaAlgorithm ::
-  hist (const std::string& name) const
+  ::StatusCode AnaAlgorithm ::
+  book (const TEfficiency& hist)
+  {
+    histogramWorker()->addOutput (hist.Clone());
+    return ::StatusCode::SUCCESS;
+  }
+
+
+
+  template<> TObject *AnaAlgorithm ::
+  hist<TObject> (const std::string& name) const
   {
     return histogramWorker()->getOutputHist (name);
   }
@@ -121,10 +149,7 @@ namespace EL
   TH2 *AnaAlgorithm ::
   hist2d (const std::string& name) const
   {
-    TH2 *hist = dynamic_cast<TH2*>(histogramWorker()->getOutputHist (name));
-    if (hist == nullptr)
-      throw std::runtime_error ("histogram not a 2d-histogram: " + name);
-    return hist;
+    return hist<TH2>(name);
   }
 
 
@@ -132,10 +157,15 @@ namespace EL
   TH3 *AnaAlgorithm ::
   hist3d (const std::string& name) const
   {
-    TH3 *hist = dynamic_cast<TH3*>(histogramWorker()->getOutputHist (name));
-    if (hist == nullptr)
-      throw std::runtime_error ("histogram not a 3d-histogram: " + name);
-    return hist;
+    return hist<TH3>(name);
+  }
+
+
+
+  TEfficiency *AnaAlgorithm ::
+  histeff (const std::string& name) const
+  {
+    return hist<TEfficiency>(name);
   }
 
 

@@ -85,7 +85,7 @@ namespace EL
           if (gSystem->MakeDirectory (basedirName.str().c_str()) != 0)
             RCU_THROW_MSG ("failed to create directory " + basedirName.str());
         }
-        auto submitSingle = [&, this] (std::size_t index) noexcept -> StatusCode
+        auto submitSingle = [&] (std::size_t index) noexcept -> StatusCode
         {
           try
           {
@@ -129,7 +129,7 @@ namespace EL
           bool abort = false;
           while (threads.size() < unsigned (numParallelProcs))
           {
-            threads.emplace_back ([&,this] () noexcept
+            threads.emplace_back ([&] () noexcept
             {
               std::unique_lock<std::mutex> lock (mutex);
               while (indexIter != data.batchJobIndices.end() && !abort)

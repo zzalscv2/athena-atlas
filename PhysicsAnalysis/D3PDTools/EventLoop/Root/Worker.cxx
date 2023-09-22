@@ -20,9 +20,11 @@
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
 #include <EventLoop/AlgorithmStateModule.h>
 #include <EventLoop/AlgorithmTimerModule.h>
+#include <EventLoop/BatchInputModule.h>
 #include <EventLoop/BatchJob.h>
 #include <EventLoop/BatchSample.h>
 #include <EventLoop/BatchSegment.h>
+#include <EventLoop/DirectInputModule.h>
 #include <EventLoop/Driver.h>
 #include <EventLoop/EventCountModule.h>
 #include <EventLoop/EventRange.h>
@@ -37,6 +39,7 @@
 #include <EventLoop/StopwatchModule.h>
 #include <EventLoop/PostClosedOutputsModule.h>
 #include <EventLoop/TEventModule.h>
+#include <EventLoop/WorkerConfigModule.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/RootUtils.h>
 #include <RootCoreUtils/ThrowMsg.h>
@@ -55,6 +58,7 @@
 #include <fstream>
 #include <memory>
 #include <xAODRootAccess/LoadDictionaries.h>
+#include <exception>
 
 //
 // method implementations
@@ -113,12 +117,12 @@ namespace EL
 
 
 
-  TH1 *Worker ::
+  TObject *Worker ::
   getOutputHist (const std::string& name) const
   {
     RCU_READ_INVARIANT (this);
 
-    TH1 *result = m_histOutput->getOutputHist (name);
+    TObject *result = m_histOutput->getOutputHist (name);
     if (result == nullptr) RCU_THROW_MSG ("unknown output histogram: " + name);
     return result;
   }
@@ -383,10 +387,13 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::TEventModule> ());
     m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ());
     m_modules.push_back (std::make_unique<Detail::StopwatchModule> ());
+    if (metaData()->castBool (Job::optGridReporting, false))
+      m_modules.push_back (std::make_unique<Detail::GridReportingModule>());
     if (metaData()->castBool (Job::optAlgorithmTimer, false))
       m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
     m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
     m_modules.push_back (std::make_unique<Detail::EventCountModule> ());
+    m_modules.push_back (std::make_unique<Detail::WorkerConfigModule> ());
     m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ());
     m_modules.push_back (std::make_unique<Detail::PostClosedOutputsModule> ());
 
@@ -411,6 +418,20 @@ namespace EL
     for (auto& module : m_modules)
       ANA_CHECK (module->preFileInitialize (*this));
     
+    return ::StatusCode::SUCCESS;
+  }
+
+
+
+  ::StatusCode Worker ::
+  processInputs ()
+  {
+    using namespace msgEventLoop;
+
+    RCU_CHANGE_INVARIANT (this);
+
+    for (auto& module : m_modules)
+      ANA_CHECK (module->processInputs (*this, *this));
     return ::StatusCode::SUCCESS;
   }
 
@@ -541,7 +562,7 @@ namespace EL
 
 
   ::StatusCode Worker ::
-  openInputFile (std::string inputFileUrl)
+  openInputFile (const std::string& inputFileUrl)
   {
     using namespace msgEventLoop;
 
@@ -575,7 +596,7 @@ namespace EL
       inputFile = SH::openFile (inputFileUrl, *metaData());
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
     }
     if (inputFile.get() == 0)
     {
@@ -664,7 +685,7 @@ namespace EL
       }
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
       ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
       return ::StatusCode::FAILURE;
     }
@@ -684,7 +705,7 @@ namespace EL
       }
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
       ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
       return ::StatusCode::FAILURE;
     }
@@ -760,47 +781,20 @@ namespace EL
       ANA_CHECK (addOutputStream (out->label(), std::move (data)));
     }
 
-    ANA_CHECK (initialize ());
-
-    Long64_t maxEvents
-      = metaData()->castDouble (Job::optMaxEvents, -1);
-    Long64_t skipEvents
-      = metaData()->castDouble (Job::optSkipEvents, 0);
-
-    std::vector<std::string> files = sample->makeFileList();
-    for (const std::string& fileName : files)
     {
-      EventRange eventRange;
-      eventRange.m_url = fileName;
-      if (skipEvents == 0 && maxEvents == -1)
-      {
-        ANA_CHECK (processEvents (eventRange));
-      } else
-      {
-        // just open the input file to inspect it
-        ANA_CHECK (openInputFile (fileName));
-        eventRange.m_endEvent = inputFileNumEntries();
-
-        if (skipEvents != 0 && skipEvents >= eventRange.m_endEvent)
-        {
-          skipEvents -= eventRange.m_endEvent;
-          continue;
-        }
-        eventRange.m_beginEvent = skipEvents;
-        skipEvents = 0;
-
-        if (maxEvents != -1)
-        {
-          if (eventRange.m_endEvent > eventRange.m_beginEvent + maxEvents)
-            eventRange.m_endEvent = eventRange.m_beginEvent + maxEvents;
-          maxEvents -= eventRange.m_endEvent - eventRange.m_beginEvent;
-          assert (maxEvents >= 0);
-        }
-        ANA_CHECK (processEvents (eventRange));
-        if (maxEvents == 0)
-          break;
-      }
+      auto module = std::make_unique<Detail::DirectInputModule> ();
+      module->fileList = sample->makeFileList();
+      Long64_t maxEvents = metaData()->castDouble (Job::optMaxEvents, -1);
+      if (maxEvents != -1)
+        module->maxEvents = maxEvents;
+      Long64_t skipEvents = metaData()->castDouble (Job::optSkipEvents, 0);
+      if (skipEvents != 0)
+        module->skipEvents = skipEvents;
+      addModule (std::move (module));
     }
+
+    ANA_CHECK (initialize ());
+    ANA_CHECK (processInputs ());
     ANA_CHECK (finalize ());
     return ::StatusCode::SUCCESS;
   }
@@ -866,25 +860,15 @@ namespace EL
         ANA_CHECK (addOutputStream (out->label(), std::move (data)));
       }
 
-      Long64_t beginFile = segment->begin_file;
-      Long64_t endFile   = segment->end_file;
-      Long64_t lastFile  = segment->end_file;
-      RCU_ASSERT (beginFile <= endFile);
-      Long64_t beginEvent = segment->begin_event;
-      Long64_t endEvent   = segment->end_event;
-      if (endEvent > 0) endFile += 1;
+      {
+        auto module = std::make_unique<Detail::BatchInputModule> ();
+        module->sample = sample;
+        module->segment = segment;
+        addModule (std::move (module));
+      }
 
       ANA_CHECK (initialize ());
-
-      for (Long64_t file = beginFile; file != endFile; ++ file)
-      {
-        RCU_ASSERT (std::size_t(file) < sample->files.size());
-        EventRange eventRange;
-        eventRange.m_url = sample->files[file];
-        eventRange.m_beginEvent = (file == beginFile ? beginEvent : 0);
-        eventRange.m_endEvent = (file == lastFile ? endEvent : EventRange::eof);
-        ANA_CHECK (processEvents (eventRange));
-      }
+      ANA_CHECK (processInputs ());
       ANA_CHECK (finalize ());
 
       std::ostringstream job_name;
@@ -893,7 +877,7 @@ namespace EL
       return ::StatusCode::SUCCESS;
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
       return ::StatusCode::FAILURE;
     }
   }
@@ -933,6 +917,8 @@ namespace EL
     ANA_CHECK (xAOD::LoadDictionaries());
 
     mo = dynamic_cast<SH::MetaObject*>(f->Get(sampleName.c_str()));
+    if (!mo)
+      mo = dynamic_cast<SH::MetaObject*>(f->Get("defaultMetaObject"));
     if (!mo) {
       ANA_MSG_ERROR ("Could not read in sample meta object");
       return ::StatusCode::FAILURE;
@@ -972,6 +958,7 @@ namespace EL
 
     const std::string location = ".";
 
+    mo->setBool (Job::optGridReporting, true);
     setMetaData (mo);
     setOutputHist (location);
     setSegmentName ("output");
@@ -998,11 +985,8 @@ namespace EL
 
     setJobConfig (std::move (*jobConfig));
 
-    addModule (std::make_unique<Detail::GridReportingModule> ());
-    ANA_CHECK (initialize());
-
-    std::vector<std::string> fileList; 
     {
+      auto module = std::make_unique<Detail::DirectInputModule> ();
       std::ifstream infile("input.txt");
       while (infile) {
         std::string sLine;
@@ -1011,53 +995,27 @@ namespace EL
         while (ssLine) {
           std::string sFile;
           if (!getline(ssLine, sFile, ',')) break;
-          fileList.push_back(sFile);
+          module->fileList.push_back(sFile);
         }
       }
-    } 
-    if (fileList.size() == 0) {
-      ANA_MSG_ERROR ("no input files provided");
-      //User was expecting input after all.
-      gSystem->Exit(EC_BADINPUT);
+      if (module->fileList.size() == 0) {
+        ANA_MSG_ERROR ("no input files provided");
+        //User was expecting input after all.
+        gSystem->Exit(EC_BADINPUT);
+      }
+      addModule (std::move (module));
     }
 
-    for (const std::string& file : fileList)
-    {
-      EventRange eventRange;
-      eventRange.m_url = file;
-
-      ANA_CHECK (processEvents (eventRange));
-    }
-
+    ANA_CHECK (initialize());
+    ANA_CHECK (processInputs ());
     ANA_CHECK (finalize ());
 
     int nEvents = eventsProcessed();
-    int nFiles = fileList.size();
     ANA_MSG_INFO ("Loop finished.");
-    ANA_MSG_INFO ("Read " << nEvents << " events in " << nFiles << " files.");
-
-    gridNotifyJobFinished(eventsProcessed(), fileList);
+    ANA_MSG_INFO ("Read/processed " << nEvents << " events.");
 
     ANA_MSG_INFO ("EventLoop Grid worker finished");
     ANA_MSG_INFO ("Saving output");
     return ::StatusCode::SUCCESS;
-  }
-
-  void Worker::gridNotifyJobFinished(uint64_t eventsProcessed,
-                                     const std::vector<std::string>& fileList) {
-    // createJobSummary
-    std::ofstream summaryfile("../AthSummary.txt");
-    if (summaryfile.is_open()) {
-      unsigned int nFiles = fileList.size();
-      summaryfile << "Files read: " << nFiles << std::endl;
-      for (unsigned int i = 0; i < nFiles; i++) {
-        summaryfile << "  " << fileList.at(i) << std::endl;
-      }      
-      summaryfile << "Events Read:    " << eventsProcessed << std::endl;
-      summaryfile.close();
-    }
-    else {
-      //cout << "Failed to write summary file.\n";
-    } 
   }
 }

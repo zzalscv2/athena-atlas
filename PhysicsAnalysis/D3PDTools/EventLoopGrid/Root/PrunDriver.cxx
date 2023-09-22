@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Alexander Madsen
@@ -8,7 +8,6 @@
 
 
 #include <EventLoopGrid/PrunDriver.h>
-#include <EventLoopGrid/GridDriver.h>
 #include <EventLoop/Algorithm.h>
 #include <EventLoop/ManagerData.h>
 #include <EventLoop/ManagerStep.h>
@@ -39,6 +38,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #include <boost/algorithm/string.hpp>
 
@@ -61,10 +61,13 @@ namespace {
 	if (what == name[i]) { return static_cast<Enum>(i); }
       }
       RCU_ASSERT0("Failed to parse job state string");
-      throw; //compiler dummy
+      throw std::runtime_error("PrunDriver.cxx: Failed to parse job state string"); //compiler dummy
     }
   }
 
+  // When changing the values in the enum make sure
+  // corresponding values in `data/ELG_jediState.py` script
+  // are changed accordingly
   namespace Status {
     //static const int NSTATES = 3;
     enum Enum { DONE=0, PENDING=1, FAIL=2 };
@@ -86,7 +89,7 @@ namespace {
 
   struct TmpCd {
     const std::string origDir;
-    TmpCd(std::string dir)
+    TmpCd(const std::string & dir)
       : origDir(gSystem->pwd())
     {
       gSystem->cd(dir.c_str());
@@ -131,8 +134,8 @@ static JobState::Enum nextState(JobState::Enum state, Status::Enum status)
       return TABLE[i].toState;
     }
   }
-  RCU_ASSERT0("Missing state transtion rule");
-  throw; //compiler dummy 
+  RCU_ASSERT0("Missing state transition rule");
+  throw std::logic_error("PrunDriver.cxx: Missing state transition rule"); 
 }
 
 static SH::MetaObject defaultOpts()
@@ -214,26 +217,24 @@ static Status::Enum checkPandaTask(SH::Sample* const sample)
 
   static bool loaded = false;
   if (not loaded) {
-    // TString path = "$ROOTCOREBIN/python/EventLoopGrid/ELG_jediState.py";
-    // gSystem->ExpandPathName(path);
-    // TPython::LoadMacro(path.Data());
     std::string path = PathResolverFindCalibFile("EventLoopGrid/ELG_jediState.py");
     TPython::LoadMacro(path.c_str());
     loaded = true;
   }
 
-  TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE"); 
-  std::string ret = (const char*) TPython::Eval("ELG_jediState(ELG_SAMPLE)");
-  TPython::Bind(0, "ELG_SAMPLE");   
+  TPython::Bind(dynamic_cast<TObject*>(sample), "ELG_SAMPLE");
+  int ret =  TPython::Eval("ELG_jediState(ELG_SAMPLE)");
+  TPython::Bind(0, "ELG_SAMPLE");
 
-  if (ret == "done")  return Status::DONE;
-  if (ret == "failed") return Status::FAIL;
-  if (ret == "finished") return Status::FAIL;
+  if (ret == Status::DONE) return Status::DONE;
+  if (ret == Status::FAIL) return Status::FAIL;
 
-  if (ret != "running") { sample->meta()->setString("nc_ELG_state_details", ret); }
-  if (ret.empty()) { 
-    sample->meta()->setString("nc_ELG_state_details", 
-                              "problem checking jedi task status"); 
+  // Value 90 corresponds to `running` state of the job
+  if (ret != 90) { sample->meta()->setString("nc_ELG_state_details", "task status other than done/finished/failed/running"); }
+  // Value 99 is returned if there is error in the script (import, missing ID)
+  if (ret == 99) {
+    sample->meta()->setString("nc_ELG_state_details",
+                              "problem checking jedi task status");
   }
 
   return Status::PENDING;
@@ -380,7 +381,7 @@ static void processAllInState(const SH::SampleHandler& sh, JobState::Enum state,
 }
 
 static std::string formatOutputName(const SH::MetaObject& sampleMeta,
-				    const std::string pattern)
+				    const std::string & pattern)
 {
   const std::string sampleName = sampleMeta.castString("sample_name");
   RCU_REQUIRE(not pattern.empty());
@@ -445,9 +446,15 @@ static void saveJobDef(const std::string& fileName,
     outputs.Add(o->Clone());
   file.WriteTObject(&job.jobConfig(), "jobConfig", "SingleKey");        
   file.WriteTObject(&outputs, "outputs", "SingleKey");        
+  bool haveDefault = false;
   for (SH::SampleHandler::iterator s = sh.begin(); s != sh.end(); ++s) {
     const SH::MetaObject& meta = *((*s)->meta());
     file.WriteObject(&meta, meta.castString("sample_name").c_str());
+    if (!haveDefault)
+    {
+      file.WriteObject (&meta, "defaultMetaObject");
+      haveDefault = true;
+    }
   }
 }  
 

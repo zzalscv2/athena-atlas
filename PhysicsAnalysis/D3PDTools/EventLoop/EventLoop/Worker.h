@@ -7,6 +7,7 @@
 
 #include <EventLoop/Global.h>
 
+#include <EventLoop/IInputModuleActions.h>
 #include <EventLoop/IWorker.h>
 #include <EventLoop/ModuleData.h>
 #include <EventLoop/OutputStreamData.h>
@@ -14,7 +15,7 @@
 
 namespace EL
 {
-  class Worker final : public IWorker, private Detail::ModuleData
+  class Worker final : public IWorker, private Detail::ModuleData, private Detail::IInputModuleActions
   {
     //
     // public interface
@@ -69,7 +70,7 @@ namespace EL
     ///   object not found
     /// \post result != 0
   public:
-    TH1 *getOutputHist (const std::string& name) const final override;
+    TObject *getOutputHist (const std::string& name) const final override;
 
 
     /// effects: get the output file that goes into the dataset with
@@ -238,14 +239,6 @@ namespace EL
   public:
     ::StatusCode gridExecute (const std::string& sampleName);
 
-
-  private:
-    void gridNotifyJobFinished(uint64_t eventsProcessed,
-                           const std::vector<std::string>& fileList);
-
-  private:
-    void gridAbort();
-
   private:    
     enum GridErrorCodes {
       EC_FAIL = 220,
@@ -321,6 +314,15 @@ namespace EL
     ::StatusCode initialize ();
 
 
+    /// \brief process all the inputs
+    ///
+    /// This method ought to be called after @ref initialize and before @ref
+    /// finalize.  It will rely on the defined modules to steer it to the files
+    /// and events it ought to process.
+  protected:
+    ::StatusCode processInputs ();
+
+
     /// \brief finalize the worker
     ///
     /// This method ought to be called after all events have been
@@ -346,7 +348,7 @@ namespace EL
     ///   event range exceeds length of file\n
     ///   processing failures
   protected:
-    ::StatusCode processEvents (EventRange& eventRange);
+    ::StatusCode processEvents (EventRange& eventRange) override;
 
 
     /// \brief open the given input file without processing it
@@ -360,7 +362,7 @@ namespace EL
     /// \par Failures
     ///   file can't be opened
   protected:
-    ::StatusCode openInputFile (std::string inputFileUrl);
+    ::StatusCode openInputFile (const std::string& inputFileUrl) override;
 
 
     /// effects: add another output file
@@ -387,7 +389,7 @@ namespace EL
     ///   no-fail
     /// \pre inputFile() != 0
   protected:
-    Long64_t inputFileNumEntries () const;
+    Long64_t inputFileNumEntries () const override;
 
 
     /// \brief the number of events that have been processed

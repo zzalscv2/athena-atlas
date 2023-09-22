@@ -23,11 +23,14 @@
 
 #include <EventLoop/Global.h>
 
-#include <vector>
+
 #include <AnaAlgorithm/Global.h>
 #include <EventLoop/JobConfig.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/MetaObject.h>
+#include <vector>
+#include <memory>
+class AnaReentrantAlgorithmConfig;
 
 namespace asg
 {
@@ -216,6 +219,19 @@ namespace EL
     ///   interested in a particular set of events
   public:
     static const std::string optSkipEvents;
+
+
+    /// \brief a python configuration file that will be executed on
+    /// the worker
+    ///
+    /// This allows to inspect the meta-data of the first input file
+    /// and configure the job accordingly.
+    ///
+    /// EXPERIMENTAL: This feature is currently (23 Feb 23) new and
+    /// experimental and details of its implementation and usage may
+    /// still change.
+  public:
+    static const std::string optWorkerConfigFile;
 
 
     /// description: the name of the option for selecting the number
@@ -462,6 +478,9 @@ namespace EL
     static const std::string optGridDisableAutoRetry;
     static const std::string optOfficial;
     static const std::string optVoms;
+
+    /// whether to use grid reporting even when not running on the grid
+    static const std::string optGridReporting;
 
     /// these options are defined in \ref SH::MetaNames
     /// \{

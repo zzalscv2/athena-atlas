@@ -56,9 +56,9 @@ protected:
       m_job.algsAdd( algconf );
 
       // Set up the job.
-      m_job.options()->setBool( EL::Job::optRemoveSubmitDir, true );
       m_job.options()->setBool( EL::Job::optMemFailOnLeak,
                                 GetParam().enableChecks );
+      m_job.options()->setString (EL::Job::optSubmitDirMode, "unique");
    }
 
    /// EventLoop job to be run
@@ -100,8 +100,8 @@ TEST_P( LeakCheckTests, batch ) {
    EL::LocalDriver driver;
    try
    {
-     driver.submit( m_job, outputDir.str() );
-     driver.retrieve( outputDir.str() );
+     std::string submitDir = driver.submit( m_job, outputDir.str() );
+     driver.retrieve( submitDir );
      if (shouldSucceed == false)
        FAIL() << "job succeeded when it should have failed";
    } catch (...)

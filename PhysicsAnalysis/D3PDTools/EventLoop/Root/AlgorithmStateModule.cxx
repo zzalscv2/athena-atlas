@@ -20,6 +20,7 @@
 #include <EventLoop/Worker.h>
 #include <RootCoreUtils/Assert.h>
 #include <TTree.h>
+#include <exception>
 
 //
 // method implementations
@@ -47,7 +48,7 @@ namespace EL
             }
           } catch (...)
           {
-            report_exception ();
+            report_exception (std::current_exception());
             ANA_MSG_ERROR ("executing " << funcName << " on algorithm " << alg->getName());
             return StatusCode::FAILURE;
           }

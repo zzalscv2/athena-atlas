@@ -17,6 +17,7 @@
 #include <AsgTools/StatusCode.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/ShellExec.h>
+#include <RootCoreUtils/UnitTestDir.h>
 #include <SampleHandler/SampleLocal.h>
 #include <EventLoop/DirectDriver.h>
 #include <EventLoop/Job.h>
@@ -150,26 +151,26 @@ TEST (DuplicateCheckerTest, all_tests)
   xAOD::TReturnCode::enableFailure();
   xAOD::Init ().ignore();
 
-  std::string prefix = "DuplicateCheckerSubmit";
+  RCU::UnitTestDir dir ("EventLoopAlgs", "DuplicateChecker");
 
-  RCU::Shell::exec ("rm -rf " + prefix + "[123]");
+  std::string prefix = dir.path() + "/";
 
-  if (makeXAOD ("test1.root", 1, 0).isFailure())
+  if (makeXAOD (prefix + "test1.root", 1, 0).isFailure())
   {
     FAIL() << "failed to make test file";
   }
-  if (makeXAOD ("test2.root", 1, 8000).isFailure())
+  if (makeXAOD (prefix + "test2.root", 1, 8000).isFailure())
   {
     FAIL() << "failed to make test file";
   }
-  if (makeXAOD ("test3.root", 2, 0).isFailure())
+  if (makeXAOD (prefix + "test3.root", 2, 0).isFailure())
   {
     FAIL() << "failed to make test file";
   }
   std::unique_ptr<SH::SampleLocal> sample (new SH::SampleLocal ("sample"));
-  sample->add ("test1.root");
-  sample->add ("test2.root");
-  sample->add ("test3.root");
+  sample->add (prefix + "test1.root");
+  sample->add (prefix + "test2.root");
+  sample->add (prefix + "test3.root");
   SH::SampleHandler sh;
   sh.add (sample.release());
 
@@ -183,15 +184,15 @@ TEST (DuplicateCheckerTest, all_tests)
 
     {
       DirectDriver driver;
-      driver.submit (job, prefix + "1");
-      checkHistograms (prefix + "1", 30000, 26000, true);
+      driver.submit (job, prefix + "submit1");
+      checkHistograms (prefix + "submit1", 30000, 26000, true);
     }
     {
       LocalDriver driver;
-      driver.submit (job, prefix + "2");
-      checkHistograms (prefix + "2", 30000, 27000, false);
+      driver.submit (job, prefix + "submit2");
+      checkHistograms (prefix + "submit2", 30000, 27000, false);
     }
-    RCU::Shell::exec ("cmp " + prefix + "1/duplicates " + prefix + "2/duplicates");
+    RCU::Shell::exec ("cmp " + prefix + "submit1/duplicates " + prefix + "submit2/duplicates");
   }
 
   {
@@ -199,14 +200,14 @@ TEST (DuplicateCheckerTest, all_tests)
     std::unique_ptr<DuplicateChecker> alg (new DuplicateChecker);
     alg->setEventInfoName ("MyEventInfo");
     alg->setOutputTreeName ("summary");
-    alg->addKnownDuplicatesFile (prefix + "1/duplicates");
+    alg->addKnownDuplicatesFile (prefix + "submit1/duplicates");
     job.algsAdd (alg.release());
     job.sampleHandler (sh);
 
     {
       LocalDriver driver;
-      driver.submit (job, prefix + "3");
-      checkHistograms (prefix + "3", 30000, 26000, true);
+      driver.submit (job, prefix + "submit3");
+      checkHistograms (prefix + "submit3", 30000, 26000, true);
     }
   }
 }

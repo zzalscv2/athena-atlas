@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -29,6 +29,7 @@
 class TH1;
 class TH2;
 class TH3;
+class TEfficiency;
 class TTree;
 class ISvcLocator;
 
@@ -108,15 +109,24 @@ namespace EL
 #ifdef XAOD_STANDALONE
     /// Type of the metadata store pointer in standalone mode
     typedef asg::SgTEventMeta* MetaStorePtr_t;
+    typedef const asg::SgTEventMeta* ConstMetaStorePtr_t;
 #else
     /// Type of the metadata store pointer in standalone mode
     typedef ServiceHandle< StoreGateSvc >& MetaStorePtr_t;
+    typedef const ServiceHandle< StoreGateSvc >& ConstMetaStorePtr_t;
 #endif // XAOD_STANDALONE
 
+    ///@{
     /// Accessor for the input metadata store
-    MetaStorePtr_t inputMetaStore() const;
+    ConstMetaStorePtr_t inputMetaStore() const;
+    MetaStorePtr_t inputMetaStore();
+    ///@}
+
+    ///@{
     /// Accessor for the output metadata store
-    MetaStorePtr_t outputMetaStore() const;
+    ConstMetaStorePtr_t outputMetaStore() const;
+    MetaStorePtr_t outputMetaStore();
+    ///@}
 
 #ifdef XAOD_STANDALONE
     /// \brief get the (main) event store for this algorithm
@@ -139,13 +149,23 @@ namespace EL
     ::StatusCode book (const TH1& hist);
 
 
+    /// \brief book the given histogram
+    /// \par Guarantee
+    ///   strong
+    /// \par Failures
+    ///   histogram booking error
+  public:
+    ::StatusCode book (const TEfficiency& hist);
+
+
     /// \brief get the histogram with the given name
     /// \par Guarantee
     ///   strong
     /// \par Failures
     ///   histogram not found
   public:
-    TH1 *hist (const std::string& name) const;
+    template<typename T=TH1>
+    T *hist (const std::string& name) const;
 
 
     /// \brief get the 2-d histogram with the given name
@@ -164,6 +184,20 @@ namespace EL
     ///   histogram not found
   public:
     TH3 *hist3d (const std::string& name) const;
+
+
+    /// \brief get the efficiency histogram with the given name
+    ///
+    /// This exists with two names, since the originally chosen name doesn't
+    /// match the name used in Athena.
+    ///
+    /// \par Guarantee
+    ///   strong
+    /// \par Failures
+    ///   histogram not found
+  public:
+    TEfficiency *histeff (const std::string& name) const;
+    TEfficiency *efficiency (const std::string& name) const;
 
 
     /// \brief the histogram worker interface
@@ -519,11 +553,11 @@ namespace EL
 
     /// \brief Object accessing the input metadata store
   private:
-    mutable MetaStore_t m_inputMetaStore;
+    MetaStore_t m_inputMetaStore;
 
     /// \brief Object accessing the output metadata store
   private:
-    mutable MetaStore_t m_outputMetaStore;
+    MetaStore_t m_outputMetaStore;
 
 #ifdef XAOD_STANDALONE
     /// \brief the value of \ref histogramWorker

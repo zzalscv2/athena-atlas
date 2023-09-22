@@ -11,7 +11,8 @@
 
 #include <EventLoop/Global.h>
 
-#include <AsgTools/MessageCheck.h>
+#include <AsgMessaging/MessageCheck.h>
+#include <exception>
 
 namespace EL
 {
@@ -20,7 +21,7 @@ namespace EL
   namespace Detail
   {
     /// \brief print out the currently evaluated exception
-    void report_exception ();
+    void report_exception (std::exception_ptr eptr);
   }
 }
 

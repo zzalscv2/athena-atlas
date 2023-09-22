@@ -34,7 +34,8 @@ atlas_add_root_dictionary( EventLoopTestLib
    EXTERNAL_PACKAGES ROOT )
 
 atlas_add_library( EventLoopTestLib
-   EventLoopTest/*.h EventLoopTest/*.ihh Root/*.cxx ${EventLoopTestDictSource}
+   Root/UnitTest.cxx Root/UnitTestAlg.cxx Root/UnitTestAlg1.cxx Root/UnitTestAlg2.cxx Root/UnitTestAlg3.cxx Root/UnitTestAlg4.cxx Root/UnitTestAlg5.cxx Root/UnitTestAlg6.cxx Root/UnitTestAlg7.cxx Root/UnitTestAlgXAOD.cxx Root/UnitTestConfig.cxx Root/UnitTestTool.cxx
+   ${EventLoopTestDictSource}
    PUBLIC_HEADERS EventLoopTest
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${GMOCK_LIBRARIES} RootCoreUtils
@@ -91,5 +92,4 @@ endforeach (source ${util_sources})
 
 
 # Install files from the package:
-atlas_install_scripts( scripts/el_retrieve scripts/el_wait )
-atlas_install_data( data/*.root data/*.yml )
+atlas_install_data( data/*.yml data/*.py )
