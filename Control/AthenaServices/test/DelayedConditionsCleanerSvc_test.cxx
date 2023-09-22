@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthenaServices/test/DelayedConditionsCleanerSvc_test.cxx
@@ -448,6 +448,7 @@ void CondContWrapper::load (const EventContext& ctx)
   if (m_cc.find (ctx.eventID(), p)) return;
 
   lock_t lock (m_mutex);
+  // cppcheck-suppress identicalConditionAfterEarlyExit; deliberate
   if (m_cc.find (ctx.eventID(), p)) return;
 
   EventIDRange r;

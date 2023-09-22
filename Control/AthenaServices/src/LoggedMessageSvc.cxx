@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -520,6 +520,7 @@ void LoggedMessageSvc::reportMessage( const Message& msg, int outputLevel )    {
   }
 
   const Message *cmsg = &msg;
+  std::unique_ptr<Message> suppressed_msg;
 
   // processing logged streams
   if ( !m_loggedStreams.empty() ) {
@@ -554,8 +555,9 @@ void LoggedMessageSvc::reportMessage( const Message& msg, int outputLevel )    {
           str += std::to_string( m_msgLimit[key].value() );
           str += ") reached for ";
           str += msg.getSource() + ". Suppressing further output.";
-          cmsg = new Message(msg.getSource(),MSG::WARNING,str);
-          cmsg->setFormat(msg.getFormat());
+          suppressed_msg = std::make_unique<Message>(msg.getSource(),MSG::WARNING,str);
+          suppressed_msg->setFormat(msg.getFormat());
+          cmsg = suppressed_msg.get();
         } else if (nmsg > m_msgLimit[key]) {
           return;
         }
@@ -583,9 +585,6 @@ void LoggedMessageSvc::reportMessage( const Message& msg, int outputLevel )    {
                          << std::endl << std::flush;
     }
   }
-
-  if (cmsg != &msg) { delete cmsg; }
-
 }
 
 //#############################################################################
