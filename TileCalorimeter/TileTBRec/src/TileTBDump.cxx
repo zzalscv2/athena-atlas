@@ -1895,11 +1895,11 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             std::cout << std::hex << std::endl;
             bool phase2format = (size>head && correct_data[2] == 0x12345678 && correct_data[size-1] == 0x87654321);
             if (phase2format) {
-              int version = (((correct_data[3] >> 16) & 0xFFFF) == 0) ? 1 : 0;
+              int thisVersion = (((correct_data[3] >> 16) & 0xFFFF) == 0) ? 1 : 0;
               const char * namesV0[] = { "size_packet", "elink", "SOP", "runParam1", "runParam2", "runParam3", "runParam4", "BC_MD_ID", "L1ID" };
               const char * namesV1[] = { "size_packet", "elink", "SOP", "version", "MODULE_BC_MD", "L1ID", "BCR" , "runParam1", "runParam2", "runParam3"};
-              const char ** names = (version) ? namesV1 : namesV0;
-              if (version) head = 10;
+              const char ** names = (thisVersion) ? namesV1 : namesV0;
+              if (thisVersion) head = 10;
               for (int i=0; i<head; ++i) {
                 std::cout << std::setw(13) << names[i] << std::setw(10) << correct_data[i] << std::endl;
               }
@@ -3076,8 +3076,8 @@ std::vector<uint32_t> TileTBDump::get_correct_data(const uint32_t* p, unsigned i
 
     ++p;
 
-    std::for_each(p, p + ppr_size, [&data] (uint32_t p) {
-      data.push_back((ntohs(p >> 16) << 16) | (ntohs(p & 0xFFFF)));
+    std::for_each(p, p + ppr_size, [&data] (uint32_t v) {
+      data.push_back((ntohs(v >> 16) << 16) | (ntohs(v & 0xFFFF)));
     });
 
     p += ppr_size;
