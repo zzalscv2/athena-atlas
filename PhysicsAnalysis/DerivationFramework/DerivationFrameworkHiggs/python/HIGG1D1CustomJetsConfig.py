@@ -123,8 +123,8 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
             "UsedInVertexFitTrackDecoratorAlgCustomVtxAlg" ,
             UsedInFitDecoratorTool=CompFactory.getComp("InDet::InDetUsedInFitTrackDecoratorTool")(
                 "UsedInFitTrackDecoratorToolCustomVtx",
-                AMVFVerticesDecoName= 'TTVA_AMVFVertices_forReco',
-                AMVFWeightsDecoName= 'TTVA_AMVFWeights_forReco',
+                AMVFVerticesDecoName= 'TTVA_AMVFVertices_forHiggs',
+                AMVFWeightsDecoName= 'TTVA_AMVFWeights_forHiggs',
                 TrackContainer=context['Tracks'],
                 VertexContainer=context['Vertices'],
             ),

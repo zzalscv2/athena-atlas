@@ -7,7 +7,8 @@ from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 
 
-def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None):
+def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None,
+                          trackAugmenterPrefix=None):
     """
     Return a component accumulator which runs tagging in derivations.
     Configures several jet collections at once.
@@ -44,7 +45,8 @@ def FtagJetCollectionsCfg(cfgFlags, jet_cols, pv_cols=None):
 
     for jet_col, pv_col in zip(jet_cols, pv_cols):
         acc.merge(
-            getFtagComponent(cfgFlags, jet_col, pv_col)
+            getFtagComponent(cfgFlags, jet_col, pv_col,
+                             trackAugmenterPrefix=trackAugmenterPrefix)
         )
 
     return(acc)    
@@ -86,7 +88,8 @@ def BTagLargeRDecoration(cfgFlags, nnFiles, jet_name='AntiKt10UFOCSSKSoftDropBet
 
 
 
-def getFtagComponent(cfgFlags, jet_col, pv_col):
+def getFtagComponent(cfgFlags, jet_col, pv_col,
+                     trackAugmenterPrefix=None):
     """
     Return a component accumulator which runs tagging on a single jet collection.
     """ 
@@ -103,6 +106,7 @@ def getFtagComponent(cfgFlags, jet_col, pv_col):
         cfgFlags,
         TrackCollection=track_collection,
         PrimaryVertexCollectionName=pv_col,
+        prefix=trackAugmenterPrefix
     ))
 
     # decorate tracks with leptonID
