@@ -328,7 +328,16 @@ kazL = ctypes.c_double()
 atlas_mean_ion = []
 atlas_rad = []
 atlas_mop_ion = []
-print("|p      | PDG Mean Ion | ATLAS Mean Ion | ATLAS Mop Ion | PDG rad | ATLAS rad |")
+print(
+    "|{0:<17}|{1:<17}|{2:<17}|{3:<17}|{4:<17}|{5:<17}|".format(
+        "Momentum P",
+        "PDG Ion <dE/dX>",
+        "ATLAS Ion <dE/dX>",
+        "ATLAS MPV dE",
+        "PDG rad <dE/dX>",
+        "ATLAS rad <dE/dX>",
+    )
+)
 for i in range(len(p)):
     atlas_mean_ion.append(
         -ROOT.Trk.MaterialInteraction.dEdl_ionization(p[i], mat, particle, sigma, kazL)
@@ -345,7 +354,7 @@ for i in range(len(p)):
     )
 
     print(
-        "|{0:10.5} | {1:10.6} | {2:10.6} | {3:10.6} | {4:10.6} | {5:10.6}".format(
+        "|{0:17.5}|{1:17.6}|{2:17.6}|{3:17.6}|{4:17.6}|{5:17.6}|".format(
             p[i],
             pdg_mean_ion[i],
             atlas_mean_ion[i],
