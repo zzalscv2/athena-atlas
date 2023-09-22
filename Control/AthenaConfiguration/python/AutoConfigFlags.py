@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from PyUtils.MetaReader import read_metadata
+from PyUtils.MetaReader import read_metadata, lite_primary_keys_to_keep, lite_TagInfo_keys_to_keep
 from AthenaCommon.Logging import logging
 from functools import lru_cache
 
@@ -25,7 +25,9 @@ class DynamicallyLoadMetadata:
     def get(self, key, default):
         if key in self.metadata:
             return self.metadata[key]
-        if self.metAccessLevel != 'peeker':
+        if self.metAccessLevel != 'peeker' \
+            and key not in lite_primary_keys_to_keep \
+            and key not in lite_TagInfo_keys_to_keep:
             msg.info("Looking into the file in 'peeker' mode as the configuration requires more details: %s ", key)
             self.metAccessLevel = 'peeker'
             self._loadMore()

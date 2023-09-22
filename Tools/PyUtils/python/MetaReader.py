@@ -32,6 +32,13 @@ regex_persistent_class = re.compile(r'^([a-zA-Z]+(_[pv]\d+)?::)*[a-zA-Z]+_[pv]\d
 regex_BS_files = re.compile(r'^(\w+):.*((\.D?RAW\..*)|(\.data$))')
 regex_URI_scheme = re.compile(r'^([A-Za-z0-9\+\.\-]+)\:')
 
+lite_primary_keys_to_keep = [
+    'lumiBlockNumbers', 'runNumbers', 'mc_event_number', 'mc_channel_number',
+    'eventTypes', 'processingTags', 'itemList']
+lite_TagInfo_keys_to_keep = [
+    'beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag',
+    'AODFixVersion', 'project_name', 'mc_campaign']
+
 
 def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = [],
                   unique_tag_info_values = True, ignoreNonExistingLocalFiles=False):
@@ -1110,22 +1117,16 @@ def make_lite(meta_dict):
     for filename, file_content in meta_dict.items():
         for key in file_content:
             if key in meta_dict[filename]['metadata_items'] and regexEventStreamInfo.match(meta_dict[filename]['metadata_items'][key]):
-                keys_to_keep = ['lumiBlockNumbers', 'runNumbers', 'mc_event_number', 'mc_channel_number', 'eventTypes', 'processingTags', 'itemList']
-
                 for item in list(meta_dict[filename][key]):
-                    if item not in keys_to_keep:
+                    if item not in lite_primary_keys_to_keep:
                         meta_dict[filename][key].pop(item)
 
         if '/TagInfo' in file_content:
-            keys_to_keep = ['beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag', 'AODFixVersion', 'project_name', 'mc_campaign']
+            
 
             for item in list(meta_dict[filename]['/TagInfo']):
-                if item not in keys_to_keep:
+                if item not in lite_TagInfo_keys_to_keep:
                     meta_dict[filename]['/TagInfo'].pop(item)
-
-            # default values:
-            if 'mc_campaign' not in meta_dict[filename]['/TagInfo']:
-                meta_dict[filename]['/TagInfo']['mc_campaign'] = ''
     return meta_dict
 
 
