@@ -31,7 +31,7 @@ def HIGG1D1KernelCfg(flags, name='HIGG1D1Kernel', **kwargs):
     acc.merge(HIGG1D1CustomJetsCfg(flags))
     
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices']))
+    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices'], trackAugmenterPrefix='btagIpHgg_'))
 
     #Custom MET
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCustomVtxCfg
