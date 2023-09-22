@@ -47,10 +47,10 @@ ToolSvc.TauTrigEffTool...WARNING 2022-prerec tag are pre-recommendations and sti
 |   |   \___ (1) C
 |   |   \___ (2) Light
 |   |   \___ (3) T
-number of taggers: 6
-DL1dv00, DL1dv01, DL1r, GN120220509, GN2v00LegacyWP, GN2v00NewAliasWP, 
-number of jet collections: 2
-AntiKt4EMPFlowJets, AntiKtVR30Rmax4Rmin02TrackJets, 
+number of taggers: 1
+DL1dv01, 
+number of jet collections: 1
+AntiKt4EMPFlowJets, 
 number of working points: 5
 Continuous, FixedCutBEff_60, FixedCutBEff_70, FixedCutBEff_77, FixedCutBEff_85, 
 === CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===
@@ -60,21 +60,21 @@ Continuous, FixedCutBEff_60, FixedCutBEff_70, FixedCutBEff_77, FixedCutBEff_85,
  CDI file build number: Custom
 
 ======= end of CalibrationDataInterfaceROOT instantiation ========
-CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 601229_Eff
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/601229_Eff (with comment: 'efficiencies from sample 601229' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF (with comment: 'negative_tag_Zjet+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF already cached! 
-CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF (with comment: 'ttbarC+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 601229_Eff
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/601229_Eff (with comment: 'efficiencies from sample 601229' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF (with comment: 'ttbar1lep+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF already cached! 
-CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF (with comment: 'ttbar_PDF+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 601229_Eff
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/601229_Eff (with comment: 'efficiencies from sample 601229' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF (with comment: 'ttbar_PDF' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF already cached! 
-CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 410470_Eff
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF (with comment: 'ttbarC+addSys[newsys]+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is 601229_Eff
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/601229_Eff (with comment: 'efficiencies from sample 601229' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF (with comment: 'ttbar1lep+addSys[newsys]+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF already cached! 
     NNJVT.Network.graph.Offline.Nonprompt_All_MaxWeight.json
 

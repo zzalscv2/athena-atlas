@@ -168,8 +168,7 @@ namespace ST {
   static inline int getMCShowerType(const std::string& sample_name) {
     /** Get MC generator index for the b-tagging efficiency maps*/
     // This needs VERY careful syncing with m_showerType in SUSYToolsInit!  Change with care!
-    const static std::vector<TString> gen_mc_generator_keys = {"HERWIG", "SHERPA_CT", "SHERPA", "AMCATNLO", "SH_228", "SH_2210"};
-    //This was the 20.7 vector... {"PYTHIAEVTGEN", "HERWIGPPEVTGEN", "PYTHIA8EVTGEN", "SHERPA_CT10", "SHERPA"};
+    const static std::vector<TString> gen_mc_generator_keys = {"PowhegHerwig7","PhH7EG_H7UE", "SHERPA_221_", "SHERPA_2210","SHERPA_2211","SHERPA_2212", "aMcAtNloPy8","aMcAtNloHerwig7"};
 
     //pre-process sample name
     TString tmp_name(sample_name);
@@ -177,8 +176,6 @@ namespace ST {
     if(tmp_name.Contains("Pythia") && !tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Pythia8") && !tmp_name.Contains("EvtGen")) tmp_name.ReplaceAll("Pythia8","PYTHIA8EVTGEN");
     if(tmp_name.Contains("Py8") && !tmp_name.Contains("EG")) tmp_name.ReplaceAll("Py8","PYTHIA8EVTGEN");
-    if(tmp_name.Contains("H7")) tmp_name.ReplaceAll("H7","HERWIG");
-    if(tmp_name.Contains("Sh_N30NNLO")) tmp_name.ReplaceAll("Sh_N30NNLO","SH_228");
     
     //capitalize the entire sample name
     tmp_name.ToUpper();
@@ -189,16 +186,17 @@ namespace ST {
       if( tmp_name.Contains(gen) ){return ishower+1;}
       ishower++;
     }  
-    if( tmp_name.Contains("PYTHIA8EVTGEN") ) return 0;
+    if( tmp_name.Contains("PYTHIA8EVTGEN") || tmp_name.Contains("PhPy8EG") ) return 0;
 
     // See if they are doing something really unwise, just in case
     TRegexp is_data("^data1[5-9]_13TeV");
-    if (tmp_name.Contains(is_data)){
+    TRegexp is_dataRun3("^data2[2-5]_13p6TeV");
+    if (tmp_name.Contains(is_data) || tmp_name.Contains(is_dataRun3)){
       std::cout << "ST::getMCShowerType WARNING: Asking for the MC shower when running on a data file is not advised.  Just returning 0." << std::endl;
       return 0;
     }
 
-    std::cout << "ST::getMCShowerType WARNING: Unknown MC generator detected. Returning default 0=PowhegPythia8(410501) ShowerType for btagging MC/MC maps." << std::endl;
+    std::cout << "ST::getMCShowerType WARNING: Unknown MC generator detected. Returning default 0 = PowhegPythia8 ShowerType for btagging MC/MC maps." << std::endl;
     return 0;
   }
 
