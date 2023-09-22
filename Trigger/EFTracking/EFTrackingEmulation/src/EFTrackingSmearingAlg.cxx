@@ -361,7 +361,7 @@ StatusCode EFTrackingSmearingAlg::execute() {
       xAOD::ParametersCovMatrix_t trkcov = trk->definingParametersCovMatrix();  
       auto trkcovvec = trk->definingParametersCovMatrixVec();  
       double theta=trk->theta();
-      double pt = std::sin(theta)/(trk->qOverP());// MeV
+      double pt = std::sin(theta)/std::abs(trk->qOverP());// MeV
       
       ATH_MSG_DEBUG ("===> New Track: "
                       <<" curv=" << 1./trk->pt()
