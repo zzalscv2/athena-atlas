@@ -123,7 +123,7 @@ private:
   };
 
   /** @brief Private member flag to copy forward clusters. */
-  bool m_doForwardClusters;
+  bool m_doForwardClusters = false;
 
   mutable Gaudi::Accumulators::Counter<> m_AllClusters {};
   mutable Gaudi::Accumulators::Counter<> m_PassPreSelection {};
