@@ -4,6 +4,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 
 
 def PileUpMergeSvcCfg(flags, name="PileUpMergeSvc", Intervals=[], **kwargs):
@@ -20,12 +21,18 @@ def PileUpMergeSvcCfg(flags, name="PileUpMergeSvc", Intervals=[], **kwargs):
             Intervals = [Intervals]
         kwargs["Intervals"] = Intervals
 
-    kwargs.setdefault("EventInfoKeyName", "EventInfo") # FIXME Make default?
-    acc.addService(CompFactory.PileUpMergeSvc(name, **kwargs), primary = True)
+    presampling = flags.Common.ProductionStep == ProductionStep.PileUpPresampling
+    if presampling:
+        kwargs.setdefault(
+            "EventInfoKeyName", flags.Overlay.BkgPrefix + "EventInfo"
+        )  # FIXME Make default?
+    else:
+        kwargs.setdefault("EventInfoKeyName", "EventInfo")  # FIXME Make default?
+    acc.addService(CompFactory.PileUpMergeSvc(name, **kwargs), primary=True)
     return acc
 
 
-def PileUpXingFolderCfg(flags, name="PileUpXingFolder" , **kwargs):
+def PileUpXingFolderCfg(flags, name="PileUpXingFolder", **kwargs):
     """Return a configured PileUpXingFolder tool"""
     acc = ComponentAccumulator()
     acc.setPrivateTools(CompFactory.PileUpXingFolder(name, **kwargs))

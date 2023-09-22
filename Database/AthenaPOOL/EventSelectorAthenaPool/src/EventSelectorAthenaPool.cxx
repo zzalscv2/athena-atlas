@@ -387,9 +387,10 @@ StatusCode EventSelectorAthenaPool::start() {
       }
    } else {
       m_headerIterator = &m_poolCollectionConverter->executeQuery(/*m_query.value()*/);
-      m_evtCount = 0;
    }
-   delete m_endIter;   m_endIter   = nullptr;
+   m_evtCount = 0;
+   delete m_endIter;
+   m_endIter = nullptr;
    m_endIter = new EventContextAthenaPool(nullptr);
    return(StatusCode::SUCCESS);
 }
@@ -778,9 +779,10 @@ StatusCode EventSelectorAthenaPool::last(IEvtSelector::Context& ctxt) const {
    return(StatusCode::FAILURE);
 }
 //________________________________________________________________________________
-StatusCode EventSelectorAthenaPool::rewind(IEvtSelector::Context& /*ctxt*/) const {
-   ATH_MSG_ERROR("EventSelectorAthenaPool::rewind() not implemented");
-   return(StatusCode::FAILURE);
+StatusCode EventSelectorAthenaPool::rewind(IEvtSelector::Context& ctxt) const {
+   ATH_CHECK(reinit());
+   ctxt = EventContextAthenaPool(this);
+   return(StatusCode::SUCCESS);
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::createAddress(const IEvtSelector::Context& /*ctxt*/,

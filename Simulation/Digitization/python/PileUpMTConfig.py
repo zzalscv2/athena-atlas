@@ -24,10 +24,11 @@ from Digitization.PileUpConfig import (
 )
 
 from enum import Enum
+from math import ceil
+from hashlib import blake2b
 
 def numBkgToLoad(nPerBC):
     "Given number of bkg needed (on average) per BC, returns number to load per batch"
-    from math import ceil
     import numpy as np
     # We don't have scipy in the release so we have a lookup table
     # Lookup table computed using scipy.stats.poisson.isf to determine how many events need
@@ -76,25 +77,28 @@ def HSInputRenameCfg():
     return acc
 
 
-def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **kwargs):
-    flags.dump()
-    acc = ComponentAccumulator()
-    skip = flags.Exec.SkipEvents
-    n_evt = flags.Exec.MaxEvents
-    n_bc = (
-        flags.Digitization.PU.FinalBunchCrossing
-        - flags.Digitization.PU.InitialBunchCrossing
-        + 1
+def MinbiasSvcSeed(flags, name, kwargs):
+    # That is *correctly* not **kwargs. This functions updates the kwargs in another.
+    kwargs["Seed"] = (
+        int.from_bytes(blake2b(name.encode(), digest_size=8).digest(), 'big')
+        + flags.Digitization.RandomSeedOffset
     )
 
+
+def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **kwargs):
+    acc = ComponentAccumulator()
+    n_evt = flags.Exec.MaxEvents
+    skip = flags.Exec.SkipEvents
+
+    MinbiasSvcSeed(flags, name, kwargs)
     if kind == PUBkgKind.LOWPT:
         acc.merge(LowPtMinBiasEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
-        kwargs.setdefault("MBBatchSize", 10000)
-        # kwargs.setdefault("MBBatchSize", 1.3 * flags.Digitization.PU.NumberOfLowPtMinBias * n_bc)
-        kwargs.setdefault("NSimultaneousBatches", 1)
         kwargs.setdefault("SkippedHSEvents", skip)
+        kwargs.setdefault("MBBatchSize", 10000)
+        kwargs.setdefault("NSimultaneousBatches", 1)
         kwargs.setdefault("HSBatchSize", 128)
+        kwargs.setdefault("AvgMBPerBunch", flags.Digitization.PU.NumberOfLowPtMinBias)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
@@ -109,89 +113,54 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
     elif kind == PUBkgKind.HIGHPT:
         acc.merge(HighPtMinBiasEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
-        # load enough events that the probability of running out for any given event is no more than 1e-6
-        kwargs.setdefault(
-            "MBBatchSize", numBkgToLoad(flags.Digitization.PU.NumberOfHighPtMinBias)
-        )
-        kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
-        kwargs.setdefault("HSBatchSize", 1)
-        evt_per_batch = kwargs["HSBatchSize"]
-        actualNHSEventsPerBatch = (
-            (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
-            + (n_evt // evt_per_batch) * [evt_per_batch]
-            + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
-        )
-        kwargs["actualNHSEventsPerBatch"] = actualNHSEventsPerBatch
+        kwargs.setdefault("AvgMBPerBunch", flags.Digitization.PU.NumberOfHighPtMinBias)
         kwargs.setdefault(
             "BkgEventSelector", acc.getService("HighPtMinBiasEventSelector")
         )
     elif kind == PUBkgKind.CAVERN:
         acc.merge(CavernEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
-        kwargs.setdefault("MBBatchSize", flags.Digitization.PU.NumberOfCavern * n_bc)
-        kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
-        kwargs.setdefault("HSBatchSize", 1)
-        evt_per_batch = kwargs["HSBatchSize"]
-        actualNHSEventsPerBatch = (
-            (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
-            + (n_evt // evt_per_batch) * [evt_per_batch]
-            + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
-        )
-        kwargs["actualNHSEventsPerBatch"] = actualNHSEventsPerBatch
+        kwargs.setdefault("AvgMBPerBunch", flags.Digitization.PU.NumberOfCavern)
+        kwargs.setdefault("UsePoisson", False)
+        kwargs.setdefault("UseBeamInt", False)
+        kwargs.setdefault("UseBeamLumi", False)
         kwargs.setdefault("BkgEventSelector", acc.getService("CavernEventSelector"))
     elif kind == PUBkgKind.BEAMGAS:
         acc.merge(BeamGasEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
-        kwargs.setdefault(
-            "MBBatchSize", numBkgToLoad(flags.Digitization.PU.NumberOfBeamGas)
-        )
-        kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
-        kwargs.setdefault("HSBatchSize", 1)
-        evt_per_batch = kwargs["HSBatchSize"]
-        actualNHSEventsPerBatch = (
-            (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
-            + (n_evt // evt_per_batch) * [evt_per_batch]
-            + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
-        )
-        kwargs["actualNHSEventsPerBatch"] = actualNHSEventsPerBatch
+        kwargs.setdefault("AvgMBPerBunch", flags.Digitization.PU.NumberOfBeamGas)
+        kwargs.setdefault("UseBeamInt", True)
+        kwargs.setdefault("UseBeamLumi", False)
         kwargs.setdefault("BkgEventSelector", acc.getService("BeamGasEventSelector"))
     elif kind == PUBkgKind.BEAMHALO:
         acc.merge(BeamHaloEventSelectorCfg(flags))
         kwargs.setdefault("OnDemandMB", False)
-        kwargs.setdefault(
-            "MBBatchSize", numBkgToLoad(flags.Digitization.PU.NumberOfBeamHalo)
-        )
-        kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
         kwargs.setdefault("SkippedHSEvents", skip)
-        kwargs.setdefault("HSBatchSize", 1)
-        evt_per_batch = kwargs["HSBatchSize"]
-        actualNHSEventsPerBatch = (
-            (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
-            + (n_evt // evt_per_batch) * [evt_per_batch]
-            + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
-        )
-        kwargs["actualNHSEventsPerBatch"] = actualNHSEventsPerBatch
+        kwargs.setdefault("AvgMBPerBunch", flags.Digitization.PU.NumberOfBeamHalo)
+        kwargs.setdefault("UseBeamInt", True)
+        kwargs.setdefault("UseBeamLumi", False)
         kwargs.setdefault("BkgEventSelector", acc.getService("BeamHaloEventSelector"))
 
-    acc.addService(CompFactory.BatchedMinbiasSvc(name, **kwargs), primary=True)
+    if kind == PUBkgKind.LOWPT:
+        acc.addService(CompFactory.BatchedMinbiasSvc(name, **kwargs), primary=True)
+    else:
+        acc.addService(CompFactory.OnDemandMinbiasSvc(name, **kwargs), primary=True)
     return acc
 
 
 def PileUpMTAlgCfg(flags, **kwargs):
-    kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
     acc = ComponentAccumulator()
+    acc.addService(CompFactory.SkipEventIdxSvc("SkipEventIdxSvc"))
+    kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
     # acc = BeamSpotFixerAlgCfg(flags)  # Needed currently for running on 21.0 HITS
 
     assert (
         not flags.Digitization.DoXingByXingPileUp
     ), "PileUpMTAlg does not support XingByXing pile-up!"
+    # Set a number of kwargs early so they can be passed to the minbias services
     # Bunch Structure
     if flags.Digitization.PU.BeamIntensityPattern:
         if flags.Digitization.PU.SignalPatternForSteppingCache:
@@ -207,58 +176,6 @@ def PileUpMTAlgCfg(flags, **kwargs):
             acc.merge(ArrayBMCfg(flags))
             kwargs.setdefault("BeamIntSvc", acc.getService("ArrayBM"))
 
-    # define inputs
-    assert not flags.Input.SecondaryFiles, (
-        "Found ConfigFlags.Input.SecondaryFiles = %r; "
-        "double event selection is not supported "
-        "by PileUpMTAlg" % (not flags.Input.SecondaryFiles)
-    )
-    acc.merge(HSInputRenameCfg())
-    acc.merge(PoolReadCfg(flags))
-    # add minbias service(s)
-    if flags.Digitization.PU.LowPtMinBiasInputCols:
-        svc = acc.getPrimaryAndMerge(
-            BatchedMinbiasSvcCfg(flags, name="LowPtMinBiasSvc", kind=PUBkgKind.LOWPT)
-        )
-        kwargs.setdefault("LowPtMinbiasSvc", svc)
-        kwargs.setdefault(
-            "FracLowPt",
-            flags.Digitization.PU.NumberOfLowPtMinBias
-            / flags.Digitization.PU.NumberOfCollisions,
-        )
-    if flags.Digitization.PU.HighPtMinBiasInputCols:
-        svc = acc.getPrimaryAndMerge(
-            BatchedMinbiasSvcCfg(flags, name="HighPtMinBiasSvc", kind=PUBkgKind.HIGHPT)
-        )
-        kwargs.setdefault("HighPtMinbiasSvc", svc)
-        kwargs.setdefault(
-            "FracHighPt",
-            flags.Digitization.PU.NumberOfHighPtMinBias
-            / flags.Digitization.PU.NumberOfCollisions,
-        )
-    if flags.Digitization.PU.CavernInputCols:
-        svc = acc.getPrimaryAndMerge(
-            BatchedMinbiasSvcCfg(flags, name="CavernMinBiasSvc", kind=PUBkgKind.CAVERN)
-        )
-        kwargs.setdefault("CavernMinbiasSvc", svc)
-        kwargs.setdefault("NumCavern", flags.Digitization.PU.NumberOfCavern)
-    if flags.Digitization.PU.BeamGasInputCols:
-        svc = acc.getPrimaryAndMerge(
-            BatchedMinbiasSvcCfg(
-                flags, name="BeamGasMinBiasSvc", kind=PUBkgKind.BEAMGAS
-            )
-        )
-        kwargs.setdefault("BeamGasMinbiasSvc", svc)
-        kwargs.setdefault("NumBeamGas", flags.Digitization.PU.NumberOfBeamGas)
-    if flags.Digitization.PU.BeamHaloInputCols:
-        svc = acc.getPrimaryAndMerge(
-            BatchedMinbiasSvcCfg(
-                flags, name="BeamHaloMinBiasSvc", kind=PUBkgKind.BEAMHALO
-            )
-        )
-        kwargs.setdefault("BeamHaloMinbiasSvc", svc)
-        kwargs.setdefault("NumBeamHalo", flags.Digitization.PU.NumberOfBeamHalo)
-
     kwargs.setdefault("SkippedHSEvents", flags.Exec.SkipEvents)
     kwargs.setdefault("BCSpacing", flags.Digitization.PU.BunchSpacing)
     kwargs.setdefault("EarliestDeltaBC", flags.Digitization.PU.InitialBunchCrossing)
@@ -271,6 +188,74 @@ def PileUpMTAlgCfg(flags, **kwargs):
         acc.merge(NoProfileSvcCfg(flags))
         kwargs.setdefault("BeamLumiSvc", acc.getService("NoProfileSvc"))
         kwargs.setdefault("AverageMu", flags.Digitization.PU.NumberOfCollisions)
+
+    # define inputs
+    assert not flags.Input.SecondaryFiles, (
+        "Found ConfigFlags.Input.SecondaryFiles = %r; "
+        "double event selection is not supported "
+        "by PileUpMTAlg" % (not flags.Input.SecondaryFiles)
+    )
+    acc.merge(HSInputRenameCfg())
+    acc.merge(PoolReadCfg(flags))
+    # add minbias service(s)
+    mbKwargs = {
+        k: kwargs[k]
+        for k in (
+            "SkippedHSEvents",
+            "EarliestDeltaBC",
+            "LatestDeltaBC",
+            "BeamIntSvc",
+            "BeamLumiSvc",
+        )
+    }
+    if flags.Digitization.PU.LowPtMinBiasInputCols:
+        svc = acc.getPrimaryAndMerge(
+            BatchedMinbiasSvcCfg(
+                flags, name="LowPtMinBiasSvc", kind=PUBkgKind.LOWPT, **mbKwargs
+            )
+        )
+        kwargs.setdefault("LowPtMinbiasSvc", svc)
+        kwargs.setdefault(
+            "FracLowPt",
+            flags.Digitization.PU.NumberOfLowPtMinBias
+            / flags.Digitization.PU.NumberOfCollisions,
+        )
+    if flags.Digitization.PU.HighPtMinBiasInputCols:
+        svc = acc.getPrimaryAndMerge(
+            BatchedMinbiasSvcCfg(
+                flags, name="HighPtMinBiasSvc", kind=PUBkgKind.HIGHPT, **mbKwargs
+            )
+        )
+        kwargs.setdefault("HighPtMinbiasSvc", svc)
+        kwargs.setdefault(
+            "FracHighPt",
+            flags.Digitization.PU.NumberOfHighPtMinBias
+            / flags.Digitization.PU.NumberOfCollisions,
+        )
+    if flags.Digitization.PU.CavernInputCols:
+        svc = acc.getPrimaryAndMerge(
+            BatchedMinbiasSvcCfg(
+                flags, name="CavernMinBiasSvc", kind=PUBkgKind.CAVERN, **mbKwargs
+            )
+        )
+        kwargs.setdefault("CavernMinbiasSvc", svc)
+        kwargs.setdefault("NumCavern", flags.Digitization.PU.NumberOfCavern)
+    if flags.Digitization.PU.BeamGasInputCols:
+        svc = acc.getPrimaryAndMerge(
+            BatchedMinbiasSvcCfg(
+                flags, name="BeamGasMinBiasSvc", kind=PUBkgKind.BEAMGAS, **mbKwargs
+            )
+        )
+        kwargs.setdefault("BeamGasMinbiasSvc", svc)
+        kwargs.setdefault("NumBeamGas", flags.Digitization.PU.NumberOfBeamGas)
+    if flags.Digitization.PU.BeamHaloInputCols:
+        svc = acc.getPrimaryAndMerge(
+            BatchedMinbiasSvcCfg(
+                flags, name="BeamHaloMinBiasSvc", kind=PUBkgKind.BEAMHALO, **mbKwargs
+            )
+        )
+        kwargs.setdefault("BeamHaloMinbiasSvc", svc)
+        kwargs.setdefault("NumBeamHalo", flags.Digitization.PU.NumberOfBeamHalo)
     presampling = flags.Common.ProductionStep == ProductionStep.PileUpPresampling
     if presampling:
         kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
