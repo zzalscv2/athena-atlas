@@ -1092,8 +1092,8 @@ std::vector<uint32_t> TileROD_Decoder::get_correct_data(const uint32_t* p) const
     data.push_back(*(++p));
 
     ++p;
-    std::for_each(p, p + ppr_size, [&data] (uint32_t p) {
-      data.push_back((ntohs(p >> 16) << 16) | (ntohs(p & 0xFFFF)));
+    std::for_each(p, p + ppr_size, [&data] (uint32_t v) {
+      data.push_back((ntohs(v >> 16) << 16) | (ntohs(v & 0xFFFF)));
     });
 
     p += ppr_size;
