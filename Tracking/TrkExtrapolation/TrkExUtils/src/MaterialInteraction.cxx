@@ -53,12 +53,19 @@
 
 namespace {
 
+constexpr double s_me = Trk::ParticleMasses::mass[Trk::electron];
 // mean excitation energy --> I
+#if (defined(__GNUC__) || defined(__clang__))
+[[gnu::always_inline]]
+#endif
 inline double MeanExcitationEnergy(const Trk::Material& mat) {
   // 16 eV * Z**0.9 - bring to MeV
   return 16.e-6 * std::pow(mat.averageZ(), 0.9);
 }
 
+#if (defined(__GNUC__) || defined(__clang__))
+[[gnu::always_inline]]
+#endif
 inline double DensityEffect(const double zOverAtimesRho, const double eta2,
                             const double gamma, const double I) {
 
@@ -74,10 +81,24 @@ inline double DensityEffect(const double zOverAtimesRho, const double eta2,
   return 0;
 }
 
+#if (defined(__GNUC__) || defined(__clang__))
+[[gnu::always_inline]]
+#endif
 inline double KAZ(const double zOverAtimesRho) {
   // K/A*Z = 0.5 * 30.7075MeV/(g/mm2) * Z/A * rho[g/mm3]
   return 0.5 * 30.7075 * zOverAtimesRho;
 }
+
+#if (defined(__GNUC__) || defined(__clang__))
+[[gnu::always_inline]]
+#endif
+inline double LandauMPV(const double kazL, const double eta2, const double I,
+                        const double beta, const double delta) {
+  // PDG 2022 Eq 34.12
+  return -kazL * (std::log(2. * s_me * eta2 / I) + std::log(kazL / I) + 0.2 -
+                  (beta * beta) - delta);
+}
+
 }  // namespace
 
 /** dE/dl ionization energy loss per path unit
@@ -95,45 +116,40 @@ double Trk::MaterialInteraction::dEdl_ionization(
   if (mat.averageZ() < 1) {
     return 0.;
   }
-  const double me = Trk::ParticleMasses::mass[Trk::electron];
   const double m = Trk::ParticleMasses::mass[particle];
-  const double mfrac = me / m;
+  const double mfrac = s_me / m;
   const double E = std::sqrt(p * p + m * m);
   const double beta = p / E;
   const double gamma = E / m;
   const double I = MeanExcitationEnergy(mat);
   const double zOverAtimesRho = mat.zOverAtimesRho();
   double kaz = KAZ(zOverAtimesRho);
-  //  sigmaL of Landau
-  sigma = 4 * kaz * beta / beta;  // dsigma/dl
-  //
   double Ionization = 0.;
+
   if (particle == Trk::electron) {
     // for electrons use slightly different BetheBloch adaption
     // see Stampfer, et al, "Track Fitting With Energy Loss", Comp. Pyhs. Comm.
     // 79 (1994), 157-164
-    Ionization = -kaz * (2. * log(2. * me / I) + 3. * log(gamma) - 1.95);
+    Ionization = -kaz * (2. * log(2. * s_me / I) + 3. * log(gamma) - 1.95);
+    //  sigmaL --> FWHM of Landau
+    sigma = 4 * kaz ;
   } else {
     double eta2 = beta * gamma;
     eta2 *= eta2;
     const double delta = DensityEffect(zOverAtimesRho, eta2, gamma, I);
     // tmax - cut off energy
     const double tMax =
-        2. * eta2 * me / (1. + 2. * gamma * mfrac + mfrac * mfrac);
+        2. * eta2 * s_me / (1. + 2. * gamma * mfrac + mfrac * mfrac);
     // divide by beta^2 for non-electrons
     kaz /= beta * beta;
-
     // PDG 2022 Eq 34.5
-    Ionization = -kaz * (std::log(2. * me * eta2 * tMax / (I * I)) -
+    Ionization = -kaz * (std::log(2. * s_me * eta2 * tMax / (I * I)) -
                          2. * (beta * beta) - delta);
-    // The MPV is path lenght dependent, here we set pathlenght = 1mm
-    constexpr double path = 1.;
-    // PDG 2022 Eq 34.12
-    const double MOP =
-        -kaz * (std::log(2. * me * eta2 / I) + std::log(path * kaz / I) + 0.2 -
-                (beta * beta) - delta);
+    // The MPV is path lenght dependent, here we set pathlenght = 1 (mm)
+    // so kazL = kaz
+    const double MPV = LandauMPV(kaz, eta2, I, beta, delta);
     constexpr double factor = (1. / 3.59524);
-    sigma = -(Ionization - MOP) * factor;
+    sigma = -(Ionization - MPV) * factor;
     kazL = kaz * factor;
   }
   return Ionization;
@@ -147,23 +163,22 @@ double Trk::MaterialInteraction::dEdl_ionization(
 double Trk::MaterialInteraction::dE_MPV_ionization(
     double p, const Trk::Material& mat, Trk::ParticleHypothesis particle,
     double& sigma, double& kazL, double path) {
+
   const double m = Trk::ParticleMasses::mass[particle];
   const double E = std::sqrt(p * p + m * m);
-  const double me = Trk::ParticleMasses::mass[Trk::electron];
   const double beta = p / E;
   const double gamma = E / m;
   const double I = MeanExcitationEnergy(mat);
   const double zOverAtimesRho = mat.zOverAtimesRho();
   double kaz = KAZ(zOverAtimesRho);
   double eta2 = beta * gamma;
+
   eta2 *= eta2;
   const double delta = DensityEffect(zOverAtimesRho, eta2, gamma, I);
   // divide by beta^2 for non-electrons
   kaz /= beta * beta;
   kazL = kaz * path;
-  // PDG 2022 Eq 34.12
-  const double MPV = -kazL * (std::log(2. * me * eta2 / I) +
-                              std::log(kazL / I) + 0.2 - (beta * beta) - delta);
+  const double MPV = LandauMPV(kazL,eta2,I,beta,delta);
   sigma = 0.424 * 4. * kazL;  // 0.424 FWHM to sigma
 
   return MPV;
@@ -179,8 +194,7 @@ double Trk::MaterialInteraction::dEdl_radiation(
 
   // preparation of kinetic constants
   const double m = Trk::ParticleMasses::mass[particle];
-  const double me = Trk::ParticleMasses::mass[Trk::electron];
-  const double mfrac = me / m;
+  const double mfrac = s_me / m;
   const double E = sqrt(p * p + m * m);
 
   // Bremsstrahlung - Bethe-Heitler
@@ -203,7 +217,6 @@ double Trk::MaterialInteraction::dEdl_radiation(
       sigma += 17.73 + 2.409e-5 * (E - 1000000.);  // idem
     }
   }
-
   sigma = sigma / mat.x0();
 
   return Radiation / mat.x0();
@@ -215,7 +228,6 @@ double Trk::MaterialInteraction::sigmaMS(double dInX0, double p, double beta) {
   if (dInX0 == 0. || p == 0. || beta == 0.) {
     return 0.;
   }
-
   // Improved (See [5] Lynch & Dahl) Highland formula
   // projected sigma_s PDG 2022 34.16
   return 13.6 * std::sqrt(dInX0) / (beta * p) *
