@@ -4,6 +4,8 @@ import re
 import math
 import ROOT
 
+from AthenaCommon.Logging import logging
+log = logging.getLogger('TrigMuonEfficiencyMonConfig.py')
 
 def regex(pat):
     if 'cached_regex' not in globals():
@@ -12,6 +14,33 @@ def regex(pat):
     if pat not in cached_regex:
         cached_regex.update({pat:re.compile(pat)})
     return cached_regex[pat]
+
+def get_singlemu_chain_closest_to(chainList, ref_hlt_pt, ref_hlt_type, ref_l1_pt):
+    # find the "closest" HLT muon chain with respect to the chain you would use for the tag
+    # in tag&probe; "close" means "mostly as good as the given reference HLT/L1 chain",
+    # which implies pt thresholds should be similar and isolation, if pt thresholds are the
+    # same, should be required
+    chain_data = []
+    for chainName in chainList:
+      # regexp to match ordinary single-muon HLT chain names
+      match = regex('HLT_mu([0-9]+)(?:_([a-zA-Z_]+))?_(L1MU([0-9]+)[A-Z_]+)').match(chainName)
+      if match:
+        hlt_threshold = float(match.group(1))
+        hlt_type = match.group(2) # None, ivarmedium, barrel only...
+        #level1_item = match.group(3) # not used so not assigned
+        level1_threshold = float(match.group(4))
+        if hlt_type is None or hlt_type == 'ivarmedium': # we restrict ourselves to ordinary cases
+          chain_data.append((chainName, hlt_type, hlt_threshold, level1_threshold))
+
+    # we determine automatically the HLT chain to choose, based on these criteria (in order of priority):
+    # 1) how far the HLT pt cut is wrt the ideal chain we'd want (based on abs(pt-ptref) := delta_hlt)
+    # 2) we prefer the chain with the lowest pt cut, if two are available with the same delta_hlt (i.e. if we want 24, we'll take 23 instead of 26 GeV)
+    # 3) we prefer the isolated version of the trigger (higher tag purity)
+    # 4+5) we prefer the chain with the lowest L1 item (again as close as possible to the one we'd want)
+    # note that the check for 3) is performed in this way as "sorted" uses ascending order (so 0 comes before 1)
+    chain_data_sorted = sorted(chain_data, key=lambda tup: (abs(tup[2]-ref_hlt_pt), tup[2]-ref_hlt_pt, tup[1]!=ref_hlt_type, abs(tup[3]-ref_l1_pt), tup[3]-ref_l1_pt))
+    chainList_sorted = [x[0] for x in chain_data_sorted]
+    return chainList_sorted
 
 
 ##
@@ -32,13 +61,18 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
         # HLT_mu6_L1MU6 is test chain for small statistics, so it will be removed.
         MonitoredChains = ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_mu50_L1MU14FCH', 'HLT_mu60_0eta105_msonly_L1MU14FCH', 'HLT_mu14_L1MU8F', 'HLT_mu22_mu8noL1_L1MU14FCH', 'HLT_mu6_mu6noL1_L1MU5VF']
 
+    ### determine what's the HLT chain to be used to select events and for the tag muon
+    singlemu_chains_sorted = get_singlemu_chain_closest_to(MonitoredChains, 24, 'ivarmedium', 14)
+    tagandprobe_chain = singlemu_chains_sorted[0]
+    log.info(f'Using {tagandprobe_chain} as tag and event trigger in ttbar tag&probe')
+
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ttbar_'+chain,
                                      MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
-        monAlg.EventTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
-        monAlg.TagTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
+        monAlg.EventTrigger = tagandprobe_chain
+        monAlg.TagTrigger = tagandprobe_chain
         monAlg.Method = 'TTbarTagAndProbe'
         monAlg.MonitoredChains = [chain]
         threshold, level1 = regex('HLT_mu([0-9]+).*_(L1MU[A-Za-z0-9_]+)').match(chain).groups()
@@ -70,13 +104,18 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
         # HLT_mu6_L1MU6 is test chain for small statistics, so it will be removed.
         MonitoredChains = ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_mu50_L1MU14FCH', 'HLT_mu60_0eta105_msonly_L1MU14FCH', 'HLT_mu14_L1MU8F', 'HLT_mu22_mu8noL1_L1MU14FCH', 'HLT_mu6_mu6noL1_L1MU5VF']
 
+    ### determine what's the HLT chain to be used to select events and for the tag muon
+    singlemu_chains_sorted = get_singlemu_chain_closest_to(MonitoredChains, 24, 'ivarmedium', 14)
+    tagandprobe_chain = singlemu_chains_sorted[0]
+    log.info(f'Using {tagandprobe_chain} as tag and event trigger in Z tag&probe')
+
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ZTP_'+chain,
                                      MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
-        monAlg.EventTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
-        monAlg.TagTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
+        monAlg.EventTrigger = tagandprobe_chain
+        monAlg.TagTrigger = tagandprobe_chain
         monAlg.Method = 'ZTagAndProbe'
         monAlg.MonitoredChains = [chain]
         threshold, level1 = regex('HLT_mu([0-9]+).*_(L1MU[A-Za-z0-9_]+)').match(chain).groups()
