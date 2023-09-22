@@ -12,8 +12,7 @@ atlas_add_library( CxxUtils
    Root/*.cxx
    PUBLIC_HEADERS CxxUtils
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES}
-   PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} TestTools )
+   PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
 
 # Additional libraries in the package:
 atlas_add_library( exctrace_collector src/exctrace/exctrace_collector.cxx
@@ -29,7 +28,7 @@ atlas_add_library( AthDSoCallBacks src/AthDsoCbk.c
    PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
 
 #Add unit_test_framework
-find_package( Boost COMPONENTS regex timer unit_test_framework )
+find_package( Boost COMPONENTS timer unit_test_framework )
 
 # Unit tests in the package:
 atlas_add_test( read_athena_statm_test

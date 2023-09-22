@@ -2,6 +2,7 @@
 
 # Declare the package name:
 atlas_subdir( TrigConfHLTUtils )
+find_package( Threads )
 
 # Component(s) in the package:
 atlas_add_library( TrigConfHLTUtilsLib
@@ -11,7 +12,7 @@ atlas_add_library( TrigConfHLTUtilsLib
 
 atlas_add_executable( trigconf_string2hash
   util/trigconf_string2hash.cxx
-  LINK_LIBRARIES TrigConfHLTUtilsLib )
+  LINK_LIBRARIES TrigConfHLTUtilsLib ${CMAKE_THREAD_LIBS_INIT})
 
 atlas_install_python_modules( python/*.py )
 
