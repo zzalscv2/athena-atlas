@@ -4,7 +4,7 @@ import re
 from collections import OrderedDict, defaultdict
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import Format, MetadataCategory
 from AthenaCommon.CFElements import seqAND, seqOR, parOR, flatAlgorithmSequences, getSequenceChildren, isSequence, hasProp, getProp
 from AthenaCommon.Logging import logging
 from .TriggerRecoConfig import TriggerMetadataWriterCfg
@@ -489,8 +489,12 @@ def triggerPOOLOutputCfg(flags):
 
 
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord, disableEventTag=True, takeItemsFromInput=(outputType == 'RDO'),
-                                    MetadataItemList=[ "xAOD::TriggerMenuJsonContainer#*", "xAOD::TriggerMenuJsonAuxContainer#*" ]))
+        acc.merge(OutputStreamCfg(flags, outputType, ItemList=itemsToRecord,
+                                  disableEventTag=True, takeItemsFromInput=(outputType == 'RDO')))
+        from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+        acc.merge(SetupMetaDataForStreamCfg(flags, outputType,
+                                            createMetadata=[MetadataCategory.TriggerMenuMetaData]))
+
         alg = acc.getEventAlgo("OutputStream"+outputType)
         # Ensure OutputStream runs after TrigDecisionMakerMT and xAODMenuWriterMT
         alg.ExtraInputs += [
