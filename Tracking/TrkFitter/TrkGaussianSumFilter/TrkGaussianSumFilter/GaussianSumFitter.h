@@ -8,9 +8,12 @@
  * @author Tom Athkinson, Anthony Morley, Christos Anastopoulos
  * @brief  Class for fitting according to the Gaussian Sum Filter  formalism
  */
+#ifndef TrkGaussianSumFitter_H
+#define TrkGaussianSumFitter_H
 
 #include "TrkGaussianSumFilter/IMultiStateExtrapolator.h"
 #include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
+#include "TrkGaussianSumFilter/GSFTsos.h"
 //
 #include "TrkTrack/MultiComponentStateOnSurface.h"
 //
@@ -107,133 +110,129 @@ public:
     const RunOutlierRemoval /*Not used*/,
     const ParticleHypothesis matEffects = nonInteracting) const override final;
 
-  //Internally we can use a simple std::vector
-  using GSFTrajectory = std::vector<Trk::MultiComponentStateOnSurface>;
+ // Internally we can use a simple std::vector
+ using GSFTrajectory = std::vector<GSFTsos>;
 
 private:
-  std::unique_ptr<MultiComponentStateOnSurfaceDV> convertTrajToTrack(
-      GSFTrajectory& trajectory) const;
+ std::unique_ptr<MultiComponentStateOnSurfaceDV> convertTrajToTrack(
+     GSFTrajectory& trajectory) const;
 
-  /** Produces a perigee from a smoothed trajectory */
-  MultiComponentStateOnSurface makePerigee(
-    const EventContext& ctx,
-    Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectory& smoothedTrajectory,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const;
+ /** Produces a perigee from a smoothed trajectory */
+ GSFTsos makePerigee(
+     const EventContext& ctx,
+     Trk::IMultiStateExtrapolator::Cache&,
+     const GSFTrajectory& smoothedTrajectory,
+     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Progress one step along the fit */
-  bool stepForwardFit(
-    const EventContext& ctx,
-    IMultiStateExtrapolator::Cache&,
-    GSFTrajectory& forwardTrajectory,
-    const PrepRawData* originalPrepRawData,
-    const MeasurementBase* originalMeasurement,
-    const Surface& surface,
-    MultiComponentState& updatedState,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const;
+ /** Progress one step along the fit */
+ bool stepForwardFit(
+     const EventContext& ctx,
+     IMultiStateExtrapolator::Cache&,
+     GSFTrajectory& forwardTrajectory,
+     const PrepRawData* originalPrepRawData,
+     const MeasurementBase* originalMeasurement,
+     const Surface& surface,
+     MultiComponentState& updatedState,
+     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Forward GSF fit using PrepRawData */
-  GSFTrajectory forwardPRDfit(
-    const EventContext& ctx,
-    IMultiStateExtrapolator::Cache& cache,
-    const PrepRawDataSet& inputPrepRawDataSet,
-    const TrackParameters& estimatedTrackParametersNearOrigin,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const;
+ /** Forward GSF fit using PrepRawData */
+ GSFTrajectory forwardPRDfit(
+     const EventContext& ctx,
+     IMultiStateExtrapolator::Cache& cache,
+     const PrepRawDataSet& inputPrepRawDataSet,
+     const TrackParameters& estimatedTrackParametersNearOrigin,
+     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Forward GSF fit using MeasurementSet */
-  GSFTrajectory forwardMeasurementFit(
-    const EventContext& ctx,
-    IMultiStateExtrapolator::Cache& cache,
-    const MeasurementSet& inputMeasurementSet,
-    const TrackParameters& estimatedTrackParametersNearOrigin,
-    const ParticleHypothesis particleHypothesis = nonInteracting) const;
+ /** Forward GSF fit using MeasurementSet */
+ GSFTrajectory forwardMeasurementFit(
+     const EventContext& ctx,
+     IMultiStateExtrapolator::Cache& cache,
+     const MeasurementSet& inputMeasurementSet,
+     const TrackParameters& estimatedTrackParametersNearOrigin,
+     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
-  /** Gsf smoothed trajectory. This method can handle additional info like
-   * calorimeter cluster constraints. It also produces what we actually store in Trk::Tracks.*/
-  GSFTrajectory smootherFit(
-    const EventContext& ctx,
-    Trk::IMultiStateExtrapolator::Cache&,
-    const GSFTrajectory& forwardTrajectory,
-    const ParticleHypothesis particleHypothesis = nonInteracting,
-    const CaloCluster_OnTrack* ccot = nullptr) const;
+ /** Gsf smoothed trajectory. This method can handle additional info like
+  * calorimeter cluster constraints. It also produces what we actually store in
+  * Trk::Tracks.*/
+ GSFTrajectory smootherFit(
+     const EventContext& ctx,
+     Trk::IMultiStateExtrapolator::Cache&,
+     const GSFTrajectory& forwardTrajectory,
+     const ParticleHypothesis particleHypothesis = nonInteracting,
+     const CaloCluster_OnTrack* ccot = nullptr) const;
 
-  /** Methof to add the CaloCluster onto the track */
-  MultiComponentState addCCOT(
-    const EventContext& ctx,
-    const Trk::CaloCluster_OnTrack* ccot,
-    GSFTrajectory& smoothedTrajectory) const;
+ /** Methof to add the CaloCluster onto the track */
+ MultiComponentState addCCOT(const EventContext& ctx,
+           const Trk::CaloCluster_OnTrack* ccot,
+           GSFTrajectory& smoothedTrajectory) const;
 
- private:
-  ToolHandle<IMultiStateExtrapolator> m_extrapolator{
-    this,
-    "ToolForExtrapolation",
-    "Trk::GsfExtrapolator/GsfExtrapolator",
-    ""
-  };
-  ToolHandle<IRIO_OnTrackCreator> m_rioOnTrackCreator{
-    this,
-    "ToolForROTCreation",
-    "",
-    "Tool for converting Raw Data to measurements if we do not fit measurements directly"
-  };
+private:
+ ToolHandle<IMultiStateExtrapolator> m_extrapolator{
+     this,
+     "ToolForExtrapolation",
+     "Trk::GsfExtrapolator/GsfExtrapolator",
+      ""};
+ ToolHandle<IRIO_OnTrackCreator> m_rioOnTrackCreator{
+     this,
+     "ToolForROTCreation", "",
+     "Tool for converting Raw Data to measurements if we do not fit "
+     "measurements directly"};
 
-  Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
-    this,
-    "MaximumNumberOfComponents",
-    12,
-    "Maximum number of components"
-  };
+ Gaudi::Property<unsigned int> m_maximumNumberOfComponents{
+     this,
+     "MaximumNumberOfComponents",
+     12,
+     "Maximum number of components"};
 
-  Gaudi::Property<bool> m_reintegrateOutliers{ this,
-                                               "ReintegrateOutliers",
-                                               true,
-                                               "Reintegrate Outliers" };
+ Gaudi::Property<bool> m_reintegrateOutliers{
+   this,
+   "ReintegrateOutliers",
+   true,
+   "Reintegrate Outliers"};
 
-  Gaudi::Property<bool> m_refitOnMeasurementBase{ this,
-                                                  "RefitOnMeasurementBase",
-                                                  true,
-                                                  "Refit On Measurement Base" };
+ Gaudi::Property<bool> m_refitOnMeasurementBase{
+     this,
+     "RefitOnMeasurementBase",
+     true,
+     "Refit On Measurement Base"};
 
-  Gaudi::Property<bool> m_combineWithFitter{
-    this,
-    "CombineStateWithFitter",
-    false,
-    "Combine with forwards state during Smoothing"
-  };
+ Gaudi::Property<bool> m_combineWithFitter{
+     this,
+     "CombineStateWithFitter",
+     false,
+     "Combine with forwards state during Smoothing"};
 
-  Gaudi::Property<bool> m_useMode{
-    this,
-    "useMode",
-    true,
-    "Combine/Collapse MultiComponent State Mode rather than mean"
-  };
+ Gaudi::Property<bool> m_useMode{
+     this,
+     "useMode",
+     true,
+     "Combine/Collapse MultiComponent State Mode rather than mean"};
 
-  Gaudi::Property<bool> m_slimTransientMTSOS{
-    this,
-    "slimTransientMTSOS",
-    true,
-    "Slim the transient MTSOS . keeping just the combined state and not all components"
-  };
+ Gaudi::Property<bool> m_slimTransientMTSOS{
+     this,
+     "slimTransientMTSOS",
+     true,
+     "Slim the transient MTSOS . keeping just the combined state and not all "
+     "components"};
 
+ Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{
+     this,
+     "StateChi2PerNDOFCut",
+     50.,
+     "Cut on Chi2 per NDOF"};
 
-  Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{
-    this,
-    "StateChi2PerNDOFCut",
-    50.,
-    "Cut on Chi2 per NDOF"
-  };
+ PropDirection m_directionToPerigee;
+ TrkParametersComparisonFunction m_trkParametersComparisonFunction;
+ std::vector<double> m_sortingReferencePoint;
 
-  PropDirection m_directionToPerigee;
-  TrkParametersComparisonFunction m_trkParametersComparisonFunction;
-  std::vector<double> m_sortingReferencePoint;
-
-  // Counters for fit statistics
-  // Number of Fit PrepRawData Calls
-  mutable std::atomic<unsigned long int> m_FitPRD{};
-  // Number of Fit MeasurementBase Calls
-  mutable std::atomic<unsigned long int> m_FitMeasurementBase{};
-  // Number of Tracks that are successfull
-  mutable std::atomic<unsigned long int> m_fitSuccess{};
+ // Counters for fit statistics
+ // Number of Fit PrepRawData Calls
+ mutable std::atomic<unsigned long int> m_FitPRD{};
+ // Number of Fit MeasurementBase Calls
+ mutable std::atomic<unsigned long int> m_FitMeasurementBase{};
+ // Number of Tracks that are successfull
+ mutable std::atomic<unsigned long int> m_fitSuccess{};
 };
 
 } // end Trk namespace
+#endif
