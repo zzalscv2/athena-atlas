@@ -81,21 +81,8 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
    result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
    outputStream.MetadataStore = result.getService("MetaDataStore")
    outputStream.MetadataItemList += [
-      f"EventStreamInfo#{outputStreamName}",
       "IOVMetaDataContainer#*",
    ]
-
-   streamInfoTool = CompFactory.MakeEventStreamInfo(f"Stream{streamName}_MakeEventStreamInfo")
-   streamInfoTool.Key = outputStreamName
-   streamInfoTool.DataHeaderKey = outputStreamName
-   streamInfoTool.EventInfoKey = eventInfoKey
-   outputStream.HelperTools.append(streamInfoTool)
-
-   # Make EventFormat object
-   from xAODEventFormatCnv.EventFormatConfig import EventFormatCfg
-   result.merge(EventFormatCfg(flags,
-                               stream=outputStream,
-                               streamName=outputStreamName))
 
    # Support for MT thinning.
    thinningCacheTool = CompFactory.Athena.ThinningCacheTool(f"ThinningCacheTool_Stream{streamName}",

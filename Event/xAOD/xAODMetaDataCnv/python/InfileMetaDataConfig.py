@@ -68,6 +68,7 @@ def createLumiBlockMetaData(flags):
         ]
     return tools, result
 
+
 def createTriggerMenuMetaData(flags):
     tools = MetaDataHelperLists()
     result = ComponentAccumulator()
@@ -104,6 +105,7 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
     tools = MetaDataHelperLists()
     result = ComponentAccumulator()
     log = logging.getLogger("SetupMetaDataForStreamCfg")
+    outputStreamName = f"Stream{streamName}"
 
     if category == MetadataCategory.FileMetaData:
         tools.mdToolNames.append("xAODMaker::FileMetaDataTool")
@@ -113,14 +115,47 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
         ]
         tools.helperTools.append(
             CompFactory.xAODMaker.FileMetaDataCreatorTool(
-                f"Stream{streamName}_FileMetaDataCreatorTool",
+                f"{outputStreamName}_FileMetaDataCreatorTool",
                 OutputKey="FileMetaData",
-                StreamName=f"Stream{streamName}",
+                StreamName=outputStreamName,
             )
         )
+    elif category == MetadataCategory.EventStreamInfo:
+        esiTool = CompFactory.MakeEventStreamInfo(
+            f"{outputStreamName}_MakeEventStreamInfo",
+            Key=outputStreamName,
+            DataHeaderKey=outputStreamName,
+            EventInfoKey="EventInfo",
+        )
+        tools.mdItems += [
+            f"EventStreamInfo#{outputStreamName}",
+        ]
+        tools.helperTools.append(esiTool)
+
+        # copy EventStreamInfo for merging jobs
+        if kwargs.get("mergeJob", False):
+            tools.mdTools += [
+                CompFactory.CopyEventStreamInfo(
+                    f"{outputStreamName}_CopyEventStreamInfo"
+                ),
+            ]
+
+    elif category == MetadataCategory.EventFormat:
+        efTool = CompFactory.xAODMaker.EventFormatStreamHelperTool(
+            f"{outputStreamName}_EventFormatStreamHelperTool",
+            Key=f"EventFormat{outputStreamName}",
+            DataHeaderKey=outputStreamName,
+        )
+        tools.mdItems += [
+            f"xAOD::EventFormat#EventFormat{outputStreamName}",
+        ]
+        tools.helperTools.append(efTool)
+        tools.mdToolNames.append("xAODMaker::EventFormatMetaDataTool")
     elif category == MetadataCategory.CutFlowMetaData:
         if "CutBookkeepers" in flags.Input.MetadataItems:
-            from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowOutputList
+            from EventBookkeeperTools.EventBookkeeperToolsConfig import (
+                CutFlowOutputList,
+            )
 
             tools.mdToolNames.append("BookkeeperTool")
             tools.mdItems += CutFlowOutputList(flags)
@@ -202,15 +237,6 @@ def SetupMetaDataForStreamCfg(
             helperLists += lists
             result.merge(caConfig)
 
-        # copy EventStreamInfo for merging jobs
-        # TODO: add dedicated metadata category for EventStreamInfo
-        # and factor out MakeEventStreamInfo from OutputStreamConfig
-        if kwargs.get("mergeJob", False):
-            helperLists.mdTools += [
-                CompFactory.CopyEventStreamInfo(
-                    f"Stream{streamName}_CopyEventStreamInfo"
-                ),
-            ]
     for md in createMetadata:
         try:
             lists, caConfig = globals()[f"create{md.name}"](

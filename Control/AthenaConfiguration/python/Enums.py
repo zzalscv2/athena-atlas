@@ -96,6 +96,8 @@ class BunchStructureSource(FlagEnum):
 
 class MetadataCategory(FlagEnum):
     FileMetaData = auto()
+    EventStreamInfo = auto()
+    EventFormat = auto()
     CutFlowMetaData = auto()
     ByteStreamMetaData = auto()
     LumiBlockMetaData = auto()
