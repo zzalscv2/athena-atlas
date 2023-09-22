@@ -9,6 +9,7 @@
 #include "AthLinks/ElementLink.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "xAODTracking/SurfaceBackendContainer.h"
+#include "xAODTracking/TrackingPrimitives.h"
 
 namespace xAOD {
     using TrackStateIndexType=uint32_t; // TODO move this declaration to one location
@@ -33,11 +34,11 @@ namespace xAOD {
         const double* chi2Ptr() const;
         double* chi2Ptr();
 
-
         /**
          * @brief get path length of this track state
          */
         double pathLength() const;
+        
         /**
          * @brief set path length of this track state
          */
@@ -49,6 +50,16 @@ namespace xAOD {
         const double* pathLengthPtr() const;
         double* pathLengthPtr();
 
+        /**
+         * @brief Get the type of this track state.
+         * Clients will actually see Acts::TrackStateType, but no need for this here. 
+         */
+        uint64_t typeFlags() const;
+        
+        /**
+         * @brief Set the type of this track state.
+         */
+        void setTypeFlags(uint64_t);
 
         /**
          * @brief set the index of preceding TrackState 

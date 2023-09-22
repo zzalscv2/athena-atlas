@@ -10,6 +10,7 @@ namespace xAOD {
 
     DEFINE_API(TrackState_v1, double, chi2, setChi2)    
     DEFINE_API(TrackState_v1, double, pathLength, setPathLength)
+    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( TrackState_v1, uint64_t, typeFlags, setTypeFlags)
     DEFINE_API(TrackState_v1, TrackStateIndexType, previous, setPrevious)
     DEFINE_API(TrackState_v1, TrackStateIndexType, predicted, setPredicted)
     DEFINE_API(TrackState_v1, TrackStateIndexType, filtered, setFiltered)

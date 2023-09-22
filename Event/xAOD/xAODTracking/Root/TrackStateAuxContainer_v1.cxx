@@ -9,6 +9,7 @@ namespace xAOD {
     AUX_VARIABLE(previous);
     AUX_VARIABLE(chi2);
     AUX_VARIABLE(pathLength);
+    AUX_VARIABLE(typeFlags);
     AUX_VARIABLE(predicted);
     AUX_VARIABLE(filtered);
     AUX_VARIABLE(smoothed);

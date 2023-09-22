@@ -17,6 +17,8 @@ constexpr std::optional<bool> has_impl(
       return trackStates[istate]->chi2() < kInvalid;
     case "pathLength"_hash:
       return trackStates[istate]->pathLength() < kInvalid;
+    case "typeFlags"_hash:
+      return static_cast<IndexType>(trackStates[istate]->typeFlags()) < kInvalid;
     case "predicted"_hash:
       return trackStates[istate]->predicted() < kInvalid;
     case "filtered"_hash:
@@ -49,6 +51,7 @@ constexpr bool ActsTrk::MutableMultiTrajectory::hasColumn_impl(
     case "previous"_hash:
     case "chi2"_hash:
     case "pathLength"_hash:
+    case "typeFlags"_hash:
     case "predicted"_hash:
     case "filtered"_hash:
     case "smoothed"_hash:
