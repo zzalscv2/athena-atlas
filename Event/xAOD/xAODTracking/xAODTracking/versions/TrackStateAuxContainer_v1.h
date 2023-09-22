@@ -20,6 +20,7 @@ namespace xAOD {
         TrackStateAuxContainer_v1();
         std::vector<double> chi2;
         std::vector<double> pathLength;
+        std::vector< uint64_t > typeFlags;
         std::vector<TrackStateIndexType> previous;
         std::vector<TrackStateIndexType> predicted;
         std::vector<TrackStateIndexType> filtered;

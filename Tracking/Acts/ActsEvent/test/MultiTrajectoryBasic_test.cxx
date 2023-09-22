@@ -108,9 +108,9 @@ template <typename track_state_t>
 void fillTrackState(const TestTrackState &pc, TrackStatePropMask mask,
                     track_state_t &ts) {
   // always set the reference surface
-  // TODO
-  // referenceSurface component not implemented:
-  // ts.setReferenceSurface(pc.predicted.referenceSurface().getSharedPtr());
+  // BOOST_CHECK_EQUAL(ts.hasReferenceSurface(), false); This currently fails (!)
+  ts.setReferenceSurface(pc.predicted.referenceSurface().getSharedPtr());
+  BOOST_CHECK(ts.hasReferenceSurface());
 
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
     ts.predicted() = pc.predicted.parameters();
@@ -475,6 +475,7 @@ BOOST_FIXTURE_TEST_CASE(AddTrackStateWithBitMask, EmptyMTJ) {
     BOOST_CHECK(ts.template has<"measdim"_hash>());
     BOOST_CHECK(ts.template has<"chi2"_hash>());
     BOOST_CHECK(ts.template has<"pathLength"_hash>());
+    BOOST_CHECK(ts.template has<"typeFlags"_hash>());
   };
 
   auto ts = mtj->getTrackState(mtj->addTrackState(PM::All));
