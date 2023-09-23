@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PFlowCalibPFODecoratorAlgorithm.h"
@@ -28,7 +28,10 @@ StatusCode PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO(
     // retrieve calo cluster, first as the iparticle we retrieve then cast to calocluster ptr
     const xAOD::IParticle* FE_Iparticle=thisFE->otherObjects().at(0);
     const xAOD::CaloCluster* thisCaloCluster = dynamic_cast<const xAOD::CaloCluster*>(FE_Iparticle);
-    
+    if (not thisCaloCluster){
+       ATH_MSG_ERROR("Dynamic cast failed in PFlowCalibPFODecoratorAlgorithm::LinkCalibHitPFO");
+       return StatusCode::FAILURE;
+    }
     std::vector<std::pair<unsigned int, double > > newBarCodeTruthPairs;
     sc = m_truthAttributerTool->calculateTruthEnergies(*thisCaloCluster, m_numTruthParticles, *CalibHitReadHandle, newBarCodeTruthPairs);
     if (sc == StatusCode::FAILURE) return sc;
