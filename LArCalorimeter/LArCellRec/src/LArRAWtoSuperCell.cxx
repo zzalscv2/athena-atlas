@@ -32,6 +32,7 @@ LArRAWtoSuperCell::initialize()
 	ATH_CHECK(detStore()->retrieve(m_laronline_id,"LArOnline_SuperCellID"));
 	ATH_CHECK( m_caloMgrKey.initialize());
 	ATH_CHECK( m_bcContKey.initialize(SG::AllowEmpty) );
+	ATH_CHECK( m_maskedContKey.initialize(SG::AllowEmpty) );
         return StatusCode::SUCCESS;
 }
 
@@ -57,10 +58,15 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 	cabling=*cablingHdl;
 
 	const LArBadChannelCont* badchannel(nullptr);
-        if ( !m_bcContKey.empty() ){
+	const LArBadChannelCont* maskedchannel(nullptr);
+	if ( !m_bcContKey.empty() ){
         SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, context };
-	badchannel = *larBadChan;
-        }
+		badchannel = *larBadChan;
+	}
+	if ( !m_maskedContKey.empty() ){
+		SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_maskedContKey, context };
+		maskedchannel = *larBadChan;
+	}
         
         const LArRawSCContainer* scells_from_sg = cellsHandle.cptr();
         ATH_MSG_DEBUG("Got a CaloCellContainer input with size : "<<scells_from_sg->size());
@@ -105,7 +111,13 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		   if ( !bc.good() && bc.statusBad(LArBadChannel::LArBadChannelSCEnum::maskedOSUMBit) ){
 		     cell->setProvenance(cell->provenance()|0x80);
 		   }
-		   
+		}
+		// similarly for OTF-masked cells
+		if(maskedchannel) {
+			LArBadChannel bc = badchannel->offlineStatus(off_id);
+			if ( !bc.good() && bc.statusBad(LArBadChannel::LArBadChannelSCEnum::maskedOSUMBit) ){
+				cell->setProvenance(cell->provenance()|0x80);
+			}
 		}
 		// energy value selected in LArLATOMEDecoder to mean
 		// invalid channel. Converting it to a bit-wise representation
