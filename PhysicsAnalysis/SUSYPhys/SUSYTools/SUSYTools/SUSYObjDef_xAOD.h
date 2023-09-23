@@ -34,6 +34,7 @@
 // Container read handle
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "CxxUtils/checker_macros.h"
 
 // Configuration
 #include "TEnv.h"
@@ -45,6 +46,7 @@
 // Various uses in function arguments and parameters
 #include <string>
 #include <vector>
+#include <mutex>
 
 // Tool interfaces
 // Toolbox, which holds the tools
@@ -436,11 +438,13 @@ namespace ST {
 
     // These variables just cache decisions so it's OK to make them mutable
     // Store trigger emulation functions so they're only setup once
-    mutable std::map<std::string, std::function<bool()>> m_metTriggerFuncs;
+    mutable std::map<std::string, std::function<bool()>> m_metTriggerFuncs ATLAS_THREAD_SAFE;
     // Store whether the trigger was in the TDT
-    mutable std::map<std::string, bool> m_checkedTriggers;
+    mutable std::map<std::string, bool> m_checkedTriggers ATLAS_THREAD_SAFE;
+    mutable std::mutex m_triggerCacheMutex;
     bool emulateHLT(const std::string& triggerName) const;
-    bool isTrigInTDT(const std::string& triggerName) const;
+    bool isTrigInTDT(std::scoped_lock<std::mutex>& lock,
+                     const std::string& triggerName) const;
 
     //book trigger chains for matching
     std::vector<std::string> m_v_trigs15_cache_singleEle;
