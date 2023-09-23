@@ -5,7 +5,7 @@
   <class name="LArHVPathologiesDb" id="6C17B534-249B-4FBA-A4DE-F4CE28312D73" />
 
   <class name="LArBadChannelCont" />
-  <class name="CondCont<LArBadChannelCont>" />
+  <class name="CondContMixed<LArBadChannelCont>" />
 
   <class name="LArHVIdMapping" />
   <class name="CondCont<LArHVIdMapping>" />
