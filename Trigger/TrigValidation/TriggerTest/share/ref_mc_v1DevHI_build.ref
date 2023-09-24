@@ -185,37 +185,37 @@ HLT_e15_lhloose_nogsf_ion_L1eEM15:
     4: 37
     5: 5
 HLT_e15_lhmedium_nogsf_ion_L1EM12:
-  eventCount: 2
+  eventCount: 5
   stepCounts:
     0: 19
     1: 19
     2: 19
     3: 17
     4: 17
-    5: 2
+    5: 5
   stepFeatures:
     0: 50
     1: 50
     2: 234
     3: 33
     4: 33
-    5: 2
+    5: 5
 HLT_e15_lhmedium_nogsf_ion_L1eEM15:
-  eventCount: 2
+  eventCount: 5
   stepCounts:
     0: 18
     1: 18
     2: 18
     3: 16
     4: 16
-    5: 2
+    5: 5
   stepFeatures:
     0: 44
     1: 44
     2: 197
     3: 37
     4: 37
-    5: 2
+    5: 5
 HLT_e15_loose_nogsf_ion_L1EM12:
   eventCount: 6
   stepCounts:
@@ -309,21 +309,21 @@ HLT_e18_lhloose_nogsf_ion_L1EM15:
     4: 27
     5: 4
 HLT_e18_lhmedium_nogsf_ion_L1EM15:
-  eventCount: 1
+  eventCount: 4
   stepCounts:
     0: 17
     1: 17
     2: 17
     3: 14
     4: 14
-    5: 1
+    5: 4
   stepFeatures:
     0: 35
     1: 35
     2: 153
     3: 27
     4: 27
-    5: 1
+    5: 4
 HLT_e18_loose_nogsf_ion_L1EM15:
   eventCount: 5
   stepCounts:
@@ -437,37 +437,37 @@ HLT_e20_lhloose_nogsf_ion_L1eEM18:
     4: 28
     5: 4
 HLT_e20_lhmedium_nogsf_ion_L1EM15:
-  eventCount: 1
+  eventCount: 4
   stepCounts:
     0: 17
     1: 17
     2: 17
     3: 14
     4: 14
-    5: 1
+    5: 4
   stepFeatures:
     0: 33
     1: 33
     2: 145
     3: 27
     4: 27
-    5: 1
+    5: 4
 HLT_e20_lhmedium_nogsf_ion_L1eEM18:
-  eventCount: 1
+  eventCount: 4
   stepCounts:
     0: 17
     1: 17
     2: 17
     3: 14
     4: 14
-    5: 1
+    5: 4
   stepFeatures:
     0: 35
     1: 35
     2: 155
     3: 28
     4: 28
-    5: 1
+    5: 4
 HLT_e20_loose_nogsf_ion_L1EM15:
   eventCount: 5
   stepCounts:
