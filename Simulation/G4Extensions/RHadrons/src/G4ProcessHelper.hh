@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHADRONS_G4PROCESSHELPER_HH
@@ -42,10 +42,10 @@ protected:
 
 private:
 
-  G4ParticleDefinition* theProton;
-  G4ParticleDefinition* theNeutron;
-  G4ParticleDefinition* theRmesoncloud;
-  G4ParticleDefinition* theRbaryoncloud;
+  void ReadAndParse(const G4String& str,
+                    std::vector<G4String>& tokens,
+                    const G4String& delimiters = " ") const;
+  void ReadInPhysicsParameters(std::map<G4String,G4double>&  parameters) const;
 
   // Version where we know if we baryonize already
   ReactionProduct GetFinalStateInternal(const G4Track& aTrack,G4ParticleDefinition*& aTarget, const bool baryonize_failed) const;
@@ -59,15 +59,14 @@ private:
 
   G4bool ReactionIsPossible(const ReactionProduct& aReaction,const G4ParticleDefinition& aTarget,const G4DynamicParticle* aDynamicParticle) const;
   G4bool ReactionGivesBaryon(const ReactionProduct& aReaction) const;
-  void ReadAndParse(const G4String& str,
-                    std::vector<G4String>& tokens,
-                    const G4String& delimiters = " ");
+
+  G4ParticleDefinition* theProton{};
+  G4ParticleDefinition* theNeutron{};
+  G4ParticleDefinition* theRmesoncloud{};
+  G4ParticleDefinition* theRbaryoncloud{};
 
   //Map of applicable particles
   std::map<const G4ParticleDefinition*,G4bool> known_particles;
-
-  //Map for physics parameters, name to value
-  std::map<G4String,G4double> parameters;
 
   //The parameters themselves
   bool resonant;
@@ -87,7 +86,7 @@ private:
   //Neutron-scattering processes
   ReactionMap nReactionMap;
 
-  G4ParticleTable* particleTable;
+  G4ParticleTable* particleTable{};
 
 };
 #endif // RHADRONS_G4PROCESSHELPER_HH

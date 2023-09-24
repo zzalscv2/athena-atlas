@@ -49,11 +49,9 @@ def TrigSPTRK(configFlags, highGranularity=False):
 
     allChains = getHLTMenuAccess(configFlags)
     detailed = ["HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED"]
-    detailed += [c for c in allChains if 'HLT_mb_sp_pix' in c]
-    detailed += [c for c in allChains if 'HLT_mb_sp_vpix' in c]
-    detailed += [c for c in allChains if 'HLT_mb_sp_nototpix' in c]
+    detailed += [c for c in allChains if 'HLT_mb' in c and 'pix' in c]
     detailed += [c for c in allChains if 'HLT_mb_sp' in c and '_hmt_' in c]
-    alg.triggerListSpacePointsMon = detailed
+    alg.triggerListSpacePointsMon = list(set(detailed))  # Remove duplicates
 
     for chain in alg.triggerListTrackingMon:
         mbEffGroup = monConfig.addGroup(alg, chain + "_Tracking", topPath="HLT/MinBiasMon/Tracking/" + chain + "/")
@@ -120,12 +118,13 @@ def TrigSPTRK(configFlags, highGranularity=False):
             chain + "_SpacePoints",
             topPath="HLT/MinBiasMon/SpacePoints/" + chain + "/",
         )
-        mbSpGroup.defineHistogram( "PixelCL;PixelCLNarrowRange", title="Number of SP in whole Pixels detector for all events", xbins=200, xmin=0, xmax=100 )
+        mbSpGroup.defineHistogram( "PixelCL;PixelCLNarrowRange", title="Number of SP in whole Pixels detector for all events", xbins=100, xmin=0, xmax=100 )
         mbSpGroup.defineHistogram( "PixelCL;PixelCLWideRange", title="Number of SP in whole Pixels detector for all events", xbins=250, xmin=0, xmax=5000 )
         mbSpGroup.defineHistogram( "PixBarr_SP", title="Number of SP for all events in Barrel", xbins=250, xmin=0, xmax=5000 )
         mbSpGroup.defineHistogram( "PixECA_SP", title="Number of SP for all events in ECA", xbins=250, xmin=0, xmax=500 )
         mbSpGroup.defineHistogram( "PixECC_SP", title="Number of SP for all events in ECC", xbins=250, xmin=0, xmax=500 )
-        mbSpGroup.defineHistogram( "SctTot", title="Number of SP in whole SCT detector for all events", xbins=250, xmin=0, xmax=5000 )
+        mbSpGroup.defineHistogram( "SctTot;SctTotNarrowRange", title="Number of SP in whole SCT detector for all events", xbins=100, xmin=0, xmax=100 )
+        mbSpGroup.defineHistogram( "SctTot;SctTotWideRange", title="Number of SP in whole SCT detector for all events", xbins=250, xmin=0, xmax=5000 )
         mbSpGroup.defineHistogram( "SctBarr_SP", title="Number of SCT_SP for all events in Barrel", xbins=250, xmin=0, xmax=5000 )
         mbSpGroup.defineHistogram( "SctECA_SP", title="Number of SCT_SP for all events in ECA", xbins=250, xmin=0, xmax=5000 )
         mbSpGroup.defineHistogram( "SctECC_SP", title="Number of SCT_SP for all events in ECC", xbins=250, xmin=0, xmax=5000 )

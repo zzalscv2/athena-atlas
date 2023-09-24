@@ -73,7 +73,7 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("RpdEndSignalSample", m_rpdEndSignalSample = 0); // 0 -> go to end of sample...there may be a more elegant solution
     declareProperty("RpdNominalBaseline", m_rpdNominalBaseline = 100);
     declareProperty("RpdPileup1stDerivThresh", m_rpdPileup1stDerivThresh = 14);
-    declareProperty("RpdADCoverflow", m_rpdADCoverflow = 4096);
+    declareProperty("RpdAdcOverflow", m_rpdAdcOverflow = 4096);
 
     declareProperty("LHCRun", m_LHCRun = 3);
 
@@ -291,7 +291,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   rpdConfig.endSignalSample = m_rpdEndSignalSample;
   rpdConfig.nominalBaseline = m_rpdNominalBaseline;
   rpdConfig.pileup1stDerivThresh = m_rpdPileup1stDerivThresh;
-  rpdConfig.ADCoverflow = m_rpdADCoverflow;
+  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
   m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig));
   m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig));
 
@@ -392,7 +392,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   rpdConfig.endSignalSample = m_rpdEndSignalSample;
   rpdConfig.nominalBaseline = m_rpdNominalBaseline;
   rpdConfig.pileup1stDerivThresh = m_rpdPileup1stDerivThresh;
-  rpdConfig.ADCoverflow = m_rpdADCoverflow;
+  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
   m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig));
   m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig));
 
@@ -496,7 +496,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   rpdConfig.endSignalSample = m_rpdEndSignalSample;
   rpdConfig.nominalBaseline = m_rpdNominalBaseline;
   rpdConfig.pileup1stDerivThresh = m_rpdPileup1stDerivThresh;
-  rpdConfig.ADCoverflow = m_rpdADCoverflow;
+  rpdConfig.AdcOverflow = m_rpdAdcOverflow;
   m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdA", rpdConfig));
   m_rpdDataAnalyzer.push_back(std::make_unique<RPDDataAnalyzer>(MakeMessageFunction(), "rpdC", rpdConfig));
   
@@ -1205,10 +1205,18 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_CHECK( m_zdcModuleMinDeriv2nd.initialize());
     m_zdcModuleMaxADC = m_zdcModuleContainerName+".MaxADC"+m_auxSuffix;
     ATH_CHECK( m_zdcModuleMaxADC.initialize());
+    m_rpdChannelBaseline = m_zdcModuleContainerName+".RPDChannelBaseline"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelBaseline.initialize());
+    m_rpdChannelPileupFitParams = m_zdcModuleContainerName+".RPDChannelPileupFitParams"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelPileupFitParams.initialize());
     m_rpdChannelAmplitude = m_zdcModuleContainerName+".RPDChannelAmplitude"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelAmplitude.initialize());
     m_rpdChannelAmplitudeCalib = m_zdcModuleContainerName+".RPDChannelAmplitudeCalib"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelAmplitudeCalib.initialize());
+    m_rpdChannelMaxAdc = m_zdcModuleContainerName+".RPDChannelMaxADC"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelMaxAdc.initialize());
+    m_rpdChannelMaxAdcCalib = m_zdcModuleContainerName+".RPDChannelMaxADCCalib"+m_auxSuffix;
+    ATH_CHECK( m_rpdChannelMaxAdcCalib.initialize());
     m_rpdChannelMaxSample = m_zdcModuleContainerName+".RPDChannelMaxSample"+m_auxSuffix;
     ATH_CHECK( m_rpdChannelMaxSample.initialize());
     m_rpdChannelStatus = m_zdcModuleContainerName+".RPDChannelStatus"+m_auxSuffix;
@@ -1464,8 +1472,12 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModulePresample(m_zdcModulePresample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMinDeriv2nd(m_zdcModuleMinDeriv2nd);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelBaseline(m_rpdChannelBaseline);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,std::vector<float>> rpdChannelPileupFitParams(m_rpdChannelPileupFitParams);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitude(m_rpdChannelAmplitude);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelAmplitudeCalib(m_rpdChannelAmplitudeCalib);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxAdc(m_rpdChannelMaxAdc);
+    SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelMaxAdcCalib(m_rpdChannelMaxAdcCalib);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelMaxSample(m_rpdChannelMaxSample);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> rpdChannelStatus(m_rpdChannelStatus);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> rpdChannelPileupFrac(m_rpdChannelPileupFrac);
@@ -1492,9 +1504,13 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
           // this is the RPD
           if (m_writeAux) {
             int rpdChannel = zdcModule->zdcChannel(); // channel numbers are fixed in mapping, numbered 0-15
-	    rpdChannelAmplitude(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumADC(rpdChannel);
-	    rpdChannelAmplitudeCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumADCcalib(rpdChannel);
-	    rpdChannelMaxSample(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxADCSample(rpdChannel);
+	    rpdChannelBaseline(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChBaseline(rpdChannel);
+	    rpdChannelPileupFitParams(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChPileupFitParams(rpdChannel);
+	    rpdChannelAmplitude(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumAdc(rpdChannel);
+	    rpdChannelAmplitudeCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChSumAdcCalib(rpdChannel);
+	    rpdChannelMaxAdc(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdc(rpdChannel);
+	    rpdChannelMaxAdcCalib(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxAdcCalib(rpdChannel);
+	    rpdChannelMaxSample(*zdcModule) = m_rpdDataAnalyzer.at(side)->getChMaxSample(rpdChannel);
 	    rpdChannelStatus(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChStatus(rpdChannel);
 	    rpdChannelPileupFrac(*zdcModule) =  m_rpdDataAnalyzer.at(side)->getChPileupFrac(rpdChannel);
           }

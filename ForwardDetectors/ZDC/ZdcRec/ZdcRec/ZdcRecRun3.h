@@ -72,12 +72,8 @@ private:
 	SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
 	  { this, "ZdcSumContainerName", "ZdcSums", "" };
 
-        SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
-	  this, "EventInfoKey", "EventInfo",
-	  "Location of the event info."};
-
-        // SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_robBCIDKey {
-	//   this, "ROBBCIDKey", "", "BCID from LUCROD ROB headers"};
+        SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "EventInfoKey", "EventInfo","Location of the event info."};
+	SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", "EventInfo.forwardDetFlags", "Key for EventInfo decoration object"};  
   
 	SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcEventType{this, "ZdcEventTypeKey", "", "ZDC event Type"};
 

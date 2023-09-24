@@ -15,7 +15,7 @@ Offline configurations are available here:
 """ Importing all read/write "DataHandles" static classes """
 from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys  import getTrigEgammaKeys
 TrigEgammaKeys = getTrigEgammaKeys()
-from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEMClusterTool, TrigEMTrackMatchBuilder, TrigEMShowerBuilder, TrigEgammaDecorationTools
+from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigEMClusterTool, TrigEMTrackMatchBuilder, TrigEMShowerBuilder, TrigEgammaDecorationTools, TrigEMShowerBuilder_HI
 from TriggerMenuMT.HLT.Egamma.TrigEgammaMVACalibFactories import trigPrecEgammaMVASvc
 
 """ Importing all the tool components """
@@ -64,6 +64,23 @@ def TrigTopoEgammaElectronCfg(name='topoEgammaBuilder_TrigElectrons'):
             PhotonOutputName = TrigEgammaKeys.precisionPhotonContainer,  
             EMClusterTool = TrigEMClusterTool("_Electron"),
             EMShowerTool=TrigEMShowerBuilder,
+            egammaTools = FcnWrapper(TrigEgammaDecorationTools),
+            doAdd = False,
+            doPhotons = False,
+            doElectrons = True,
+            )
+    return TrigTopoEgammaElectron()
+
+def TrigTopoEgammaElectronCfg_HI(name='topoEgammaBuilder_TrigElectrons'):
+    mlog = logging.getLogger(__name__)
+    mlog.info('Starting configuration')
+    TrigTopoEgammaElectron = AlgFactory( egammaAlgsConf.xAODEgammaBuilder, name = name+'HI',
+            InputElectronRecCollectionName = TrigEgammaKeys.precisionElectronSuperClusterRecCollection,
+            InputPhotonRecCollectionName = TrigEgammaKeys.precisionPhotonSuperClusterRecCollection,
+            ElectronOutputName = TrigEgammaKeys.precisionElectronContainer,
+            PhotonOutputName = TrigEgammaKeys.precisionPhotonContainer,
+            EMClusterTool = TrigEMClusterTool("_Electron"),
+            EMShowerTool=TrigEMShowerBuilder_HI,
             egammaTools = FcnWrapper(TrigEgammaDecorationTools),
             doAdd = False,
             doPhotons = False,

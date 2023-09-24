@@ -9,6 +9,8 @@
 // class header include
 #include "ISF_FastCaloSimEvent/TFCSGANEtaSlice.h"
 
+#include "ISF_FastCaloSimEvent/TFCSNetworkFactory.h"
+
 #include "CLHEP/Random/RandGauss.h"
 
 #include "TFitResult.h"
@@ -26,32 +28,38 @@ TFCSGANEtaSlice::TFCSGANEtaSlice() {}
 
 TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax,
                                  const TFCSGANXMLParameters &param)
-  : m_pid (pid),
-    m_etaMin (etaMin),
-    m_etaMax (etaMax),
-    m_param (param)
-{
-}
+    : m_pid(pid), m_etaMin(etaMin), m_etaMax(etaMax), m_param(param) {}
 
 TFCSGANEtaSlice::~TFCSGANEtaSlice() {
-  if (m_gan_all != nullptr) {
-    delete m_gan_all;
-  }
-  if (m_gan_low != nullptr) {
-    delete m_gan_low;
-  }
-  if (m_gan_high != nullptr) {
-    delete m_gan_high;
-  }
+  // Deleting a nullptr is a noop
+  delete m_gan_all;
+  delete m_gan_low;
+  delete m_gan_high;
+}
+
+VNetworkBase *TFCSGANEtaSlice::GetNetAll() const {
+  if (m_net_all != nullptr)
+    return m_net_all.get();
+  return m_gan_all;
+}
+VNetworkBase *TFCSGANEtaSlice::GetNetLow() const {
+  if (m_net_low != nullptr)
+    return m_net_low.get();
+  return m_gan_low;
+}
+VNetworkBase *TFCSGANEtaSlice::GetNetHigh() const {
+  if (m_net_high != nullptr)
+    return m_net_high.get();
+  return m_gan_high;
 }
 
 bool TFCSGANEtaSlice::IsGanCorrectlyLoaded() const {
   if (m_pid == 211 || m_pid == 2212) {
-    if (m_gan_all == nullptr) {
+    if (GetNetAll() == nullptr) {
       return false;
     }
   } else {
-    if (m_gan_high == nullptr || m_gan_low == nullptr) {
+    if (GetNetHigh() == nullptr || GetNetLow() == nullptr) {
       return false;
     }
   }
@@ -59,43 +67,47 @@ bool TFCSGANEtaSlice::IsGanCorrectlyLoaded() const {
 }
 
 bool TFCSGANEtaSlice::LoadGAN() {
+  // Now load new data
   std::string inputFileName;
 
   CalculateMeanPointFromDistributionOfR();
   ExtractExtrapolatorMeansFromInputs();
 
+  bool success = true;
+
   if (m_pid == 211) {
     inputFileName = m_param.GetInputFolder() + "/neural_net_" +
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_All.json";
+                    "_" + std::to_string(m_etaMax) + "_All.*";
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
-    m_gan_all = new TFCSGANLWTNNHandler();
-    return m_gan_all->LoadGAN(inputFileName);
+    m_net_all = TFCSNetworkFactory::create(inputFileName);
+    if (m_net_all == nullptr)
+      success = false;
   } else if (m_pid == 2212) {
     inputFileName = m_param.GetInputFolder() + "/neural_net_" +
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_High10.json";
+                    "_" + std::to_string(m_etaMax) + "_High10.*";
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
-    m_gan_all = new TFCSGANLWTNNHandler();
-    return m_gan_all->LoadGAN(inputFileName);
+    m_net_all = TFCSNetworkFactory::create(inputFileName);
+    if (m_net_all == nullptr)
+      success = false;
   } else {
-    bool returnValue;
     inputFileName = m_param.GetInputFolder() + "/neural_net_" +
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_High12.json";
-    m_gan_high = new TFCSGANLWTNNHandler();
-    returnValue = m_gan_high->LoadGAN(inputFileName);
-    if (!returnValue) {
-      return returnValue;
-    }
+                    "_" + std::to_string(m_etaMax) + "_High12.*";
+    ATH_MSG_DEBUG("Gan input file name " << inputFileName);
+    m_net_high = TFCSNetworkFactory::create(inputFileName);
+    if (m_net_high == nullptr)
+      success = false;
 
     inputFileName = m_param.GetInputFolder() + "/neural_net_" +
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_UltraLow12.json";
-    m_gan_low = new TFCSGANLWTNNHandler();
-    return m_gan_low->LoadGAN(inputFileName);
-    return true;
+                    "_" + std::to_string(m_etaMax) + "_UltraLow12.*";
+    m_net_low = TFCSNetworkFactory::create(inputFileName);
+    if (m_net_low == nullptr)
+      success = false;
   }
+  return success;
 }
 
 void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
@@ -106,7 +118,7 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
   ATH_MSG_DEBUG("Opening file " << rootFileName);
   TFile *file = TFile::Open(rootFileName.c_str(), "read");
   for (int layer : m_param.GetRelevantLayers()) {
-    ATH_MSG_DEBUG("Layer " << layer);
+    ATH_MSG_VERBOSE("Layer " << layer);
     TFCSGANXMLParameters::Binning binsInLayers = m_param.GetBinning();
     TH2D *h2 = &binsInLayers[layer];
 
@@ -119,7 +131,7 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
 
     TAxis *x = (TAxis *)h2->GetXaxis();
     for (int ix = 1; ix <= h2->GetNbinsX(); ++ix) {
-      ATH_MSG_DEBUG(ix);
+      ATH_MSG_VERBOSE(ix);
       h1->GetXaxis()->SetRangeUser(x->GetBinLowEdge(ix), x->GetBinUpEdge(ix));
 
       double result = 0;
@@ -151,12 +163,12 @@ void TFCSGANEtaSlice::ExtractExtrapolatorMeansFromInputs() {
     std::string command = branchName + ">>h";
     tree->Draw(command.c_str());
     m_extrapolatorWeights[layer] = h->GetMean();
-    ATH_MSG_DEBUG("Extrapolation: layer " << layer << " mean "
-                                          << m_extrapolatorWeights[layer]);
+    ATH_MSG_VERBOSE("Extrapolation: layer " << layer << " mean "
+                                            << m_extrapolatorWeights[layer]);
   }
 }
 
-TFCSGANEtaSlice::NetworkOutputs
+VNetworkBase::NetworkOutputs
 TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
                                    const TFCSExtrapolationState *extrapol,
                                    TFCSSimulationState simulstate) const {
@@ -192,7 +204,7 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
 
   for (int i = 0; i < m_param.GetLatentSpaceSize(); i++) {
     randUniformZ = CLHEP::RandGauss::shoot(simulstate.randomEngine(), 0.5, 0.5);
-    inputs["node_0"].insert(std::pair<std::string, double>(
+    inputs["Noise"].insert(std::pair<std::string, double>(
         "variable_" + std::to_string(i), randUniformZ));
   }
 
@@ -202,35 +214,43 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
   //                truth->P() <<" mass:" << truth->M() <<" Ekin_off:" <<
   //                truth->Ekin_off() << " Ekin_min:"<<Ekin_min<<"
   //                Ekin_max:"<<Ekin_max);
-  // inputs["node_1"].insert ( std::pair<std::string,double>("variable_0",
+  // inputs["mycond"].insert ( std::pair<std::string,double>("variable_0",
   // truth->Ekin()/(std::pow(2,maxExp))) ); //Old conditioning using linear
   // interpolation, now use logaritminc interpolation
-  inputs["node_1"].insert(std::pair<std::string, double>(
+  inputs["mycond"].insert(std::pair<std::string, double>(
       "variable_0", log(truth->Ekin() / Ekin_min) / log(Ekin_max / Ekin_min)));
 
   if (m_param.GetGANVersion() >= 2) {
     if (false) { // conditioning on eta, should only be needed in transition
                  // regions and added only to the GANs that use it, for now all
                  // GANs have 3 conditioning inputs so filling zeros
-      inputs["node_1"].insert(std::pair<std::string, double>(
+      inputs["mycond"].insert(std::pair<std::string, double>(
           "variable_1", fabs(extrapol->CaloSurface_eta())));
     } else {
-      inputs["node_1"].insert(std::pair<std::string, double>("variable_1", 0));
+      inputs["mycond"].insert(std::pair<std::string, double>("variable_1", 0));
     }
   }
 
+  VNetworkBase::NetworkOutputs outputs;
   if (m_param.GetGANVersion() == 1 || m_pid == 211 || m_pid == 2212) {
-    return m_gan_all->GetGraph()->compute(inputs);
+    outputs = GetNetAll()->compute(inputs);
   } else {
     if (truth->P() >
         4096) { // This is the momentum, not the energy, because the split is
                 // based on the samples which are produced with the momentum
       ATH_MSG_DEBUG("Computing outputs given inputs for high");
-      return m_gan_high->GetGraph()->compute(inputs);
+      outputs = GetNetHigh()->compute(inputs);
     } else {
-      return m_gan_low->GetGraph()->compute(inputs);
+      outputs = GetNetLow()->compute(inputs);
     }
   }
+  ATH_MSG_DEBUG("Start Network inputs ~~~~~~~~");
+  ATH_MSG_DEBUG(VNetworkBase::representNetworkInputs(inputs, 10000));
+  ATH_MSG_DEBUG("End Network inputs ~~~~~~~~");
+  ATH_MSG_DEBUG("Start Network outputs ~~~~~~~~");
+  ATH_MSG_DEBUG(VNetworkBase::representNetworkOutputs(outputs, 10000));
+  ATH_MSG_DEBUG("End Network outputs ~~~~~~~~");
+  return outputs;
 }
 
 void TFCSGANEtaSlice::Print() const {

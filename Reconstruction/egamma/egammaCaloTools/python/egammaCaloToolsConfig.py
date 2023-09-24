@@ -24,9 +24,9 @@ def egammaCheckEnergyDepositToolcfg(
     flags, name="egammaCheckEnergyDepositTool", **kwargs
 ):
     result = ComponentAccumulator()
-    kwargs.setdefault("ThrE2min", 50 if not flags.Egamma.doLowMu else 20)
+    kwargs.setdefault("ThrE2min", 50)
     kwargs.setdefault("ThrF0max", 0.9)
-    kwargs.setdefault("ThrF1max", 0.9 if not flags.Egamma.doLowMu else 0.95)
+    kwargs.setdefault("ThrF1max", 0.9)
     kwargs.setdefault("ThrF2max", 0.999)
     kwargs.setdefault("ThrF3max", 0.8)
     result.setPrivateTools(CompFactory.egammaCheckEnergyDepositTool(name, **kwargs))
@@ -37,11 +37,12 @@ def egammaCaloClusterSelectorGSFCfg(flags, name="caloClusterGSFSelector", **kwar
     result = ComponentAccumulator()
 
     if "egammaCheckEnergyDepositTool" not in kwargs:
-        kwargs["egammaCheckEnergyDepositTool"] = result.popToolsAndMerge(
-            egammaCheckEnergyDepositToolcfg(flags)
-        )
+        if not flags.Egamma.doLowMu:
+            kwargs["egammaCheckEnergyDepositTool"] = result.popToolsAndMerge(
+                egammaCheckEnergyDepositToolcfg(flags)
+            )
 
-    kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 400.0)
+    kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 300.0)
     kwargs.setdefault("EMEtSplittingFraction", 0.7)
     kwargs.setdefault("EMFCut", 0.5)
     kwargs.setdefault("CellContainerName", flags.Egamma.Keys.Input.CaloCells)
@@ -53,10 +54,11 @@ def egammaCaloClusterSelectorCfg(flags, name="caloClusterROISelector", **kwargs)
     result = ComponentAccumulator()
 
     if "egammaCheckEnergyDepositTool" not in kwargs:
-        kwargs["egammaCheckEnergyDepositTool"] = result.popToolsAndMerge(
-            egammaCheckEnergyDepositToolcfg(flags)
-        )
-    kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 400.0)
+        if not flags.Egamma.doLowMu:
+            kwargs["egammaCheckEnergyDepositTool"] = result.popToolsAndMerge(
+                egammaCheckEnergyDepositToolcfg(flags)
+            )
+    kwargs.setdefault("EMEtCut", 2250.0 if not flags.Egamma.doLowMu else 300.0)
     kwargs.setdefault("EMEtSplittingFraction", 0.7)
     kwargs.setdefault("EMFCut", 0.7)
     kwargs.setdefault("RetaCut", 0.65 if not flags.Egamma.doLowMu else 0.0)

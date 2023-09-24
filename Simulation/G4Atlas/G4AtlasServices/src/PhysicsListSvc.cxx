@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhysicsListSvc.h"
@@ -70,14 +70,57 @@ void PhysicsListSvc::CreatePhysicsList()
   //   these as separate functions lets someone who is inheriting from this use
   //   them...
 
+  // sort m_phys_option list
+  std::vector<IPhysicsOptionTool*> sortedPhysicsOptions;
+  sortedPhysicsOptions.reserve(m_phys_option.size());
+  // Manually sorting ToolHandleArray
+  {
+    // BSM Physics
+    for (auto& physOptTool: m_phys_option) {
+      if (physOptTool->GetOptionType() == G4AtlasPhysicsOption::Type::BSMPhysics) {
+        sortedPhysicsOptions.push_back(&*physOptTool);
+      }
+    }
+
+    // Add particles from the PDG Table not currently known to Geant4
+    for (auto& physOptTool: m_phys_option) {
+      if (physOptTool->GetOptionType() == G4AtlasPhysicsOption::Type::QS_ExtraParticles) {
+        sortedPhysicsOptions.push_back(&*physOptTool);
+      }
+    }
+
+    // Add MSC and Ionisation processes for specific particles (possibly merge with the next one?)
+    for (auto& physOptTool: m_phys_option) {
+      if (physOptTool->GetOptionType() == G4AtlasPhysicsOption::Type::QS_ExtraProc) {
+        sortedPhysicsOptions.push_back(&*physOptTool);
+      }
+    }
+
+    // G4StepLimitation, LUCID Op Process, TRT XTR process
+    for (auto& physOptTool: m_phys_option) {
+      if (physOptTool->GetOptionType() == G4AtlasPhysicsOption::Type::GlobalProcesses) {
+        sortedPhysicsOptions.push_back(&*physOptTool);
+      }
+    }
+
+    // Unknown
+    for (auto& physOptTool: m_phys_option) {
+      if (physOptTool->GetOptionType() == G4AtlasPhysicsOption::Type::UnknownType) {
+        ATH_MSG_ERROR(physOptTool->name() << "set as UnknownType. This tool will not be used to modify the physics list of this job.");
+      }
+    }
+  }
+
   //Register physics options to the G4VModularPhysicsList
-  for (auto& physOptTool: m_phys_option)
+  for (auto& physOptTool: sortedPhysicsOptions)
     {
+      ATH_MSG_DEBUG("Registering " << physOptTool->name());
       m_physicsList->RegisterPhysics(physOptTool->GetPhysicsOption());
     }
   //Register decays to the G4VModularPhysicsList
   for (auto& physDecayTool: m_phys_decay)
     {
+      ATH_MSG_DEBUG("Registering " << physDecayTool->name());
       m_physicsList->RegisterPhysics(physDecayTool->GetPhysicsOption());
     }
 

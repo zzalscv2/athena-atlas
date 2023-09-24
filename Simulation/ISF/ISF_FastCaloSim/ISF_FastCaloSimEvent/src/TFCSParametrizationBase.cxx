@@ -57,8 +57,8 @@ void TFCSParametrizationBase::Print(Option_t *option) const {
   optprint.ReplaceAll("short", "");
 
   if (longprint) {
-    ATH_MSG_INFO(optprint << GetTitle() << " (" << IsA()->GetName() << "*)"
-                          << this);
+    ATH_MSG_DEBUG(optprint << GetTitle() << " (" << IsA()->GetName() << "*)"
+                           << this);
     ATH_MSG(INFO) << optprint << "  PDGID: ";
     if (is_match_all_pdgid()) {
       ATH_MSG(INFO) << "all";

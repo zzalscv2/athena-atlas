@@ -82,8 +82,10 @@ def AthenaMonitoringCfg(flags):
         #Need to create links between global FE, created in jet finding, and other objects
         #MET monitoring will need these in some workflows (but not in tier0ESD)
         if flags.DQ.Environment != 'tier0ESD':
-            from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg            
-            result.merge(PFGlobalFlowElementLinkingCfg(flags))
+            # Only run PFlow linking for ion runs in UPC mode
+            if not flags.Reco.EnableHI or (flags.Reco.EnableHI and flags.Tracking.doUPC) :
+                from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+                result.merge(PFGlobalFlowElementLinkingCfg(flags))
         
     if flags.DQ.Steering.doJetInputsMon:
         info('Set up Jet Inputs monitoring')

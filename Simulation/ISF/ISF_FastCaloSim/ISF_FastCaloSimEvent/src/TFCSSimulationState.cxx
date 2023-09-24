@@ -48,10 +48,10 @@ void TFCSSimulationState::Print(Option_t *) const {
   if (!m_AuxInfo.empty()) {
     ATH_MSG_INFO("  AuxInfo has " << m_AuxInfo.size() << " elements");
     for (const auto &a : m_AuxInfo) {
-      ATH_MSG_INFO("    " << a.first << " : bool=" << a.second.b
-                          << " char=" << a.second.c << " int=" << a.second.i
-                          << " float=" << a.second.f << " double=" << a.second.d
-                          << " void*=" << a.second.p);
+      ATH_MSG_DEBUG("    " << a.first << " : bool=" << a.second.b
+                           << " char=" << a.second.c << " int=" << a.second.i
+                           << " float=" << a.second.f << " double="
+                           << a.second.d << " void*=" << a.second.p);
     }
   }
 }

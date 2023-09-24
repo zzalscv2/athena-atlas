@@ -22,7 +22,7 @@ struct RPDConfig {
   unsigned int endSignalSample;
   unsigned int nominalBaseline;
   float pileup1stDerivThresh;
-  unsigned int ADCoverflow;
+  unsigned int AdcOverflow;
 };
 
 class RPDDataAnalyzer
@@ -39,17 +39,22 @@ private:
   unsigned int m_endSignalSample; /** sample expected to be the end of signal; sum until (not including) this sample */
   unsigned int m_nominalBaseline; /** baseline value to use when OOT pileup is detected */
   float m_pileup1stDerivThresh; /** OOT pileup if -derivative in first two samples is greater than this number */
-  unsigned int m_ADCoverflow;
+  unsigned int m_AdcOverflow;
   std::vector<float> m_chCalibFactors;
 
-  std::vector<std::vector<float> > m_chFADCdata;
-  std::vector<float> m_chSumADCvec;
-  std::vector<float> m_chSumADCvecCalib;
-  std::vector<float> m_chPileupFracVec; /** OOT pileup sum as a fraction of non-pileup signal sum (zero if no OOT pileup) */
-  std::vector<float> m_rowSumADCvec;
-  std::vector<float> m_rowSumADCvecCalib;
-  std::vector<float> m_columnSumADCvec;
-  std::vector<float> m_columnSumADCvecCalib;
+  std::vector<std::vector<float> > m_chFadcData;
+  std::vector<float> m_chMaxSample;
+  std::vector<float> m_chSumAdc;
+  std::vector<float> m_chSumAdcCalib;
+  std::vector<float> m_chMaxAdc;
+  std::vector<float> m_chMaxAdcCalib;
+  std::vector<float> m_chPileupFrac; /** OOT pileup sum as a fraction of non-pileup signal sum (0 if no OOT pileup, -1 if sumadc <= 0) */
+  std::vector<float> m_chBaseline;
+  std::vector<std::vector<float>> m_chPileupFitParams;
+  std::vector<float> m_rowSumAdc;
+  std::vector<float> m_rowSumAdcCalib;
+  std::vector<float> m_columnSumAdc;
+  std::vector<float> m_columnSumAdcCalib;
   std::vector<unsigned int> m_chStatus;
   unsigned int m_sideStatus = 1 << SideValidBit;
 
@@ -71,19 +76,17 @@ public:
   virtual ~RPDDataAnalyzer() = default;
 
   void setCalibFactors(const std::vector<float>& chFactors);
-  void loadChannelData(unsigned int channel, const std::vector<uint16_t>& FADCdata);
+  void loadChannelData(unsigned int channel, const std::vector<uint16_t>& FadcData);
   void analyzeData();
 
-  unsigned int getChMaxADCSample(unsigned int channel) const;
-  float getChSumADC(unsigned int channel) const;
-  float getChSumADCcalib(unsigned int channel) const;
+  unsigned int getChMaxSample(unsigned int channel) const;
+  float getChSumAdc(unsigned int channel) const;
+  float getChSumAdcCalib(unsigned int channel) const;
+  float getChMaxAdc(unsigned int channel) const;
+  float getChMaxAdcCalib(unsigned int channel) const;
   float getChPileupFrac(unsigned int channel) const;
-  const std::vector<float>& getChSumADCvec() const;
-  const std::vector<float>& getChSumADCvecCalib() const;
-  const std::vector<float>& getRowSumADCvec() const;
-  const std::vector<float>& getRowSumADCvecCalib() const;
-  const std::vector<float>& getColumnSumADCvec() const;
-  const std::vector<float>& getColumnSumADCvecCalib() const;
+  float getChBaseline(unsigned int channel) const;
+  const std::vector<float>& getChPileupFitParams(unsigned int channel) const;
 
   unsigned int getChStatus(unsigned int channel) const;
   unsigned int getSideStatus() const;
