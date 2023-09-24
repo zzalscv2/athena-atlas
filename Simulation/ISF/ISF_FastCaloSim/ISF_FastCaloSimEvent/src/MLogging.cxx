@@ -104,8 +104,8 @@ MLogging &MLogging::operator=(const MLogging &rhs) {
 
 void MLogging::setLevel(MSG::Level lvl) {
   lvl = (lvl >= MSG::NUM_LEVELS) ? MSG::ALWAYS
-        : (lvl < MSG::NIL)       ? MSG::NIL
-                                 : lvl;
+          : (lvl < MSG::NIL)       ? MSG::NIL
+                                     : lvl;
   msg().setLevel(lvl);
 }
 

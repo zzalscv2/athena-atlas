@@ -372,7 +372,7 @@ void TFCSPCAEnergyParametrization::clean() {
 
 void TFCSPCAEnergyParametrization::Streamer(TBuffer &R__b) {
   // Stream an object of class TFCSPCAEnergyParametrization
-  ATH_MSG_DEBUG("In streamer of " << __FILE__);
+
   if (R__b.IsReading()) {
     UInt_t R__s, R__c;
     Version_t R__v = R__b.ReadVersion(&R__s, &R__c);

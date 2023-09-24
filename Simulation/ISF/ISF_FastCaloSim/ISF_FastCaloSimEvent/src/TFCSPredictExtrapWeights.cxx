@@ -2,7 +2,6 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// TODO does m_inputs ever get filled in??
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
 #include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
 #include "ISF_FastCaloSimEvent/TFCSTruthState.h"
@@ -28,9 +27,10 @@
 #include <iostream>
 #include <fstream>
 
-// Neural networks
-#include "ISF_FastCaloSimEvent/TFCSNetworkFactory.h"
-#include "ISF_FastCaloSimEvent/VNetworkBase.h"
+// LWTNN
+#include "lwtnn/LightweightGraph.hh"
+#include "lwtnn/LightweightNeuralNetwork.hh"
+#include "lwtnn/parse_json.hh"
 
 // XML reader
 #include <libxml/xmlmemory.h>
@@ -67,6 +67,9 @@ TFCSPredictExtrapWeights::~TFCSPredictExtrapWeights() {
   }
   if (m_normStdDevs != nullptr) {
     delete m_normStdDevs;
+  }
+  if (m_nn != nullptr) {
+    delete m_nn;
   }
 }
 
@@ -112,12 +115,11 @@ bool TFCSPredictExtrapWeights::getNormInputs(
   } else {
     m_normStdDevs = new std::vector<float>();
   }
-  const std::string inputFileName = FastCaloTXTInputFolderName +
-                                    "MeanStdDevEnergyFractions_eta_" + etaBin +
-                                    ".txt";
+  std::string inputFileName = FastCaloTXTInputFolderName +
+                              "MeanStdDevEnergyFractions_eta_" + etaBin +
+                              ".txt";
   ATH_MSG_DEBUG(" Opening " << inputFileName);
   std::ifstream inputTXT(inputFileName);
-  int index;
   if (inputTXT.is_open()) {
     std::string line;
     while (getline(inputTXT, line)) {
@@ -128,13 +130,11 @@ bool TFCSPredictExtrapWeights::getNormInputs(
         getline(ss, substr, ' ');
         if (counter == 0) { // Get index (#layer or -1 if var == etrue)
           if (substr != "etrue") {
-            index = std::stoi(substr.substr(substr.find('_') + 1));
+            int index = std::stoi(substr.substr(substr.find('_') + 1));
+            m_normLayers->push_back(index);
           } else { // etrue
-            index = -1;
+            m_normLayers->push_back(-1);
           }
-          m_normLayers->push_back(index);
-          ATH_MSG_VERBOSE("Filling m_normLayers; Got the index "
-                          << index << " from the line " << line);
         } else if (counter == 1) {
           m_normMeans->push_back(std::stof(substr));
         } else if (counter == 2) {
@@ -154,11 +154,10 @@ bool TFCSPredictExtrapWeights::getNormInputs(
 
 // prepareInputs()
 // Prepare input variables to the Neural Network
-VNetworkBase::NetworkInputs
+std::map<std::string, double>
 TFCSPredictExtrapWeights::prepareInputs(TFCSSimulationState &simulstate,
                                         const float truthE) const {
-  VNetworkBase::NetworkInputs inputs;
-  std::map<std::string, double> flat_inputs;
+  std::map<std::string, double> inputVariables;
   for (int ilayer = 0; ilayer < CaloCell_ID_FCS::MaxSample; ++ilayer) {
     if (std::find(m_relevantLayers->cbegin(), m_relevantLayers->cend(),
                   ilayer) != m_relevantLayers->cend()) {
@@ -168,8 +167,7 @@ TFCSPredictExtrapWeights::prepareInputs(TFCSSimulationState &simulstate,
           std::find(m_normLayers->cbegin(), m_normLayers->cend(), ilayer);
       if (itr != m_normLayers->cend()) {
         const int index = std::distance(m_normLayers->cbegin(), itr);
-        std::map<std::string, double> element;
-        flat_inputs["ef_" + layer] =
+        inputVariables["ef_" + layer] =
             (simulstate.Efrac(ilayer) - std::as_const(m_normMeans)->at(index)) /
             std::as_const(m_normStdDevs)->at(index);
       } else {
@@ -180,20 +178,16 @@ TFCSPredictExtrapWeights::prepareInputs(TFCSSimulationState &simulstate,
   }
   // Find index for truth energy
   auto itr = std::find(m_normLayers->cbegin(), m_normLayers->cend(), -1);
-  const int index = std::distance(m_normLayers->cbegin(), itr);
-  flat_inputs["etrue"] = (truthE - std::as_const(m_normMeans)->at(index)) /
-                         std::as_const(m_normStdDevs)->at(index);
+  int index = std::distance(m_normLayers->cbegin(), itr);
+  inputVariables["etrue"] = (truthE - std::as_const(m_normMeans)->at(index)) /
+                            std::as_const(m_normStdDevs)->at(index);
   if (is_match_pdgid(22)) {
-    flat_inputs["pdgId"] = 1; // one hot enconding
+    inputVariables["pdgId"] = 1; // one hot enconding
   } else if (is_match_pdgid(11) || is_match_pdgid(-11)) {
-    flat_inputs["pdgId"] = 0; // one hot enconding
-  } else {
-    ATH_MSG_ERROR("have no one-hot encoding for pdgId; pottential issue with "
-                  "predicted weights.");
+    inputVariables["pdgId"] = 0; // one hot enconding
   }
-  inputs["dense_input"] = flat_inputs;
 
-  return inputs;
+  return inputVariables;
 }
 
 // simulate()
@@ -203,22 +197,18 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(
     const TFCSExtrapolationState * /*extrapol*/) const {
 
   // Get inputs to Neural Network
-  const VNetworkBase::NetworkInputs inputVariables =
+  std::map<std::string, double> inputVariables =
       prepareInputs(simulstate, truth->E() * 0.001);
 
-  ATH_MSG_DEBUG("Inputs to predicted weights network "
-                << VNetworkBase::representNetworkInputs(inputVariables));
-  ATH_MSG_DEBUG("Address of m_nn " << m_nn.get());
-  ATH_MSG_DEBUG("Description of m_nn " << *m_nn.get());
   // Get predicted extrapolation weights
-  VNetworkBase::NetworkOutputs outputs = m_nn->compute(inputVariables);
+  auto outputs = m_nn->compute(inputVariables);
   for (int ilayer = 0; ilayer < CaloCell_ID_FCS::MaxSample; ++ilayer) {
     if (std::find(m_relevantLayers->cbegin(), m_relevantLayers->cend(),
                   ilayer) != m_relevantLayers->cend()) {
-      ATH_MSG_VERBOSE("TFCSPredictExtrapWeights::simulate: layer: "
-                      << ilayer
-                      << " weight: " << outputs[std::to_string(ilayer)]);
-      float weight = outputs[std::to_string(ilayer)];
+      ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: "
+                    << ilayer << " weight: "
+                    << outputs["extrapWeight_" + std::to_string(ilayer)]);
+      float weight = outputs["extrapWeight_" + std::to_string(ilayer)];
       // Protections
       if (weight < 0) {
         weight = 0;
@@ -227,7 +217,7 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(
       }
       simulstate.setAuxInfo<float>(ilayer, weight);
     } else { // use weight=0.5 for non-relevant layers
-      ATH_MSG_VERBOSE(
+      ATH_MSG_DEBUG(
           "Setting weight=0.5 for layer = " << std::to_string(ilayer));
       simulstate.setAuxInfo<float>(ilayer, float(0.5));
     }
@@ -305,30 +295,46 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(
 }
 
 // initializeNetwork()
-// Initialize network
+// Initialize lwtnn network
 bool TFCSPredictExtrapWeights::initializeNetwork(
     int pid, const std::string &etaBin,
     const std::string &FastCaloNNInputFolderName) {
 
-  set_pdgid(pid);
-  ATH_MSG_DEBUG(
+  ATH_MSG_INFO(
       "Using FastCaloNNInputFolderName: " << FastCaloNNInputFolderName);
 
-  std::string inputFileName = FastCaloNNInputFolderName + "NN_" + etaBin + ".*";
+  std::string inputFileName =
+      FastCaloNNInputFolderName + "NN_" + etaBin + ".json";
   ATH_MSG_DEBUG("Will read JSON file: " << inputFileName);
-  m_nn = TFCSNetworkFactory::create(inputFileName);
-  if (m_nn == nullptr) {
-    ATH_MSG_ERROR("Could not create network from " << inputFileName);
+  if (inputFileName.empty()) {
+    ATH_MSG_ERROR("Could not find json file " << inputFileName);
     return false;
-  }
-  ATH_MSG_VERBOSE("m_nn points to " << m_nn.get());
-  // Extract relevant layers from the outputs
-  m_relevantLayers = new std::vector<int>();
-  for (std::string name : m_nn->getOutputLayers()) {
-    // now pre-strip any common prefix.
-    // std::string layer_num = ::split(name, "_")[1];
-    const int layer = std::stoi(name.substr(name.find('_') + 1));
-    m_relevantLayers->push_back(layer);
+  } else {
+    ATH_MSG_INFO("For pid: " << pid << " and etaBin" << etaBin
+                             << ", loading json file " << inputFileName);
+    std::ifstream input(inputFileName);
+    std::stringstream sin;
+    sin << input.rdbuf();
+    input.close();
+    auto config = lwt::parse_json(sin);
+    m_nn = new lwt::LightweightNeuralNetwork(config.inputs, config.layers,
+                                             config.outputs);
+    if (m_nn == nullptr) {
+      ATH_MSG_ERROR("Could not create LightWeightNeuralNetwork from "
+                    << inputFileName);
+      return false;
+    }
+    if (m_input != nullptr) {
+      delete m_input;
+    }
+    m_input = new std::string(sin.str());
+    // Extract relevant layers from the outputs
+    m_relevantLayers = new std::vector<int>();
+    for (auto name : config.outputs) {
+      int layer = std::stoi(
+          name.erase(0, 13)); // remove "extrapWeight_" and convert to int
+      m_relevantLayers->push_back(layer);
+    }
   }
   return true;
 }
@@ -336,15 +342,20 @@ bool TFCSPredictExtrapWeights::initializeNetwork(
 // Streamer()
 void TFCSPredictExtrapWeights::Streamer(TBuffer &R__b) {
   // Stream an object of class TFCSPredictExtrapWeights
-  ATH_MSG_DEBUG("In Streamer of " << __FILE__);
+
   if (R__b.IsReading()) {
     R__b.ReadClassBuffer(TFCSPredictExtrapWeights::Class(), this);
-    ATH_MSG_DEBUG("Reading: m_nn points to " << m_nn.get());
-    if (m_input && !m_input->empty()) {
-      ATH_MSG_DEBUG("Reading: m_input starts as " << m_input->substr(0, 5));
-      m_nn = TFCSNetworkFactory::create(*m_input);
+    if (m_nn != nullptr) {
+      delete m_nn;
+      m_nn = nullptr;
     }
-    ATH_MSG_DEBUG("Reading: m_nn points to " << m_nn.get());
+    if (m_input && !m_input->empty()) {
+      std::stringstream sin;
+      sin.str(*m_input);
+      auto config = lwt::parse_json(sin);
+      m_nn = new lwt::LightweightNeuralNetwork(config.inputs, config.layers,
+                                               config.outputs);
+    }
 #ifndef __FastCaloSimStandAlone__
     // When running inside Athena, delete input/config/normInputs to free the
     // memory
@@ -363,28 +374,7 @@ void TFCSPredictExtrapWeights::Streamer(TBuffer &R__b) {
 void TFCSPredictExtrapWeights::unit_test(
     TFCSSimulationState *simulstate, const TFCSTruthState *truth,
     const TFCSExtrapolationState *extrapol) {
-  const std::string this_file = __FILE__;
-  const std::string parent_dir = this_file.substr(0, this_file.find("/src/"));
-  const std::string norm_path = parent_dir + "/share/NormPredExtrapSample/";
-  std::string net_path = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/"
-                         "FastCaloSim/LWTNNPredExtrapSample/";
-  test_path(net_path, norm_path, simulstate, truth, extrapol);
-  net_path = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/"
-             "ONNXPredExtrapSample/";
-  test_path(net_path, norm_path, simulstate, truth, extrapol);
-}
-
-// test_path()
-// Function for testing
-void TFCSPredictExtrapWeights::test_path(
-    std::string &net_path, std::string const &norm_path,
-    TFCSSimulationState *simulstate, const TFCSTruthState *truth,
-    const TFCSExtrapolationState *extrapol) {
   ISF_FCS::MLogging logger;
-  ATH_MSG_NOCLASS(logger, "Testing net path ..."
-                              << net_path.substr(net_path.length() - 20)
-                              << " and norm path ..."
-                              << norm_path.substr(norm_path.length() - 20));
   if (!simulstate) {
     simulstate = new TFCSSimulationState();
 #if defined(__FastCaloSimStandAlone__)
@@ -442,7 +432,7 @@ void TFCSPredictExtrapWeights::test_path(
                                          << " eta " << eta);
 
   // Find eta bin
-  const int Eta = eta * 10;
+  int Eta = eta * 10;
   std::string etaBin = "";
   for (int i = 0; i <= 25; ++i) {
     int etaTmp = i * 5;
@@ -454,29 +444,30 @@ void TFCSPredictExtrapWeights::test_path(
   ATH_MSG_NOCLASS(logger, "etaBin = " << etaBin);
 
   TFCSPredictExtrapWeights NN("NN", "NN");
-  NN.setLevel(MSG::INFO);
+  NN.setLevel(MSG::VERBOSE);
   const int pid = truth->pdgid();
-  NN.initializeNetwork(pid, etaBin, net_path);
-  NN.getNormInputs(etaBin, norm_path);
+  NN.initializeNetwork(pid, etaBin,
+                       "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/Jona/"
+                       "lwtnn_inputs/json/v23/");
+  NN.getNormInputs(etaBin, "/eos/atlas/atlascerngroupdisk/proj-simul/AF3_Run3/"
+                           "Jona/lwtnn_inputs/txt/v23/");
 
   // Get extrapWeights and save them as AuxInfo in simulstate
 
   // Get inputs to Neural Network
-  const int pid2 = *(NN.pdgid()).begin();
-  ATH_MSG_NOCLASS(logger, " Have pid2 = " << pid2);
-  const VNetworkBase::NetworkInputs inputVariables =
+  std::map<std::string, double> inputVariables =
       NN.prepareInputs(*simulstate, truth->E() * 0.001);
 
   // Get predicted extrapolation weights
-  ATH_MSG_NOCLASS(logger, "computing with m_nn");
-  VNetworkBase::NetworkOutputs outputs = NN.m_nn->compute(inputVariables);
-  const std::vector<int> layers = {0, 1, 2, 3, 12};
+  auto outputs = NN.m_nn->compute(inputVariables);
+  std::vector<int> layers = {0, 1, 2, 3, 12};
   for (int ilayer : layers) {
-    simulstate->setAuxInfo<float>(ilayer, outputs[std::to_string(ilayer)]);
+    simulstate->setAuxInfo<float>(
+        ilayer, outputs["extrapWeight_" + std::to_string(ilayer)]);
   }
 
   // Simulate
-  const int layer = 0;
+  int layer = 0;
   NN.set_calosample(layer);
   TFCSLateralShapeParametrizationHitBase::Hit hit;
   NN.simulate_hit(hit, *simulstate, truth, extrapol);
@@ -492,7 +483,7 @@ void TFCSPredictExtrapWeights::test_path(
   fNN = TFile::Open("FCSNNtest.root");
   TFCSPredictExtrapWeights *NN2 = (TFCSPredictExtrapWeights *)(fNN->Get("NN"));
 
-  NN2->setLevel(MSG::INFO);
+  NN2->setLevel(MSG::DEBUG);
   NN2->simulate_hit(hit, *simulstate, truth, extrapol);
   simulstate->Print();
 
@@ -501,9 +492,8 @@ void TFCSPredictExtrapWeights::test_path(
 
 void TFCSPredictExtrapWeights::Print(Option_t *option) const {
   TString opt(option);
-  const bool shortprint = opt.Index("short") >= 0;
-  const bool longprint =
-      msgLvl(MSG::DEBUG) || (msgLvl(MSG::INFO) && !shortprint);
+  bool shortprint = opt.Index("short") >= 0;
+  bool longprint = msgLvl(MSG::DEBUG) || (msgLvl(MSG::INFO) && !shortprint);
   TString optprint = opt;
   optprint.ReplaceAll("short", "");
   TFCSLateralShapeParametrizationHitBase::Print(option);
@@ -512,5 +502,5 @@ void TFCSPredictExtrapWeights::Print(Option_t *option) const {
     ATH_MSG_INFO(optprint << "  m_input (TFCSPredictExtrapWeights): "
                           << CxxUtils::as_const_ptr(m_input));
   if (longprint)
-    ATH_MSG_INFO(optprint << "  Address of m_nn: " << m_nn.get());
+    ATH_MSG_INFO(optprint << "  Address of m_nn: " << (void *)m_nn);
 }

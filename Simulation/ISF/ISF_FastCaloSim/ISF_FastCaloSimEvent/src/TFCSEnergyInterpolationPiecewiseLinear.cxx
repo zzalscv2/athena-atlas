@@ -126,7 +126,6 @@ void TFCSEnergyInterpolationPiecewiseLinear::Print(Option_t *option) const {
 }
 
 void TFCSEnergyInterpolationPiecewiseLinear::Streamer(TBuffer &R__b) {
-  ATH_MSG_DEBUG("In Streamer of " << __FILE__);
   // Stream an object of class TFCSEnergyInterpolationPiecewiseLinear
   if (R__b.IsReading()) {
     // read the class buffer

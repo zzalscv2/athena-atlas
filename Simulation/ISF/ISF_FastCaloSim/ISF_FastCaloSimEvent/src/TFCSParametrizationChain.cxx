@@ -271,15 +271,13 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b) {
     if (R__n) {
       TFCSParametrizationChain::Chain_t::iterator R__k;
       for (R__k = R__stl.begin(); R__k != R__stl.end(); ++R__k) {
-        TFCSParametrizationBase *R__t = *R__k; // Ownership stays with m_chain
-        if (dir && R__t != nullptr) {
+        TFCSParametrizationBase *R__t = *R__k;  // Ownership stays with m_chain
+        if (dir && R__t != nullptr) { 
           dir->WriteTObject(R__t);
-          TFCSParametrizationPlaceholder tmp(
-              R__t->GetName(), TString("Placeholder for: ") + R__t->GetTitle());
-          R__b.WriteObject(&tmp, false); // tell R__b object with same address
-                                         // are actually different
+          TFCSParametrizationPlaceholder tmp( R__t->GetName(), TString("Placeholder for: ") + R__t->GetTitle());
+          R__b.WriteObject( &tmp, false ); // tell R__b object with same address are actually different
         } else {
-          R__b.WriteObject(R__t);
+          R__b.WriteObject( R__t );
         }
       }
     }

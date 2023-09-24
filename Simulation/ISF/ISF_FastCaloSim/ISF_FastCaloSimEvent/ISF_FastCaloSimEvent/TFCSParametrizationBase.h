@@ -132,6 +132,7 @@ public:
   /// Print object information.
   void Print(Option_t *option = "") const;
 
+
   struct Duplicate_t {
     TFCSParametrizationBase *replace = nullptr;
     std::vector<TFCSParametrizationBase *> mother;
@@ -156,6 +157,7 @@ protected:
   static constexpr double init_eta_min = -100;      //! Do not persistify!
   static constexpr double init_eta_max = 100;       //! Do not persistify!
 
+
   bool compare(const TFCSParametrizationBase &ref) const;
 
 #if defined(__FastCaloSimStandAlone__)
@@ -172,6 +174,7 @@ public:
 #endif
 
 private:
+
   ClassDef(TFCSParametrizationBase, 3) // TFCSParametrizationBase
 };
 
