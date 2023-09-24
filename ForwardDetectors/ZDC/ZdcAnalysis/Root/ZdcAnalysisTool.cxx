@@ -409,7 +409,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   const int deriv2ndThreshDSHG = -35;
   const int deriv2ndThreshDSLG = -10;
-  const unsigned int peakSample = 12;
+  const unsigned int peakSample = 10;
 
   const float deltaTcutLow = -10;
   const float deltaTcutHigh = 10;
@@ -426,8 +426,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{36, 36, 36, 36}, {36, 36, 36, 36}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{36, 36, 36, 36}, {36, 36, 36, 36}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
     
   ATH_MSG_DEBUG( "PbPb2023: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
 
