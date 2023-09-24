@@ -55,7 +55,9 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     ViewVerifyTrk_GSF   = CfgMgr.AthViews__ViewDataVerifier("PrecisionTrackViewDataVerifier"+tag)
 
     from TrigInDetConfig.InDetTrigCollectionKeys import TrigTRTKeys, TrigPixelKeys
-    ViewVerifyTrk_GSF.DataObjects = [( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
+    CellsName = "CaloCells" if not ion else "CorrectedRoICaloCells"
+    ViewVerifyTrk_GSF.DataObjects = [
+                                 ( 'CaloCellContainer' , 'StoreGateSvc+%s' % CellsName),
                                  ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
                                  ( 'xAOD::TrackParticleContainer','StoreGateSvc+%s' % trackParticles_noGSF)]
     if doGSF:
@@ -69,7 +71,7 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
 
 
     """ Retrieve the factories now """
-    from TriggerMenuMT.HLT.Electron.TrigElectronFactories import TrigEgammaRecElectronCfg, TrigElectronSuperClusterBuilderCfg, TrigTopoEgammaElectronCfg
+    from TriggerMenuMT.HLT.Electron.TrigElectronFactories import TrigEgammaRecElectronCfg, TrigElectronSuperClusterBuilderCfg, TrigTopoEgammaElectronCfg, TrigTopoEgammaElectronCfg_HI
     from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import  TrigEMTrackMatchBuilder, TrigElectronIsoBuilderCfg, TrigElectronIsoBuilderCfg_LRT
    
     # Create the sequence of three steps:
@@ -102,7 +104,10 @@ def precisionElectronRecoSequence(flags, RoIs, ion=False, doGSF=True, doLRT=Fals
     TrigSuperElectronAlgo_GSF.TrackMatchBuilderTool = TrigEMTrackMatchBuilder_GSF
 
     ## TrigTopoEgammaElectronCfg_GSF ##
-    TrigTopoEgammaAlgo_GSF = TrigTopoEgammaElectronCfg("TrigTopoEgammaElectronCfg"+tag) 
+    if ion:
+        TrigTopoEgammaAlgo_GSF = TrigTopoEgammaElectronCfg_HI("TrigTopoEgammaElectronCfg_HI"+tag)
+    else:
+        TrigTopoEgammaAlgo_GSF = TrigTopoEgammaElectronCfg("TrigTopoEgammaElectronCfg"+tag) 
     thesequence_GSF += TrigTopoEgammaAlgo_GSF
     TrigTopoEgammaAlgo_GSF.EMClusterTool = TrigEMClusterTool("electron",variant)
     if doGSF:
