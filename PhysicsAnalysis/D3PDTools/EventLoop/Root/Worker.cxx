@@ -895,7 +895,7 @@ namespace EL
 
 
   ::StatusCode Worker ::
-  gridExecute (const std::string& sampleName)
+  gridExecute (const std::string& sampleName, Long64_t SkipEvents, Long64_t nEventsPerJob)
   {
     using namespace msgEventLoop;
     RCU_CHANGE_INVARIANT (this);
@@ -1003,6 +1003,11 @@ namespace EL
         //User was expecting input after all.
         gSystem->Exit(EC_BADINPUT);
       }
+
+      if (nEventsPerJob != -1)
+        module->maxEvents = nEventsPerJob;
+      if (SkipEvents != 0)
+        module->skipEvents = SkipEvents;
       addModule (std::move (module));
     }
 
