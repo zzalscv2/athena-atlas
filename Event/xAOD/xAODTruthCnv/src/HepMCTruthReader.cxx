@@ -136,7 +136,6 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex, bool 
     //  print out gives us a unique tag for the particle.
     if (vertex->position().x() != 0.0 && vertex->position().y() != 0.0 && vertex->position().z() != 0.0) {
       cout.width(9);
-      cout << HepMC::raw_pointer(vertex);
       cout << " ID:";
       cout.width(5);
       cout << vertex->id();
@@ -160,7 +159,6 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex, bool 
       cout << endl;
     } else {
       cout.width(9);
-      cout << HepMC::raw_pointer(vertex);
       cout << " ID:";
       cout.width(5);
       cout << vertex->id();
