@@ -250,7 +250,7 @@ namespace Muon {
 
         // find segment seeds
         std::vector<NSWSeed> segmentSeedFromStgc(const LayerMeasVec& orderedClusters,
-                                         bool usePhi) const;
+                                                 bool usePhi) const;
 
         std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters) const;
         std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters, 
@@ -279,7 +279,9 @@ namespace Muon {
         std::unique_ptr<Trk::PseudoMeasurementOnTrack> ipConstraint(const EventContext& ctx) const;
 
         std::vector<NSWSeed> resolveAmbiguities(std::vector<NSWSeed>&& unresolved) const;
-        std::vector<std::unique_ptr<Muon::MuonSegment>> resolveAmbiguities(const EventContext& ctx, const TrackCollection& segColl) const;
+        std::vector<std::unique_ptr<Muon::MuonSegment>> resolveAmbiguities(const EventContext& ctx, 
+                                                                           const TrackCollection& segColl,
+                                                                           const Trk::Segment::Author a) const;
         std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const std::vector<const Trk::MeasurementBase*>& fit_meas,
                                         const Trk::TrackParameters& perigee) const;
 
@@ -292,7 +294,9 @@ namespace Muon {
         };
         /// Checks whether the two measurements are compatible within the IP constraint        
         ChannelConstraint compatiblyFromIP(const SeedMeasurement& meas1, const SeedMeasurement& meas2) const;
-
+        /// @brief Returns the minimal & maximal radial distance of a measurement
+        std::pair<double, double> coveredRadii(const SeedMeasurement& meas) const;
+        
         /// @brief  Removes clusters from high activity areas in the detector
         MeasVec vetoBursts( MeasVec && clustInLay ) const;
 
