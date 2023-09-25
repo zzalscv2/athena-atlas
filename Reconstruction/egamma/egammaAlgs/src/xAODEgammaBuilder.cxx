@@ -270,8 +270,7 @@ xAODEgammaBuilder::execute(const EventContext& ctx) const
       std::make_unique<xAOD::ElectronContainer>(),
       std::make_unique<xAOD::ElectronAuxContainer>()));
 
-    xAOD::Electron* dummy = new xAOD::Electron();
-    dummyElectronContainer->push_back(dummy);
+    dummyElectronContainer->push_back(std::unique_ptr<xAOD::Electron>());
   }
 
   return StatusCode::SUCCESS;
@@ -380,8 +379,7 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
     return false;
   }
 
-  xAOD::Electron* electron = new xAOD::Electron();
-  electronContainer->push_back(electron);
+  xAOD::Electron* electron = electronContainer->push_back(std::make_unique<xAOD::Electron>());
   electron->setAuthor(author);
 
   static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
@@ -421,8 +419,7 @@ xAODEgammaBuilder::getPhoton(const egammaRec* egRec,
     return false;
   }
 
-  xAOD::Photon* photon = new xAOD::Photon();
-  photonContainer->push_back(photon);
+  xAOD::Photon* photon = photonContainer->push_back(std::make_unique<xAOD::Photon>());
   photon->setAuthor(author);
   static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
   acc(*photon) = type;

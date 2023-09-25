@@ -51,8 +51,7 @@ electronRescaler::execute(const EventContext& ctx) const {
   xAOD::ElectronContainer* electrons = outputContainer.ptr();
   electrons->reserve(inputContainer->size());
   for (const xAOD::Electron* old_el : *inputContainer) {
-    xAOD::Electron* electron = new xAOD::Electron();
-    electrons->push_back(electron);
+    xAOD::Electron*  electron = electrons->push_back(std::make_unique<xAOD::Electron>());
     *electron=*old_el;
     electron->setPt(old_el->pt()*m_scaleValue);
   }
