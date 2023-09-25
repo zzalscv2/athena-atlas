@@ -178,7 +178,7 @@ bool CaloTowerStore::buildLookUp(const CaloDetDescrManager& theManager,
                     m_weights.push_back (theWeight);
 
                   if (towerIndex < ntowers) {
-                    ttcmatrix[towerIndex].push_back(Entry(cellIndex,iw));
+                    ttcmatrix[towerIndex].emplace_back(cellIndex,iw);
                   }
                 } // index retrieval check
 

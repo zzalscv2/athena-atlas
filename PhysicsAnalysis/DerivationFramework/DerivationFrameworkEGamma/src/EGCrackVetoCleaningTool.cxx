@@ -63,8 +63,8 @@ EGCrackVetoCleaningTool::addBranches() const
           dRsatMax = dR;
       }
     }
-    decoratorPass(*eg) = !(maybeBug && assocC.size() > 1 &&
-                           dRsatMax > 0.16); // (or dPhi > 0.15 better ?)
+    decoratorPass(*eg) = !maybeBug || assocC.size() <= 1 ||
+                           dRsatMax <= 0.16; // (or dPhi > 0.15 better ?)
   }
 
   return StatusCode::SUCCESS;

@@ -56,7 +56,7 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
     ATH_CHECK(m_SGKey_electrons_decorations.initialize());
     if (msgLvl(MSG::DEBUG)) {
       ATH_MSG_DEBUG("Decorations for " << containerKey);
-      for (auto s : m_SGKey_electrons_decorations)
+      for (const auto& s : m_SGKey_electrons_decorations)
 	{ ATH_MSG_DEBUG(s.key()); }
     }
   }
@@ -75,7 +75,7 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
     ATH_CHECK(m_SGKey_photons_decorations.initialize());
     if (msgLvl(MSG::DEBUG)) {
       ATH_MSG_DEBUG("Decorations for " << containerKey);
-      for (auto s : m_SGKey_photons_decorations)
+      for (const auto& s : m_SGKey_photons_decorations)
 	{ ATH_MSG_DEBUG(s.key()); }
     }
   }
@@ -101,10 +101,10 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
   if (!m_SGKey_photons.key().empty()) {
     
     for (int i = 0; i < 2; i++) {
-      decon.emplace_back(SG::WriteDecorHandle<xAOD::EgammaContainer, char>(
-			     m_SGKey_photons_decorations[i * 2], ctx));
-      decoE.emplace_back(SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-			     m_SGKey_photons_decorations[i * 2 + 1], ctx));
+      decon.emplace_back(
+			     m_SGKey_photons_decorations[i * 2], ctx);
+      decoE.emplace_back(
+			     m_SGKey_photons_decorations[i * 2 + 1], ctx);
     }
     
     // Retrieve photon container

@@ -151,14 +151,14 @@ DerivationFramework::GainDecorator::addBranches() const
       for (const auto layer : m_layers) {
         std::pair<int, int> key(kv.first, layer);
         decorations_E.emplace_back(
-          SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_photons_decorations[i * 3], ctx));
+          
+            m_SGKey_photons_decorations[i * 3], ctx);
         decorations_rnoW.emplace_back(
-          SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_photons_decorations[i * 3 + 1], ctx));
+          
+            m_SGKey_photons_decorations[i * 3 + 1], ctx);
         decorations_nCells.emplace_back(
-          SG::WriteDecorHandle<xAOD::EgammaContainer, char>(
-            m_SGKey_photons_decorations[i * 3 + 2], ctx));
+          
+            m_SGKey_photons_decorations[i * 3 + 2], ctx);
         i++;
       }
     }
@@ -202,14 +202,14 @@ DerivationFramework::GainDecorator::addBranches() const
       for (const auto layer : m_layers) {
         std::pair<int, int> key(kv.first, layer);
         decorations_E.emplace_back(
-          SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_electrons_decorations[i * 3], ctx));
+          
+            m_SGKey_electrons_decorations[i * 3], ctx);
         decorations_rnoW.emplace_back(
-          SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_electrons_decorations[i * 3 + 1], ctx));
+          
+            m_SGKey_electrons_decorations[i * 3 + 1], ctx);
         decorations_nCells.emplace_back(
-          SG::WriteDecorHandle<xAOD::EgammaContainer, char>(
-            m_SGKey_electrons_decorations[i * 3 + 2], ctx));
+          
+            m_SGKey_electrons_decorations[i * 3 + 2], ctx);
         i++;
       }
     }
