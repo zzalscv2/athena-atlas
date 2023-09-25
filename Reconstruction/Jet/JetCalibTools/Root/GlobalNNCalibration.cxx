@@ -175,7 +175,7 @@ void GlobalNNCalibration::loadSplineHists(const TString & fileName, const std::s
   for(unsigned int i=0 ; i<m_closureEtaBins.size()-1; i++){
     auto pTH1 = dynamic_cast<TH1*>(ptCorr_l->At(i));
     if (not pTH1) continue;
-    m_ptCorrFactors[i].reset();
+    m_ptCorrFactors[i].reset(pTH1);
     m_ptCorrFactors[i]->SetDirectory(nullptr);
   }
   tmpF->Close();
