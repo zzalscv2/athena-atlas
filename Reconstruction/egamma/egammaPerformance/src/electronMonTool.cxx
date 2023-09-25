@@ -331,36 +331,11 @@ StatusCode electronMonTool::bookHistograms()
   m_electronIdGroup = new MonGroup(this,"egamma/electrons"+m_GroupExtension+"/ID",               run);  // to be re-booked every new run
   m_electronLBGroup = new MonGroup(this,"egamma/electrons"+m_GroupExtension+"/LBMon", run, ATTRIB_X_VS_LB, "", "merge"); // to be re-booked every new run
 
-  StatusCode sc;
-  sc = bookHistogramsForOneElectronType(*m_LhLooseElectrons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
-
-  sc = bookHistogramsForOneElectronType(*m_LhMediumElectrons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
-
-  sc = bookHistogramsForOneElectronType(*m_CbLooseElectrons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
-
-  sc = bookHistogramsForOneElectronType(*m_LhTightElectrons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
-
-  sc = bookHistogramsForOneElectronType(*m_CbTightElectrons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(bookHistogramsForOneElectronType(*m_LhLooseElectrons));
+  ATH_CHECK(bookHistogramsForOneElectronType(*m_LhMediumElectrons));
+  ATH_CHECK(bookHistogramsForOneElectronType(*m_CbLooseElectrons));
+  ATH_CHECK(bookHistogramsForOneElectronType(*m_LhTightElectrons));
+  ATH_CHECK(bookHistogramsForOneElectronType(*m_CbTightElectrons));
 
   return StatusCode::SUCCESS;
 }
@@ -598,56 +573,35 @@ StatusCode electronMonTool::fillHistograms() {
     // CbMedium
     if((*e_iter)->passSelection(isGood,"Medium")) {
       if(isGood) {
-	StatusCode sc = fillHistogramsForOneElectron(e_iter, *m_CbLooseElectrons);
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOneElectron(e_iter, *m_CbLooseElectrons));
       }
     }  else ATH_MSG_WARNING( "Electron selection menu Medium is not defined" );
 
     // LhLoose
     if((*e_iter)->passSelection(isGood,"LHLoose")) {
       if(isGood) {
-	StatusCode sc = fillHistogramsForOneElectron(e_iter, *m_LhLooseElectrons); 
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOneElectron(e_iter, *m_LhLooseElectrons));
       }
     }  else ATH_MSG_WARNING( "Electron selection LHLoose is not defined" );
 
     // LhMedium
     if((*e_iter)->passSelection(isGood,"LHMedium")) {
       if(isGood) {
-	StatusCode sc = fillHistogramsForOneElectron(e_iter, *m_LhMediumElectrons); 
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOneElectron(e_iter, *m_LhMediumElectrons));
       }
     }  else ATH_MSG_WARNING( "Electron selection LHMedium is not defined" );
 
-
     // CbTight
     if((*e_iter)->passSelection(isGood,"Tight")) { 
-      if(isGood) { 
-	StatusCode sc = fillHistogramsForOneElectron(e_iter, *m_CbTightElectrons); 
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+      if(isGood) {
+        ATH_CHECK(fillHistogramsForOneElectron(e_iter, *m_CbTightElectrons)); 
       }
     }  else ATH_MSG_WARNING( "Electron selection menu Tight is not defined" );
 
     // LhTight
     if((*e_iter)->passSelection(isGood,"LHTight")) {
       if(isGood) {
-	StatusCode sc = fillHistogramsForOneElectron(e_iter, *m_LhTightElectrons);  
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOneElectron(e_iter, *m_LhTightElectrons));
       }
     }  else ATH_MSG_WARNING( "Electron selection menu LHTight is not defined" );
 

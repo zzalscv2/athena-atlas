@@ -403,18 +403,8 @@ StatusCode photonMonTool::bookHistograms()
   m_photonRegionGroup = new MonGroup(this,"egamma/photons"+m_GroupExtension+"/Region",  run); // to be re-booked every new run
   m_photonLBGroup = new MonGroup(this,"egamma/photons"+m_GroupExtension+"/LBMon",run, ATTRIB_X_VS_LB, "", "merge"); // to be re-booked every new run
 
-  StatusCode sc;
-  sc = bookHistogramsForOnePhotonType(*m_CbLoosePhotons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
-
-  sc = bookHistogramsForOnePhotonType(*m_CbTightPhotons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(bookHistogramsForOnePhotonType(*m_CbLoosePhotons));
+  ATH_CHECK(bookHistogramsForOnePhotonType(*m_CbTightPhotons));
 
   return StatusCode::SUCCESS;
 }
@@ -730,22 +720,14 @@ StatusCode photonMonTool::fillHistograms() {
     // CbLoose
     if((*ph_iter)->passSelection(isGood,"Loose")) { 
       if(isGood) { 
-	StatusCode sc = fillHistogramsForOnePhoton(ph_iter, *m_CbLoosePhotons); 
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOnePhoton(ph_iter, *m_CbLoosePhotons));
       }
     }  else ATH_MSG_WARNING( "Photon selection menu LHMedium is not defined" );
 
     // Cb Tight
     if((*ph_iter)->passSelection(isGood,"Tight")) {
       if(isGood) {
-	StatusCode sc = fillHistogramsForOnePhoton(ph_iter, *m_CbTightPhotons);  
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOnePhoton(ph_iter, *m_CbTightPhotons));
       }
     }  else ATH_MSG_WARNING( "Photon selection menu LHTight is not defined" );
 
