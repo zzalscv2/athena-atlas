@@ -1,7 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
-sPrefix = 'tauRec_'
-bAODmode = False
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -135,11 +132,12 @@ def PanTauDetailsArrangerCfg(flags, infoHandler):
 # PanTau
 def PanTauCfg(flags):
     result = ComponentAccumulator()
+    sPrefix = 'tauRec_'
     _name = sPrefix + 'PanTau'
    
     # set up the job properties
-    from PanTauAlgs.Class_InformationHandler import InformationHandler
-    infoHandler = InformationHandler()
+    from PanTauAlgs.Class_InformationHandler_New import InformationHandler
+    infoHandler = InformationHandler(flags)
 
     curInAlg = 'CellBased'
     print("TopOptions_NewPanTau: Adding PanTau algorithms for input alg: " + curInAlg)
