@@ -125,7 +125,7 @@ def DCMathSegmentMakerCfg(flags,
                           doSegmentT0Fit=False,
                           **kwargs):
     
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg, MdtCalibToolForRotsCfg
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentSelectionToolCfg
     
     # This in general is a pretty problematic piece of code. It seems to have a lot of potential issues, because it has loads of mutables / subtools etc
@@ -181,9 +181,13 @@ def DCMathSegmentMakerCfg(flags,
     kwargs.setdefault("MuonCompetingClustersCreator", result.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
     edm_printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ) # Needed again below
     kwargs.setdefault("EDMPrinter", edm_printer )
-    if doSegmentT0Fit:
-        mdt_dcot_CA = MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtDriftCircleOnTrackCreatorAdjustableT0", TimingMode=3, \
-                   DoTofCorrection=True, TimeWindowSetting=MdtCalibWindowNumber('Collision_data'))
+    if doSegmentT0Fit:        
+        mdt_dcot_CA = MdtDriftCircleOnTrackCreatorCfg(flags,    
+                                                      name="MdtDriftCircleOnTrackCreatorAdjustableT0", 
+                                                      TimingMode=3,
+                                                      CalibrationTool = result.popToolsAndMerge(MdtCalibToolForRotsCfg(flags, 
+                                                                                                                       DoTofCorrection=True, 
+                                                                                                                       TimeWindowSetting=MdtCalibWindowNumber('Collision_data'))))
         kwargs.setdefault("MdtCreatorT0", result.getPrimaryAndMerge(mdt_dcot_CA)) 
         kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags, name='MdtMathT0FitSegmentFinder', doSegmentT0Fit=True)))
     else:
@@ -459,7 +463,7 @@ def MuonLayerHoughAlgCfg(flags, name = "MuonLayerHoughAlg", **kwargs):
 
 
 def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg, MdtCalibToolForRotsCfg
     result = ComponentAccumulator()
     
     if "MdtCreator" not in kwargs: 
@@ -471,11 +475,13 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
             else:
                 timeWindowSetting = MdtCalibWindowNumber('Collision_data')
             acc = MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtDriftCircleOnTrackCreatorSegmentFinding", 
-                                                         CreateTubeHit = False, 
-                                                         TimeWindowSetting = timeWindowSetting)   
+                                                         CreateTubeHit = False,
+                                                         CalibrationTool = result.popToolsAndMerge(MdtCalibToolForRotsCfg(flags,
+                                                                                                        TimeWindowSetting = timeWindowSetting)) 
+                                                         )   
         else:
             # I think we need to configure a 'default' version of the MdtDriftCircleOnTrackCreator here
-            acc=MdtDriftCircleOnTrackCreatorCfg(flags)
+            acc = MdtDriftCircleOnTrackCreatorCfg(flags)
 
         kwargs.setdefault('MdtCreator', result.popToolsAndMerge(acc))
     

@@ -1068,11 +1068,13 @@ def MuonLayerAmbiguitySolverToolCfg(flags, name="MuonLayerAmbiguitySolverTool", 
 
 
 def MdtDriftCircleOnTrackCreatorStauCfg(flags, name="MdtDriftCircleOnTrackCreatorStau", **kwargs):
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MdtCalibWindowNumber
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MdtCalibWindowNumber, MdtCalibToolForRotsCfg
+    result = ComponentAccumulator()
     kwargs.setdefault("TimingMode", 3)
-    kwargs.setdefault("TimeWindowSetting",
-                      MdtCalibWindowNumber('Collision_t0fit'))
-    return MdtDriftCircleOnTrackCreatorCfg(flags, name, **kwargs)
+    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(MdtCalibToolForRotsCfg(flags, TimeWindowSetting = MdtCalibWindowNumber('Collision_t0fit') )) )
+    the_tool = result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags, name, **kwargs))
+    result.setPrivateTools(the_tool)
+    return result
 
 
 def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
