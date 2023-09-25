@@ -115,7 +115,7 @@ AmgSymMatrix(DIM) projection_T(const AmgSymMatrix(5) & M, int key)
 {
   if (key == 3 || key == 7 || key == 15) { // shortcuts for the most common use
                                            // cases
-    return M.block<DIM, DIM>(0, 0);
+    return M.topLeftCorner<DIM, DIM>();
   } else {
     Eigen::Matrix<int, DIM, 1, 0, DIM, 1> iv;
     iv.setZero();
@@ -170,7 +170,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   }
   R = 1. / R;
   // --- compute Kalman gain matrix
-  AmgMatrix(5, 1) K = trkCov.block<5, 1>(0, mk) * R;
+  AmgVector(5) K = trkCov.col(mk) * R;
   // --- compute local filtered state, here = TP+K*r = TP + TCov * H.T * R * r
   AmgVector(5) newPar = trkPar + trkCov.col(mk) * R * r;
 
@@ -266,11 +266,11 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
   const AmgVector(5)& trkPar = TP.parameters();
   // reduction matrix
   AmgMatrix(DIM, 5) H =
-    s_reMatrices.expansionMatrix(paramKey).block<DIM, 5>(0, 0);
+    s_reMatrices.expansionMatrix(paramKey).topLeftCorner<DIM, 5>();
   // the projected parameters from the TrackParameters
   AmgVector(DIM) projTrkPar;
   if (paramKey == 3 || paramKey == 7 || paramKey == 15) {
-    projTrkPar = trkPar.block<DIM, 1>(0, 0);
+    projTrkPar = trkPar.head<DIM>();
   } else {
     projTrkPar = H * trkPar;
   }
@@ -339,8 +339,8 @@ filterStep(Trk::TrackParameters& trackParameters,
     case 2: {
       return calculateFilterStep_T<2>(trackParameters,
                                       *trkCov,
-                                      measurement.block<2, 1>(0, 0),
-                                      measCovariance.block<2, 2>(0, 0),
+                                      measurement.head<2>(),
+                                      measCovariance.topLeftCorner<2, 2>(),
                                       measurement.parameterKey(),
                                       sign,
                                       fitQos);
@@ -348,8 +348,8 @@ filterStep(Trk::TrackParameters& trackParameters,
     case 3: {
       return calculateFilterStep_T<3>(trackParameters,
                                       *trkCov,
-                                      measurement.block<3, 1>(0, 0),
-                                      measCovariance.block<3, 3>(0, 0),
+                                      measurement.head<3>(0),
+                                      measCovariance.topLeftCorner<3, 3>(),
                                       measurement.parameterKey(),
                                       sign,
                                       fitQos);
@@ -357,8 +357,8 @@ filterStep(Trk::TrackParameters& trackParameters,
     case 4: {
       return calculateFilterStep_T<4>(trackParameters,
                                       *trkCov,
-                                      measurement.block<4, 1>(0, 0),
-                                      measCovariance.block<4, 4>(0, 0),
+                                      measurement.head<4>(0),
+                                      measCovariance.topLeftCorner<4, 4>(),
                                       measurement.parameterKey(),
                                       sign,
                                       fitQos);
@@ -366,8 +366,8 @@ filterStep(Trk::TrackParameters& trackParameters,
     case 5: {
       return calculateFilterStep_5D(trackParameters,
                                     *trkCov,
-                                    measurement.block<5, 1>(0, 0),
-                                    measCovariance.block<5, 5>(0, 0),
+                                    measurement.head<5>(),
+                                    measCovariance.topLeftCorner<5, 5>(),
                                     sign,
                                     fitQos);
     }
@@ -423,7 +423,7 @@ makeChi2_T(Trk::FitQualityOnSurface& updatedFitQoS,
 
 { // sign: -1 = updated, +1 = predicted parameters.
   const AmgMatrix(DIM, 5) H =
-    s_reMatrices.expansionMatrix(paramKey).block<DIM, 5>(0, 0);
+    s_reMatrices.expansionMatrix(paramKey).topLeftCorner<DIM, 5>();
   const AmgVector(DIM) r = measPar - H * trkPar;
   // get the projected matrix
   AmgSymMatrix(DIM) R = sign * projection_T<DIM>(trkCov, paramKey);
@@ -465,7 +465,7 @@ stateFitQuality(Trk::FitQualityOnSurface& updatedFitQoS,
                            trkPar.parameters(),
                            (*trkPar.covariance()),
                            position,
-                           covariance.block<2, 2>(0, 0),
+                           covariance.topLeftCorner<2, 2>(),
                            3,
                            predFull);
     }
@@ -490,7 +490,7 @@ calculateWeight_T(const Trk::TrackParameters* componentTrackParameters,
 {
   // Define the expansion matrix
   const AmgMatrix(DIM, 5) H =
-    s_reMatrices.expansionMatrix(paramKey).block<DIM, 5>(0, 0);
+    s_reMatrices.expansionMatrix(paramKey).topLeftCorner<DIM, 5>();
 
   // Calculate the residual
   AmgVector(DIM) r = measPar - H * componentTrackParameters->parameters();
@@ -545,10 +545,10 @@ calculateWeight_2D_3(const Trk::TrackParameters* componentTrackParameters,
 {
   // Calculate the residual
   AmgVector(2) r =
-    measPar - componentTrackParameters->parameters().block<2, 1>(0, 0);
+    measPar - componentTrackParameters->parameters().head<2>();
   // Residual covariance. Posterior weights is calculated used predicted state
   // and measurement. Therefore add covariances
-  AmgSymMatrix(2) R(measCov + predictedCov->block<2, 2>(0, 0));
+  AmgSymMatrix(2) R(measCov + predictedCov->topLeftCorner<2, 2>());
   // compute determinant of residual
   const double det = R.determinant();
   if (det == 0) {
@@ -613,14 +613,14 @@ weights(Trk::MultiComponentState&& predictedState,
           result = calculateWeight_2D_3(
             componentTrackParameters,
             predictedCov,
-            measurementLocalParameters.block<2, 1>(0, 0),
-            measurement.localCovariance().block<2, 2>(0, 0));
+            measurementLocalParameters.head<2>(),
+            measurement.localCovariance().topLeftCorner<2, 2>());
         } else {
           result = calculateWeight_T<2>(
             componentTrackParameters,
             predictedCov,
-            measurementLocalParameters.block<2, 1>(0, 0),
-            measurement.localCovariance().block<2, 2>(0, 0),
+            measurementLocalParameters.head<2>(),
+            measurement.localCovariance().topLeftCorner<2, 2>(),
             measurementLocalParameters.parameterKey());
         }
       } break;
@@ -628,24 +628,24 @@ weights(Trk::MultiComponentState&& predictedState,
         result =
           calculateWeight_T<3>(componentTrackParameters,
                                predictedCov,
-                               measurementLocalParameters.block<3, 1>(0, 0),
-                               measurement.localCovariance().block<3, 3>(0, 0),
+                               measurementLocalParameters.head<3>(),
+                               measurement.localCovariance().topLeftCorner<3, 3>(),
                                measurementLocalParameters.parameterKey());
       } break;
       case 4: {
         result =
           calculateWeight_T<4>(componentTrackParameters,
                                predictedCov,
-                               measurementLocalParameters.block<4, 1>(0, 0),
-                               measurement.localCovariance().block<4, 4>(0, 0),
+                               measurementLocalParameters.head<4>(),
+                               measurement.localCovariance().topLeftCorner<4, 4>(),
                                measurementLocalParameters.parameterKey());
       } break;
       case 5: {
         result =
           calculateWeight_T<5>(componentTrackParameters,
                                predictedCov,
-                               measurementLocalParameters.block<5, 1>(0, 0),
-                               measurement.localCovariance().block<5, 5>(0, 0),
+                               measurementLocalParameters.head<5>(),
+                               measurement.localCovariance().topLeftCorner<5, 5>(),
                                measurementLocalParameters.parameterKey());
       } break;
       default: {
