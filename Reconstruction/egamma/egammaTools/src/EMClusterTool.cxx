@@ -99,9 +99,7 @@ EMClusterTool::setNewCluster(
   }
   using ClusterLink_t = ElementLink<xAOD::CaloClusterContainer>;
   //create new cluster
-  xAOD::CaloCluster* cluster = new xAOD::CaloCluster();
-  //store owns it
-  outputClusterContainer->push_back(cluster);
+xAOD::CaloCluster* cluster = outputClusterContainer->push_back(std::make_unique<xAOD::CaloCluster>());
   //copy over 
   (*cluster)=*(eg->caloCluster());
   //and do final calibration
