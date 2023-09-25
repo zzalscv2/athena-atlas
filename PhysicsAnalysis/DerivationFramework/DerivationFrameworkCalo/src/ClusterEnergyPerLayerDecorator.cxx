@@ -116,8 +116,8 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decorations;
     for (unsigned int i = 0; i < m_layers.size(); i++) {
       decorations.emplace_back(
-        SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-          m_SGKey_photons_decorations[i], ctx));
+        
+          m_SGKey_photons_decorations[i], ctx);
     }
 
     // Decorate photons
@@ -142,8 +142,8 @@ DerivationFramework::ClusterEnergyPerLayerDecorator::addBranches() const
     std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decorations;
     for (unsigned int i = 0; i < m_layers.size(); i++) {
       decorations.emplace_back(
-        SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-          m_SGKey_electrons_decorations[i], ctx));
+        
+          m_SGKey_electrons_decorations[i], ctx);
     }
 
     // Decorate electrons

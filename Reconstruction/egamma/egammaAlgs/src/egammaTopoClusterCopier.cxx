@@ -123,7 +123,7 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     const double clusterE = clus->e();
     const double aeta = std::abs(clus->eta());
 
-    const bool valid_for_central = !(aeta > m_etaCut || clusterE < m_ECut);
+    const bool valid_for_central = aeta <= m_etaCut && clusterE >= m_ECut;
     bool valid_for_fwd = false;
 
     if (m_doForwardClusters) {
@@ -134,10 +134,10 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
       const double aetaLC = std::abs(clus->getSisterCluster()->eta());
       if (m_hasITk) {
         // When we do actually ITK these should be EM.
-        valid_for_fwd = !(aeta < m_fwdEtaCut || clusterET < m_fwdETCut);
+        valid_for_fwd = aeta >= m_fwdEtaCut && clusterET >= m_fwdETCut;
       } else {
         // Without ITK we need the LC.
-        valid_for_fwd = !(aetaLC < m_fwdEtaCut || clusterETLC < m_fwdETCut);
+        valid_for_fwd = aetaLC >= m_fwdEtaCut && clusterETLC >= m_fwdETCut;
       }
     }
 

@@ -354,7 +354,7 @@ private:
 
   corr_pileupShift* m_pileup_tool = nullptr;
 
-  bool m_aodFixMissingCells;
+  bool m_aodFixMissingCells = false;
 };
 
 #endif // EGAMMA_LAYER_RECALIB_TOOL

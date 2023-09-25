@@ -889,7 +889,7 @@ egammaLayerRecalibTool::egammaLayerRecalibTool(const std::string& tune)
 
 void egammaLayerRecalibTool::add_scale(InputModifier* modifier, GetAmountBase* amount)
 {
-  m_modifiers.push_back(std::make_pair(modifier, amount));
+  m_modifiers.emplace_back(modifier, amount);
 }
 
 CP::CorrectionCode egammaLayerRecalibTool::scale_inputs(StdCalibrationInputs & inputs) const

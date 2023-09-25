@@ -194,7 +194,7 @@ EGElectronAmbiguityTool::addBranches() const
 
     // Electron preselection
     if (ele->pt() < m_elepTCut ||
-        !(!m_idCut.empty() && aidCut.isAvailable(*ele) && aidCut(*ele)))
+        m_idCut.empty() || !aidCut.isAvailable(*ele) || !aidCut(*ele))
       continue;
 
     // Just for debug
@@ -226,7 +226,7 @@ EGElectronAmbiguityTool::addBranches() const
       // Close-by
       double dR = eleIDtp->p4().DeltaR(tp->p4());
       double dz = std::abs(eleIDtp->z0() - tp->z0()) * sin(eleIDtp->theta());
-      if (!(dR < 0.3 && dz < m_dzCut))
+      if (dR >= 0.3 || dz >= m_dzCut)
         continue;
 
       // With minimum number of Si hits
@@ -272,7 +272,7 @@ EGElectronAmbiguityTool::addBranches() const
 
     // Electron preselection
     if (ele->pt() < m_elepTCut ||
-        !(!m_idCut.empty() && aidCut.isAvailable(*ele) && aidCut(*ele)))
+        m_idCut.empty() || !aidCut.isAvailable(*ele) || !aidCut(*ele))
       continue;
 
     // Henri's circles
@@ -338,7 +338,7 @@ DerivationFramework::EGElectronAmbiguityTool::decorateSimple(
     // Close-by
     double dR = eletrkP->p4().DeltaR(tp->p4());
     double dz = std::abs(eletrkP->z0() - tp->z0()) * sin(eletrkP->theta());
-    if (!(dR < 0.3 && dz < m_dzCut))
+    if (dR >= 0.3 || dz >= m_dzCut)
       continue;
 
     double deta = std::abs(eletrkP->eta() - tp->eta());
