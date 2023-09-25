@@ -184,7 +184,6 @@ private:
     PropDirection dir = alongMomentum,
     ParticleHypothesis particle = pion) const;
 
-  Trk::MaterialInteraction m_matInt;  //!< MaterialInterAction.h
   bool m_detailedEloss;               //!< provide extended EnergyLoss info
   bool m_optimalRadiation;  //!< use calorimeter more optimal for radiation
                             //!< detection
