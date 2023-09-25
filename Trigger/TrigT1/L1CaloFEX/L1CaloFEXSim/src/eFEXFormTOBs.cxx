@@ -58,9 +58,9 @@ uint32_t eFEXFormTOBs::formTauTOBWord(int fpga, int eta, int phi, unsigned int e
   return tobWord;
 }
 
-uint32_t eFEXFormTOBs::formTauBDTTOBWord(int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int bdtCondition, unsigned int ptMinTopo) const
+uint32_t eFEXFormTOBs::formTauBDTTOBWord(int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int bdtCondition, unsigned int bdtSeed, unsigned int ptMinTopo) const
 {
-  uint32_t tobWord = doFormTauTOBWord(fpga, eta, phi, et, rhad, bdtCondition, 0, 0, ptMinTopo, 1);
+  uint32_t tobWord = doFormTauTOBWord(fpga, eta, phi, et, rhad, bdtCondition, bdtSeed, 0, ptMinTopo, 1);
   ATH_MSG_DEBUG("Tau BDT tobword: " << std::bitset<32>(tobWord) );
   return tobWord;
 }
@@ -97,9 +97,9 @@ std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int efexid, int fpga, int 
   return tobWords;
 }
 
-std::vector<uint32_t>  eFEXFormTOBs::formTauBDTxTOBWords(int efexid, int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int bdtCondition, unsigned int ptMinTopo, unsigned int bdtScore) const
+std::vector<uint32_t>  eFEXFormTOBs::formTauBDTxTOBWords(int efexid, int fpga, int eta, int phi, unsigned int et, unsigned int rhad, unsigned int bdtCondition, unsigned int bdtSeed, unsigned int ptMinTopo, unsigned int bdtScore) const
 {
-  std::vector<uint32_t> tobWords = doFormTauxTOBWords(efexid, fpga, eta, phi, et, rhad, bdtCondition, 0, 0, ptMinTopo, 1);
+  std::vector<uint32_t> tobWords = doFormTauxTOBWords(efexid, fpga, eta, phi, et, rhad, bdtCondition, bdtSeed, 0, ptMinTopo, 1);
   if ( (tobWords[0] > 0) or (tobWords[1] > 0) ) {
     tobWords[0] += bdtScore;
   }

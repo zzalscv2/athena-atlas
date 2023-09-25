@@ -36,7 +36,7 @@ namespace xAOD {
 
       /** Quantities derived from TOB data, stored for convenience */
       setEt( etTOB()*s_tobEtScale );
-      float etaVal = iEta()*s_towerEtaWidth + (seed()+0.5)*s_towerEtaWidth/4;
+      float etaVal = computeEta();
       setEta( etaVal );
       float phiVal = iPhi() * M_PI/32. + M_PI/64.;
       if (phiVal > M_PI) phiVal = phiVal - 2.*M_PI;
@@ -60,7 +60,7 @@ namespace xAOD {
 
       /** Quantities derived from TOB data, stored for convenience */
       setEt( etTOB()*s_tobEtScale );
-      float etaVal = iEta()*s_towerEtaWidth + (seed()+0.5)*s_towerEtaWidth/4;
+      float etaVal = computeEta();
       setEta( etaVal );
       float phiVal = iPhi() * M_PI/32. + M_PI/64.;
       if (phiVal > M_PI) phiVal = phiVal - 2.*M_PI;
@@ -175,7 +175,7 @@ namespace xAOD {
    /// Tau BDT score, only available in xTOBs 
    unsigned int eFexTauRoI_v1::bdtScore() const {
      /// Was the BDT algorithm run?
-     if (tobVersion() != 1) return 0;
+     if (tobVersion() != BDT) return 0;
      /// If the object is not an xTOB this will return 0
      return (word0() >> s_bdtScoreBit) & s_bdtScoreMask;
    }
@@ -184,13 +184,13 @@ namespace xAOD {
    /// Results of the rCore discriminant algorithm
    unsigned int eFexTauRoI_v1::rCoreThresholds() const {
      // Return rCore results if used, otherwise return 0
-    return (tobVersion() == 0 ? tauOneThresholds() : 0);
+    return (tobVersion() == Heuristic ? tauOneThresholds() : 0);
    }
    
    /// Results of BDT discriminant algorithm
    unsigned int eFexTauRoI_v1::bdtThresholds() const {
      // Return BDT results if used, otherwise return 0
-    return (tobVersion() == 1 ? tauOneThresholds() : 0);
+    return (tobVersion() == BDT ? tauOneThresholds() : 0);
    }
     
    /// Results of the rHad discriminant algorithm
@@ -284,6 +284,13 @@ namespace xAOD {
      /// Value corresponds to 4*lower eta edge of supercell (so 0 means 0.0 -> 0.025) 
      return iEta()*4 + seed();
 
+   }
+
+   float eFexTauRoI_v1::computeEta() const {
+     if (tobVersion() == Heuristic) {
+       return iEta()*s_towerEtaWidth + (seed()+0.5)*s_towerEtaWidth/4;
+     } 
+     return iEta()*s_towerEtaWidth + s_towerEtaWidth/2;
    }
 
 
