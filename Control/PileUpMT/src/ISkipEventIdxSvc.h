@@ -38,8 +38,8 @@ struct fmt::formatter<ISkipEventIdxSvc::EvtId> : formatter<string_view> {
   template <typename FormatContext>
   auto format(const ISkipEventIdxSvc::EvtId& evtId, FormatContext& ctx) {
     auto out = memory_buffer();
-    format_to(out, "[Run: {}, LB: {}, Evt: {} ({})]", evtId.runNum, evtId.lbNum,
-              evtId.evtNum, evtId.evtIdx);
+    format_to(std::back_inserter(out), "[Run: {}, LB: {}, Evt: {} ({})]",
+              evtId.runNum, evtId.lbNum, evtId.evtNum, evtId.evtIdx);
     const string_view str(out.data(), out.size());
     return formatter<string_view>::format(str, ctx);
   }
