@@ -5,7 +5,7 @@ from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.Enums import LHCPeriod
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
     LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
-from AthenaCommon.SystemOfUnits import m
+from AthenaCommon.SystemOfUnits import m, ns
 
 #todo? add in the explanatory text from previous implementation
 
@@ -131,6 +131,15 @@ def createSimConfigFlags():
     scf.addFlag("Sim.VertexSource", VertexSource.CondDB, enum=VertexSource)
     scf.addFlag("Sim.VertexTimeSmearing", lambda prevFlags:
                 prevFlags.GeoModel.Run >= LHCPeriod.Run4)
+
+    def _checkVertexTimeWidth(prevFlags):
+        default = 0.175*ns
+        vertexTimeWidth  = default
+        if prevFlags.Input.Files:
+            vertexTimeWidth = GetFileMD(prevFlags.Input.Files).get("VertexTimeWidth", default)
+        return vertexTimeWidth
+
+    scf.addFlag("Sim.VertexTimeWidth", _checkVertexTimeWidth)
 
     # G4UserActions
     scf.addFlag("Sim.NRRThreshold", False)

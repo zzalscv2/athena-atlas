@@ -64,6 +64,7 @@ def VertexBeamCondPositionerCfg(flags, name="VertexBeamCondPositioner", **kwargs
 
     kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("SimpleTimeSmearing", flags.Sim.VertexTimeSmearing)
+    kwargs.setdefault("TimeWidth", flags.Sim.VertexTimeWidth)
 
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
