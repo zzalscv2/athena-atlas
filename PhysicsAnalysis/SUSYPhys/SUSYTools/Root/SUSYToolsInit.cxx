@@ -1127,7 +1127,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
   if( !m_elecEfficiencySFTool_chf.isUserConfigured() ) {
     m_elecEfficiencySFTool_chf.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
-    std::vector<std::string> corrFileNamechf = {"ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/additional/efficiencySF.ChargeID."+tmpIDWP+"_d0z0_v13_"+tmpIsoWP+"_ECIDSloose.root"};
+    std::vector<std::string> corrFileNamechf = {"ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v2/additional/efficiencySF.ChargeID."+tmpIDWP+"_d0z0_v13_"+tmpIsoWP+"_ECIDSloose.root"};
     ATH_CHECK( m_elecEfficiencySFTool_chf.setProperty("CorrectionFileNameList", corrFileNamechf) );
     if(!isData()){
       ATH_CHECK( m_elecEfficiencySFTool_chf.setProperty("ForceDataType", (int) (data_type==PATCore::ParticleDataType::Fast)? PATCore::ParticleDataType::Full : data_type) );
