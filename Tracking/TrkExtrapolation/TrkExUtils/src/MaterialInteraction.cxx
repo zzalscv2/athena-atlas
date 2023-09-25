@@ -58,7 +58,8 @@ constexpr double s_me = Trk::ParticleMasses::mass[Trk::electron];
 #if (defined(__GNUC__) || defined(__clang__))
 [[gnu::always_inline]]
 #endif
-inline double MeanExcitationEnergy(const Trk::Material& mat) {
+inline double
+MeanExcitationEnergy(const Trk::Material& mat) {
   // 16 eV * Z**0.9 - bring to MeV
   return 16.e-6 * std::pow(mat.averageZ(), 0.9);
 }
@@ -66,8 +67,9 @@ inline double MeanExcitationEnergy(const Trk::Material& mat) {
 #if (defined(__GNUC__) || defined(__clang__))
 [[gnu::always_inline]]
 #endif
-inline double DensityEffect(const double zOverAtimesRho, const double eta2,
-                            const double gamma, const double I) {
+inline double
+DensityEffect(const double zOverAtimesRho, const double eta2,
+              const double gamma, const double I) {
 
   // density effect. Done for gamma > 10  ( p > 1GeV for muons)
   // see ATLASRECTS-3144 and ATLASRECTS-7586
@@ -84,7 +86,8 @@ inline double DensityEffect(const double zOverAtimesRho, const double eta2,
 #if (defined(__GNUC__) || defined(__clang__))
 [[gnu::always_inline]]
 #endif
-inline double KAZ(const double zOverAtimesRho) {
+inline double
+KAZ(const double zOverAtimesRho) {
   // K/A*Z = 0.5 * 30.7075MeV/(g/mm2) * Z/A * rho[g/mm3]
   return 0.5 * 30.7075 * zOverAtimesRho;
 }
@@ -92,8 +95,9 @@ inline double KAZ(const double zOverAtimesRho) {
 #if (defined(__GNUC__) || defined(__clang__))
 [[gnu::always_inline]]
 #endif
-inline double LandauMPV(const double kazL, const double eta2, const double I,
-                        const double beta, const double delta) {
+inline double
+LandauMPV(const double kazL, const double eta2, const double I,
+          const double beta, const double delta) {
   // PDG 2022 Eq 34.12
   return -kazL * (std::log(2. * s_me * eta2 / I) + std::log(kazL / I) + 0.2 -
                   (beta * beta) - delta);
@@ -132,7 +136,7 @@ double Trk::MaterialInteraction::dEdl_ionization(
     // 79 (1994), 157-164
     Ionization = -kaz * (2. * log(2. * s_me / I) + 3. * log(gamma) - 1.95);
     //  sigmaL --> FWHM of Landau
-    sigma = 4 * kaz ;
+    sigma = 4 * kaz;
   } else {
     double eta2 = beta * gamma;
     eta2 *= eta2;
@@ -153,6 +157,41 @@ double Trk::MaterialInteraction::dEdl_ionization(
     kazL = kaz * factor;
   }
   return Ionization;
+}
+
+double Trk::MaterialInteraction::dEdXBetheBloch(
+    const Trk::MaterialProperties& mat, double beta, double gamma,
+    Trk::ParticleHypothesis particle) {
+  if (particle == Trk::undefined || particle == Trk::nonInteracting) {
+    return 0.;
+  }
+
+  if (mat.averageZ() == 0. || mat.zOverAtimesRho() == 0.) {
+    return 0.;
+  }
+  const double iPot = 16.e-6 * std::pow(mat.averageZ(), 0.9);
+  const double m = Trk::ParticleMasses::mass[particle];
+  const double zOverAtimesRho = mat.zOverAtimesRho();
+  double kaz = KAZ(mat.zOverAtimesRho());
+
+  if (particle != Trk::electron) {
+    double eta2 = beta * gamma;
+    eta2 *= eta2;
+    double delta = DensityEffect(zOverAtimesRho, eta2, gamma, iPot);
+    // mass fraction
+    double mfrac = s_me / m;
+    // tmax - cut off energy
+    double tMax = 2. * eta2 * s_me / (1. + 2. * gamma * mfrac + mfrac * mfrac);
+    // divide by beta^2 for non-electrons
+    kaz /= beta * beta;
+    // return PDG 2022 Eq 34.5
+    return kaz * (std::log(2. * s_me * eta2 * tMax / (iPot * iPot)) -
+                  2. * (beta * beta) - delta);
+  }
+  // for electrons use slightly different BetheBloch adaption
+  // see Stampfer, et al, "Track Fitting With Energy Loss", Comp. Pyhs. Comm. 79
+  // (1994), 157-164
+  return kaz * (2. * std::log(2. * s_me / iPot) + 3. * std::log(gamma) - 1.95);
 }
 
 /** Most Propable dE ionization energly loss
@@ -178,7 +217,7 @@ double Trk::MaterialInteraction::dE_MPV_ionization(
   // divide by beta^2 for non-electrons
   kaz /= beta * beta;
   kazL = kaz * path;
-  const double MPV = LandauMPV(kazL,eta2,I,beta,delta);
+  const double MPV = LandauMPV(kazL, eta2, I, beta, delta);
   sigma = 0.424 * 4. * kazL;  // 0.424 FWHM to sigma
 
   return MPV;
@@ -220,6 +259,17 @@ double Trk::MaterialInteraction::dEdl_radiation(
   sigma = sigma / mat.x0();
 
   return Radiation / mat.x0();
+}
+
+double Trk::MaterialInteraction::dEdXBetheHeitler(
+    const Trk::MaterialProperties& mat, double initialE,
+    Trk::ParticleHypothesis particle) {
+  if (particle == Trk::undefined || particle == Trk::nonInteracting) {
+    return 0.;
+  }
+  double mfrac = (s_me / Trk::ParticleMasses::mass[particle]);
+  mfrac *= mfrac;
+  return initialE / mat.x0() * mfrac;
 }
 
 /** multiple scattering as function of dInX0 */
