@@ -51,7 +51,7 @@ atlas_add_citest( OverlayRun3MC_Legacy
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
 
 atlas_add_citest( RecoRun2Data_Legacy
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA False --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11' --no-output-checks )

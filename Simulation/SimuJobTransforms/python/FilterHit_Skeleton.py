@@ -8,6 +8,10 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from AthenaConfiguration import AllConfigFlags
 del AllConfigFlags.ConfigFlags
 
+# force no legacy job properties
+from AthenaCommon import JobProperties
+JobProperties.jobPropertiesDisallowed = True
+
 
 def getStreamHITS_ItemList(flags):
     #--------------------------------------------------------------

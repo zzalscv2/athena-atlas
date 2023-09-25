@@ -61,6 +61,10 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauJetDeepSetConfig_v2", ["tauid_1p_R22_dpst_noTrackScore.json", "tauid_2p_R22_dpst_noTrackScore.json", "tauid_3p_R22_dpst_noTrackScore.json"])
     tau_cfg.addFlag("Tau.TauJetDeepSetWP_v2", ["model_1p_R22_dpst_noTrackScore.root", "model_2p_R22_dpst_noTrackScore.root", "model_3p_R22_dpst_noTrackScore.root"])
 
+    # PanTau config flags
+    from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags
+    tau_cfg.addFlagsCategory("Tau.PanTau", createPanTauConfigFlags, prefix=True)
+
     # create 2 flag categories, for standard taus and electron-subtracted taus
     tau_cfg.addFlagsCategory("Tau.TauRec", createTauRecConfigFlags, prefix=True)
     tau_cfg.addFlagsCategory("Tau.TauEleRM", createTauEleRMConfigFlags, prefix=True)
