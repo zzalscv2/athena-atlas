@@ -459,6 +459,7 @@ namespace EL
     static const std::string optGridNJobs;
     static const std::string optGridMaxFileSize;
     static const std::string optGridMaxNFilesPerJob;
+    static const std::string optGridNEventsPerJob;
     static const std::string optGridExpress;
     static const std::string optGridNoSubmit;
     static const std::string optGridMergeOutput;

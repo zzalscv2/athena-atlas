@@ -78,6 +78,7 @@ namespace EL
   const std::string Job::optGridNJobs = "nc_nJobs";
   const std::string Job::optGridMaxFileSize = "nc_maxFileSize";
   const std::string Job::optGridMaxNFilesPerJob = "nc_maxNFilesPerJob";
+  const std::string Job::optGridNEventsPerJob = "nc_nEventsPerJob";
   const std::string Job::optGridExpress = "nc_express";
   const std::string Job::optGridNoSubmit = "nc_noSubmit";
   const std::string Job::optGridMergeOutput = "nc_mergeOutput";

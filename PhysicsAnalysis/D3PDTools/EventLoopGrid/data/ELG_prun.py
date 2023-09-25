@@ -29,6 +29,7 @@ def ELG_prun(sample) :
             'maxCpuCount',
             'nFiles',
             'nFilesPerJob',
+            'nEventsPerJob',
             'nJobs',
             'maxFileSize',
             'maxNFilesPerJob',
@@ -51,16 +52,24 @@ def ELG_prun(sample) :
                 'useAthenaPackages',
                 'avoidVP']
 
+    using_nEventsPerJob = False
     from ROOT import SH
     for opt in opts :
         arg = sample.meta().castDouble('nc_' + opt, -1, SH.MetaObject.CAST_NOCAST_DEFAULT)
         if abs(arg + 1) > 1e-6 :
             cmd += ["--" + opt + "=" + str(int(round(arg)))]
+            if opt=="nEventsPerJob":
+                using_nEventsPerJob=True
         else :
             arg = sample.meta().castString('nc_' + opt)
             if len(arg) :
                 cmd += ["--" + opt + "=" + arg]
-    
+
+    # nGBPerJob and nEventsPerJob are incompatible to prun
+    if using_nEventsPerJob:
+        cmd = [ x for x in cmd if "nGBPerJob" not in x ]
+        print(cmd)
+
     for switch in switches :
         arg = sample.meta().castDouble('nc_' + switch, 0, SH.MetaObject.CAST_NOCAST_DEFAULT)
         if arg != 0 :
@@ -80,7 +89,10 @@ def ELG_prun(sample) :
                     'match']                    
 
     for opt in internalOpts :
-        cmd += ["--" + opt + "=" + sample.meta().castString('nc_' + opt)]
+        value = sample.meta().castString('nc_' + opt)
+        if opt == "exec" and using_nEventsPerJob:
+            value += " %SKIPEVENTS %MAXEVENTS"
+        cmd += ["--" + opt + "=" + value]
 
     if sample.meta().castDouble('nc_mergeOutput', 1, SH.MetaObject.CAST_NOCAST_DEFAULT) == 0 or sample.meta().castString('nc_mergeOutput').upper() == 'FALSE' :
         #don't set merge script 
