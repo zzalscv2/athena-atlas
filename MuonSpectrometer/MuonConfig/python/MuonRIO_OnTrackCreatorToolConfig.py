@@ -59,38 +59,35 @@ def CscClusterOnTrackCreatorCfg(flags,name="CscClusterOnTrackCreator", **kwargs)
     return result
 
 
-def MdtDriftCircleOnTrackCreatorCfg(flags,name="MdtDriftCircleOnTrackCreator", **kwargs):
-    result=ComponentAccumulator()
-    margs = dict()
-    margs.setdefault("DoMagneticFieldCorrection", flags.Muon.Calib.correctMdtRtForBField)
-    margs.setdefault("DoWireSagCorrection", flags.Muon.useWireSagCorrections)
-    margs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
-
-
+def MdtCalibToolForRotsCfg(flags, name ="MdtCalibrationTool", **kwargs):
+    kwargs.setdefault("DoMagneticFieldCorrection", flags.Muon.Calib.correctMdtRtForBField)
+    kwargs.setdefault("DoWireSagCorrection", flags.Muon.useWireSagCorrections)
+    kwargs.setdefault("DoSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     if flags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]:
-        margs.setdefault("DoTofCorrection", False)
+        kwargs.setdefault("DoTofCorrection", False)
+    else:
+        kwargs.setdefault("DoTofCorrection", True)
+        kwargs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_data'))
+    return MdtCalibrationToolCfg(flags, name = name, **kwargs)
+
+def MdtDriftCircleOnTrackCreatorCfg(flags,name="MdtDriftCircleOnTrackCreator", **kwargs):
+    result = ComponentAccumulator()
+    if flags.Beam.Type in [BeamType.Cosmics, BeamType.SingleBeam]:
         kwargs.setdefault("DoFixedError", True)
         kwargs.setdefault("TimingMode", 1)
         kwargs.setdefault("UseParametrisedError", True)
         kwargs.setdefault("ApplyToF", False)
 
     else: # collisions simulation/data settings
-        margs.setdefault("DoTofCorrection", True)
+        kwargs.setdefault("UseParametrisedError", False)
         kwargs.setdefault("DoFixedError", False)
         kwargs.setdefault("DoErrorScaling", False)
-        margs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_data'))  # MJW: should this be Collision_G4 ???
-        kwargs.setdefault("UseParametrisedError", False)
 
         if not flags.Input.isMC : 
             kwargs.setdefault("CreateTubeHit", True)  # BroadErrors
             kwargs.setdefault("UseLooseErrors", flags.Muon.useLooseErrorTuning)  # LooseErrors on data                          
-    
-    calibSettings = ["DoTofCorrection", "TimeWindowSetting"]
-    for cSett in calibSettings:
-        if cSett in kwargs: 
-          margs[cSett] =  kwargs.pop(cSett)
-    
-    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge( MdtCalibrationToolCfg(flags, **margs)) )
+
+    kwargs.setdefault("CalibrationTool", result.popToolsAndMerge( MdtCalibToolForRotsCfg(flags)) )
     kwargs.setdefault("IsMC", flags.Input.isMC)
 
     result.setPrivateTools(CompFactory.Muon.MdtDriftCircleOnTrackCreator(name, WasConfigured=True, **kwargs))
