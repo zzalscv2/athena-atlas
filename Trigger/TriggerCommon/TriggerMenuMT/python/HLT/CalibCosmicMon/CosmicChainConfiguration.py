@@ -26,7 +26,7 @@ def CosmicsTrkSequence(flags):
     trkInputMakerAlg = EventViewCreatorAlgorithm("IMCosmicTrkEventViewCreator")
     trkInputMakerAlg.ViewFallThrough = True
     trkInputMakerAlg.RoITool = ViewCreatorInitialROITool()
-    trkInputMakerAlg.InViewRoIs = "InputRoI" # contract with the consumer
+    trkInputMakerAlg.InViewRoIs = "CosmicRoIs" # contract with the consumer
     trkInputMakerAlg.Views = "CosmicViewRoIs"
     trkInputMakerAlg.RequireParentView = False
 

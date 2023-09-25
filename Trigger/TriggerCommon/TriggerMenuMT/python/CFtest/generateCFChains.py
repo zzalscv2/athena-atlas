@@ -71,7 +71,10 @@ def generateCFChains(flags, opt):
             mufastS= menuSequenceCAToGlobalWrapper(muFastSequence,flags)
         step1mufast=makeChainStep("Step1_muFast", [ mufastS ])
         # step2
-        mucombS = muCombSequence(flags)
+        if isComponentAccumulatorCfg():
+            mucombS = muCombSequence(flags)
+        else:
+            mucombS = menuSequenceCAToGlobalWrapper(muCombSequence, flags)
         step2muComb=makeChainStep("Step2_muComb", [ mucombS ])
         # step3
         if isComponentAccumulatorCfg():
@@ -231,7 +234,11 @@ def generateCFChains(flags, opt):
         else:
             muFast = menuSequenceCAToGlobalWrapper(muFastSequence,flags)
         step1_dimufast=makeChainStep("Step1_dimuFast", [muFast], multiplicity=[2])
-        step2_dimuComb=makeChainStep("Step2_dimuComb", [muCombSequence(flags)], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
+        if isComponentAccumulatorCfg():
+            mucombS = muCombSequence(flags)
+        else:
+            mucombS = menuSequenceCAToGlobalWrapper(muCombSequence,flags)
+        step2_dimuComb=makeChainStep("Step2_dimuComb", [mucombS], multiplicity=[2], comboHypoCfg=functools.partial(StreamerDimuL2ComboHypoCfg,flags))
         if isComponentAccumulatorCfg():
             muEFSAS = muEFSASequence(flags)
         else:

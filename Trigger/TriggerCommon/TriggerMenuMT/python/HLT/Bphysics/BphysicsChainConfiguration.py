@@ -39,7 +39,10 @@ else:
 #--------------------------------------------------------
 
 def dimuL2SequenceCfg(flags):
-    return dimuL2Sequence(flags)
+    if isComponentAccumulatorCfg():
+        return dimuL2Sequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(dimuL2Sequence,flags)
 
 def dimuEFSequenceCfg(flags):
     if isComponentAccumulatorCfg():
