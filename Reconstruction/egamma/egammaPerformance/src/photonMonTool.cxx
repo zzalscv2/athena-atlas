@@ -82,27 +82,10 @@
 #include "TH2F.h"
 
 photonMonTool::photonMonTool(const std::string & type, const std::string & name, const IInterface* parent)
-  :  egammaMonToolBase(type,name,parent),
-     m_photonGroup(nullptr),
-     m_photonConvGroup(nullptr),
-     m_photonUnconvGroup(nullptr),
-     m_photonIdGroup(nullptr),
-     m_photonRegionGroup(nullptr),
-     m_photonLBGroup(nullptr)
+  :  egammaMonToolBase(type,name,parent)
 {
   m_CbTightPhotons = new photonHist(std::string("CbTight"));
-  m_CbTightPhotons->m_lumiBlockNumber = 0;
-  m_CbTightPhotons->m_nPhotonsInCurrentLB = 0;
-  m_CbTightPhotons->m_nPhotonsPerLumiBlock.clear();
-  m_CbTightPhotons->m_nPhotonsPerRegion.clear();
-  m_CbTightPhotons->m_nPhotons=0;
-
   m_CbLoosePhotons = new photonHist(std::string("CbLoose"));
-  m_CbLoosePhotons->m_lumiBlockNumber = 0;
-  m_CbLoosePhotons->m_nPhotonsInCurrentLB = 0;
-  m_CbLoosePhotons->m_nPhotonsPerLumiBlock.clear();
-  m_CbLoosePhotons->m_nPhotonsPerRegion.clear();
-  m_CbLoosePhotons->m_nPhotons=0;
 
   m_currentLB = -1;
 }
@@ -110,11 +93,8 @@ photonMonTool::photonMonTool(const std::string & type, const std::string & name,
 photonMonTool::~photonMonTool()
 {
 
-  ATH_MSG_DEBUG("photonMonTool::~photonMontTool");
-  if (m_CbLoosePhotons) delete m_CbLoosePhotons;
-  ATH_MSG_DEBUG("photonMonTool ::: m_CbLoosePhotons deleted");
-  if (m_CbTightPhotons) delete m_CbTightPhotons;
-  ATH_MSG_DEBUG("photonMonTool ::: m_CbTightPhotons deleted");
+  delete m_CbLoosePhotons;
+  delete m_CbTightPhotons;
 }
 
 StatusCode photonMonTool::initialize()
@@ -129,10 +109,8 @@ StatusCode photonMonTool::bookHistogramsForOnePhotonType(photonHist& myHist)
 
   ATH_MSG_DEBUG("photonMonTool::bookHistogramsForOnePhoton()");
 
-  int start;
-  int end;
-  start = 0;
-  end = ENDCAP;
+  int start = 0;
+  int end = ENDCAP;
 
   // MAIN PANEL
 

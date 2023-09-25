@@ -75,49 +75,16 @@
 #include "electronMonTool.h"
 
 electronMonTool::electronMonTool(const std::string & type, const std::string & name, const IInterface* parent) : 
-  egammaMonToolBase(type,name,parent),
-  m_electronGroup(nullptr),
-  m_electronTrkGroup(nullptr),
-  m_electronIdGroup(nullptr),
-  m_electronLBGroup(nullptr)
+  egammaMonToolBase(type,name,parent)
 {
   bool WithFullHistList = true;
   bool WithLimitedHistList = false;
 
   m_LhLooseElectrons = new electronHist(std::string("LhLoose"), WithFullHistList);
-  m_LhLooseElectrons->m_lumiBlockNumber = 0;
-  m_LhLooseElectrons->m_nElectronsInCurrentLB = 0;
-  m_LhLooseElectrons->m_nElectronsPerLumiBlock.clear();
-  m_LhLooseElectrons->m_nElectronsPerRegion.clear();
-  m_LhLooseElectrons->m_nElectrons=0;
-
   m_LhMediumElectrons = new electronHist(std::string("LhMedium"), WithFullHistList);
-  m_LhMediumElectrons->m_lumiBlockNumber = 0;
-  m_LhMediumElectrons->m_nElectronsInCurrentLB = 0;
-  m_LhMediumElectrons->m_nElectronsPerLumiBlock.clear();
-  m_LhMediumElectrons->m_nElectronsPerRegion.clear();
-  m_LhMediumElectrons->m_nElectrons=0;
-
   m_CbLooseElectrons = new electronHist(std::string("CbLoose"), WithLimitedHistList);
-  m_CbLooseElectrons->m_lumiBlockNumber = 0;
-  m_CbLooseElectrons->m_nElectronsInCurrentLB = 0;
-  m_CbLooseElectrons->m_nElectronsPerLumiBlock.clear();
-  m_CbLooseElectrons->m_nElectronsPerRegion.clear();
-  m_CbLooseElectrons->m_nElectrons=0;
-
   m_LhTightElectrons = new electronHist(std::string("LhTight"), WithFullHistList);
-  m_LhTightElectrons->m_lumiBlockNumber = 0;
-  m_LhTightElectrons->m_nElectronsInCurrentLB = 0;
-  m_LhTightElectrons->m_nElectronsPerLumiBlock.clear();
-  m_LhTightElectrons->m_nElectronsPerRegion.clear();
-  m_LhTightElectrons->m_nElectrons=0;
-
   m_CbTightElectrons = new electronHist(std::string("CbTight"), WithLimitedHistList);
-  m_CbTightElectrons->m_lumiBlockNumber = 0;
-  m_CbTightElectrons->m_nElectronsInCurrentLB = 0;
-  m_CbTightElectrons->m_nElectronsPerLumiBlock.clear();
-  m_CbTightElectrons->m_nElectronsPerRegion.clear();
-  m_CbTightElectrons->m_nElectrons=0;
 
   m_currentLB = -1;
 
