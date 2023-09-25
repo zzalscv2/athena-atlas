@@ -161,7 +161,6 @@ class FlagAddress(object):
         return self._flags._get(merged)
 
     def __setitem__(self, name, value):
-        print(f"setting {name} to {value}")
         setattr(self, name, value)
 
     def __delitem__(self, name):
