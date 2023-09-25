@@ -3,7 +3,7 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-from ..Config.MenuComponents import MenuSequence, MenuSequenceCA, RecoFragmentsPool, SelectionCA, InEventRecoCA, InViewRecoCA
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrigEDMConfig.TriggerEDMRun3 import recordable
@@ -47,22 +47,17 @@ def bmumuxSequence(flags):
 
 
 def dimuL2Sequence(flags):
-    from ..Muon.MuonMenuSequences import muCombAlgSequence
-    from TrigBphysHypo.TrigBphysHypoConf import TrigBphysStreamerHypo
+    from ..Muon.MuonMenuSequences import muCombAlgSequenceCfg
     from TrigBphysHypo.TrigBphysStreamerHypoConfig import TrigBphysStreamerHypoToolFromDict
 
-    sequence, viewMaker, combinedMuonContainerName = RecoFragmentsPool.retrieve(muCombAlgSequence, flags)
+    sequence, combinedMuonContainerName = muCombAlgSequenceCfg(flags)
+    hypo = CompFactory.TrigBphysStreamerHypo('DimuL2StreamerHypoAlg', 
+                                             triggerList = getNoL2CombChainNames(),
+                                             triggerLevel = 'L2')
+    sequence.addHypoAlgo(hypo)
 
-    hypo = TrigBphysStreamerHypo(
-        name = 'DimuL2StreamerHypoAlg',
-        triggerList = getNoL2CombChainNames(),
-        triggerLevel = 'L2')
-
-    return MenuSequence(flags,
-        Sequence = sequence,
-        Maker = viewMaker,
-        Hypo = hypo,
-        HypoToolGen = TrigBphysStreamerHypoToolFromDict)
+    return MenuSequenceCA(flags, sequence,
+                                  HypoToolGen = TrigBphysStreamerHypoToolFromDict)
 
 
 @AccumulatorCache
