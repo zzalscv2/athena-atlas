@@ -8,8 +8,9 @@ and the info on the format of the map files: https://gitlab.cern.ch/atlas-tdaq-p
 
 To run the FPGATrackSimMapMaker in `main`:
 ```
-python3 -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig --filesInput=../singlemu_invPtFlat1_1M_wrap.root --evtMax=5 OutFileName="NN_" region=0 Exec.DebugMessageComponents='["*/FPGATrackSim*"]'
+python3 -m FPGATrackSimConfTools.FPGATrackSimMapMakerConfig --filesInput=../singlemu_invPtFlat1_1M_wrap.root --evtMax=5 OutFileName="NN_" region=0 Exec.DebugMessageComponents='["*/FPGATrackSim*"] GeoModel.AtlasVersion="ATLAS-P2-RUN4-03-00-00"'
 ```
+Obviously the correct path and geo version need to be used.
 
 Or instead of the `--filesInput` one can use directly the property (note that a proper escaping is needed - it is python list of strings): 
 `Trigger.FPGATrackSim.wrapperFileName="['../singlemu_invPtFlat1_1M_wrap.root',]"`
