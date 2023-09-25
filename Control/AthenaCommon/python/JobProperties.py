@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #=======================================================================
 # File: JobProperties/python/JobProperties.py
@@ -13,6 +13,8 @@
     .............................................................
     
 """
+
+jobPropertiesDisallowed = False
 
 import functools
 
@@ -137,6 +139,9 @@ class JobProperty(metaclass = _JobPropertyMeta):
             context. The context is given by the container and sub-containers
             to which the job property belongs. 
         """
+        if jobPropertiesDisallowed:
+            raise RuntimeError("JobProperty should not be called in pure CA config")
+
         context_name=context+'.'+self.__class__.__name__
         if not (context_name in self.__class__._nInstancesContextDict.keys()):
             self.__class__._nInstancesContextDict[context_name]=self
