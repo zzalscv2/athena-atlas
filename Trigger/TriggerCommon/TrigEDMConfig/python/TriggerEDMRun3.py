@@ -585,7 +585,7 @@ TriggerHLTListRun3 = [
     # Muon
 
     # Id track particles
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_FTF',                 'BS ESD AODFULL', 'Muon', [InViews('MUCombViewRoIs'), InViews('MUCBFSViews'), InViews('MUEFLATEViewRoIs')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_FTF',                 'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews'), InViews('MUCBFSViews'), InViews('MUEFLATEViewRoIs')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Muon_FTFAux.',          'BS ESD AODFULL', 'Muon'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Muon_IDTrig',                 'BS ESD AODFULL', 'Muon', [InViews('MUEFCBViewRoIs'), InViews('MUCBFSViews'), InViews('MUEFLATEViewRoIs')]),
@@ -707,16 +707,16 @@ TriggerHLTListRun3 = [
     ('xAOD::L2StandAloneMuonContainer#HLT_MuonL2SAInfol2mtmode',        'BS ESD AODFULL', 'Muon', [InViews('MUViewRoIs'), InViews('L2MuFastRecoViews')]),
     ('xAOD::L2StandAloneMuonAuxContainer#HLT_MuonL2SAInfol2mtmodeAux.', 'BS ESD AODFULL', 'Muon'),
 
-    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo',          'BS ESD AODFULL', 'Muon', [InViews('MUCombViewRoIs')]),
+    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo',          'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews')]),
     ('xAOD::L2CombinedMuonAuxContainer#HLT_MuonL2CBInfoAux.',   'BS ESD AODFULL', 'Muon'),
 
     ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfoLRT',          'BS ESD AODFULL', 'Muon', [InViews('l2muCombLRTViews')]),
     ('xAOD::L2CombinedMuonAuxContainer#HLT_MuonL2CBInfoLRTAux.',   'BS ESD AODFULL', 'Muon'),
 
-    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfoIOmode',          'BS ESD AODFULL', 'Muon', [InViews('MUCombViewRoIs')]),
+    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfoIOmode',          'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews')]),
     ('xAOD::L2CombinedMuonAuxContainer#HLT_MuonL2CBInfoIOmodeAux.',   'BS ESD AODFULL', 'Muon'),
 
-    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfol2mtmode',          'BS ESD AODFULL', 'Muon', [InViews('MUCombViewRoIs')]),
+    ('xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfol2mtmode',          'BS ESD AODFULL', 'Muon', [InViews('L2MuCombRecoViews')]),
     ('xAOD::L2CombinedMuonAuxContainer#HLT_MuonL2CBInfol2mtmodeAux.',   'BS ESD AODFULL', 'Muon'),
 
     ('xAOD::L2IsoMuonContainer#HLT_MuonL2ISInfo',               'BS ESD', 'Muon', [InViews('MUIsoViewRoIs')]),
@@ -1155,7 +1155,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_EFID',                 'BS ESD AODFULL', 'Cosmic'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Cosmic_EFIDAux.',          'BS ESD AODFULL', 'Cosmic'),
     #And their respective precision tracks
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_IDTrig',               'BS ESD AODFULL', 'Cosmic', [InViews('CosmicViewRoIs'), InViews('MUCombViewCosmic')]),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_IDTrig',               'BS ESD AODFULL', 'Cosmic', [InViews('CosmicViewRoIs')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Cosmic_IDTrigAux.',        'BS ESD AODFULL', 'Cosmic'),
 
     # UTT

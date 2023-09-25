@@ -196,10 +196,10 @@ protected:
 
   // these are calculated search window values
   // half of search window size, converted to units of eta,phi
-  float m_searchWindowEtaBarrel;
-  float m_searchWindowPhiBarrel;
-  float m_searchWindowEtaEndcap;
-  float m_searchWindowPhiEndcap;
+  float m_searchWindowEtaBarrel = 0.0F;
+  float m_searchWindowPhiBarrel = 0.0F;
+  float m_searchWindowEtaEndcap = 0.0F;
+  float m_searchWindowPhiEndcap = 0.0F;
 
 private:
  /**
@@ -272,12 +272,12 @@ private:
   // window values for the windows
   // in which cells of topoclusters are added
   // half of addCells window size, converted in units of eta/phi
-  float m_addCellsWindowEtaBarrel;
-  float m_addCellsWindowEtaEndcap;
+  float m_addCellsWindowEtaBarrel = 0.0F;
+  float m_addCellsWindowEtaEndcap = 0.0F;
   // Extra opening in phi for L0,L1
-  float m_extraL0L1PhiSize;
+  float m_extraL0L1PhiSize = 0.0F;
   // Extra opening in eta for L3 cells
-  float m_extraL3EtaSize;
+  float m_extraL3EtaSize = 0.0F;
 
   /** @brief Decorate the supercluster with links to the component topoclusters
    */

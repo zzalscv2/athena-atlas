@@ -1,9 +1,9 @@
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-athenaCommonFlags.FilesInput= ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/tauRec/input/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.ESD.e4993_s3227_r12847/ESD.26288534._000001.pool.root.1", "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/tauRec/input/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.recon.ESD.e4993_s3227_r12847/ESD.26288534._000002.pool.root.1"]
+athenaCommonFlags.FilesInput=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
 athenaCommonFlags.PoolAODOutput = "EMTopo_AOD.pool.root"
 
 from AthenaCommon.GlobalFlags import globalflags
-globalflags.ConditionsTag.set_Value_and_Lock("OFLCOND-MC16-SDR-RUN2-08")
+globalflags.ConditionsTag.set_Value_and_Lock("OFLCOND-MC21-SDR-RUN3-10")
 
 from RecExConfig.RecFlags import rec
 rec.doEgamma.set_Value_and_Lock(False)
@@ -41,9 +41,9 @@ tauFlags.Enabled.set_Value_and_Lock(True)
 # set seed jets
 tauFlags.tauRecSeedJetCollection.set_Value_and_Lock("AntiKt4EMTopoJets")
 
-# ditau reconstruction setup
+# disable ditau reconstruction
 from DiTauRec.DiTauRecFlags import diTauFlags
-diTauFlags.doVtxFinding.set_Value_and_Lock(True)
+diTauFlags.Enabled.set_Value_and_Lock(False)
 
 include ("RecExCommon/RecExCommon_topOptions.py")
 

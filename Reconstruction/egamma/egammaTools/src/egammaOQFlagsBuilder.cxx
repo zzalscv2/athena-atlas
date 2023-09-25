@@ -165,23 +165,9 @@ egammaOQFlagsBuilder::initialize()
   ATH_CHECK(m_affKey.initialize());
 
   // Get CaloAffectedTool
-  StatusCode sc = m_affectedTool.retrieve();
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR("Could not retrieve CaloAffectedTool " << m_affectedTool);
-    return StatusCode::FAILURE;
-  }
-
-  sc = detStore()->retrieve(m_calocellId, "CaloCell_ID");
-  if (sc.isFailure()) {
-    ATH_MSG_WARNING("Cannot retrieve online_id");
-    return StatusCode::FAILURE;
-  }
-
-  sc = detStore()->retrieve(m_emHelper);
-  if (sc.isFailure()) {
-    ATH_MSG_WARNING("Cannot retrieve online_id");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(m_affectedTool.retrieve());
+  ATH_CHECK(detStore()->retrieve(m_calocellId, "CaloCell_ID"));
+  ATH_CHECK(detStore()->retrieve(m_emHelper));
 
   return StatusCode::SUCCESS;
 }

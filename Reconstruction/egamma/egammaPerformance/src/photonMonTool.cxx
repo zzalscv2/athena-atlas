@@ -82,27 +82,10 @@
 #include "TH2F.h"
 
 photonMonTool::photonMonTool(const std::string & type, const std::string & name, const IInterface* parent)
-  :  egammaMonToolBase(type,name,parent),
-     m_photonGroup(nullptr),
-     m_photonConvGroup(nullptr),
-     m_photonUnconvGroup(nullptr),
-     m_photonIdGroup(nullptr),
-     m_photonRegionGroup(nullptr),
-     m_photonLBGroup(nullptr)
+  :  egammaMonToolBase(type,name,parent)
 {
   m_CbTightPhotons = new photonHist(std::string("CbTight"));
-  m_CbTightPhotons->m_lumiBlockNumber = 0;
-  m_CbTightPhotons->m_nPhotonsInCurrentLB = 0;
-  m_CbTightPhotons->m_nPhotonsPerLumiBlock.clear();
-  m_CbTightPhotons->m_nPhotonsPerRegion.clear();
-  m_CbTightPhotons->m_nPhotons=0;
-
   m_CbLoosePhotons = new photonHist(std::string("CbLoose"));
-  m_CbLoosePhotons->m_lumiBlockNumber = 0;
-  m_CbLoosePhotons->m_nPhotonsInCurrentLB = 0;
-  m_CbLoosePhotons->m_nPhotonsPerLumiBlock.clear();
-  m_CbLoosePhotons->m_nPhotonsPerRegion.clear();
-  m_CbLoosePhotons->m_nPhotons=0;
 
   m_currentLB = -1;
 }
@@ -110,11 +93,8 @@ photonMonTool::photonMonTool(const std::string & type, const std::string & name,
 photonMonTool::~photonMonTool()
 {
 
-  ATH_MSG_DEBUG("photonMonTool::~photonMontTool");
-  if (m_CbLoosePhotons) delete m_CbLoosePhotons;
-  ATH_MSG_DEBUG("photonMonTool ::: m_CbLoosePhotons deleted");
-  if (m_CbTightPhotons) delete m_CbTightPhotons;
-  ATH_MSG_DEBUG("photonMonTool ::: m_CbTightPhotons deleted");
+  delete m_CbLoosePhotons;
+  delete m_CbTightPhotons;
 }
 
 StatusCode photonMonTool::initialize()
@@ -129,10 +109,8 @@ StatusCode photonMonTool::bookHistogramsForOnePhotonType(photonHist& myHist)
 
   ATH_MSG_DEBUG("photonMonTool::bookHistogramsForOnePhoton()");
 
-  int start;
-  int end;
-  start = 0;
-  end = ENDCAP;
+  int start = 0;
+  int end = ENDCAP;
 
   // MAIN PANEL
 
@@ -403,18 +381,8 @@ StatusCode photonMonTool::bookHistograms()
   m_photonRegionGroup = new MonGroup(this,"egamma/photons"+m_GroupExtension+"/Region",  run); // to be re-booked every new run
   m_photonLBGroup = new MonGroup(this,"egamma/photons"+m_GroupExtension+"/LBMon",run, ATTRIB_X_VS_LB, "", "merge"); // to be re-booked every new run
 
-  StatusCode sc;
-  sc = bookHistogramsForOnePhotonType(*m_CbLoosePhotons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
-
-  sc = bookHistogramsForOnePhotonType(*m_CbTightPhotons);
-  if(sc.isFailure()){
-    ATH_MSG_VERBOSE("Could not book Histos");
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(bookHistogramsForOnePhotonType(*m_CbLoosePhotons));
+  ATH_CHECK(bookHistogramsForOnePhotonType(*m_CbTightPhotons));
 
   return StatusCode::SUCCESS;
 }
@@ -730,22 +698,14 @@ StatusCode photonMonTool::fillHistograms() {
     // CbLoose
     if((*ph_iter)->passSelection(isGood,"Loose")) { 
       if(isGood) { 
-	StatusCode sc = fillHistogramsForOnePhoton(ph_iter, *m_CbLoosePhotons); 
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOnePhoton(ph_iter, *m_CbLoosePhotons));
       }
     }  else ATH_MSG_WARNING( "Photon selection menu LHMedium is not defined" );
 
     // Cb Tight
     if((*ph_iter)->passSelection(isGood,"Tight")) {
       if(isGood) {
-	StatusCode sc = fillHistogramsForOnePhoton(ph_iter, *m_CbTightPhotons);  
-	if (sc.isFailure()) {
-	  ATH_MSG_ERROR("couldn't book histograms");
-	  return StatusCode::FAILURE;
-	}
+        ATH_CHECK(fillHistogramsForOnePhoton(ph_iter, *m_CbTightPhotons));
       }
     }  else ATH_MSG_WARNING( "Photon selection menu LHTight is not defined" );
 

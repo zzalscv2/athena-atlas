@@ -169,12 +169,12 @@ namespace MuonCalib {
             const Identifier moduleID = idHelper.elementID(id.GetStation(), id.GetEta(), id.GetPhi());
             MdtTubeFitContainer *ret = new MdtTubeFitContainer(m_idHelperSvc.get(), moduleID);
             for (auto& [tubeId, tubeFit] : fits) {
-                const Identifier id = idHelper.channelID(moduleID, 
+                const Identifier thisId = idHelper.channelID(moduleID, 
                                                          tubeId.mdtMultilayer(),
                                                          tubeId.mdtTubeLayer(),
                                                          tubeId.mdtTube());
-                ret->setFit(std::move(tubeFit), id, msg());
-                ret->setCalib(std::move(calibs[tubeId]), id, msg());
+                ret->setFit(std::move(tubeFit), thisId, msg());
+                ret->setCalib(std::move(calibs[tubeId]), thisId, msg());
             }
             ret->setGroupBy(tb_grp);
             ret->setImplementation(alg_flg);

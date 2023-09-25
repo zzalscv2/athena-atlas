@@ -157,7 +157,7 @@ private:
  GSFTrajectory smootherFit(
      const EventContext& ctx,
      Trk::IMultiStateExtrapolator::Cache&,
-     const GSFTrajectory& forwardTrajectory,
+     GSFTrajectory& forwardTrajectory,
      const ParticleHypothesis particleHypothesis = nonInteracting,
      const CaloCluster_OnTrack* ccot = nullptr) const;
 

@@ -23,6 +23,9 @@ def fillAtlasMetadata(flags, dbFiller):
             if "UseShadowEvent" in flag and not flags.Sim.UseShadowEvent:
                 # This flag is added temporarily to allow a new approach to quasi-stable particle simulation to be tested.
                 continue
+            if "VertexTimeWidth" in flag and not flags.Sim.VertexTimeSmearing:
+                # This flag is only written to metadata when vertex time smearing is enabled
+                continue
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)
             if isinstance(value, FlagEnum):

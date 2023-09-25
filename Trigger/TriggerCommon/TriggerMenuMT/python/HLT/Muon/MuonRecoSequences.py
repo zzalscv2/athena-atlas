@@ -255,15 +255,11 @@ def muonIDFastTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLoad
 
   return acc
 
-def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None ):
+def muonIDCosmicTrackingSequenceCfg( flags, RoIs, name, extraLoads=None, extraLoadsForl2mtmode=None ):
 
-  from AthenaCommon.CFElements import parOR
-  viewNodeName=name+"IDTrackingViewNode"
+  acc = ComponentAccumulator()
 
-  trackingSequence = parOR(viewNodeName)
-
-  dataVerifier = algorithmCAToGlobalWrapper(muonIDtrackVDVCfg,flags, 'cosmics', RoIs, extraLoads, extraLoadsForl2mtmode)
-  trackingSequence += dataVerifier
+  acc.merge(muonIDtrackVDVCfg(flags, 'cosmics', RoIs, extraLoads, extraLoadsForl2mtmode))
 
   from TrigInDetConfig.utils import getFlagsForActiveConfig
   flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
@@ -271,14 +267,10 @@ def muonIDCosmicTrackingSequence( flags, RoIs, name, extraLoads=None, extraLoads
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
                           rois = RoIs, inView = "muCombVDVcosmics")
+  acc.merge(seq.sequence("Offline"))
 
-  from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
-  trackingAlgs = extractAlgorithmsAndAppendCA(seq.sequence("Offline"))
-
-  for alg in trackingAlgs:
-      trackingSequence += alg
   
-  return trackingSequence
+  return acc
 
 def muCombVDVCfg( flags, postFix):
   result=ComponentAccumulator()
@@ -287,6 +279,7 @@ def muCombVDVCfg( flags, postFix):
   result.addEventAlgo(ViewVerify)
   return result
 
+@AccumulatorCache
 def muCombRecoSequenceCfg( flags, RoIs, name, l2mtmode=False, l2CBname="" ):
 
   acc = ComponentAccumulator()

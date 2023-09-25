@@ -3,6 +3,7 @@
 #include "FPGATrackSimMapMakerAlg.h"
 
 #include "FPGATrackSimInput/IFPGATrackSimEventInputHeaderTool.h"
+#include "FPGATrackSimMaps/Remappings.h"
 #include "TH2.h"
 
 #include "GaudiKernel/IEventProcessor.h"
@@ -20,13 +21,19 @@ FPGATrackSimMapMakerAlg::FPGATrackSimMapMakerAlg (const std::string& name, ISvcL
 
 StatusCode FPGATrackSimMapMakerAlg::initialize()
 {
+    if(m_geo == "") {
+        ATH_MSG_ERROR("Geometry version must be provided (vis GeometryVersion property of this alg)");
+        return StatusCode::FAILURE;
+    }
+    m_diskIndex =  Remappings::diskIndices(m_geo);
     std::stringstream ss(m_description);
-    std::string line;
+    std::string line;    
     ATH_MSG_INFO("Tag config:");
     if (m_description.value() != nullptr) 
         while (std::getline(ss, line, '\n')) 
             ATH_MSG_INFO('\t' << line);
     
+
     // reset Hit and Module vectors    
     m_pbHits.clear(); m_peHits.clear(); m_sbHits.clear(); m_seHits.clear(); m_allHits.clear();
     m_track2modules.clear(); m_track2slice.clear(); m_slice2modules.clear();
@@ -156,7 +163,7 @@ StatusCode FPGATrackSimMapMakerAlg::writePmapAndRmap(std::vector<FPGATrackSimHit
     std::string pmap_path = m_outFileName.value() + "region" + std::to_string(m_region) + ".pmap";
     ATH_MSG_INFO("Creating pmap: " << pmap_path);
     m_pmap.open(pmap_path, std::ofstream::out);
-    m_pmap << "ATLAS-P2-ITK-22-02-00\n" << m_planes[reg].size() << " logical_s1\n" << m_planes2[reg].size() << " logical_s2\n";
+    m_pmap << m_geo << "\n" << m_planes[reg].size() << " logical_s1\n" << m_planes2[reg].size() << " logical_s2\n";
     m_pmap << m_pbmax+1 << " pixel barrel \n" << m_pemax[0]+1 << " pixel endcap+ \n" << m_pemax[1]+1 << " pixel endcap- \n"; 
     m_pmap << m_sbmax+1 << " SCT barrel \n" << m_semax[0]+1 << " SCT endcap+\n" << m_semax[1]+1 << " SCT endcap-\n";
     m_pmap << "! silicon endCap physDisk physLayer ['stereo' stripSide <strip only>] 'plane1' logiLayer1 'plane2' logiLayer2\n";

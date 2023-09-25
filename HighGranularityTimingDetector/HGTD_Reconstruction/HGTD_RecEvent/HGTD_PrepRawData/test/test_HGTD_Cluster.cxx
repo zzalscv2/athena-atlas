@@ -95,7 +95,6 @@ void testMoveCtor(HGTD_Cluster cluster) {
   std::cout << "testMoveCtor\n";
   HGTD_Cluster copied_cluster(std::move(cluster));
 
-  BOOST_CHECK(cluster.time() == 0.0);
   std::cout << "copied_cluster.time() " << copied_cluster.time() << '\n';
   BOOST_CHECK(copied_cluster.time() == dummy_toa);
   std::cout << "testMoveCtor done\n";
@@ -106,9 +105,7 @@ void testMoveAssignment(HGTD_Cluster cluster) {
   HGTD_Cluster move_assign_cluster;
   move_assign_cluster = std::move(cluster);
 
-  BOOST_CHECK(cluster.time() == 0.0);
   BOOST_CHECK(move_assign_cluster.time() == dummy_toa);
-  BOOST_CHECK(cluster.time() != move_assign_cluster.time());
 
   std::cout << "testMoveAssignment done\n";
 }

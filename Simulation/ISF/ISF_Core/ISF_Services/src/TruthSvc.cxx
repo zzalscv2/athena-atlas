@@ -623,7 +623,7 @@ int ISF::TruthSvc::maxGeneratedVertexBarcode(const HepMC::GenEvent *genEvent) co
 }
 
 ISF::InteractionClass_t ISF::TruthSvc::interactionClassification(HepMC::GenVertexPtr& vtx) const {
-  const int nIn = HepMC::particles_in_size(vtx);
+  const int nIn = vtx->particles_in_size();
   std::vector<int> pdgIn; pdgIn.reserve(nIn);
 #ifdef HEPMC3
   for(const auto& particle : vtx->particles_in()) {
@@ -634,7 +634,7 @@ ISF::InteractionClass_t ISF::TruthSvc::interactionClassification(HepMC::GenVerte
     pdgIn.push_back((*partItr)->pdg_id());
   }
 #endif
-  const int nOut = HepMC::particles_out_size(vtx);
+  const int nOut = vtx->particles_out_size();
   std::vector<int> pdgOut; pdgOut.reserve(nOut);
 #ifdef HEPMC3
   for(const auto& particle : vtx->particles_out()) {

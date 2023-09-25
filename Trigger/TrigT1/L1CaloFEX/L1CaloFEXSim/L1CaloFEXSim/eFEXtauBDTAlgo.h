@@ -55,6 +55,11 @@ public:
                              unsigned int etThreshold,
                              unsigned int etThresholdForRHad) override;
 
+  // Seed is hard-coded to 1 to reduce eta asymmetry 
+  // which is stronger when it's hard-coded to 0 and 
+  // also to avoid modifications in L1Topo
+  virtual unsigned int getSeed() const override { return 1; }
+
 protected:
 private:
   StatusCode initBDTVars();

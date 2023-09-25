@@ -58,8 +58,8 @@ def getMETRecoSequences(flags, purposes: List[str]):
                 merged_ca.merge(ca, seqname)
 
     rois = [caloFSRoI]
-    if max_step_idx > 2:
-        # If we have more than two steps then we also need the FS tracking RoI
+    if max_step_idx > 1:
+        # If we have more than one step then we also need the FS tracking RoI
         rois.append(trkFSRoI)
     algorithms = extractAlgorithmsAndAppendCA(merged_ca)
 

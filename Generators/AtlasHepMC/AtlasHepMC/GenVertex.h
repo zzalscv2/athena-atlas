@@ -27,11 +27,6 @@ inline GenVertexPtr newGenVertexPtr(const HepMC3::FourVector &pos = HepMC3::Four
     return v;
 }
 
-inline int particles_in_size(const GenVertexPtr& v) { return v->particles_in().size();}
-inline int particles_out_size(const GenVertexPtr& v) { return v->particles_out().size();}
-inline int particles_in_size(const ConstGenVertexPtr& v) { return v->particles_in().size();}
-inline int particles_out_size(const ConstGenVertexPtr& v) { return v->particles_out().size();}
-
 inline int barcode(const GenVertexPtr& p) {
     if (!p) return 0;
     auto e = p->parent_event();
@@ -54,8 +49,6 @@ inline int barcode(const HepMC3::GenVertex& p) {
     return barcode?(barcode->value()):p.id();
 }
 
-inline void* raw_pointer(GenVertexPtr p) { return p.get();}
-inline const void* raw_pointer(ConstGenVertexPtr p) { return p.get();}
 using HepMC3::GenVertex;
 }
 #else
@@ -65,9 +58,6 @@ typedef HepMC::GenVertex* GenVertexPtr;
 typedef const HepMC::GenVertex* ConstGenVertexPtr;
 inline GenVertex::particles_out_const_iterator  begin(const HepMC::GenVertex& v) { return v.particles_out_const_begin(); }
 inline GenVertex::particles_out_const_iterator  end(const HepMC::GenVertex& v) { return v.particles_out_const_end(); }
-
-inline int particles_in_size(const HepMC::GenVertex* v) { return v->particles_in_size();}
-inline int particles_out_size(const HepMC::GenVertex* v) { return v->particles_out_size();}
 
 inline GenVertexPtr newGenVertexPtr(const HepMC::FourVector &pos = HepMC::FourVector(0.0,0.0,0.0,0.0), const int i=0) {
     return new HepMC::GenVertex(pos,i);
@@ -79,8 +69,6 @@ inline void line(std::ostream& os,const GenVertex* v) {v->print(os);}
 inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->barcode();}
 inline int barcode(const ConstGenVertexPtr& p) { return p->barcode();}
 inline int barcode(const GenVertex& p) { return p.barcode();}
-inline void* raw_pointer(GenVertexPtr p) { return p;}
-inline const void* raw_pointer(ConstGenVertexPtr p) { return p;}
 inline std::ostream& operator<<( std::ostream& os, const GenVertex* v ) { if (v) return os<<(*v); else return os;}
 }
 #endif

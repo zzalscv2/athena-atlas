@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BEAMEFFECTS_VERTEXBEAMCONPOSITIONER_H
@@ -54,7 +54,9 @@ namespace Simulation {
       ATHRNG::RNGWrapper*           m_randomEngine ATLAS_THREAD_SAFE{};  //!< Slot-local RNG
 
       Gaudi::Property<std::string>  m_randomEngineName{this, "RandomStream", "VERTEX"};         //!< Name of the random number stream
-      Gaudi::Property<bool>           m_timeSmearing{this, "SimpleTimeSmearing", false};             //!< Do time smearing
+      Gaudi::Property<bool> m_timeSmearing{this, "SimpleTimeSmearing", false}; //!< Do time smearing
+      Gaudi::Property<float> m_timeWidth{this, "TimeWidth", 0.}; //!< Width of time for smearing
+
 
   };
 

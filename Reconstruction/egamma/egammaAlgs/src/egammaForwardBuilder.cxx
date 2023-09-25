@@ -166,8 +166,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     ++buff_AllClusters;
 
     //common part
-    xAOD::Electron* el = new xAOD::Electron();
-    xaodFrwd->push_back(el);
+    xAOD::Electron* el = xaodFrwd->push_back(std::make_unique<xAOD::Electron>());
     el->setAuthor(xAOD::EgammaParameters::AuthorFwdElectron);
     el->setCaloClusterLinks(egRec->caloClusterElementLinks());
 

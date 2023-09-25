@@ -85,15 +85,6 @@ public:
                                 double& X0Scale,
                                 double& ElossScale) const = 0;
 
-  /**
-   Calculate dg/dlambda, for non-electrons (g=dEdX and lambda=q/p).
-   This is used by the analytical error propagation in STEP
-   */
-  double dgdlambda(double, const MaterialProperties&, ParticleHypothesis) const
-  {
-    return 0;
-  }
-
   /** Validation Action:
      Can be implemented optionally, outside access to internal validation steps
    */

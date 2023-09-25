@@ -16,6 +16,11 @@ except AttributeError:
     # AllConfigFlags.ConfigFlags has already been deleted
     pass
 
+# force no legacy job properties
+from AthenaCommon import JobProperties
+JobProperties.jobPropertiesDisallowed = True
+
+
 def setOverlayInputFiles(runArgs, flags, log):
     hasRDO_BKGInput = hasattr(runArgs, 'inputRDO_BKGFile')
     hasBS_SKIMInput = hasattr(runArgs, 'inputBS_SKIMFile')
