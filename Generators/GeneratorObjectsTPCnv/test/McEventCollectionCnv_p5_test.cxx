@@ -47,8 +47,8 @@ void compareGenVertex(const HepMC::ConstGenVertexPtr& v1,
   assert (float(v1->position().y()) == float(v2->position().y())); // only persistified with float precision
   assert (float(v1->position().z()) == float(v2->position().z())); // only persistified with float precision
   assert (float(v1->position().t()) == float(v2->position().t())); // only persistified with float precision
-  assert (HepMC::particles_in_size(v1) == HepMC::particles_in_size(v2));
-  assert (HepMC::particles_out_size(v1) == HepMC::particles_out_size(v2));
+  assert (v1->particles_in_size() == v2->particles_in_size());
+  assert (v1->particles_out_size() == v2->particles_out_size());
 
 #ifdef HEPMC3
   assert (v1->id() == v2->id());
