@@ -342,10 +342,12 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       bdtCondition = m_eFEXtauBDTAlgoTool->getBDTCondition();
 
       unsigned int seed = m_eFEXtauAlgoTool->getSeed();
-      // Seed as returned is supercell value within 3x3 area, here want it within central cell
+      // Heuristic seed as returned is supercell value within 3x3 area, here want it within central cell
       seed = seed - 4;      
 
       unsigned int und = (m_eFEXtauAlgoTool->getUnD() ? 1 : 0);
+
+      unsigned int bdtSeed = m_eFEXtauBDTAlgoTool->getSeed();
 
       int eta_ind = ieta; // No need to offset eta index with new 0-5 convention
       int phi_ind = iphi - 1;
@@ -357,8 +359,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       ATH_MSG_DEBUG("m_id: " << m_id << ", eta_ind: " <<eta_ind << ", phi_ind: " 
 		      <<phi_ind << ", eTauBDTTobEt: " <<eTauBDTTobEt
 		      <<", eTauTobEt: "<<eTauTobEt << ", ptTauMinToTopoCounts: " << ptTauMinToTopoCounts<< ", maxEtCountsTau: " <<maxEtCountsTau << ", bdtScore: "<<bdtScore);
-      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts);
-      xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, ptTauMinToTopoCounts, bdtScore);
+      uint32_t tobwordBDT = m_eFEXFormTOBsTool->formTauBDTTOBWord(m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts);
+      xtobwordsBDT = m_eFEXFormTOBsTool->formTauBDTxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauBDTTobEt, rHadWP, bdtCondition, bdtSeed, ptTauMinToTopoCounts, bdtScore);
       uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
       xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
 
