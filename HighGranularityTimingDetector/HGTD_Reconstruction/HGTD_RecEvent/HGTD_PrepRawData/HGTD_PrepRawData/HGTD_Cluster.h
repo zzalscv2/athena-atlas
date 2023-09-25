@@ -38,8 +38,9 @@ public:
   HGTD_Cluster();
   HGTD_Cluster(const HGTD_Cluster&) = default;
   HGTD_Cluster& operator=(const HGTD_Cluster&) = default;
-  HGTD_Cluster(HGTD_Cluster&&);
-  HGTD_Cluster& operator=(HGTD_Cluster&&);
+  HGTD_Cluster(HGTD_Cluster&&) = default;
+  HGTD_Cluster& operator=(HGTD_Cluster&&) = default;
+  virtual ~HGTD_Cluster() = default;
 
   HGTD_Cluster(const Identifier& rdo_id, const Amg::Vector2D& loc_pos,
                const std::vector<Identifier>& rdo_list,
@@ -57,7 +58,6 @@ public:
                const float time_of_arrival, const float time_of_arrival_err,
                const std::vector<int>& time_over_threshold);
 
-  virtual ~HGTD_Cluster() {}
 
   // return width class reference
   virtual const InDet::SiWidth& width() const;
