@@ -54,8 +54,6 @@ inline int barcode(const HepMC3::GenVertex& p) {
     return barcode?(barcode->value()):p.id();
 }
 
-inline void* raw_pointer(GenVertexPtr p) { return p.get();}
-inline const void* raw_pointer(ConstGenVertexPtr p) { return p.get();}
 using HepMC3::GenVertex;
 }
 #else
@@ -79,8 +77,6 @@ inline void line(std::ostream& os,const GenVertex* v) {v->print(os);}
 inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->barcode();}
 inline int barcode(const ConstGenVertexPtr& p) { return p->barcode();}
 inline int barcode(const GenVertex& p) { return p.barcode();}
-inline void* raw_pointer(GenVertexPtr p) { return p;}
-inline const void* raw_pointer(ConstGenVertexPtr p) { return p;}
 inline std::ostream& operator<<( std::ostream& os, const GenVertex* v ) { if (v) return os<<(*v); else return os;}
 }
 #endif
