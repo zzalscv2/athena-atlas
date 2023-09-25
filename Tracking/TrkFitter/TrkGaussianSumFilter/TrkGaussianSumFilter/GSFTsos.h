@@ -23,29 +23,8 @@ struct GSFTsos {
   ~GSFTsos() = default;
 
   // implement copy and copy assignment
-  GSFTsos(const GSFTsos& rhs)
-      : multiComponentState(
-            Trk::MultiComponentStateHelpers::clone(rhs.multiComponentState)),
-        trackParameters(rhs.trackParameters ? rhs.trackParameters->clone()
-                                            : nullptr),
-        measurementOnTrack(
-            rhs.measurementOnTrack ? rhs.measurementOnTrack->clone() : nullptr),
-        fitQualityOnSurface(rhs.fitQualityOnSurface),
-        typeFlags(rhs.typeFlags) {}
-
-  GSFTsos& operator=(const GSFTsos& rhs) {
-    if (this != &rhs) {
-      multiComponentState =
-          Trk::MultiComponentStateHelpers::clone(rhs.multiComponentState);
-      trackParameters.reset(rhs.trackParameters ? rhs.trackParameters->clone()
-                                                : nullptr);
-      measurementOnTrack.reset(
-          rhs.measurementOnTrack ? rhs.measurementOnTrack->clone() : nullptr);
-      fitQualityOnSurface = rhs.fitQualityOnSurface;
-      typeFlags = rhs.typeFlags;
-    }
-    return *this;
-  }
+  GSFTsos(const GSFTsos& rhs) = delete;
+  GSFTsos& operator=(const GSFTsos& rhs) =delete;
 
   // Full constructor with passing of type flags
   GSFTsos(
