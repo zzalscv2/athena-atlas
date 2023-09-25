@@ -32,6 +32,9 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm {
       this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimSGToRawHitsTool"};
 
   FPGATrackSimEventInputHeader m_eventHeader;
+  Gaudi::Property<std::string> m_geo{this, "GeometryVersion", "",
+                                             "geometry version, has to be set, else error"};
+
   Gaudi::Property<std::string> m_description{this, "description", "",
                                              "tag description"};
   Gaudi::Property<std::string> m_outFileName{
@@ -239,12 +242,8 @@ class FPGATrackSimMapMakerAlg : public AthAlgorithm {
   std::ofstream m_pmap, m_rmap, m_subrmap, m_etapat, m_radfile, m_zedfile;
   TFile m_monitorFile;
 
-  // TODO make automatic
-  const std::vector<uint32_t> m_diskIndex = {
-      0, 17, 47, 58,
-      66};  // number of disks per layer in ATLAS-P2-ITK-22-02-00:  [17, 30, 11,
-            // 8, 9] --> [0,17,47,58,66]
-
+  std::vector<uint32_t> m_diskIndex;
+  
   StatusCode readInputs(bool& done);
   StatusCode writePmapAndRmap(std::vector<FPGATrackSimHit> const& pbHits,
                               std::vector<FPGATrackSimHit> const& peHits,

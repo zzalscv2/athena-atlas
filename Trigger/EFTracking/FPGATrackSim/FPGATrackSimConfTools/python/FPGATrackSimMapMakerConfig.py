@@ -8,12 +8,13 @@ def FPGATrackSimMapMakerCfg(flags):
     acc = ComponentAccumulator()
     from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import FPGATrackSimReadInputCfg
     alg = CompFactory.FPGATrackSimMapMakerAlg(
+        GeometryVersion=flags.GeoModel.AtlasVersion,
         OutFileName=flags.OutFileName,
         KeyString=flags.KeyString,
         nSlices=flags.nSlices,
         region=flags.region,
         trim=flags.trim,
-        InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))
+        InputTool = acc.getPrimaryAndMerge(FPGATrackSimReadInputCfg(flags))        
         )
 
     acc.addEventAlgo(alg)
