@@ -5,6 +5,7 @@
 #ifndef MDTCALIBSVC_IMDTCALIBRATIONTOOL_H
 #define MDTCALIBSVC_IMDTCALIBRATIONTOOL_H
 
+#include <bitset>
 #include <GaudiKernel/IAlgTool.h>
 
 #include <MdtCalibInterfaces/MdtCalibInput.h>
