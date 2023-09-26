@@ -243,9 +243,7 @@ InDetStrawSummaryTool=TRT_StrawStatusSummaryTool(name = "TRT_StrawStatusSummaryT
 
 from TRT_DriftFunctionTool.TRT_DriftFunctionToolConf import TRT_DriftFunctionTool
 InDetTRT_DriftFunctionTool = TRT_DriftFunctionTool(name = "InDetTRT_DriftFunctionTool",
-                                                   AllowDataMCOverride = True,
                                                    TRTCalDbTool=InDetCalDbTool,
-                                                   ForceData = True,
                                                    IsMC=(globalflags.DataSource == 'geant4'))
 
 ToolSvc += InDetTRT_DriftFunctionTool

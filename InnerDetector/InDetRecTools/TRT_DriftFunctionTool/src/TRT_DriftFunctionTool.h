@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -80,10 +80,8 @@ public:
   /** Returns high threshold correction to the drift time (ns) */
   virtual double driftTimeHTCorrection(Identifier id, bool isArgonStraw=false) const override;
   
-  /** Initialise Rt relation in data */
-  void setupRtRelationData();
-  /** Initialise Rt relation in MC */
-  void setupRtRelationMC();
+  /** Initialise Rt relation */
+  void setupRtRelation();
 
 
 private:
@@ -102,16 +100,11 @@ private:
   
   enum ETimeBins { MaxTimeBin = 50 } ; //!< number of time bins
   double m_radius[MaxTimeBin]{};         //!< most probable radius in each bin
-  double m_errors[MaxTimeBin]{};         //!< width of radius dist in each bin         
-  double m_drifttimeperhalfbin;        //!< 1.5625ns
+  double m_errors[MaxTimeBin]{};         //!< width of radius dist in each bin
 
-  bool m_isdata;                       //!< flag for real data
   bool m_ismc;                         //!< flag for mc
   bool m_isoverlay;                    //!< flag for overlay
   bool m_istestbeam;                   //!< flag for CTB data or mc
-
-  bool m_allow_data_mc_override;       //!< treat mc as data or vice versa
-  bool m_forcedata;                    //!< treat mc as data
 
   bool m_dummy;                        //!< flag for ignoring drift time info
 
@@ -138,19 +131,41 @@ private:
   std::vector<double> m_tot_corrections_endcap_Xe; //!< ToT corrections for 20 ToT bins in Xe endcap straws
   std::vector<double> m_tot_corrections_barrel_Ar; //!< ToT corrections for 20 ToT bins in Ar barrel straws
   std::vector<double> m_tot_corrections_endcap_Ar; //!< ToT corrections for 20 ToT bins in Ar endcap straws
+
+  static const size_t s_size_default = 19;
+  static constexpr double s_radius_default[s_size_default] = {
+    0.   , 0.   , 0.1  , 0.262, 0.466,
+    0.607, 0.796, 0.931, 1.065, 1.212,
+    1.326, 1.466, 1.585, 1.689, 1.809,
+    1.880, 1.940, 1.950, 1.955 };
+  static constexpr double s_errors_default[s_size_default] = {
+    0.15, 0.15, 0.20, 0.23, 0.21,
+    0.18, 0.17, 0.16, 0.15, 0.15,
+    0.14, 0.13, 0.12, 0.11, 0.11,
+    0.11, 0.13, 0.20, 0.20 };
+
+  static const size_t s_size_Comm = 13;
+  static constexpr double s_radius_Comm[s_size_Comm] = {
+    0.      , 0.     , 0.     , 0.252054, 0.488319,
+    0.751514, 1.00173, 1.21851, 1.40886 , 1.68368 ,
+    1.85363 , 1.91764, 1.94114 };
+  static constexpr double s_errors_Comm[s_size_Comm] = {
+    0.10440061, 0.1510298, 0.26130742, 0.260436, 0.246961,
+    0.226037,   0.18272  , 0.195482  , 0.213817, 0.157627,
+    0.0922559,  0.0463124, 0.0480864 };
+
 };
 
 inline bool TRT_DriftFunctionTool::isValidTime(double drifttime) const
 { return (drifttime>-10. && drifttime<75.); }
 
 inline bool TRT_DriftFunctionTool::isTestBeamData() const
-{ return (m_isdata && m_istestbeam); }
+{ return m_istestbeam; }
 
 inline double TRT_DriftFunctionTool::rawTime(int tdcvalue) const
 {
-   return  (m_isdata && m_istestbeam) ?
-    (tdcvalue*m_drifttimeperhalfbin + m_drifttimeperhalfbin/2.) :
-    (tdcvalue*m_drifttimeperbin + m_drifttimeperbin/2.) ;
+  double time = (tdcvalue+0.5)*m_drifttimeperbin ;
+  return m_istestbeam ? 0.5*time : time;
 }
 
 
