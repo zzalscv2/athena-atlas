@@ -133,7 +133,8 @@ namespace CP {
         Gaudi::Property<int> m_quality{this, "MuQuality", 1,"Quality to select. Values correspond to 0=Tight, 1=Medium, 2=Loose, 3=VeryLoose (only for debug, not supported), 4=HighPt, 5=LowPtEfficiency"};
         Gaudi::Property<bool> m_toroidOff{this, "ToroidOff", false, "Run the tool in Toroid off setup"};
         Gaudi::Property<bool> m_isRun3{this, "IsRun3Geo", false, "Switch to toggle the run 2 & run 3 geometry cuts. The tool will throw an exception if the run number does not match the expectations later"}; 
-        Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", true, "If True, cut on the number of precision layers will ignore the NSW, which is currently the recommended behaviour. Setting this to False is not supported and can be done only for development studies."};
+        Gaudi::Property<bool> m_excludeNSWFromPrecisionLayers{this, "ExcludeNSWFromPrecisionLayers", false, "If True, cut on the number of precision layers will ignore the NSW, which is currently the recommended behaviour. Setting this to False is not supported and can be done only for development studies."};
+        Gaudi::Property<bool> m_recalcPrecisionLayerswNSW{this, "RecalcPrecisionLayerswNSW", true, "If True, recalculate the number of precision layers with the NSW."};
         Gaudi::Property<bool> m_useCaloScore{this, "UseCaloScore", true,"Switch to use CaloScore for calo-tags in the Loose working point. False will revert back to CaloMuonIDTag, not recommended in rel. 22"};
         Gaudi::Property<int> m_CaloScoreWP{this, "CaloScoreWP", 4,"currently there are 4 CaloScore WPs for test, WP4 is the recommended one"};
         
@@ -238,6 +239,9 @@ namespace CP {
             uint8_t extendedSmallHoles{0};
             uint8_t isSmallGoodSectors{0};
             uint8_t cscUnspoiledEtaHits{0};
+            uint8_t etaLayer1STGCHits{0};
+            uint8_t etaLayer2STGCHits{0};
+            uint8_t MMHits{0};
         };
 
         template <class P, class T, class S> inline void retrieveSummaryValue(const P& muon, T& value, const S type) const {

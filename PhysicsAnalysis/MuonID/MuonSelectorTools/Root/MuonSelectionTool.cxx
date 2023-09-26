@@ -43,6 +43,9 @@ namespace {
 
     static const SG::AuxElement::Accessor<float> mePt_acc("MuonSpectrometerPt");
     static const SG::AuxElement::Accessor<float> idPt_acc("InnerDetectorPt");
+    static const SG::AuxElement::Accessor<uint8_t> eta1stgchits_acc("etaLayer1STGCHits");
+    static const SG::AuxElement::Accessor<uint8_t> eta2stgchits_acc("etaLayer2STGCHits");
+    static const SG::AuxElement::Accessor<uint8_t> mmhits_acc("MMHits");
 }  // namespace
 
 namespace CP {
@@ -452,20 +455,6 @@ namespace CP {
         hitSummary summary{};
         fillSummary(mu, summary);
         
-        ///---- FIX FOR CSC ----
-        if (!isRun3() && std::abs(mu.eta()) > 2.0) {
-            ATH_MSG_VERBOSE("Recalculating number of precision layers for combined muon");
-            summary.nprecisionLayers = 0;
-            if (summary.innerSmallHits > 1 || summary.innerLargeHits > 1) summary.nprecisionLayers += 1;
-            if (summary.middleSmallHits > 2 || summary.middleLargeHits > 2) summary.nprecisionLayers += 1;
-            if (summary.outerSmallHits > 2 || summary.outerLargeHits > 2) summary.nprecisionLayers += 1;
-        }
-        if (isRun3() && m_excludeNSWFromPrecisionLayers && std::abs(mu.eta()) > 1.3) {
-            summary.nprecisionLayers = 0;            
-            if (summary.middleSmallHits > 2 || summary.middleLargeHits > 2) summary.nprecisionLayers += 1;
-            if (summary.outerSmallHits > 2 || summary.outerLargeHits > 2) summary.nprecisionLayers += 1;
-            if (summary.extendedSmallHits > 2 || summary.extendedLargeHits > 2) summary.nprecisionLayers += 1;
-        }      
         if (mu.muonType() == xAOD::Muon::Combined) {
             ATH_MSG_VERBOSE("Muon is combined");
             if (mu.author() == xAOD::Muon::STACO) {
@@ -654,12 +643,12 @@ namespace CP {
                 // recipe for high-pt selection
                 IsBadMuon = !passedErrorCutCB(mu);
 
-                uint8_t nprecisionLayers{0};
-                retrieveSummaryValue(mu, nprecisionLayers, xAOD::SummaryType::numberOfPrecisionLayers);
+                hitSummary summary{};
+                fillSummary(mu, summary);
 
                 // temporarily apply same recipe as for other working points in addition to CB error
                 // cut for 2-station muons, pending better treatment of ID/MS misalignments
-                if (m_use2stationMuonsHighPt && nprecisionLayers == 2) {
+                if (m_use2stationMuonsHighPt && summary.nprecisionLayers == 2) {
                     double IdCbRatio = std::abs((qOverPerr_ID / qOverP_ID) / (qOverPerr_CB / qOverP_CB));
                     double MeCbRatio = std::abs((qOverPerr_ME / qOverP_ME) / (qOverPerr_CB / qOverP_CB));
                     IsBadMuon = (IdCbRatio < 0.8 || MeCbRatio < 0.8 || IsBadMuon);
@@ -748,11 +737,11 @@ namespace CP {
 
         // requiring explicitely >=1 station (2 in the |eta|>1.3 region when Medium selection is not explicitely required)
         if (mu.muonType() == xAOD::Muon::Combined) {
-            uint8_t nprecisionLayers{0};
-            retrieveSummaryValue(mu, nprecisionLayers, xAOD::SummaryType::numberOfPrecisionLayers);
+            hitSummary summary{};
+            fillSummary(mu, summary);
             uint nStationsCut = (std::abs(mu.eta()) > 1.3 && std::abs(mu.eta()) < 1.55) ? 2 : 1;
-            if (nprecisionLayers < nStationsCut) {
-                ATH_MSG_VERBOSE("number of precision layers = " << (int)nprecisionLayers << " is lower than cut value " << nStationsCut
+            if (summary.nprecisionLayers < nStationsCut) {
+                ATH_MSG_VERBOSE("number of precision layers = " << (int)summary.nprecisionLayers << " is lower than cut value " << nStationsCut
                                                                 << " - fail low-pT");
                 return false;
             }
@@ -920,13 +909,6 @@ namespace CP {
 
     bool MuonSelectionTool::passedHighPtCuts(const xAOD::Muon& mu) const {
         ATH_MSG_VERBOSE("Checking whether muon passes high-pT selection...");
-        
-        //highPt supported only in the barrel in run3 for the time being
-        if(isRun3() && !m_developMode && std::abs(mu.eta())>1.05)
-        {
-          ATH_MSG_VERBOSE("HighPt WP currently not supported in the endcap for Run3 if not in expert mode, will return false for muon with eta="<<mu.eta());
-          return false;
-        }
 
         // :: Request combined muons
         if (mu.muonType() != xAOD::Muon::Combined) {
@@ -1121,11 +1103,11 @@ namespace CP {
             start_cut = 2.0;
         }
         // ::
-        uint8_t nprecisionLayers{0};
-        retrieveSummaryValue(mu, nprecisionLayers, xAOD::SummaryType::numberOfPrecisionLayers);
+        hitSummary summary{};
+        fillSummary(mu, summary);
 
         // independent parametrization for 2-station muons
-        if (m_use2stationMuonsHighPt && nprecisionLayers == 2) {
+        if (m_use2stationMuonsHighPt && summary.nprecisionLayers == 2) {
             p1 = 0.0739568;
             p2 = 0.00012443;
             if (abs_eta > 1.05 && abs_eta < 1.3) {
@@ -1157,13 +1139,13 @@ namespace CP {
             double a = (1.0 - start_cut) / 4000.0;
             double b = 1.0 - a * 5000.0;
             double coefficient = (pt_CB > 1000.) ? (a * pt_CB + b) : start_cut;
-            if (m_use2stationMuonsHighPt && nprecisionLayers == 2)
+            if (m_use2stationMuonsHighPt && summary.nprecisionLayers == 2)
                 coefficient = (pt_CB > 1000.) ? (1.2 - 0.0001 * pt_CB) : 1.1;  // for 2-station muons 1.1*sigma -> 0.7*sigma @ 5 TeV
             // ::
             if (std::abs(qOverPerr_CB / qOverP_CB) < coefficient * sigma) { passErrorCutCB = true; }
         }
         // ::
-        if (m_use2stationMuonsHighPt && m_doBadMuonVetoMimic && nprecisionLayers == 2) {
+        if (m_use2stationMuonsHighPt && m_doBadMuonVetoMimic && summary.nprecisionLayers == 2) {
             SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
 
             if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
@@ -1389,6 +1371,37 @@ namespace CP {
         retrieveSummaryValue(muon, summary.extendedSmallHoles, xAOD::MuonSummaryType::extendedSmallHoles);
         retrieveSummaryValue(muon, summary.isSmallGoodSectors, xAOD::MuonSummaryType::isSmallGoodSectors);
         if(!isRun3(false)) retrieveSummaryValue(muon, summary.cscUnspoiledEtaHits, xAOD::MuonSummaryType::cscUnspoiledEtaHits); //setting allowForce to false for isRun3(bool) because otherwise that flag can be forced via tool properties to get a specific value, typically for testing purposes. But whatever you force that flag to be, you'll not have CSC hits in run-3 samples!
+
+        if (!isRun3() && std::abs(muon.eta()) > 2.0) {
+          ATH_MSG_VERBOSE("Recalculating number of precision layers for combined muon");
+          summary.nprecisionLayers = 0;
+          if (summary.innerSmallHits > 1 || summary.innerLargeHits > 1) summary.nprecisionLayers += 1;
+          if (summary.middleSmallHits > 2 || summary.middleLargeHits > 2) summary.nprecisionLayers += 1;
+          if (summary.outerSmallHits > 2 || summary.outerLargeHits > 2) summary.nprecisionLayers += 1;
+        }
+        if (isRun3() && m_excludeNSWFromPrecisionLayers && std::abs(muon.eta()) > 1.3) {
+          summary.nprecisionLayers = 0;
+          if (summary.middleSmallHits > 2 || summary.middleLargeHits > 2) summary.nprecisionLayers += 1;
+          if (summary.outerSmallHits > 2 || summary.outerLargeHits > 2) summary.nprecisionLayers += 1;
+          if (summary.extendedSmallHits > 2 || summary.extendedLargeHits > 2) summary.nprecisionLayers += 1;
+        }
+        if (isRun3() && !m_excludeNSWFromPrecisionLayers && m_recalcPrecisionLayerswNSW && std::abs(muon.eta()) > 1.3) {
+          if (!eta1stgchits_acc.isAvailable(muon) || !eta2stgchits_acc.isAvailable(muon) || !mmhits_acc.isAvailable(muon)) {
+            ATH_MSG_FATAL(__FILE__ << ":" << __LINE__ << " Failed to retrieve NSW hits!!"
+                                   << " If you're using DxAODs (with smart slimming for muons), you should use p-tags >= p5834."
+                                   << " OR set ExcludeNSWFromPrecisionLayers to True before crashing if you want to technically be able to run on old DAODs, noting that this is allowed only for testing purposes");
+            throw std::runtime_error("Failed to retrieve NSW hits");
+          }
+          retrieveSummaryValue(muon, summary.etaLayer1STGCHits, xAOD::MuonSummaryType::etaLayer1STGCHits);
+          retrieveSummaryValue(muon, summary.etaLayer2STGCHits, xAOD::MuonSummaryType::etaLayer2STGCHits);
+          retrieveSummaryValue(muon, summary.MMHits, xAOD::MuonSummaryType::MMHits);
+          summary.nprecisionLayers = 0;
+          if (summary.middleSmallHits > 2 || summary.middleLargeHits > 2) summary.nprecisionLayers += 1;
+          if (summary.outerSmallHits > 2 || summary.outerLargeHits > 2) summary.nprecisionLayers += 1;
+          if (summary.extendedSmallHits > 2 || summary.extendedLargeHits > 2) summary.nprecisionLayers += 1;
+          if (summary.etaLayer1STGCHits + summary.etaLayer2STGCHits > 3 || summary.MMHits > 3) summary.nprecisionLayers += 1;
+        }
+
     }
     void MuonSelectionTool::retrieveParam(const xAOD::Muon& muon, float& value, const xAOD::Muon::ParamDef param) const {
         if (!muon.parameter(value, param)) {
