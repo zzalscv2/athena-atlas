@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // *************************************************************************
@@ -12,35 +12,21 @@
 #ifndef LUCID_DIGITBYTESTREAMCNV_H
 #define LUCID_DIGITBYTESTREAMCNV_H
 
-#include <stdint.h>
-#include <map>
-#include <string>
-
 #include "GaudiKernel/Converter.h"
-
-#include "ByteStreamData/RawEvent.h" 
-#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
-
-#include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
-
-#include "eformat/SourceIdentifier.h"
-
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/StatusCode.h"
-#include "GaudiKernel/DataObject.h"
-#include "GaudiKernel/IRegistry.h"
-#include "GaudiKernel/IToolSvc.h"
-
 #include "AthenaBaseComps/AthMessaging.h"
-#include "StoreGate/StoreGateSvc.h"
-
+#include "ByteStreamData/RawEvent.h"  //for RawEventWrite typedef
+#include "GaudiKernel/StatusCode.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h" 
 #include "ByteStreamCnvSvcBase/SrcIdMap.h"
+//
 
-#include "LUCID_RawEvent/LUCID_DigitContainer.h"
-#include "LUCID_RawDataByteStreamCnv/LUCID_RodEncoder.h"
 
-typedef std::map<uint32_t, LUCID_RodEncoder> LucidRodEncoder_map;
+
+
+class DataObject;
+class StoreGateSvc;
+class LUCID_DigitContainer;
+class IByteStreamEventAccess;
 
 class LUCID_DigitByteStreamCnv: public Converter, public AthMessaging {
 
