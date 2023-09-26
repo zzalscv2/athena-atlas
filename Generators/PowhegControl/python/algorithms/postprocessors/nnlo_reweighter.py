@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import glob
 import os
@@ -39,6 +39,39 @@ def NNLO_reweighter(process, powheg_LHE_output):
     run_NNLO_executable(process, powheg_LHE_output, output_LHE_name)
     reformat_NNLO_events(process, powheg_LHE_output, output_LHE_name)
 
+def rename_weights_toNNLOPS(input_filename, output_filename, powheg_LHE_output):
+    # Define the pattern to extract information from the weight name
+    weight_pattern = re.compile(r'MUR(\d+(\.\d+)?)_MUF(\d+(\.\d+)?)_PDF(\d+)')
+
+    # Define the function to create the new weight name
+    def create_new_name(match):
+        mur_value = match.group(1)
+        muf_value = match.group(3)
+        pdf_number = match.group(5)
+        return f'renscfact={mur_value} facscfact={muf_value} lhapdf={pdf_number}'
+
+    # Create a backup of the original LHE file
+    shutil.copy(input_filename, 'pwgevents.lhe_beforeNNLOPSreweighting')
+
+    # Open the input and output files
+    with open(input_filename, 'r') as input_file, open(output_filename, 'w') as output_file:
+        for line in input_file:
+            # Check if the line contains a weight to be renamed
+            if '<weight id' in line:
+                # Extract the weight name using regex
+                match = weight_pattern.search(line)
+                if match:
+                    # Create the new weight name
+                    new_name = create_new_name(match)
+                    # Replace the old weight name with the new name
+                    line = line.replace(match.group(0), new_name)
+                elif '>nominal</weight>' in line:
+                    # Rename 'nominal' to 'default'
+                    line = line.replace('nominal', 'default')
+            # Write the line to the output file
+            output_file.write(line)
+
+    shutil.move(output_filename, powheg_LHE_output)
 
 def acquire_NNLO_inputs(aux_directory, NNLO_reweighting_inputs):
     """! Get reweighting files from AuxFiles directory if not provided with job."""
@@ -64,6 +97,7 @@ def run_NNLO_executable(process, powheg_LHE_output, output_LHE_name):
     print("eA minnlo? ",NNLO_executable)
     if "nnlopsreweighter" in NNLO_executable:
         process.NNLO_weight_list = construct_NNLOPS_weight_list(process.NNLO_output_weights, powheg_LHE_output)
+        rename_weights_toNNLOPS( "pwgevents.lhe", "pwgevents.lhe_nnlops",powheg_LHE_output)
         run_NNLOPS_executable(NNLO_executable, process.NNLO_reweighting_inputs, process.NNLO_weight_list, powheg_LHE_output, output_LHE_name)
     # Run DYNNLO
     elif "minnlo" in NNLO_executable:
@@ -144,20 +178,91 @@ def reformat_NNLO_events(process, powheg_LHE_output, output_LHE_name):
 def reformat_NNLOPS_events(NNLO_weight_list, powheg_LHE_output, output_LHE_name):
     """! Reformat NNLOPS events to fit ATLAS conventions."""
     logger.info("Renaming NNLO weights")
-    # Rename NNLO weights to fit ATLAS conventions - could be rewritten to use XML parsing, but this may be overkill
-    with open(powheg_LHE_output, "w") as f_output:
-        with open(output_LHE_name, "r") as f_input:
-            for input_line in f_input:
-                output_line = input_line
-                for idx, weight_ID, weight_name in NNLO_weight_list:
-                    # Switch weight ID/description naming
-                    if "id='{}'".format(weight_ID) in output_line:
-                        output_line = output_line.replace(weight_ID, str(idx)).replace(weight_name, weight_ID)
-                # Convert exponential delimiter
-                if "wgt id=" in output_line:
-                    output_line = output_line.replace("D+", "E+").replace("D-", "E-")
-                if len(output_line) > 1:  # strip empty lines
-                    f_output.write(output_line)
+    # Open the input and output files
+    with open(output_LHE_name, 'r') as infile, open(powheg_LHE_output, 'w') as outfile:
+        # Initialize variables to store weight IDs and mappings
+        # These are used to set the value of wgt id=? for each event in the file
+        weight_ids      = []
+        weight_mappings = {}
+
+        # Initialize a flag to indicate if we are inside a weight block or headerblock
+        inside_weight_block = False
+        weight_number       = 0
+        weight_number_NNLO  = 0
+
+        # Process each line in the input file
+        for line in infile:
+            # Check if we are inside a weight block
+            if inside_weight_block:
+                # Check for the end of the weight block
+                if '</weights>' in line:
+                    inside_weight_block = False
+                    weight_number       =0
+                    # Replace </weights> with </rwgt>
+                    line = line.replace('</weights>', '</rwgt>')
+                else:
+                    # Extract the weight value and format it
+                    weight_value = line.strip()
+                    if weight_ids:
+                        # Get the corresponding weight ID
+                        weight_id       = weight_ids[weight_number]
+                        weight_number  += 1
+                        # Replace <weights> with <wgt id='weight_id'>
+                        line = f'<wgt id="{weight_id}">{weight_value}</wgt>\n'
+            else:
+                # Check for the start of a weight block
+                if '<weights>' in line:
+                    inside_weight_block = True
+                    # Replace <weights> with <rwgt>
+                    line = line.replace('<weights>', '<rwgt>')
+                elif '#rwgt' in line:
+                    continue
+                # Check if the line contains weight definitions in the header
+                elif '<weight id=' in line:
+                    if 'default</weight>' in line:
+                        match = re.search(r'weight id=\'(\d+)\'\s*>(.*?)<', line)
+                        weight_id = match.group(1)
+                        line = line.replace('default', 'nominal')
+                        weight_ids.append(weight_id)
+                    elif '<weight id=\'nnlops-' in line:
+                        #rename all NNLOPS weights and remove spaces, strings from the name
+                        match = re.search(r"<weight id='(.*?)'\s>\s(.*?)\s<", line)
+                        weight_id_NNLO = match.group(1)
+                        weight_name    = match.group(2)
+                        line = line.replace(weight_id_NNLO, str(NNLO_weight_list[weight_number_NNLO][0]))
+                        # Remove single quotes and "and" from the weight name
+                        renamed_name = weight_name.replace("'", "")
+                        # Replace spaces between words with underscores
+                        renamed_name = renamed_name.replace(" ", "_")
+                        line = line.replace(weight_name, renamed_name)
+                        weight_number_NNLO += 1
+                    # Extract the weight ID and name using regex
+                    else:
+                        match = re.search(r'weight id=\'(\d+)\'\s*>(.*?)<', line)
+                        if match:
+                            weight_id = match.group(1)
+                            weight_name = match.group(2)
+                            weight_ids.append(weight_id)
+                            # Rename the weight name
+                            renamed_name = re.sub(r'renscfact=(\S+)\s+facscfact=(\S+)\s+lhapdf=(\d+)',
+                                                  r'MUR\1_MUF\2_PDF\3', weight_name)
+                            weight_mappings[weight_id] = renamed_name
+                            # Replace the weight name in the line
+                            line = line.replace(weight_name, renamed_name)
+                    # remove all left spaces except for  "weight id"
+                    match = re.search(r"<weight id='(.*?)</weight>", line)
+                    if match:
+                        removed_spaces = match.group(1).replace(" ", "")
+                        line = line.replace(match.group(1), removed_spaces)
+
+                elif '</header>' in line:
+                    # After the header,  add the NNLO weight IDs to the weight_ids
+                    for nnlo_id, _, _ in NNLO_weight_list:
+                        weight_ids.append(nnlo_id)
+
+
+            # Write the processed line to the output file
+            outfile.write(line)
 
 
 def reformat_DYNNLO_events(powheg_LHE_output, input_LHE_name):
