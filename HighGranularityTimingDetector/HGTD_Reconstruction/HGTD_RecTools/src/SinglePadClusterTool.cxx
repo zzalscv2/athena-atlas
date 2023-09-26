@@ -31,13 +31,19 @@ StatusCode SinglePadClusterTool::initialize() {
 }
 
 std::unique_ptr<HGTD_ClusterCollection>
-SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll) const {
+SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll,
+                                 DataPool<HGTD_Cluster>* dataItemsPool) const {
 
   Identifier identifier = rdo_coll.identify();
   IdentifierHash id_hash = rdo_coll.identifierHash();
 
   std::unique_ptr<HGTD_ClusterCollection> cluster_collection =
       std::make_unique<HGTD_ClusterCollection>(id_hash);
+
+  if(dataItemsPool){
+      cluster_collection->clear(SG::VIEW_ELEMENTS);
+  }
+
   cluster_collection->setIdentifier(identifier);
   cluster_collection->reserve(rdo_coll.size());
 
@@ -85,14 +91,23 @@ SinglePadClusterTool::clusterize(const HGTD_RDO_Collection& rdo_coll) const {
     // gets transformed to cluster directly
     std::vector<int> time_over_threshold = {static_cast<int>(rdo->getTOT())};
 
-    std::unique_ptr<HGTD_Cluster> cluster =
-        m_cluster_maker->createCluster(rdo_id, loc_pos, rdo_list, si_width,
-                                       element, time_of_arrival,
-                                       time_over_threshold);
-    cluster->setHashAndIndex(cluster_collection->identifyHash(),
+    HGTD_Cluster* cluster = nullptr;
+    if (dataItemsPool) {
+      // data Item pool owns the element. The collection
+      // is view. Just move assign to it.
+      cluster = dataItemsPool->nextElementPtr();
+   } else {
+      // collection will own the element release
+      cluster = new HGTD_Cluster();
+    }
+    (*cluster) = m_cluster_maker->createCluster(
+        rdo_id, loc_pos, rdo_list, si_width, element, time_of_arrival,
+        time_over_threshold);
+
+   cluster->setHashAndIndex(cluster_collection->identifyHash(),
                              cluster_collection->size());
 
-    cluster_collection->push_back(cluster.release());
+    cluster_collection->push_back(cluster);
   }
   return cluster_collection;
 }

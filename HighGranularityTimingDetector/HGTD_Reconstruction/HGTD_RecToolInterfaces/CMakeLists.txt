@@ -6,5 +6,5 @@ atlas_subdir( HGTD_RecToolInterfaces )
 # Component(s) in the package:
 atlas_add_library( HGTD_RecToolInterfaces
                    PUBLIC_HEADERS HGTD_RecToolInterfaces
-                   LINK_LIBRARIES GaudiKernel HGTD_Identifier HGTD_PrepRawData
+                   LINK_LIBRARIES GaudiKernel HGTD_Identifier HGTD_PrepRawData AthAllocators
                    HGTD_RawData HGTD_ReadoutGeometry TrkTrack xAODTracking xAODTruth AtlasHepMCLib )

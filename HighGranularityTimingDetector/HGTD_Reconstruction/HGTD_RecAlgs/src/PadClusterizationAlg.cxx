@@ -50,6 +50,14 @@ StatusCode PadClusterizationAlg::execute(const EventContext& ctx) const {
 
   HGTD_ClusterContainer* locp_prd_container = prd_container_handle.ptr();
 
+   std::unique_ptr<DataPool<HGTD_Cluster>> dataItemsPool = nullptr;
+   const bool hasExternalCache = rdo_container->hasExternalCache();
+    if (!hasExternalCache) {
+      dataItemsPool = std::make_unique<DataPool<HGTD_Cluster>>(ctx);
+      dataItemsPool->reserve(10000);  // Some large default size
+    }
+
+
   // Transform the RDOs collection by collection
   for (const auto rdo_collection : *rdo_container) {
     if (rdo_collection->empty()) {
@@ -57,7 +65,7 @@ StatusCode PadClusterizationAlg::execute(const EventContext& ctx) const {
     }
 
     std::unique_ptr<HGTD_ClusterCollection> prd_collection =
-        m_clusterization_tool->clusterize(*rdo_collection);
+        m_clusterization_tool->clusterize(*rdo_collection,dataItemsPool.get());
 
     // can happen if some channels are masked, not really relevant currently
     if (prd_collection->empty()) {
