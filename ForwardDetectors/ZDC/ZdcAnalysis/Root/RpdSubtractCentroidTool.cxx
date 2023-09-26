@@ -412,7 +412,7 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
         for (int col = 0; col < m_nCols; col++) {
           const float &amplitudeSubtr = rpdChannelData.at(side).at(row).at(col).amplitudeSubtr;
           if (amplitudeSubtr < 0 && -amplitudeSubtr/ampSumSub.at(side) < m_subAmpUnderflowFrac.at(side)) {
-            status.at(side) |= 1 << ExcessivePileupBit;
+            status.at(side) |= 1 << SubtrUnderflowBit;
             // => centroid calculation is invalid
             status.at(side) &= ~(1 << ValidBit);
           }
