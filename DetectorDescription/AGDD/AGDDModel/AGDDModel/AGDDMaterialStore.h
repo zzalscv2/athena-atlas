@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDMaterialStore_H
@@ -39,8 +39,8 @@ public:
 	
 	void PrintElementNames();
 	void PrintMaterialNames();
-	void PrintElement(std::string n);
-	void PrintMaterial(std::string n);
+	void PrintElement(const std::string& n);
+	void PrintMaterial(const std::string& n);
 	
 private:
 	AGDDMaterialMap m_theMaterials;

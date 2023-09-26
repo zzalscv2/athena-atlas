@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDModel/AGDDSimpleMaterial.h"
@@ -87,7 +87,7 @@ void AGDDMaterialStore::PrintMaterialNames()
 	}
 }
 
-void AGDDMaterialStore::PrintElement(std::string n)
+void AGDDMaterialStore::PrintElement(const std::string& n)
 {
 	if (m_theElements.find(n)!=m_theElements.end())
 		std::cout<<*(m_theElements[n]);
@@ -95,7 +95,7 @@ void AGDDMaterialStore::PrintElement(std::string n)
 		std::cout<<"Element "<<n<<" not found!"<<std::endl;
 }
 
-void AGDDMaterialStore::PrintMaterial(std::string n)
+void AGDDMaterialStore::PrintMaterial(const std::string& n)
 {
 	if (m_theMaterials.find(n)!=m_theMaterials.end())
 		std::cout<<*(m_theMaterials[n]);

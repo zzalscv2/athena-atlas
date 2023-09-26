@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -201,13 +201,13 @@ private:
     ;
 
   /** Distance to line */
-  static double distanceToLine(const Amg::Vector2D& locpo, std::vector<TDD_real_t> P1, std::vector<TDD_real_t> P2) ;
+  static double distanceToLine(const Amg::Vector2D& locpo, const std::vector<TDD_real_t>& P1, const std::vector<TDD_real_t>& P2) ;
 
   /** Distance to arc */
   static double distanceToArc(const Amg::Vector2D& locpo,
                        double R,
-                       std::vector<TDD_real_t> sL,
-                       std::vector<TDD_real_t> sR) ;
+                       const std::vector<TDD_real_t>& sL,
+                       const std::vector<TDD_real_t>& sR) ;
 
   /** 
    * @brief Circle and line intersection. \n 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmdcStand/AmdcsimrecStand.h"
@@ -24,7 +24,7 @@
 
 using std::setiosflags;
 
-int AmdcsimrecStand::initFromAscii (std::string fileName)
+int AmdcsimrecStand::initFromAscii (const std::string& fileName)
 {
   // Returns non null value on success
 

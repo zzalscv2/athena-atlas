@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AMDCSTAND_AMDCSIMRECSTAND_H
@@ -24,7 +24,7 @@ public:
     AmdcsimrecStand();
     virtual ~AmdcsimrecStand();
 
-    static int initFromAscii (std::string fileName);
+    static int initFromAscii (const std::string& fileName);
 
 public:
 ///////////////////////////////////

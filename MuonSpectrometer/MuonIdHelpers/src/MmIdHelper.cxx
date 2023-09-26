@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MmIdHelper.h"
@@ -842,7 +842,7 @@ bool MmIdHelper::LargeSector(int stationName) const { return ('L' == stationName
 bool MmIdHelper::SmallSector(int stationName) const { return ('S' == stationNameString(stationName)[2]); }
 /*******************************************************************************/
 // Nektar: Modified for MicroMegas, but is almost certainly wrong
-int MmIdHelper::sectorType(std::string stationName, int stationEta) const {
+int MmIdHelper::sectorType(const std::string& stationName, int stationEta) const {
     if ('L' == stationName[2]) {
         return (abs(stationEta) + 1);
     } else if ('S' == stationName[2]) {
