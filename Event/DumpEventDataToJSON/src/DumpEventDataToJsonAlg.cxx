@@ -65,14 +65,13 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
   if (!m_trtPrepRawDataKey.empty())
     ATH_CHECK(m_trtPrepRawDataKey.initialize());
 
-  if (m_extrapolateTrackParticless) {
-    ATH_CHECK(m_extrapolator.retrieve());
+  ATH_CHECK(m_extrapolator.retrieve( DisableTool{m_extrapolator.empty()} ));
+  ATH_CHECK(m_trackingGeometryTool.retrieve( DisableTool{m_trackingGeometryTool.empty()} ));
+  if (m_extrapolator.empty()) {
+    ATH_MSG_WARNING("No extrapolator found. Will not be able to extrapolate tracks.");
   } else {
-    m_extrapolator.disable();
+    ATH_MSG_INFO("Extrapolator found. Will be able to extrapolate tracks.");
   }
-  
-  ATH_CHECK(m_trackingGeometryTool.retrieve());
-
   return StatusCode::SUCCESS;
 }
 
@@ -161,38 +160,34 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   ATH_CHECK(getAndFillArrayOfContainers(j, m_trackCollectionKeys, "Tracks"));
 
   // ACTS
-  auto vtcHandles = m_vectorTrackContainerKeys.makeHandles();
-  auto tsHandles = m_trackStatesKeys.makeHandles();
-  auto jHandles = m_jacobiansKeys.makeHandles();
-  auto mHandles = m_measurementsKeys.makeHandles();
-  auto pHandles = m_parametersKeys.makeHandles();
+  if (!m_vectorTrackContainerKeys.empty()) {
+    auto vtcHandles = m_vectorTrackContainerKeys.makeHandles();
+    auto tsHandles = m_trackStatesKeys.makeHandles();
+    auto jHandles = m_jacobiansKeys.makeHandles();
+    auto mHandles = m_measurementsKeys.makeHandles();
+    auto pHandles = m_parametersKeys.makeHandles();
 
-  unsigned int i = 0;
-  for ( ; i < vtcHandles.size(); ++i) {
-    SG::ReadHandle<Acts::ConstVectorTrackContainer> vtcHandle = vtcHandles[i];
-    SG::ReadHandle<xAOD::TrackStateContainer> tsHandle = tsHandles[i];
-    SG::ReadHandle<xAOD::TrackJacobianContainer> jHandle = jHandles[i];
-    SG::ReadHandle<xAOD::TrackMeasurementContainer> mHandle = mHandles[i];
-    SG::ReadHandle<xAOD::TrackParametersContainer> pHandle = pHandles[i];
+    unsigned int i = 0;
+    for ( ; i < vtcHandles.size(); ++i) {
+      SG::ReadHandle<Acts::ConstVectorTrackContainer> vtcHandle = vtcHandles[i];
+      SG::ReadHandle<xAOD::TrackStateContainer> tsHandle = tsHandles[i];
+      SG::ReadHandle<xAOD::TrackJacobianContainer> jHandle = jHandles[i];
+      SG::ReadHandle<xAOD::TrackMeasurementContainer> mHandle = mHandles[i];
+      SG::ReadHandle<xAOD::TrackParametersContainer> pHandle = pHandles[i];
 
-    // Temporary debugging information
-    ATH_MSG_VERBOSE("TrackStateContainer has "<< tsHandle->size() << " elements");
-    ATH_MSG_VERBOSE("TrackParametersContainer has "<< pHandle->size() << " elements");
 
-    
-    ATH_MSG_VERBOSE("Trying to load " << vtcHandle.key() << " with " << vtcHandle->size_impl() << " tracks");
-
-    auto multiTraj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&(*tsHandle), &(*pHandle), &(*jHandle), &(*mHandle));
-    multiTraj->fillSurfaces(m_trackingGeometryTool->trackingGeometry().get(),
-                            m_trackingGeometryTool->getGeometryContext(getContext()));
-    ATH_MSG_VERBOSE("Surfaces restored");
-    Acts::TrackContainer<Acts::ConstVectorTrackContainer,
-                         ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder>
-        tc{*vtcHandle, *multiTraj};
-    ATH_MSG_VERBOSE("Found " << tc.size() << " tracks in " << vtcHandle.key());
-    for (auto track : tc) {
-      nlohmann::json tmp = getData(track);
-      j["TrackContainers"][vtcHandle.key()].push_back(tmp);
+      auto multiTraj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&(*tsHandle), &(*pHandle), &(*jHandle), &(*mHandle));
+      multiTraj->fillSurfaces(m_trackingGeometryTool->trackingGeometry().get(),
+                              m_trackingGeometryTool->getGeometryContext(getContext()));
+      ATH_MSG_VERBOSE("Surfaces restored");
+      Acts::TrackContainer<Acts::ConstVectorTrackContainer,
+                          ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder>
+          tc{*vtcHandle, *multiTraj};
+      ATH_MSG_VERBOSE("Found " << tc.size() << " tracks in " << vtcHandle.key());
+      for (auto track : tc) {
+        nlohmann::json tmp = getData(track);
+        j["TrackContainers"][vtcHandle.key()].push_back(tmp);
+      }
     }
   }
 
@@ -335,7 +330,7 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp) {
   data["dof"] = tp.numberDoF();
   data["dparams"] = {tp.d0(), tp.z0(), tp.phi0(), tp.theta(), tp.qOverP()};
 
-  if (!m_extrapolateTrackParticless) {
+  if (m_extrapolator.empty()) {
     data["pos"] = {tp.perigeeParameters().position().x(),
                    tp.perigeeParameters().position().y(),
                    tp.perigeeParameters().position().z()};

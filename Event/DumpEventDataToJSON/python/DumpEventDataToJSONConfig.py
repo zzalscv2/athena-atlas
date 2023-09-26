@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import VERBOSE
 
 
-def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, **kwargs):
+def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, doACTSEDM = True, **kwargs):
     result = ComponentAccumulator()
     extrapolationEngine = ""
     if doExtrap:
@@ -19,19 +19,31 @@ def DumpEventDataToJSONAlgCfg(flags, doExtrap=False, **kwargs):
         result.merge(extrapAcc)
 
         kwargs.setdefault('Extrapolator', extrapolationEngine)
+    else:
+        kwargs.setdefault('Extrapolator', '')
 
-    dumpAlg = CompFactory.DumpEventDataToJsonAlg(
-        ExtrapolateTrackParticles=doExtrap, **kwargs)
+
+    if doACTSEDM:
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+        kwargs.setdefault('TrackingGeometryTool', result.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    else:
+        kwargs.setdefault('TrackingGeometryTool', '')
+        kwargs.setdefault('VectorTrackContainerKeys', [])
+        kwargs.setdefault('TrackStatesLocation', [])
+        kwargs.setdefault('TrackJacobiansLocation', [])
+        kwargs.setdefault('TrackMeasurementsLocation', [])
+        kwargs.setdefault('TrackParametersLocation', [])
+
+    dumpAlg = CompFactory.DumpEventDataToJsonAlg( **kwargs)
     result.addEventAlgo(dumpAlg)
     return result
 
 
 if __name__ == "__main__":
     # Run this with python -m DumpEventDataToJSON.DumpEventDataToJSONConfig myESD.pool.root
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
-    parser.add_argument("input",
-                        help="Input pool file", default="../q221/myESD.pool.root")
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    parser = flags.getArgumentParser()
     parser.add_argument("-o", "--output", dest="output", default='Event.json',
                         help="write JSON to FILE", metavar="FILE")
     parser.add_argument("--prependCalib", help="Prepend a calibartion event with some labelled objects at specific eta/phi.",
@@ -39,10 +51,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     print('Running DumpEventDataToJSON on {} and outputting to {}. Prepend calib event is {}'.format(
-        args.input, args.output, args.prependCalib))
+        args.filesInput, args.output, args.prependCalib))
 
     from AthenaCommon.Logging import log
-    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
@@ -50,11 +61,7 @@ if __name__ == "__main__":
     # from AthenaCommon.Constants import DEBUG
     # log.setLevel(DEBUG)
 
-    flags = initConfigFlags()
-    # To run on MC do e.g.
-    flags.Input.Files = [args.input]
-    # To run on data do e.g.
-    # flags.Input.Files = ["../q431/myESD.pool.root"]
+    args = flags.fillFromArgs(parser = parser)
 
     # This should run serially for the moment.
     flags.Concurrency.NumThreads = 1
@@ -103,9 +110,6 @@ if __name__ == "__main__":
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
         cfg.merge(MuonGeoModelCfg(flags))
 
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    cfg.merge(TrackingGeometrySvcCfg(flags))
-
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
     cfg.merge(TrackCollectionReadCfg(flags, 'Tracks'))
 
@@ -114,7 +118,7 @@ if __name__ == "__main__":
 
     # Disable doExtrap if you would prefer not to use the extrapolator.
     topoAcc = DumpEventDataToJSONAlgCfg(
-        flags, doExtrap=False, OutputLevel=VERBOSE, DumpTestEvent=args.prependCalib, OutputLocation=args.output,
+        flags, doExtrap=True, doACTSEDM=False, OutputLevel=VERBOSE, DumpTestEvent=args.prependCalib, OutputLocation=args.output,
         CscPrepRawDataKey = "CSC_Clusters" if flags.Detector.EnableCSC else "",
         MMPrepRawDataKey = "MM_Measurements" if flags.Detector.EnableMM else "",
         sTgcPrepRawDataKey = "STGC_Measurements" if flags.Detector.EnablesTGC else "",
@@ -123,6 +127,3 @@ if __name__ == "__main__":
     cfg.merge(topoAcc)
 
     cfg.run(2)
-    f = open("DumpEventDataToJSONConfig.pkl", "wb")
-    cfg.store(f)
-    f.close()
