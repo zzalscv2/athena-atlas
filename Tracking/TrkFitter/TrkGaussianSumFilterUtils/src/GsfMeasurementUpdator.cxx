@@ -172,7 +172,7 @@ calculateFilterStep_1D(Trk::TrackParameters& TP,
   // --- compute Kalman gain matrix
   AmgVector(5) K = trkCov.col(mk) * R;
   // --- compute local filtered state, here = TP+K*r = TP + TCov * H.T * R * r
-  AmgVector(5) newPar = trkPar + trkCov.col(mk) * R * r;
+  AmgVector(5) newPar = trkPar + K * r;
 
   if (!thetaWithinRange_5D(newPar)) {
 

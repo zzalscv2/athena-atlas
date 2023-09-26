@@ -90,16 +90,6 @@ private:
     "Maximum number of components"
   };
 
-  Gaudi::Property<bool> m_useReferenceMaterial{ this,
-                                                "UseReferenceMaterial",
-                                                false,
-                                                "" };
-
-  Gaudi::Property<double> m_momentumCut{ this,
-                                         "MinimalMomentum",
-                                         250. * Gaudi::Units::MeV,
-                                         "" };
-
   Gaudi::Property<std::string> m_parameterisationFileName{
     this,
     "BetheHeitlerParameterisationFileName",

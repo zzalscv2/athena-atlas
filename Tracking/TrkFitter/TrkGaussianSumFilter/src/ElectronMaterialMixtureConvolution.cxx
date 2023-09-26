@@ -69,34 +69,12 @@ updateP(double& qOverP, double deltaP)
 
 std::pair<const Trk::MaterialProperties*, double>
 getMaterialProperties(const Trk::TrackParameters* trackParameters,
-                      const Trk::Layer& layer,
-                      bool useReferenceMaterial)
+                      const Trk::Layer& layer)
 {
 
   const Trk::MaterialProperties* materialProperties(nullptr);
   double pathCorrection(0.);
 
-  // Incorporate the reference material
-  if (useReferenceMaterial) {
-    // Get the surface associated with the parameters
-    const Trk::Surface* surface = &(trackParameters->associatedSurface());
-    // Only utilise the reference material if an associated detector element
-    // exists
-    if (surface && surface->associatedDetectorElement()) {
-      // Get the layer material properties
-      const Trk::LayerMaterialProperties* layerMaterial =
-        layer.layerMaterialProperties();
-      // Assign the material properties
-      materialProperties =
-        layerMaterial ? layerMaterial->fullMaterial(trackParameters->position())
-                      : nullptr;
-      // Determine the pathCorrection if the material properties exist
-      pathCorrection = materialProperties
-                         ? 1. / std::abs(surface->normal().dot(
-                                  trackParameters->momentum().unit()))
-                         : 0.;
-    }
-  }
   // Check that the material properties have been defined - if not define them
   // from the layer information
   materialProperties = materialProperties
@@ -272,7 +250,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
   for (size_t i(0); i < inputState.size(); ++i) {
     const AmgSymMatrix(5)* measuredCov = inputState[i].first->covariance();
     // If the momentum is too dont apply material effects
-    if (inputState[i].first->momentum().mag() <= m_momentumCut) {
+    if (inputState[i].first->momentum().mag() <= 250. * Gaudi::Units::MeV) {
       dummyCacheElement(caches[i]);
       updateCacheElement(
         caches[i], 0, inputState[i].first->parameters(), measuredCov);
@@ -283,8 +261,7 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
     // Get the material effects and store them in the cache
     std::pair<const Trk::MaterialProperties*, double> matPropPair =
-      getMaterialProperties(
-        inputState[i].first.get(), layer, m_useReferenceMaterial);
+        getMaterialProperties(inputState[i].first.get(), layer);
 
     if (!matPropPair.first) {
       dummyCacheElement(caches[i]);
