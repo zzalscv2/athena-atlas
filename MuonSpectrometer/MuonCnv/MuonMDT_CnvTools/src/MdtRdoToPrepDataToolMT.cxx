@@ -23,7 +23,6 @@ using MdtDriftCircleStatus = MdtCalibOutput::MdtDriftCircleStatus;
 
 
 namespace {
-    static constexpr double inverseSpeedOfLight = 1 / Gaudi::Units::c_light;  // need 1/299.792458
     // the tube number of a tube in a tubeLayer is encoded in the GeoSerialIdentifier (modulo maxNTubesPerLayer)
     static constexpr unsigned int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
 
