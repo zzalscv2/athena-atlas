@@ -3,37 +3,37 @@
 #
 
 # menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import parOR, seqAND
-import AthenaCommon.CfgMgr as CfgMgr
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def TRTHitGeneratorSequence(flags):
+
+def TRTHitGeneratorSequenceCfg(flags, is_probe_leg = False):
+
+    recAcc = ComponentAccumulator()
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys()
 
     """ hipTRT step ....."""
-    InViewRoIs = "TRTHitGenerator"
+    inViewRoIs = "TRTHitGenerator"
     # EVCreator:
-    roiTool = ViewCreatorCentredOnClusterROITool()
+    roiTool = CompFactory.ViewCreatorCentredOnClusterROITool()
     roiTool.AllowMultipleClusters = False 
     roiTool.RoisWriteHandleKey = "HLT_Roi_TRTHit"
     roiTool.RoIEtaWidth = 0.10
     roiTool.RoIPhiWidth = 0.10
-    trtViewsMaker = EventViewCreatorAlgorithm("IMTRTHitGenerator")
-    trtViewsMaker.RoIsLink = "initialRoI" # Merge inputs based on their initial L1 ROI
-    trtViewsMaker.RoITool = roiTool
-    trtViewsMaker.InViewRoIs = InViewRoIs
-    trtViewsMaker.Views = "TRTHitGeneratorViews"
-    trtViewsMaker.ViewFallThrough = True
-    trtViewsMaker.RequireParentView = True
+    viewName = "TRTHitGenerator"
+
+    hipTRTReco = InViewRecoCA(viewName,
+                              RoITool=roiTool, # view maker args
+                              RequireParentView=True,
+                              InViewRoIs=inViewRoIs,
+                              isProbe=is_probe_leg)
    
     # view data verifier
-    ViewVerifyName = "TRTHitGeneratorViewDataVerifier"
-    ViewVerify = CfgMgr.AthViews__ViewDataVerifier(ViewVerifyName)
+    ViewVerify = CompFactory.AthViews.ViewDataVerifier("TRTHitGeneratorViewDataVerifier")
     ViewVerify.DataObjects = [('TrigRoiDescriptorCollection' , 'StoreGateSvc+TRTHitGenerator'),
                              ]
     from AthenaCommon.Logging import logging
@@ -41,47 +41,35 @@ def TRTHitGeneratorSequence(flags):
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     flagsWithTrk = getFlagsForActiveConfig(flags, 'photon', log)
 
-    from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
     from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
 
     seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
-                            rois = trtViewsMaker.InViewRoIs, inView = ViewVerifyName)
+                            rois=inViewRoIs, inView=ViewVerify.getName())
 
-    ca = seq.dataPreparationTRT()
-    trtInviewAlgs = extractAlgorithmsAndAppendCA(ca)
+    recAcc.merge(seq.dataPreparationTRT())
     
+    recAcc.addEventAlgo(ViewVerify)
     trtHTHFex = TrigTRTHTHCounterFex(flags, name="TrigTRTH_fex",
-                                     RoIs = trtViewsMaker.InViewRoIs,
+                                     RoIs = inViewRoIs,
                                      containerName = "TRT_TrigDriftCircles",
                                      RNNOutputName = TrigEgammaKeys.TrigTRTHTCountsContainer)
 
-    sequenceOut = TrigEgammaKeys.TrigTRTHTCountsContainer
-    
-    trtInviewAlgs = parOR("trtInviewAlgs", trtInviewAlgs + [ViewVerify,trtHTHFex])
-    trtViewsMaker.ViewNodeName = "trtInviewAlgs"
+    recAcc.addEventAlgo(trtHTHFex)
 
+    hipTRTReco.mergeReco(recAcc)
 
-    trtDataSequence = seqAND("trtDataSequence", [trtViewsMaker, trtInviewAlgs ] )
-    return (sequenceOut, trtDataSequence, trtViewsMaker)
-
-
+    selAcc=SelectionCA("trtHitCounter", isProbe=is_probe_leg)   
+    selAcc.mergeReco(hipTRTReco)
+    trtHTHhypo = CompFactory.TrigTRTHTHhypoAlg(name="TrigTRTHTHhypo", RNNOutputName=TrigEgammaKeys.TrigTRTHTCountsContainer)
+    selAcc.addHypoAlgo(trtHTHhypo)
+    from TrigTRTHighTHitCounter.TrigTRTHTHhypoTool import TrigTRTHTHhypoToolFromDict
+    return MenuSequenceCA(flags,selAcc, HypoToolGen=TrigTRTHTHhypoToolFromDict, isProbe=is_probe_leg)
 
 def hipTRTMenuSequence(flags, is_probe_leg=False):
-    """ Creates TRTDataGenerator MENU sequence """
-    (sequenceOut, trtDataSequence, trtViewsMaker) = RecoFragmentsPool.retrieve(TRTHitGeneratorSequence, flags)
 
-    #Hypo
-    from TrigTRTHighTHitCounter.TrigTRTHighTHitCounterConf import TrigTRTHTHhypoAlg
-    from TrigTRTHighTHitCounter.TrigTRTHTHhypoTool import TrigTRTHTHhypoToolFromDict
-
-    trtHTHhypo = TrigTRTHTHhypoAlg("TrigTRTHTHhypo")
-    trtHTHhypo.RNNOutputName = sequenceOut 
-
-    return MenuSequence( flags,
-                         Sequence    = trtDataSequence,
-                         Maker       = trtViewsMaker, 
-                         Hypo        = trtHTHhypo,
-                         HypoToolGen = TrigTRTHTHhypoToolFromDict,
-                         IsProbe     = is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return TRTHitGeneratorSequenceCfg(flags, is_probe_leg=is_probe_leg)
+    else: 
+        return menuSequenceCAToGlobalWrapper(TRTHitGeneratorSequenceCfg, flags, is_probe_leg=is_probe_leg)
 
 

@@ -13,11 +13,11 @@ from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
 from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
 from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
 from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
+from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
 
 if isComponentAccumulatorCfg():
     pass
 else:
-    from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
 
 
