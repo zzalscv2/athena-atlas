@@ -87,7 +87,6 @@ electronMonTool::electronMonTool(const std::string & type, const std::string & n
   m_CbTightElectrons = new electronHist(std::string("CbTight"), WithLimitedHistList);
 
   m_currentLB = -1;
-
 }
 
 electronMonTool::~electronMonTool()
@@ -113,174 +112,56 @@ StatusCode electronMonTool::bookHistogramsForOneElectronType(electronHist& myHis
 
   ATH_MSG_DEBUG("electronMonTool::bookHistogramsForOneElectron()");
 
-  int start;
-  int end;
-  start = 0;
-  end = ENDCAP;
+  int start = 0;
+  int end = ENDCAP;
 
   // MAIN PANEL
-  std::string hname = std::string("electronN") + myHist.m_nameOfElectronType;
-  std::string hlongname =  std::string("Number of electrons") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hN, *m_electronGroup, hname, hlongname, 20, 0.0, 20.0);
-
-  hname = std::string("electronEt") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron transverse energy [MeV]") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hEt, *m_electronGroup, hname, hlongname, 100, -1000.0, 250000.0);
-
-  hname = std::string("electronEtaPhiPtgt4GeV") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron #eta,#phi map (candidates with Pt>4GeV)") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhi4GeV, *m_electronGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  hname = std::string("electronEta") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron #eta") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hEta, *m_electronGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  hname = std::string("electronPhi") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron #phi") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hPhi, *m_electronGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  hname = std::string("electronTopoEtCone40") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron Topocluster Isolation Energy") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hTopoEtCone40, *m_electronGroup, hname, hlongname, 64, -10000., 40000.);
-
-  hname = std::string("electronPtCone20") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron Track Isolation Energy") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hPtCone20, *m_electronGroup, hname, hlongname, 64, -10000., 40000.);
-
-  hname = std::string("electronTime") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Time associated with electron cluster [ns]") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hTime, *m_electronGroup, hname, hlongname, 90, -30., 60.);
+  bookTH1F(myHist.m_hN, *m_electronGroup, "electronN", "Number of electrons", 20, 0.0, 20.0, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEt, *m_electronGroup, "electronEt", "Electron transverse energy [MeV]", 100, -1000.0, 250000.0, myHist.m_nameOfEgammaType);
+  bookTH2F(myHist.m_hEtaPhi4GeV, *m_electronGroup, "electronEtaPhiPtgt4GeV", "Electron #eta,#phi map (candidates with Pt>4GeV)", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEta, *m_electronGroup, "electronEta", "Electron #eta", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPhi, *m_electronGroup, "electronPhi", "Electron #phi", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hTopoEtCone40, *m_electronGroup, "electronTopoEtCone40", "Electron Topocluster Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPtCone20, *m_electronGroup, "electronPtCone20", "Electron Track Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hTime, *m_electronGroup, "electronTime", "Time associated with electron cluster [ns]", 90, -30., 60., myHist.m_nameOfEgammaType);
 
   // EXPERT PANEL
-
-  hname = std::string("electronEtaPhiPtgt2.5GeV") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron #eta,#phi map  (candidates with Pt>2.5GeV)") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhi, *m_electronGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  hname = std::string("electronEtaPhiPtgt20GeV") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Electron #eta,#phi map (candidates with Pt>20GeV)") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhi20GeV, *m_electronGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
+  bookTH2F(myHist.m_hEtaPhi, *m_electronGroup, "electronEtaPhiPtgt2.5GeV", "Electron #eta,#phi map  (candidates with Pt>2.5GeV)", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH2F(myHist.m_hEtaPhi20GeV, *m_electronGroup, "electronEtaPhiPtgt20GeV", "Electron #eta,#phi map (candidates with Pt>20GeV)", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
 
   // PER REGION IN EXPERT PANEL
-
   if (myHist.m_fullHistoList) {
-    
-    hname = std::string("electronN") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron number ; Nel ; Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvN, *m_electronGroup, hname, hlongname ,20, 0.0, 20.0,start,end);
+    bookTH1FperRegion(myHist.m_hvN, *m_electronGroup, "electronN", "Electron number ; Nel ; Nevents",20, 0.0, 20.0,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvEta, *m_electronGroup, "electronEta", "Electron #eta distribution ; #eta ; Nevents",64, -3.2, 3.2,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvPhi, *m_electronGroup, "electronPhi", "Electron #phi distribution ; #phi ; Nevents", 64, -3.2, 3.2,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvEt, *m_electronGroup, "electronEt", "Electron Et distribution ; Et [MeV] ; Nevents", 100, -1000.0, 250000.0,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvTopoEtCone40, *m_electronGroup, "electronTopoEtCone40", "Electron Isolation Energy TopoEtCone40 [MeV] ; Eiso ; Nevents", 64, -10000., 40000.,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvPtCone20, *m_electronGroup, "electronPtCone20", "Electron PtCone20 distribution ; PtCone20 ; Nevents", 64, -10000., 40000.,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvTime, *m_electronGroup, "electronTime", "Electron time [ns] ; Time [ns] ; Nevents", 90, -30.0, 60.0,start,end, myHist.m_nameOfEgammaType);
 
-    hname = std::string("electronEta") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron #eta distribution ; #eta ; Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvEta, *m_electronGroup, hname, hlongname,64, -3.2, 3.2,start,end);
-
-    hname = std::string("electronPhi") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron #phi distribution ; #phi ; Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvPhi, *m_electronGroup, hname, hlongname, 64, -3.2, 3.2,start,end);
-
-    hname = std::string("electronEt") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron Et distribution ; Et [MeV] ; Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvEt, *m_electronGroup, hname, hlongname, 100, -1000.0, 250000.0,start,end);
-
-    hname = std::string("electronTopoEtCone40") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron Isolation Energy TopoEtCone40 [MeV] ; Eiso ; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvTopoEtCone40, *m_electronGroup, hname, hlongname, 64, -10000., 40000.,start,end);
-
-    hname = std::string("electronPtCone20") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron PtCone20 distribution ; PtCone20 ; Nevents") + std::string (" (")
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvPtCone20, *m_electronGroup, hname, hlongname, 64, -10000., 40000.,start,end);
-
-    hname = std::string("electronTime") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron time [ns] ; Time [ns] ; Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvTime, *m_electronGroup, hname, hlongname, 90, -30.0, 60.0,start,end);
-
-  // TRACK PANEL
-    hname = std::string("electronNOfBLayersHits") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron number of track B-Layer Hits ; N B-layer hits ; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvNOfBLayerHits, *m_electronTrkGroup, hname, hlongname, 6,-0.5,5.5,start,end);
-
-    hname = std::string("electronNOfSiHits") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron number of track precision Hits ;N Si hits;Nevents") + std::string (" (")
-    + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvNOfSiHits, *m_electronTrkGroup,hname, hlongname, 26,-0.5,25.5,start,end);
-    
-    hname = std::string("electronNOfTRTHits") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron number of TRT Hits ;N TRT hits;Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvNOfTRTHits, *m_electronTrkGroup, hname, hlongname, 51,-0.5,50.5,start,end);
-    
-    hname = std::string("electronNOfTRTHighThresholdHits") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron number of High Threshold TRT Hits ;N TRT High Threshold hits;Nevents") + std::string (" (")
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvNOfTRTHighThresholdHits, *m_electronTrkGroup, hname, hlongname, 51,-0.5,50.5,start,end);
-    
-    hname = std::string("electronDeltaEta1") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("electron track match #Delta #eta (1st sampling) ;#Delta #eta;Nevents") 
-      + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvDeltaEta1, *m_electronTrkGroup,hname, hlongname, 50,-0.05,0.05,start,end);
-    
-    hname = std::string("electronDeltaPhi2") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("electron track match #Delta #phi (2nd sampling) ;#Delta #phi ; Nevents") 
-      + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvDeltaPhi2, *m_electronTrkGroup, hname, hlongname, 50,-0.15,0.1,start,end);
-    
-    hname = std::string("electronTrackd0") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("electron track match d0 ; d0 ; Nevents") 
-      + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvd0, *m_electronTrkGroup, hname, hlongname, 100,-5.,5.,start,end);
+    // TRACK PANEL
+    bookTH1FperRegion(myHist.m_hvNOfBLayerHits, *m_electronTrkGroup, "electronNOfBLayersHits", "Electron number of track B-Layer Hits ; N B-layer hits ; Nevents", 6,-0.5,5.5,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvNOfSiHits, *m_electronTrkGroup,"electronNOfSiHits", "Electron number of track precision Hits ;N Si hits;Nevents", 26,-0.5,25.5,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvNOfTRTHits, *m_electronTrkGroup, "electronNOfTRTHits", "Electron number of TRT Hits ;N TRT hits;Nevents", 51,-0.5,50.5,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvNOfTRTHighThresholdHits, *m_electronTrkGroup, "electronNOfTRTHighThresholdHits", "Electron number of High Threshold TRT Hits ;N TRT High Threshold hits;Nevents", 51,-0.5,50.5,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvDeltaEta1, *m_electronTrkGroup,"electronDeltaEta1", "electron track match #Delta #eta (1st sampling) ;#Delta #eta;Nevents", 50,-0.05,0.05,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvDeltaPhi2, *m_electronTrkGroup, "electronDeltaPhi2", "electron track match #Delta #phi (2nd sampling) ;#Delta #phi ; Nevents", 50,-0.15,0.1,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvd0, *m_electronTrkGroup, "electronTrackd0", "electron track match d0 ; d0 ; Nevents", 100,-5.,5.,start,end, myHist.m_nameOfEgammaType);
     
     // ID PANEL
-    hname = std::string("electronEhad1") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron energy leakage in 1st hadronic sampling ; Ehad 1; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvEhad1, *m_electronIdGroup, hname, hlongname, 50, -1000., 10000.,start,end);
-    
-    hname = std::string("electronEoverP") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron match track E over P ; E/p ; Nevents") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvEoverP, *m_electronIdGroup, hname, hlongname, 50,0,5,start,end);
-    
-    hname = std::string("electronCoreEM") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron core energy in EM calorimeter ;E [MeV]; Nevents") + std::string (" (")
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvCoreEM, *m_electronIdGroup, hname, hlongname, 50, -5000., 250000.,start,end);
-    
-    hname = std::string("electronF0") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron fractional energy in PreSampler ; F0 ; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvF0, *m_electronIdGroup, hname, hlongname, 50, -0.2,1.0,start,end);
-    
-    hname = std::string("electronF1") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron fractional energy in 1st sampling ; F1 ; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvF1, *m_electronIdGroup, hname, hlongname, 50, -0.2,1.0,start,end);
-    
-    hname = std::string("electronF2") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron fractional energy in 2nd sampling ; F2 ; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvF2, *m_electronIdGroup,hname, hlongname, 50, -0.2,1.0,start,end);
-    
-    hname = std::string("electronF3") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron fractional energy in 3rd sampling ; F3 ; Nevents") + std::string (" (") 
-      + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvF3, *m_electronIdGroup, hname, hlongname, 50, -0.2,1.0,start,end);
-    
-    hname = std::string("electronRe233e237") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron uncor. energy fraction in 3x3/3x7 cells in em sampling 2 ;R 3x3/3x7; Nevents") 
-      + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvRe233e237, *m_electronIdGroup, hname, hlongname, 50, 0., 2.,start,end);
-    
-    hname = std::string("electronRe237e277") + myHist.m_nameOfElectronType;
-    hlongname =  std::string("Electron uncor. energy fraction in 3x7/7x7 cells in em sampling 2 ;R 3x7/7x7; Nevents") 
-      + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-    bookTH1FperRegion(myHist.m_hvRe237e277, *m_electronIdGroup, hname, hlongname, 50, 0., 2.,start,end);
-
+    bookTH1FperRegion(myHist.m_hvEhad1, *m_electronIdGroup, "electronEhad1", "Electron energy leakage in 1st hadronic sampling ; Ehad 1; Nevents", 50, -1000., 10000.,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvEoverP, *m_electronIdGroup, "electronEoverP", "Electron match track E over P ; E/p ; Nevents", 50,0,5,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvCoreEM, *m_electronIdGroup, "electronCoreEM", "Electron core energy in EM calorimeter ;E [MeV]; Nevents", 50, -5000., 250000.,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvF0, *m_electronIdGroup, "electronF0", "Electron fractional energy in PreSampler ; F0 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvF1, *m_electronIdGroup, "electronF1", "Electron fractional energy in 1st sampling ; F1 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvF2, *m_electronIdGroup,"electronF2", "Electron fractional energy in 2nd sampling ; F2 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvF3, *m_electronIdGroup, "electronF3", "Electron fractional energy in 3rd sampling ; F3 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvRe233e237, *m_electronIdGroup, "electronRe233e237", "Electron uncor. energy fraction in 3x3/3x7 cells in em sampling 2 ;R 3x3/3x7; Nevents", 50, 0., 2.,start,end, myHist.m_nameOfEgammaType);
+    bookTH1FperRegion(myHist.m_hvRe237e277, *m_electronIdGroup, "electronRe237e277", "Electron uncor. energy fraction in 3x7/7x7 cells in em sampling 2 ;R 3x7/7x7; Nevents", 50, 0., 2.,start,end, myHist.m_nameOfEgammaType);
   }
+  
   // LUMI DEPENDANT PANEL
-
-  hname = std::string("LBEvoNElectrons") + myHist.m_nameOfElectronType;
-  hlongname =  std::string("Number of Electrons vs LB") + std::string (" (") + myHist.m_nameOfElectronType + std::string (")");
-  bookTH1F(myHist.m_hLB_N, *m_electronLBGroup, hname, hlongname, 2000, -0.5, 1999.5);
+  bookTH1F(myHist.m_hLB_N, *m_electronLBGroup, "LBEvoNElectrons", "Number of Electrons vs LB", 2000, -0.5, 1999.5, myHist.m_nameOfEgammaType);
 
   return StatusCode::SUCCESS;
 

@@ -109,10 +109,24 @@ void egammaMonToolBase::bookTH1F(TH1* &h, MonGroup& mygroup, const std::string& 
   regHist(h,mygroup).ignore();
 }
 
+void egammaMonToolBase::bookTH1F(TH1* &h, MonGroup& mygroup, const std::string& hname_prefix, const std::string& htitle_prefix, int nbins, float low, float high, std::string &nameOfEgammaType)
+{
+  std::string hname = hname_prefix + nameOfEgammaType;
+  std::string htitle =  htitle_prefix + " (" + nameOfEgammaType + ")";
+  bookTH1F(h, mygroup, hname, htitle, nbins, low, high);
+}
+
 void egammaMonToolBase::bookTH2F(TH2* &h, MonGroup& mygroup, const std::string& hname, const std::string& htitle, int nbinsx, float xlow, float xhigh, int nbinsy, float ylow, float yhigh)
 {
   h = new TH2F(hname.c_str(),htitle.c_str(),nbinsx,xlow,xhigh,nbinsy,ylow,yhigh);
   regHist(h,mygroup).ignore();
+}
+
+void egammaMonToolBase::bookTH2F(TH2* &h, MonGroup& mygroup, const std::string& hname_prefix, const std::string& htitle_prefix, int nbinsx, float xlow, float xhigh, int nbinsy, float ylow, float yhigh, std::string &nameOfEgammaType)
+{
+  std::string hname = hname_prefix + nameOfEgammaType;
+  std::string htitle =  htitle_prefix + " (" + nameOfEgammaType + ")";
+  bookTH2F(h, mygroup, hname, htitle, nbinsx, xlow, xhigh, nbinsy, ylow, yhigh);
 }
 
 void egammaMonToolBase::bookTProfile(TProfile* &h, MonGroup& mygroup, const std::string& hname, const std::string& htitle, int nbins, float xlow, float xhigh, float ylow, float yhigh)
@@ -133,10 +147,15 @@ void egammaMonToolBase::bookTH1FperRegion(std::vector<TH1*> &vhist, MonGroup& my
     title = htitle+" "+m_region[ir];
     TH1 *h = new TH1F(name.c_str(),title.c_str(),nbins,low,high);
     vhist[ir] = h;
-    //ATH_MSG_DEBUG("Histo: " << name.c_str() << " " << h);
-    // Register histograms
     regHist(h,mygroup).ignore();
   }
+}
+
+void egammaMonToolBase::bookTH1FperRegion(std::vector<TH1*> &vhist, MonGroup& mygroup, const std::string& hname_prefix, const std::string& htitle_prefix, int nbins, float low, float high, unsigned int min_region, unsigned int max_region, std::string &nameOfEgammaType)
+{
+  std::string hname = hname_prefix + nameOfEgammaType;
+  std::string htitle =  htitle_prefix + " (" + nameOfEgammaType + ")";
+  bookTH1FperRegion(vhist, mygroup, hname, htitle, nbins, low, high, min_region, max_region);
 }
 
 void egammaMonToolBase::bookTH2FperRegion(std::vector<TH2*> &vhist, MonGroup& mygroup, const std::string& hname, const std::string& htitle, int nbinsx, float xlow, float xhigh, int nbinsy, float ylow, float yhigh, unsigned int min_region, unsigned int max_region)
@@ -151,9 +170,15 @@ void egammaMonToolBase::bookTH2FperRegion(std::vector<TH2*> &vhist, MonGroup& my
     title = htitle+" "+m_region[ir];
     TH2 *h = new TH2F(name.c_str(),title.c_str(),nbinsx,xlow,xhigh,nbinsy,ylow,yhigh);
     vhist[ir] = h;
-    // Register histograms
     regHist(h,mygroup).ignore();
   }
+}
+
+void egammaMonToolBase::bookTH2FperRegion(std::vector<TH2*> &vhist, MonGroup& mygroup, const std::string& hname_prefix, const std::string& htitle_prefix, int nbinsx, float xlow, float xhigh, int nbinsy, float ylow, float yhigh, unsigned int min_region, unsigned int max_region, std::string &nameOfEgammaType)
+{
+  std::string hname = hname_prefix + nameOfEgammaType;
+  std::string htitle =  htitle_prefix + " (" + nameOfEgammaType + ")";
+  bookTH2FperRegion(vhist, mygroup, hname, htitle, nbinsx, xlow, xhigh, nbinsy, ylow, yhigh, min_region, max_region);
 }
 
 void egammaMonToolBase::fillTH1FperRegion(std::vector<TH1*> &vhist, unsigned int ir, float x)
