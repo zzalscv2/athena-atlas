@@ -1,6 +1,8 @@
 #ifndef FPGATrackSimMaps_Remappings_h
 #define FPGATrackSimMaps_Remappings_h
 #include <vector>
+#include <string>
+#include <cstdint>
 namespace Remappings {
     /**
     * @brief for a given geo tag return disk indices remappings
