@@ -20,6 +20,9 @@
 #include "HGTD_PrepRawData/HGTD_ClusterCollection.h"
 #include "HGTD_RawData/HGTD_RDO_Collection.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
+
+#include "AthAllocators/DataPool.h"
+
 #include <memory>
 
 class IHGTD_PadClusterizationTool : virtual public IAlgTool {
@@ -36,7 +39,8 @@ public:
    * @return The collection of clusters built from the RDOs.
    */
   virtual std::unique_ptr<HGTD_ClusterCollection>
-  clusterize(const HGTD_RDO_Collection& rdo_collection) const = 0;
+  clusterize(const HGTD_RDO_Collection& rdo_collection,
+             DataPool<HGTD_Cluster>* dataItemsPool) const = 0;
 };
 
 #endif // IHGTD_CLUSTERMAKERTOOL_H

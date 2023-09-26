@@ -42,7 +42,7 @@ public:
    *
    * @return Pointer to a HGTD_Cluster, owned by caller.
    */
-  virtual std::unique_ptr<HGTD_Cluster>
+  HGTD_Cluster
   createCluster(const Identifier& rdo_id, const Amg::Vector2D& loc_pos,
                 const std::vector<Identifier>& rdo_list,
                 const InDet::SiWidth& width,
