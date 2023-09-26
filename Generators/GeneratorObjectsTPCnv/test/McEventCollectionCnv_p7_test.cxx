@@ -196,20 +196,24 @@ void populateGenEvent(HepMC::GenEvent & ge)
   HepMC::FourVector myPos( 0.0345682751, 0.00872347682, 0.23671987, 0.0 );
   HepMC::GenVertexPtr myVertex = HepMC::newGenVertexPtr( myPos, -1 );
   HepMC::FourVector fourMomentum1( 0.0, 0.0, 1.0, 1.0*CLHEP::TeV);
-  HepMC::GenParticlePtr inParticle1 = HepMC::newGenParticlePtr(fourMomentum1, 2, 10);
+  HepMC::GenParticlePtr inParticle1 = HepMC::newGenParticlePtr(fourMomentum1, 2, 4);
   myVertex->add_particle_in(inParticle1);
   HepMC::FourVector fourMomentum2( 0.0, 0.0, -1.0, 1.0*CLHEP::TeV);
-  HepMC::GenParticlePtr inParticle2 = HepMC::newGenParticlePtr(fourMomentum2, -2, 10);
+  HepMC::GenParticlePtr inParticle2 = HepMC::newGenParticlePtr(fourMomentum2, -2, 4);
   myVertex->add_particle_in(inParticle2);
   HepMC::FourVector fourMomentum3( 0.0, 1.0, 0.0, 1.0*CLHEP::TeV);
-  HepMC::GenParticlePtr inParticle3 = HepMC::newGenParticlePtr(fourMomentum3, 2, 10);
+  HepMC::GenParticlePtr inParticle3 = HepMC::newGenParticlePtr(fourMomentum3, 2, 1);
   myVertex->add_particle_out(inParticle3);
   HepMC::FourVector fourMomentum4( 0.0, -1.0, 0.0, 1.0*CLHEP::TeV);
-  HepMC::GenParticlePtr inParticle4 = HepMC::newGenParticlePtr(fourMomentum4, -2, 10);
+  HepMC::GenParticlePtr inParticle4 = HepMC::newGenParticlePtr(fourMomentum4, -2, 1);
   myVertex->add_particle_out(inParticle4);
   ge.add_vertex( myVertex );
   HepMC::set_signal_process_vertex(&ge, myVertex );
   ge.set_beam_particles(inParticle1,inParticle2);
+  HepMC::suggest_barcode(inParticle1,1);
+  HepMC::suggest_barcode(inParticle2,2);
+  HepMC::suggest_barcode(inParticle3,3);
+  HepMC::suggest_barcode(inParticle4,4);
 #if HEPMC3
   ge.add_attribute("BunchCrossingTime",std::make_shared<HepMC3::IntAttribute>(0));
   ge.add_attribute("MyFloatProp",std::make_shared<HepMC3::FloatAttribute>(0.5));
