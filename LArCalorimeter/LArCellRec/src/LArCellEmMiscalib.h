@@ -19,12 +19,14 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include "CaloUtils/CaloCellCorrection.h"
-#include "CaloIdentifier/CaloIdManager.h"
-#include "CaloIdentifier/LArEM_ID.h"
+
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
+
+class LArEM_ID;
+class CaloIdManager;
 
 namespace CLHEP {
   class HepRandomEngine;

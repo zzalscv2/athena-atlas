@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,6 +24,7 @@ PURPOSE:  applies miscalibration in EM calorimeter
 #include "CLHEP/Units/SystemOfUnits.h"
 #include <CLHEP/Random/Randomize.h>
 
+#include "CaloIdentifier/LArEM_ID.h"
 
 using CLHEP::RandGauss;
 
@@ -95,15 +96,10 @@ void LArCellEmMiscalib::initOnce (const EventContext& ctx) {
     const CaloDetDescrElement* calodde = m_calodetdescrmgr->get_element(id);
     double eta = fabs(calodde->eta_raw());
     double phi = calodde->phi_raw();
-    
-
     int iregion= this->region(barrel_ec,eta,phi);
-
-    ATH_MSG_VERBOSE("barrel_ec,eta,phi,region " << barrel_ec << " " << eta << " " << phi << " " 
-		    << iregion << " " << m_spread1[iregion]);
-
-
     if (iregion>=0) {
+        ATH_MSG_VERBOSE("barrel_ec,eta,phi,region " << barrel_ec << " " << eta << " " << phi << " " 
+		    << iregion << " " << m_spread1[iregion]);
          double spread2=m_sigmaPerCell*RandGauss::shoot(engine,0.,1.);
          m_calib[idHash] = m_spread1[iregion] + spread2;
          if (m_undo ) {
