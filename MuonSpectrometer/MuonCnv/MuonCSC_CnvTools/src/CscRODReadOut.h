@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCSC_CNVTOOL_CSCRODREADOUT_H
@@ -11,6 +11,7 @@
 #include <cmath>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #include "MuonIdHelpers/CscIdHelper.h"
 
@@ -221,7 +222,9 @@ inline uint32_t CscRODReadOut::hashIdentifier(const uint32_t address, const Iden
     Identifier id = m_cscIdHelper->channelID(moduleId, chamberLayer, wireLayer, measuresPhi, strip);
     IdContext context = m_cscIdHelper->channel_context();
     IdentifierHash hash;
-    m_cscIdHelper->get_hash(id, hash, &context);
+    if (m_cscIdHelper->get_hash(id, hash, &context)){
+      throw (std::runtime_error("CscRODReadOut::hashIdentifier: Unable to get identifier!"));
+    };
     return (uint32_t)hash;
 }
 
