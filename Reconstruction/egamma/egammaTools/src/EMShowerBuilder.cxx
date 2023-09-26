@@ -42,45 +42,25 @@ EMShowerBuilder::initialize()
   ATH_CHECK(m_cellsKey.initialize((m_UseShowerShapeTool || m_UseCaloIsoTool) &&
                                   !m_cellsKey.key().empty()));
 
-  if (m_UseShowerShapeTool) {
-    if ((RetrieveShowerShapeTool()).isFailure()) {
-      return StatusCode::FAILURE;
-    }
-    m_ShowerShapeTool.disable();
-  }
-  //
-  // call calorimeter isolation tool only if needed
-  //
-  if (m_UseCaloIsoTool) {
-    if ((RetrieveHadronicLeakageTool()).isFailure()) {
-      return StatusCode::FAILURE;
-    }
-    m_HadronicLeakageTool.disable();
-  }
-  // for measuring the timing
+  ATH_CHECK(RetrieveTool<IegammaShowerShape>(m_ShowerShapeTool, m_UseShowerShapeTool));
+  ATH_CHECK(RetrieveTool<IegammaIso>(m_HadronicLeakageTool, m_UseCaloIsoTool));
 
   return StatusCode::SUCCESS;
 }
 
+template <typename T>
 StatusCode
-EMShowerBuilder::RetrieveShowerShapeTool()
+EMShowerBuilder::RetrieveTool(ToolHandle<T> &tool, bool tool_requested)
 {
-  if (m_ShowerShapeTool.empty()) {
-    ATH_MSG_INFO("ShowerShape is empty");
+  if (!tool_requested) {
+    tool.disable();
     return StatusCode::SUCCESS;
   }
-  ATH_CHECK(m_ShowerShapeTool.retrieve());
-  return StatusCode::SUCCESS;
-}
-
-StatusCode
-EMShowerBuilder::RetrieveHadronicLeakageTool()
-{
-  if (m_HadronicLeakageTool.empty()) {
-    ATH_MSG_INFO("HadronicLeakageTool is empty");
-    return StatusCode::SUCCESS;
+  if (tool.empty()) {
+    ATH_MSG_INFO(tool.type() << " is empty");
+    return StatusCode::FAILURE;
   }
-  ATH_CHECK(m_HadronicLeakageTool.retrieve());
+  ATH_CHECK(tool.retrieve());
   return StatusCode::SUCCESS;
 }
 
@@ -149,7 +129,7 @@ EMShowerBuilder::CalcShowerShape(xAOD::Egamma* eg,
   }
 
   // Calculate shower shapes in all samplings
-  if (m_UseShowerShapeTool && !m_ShowerShapeTool.empty()) {
+  if (m_UseShowerShapeTool) {
     // protection in case tool does not exist
     IegammaShowerShape::Info info;
     ATH_CHECK(m_ShowerShapeTool->execute(*clus, cmgr, *cellcoll, info));
