@@ -162,7 +162,7 @@ class MdtDriftCircleOnTrackCreator: public AthAlgTool, public IMdtDriftCircleOnT
                              const double tTrack) const override final;
 
     /** @brief Returns the default error strategy object */
-    const MuonDriftCircleErrorStrategy& errorStrategy() const {
+    virtual const MuonDriftCircleErrorStrategy& errorStrategy() const override {
         return m_errorStrategy;
     };
     

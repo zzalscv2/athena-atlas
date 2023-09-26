@@ -40,7 +40,8 @@ class OnDemandMinbiasSvc final : public extends<AthService, IMinbiasSvc> {
   StoreGateSvc* getMinbias(const EventContext& ctx,
                            std::uint64_t mb_id) override;
   std::size_t getNumForBunch(const EventContext& ctx, int bunch) const override;
-  inline std::int64_t get_hs_id(const EventContext& ctx) const {
+  inline virtual
+  std::int64_t get_hs_id(const EventContext& ctx) const override {
     return m_skippedHSEvents.value() + ctx.evt();
   }
 
