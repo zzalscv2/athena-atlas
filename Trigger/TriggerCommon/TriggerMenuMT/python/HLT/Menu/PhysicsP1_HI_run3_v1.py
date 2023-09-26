@@ -786,6 +786,10 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_noalg_eb_L1ZDC_XOR_TE5_VTE200',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups= ["PS:Online", "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1VZDC_A_VZDC_C_VTE50',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups= ["PS:Online", "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
         ChainProp(name='HLT_noalg_eb_L1VZDC_A_VZDC_C_TE5_VTE200',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups= ["PS:Online", "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1ZDC_A_VTE200',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups= ["PS:Online", "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1ZDC_C_VTE200',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups= ["PS:Online", "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+        ChainProp(name='HLT_noalg_eb_L1VTE200',         l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups= ["PS:Online", "RATE:EnhancedBias", "BW:Detector"]+SupportGroup ),
+
     ]
 
     chains['Monitor'] = [

@@ -18,7 +18,7 @@
 #include "ZdcIdentifier/ZdcID.h"
 
 // This will normally be one for HI running, but not for the LHCf run
-#define LUCROD_TRIG_ID 0
+#define LUCROD_TRIG_ID 1
 
 //==================================================================================================
 ZdcRecChannelToolLucrod::ZdcRecChannelToolLucrod(const std::string& name):

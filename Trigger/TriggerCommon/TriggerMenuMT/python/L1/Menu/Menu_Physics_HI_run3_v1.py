@@ -172,6 +172,7 @@ def defineMenu():
         'L1_ZDC_C_VZDC_A', 'L1_ZDC_A_VZDC_C',
         'L1_ZDC_A_EMPTY','L1_ZDC_C_EMPTY','L1_ZDC_A_C_EMPTY',
         'L1_ZDC_A_UNPAIRED_NONISO','L1_ZDC_C_UNPAIRED_NONISO','L1_ZDC_A_C_UNPAIRED_NONISO',
+        'L1_ZDC_A_VTE200', 'L1_ZDC_C_VTE200',
 
         # Run3 ZDC items for heavy ion runs 
         'L1_VZDC_A_VZDC_C', #comb0
