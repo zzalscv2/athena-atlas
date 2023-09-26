@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
     LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
 from AthenaCommon.SystemOfUnits import m, ns
@@ -130,7 +130,7 @@ def createSimConfigFlags():
     # BeameffectsAlg
     scf.addFlag("Sim.VertexSource", VertexSource.CondDB, enum=VertexSource)
     scf.addFlag("Sim.VertexTimeSmearing", lambda prevFlags:
-                prevFlags.GeoModel.Run >= LHCPeriod.Run4)
+                prevFlags.Beam.Type == BeamType.Collisions and prevFlags.GeoModel.Run >= LHCPeriod.Run4)
 
     def _checkVertexTimeWidth(prevFlags):
         default = 0.175*ns
