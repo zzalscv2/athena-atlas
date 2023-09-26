@@ -37,7 +37,7 @@ auto intAccessors = initAccessors<int>(
   "IP2D_nTrks", "IP3D_nTrks", "JetFitterSecondaryVertex_nTracks", "JetFitter_N2Tpair",
   "JetFitter_nSingleTracks", "JetFitter_nTracksAtVtx", "JetFitter_nVTX", "JetFitter_ndof",
   "SV1_N2Tpair", "SV1_NGTinSvx", "seed_et_small", "seed_et_large",
-  "pixCL", "pixCL_1", "pixCL_2", "pixCLmin3", "pixCLBarrel", "pixCLEndcapA", "pixCLEndcapC",
+  "pixCL", "pixCL_1", "pixCL_2", "pixCLmin3", "pixCLBarrel", "pixCLEndcapA", "pixCLEndcapC", "pixCLnoToT",
   "nCells",
   "sctSP", "sctSPBarrel", "sctSPEndcapA", "sctSPEndcapC",
   "zfinder_tool",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASINTERFACES_IPHYSICSOPTIONTOOL_H
@@ -17,9 +17,20 @@ class G4VPhysicsConstructor;
  *  @date   2015-05-15
  */
 
+namespace G4AtlasPhysicsOption {
+  enum Type {
+    BSMPhysics = 1, // Adds new BSM particles and potentially decays
+    QS_ExtraParticles = 2, // Adds particles from the PDG Table not currently known to Geant4
+    QS_ExtraProc = 3, // Adds MSC and Ionisation processes for specific particles (possibly merge with the next one?)
+    GlobalProcesses = 4, // Adds a new physics process for all particles meeting certain criteria
+    UnknownType = 5 // Not set
+  };
+}
+
 class IPhysicsOptionTool : virtual public IAlgTool
 {
 public:
+
   IPhysicsOptionTool() {}
   virtual ~IPhysicsOptionTool() {}
   /// Creates the InterfaceID and interfaceID() method
@@ -27,5 +38,12 @@ public:
 
   // Method needed to register G4VPhysicsConstructor into G4VmodularPhysicsList
   virtual G4VPhysicsConstructor* GetPhysicsOption() = 0 ;
+
+  virtual G4AtlasPhysicsOption::Type GetOptionType() const { return m_physicsOptionType; };
+
+protected:
+
+  G4AtlasPhysicsOption::Type m_physicsOptionType{G4AtlasPhysicsOption::Type::UnknownType};
+
 };
 #endif

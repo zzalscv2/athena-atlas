@@ -114,7 +114,7 @@ G4VParticleChange* FullModelHadronicProcess::PostStepDoIt(const G4Track& aTrack,
 
   if(cloudParticle->GetDefinition() == 0)
     {
-      std::cout << "FullModelHadronicProcess::PostStepDoIt  Definition of particle cloud not available!!" << std::endl;
+      G4cout << "FullModelHadronicProcess::PostStepDoIt  Definition of particle cloud not available!!" << G4endl;
     }
   double scale=cloudParticle->GetDefinition()->GetPDGMass()/IncidentRhadron->GetDefinition()->GetPDGMass();
 
@@ -211,7 +211,7 @@ G4VParticleChange* FullModelHadronicProcess::PostStepDoIt(const G4Track& aTrack,
           outgoingCloud=tempCust->GetCloud();
           if(outgoingCloud == 0)
             {
-              std::cout << "FullModelHadronicProcess::PostStepDoIt  Definition of outgoing particle cloud for " << tempDef->GetParticleName() << " not available!!" << std::endl;
+              G4cout << "FullModelHadronicProcess::PostStepDoIt() Definition of outgoing particle cloud for " << tempDef->GetParticleName() << " not available!!" << G4endl;
             }
         }
 

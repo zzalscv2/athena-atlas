@@ -251,7 +251,10 @@ def getCalibMods(flags,jetRecoDict,dataSource,rhoKey="auto"):
             else:
                 calibKey = flags.Trigger.Jet.pflowCalibKey # small-R pflow
                 gscDepth = "trackWIDTH"
+                if "gsc" not in jetRecoDict["jetCalib"]:
+                    gscDepth = "EM3" # calo-only GSC
                 calibContext,calibSeq = {
+                  ("a4","jes"):    (calibKey,"EtaJES_GSC"),                          # w/o jet area sub, w/o pu residual + calo GSC only (no insitu)
                   ("a4","subjesgsc"):    (calibKey,"JetArea_EtaJES_GSC"),            # w/o pu residual  + calo+trk GSC
                   ("a4","subresjesgsc"): (calibKey,"JetArea_Residual_EtaJES_GSC"),   # pu residual + calo+trk GSC
                   ("a4","subjesgscIS"): (calibKey,"JetArea_EtaJES_GSC"),             # w/o pu residual  + calo+trk GSC

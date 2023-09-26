@@ -60,25 +60,7 @@ public:
 
 private:
 
-  /** class member version of retrieving StoreGate */
-	//StoreGateSvc* m_storeGate;
-	// ServiceHandle<StoreGateSvc> m_storeGate;
-
-
-	/** Does the collection own it's objects ? **/
 	int m_ownPolicy;
-
-
-	/** Digits data container name */
-	//std::string m_ttContainerName;
-
-	/** Raw data object name */
-	//std::string m_zdcModuleContainerName;
-	//std::string m_zdcModuleAuxContainerName;
-
-
-	/** Pointer to Zdc input "digits" data */
-	//const xAOD::TriggerTowerContainer* m_ttContainer;
 
 	SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttContainerName
 	  { this, "DigitsContainerName", "ZdcTriggerTowers", "" };

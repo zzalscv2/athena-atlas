@@ -27,6 +27,7 @@ pflowcontexts = {
     "TrigLS2":("JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "Trigger":("JES_MC16Recommendation_Consolidated_PFlow_30May2022_Rel22_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "TrigR22Prerec":("PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config", "00-04-82", "JetArea_Residual_EtaJES_GSC_Insitu"),
+    "TrigHIUPC" : ("JES_MC16Recommendation_LowMu1718_MCJES_GSC_nTrkOn_PFlow_Sep2023_Rel21.config", "00-04-82", "EtaJES_GSC"),
 }
 
 topocontexts = {
@@ -138,6 +139,9 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
             _data_type = "data"
         _pvname = ""
         if "Residual" in _calibseq or "GSC" in _calibseq and gscdepth!="EM3" or "LargeRDNN" in _calibseq:
+            _pvname = pvname
+        # HACK: For Trigger HI UPC who want to do pflow but avoid track-GSC
+        if context == "TrigHIUPC":
             _pvname = pvname
         # HACK: For testing while we don't have finalised calibrations for trigger PF jets
         _jetcollection = jetcollection

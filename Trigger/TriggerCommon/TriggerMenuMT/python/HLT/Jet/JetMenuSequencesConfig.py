@@ -277,7 +277,7 @@ def jetFSTrackingSelCfg(flags, clustersKey, isPerf, **jetRecoDict):
     reco.mergeReco(jetreco)
     log.debug("Generating jet tracking hypo menu sequence for reco %s",jetDef.fullname())
 
-    if isPFlow(jetRecoDict) and jetRecoDict['recoAlg'] == 'a4':
+    if isPFlow(jetRecoDict) and jetRecoDict['recoAlg'] == 'a4' and 'sub' in jetRecoDict['jetCalib']:
         pvKey = getInDetTrigConfig('fullScan').vertex_jet
         trig_evt_info_key = recordable("HLT_TCEventInfo_jet")
 

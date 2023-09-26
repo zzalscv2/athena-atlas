@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Include files
@@ -26,9 +26,11 @@
 G4EMProcessesPhysicsTool::G4EMProcessesPhysicsTool(const std::string &type,
                                                    const std::string &name,
                                                    const IInterface *parent)
-    : base_class(type, name, parent)
+  : base_class(type, name, parent)
 {
-    declareProperty("ParticleList", m_particleList);
+  m_physicsOptionType = G4AtlasPhysicsOption::Type::QS_ExtraProc;
+
+  declareProperty("ParticleList", m_particleList);
 }
 
 //=============================================================================
@@ -36,9 +38,9 @@ G4EMProcessesPhysicsTool::G4EMProcessesPhysicsTool(const std::string &type,
 //=============================================================================
 StatusCode G4EMProcessesPhysicsTool::initialize()
 {
-    ATH_MSG_DEBUG("initializing...");
-    this->SetPhysicsName(this->name());
-    return StatusCode::SUCCESS;
+  ATH_MSG_DEBUG("initializing...");
+  this->SetPhysicsName(this->name());
+  return StatusCode::SUCCESS;
 }
 
 //=============================================================================
@@ -46,7 +48,7 @@ StatusCode G4EMProcessesPhysicsTool::initialize()
 //=============================================================================
 G4EMProcessesPhysicsTool *G4EMProcessesPhysicsTool::GetPhysicsOption()
 {
-    return this;
+  return this;
 }
 
 //=============================================================================
@@ -59,19 +61,22 @@ void G4EMProcessesPhysicsTool::ConstructParticle() {}
 //=============================================================================
 void G4EMProcessesPhysicsTool::ConstructProcess()
 {
-    G4ParticleTable::G4PTblDicIterator *particleIterator = G4ParticleTable::GetParticleTable()->GetIterator();
-    particleIterator->reset();
+  ATH_MSG_DEBUG("G4EMProcessesPhysicsTool::ConstructProcess() - start");
+  ATH_MSG_DEBUG("G4EMProcessesPhysicsTool::ConstructProcess() - m_particleList = " << m_particleList);
+  G4ParticleTable::G4PTblDicIterator *particleIterator = G4ParticleTable::GetParticleTable()->GetIterator();
+  particleIterator->reset();
 
-    while ((*particleIterator)())
+  while ((*particleIterator)())
     {
-        G4ParticleDefinition *particle = particleIterator->value();
-        if (std::find(m_particleList.begin(), m_particleList.end(), std::abs(particle->GetPDGEncoding())) != m_particleList.end())
+      G4ParticleDefinition *particle = particleIterator->value();
+      if (std::find(m_particleList.begin(), m_particleList.end(), std::abs(particle->GetPDGEncoding())) != m_particleList.end())
         {
-            ATH_MSG_INFO("Adding EM processes for "
+          ATH_MSG_DEBUG("Adding EM processes for "
                          << particle->GetParticleName());
-            G4ProcessManager *proc = particle->GetProcessManager();
-            proc->AddProcess(new G4hMultipleScattering, -1, 1, 1);
-            proc->AddProcess(new G4hIonisation, -1, 2, 2);
+          G4ProcessManager *proc = particle->GetProcessManager();
+          proc->AddProcess(new G4hMultipleScattering, -1, 1, 1);
+          proc->AddProcess(new G4hIonisation, -1, 2, 2);
         }
     } // End of the particle iterator
+  ATH_MSG_DEBUG("G4EMProcessesPhysicsTool::ConstructProcess() - end");
 }

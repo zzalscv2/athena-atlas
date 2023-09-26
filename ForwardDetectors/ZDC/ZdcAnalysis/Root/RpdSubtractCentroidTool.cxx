@@ -41,9 +41,12 @@ declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Locat
 declareProperty("WriteAux", m_writeAux = true);
 declareProperty("AuxSuffix", m_auxSuffix = "");
 
-declareProperty("MinZDCEnergy", m_minZDCEnergy = {0, 0}, "Minimum ZDC energy for which the analysis will be performed");
-declareProperty("MaxZDCEnergy", m_maxZDCEnergy = {9999, 9999}, "Maximum ZDC energy for which the analysis will be performed");
-declareProperty("MinSubAmp", m_minSubAmp = {-9999, -9999}, "Lowest value for a subtracted amplitude to be included in calculation");
+declareProperty("UseEmCut", m_useEmCut = {true, true}, "true: on the EM ampliitude, false: cut on the ZDC calibrated energy");
+declareProperty("MinZdcEnergy", m_minZdcEnergy = {0, 0}, "Minimum ZDC calibrated energy for which the analysis will be performed");
+declareProperty("MaxZdcEnergy", m_maxZdcEnergy = {1e6, 1e6}, "Maximum ZDC calibrated energy for which the analysis will be performed");
+declareProperty("MinEmAmp", m_minEmAmp = {0, 0}, "Minimum EM amplitude for which the analysis will be performed");
+declareProperty("MaxEmAmp", m_maxEmAmp = {1e6, 1e6}, "Maximum EM amplitude for which the analysis will be performed");
+declareProperty("MinRpdSubAmp", m_minRpdSubAmp = {-1e6, -1e6}, "Lowest value for a subtracted amplitude to be included in calculation");
 declareProperty("SubAmpUnderflowFrac", m_subAmpUnderflowFrac = {1, 1}, "Lowest (most negative) value for a subtracted amplitude as fraction of the sum, if exceeded calculation invalid");
 declareProperty("PileupMaxFrac", m_pileupMaxFrac = {1, 1}, "Largest fractional pileup allowed for any channel");
 
@@ -56,7 +59,7 @@ RpdSubtractCentroidTool::~RpdSubtractCentroidTool()
 
 StatusCode RpdSubtractCentroidTool::initialize()
 {
-  // initialize read and write handle keys
+  // zdc modules read keys
   ATH_CHECK(m_eventInfoKey.initialize());
   m_xposRelKey = m_zdcModuleContainerName + ".xposRel" + m_auxSuffix;
   ATH_CHECK(m_xposRelKey.initialize());
@@ -66,6 +69,8 @@ StatusCode RpdSubtractCentroidTool::initialize()
   ATH_CHECK(m_rowKey.initialize());
   m_colKey = m_zdcModuleContainerName + ".col" + m_auxSuffix;
   ATH_CHECK(m_colKey.initialize());
+  m_ZDCAmplitudeKey = m_zdcModuleContainerName + ".Amplitude" + m_auxSuffix;
+  ATH_CHECK(m_ZDCAmplitudeKey.initialize());
   m_RPDChannelAmplitudeKey = m_zdcModuleContainerName + ".RPDChannelAmplitude" + m_auxSuffix;
   ATH_CHECK(m_RPDChannelAmplitudeKey.initialize());
   m_RPDChannelAmplitudeCalibKey = m_zdcModuleContainerName + ".RPDChannelAmplitudeCalib" + m_auxSuffix;
@@ -74,25 +79,28 @@ StatusCode RpdSubtractCentroidTool::initialize()
   ATH_CHECK(m_RPDChannelPileupFracKey.initialize());
   m_RPDChannelStatusKey = m_zdcModuleContainerName + ".RPDChannelStatus" + m_auxSuffix;
   ATH_CHECK(m_RPDChannelStatusKey.initialize());
-  
+
+  // zdc sums read keys
   m_RPDStatusKey = m_zdcSumContainerName + ".RPDStatus" + m_auxSuffix;
   ATH_CHECK(m_RPDStatusKey.initialize());
   m_ZDCFinalEnergyKey = m_zdcSumContainerName + ".FinalEnergy" + m_auxSuffix;
   ATH_CHECK(m_ZDCFinalEnergyKey.initialize());
   m_ZDCStatusKey = m_zdcSumContainerName + ".Status" + m_auxSuffix;
-  ATH_CHECK(m_rpdSubAmpKey.initialize());
-  m_rpdSubAmpKey = m_zdcSumContainerName + ".rpdSubAmp" + m_auxSuffix;
-  ATH_CHECK(m_rpdSubAmpSumKey.initialize());
-  m_rpdSubAmpSumKey = m_zdcSumContainerName + ".rpdSubAmpSum" + m_auxSuffix;
   ATH_CHECK(m_ZDCStatusKey.initialize());
-  m_xCentroidKey = m_zdcSumContainerName + ".xCentroid" + m_auxSuffix;
-  ATH_CHECK(m_xCentroidKey.initialize());
-  m_yCentroidKey = m_zdcSumContainerName + ".yCentroid" + m_auxSuffix;
-  ATH_CHECK(m_yCentroidKey.initialize());
+
+  // zdc sums write keys
+  m_rpdSubAmpKey = m_zdcSumContainerName + ".RpdSubAmp" + m_auxSuffix;
+  ATH_CHECK(m_rpdSubAmpKey.initialize());
+  m_rpdSubAmpSumKey = m_zdcSumContainerName + ".RpdSubAmpSum" + m_auxSuffix;
+  ATH_CHECK(m_rpdSubAmpSumKey.initialize());
   m_xDetCentroidKey = m_zdcSumContainerName + ".xDetCentroid" + m_auxSuffix;
   ATH_CHECK(m_xDetCentroidKey.initialize());
   m_yDetCentroidKey = m_zdcSumContainerName + ".yDetCentroid" + m_auxSuffix;
   ATH_CHECK(m_yDetCentroidKey.initialize());
+  m_xCentroidKey = m_zdcSumContainerName + ".xCentroid" + m_auxSuffix;
+  ATH_CHECK(m_xCentroidKey.initialize());
+  m_yCentroidKey = m_zdcSumContainerName + ".yCentroid" + m_auxSuffix;
+  ATH_CHECK(m_yCentroidKey.initialize());
   m_xDetCentroidUnsubKey = m_zdcSumContainerName + ".xDetCentroidUnsub" + m_auxSuffix;
   ATH_CHECK(m_xDetCentroidUnsubKey.initialize());
   m_yDetCentroidUnsubKey = m_zdcSumContainerName + ".yDetCentroidUnsub" + m_auxSuffix;
@@ -105,6 +113,10 @@ StatusCode RpdSubtractCentroidTool::initialize()
   ATH_CHECK(m_xDetRowCentroidStdevKey.initialize());
   m_yDetColCentroidStdevKey = m_zdcSumContainerName + ".yDetColCentroidStdev" + m_auxSuffix;
   ATH_CHECK(m_yDetColCentroidStdevKey.initialize());
+  m_reactionPlaneAngleKey = m_zdcSumContainerName + ".reactionPlaneAngle" + m_auxSuffix;
+  ATH_CHECK(m_reactionPlaneAngleKey.initialize());
+  m_cosDeltaReactionPlaneAngleKey = m_zdcSumContainerName + ".cosDeltaReactionPlaneAngle" + m_auxSuffix;
+  ATH_CHECK(m_cosDeltaReactionPlaneAngleKey.initialize());
   m_centroidStatusKey = m_zdcSumContainerName + ".centroidStatus" + m_auxSuffix;
   ATH_CHECK(m_centroidStatusKey.initialize());
 
@@ -133,6 +145,7 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> yposRelHandle(m_yposRelKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, uint16_t> rowHandle(m_rowKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, uint16_t> colHandle(m_colKey);
+  SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleAmplitudeHandle(m_ZDCAmplitudeKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelAmplitudeHandle(m_RPDChannelAmplitudeKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelAmplitudeCalibHandle(m_RPDChannelAmplitudeCalibKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> rpdChannelPileupFracHandle(m_RPDChannelPileupFracKey);
@@ -184,6 +197,8 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   std::array<float, 2> xStdev = {0, 0};
   // y standard deviation
   std::array<float, 2> yStdev = {0, 0};
+  // reaction plane angle
+  std::array<float, 2> reactionPlaneAngle = {0, 0};
   
   std::array<std::vector<std::vector<RpdChannelData>>, 2> rpdChannelData = {
     std::vector<std::vector<RpdChannelData>>(4, std::vector<RpdChannelData>(4)),
@@ -192,26 +207,32 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   std::array<unsigned int, 2> rpdSideStatus;
   std::array<unsigned int, 2> zdcSideStatus;
   std::array<float, 2> zdcFinalEnergy;
+  std::array<float, 2> emAmplitude;
 
   ATH_MSG_DEBUG("Starting event processing");
   ATH_MSG_DEBUG("LB=" << lumiBlock);
   
   ATH_MSG_DEBUG("Processing modules");
   for (const auto &zdcModule : moduleContainer) {
-    if (zdcModule->zdcType() == 1) {
-      //  This is RPD data in Run 3
+    int side = -1;
+    if (zdcModule->zdcSide() == -1) {
+      side = 0;
+    } else if (zdcModule->zdcSide() == 1) {
+      side = 1;
+    } else {
+      continue;
+    }
+    if (zdcModule->zdcType() == 0) {
+      // this is a ZDC module
+      if (zdcModule->zdcModule() == 0) {
+        // this is an EM module
+        emAmplitude.at(side) = zdcModuleAmplitudeHandle(*zdcModule);
+      }
+    } else if (zdcModule->zdcType() == 1) {
+      //  this is a Run 3 RPD module
       //
       // right now it is assumed that this tool will not be invoked unless there is a run 3 RPD
       // if (m_LHCRun < 3) continue; // type == 1 -> pixel data in runs 2 and 3, skip
-      
-      int side = -1;
-      if (zdcModule->zdcSide() == -1) {
-        side = 0;
-      } else if (zdcModule->zdcSide() == 1) {
-        side = 1;
-      } else {
-        continue;
-      }
       
       const unsigned int &rpdChannel = zdcModule->zdcChannel();
 
@@ -229,8 +250,8 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
         rpdChannelData.at(side).at(row).at(col).yposRel = yposRelHandle(*zdcModule);
         rpdChannelData.at(side).at(row).at(col).row = rowHandle(*zdcModule);
         rpdChannelData.at(side).at(row).at(col).col = colHandle(*zdcModule);
-        rpdChannelData.at(side).at(row).at(col).amplitude = rpdChannelAmplitudeHandle(*zdcModule);
-        // ... = RPDChannelAmplitudeCalibHandle(*zdcModule);
+        // rpdChannelData.at(side).at(row).at(col).amplitude = rpdChannelAmplitudeHandle(*zdcModule);
+        rpdChannelData.at(side).at(row).at(col).amplitude = rpdChannelAmplitudeCalibHandle(*zdcModule);
         rpdChannelData.at(side).at(row).at(col).pileupFrac = rpdChannelPileupFracHandle(*zdcModule);
         rpdChannelData.at(side).at(row).at(col).status = rpdChannelStatusHandle(*zdcModule);
       }
@@ -259,15 +280,28 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
       // => centroid calculation is invalid
       status.at(side) &= ~(1 << ValidBit);
     }
-    if (zdcFinalEnergy.at(side) > m_maxZDCEnergy.at(side)) {
-      status.at(side) |= 1 << ExcessiveZDCEnergyBit;
-      // => centroid calculation is invalid
-      status.at(side) &= ~(1 << ValidBit);
-    }
-    if (zdcFinalEnergy.at(side) < m_minZDCEnergy.at(side)) {
-      status.at(side) |= 1 << MinimumZDCEnergyBit;
-      // => centroid calculation is invalid
-      status.at(side) &= ~(1 << ValidBit);
+    if (m_useEmCut.at(side)) {
+      if (emAmplitude.at(side) > m_maxEmAmp.at(side)) {
+        status.at(side) |= 1 << ExcessiveZDCEnergyBit;
+        // => centroid calculation is invalid
+        status.at(side) &= ~(1 << ValidBit);
+      }
+      if (emAmplitude.at(side) < m_minEmAmp.at(side)) {
+        status.at(side) |= 1 << MinimumZDCEnergyBit;
+        // => centroid calculation is invalid
+        status.at(side) &= ~(1 << ValidBit);
+      }
+    } else {
+      if (zdcFinalEnergy.at(side) > m_maxZdcEnergy.at(side)) {
+        status.at(side) |= 1 << ExcessiveZDCEnergyBit;
+        // => centroid calculation is invalid
+        status.at(side) &= ~(1 << ValidBit);
+      }
+      if (zdcFinalEnergy.at(side) < m_minZdcEnergy.at(side)) {
+        status.at(side) |= 1 << MinimumZDCEnergyBit;
+        // => centroid calculation is invalid
+        status.at(side) &= ~(1 << ValidBit);
+      }
     }
     bool rpdPileup = rpdSideStatus.at(side) & (1 << RPDDataAnalyzer::SideOutOfTimePileupBit);
     if (rpdPileup) {
@@ -288,6 +322,7 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
           // => centroid calculation is invalid
           status.at(side) &= ~(1 << ValidBit);
         }
+        // note that pileupFrac == -1 => sum adc <= 0 and pileupFrac is not defined
       }
     }
   }
@@ -315,7 +350,7 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   for (int side : {0, 1}) {
     for (int row = 0; row < m_nRows; row++) {
       for (int col = 0; col < m_nCols; col++) {
-        if (rpdChannelData.at(side).at(row).at(col).amplitudeSubtr < m_minSubAmp.at(side)) {
+        if (rpdChannelData.at(side).at(row).at(col).amplitudeSubtr < m_minRpdSubAmp.at(side)) {
           rpdChannelData.at(side).at(row).at(col).amplitudeSubtr = 0;
         }
       }
@@ -440,10 +475,15 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
     float y = yCentUnsubCor.at(side);
     xCentUnsubCor.at(side) = geometryCorrectionX(x, y, side);
     yCentUnsubCor.at(side) = geometryCorrectionY(x, y, side);
-    x = xCentCor.at(side);
-    y = yCentCor.at(side);
+    x = xCent.at(side);
+    y = yCent.at(side);
     xCentCor.at(side) = geometryCorrectionX(x, y, side);
     yCentCor.at(side) = geometryCorrectionY(x, y, side);
+  }
+
+  // calculate reaction plane angle! (using centroid with subtraction)
+  for (int side : {0, 1}) {
+    reactionPlaneAngle.at(side) = TMath::ATan2(yCentCor.at(side), xCentCor.at(side));
   }
 
   ATH_MSG_DEBUG("Finishing event processing");
@@ -453,18 +493,20 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
   // decorate zdc sum
 
   // initialize write handles from write handle keys
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, std::vector<std::vector<float>>> rpdSubAmp(m_rpdSubAmpKey);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> rpdSubAmpSum(m_rpdSubAmpSumKey);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> xCentroidHandle(m_xCentroidKey);
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> yCentroidHandle(m_yCentroidKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, std::vector<std::vector<float>>> rpdSubAmpHandle(m_rpdSubAmpKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> rpdSubAmpSumHandle(m_rpdSubAmpSumKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> xDetCentroidHandle(m_xDetCentroidKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> yDetCentroidHandle(m_yDetCentroidKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> xCentroidHandle(m_xCentroidKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> yCentroidHandle(m_yCentroidKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> xDetCentroidUnsubHandle(m_xDetCentroidUnsubKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> yDetCentroidUnsubHandle(m_yDetCentroidUnsubKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, std::vector<float>> xDetRowCentroidHandle(m_xDetRowCentroidKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, std::vector<float>> yDetColCentroidHandle(m_yDetColCentroidKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> xDetRowCentroidStdevHandle(m_xDetRowCentroidStdevKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> yDetColCentroidStdevHandle(m_yDetColCentroidStdevKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> reactionPlaneAngleHandle(m_reactionPlaneAngleKey);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> cosDeltaReactionPlaneAngleHandle(m_cosDeltaReactionPlaneAngleKey);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> centroidStatusHandle(m_centroidStatusKey);
   
   for (const auto &zdcSum: moduleSumContainer) {
@@ -474,20 +516,22 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
     } else if (zdcSum->zdcSide() == 1) {
       side = 1;
     } else {
+      cosDeltaReactionPlaneAngleHandle(*zdcSum) = TMath::Cos(reactionPlaneAngle.at(1) - reactionPlaneAngle.at(0));
       continue;
     }
-    rpdSubAmp(*zdcSum) = ampSub.at(side);
-    rpdSubAmpSum(*zdcSum) = ampSumSub.at(side);
-    xCentroidHandle(*zdcSum) = xCentCor.at(side);
-    yCentroidHandle(*zdcSum) = yCentCor.at(side);
+    rpdSubAmpHandle(*zdcSum) = ampSub.at(side);
+    rpdSubAmpSumHandle(*zdcSum) = ampSumSub.at(side);
     xDetCentroidHandle(*zdcSum) = xCent.at(side);
     yDetCentroidHandle(*zdcSum) = yCent.at(side);
+    xCentroidHandle(*zdcSum) = xCentCor.at(side);
+    yCentroidHandle(*zdcSum) = yCentCor.at(side);
     xDetCentroidUnsubHandle(*zdcSum) = xCentUnsub.at(side);
     yDetCentroidUnsubHandle(*zdcSum) = yCentUnsub.at(side);
     xDetRowCentroidHandle(*zdcSum) = xCentRow.at(side);
     yDetColCentroidHandle(*zdcSum) = yCentCol.at(side);
     xDetRowCentroidStdevHandle(*zdcSum) = xStdev.at(side);
     yDetColCentroidStdevHandle(*zdcSum) = yStdev.at(side);
+    reactionPlaneAngleHandle(*zdcSum) = reactionPlaneAngle.at(side);
     centroidStatusHandle(*zdcSum) = status.at(side);
   }
 
