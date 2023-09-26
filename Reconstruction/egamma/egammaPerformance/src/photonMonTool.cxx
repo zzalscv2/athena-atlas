@@ -113,258 +113,67 @@ StatusCode photonMonTool::bookHistogramsForOnePhotonType(photonHist& myHist)
   int end = ENDCAP;
 
   // MAIN PANEL
+  bookTH1F(myHist.m_hN, *m_photonGroup, "photonN", "Number of photons", 20, 0.0, 20.0, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEt, *m_photonGroup, "photonEt", "Photon transverse energy [MeV]", 100, -1000.0, 250000.0, myHist.m_nameOfEgammaType);
+  bookTH2F(myHist.m_hEtaPhi4GeV, *m_photonGroup, "photonEtaPhiPtgt4GeV", "Photon #eta,#phi map (candidates with Pt>4 GeV)", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEta, *m_photonGroup, "photonEta", "Photon #eta", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPhi, *m_photonGroup, "photonPhi", "Photon #phi", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hTopoEtCone40, *m_photonGroup, "photonTopoEtCone40", "Photon Topocluster Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPtCone20, *m_photonGroup, "photonPtCone20", "Photon Track Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hTime, *m_photonGroup, "photonTime", "Time associated with photon cluster [ns]", 90, -30., 60., myHist.m_nameOfEgammaType);
 
-  // N
-  std::string hname = std::string("photonN") + myHist.m_nameOfPhotonType;
-  std::string hlongname =  std::string("Number of photons") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hN, *m_photonGroup, hname, hlongname, 20, 0.0, 20.0);
-
-  // Et
-  hname = std::string("photonEt") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon transverse energy [MeV]") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hEt, *m_photonGroup, hname, hlongname, 100, -1000.0, 250000.0);
-
-  // EtaPhi
-  hname = std::string("photonEtaPhiPt2.5GeV") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #eta,#phi map (candidates with Pt>2.5 GeV)") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhi, *m_photonGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  // EtaPhi4GeV
-  hname = std::string("photonEtaPhiPtgt4GeV") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #eta,#phi map (candidates with Pt>4 GeV)") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhi4GeV, *m_photonGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  // EtaPhi20GeV
-  hname = std::string("photonEtaPhiPtgt20GeV") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #eta,#phi map (candidates with Pt>20 GeV)") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhi20GeV, *m_photonGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  // Eta
-  hname = std::string("photonEta") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #eta") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hEta, *m_photonGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  // Phi
-  hname = std::string("photonPhi") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #phi") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hPhi, *m_photonGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  // EtCone40
-  hname = std::string("photonTopoEtCone40") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon Topocluster Isolation Energy") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hTopoEtCone40, *m_photonGroup, hname, hlongname, 64, -10000., 40000.);
-
-  // PtCone20
-  hname = std::string("photonPtCone20") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon Track Isolation Energy") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hPtCone20, *m_photonGroup, hname, hlongname, 64, -10000., 40000.);
-
-  // time
-  hname = std::string("photonTime") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Time associated with photon cluster [ns]") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hTime, *m_photonGroup, hname, hlongname, 90, -30., 60.);
+  // EXPERT PANEL
+  bookTH2F(myHist.m_hEtaPhi, *m_photonGroup, "photonEtaPhiPt2.5GeV", "Photon #eta,#phi map (candidates with Pt>2.5 GeV)", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH2F(myHist.m_hEtaPhi20GeV, *m_photonGroup, "photonEtaPhiPtgt20GeV", "Photon #eta,#phi map (candidates with Pt>20 GeV)", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
 
   // RConv
-  hname = std::string("photonRconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("RConv of photon [mm]") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hRConv, *m_photonGroup, hname, hlongname, 100, 0., 800.);
+  bookTH1F(myHist.m_hRConv, *m_photonGroup, "photonRconv", "RConv of photon [mm]", 100, 0., 800., myHist.m_nameOfEgammaType);
 
-  ////////////////////////////////////
   // REGION PANEL
-  ////////////////////////////////////
+  bookTH1FperRegion(myHist.m_hvN, *m_photonRegionGroup, "photonN", "Photon number ; Nel ; Nevents",20, 0.0, 20.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvEta, *m_photonRegionGroup, "photonEta", "Photon #eta distribution ; #eta ; Nevents",64, -3.2, 3.2,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvPhi, *m_photonRegionGroup, "photonPhi", "Photon #phi distribution ; #phi ; Nevents", 64, -3.2, 3.2,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvEt, *m_photonRegionGroup, "photonEt", "Photon Et distribution ; Et [MeV] ; Nevents", 100, -1000.0, 250000.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvTopoEtCone40, *m_photonRegionGroup, "photonTopoEtCone40", "Photon Isolation Energy TopoEtCone40 [MeV] ; Eiso ; Nevents", 64, -10000., 40000.,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvPtCone20, *m_photonRegionGroup, "photonPtCone20", "Photon PtCone20 distribution ; PtCone20 ; Nevents", 64, -10000., 40000.,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvTime, *m_photonRegionGroup, "photonTime", "Photon time [ns] ; Time [ns] ; Nevents", 90, -30.0, 60.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvConvType, *m_photonRegionGroup, "photonConvType", "Photon conv type; Nevents", 4,0,4,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvConvTrkMatch1, *m_photonRegionGroup, "photonConvTrkMatch1", "Photon ConvTrkMatch1; Nevents", 4,0,4,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvConvTrkMatch2, *m_photonRegionGroup, "photonConvTrkMatch2", "Photon ConvTrkMatch2; Nevents", 4,0,4,start,end, myHist.m_nameOfEgammaType);
 
-  // N
-  hname = std::string("photonN") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon number ; Nel ; Nevents") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvN, *m_photonRegionGroup, hname, hlongname ,20, 0.0, 20.0,start,end);
-
-  // Eta
-  hname = std::string("photonEta") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #eta distribution ; #eta ; Nevents") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvEta, *m_photonRegionGroup, hname, hlongname,64, -3.2, 3.2,start,end);
-
-  // Phi
-  hname = std::string("photonPhi") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon #phi distribution ; #phi ; Nevents") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvPhi, *m_photonRegionGroup, hname, hlongname, 64, -3.2, 3.2,start,end);
-
-  // Et
-  hname = std::string("photonEt") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon Et distribution ; Et [MeV] ; Nevents") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvEt, *m_photonRegionGroup, hname, hlongname, 100, -1000.0, 250000.0,start,end);
-
-  // TopoEtCone40
-  hname = std::string("photonTopoEtCone40") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon Isolation Energy TopoEtCone40 [MeV] ; Eiso ; Nevents") + std::string (" (") 
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvTopoEtCone40, *m_photonRegionGroup, hname, hlongname, 64, -10000., 40000.,start,end);
-
-  // Ptcone20
-  hname = std::string("photonPtCone20") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon PtCone20 distribution ; PtCone20 ; Nevents") + std::string (" (")
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvPtCone20, *m_photonRegionGroup, hname, hlongname, 64, -10000., 40000.,start,end);
-
-  // Time
-  hname = std::string("photonTime") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon time [ns] ; Time [ns] ; Nevents") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvTime, *m_photonRegionGroup, hname, hlongname, 90, -30.0, 60.0,start,end);
-
-  // ConvType
-  hname = std::string("photonConvType") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon conv type; Nevents") + std::string (" (")+ myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvConvType, *m_photonRegionGroup, hname, hlongname, 4,0,4,start,end);
-
-  // ConvTrkMatch1
-  hname = std::string("photonConvTrkMatch1") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon ConvTrkMatch1; Nevents") + std::string (" (")+ myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvConvTrkMatch1, *m_photonRegionGroup, hname, hlongname, 4,0,4,start,end);
-
-  // ConvTrkMatch2
-  hname = std::string("photonConvTrkMatch2") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon ConvTrkMatch2; Nevents") + std::string (" (")+ myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvConvTrkMatch2, *m_photonRegionGroup, hname, hlongname, 4,0,4,start,end);
-
-
-  //////////////////////////////////
   // UNCONV PANEL
-  //////////////////////////////////
+  bookTH1F(myHist.m_hNUnconv, *m_photonUnconvGroup, "photonNUnconv", "Number of Unconverted photons", 20, 0.0, 20.0, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEtUnconv, *m_photonUnconvGroup, "photonEtUnconv", "Unconverted photon transverse energy [MeV]", 100, -1000.0, 250000.0, myHist.m_nameOfEgammaType);
+  bookTH2F(myHist.m_hEtaPhiUnconv, *m_photonUnconvGroup, "photonEtaPhiUnconv", "Unconverted photon #eta,#phi map", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEtaUnconv, *m_photonUnconvGroup, "photonEtaUnconv", "Unconverted photon #eta", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPhiUnconv, *m_photonUnconvGroup, "photonPhiUnconv", "Unconverted photon #phi", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hTopoEtCone40Unconv, *m_photonUnconvGroup, "photonTopoEtCone40Unconv", "Unconverted photon Topocluster Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPtCone20Unconv, *m_photonUnconvGroup, "photonPtCone20Unconv", "Unconverted photon Topocluster Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
 
-  // N
-  hname = std::string("photonNUnconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Number of Unconverted photons") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hNUnconv, *m_photonUnconvGroup, hname, hlongname, 20, 0.0, 20.0);
-
-  // Et
-  hname = std::string("photonEtUnconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Unconverted photon transverse energy [MeV]") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hEtUnconv, *m_photonUnconvGroup, hname, hlongname, 100, -1000.0, 250000.0);
-
-  // EtaPhi
-  hname = std::string("photonEtaPhiUnconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Unconverted photon #eta,#phi map") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhiUnconv, *m_photonUnconvGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  // Eta
-  hname = std::string("photonEtaUnconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Unconverted photon #eta") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hEtaUnconv, *m_photonUnconvGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  // Phi
-  hname = std::string("photonPhiUnconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Unconverted photon #phi") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hPhiUnconv, *m_photonUnconvGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  // EtCone40
-  hname = std::string("photonTopoEtCone40Unconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Unconverted photon Topocluster Isolation Energy") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hTopoEtCone40Unconv, *m_photonUnconvGroup, hname, hlongname, 64, -10000., 40000.);
-
-  // PtCone20
-  hname = std::string("photonPtCone20Unconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Unconverted photon Topocluster Isolation Energy") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hPtCone20Unconv, *m_photonUnconvGroup, hname, hlongname, 64, -10000., 40000.);
-
-  /////////////////////////////////
   // CONV PANEL 
-  /////////////////////////////////
+  bookTH1F(myHist.m_hNConv, *m_photonConvGroup, "photonNConv", "Number of Converted photons", 20, 0.0, 20.0, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEtConv, *m_photonConvGroup, "photonEtConv", "Converted photon transverse energy [MeV]", 100, -1000.0, 250000.0, myHist.m_nameOfEgammaType);
+  bookTH2F(myHist.m_hEtaPhiConv, *m_photonConvGroup, "photonEtaPhiConv", "Converted photon #eta,#phi map", 64, -3.2, 3.2, 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hEtaConv, *m_photonConvGroup, "photonEtaConv", "Converted photon #eta", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPhiConv, *m_photonConvGroup, "photonPhiConv", "Converted photon #phi", 64, -3.2, 3.2, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hTopoEtCone40Conv, *m_photonConvGroup, "photonTopoEtCone40Conv", "Converted photon Topocluster Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hPtCone20Conv, *m_photonConvGroup, "photonPtCone20Conv", "Converted photon Topocluster Isolation Energy", 64, -10000., 40000., myHist.m_nameOfEgammaType);
 
-  // N
-  hname = std::string("photonNConv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Number of Converted photons") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hNConv, *m_photonConvGroup, hname, hlongname, 20, 0.0, 20.0);
-
-  // Et
-  hname = std::string("photonEtConv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Converted photon transverse energy [MeV]") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hEtConv, *m_photonConvGroup, hname, hlongname, 100, -1000.0, 250000.0);
-
-  // EtaPhi
-  hname = std::string("photonEtaPhiConv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Converted photon #eta,#phi map") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH2F(myHist.m_hEtaPhiConv, *m_photonConvGroup, hname, hlongname, 64, -3.2, 3.2, 64, -3.2, 3.2);
-
-  // Eta
-  hname = std::string("photonEtaConv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Converted photon #eta") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hEtaConv, *m_photonConvGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  // Phi
-  hname = std::string("photonPhiConv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Converted photon #phi") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hPhiConv, *m_photonConvGroup, hname, hlongname, 64, -3.2, 3.2);
-
-  // EtCone40
-  hname = std::string("photonTopoEtCone40Conv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Converted photon Topocluster Isolation Energy") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hTopoEtCone40Conv, *m_photonConvGroup, hname, hlongname, 64, -10000., 40000.);
-
-  // PtCone20
-  hname = std::string("photonPtCone20Conv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Converted photon Topocluster Isolation Energy") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hPtCone20Conv, *m_photonConvGroup, hname, hlongname, 64, -10000., 40000.);
-
-  ////////////////////////////////
   // ID PANEL
-  ////////////////////////////////
-
-  hname = std::string("photonEhad1") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon energy leakage in 1st hadronic sampling ; Ehad 1; Nevents") + std::string (" (") 
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvEhad1, *m_photonIdGroup, hname, hlongname, 50, -1000., 10000.,start,end);
-
-  hname = std::string("photonCoreEM") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon core energy in EM calorimeter ;E [MeV]; Nevents") + std::string (" (")
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvCoreEM, *m_photonIdGroup, hname, hlongname, 50, -5000., 250000.,start,end);
-
-  hname = std::string("photonF0") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon fractional energy in PreSampler ; F0 ; Nevents") + std::string (" (") 
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvF0, *m_photonIdGroup, hname, hlongname, 50, -0.2,1.0,start,end);
-
-  hname = std::string("photonF1") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon fractional energy in 1st sampling ; F1 ; Nevents") + std::string (" (") 
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvF1, *m_photonIdGroup, hname, hlongname, 50, -0.2,1.0,start,end);
-
-  hname = std::string("photonF2") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon fractional energy in 2nd sampling ; F2 ; Nevents") + std::string (" (") 
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvF2, *m_photonIdGroup,hname, hlongname, 50, -0.2,1.0,start,end);
-
-  hname = std::string("photonF3") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon fractional energy in 3rd sampling ; F3 ; Nevents") + std::string (" (") 
-    + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvF3, *m_photonIdGroup, hname, hlongname, 50, -0.2,1.0,start,end);
-
-  hname = std::string("photonRe233e237") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon uncor. energy fraction in 3x3/3x7 cells in em sampling 2 ;R 3x3/3x7; Nevents") 
-    + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvRe233e237, *m_photonIdGroup, hname, hlongname, 50, 0., 2.,start,end);
-
-  hname = std::string("photonRe237e277") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Photon uncor. energy fraction in 3x7/7x7 cells in em sampling 2 ;R 3x7/7x7; Nevents") 
-    + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1FperRegion(myHist.m_hvRe237e277, *m_photonIdGroup, hname, hlongname, 50, 0., 2.,start,end);
+  bookTH1FperRegion(myHist.m_hvEhad1, *m_photonIdGroup, "photonEhad1", "Photon energy leakage in 1st hadronic sampling ; Ehad 1; Nevents", 50, -1000., 10000.,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvCoreEM, *m_photonIdGroup, "photonCoreEM", "Photon core energy in EM calorimeter ;E [MeV]; Nevents", 50, -5000., 250000.,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvF0, *m_photonIdGroup, "photonF0", "Photon fractional energy in PreSampler ; F0 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvF1, *m_photonIdGroup, "photonF1", "Photon fractional energy in 1st sampling ; F1 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvF2, *m_photonIdGroup,"photonF2", "Photon fractional energy in 2nd sampling ; F2 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvF3, *m_photonIdGroup, "photonF3", "Photon fractional energy in 3rd sampling ; F3 ; Nevents", 50, -0.2,1.0,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvRe233e237, *m_photonIdGroup, "photonRe233e237", "Photon uncor. energy fraction in 3x3/3x7 cells in em sampling 2 ;R 3x3/3x7; Nevents", 50, 0., 2.,start,end, myHist.m_nameOfEgammaType);
+  bookTH1FperRegion(myHist.m_hvRe237e277, *m_photonIdGroup, "photonRe237e277", "Photon uncor. energy fraction in 3x7/7x7 cells in em sampling 2 ;R 3x7/7x7; Nevents", 50, 0., 2.,start,end, myHist.m_nameOfEgammaType);
 
   // LUMIBLOCK DEPENDANT PANEL
-
-  hname = std::string("LBEvoNPhotons") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Number of Photons vs LB") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hLB_N, *m_photonLBGroup, hname, hlongname, 2000, -0.5, 1999.5);
-
-  hname = std::string("LBEvoNPhotonsUnconv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Number of Unconverted Photons vs LB") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hLB_NUnconv, *m_photonLBGroup, hname, hlongname, 2000, -0.5, 1999.5);
-
-  hname = std::string("LBEvoNPhotonsConv") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Number of Converted Photons vs LB") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hLB_NConv, *m_photonLBGroup, hname, hlongname, 2000, -0.5, 1999.5);
-
-  hname = std::string("LBEvoConvOverN") + myHist.m_nameOfPhotonType;
-  hlongname =  std::string("Fraction of converted photons vs LB") + std::string (" (") + myHist.m_nameOfPhotonType + std::string (")");
-  bookTH1F(myHist.m_hLB_fConv, *m_photonLBGroup, hname, hlongname,2000, -0.5,1999.5);
+  bookTH1F(myHist.m_hLB_N, *m_photonLBGroup, "LBEvoNPhotons", "Number of Photons vs LB", 2000, -0.5, 1999.5, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hLB_NUnconv, *m_photonLBGroup, "LBEvoNPhotonsUnconv", "Number of Unconverted Photons vs LB", 2000, -0.5, 1999.5, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hLB_NConv, *m_photonLBGroup, "LBEvoNPhotonsConv", "Number of Converted Photons vs LB", 2000, -0.5, 1999.5, myHist.m_nameOfEgammaType);
+  bookTH1F(myHist.m_hLB_fConv, *m_photonLBGroup, "LBEvoConvOverN", "Fraction of converted photons vs LB",2000, -0.5,1999.5, myHist.m_nameOfEgammaType);
 
   return StatusCode::SUCCESS;
 }
