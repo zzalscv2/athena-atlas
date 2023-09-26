@@ -5,6 +5,10 @@
 
 from . import Herwig7Utils as hw7Utils
 
+# import Athena modules
+from AthenaCommon import Logging
+athMsgLog = Logging.logging.getLogger('Herwig7Config')
+
 ## Configuration base class for %Herwig7
 class Hw7Config(object):
 
@@ -450,3 +454,17 @@ set /Herwig/Particles/pbar-:PDF /Herwig/Partons/BudnevPDF
 set /Herwig/Generators/EventGenerator:EventHandler:CascadeHandler:MPIHandler NULL
 
 """
+
+  def set_tune_scheme(self, tune_scheme="DotProduct"):
+    if tune_scheme != "DotProduct-Veto" or tune_scheme != "DotProduct" or tune_scheme != "pT" or tune_scheme != "Q2":
+      athMsgLog.warn("Please choose one of the supported tune-schemes! (DotProduct-Veto,DotProduct,pT,Q2)")
+    # create a tune-section in the config
+    self.commands += """\
+## -------------
+## Tune Settings
+## -------------
+
+# Tune-{tune_scheme:s}
+read snippets/EvolutionScheme-{tune_scheme:s}.in
+read snippets/Tune-{tune_scheme:s}.in
+""".format(tune_scheme=tune_scheme)
