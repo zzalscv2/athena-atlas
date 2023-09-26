@@ -144,7 +144,8 @@ StatusCode SkipEventIdxSvc::initialize() {
     // Read EventInfo
     // We don't look for the legacy EventInfo, only an Input attribute list and
     // if that doesn't exist, and xAOD::EventInfo
-    auto attr_lists = sg->keys<AthenaAttributeList>();
+    std::vector<std::string> attr_lists;
+    sg->keys<AthenaAttributeList> (attr_lists);
     ATH_MSG_DEBUG(
         "Attr lists are: " << fmt::format("[{}]", fmt::join(attr_lists, ", ")));
     const auto* attr_list_p =
