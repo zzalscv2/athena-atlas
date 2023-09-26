@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCellRescaler.h" 
@@ -21,10 +21,9 @@ LArCellRescaler::~LArCellRescaler() {}
 
 
 StatusCode LArCellRescaler::initialize() {
-  ATH_MSG_INFO( " initialization "  );
-
+  ATH_MSG_DEBUG( " initialization "  );
   ATH_CHECK( detStore()->regFcn(&LArCellRescaler::checkConstants,
-                                dynamic_cast<LArCellRescaler*>(this),
+                                this,
                                 m_factors,m_key) );
 
   return StatusCode::SUCCESS;
