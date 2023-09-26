@@ -125,7 +125,7 @@ StatusCode PileUpMTAlg::initialize() {
     m_pileupTrace.init(
         fmt::format("pileup_trace_skipping-{}_{:%Y-%m-%dT%H%M}.txt",
                     m_skippedHSEvents.value(),
-                    fmt::localtime(std::chrono::system_clock::now())));
+                    fmt::localtime(system_clock::to_time_t(system_clock::now()))));
   }
   ATH_CHECK(m_skipEventIdxSvc.retrieve());
   ATH_CHECK(m_rngSvc.retrieve());

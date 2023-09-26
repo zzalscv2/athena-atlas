@@ -31,6 +31,8 @@
 #include <string_view>
 #include <thread>
 
+using namespace std::chrono;
+
 class atomic_output {
  private:
   std::FILE* m_file{};
@@ -44,7 +46,7 @@ class atomic_output {
       return;
     }
     m_file = std::fopen(filename.c_str(), "a");
-    auto time = fmt::localtime(std::chrono::system_clock::now());
+    auto time = fmt::localtime(system_clock::to_time_t(system_clock::now()));
     fmt::print(m_file, ("FILE CREATED ON {:%Y-%m-%d} at {:%H:%M:%S %Z}\n"),
                time, time);
   }
