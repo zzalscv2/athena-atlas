@@ -3,6 +3,19 @@
 */
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_DigitByteStreamCnv.h"
+#include "AthenaBaseComps/AthCheckMacros.h"
+#include "LUCID_RawEvent/LUCID_DigitContainer.h"
+#include "AthenaKernel/ClassID_traits.h"
+#include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
+#include "StoreGate/StoreGateSvc.h"
+#include "LUCID_RawDataByteStreamCnv/LUCID_RodEncoder.h"
+
+#include <cstdint>
+#include <string>
+#include <map>
+
+typedef std::map<uint32_t, LUCID_RodEncoder> LucidRodEncoder_map;
 
 LUCID_DigitByteStreamCnv::LUCID_DigitByteStreamCnv(ISvcLocator* svcloc) : 
   Converter(storageType(), classID(), svcloc),
@@ -39,13 +52,9 @@ StatusCode LUCID_DigitByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddress*
    RawEventWrite*        re = m_ByteStreamEventAccess->getRawEvent();
    LUCID_DigitContainer* RDO_container = nullptr;
 
-// dynamic cast of the pObj to RDO_container based in clid of pObj
-   SG::fromStorable(pObj, RDO_container);
-
-   if (!RDO_container) {
-
+   // dynamic cast of the pObj to RDO_container based in clid of pObj
+   if (!SG::fromStorable(pObj, RDO_container)) {
      ATH_MSG_ERROR("Can not cast to LUCID_DigitContainer");
-     
      return StatusCode::RECOVERABLE;
    }
 
@@ -60,9 +69,7 @@ StatusCode LUCID_DigitByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddress*
    StatusCode sc = fillFEA(RDO_container, re);
    
    if (sc.isFailure()){
-
      ATH_MSG_ERROR(" Could not convert RawData with to ByteStream ");
-     
      return StatusCode::RECOVERABLE;
    }
 
