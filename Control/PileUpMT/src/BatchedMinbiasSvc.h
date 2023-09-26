@@ -1,6 +1,6 @@
 /* -*- C++ -*- */
 /*
-  Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2022, 2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_BATCHEDMINBIASSVC_H
@@ -38,7 +38,8 @@ class BatchedMinbiasSvc : public extends<AthService, IMinbiasSvc> {
   StoreGateSvc* getMinbias(const EventContext& ctx,
                            std::uint64_t mb_id) override;
   std::size_t getNumForBunch(const EventContext& ctx, int bunch) const override;
-  inline std::int64_t get_hs_id(const EventContext& ctx) const {
+  virtual inline
+  std::int64_t get_hs_id(const EventContext& ctx) const override {
     return m_skippedHSEvents.value() + ctx.evt();
   }
   StatusCode endHardScatter(const EventContext& ctx) override;
