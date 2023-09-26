@@ -212,10 +212,7 @@ StatusCode forwardElectronMonTool::fillHistograms()
 
   // Get electron container
   SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ForwardElectronContainer};
-  if(!electron_container.isValid()){
-    ATH_MSG_VERBOSE("no electron container found in TDS");
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(electron_container.isValid());
 
   xAOD::ElectronContainer::const_iterator e_iter = electron_container->begin();
   xAOD::ElectronContainer::const_iterator e_end  = electron_container->end();

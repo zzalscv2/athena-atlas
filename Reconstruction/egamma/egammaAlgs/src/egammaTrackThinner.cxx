@@ -65,10 +65,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
   std::vector<bool> keptTrackParticles;
   SG::ThinningHandle<xAOD::TrackParticleContainer> trackPC(m_TrackParticlesKey, ctx);
   // check is only used for serial running; remove when MT scheduler used
-  if(!trackPC.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve "<< m_TrackParticlesKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(trackPC.isValid());
   ATH_MSG_DEBUG("Number of TrackParticles "<< trackPC->size());
   keptTrackParticles.resize( trackPC->size(), false );
 
@@ -79,10 +76,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
   std::vector<bool> keptVertices;
   SG::ThinningHandle<xAOD::VertexContainer> vertices(m_VertexKey, ctx);
   // check is only used for serial running; remove when MT scheduler used
-  if(!vertices.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve "<< m_VertexKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(vertices.isValid());
   ATH_MSG_DEBUG("Number of Vertices "<< vertices->size());
   keptVertices.resize( vertices->size(), false );
 
@@ -96,10 +90,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
    */
   SG::ReadHandle<xAOD::ElectronContainer> electrons(m_InputElectronContainerKey, ctx);
   // check is only used for serial running; remove when MT scheduler used
-  if(!electrons.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve "<< m_InputElectronContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(electrons.isValid());
 
   //Loop over electrons
   auto el_itr = electrons->begin();
@@ -121,10 +112,7 @@ StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
    */
   SG::ReadHandle<xAOD::PhotonContainer> photons(m_InputPhotonContainerKey, ctx);
   // check is only used for serial running; remove when MT scheduler used
-  if(!photons.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve "<< m_InputPhotonContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(photons.isValid());
     
   //Loop over photons
   auto ph_itr = photons->begin();

@@ -125,11 +125,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoContainerKey, ctx);
-  if (!eventInfo.isValid()) {
-    ATH_MSG_ERROR("Couldn't retrieve EventInfo container with key: "
-                  << m_EventInfoContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(eventInfo.isValid());
 
   float weight = eventInfo->beamSpotWeight();
 
@@ -141,11 +137,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
     // (containing only iso particles)
     // validity check is only really needed for serial running. Remove when MT
     // is only way.
-    if (!truthParticles.isValid()) {
-      ATH_MSG_ERROR("Couldn't retrieve Truth container with key: "
-                    << m_egammaTruthContainerKey.key());
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(truthParticles.isValid());
 
     for (const auto* const truthParticle : *truthParticles) {
 
@@ -240,11 +232,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
     // be deleted, also possibly to fill only prompt particles)
     SG::ReadHandle<xAOD::TruthParticleContainer> truthallParticles(
       m_truthParticleContainerKey, ctx);
-    if (!truthallParticles.isValid()) {
-      ATH_MSG_ERROR("Couldn't retrieve Truth container with key: "
-                    << m_truthParticleContainerKey.key());
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(truthallParticles.isValid());
 
 #ifdef MCTRUTHCLASSIFIER_CONST
     IMCTruthClassifier::Info info;
@@ -408,10 +396,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
   
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::ElectronContainer> Electrons( m_electronContainerKey, ctx);
-  if (!Electrons.isValid()) {
-    ATH_MSG_ERROR ("Couldn't retrieve Electron container with key: " << m_electronContainerKey.key());
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(Electrons.isValid());
   
   int numofele=0;
 
@@ -471,10 +456,7 @@ StatusCode EgammaPhysValMonitoringTool::fillLRTElecHistograms(const xAOD::TruthP
   
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::ElectronContainer> LRTElectrons( m_lrtelectronContainerKey, ctx);
-  if (!LRTElectrons.isValid()) {
-    ATH_MSG_ERROR ("Couldn't retrieve Electron container with key: " << m_lrtelectronContainerKey.key());
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(LRTElectrons.isValid());
   
   int numofele=0;
 
@@ -547,10 +529,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoFrwdElecHistograms(const xAOD::T
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::ElectronContainer> ElectronsFrwd( m_electronContainerFrwdKey, ctx);
-  if(!ElectronsFrwd.isValid() ) {
-    ATH_MSG_ERROR ("Couldn't retrieve Forward Electrons container with key: " << m_electronContainerFrwdKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(ElectronsFrwd.isValid());
   
   int numoffrwdele=0;
   float weight = eventInfo->beamSpotWeight();
@@ -579,10 +558,7 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoPhotHistograms(const xAOD::Truth
  
   const EventContext& ctx = Gaudi::Hive::currentContext();
   SG::ReadHandle<xAOD::PhotonContainer> Photons( m_photonContainerKey, ctx);
-  if (!Photons.isValid()) {
-    ATH_MSG_ERROR ("Couldn't retrieve Photons container with key: " << m_photonContainerKey.key());
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(Photons.isValid());
   
   int numofPhot=0;
   int numofTopo=0;

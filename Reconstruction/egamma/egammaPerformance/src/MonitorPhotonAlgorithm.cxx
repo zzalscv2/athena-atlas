@@ -38,10 +38,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
     // get the Photon container
 
     SG::ReadHandle<xAOD::PhotonContainer> photons(m_ParticleContainerKey, ctx);
-    if (! photons.isValid() ) {
-      ATH_MSG_ERROR("evtStore() does not contain photon Collection with name "<< m_ParticleContainerKey);
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(photons.isValid());
 
     // Specific Photon variables to be monitored
 

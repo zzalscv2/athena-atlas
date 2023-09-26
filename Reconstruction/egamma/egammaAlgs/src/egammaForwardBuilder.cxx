@@ -112,10 +112,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   SG::ReadHandle<xAOD::CaloClusterContainer> inputClusters(m_topoClusterKey, ctx);
 
   // Check is only used for serial running, remove when MT scheduler used.
-  if(!inputClusters.isValid()) {
-    ATH_MSG_FATAL("egammaForwardBuilder::Could not retrieve Cluster container");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(inputClusters.isValid());
 
   static const SG::AuxElement::Accessor<
     std::vector<ElementLink<xAOD::CaloClusterContainer>>

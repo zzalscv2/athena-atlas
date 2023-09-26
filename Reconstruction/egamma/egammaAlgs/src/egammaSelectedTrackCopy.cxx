@@ -76,24 +76,10 @@ StatusCode
 egammaSelectedTrackCopy::execute(const EventContext& ctx) const
 {
   SG::ReadHandle<xAOD::CaloClusterContainer> clusterTES(m_clusterContainerKey, ctx);
-  if (!clusterTES.isValid()) {
-    ATH_MSG_FATAL(
-      "Failed to retrieve cluster container: " <<
-      m_clusterContainerKey.key()
-    );
-
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(clusterTES.isValid());
 
   SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(m_trackParticleContainerKey, ctx);
-  if (!trackTES.isValid()) {
-    ATH_MSG_FATAL(
-      "Failed to retrieve TrackParticle container: " <<
-      m_trackParticleContainerKey.key()
-    );
-
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(trackTES.isValid());
 
   SG::WriteHandle<ConstDataVector<xAOD::TrackParticleContainer>> outputTrkPartContainer(
     m_OutputTrkPartContainerKey,
@@ -108,15 +94,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
       ctx
     );
 
-    if (!fwdClusterTES.isValid()) {
-      ATH_MSG_FATAL(
-        "Failed to retrieve forward cluster container: " <<
-        m_fwdClusterContainerKey.key()
-      );
-
-      return StatusCode::FAILURE;
-    }
-
+    ATH_CHECK(fwdClusterTES.isValid());
     m_AllFwdClusters += fwdClusterTES->size();
   }
 

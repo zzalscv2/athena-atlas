@@ -48,10 +48,7 @@ photonSuperClusterBuilder::execute(const EventContext& ctx) const
                                                 ctx);
 
   // check is only used for serial running; remove when MT scheduler used
-  if (!egammaRecs.isValid()) {
-    ATH_MSG_ERROR("Failed to retrieve " << m_inputEgammaRecContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(egammaRecs.isValid());
 
   // Have to register cluster container in order to properly get cluster links.
   SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(

@@ -651,10 +651,7 @@ StatusCode photonMonTool::fillHistograms() {
 
   // Get photon container
   SG::ReadHandle<xAOD::PhotonContainer> photon_container{m_PhotonContainer};
-  if(!photon_container.isValid()){
-    ATH_MSG_VERBOSE("no photon container found in TDS");
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(photon_container.isValid());
 
   // Check that the auxiliary store association was made successfully:
   if( ! photon_container->hasStore() ) {
