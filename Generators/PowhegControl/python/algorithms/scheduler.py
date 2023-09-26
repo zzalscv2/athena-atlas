@@ -29,8 +29,8 @@ class Scheduler(object):
     ## Postprocessing evaluation order
     ordered_postprocessors = [
         "quark colour fixer",
-        "PHOTOS", "reweighter",
-        "NNLO reweighter",
+        "PHOTOS", 
+        "reweighter", "NNLO reweighter",
         "LHE file nominal weight updater",
         "mu2tau",
         "mu2e",
