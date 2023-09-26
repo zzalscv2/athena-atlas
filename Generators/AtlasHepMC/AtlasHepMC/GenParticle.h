@@ -8,6 +8,7 @@
 #ifdef HEPMC3
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/PrintStreams.h"
+#include "AtlasHepMC/Barcode.h"
 #include "AtlasHepMC/Polarization.h"
 #include "AtlasHepMC/Flow.h"
 namespace HepMC3 {
@@ -24,31 +25,13 @@ inline GenParticlePtr newGenParticlePtr(const HepMC3::FourVector &mom = HepMC3::
 inline ConstGenParticlePtr newConstGenParticlePtr(const HepMC3::FourVector &mom = HepMC3::FourVector::ZERO_VECTOR(), int pid = 0, int status = 0) {
     return std::make_shared<const HepMC3::GenParticle>(mom,pid,status);
 }
-inline int barcode(const GenParticlePtr& p) {
-    if (!p) return 0;
-    auto e = p->parent_event();
-    if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
-    return barcode?(barcode->value()):p->id();
-}
 inline int barcode_or_id(const ConstGenParticlePtr& p) { return p->id(); }
-inline int barcode(const ConstGenParticlePtr& p) {
-    if (!p) return 0;
-    auto e = p->parent_event();
-    if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
-    return barcode?(barcode->value()):p->id();
-}
-inline int barcode(const HepMC3::GenParticle& p) {
-    auto e = p.parent_event();
-    if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p.id());
-    return barcode?(barcode->value()):p.id();
-}
+
 using HepMC3::GenParticle;
 }
 #else
 #include "HepMC/GenParticle.h"
+#include "AtlasHepMC/Barcode.h"
 #include <memory>
 namespace HepMC {
 typedef GenParticle* GenParticlePtr;
@@ -57,8 +40,6 @@ inline GenParticlePtr newGenParticlePtr(const HepMC::FourVector &mom = HepMC::Fo
     return new HepMC::GenParticle(mom,pid,status);
 }
 inline int barcode_or_id(const ConstGenParticlePtr& p) { return p->barcode();}
-inline int barcode(const ConstGenParticlePtr& p) { return p->barcode();}
-inline int barcode(const GenParticle& p) {   return    p.barcode(); }
 namespace Print {
 inline void line(std::ostream& os,const GenParticle& p) {p.print(os);}
 inline void line(std::ostream& os,const GenParticle* p) {p->print(os);}

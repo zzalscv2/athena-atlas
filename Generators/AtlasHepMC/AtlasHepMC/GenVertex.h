@@ -8,6 +8,7 @@
 #ifdef HEPMC3
 #include "HepMC3/GenVertex.h"
 #include "HepMC3/PrintStreams.h"
+#include "AtlasHepMC/Barcode.h"
 namespace HepMC3 {
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  begin(const HepMC3::GenVertex& v) { return v.particles_out().begin(); }
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  end(const HepMC3::GenVertex& v) { return v.particles_out().end(); }
@@ -53,6 +54,7 @@ using HepMC3::GenVertex;
 }
 #else
 #include "HepMC/GenVertex.h"
+#include "AtlasHepMC/Barcode.h"
 namespace HepMC {
 typedef HepMC::GenVertex* GenVertexPtr;
 typedef const HepMC::GenVertex* ConstGenVertexPtr;
@@ -67,8 +69,6 @@ inline void line(std::ostream& os,const GenVertex& v) {v.print(os);}
 inline void line(std::ostream& os,const GenVertex* v) {v->print(os);}
 }
 inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->barcode();}
-inline int barcode(const ConstGenVertexPtr& p) { return p->barcode();}
-inline int barcode(const GenVertex& p) { return p.barcode();}
 inline std::ostream& operator<<( std::ostream& os, const GenVertex* v ) { if (v) return os<<(*v); else return os;}
 }
 #endif
