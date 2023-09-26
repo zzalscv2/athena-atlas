@@ -153,7 +153,7 @@ public:
     int channelMax(const Identifier& id) const;
 
     // Utility methods
-    int sectorType(std::string stationName, int stationEta) const;
+    int sectorType(const std::string& stationName, int stationEta) const;
     int sectorType(int stationName, int stationEta) const;
 
     // Public validation of levels

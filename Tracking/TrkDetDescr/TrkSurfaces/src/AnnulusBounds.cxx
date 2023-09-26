@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -498,8 +498,8 @@ Trk::AnnulusBounds::circleLineIntersection(double R, double k, double d)
 /** Distance to line */
 double
 Trk::AnnulusBounds::distanceToLine(const Amg::Vector2D& locpo,
-                                   std::vector<TDD_real_t> P1,
-                                   std::vector<TDD_real_t> P2) 
+                                   const std::vector<TDD_real_t>& P1,
+                                   const std::vector<TDD_real_t>& P2) 
 {
   double P1x = P1[0];
   double P1y = P1[1];
@@ -532,8 +532,8 @@ Trk::AnnulusBounds::distanceToLine(const Amg::Vector2D& locpo,
 double
 Trk::AnnulusBounds::distanceToArc(const Amg::Vector2D& locpo,
                                   double R,
-                                  std::vector<TDD_real_t> sL,
-                                  std::vector<TDD_real_t> sR) 
+                                  const std::vector<TDD_real_t>& sL,
+                                  const std::vector<TDD_real_t>& sR) 
 {
 
   double X = locpo[Trk::locX];

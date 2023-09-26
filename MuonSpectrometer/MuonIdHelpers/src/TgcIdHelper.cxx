@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/TgcIdHelper.h"
@@ -687,7 +687,7 @@ bool TgcIdHelper::tripletChamber(int stationName) const {
     return ('1' == name[1]);
 }
 
-int TgcIdHelper::chamberType(std::string stationName, int stationEta) const {
+int TgcIdHelper::chamberType(const std::string& stationName, int stationEta) const {
     if ('1' == stationName[1]) {
         if ('F' == stationName[2])
             return 1;
