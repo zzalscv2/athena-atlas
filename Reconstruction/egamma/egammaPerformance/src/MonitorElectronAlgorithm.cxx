@@ -41,10 +41,7 @@ StatusCode MonitorElectronAlgorithm::fillHistograms( const EventContext& ctx ) c
     // get the Electron container
 
     SG::ReadHandle<xAOD::ElectronContainer> electrons(m_ParticleContainerKey, ctx);
-    if (! electrons.isValid() ) {
-      ATH_MSG_ERROR("evtStore() does not contain electron Collection with name "<< m_ParticleContainerKey);
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(electrons.isValid());
 
     // Event variables to be monitored
     auto lbNCandidates = Monitored::Scalar<u_int16_t>("LBEvoN",0);

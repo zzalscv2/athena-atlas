@@ -58,10 +58,7 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
   SG::ReadHandle<xAOD::TrackParticleContainer> TPCol(m_inputTrackParticleContainerKey,ctx);
 
   // check for serial running only, remove in MT
-  if(!TPCol.isValid()){
-    ATH_MSG_FATAL("No TrackParticleInputContainer found in TDS");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(TPCol.isValid());
 
   std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*> verticesPair =
     m_vertexFinderTool->findVertex(ctx,TPCol.cptr());

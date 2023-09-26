@@ -72,11 +72,7 @@ EMTrackMatchBuilder::executeRec(const EventContext& ctx,
   const CaloDetDescrManager* caloDD = *caloDetDescrMgrHandle;
 
   // check is only used for serial running; remove when MT scheduler used
-  if (!trackPC.isValid()) {
-    ATH_MSG_ERROR("Couldn't retrieve TrackParticle container with key: "
-                  << m_TrackParticlesKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(trackPC.isValid());
   // Loop over calling the trackExecute method
   for (egammaRec* eg : *egammas) {
     // retrieve the cluster

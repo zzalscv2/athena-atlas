@@ -111,11 +111,7 @@ EMConversionBuilder::executeRec(const EventContext& ctx, egammaRec* egRec) const
                                                     ctx);
 
   // only for serial running; remove for MT
-  if (!conversions.isValid()) {
-    ATH_MSG_ERROR("Could not retrieve Conversion container with key: "
-                  << m_conversionContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(conversions.isValid());
   // reset the vertices
   std::vector<ElementLink<xAOD::VertexContainer>> vertices;
   egRec->setVertices(vertices);

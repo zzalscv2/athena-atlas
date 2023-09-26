@@ -71,21 +71,13 @@ EMBremCollectionBuilder::execute(const EventContext& ctx) const
   // The input track particles
   SG::ReadHandle<xAOD::TrackParticleContainer> trackTES(
     m_trackParticleContainerKey, ctx);
-  if (!trackTES.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve TrackParticle container: "
-                  << m_trackParticleContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(trackTES.isValid());
 
   // The input selected track particles (subset of "all" input
   // read above).
   SG::ReadHandle<xAOD::TrackParticleContainer> selectedTrackParticles(
     m_selectedTrackParticleContainerKey, ctx);
-  if (!selectedTrackParticles.isValid()) {
-    ATH_MSG_FATAL("Failed to retrieve TrackParticle container: "
-                  << m_selectedTrackParticleContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(selectedTrackParticles.isValid());
 
   // Create the final containers to be written out
   // 1. Track particles
@@ -111,13 +103,8 @@ EMBremCollectionBuilder::execute(const EventContext& ctx) const
   trtAloneTrkTracks.reserve(8);
 
   for (const xAOD::TrackParticle* trackParticle : *selectedTrackParticles) {
-    const Trk::Track* trktrack{ nullptr };
-    if (trackParticle->trackLink().isValid()) {
-      trktrack = trackParticle->track();
-    } else {
-      ATH_MSG_ERROR("TrackParticle has not Track --  are you running on AOD?");
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK(trackParticle->trackLink().isValid());
+    const Trk::Track* trktrack = trackParticle->track();
     int nSiliconHits_trk = 0;
     uint8_t dummy(0);
     if (trackParticle->summaryValue(dummy, xAOD::numberOfSCTHits)) {

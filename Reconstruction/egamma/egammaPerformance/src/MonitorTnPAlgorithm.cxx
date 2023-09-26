@@ -39,10 +39,7 @@ StatusCode MonitorTnPAlgorithm::fillHistograms( const EventContext& ctx ) const 
   // get the Electron container
 
   SG::ReadHandle<xAOD::ElectronContainer> electrons(m_ParticleContainerKey, ctx);
-  if (! electrons.isValid() ) {
-    ATH_MSG_ERROR("evtStore() does not contain electron Collection with name "<< m_ParticleContainerKey);
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(electrons.isValid());
 
   // Useful variables to find the leading pair of electrons
 

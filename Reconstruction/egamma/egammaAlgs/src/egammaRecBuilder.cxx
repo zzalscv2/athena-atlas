@@ -90,11 +90,7 @@ egammaRecBuilder::execute(const EventContext& ctx) const
 
   // validity check is only really needed for serial running. Remove when MT is
   // only way.
-  if (!clusters.isValid()) {
-    ATH_MSG_ERROR("Could not retrieve cluster container:"
-                  << m_inputClusterContainerKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(clusters.isValid());
 
   SG::WriteHandle<EgammaRecContainer> egammaRecs(m_egammaRecContainerKey, ctx);
   ATH_CHECK(egammaRecs.record(std::make_unique<EgammaRecContainer>()));

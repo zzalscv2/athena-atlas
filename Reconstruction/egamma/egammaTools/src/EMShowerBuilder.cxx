@@ -104,10 +104,7 @@ EMShowerBuilder::execute(const EventContext& ctx,
   // retrieve the cell containers
   SG::ReadHandle<CaloCellContainer> cellcoll(m_cellsKey, ctx);
   // check is only used for serial running; remove when MT scheduler used
-  if (!cellcoll.isValid()) {
-    ATH_MSG_ERROR("Failed to retrieve cell container: " << m_cellsKey.key());
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(cellcoll.isValid());
 
   ATH_CHECK(executeWithCells(cellcoll.cptr(), cmgr, eg));
   return StatusCode::SUCCESS;

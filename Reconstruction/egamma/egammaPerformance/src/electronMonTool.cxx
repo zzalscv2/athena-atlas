@@ -497,10 +497,7 @@ StatusCode electronMonTool::fillHistograms() {
 
   // Get electron container
   SG::ReadHandle<xAOD::ElectronContainer> electron_container{m_ElectronContainer};
-  if(!electron_container.isValid()){
-    ATH_MSG_VERBOSE("no electron container found in TDS");
-    return StatusCode::FAILURE;
-  } 
+  ATH_CHECK(electron_container.isValid());
 
   // Check that the auxiliary store association was made successfully:
   if( ! electron_container->hasStore() ) {
