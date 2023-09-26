@@ -413,18 +413,20 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
 
   const float deltaTcutLow = -10;
   const float deltaTcutHigh = 10;
-  const float chisqDivAmpCutVal = 10;
+  const float chisqDivAmpCutHGVal = 30;
+  const float chisqDivAmpCutLGVal = 50;
 
   ZDCDataAnalyzer::ZDCModuleIntArray peak2ndDerivMinSamples;
   ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh;
+    ZDCDataAnalyzer::ZDCModuleFloatArray chisqDivAmpCutHG, chisqDivAmpCutLG;
   ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
   
   ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{1.1, 1.1, 1.1, 1.1},
 						{1.1, 1.1, 1.1, 1.1}}};
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{5.5, 5.5, 5.5, 5.5}, {5.5, 5.5, 5.5, 5.5}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.4, 4.7, 4.5, 4.6}, {4.8, 4.6, 4.4, 4.2}}};
   
   ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
   ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{31.25, 31.25, 31.25, 31.25}, {31.25, 31.25, 31.25, 31.25}}};
@@ -434,7 +436,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
       fixTau1Arr[side][module] = true;
-      fixTau2Arr[side][module] = true;
+      fixTau2Arr[side][module] = false;
 
       peak2ndDerivMinSamples[side][module] = peakSample;
       peak2ndDerivMinThresholdsHG[side][module] = deriv2ndThreshDSHG;
@@ -442,7 +444,8 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
       
       deltaT0CutLow[side][module] = deltaTcutLow;
       deltaT0CutHigh[side][module] = deltaTcutHigh;
-      chisqDivAmpCut[side][module] = chisqDivAmpCutVal;
+      chisqDivAmpCutLG[side][module] = chisqDivAmpCutLGVal;
+      chisqDivAmpCutHG[side][module] = chisqDivAmpCutHGVal;
     }
   }
   
@@ -459,8 +462,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(3);
   zdcDataAnalyzer->SetGainFactorsHGLG(1, 10); // a gain adjustment of 10 applied to LG ADC, 1 to HG ADC values
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{0.5, 0.5, 0.5, 0.5}, {0.5, 0.5, 0.5, 0.5}}};
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{1, 1, 1, 1}, {1, 1, 1, 1}}};
+  // These noise sigmas we read off from the ch_x_BaselineStdev monitoring histograms with our 
+  //   final readout configuration for the Pb+Pb run by BAC on 25-09-2023
+  //
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{1.0, 1.0,  1.0,  1.0}, {1.0, 1.0, 1.0, 1.0}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{1.5, 1.7, 3, 1.7}, {1.7, 1.6, 2.2, 1.8}}};
   
   zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
 
@@ -472,7 +478,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   
   zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
   zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0HG, t0LG);
-  zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCutHG, chisqDivAmpCutLG, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
   
     // Enable two-pass analysis                                                                                 
   //                                                                                                          

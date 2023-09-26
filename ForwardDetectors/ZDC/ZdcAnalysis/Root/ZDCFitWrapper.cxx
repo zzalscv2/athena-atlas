@@ -126,11 +126,9 @@ ZDCFitExpFermiVariableTausLHCf::ZDCFitExpFermiVariableTausLHCf(const std::string
   // BAC, parameter 0 limits now is set in DoInitialize
   theTF1->SetParLimits(1, tmin, tmax);
   theTF1->SetParLimits(2, 0.5, 2);
-  theTF1->SetParLimits(3, 4, 12);
-  //theTF1->SetParLimits(5, 6, 8);
-  theTF1->SetParLimits(6, -1e-4, 0.25);
-
-  theTF1->FixParameter(5, 5.75);
+  theTF1->SetParLimits(3, 3.5, 6);
+  theTF1->SetParLimits(5, 5, 8);
+  theTF1->SetParLimits(6, -1e-4, 0.2);
   theTF1->FixParameter(7, 1.5);
 
   if (m_fixTau1) theTF1->FixParameter(2, m_tau1);
@@ -144,7 +142,7 @@ void ZDCFitExpFermiVariableTausLHCf::DoInitialize(float initialAmp, float initia
   theTF1->SetParameter(0, initialAmp);
   theTF1->SetParameter(1, initialT0);
   theTF1->SetParameter(4, 0);
-  //theTF1->SetParameter(5, 6);
+  theTF1->SetParameter(5, 5);
   theTF1->SetParameter(6, 0.1);
 
   theTF1->SetParLimits(0, ampMin, ampMax);
@@ -168,14 +166,14 @@ void ZDCFitExpFermiVariableTausLHCf::ConstrainFit()
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
 
   theTF1->FixParameter(4, 0);
-  //theTF1->FixParameter(5, 5);
+  theTF1->FixParameter(5, 5);
   theTF1->FixParameter(6, 0);
 }
 void ZDCFitExpFermiVariableTausLHCf::UnconstrainFit()
 {
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
   theTF1->ReleaseParameter(4);
-  //theTF1->ReleaseParameter(5);
+  theTF1->ReleaseParameter(5);
   theTF1->ReleaseParameter(6);
 }
 
