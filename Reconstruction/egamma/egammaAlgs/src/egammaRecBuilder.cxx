@@ -32,51 +32,25 @@ egammaRecBuilder::initialize()
   ATH_CHECK(m_egammaRecContainerKey.initialize());
   ATH_CHECK(m_trackMatchedEgammaRecs.initialize(m_doTrackMatchedView));
   // retrieve track match builder
-  CHECK(RetrieveEMTrackMatchBuilder());
+  ATH_CHECK(RetrieveTool<IEMTrackMatchBuilder>(m_trackMatchBuilder, m_doTrackMatching));
   // retrieve conversion builder
-  CHECK(RetrieveEMConversionBuilder());
+  ATH_CHECK(RetrieveTool<IEMConversionBuilder>(m_conversionBuilder, m_doConversions));
   return StatusCode::SUCCESS;
 }
 
+template <typename T>
 StatusCode
-egammaRecBuilder::RetrieveEMTrackMatchBuilder()
+egammaRecBuilder::RetrieveTool(ToolHandle<T> &tool, bool tool_requested)
 {
-  // retrieve EMTrackMatchBuilder tool
-  if (!m_doTrackMatching) {
-    m_trackMatchBuilder.disable();
+  if (!tool_requested) {
+    tool.disable();
     return StatusCode::SUCCESS;
   }
-
-  if (m_trackMatchBuilder.empty()) {
-    ATH_MSG_ERROR(
-      "EMTrackMatchBuilder is empty, but track matching is enabled");
+  if (tool.empty()) {
+    ATH_MSG_INFO(tool.type() << " is empty");
     return StatusCode::FAILURE;
   }
-
-  if (m_trackMatchBuilder.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve " << m_trackMatchBuilder);
-    return StatusCode::FAILURE;
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode
-egammaRecBuilder::RetrieveEMConversionBuilder()
-{
-  // retrieve EMConversionBuilder tool
-  if (!m_doConversions) {
-    m_conversionBuilder.disable();
-    return StatusCode::SUCCESS;
-  }
-  if (m_conversionBuilder.empty()) {
-    ATH_MSG_ERROR("EMConversionBuilder is empty");
-    return StatusCode::FAILURE;
-  }
-  if (m_conversionBuilder.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve " << m_conversionBuilder);
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK(tool.retrieve());
   return StatusCode::SUCCESS;
 }
 

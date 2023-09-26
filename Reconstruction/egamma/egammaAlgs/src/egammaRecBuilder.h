@@ -47,10 +47,8 @@ public:
   virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-  /** @brief retrieve TrackMatchBuilderTool (EMTrackMatchBuilder) **/
-  StatusCode RetrieveEMTrackMatchBuilder();
-  /** @brief retrieve ConversionBuilderTool (EMConversionBuilder) **/
-  StatusCode RetrieveEMConversionBuilder();
+  /** @brief Wrap tool retrieval, ensuring it was named and requested. **/ 
+  template <typename T> StatusCode RetrieveTool(ToolHandle<T> &tool, bool tool_requested);
   /** @brief Key for the topo cluster input collection */
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_inputClusterContainerKey{
     this,

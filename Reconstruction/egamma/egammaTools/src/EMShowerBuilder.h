@@ -75,11 +75,8 @@ public:
   virtual StatusCode finalize() override;
 
 private:
-  /** @brief method to retrieve ShowerBuilder tool */
-  StatusCode RetrieveShowerShapeTool();
-  /** @brief method to retrieve hadronic leakage calculation from CaloIso tool
-   */
-  StatusCode RetrieveHadronicLeakageTool();
+  /** @brief Wraps tool retrival to ensure it is has a name. */
+  template <typename T> StatusCode RetrieveTool(ToolHandle<T> &tool, bool tool_requested);
   /** @brief calculate shower shapes*/
   StatusCode CalcShowerShape(xAOD::Egamma* eg,
                              const CaloDetDescrManager& cmgr,
