@@ -12,6 +12,7 @@
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenPdfInfo.h"
 #include "HepMC3/PrintStreams.h"
+#include "AtlasHepMC/Barcode.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/SimpleVector.h"
@@ -483,6 +484,7 @@ template <class T> bool suggest_barcode(T& p, int i) {
 #include "HepMC/GenEvent.h"
 #include "HepMC/GenVertex.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/Barcode.h"
 #include <memory>
 namespace HepMC {
 inline bool set_ll_event_number(HepMC::GenEvent* e, long long int num){

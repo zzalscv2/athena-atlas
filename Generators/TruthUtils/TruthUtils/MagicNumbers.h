@@ -15,6 +15,10 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#else
+namespace HepMC {
+template <class T>  inline int barcode(const T& p){ return p->barcode();}
+}
 #endif
 namespace HepMC {
 
@@ -50,45 +54,25 @@ constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 constexpr int INVALID_PARTICLE_BARCODE = -1;
 
 /// @brief Method to establish if a particle (or barcode) was created during the simulation (TODO update to be status based)
-template <class T>  inline bool is_simulation_particle(const T& p){ return (p->barcode()>SIM_BARCODE_THRESHOLD);}
+template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
 template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BARCODE_THRESHOLD);}
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-template <>  inline bool is_simulation_particle(const ConstGenParticlePtr& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
-template <>  inline bool is_simulation_particle(const GenParticlePtr& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
-#endif
 
 /// @brief Method to return how many interactions a particle has undergone during simulation (TODO migrate to be based on status).
-template <class T>  inline int generations(const T& p){ return (p->barcode()/SIM_REGENERATION_INCREMENT);}
+template <class T>  inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
 template <>  inline int generations(const int& b){ return (b/SIM_REGENERATION_INCREMENT);}
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-template <>  inline int generations(const ConstGenParticlePtr& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
-template <>  inline int generations(const GenParticlePtr& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
-#endif
 
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) was created during the simulation (only to be used in legacy TP converters)
-    template <class T>  inline bool is_simulation_particle(const T& p){ return (p->barcode()>SIM_BARCODE_THRESHOLD);}
+    template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
     template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BARCODE_THRESHOLD);}
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-    template <>  inline bool is_simulation_particle(const ConstGenParticlePtr& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
-    template <>  inline bool is_simulation_particle(const GenParticlePtr& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
-#endif
 
     /// @brief Method to establish if a particle (or barcode) is a new seondary created during the simulation (only to be used in legacy TP converters)
-    template <class T>  inline bool is_sim_secondary(const T& p){ return (p->barcode()%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
+    template <class T>  inline bool is_sim_secondary(const T& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
     template <>  inline bool  is_sim_secondary(const int& b){ return (b%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-    template <>  inline bool  is_sim_secondary(const ConstGenParticlePtr& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
-    template <>  inline bool  is_sim_secondary(const GenParticlePtr& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
-#endif
 
     /// @brief Method to return how many interactions a particle has undergone during simulation (only to be used in legacy TP converters).
-    template <class T>  inline int generations(const T& p){ return (p->barcode()/SIM_REGENERATION_INCREMENT);}
+    template <class T>  inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
     template <>  inline int generations(const int& b){ return (b/SIM_REGENERATION_INCREMENT);}
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-    template <>  inline int generations(const ConstGenParticlePtr& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
-    template <>  inline int generations(const GenParticlePtr& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
-#endif
   }
 
   namespace StatusBased {
@@ -106,21 +90,13 @@ template <>  inline int generations(const GenParticlePtr& p){ return (barcode(p)
   }
 
 /// @brief Method to establish if the vertex was created during simulation (TODO migrate to be based on status).
-template <class T>  inline bool is_simulation_vertex(const T& v){ return (v->barcode()<-SIM_BARCODE_THRESHOLD);}
+template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
 template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARCODE_THRESHOLD);}
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-template <>  inline bool is_simulation_vertex(const ConstGenVertexPtr& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
-template <>  inline bool is_simulation_vertex(const GenVertexPtr& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
-#endif
 
   namespace BarcodeBased {
     /// @brief Method to establish if the vertex was created during simulation (only to be used in legacy TP converters)
-    template <class T>  inline bool is_simulation_vertex(const T& v){ return (v->barcode()<-SIM_BARCODE_THRESHOLD);}
+    template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
     template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARCODE_THRESHOLD);}
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
-    template <>  inline bool is_simulation_vertex(const ConstGenVertexPtr& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
-    template <>  inline bool is_simulation_vertex(const GenVertexPtr& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
-#endif
   }
 
   namespace StatusBased {
