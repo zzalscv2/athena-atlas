@@ -141,6 +141,7 @@ StatusCode GlobalNNCalibration::calibrate(xAOD::Jet& jet, JetEventInfo& jetEvent
   if(m_doSplineCorr){
     double jetPt = getJESPt(jet);
     response *= getSplineCorr(closureEtaBin, jetPt/nnCalibFactor);
+    if(response == 0) response = nnCalibFactor;
   }
 
   xAOD::JetFourMom_t calibP4 = jetStartP4 / response;

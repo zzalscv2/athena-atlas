@@ -40,6 +40,10 @@ topocontexts = {
     "HLLHC":("HLLHC/JES_MC16_HLLHC_Aug2021_rel21.config","00-04-82","JetArea_Residual_EtaJES"),
 }
 
+ufocontexts = {
+    "T0":("Consolidated_R22_CSSKUFO_ResPU_EtaJES_GNNC_20230811.config", "00-04-83", "Residual_EtaJES_GNNC"),
+}
+
 rscanlc2 = {
     "RScanLatest":("JES_MC16Recommendation_Rscan2LC_22Feb2018_rel21.config","00-04-81","JetArea_Residual_EtaJES_GSC_Insitu")
 }
@@ -71,6 +75,7 @@ calibcontexts = {
     # Standard AntiKt4
     "AntiKt4EMPFlow":pflowcontexts,
     "AntiKt4GPFlow":pflowcontexts,
+    "AntiKt4UFOCSSK":ufocontexts,
     "AntiKt4EMTopo":topocontexts,
     "AntiKt4LCTopo":topocontexts,
     "AntiKt10LCTopo":fatjetcontexts,
@@ -189,6 +194,8 @@ def getJetCalibToolPrereqs(modspec,jetdef):
         if calibcontext != "TrigRun2": # No track/MS GSC for trigger w/o FTK
             prereqs += ["mod:TrackMoments",
                         "ghost:MuonSegment"]
+    if "GNNC" in calibseq:
+        prereqs += ["mod:CaloQuality"]
     if "CombinedMass" in calibcontext:
         prereqs += ["mod:TrackSumMoments"]
     if "LargeRDNN" in calibseq:
