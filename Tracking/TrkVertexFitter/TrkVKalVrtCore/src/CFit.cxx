@@ -162,7 +162,7 @@ int fitVertex(VKVertex * vk)
     double cnstRemnants=0., iniCnstRem=1.e-12;
     double newVrtXYZ[3];
 
-    const double ConstraintAccuracy=1.e-4;
+    const double ConstraintAccuracy=1.e-6;
 
     extern int  vtcfit( VKVertex * vk);
     extern void cfsetdiag(long int , double *, double );
