@@ -546,11 +546,11 @@ TriggerHLTListRun3 = [
     # These are for precision photon and precision Electron Keeping same names as in Run2
     ('xAOD::ElectronContainer#HLT_egamma_Electrons',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectronViews'), InViews('precisionHIElectronViews')]),
     ('xAOD::ElectronAuxContainer#HLT_egamma_ElectronsAux.'+ElVars,     'BS ESD AODFULL AODSLIM', 'Egamma'),
-    ('xAOD::ElectronContainer#HLT_egamma_Electrons_GSF',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectronViews_GSF')]),
+    ('xAOD::ElectronContainer#HLT_egamma_Electrons_GSF',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectron_GSFViews')]),
     ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_GSFAux.'+ElVars,     'BS ESD AODFULL AODSLIM', 'Egamma'),
-    ('xAOD::ElectronContainer#HLT_egamma_Electrons_LRT',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectronViews_LRT')]),
+    ('xAOD::ElectronContainer#HLT_egamma_Electrons_LRT',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectron_LRTViews')]),
     ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_LRTAux.'+ElVars,     'BS ESD AODFULL AODSLIM', 'Egamma'),
-    ('xAOD::ElectronContainer#HLT_egamma_Electrons_LRTGSF',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectronViews_LRTGSF')]),
+    ('xAOD::ElectronContainer#HLT_egamma_Electrons_LRTGSF',                'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionElectron_LRTGSFViews')]),
     ('xAOD::ElectronAuxContainer#HLT_egamma_Electrons_LRTGSFAux.'+ElVars,     'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     ('xAOD::PhotonContainer#HLT_egamma_Photons',                    'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionPhotonViews'), InViews('precisionHIPhotonViews')]),
@@ -573,11 +573,11 @@ TriggerHLTListRun3 = [
     # CaloCluster object written by EMClusterTool
     ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectronViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_ElectronsAux.',     'BS ESD AODFULL', 'Egamma'),
-    ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_LRT',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectronViews_LRT')]),
+    ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_LRT',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectron_LRTViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_Electrons_LRTAux.',     'BS ESD AODFULL', 'Egamma'),
     ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_GSF',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectronViews_GSF')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_Electrons_GSFAux.',     'BS ESD AODFULL', 'Egamma'),
-    ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_LRTGSF',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectronViews_LRTGSF')]),
+    ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Electrons_LRTGSF',        'BS ESD AODFULL', 'Egamma', [InViews('precisionElectron_LRTGSFViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_Electrons_LRTGSFAux.',     'BS ESD AODFULL', 'Egamma'),
     ('xAOD::CaloClusterContainer#HLT_TrigEMClusters_Photons',        'BS ESD AODFULL', 'Egamma', [InViews('precisionPhotonViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TrigEMClusters_PhotonsAux.',     'BS ESD AODFULL', 'Egamma'),
@@ -1307,4 +1307,5 @@ def addExtraCollectionsToEDMList(edmList, extraList):
             else:
                 # asking to add some collection which is already in the list - do nothing
                 pass
+
 
