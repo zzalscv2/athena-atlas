@@ -80,19 +80,19 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
   xAOD::VertexContainer::iterator itVtxEnd = vertices->end();
 
   while (itVtx != itVtxEnd){
-    xAOD::Vertex& vertex = **itVtx;
+    xAOD::Vertex* vertex = *itVtx;
 
     Amg::Vector3D momentum(0., 0., 0.);
-    for (unsigned int i = 0; i < vertex.nTrackParticles(); ++i){
-      momentum += m_EMExtrapolationTool->getMomentumAtVertex(ctx,vertex, i);
+    for (unsigned int i = 0; i < vertex->nTrackParticles(); ++i){
+      momentum += m_EMExtrapolationTool->getMomentumAtVertex(ctx,*vertex, i);
     }
 
     static const SG::AuxElement::Accessor<float> accPx("px");
     static const SG::AuxElement::Accessor<float> accPy("py");
     static const SG::AuxElement::Accessor<float> accPz("pz");
-    accPx(vertex) = momentum.x();
-    accPy(vertex) = momentum.y();
-    accPz(vertex) = momentum.z();
+    accPx(*vertex) = momentum.x();
+    accPy(*vertex) = momentum.y();
+    accPz(*vertex) = momentum.z();
 
     xAOD::EgammaParameters::ConversionType convType(xAOD::EgammaHelpers::conversionType((*itVtx)));
     const bool vxDoubleTRT = (convType == xAOD::EgammaParameters::doubleTRT);
@@ -105,27 +105,23 @@ StatusCode EMVertexBuilder::execute(const EventContext& ctx) const
       itVtx = vertices->erase(itVtx);
       itVtxEnd = vertices->end();
     } else {
+      // Decorate the vertices with the momentum at the conversion point and
+      // etaAtCalo, phiAtCalo (extrapolate each vertex)
+      float etaAtCalo = -9999.;
+      float phiAtCalo = -9999.;
+
+      if (!m_EMExtrapolationTool->getEtaPhiAtCalo(
+            ctx, vertex, &etaAtCalo, &phiAtCalo)) {
+        ATH_MSG_DEBUG("getEtaPhiAtCalo failed!");
+      }
+
+      static const SG::AuxElement::Accessor<float> accetaAtCalo("etaAtCalo");
+      static const SG::AuxElement::Accessor<float> accphiAtCalo("phiAtCalo");
+      accetaAtCalo(*vertex) = etaAtCalo;
+      accphiAtCalo(*vertex) = phiAtCalo;
+
       ++itVtx;
     }
-  }
-
-  // Decorate the vertices with the momentum at the conversion point and
-  // etaAtCalo, phiAtCalo (extrapolate each vertex)
-  float etaAtCalo = -9999.;
-  float phiAtCalo = -9999.;
-  for (itVtx = vertices->begin(); itVtx != vertices->end(); ++itVtx) {
-    xAOD::Vertex *vertex = *itVtx;
-
-    if (!m_EMExtrapolationTool->getEtaPhiAtCalo(
-          ctx, vertex, &etaAtCalo, &phiAtCalo)) {
-      ATH_MSG_DEBUG("getEtaPhiAtCalo failed!");
-    }
-
-    // Decorate vertex with etaAtCalo, phiAtCalo
-    static const SG::AuxElement::Accessor<float> accetaAtCalo("etaAtCalo");
-    static const SG::AuxElement::Accessor<float> accphiAtCalo("phiAtCalo");
-    accetaAtCalo(*vertex) = etaAtCalo;
-    accphiAtCalo(*vertex) = phiAtCalo;
   }
 
   return StatusCode::SUCCESS;
