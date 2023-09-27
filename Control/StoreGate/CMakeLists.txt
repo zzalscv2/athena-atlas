@@ -10,7 +10,7 @@ find_package( Boost COMPONENTS timer)
 atlas_add_library( StoreGateLib src/*.cxx
    PUBLIC_HEADERS StoreGate
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} AthAllocators AthenaKernel AthContainers
+   LINK_LIBRARIES AthAllocators AthenaKernel AthContainers
    AthContainersInterfaces SGTools GaudiKernel PersistentDataModel
    PRIVATE_LINK_LIBRARIES CxxUtils TestTools )
 
