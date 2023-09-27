@@ -59,11 +59,11 @@ PARTICLE_DATA:
 """.format(id=id, mass=values['mass'], width=values['width'])
   ## ToDo: Include partial widths for H/W/Z in EvgenProdTools/python/offline_dict.py ?
 
-  ## Switch to EW_SCHEME=0 to be able to set PDG value of thetaW
+  ## Switch to EW_SCHEME=Gmu
   genSeq.Sherpa_i.BaseFragment += """
-EW_SCHEME: UserDefined
-SIN2THETAW: {}
-""".format(sin2thetaw)
+EW_SCHEME: Gmu
+GF: 1.166397e-5
+"""
 
 
   ## SM decay branching ratios
