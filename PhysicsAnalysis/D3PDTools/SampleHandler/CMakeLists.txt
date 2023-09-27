@@ -34,8 +34,7 @@ atlas_add_library( SampleHandler
    SampleHandler/*.h Root/*.cxx ${SampleHandlerDictSource}
    PUBLIC_HEADERS SampleHandler
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib RootCoreUtils
-   PRIVATE_LINK_LIBRARIES CxxUtils )
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib RootCoreUtils)
 
 # Test(s) in the package:
 function( _add_gtest cxx_name )

@@ -17,7 +17,6 @@
 
 #include <SampleHandler/ToolsDiscovery.h>
 
-#include <CxxUtils/StringUtils.h>
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/StringUtil.h>
 #include <RootCoreUtils/ThrowMsg.h>
@@ -213,8 +212,6 @@ namespace SH
     sample->meta()->setString (MetaFields::gridFilter, MetaFields::gridFilter_default);
     sh.add (sample.release());
   }
-
-
   void addGridCombinedFromFile (SampleHandler& sh, const std::string& dsName,
                                 const std::string& dsFile)
   {
@@ -222,9 +219,10 @@ namespace SH
 
     std::string name;
     std::string ds;
+    const std::set<char> whitespaces{'\t',' ','\n','\r'};
     while (std::getline (file, ds))
     {
-      ds = CxxUtils::StringUtils::trim(ds);
+      while(whitespaces.count(ds.back())) ds.pop_back();
       if (ds.empty() || ds.at(0) == '#')
         continue;
 
@@ -377,9 +375,10 @@ namespace SH
 
     auto sample = std::make_unique<SampleLocal> (name);
     std::string line;
+    const std::set<char> whitespaces{'\t',' ','\n','\r'};
     while (std::getline (myfile, line))
     {
-      line = CxxUtils::StringUtils::trim(line);
+      while(whitespaces.count(line.back())) line.pop_back();
       if (!line.empty() && line.at(0) != '#')
       {
 	sample->add (line);
