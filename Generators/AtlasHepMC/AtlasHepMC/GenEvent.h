@@ -420,7 +420,7 @@ inline GenParticlePtr  barcode_to_particle(GenEvent* e, int id ) {
   return  HepMC3::GenParticlePtr();
 }
 
-inline int mpi(const GenEvent evt) {
+inline int mpi(const GenEvent& evt) {
     std::shared_ptr<HepMC3::IntAttribute> A_mpi=evt.attribute<HepMC3::IntAttribute>("mpi");
     return A_mpi?(A_mpi->value()):0;
 }
@@ -429,7 +429,7 @@ inline int mpi(const GenEvent* evt) {
     return A_mpi?(A_mpi->value()):0;
 }
 
-inline int signal_process_id(const GenEvent evt) {
+inline int signal_process_id(const GenEvent& evt) {
     std::shared_ptr<HepMC3::IntAttribute> A_signal_process_id=evt.attribute<HepMC3::IntAttribute>("signal_process_id");
     return A_signal_process_id?(A_signal_process_id->value()):0;
 }
@@ -504,13 +504,13 @@ inline GenVertex* signal_process_vertex(const GenEvent* e) { return e->signal_pr
 inline void fillBarcodesAttribute(GenEvent* ) { }
 inline GenVertex* barcode_to_vertex(const GenEvent* e, int id ) {return  e->barcode_to_vertex(id);}
 inline GenParticle* barcode_to_particle(const GenEvent* e, int id ) {return  e->barcode_to_particle(id);}
-inline int mpi(const GenEvent e) {
+inline int mpi(const GenEvent& e) {
     return e.mpi();
 }
 inline int mpi(const GenEvent* e) {
     return e->mpi();
 }
-inline int signal_process_id(const GenEvent e) {
+inline int signal_process_id(const GenEvent& e) {
     return e.signal_process_id();
 }
 inline int signal_process_id(const GenEvent* e) {
