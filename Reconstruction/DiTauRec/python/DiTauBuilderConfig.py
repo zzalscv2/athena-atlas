@@ -7,7 +7,7 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
     acc = ComponentAccumulator()
 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection="AntiKt10LCTopoJets")),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[0])),
         acc.popToolsAndMerge(ElMuFinderCfg(flags)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
@@ -20,14 +20,14 @@ def DiTauBuilderCfg(flags, name="DiTauBuilder", **kwargs):
     tools.append(acc.popToolsAndMerge(CellFinderCfg(flags)))
     tools.append(acc.popToolsAndMerge(IDVarCalculatorCfg(flags)))
 
-    kwargs.setdefault("DiTauContainer", "DiTauJets")
+    kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[0])
     kwargs.setdefault("Tools", tools)
-    kwargs.setdefault("SeedJetName", "AntiKt10LCTopoJets")
-    kwargs.setdefault("minPt", 300000) # diTauFlags.diTauRecJetSeedPt
-    kwargs.setdefault("maxEta", 2.5)
-    kwargs.setdefault("Rjet", 1.0)
-    kwargs.setdefault("Rsubjet", 0.2)
-    kwargs.setdefault("Rcore", 0.1)
+    kwargs.setdefault("SeedJetName", flags.DiTau.SeedJetCollection[0])
+    kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[0])
+    kwargs.setdefault("maxEta", flags.DiTau.MaxEta)
+    kwargs.setdefault("Rjet", flags.DiTau.Rjet)
+    kwargs.setdefault("Rsubjet", flags.DiTau.Rsubjet)
+    kwargs.setdefault("Rcore", flags.DiTau.Rcore)
 
     acc.addEventAlgo(CompFactory.DiTauBuilder(name, **kwargs))
     return acc
@@ -38,7 +38,7 @@ def DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder", **kwargs):
     acc = ComponentAccumulator()
 
     tools = [
-        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection="AntiKt10EMPFlowJets")),
+        acc.popToolsAndMerge(SeedJetBuilderCfg(flags, JetCollection=flags.DiTau.SeedJetCollection[1])),
         acc.popToolsAndMerge(ElMuFinderCfg(flags)),
         acc.popToolsAndMerge(SubjetBuilderCfg(flags))
     ]
@@ -51,10 +51,10 @@ def DiTauBuilderLowPtCfg(flags, name="DiTauLowPtBuilder", **kwargs):
     # No CellFinder as run in derivation
     tools.append(acc.popToolsAndMerge(IDVarCalculatorCfg(flags)))
 
-    kwargs.setdefault("DiTauContainer", "DiTauJetsLowPt")
+    kwargs.setdefault("DiTauContainer", flags.DiTau.DiTauContainer[1])
     kwargs.setdefault("Tools", tools)
-    kwargs.setdefault("SeedJetName", "AntiKt10EMPFlowJets")
-    kwargs.setdefault("minPt", 50000)
+    kwargs.setdefault("SeedJetName", flags.DiTau.SeedJetCollection[1])
+    kwargs.setdefault("minPt", flags.DiTau.JetSeedPt[1])
     
     acc.merge(DiTauBuilderCfg(flags, name, **kwargs))
     return acc
