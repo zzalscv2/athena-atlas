@@ -2,62 +2,57 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-# menu components
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
-from AthenaCommon.CFElements import parOR, seqAND
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
-from AthenaCommon.Configurable import ConfigurableCABehavior
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
+
+# menu components   
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
 
 
-def precisionElectronSequence(flags, ion=False, variant=''):
-    """ fifth step:  precision electron....."""
-    InViewRoIs = "electronPrecision"
-    # EVCreator:
-    precisionElectronViewsMaker = EventViewCreatorAlgorithm("IM" + tag(ion) + variant)
-    precisionElectronViewsMaker.RoIsLink = "initialRoI"
-    precisionElectronViewsMaker.RoITool = ViewCreatorPreviousROITool()
-    precisionElectronViewsMaker.InViewRoIs = InViewRoIs
-    precisionElectronViewsMaker.Views = tag(ion) + "Views" + variant #precisionElectronViews
-    precisionElectronViewsMaker.ViewFallThrough = True
-    precisionElectronViewsMaker.RequireParentView = True
-
+def precisionElectronSequenceCfg(flags, ion=False, variant='',is_probe_leg = False):
+    """ seventh step:  precision electron....."""
+    
+    inViewRoIs = "precisionElectron"
+    probeInfo = '_probe' if  is_probe_leg else ''
+    roiTool = CompFactory.ViewCreatorPreviousROITool()
+    reco = InViewRecoCA(tag(ion)+variant, RoITool = roiTool, InViewRoIs = inViewRoIs, RequireParentView = True, isProbe=is_probe_leg)
+    
     # Configure the reconstruction algorithm sequence
     from TriggerMenuMT.HLT.Electron.PrecisionElectronRecoSequences import precisionElectronRecoSequence
-    (electronPrecisionRec, sequenceOut, sequenceOut_dummy) = precisionElectronRecoSequence(flags, InViewRoIs, ion, doGSF=False, doLRT = 'LRT' in variant)
+    reco.mergeReco(precisionElectronRecoSequence(flags, inViewRoIs, ion, doGSF=False, doLRT = 'LRT' in variant))
+    TrigEgammaKeys = getTrigEgammaKeys(variant, ion=ion)
+    selAcc = SelectionCA('PrecisionElectronMenuSequence'+variant,isProbe=is_probe_leg)
+    
+    from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import TrigEgammaPrecisionElectronHypoToolFromDict, TrigEgammaPrecisionElectronHypoAlgCfg
 
-    # Suffix to distinguish probe leg sequences
-    electronPrecisionInViewAlgs = parOR(tag(ion) + "InViewAlgs" + variant, [electronPrecisionRec])
-    precisionElectronViewsMaker.ViewNodeName = tag(ion) + "InViewAlgs" + variant
+    selAcc.mergeReco(reco)
+    selAcc.mergeHypo(TrigEgammaPrecisionElectronHypoAlgCfg(flags, "TrigEgamma"+tag(ion)+"HypoAlg_noGSF"+variant+probeInfo, TrigEgammaKeys.precisionElectronContainer ))
+    return MenuSequenceCA(flags,selAcc,HypoToolGen=TrigEgammaPrecisionElectronHypoToolFromDict, isProbe=is_probe_leg)
 
-    electronPrecisionAthSequence = seqAND(tag(ion) + "AthSequence" + variant, [precisionElectronViewsMaker, electronPrecisionInViewAlgs ] )
-    return (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy)
+def precisionElectronSequenceCfg_lrt(flags,is_probe_leg=False):
+    # This is to call precisionElectronMenuSequence for the _LRT variant
+    return precisionElectronSequenceCfg(flags, ion=False, variant='_LRT',is_probe_leg=is_probe_leg)
 
 
 def precisionElectronMenuSequence(flags, is_probe_leg=False, ion=False,  variant=''):
-    # retrieve the reco seuqence+EVC
-    (electronPrecisionAthSequence, precisionElectronViewsMaker, sequenceOut, sequenceOut_dummy) = RecoFragmentsPool.retrieve(precisionElectronSequence, flags, ion=ion, variant=variant)
+    """Creates seventh step of electron sequence"""
 
-    # make the Hypo
-    from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import createTrigEgammaPrecisionElectronHypoAlg
-    with ConfigurableCABehavior():
-       hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg(flags, "TrigEgamma" + tag(ion) + "HypoAlg_noGSF"+ variant, sequenceOut)
-    thePrecisionElectronHypo = conf2toConfigurable(hypo_tuple[0])
-    hypo_acc = hypo_tuple[1]
-    appendCAtoAthena( hypo_acc )
-    
-    from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import TrigEgammaPrecisionElectronHypoToolFromDict
-    
-    return  MenuSequence( flags,
-                          Maker       = precisionElectronViewsMaker,
-                          Sequence    = electronPrecisionAthSequence,
-                          Hypo        = thePrecisionElectronHypo,
-                          HypoToolGen = TrigEgammaPrecisionElectronHypoToolFromDict,
-                          IsProbe     = is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return precisionElectronSequenceCfg(flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
+    else: 
+        return menuSequenceCAToGlobalWrapper(precisionElectronSequenceCfg, flags, ion=ion, variant=variant, is_probe_leg=is_probe_leg)
 
-def precisionElectronMenuSequence_LRT(flags, is_probe_leg=False ):
-    return precisionElectronMenuSequence(flags, is_probe_leg=is_probe_leg, ion=False, variant='_LRT')
+
+def precisionElectronMenuSequence_LRT(flags, is_probe_leg=False):
+    """Creates seventh step of electron sequence"""
+
+    if isComponentAccumulatorCfg():
+        return precisionElectronSequenceCfg_lrt(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(precisionElectronSequenceCfg_lrt, flags, is_probe_leg=is_probe_leg)
+
+
