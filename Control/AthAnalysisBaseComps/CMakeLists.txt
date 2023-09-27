@@ -14,7 +14,7 @@ atlas_add_library( AthAnalysisBaseCompsLib
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps IOVDbDataModel GaudiKernel StoreGateLib AthContainers
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils )
+                   PRIVATE_LINK_LIBRARIES CxxUtils )
 
 atlas_add_component( AthAnalysisBaseComps
                      src/components/*.cxx

@@ -11,7 +11,7 @@ atlas_add_component( SCT_ConditionsAlgorithms
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib Identifier DetDescrConditions GeoModelUtilities GeoPrimitives GaudiKernel SCT_ConditionsData SCT_CablingLib AthenaPoolUtilities InDetConditionsSummaryService InDetIdentifier InDetReadoutGeometry SCT_ReadoutGeometry TrkGeometry TrkSurfaces SCT_ConditionsToolsLib MuonReadoutGeometry TRT_ReadoutGeometry)
+                     LINK_LIBRARIES AthenaBaseComps AthenaKernel StoreGateLib Identifier DetDescrConditions GeoModelUtilities GeoPrimitives GaudiKernel SCT_ConditionsData SCT_CablingLib AthenaPoolUtilities InDetConditionsSummaryService InDetIdentifier InDetReadoutGeometry SCT_ReadoutGeometry TrkGeometry TrkSurfaces SCT_ConditionsToolsLib MuonReadoutGeometry TRT_ReadoutGeometry)
 
 # Helper functions for test definitions:
 function( _add_athena_test name )

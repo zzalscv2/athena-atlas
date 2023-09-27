@@ -22,7 +22,7 @@ atlas_add_library( SiClusterizationToolLib
    BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives Identifier InDetCondTools InDetConditionsSummaryService 
    InDetIdentifier InDetPrepRawData InDetRawData ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry InDetRecToolInterfaces 
    InDetSimData PixelConditionsData PixelGeoModelLib PixelReadoutGeometryLib PoolSvcLib StoreGateLib TrkNeuralNetworkUtilsLib TrkParameters TrkSurfaces LwtnnUtils xAODInDetMeasurement
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib DetDescrCondToolsLib FileCatalog TrkEventPrimitives VxVertex CxxUtils  )
+   PRIVATE_LINK_LIBRARIES ${COOL_LIBRARIES} AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib DetDescrCondToolsLib FileCatalog TrkEventPrimitives VxVertex CxxUtils  )
 
 atlas_add_component( SiClusterizationTool
    src/components/*.cxx

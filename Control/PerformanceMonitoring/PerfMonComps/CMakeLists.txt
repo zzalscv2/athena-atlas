@@ -18,7 +18,7 @@ atlas_add_component( PerfMonComps
    src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${AIDA_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    ${Python_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${Python_LIBRARIES}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Python_LIBRARIES}
    ${CMAKE_DL_LIBS} ${TBB_LIBRARIES} AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils
    PerfMonEvent PerfMonKernel SGTools StoreGateLib GaudiKernel
    AthDSoCallBacks nlohmann_json::nlohmann_json)

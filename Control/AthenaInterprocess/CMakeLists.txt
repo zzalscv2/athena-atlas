@@ -12,5 +12,5 @@ atlas_add_library( AthenaInterprocess
    AthenaInterprocess/*.h src/*.cxx
    PUBLIC_HEADERS AthenaInterprocess
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${UUID_LIBRARIES} AthenaKernel GaudiKernel
+   LINK_LIBRARIES ${UUID_LIBRARIES} AthenaKernel GaudiKernel
    PRIVATE_LINK_LIBRARIES ${CMAKE_DL_LIBS} )
