@@ -20,10 +20,16 @@
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
+#include "ActsEventCnv/IActsToTrkConverterTool.h"
 
 // Other
 #include <memory>
 #include <tuple>
+#include <boost/container/small_vector.hpp>
+
+namespace InDetDD {
+   class SiDetectorElementCollection;
+}
 
 namespace ActsTrk
 {
@@ -38,10 +44,11 @@ namespace ActsTrk
     virtual StatusCode initialize() override;
 
     void
-    printSourceLinks(const EventContext &ctx,
-                     const std::vector<ATLASUncalibSourceLink> &sourceLinks,
-                     size_t typeIndex,
-                     size_t offset) const override;
+    printMeasurements(const EventContext &ctx,
+                      const xAOD::UncalibratedMeasurementContainer &clusterContainer,
+                      const InDetDD::SiDetectorElementCollection *detectorElements,
+                      size_t typeIndex,
+                      size_t offset) const override;
 
     void
     printSeed(const Acts::GeometryContext &tgContext,
@@ -54,7 +61,7 @@ namespace ActsTrk
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::TrackContainer &tracks,
                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                const std::vector<ATLASUncalibSourceLink> &measurements) const override;
+                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &offset) const override;
 
     using MeasurementInfo = std::tuple<size_t,
                                        const ATLASUncalibSourceLink *,
@@ -66,11 +73,25 @@ namespace ActsTrk
 
     // Tools
     ToolHandle<IActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+    ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", "ActsToTrkConverterTool"};
 
     // Configuration
     Gaudi::Property<std::vector<size_t>> m_spacePointType{this, "spacePointType", {}, "Type of each InputSpacePoints collection used for debugging"};
 
-    void addSpacePoints(const EventContext &ctx, std::vector<MeasurementInfo> &measurementIndex, size_t typeIndex) const;
+    // most measurements are associated to only one SP, but allow some headroom to reduce number of allocations
+    static constexpr unsigned int N_SP_PER_MEAS = 2;
+    template <class T>
+    using small_vector = boost::container::small_vector<T,N_SP_PER_MEAS>;
+    void addSpacePoints(const EventContext &ctx, std::vector<small_vector<const xAOD::SpacePoint *> > &measToSp, size_t type, size_t offset) const;
+
+    static void
+    printMeasurementAssociatedSpacePoint(const Acts::GeometryContext &tgContext,
+                                         const xAOD::UncalibratedMeasurement *measurement,
+                                         const std::vector<small_vector<const xAOD::SpacePoint *> > &measToSp,
+                                         const InDetDD::SiDetectorElementCollection *detectorElements,
+                                         const ActsTrk::IActsToTrkConverterTool &converterTool,
+                                         size_t offset);
+
   };
 
 } // namespace

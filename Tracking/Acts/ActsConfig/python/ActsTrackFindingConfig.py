@@ -21,6 +21,12 @@ def ActsTrackStatePrinterCfg(
     )
     kwargs.setdefault("spacePointType", [0, 1, 1])
 
+    from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
+    kwargs.setdefault(
+        "ATLASConverterTool",
+        acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)),
+    )
+
     acc.setPrivateTools(CompFactory.ActsTrk.TrackStatePrinter(name, **kwargs))
     return acc
 
@@ -49,11 +55,6 @@ def ActsTrackFindingCfg(flags,
         kwargs.setdefault('StripSeeds', 'ITkStripSeeds')
 
     kwargs.setdefault('ACTSTracksLocation', 'ActsTracks')
-
-    # need to persistify source link helper container to ensure that source links in ActsTracks do not contaion
-    # stale pointers pointing to freed memory
-    kwargs.setdefault("ATLASUncalibSourceLinkElementsName",
-                      "ACTSUncalibratedMeasurementSourceLinkElements")
 
     if flags.Acts.doAmbiguityResolution:
         kwargs.setdefault(

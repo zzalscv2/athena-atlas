@@ -40,6 +40,8 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 
+#include "MeasurementCalibrator.h"
+
 // STL
 #include <string>
 #include <memory>//unique_ptr
@@ -169,6 +171,8 @@ private:
 
   Gaudi::Property<double> m_overstepLimit{this, "OverstepLimit", 100 * Acts::UnitConstants::mm, 
       "Overstep limit / tolerance for the Eigen stepper (use ACTS units!)"};
+
+  std::unique_ptr<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>> m_calibrator;
 
   /// Type erased track fitter function.
     using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::TrackStateBackend>;

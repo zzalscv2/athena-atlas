@@ -8,7 +8,6 @@
 // ATHENA
 #include <memory>
 
-#include "ActsGeometry/ATLASSourceLink.h"  // inner class, cannot fwd declare
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/IInterface.h"
 #include "StoreGate/WriteHandle.h"
@@ -35,6 +34,7 @@ class SiDetectorElementCollection;
 
 namespace Acts {
 class Surface;
+class SourceLink;
 }
 
 class IActsTrackingGeometryTool;
@@ -50,20 +50,12 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
   virtual const Acts::Surface& trkSurfaceToActsSurface(
       const Trk::Surface& atlasSurface) const = 0;
 
-  virtual const ATLASSourceLink trkMeasurementToSourceLink(
+  virtual Acts::SourceLink trkMeasurementToSourceLink(
       const Acts::GeometryContext& gctx,
-      const Trk::MeasurementBase& measurement,
-      std::vector<ATLASSourceLink::ElementsType>& Collection) const = 0;
+      const Trk::MeasurementBase &measurement) const = 0;
 
-  virtual
-  const ATLASUncalibSourceLink
-  uncalibratedTrkMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
-				      const xAOD::UncalibratedMeasurement &measurement,
-				      std::vector<ATLASUncalibSourceLink::ElementsType>& Collection) const = 0;
-
-  virtual const std::vector<ATLASSourceLink> trkTrackToSourceLinks(
-      const Acts::GeometryContext& gctx, const Trk::Track& track,
-      std::vector<ATLASSourceLink::ElementsType>& collection) const = 0;
+  virtual std::vector<Acts::SourceLink> trkTrackToSourceLinks(
+      const Acts::GeometryContext& gctx, const Trk::Track& track) const = 0;
 
   virtual const Acts::BoundTrackParameters trkTrackParametersToActsParameters(
       const Trk::TrackParameters& atlasParameter, const Acts::GeometryContext& gctx) const = 0;

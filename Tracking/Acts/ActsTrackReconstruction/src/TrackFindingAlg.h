@@ -43,6 +43,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
+class TrackingSurfaceHelper;
 namespace
 {
   // Forward-declare internal classes defined in TrackFindingData.h and used only in TrackFindingAlg.cxx.
@@ -86,7 +87,6 @@ namespace ActsTrk
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_pixelEstimatedTrackParametersKey{this, "PixelEstimatedTrackParameters", "", "estimated track parameters from pixel seeding"};
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
 
-    SG::WriteHandleKey<std::vector<ATLASUncalibSourceLink::ElementsType>> m_sourceLinksOutKey{this, "ATLASUncalibSourceLinkElementsName", "" /*"UncalibratedMeasurementSourceLinkElements"*/, ""};
     SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
 
     // Configuration
@@ -143,6 +143,7 @@ namespace ActsTrk
     StatusCode
     findTracks(const EventContext &ctx,
                const TrackFindingMeasurements &measurements,
+               const TrackingSurfaceHelper &tracking_surface_helper,
                DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,

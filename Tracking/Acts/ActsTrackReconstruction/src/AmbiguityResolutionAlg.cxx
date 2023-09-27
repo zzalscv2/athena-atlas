@@ -21,12 +21,13 @@
 
 namespace {
    std::size_t sourceLinkHash(const Acts::SourceLink& slink) {
-      const ATLASUncalibSourceLink &atlasSourceLink = slink.get<ATLASUncalibSourceLink>();
-      return atlasSourceLink.atlasHit().identifierHash();
+      const ActsTrk::ATLASUncalibSourceLink &atlasSourceLink = slink.get<ActsTrk::ATLASUncalibSourceLink>();
+      return (*atlasSourceLink)->identifierHash();
    }
 
    bool sourceLinkEquality(const Acts::SourceLink& a, const Acts::SourceLink& b) {
-      return a.get<ATLASUncalibSourceLink>().atlasHit().identifierHash() == b.get<ATLASUncalibSourceLink>().atlasHit().identifierHash();
+      return    (*a.get<ActsTrk::ATLASUncalibSourceLink>())->identifierHash()
+             == (*b.get<ActsTrk::ATLASUncalibSourceLink>())->identifierHash();
    }
 }
 

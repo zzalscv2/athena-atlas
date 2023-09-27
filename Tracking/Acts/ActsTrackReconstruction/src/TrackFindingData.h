@@ -1,7 +1,6 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H
 #define ACTSTRACKRECONSTRUCTION_TRACKFINDINGDATA_H 1
 
@@ -16,6 +15,7 @@
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackSelector.hpp"
+#include "InDetReadoutGeometry/SiDetectorElement.h"
 
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
@@ -58,6 +58,49 @@ namespace
     return smoother.template operator()<ActsTrk::TrackStateBackend>(gctx, trajectory, entryIndex, logger);
   }
 
+  // Helper class to describe ranges of measurements
+  // the range provides the measurement collection index and  element index range (begin, end)
+  struct MeasurementRange : public std::pair<unsigned int, unsigned int> {
+     MeasurementRange() : std::pair<unsigned int, unsigned int>(std::numeric_limits<unsigned int>::max(), std::numeric_limits<unsigned int>::max()) {}
+     static constexpr unsigned int CONTAINER_IDX_SHIFT = 28;
+     static constexpr unsigned int CONTAINER_IDX_MASK = (1u<<31) | (1u<<30) | (1u<<29) | (1u<<28);
+     static constexpr unsigned int ELEMENT_IDX_MASK = ~CONTAINER_IDX_MASK;
+     static unsigned int createRangeValue( unsigned int container_idx, unsigned int index) {
+        assert( container_idx < ( 1u<<(32 - CONTAINER_IDX_SHIFT)) );
+        assert( (index & CONTAINER_IDX_MASK) == 0u);
+        return (container_idx << CONTAINER_IDX_SHIFT) | index;
+     }
+     void setRangeBegin( std::size_t container_idx, unsigned int element_idx)  {
+        assert( container_idx < (1u<<(32-CONTAINER_IDX_SHIFT)) );
+        this->first = MeasurementRange::createRangeValue(container_idx, element_idx);
+     }
+     void setRangeEnd( std::size_t  container_idx, unsigned int element_idx)  {
+        this->second = MeasurementRange::createRangeValue(container_idx, element_idx);
+     }
+     unsigned int containerIndex() const {
+        assert( (this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK) );
+        return (this->first & CONTAINER_IDX_MASK) >> CONTAINER_IDX_SHIFT;
+     }
+     unsigned int elementBeginIndex() const {
+        assert( (this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK) );
+        return this->first & ELEMENT_IDX_MASK;
+     }
+     unsigned int elementEndIndex() const {
+        assert( (this->first & CONTAINER_IDX_MASK) == (this->second & CONTAINER_IDX_MASK) );
+        return this->second & ELEMENT_IDX_MASK;
+     }
+     bool empty() const { return this->first == this->second; }
+  };
+
+  // List of measurement ranges and the measurement container targeted by the ranges.
+  struct MeasurementRangeList : public std::vector< MeasurementRange >  {
+     const xAOD::UncalibratedMeasurementContainer *container(unsigned int container_index) const {
+        assert( container_index < m_measurementContainer.size());
+        return m_measurementContainer[container_index];
+     }
+     std::vector<const xAOD::UncalibratedMeasurementContainer *> m_measurementContainer;
+  };
+
   /// Accessor for the above source link container
   ///
   /// It wraps up a few lookup methods to be used in the Combinatorial Kalman
@@ -65,17 +108,53 @@ namespace
   class  UncalibSourceLinkAccessor
   {
   private:
-    const std::vector<ATLASUncalibSourceLink>      *m_sourceLinks;
+    const EventContext                                           *m_eventContext;
     const std::vector<Acts::GeometryIdentifier>                  *m_orderedGeoIds;
-    const std::vector< std::pair< unsigned int , unsigned int> > *m_measurementRanges;
+    const MeasurementRangeList                                   *m_measurementRanges;
 
   public:
-    using BaseIterator = std::vector<ATLASUncalibSourceLink>::const_iterator;
+    class BaseIterator {
+    public:
+       BaseIterator(const EventContext &ctx,
+                    const xAOD::UncalibratedMeasurementContainer *container,
+                    unsigned int element_index,
+                    const Acts::GeometryIdentifier &geometry_id)
+          : m_container(container),
+            m_index(element_index),
+            m_refElementLink(*container,
+                             static_cast<ActsTrk::ATLASUncalibSourceLink::index_type>(0),
+                             Atlas::getExtendedEventContext(ctx).proxy()),
+            m_geometryId(geometry_id)
+
+       {
+          if (m_refElementLink.isValid() && !container->empty()) {
+             m_refElementLink.getStorableObjectPointer();
+          }
+       }
+       BaseIterator &operator++() { ++m_index; return *this; }
+       bool operator==(const BaseIterator &a) const { return m_index == a.m_index  && m_container == a.m_container; }
+
+       Acts::SourceLink operator*() const {
+          assert( m_container && m_index < m_container->size() );
+          return Acts::SourceLink( ActsTrk::ATLASUncalibSourceLink(m_refElementLink, m_index) );
+       }
+       using value_type = unsigned int;
+       using difference_type = unsigned int;
+       using pointer = const xAOD::UncalibratedMeasurementContainer **;
+       using reference = const xAOD::UncalibratedMeasurementContainer *;
+       using iterator_category = std::contiguous_iterator_tag;
+    private:
+       const xAOD::UncalibratedMeasurementContainer *m_container;
+       unsigned int m_index;
+       ActsTrk::ATLASUncalibSourceLink m_refElementLink;
+       Acts::GeometryIdentifier m_geometryId;
+    };
+
     using Iterator = Acts::SourceLinkAdapterIterator<BaseIterator>;
-    UncalibSourceLinkAccessor(const std::vector<ATLASUncalibSourceLink> &source_links,
+    UncalibSourceLinkAccessor(const EventContext &ctx,
                               const std::vector<Acts::GeometryIdentifier> &ordered_geoIds,
-                              const std::vector< std::pair< unsigned int , unsigned int> > &measurement_ranges)
-       : m_sourceLinks(&source_links),
+                              const MeasurementRangeList &measurement_ranges)
+       : m_eventContext(&ctx),
          m_orderedGeoIds(&ordered_geoIds),
          m_measurementRanges(&measurement_ranges)
     {}
@@ -84,13 +163,18 @@ namespace
     {
        std::vector<Acts::GeometryIdentifier>::const_iterator
           geo_iter = std::lower_bound( m_orderedGeoIds->begin(),m_orderedGeoIds->end(), surface.geometryId());
-       if (geo_iter == m_orderedGeoIds->end() || *geo_iter != surface.geometryId()) {
-          return {Iterator{ m_sourceLinks->end()}, Iterator{ m_sourceLinks->end()}};
+       if (geo_iter == m_orderedGeoIds->end()
+           || *geo_iter != surface.geometryId()
+           || (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin()).empty()) {
+          return {Iterator(BaseIterator(*m_eventContext, nullptr, 0u, surface.geometryId())),
+                  Iterator(BaseIterator( *m_eventContext, nullptr, 0u, surface.geometryId()) ) };
        }
 
-       assert( geo_iter - m_orderedGeoIds->begin() >= 0 and static_cast<std::size_t>(geo_iter - m_orderedGeoIds->begin()) < m_measurementRanges->size());
-       const std::pair<unsigned int, unsigned int> &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
-       return {Iterator{ m_sourceLinks->begin() + range.first}, Iterator{ m_sourceLinks->begin() + range.second}};
+       assert( geo_iter - m_orderedGeoIds->begin() < m_measurementRanges->size());
+       const MeasurementRange &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
+       const xAOD::UncalibratedMeasurementContainer *container = m_measurementRanges->container(range.containerIndex());
+       return {Iterator( BaseIterator(*m_eventContext, container, range.elementBeginIndex(), surface.geometryId()) ),
+               Iterator( BaseIterator(*m_eventContext, container, range.elementEndIndex(), surface.geometryId())) };
     }
   };
 
@@ -138,7 +222,7 @@ namespace
 
     // add seeds from an associated measurements collection.
     // measurementOffset non-zero is only needed if measurements holds more than one collection (eg. kept for TrackStatePrinter).
-    size_t addSeeds(const ActsTrk::SeedContainer &seeds, const std::vector<ATLASUncalibSourceLink> &measurements, size_t measurementOffset = 0)
+    size_t addSeeds(const ActsTrk::SeedContainer &seeds, const xAOD::UncalibratedMeasurementContainer &measurements, [[maybe_unused]] std::size_t typeIndex)
     {
       size_t seedOffset = m_numSeed;
       if (m_disabled)
@@ -152,10 +236,9 @@ namespace
 	  const auto& els = sp->measurements();
 	  for (std::size_t i(0ul); i<els.size(); i++) 
           {
-	    size_t index = (*els[i])->index();
-            size_t imeasurement = measurementOffset + index;
+            size_t imeasurement = (*els[i])->index();
             assert(imeasurement < measurements.size());
-            m_seedIndex.insert({&measurements[imeasurement].atlasHit(), m_numSeed});
+            m_seedIndex.insert({measurements[imeasurement], m_numSeed});
             ++m_nSeedMeasurements[m_numSeed];
           }
         }
@@ -174,11 +257,11 @@ namespace
       std::fill(beg, m_nUsedMeasurements.end(), 0u);
     }
 
-    void addMeasurement(const ATLASUncalibSourceLink &sl)
+    void addMeasurement(const ActsTrk::ATLASUncalibSourceLink &sl)
     {
       if (m_disabled || m_nextSeed == m_nUsedMeasurements.size())
         return;
-      for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&sl.atlasHit()); iiseed != eiseed; ++iiseed)
+      for (auto [iiseed, eiseed] = m_seedIndex.equal_range(&(**sl)); iiseed != eiseed; ++iiseed)
       {
         size_t iseed = iiseed->second;
         assert(iseed < m_nUsedMeasurements.size());
@@ -218,30 +301,20 @@ namespace
 
   // === TrackFindingMeasurements ================================
 
+
   // Helper class to convert xAOD::PixelClusterContainer or xAOD::StripClusterContainer to UncalibSourceLinkMultiset.
   class TrackFindingMeasurements
   {
   public:
 
-    TrackFindingMeasurements(size_t numMeasurements,
-                             size_t maxMeasurements,
-                             const std::vector< Acts::GeometryIdentifier > &ordered_geo_ids,
-                             bool doTrackStatePrinter,
-                             std::vector<ATLASUncalibSourceLink::ElementsType> *elementsCollection)
-       : m_elementsCollection(elementsCollection),
-         m_orderedGeoIds(&ordered_geo_ids)
+    TrackFindingMeasurements(const std::vector< Acts::GeometryIdentifier > &ordered_geo_ids,
+                             bool doTrackStatePrinter)
+       : m_orderedGeoIds(&ordered_geo_ids)
     {
-      m_measurementRanges.resize(m_orderedGeoIds->size(), std::make_pair(std::numeric_limits<unsigned int>::max(),
-                                                                         std::numeric_limits<unsigned int>::max()) );
-      m_elementsCollection->reserve(numMeasurements);
+       m_measurementRanges.resize(m_orderedGeoIds->size(), MeasurementRange());
       if (doTrackStatePrinter)
       {
-        m_sourceLinksVec.reserve(numMeasurements);
         m_measurementOffset.reserve(2); // pixels+strips
-      }
-      else
-      {
-        m_sourceLinksVec.reserve(maxMeasurements);
       }
       m_seedOffset.reserve(2);
     }
@@ -251,15 +324,15 @@ namespace
     TrackFindingMeasurements &operator=(const TrackFindingMeasurements &) = delete;
 
     void addMeasurements(size_t typeIndex,
-                         const EventContext &ctx,
                          const xAOD::UncalibratedMeasurementContainer &clusterContainer,
                          const InDetDD::SiDetectorElementCollection &detElems,
                          const ActsTrk::SeedContainer *seeds,
                          const ToolHandle<ActsTrk::IActsToTrkConverterTool> &ATLASConverterTool,
                          const ToolHandle<ActsTrk::ITrackStatePrinter> &trackStatePrinter,
-                         DuplicateSeedDetector &duplicateSeedDetector)
+                         DuplicateSeedDetector &duplicateSeedDetector,
+                         const EventContext &ctx)
     {
-      size_t measurementOffset = m_sourceLinksVec.size();
+      size_t measurementOffset = m_measurementsTotal;
       if (!trackStatePrinter.empty())
       {
         if (!(typeIndex < m_measurementOffset.size()))
@@ -267,22 +340,33 @@ namespace
         m_measurementOffset[typeIndex] = measurementOffset;
       }
       // the following is just in case we call addMeasurements out of order or not for 2 types of measurements
+      if (typeIndex >= m_measurementRanges.m_measurementContainer.size()) {
+         m_measurementRanges.m_measurementContainer.resize(typeIndex+1,nullptr);
+      }
+      m_measurementRanges.m_measurementContainer[typeIndex] = &clusterContainer;
       if (!(typeIndex < m_seedOffset.size()))
         m_seedOffset.resize(typeIndex + 1);
 
       xAOD::UncalibMeasType    last_measurement_type = xAOD::UncalibMeasType::Other;
       xAOD::DetectorIDHashType last_id_hash = std::numeric_limits<xAOD::DetectorIDHashType>::max();
       unsigned int range_idx = m_measurementRanges.size();
+      std::size_t max_measurement_index=0;
       for (auto *measurement : clusterContainer) {
-         auto sl = ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(detElems, *measurement, *m_elementsCollection);
-         unsigned int sl_idx=m_sourceLinksVec.size();
-         m_sourceLinksVec.push_back( sl );
+         max_measurement_index = std::max(max_measurement_index,measurement->index());
+         const InDetDD::SiDetectorElement *elem =
+            detElems.getDetectorElement(measurement->identifierHash());
+         if (!elem) {
+            throw std::domain_error("No detector element for measurement");
+         }
+
+         unsigned int sl_idx=measurement->index();
          if (measurement->identifierHash() != last_id_hash || measurement->type() != last_measurement_type) {
+            const Acts::Surface &surface = ATLASConverterTool->trkSurfaceToActsSurface(elem->surface());
             std::vector<Acts::GeometryIdentifier>::const_iterator
-               geo_iter = std::lower_bound( m_orderedGeoIds->begin(),m_orderedGeoIds->end(), sl.geometryId());
-            if (geo_iter == m_orderedGeoIds->end() || *geo_iter != sl.geometryId()) {
+               geo_iter = std::lower_bound( m_orderedGeoIds->begin(),m_orderedGeoIds->end(), surface.geometryId());
+            if (geo_iter == m_orderedGeoIds->end() || *geo_iter != surface.geometryId()) {
                std::stringstream msg;
-               msg << "Measurement with unexpected Acts geometryId: " << sl.geometryId()
+               msg << "Measurement with unexpected Acts geometryId: " << surface.geometryId()
                    << " type = " << static_cast<unsigned int >(measurement->type())
                    << " idHash=" << measurement->identifierHash();
                throw std::runtime_error(msg.str());
@@ -291,45 +375,44 @@ namespace
             if (m_measurementRanges[ range_idx ].first != std::numeric_limits<unsigned int>::max()) {
                std::stringstream msg;
                msg << "Measurement not clustered by identifierHash / geometryId. New measurement "
-                   << measurement->index() << " with geo Id " << sl.geometryId()
+                   << measurement->index() << " with geo Id " << surface.geometryId()
                    << " type = " << static_cast<unsigned int>(measurement->type())
                    << " idHash=" << measurement->identifierHash()
                    << " but already recorded for this geo ID the range : " << m_measurementRanges[ range_idx ].first
                    << " .. " << m_measurementRanges[ range_idx ].second;
                throw std::runtime_error(msg.str());
             }
-            m_measurementRanges[ range_idx ].first = sl_idx;
+            m_measurementRanges[ range_idx ].setRangeBegin(typeIndex, sl_idx );
             last_id_hash = measurement->identifierHash();
             last_measurement_type = measurement->type();
          }
-         m_measurementRanges[ range_idx ].second = sl_idx+1;
+         m_measurementRanges[ range_idx ].setRangeEnd(typeIndex,sl_idx+1);
       }
-
+      m_measurementsTotal = std::max(max_measurement_index+1, clusterContainer.size());
       if (seeds)
       {
-        m_seedOffset[typeIndex] = duplicateSeedDetector.addSeeds(*seeds, m_sourceLinksVec, measurementOffset);
+        m_seedOffset[typeIndex] = duplicateSeedDetector.addSeeds(*seeds, clusterContainer, typeIndex);
       }
 
       if (!trackStatePrinter.empty())
       {
-        trackStatePrinter->printSourceLinks(ctx, m_sourceLinksVec, typeIndex, measurementOffset);
+         trackStatePrinter->printMeasurements(ctx, clusterContainer, &detElems, typeIndex, m_measurementOffset.at(typeIndex));
       }
     }
 
-    const std::vector<ATLASUncalibSourceLink> &sourceLinkVec() const { return m_sourceLinksVec; }
     size_t measurementOffset(size_t typeIndex) const { return typeIndex < m_measurementOffset.size() ? m_measurementOffset[typeIndex] : 0u; }
     size_t seedOffset(size_t typeIndex) const { return typeIndex < m_seedOffset.size() ? m_seedOffset[typeIndex] : 0u; }
 
     const std::vector<Acts::GeometryIdentifier> &orderedGeoIds() const { return *m_orderedGeoIds; }
-    const std::vector< std::pair< unsigned int , unsigned int> > &measurementRanges() const { return m_measurementRanges; }
+    const MeasurementRangeList &measurementRanges() const { return m_measurementRanges; }
 
   private:
-    std::vector<ATLASUncalibSourceLink> m_sourceLinksVec;
-    std::vector<ATLASUncalibSourceLink::ElementsType> *m_elementsCollection;
     std::vector<size_t> m_measurementOffset;
     std::vector<size_t> m_seedOffset;
     const std::vector< Acts::GeometryIdentifier >  *m_orderedGeoIds;
-    std::vector< std::pair< unsigned int , unsigned int> > m_measurementRanges;
+
+    MeasurementRangeList m_measurementRanges;
+    std::size_t m_measurementsTotal = 0;
 
 
   };

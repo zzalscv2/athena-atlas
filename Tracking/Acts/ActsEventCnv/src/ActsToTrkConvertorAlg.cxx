@@ -8,6 +8,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsGeometry/ATLASSourceLink.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"
 #include "InDetPrepRawData/SCT_ClusterCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -168,7 +169,8 @@ namespace ActsTrk
             if (state.hasUncalibratedSourceLink())
             {
               auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
-              const xAOD::UncalibratedMeasurement &uncalibMeas = sl.atlasHit();
+              assert( sl.isValid() && *sl);
+              const xAOD::UncalibratedMeasurement &uncalibMeas = **sl;
               measState = makeRIO_OnTrack(uncalibMeas, *parm);
             }
 

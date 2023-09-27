@@ -13,6 +13,19 @@
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "Acts/SpacePointFormation/SpacePointBuilderConfig.hpp"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
+
+namespace {
+   void gatherActsSurfaces(const ActsTrk::IActsToTrkConverterTool &converter_tool,
+                     const InDetDD::SiDetectorElementCollection &detectorElements,
+                     std::vector<const Acts::Surface *> &acts_surfaces) {
+      for (const auto *det_el :  detectorElements) {
+         const Acts::Surface &surface =
+            converter_tool.trkSurfaceToActsSurface(det_el->surface());
+         acts_surfaces.push_back( &surface );
+      }
+   }
+}
 
 #include "StoreGate/WriteHandle.h"
 namespace ActsTrk
@@ -30,7 +43,6 @@ namespace ActsTrk
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(m_trackingGeometryTool.retrieve());
     ATH_CHECK(m_ATLASConverterTool.retrieve());
-    ATH_CHECK(m_sourceLinksOut.initialize(SG::AllowEmpty));
     return StatusCode::SUCCESS;
   }
 
@@ -85,16 +97,18 @@ namespace ActsTrk
     /// Access to the cluster from a given detector element is possible
     /// via the ContainerAccessor.
 
-
-
-    std::vector<ATLASUncalibSourceLink::ElementsType> elementsCollection;
-    elementsCollection.reserve(clusterContainer.size());
-
     auto spBuilderConfig = std::make_shared<Acts::SpacePointBuilderConfig>();
+    std::array<std::vector< const Acts::Surface * >, 4> acts_surfaces;
+    acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) )
+       .reserve(   elements.size() );
+    gatherActsSurfaces(*m_ATLASConverterTool, elements, acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) ));
+    TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
+    tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::StripClusterType, &elements);
 
-    ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
+    ATLASUncalibSourceLinkSurfaceAccessor surfaceAccessor{ &(*m_ATLASConverterTool), &tracking_surface_helper };
+
     spBuilderConfig->slSurfaceAccessor
-      .connect<&ATLASSourceLinkSurfaceAccessor::uncalibratedMeasurement>(&surfaceAccessor);
+      .connect<&ATLASUncalibSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
     const std::shared_ptr<const Acts::TrackingGeometry> trkGeometry = m_trackingGeometryTool->trackingGeometry();
     spBuilderConfig->trackingGeometry = trkGeometry;
@@ -109,19 +123,18 @@ namespace ActsTrk
       size_t idx = 0;
       for (const auto& slink : slinks){
 	const auto& atlasSourceLink = slink.get<ATLASUncalibSourceLink>();
-	const auto& hit = atlasSourceLink.atlasHit();
+	const xAOD::UncalibratedMeasurement *hit = *atlasSourceLink;
 
 	// Check if the cluster is in the cluster container
-	const auto it = std::find(clusterContainer.begin(), clusterContainer.end(), dynamic_cast<const xAOD::StripCluster*>(&hit));
+	const auto it = std::find(clusterContainer.begin(), clusterContainer.end(), dynamic_cast<const xAOD::StripCluster*>(hit));
 	if (it != clusterContainer.end()){
 	  const auto cluster_index = it - clusterContainer.begin();
-	  const auto &id = hit.identifierHash();
+	  const auto id = hit->identifierHash();
 	  const auto &element = elements.getDetectorElement(id);
 	  size_t stripIndex = 0;
 	  auto ends = this->getStripEnds(atlasSourceLink, element, stripIndex);
-	  const auto &currentLocalPos = atlasSourceLink.values();
 	  auto vertex = Amg::Vector3D(0,0,0);
-	  StripInformationHelper stripInfo(id,ends.first, ends.second, vertex, currentLocalPos(0, 0), cluster_index, stripIndex);
+	  StripInformationHelper stripInfo(id,ends.first, ends.second, vertex, ActsTrk::localXFromSourceLink(atlasSourceLink), cluster_index, stripIndex);
 	  measIndices.push_back(cluster_index);
 	  stripInfos[idx++] = std::move(stripInfo);
 	}
@@ -195,7 +208,10 @@ namespace ActsTrk
 	  for (auto start = this_range.first; start != this_range.second; ++start){
 	    size_t position = std::distance(groupStart, start);
 	    neighbourClusters[0].push_back(std::make_pair(*start, position));
-	    auto slink = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(elements, **start, elementsCollection);
+            if ((*start)->identifierHash() != thisElement->identifyHash()) {
+               throw std::logic_error("Identifier mismatch.");
+            }
+	    auto slink = ATLASUncalibSourceLink(clusterContainer, (*start)->index());
 	    neighbourSourceLinks[0].emplace_back(std::make_pair(slink, position));
 	  }
 	}
@@ -238,7 +254,10 @@ namespace ActsTrk
 	    for (auto start = this_range.first; start != this_range.second; ++start){
 	      size_t position = std::distance(groupStart, start);
 	      neighbourClusters[neigbourIndices[n]].push_back(std::make_pair(*start, position));
-	      auto slink = m_ATLASConverterTool->uncalibratedTrkMeasurementToSourceLink(elements, **start, elementsCollection);
+              if ((*start)->identifierHash() != otherElement->identifyHash()) {
+                 throw std::logic_error("Identifier mismatch.");
+              }
+              auto slink = ATLASUncalibSourceLink(clusterContainer, (*start)->index());
 	      neighbourSourceLinks[neigbourIndices[n]].emplace_back(std::make_pair(slink, position));
 	    }
 	  }
@@ -292,19 +311,9 @@ namespace ActsTrk
 	}
 
 	ATH_CHECK( fillSpacePoints(ctx, spBuilder, neighbourElements, neighbourSourceLinks, overlapExtents, beamSpotVertex,
-					spacePoints, overlapSpacePoints) );
+                                   spacePoints, overlapSpacePoints) );
       }
 
-    if (!m_sourceLinksOut.empty()) {
-       SG::WriteHandle< std::vector<ATLASUncalibSourceLink::ElementsType> > source_links_out_handle(m_sourceLinksOut, ctx);
-       if (source_links_out_handle.record(
-              std::make_unique< std::vector<ATLASUncalibSourceLink::ElementsType> >(
-                 std::move(elementsCollection)) ).isFailure() ) {
-          ATH_MSG_FATAL("Failed to write ATLASUncalibSourceLink elements collection with key "
-                        << m_sourceLinksOut.key() );
-          return StatusCode::FAILURE;
-       }
-    }
     return StatusCode::SUCCESS;
   }
 
@@ -357,6 +366,7 @@ namespace ActsTrk
     if(!nElements) return StatusCode::SUCCESS;
 
     const InDetDD::SiDetectorElement *triggerElement = elements[0];
+
     bool isEndcap = triggerElement->isEndcap();
     std::vector<StripInformationHelper> stripInfos;
     stripInfos.reserve(sourceLinks[0].size());
@@ -396,12 +406,11 @@ namespace ActsTrk
 
 	StripInformationHelper currentStripInfo;
 	for (auto &sourceLink_index : sourceLinks[currentIndex]){
-	  const auto &currentLocalPos = sourceLink_index.first.values();
-
+          float source_local_x = ActsTrk::localXFromSourceLink( sourceLink_index.first );
 	  const auto currentSlink = sourceLink_index.first;
 	  for (auto triggerSlink : triggerSlinks){
-	    const auto &triggerLocalPos = triggerSlink.values();
-	    double diff = currentLocalPos(0, 0) - triggerLocalPos(0, 0);
+
+            double diff = source_local_x - ActsTrk::localXFromSourceLink( triggerSlink );
 	    if (diff < min || diff > max)
 	      continue;
 	    if (currentIndex == otherSideIndex){
@@ -433,7 +442,7 @@ namespace ActsTrk
 	std::vector<ATLASUncalibSourceLink> triggerPhiSlinks;
 	triggerSlinks.reserve(triggerSlinks.size());
 	for (auto triggerSlink : triggerSlinks){
-	  auto centralValue = triggerSlink.values()(0, 0);
+	  auto centralValue = ActsTrk::localXFromSourceLink( triggerSlink );
 	  auto minValue = min;
 	  auto maxValue = max;
 	  if (isEndcap){
@@ -457,12 +466,11 @@ namespace ActsTrk
 	}
 
 	for (auto &sourceLink_index : sourceLinks[currentIndex]){
-	  const auto &currentLocalPos = sourceLink_index.first.values();
 	  const auto currentSlink = sourceLink_index.first;
 
 	  size_t currentStripIndex = 0;
 	  getStripEnds(currentSlink, currentElement, currentStripIndex);
-	  auto centralValue = currentLocalPos(0, 0);
+	  auto centralValue = ActsTrk::localXFromSourceLink( sourceLink_index.first );
 	  auto minValue = min;
 	  auto maxValue = max;
 	  if (isEndcap) {
@@ -535,12 +543,31 @@ namespace ActsTrk
     ends2_acts.first = ends2.first;
     ends2_acts.second = ends2.second;
     auto paramCovAccessor = [&](const Acts::SourceLink &slink) {
-      auto atlasSLink = slink.get<ATLASUncalibSourceLink>();
-      Acts::BoundVector param = atlasSLink.values();
-      Acts::BoundSquareMatrix cov =  atlasSLink.cov();
-      return std::make_pair(param, cov);
+      const auto &atlasSLink = slink.get<ATLASUncalibSourceLink>();
+      assert( atlasSLink.isValid());
+      const xAOD::UncalibratedMeasurement *measurement = *atlasSLink;
+      Acts::BoundVector loc = Acts::BoundVector::Zero();
+      Acts::BoundSquareMatrix cov = Acts::BoundMatrix::Zero();
+      switch (measurement->type()) {
+      case (xAOD::UncalibMeasType::StripClusterType):
+         loc[Acts::eBoundLoc0] = measurement->localPosition<1>()[Trk::locX];
+         cov.topLeftCorner<1, 1>() =
+            measurement->localCovariance<1>().cast<Acts::ActsScalar>();
+         break;
+      case (xAOD::UncalibMeasType::PixelClusterType):
+         loc[Acts::eBoundLoc0] = measurement->localPosition<2>()[Trk::locX];
+         loc[Acts::eBoundLoc1] = measurement->localPosition<2>()[Trk::locY];
+         cov.topLeftCorner<2, 2>() =
+            measurement->localCovariance<2>().cast<Acts::ActsScalar>();
+         break;
+      default:
+         throw std::domain_error(
+                                 "Can only handle measurement type pixel or strip");
+      }
+      return std::make_pair(loc, cov);
     };
     std::vector<Acts::SourceLink> slinks;
+
     slinks.emplace_back(Acts::SourceLink{currentSlink});
     slinks.emplace_back(Acts::SourceLink{anotherSlink});
 
@@ -640,17 +667,18 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
   }
 
   std::pair<Amg::Vector3D, Amg::Vector3D>
-  ActsCoreStripSpacePointFormationTool::getStripEnds(ATLASUncalibSourceLink sourceLink,
-                                                 const InDetDD::SiDetectorElement *element,
-                                                 size_t &stripIndex) const
+  ActsCoreStripSpacePointFormationTool::getStripEnds(const ATLASUncalibSourceLink &sourceLink,
+                                                     const InDetDD::SiDetectorElement *element,
+                                                     size_t &stripIndex) const
   {
-    const auto &localPos = sourceLink.values();
-
-    auto cluster = dynamic_cast<const xAOD::StripCluster *>(&sourceLink.atlasHit());
+    assert( sourceLink->isValid());
+    const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
+    auto cluster = dynamic_cast<const xAOD::StripCluster *>(measurement);
     if(!cluster){
       ATH_MSG_FATAL("Could not cast UncalibratedMeasurement as StripCluster");
       return {};
     }
+    float source_local_x = ActsTrk::localXFromSourceLink( sourceLink );
     if (element->isEndcap())  {
       // design for endcap modules
       const InDetDD::StripStereoAnnulusDesign *design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element->design());
@@ -661,7 +689,7 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
 
       // calculate phi pitch for evaluating the strip index
       double phiPitchPhi = design->phiWidth()/design->diodesInRow(0);
-      stripIndex = -std::floor(localPos(0, 0) / phiPitchPhi) + design->diodesInRow(0) *0.5 - 0.5;
+      stripIndex = -std::floor(source_local_x / phiPitchPhi) + design->diodesInRow(0) *0.5 - 0.5;
 
       std::pair<Amg::Vector3D, Amg::Vector3D > ends = {
         element->globalPosition(design->stripPosAtR(stripIndex, 0, design->minR())),
@@ -670,7 +698,7 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
       return ends;
     }
 
-    InDetDD::SiLocalPosition localPosition(0., localPos(0, 0), 0.);
+    InDetDD::SiLocalPosition localPosition(0., source_local_x, 0.);
     std::pair<Amg::Vector3D, Amg::Vector3D> ends(element->endsOfStrip(localPosition));
     return ends;
   }
