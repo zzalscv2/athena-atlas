@@ -1404,8 +1404,8 @@ StatusCode IDPerfMonZmumu::execute()
       }
       else {
 	ATH_MSG_DEBUG("** IDPerfMonZmumu::execute **  going to fill refit1tree ");
-	success_pos = FillRecParametersSimple (refit1MuonTrk1, ppos_comb->charge(), ppos_comb_v, ctx);
-	success_neg = FillRecParametersSimple (refit1MuonTrk2, pneg_comb->charge(), pneg_comb_v, ctx);
+	success_pos = FillRecParametersSimple (refit1MuonTrk1, ppos_comb->charge(), ppos_comb_v);
+	success_neg = FillRecParametersSimple (refit1MuonTrk2, pneg_comb->charge(), pneg_comb_v);
 	
 	if (m_storeZmumuNtuple) {
 	  if (success_pos && success_neg) {
@@ -1459,8 +1459,8 @@ StatusCode IDPerfMonZmumu::execute()
       }
       else{
 	ATH_MSG_DEBUG("-- >> going to fill refit2params << --");
-	success_pos = FillRecParametersSimple (refit2MuonTrk1, ppos_comb->charge(), ppos_comb_v, ctx);
-	success_neg = FillRecParametersSimple (refit2MuonTrk2, pneg_comb->charge(), pneg_comb_v, ctx);
+	success_pos = FillRecParametersSimple (refit2MuonTrk1, ppos_comb->charge(), ppos_comb_v);
+	success_neg = FillRecParametersSimple (refit2MuonTrk2, pneg_comb->charge(), pneg_comb_v);
 	
 	if (m_storeZmumuNtuple) {
 	  if (success_pos && success_neg) {
@@ -1968,7 +1968,7 @@ StatusCode IDPerfMonZmumu::FillRecParameters (const Trk::Track* track, const xAO
   return StatusCode::SUCCESS;
 }
 //==================================================================================
-StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, float charge, const xAOD::Vertex* vertex, const EventContext& ctx)  
+StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, float charge, const xAOD::Vertex* vertex)
 {
   if (!track){
     ATH_MSG_DEBUG("* FillRecParametersSimple * Empty Track: track. Skipping.");
@@ -2007,8 +2007,8 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
     z0_err = Amg::error(*trkPerigee->covariance(),Trk::z0);
   }
 
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, ctx };
-  Amg::Vector3D position = beamSpotHandleRec->beamPos();
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, getContext());
+  Amg::Vector3D position (eventInfo->beamPosX(), eventInfo->beamPosY(), eventInfo->beamPosZ());
   TLorentzVector vtrack = TLorentzVector (trkPerigee->momentum().x(),
 					  trkPerigee->momentum().y(),
 					  trkPerigee->momentum().z(),
@@ -2018,8 +2018,8 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
   float bsX = position.x();
   float bsY = position.y();
   float bsZ = position.z();
-  float btiltX = beamSpotHandleRec->beamTilt(0);
-  float btiltY = beamSpotHandleRec->beamTilt(1);
+  float btiltX = eventInfo->beamTiltXZ();
+  float btiltY = eventInfo->beamTiltYZ();
   // correct the track parameters for the beamspot position
   float beamX = bsX + std::tan(btiltX) * (trkz0-bsZ);
   float beamY = bsY + std::tan(btiltY) * (trkz0-bsZ);

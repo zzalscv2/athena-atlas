@@ -184,7 +184,6 @@ ElectronRefitterTool = egammaTrkRefitterTool(name='ElectronRefitterTool',
                                              # FitterTool = GSFTrackFitter,
                                              FitterTool=GX2TrackFitter,
                                              matEffects=3,
-                                             useBeamSpot=False,
                                              OutputLevel =4)
 ToolSvc += ElectronRefitterTool
 
@@ -193,14 +192,12 @@ ElectronRefitterTool2 = egammaTrkRefitterTool(name = 'ElectronRefitterTool2',
                                             FitterTool = GX2TrackFitter,
                                             matEffects = 3,
                                             RemoveTRTHits = True,
-                                            useBeamSpot = False,
                                             OutputLevel =4)
 ToolSvc += ElectronRefitterTool2
 
 MuonRefitterTool = egammaTrkRefitterTool(name = 'MuonRefitterTool',
                                          FitterTool = GX2TrackFitter,
                                          matEffects = 2,
-                                         useBeamSpot = False,
                                          OutputLevel =4)
 ToolSvc += MuonRefitterTool
 
@@ -209,7 +206,6 @@ MuonRefitterToolIDSiOnly = egammaTrkRefitterTool(name = 'MuonRefitterToolIDSiOnl
                                             FitterTool = GX2TrackFitter,
                                             matEffects = 2,
                                             RemoveTRTHits = True,
-                                            useBeamSpot = False,
                                             OutputLevel =4)
 ToolSvc += MuonRefitterToolIDSiOnly
 
