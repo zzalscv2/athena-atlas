@@ -377,7 +377,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         ok = true;
     
     // BSM particles
-    if(m_writeBSM && MC::MenuTruthThinning_isBSM(p))
+    if(m_writeBSM && MC::isBSM(p))
         ok = true;
     
     // tt+HF hadrons
@@ -407,7 +407,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         for(unsigned int itr=0; itr<nIncoming; ++itr) {
             const xAOD::TruthParticle* incomingParticle = prodVtx->incomingParticle(itr);
             if (!incomingParticle) continue;
-            if ((m_writeBSMProducts && MC::MenuTruthThinning_isBSM( (incomingParticle) )) ||
+            if ((m_writeBSMProducts && MC::isBSM( (incomingParticle) )) ||
                 (m_writeBosonProducts && isBoson( (incomingParticle) )) ||
                 (m_writeTopAndDecays && abs(incomingParticle->pdgId())==6) ){
                 ok = true;

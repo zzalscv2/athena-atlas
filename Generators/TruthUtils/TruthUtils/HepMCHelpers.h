@@ -80,35 +80,5 @@ namespace MC
     return isStableOrSimDecayed<T>(p);
   }
 
-  template <class T> inline bool ThinGeantTruthAlg_isStatus1BSMParticle(const T& p)  {
-    const int apid = std::abs(p->pdg_id());
-    return ((31 < apid && apid < 38) || // BSM Higgs / W' / Z' / etc
-      apid == 39 || apid == 41 || apid == 42 ||
-      apid == 7 || // 4th gen beauty
-      apid == 8 || // 4th gen top
-      (600 < apid && apid < 607) || // scalar leptoquarks
-      (1000000 < apid && apid < 2000000) || // left-handed SUSY (including R-Hadrons)
-      (2000000 < apid && apid < 3000000) || // right-handed SUSY (including R-Hadrons)
-      apid == 6000005 ||  // X5/3
-      apid == 6000006 ||  // T2/3
-      apid == 6000007 ||  // B-1/3
-      apid == 6000008 ||  // Y-4/3
-      ((apid >= 10000100) && (apid <= 10001000)) // multi-charged
-      ) && isStable<T>(p);
-  }
-
-  template <class T> inline bool MenuTruthThinning_isBSM(const T& p) {
-    const int apid = std::abs(p->pdg_id());
-    return (isBSM(apid) ||
-      /// Legacy Athena BSM. Not clear if those are still in use.
-      (600 < apid && apid < 607) || // scalar leptoquarks
-      apid == 6000005 || // X5/3
-      apid == 6000006 || // T2/3
-      apid == 6000007 || // B-1/3
-      apid == 6000008 || // Y-4/3
-      ((apid >= 10000100) && (apid <= 10001000) ) // multi-charged
-      );
-  }
-
 }
 #endif
