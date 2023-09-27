@@ -15,7 +15,6 @@
 
 #include "CaloClusterCorrection/interpolate.h"
 #include "CaloConditions/Array.h"
-#include "boost/io/ios_state.hpp"
 #include <vector>
 #include <cassert>
 #include <iostream>
@@ -140,9 +139,10 @@ void testit (float y2,
   float y1 = interpolate (table, x, degree, ycol, regions);
   //assert (!is_different (y1, y2));
   if (is_different (y1, y2)) {
-    boost::io::ios_base_all_saver iosaver (std::cout);  // Avoid coverity warning.
-    std::cout << std::setprecision (8);
-    std::cout << "diff " << x << " " << y1 << " " << y2 << "\n";
+    std::stringstream coutx;
+    coutx << std::setprecision (8);
+    coutx << "diff " << x << " " << y1 << " " << y2 << "\n";
+    std::cout<<coutx.str();
     std::abort();
   }
 }

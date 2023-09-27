@@ -3,7 +3,6 @@
 */
 
 #include "FourMom/P4EEtaPhiMBase.h"
-#include <boost/io/ios_state.hpp>
 #include <cmath>
 #include <iomanip>
 #include <cstdlib>
@@ -160,15 +159,15 @@ CLHEP::HepLorentzVector P4EEtaPhiMBase::hlv() const
 std::ostream& P4EEtaPhiMBase::dump( std::ostream& out ) const
 {
 
-  boost::io::ios_all_saver ias(out);
-  out << "[e,eta,phi,m] ="
+  std::stringstream outx;
+  outx << "[e,eta,phi,m] ="
 	     << std::right << std::scientific << std::setprecision(8) 
 	     << std::setw(16) << this->e()
 	     << std::setw(16) << this->eta()
 	     << std::setw(16) << this->phi()
 	     << std::setw(16) << this->m();
 
-  ias.restore();
+  out<<outx.str();
   
   return out;
 }

@@ -4,7 +4,6 @@
 
 #include "TestActionVPTimerTool.h"
 #include "VolumeTreeNavigator.h"
-#include "boost/io/ios_state.hpp"
 #include <algorithm>
 #include <iomanip>
 #include <ios>

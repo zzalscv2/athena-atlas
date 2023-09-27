@@ -21,7 +21,6 @@
 #include "TAxis.h"
 #include "TH2.h"
 
-#include "boost/io/ios_state.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -622,13 +621,13 @@ LArOnlineIDStrHelper::test()
     HWIdentifier idEXPERTSCOMPACT     = this->feedthrough_id(nameEXPERTSCOMPACT);
     HWIdentifier idLARONLINEID        = this->feedthrough_id(nameLARONLINEID);
     HWIdentifier idLARONLINEIDCOMPACT = this->feedthrough_id(nameLARONLINEIDCOMPACT);
-    boost::io::ios_base_all_saver foutsave (std::cout);
+    std::stringstream coutx;
     if (idEXPERTS == feedthroughID
         && idEXPERTSCOMPACT == feedthroughID
         && idLARONLINEID == feedthroughID
         && idLARONLINEIDCOMPACT == feedthroughID)
       {
-      std::cout << std::setw(11) << std::left << std::hex << feedthroughID << std::dec
+      coutx << std::setw(11) << std::left << std::hex << feedthroughID << std::dec
                 << std::setw(15) << nameEXPERTS
                 << std::setw(9)  << nameEXPERTSCOMPACT
                 << std::setw(14) << nameLARONLINEID 
@@ -637,8 +636,9 @@ LArOnlineIDStrHelper::test()
                 << std::setw(3)  << nameOnlyLARONLINEID 
                 << std::endl;
     } else {
-      std::cout << "Bad HWId extraction for " << nameEXPERTS << ", " << idEXPERTS << std::endl;
+      coutx << "Bad HWId extraction for " << nameEXPERTS << ", " << idEXPERTS << std::endl;
     }
+    std::cout<<coutx.str();
   }
 
   std::cout << "Febs" << std::endl;

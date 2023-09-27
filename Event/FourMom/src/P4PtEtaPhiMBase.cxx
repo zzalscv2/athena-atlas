@@ -3,7 +3,6 @@
 */
 
 #include "FourMom/P4PtEtaPhiMBase.h"
-#include <boost/io/ios_state.hpp>
 #include <cmath>
 #include <iomanip>
 #include <cstdlib>
@@ -147,15 +146,14 @@ double P4PtEtaPhiMBase::rapidity() const
 
 std::ostream& P4PtEtaPhiMBase::dump( std::ostream& out ) const
 {
-  boost::io::ios_all_saver ias(out);
-  
-  out << "[pt,eta,phi,m] ="
+  std::stringstream outx;
+  outx << "[pt,eta,phi,m] ="
 	     << std::right << std::scientific << std::setprecision(8) 
 	     << std::setw(16) << this->pt()
 	     << std::setw(16) << this->eta()
 	     << std::setw(16) << this->phi()
 	     << std::setw(16) << this->m();
-  ias.restore();
+  out<<outx.str();
   
   return out;
   

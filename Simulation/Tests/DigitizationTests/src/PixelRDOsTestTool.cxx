@@ -4,7 +4,6 @@
 
 #include "PixelRDOsTestTool.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include <boost/io/ios_state.hpp>
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetIdentifier/PixelID.h"
