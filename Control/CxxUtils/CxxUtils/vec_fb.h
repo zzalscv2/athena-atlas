@@ -16,17 +16,17 @@
 #ifndef CXXUTILS_VEC_FB_H
 #define CXXUTILS_VEC_FB_H
 
-#include "boost/integer.hpp"
 #include <initializer_list>
+#include <type_traits>
 #include <algorithm>
+#include <cstdint>
 
 namespace CxxUtils {
 /**
  */
 template<typename T, size_t N>
-class vec_fb
+struct alignas(N*sizeof(T)) vec_fb
 {
-public:
   // cppcheck-suppress uninitMemberVar; deliberate
   vec_fb() = default;
   vec_fb(const vec_fb&) = default;
@@ -45,8 +45,17 @@ public:
 
 // Helper: Given a vectorized class, find another vectorized class
 // that uses integers of the same size as the original class.
-template<typename T, size_t N>
-using ivec = vec_fb<typename boost::int_t<sizeof(T) * 8>::exact, N>;
+template <typename T>
+struct vec_fbMaskHelper {
+  using type = typename std::conditional<
+      sizeof(T) * 8 <= 8, std::int8_t,
+      typename std::conditional<
+          sizeof(T) * 8 <= 16, std::int16_t,
+          typename std::conditional<sizeof(T) * 8 <= 32, std::int32_t,
+                                    std::int64_t>::type>::type>::type;
+};
+template <typename T, size_t N>
+using ivec = vec_fb<typename vec_fbMaskHelper<T>::type, N>;
 
 // Define binary operations.
 // For each operation, define
