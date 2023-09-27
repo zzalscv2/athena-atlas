@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsMuonDecorator.cxx
@@ -15,6 +15,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "CaloGeoHelpers/proxim.h"
 
 #include <vector>
 #include <algorithm>
@@ -28,6 +29,7 @@ namespace DerivationFramework {
     ATH_CHECK(m_cellsDecorator.retrieve());
 
     ATH_CHECK( m_muonContainerKey.initialize() );
+    ATH_CHECK( m_cellContainerKey.initialize(SG::AllowEmpty) );
 
     const std::string baseName = m_muonContainerKey.key() + ".";
 
@@ -83,6 +85,13 @@ namespace DerivationFramework {
     SG::ReadHandle<xAOD::MuonContainer> muons(m_muonContainerKey, ctx);
     ATH_CHECK( muons.isValid() );
 
+    const CaloCellContainer* cellContainer = nullptr;
+    if (!m_cellContainerKey.empty()) {
+      SG::ReadHandle<CaloCellContainer> caloCells(m_cellContainerKey, ctx);
+      ATH_CHECK( caloCells.isValid() );
+      cellContainer = caloCells.cptr();
+    }
+
     std::vector<const CaloCell*> cells;
 
     SG::WriteDecorHandle<xAOD::MuonContainer, int> selected_mu(m_selectedMuKey, ctx);
@@ -136,12 +145,36 @@ namespace DerivationFramework {
         selected_mu(*mu) = 1;
 
         cells.clear();
+        bool addAdditionalGapCrackCells = false;
         for (const CaloCell* cell : *mu_cluster) {
-
           const CaloDetDescrElement* cell_dde = cell->caloDDE();
-          if (!(cell_dde->is_tile())) continue;
+          if ((cell_dde->is_tile())) {
+            if (cellContainer && (cell_dde->getSampling() == CaloCell_ID::TileGap3)) {
+              addAdditionalGapCrackCells = true;
+              continue;
+            }
+            cells.push_back(cell);
+          }
+        }
 
-          cells.push_back(cell);
+        if (addAdditionalGapCrackCells) {
+          std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, CaloCell_ID::TileGap3);
+          if (coordinates.size() == 5 ) {
+            double eta = coordinates[3];
+            double phi = coordinates[4];
+            for (const CaloCell* cell : *cellContainer) {
+              const CaloDetDescrElement* cell_dde = cell->caloDDE();
+              if (cell_dde->getSampling() == CaloCell_ID::TileGap3) {
+                if (std::fabs(eta - cell->eta()) < m_gapCrackCellsInDeltaEta
+                    && std::fabs(KinematicUtils::deltaPhi(phi, cell->phi())) < m_gapCrackCellsInDeltaPhi) {
+                  cells.push_back(cell);
+                }
+              }
+            }
+          }
+        }
+
+        for (const CaloCell* cell : cells) {
 
           if (m_saveTileCellMuonInfo) {
             std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, cell);
