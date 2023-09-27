@@ -12,4 +12,4 @@ atlas_add_library( SiSPSeededTrackFinderData
                    PUBLIC_HEADERS SiSPSeededTrackFinderData
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaKernel InDetPrepRawData InDetReadoutGeometry SiSpacePointsSeed TrkEventPrimitives TrkExInterfaces TrkGeometry TrkPatternParameters TrkSurfaces TrkTrack TrkCaloClusterROI TrkToolInterfaces TrkEventUtils MagFieldElements MagFieldConditions InDetConditionsSummaryService xAODInDetMeasurement SiSpacePoint
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} InDetRIO_OnTrack StoreGateLib TrkExUtils TrkMaterialOnTrack TrkPrepRawData TrkRIO_OnTrack TrkSpacePoint)
+                   PRIVATE_LINK_LIBRARIES InDetRIO_OnTrack StoreGateLib TrkExUtils TrkMaterialOnTrack TrkPrepRawData TrkRIO_OnTrack TrkSpacePoint)

@@ -30,7 +30,6 @@ atlas_add_library(
         TrigDecisionToolLib
         TrigNavToolsLib
     PRIVATE_LINK_LIBRARIES
-        ${Boost_LIBRARIES}
         ${CORAL_LIBRARIES}
         AthenaKernel
         CxxUtils

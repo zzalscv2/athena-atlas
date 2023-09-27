@@ -13,7 +13,7 @@ atlas_add_library( InDetVKalVxInJetToolLib
                    src/*.cxx
                    PUBLIC_HEADERS InDetVKalVxInJetTool
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AnalysisUtilsLib AthenaBaseComps BeamPipeGeoModelLib PixelReadoutGeometryLib CxxUtils GeoPrimitives InDetRecToolInterfaces MVAUtils PathResolver TrkNeutralParameters TrkToolInterfaces TrkVKalVrtFitterLib VxSecVertex xAODTracking xAODTruth xAODEventInfo xAODJet TestTools)
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AnalysisUtilsLib AthenaBaseComps BeamPipeGeoModelLib PixelReadoutGeometryLib CxxUtils GeoPrimitives InDetRecToolInterfaces MVAUtils PathResolver TrkNeutralParameters TrkToolInterfaces TrkVKalVrtFitterLib VxSecVertex xAODTracking xAODTruth xAODEventInfo xAODJet TestTools)
 
 atlas_add_component( InDetVKalVxInJetTool
                      src/components/*.cxx

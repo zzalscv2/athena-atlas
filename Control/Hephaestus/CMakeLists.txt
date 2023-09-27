@@ -23,8 +23,7 @@ atlas_add_library( MemoryTracker
 
 atlas_add_executable( hephprof
    src/HephProf/HephProf.cxx
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} )
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
 # Construct the python loadable modules:
 add_custom_command( TARGET MemoryTracker POST_BUILD

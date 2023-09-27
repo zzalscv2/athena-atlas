@@ -15,7 +15,7 @@ atlas_add_library( TrigPSC
                    PUBLIC_HEADERS TrigPSC
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${TDAQ-COMMON_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${TDAQ-COMMON_LIBRARIES} GaudiKernel
+                   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} GaudiKernel
                    PRIVATE_LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils TrigKernel PathResolver )
 
 # Install files from the package:

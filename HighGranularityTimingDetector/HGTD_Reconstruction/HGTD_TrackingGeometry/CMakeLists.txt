@@ -11,7 +11,7 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_component( HGTD_TrackingGeometry
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${GEOMODEL_LIBRARIES} GaudiKernel
+   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GaudiKernel
    AthenaKernel AthenaBaseComps CxxUtils StoreGateLib GeoPrimitives Identifier
    TrkGeometry TrkSurfaces TrkVolumes TrkDetDescrInterfaces TrkDetDescrUtils
    SubDetectorEnvelopesLib HGTD_ReadoutGeometry HGTD_Identifier )
