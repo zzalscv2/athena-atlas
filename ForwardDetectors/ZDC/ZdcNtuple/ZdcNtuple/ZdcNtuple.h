@@ -144,6 +144,8 @@ public:
   uint32_t t_timeStampNSOffset;
   float t_avgIntPerCrossing;
   float t_actIntPerCrossing;
+  uint8_t t_zdcEventInfoError;
+  uint32_t t_zdcEventInfoErrorWord;
 
   uint64_t t_trigger;
   uint32_t t_trigger_TBP;

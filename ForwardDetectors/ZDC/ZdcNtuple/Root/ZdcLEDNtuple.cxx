@@ -164,6 +164,11 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
         if (zdcMod->zdcType() == ZdcTypeInd)
         {
           int imod = zdcMod->zdcModule();
+	  if (!zdcMod->isAvailable<float>("Presample"+auxSuffix))
+	    {
+	      ANA_MSG_WARNING("Missing ZDC aux data");
+	      continue;
+	    }
           t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
           t_ZdcModuleADCSum[iside][imod] = zdcMod->auxdataConst<int>("ADCSum" + auxSuffix);
           t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<int>("MaxADC" + auxSuffix);
@@ -182,6 +187,11 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
         if ((zdcMod->zdcType() == RPDTypeInd) && (zdcMod->zdcModule() == RPDModuleInd))
         {
           int imod = zdcMod->zdcChannel();
+	  if (!zdcMod->isAvailable<float>("Presample"+auxSuffix))
+	    {
+	      ANA_MSG_WARNING("Missing RPD aux data");
+	      continue;
+	    }
           t_RPDModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
           t_RPDModuleADCSum[iside][imod] = zdcMod->auxdataConst<int>("ADCSum" + auxSuffix);
           t_RPDModuleMaxADC[iside][imod] = zdcMod->auxdataConst<int>("MaxADC" + auxSuffix);
