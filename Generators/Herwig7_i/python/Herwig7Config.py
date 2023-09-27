@@ -455,12 +455,16 @@ set /Herwig/Generators/EventGenerator:EventHandler:CascadeHandler:MPIHandler NUL
 
 """
 
+  # Set the tune schemes for the new angular ordering of the shower
   def set_tune_scheme(self, tune_scheme="DotProduct"):
-    if tune_scheme != "DotProduct-Veto" or tune_scheme != "DotProduct" or tune_scheme != "pT" or tune_scheme != "Q2":
+    tune_schemes = ["DotProduct-Veto","DotProduct","pT","Q2"]
+    if tune_scheme not in tune_schemes:
       athMsgLog.warn("Please choose one of the supported tune-schemes! (DotProduct-Veto,DotProduct,pT,Q2)")
+    else:
+      athMsgLog.info("{tune_scheme:s} was used for the tune scheme.".format(tune_scheme=tune_scheme))
     # create a tune-section in the config
     self.commands += """\
-## -------------
+\n## -------------
 ## Tune Settings
 ## -------------
 
@@ -468,3 +472,26 @@ set /Herwig/Generators/EventGenerator:EventHandler:CascadeHandler:MPIHandler NUL
 read snippets/EvolutionScheme-{tune_scheme:s}.in
 read snippets/Tune-{tune_scheme:s}.in
 """.format(tune_scheme=tune_scheme)
+
+  # Add the commands for enabling shower scale variations
+  def enable_angularShowerScaleVariations(self, do_variations=False):
+    if do_variations:
+      self.commands += """\
+\n## -----------------------
+## Shower scale variation
+## -----------------------
+cd /Herwig/Shower
+do ShowerHandler:AddVariation MUR2_MUF2_SHOWER_HARD     2 2     Hard
+do ShowerHandler:AddVariation MUR2_MUF1_SHOWER_HARD     2 1     Hard
+do ShowerHandler:AddVariation MUR1_MUF2_SHOWER_HARD     1 2     Hard
+do ShowerHandler:AddVariation MUR1_MUF0.5_SHOWER_HARD   1 0.5   Hard
+do ShowerHandler:AddVariation MUR0.5_MUF1_SHOWER_HARD   0.5 1   Hard
+do ShowerHandler:AddVariation MUR0.5_MUF0.5_SHOWER_HARD 0.5 0.5 Hard
+do ShowerHandler:AddVariation MUR2_MUF2_SHOWER_SEC      2 2     Secondary
+do ShowerHandler:AddVariation MUR2_MUF1_SHOWER_SEC      2 1     Secondary
+do ShowerHandler:AddVariation MUR1_MUF2_SHOWER_SEC      1 2     Secondary
+do ShowerHandler:AddVariation MUR1_MUF0.5_SHOWER_SEC    1 0.5   Secondary
+do ShowerHandler:AddVariation MUR0.5_MUF1_SHOWER_SEC    0.5 1   Secondary
+do ShowerHandler:AddVariation MUR0.5_MUF0.5_SHOWER_SEC  0.5 0.5 Secondary
+set SplittingGenerator:Detuning 2.0      
+"""

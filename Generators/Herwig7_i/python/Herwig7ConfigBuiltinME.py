@@ -69,6 +69,9 @@ saverun {} /Herwig/Generators/EventGenerator
     if not self.set_technical_parameter_commands:
       self.default_commands += self.technical_parameter_commands()
 
+    # add the shower scale-variations for the ME calculation
+    self.enable_angularShowerScaleVariations(do_variations=True)
+
     ## do read and run step in one go
 
     hw7Control.run(self)
