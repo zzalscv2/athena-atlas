@@ -14,6 +14,7 @@
 // Input Containers
 #include "xAODForward/ZdcModuleContainer.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "xAODEventInfo/EventInfo.h"
 
 /**
  * @class FwdZDCMonitoringAlg
@@ -34,6 +35,8 @@ private:
       this, "ZdcModuleContainerKey", "ZdcModules", "Read handle key for ZdcModuleContainer"};
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleCalibEnergyKey 
    {this, "ZdcModuleCalibEnergyKey", "ZdcModules.CalibEnergy", "ReadHandleKey for Zdc CalibEnergy AuxData"};
+   
+   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "eventInfoDecorKey", "EventInfo.forwardDetFlags", "Key for EventInfo decoration object"};  
 };
 
 #endif // TRIGMINBIASMONITORING_FWDZDCMONITORINGALG_H
