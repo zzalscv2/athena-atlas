@@ -213,6 +213,7 @@ JetChainParts = {
        'presel2c20XX2c20bg80',
        'presel2c20XX2c20b90',
        'presel3c20XX1c20b85',
+       'presel3c20XX1c20bg85',
        'preselj20b95',
        'preselj2b77',
        'preselj20b77',

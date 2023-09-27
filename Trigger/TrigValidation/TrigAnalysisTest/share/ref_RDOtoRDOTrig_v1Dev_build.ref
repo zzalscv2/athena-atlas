@@ -23362,6 +23362,50 @@ HLT_tau20_mediumRNN_tracktwoMVA_L1eTAU12:
     2: 75
     3: 75
     4: 6
+? HLT_tau20_mediumRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 111
+    8: 11
+? HLT_tau20_mediumRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 111
+    8: 12
 ? HLT_tau20_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn170_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 5
   stepCounts:
@@ -23406,7 +23450,51 @@ HLT_tau20_mediumRNN_tracktwoMVA_L1eTAU12:
     6: 25
     7: 102
     8: 11
+? HLT_tau20_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 102
+    8: 11
 ? HLT_tau20_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 102
+    8: 12
+? HLT_tau20_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 5
   stepCounts:
     0: 14
@@ -23672,6 +23760,94 @@ HLT_tau20_mediumRNN_tracktwoMVA_probe_j60_pf_ftf_preselj50_03dRAB_L1jJ50:
     4: 75
     5: 75
     6: 6
+? HLT_tau20_mediumRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 24
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
+? HLT_tau20_mediumRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 26
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
+? HLT_tau20_mediumRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 24
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
+? HLT_tau20_mediumRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 26
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
 HLT_tau20_mediumRNN_tracktwoMVA_probe_j85_pf_ftf_preselj50_03dRAB_L1J20:
   eventCount: 5
   stepCounts:
@@ -23908,6 +24084,50 @@ HLT_tau20_perf_tracktwoMVA_L1eTAU12:
     2: 75
     3: 75
     4: 28
+? HLT_tau20_tightRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 111
+    8: 11
+? HLT_tau20_tightRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 111
+    8: 12
 ? HLT_tau20_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn170_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 5
   stepCounts:
@@ -23952,6 +24172,28 @@ HLT_tau20_perf_tracktwoMVA_L1eTAU12:
     6: 25
     7: 102
     8: 11
+? HLT_tau20_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 102
+    8: 11
 ? HLT_tau20_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 5
   stepCounts:
@@ -23974,6 +24216,116 @@ HLT_tau20_perf_tracktwoMVA_L1eTAU12:
     6: 25
     7: 102
     8: 12
+? HLT_tau20_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 5
+    5: 5
+    6: 5
+    7: 5
+    8: 5
+  stepFeatures:
+    0: 64
+    1: 64
+    2: 64
+    3: 64
+    4: 6
+    5: 25
+    6: 25
+    7: 102
+    8: 12
+? HLT_tau20_tightRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 24
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
+? HLT_tau20_tightRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 26
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
+? HLT_tau20_tightRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 24
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
+? HLT_tau20_tightRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 5
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 5
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 26
+    4: 59
+    5: 59
+    6: 59
+    7: 59
+    8: 6
 HLT_tau25_idperf_trackLRT_L1TAU12IM:
   eventCount: 16
   stepCounts:
@@ -24244,6 +24596,50 @@ HLT_tau25_mediumRNN_tracktwoMVA_L1jTAU20:
     2: 69
     3: 69
     4: 3
+? HLT_tau25_mediumRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 66
+    8: 5
+? HLT_tau25_mediumRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 66
+    8: 5
 ? HLT_tau25_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn170_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 3
   stepCounts:
@@ -24288,6 +24684,28 @@ HLT_tau25_mediumRNN_tracktwoMVA_L1jTAU20:
     6: 15
     7: 61
     8: 5
+? HLT_tau25_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 61
+    8: 5
 ? HLT_tau25_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 3
   stepCounts:
@@ -24310,6 +24728,116 @@ HLT_tau25_mediumRNN_tracktwoMVA_L1jTAU20:
     6: 15
     7: 61
     8: 5
+? HLT_tau25_mediumRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 61
+    8: 5
+? HLT_tau25_mediumRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 24
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
+? HLT_tau25_mediumRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 26
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
+? HLT_tau25_mediumRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 24
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
+? HLT_tau25_mediumRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 26
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
 HLT_tau25_mediumRNN_tracktwoMVA_probe_xe65_cell_xe100_pfopufit_L1XE50:
   eventCount: 0
   stepCounts:
@@ -24696,6 +25224,50 @@ HLT_tau25_tightRNN_tracktwoMVA_L1TAU12IM:
     2: 27
     3: 27
     4: 3
+? HLT_tau25_tightRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 66
+    8: 5
+? HLT_tau25_tightRNN_tracktwoMVA_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 66
+    8: 5
 ? HLT_tau25_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn170_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 3
   stepCounts:
@@ -24740,6 +25312,28 @@ HLT_tau25_tightRNN_tracktwoMVA_L1TAU12IM:
     6: 15
     7: 61
     8: 5
+? HLT_tau25_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 61
+    8: 5
 ? HLT_tau25_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20b85_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 3
   stepCounts:
@@ -24762,6 +25356,116 @@ HLT_tau25_tightRNN_tracktwoMVA_L1TAU12IM:
     6: 15
     7: 61
     8: 5
+? HLT_tau25_tightRNN_tracktwoMVA_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 3
+    5: 3
+    6: 3
+    7: 3
+    8: 3
+  stepFeatures:
+    0: 58
+    1: 58
+    2: 58
+    3: 58
+    4: 3
+    5: 15
+    6: 15
+    7: 61
+    8: 5
+? HLT_tau25_tightRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 24
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
+? HLT_tau25_tightRNN_tracktwoMVA_probe_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 282
+    3: 26
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
+? HLT_tau25_tightRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn177_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 24
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
+? HLT_tau25_tightRNN_tracktwoMVA_probe_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn185_pf_ftf_presel3c20XX1c20bg85_L1J45p0ETA21_3J15p0ETA25
+: eventCount: 3
+  stepCounts:
+    0: 14
+    1: 14
+    2: 13
+    3: 13
+    4: 13
+    5: 13
+    6: 13
+    7: 13
+    8: 3
+  stepFeatures:
+    0: 70
+    1: 70
+    2: 266
+    3: 26
+    4: 53
+    5: 53
+    6: 53
+    7: 53
+    8: 3
 HLT_tau30_idperf_tracktwoMVA_tau20_idperf_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25:
   eventCount: 6
   stepCounts:
