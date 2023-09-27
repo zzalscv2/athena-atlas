@@ -15,9 +15,6 @@
 
 #include "CxxUtils/no_sanitize_undefined.h"
 #include "CxxUtils/vec.h"
-#include "boost/preprocessor/list/first_n.hpp"
-#include "boost/preprocessor/list/for_each.hpp"
-#include "boost/preprocessor/variadic/to_list.hpp"
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -431,6 +428,23 @@ test_convert_to_int(const VEC& v1)
   }
 }
 
+/**
+ * Helper to fill a vector with N
+ * elements. Where N the size of the vec
+ */
+template <typename VEC, typename... Args>
+inline void fillHelper(VEC& vec, Args... args) {
+  constexpr size_t N = CxxUtils::vec_size<VEC>();
+  size_t pos{0};
+  for (auto value : {args...}) {
+    if (pos < N) {
+      vec[pos] = value;
+    }else{
+      break;
+    }
+    ++pos;
+  }
+}
 
 template<template<class T, size_t N> class VEC>
 void
@@ -441,30 +455,22 @@ testFloat1()
   assert((CxxUtils::vec_size<VEC<float, 4>>()) == 4);
   assert(CxxUtils::vec_size(v) == 4);
 
-#define ELT(r, data, elem) elem,
-#define INITN(N, ...)                                                          \
-  {                                                                            \
-    BOOST_PP_LIST_FOR_EACH(                                                    \
-      ELT,                                                                     \
-      _,                                                                       \
-      BOOST_PP_LIST_FIRST_N(N, BOOST_PP_VARIADIC_TO_LIST(__VA_ARGS__)))        \
-  }
-
-#define TEST_FLOAT(T, N)                                                       \
-  do {                                                                         \
-    test_arith(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));    \
-    test_relops(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));   \
-    test_broadcast(                                                            \
-      VEC<T, N> INITN(N, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));             \
-    test_storeload(                                                            \
-      VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));             \
-    test_select(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));   \
-    test_min(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));      \
-    test_max(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));      \
-    test_permute(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));  \
-    test_blend(VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));    \
-    test_convert_to_int(                                                       \
-      VEC<T, N> INITN(N, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5));             \
+#define TEST_FLOAT(T, N)                                          \
+  do {                                                            \
+    VEC<T, N> testVec1;                                           \
+    fillHelper(testVec1, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5); \
+    VEC<T, N> testVec2;                                           \
+    fillHelper(testVec2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); \
+    test_arith(testVec1);                                         \
+    test_relops(testVec1);                                        \
+    test_broadcast(testVec2);                                     \
+    test_storeload(testVec1);                                     \
+    test_select(testVec1);                                        \
+    test_min(testVec1);                                           \
+    test_max(testVec1);                                           \
+    test_permute(testVec1);                                       \
+    test_blend(testVec1);                                         \
+    test_convert_to_int(testVec1);                                \
   } while (0)
 
   TEST_FLOAT(float, 4); // 128 bit wide 4 floats
@@ -474,8 +480,6 @@ testFloat1()
   TEST_FLOAT(double, 4); // 256 bit wide 4 double
 
 #undef TEST_FLOAT
-#undef INITN
-#undef ELT
 }
 
 
@@ -488,41 +492,27 @@ testInt1()
   assert((CxxUtils::vec_size<VEC<int, 4>>()) == 4);
   assert(CxxUtils::vec_size(v) == 4);
 
-#define ELT(r, data, elem) elem,
-#define INITN(N, ...)                                                          \
-  {                                                                            \
-    BOOST_PP_LIST_FOR_EACH(                                                    \
-      ELT,                                                                     \
-      _,                                                                       \
-      BOOST_PP_LIST_FIRST_N(N, BOOST_PP_VARIADIC_TO_LIST(__VA_ARGS__)))        \
-  }
-
-#define TEST_INT(T, N)                                                         \
-  do {                                                                         \
-    test_arith(VEC<T, N> INITN(                                                \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_relops(VEC<T, N> INITN(                                               \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_broadcast(                                                            \
-      VEC<T, N> INITN(N, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));     \
-    test_storeload(VEC<T, N> INITN(                                            \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_select(VEC<T, N> INITN(                                               \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_min(VEC<T, N> INITN(                                                  \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_max(VEC<T, N> INITN(                                                  \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_permute(VEC<T, N> INITN(                                              \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_blend(VEC<T, N> INITN(                                                \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_convert_to_double(VEC<T, N> INITN(                                    \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_int(VEC<T, N> INITN(                                                  \
-      N, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16));              \
-    test_logops(                                                               \
-      VEC<T, N> INITN(N, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1));     \
+#define TEST_INT(T, N)                                                      \
+  do {                                                                      \
+    VEC<T, N> testVec1;                                                     \
+    fillHelper(testVec1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, \
+               16);                                                         \
+    VEC<T, N> testVec2;                                                     \
+    fillHelper(testVec2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);   \
+    VEC<T, N> testVec3;                                                     \
+    fillHelper(testVec3, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1);   \
+    test_arith(testVec1);                                                   \
+    test_relops(testVec1);                                                  \
+    test_broadcast(testVec2);                                               \
+    test_storeload(testVec1);                                               \
+    test_select(testVec1);                                                  \
+    test_min(testVec1);                                                     \
+    test_max(testVec1);                                                     \
+    test_permute(testVec1);                                                 \
+    test_blend(testVec1);                                                   \
+    test_convert_to_double(testVec1);                                       \
+    test_int(testVec1);                                                     \
+    test_logops(testVec3);                                                  \
   } while (0)
 
   TEST_INT(int8_t, 16); // 128 bit wide
@@ -548,8 +538,6 @@ testInt1()
   TEST_INT(uint64_t, 4); // 256 bit wide
 
 #undef TEST_INT
-#undef INITN
-#undef ELT
 }
 
 #endif
