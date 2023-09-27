@@ -213,7 +213,7 @@ ThinGeantTruthAlg::execute(const EventContext& ctx) const
     encounteredBarcodes.clear();
     const xAOD::TruthParticle* particle = (*truthParticles)[i];
     // Retain status 1 BSM particles and descendants
-    if (MC::ThinGeantTruthAlg_isStatus1BSMParticle(particle)) {
+    if (MC::isBSM(particle) && MC::isStable(particle)) {
       descendants(particle, particleMask, encounteredBarcodes);
       encounteredBarcodes.clear();
     }
