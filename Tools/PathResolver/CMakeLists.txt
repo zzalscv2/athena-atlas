@@ -9,7 +9,7 @@ if( NOT XAOD_STANDALONE )
 endif()
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem )
+find_package( Boost )
 find_package( ROOT COMPONENTS RIO Core )
 
 # Component(s) in the package:
@@ -18,7 +18,7 @@ atlas_add_library( PathResolver
    PUBLIC_HEADERS PathResolver
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${extra_libs} )
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} )
 
 atlas_add_dictionary( PathResolverDict
    PathResolver/PathResolverDict.h PathResolver/selection.xml
