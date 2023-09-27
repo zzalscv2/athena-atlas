@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsMuonDecorator.h
@@ -19,6 +19,7 @@
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODMuon/MuonContainer.h"
+#include "CaloEvent/CaloCellContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "ParticlesInConeTools/ITrackParticlesInConeTool.h"
@@ -58,8 +59,11 @@ namespace DerivationFramework {
       Gaudi::Property<double> m_isoCone{this, "IsoCone", 0.4};
       Gaudi::Property<double> m_maxRelEtrkInIsoCone{this, "MaxRelETrkInIsoCone", 0.1};
       Gaudi::Property<bool> m_saveTileCellMuonInfo{this, "SaveTileCellMuonInfo", true};
+      Gaudi::Property<double> m_gapCrackCellsInDeltaEta{this, "GapCrackCellsInDeltaEta", 0.5};
+      Gaudi::Property<double> m_gapCrackCellsInDeltaPhi{this, "GapCrackCellsInDeltaPhi", 0.5};
 
       SG::ReadHandleKey<xAOD::MuonContainer> m_muonContainerKey{this, "MuonContainer", "Muons"};
+      SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey{this, "CellContainer", "AllCalo"};
 
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_selectedMuKey{this, "SelectedMuon", "SelectedMuon"};
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_econeMuKey{this, "Etrkcone", "etrkcone"};
