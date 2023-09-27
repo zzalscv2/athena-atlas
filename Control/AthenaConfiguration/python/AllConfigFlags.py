@@ -422,6 +422,11 @@ def initConfigFlags():
         return createTauConfigFlags()
     _addFlagsCategory(acf, "Tau",__tau, 'tauRec')
 
+    def __ditau():
+        from DiTauRec.DiTauConfigFlags import createDiTauConfigFlags
+        return createDiTauConfigFlags()
+    _addFlagsCategory(acf, "DiTau",__ditau, 'DiTauRec')
+ 
     def __pflow():
         from eflowRec.PFConfigFlags import createPFConfigFlags
         return createPFConfigFlags()
