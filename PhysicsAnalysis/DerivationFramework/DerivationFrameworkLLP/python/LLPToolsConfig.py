@@ -6,6 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 # Thinning for VSI tracks
 def VSITrackParticleThinningCfg(ConfigFlags, name, **kwargs):
@@ -192,8 +193,7 @@ def LRTElectronLHSelectorsCfg(ConfigFlags):
     from ROOT import LikeEnum
 
     lhMenu = electronLHmenu.offlineMC21
-    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
-    if geoFlags.Run() == "RUN2" :
+    if ConfigFlags.GeoModel.Run is LHCPeriod.Run2:
         lhMenu = electronLHmenu.offlineMC20
 
     ElectronLHSelectorVeryLooseNoPix = acc.popToolsAndMerge(AsgElectronLikelihoodToolCfg(
