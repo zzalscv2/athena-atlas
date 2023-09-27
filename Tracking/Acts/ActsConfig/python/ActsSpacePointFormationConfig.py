@@ -27,10 +27,6 @@ def ActsCoreStripSpacePointToolCfg(flags, name = "ActsCoreStripSpacePointTool", 
     from ActsConfig.ActsEventCnvConfig import ActsToTrkConverterToolCfg
     kwargs.setdefault("ConverterTool", acc.popToolsAndMerge(ActsToTrkConverterToolCfg(flags)))
 
-    # need to persistify source link helper container to ensure that source links do not contaion
-    # stale pointers pointing to freed memory
-    kwargs.setdefault("ATLASUncalibSourceLinkElementsName","ACTSStripSourceLinkElements")
-
     acc.setPrivateTools(CompFactory.ActsTrk.ActsCoreStripSpacePointFormationTool(name, **kwargs))
     return acc
 

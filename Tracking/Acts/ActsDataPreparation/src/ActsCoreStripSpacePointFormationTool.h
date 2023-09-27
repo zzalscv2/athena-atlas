@@ -92,7 +92,7 @@ namespace ActsTrk {
     std::pair<Amg::Vector3D, Amg::Vector3D > getStripEnds(const xAOD::StripCluster* cluster,
 							  const InDetDD::SiDetectorElement* element,
 							  size_t& stripIndex) const;
-    std::pair<Amg::Vector3D, Amg::Vector3D > getStripEnds(ATLASUncalibSourceLink sourceLink,
+    std::pair<Amg::Vector3D, Amg::Vector3D > getStripEnds(const ATLASUncalibSourceLink &sourceLink,
 							  const InDetDD::SiDetectorElement* element,
 							  size_t& stripIndex) const;
     const SCT_ID* m_stripId{};
@@ -108,9 +108,6 @@ namespace ActsTrk {
     Gaudi::Property<float> m_overlapLimitEtaMax{this, "OverlapLimitEtaMax", 3.0, "High overlap limit for eta-neighbours."};
     Gaudi::Property<float> m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
     Gaudi::Property<float> m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
-
-    SG::WriteHandleKey< std::vector<ATLASUncalibSourceLink::ElementsType> > m_sourceLinksOut
-       {this, "ATLASUncalibSourceLinkElementsName","" /*"StripSourceLinkElements"*/, ""};
   };
 
 }

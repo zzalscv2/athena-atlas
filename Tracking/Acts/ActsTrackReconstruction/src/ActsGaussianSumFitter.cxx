@@ -70,10 +70,11 @@ StatusCode ActsGaussianSumFitter::initialize() {
               logger().cloneWithSuffix("GaussianSumFitter"));
 
   m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::TrackStateBackend>>();
-  m_gsfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>>(*m_ATLASConverterTool);
+  m_gsfExtensions.calibrator.connect(*m_calibrator);
 
-  m_surfaceAccessor.trackingGeometry = m_trackingGeometryTool->trackingGeometry().get();
-  m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::trkMeasurementBase>(&m_surfaceAccessor);
+  m_surfaceAccessor.m_converterTool = &(*m_ATLASConverterTool);
+  m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::TrackStateBackend>>(&m_outlierFinder);
@@ -121,9 +122,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 				calContext, 
 				*pSurface);
 
-  std::vector<typename ATLASSourceLink::ElementsType> elementCollection;
-
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack,elementCollection);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack);
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters((*inputTrack.perigeeParameters()), tgContext);
 
   return performFit(ctx, 
@@ -169,14 +168,11 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
   gsfOptions.abortOnError = false;
 
-  std::vector< ATLASSourceLink > trackSourceLinks;
+  std::vector< Acts::SourceLink > trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
 
-  std::vector< ATLASSourceLink::ElementsType > elementCollection;
-  elementCollection.reserve(inputMeasSet.size());
-
   for (auto* measSet : inputMeasSet) {
-    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet, elementCollection));
+    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *measSet));
   }
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
@@ -249,17 +245,11 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 				calContext,
 				*pSurface);
 
-  std::vector< ATLASSourceLink::ElementsType > elementCollection;
-
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack, elementCollection);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
 
-
-  std::vector< typename ATLASSourceLink::ElementsType > atlasElementCollection;
-  atlasElementCollection.reserve(addMeasColl.size());
-
   for (auto* meas : addMeasColl)  {
-    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *meas, atlasElementCollection));
+    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, *meas));
   }
 
   return performFit(ctx,
@@ -332,11 +322,8 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 				calContext,
 				*pSurface);
 
-  std::vector< typename ATLASSourceLink::ElementsType > elementCollection1;
-  std::vector< typename ATLASSourceLink::ElementsType > elementCollection2;
-
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1, elementCollection1);
-  std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2, elementCollection2);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);
+  std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
   const auto &initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(intrk1.perigeeParameters()), tgContext);
 
@@ -453,7 +440,8 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
     std::unique_ptr<Trk::MeasurementBase> measState;
     if (state.hasUncalibratedSourceLink()){
       auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
-      measState = sl.atlasHit().uniqueClone();
+      assert(sl);
+      measState = sl->uniqueClone();
     }
     double nDoF = state.calibratedSize();
     auto quality =Trk::FitQualityOnSurface(state.chi2(), nDoF);
@@ -530,7 +518,7 @@ std::unique_ptr<Trk::Track>
 ActsGaussianSumFitter::performFit(const EventContext& ctx,
 				  const Acts::GeometryContext& tgContext,
 				  const Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
-				  const std::vector<ATLASSourceLink>& trackSourceLinks,
+				  const std::vector<Acts::SourceLink>& trackSourceLinks,
 				  const Acts::BoundTrackParameters& initialParams) const
 {
   if (trackSourceLinks.empty()) {
@@ -542,12 +530,8 @@ ActsGaussianSumFitter::performFit(const EventContext& ctx,
     Acts::VectorTrackContainer{},
     Acts::VectorMultiTrajectory{}};
 
-  // Convert to Acts::SourceLink during iteration
-  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
-  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
-
   // Perform the fit
-  auto result = m_fitter->fit(begin, end,
+  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
 			      initialParams, gsfOptions, tracks);
 
   // Convert

@@ -18,7 +18,6 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 // PACKAGE
-#include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
@@ -37,6 +36,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "ActsEvent/MultiTrajectory.h"
 #include "Acts/EventData/TrackStatePropMask.hpp"
+#include "Acts/EventData/SourceLink.hpp"
 
 // STL
 #include <cmath>
@@ -47,10 +47,13 @@
 namespace ActsTrk {
 
 // Forward definitions of local functions
+// @TODO unused, remove ?
+#pragma GCC diagnostic ignored "-Wunused-function"
 static void ActsMeasurementCheck(const Acts::GeometryContext &gctx,
                                  const Trk::MeasurementBase &measurement,
                                  const Acts::Surface &surface,
                                  const Acts::BoundVector &loc);
+#pragma GCC diagnostic pop
 
 static void ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
@@ -119,97 +122,32 @@ const Acts::Surface &ActsTrk::ActsToTrkConverterTool::trkSurfaceToActsSurface(
   throw std::domain_error("No Acts surface corresponding to the ATLAS one");
 }
 
-const ATLASSourceLink
-ActsTrk::ActsToTrkConverterTool::trkMeasurementToSourceLink(
-    const Acts::GeometryContext &gctx, const Trk::MeasurementBase &measurement,
-    std::vector<ATLASSourceLink::ElementsType> &externalCollection) const {
-
-  const Acts::Surface &surface =
-      trkSurfaceToActsSurface(measurement.associatedSurface());
-  Acts::BoundVector loc = Acts::BoundVector::Zero();
-  Acts::BoundMatrix cov = Acts::BoundMatrix::Zero();
-  int dim = measurement.localParameters().dimension();
-  if (dim == 1) {
-    loc[Acts::eBoundLoc0] = measurement.localParameters()[Trk::locX];
-    cov.topLeftCorner<1, 1>() = measurement.localCovariance();
-  } else if (dim >= 2) {
-    loc[Acts::eBoundLoc0] = measurement.localParameters()[Trk::locX];
-    loc[Acts::eBoundLoc1] = measurement.localParameters()[Trk::locY];
-    cov.topLeftCorner<2, 2>() = measurement.localCovariance();
-  } else {
-    throw std::domain_error("Cannot handle measurement dim>2");
-  }
-
-  if (m_visualDebugOutput) {
-    // debug Annulus surface measurements
-    ActsMeasurementCheck(gctx, measurement, surface, loc);
-  }
-  externalCollection.push_back(
-      std::make_tuple(&measurement, loc, cov, dim, surface.bounds().type()));
-  return ATLASSourceLink(surface, externalCollection.back());
+Acts::SourceLink ActsTrk::ActsToTrkConverterTool::trkMeasurementToSourceLink(
+    [[maybe_unused]] const Acts::GeometryContext& gctx,
+    const Trk::MeasurementBase &measurement) const
+{
+   return Acts::SourceLink(&measurement);
 }
 
-const ATLASUncalibSourceLink
-ActsTrk::ActsToTrkConverterTool::uncalibratedTrkMeasurementToSourceLink(
-    const InDetDD::SiDetectorElementCollection &detectorElements,
-    const xAOD::UncalibratedMeasurement &measurement,
-    std::vector<ATLASUncalibSourceLink::ElementsType> &externalCollection)
-    const {
-  const InDetDD::SiDetectorElement *elem =
-      detectorElements.getDetectorElement(measurement.identifierHash());
-  if (!elem) {
-    throw std::domain_error("No detector element for measurement");
-  }
-  const Acts::Surface &surface = trkSurfaceToActsSurface(elem->surface());
-  Acts::BoundVector loc = Acts::BoundVector::Zero();
-  Acts::BoundMatrix cov = Acts::BoundMatrix::Zero();
-  xAOD::UncalibMeasType typ = measurement.type();
 
-  std::size_t dim = 0;
-  switch (typ) {
-    case (xAOD::UncalibMeasType::StripClusterType):
-      dim = 1;
-      loc[Acts::eBoundLoc0] = measurement.localPosition<1>()[Trk::locX];
-      cov.topLeftCorner<1, 1>() =
-          measurement.localCovariance<1>().cast<Acts::ActsScalar>();
-      break;
-    case (xAOD::UncalibMeasType::PixelClusterType):
-      dim = 2;
-      loc[Acts::eBoundLoc0] = measurement.localPosition<2>()[Trk::locX];
-      loc[Acts::eBoundLoc1] = measurement.localPosition<2>()[Trk::locY];
-      cov.topLeftCorner<2, 2>() =
-          measurement.localCovariance<2>().cast<Acts::ActsScalar>();
-      break;
-    default:
-      throw std::domain_error(
-          "Can only handle measurement type pixel or strip");
-  };
-
-  externalCollection.push_back(
-      std::make_tuple(&measurement, loc, cov, dim, surface.bounds().type()));
-  return ATLASUncalibSourceLink(surface, externalCollection.back());
-}
-
-const std::vector<ATLASSourceLink>
+std::vector<Acts::SourceLink>
 ActsTrk::ActsToTrkConverterTool::trkTrackToSourceLinks(
-    const Acts::GeometryContext &gctx, const Trk::Track &track,
-    std::vector<ATLASSourceLink::ElementsType> &collection) const {
+    const Acts::GeometryContext &gctx, const Trk::Track &track) const {
   auto hits = track.measurementsOnTrack();
   auto outliers = track.outliersOnTrack();
 
-  std::vector<ATLASSourceLink> sourceLinks;
+  std::vector<Acts::SourceLink> sourceLinks;
   sourceLinks.reserve(hits->size() + outliers->size());
 
-  collection.reserve(hits->size() + outliers->size());
-
   for (auto it = hits->begin(); it != hits->end(); ++it) {
-    sourceLinks.push_back(trkMeasurementToSourceLink(gctx, **it, collection));
+     sourceLinks.push_back(trkMeasurementToSourceLink(gctx, **it));
   }
   for (auto it = outliers->begin(); it != outliers->end(); ++it) {
-    sourceLinks.push_back(trkMeasurementToSourceLink(gctx, **it, collection));
+    sourceLinks.push_back(trkMeasurementToSourceLink(gctx, **it));
   }
   return sourceLinks;
 }
+
 
 const Acts::BoundTrackParameters
 ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
@@ -570,6 +508,7 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
 
 // Local functions to check/debug Annulus bounds
 
+#pragma GCC diagnostic ignored "-Wunused-function"
 static void ActsTrk::ActsMeasurementCheck(
     const Acts::GeometryContext &gctx, const Trk::MeasurementBase &measurement,
     const Acts::Surface &surface, const Acts::BoundVector &loc) {
@@ -661,6 +600,7 @@ static void ActsTrk::ActsMeasurementCheck(
     std::cout << std::endl;
   }
 }
+#pragma GCC diagnostic pop
 
 void ActsTrk::ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,

@@ -33,9 +33,11 @@
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
 
 #include "TableUtils.h"
+#include "MeasurementCalibrator.h"
 // Other
 #include <sstream>
 #include <functional>
@@ -56,11 +58,13 @@ namespace {
 
    void gatherGeoIds(const ActsTrk::IActsToTrkConverterTool &converter_tool,
                      const InDetDD::SiDetectorElementCollection &detectorElements,
-                     std::vector<Acts::GeometryIdentifier> &geo_ids) {
+                     std::vector<Acts::GeometryIdentifier> &geo_ids,
+                     std::vector<const Acts::Surface *> &acts_surfaces) {
       for (const auto *det_el :  detectorElements) {
          const Acts::Surface &surface =
             converter_tool.trkSurfaceToActsSurface(det_el->surface());
          geo_ids.push_back(surface.geometryId());
+         acts_surfaces.push_back( &surface );
       }
    }
 }
@@ -111,7 +115,6 @@ namespace ActsTrk
     ATH_CHECK(m_pixelEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_stripEstimatedTrackParametersKey.initialize(SG::AllowEmpty));
     ATH_CHECK(m_trackContainerKey.initialize());
-    ATH_CHECK(m_sourceLinksOutKey.initialize());
 
     ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
     ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -152,7 +155,6 @@ namespace ActsTrk
 
     trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
     trackFinder().ckfExtensions.smoother.connect<&gainMatrixSmoother>();
-    trackFinder().ckfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend, ATLASUncalibSourceLink>>();
     trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&trackFinder().measurementSelector);
 
     if (!m_statEtaBins.empty()) {
@@ -466,17 +468,6 @@ namespace ActsTrk
       ATH_MSG_DEBUG("Retrieved " << stripDetEleColl->size() << " input condition elements from key " << m_stripDetEleCollKey.key());
     }
 
-    // convert all measurements to source links, so the CKF can find them from either strip or pixel seeds.
-    SG::WriteHandle<std::vector<ATLASUncalibSourceLink::ElementsType>> sourceLinksOutHandle(m_sourceLinksOutKey, ctx);
-    ATH_CHECK(sourceLinksOutHandle.record(std::make_unique<std::vector<ATLASUncalibSourceLink::ElementsType>>()));
-    if (!sourceLinksOutHandle.isValid())
-    {
-      ATH_MSG_FATAL("Failed to write ATLASUncalibSourceLink elements collection with key " << m_sourceLinksOutKey.key());
-      return StatusCode::FAILURE;
-    }
-
-    size_t numPixelMeasurements = (pixelClusterContainer ? pixelClusterContainer->size() : 0u);
-    size_t numStripMeasurements = (stripClusterContainer ? stripClusterContainer->size() : 0u);
     std::array<xAOD::DetectorIDHashType, 3> max_hash{ };
     {
        std::pair< xAOD::DetectorIDHashType, bool> max_hash_ordered = getMaxHashAndCheckOrder(*pixelClusterContainer);
@@ -499,17 +490,20 @@ namespace ActsTrk
 
     // @TODO make this condition data
     std::vector< Acts::GeometryIdentifier > geo_ids;
+    std::array<std::vector< const Acts::Surface * >, 4> acts_surfaces;
     geo_ids.reserve(   max_hash[ static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType)]
                      + max_hash[static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType)]);
-    gatherGeoIds(*m_ATLASConverterTool, *pixelDetEleColl, geo_ids);
-    gatherGeoIds(*m_ATLASConverterTool, *stripDetEleColl, geo_ids);
+    acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType) )
+       .reserve(   max_hash[ static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType)] );
+    acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) )
+       .reserve(   max_hash[ static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType)] );
+    gatherGeoIds(*m_ATLASConverterTool, *pixelDetEleColl, geo_ids, acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::PixelClusterType) ));
+    gatherGeoIds(*m_ATLASConverterTool, *stripDetEleColl, geo_ids, acts_surfaces.at(static_cast<unsigned int>(xAOD::UncalibMeasType::StripClusterType) ));
     std::sort( geo_ids.begin(), geo_ids.end());
 
-    TrackFindingMeasurements measurements(numPixelMeasurements + numStripMeasurements,
-                                          std::max(numPixelMeasurements, numStripMeasurements),
-                                          geo_ids,
-                                          !m_trackStatePrinter.empty(),
-                                          sourceLinksOutHandle.ptr());
+    TrackingSurfaceHelper tracking_surface_helper(std::move(acts_surfaces));
+    TrackFindingMeasurements measurements(geo_ids,
+                                          !m_trackStatePrinter.empty());
 
     DuplicateSeedDetector duplicateSeedDetector(((pixelSeeds ? pixelSeeds->size() : 0u) +
                                                  (stripSeeds ? stripSeeds->size() : 0u)),
@@ -518,14 +512,16 @@ namespace ActsTrk
     if (pixelClusterContainer && pixelDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << pixelClusterContainer->size() << " source links from pixel measurements");
-      measurements.addMeasurements(0, ctx, *pixelClusterContainer, *pixelDetEleColl, pixelSeeds,
-                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector);
+      tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::PixelClusterType, pixelDetEleColl);
+      measurements.addMeasurements(0, *pixelClusterContainer, *pixelDetEleColl, pixelSeeds,
+                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector, ctx);
     }
     if (stripClusterContainer && stripDetEleColl)
     {
       ATH_MSG_DEBUG("Create " << stripClusterContainer->size() << " source links from strip measurements");
-      measurements.addMeasurements(1, ctx, *stripClusterContainer, *stripDetEleColl, stripSeeds,
-                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector);
+      tracking_surface_helper.setSiDetectorElements(xAOD::UncalibMeasType::StripClusterType, stripDetEleColl);
+      measurements.addMeasurements(1, *stripClusterContainer, *stripDetEleColl, stripSeeds,
+                                   m_ATLASConverterTool, m_trackStatePrinter, duplicateSeedDetector, ctx);
     }
 
     // ================================================== //
@@ -551,6 +547,7 @@ namespace ActsTrk
     {
       ATH_CHECK(findTracks(ctx,
                            measurements,
+                           tracking_surface_helper,
                            duplicateSeedDetector,
                            *pixelEstimatedTrackParameters,
                            pixelSeeds,
@@ -564,6 +561,7 @@ namespace ActsTrk
     {
       ATH_CHECK(findTracks(ctx,
                            measurements,
+                           tracking_surface_helper,
                            duplicateSeedDetector,
                            *stripEstimatedTrackParameters,
                            stripSeeds,
@@ -609,6 +607,7 @@ namespace ActsTrk
   StatusCode
   TrackFindingAlg::findTracks(const EventContext &ctx,
                               const TrackFindingMeasurements &measurements,
+                              const TrackingSurfaceHelper &tracking_surface_helper,
                               DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                               const ActsTrk::SeedContainer *seeds,
@@ -633,7 +632,7 @@ namespace ActsTrk
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-    UncalibSourceLinkAccessor slAccessor( measurements.sourceLinkVec(),
+    UncalibSourceLinkAccessor slAccessor( ctx,
                                           measurements.orderedGeoIds(),
                                           measurements.measurementRanges());
     Acts::SourceLinkAccessorDelegate<UncalibSourceLinkAccessor::Iterator> slAccessorDelegate;
@@ -650,6 +649,9 @@ namespace ActsTrk
                                &(*pSurface));
 
     Acts::TrackContainer tracksContainerTemp{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
+
+    UncalibratedMeasurementCalibrator<ActsTrk::TrackStateBackend> calibrator(*m_ATLASConverterTool, tracking_surface_helper);
+    options.extensions.calibrator.connect(calibrator);
 
     // Perform the track finding for all initial parameters
     ATH_MSG_DEBUG("Invoke track finding with " << estimatedTrackParameters.size() << ' ' << seedType << " seeds.");
@@ -710,7 +712,15 @@ namespace ActsTrk
 
       if (!m_trackStatePrinter.empty())
       {
-        m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, result.value(), measurements.sourceLinkVec());
+         const MeasurementRangeList &measurement_list = measurements.measurementRanges();
+         std::vector< std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > offset;
+         offset.reserve( measurement_list.m_measurementContainer.size());
+         for (std::size_t type_index = 0; type_index < measurement_list.m_measurementContainer.size(); ++type_index) {
+            if ( measurement_list.m_measurementContainer[type_index] != nullptr) {
+               offset.push_back( std::make_pair( measurement_list.m_measurementContainer[type_index], measurements.measurementOffset(type_index) ));
+            }
+         }
+         m_trackStatePrinter->printTracks(tgContext, tracksContainerTemp, result.value(), offset);
       }
 
       if (ntracks == 0)

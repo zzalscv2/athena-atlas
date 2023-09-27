@@ -23,7 +23,9 @@
 
 // Other
 #include <vector>
-
+namespace InDetDD {
+   class SiDetectorElementCollection;
+}
 namespace ActsTrk
 {
   class ITrackStatePrinter
@@ -33,10 +35,11 @@ namespace ActsTrk
     DeclareInterfaceID(ITrackStatePrinter, 1, 0);
 
     virtual void
-    printSourceLinks(const EventContext &ctx,
-                     const std::vector<ATLASUncalibSourceLink> &sourceLinks,
-                     size_t typeIndex,
-                     size_t offset) const = 0;
+    printMeasurements(const EventContext &ctx,
+                      const xAOD::UncalibratedMeasurementContainer &clusterContainer,
+                      const InDetDD::SiDetectorElementCollection *detectorElements,
+                      size_t typeIndex,
+                      size_t offset) const = 0;
 
     virtual void
     printSeed(const Acts::GeometryContext &tgContext,
@@ -49,7 +52,7 @@ namespace ActsTrk
     printTracks(const Acts::GeometryContext &tgContext,
                 const ActsTrk::TrackContainer &tracks,
                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
-                const std::vector<ATLASUncalibSourceLink> &measurements) const = 0;
+                const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &offset) const = 0;
   };
 
 } // namespace

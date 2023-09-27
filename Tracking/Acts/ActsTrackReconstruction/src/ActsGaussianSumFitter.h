@@ -32,6 +32,8 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
 #include "ActsFitterHelperFunctions.h"
+#include "MeasurementCalibrator.h"
+#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 
 // STL
 #include <string>
@@ -108,7 +110,7 @@ private:
   std::unique_ptr<Trk::Track> performFit(const EventContext& ctx,
 					 const Acts::GeometryContext& tgContext,
 					 const Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
-					 const std::vector<ATLASSourceLink>& trackSourceLinks,
+					 const std::vector<Acts::SourceLink>& trackSourceLinks,
 					 const Acts::BoundTrackParameters& initialParams) const;
 
   // Create a track from the fitter result
@@ -142,6 +144,8 @@ private:
   using Fitter = Acts::Experimental::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
                                                         Acts::Experimental::AtlasBetheHeitlerApprox<6, 5>,
                                                         ActsTrk::TrackStateBackend>;
+
+  std::unique_ptr<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>> m_calibrator;
   std::unique_ptr<Fitter> m_fitter;
 
 

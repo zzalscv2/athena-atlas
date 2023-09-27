@@ -39,6 +39,7 @@
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "ActsGeometry/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
+#include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 #include "ActsInterop/Logger.h"
 
 // STL
@@ -194,8 +195,8 @@ StatusCode ActsKalmanFitter::initialize() {
   m_fitter = std::make_unique<Fitter>(std::move(propagator),
               logger().cloneWithSuffix("KalmanFitter"));
 
-
-
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>>(*m_ATLASConverterTool);
+  m_kfExtensions.calibrator.connect(*m_calibrator);
 
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
@@ -205,6 +206,8 @@ StatusCode ActsKalmanFitter::initialize() {
   m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::TrackStateBackend>>(&m_reverseFilteringLogic);
   m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::TrackStateBackend>>();
   m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<ActsTrk::TrackStateBackend>>();
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>>(*m_ATLASConverterTool);
+  m_kfExtensions.calibrator.connect(*m_calibrator);
 
   return StatusCode::SUCCESS;
 }
@@ -243,10 +246,9 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
   Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
-  kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
-  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
-  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::trkMeasurementBase>(&surfaceAccessor);
+  ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
+  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -257,10 +259,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                 propagationOption,
                 &(*pSurface));
 
-  std::vector<ATLASSourceLink::ElementsType> elementCollection;
-
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack,elementCollection);
-
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext,inputTrack);
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
     ATH_MSG_DEBUG("input contain measurement but no source link created, probable issue with the converter, reject fit ");
@@ -285,12 +284,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     Acts::VectorTrackContainer{},
     ActsTrk::TrackStateBackend{}};
   
-  // Convert to Acts::SourceLink during iteration
-  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
-  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
-
   // Perform the fit
-  auto result = m_fitter->fit(begin, end,           
+  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
     track = makeTrack(ctx, tgContext, tracks, result);
@@ -325,10 +320,9 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
   Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
-  kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
-  ATLASSourceLinkSurfaceAccessor surfaceAccessor{m_trackingGeometryTool->trackingGeometry().get()};
-  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::trkMeasurementBase>(&surfaceAccessor);
+  ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
+  kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -339,14 +333,11 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                 propagationOption,
                 &(*pSurface));
 
-  std::vector<ATLASSourceLink> trackSourceLinks;
+  std::vector<Acts::SourceLink> trackSourceLinks;
   trackSourceLinks.reserve(inputMeasSet.size());
 
-  std::vector< ATLASSourceLink::ElementsType > elementCollection;
-  elementCollection.reserve(inputMeasSet.size());
-
   for (auto it = inputMeasSet.begin(); it != inputMeasSet.end(); ++it){
-   trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it, elementCollection)); 
+   trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it));
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -360,12 +351,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     Acts::VectorTrackContainer{},
     ActsTrk::TrackStateBackend{}};
 
-  // Convert to Acts::SourceLink during iteration
-  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
-  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
-
   // Perform the fit
-  auto result = m_fitter->fit(begin, end,
+  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
     initialParams, kfOptions, tracks);
   if (result.ok()) {
     track = makeTrack(ctx, tgContext, tracks, result);
@@ -490,7 +477,6 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
   Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
-  kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -501,18 +487,12 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                 propagationOption,
                 &(*pSurface));
 
-  std::vector<ATLASSourceLink::ElementsType> elementCollection;
-
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack, elementCollection);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, inputTrack);
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(*(inputTrack.perigeeParameters()), tgContext);
-
-
-  std::vector< ATLASSourceLink::ElementsType > atlasElementCollection;
-  atlasElementCollection.reserve(addMeasColl.size());
 
   for (auto it = addMeasColl.begin(); it != addMeasColl.end(); ++it)
   {
-    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it, atlasElementCollection));
+    trackSourceLinks.push_back(m_ATLASConverterTool->trkMeasurementToSourceLink(tgContext, **it));
   }
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -524,12 +504,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     Acts::VectorTrackContainer{},
     ActsTrk::TrackStateBackend{}};
 
-  // Convert to Acts::SourceLink during iteration
-  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
-  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
-
   // Perform the fit
-  auto result = m_fitter->fit(begin, end,
+  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
     initialParams, kfOptions, tracks);
   if (result.ok()) {
     track = makeTrack(ctx, tgContext, tracks, result);
@@ -593,7 +569,6 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
   Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
-  kfExtensions.calibrator.connect<&ATLASSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>();
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -604,11 +579,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                 propagationOption,
                 &(*pSurface));
 
-  std::vector<ATLASSourceLink::ElementsType> elementCollection1;
-  std::vector<ATLASSourceLink::ElementsType> elementCollection2;
-
-  std::vector<ATLASSourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1, elementCollection1);
-  std::vector<ATLASSourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2, elementCollection2);
+  std::vector<Acts::SourceLink> trackSourceLinks = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk1);
+  std::vector<Acts::SourceLink> trackSourceLinks2 = m_ATLASConverterTool->trkTrackToSourceLinks(tgContext, intrk2);
   trackSourceLinks.insert(trackSourceLinks.end(), trackSourceLinks2.begin(), trackSourceLinks2.end());
   // protection against error in the conversion from Atlas masurement to Acts source link
   if (trackSourceLinks.empty()) {
@@ -635,12 +607,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     Acts::VectorTrackContainer{},
     ActsTrk::TrackStateBackend{}};
 
-  // Convert to Acts::SourceLink during iteration
-  Acts::SourceLinkAdapterIterator begin{trackSourceLinks.begin()};
-  Acts::SourceLinkAdapterIterator end{trackSourceLinks.end()};
-
   // Perform the fit
-  auto result = m_fitter->fit(begin, end,
+  auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
     scaledInitialParams, kfOptions, tracks);
   if (result.ok()) {
     track = makeTrack(ctx, tgContext, tracks, result);
@@ -754,7 +722,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
     std::unique_ptr<Trk::MeasurementBase> measState;
     if (state.hasUncalibratedSourceLink() && !SourceLinkType){
       auto sl = state.getUncalibratedSourceLink().template get<ATLASSourceLink>();
-      measState = sl.atlasHit().uniqueClone();
+      assert(sl);
+      measState = sl->uniqueClone();
     }
     else if (state.hasUncalibratedSourceLink() && SourceLinkType){ //If the SourceLink is of type PRDSourceLink, we need to create the RIO_OnTrack here.
       auto sl = state.getUncalibratedSourceLink().template get<PRDSourceLink>().prd;

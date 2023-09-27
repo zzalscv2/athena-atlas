@@ -50,29 +50,16 @@ public:
   trkSurfaceToActsSurface(const Trk::Surface &atlasSurface) const override;
 
   /// Create an SourceLink from an ATLAS measurment
-  /// Works for 1 and 2D measurmenent. 
-  /// A pointer to the measurment is kept in the SourceLink
-  virtual 
-  const ATLASSourceLink
-  trkMeasurementToSourceLink(const Acts::GeometryContext& gctx, const Trk::MeasurementBase &measurement,
-			       std::vector<ATLASSourceLink::ElementsType>& Collection) const override;
-
-  /// Create an SourceLink from an ATLAS uncalibrated measurment
   /// Works for 1 and 2D measurmenent.
   /// A pointer to the measurment is kept in the SourceLink
   virtual
-  const ATLASUncalibSourceLink
-  uncalibratedTrkMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, 
-				      const xAOD::UncalibratedMeasurement &measurement,
-				      std::vector<ATLASUncalibSourceLink::ElementsType>& Collection) const override;
+  Acts::SourceLink
+  trkMeasurementToSourceLink(const Acts::GeometryContext& gctx, const Trk::MeasurementBase &measurement) const override;
 
   /// Transform an ATLAS track into a vector of SourceLink to be use in the avts tracking
   /// Transform both measurement and outliers.
-  virtual 
-  const std::vector<ATLASSourceLink>
-  trkTrackToSourceLinks(const Acts::GeometryContext& gctx, 
-			 const Trk::Track &track,
-			 std::vector<ATLASSourceLink::ElementsType>& collection) const override;
+  virtual std::vector<Acts::SourceLink> trkTrackToSourceLinks(
+                       const Acts::GeometryContext& gctx, const Trk::Track& track) const override;
 
   /// Create Acts TrackParameter from ATLAS one.
   /// Take care of unit conversion between the two.  
