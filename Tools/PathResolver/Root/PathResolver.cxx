@@ -18,7 +18,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include "CxxUtils/checker_macros.h"
 
 
@@ -27,7 +27,7 @@
 #include "TSystem.h"
 #include "TError.h" //needed to suppress errors when attempting file downloads
 
-namespace bf = boost::filesystem;
+namespace bf = std::filesystem;
 using namespace std;
 
 namespace {
@@ -135,7 +135,7 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
   try {
     if ( ( file_type == PR_regular_file && is_regular_file( file ) ) ||
          ( file_type == PR_directory && is_directory( file ) ) ) {
-      result = bf::system_complete(file).string();
+      result = bf::absolute(file).string();
       return true;
     }
   } catch (const bf::filesystem_error& /*err*/) {
@@ -144,10 +144,11 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
   // assume that "." is always part of the search path, so check locally first
 
   try {
-    bf::path local = bf::initial_path() / file;
+    bf::path local = bf::current_path() / file;
+    //AV: boost has bf::path local = bf::initial_path() / file;
     if ( ( file_type == PR_regular_file && is_regular_file( local ) ) ||
          ( file_type == PR_directory && is_directory( local ) ) ) {
-      result = bf::system_complete(file).string();
+      result = bf::absolute(file).string();
       return true;
     }
   } catch (const bf::filesystem_error& /*err*/) {
@@ -171,7 +172,7 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
 
       if(!is_directory(lpd)) {
          msg(MSG::DEBUG) <<"   Creating directory: " << lpd  << endmsg;
-         if(!boost::filesystem::create_directories(lpd)) {
+         if(!bf::create_directories(lpd)) {
             msg(MSG::DEBUG) <<"Unable to create directories to write file to : " << lp << endmsg;
             continue;
             //throw std::runtime_error("Unable to download calibration file");
@@ -209,7 +210,7 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
     try {
       if ( ( file_type == PR_regular_file && is_regular_file( fp ) ) ||
            ( file_type == PR_directory && is_directory( fp ) ) ) {
-        result = bf::system_complete(fp).string();
+        result = bf::absolute(fp).string();
         return true;
       }
     } catch (const bf::filesystem_error& /*err*/) {
@@ -231,7 +232,7 @@ PathResolver::PR_find( const std::string& logical_file_name, const string& searc
           bf::path fp2 = bf::path(*ritr) / file;
           if ( ( file_type == PR_regular_file && is_regular_file( fp2 ) ) ||
                ( file_type == PR_directory && is_directory( fp2 ) ) ) {
-            result = bf::system_complete( fp2 ).string();
+            result = bf::absolute( fp2 ).string();
             return true;
           }
         }
