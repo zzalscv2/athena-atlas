@@ -1818,27 +1818,6 @@ StatusCode IDAlignMonGenericTracks::fillHistograms() {
   std::map<const xAOD::TrackParticle*, const xAOD::Vertex*> trackVertexMapTP;
   if (m_doIP) fillVertexInformation(trackVertexMapTP);
 
-  float beamSpotX = 0.;
-  float beamSpotY = 0.;
-  float beamSpotZ = 0.;
-  float beamTiltX = 0.;
-  float beamTiltY = 0.;
-  ATH_MSG_DEBUG(" retrieveing beam spot information for event " << m_events);
-  if (m_hasBeamCondSvc) {
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle {
-      m_beamSpotKey
-    };
-    Amg::Vector3D bpos = beamSpotHandle->beamPos();
-    beamSpotX = bpos.x();
-    beamSpotY = bpos.y();
-    beamSpotZ = bpos.z();
-    beamTiltX = beamSpotHandle->beamTilt(0);
-    beamTiltY = beamSpotHandle->beamTilt(1);
-    ATH_MSG_DEBUG("Beamspot from " << beamSpotHandle.retrieve() << ": x0 = " << beamSpotX << ", y0 = " << beamSpotY
-                                   << ", z0 = " << beamSpotZ << ", tiltX = " << beamTiltX
-                                   << ", tiltY = " << beamTiltY);
-  }
-
   // Get EventInfo
   SG::ReadHandle<xAOD::EventInfo> eventInfo {
     m_eventInfoKey
@@ -1848,6 +1827,24 @@ StatusCode IDAlignMonGenericTracks::fillHistograms() {
     delete trks;
     return StatusCode::FAILURE;
   }
+
+  float beamSpotX = 0.;
+  float beamSpotY = 0.;
+  float beamSpotZ = 0.;
+  float beamTiltX = 0.;
+  float beamTiltY = 0.;
+  ATH_MSG_DEBUG(" retrieveing beam spot information for event " << m_events);
+  if (m_hasBeamCondSvc) {
+    beamSpotX = eventInfo->beamPosX();
+    beamSpotY = eventInfo->beamPosY(); 
+    beamSpotZ = eventInfo->beamPosZ(); 
+    beamTiltX = eventInfo->beamTiltXZ();
+    beamTiltY = eventInfo->beamTiltYZ();
+    ATH_MSG_INFO(" -- Beamspot --  x0 = " << beamSpotX << ", y0 = " << beamSpotY
+                                   << ", z0 = " << beamSpotZ << ", tiltX = " << beamTiltX
+                                   << ", tiltY = " << beamTiltY);
+  }
+
   //EventID* eventID = eventInfo->event_ID();
   float LumiBlock = static_cast<float>(eventInfo->lumiBlock());
 
