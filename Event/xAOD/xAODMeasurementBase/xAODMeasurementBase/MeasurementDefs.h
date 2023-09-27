@@ -29,6 +29,7 @@ enum class UncalibMeasType {
     StripClusterType = 2,
     // Muon
     MdtDriftCircleType = 3,
+    RpcStripType = 4,
 };
 
 /// @ detector ID element hash

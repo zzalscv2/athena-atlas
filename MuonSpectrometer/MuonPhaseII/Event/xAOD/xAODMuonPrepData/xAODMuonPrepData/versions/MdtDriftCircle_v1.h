@@ -34,9 +34,9 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
 
     /** @brief Returns the tube number of the measurement (1-120)*/
     uint16_t driftTube() const;
-    /** @brief Returns the layer number of the measruement (1-4)*/
+    /** @brief Returns the layer number of the measurement (1-4)*/
     uint8_t tubeLayer() const;
-    /** @brief Returns the hash of the measurment channel (tube (x) layer) */
+    /** @brief Returns the hash of the measurement channel (tube (x) layer) */
     IdentifierHash measurementHash() const;
     /** @brief Returns the status of the measurement */
     MdtDriftCircleStatus status() const;
