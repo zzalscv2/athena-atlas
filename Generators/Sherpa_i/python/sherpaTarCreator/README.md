@@ -45,7 +45,7 @@ genSeq.Sherpa_i.ExtraFiles = [ "libSherpaFastjetMAXHTPTV.so" ]
   sherpaTarCreator.py myExampleSetup
   ```
 
-You can learn about various options using `sherpaTarCreator.py --help`. An important one is the `--ecm 13.0` default, which you would have to change if you want to generate tarballs for other sqrt(s).
+You can learn about various options using `sherpaTarCreator.py --help`. An important one is the `--ecm 13.6` default, which you would have to change if you want to generate tarballs for other sqrt(s).
 
 # Monitoring the progress
 

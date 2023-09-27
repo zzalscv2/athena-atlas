@@ -168,6 +168,9 @@ def mkIntegrateJob(options, ecm, prevJob):
     #write rundata into Run.dat file for integration
     configname = "Run.dat" if os.environ["SHERPAVER"].startswith('2.') else "Sherpa.yaml"
     job.cmds += ["cat > "+configname+" <<EOL"]
+    if os.environ["SHERPAVER"].startswith('3.'):
+        # prepend base fragment
+        job.cmds += [options.Sherpa_i.BaseFragment]
     job.cmds += [options.Sherpa_i.RunCard]
     job.cmds += ["EOL"]
     #append infos in options
@@ -186,6 +189,9 @@ def mkIntegrateJob(options, ecm, prevJob):
                 job.cmds += [r"sed '/.*\}(run).*/i\ \ "+s+"' -i Run.dat"]
             else:
                 job.cmds += [r"sed '/.*PROCESSES:.*/i"+s+"\\n' -i Sherpa.yaml"]
+    if os.environ["SHERPAVER"].startswith('3.'):
+        # disable ATLAS RNG as integration job runs outside Athena
+        job.cmds += [r"sed '/.*EXTERNAL_RNG.*/d' -i Sherpa.yaml"]
 
     olpath = str(os.environ['OPENLOOPSPATH'])
     lcglayer = olpath[olpath.find("LCG_"):olpath.find("/MCGenerators")]
