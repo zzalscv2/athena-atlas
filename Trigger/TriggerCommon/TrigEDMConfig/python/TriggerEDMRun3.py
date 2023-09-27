@@ -513,7 +513,7 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS PhysicsTLA ESD AODFULL AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionHICalo step
-    ('xAOD::CaloClusterContainer#HLT_HICaloEMClusters',               'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionHICaloElectronViews')]),
+    ('xAOD::CaloClusterContainer#HLT_HICaloEMClusters',               'BS ESD AODFULL AODSLIM', 'Egamma', [InViews('precisionHICaloElectronViews'),InViews('precisionHICaloPhotonViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_HICaloEMClustersAux.',    'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo_LRT step
@@ -540,7 +540,7 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersRoI_LRTAux.nCells', 'BS ESD AODFULL', 'Egamma'),
 
     # UE subtracted versions for heavy ion paths
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersHIRoI',                    'BS ESD AODFULL', 'Egamma', [InViews('precisionHICaloElectronViews')]),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersHIRoI',                    'BS ESD AODFULL', 'Egamma', [InViews('precisionHICaloElectronViews'), InViews('precisionHICaloPhotonViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersHIRoIAux.nCells',   'BS ESD AODFULL', 'Egamma'),
 
     # These are for precision photon and precision Electron Keeping same names as in Run2
