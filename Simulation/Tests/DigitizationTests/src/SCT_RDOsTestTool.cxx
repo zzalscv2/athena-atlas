@@ -4,7 +4,6 @@
 
 #include "SCT_RDOsTestTool.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include <boost/io/ios_state.hpp>
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -313,7 +312,6 @@ StatusCode SCT_RDOsTestTool::CheckSDOs() {
     return StatusCode::SUCCESS;
   }
 
-  boost::io::ios_all_saver ias( std::cout );
 
   if(msgLvl(MSG::VERBOSE))
     {
@@ -384,8 +382,8 @@ StatusCode SCT_RDOsTestTool::CheckSDOs() {
               const HepMcParticleLink& particleLink = (*itDep).first;
               const float charge = (*itDep).second;
               ATH_MSG_VERBOSE (" event index=" << particleLink.eventIndex() << " barcode=" << particleLink.barcode() << ", charge=" << charge);
-
-              std::cout << std::setw(3)  << m_sctID->barrel_ec(sdoId)
+              std::stringstream coutx;
+                  coutx << std::setw(3)  << m_sctID->barrel_ec(sdoId)
                         << std::setw(3)  << m_sctID->layer_disk(sdoId)
                         << std::setw(3)  << m_sctID->phi_module(sdoId)
                         << std::setw(3)  << m_sctID->eta_module(sdoId)
@@ -402,7 +400,7 @@ StatusCode SCT_RDOsTestTool::CheckSDOs() {
                         << std::fixed << std::showpoint << std::setprecision(1)
                         << std::setw(10) << charge
                         << std::endl;
-              ias.restore();
+              std::cout<<coutx.str();
             }
         }
     }

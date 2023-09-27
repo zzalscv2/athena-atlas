@@ -4,7 +4,6 @@
 atlas_subdir( G4ProfilingTools )
 
 # External dependencies:
-find_package( Boost )
 find_package( Geant4 )
 find_package( ROOT COMPONENTS Core Hist RIO )
 
@@ -14,8 +13,8 @@ atlas_add_library( G4ProfilingToolsLib
                    OBJECT
                    NO_PUBLIC_HEADERS
                    LINK_LIBRARIES G4AtlasToolsLib
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib )
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS}
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib )
 
 atlas_add_library( G4ProfilingTools
                    src/components/*.cxx
