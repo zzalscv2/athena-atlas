@@ -718,7 +718,7 @@ namespace Trk {
 
   int NTRK=vk->TrackList.size();
   double dScale=1.e8, dScaleMax=1.e10;
-  double alfLowLim=0.03;
+  double alfLowLim=0.1;
   double alfUppLim=1.1;  //Should be compatible with vkalAllowedPtChange - not causing 1/p shift up to zero.
   double xyzt[3],chi2t[10]={0.};
   double alf=1.,bet=0.;
@@ -734,7 +734,7 @@ namespace Trk {
 	chi2t[jm1] = 0.; ContribC[jm1]=0.;
 //--
 	if (j < 4){ alf = jm1 * .5;  bet = 0.;}
-	else{ if(j==4)bet=0.; if(j==5)bet=-0.02; if(j==6)bet= 0.02;}
+	//else{ if(j==4)bet=0.; if(j==5)bet=-0.02; if(j==6)bet= 0.02;}
 //
 //--vk->fitV and trk->fitP stay untouched during these iterations
 //
@@ -751,7 +751,7 @@ namespace Trk {
 	                  if(dScale < 0.01)       dScale=0.01;
 	    }
 	    ContribC[jm1] = dCnstContrib*dScale;
-	    if ( j != PostFitIteration) {  chi2t[jm1] += 25.*ContribC[jm1]; }  // Last cycle is ALWAYS without constraints
+	    if ( j != PostFitIteration) {  chi2t[jm1] += 5.*ContribC[jm1]; }  // Last cycle is ALWAYS without constraints
 	}
 //Having 3 points (0,0.5,1.) find a pabolic minimum
 	if (j == 3) {  alf = finter(chi2t[0], chi2t[1], chi2t[2], 0., 0.5, 1.);
@@ -763,8 +763,12 @@ namespace Trk {
 		       }
         }
 
+// The commented piece of code below worked well before Rel.22 but now (22.0+) results in performance
+// degradation. The reason is not clear and is being investigated. 
+// This part will be either retuned of rewritten (WIP).
+// ------
 //Having 3 points (0,-0.02,0.02) find a pabolic minimum
-	if (j == 6) {  bet = finter(chi2t[4], chi2t[3], chi2t[5], -0.02, 0., 0.02);
+/*	if (j == 6) {  bet = finter(chi2t[4], chi2t[3], chi2t[5], -0.02, 0., 0.02);
 	               if (chi2t[3] == chi2t[4] && chi2t[4] == chi2t[5])  bet = 0.;
 	               if (bet > 0.2)bet =  0.2;
                        if (bet <-0.2)bet = -0.2;
@@ -778,10 +782,10 @@ namespace Trk {
             chi2t[jm1] += calcChi2Addition( vk, wgtvrtd, xyzt);     // Constraints of Chi2 type
 	    if (NCNST) {         //VK 25.10.2006 new mechanism for constraint treatment
               applyConstraints(vk);
-	      ContribC[jm1] = 25.*dScale*getCnstValues2(vk);
+	      ContribC[jm1] = 2.*dScale*getCnstValues2(vk);
             }
         }
-
+*/
 // Trick to cut step in case of divergence and wrong ALFA. Step==4!!!
 // Check if minimum is really a minimum. Otherwise use alf=0.02 or alf=0.5 or alf=1. points
         if(j==4 && alf!=alfLowLim ){ 
@@ -797,7 +801,7 @@ namespace Trk {
             chi2t[jm1] += calcChi2Addition( vk, wgtvrtd, xyzt);     // Constraints of Chi2 type
 	    if (NCNST) {         //VK 25.10.2006 new mechanism for constraint treatment
               applyConstraints(vk);
-	      ContribC[jm1] = 25.*dScale*getCnstValues2(vk);
+	      ContribC[jm1] = 5.*dScale*getCnstValues2(vk);
 	      if ( j != PostFitIteration) {  chi2t[jm1] += ContribC[jm1]; }  // Last cycle is ALWAYS without constraints
             }
           }
