@@ -8,7 +8,6 @@
 #include "L1DynamicPedestalProviderTxt.h"
 
 #include "PathResolver/PathResolver.h"
-#include "CxxUtils/StringUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -276,7 +275,6 @@ namespace {
     }
   };
 } // namespace anonymous
-
 //================ Parse input file ============================================
 // parses the input file @fileName and fills the parameterizations into @params
 // Each file is built out of block with the following format:
@@ -297,15 +295,15 @@ namespace {
 void L1DynamicPedestalProviderTxt::parseInputFile(const std::string& fileName,
                                                   std::vector<std::vector<std::unique_ptr<ParamFunc>>>& params)
 {
-  using CxxUtils::StringUtils::trim;
   using std::istream_iterator;
 
   std::ifstream F(fileName);
   Context ctx;
 
   // read file line-by-line
+  const std::set<char> whitespaces{'\t',' ','\n','\r'};
   for(std::string L; std::getline(F, L); ) {
-    trim(L);
+    while(whitespaces.count(L.back())) L.pop_back();
     if(L.empty()) continue; // ignore empty lines
     if(L[0] == '#') continue; // ignore comments
 
