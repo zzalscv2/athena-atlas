@@ -26,7 +26,6 @@
 #include <G4TouchableHistory.hh>
 #include <G4ParticleDefinition.hh>
 
-#include "boost/io/ios_state.hpp"
 #include <algorithm>
 #include <iomanip>
 #include <ios>

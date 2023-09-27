@@ -3,7 +3,6 @@
 */
 
 #include "FourMom/P4IPtCotThPhiMBase.h"
-#include <boost/io/ios_state.hpp>
 #include <cmath>
 #include <iomanip>
 
@@ -127,16 +126,15 @@ double P4IPtCotThPhiMBase::sinPhi() const
 std::ostream& P4IPtCotThPhiMBase::dump( std::ostream& out ) const
 {
 
-  boost::io::ios_all_saver ias(out);
-
-   out << "[ipt,cotTh,phi,m] ="
+   std::stringstream outx;
+   outx << "[ipt,cotTh,phi,m] ="
 	     << std::right << std::scientific << std::setprecision(8) 
 	     << std::setw(16) << this->iPt()
 	     << std::setw(16) << this->cotTh()
 	     << std::setw(16) << this->phi()
 	     << std::setw(16) << this->m();
 
-  ias.restore();
+  out<<outx.str();
   
   return out;
 }

@@ -4,7 +4,6 @@
 
 #include "CaloConditions/CaloHadDMCoeff2.h"
 
-#include "boost/io/ios_state.hpp"
 
 #include <cmath>
 #include <iomanip>
@@ -248,8 +247,9 @@ void CaloHadDMCoeff2::PrintData(std::ostream &fout) const
       }
       fout << "     ";
       for(int i_par=0; i_par<area->m_nPars; i_par++){
-        boost::io::ios_base_all_saver foutsave (fout);
-        fout << std::fixed << std::setprecision(5) << std::setw(12) << (*pars)[i_par] << " ";
+        std::stringstream foutx;
+        foutx << std::fixed << std::setprecision(5) << std::setw(12) << (*pars)[i_par] << " ";
+        fout<<foutx.str();
       }
       fout << std::endl;
     }

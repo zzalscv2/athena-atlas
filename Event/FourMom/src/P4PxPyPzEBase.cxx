@@ -3,7 +3,6 @@
 */
 
 #include "FourMom/P4PxPyPzEBase.h"
-#include <boost/io/ios_state.hpp>
 #include <cmath>
 #include <limits>
 #include <iomanip>
@@ -153,15 +152,15 @@ double P4PxPyPzEBase::rapidity() const
 std::ostream& P4PxPyPzEBase::dump( std::ostream& out ) const
 {
 
-  boost::io::ios_all_saver ias(out);
-  out << "[px,py,pz,e] ="
+  std::stringstream outx;
+  outx << "[px,py,pz,e] ="
 	     << std::right << std::scientific << std::setprecision(8) 
 	     << std::setw(16) << this->px()
 	     << std::setw(16) << this->py()
 	     << std::setw(16) << this->pz()
 	     << std::setw(16) << this->e();
 
-  ias.restore();
+   out<<outx.str();
   
   return out;
 

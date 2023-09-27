@@ -24,8 +24,6 @@
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloDetDescr/ICaloCoordinateTool.h"
 
-#include "boost/io/ios_state.hpp"
-
 // -------------------------------------------------------------
 // Constructor 
 // -------------------------------------------------------------
