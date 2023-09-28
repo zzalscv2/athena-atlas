@@ -48,6 +48,7 @@ namespace ActsTrk {
 
 // Forward definitions of local functions
 // @TODO unused, remove ?
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 static void ActsMeasurementCheck(const Acts::GeometryContext &gctx,
                                  const Trk::MeasurementBase &measurement,
@@ -508,6 +509,7 @@ void ActsTrk::ActsToTrkConverterTool::actsTrackParameterPositionCheck(
 
 // Local functions to check/debug Annulus bounds
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
 static void ActsTrk::ActsMeasurementCheck(
     const Acts::GeometryContext &gctx, const Trk::MeasurementBase &measurement,

@@ -142,7 +142,7 @@ namespace
        using difference_type = unsigned int;
        using pointer = const xAOD::UncalibratedMeasurementContainer **;
        using reference = const xAOD::UncalibratedMeasurementContainer *;
-       using iterator_category = std::contiguous_iterator_tag;
+       using iterator_category = std::input_iterator_tag;
     private:
        const xAOD::UncalibratedMeasurementContainer *m_container;
        unsigned int m_index;
@@ -170,7 +170,7 @@ namespace
                   Iterator(BaseIterator( *m_eventContext, nullptr, 0u, surface.geometryId()) ) };
        }
 
-       assert( geo_iter - m_orderedGeoIds->begin() < m_measurementRanges->size());
+       assert( static_cast<std::size_t>(geo_iter - m_orderedGeoIds->begin()) < m_measurementRanges->size());
        const MeasurementRange &range = (*m_measurementRanges).at(geo_iter - m_orderedGeoIds->begin());
        const xAOD::UncalibratedMeasurementContainer *container = m_measurementRanges->container(range.containerIndex());
        return {Iterator( BaseIterator(*m_eventContext, container, range.elementBeginIndex(), surface.geometryId()) ),
