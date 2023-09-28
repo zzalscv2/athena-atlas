@@ -18,6 +18,8 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
+
 // CLHEP includes
 #include "CLHEP/Geometry/Point3D.h"
 
@@ -274,8 +276,11 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       // Special case when a particle with a pre-defined decay
       // interacts and survives.
       // 1) As the parentParticleAfterIncident has a pre-defined decay
-      // its status should be to 2.
-      parentAfterIncident->set_status(2);
+      // its status should end in 2, but we should flag that it has
+      // survived an interaction.
+      if (!MC::isDecayed(parentAfterIncident)) {
+        ATH_MSG_WARNING ( "recordIncidentToMCTruth - check parentAfterIncident: " << parentAfterIncident );
+      }
       // 2) A new GenVertex for the intermediate interaction should be
       // added.
       if (oldClassification == ISF::QS_DEST_VTX && ti.interactionClassification() == ISF::QS_SURV_VTX) {
@@ -449,7 +454,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
       abort();
     }
   }
-  int vtxID = 1000 + static_cast<int>(processCode);
+  int vtxID = 1000 + static_cast<int>(processCode) + HepMC::SIM_STATUS_THRESHOLD;
 #ifdef HEPMC3
   auto newVtx = HepMC::newGenVertexPtr( ti.position(),vtxID);
 #else

@@ -27,6 +27,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "HepPDT/ParticleDataTable.hh"
+#include "TruthUtils/MagicNumbers.h"
 
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
@@ -1351,7 +1352,7 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &i
   Barcode::PhysicsProcessCode processCode{0};
   const Barcode::ParticleBarcode secBC = m_barcodeSvc->newSecondary( isfp.barcode(), processCode);
 
-  ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, 1, pTime, isfp, secBC);
+  ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, 1 + HepMC::SIM_STATUS_THRESHOLD, pTime, isfp, secBC);
   finalPar->setNextGeoID( AtlasDetDescr::fAtlasMS);
 
   // return the punch-through particle

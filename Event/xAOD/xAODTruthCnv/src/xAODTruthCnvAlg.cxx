@@ -33,6 +33,8 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
 
+#include "TruthUtils/MagicNumbers.h"
+
 #include "xAODTruthCnvAlg.h"
 
 bool isSeparatorGenEvent(const HepMC::GenEvent *genEvt) {
@@ -533,9 +535,9 @@ namespace xAODMaker {
     void xAODTruthCnvAlg::fillVertex(xAOD::TruthVertex* tv, const HepMC::ConstGenVertexPtr& gv) {
         // id was renamed to status in HepMC3.
 #ifdef HEPMC3
-        tv->setId(gv->status());
+        tv->setId(HepMC::old_vertex_status_from_new(gv->status())); // For now convert the status back to the old scheme
 #else
-        tv->setId(gv->id());
+        tv->setId(HepMC::old_vertex_status_from_new(gv->id())); // For now convert the status back to the old scheme
 #endif
         tv->setBarcode(HepMC::barcode(gv));
         tv->setX(gv->position().x());
@@ -549,7 +551,7 @@ namespace xAODMaker {
     void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, const HepMC::ConstGenParticlePtr& gp) {
         tp->setPdgId(gp->pdg_id());
         tp->setBarcode(HepMC::barcode(gp));
-        tp->setStatus(gp->status());
+        tp->setStatus(HepMC::old_particle_status_from_new(gp->status())); // For now convert the status back to the old scheme
         
         auto pol = HepMC::polarization(gp);
         if (pol.is_defined()) {
