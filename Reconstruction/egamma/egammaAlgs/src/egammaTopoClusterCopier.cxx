@@ -23,6 +23,30 @@ bool greater(xAOD::CaloCluster const* a, xAOD::CaloCluster const* b) {
   return (a->et() * emfrac_a) > (b->et() * emfrac_b);
 }
 
+double addTileGapCellsEnergy(xAOD::CaloCluster* cluster) {
+  double eg_tilegap = 0;
+
+  xAOD::CaloCluster::const_cell_iterator cell_itr = cluster->cell_cbegin();
+  xAOD::CaloCluster::const_cell_iterator cell_end = cluster->cell_cend();
+
+  for (; cell_itr != cell_end; ++cell_itr) {
+    const CaloCell* cell = *cell_itr;
+    if (!cell) { continue; }
+
+    const CaloDetDescrElement *dde = cell->caloDDE();
+    if (!dde) { continue; }
+
+    // Add TileGap3. Consider only E4 cell.
+    if (CaloCell_ID::TileGap3 == dde->getSampling()) {
+      double ddAbsEta = std::abs(dde->eta_raw());
+      if (ddAbsEta > 1.4 && ddAbsEta < 1.6) {
+        eg_tilegap += cell->e() * cell_itr.weight();
+      }
+    }
+  }
+
+  return eg_tilegap;
+}
 }  // namespace
 
 egammaTopoClusterCopier::egammaTopoClusterCopier(const std::string& name,
@@ -161,26 +185,7 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     double eg_tilegap = 0;
     if (valid_for_central) {
       if (aeta > 1.35 && aeta < 1.65 && clusterE > 0) {
-        xAOD::CaloCluster::const_cell_iterator cell_itr = clus->cell_cbegin();
-        xAOD::CaloCluster::const_cell_iterator cell_end = clus->cell_cend();
-
-        for (; cell_itr != cell_end; ++cell_itr) {
-          const CaloCell* cell = *cell_itr;
-          if (!cell) { continue; }
-
-          const CaloDetDescrElement *dde = cell->caloDDE();
-          if (!dde) { continue; }
-
-          // Add TileGap3. Consider only E4 cell.
-          if (CaloCell_ID::TileGap3 == dde->getSampling()) {
-            if (
-                std::abs(dde->eta_raw()) > 1.4 &&
-                std::abs(dde->eta_raw()) < 1.6
-            ) {
-              eg_tilegap += cell->e() * cell_itr.weight();
-            }
-          }
-        }
+        eg_tilegap += addTileGapCellsEnergy(clus);
       }
     }
 
@@ -239,5 +244,4 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
 
   return StatusCode::SUCCESS;
 }
-
 
