@@ -53,17 +53,9 @@ def BPHY24Cfg(flags):
     augsList += [ BPHY24_AugOriginalCounts ]
 
     # LRT track merge
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
-    BPHY24TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
-        flags,
-        name                        = "BPHY24TrackParticleMergerTool",
-        TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-        OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
-        CreateViewColllection       = True))
-    acc.addPublicTool(BPHY24TrackParticleMergerTool)
- 
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("BPHY24InDetLRTMerge", AugmentationTools = [BPHY24TrackParticleMergerTool])
-    acc.addEventAlgo(LRTMergeAug)
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+    acc.merge(InDetLRTMergeCfg(flags))
+
     mainIDInput = "InDetWithLRTTrackParticles"
     originalTrackCond = ["InDetTrackParticles", "InDetLargeD0TrackParticles","GSFTrackParticles"]
     BPHY24_Finder_DiMuon = CompFactory.Analysis.JpsiFinder( name    = "BPHY24_Finder_DiMuon",

@@ -12,11 +12,11 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY5"
 streamName = "StreamDAOD_BPHY5"
 
-def BPHY5Cfg(ConfigFlags):
+def BPHY5Cfg(flags):
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
-   isSimulation = ConfigFlags.Input.isMC
+   isSimulation = flags.Input.isMC
    BPHY5_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
        name = "BPHY5_AugOriginalCounts",
        VertexContainer = "PrimaryVertices",
@@ -24,20 +24,14 @@ def BPHY5Cfg(ConfigFlags):
 
 
    from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-   acc.merge(LRTMuonMergerAlg( ConfigFlags,
+   acc.merge(LRTMuonMergerAlg( flags,
                                 PromptMuonLocation    = "Muons",
                                 LRTMuonLocation       = "MuonsLRT",
                                 OutputMuonLocation    = "StdWithLRTMuons",
                                 CreateViewCollection  = True))
-   from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
-   BPHY5TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
-        ConfigFlags,
-        name                        = "BPHY5TrackParticleMergerTool",
-        TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-        OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
-        CreateViewColllection       = True))
-   LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("BPHY5InDetLRTMerge", AugmentationTools = [BPHY5TrackParticleMergerTool])
-   acc.addEventAlgo(LRTMergeAug)
+
+   from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+   acc.merge(InDetLRTMergeCfg(flags))
 
    mainMuonInput = "StdWithLRTMuons"
    mainIDInput   = "InDetWithLRTTrackParticles"
@@ -45,13 +39,13 @@ def BPHY5Cfg(ConfigFlags):
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"]
    MuonReLink = [ "Muons", "MuonsLRT" ]
 
-   V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-   vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+   V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+   vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
    acc.addPublicTool(vkalvrt)
    acc.addPublicTool(V0Tools)
-   trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+   trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
    acc.addPublicTool(trackselect)
-   vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+   vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
    acc.addPublicTool(vpest)
    BPHY5JpsiFinder = CompFactory.Analysis.JpsiFinder(
        name                        = "BPHY5JpsiFinder",
@@ -81,7 +75,7 @@ def BPHY5Cfg(ConfigFlags):
                                                        OutputVtxContainerName = "BPHY5JpsiCandidates",
                                                        PVContainerName        = "PrimaryVertices",
                                                        V0Tools                = V0Tools,
-                                                       PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                                       PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
                                                        RelinkTracks  =  toRelink,
                                                        RelinkMuons   =  MuonReLink,
@@ -192,7 +186,7 @@ def BPHY5Cfg(ConfigFlags):
                         OutputVtxContainerName   = "BPHY5BsJpsiKKCandidates",
                         PVContainerName          = "PrimaryVertices",
                         V0Tools                  = V0Tools,
-                        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                        PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                         RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
                         RefitPV                  = True, Do3d = False,
                         RelinkTracks  =  toRelink,
@@ -203,7 +197,7 @@ def BPHY5Cfg(ConfigFlags):
                                                               OutputVtxContainerName    = "BPHY5BpmJpsiKpmCandidates",
                                                               PVContainerName           = "PrimaryVertices",
                                                               V0Tools                   = V0Tools,
-                                                              PVRefitter                = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                                              PVRefitter                = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                                               RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
                                                               RefitPV                   = True,
                                                               RelinkTracks  =  toRelink,
@@ -214,7 +208,7 @@ def BPHY5Cfg(ConfigFlags):
                                                            OutputVtxContainerName   = "BPHY5BJpsipipiXCandidates",
                                                            PVContainerName          = "PrimaryVertices",
                                                            V0Tools                  = V0Tools,
-                                                           PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                                           PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                                            RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
                                                            RefitPV                  = True, Do3d = False,
                                                            RelinkTracks  =  toRelink,
@@ -225,7 +219,7 @@ def BPHY5Cfg(ConfigFlags):
                                  VertexSearchTool       = BPHY5BdJpsiKst,
                                  OutputVtxContainerName = "BPHY5BdJpsiKstCandidates",
                                  V0Tools                = V0Tools,
-                                 PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+                                 PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                  PVContainerName        = "PrimaryVertices",
                                  RefPVContainerName     = "BPHY5RefittedKstPrimaryVertices",
                                  RefitPV                = True,
@@ -340,7 +334,7 @@ def BPHY5Cfg(ConfigFlags):
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
-   BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+   BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
    StaticContent = []
@@ -417,7 +411,7 @@ def BPHY5Cfg(ConfigFlags):
    BPHY5SlimmingHelper.StaticContent = StaticContent
    BPHY5SlimmingHelper.SmartCollections = SmartVar
    BPHY5ItemList = BPHY5SlimmingHelper.GetItemList()
-   acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY5", ItemList=BPHY5ItemList, AcceptAlgs=["BPHY5Kernel"]))
-   acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY5", AcceptAlgs=["BPHY5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+   acc.merge(OutputStreamCfg(flags, "DAOD_BPHY5", ItemList=BPHY5ItemList, AcceptAlgs=["BPHY5Kernel"]))
+   acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY5", AcceptAlgs=["BPHY5Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
    return acc

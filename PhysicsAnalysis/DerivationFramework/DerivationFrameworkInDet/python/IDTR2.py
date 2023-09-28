@@ -16,20 +16,8 @@ def IDTR2Cfg(flags):
     acc = ComponentAccumulator()
 
     # LRT merge
-    from DerivationFrameworkInDet.InDetToolsConfig import (
-        TrackParticleMergerCfg)
-    IDTR2TrackParticleMergerTool = acc.getPrimaryAndMerge(
-        TrackParticleMergerCfg(
-            flags,
-            name="IDTR2TrackParticleMergerTool",
-            TrackParticleLocation=["InDetTrackParticles",
-                                   "InDetLargeD0TrackParticles"],
-            OutputTrackParticleLocation="InDetWithLRTTrackParticles",
-            CreateViewColllection=True))
-
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation(
-        "InDetLRTMerge", AugmentationTools=[IDTR2TrackParticleMergerTool])
-    acc.addEventAlgo(LRTMergeAug)
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+    acc.merge(InDetLRTMergeCfg(flags))
 
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg

@@ -191,22 +191,11 @@ def InDetCommonCfg(flags, **kwargs):
 
     # Add LRT merger job to the sequence when the LRT track particle is supposed to be made already
     if (kwargs['MergeLRT'] and kwargs['DoR3LargeD0'] and
-            kwargs['StoreSeparateLargeD0Container']):
+        kwargs['StoreSeparateLargeD0Container']):
         # ====================================================================
         # Merge the LRT and standard track using track particle merger
         # ====================================================================
-        from DerivationFrameworkInDet.InDetToolsConfig import (
-            TrackParticleMergerCfg)
-        LRTAndStandardTrackParticleMerger = acc.getPrimaryAndMerge(
-            TrackParticleMergerCfg(
-                flags,
-                name="LRTAndStandardTrackParticleMerger",
-                TrackParticleLocation=["InDetTrackParticles",
-                                       "InDetLargeD0TrackParticles"],
-                OutputTrackParticleLocation="InDetWithLRTTrackParticles",
-                CreateViewColllection=True))
-        acc.addEventAlgo(CommonAugmentation(
-            "InDetLRTMerge",
-            AugmentationTools=[LRTAndStandardTrackParticleMerger]))
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+        acc.merge(InDetLRTMergeCfg(flags))
 
     return acc

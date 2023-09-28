@@ -5,23 +5,14 @@
 #==============================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 
 def PhysValLLPCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
     # LRT track merge
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
-    LLP1TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
-        flags,
-        name                        = "LLP1TrackParticleMergerTool",
-        TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-        OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
-        CreateViewColllection       = True))
-
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = [LLP1TrackParticleMergerTool])
-    acc.addEventAlgo(LRTMergeAug)
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+    acc.merge(InDetLRTMergeCfg(flags))
 
     # LRT muons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
