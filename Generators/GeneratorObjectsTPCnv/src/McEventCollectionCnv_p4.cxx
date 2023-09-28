@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p4.cxx
@@ -23,6 +23,7 @@
 
 #include "McEventCollectionCnv_utils.h"
 #include "GaudiKernel/ThreadLocalContext.h"
+#include "TruthUtils/MagicNumbers.h"
 
 ///////////////////////////////////////////////////////////////////
 // Constructors
@@ -238,6 +239,7 @@ void McEventCollectionCnv_p4::persToTrans( const McEventCollection_p4* persObj,
             }
         }
 #endif
+
     } //> end loop over m_genEvents
 
   msg << MSG::DEBUG << "Loaded McEventCollection from persistent state [OK]"
@@ -393,7 +395,7 @@ McEventCollectionCnv_p4::createGenVertex( const McEventCollection_p4& persEvt,
   if (parent) parent->add_vertex(vtx);
 #ifdef HEPMC3
   vtx->set_position(HepMC::FourVector( persVtx.m_x , persVtx.m_y , persVtx.m_z ,persVtx.m_t ));
-  vtx->set_status(persVtx.m_id);
+  vtx->set_status(HepMC::new_vertex_status_from_old(persVtx.m_id, persVtx.m_barcode)); // UPDATED STATUS VALUE TO NEW SCHEME
   // cast from std::vector<float> to std::vector<double>
   std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
   vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
@@ -420,7 +422,7 @@ McEventCollectionCnv_p4::createGenVertex( const McEventCollection_p4& persEvt,
   vtx->m_position.setT( persVtx.m_t );
   vtx->m_particles_in.clear();
   vtx->m_particles_out.clear();
-  vtx->m_id      = persVtx.m_id;
+  vtx->m_id      = HepMC::new_vertex_status_from_old(persVtx.m_id, persVtx.m_barcode); // UPDATED STATUS VALUE TO NEW SCHEME
   vtx->m_weights.m_weights.reserve( persVtx.m_weights.size() );
   vtx->m_weights.m_weights.assign ( persVtx.m_weights.begin(),
                                     persVtx.m_weights.end() );
@@ -466,7 +468,7 @@ McEventCollectionCnv_p4::createGenParticle( const GenParticle_p4& persPart,
   if (parent) add_to_output?parent->add_particle_out(p):parent->add_particle_in(p);
 #ifdef HEPMC3
   p->set_pdg_id(              persPart.m_pdgId);
-  p->set_status(              persPart.m_status);
+  p->set_status(HepMC::new_particle_status_from_old(persPart.m_status, persPart.m_barcode)); // UPDATED STATUS VALUE TO NEW SCHEME
   p->add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_phiPolarization));
   p->add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_thetaPolarization));
   HepMC::suggest_barcode(p,persPart.m_barcode);
@@ -509,7 +511,7 @@ McEventCollectionCnv_p4::createGenParticle( const GenParticle_p4& persPart,
   p->add_attribute("flows", std::make_shared<HepMC3::VectorIntAttribute>(flows));
 #else
   p->m_pdg_id              = persPart.m_pdgId;
-  p->m_status              = persPart.m_status;
+  p->m_status              = HepMC::new_particle_status_from_old(persPart.m_status, persPart.m_barcode); // UPDATED STATUS VALUE TO NEW SCHEME
   p->m_polarization.m_theta= static_cast<double>(persPart.m_thetaPolarization);
   p->m_polarization.m_phi  = static_cast<double>(persPart.m_phiPolarization  );
   p->m_production_vertex   = 0;
@@ -582,7 +584,7 @@ void McEventCollectionCnv_p4::writeGenVertex( const HepMC::ConstGenVertexPtr& vt
                                                 position.y(),
                                                 position.z(),
                                                 position.t(),
-                                                vtx->status(),
+                                                HepMC::old_vertex_status_from_new(vtx->status()), // REVERTED STATUS VALUE TO OLD SCHEME
                                                 weights.begin(),
                                                 weights.end(),
                                                 A_barcode?(A_barcode->value()):vtx->id()
@@ -613,7 +615,7 @@ void McEventCollectionCnv_p4::writeGenVertex( const HepMC::GenVertex& vtx,
                                                 position.y(),
                                                 position.z(),
                                                 position.t(),
-                                                vtx.m_id,
+                                                HepMC::old_vertex_status_from_new(vtx.m_id), // REVERTED STATUS VALUE TO OLD SCHEME
                                                 vtx.m_weights.m_weights.begin(),
                                                 vtx.m_weights.m_weights.end(),
                                                 vtx.m_barcode ) );
@@ -669,7 +671,7 @@ int McEventCollectionCnv_p4::writeGenParticle( const HepMC::ConstGenParticlePtr&
                                mom.pz(),
                                mom.m(),
                                p->pdg_id(),
-                               p->status(),
+                               HepMC::old_particle_status_from_new(p->status()), // REVERTED STATUS VALUE TO OLD SCHEME
                                A_flows?(A_flows->value().size()):0,
                                A_theta?(A_theta->value()):0.0,
                                A_phi?(A_phi->value()):0.0,
@@ -710,7 +712,7 @@ int McEventCollectionCnv_p4::writeGenParticle( const HepMC::GenParticle& p,
                                mom.pz(),
                                mom.m(),
                                p.m_pdg_id,
-                               p.m_status,
+                               HepMC::old_particle_status_from_new(p.m_status), // REVERTED STATUS VALUE TO OLD SCHEME
                                p.m_flow.size(),
                                p.m_polarization.theta(),
                                p.m_polarization.phi(),

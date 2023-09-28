@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFTruthIncident.h"
 #include "ISF_Event/ParticleUserInformation.h"
+#include "TruthUtils/MagicNumbers.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
 #include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
@@ -414,7 +415,7 @@ ISF::ISFParticle* iFatras::McMaterialEffectsEngine::bremPhoton(const ISF::ISFPar
 						       0,   //!< mass
 						       0,   //!< charge
 						       22,  //!< pdg code
-						       1,   //!status
+						       1 + HepMC::SIM_STATUS_THRESHOLD,   //!< status
 						       time,  //!< time
 						       *parent );
 

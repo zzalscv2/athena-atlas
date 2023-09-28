@@ -15,4 +15,4 @@ atlas_add_library( ISF_FatrasToolsG4
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}  ${GEANT4_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}  ${CLHEP_LIBRARIES} AtlasHepMCLib ${GEANT4_LIBRARIES} AthenaBaseComps AthenaKernel BarcodeEventLib CxxUtils GaudiKernel ISF_Event ISF_FatrasInterfaces TrkEventPrimitives StoreGateLib ISF_InterfacesLib ISF_Geant4ToolsLib TrkGeometry )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES}  ${CLHEP_LIBRARIES} AtlasHepMCLib ${GEANT4_LIBRARIES} AthenaBaseComps AthenaKernel BarcodeEventLib CxxUtils GaudiKernel ISF_Event ISF_FatrasInterfaces TrkEventPrimitives StoreGateLib ISF_InterfacesLib ISF_Geant4ToolsLib TrkGeometry TruthUtils )

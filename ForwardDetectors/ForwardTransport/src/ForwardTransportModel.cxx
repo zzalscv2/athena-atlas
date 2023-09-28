@@ -153,7 +153,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                                                postTransportMomentum.z(),
                                                                                energy),
                                                              pdgcode,
-                                                             HepMC::FORWARDTRANSPORTMODELSTATUS);
+                                                             part->status());  // For now leave particle status unchanged - TODO potentially revisit this in the future.
   gVertex->add_particle_out(gParticle);
   HepMC::suggest_barcode(gParticle, HepMC::barcode(part)+HepMC::SIM_REGENERATION_INCREMENT);
 
@@ -197,7 +197,7 @@ void ForwardTransportModel::DoIt(const G4FastTrack& fastTrack, G4FastStep& fastS
                                                             initialISP->mass(),
                                                             initialISP->charge(),
                                                             initialISP->pdgCode(),
-                                                            initialISP->status(),
+                                                            initialISP->status(), // For now leave particle status unchanged - TODO potentially revisit this in the future.
                                                             time, // TODO Update??
                                                             *initialISP,
                                                             pBarcode,
@@ -251,6 +251,12 @@ void ForwardTransportModel::KillPrimaryTrack(const G4FastTrack& fastTrack, G4Fas
                                                                          initialPosition.y(),
                                                                          initialPosition.z(),
                                                                          fastTrack.GetPrimaryTrack()->GetGlobalTime()));
+  // Flag the fact that Forward Transport has occurred using the vertex status
+#ifdef HEPMC3
+  gVertex->set_status(HepMC::SIM_STATUS_THRESHOLD+1000+HepMC::FORWARDTRANSPORTMODELSTATUS);
+#else
+  gVertex->set_id(HepMC::SIM_STATUS_THRESHOLD+1000+HepMC::FORWARDTRANSPORTMODELSTATUS);
+#endif
   gEvent->add_vertex(gVertex);
   gVertex->add_particle_in(part);
   // Kill track and deposit all energy in the current volume

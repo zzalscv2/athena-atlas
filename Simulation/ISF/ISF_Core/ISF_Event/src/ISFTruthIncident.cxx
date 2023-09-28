@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ISFTruthIncident.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header
 #include "ISF_Event/ISFTruthIncident.h"
@@ -16,6 +12,7 @@
 #include "AtlasHepMC/SimpleVector.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
+#include "TruthUtils/MagicNumbers.h"
 
 static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &particle) {
 
@@ -23,9 +20,8 @@ static HepMC::GenParticlePtr ParticleHelper_convert( const ISF::ISFParticle &par
   double mass = particle.mass();
   double energy = sqrt( mom.mag2() + mass*mass);
   HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
-  int status = 1; // stable particle not decayed by EventGenerator
 
-  auto hepParticle = HepMC::newGenParticlePtr( fourMomentum, particle.pdgCode(), status );
+  auto hepParticle = HepMC::newGenParticlePtr( fourMomentum, particle.pdgCode(), particle.status() );
   HepMC::suggest_barcode(hepParticle, particle.barcode() );
 
   // return a newly created GenParticle
@@ -119,6 +115,9 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticleAfterIncident(Barcode
 
   // set a new barcode
   m_parent.setBarcode( newBC );
+
+  // set a new status
+  m_parent.setStatus( parentStatus() + HepMC::SIM_STATUS_INCREMENT );
 
   // and update truth info (including the ISFParticle's HMPL)
   return updateHepMCTruthParticle(m_parent, &m_parent);

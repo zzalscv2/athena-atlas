@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -618,7 +618,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 							 mass,
 							 charge[i],
 							 pdgid[i],
-							 1,
+							 1 + HepMC::SIM_STATUS_THRESHOLD,
 							 time,
 							 *parent );
 	// in the validation mode, add process info

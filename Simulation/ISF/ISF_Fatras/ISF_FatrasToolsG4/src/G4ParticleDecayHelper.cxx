@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -28,6 +28,8 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "TruthUtils/MagicNumbers.h"
+
 // G4
 #include "G4RunManager.hh"
 #include "G4ParticleDefinition.hh"
@@ -381,7 +383,7 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
                                                             prod->GetMass(),
                                                             prod->GetCharge(),
                                                             prod->GetPDGcode(),
-                                                            1, //status
+                                                            1 + HepMC::SIM_STATUS_THRESHOLD, //status
                                                             timeStamp, 
                                                             parent,
 							    Barcode::fUndefinedBarcode,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -18,6 +18,7 @@
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
 #include "ISF_FatrasInterfaces/IParticleDecayHelper.h"
+#include "TruthUtils/MagicNumbers.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
 #include "ISF_FatrasInterfaces/IProcessSamplingTool.h"
@@ -1287,7 +1288,7 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
                                                          0,   //!< mass
                                                          0,   //!< charge
                                                          22,  //!< pdg code
-                                                         1,   //!status
+                                                         1 + HepMC::SIM_STATUS_THRESHOLD,   //!< status
                                                          time,  //!< time
                                                          *parent );
 

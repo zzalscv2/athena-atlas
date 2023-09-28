@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -20,6 +20,7 @@
 
 // HepMC includes
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // Geant4 includes
 #include "G4Step.hh"
@@ -317,7 +318,7 @@ bool iGeant4::Geant4TruthIncident::particleAlive(const G4Track *track) const {
 }
 
 #ifdef HEPMC3
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int, const bool) const {
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int, const bool secondary) const {
 #else
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int barcode, const bool secondary) const {
 #endif
@@ -327,7 +328,8 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
   const int pdgCode = track->GetDefinition()->GetPDGEncoding();
   const HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
-  const int status = 1; // stable particle not decayed by EventGenerator
+  const HepMC::GenParticlePtr parent = m_atlasG4EvtUserInfo->GetCurrentlyTraced();
+  const int status = (secondary) ? 1 + HepMC::SIM_STATUS_THRESHOLD : parent->status() + HepMC::SIM_STATUS_INCREMENT;
   HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(fourMomentum, pdgCode, status);
 
 #ifndef HEPMC3

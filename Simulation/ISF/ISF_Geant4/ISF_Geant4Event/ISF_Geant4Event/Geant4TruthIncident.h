@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_Geant4TruthIncident_H
@@ -16,6 +16,8 @@
 
 //Geant4 includes
 #include "G4ThreeVector.hh"
+
+#include "CxxUtils/checker_macros.h"
 
 // forward declarations
 class G4Step;
@@ -125,7 +127,7 @@ namespace iGeant4 {
       const G4Step*                 m_step{};
       const ISF::ISFParticle&       m_baseISP;
 
-      AtlasG4EventUserInfo*         m_atlasG4EvtUserInfo{};
+      AtlasG4EventUserInfo*         m_atlasG4EvtUserInfo ATLAS_THREAD_SAFE{};
       std::vector<const G4Track*>   m_children;
 
       HepMC::GenParticlePtr         m_parentParticleAfterIncident{};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 #include "ISF_Event/ITruthIncident.h"
 #include "ISF_Event/ISFTruthIncident.h"
 #include "ISF_Interfaces/ITruthSvc.h"
+#include "TruthUtils/MagicNumbers.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IHadronicInteractionProcessor.h"
 #include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
@@ -268,7 +269,7 @@ ISF::ISFParticleVector  iFatras::ProcessSamplingTool::interact(const ISF::ISFPar
                                         0.,
                                         0.,
                                         22,
-                                        1,
+                                        1 + HepMC::SIM_STATUS_THRESHOLD,
                                         eCell.time,
                                         *parent );
 
@@ -277,7 +278,7 @@ ISF::ISFParticleVector  iFatras::ProcessSamplingTool::interact(const ISF::ISFPar
                                         0.,
                                         0.,
                                         22,
-                                        1,
+                                        1 + HepMC::SIM_STATUS_THRESHOLD,
                                         eCell.time,
                                         *parent );
 

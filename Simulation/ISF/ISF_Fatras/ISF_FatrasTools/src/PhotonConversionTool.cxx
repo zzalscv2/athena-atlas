@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@
 #include "ISF_Interfaces/IParticleBroker.h"
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFTruthIncident.h"
+#include "TruthUtils/MagicNumbers.h"
 // iFatras
 #include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
 // Trk inlcude
@@ -251,7 +252,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                                mass,
                                                charge1,
                                                pdg1,
-                                               1,
+                                               1 + HepMC::SIM_STATUS_THRESHOLD,
                                                time,
                                                *parent );
       // in the validation mode, add process info
@@ -276,7 +277,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
                                                mass,
                                                charge2,
                                                pdg2,
-                                               1,
+                                               1 + HepMC::SIM_STATUS_THRESHOLD,
                                                time,
                                                *parent );
       
