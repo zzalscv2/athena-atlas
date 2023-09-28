@@ -545,7 +545,6 @@ inline GenEvent* copyemptyGenEvent(const GenEvent* inEvt) {
     return outEvt;
 }
 
-template <class T> inline int barcode(const T* p) {   return    p->barcode(); }
 template <class T> bool suggest_barcode(T& p, int i) {return p.suggest_barcode(i);}
 template <class T> bool suggest_barcode(T* p, int i) {return p->suggest_barcode(i);}
 //Smart pointers should not be used with HepMC2. But it happens.
