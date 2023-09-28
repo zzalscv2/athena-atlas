@@ -6,7 +6,6 @@
 #include "CLHEP/Random/Random.h"
 #include "AtlasCLHEP_RandomGenerators/dSFMTEngine.h"
 #include "CLHEP/Random/engineIDulong.h"
-#include "boost/io/ios_state.hpp"
 #include "CxxUtils/checker_macros.h"
 #include <string.h>
 #include <sstream>
@@ -187,10 +186,10 @@ void dSFMTEngine::restoreStatus( const char filename[] )
 
 void dSFMTEngine::showStatus() const
 {
-   boost::io::ios_all_saver saver (std::cout);
    std::cout << std::endl;
    std::cout << "--------- dSFMT engine status ---------" << std::endl;
-   std::cout << std::setprecision(20);
+   int pr = std::cout.precision();
+   std::cout.precision(20);
    std::cout << " Current index     = " << m_dsfmt->idx << std::endl;
    std::cout << " Array status[] = " << std::endl;
    for (int i=0; i<DSFMT_N + 1; ++i) {
@@ -198,6 +197,7 @@ void dSFMTEngine::showStatus() const
                << m_dsfmt->status[i].u32[2] << " " << m_dsfmt->status[i].u32[3] << std::endl;
    }
    std::cout << "----------------------------------------" << std::endl;
+   std::cout.precision(pr);
 }
 
 dSFMTEngine::operator float() {
