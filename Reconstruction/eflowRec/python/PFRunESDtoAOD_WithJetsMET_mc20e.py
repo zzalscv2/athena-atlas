@@ -59,6 +59,9 @@ if __name__=="__main__":
     cfg.merge(JetInputCfg(cfgFlags,cst.EMTopoOrigin))
     cfg.merge(JetInputCfg(cfgFlags,cst.LCTopoOrigin))
 
+    from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+    cfg.merge(PFGlobalFlowElementLinkingCfg(cfgFlags))
+
     #Now build the pflow MET association map and then add the METMaker algorithm
     from METReconstruction.METAssociatorCfg import METAssociatorCfg
     cfg.merge(METAssociatorCfg(cfgFlags, 'AntiKt4EMPFlow'))
