@@ -55,9 +55,6 @@ InDet::TRT_SeededSpacePointFinder_ATL::TRT_SeededSpacePointFinder_ATL
   m_r2min     = 340.    ;  //Min radius of 3rd SCT layer.Never search below that
   m_dzdrmin   = -4.00   ;  //Min pseudorapidity cut
   m_dzdrmax   = +4.00   ;  //Max pseudorapidity cut
-//   m_xiC       = 15.     ;  //Momentum chi2 cut between seed and TRT segment estimate
-//   m_xiTC      = 30.     ;  //Polar angle chi2 cut between seed and TRT segment estimate
-//   m_xiFC      = 50.     ;  //Azimuthal angle chi2 cut between seed and TRT segment estimate
   m_xiC      = 100.     ;  //Momentum chi2 cut between seed and TRT segment estimate
   m_xiTC     = 100.     ;  //Polar angle chi2 cut between seed and TRT segment estimate
   m_xiFC     = 100.     ;  //Azimuthal angle chi2 cut between seed and TRT segment estimate
@@ -681,16 +678,13 @@ InDet::TRT_SeededSpacePointFinder_ATL::production2Spb(const EventContext& ctx,
   //const Trk::MeasuredAtaStraightLine &ntP =
   //dynamic_cast<const Trk::MeasuredAtaStraightLine&>(tP);
   const AmgVector(5)& pTS=tP.parameters();
-  double xiC = m_xiC; double xiTC = m_xiTC; double xiFC = m_xiFC;
-
-
   const AmgSymMatrix(5)* vCM = tP.covariance();
 
   double sPhi = (*vCM)(2,2)  ; //Sigma on TRT segment azimuthal angle
   double sTheta = (*vCM)(3,3); //Sigma on TRT segment polar angle
   double sp = (*vCM)(4,4)    ; //Sigma on TRT segment inverse momentum estimate
 
-  double ipdelta = sqrt(xiC*sp);
+  double ipdelta = sqrt(m_xiC*sp);
 
   invar_bypass_struct tmp_invar_bypass{};
   tmp_invar_bypass.invp_min = pTS[4] - ipdelta;
@@ -700,10 +694,10 @@ InDet::TRT_SeededSpacePointFinder_ATL::production2Spb(const EventContext& ctx,
   tmp_invar_bypass.invp_max2 = tmp_invar_bypass.invp_max*tmp_invar_bypass.invp_max;
 
   double theta_center = pTS[3];
-  double theta_delta = sqrt(xiTC*sTheta);
+  double theta_delta = sqrt(m_xiTC*sTheta);
 
   double phi_center = pTS[2];
-  double phi_delta = sqrt(xiFC*sPhi);
+  double phi_delta = sqrt(m_xiFC*sPhi);
 
   bracket_angle(theta_center, theta_delta,
 		&(tmp_invar_bypass.min_theta), &(tmp_invar_bypass.max_theta));

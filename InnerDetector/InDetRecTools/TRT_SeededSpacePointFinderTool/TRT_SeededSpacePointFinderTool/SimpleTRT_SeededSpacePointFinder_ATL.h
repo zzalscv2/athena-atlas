@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,6 @@ namespace InDet{
       ///////////////////////////////////////////////////////////////////
       // Overall selection criteria cuts. See source code for explanation
       ///////////////////////////////////////////////////////////////////
-      int                            m_maxLayers;
       /** controls how many not considered SCT layers are allowed between two SP in order
           to form a seed pair */
       int                            m_maxHoles;
@@ -100,9 +99,6 @@ namespace InDet{
       /** rough cuts on the quality of the suggested SP pair */
       double                         m_perigeeCut;
       double                         m_directionPhiCut;
-      double                         m_directionEtaCut;
-      double                         m_positionPhiCut;
-      double                         m_positionZ_Cut;
 
 
       ///////////////////////////////////////////////////////////////////
