@@ -151,6 +151,7 @@ def defineMenu():
         'L1_TRT_VTE50',
         'L1_TRT_VTE200',
         'L1_TRT_VTE20',
+        'L1_TAU1_TRT_VTE50',
         #UPC - TRT,  phase-1 calo
         'L1_TRT_VjTE50',
         #UPC - calo only - legacy
@@ -207,6 +208,7 @@ def defineMenu():
 
         'L1_TAU1_VZDC_A_VZDC_C_VTE100', 'L1_TAU1_ZDC_XOR4_VTE100',
         'L1_TAU2_VZDC_A_VZDC_C_VTE100', 'L1_TAU2_ZDC_XOR4_VTE100',
+        'L1_TAU1_TRT_VZDC_A_VZDC_C_VTE100', 'L1_TAU1_TRT_ZDC_XOR4_VTE100',
         'L1_TRT_VZDC_A_VZDC_C_VTE50', 'L1_TRT_VZDC_A_VZDC_C_VTE20',
         'L1_TRT_VZDC_A_VZDC_C_VTE200',
 
