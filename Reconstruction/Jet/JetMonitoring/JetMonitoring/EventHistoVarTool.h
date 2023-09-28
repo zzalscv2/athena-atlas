@@ -9,6 +9,7 @@
 #include "xAODJet/JetContainer.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
 
 static const InterfaceID IID_IEventHistoVarTool("IEventHistoVarTool", 1 , 0); 
@@ -30,7 +31,7 @@ public:
   virtual ~IEventHistoVarTool(){}
   
   /// the value of the variable for a given Event
-  virtual float value(const xAOD::EventInfo &, const xAOD::JetContainer&) const = 0;
+  virtual float value(const xAOD::JetContainer&) const = 0;
   /// a compact description of the variable.
   virtual std::string varName() const =0;
 };
@@ -43,15 +44,15 @@ public:
 
   virtual StatusCode initialize() ;  
 
-  virtual float value(const xAOD::EventInfo &, const xAOD::JetContainer&) const;
+  virtual float value(const xAOD::JetContainer&) const;
   virtual std::string varName() const {return m_varName;}
   
   
 private:
 
   Gaudi::Property<std::string> m_varName {this,"VarName", ""};
-  Gaudi::Property<std::string> m_attName {this,"Attribute", ""};
   Gaudi::Property<float> m_defaultValue = {this,"Default", -1.};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_attName {this, "Attribute", "", "Attribute name retrieved from event info container ('<event info name>.<decoration>'). If no container name prefixed, then EventInfo.<Attribute> is used."};
   
 };
 
