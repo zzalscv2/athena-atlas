@@ -222,7 +222,7 @@ namespace SH
     const std::set<char> whitespaces{'\t',' ','\n','\r'};
     while (std::getline (file, ds))
     {
-      while(whitespaces.count(ds.back())) ds.pop_back();
+      while ((!ds.empty()) && whitespaces.count(ds.back())) ds.pop_back();
       if (ds.empty() || ds.at(0) == '#')
         continue;
 
@@ -378,7 +378,7 @@ namespace SH
     const std::set<char> whitespaces{'\t',' ','\n','\r'};
     while (std::getline (myfile, line))
     {
-      while(whitespaces.count(line.back())) line.pop_back();
+      while ((!line.empty()) && whitespaces.count(line.back())) line.pop_back();
       if (!line.empty() && line.at(0) != '#')
       {
 	sample->add (line);

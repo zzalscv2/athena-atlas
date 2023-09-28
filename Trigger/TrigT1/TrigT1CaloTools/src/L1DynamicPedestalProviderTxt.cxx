@@ -303,7 +303,7 @@ void L1DynamicPedestalProviderTxt::parseInputFile(const std::string& fileName,
   // read file line-by-line
   const std::set<char> whitespaces{'\t',' ','\n','\r'};
   for(std::string L; std::getline(F, L); ) {
-    while(whitespaces.count(L.back())) L.pop_back();
+    while ((!L.empty()) && whitespaces.count(L.back())) L.pop_back();
     if(L.empty()) continue; // ignore empty lines
     if(L[0] == '#') continue; // ignore comments
 
