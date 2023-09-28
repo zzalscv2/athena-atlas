@@ -1,9 +1,6 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-#include <RootCoreUtils/StringUtil.h>
-
 #include <ROOT/RDataFrame.hxx>
 #include <ROOT/RLogger.hxx>
 #include <TCanvas.h>
@@ -103,7 +100,8 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
 
   // Base name of branches to read
   std::string treeName = poVariablesMap["tree-name"].as<std::string>();
-  std::string treeNameOut = RCU::substitute(treeName, "/", "_");
+  std::string treeNameOut = treeName;
+  std::replace( treeNameOut.begin(), treeNameOut.end(), '/', '_');
   std::string referenceInput = poVariablesMap["reference-file"].as<std::string>();
   std::string testInput = poVariablesMap["test-file"].as<std::string>();
   std::string baseBranchName;
