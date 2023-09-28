@@ -441,10 +441,10 @@ void Trk::PatternTrackParameters::changeDirection()
     m_parameters[2] += pi2;
   }
 
-  if(!dynamic_cast<const Trk::StraightLineSurface*>(m_surface.get()) &&
-     !dynamic_cast<const Trk::PerigeeSurface*>     (m_surface.get())) {
+  if ((m_surface->type() != Trk::SurfaceType::Line) &&
+      (m_surface->type() != Trk::SurfaceType::Perigee)) {
 
-    if(m_covariance == std::nullopt) { 
+    if (m_covariance == std::nullopt) {
       return;
     }
 
@@ -461,7 +461,7 @@ void Trk::PatternTrackParameters::changeDirection()
   m_parameters[ 0] = -m_parameters[ 0];
 
 
-  if(m_covariance == std::nullopt) { 
+  if(m_covariance == std::nullopt) {
     return;
   }
 
