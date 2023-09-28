@@ -21,8 +21,6 @@
 - graphics/VP1/VP1Systems/VP1TriggerSystems
 - graphics/VP1/VP1Systems/VP1TriggerDecisionSystems
 - graphics/VP1/VP1Plugins/VP1TriggerDecisionPlugin
-- graphics/VP1/VP1Systems/VP1MCSystems
-- graphics/VP1/VP1Plugins/VP1MCPlugin
 + graphics/VP1/.*
 
 - Generators/MCTester_i
