@@ -17,10 +17,11 @@
 ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   : EL::AnaAlgorithm(name, pSvcLocator),
     //m_trigConfigTool("TrigConf::xAODConfigTool/xAODConfigTool", this),
-    m_trigDecisionTool ("Trig::TrigDecisionTool/TrigDecisionTool"),
     //    m_trigMatchingTool("Trig::MatchingTool/TrigMatchingTool", this),
+    // disabling these
+    m_trigDecisionTool ("Trig::TrigDecisionTool/TrigDecisionTool"),
     m_grl ("GoodRunsListSelectionTool/grl", this),
-    m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this),
+    //m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this),
     m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this )
 {
   // Here you put any code for the base initialization of variables,
@@ -36,7 +37,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("enableOutputTree",  enableOutputTree = false, "Enable output tree");
   declareProperty("enableOutputSamples",  enableOutputSamples = false, "Output ZDC and RPD raw data");
   declareProperty("enableTrigger",  enableTrigger = true, "comment");
-  declareProperty("enableTracks",  enableTracks = true, "comment");
+  declareProperty("enableTracks",  enableTracks = false, "comment");
   declareProperty("trackLimit",  trackLimit = 500, "comment");
   declareProperty("enableClusters",  enableClusters = true, "comment");
   declareProperty("writeOnlyTriggers",  writeOnlyTriggers = false, "comment");
@@ -118,6 +119,8 @@ StatusCode ZdcNtuple :: initialize ()
     m_outputTree->Branch("extendedLevel1ID",&t_extendedLevel1ID,"extendedLevel1ID/i");
     m_outputTree->Branch("timeStamp",&t_timeStamp,"timeStamp/i");
     m_outputTree->Branch("timeStampNSOffset",&t_timeStampNSOffset,"timeStampNSOffset/i");
+    m_outputTree->Branch("zdcEventInfoError",&t_zdcEventInfoError,"zdcEventInfoError/b");
+    m_outputTree->Branch("zdcEventInfoErrorWord",&t_zdcEventInfoErrorWord,"zdcEventInfoErrorWord/i");
 
     if (enableOutputSamples)
     {
@@ -390,6 +393,8 @@ StatusCode ZdcNtuple :: initialize ()
   // ZDC re-reco tool
   if (reprocZdc)
   {
+    m_zdcAnalysisTool.setTypeAndName("ZDC::ZdcAnalysisTool/ZdcAnalysisTool");
+
     ANA_MSG_INFO("Trying to configure ZDC Analysis Tool!");
 
     ANA_CHECK(m_zdcAnalysisTool.setProperty("FlipEMDelay", flipDelay));
@@ -424,10 +429,9 @@ StatusCode ZdcNtuple :: initialize ()
     else
       ANA_MSG_INFO("NO FLIP ZDC DELAY IN EM MODULES");
 
-    ANA_MSG_INFO("Trying to initialize ZDC Analysis Tool!");
 
+    ANA_MSG_INFO("Trying to initialize ZDC Analysis Tool!");
     ANA_CHECK(m_zdcAnalysisTool.initialize());
-    
   }
   
   
@@ -481,12 +485,14 @@ StatusCode ZdcNtuple :: execute ()
   if (!m_isMC)
   {
     if (reprocZdc)
-    {
-      ANA_CHECK(m_zdcAnalysisTool->reprocessZdc());
-    }
+      {
+	ANA_MSG_INFO ("Reprocessing ZDC in ZdcNtuple");
+	ANA_CHECK(m_zdcAnalysisTool->reprocessZdc());
+      }
     else
-      ANA_MSG_DEBUG ("No reprocessing");
-
+      {
+	ANA_MSG_INFO ("No ZDC reprocessing");
+      }
     processZdcNtupleFromModules(); // same model in both cases -- processZdcNtuple() goes straight to the anlaysis tool, which is good for debugging
 
  
@@ -638,6 +644,12 @@ void ZdcNtuple::processZdcNtupleFromModules()
 
   t_ZdcModuleMask = 0;
   if (enableCentroid) t_cosDeltaReactionPlaneAngle = 0;
+  
+  if (t_zdcEventInfoError == xAOD::EventInfo::Error)
+    {
+      ANA_MSG_INFO("ZDC event failed EventInfo error check - aborting!");
+      return;
+    }
 
   if (zdcSums.ptr())
   {
@@ -825,7 +837,7 @@ bool ZdcNtuple::processTriggerDecision()
 	{
 	  t_tbp[i] = m_trigDecision->tbp().at(i);
 	  t_tav[i] = m_trigDecision->tav().at(i);	  
-	  ATH_MSG_DEBUG( "TD: " << i << " tbp: " << std::hex << t_tbp[i] << "\t" << t_tav[i] );
+	  ANA_MSG_DEBUG( "TD: " << i << " tbp: " << std::hex << t_tbp[i] << "\t" << t_tav[i] );
 	}
       t_bunchGroup = m_trigDecision->bgCode();
     }
@@ -890,10 +902,12 @@ void ZdcNtuple::processEventInfo()
   t_passBits = acceptEvent();
   t_avgIntPerCrossing = m_eventInfo->averageInteractionsPerCrossing();
   t_actIntPerCrossing = m_eventInfo->actualInteractionsPerCrossing();
-
+  t_zdcEventInfoError = m_eventInfo->errorState(xAOD::EventInfo::ForwardDet);
+  t_zdcEventInfoErrorWord = m_eventInfo->eventFlags(xAOD::EventInfo::ForwardDet);
+  
   if ( !(m_eventCounter++ % 1000) || msgLvl(MSG::DEBUG))
   {
-    ANA_MSG_INFO("Event# " << m_eventCounter << "Run " << m_eventInfo->runNumber() << " Event " << m_eventInfo->eventNumber() << " LB " << m_eventInfo->lumiBlock() );
+    ANA_MSG_INFO("Event# " << m_eventCounter << " Run " << m_eventInfo->runNumber() << " Event " << m_eventInfo->eventNumber() << " LB " << m_eventInfo->lumiBlock() );
   }
 
 }
@@ -1648,7 +1662,7 @@ void ZdcNtuple::setupTriggerHistos()
       ic++;
     }
 
-  ATH_MSG_INFO( "triggers = " << triggers.size() << " chains = " << m_chainGroups.size() );
+  ANA_MSG_INFO( "triggers = " << triggers.size() << " chains = " << m_chainGroups.size() );
 
   int irc = 0;
   ANA_MSG_INFO("Adding rerun trigger branches!");
