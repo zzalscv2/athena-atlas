@@ -17,7 +17,7 @@ The main reconstruction of electron and photons is made by the following algorit
 - egammaRecBuilder: build egammaRec objects from tracks, vertices and clusters
 - photonSuperClusterBuilder: create supercluster for photons
 - electronSuperClusterBuilder: create superclusters for electrons
-- topoEgammaBuilder: create the final superclusters
+- xAODEgammaBuilder: create the final superclusters
 
 <center>
 @image html egammaAlgs_algos.svg width=80%

@@ -58,9 +58,9 @@ def egammaReconstructionCfg(flags, name="egammaReconstruction"):
         acc.merge(electronSuperClusterBuilderCfg(flags))
         acc.merge(photonSuperClusterBuilderCfg(flags))
 
-        from egammaAlgs.topoEgammaBuilderConfig import (
-            topoEgammaBuilderCfg)
-        acc.merge(topoEgammaBuilderCfg(flags))
+        from egammaAlgs.xAODEgammaBuilderConfig import (
+            xAODEgammaBuilderCfg)
+        acc.merge(xAODEgammaBuilderCfg(flags))
 
         from egammaAlgs.egammaLargeClusterMakerAlgConfig import (
             egammaLargeClusterMakerAlgCfg)

@@ -42,8 +42,8 @@ atlas_add_test( egammaTopoClusterCopierConfig_test
     SCRIPT python -m egammaAlgs.egammaTopoClusterCopierConfig
     POST_EXEC_SCRIPT nopost.sh)
 
-atlas_add_test( topoEgammaBuilderConfig_test
-    SCRIPT python -m egammaAlgs.topoEgammaBuilderConfig
+atlas_add_test( xAODEgammaBuilderConfig_test
+    SCRIPT python -m egammaAlgs.xAODEgammaBuilderConfig
     POST_EXEC_SCRIPT nopost.sh)
 
 atlas_add_test( egammaForwardBuilderConfig_test

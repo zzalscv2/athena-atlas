@@ -106,9 +106,9 @@ def _run(args):
     acc.merge(electronSuperClusterBuilderCfg(flags))
     acc.merge(photonSuperClusterBuilderCfg(flags))
 
-    from egammaAlgs.topoEgammaBuilderConfig import (
-        topoEgammaBuilderCfg)
-    acc.merge(topoEgammaBuilderCfg(flags,name='topoEgammaBuilder',sequenceName = None))
+    from egammaAlgs.xAODEgammaBuilderConfig import (
+        xAODEgammaBuilderCfg)
+    acc.merge(xAODEgammaBuilderCfg(flags,name='xAODEgammaBuilder',sequenceName = None))
 
     from egammaConfig.egammaOutputConfig import (
         egammaOutputCfg)

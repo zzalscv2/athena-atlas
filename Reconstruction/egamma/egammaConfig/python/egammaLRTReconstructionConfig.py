@@ -78,8 +78,8 @@ def egammaLRTReconstructionCfg(flags, name="egammaLRTReconstruction"):
             TrackMatchBuilderTool=lrtemtrackmatch)
         )
 
-        from egammaAlgs.topoEgammaBuilderConfig import (
-            topoEgammaBuilderCfg)
+        from egammaAlgs.xAODEgammaBuilderConfig import (
+            xAODEgammaBuilderCfg)
         from egammaTools.EMClusterToolConfig import (
             EMClusterToolCfg)
         LRTEMClusterTool = acc.popToolsAndMerge(EMClusterToolCfg(
@@ -87,9 +87,9 @@ def egammaLRTReconstructionCfg(flags, name="egammaLRTReconstruction"):
             name='LRTEMClusterTool',
             OutputClusterContainerName='LRT'+flags.Egamma.Keys.Output.CaloClusters)
         )
-        acc.merge(topoEgammaBuilderCfg(
+        acc.merge(xAODEgammaBuilderCfg(
             flags,
-            name='LRTtopoEgammaBuilder',
+            name='LRTxAODEgammaBuilder',
             InputElectronRecCollectionName='LRT' +
             flags.Egamma.Keys.Internal.ElectronSuperRecs,
             ElectronOutputName='LRT'+flags.Egamma.Keys.Output.Electrons,
