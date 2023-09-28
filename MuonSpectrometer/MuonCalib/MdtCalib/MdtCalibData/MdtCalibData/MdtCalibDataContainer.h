@@ -54,6 +54,6 @@ namespace MuonCalib{
 }
 
 CLASS_DEF( MuonCalib::MdtCalibDataContainer , 1228248101 , 1 );
-CONDCONT_DEF( MuonCalib::MdtCalibDataContainer , 1267664791 );
+CONDCONT_MIXED_DEF( MuonCalib::MdtCalibDataContainer , 1267664791 );
 
 #endif
