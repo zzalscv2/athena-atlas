@@ -98,25 +98,6 @@ def InDetVertexTruthMatchToolCfg(flags, **kwargs):
     return acc
 
 
-def LRTTrackParticleMergerCfg(flags, name="MergeLRTAndStandard", **kwargs):
-    kwargs.setdefault("TrackParticleLocation",
-                      ["InDetTrackParticles", "InDetLargeD0TrackParticles"])
-    kwargs.setdefault("OutputTrackParticleLocation",
-                      "InDetWithLRTTrackParticles")
-    kwargs.setdefault("CreateViewColllection", True)
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
-    return TrackParticleMergerCfg(flags, name, **kwargs)
-
-
-def LRTMergerCfg(flags, name="InDetLRTMerge", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("AugmentationTools", acc.getPrimaryAndMerge(
-        LRTTrackParticleMergerCfg(flags)))
-    acc.addEventAlgo(
-        CompFactory.DerivationFramework.CommonAugmentation(name, **kwargs))
-    return acc
-
-
 def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     from InDetPhysValMonitoring.InDetPhysValDecorationConfig import (
         AddDecoratorIfNeededCfg)
@@ -383,7 +364,8 @@ def InDetPhysValMonitoringCfg(flags):
     acc = ComponentAccumulator()
 
     if flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
-        acc.merge(LRTMergerCfg(flags))
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+        acc.merge(InDetLRTMergeCfg(flags))
 
     mons = [(True,
              InDetPhysValMonitoringToolCfg),

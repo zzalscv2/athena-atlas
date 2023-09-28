@@ -15,30 +15,21 @@ from AthenaConfiguration.Enums import MetadataCategory
 
 TRIG8MergedElectronContainer = "StdWithLRTElectrons"
 TRIG8MergedMuonContainer = "StdWithLRTMuons"
-TRIG8MergedTrackCollection = "InDetWithLRTTrackParticles"
 
 # Main algorithm config
-def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
+def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for TRIG8"""
     acc = ComponentAccumulator()
 
     # Augmentations
 
     # LRT track merge
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
-    TRIG8TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
-        ConfigFlags,
-        name                        = "TRIG8TrackParticleMergerTool",
-        TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-        OutputTrackParticleLocation = TRIG8MergedTrackCollection,
-        CreateViewColllection       = True))
-
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = [TRIG8TrackParticleMergerTool])
-    acc.addEventAlgo(LRTMergeAug)
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+    acc.merge(InDetLRTMergeCfg(flags))
 
     # LRT muons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-    acc.merge(LRTMuonMergerAlg( ConfigFlags,
+    acc.merge(LRTMuonMergerAlg( flags,
                                 PromptMuonLocation    = "Muons",
                                 LRTMuonLocation       = "MuonsLRT",
                                 OutputMuonLocation    = TRIG8MergedMuonContainer,
@@ -46,7 +37,7 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
 
     # LRT electrons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronMergerAlg
-    acc.merge(LRTElectronMergerAlg( ConfigFlags,
+    acc.merge(LRTElectronMergerAlg( flags,
                                     PromptElectronLocation = "Electrons",
                                     LRTElectronLocation    = "LRTElectrons",
                                     OutputCollectionName   = TRIG8MergedElectronContainer,
@@ -58,18 +49,18 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
 
     # Common augmentations
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # LRT Egamma
     from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
-    acc.merge(EGammaLRTCfg(ConfigFlags))
+    acc.merge(EGammaLRTCfg(flags))
 
     from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronLHSelectorsCfg
-    acc.merge(LRTElectronLHSelectorsCfg(ConfigFlags))
+    acc.merge(LRTElectronLHSelectorsCfg(flags))
 
     # LRT Muons
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
-    acc.merge(MuonsCommonCfg(ConfigFlags,
+    acc.merge(MuonsCommonCfg(flags,
                              suff="LRT"))
 
 
@@ -81,21 +72,21 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
 
     TRIG8PhotonsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(
-        ConfigFlags,
+        flags,
         name            = "TRIG8PhotonsThinningTool",
         StreamName      = kwargs['StreamName'],
         ContainerName   = "Photons",
         SelectionString = "Photons.pt >= 1000000."))
 
     TRIG8TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "TRIG8TrackParticleThinningTool",
         StreamName              = kwargs['StreamName'],
         SelectionString         = "InDetTrackParticles.pt > 1*GeV",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     TRIG8LRTTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "TRIG8LRTTrackParticleThinningTool",
         StreamName              = kwargs['StreamName'],
         SelectionString         = "InDetLargeD0TrackParticles.pt > 1*GeV",
@@ -113,7 +104,7 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
 
     allperiods = TriggerPeriod.y2015 | TriggerPeriod.y2016 | TriggerPeriod.y2017 | TriggerPeriod.y2018 | TriggerPeriod.future2e34
-    TriggerAPI.setConfigFlags(ConfigFlags)
+    TriggerAPI.setConfigFlags(flags)
     trig_all = TriggerAPI.getAllHLT(allperiods)
     
     # Pieces of trigger names to keep
@@ -156,7 +147,7 @@ def TRIG8KernelCfg(ConfigFlags, name='TRIG8Kernel', **kwargs):
     return acc
 
 
-def TRIG8Cfg(ConfigFlags):
+def TRIG8Cfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -165,10 +156,10 @@ def TRIG8Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TRIG8TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    TRIG8TriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(TRIG8KernelCfg(ConfigFlags, name="TRIG8Kernel", StreamName = 'StreamDAOD_TRIG8', TriggerListsHelper = TRIG8TriggerListsHelper))
+    acc.merge(TRIG8KernelCfg(flags, name="TRIG8Kernel", StreamName = 'StreamDAOD_TRIG8', TriggerListsHelper = TRIG8TriggerListsHelper))
 
 
     # ============================
@@ -178,7 +169,7 @@ def TRIG8Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    TRIG8SlimmingHelper = SlimmingHelper("TRIG8SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
 
     TRIG8SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
@@ -272,7 +263,7 @@ def TRIG8Cfg(ConfigFlags):
 
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(TRIG8SlimmingHelper)
         TRIG8SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
@@ -299,9 +290,9 @@ def TRIG8Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
-        acc.merge(LLP1TriggerMatchingToolRun2Cfg(ConfigFlags,
+        acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
                                               name = "LRTTriggerMatchingTool",
                                               OutputContainerPrefix = "LRTTrigMatch_",
                                               TriggerList = TRIG8TriggerListsHelper.Run2TriggerNamesNoTau,
@@ -322,9 +313,9 @@ def TRIG8Cfg(ConfigFlags):
                                          InputMuons=TRIG8MergedMuonContainer
                                          )
     # Run 3
-    elif ConfigFlags.Trigger.EDMVersion == 3:
+    elif flags.Trigger.EDMVersion == 3:
         from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
-        acc.merge(LLP1TriggerMatchingToolRun2Cfg(ConfigFlags,
+        acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
                                               name = "LRTTriggerMatchingTool",
                                               OutputContainerPrefix = "LRTTrigMatch_",
                                               TriggerList = TRIG8TriggerListsHelper.Run3TriggerNamesNoTau,
@@ -336,8 +327,8 @@ def TRIG8Cfg(ConfigFlags):
 
     # Output stream
     TRIG8ItemList = TRIG8SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TRIG8", ItemList=TRIG8ItemList, AcceptAlgs=["TRIG8Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_TRIG8", AcceptAlgs=["TRIG8Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_TRIG8", ItemList=TRIG8ItemList, AcceptAlgs=["TRIG8Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_TRIG8", AcceptAlgs=["TRIG8Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 

@@ -18,7 +18,7 @@ MergedTrackCollection = "InDetWithLRTTrackParticles"
 LLP1VrtSecInclusiveSuffixes = []
 
 # Main algorithm config
-def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
+def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
 
     """Configure the derivation framework driving algorithm (kernel) for LLP1"""
     acc = ComponentAccumulator()
@@ -26,29 +26,21 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     # Augmentations
 
     # LRT track merge
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
-    LLP1TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
-        ConfigFlags,
-        name                        = "LLP1TrackParticleMergerTool",
-        TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-        OutputTrackParticleLocation = MergedTrackCollection,
-        CreateViewColllection       = True))
-
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = [LLP1TrackParticleMergerTool])
-    acc.addEventAlgo(LRTMergeAug)
+    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+    acc.merge(InDetLRTMergeCfg(flags))
 
     # LRT muons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-    acc.merge(LRTMuonMergerAlg( ConfigFlags,
+    acc.merge(LRTMuonMergerAlg( flags,
                                 PromptMuonLocation    = "Muons",
                                 LRTMuonLocation       = "MuonsLRT",
                                 OutputMuonLocation    = MergedMuonContainer,
                                 CreateViewCollection  = True,
-                                UseRun3WP = ConfigFlags.GeoModel.Run == LHCPeriod.Run3))
+                                UseRun3WP = flags.GeoModel.Run == LHCPeriod.Run3))
 
     # LRT electrons merge
     from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronMergerAlg
-    acc.merge(LRTElectronMergerAlg( ConfigFlags,
+    acc.merge(LRTElectronMergerAlg( flags,
                                     PromptElectronLocation = "Electrons",
                                     LRTElectronLocation    = "LRTElectrons",
                                     OutputCollectionName   = MergedElectronContainer,
@@ -57,27 +49,27 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Max Cell sum decoration tool
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    acc.merge(LArOnOffIdMappingCfg(flags))
 
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import MaxCellDecoratorCfg
 
     LLP1MaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
-        ConfigFlags,
+        flags,
         name = "LLP1MaxCellDecoratorTool",
         SGKey_electrons = "Electrons",
         SGKey_photons   = "Photons"))
     acc.addPublicTool(LLP1MaxCellDecoratorTool)
 
 
-    if ConfigFlags.GeoModel.Run == LHCPeriod.Run3:
+    if flags.GeoModel.Run == LHCPeriod.Run3:
         LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
-            ConfigFlags,
+            flags,
             name = "LLP1LRTMaxCellDecoratorTool",
             SGKey_electrons = "LRTElectrons",
             SGKey_photons = ''))
     else:
         LLP1LRTMaxCellDecoratorTool = acc.popToolsAndMerge(MaxCellDecoratorCfg(
-            ConfigFlags,
+            flags,
             name = "LLP1LRTMaxCellDecoratorTool",
             SGKey_electrons = "LRTElectrons",
             SGKey_egammaClusters   = "egammaClusters",
@@ -106,7 +98,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                         standardRecoMode = True,
                                         lock = True,
     )
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         AntiKt10RCTruth = JetDefinition("AntiKt",1.0,cst.AntiKt4TruthJets,
                                         ghostdefs = [],
                                         modifiers = ("Sort", "Filter:200000",),
@@ -115,39 +107,39 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
         )
 
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
-    acc.merge(JetRecCfg(ConfigFlags,AntiKt10RCEMTopo))
-    if ConfigFlags.Input.isMC: acc.merge(JetRecCfg(ConfigFlags,AntiKt10RCTruth))
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    acc.merge(JetRecCfg(flags,AntiKt10RCEMTopo))
+    if flags.Input.isMC: acc.merge(JetRecCfg(flags,AntiKt10RCTruth))
 
     # MET with LRT in association map
     from DerivationFrameworkJetEtMiss.METCommonConfig import METLRTCfg
-    acc.merge(METLRTCfg(ConfigFlags, "AntiKt4EMTopo"))
-    acc.merge(METLRTCfg(ConfigFlags, "AntiKt4EMPFlow"))
+    acc.merge(METLRTCfg(flags, "AntiKt4EMTopo"))
+    acc.merge(METLRTCfg(flags, "AntiKt4EMPFlow"))
 
     # LRT Egamma
     from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
-    acc.merge(EGammaLRTCfg(ConfigFlags))
+    acc.merge(EGammaLRTCfg(flags))
 
     from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronLHSelectorsCfg
-    acc.merge(LRTElectronLHSelectorsCfg(ConfigFlags))
+    acc.merge(LRTElectronLHSelectorsCfg(flags))
 
     #Photon ID Selector
     from DerivationFrameworkLLP.LLPToolsConfig import PhotonIsEMSelectorsCfg
-    acc.merge(PhotonIsEMSelectorsCfg(ConfigFlags))
+    acc.merge(PhotonIsEMSelectorsCfg(flags))
 
     # LRT Muons
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
-    acc.merge(MuonsCommonCfg(ConfigFlags,
+    acc.merge(MuonsCommonCfg(flags,
                              suff="LRT"))
 
     # flavor tagging
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    acc.merge(FtagJetCollectionsCfg(ConfigFlags, ['AntiKt4EMTopoJets']))
+    acc.merge(FtagJetCollectionsCfg(flags, ['AntiKt4EMTopoJets']))
 
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
 
-    acc.merge(VrtSecInclusiveCfg(ConfigFlags,
+    acc.merge(VrtSecInclusiveCfg(flags,
                                  name = "VrtSecInclusive",
                                  AugmentingVersionString  = "",
                                  FillIntermediateVertices = False,
@@ -155,14 +147,14 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     LLP1VrtSecInclusiveSuffixes.append("")
 
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         TrackSystSuffix = "_TRK_EFF_LARGED0_GLOBAL__1down"
         acc.merge(TrackSystematicsAlgCfg(
-            ConfigFlags,
+            flags,
             InputTrackContainer  = MergedTrackCollection,
             OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}"))
-        acc.merge(VrtSecInclusiveCfg(ConfigFlags,
+        acc.merge(VrtSecInclusiveCfg(flags,
                                      name = f"VrtSecInclusive{TrackSystSuffix}",
                                      AugmentingVersionString  = TrackSystSuffix,
                                      FillIntermediateVertices = False,
@@ -171,7 +163,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # leptons-only VSI
     LeptonsSuffix = "_Leptons"
-    acc.merge(VrtSecInclusiveCfg(ConfigFlags,
+    acc.merge(VrtSecInclusiveCfg(flags,
                                  name = "VrtSecInclusive_InDet"+LeptonsSuffix,
                                  AugmentingVersionString     = LeptonsSuffix,
                                  FillIntermediateVertices    = False,
@@ -186,7 +178,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # track VSI
     LepTrackSuffix = "_LepTrack"
-    acc.merge(VrtSecInclusiveCfg(ConfigFlags,
+    acc.merge(VrtSecInclusiveCfg(flags,
                                  name = "VrtSecInclusive_InDet"+LepTrackSuffix,
                                  AugmentingVersionString     = LepTrackSuffix,
                                  FillIntermediateVertices    = False,
@@ -208,7 +200,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
     LLP1_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
     LLP1TrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "LLP1TrackParticleThinningTool",
         StreamName              = kwargs['StreamName'],
         SelectionString         = LLP1_thinning_expression,
@@ -216,14 +208,14 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Include inner detector tracks associated with muons
     LLP1MuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "LLP1MuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "Muons",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
     # Include LRT inner detector tracks associated with LRT muons
     LLP1LRTMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "LLP1LRTMuonTPThinningTool",
         StreamName              = kwargs['StreamName'],
         MuonKey                 = "MuonsLRT",
@@ -231,7 +223,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # disable tau thinning for now
     tau_thinning_expression = "(TauJets.ptFinalCalib >= 0)"
-    LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
         name            = "LLP1TauJetThinningTool",
         StreamName      = kwargs['StreamName'],
         ContainerName   = "TauJets",
@@ -239,7 +231,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Only keep tau tracks (and associated ID tracks) classified as charged tracks
     LLP1TauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                   = "LLP1TauTPThinningTool",
         StreamName             = kwargs['StreamName'],
         TauKey                 = "TauJets",
@@ -249,7 +241,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     tau_murm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_MuonRM')
     LLP1TauJetMuonRMParticleThinningTool = acc.getPrimaryAndMerge(TauJetLepRMParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                   = "LLP1TauJets_MuonRMThinningTool",
         StreamName             = kwargs['StreamName'],
         originalTauKey         = "TauJets",
@@ -260,21 +252,21 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # ID tracks associated with high-pt di-tau
     LLP1DiTauTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(
-        ConfigFlags,
+        flags,
         name                    = "LLP1DiTauTPThinningTool",
         StreamName              = kwargs['StreamName'],
         DiTauKey                = "DiTauJets",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
     ## Low-pt di-tau thinning
-    LLP1DiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+    LLP1DiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(flags,
                                                                                  name            = "LLP1DiTauLowPtThinningTool",
                                                                                  StreamName      = kwargs['StreamName'],
                                                                                  ContainerName   = "DiTauJetsLowPt",
                                                                                  SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
 
     # ID tracks associated with low-pt ditau
-    LLP1DiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(ConfigFlags,
+    LLP1DiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(flags,
                                                                                         name                    = "LLP1DiTauLowPtTPThinningTool",
                                                                                         StreamName              = kwargs['StreamName'],
                                                                                         DiTauKey                = "DiTauJetsLowPt",
@@ -286,12 +278,12 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # ID Tracks associated with secondary vertices
     from DerivationFrameworkLLP.LLPToolsConfig import VSITrackParticleThinningCfg
-    LLP1VSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(ConfigFlags,
+    LLP1VSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(flags,
                                                                                name                    = "LLP1VSITPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles",
                                                                                AugVerStrings = LLP1VrtSecInclusiveSuffixes))
-    LLP1LRTVSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(ConfigFlags,
+    LLP1LRTVSITPThinningTool = acc.getPrimaryAndMerge(VSITrackParticleThinningCfg(flags,
                                                                                   name                    = "LLP1LRTVSITPThinningTool",
                                                                                   StreamName              = kwargs['StreamName'],
                                                                                   InDetTrackParticlesKey  = "InDetLargeD0TrackParticles",
@@ -301,14 +293,14 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # ID Tracks associated with jets
     from DerivationFrameworkLLP.LLPToolsConfig import JetTrackParticleThinningCfg, JetLargeD0TrackParticleThinningCfg
-    LLP1JetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(ConfigFlags,
+    LLP1JetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(flags,
                                                                                name                    = "LLP1JetTPThinningTool",
                                                                                StreamName              = kwargs['StreamName'],
                                                                                JetKey                  = "AntiKt4EMTopoJets",
                                                                                SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    LLP1FatJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(  ConfigFlags,
+    LLP1FatJetTPThinningTool = acc.getPrimaryAndMerge(JetTrackParticleThinningCfg(  flags,
                                                                                     name                    = "LLP1FatJetTPThinningTool",
                                                                                     StreamName              = kwargs['StreamName'],
                                                                                     JetKey                  = "AntiKt10EMTopoRCJets",
@@ -317,15 +309,15 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                                                                     ))
 
     # LRT Tracks associated with jets
-    if ConfigFlags.Tracking.doLargeD0:
-        LLP1LRTJetTPThinningTool = acc.getPrimaryAndMerge(JetLargeD0TrackParticleThinningCfg(ConfigFlags,
+    if flags.Tracking.doLargeD0:
+        LLP1LRTJetTPThinningTool = acc.getPrimaryAndMerge(JetLargeD0TrackParticleThinningCfg(flags,
                                                                                              name                    = "LLP1LRTJetTPThinningTool",
                                                                                              StreamName              = kwargs['StreamName'],
                                                                                              JetKey                  = "AntiKt4EMTopoJets",
                                                                                              SelectionString         = "(AntiKt4EMTopoJets.pt > 20.*GeV) && (abs(AntiKt4EMTopoJets.eta) < 2.5)",
                                                                                              InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
 
-        LLP1LRTFatJetTPThinningTool = acc.getPrimaryAndMerge(JetLargeD0TrackParticleThinningCfg(ConfigFlags,
+        LLP1LRTFatJetTPThinningTool = acc.getPrimaryAndMerge(JetLargeD0TrackParticleThinningCfg(flags,
                                                                                                 name                    = "LLP1LRTFatJetTPThinningTool",
                                                                                                 StreamName              = kwargs['StreamName'],
                                                                                                 JetKey                  = "AntiKt10EMTopoRCJets",
@@ -348,7 +340,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                      LLP1JetTPThinningTool,
                      LLP1FatJetTPThinningTool]
 
-    if ConfigFlags.Tracking.doLargeD0:
+    if flags.Tracking.doLargeD0:
         thinningTools.append(LLP1LRTJetTPThinningTool)
         thinningTools.append(LLP1LRTFatJetTPThinningTool)
 
@@ -356,7 +348,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Compute RC substructure variables from energy clusters
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
-    LLP1RCJetSubstructureClustTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(ConfigFlags,
+    LLP1RCJetSubstructureClustTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(flags,
                                                                                     name                              = "LLP1RCJetSubstructureClustTrimAugTool",
                                                                                     StreamName                        = kwargs['StreamName'],
                                                                                     JetContainerKey                   = "AntiKt10EMTopoRCJets",
@@ -370,7 +362,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     RCSubstructureClusterTrimAug = CompFactory.DerivationFramework.CommonAugmentation("RCSubstructureClusterTrimAug", AugmentationTools = [LLP1RCJetSubstructureClustTrimAugTool])
     acc.addEventAlgo(RCSubstructureClusterTrimAug)
 
-    LLP1RCJetSubstructureClustSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(ConfigFlags,
+    LLP1RCJetSubstructureClustSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg(flags,
                                                                                     name                              = "LLP1RCJetSubstructureClustSDAugTool",
                                                                                     StreamName                        = kwargs['StreamName'],
                                                                                     JetContainerKey                   = "AntiKt10EMTopoRCJets",
@@ -386,7 +378,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Compute RC substructure variables from tracks
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
-    LLP1RCJetSubstructureTrackTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( ConfigFlags,
+    LLP1RCJetSubstructureTrackTrimAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( flags,
                                                                                         name                              = "LLP1RCJetSubstructureTrackTrimAugTool",
                                                                                         StreamName                        = kwargs['StreamName'],
                                                                                         JetContainerKey                   = "AntiKt10EMTopoRCJets",
@@ -401,7 +393,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     acc.addEventAlgo(RCSubstructureTrackTrimAug)
 
     from DerivationFrameworkLLP.LLPToolsConfig import RCJetSubstructureAugCfg
-    LLP1RCJetSubstructureTrackSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( ConfigFlags,
+    LLP1RCJetSubstructureTrackSDAugTool = acc.getPrimaryAndMerge(RCJetSubstructureAugCfg( flags,
                                                                                         name                              = "LLP1RCJetSubstructureTrackSDAugTool",
                                                                                         StreamName                        = kwargs['StreamName'],
                                                                                         JetContainerKey                   = "AntiKt10EMTopoRCJets",
@@ -419,7 +411,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     skimmingTools = []
 
     from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerSkimmingToolCfg
-    LLP1TriggerSkimmingTool = acc.getPrimaryAndMerge(LLP1TriggerSkimmingToolCfg(ConfigFlags,
+    LLP1TriggerSkimmingTool = acc.getPrimaryAndMerge(LLP1TriggerSkimmingToolCfg(flags,
                                                                                 name = "LLP1TriggerSkimmingTool"))
 
     skimmingTools.append(LLP1TriggerSkimmingTool)
@@ -433,24 +425,24 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     return acc
 
 
-def LLP1Cfg(ConfigFlags):
+def LLP1Cfg(flags):
     acc = ComponentAccumulator()
     # Get the lists of triggers needed for trigger matching.
     # This is needed at this scope (for the slimming) and further down in the config chain
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    LLP1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    LLP1TriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
-    acc.merge(LLP1KernelCfg(ConfigFlags, name="LLP1Kernel", StreamName = 'StreamDAOD_LLP1', TriggerListsHelper = LLP1TriggerListsHelper))
+    acc.merge(LLP1KernelCfg(flags, name="LLP1Kernel", StreamName = 'StreamDAOD_LLP1', TriggerListsHelper = LLP1TriggerListsHelper))
 
     ## CloseByIsolation correction augmentation
     ## For the moment, run BOTH CloseByIsoCorrection on AOD AND add in augmentation variables to be able to also run on derivation (the latter part will eventually be suppressed)
     ## Must set useSelTools to set elLHVLoose and phIsEMLoose with tools - not already set in LLP1 derivation
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByAlgsCfg
     contNames = [ "Muons", "Electrons", "Photons", "LRTElectrons", "MuonsLRT" ]
-    acc.merge(IsoCloseByAlgsCfg(ConfigFlags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
+    acc.merge(IsoCloseByAlgsCfg(flags, suff = "_LLP1", isPhysLite = False, containerNames = contNames, useSelTools = True, stream_name = 'StreamDAOD_LLP1'))
 
     # ============================
     # Define contents of the format
@@ -459,7 +451,7 @@ def LLP1Cfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
 
     LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",
@@ -551,7 +543,7 @@ def LLP1Cfg(ConfigFlags):
     setupIsoCloseBySlimmingVariables(LLP1SlimmingHelper, isLLP1 = True)
 
     # Truth containers
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(LLP1SlimmingHelper)
@@ -580,9 +572,9 @@ def LLP1Cfg(ConfigFlags):
 
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
-        acc.merge(LLP1TriggerMatchingToolRun2Cfg(ConfigFlags,
+        acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
                                               name = "LRTTriggerMatchingTool",
                                               OutputContainerPrefix = "LRTTrigMatch_",
                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
@@ -603,15 +595,15 @@ def LLP1Cfg(ConfigFlags):
                                          InputMuons=MergedMuonContainer
                                          )
     # Run 3
-    elif ConfigFlags.Trigger.EDMVersion == 3:
+    elif flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(LLP1SlimmingHelper)
 
 
     # Output stream
     LLP1ItemList = LLP1SlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_LLP1", ItemList=LLP1ItemList, AcceptAlgs=["LLP1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_LLP1", AcceptAlgs=["LLP1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_LLP1", ItemList=LLP1ItemList, AcceptAlgs=["LLP1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_LLP1", AcceptAlgs=["LLP1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
 
     return acc
 
