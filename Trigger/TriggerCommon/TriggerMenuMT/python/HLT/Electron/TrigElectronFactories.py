@@ -53,7 +53,7 @@ def TrigElectronSuperClusterBuilderCfg(flags, name = 'TrigElectronSuperClusterBu
     return builder()
 
 
-def TrigTopoEgammaElectronCfg(name='topoEgammaBuilder_TrigElectrons'):
+def TrigTopoEgammaElectronCfg(name='xAODEgammaBuilder_TrigElectrons'):
     
     mlog = logging.getLogger(__name__)
     mlog.info('Starting configuration')
@@ -71,7 +71,7 @@ def TrigTopoEgammaElectronCfg(name='topoEgammaBuilder_TrigElectrons'):
             )
     return TrigTopoEgammaElectron()
 
-def TrigTopoEgammaElectronCfg_HI(name='topoEgammaBuilder_TrigElectrons'):
+def TrigTopoEgammaElectronCfg_HI(name='xAODEgammaBuilder_TrigElectrons'):
     mlog = logging.getLogger(__name__)
     mlog.info('Starting configuration')
     TrigTopoEgammaElectron = AlgFactory( egammaAlgsConf.xAODEgammaBuilder, name = name+'HI',

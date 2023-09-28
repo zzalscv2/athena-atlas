@@ -16,7 +16,7 @@ from egammaTools.EMPIDBuilderConfig import (
     EMPIDBuilderElectronCfg, EMPIDBuilderPhotonCfg)
 
 
-def topoEgammaBuilderCfg(flags, name='topoEgammaBuilder',
+def xAODEgammaBuilderCfg(flags, name='xAODEgammaBuilder',
                          sequenceName = None,
                          **kwargs):
 
@@ -83,12 +83,12 @@ if __name__ == "__main__":
     flags.lock()
 
     acc = MainServicesCfg(flags)
-    acc.merge(topoEgammaBuilderCfg(flags))
-    mlog = logging.getLogger("topoEgammaBuilderConfigTest")
-    mlog.info("Configuring  topoEgammaBuilder: ")
+    acc.merge(xAODEgammaBuilderCfg(flags))
+    mlog = logging.getLogger("xAODEgammaBuilderConfigTest")
+    mlog.info("Configuring  xAODEgammaBuilder: ")
     printProperties(mlog,
-                    acc.getEventAlgo("topoEgammaBuilder"),
+                    acc.getEventAlgo("xAODEgammaBuilder"),
                     nestLevel=1,
                     printDefaults=True)
-    with open("topoegammabuilder.pkl", "wb") as f:
+    with open("xaodegammabuilder.pkl", "wb") as f:
         acc.store(f)

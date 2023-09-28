@@ -33,7 +33,7 @@ def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
       - photonSuperClusterBuilder algorithm will create superclusters out of the toposlusters and tracks in egammaRec under the photon hypothesis
           https://gitlab.cern.ch/atlas/athena/blob/master/Reconstruction/egamma/egammaAlgs/python/egammaSuperClusterBuilder.py#L26 
       - TopoEgammBuilder will create photons and electrons out of trakcs and SuperClusters. Here at HLT photons the aim is to ignore electrons and not use tracks at all.
-          https://gitlab.cern.ch/atlas/athena/blob/master/Reconstruction/egamma/egammaAlgs/src/topoEgammaBuilder.cxx
+          https://gitlab.cern.ch/atlas/athena/blob/master/Reconstruction/egamma/egammaAlgs/src/xAODEgammaBuilder.cxx
     """
 
     log.debug('precisionPhotonRecoSequence(RoIs = %s)',RoIs)
@@ -54,7 +54,7 @@ def precisionPhotonRecoSequence(flags, RoIs, name = None, ion=False):
 
     acc.merge(TrigTopoEgammaPhoton)
 
-    #online monitoring for topoEgammaBuilder
+    #online monitoring for xAODEgammaBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactoriesCfg import PrecisionPhotonTopoMonitorCfg
     PrecisionPhotonTopoRecoMonAlgo = PrecisionPhotonTopoMonitorCfg(flags,ion=ion)
     acc.merge(PrecisionPhotonTopoRecoMonAlgo)

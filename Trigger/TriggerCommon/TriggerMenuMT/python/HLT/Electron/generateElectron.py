@@ -191,7 +191,7 @@ def _precisionElectronSeq(flags):
         acc.setPrivateTools(tool)
         return acc
 
-    def TrigTopoEgammaElectronCfg(flags, name='topoEgammaBuilder_TrigElectrons'):
+    def TrigTopoEgammaElectronCfg(flags, name='xAODEgammaBuilder_TrigElectrons'):
         acc = ComponentAccumulator()
         from egammaTools.EMShowerBuilderConfig import EMShowerBuilderCfg
         builder = CompFactory.xAODEgammaBuilder(name,

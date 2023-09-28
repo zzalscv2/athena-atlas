@@ -47,7 +47,7 @@ def precisionPhotonCaloIsoRecoSequence(flags, RoIs,  name = None, ion=False):
 
     acc.merge(TrigPhotonIsoBuilder)
 
-    #online monitoring for topoEgammaBuilder
+    #online monitoring for xAODEgammaBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactoriesCfg import PrecisionPhotonCaloIsoMonitorCfg
     PrecisionPhotonCaloIsoRecoMonAlgo = PrecisionPhotonCaloIsoMonitorCfg(flags)
     acc.merge(PrecisionPhotonCaloIsoRecoMonAlgo)
