@@ -7,7 +7,6 @@ from AthenaCommon.CFElements import seqAND
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
-from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 import AthenaCommon.SystemOfUnits as Units
 from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 
@@ -15,6 +14,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from ..Config.MenuComponents import InViewRecoCA, InEventRecoCA, SelectionCA, MenuSequenceCA
+
+from AthenaCommon.Logging import logging
+log = logging.getLogger(__name__)
+
 
 
 ########
@@ -160,15 +163,19 @@ def MinBiasTrkSequence(flags):
         trkInputMakerAlg.Views = "TrkView"
         trkInputMakerAlg.RequireParentView = True
 
-        # prepare algorithms to run in views, first,
-        # inform scheduler that input data is available in parent view (has to be done by hand)
-        idTrigConfig = getInDetTrigConfig('minBias')
+        from TrigInDetConfig.utils import getFlagsForActiveConfig
+        flagsWithTrk = getFlagsForActiveConfig(flags, "minBias", log)
 
-        from TrigInDetConfig.EFIDTracking import makeInDetPatternRecognition
-        algs,_ = makeInDetPatternRecognition(flags, idTrigConfig, verifier='VDVMinBiasIDTracking')
-        vdv = algs[0]
-        assert vdv.DataObjects, "Likely not ViewDataVerifier, does not have DataObjects property"
-        vdv.DataObjects += [("xAOD::TrigCompositeContainer", "HLT_vtx_z")]
+        from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+        seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                                rois = trkInputMakerAlg.InViewRoIs, inView = "VDVMinBiasIDTracking")
+
+        from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
+        algs = extractAlgorithmsAndAppendCA(seq.sequence("OfflineNoDataPrep"))
+
+        #vdv = algs[0]
+        #assert vdv.DataObjects, "Likely not ViewDataVerifier, does not have DataObjects property"
+        #vdv.DataObjects += [("xAOD::TrigCompositeContainer", "HLT_vtx_z")]
 
 
         from ..Config.MenuComponents import algorithmCAToGlobalWrapper # this will disappear once whole sequence would be configured at once

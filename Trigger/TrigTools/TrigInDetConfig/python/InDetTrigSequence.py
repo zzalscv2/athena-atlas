@@ -30,19 +30,29 @@ class InDetTrigSequence:
       if self.__inView:
         ca.merge(self.viewDataVerifier(self.__inView))
 
-      ca.merge(self.dataPreparation())
       if recoType == "dataPreparation":
+        ca.merge(self.dataPreparation())
         return ca
     
-      ca.merge(self.spacePointFormation())
       if recoType =="spacePointFormation":
+        ca.merge(self.dataPreparation())
+        ca.merge(self.spacePointFormation())
         return ca
 
       if recoType =="FastTrackFinder":
+        ca.merge(self.dataPreparation())
+        ca.merge(self.spacePointFormation())
         ca.merge(self.fastTrackFinder())
         return ca
 
       if recoType =="Offline":
+        ca.merge(self.dataPreparation())
+        ca.merge(self.spacePointFormation())
+        ca.merge(self.offlinePattern())
+        ca.merge(self.sequenceAfterPattern())
+
+      if recoType =="OfflineNoDataPrep":
+        ca.merge(self.viewDataVerifierAfterDataPrep())
         ca.merge(self.offlinePattern())
         ca.merge(self.sequenceAfterPattern())
     
@@ -128,6 +138,32 @@ class InDetTrigSequence:
       acc.addEventAlgo(ViewDataVerifier)
       return acc
 
+  def viewDataVerifierAfterDataPrep(self, viewVerifier='IDViewDataVerifierAfterDataPrep') -> ComponentAccumulator:
+    with ConfigurableCABehavior():
+      
+      acc = ComponentAccumulator()
+      
+      ViewDataVerifier = \
+        CompFactory.AthViews.ViewDataVerifier( name = viewVerifier + "_" + self.__signature,
+                                               DataObjects = [
+                                                 ( 'SpacePointContainer',           'StoreGateSvc+SCT_TrigSpacePoints' ),                                             
+                                                 ( 'SpacePointContainer',           'StoreGateSvc+PixelTrigSpacePoints' ),
+                                                 ( 'SpacePointOverlapCollection',   'StoreGateSvc+OverlapSpacePoints' ),
+                                                 #( 'InDet::PixelGangedClusterAmbiguities' , 'StoreGateSvc+TrigPixelClusterAmbiguitiesMap' ),
+                                                 ( 'InDet::SCT_ClusterContainer',   'StoreGateSvc+SCT_TrigClusters' ),
+                                                 ( 'InDet::PixelClusterContainer',  'StoreGateSvc+PixelTrigClusters' ),
+                                               ]
+                                              )
+      
+      if self.__flags.Input.Format == Format.BS:
+        ViewDataVerifier.DataObjects += [
+          ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
+          ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
+        ]
+      
+      acc.addEventAlgo(ViewDataVerifier)
+      return acc
+    
   def viewDataVerifierAfterPattern(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:
     
     with ConfigurableCABehavior():
