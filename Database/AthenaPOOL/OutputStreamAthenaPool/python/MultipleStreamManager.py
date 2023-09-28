@@ -640,7 +640,6 @@ class MultipleStreamManager:
         from AthenaCommon.AppMgr import theApp
         svcMgr = theApp.serviceMgr()
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DatabaseName = '" + FileName + "'; INDEX_MASTER = 'POOLContainer(DataHeader)'" ]
-        svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DatabaseName = '" + FileName + "'; FRIEND_TREE = 'CollectionTree:CollectionTree_" + StreamName + "'" ]
         # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
         from AthenaPoolCnvSvc import PoolAttributeHelper as pah
         CONTAINER_SPLITLEVEL = 0

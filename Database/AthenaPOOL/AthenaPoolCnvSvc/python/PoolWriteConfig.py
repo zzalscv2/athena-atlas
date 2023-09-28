@@ -120,9 +120,8 @@ def PoolWriteCfg(flags):
                 PoolAttributes += [ pah.setMinBufferEntries( fileName, "10" ) ]
         else:
             # Changes in this else block need to be coordinated w/ OutputStreamConfig!
-            # Set the index and friend tree information
+            # Set the master index
             PoolAttributes += [ f"DatabaseName = '{fileName}'; INDEX_MASTER = 'POOLContainer(DataHeader)'" ]
-            PoolAttributes += [ f"DatabaseName = '{fileName}'; FRIEND_TREE = '{poolContainerPrefix}:{poolContainerPrefix}_{stream}'" ]
 
             # Set the Collection/Container prefixes
             outputCollection += f"_{stream}"
