@@ -5,6 +5,7 @@
 #define MUONCONDDATA_DEFS_H
 
 #include <string>
+#include <iostream>
 
 namespace MuonCond {
     enum class DcsDataType{
@@ -34,7 +35,7 @@ namespace MuonCond {
     };
  
     DcsFsmState getFsmStateEnum(const std::string& fsmState);
-    std::string getFsmStateStrg(DcsFsmState fsmState);
- 
+    std::string getFsmStateStrg(DcsFsmState fsmState); 
 }
+std::ostream& operator<<(std::ostream& ostr, const MuonCond::DcsConstants& dcs);
 #endif

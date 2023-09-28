@@ -88,6 +88,7 @@ StatusCode MdtCalibDbAlg::initialize() {
     ATH_CHECK(m_readKeyRt.initialize());
     ATH_CHECK(m_readKeyTube.initialize());
     ATH_CHECK(m_writeKey.initialize());
+    ATH_CHECK(m_readKeyDCS.initialize(m_create_b_field_function && !m_readKeyDCS.empty()));
     
     if (m_useNewGeo) ATH_CHECK(detStore()->retrieve(m_r4detMgr));
     else ATH_CHECK(detStore()->retrieve(m_detMgr));
@@ -108,6 +109,13 @@ StatusCode MdtCalibDbAlg::initialize() {
         ATH_MSG_INFO("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdoRt->size()= " << readHandle->size());
         ATH_MSG_INFO("Range of input is " << readHandle.getRange());
     }
+    if (m_readKeyDCS.empty()) return StatusCode::SUCCESS;
+    SG::ReadCondHandle<MdtCondDbData> readHandle{m_readKeyDCS, ctx};
+    if (!readHandle.isValid()) {
+        ATH_MSG_FATAL("Failed to retrieve conditions object "<<m_readKeyDCS.fullKey());
+        return StatusCode::FAILURE;
+    }
+    writeHandle.addDependency(readHandle);
     return StatusCode::SUCCESS;
 }
 StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
@@ -547,9 +555,38 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
     }
    
     ATH_MSG_DEBUG("Initializing " << loadedRtRel.size()<< " b-field functions");
+    const MdtCondDbData* condDbData{nullptr};
+    if (!m_readKeyDCS.empty()) {
+        SG::ReadCondHandle<MdtCondDbData> readCondHandleDb{m_readKeyDCS, ctx};
+        condDbData = readCondHandleDb.cptr();
+    }
+  
+  
     for (const auto& [athenaId, rtRelation] : loadedRtRel) {
-        CorrectionPtr corrFuncSet = std::make_unique<MuonCalib::MdtCorFuncSet>(); 
-        if (m_create_b_field_function) initialize_B_correction(*corrFuncSet, *rtRelation);
+        CorrectionPtr corrFuncSet = std::make_unique<MuonCalib::MdtCorFuncSet>();
+
+        if (m_create_b_field_function) {
+            std::vector<double> corr_params(2);
+            bool loadDefault{false};
+            if (condDbData){
+                const MuonCond::DcsConstants& dcs{condDbData->getHvState(athenaId)};
+                corr_params[0] = dcs.readyVolt;
+                /// SKip everything that's switched off
+                if (corr_params[0] < std::numeric_limits<float>::epsilon()) {
+                    ATH_MSG_DEBUG("Chamber "<<m_idHelperSvc->toString(athenaId)<<" is switched off "<<dcs);
+                    loadDefault = true;
+                }
+            } else loadDefault = true;
+            if (loadDefault) {
+                if (m_idHelperSvc->issMdt(athenaId)) {
+                    corr_params[0] = 2730.0;
+                } else {
+                    corr_params[0] = 3080.0;  
+                }
+            }
+            corr_params[1] = 0.11;    // epsilon parameter
+            corrFuncSet->setBField(std::make_unique<MuonCalib::BFieldCorFunc>("medium", corr_params, rtRelation->rt()));
+        }
         if (m_createWireSagFunction) initializeSagCorrection(*corrFuncSet);
         if (m_createSlewingFunction) {
             corrFuncSet->setSlewing(std::make_unique<MuonCalib::MdtSlewCorFuncHardcoded>(MuonCalib::CalibFunc::ParVec()));
@@ -871,16 +908,6 @@ std::unique_ptr<MuonCalib::RtResolutionLookUp> MdtCalibDbAlg::getRtResolutionInt
       }
     }
     return std::make_unique<MuonCalib::RtResolutionLookUp>(std::move(res_param));
-}
-
-// like MdtCalibrationDbSvc
-// for corData in loadRt
-void MdtCalibDbAlg::initialize_B_correction(MuonCalib::MdtCorFuncSet& funcSet, const MuonCalib::MdtRtRelation& rt_rel) const {
-    ATH_MSG_VERBOSE("initialize_B_correction...");
-    std::vector<double> corr_params(2);
-    corr_params[0] = 3080.0;  // high voltage (not correct for sMDT which use 2730V!)
-    corr_params[1] = 0.11;    // epsilon parameter
-    funcSet.setBField(std::make_unique<MuonCalib::BFieldCorFunc>("medium", corr_params, rt_rel.rt()));
 }
 
 void MdtCalibDbAlg::initializeSagCorrection(MuonCalib::MdtCorFuncSet& funcSet) const {

@@ -100,7 +100,10 @@ def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
 
 def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     result = ComponentAccumulator()
-    result.merge(MuonGeoModelCfg(flags))
+    result.merge(MuonGeoModelCfg(flags))    
+    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    result.merge(MdtCondDbAlgCfg(flags))
+    
 
     # setup COOL folders
     acc, mdt_folder_name_appendix = _setupMdtCondDB(flags)
@@ -118,6 +121,8 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
         kwargs.setdefault("defaultT0", 40)
     else:
         kwargs.setdefault("defaultT0", 799)
+    if flags.Common.isOnline:
+        kwargs.setdefault("ReadKeyDCS", "" )
     kwargs.setdefault("UseMLRt",  flags.Muon.Calib.useMLRt )
     kwargs.setdefault("TimeSlewingCorrection", flags.Muon.Calib.correctMdtRtForTimeSlewing)
     kwargs.setdefault("MeanCorrectionVsR", [ -5.45973, -4.57559, -3.71995, -3.45051, -3.4505, -3.4834, -3.59509, -3.74869, -3.92066, -4.10799, -4.35237, -4.61329, -4.84111, -5.14524 ])

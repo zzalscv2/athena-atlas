@@ -26,15 +26,6 @@ NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stg
 {
 }
 
-namespace MuonCond {
-std::ostream& operator<<(std::ostream& ostr, const DcsConstants& obj) {
-    ostr<<" standbyVolt: "   <<std::setprecision(15)<<obj.standbyVolt;
-    ostr<<" readyVolt: "   <<std::setprecision(15)<<obj.readyVolt;
-    ostr<<" fsmState: "<<MuonCond::getFsmStateStrg(obj.fsmState);
-    return ostr;
-}
-} // namespace MuonCond
-
 std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::TDaqConstants& obj) {
     ostr  << " lbSince " << obj.lbSince << " lbUntil " << obj.lbUntil << " elink " << obj.elink;
     return ostr;

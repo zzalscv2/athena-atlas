@@ -23,15 +23,12 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonCondData/MdtCondDbData.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "nlohmann/json.hpp"
 #include "zlib.h"
-
-namespace coral {
-    class Blob;
-}
 
 class MdtCalibDbAlg : public AthReentrantAlgorithm {
 public:
@@ -39,7 +36,7 @@ public:
     virtual ~MdtCalibDbAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override { return false;}
+    virtual bool isReEntrant() const override { return false; }
 
 private:
     StatusCode declareDependency(const EventContext& ctx, 
@@ -88,7 +85,6 @@ private:
     Gaudi::Property<bool> m_createSlewingFunction{this, "CreateSlewingFunctions", false,
         "If set to true, the slewing correction functions are initialized for each rt-relation that is loaded."};
 
-    void initialize_B_correction(MuonCalib::MdtCorFuncSet& funcSet, const MuonCalib::MdtRtRelation& rt) const;
     void initializeSagCorrection(MuonCalib::MdtCorFuncSet& funcSet) const;
 
     // if m_TimeSlewingCorrection is set to true then it is assumed that the
@@ -127,7 +123,8 @@ private:
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyTube{this, "ReadKeyTube", "/MDT/T0BLOB", "DB folder containing the tube constants"};
     SG::WriteCondHandleKey<MuonCalib::MdtCalibDataContainer> m_writeKey{this, "WriteKey",  "MdtCalibConstants",
                                                                        "Conditions object containing the calibrations"};
-
+    
+    SG::ReadCondHandleKey<MdtCondDbData> m_readKeyDCS{this, "ReadKeyDCS", "MdtCondDbData", "Key of the input DCS data"};
 };
 
 #endif
