@@ -204,6 +204,7 @@ bool TrigInDetAccelerationSvc::exportITkGeometryInformation(const std::map<std::
     short barrel_ec = std::get<0>((*it).first);
     int vol_id = std::get<2>((*it).first);
     int lay_id = std::get<3>((*it).first);
+    if(barrel_ec == -100) barrel_ec = 0;
     int globalLayerId = vol_id*1000 + lay_id;
 
     pArray->m_layers[layerIdx].m_nElements = 0;
@@ -348,6 +349,7 @@ bool TrigInDetAccelerationSvc::extractITkGeometryInformation(std::map<std::tuple
 
     short barrel_ec = std::get<0>((*it).first);
     short subdetId = std::get<1>((*it).first);
+    if(barrel_ec == -100) barrel_ec = 0;
 
     m_layerInfo[0][layerId] = barrel_ec;
 
