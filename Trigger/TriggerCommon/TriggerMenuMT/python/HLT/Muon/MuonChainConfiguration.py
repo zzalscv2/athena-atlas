@@ -15,9 +15,9 @@ from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 if isComponentAccumulatorCfg():
     from .generateMuon import muEFCBSequence
 else: 
-    from .MuonMenuSequences import muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence,  efLateMuSequence, muEFIDtpSequence
+    from .MuonMenuSequences import muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, muEFIDtpSequence
 
-from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence
+from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence, efLateMuSequence
 
 from .MuonMenuSequences import efLateMuRoISequence, muRoiClusterSequence
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
@@ -118,7 +118,10 @@ def muEFLateRoISequenceCfg(flags,is_probe_leg=False):
         return menuSequenceCAToGlobalWrapper(efLateMuRoISequence, flags)
 
 def muEFLateSequenceCfg(flags,is_probe_leg=False):
-    return efLateMuSequence(flags)
+    if isComponentAccumulatorCfg():
+        return efLateMuSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(efLateMuSequence, flags)
 
 def muRoiClusterSequenceCfg(flags,is_probe_leg=False):
     if isComponentAccumulatorCfg():
