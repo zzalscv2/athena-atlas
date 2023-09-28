@@ -22,7 +22,7 @@ if( NOT SIMULATIONBASE )
    atlas_add_executable( compareFlatTrees
       utils/compareFlatTrees.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-      LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${VDT_LIBRARIES} RootCoreUtils nlohmann_json::nlohmann_json )
+      LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${VDT_LIBRARIES} nlohmann_json::nlohmann_json )
 endif()
 
 atlas_add_test( gt_UnitTest_test
