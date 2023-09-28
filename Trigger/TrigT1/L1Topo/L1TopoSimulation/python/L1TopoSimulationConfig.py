@@ -476,6 +476,8 @@ if __name__ == '__main__':
   from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
   log.debug('Adding the following output EDM to ItemList: %s', outputEDM)
   acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))
+  from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+  acc.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
   if args.log == 'verbose' or args.perfmon:
       acc.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
