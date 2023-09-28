@@ -21,12 +21,16 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "boost/integer.hpp"
+
 namespace CxxUtils {
 /**
  */
 template<typename T, size_t N>
 struct alignas(N*sizeof(T)) vec_fb
 {
+  static_assert(std::is_arithmetic_v<T>, "Element type is not arithmetic");
+  static_assert(N > 0 && (N & (N - 1)) == 0, "Size not a power or 2");
   // cppcheck-suppress uninitMemberVar; deliberate
   vec_fb() = default;
   vec_fb(const vec_fb&) = default;
@@ -45,17 +49,8 @@ struct alignas(N*sizeof(T)) vec_fb
 
 // Helper: Given a vectorized class, find another vectorized class
 // that uses integers of the same size as the original class.
-template <typename T>
-struct vec_fbMaskHelper {
-  using type = typename std::conditional<
-      sizeof(T) * 8 <= 8, std::int8_t,
-      typename std::conditional<
-          sizeof(T) * 8 <= 16, std::int16_t,
-          typename std::conditional<sizeof(T) * 8 <= 32, std::int32_t,
-                                    std::int64_t>::type>::type>::type;
-};
 template <typename T, size_t N>
-using ivec = vec_fb<typename vec_fbMaskHelper<T>::type, N>;
+using ivec = vec_fb<typename boost::int_t<sizeof(T) * 8>::exact, N>;
 
 // Define binary operations.
 // For each operation, define
