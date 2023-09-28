@@ -77,7 +77,6 @@ class ConfiguredBackTracking:
                                                                                           SpacePointsOverlapName = InDetKeys.OverlapSpacePoints(),
                                                                                           PerigeeCut             = 1000.,
                                                                                           DirectionPhiCut        = .3,
-                                                                                          DirectionEtaCut        = 1.,
                                                                                           MaxHoles               = 2,
                                                                                           AssociationTool        = asso_tool,
                                                                                           RestrictROI            = True)

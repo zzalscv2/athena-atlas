@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,6 @@
 #include "TRT_SeededSpacePointFinderTool/SimpleTRT_SeededSpacePointFinder_ATL.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/TRT_ID.h"
-//#include "TrkEventPrimitives/GlobalPosition.h"
 #include "TrkSurfaces/Surface.h"
 #include "RoiDescriptor/RoiDescriptor.h"
 
@@ -33,28 +32,19 @@ InDet::SimpleTRT_SeededSpacePointFinder_ATL::SimpleTRT_SeededSpacePointFinder_AT
 (const std::string& t,const std::string& n,const IInterface* p)
   : AthAlgTool(t,n,p),
     m_useROI(true),
-    m_maxLayers(3),
     m_maxHoles(1),
     m_perigeeCut(200),
     m_directionPhiCut(0.05),
-    m_directionEtaCut(0.5),
-    m_positionPhiCut(5.),
-    m_positionZ_Cut(250.),
     m_sctId(nullptr),
     m_trtId(nullptr)
 {
 
-
   declareInterface<ITRT_SeededSpacePointFinder>(this);
 
   declareProperty("RestrictROI"           ,m_useROI                );
-  declareProperty("MaxLayers"             ,m_maxLayers             );
   declareProperty("MaxHoles"              ,m_maxHoles              );
   declareProperty("PerigeeCut"            ,m_perigeeCut            );
   declareProperty("DirectionPhiCut"       ,m_directionPhiCut       );
-  declareProperty("DirectionEtaCut"       ,m_directionEtaCut       );
-  declareProperty("PositionPhiCut"        ,m_positionPhiCut        );
-  declareProperty("PositionZ_Cut"         ,m_positionZ_Cut         );
 
 }
 
@@ -530,32 +520,6 @@ bool InDet::SimpleTRT_SeededSpacePointFinder_ATL::pairIsOk(const Trk::SpacePoint
 
   msg(MSG::VERBOSE) << " Passed cut on direction phi deviation" <<endmsg;
 
-  // cut on eta deviation
-  //if (std::abs(s1s2.eta()-v0.eta()) > m_directionEtaCut) return false;
-  //msg(MSG::VERBOSE) << " Passed cut on direction eta deviation" <<endmsg;
-
-
-  /*
-  // Cut on angle between s1-s2 and parameter direction
-  double cosAng = s1s2.mag()*v0.mag();
-  if (cosAng)
-    {
-      cosAng = std::abs(v0.dot(s1s2)/cosAng);
-      msg(MSG::VERBOSE) << "Cosine of angle between SP-extrap. and momentum is " << cosAng << endmsg;
-      if ( cosAng < cosAngleCut ) return false;
-    }
-  msg(MSG::VERBOSE) << " Passed cut on direction deviation" <<endmsg;
-  */
-
-  /*
-  // Cut on closest approach to parameter position
-  Trk::GlobalPosition s1r0 = r0-s1;  // vector from s1 to r0
-  Trk::GlobalPosition h = s1r0 - s1r0.dot(s1s2)/s1s2.mag();  // the part of s1r0 perp. to s1s2
-  msg(MSG::VERBOSE) << "closest approach to Parameter Position is ( " << h.x() << ", "<< h.y() << ", " << h.z() << " )"<<endmsg; 
-  if (h.x()*h.x() + h.y()*h.y() > positionPhiCutSquared || std::abs(h.z()) > positionZ_Cut) return false;
-  
-  msg(MSG::VERBOSE) << " Passed cut on extrapolation to TRT" <<endmsg;
-  */
   return true;
 }
 //=====================================================================================================

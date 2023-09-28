@@ -14,7 +14,6 @@ def SimpleTRT_SeededSpacePointFinder_ATLCfg(flags, name='InDetTRT_SeededSpFinder
                       'InDetSegmentPRDtoTrackMap' if InputCollections is not None else "")
     kwargs.setdefault("PerigeeCut", 1000.)
     kwargs.setdefault("DirectionPhiCut", .3)
-    kwargs.setdefault("DirectionEtaCut", 1.)
     kwargs.setdefault("MaxHoles", 2)
     kwargs.setdefault("RestrictROI", True)
 
