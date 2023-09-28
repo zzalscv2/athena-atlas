@@ -671,7 +671,7 @@ double ActsCoreStripSpacePointFormationTool::computeOffset(const InDetDD::SiDete
                                                      const InDetDD::SiDetectorElement *element,
                                                      size_t &stripIndex) const
   {
-    assert( sourceLink->isValid());
+    assert( sourceLink.isValid());
     const xAOD::UncalibratedMeasurement *measurement = *sourceLink;
     auto cluster = dynamic_cast<const xAOD::StripCluster *>(measurement);
     if(!cluster){
