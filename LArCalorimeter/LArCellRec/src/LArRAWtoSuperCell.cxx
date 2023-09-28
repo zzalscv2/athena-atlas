@@ -89,7 +89,10 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
                 const CaloDetDescrElement* dde = sem_mgr ->get_element(off_id);
 		CaloCell* cell = new CaloCell();
 		cell->setCaloDDE(dde);
-                cell->setGain(CaloGain::LARHIGHGAIN);
+                if (dde->getSubCalo() == CaloCell_ID::LARHEC)
+                  cell->setGain (CaloGain::LARMEDIUMGAIN);
+                else
+                  cell->setGain (CaloGain::LARHIGHGAIN);
 		const std::vector< unsigned short >& bcids = sc->bcids();
 		const std::vector< int >& energies = sc->energies();
 		const std::vector< bool>& satur = sc->satur();
