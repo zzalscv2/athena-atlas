@@ -410,7 +410,11 @@ TauSelectionCutRNNEleScore::TauSelectionCutRNNEleScore(TauSelectionTool* tTST)
 //______________________________________________________________________________
 void TauSelectionCutRNNEleScore::fillHistogram(const xAOD::TauJet& xTau, TH1F& hHist) const
 {
- hHist.Fill(xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans));
+   if(m_tTST->m_iEleIDVersion!=0){  
+      hHist.Fill(xTau.auxdata<float>("RNNEleScoreSigTrans_v"+std::to_string(m_tTST->m_iEleIDVersion)));
+   } else {
+      hHist.Fill(xTau.discriminant(xAOD::TauJetParameters::RNNEleScoreSigTrans));
+   }
 }
 
 //______________________________________________________________________________
