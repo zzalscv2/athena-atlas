@@ -27,7 +27,7 @@ then
 	--maxEvents '10' \
 	--preExec 'ConfigFlags.GeoModel.SQLiteDB="ATLAS-R3S-2021-03-00-00.db"' \
 	--imf False \
-	--detectors Bpipe ID Calo MDT RPC TGC
+	--detectors Bpipe ID Calo MDT RPC TGC MM sTGC
     rc1=$?
 fi
 echo  "art-result: $rc1 Sim_tf"
