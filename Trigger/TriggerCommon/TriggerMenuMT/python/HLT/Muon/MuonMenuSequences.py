@@ -771,62 +771,50 @@ def efLateMuRoISequence(flags):
     return latemuRoISequence
 
 
-def efLateMuAlgSequence(flags):
+def efLateMuAlgSequenceCfg(flags):
 
     from .MuonRecoSequences import muEFInsideOutRecoSequenceCfg, muonDecodeCfg, muonIDFastTrackingSequenceCfg
-    eflateViewsMaker = EventViewCreatorAlgorithm("IMeflatemu")
-    roiTool = ViewCreatorNamedROITool() # Use an existing ROI which is linked to the navigation with a custom name.
-    roiTool.ROILinkName = "feature" # The ROI is actually linked as Step 1's feature. So the custom name is "feature".
-    #
-    eflateViewsMaker.mergeUsingFeature = True # Expect to have efLateMuRoIAlgSequence produce one Decision Object per lateROI, keep these distinct in the merging
-    eflateViewsMaker.RoITool = roiTool
-    #
-    eflateViewsMaker.Views = "MUEFLATEViewRoIs"
-    eflateViewsMaker.InViewRoIs = "MUEFLATERoIs"
-    #
-    eflateViewsMaker.ViewFallThrough = True
+    selAcc = SelectionCA('EFLateMuAlg')
+    
+    viewName="EFLateMuReco"
+    viewcreator         = CompFactory.ViewCreatorNamedROITool
+    roiTool = viewcreator(ROILinkName="feature")
+    requireParentView = True
+                                                         
+    recoLateMu = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, mergeUsingFeature=True)
+
 
     #Clone and replace offline flags so we can set muon trigger specific values
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
     muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
     #decode data in these RoIs
-    viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=eflateViewsMaker.InViewRoIs.path())
+    recoLateMu.mergeReco(muonDecodeCfg(muonflags,RoIs=recoLateMu.name+"RoIs"))
     #ID fast tracking
-    muFastIDRecoSequence = algorithmCAToGlobalWrapper(muonIDFastTrackingSequenceCfg, flags, eflateViewsMaker.InViewRoIs,"muonLate" )
+    recoLateMu.mergeReco(muonIDFastTrackingSequenceCfg(flags, recoLateMu.name+"RoIs","muonLate" ))
     #inside-out reco sequence
-    #Clone and replace offline flags so we can set muon trigger specific values
-    #muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
-    muonEFInsideOutRecoSequence = algorithmCAToGlobalWrapper(muEFInsideOutRecoSequenceCfg, muonflagsCB, eflateViewsMaker.InViewRoIs, "LateMu")
+    recoLateMu.mergeReco(muEFInsideOutRecoSequenceCfg(muonflagsCB, recoLateMu.name+"RoIs", "LateMu"))
     sequenceOut = muNames.EFCBInOutName+'_Late'
 
-    lateMuRecoSequence = parOR("lateMuonRecoSequence", [viewAlgs_MuonPRD, muFastIDRecoSequence, muonEFInsideOutRecoSequence])
-
-    #Final sequence running in view
-    eflateViewsMaker.ViewNodeName = lateMuRecoSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, flags, nameSuffix=eflateViewsMaker.name())[0]
+    robPrefetchAlg = ROBPrefetchingAlgCfg_Muon(flags, nameSuffix=viewName)
+    selAcc.mergeReco(recoLateMu, robPrefetchCA = robPrefetchAlg)
 
-    muonSequence = seqAND("lateMuonOutSequence", [eflateViewsMaker, robPrefetchAlg, lateMuRecoSequence])
-
-    return (muonSequence, eflateViewsMaker, sequenceOut)
+    return (selAcc, sequenceOut)
 
 def efLateMuSequence(flags):
 
-    (muonEFLateSequence, eflateViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(efLateMuAlgSequence, flags)
+    (selAcc, sequenceOut) = efLateMuAlgSequenceCfg(flags)
 
     # setup EFCB hypo
-    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlg
-    trigMuonEFLateHypo = TrigMuonEFHypoAlg( "TrigMuonEFCombinerLateMuHypoAlg" )
-    trigMuonEFLateHypo.MuonDecisions = sequenceOut
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg
+    trigMuonEFLateHypo = TrigMuonEFHypoAlgCfg( "TrigMuonEFCombinerLateMuHypoAlg", MuonDecisions = sequenceOut )
 
+    selAcc.addHypoAlgo(trigMuonEFLateHypo)
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFCombinerHypoToolFromDict
 
-    return MenuSequence( flags,
-                         Sequence    = muonEFLateSequence,
-                         Maker       = eflateViewsMaker,
-                         Hypo        = trigMuonEFLateHypo,
-                         HypoToolGen = TrigMuonEFCombinerHypoToolFromDict )
+    return MenuSequenceCA(flags, selAcc,
+                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict )
 
 
 
