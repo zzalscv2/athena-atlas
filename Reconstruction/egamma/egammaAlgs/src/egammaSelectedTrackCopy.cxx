@@ -32,6 +32,16 @@ UPDATE : 25/06/2018
 #include <memory>
 #include <vector>
 
+namespace {
+  // Wrap a check to see if a track is valid for reffiting.
+  bool checkIfValidForRefit(const xAOD::TrackParticle *track) {
+    uint8_t dummy = 0;
+    int nhits = track->summaryValue(dummy, xAOD::numberOfPixelHits) ? dummy : 0;
+    nhits += track->summaryValue(dummy, xAOD::numberOfSCTHits) ? dummy : 0;
+    return nhits >= 4;
+  }
+}
+
 egammaSelectedTrackCopy::egammaSelectedTrackCopy(const std::string& name,
                                                  ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -101,9 +111,7 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
   // Here it just needs to be a view copy , i.e the collection of selected
   // trackParticles we create does not really own its elements.
   auto viewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
-  auto fwdViewCopy = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
   // Local counters.
-  auto allTracks = m_AllTracks.buffer();
   auto selectedTracks = m_SelectedTracks.buffer();
   auto selectedFwdTracks = m_SelectedFwdTracks.buffer();
   auto allSiTracks = m_AllSiTracks.buffer();
@@ -124,36 +132,26 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
     }
   }
 
+  m_AllTracks += trackTES->size();
   m_AllClusters += clusterTES->size();
   m_SelectedClusters += passingClusters.size();
 
   // Extrapolation cache.
   for (const xAOD::TrackParticle* track : *trackTES) {
-    ++allTracks;
-    bool isTRT = false;
-    int nhits(0);
-    uint8_t dummy(0);
-    if (track->summaryValue(dummy, xAOD::numberOfPixelHits)) {
-      nhits += dummy;
-    }
-    if (track->summaryValue(dummy, xAOD::numberOfSCTHits)) {
-      nhits += dummy;
-    }
-    if (nhits < 4) {
-      isTRT = true;
+    bool isNotValidForRefit = !checkIfValidForRefit(track);
+    if (isNotValidForRefit) {
       ++allTRTTracks;
     } else {
-      isTRT = false;
       ++allSiTracks;
     }
 
     // Check if the track is selected for a central electron
     // due to a central cluster
     for (const xAOD::CaloCluster* cluster : passingClusters) {
-      if (selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
+      if (selectTrack(ctx, cluster, track, isNotValidForRefit, *calodetdescrmgr)) {
         viewCopy->push_back(track);
         ++selectedTracks;
-        if (isTRT) {
+        if (isNotValidForRefit) {
           ++selectedTRTTracks;
         } else {
           ++selectedSiTracks;
@@ -161,12 +159,12 @@ egammaSelectedTrackCopy::execute(const EventContext& ctx) const
         break;
       }
     } // Loop on clusters.
-
+  
     // Check if the track is selected for a forwand  electron
     // due to a forwand cluster
     if (m_doForwardTracks) {
       for (const xAOD::CaloCluster* cluster : *fwdClusterTES) {
-        if (selectTrack(ctx, cluster, track, isTRT, *calodetdescrmgr)) {
+        if (selectTrack(ctx, cluster, track, isNotValidForRefit, *calodetdescrmgr)) {
           viewCopy->push_back(track);
           ++selectedFwdTracks;
           break;
@@ -383,3 +381,4 @@ egammaSelectedTrackCopy::selectTrack(const EventContext& ctx,
   // Default is fail.
   return false;
 }
+
