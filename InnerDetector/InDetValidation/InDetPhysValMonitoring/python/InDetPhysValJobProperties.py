@@ -175,6 +175,11 @@ class doIDTIDE(InDetPhysValFlagsJobProperty):
     allowedTypes = ['bool']
     StoredValue = False
 
+class doTechnicalEfficiency(InDetPhysValFlagsJobProperty):
+    ''' enables the filling of the technical efficiency '''
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
 
 # -----------------------------------------------------------------------------
 # 2nd step
@@ -244,7 +249,8 @@ _list_InDetPhysValJobProperties = [
     ancestorIDs,
     requiredSiHits,
     hardScatterStrategy,
-    doIDTIDE
+    doIDTIDE,
+    doTechnicalEfficiency
 ]
 
 for j in _list_InDetPhysValJobProperties:

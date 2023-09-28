@@ -232,6 +232,13 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         # Disable vertex container for now
         kwargs.setdefault("doTRTExtensionPlots", False)
 
+    if flags.PhysVal.IDPVM.doTechnicalEfficiency:
+        kwargs.setdefault("fillTechnicalEfficiency", True)
+        kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk
+                                     else [-1, 9999.]) # Configurable eta bins for determining a "reconstructable" particle
+        kwargs.setdefault("MinNumberClusters", flags.Tracking.ITkMainPass.minClusters if flags.Detector.GeometryITk
+                                               else [flags.Tracking.MainPass.minClusters]) # Configurable hits per eta bins for determining a "reconstructable" particle
+
     # Control the number of output histograms
     if flags.PhysVal.IDPVM.doPhysValOutput:
         kwargs.setdefault("DetailLevel", 100)

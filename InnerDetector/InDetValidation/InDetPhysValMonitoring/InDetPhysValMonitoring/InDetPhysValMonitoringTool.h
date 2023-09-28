@@ -88,6 +88,9 @@ private:
     /// Generate an Rtt config struct based on the user-passed properties
     InDetRttPlotConfig getFilledPlotConfig() const;  
 
+    /// Utility function for evaluation of technical efficiency
+    int getIndexByEta(const xAOD::TruthParticle& truth) const;
+
     //
     const Trk::TrackParameters* getUnbiasedTrackParameters(const Trk::TrackParameters* trkParameters, const Trk::MeasurementBase* measurement );
     // Do Jet/TIDE plots (Tracking In Dense Environment)
@@ -173,6 +176,7 @@ private:
     BooleanProperty m_doTRTExtensionPlots {this, "doTRTExtensionPlots", true, "do TRT extension plots"};
     BooleanProperty m_useGRL {this, "useGRL", false, "Apply GRL selection or not when running on data"};
     BooleanProperty m_doIDTIDEPlots{this, "doIDTIDEPlots", false, "do ID TIDE derivation plots"};
+    BooleanProperty m_fillTechnicalEfficiency{this, "fillTechnicalEfficiency", false, "Fill the technical efficiency plot. Requires additional sihit information in input file"};
 
     FloatProperty m_maxTrkJetDR{this,"maxTrkJetDR",0.4,"the maximum dR to jets to allow for track-in-jet plots"}; 
     StringProperty m_dirName {this, "DirName", "SquirrelPlots/", "Top level directory to write histograms into"}; 
@@ -180,6 +184,8 @@ private:
     StringProperty m_pileupSwitch {this, "PileupSwitch", "HardScatter", "Pileup truth strategy to use. May be \"All\", \"HardScatter\", or \"PileUp\""}; 
     FloatProperty m_lowProb{this,"LowProb",0.5,"Truth match prob. cutoff for efficiency (lower bound) and fake (upper bound) classification."}; 
     FloatProperty m_highProb{this,"HighProb",0.8,"Truth match prob. cutoff - currently unused"}; 
+    Gaudi::Property<std::vector<double> > m_etaBins{this, "EtaBins", {}};
+    Gaudi::Property<std::vector<int> > m_minHits{this, "MinNumberClusters", {}};
 
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool", "Track selection tool to use"};
     ToolHandle<IInDetVertexTruthMatchTool> m_vtxValidTool{this, "VertexTruthMatchTool", "InDetVertexTruthMatchTool/VtxTruthMatchTool", "Vertex truth matching tool to use"};

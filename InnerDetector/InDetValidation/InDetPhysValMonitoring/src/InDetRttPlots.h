@@ -128,6 +128,7 @@ public:
   void fill(const xAOD::TruthParticle& particle, float weight);
   ///Fill for efficiency plots
   void fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::TrackParticle* track, const bool isGood, const float mu, const unsigned int nVtx, float weight);
+  void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, const float mu, float weight);
 
   ///fill for things needing all truth - not just the ones from the reco tracks
   

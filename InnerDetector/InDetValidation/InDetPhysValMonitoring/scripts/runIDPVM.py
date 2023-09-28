@@ -38,6 +38,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022'], nargs='+', default=[])
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
     IDPVMparser.add_argument("--doIDTIDE", help='run the output from IDTIDE derivation', action='store_true', default=False)
+    IDPVMparser.add_argument("--doTechnicalEfficiency", help='fill the technical efficiency plot (requires additional si hit information in the input file)', action='store_true', default=False)
     return IDPVMparser.parse_args()
 
 # Parse the arguments
@@ -85,6 +86,7 @@ flags.PhysVal.IDPVM.jetsNameForHardScatter = MyArgs.jetsNameForHardScatter
 flags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
 flags.PhysVal.IDPVM.GRL = MyArgs.GRL
 flags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
+flags.PhysVal.IDPVM.doTechnicalEfficiency = MyArgs.doTechnicalEfficiency
 flags.PhysVal.doActs = MyArgs.doActs
 
 flags.Exec.SkipEvents = MyArgs.skipEvents

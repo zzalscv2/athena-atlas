@@ -29,6 +29,9 @@ public:
   InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& dirName);
 
   void fill(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu);
+
+  void fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu);
+
 private:
   TEfficiency* m_efficiency_vs_pteta{};
   TEfficiency* m_efficiency_vs_ptmu{};
@@ -47,6 +50,13 @@ private:
   TEfficiency* m_efficiency_vs_R{};
   TEfficiency* m_efficiency_vs_Z{};
   TEfficiency* m_efficiency_vs_mu{};
+
+  TEfficiency* m_technical_efficiency_vs_eta{};
+  TEfficiency* m_technical_efficiency_vs_pt{};
+  TEfficiency* m_technical_efficiency_vs_phi{};
+  TEfficiency* m_technical_efficiency_vs_d0{};
+  TEfficiency* m_technical_efficiency_vs_z0{};
+  TEfficiency* m_technical_efficiency_vs_mu{};
 
   TEfficiency* m_extended_efficiency_vs_d0{};
   TEfficiency* m_extended_efficiency_vs_d0_abs{};

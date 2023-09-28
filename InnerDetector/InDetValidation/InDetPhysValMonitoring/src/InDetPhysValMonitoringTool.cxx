@@ -570,6 +570,16 @@ InDetPhysValMonitoringTool::fillHistograms() {
       else{ 
         ATH_MSG_DEBUG("Filling efficiency plots info monitoring plots");
         m_monPlots->fillEfficiency(*thisTruth, matchedTrack, isEfficient, puEvents, nVertices, beamSpotWeight);
+        if (m_fillTechnicalEfficiency) {
+          ATH_MSG_DEBUG("Filling technical efficiency plots info monitoring plots");
+          static const SG::AuxElement::ConstAccessor< float > nSilHitsAcc("nSilHits");
+          if (nSilHitsAcc.isAvailable(*thisTruth)) {
+            if (nSilHitsAcc(*thisTruth) >= m_minHits.value().at(getIndexByEta(*thisTruth)))
+              m_monPlots->fillTechnicalEfficiency(*thisTruth, isEfficient, puEvents, beamSpotWeight);
+          } else {
+            ATH_MSG_DEBUG("Cannot fill technical efficiency. Missing si hit information for truth particle.");
+          }
+        }
       }
     }
     
@@ -948,3 +958,17 @@ InDetPhysValMonitoringTool::fillCutFlow(const asg::AcceptData& accept, std::vect
     }
   }
   }
+
+int InDetPhysValMonitoringTool::getIndexByEta(const xAOD::TruthParticle& truth) const {
+  double absEta = std::abs(truth.eta());
+  if (absEta > m_etaBins.value().back() || absEta < m_etaBins.value().front()) {
+    absEta = std::clamp(absEta, m_etaBins.value().front(), m_etaBins.value().back());
+    ATH_MSG_INFO("Requesting cut value outside of configured eta range: clamping eta = "
+                 << std::abs(truth.eta()) << " to eta= " << absEta);
+  } else
+    absEta = std::clamp(absEta, m_etaBins.value().front(), m_etaBins.value().back());
+  const auto pVal =  std::lower_bound(m_etaBins.value().begin(), m_etaBins.value().end(), absEta);
+  const int bin = std::distance(m_etaBins.value().begin(), pVal) - 1;
+  ATH_MSG_DEBUG("Checking (abs(eta)/bin) = (" << absEta << "," << bin << ")");
+  return bin;
+}

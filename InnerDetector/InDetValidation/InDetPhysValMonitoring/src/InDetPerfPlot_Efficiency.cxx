@@ -33,6 +33,13 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_Z, "efficiency_vs_Z");
   book(m_efficiency_vs_mu, "efficiency_vs_mu");
 
+  book(m_technical_efficiency_vs_eta, "technical_efficiency_vs_eta");
+  book(m_technical_efficiency_vs_pt, "technical_efficiency_vs_pt");
+  book(m_technical_efficiency_vs_phi, "technical_efficiency_vs_phi");
+  book(m_technical_efficiency_vs_d0, "technical_efficiency_vs_d0");
+  book(m_technical_efficiency_vs_z0, "technical_efficiency_vs_z0");
+  book(m_technical_efficiency_vs_mu, "technical_efficiency_vs_mu");
+
   book(m_extended_efficiency_vs_d0, "extended_efficiency_vs_d0");
   book(m_extended_efficiency_vs_d0_abs, "extended_efficiency_vs_d0_abs");
   book(m_extended_efficiency_vs_z0, "extended_efficiency_vs_z0");
@@ -114,6 +121,23 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
     fillHisto(m_TrkRec_eta_prodR, eta, prod_rad, isGood, weight);
   }
 }
+
+void
+InDetPerfPlot_Efficiency::fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu) {
+  double eta = truth.eta();
+  double pt = truth.pt() / Gaudi::Units::GeV; // convert MeV to GeV
+  double phi = truth.phi();
+  fillHisto(m_technical_efficiency_vs_eta, eta, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_pt, pt, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_phi, phi, isGood, weight);
+
+  double d0 = truth.auxdata<float>("d0");
+  double z0 = truth.auxdata<float>("z0");
+  fillHisto(m_technical_efficiency_vs_d0, d0, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_z0, z0, isGood, weight);
+  fillHisto(m_technical_efficiency_vs_mu, mu, isGood, weight);
+}
+
 
 void
 InDetPerfPlot_Efficiency::finalizePlots() {

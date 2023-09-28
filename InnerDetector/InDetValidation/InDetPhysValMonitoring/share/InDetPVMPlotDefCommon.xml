@@ -744,7 +744,6 @@
   <x title="p_{T} [GeV]" n="200" lo="0.0" hi="20"/>
   <y title="#mu" n="100" lo="0" hi="100"/>
 </h>
-
 <h id="efficiency_vs_eta" type="TEfficiency" title="Fraction of reco-matched truth track">
   <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>
   <y title="Efficiency" lo="0.0" hi="2.0"/>
@@ -806,7 +805,7 @@
   <y title="Efficiency" lo="0.0" hi="2.0"/>
 </h>
 <h id="efficiency_vs_mu" type="TEfficiency" title="Fraction of reco-matched truth track">
-  <x title="#mu" n="100" lo="0" hi="100"/>
+  <x title="#mu" n="300" lo="0" hi="300"/>
   <y title="Efficiency" lo="0.0" hi="2.0"/>
 </h>
 <h id="extended_efficiency_vs_z0" type="TEfficiency" title="Fraction of reco-matched truth track">
@@ -832,6 +831,30 @@
 <h id="efficiency_vs_prodZ_extended" type="TEfficiency" title="Track Efficiency vs Production Vertex Z">
   <x title="prod_Z [mm]" n="40" lo="0" hi="1000"/>
   <y title="Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_eta" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="#eta" n="20" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_pt" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="p_{T} [GeV]" n="25" lo="0" hi="50"/>
+  <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_phi" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="#phi [rads]" n="25" lo="-&PI;" hi="&PI;"/>
+  <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_d0" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="d_{0} [mm]" n="80" lo="-10" hi="10"/>
+  <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_z0" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="z_{0} [mm]" n="100" lo="-250" hi="250"/>
+  <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
+</h>
+<h id="technical_efficiency_vs_mu" type="TEfficiency" title="Fraction of reco-matched truth track (with hit requirement)">
+  <x title="#mu" n="300" lo="0" hi="300"/>
+  <y title="Technical Efficiency" lo="0.0" hi="2.0"/>
 </h>
 <!-- Fake rate plots -->
 <h id="fakerate_vs_eta" type="TEfficiency" title="Fractions of reco-tracks with matching probability &lt; 50%">

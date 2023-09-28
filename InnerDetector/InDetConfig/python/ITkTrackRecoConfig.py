@@ -189,13 +189,22 @@ def ITkTrackRecoCfg(flags):
                 TracksLocation=StatTrackCollections))
 
     if flags.Tracking.writeExtendedSi_PRDInfo:
-        from InDetConfig.InDetPrepRawDataToxAODConfig import (
-            ITkPixelPrepDataToxAODCfg, ITkStripPrepDataToxAODCfg)
-        result.merge(ITkPixelPrepDataToxAODCfg(
-            flags,
-            ClusterSplitProbabilityName=(
-                ITkClusterSplitProbabilityContainerName(flags))))
-        result.merge(ITkStripPrepDataToxAODCfg(flags))
+        if flags.Tracking.doTIDE_AmbiTrackMonitoring:
+            from InDetConfig.InDetPrepRawDataToxAODConfig import (
+                ITkPixelPrepDataToxAOD_ExtraTruthCfg, ITkStripPrepDataToxAOD_ExtraTruthCfg)
+            result.merge(ITkPixelPrepDataToxAOD_ExtraTruthCfg(
+                flags,
+                ClusterSplitProbabilityName=(
+                    ITkClusterSplitProbabilityContainerName(flags))))
+            result.merge(ITkStripPrepDataToxAOD_ExtraTruthCfg(flags))
+        else:
+            from InDetConfig.InDetPrepRawDataToxAODConfig import (
+                ITkPixelPrepDataToxAODCfg, ITkStripPrepDataToxAODCfg)
+            result.merge(ITkPixelPrepDataToxAODCfg(
+                flags,
+                ClusterSplitProbabilityName=(
+                    ITkClusterSplitProbabilityContainerName(flags))))
+            result.merge(ITkStripPrepDataToxAODCfg(flags))
 
         from DerivationFrameworkInDet.InDetToolsConfig import (
             ITkTSOS_CommonKernelCfg)

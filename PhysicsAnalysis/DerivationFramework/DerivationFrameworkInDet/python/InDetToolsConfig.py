@@ -198,7 +198,8 @@ def GSFTSOS_CommonKernelCfg(flags, name="GSFTSOS_CommonKernel"):
         name, AugmentationTools=[GSFTrackStateOnSurfaceDecorator]))
     return acc
 
-def ITkTrackStateOnSurfaceDecoratorCfg(flags, name, **kwargs):
+def ITkTrackStateOnSurfaceDecoratorCfg(
+        flags, name="TrackStateOnSurfaceDecorator", **kwargs):
     """Configure the TSOS decorator"""
     # To produce ITkStripDetectorElementCollection
     from StripGeoModelXml.ITkStripGeoModelConfig import (
