@@ -23,7 +23,7 @@ public:
 
   virtual StatusCode initialize() ;  
 
-  virtual float value(const xAOD::EventInfo &, const xAOD::JetContainer&) const;
+  virtual float value(const xAOD::JetContainer&) const;
   virtual std::string varName() const {return m_varName;}
   
 private:
