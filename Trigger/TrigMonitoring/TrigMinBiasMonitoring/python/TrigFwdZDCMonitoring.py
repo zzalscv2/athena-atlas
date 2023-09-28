@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoring import AthMonitorCfgHelper
-from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 
 def TrigFwdZDCMonitoringAlg(configFlags):
     """ Configure general ZDC chains monitoring algs """
@@ -10,7 +9,6 @@ def TrigFwdZDCMonitoringAlg(configFlags):
 
     zdcMonAlg = monConfig.addAlgorithm(CompFactory.FwdZDCMonitoringAlg, 'FwdZDCMonitoringAlg')
     
-    zdcMonAlg.triggerList = [c for c in getL1MenuAccess(configFlags) if 'L1_ZDC_COMB' in c]
     zdcMonAlg.triggerList += ['L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C','L1_ZDC_XOR']
     # this creates a 'Group' called 'zdcMonitor' which will put its histograms into the subdirectory 'L1/FwdZDC/'
     
