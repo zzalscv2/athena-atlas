@@ -35,6 +35,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("truthMinPt", lambda pcf : 500 if pcf.GeoModel.Run <= LHCPeriod.Run3 else 1000) # Configurable pT cut for determining a "reconstructable" particle
     icf.addFlag("GRL", [])
     icf.addFlag("doIDTIDE", False ) # for IDTIDE derivation
-    
+    icf.addFlag("doTechnicalEfficiency", False) # for enabling the filling of technical efficiency
+
     return icf
 

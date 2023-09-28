@@ -236,6 +236,10 @@ InDetRttPlots::fillEfficiency(const xAOD::TruthParticle& truth, const xAOD::Trac
 
 }
 
+void InDetRttPlots::fillTechnicalEfficiency(const xAOD::TruthParticle& truth, const bool isGood, const float mu, float weight) {
+  if(m_effPlots) m_effPlots->fillTechnicalEfficiency(truth, isGood, weight, mu);
+}
+
 //
 //Fill Fake Rates
 //

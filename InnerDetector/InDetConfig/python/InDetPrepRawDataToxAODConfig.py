@@ -78,6 +78,11 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc
+
+def ITkPixelPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAODCfg_ExtraTruth', **kwargs):
+    kwargs.setdefault("WriteSDOs", True)
+    kwargs.setdefault("WriteSiHits", True)
+    return ITkPixelPrepDataToxAODCfg(flags, name, **kwargs)
     
 def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
@@ -108,6 +113,11 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
 
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
+
+def ITkStripPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkStripPrepDataToxAODCfg_ExtraTruth', **kwargs):
+    kwargs.setdefault("WriteSDOs", True)
+    kwargs.setdefault("WriteSiHits", True)
+    return ITkStripPrepDataToxAODCfg(flags, name, **kwargs)
 
 def InDetTRT_PrepDataToxAODCfg(flags, name='InDetTRTPrepDataToxAOD', **kwargs):
     acc = ComponentAccumulator()

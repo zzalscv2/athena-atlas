@@ -113,6 +113,10 @@ def InDetPhysValTruthDecoratorAlgCfg(
     acc.addPublicTool(extrapolator)  # TODO: migrate to private?
     kwargs.setdefault("Extrapolator", extrapolator)
 
+    if flags.Detector.GeometryITk:
+        kwargs.setdefault("PixelClusterContainerName", "ITkPixelClusters")
+        kwargs.setdefault("SCTClusterContainerName", "ITkStripClusters")
+
     acc.addEventAlgo(CompFactory.InDetPhysValTruthDecoratorAlg(name, **kwargs))
     return acc
 
