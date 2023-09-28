@@ -53,25 +53,25 @@ EMFourMomBuilder::initialize()
 }
 
 StatusCode
-EMFourMomBuilder::execute(const EventContext& ctx, xAOD::Egamma* eg) const
+EMFourMomBuilder::execute([[maybe_unused]] const EventContext& ctx, xAOD::Egamma* eg) const
 {
-  (void)ctx;
   if (!eg) {
     ATH_MSG_WARNING("Null pointer to egamma object ");
     return StatusCode::SUCCESS;
   }
 
-  xAOD::Electron* electron = eg->type() == xAOD::Type::Electron
-                               ? static_cast<xAOD::Electron*>(eg)
-                               : nullptr;
-  xAOD::Photon* photon = electron ? nullptr : static_cast<xAOD::Photon*>(eg);
+  if (!eg->caloCluster()) {
+    ATH_MSG_WARNING("Null pointer to cluster");
+    return StatusCode::SUCCESS;
+  }
 
-  bool hasTrack(false);
-  if (electron) {
-    const xAOD::TrackParticle* trackParticle = electron->trackParticle();
-    if (trackParticle) {
-      hasTrack = true;
-    }
+  xAOD::Electron* electron = nullptr;
+  xAOD::Photon* photon = nullptr; 
+
+  if (eg->type() == xAOD::Type::Electron) {
+    electron = static_cast<xAOD::Electron*>(eg);
+  } else {
+    photon = static_cast<xAOD::Photon*>(eg);
   }
 
   /* One method deals with electron with tracks,
@@ -79,17 +79,16 @@ EMFourMomBuilder::execute(const EventContext& ctx, xAOD::Egamma* eg) const
    * The last is for no track e.g forward electrons
    * or the rest of the photons
    */
-
-  StatusCode sc = StatusCode::SUCCESS;
-  if (electron && hasTrack) {
-    sc = setFromTrkCluster(*electron);
+  if (electron) {
+    if (electron->trackParticle()) {
+      return setFromTrkCluster(*electron);
+    }
   } else if (photon && xAOD::EgammaHelpers::conversionType(photon) ==
                          xAOD::EgammaParameters::doubleSi) {
-    sc = setFromTrkCluster(*photon);
-  } else {
-    sc = setFromCluster(*eg);
+    return setFromTrkCluster(*photon);
   }
-  return sc;
+
+  return setFromCluster(*eg);
 }
 
 StatusCode
@@ -97,10 +96,6 @@ EMFourMomBuilder::setFromTrkCluster(xAOD::Electron& el) const
 {
 
   const xAOD::CaloCluster* cluster = el.caloCluster();
-  if (!cluster) {
-    ATH_MSG_WARNING("Null pointer to cluster");
-    return StatusCode::SUCCESS;
-  }
   const xAOD::TrackParticle* trackParticle = el.trackParticle();
   if (!trackParticle) {
     ATH_MSG_WARNING("Null pointer to Track Particle");
@@ -151,10 +146,6 @@ StatusCode
 EMFourMomBuilder::setFromTrkCluster(xAOD::Photon& ph) const
 {
   const xAOD::CaloCluster* cluster = ph.caloCluster();
-  if (!cluster) {
-    ATH_MSG_WARNING("Null pointer to cluster");
-    return StatusCode::SUCCESS;
-  }
   float E = cluster->e();
   float eta = cluster->eta();
   float phi = cluster->phi();
@@ -175,11 +166,6 @@ EMFourMomBuilder::setFromCluster(xAOD::Egamma& eg) const
 {
 
   const xAOD::CaloCluster* cluster = eg.caloCluster();
-  if (!cluster) {
-    ATH_MSG_WARNING("Null pointer to cluster");
-    return StatusCode::SUCCESS;
-  }
-
   const float eta = cluster->eta();
   const float phi = cluster->phi();
   const float E = cluster->e();
