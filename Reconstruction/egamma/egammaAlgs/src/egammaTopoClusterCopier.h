@@ -134,7 +134,6 @@ private:
   mutable Gaudi::Accumulators::Counter<> m_FwdPassSelection {};
   mutable Gaudi::Accumulators::Counter<> m_SharedPassPreSelection {};
   mutable Gaudi::Accumulators::Counter<> m_SharedPassSelection {};
-
 };
 
 #endif // EGAMMATOOLS_EMCLUSTERTOOL_H
