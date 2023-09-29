@@ -68,7 +68,7 @@ MeanExcitationEnergy(const Trk::Material& mat) {
 [[gnu::always_inline]]
 #endif
 inline double
-DensityEffect(const double zOverAtimesRho, const double eta2,
+DensityEffect(const double zOverAtimesRho, const double eta,
               const double gamma, const double I) {
 
   // density effect. Done for gamma > 10  ( p > 1GeV for muons)
@@ -78,7 +78,10 @@ DensityEffect(const double zOverAtimesRho, const double eta2,
     // PDG 2022 Table 34.1
     double eplasma = 28.816e-6 * std::sqrt(1000. * zOverAtimesRho);
     // PDG 2022 Eq. 34.6
-    return 2. * std::log(eplasma / I) + std::log(eta2) - 1.;
+    //2. * std::log(eplasma / I) + std::log(eta2) - 1.
+    //applying logarithmic identities becomes 
+    // 2*(log(eplasma/I) + log(eta))  = 2*log(eplasma*eta/I)
+    return 2. * std::log(eplasma*eta / I) - 1.;
   }
   return 0;
 }
@@ -99,7 +102,9 @@ inline double
 LandauMPV(const double kazL, const double eta2, const double I,
           const double beta, const double delta) {
   // PDG 2022 Eq 34.12
-  return -kazL * (std::log(2. * s_me * eta2 / I) + std::log(kazL / I) + 0.2 -
+  // then apply logarithmic identity
+  // log(2. * s_me * eta2 / I) + log(kazL / I) = log(2. * s_me* eta2 * kazL/(I*I))
+  return -kazL * (std::log(2. * s_me * eta2*kazL/(I*I)) + 0.2 -
                   (beta * beta) - delta);
 }
 
@@ -138,9 +143,9 @@ double Trk::MaterialInteraction::dEdl_ionization(
     //  sigmaL --> FWHM of Landau
     sigma = 4 * kaz;
   } else {
-    double eta2 = beta * gamma;
-    eta2 *= eta2;
-    const double delta = DensityEffect(zOverAtimesRho, eta2, gamma, I);
+    const double eta = beta * gamma;
+    const double eta2 = eta*eta;
+    const double delta = DensityEffect(zOverAtimesRho, eta, gamma, I);
     // tmax - cut off energy
     const double tMax =
         2. * eta2 * s_me / (1. + 2. * gamma * mfrac + mfrac * mfrac);
@@ -175,9 +180,9 @@ double Trk::MaterialInteraction::dEdXBetheBloch(
   double kaz = KAZ(mat.zOverAtimesRho());
 
   if (particle != Trk::electron) {
-    double eta2 = beta * gamma;
-    eta2 *= eta2;
-    double delta = DensityEffect(zOverAtimesRho, eta2, gamma, iPot);
+    const double eta = beta * gamma;
+    const double eta2 = eta*eta;
+    double delta = DensityEffect(zOverAtimesRho, eta, gamma, iPot);
     // mass fraction
     double mfrac = s_me / m;
     // tmax - cut off energy
@@ -210,10 +215,9 @@ double Trk::MaterialInteraction::dE_MPV_ionization(
   const double I = MeanExcitationEnergy(mat);
   const double zOverAtimesRho = mat.zOverAtimesRho();
   double kaz = KAZ(zOverAtimesRho);
-  double eta2 = beta * gamma;
-
-  eta2 *= eta2;
-  const double delta = DensityEffect(zOverAtimesRho, eta2, gamma, I);
+  const double eta = beta * gamma;
+  const double eta2 = eta*eta;
+  const double delta = DensityEffect(zOverAtimesRho, eta, gamma, I);
   // divide by beta^2 for non-electrons
   kaz /= beta * beta;
   kazL = kaz * path;
