@@ -76,24 +76,50 @@ findNeighbours(const Identifier cellCentrId,
   return neighbourList;
 }
 
+void maskIflagIf(
+  unsigned int &iflag, 
+  const xAOD::EgammaParameters::BitDefOQ &parameter,
+  const bool &applyMask
+){
+  if (applyMask) {
+    iflag |= (0x1 << parameter);
+  }
+}
+
+template <typename ...T>
+bool chainIsAffected(
+  const ToolHandle<ICaloAffectedTool> &affectedTool,
+  const xAOD::CaloCluster* cluster,
+  const CaloAffectedRegionInfoVec* affCont,
+  const float &deta,
+  const float &dphi,
+  const int &problemType,
+  const T ...samplings
+) {
+  bool value = false;
+
+  for (const CaloSampling::CaloSample sampling : {samplings...}) {
+    value |= affectedTool->isAffected(
+      cluster,
+      affCont,
+      deta,
+      dphi,
+      sampling,
+      sampling,
+      problemType);
+  }
+
+  return value;
+}
+
 void coreCellHelper(const bool isMissing, const bool isMasked,
                     const bool isSporadicNoise, const bool isAffected,
                     const bool isHighQ, unsigned int& iflag) {
-  if (isMissing) {
-    iflag |= (0x1 << xAOD::EgammaParameters::MissingFEBCellCore);
-  }
-  if (isMasked) {
-    iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellCore);
-  }
-  if (isSporadicNoise) {
-    iflag |= (0x1 << xAOD::EgammaParameters::SporadicNoiseLowQCore);
-  }
-  if (isAffected) {
-    iflag |= (0x1 << xAOD::EgammaParameters::AffectedCellCore);
-  }
-  if (isHighQ) {
-    iflag |= (0x1 << xAOD::EgammaParameters::HighQCore);
-  }
+  maskIflagIf(iflag, xAOD::EgammaParameters::MissingFEBCellCore, isMissing);
+  maskIflagIf(iflag, xAOD::EgammaParameters::MaskedCellCore, isMasked);
+  maskIflagIf(iflag, xAOD::EgammaParameters::SporadicNoiseLowQCore, isSporadicNoise);
+  maskIflagIf(iflag, xAOD::EgammaParameters::AffectedCellCore, isAffected);
+  maskIflagIf(iflag, xAOD::EgammaParameters::HighQCore, isHighQ);
 }
 
 void missingHelper(const bool isPresampler, const bool isL1,
@@ -120,9 +146,7 @@ void maskedHelper(const bool isPresampler, const bool isL1,
     iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgePS);
   } else if (isL1) {
     iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS1);
-    if (isStripCoreCell) {
-      iflag |= (0x1 << xAOD::EgammaParameters::BadS1Core);
-    }
+    maskIflagIf(iflag, xAOD::EgammaParameters::BadS1Core, isStripCoreCell);
   } else if (isL2) {
     iflag |= (0x1 << xAOD::EgammaParameters::MaskedCellEdgeS2);
   } else if (isL3) {
@@ -199,16 +223,13 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
   // If no proper size could be found automatically, deduce by hand
   // for the known std cases
   if (etaSize == 0 && phiSize == 0) {
-    bool isBarrel = xAOD::EgammaHelpers::isBarrel(cluster);
-    if (xAOD::EgammaHelpers::isElectron(&eg)) {
-      etaSize = (isBarrel ? 3 : 5);
-      phiSize = (isBarrel ? 7 : 5);
-    } else if (xAOD::EgammaHelpers::isConvertedPhoton(&eg)) {
-      etaSize = (isBarrel ? 3 : 5);
-      phiSize = (isBarrel ? 7 : 5);
-    } else { // unconverted photons
-      etaSize = (isBarrel ? 3 : 5);
-      phiSize = (isBarrel ? 7 : 5);
+    if (xAOD::EgammaHelpers::isBarrel(cluster)) {
+      etaSize = 3;
+      phiSize = 7;
+    }
+    else {
+      etaSize = 5;
+      phiSize = 5;
     }
   }
 
@@ -216,10 +237,10 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
 
   // Set timing bit
   const double absEnergyGeV = fabs(cluster->e() * (1. / Gaudi::Units::GeV));
-  if (absEnergyGeV != 0 &&
-      fabs(cluster->time()) > m_TCut + m_TCutVsE / absEnergyGeV) {
-    iflag |= (0x1 << xAOD::EgammaParameters::OutTime);
-  }
+  maskIflagIf(
+    iflag, 
+    xAOD::EgammaParameters::OutTime,
+    absEnergyGeV != 0 && std::abs(cluster->time()) > m_TCut + m_TCutVsE / absEnergyGeV);
 
   // Declare totE and badE for LarQ cleaning
   double totE = 0;
@@ -312,15 +333,12 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
         if (isMasked) {
           maskedHelper(isPresampler, isL1, isStripCoreCell, isL2, isL3, iflag);
         }  // isMasked
-        if (isSporadicNoise) {
-          iflag |= (0x1 << xAOD::EgammaParameters::SporadicNoiseLowQEdge);
-        }
         if (isAffected) {
           affectedHelper(isPresampler, isL1, isL2, isL3, iflag);
         }  // is affected
-        if (isHighQ) {
-          iflag |= (0x1 << xAOD::EgammaParameters::HighQEdge);
-        }
+
+        maskIflagIf(iflag, xAOD::EgammaParameters::SporadicNoiseLowQEdge, isSporadicNoise);
+        maskIflagIf(iflag, xAOD::EgammaParameters::HighQEdge, isHighQ);
       }
     }  // end loop over LAr cells
 
@@ -329,17 +347,20 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
     if (totE != 0) {
       egammaLArQCleaning = badE / totE;
     }
-    if (egammaLArQCleaning > m_LArQCut) {
-      iflag |= (0x1 << xAOD::EgammaParameters::LArQCleaning);
-    }
+    maskIflagIf(
+      iflag,
+      xAOD::EgammaParameters::LArQCleaning,
+      egammaLArQCleaning > m_LArQCut);
+
     // Set HighRcell bit//
     double ratioCell = 0;
     if (totE != 0) {
       ratioCell = energyCellMax / totE;
     }
-    if (ratioCell > m_RcellCut) {
-      iflag |= (0x1 << xAOD::EgammaParameters::HighRcell);
-    }
+    maskIflagIf(
+      iflag,
+      xAOD::EgammaParameters::HighRcell,
+      ratioCell > m_RcellCut);
   } // close if found central cell
 
   // Check the HV components
@@ -357,161 +378,74 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
   deta = 0.5 * 0.025 * etaSize;
   dphi = 0.5 * 0.025 * phiSize;
 
-  bool isNonNominalHVPS = (m_affectedTool->isAffected(cluster,
-                                                      affCont,
-                                                      deta,
-                                                      dphi,
-                                                      CaloSampling::PreSamplerE,
-                                                      CaloSampling::PreSamplerE,
-                                                      1) ||
-                           m_affectedTool->isAffected(cluster,
-                                                      affCont,
-                                                      deta,
-                                                      dphi,
-                                                      CaloSampling::PreSamplerB,
-                                                      CaloSampling::PreSamplerB,
-                                                      1));
-  if (isNonNominalHVPS) {
-    iflag |= (0x1 << xAOD::EgammaParameters::NonNominalHVPS);
-  }
-
-  bool isDeadHVPS = (m_affectedTool->isAffected(cluster,
-                                                affCont,
-                                                deta,
-                                                dphi,
-                                                CaloSampling::PreSamplerE,
-                                                CaloSampling::PreSamplerE,
-                                                2) ||
-                     m_affectedTool->isAffected(cluster,
-                                                affCont,
-                                                deta,
-                                                dphi,
-                                                CaloSampling::PreSamplerB,
-                                                CaloSampling::PreSamplerB,
-                                                2));
-  if (isDeadHVPS) {
-    iflag |= (0x1 << xAOD::EgammaParameters::DeadHVPS);
-  }
+  bool isNonNominalHVPS = chainIsAffected(
+    m_affectedTool,
+    cluster,
+    affCont,
+    deta,
+    dphi,
+    1,
+    CaloSampling::PreSamplerE,
+    CaloSampling::PreSamplerB);
+  maskIflagIf(iflag, xAOD::EgammaParameters::NonNominalHVPS, isNonNominalHVPS);
+  bool isDeadHVPS = chainIsAffected(
+    m_affectedTool,
+    cluster,
+    affCont,
+    deta,
+    dphi,
+    2,
+    CaloSampling::PreSamplerE,
+    CaloSampling::PreSamplerB);
+  maskIflagIf(iflag, xAOD::EgammaParameters::DeadHVPS, isDeadHVPS);
 
   //---------------> SAMPLING 2 : CLUSTER CORE
   deta = 0.5 * 0.025 * 3.;
   dphi = 0.5 * 0.025 * 3.;
-  const bool isDeadHVS2Core = (m_affectedTool->isAffected(cluster,
-                                                          affCont,
-                                                          deta,
-                                                          dphi,
-                                                          CaloSampling::EMB2,
-                                                          CaloSampling::EMB2,
-                                                          2) ||
-                               m_affectedTool->isAffected(cluster,
-                                                          affCont,
-                                                          deta,
-                                                          dphi,
-                                                          CaloSampling::EME2,
-                                                          CaloSampling::EME2,
-                                                          2));
+  bool isDeadHVS2Core = chainIsAffected(
+    m_affectedTool,
+    cluster,
+    affCont,
+    deta,
+    dphi,
+    2,
+    CaloSampling::EMB2,
+    CaloSampling::EME2);
+  maskIflagIf(iflag, xAOD::EgammaParameters::DeadHVS1S2S3Core, isDeadHVS2Core);
 
-  if (isDeadHVS2Core) {
-    iflag |= (0x1 << xAOD::EgammaParameters::DeadHVS1S2S3Core);
-  }
   //----------------> SAMPLINGS 1,2,3 : CLUSTER EDGE
   deta = 0.5 * 0.025 * etaSize;
   dphi = 0.5 * 0.025 * phiSize;
 
-  const bool isNonNominalHVS1S2S3 =
-    (m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EMB1,
-                                CaloSampling::EMB1,
-                                1) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EMB2,
-                                CaloSampling::EMB2,
-                                1) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EMB3,
-                                CaloSampling::EMB3,
-                                1) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EME1,
-                                CaloSampling::EME1,
-                                1) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EME2,
-                                CaloSampling::EME2,
-                                1) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EME3,
-                                CaloSampling::EME3,
-                                1));
-  if (isNonNominalHVS1S2S3) {
-    iflag |= (0x1 << xAOD::EgammaParameters::NonNominalHVS1S2S3);
-  }
+  bool isNonNominalHVS1S2S3 = chainIsAffected(
+    m_affectedTool,
+    cluster,
+    affCont,
+    deta,
+    dphi,
+    1,
+    CaloSampling::EMB1,
+    CaloSampling::EMB2,
+    CaloSampling::EMB3,
+    CaloSampling::EME1,
+    CaloSampling::EME2,
+    CaloSampling::EME3);
+  maskIflagIf(iflag, xAOD::EgammaParameters::NonNominalHVS1S2S3, isNonNominalHVS1S2S3);
 
-  const bool isDeadHVS1S2S3Edge =
-    (m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EMB1,
-                                CaloSampling::EMB1,
-                                2) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EMB2,
-                                CaloSampling::EMB2,
-                                2) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EMB3,
-                                CaloSampling::EMB3,
-                                2) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EME1,
-                                CaloSampling::EME1,
-                                2) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EME2,
-                                CaloSampling::EME2,
-                                2) ||
-     m_affectedTool->isAffected(cluster,
-                                affCont,
-                                deta,
-                                dphi,
-                                CaloSampling::EME3,
-                                CaloSampling::EME3,
-                                2));
-
-  if (isDeadHVS1S2S3Edge) {
-    iflag |= (0x1 << xAOD::EgammaParameters::DeadHVS1S2S3Edge);
-  }
+  bool isDeadHVS1S2S3Edge = chainIsAffected(
+    m_affectedTool,
+    cluster,
+    affCont,
+    deta,
+    dphi,
+    2,
+    CaloSampling::EMB1,
+    CaloSampling::EMB2,
+    CaloSampling::EMB3,
+    CaloSampling::EME1,
+    CaloSampling::EME2,
+    CaloSampling::EME3);
+  maskIflagIf(iflag, xAOD::EgammaParameters::DeadHVS1S2S3Edge, isDeadHVS1S2S3Edge);
 
   eg.setOQ(iflag);
   ATH_MSG_DEBUG("Executing egammaOQFlagsBuilder::execute");
