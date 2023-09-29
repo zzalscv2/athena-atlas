@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AMDCATH_AMDCSIMRECATHENASVC_H
@@ -119,7 +119,7 @@ private:
    StatusCode ProduceString();
 
    /**Set Geometry from strings */
-   StatusCode SetFromString(std::string AmdcString,std::string AgddString);
+   StatusCode SetFromString(const std::string& AmdcString,const std::string& AgddString);
   
 
     Amdcsimrec* p_Amdcsimrec ; //!< Pointer on Amdcsimrec interface
