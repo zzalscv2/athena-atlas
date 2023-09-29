@@ -3,21 +3,6 @@
 */
 
 #include "egammaRecEvent/egammaRec.h"
-egammaRec::egammaRec()
-  : m_deltaPhiLast(-999.)
-  , m_deltaEtaVtx(-999)
-  , m_deltaPhiVtx(-999)
-{
-  //This we do not know the exact size 
-  //reserve something reasonable 
-  m_caloClusters.reserve(2);
-  m_trackParticles.reserve(4);
-  m_vertices.reserve(4);
-  // init to -999
-  m_deltaEta = {-999,-999,-999,-999};
-  m_deltaPhi = {-999,-999,-999,-999};
-  m_deltaPhiRescaled= {-999,-999,-999,-999};
-}
 
 const xAOD::CaloCluster*
 egammaRec::caloCluster(size_t index) const
