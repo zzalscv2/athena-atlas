@@ -618,6 +618,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "PRWActualMu2017File",  m_prwActualMu2017File );
   declareProperty( "PRWActualMu2018File",  m_prwActualMu2018File );
   declareProperty( "PRWActualMu2022File",  m_prwActualMu2022File );
+  declareProperty( "PRWActualMu2023File",  m_prwActualMu2023File );
   declareProperty( "PRWDataScaleFactor",   m_prwDataSF);
   declareProperty( "PRWDataScaleFactorUP", m_prwDataSF_UP);
   declareProperty( "PRWDataScaleFactorDOWN", m_prwDataSF_DW);
@@ -1127,7 +1128,10 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2018File) );
       } else if (mcCampaignMD == "mc21a" || mcCampaignMD == "mc23a") {
         m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2022File) );
+      } else if (mcCampaignMD == "mc23c") {
+        m_prwConfFiles.push_back( PathResolverFindCalibFile(m_prwActualMu2023File) );
       }
+
     }
     prwConfigFile = usePathResolver ? PathResolverFindCalibFile(prwConfigFile) : prwConfigFile;
 
@@ -1614,6 +1618,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_prwActualMu2017File, "PRW.ActualMu2017File", rEnv, "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root");
   configFromFile(m_prwActualMu2018File, "PRW.ActualMu2018File", rEnv, "GoodRunsLists/data18_13TeV/20190219/purw.actualMu.root");
   configFromFile(m_prwActualMu2022File, "PRW.ActualMu2022File", rEnv, "GoodRunsLists/data22_13p6TeV/20230207/purw.actualMu.2022.root");
+  configFromFile(m_prwActualMu2023File, "PRW.ActualMu2023File", rEnv, "GoodRunsLists/data23_13p6TeV/20230828/purw.actualMu.2023.root");
   configFromFile(m_prwDataSF, "PRW.DataSF", rEnv, 1./1.03); // default for mc16, see: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ExtendedPileupReweighting#Tool_Properties
   configFromFile(m_prwDataSF_UP, "PRW.DataSF_UP", rEnv, 1./0.99); // mc16 uncertainty? defaulting to the value in PRWtool
   configFromFile(m_prwDataSF_DW, "PRW.DataSF_DW", rEnv, 1./1.07); // mc16 uncertainty? defaulting to the value in PRWtool

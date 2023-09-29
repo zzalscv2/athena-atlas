@@ -145,7 +145,7 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( ifile.get() );
 
   bool isRun3 = false;
-  if ((fileName.Contains("mc23") || fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
+  if ((fileName.Contains("mc23") || fileName.Contains("mc21") || fileName.Contains("data2")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
   if (isRun3) {
     config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
@@ -230,6 +230,7 @@ int main( int argc, char* argv[] ) {
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data23_13p6TeV/20230828/data23_13p6TeV.periodAllYear_DetStatus-v110-pro31-06_MERGED_PHYS_StandardGRL_All_Good_25ns.xml"));
     //myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20230116/data22_13p6TeV.periodAllYear_DetStatus-v109-pro28-04_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore_TRIGMUO_TRIGLAR.xml"));
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", false) );
@@ -385,7 +386,7 @@ int main( int argc, char* argv[] ) {
   // Triggers from https://twiki.cern.ch/twiki/bin/view/Atlas/LowestUnprescaled
   std::vector<std::string> el_triggers,mu_triggers,ph_triggers,tau_triggers,emu_triggers;
   if (isRun3){
-    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI"};//,"HLT_e300_etcut_L1EM22VHI"
+    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e26_lhtight_ivarloose_L1eEM26M","HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI"};//,"HLT_e300_etcut_L1EM22VHI"
     mu_triggers = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"};
     ph_triggers = {"HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"};
     tau_triggers = {"HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100", "HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20"};
@@ -519,7 +520,7 @@ int main( int argc, char* argv[] ) {
     const xAOD::EventInfo* ei = nullptr;
     ANA_CHECK( event.retrieve( ei, "EventInfo" ) );
 
-    if (entry==0 || entry % period == 99) {
+    if (entry==0 || entry % period == 999) {
       ANA_MSG_INFO( "===>>>  start processing event #, " << static_cast< int >( ei->eventNumber() ) << 
                     "run #" << static_cast< int >( ei->runNumber() ) << " " << static_cast< int >( entry ) << " events processed so far  <<<===");
     }
@@ -747,7 +748,7 @@ int main( int argc, char* argv[] ) {
       if (debug>0 && entry==0) {
         // Testing trigger
         std::vector<std::string> trigItem = {"HLT_e26_lhtight_nod0_ivarloose","HLT_mu26_ivarmedium","HLT_mu50","HLT_xe100","HLT_noalg_.*"}; // Trigger for Run 2
-        if (isRun3) trigItem = {"HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_xe100","HLT_noalg_.*"}; // Trigger for Run 3
+        if (isRun3) trigItem = {"HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_e26_lhtight_ivarloose_L1eEM26M","HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_xe100","HLT_noalg_.*"}; // Trigger for Run 3
         for (int it = 0; it < (int) trigItem.size(); it++) {
           bool passed = objTool.IsTrigPassed(trigItem[it]);
           float prescale = objTool.GetTrigPrescale(trigItem[it]);
