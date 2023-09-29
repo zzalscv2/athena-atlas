@@ -7,6 +7,10 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthVertex.h"
+#include "xAODTruth/TruthVertexContainer.h"
 
 #include "PathResolver/PathResolver.h"
 
@@ -28,7 +32,11 @@ namespace InDet {
       InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_IBL),
       InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_PP0),
       InDet::TrackSystematicMap.at(TRK_EFF_TIGHT_PHYSMODEL),
-      InDet::TrackSystematicMap.at(TRK_FAKE_RATE_LOOSE_ROBUST)
+      InDet::TrackSystematicMap.at(TRK_FAKE_RATE_LOOSE_ROBUST),
+      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_GLOBAL),
+      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_IBL),
+      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_PP0),
+      InDet::TrackSystematicMap.at(TRK_EFF_LARGED0_PHYSMODEL),
     };
 
   InDetTrackTruthFilterTool::InDetTrackTruthFilterTool(const std::string& name) :
@@ -55,6 +63,7 @@ namespace InDet {
     declareProperty("trkEffSystScale", m_trkEffSystScale);
 
     declareProperty("calibFileNomEff", m_calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
+    declareProperty("calibFileLRTEff", m_calibFileLRTEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
   }
 
   StatusCode InDetTrackTruthFilterTool::initialize() {
@@ -94,7 +103,25 @@ namespace InDet {
            m_calibFileNomEff,
            "OneMinusRatioEfficiencyVSEtaPt_AfterRebinning_NominalVSQGSP_BIC_TightPrimary") );
 
+    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+           m_trkEffHistLRTGlobal,
+           m_calibFileLRTEff,
+           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp5Overall_LRT") );
+    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+           m_trkEffHistLRTIBL,
+           m_calibFileLRTEff,
+           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp10IBL_LRT") );
+    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+           m_trkEffHistLRTPP0,
+           m_calibFileLRTEff,
+           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp25PP0_LRT") );
+    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+           m_trkEffHistLRTPhysModel,
+           m_calibFileLRTEff,
+           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSQGSP_LRT") );
+
     ATH_MSG_INFO( "Using for nominal track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileNomEff) );
+    ATH_MSG_INFO( "Using for LRT track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileLRTEff) );
 
     ATH_CHECK ( m_trackOriginTool.retrieve() );
 
@@ -121,6 +148,10 @@ namespace InDet {
     delete m_trkEffHistTightIBL;
     delete m_trkEffHistTightPP0;
     delete m_trkEffHistTightPhysModel;
+    delete m_trkEffHistLRTGlobal;
+    delete m_trkEffHistLRTIBL;
+    delete m_trkEffHistLRTPP0;
+    delete m_trkEffHistLRTPhysModel;
 
     m_fPrimHistogram = nullptr;
     m_fSecHistogram = nullptr;
@@ -137,6 +168,10 @@ namespace InDet {
     m_trkEffHistTightIBL = nullptr;
     m_trkEffHistTightPP0 = nullptr;
     m_trkEffHistTightPhysModel = nullptr;
+    m_trkEffHistLRTGlobal = nullptr;
+    m_trkEffHistLRTIBL = nullptr;
+    m_trkEffHistLRTPP0 = nullptr;
+    m_trkEffHistLRTPhysModel = nullptr;
   }
 
   bool InDetTrackTruthFilterTool::accept(const xAOD::TrackParticle* track, float mu) const {
@@ -205,6 +240,7 @@ namespace InDet {
         if(m_rnd->Uniform(0, 1) < m_fFakeTight) return false;
       }
     }
+
     if ( InDet::TrkOrigin::isPrimary(origin) ) {
       if ( isActive( TRK_EFF_LOOSE_GLOBAL ) ) {
         float fTrkEffSyst = getFractionDropped(1, m_trkEffHistLooseGlobal, pt, eta);
@@ -240,6 +276,38 @@ namespace InDet {
       }
     }
 
+    const ElementLink< xAOD::TruthParticleContainer > &truthParticleLink = track->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+    if(truthParticleLink.isValid()) {
+      const xAOD::TruthParticle *truthParticle = *truthParticleLink;
+      double eta = truthParticle->eta();
+
+      const ElementLink< xAOD::TruthVertexContainer > &truthVertexLink = truthParticle->auxdata< ElementLink< xAOD::TruthVertexContainer > >("prodVtxLink");
+      if(truthVertexLink.isValid()) {
+        const xAOD::TruthVertex *truthVertex = *truthVertexLink;
+        double prodR = truthVertex->perp();
+
+        if ( isActive( TRK_EFF_LARGED0_GLOBAL ) ) {
+          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTGlobal, eta, prodR, false);
+          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        }
+
+        if ( isActive( TRK_EFF_LARGED0_IBL ) ) {
+          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTIBL, eta, prodR, false);
+          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        }
+
+        if ( isActive( TRK_EFF_LARGED0_PP0 ) ) {
+          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPP0, eta, prodR, false);
+          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        }
+
+        if ( isActive( TRK_EFF_LARGED0_PHYSMODEL ) ) {
+          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPhysModel, eta, prodR, false);
+          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+        }
+      }
+    }
+
     return true;
   }
 
@@ -262,16 +330,19 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-  float InDetTrackTruthFilterTool::getFractionDropped(float fDefault, const TH2 *histogram, float pt, float eta) const {
+  float InDetTrackTruthFilterTool::getFractionDropped(float fDefault, const TH2 *histogram, float x, float y, bool xAxisIspT) const {
 
     if(histogram==nullptr) {
       return fDefault;
     }
 
-    pt *= 1.e-3; // unit conversion to GeV
-    if( pt >= histogram->GetXaxis()->GetXmax() ) pt = histogram->GetXaxis()->GetXmax() - 0.001;
+    if(xAxisIspT)
+      {
+        x *= 1.e-3; // unit conversion to GeV
+        if( x >= histogram->GetXaxis()->GetXmax() ) x = histogram->GetXaxis()->GetXmax() - 0.001;
+      }
 
-    float frac = histogram->GetBinContent(histogram->FindFixBin(pt, eta));
+    float frac = histogram->GetBinContent(histogram->FindFixBin(x, y));
     if( frac > 1. ) {
       ATH_MSG_WARNING( "Fraction from histogram " << histogram->GetName()
            << " is greater than 1. Setting fraction to 1." );
