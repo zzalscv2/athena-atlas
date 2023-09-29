@@ -23,6 +23,7 @@ Sim_tf.py \
 --imf False
 
 rc=$?
+status=$rc
 mv log.EVNTtoHITS log.EVNTtoHITS_CA
 echo  "art-result: $rc simCA"
 
@@ -50,14 +51,19 @@ Sim_tf.py \
 --imf False
 
 rc2=$?
+if [ $status -eq 0 ]
+then
+    status=$rc2
+fi
 mv log.EVNTtoHITS log.EVNTtoHITS_OLD
 echo  "art-result: $rc2 simOLD"
 
 rc3=-9999
-if [ $rc -eq 0 ] && [ $rc2 -eq 0 ]
+if [ $status -eq 0 ]
 then
     acmd.py diff-root test.HITS.pool.root test.CA.HITS.pool.root --error-mode resilient --mode=semi-detailed --order-trees --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
     rc3=$?
+    status=$rc3
 fi
 echo  "art-result: $rc3 OLDvsCA"
 
@@ -68,5 +74,10 @@ then
     ArtJobName=$2
     art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.HITS.pool.root
     rc4=$?
+    if [ $status -eq 0 ]
+    then
+        status=$rc4
+    fi
 fi
 echo  "art-result: $rc4 regression"
+exit $status

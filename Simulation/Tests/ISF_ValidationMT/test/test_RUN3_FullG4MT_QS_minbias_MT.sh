@@ -91,7 +91,10 @@ then
     ArtJobName=$2
     art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --diff-root --mode=semi-detailed --file=test.CG.HITS.pool.root
     rc4=$?
-    status=$rc4
+    if [ $status -eq 0 ]
+    then
+        status=$rc4
+    fi
 fi
 echo  "art-result: $rc4 regression"
 
@@ -109,7 +112,10 @@ then
         --postExec 'with open("ConfigFiltCA.pkl", "wb") as f: cfg.store(f)' \
         --imf False
     rc5=$?
-    status=$rc5
+    if [ $status -eq 0 ]
+    then
+        status=$rc5
+    fi
     mv log.FilterHitTf log.FilterHitTf.CA
 fi
 echo  "art-result: $rc5 filtCA"
@@ -136,7 +142,10 @@ then
         --outputHITS_FILTFile="filt.CG.HITS.pool.root" \
         --imf False
     rc6=$?
-    status=$rc6
+    if [ $status -eq 0 ]
+    then
+        status=$rc6
+    fi
     mv log.FilterHitTf log.FilterHitTf.CG
 fi
 echo  "art-result: $rc6 filtOLD"
@@ -162,7 +171,10 @@ then
     ArtJobName=$2
     art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName}  --order-trees --mode=semi-detailed --diff-root --file=filt.CG.HITS.pool.root
     rc8=$?
-    status=$rc8
+    if [ $status -eq 0 ]
+    then
+        status=$rc8
+    fi
 fi
 echo  "art-result: $rc8 filt_regression"
 exit $status

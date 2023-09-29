@@ -108,7 +108,10 @@ then
     ArtJobName=$2
     art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --file=test.ST.HITS.pool.root
     rc5=$?
-    status=$rc5
+    if [ $status -eq 0 ]
+    then
+        status=$rc5
+    fi
 fi
 echo  "art-result: $rc5 regression"
 
