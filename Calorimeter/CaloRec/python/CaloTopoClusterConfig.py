@@ -407,6 +407,9 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
                        ,"PTD"
                        ,"MASS"]
 
+    if flags.Reco.EnableHI:
+        AODMoments += ["CELL_SIG_SAMPLING"]
+
     if flags.Calo.TopoCluster.writeCalibHitClusterMoments:
         AODMoments += ["ENG_CALIB_TOT"
                        ,"ENG_CALIB_OUT_L"

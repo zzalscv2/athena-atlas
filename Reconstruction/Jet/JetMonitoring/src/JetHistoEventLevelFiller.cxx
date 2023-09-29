@@ -16,11 +16,10 @@ JetHistoEventLevelFiller::JetHistoEventLevelFiller( const std::string& type,  co
   declareProperty("Var", m_var);
 }
 
-StatusCode JetHistoEventLevelFiller::processJetContainer(const JetMonitoringAlg& parentAlg, const xAOD::JetContainer & jets, const EventContext& ctx) const {
+StatusCode JetHistoEventLevelFiller::processJetContainer(const JetMonitoringAlg& parentAlg, const xAOD::JetContainer & jets, const EventContext&) const {
 
-  auto eventInfo = parentAlg.GetEventInfo(ctx);
   Monitored::Scalar<float> s( m_var->varName() );
-  s = m_var->value( *eventInfo, jets );
+  s = m_var->value(jets );
   parentAlg.fill(m_group, s );
 
   return StatusCode::SUCCESS;

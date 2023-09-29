@@ -126,14 +126,14 @@ public:
     // readChannelParam
     template <typename T> StatusCode readChannelParam(IdentifierHash hash, T& val, const std::string& parName) const{
 
-        if     (parName == "f001"   ) { float theVal; return readChannelF001   (hash, theVal); val = theVal; }
-        else if(parName == "noise"  ) { float theVal; return readChannelNoise  (hash, theVal); val = theVal; }
-        else if(parName == "ped"    ) { float theVal; return readChannelPed    (hash, theVal); val = theVal; }
-        else if(parName == "pslope" ) { float theVal; return readChannelPSlope (hash, theVal); val = theVal; }
-        else if(parName == "rms"    ) { float theVal; return readChannelRMS    (hash, theVal); val = theVal; }
-        else if(parName == "status" ) { int   theVal; return readChannelStatus (hash, theVal); val = theVal; }
-        else if(parName == "t0base" ) { float theVal; return readChannelT0Base (hash, theVal); val = theVal; }
-        else if(parName == "t0phase") { bool  theVal; return readChannelT0Phase(hash, theVal); val = theVal; }
+        if     (parName == "f001"   ) { float theVal; auto sc = readChannelF001   (hash, theVal); val = theVal; return sc;}
+        else if(parName == "noise"  ) { float theVal; auto sc = readChannelNoise  (hash, theVal); val = theVal; return sc;}
+        else if(parName == "ped"    ) { float theVal; auto sc = readChannelPed    (hash, theVal); val = theVal; return sc;}
+        else if(parName == "pslope" ) { float theVal; auto sc = readChannelPSlope (hash, theVal); val = theVal; return sc;}
+        else if(parName == "rms"    ) { float theVal; auto sc = readChannelRMS    (hash, theVal); val = theVal; return sc;}
+        else if(parName == "status" ) { int   theVal; auto sc = readChannelStatus (hash, theVal); val = theVal; return sc;}
+        else if(parName == "t0base" ) { float theVal; auto sc = readChannelT0Base (hash, theVal); val = theVal; return sc;}
+        else if(parName == "t0phase") { bool  theVal; auto sc = readChannelT0Phase(hash, theVal); val = theVal; return sc;}
         return StatusCode::FAILURE;
     }
 

@@ -27,10 +27,14 @@ StatusCode JetEventSelector::initialize() {
   return StatusCode::SUCCESS;
 }
 
-int JetEventSelector::keep(const xAOD::EventInfo& e, const xAOD::JetContainer & jets) const {
+// This IJetEventSelector implementation uses EventHistoVarTool to
+// retrieve EventInfo attribute.
+// Note: xAOD:EventInfo passing not needed as EventHistoVarTool member (m_var)
+// configured for and accesses EventInfo attribute directly.
+int JetEventSelector::keep(const xAOD::EventInfo&/*not used in this implementation*/ , const xAOD::JetContainer & jets) const {
 
   for (unsigned int it = 0; it < m_var.size(); it++) {
-    float v = m_var[it]->value(e,jets);
+    float v = m_var[it]->value(jets);
     if ((m_min.at(it) > v) || (m_max.at(it) < v)) return false;
   }
   return true;
