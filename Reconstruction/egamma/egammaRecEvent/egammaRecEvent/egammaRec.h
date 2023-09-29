@@ -34,7 +34,10 @@ class egammaRec
   ///////////////////////////////////////////////////////////////////
 public:
   /** @brief Default constructor implemented*/
-  egammaRec();
+  egammaRec() = default;
+
+  /** @brief Constructor which adds cluster links. */
+  egammaRec(const std::vector<ElementLink<xAOD::CaloClusterContainer>> &caloClusterLinks);
   
   /**
    * Default copy/move ctor/assignment dtor
@@ -144,13 +147,13 @@ private:
   std::vector<ElementLink<xAOD::TrackParticleContainer>> m_trackParticles;
   std::vector<ElementLink<xAOD::VertexContainer>> m_vertices;
 
-  std::array<double, 4> m_deltaEta{};
-  std::array<double, 4> m_deltaPhi{};
-  std::array<double, 4> m_deltaPhiRescaled{};
+  std::array<double, 4> m_deltaEta {-999, -999, -999, -999};
+  std::array<double, 4> m_deltaPhi {-999, -999, -999, -999};
+  std::array<double, 4> m_deltaPhiRescaled {-999, -999, -999, -999};
 
-  double m_deltaPhiLast;
-  float m_deltaEtaVtx;
-  float m_deltaPhiVtx;
+  double m_deltaPhiLast = -999;
+  float m_deltaEtaVtx = -999;
+  float m_deltaPhiVtx = -999;
 };
 #include"egammaRec.icc"
 #endif

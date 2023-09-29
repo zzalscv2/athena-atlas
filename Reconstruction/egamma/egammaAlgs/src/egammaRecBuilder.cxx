@@ -77,9 +77,7 @@ egammaRecBuilder::execute(const EventContext& ctx) const
       *clusters, i, ctx);
     const std::vector<ElementLink<xAOD::CaloClusterContainer>>
       clusterLinkVector{ clusterLink };
-    auto egRec = std::make_unique<egammaRec>();
-    egRec->setCaloClusters(clusterLinkVector);
-    egammaRecs->push_back(std::move(egRec));
+    egammaRecs->push_back(std::make_unique<egammaRec>(clusterLinkVector));
   }
 
   // Append track Matching information if requested

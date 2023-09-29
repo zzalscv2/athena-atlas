@@ -139,9 +139,7 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
     const std::vector<ElementLink<xAOD::CaloClusterContainer>> clusterLinkVector{clusterLink};
     
     // Now create the egamma Rec
-    auto egRec = std::make_unique<egammaRec>();
-    egRec->setCaloClusters(clusterLinkVector);
-    egammaRecsFwd.push_back(std::move(egRec));
+    egammaRecsFwd.push_back(std::make_unique<egammaRec>(clusterLinkVector));
 
     ++origClusterIndex;
   }
