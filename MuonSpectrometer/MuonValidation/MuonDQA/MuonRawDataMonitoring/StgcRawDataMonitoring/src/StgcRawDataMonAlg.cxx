@@ -20,8 +20,6 @@
 // ********************************************************************* 
 /////////////////////////////////////////////////////////////////////////////
  
-// Pad Trigger Branch -> Testing 
-
 sTgcRawDataMonAlg::sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthMonitorAlgorithm(name, pSvcLocator) {
   //Declare the property 
 }
@@ -51,197 +49,190 @@ StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_FATAL("Could not get track particle container: " << m_meTrkKey.fullKey());
     return StatusCode::FAILURE;
   }
- 
+  
+  if (!muonContainer.isValid()) {
+    ATH_MSG_FATAL("Could not get muon container: " << m_muonKey.fullKey());
+    return StatusCode::FAILURE;
+  }
+  
   if(!m_rdoKey.key().empty()){
     SG::ReadHandle<Muon::NSW_PadTriggerDataContainer> NSWpadTriggerContainer(m_rdoKey, ctx);
     if (!NSWpadTriggerContainer.isValid()) {
       ATH_MSG_FATAL("Could not get pad trigger data container: " << m_rdoKey.fullKey());
       return StatusCode::FAILURE;
     }
-    fillsTgcPadTriggerDataHistograms(NSWpadTriggerContainer.cptr(), lumiblock);
+    fillsTgcPadTriggerDataHistograms(muonContainer.cptr(), NSWpadTriggerContainer.cptr(), lumiblock);
   } 
-
-  if (!muonContainer.isValid()) {
-    ATH_MSG_FATAL("Could not get muon container: " << m_muonKey.fullKey());
-    return StatusCode::FAILURE;
-  }
 
   fillsTgcClusterFromTrackHistograms(meTPContainer.cptr());
   fillsTgcEfficiencyHistograms(muonContainer.cptr(), detectorManagerKey.cptr());
-
-  for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
-    for (const Muon::sTgcPrepData* prd : *coll) {
-      fillsTgcOccupancyHistograms(prd, detectorManagerKey.cptr());
-      fillsTgcLumiblockHistograms(prd, lumiblock);
-    }
-  }
+  fillsTgcOccupancyHistograms(sTgcContainer.cptr(), detectorManagerKey.cptr());
+  fillsTgcLumiblockHistograms(sTgcContainer.cptr(), lumiblock);
   
   return StatusCode::SUCCESS;
 }
 
-void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepData* sTgcObject, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
-  Identifier id    = sTgcObject -> identify();
+void sTgcRawDataMonAlg::fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataContainer* sTgcContainer, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {
+  for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
+    for (const Muon::sTgcPrepData* prd : *coll) {  
+      Identifier id = prd -> identify();
 
-  if(!id.is_valid()) {
-    ATH_MSG_DEBUG("Invalid identifier found in Muon::sTgcPrepData");
-    return;
-  }
-
-  std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(id));
-  int stationEta          = m_idHelperSvc -> stgcIdHelper().stationEta(id);
-  int stationPhi          = m_idHelperSvc -> stgcIdHelper().stationPhi(id);
-  int multiplet           = m_idHelperSvc -> stgcIdHelper().multilayer(id);
-  int gasGap              = m_idHelperSvc -> stgcIdHelper().gasGap(id);    
-  int channelType         = m_idHelperSvc -> stgcIdHelper().channelType(id);
-  int sector              = m_idHelperSvc -> sector(id);
-  int sectorsTotal        = getSectors(id);
-  int layer               = getLayer(multiplet, gasGap);
-  int stationEtaShifted   = (stationEta   < 0) ? stationEta   - 1: stationEta;
-  int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal; 
-
-  if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
-    int padNumber = m_idHelperSvc -> stgcIdHelper().channel(id);       
-    Identifier idPadQ1 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 1, stationPhi, multiplet, gasGap, channelType, 1);    
-    Identifier idPadQ2 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 2, stationPhi, multiplet, gasGap, channelType, 1);
-    const MuonGM::sTgcReadoutElement* sTgcReadoutObjectPadQ1 = muonDetectorManagerObject -> getsTgcReadoutElement(idPadQ1);
-    const MuonGM::sTgcReadoutElement* sTgcReadoutObjectPadQ2 = muonDetectorManagerObject -> getsTgcReadoutElement(idPadQ2);
-    int maxPadNumberQ1 = sTgcReadoutObjectPadQ1 -> maxPadNumber(idPadQ1);
-    int maxPadNumberQ2 = sTgcReadoutObjectPadQ2 -> maxPadNumber(idPadQ2);    
-            
-    if (std::abs(stationEta) == 1) {
-      auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
-      auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + std::to_string(layer), padNumber);
-      fill("sTgcOccupancy", sectorMon, padNumberMon);
+      if(!id.is_valid()) {
+	ATH_MSG_WARNING("Invalid identifier found in Muon::sTgcPrepData");
+	return;
+      }
+      
+      std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(id));
+      int stationEta          = m_idHelperSvc -> stgcIdHelper().stationEta(id);
+      int stationPhi          = m_idHelperSvc -> stgcIdHelper().stationPhi(id);
+      int multiplet           = m_idHelperSvc -> stgcIdHelper().multilayer(id);
+      int gasGap              = m_idHelperSvc -> stgcIdHelper().gasGap(id);    
+      int channelType         = m_idHelperSvc -> stgcIdHelper().channelType(id);
+      int sector              = m_idHelperSvc -> sector(id);
+      int sectorsTotal        = getSectors(id);
+      int layer               = getLayer(multiplet, gasGap);
+      int stationEtaShifted   = (stationEta   < 0) ? stationEta   - 1: stationEta;
+      int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal; 
+      
+      if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+	int padNumber = m_idHelperSvc -> stgcIdHelper().channel(id);       
+	Identifier idPadQ1 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 1, stationPhi, multiplet, gasGap, channelType, 1);    
+	Identifier idPadQ2 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 2, stationPhi, multiplet, gasGap, channelType, 1);
+	const MuonGM::sTgcReadoutElement* sTgcReadoutObjectPadQ1 = muonDetectorManagerObject -> getsTgcReadoutElement(idPadQ1);
+	const MuonGM::sTgcReadoutElement* sTgcReadoutObjectPadQ2 = muonDetectorManagerObject -> getsTgcReadoutElement(idPadQ2);
+	int maxPadNumberQ1 = sTgcReadoutObjectPadQ1 -> maxPadNumber(idPadQ1);
+	int maxPadNumberQ2 = sTgcReadoutObjectPadQ2 -> maxPadNumber(idPadQ2);    
+	
+	if (std::abs(stationEta) == 1) {
+	  auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
+	  auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + std::to_string(layer), padNumber);
+	  fill("sTgcOccupancy", sectorMon, padNumberMon);
+	}
+	
+	else if (std::abs(stationEta) == 2) {
+	  auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
+	  auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + std::to_string(layer), padNumber + maxPadNumberQ1);
+	  fill("sTgcOccupancy", sectorMon, padNumberMon);
+	}
+	
+	else {
+	  auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
+	  auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + std::to_string(layer), padNumber + maxPadNumberQ1 + maxPadNumberQ2);
+	  fill("sTgcOccupancy", sectorMon, padNumberMon);
+	}
+	
+	auto sectorSidedMon       = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
+	auto stationEtaSidedMon   = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted);
+	fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
+      }
+      
+      else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+	int stripNumber      = m_idHelperSvc -> stgcIdHelper().channel(id);
+	Identifier idStripQ1 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 1, stationPhi, multiplet, gasGap, channelType, 1);    
+	Identifier idStripQ2 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 2, stationPhi, multiplet, gasGap, channelType, 1);
+	const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStripQ1 = muonDetectorManagerObject -> getsTgcReadoutElement(idStripQ1);
+	const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStripQ2 = muonDetectorManagerObject -> getsTgcReadoutElement(idStripQ2);    
+	int maxStripNumberQ1 = sTgcReadoutObjectStripQ1 -> numberOfStrips(idStripQ1);
+	int maxStripNumberQ2 = sTgcReadoutObjectStripQ2 -> numberOfStrips(idStripQ2);
+	
+	if (std::abs(stationEta) == 1) {
+	  auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
+	  auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + std::to_string(layer), stripNumber);
+	  fill("sTgcOccupancy", sectorMon, stripNumberMon);
+	}
+	
+	else if (std::abs(stationEta) == 2) {
+	  auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
+	  auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + std::to_string(layer), stripNumber + maxStripNumberQ1 + 1);
+	  fill("sTgcOccupancy", sectorMon, stripNumberMon);
+	}
+	
+	else {
+	  auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
+	  auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + std::to_string(layer), stripNumber + maxStripNumberQ1 + maxStripNumberQ2 + 1);
+	  fill("sTgcOccupancy", sectorMon, stripNumberMon);
+	}
+	
+	auto sectorSidedMon         = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
+	auto stationEtaSidedMon     = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted); 
+	fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
+      }
+      
+      else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
+	int wireGroupNumber      = m_idHelperSvc -> stgcIdHelper().channel(id);
+	Identifier idWireGroupQ3 = m_idHelperSvc -> stgcIdHelper().channelID("STL", 3, stationPhi, 1, 3, channelType, 1);
+	const MuonGM::sTgcReadoutElement* sTgcReadoutObjectWireGroupQ3 = muonDetectorManagerObject -> getsTgcReadoutElement(idWireGroupQ3);
+	int maxWireGroupNumberQ3 = sTgcReadoutObjectWireGroupQ3 -> numberOfStrips(idWireGroupQ3);
+	
+	auto stationEtaMon      = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted);
+	auto wireGroupNumberMon = Monitored::Scalar<int>("wireGroupNumber_layer_" + std::to_string(layer), wireGroupNumber + (sector - 1)*maxWireGroupNumberQ3); 
+	fill("sTgcOccupancy", stationEtaMon, wireGroupNumberMon);
+	
+	auto sectorSidedMon             = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
+	auto stationEtaSidedMon         = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted); 
+	fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
+      }
     }
-  
-    else if (std::abs(stationEta) == 2) {
-      auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
-      auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + std::to_string(layer), padNumber + maxPadNumberQ1);
-      fill("sTgcOccupancy", sectorMon, padNumberMon);
-    }
-   
-    else {
-      auto sectorMon    = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
-      auto padNumberMon = Monitored::Scalar<int>("padNumber_layer_" + std::to_string(layer), padNumber + maxPadNumberQ1 + maxPadNumberQ2);
-      fill("sTgcOccupancy", sectorMon, padNumberMon);
-    }
-    
-    auto sectorSidedMon       = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
-    auto stationEtaSidedMon   = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted);
-    fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
-  }
-  
-  else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
-    int stripNumber      = m_idHelperSvc -> stgcIdHelper().channel(id);
-    Identifier idStripQ1 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 1, stationPhi, multiplet, gasGap, channelType, 1);    
-    Identifier idStripQ2 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 2, stationPhi, multiplet, gasGap, channelType, 1);
-    const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStripQ1 = muonDetectorManagerObject -> getsTgcReadoutElement(idStripQ1);
-    const MuonGM::sTgcReadoutElement* sTgcReadoutObjectStripQ2 = muonDetectorManagerObject -> getsTgcReadoutElement(idStripQ2);    
-    int maxStripNumberQ1 = sTgcReadoutObjectStripQ1 -> numberOfStrips(idStripQ1);
-    int maxStripNumberQ2 = sTgcReadoutObjectStripQ2 -> numberOfStrips(idStripQ2);
-            
-    if (std::abs(stationEta) == 1) {
-      auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
-      auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + std::to_string(layer), stripNumber);
-      fill("sTgcOccupancy", sectorMon, stripNumberMon);
-    }
-    
-    else if (std::abs(stationEta) == 2) {
-      auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
-      auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + std::to_string(layer), stripNumber + maxStripNumberQ1 + 1);
-      fill("sTgcOccupancy", sectorMon, stripNumberMon);
-    }
-    
-    else {
-      auto sectorMon      = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sectorsTotalShifted);
-      auto stripNumberMon = Monitored::Scalar<int>("stripNumber_layer_" + std::to_string(layer), stripNumber + maxStripNumberQ1 + maxStripNumberQ2 + 1);
-      fill("sTgcOccupancy", sectorMon, stripNumberMon);
-    }
-    
-    auto sectorSidedMon         = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
-    auto stationEtaSidedMon     = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted); 
-    fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
-  }
-  
-  else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
-    int wireGroupNumber      = m_idHelperSvc -> stgcIdHelper().channel(id);
-    Identifier idWireGroupQ3 = m_idHelperSvc -> stgcIdHelper().channelID("STL", 3, stationPhi, 1, 3, channelType, 1);
-    const MuonGM::sTgcReadoutElement* sTgcReadoutObjectWireGroupQ3 = muonDetectorManagerObject -> getsTgcReadoutElement(idWireGroupQ3);
-    int maxWireGroupNumberQ3 = sTgcReadoutObjectWireGroupQ3 -> numberOfStrips(idWireGroupQ3);
-    
-    auto stationEtaMon      = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted);
-    auto wireGroupNumberMon = Monitored::Scalar<int>("wireGroupNumber_layer_" + std::to_string(layer), wireGroupNumber + (sector - 1)*maxWireGroupNumberQ3); 
-    fill("sTgcOccupancy", stationEtaMon, wireGroupNumberMon);
-
-    auto sectorSidedMon             = Monitored::Scalar<int>("sector_layer_" + std::to_string(layer), sector);
-    auto stationEtaSidedMon         = Monitored::Scalar<int>("stationEta_layer_" + std::to_string(layer), stationEtaShifted); 
-    fill("sTgcQuadOccupancy", sectorSidedMon, stationEtaSidedMon);
   }
 }
 
-void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepData* sTgcObject, int lb) const {
-  Identifier id = sTgcObject -> identify();
-
-  if(!id.is_valid()) {
-    ATH_MSG_DEBUG("Invalid identifier found in Muon::sTgcPrepData");
-    return;
-  }
+void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataContainer* sTgcContainer, int lb) const {
+  for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
+    for (const Muon::sTgcPrepData* prd : *coll) {  
+      Identifier id = prd -> identify();
   
-  std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(id));
-  int stationEta          = m_idHelperSvc -> stgcIdHelper().stationEta(id);
-  int multiplet           = m_idHelperSvc -> stgcIdHelper().multilayer(id);
-  int gasGap              = m_idHelperSvc -> stgcIdHelper().gasGap(id);    
-  int channelType         = m_idHelperSvc -> stgcIdHelper().channelType(id);
-  int layer               = getLayer(multiplet, gasGap);
-  int sectorsTotal        = getSectors(id);
-  int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal;
-
-  if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
-    auto padStationEtaMon = Monitored::Scalar<int>("padStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
-    auto padLumiblockMon  = Monitored::Scalar<int>("padLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
-    fill("sTgcLumiblockPad_quad_" + std::to_string(std::abs(stationEta)), padStationEtaMon, padLumiblockMon);
-  }
-
-  else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
-    auto stripStationEtaMon = Monitored::Scalar<int>("stripStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
-    auto stripLumiblockMon  = Monitored::Scalar<int>("stripLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
-    fill("sTgcLumiblockStrip_quad_" + std::to_string(std::abs(stationEta)), stripStationEtaMon, stripLumiblockMon);
-  }
-
-  else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
-    auto wireStationEtaMon = Monitored::Scalar<int>("wireStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
-    auto wireLumiblockMon  = Monitored::Scalar<int>("wireLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
-    fill("sTgcLumiblockWire_quad_" + std::to_string(std::abs(stationEta)), wireStationEtaMon, wireLumiblockMon);
+      if(!id.is_valid()) {
+	ATH_MSG_WARNING("Invalid identifier found in Muon::sTgcPrepData");
+	return;
+      }
+      
+      std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(id));
+      int stationEta          = m_idHelperSvc -> stgcIdHelper().stationEta(id);
+      int multiplet           = m_idHelperSvc -> stgcIdHelper().multilayer(id);
+      int gasGap              = m_idHelperSvc -> stgcIdHelper().gasGap(id);    
+      int channelType         = m_idHelperSvc -> stgcIdHelper().channelType(id);
+      int layer               = getLayer(multiplet, gasGap);
+      int sectorsTotal        = getSectors(id);
+      int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal;
+      
+      if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+	auto padStationEtaMon = Monitored::Scalar<int>("padStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+	auto padLumiblockMon  = Monitored::Scalar<int>("padLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
+	fill("sTgcLumiblockPad_quad_" + std::to_string(std::abs(stationEta)), padStationEtaMon, padLumiblockMon);
+      }
+      
+      else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+	auto stripStationEtaMon = Monitored::Scalar<int>("stripStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+	auto stripLumiblockMon  = Monitored::Scalar<int>("stripLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
+	fill("sTgcLumiblockStrip_quad_" + std::to_string(std::abs(stationEta)), stripStationEtaMon, stripLumiblockMon);
+      }
+      
+      else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
+	auto wireStationEtaMon = Monitored::Scalar<int>("wireStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+	auto wireLumiblockMon  = Monitored::Scalar<int>("wireLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
+	fill("sTgcLumiblockWire_quad_" + std::to_string(std::abs(stationEta)), wireStationEtaMon, wireLumiblockMon);
+      }
+    }
   }
 }
-
+    
 void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*  trkPartCont) const {
   for (const xAOD::TrackParticle* meTP : *trkPartCont) {
     const Trk::Track* meTrack = meTP -> track();
     if(!meTrack) continue;
- 
-    for (const Trk::TrackStateOnSurface* trk_state : *meTrack -> trackStateOnSurfaces()) {
-      const Trk::MeasurementBase* it = trk_state -> measurementOnTrack();
-      if(!it) continue;
+    for (const Trk::TrackStateOnSurface* trkState : *meTrack -> trackStateOnSurfaces()) {      
+      std::optional<std::tuple<Identifier, const Trk::RIO_OnTrack*>> status = getRotIdAndRotObject(trkState);
+      if (!status.has_value()) continue;
+      std::tuple<Identifier, const Trk::RIO_OnTrack*> rotIDtuple = status.value();
       
-      const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(it);
-      if(!rot) continue;
-      
-      Identifier rot_id = rot -> identify();
-
-      if(!rot_id.is_valid()) {
-	ATH_MSG_DEBUG("Invalid identifier found in Trk::RIO_OnTrack");
-	continue;
-      }
-
-      if(!m_idHelperSvc -> issTgc(rot_id)) continue;
-      
-      const Muon::sTgcClusterOnTrack* cluster = dynamic_cast<const Muon::sTgcClusterOnTrack*>(rot);
+      Identifier rot_id = std::get<Identifier>(rotIDtuple);
+            
+      const Muon::sTgcClusterOnTrack* cluster = dynamic_cast<const Muon::sTgcClusterOnTrack*>(std::get<const Trk::RIO_OnTrack*>(rotIDtuple));
       if(!cluster) continue;
-      
+  
       const Muon::sTgcPrepData* prd = cluster -> prepRawData();
       if (!prd) continue;
-
+      
       int channelType = m_idHelperSvc  -> stgcIdHelper().channelType(rot_id);
       int stEta       =  m_idHelperSvc -> stgcIdHelper().stationEta(rot_id);
       int multi       = m_idHelperSvc  -> stgcIdHelper().multilayer(rot_id);
@@ -299,7 +290,7 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
 	fill("stripTiming_quad_" + std::to_string(std::abs(stEta)), stripSectorSidedExpertMon, stripTimingExpertMon);
 
 
-	std::unique_ptr<const Trk::ResidualPull> resPull(m_residualPullCalculator -> residualPull(trk_state -> measurementOnTrack(), trk_state -> trackParameters(), Trk::ResidualPull::ResidualType::Biased));	
+	std::unique_ptr<const Trk::ResidualPull> resPull(m_residualPullCalculator -> residualPull(trkState -> measurementOnTrack(), trkState -> trackParameters(), Trk::ResidualPull::ResidualType::Biased));	
 
 	if (resPull) {
 	  float residual = resPull -> residual()[Trk::locX];
@@ -326,72 +317,101 @@ void sTgcRawDataMonAlg::fillsTgcClusterFromTrackHistograms(const xAOD::TrackPart
   }
 }
 
-void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const Muon::NSW_PadTriggerDataContainer* NSWpadTriggerObject, int lb) const {
-  for (const Muon::NSW_PadTriggerData* rdo : *NSWpadTriggerObject ) {
-    for (size_t it = 0; it < rdo -> getNumberOfTriggers(); ++it) {
-      std::vector<unsigned int> phiIds  = rdo -> getTriggerPhiIds();
-      std::vector<unsigned int> bandIds = rdo -> getTriggerBandIds();
-      std::vector<unsigned int> relBCID = rdo -> getTriggerRelBcids();
-      std::vector<unsigned int> hitpfeb = rdo -> getHitPfebs();
-
-      bool sideA = rdo -> sideA();
-      bool largeSector = rdo -> largeSector();
+void sTgcRawDataMonAlg::fillsTgcPadTriggerDataHistograms(const xAOD::MuonContainer*  muonContainer, const Muon::NSW_PadTriggerDataContainer* NSWpadTriggerObject, int lb) const {
+  for (const xAOD::Muon* mu : *muonContainer) {
+    if(mu -> pt() < m_cutPt) continue;
+    int author = mu -> author();
+    if(!(author == xAOD::Muon_v1::Author::MuidCo || author == xAOD::Muon_v1::Author::MuidSA)) continue; 
+    
+    const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
+    if(meTP == nullptr) continue;
+    
+    const Trk::Track* meTrack = meTP -> track();
+    if(!meTrack) continue;
+  
+    for(const Trk::TrackStateOnSurface* trkState : *meTrack->trackStateOnSurfaces()) {
+      std::optional<Identifier> status = getRotId(trkState);
+      if (!status.has_value()) continue;
+      Identifier rot_id = status.value();
       
-      int iside = (sideA) ? 1 : 0;
-      int isize = (largeSector) ? 1 : 0; 
-      
-      std::string side = GeometricSectors::sTgcSide[iside];
-      std::string size = GeometricSectors::sTgcSize[isize];
+      int channelType = m_idHelperSvc -> stgcIdHelper().channelType(rot_id);
+      if (channelType != sTgcIdHelper::sTgcChannelTypes::Pad) continue;
+   
+      for (const Muon::NSW_PadTriggerData* rdo : *NSWpadTriggerObject) {
+	bool sideA = rdo -> sideA();
+	bool largeSector = rdo -> largeSector();
+	
+	int iside = (sideA) ? 1 : 0;
+	int isize = (largeSector) ? 1 : 0; 
+	
+	std::string side = GeometricSectors::sTgcSide[iside];
+	std::string size = GeometricSectors::sTgcSize[isize];
+	
+	size_t numberOfTriggers = rdo -> getNumberOfTriggers();
+	size_t numberOfHits     = rdo -> getNumberOfHits();
+	
+	for (size_t trigger = 0; trigger < numberOfTriggers; ++trigger) {
+	  int triggerPhiIds       = rdo -> getTriggerPhiIds().at(trigger);	  
+	  int triggerBandIds      = rdo -> getTriggerBandIds().at(trigger);
+	  int triggerRelBCID      = rdo -> getTriggerRelBcids().at(trigger);
+	  int sourceId     = rdo -> getSourceid();
+	  int sectorNumber = sourceidToSector(sourceId, sideA);
+ 
+	  if (triggerPhiIds == m_cutTriggerPhiId || triggerBandIds == m_cutTriggerBandId) continue;
+	  	  
+	  auto phiIdsPerSideSizeMon  = Monitored::Scalar<int>("phiIds_"  + side + "_" + size, triggerPhiIds);
+	  auto bandIdsPerSideSizeMon = Monitored::Scalar<int>("bandIds_" + side + "_" + size, triggerBandIds);
+	  fill("padTriggerShifter", phiIdsPerSideSizeMon, bandIdsPerSideSizeMon);
+ 
+	  auto lbMon = Monitored::Scalar<int>("lb", lb);
+	  auto relBCIDMon = Monitored::Scalar<int>("relBCID", triggerRelBCID);
+	  auto sectorMon = Monitored::Scalar<int>("sector", sectorNumber);
+	  auto numberOfTriggersMon = Monitored::Scalar<int>("numberOfTriggers", numberOfTriggers);
+	  fill("padTriggerShifter", lbMon, relBCIDMon, sectorMon, numberOfTriggersMon);
+	  
+	  auto numberOfTriggersPerSectorMon = Monitored::Scalar<int>("numberOfTriggers_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), numberOfTriggers);
+	  auto phiIdsSidedSizedPerSectorMon  = Monitored::Scalar<int>("phiIds_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerPhiIds);
+	  auto bandIdsSidedSizedPerSectorMon = Monitored::Scalar<int>("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerBandIds);
+	  auto lbPerSectorMon = Monitored::Scalar<int>("lb_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), lb);
+	  fill("padTriggerExpert", numberOfTriggersPerSectorMon, phiIdsSidedSizedPerSectorMon, bandIdsSidedSizedPerSectorMon, lbPerSectorMon);
+	  
+	  auto RelBCIDPerSectorMon = Monitored::Scalar<int>("relBCID_"+ side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerRelBCID);
+	  auto PhiIDPerSectorMon   = Monitored::Scalar<int>("phiID_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerPhiIds);
+	  auto BandIDPerSectorMon  = Monitored::Scalar<int>("bandID_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), triggerBandIds);
+	  fill("padTriggerShifter", RelBCIDPerSectorMon, PhiIDPerSectorMon, BandIDPerSectorMon);
+	} // end Number of triggers loop
+	
+	for (size_t hits = 0; hits < numberOfHits; ++hits){
+	  std::optional<Identifier> status = getPadId(rdo->getSourceid(), rdo->getHitPfebs().at(hits), rdo->getHitTdsChannels().at(hits));
+	  if (!status.has_value()) continue;
+	  Identifier pad_id = status.value();
+	  
+	  if (rot_id != pad_id) continue;
 
-      unsigned int sourceId = rdo -> getSourceid();
-      int sectorNumber = sourceidToSector(sourceId, sideA);
-      unsigned int numberOfTriggers = rdo -> getNumberOfTriggers();
-
-      auto phiIdsSidedSizedMon  = Monitored::Collection("phiIds_"  + side + "_" + size, phiIds);
-      auto bandIdsSidedSizedMon = Monitored::Collection("bandIds_" + side + "_" + size, bandIds);
-      fill("padTriggerShifter", phiIdsSidedSizedMon, bandIdsSidedSizedMon);
-
-      auto relBCIDMon = Monitored::Collection("relBCID", relBCID);
-      auto hitpfebMon = Monitored::Collection("hitpfeb", hitpfeb);
-      auto lbMon = Monitored::Scalar<int>("lb", lb);
-      auto sectorMon = Monitored::Scalar<int>("sector", sectorNumber);
-      auto numberOfTriggersMon = Monitored::Scalar<int>("numberOfTriggers", numberOfTriggers);
-      fill("padTriggerShifter", relBCIDMon, lbMon, sectorMon, numberOfTriggersMon, hitpfebMon);
-
-      auto lbPerSectorMon = Monitored::Scalar<int>("lb_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), lb);
-      auto bandIDperSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
-      auto numberOfTriggersPerSectorMon = Monitored::Scalar<int>("numberOfTriggers_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), numberOfTriggers);
-      auto phiIdsSidedSizedPerSectorMon  = Monitored::Collection("phiIds_"  + side + "_sector_" + std::to_string(std::abs(sectorNumber)), phiIds);
-      auto bandIdsSidedSizedPerSectorMon = Monitored::Collection("bandIds_" + side + "_sector_" + std::to_string(std::abs(sectorNumber)), bandIds);
-      fill("padTriggerExpert", lbPerSectorMon, bandIDperSectorMon, numberOfTriggersPerSectorMon, phiIdsSidedSizedPerSectorMon, bandIdsSidedSizedPerSectorMon);
-      
-      auto TriggerRelBCIDPerSectorMon = Monitored::Collection("TriggerRelBCID_"+side+"_sector_"+std::to_string(std::abs(sectorNumber)), relBCID);
-      auto TriggerPhiIDPerSectorMon = Monitored::Collection("TriggerPhiID_"+side+"_sector_"+std::to_string(std::abs(sectorNumber)), phiIds);
-      auto TriggerBandIDPerSectorMon = Monitored::Collection("TriggerBandID_"+side+"_sector_"+std::to_string(std::abs(sectorNumber)), bandIds);
-      fill("padTriggerShifter", TriggerRelBCIDPerSectorMon, TriggerPhiIDPerSectorMon, TriggerBandIDPerSectorMon);
-      
-      for (size_t hits = 0; hits < rdo -> getNumberOfHits(); ++hits){
-	bool sideAs = rdo -> sideA();
-	int isides = (sideAs) ? 1 : 0;
-	std::string sides = GeometricSectors::sTgcSide[isides];
-	unsigned int sourceIds = rdo -> getSourceid();
-	int sectorNumbers = sourceidToSector(sourceIds, sideAs);
-	std::vector<unsigned int> hitRelBCID = rdo -> getHitRelBcids();
-	std::vector<unsigned int> hitpfebs = rdo -> getHitPfebs();
-
-	auto hitRelBCIDPerSectorMon = Monitored::Collection("hitRelBCID_"+sides+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitRelBCID);
-	auto hitpfebsPerSectorMon = Monitored::Collection("hitpfebs_"+sides+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitpfebs);     
-	fill("padTriggerShifter", hitRelBCIDPerSectorMon, hitpfebsPerSectorMon);
-      }
-    }
-  }
-}
+	  int sourceIds = rdo -> getSourceid();
+	  int sectorNumbers = sourceidToSector(sourceIds, sideA);
+	  int hitRelBCID = rdo -> getHitRelBcids().at(hits);
+	  int hitpfebs = rdo -> getHitPfebs().at(hits);
+	  
+	  auto hitRelBCIDmon = Monitored::Scalar<int>("hitRelBCID", hitRelBCID);
+	  auto hitPfebsMon   = Monitored::Scalar<int>("hitPfebs", hitpfebs);
+	  auto sectorMon     = Monitored::Scalar<int>("sector", sectorNumbers);
+	  fill("padTriggerShifter", hitRelBCIDmon, hitPfebsMon, sectorMon);
+	  
+	  auto hitRelBCIDPerSectorMon = Monitored::Scalar<int>("hitRelBCID_"+side+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitRelBCID);
+	  auto hitpfebsPerSectorMon = Monitored::Scalar<int>("hitPfebs_"+side+"_sector_"+std::to_string(std::abs(sectorNumbers)), hitpfebs);     
+	  fill("padTriggerShifter", hitRelBCIDPerSectorMon, hitpfebsPerSectorMon);
+	} // end number of hits loop
+      } // end NSW_PadTriggerData loop
+    } // end TrackStateOnSurface loop
+  } // end Muon loop
+} // end fillsTgcPadTriggerDataHistograms function
 
 void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*  muonContainer, const MuonGM::MuonDetectorManager* muonDetectorManagerObject) const {  
   for (const xAOD::Muon* mu : *muonContainer) {
-    if(mu -> pt() < m_cutPt) continue; 
+    if(mu -> pt() < m_cutPt) continue;
     int author = mu -> author();
-    if(!(author == xAOD::Muon_v1::MuonType::Combined || author == xAOD::Muon_v1::MuonType::MuonStandAlone)) continue; 
+    if(!(author == xAOD::Muon_v1::Author::MuidCo || author == xAOD::Muon_v1::Author::MuidSA)) continue; 
 
     const xAOD::TrackParticle* meTP = mu -> trackParticle(xAOD::Muon::TrackParticleType::ExtrapolatedMuonSpectrometerTrackParticle);
     if(meTP == nullptr) continue;
@@ -402,20 +422,11 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
     sTGCeff effPlots[2][3][16][2];
 
     for(const Trk::TrackStateOnSurface* trkState : *meTrack->trackStateOnSurfaces()) {
-      if (!trkState->type(Trk::TrackStateOnSurface::Measurement)) continue;
-
-      Identifier surfaceId = (trkState) -> surface().associatedDetectorElementIdentifier();
-      if(!m_idHelperSvc -> issTgc(surfaceId)) continue;
-
-      const Trk::MeasurementBase* meas = trkState->measurementOnTrack();
-      if(!meas) continue;
-      
-      const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
-      if(!rot) continue;
-
-      Identifier rot_id = rot -> identify();
-      if(!m_idHelperSvc -> issTgc(rot_id)) continue;
-      
+      std::optional<Identifier> status = getRotId(trkState);
+      if (!status.has_value()) continue;
+            
+      Identifier rot_id = status.value();
+            
       int channelType = m_idHelperSvc -> stgcIdHelper().channelType(rot_id);
       if (channelType != sTgcIdHelper::sTgcChannelTypes::Strip) continue;
       
@@ -439,7 +450,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 	effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].yPosMultiplet.push_back(yPosStripInMultiplet);	
 	effPlots[iside][std::abs(stEta) - 1][sector - 1][multi - 1].zPosMultiplet.push_back(zPosStripInMultiplet);
       }
-    } // End track state loop
+    } // end track state loop
    
     for (unsigned int isideIndex = 0; isideIndex <= 1; ++isideIndex) {
       for (unsigned int stEtaIndex = 1; stEtaIndex <= 3; ++stEtaIndex) {
@@ -457,7 +468,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 		const Identifier IDeffLayerStrip = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2,  multiIndex, gapIndex, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
 		
 		if (!isValid) { 
-		  ATH_MSG_DEBUG("Identifier of eff layer isn't valid"); 
+		  ATH_MSG_WARNING("Identifier of eff layer isn't valid"); 
 		  continue;
 		}
 				
@@ -481,7 +492,6 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 		
 		auto xPosStripmon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerEff), xPosGlobal); 
 		auto yPosStripmon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerEff), yPosGlobal);
-		fill("efficiencyOverview", xPosStripmon, yPosStripmon, effQuestionMon);
 		fill("sTgcOverview", xPosStripmon, yPosStripmon, effQuestionMon);
 	      } // close gap loop
 	    } // close 4 out 4 if case
@@ -506,7 +516,7 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 	      const Identifier idProbeL1 = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multiIndex, probeL1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
 	      
 	      if (!isValid) { 
-		ATH_MSG_DEBUG("Identifier of probe L1 is invalid"); 
+		ATH_MSG_WARNING("Identifier of probe L1 is invalid"); 
 		continue;
 	      }
 
@@ -539,7 +549,6 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 	      	      
 	      auto xPosStripProbeL1mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), xPosGlobalProbeLayer1); 
 	      auto yPosStripProbeL1mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), yPosGlobalProbeLayer1);
-	      fill("efficiencyOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
 	      fill("sTgcOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
 	    } // close 3 out 4 if case
 
@@ -567,14 +576,14 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 	      const Identifier idProbeL1 = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multiIndex, probeL1, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
 	      
 	      if (!isValid) {
-		ATH_MSG_DEBUG("Identifier of probe L1 is invalid"); 
+		ATH_MSG_WARNING("Identifier of probe L1 is invalid"); 
 		continue;
 	      }
 	      
 	      const Identifier idProbeL2 = m_idHelperSvc -> stgcIdHelper().channelID((sectorIndex % 2 == 0) ? "STS" : "STL", quad, (sectorIndex % 2 == 0) ? sectorIndex/2 : (sectorIndex + 1)/2, multiIndex, probeL2, sTgcIdHelper::sTgcChannelTypes::Strip, 1, isValid);
 	      
 	      if (!isValid) { 
-		ATH_MSG_DEBUG("Identifier of probe L2 is invalid"); 
+		ATH_MSG_WARNING("Identifier of probe L2 is invalid"); 
 		continue;
 	      }
 	      
@@ -627,12 +636,10 @@ void sTgcRawDataMonAlg::fillsTgcEfficiencyHistograms(const xAOD::MuonContainer* 
 	      
 	      auto xPosStripProbeL1mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), xPosGlobalProbeLayer1); 
 	      auto yPosStripProbeL1mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL1), yPosGlobalProbeLayer1);
-	      fill("efficiencyOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
 	      fill("sTgcOverview", xPosStripProbeL1mon, yPosStripProbeL1mon, effQuestionMon);
 	      
 	      auto xPosStripProbeL2mon = Monitored::Scalar<float>("xPosStrip_" + side + "_layer_" + std::to_string(layerProbeL2), xPosGlobalProbeLayer2); 
 	      auto yPosStripProbeL2mon = Monitored::Scalar<float>("yPosStrip_" + side + "_layer_" + std::to_string(layerProbeL2), yPosGlobalProbeLayer2);
-	      fill("efficiencyOverview", xPosStripProbeL2mon, yPosStripProbeL2mon, effQuestionMon);
 	      fill("sTgcOverview", xPosStripProbeL2mon, yPosStripProbeL2mon, effQuestionMon); 
 	    } // close 2 out 4 if case
 	  } // multiIndex loop end

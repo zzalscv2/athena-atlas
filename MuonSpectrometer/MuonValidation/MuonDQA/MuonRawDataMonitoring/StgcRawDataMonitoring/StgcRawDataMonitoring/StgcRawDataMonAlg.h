@@ -32,6 +32,8 @@
 
 #include "MuonRDO/NSW_PadTriggerDataContainer.h"
 
+#include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
+
 // stl includes                                                                                 
 #include <string>
 
@@ -54,6 +56,9 @@ namespace {
 }
 
 class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
+  using decoder = Muon::nsw::NSWPadTriggerL1a;
+  static constexpr uint32_t NVMMCHAN = Muon::nsw::Constants::N_CHAN_PER_VMM;
+  static constexpr uint32_t FIRSTPFEBVMM = 1;
  public:
   sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
   
@@ -64,15 +69,18 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator {this, "ResPullCalc", "Trk::ResidualPullCalculator/ResidualPullCalculator"};
   
-  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepData*, const MuonGM::MuonDetectorManager*) const;
-  void fillsTgcLumiblockHistograms(const Muon::sTgcPrepData*, const int lb) const;
+  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataContainer*, const MuonGM::MuonDetectorManager*) const;
+  void fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataContainer*, const int lb) const;
   void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;  
-  void fillsTgcPadTriggerDataHistograms(const Muon::NSW_PadTriggerDataContainer*, const int lb) const;
+  void fillsTgcPadTriggerDataHistograms(const xAOD::MuonContainer*, const Muon::NSW_PadTriggerDataContainer*, const int lb) const;
   void fillsTgcEfficiencyHistograms(const xAOD::MuonContainer*, const MuonGM::MuonDetectorManager*) const;
 
   int getSectors(const Identifier& id) const;
   int getLayer(const int multiplet, const int gasGap) const;
   int32_t sourceidToSector(uint32_t sourceid, bool isSideA) const;
+  std::optional<Identifier> getPadId(uint32_t sourceid, uint32_t pfeb, uint32_t tdschan) const;
+  std::optional<std::tuple<Identifier, const Trk::RIO_OnTrack*>> getRotIdAndRotObject(const Trk::TrackStateOnSurface* trkState) const;
+  std::optional<Identifier> getRotId(const Trk::TrackStateOnSurface* trkState) const;
   
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"}; 
@@ -81,5 +89,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonsKey", "Muons"};
 
   Gaudi::Property<float> m_cutPt{this, "cutPt", 15000.};
+  Gaudi::Property<int> m_cutTriggerPhiId{this, "cutTriggerPhiId", 63};
+  Gaudi::Property<int> m_cutTriggerBandId{this, "cutTriggerBandId", 255};
 };    
 #endif
