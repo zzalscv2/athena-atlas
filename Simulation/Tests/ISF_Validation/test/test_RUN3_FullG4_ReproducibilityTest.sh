@@ -27,7 +27,9 @@ Sim_tf.py \
 --maxEvents '10' \
 --skipEvents '0'
 
-echo "art-result: $? unsplit-sim"
+rc=$?
+status=$rc
+echo "art-result: $rc unsplit-sim"
 
 # Run first 5 events
 Sim_tf.py \
@@ -41,7 +43,12 @@ Sim_tf.py \
 --maxEvents '5' \
 --skipEvents '0'
 
-echo "art-result: $? split-sim1"
+rc2=$?
+if [ $status -eq 0 ]
+then
+    status=$rc2
+fi
+echo "art-result: $rc2 split-sim1"
 
 # Run next 5 events
 Sim_tf.py \
@@ -55,21 +62,52 @@ Sim_tf.py \
 --maxEvents '5' \
 --skipEvents '5'
 
-echo "art-result: $? split-sim2"
+rc3=$?
+if [ $status -eq 0 ]
+then
+    status=$rc3
+fi
+echo "art-result: $rc3 split-sim2"
 
-# Merge the partial files
-HITSMerge_tf.py --inputHitsFile hitsHalf1.ttbar.pool.root \
-                                hitsHalf2.ttbar.pool.root \
+rc4=-9999
+if [ $rc2 -eq 0 ] && [ $rc3 -eq 0 ]
+then
+    # Merge the partial files
+    HITSMerge_tf.py --inputHitsFile hitsHalf1.ttbar.pool.root \
+        hitsHalf2.ttbar.pool.root \
                 --outputHitsFile 'hitsMerged.ttbar.pool.root'
+    rc4=$?
+    if [ $status -eq 0 ]
+    then
+        status=$rc4
+    fi
+fi
+echo "art-result: $rc4 split-merge"
 
-echo "art-result: $? split-merge"
+rc5=-9999
+if [ $rc4 -eq 0 ]
+then
+    # Run a dummy merge on the full hits file to deal with lossy compression:
+    HITSMerge_tf.py --inputHitsFile 'hitsFull.ttbar.pool.root' --outputHitsFile 'hitsFullMerged.ttbar.pool.root'
+    rc5=$?
+    if [ $status -eq 0 ]
+    then
+        status=$rc5
+    fi
+fi
+echo "art-result: $rc5 dummy-merge"
 
-# Run a dummy merge on the full hits file to deal with lossy compression:
-HITSMerge_tf.py --inputHitsFile 'hitsFull.ttbar.pool.root' --outputHitsFile 'hitsFullMerged.ttbar.pool.root'
+rc6=-9999
+if [ $rc -eq 0 ] && [ $rc5 -eq 0 ]
+then
+    # Compare the merged outputs
+    acmd.py diff-root hitsFullMerged.ttbar.pool.root hitsMerged.ttbar.pool.root --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+    rc6=?$
+    if [ $status -eq 0 ]
+    then
+        status=$rc6
+    fi
+fi
 
-echo "art-result: $? dummy-merge"
-
-# Compare the merged outputs
-acmd.py diff-root hitsFullMerged.ttbar.pool.root hitsMerged.ttbar.pool.root --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
-
-echo "art-result: $? comparison"
+echo "art-result: $rc6 comparison"
+exit $status

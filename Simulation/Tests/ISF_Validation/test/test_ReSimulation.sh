@@ -24,24 +24,36 @@ Sim_tf.py \
 --maxEvents $MAXEVENTS \
 --imf False
 
-echo "art-result: $? initial-sim"
+rc=$?
+echo "art-result: $rc initial-sim"
+status=$rc
 cp log.EVNTtoHITS log.EVNTtoHITS.initial
 
-ReSim_tf.py \
---conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
---simulator 'FullG4_QS' \
---postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
---preInclude 'ReSim:Campaigns/MC16SimulationNoIoV.py' \
---geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
---inputHITSFile "original.HITS.pool.root" \
---outputHITS_RSMFile "resim.HITS.pool.root" \
---maxEvents $MAXEVENTS \
---imf False
+rc2=-9999
+if [ $status -eq 0 ]; then
+    ReSim_tf.py \
+        --conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
+        --simulator 'FullG4_QS' \
+        --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
+        --preInclude 'ReSim:Campaigns/MC16SimulationNoIoV.py' \
+        --geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
+        --inputHITSFile "original.HITS.pool.root" \
+        --outputHITS_RSMFile "resim.HITS.pool.root" \
+        --maxEvents $MAXEVENTS \
+        --imf False
+    rc=$?
+    status=$rc2
+fi
+echo "art-result: $rc2 re-sim"
 
-echo "art-result: $? re-sim"
+rc3=-9999
+if [ $status -eq 0 ]; then
+    ArtPackage=$1
+    ArtJobName=$2
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed --ignore-leave RecoTimingObj_p1_EVNTtoHITS_timingsOLD
+    rc3=$?
+    status=$rc3
+fi
+echo  "art-result: $rc3 regression"
 
-ArtPackage=$1
-ArtJobName=$2
-art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed --ignore-leave RecoTimingObj_p1_EVNTtoHITS_timingsOLD
-
-echo  "art-result: $? regression"
+exit $status

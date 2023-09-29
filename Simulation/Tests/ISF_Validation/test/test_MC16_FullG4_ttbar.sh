@@ -24,6 +24,7 @@ Sim_tf.py \
 --imf False
 
 rc=$?
+status=$rc
 rc2=-9999
 echo  "art-result: $rc simOLD"
 if [ $rc -eq 0 ]
@@ -32,6 +33,8 @@ then
     ArtJobName=$2
     art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed
     rc2=$?
+    status=$rc2
 fi
 
 echo  "art-result: $rc2 regression"
+exit $status

@@ -22,23 +22,37 @@ Sim_tf.py --simulator 'FullG4MT'  \
 --outputHITSFile "Hits.pool.root" \
 --maxEvents=2 \
 
-echo  "art-result: $? simulation"
+rc=$?
+status=$rc
+echo  "art-result: $rc simulation"
 
-Reco_tf.py --inputHITSFile "Hits.pool.root" \
---outputESDFile ESD.pool.root \
---conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
---geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
---DataRunNumber='410000' \
---postExec 'HITtoRDO:ToolSvc.LArPileUpTool.CrossTalk=False' 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' 'all:conddb.addOverride("/LAR/BadChannels/BadChannels", "LARBadChannelsBadChannels-MC-empty")' 'all:conddb.addOverride("/TILE/OFL02/STATUS/ADC", "TileOfl02StatusAdc-EmptyBCh")' 'RAWtoESD:StreamESD.ItemList+=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps","LArHitContainer#*","TileHitVector#*", "TrackRecordCollection#CaloEntryLayer", "TrackRecordCollection#MuonEntryLayer"]' \
---postInclude "all:PyJobTransforms/UseFrontier.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiTilePostInclude.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiPostInclude.py" \
---preExec "all:rec.Commissioning.set_Value_and_Lock(True);from AthenaCommon.BeamFlags import jobproperties;jobproperties.Beam.numberOfCollisions.set_Value_and_Lock(0.0);from LArROD.LArRODFlags import larRODFlags;larRODFlags.NumberOfCollisions.set_Value_and_Lock(20);larRODFlags.nSamples.set_Value_and_Lock(4);larRODFlags.doOFCPileupOptimization.set_Value_and_Lock(True);larRODFlags.firstSample.set_Value_and_Lock(0);larRODFlags.useHighestGainAutoCorr.set_Value_and_Lock(True)" "RAWtoESD:from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArCellEmMisCalib=False;from RecExConfig.RecFlags import rec;rec.doTrigger=False" "HITtoRDO:from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.doCaloNoise=False" \
---maxEvents -1 \
---autoConfiguration everything
+rc2=-9999
+if [ $rc -eq 0 ]
+then
+    Reco_tf.py --inputHITSFile "Hits.pool.root" \
+        --outputESDFile ESD.pool.root \
+        --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+        --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+        --DataRunNumber='410000' \
+        --postExec 'HITtoRDO:ToolSvc.LArPileUpTool.CrossTalk=False' 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' 'all:conddb.addOverride("/LAR/BadChannels/BadChannels", "LARBadChannelsBadChannels-MC-empty")' 'all:conddb.addOverride("/TILE/OFL02/STATUS/ADC", "TileOfl02StatusAdc-EmptyBCh")' 'RAWtoESD:StreamESD.ItemList+=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps","LArHitContainer#*","TileHitVector#*", "TrackRecordCollection#CaloEntryLayer", "TrackRecordCollection#MuonEntryLayer"]' \
+        --postInclude "all:PyJobTransforms/UseFrontier.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiTilePostInclude.py" "HITtoRDO:ISF_FastCaloSimParametrization/ISF_FastCaloSimParametrization_DigiPostInclude.py" \
+        --preExec "all:rec.Commissioning.set_Value_and_Lock(True);from AthenaCommon.BeamFlags import jobproperties;jobproperties.Beam.numberOfCollisions.set_Value_and_Lock(0.0);from LArROD.LArRODFlags import larRODFlags;larRODFlags.NumberOfCollisions.set_Value_and_Lock(20);larRODFlags.nSamples.set_Value_and_Lock(4);larRODFlags.doOFCPileupOptimization.set_Value_and_Lock(True);larRODFlags.firstSample.set_Value_and_Lock(0);larRODFlags.useHighestGainAutoCorr.set_Value_and_Lock(True)" "RAWtoESD:from CaloRec.CaloCellFlags import jobproperties;jobproperties.CaloCellFlags.doLArCellEmMisCalib=False;from RecExConfig.RecFlags import rec;rec.doTrigger=False" "HITtoRDO:from Digitization.DigitizationFlags import digitizationFlags;digitizationFlags.doCaloNoise=False" \
+        --maxEvents -1 \
+        --autoConfiguration everything
+    rc2=$?
+    status=$rc2
+fi
+echo  "art-result: $rc2 reconstruction"
 
-echo  "art-result: $? reconstruction"
+rc3=-9999
+if [ $rc2 -eq 0 ]
+then
+    FCS_Ntup_tf.py --inputESDFile 'ESD.pool.root' \
+        --outputNTUP_FCSFile 'calohit.root' \
+        --doG4Hits true
+    rc3=$?
+    status=$rc3
+fi
 
-FCS_Ntup_tf.py --inputESDFile 'ESD.pool.root' \
---outputNTUP_FCSFile 'calohit.root' \
---doG4Hits true 
-
-echo  "art-result: $? fcs_ntup step"
+echo  "art-result: $rc3 fcs_ntup step"
+exit $status
