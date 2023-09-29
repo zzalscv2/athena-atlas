@@ -36,6 +36,8 @@ namespace MuonCond {
  
     DcsFsmState getFsmStateEnum(const std::string& fsmState);
     std::string getFsmStateStrg(DcsFsmState fsmState); 
+    
+    std::ostream& operator<<(std::ostream& ostr, const DcsConstants& dcs);
+
 }
-std::ostream& operator<<(std::ostream& ostr, const MuonCond::DcsConstants& dcs);
 #endif

@@ -49,10 +49,10 @@ std::string getFsmStateStrg(DcsFsmState fsmState) {
     return "NONE";
 }
 
-}
 std::ostream& operator<<(std::ostream& ostr, const MuonCond::DcsConstants& dcs) {
     ostr<<"DCS (STATE/standby/ready): "<<MuonCond::getFsmStateStrg(dcs.fsmState);
     ostr<<"/"<<dcs.standbyVolt;
     ostr<<"/"<<dcs.readyVolt;
     return ostr;
+}
 }
