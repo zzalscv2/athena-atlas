@@ -65,6 +65,7 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_xtalk2Eratio1                    ( 4.),
     m_xtalk2Eratio2                    ( 25.),
     m_xtalk3Eratio                     ( 10.),
+    m_xtalkEtaEratio                   (4.),
     m_neighborOption                   ("super3D"),
     m_nOption                          (LArNeighbours::super3D),
     m_restrictHECIWandFCalNeighbors    (false),
@@ -81,6 +82,7 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
     m_xtalkEM2                         (false),
     m_xtalkEM2n                        (false),
     m_xtalkEM3                         (false),
+    m_xtalkEMEta                       (false),
     m_minSampling                      (0),
     m_maxSampling                      (0),
     m_hashMin                          (999999),
@@ -122,6 +124,8 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
   declareProperty("UseTimeCutUpperLimit",m_useTimeCutUpperLimit);
   //relax time window (if timing is used) in EM2 when xTalk is present
   declareProperty("XTalkEM2",m_xtalkEM2);
+  //relax time window (if timing is used) in EM2 Eta directionwhen xTalk is present
+  declareProperty("XTalkEMEta",m_xtalkEMEta);
   //relax time window (if timing is used) in EM2 when xTalk is present also for 2nd phi neighbors (if XTalkEM2 is also set)
   declareProperty("XTalkEM2n",m_xtalkEM2n);
   //relax time window (if timing is used) in EM3 when xTalk is present for layer 3 neighbor of high energy layer 2 cells
@@ -134,6 +138,8 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
   declareProperty("XTalk2Eratio2",m_xtalk2Eratio2);
   //Eratio for previous sampling neighbor in layer 3
   declareProperty("XTalk3Eratio",m_xtalk3Eratio);
+  //Eratio for cross-talk in eta layer 2
+  declareProperty("XTalkEtaEratio",m_xtalkEtaEratio);
 
   // Neighbor cuts are in E or Abs E
   declareProperty("NeighborCutsInAbsE",m_neighborCutsInAbsE);
@@ -752,6 +758,29 @@ inline bool CaloTopoClusterMaker::passCellTimeCut(const CaloCell* pCell, const C
 	  }      // if (pNcell)
 	}        // loop over first neighbors
       }          // special case for layer 2
+
+      // check cross talk in eta
+      if ( m_xtalkEMEta && (!isInTime) && (pCell->energy() > 0 && (sam == CaloSampling::EMB2 || (sam == CaloSampling::EME2 && std::abs(pCell->eta()) < 2.5)))) {
+          IdentifierHash hashid = pCell->caloDDE()->calo_hash();
+          std::vector<IdentifierHash> theNeighbors;
+          LArNeighbours::neighbourOption opt = (LArNeighbours::neighbourOption)(((int)LArNeighbours::prevInEta)|((int)LArNeighbours::nextInEta));
+          m_calo_id->get_neighbours(hashid,opt,theNeighbors);
+          for (IdentifierHash nId : theNeighbors) {
+            const CaloCell * pNCell = cellColl->findCell(nId);
+            if ( pNCell ) {
+                if ( pNCell->energy() > m_xtalkEtaEratio*pCell->energy() ) {
+                 if ( (!(pNCell->provenance() & pmask)) || std::abs(pNCell->time()) < m_seedThresholdOnTAbs) {
+                    isInTime = ((pCell->time() > -m_seedThresholdOnTAbs) && (pCell->time() < m_seedThresholdOnTAbs + m_xtalkDeltaT));
+                    if ( isInTime ) {
+                     // exit after first phi neighbour in case that already made
+                     // the time-cut pass
+                     break;
+                    }
+                 }
+                }
+            }
+          }
+      }
 
       // relax also time constraint for EMB3 and EME2_OW
       if ( m_xtalkEM3 && (!isInTime) && (pCell->energy() > 0 && (sam == CaloSampling::EMB3 || (sam == CaloSampling::EME3 && std::abs(pCell->eta()) < 2.5)))) {
