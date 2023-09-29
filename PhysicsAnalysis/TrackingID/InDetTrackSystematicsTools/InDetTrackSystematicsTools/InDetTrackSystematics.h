@@ -39,6 +39,9 @@ namespace InDet {
     TRK_EFF_TIGHT_PP0,
     TRK_EFF_TIGHT_PHYSMODEL,
     TRK_EFF_LARGED0_GLOBAL,
+    TRK_EFF_LARGED0_IBL,
+    TRK_EFF_LARGED0_PP0,
+    TRK_EFF_LARGED0_PHYSMODEL,
     // uncertainty for tracking efficiency in jets
     TRK_EFF_LOOSE_TIDE,
     // uncertainties for tracking fake rates in jets
@@ -75,6 +78,9 @@ namespace InDet {
     DEF_SYST( EFF_TIGHT_PHYSMODEL ),
     DEF_SYST( EFF_LOOSE_TIDE ),
     DEF_SYST( EFF_LARGED0_GLOBAL ),
+    DEF_SYST( EFF_LARGED0_IBL ),
+    DEF_SYST( EFF_LARGED0_PP0 ),
+    DEF_SYST( EFF_LARGED0_PHYSMODEL ),
     DEF_SYST( FAKE_RATE_TIGHT_TIDE ),
     DEF_SYST( FAKE_RATE_LOOSE_TIDE ),
     DEF_SYST( FAKE_RATE_LOOSE_ROBUST )

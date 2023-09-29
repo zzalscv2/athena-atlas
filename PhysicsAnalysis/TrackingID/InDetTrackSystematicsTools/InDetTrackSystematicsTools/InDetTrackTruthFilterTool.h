@@ -69,7 +69,7 @@ namespace InDet {
   private:
 
     StatusCode initTrkEffSystHistogram(float scale, TH2 *&histogram, std::string rootFileName, std::string histogramName) const;
-    float getFractionDropped(float fDefault, const TH2 *histogram, float pt, float eta) const;
+    float getFractionDropped(float fDefault, const TH2 *histogram, float x, float y, bool xAxisIspT = true) const;
     float pseudoFakeProbability(const xAOD::TrackParticle* track, float mu) const;
     bool dropPseudoFake(float prob) const;
 
@@ -103,9 +103,14 @@ namespace InDet {
     TH2* m_trkEffHistTightIBL = nullptr;
     TH2* m_trkEffHistTightPP0 = nullptr;
     TH2* m_trkEffHistTightPhysModel = nullptr;
+    TH2* m_trkEffHistLRTGlobal = nullptr;
+    TH2* m_trkEffHistLRTIBL = nullptr;
+    TH2* m_trkEffHistLRTPP0 = nullptr;
+    TH2* m_trkEffHistLRTPhysModel = nullptr;
 
     // allow the user to configure which calibration files to use if desired
     std::string m_calibFileNomEff;
+    std::string m_calibFileLRTEff;
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool;
 
