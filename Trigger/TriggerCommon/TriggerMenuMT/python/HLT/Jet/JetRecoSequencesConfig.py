@@ -371,6 +371,29 @@ def GroomedJetRecoCfg(flags, dataSource, clustersKey, **jetRecoDict):
         ),
         seqname
     )
+    jetCalibDef=getJetCalibDefaultString(jetRecoDict)
+    if(
+        isPFlow(jetRecoDict)   # tag only PFlow jets
+        and jetRecoDict['recoAlg'] == 'a10sd'
+        and jetRecoDict['constitMod']=='cssk'        # include only CSSK chains
+        and jetRecoDict['jetCalib']==jetCalibDef # exclude jets without full default calibration
+        ):
+        context = getJetContext(jetRecoDict)
+
+        ftagseqname = f"jetFtagSeq_{jetRecoDict['trkopt']}_largeR"
+        acc.addSequence(parOR(ftagseqname), seqname)
+
+        acc.merge(
+                fastFlavourTaggingCfg(
+                    flags,
+                    groomDef.fullname(),
+                    context['Vertices'],
+                    context['Tracks'],
+                    isPFlow=True,
+                    doXbbtagLargeRJet = True,
+                ),
+                ftagseqname 
+            )
     return acc, jetsOut, groomDef
 
 
