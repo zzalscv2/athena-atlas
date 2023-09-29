@@ -141,6 +141,30 @@ def get_condition_args_from_chainpart(cp):
                     'nameValid': 'TracksForMinimalJetTag_isValid'
                 }
                 condargs.append((k, vals))
+            elif 'bgntwox' in v:
+                key = 'bgntwox'
+                values = v.split(key)
+                assert values[1] == '','bgntwox condition takes only one argument, two were given'
+                
+                #This dictionary maps the bdips efficiency into the WP cut to be applied to the DIPS output
+                gn2x_WPs = {
+                    '':   float('-inf'),
+                    '60': 4.1,
+                }
+
+                assert (values[0] in gn2x_WPs.keys()),f"The efficiency of the specified gn2x cut \'{v}\' can not be found in the WP dictionary. Please add or remove the WP from the dips WP dictionary."
+
+                lo   = gn2x_WPs[values[0]]
+                vals = {
+                    'min': str(lo),
+                    'max': '',
+                    'cfrac': '0.25',
+                    'namePb': 'GN2Xv01_phbb', 
+                    'namePc': 'GN2Xv01_ptop', 
+                    'namePu': 'GN2Xv01_pqcd',
+                    'nameValid': 'TracksForMinimalJetTag_isValid'
+                }
+                condargs.append((k, vals))
             else:
                 raise ValueError(f'btagger {v.split("b")[1]} not supportted')
 

@@ -58,7 +58,7 @@ def flavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, BTagName,
 
     return acc
 
-def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=False, fastDipsMinimumPt=None):
+def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=False, fastDipsMinimumPt=None, doXbbtagLargeRJet = False):
     """
     This function tags jets directly: there is no  b-tagging object
     """
@@ -115,27 +115,37 @@ def fastFlavourTaggingCfg( flags, inputJets, inputVertex, inputTracks, isPFlow=F
     # The file above adds fastDIPSnoPV20220211_p*, we'll call them
     # fastDips_p* on the jet.
     if isPFlow:
-        dl2_configs=[
-            [
-                'BTagging/20211216trig/dips/AntiKt4EMPFlow/network.json',
-                {
-                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                }
-            ],
-            [
-                'BTagging/20211215trig/fastDips/antikt4empflow/network.json',
-                {
-                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                },
-            ],
+        if doXbbtagLargeRJet:
+            dl2_configs = [
+                [
+                    'BTagging/20230705/gn2xv01/antikt10ufo/network.onnx',
+                    {
+                        'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    }
+                ],
+            ]
+        else: 
+            dl2_configs=[
+                [
+                    'BTagging/20211216trig/dips/AntiKt4EMPFlow/network.json',
+                    {
+                        'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    }
+                ],
+                [
+                    'BTagging/20211215trig/fastDips/antikt4empflow/network.json',
+                    {
+                        'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    },
+                ],
 
-            [
-                'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
-                {
-                    'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
-                },
-            ],
-        ]
+                [
+                    'BTagging/20230331trig/gn1/antikt4empflow/network.onnx',
+                    {
+                        'BTagTrackToJetAssociator': tracksOnJetDecoratorName,
+                    },
+                ],
+            ]
     else:
         dl2_configs=[
             [

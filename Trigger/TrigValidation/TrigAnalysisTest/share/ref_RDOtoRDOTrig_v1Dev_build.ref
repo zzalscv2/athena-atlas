@@ -11845,6 +11845,12 @@ HLT_j100_0eta290_020jvt_boffperf_pf_ftf_preselj80_L1jJ90:
     0: 15
     1: 15
     2: 15
+HLT_j100_a10sd_cssk_60bgntwox_pf_jes_ftf_L1J100:
+  eventCount: 0
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 3
 HLT_j110_L1J30:
   eventCount: 10
   stepCounts:
