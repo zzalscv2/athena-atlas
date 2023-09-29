@@ -371,10 +371,12 @@ class CaloClusterTopoGetter ( Configured )  :
         TopoMaker.XTalkEM2 = jobproperties.CaloTopoClusterFlags.xtalkEM2()
         TopoMaker.XTalkEM2n = jobproperties.CaloTopoClusterFlags.xtalkEM2n()
         TopoMaker.XTalkEM3 = jobproperties.CaloTopoClusterFlags.xtalkEM3()
+        TopoMaker.XTalkEMEta = jobproperties.CaloTopoClusterFlags.xtalkEMEta()
         TopoMaker.XTalkDeltaT = jobproperties.CaloTopoClusterFlags.xtalkDeltaT()
         TopoMaker.XTalk2Eratio1 = jobproperties.CaloTopoClusterFlags.xtalk2Eratio1()
         TopoMaker.XTalk2Eratio2 = jobproperties.CaloTopoClusterFlags.xtalk2Eratio2()
         TopoMaker.XTalk3Eratio  = jobproperties.CaloTopoClusterFlags.xtalk3Eratio()
+        TopoMaker.XTalkEtaEratio  = jobproperties.CaloTopoClusterFlags.xtalkEtaEratio()
 
         # note E or AbsE 
         #
