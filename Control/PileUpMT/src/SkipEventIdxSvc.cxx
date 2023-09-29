@@ -20,7 +20,9 @@ namespace rv = ranges::views;
 
 namespace {
 template <typename propType, typename T>
-const auto& getProp(SmartIF<T>& iface, const std::string& name) {
+const Gaudi::Property<propType>&
+getProp(SmartIF<T>& iface, const std::string& name)
+{
   auto prop_iface = iface.template as<IProperty>();
   const auto& prop = prop_iface->getProperty(name);
   try {
@@ -85,9 +87,8 @@ StatusCode SkipEventIdxSvc::initialize() {
           getProp<std::uint64_t&>(modSvc, "SkipEvents").value();
       ATH_MSG_INFO("Skipping " << evts_skipped_before_mod
                                << " events before modifying");
-      const auto& mod_prop =
-          getProp<std::vector<std::uint64_t>&>(modSvc, "Modifiers");
-      std::vector<std::uint64_t> lst = mod_prop.value();
+      std::vector<std::uint64_t> lst = 
+        getProp<std::vector<std::uint64_t>&>(modSvc, "Modifiers").value();
       ATH_MSG_DEBUG("Printing EvtId modifier config. There are "
                    << lst.size() / 6 << " entries.");
       std::string config_str{};
