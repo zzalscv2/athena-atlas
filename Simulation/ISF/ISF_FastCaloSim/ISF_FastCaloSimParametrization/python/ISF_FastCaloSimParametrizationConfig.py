@@ -1,6 +1,6 @@
 """ComponentAccumulator config of tools for ISF_FastCaloSimParametrization
 
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -19,8 +19,7 @@ def FastCaloSimCaloExtrapolationCfg(flags, name="FastCaloSimCaloExtrapolation", 
     kwargs.setdefault("CaloMargin", 100)
     kwargs.setdefault("Extrapolator", acc.getPublicTool(Extrapolator.name))
     kwargs.setdefault("CaloGeometryHelper", acc.getPublicTool(GeometryHelper.name))
-    from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
-    kwargs.setdefault("CaloEntrance", TrkDetFlags.InDetContainerName())
+    kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector')
 
     acc.setPrivateTools(CompFactory.FastCaloSimCaloExtrapolation(name, **kwargs))
     return acc
