@@ -37,6 +37,9 @@ def athenaMPRunArgsToFlags(runArgs, flags):
     if hasattr(runArgs, "sharedWriter"):
         flags.MP.UseSharedWriter = runArgs.sharedWriter
 
+    if hasattr(runArgs, "sharedReader"):
+        flags.MP.UseSharedReader = runArgs.sharedReader
+
     if hasattr(runArgs, "parallelCompression"):
         flags.MP.UseParallelCompression = runArgs.parallelCompression
 
@@ -98,8 +101,7 @@ def AthenaMPCfg(flags):
                 evSel = CompFactory.EventSelectorAthenaPool("EventSelector")
 
                 inputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool",
-                                                            SharedMemoryName=f"InputStream{str(os.getpid())}",
-                                                            UseMultipleSegments=True)
+                                                            SharedMemoryName=f"InputStream{str(os.getpid())}")
 
                 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
                 result.merge(PoolReadCfg(flags))
