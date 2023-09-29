@@ -194,10 +194,6 @@ namespace CP {
   {
     vtxCase = yyVtxType::Unknown;
     const xAOD::PhotonContainer *photons = dynamic_cast<const xAOD::PhotonContainer*>(&egammas);
-    if(!photons){
-      ATH_MSG_WARNING("Container is not a photon");
-      return StatusCode::FAILURE;
-    }
 
     // Retrieve PV collection from TEvent
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer);
@@ -209,7 +205,7 @@ namespace CP {
 
 
     // Check if a conversion photon has a track attached to a primary/pileup vertex
-    if (!ignoreConv) { 
+    if (!ignoreConv && photons) { 
       prime_vertex = getPrimaryVertexFromConv(photons);
       if (prime_vertex != nullptr) {
         vtxCase = yyVtxType::ConvTrack;
