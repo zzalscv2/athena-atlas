@@ -11,7 +11,7 @@
 #include <memory>
 #include <deque>
 #include <type_traits>
-#if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
+#if !defined(XAOD_STANDALONE)
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
