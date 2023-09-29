@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StoreGate/StoreGateSvc.h"
@@ -511,7 +511,8 @@ StatusCode AmdcsimrecAthenaSvc::ProduceString()
 
 } 
 
-StatusCode AmdcsimrecAthenaSvc::SetFromString(std::string AmdcString,std::string AgddString)
+StatusCode AmdcsimrecAthenaSvc::SetFromString(const std::string& AmdcString,
+                                              const std::string& AgddString)
 {
 
   ATH_MSG_DEBUG("----> SetFromString is called" ) ; 

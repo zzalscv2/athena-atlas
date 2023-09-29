@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadChannel2Ascii.h"
@@ -229,7 +229,7 @@ StatusCode LArBadChannel2Ascii::execute() {
 }
 
 
-void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, std::vector<unsigned> probs) const {
+void LArBadChannel2Ascii::writeSum(std::ofstream& exeFile, const std::vector<unsigned>& probs) const {
   const unsigned nEMB=109568, nEMEC=63744, nHEC=5632, nFCAL=3524;
   const unsigned nTot=nEMB+nEMEC+nHEC+nFCAL;
   unsigned nTotProb=0;
