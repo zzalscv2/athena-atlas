@@ -105,13 +105,13 @@ void setDefiningParameters( xAOD::TrackParticle& tp,
     perigee.parameters()[Trk::theta],
     perigee.parameters()[Trk::qOverP]);
   const AmgSymMatrix(5)* covMatrix = perigee.covariance();
-  // see https://its.cern.ch/jira/browse/ATLASRECTS-645 for justification to comment out the following line 
-  // assert(covMatrix && covMatrix->rows()==5&& covMatrix->cols()==5); 
+  // see https://its.cern.ch/jira/browse/ATLASRECTS-645 for justification to comment out the following line
+  // assert(covMatrix && covMatrix->rows()==5&& covMatrix->cols()==5);
   std::vector<float> covMatrixVec;
   if( !covMatrix ) ;//ATH_MSG_WARNING("Setting Defining parameters without error matrix");
   else Amg::compress(*covMatrix,covMatrixVec);
   tp.setDefiningParametersCovMatrixVec(covMatrixVec);
-  const Amg::Vector3D& surfaceCenter = perigee.associatedSurface().center(); 
+  const Amg::Vector3D& surfaceCenter = perigee.associatedSurface().center();
   tp.setParametersOrigin(surfaceCenter.x(), surfaceCenter.y(), surfaceCenter.z() );
 }
 void setDefiningParameters( xAOD::NeutralParticle& tp,
@@ -123,13 +123,13 @@ void setDefiningParameters( xAOD::NeutralParticle& tp,
     perigee.parameters()[Trk::theta],
     perigee.parameters()[Trk::qOverP]);
   const AmgSymMatrix(5)* covMatrix = perigee.covariance();
-  // see https://its.cern.ch/jira/browse/ATLASRECTS-645 for justification to comment out the following line 
-  // assert(covMatrix && covMatrix->rows()==5&& covMatrix->cols()==5); 
+  // see https://its.cern.ch/jira/browse/ATLASRECTS-645 for justification to comment out the following line
+  // assert(covMatrix && covMatrix->rows()==5&& covMatrix->cols()==5);
   std::vector<float> covMatrixVec;
   if( !covMatrix ) ;//ATH_MSG_WARNING("Setting Defining parameters without error matrix");
   else Amg::compress(*covMatrix,covMatrixVec);
   tp.setDefiningParametersCovMatrixVec(covMatrixVec);
-  const Amg::Vector3D& surfaceCenter = perigee.associatedSurface().center(); 
+  const Amg::Vector3D& surfaceCenter = perigee.associatedSurface().center();
   tp.setParametersOrigin(surfaceCenter.x(), surfaceCenter.y(), surfaceCenter.z() );
 }
 
@@ -284,7 +284,6 @@ void compareVertex (const xAOD::Vertex& a, const xAOD::Vertex& b,
   assert (Athena_test::isEqual (a.chiSquared(), b.chiSquared(),
                                 std::max (5e-5, thresh)) );
   assert (Athena_test::isEqual (a.numberDoF(), b.numberDoF(), 1e-5) );
-
   assert (a.covariance().size() == b.covariance().size());
   for (unsigned int i = 0; i < a.covariance().size(); i++) {
     if (isinf(a.covariance()[i]) && isinf(b.covariance()[i])) continue;
@@ -378,16 +377,14 @@ StatusCode TrkVKalVrtFitterTestAlg::test1()
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
-  exp_v0.setPosition ({-5.50787, -8.38822, -4.67306});
-  exp_v0.setFitQuality (0.531859, 3);
-  exp_v0.setCovariance (std::vector<float>
-                        {246.136, 373.626, 725.174, 134.985,
-                           248.851, 145.765, -29779.7, -5881.23,
-                           -2327.52, 4.64884e+13, 10334, -5625.55,
-                           6012.6, 1.05714e+14, 2.44703e+14, -11615.6,
-                           -22512.2, -39837.2, 1.97188e+13, 4.39981e+13,
-                           8.80508e+12 });
-  setFitQuality (exp_v0, 0, 0.311, 2);
+  exp_v0.setPosition ({-5.58116, -8.50767, -4.76804});
+  exp_v0.setFitQuality (0.541406, 3);
+  exp_v0.setCovariance(std::vector<float>{
+      259.128,     394.824,     764.131,    144.775,     266.345,  155.231,
+      -30152,      -6184.95,    -2642.5,    4.60831e+13, 10912.8,  -4760.06,
+      6318.67,     1.0494e+14,  2.4226e+14, -12079,      -23269.1, -40859.3,
+      2.00894e+13, 4.51754e+13, 9.12659e+12});
+  setFitQuality(exp_v0, 0, 0.311, 2);
   setFitQuality (exp_v0, 1, 0.138, 2);
   setFitQuality (exp_v0, 2, 0.082, 2);
 
@@ -406,20 +403,19 @@ StatusCode TrkVKalVrtFitterTestAlg::test2()
 {
   xAOD::Vertex exp_v0;
   exp_v0.makePrivateStore();
-  exp_v0.setPosition ({-5.32687, -8.28403, -4.63052});
-  exp_v0.setFitQuality (0.525555, 3);
-  exp_v0.setCovariance (std::vector<float>
-                        { 208.636, 319.448, 638.225, 110.249,
-                            209.116, 123.504, -39371.1, -11521.7,
-                            11317.9, 4.04178e+14, -21193.4, -70432,
-                            1453.88, 4.81939e+14, 6.44741e+14, -18347.9,
-                            -34574.9, -35450.7, 2.65866e+14, 3.03215e+14,
-                           1.77877e+14 });
-  setFitQuality (exp_v0, 0, 0.306, 2);
-  setFitQuality (exp_v0, 1, 0.143, 2);
-  setFitQuality (exp_v0, 2, 0.076, 2);
+  exp_v0.setPosition ({ 24.131, 38.8186, 13.2978});
+  exp_v0.setFitQuality (0.564942, 3);
+  exp_v0.setCovariance(std::vector<float>{
+      21964.5,     32891.5,     51244.9,     13612.1,     20963.9,
+      9573.41,     816688,      1.09315e+06, 393680,      1.92433e+14,
+      1.10804e+06, 1.87392e+06, 616429,      3.20119e+14, 5.41674e+14,
+      401502,      640572,      338398,      1.97024e+14, 3.42617e+14,
+      2.25906e+14});
+  setFitQuality(exp_v0, 0, 0.306, 2);
+  setFitQuality(exp_v0, 1, 0.00660789, 2);
+  setFitQuality(exp_v0, 2, 0.266975, 2);
 
-  Amg::Vector3D pnt1 (5, 6, -3);
+  Amg::Vector3D pnt1(5, 6, -3);
 
   NeutralUVec_t neutrals = makeNeutrals1();
   std::unique_ptr<xAOD::Vertex> v1 (m_fitter->fit (std::vector<const Trk::TrackParameters*>(),
@@ -431,20 +427,19 @@ StatusCode TrkVKalVrtFitterTestAlg::test2()
   //     handling in CvtNeutralParameters vs CvtNeutralParticle
   xAOD::Vertex exp_v1;
   exp_v1.makePrivateStore();
-  exp_v1.setPosition ({27.5393, 46.192, 14.3115});
-  exp_v1.setFitQuality (0.539225, 3);
-  exp_v1.setCovariance (std::vector<float>
-                        {31839.2, 49179.6, 78856.4, 18195.7,
-                           28852.3, 11897.5, 350173, 364859,
-                           121754, 9.62321e+13, 462920, 875224,
-                           249969, 1.46679e+14, 2.25898e+14, -21927.8,
-                           -28423, 126640, 6.79303e+13, 1.08235e+14,
-                           5.74699e+13 });
-  setFitQuality (exp_v1, 0, 0.281, 2);
-  setFitQuality (exp_v1, 1, 0.010, 2);
-  setFitQuality (exp_v1, 2, 0.248, 2);
+  exp_v1.setPosition ({27.7411, 46.5526, 14.3721});
+  exp_v1.setFitQuality (0.537727, 3);
+  exp_v1.setCovariance(std::vector<float>{
+      32598.3,     50372.7,     80773.1,    18537.3,     29396.9,
+      12058.1,     850485,      1.1479e+06, 380180,      1.54295e+14,
+      1.21881e+06, 2.11418e+06, 643860,     2.55981e+14, 4.31589e+14,
+      417309,      683027,      356607,     1.51101e+14, 2.64837e+14,
+      1.77033e+14});
+  setFitQuality(exp_v1, 0, 0.281, 2);
+  setFitQuality(exp_v1, 1, 0.010, 2);
+  setFitQuality(exp_v1, 2, 0.248, 2);
 
-  xAODNPUVec_t xaodnp = makexAODNP (makeNeutrals1());
+  xAODNPUVec_t xaodnp = makexAODNP(makeNeutrals1());
   std::unique_ptr<xAOD::Vertex> v2 (m_fitter->fit (std::vector<const xAOD::TrackParticle*>(),
                                                    asVec (xaodnp),
                                                    pnt1));
