@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ SCT_ForwardModuleSideDesign::SCT_ForwardModuleSideDesign(const double thickness,
     double radius = 0.5 * (radius1 + radius2 + halfHeight2 - halfHeight1);
     m_frame=SCT_ForwardFrameTransformation(etaCenter,phiCenter,radius);
   }
-  m_bounds = Trk::TrapezoidBounds(0.5*minWidth(), 0.5*maxWidth(), 0.5*length());
+  m_bounds = Trk::TrapezoidBounds(0.5*SCT_ForwardModuleSideDesign::minWidth(), 0.5*SCT_ForwardModuleSideDesign::maxWidth(), 0.5*SCT_ForwardModuleSideDesign::length());
 }
 
 double SCT_ForwardModuleSideDesign::sinStripAngleReco(double x, double y) const {
