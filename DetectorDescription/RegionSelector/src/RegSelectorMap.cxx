@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -443,7 +443,7 @@ StatusCode RegSelectorMap::verifyInputsMinusPi( double &etaminIn, double &etamax
 
 void RegSelectorMap::verifyOutput( double etaminIn, double etamaxIn,
 				   double phiminIn, double phimaxIn,
-				   std::vector<IdentifierHash> outputIdlist) const {
+				   const std::vector<IdentifierHash>& outputIdlist) const {
 
   std::vector<IdentifierHash> outset;
   int i;
