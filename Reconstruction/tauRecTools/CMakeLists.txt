@@ -45,6 +45,6 @@ if( NOT XAOD_STANDALONE )
       src/*.h src/*.cxx src/components/*.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AsgMessagingLib xAODBase
-      xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib
+      xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib PFlowUtilsLib
       ${extra_private_libs} )
 endif()

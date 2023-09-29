@@ -139,6 +139,10 @@ TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::JetConstituent& c
     const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(constituent.rawConstituent());
     vertexCorrectedP4 = getVertexCorrectedP4(*pfo, position); 
   }
+  else if ( constituent->type() == xAOD::Type::FlowElement ) {
+    const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() );
+    vertexCorrectedP4 = getVertexCorrectedP4(*fe, position);
+  }
   else {
     ATH_MSG_WARNING("Seed jet constituent type not supported, will not do vertex correction !");
     vertexCorrectedP4 = tauRecTools::GetConstituentP4(constituent);
@@ -174,6 +178,29 @@ TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::PFO& pfo,
                 " eta: " << vertexCorrectedP4.Eta() << " phi: " << vertexCorrectedP4.Phi() << " e: " << vertexCorrectedP4.E());
       
   return vertexCorrectedP4;
+}
+
+
+TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::FlowElement& fe,
+                                                   const Amg::Vector3D& position) const {
+
+  TLorentzVector vertexCorrectedP4; 
+  // Only perfrom vertex corretion for neutral FlowElement
+  if (!fe.isCharged()) { 
+     TVector3 pos(position.x(), position.y(), position.z());
+     vertexCorrectedP4 = FEHelpers::getVertexCorrectedFourVec(fe,pos);
+  }
+  else {
+     vertexCorrectedP4 = fe.p4();
+  }
+
+  ATH_MSG_DEBUG("Original fe four momentum, pt: " << fe.pt() <<
+                  " eta: " << fe.eta() << " phi: " << fe.phi() << " e: " << fe.e());
+  ATH_MSG_DEBUG("Vertex corrected four momentum, pt: " << vertexCorrectedP4.Pt() <<
+                " eta: " << vertexCorrectedP4.Eta() << " phi: " << vertexCorrectedP4.Phi() << " e: " << vertexCorrectedP4.E());
+
+  return vertexCorrectedP4;
+  
 }
 
 #endif

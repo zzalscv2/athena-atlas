@@ -10,7 +10,7 @@
 #include "xAODTau/TauJet.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODPFlow/PFO.h"
-
+#include "xAODPFlow/FlowElement.h"
 #include "AsgMessaging/MessageCheck.h"
 
 #include "MVAUtils/BDT.h"

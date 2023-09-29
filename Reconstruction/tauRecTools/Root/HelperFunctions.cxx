@@ -180,7 +180,7 @@ std::unique_ptr<MVAUtils::BDT> tauRecTools::configureMVABDT(std::vector<TString>
 TLorentzVector tauRecTools::GetConstituentP4(const xAOD::JetConstituent& constituent) {
   using namespace tauRecTools::msgHelperFunction;
 
-  TLorentzVector constituentP4;
+  TLorentzVector constituentP4; 
 
   if( constituent->type() == xAOD::Type::CaloCluster ) {
     const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>( constituent->rawConstituent() );
@@ -189,6 +189,10 @@ TLorentzVector tauRecTools::GetConstituentP4(const xAOD::JetConstituent& constit
   else if ( constituent->type() == xAOD::Type::ParticleFlow ) {
     const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>( constituent->rawConstituent() );
     constituentP4 = pfo->p4();
+  }
+  else if ( constituent->type() == xAOD::Type::FlowElement ) {
+    const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() );
+    constituentP4 = fe->p4();
   }
   else {
     ANA_MSG_ERROR("GetConstituentP4: Seed jet constituent type not supported!");
