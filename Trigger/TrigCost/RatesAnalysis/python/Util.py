@@ -39,10 +39,10 @@ def toCSV(fileName, metadata, HLTTriggers, readL1=False):
       group_name = chain_id = ""
       if "ChainL1" in fileName:
         group_name = "None"
-        chain_id = metadata["itemID"][trig.name]
+        chain_id = metadata["itemID"].get(trig.name)
       elif "ChainHLT" in fileName:
-        group_name = metadata["chainGroup"][trig.name]
-        chain_id = metadata["chainID"][trig.name]
+        group_name = metadata["chainGroup"].get(trig.name)
+        chain_id = metadata["chainID"].get(trig.name)
       elif "Group" in fileName:
         chain_id = 0
         group_name = "All" if "GLOBAL" in trig.name else group_name
