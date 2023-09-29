@@ -8,6 +8,7 @@ def _HIcommon(flags):
     flags.Calo.TopoCluster.doTimeCut = False
     flags.Calo.TopoCluster.extendTimeCut = False
     flags.Calo.TopoCluster.useUpperLimitForTimeCut = False
+    flags.Reco.PostProcessing.ThinNegativeClusters = False
 
 
 def HImode(flags):

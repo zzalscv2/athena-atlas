@@ -3,11 +3,11 @@
 */
 
 #include "JetMonitoring/EventHistoVarTool.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 
 EventHistoVarTool::EventHistoVarTool(const std::string & type, const std::string & name ,const IInterface* parent):
   AthAlgTool( type, name, parent )
-
 {
   declareInterface<IEventHistoVarTool>(this);
 }
@@ -16,17 +16,24 @@ StatusCode EventHistoVarTool::initialize() {
 
   if(m_varName=="") m_varName = name();
 
+  size_t pos = (m_attName.key()).find(".");
+  if (pos == std::string::npos){
+      m_attName = "EventInfo."+m_attName.key(); // If no container specified, assuming we want "EventInfo"
+      ATH_MSG_INFO("Updated attribute key to "<<m_attName);
+  }
+  ATH_MSG_INFO("Event info attribute that will be retrieved: "<<m_attName);
+  ATH_CHECK( m_attName.initialize() );
+
   return StatusCode::SUCCESS;
   
 }
 
-float EventHistoVarTool::value(const xAOD::EventInfo & e, const xAOD::JetContainer & /*jets not used in this implementation*/) const {
+float EventHistoVarTool::value(const xAOD::JetContainer & /*jets not used in this implementation*/) const {
 
-  if (! e.isAvailable<float>(m_attName) ) {
-    ATH_MSG_WARNING("Could not access EventInfo variable "<< m_attName << ", returning default value " << m_defaultValue );
+  SG::ReadDecorHandle<xAOD::EventInfo,float> eiDecor(m_attName);
+  if(!eiDecor.isPresent()){
+    ATH_MSG_WARNING("Could not access EventInfo variable "<< m_attName << ". Returning default value " << m_defaultValue );
     return m_defaultValue;
   }
-
-  return e.auxdata<float>(m_attName);
-
+  return eiDecor(0);
 }
