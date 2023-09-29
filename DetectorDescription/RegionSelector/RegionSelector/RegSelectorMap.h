@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REGSELECTORMAP_H
@@ -112,11 +112,7 @@ public:
 
   void verifyOutput( double etaminIn, double etamaxIn, 
 		     double phiminIn, double phimaxIn,
-		     std::vector<IdentifierHash> outputIdlist ) const;
-
-  void verifyOutputRobId( double etaminIn, double etamaxIn, 
-			  double phiminIn, double phimaxIn,
-			  std::vector<uint32_t> outputIdlist ) const;
+		     const std::vector<IdentifierHash>& outputIdlist ) const;
 
   void getEtaPhi( IdentifierHash hashId, 
 		  double *etaMin, double *etaMax,
