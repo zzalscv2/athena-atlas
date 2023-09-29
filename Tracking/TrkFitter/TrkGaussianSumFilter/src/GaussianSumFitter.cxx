@@ -873,19 +873,18 @@ Trk::GaussianSumFitter::smootherFit(
   // This is the 1st track state on surface for a measurement
   // in the reverse direction. Our starting point for the smoother
   MultiComponentState smootherPredictionMultiState =
-    MultiComponentStateHelpers::clone(trackStateOnSurfaceItr->multiComponentState);
+      std::move(trackStateOnSurfaceItr->multiComponentState);
   // Perform the  update with the measurement and create the
   // the 1st updated/smoothed entry in the trajectory
-  Trk::FitQualityOnSurface fitQuality;
   std::unique_ptr<Trk::MeasurementBase> firstSmootherMeasurementOnTrack =
-    trackStateOnSurfaceItr->measurementOnTrack->uniqueClone();
-
+      std::move(trackStateOnSurfaceItr->measurementOnTrack);
   if (!firstSmootherMeasurementOnTrack) {
     ATH_MSG_WARNING(
       "Initial state on surface in smoother does not have an associated "
       "MeasurementBase object");
     return {};
   }
+  Trk::FitQualityOnSurface fitQuality;
   Trk::MultiComponentState firstSmoothedState =
     Trk::GsfMeasurementUpdator::update(std::move(smootherPredictionMultiState),
                                        *firstSmootherMeasurementOnTrack,
@@ -903,19 +902,23 @@ Trk::GaussianSumFitter::smootherFit(
   // of the multi component to single TrackParameter
   std::unique_ptr<Trk::TrackParameters> combinedFirstSmoothedState =
     MultiComponentStateCombiner::combineToSingle(firstSmoothedState, m_useMode);
-
-  // The 1st updated/smoothed state owned  by the trajectory
   smoothedTrajectory.emplace_back(
       fitQuality, std::move(firstSmootherMeasurementOnTrack),
       std::move(combinedFirstSmoothedState),
       MultiComponentStateHelpers::clone(firstSmoothedState));
-
   const auto& updatedFirstStateOnSurface = smoothedTrajectory.back();
+
+  // continue the reverse looping of the TrackStateOnSurfaces
+  // in the forward trajectory
+  ++trackStateOnSurfaceItr;
+  // The is the last one we will see
+  auto lasttrackStateOnSurface = forwardTrajectory.rend() - 1;
+  // TSOS that the cluster measuremenet will added on.
+  auto secondLastTrackStateOnSurface = forwardTrajectory.rend() - 2;
   // Generate a prediction by scaling the covariance of all components in the
   // first smoothed state and perform a measurement update to it.
-  // This way there is no
-  // dependance on error of prediction NB local Y and theta are not blown out
-  // too much to help in the TRT.
+  // This way there is no dependance on error of prediction
+  // NB local Y and theta are not blown out too much to help in the TRT.
   Trk::MultiComponentState smoothedStateWithScaledError =
     MultiComponentStateHelpers::WithScaledError(
       std::move(firstSmoothedState), 15., 5., 15., 5., 15.);
@@ -928,16 +931,9 @@ Trk::GaussianSumFitter::smootherFit(
     ATH_MSG_WARNING("Smoother prediction could not be determined");
     return {};
   }
-  // continue the reverse looping of the TrackStateOnSurfaces
-  // in the forward trajectory
-  ++trackStateOnSurfaceItr;
-  // The is the last one we will see
-  auto lasttrackStateOnSurface = forwardTrajectory.rend() - 1;
-  // TSOS that the cluster measuremenet will added on.
-  auto secondLastTrackStateOnSurface = forwardTrajectory.rend() - 2;
-  // loopUpdatedState is a ptr to the most recent
-  // predicted MultiComponentState
-  // we start from our previous inflated prediction
+  // loopUpdatedState is a plain ptr to the most recent
+  // predicted MultiComponentState.
+  // We start from our previous inflated prediction
   Trk::MultiComponentState* loopUpdatedState = &updatedState;
 
   for (; trackStateOnSurfaceItr != forwardTrajectory.rend();
