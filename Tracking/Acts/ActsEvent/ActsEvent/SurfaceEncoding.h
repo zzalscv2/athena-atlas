@@ -7,6 +7,15 @@
 #include <xAODTracking/SurfaceBackend.h>
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Surfaces/SurfaceBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/ConeSurface.hpp"
+#include "Acts/Surfaces/CylinderSurface.hpp"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/Surfaces/DiscSurface.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
 #include "ActsGeometryInterfaces/ActsGeometryContext.h"
 
 
