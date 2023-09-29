@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ SCT_BarrelModuleSideDesign::SCT_BarrelModuleSideDesign(const double thickness,
     m_xEtaAbsSizeLow = m_xEtaAbsSizeHigh = m_xPhiAbsSize = 0.0;
   }
   
-  m_bounds = Trk::RectangleBounds(0.5*width(), 0.5*length());
+  m_bounds = Trk::RectangleBounds(0.5*SCT_BarrelModuleSideDesign::width(), 0.5*SCT_BarrelModuleSideDesign::length());
 }
 
 
