@@ -57,6 +57,33 @@ def ITkClusterSplitProbabilityContainerName(flags):
     return ClusterSplitProbContainer
 
 
+def ITkStoreTrackSeparateContainerCfg(flags, TrackContainer="",
+                                      ClusterSplitProbContainer=""):
+    result = ComponentAccumulator()
+    extension = flags.Tracking.ActiveConfig.extension
+
+    if flags.Tracking.doTruth:
+        from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
+        result.merge(ITkTrackTruthCfg(
+            flags,
+            Tracks=TrackContainer,
+            DetailedTruth=TrackContainer+"DetailedTruth",
+            TracksTruth=TrackContainer+"TruthCollection"))
+
+    from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
+    result.merge(ITkTrackParticleCnvAlgCfg(
+        flags,
+        name=extension + "TrackParticleCnvAlg",
+        TrackContainerName=TrackContainer,
+        xAODTrackParticlesFromTracksContainerName=(
+            "InDet" + extension + "TrackParticles"),
+        ClusterSplitProbabilityName=(
+            "" if flags.Tracking.doITkFastTracking else
+            ClusterSplitProbContainer),
+        AssociationMapName=""))
+
+    return result
+
 ##############################################################################
 #####################     Main ITk tracking config       #####################
 ##############################################################################
@@ -83,7 +110,6 @@ def ITkTrackRecoCfg(flags):
     StatTrackTruthCollections = []
 
     from InDetConfig.ITkTrackingSiPatternConfig import ITkTrackingSiPatternCfg
-    from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
 
     for current_flags in flags_set:
@@ -104,23 +130,10 @@ def ITkTrackRecoCfg(flags):
                                       TrackContainer+"TruthCollection"]
 
         if current_flags.Tracking.ActiveConfig.storeSeparateContainer:
-            if flags.Tracking.doTruth:
-                result.merge(ITkTrackTruthCfg(
-                    current_flags,
-                    Tracks=TrackContainer,
-                    DetailedTruth=TrackContainer+"DetailedTruth",
-                    TracksTruth=TrackContainer+"TruthCollection"))
-
-            result.merge(ITkTrackParticleCnvAlgCfg(
+            result.merge(ITkStoreTrackSeparateContainerCfg(
                 current_flags,
-                name=extension + "TrackParticleCnvAlg",
-                TrackContainerName=TrackContainer,
-                xAODTrackParticlesFromTracksContainerName=(
-                    "InDet" + extension + "TrackParticles"),
-                ClusterSplitProbabilityName=(
-                    "" if flags.Tracking.doITkFastTracking else
-                    ClusterSplitProbContainer),
-                AssociationMapName=""))
+                TrackContainer=TrackContainer,
+                ClusterSplitProbContainer=ClusterSplitProbContainer))
 
         else:
             ClusterSplitProbContainer = (
@@ -141,11 +154,12 @@ def ITkTrackRecoCfg(flags):
 
     if flags.Tracking.doTruth:
         from InDetConfig.ITkTrackTruthConfig import ITkTrackTruthCfg
+        TrackContainer = "CombinedITkTracks"
         result.merge(ITkTrackTruthCfg(
             flags,
-            Tracks="CombinedITkTracks",
-            DetailedTruth="CombinedITkTracksDetailedTruth",
-            TracksTruth="CombinedITkTracksTruthCollection"))
+            Tracks=TrackContainer,
+            DetailedTruth=f"{TrackContainer}DetailedTruth",
+            TracksTruth=f"{TrackContainer}TruthCollection"))
 
     StatTrackCollections += ["CombinedITkTracks"]
     StatTrackTruthCollections += ["CombinedITkTracksTruthCollection"]
@@ -155,9 +169,6 @@ def ITkTrackRecoCfg(flags):
         result.merge(TrackSlimmerCfg(
             flags,
             TrackLocation=["CombinedITkTracks"]))
-
-    if flags.Tracking.doTruth:
-        result.merge(ITkTrackTruthCfg(flags))
 
     result.merge(ITkTrackParticleCnvAlgCfg(
         flags,
@@ -284,8 +295,8 @@ def ITkTrackRecoOutputCfg(flags):
 
     # Save (Detailed) Track Truth
     if flags.Tracking.doTruth:
-        toESD += ["TrackTruthCollection#TrackTruthCollection"]
-        toESD += ["DetailedTrackTruthCollection#DetailedTrackTruth"]
+        toESD += ["TrackTruthCollection#CombinedITkTracksTrackTruthCollection"]
+        toESD += ["DetailedTrackTruthCollection#CombinedITkTracksDetailedTrackTruth"]
 
     # add tracks
     if flags.Tracking.doStoreTrackSeeds:

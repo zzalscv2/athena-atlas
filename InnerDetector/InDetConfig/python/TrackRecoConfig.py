@@ -151,18 +151,7 @@ def InDetCosmicsTrackRecoPreProcessingCfg(flags):
     return result
 
 
-##############################################################################
-#####################     Main ID tracking config       #####################
-##############################################################################
-
-def InDetTrackRecoCfg(flags):
-
-    # Bypass to ITk config
-    if flags.Detector.GeometryITk:
-        from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
-        return ITkTrackRecoCfg(flags)
-
-    """Configures complete ID tracking """
+def InDetPreProcessingCfg(flags):
     result = ComponentAccumulator()
 
     # Detector ByteStream pre-processing
@@ -185,16 +174,215 @@ def InDetTrackRecoCfg(flags):
     from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
     result.merge(TRTPreProcessingCfg(flags))
 
+    return result
+
+
+# Returns CA + ClusterSplitProbContainer
+def SiSubDetTrackRecoCfg(flags, detector="",
+                         extensions_list=[],
+                         ClusterSplitProbContainer=""):
+    result = ComponentAccumulator()
+
+    flagsDet = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                     f"Tracking.{detector}Pass")
+    TrackContainer = f"Resolved{detector}Tracks"
+    extensions_list.append(flagsDet.Tracking.ActiveConfig.extension)
+    printActiveConfig(flagsDet)
+
+    from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
+    result.merge(TrackingSiPatternCfg(
+        flagsDet,
+        InputCollections=[],
+        ResolvedTrackCollectionKey=TrackContainer,
+        SiSPSeededTrackCollectionKey=f"SiSPSeeded{detector}Tracks",
+        ClusterSplitProbContainer=ClusterSplitProbContainer))
+
+    ClusterSplitProbContainer = (
+        "InDetAmbiguityProcessorSplitProb" +
+        flagsDet.Tracking.ActiveConfig.extension)
+
+    if flags.Tracking.doTruth:
+        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+        result.merge(InDetTrackTruthCfg(
+            flagsDet,
+            Tracks=TrackContainer,
+            DetailedTruth=TrackContainer+"DetailedTruth",
+            TracksTruth=TrackContainer+"TruthCollection"))
+
+    from xAODTrackingCnv.xAODTrackingCnvConfig import (
+        TrackParticleCnvAlgNoPIDCfg)
+    result.merge(TrackParticleCnvAlgNoPIDCfg(
+        flags,
+        name=TrackContainer+"CnvAlg",
+        TrackContainerName=TrackContainer,
+        xAODTrackParticlesFromTracksContainerName=(
+            f"InDet{detector}TrackParticles")))
+
+    return result, ClusterSplitProbContainer
+
+
+def TRTTrackRecoCfg(flags, extensions_list=[]):
+    result = ComponentAccumulator()
+
+    flagsTRT = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                     "Tracking.TRTPass")
+    extensions_list.append(flagsTRT.Tracking.ActiveConfig.extension)
+    printActiveConfig(flagsTRT)
+
+    from InDetConfig.TRTSegmentFindingConfig import (
+        TRTSegmentFinding_TrackSegments_Cfg)
+    result.merge(TRTSegmentFinding_TrackSegments_Cfg(flagsTRT))
+
+    from InDetConfig.TRTStandaloneConfig import TRT_TrackSegment_Cfg
+    result.merge(TRT_TrackSegment_Cfg(flagsTRT))
+
+    return result
+
+
+def TRTStandalonePassRecoCfg(flags,
+                             InputCombinedInDetTracks=[],
+                             InputExtendedInDetTracks=[],
+                             StatTrackCollections=[],
+                             StatTrackTruthCollections=[]):
+    result = ComponentAccumulator()
+
+    from InDetConfig.TRTStandaloneConfig import TRTStandaloneCfg
+    result.merge(TRTStandaloneCfg(flags,
+                                  InputCollections=InputCombinedInDetTracks))
+
+    TRTTrackContainer = "TRTStandaloneTracks"
+    InputCombinedInDetTracks += [TRTTrackContainer]
+    InputExtendedInDetTracks += [TRTTrackContainer]
+    StatTrackCollections += [TRTTrackContainer]
+    StatTrackTruthCollections += [TRTTrackContainer+"TruthCollection"]
+
+    if flags.Tracking.doTrackSegmentsTRT:
+        from xAODTrackingCnv.xAODTrackingCnvConfig import (
+            TrackParticleCnvAlgNoPIDCfg)
+        result.merge(TrackParticleCnvAlgNoPIDCfg(
+            flags, TRTTrackContainer+"CnvAlg",
+            TrackContainerName=TRTTrackContainer,
+            xAODTrackParticlesFromTracksContainerName=(
+                "InDetTRTTrackParticles")))
+
+    return result
+
+
+# Return CA + TrackContainer
+def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
+                                   ClusterSplitProbContainer=""):
+    result = ComponentAccumulator()
+
+    # Dummy Merger to fill additional info
+    # for PRD-associated pixel tracklets
+    # Can also run on all separate collections like R3LargeD0
+    # but kept consistent with legacy config
+
+    AssociationMapName = ""
+    extension = flags.Tracking.ActiveConfig.extension
+
+    if extension == "Disappearing" or flags.Overlay.doTrackOverlay:
+        if extension == "Disappearing":
+            InputTracks = [TrackContainer]
+            if flags.Overlay.doTrackOverlay:
+                InputTracks += [flags.Overlay.BkgPrefix +
+                                extension + "Tracks"]
+            TrackContainer = extension+"Tracks"
+            AssociationMapName = "PRDtoTrackMap" + TrackContainer
+            MergerOutputTracks = TrackContainer
+        elif flags.Overlay.doTrackOverlay:
+            # schedule merger to combine signal and background tracks
+            InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
+                           flags.Overlay.BkgPrefix+TrackContainer]
+            AssociationMapName = ("PRDtoTrackMapResolved" +
+                                  extension + "Tracks")
+            MergerOutputTracks = TrackContainer
+
+        from TrkConfig.TrkTrackCollectionMergerConfig import (
+            TrackCollectionMergerAlgCfg)
+        result.merge(TrackCollectionMergerAlgCfg(
+            flags, "InDetTrackCollectionMerger"+extension,
+            InputCombinedTracks=InputTracks,
+            OutputCombinedTracks=MergerOutputTracks,
+            AssociationMapName=AssociationMapName))
+
+    if flags.Tracking.doTruth:
+        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+        result.merge(InDetTrackTruthCfg(
+            flags,
+            Tracks=TrackContainer,
+            DetailedTruth=TrackContainer+"DetailedTruth",
+            TracksTruth=TrackContainer+"TruthCollection"))
+
+    # Need specific handling with TrackParticles for R3LargeD0
+    # not to break downstream configs
+    xAODTrackParticlesName = (
+        "InDetLargeD0TrackParticles" if "LargeD0" in extension else
+        "InDet" + extension + "TrackParticles")
+
+    from xAODTrackingCnv.xAODTrackingCnvConfig import (
+        TrackParticleCnvAlgPIDCheckCfg)
+    result.merge(TrackParticleCnvAlgPIDCheckCfg(
+        flags, extension + "TrackParticleCnvAlg",
+        TrackContainerName=TrackContainer,
+        xAODTrackParticlesFromTracksContainerName=xAODTrackParticlesName,
+        ClusterSplitProbabilityName=ClusterSplitProbContainer,
+        AssociationMapName=AssociationMapName))
+
+    return result, TrackContainer
+
+
+# Returns CA + ClusterSplitProbContainer
+def BackTrackingRecoCfg(flags,
+                        InputCombinedInDetTracks=[],
+                        InputExtendedInDetTracks=[],
+                        StatTrackCollections=[],
+                        StatTrackTruthCollections=[],
+                        ClusterSplitProbContainer=""):
+    result = ComponentAccumulator()
+
+    from InDetConfig.BackTrackingConfig import BackTrackingCfg
+    result.merge(BackTrackingCfg(
+        flags,
+        InputCollections=InputCombinedInDetTracks,
+        ClusterSplitProbContainer=ClusterSplitProbContainer))
+
+    ClusterSplitProbContainer = (
+        "InDetTRT_SeededAmbiguityProcessorSplitProb" +
+        flags.Tracking.ActiveConfig.extension)
+    TRTSeededTracks = "TRTSeededTracks"
+    ResolvedTRTSeededTracks = "ResolvedTRTSeededTracks"
+    InputCombinedInDetTracks += [ResolvedTRTSeededTracks]
+    InputExtendedInDetTracks += [ResolvedTRTSeededTracks]
+    StatTrackCollections += [TRTSeededTracks,
+                             ResolvedTRTSeededTracks]
+    StatTrackTruthCollections += [TRTSeededTracks+"TruthCollection",
+                                  ResolvedTRTSeededTracks+"TruthCollection"]
+
+    return result, ClusterSplitProbContainer
+
+
+##############################################################################
+#####################     Main ID tracking config       #####################
+##############################################################################
+
+def InDetTrackRecoCfg(flags):
+
+    # Bypass to ITk config
+    if flags.Detector.GeometryITk:
+        from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
+        return ITkTrackRecoCfg(flags)
+
+    """Configures complete ID tracking """
+    result = ComponentAccumulator()
+    result.merge(InDetPreProcessingCfg(flags))
+
     ClusterSplitProbContainer = ''
 
     from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
-    from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
-    from InDetConfig.TRTStandaloneConfig import TRTStandaloneCfg
     from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionCfg
     from xAODTrackingCnv.xAODTrackingCnvConfig import (
-        TrackParticleCnvAlgPIDCheckCfg)
-    from TrkConfig.TrkTrackCollectionMergerConfig import (
-        TrackCollectionMergerAlgCfg)
+        TrackParticleCnvAlgNoPIDCfg)
 
     # ------------------------------------------------------------
     #
@@ -204,80 +392,23 @@ def InDetTrackRecoCfg(flags):
 
     # Pixel track segment finding
     if flags.Tracking.doTrackSegmentsPixel:
-        flagsPixel = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                           "Tracking.PixelPass")
-        PixelTrackContainer = "ResolvedPixelTracks"
-        _extensions_list.append(flagsPixel.Tracking.ActiveConfig.extension)
-        printActiveConfig(flagsPixel)
-
-        result.merge(TrackingSiPatternCfg(
-            flagsPixel,
-            InputCollections=[],
-            ResolvedTrackCollectionKey=PixelTrackContainer,
-            SiSPSeededTrackCollectionKey="SiSPSeededPixelTracks",
-            ClusterSplitProbContainer=ClusterSplitProbContainer))
-
-        ClusterSplitProbContainer = (
-            "InDetAmbiguityProcessorSplitProb" +
-            flagsPixel.Tracking.ActiveConfig.extension)
-
-        if flags.Tracking.doTruth:
-            result.merge(InDetTrackTruthCfg(
-                flagsPixel,
-                Tracks=PixelTrackContainer,
-                DetailedTruth=PixelTrackContainer+"DetailedTruth",
-                TracksTruth=PixelTrackContainer+"TruthCollection"))
-
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            TrackParticleCnvAlgNoPIDCfg)
-        result.merge(TrackParticleCnvAlgNoPIDCfg(
-            flags,
-            name=PixelTrackContainer+"CnvAlg",
-            TrackContainerName=PixelTrackContainer,
-            xAODTrackParticlesFromTracksContainerName=(
-                "InDetPixelTrackParticles")))
+        acc, ClusterSplitProbContainer = (
+            SiSubDetTrackRecoCfg(flags, detector="Pixel",
+                                 extensions_list=_extensions_list,
+                                 ClusterSplitProbContainer=ClusterSplitProbContainer))
+        result.merge(acc)
 
     # SCT track segment finding
     if flags.Tracking.doTrackSegmentsSCT:
-        flagsSCT = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                         "Tracking.SCTPass")
-        SCTTrackContainer = "ResolvedSCTTracks"
-        _extensions_list.append(flagsSCT.Tracking.ActiveConfig.extension)
-        printActiveConfig(flagsSCT)
-
-        result.merge(TrackingSiPatternCfg(
-            flagsSCT,
-            InputCollections=[],
-            ResolvedTrackCollectionKey=SCTTrackContainer,
-            SiSPSeededTrackCollectionKey="SiSPSeededSCTTracks",
-            ClusterSplitProbContainer=ClusterSplitProbContainer))
-
-        ClusterSplitProbContainer = (
-            "InDetAmbiguityProcessorSplitProb" +
-            flagsSCT.Tracking.ActiveConfig.extension)
-
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            TrackParticleCnvAlgNoPIDCfg)
-        result.merge(TrackParticleCnvAlgNoPIDCfg(
-            flags,
-            name=SCTTrackContainer+"CnvAlg",
-            TrackContainerName=SCTTrackContainer,
-            xAODTrackParticlesFromTracksContainerName=(
-                "InDetSCTTrackParticles")))
+        acc, ClusterSplitProbContainer = (
+            SiSubDetTrackRecoCfg(flags, detector="SCT",
+                                 extensions_list=_extensions_list,
+                                 ClusterSplitProbContainer=ClusterSplitProbContainer))
+        result.merge(acc)
 
     # TRT track segment finding
     if flags.Tracking.doTrackSegmentsTRT:
-        flagsTRT = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                         "Tracking.TRTPass")
-        _extensions_list.append(flagsTRT.Tracking.ActiveConfig.extension)
-        printActiveConfig(flagsTRT)
-
-        from InDetConfig.TRTSegmentFindingConfig import (
-            TRTSegmentFinding_TrackSegments_Cfg)
-        result.merge(TRTSegmentFinding_TrackSegments_Cfg(flagsTRT))
-
-        from InDetConfig.TRTStandaloneConfig import TRT_TrackSegment_Cfg
-        result.merge(TRT_TrackSegment_Cfg(flagsTRT))
+        result.merge(TRTTrackRecoCfg(flags, extensions_list=_extensions_list))
 
     flags_set = CombinedTrackingPassFlagSets(flags)
 
@@ -314,23 +445,12 @@ def InDetTrackRecoCfg(flags):
         # ---------------------------------------
 
         if flags.Tracking.doTRTStandalone and extension == "TRTStandalone":
-            result.merge(TRTStandaloneCfg(
+            result.merge(TRTStandalonePassRecoCfg(
                 current_flags,
-                InputCollections=InputCombinedInDetTracks))
-
-            TRTTrackContainer = "TRTStandaloneTracks"
-            InputCombinedInDetTracks += [TRTTrackContainer]
-            InputExtendedInDetTracks += [TRTTrackContainer]
-            StatTrackCollections += [TRTTrackContainer]
-            StatTrackTruthCollections += [TRTTrackContainer+"TruthCollection"]
-
-            if flags.Tracking.doTrackSegmentsTRT:
-                result.merge(TrackParticleCnvAlgNoPIDCfg(
-                    flags,
-                    name=TRTTrackContainer+"CnvAlg",
-                    TrackContainerName=TRTTrackContainer,
-                    xAODTrackParticlesFromTracksContainerName=(
-                        "InDetTRTTrackParticles")))
+                InputCombinedInDetTracks=InputCombinedInDetTracks,
+                InputExtendedInDetTracks=InputExtendedInDetTracks,
+                StatTrackCollections=StatTrackCollections,
+                StatTrackTruthCollections=StatTrackTruthCollections))
 
             continue  # Skip rest of config for the TRTStandalone pass
 
@@ -409,59 +529,11 @@ def InDetTrackRecoCfg(flags):
         # ---------------------------------------
 
         if current_flags.Tracking.ActiveConfig.storeSeparateContainer:
-            # Dummy Merger to fill additional info
-            # for PRD-associated pixel tracklets
-            # Can also run on all separate collections like R3LargeD0
-            # but kept consistent with legacy config
-
-            AssociationMapName = ""
-
-            if extension == "Disappearing" or flags.Overlay.doTrackOverlay:
-
-                if extension == "Disappearing":
-                    InputTracks = [TrackContainer]
-                    if flags.Overlay.doTrackOverlay:
-                        InputTracks += [flags.Overlay.BkgPrefix +
-                                        extension + "Tracks"]
-                    TrackContainer = extension+"Tracks"
-                    AssociationMapName = "PRDtoTrackMap" + TrackContainer
-                    MergerOutputTracks = TrackContainer
-                elif flags.Overlay.doTrackOverlay:
-                    # schedule merger to combine signal and background tracks
-                    InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
-                                   flags.Overlay.BkgPrefix+TrackContainer]
-                    AssociationMapName = ("PRDtoTrackMapResolved" +
-                                          extension + "Tracks")
-                    MergerOutputTracks = TrackContainer
-
-                result.merge(TrackCollectionMergerAlgCfg(
-                    current_flags,
-                    name="InDetTrackCollectionMerger"+extension,
-                    InputCombinedTracks=InputTracks,
-                    OutputCombinedTracks=MergerOutputTracks,
-                    AssociationMapName=AssociationMapName))
-
-            if flags.Tracking.doTruth:
-                result.merge(InDetTrackTruthCfg(
-                    current_flags,
-                    Tracks=TrackContainer,
-                    DetailedTruth=TrackContainer+"DetailedTruth",
-                    TracksTruth=TrackContainer+"TruthCollection"))
-
-            # Need specific handling with TrackParticles for R3LargeD0
-            # not to break downstream configs
-            xAODTrackParticlesName = (
-                "InDetLargeD0TrackParticles" if "LargeD0" in extension else
-                "InDet" + extension + "TrackParticles")
-
-            result.merge(TrackParticleCnvAlgPIDCheckCfg(
+            acc, TrackContainer = StoreTrackSeparateContainerCfg(
                 current_flags,
-                name=extension + "TrackParticleCnvAlg",
-                TrackContainerName=TrackContainer,
-                xAODTrackParticlesFromTracksContainerName=(
-                    xAODTrackParticlesName),
-                ClusterSplitProbabilityName=ClusterSplitProbContainer,
-                AssociationMapName=AssociationMapName))
+                TrackContainer=TrackContainer,
+                ClusterSplitProbContainer=ClusterSplitProbContainer)
+            result.merge(acc)
 
         else:  # Do not store separate track container
             ClusterSplitProbContainer = (
@@ -493,23 +565,14 @@ def InDetTrackRecoCfg(flags):
             # ---------------------------------------
 
             if flags.Tracking.doBackTracking:
-                from InDetConfig.BackTrackingConfig import BackTrackingCfg
-                result.merge(BackTrackingCfg(
+                acc, ClusterSplitProbContainer = BackTrackingRecoCfg(
                     current_flags,
-                    InputCollections=InputCombinedInDetTracks,
-                    ClusterSplitProbContainer=ClusterSplitProbContainer))
-
-                ClusterSplitProbContainer = (
-                    "InDetTRT_SeededAmbiguityProcessorSplitProb" +
-                    current_flags.Tracking.ActiveConfig.extension)
-                TRTSeededTracks = "TRTSeededTracks"
-                ResolvedTRTSeededTracks = "ResolvedTRTSeededTracks"
-                InputCombinedInDetTracks += [ResolvedTRTSeededTracks]
-                InputExtendedInDetTracks += [ResolvedTRTSeededTracks]
-                StatTrackCollections += [TRTSeededTracks,
-                                         ResolvedTRTSeededTracks]
-                StatTrackTruthCollections += [TRTSeededTracks+"TruthCollection",
-                                              ResolvedTRTSeededTracks+"TruthCollection"]
+                    InputCombinedInDetTracks=InputCombinedInDetTracks,
+                    InputExtendedInDetTracks=InputExtendedInDetTracks,
+                    StatTrackCollections=StatTrackCollections,
+                    StatTrackTruthCollections=StatTrackTruthCollections,
+                    ClusterSplitProbContainer=ClusterSplitProbContainer)
+                result.merge(acc)
 
             # ---------------------------------------
             # --- PseudoTracking
@@ -532,6 +595,8 @@ def InDetTrackRecoCfg(flags):
         InputCombinedInDetTracks += [flags.Overlay.BkgPrefix +
                                      "CombinedInDetTracks"]
 
+    from TrkConfig.TrkTrackCollectionMergerConfig import (
+        TrackCollectionMergerAlgCfg)
     result.merge(TrackCollectionMergerAlgCfg(
         flags,
         InputCombinedTracks=InputCombinedInDetTracks,
@@ -539,11 +604,13 @@ def InDetTrackRecoCfg(flags):
         AssociationMapName="PRDtoTrackMapCombinedInDetTracks"))
 
     if flags.Tracking.doTruth:
+        from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
+        TrackContainer = "CombinedInDetTracks"
         result.merge(InDetTrackTruthCfg(
             flags,
-            Tracks="CombinedInDetTracks",
-            DetailedTruth="CombinedInDetTracksDetailedTruth",
-            TracksTruth="CombinedInDetTracksTruthCollection"))
+            Tracks=TrackContainer,
+            DetailedTruth=f"{TrackContainer}DetailedTruth",
+            TracksTruth=f"{TrackContainer}TruthCollection"))
 
     StatTrackCollections += ["CombinedInDetTracks"]
     StatTrackTruthCollections += ["CombinedInDetTracksTruthCollection"]
@@ -555,8 +622,6 @@ def InDetTrackRecoCfg(flags):
             TrackLocation=["CombinedInDetTracks"]))
 
     if flags.Tracking.doTruth:
-        result.merge(InDetTrackTruthCfg(flags))
-
         if (flags.Tracking.doPseudoTracking or
             flags.Tracking.doIdealPseudoTracking):
             result.merge(InDetTrackTruthCfg(
@@ -599,8 +664,6 @@ def InDetTrackRecoCfg(flags):
                 "PRDtoTrackMapCombinedInDetTracks")))
 
     if flags.Tracking.doStoreTrackSeeds:
-        from xAODTrackingCnv.xAODTrackingCnvConfig import (
-            TrackParticleCnvAlgNoPIDCfg)
         # get list of extensions requesting track seeds. Add always the Primary Pass.
         listOfExtensionsRequesting = [ e for e in _extensions_list if (e == '' or flags.Tracking.__getattr__(e+'Pass').storeTrackSeeds) ]
         for extension in listOfExtensionsRequesting:
@@ -895,8 +958,8 @@ def InDetTrackRecoOutputCfg(flags):
 
     # Save (Detailed) Track Truth
     if flags.Tracking.doTruth:
-        toESD += ["TrackTruthCollection#TrackTruthCollection"]
-        toESD += ["DetailedTrackTruthCollection#DetailedTrackTruth"]
+        toESD += ["TrackTruthCollection#CombinedInDetTracksTruthCollection"]
+        toESD += ["DetailedTrackTruthCollection#CombinedInDetTracksDetailedTruth"]
 
         # save PRD MultiTruth
         toESD += [
