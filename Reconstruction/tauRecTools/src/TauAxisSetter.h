@@ -9,6 +9,9 @@
 
 #include "AsgTools/ToolHandle.h"
 
+#include "xAODPFlow/FlowElement.h"
+#include "PFlowUtils/FEHelpers.h"
+
 /**
  * @brief Set Tau "Detector Axis" and "Intermediate Axis". 
  * 
@@ -46,6 +49,10 @@ private:
   /**@brief Get the vertex corrected four momentum */
   TLorentzVector getVertexCorrectedP4(const xAOD::PFO& pfo, 
                                       const Amg::Vector3D& position) const; 
+
+  /**@brief Get the vertex corrected four momentum */
+  TLorentzVector getVertexCorrectedP4(const xAOD::FlowElement& fe,
+                                      const Amg::Vector3D& position) const;
 
   Gaudi::Property<double> m_clusterCone {this, "ClusterCone", 0.2, "cone of tau candidate"};
   Gaudi::Property<bool> m_doVertexCorrection {this, "VertexCorrection", true, "switch of tau vertex correction"};
