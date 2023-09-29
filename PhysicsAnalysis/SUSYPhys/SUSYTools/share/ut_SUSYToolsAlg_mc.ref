@@ -143,5 +143,7 @@ ToolSvc.TauTrigEffTool_Medium_HLT_tau80L1TAU60_...WARNING TauEfficiency callibra
 ToolSvc.TauTrigEffTool_Medium_HLT_tau80L1TAU60_...WARNING TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once.
 ToolSvc.TauTrigEffTool_Medium_HLT_tau80L1TAU60_...WARNING TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once.
 ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
-			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF general: 22, extrapolated: 0
+			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF general: 11, extrapolated: 0

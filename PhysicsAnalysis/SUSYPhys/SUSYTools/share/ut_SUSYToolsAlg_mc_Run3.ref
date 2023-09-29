@@ -142,5 +142,4 @@ CP::TPileupReweighting::Initialize                WARNING has 0.038470% unrepres
 CP::TPileupReweighting::Initialize                WARNING has 0.018577% unrepresented data. This was reassigned (UnrepresentedDataAction=3)
 ToolSvc.TopTagger                                 WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
-			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF general: 33, extrapolated: 0
-			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF general: 0, extrapolated: 11
+			DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF general: 11, extrapolated: 0

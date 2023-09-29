@@ -599,6 +599,7 @@ namespace ST {
     std::string m_prwActualMu2017File;
     std::string m_prwActualMu2018File;
     std::string m_prwActualMu2022File;
+    std::string m_prwActualMu2023File;
 
     double m_prwDataSF;
     double m_prwDataSF_UP;
