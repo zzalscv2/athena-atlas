@@ -146,8 +146,8 @@ bool LArAccumulatedDigit::setAddSubStep(const CaloGain::CaloGain gain_value,
 }
 
 
-void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vector<uint64_t> sampleSum,
-					std::vector <uint64_t> sampleSquare, unsigned nTrigger)
+void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, const std::vector<uint64_t>& sampleSum,
+					const std::vector <uint64_t>& sampleSquare, unsigned nTrigger)
 {
   std::vector<uint64_t> tmpSum;
   std::vector<uint64_t> tmpSquare;
@@ -185,8 +185,8 @@ void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vect
   tmpSquare.clear();
 }
 
-void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, std::vector<int64_t> sampleSum,
-					std::vector <int64_t> sampleSquare, unsigned nTrigger,
+void LArAccumulatedDigit::setAddSubStep(CaloGain::CaloGain gain_value, const std::vector<int64_t>& sampleSum,
+					const std::vector <int64_t>& sampleSquare, unsigned nTrigger,
 					int32_t base)
 {
   int64_t  tmpBase;

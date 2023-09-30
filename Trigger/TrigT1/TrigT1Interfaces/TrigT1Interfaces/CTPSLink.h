@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1INTERFACES_CTPSLINK_H
 #define TRIGT1INTERFACES_CTPSLINK_H
@@ -121,7 +121,7 @@ namespace LVL1CTP {
       unsigned int m_wordsPerCTPSLink;       //!< number of words per CTPSLink
 
       //! convert data contetn into string (used by dump and print)
-      const std::string convert(std::vector<uint32_t> data,
+      const std::string convert(const std::vector<uint32_t>& data,
                                 const bool longFormat = false) const;
 
 
