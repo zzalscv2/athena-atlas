@@ -2,6 +2,13 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+/**
+ * @file /GSFTsos.h
+ * @begin         September 2023
+ * @author        Christos Anastopoulos
+ * @brief         Simplified TSos for internal GSF use
+ */
+
 #ifndef TrkGsfTsos_H
 #define TrkGsfTsos_H
 
@@ -9,10 +16,15 @@
 
 struct GSFTsos {
 
+  // Full state
   Trk::MultiComponentState multiComponentState{};
+  // Collapsed to single Parameters state
   std::unique_ptr<Trk::TrackParameters> trackParameters{};
+  // Measurement
   std::unique_ptr<Trk::MeasurementBase> measurementOnTrack{};
+  // FitQuality
   Trk::FitQualityOnSurface fitQualityOnSurface{};
+  // Type of TSOS
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
       typeFlags{};
 
@@ -24,7 +36,7 @@ struct GSFTsos {
 
   // implement copy and copy assignment
   GSFTsos(const GSFTsos& rhs) = delete;
-  GSFTsos& operator=(const GSFTsos& rhs) =delete;
+  GSFTsos& operator=(const GSFTsos& rhs) = delete;
 
   // Full constructor with passing of type flags
   GSFTsos(
@@ -52,7 +64,7 @@ struct GSFTsos {
     if (measurementOnTrack) {
       typeFlags.set(Trk::TrackStateOnSurface::Measurement);
     }
-    if (trackParameters) {
+    if (!multiComponentState.empty()) {
       typeFlags.set(Trk::TrackStateOnSurface::Parameter);
     }
     if (fitQualityOnSurface) {
@@ -61,6 +73,9 @@ struct GSFTsos {
   }
   // convert pass ownership to MTSOS
   std::unique_ptr<const Trk::MultiComponentStateOnSurface> convert(bool slim) {
+    if (!trackParameters) {
+      trackParameters = multiComponentState.front().first->uniqueClone();
+    }
     if (slim) {
       multiComponentState.clear();
     }
