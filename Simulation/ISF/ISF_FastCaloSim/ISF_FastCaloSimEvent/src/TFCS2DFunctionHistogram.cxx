@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS2DFunctionHistogram.h"
@@ -126,6 +126,7 @@ void TFCS2DFunctionHistogram::unit_test ATLAS_NOT_THREAD_SAFE(TH2 *hist) {
 
   float value[2];
   float rnd[2];
+  //cppcheck-suppress uninitvar
   for (rnd[0] = 0; rnd[0] < 0.9999; rnd[0] += 0.25) {
     for (rnd[1] = 0; rnd[1] < 0.9999; rnd[1] += 0.25) {
       rtof.rnd_to_fct(value, rnd);

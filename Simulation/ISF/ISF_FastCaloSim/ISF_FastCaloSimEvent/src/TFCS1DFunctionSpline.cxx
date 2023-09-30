@@ -405,6 +405,7 @@ void TFCS1DFunctionSpline::unit_test ATLAS_NOT_THREAD_SAFE(TH1 *hist) {
 
   float value[2];
   float rnd[2];
+  //cppcheck-suppress uninitvar
   for (rnd[0] = 0; rnd[0] < 0.9999; rnd[0] += 0.25) {
     rtof.rnd_to_fct(value, rnd);
     ATH_MSG_NOCLASS(logger, "rnd0=" << rnd[0] << " -> x=" << value[0]);
