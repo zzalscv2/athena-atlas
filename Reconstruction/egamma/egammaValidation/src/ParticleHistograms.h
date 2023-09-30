@@ -23,6 +23,11 @@ namespace egammaMonitoring {
     void fill(const xAOD::IParticle& egamma);
     void fill(const xAOD::IParticle& egamma, float mu);
 
+    void hasFwd(bool a = true) { m_hasFwd = a; }
+
+  private:
+    bool m_hasFwd = false;
+
   };
  
 }

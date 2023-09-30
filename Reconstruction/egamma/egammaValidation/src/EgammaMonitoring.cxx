@@ -16,6 +16,7 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
@@ -108,6 +109,20 @@ StatusCode EgammaMonitoring::initialize() {
 
     truthRecoElectronTightLH = std::make_unique<egammaMonitoring::TruthElectronHistograms>(
       "truthRecoElectronTightLH","TLH Electrons Reco Electron", "/MONITORING/truthRecoElectronTightLH/", rootHistSvc);
+
+    if (!m_FwdElectronsKey.empty()) {
+      recoElectronAll->hasFwd();
+      truthElectronAll->hasFwd();
+      truthPromptElectronAll->hasFwd();
+      truthElectronRecoElectronAll->hasFwd();
+      truthPromptElectronWithTrack->hasFwd();
+      truthPromptElectronWithGSFTrack->hasFwd();
+      truthPromptElectronWithReco->hasFwd();
+      truthPromptElectronWithRecoTrack->hasFwd();
+      truthRecoElectronLooseLH->hasFwd();
+      truthRecoElectronMediumLH->hasFwd();
+      truthRecoElectronTightLH->hasFwd();
+    }
 
     ATH_CHECK(recoElectronAll->initializePlots());
     ATH_CHECK(truthRecoElectronLooseLH->initializePlots());
@@ -407,25 +422,41 @@ StatusCode EgammaMonitoring::execute() {
       MCTruthPartClassifier::ParticleOrigin TO = res.second;
       MCTruthPartClassifier::ParticleType TT = res.first;
 
-      ATH_MSG_DEBUG( " ******** Truth particle associated to Electron Found: "
-                << " STATUS  " << truth->status()
-                << " type  " << truth->type()
-                << " barcode  " << truth->barcode()
-                << " PDG id   " << truth->pdgId()
-                << " index    " << truth->index()
-                << " TO  " << TO
-                << " TT   " << TT
-                << " eventNumber  " << eventInfo->eventNumber() );
+      if (msgLvl(MSG::DEBUG)) {
+
+	bool haspVtx = truth->hasProdVtx();
+	double rProd = -1;
+	if (haspVtx) {
+	  const xAOD::TruthVertex* pvtx = truth->prodVtx();
+	  rProd = pvtx->perp();
+	}
+	bool hasdVtx = truth->hasDecayVtx();
+	double rDec = -1;
+	if (hasdVtx) {
+	  const xAOD::TruthVertex* dvtx = truth->decayVtx();
+	  rDec = dvtx->perp();
+	}
+
+	ATH_MSG_DEBUG( " ******** Truth electron found: "
+		       << " STATUS  " << truth->status()
+		       << " barcode  " << truth->barcode()
+		       << " charge   " << truth->charge()
+		       << " index    " << truth->index()
+		       << " TO  " << TO
+		       << " TT   " << TT
+		       << " Rprod = " << rProd
+		       << " Rdec = " << rDec
+		       << " eventNumber  " << eventInfo->eventNumber() );
+      }
 
       // Check if it is the prompt electron
       if (TO == MCTruthPartClassifier::SingleElec &&
           TT == MCTruthPartClassifier::IsoElectron && truth->barcode() == 10001) {
         truthPromptElectronAll->fill(truth);
         promptElectronTruthIndex = truth->index();
-
       }
 
-      // Check that it is not from geant4
+      // Check that it is not from geant4 (but electron from photon conversion are kept)
       if (TT != MCTruthPartClassifier::NonPrimary) truthElectronAll->fill(truth);
 
     }
