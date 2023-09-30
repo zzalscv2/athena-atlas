@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -10,8 +10,8 @@
  *
  */
 
-#ifndef __ERROR_MATRIX_COMPRESSOR_H__
-#define __ERROR_MATRIX_COMPRESSOR_H__
+#ifndef EVENTCOMMONTPCNV_ERROR_MATRIX_COMPRESSOR_H
+#define EVENTCOMMONTPCNV_ERROR_MATRIX_COMPRESSOR_H
   
 #include <vector>
 #include <iostream>
@@ -88,15 +88,15 @@ public:
       decoder.m_l=buf;
       return decoder.m_f;
     }
-  char sign()
+  char sign() const
     {
       return m_sign;
     }
-  unsigned short exponent()
+  unsigned short exponent() const
     {
       return m_exp;
     }
-  unsigned int mantissa()
+  unsigned int mantissa() const
     {
       return m_mant;
     }
@@ -139,16 +139,16 @@ class Triplet {
   ErrorMatrixCompressor(int);
   ~ErrorMatrixCompressor(){m_tripVec.clear();}
 
-  bool compress(std::vector<double>, std::vector<unsigned int>&);
-  bool restore(std::vector<unsigned int>, std::vector<double>&);
+  bool compress(const std::vector<double>&, std::vector<unsigned int>&);
+  bool restore(const std::vector<unsigned int>&, std::vector<double>&);
   void setBiases(const int b[6]);
   void setUpperLimits(const int l[2]);
 
  protected:
 
   bool CholeskyDecomposition(double a[5][5], double L[5][5]);
-  bool compressFR(std::vector<FloatRep>,std::vector<unsigned short>&);
-  bool restoreFR(std::vector<unsigned short>,std::vector<FloatRep>&);
+  bool compressFR(const std::vector<FloatRep>&,std::vector<unsigned short>&);
+  bool restoreFR(const std::vector<unsigned short>&,std::vector<FloatRep>&);
 
   short int m_biases[6];
   short int m_limits[2];
