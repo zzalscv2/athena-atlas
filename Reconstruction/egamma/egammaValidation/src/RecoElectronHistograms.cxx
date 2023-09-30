@@ -54,7 +54,8 @@ void RecoElectronHistograms::fill(const xAOD::Electron& elrec) {
   }
 
   histo2DMap["eta_nTracks"]->Fill(elrec.eta(),elrec.nTrackParticles());
-  histo3DMap["eteta_eop"]->Fill(elrec.pt()*1e-3,std::abs(elrec.eta()),elrec.pt()/elrec.trackParticle()->pt());
+  if (elrec.nTrackParticles())
+    histo3DMap["eteta_eop"]->Fill(elrec.pt()*1e-3,std::abs(elrec.eta()),elrec.pt()/elrec.trackParticle()->pt());
 
 }
   

@@ -39,7 +39,7 @@ case $ArtProcess in
 
 	echo  "art-result: $? checks_files"
 
-	runegammaMonitoring.py -p 'electron' -fwd 'True'
+	runegammaMonitoring.py -p 'electron'
 
 	echo  "art-result: $? athena_job"
 
