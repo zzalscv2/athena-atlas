@@ -339,6 +339,16 @@ def TIDAbjet( flags, key, toolkey, tools, monlevel, mcTruth ) :
                               "HLT_j.*boffperf.*_ftf.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"
                             ], monlevel )
 
+        # if we find no chains, try to get more generic chains
+
+        if len(chains)==0 : 
+                chains = getchains( flags, 
+                            [ "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_FTF",
+                              "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_IDTrig", 
+                              "HLT_j(?!0).*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+                            ], None )
+        
+
         if len(chains)>0 : 
                         
                 tidabjet.ntupleChainNames += chains
