@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1Interfaces/CTPSLink.h"
@@ -212,7 +212,7 @@ namespace LVL1CTP {
     return s.str();
   }
 
-  const std::string CTPSLink::convert(std::vector<uint32_t> data, const bool longFormat) const
+  const std::string CTPSLink::convert(const std::vector<uint32_t>& data, const bool longFormat) const
   {
     std::ostringstream s;
 

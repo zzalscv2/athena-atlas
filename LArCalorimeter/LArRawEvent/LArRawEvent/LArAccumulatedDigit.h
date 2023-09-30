@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -108,10 +108,10 @@ public:
                      const std::vector <uint64_t>& sampleSquare,
 		     const unsigned nTrigger);
 
-  void setAddSubStep(CaloGain::CaloGain gain_value, std::vector<uint64_t> sampleSum,
- 		     std::vector < uint64_t > sampleSquare, unsigned nTrigger);
-  void setAddSubStep(CaloGain::CaloGain gain_value, std::vector<int64_t> sampleSum,
- 		     std::vector < int64_t > sampleSquare, unsigned nTrigger, int32_t base);
+  void setAddSubStep(CaloGain::CaloGain gain_value, const std::vector<uint64_t>& sampleSum,
+ 		     const std::vector < uint64_t >& sampleSquare, unsigned nTrigger);
+  void setAddSubStep(CaloGain::CaloGain gain_value, const std::vector<int64_t>& sampleSum,
+ 		     const std::vector < int64_t >& sampleSquare, unsigned nTrigger, int32_t base);
 
 
   bool setAddSubStep(const LArAccumulatedDigit& ad) {
