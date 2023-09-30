@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -170,7 +170,7 @@ bool ErrorMatrixCompressor::CholeskyDecomposition(double a[5][5], double L[5][5]
   return true;
 }
 
-bool ErrorMatrixCompressor::compress(std::vector<double> src, std::vector<unsigned int>& dest)
+bool ErrorMatrixCompressor::compress(const std::vector<double>& src, std::vector<unsigned int>& dest)
 {
   int i,j;
   double L[5][5],C0[5][5],C[5][5];
@@ -246,7 +246,7 @@ bool ErrorMatrixCompressor::compress(std::vector<double> src, std::vector<unsign
   return true;
 }
   
-bool ErrorMatrixCompressor::restore(std::vector<unsigned int> src, std::vector<double>& dest)
+bool ErrorMatrixCompressor::restore(const std::vector<unsigned int>& src, std::vector<double>& dest)
 {
   int i,j;
   float S[5][5];
@@ -261,11 +261,11 @@ bool ErrorMatrixCompressor::restore(std::vector<unsigned int> src, std::vector<d
 
   vShorts.clear();
 
-  for(std::vector<unsigned int>::iterator it = src.begin(); it!=src.end(); ++it) {
+  for (unsigned int ii : src) {
     unsigned short s1,s2;
 
-    s1 = (unsigned short)((0xFFFF0000 & (*it)) >> 16);
-    s2 = (unsigned short)(0x0000FFFF & (*it));
+    s1 = (unsigned short)((0xFFFF0000 & ii) >> 16);
+    s2 = (unsigned short)(0x0000FFFF & ii);
     vShorts.push_back(s1);
     //if(!((s2==0) && ((it+1)==src.end()))) //do not store last zero
     vShorts.push_back(s2);
@@ -305,7 +305,7 @@ bool ErrorMatrixCompressor::restore(std::vector<unsigned int> src, std::vector<d
 }
 
 
-bool ErrorMatrixCompressor::compressFR(std::vector<FloatRep> src, std::vector<unsigned short>& dest)
+bool ErrorMatrixCompressor::compressFR(const std::vector<FloatRep>& src, std::vector<unsigned short>& dest)
 {
   unsigned short buf=0x0000;
   dest.clear();
@@ -315,7 +315,7 @@ bool ErrorMatrixCompressor::compressFR(std::vector<FloatRep> src, std::vector<un
       std::cout<<"Requested mantissa reduction is too large: 23->"<<nMantLength<<std::endl;
       return false;
     }
-  std::vector<FloatRep>::iterator fIt;
+  std::vector<FloatRep>::const_iterator fIt;
   /*
   for(fIt=src.begin();fIt!=src.end();++fIt)
     {
@@ -438,16 +438,15 @@ bool ErrorMatrixCompressor::compressFR(std::vector<FloatRep> src, std::vector<un
     }
   //  printf("Storing 0x%X\n",buf);
   dest.push_back(buf);
-  src.clear();
   return true;
 }
   
-bool ErrorMatrixCompressor::restoreFR(std::vector<unsigned short> src, std::vector<FloatRep>& dest)
+bool ErrorMatrixCompressor::restoreFR(const std::vector<unsigned short>& src, std::vector<FloatRep>& dest)
 {
   int i,nRestored,nFreeBits,nBitsToStore;
   unsigned short buf=0x0000;
   unsigned int destBuffer=0x00000000;
-  std::vector<unsigned short>::iterator uIt(src.begin());
+  std::vector<unsigned short>::const_iterator uIt(src.begin());
   dest.clear();
 
   for(i=0;i<15;i++)
