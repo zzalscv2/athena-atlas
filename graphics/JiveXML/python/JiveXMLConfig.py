@@ -40,8 +40,18 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
     data_types += ["JiveXML::TruthMuonTrackRetriever/TruthMuonTrackRetriever"]
 
     if flags.Detector.EnableCalo:
-        # TODO
-        pass
+        # Taken from CaloJiveXML_DataTypes.py
+        # TODO find correct flag and check the LArDigitRetriever is doing what we want it to do
+        #if doLArDigits:
+            #data_types += ["JiveXML::LArDigitRetriever/LArDigitRetriever"]
+        #else:
+        data_types += ["JiveXML::CaloFCalRetriever/CaloFCalRetriever"]
+        data_types += ["JiveXML::CaloLArRetriever/CaloLArRetriever"]
+        data_types += ["JiveXML::CaloHECRetriever/CaloHECRetriever"]
+        #end of else
+        data_types += ["JiveXML::CaloMBTSRetriever/CaloMBTSRetriever"]
+        data_types += ["JiveXML::CaloTileRetriever/CaloTileRetriever"]
+        data_types += ["JiveXML::CaloClusterRetriever/CaloClusterRetriever"]
 
     if flags.Detector.EnableMuon:
         # Taken from MuonJiveXML_DataTypes.py
@@ -58,6 +68,10 @@ def getDataTypes(flags, haveRDO=False, readAOD=False):
             data_types += ["JiveXML::sTgcPrepDataRetriever/sTgcPrepDataRetriever"]
         if flags.Detector.EnableMM:
             data_types += ["JiveXML::MMPrepDataRetriever/MMPrepDataRetriever"]
+        # TODO Not sure if below are still needed?
+        # data_types += ["JiveXML::TrigMuonROIRetriever/TrigMuonROIRetriever"]
+        # data_types += ["JiveXML::MuidTrackRetriever/MuidTrackRetriever]
+        # data_types += ["JiveXML::TrigRpcDataRetriever/TrigRpcDataRetriever"]
 
     # Taken from xAODJiveXML_DataTypes.py
     data_types += ["JiveXML::xAODCaloClusterRetriever/xAODCaloClusterRetriever"]
@@ -148,7 +162,7 @@ def TrackRetrieverCfg(flags, name="TrackRetriever", **kwargs):
     # kwargs.setdefault("DoWriteHLT", True)
     ### switch residual data off:
     kwargs.setdefault("DoWriteResiduals", False)
-    the_tool = CompFactory.JiveXML.TrackRetrieve(name, **kwargs)
+    the_tool = CompFactory.JiveXML.TrackRetriever(name, **kwargs)
     result.addPublicTool(the_tool)
     return result
 
@@ -167,15 +181,86 @@ def TruthTrackRetrieverCfg(flags, name="TruthTrackRetriever", **kwargs):
     return result
 
 
-def CaloRetrieversCfg(flags):
+def CaloRetrieversCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    # TODO
+    from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
+    result.merge(LArADC2MeVCondAlgCfg (flags))
+
+    rawChannelContainer = flags.Tile.RawChannelContainer
+    digitsContainer = "TileDigitsCnt"
+    if "TileDigitsFlt" in flags.Input.Collections:
+        digitsContainer = "TileDigitsFlt"
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloClusterRetriever(name = "CaloClusterRetriever",**kwargs
+        )
+    )
+    
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloTileRetriever(
+            name = "CaloTileRetriever",
+            TileDigitsContainer = digitsContainer,
+            TileRawChannelContainer = rawChannelContainer,
+            DoTileCellDetails = False,
+            DoTileDigit = False,
+            DoBadTile = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloMBTSRetriever(
+            name = "CaloMBTSRetriever",
+            TileDigitsContainer= digitsContainer,
+            TileRawChannelContainer = rawChannelContainer,
+            DoMBTSDigits = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloFCalRetriever(
+            name = "CaloFCalRetriever",
+            DoFCalCellDetails = False,
+            DoBadFCal = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloLArRetriever(
+            name = "CaloLArRetriever",
+            DoLArCellDetails = False,
+            DoBadLAr = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.CaloHECRetriever(
+            name = "CaloHECRetriever",
+            DoHECCellDetails = False,
+            DoBadHEC = False,
+        )
+    )
+
+    result.addPublicTool(
+        CompFactory.JiveXML.LArDigitRetriever(
+            name = "LArDigitRetriever",
+            DoLArDigit = False,
+            DoHECDigit = False,
+            DoFCalDigit = False,
+        )
+    )
     return result
 
 
-def MuonRetrieversCfg(flags):
+def MuonRetrieversCfg(flags, **kwargs):
     result = ComponentAccumulator()
-    # TODO
+    # TODO add in other retrievers
+    # Based on MuonJiveXML_DataTypes.py
+    #kwargs.setdefault("StoreGateKey", "MDT_DriftCircles")
+
+    result.addPublicTool(
+        CompFactory.JiveXML.MdtPrepDataRetriever(name = "MdtPrepDataRetriever",**kwargs
+        )
+    )
     return result
 
 
@@ -298,8 +383,8 @@ def AlgoJiveXMLCfg(flags, name="MuonCombinePatternTool", **kwargs):
 
     result.merge(xAODRetrieversCfg(flags))
 
-    if flags.Trigger.doHLT: #FIXME - is this the right flag?
-        result.merge(TriggerRetrieversCfg(flags))
+    #if flags.Trigger.doHLT: #FIXME - is this the right flag?
+    #result.merge(TriggerRetrieversCfg(flags))
 
     the_alg = CompFactory.JiveXML.AlgoJiveXML(name="AlgoJiveXML", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
