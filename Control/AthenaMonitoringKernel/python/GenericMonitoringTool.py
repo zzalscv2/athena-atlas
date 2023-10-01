@@ -315,6 +315,13 @@ def _options(opt):
         assert len(unknown)==0,\
             f'Unknown option(s) provided: {", ".join(unknown)}.'
         settings = vars(known)
+    elif isinstance(opt,str):
+        # empty string case 
+        pass
+    elif isinstance(opt, list):
+        for o in opt: settings.update( _options(o) ) # process each item in list
+    else:
+        raise ValueError("Unknown opt type")
     return settings
 
 
