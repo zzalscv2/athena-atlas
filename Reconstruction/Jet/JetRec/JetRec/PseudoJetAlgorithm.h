@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PseudoJetAlgorithm.h 
@@ -26,6 +26,9 @@
 #include "fastjet/PseudoJet.hh"
 #include "JetRec/PseudoJetContainer.h"
 
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/Vertex.h"
+
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
 #include "AsgTools/PropertyWrapper.h"
@@ -47,13 +50,16 @@ public:
 private: 
 
   /// Method to construct the PseudoJetContainer and record in StoreGate
-  virtual std::unique_ptr<PseudoJetContainer> createPJContainer(const xAOD::IParticleContainer& cont) const;
+  virtual std::unique_ptr<PseudoJetContainer> createPJContainer(const xAOD::IParticleContainer& cont, const EventContext& ctx) const;
 
   /// Dump to properties to the log.
   virtual void print() const;
 
   std::vector<fastjet::PseudoJet> 
   createPseudoJets(const xAOD::IParticleContainer&) const;
+
+  std::vector<fastjet::PseudoJet> 
+  createPseudoJets(const xAOD::IParticleContainer&, const xAOD::VertexContainer* vertices) const;
 
 private:
 
@@ -83,6 +89,11 @@ private:
 
   /// Flag for PFlow sideband definition
   Gaudi::Property<bool> m_useChargedPUsideband{this, "UseChargedPUsideband", false, "Whether to use charged PU sideband only"};
+
+  /// Flag for by-vertex jet reconstruction
+  Gaudi::Property<bool> m_byVertex{this, "DoByVertex", false, "True if jets should be reconstructed by vertex"};
+
+  SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "PrimaryVertices", "Vertex container (for by-vertex reconstruction)"};
 
   /// Internal steering flags
   /// Set in initialize()

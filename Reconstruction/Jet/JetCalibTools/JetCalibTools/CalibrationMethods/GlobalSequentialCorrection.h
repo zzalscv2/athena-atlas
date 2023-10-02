@@ -31,7 +31,7 @@ class GlobalSequentialCorrection
   typedef unsigned int uint;
 
   GlobalSequentialCorrection();
-  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, const std::string& depth, TString calibAreaTag, bool dev); //Apply the full GS calibration by default
+  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, const std::string& depth, TString calibAreaTag, bool useOriginVertex, bool dev); //Apply the full GS calibration by default
 
   virtual StatusCode initialize() override;
   virtual StatusCode calibrate(xAOD::Jet& jet, JetEventInfo&) const override;
@@ -96,6 +96,7 @@ class GlobalSequentialCorrection
   bool m_pTResponseRequirementOff{false};
   bool m_nTrkwTrk_4PFlow{false};
   double m_turnOffStartingpT{1200.}, m_turnOffEndpT{2000};
+  bool m_useOriginVertex{false};
 
 };
 

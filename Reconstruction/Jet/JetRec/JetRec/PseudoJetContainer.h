@@ -6,7 +6,7 @@
 #define PseudoJetContainer_H
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -37,6 +37,7 @@
 #include "fastjet/PseudoJet.hh"
 #include "xAODJet/Jet.h"
 #include "JetRec/IConstituentExtractor.h"
+#include "xAODTracking/VertexContainer.h"
 #include <vector>
 #include <string>
 #include <set>
@@ -59,10 +60,12 @@ public:
   // fill xAOD jet with constit&ghosts extracted from final PSeudoJet
   bool extractConstituents(xAOD::Jet&, const std::vector<PseudoJet>&) const;
   bool extractConstituents(xAOD::Jet& jet, const PseudoJet &finalPJ) const;
-
+  // fill xAOD jet with correct by-vertex consituents and ghosts
+  bool extractByVertexConstituents(xAOD::Jet& jet, const PseudoJet& finalPJ, const xAOD::Vertex* vertex) const;
   // returns the list of input constituents
   // typically to give to a fastjet::ClusterSequence 
   const std::vector<PseudoJet>* casVectorPseudoJet() const;
+  std::vector<PseudoJet>* casVectorPseudoJet();
 
   // combine the contents of a PseudoJetContainer with the current container.
   void append(const PseudoJetContainer*);

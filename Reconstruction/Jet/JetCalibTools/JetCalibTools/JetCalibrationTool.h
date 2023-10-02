@@ -109,6 +109,8 @@ private:
   std::vector<std::unique_ptr<JetCalibrationStep> > m_calibSteps;
   int m_smearIndex;
 
+  // Try to use jet-attribute-specified origin vertex for calibration
+  bool m_useOriginVertex;
 }; 
 
 #endif //> !JETCALIBTOOLS_APPLYJETCALIBRATION_H

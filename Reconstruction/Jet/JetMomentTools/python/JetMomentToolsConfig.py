@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
                                                                       
@@ -106,7 +106,8 @@ def getJVFTool(jetdef, modspec):
         TrackVertexAssociation = trackingKeys["TVA"],
         TrackParticleContainer  = trackingKeys["Tracks"],
         TrackSelector = idTrackSelToolFromJetCtx(modspec or jetdef.context),
-        SuppressInputDependence = True
+        SuppressInputDependence = True,
+        UseOriginVertex = jetdef.byVertex
     )
     return jvf
 
@@ -116,7 +117,8 @@ def getJVTTool(jetdef, modspec):
     jvt = CompFactory.JetVertexTaggerTool(
         "jvt",
         VertexContainer = jetContextDic[modspec or jetdef.context]["Vertices"],
-        SuppressInputDependence = True
+        SuppressInputDependence = True,
+        UseOriginVertex = jetdef.byVertex
     )
     return jvt
 

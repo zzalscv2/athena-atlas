@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 jetlog = Logging.logging.getLogger('JetRec_jobOptions')
@@ -45,6 +45,7 @@ def retrieveAODList(enableOutputOverride = False):
         'xAOD::EventShape#TopoClusterIsoForwardEventShape',         'xAOD::EventShapeAuxInfo#TopoClusterIsoForwardEventShapeAux.',
 
         'xAOD::JetContainer#AntiKt4EMPFlowJets',                    'xAOD::JetAuxContainer#AntiKt4EMPFlowJetsAux.-PseudoJet',
+        'xAOD::JetContainer#AntiKt4EMPFlowByVertexJets',            'xAOD::JetAuxContainer#AntiKt4EMPFlowByVertexJetsAux.-PseudoJet',
         'xAOD::JetContainer#AntiKt4EMTopoJets',                     'xAOD::JetAuxContainer#AntiKt4EMTopoJetsAux.-PseudoJet',
         'xAOD::JetContainer#AntiKt4LCTopoJets',                     'xAOD::JetAuxContainer#AntiKt4LCTopoJetsAux.-PseudoJet',
         ]

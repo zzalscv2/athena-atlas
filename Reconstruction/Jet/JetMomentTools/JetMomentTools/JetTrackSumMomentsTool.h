@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrackSumMomentsTool.h 
@@ -70,7 +70,7 @@ private:
   Gaudi::Property<bool> m_requireTrackPV{this, "RequireTrackPV", true, "Require track to be from the primary vertex?"};
   Gaudi::Property<std::string> m_jetContainerName{this, "JetContainer", "", "SG key for the input jet container"};
   ToolHandle<IJetTrackSelector> m_htsel{this, "TrackSelector", "", "Track selector"};
-
+  Gaudi::Property<bool> m_useOriginVertex = {this, "UseOriginVertex", false, "use origin vertex for each jet"};
 
   SG::ReadHandleKey< xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "", "Vertex container key"};
   SG::ReadHandleKey<jet::TrackVertexAssociation> m_tva_key{this, "TrackVertexAssociation", "", "Track vertex association key"};

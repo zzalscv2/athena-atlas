@@ -25,23 +25,27 @@
 #include "JetCalibTools/CalibrationMethods/GlobalSequentialCorrection.h"
 #include "PathResolver/PathResolver.h"
 
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/Vertex.h"
 
 GlobalSequentialCorrection::GlobalSequentialCorrection()
   : JetCalibrationStep::JetCalibrationStep(),
     m_config(NULL), m_jetAlgo(""), m_depthString("auto"), m_calibAreaTag(""), m_dev(false),
     m_binSize(0.1), m_depth(0), 
     m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35),
-    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50)
+    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_useOriginVertex(false)
    
 { }
 
-GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, TEnv* config, TString jetAlgo, const std::string& depth, TString calibAreaTag, bool dev)
+GlobalSequentialCorrection::GlobalSequentialCorrection(const std::string& name, TEnv* config, TString jetAlgo, const std::string& depth, TString calibAreaTag,  bool useOriginVertex, bool dev)
   : JetCalibrationStep::JetCalibrationStep(name.c_str()),
     m_config(config), m_jetAlgo(jetAlgo), m_depthString(depth), m_calibAreaTag(calibAreaTag), m_dev(dev),
     m_binSize(0.1), m_depth(0),
-    m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35),
-    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50)
+    m_trackWIDTHMaxEtaBin(25), m_nTrkMaxEtaBin(25), m_Tile0MaxEtaBin(17), m_EM3MaxEtaBin(35), m_chargedFractionMaxEtaBin(27), m_caloWIDTHMaxEtaBin(35), m_N90ConstituentsMaxEtaBin(35), 
+    m_TileGap3MaxEtaBin(16), m_punchThroughMinPt(50), m_useOriginVertex(useOriginVertex)
+   
 { }
+
 
 StatusCode GlobalSequentialCorrection::initialize() {
 
@@ -502,8 +506,18 @@ StatusCode GlobalSequentialCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& j
 
   xAOD::JetFourMom_t jetconstitP4 = jet.getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum");
 
+  //Entry 0 of the ChargedFraction, nTrk, and trackWIDTH vectors should correspond to PV0
+  //other entries are for other primary vertices in the event
+  //Check what index the user wants just in case (default to PVIndex, which is typically PV0)
+  int PVindex = jetEventInfo.PVIndex();
+
+  if (m_useOriginVertex){
+    // Retrieve the vertex the jet was reconstructed with respect to
+    PVindex = jet.getAssociatedObject<xAOD::Vertex>("OriginVertex")->index();
+  }
+
   double ChargedFraction = 0;
-  if( m_PFlow ) ChargedFraction = (jet.getAttribute<std::vector<float> >("SumPtChargedPFOPt500"))[0]/jetconstitP4.Pt();
+  if( m_PFlow ) ChargedFraction = (jet.getAttribute<std::vector<float> >("SumPtChargedPFOPt500"))[PVindex]/jetconstitP4.Pt();
 
   xAOD::JetFourMom_t jetStartP4;
   ATH_CHECK( setStartP4(jet) );
@@ -511,12 +525,9 @@ StatusCode GlobalSequentialCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& j
 
   float jetE_constitscale = jetconstitP4.e();
   float detectorEta = jet.getAttribute<float>("DetectorEta");
-  //Entry 0 of the nTrk and trackWIDTH vectors should correspond to PV0
-  //other entries are for other primary vertices in the event
-  //Check what index the user wants just in case (99% of the time they want PV0)
-  int PVindex = jetEventInfo.PVIndex();
-  int nTrkPV0 = (m_depth & ApplynTrk) ? nTrk[PVindex] : 0;
-  float trackWIDTHPV0 = (m_depth & ApplytrackWIDTH) ? trackWIDTH[PVindex] : 0;
+
+  int nTrkPVX = (m_depth & ApplynTrk) ? nTrk[PVindex] : 0;
+  float trackWIDTHPVX = (m_depth & ApplytrackWIDTH) ? trackWIDTH[PVindex] : 0;
   //EM3 and Tile0 fraction calculations
   //EM3 = (EMB3+EME3)/energy, Tile0 = (TileBar0+TileExt0)/energy
   //Check the map above to make sure the correct entries of samplingFrac are being used
@@ -540,7 +551,7 @@ StatusCode GlobalSequentialCorrection::calibrate(xAOD::Jet& jet, JetEventInfo& j
     }
   }
   
-  xAOD::JetFourMom_t calibP4 = jetStartP4*getGSCCorrection( jetStartP4, fabs(detectorEta), trackWIDTHPV0, nTrkPV0, Tile0, EM3, Nsegments, ChargedFraction, caloWIDTH, N90Constituents, TG3);
+  xAOD::JetFourMom_t calibP4 = jetStartP4*getGSCCorrection( jetStartP4, fabs(detectorEta), trackWIDTHPVX, nTrkPVX, Tile0, EM3, Nsegments, ChargedFraction, caloWIDTH, N90Constituents, TG3);
 
   //Transfer calibrated jet properties to the Jet object
   jet.setAttribute<xAOD::JetFourMom_t>("JetGSCScaleMomentum",calibP4);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexTaggerTool.h
@@ -113,9 +113,14 @@ private:  // data
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "PrimaryVertices", "SG key for input vertex container"};
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_jvfCorrKey{this, "JVFCorrName", "JVFCorr", "SG key for input JVFCorr decoration"};
+  SG::ReadDecorHandleKey<xAOD::JetContainer> m_jvfCorrVtxKey; // Set automatically if running by-vertex jet reconstruction
   SG::ReadDecorHandleKey<xAOD::JetContainer> m_sumPtTrkKey{this, "SumPtTrkName", "SumPtTrkPt500", "SG key for input SumPtTrk decoration"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvtKey{this, "JVTName", "Jvt", "SG key for output JVT decoration"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvtVecKey; // Set automatically if running by-vertex jet reconstruction
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_rptKey{this, "RpTName", "JvtRpt", "SG key for output RpT decoration"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_rptVecKey; // Set automatically if running by-vertex jet reconstruction
+
+  Gaudi::Property<bool> m_useOriginVertex = {this, "UseOriginVertex", false, "use origin vertex for each jet"};
 
   // Internal objects
   TString m_fn;

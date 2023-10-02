@@ -27,7 +27,7 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   : asg::AsgTool( name ),
     m_jetAlgo(""), m_config(""), m_calibSeq(""), m_calibAreaTag(""), m_originScale(""), m_devMode(false),
     m_isData(true), m_timeDependentCalib(false), m_dir(""), m_eInfoName(""), m_globalConfig(nullptr),
-    m_doBcid(true), m_doJetArea(true), m_doResidual(true), m_doOrigin(true), m_doGSC(true), m_doDNNCal(false), m_gscDepth("auto"), m_smearIndex(-1)
+    m_doBcid(true), m_doJetArea(true), m_doResidual(true), m_doOrigin(true), m_doGSC(true), m_doDNNCal(false), m_gscDepth("auto"), m_smearIndex(-1), m_useOriginVertex(false)
 { 
   declareProperty( "JetCollection", m_jetAlgo = "AntiKt4LCTopo" );
   declareProperty( "ConfigFile", m_config = "" );
@@ -39,6 +39,7 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   declareProperty( "OriginScale", m_originScale = "JetOriginConstitScaleMomentum");
   declareProperty( "CalibArea", m_calibAreaTag = "00-04-82");
   declareProperty( "GSCDepth", m_gscDepth);
+  declareProperty( "useOriginVertex", m_useOriginVertex = false);
 }
 
 JetCalibrationTool::~JetCalibrationTool() {
@@ -258,7 +259,7 @@ StatusCode JetCalibrationTool::getCalibClass(TString calibration) {
     return StatusCode::SUCCESS; 
   }
   else if ( calibration.EqualTo("GSC") ) {
-    std::unique_ptr<JetCalibrationStep> gsc = std::make_unique<GlobalSequentialCorrection>(this->name()+"_GSC", m_globalConfig, jetAlgo, m_gscDepth, calibPath, m_devMode);
+    std::unique_ptr<JetCalibrationStep> gsc = std::make_unique<GlobalSequentialCorrection>(this->name()+"_GSC", m_globalConfig, jetAlgo, m_gscDepth, calibPath, m_useOriginVertex, m_devMode);
     gsc->msg().setLevel( this->msg().level() );
     ATH_CHECK(gsc->initialize());
     m_calibSteps.push_back(std::move(gsc)); 

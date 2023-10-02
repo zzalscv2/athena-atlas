@@ -6,7 +6,7 @@
 
 xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
 					  const PseudoJetContainer& pjCont,
-					  xAOD::JetContainer& jetCont) const {
+					  xAOD::JetContainer& jetCont, const xAOD::Vertex* originVertex) const {
 
   // Create a new jet in place at the end of the container
   jetCont.emplace_back(new xAOD::Jet());
@@ -30,7 +30,12 @@ xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
     }    
   }// area -------------
   
-  pjCont.extractConstituents(jet, pj);
+  if (originVertex == nullptr){
+    pjCont.extractConstituents(jet, pj);
+  }
+  else{
+    pjCont.extractByVertexConstituents(jet, pj, originVertex);
+  }
 
   return jet;
 }
@@ -38,8 +43,8 @@ xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
 xAOD::Jet& PseudoJetTranslator::translate(const fastjet::PseudoJet& pj,
 					  const PseudoJetContainer& pjCont,
 					  xAOD::JetContainer& jetCont,
-					  const xAOD::Jet &parent ) const {
-  xAOD::Jet& jet = translate(pj, pjCont, jetCont);
+					  const xAOD::Jet &parent, const xAOD::Vertex* originVertex) const {
+  xAOD::Jet& jet = translate(pj, pjCont, jetCont, originVertex);
 
   const xAOD::JetContainer* parentCont = dynamic_cast<const xAOD::JetContainer*>(parent.container());
   if ( parentCont == 0 ) { return jet ;}  // can this happen? if so THIS IS an ERROR ! should do something

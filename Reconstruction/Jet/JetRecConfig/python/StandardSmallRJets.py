@@ -99,6 +99,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               lock = True,
 )
 
+
 # *********************************************************
 # EMPFlow CSSK jets  (no jet calibration available yet,
 # thus applying only low pT filter)
@@ -148,6 +149,13 @@ AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       lock = True
 )
 
+AntiKt4EMPFlowByVertex = JetDefinition("AntiKt", 0.4, cst.GPFlowByVtx,
+                                        ghostdefs = standardghosts+flavourghosts,
+                                        modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+("JetPtAssociation","CaloEnergiesClus"),
+                                        ptmin = 7000,
+                                        lock = True,
+                                        byVertex = True
+)
 
 AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                                      infix = "NoPtCut",

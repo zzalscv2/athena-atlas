@@ -36,6 +36,7 @@ JetVertexTaggerTool::~JetVertexTaggerTool(){
 
 StatusCode JetVertexTaggerTool::initialize() {
   ATH_MSG_INFO("Initializing JetVertexTaggerTool " << name());
+  ATH_MSG_INFO("Using origin vertex: " << m_useOriginVertex);
 
   if(m_jetContainerName.empty()){
     ATH_MSG_ERROR("JetVertexTaggerTool needs to have its input jet container configured!");
@@ -63,9 +64,12 @@ StatusCode JetVertexTaggerTool::initialize() {
   m_jvthisto->SetDirectory (nullptr);
 
   m_jvfCorrKey = m_jetContainerName + "." + m_jvfCorrKey.key();
+  m_jvfCorrVtxKey = m_jvfCorrKey.key()+"Vec";
   m_sumPtTrkKey = m_jetContainerName + "." + m_sumPtTrkKey.key();
   m_jvtKey = m_jetContainerName + "." + m_jvtKey.key();
+  m_jvtVecKey = m_jvtKey.key()+"Vec";
   m_rptKey = m_jetContainerName + "." + m_rptKey.key();
+  m_rptVecKey = m_rptKey.key()+"Vec";
 
 #ifndef XAOD_STANDALONE
   if(m_suppressInputDeps){
@@ -82,6 +86,11 @@ StatusCode JetVertexTaggerTool::initialize() {
   ATH_CHECK(m_jvtKey.initialize());
   ATH_CHECK(m_rptKey.initialize());
 
+  ATH_CHECK(m_jvfCorrVtxKey.initialize(m_useOriginVertex));
+  ATH_CHECK(m_jvtVecKey.initialize(m_useOriginVertex));
+  ATH_CHECK(m_rptVecKey.initialize(m_useOriginVertex));
+
+
   return StatusCode::SUCCESS;
 }
 
@@ -89,9 +98,14 @@ StatusCode JetVertexTaggerTool::initialize() {
 
 StatusCode JetVertexTaggerTool::decorate(const xAOD::JetContainer& jetCont) const {
 
-  const xAOD::Vertex* HSvertex = findHSVertex();
-  // findHSVertex will provide an error message if this comes back null
-  if(HSvertex == nullptr) return StatusCode::FAILURE;
+  // Get the vertex to calculate with respect to
+  // Only appropriate if we are using a single vertex interpretation, not if using OriginVertex
+  const xAOD::Vertex* HSvertex = nullptr;
+  if (!m_useOriginVertex)
+  {
+    HSvertex = findHSVertex();
+    if(!HSvertex) return StatusCode::FAILURE;
+  }
 
   // Grab vertices for index bookkeeping
   SG::ReadHandle<xAOD::VertexContainer> vertexHandle = SG::makeHandle (m_vertexContainer_key);
@@ -102,7 +116,24 @@ StatusCode JetVertexTaggerTool::decorate(const xAOD::JetContainer& jetCont) cons
   SG::WriteDecorHandle<xAOD::JetContainer, float> jvtHandle(m_jvtKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> rptHandle(m_rptKey);
 
-  for(const xAOD::Jet* jet : jetCont){
+
+
+  for(const xAOD::Jet * jet : jetCont) {      
+    // Get origin-vertex-specific information if relevant
+    if (m_useOriginVertex)
+    {
+      HSvertex = jet->getAssociatedObject<xAOD::Vertex>("OriginVertex");
+      if (!HSvertex) // nullptr if the attribute doesn't exist
+      {
+        ATH_MSG_ERROR("OriginVertex was requested, but the jet does not contain an OriginVertex");
+        return StatusCode::FAILURE;
+      }
+      else
+      {
+        ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+      }
+    }
+
     // Calculate RpT and JVFCorr
     // Default JVFcorr to -1 when no tracks are associated.
     float jvfcorr = jvfCorrHandle(*jet);
@@ -112,13 +143,42 @@ StatusCode JetVertexTaggerTool::decorate(const xAOD::JetContainer& jetCont) cons
 
     rptHandle(*jet) = rpt;
     jvtHandle(*jet) = jvt;
-
     ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << ": JVT=" << jvt << ", RpT=" << rpt << ", JVFCorr=" << jvfcorr);
   }
 
+  if (m_useOriginVertex) { // Compute JVT for jets assuming other vertices as origin
+
+    SG::ReadDecorHandle<xAOD::JetContainer, std::vector<float> > jvfCorrVtxHandle(m_jvfCorrVtxKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> jvtVecHandle(m_jvtVecKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, std::vector<float>> rptVecHandle(m_rptVecKey);
+
+    std::vector<float> jvtVtx;
+    std::vector<float> rptVtx;
+
+    for(const xAOD::Jet * jet : jetCont) {      
+      jvtVtx.clear();
+      rptVtx.clear();
+      std::vector<float> sumpttrk = sumPtTrkHandle(*jet);
+      std::vector<float> jvfcorrVtx = jvfCorrVtxHandle(*jet);
+
+      // Loop over vertices
+      for(size_t vtxi=0; vtxi<vertices->size(); ++vtxi) {
+
+        float jvfcorr = jvfcorrVtx.at(vtxi);
+        const float rpt = sumpttrk[vtxi]/jet->pt();
+        float jvt = evaluateJvt(rpt, jvfcorr);
+        jvtVtx.push_back(jvt);
+        rptVtx.push_back(rpt);
+      }
+
+      jvtVecHandle(*jet) = jvtVtx;
+      rptVecHandle(*jet) = rptVtx;
+      // Done
+      
+    } 
+  }
   return StatusCode::SUCCESS;
 }
-
 //**********************************************************************
 
 float JetVertexTaggerTool::evaluateJvt(float rpt, float jvfcorr) const {
@@ -138,14 +198,23 @@ float JetVertexTaggerTool::evaluateJvt(float rpt, float jvfcorr) const {
 //**********************************************************************
 
 float JetVertexTaggerTool::updateJvt(const xAOD::Jet& jet) const {
-
   SG::ReadDecorHandle<xAOD::JetContainer, float> jvfCorrHandle(m_jvfCorrKey);
   SG::ReadDecorHandle<xAOD::JetContainer, std::vector<float> > sumPtTrkHandle(m_sumPtTrkKey);
 
   float jvfcorr = jvfCorrHandle(jet);
   std::vector<float> sumpttrk = sumPtTrkHandle(jet);
-
-  const xAOD::Vertex* HSvertex = findHSVertex();
+  
+  // Get the vertex to calculate with respect to
+  const xAOD::Vertex* HSvertex = nullptr;
+  if (!m_useOriginVertex)
+    HSvertex = findHSVertex();
+  else
+  {
+    HSvertex = jet.getAssociatedObject<xAOD::Vertex>("OriginVertex");
+    if (!HSvertex) // nullptr if the attribute doesn't exist, nothing to do as behaviour is same as other method, checked below and return -1
+      ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+  }
+  
   if(!HSvertex) {
     ATH_MSG_ERROR("No hard scatter vertex found. Returning JVT=-1");
     return -1.;

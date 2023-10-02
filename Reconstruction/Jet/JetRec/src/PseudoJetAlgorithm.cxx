@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PseudoJetAlgorithm.cxx 
@@ -39,6 +39,8 @@ StatusCode PseudoJetAlgorithm::initialize() {
   ATH_CHECK( m_incoll.initialize() );
   ATH_CHECK( m_outcoll.initialize() );
 
+  ATH_CHECK( m_vertexContainer_key.initialize(m_byVertex) );
+
   return StatusCode::SUCCESS;
 }
 
@@ -59,7 +61,7 @@ StatusCode PseudoJetAlgorithm::execute(const EventContext& ctx) const {
 		<<  ", isGhost=" << m_isGhost);
 
   ATH_MSG_DEBUG("Creating PseudoJetContainer...");
-  std::unique_ptr<PseudoJetContainer> pjcont( createPJContainer(*incoll) );
+  std::unique_ptr<PseudoJetContainer> pjcont( createPJContainer(*incoll, ctx) );
 
   auto outcoll = SG::makeHandle(m_outcoll, ctx);
   ATH_MSG_DEBUG("Created new PseudoJetContainer \"" << m_outcoll.key() << "\" with size " << pjcont->size());
@@ -70,9 +72,22 @@ StatusCode PseudoJetAlgorithm::execute(const EventContext& ctx) const {
 }
 
 
-std::unique_ptr<PseudoJetContainer> PseudoJetAlgorithm::createPJContainer(const xAOD::IParticleContainer& cont) const {
+std::unique_ptr<PseudoJetContainer> PseudoJetAlgorithm::createPJContainer(const xAOD::IParticleContainer& cont, const EventContext& ctx) const {
   // create PseudoJets
-  std::vector<fastjet::PseudoJet> vpj = createPseudoJets(cont);
+  std::vector<fastjet::PseudoJet> vpj;
+
+  #ifndef GENERATIONBASE
+  if (m_byVertex){
+    auto pvs = SG::makeHandle(m_vertexContainer_key, ctx);
+    vpj = createPseudoJets(cont, pvs.cptr());
+  }
+  else{
+    vpj = createPseudoJets(cont);
+  }
+  #else
+  [[maybe_unused]] const EventContext& unused_ctx = ctx;
+  vpj = createPseudoJets(cont);
+  #endif
 
   // create an extractor to attach to the PJContainer -- this will be used by clients
   auto extractor = std::make_unique<IParticleExtractor>(&cont, m_label, m_isGhost);
@@ -100,6 +115,12 @@ PseudoJetAlgorithm::createPseudoJets(const xAOD::IParticleContainer& ips) const{
   return PseudoJetGetter::IParticlesToPJs(ips,m_skipNegativeEnergy.value());
 }
 
+#ifndef GENERATIONBASE
+std::vector<fastjet::PseudoJet> 
+PseudoJetAlgorithm::createPseudoJets(const xAOD::IParticleContainer& ips, const xAOD::VertexContainer* pvs) const{
+  return PseudoJetGetter::ByVertexPFlowsToPJs(ips, pvs, m_skipNegativeEnergy.value(),m_useCharged.value(),m_useNeutral.value(),m_ufo);
+}
+#endif
 
 //**********************************************************************
 
@@ -116,6 +137,9 @@ void PseudoJetAlgorithm::print() const {
   ATH_MSG_INFO("            Is UFO: " << m_ufo);
   ATH_MSG_INFO("          Is ghost: " << m_isGhost);
   ATH_MSG_INFO(" Treat negative E as ghost: " << m_negEnergyAsGhosts.value());
+  ATH_MSG_INFO(" Running by-vertex reco: " << m_byVertex.value());
+  ATH_MSG_INFO(" Vertex input container: " << m_vertexContainer_key.key());
+
   if(m_pflow){
     ATH_MSG_INFO("   Use charged FEs: " << m_useCharged.value());
     ATH_MSG_INFO("   Use neutral FEs: " << m_useNeutral.value());

@@ -29,6 +29,8 @@
 #include "JetRec/JetFilterTool.h"
 #include "JetRec/JetConstitRemover.h"
 #include "JetRec/JetClusterer.h"
+#include "JetRec/JetClustererByVertex.h"
+
 #include "JetRec/JetCopier.h"
 
 #include "JetRec/JetDecorationAlg.h"
@@ -53,6 +55,7 @@ DECLARE_COMPONENT( JetConstituentsRetriever )
 DECLARE_COMPONENT( JetPseudojetCopier )
 DECLARE_COMPONENT( JetConstitRemover )
 DECLARE_COMPONENT( JetClusterer )
+DECLARE_COMPONENT( JetClustererByVertex )
 DECLARE_COMPONENT( JetCopier )
 DECLARE_COMPONENT( PseudoJetMerger )
 

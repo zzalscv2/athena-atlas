@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ####################################################################
 # SlimmingHelper.py
@@ -423,6 +423,9 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt4EMPFlowLowPtJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowLowPtJetsCPContent import AntiKt4EMPFlowLowPtJetsCPContent
                         items.extend(AntiKt4EMPFlowLowPtJetsCPContent)
+                elif collectionName=="AntiKt4EMPFlowByVertexJets":
+                        from DerivationFrameworkJetEtMiss.AntiKt4EMPFlowByVertexJetsCPContent import AntiKt4EMPFlowByVertexJetsCPContent
+                        items.extend(AntiKt4EMPFlowByVertexJetsCPContent)
                 elif collectionName=="AntiKt10TruthJets":
                         from DerivationFrameworkJetEtMiss.AntiKt10TruthJetsCPContent import AntiKt10TruthJetsCPContent
                         items.extend(AntiKt10TruthJetsCPContent)

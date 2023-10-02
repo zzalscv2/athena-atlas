@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetEDM/VertexIndexedConstituentUserInfo.h"
 
 namespace jet {
 
-  VertexIndexedConstituentUserInfo::VertexIndexedConstituentUserInfo()  : IndexedConstituentUserInfo(), m_vertex{} {
+  VertexIndexedConstituentUserInfo::VertexIndexedConstituentUserInfo()  : UserInfoBase(), m_vertex{nullptr} {
     //nop
   } 
 
   
-  VertexIndexedConstituentUserInfo::VertexIndexedConstituentUserInfo(const xAOD::IParticle& par, Index idx, const LabelIndex* pli, const xAOD::Vertex* vtx) : IndexedConstituentUserInfo(par, idx, pli) , m_vertex(vtx) {
+  VertexIndexedConstituentUserInfo::VertexIndexedConstituentUserInfo(const xAOD::Vertex* vtx) : UserInfoBase(), m_vertex(vtx) {
     //nop
   }
 }

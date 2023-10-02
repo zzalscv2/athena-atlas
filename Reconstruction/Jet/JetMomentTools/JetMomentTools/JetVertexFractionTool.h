@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexFractionTool.h
@@ -100,6 +100,7 @@ private:  // data
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvfCorrKey{this, "JVFCorrName", "JVFCorr", "SG key for output JVFCorr decoration"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_maxJvfVtxKey{this, "HighestJVFVertexName", "HighestJVFVtx", "SG key for output HighestJVFVertex decoration"};
 
+
 private:  // methods
 
   std::vector<float> getEmptyJetVertexFraction(const xAOD::VertexContainer*) const;
@@ -121,6 +122,8 @@ private:  // methods
 
 protected:
   Gaudi::Property<bool> m_isTrigger{this, "IsTrigger", false, "Is this in the trigger?"};
+  Gaudi::Property<bool> m_useOriginVertex = {this, "UseOriginVertex", false, "use origin vertex for each jet"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_jvfCorrVtxHandleKey; // Set this automatically
 
 };
 

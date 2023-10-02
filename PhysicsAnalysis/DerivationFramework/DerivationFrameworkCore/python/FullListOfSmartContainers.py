@@ -35,6 +35,7 @@ def FullListOfSmartContainers(flags=None):
       "AntiKt4LCTopoJets",
       "AntiKt4EMTopoJets",
       "AntiKt4EMPFlowJets",
+      "AntiKt4EMPFlowByVertexJets",
       "AntiKt4EMTopoLowPtJets",
       "AntiKt4EMPFlowLowPtJets",
       "AntiKt2LCTopoJets",

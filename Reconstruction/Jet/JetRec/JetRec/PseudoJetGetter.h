@@ -23,6 +23,10 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/FlowElement.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/Vertex.h"
+#include "JetEDM/LabelIndex.h"
+#include "JetEDM/VertexIndexedConstituentUserInfo.h"
 #endif
 
 namespace PseudoJetGetter {
@@ -208,6 +212,72 @@ namespace PseudoJetGetter {
     }
     return vpj;
   }
+
+  std::vector<fastjet::PseudoJet> 
+  ByVertexPFlowsToPJs(const xAOD::IParticleContainer& ips, const xAOD::VertexContainer* pvs, bool skipNegativeEnergy, bool useChargedPFOs, bool useNeutralPFOs, bool isUFO) {
+
+    const static SG::AuxElement::Accessor<             unsigned  > copyIndex("ConstituentCopyIndex");     // For neutral PFOs
+    const static SG::AuxElement::Accessor< std::vector<unsigned> > matchedPVs("MatchingPVs");             // For charged PFOs
+    const static SG::AuxElement::Accessor< std::vector<unsigned> > matchedPUSBs("MatchingPUsidebands");   // For charged PFOs
+    PFlowRejecter rejecter(skipNegativeEnergy, useChargedPFOs, useNeutralPFOs, false, false, isUFO);
+    std::vector<fastjet::PseudoJet> vpj;
+    int index = -1;
+
+    // loop over the input iparticles, select and  convert to pseudojets
+    for(const xAOD::IParticle* ip: ips) {
+
+      const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(ip);
+      ++index;
+      if(rejecter(ip)){
+        continue;
+      }
+
+      unsigned vertexIndex{0};
+      if (pfo->isCharged())
+      {
+        // Charged PFOs - use the vertex matched to the track
+        if (matchedPVs.isAvailable(*pfo) && matchedPVs(*pfo).size())
+        {
+          // A charged PFO can potentially match multiple vertices, depending on the matching criteria used
+          // For now, just use the first match, to be further optimised later -- TODO
+          // Also add the part for PU sidebands -- TODO
+          vertexIndex = matchedPVs(*pfo).at(0);
+        }
+        else{
+          continue;
+        }
+      }
+      else
+      {
+        // Neutral PFOs - there is one neutral PFO corrected to point to each vertex of interest
+        // As such, just get the vertex index that this neutral PFO corresponds to
+        if (copyIndex.isAvailable(*pfo)){
+          vertexIndex = copyIndex(*pfo);
+        }
+        else{
+          continue;         
+        }
+      }
+    
+      // Create a Pseudojet with the momentum of the selected IParticles.
+      fastjet::PseudoJet psj(ip->p4());
+
+
+      // Get the specified vertex and build the VertexIndexedConstituentUserInfo
+      for (const xAOD::Vertex* vertex : *pvs)
+        if (vertex->index() == vertexIndex){
+          // vertex indexed constituent info associated to the pseudojet
+          psj.set_user_info(new jet::VertexIndexedConstituentUserInfo(vertex));
+
+          // user index is used to identify the xAOD object used for the PSeudoJet
+          psj.set_user_index(index);
+
+          vpj.push_back(psj);
+        }
+    }
+    return vpj;
+  }
+
 #endif
 
 }

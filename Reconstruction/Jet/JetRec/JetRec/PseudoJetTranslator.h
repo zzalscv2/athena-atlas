@@ -17,15 +17,12 @@ public:
   
   xAOD::Jet& translate(const fastjet::PseudoJet& pj,
 		       const PseudoJetContainer& pjCont,
-		       xAOD::JetContainer& jetCont) const ;
+		       xAOD::JetContainer& jetCont, const xAOD::Vertex* originVertex=nullptr) const ;
 
   xAOD::Jet& translate(const fastjet::PseudoJet& pj,
 		       const PseudoJetContainer& pjCont,
 		       xAOD::JetContainer& jetCont,
-		       const xAOD::Jet &parent) const ;
-
-  
-  
+		       const xAOD::Jet &parent, const xAOD::Vertex* originVertex=nullptr) const ;  
   
 protected:
   bool m_saveArea = true;
