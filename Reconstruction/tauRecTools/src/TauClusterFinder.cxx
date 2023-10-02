@@ -78,17 +78,6 @@ std::vector<const xAOD::CaloCluster*> TauClusterFinder::getClusterList(const xAO
         clusterList.push_back(cluster);
       }
     }
-    else if ( constituent->type() == xAOD::Type::ParticleFlow ) {
-      const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(constituent->rawConstituent());
-	  
-      if (pfo->isCharged()) continue;
-      if (pfo->nCaloCluster()!=1){
-	ATH_MSG_WARNING("Neutral PFO has " << std::to_string(pfo->nCaloCluster()) << " clusters, expected exactly 1!\n");
-        continue;
-      }
-	  
-      clusterList.push_back(pfo->cluster(0));
-    }
     else if ( constituent->type() == xAOD::Type::FlowElement ) {
       const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() ); 
      
@@ -109,30 +98,17 @@ std::vector<const xAOD::CaloCluster*> TauClusterFinder::getClusterList(const xAO
   
   for (const xAOD::JetConstituent* constituent : constituents) {
     // There is only one type in the constituents
-    if (constituent->type() != xAOD::Type::ParticleFlow || constituent->type() != xAOD::Type::FlowElement) break;
+    if (constituent->type() != xAOD::Type::FlowElement) break;
 
-    if (constituent->type() == xAOD::Type::ParticleFlow){
-       const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>( constituent->rawConstituent() );
-       if (! pfo->isCharged()) continue;
+    const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() );
+    if (! fe->isCharged()) continue;
 
-       for (u_int index=0; index<pfo->nCaloCluster(); index++){
-         const xAOD::CaloCluster* cluster = pfo->cluster(index);
-         // Check it is not duplicate of one in neutral list
-         if ( std::find(clusterList.begin(), clusterList.end(), cluster) == clusterList.end() ) {
-	    clusterList.push_back(cluster);
-         }
-       }
-    } else {
-       const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() );
-       if (! fe->isCharged()) continue;
-
-       for (u_int index=0; index<fe->nOtherObjects(); index++){
-         const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(fe->otherObject(index));
-         // Check it is not duplicate of one in neutral list
-         if ( std::find(clusterList.begin(), clusterList.end(), cluster) == clusterList.end() ) {
-            clusterList.push_back(cluster);
-         }
-       }
+    for (u_int index=0; index<fe->nOtherObjects(); index++){
+      const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(fe->otherObject(index));
+      // Check it is not duplicate of one in neutral list
+      if ( std::find(clusterList.begin(), clusterList.end(), cluster) == clusterList.end() ) {
+         clusterList.push_back(cluster);
+      }
     }
   }
  

@@ -135,10 +135,6 @@ TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::JetConstituent& c
     const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(constituent.rawConstituent());
     vertexCorrectedP4 = xAOD::CaloVertexedTopoCluster(*cluster, position).p4();;
   }
-  else if (constituent.type() == xAOD::Type::ParticleFlow) {
-    const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>(constituent.rawConstituent());
-    vertexCorrectedP4 = getVertexCorrectedP4(*pfo, position); 
-  }
   else if ( constituent->type() == xAOD::Type::FlowElement ) {
     const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() );
     vertexCorrectedP4 = getVertexCorrectedP4(*fe, position);
@@ -150,36 +146,6 @@ TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::JetConstituent& c
  
   return vertexCorrectedP4; 
 }
-
-
-
-TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::PFO& pfo,
-                                                   const Amg::Vector3D& position) const {
-  TLorentzVector vertexCorrectedP4;
-
-  // Only perfrom vertex corretion for neutral PFO
-  if (!pfo.isCharged()) {
-    // Convert the type to TVector3 for PFO
-    TVector3 pos(position.x(), position.y(), position.z());
-
-    // If there is a vertex correction in jet reconstruction, then pfo.p4() is the four momentum 
-    // at EM scale. Otherwise, pfo.p4() is at LC scale (not clear), and pfo.p4EM() is the four 
-    // momentum at EM scale. Here, we assume jet always perform the vertex correction in offline 
-    // reconstruction.
-    vertexCorrectedP4 = pfo.GetVertexCorrectedFourVec(pos);
-  }
-  else {
-    vertexCorrectedP4 = pfo.p4();
-  }
-
-  ATH_MSG_DEBUG("Original pfo four momentum, pt: " << pfo.pt() << 
-                  " eta: " << pfo.eta() << " phi: " << pfo.phi() << " e: " << pfo.e());
-  ATH_MSG_DEBUG("Vertex corrected four momentum, pt: " << vertexCorrectedP4.Pt() << 
-                " eta: " << vertexCorrectedP4.Eta() << " phi: " << vertexCorrectedP4.Phi() << " e: " << vertexCorrectedP4.E());
-      
-  return vertexCorrectedP4;
-}
-
 
 TLorentzVector TauAxisSetter::getVertexCorrectedP4(const xAOD::FlowElement& fe,
                                                    const Amg::Vector3D& position) const {

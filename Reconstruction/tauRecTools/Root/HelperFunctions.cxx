@@ -186,10 +186,6 @@ TLorentzVector tauRecTools::GetConstituentP4(const xAOD::JetConstituent& constit
     const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>( constituent->rawConstituent() );
     constituentP4 = cluster->p4();
   }
-  else if ( constituent->type() == xAOD::Type::ParticleFlow ) {
-    const xAOD::PFO* pfo = static_cast<const xAOD::PFO*>( constituent->rawConstituent() );
-    constituentP4 = pfo->p4();
-  }
   else if ( constituent->type() == xAOD::Type::FlowElement ) {
     const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>( constituent->rawConstituent() );
     constituentP4 = fe->p4();

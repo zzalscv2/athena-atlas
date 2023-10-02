@@ -45,10 +45,6 @@ private:
   /**@brief Get the vertex corrected four momentum */
   TLorentzVector getVertexCorrectedP4(const xAOD::JetConstituent& constituent, 
                                       const Amg::Vector3D& position) const; 
-  
-  /**@brief Get the vertex corrected four momentum */
-  TLorentzVector getVertexCorrectedP4(const xAOD::PFO& pfo, 
-                                      const Amg::Vector3D& position) const; 
 
   /**@brief Get the vertex corrected four momentum */
   TLorentzVector getVertexCorrectedP4(const xAOD::FlowElement& fe,
