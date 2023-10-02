@@ -71,13 +71,11 @@ GSFTsos smootherHelper(
     Trk::MultiComponentState&& updatedState,
     std::unique_ptr<Trk::MeasurementBase>&& measurement,
     const Trk::FitQualityOnSurface& fitQuality,
-    bool islast,
+    bool combineToSingle,
     bool useMode)
 
 {
-  // If is the last we want also to combine
-  // the Multi component state in a single TrackParameter
-  if (islast) {
+  if (combineToSingle) {
     auto combinedLastState = Trk::MultiComponentStateCombiner::combineToSingle(
         updatedState, useMode);
     if (combinedLastState) {
@@ -85,8 +83,7 @@ GSFTsos smootherHelper(
               std::move(updatedState)};
     }
   }
-  return {fitQuality, std::move(measurement),
-          updatedState.front().first->uniqueClone(), std::move(updatedState)};
+  return {fitQuality, std::move(measurement), nullptr, std::move(updatedState)};
 }
 
 } // end of anonymous namespace
@@ -821,7 +818,7 @@ Trk::GaussianSumFitter::stepForwardFit(
     forwardTrajectory.emplace_back(
         fitQuality,
         std::move(measurement),
-        extrapolatedState.front().first->uniqueClone(),
+        nullptr,
         // used below for the updated state so clone
         Trk::MultiComponentStateHelpers::clone(extrapolatedState),
         type);
@@ -831,7 +828,7 @@ Trk::GaussianSumFitter::stepForwardFit(
   } else {
     forwardTrajectory.emplace_back(fitQuality,
                 std::move(measurement),
-                extrapolatedState.front().first->uniqueClone(),
+                nullptr,
                 std::move(extrapolatedState));
   }
   return true;
@@ -972,7 +969,7 @@ Trk::GaussianSumFitter::smootherFit(
       smoothedTrajectory.emplace_back(
           FitQualityOnSurface(1, 1),
           std::move(measurement),
-          extrapolatedState.front().first->uniqueClone(),
+          nullptr,
           std::move(extrapolatedState),
           type);
       loopUpdatedState = &(smoothedTrajectory.back().multiComponentState);
@@ -1086,7 +1083,7 @@ Trk::GaussianSumFitter::addCCOT(
   smoothedTrajectory.emplace_back(
       fitQuality,
       std::unique_ptr<Trk::CaloCluster_OnTrack>(ccot->clone()),
-      updatedState.front().first->uniqueClone(),
+      nullptr,
       std::move(updatedState));
 
   // Now build a dummy measurement ....  we dont want to a double count the
