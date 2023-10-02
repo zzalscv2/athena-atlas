@@ -21,7 +21,7 @@ namespace xAOD {
   }
 
   CaloClustersInConeTool::~CaloClustersInConeTool()
-  {}
+  = default;
 
   StatusCode CaloClustersInConeTool::initialize() {
     ATH_CHECK(m_caloClusterLocation.initialize());

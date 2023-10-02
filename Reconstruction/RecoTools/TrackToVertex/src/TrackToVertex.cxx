@@ -222,7 +222,7 @@ Reco::TrackToVertex::perigeeAtBeamline(
 std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const EventContext&, const Rec::TrackParticle& /*tp*/) const
 {
   ATH_MSG_WARNING(" Method not implemented!! ");
-  return std::unique_ptr<Trk::TrackParameters>();
+  return {};
   //return m_extrapolator->extrapolate(tp, *m_beamLine);
 }
 

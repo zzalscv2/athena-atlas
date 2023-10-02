@@ -29,7 +29,7 @@ CaloRingerAlgorithm::CaloRingerAlgorithm( const std::string& name,
 }
 
 // =================================================================================
-CaloRingerAlgorithm::~CaloRingerAlgorithm() {}
+CaloRingerAlgorithm::~CaloRingerAlgorithm() = default;
 
 // =================================================================================
 StatusCode CaloRingerAlgorithm::initialize()

@@ -259,7 +259,7 @@ namespace xAOD {
                         const CaloCluster* fwdClus) const;
 
       // init result structure
-      void initresult(CaloIsolation& result, const CaloCorrection& corrlist, unsigned int typesize) const;
+      static void initresult(CaloIsolation& result, const CaloCorrection& corrlist, unsigned int typesize) ;
 
       /** get reference particle */
       const IParticle* getReferenceParticle(const IParticle& particle) const;

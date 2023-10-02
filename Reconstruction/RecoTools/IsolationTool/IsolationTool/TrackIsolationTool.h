@@ -108,7 +108,7 @@ namespace xAOD {
     const IParticle* getReferenceParticle(const IParticle& particle) const;
 
     /** init result struct */
-    void initresult(TrackIsolation& result, TrackCorrection corrlist, unsigned int typesize) const;
+    static void initresult(TrackIsolation& result, TrackCorrection corrlist, unsigned int typesize) ;
 
 #ifdef XAOD_ANALYSIS // particlesInCone tool will not be avaible. Write our own...
     bool getparticlesInCone( float eta, float phi, float dr, std::vector< const TrackParticle*>& output ) const;
@@ -123,7 +123,7 @@ namespace xAOD {
     
     Gaudi::Property<float> m_overlapCone{this, "OverlapCone", 0.1};
 
-    float m_overlapCone2; /// overlap cone size squared
+    float m_overlapCone2 = 0.0F; /// overlap cone size squared
 
     /// The maximum eta range to consider something a core track
     Gaudi::Property<float> m_coreTrackEtaRange{this,

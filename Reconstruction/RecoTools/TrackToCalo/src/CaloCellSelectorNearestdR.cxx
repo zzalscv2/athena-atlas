@@ -16,7 +16,7 @@ namespace Trk {
 
     CaloCellSelectorNearestdR::CaloCellSelectorNearestdR(double coneSize) : m_caloExtension(nullptr), m_coneSize2(coneSize * coneSize) {}
 
-    CaloCellSelectorNearestdR::~CaloCellSelectorNearestdR() {}
+    CaloCellSelectorNearestdR::~CaloCellSelectorNearestdR() = default;
 
     bool CaloCellSelectorNearestdR::preSelectAction(const Trk::CaloExtension& caloExtension) {
         m_caloExtension = &caloExtension;

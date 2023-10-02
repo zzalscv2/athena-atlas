@@ -87,7 +87,7 @@ class TopoClusterMap {
   void SortGridVector(int eta_key, int phi_key);
 
   //Used for removing clusters from map - reducing size, access time.
-  double GetLArThirdLayerRatio (const xAOD::CaloCluster*);
+  static double GetLArThirdLayerRatio (const xAOD::CaloCluster*);
 
 };
 

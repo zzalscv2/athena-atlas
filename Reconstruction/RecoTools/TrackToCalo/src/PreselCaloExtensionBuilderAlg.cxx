@@ -13,7 +13,7 @@ namespace Trk {
     PreselCaloExtensionBuilderAlg::PreselCaloExtensionBuilderAlg(const std::string& name, ISvcLocator* pSvcLocator) :
         AthReentrantAlgorithm(name, pSvcLocator) {}
 
-    PreselCaloExtensionBuilderAlg::~PreselCaloExtensionBuilderAlg() {}
+    PreselCaloExtensionBuilderAlg::~PreselCaloExtensionBuilderAlg() = default;
 
     StatusCode PreselCaloExtensionBuilderAlg::initialize() {
         ATH_CHECK(m_particleCaloExtensionTool.retrieve());

@@ -25,7 +25,7 @@ declareProperty("Prefix",             m_prefix="");
 }
 
 
-IsolationTool_AthTest::~IsolationTool_AthTest() {}
+IsolationTool_AthTest::~IsolationTool_AthTest() = default;
 
 
 StatusCode IsolationTool_AthTest::initialize() {

@@ -11,15 +11,14 @@
 #include "TrackParticlesInConeTool.h"
 
 namespace xAOD {
- 
+
   TrackParticlesInConeTool::TrackParticlesInConeTool (const std::string& type, const std::string& name, const IInterface* parent)
     :	AthAlgTool(type, name, parent)
   {
     declareInterface<ITrackParticlesInConeTool>(this);
   }
 
-  TrackParticlesInConeTool::~TrackParticlesInConeTool()
-  {}
+  TrackParticlesInConeTool::~TrackParticlesInConeTool() = default;
 
   StatusCode TrackParticlesInConeTool::initialize() {
     ATH_CHECK(m_indetTrackParticleLocation.initialize());
@@ -40,7 +39,7 @@ namespace xAOD {
 
     SG::ReadHandle<TrackParticleContainer> indetTrackParticles(m_indetTrackParticleLocation);
     if( !indetTrackParticles.isValid() ) {
-      ATH_MSG_ERROR("Could not open the TrackParticle container with key " 
+      ATH_MSG_ERROR("Could not open the TrackParticle container with key "
 		    << m_indetTrackParticleLocation.key());
       return nullptr;
     }

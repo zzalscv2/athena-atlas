@@ -32,7 +32,7 @@ TopoClusterMap::TopoClusterMap(float minEta, float minPhi, float maxEta, float m
 }
 
 //Destructor.
-TopoClusterMap::~TopoClusterMap() {}
+TopoClusterMap::~TopoClusterMap() = default;
 
 //////////////////////////////////////////////////
 //Functional routines.
@@ -44,7 +44,7 @@ StatusCode TopoClusterMap::SetTopoClusters(const xAOD::CaloClusterContainer *inp
 
   double eta, phi;
 
-  for(const auto cc : *inputTopoClusterContainer) 
+  for(const auto *const cc : *inputTopoClusterContainer) 
   {
     //Retrieve eta, phi from ith topocluster.
     eta = cc->eta();

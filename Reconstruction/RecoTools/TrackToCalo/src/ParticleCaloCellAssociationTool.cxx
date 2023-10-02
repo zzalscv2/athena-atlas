@@ -29,7 +29,7 @@ ParticleCaloCellAssociationTool::ParticleCaloCellAssociationTool(
   declareInterface<IParticleCaloCellAssociationTool>(this);
 }
 
-ParticleCaloCellAssociationTool::~ParticleCaloCellAssociationTool() {}
+ParticleCaloCellAssociationTool::~ParticleCaloCellAssociationTool() = default;
 
 StatusCode
 ParticleCaloCellAssociationTool::initialize()
@@ -414,8 +414,8 @@ ParticleCaloCellAssociationTool::getCellIntersections(
                   << cell->caloDDE()->dz() << " volume "
                   << cell->caloDDE()->volume());
 
-    cellIntersections.push_back(std::make_pair(
-      cell, new ParticleCellIntersection(*cell, eLoss, use3D ? path : path2)));
+    cellIntersections.emplace_back(
+      cell, new ParticleCellIntersection(*cell, eLoss, use3D ? path : path2));
   }
   ATH_MSG_DEBUG(" added cell intersections  " << cellIntersections.size());
 }

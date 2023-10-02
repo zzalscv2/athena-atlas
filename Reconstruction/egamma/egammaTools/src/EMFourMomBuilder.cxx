@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /********************************************************************
@@ -30,85 +30,36 @@ namespace {
 const float el_mass = 0.510998;
 const float ph_mass = 0.0;
 
-}
-
-/////////////////////////////////////////////////////////////////
-
-EMFourMomBuilder::EMFourMomBuilder(const std::string& type,
-                                   const std::string& name,
-                                   const IInterface* parent)
-  : egammaBaseTool(type, name, parent)
-{
-  // declare interface
-  declareInterface<IEMFourMomBuilder>(this);
-}
-
 StatusCode
-EMFourMomBuilder::initialize()
+setFromCluster(xAOD::Egamma& eg)
 {
 
-  ATH_MSG_DEBUG(" Initializing EMFourMomBuilder");
-  m_eg_resol = std::make_unique<eg_resolution>(m_ResolutionConfiguration);
+  const xAOD::CaloCluster* cluster = eg.caloCluster();
+  const float eta = cluster->eta();
+  const float phi = cluster->phi();
+  const float E = cluster->e();
+  if (eg.type() == xAOD::Type::Electron) {
+    const double pt =
+      E > el_mass ? sqrt(E * E - el_mass * el_mass) / cosh(eta) : 0;
+    eg.setP4(pt, eta, phi, el_mass);
+  } else {
+    eg.setP4(E / cosh(eta), eta, phi, ph_mass);
+  }
   return StatusCode::SUCCESS;
 }
 
 StatusCode
-EMFourMomBuilder::execute([[maybe_unused]] const EventContext& ctx, xAOD::Egamma* eg) const
-{
-  if (!eg) {
-    ATH_MSG_WARNING("Null pointer to egamma object ");
-    return StatusCode::SUCCESS;
-  }
-
-  if (!eg->caloCluster()) {
-    ATH_MSG_WARNING("Null pointer to cluster");
-    return StatusCode::SUCCESS;
-  }
-
-  xAOD::Electron* electron = nullptr;
-  xAOD::Photon* photon = nullptr; 
-
-  if (eg->type() == xAOD::Type::Electron) {
-    electron = static_cast<xAOD::Electron*>(eg);
-  } else {
-    photon = static_cast<xAOD::Photon*>(eg);
-  }
-
-  /* One method deals with electron with tracks,
-   * Another with double Si Conversion Photons
-   * The last is for no track e.g forward electrons
-   * or the rest of the photons
-   */
-  if (electron) {
-    if (electron->trackParticle()) {
-      return setFromTrkCluster(*electron);
-    }
-  } else if (photon && xAOD::EgammaHelpers::conversionType(photon) ==
-                         xAOD::EgammaParameters::doubleSi) {
-    return setFromTrkCluster(*photon);
-  }
-
-  return setFromCluster(*eg);
-}
-
-StatusCode
-EMFourMomBuilder::setFromTrkCluster(xAOD::Electron& el) const
+setFromTrkCluster(xAOD::Electron& el, const eg_resolution& eg_resol)
 {
 
   const xAOD::CaloCluster* cluster = el.caloCluster();
   const xAOD::TrackParticle* trackParticle = el.trackParticle();
-  if (!trackParticle) {
-    ATH_MSG_WARNING("Null pointer to Track Particle");
-    return StatusCode::SUCCESS;
-  }
+
   bool goodTrack = (xAOD::EgammaHelpers::numberOfSiHits(trackParticle) >= 4);
   const float E = cluster->e();
   const float eta = goodTrack ? trackParticle->eta() : cluster->eta();
   const float phi = goodTrack ? trackParticle->phi() : cluster->phi();
 
-  // Set the four momentum.
-  ATH_MSG_DEBUG("Setting P4 using E=" << E << " eta=" << eta << " phi=" << phi
-                                      << " mass" << el_mass);
   const double pt =
     E > el_mass ? sqrt(E * E - el_mass * el_mass) / cosh(eta) : 0;
   el.setP4(pt, eta, phi, el_mass);
@@ -116,7 +67,7 @@ EMFourMomBuilder::setFromTrkCluster(xAOD::Electron& el) const
   // Electron with tracks all should  have a covariance matrix set
   AmgMatrix(4, 4) matrix;
   matrix.setZero();
-  const float sigmaE_over_E = m_eg_resol->getResolution(el);
+  const float sigmaE_over_E = eg_resol.getResolution(el);
   matrix(0, 0) =
     (sigmaE_over_E * E * sigmaE_over_E * E) / (cosh(eta) * cosh(eta));
 
@@ -143,7 +94,7 @@ EMFourMomBuilder::setFromTrkCluster(xAOD::Electron& el) const
 }
 
 StatusCode
-EMFourMomBuilder::setFromTrkCluster(xAOD::Photon& ph) const
+setFromTrkCluster(xAOD::Photon& ph)
 {
   const xAOD::CaloCluster* cluster = ph.caloCluster();
   float E = cluster->e();
@@ -154,28 +105,68 @@ EMFourMomBuilder::setFromTrkCluster(xAOD::Photon& ph) const
     eta = momentumAtVertex.eta();
     phi = momentumAtVertex.phi();
   }
-  // Set the four momentum.
-  ATH_MSG_DEBUG("Setting P4 using E=" << E << " eta=" << eta << " phi=" << phi
-                                      << " mass" << ph_mass);
   ph.setP4(E / cosh(eta), eta, phi, ph_mass);
   return StatusCode::SUCCESS;
 }
 
-StatusCode
-EMFourMomBuilder::setFromCluster(xAOD::Egamma& eg) const
-{
+}
 
-  const xAOD::CaloCluster* cluster = eg.caloCluster();
-  const float eta = cluster->eta();
-  const float phi = cluster->phi();
-  const float E = cluster->e();
-  if (eg.type() == xAOD::Type::Electron) {
-    const double pt =
-      E > el_mass ? sqrt(E * E - el_mass * el_mass) / cosh(eta) : 0;
-    eg.setP4(pt, eta, phi, el_mass);
-  } else {
-    eg.setP4(E / cosh(eta), eta, phi, ph_mass);
-  }
+/////////////////////////////////////////////////////////////////
+
+EMFourMomBuilder::EMFourMomBuilder(const std::string& type,
+                                   const std::string& name,
+                                   const IInterface* parent)
+  : egammaBaseTool(type, name, parent)
+{
+  // declare interface
+  declareInterface<IEMFourMomBuilder>(this);
+}
+
+StatusCode
+EMFourMomBuilder::initialize()
+{
+  ATH_MSG_DEBUG(" Initializing EMFourMomBuilder");
+  m_eg_resol = std::make_unique<eg_resolution>(m_ResolutionConfiguration);
   return StatusCode::SUCCESS;
 }
+
+StatusCode
+EMFourMomBuilder::execute([[maybe_unused]] const EventContext& ctx, xAOD::Egamma* eg) const
+{
+  if (!eg) {
+    ATH_MSG_WARNING("Null pointer to egamma object ");
+    return StatusCode::SUCCESS;
+  }
+
+  if (!eg->caloCluster()) {
+    ATH_MSG_WARNING("Null pointer to cluster");
+    return StatusCode::SUCCESS;
+  }
+
+  xAOD::Electron* electron = nullptr;
+  xAOD::Photon* photon = nullptr;
+
+  if (eg->type() == xAOD::Type::Electron) {
+    electron = static_cast<xAOD::Electron*>(eg);
+  } else {
+    photon = static_cast<xAOD::Photon*>(eg);
+  }
+
+  /* One method deals with electron with tracks,
+   * Another with double Si Conversion Photons
+   * The last is for no track e.g forward electrons
+   * or the rest of the photons
+   */
+  if (electron) {
+    if (electron->trackParticle()) {
+      return setFromTrkCluster(*electron,*m_eg_resol);
+    }
+  } else if (photon && xAOD::EgammaHelpers::conversionType(photon) ==
+                         xAOD::EgammaParameters::doubleSi) {
+    return setFromTrkCluster(*photon);
+  }
+
+  return setFromCluster(*eg);
+}
+
 

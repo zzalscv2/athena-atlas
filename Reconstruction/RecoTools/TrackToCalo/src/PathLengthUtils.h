@@ -28,7 +28,7 @@
 class PathLengthUtils {
 public:
     PathLengthUtils();
-    ~PathLengthUtils();
+    ~PathLengthUtils() = default;
 
     double pathInsideCell(const CaloCell& cell, const CaloExtensionHelpers::EntryExitLayerMap& entryExitLayerMap) const;
     static double get3DPathLength(const CaloCell& cell, const Amg::Vector3D& entry, const Amg::Vector3D& exit, double drFix, double dzFix) ;
