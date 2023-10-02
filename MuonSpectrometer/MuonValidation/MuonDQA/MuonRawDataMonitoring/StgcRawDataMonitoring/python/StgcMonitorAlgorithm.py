@@ -39,7 +39,8 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     sTgcQuadOccupancyGroup     = helper.addGroup(sTgcMonAlg, 'sTgcQuadOccupancy', globalPath + 'Shifter/Occupancy')
     sTgcTimingGroup = helper.addGroup(sTgcMonAlg, 'sTgcTiming', globalPath + 'Shifter/Timing')
     sTgcPadTriggerShifterGroup = helper.addGroup(sTgcMonAlg, 'padTriggerShifter', globalPath + 'Shifter/')
-    
+    sTgcLBshifterGroup = helper.addGroup(sTgcMonAlg, 'sTgcLumiblock', globalPath + 'Shifter/Lumiblock/')
+        
     #Expert
     sTgcOccupancyGroup = helper.addGroup(sTgcMonAlg, 'sTgcOccupancy', globalPath + 'Expert/Occupancy')
     sTgcPadTriggerExpertGroup = helper.addGroup(sTgcMonAlg, 'padTriggerExpert', globalPath + 'Expert/')
@@ -50,6 +51,18 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
     stationEtaMax = 3
     sectorMax     = 16
     layerMax      = 8
+
+    titleSectorsVersusLumiblockPad  = '; LB (Pad); Sector; Hits'
+    varSectorsVersusLumiblockPad    = 'padLumiblock,padSector;Nhits_all_pad_in_sector_per_LB'
+    sTgcLBshifterGroup.defineHistogram(varSectorsVersusLumiblockPad, type = 'TH2F', title = titleSectorsVersusLumiblockPad, path = 'Pad', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
+
+    titleSectorsVersusLumiblockStrip  = '; LB (Strip); Sector; Hits'
+    varSectorsVersusLumiblockStrip    = 'stripLumiblock,stripSector;Nhits_all_strip_in_sector_per_LB'
+    sTgcLBshifterGroup.defineHistogram(varSectorsVersusLumiblockStrip, type = 'TH2F', title = titleSectorsVersusLumiblockStrip, path = 'Strip', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
+            
+    titleSectorsVersusLumiblockWire  = '; LB (Wire); Sector; Hits'
+    varSectorsVersusLumiblockWire    = 'wireLumiblock,wireSector;Nhits_all_wire_in_sector_per_LB'
+    sTgcLBshifterGroup.defineHistogram(varSectorsVersusLumiblockWire, type = 'TH2F', title = titleSectorsVersusLumiblockWire, path = 'Wire', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
     
     titleSectorVsLB  = '; LB; Sector; Number of triggers'
     varSectorVsLB    = 'lb,sector;OccupancySector_vs_LB'
@@ -104,15 +117,15 @@ def sTgcMonitoringConfig(inputFlags,NSW_PadTrigKey=''):
             sTgcWireTimingExpertGroup.defineHistogram(varTimingWireTrack, type = 'TH2F', title = titleTimingWireTrack, path = f'Q{stationEtaIndex}', xbins = 2*sectorMax + 2, xmin = -float(sectorMax + 1), xmax = float(sectorMax + 1), ybins = 200, ymin = -75., ymax = 125., opt = 'kAlwaysCreate')
             
             titleSectorsVersusLumiblockPad  = f'L{layerIndex}Q{stationEtaIndex}; LB (Pad); All Sectors; Hits'
-            varSectorsVersusLumiblockPad    = f'padLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},padStationEta_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_pad_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
+            varSectorsVersusLumiblockPad    = f'padLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},padSector_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_pad_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcLBpadShifterGroup.defineHistogram(varSectorsVersusLumiblockPad, type = 'TH2F', title = titleSectorsVersusLumiblockPad, path = f'Q{stationEtaIndex}', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
 
             titleSectorsVersusLumiblockStrip  = f'L{layerIndex}Q{stationEtaIndex}; LB (Strip); All Sectors; Hits'
-            varSectorsVersusLumiblockStrip    = f'stripLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},stripStationEta_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_strip_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
+            varSectorsVersusLumiblockStrip    = f'stripLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},stripSector_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_strip_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcLBstripShifterGroup.defineHistogram(varSectorsVersusLumiblockStrip, type = 'TH2F', title = titleSectorsVersusLumiblockStrip, path = f'Q{stationEtaIndex}', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
             
             titleSectorsVersusLumiblockWire  = f'L{layerIndex}Q{stationEtaIndex}; LB (Wire); All Sectors; Hits'
-            varSectorsVersusLumiblockWire    = f'wireLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},wireStationEta_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_wire_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
+            varSectorsVersusLumiblockWire    = f'wireLumiblock_quad_{stationEtaIndex}_layer_{layerIndex},wireSector_quad_{stationEtaIndex}_layer_{layerIndex};Nhits_all_wire_in_sector_per_LB_in_Q{stationEtaIndex}_Layer{layerIndex}'
             sTgcLBwireShifterGroup.defineHistogram(varSectorsVersusLumiblockWire, type = 'TH2F', title = titleSectorsVersusLumiblockWire, path = f'Q{stationEtaIndex}', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*sectorMax + 2, ymin = -float(sectorMax + 1), ymax = float(sectorMax + 1), opt = 'kAlwaysCreate')
 
     for sideIndex in side:
