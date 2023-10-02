@@ -11,7 +11,8 @@ atlas_add_component( TrkGaussianSumFilter
                      TrkGeometry  TrkSurfaces TrkEventPrimitives TrkEventUtils TrkMaterialOnTrack 
                      TrkParameters TrkExInterfaces TrkExUtils TrkFitterInterfaces 
                      TrkFitterUtils TrkToolInterfaces CxxUtils TrkDetElementBase TrkCaloCluster_OnTrack 
-                     TrkPrepRawData TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack ${Boost_LIBRARIES} )
+                     TrkPrepRawData TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkTrack 
+                     PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} )
 
 # Install files from the package:
 atlas_install_runtime( Data/*.par )

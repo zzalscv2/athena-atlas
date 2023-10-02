@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
 atlas_subdir( FakeBkgTools )
 
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree RIO MathCore Gpad Hist MathMore Minuit Matrix )
 
 atlas_add_root_dictionary( FakeBkgToolsLib FakeBkgToolsDictSource

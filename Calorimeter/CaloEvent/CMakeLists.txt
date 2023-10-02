@@ -10,17 +10,16 @@ if( NOT GENERATIONBASE )
 endif()
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 
 # Component(s) in the package:
 atlas_add_library( CaloEvent CaloEvent/*.h CaloEvent/*.icc src/*.cxx
    PUBLIC_HEADERS CaloEvent
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
    LINK_LIBRARIES CaloConditions CaloGeoHelpers CaloIdentifier AthAllocators
    AthContainers AthLinks CxxUtils Navigation GeoPrimitives
    Identifier EventKernel FourMom NavFourMom CaloDetDescrLib ${extra_libs}
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} AthenaKernel )
+   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaKernel )
 
 atlas_add_dictionary( CaloEventDict
    CaloEvent/CaloEventDict.h CaloEvent/selection.xml

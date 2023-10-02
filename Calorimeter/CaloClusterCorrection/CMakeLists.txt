@@ -4,7 +4,6 @@
 atlas_subdir( CaloClusterCorrection )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
@@ -30,8 +29,7 @@ atlas_add_dictionary( CaloClusterCorrectionDict
 atlas_add_test( interpolate_test
                 SOURCES
                 test/interpolate_test.cxx
-                INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                LINK_LIBRARIES ${Boost_LIBRARIES} CaloClusterCorrectionLib )
+                LINK_LIBRARIES CaloClusterCorrectionLib )
 
 atlas_add_test( config_test
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/config_t.py
