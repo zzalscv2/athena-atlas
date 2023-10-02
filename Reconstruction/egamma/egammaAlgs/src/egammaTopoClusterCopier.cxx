@@ -11,6 +11,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
 #include <cmath>
+#include <map>
 
 namespace{
 // Special egamma EMFraction which includes presampler and E4 cells.
@@ -46,6 +47,42 @@ double addTileGapCellsEnergy(xAOD::CaloCluster* cluster) {
   }
 
   return eg_tilegap;
+}
+
+bool checkIfValidForCentral(
+  double aeta, 
+  float etaCut,
+  double clusterE,
+  float ECut
+) {
+  return aeta <= etaCut && clusterE >= ECut;
+}
+
+bool checkIfValidForFwd(
+  double aeta, 
+  float etaCut,
+  double ETCut,
+  xAOD::CaloCluster *clus,
+  bool doForwardClusters,
+  bool hasITk
+) {
+  if (doForwardClusters) {
+    // LC variables are Local Hadronic Calorimeter calibrated and are included
+    // for compatibility with Run3.
+    const double clusterET = clus->et();
+    const double clusterETLC = clus->getSisterCluster()->et();
+    const double aetaLC = std::abs(clus->getSisterCluster()->eta());
+
+    if (hasITk) {
+      // When we do actually ITK these should be EM.
+      return aeta >= etaCut && clusterET >= ETCut;
+    } else {
+      // Without ITK we need the LC.
+      return aetaLC >= etaCut && clusterETLC >= ETCut;
+    }
+  } else {
+    return false;
+  }
 }
 }  // namespace
 
@@ -147,24 +184,8 @@ StatusCode egammaTopoClusterCopier::execute(const EventContext& ctx) const {
     const double clusterE = clus->e();
     const double aeta = std::abs(clus->eta());
 
-    const bool valid_for_central = aeta <= m_etaCut && clusterE >= m_ECut;
-    bool valid_for_fwd = false;
-
-    if (m_doForwardClusters) {
-      // LC variables are Local Hadronic Calorimeter calibrated and are included
-      // for compatibility with Run3.
-      const double clusterET = clus->et();
-      const double clusterETLC = clus->getSisterCluster()->et();
-      const double aetaLC = std::abs(clus->getSisterCluster()->eta());
-      if (m_hasITk) {
-        // When we do actually ITK these should be EM.
-        valid_for_fwd = aeta >= m_fwdEtaCut && clusterET >= m_fwdETCut;
-      } else {
-        // Without ITK we need the LC.
-        valid_for_fwd = aetaLC >= m_fwdEtaCut && clusterETLC >= m_fwdETCut;
-      }
-    }
-
+    const bool valid_for_central = checkIfValidForCentral(aeta, m_etaCut, clusterE, m_ECut);
+    const bool valid_for_fwd = checkIfValidForFwd(aeta, m_fwdEtaCut, m_fwdETCut, clus, m_doForwardClusters, m_hasITk);
     const bool valid_for_both = valid_for_central && valid_for_fwd;
     const bool valid_for_either = valid_for_central || valid_for_fwd;
 
