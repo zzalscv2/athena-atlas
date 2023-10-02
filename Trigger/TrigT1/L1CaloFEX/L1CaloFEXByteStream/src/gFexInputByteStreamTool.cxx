@@ -34,6 +34,7 @@ StatusCode gFexInputByteStreamTool::initialize() {
     ConversionMode gTowersmode = getConversionMode(m_gTowersReadKey, m_gTowersWriteKey, msg());
     ATH_CHECK(gTowersmode!=ConversionMode::Undefined);
     ATH_CHECK(m_gTowersWriteKey.initialize(gTowersmode==ConversionMode::Decoding));
+    ATH_CHECK(m_gTowers50WriteKey.initialize(gTowersmode==ConversionMode::Decoding));
     ATH_CHECK(m_gTowersReadKey.initialize(gTowersmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((gTowersmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " gTowers ");
     
@@ -56,7 +57,11 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     //---gTower EDM
     SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey, ctx);
     ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
-    ATH_MSG_DEBUG("Recorded gFexTowerContainer with key " << gTowersContainer.key());
+    ATH_MSG_DEBUG("Recorded gFexTowerContainer (200 MeV resolution, default) with key " << gTowersContainer.key());
+
+    SG::WriteHandle<xAOD::gFexTowerContainer> gTowers50Container(m_gTowers50WriteKey, ctx);
+    ATH_CHECK(gTowers50Container.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
+    ATH_MSG_DEBUG("Recorded gFexTower50Container (50 MeV resolution) with key " << gTowers50Container.key());
         
     // Iterate over ROBFragments to decode
     for (const ROBF* rob : vrobf) {
@@ -140,30 +145,35 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         gtFPGA Btwr  = {{{0}}};
         gtFPGA Ctwr  = {{{0}}};
 
-        gtFPGA AtwrS  = {{{0}}};
-        gtFPGA BtwrS  = {{{0}}};
-        gtFPGA CtwrS  = {{{0}}};
+        gtFPGA AtwrF  = {{{0}}};
+        gtFPGA BtwrF  = {{{0}}};
+        gtFPGA CtwrF  = {{{0}}};
+
+        gtFPGA Asatur  = {{{0}}};
+        gtFPGA Bsatur  = {{{0}}};
+        gtFPGA Csatur  = {{{0}}};
 
         a_gtrx_map(Afiber, AMapped);
 
         int fpgaA = 0;
-        // int puCorrA = 0;
         int fBcidA = -1; 
         int do_lconv = 1; 
    
         gtReconstructABC(fpgaA,
                          AMapped,               // input fibers AB_FIBER = 80 > C fibers
                          gPos::AB_FIBERS,
-                         Atwr, &fBcidA,
+                         AtwrF,
+                         Atwr, 
+                         &fBcidA,
                          do_lconv,              // flag to indicate multilinear conversion
                          gPos::AMPD_NFI, 
                          gPos::ACALO_TYPE, 
                          gPos::AMPD_GTRN_ARR, 
                          gPos::AMPD_DSTRT_ARR, 
                          gPos::AMPD_DTYP_ARR, 
-                         gPos::AMSK  );
+                         gPos::AMSK,
+                         Asatur  );
 
-        gtRescale(Atwr, AtwrS, 4);
 
         b_gtrx_map(Bfiber, BMapped);
 
@@ -172,16 +182,17 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     
         gtReconstructABC( fpgaB,
                           BMapped, gPos::AB_FIBERS, 
-                          Btwr, &fBcidB,
+                          BtwrF, 
+                          Btwr, 
+                          &fBcidB,
                           do_lconv, 
                           gPos::BMPD_NFI, 
                           gPos::BCALO_TYPE, 
                           gPos::BMPD_GTRN_ARR, 
                           gPos::BMPD_DSTRT_ARR, 
                           gPos::BMPD_DTYP_ARR, 
-                          gPos::BMSK  );
-
-        gtRescale(Btwr, BtwrS, 4);
+                          gPos::BMSK,
+                          Bsatur  );
 
         c_gtrx_map(Cfiber, CMapped);
 
@@ -190,16 +201,17 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
     
         gtReconstructABC( fpgaC,
                           CMapped, gPos::C_FIBERS, 
-                          Ctwr, &fBcidC,
+                          CtwrF, 
+                          Ctwr, 
+                          &fBcidC,
                           do_lconv, 
                           gPos::CMPD_NFI, 
                           gPos::CCALO_TYPE, 
                           gPos::CMPD_GTRN_ARR, 
                           gPos::CMPD_DSTRT_ARR, 
                           gPos::CMPD_DTYP_ARR, 
-                          gPos::CMSK  );
-
-        gtRescale(Ctwr, CtwrS, 4);
+                          gPos::CMSK, 
+                          Csatur );
 
         // Fill the gTower EDM with the corresponding towers
         int iEta = 0;
@@ -207,6 +219,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         float Eta = 0;
         float Phi = 0;
         int Et  = 0;
+        int EtF  = 0;
         int Fpga = 0;
         char IsSaturated = 0;
         int towerID = 0;
@@ -214,8 +227,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         // Assign ID based on FPGA (FPGA-A 0->0; FPGA-B 1->10000, FPGA-C 2->20000) and gTower number assigned as per firmware convention
 
 
-        int twr_rows = AtwrS.size();
-        int twr_cols = AtwrS[0].size();
+        int twr_rows = Atwr.size();
+        int twr_cols = Atwr[0].size();
         
         Fpga = 0;
 
@@ -224,10 +237,14 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             for (int icol = 0; icol < twr_cols; icol++){
                 iEta = icol + 8;
                 iPhi = irow;
-                Et = AtwrS[irow][icol];
+                Et = Atwr[irow][icol];
+                EtF = AtwrF[irow][icol];
+                IsSaturated = Asatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
+                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID);
                 towerID += 1;
 
   
@@ -242,10 +259,14 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             for (int icol = 0; icol < twr_cols; icol++){
                 iEta = icol + 20;
                 iPhi = irow;
-                Et = BtwrS[irow][icol];
+                Et = Btwr[irow][icol];
+                EtF = BtwrF[irow][icol];
+                IsSaturated = Bsatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID); 
+                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
+                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID); 
                 towerID += 1;
 
             }
@@ -258,19 +279,27 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             for (int icol = 0; icol < twr_cols/2; icol++){                
                 iEta = icol + 2;
                 iPhi = irow;
-                Et = CtwrS[irow][icol];
+                Et = Ctwr[irow][icol];
+                EtF = CtwrF[irow][icol];
+                IsSaturated = Csatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
+                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID); 
                 towerID += 1;   
             }
             for (int icol = twr_cols/2; icol < twr_cols; icol++){                
                 iEta = icol + 26;
                 iPhi = irow;
-                Et = CtwrS[irow][icol];
+                Et = Ctwr[irow][icol];
+                EtF = CtwrF[irow][icol];
+                IsSaturated = Csatur[irow][icol];
                 getEtaPhi(Eta, Phi, iEta, iPhi, towerID);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);  
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated, towerID);
+                gTowers50Container->push_back( std::make_unique<xAOD::gFexTower>() );
+                gTowers50Container->back()->initialize(iEta, iPhi, Eta, Phi, EtF, Fpga, IsSaturated, towerID); 
                 towerID += 1;
 
             }
@@ -349,22 +378,24 @@ void gFexInputByteStreamTool::c_gtrx_map( const gfiber &inputData, gfiber &outpu
 
 
 void gFexInputByteStreamTool::gtReconstructABC(int XFPGA, 
-                                               gfiber Xfiber,  int Xin, 
-                                               gtFPGA &Xgt, int *BCIDptr,
+                                               gfiber Xfiber, int Xin, 
+                                               gtFPGA &XgtF, gtFPGA &Xgt,
+                                               int *BCIDptr,
                                                int do_lconv, 
                                                std::array<int, gPos::MAX_FIBERS> XMPD_NFI,
                                                std::array<int, gPos::MAX_FIBERS>  XCALO_TYPE,
                                                gCaloTwr XMPD_GTRN_ARR,
                                                gType XMPD_DSTRT_ARR,  
                                                gTypeChar XMPD_DTYP_ARR,
-                                               std::array<int, gPos::MAX_FIBERS> XMSK) const{
+                                               std::array<int, gPos::MAX_FIBERS> XMSK,
+                                               gtFPGA &Xsaturation) const{
  
 // Output is uncalibrated gTowers with 50MeV LSB
 //       Xfiber -- 80 fibers, each with seven words, 32 bits per word
 //       Xin    -- usually 80 -- number of fibers actually used, is 50 for EMEC/HEC FPGAC 
-//       Xgt    --  12*32 = 384 towers -- given as integers, 
-//              limited to 12 signed bits in hardware ( -2048 to 2047, lsb 200 MeV)  
-//              Currently no calibration is implemented
+//       XgtF -- 12*32 = 384 towers -- 50 MeV LSB 
+//       Xgt --  12*32 = 384 towers -- given as integers
+
 
 //       XMPD_NFI         -- gives the fiber type 0, 1, 2, 3 (A & B only use types 0,1,2) 
 //       XMPD_DTYP_ARR    -- gives the detector type for the 20 fields on a fiber
@@ -373,11 +404,14 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
 //       In the firmware Xfiber is an array of 32 bit words and on each of seven clocks new data for a BC comes in.
 
+    // gtFPGA Xsaturation;
 
     //loop over fibers -- 
     for(int irow=0; irow<gPos::ABC_ROWS; irow++){
         for(int icolumn=0; icolumn<gPos::AB_COLUMNS; icolumn++){
             Xgt[irow][icolumn] = 0;
+            XgtF[irow][icolumn] = 0;
+            Xsaturation[irow][icolumn] = 0;
         }
     }
 
@@ -394,10 +428,10 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
     // -- "1010" - BCID_LOW
     // -- "1111" - unused field
 
-    // eventually need to read this from record 
-    *BCIDptr = 0;
+    // use fiber 0 for BCID 
+    *BCIDptr = (Xfiber[0][gPos::W280-1]&0x007F0000) >>16;
     
-  
+    //200 MeV towers
     std::array<int, gPos::AB_TOWERS> etowerData;
     std::array<int, gPos::AB_TOWERS> htowerData;
     std::array<int, gPos::ABC_ROWS>  xetowerData;
@@ -410,7 +444,64 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
     xhtowerData.fill(0);
     ohtowerData.fill(0);
 
+    //50 MeV towers
+    std::array<int, gPos::AB_TOWERS> etowerDataF;
+    std::array<int, gPos::AB_TOWERS> htowerDataF;
+    std::array<int, gPos::ABC_ROWS>  xetowerDataF;
+    std::array<int, gPos::ABC_ROWS>  xhtowerDataF;
+    std::array<int, gPos::ABC_ROWS>  ohtowerDataF;
+  
+    etowerDataF.fill(0);
+    htowerDataF.fill(0);
+    xetowerDataF.fill(0);
+    xhtowerDataF.fill(0);
+    ohtowerDataF.fill(0);
 
+
+    // save values from fiber fields for monitoring (50 MeV towers)
+      
+    gFields fiberFields;
+    gFields fiberFieldsUndecoded;
+    gSatur  fiberSaturation;
+
+    fiberFields = {{0}};
+    fiberFieldsUndecoded = {{0}};
+    fiberSaturation = {{0}};
+
+    for(unsigned int i=0; i<100; i++){
+        if( ( Xfiber[i][gPos::W280-1] & 0x000000FF ) == 0x000000BC ) {
+          fiberFields[i][16] = 1;
+        }
+      
+        fiberFields[i][18] = ( Xfiber[i][gPos::W280-1] & 0x007F0000) >>16 ;
+        fiberFields[i][19] = ( Xfiber[i][gPos::W280-1] & 0xFF800000) >>23  ;
+      
+        if (XMPD_DTYP_ARR[ XMPD_NFI[i] ][17] == 8) {
+          fiberFields[i][17] = ( Xfiber[i][gPos::W280-1] & 0x0000FF00) >>8  ;         
+          // fill in saturation bits
+            for(unsigned int k=0; k<8; k++){
+                if( fiberFields[i][17] & (1<<k) ) { 
+                    fiberSaturation[i][k] = 1; 
+                }
+            }
+        }
+
+        int kFilled = 0; 
+        for(unsigned int k=0; k<16; k++){
+            if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] != 2 ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ) { 
+                int krow = XMPD_GTRN_ARR[i][k]/12;
+                int kcolumn = XMPD_GTRN_ARR[i][k]%12;
+                if(kFilled <8 ){
+                    if( fiberSaturation[i][kFilled] == 1   ) {
+                        Xsaturation[ krow][kcolumn] = 1;
+                    }
+                }
+                kFilled = kFilled + 1; 
+            }
+        }
+    }
+
+    //Loop over fibers
     for(int iFiber = 0; iFiber < Xin; iFiber++) { 
         // first do CRC check
         std::array<int, 6> tmp; 
@@ -478,7 +569,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                 dataType = 99;
             }
 
-            if( XCALO_TYPE[iFiber] < 3) {
+            //Different kinds of data type
+            if( (XCALO_TYPE[iFiber] < 3) && (ntower>-1) && (ntower<384) ) {
                 switch(dataType){
                     case 0:
                     ilow    = ihigh - 11;
@@ -490,12 +582,17 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         etowerData[ntower] = etowerData[ntower] | ( (Xfiber[iFiber][ihword] & mask) >> ilbit );
                         // undo multilinear decoding
                         if( do_lconv){
+                            fiberFieldsUndecoded[iFiber][iDatum] = etowerData[ntower]; 
                             undoMLE( etowerData[ntower] );
+                            etowerDataF[ntower] = etowerData[ntower]; 
+                            fiberFields[iFiber][iDatum] = etowerData[ntower]; 
+
                         } 
                         else {
                         // sign extend etower data 
                         if( etowerData[ntower] & 0x00000800 ){ etowerData[ntower] = (etowerData[ntower] | 0xFFFFF000) ;}
-                        etowerData[ntower] = etowerData[ntower]*4; 
+                            etowerData[ntower] = etowerData[ntower]*4; 
+                            etowerDataF[ntower] = etowerData[ntower];
                         }     
                     } 
                     else {
@@ -555,16 +652,24 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
                     // mulitply by 20 to make 50 MeV LSB
                     if( (Xin > 50) ) {
-                        htowerData[ntower] = 20*htowerData[ntower];
+                        // include this here before mulitplicaiton by 20 
+                        fiberFieldsUndecoded[iFiber][iDatum] = htowerData[ntower]; 
+                        htowerData[ntower]  = 20*htowerData[ntower];
+                        htowerDataF[ntower] =  htowerData[ntower];
+                        fiberFields[iFiber][iDatum] = htowerData[ntower]; 
                     } 
                     else {
                         if( do_lconv){
-                            undoMLE( etowerData[ntower] );
+                            fiberFieldsUndecoded[iFiber][1] = htowerData[ntower]; 
+                            undoMLE( htowerData[ntower] );
+                            htowerDataF[ntower] = htowerData[ntower];
+                            fiberFields[iFiber][1] = htowerData[ntower];
                         } 
                         else {
                         // sign extend etower data 
                         if( htowerData[ntower] & 0x00000800 ){   htowerData[ntower] = (etowerData[ntower] | 0xFFFFF000) ;}
                         htowerData[ntower] = htowerData[ntower]*4; 
+                        htowerDataF[ntower] =  htowerData[ntower];
                         }      
                     }
                     break;
@@ -573,7 +678,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     ilow    = ihigh - 11;
                     ilword  = ilow/32;
                     ilbit   = ilow%32;
-                    if( ntower > 32 ){
+                    if( (ntower > 32) || (ntower < 0) ){
                         
                         std::stringstream sdetail;
                         sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: bad value of nTower for extended region 2.4 - 2.5 in eta" ;
@@ -616,12 +721,17 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     }
                     // undo multilinear decoding
                     if( do_lconv){
+                        fiberFieldsUndecoded[iFiber][iDatum] = xetowerData[ntower]; 
                         undoMLE( xetowerData[ntower] );
+                        xetowerDataF[ntower]       = xetowerData[ntower]; 
+                        fiberFields[iFiber][iDatum] = xetowerData[ntower];
+
                     } 
                     else {
                         // sign extend etower data 
                         if( xetowerData[ntower] & 0x00000800 ){   xetowerData[ntower] = (xetowerData[ntower] | 0xFFFFF000) ;}
                         xetowerData[ntower] = xetowerData[ntower]*4; 
+                        xetowerDataF[ntower] = xetowerData[ntower]; 
                     }   
                     break;
     
@@ -672,12 +782,16 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     }
                     // undo multilinear decoding
                     if( do_lconv){
+                        fiberFieldsUndecoded[iFiber][iDatum] = xhtowerData[ntower];
                         undoMLE( xhtowerData[ntower] );
+                        xhtowerDataF[ntower]       = xhtowerData[ntower]; 
+                        fiberFields[iFiber][iDatum] = xhtowerData[ntower];
                     } 
                     else {
                         // sign extend etower data 
                         if( xhtowerData[ntower] & 0x00000800 ){   xhtowerData[ntower] = (xhtowerData[ntower] | 0xFFFFF000) ;}
-                        xhtowerData[ntower] = xhtowerData[ntower]*4; 
+                        xhtowerData[ntower] = xhtowerData[ntower]*4;
+                        xhtowerDataF[ntower] = xhtowerData[ntower]; 
                     }   
                     break;
     
@@ -727,12 +841,16 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         
                     }
                     if( do_lconv){
+                        fiberFieldsUndecoded[iFiber][iDatum] = ohtowerData[ntower]; 
                         undoMLE( ohtowerData[ntower] );
+                        ohtowerDataF[ntower]       =  ohtowerData[ntower];
+                        fiberFields[iFiber][iDatum] = ohtowerData[ntower];
                     } 
                     else {
                         // sign extend etower data 
                         if( ohtowerData[ntower] & 0x00000800 ){   ohtowerData[ntower] = (ohtowerData[ntower] | 0xFFFFF000) ;}
                          ohtowerData[ntower] = ohtowerData[ntower]*4; 
+                         ohtowerDataF[ntower] =  ohtowerData[ntower];
                     }   
                     break;
 
@@ -774,130 +892,168 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         
                     }
                     if( do_lconv){
+                        fiberFieldsUndecoded[iFiber][iDatum] = htowerData[ntower]; 
                         undoMLE( htowerData[ntower] );
+                        htowerDataF[ntower] = htowerData[ntower]; 
+                        fiberFields[iFiber][iDatum] = htowerData[ntower];
                     } 
                     else {
                         // sign extend etower data 
                         if( htowerData[ntower] & 0x00000800 ){   htowerData[ntower] = (htowerData[ntower] | 0xFFFFF000) ;}
                         htowerData[ntower] = htowerData[ntower]*4; 
+                        htowerDataF[ntower] = htowerData[ntower];
                     }   
                     break;
                 }
                 // FPGA C EMEC/HEC + FCAL
                 // These all have same dataType as extended ECAL and extended HCAL
             } 
-            else {
+            else if (  (ntower>-1) && (ntower<384) ){
+            // this is FPGA C
             // only types 2 and 3 exist in FPGA C
     
                 switch(dataType){ 
-                case 2:
-                ilow    = ihigh - 11;
-                ilword  = ilow/32;
-                ilbit   = ilow%32;
-        
-                if(ilword == ihword){
-                    int mask = 0x00000FFF;
-                    mask = mask << ilbit; 
-                    etowerData[ntower] = etowerData[ntower] | ( (Xfiber[iFiber][ihword]&mask) >> (ilbit)  );
-                } 
-                else if ( ihbit == 7 ) {
-                    mask  = 0x0000000F;
-                    hmask = 0x000000FF;
-                    etowerData[ntower] = etowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 4);
-                    lmask = 0xF0000000;
-                    etowerData[ntower] = etowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 28)&mask)  ;
-                } 
-                else if ( ihbit == 3) {
-                    mask  = 0x000000FF;
-                    hmask = 0x000000F;
-                    etowerData[ntower] = etowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 8);
-                    lmask = 0xFF000000;
-                    etowerData[ntower] = etowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
-                } 
-                else {
+                    case 2:
+                    ilow    = ihigh - 11;
+                    ilword  = ilow/32;
+                    ilbit   = ilow%32;
+            
+                    if( etowerData[ntower] != 0 ) {
 
-                    std::stringstream sdetail;
-                    sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
-                    std::stringstream slocation;
-                    slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
-                    std::stringstream stitle;
-                    stitle  << "Wrongly packed data" ;
-                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                     
-                    
-                }
-                // undo multilinear decoding
-                if( do_lconv){
-                    undoMLE( etowerData[ntower] );
-                }  
-                else {
-                    // sign extend etower data 
-                    if( etowerData[ntower] & 0x00000800 ){   etowerData[ntower] = (etowerData[ntower] | 0xFFFFF000) ;}
-                    etowerData[ntower] = etowerData[ntower]*4; 
-                }   
-                break;
-    
-                case 3:
-                ilow    = ihigh - 11;
-                ilword  = ilow/32;
-                ilbit   = ilow%32;
-      
-                if(ilword == ihword){
-                    mask = 0x00000FFF;
-                    mask = mask << ilbit;
-                    htowerData[ntower] = htowerData[ntower] | ( (Xfiber[iFiber][ihword]&mask) >> (ilbit)  );
-                } 
-                else if ( ihbit == 7 ) {
-                    mask  = 0x0000000F;
-                    hmask = 0x000000FF;
-                    htowerData[ntower] = htowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 4);
-                    lmask = 0xF0000000;
-                    htowerData[ntower] = htowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 28)&mask)  ;
-                } 
-                else if ( ihbit == 3) {
-                    mask  = 0x000000FF;
-                    hmask = 0x0000000F;
-                    htowerData[ntower] = htowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 8);
-                    lmask = 0xFF000000;
-                    htowerData[ntower] = htowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
-                } 
-                else {
-
-                    std::stringstream sdetail;
-                    sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
-                    std::stringstream slocation;
-                    slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
-                    std::stringstream stitle;
-                    stitle  << "Wrongly packed data" ;
-                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());             
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: etowerData[nTower] is not zero, inconsistent constants! "<< etowerData[ntower] ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "etowerData not zero" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());   
                             
-                }
-                // undo multilinear decoding
-                if( do_lconv){
-                    undoMLE( htowerData[ntower] );
-                } 
-                else {
-                    // sign extend etower data 
-                    if( htowerData[ntower] & 0x00000800 ){ htowerData[ntower] = (htowerData[ntower] | 0xFFFFF000) ;}
-                    htowerData[ntower] = htowerData[ntower]*4; 
-                }   
-                break;
+                    } else {
 
-                case 15:
-                break;
+                        if(ilword == ihword){
+                            int mask = 0x00000FFF;
+                            mask = mask << ilbit; 
+                            etowerData[ntower] = etowerData[ntower] | ( (Xfiber[iFiber][ihword]&mask) >> (ilbit)  );
+                        } 
+                        else if ( ihbit == 7 ) {
+                            mask  = 0x0000000F;
+                            hmask = 0x000000FF;
+                            etowerData[ntower] = etowerData[ntower] | ( (Xfiber[iFiber][ihword]&hmask) << 4);
+                            lmask = 0xF0000000;
+                            etowerData[ntower] = etowerData[ntower] | ( ( (Xfiber[iFiber][ilword]&lmask) >> 28)&mask)  ;
+                        } 
+                        else if ( ihbit == 3) {
+                            mask  = 0x000000FF;
+                            hmask = 0x000000F;
+                            etowerData[ntower] = etowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 8);
+                            lmask = 0xFF000000;
+                            etowerData[ntower] = etowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
+                        } 
+                        else {
 
-                case 99:
-                break; 
-    
-                default:
-                
-                    std::stringstream sdetail;
-                    sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrong detector type "<< dataType ;
-                    std::stringstream slocation;
-                    slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
-                    std::stringstream stitle;
-                    stitle  << "Wrong detector type" ;
-                    printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str()); 
+                            std::stringstream sdetail;
+                            sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                            std::stringstream slocation;
+                            slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                            std::stringstream stitle;
+                            stitle  << "Wrongly packed data" ;
+                            printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());                     
+                            
+                        }
+                        // undo multilinear decoding
+                        if( do_lconv){
+                            fiberFieldsUndecoded[iFiber][iDatum] = etowerData[ntower]; 
+                            undoMLE( etowerData[ntower] );
+                            etowerDataF[ntower]         = etowerData[ntower]; 
+                            fiberFields[iFiber][iDatum] = etowerData[ntower];
+                        }  
+                        else {
+                            // sign extend etower data 
+                            if( etowerData[ntower] & 0x00000800 ){   etowerData[ntower] = (etowerData[ntower] | 0xFFFFF000) ;}
+                            etowerData[ntower] = etowerData[ntower]*4; 
+                            etowerDataF[ntower]  = etowerData[ntower];
+                        }
+                    }   
+                    break;
+        
+                    case 3:
+                    ilow    = ihigh - 11;
+                    ilword  = ilow/32;
+                    ilbit   = ilow%32;
+
+                    if( htowerData[ntower] != 0 ) {
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: etowerData[nTower] is not zero, inconsistent constants! "<< etowerData[ntower] ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "etowerData not zero" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());   
+
+                    } else {
+
+                        if(ilword == ihword){
+                            mask = 0x00000FFF;
+                            mask = mask << ilbit;
+                            htowerData[ntower] = htowerData[ntower] | ( (Xfiber[iFiber][ihword]&mask) >> (ilbit)  );
+                        } 
+                        else if ( ihbit == 7 ) {
+                            mask  = 0x0000000F;
+                            hmask = 0x000000FF;
+                            htowerData[ntower] = htowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 4);
+                            lmask = 0xF0000000;
+                            htowerData[ntower] = htowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 28)&mask)  ;
+                        } 
+                        else if ( ihbit == 3) {
+                            mask  = 0x000000FF;
+                            hmask = 0x0000000F;
+                            htowerData[ntower] = htowerData[ntower] | (  (Xfiber[iFiber][ihword]&hmask) << 8);
+                            lmask = 0xFF000000;
+                            htowerData[ntower] = htowerData[ntower] | ( (  (Xfiber[iFiber][ilword]&lmask) >> 24)&mask)  ;
+                        } 
+                        else {
+
+                            std::stringstream sdetail;
+                            sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrongly packed data "<< fiber_type<< ", "<<dataType<< ", "<<ilword<< ", " <<ihword ;
+                            std::stringstream slocation;
+                            slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                            std::stringstream stitle;
+                            stitle  << "Wrongly packed data" ;
+                            printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str());             
+                                    
+                        }
+                    // undo multilinear decoding
+                        if( do_lconv){
+                            fiberFieldsUndecoded[iFiber][iDatum] = htowerData[ntower]; 
+                            undoMLE( htowerData[ntower] );
+                            htowerDataF[ntower] = htowerData[ntower];
+                            fiberFields[iFiber][iDatum] = htowerData[ntower];              
+                        } 
+                        else {
+                            // sign extend etower data 
+                            if( htowerData[ntower] & 0x00000800 ){ htowerData[ntower] = (htowerData[ntower] | 0xFFFFF000) ;}
+                            htowerData[ntower] = htowerData[ntower]*4; 
+                            htowerDataF[ntower] = htowerData[ntower]; 
+                        }   
+                    }
+                    break;
+
+                    case 15:
+                    break;
+
+                    case 99:
+                    break; 
+        
+                    default:
                     
+                        std::stringstream sdetail;
+                        sdetail  << "[gFexInputByteStreamTool::gtReconstructABC]: wrong detector type "<< dataType ;
+                        std::stringstream slocation;
+                        slocation  << "Fiber type "<< fiber_type<< " and data type"<< dataType;
+                        std::stringstream stitle;
+                        stitle  << "Wrong detector type" ;
+                        printError(slocation.str(),stitle.str(),MSG::DEBUG,sdetail.str()); 
+                        
                 } // end of case statement for FPGAC 
             } // end of | eta | > 2,5 
         } // end of loop over words
@@ -909,12 +1065,25 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         for(int itower=0;itower<384;itower++){
             int icolumn = itower%12;
             int irow    =  itower/12;
-            Xgt[irow][icolumn] = etowerData[itower] + htowerData[itower];
+
+            // 50 MeV towers 
+            int xF = etowerDataF[itower] + htowerDataF[itower];
+            // 200 MeV towers 
+            int x   = ( (etowerData[itower]>>2) + (htowerData[itower]>>2) );
+
+            Xgt[irow][icolumn]  = x;
+            XgtF[irow][icolumn] = xF;
+
+            // etra  region in FPGA A  (eta ~ -2.5)
             if ( icolumn == 0) {
-                Xgt[irow][icolumn] = Xgt[irow][icolumn] + xetowerData[irow] + xhtowerData[irow]; 
+                int xx =  ( (xetowerData[irow]>>2) + (xhtowerData[irow]>>2) );
+
+                Xgt[irow][icolumn]  = Xgt[irow][icolumn]  + xx;
             }
             if ( icolumn == 4) {
-                Xgt[irow][icolumn] = Xgt[irow][icolumn]  + ohtowerData[irow]; 
+                // 200 MeV towers
+                int ox =  (ohtowerData[irow] >> 2 ) ; 
+                Xgt[irow][icolumn]  = Xgt[irow][icolumn]   + ox ;
             }
         }
     } 
@@ -922,12 +1091,26 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         for(int itower=0;itower<384;itower++){
             int icolumn = itower%12;
             int irow    =  itower/12;
-            Xgt[irow][icolumn] = etowerData[itower] + htowerData[itower];
+
+            // 50 MeV towers
+            int xF =  etowerDataF[itower]  +  htowerDataF[itower] ;
+            // 200 MeV towers 
+            int x  =  ( (etowerData[itower]>>2) +  (htowerData[itower] >> 2) );
+
+            Xgt[irow][icolumn]  = x;
+            XgtF[irow][icolumn] = xF;
+
+            // extra region FPGA B (eta ~ 2.5) 
             if ( icolumn == 11) {
-                Xgt[irow][icolumn] = Xgt[irow][icolumn] + xetowerData[irow] + xhtowerData[irow]; 
+                // 200 MeV towers 
+                int xx = ( (xetowerData[irow]>>2) + (xhtowerData[irow]>>2) );
+
+                Xgt[irow][icolumn]  = Xgt[irow][icolumn]  + xx;
             }
             if ( icolumn == 7 ) {
-                Xgt[irow][icolumn] = Xgt[irow][icolumn]  + ohtowerData[irow]; 
+                // 200 MeV towers
+                int xo =  ohtowerData[irow]>>2;
+                Xgt[irow][icolumn]  = Xgt[irow][icolumn]   + xo;
             }
         }  
     } 
@@ -935,7 +1118,14 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         for(int itower=0;itower<384;itower++){
             int icolumn = itower%12;
             int irow    =  itower/12;
-            Xgt[irow][icolumn] = etowerData[itower] + htowerData[itower];
+
+            // 50 MeV towers 
+            int xF =   etowerDataF[itower] + htowerDataF[itower] ;
+            // 200 MeV towers 
+            int x =  ( (etowerData[itower]>>2 ) + (htowerData[itower]>>2));
+
+            Xgt[irow][icolumn] = x;
+            XgtF[irow][icolumn] = xF;
         }
     } 
     else {
@@ -1073,6 +1263,13 @@ int gFexInputByteStreamTool::crc9d23(int inword, int in_crc, int  reverse ) cons
 void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     // limit input to 12 bits to avoid accidental sign extension
     int din = (0x00000FFF &  datumPtr );
+    // map all special cases to zero for now
+    if( din > 0x0FDE ) din = 0x4EE;
+    // limit negative values
+    if( (din > 0) && ( din < 962 )  ) din =  962;
+    //zeroZero
+    if( din == 0) din = 0x4EE;
+
     int dout = 0; 
   
     int FPGA_CONVLIN_TH1 = 5; 
@@ -1165,22 +1362,22 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
         dout = 0;
     } 
     else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
-        dout =  r1conv/2;
+        dout =  r1conv >>1;
     } 
     else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
-        dout = r2conv/2;
+        dout = r2conv >>1;
     } 
     else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 )  ) {
-        dout = r3conv/2;
+        dout = r3conv >>1;
     }  
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 )  ) {
-        dout = r4conv/2;
+        dout = r4conv >>1;
     }  
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 )  ) {
-        dout = r5conv/2;
+        dout = r5conv >>1;
     }  
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 )  ) {
-        dout = r6conv/2;
+        dout = r6conv >>1;
     } 
     else {
         dout = 0; 
@@ -1189,15 +1386,6 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     datumPtr = dout;
 }
 
-void gFexInputByteStreamTool::gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const{
-    int rows = twr.size();
-    int cols = twr[0].size();
-    for(int irow=0; irow<rows; irow++){
-        for( int icolumn=0; icolumn<cols; icolumn++){
-            twrScaled[irow][icolumn] = twr[irow][icolumn]/scale; 
-        }
-    }
-}
 
 void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const{
     
@@ -1286,6 +1474,8 @@ void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int 
        Phi = (Phi_gFex - 2*M_PI);
     }
 }
+
+
 
 /// xAOD->BS conversion
 StatusCode gFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {

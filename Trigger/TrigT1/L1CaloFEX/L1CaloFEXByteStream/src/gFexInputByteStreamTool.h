@@ -37,6 +37,8 @@ typedef  std::array<std::array<int,      6>,   32>        gEngines;
 typedef  std::array<std::array<int,      12>,  32>        gtFPGA;
 typedef  std::array<std::array<int,      20>,  100>       gFields;
 typedef  std::array<std::array<int,      16>,  100>       gCaloTwr;
+typedef  std::array<std::array<int,      8>,   100>       gSatur;
+
 typedef  std::array<std::array<char,     20>,  100>       gFieldsChar;
 
 typedef  std::array<std::array<int,      20>,  4>         gType;
@@ -75,7 +77,8 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
 
          //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
-        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers","Write gFexEDM Trigger Tower container"};
+        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowersWriteKey   {this,"gTowersWriteKey"  ,"L1_gFexDataTowers","Write gFexEDM Trigger Tower container with 200 MeV resolution (default)"};
+        SG::WriteHandleKey< xAOD::gFexTowerContainer> m_gTowers50WriteKey   {this,"gTowers50WriteKey"  ,"L1_gFexDataTowers50","Write gFexEDM Trigger Tower container with 50 MeV resolution"};
         
         // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
         SG::ReadHandleKey < xAOD::gFexTowerContainer> m_gTowersReadKey    {this,"gTowersReadKey"   ,"L1_gFexDataTowers","Read gFexEDM Trigger Tower container"};
@@ -87,23 +90,25 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         virtual void c_gtrx_map( const gfiber &inputData, gfiber &outputData) const;
         
         virtual void gtReconstructABC(  int XFPGA, 
-                                        gfiber Xfiber,  int Xin, 
-                                        gtFPGA &Xgt, int *BCIDptr,
+                                        gfiber Xfiber, 
+                                        int Xin, 
+                                        gtFPGA &XgtF, 
+                                        gtFPGA &Xgt,
+                                        int *BCIDptr,
                                         int do_lconv, 
                                         std::array<int, gPos::MAX_FIBERS> XMPD_NFI,
                                         std::array<int, gPos::MAX_FIBERS>  XCALO_TYPE,
                                         gCaloTwr XMPD_GTRN_ARR,
                                         gType XMPD_DSTRT_ARR,  
                                         gTypeChar XMPD_DTYP_ARR,
-                                        std::array<int, gPos::MAX_FIBERS> XMSK) const;
+                                        std::array<int, gPos::MAX_FIBERS> XMSK,
+                                        gtFPGA &Xsatur) const;
 
         virtual int crc9d32(std::array<int, 6> inWords,int numWords,int reverse) const;
 
         virtual int crc9d23(int inword, int in_crc, int  reverse ) const;
 
         virtual void undoMLE(int &datumPtr ) const;
-
-        virtual void gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const;
         
         virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi, int gFEXtowerID) const;
         
