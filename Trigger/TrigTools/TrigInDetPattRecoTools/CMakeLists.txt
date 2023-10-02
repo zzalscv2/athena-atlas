@@ -10,7 +10,6 @@ atlas_add_library( TrigInDetPattRecoTools
                    LINK_LIBRARIES TrigInDetPattRecoEvent
                    PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData BeamSpotConditionsData)
 
-find_package(Boost)
 
 atlas_add_test( mockSeeds
                 SOURCES test/mockSeeds.cxx

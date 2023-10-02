@@ -6,7 +6,6 @@ atlas_subdir( VrtSecInclusive )
 # External dependencies:
 find_package( LAPACK )
 find_package( BLAS )
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
