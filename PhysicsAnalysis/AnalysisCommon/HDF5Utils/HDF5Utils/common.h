@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef H5UTILS_COMMON_H
 #define H5UTILS_COMMON_H
@@ -9,6 +9,8 @@ namespace H5 {
   class DataSpace;
   class DSetCreatPropList;
 }
+
+#include "WriterConfiguration.h"
 
 #include "H5Traits.h"
 #include "H5Cpp.h"
@@ -25,9 +27,9 @@ namespace H5Utils {
     // functions which are used by writers to set up the data spaces
     // and datasets
     H5::DataSpace getUnlimitedSpace(const std::vector<hsize_t>& max_length);
+    template <size_t N>
     H5::DSetCreatPropList getChunckedDatasetParams(
-      const std::vector<hsize_t>& max_length,
-      hsize_t batch_size);
+      const WriterConfiguration<N>&);
     std::vector<hsize_t> getStriding(std::vector<hsize_t> max_length);
 
     // writer error handling
@@ -36,5 +38,7 @@ namespace H5Utils {
 
   }
 }
+
+#include "common.icc"
 
 #endif

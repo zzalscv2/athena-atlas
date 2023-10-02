@@ -1,6 +1,6 @@
 // this is -*- C++ -*-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "HDF5Utils/Writer.h"
 
@@ -34,16 +34,6 @@ namespace H5Utils {
       std::vector<hsize_t> eventual{H5S_UNLIMITED};
       eventual.insert(eventual.end(), extent.begin(), extent.end());
       return H5::DataSpace(eventual.size(), initial.data(), eventual.data());
-    }
-    H5::DSetCreatPropList getChunckedDatasetParams(
-      const std::vector<hsize_t>& extent,
-      hsize_t batch_size) {
-      H5::DSetCreatPropList params;
-      std::vector<hsize_t> chunk_size{batch_size};
-      chunk_size.insert(chunk_size.end(), extent.begin(), extent.end());
-      params.setChunk(chunk_size.size(), chunk_size.data());
-      params.setDeflate(7);
-      return params;
     }
     std::vector<hsize_t> getStriding(std::vector<hsize_t> extent) {
       // calculate striding

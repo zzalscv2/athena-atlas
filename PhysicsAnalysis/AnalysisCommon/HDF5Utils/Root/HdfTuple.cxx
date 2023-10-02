@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "HDF5Utils/HdfTuple.h"
 #include "HDF5Utils/common.h"
@@ -31,6 +31,17 @@ namespace H5Utils {
       return type;
     }
 
+    H5::DSetCreatPropList getChunckedDatasetParams(
+      const std::vector<hsize_t>& extent,
+      hsize_t batch_size) {
+      H5::DSetCreatPropList params;
+      std::vector<hsize_t> chunk_size{batch_size};
+      chunk_size.insert(chunk_size.end(), extent.begin(), extent.end());
+      params.setChunk(chunk_size.size(), chunk_size.data());
+      params.setDeflate(7);
+      return params;
+    }
+
   }
 
 // _______________________________________________________________________
@@ -55,7 +66,7 @@ namespace H5Utils {
     H5::DataSpace space = internal::getUnlimitedSpace(max_length);
 
     // create params
-    H5::DSetCreatPropList params = internal::getChunckedDatasetParams(
+    H5::DSetCreatPropList params = getChunckedDatasetParams(
       max_length, batch_size);
 
     // calculate striding
