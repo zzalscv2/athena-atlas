@@ -1,0 +1,28 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "defaults.h"
+
+namespace H5Utils {
+  namespace internal {
+    template <size_t N>
+    H5::DSetCreatPropList getChunckedDatasetParams(
+      const WriterConfiguration<N>& cfg) {
+      H5::DSetCreatPropList params;
+      hsize_t batch_size = (
+        cfg.batch_size ? *cfg.batch_size : defaults::batch_size);
+      std::vector<hsize_t> chunk_size{batch_size};
+      if (cfg.chunks) {
+        chunk_size.insert(
+          chunk_size.end(), cfg.chunks->begin(), cfg.chunks->end());
+      } else {
+        chunk_size.insert(
+          chunk_size.end(), cfg.extent.begin(), cfg.extent.end());
+      }
+      params.setChunk(chunk_size.size(), chunk_size.data());
+      if (cfg.deflate) params.setDeflate(*cfg.deflate);
+      return params;
+    }
+  }
+}

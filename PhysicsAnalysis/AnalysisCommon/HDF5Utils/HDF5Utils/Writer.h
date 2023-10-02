@@ -1,6 +1,6 @@
 // this is -*- C++ -*-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HDF_TUPLE_HH
 #define HDF_TUPLE_HH
@@ -13,9 +13,11 @@
  *
  **/
 
+#include "WriterConfiguration.h"
 #include "H5Traits.h"
 #include "CompressedTypes.h"
 #include "common.h"
+#include "defaults.h"
 
 #include "H5Cpp.h"
 
@@ -345,7 +347,10 @@ namespace H5Utils {
     Writer(H5::Group& group, const std::string& name,
            const Consumers<I>& consumers,
            const std::array<hsize_t, N>& extent = internal::uniform<N>(5),
-           hsize_t batch_size = 2048);
+           hsize_t batch_size = defaults::batch_size);
+    Writer(H5::Group& group,
+           const Consumers<I>& consumers,
+           const WriterConfiguration<N>& = WriterConfiguration<N>());
     Writer(const Writer&) = delete;
     Writer(Writer&&) = default;
     Writer& operator=(Writer&) = delete;
@@ -358,6 +363,7 @@ namespace H5Utils {
     using input_type = I;
     template <typename T>
     using function_type = typename consumer_type::template function_type<T>;
+    using configuration_type = WriterConfiguration<N>;
   private:
     const internal::DSParameters<I,N> m_par;
     hsize_t m_offset;
@@ -373,30 +379,45 @@ namespace H5Utils {
                        const Consumers<I>& consumers,
                        const std::array<hsize_t,N>& extent,
                        hsize_t batch_size):
-    m_par(consumers.getConsumers(), extent, batch_size),
+    Writer<N,I>(
+      group, consumers, WriterConfiguration<N>{
+        name, // name
+        extent, // extent
+        batch_size, // batch_size
+        extent, // chunks
+        defaults::deflate // deflate
+      })
+  {}
+
+  template <size_t N, typename I>
+  Writer<N, I>::Writer(H5::Group& group,
+                       const Consumers<I>& consumers,
+                       const WriterConfiguration<N>& cfg):
+    m_par(consumers.getConsumers(), cfg.extent,
+          cfg.batch_size ? *cfg.batch_size : defaults::batch_size),
     m_offset(0),
     m_buffer_rows(0),
     m_consumers(consumers.getConsumers()),
     m_file_space(H5S_SIMPLE)
   {
     using internal::data_buffer_t;
-    if (batch_size < 1) {
+    if (m_par.batch_size < 1) {
       throw std::logic_error("batch size must be > 0");
     }
     // create space
-    H5::DataSpace space = internal::getUnlimitedSpace(internal::vec(extent));
+    H5::DataSpace space = internal::getUnlimitedSpace(
+      internal::vec(cfg.extent));
 
     // create params
-    H5::DSetCreatPropList params = internal::getChunckedDatasetParams(
-      internal::vec(extent), batch_size);
+    H5::DSetCreatPropList params = internal::getChunckedDatasetParams(cfg);
     std::vector<data_buffer_t> default_value = internal::buildDefault(
       consumers.getConsumers());
     params.setFillValue(m_par.type, default_value.data());
 
     // create ds
-    internal::throwIfExists(name, group);
+    internal::throwIfExists(cfg.name, group);
     H5::CompType packed_type = buildWriteType(consumers.getConsumers());
-    m_ds = group.createDataSet(name, packed_type, space, params);
+    m_ds = group.createDataSet(cfg.name, packed_type, space, params);
     m_file_space = m_ds.getSpace();
     m_file_space.selectNone();
   }
@@ -501,7 +522,7 @@ namespace H5Utils {
     H5::Group& group, const std::string& name,
     const Consumers<I>& consumers,
     const std::array<hsize_t, N>& extent = internal::uniform<N>(5),
-    hsize_t batch_size = 2048) {
+    hsize_t batch_size = defaults::batch_size) {
     return Writer<N,I>(group, name, consumers, extent, batch_size);
   }
 
