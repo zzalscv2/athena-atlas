@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -72,7 +72,7 @@ namespace Athena_test {
     assert(!emptyProxy.isValid());
 
     //init with a valid proxy
-    DataProxy* pMyProxy(new DataProxy(StoreGateSvc::asStorable(new MyDataObj),
+    DataProxy* pMyProxy(new DataProxy(SG::asStorable(new MyDataObj),
 				      new TransientAddress(CLID(8000), "foo")));
     pMyProxy->addRef();
     ReadHandle<MyDataObj> hMyR;
@@ -159,7 +159,7 @@ namespace Athena_test {
     }
 
     //init with another copy of the same object and compare
-    DataProxy* pMyProxy2(new DataProxy(StoreGateSvc::asStorable(new MyDataObj),
+    DataProxy* pMyProxy2(new DataProxy(SG::asStorable(new MyDataObj),
 				       new TransientAddress(CLID(8000), "foo2")));
     UpdateHandle<MyDataObj> hMy2;
     assert(!hMy2.isInitialized());
@@ -173,7 +173,7 @@ namespace Athena_test {
     //assert(*hMy==*hMy2);
 
     const bool CONSTPROXY(true);
-    DataProxy* pMyProxy3(new DataProxy(StoreGateSvc::asStorable(new MyDataObj),
+    DataProxy* pMyProxy3(new DataProxy(SG::asStorable(new MyDataObj),
 				       new TransientAddress(CLID(8000), "foo3"), CONSTPROXY));
     ReadHandle<MyDataObj> hMy3;
     assert(hMy3.setState(pMyProxy3).isSuccess());
@@ -202,7 +202,7 @@ namespace Athena_test {
     const bool CONSTPROXY(true);
     const bool RESETONLY(true);
     
-    DataProxy* pNR(new DataProxy(StoreGateSvc::asStorable(new MyDataObj(33)),
+    DataProxy* pNR(new DataProxy(SG::asStorable(new MyDataObj(33)),
 				 new TransientAddress(CLID(8000), "noReset"),
 				 CONSTPROXY, !RESETONLY) );
     ReadHandle<MyDataObj> hNR ("noReset");
@@ -213,7 +213,7 @@ namespace Athena_test {
     assert(!hNR.isInitialized());
     assert(!hNR.isValid());
 
-    pNR = new DataProxy(StoreGateSvc::asStorable(new MyDataObj(33)),
+    pNR = new DataProxy(SG::asStorable(new MyDataObj(33)),
                         new TransientAddress(CLID(8000), "noReset"),
                         CONSTPROXY, !RESETONLY);
     assert(hNR.setState(pNR).isSuccess());
@@ -224,7 +224,7 @@ namespace Athena_test {
     assert(!hNR.isValid());
 
     //now with the RESETONLY
-    DataProxy* pRO(new DataProxy(StoreGateSvc::asStorable(new MyDataObj(44)),
+    DataProxy* pRO(new DataProxy(SG::asStorable(new MyDataObj(44)),
 				 new TransientAddress(CLID(8000), "noReset"),
 				 !CONSTPROXY, RESETONLY) );  
     pRO->addRef();
@@ -255,7 +255,7 @@ namespace Athena_test {
   void refCountTest () {
     std::vector<DataProxy*> vp;
     for (int i=0; i < 4; i++) {
-      DataProxy* dp = new DataProxy(StoreGateSvc::asStorable(new MyDataObj),
+      DataProxy* dp = new DataProxy(SG::asStorable(new MyDataObj),
 				    new TransientAddress(CLID(8000), "foo"));
       vp.push_back (dp);
     }

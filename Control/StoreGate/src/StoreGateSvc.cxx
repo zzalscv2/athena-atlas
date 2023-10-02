@@ -114,15 +114,6 @@ StoreGateSvc::setConst(const void* pObject) {
   _SGXCALL(setConst, (pObject), StatusCode::FAILURE);
 }
 
-/// DEPRECATED, use version taking ref to vector
-std::vector<std::string> //FIXME inefficient. Should take ref to vector
-StoreGateSvc::keys(const CLID& id, bool allKeys) const {
-  std::vector<std::string> nullV;
-  _SGXCALL( keys, (id, allKeys), nullV );
-}
-
-
-
 
 /////////////////////////////////////////////////////////////
 /// Service initialization

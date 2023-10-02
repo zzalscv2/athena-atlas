@@ -618,7 +618,6 @@ private:
   ///access typeless_record
   friend class SG::VarHandleBase;                                                      
 
-  ///DEPRECATED: Return a _pointer_ to the DataStore
   SG::DataStore* store();
   const SG::DataStore* store() const;
 
@@ -739,17 +738,6 @@ private:
   mutable mutex_t m_mutex;
   mutable mutex_t m_remapMutex;
   mutable mutex_t m_stringPoolMutex;
-
-  
-public:
-  ///////////////////////////////////////////////////////////////////////
-  /// \name Obsolete and Deprecated methods 
-  //@{
-
-  /// DEPRECATED, use version taking ref to vector
-  std::vector<std::string> //FIXME inefficient. Should take ref to vector 
-  keys(const CLID id, bool allKeys = false);
-  //@}
 };
 
 

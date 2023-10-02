@@ -536,15 +536,6 @@ SGImplSvc::keys(const CLID& id, std::vector<std::string>& vkeys,
 } 
 
 
-// DEPRECATED
-std::vector<std::string> 
-SGImplSvc::keys(const CLID id, bool allKeys) {
-  std::vector<std::string> vkeys;
-  this->keys(id, vkeys, allKeys);
-  return vkeys;
-}
-
-
 bool SGImplSvc::isSymLinked(const CLID& linkID, DataProxy* dp)   
 {        
   return (0 != dp) ? dp->transientID(linkID) : false;        
