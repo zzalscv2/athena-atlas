@@ -16,7 +16,7 @@ namespace Trk {
 
     CaloCellSelectorRoughdR::CaloCellSelectorRoughdR(double coneSize) : m_coneSize(coneSize), m_midEta(0), m_midPhi(0), m_maxDiff(0) {}
 
-    CaloCellSelectorRoughdR::~CaloCellSelectorRoughdR() {}
+    CaloCellSelectorRoughdR::~CaloCellSelectorRoughdR() = default;
 
     bool CaloCellSelectorRoughdR::preSelectAction(const Trk::CaloExtension& caloExtension) {
         if (caloExtension.caloLayerIntersections().empty()) return false;
@@ -27,7 +27,7 @@ namespace Trk {
         Amg::Vector3D meanPos(0., 0., 0.);
         for (auto entry : m_crossPoints) {
             int code = std::get<0>(entry);
-            if (!(code >= 0 && code < 24)) { continue; }  // not a intersection with a calo layer
+            if (code < 0 || code >= 24) { continue; }  // not a intersection with a calo layer
             meanPos += std::get<1>(entry).unit();
         }
 
@@ -38,7 +38,7 @@ namespace Trk {
         m_maxDiff = 0.;
         for (auto entry : m_crossPoints) {
             int code = std::get<0>(entry);
-            if (!(code >= 0 && code < 24)) { continue; }  // not a intersection with a calo layer
+            if (code < 0 || code >= 24) { continue; }  // not a intersection with a calo layer
             Amg::Vector3D pos = std::get<1>(entry);
             double rDiff = Utils::deltaR(pos.eta(), m_midEta, pos.phi(), m_midPhi);
             if (rDiff > m_maxDiff) m_maxDiff = rDiff;

@@ -27,7 +27,7 @@ ParticleCaloExtensionTool::ParticleCaloExtensionTool(const std::string& t,
   declareInterface<IParticleCaloExtensionTool>(this);
 }
 
-ParticleCaloExtensionTool::~ParticleCaloExtensionTool() {}
+ParticleCaloExtensionTool::~ParticleCaloExtensionTool() = default;
 
 StatusCode
 ParticleCaloExtensionTool::initialize()
@@ -370,21 +370,21 @@ ParticleCaloExtensionTool::caloExtension(const EventContext& ctx,
        * covariance matrix
        */
       if (p.first->type() != Trk::Curvilinear) {
-        caloLayers.emplace_back(CurvilinearParameters(p.first->position(),
-                                                      p.first->momentum(),
-                                                      p.first->charge(),
-                                                      std::nullopt,
-                                                      id));
+        caloLayers.emplace_back(p.first->position(),
+                                p.first->momentum(),
+                                p.first->charge(),
+                                std::nullopt,
+                                id);
       } else {
         std::optional<AmgSymMatrix(5)> covariance(std::nullopt);
         if (p.first->covariance()) {
           covariance = AmgSymMatrix(5)(*(p.first->covariance()));
         }
-        caloLayers.emplace_back(CurvilinearParameters(p.first->position(),
-                                                      p.first->momentum(),
-                                                      p.first->charge(),
-                                                      std::move(covariance),
-                                                      id));
+        caloLayers.emplace_back(p.first->position(),
+                                p.first->momentum(),
+                                p.first->charge(),
+                                std::move(covariance),
+                                id);
       }
     }
   }

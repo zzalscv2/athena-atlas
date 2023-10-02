@@ -20,7 +20,7 @@ IsolationBuilder::IsolationBuilder(const std::string& name,
   : ::AthReentrantAlgorithm(name, pSvcLocator)
 {}
 
-IsolationBuilder::~IsolationBuilder() {}
+IsolationBuilder::~IsolationBuilder() = default;
 
 StatusCode
 IsolationBuilder::initialize()

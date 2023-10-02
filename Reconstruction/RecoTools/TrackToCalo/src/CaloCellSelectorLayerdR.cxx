@@ -15,7 +15,7 @@ namespace Trk {
 
     CaloCellSelectorLayerdR::CaloCellSelectorLayerdR(double coneSize) : m_coneSize2(coneSize * coneSize) {}
 
-    CaloCellSelectorLayerdR::~CaloCellSelectorLayerdR() {}
+    CaloCellSelectorLayerdR::~CaloCellSelectorLayerdR() = default;
 
     bool CaloCellSelectorLayerdR::preSelectAction(const Trk::CaloExtension& caloExtension) {
         if (caloExtension.caloLayerIntersections().empty()) return false;
@@ -29,9 +29,9 @@ namespace Trk {
         for (unsigned int i = 0; i < CaloSampling::Unknown; i++) {
             auto s = static_cast<CaloSampling::CaloSample>(i);
             if (!caloCluster.hasSampling(s))
-                m_midPoints.push_back(std::make_tuple(false, 0., 0.));
+                m_midPoints.emplace_back(false, 0., 0.);
             else
-                m_midPoints.push_back(std::make_tuple(true, caloCluster.etaSample(s), caloCluster.phiSample(s)));
+                m_midPoints.emplace_back(true, caloCluster.etaSample(s), caloCluster.phiSample(s));
         }
         return true;
     }

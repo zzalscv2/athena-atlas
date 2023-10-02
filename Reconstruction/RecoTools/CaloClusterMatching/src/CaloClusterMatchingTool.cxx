@@ -25,7 +25,7 @@ namespace ClusterMatching {
 
   // Destructor
   ///////////////
-  CaloClusterMatchingTool::~CaloClusterMatchingTool() {}
+  CaloClusterMatchingTool::~CaloClusterMatchingTool() = default;
 
   // Athena algtool's Hooks
   ////////////////////////////

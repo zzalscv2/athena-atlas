@@ -33,7 +33,7 @@ namespace xAOD {
   }
 
   TrackIsolationTool::~TrackIsolationTool()
-  {}
+  = default;
 
   //<<<<<< PUBLIC MEMBER FUNCTION DEFINITIONS                             >>>>>>
 
@@ -282,7 +282,7 @@ namespace xAOD {
 
   void TrackIsolationTool::initresult(TrackIsolation& result,
 				      TrackCorrection corrlist,
-				      unsigned int typesize) const {
+				      unsigned int typesize) {
 
     result.corrlist = corrlist;
     result.coreCorrections.clear();

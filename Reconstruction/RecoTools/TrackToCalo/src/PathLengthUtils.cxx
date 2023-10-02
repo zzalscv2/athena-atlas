@@ -9,12 +9,10 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 
 //=================================
-PathLengthUtils::PathLengthUtils() {
-}
+PathLengthUtils::PathLengthUtils() = default;
 
 //==================================
-PathLengthUtils::~PathLengthUtils() {
-}
+
 
 //=========================================================================================================================
 double PathLengthUtils::get3DPathLength(const CaloCell& cell, const Amg::Vector3D& entrance, const Amg::Vector3D& exit, double drFix,

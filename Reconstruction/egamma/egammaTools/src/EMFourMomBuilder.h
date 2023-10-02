@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EGAMMATOOLS_EMFOURMOMBUILDER_H
@@ -53,11 +53,6 @@ public:
                              xAOD::Egamma* eg) const override final;
 
 private:
-  /** @brief Method to set the 4-mom in case of electron */
-  StatusCode setFromTrkCluster(xAOD::Electron&) const;
-  StatusCode setFromTrkCluster(xAOD::Photon&) const;
-  /** @brief Method to set the 4-mom in case of unconverted photon */
-  StatusCode setFromCluster(xAOD::Egamma&) const;
 
   /** @brief Resolution configuration*/
   Gaudi::Property<std::string> m_ResolutionConfiguration{

@@ -13,7 +13,7 @@
 #include "PFlowUtils/PFODefs.h"
 
 namespace xAOD {
- 
+
   //<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
 
   PFlowObjectsInConeTool::PFlowObjectsInConeTool (const std::string& type, const std::string& name, const IInterface* parent)
@@ -22,8 +22,7 @@ namespace xAOD {
     declareInterface<IPFlowObjectsInConeTool>(this);
   }
 
-  PFlowObjectsInConeTool::~PFlowObjectsInConeTool()
-  {}
+  PFlowObjectsInConeTool::~PFlowObjectsInConeTool() = default;
 
   //<<<<<< PUBLIC MEMBER FUNCTION DEFINITIONS                             >>>>>>
 
@@ -44,7 +43,7 @@ namespace xAOD {
     if (rh.isValid())
       return &*rh;
 
-    
+
     SG::ReadHandle<PFOContainer> pfos(m_pfokey);
     if( !pfos.isValid() ) {
       ATH_MSG_WARNING("Unable to open pflow container with key " << m_pfokey.key());

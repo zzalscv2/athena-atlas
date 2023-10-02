@@ -208,7 +208,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   const xAOD::TruthParticle* truth,
   const xAOD::TruthParticleContainer* oldContainer) const
 {
-  auto truthParticle = egammaTruthContainer.push_back(std::make_unique<xAOD::TruthParticle>());
+  auto *truthParticle = egammaTruthContainer.push_back(std::make_unique<xAOD::TruthParticle>());
   truthParticle->setPdgId(truth->pdgId());
   truthParticle->setBarcode(truth->barcode());
   truthParticle->setStatus(truth->status());

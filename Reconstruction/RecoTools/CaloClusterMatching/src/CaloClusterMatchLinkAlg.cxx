@@ -24,7 +24,7 @@ namespace ClusterMatching {
   // Destructor
   ///////////////
   CaloClusterMatchLinkAlg::~CaloClusterMatchLinkAlg()
-  {}
+  = default;
 
   // Athena Algorithm's Hooks
   ////////////////////////////
@@ -77,7 +77,7 @@ namespace ClusterMatching {
     }
 
     ICaloClusterMatchingTool::elementLinkDecorHandle_t elementLinkDec (m_elementLinkName, ctx);
-    for(const auto cl : *clustersToDecorate) {
+    for(const auto *const cl : *clustersToDecorate) {
       ATH_CHECK( m_clusterMatch->linkMatchedClusters(elementLinkDec, *cl, tcmap, m_useLeadCellEtaPhi, gtrthan) );
     }
 

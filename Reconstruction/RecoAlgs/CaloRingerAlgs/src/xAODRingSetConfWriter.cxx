@@ -105,7 +105,7 @@ StatusCode xAODRingSetConfWriter::initialize() {
   for ( const auto* c : m_rsConfContVec ) {
     if ( nullptr != c ) {
       if ( msg().level() <= MSG::VERBOSE ) {
-        for ( const auto r : *c ){
+        for ( const auto *const r : *c ){
           std::ostringstream str;
           r->print( str );
           ATH_MSG_VERBOSE( str.str() );

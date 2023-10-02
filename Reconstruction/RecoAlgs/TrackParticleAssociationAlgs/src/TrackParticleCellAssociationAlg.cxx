@@ -17,10 +17,7 @@ TrackParticleCellAssociationAlg::TrackParticleCellAssociationAlg(const std::stri
   declareProperty("PtCut", m_ptCut = 10000. );
 }
 
-TrackParticleCellAssociationAlg::~TrackParticleCellAssociationAlg()
-{
-
-}
+TrackParticleCellAssociationAlg::~TrackParticleCellAssociationAlg() = default;
 
 StatusCode TrackParticleCellAssociationAlg::initialize()
 {
@@ -30,7 +27,7 @@ StatusCode TrackParticleCellAssociationAlg::initialize()
   ATH_CHECK(m_clusterContainerName.initialize());
   ATH_CHECK(m_associationContainerName.initialize());
   ATH_CHECK(m_clusterCellLinkName.initialize());
-  return StatusCode::SUCCESS; 
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TrackParticleCellAssociationAlg::execute(const EventContext& ctx) const
@@ -42,12 +39,12 @@ StatusCode TrackParticleCellAssociationAlg::execute(const EventContext& ctx) con
   SG::WriteHandle<xAOD::CaloClusterContainer> clusColl( m_clusterContainerName ,ctx);
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(clusColl));
 
-  
+
   SG::WriteHandle<xAOD::TrackParticleClusterAssociationContainer> xaoda( m_associationContainerName, ctx);
   ATH_CHECK(xaoda.record (std::make_unique<xAOD::TrackParticleClusterAssociationContainer>(),
 			  std::make_unique<xAOD::TrackParticleClusterAssociationAuxContainer>()));
 
-  
+
 
   unsigned int ntracks = 0;
   for( unsigned int i=0;i<trackParticles->size();++i ){
@@ -73,7 +70,7 @@ StatusCode TrackParticleCellAssociationAlg::execute(const EventContext& ctx) con
 
     // create cell from ParticleCellAssociation
     xAOD::CaloCluster* cluster = Rec::CrossedCaloCellHelper::crossedCells( *association,
-                                                                           *association->container(), 
+                                                                           *association->container(),
                                                                            *clusColl );
     if( !cluster ){
       ATH_MSG_WARNING("Failed to create cluster from ParticleCellAssociation");

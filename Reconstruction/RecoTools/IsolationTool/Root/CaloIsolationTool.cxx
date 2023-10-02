@@ -61,7 +61,7 @@ namespace xAOD {
 #endif // XAOD_ANALYSIS
   }
 
-  CaloIsolationTool::~CaloIsolationTool() { }
+  CaloIsolationTool::~CaloIsolationTool() = default;
 
   StatusCode CaloIsolationTool::initialize() {
 #ifndef XAOD_ANALYSIS
@@ -1577,7 +1577,7 @@ bool CaloIsolationTool::correctIsolationEnergy_pflowCore(CaloIsolation& result,
 
   void CaloIsolationTool::initresult(CaloIsolation& result,
 				     const CaloCorrection& corrlist,
-				     unsigned int typesize) const {
+				     unsigned int typesize) {
 
     result.corrlist = corrlist;
     result.coreCorrections.clear();
