@@ -88,7 +88,7 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       auto eta = cluster->etaSample(sam);
       auto phi = cluster->phiSample(sam);
 
-      if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
+      if ((eta == 0. && phi == 0.) || std::abs(eta) > 100) {
         ATH_MSG_WARNING("Weird input cluster, eta = " << eta
                                                       << " phi = " << phi);
         continue;
@@ -171,7 +171,7 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       auto eta = cluster->etaSample(sam);
       auto phi = cluster->phiSample(sam);
 
-      if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
+      if ((eta == 0. && phi == 0.) || std::abs(eta) > 100) {
         ATH_MSG_WARNING("Weird input cluster, maxeta = "
                         << eta << " phi = " << phi << " Eeme2 = "
                         << cluster->eSample(CaloSampling::EME2) << " Efcal = "

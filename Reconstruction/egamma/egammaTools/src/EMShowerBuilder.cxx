@@ -19,7 +19,6 @@
 #include "xAODEgamma/Egamma.h"
 
 #include <algorithm>
-#include <cmath>
 
 //  END OF HEADER FILES INCLUDE
 
@@ -331,7 +330,7 @@ EMShowerBuilder::FillEMShowerShape(xAOD::Egamma* eg,
   /// @brief (emaxs1-e2tsts1)/(emaxs1+e2tsts1)
   value = static_cast<float>(info.emaxs1);
   valueSecond = static_cast<float>(info.esec1);
-  eg->setShowerShapeValue(fabs(value + valueSecond) > 0.
+  eg->setShowerShapeValue(std::abs(value + valueSecond) > 0.
                             ? (value - valueSecond) / (value + valueSecond)
                             : 0.,
                           xAOD::EgammaParameters::Eratio);

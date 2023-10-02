@@ -8,7 +8,6 @@
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include <algorithm>
-#include <cmath>
 #include <vector>
 
 #include "CaloConditions/CaloAffectedRegionInfoVec.h"
@@ -43,8 +42,8 @@ findCentralCell(const xAOD::CaloCluster* cluster, Identifier& cellCentrId)
     float phi = cell->phi();
     float energy = cell->energy();
     CaloSampling::CaloSample layer = cell->caloDDE()->getSampling();
-    if (fabs(eta - clusEta) < 0.025 &&
-        fabs(P4Helpers::deltaPhi(phi, clusPhi)) < 0.025 &&
+    if (std::abs(eta - clusEta) < 0.025 &&
+        std::abs(P4Helpers::deltaPhi(phi, clusPhi)) < 0.025 &&
         (layer == CaloSampling::EMB2 || layer == CaloSampling::EME2) &&
         (energy > energymax)) {
       energymax = energy;
@@ -236,7 +235,7 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
   unsigned int iflag = eg.OQ();
 
   // Set timing bit
-  const double absEnergyGeV = fabs(cluster->e() * (1. / Gaudi::Units::GeV));
+  const double absEnergyGeV = std::abs(cluster->e() * (1. / Gaudi::Units::GeV));
   maskIflagIf(
     iflag, 
     xAOD::EgammaParameters::OutTime,
@@ -301,7 +300,7 @@ egammaOQFlagsBuilder::execute(const EventContext& ctx,
 
       bool isStripCoreCell = false;
       if ((layer == CaloSampling::EMB1 || layer == CaloSampling::EME1) &&
-          fabs(eta - clusterEta) < 0.025 / 2.) {
+          std::abs(eta - clusterEta) < 0.025 / 2.) {
         isStripCoreCell = true;
       }
 
