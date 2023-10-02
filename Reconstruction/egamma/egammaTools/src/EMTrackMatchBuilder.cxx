@@ -26,6 +26,8 @@
 
 //  END OF HEADER FILES INCLUDE
 
+using xAOD::EgammaHelpers::summaryValueInt;
+
 EMTrackMatchBuilder::EMTrackMatchBuilder(const std::string& type,
                                          const std::string& name,
                                          const IInterface* parent)
@@ -308,15 +310,9 @@ EMTrackMatchBuilder::inBroadWindow(const EventContext& ctx,
    * The first thing is
    * Prefer pixel over SCT only
    */
-  int nPixel = 0;
-  uint8_t uint8_value = 0;
   // Check number of pixel hits
-  if (trkPB.summaryValue(uint8_value, xAOD::numberOfPixelDeadSensors)) {
-    nPixel += uint8_value;
-  }
-  if (trkPB.summaryValue(uint8_value, xAOD::numberOfPixelHits)) {
-    nPixel += uint8_value;
-  }
+  int nPixel = summaryValueInt(trkPB, xAOD::numberOfPixelDeadSensors, 0);
+  nPixel += summaryValueInt(trkPB, xAOD::numberOfPixelHits, 0);
   trkmatch.hasPix = (nPixel > 0);
 
   /*
@@ -328,25 +324,11 @@ EMTrackMatchBuilder::inBroadWindow(const EventContext& ctx,
   trkmatch.hitsScore = 0;
   if (m_useScoring) {
     // Check the 2 innermost layers
-    int nInnerMost = 0;
-    if (trkPB.summaryValue(uint8_value,
-                           xAOD::numberOfInnermostPixelLayerHits)) {
-      nInnerMost += uint8_value;
-    }
-    int expectInnermostPixelLayerHit = 0;
-    if (trkPB.summaryValue(uint8_value, xAOD::expectInnermostPixelLayerHit)) {
-      expectInnermostPixelLayerHit += uint8_value;
-    }
-    int nNextToInnerMost = 0;
-    if (trkPB.summaryValue(uint8_value,
-                           xAOD::numberOfNextToInnermostPixelLayerHits)) {
-      nNextToInnerMost += uint8_value;
-    }
-    int expectNextToInnermostPixelLayerHit = 0;
-    if (trkPB.summaryValue(uint8_value,
-                           xAOD::expectNextToInnermostPixelLayerHit)) {
-      expectNextToInnermostPixelLayerHit += uint8_value;
-    }
+    int nInnerMost = summaryValueInt(trkPB, xAOD::numberOfInnermostPixelLayerHits, 0);
+    int expectInnermostPixelLayerHit = summaryValueInt(trkPB, xAOD::expectInnermostPixelLayerHit, 0);
+    int nNextToInnerMost = summaryValueInt(trkPB, xAOD::numberOfNextToInnermostPixelLayerHits, 0);
+    int expectNextToInnermostPixelLayerHit = summaryValueInt(trkPB, xAOD::expectNextToInnermostPixelLayerHit, 0);
+
     // Secondary score , find the longest track possible,
     // i.e the one with the most inner hists  in the pixel
     // npixel*5
