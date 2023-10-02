@@ -14,13 +14,16 @@
 #include "xAODMuonPrepData/RpcStrip.h"
 #include "xAODMuonPrepData/RpcStripAuxContainer.h"
 #include "xAODMuonPrepData/RpcStripContainer.h"
-
+#include "xAODMuonPrepData/versions/TgcStripAuxContainer_v1.h"
+#include "xAODMuonPrepData/versions/TgcStripContainer_v1.h"
+#include "xAODMuonPrepData/versions/TgcStrip_v1.h"
 // Instantiate all necessary types for the dictionary.
 namespace {
 struct GCCXML_DUMMY_INSTANTIATION_XAODMUONRDO {
     // Type(s) needed for the dictionary generation to succeed.
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtDriftCircleContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStripContainer_v1);
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, TgcStripContainer_v1);
 };
 }  // namespace
 
