@@ -15,7 +15,7 @@
 #ifndef PatternTrackParameters_H
 #define PatternTrackParameters_H
 
-#include "TrkParametersBase/ParametersBase.h"
+#include "TrkParametersBase/ParametersCommon.h"
 #include "TrkParametersBase/Charged.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkSurfaces/Surface.h"
@@ -28,14 +28,14 @@ class MsgStream;
 
 namespace Trk {
 
-  class PlaneSurface       ;  
+  class PlaneSurface       ;
   class StraightLineSurface;
   class DiscSurface        ;
   class CylinderSurface    ;
   class PerigeeSurface     ;
   class ConeSurface        ;
 
-  class PatternTrackParameters final : public ParametersBase<5, Trk::Charged>{
+  class PatternTrackParameters final : public ParametersCommon<5, Trk::Charged>{
     public:
       PatternTrackParameters();
       PatternTrackParameters(const PatternTrackParameters&);
@@ -54,7 +54,7 @@ namespace Trk {
       void             changeDirection   ()          ;
       double           transverseMomentum()     const;
 
-      // Methods from ParametersBase
+      // Methods from ParametersCommon
       virtual const Surface&  associatedSurface ()  const override final;
       virtual Amg::Vector3D position() const override final;
       virtual Amg::Vector3D momentum() const override final;
@@ -81,18 +81,18 @@ namespace Trk {
       bool initiate (PatternTrackParameters&, const Amg::Vector2D&,const Amg::MatrixX&);
 
       // Add or remove noise
-      void addNoise   (const NoiseOnSurface&,PropDirection); 
-      void removeNoise(const NoiseOnSurface&,PropDirection); 
+      void addNoise   (const NoiseOnSurface&,PropDirection);
+      void removeNoise(const NoiseOnSurface&,PropDirection);
 
       // Covariance matrix production using jacobian CovNEW = J*CovOLD*Jt
       static AmgSymMatrix(5) newCovarianceMatrix(const AmgSymMatrix(5) &, const double *);
 
       // Print
-      virtual std::ostream& dump(std::ostream&) const override;
-      virtual MsgStream&    dump(MsgStream&   ) const override;
+      std::ostream& dump(std::ostream&) const;
+      MsgStream&    dump(MsgStream&   ) const;
 
     protected:
-      
+
       // Protected data
       SurfaceUniquePtrT<const Surface> m_surface;
 
@@ -128,9 +128,9 @@ namespace Trk {
   // Overload operator
   /////////////////////////////////////////////////////////////////////////////////
 
-  std::ostream& operator << (std::ostream&,const PatternTrackParameters&); 
+  std::ostream& operator << (std::ostream&,const PatternTrackParameters&);
   MsgStream& operator    << (MsgStream&, const PatternTrackParameters& );
- 
+
 } // end of name space Trk
 
 #include "TrkPatternParameters/PatternTrackParameters.icc"
