@@ -21,6 +21,8 @@
 #include <cmath>
 #include <memory>
 
+using xAOD::EgammaHelpers::summaryValueInt;
+
 electronSuperClusterBuilder::electronSuperClusterBuilder(
   const std::string& name,
   ISvcLocator* pSvcLocator)
@@ -114,26 +116,16 @@ electronSuperClusterBuilder::execute(const EventContext& ctx) const
     if (egRec->getNumberOfTrackParticles() == 0) {
       continue;
     }
+    const xAOD::TrackParticle *trackParticle = egRec->trackParticle(0);
     // with possible pixel
-    uint8_t nPixelHits(0);
-    uint8_t uint8_value(0);
-    if (egRec->trackParticle(0)->summaryValue(uint8_value,
-                                              xAOD::numberOfPixelDeadSensors)) {
-      nPixelHits += uint8_value;
-    }
-    if (egRec->trackParticle(0)->summaryValue(uint8_value,
-                                              xAOD::numberOfPixelHits)) {
-      nPixelHits += uint8_value;
-    }
+    uint8_t nPixelHits = summaryValueInt(*trackParticle, xAOD::numberOfPixelDeadSensors, 0);
+    nPixelHits += summaryValueInt(*trackParticle, xAOD::numberOfPixelHits, 0); 
     if (nPixelHits < m_numberOfPixelHits) {
       continue;
     }
     // and with silicon (add SCT to pixel)
     uint8_t nSiHits = nPixelHits;
-    if (egRec->trackParticle(0)->summaryValue(uint8_value,
-                                              xAOD::numberOfSCTHits)) {
-      nSiHits += uint8_value;
-    }
+    nSiHits += summaryValueInt(*trackParticle, xAOD::numberOfSCTHits, 0);
     if (nSiHits < m_numberOfSiHits) {
       continue;
     }

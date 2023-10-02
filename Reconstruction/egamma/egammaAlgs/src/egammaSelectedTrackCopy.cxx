@@ -32,12 +32,13 @@ UPDATE : 25/06/2018
 #include <memory>
 #include <vector>
 
+using xAOD::EgammaHelpers::summaryValueInt;
+
 namespace {
   // Wrap a check to see if a track is valid for reffiting.
   bool checkIfValidForRefit(const xAOD::TrackParticle *track) {
-    uint8_t dummy = 0;
-    int nhits = track->summaryValue(dummy, xAOD::numberOfPixelHits) ? dummy : 0;
-    nhits += track->summaryValue(dummy, xAOD::numberOfSCTHits) ? dummy : 0;
+    int nhits = summaryValueInt(*track, xAOD::numberOfPixelHits, 0);
+    nhits += summaryValueInt(*track, xAOD::numberOfSCTHits, 0);
     return nhits >= 4;
   }
 }
