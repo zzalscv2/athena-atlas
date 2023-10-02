@@ -20,6 +20,15 @@ from AthenaCommon import SystemOfUnits as Units
 from RecExConfig.RecFlags import rec
 from AthenaCommon.Resilience import treatException,protectedInclude
 
+if not rec.runUnsupportedLegacyReco:
+    print("!!! RecExCommon_topOptions is unsupported !!!")
+    print("Consider moving you workflow to Component Accumulator (CA) : ")
+    print("If you absolutely have to use this, you need to add : ")
+    print("from RecExConfig.RecFlags import rec")
+    print("rec.runUnsupportedLegacyReco=True")
+    import sys
+    sys.exit(1)
+
 topSequence = AlgSequence()
 
 import AthenaCommon.Debugging as _acdbg

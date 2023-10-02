@@ -39,6 +39,13 @@ from AthenaCommon.JobProperties import jobproperties
 
 from RecExConfig.RecoFunctions import AddValidItemToList,RemoveValidItemFromList
 
+class runUnsupportedLegacyReco(JobProperty):
+    """ Allow to use the Unsupported Legacy non-CA reco configs
+    """
+    statusOn=True
+    allowedTypes=['bool']
+    StoredValue=False
+#
 class readTAG(JobProperty):
     """ Switch to True if read TAG (in addition to one of RDO ESD AOD)
     """
@@ -986,7 +993,7 @@ jobproperties.add_Container(Rec)
 #jobproperties.Rec.RecAlgs.import_JobProperties('RecExConfig.RecAlgsFlags')
 
 # I want always the following flags in the Rec container
-_list_Rec=[TAGFromRDO, doTagRawSummary , doBeamBackgroundFiller, \
+_list_Rec=[runUnsupportedLegacyReco, TAGFromRDO, doTagRawSummary, doBeamBackgroundFiller, \
 OutputLevel, RootHistoOutput, RootNtupleOutput, UserAlgs, UserExecs, UserFlags, doDPD, DPDMakerScripts, LoadGeometry, doAOD, doAODCaloCells, doESD,\
 doAODall, doCBNT, doPyDump, doMonitoring, doCheckDictionary, doCheckJOT,CBNTAthenaAware,\
 doDetailedAuditor, doSGAuditor, doFastMemoryAuditor, doMemoryAuditor, OutputSuffix, OutputFileNameForRecoStep, doPerfMon, doDetailedPerfMon, doSemiDetailedPerfMon, doDetailedPerfMonMT, doDumpMC, doDumpPoolInputContent, doDumpProperties,\

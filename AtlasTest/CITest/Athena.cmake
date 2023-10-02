@@ -49,16 +49,8 @@ atlas_add_citest( OverlayRun3MC_Legacy
 #################################################################################
 # Standard reconstruction workflows
 #################################################################################
-
 atlas_add_citest( RecoRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
-
-atlas_add_citest( RecoRun2Data_Legacy
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA False --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11' --no-output-checks )
-
-atlas_add_citest( RecoRun2Data_LegacyVsCA
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2Data q442
-   DEPENDS_SUCCESS RecoRun2Data RecoRun2Data_Legacy )
 
 atlas_add_citest( DerivationRun2Data_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4
@@ -72,14 +64,14 @@ atlas_add_citest( RecoRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--CA "all:True" "RDOtoRDOTrigger:False" --conditionsTag "default:OFLCOND-MC16-SDR-RUN2-11" "RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02" --maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2MC_Legacy
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA False --conditionsTag "default:OFLCOND-MC16-SDR-RUN2-11" "RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02" --maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA False --conditionsTag "default:OFLCOND-MC16-SDR-RUN2-11" "RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02" --preExec \"r2a:from RecExConfig.RecFlags import rec $<SEMICOLON> rec.runUnsupportedLegacyReco=True\" --maxEvents 25' )
 
 atlas_add_citest( RecoRun2MC_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2MC q443
    DEPENDS_SUCCESS RecoRun2MC RecoRun2MC_Legacy )
 
 atlas_add_citest( RecoRun2MC_PileUp
-   SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root --conditionsTag OFLCOND-MC16-SDR-RUN2-11' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--CA True --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root --conditionsTag OFLCOND-MC16-SDR-RUN2-11 --preExec="flags.Exec.FPE=500;" ' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( DerivationRun2MC_PHYS
@@ -98,13 +90,6 @@ atlas_add_citest( RecoRun3Data_Checks
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec pass' --checks-only --output-path ../RecoRun3Data
    DEPENDS_SUCCESS RecoRun3Data )
 
-atlas_add_citest( RecoRun3Data_Legacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA False --maxEvents 100 --postExec="FPEAuditor.NStacktracesOnFPE=500;"' --threads 8 --no-output-checks )
-
-atlas_add_citest( RecoRun3Data_LegacyVsCA
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3Data q449
-   DEPENDS_SUCCESS RecoRun3Data RecoRun3Data_Legacy )
-
 atlas_add_citest( RecoRun3Data_Bulk
     SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8  -e ' --CA True --skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data'  --run-only --no-output-checks
    PROPERTIES PROCESSORS 8 )
@@ -114,15 +99,16 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
    DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x686 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --no-output-checks
-   LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"  # ignore FPEs from PixelChargeLUTCalibCondAlg
-   )
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x785 -e ' --CA True --maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1  ' --no-output-checks
+    LOG_IGNORE_PATTERN "WARNING FPE .*PixelChargeLUTCalibCondAlg"
+    # ignore FPEs from PixelChargeLUTCalibCondAlg
+  )
 
 atlas_add_citest( RecoRun3Data_Cosmics
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"'  --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_Calib
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--CA True --maxEvents 25  --preExec="all:flags.Exec.FPE=500;"' --no-output-checks )
 
 atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
@@ -135,15 +121,8 @@ atlas_add_citest( DerivationRun3Data_PHYSLITE
 atlas_add_citest( RecoRun3MC
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA "all:True" "RDOtoRDOTrigger:False" --maxEvents 25' )
 
-atlas_add_citest( RecoRun3MC_Legacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA False --maxEvents 25' --no-output-checks )
-
-atlas_add_citest( RecoRun3MC_LegacyVsCA
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3MC q445
-   DEPENDS_SUCCESS RecoRun3MC RecoRun3MC_Legacy )
-
 atlas_add_citest( RecoRun3MC_PileUp
-   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1760/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
+    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--CA "all:True" "RDOtoRDOTrigger:False" --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1760/myRDO.pool.root --preExec="flags.Exec.FPE=500;" ' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
 
 atlas_add_citest( DerivationRun3MC_PHYS
@@ -212,7 +191,7 @@ atlas_add_citest( DataQuality_Run3Data_Postprocessing
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( DataQuality_Run3Data_AODtoHIST
-   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root  --athenaopts='--threads=1'
+   SCRIPT Reco_tf.py --AMI=q449 --CA --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root   --preExec="all:flags.Exec.FPE=500;" --athenaopts='--threads=1'
    DEPENDS_SUCCESS RecoRun3Data )
 
 
