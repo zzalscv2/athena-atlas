@@ -33,20 +33,17 @@ atlas_subdir( BPhysTools )
 
 # Used external(s):
 find_package( ROOT COMPONENTS Core Physics Matrix )
-find_package( Boost )
 
 # Build the main library of the package: 
 atlas_add_library( BPhysToolsLib
 		   BPhysTools/*.h Root/*.cxx src/*.cxx
 		   PUBLIC_HEADERS BPhysTools
 		   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-		   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
 		   LINK_LIBRARIES ${ROOT_LIBRARIES} 
 		   xAODTracking
 		   xAODBPhysLib
 		   AsgTools
        ${extra_libs}
-		   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES}
 		   xAODEventInfo
 		   )
 
@@ -54,14 +51,12 @@ if(NOT XAOD_STANDALONE)
 atlas_add_component( BPhysTools
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-		                 PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} 
 		                 xAODTracking
 		                 xAODBPhysLib
 		                 AsgTools
                      ${extra_libs}
                      BPhysToolsLib
-		                 PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES}
 		                 xAODEventInfo
 		                 )
 endif()
