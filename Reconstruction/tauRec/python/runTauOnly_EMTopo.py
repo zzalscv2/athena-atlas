@@ -3,12 +3,12 @@
 # Simple script to run a
 # Tau job
 #
-# Usefull for quick testing
+# Usefull for quick testing using EMTopo jets for tau seeding 
 # run with
 #
-# athena --CA runTauOnly.py 
+# athena --CA runTauOnly_EMTopo.py 
 # or
-# python runTauOnly.py
+# python runTauOnly_EMTopo.py
 
 import sys
 
@@ -53,6 +53,7 @@ def _run():
     flags.Reco.EnableCaloRinger = False
     flags.Reco.PostProcessing.GeantTruthThinning = False
     flags.Reco.PostProcessing.TRTAloneThinning = False
+    flags.Tau.TauRec.SeedJetCollection = "AntiKt4EMTopoJets" 
     flags.lock()
 
     from RecJobTransforms.RecoSteering import RecoSteering
