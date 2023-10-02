@@ -77,7 +77,7 @@ private:
   float m_tmax;
 
   std::string m_fitFunction;
-  size_t m_2ndDerivStep;
+  size_t m_2ndDerivStep{};
   size_t m_peak2ndDerivMinSample;
   size_t m_peak2ndDerivMinTolerance;
   float m_peak2ndDerivMinThreshLG;
@@ -86,18 +86,18 @@ private:
   bool m_useDelayed;
 
   bool m_enableRepass;
-  float m_peak2ndDerivMinRepassLG;
-  float m_peak2ndDerivMinRepassHG;
+  float m_peak2ndDerivMinRepassLG{};
+  float m_peak2ndDerivMinRepassHG{};
 
   // Gain factors for low gain and high gain
   //
-  float m_gainFactorHG;
-  float m_gainFactorLG;
+  float m_gainFactorHG{};
+  float m_gainFactorLG{};
 
   // Uncertainties on the ADC values due to noise
   //
-  float m_noiseSigHG;
-  float m_noiseSigLG;
+  float m_noiseSigHG{};
+  float m_noiseSigLG{};
 
   // Default fit values and cuts that can be set via modifier methods
   //
@@ -114,11 +114,11 @@ private:
   bool m_fixTau1{};
   bool m_fixTau2{};
 
-  float m_defaultFitTMax;   // user-provided upper limit on samples to be included in fit
-  float m_defaultFitTMin;   // user-provided upper limit on samples to be included in fit
+  float m_defaultFitTMax{};   // user-provided upper limit on samples to be included in fit
+  float m_defaultFitTMin{};   // user-provided upper limit on samples to be included in fit
 
-  float m_chisqDivAmpCutLG; // maximum good LG chisq / amplitude
-  float m_chisqDivAmpCutHG; // maximum good HG chisq / amplitude
+  float m_chisqDivAmpCutLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpCutHG{}; // maximum good HG chisq / amplitude
 
   float m_T0CutLowLG{};  // minimum good corrected time for LG fits
   float m_T0CutHighLG{}; // maximum good corrected time for LG fits
@@ -126,14 +126,14 @@ private:
   float m_T0CutLowHG{};  // minimum good corrected time for HG fits
   float m_T0CutHighHG{}; // maximum good corrected time for HG fits
 
-  float m_defaultT0Max;   // Upper limit on pulse t0
-  float m_defaultT0Min;   // Lower limit on pulse t0
+  float m_defaultT0Max{};   // Upper limit on pulse t0
+  float m_defaultT0Min{};   // Lower limit on pulse t0
 
-  float m_fitAmpMinHG;      // Minimum amplitude in the fit
-  float m_fitAmpMinLG;      // Minimum amplitude in the fit
+  float m_fitAmpMinHG{};      // Minimum amplitude in the fit
+  float m_fitAmpMinLG{};      // Minimum amplitude in the fit
 
-  float m_fitAmpMaxHG;      // Minimum amplitude in the fit
-  float m_fitAmpMaxLG;      // Minimum amplitude in the fit
+  float m_fitAmpMaxHG{};      // Minimum amplitude in the fit
+  float m_fitAmpMaxLG{};      // Minimum amplitude in the fit
 
   //
   bool m_haveTimingCorrections;
@@ -153,16 +153,16 @@ private:
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
-  bool m_adjTimeRangeEvent; // indicates whether we adjust the time range for this specific event
+  bool m_adjTimeRangeEvent{}; // indicates whether we adjust the time range for this specific event
 
-  int m_minSampleEvt;
-  int m_maxSampleEvt;
+  int m_minSampleEvt{};
+  int m_maxSampleEvt{};
 
   // Delayed pulse members
   //
-  bool  m_useFixedBaseline;
-  float m_delayedDeltaT;
-  float m_delayedPedestalDiff;
+  bool  m_useFixedBaseline{};
+  float m_delayedDeltaT{};
+  float m_delayedPedestalDiff{};
   mutable std::unique_ptr<TH1> m_delayedHist;
 
   std::unique_ptr<TFitter> m_prePulseCombinedFitter;
@@ -174,91 +174,91 @@ private:
   // -----------------------
   // Statuses
   //
-  bool m_haveData;
+  bool m_haveData{};
 
-  bool m_havePulse;
-  bool m_useLowGain;
-  bool m_fail;
-  bool m_HGOverflow;
+  bool m_havePulse{};
+  bool m_useLowGain{};
+  bool m_fail{};
+  bool m_HGOverflow{};
 
-  bool m_HGUnderflow;
-  bool m_PSHGOverUnderflow;
-  bool m_LGOverflow;
-  bool m_LGUnderflow;
+  bool m_HGUnderflow{};
+  bool m_PSHGOverUnderflow{};
+  bool m_LGOverflow{};
+  bool m_LGUnderflow{};
 
-  bool m_prePulse;
-  bool m_postPulse;
-  bool m_fitFailed;
-  bool m_badChisq;
+  bool m_prePulse{};
+  bool m_postPulse{};
+  bool m_fitFailed{};
+  bool m_badChisq{};
 
-  bool m_badT0;
-  bool m_ExcludeEarly;
-  bool m_ExcludeLate;
-  bool m_preExpTail;
+  bool m_badT0{};
+  bool m_ExcludeEarly{};
+  bool m_ExcludeLate{};
+  bool m_preExpTail{};
 
-  bool m_fixPrePulse;
-  bool m_fitMinAmp;
-  bool m_repassPulse;
+  bool m_fixPrePulse{};
+  bool m_fitMinAmp{};
+  bool m_repassPulse{};
 
   // -----------------------
 
-  bool  m_backToHG_pre;
-  float m_baselineCorr;
+  bool  m_backToHG_pre{};
+  float m_baselineCorr{};
 
   // Pulse analysis
   //
-  int m_usedPresampIdx;
-  float m_preSample;
+  int m_usedPresampIdx{};
+  float m_preSample{};
 
-  float m_maxADCValue;
-  float m_minADCValue;
+  float m_maxADCValue{};
+  float m_minADCValue{};
 
-  float m_maxDelta;
-  float m_minDelta;
+  float m_maxDelta{};
+  float m_minDelta{};
 
-  int m_maxSampl;
-  int m_minSampl;
+  int m_maxSampl{};
+  int m_minSampl{};
 
-  float m_initialExpAmp;
-  float m_minDeriv2nd;
-  int   m_minDeriv2ndIndex;
+  float m_initialExpAmp{};
+  float m_minDeriv2nd{};
+  int   m_minDeriv2ndIndex{};
 
-  float m_fitTMax;          // event-by-event specified fit tmax
-  float m_fitTMin;          // event-by-event specified fit tmin
+  float m_fitTMax{};          // event-by-event specified fit tmax
+  float m_fitTMin{};          // event-by-event specified fit tmin
 
-  float m_fitPostT0lo;      // use to assign lower bound of post pulse T0
+  float m_fitPostT0lo{};      // use to assign lower bound of post pulse T0
 
-  float m_initialPrePulseT0;
-  float m_initialPrePulseAmp;
+  float m_initialPrePulseT0{};
+  float m_initialPrePulseAmp{};
 
-  float m_initialPostPulseT0;
+  float m_initialPostPulseT0{};
 
-  float m_fitAmplitude;
-  float m_fitAmpError;
-  float m_fitTime;
-  float m_fitTimeSub;
-  float m_fitTimeCorr;
-  float m_fitTCorr2nd;
-  float m_fitTau1;
-  float m_fitTau2;
-  float m_fitChisq;
-  float m_fitNDoF;
-  float m_fitPreT0;
-  float m_fitPreAmp;
-  float m_fitPostT0;
-  float m_fitPostAmp;
-  float m_fitExpAmp;
-  float m_amplitude;
-  float m_ampError;
-  float m_preSampleAmp;
-  float m_preAmplitude;
-  float m_postAmplitude;
-  float m_expAmplitude;
-  float m_bkgdMaxFraction;
-  float m_delayedBaselineShift;
+  float m_fitAmplitude{};
+  float m_fitAmpError{};
+  float m_fitTime{};
+  float m_fitTimeSub{};
+  float m_fitTimeCorr{};
+  float m_fitTCorr2nd{};
+  float m_fitTau1{};
+  float m_fitTau2{};
+  float m_fitChisq{};
+  float m_fitNDoF{};
+  float m_fitPreT0{};
+  float m_fitPreAmp{};
+  float m_fitPostT0{};
+  float m_fitPostAmp{};
+  float m_fitExpAmp{};
+  float m_amplitude{};
+  float m_ampError{};
+  float m_preSampleAmp{};
+  float m_preAmplitude{};
+  float m_postAmplitude{};
+  float m_expAmplitude{};
+  float m_bkgdMaxFraction{};
+  float m_delayedBaselineShift{};
 
-  int m_lastHGOverFlowSample;
-  int m_firstHGOverFlowSample;
+  int m_lastHGOverFlowSample{};
+  int m_firstHGOverFlowSample{};
 
   std::vector<float> m_ADCSamplesHGSub;
   std::vector<float> m_ADCSamplesLGSub;

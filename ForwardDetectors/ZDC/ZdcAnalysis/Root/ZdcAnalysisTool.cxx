@@ -283,7 +283,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   zdcDataAnalyzer->disableModule(1, 0);
 
 
-  RPDConfig rpdConfig;
+  RPDConfig rpdConfig{};
   rpdConfig.nRows = 4;
   rpdConfig.nColumns = 4;
   rpdConfig.nSamples = m_numSample;
@@ -384,7 +384,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializepp2023()
   zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
 
 
-  RPDConfig rpdConfig;
+  RPDConfig rpdConfig{};
   rpdConfig.nRows = 4;
   rpdConfig.nColumns = 4;
   rpdConfig.nSamples = m_numSample;
@@ -494,7 +494,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2023()
   //                                                                                                          
   zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
   
-  RPDConfig rpdConfig;
+  RPDConfig rpdConfig{};
   rpdConfig.nRows = 4;
   rpdConfig.nColumns = 4;
   rpdConfig.nSamples = m_numSample;

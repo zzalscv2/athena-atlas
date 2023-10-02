@@ -187,9 +187,9 @@ private:
 
   std::vector<std::unique_ptr<RPDDataAnalyzer> > m_rpdDataAnalyzer;
   
-  ZDCDataAnalyzer::ZDCModuleIntArray m_peak2ndDerivMinSamples;
-  ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsHG;
-  ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsLG;
+  ZDCDataAnalyzer::ZDCModuleIntArray m_peak2ndDerivMinSamples{};
+  ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsHG{};
+  ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsLG{};
 
 
   std::shared_ptr<ZDCTriggerEfficiency> m_zdcTriggerEfficiency;
