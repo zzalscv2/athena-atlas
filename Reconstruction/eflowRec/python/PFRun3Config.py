@@ -124,6 +124,9 @@ def PFCfg(inputFlags,**kwargs):
       from ThinningUtils.ThinNegativeEnergyNeutralPFOCfg import ThinNegativeEnergyNeutralPFOCfg
       result.merge(ThinNegativeEnergyNeutralPFOCfg(inputFlags))
 
+    if inputFlags.PF.addCPData:
+      result.addEventAlgo(CompFactory.PFlowCellCPDataDecoratorAlgorithm())
+
     return result
 
 #Configure tau-FE link algorithm - this cannot be in PFCfg because

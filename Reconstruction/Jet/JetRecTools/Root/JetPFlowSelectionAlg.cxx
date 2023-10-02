@@ -127,50 +127,7 @@ StatusCode JetPFlowSelectionAlg::execute(const EventContext& ctx) const {
             neutralFE->setP4(newEnergy/cosh(neutralFE->eta()), 
                             neutralFE->eta(),
                             neutralFE->phi(),
-                            neutralFE->m());
-
-            if (m_addCPData){
-              //compare the list of calorimeter cells in the calorimeter cluster linked to the neutral FE object
-              //to the list of calorimeter cells in the calorimeter clusters linked to the charged FE object
-
-              //get the list of calorimeter cells in the charged cluster
-              const xAOD::CaloCluster* chargedCluster = dynamic_cast<const xAOD::CaloCluster*>(theCluster_charged);
-              const CaloClusterCellLink* chargedClusterCellLinks = chargedCluster->getCellLinks();
-              CaloClusterCellLink::const_iterator chargedClusterCellLinksItr = chargedClusterCellLinks->begin();
-
-              //get the list of calorimeter cells in the neutral cluster
-              const xAOD::CaloCluster* neutralCluster = dynamic_cast<const xAOD::CaloCluster*>(theCluster_neutral);
-              const CaloClusterCellLink* neutralClusterCellLinks = neutralCluster->getCellLinks();
-              CaloClusterCellLink::const_iterator neutralClusterCellLinksItr = neutralClusterCellLinks->begin();
-
-              //list of CaloCell that we will decorate the neutral FE object with
-              std::vector<ElementLink<CaloCellContainer> > cellsToDecorate;
-
-              //loop over the cells in the charged cluster
-              for ( ; chargedClusterCellLinksItr != chargedClusterCellLinks->end(); ++chargedClusterCellLinksItr ) {
-                //get the cell
-                const CaloCell* chargedCell = *chargedClusterCellLinksItr;
-
-                //loop over the cells in the neutral cluster
-                //flag whether the charged cell is in the neutral cluster
-                bool cellInNeutralCluster = false;                  
-                for ( ; neutralClusterCellLinksItr != neutralClusterCellLinks->end(); ++neutralClusterCellLinksItr ) {
-                  //get the cell
-                  const CaloCell* neutralCell = *neutralClusterCellLinksItr;
-
-                  //if the cells are the same, set the flag to true
-                  if (chargedCell == neutralCell) cellInNeutralCluster = true;
-
-                }//loop over the cells in the neutral cluster
-
-                //if the cell is not in the neutral cluster, store the cell in the list of cells to decorate the neutral FE object with
-                if (!cellInNeutralCluster) cellsToDecorate.push_back(ElementLink<CaloCellContainer>("AllCalo", chargedClusterCellLinksItr.index()));
-              }//loop over the cells in the charged cluster
-
-              SG::AuxElement::Decorator< std::vector<ElementLink<CaloCellContainer> > > dec_cellsToDecorate("cellsRemovedFromNeutralFE");
-              dec_cellsToDecorate(*neutralFE) = cellsToDecorate;
-
-            }//if we are adding CP data to the neutral FE object
+                            neutralFE->m());            
 
             ATH_MSG_DEBUG("Updated neutral FlowElement with E, pt, eta and phi: "
                     << neutralFE->e() << ", " << neutralFE->pt() << ", "
