@@ -22,8 +22,6 @@
 #include "SGTools/CurrentEventStore.h"
 #include "StoreGate/ReadHandle.h"
 
-#include <cmath>
-
 //  END OF HEADER FILES INCLUDE
 
 EMTrackMatchBuilder::EMTrackMatchBuilder(const std::string& type,
@@ -223,7 +221,7 @@ EMTrackMatchBuilder::inBroadWindow(const EventContext& ctx,
    * The assumption is when we rescale we should be in the
    * correct neighborhood for a valid track-cluster pair.
    */
-  if (fabs(deltaPhiRes[2]) > m_MaxDeltaPhiRescale) {
+  if (std::abs(deltaPhiRes[2]) > m_MaxDeltaPhiRescale) {
     ATH_MSG_DEBUG("DeltaPhiRescaled above maximum: "
                   << deltaPhiRes[2] << " (max: " << m_MaxDeltaPhiRescale
                   << ")");
@@ -235,11 +233,11 @@ EMTrackMatchBuilder::inBroadWindow(const EventContext& ctx,
    * it might get matched only under the rescaled assumption that
    * should be less sensitive to radiative losses.
    */
-  if (fabs(deltaEta[2]) < m_narrowDeltaEta && deltaPhi[2] < m_narrowDeltaPhi &&
+  if (std::abs(deltaEta[2]) < m_narrowDeltaEta && deltaPhi[2] < m_narrowDeltaPhi &&
       deltaPhi[2] > -m_narrowDeltaPhiBrem) {
     ATH_MSG_DEBUG("Matched with Perigee");
   } else if (m_SecondPassRescale && cluster.et() > trkPB.pt() &&
-             fabs(deltaEtaRes[2]) < m_narrowDeltaEta &&
+             std::abs(deltaEtaRes[2]) < m_narrowDeltaEta &&
              deltaPhiRes[2] < m_narrowDeltaPhiRescale &&
              deltaPhiRes[2] > -m_narrowDeltaPhiRescaleBrem) {
     ATH_MSG_DEBUG("Not Perigee but matched with Rescale");
@@ -396,7 +394,7 @@ EMTrackMatchBuilder::isCandidateMatch(const xAOD::CaloCluster* cluster,
   const double clusterPhi = cluster->phi();
 
   // Avoid clusters with |eta| > 10 or Et less than 10 MeV
-  if (fabs(clusterEta) > 10.0 || Et < 10) {
+  if (std::abs(clusterEta) > 10.0 || Et < 10) {
     return false;
   }
   // Calculate the eta/phi of the cluster as would be seen from the perigee
@@ -407,8 +405,8 @@ EMTrackMatchBuilder::isCandidateMatch(const xAOD::CaloCluster* cluster,
 
   const double clusterEtaCorrected = XYZClusterWrtTrackPerigee.eta();
   // check eta match . Both metrics need to fail in order to disgard the track
-  if ((fabs(clusterEta - trkEta) > 2. * m_broadDeltaEta) &&
-      (fabs(clusterEtaCorrected - trkEta) > 2. * m_broadDeltaEta)) {
+  if ((std::abs(clusterEta - trkEta) > 2. * m_broadDeltaEta) &&
+      (std::abs(clusterEtaCorrected - trkEta) > 2. * m_broadDeltaEta)) {
     ATH_MSG_DEBUG(" Fails broad window eta match (track eta, cluster eta, "
                   "cluster eta corrected): ( "
                   << trkEta << ", " << clusterEta << ", " << clusterEtaCorrected
@@ -437,9 +435,9 @@ EMTrackMatchBuilder::isCandidateMatch(const xAOD::CaloCluster* cluster,
     P4Helpers::deltaPhi(clusterPhiCorrected, trkPhiCorrTrack);
 
   // It has to fail all phi metrics in order to be disgarded
-  if ((fabs(deltaPhiRescaled) > 2. * m_broadDeltaPhi) &&
-      (fabs(deltaPhiTrack) > 2. * m_broadDeltaPhi) &&
-      (fabs(deltaPhiStd) > 2. * m_broadDeltaPhi)) {
+  if ((std::abs(deltaPhiRescaled) > 2. * m_broadDeltaPhi) &&
+      (std::abs(deltaPhiTrack) > 2. * m_broadDeltaPhi) &&
+      (std::abs(deltaPhiStd) > 2. * m_broadDeltaPhi)) {
 
     ATH_MSG_DEBUG(
       "FAILS broad window phi match (track phi, phirotCluster , phiRotTrack , "
@@ -462,9 +460,9 @@ EMTrackMatchBuilder::TrackMatchSorter::operator()(
     return match1.hasPix;
   }
   // sqrt(0.025**2)*sqrt(2)/sqrt(12) ~ 0.01
-  if (fabs(match1.dR - match2.dR) < m_distance) {
+  if (std::abs(match1.dR - match2.dR) < m_distance) {
 
-    if (fabs(match1.seconddR - match2.seconddR) >
+    if (std::abs(match1.seconddR - match2.seconddR) >
         m_distance) { // Can the second distance separate them?
       return match1.seconddR < match2.seconddR;
     }

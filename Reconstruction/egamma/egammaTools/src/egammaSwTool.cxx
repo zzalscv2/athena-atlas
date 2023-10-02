@@ -11,7 +11,6 @@
 #include "GaudiKernel/ListItem.h"
 
 #include <algorithm>
-#include <cmath>
 
 
 egammaSwTool::egammaSwTool(const std::string& type,
