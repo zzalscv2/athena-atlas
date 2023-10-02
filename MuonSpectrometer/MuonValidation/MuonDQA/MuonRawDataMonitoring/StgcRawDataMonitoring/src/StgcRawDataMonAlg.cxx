@@ -196,21 +196,33 @@ void sTgcRawDataMonAlg::fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataCont
       int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal;
       
       if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
-	auto padStationEtaMon = Monitored::Scalar<int>("padStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+	auto padSectorMon = Monitored::Scalar<int>("padSector_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
 	auto padLumiblockMon  = Monitored::Scalar<int>("padLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
-	fill("sTgcLumiblockPad_quad_" + std::to_string(std::abs(stationEta)), padStationEtaMon, padLumiblockMon);
+	fill("sTgcLumiblockPad_quad_" + std::to_string(std::abs(stationEta)), padSectorMon, padLumiblockMon);
+
+	auto padSectorGlobalMon = Monitored::Scalar<int>("padSector", sectorsTotalShifted);
+	auto padLumiblockGlobalMon  = Monitored::Scalar<int>("padLumiblock", lb);
+	fill("sTgcLumiblock", padSectorGlobalMon, padLumiblockGlobalMon);
       }
       
       else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
-	auto stripStationEtaMon = Monitored::Scalar<int>("stripStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+	auto stripSectorMon = Monitored::Scalar<int>("stripSector_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
 	auto stripLumiblockMon  = Monitored::Scalar<int>("stripLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
-	fill("sTgcLumiblockStrip_quad_" + std::to_string(std::abs(stationEta)), stripStationEtaMon, stripLumiblockMon);
+	fill("sTgcLumiblockStrip_quad_" + std::to_string(std::abs(stationEta)), stripSectorMon, stripLumiblockMon);
+	
+	auto stripSectorGlobalMon = Monitored::Scalar<int>("stripSector", sectorsTotalShifted);
+	auto stripLumiblockGlobalMon  = Monitored::Scalar<int>("stripLumiblock", lb);
+	fill("sTgcLumiblock", stripSectorGlobalMon, stripLumiblockGlobalMon);
       }
       
       else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
-	auto wireStationEtaMon = Monitored::Scalar<int>("wireStationEta_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
+	auto wireSectorMon = Monitored::Scalar<int>("wireSector_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), sectorsTotalShifted);
 	auto wireLumiblockMon  = Monitored::Scalar<int>("wireLumiblock_quad_" + std::to_string(std::abs(stationEta)) + "_layer_" + std::to_string(layer), lb);
-	fill("sTgcLumiblockWire_quad_" + std::to_string(std::abs(stationEta)), wireStationEtaMon, wireLumiblockMon);
+	fill("sTgcLumiblockWire_quad_" + std::to_string(std::abs(stationEta)), wireSectorMon, wireLumiblockMon);
+	
+	auto wireSectorGlobalMon = Monitored::Scalar<int>("wireSector", sectorsTotalShifted);
+	auto wireLumiblockGlobalMon  = Monitored::Scalar<int>("wireLumiblock", lb);
+	fill("sTgcLumiblock", wireSectorGlobalMon, wireLumiblockGlobalMon);
       }
     }
   }
