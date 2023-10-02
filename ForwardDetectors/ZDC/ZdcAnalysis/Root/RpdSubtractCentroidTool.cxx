@@ -204,10 +204,10 @@ StatusCode RpdSubtractCentroidTool::recoZdcModules(const xAOD::ZdcModuleContaine
     std::vector<std::vector<RpdChannelData>>(4, std::vector<RpdChannelData>(4)),
     std::vector<std::vector<RpdChannelData>>(4, std::vector<RpdChannelData>(4))
   };
-  std::array<unsigned int, 2> rpdSideStatus;
-  std::array<unsigned int, 2> zdcSideStatus;
-  std::array<float, 2> zdcFinalEnergy;
-  std::array<float, 2> emAmplitude;
+  std::array<unsigned int, 2> rpdSideStatus{};
+  std::array<unsigned int, 2> zdcSideStatus{};
+  std::array<float, 2> zdcFinalEnergy{};
+  std::array<float, 2> emAmplitude{};
 
   ATH_MSG_DEBUG("Starting event processing");
   ATH_MSG_DEBUG("LB=" << lumiBlock);
