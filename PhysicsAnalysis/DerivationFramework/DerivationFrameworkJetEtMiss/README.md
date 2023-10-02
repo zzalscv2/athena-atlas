@@ -18,6 +18,7 @@ Test file: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFramework
 * `JETM4.py`: *in situ* gamma+jets
 * `JETM5.py`: random cones in zero bias data
 * `JETM6.py`: tagging scale factors
+* `JETM7.py`: by-vertex jet reconstruction
 * `JETM10.py`: MET trigger studies
 * `JETM11.py`: MET trigger studies in e+mu events
 * `JETM12.py` : E/p studies in W to tau + nu events

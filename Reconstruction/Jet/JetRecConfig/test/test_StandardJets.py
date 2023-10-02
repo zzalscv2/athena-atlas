@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 # should choose a better default ??
@@ -45,6 +45,9 @@ tlog = Logging.logging.getLogger('test_StandardJets')
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 flags.Input.Files = args.filesIn.split(",")
+flags.Exec.OutputLevel = msgLvl
+
+
 
 # Flags relating to multithreaded execution
 flags.Concurrency.NumThreads = args.nThreads
@@ -103,12 +106,14 @@ elif args.jetType=='VR':
 # Derivation test
 elif args.jetType=='deriv':
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo, AntiKt4EMPFlow, AntiKt4Truth, AntiKtVR30Rmax4Rmin02PV0Track
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlowByVertex
     from JetRecConfig.StandardLargeRJets import AntiKt10LCTopoTrimmed, AntiKt10TruthTrimmed
     # Not in AOD
-    jetdefs = [AntiKt4Truth,AntiKtVR30Rmax4Rmin02PV0Track,AntiKt10TruthTrimmed,AntiKt10LCTopoTrimmed]
+    jetdefs = [AntiKt4Truth,AntiKtVR30Rmax4Rmin02PV0Track,AntiKt10TruthTrimmed,AntiKt10LCTopoTrimmed, AntiKt4EMPFlowByVertex]
     # In AOD, need renaming
     DerivAntiKt4EMTopo = AntiKt4EMTopo.clone(prefix="Deriv",modifiers=list(AntiKt4EMTopo.modifiers)+["QGTagging"])
     DerivAntiKt4EMPFlow = AntiKt4EMPFlow.clone(prefix="Deriv",modifiers=list(AntiKt4EMPFlow.modifiers)+["QGTagging","fJVT","NNJVT"])
+
     jetdefs += [DerivAntiKt4EMTopo,DerivAntiKt4EMPFlow]
     alljetdefs = jetdefs
 
@@ -165,6 +170,9 @@ for j in alljetdefs:
     key = j.fullname()
     outputlist += [f"xAOD::JetContainer#{key}",
                    f"xAOD::JetAuxContainer#{key}Aux.-PseudoJet"]
+    if "ByVertex" in key:
+        outputlist += ["xAOD::VertexContainer#PrimaryVertices"]
+
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 cfg.merge(OutputStreamCfg(flags,"xAOD",ItemList=outputlist))

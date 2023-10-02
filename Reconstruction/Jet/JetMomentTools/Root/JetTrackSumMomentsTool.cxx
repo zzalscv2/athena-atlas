@@ -88,8 +88,20 @@ StatusCode JetTrackSumMomentsTool::decorate(const xAOD::JetContainer& jets) cons
       return StatusCode::FAILURE;
     }
 
-    const xAOD::Vertex* HSvertex = findHSVertex(vertexContainer);
-
+    const xAOD::Vertex* HSvertex = nullptr;
+    if (!m_useOriginVertex)
+      HSvertex = findHSVertex(vertexContainer);
+    else
+    {
+      HSvertex = jet->getAssociatedObject<xAOD::Vertex>("OriginVertex");
+      if (!HSvertex) // nullptr if the attribute doesn't exist
+      {
+        ATH_MSG_ERROR("OriginVertex was requested, but the jet does not contain an OriginVertex");
+        return StatusCode::FAILURE;
+      }
+      else
+        ATH_MSG_VERBOSE("JetTrackSumMomentsTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+    }
     const std::pair<float,float> tracksums = getJetTrackSums(HSvertex, tracks, tva);
 
     trackSumPtHandle(*jet) = tracksums.first;

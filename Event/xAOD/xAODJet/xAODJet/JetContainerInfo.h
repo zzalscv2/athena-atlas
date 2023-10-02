@@ -1,7 +1,7 @@
 // this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODJET_JETALGORITHMTYPE_H
@@ -95,6 +95,7 @@ namespace xAOD {
       HI,
       HIClusters,
       PFlowCustomVtx, // for testing
+      EMPFlowByVertex,
       Other = 100,
       Uncategorized= 1000
     };

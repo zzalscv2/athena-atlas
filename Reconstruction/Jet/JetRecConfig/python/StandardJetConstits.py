@@ -283,6 +283,9 @@ _stdSeqList = [
     JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
                        label='EMPFlow'),
     
+    # Particle Flow Objects with several neutral PFO copies for by-vertex reconstruction
+    JetInputConstitSeq("GPFlowByVtx", xAODType.FlowElement, ["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSByVtxGParticleFlowObjects',
+                       label='EMPFlowByVertex', byVertex=True),
     
     # Particle Flow Objects with Constituent Subtraction + SoftKiller
     JetInputConstitSeq("EMPFlowCSSK", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
@@ -382,7 +385,8 @@ _stdModList = [
                        # See StandardJetContext.py for the default values.
                        prereqs=[inputsFromContext("Vertices")],
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),
-                                       WeightPFOTool= _getPFOTool ) ), 
+                                       WeightPFOTool= _getPFOTool,
+                                       DoByVertex = lambda jdef, _: jdef.byVertex) ), 
               
     JetConstitModifier("CHS",    "ChargedHadronSubtractionTool",
                        # get the track properties from the context with wich jet will be configured with propFromContext
@@ -393,6 +397,7 @@ _stdModList = [
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),                                       
                                        TrackVertexAssociation=propFromContext("TVA"),
                                        UseTrackToVertexTool= lambda jdef,_: jdef.context in ['default', 'HL_LHC'], 
+                                       DoByVertex = lambda jdef, _: jdef.byVertex
                                        )),
     
     # Pileup suppression

@@ -27,6 +27,7 @@
 
 #include "JetRec/PseudoJetContainer.h"
 #include "JetRec/JetFromPseudojet.h"
+#include "JetRec/PseudoJetTranslator.h"
 #include "JetEDM/PseudoJetVector.h"
 #include "JetEDM/ClusterSequence.h"
 
@@ -35,6 +36,8 @@
 #include "fastjet/JetDefinition.hh"
 
 #include "xAODJet/JetAuxContainer.h"
+#include "xAODTracking/VertexContainer.h"
+
 
 class JetClusterer
 : public asg::AsgTool,
@@ -58,7 +61,13 @@ protected:
 
   /// Build the area definition when running with area calculation. The seedsok flag is set to false when error occurs when retrieving event/run number to initiate the seeds.
   fastjet::AreaDefinition buildAreaDefinition(bool &seedsok) const ;
+
+  /// Used to create the cluster sequence
+  std::unique_ptr<fastjet::ClusterSequence> buildClusterSequence(const PseudoJetVector* pseudoJetvector) const ;
     
+  /// translate to xAOD::Jet
+  void processPseudoJet(const fastjet::PseudoJet& pj, const PseudoJetContainer& pjCont, xAOD::JetContainer* jets, const xAOD::Vertex* vertex) const;
+
   /// Handle to EventInfo. This is used to get the evt&run number to set the Ghost area random seeds.
   SG::ReadHandleKey<xAOD::EventInfo> m_eventinfokey{"EventInfo"};
 
@@ -81,7 +90,7 @@ protected:
   
   // internal data set from properties during initialize()
   fastjet::JetAlgorithm m_fjalg;
-
+  bool m_useArea;
   
   Gaudi::Property<float> m_minrad        {this, "VariableRMinRadius", -1.0, "Variable-R min radius" };
   Gaudi::Property<float> m_massscale     {this, "VariableRMassScale", -1.0, "Variable-R mass scale" };

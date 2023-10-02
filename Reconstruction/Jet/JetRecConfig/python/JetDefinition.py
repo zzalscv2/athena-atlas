@@ -81,6 +81,7 @@ class JetDefinition(object):
                  VRMinR = -1.0, # Minimum radius for VR jet finding
                  VRMassSc = -1.0, # Mass scale for VR jet finding, in MeV
                  ghostarea = 0.01, # area resolution when evaluating jet area using "ghosts"
+                 byVertex = False, # Reconstruct the jets by vertex
                  lock = False,        # lock the properties of this instance to avoid accidental overwrite after __init__
     ):     
 
@@ -116,6 +117,7 @@ class JetDefinition(object):
         self._prereqOrder = [] 
         self._internalAtt = {}
         self._cflags = None # pointer to AthenaConfiguration.ConfigFlags. Mainly to allow to invoke building of input dependencies which are outside Jet domain during std reco
+        self.byVertex = byVertex
         self._locked = lock
 
             
@@ -411,6 +413,7 @@ class JetInputType(IntEnum):
     PFlow=auto()      
     LCPFlow=auto()      # LC PFlow
     EMPFlow=auto()      # EM Pflow at EM scale
+    EMPFlowByVertex=auto() # EM Pflow by vertex
     EMCPFlow=auto()     # EM Pflow calibrated to LC scale
     Jet=auto()
     LCTopoOrigin=auto()
@@ -476,6 +479,7 @@ class JetInputConstit(object):
         jetinputtype=None,  # The JetInputType category. Can be passed as a string.
                             #    if None, set according to objtype.
         filterfn=_condAlwaysPass,
+        byVertex=False,
         lock=False,  # lock all properties of this instance
     ):
 
@@ -491,7 +495,7 @@ class JetInputConstit(object):
         if isinstance(jetinputtype, str):
             jetinputtype = JetInputType[jetinputtype]
         self.jetinputtype = jetinputtype
-
+        self.byVertex = byVertex
         self._locked = lock
 
     @make_lproperty
@@ -537,11 +541,12 @@ class JetInputConstitSeq(JetInputConstit):
                  prereqs = [],     # will contain references to JetInputExternal 
                  label = None,
                  jetinputtype=None,
-                 filterfn=_condAlwaysPass,                 
+                 filterfn=_condAlwaysPass,
+                 byVertex=False,
                  lock = False,    # lock all properties of this instance
     ):    
         
-        JetInputConstit.__init__(self,name, objtype, outputname, prereqs=prereqs, jetinputtype=jetinputtype, filterfn=filterfn,label=label,lock=False, finalinit=False, )
+        JetInputConstit.__init__(self,name, objtype, outputname, prereqs=prereqs, jetinputtype=jetinputtype, filterfn=filterfn,label=label,lock=False, finalinit=False, byVertex=byVertex)
         self.inputname  = inputname or name
         self.modifiers = modifiers
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Source file for the JetConstituentModSequence.h
@@ -14,15 +14,8 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
-#include "xAODPFlow/PFO.h"
-#include "xAODPFlow/PFOContainer.h"
-#include "xAODPFlow/PFOAuxContainer.h"
-#include "xAODPFlow/TrackCaloCluster.h"
-#include "xAODPFlow/TrackCaloClusterContainer.h"
-#include "xAODPFlow/TrackCaloClusterAuxContainer.h"
-#include "xAODPFlow/FlowElement.h"
-#include "xAODPFlow/FlowElementContainer.h"
-#include "xAODPFlow/FlowElementAuxContainer.h"
+#include "xAODTracking/VertexContainer.h"
+
 
 #include "AsgDataHandles/WriteHandle.h"
 
@@ -47,6 +40,7 @@ StatusCode JetConstituentModSequence::initialize() {
 
 
   ATH_CHECK( m_modifiers.retrieve() );
+  ATH_CHECK(m_vertexContainerKey.initialize(m_byVertex));
 
 #ifndef XAOD_ANALYSIS
   ATH_CHECK( m_monTool.retrieve( DisableTool{m_monTool.empty()} ) );
@@ -185,13 +179,12 @@ int JetConstituentModSequence::execute() const {
     }
 
     case xAOD::Type::ParticleFlow: {
-      auto sc = copyModRecordPFO();
+      auto sc = copyModRecordFlowLike<xAOD::PFOContainer, xAOD::PFO>(m_inNeutralPFOKey, m_inChargedPFOKey, m_outNeutralPFOKey, m_outChargedPFOKey, m_outAllPFOKey);
       if(!sc.isSuccess()) return 1;
       break;
     }
-
     case xAOD::Type::FlowElement: {
-      auto sc = copyModRecordFE();
+      auto sc = copyModRecordFlowLike<xAOD::FlowElementContainer, xAOD::FlowElement>(m_inNeutralFEKey, m_inChargedFEKey, m_outNeutralFEKey, m_outChargedFEKey, m_outAllFEKey);
       if(!sc.isSuccess()) return 1;
       break;
     }
@@ -205,124 +198,13 @@ int JetConstituentModSequence::execute() const {
 
     default: {
       ATH_MSG_WARNING( "Unsupported input type " << m_inputType );
-      return 1;
     }
-    
+
   }
 
-#ifndef XAOD_ANALYSIS
-  auto mon = Monitored::Group(m_monTool, t_exec);
-#endif
-  return 0;
+  #ifndef XAOD_ANALYSIS
+    auto mon = Monitored::Group(m_monTool, t_exec);
+  #endif
+    return 0;
 }
 
-StatusCode
-JetConstituentModSequence::copyModRecordPFO() const {
-
-  // Cannot be handled the same way as other objects (e.g. clusters),
-  // because the data is split between two containers, but we need
-  // information from both to do the modifications.
-  //
-  // The logic is:
-  //   1. Copy the charged & neutral containers independently
-  //   2. Merge into a combined view container
-  //   3. Modify the combined container
-
-  // 1. Retrieve the input containers
-  auto inNeutralPFOHandle = makeHandle(m_inNeutralPFOKey);
-  auto inChargedPFOHandle = makeHandle(m_inChargedPFOKey);
-  if(!inNeutralPFOHandle.isValid()){
-    ATH_MSG_WARNING("Unable to retrieve input PFO containers \""
-                    << m_inNeutralPFOKey.key() << "\" and \""
-                    << m_inChargedPFOKey.key() << "\"");
-    return StatusCode::FAILURE;
-  }
-
-  //    Copy the input containers individually, set I/O option and record
-  //    Neutral PFOs
-  std::pair<xAOD::PFOContainer*, xAOD::ShallowAuxContainer* > neutralCopy =
-    xAOD::shallowCopyContainer(*inNeutralPFOHandle);
-  neutralCopy.second->setShallowIO(m_saveAsShallow);
-  //
-  auto outNeutralPFOHandle = makeHandle(m_outNeutralPFOKey);
-  ATH_CHECK(outNeutralPFOHandle.record(std::unique_ptr<xAOD::PFOContainer>(neutralCopy.first),
-                                       std::unique_ptr<xAOD::ShallowAuxContainer>(neutralCopy.second)));
-  //    Charged PFOs
-  std::pair<xAOD::PFOContainer*, xAOD::ShallowAuxContainer* > chargedCopy =
-    xAOD::shallowCopyContainer(*inChargedPFOHandle);
-  chargedCopy.second->setShallowIO(m_saveAsShallow);
-  //
-  auto outChargedPFOHandle = makeHandle(m_outChargedPFOKey);
-  ATH_CHECK(outChargedPFOHandle.record(std::unique_ptr<xAOD::PFOContainer>(chargedCopy.first),
-                                       std::unique_ptr<xAOD::ShallowAuxContainer>(chargedCopy.second)));
-
-  // 2. Set up output handle for merged (view) container and record
-  auto outAllPFOHandle = makeHandle(m_outAllPFOKey);
-  ATH_CHECK(outAllPFOHandle.record(std::make_unique<xAOD::PFOContainer>(SG::VIEW_ELEMENTS)));
-  //    Merge charged & neutral PFOs into the viw container
-  (*outAllPFOHandle).assign((*outNeutralPFOHandle).begin(), (*outNeutralPFOHandle).end());
-  (*outAllPFOHandle).insert((*outAllPFOHandle).end(),
-			    (*outChargedPFOHandle).begin(), 
-			    (*outChargedPFOHandle).end());
-
-  // 3. Now process modifications on all PFOs
-  for (auto t : m_modifiers) {ATH_CHECK(t->process( &*outAllPFOHandle));}
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode JetConstituentModSequence::copyModRecordFE() const {
-
-  // Cannot be handled the same way as other objects (e.g. clusters),
-  // because the data is split between two containers, but we need
-  // information from both to do the modifications.
-  //
-  // The logic is:
-  //   1. Copy the charged & neutral containers independently
-  //   2. Merge into a combined view container
-  //   3. Modify the combined container
-
-  // 1. Retrieve the input containers
-  SG::ReadHandle<xAOD::FlowElementContainer> inNeutralFEHandle = makeHandle(m_inNeutralFEKey);
-  SG::ReadHandle<xAOD::FlowElementContainer> inChargedFEHandle = makeHandle(m_inChargedFEKey);
-  if(!inNeutralFEHandle.isValid()){
-    ATH_MSG_WARNING("Unable to retrieve input FlowElement containers \""
-                    << m_inNeutralFEKey.key() << "\" and \""
-                    << m_inChargedFEKey.key() << "\"");
-    return StatusCode::FAILURE;
-  }
-
-  //    Copy the input containers individually, set I/O option and record
-  //    Neutral FEs
-  std::pair<xAOD::FlowElementContainer*, xAOD::ShallowAuxContainer* > neutralCopy = xAOD::shallowCopyContainer(*inNeutralFEHandle);
-  neutralCopy.second->setShallowIO(m_saveAsShallow);
-  xAOD::setOriginalObjectLink(*inNeutralFEHandle, *neutralCopy.first);
-
-  
-  SG::WriteHandle<xAOD::FlowElementContainer> outNeutralFEHandle = makeHandle(m_outNeutralFEKey);
-  ATH_CHECK(outNeutralFEHandle.record(std::unique_ptr<xAOD::FlowElementContainer>(neutralCopy.first),
-                                      std::unique_ptr<xAOD::ShallowAuxContainer>(neutralCopy.second)));
-  //    Charged FEs
-  std::pair<xAOD::FlowElementContainer*, xAOD::ShallowAuxContainer* > chargedCopy = xAOD::shallowCopyContainer(*inChargedFEHandle);
-  chargedCopy.second->setShallowIO(m_saveAsShallow);
-  xAOD::setOriginalObjectLink(*inChargedFEHandle, *chargedCopy.first);
-
-  
-  SG::WriteHandle<xAOD::FlowElementContainer> outChargedFEHandle = makeHandle(m_outChargedFEKey);
-  ATH_CHECK(outChargedFEHandle.record(std::unique_ptr<xAOD::FlowElementContainer>(chargedCopy.first),
-                                      std::unique_ptr<xAOD::ShallowAuxContainer>(chargedCopy.second)));
-
-  // 2. Set up output handle for merged (view) container and record
-  SG::WriteHandle<xAOD::FlowElementContainer> outAllFEHandle = makeHandle(m_outAllFEKey);
-  ATH_CHECK(outAllFEHandle.record(std::make_unique<xAOD::FlowElementContainer>(SG::VIEW_ELEMENTS)));
-  //    Merge charged & neutral FEs into the view container
-  (*outAllFEHandle).assign((*outNeutralFEHandle).begin(), (*outNeutralFEHandle).end());
-  (*outAllFEHandle).insert((*outAllFEHandle).end(),
-			   (*outChargedFEHandle).begin(), 
-			   (*outChargedFEHandle).end());
-
-  // 3. Now process modifications on all FEs
-  for (auto t : m_modifiers) {ATH_CHECK(t->process(&*outAllFEHandle));}
-
-  return StatusCode::SUCCESS;
-}

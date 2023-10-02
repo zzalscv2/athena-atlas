@@ -1,7 +1,7 @@
 // this file is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //JetConstituentModSequence.h
@@ -16,11 +16,7 @@
 #include <string>
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODBase/IParticleContainer.h"
-#include "xAODCaloEvent/CaloClusterContainer.h"
-#include "xAODPFlow/TrackCaloClusterContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODPFlow/PFOContainer.h"
-#include "xAODPFlow/FlowElementContainer.h"
+
 
 #include "AsgTools/AsgTool.h"
 #include "JetInterface/IJetExecuteTool.h"
@@ -31,6 +27,20 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "xAODCore/ShallowCopy.h"
 #include "AsgTools/PropertyWrapper.h"
+
+#include "xAODPFlow/PFO.h"
+#include "xAODPFlow/PFOContainer.h"
+#include "xAODPFlow/PFOAuxContainer.h"
+#include "xAODPFlow/TrackCaloCluster.h"
+#include "xAODPFlow/TrackCaloClusterContainer.h"
+#include "xAODPFlow/TrackCaloClusterAuxContainer.h"
+#include "xAODPFlow/FlowElement.h"
+#include "xAODPFlow/FlowElementContainer.h"
+#include "xAODPFlow/FlowElementAuxContainer.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "AsgDataHandles/WriteHandle.h"
+
 
 #ifndef XAOD_ANALYSIS
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
@@ -47,6 +57,8 @@ class JetConstituentModSequence: public asg::AsgTool, virtual public IJetExecute
 protected:
   Gaudi::Property<std::string> m_inputContainer {this, "InputContainer", "", "The input container for the sequence"};
   Gaudi::Property<std::string> m_outputContainer = {this, "OutputContainer", "", "The output container for the sequence"};
+  Gaudi::Property<bool> m_byVertex = {this, "DoByVertex", false, "True if we should match to each primary vertex, not just PV0"};
+  SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey{this, "VertexContainerKey", "PrimaryVertices", "Reconstructed primary vertex container name"};
 
   // P-A : the actual type
   // Define as a basic integer type because Gaudi
@@ -85,15 +97,16 @@ protected:
 
   SG::WriteHandleKey<xAOD::FlowElementContainer> m_outAllFEKey{this, "OutAllFEKey", "", "WriteHandleKey for all modified FlowElements"};
 
-  StatusCode copyModRecordPFO() const;
-  StatusCode copyModRecordFE() const;
-
   /// helper function to cast, shallow copy and record a container.
 
   template<class T>
   StatusCode
   copyModRecord(const SG::ReadHandleKey<T>&,
                 const SG::WriteHandleKey<T>&) const;
+
+  template<class T, class U>
+  StatusCode
+  copyModRecordFlowLike(const SG::ReadHandleKey<T>&, const SG::ReadHandleKey<T>&, const SG::WriteHandleKey<T>&, const SG::WriteHandleKey<T>&, const SG::WriteHandleKey<T>&) const;
 };
 
 template<class T>
@@ -126,5 +139,97 @@ JetConstituentModSequence::copyModRecord(const SG::ReadHandleKey<T>& inKey,
   
   return StatusCode::SUCCESS;
 }
+
+template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFlowLike(const SG::ReadHandleKey<T>& inNeutralKey, const SG::ReadHandleKey<T>& inChargedKey, const SG::WriteHandleKey<T>& outNeutralKey, const SG::WriteHandleKey<T>& outChargedKey, const SG::WriteHandleKey<T>& outAllKey) const {
+
+  // Cannot be handled the same way as other objects (e.g. clusters),
+  // because the data is split between two containers, but we need
+  // information from both to do the modifications.
+  //
+  // The logic is:
+  //   1. Copy the charged container via a shallow copy
+  //   2. Create N copies of neutral container for by-vertex reconstruction OR
+  //      Create a single copy of neutral container for regular jet reconstruction
+  //   3. Merge into a combined view container
+  //   4. Modify the combined container
+
+  // 1. Retrieve the input containers
+  SG::ReadHandle<T> inNeutralHandle = makeHandle(inNeutralKey);
+  SG::ReadHandle<T> inChargedHandle = makeHandle(inChargedKey);
+  if(!inNeutralHandle.isValid()){
+    ATH_MSG_WARNING("Unable to retrieve input containers \""
+                    << inNeutralKey.key() << "\" and \""
+                    << inChargedKey.key() << "\"");
+    return StatusCode::FAILURE;
+  }
+
+  unsigned numNeutralCopies = 1;
+  if (m_byVertex){
+    // Retrieve Primary Vertices
+    auto handle = SG::makeHandle(m_vertexContainerKey);
+    if (!handle.isValid()){
+        ATH_MSG_WARNING(" This event has no primary vertex container" );
+        return StatusCode::FAILURE;
+    }
+    
+    const xAOD::VertexContainer* vertices = handle.cptr();
+    if(vertices->empty()){
+        ATH_MSG_WARNING(" Failed to retrieve valid primary vertex container" );
+        return StatusCode::FAILURE;
+    } 
+    numNeutralCopies = static_cast<unsigned>(vertices->size());
+  }
+
+  // Copy the input containers individually, set I/O option and record
+  // Charged elements
+  std::pair<T*, xAOD::ShallowAuxContainer* > chargedCopy = xAOD::shallowCopyContainer(*inChargedHandle);
+  chargedCopy.second->setShallowIO(m_saveAsShallow);
+  xAOD::setOriginalObjectLink(*inChargedHandle, *chargedCopy.first);
+
+  SG::WriteHandle<T> outChargedHandle = makeHandle(outChargedKey);
+  ATH_CHECK(outChargedHandle.record(std::unique_ptr<T>(chargedCopy.first),
+                                    std::unique_ptr<xAOD::ShallowAuxContainer>(chargedCopy.second)));
+
+  SG::WriteHandle<T> outNeutralHandle = makeHandle(outNeutralKey);
+  // Define the accessor which will add the index
+  const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+
+  // Create the new container and its auxiliary store.
+  auto neutralCopies = std::make_unique<T>();
+  auto neutralCopiesAux = std::make_unique<xAOD::AuxContainerBase>();
+  neutralCopies->setStore(neutralCopiesAux.get()); //< Connect the two
+  // Is it possible to make the neutral copies shallow ..?
+  // neutralCopiesAux->setShallowIO(m_saveAsShallow);
+
+  // Neutral elements
+  // Create N copies and set copy index
+  for (unsigned i = 0; i < numNeutralCopies; i++){
+    for (const U* fe : *inNeutralHandle) {
+        U* copy = new U();
+        neutralCopies->push_back(copy);
+        *copy = *fe;
+        copyIndex(*copy) = i;
+        xAOD::setOriginalObjectLink(*fe, *copy);
+    }
+  }
+
+  ATH_CHECK(outNeutralHandle.record(std::move(neutralCopies),
+                                      std::move(neutralCopiesAux))
+  );
+
+
+  // 2. Set up output handle for merged (view) container and record
+  SG::WriteHandle<T> outAllHandle = makeHandle(outAllKey);
+  ATH_CHECK(outAllHandle.record(std::make_unique<T>(SG::VIEW_ELEMENTS)));
+  (*outAllHandle).assign((*outNeutralHandle).begin(), (*outNeutralHandle).end());
+  (*outAllHandle).insert((*outAllHandle).end(),
+      (*outChargedHandle).begin(), 
+      (*outChargedHandle).end());
+
+  // 3. Now process modifications on all elements
+  for (auto t : m_modifiers) {ATH_CHECK(t->process(&*outAllHandle));}
+  return StatusCode::SUCCESS;
+}
+
 
 #endif

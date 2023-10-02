@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 JetRecConfig: A helper module for configuring jet reconstruction     
@@ -355,27 +355,25 @@ def getPJContName( jetOrConstitdef, suffix=None):
     end = '' if suffix is None else f'_{suffix}'
     return f'PseudoJet{cdef.containername}{end}'
     
-def getConstitPJGAlg(constitdef,suffix=None, flags=None):
+def getConstitPJGAlg(constitdef, suffix=None, flags=None):
     """returns a configured PseudoJetAlgorithm which converts the inputs defined by constitdef into fastjet::PseudoJet
 
     IMPORTANT : constitdef must have its dependencies solved (i.e. it must result from a solveDependencies() call)
     
     the flags argument is TEMPORARY and will be removed once further dev on PseudoJetAlgorithm is done (see comment below)
     """
-
     jetlog.debug("Getting PseudoJetAlg for label {0} from {1}".format(constitdef.name,constitdef.inputname))
 
     end = '' if suffix is None else f'_{suffix}'
     full_label = constitdef.label + end
-
     pjgalg = CompFactory.PseudoJetAlgorithm(
         "pjgalg_"+constitdef.containername+end,
         InputContainer = constitdef.containername,
         OutputContainer =getPJContName(constitdef,suffix),
         Label = full_label,
-        SkipNegativeEnergy=True
+        SkipNegativeEnergy=True,
+        DoByVertex=constitdef.byVertex
         )
-
     
     # This is a terrible temporary hack to enable running in cosmic runs.
     # There should not be any Properties setting here in a helper function.
@@ -427,18 +425,29 @@ def getJetRecAlg( jetdef, monTool = None, ftf_suffix = ''):
     IMPORTANT : jetdef must have its dependencies solved (i.e. it must result from solveDependencies() )
     """
     pjContNames = jetdef._internalAtt['finalPJContainer']
-    jclust = CompFactory.JetClusterer(
-        "builder",
-        JetAlgorithm = jetdef.algorithm,#
-        JetRadius = jetdef.radius,
-        PtMin = jetdef.ptmin,
-        InputPseudoJets = pjContNames,#
-        GhostArea = jetdef.ghostarea, 
-        JetInputType = int(jetdef.inputdef.jetinputtype),
-        RandomOption = 1,
-        VariableRMinRadius = jetdef.VRMinRadius,
-        VariableRMassScale = jetdef.VRMassScale,
-    )
+
+    kwargs = {
+        "JetAlgorithm": jetdef.algorithm,
+        "JetRadius": jetdef.radius,
+        "PtMin": jetdef.ptmin,
+        "InputPseudoJets": pjContNames,
+        "GhostArea": jetdef.ghostarea,
+        "JetInputType": int(jetdef.inputdef.jetinputtype),
+        "RandomOption": 1,
+        "VariableRMinRadius": jetdef.VRMinRadius,
+        "VariableRMassScale": jetdef.VRMassScale
+    }
+
+    if jetdef.byVertex:
+        jclust = CompFactory.JetClustererByVertex(
+            "builder",
+            **kwargs
+        )
+    else:
+        jclust = CompFactory.JetClusterer(
+            "builder",
+            **kwargs
+        )
 
     mods = getJetModifierTools(jetdef)
 
@@ -585,11 +594,14 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
         inputcontainer = chopPFO(inputcontainer)
         outputcontainer = chopPFO(outputcontainer)
 
+    doByVertex = constitSeq.byVertex
+
     modseq = CompFactory.JetConstituentModSequence(seqname,
                                                    InputType=inputtype,
                                                    OutputContainer = outputcontainer,
                                                    InputContainer= inputcontainer,
                                                    Modifiers = modlist,
+                                                   DoByVertex = doByVertex
     )
     if monTool:
         modseq.MonTool = monTool

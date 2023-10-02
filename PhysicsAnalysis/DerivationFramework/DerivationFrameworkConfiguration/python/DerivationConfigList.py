@@ -100,6 +100,8 @@ from DerivationFrameworkJetEtMiss.JETM4 import JETM4Cfg
 from DerivationFrameworkJetEtMiss.JETM5 import JETM5Cfg
 # JETM6: tagging SFs
 from DerivationFrameworkJetEtMiss.JETM6 import JETM6Cfg
+# JETM7: by-vertex jet reconstruction
+from DerivationFrameworkJetEtMiss.JETM7 import JETM7Cfg
 # JETM10: MET trigger
 from DerivationFrameworkJetEtMiss.JETM10 import JETM10Cfg
 # JETM11: MET trigger (e + mu skimming)
@@ -138,7 +140,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg', 'EGAM11Cfg', 'EGAM12Cfg',
-           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg',
+           'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg','JETM7Cfg',
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg',
            'TRIG8Cfg','L1CALO1Cfg',
            'MUON1Cfg' 

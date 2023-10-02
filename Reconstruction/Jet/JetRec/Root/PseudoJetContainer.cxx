@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // PseudoJetContainer.cxx
 
 #include "JetRec/PseudoJetContainer.h"
 #include "JetRec/IConstituentExtractor.h"
+#include "JetEDM/VertexIndexedConstituentUserInfo.h"
 #include <map>
 #include "xAODJet/Jet.h"
 #include "fastjet/PseudoJet.hh"
@@ -109,7 +110,34 @@ bool PseudoJetContainer::extractConstituents(xAOD::Jet& jet,
   return extractConstituents(jet, inConstituents);
 }
 
+// fill xAOD jet with correct by-vertex consituents and ghosts
+bool PseudoJetContainer::extractByVertexConstituents(xAOD::Jet& jet, const PseudoJet& finalPJ, const xAOD::Vertex* vertex) const {
+  std::vector<PseudoJet> allInConstituents = finalPJ.constituents();
+  std::vector<PseudoJet> byVertexConstituents;
+  for (PseudoJet& constituent: allInConstituents){
+    if (constituent.has_user_info<jet::VertexIndexedConstituentUserInfo>()){
+      const jet::VertexIndexedConstituentUserInfo& userInfo = constituent.user_info<jet::VertexIndexedConstituentUserInfo>();
+      const xAOD::Vertex* originVertex = userInfo.vertex();
+
+      // if constituent has relevant user info, only accept it if it matches the vertex in question
+      if (originVertex == vertex){
+        byVertexConstituents.emplace_back(constituent);
+      }
+    }
+    else{
+      // this must be a ghost constituent, since it does not have userinfo
+      byVertexConstituents.emplace_back(constituent);
+    }
+  }
+  return extractConstituents(jet, byVertexConstituents);
+}
+
 const std::vector<PseudoJet>* PseudoJetContainer::casVectorPseudoJet() const {
+  if (m_debug){checkInvariants("asVectorPseudoJet()");}
+  return &m_allConstituents;
+}
+
+std::vector<PseudoJet>* PseudoJetContainer::casVectorPseudoJet() {
   if (m_debug){checkInvariants("asVectorPseudoJet()");}
   return &m_allConstituents;
 }
