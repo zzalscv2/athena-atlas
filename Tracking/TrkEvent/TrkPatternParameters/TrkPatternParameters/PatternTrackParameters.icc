@@ -5,7 +5,7 @@
 namespace Trk {
 
 inline PatternTrackParameters::PatternTrackParameters()
-    : ParametersBase<5, Trk::Charged>() {
+    : ParametersCommon<5, Trk::Charged>() {
   m_parameters.setZero();
 }
 

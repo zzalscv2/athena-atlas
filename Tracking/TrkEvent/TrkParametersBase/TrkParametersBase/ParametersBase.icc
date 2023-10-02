@@ -6,253 +6,133 @@
 // ParametersBase.icc, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // Trk
 #include "TrkEventPrimitives/ParamDefs.h"
 // STD
-#include <ostream>
-#include <utility>
-#include <sstream>
 #include <iomanip>
+#include <ostream>
+#include <sstream>
+#include <utility>
 
 namespace Trk {
 
-  namespace {
-    template<typename T>
-    int
-    sgn(const T& val)
-    {
-      return (val > 0) - (val < 0);
-    }
-  }
+namespace {
+template <typename T>
+int sgn(const T& val) {
+  return (val > 0) - (val < 0);
+}
+}  // namespace
 
-  // Helper protected ctor*/
-  template<int DIM, class T>
-  inline ParametersBase<DIM, T>::ParametersBase(
+// Helper protected ctor*/
+template <int DIM, class T>
+inline ParametersBase<DIM, T>::ParametersBase(
     const AmgVector(DIM) parameters,
-    std::optional<AmgSymMatrix(DIM)>&& covariance,
-    const T chargeDef)
-    : m_parameters(parameters)
-    , m_covariance(std::move(covariance))
-    , m_chargeDef(chargeDef)
-  {}
+    std::optional<AmgSymMatrix(DIM)>&& covariance, const T chargeDef)
+    : ParametersCommon<DIM, T>(parameters, std::move(covariance), chargeDef) {}
 
-  // Helper protected ctor
-  template<int DIM, class T>
-  inline ParametersBase<DIM, T>::ParametersBase(
+// Helper protected ctor
+template <int DIM, class T>
+inline ParametersBase<DIM, T>::ParametersBase(
     std::optional<AmgSymMatrix(DIM)>&& covariance)
-    : m_parameters()
-    , m_covariance(std::move(covariance))
-    , m_chargeDef{}
-  {}
-  // Protected Constructor with local arguments - persistency only
-  template<int DIM, class T>
-  inline ParametersBase<DIM, T>::ParametersBase(
+    : ParametersCommon<DIM, T>(std::move(covariance)) {}
+
+// Protected Constructor with local arguments - persistency only
+template <int DIM, class T>
+inline ParametersBase<DIM, T>::ParametersBase(
     const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance)
-    : m_parameters(parameters)
-    , m_covariance(std::move(covariance))
-    , m_chargeDef{}
-  {}
+    : ParametersCommon<DIM, T>(parameters, std::move(covariance)) {}
 
-  template<int DIM, class T>
-  inline const AmgVector(DIM)& 
-  ParametersBase<DIM, T>::parameters() const
-  {
-    return m_parameters;
+/** equality operator */
+template <int DIM, class T>
+bool ParametersBase<DIM, T>::operator==(
+    const ParametersBase<DIM, T>& rhs) const {
+  // tolerance for comparisons
+  constexpr double tolerance = 1e-8;
+
+  // compare parameters
+  if (!this->parameters().isApprox(rhs.parameters(), tolerance)) {
+    return false;
   }
 
-  template<int DIM, class T>
-  inline AmgVector(DIM)& 
-  ParametersBase<DIM, T>::parameters()
-  {
-    return m_parameters;
+  // compare covariance
+  if (((this->covariance() != nullptr) && (rhs.covariance() != nullptr) &&
+       !this->covariance()->isApprox(*rhs.covariance(), tolerance)) ||
+      (!this->covariance() !=
+       !rhs.covariance())) {  // <-- this is: covariance()
+                              // XOR pCast->covariance()
+    return false;
   }
 
-  template<int DIM, class T>
-  inline const AmgSymMatrix(DIM)* 
-  ParametersBase<DIM, T>::covariance() const
-  {
-    if (m_covariance) {
-      return &(*m_covariance);
-    } else {
-      return nullptr;
-    }
+  // compare position
+  if (!this->position().isApprox(rhs.position(), tolerance)) {
+    return false;
   }
 
-  template<int DIM, class T>
-  inline AmgSymMatrix(DIM)* 
-  ParametersBase<DIM, T>::covariance()
-  {
-    if (m_covariance) {
-      return &(*m_covariance);
-    } else {
-      return nullptr;
-    }
+  // compare momentum
+  if (!this->momentum().isApprox(rhs.momentum(), tolerance)) {
+    return false;
   }
 
-  template<int DIM, class T>
-  inline double
-  ParametersBase<DIM, T>::pT() const
-  {
-    return momentum().perp();
+  // compare charge definition
+  if (m_chargeDef != rhs.m_chargeDef) {
+    return false;
   }
 
-  template<int DIM, class T>
-  inline double
-  ParametersBase<DIM, T>::eta() const
-  {
-    return momentum().eta();
+  return true;
+}
+
+template <int DIM, class T>
+MsgStream& ParametersBase<DIM, T>::dump(MsgStream& sl) const {
+  std::ostringstream output{};
+  dump(output);
+  sl << output.str();
+  return sl;
+}
+
+template <int DIM, class T>
+std::ostream& ParametersBase<DIM, T>::dump(std::ostream& sl) const {
+  const std::string nl{"\n"};
+  sl << std::setiosflags(std::ios::fixed);
+  sl << std::setprecision(7);
+  sl << " * TrackParameters on Surface" << nl;
+  sl << " * loc1  : " << this->parameters()[Trk::loc1] << nl;
+  sl << " * loc2  : " << this->parameters()[Trk::loc2] << nl;
+  sl << " * phi   : " << this->parameters()[Trk::phi] << nl;
+  sl << " * Theta : " << this->parameters()[Trk::theta] << nl;
+  sl << " * q/p   : " << this->parameters()[Trk::qOverP] << nl;
+  if (this->parameters().rows() > 5) {
+    sl << " * mass  : " << this->parameters()[Trk::trkMass]
+       << " (extended parameters)" << nl;
+  }
+  sl << " * charge: " << this->charge() << nl;
+  sl << " * covariance matrix = " << this->covariance() << nl;
+  sl << " * corresponding global parameters:" << nl;
+  sl << " *    position  (x,  y,  z ) = (" << this->position().x() << ", "
+     << this->position().y() << ", " << this->position().z() << ")" << nl;
+  sl << " *    momentum  (px, py, pz) = (" << this->momentum().x() << ", "
+     << this->momentum().y() << ", " << this->momentum().z() << ")" << nl;
+  sl << std::setprecision(-1);
+  if (this->hasSurface()) {
+    sl << "associated surface:" << nl;
+    sl << this->associatedSurface() << std::endl;
+  } else {
+    sl << "no associated surface" << std::endl;
   }
 
-  template<int DIM, class T>
-  inline constexpr bool
-  ParametersBase<DIM, T>::isCharged() const
-  {
-    if constexpr (std::is_same<T, Trk::Neutral>::value) {
-      return false;
-    } else {
-      return true;
-    }
-  }
+  return sl;
+}
 
-  template<int DIM, class T>
-  inline Amg::Vector2D
-  ParametersBase<DIM, T>::localPosition() const
-  {
-    return Amg::Vector2D(m_parameters[Trk::loc1], m_parameters[Trk::loc2]);
-  }
+template <int DIM, class T>
+MsgStream& operator<<(MsgStream& sl, const Trk::ParametersBase<DIM, T>& p) {
+  return p.dump(sl);
+}
 
-  template<int DIM, class T>
-  inline void
-  ParametersBase<DIM, T>::setParameters(const AmgVector(DIM) & param)
-  {
-    m_parameters = param;
-  }
-
-  template<int DIM, class T>
-  inline void
-  ParametersBase<DIM, T>::setCovariance(const AmgSymMatrix(DIM) & cov)
-  {
-    m_covariance = cov;
-  }
-
-  template<int DIM, class T>
-  inline void
-  ParametersBase<DIM, T>::updateParameters(const AmgVector(DIM) &
-                                             updatedParameters)
-  {
-    this->updateParametersHelper(updatedParameters);
-  }
-
-  template<int DIM, class T>
-  inline void
-  ParametersBase<DIM, T>::updateParameters(const AmgVector(DIM) &
-                                             updatedParameters,
-                                           const AmgSymMatrix(DIM) &
-                                             updatedCovariance)
-  {
-    m_covariance = updatedCovariance;
-    this->updateParametersHelper(updatedParameters);
-  }
-
-  /** equality operator */
-  template<int DIM, class T>
-  bool
-  ParametersBase<DIM, T>::operator==(const ParametersBase<DIM, T>& rhs) const
-  {
-    // tolerance for comparisons
-    constexpr double tolerance = 1e-8;
-
-    // compare parameters
-    if (!this->parameters().isApprox(rhs.parameters(), tolerance)) {
-      return false;
-    }
-
-    // compare covariance
-    if (((this->covariance() != nullptr) && (rhs.covariance() != nullptr) &&
-         !this->covariance()->isApprox(*rhs.covariance(), tolerance)) ||
-        (!this->covariance() != !rhs.covariance())) { // <-- this is: covariance()
-                                                      // XOR pCast->covariance()
-      return false;
-    }
-
-    // compare position
-    if (!this->position().isApprox(rhs.position(), tolerance)) {
-      return false;
-    }
-
-    // compare momentum
-    if (!this->momentum().isApprox(rhs.momentum(), tolerance)) {
-      return false;
-    }
-
-    // compare charge definition
-    if (m_chargeDef != rhs.m_chargeDef) {
-      return false;
-    }
-
-    return true;
-  }
-
-  template<int DIM, class T>
-  MsgStream&
-  ParametersBase<DIM, T>::dump(MsgStream& sl) const
-  {
-    std::ostringstream output{};
-    dump(output);
-    sl<<output.str();
-    return sl;
-  }
-
-  template<int DIM, class T>
-  std::ostream&
-  ParametersBase<DIM, T>::dump(std::ostream& sl) const
-  {
-    const std::string nl{"\n"};
-    sl << std::setiosflags(std::ios::fixed);
-    sl << std::setprecision(7);
-    sl << " * TrackParameters on Surface" << nl;
-    sl << " * loc1  : " << parameters()[Trk::loc1] << nl;
-    sl << " * loc2  : " << parameters()[Trk::loc2] << nl;
-    sl << " * phi   : " << parameters()[Trk::phi] << nl;
-    sl << " * Theta : " << parameters()[Trk::theta] << nl;
-    sl << " * q/p   : " << parameters()[Trk::qOverP] << nl;
-    if (parameters().rows() > 5) {
-      sl << " * mass  : " << parameters()[Trk::trkMass]
-         << " (extended parameters)" << nl;
-    }
-    sl << " * charge: " << charge() << nl;
-    sl << " * covariance matrix = " << covariance() << nl;
-    sl << " * corresponding global parameters:" << nl;
-    sl << " *    position  (x,  y,  z ) = (" << position().x() << ", "
-       << position().y() << ", " << position().z() << ")" << nl;
-    sl << " *    momentum  (px, py, pz) = (" << momentum().x() << ", "
-       << momentum().y() << ", " << momentum().z() << ")" << nl;
-    sl << std::setprecision(-1);
-    if (hasSurface()){
-      sl << "associated surface:" << nl;
-      sl << associatedSurface() << std::endl;
-    } else {
-      sl<< "no associated surface"<< std::endl;
-    }
-    
-    return sl;
-  }
-
-  template<int DIM, class T>
-  MsgStream&
-  operator<<(MsgStream& sl, const Trk::ParametersBase<DIM, T>& p)
-  {
-    return p.dump(sl);
-  }
-
-  template<int DIM, class T>
-  std::ostream&
-  operator<<(std::ostream& sl, const Trk::ParametersBase<DIM, T>& p)
-  {
-    return p.dump(sl);
-  }
-} // end of namespace Trk
+template <int DIM, class T>
+std::ostream& operator<<(std::ostream& sl,
+                         const Trk::ParametersBase<DIM, T>& p) {
+  return p.dump(sl);
+}
+}  // end of namespace Trk
