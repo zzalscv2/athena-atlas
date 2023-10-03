@@ -37,6 +37,14 @@ atlas_add_test( PixelConfigCondAlg_test
   POST_EXEC_SCRIPT "nopost.sh"
 )
 
+atlas_add_test( ITkPixChargeCalibAlg_test
+  SOURCES test/ITkPixChargeCalibAlg_test.cxx src/ITkPixChargeCalibAlg.cxx
+  INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
+  LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel AthenaPoolUtilities PixelConditionsData PathResolver StoreGateLib
+  POST_EXEC_SCRIPT "nopost.sh"
+)
+
+
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

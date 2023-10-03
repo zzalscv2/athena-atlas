@@ -37,7 +37,9 @@ def createITkConfigFlags():
                   prevFlags.ITk.Geometry.StripLocal or
                   prevFlags.ITk.Geometry.BCMPrimeLocal or
                   prevFlags.ITk.Geometry.PLRLocal)
-
+    # The following flag is (3 Oct 2023) unused for now, the charge calibration
+    # constants are hardcoded in the alg implementation
+    # InnerDetector/InDetConditions/PixelConditionsAlgorithms/src/ITkPixChargeCalibAlg.cxx
     itkcf.addFlag("ITk.Conditions.PixelChargeCalibTag", "ChargeCalib-MC21-01")
     itkcf.addFlag("ITk.Conditions.PixelChargeCalibFile", "")
     itkcf.addFlag("ITk.Conditions.PixelOfflineCalibTag",
