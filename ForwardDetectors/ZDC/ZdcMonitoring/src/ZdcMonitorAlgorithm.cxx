@@ -4,6 +4,7 @@
 
 #include "ZdcMonitoring/ZdcMonitorAlgorithm.h"
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
+#include "ZdcAnalysis/RpdSubtractCentroidTool.h"
 
 ZdcMonitorAlgorithm::ZdcMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator){
@@ -40,21 +41,21 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
 
     ATH_CHECK( m_RPDChannelAmplitudeKey.initialize() );
     ATH_CHECK( m_RPDChannelAmplitudeCalibKey.initialize() );
+    ATH_CHECK( m_RPDChannelMaxADCKey.initialize() );
     ATH_CHECK( m_RPDChannelStatusKey.initialize() );
 
-    ATH_CHECK( m_LEDTypeKey.initialize() );
-    ATH_CHECK( m_LEDPresampleADCKey.initialize() );
-    ATH_CHECK( m_LEDADCSumKey.initialize() );
-    ATH_CHECK( m_LEDMaxADCKey.initialize() );
-    ATH_CHECK( m_LEDMaxSampleKey.initialize() );
-    ATH_CHECK( m_LEDAvgTimeKey.initialize() );
+    ATH_CHECK( m_RPDxCentroidKey.initialize() );
+    ATH_CHECK( m_RPDyCentroidKey.initialize() );
+    ATH_CHECK( m_RPDxDetCentroidUnsubKey.initialize() );
+    ATH_CHECK( m_RPDyDetCentroidUnsubKey.initialize() );
+    ATH_CHECK( m_RPDreactionPlaneAngleKey.initialize() );
+    ATH_CHECK( m_RPDcosDeltaReactionPlaneAngleKey.initialize() );
+    ATH_CHECK( m_RPDcentroidStatusKey.initialize() );
     
 
-    
+    m_ZDCSideToolIndices = buildToolMap<int>(m_tools,"ZdcSideMonitor",m_nSides);
     m_ZDCModuleToolIndices = buildToolMap<std::vector<int>>(m_tools,"ZdcModuleMonitor",m_nSides,m_nModules);
-    m_RPDChannelToolIndices = buildToolMap<std::vector<int>>(m_tools,"RPDChannelMonitor",m_nSides,m_nChannels);
-    m_ZDCModuleLEDToolIndices = buildToolMap<std::vector<std::vector<int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames.size(),m_nSides,m_nModules);
-    m_RPDChannelLEDToolIndices = buildToolMap<std::vector<std::vector<int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames.size(),m_nSides,m_nChannels);
+    m_RPDChannelToolIndices = buildToolMap<std::vector<int>>(m_tools,"RpdChannelMonitor",m_nSides,m_nChannels);
 
     //---------------------------------------------------
     // initialize superclass
@@ -65,115 +66,64 @@ StatusCode ZdcMonitorAlgorithm::initialize() {
 }
 
 
-StatusCode ZdcMonitorAlgorithm::fillLEDHistograms( const EventContext& ctx ) const {
-
-    ATH_MSG_DEBUG("filling LED histograms");
-// ______________________________________________________________________________
-    // declaring & obtaining event-level information of interest 
-// ______________________________________________________________________________
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
-    // already checked in fillHistograms that eventInfo is valid
-    auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
-    
-// ______________________________________________________________________________
-    // declaring & obtaining LED variables of interest for the ZDC modules & RPD channels
-    // filling arrays of monitoring tools (module/channel-level)
-// ______________________________________________________________________________
-
-    SG::ReadHandle<xAOD::ZdcModuleContainer> zdcModules(m_ZdcModuleContainerKey, ctx);
-
-    auto zdcLEDADCSum = Monitored::Scalar<unsigned int>("zdcLEDADCSum",-1000);
-    auto zdcLEDMaxADC = Monitored::Scalar<unsigned int>("zdcLEDMaxADC",-1000);
-    auto rpdLEDADCSum = Monitored::Scalar<unsigned int>("rpdLEDADCSum",-1000);
-    auto rpdLEDMaxADC = Monitored::Scalar<unsigned int>("rpdLEDMaxADC",-1000);
-
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, int> LEDADCSumHandle(m_LEDADCSumKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, int> LEDMaxADCHandle(m_LEDMaxADCKey, ctx);
-
-
-    if (! zdcModules.isValid() ) {
-       ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcModuleContainerKey);
-       return StatusCode::SUCCESS;
-    }
-
-    unsigned int iLEDType = 1000;
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> zdcLEDTypeHandle(m_LEDTypeKey, ctx);
-    if (!zdcLEDTypeHandle.isAvailable()){
-        ATH_MSG_WARNING("CANNOT find the variable " << m_LEDTypeKey << "!");
-        return StatusCode::SUCCESS;
-    } 
-
-    SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums(m_ZdcSumContainerKey, ctx); // already checked in fillHistograms that zdcSums is valid
-
-    for (const auto& zdcSum : *zdcSums) { 
-        if (zdcSum->zdcSide() == 0){
-            iLEDType = zdcLEDTypeHandle(*zdcSum);
-        }
-    }
-    
-    if (iLEDType == 1000){
-        ATH_MSG_WARNING("The LED type is unretrieved!");
-        return StatusCode::SUCCESS;
-    } 
-    if (iLEDType >= m_LEDNames.size()){
-        ATH_MSG_WARNING("The retrieved LED type is incorrect (larger than 2)!");
-        return StatusCode::SUCCESS;
-    } 
-
-    for (const auto zdcMod : *zdcModules){
-        int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
-    
-        if (zdcMod->zdcType() == 0){ // zdc
-            int imod = zdcMod->zdcModule();
-            zdcLEDADCSum = LEDADCSumHandle(*zdcMod);
-            zdcLEDMaxADC = LEDMaxADCHandle(*zdcMod);
-
-            fill(m_tools[m_ZDCModuleLEDToolIndices[iLEDType][iside][imod]], lumiBlock, zdcLEDADCSum, zdcLEDMaxADC);
-        } 
-        else if (zdcMod->zdcType() == 1) { // rpd
-            int ichannel = zdcMod->zdcChannel();
-            if (ichannel >= m_nChannels){
-                ATH_MSG_WARNING("The current channel number exceeds the zero-based limit (15): it is " << ichannel);
-                continue;
-            }
-            rpdLEDADCSum = LEDADCSumHandle(*zdcMod);
-            rpdLEDMaxADC = LEDMaxADCHandle(*zdcMod);
-
-            fill(m_tools[m_RPDChannelLEDToolIndices[iLEDType][iside][ichannel]], lumiBlock, rpdLEDADCSum, rpdLEDMaxADC);
-        }
-    }
-    
-    return StatusCode::SUCCESS;
-}
-
-
 StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& ctx ) const {
+    ATH_MSG_DEBUG("calling the fillPhysicsDataHistograms function");    
 
-    ATH_MSG_DEBUG("filling physics histograms");
-  
     auto zdcTool = getGroup("genZdcMonTool"); // get the tool for easier group filling
-
+    const auto &trigDecTool = getTrigDecisionTool();
 // ______________________________________________________________________________
     // declaring & obtaining event-level information of interest 
 // ______________________________________________________________________________
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx);
     // already checked in fillHistograms that eventInfo is valid
     auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
-    
+
+    auto passTrigSideA = Monitored::Scalar<bool>("passTrigSideA",trigDecTool->isPassed(m_triggerSideA, TrigDefs::Physics));
+    auto passTrigSideC = Monitored::Scalar<bool>("passTrigSideC",trigDecTool->isPassed(m_triggerSideC, TrigDefs::Physics));
+    if (passTrigSideA) ATH_MSG_DEBUG("passing trig on side A!");    
+    if (passTrigSideC) ATH_MSG_DEBUG("passing trig on side C!");    
+
 // ______________________________________________________________________________
     // declaring & obtaining variables of interest for the ZDC sums
+    // including the RPD x,y positions, reaction plane and status
 // ______________________________________________________________________________
     SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums(m_ZdcSumContainerKey, ctx);
+
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> ZdcSumCalibEnergyHandle(m_ZdcSumCalibEnergyKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> ZdcSumAverageTimeHandle(m_ZdcSumAverageTimeKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> ZdcSumUncalibSumHandle(m_ZdcSumUncalibSumKey, ctx);
+   
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDxCentroidHandle(m_RPDxCentroidKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDyCentroidHandle(m_RPDyCentroidKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDxDetCentroidUnsubHandle(m_RPDxDetCentroidUnsubKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDyDetCentroidUnsubHandle(m_RPDyDetCentroidUnsubKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDreactionPlaneAngleHandle(m_RPDreactionPlaneAngleKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDcosDeltaReactionPlaneAngleHandle(m_RPDcosDeltaReactionPlaneAngleKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> RPDcentroidStatusHandle(m_RPDcentroidStatusKey, ctx);
     
     auto zdcEnergySumA = Monitored::Scalar<float>("zdcEnergySumA",-1000.0);
     auto zdcEnergySumC = Monitored::Scalar<float>("zdcEnergySumC",-1000.0);
-    auto zdcAvgTimeA = Monitored::Scalar<float>("zdcAvgTimeA",-1000.0);
-    auto zdcAvgTimeC = Monitored::Scalar<float>("zdcAvgTimeC",-1000.0);
     auto zdcUncalibSumA = Monitored::Scalar<float>("zdcUncalibSumA",-1000.0);
     auto zdcUncalibSumC = Monitored::Scalar<float>("zdcUncalibSumC",-1000.0);
+    auto rpdCosDeltaReactionPlaneAngle = Monitored::Scalar<float>("rpdCosDeltaReactionPlaneAngle",-1000.0);
+    
+    auto zdcAvgTimeCurSide = Monitored::Scalar<float>("zdcAvgTime",-1000.0); // this is duplicate information as A,C but convenient for filling per-side histograms
+    auto rpdXCentroidCurSide = Monitored::Scalar<float>("xCentroid",-1000.0);
+    auto rpdYCentroidCurSide = Monitored::Scalar<float>("yCentroid",-1000.0);
+    auto rpdXDetCentroidUnsubCurSide = Monitored::Scalar<float>("xDetCentroidUnsub",-1000.0);
+    auto rpdYDetCentroidUnsubCurSide = Monitored::Scalar<float>("yDetCentroidUnsub",-1000.0);
+    auto rpdReactionPlaneAngleCurSide = Monitored::Scalar<float>("ReactionPlaneAngle",-1000.0);
+
+    // need to recognize same-side correlation among the following observables
+    // since they are filled differently, it is helpful to store each of their values in the 2-dimension array first
+    // and fill the side monitoring tool in the same "monitoring group"
+    std::array<float, 2> zdcEMModuleEnergy = {0,0};
+    std::array<float, 2> zdcEnergySum = {0,0};
+    std::array<float, 2> rpdAmplitudeCalibSum = {0,0};
+    std::array<float, 2> rpdMaxADCSum = {0,0};
+
+    std::array<float, m_nRpdCentroidStatusBits> centroidStatusBitsCountCurSide;
+    for (int bit = 0; bit < m_nRpdCentroidStatusBits; bit++) centroidStatusBitsCountCurSide[bit] = 0;
 
     if (! zdcSums.isValid() ) {
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcSumContainerKey);
@@ -182,15 +132,39 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     else{
         for (const auto& zdcSum : *zdcSums) { // side -1: C; side 1: A
             
-            // skipping the side == 0 global sum
-            if (zdcSum->zdcSide() == 1){
-                zdcEnergySumA = ZdcSumCalibEnergyHandle(*zdcSum);
-                zdcAvgTimeA = ZdcSumAverageTimeHandle(*zdcSum);
-                zdcUncalibSumA = ZdcSumUncalibSumHandle(*zdcSum);
-            } else if (zdcSum->zdcSide() == -1){
-                zdcEnergySumC = ZdcSumCalibEnergyHandle(*zdcSum);
-                zdcAvgTimeC = ZdcSumAverageTimeHandle(*zdcSum);
-                zdcUncalibSumC = ZdcSumUncalibSumHandle(*zdcSum);
+            if (zdcSum->zdcSide() == 0){ // contains the RPD Cos Delta reaction plane
+                rpdCosDeltaReactionPlaneAngle = RPDcosDeltaReactionPlaneAngleHandle(*zdcSum);
+            }else{
+                int iside = (zdcSum->zdcSide() > 0)? 1 : 0; // already exclude the possibility of global sum
+                
+                zdcAvgTimeCurSide = ZdcSumAverageTimeHandle(*zdcSum);
+                zdcEnergySum[iside] = ZdcSumCalibEnergyHandle(*zdcSum);
+
+                rpdXCentroidCurSide = RPDxCentroidHandle(*zdcSum);
+                rpdYCentroidCurSide = RPDyCentroidHandle(*zdcSum);
+                rpdXDetCentroidUnsubCurSide = RPDxDetCentroidUnsubHandle(*zdcSum);
+                rpdYDetCentroidUnsubCurSide = RPDyDetCentroidUnsubHandle(*zdcSum);
+                rpdReactionPlaneAngleCurSide = RPDreactionPlaneAngleHandle(*zdcSum);
+                
+                unsigned int rpdCentroidStatusCurSide = RPDcentroidStatusHandle(*zdcSum);
+
+                for (int bit = 0; bit < m_nRpdCentroidStatusBits; bit++){
+                    if (rpdCentroidStatusCurSide & 1 << bit){
+                        centroidStatusBitsCountCurSide[bit] += 1;
+                    }
+                }
+                auto centroidStatusBits = Monitored::Collection("centroidStatusBits", centroidStatusBitsCountCurSide);
+
+                fill(m_tools[m_ZDCSideToolIndices[iside]], zdcAvgTimeCurSide, rpdXCentroidCurSide, rpdYCentroidCurSide, rpdXDetCentroidUnsubCurSide, rpdYDetCentroidUnsubCurSide, rpdReactionPlaneAngleCurSide, centroidStatusBits, lumiBlock);
+                
+                if (zdcSum->zdcSide() == 1){
+                    zdcEnergySumA = ZdcSumCalibEnergyHandle(*zdcSum);
+                    zdcUncalibSumA = ZdcSumUncalibSumHandle(*zdcSum);
+                } 
+                else {
+                    zdcEnergySumC = ZdcSumCalibEnergyHandle(*zdcSum);
+                    zdcUncalibSumC = ZdcSumUncalibSumHandle(*zdcSum);
+                }
             }
         } // having filled both sides
         
@@ -210,11 +184,11 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleChisqHandle(m_ZdcModuleChisqKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibEnergyHandle(m_ZdcModuleCalibEnergyKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> zdcModuleCalibTimeHandle(m_ZdcModuleCalibTimeKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelAmplitudeHandle(m_RPDChannelAmplitudeKey, ctx);
-    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelAmplitudeCalibHandle(m_RPDChannelAmplitudeCalibKey, ctx);
+    
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> RPDChannelStatusHandle(m_RPDChannelStatusKey, ctx);
-
-    bool zdc_filled = false;
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelAmplitudeHandle(m_RPDChannelAmplitudeKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelMaxADCHandle(m_RPDChannelMaxADCKey, ctx);
+    SG::ReadDecorHandle<xAOD::ZdcModuleContainer, float> RPDChannelAmplitudeCalibHandle(m_RPDChannelAmplitudeCalibKey, ctx);
 
     auto zdcModuleAmp = Monitored::Scalar<float>("zdcModuleAmp", -1000.0);
     auto zdcModuleFract = Monitored::Scalar<float>("zdcModuleFract", -1000.0);
@@ -225,32 +199,37 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto zdcModuleCalibAmp = Monitored::Scalar<float>("zdcModuleCalibAmp", -1000.0);
     auto zdcModuleCalibTime = Monitored::Scalar<float>("zdcModuleCalibTime", -1000.0);
 
-    auto RPDChannelAmplitude = Monitored::Scalar<float>("RPDChannelAmplitude", -1000.0);
-    auto RPDChannelAmplitudeCalib = Monitored::Scalar<float>("RPDChannelAmplitudeCalib", -1000.0);
-    auto RPDChannelStatus = Monitored::Scalar<unsigned int>("RPDChannelStatus", -1000);
+    auto rpdChannelAmplitude = Monitored::Scalar<float>("RPDChannelAmplitude", -1000.0);
+    auto rpdChannelMaxADC = Monitored::Scalar<float>("RPDChannelMaxADC", -1000.0);
+    auto rpdChannelAmplitudeCalib = Monitored::Scalar<float>("RPDChannelAmplitudeCalib", -1000.0);
+    auto rpdChannelStatus = Monitored::Scalar<unsigned int>("RPDChannelStatus", -1000);
 
-    std::array<float, m_nStatusBits> statusBitsCount;
-    for (int bit = 0; bit < m_nStatusBits; bit++) statusBitsCount[bit] = 0;
+    std::array<float, m_nZdcStatusBits> zdcStatusBitsCount;
+    for (int bit = 0; bit < m_nZdcStatusBits; bit++) zdcStatusBitsCount[bit] = 0;
+    std::array<float, m_nRpdStatusBits> rpdStatusBitsCount;
+    for (int bit = 0; bit < m_nRpdStatusBits; bit++) rpdStatusBitsCount[bit] = 0;
     
     if (! zdcModules.isValid() ) {
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcModuleContainerKey);
        return StatusCode::SUCCESS;
     }
 
+
     for (const auto zdcMod : *zdcModules){
         int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
     
         if (zdcMod->zdcType() == 0){
-            // zdc
-            zdc_filled = true;
             int imod = zdcMod->zdcModule();
             int status = zdcModuleStatusHandle(*zdcMod);
     
-            for (int bit = 0; bit < m_nStatusBits; bit++){
+            for (int bit = 0; bit < m_nZdcStatusBits; bit++){
                 if (status & 1 << bit){
-                    statusBitsCount[bit] += 1;
+                    zdcStatusBitsCount[bit] += 1;
                 }
             }
+
+            auto zdcStatusBits = Monitored::Collection("zdcStatusBits", zdcStatusBitsCount);
+            fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcStatusBits, lumiBlock);
 
             if ((status & 1 << ZDCPulseAnalyzer::PulseBit) != 0){
                 zdcModuleAmp = zdcModuleAmplitudeHandle(*zdcMod);
@@ -260,32 +239,39 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 zdcModuleCalibTime = zdcModuleCalibTimeHandle(*zdcMod);
                 zdcEnergySumCurrentSide = (zdcMod->zdcSide() > 0)? 1. * zdcUncalibSumA : 1. * zdcUncalibSumC;
                 zdcModuleFract = (zdcEnergySumCurrentSide == 0)? -1000. : zdcModuleAmp / zdcEnergySumCurrentSide;
-                zdcModuleChisqOverAmp = zdcModuleChisq / zdcModuleAmp;
+                zdcModuleChisqOverAmp = (zdcModuleAmp == 0)? -1000. : zdcModuleChisq / zdcModuleAmp;
             
+                if (imod == 0) zdcEMModuleEnergy[iside] = zdcModuleCalibAmp;
+
                 fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleFract, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleCalibAmp, zdcModuleCalibTime);
             } 
-        } else if (zdcMod->zdcType() == 1) {
+        } 
+        else if (zdcMod->zdcType() == 1) {
             // this is the RPD
 
-            // int ichannel = zdcMod->zdcChannel() - 1; // zero-based
+            int ichannel = zdcMod->zdcChannel(); // zero-based
             // // at runtime, the following 
             int status = RPDChannelStatusHandle(*zdcMod);
-            if ((status & 1 << ZDCPulseAnalyzer::PulseBit) != 0){
-                RPDChannelAmplitude = RPDChannelAmplitudeHandle(*zdcMod);
-                RPDChannelAmplitudeCalib = RPDChannelAmplitudeCalibHandle(*zdcMod);
-            // fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelAmplitude, rpdChannelMaxSample);
+
+            for (int bit = 0; bit < m_nRpdStatusBits; bit++){
+                if (status & 1 << bit){
+                    rpdStatusBitsCount[bit] += 1;
+                }
             }
+
+            auto rpdStatusBits = Monitored::Collection("RPDStatusBits", rpdStatusBitsCount);
+            
+            rpdChannelAmplitude = RPDChannelAmplitudeHandle(*zdcMod);
+            rpdChannelMaxADC = RPDChannelMaxADCHandle(*zdcMod);
+            rpdChannelAmplitudeCalib = RPDChannelAmplitudeCalibHandle(*zdcMod);
+
+            rpdAmplitudeCalibSum[iside] += rpdChannelAmplitudeCalib;
+            rpdMaxADCSum[iside] += rpdChannelMaxADC;
+
+            fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelAmplitude, rpdChannelAmplitudeCalib, rpdChannelMaxADC, rpdStatusBits, lumiBlock);
         }
     }
-
     
-    if (!zdc_filled){
-        ATH_MSG_WARNING("No ZDC modules filled");
-        return StatusCode::SUCCESS; 
-    }
-    
-    auto statusBits = Monitored::Collection("statusBits", statusBitsCount);
-
 // ______________________________________________________________________________
     // obtaining fCalEt on A,C side
 // ______________________________________________________________________________
@@ -319,11 +305,19 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 // ______________________________________________________________________________
 
     if (m_CalInfoOn){ // calorimeter information is turned on
-        fill(zdcTool, lumiBlock, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, statusBits, fcalEtA, fcalEtC);
+        fill(zdcTool, lumiBlock, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, rpdCosDeltaReactionPlaneAngle, fcalEtA, fcalEtC);
     } else{
-        fill(zdcTool, lumiBlock, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, statusBits);
+        fill(zdcTool, lumiBlock, passTrigSideA, passTrigSideC, zdcEnergySumA, zdcEnergySumC, zdcUncalibSumA, zdcUncalibSumC, rpdCosDeltaReactionPlaneAngle);
     }
 
+
+    for (int iside = 0; iside < m_nSides; iside++){
+        auto zdcEnergySumCurSide = Monitored::Scalar<float>("zdcEnergySum",zdcEnergySum[iside]); // this is duplicate information as A,C but convenient for filling per-side histograms
+        auto zdcEMModuleEnergyCurSide = Monitored::Scalar<float>("zdcEMModuleEnergy",zdcEMModuleEnergy[iside]);
+        auto rpdAmplitudeCalibSumCurSide = Monitored::Scalar<float>("rpdAmplitudeCalibSum",rpdAmplitudeCalibSum[iside]);
+        auto rpdMaxADCSumCurSide = Monitored::Scalar<float>("rpdMaxADCSum",rpdMaxADCSum[iside]);
+        fill(m_tools[m_ZDCSideToolIndices[iside]], zdcEnergySumCurSide, zdcEMModuleEnergyCurSide, rpdAmplitudeCalibSumCurSide, rpdMaxADCSumCurSide, lumiBlock);
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -367,11 +361,11 @@ StatusCode ZdcMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
         }
     }
 
-    ATH_MSG_DEBUG("extracted eventType = " << eventType << " DAQMode = " << DAQMode);
+    ATH_MSG_DEBUG("The event type is: " << eventType);
 
     if (eventType == ZdcEventInfo::ZdcEventUnknown || DAQMode == ZdcEventInfo::DAQModeUndef){
         ATH_MSG_WARNING("The zdc sum container can be retrieved from the evtStore() but");
-        ATH_MSG_WARNING("Either the event type or the DAQ mode is invalid");
+        ATH_MSG_WARNING("Either the event type or the DAQ mode is the default unknown value");
         ATH_MSG_WARNING("Most likely, there is no global sum (side == 0) entry in the zdc sum container");
         return StatusCode::SUCCESS;
     }
@@ -379,11 +373,8 @@ StatusCode ZdcMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     if (eventType == ZdcEventInfo::ZdcEventPhysics || eventType == ZdcEventInfo::ZdcSimulation){
         return fillPhysicsDataHistograms(ctx);
     }
-    if (eventType == ZdcEventInfo::ZdcEventLED){
-        return fillLEDHistograms(ctx);
-    }
     
-    ATH_MSG_WARNING("Event type is invalid"); // case where m_eventType >= ZdcEventInfo::numEventTypes
+    ATH_MSG_WARNING("Event type should be PhysicsData/Simulation but it is NOT");
     return StatusCode::SUCCESS;
 }
 
