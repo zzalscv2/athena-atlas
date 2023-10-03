@@ -13,6 +13,7 @@
 #endif
 namespace HepMC {
 template <class T, std::enable_if_t<std::is_pointer<T>::value, bool> = true > inline int barcode(const T& p){ return p->barcode(); }
+template <class T, std::enable_if_t<std::is_same<T, int>::value, bool > = true>  inline int barcode(const T& p){ return p;}
 #ifdef HEPMC3
 template <class T, std::enable_if_t< !std::is_pointer<T>::value &&
                            !std::is_same<T, HepMC3::GenParticlePtr>::value &&
@@ -20,7 +21,8 @@ template <class T, std::enable_if_t< !std::is_pointer<T>::value &&
                            !std::is_same<T, HepMC3::GenVertexPtr>::value &&
                            !std::is_same<T, HepMC3::ConstGenVertexPtr>::value &&
                            !std::is_same<T, HepMC3::GenVertex>::value &&
-                           !std::is_same<T, HepMC3::GenParticle>::value 
+                           !std::is_same<T, HepMC3::GenParticle>::value &&
+                           !std::is_same<T, int>::value 
                         , bool > = true>
 inline int barcode(const T& p){ return p.barcode();}
 
@@ -49,7 +51,9 @@ inline int barcode(const T& p) {
     return barcode?(barcode->value()):p.id();
 }
 #else
-template <class T, std::enable_if_t<!std::is_pointer<T>::value, bool> = true>  inline int barcode(const T& p){ return p.barcode();}
+template <class T, std::enable_if_t<!std::is_pointer<T>::value &&
+                                    !std::is_same<T,int>::value
+                                    , bool> = true>  inline int barcode(const T& p){ return p.barcode();}
 #endif
 
 }
