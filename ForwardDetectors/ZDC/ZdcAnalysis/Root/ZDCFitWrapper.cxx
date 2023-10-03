@@ -304,6 +304,7 @@ void ZDCFitExpFermiPrePulse::DoInitialize(float initialAmp, float initialT0, flo
   GetWrapperTF1()->SetParameter(1, initialT0);
   GetWrapperTF1()->SetParameter(2, 5);
   GetWrapperTF1()->SetParameter(3, 0.5*(m_preT0Min + m_preT0Max));
+  GetWrapperTF1()->SetParameter(4, 0);
 
   GetWrapperTF1()->SetParLimits(0, ampMin, ampMax);
 }
