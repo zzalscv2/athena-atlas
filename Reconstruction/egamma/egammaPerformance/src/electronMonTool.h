@@ -60,7 +60,7 @@ struct electronHist : egammaBaseHist
   std::vector<int> m_nElectronsPerLumiBlock {};
   std::vector<int> m_nElectronsPerRegion {};
 
-  electronHist(std::string name, bool FullHistoList) 
+  electronHist(const std::string& name, bool FullHistoList) 
     : egammaBaseHist(name)
   {
     m_fullHistoList = FullHistoList;
