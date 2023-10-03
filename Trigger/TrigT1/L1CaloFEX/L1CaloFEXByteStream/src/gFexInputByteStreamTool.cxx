@@ -464,9 +464,9 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
     gFields fiberFieldsUndecoded;
     gSatur  fiberSaturation;
 
-    fiberFields = {{0}};
-    fiberFieldsUndecoded = {{0}};
-    fiberSaturation = {{0}};
+    fiberFields = {{{0}}};
+    fiberFieldsUndecoded = {{{0}}};
+    fiberSaturation = {{{0}}};
 
     for(unsigned int i=0; i<100; i++){
         if( ( Xfiber[i][gPos::W280-1] & 0x000000FF ) == 0x000000BC ) {
