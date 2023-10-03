@@ -45,6 +45,14 @@ inline ParametersBase<DIM, T>::ParametersBase(
     std::optional<AmgSymMatrix(DIM)>&& covariance)
     : ParametersCommon<DIM, T>(parameters, std::move(covariance)) {}
 
+
+template<int DIM, class T>
+inline double
+ParametersBase<DIM, T>::charge() const
+{
+  return m_chargeDef.charge();
+}
+
 /** equality operator */
 template <int DIM, class T>
 bool ParametersBase<DIM, T>::operator==(

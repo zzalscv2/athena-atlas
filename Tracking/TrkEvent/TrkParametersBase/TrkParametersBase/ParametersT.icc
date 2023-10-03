@@ -181,13 +181,6 @@ ParametersT<DIM, T, S>&
 ParametersT<DIM, T, S>::operator=(const ParametersT<DIM, T, S>& rhs) = default;
 
 template<int DIM, class T, class S>
-inline double
-ParametersT<DIM, T, S>::charge() const
-{
-  return m_chargeDef.charge();
-}
-
-template<int DIM, class T, class S>
 inline Amg::Vector3D
 ParametersT<DIM, T, S>::position() const
 {

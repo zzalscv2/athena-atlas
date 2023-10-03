@@ -7,7 +7,7 @@
  * @file TrkParametersBase/test/ParametersBase_test.cxx
  * @author Shaun Roe
  * @date Jan, 2019
- * @brief Some tests for Trk::ParametersBase 
+ * @brief Some tests for Trk::ParametersBase
  */
 
 #define BOOST_TEST_DYN_LINK
@@ -45,7 +45,7 @@ namespace Trk{
       return std::string("TestSurface");
     }
   };
-  
+
   std::ostream & operator<< (std::ostream & out, const Surface &  /*s*/){
     out<<Trk::Surface::str();
     return out;
@@ -58,25 +58,23 @@ public:
   ChargedParametersStub(const AmgVector(DIM)& parameters,
     std::optional<AmgSymMatrix(DIM)> covariance, const T chargeDef):
     Trk::ParametersBase<DIM,T>(parameters, std::move(covariance),chargeDef){
-    //nop           
+    //nop
   }
-  
+
   explicit ChargedParametersStub(std::optional<AmgSymMatrix(DIM)> covariance):
     ParametersBase(std::move(covariance)){
    //nop
   }
-  
+
   explicit ChargedParametersStub(const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)> covariance = std::nullopt):
     ParametersBase(parameters,std::move(covariance)){
-    //nop  
+    //nop
   }
 
 
   ChargedParametersStub() = default;
-  double charge() const final{
-    return m_chargeDef.charge();
-  }
+
   Amg::Vector3D position() const override{
     Amg::Vector3D p (1, 1, 1);
     return p;
@@ -92,7 +90,7 @@ public:
     Amg::RotationMatrix3D m;
     m.setIdentity();
     return m;
-  } 
+  }
 
   virtual
   const Trk::Surface& associatedSurface() const override {
@@ -107,7 +105,7 @@ public:
   Trk::ParametersType type() const override{
     return Trk::ParametersType::AtaSurface;
   }
-  
+
   void updateParametersHelper(const AmgVector(DIM) & p) override{
     m_parameters = p;
   }
@@ -121,7 +119,7 @@ BOOST_AUTO_TEST_SUITE(ParametersBaseTest)
     //compiles for each instantiation, but I put the 'NO_THROW' check around them
     using ChargedParams_t [[maybe_unused]] = Trk::ParametersBase<DIM, T>;
     //ChargedParams_t x; <-constructors are protected, this won't compile
-    //Instantiate a derived class using default c'tor . Never do this! 
+    //Instantiate a derived class using default c'tor . Never do this!
     //The default c'tor is only for use by POOL
     BOOST_CHECK_NO_THROW(ChargedParametersStub x);
     //preconstruct required parameters
@@ -167,7 +165,7 @@ BOOST_AUTO_TEST_SUITE(ParametersBaseTest)
     BOOST_TEST(y.position() == expectedPosition);
     BOOST_TEST(y.momentum() == expectedMomentum);
     BOOST_TEST(y.hasSurface() == false);
-    //dummy check on my dummy surface. 
+    //dummy check on my dummy surface.
     constexpr unsigned int surfaceId{12345};
     BOOST_TEST(y.associatedSurface().id == surfaceId);
     Amg::RotationMatrix3D expected;
@@ -182,7 +180,7 @@ BOOST_AUTO_TEST_SUITE(ParametersBaseTest)
     y.dump(os);
     BOOST_TEST_MESSAGE(os.str());
   }
-  
+
   BOOST_AUTO_TEST_CASE(Setters){
     ChargedParametersStub x;
     static const double pars[] = {0.5,1,1.5,2.,2.5};
@@ -205,7 +203,7 @@ BOOST_AUTO_TEST_SUITE(ParametersBaseTest)
     x.updateParameters(parameters);
     BOOST_TEST(x.parameters() == parameters,"Just the parameters have been updated");
   }
-  
+
   BOOST_AUTO_TEST_CASE(CopyEqualityAssignment){
     //preconstruct required parameters
     static const double pars[] = {0.5,1,1.5,2.,2.5};
