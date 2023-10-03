@@ -108,7 +108,7 @@ typedef LArBadXCont<LArBadChannel> LArBadChannelCont;
 #include "AthenaKernel/CLASS_DEF.h" 
 CLASS_DEF(LArBadChannelCont,64272230,1)
 #include "AthenaKernel/CondCont.h"
-CLASS_DEF( CondCont<LArBadChannelCont>,144954956 , 1 )
+CONDCONT_MIXED_DEF( LArBadChannelCont, 144954956);
 
 //Template instantiation for LArBadFeb
 typedef LArBadXCont<LArBadFeb> LArBadFebCont;

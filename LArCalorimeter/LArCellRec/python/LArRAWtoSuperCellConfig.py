@@ -26,6 +26,17 @@ def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellCo
     result.merge(LArBadChannelCfg(configFlags,isSC=True,tag="LARBadChannelsBadChannelsSC-RUN3-UPD1-00") )
 
     algo = CompFactory.LArRAWtoSuperCell(name,SCellContainerOut=SCellContainerOut,LArBadChannelKey=LArBadChannelKey,BCIDOffset=bcidShift)
+
+    if mask and not configFlags.Input.isMC:
+        # also setup to read OTF masked supercells if running on data
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        result.merge(addFolders(configFlags,"/LAR/BadChannels/MaskedSC","LAR_ONL",tag="LARBadChannelsMaskedSC-RUN3-UPD1-00",
+                                className="CondAttrListCollection",extensible=configFlags.Common.isOnline )) # when run online, need folder to be extensible to force reload each event
+        condAlgo = CompFactory.LArBadChannelCondAlg(name="MaskedSCCondAlg",ReadKey="/LAR/BadChannels/MaskedSC",isSC=True,
+                                                    CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC",ReloadEveryEvent=configFlags.Common.isOnline)
+        result.addCondAlgo(condAlgo)
+        algo.LArMaskedChannelKey=condAlgo.WriteKey
+
     if ( SCInput == ""):
        mlog.info("Not setting SCInput container name")
     else :

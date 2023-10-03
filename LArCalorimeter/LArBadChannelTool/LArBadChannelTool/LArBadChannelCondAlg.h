@@ -34,6 +34,7 @@ class LArBadChannelCondAlg: public AthReentrantAlgorithm {
   Gaudi::Property<std::string> m_inputFileName{this,"InputFileName","",
       "Optional file containing (supplemental) bad channels"};
   Gaudi::Property<bool> m_isSC{this,"isSC",false,"Set to true to interpret the identifiers in the InputFile as SuperCell IDs"};
+  Gaudi::Property<bool> m_reloadEveryEvent{this,"ReloadEveryEvent",false,"Set to true to force DB-cache to be cleared - necessary if running online"};
 
 };
 

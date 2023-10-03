@@ -61,6 +61,9 @@ private:
   /// Bad Channel masking for Super-Cells
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey
     {this, "LArBadChannelKey", "LArBadChannelSC", "Key of the LArBadChannelCont SC" };
+  /// OTF Channel masking for Super-Cells
+  SG::ReadCondHandleKey<LArBadChannelCont> m_maskedContKey
+          {this, "LArMaskedChannelKey", "", "Key of the OTF-Masked SC" };
 
   IntegerProperty m_bcidOffset {this, "BCIDOffset", 0, "offset from bcid'ed energy"};
   //Identifier helper

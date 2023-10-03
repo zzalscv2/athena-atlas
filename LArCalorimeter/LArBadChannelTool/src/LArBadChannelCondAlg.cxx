@@ -25,7 +25,12 @@ StatusCode LArBadChannelCondAlg::execute(const EventContext& ctx) const{
   if (writeHandle.isValid()) {
     msg(MSG::DEBUG) << "Found valid write handle" << endmsg;
     return StatusCode::SUCCESS;
-  }  
+  }
+
+  if(m_reloadEveryEvent) {
+      // remove old object from db (necessary when running online)
+      CHECK(ServiceHandle<IIOVSvc>("IOVSvc", "")->dropObjectFromDB(m_BCInputKey.clid(), m_BCInputKey.key(), m_BCInputKey.storeHandle().name()));
+  }
 
   std::unique_ptr<LArBadChannelCont> badChannelCont=std::make_unique<LArBadChannelCont>();
 
