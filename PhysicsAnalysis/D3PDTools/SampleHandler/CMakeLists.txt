@@ -6,6 +6,7 @@ atlas_subdir( SampleHandler )
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO ROOTTPython Proof )
 find_package( GTest )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_root_dictionary( SampleHandler
@@ -33,7 +34,7 @@ atlas_add_root_dictionary( SampleHandler
 atlas_add_library( SampleHandler
    SampleHandler/*.h Root/*.cxx ${SampleHandlerDictSource}
    PUBLIC_HEADERS SampleHandler
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib RootCoreUtils)
 
 # Test(s) in the package:
