@@ -91,7 +91,7 @@ struct photonHist : egammaBaseHist
   TH1 *m_hLB_NConv {}; // Histogram for number of photons vs LB
   TH1 *m_hLB_fConv {}; // Histogram of Conv. photon fraction vs LB
 
-  photonHist(std::string name) : egammaBaseHist(name) {}
+  photonHist(const std::string& name) : egammaBaseHist(name) {}
 };
 
 
