@@ -25,32 +25,35 @@ public:
     virtual ~ZdcMonitorAlgorithm();
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
-    StatusCode fillLEDHistograms( const EventContext& ctx ) const;
     StatusCode fillPhysicsDataHistograms( const EventContext& ctx ) const;
 
 private:
     // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
     // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
     // input to constructor: owner, name, value, title = "" (by default)
-    Gaudi::Property<bool> m_isLED {this,"isLED",false};
     Gaudi::Property<bool> m_CalInfoOn {this,"CalInfoOn",false};
 
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
     Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
 
+    // single side triggers - less error-prone if defined as separate properties then in a vector (where order would be crucial)
+    Gaudi::Property<std::string> m_triggerSideA{this, "triggerSideA", "L1_ZDC_A", "Trigger on side A, needed for 1N-peak monitoring on side C"};
+    Gaudi::Property<std::string> m_triggerSideC{this, "triggerSideC", "L1_ZDC_C", "Trigger on side C, needed for 1N-peak monitoring on side A"};
+
+
     static const int m_nSides = 2;
     static const int m_nModules = 4;
     static const int m_nChannels = 16;
-    static const int m_nStatusBits = 18; // ignoring the last one
-    const std::vector<std::string> m_LEDNames = {"Blue1", "Green", "Blue2"};
+    static const int m_nZdcStatusBits = 18; // ignoring the last one
+    static const int m_nRpdStatusBits = 3; // ignoring the last one
+    static const int m_nRpdCentroidStatusBits = 17; // ignoring the last one
 
     // the i-th element (or (i,j)-th element for 2D vector) here gives the index of the generic monitoring tool (GMT)
     // in the array of all GMT's --> allows faster tool retrieving and hence faster histogram filling
+    std::vector<int> m_ZDCSideToolIndices;
     std::vector<std::vector<int>> m_ZDCModuleToolIndices;
     std::vector<std::vector<int>> m_RPDChannelToolIndices;
-    std::vector<std::vector<std::vector<int>>> m_ZDCModuleLEDToolIndices;
-    std::vector<std::vector<std::vector<int>>> m_RPDChannelLEDToolIndices;
 
     //---------------------------------------------------
     
@@ -76,15 +79,31 @@ private:
     
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeKey {this, "RPDChannelAmplitudeKey", m_zdcModuleContainerName + ".RPDChannelAmplitude" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeCalibKey {this, "RPDChannelAmplitudeCalibKey", m_zdcModuleContainerName + ".RPDChannelAmplitudeCalib" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCKey {this, "RPDChannelMaxADCKey", m_zdcModuleContainerName + ".RPDChannelMaxADC" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelStatusKey {this, "RPDChannelStatusKey", m_zdcModuleContainerName + ".RPDChannelStatus" + m_auxSuffix};
     
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDTypeKey{this, "ZdcLEDTypeKey", m_zdcSumContainerName + ".LEDType" + m_auxSuffix}; // recorded in the global sum
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDPresampleADCKey{this, "ZdcLEDPresampleADCKey", m_zdcModuleContainerName + ".Presample" + m_auxSuffix};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDADCSumKey{this, "ZdcLEDADCSumKey", m_zdcModuleContainerName + ".ADCSum" + m_auxSuffix};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDMaxADCKey{this, "ZdcLEDMaxADCKey", m_zdcModuleContainerName + ".MaxADC" + m_auxSuffix};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDMaxSampleKey{this, "ZdcLEDMaxSampleKey", m_zdcModuleContainerName + ".MaxSample" + m_auxSuffix};
-    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDAvgTimeKey{this, "ZdcLEDAvgTimeKey", m_zdcModuleContainerName + ".AvgTime" + m_auxSuffix};
-
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDxCentroidKey {
+        this, "xCentroidKey", m_zdcSumContainerName + ".xCentroid" + m_auxSuffix, 
+        "X position of centroid in beamline coordinates (after geometry corrections)"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDyCentroidKey {
+        this, "yCentroidKey", m_zdcSumContainerName + ".yCentroid" + m_auxSuffix, 
+        "Y position of centroid in beamline coordinates (after geometry corrections)"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDxDetCentroidUnsubKey {
+        this, "xDetCentroidUnsubKey", m_zdcSumContainerName + ".xDetCentroidUnsub" + m_auxSuffix, 
+        "X position of centroid in RPD detector coordinates (before geometry corrections), calculated with unsubtracted amplitudes"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDyDetCentroidUnsubKey {
+        this, "yDetCentroidUnsubKey", m_zdcSumContainerName + ".yDetCentroidUnsub" + m_auxSuffix, 
+        "Y position of centroid in RPD detector coordinates (before geometry corrections), calculated with unsubtracted amplitudes"};
+    
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDreactionPlaneAngleKey {
+        this, "reactionPlaneAngleKey", m_zdcSumContainerName + ".reactionPlaneAngle" + m_auxSuffix, 
+        "Reaction plane angle"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDcosDeltaReactionPlaneAngleKey {
+        this, "cosDeltaReactionPlaneAngleKey", m_zdcSumContainerName + ".cosDeltaReactionPlaneAngle" + m_auxSuffix, 
+        "Cosine of the difference between the reaction plane angles of the two sides"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDcentroidStatusKey {
+        this, "centroidStatusKey", m_zdcSumContainerName + ".centroidStatus" + m_auxSuffix, 
+        "Centriod calculation status word"};
     //---------------------------------------------------
 
 };

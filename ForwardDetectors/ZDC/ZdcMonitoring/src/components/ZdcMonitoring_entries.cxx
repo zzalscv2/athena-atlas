@@ -3,5 +3,7 @@
 */
 
 #include "ZdcMonitoring/ZdcMonitorAlgorithm.h"
+#include "ZdcMonitoring/ZdcLEDMonitorAlgorithm.h"
 
 DECLARE_COMPONENT( ZdcMonitorAlgorithm )
+DECLARE_COMPONENT( ZdcLEDMonitorAlgorithm )
