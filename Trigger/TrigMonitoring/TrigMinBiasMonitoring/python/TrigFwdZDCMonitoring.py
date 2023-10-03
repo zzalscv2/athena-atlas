@@ -7,7 +7,7 @@ def TrigFwdZDCMonitoringAlg(configFlags):
     """ Configure general ZDC chains monitoring algs """
     monConfig = AthMonitorCfgHelper(configFlags,'FwdZDCMonitoringAlgs')
 
-    zdcMonAlg = monConfig.addAlgorithm(CompFactory.FwdZDCMonitoringAlg, 'FwdZDCMonitoringAlg')
+    zdcMonAlg = monConfig.addAlgorithm(CompFactory.FwdZDCMonitoringAlg, 'FwdZDCTrigMonitoringAlg')
     
     zdcMonAlg.triggerList += ['L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C','L1_ZDC_XOR']
     # this creates a 'Group' called 'zdcMonitor' which will put its histograms into the subdirectory 'L1/FwdZDC/'
@@ -67,7 +67,7 @@ if __name__=='__main__':
     cfg.merge(TrigFwdZDCMonitoringAlg(flags))
 
     # If you want to turn on more detailed messages ...
-    cfg.getEventAlgo('FwdZDCMonitoringAlg').OutputLevel = DEBUG
+    cfg.getEventAlgo('FwdZDCTrigMonitoringAlg').OutputLevel = DEBUG
     cfg.printConfig(withDetails=False) # set True for exhaustive info
     with open("cfg.pkl", "wb") as f:
         cfg.store(f)

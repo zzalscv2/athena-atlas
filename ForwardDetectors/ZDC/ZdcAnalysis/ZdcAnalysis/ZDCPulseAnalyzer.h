@@ -115,11 +115,11 @@ private:
   bool m_fixTau1{};
   bool m_fixTau2{};
 
-  float m_defaultFitTMax;   // user-provided upper limit on samples to be included in fit
-  float m_defaultFitTMin;   // user-provided upper limit on samples to be included in fit
+  float m_defaultFitTMax{};   // user-provided upper limit on samples to be included in fit
+  float m_defaultFitTMin{};   // user-provided upper limit on samples to be included in fit
 
-  float m_chisqDivAmpCutLG; // maximum good LG chisq / amplitude
-  float m_chisqDivAmpCutHG; // maximum good HG chisq / amplitude
+  float m_chisqDivAmpCutLG{}; // maximum good LG chisq / amplitude
+  float m_chisqDivAmpCutHG{}; // maximum good HG chisq / amplitude
 
   float m_T0CutLowLG{};  // minimum good corrected time for LG fits
   float m_T0CutHighLG{}; // maximum good corrected time for LG fits
@@ -127,14 +127,14 @@ private:
   float m_T0CutLowHG{};  // minimum good corrected time for HG fits
   float m_T0CutHighHG{}; // maximum good corrected time for HG fits
 
-  float m_defaultT0Max;   // Upper limit on pulse t0
-  float m_defaultT0Min;   // Lower limit on pulse t0
+  float m_defaultT0Max{};   // Upper limit on pulse t0
+  float m_defaultT0Min{};   // Lower limit on pulse t0
 
-  float m_fitAmpMinHG;      // Minimum amplitude in the fit
-  float m_fitAmpMinLG;      // Minimum amplitude in the fit
+  float m_fitAmpMinHG{};      // Minimum amplitude in the fit
+  float m_fitAmpMinLG{};      // Minimum amplitude in the fit
 
-  float m_fitAmpMaxHG;      // Minimum amplitude in the fit
-  float m_fitAmpMaxLG;      // Minimum amplitude in the fit
+  float m_fitAmpMaxHG{};      // Minimum amplitude in the fit
+  float m_fitAmpMaxLG{};      // Minimum amplitude in the fit
 
   //
   bool m_haveTimingCorrections{};
@@ -154,7 +154,7 @@ private:
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //
-  bool m_adjTimeRangeEvent; // indicates whether we adjust the time range for this specific event
+  bool m_adjTimeRangeEvent{}; // indicates whether we adjust the time range for this specific event
 
   int m_minSampleEvt{};
   int m_maxSampleEvt{};
@@ -227,10 +227,10 @@ private:
   float m_fitTMax{};          // event-by-event specified fit tmax
   float m_fitTMin{};          // event-by-event specified fit tmin
 
-  float m_fitPostT0lo;      // use to assign lower bound of post pulse T0
+  float m_fitPostT0lo{};      // use to assign lower bound of post pulse T0
 
   float m_initialPrePulseT0{};
-  float m_initialPrePulseAmp;
+  float m_initialPrePulseAmp{};
 
   float m_initialPostPulseT0{};
 
