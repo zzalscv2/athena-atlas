@@ -71,8 +71,8 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_wirePitch{m_tree.newScalar<float>("wirePitch")}; // wirePitch 1.8mm
     MuonVal::ScalarBranch<float>& m_wireWidth{m_tree.newScalar<float>("wireWidth")}; // wireWidth 0.015mm
     MuonVal::ScalarBranch<short>& m_wireGroupWidth{m_tree.newScalar<short>("wireGroupWidth")}; // wireGroupWidth 20
-    MuonVal::ThreeVectorBranch m_globalWireGroupPositions{m_tree, "globalWireGroupPositions"};
-    MuonVal::VectorBranch<uint8_t>& m_wireGroupNum{m_tree.newVector<uint8_t>("wireGroupNumber")}; // wire Group number
+    MuonVal::ThreeVectorBranch m_globalWireGroupPos{m_tree, "globalWireGroupPos"};
+    MuonVal::VectorBranch<uint8_t>& m_wireGroupNum{m_tree.newVector<uint8_t>("wireGroupNum")}; // wire Group number
     MuonVal::VectorBranch<uint8_t>& m_wireGroupGasGap{m_tree.newVector<uint8_t>("wireGroupGasGap")}; // gas gap number
 
     /// Strip dimensions 
@@ -80,7 +80,7 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_stripPitch{m_tree.newScalar<float>("stripPitch")}; // stripPitch 3.2mm
     MuonVal::ScalarBranch<float>& m_stripWidth{m_tree.newScalar<float>("stripWidth")}; // stripWidth 2.7mm
     MuonVal::VectorBranch<float>& m_firstStripPitch{m_tree.newVector<float>("firstStripPitch")}; // firstStripWidth 1.6/3.2mm
-    MuonVal::ThreeVectorBranch m_globalStripPositions{m_tree, "globalStripPositions"};
+    MuonVal::ThreeVectorBranch m_globalStripPos{m_tree, "globalStripPos"};
     MuonVal::VectorBranch<uint>& m_stripNum{m_tree.newVector<uint>("stripNumber")}; // strip number
     MuonVal::VectorBranch<uint8_t>& m_stripGasGap{m_tree.newVector<uint8_t>("stripGasGap")}; // gas gap number
     MuonVal::VectorBranch<float>& m_stripLengths{m_tree.newVector<float>("stripLengths")}; // Length of each strip
@@ -90,11 +90,11 @@ class GeoModelsTgcTest : public AthHistogramAlgorithm {
     MuonVal::VectorBranch<uint>& m_numPadEta{m_tree.newVector<uint>("numPadEta")};
     MuonVal::VectorBranch<uint>& m_numPadPhi{m_tree.newVector<uint>("numPadPhi")};
 
-    MuonVal::ThreeVectorBranch m_globalPadCornerBL{m_tree, "globalPadCornerBottomLeft"};
-    MuonVal::ThreeVectorBranch m_globalPadCornerBR{m_tree, "globalPadCornerBottomRight"};
-    MuonVal::ThreeVectorBranch m_globalPadCornerTL{m_tree, "globalPadCornerTopLeft"};
-    MuonVal::ThreeVectorBranch m_globalPadCornerTR{m_tree, "globalPadCornerTopRight"};
-    MuonVal::ThreeVectorBranch m_globalPadPositions{m_tree, "globalPadPositions"};
+    MuonVal::ThreeVectorBranch m_globalPadCornerBR{m_tree, "globalPadCornerBR"};
+    MuonVal::ThreeVectorBranch m_globalPadCornerBL{m_tree, "globalPadCornerBL"};
+    MuonVal::ThreeVectorBranch m_globalPadCornerTR{m_tree, "globalPadCornerTR"};
+    MuonVal::ThreeVectorBranch m_globalPadCornerTL{m_tree, "globalPadCornerTL"};
+    MuonVal::ThreeVectorBranch m_globalPadPos{m_tree, "globalPadPos"};
     MuonVal::VectorBranch<uint8_t>& m_padGasGap{m_tree.newVector<uint8_t>("padGasGap")}; // gas gap number
     MuonVal::VectorBranch<uint>& m_padEta{m_tree.newVector<uint>("padEtaNumber")}; // pad number in eta direction
     MuonVal::VectorBranch<uint>& m_padPhi{m_tree.newVector<uint>("padPhiNumber")}; // pad number in phi direction
