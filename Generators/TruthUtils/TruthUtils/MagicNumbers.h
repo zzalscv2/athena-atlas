@@ -18,6 +18,7 @@
 #else
 namespace HepMC {
 template <class T>  inline int barcode(const T& p){ return p->barcode();}
+template <>  inline int barcode(const int& p){ return p;}
 }
 #endif
 namespace HepMC {
@@ -55,48 +56,38 @@ constexpr int INVALID_PARTICLE_BARCODE = -1;
 
 /// @brief Method to establish if a particle (or barcode) was created during the simulation (TODO update to be status based)
 template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
-template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BARCODE_THRESHOLD);}
 
 /// @brief Method to return how many interactions a particle has undergone during simulation (TODO migrate to be based on status).
 template <class T>  inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
-template <>  inline int generations(const int& b){ return (b/SIM_REGENERATION_INCREMENT);}
 
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) was created during the simulation (only to be used in legacy TP converters)
     template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
-    template <>  inline bool is_simulation_particle(const int& b){ return (b>SIM_BARCODE_THRESHOLD);}
 
     /// @brief Method to establish if a particle (or barcode) is a new seondary created during the simulation (only to be used in legacy TP converters)
     template <class T>  inline bool is_sim_secondary(const T& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
-    template <>  inline bool  is_sim_secondary(const int& b){ return (b%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation (only to be used in legacy TP converters).
     template <class T>  inline int generations(const T& p){ return (barcode(p)/SIM_REGENERATION_INCREMENT);}
-    template <>  inline int generations(const int& b){ return (b/SIM_REGENERATION_INCREMENT);}
   }
 
   namespace StatusBased {
     /// @brief Method to establish if a particle was created during the simulation based on the status value
     template <class T>  inline bool is_simulation_particle(const T& p){ return (p->status()>SIM_STATUS_THRESHOLD);}
-    template <>  inline bool is_simulation_particle(const int& s){ return (s>SIM_STATUS_THRESHOLD);}
 
     /// @brief Method to establish if a particle is a new seondary created during the simulation based on the status value
     template <class T>  inline bool is_sim_secondary(const T& p){ return (p->status()%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
-    template <>  inline bool  is_sim_secondary(const int& s){ return (s%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation based on the status value
     template <class T>  inline int generations(const T& p){ return (p->status()/SIM_STATUS_INCREMENT);}
-    template <>  inline int generations(const int& s){ return (s/SIM_STATUS_INCREMENT);}
   }
 
 /// @brief Method to establish if the vertex was created during simulation (TODO migrate to be based on status).
 template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
-template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARCODE_THRESHOLD);}
 
   namespace BarcodeBased {
     /// @brief Method to establish if the vertex was created during simulation (only to be used in legacy TP converters)
     template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcode(v)<-SIM_BARCODE_THRESHOLD);}
-    template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARCODE_THRESHOLD);}
   }
 
   namespace StatusBased {
@@ -106,7 +97,6 @@ template <>  inline bool is_simulation_vertex(const int& b){ return (b<-SIM_BARC
 #else
     template <class T>  inline bool is_simulation_vertex(const T& v){ return (v->id()>SIM_STATUS_THRESHOLD);}
 #endif
-    template <>  inline bool is_simulation_vertex(const int& s){ return (s>SIM_STATUS_THRESHOLD);}
   }
 
 template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
@@ -193,11 +183,18 @@ template <class T> void old_to_new_simulation_scheme(T& evt) {
 }
 
 /// @brief Functions for converting between the old and new barcode/status schemes
-inline int new_particle_status_from_old(int oldStatus, int barcode) { return oldStatus + SIM_STATUS_INCREMENT*BarcodeBased::generations(barcode) + (BarcodeBased::is_sim_secondary(barcode)? SIM_STATUS_THRESHOLD : 0); }
+inline int new_particle_status_from_old(int oldStatus, int barcode) { 
+  int generations_barcode_based = (barcode/SIM_REGENERATION_INCREMENT);
+  bool is_sim_secondary_barcode_based = (barcode%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD);
+  return oldStatus + SIM_STATUS_INCREMENT*generations_barcode_based + (is_sim_secondary_barcode_based? SIM_STATUS_THRESHOLD : 0); }
 inline int old_particle_status_from_new(int newStatus) { return newStatus%SIM_STATUS_THRESHOLD; }
 
-inline int new_vertex_status_from_old(int oldStatus, int barcode) { return (BarcodeBased::is_simulation_vertex(barcode)? SIM_STATUS_THRESHOLD : 0) + oldStatus; }
-inline int old_vertex_status_from_new(int newStatus) { return (StatusBased::is_simulation_vertex(newStatus) ? -SIM_STATUS_THRESHOLD : 0) + newStatus; }
-
+inline int new_vertex_status_from_old(int oldStatus, int barcode) { 
+  bool is_simulation_vertex_barcode_based =  (barcode<-SIM_BARCODE_THRESHOLD);
+  return (is_simulation_vertex_barcode_based? SIM_STATUS_THRESHOLD : 0) + oldStatus; 
+}
+inline int old_vertex_status_from_new(int newStatus) {
+  bool is_simulation_vertex_status_based = (newStatus>SIM_STATUS_THRESHOLD); 
+  return ( is_simulation_vertex_status_based ? -SIM_STATUS_THRESHOLD : 0) + newStatus; }
 }
 #endif
