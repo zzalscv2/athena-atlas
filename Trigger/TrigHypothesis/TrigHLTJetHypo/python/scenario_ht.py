@@ -16,7 +16,7 @@ pattern_et_threshold = r'^HT(?P<htlo>\d+)'\
     r'(XX(?P<etlo>\d*)et(?P<ethi>\d*))?'
 
 pattern_common = r'(XX(?P<etalo>\d*)eta(?P<etahi>\d*))?'\
-    r'(XX(?P<jvtlo>\d*)jvt)?$'
+    r'(XX(?P<jvtlo>\d*)jvt)?(XX(?P<veto>veto))?$'
 
 pattern_ptfull = pattern_pt_threshold + pattern_common
 rgx_pt         = re.compile(pattern_ptfull)
@@ -26,7 +26,7 @@ rgx_et         = re.compile(pattern_etfull)
 
 def get_conditionfilter_args_from_matchdict(groupdict, threshold_var):
     """ Extract the arguments used by the filter of the HT condition
-    from the dictionary greated during ghe regex matching to the sceanario
+    from the dictionary created during the regex matching to the scenario
     string. THESE CHAINS HAS DEFAULT CONDITION FILTERING"""
     
     # care! if et no match, etlo and etahi are None.
@@ -40,6 +40,7 @@ def get_conditionfilter_args_from_matchdict(groupdict, threshold_var):
     if groupdict['etalo'] is None:  # then default filtering for eta
         groupdict['etalo'] = ''  # will be assigned default value
         groupdict['etahi'] = '320'
+
 
     condargs = []
     vals = defaults(threshold_var,
@@ -86,7 +87,8 @@ def scenario_ht(scenario, chainPartInd):
     repcondargs = [RepeatedConditionParams(tree_id = 1,
                                            tree_pid=0,
                                            chainPartInd=chainPartInd,
-                                           condargs=condargs)]
+                                           condargs=condargs,
+                                           invert='veto' in scenario)]
 
     # get the arguments needed for the HT condition filter
     filterparams = None

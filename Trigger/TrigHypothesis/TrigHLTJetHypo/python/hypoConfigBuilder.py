@@ -65,7 +65,7 @@ def make_root_repcondconfig():
     return configurer
 
 def buildHypoHelperConfigTool(params):
-    """the parameter object passed in is build in the modules handling
+    """the parameter object passed in is built in the modules handling
     scenarios. It contains the information needed to build the
     configuration AlgTool that intialiases a hypo helper AlgTool"""
 
@@ -224,6 +224,7 @@ def make_fastreduction_configurers(chain_dict):
     
 
     chain_parts = chain_dict['chainParts']
+
     simple_chainparts = [
         cp for cp in chain_parts if cp['hypoScenario'] == 'simple']
 

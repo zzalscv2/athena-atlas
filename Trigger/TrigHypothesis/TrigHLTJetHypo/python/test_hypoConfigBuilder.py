@@ -3,9 +3,8 @@
 
 from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import (
     SingleJetGroup,
-    MultiJetGroup,
-    PrimaryLegGroup,
-    MultiBjetGroup,
+    PhysicsStream,
+    SupportLegGroup,
 )
 
 DevGroup = ['Development']
@@ -31,83 +30,22 @@ logger.setLevel(DEBUG)
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
+flags.Input.Files = []
 flags.lock()
 
+
+
 chains = [
-    ChainProp(name='HLT_j0_DIJET70j12ptXX1000djmassXXdjdphi200XX400djdeta_pf_ftf_L1MJJ-500-NFF',
-              l1SeedThresholds=['FSNOSEED'],stream=['VBFDelayed'], groups=PrimaryLegGroup+MultiBjetGroup),
 
-    ChainProp(name='HLT_j0_DIJET70j12ptXX1000djmassXXdjdphi200XX400djdeta_L1J20',
-              l1SeedThresholds=['FSNOSEED'],groups=MultiJetGroup),
-    
-    ChainProp(name='HLT_j85_050momemfrac100_L1J20', groups=SingleJetGroup),
-    
-    ChainProp(name='HLT_j80_CLEANlb_L1J15', groups=SingleJetGroup),
 
-    ChainProp(name='HLT_j80_CLEANllp_L1J15', groups=SingleJetGroup),
+    ChainProp(name='HLT_j45a_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream,'express'], groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J15'], monGroups=['jetMon:t0','jetMon:online','idMon:shifter','caloMon:t0']),
+
+
+    ChainProp(name='HLT_j0_HT400XX15ptXX0eta490_j45a_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J15'], monGroups=['jetMon:t0','jetMon:online','idMon:shifter','caloMon:t0']),
+
  
-    ChainProp(name='HLT_j420_subresjesgscIS_ftf_L1J100',groups=SingleJetGroup),
-
-    ChainProp(name='HLT_j0_perf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SingleJetGroup),
-
-    ChainProp(name='HLT_j0_perf_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SingleJetGroup),
-
-    ChainProp(name='HLT_j0_perf_pf_ftf_nojcalib_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SingleJetGroup),
-
-    ChainProp(name='HLT_j0_perf_a10sd_cssk_pf_nojcalib_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:Online']+SingleJetGroup),
-
-    ChainProp(name='HLT_j260f_L1J75_31ETA49',
-              groups=SingleJetGroup),
-
-    ChainProp(name='HLT_j80_j60_L1J15',
-              l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup),
-
-    ChainProp(name='HLT_2j80_3j60_L1J15',
-              l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup),
-
-    ChainProp(name='HLT_j0_HT1000_L1J20', groups=SingleJetGroup),
-
-
-     ChainProp(name='HLT_j70_0eta320_j50_0eta490_j0_DIJET70j12ptXX1000djmassXXdjdphi200XX400djdeta__L1MJJ-500-NFF',
-
-               l1SeedThresholds=['FSNOSEED']*3,
-               groups=MultiJetGroup),
-
-    ChainProp(name='HLT_10j40_L1J15',
-              l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup),
-
-    ChainProp(name='HLT_j0_fbdjshared_L1J20', groups=SingleJetGroup),
-        
-    ChainProp(name='HLT_j40_j0_HT50XX10etXX0eta320_L1J20',
-              l1SeedThresholds=['FSNOSEED']*2,
-              groups=MultiJetGroup),
-
-    ChainProp(name='HLT_j0_FBDJNOSHARED10etXX20etXX34massXX50fbet_L1J20',
-              groups=SingleJetGroup),
-
-    ChainProp(name='HLT_j85_ftf_MASK300ceta210XX300nphi10_L1J20',
-                  groups=SingleJetGroup),
-
-    ChainProp(name='HLT_j45_pf_ftf_preselj20_L1J15', groups=SingleJetGroup),
-    
-    ChainProp(name='HLT_j85_ftf_MASK300ceta210XX300nphi10_L1J20',
-              groups=SingleJetGroup),
-        
-    ChainProp(name='HLT_j0_DIJET80j12ptXX0j12eta240XX700djmass_L1J20', groups=SingleJetGroup),
-
-    ChainProp(name='HLT_j0_DIJET80j12ptXX0j12eta240XX700djmass_PTRANGE2r3_L1J20', groups=SingleJetGroup),
-
-    ChainProp(name='HLT_j80_j60_SHARED_j40__L1J15', groups=MultiJetGroup, l1SeedThresholds=['FSNOSEED']*3,),
-
-    ChainProp(name='HLT_j0_HT1000_j0_DIJET80j12ptXX0j12eta240XX700djmass_L1J20', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup),
-
-    ChainProp(name='HLT_2j35c_2j35c_85bdips_roiftf_presel4c35_L14J15p0ETA25', l1SeedThresholds=['FSNOSEED','FSNOSEED'], groups=MultiJetGroup+DevGroup),
-
-    
-    ChainProp(name='HLT_3j45_j45_2timing_roiftf_presel4c35_L14J15p0ETA25', l1SeedThresholds=['FSNOSEED']*2, groups=MultiJetGroup+DevGroup),
-
-    ChainProp(name='HLT_j220__2timing_roiftf_presel4c35_L14J15p0ETA25', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
-]
+    ChainProp(name='HLT_j0_HT400XX15ptXX0eta490XXveto_j45a_pf_ftf_preselj20_L1J15', l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream,'express'], groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J15'], monGroups=['jetMon:t0','jetMon:online','idMon:shifter','caloMon:t0']),
+   ]
 
 def testChainDictMaker(idict):
 
