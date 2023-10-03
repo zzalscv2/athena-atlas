@@ -54,6 +54,7 @@ L1JetCollections = dict()
 match_smallRL1_OfflineJets_List = ['AntiKt4EMPFlowJets', 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf']
 # temporarily modified to use small-R offline jet in turn-on to fix tier0 jet mon crash ATR-25800!! - throws exception if < 2 jet collections provided
 match_largeRL1_OfflineJets_List = ['AntiKt4EMPFlowJets', 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf']
+match_HIL1_OfflineJets_List = ['AntiKt4HIJets', 'HLT_AntiKt4HIJets']
 
 L1JetCollections['pp'] = {
 
@@ -70,12 +71,9 @@ L1JetCollections['pp'] = {
 }
 
 L1JetCollections['HI'] = {
-  'LVL1JetRoIs'  : {'MatchTo' : ['AntiKt4HIJets',
-                                  'HLT_AntiKt4HIJets']},
-  'L1_jFexSRJetRoI': {'MatchTo': ['AntiKt4HIJets',
-                                  'HLT_AntiKt4HIJets']},
-  'L1_gFexSRJetRoI': {'MatchTo': ['AntiKt4HIJets',
-                                  'HLT_AntiKt4HIJets']},
+  'LVL1JetRoIs'  : {'MatchTo' : match_HIL1_OfflineJets_List},
+  'L1_jFexSRJetRoI': {'MatchTo': match_HIL1_OfflineJets_List},
+  'L1_gFexSRJetRoI': {'MatchTo': match_HIL1_OfflineJets_List},
 }
 
 for case in L1JetCollections.keys():
@@ -231,312 +229,80 @@ JetCollections['HI'] = {
   'HLT_AntiKt4EMPFlowJets_jes_ftf' : {'MatchTo': 'AntiKt4HIJets'}
 }
 
-# set HLT jet collection, reference chain and offline jet collection
-# for turn-on curves 
 
-Chains2Monitor  = dict()
+def getChains2Monitor(inputFlags, monMode):
 
-Chains2Monitor['HI'] = {  # TODO: do it properly with monGroups
-
-  'HLT_j60_ion_L1J15': {'HLTColl': 'HLT_AntiKt4HIJets',
-                        'RefChain': 'NONE',
-                        'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j75_ion_L1J30': {'HLTColl': 'HLT_AntiKt4HIJets',
-                        'RefChain': 'NONE',
-                        'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j60_ion_L1jJ40': {'HLTColl': 'HLT_AntiKt4HIJets',
-                         'RefChain': 'NONE',
-                         'OfflineColl': 'AntiKt4HIJets'},
-                        
-  'HLT_j75_ion_L1jJ60': {'HLTColl': 'HLT_AntiKt4HIJets',
-                         'RefChain': 'NONE',
-                         'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j85_ion_L1J30': {'HLTColl': 'HLT_AntiKt4HIJets',
-                        'RefChain': 'NONE',
-                        'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j150_ion_L1J50': {'HLTColl': 'HLT_AntiKt4HIJets',
-                         'RefChain': 'NONE',
-                         'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j200_ion_L1J50': {'HLTColl': 'HLT_AntiKt4HIJets',
-                         'RefChain': 'NONE',
-                         'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j50f_ion_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
-                                 'RefChain': 'NONE', 
-                                 'OfflineColl': 'AntiKt4HIJets'},
-
-  'HLT_j60f_ion_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
-                                 'RefChain': 'NONE', 
-                                 'OfflineColl': 'AntiKt4HIJets'},
-                        
-  'HLT_j50f_ion_L1jJ40p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
-                                  'RefChain': 'NONE',
-                                  'OfflineColl': 'AntiKt4HIJets'},
-                        
-  'HLT_j60f_ion_L1jJ40p31ETA49': {'HLTColl': 'HLT_AntiKt4HIJets',
-                                  'RefChain': 'NONE',
-                                  'OfflineColl': 'AntiKt4HIJets'},
-                        
-  'HLT_j20a_L1VZDC_A_VZDC_C_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                                          'RefChain': 'NONE',
-                                          'OfflineColl': 'AntiKt4EMPFlowJets'},
-
-  'HLT_j20a_L1ZDC_XOR_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                                    'RefChain': 'NONE',
-                                    'OfflineColl': 'AntiKt4EMPFlowJets'},
-                        
-                        
-  'HLT_j20a_L11ZDC_NZDC_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                                      'RefChain': 'NONE',
-                                      'OfflineColl': 'AntiKt4EMPFlowJets'},
-
-  'HLT_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_jes_ftf',
-                                          'RefChain': 'NONE',
-                                          'OfflineColl': 'AntiKt4EMPFlowJets'},
-
-  'HLT_j20a_pf_jes_ftf_L1ZDC_XOR_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_jes_ftf',
-                                    'RefChain': 'NONE',
-                                    'OfflineColl': 'AntiKt4EMPFlowJets'},
-
-  'HLT_j20a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_jes_ftf',
-                                      'RefChain': 'NONE',
-                                      'OfflineColl': 'AntiKt4EMPFlowJets'},
-
-}
-
-Chains2Monitor['pp'] = {
-  # perf chain (runs no hypo)
-  'HLT_j0_perf_L1J12_EMPTY': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                              'RefChain': 'NONE',
-                              'OfflineColl': 'NONE'},
-    
-  # Small-R EMTopo chains
-  'HLT_j45_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subjesIS',
-                       'RefChain' : 'NONE',
-                       'OfflineColl' : 'AntiKt4EMPFlowJets' },
-
-  'HLT_j45_ftf_preselj20_L1J15'  : { 'HLTColl' : 'HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf',
-                       'RefChain' : 'NONE',
-                       'OfflineColl' : 'AntiKt4EMPFlowJets' },
-
-  'HLT_j420_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                      'RefChain': 'HLT_j85_L1J20',
-                      'OfflineColl': 'AntiKt4EMPFlowJets'},
+  Chains2Monitor = dict()
+  from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
+  monAccess = getHLTMonitoringAccess(inputFlags)
   
-  'HLT_3j200_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                       'RefChain': 'HLT_j85_L1J20',
-                       'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_4j120_L13J50': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                       'RefChain': 'HLT_j85_L1J20',
-                       'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_j45_320eta490_L1J15p31ETA49': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                                      'RefChain': 'NONE',
-                                      'OfflineColl': 'NONE'},
-  
-  # Small-R PFlow chains
-  'HLT_j45_pf_ftf_preselj20_L1J15': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                     'RefChain': 'NONE',
-                                     'OfflineColl': 'NONE'},
-  
-  'HLT_5j85_pf_ftf_presel5j50_L14J15': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                        'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                                        'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_j420_pf_ftf_L1J100': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                             'RefChain': 'HLT_j85_pf_ftf_preselj50_L1J20',
-                             'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_j420_pf_ftf_preselj225_L1J100': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                        'RefChain': 'HLT_j85_pf_ftf_preselj50_L1J20',
-                                        'OfflineColl': 'AntiKt4EMPFlowJets'},
+  # set HLT jet collection, reference chain and offline jet collection
+  # for turn-on curves 
+  ListOfMonChains = monAccess.monitoredChains(signatures="jetMon", monLevels = ["shifter","t0"])
 
-  'HLT_6j35c_pf_ftf_presel6c25_L14J15' : { 'HLTColl' : 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                           'RefChain': 'NONE',
-                                           'OfflineColl': 'NONE'},
+  default_dict = {"HLTColl": "NONE", "RefChain": "NONE" ,"OfflineColl": "NONE"}
+  Chains2Monitor[monMode] = dict((chain, default_dict.copy()) for chain in ListOfMonChains)  
 
-  'HLT_6j35c_020jvt_pf_ftf_presel6c25_L14J15' : { 'HLTColl' : 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                                  'RefChain': 'NONE',
-                                                  'OfflineColl': 'NONE'},
+  if monMode == 'HI':
+    for chainName in Chains2Monitor['HI']:
+      if '_ion_' in chainName:
+          Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4HIJets"
+          Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4HIJets"
+      else: 
+          Chains2Monitor['HI'][chainName]["HLTColl"] = "HLT_AntiKt4EMTopoJets_subjesIS"
+          Chains2Monitor['HI'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets"
+  elif monMode == "pp":  
+    # logic to define HLTColl, RefChain, OfflineColl
+    for chainName in Chains2Monitor['pp']:
+      Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMTopoJets_subjesIS"
+      if '_pf_' in chainName and 'a10' not in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
+      elif 'a10' in chainName:
+        if 'a10t' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes"
+        elif 'sd_cssk_pf' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
+        elif 'a10r' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMTopoRCJets_subjesIS"
+        else: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10LCTopoJets_subjes"
+      elif '_noalg_' in chainName: 
+        Chains2Monitor['pp'][chainName]["RefChain"] = "HLT_j45_pf_ftf_preselj20_L1J15" # temporarily modify to using small-R jet in turn-on for both small and large-R jets to fix tier0 jet mon crash ATR-25800!!
+        Chains2Monitor['pp'][chainName]["OfflineColl"] = "AntiKt4EMPFlowJets"
+        if 'jJ' in chainName or 'gJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
+        if 'jLJ' in chainName or 'gLJ' in chainName: Chains2Monitor['pp'][chainName]["HLTColl"] = "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf"
+      else: continue
 
-  'HLT_3j200_pf_ftf_L1J100'         : { 'HLTColl' : 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                        'RefChain': 'NONE',
-                                        'OfflineColl': 'NONE'},
-  
-  'HLT_j0_HT1000_L1HT190-J15s5pETA21': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                                        'RefChain': 'NONE',
-                                        'OfflineColl': 'NONE'},
-  
-  # Large-R reclustered chains
-  'HLT_j460_a10r_L1J100': {'HLTColl': 'HLT_AntiKt10EMTopoRCJets_subjesIS',
-                           'RefChain': 'NONE',
-                           'OfflineColl': 'NONE'},
-  
-  # Large-R LCTopo chains
-  'HLT_j460_a10_lcw_subjes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoJets_subjes',
-                                     'RefChain': 'NONE',
-                                     'OfflineColl': 'NONE'},
-  
-  # Large-R trimmed chains
-  'HLT_j420_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                   'RefChain': 'NONE',
-                                   'OfflineColl': 'NONE'},
-  
-  'HLT_j420_35smcINF_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                            'RefChain': 'NONE',
-                                            'OfflineColl': 'NONE'},
-  
-  'HLT_j460_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                   'RefChain': 'NONE',
-                                   'OfflineColl': 'NONE'},
-
-  'HLT_j460_a10t_lcw_jes_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                         'RefChain': 'NONE',
-                                         'OfflineColl': 'NONE'},
-  
-  'HLT_j420_a10t_lcw_jes_35smcINF_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                                  'RefChain': 'NONE',
-                                                  'OfflineColl': 'NONE'},
-
-  'HLT_2j330_a10t_lcw_jes_L1J100':          {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                             'RefChain': 'NONE',
-                                             'OfflineColl': 'NONE'},
-  
-  'HLT_2j330_35smcINF_a10t_lcw_jes_L1J100': {'HLTColl': 'HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes',
-                                             'RefChain': 'NONE',
-                                             'OfflineColl': 'NONE'},
-  
-  # Large-R SoftDrop chains
-  'HLT_j420_a10sd_cssk_pf_jes_ftf_preselj225_L1J100': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                       'RefChain': 'NONE',
-                                                       'OfflineColl': 'NONE'},
-  
-  'HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1J100': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                                'RefChain': 'NONE',
-                                                                'OfflineColl': 'NONE'},
-  
-  'HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1J100': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                       'RefChain': 'NONE',
-                                                       'OfflineColl': 'NONE'},
-  
-  'HLT_2j330_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                               'RefChain': 'NONE',
-                                                               'OfflineColl': 'NONE'},
-  
-  'HLT_2j330_35smcINF_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                                        'RefChain': 'NONE',
-                                                                        'OfflineColl': 'NONE'},
-
-  'HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1J100': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                                  'RefChain': 'NONE',
-                                                                  'OfflineColl': 'NONE'},
-
-  'HLT_2j330_35smcINF_a10sd_cssk_pf_jes_ftf_presel2j225_L1J100': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                                                                  'RefChain': 'NONE',
-                                                                  'OfflineColl': 'NONE'},
-
-  # HT and dijet scenarios
-  'HLT_j0_HT1000_L1J100': {'HLTColl': 'HLT_AntiKt4EMTopoJets_subjesIS',
-                           'RefChain': 'NONE',
-                           'OfflineColl': 'NONE'},
-
-  'HLT_j0_HT1000_pf_ftf_preselcHT450_L1HT190-J15s5pETA21': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                                          'RefChain': 'NONE',
-                                                          'OfflineColl': 'NONE'},
-
-  # L1 turn-ons
-  'HLT_noalg_L1J100'                     : { 'HLTColl' : 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',                                              
-                                             'RefChain' : 'HLT_j45_pf_ftf_preselj20_L1J15', 
-                                             'OfflineColl' : 'AntiKt4EMPFlowJets' },
-}
-
-
-# Phase1: duplicate all relevant chains with jFex algos
-temp_Phase1_chains = dict()
-L1pattern = re.compile(r"L1([0-9]*[J][0-9]+)")
-for chainName in Chains2Monitor['pp']:
-  foundL1 = L1pattern.search(chainName)
-  if foundL1:
-    L1Legacy =  foundL1.group(1)
-    if L1Legacy in Legacy2PhaseIjJThresholdDict:
-        L1PhaseI = Legacy2PhaseIjJThresholdDict[L1Legacy]
-        newChain = chainName.replace(L1Legacy,L1PhaseI)
-        temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-    if L1Legacy in Legacy2PhaseIgJThresholdDict:
-        L1PhaseI = Legacy2PhaseIgJThresholdDict[L1Legacy]
-        newChain = chainName.replace(L1Legacy,L1PhaseI)
-        temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-    if "a10" in chainName:
-        if L1Legacy in Legacy2PhaseIjLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
-            L1PhaseI = Legacy2PhaseIjLJThresholdDict[L1Legacy]
+    # Phase1: duplicate all relevant chains with jFex algos
+    temp_Phase1_chains = dict()
+    L1pattern = re.compile(r"L1([0-9]*[J][0-9]+)")
+    for chainName in Chains2Monitor['pp']:
+      foundL1 = L1pattern.search(chainName)
+      if foundL1:
+        L1Legacy =  foundL1.group(1)
+        if L1Legacy in Legacy2PhaseIjJThresholdDict:
+            L1PhaseI = Legacy2PhaseIjJThresholdDict[L1Legacy]
             newChain = chainName.replace(L1Legacy,L1PhaseI)
             temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-        if L1Legacy in Legacy2PhaseIgLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
-            L1PhaseI = Legacy2PhaseIgLJThresholdDict[L1Legacy]
+        if L1Legacy in Legacy2PhaseIgJThresholdDict:
+            L1PhaseI = Legacy2PhaseIgJThresholdDict[L1Legacy]
             newChain = chainName.replace(L1Legacy,L1PhaseI)
             temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
-  if 'L1SC111-CJ15' in chainName:
-    for largerSeed in ('L1SC111-CjJ40', 'L1jLJ140', 'L1jLJ160'):
-      newChain = chainName.replace('L1SC111-CJ15', largerSeed)
-      temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName]      
-      pass
-    pass
-temp_Phase1_chains.update({
-  # Additional Phase I test chains (beyond the duplicated ones)
-  'HLT_noalg_L1jJ80': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                    'RefChain': 'HLT_j25_pf_ftf_L1RD0_FILLED',
-                    'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_noalg_L1jJ160': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                        'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                        'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_noalg_L1jJ140': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                        'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                        'OfflineColl': 'AntiKt4EMPFlowJets'},
- 
-  # temporarily modify to using small-R jet in turn-on to fix tier0 jet mon crash ATR-25800!!
-  'HLT_noalg_L1jLJ140': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                         'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                         'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_noalg_L1gJ100': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                        'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                        'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  'HLT_noalg_L1gJ160': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                        'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                        'OfflineColl': 'AntiKt4EMPFlowJets'},
-  
-  # temporarily modify to using small-R jet in turn-on to fix tier0 jet mon crash ATR-25800!!
-  'HLT_noalg_L1gLJ160': {'HLTColl': 'HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',
-                         'RefChain': 'HLT_j45_pf_ftf_preselj20_L1J15',
-                         'OfflineColl': 'AntiKt4EMPFlowJets'},
-
-  'HLT_j60_pf_ftf_preselj50_L1jJ50': {'HLTColl': 'HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf',
-                                      'RefChain': 'NONE',
-                                      'OfflineColl': 'NONE'},
-})
-
-Chains2Monitor['pp'].update(temp_Phase1_chains)
-
-#########################################################
-# Protections
-#########################################################
-
-# Add missing jet collections to JetCollections dict
-# (this can happen if a given chain uses a jet collection that is not listed in JetCollections) 
-# TODO: make more general
-for case in ['pp','HI']:
-  for chain,chaindict in Chains2Monitor[case].items():
-    if chaindict['HLTColl'] not in JetCollections[case]: # chain will not be monitored unless HLT collection is present in JetCollections
-      JetCollections[case][chaindict['HLTColl']] = {'MatchTo': 'NONE'}
+        if "a10" in chainName:
+            if L1Legacy in Legacy2PhaseIjLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
+                L1PhaseI = Legacy2PhaseIjLJThresholdDict[L1Legacy]
+                newChain = chainName.replace(L1Legacy,L1PhaseI)
+                temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
+            if L1Legacy in Legacy2PhaseIgLJThresholdDict:   ## For now monitor a10 chains seeded by both jLJ and jJ items.
+                L1PhaseI = Legacy2PhaseIgLJThresholdDict[L1Legacy]
+                newChain = chainName.replace(L1Legacy,L1PhaseI)
+                temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName] #uses same reference chain, not phase1 variation!
+      if 'L1SC111-CJ15' in chainName:
+        for largerSeed in ('L1SC111-CjJ40', 'L1jLJ140', 'L1jLJ160'):
+          newChain = chainName.replace('L1SC111-CJ15', largerSeed)
+          temp_Phase1_chains[newChain] = Chains2Monitor['pp'][chainName]      
+          pass
+        pass
+    Chains2Monitor['pp'].update(temp_Phase1_chains)
+  else: 
+    errmsg = 'Returned empty Chains2Monitor due to invalid monMode'
+    raise RuntimeError(errmsg)
+  return Chains2Monitor
 
 #########################################################
 # Helpful functions
@@ -724,6 +490,16 @@ def TrigJetMonConfig(inputFlags):
 
   monMode = 'pp'
   if inputFlags.Reco.EnableHI: monMode = 'HI'
+
+  Chains2Monitor = getChains2Monitor(inputFlags, monMode)
+
+  # Protections
+  # Add missing jet collections to JetCollections dict
+  # (this can happen if a given chain uses a jet collection that is not listed in JetCollections) 
+  # TODO: make more general
+  for chain,chaindict in Chains2Monitor[monMode].items():
+    if chaindict['HLTColl'] not in JetCollections[case]: # chain will not be monitored unless HLT collection is present in JetCollections
+      JetCollections[case][chaindict['HLTColl']] = {'MatchTo': 'NONE'}
 
   # Match HLT jets to offline jets
   CopiedJetCollections = copy.deepcopy(JetCollections)
@@ -1279,6 +1055,16 @@ if __name__=='__main__':
 
   monMode = 'pp'
   if flags.Reco.EnableHI: monMode = 'HI'
+
+  Chains2Monitor = getChains2Monitor(flags, monMode)
+
+  # Protections
+  # Add missing jet collections to JetCollections dict
+  # (this can happen if a given chain uses a jet collection that is not listed in JetCollections) 
+  # TODO: make more general
+  for chain,chaindict in Chains2Monitor[monMode].items():
+    if chaindict['HLTColl'] not in JetCollections[case]: # chain will not be monitored unless HLT collection is present in JetCollections
+      JetCollections[case][chaindict['HLTColl']] = {'MatchTo': 'NONE'}  
 
   # Initialize configuration object, add accumulator, merge, and run.
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
