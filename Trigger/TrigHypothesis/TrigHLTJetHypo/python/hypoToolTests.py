@@ -21,6 +21,8 @@ logger.setLevel(DEBUG)
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
+flags.Input.Files = []
+
 flags.lock()
 
 class HypoToolStructure(unittest.TestCase):
