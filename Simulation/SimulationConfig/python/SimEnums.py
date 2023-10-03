@@ -49,6 +49,7 @@ class SimulationFlavour(FlagEnum):
     ATLFAST3MT = 'ATLFAST3MT'
     ATLFAST3MT_QS = 'ATLFAST3MT_QS'
     ATLFAST3F_G4MS = 'ATLFAST3F_G4MS'
+    ATLFAST3F_ACTSMT = 'ATLFAST3F_ACTSMT'
     AtlasG4 = 'AtlasG4' # Outside ISF
     AtlasG4_QS = 'AtlasG4_QS' # Outside ISF
 

@@ -149,6 +149,15 @@ def DefaultFatrasSelectorCfg(flags, name="ISF_DefaultFatrasSelector", **kwargs):
     return acc
 
 
+def DefaultActsSelectorCfg(flags, name="ISF_DefaultActsSelector", **kwargs):
+    acc = ComponentAccumulator()
+    if not flags.Sim.ISF.Simulator.isMT():
+        raise RuntimeError("SimulationSelector '%s' does not support running with SimKernel." % name)
+    kwargs.setdefault('SimulationFlavor', SimulationFlavor.Fatras)
+    acc.setPrivateTools(CompFactory.ISF.DefaultSimSelector(name, **kwargs))
+    return acc
+
+
 def DefaultFatrasNewExtrapolationSelectorCfg(flags, name="ISF_DefaultFatrasNewExtrapolationSelector", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("SimulationFlavor", SimulationFlavor.Fatras)
