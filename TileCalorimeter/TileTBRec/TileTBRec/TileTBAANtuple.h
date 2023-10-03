@@ -48,12 +48,21 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 
+#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CaloEvent/CaloCellContainer.h"
 
 // Tile includes
+#include "TileConditions/TileInfo.h"
+#include "TileEvent/TileLaserObject.h"
+#include "TileEvent/TileDigitsContainer.h"
+#include "TileEvent/TileBeamElemContainer.h"
+#include "TileEvent/TileRawChannelContainer.h"
+#include "TileEvent/TileHitContainer.h"
+#include "TileSimEvent/TileHitVector.h"
 #include "TileConditions/TileSamplingFraction.h"
 #include "TileConditions/TileCablingService.h"
 #include "TileConditions/TileCondToolEmscale.h"
@@ -83,7 +92,7 @@ class TileTBAANtuple: public AthAlgorithm {
 
     //Destructor 
     virtual ~TileTBAANtuple() = default;
-    StatusCode ntuple_initialize();
+    StatusCode ntuple_initialize(const EventContext& ctx);
     StatusCode ntuple_clear();
 
     //Gaudi Hooks
@@ -92,42 +101,146 @@ class TileTBAANtuple: public AthAlgorithm {
 
   private:
 
+    enum {NOT_SETUP = -9999};
+    enum {MAX_MINIDRAWER = 4, MAX_CHAN = 48, MAX_DMU = 16};
+
     /**
      * @brief Name of TileSamplingFraction in condition store
      */
     SG::ReadCondHandleKey<TileSamplingFraction> m_samplingFractionKey{this,
         "TileSamplingFraction", "TileSamplingFraction", "Input Tile sampling fraction"};
 
+    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,
+        "TileDigitsContainer", "TileDigitsCnt", "Input Tile digits container"};
 
-    StatusCode storeRawChannels(std::string cntID
+    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerFlxKey{this,
+        "TileDigitsContainerFlx", "", "Input Tile FELIX digits container"};
+
+    SG::ReadHandleKey<TileBeamElemContainer> m_beamElemContainerKey{this,
+        "TileBeamElemContainer", "TileBeamElemCnt", "Input Tile beam elements container"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_flatRawChannelContainerKey{this,
+        "TileRawChannelContainerFlat", "", "Input Tile raw channel container reconstructed with Flat method"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_fitRawChannelContainerKey{this,
+        "TileRawChannelContainerFit", "", "Input Tile raw channel container reconstructed with Fit method"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_optRawChannelContainerKey{this,
+        "TileRawChannelContainerOpt", "TileRawChannelOpt2", "Input Tile raw channel container reconstructed with Opt2 method"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_dspRawChannelContainerKey{this,
+        "TileRawChannelContainerDsp", "", "Input Tile DSP raw channel container"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_fitcRawChannelContainerKey{this,
+        "TileRawChannelContainerFitCool", "", "Input Tile raw channel container reconstructed with Fit COOL method"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_flxFitRawChannelContainerKey{this,
+        "TileRawChannelContainerFitFlx", "", "Input Tile FELIX raw channel container reconstructed with Fit method"};
+
+    SG::ReadHandleKey<TileRawChannelContainer> m_flxOptRawChannelContainerKey{this,
+        "TileRawChannelContainerOptFlx", "", "Input Tile FELIX raw channel container reconstructed with Opt2 method"};
+
+    SG::ReadHandleKey<TileLaserObject> m_laserObjectKey{this,
+        "TileLaserObj", "", "Input Tile laser object"};
+
+    SG::ReadHandleKey<TileHitContainer> m_hitContainerKey{this,
+        "TileHitContainer", "TileHitCnt", "Input Tile hit container"};
+
+    SG::ReadHandleKey<TileHitVector> m_hitVectorKey{this,
+        "TileHitVector", "TileHitVec", "Input Tile hit vector"};
+
+    SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey{this,
+        "CaloCellContainer", "AllCalo", "Input Calo cell container"};
+
+    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
+        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EMS conditions tool"};
+
+    ToolHandle<TileRawChannelBuilderFlatFilter> m_adderFilterAlgTool{this,
+        "TileRawChannelBuilderFlatFilter", "TileRawChannelBuilderFlatFilter", "Tile raw channel builder tool"};
+
+    Gaudi::Property<bool> m_calibrateEnergy{this, "CalibrateEnergy", true, "Calibrate energy"};
+    Gaudi::Property<bool> m_useDspUnits{this, "UseDspUnits", false, "Use DSP untis"};
+    Gaudi::Property<int> m_finalUnit{this, "OfflineUnits", TileRawChannelUnit::MegaElectronVolts, "Calibrate everything to this level"};
+    Gaudi::Property<bool> m_calibMode{this, "CalibMode", false, "If data should be put in calib mode"};
+    Gaudi::Property<bool> m_unpackAdder{this, "UnpackAdder", false, "Unpack adder"};
+    Gaudi::Property<bool> m_completeNtuple{this, "CompleteNtuple", true, "Complete the ntuple"};
+    Gaudi::Property<bool> m_bsInput{this, "BSInput", true, "Bytestream input"};
+    Gaudi::Property<bool> m_pmtOrder{this, "PMTOrder", true, "Change channel ordering to pmt ordering in the ntuple"};
+    Gaudi::Property<int> m_nSamples{this, "NSamples", NOT_SETUP, "Number of samples"};
+    Gaudi::Property<int> m_nSamplesFlx{this, "NSamplesFelix", NOT_SETUP, "Number of samples for FELIX"};
+    Gaudi::Property<unsigned int> m_nDrawers{this, "NDrawers", 6, "Number of drawers"};
+    Gaudi::Property<unsigned int> m_nDrawersFlx{this, "NDrawersFelix", 0, "Number of drawers for FELIX"};
+    Gaudi::Property<int> m_TBperiod{this, "TBperiod", 2016, "Tuned for 2016 testbeam by default"};
+    Gaudi::Property<int> m_eventsPerFile{this, "EventsPerFile", 200000, "Number of events per file"};
+    Gaudi::Property<Long64_t> m_treeSize{this, "TreeSize", 16000000000LL, "Size of tree"};
+    Gaudi::Property<std::string> m_streamName{this, "StreamName", "AANT", "Name of the output stream"};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "h1000", "Name of the ntuple ID"};
+
+    Gaudi::Property<std::vector<std::string>> m_rosName{this, "rosName", {"B", "A", "C", "D", "E"}, "Name of arrays in ntuple for different ROSes"};
+    Gaudi::Property<std::vector<std::string>> m_drawerList{this, "drawerList", {"-1"}, "List of frag IDs in correct order; Setup drawer list from data"};
+    Gaudi::Property<std::vector<int>> m_drawerType{this, "drawerType", {}, "Type of every drawer 1-4: B+, B-, EB+, EB-; Take drawer type from Frag ID (doesn't work for 2003)"};
+    Gaudi::Property<std::vector<std::string>> m_beamFragList{this, "beamFragList", {}, "List of beam frag IDs to store in the ntuple"};
+
+    Gaudi::Property<float> m_beamBN2X1{this, "BN2X1", 0.0, "Params for Beam TDC: Beam chamber: -2"};
+    Gaudi::Property<float> m_beamBN2X2{this, "BN2X2", 0.2, "Params for Beam TDC: Beam chamber: -2"};
+    Gaudi::Property<float> m_beamBN2Y1{this, "BN2Y1", 0.0, "Params for Beam TDC: Beam chamber: -2"};
+    Gaudi::Property<float> m_beamBN2Y2{this, "BN2Y2", 0.2, "Params for Beam TDC: Beam chamber: -2"};
+
+    Gaudi::Property<float> m_beamBN1X1{this, "BN1X1", 0.0, "Params for Beam TDC: Beam chamber: -1"};
+    Gaudi::Property<float> m_beamBN1X2{this, "BN1X2", 0.2, "Params for Beam TDC: Beam chamber: -1"};
+    Gaudi::Property<float> m_beamBN1Y1{this, "BN1Y1", 0.0, "Params for Beam TDC: Beam chamber: -1"};
+    Gaudi::Property<float> m_beamBN1Y2{this, "BN1Y2", 0.2, "Params for Beam TDC: Beam chamber: -1"};
+
+    Gaudi::Property<float> m_beamBC0X1{this, "BC0X1", 0.0, "Params for Beam TDC: Beam chamber: 0"};
+    Gaudi::Property<float> m_beamBC0X2{this, "BC0X2", 0.2, "Params for Beam TDC: Beam chamber: 0"};
+    Gaudi::Property<float> m_beamBC0Y1{this, "BC0Y1", 0.0, "Params for Beam TDC: Beam chamber: 0"};
+    Gaudi::Property<float> m_beamBC0Y2{this, "BC0Y2", 0.2, "Params for Beam TDC: Beam chamber: 0"};
+    Gaudi::Property<float> m_beamBC0Z{this, "BC0Z", 17138.0, "Params for Beam TDC: Beam chamber: 0"};
+
+    Gaudi::Property<float> m_beamBC1X1{this, "BC1X1", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1X2{this, "BC1X2", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1Y1{this, "BC1Y1", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1Y2{this, "BC1Y2", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1Z{this, "BC1Z", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1Z_0{this, "BC1Z_0", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1Z_90{this, "BC1Z_90", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+    Gaudi::Property<float> m_beamBC1Z_min90{this, "BC1Z_min90", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 1"};
+
+    Gaudi::Property<float> m_beamBC2X1{this, "BC2X1", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2X2{this, "BC2X2", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2Y1{this, "BC2Y1", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2Y2{this, "BC2Y2", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2Z{this, "BC2Z", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2Z_0{this, "BC2Z_0", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2Z_90{this, "BC2Z_90", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+    Gaudi::Property<float> m_beamBC2Z_min90{this, "BC2Z_min90", NOT_SETUP - 1, "Params for Beam TDC: Beam chamber: 2"};
+
+    Gaudi::Property<float> m_radius{this, "Radius", 2280.0, "Inner radius of calo, for CTB 2004 only"};
+    Gaudi::Property<std::string> m_etaFileName{this, "EtaFileName", "TileEtaCTB.txt", "File name with ETA, for CTB 2004 only"};
+
+    StatusCode storeRawChannels(const EventContext& ctx
+                                , const SG::ReadHandleKey<TileRawChannelContainer>& containerKey
                                 , bool calibMode
-                                , std::vector<float*>* eneVec
-                                , std::vector<float*>* timeVec
-                                , std::vector<float*>* chi2Vec
-                                , std::vector<float*>* pedVec
-                                , std::vector<short*>* ROD_GlobalCRCVec
-                                , std::vector<short*>* ROD_DMUBCIDVec
-                                , std::vector<short*>* ROD_DMUmemoryErrVec
-                                , std::vector<short*>* ROD_DMUSstrobeErrVec
-                                , std::vector<short*>* ROD_DMUDstrobeErrVec
-                                , std::vector<short*>* ROD_DMUHeadformatErrVec
-                                , std::vector<short*>* ROD_DMUHeadparityErrVec
-                                , std::vector<short*>* ROD_DMUDataformatErrVec
-                                , std::vector<short*>* ROD_DMUDataparityErrVec
-                                , std::vector<short*>* ROD_DMUMaskVec);
+                                , std::vector<std::array<float, MAX_CHAN>>* eneVec
+                                , std::vector<std::array<float, MAX_CHAN>>* timeVec
+                                , std::vector<std::array<float, MAX_CHAN>>* chi2Vec
+                                , std::vector<std::array<float, MAX_CHAN>>* pedVec
+                                , bool saveDQstatus = false);
 
-    StatusCode storeDigits();
-    StatusCode storeDigitsFlx();
-    StatusCode storeBeamElements();
-    StatusCode storeCells();
-    StatusCode storeLaser();
-    StatusCode storeHitVector();
-    StatusCode storeHitContainer();
-    void storeHit(const TileHit *hit, int fragType, int fragId, float* ehitVec, float* thitVec,
+    StatusCode storeDigits(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey);
+    StatusCode storeDigitsFlx(const EventContext& ctx, const SG::ReadHandleKey<TileDigitsContainer>& containerKey);
+    StatusCode storeBeamElements(const EventContext& ctx);
+    StatusCode storeCells(const EventContext& ctx);
+    StatusCode storeLaser(const EventContext& ctx);
+    StatusCode storeHitVector(const EventContext& ctx);
+    StatusCode storeHitContainer(const EventContext& ctx);
+    void storeHit(const TileHit *hit, int fragType, int fragId,
+                  std::array<float, MAX_CHAN>& ehitVec,
+                  std::array<float, MAX_CHAN>& thitVec,
                   const TileSamplingFraction* samplingFraction);
 
-    StatusCode initList(void);
-    StatusCode initListFlx(void);
+    StatusCode initList(const EventContext& ctx);
+    StatusCode initListFlx(const EventContext& ctx);
     StatusCode initNTuple(void);
     //StatusCode connectFile(void);
 
@@ -165,11 +278,16 @@ class TileTBAANtuple: public AthAlgorithm {
     void COINCBOARD_clearBranch(void);
     void LASEROBJ_clearBranch(void);
 
-    void clear_int(std::vector<int*> & vec, int nchan=48);
-    void clear_uint32(std::vector<uint32_t*> & vec, int nchan=48);
-    void clear_short(std::vector<short*> & vec, int nchan=48);
-    void clear_float(std::vector<float*> & vec, int nchan=48);
-    void clear_intint(std::vector<int**> & vec, int nchan=48);
+    template<typename T>
+    void clear_init_minus1(std::vector<T>& vec);
+
+    template<typename T, size_t N>
+    void clear_init_minus1(std::vector<std::array<T,N>>& vec);
+
+    template<typename T, size_t N>
+    void clear_init_zero(std::vector<std::array<T,N>>& vec);
+
+    void clear_samples(std::vector<std::unique_ptr<int []>>& vec, const std::vector<int>& nsamples, int nchan=MAX_CHAN);
     
     inline int digiChannel2PMT(int fragType, int chan) {
       return (abs(m_cabling->channel2hole(fragType, chan)) - 1);
@@ -214,14 +332,13 @@ class TileTBAANtuple: public AthAlgorithm {
     void setupBeamChambersTB2015(void);
     void setupBeamChambersTB2016_2020(void);
 
-    // If data should be put in calib mode
-    bool m_calibMode;
+    //
 
     //handle to THistSvc
     ServiceHandle<ITHistSvc> m_thistSvc;
 
     // The ntuple
-    TTree* m_ntuplePtr;
+    TTree* m_ntuplePtr{nullptr};
     bool m_ntupleCreated;
 
     // event number
@@ -235,23 +352,23 @@ class TileTBAANtuple: public AthAlgorithm {
     int m_dspFlags;
 
     // 0 - Beam, 1 neg eta, 2 pos eta
-    std::vector<int>* m_l1ID;
-    std::vector<int>* m_l1Type;
-    std::vector<int>* m_evBCID;
-    std::vector<int>* m_evType;
-    std::vector<int>* m_frBCID;
+    std::vector<int> m_l1ID;
+    std::vector<int> m_l1Type;
+    std::vector<int> m_evBCID;
+    std::vector<int> m_evType;
+    std::vector<int> m_frBCID;
 
     // Muon items
     float m_muBackHit;
     float m_muBackSum;
-    float* m_muBack; // MUON/MuBack
-    float* m_muCalib; // MUON/MuCalib
+    std::array<float,14> m_muBack; // MUON/MuBack
+    std::array<float,2> m_muCalib; // MUON/MuCalib
 
     // Ecal
-    float* m_ecal;
+    std::array<float,8> m_ecal;
 
     // QDC
-    uint32_t* m_qdc;
+    std::array<uint32_t,33> m_qdc;
 
     // laser items
     int m_las_BCID;
@@ -314,7 +431,7 @@ class TileTBAANtuple: public AthAlgorithm {
     float m_las1;
     float m_las2;
     float m_las3;
-    float* m_lasExtra;
+    std::array<float, 4> m_lasExtra;
 
     // pattern Unit in common beam crate
     int m_commonPU;
@@ -322,8 +439,8 @@ class TileTBAANtuple: public AthAlgorithm {
     // Adder items
     int** m_adder;
     //std::vector<int>* m_addx;
-    float* m_eneAdd;
-    float* m_timeAdd;
+    std::array<float, 16> m_eneAdd;
+    std::array<float, 16> m_timeAdd;
 
     // Cispar
     int m_cispar[16];
@@ -345,10 +462,10 @@ class TileTBAANtuple: public AthAlgorithm {
     int m_sc1;
     int m_sc2;
 
-    int* m_tof;
-    int* m_btdc1;
-    int* m_btdc2;
-    int* m_scaler;
+    std::array<int, 16> m_tof;
+    std::array<int, 16> m_btdc1;
+    std::array<int, 16> m_btdc2;
+    std::array<int, 16> m_scaler;
     std::vector<std::vector<int> > *m_btdc;
     int m_tjitter;
     int m_tscTOF;
@@ -380,105 +497,95 @@ class TileTBAANtuple: public AthAlgorithm {
     float m_xImp_min90;
     float m_yImp_min90;
     // Digi/Energy items
-    std::vector<int*> m_evtVec;
-    std::vector<short*> m_rodBCIDVec;
-    std::vector<short*> m_sizeVec;
+    std::vector<int> m_evtVec;
+    std::vector<short> m_rodBCIDVec;
+    std::vector<short> m_sizeVec;
 
-    std::vector<int*> m_evtflxVec;
-    std::vector<short*> m_rodBCIDflxVec;
-    std::vector<short*> m_sizeflxVec;
+    std::vector<int> m_evtflxVec;
+    std::vector<short> m_rodBCIDflxVec;
+    std::vector<short> m_sizeflxVec;
 
-    std::vector<int*> m_gainflxVec;
-    std::vector<int**> m_sampleflxVec;
+    std::vector<std::array<int, MAX_CHAN>> m_gainflxVec;
+    std::vector<std::unique_ptr<int []>> m_sampleflxVec;
 
-    std::vector<int*> m_bcidVec;
-    std::vector<uint32_t*> m_DMUheaderVec;
-    std::vector<short*> m_DMUformatErrVec;
-    std::vector<short*> m_DMUparityErrVec;
-    std::vector<short*> m_DMUmemoryErrVec;
-    std::vector<short*> m_DMUDstrobeErrVec;
-    std::vector<short*> m_DMUSstrobeErrVec;
-    std::vector<int*> m_dmuMaskVec;
-    std::vector<int*> m_slinkCRCVec;
-    std::vector<int*> m_gainVec;
-    //std::vector< TMatrixT<double> * >  m_sampleVec;
-    std::vector<int**> m_sampleVec;
-    std::vector<int*> m_feCRCVec; //we use int, because vector<bool> and shorts are bugged
-    std::vector<int*> m_rodCRCVec;
+    std::vector<std::array<int, MAX_DMU>> m_bcidVec;
+    std::vector<std::array<uint32_t, MAX_DMU>> m_DMUheaderVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUformatErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUparityErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUmemoryErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUDstrobeErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_DMUSstrobeErrVec;
+    std::vector<std::array<int, 2>> m_dmuMaskVec;
+    std::vector<std::array<int, 2>> m_slinkCRCVec;
+    std::vector<std::array<int, MAX_CHAN>> m_gainVec;
+    std::vector<std::unique_ptr<int []>> m_sampleVec;
+    std::vector<std::array<int, MAX_DMU>> m_feCRCVec; //we use int, because vector<bool> and shorts are bugged
+    std::vector<std::array<int, MAX_DMU>> m_rodCRCVec;
 
-    std::vector<float*> m_eneVec;
-    std::vector<float*> m_timeVec;
-    std::vector<float*> m_pedFlatVec;
-    std::vector<float*> m_chi2FlatVec;
-    std::vector<float*> m_efitVec;
-    std::vector<float*> m_tfitVec;
-    std::vector<float*> m_pedfitVec;
-    std::vector<float*> m_chi2Vec;
-    std::vector<float*> m_efitcVec;
-    std::vector<float*> m_tfitcVec;
-    std::vector<float*> m_pedfitcVec;
-    std::vector<float*> m_chi2cVec;
-    std::vector<float*> m_eOptVec;
-    std::vector<float*> m_tOptVec;
-    std::vector<float*> m_pedOptVec;
-    std::vector<float*> m_chi2OptVec;
-    std::vector<float*> m_eDspVec;
-    std::vector<float*> m_tDspVec;
-    std::vector<float*> m_chi2DspVec;
+    std::vector<std::array<float, MAX_CHAN>> m_eneVec;
+    std::vector<std::array<float, MAX_CHAN>> m_timeVec;
+    std::vector<std::array<float, MAX_CHAN>> m_pedFlatVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2FlatVec;
+    std::vector<std::array<float, MAX_CHAN>> m_efitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_tfitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_pedfitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2Vec;
+    std::vector<std::array<float, MAX_CHAN>> m_efitcVec;
+    std::vector<std::array<float, MAX_CHAN>> m_tfitcVec;
+    std::vector<std::array<float, MAX_CHAN>> m_pedfitcVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2cVec;
+    std::vector<std::array<float, MAX_CHAN>> m_eOptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_tOptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_pedOptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2OptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_eDspVec;
+    std::vector<std::array<float, MAX_CHAN>> m_tDspVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2DspVec;
 
-    std::vector<float*> m_eflxfitVec;
-    std::vector<float*> m_tflxfitVec;
-    std::vector<float*> m_chi2flxfitVec;
-    std::vector<float*> m_pedflxfitVec;
-    std::vector<float*> m_eflxoptVec;
-    std::vector<float*> m_tflxoptVec;
-    std::vector<float*> m_chi2flxoptVec;
-    std::vector<float*> m_pedflxoptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_eflxfitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_tflxfitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2flxfitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_pedflxfitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_eflxoptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_tflxoptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_chi2flxoptVec;
+    std::vector<std::array<float, MAX_CHAN>> m_pedflxoptVec;
 
-    std::vector<short*> m_ROD_GlobalCRCVec;
-    std::vector<short*> m_ROD_DMUBCIDVec;
-    std::vector<short*> m_ROD_DMUmemoryErrVec;
-    std::vector<short*> m_ROD_DMUSstrobeErrVec;
-    std::vector<short*> m_ROD_DMUDstrobeErrVec;
-    std::vector<short*> m_ROD_DMUHeadformatErrVec;
-    std::vector<short*> m_ROD_DMUHeadparityErrVec;
-    std::vector<short*> m_ROD_DMUDataformatErrVec;
-    std::vector<short*> m_ROD_DMUDataparityErrVec;
-    std::vector<short*> m_ROD_DMUMaskVec;
+    std::vector<short> m_ROD_GlobalCRCVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUBCIDVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUmemoryErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUSstrobeErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUDstrobeErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUHeadformatErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUHeadparityErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUDataformatErrVec;
+    std::vector<std::array<short, MAX_DMU>> m_ROD_DMUDataparityErrVec;
+    std::vector<std::array<short, 2>> m_ROD_DMUMaskVec;
 
-    std::vector<int*> m_mdL1idVec;
-    std::vector<int*> m_mdBcidVec;
-    std::vector<int*> m_mdModuleVec;
-    std::vector<int*> m_mdRunTypeVec;
-    std::vector<int*> m_mdRunVec;
-    std::vector<int*> m_mdChargeVec;
-    std::vector<int*> m_mdChargeTimeVec;
-    std::vector<int*> m_mdCapacitorVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdL1idflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdBcidflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdModuleflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdRunTypeflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdPedLoflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdPedHiflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdRunflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdChargeflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdChargeTimeflxVec;
+    std::vector<std::array<int, MAX_MINIDRAWER>> m_mdCapacitorflxVec;
 
-    std::vector<int*> m_mdL1idflxVec;
-    std::vector<int*> m_mdBcidflxVec;
-    std::vector<int*> m_mdModuleflxVec;
-    std::vector<int*> m_mdRunTypeflxVec;
-    std::vector<int*> m_mdPedLoflxVec;
-    std::vector<int*> m_mdPedHiflxVec;
-    std::vector<int*> m_mdRunflxVec;
-    std::vector<int*> m_mdChargeflxVec;
-    std::vector<int*> m_mdChargeTimeflxVec;
-    std::vector<int*> m_mdCapacitorflxVec;
+    std::array<float, 4> m_LarEne;
+    std::array<float, 3> m_BarEne;
+    std::array<float, 3> m_ExtEne;
+    std::array<float, 3> m_GapEne;
 
-    float* m_LarEne;
-    float* m_BarEne;
-    float* m_ExtEne;
-    float* m_GapEne;
-
-    unsigned int* m_coincTrig1;
-    unsigned int* m_coincTrig2;
-    unsigned int* m_coincTrig3;
-    unsigned int* m_coincTrig4;
-    unsigned int* m_coincTrig5;
-    unsigned int* m_coincTrig6;
-    unsigned int* m_coincTrig7;
-    unsigned int* m_coincTrig8;
+    std::array<unsigned int, 96> m_coincTrig1;
+    std::array<unsigned int, 96> m_coincTrig2;
+    std::array<unsigned int, 96> m_coincTrig3;
+    std::array<unsigned int, 96> m_coincTrig4;
+    std::array<unsigned int, 96> m_coincTrig5;
+    std::array<unsigned int, 96> m_coincTrig6;
+    std::array<unsigned int, 96> m_coincTrig7;
+    std::array<unsigned int, 96> m_coincTrig8;
 
     int m_coincFlag1;
     int m_coincFlag2;
@@ -489,130 +596,41 @@ class TileTBAANtuple: public AthAlgorithm {
     int m_coincFlag7;
     int m_coincFlag8;
 
-    std::vector<std::string> m_rosName; // name of arrays in ntuple for different ROSes
-    std::vector<std::string> m_drawerList; // list of frag IDs in correct order
-    std::vector<int> m_drawerType; // type of every drawer 1-4: B+, B-, EB+, EB-
     std::map<unsigned int, unsigned int, std::less<unsigned int> > m_drawerMap; // map for frag IDs -> index
+    std::map<unsigned int, unsigned int, std::less<unsigned int> > m_drawerFlxMap; // map for frag IDs -> index for FELIX
     typedef std::map<unsigned int, unsigned int, std::less<unsigned int> >::iterator drawerMap_iterator;
 
-    std::vector<std::string> m_beamFragList; // list of beam frag IDs to store in the ntuple
     bool m_beamIdList[32]; // list of beam frag IDs to store in the ntuple
 
-    // Params for Beam TDC
-    // Beam chambers -1 and -2
-    float m_beamBN2X1;
-    float m_beamBN2X2;
-    float m_beamBN2Y1;
-    float m_beamBN2Y2;
-    float m_beamBN2Z;
-
-    float m_beamBN1X1;
-    float m_beamBN1X2;
-    float m_beamBN1Y1;
-    float m_beamBN1Y2;
-    float m_beamBN1Z;
-
-    // Beam chamber 0
-    float m_beamBC0X1;
-    float m_beamBC0X2;
-    float m_beamBC0Y1;
-    float m_beamBC0Y2;
-    float m_beamBC0Z;
-
-    // Beam chambers 1 and 2
-    float m_beamBC1X1;
-    float m_beamBC1X2;
-    float m_beamBC1Y1;
-    float m_beamBC1Y2;
-    float m_beamBC1Z;
-
-    float m_beamBC2X1;
-    float m_beamBC2X2;
-    float m_beamBC2Y1;
-    float m_beamBC2Y2;
-    float m_beamBC2Z;
-    float m_beamBC2Zperiod1;
-    float m_beamBC2Zperiod2;
-
-    float m_beamBC1Z_0;
-    float m_beamBC1Z_90;
-    float m_beamBC1Z_min90;
-    float m_beamBC2Z_0;
-    float m_beamBC2Z_90;
-    float m_beamBC2Z_min90;
     //run number
     int m_runNumber;
     float m_eta;
     float m_theta;
-    std::string m_etaFileName;
-
-    //inner radius of calo
-    float m_radius;
 
     //MC truth info
-    std::vector<float*> m_ehitVec;
-    std::vector<float*> m_thitVec;
-    std::vector<float*> m_ehitCnt;
-    std::vector<float*> m_thitCnt;
-    // Container Parameters
-    std::string m_digitsContainer;
-    std::string m_digitsContainerFlx;
-    std::string m_flxFitRawChannelContainer;
-    std::string m_flxOptRawChannelContainer;
-    std::string m_beamElemContainer;
-    std::string m_flatRawChannelContainer;
-    std::string m_fitRawChannelContainer;
-    std::string m_fitcRawChannelContainer;
-    std::string m_optRawChannelContainer;
-    std::string m_dspRawChannelContainer;
-    std::string m_laserObject;
-    std::string m_hitVector;
-    std::string m_hitContainer;
-    std::string m_infoName;
+    std::vector<std::array<float, MAX_CHAN>> m_ehitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_thitVec;
+    std::vector<std::array<float, MAX_CHAN>> m_ehitCnt;
+    std::vector<std::array<float, MAX_CHAN>> m_thitCnt;
 
     bool m_calibrateEnergyThisEvent;
-    bool m_calibrateEnergy;
-    bool m_useDspUnits;
-    bool m_unpackAdder;
-    bool m_completeNtuple;
-    bool m_commitNtuple;
-    bool m_bsInput;
-    bool m_pmtOrder;  //!< change channel ordering to pmt ordering in ntuple
-    int m_finalUnit;  //!< calibrate everything to this level
-    int m_TBperiod;
 
-    // NTuple parameters
-    std::string m_ntupleID;
-    std::string m_ntupleLoc;
-    Long64_t m_treeSize;
-    int m_nSamples;
-    int m_nSamplesFlx;
-    unsigned int m_nDrawers;
     TileRawChannelUnit::UNIT m_rchUnit;  //!< Unit for TileRawChannels (ADC, pCb, MeV)
     TileRawChannelUnit::UNIT m_dspUnit;  //!< Unit for TileRawChannels in DSP
-
-    ToolHandle<TileRawChannelBuilderFlatFilter> m_adderFilterAlgTool;
 
     // Identifiers
     const TileID* m_tileID{nullptr};
     const TileHWID* m_tileHWID{nullptr};
     const TileCablingService* m_cabling{nullptr};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale; //!< main Tile Calibration tool
-
-    TileBeamElemContByteStreamCnv* m_beamCnv;
-
-    std::string m_currentNtupleLoc;
-    int m_currentFileNum;
-    int m_eventsPerFile;
-
-    std::string m_streamName;
-
     std::map<int, int> m_nSamplesInDrawerMap;
+    std::map<int, int> m_nSamplesFlxInDrawerMap;
+    std::vector<int> m_nSamplesInDrawer;
+    std::vector<int> m_nSamplesFlxInDrawer;
     bool m_saveFelixData{false};
 
-    static const int MAX_MINIDRAWERS = 4;
-    static const int NOT_SETUP = -9999;
+
+
 };
 
 #endif
