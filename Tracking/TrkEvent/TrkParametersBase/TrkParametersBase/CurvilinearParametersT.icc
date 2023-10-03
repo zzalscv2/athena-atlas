@@ -152,13 +152,6 @@ CurvilinearParametersT<DIM, T, S>::setcIdentifier(unsigned int cIdentifier)
 }
 
 template<int DIM, class T, class S>
-inline double
-CurvilinearParametersT<DIM, T, S>::charge() const
-{
-  return m_chargeDef.charge();
-}
-
-template<int DIM, class T, class S>
 inline Amg::Vector3D
 CurvilinearParametersT<DIM, T, S>::position() const
 {

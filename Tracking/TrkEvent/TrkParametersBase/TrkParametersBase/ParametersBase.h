@@ -58,7 +58,7 @@ public:
   virtual ~ParametersBase() = default;
 
   /** Returns the charge */
-  virtual double charge() const override = 0;
+  virtual double charge() const override final;
 
   /** Access method for the position */
   virtual Amg::Vector3D position() const override = 0;
@@ -91,7 +91,6 @@ public:
   std::unique_ptr<ParametersBase<DIM, T>> uniqueClone() const{
     return std::unique_ptr<ParametersBase<DIM, T>>(this->clone());
   }
-
 
   /** Return the ParametersType enum */
   virtual ParametersType type() const override = 0;

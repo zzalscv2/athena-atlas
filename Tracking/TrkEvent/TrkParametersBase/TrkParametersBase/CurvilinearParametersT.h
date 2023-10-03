@@ -101,9 +101,6 @@ public:
 
   void setcIdentifier(unsigned int cIdentifier);
 
-  /** Returns the charge */
-  virtual double charge() const override final;
-
   /** Access method for the position */
   virtual Amg::Vector3D position() const override final;
 

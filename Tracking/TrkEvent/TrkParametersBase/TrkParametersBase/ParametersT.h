@@ -108,9 +108,6 @@ public:
   //** Destructor */
   virtual ~ParametersT() = default;
 
-  /** Returns the charge */
-  virtual double charge() const override final;
-
   /** Access method for the position */
   virtual Amg::Vector3D position() const override final;
 
@@ -141,7 +138,7 @@ public:
 
   /** Return the measurementFrame of the parameters */
   virtual Amg::RotationMatrix3D measurementFrame() const override final;
-  
+
     /**Dumps relevant information about the track parameters into the ostream.*/
   virtual MsgStream& dump(MsgStream& out) const override final;
   virtual std::ostream& dump(std::ostream& out) const override final;
