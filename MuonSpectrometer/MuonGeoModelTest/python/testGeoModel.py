@@ -61,7 +61,7 @@ def GeoModelMmTestCfg(flags,name = "GeoModelMmTest", **kwargs):
 
 def GeoModelsTgcTestCfg(flags, name = "GeoModelsTgcTest", **kwargs):
     result = ComponentAccumulator()
-    if not flags.Detector.GeometrySTGC: return result
+    if not flags.Detector.GeometrysTGC: return result
     the_alg = CompFactory.MuonGM.GeoModelsTgcTest(name, **kwargs)
     result.addEventAlgo(the_alg)
     return result

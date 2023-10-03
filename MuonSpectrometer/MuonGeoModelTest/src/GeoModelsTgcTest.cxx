@@ -158,10 +158,10 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
             if(!isValid) {
                 ATH_MSG_WARNING("The following wire group ID is not valid: " << wireGroupID);
             }
-            Amg::Vector3D wireGroupPosition(Amg::Vector3D::Zero());
+            Amg::Vector3D wireGroupPos(Amg::Vector3D::Zero());
             
-            readoutEle->stripGlobalPosition(wireGroupID, wireGroupPosition);
-            m_globalWireGroupPositions.push_back(wireGroupPosition);
+            readoutEle->stripGlobalPosition(wireGroupID, wireGroupPos);
+            m_globalWireGroupPos.push_back(wireGroupPos);
             m_wireGroupNum.push_back(wireGroupIndex);
             m_wireGroupGasGap.push_back(lay);
         }
@@ -186,10 +186,10 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 ATH_MSG_WARNING("The following strip ID is not valid: " << stripID);
             }
             double stripLength = readoutEle->getDesign(stripID)->channelLength(stripIndex);
-            Amg::Vector3D stripPosition(Amg::Vector3D::Zero());
+            Amg::Vector3D stripPos(Amg::Vector3D::Zero());
 
-            readoutEle->stripGlobalPosition(stripID, stripPosition);
-            m_globalStripPositions.push_back(stripPosition);
+            readoutEle->stripGlobalPosition(stripID, stripPos);
+            m_globalStripPos.push_back(stripPos);
             m_stripNum.push_back(stripIndex);
             m_stripGasGap.push_back(lay);
             m_stripLengths.push_back(stripLength);
@@ -213,17 +213,17 @@ StatusCode GeoModelsTgcTest::dumpToTree(const EventContext& ctx, const sTgcReado
                 if(!isValid) {
                     ATH_MSG_WARNING("The following pad ID is not valid: " << padID);
                 }
-                Amg::Vector3D padPosition(Amg::Vector3D::Zero());
+                Amg::Vector3D padPos(Amg::Vector3D::Zero());
                 std::array<Amg::Vector3D,4> padCorners{make_array<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
 
-                readoutEle->padGlobalPosition(padID, padPosition);
+                readoutEle->padGlobalPosition(padID, padPos);
                 readoutEle->padGlobalCorners(padID, padCorners);
                
-                m_globalPadPositions.push_back(padPosition);
-                m_globalPadCornerBL.push_back(padCorners[0]);
-                m_globalPadCornerBR.push_back(padCorners[1]);
-                m_globalPadCornerTL.push_back(padCorners[2]);
-                m_globalPadCornerTR.push_back(padCorners[3]);
+                m_globalPadPos.push_back(padPos);
+                m_globalPadCornerBR.push_back(padCorners[0]);
+                m_globalPadCornerBL.push_back(padCorners[1]);
+                m_globalPadCornerTR.push_back(padCorners[2]);
+                m_globalPadCornerTL.push_back(padCorners[3]);
 
                 m_padEta.push_back(etaIndex);
                 m_padPhi.push_back(phiIndex);
