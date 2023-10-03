@@ -19,6 +19,8 @@
 #include "../PixeldEdxAlg.h"
 #include "../PixelRadSimFluenceMapAlg.h"
 #include "../ITkPixelOfflineCalibCondAlg.h"
+#include "../ITkPixChargeCalibAlg.h"
+
 
 DECLARE_COMPONENT( PixelDCSCondHVAlg )
 DECLARE_COMPONENT( PixelDCSCondTempAlg )
@@ -41,3 +43,4 @@ DECLARE_COMPONENT( PixelDetectorElementCondAlg )
 DECLARE_COMPONENT( PixeldEdxAlg )
 DECLARE_COMPONENT( PixelRadSimFluenceMapAlg )
 DECLARE_COMPONENT( ITk::PixelOfflineCalibCondAlg )
+DECLARE_COMPONENT( ITkPixChargeCalibAlg )
