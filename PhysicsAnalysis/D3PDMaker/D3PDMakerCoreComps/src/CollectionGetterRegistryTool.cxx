@@ -14,8 +14,8 @@
 #include "D3PDMakerInterfaces/ICollectionGetterTool.h"
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/IToolSvc.h"
+#include "CxxUtils/starts_with.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 
 namespace D3PD {
 
@@ -101,7 +101,7 @@ CollectionGetterRegistryTool::get (const std::string& label,
 
   // Get the properties for the source tool.
   const auto& props = m_jos->items([&i](const auto& p) {
-    return boost::algorithm::starts_with(std::get<0>(p), i->second->name()+".");
+    return CxxUtils::starts_with(std::get<0>(p), i->second->name()+".");
   });
 
   // Copy them to the destination tool (except for Label).
