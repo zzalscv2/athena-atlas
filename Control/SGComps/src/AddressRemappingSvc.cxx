@@ -276,28 +276,37 @@ StatusCode AddressRemappingSvc::updateAddress(StoreID::type /*storeID*/,
 					      SG::TransientAddress* tad,
                                               const EventContext& /*ctx*/)
 {
-   lock_t lock (m_mutex);
+   SG::DataProxy* dataProxy=nullptr;
+   // do not lock the mutex yet because this may cause a deadlock when calling m_proxyDict->proxy
+   // VarHandleBase::typeless_dataPointer may call AddressRemappingSvc::updateAddress without passing through SGImplSvc
+   // and VarHandleBase::record_impl may call SGImplSvc::record_impl which may call AddressRemappingSvc::updateAddress
+   std::vector<SG::TransientAddress>::const_iterator the_new_tad_iter=m_newTads.end();
    for (std::vector<SG::TransientAddress>::const_iterator oldIter = m_oldTads.begin(),
 		   newIter = m_newTads.begin(), oldIterEnd = m_oldTads.end();
 		   oldIter != oldIterEnd; ++oldIter, ++newIter) {
       if (oldIter->transientID(tad->clID())
 	      && (oldIter->name() == tad->name() || oldIter->alias().find(tad->name()) != oldIter->alias().end())) {
          ATH_MSG_DEBUG("Overwrite for: " << tad->clID() << "#" << tad->name() << " -> " << newIter->clID() << "#" << newIter->name());
-         SG::DataProxy* dataProxy(m_proxyDict->proxy(newIter->clID(), newIter->name()));
+         dataProxy = m_proxyDict->proxy(newIter->clID(), newIter->name());
          if (dataProxy == 0) {
             ATH_MSG_WARNING("Cannot get proxy for: " << newIter->clID() << "#" << newIter->name());
             return(StatusCode::FAILURE);
          }
-         GenericAddress* newGadd = 0;
-	 if (dataProxy->isValidAddress()) newGadd = dynamic_cast<GenericAddress*>(dataProxy->address());
-         if (newGadd == 0) {
-            ATH_MSG_WARNING("Cannot get GenericAddress for: " << newIter->clID() << "#" << newIter->name());
-            return(StatusCode::FAILURE);
-         }
-         GenericAddress* oldGadd = new GenericAddress(newGadd->svcType(), tad->clID(), *newGadd->par(), tad->name(), *newGadd->ipar());
-         tad->setAddress(oldGadd);
-         return(StatusCode::SUCCESS);
+         the_new_tad_iter=newIter;
+         break;
       }
+   }
+   if (dataProxy) {
+     lock_t lock (m_mutex);
+     GenericAddress* newGadd = 0;
+     if (dataProxy->isValidAddress()) newGadd = dynamic_cast<GenericAddress*>(dataProxy->address());
+     if (newGadd == 0) {
+            ATH_MSG_WARNING("Cannot get GenericAddress for: " << the_new_tad_iter->clID() << "#" << the_new_tad_iter->name());
+            return(StatusCode::FAILURE);
+     }
+     GenericAddress* oldGadd = new GenericAddress(newGadd->svcType(), tad->clID(), *newGadd->par(), tad->name(), *newGadd->ipar());
+     tad->setAddress(oldGadd);
+     return(StatusCode::SUCCESS);
    }
    return(StatusCode::FAILURE);
 }
