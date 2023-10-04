@@ -434,6 +434,9 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU2_TE4_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
         ChainProp(name='HLT_mb_excl_1trk5_pt1_hi_FgapAC5_L1TAU8_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
 
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2+['TAU1'],stream=[UPCStream, 'express'],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_25dphiCC_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2+['TAU1'],stream=[UPCStream, 'express'],groups=MinBiasGroup+PrimaryLegGroup),
+
         #supporting
         ChainProp(name='HLT_mb_sp_vpix15_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_L1TAU1_TE4_VTE200_EMPTY', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
@@ -450,6 +453,10 @@ def getPhysicsHISignatures():
         ChainProp(name='HLT_mb_sptrk_hi_FgapAC5_L12TAU1_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_mb_sptrk_hi_FgapAC5_L1TAU8_VTE200', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream],groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_mb_sptrk_hi_FgapAC5_L1VTE50', l1SeedThresholds=['FSNOSEED']*2,stream=[UPCStream, 'express'],groups=MinBiasGroup+SupportLegGroup),
+
+        #for tests
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2+['TAU1'],stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
+        ChainProp(name='HLT_mb_sp_vpix30_hi_FgapAC5_2g0_etcut_25dphiCC_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2+['TAU1'],stream=[UPCStream],groups=MinBiasGroup+PrimaryLegGroup),
 
         #----------- UPC diphotons/dielectrons - phase-1
         #primary

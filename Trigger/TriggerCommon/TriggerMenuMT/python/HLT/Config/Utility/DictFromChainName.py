@@ -637,6 +637,8 @@ def dictFromChainName(flags, chainInfo):
     but for nwo plain chain name is also supported
     
     """
+    from TrigConfigSvc.TrigConfigSvcCfg     import getL1MenuFileName
+    lvl1name    = getL1MenuFileName(flags)
 
     # these if/elif/else statements are due to temporary development
     if type(chainInfo) == str:
@@ -698,7 +700,7 @@ def dictFromChainName(flags, chainInfo):
                     log.error("Standard muon and Bphysics chain should be seeded from L1_MU. Check %s seeded from %s (defined L1: %s), signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                     #incorrectL1=True
 
-        if thisSignature in ['Electron','Photon']:
+        if thisSignature in ['Electron','Photon'] and not ('HI' in lvl1name): # don't apply for HI menu
             if 'EM' not in thisL1 and 'BKee' not in thisL1 and 'All' not in thisL1:
                 log.error("Standard egamma chains should be seeded from L1_EM. Check %s seeded from %s (defined L1: %s),  signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                 #incorrectL1=True
