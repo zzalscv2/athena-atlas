@@ -31,6 +31,7 @@ enum class UncalibMeasType {
     MdtDriftCircleType = 3,
     RpcStripType = 4,
     TgcStripType = 5,
+    MMClusterType = 6,
 };
 
 /// @ detector ID element hash
