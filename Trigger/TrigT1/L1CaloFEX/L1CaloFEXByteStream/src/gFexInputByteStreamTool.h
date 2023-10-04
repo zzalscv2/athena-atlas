@@ -96,15 +96,15 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
                                         gtFPGA &Xgt,
                                         int *BCIDptr,
                                         int do_lconv, 
-                                        std::array<int, gPos::MAX_FIBERS> XMPD_NFI,
-                                        std::array<int, gPos::MAX_FIBERS>  XCALO_TYPE,
+                                        const std::array<int, gPos::MAX_FIBERS> &XMPD_NFI,
+                                        const std::array<int, gPos::MAX_FIBERS> &XCALO_TYPE,
                                         gCaloTwr XMPD_GTRN_ARR,
                                         gType XMPD_DSTRT_ARR,  
                                         gTypeChar XMPD_DTYP_ARR,
-                                        std::array<int, gPos::MAX_FIBERS> XMSK,
+                                        const std::array<int, gPos::MAX_FIBERS> &XMSK,
                                         gtFPGA &Xsatur) const;
 
-        virtual int crc9d32(std::array<int, 6> inWords,int numWords,int reverse) const;
+        virtual int crc9d32(const std::array<int, 6> &inWords,int numWords,int reverse) const;
 
         virtual int crc9d23(int inword, int in_crc, int  reverse ) const;
 

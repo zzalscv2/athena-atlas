@@ -125,9 +125,7 @@ private:
     std::vector<std::unique_ptr<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment>> robFragments;
     ~Cache() {clear();}
     void clear() {
-      for (auto& ptr : rodData) ptr.reset();
       rodData.clear();
-      for (auto& ptr : robFragments) ptr.reset();
       robFragments.clear();
     }
   };

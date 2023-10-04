@@ -382,12 +382,12 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                                                gtFPGA &XgtF, gtFPGA &Xgt,
                                                int *BCIDptr,
                                                int do_lconv, 
-                                               std::array<int, gPos::MAX_FIBERS> XMPD_NFI,
-                                               std::array<int, gPos::MAX_FIBERS>  XCALO_TYPE,
+                                               const std::array<int, gPos::MAX_FIBERS> &XMPD_NFI,
+                                               const std::array<int, gPos::MAX_FIBERS> &XCALO_TYPE,
                                                gCaloTwr XMPD_GTRN_ARR,
                                                gType XMPD_DSTRT_ARR,  
                                                gTypeChar XMPD_DTYP_ARR,
-                                               std::array<int, gPos::MAX_FIBERS> XMSK,
+                                               const std::array<int, gPos::MAX_FIBERS> &XMSK,
                                                gtFPGA &Xsaturation) const{
  
 // Output is uncalibrated gTowers with 50MeV LSB
@@ -1135,7 +1135,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
 
 
 
-int gFexInputByteStreamTool::crc9d32(std::array<int, 6> inWords,int numWords,int reverse) const{
+int gFexInputByteStreamTool::crc9d32(const std::array<int, 6> &inWords,int numWords,int reverse) const{
   // calculate this for reversed bits
 
     std::array<int, 32> dIn; 
