@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -367,7 +367,7 @@ void CTP_BC::setTIPWord( uint32_t word, uint32_t pos)
    else setPITWordAux(word);
 }
 
-void CTP_BC::setTIP(std::vector<uint32_t> words)
+void CTP_BC::setTIP(const std::vector<uint32_t>& words)
 {
   for(uint32_t i = 0; i<words.size();++i) setTIPWord(words[i],i);
 }
@@ -393,7 +393,7 @@ void CTP_BC::setTBPWord( uint32_t word, uint32_t pos)
   m_tbp |= bs;
 }
 
-void CTP_BC::setTBP(std::vector<uint32_t> words)
+void CTP_BC::setTBP(const std::vector<uint32_t>& words)
 {
   for(uint32_t i = 0; i<words.size();++i) setTBPWord(words[i],i);
 }
@@ -416,7 +416,7 @@ void CTP_BC::setTAPWord( uint32_t word, uint32_t pos)
   m_tap |= bs;
 }
 
-void CTP_BC::setTAP(std::vector<uint32_t> words)
+void CTP_BC::setTAP(const std::vector<uint32_t>& words)
 {
   for(uint32_t i = 0; i<words.size();++i)
     setTAPWord(words[i],i);
@@ -440,7 +440,7 @@ void CTP_BC::setTAVWord( uint32_t word, uint32_t pos)
   m_tav |= bs;
 }
 
-void CTP_BC::setTAV(std::vector<uint32_t> words)
+void CTP_BC::setTAV(const std::vector<uint32_t>& words)
 {
   for(uint32_t i = 0; i<words.size();++i)
     setTAVWord(words[i],i);

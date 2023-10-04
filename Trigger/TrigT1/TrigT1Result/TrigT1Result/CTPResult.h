@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -126,7 +126,7 @@ namespace ROIB {
      CTPdataformatVersion m_ctpDataformat;
     
      //! convert data content into string (used by dump and print)
-     const std::string convert(std::vector<CTPRoI> data, const bool longFormat = false) const;
+     const std::string convert(const std::vector<CTPRoI>& data, const bool longFormat = false) const;
 
      // flag to tell if this is a RoIB result or a DAQ result
      bool m_useRoIB;
