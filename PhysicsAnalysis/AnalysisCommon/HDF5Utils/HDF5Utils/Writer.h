@@ -136,10 +136,14 @@ namespace H5Utils {
              Compression = Compression::STANDARD);
 
     /// overload to cast lambdas into functions
-    template <typename T, typename F>
+    template <
+      typename T,
+      typename F,
+      typename R=decltype(std::declval<F>()(std::declval<I>()))
+      >
     void add(const std::string& name, const F func, const T& def = T(),
              Compression comp = Compression::STANDARD) {
-      add(name, std::function<T(I)>(func), def, comp);
+      add<R>(name, std::function<R(I)>(func), R(def), comp);
     }
 
 
