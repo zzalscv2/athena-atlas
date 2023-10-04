@@ -40,12 +40,7 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize(!m_trackCollectionKeys.empty()));
 
   // ACTS
-  ATH_CHECK(m_vectorTrackContainerKeys.initialize());
-  ATH_CHECK(m_trackStatesKeys.initialize());
-  ATH_CHECK(m_jacobiansKeys.initialize());
-  ATH_CHECK(m_measurementsKeys.initialize());
-  ATH_CHECK(m_parametersKeys.initialize());
-
+  ATH_CHECK(m_trackContainerKeys.initialize());
   if (!m_cscPrepRawDataKey.empty())
     ATH_CHECK(m_cscPrepRawDataKey.initialize());
   if (!m_mdtPrepRawDataKey.empty())
@@ -76,8 +71,9 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 }
 
 // Specialisation for TrackProxy
+// TODO understand why this is not matching: ActsTrk::future::ConstTrackContainer::TrackProxy
 template <>
-nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<Acts::ConstVectorTrackContainer, ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder, true> &track) {
+nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::ConstTrackBackendContainer, ActsTrk::ConstMultiTrajectory, ActsTrk::future::ConstDataLinkHolder, true> &track) {
   nlohmann::json data;
 
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(getContext()).context();
@@ -160,34 +156,19 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   ATH_CHECK(getAndFillArrayOfContainers(j, m_trackCollectionKeys, "Tracks"));
 
   // ACTS
-  if (!m_vectorTrackContainerKeys.empty()) {
-    auto vtcHandles = m_vectorTrackContainerKeys.makeHandles();
-    auto tsHandles = m_trackStatesKeys.makeHandles();
-    auto jHandles = m_jacobiansKeys.makeHandles();
-    auto mHandles = m_measurementsKeys.makeHandles();
-    auto pHandles = m_parametersKeys.makeHandles();
-
-    unsigned int i = 0;
-    for ( ; i < vtcHandles.size(); ++i) {
-      SG::ReadHandle<Acts::ConstVectorTrackContainer> vtcHandle = vtcHandles[i];
-      SG::ReadHandle<xAOD::TrackStateContainer> tsHandle = tsHandles[i];
-      SG::ReadHandle<xAOD::TrackJacobianContainer> jHandle = jHandles[i];
-      SG::ReadHandle<xAOD::TrackMeasurementContainer> mHandle = mHandles[i];
-      SG::ReadHandle<xAOD::TrackParametersContainer> pHandle = pHandles[i];
+  auto tcHandles = m_trackContainerKeys.makeHandles();
 
 
-      auto multiTraj = std::make_unique<ActsTrk::ConstMultiTrajectory>(&(*tsHandle), &(*pHandle), &(*jHandle), &(*mHandle));
-      multiTraj->fillSurfaces(m_trackingGeometryTool->trackingGeometry().get(),
-                              m_trackingGeometryTool->getGeometryContext(getContext()));
-      ATH_MSG_VERBOSE("Surfaces restored");
-      Acts::TrackContainer<Acts::ConstVectorTrackContainer,
-                          ActsTrk::ConstMultiTrajectory, Acts::detail::ConstRefHolder>
-          tc{*vtcHandle, *multiTraj};
-      ATH_MSG_VERBOSE("Found " << tc.size() << " tracks in " << vtcHandle.key());
-      for (auto track : tc) {
-        nlohmann::json tmp = getData(track);
-        j["TrackContainers"][vtcHandle.key()].push_back(tmp);
-      }
+  for ( SG::ReadHandle<ActsTrk::future::ConstTrackContainer>& tcHandle: tcHandles ) {
+    // Temporary debugging information
+    ATH_MSG_VERBOSE("TrackStateContainer has "<< tcHandle->size() << " elements");
+
+    
+    ATH_MSG_VERBOSE("Trying to load " << tcHandle.key() << " with " << tcHandle->size() << " tracks");
+    const ActsTrk::future::ConstTrackContainer* tc = tcHandle.get();
+    for (auto track : *tc) {
+      nlohmann::json tmp = getData(track);
+      j["TrackContainers"][tcHandle.key()].push_back(tmp);
     }
   }
 

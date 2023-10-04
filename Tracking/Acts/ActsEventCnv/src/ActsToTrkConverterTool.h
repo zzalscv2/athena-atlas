@@ -80,8 +80,7 @@ public:
    * @param parameters The track parameters container
   */
   virtual 
-  void trkTrackCollectionToActsTrackContainer(Acts::TrackContainer<Acts::VectorTrackContainer,
-                       ActsTrk::MutableMultiTrajectory> &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
+  void trkTrackCollectionToActsTrackContainer(ActsTrk::future::TrackContainer &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
 
   virtual
   const IActsTrackingGeometryTool*

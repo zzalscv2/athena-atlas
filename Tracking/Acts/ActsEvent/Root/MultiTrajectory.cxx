@@ -363,7 +363,6 @@ ActsTrk::ConstMultiTrajectory::ConstMultiTrajectory(
       for ( auto id : m_trackStates->getConstStore()->getAuxIDs() ) {
 
         const std::string name = SG::AuxTypeRegistry::instance().getName(id);
-        std::cerr << " found aux " << name  << std::endl;
         if ( hasColumn_impl(Acts::hashString(name)) ) { // already known columns
           continue;
         }

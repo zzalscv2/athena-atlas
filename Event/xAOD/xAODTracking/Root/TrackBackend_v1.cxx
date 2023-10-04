@@ -19,7 +19,7 @@ DEFINE_API(TrackBackend_v1, unsigned int, nMeasurements, setnMeasurements)
 
 DEFINE_API(TrackBackend_v1, unsigned int, nHoles, setnHoles)
 
-DEFINE_API(TrackBackend_v1, float, chi2, setChi2)
+DEFINE_API(TrackBackend_v1, double, chi2, setChi2)
 
 DEFINE_API(TrackBackend_v1, unsigned int, ndf, setNdf)
 

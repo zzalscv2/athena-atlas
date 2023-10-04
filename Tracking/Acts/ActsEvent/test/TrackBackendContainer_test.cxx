@@ -33,16 +33,10 @@ BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
 
 struct EmptyBackend {
   EmptyBackend() {
-    backend = std::make_unique<xAOD::TrackBackendContainer>();
-    backendAux = std::make_unique<xAOD::TrackBackendAuxContainer>();
-    backend->setStore(backendAux.get());
-
-    m = std::make_unique<ActsTrk::MutableTrackBackendContainer>(backend.get());
+    m = std::make_unique<ActsTrk::MutableTrackBackendContainer>();
     c = m.get();
   }
 
-  std::unique_ptr<xAOD::TrackBackendContainer> backend;
-  std::unique_ptr<xAOD::TrackBackendAuxContainer> backendAux;
 
   std::unique_ptr<ActsTrk::MutableTrackBackendContainer> m;
   const ActsTrk::ConstTrackBackendContainer* c = nullptr;
@@ -58,17 +52,17 @@ BOOST_FIXTURE_TEST_CASE(BareContainerFill, EmptyBackend) {
 
   m->addTrack_impl();
 
-  *std::any_cast<float*>(m->component_impl("chi2"_hash, 0)) = 2.5f;
+  *std::any_cast<double*>(m->component_impl("chi2"_hash, 0)) = 2.5f;
   *std::any_cast<unsigned int*>(m->component_impl("nHoles"_hash, 0)) = 2;
   *std::any_cast<int*>(m->component_impl("author"_hash, 0)) = 77;
 
-  BOOST_CHECK_EQUAL(*std::any_cast<float*>(m->component_impl("chi2"_hash, 0)), 2.5f);
+  BOOST_CHECK_EQUAL(*std::any_cast<double*>(m->component_impl("chi2"_hash, 0)), 2.5f);
   BOOST_CHECK_EQUAL(*std::any_cast<unsigned int*>(m->component_impl("nHoles"_hash, 0)), 2);
   BOOST_CHECK_EQUAL(*std::any_cast<int*>(m->component_impl("author"_hash, 0)), 77);
 
   BOOST_CHECK_EQUAL(m->size_impl(), 1);  
   m->addTrack_impl();
-  BOOST_CHECK_EQUAL(*std::any_cast<float*>(m->component_impl("chi2"_hash, 1)), 0.0f);
+  BOOST_CHECK_EQUAL(*std::any_cast<double*>(m->component_impl("chi2"_hash, 1)), 0.0f);
   BOOST_CHECK_EQUAL(*std::any_cast<unsigned int*>(m->component_impl("nHoles"_hash, 1)), 0);
   BOOST_CHECK_EQUAL(*std::any_cast<int*>(m->component_impl("author"_hash, 1)), 0);
 
@@ -79,7 +73,7 @@ BOOST_FIXTURE_TEST_CASE(BareContainerFill, EmptyBackend) {
   BOOST_CHECK(c->hasColumn_impl("author"_hash));
   BOOST_CHECK(c->hasColumn_impl("z0"_hash) == false);
 
-  BOOST_CHECK_EQUAL(*std::any_cast<const float*>(c->component_impl("chi2"_hash, 0)), 2.5f);
+  BOOST_CHECK_EQUAL(*std::any_cast<const double*>(c->component_impl("chi2"_hash, 0)), 2.5f);
   BOOST_CHECK_EQUAL(*std::any_cast<const unsigned int*>(c->component_impl("nHoles"_hash, 0)), 2);
   BOOST_CHECK_EQUAL(*std::any_cast<const int*>(c->component_impl("author"_hash, 0)), 77);
 }

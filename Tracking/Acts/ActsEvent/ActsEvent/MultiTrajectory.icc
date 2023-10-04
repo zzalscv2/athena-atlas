@@ -97,8 +97,9 @@ std::any ActsTrk::MutableMultiTrajectory::decorationSetter(
   // to construct SG::Accessor and reuse it
   // however the SG::Accessor is typed and we'll need a classic inheritance for
   // that
-  const SG::AuxElement* el = (*m_trackStates)[idx];
-  return &(el->auxdecor<T>(name));
+  const SG::ConstAuxElement el(m_trackStates.get(), idx);  
+  return &(el.auxdataConst<T>(name));
+
 }
 
 template <typename T>
