@@ -26,7 +26,7 @@ parser.add_option('-d', '--daod', dest = 'daod', type = 'int', default = 0, help
 parser.add_option('-f', '--flav', dest = 'flav', default = 'PHYS', help = 'input DAOD flavour' )
 parser.add_option('-m', '--maxEvts', dest = 'maxEvts', type = 'int', default = -1, help = 'Max events (-1 is all)' )
 parser.add_option('-M', '--maxEvtsManual', dest = 'maxEvtsManual', type = 'int')
-parser.add_option('-p', '--ptag', dest = 'ptag', default = 'p5226', help = 'ptag' )
+parser.add_option('-p', '--ptag', dest = 'ptag', default = 'p5855', help = 'ptag' )
 parser.add_option('--grl', dest = 'grl')
 parser.add_option('--inputDir', dest = 'inputDir')
 parser.add_option('--inputFile', dest = 'inputFile')
@@ -116,7 +116,7 @@ config.addPrivateTool("SUSYTools","ST::SUSYObjDef_xAOD")
 
 config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default.conf"
 if ("data2" in options.type or "mc21" in options.type or "mc23" in options.type): config.SUSYTools.ConfigFile = "SUSYTools/SUSYTools_Default_Run3.conf"
-if ("data" not in options.type )config.DoSyst = options.dosyst
+if ("data" not in options.type): config.DoSyst = options.dosyst
 config.SUSYTools.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
 config.SUSYTools.PRWLumiCalcFiles = []

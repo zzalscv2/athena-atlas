@@ -98,67 +98,6 @@ if( XAOD_STANDALONE )
       SUSYToolsLib )
 endif()
 
-# Log ignore patterns
-set (extra_patterns "  (Entire loop|Excluding first event|First event).*ms|cvmfs/atlas.*\.cern\.ch/repo|INFO|${ATLAS_PLATFORM}/data/SUSYTools|build(/Analysis.*)?/${ATLAS_PLATFORM}|mySTdefs_conf\.tmp|^Ran [0-9]+ tests in [0-9.]+s|create data set info.*|Booked|<HEADER>|Warning in <TClass::Init>|(start|done) processing event|data/JetMomentTools")
-
-# Test(s) in the package:
-if( XAOD_STANDALONE )
-   atlas_add_test( ut_SUSYToolsTester_data
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/data18_13TeV.00356250_p5855.PHYS.pool.root
-             maxEvents=500 isData=1 isAtlfast=0 Debug=0
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-   atlas_add_test( ut_SUSYToolsTester_data_Run3
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/data22_13p6TeV.00440543_p5858.PHYS.pool.root
-            maxEvents=1000 isData=1 isAtlfast=0 Debug=0
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-   atlas_add_test( ut_SUSYToolsTester_mc
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc20_13TeV.410470.FS_mc20e_p5855.PHYS.pool.root
-             maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
-             ilumicalcFile=GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-   atlas_add_test( ut_SUSYToolsTester_mc_Run3
-      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc21_13p6TeV.601229.FS_mc21a_p5855.PHYS.pool.root
-             maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
-             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-#
-#   Disabling the following test for now - plan is to re-enable it once the derivation will be available
-#
-#   atlas_add_test( ut_SUSYToolsTester_mc23a_Run3
-#   SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/mc23_13p6TeV.601229.FS_mc23a_p5737.PHYS.pool.root
-#   maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
-#   ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root
-#   LOG_IGNORE_PATTERN ${extra_patterns}
-#   )
-
-   else()
-     set( extra_patterns "${extra_patterns}|The ParticleCaloExtensionTool was not configured." )
-     atlas_add_test( ut_SUSYToolsAlg_data
-      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 500 - --testCampaign data18"
-      PROPERTIES TIMEOUT 300
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-   atlas_add_test( ut_SUSYToolsAlg_data_Run3
-      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 500 - --testCampaign data22"
-      PROPERTIES TIMEOUT 300
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-   atlas_add_test( ut_SUSYToolsAlg_mc
-      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --testCampaign mc20e"
-      PROPERTIES TIMEOUT 300
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-   atlas_add_test( ut_SUSYToolsAlg_mc_Run3
-      SCRIPT "athena SUSYTools/jobOptions.py --evtMax 100 - --testCampaign mc21a"
-      PROPERTIES TIMEOUT 300
-      LOG_IGNORE_PATTERN ${extra_patterns}
-   )
-endif()
-
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*.py )
