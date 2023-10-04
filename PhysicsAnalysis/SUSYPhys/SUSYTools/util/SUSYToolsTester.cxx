@@ -147,8 +147,10 @@ int main( int argc, char* argv[] ) {
   bool isRun3 = false;
   if ((fileName.Contains("mc23") || fileName.Contains("mc21") || fileName.Contains("data2")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
+  if (fileName.Contains("LITE")) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_LITE.conf")).c_str();
   if (isRun3) {
     config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+    if (fileName.Contains("LITE")) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3_LITE.conf")).c_str();
     ANA_MSG_INFO("Configuring for Run 3");
   }
   std::string prw_file = "DUMMY";
@@ -189,7 +191,7 @@ int main( int argc, char* argv[] ) {
     if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos)           hasTrkJets = true;
     if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
     if (x.first.find("AnalysisElectrons")!=std::string::npos)                        isPHYSLite = true;
-    if (isPHYSLite && x.first.find("AnalysisLargeRJets")!=std::string::npos)         hasFatJets = true;
+    if (isPHYSLite && x.first.find("AnalysisLargeRJets")!=std::string::npos)         hasFatJets = false;
     if (x.first.find("InDetLargeD0TrackParticles") != std::string::npos)             hasLRT     = true;
   }
   if (debug>0) {
@@ -507,7 +509,6 @@ int main( int argc, char* argv[] ) {
     if (!isPHYSLite) {
       ANA_CHECK( objTool.ApplyPRWTool());
     }
-    ANA_MSG_DEBUG( "PRW Weight = " << objTool.GetPileupWeight());
 
     // Only need LRT uncertainty tool if there are LRT tracks!
     if (hasLRT) {
@@ -534,6 +535,11 @@ int main( int argc, char* argv[] ) {
     bool eventPassesCleaning(true);
     bool eventPassesTileTrip(true); // move to xAOD tool!
     bool eventPassesTrigger(true);  // coming soon!
+
+    if (!isData){
+      float PRW_weight = isPHYSLite? ei->auxdata< float >("PileupWeight_NOSYS"): objTool.GetPileupWeight();
+      ANA_MSG_DEBUG( "PRW Weight = " << PRW_weight);
+    }
 
     if (isData) {
       eventPassesGRL = m_grl->passRunLB(ei->runNumber(), ei->lumiBlock());
