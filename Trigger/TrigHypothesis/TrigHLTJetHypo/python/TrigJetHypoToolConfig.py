@@ -149,6 +149,8 @@ class TestStringMethods(unittest.TestCase):
 
         from AthenaConfiguration.AllConfigFlags import initConfigFlags
         flags = initConfigFlags()
+        flags.Input.Files = []
+
         flags.lock()
 
         wid = max(len(c) for c in chain_names)
