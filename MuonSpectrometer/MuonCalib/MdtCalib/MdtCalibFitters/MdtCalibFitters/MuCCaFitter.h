@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -71,11 +71,11 @@ namespace MuonCalib {
         void computehitsfromcircles(double x0, double y0, double r0, double x1, double y1, double r1, double a, double b);
         //  void Computehitpsemes(int nhit,double *xcirc, double *ycirc,
         //                        double *rcirc, double a, double b);
-        void Computehitpsemes(int nhit, std::vector<double> xcirc, std::vector<double> ycirc, std::vector<double> rcirc, double a,
+        void Computehitpsemes(int nhit, const std::vector<double>& xcirc, const std::vector<double>& ycirc, const std::vector<double>& rcirc, double a,
                               double b);
         //  void Computeparam3(int number_of_hits,double x[100],double y[100],
         //                     double r[100],double sr[100]);
-        void Computeparam3(int number_of_hits, std::vector<double> x, std::vector<double> y, std::vector<double> r, std::vector<double> sr);
+        void Computeparam3(int number_of_hits, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& r, const std::vector<double>& sr);
         double get_a();
         double get_b();
         double get_da();

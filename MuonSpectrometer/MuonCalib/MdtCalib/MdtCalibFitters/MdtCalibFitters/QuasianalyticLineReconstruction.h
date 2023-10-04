@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef QuasianalyticLineReconstructionH
@@ -129,7 +129,7 @@ namespace MuonCalib {
         // r_case = 1, 2, 3, 4: select one of the four cases of a tangent
 
         MTStraightLine track_candidate(const IndexSet& r_index_set, const int& r_k_cand, const int& r_l_cand, const int& r_cand_case,
-                                       std::vector<Amg::Vector3D> r_w, std::vector<double> r_r, std::vector<double> r_sigma2,
+                                       const std::vector<Amg::Vector3D>& r_w, const std::vector<double>& r_r, const std::vector<double>& r_sigma2,
                                        double& r_chi2) const;
         // method for the calculatation of a straight line from tangents;
         // r_nb_selected_hits: number of selected hits,

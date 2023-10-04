@@ -96,12 +96,12 @@ namespace Analysis
   JetFitterGenericTagInfo::getDoublesEnd() const { 
     return m_experimental_doubles.end(); 
   }
-  bool JetFitterGenericTagInfo::setDouble(std::string key, double value) {
+  bool JetFitterGenericTagInfo::setDouble(const std::string& key, double value) {
     bool already_defined = m_experimental_doubles.count(key); 
     (m_experimental_doubles)[key] = value; 
     return already_defined; 
   }
-  bool JetFitterGenericTagInfo::setTemporaryDouble(std::string key, double value) {
+  bool JetFitterGenericTagInfo::setTemporaryDouble(const std::string& key, double value) {
     m_temporary_variables.push_back(key); 
     return setDouble(key, value); 
   }
@@ -132,12 +132,12 @@ namespace Analysis
   JetFitterGenericTagInfo::getIntsEnd() const { 
     return m_experimental_ints.end(); 
   }
-  bool JetFitterGenericTagInfo::setInt(std::string key, int value) {
+  bool JetFitterGenericTagInfo::setInt(const std::string& key, int value) {
     bool already_defined = m_experimental_ints.count(key); 
     (m_experimental_ints)[key] = value; 
     return already_defined; 
   }
-  bool JetFitterGenericTagInfo::setTemporaryInt(std::string key, int value) { 
+  bool JetFitterGenericTagInfo::setTemporaryInt(const std::string& key, int value) { 
     m_temporary_variables.push_back(key); 
     return setInt(key, value); 
   }
