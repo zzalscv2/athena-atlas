@@ -62,6 +62,7 @@ def _gen_jobo(dct):
 
         # import the rec flags...
         from RecExConfig.RecFlags import rec
+        rec.runUnsupportedLegacyReco=True
         # check we have been configured to read...
         for item in ('readRDO',
                      #'readBS' ?!?!
