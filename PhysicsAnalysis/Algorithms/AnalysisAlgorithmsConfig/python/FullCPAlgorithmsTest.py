@@ -22,6 +22,31 @@ triggerChains = [
     'HLT_2e17_lhvloose_nod0'
 ]
 
+# Example cuts used for event selection algorithm test
+exampleSelectionCuts = {
+  'SUBcommon': """
+JET_N_BTAG >= 2
+JET_N 25000 >= 4
+MET >= 20000
+SAVE
+""",
+  'ejets': """
+IMPORT SUBcommon
+EL_N 25000 >= 1
+EL_N tight 25000 == 1
+MU_N 5000 == 0
+MWT < 170000
+MET+MWT > 40000
+SAVE
+""",
+  'mujets': """
+IMPORT SUBcommon
+EL_N 5000 == 0
+MU_N tight 25000 > 0
+SAVE
+"""
+}
+
 electronMinPt = 10e3
 electronMaxEta = None
 photonMinPt = 10e3
@@ -595,13 +620,13 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
     if not noPhysliteBroken :
-        btagger = "DL1r"
-        btagWP = "FixedCutBEff_77"
+        btagger_legacy = "DL1r"
+        btagWP_legacy = "FixedCutBEff_77"
         configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
         configSeq.setOptionValue ('.noEffSF', False)
         configSeq.setOptionValue ('.legacyRecommendations', True)
-        configSeq.setOptionValue ('.btagger', btagger)
-        configSeq.setOptionValue ('.btagWP', btagWP)
+        configSeq.setOptionValue ('.btagger', btagger_legacy)
+        configSeq.setOptionValue ('.btagWP', btagWP_legacy)
         configSeq.setOptionValue ('.kinematicSelection', True )
 
     configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
@@ -760,7 +785,21 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         # provide a preselection for the objects in subsequent algorithms
         configSeq.setOptionValue ('.selectionName', '')
         configSeq.setOptionValue ('.addPreselection', True)
+    
+    # Include and set up a basic run of the event selection algorithm config:
+    if not forCompare:
+        # configSeq += makeConfig( 'EventSelection', None )
+        # configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
+        # configSeq.setOptionValue ('.muons',       'AnaMuons.medium')
+        # configSeq.setOptionValue ('.jets',        'AnaJets')
+        # configSeq.setOptionValue ('.met',         'AnaMET')
+        # configSeq.setOptionValue ('.selectionCutsDict', exampleSelectionCuts)
+        from EventSelectionAlgorithms.EventSelectionConfig import makeMultipleEventSelectionConfigs
+        makeMultipleEventSelectionConfigs(configSeq, electrons = 'AnaElectrons.loose', muons = 'AnaMuons.medium', jets = 'AnaJets.ftag',
+                                          met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
+                                          selectionCutsDict = exampleSelectionCuts, noFilter = True)
 
+        
     configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
     configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.outputName', 'OutElectrons')
