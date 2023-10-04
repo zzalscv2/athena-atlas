@@ -32,21 +32,16 @@ egammaBackShape::execute(const xAOD::CaloCluster& cluster,
 
   double eallsamples = egammaEnergyPositionAllSamples::e(cluster);
   double e3 = egammaEnergyPositionAllSamples::e3(cluster);
-  // check if cluster is in barrel or end-cap
-  bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 3);
-  // define accordingly position of CaloSampling
+
   // fraction of energy deposited in third sampling
   info.f3 = fabs(eallsamples) > 0. ? e3 / eallsamples : 0.;
 
-  CaloSampling::CaloSample sam = CaloSampling::EMB3;
-  CaloSampling::CaloSample sam2 = CaloSampling::EMB2;
-  if (in_barrel) {
-    sam = CaloSampling::EMB3;
-    sam2 = CaloSampling::EMB2;
-  } else {
-    sam = CaloSampling::EME3;
-    sam2 = CaloSampling::EME2;
-  }
+  // check if cluster is in barrel or end-cap
+  const bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 3);
+
+  // define accordingly position of CaloSampling
+  const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::EMB3 : CaloSampling::EME3;
+  const CaloSampling::CaloSample sam2 = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;
 
   double eta = 0;
   double phi = 0;
