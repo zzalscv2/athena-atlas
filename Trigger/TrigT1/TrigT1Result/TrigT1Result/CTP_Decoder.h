@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1_CTP_DECODER_H
@@ -76,7 +76,7 @@ public:
   std::string printPITWordAux() const;
 	
   //! Set TIP words
-  void setTIP(std::vector<uint32_t> words);
+  void setTIP(const std::vector<uint32_t>& words);
   //! get bitset of TIP words
   const std::bitset<512> & getTIP() const {
     return m_tip;
@@ -88,7 +88,7 @@ public:
 	
   
   //! Set TBP (Trigger Before Prescales) words
-  void setTBP(std::vector<uint32_t> words);
+  void setTBP(const std::vector<uint32_t>& words);
   //! get bitset of TBP words
   const std::bitset<512> & getTBP() const {
     return m_tbp;
@@ -99,7 +99,7 @@ public:
   std::string printTBP() const;
   
   //! Set TAP (Trigger After Prescales) words
-  void setTAP(std::vector<uint32_t> words);
+  void setTAP(const std::vector<uint32_t>& words);
   //! Set TAP word number 'pos'
   void setTAPWord( uint32_t word, uint32_t pos = 0);
   //! get bitset of TAP words
@@ -110,7 +110,7 @@ public:
   std::string printTAP() const;
   
   //! Set TAV (Trigger After Veto) words
-  void setTAV(std::vector<uint32_t> words);
+  void setTAV(const std::vector<uint32_t>& words);
   //! get bitset of TAV words
   const std::bitset<512> & getTAV() const {
     return m_tav;
