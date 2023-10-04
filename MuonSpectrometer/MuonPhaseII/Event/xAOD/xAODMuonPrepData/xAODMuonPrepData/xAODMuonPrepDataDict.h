@@ -17,6 +17,9 @@
 #include "xAODMuonPrepData/versions/TgcStripAuxContainer_v1.h"
 #include "xAODMuonPrepData/versions/TgcStripContainer_v1.h"
 #include "xAODMuonPrepData/versions/TgcStrip_v1.h"
+#include "xAODMuonPrepData/versions/MMClusterAuxContainer_v1.h"
+#include "xAODMuonPrepData/versions/MMClusterContainer_v1.h"
+#include "xAODMuonPrepData/versions/MMCluster_v1.h"
 // Instantiate all necessary types for the dictionary.
 namespace {
 struct GCCXML_DUMMY_INSTANTIATION_XAODMUONRDO {
@@ -24,6 +27,7 @@ struct GCCXML_DUMMY_INSTANTIATION_XAODMUONRDO {
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MdtDriftCircleContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, RpcStripContainer_v1);
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, TgcStripContainer_v1);
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES(xAOD, MMClusterContainer_v1);
 };
 }  // namespace
 

@@ -14,6 +14,6 @@ typedef TgcStrip_v1 TgcStrip;
 
 // Set up a CLID for the class:
 #include "xAODCore/CLASS_DEF.h"
-CLASS_DEF(xAOD::TgcStrip, 47111859, 1)
+CLASS_DEF(xAOD::TgcStrip, 46677082, 1)
 
 #endif  // XAODMUONPREPDATA_TGCSTRIP_H

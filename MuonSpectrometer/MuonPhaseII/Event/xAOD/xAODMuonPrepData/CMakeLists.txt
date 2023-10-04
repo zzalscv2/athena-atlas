@@ -16,7 +16,7 @@ atlas_add_library( xAODMuonPrepData
     atlas_add_xaod_smart_pointer_dicts(
     INPUT xAODMuonPrepData/selection.xml
     OUTPUT _selectionFile
-    CONTAINERS "xAOD::MdtDriftCircleContainer_v1" "xAOD::RpcStripContainer_v1" )
+    CONTAINERS "xAOD::MdtDriftCircleContainer_v1" "xAOD::RpcStripContainer_v1" "xAOD::TgcStripContainer_v1" "xAOD::MM_ClusterContainer_v1")
 
 atlas_add_dictionary( xAODMuonPrepDataDict
     xAODMuonPrepData/xAODMuonPrepDataDict.h

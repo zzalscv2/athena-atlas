@@ -33,4 +33,15 @@
            id="D815081F-936D-4D4B-BC61-D060886C9725" />
     <typedef name = "xAOD::TgcStripAuxContainer" />
 
+            <!-- MM Cluster -->
+    <class name="xAOD::MMCluster_v1" />
+    <class name="xAOD::MMClusterContainer_v1"
+           id="C8ED2C42-FE97-4C67-BFBC-69A272A9A6D6" />
+    <typedef name="xAOD::MMCluster" />
+    <typedef name="xAOD::MMClusterContainer" />
+    
+    <class name="xAOD::MMClusterAuxContainer_v1"
+           id="E7DDF5FA-9999-4497-A1F1-DAFC7D4D7A32" />
+    <typedef name = "xAOD::MMClusterAuxContainer" />
+
 </lcgdict>
