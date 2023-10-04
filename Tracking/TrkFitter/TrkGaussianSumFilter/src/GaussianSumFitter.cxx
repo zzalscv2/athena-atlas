@@ -619,7 +619,7 @@ Trk::GaussianSumFitter::makePerigee(
 
 /*
  * Private method for
- * Forward fit on a  set of PrepRawData
+ * Forward fit on a set of PrepRawData
  */
 Trk::GaussianSumFitter::GSFTrajectory
 Trk::GaussianSumFitter::forwardPRDfit(
@@ -928,6 +928,7 @@ Trk::GaussianSumFitter::smootherFit(
     ATH_MSG_WARNING("Smoother prediction could not be determined");
     return {};
   }
+
   // loopUpdatedState is a plain ptr to the most recent
   // predicted MultiComponentState.
   // We start from our previous inflated prediction
@@ -935,17 +936,15 @@ Trk::GaussianSumFitter::smootherFit(
 
   for (; trackStateOnSurfaceItr != forwardTrajectory.rend();
        ++trackStateOnSurfaceItr) {
-    const auto& trackStateOnSurface = (*trackStateOnSurfaceItr);
+    auto& trackStateOnSurface = (*trackStateOnSurfaceItr);
     // Retrieve the MeasurementBase object from the TrackStateOnSurface object
-    const Trk::MeasurementBase* measurement_in =
-      trackStateOnSurface.measurementOnTrack.get();
-    if (!measurement_in) {
+    std::unique_ptr<Trk::MeasurementBase> measurement =
+        std::move(trackStateOnSurface.measurementOnTrack);
+    if (!measurement) {
       ATH_MSG_WARNING("MeasurementBase object could not be extracted from a "
-                      "measurement... continuing");
+                      "measurement TSOS... continuing");
       continue;
     }
-    // Clone the MeasurementBase object
-    auto measurement = measurement_in->uniqueClone();
     // Create prediction for the next measurement surface.
     // For the smoother the direction of propagation
     // is opposite to the direction of momentum
@@ -990,10 +989,11 @@ Trk::GaussianSumFitter::smootherFit(
       // e.g combine the current tsos (from the forward) with
       // the updated from the smoother
       const Trk::MultiComponentState& forwardsMultiState =
-        trackStateOnSurface.multiComponentState;
+          trackStateOnSurface.multiComponentState;
       Trk::MultiComponentState combinedfitterState =
-        Trk::MultiComponentStateCombiner::combineWithSmoother(
-          forwardsMultiState, updatedState, m_maximumNumberOfComponents);
+          Trk::MultiComponentStateCombiner::combineWithSmoother(
+              forwardsMultiState, updatedState, m_maximumNumberOfComponents);
+      //
       if (combinedfitterState.empty()) {
         ATH_MSG_WARNING("Could not combine state from forward fit with "
                         "smoother state");
@@ -1010,6 +1010,7 @@ Trk::GaussianSumFitter::smootherFit(
           smootherHelper(std::move(updatedState), std::move(measurement),
                          fitQuality, islast, m_useMode));
     }
+    //
     // For the next iteration start from last added
     loopUpdatedState = &(smoothedTrajectory.back().multiComponentState);
     // Handle adding measurement from calo if it is present
