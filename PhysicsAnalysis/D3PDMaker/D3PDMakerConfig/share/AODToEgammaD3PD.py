@@ -54,6 +54,7 @@ muonRecFlags.doMSVertex.set_Value_and_Lock( False )
 #from xAODJetCnv import ParticleJetCompatibility
 
 
+rec.runUnsupportedLegacyReco=True
 include( "RecExCommon/RecExCommon_topOptions.py" )
 
 # Block loading conditions folders we won't need.
