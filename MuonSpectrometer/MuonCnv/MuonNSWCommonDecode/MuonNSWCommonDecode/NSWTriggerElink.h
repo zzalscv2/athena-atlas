@@ -19,7 +19,7 @@ namespace Muon
     class NSWTriggerException: public std::exception
     {
     public:
-      explicit NSWTriggerException (const std::string s, const int id = -999)
+      explicit NSWTriggerException (const std::string& s, const int id = -999)
 	: m_description(s), m_id(id) {};
       
       virtual const char *what () const throw () {return m_description.c_str ();};
