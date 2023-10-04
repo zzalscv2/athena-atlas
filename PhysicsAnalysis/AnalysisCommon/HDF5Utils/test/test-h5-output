@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -eu
+noerror.sh
+h5ls output.h5

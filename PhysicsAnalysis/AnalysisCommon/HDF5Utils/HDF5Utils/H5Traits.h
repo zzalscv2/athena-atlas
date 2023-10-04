@@ -33,7 +33,9 @@ namespace H5Utils {
     union data_buffer_t
     {
       int u_int;
+      long u_long;
       long long u_llong;
+      unsigned long u_ulong;
       unsigned long long u_ullong;
       unsigned int u_uint;
       unsigned char u_uchar;
@@ -54,9 +56,17 @@ namespace H5Utils {
       static const H5::DataType type;
       static int& ref(data_buffer_t& buf) { return buf.u_int; }
     };
+    template <> struct H5Traits<long> {
+      static const H5::DataType type;
+      static long& ref(data_buffer_t& buf) { return buf.u_long; }
+    };
     template <> struct H5Traits<long long> {
       static const H5::DataType type;
       static long long& ref(data_buffer_t& buf) { return buf.u_llong; }
+    };
+    template <> struct H5Traits<unsigned long> {
+      static const H5::DataType type;
+      static unsigned long& ref(data_buffer_t& buf) { return buf.u_ulong; }
     };
     template <> struct H5Traits<unsigned long long> {
       static const H5::DataType type;

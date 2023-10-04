@@ -64,3 +64,15 @@ if (NOT XAOD_STANDALONE)
     LINK_LIBRARIES IH5GroupSvc ${HDF5_LIBRARIES}
   )
 endif()
+
+# unit tests
+
+atlas_add_executable( test-hdf5-writer
+  util/test-hdf5-writer.cxx
+  LINK_LIBRARIES HDF5Utils )
+atlas_install_scripts( test/test-h5-output )
+
+atlas_add_test( test_hdf5_writer
+  SCRIPT test-hdf5-writer
+  LINK_LIBRARIES HDF5Utils
+  POST_EXEC_SCRIPT test-h5-output)
