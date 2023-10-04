@@ -280,8 +280,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                                                        initialParams.parameters(),
                                                        scaledCov);
 
-  Acts::TrackContainer tracks{
-    Acts::VectorTrackContainer{},
+  ActsTrk::TrackContainer tracks{
+    ActsTrk::TrackBackend{},
     ActsTrk::TrackStateBackend{}};
   
   // Perform the fit
@@ -347,8 +347,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-  Acts::TrackContainer tracks{
-    Acts::VectorTrackContainer{},
+  ActsTrk::TrackContainer tracks{
+    ActsTrk::TrackBackend{},
     ActsTrk::TrackStateBackend{}};
 
   // Perform the fit
@@ -420,9 +420,9 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
 
-    Acts::TrackContainer tracks{
-      Acts::VectorTrackContainer{},
-      Acts::VectorMultiTrajectory{}};
+    ActsTrk::TrackContainer tracks{
+      ActsTrk::TrackBackend{},
+      ActsTrk::TrackStateBackend{}};
 
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -500,8 +500,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  Acts::TrackContainer tracks{
-    Acts::VectorTrackContainer{},
+  ActsTrk::TrackContainer tracks{
+    ActsTrk::TrackBackend{},
     ActsTrk::TrackStateBackend{}};
 
   // Perform the fit
@@ -603,8 +603,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                                                        scaledCov);
 
 
-  Acts::TrackContainer tracks{
-    Acts::VectorTrackContainer{},
+  ActsTrk::TrackContainer tracks{
+    ActsTrk::TrackBackend{},
     ActsTrk::TrackStateBackend{}};
 
   // Perform the fit

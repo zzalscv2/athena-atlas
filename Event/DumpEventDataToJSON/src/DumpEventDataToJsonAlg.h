@@ -32,7 +32,7 @@
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
 // ACTS
 #include "ActsEvent/MultiTrajectory.h"
-#include "Acts/EventData/VectorTrackContainer.hpp"
+#include "ActsEvent/FutureTrackContainer.h"
 // Misc
 #include <nlohmann/json.hpp>
 #include <string>
@@ -86,12 +86,7 @@ protected:
   SG::ReadHandleKeyArray<TrackCollection> m_trackCollectionKeys{this, "TrackCollectionKeys", {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"}, "Keys for Track Containers"};
   
   // ACTS TrackContainer keys
-  SG::ReadHandleKeyArray<Acts::ConstVectorTrackContainer> m_vectorTrackContainerKeys {this, "VectorTrackContainerKeys", {"ConvertedVectorTrackContainer"}, "Location of the converted VectorTrackContainer"};
-  SG::ReadHandleKeyArray<xAOD::TrackStateContainer> m_trackStatesKeys {this, "TrackStatesLocation", {"ConvertedTrackStates"}, "Location of the converted TrackStates"}; 
-  SG::ReadHandleKeyArray<xAOD::TrackJacobianContainer> m_jacobiansKeys {this, "TrackJacobiansLocation", {"ConvertedTrackJacobians"}, "Location of the converted TrackJacobians"};
-  SG::ReadHandleKeyArray<xAOD::TrackMeasurementContainer> m_measurementsKeys {this, "TrackMeasurementsLocation", {"ConvertedTrackMeasurements"}, "Location of the converted TrackMeasurements"};
-  SG::ReadHandleKeyArray<xAOD::TrackParametersContainer> m_parametersKeys {this, "TrackParametersLocation", {"ConvertedTrackParameters"}, "Location of the converted TrackParameters"};
-
+  SG::ReadHandleKeyArray<ActsTrk::future::ConstTrackContainer> m_trackContainerKeys{this, "TrackContainerKeys", {"ConvertedTrackContainer"}, "Location of the converted Acts TrackContainer"};
 
   SG::ReadHandleKey<Muon::CscPrepDataContainer> m_cscPrepRawDataKey{this, "CscPrepRawDataKey", "CSC_Clusters", "Key for CSC PRD Container"};
   SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepRawDataKey{this, "MdtPrepRawDataKey", "MDT_DriftCircles", "Key for MDT PRD Container"};

@@ -51,7 +51,7 @@ class MutableMultiTrajectoryHandle {
    * anymore, the MutableMTJ is actually purged in this operation
    */
   std::unique_ptr<ActsTrk::ConstMultiTrajectory> convertToConst(
-      ActsTrk::MutableMultiTrajectory* mmtj, const EventContext& context) const;
+      ActsTrk::MutableMultiTrajectory& mmtj, const EventContext& context) const;
 
  private:
   SG::WriteHandleKey<xAOD::TrackStateContainer> m_statesKey;
@@ -127,12 +127,12 @@ StatusCode MutableMultiTrajectoryHandle<C>::initialize() {
 template <class C>
 std::unique_ptr<ActsTrk::ConstMultiTrajectory>
 MutableMultiTrajectoryHandle<C>::convertToConst(
-    ActsTrk::MutableMultiTrajectory* mmtj, const EventContext& context) const {
+    ActsTrk::MutableMultiTrajectory& mmtj, const EventContext& context) const {
 
   auto statesBackendHandle = SG::makeHandle(m_statesKey, context);
   if (statesBackendHandle
-          .record(std::move(mmtj->m_trackStates),
-                  std::move(mmtj->m_trackStatesAux))
+          .record(std::move(mmtj.m_trackStates),
+                  std::move(mmtj.m_trackStatesAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record TrackStates "
@@ -141,8 +141,8 @@ MutableMultiTrajectoryHandle<C>::convertToConst(
 
   auto parametersBackendHandle = SG::makeHandle(m_parametersKey, context);
   if (parametersBackendHandle
-          .record(std::move(mmtj->m_trackParameters),
-                  std::move(mmtj->m_trackParametersAux))
+          .record(std::move(mmtj.m_trackParameters),
+                  std::move(mmtj.m_trackParametersAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record TrackParameters "
@@ -151,8 +151,8 @@ MutableMultiTrajectoryHandle<C>::convertToConst(
 
   auto jacobiansBackendHandle = SG::makeHandle(m_jacobiansKey, context);
   if (jacobiansBackendHandle
-          .record(std::move(mmtj->m_trackJacobians),
-                  std::move(mmtj->m_trackJacobiansAux))
+          .record(std::move(mmtj.m_trackJacobians),
+                  std::move(mmtj.m_trackJacobiansAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record TrackJacobians "
@@ -161,8 +161,8 @@ MutableMultiTrajectoryHandle<C>::convertToConst(
 
   auto measurementsBackendHandle = SG::makeHandle(m_measurementsKey, context);
   if (measurementsBackendHandle
-          .record(std::move(mmtj->m_trackMeasurements),
-                  std::move(mmtj->m_trackMeasurementsAux))
+          .record(std::move(mmtj.m_trackMeasurements),
+                  std::move(mmtj.m_trackMeasurementsAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record "
@@ -172,8 +172,8 @@ MutableMultiTrajectoryHandle<C>::convertToConst(
 
   auto surfacesBackendHandle = SG::makeHandle(m_surfacesKey, context);
   if (surfacesBackendHandle
-          .record(std::move(mmtj->m_surfacesBackend),
-                  std::move(mmtj->m_surfacesBackendAux))
+          .record(std::move(mmtj.m_surfacesBackend),
+                  std::move(mmtj.m_surfacesBackendAux))
           .isFailure()) {
     throw std::runtime_error(
         "MutableMultiTrajectoryHandle::build, can't record Surfaces "
@@ -186,7 +186,7 @@ MutableMultiTrajectoryHandle<C>::convertToConst(
       DataLink<xAOD::TrackJacobianContainer>(m_jacobiansKey.key(), context),
       DataLink<xAOD::TrackMeasurementContainer>(m_measurementsKey.key(),
                                                 context));
-  cmtj->fillSurfaces(mmtj);
+  cmtj->fillSurfaces(&mmtj);
   return cmtj;
 }
 

@@ -20,7 +20,7 @@
 #include "xAODTracking/TrackStateContainer.h"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/VectorTrackContainer.hpp"
-#include "ActsEvent/MultiTrajectory.h"
+#include "ActsEvent/FutureTrackContainer.h"
 
 namespace Trk {
 class Surface;
@@ -67,8 +67,7 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
 
 
   virtual void trkTrackCollectionToActsTrackContainer(
-      Acts::TrackContainer<Acts::VectorTrackContainer,
-                           ActsTrk::MutableMultiTrajectory> &tc,
+      ActsTrk::future::TrackContainer &tc,
       const TrackCollection& trackColl,
       const Acts::GeometryContext& gctx) const = 0;
 

@@ -21,7 +21,7 @@ namespace xAOD {
 
         std::vector<unsigned int> nMeasurements;
         std::vector<unsigned int> nHoles;
-        std::vector<float> chi2;
+        std::vector<double> chi2;
         std::vector<unsigned int> ndf;
         std::vector<unsigned int> nOutliers;
         std::vector<unsigned int> nSharedHits;

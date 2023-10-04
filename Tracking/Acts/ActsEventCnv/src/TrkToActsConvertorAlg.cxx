@@ -14,10 +14,9 @@ Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 StatusCode ActsTrk::TrkToActsConvertorAlg::initialize() {
   ATH_CHECK(m_trackCollectionKeys.initialize());
-  ATH_CHECK(m_vectorTrackContainer.initialize());
-  ATH_CHECK(m_mtjHandle.initialize());
+  ATH_CHECK(m_trackContainerKey.initialize());
   ATH_CHECK(m_convertorTool.retrieve());
-  ATH_CHECK(m_constMTJKey.initialize());
+  ATH_CHECK(m_trackContainerBackends.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -30,12 +29,10 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   }
   ATH_MSG_VERBOSE("create containers");
 
-  ATH_MSG_VERBOSE("About to create multiTraj");
-  auto multiTraj = std::make_unique<MutableMultiTrajectory>();
-  Acts::VectorTrackContainer vecTrk;
-  Acts::TrackContainer<Acts::VectorTrackContainer,
-                       ActsTrk::MutableMultiTrajectory>
-      tc{vecTrk, *multiTraj};
+  ATH_MSG_VERBOSE("About to create trackContainer");
+  ActsTrk::MutableTrackBackendContainer tb;
+  ActsTrk::MutableMultiTrajectory mtj;
+  ActsTrk::future::TrackContainer tc(tb, mtj);
   Acts::GeometryContext tgContext = m_convertorTool->trackingGeometryTool()
                                             ->getGeometryContext(ctx)
                                             .context();
@@ -48,24 +45,17 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
 
     m_convertorTool->trkTrackCollectionToActsTrackContainer(
           tc, *handle, tgContext);
-    ATH_MSG_VERBOSE("multiTraj has  " << multiTraj->size() << " states");
+    ATH_MSG_VERBOSE("multiTraj has  " << mtj.size() << " states");
   }
 
   // // Let's dump some information for debugging (will be removed later)
-  ATH_MSG_VERBOSE("TrackStateContainer has  " << multiTraj->trackStates().size() << " states");
-  ATH_MSG_VERBOSE("TrackParametersContainer has  " << multiTraj->trackParameters().size() << " parameters");
-  // TODO the TrackContainer should be constructed with ConstMTJ
-  std::unique_ptr<ActsTrk::ConstMultiTrajectory> constMultiTraj = m_mtjHandle.convertToConst(multiTraj.get(), ctx);
-  SG::WriteHandle<ActsTrk::ConstMultiTrajectory> mtjHandle(m_constMTJKey, ctx);
-  ATH_CHECK(mtjHandle.record(std::move(constMultiTraj)));  
+  ATH_MSG_VERBOSE("TrackStateContainer has  " << mtj.trackStates().size() << " states");
+  ATH_MSG_VERBOSE("TrackParametersContainer has  " << mtj.trackParameters().size() << " parameters");
 
-
-
-  // Store the VectorTrackContainer
-  auto constVecTrackCont = std::make_unique<Acts::ConstVectorTrackContainer>(std::move(vecTrk)); 
-  SG::WriteHandle<Acts::ConstVectorTrackContainer> wh_vtc(m_vectorTrackContainer, ctx);
-  ATH_MSG_VERBOSE("Saving " << constVecTrackCont->size_impl() << " tracks to "<< wh_vtc.key());
-  ATH_CHECK(wh_vtc.record(std::move(constVecTrackCont)));
+  std::unique_ptr<ActsTrk::future::ConstTrackContainer> constTrackContainer = m_trackContainerBackends.convertToConst(tc, ctx);
+  auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
+  ATH_MSG_VERBOSE("Saving " << constTrackContainer->size() << " tracks to "<< trackContainerHandle.key());
+  ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
   return StatusCode::SUCCESS;
 }
 

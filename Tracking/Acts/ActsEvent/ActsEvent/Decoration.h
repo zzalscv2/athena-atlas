@@ -30,6 +30,7 @@ struct accepted_decoration_types {
       std::is_same<T, std::uint32_t>::value;
 };
 
+
 }  // namespace detail
 }  // namespace ActsTrk
 

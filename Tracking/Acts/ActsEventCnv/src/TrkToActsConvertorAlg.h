@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-*/
+*/  
 
 #ifndef TRKTOACTSCONVERTORALG_H
 #define TRKTOACTSCONVERTORALG_H
@@ -12,7 +12,8 @@
 #include "TrkTrack/TrackCollection.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/MultiTrajectoryHandle.h"
+#include "ActsEvent/TrackContainerHandle.h"
+#include "ActsEvent/FutureTrackContainer.h"
 
 
 namespace ActsTrk {
@@ -33,10 +34,10 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
       {"CombinedInDetTracks", "CombinedMuonTracks", "MuonSpectrometerTracks"},
       "Keys for Track Containers"};
   
-  SG::WriteHandleKey<Acts::ConstVectorTrackContainer> m_vectorTrackContainer {this, "VectorTrackContainerLocation", "ConvertedVectorTrackContainer", "Location of the converted VectorTrackContainer"};
-  ActsTrk::MutableMultiTrajectoryHandle<ActsTrk::TrkToActsConvertorAlg> m_mtjHandle {this, "MTJKey", "Converted"};
-  SG::WriteHandleKey<ActsTrk::ConstMultiTrajectory> m_constMTJKey {this, "ConstMTJKey", "ConvertedMultiTrajectory"};
+  
 
+  SG::WriteHandleKey<ActsTrk::future::ConstTrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTrackContainer", "Location of the converted TrackContainer"};
+  ActsTrk::MutableTrackContainerHandle<ActsTrk::TrkToActsConvertorAlg> m_trackContainerBackends{this, "", "Converted"};
 
 };
 }  // namespace ActsTrk
