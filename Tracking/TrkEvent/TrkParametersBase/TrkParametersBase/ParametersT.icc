@@ -171,15 +171,6 @@ Trk::ParametersT<DIM, T, S>::ParametersT(const Amg::Vector3D& pos,
   m_parameters << lPosition[Trk::loc1], lPosition[Trk::loc2], phi, theta, qop;
 }
 
-// Copy constructor
-template<int DIM, class T, class S>
-ParametersT<DIM, T, S>::ParametersT(const ParametersT<DIM, T, S>& rhs) = default;
-
-// assignment operator
-template<int DIM, class T, class S>
-ParametersT<DIM, T, S>&
-ParametersT<DIM, T, S>::operator=(const ParametersT<DIM, T, S>& rhs) = default;
-
 template<int DIM, class T, class S>
 inline Amg::Vector3D
 ParametersT<DIM, T, S>::position() const

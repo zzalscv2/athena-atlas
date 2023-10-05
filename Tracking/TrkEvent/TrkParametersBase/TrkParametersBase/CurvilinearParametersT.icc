@@ -108,34 +108,6 @@ CurvilinearParametersT<DIM, T, S>::CurvilinearParametersT(
   m_surface = S(this->m_position, curvilinearFrame());
 }
 
-// Copy constructor
-template<int DIM, class T, class S>
-CurvilinearParametersT<DIM, T, S>::CurvilinearParametersT(
-  const CurvilinearParametersT<DIM, T, S>& rhs)
-  : ParametersBase<DIM, T>(rhs)
-  , m_position(rhs.position())
-  , m_momentum(rhs.momentum())
-  , m_surface(rhs.m_surface)
-  , m_cIdentifier(rhs.m_cIdentifier)
-{}
-
-// assignment operator
-template<int DIM, class T, class S>
-CurvilinearParametersT<DIM, T, S>&
-CurvilinearParametersT<DIM, T, S>::operator=(
-  const CurvilinearParametersT<DIM, T, S>& rhs)
-{
-  if (this != &rhs) {
-    m_parameters = rhs.m_parameters;
-    m_covariance = rhs.m_covariance;
-    m_position = rhs.position();
-    m_momentum = rhs.momentum();
-    m_surface = rhs.m_surface;
-    m_chargeDef = rhs.m_chargeDef;
-    m_cIdentifier = rhs.m_cIdentifier;
-  }
-  return *this;
-}
 /** the curvilinear parameters identifier */
 template<int DIM, class T, class S>
 inline unsigned int
