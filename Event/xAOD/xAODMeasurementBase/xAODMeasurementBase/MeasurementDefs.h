@@ -21,7 +21,6 @@
 namespace xAOD {
 
 /// Define the type of the uncalibrated measurement
-/// Wondering whether we should just
 enum class UncalibMeasType {
     Other = 0,
     // InDet
@@ -32,6 +31,7 @@ enum class UncalibMeasType {
     RpcStripType = 4,
     TgcStripType = 5,
     MMClusterType = 6,
+    sTgcStripType = 7,
 };
 
 /// @ detector ID element hash
