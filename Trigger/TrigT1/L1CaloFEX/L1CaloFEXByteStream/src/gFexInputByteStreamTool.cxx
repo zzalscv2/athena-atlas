@@ -384,8 +384,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                                                int do_lconv, 
                                                const std::array<int, gPos::MAX_FIBERS> &XMPD_NFI,
                                                const std::array<int, gPos::MAX_FIBERS> &XCALO_TYPE,
-                                               gCaloTwr XMPD_GTRN_ARR,
-                                               gType XMPD_DSTRT_ARR,  
+                                               const gCaloTwr & XMPD_GTRN_ARR,
+                                               const gType & XMPD_DSTRT_ARR,  
                                                gTypeChar XMPD_DTYP_ARR,
                                                const std::array<int, gPos::MAX_FIBERS> &XMSK,
                                                gtFPGA &Xsaturation) const{
@@ -432,41 +432,27 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
     *BCIDptr = (Xfiber[0][gPos::W280-1]&0x007F0000) >>16;
     
     //200 MeV towers
-    std::array<int, gPos::AB_TOWERS> etowerData;
-    std::array<int, gPos::AB_TOWERS> htowerData;
-    std::array<int, gPos::ABC_ROWS>  xetowerData;
-    std::array<int, gPos::ABC_ROWS>  xhtowerData;
-    std::array<int, gPos::ABC_ROWS>  ohtowerData;
+    std::array<int, gPos::AB_TOWERS> etowerData{};
+    std::array<int, gPos::AB_TOWERS> htowerData{};
+    std::array<int, gPos::ABC_ROWS>  xetowerData{};
+    std::array<int, gPos::ABC_ROWS>  xhtowerData{};
+    std::array<int, gPos::ABC_ROWS>  ohtowerData{};
   
-    etowerData.fill(0);
-    htowerData.fill(0);
-    xetowerData.fill(0);
-    xhtowerData.fill(0);
-    ohtowerData.fill(0);
-
     //50 MeV towers
-    std::array<int, gPos::AB_TOWERS> etowerDataF;
-    std::array<int, gPos::AB_TOWERS> htowerDataF;
-    std::array<int, gPos::ABC_ROWS>  xetowerDataF;
-    std::array<int, gPos::ABC_ROWS>  xhtowerDataF;
-    std::array<int, gPos::ABC_ROWS>  ohtowerDataF;
+    std::array<int, gPos::AB_TOWERS> etowerDataF{};
+    std::array<int, gPos::AB_TOWERS> htowerDataF{};
+    std::array<int, gPos::ABC_ROWS>  xetowerDataF{};
+    std::array<int, gPos::ABC_ROWS>  xhtowerDataF{};
+    std::array<int, gPos::ABC_ROWS>  ohtowerDataF{};
   
-    etowerDataF.fill(0);
-    htowerDataF.fill(0);
-    xetowerDataF.fill(0);
-    xhtowerDataF.fill(0);
-    ohtowerDataF.fill(0);
 
 
     // save values from fiber fields for monitoring (50 MeV towers)
       
-    gFields fiberFields;
-    gFields fiberFieldsUndecoded;
-    gSatur  fiberSaturation;
+    gFields fiberFields{{}};
+    gFields fiberFieldsUndecoded{{}};
+    gSatur  fiberSaturation{{}};
 
-    fiberFields = {{{0}}};
-    fiberFieldsUndecoded = {{{0}}};
-    fiberSaturation = {{{0}}};
 
     for(unsigned int i=0; i<100; i++){
         if( ( Xfiber[i][gPos::W280-1] & 0x000000FF ) == 0x000000BC ) {
@@ -505,7 +491,8 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
     for(int iFiber = 0; iFiber < Xin; iFiber++) { 
         // first do CRC check
         std::array<int, 6> tmp; 
-        for(int i = 0; i < 6; i++){ tmp[i] = Xfiber[iFiber][i];  }; 
+        for(int i = 0; i < 6; i++){ tmp[i] = Xfiber[iFiber][i];  };
+        // coverity[uninit_use_in_cal : FALSE] 
         int CRC  = crc9d32(tmp, 6, 1);
         int withoutComma = Xfiber[iFiber][6] & 0xFFFFFF00 ; 
         CRC = crc9d23(withoutComma, CRC,  1 );
@@ -667,7 +654,7 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         } 
                         else {
                         // sign extend etower data 
-                        if( htowerData[ntower] & 0x00000800 ){   htowerData[ntower] = (etowerData[ntower] | 0xFFFFF000) ;}
+                        if( htowerData[ntower] & 0x00000800 ){   htowerData[ntower] = (htowerData[ntower] | 0xFFFFF000) ;}
                         htowerData[ntower] = htowerData[ntower]*4; 
                         htowerDataF[ntower] =  htowerData[ntower];
                         }      

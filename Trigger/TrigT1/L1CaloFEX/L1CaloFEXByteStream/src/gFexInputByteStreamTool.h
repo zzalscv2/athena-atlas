@@ -25,6 +25,9 @@
 #include "Gaudi/Property.h"
 
 #include "gFexPos.h"
+#include <array>
+#include <vector>
+#include <cstdint>
 namespace gPos = LVL1::gFEXPos;
 
 /** @class gFexInputByteStreamTool
@@ -32,21 +35,20 @@ namespace gPos = LVL1::gFEXPos;
  *  (IL1TriggerByteStreamTool interface)
  **/
 
-typedef  std::array<std::array<uint32_t, 7>,  100>        gfiber;
-typedef  std::array<std::array<int,      6>,   32>        gEngines;
-typedef  std::array<std::array<int,      12>,  32>        gtFPGA;
-typedef  std::array<std::array<int,      20>,  100>       gFields;
-typedef  std::array<std::array<int,      16>,  100>       gCaloTwr;
-typedef  std::array<std::array<int,      8>,   100>       gSatur;
 
-typedef  std::array<std::array<char,     20>,  100>       gFieldsChar;
-
-typedef  std::array<std::array<int,      20>,  4>         gType;
-typedef  std::array<std::array<char,     20>,  4>         gTypeChar;
 
 
 class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> {
     public:
+        typedef  std::array<std::array<uint32_t, 7>,  100>        gfiber;
+        typedef  std::array<std::array<int,      6>,   32>        gEngines;
+        typedef  std::array<std::array<int,      12>,  32>        gtFPGA;
+        typedef  std::array<std::array<int,      20>,  100>       gFields;
+        typedef  std::array<std::array<int,      16>,  100>       gCaloTwr;
+        typedef  std::array<std::array<int,      8>,   100>       gSatur;
+        typedef  std::array<std::array<char,     20>,  100>       gFieldsChar;
+        typedef  std::array<std::array<int,      20>,  4>         gType;
+        typedef  std::array<std::array<char,     20>,  4>         gTypeChar;
         gFexInputByteStreamTool(const std::string& type, const std::string& name, const IInterface* parent);
         virtual ~gFexInputByteStreamTool() override = default;
 
@@ -98,8 +100,8 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
                                         int do_lconv, 
                                         const std::array<int, gPos::MAX_FIBERS> &XMPD_NFI,
                                         const std::array<int, gPos::MAX_FIBERS> &XCALO_TYPE,
-                                        gCaloTwr XMPD_GTRN_ARR,
-                                        gType XMPD_DSTRT_ARR,  
+                                        const gCaloTwr & XMPD_GTRN_ARR,
+                                        const gType & XMPD_DSTRT_ARR,  
                                         gTypeChar XMPD_DTYP_ARR,
                                         const std::array<int, gPos::MAX_FIBERS> &XMSK,
                                         gtFPGA &Xsatur) const;
