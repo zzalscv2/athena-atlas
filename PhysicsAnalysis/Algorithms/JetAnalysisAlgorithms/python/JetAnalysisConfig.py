@@ -97,6 +97,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('runFJvtEfficiency', False, type=bool)
         self.addOption ('reduction', "Global", type=str)
         self.addOption ('JEROption', "Simple", type=str)
+        self.addOption ('recalibratePhyslite', True, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -115,30 +116,31 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             raise ValueError(
                 "Unsupported input type '{0}' for R=0.4 jets!".format(self.jetInput) )
 
-        # Prepare the jet calibration algorithm
-        alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
-        config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
-        alg.calibrationTool.JetCollection = jetCollectionName[:-4]
-        # Get the correct string to use in the config file name
-        if self.jetInput == "EMPFlow":
-            configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
-        else:
-            if config.dataType == 'afii':
-                configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
-            else:
-                configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
-            configFile = configFile.format(self.jetInput)
-        alg.calibrationTool.ConfigFile = configFile
-        if config.dataType() == 'data':
-            alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
-        else:
+        if not config.isPhyslite() or self.recalibratePhyslite:
+            # Prepare the jet calibration algorithm
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
+            config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
+            alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+            # Get the correct string to use in the config file name
             if self.jetInput == "EMPFlow":
-                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+                configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
             else:
-                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
-        alg.calibrationTool.IsData = (config.dataType() == 'data')
-        alg.jets = config.readName (self.containerName)
-        alg.jetsOut = config.copyName (self.containerName)
+                if config.dataType == 'afii':
+                    configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
+                else:
+                    configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
+                configFile = configFile.format(self.jetInput)
+            alg.calibrationTool.ConfigFile = configFile
+            if config.dataType() == 'data':
+                alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
+            else:
+                if self.jetInput == "EMPFlow":
+                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+                else:
+                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+            alg.calibrationTool.IsData = (config.dataType() == 'data')
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
 
         # Jet uncertainties
         # Prepare the config file
@@ -266,6 +268,7 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         self.jetInput = jetInput
         self.radius = radius
         self.addOption ('postfix', '', type=str)
+        self.addOption ('recalibratePhyslite', True, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -280,23 +283,24 @@ class RScanJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"
 
-        if self.jetInput != "LCTopo":
-            raise ValueError(
-                "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
-        # Prepare the jet calibration algorithm
-        alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
-        config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
-        alg.calibrationTool.JetCollection = jetCollectionName[:-4]
-        alg.calibrationTool.ConfigFile = \
-            "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
-        if config.dataType() == 'data':
-            alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-        else:
-            alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
-        alg.calibrationTool.IsData = (config.dataType() == 'data')
-        alg.jets = config.readName (self.containerName)
-        # Logging would be good
-        print("WARNING: uncertainties for R-Scan jets are not yet released!")
+        if not config.isPhyslite() or self.recalibratePhyslite:
+            if self.jetInput != "LCTopo":
+                raise ValueError(
+                    "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
+            # Prepare the jet calibration algorithm
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
+            config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
+            alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+            alg.calibrationTool.ConfigFile = \
+                "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
+            if config.dataType() == 'data':
+                alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
+            else:
+                alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+            alg.calibrationTool.IsData = (config.dataType() == 'data')
+            alg.jets = config.readName (self.containerName)
+            # Logging would be good
+            print("WARNING: uncertainties for R-Scan jets are not yet released!")
 
 
 
@@ -312,6 +316,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.jetInput = jetInput
         self.addOption ('postfix', '', type=str)
         self.addOption ('largeRMass', "Comb", type=str)
+        self.addOption ('recalibratePhyslite', True, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -360,17 +365,18 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if self.jetInput == "UFO":
             configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_10Mar2023.config"
 
-        # Prepare the jet calibration algorithm
-        alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
-        config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
-        alg.calibrationTool.JetCollection = jetCollectionName[:-4]
-        alg.calibrationTool.ConfigFile = configFile
-        if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() == "mc":
-            alg.calibrationTool.CalibSequence = "EtaJES_JMS"
-        elif config.dataType() == "data":
-            alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
-        alg.calibrationTool.IsData = (config.dataType() == "data")
-        alg.jets = config.readName (self.containerName)
+        if not config.isPhyslite() or self.recalibratePhyslite:
+            # Prepare the jet calibration algorithm
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
+            config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
+            alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+            alg.calibrationTool.ConfigFile = configFile
+            if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() == "mc":
+                alg.calibrationTool.CalibSequence = "EtaJES_JMS"
+            elif config.dataType() == "data":
+                alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
+            alg.calibrationTool.IsData = (config.dataType() == "data")
+            alg.jets = config.readName (self.containerName)
 
         # Jet uncertainties
 

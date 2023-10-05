@@ -105,11 +105,11 @@ if( XAOD_STANDALONE )
 add_test_job( TestJobFullSimSequenceLite mc --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimConfigLite   mc --for-compare --block-config --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimFullLite     mc --block-config --physlite --no-physlite-broken )
-#add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
+add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
 
 add_test_job( TestJobFastSimSequenceLite afii --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimConfigLite   afii --for-compare --block-config --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimFullLite     afii --block-config --physlite --no-physlite-broken )
-#add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
+add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 
 endif()

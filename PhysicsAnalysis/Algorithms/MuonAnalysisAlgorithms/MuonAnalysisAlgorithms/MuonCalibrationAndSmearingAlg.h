@@ -10,6 +10,7 @@
 #define MUON_ANALYSIS_ALGORITHMS__MUON_CALIBRATION_AND_SMEARING_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h>
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
@@ -40,6 +41,11 @@ namespace CP
     /// \brief the smearing tool
   private:
     ToolHandle<IMuonCalibrationAndSmearingTool> m_calibrationAndSmearingTool;
+
+    /// \brief whether to skip the nominal correction (for PHYSLITE)
+  private:
+    Gaudi::Property<bool> m_skipNominal {
+      this, "skipNominal", false, "whether to skip the nominal correction (for PHYSLITE)"};
 
     /// \brief the systematics list we run
   private:

@@ -608,6 +608,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
+    if not forCompare :
+        configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     # Add systematic object links
     configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaJets')
@@ -638,6 +640,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
         # Add systematic object links
         configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaLargeRJets')
+        if not forCompare :
+            configSeq.setOptionValue ('.recalibratePhyslite', False)
 
     if trackJets :
         configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
@@ -650,6 +654,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     likelihood = True
     recomputeLikelihood=False
     configSeq += makeConfig ('Electrons', 'AnaElectrons')
+    if not forCompare :
+        configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += makeConfig ('Electrons.Selection', 'AnaElectrons.loose')
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
@@ -671,6 +677,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     # Include, and then set up the photon analysis algorithm sequence:
     configSeq += makeConfig ('Photons', 'AnaPhotons')
     configSeq.setOptionValue ('.recomputeIsEM', False)
+    if not forCompare :
+        configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += makeConfig ('Photons.Selection', 'AnaPhotons.tight')
     if forCompare :
         configSeq.setOptionValue ('.noEffSF', True)
@@ -684,6 +692,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     # set up the muon analysis algorithm sequence:
     configSeq += makeConfig ('Muons', 'AnaMuons')
+    if not forCompare :
+        configSeq.setOptionValue ('.recalibratePhyslite', False)
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
     configSeq.setOptionValue ('.quality', 'Medium')
     configSeq.setOptionValue ('.isolation', 'Loose_VarRad')

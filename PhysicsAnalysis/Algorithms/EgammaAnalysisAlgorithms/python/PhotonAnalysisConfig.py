@@ -23,6 +23,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('cleaningAllowLate', False, type=bool)
         self.addOption ('recomputeIsEM', False, type=bool)
         self.addOption ('ptSelectionOutput', False, type=bool)
+        self.addOption ('recalibratePhyslite', True, type=bool)
 
 
     def makeAlgs (self, config) :
@@ -99,6 +100,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+        if config.isPhyslite() and not self.recalibratePhyslite :
+            alg.skipNominal = True
 
         # Set up the the pt selection
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonPtCutAlg' + postfix )

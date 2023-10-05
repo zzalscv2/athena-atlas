@@ -56,6 +56,11 @@ namespace CP
     Gaudi::Property<bool> m_noToolSystematics {
       this, "noToolSystematics", false, "whether to ignore all tool systematics"};
 
+    /// \brief whether to skip the nominal correction (for PHYSLITE)
+  private:
+    Gaudi::Property<bool> m_skipNominal {
+      this, "skipNominal", false, "whether to skip the nominal correction (for PHYSLITE)"};
+
     /// \brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
