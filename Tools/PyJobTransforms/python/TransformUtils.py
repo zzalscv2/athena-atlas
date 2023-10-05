@@ -42,6 +42,7 @@ def processPreExec(runArgs, flags):
     """Process preExec from runtime arguments."""
     if hasattr(runArgs, 'preExec') and runArgs.preExec and runArgs.preExec != 'NONE':
         ConfigFlags = flags  # noqa: F841
+        from AthenaConfiguration.Enums import HIMode,BeamType  # noqa: F401
         for cmd in runArgs.preExec:
             exec(cmd)
 
