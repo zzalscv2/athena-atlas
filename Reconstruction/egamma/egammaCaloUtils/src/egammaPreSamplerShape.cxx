@@ -31,18 +31,13 @@ egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
   if (!cluster.inBarrel() && !cluster.inEndcap()) {
     return StatusCode::SUCCESS;
   }
-  CaloSampling::CaloSample sam = CaloSampling::PreSamplerB;
-  CaloSampling::CaloSample sam2 = CaloSampling::EMB2;
   // check if cluster is in barrel or end-cap
-  bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 0);
+  const bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 0);
+
   // define accordingly the position of CaloSampling
-  if (in_barrel) {
-    sam = CaloSampling::PreSamplerB;
-    sam2 = CaloSampling::EMB2;
-  } else {
-    sam = CaloSampling::PreSamplerE;
-    sam2 = CaloSampling::EME2;
-  }
+  const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::PreSamplerB : CaloSampling::PreSamplerE;
+  const CaloSampling::CaloSample sam2 = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;
+
   double eta = 0;
   double phi = 0;
   double deta = 0;

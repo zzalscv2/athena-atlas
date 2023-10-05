@@ -719,22 +719,20 @@ egammaStripsShape::execute(const xAOD::CaloCluster& cluster,
   // retrieve energy in 1st sampling
   const double e1 = egammaEnergyPositionAllSamples::e1(cluster);
 
-  // check if cluster is in barrel or end-cap
   // sam is used in SetArray to check that cells belong to strips
   // samgran is used to estimate the window to use cells in eta
   // it is based on the granularity of the middle layer
   // For phi we use the strip layer granularity
-  bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 2);
-  CaloSampling::CaloSample sam = CaloSampling::EMB1;
-  CaloSampling::CaloSample samgran = CaloSampling::EMB2;
+
+  // check if cluster is in barrel or end-cap
+  const bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 2);
+  
+  // define accordingly the position of CaloSampling
+  const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::EMB1 : CaloSampling::EME1;
+  const CaloSampling::CaloSample samgran = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;
+
   CaloCell_ID::SUBCALO subcalo = CaloCell_ID::LAREM;
-  if (in_barrel) {
-    sam = CaloSampling::EMB1;
-    samgran = CaloSampling::EMB2;
-  } else {
-    sam = CaloSampling::EME1;
-    samgran = CaloSampling::EME2;
-  }
+
   // get eta and phi of the seed
   info.etaseed = cluster.etaSample(sam);
   info.phiseed = cluster.phiSample(sam);

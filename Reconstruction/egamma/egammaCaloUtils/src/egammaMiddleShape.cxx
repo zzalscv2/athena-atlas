@@ -37,13 +37,10 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
   }
 
   // check if cluster is in barrel or end-cap
-  bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 2);
-  CaloSampling::CaloSample sam = CaloSampling::EMB2;
-  if (in_barrel) {
-    sam = CaloSampling::EMB2;
-  } else {
-    sam = CaloSampling::EME2;
-  }
+  const bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 2);
+
+  // define accordingly position of CaloSampling
+  const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;
 
   // granularity in (eta,phi) in the pre sampler
   // CaloCellList needs both enums: subCalo and CaloSample
