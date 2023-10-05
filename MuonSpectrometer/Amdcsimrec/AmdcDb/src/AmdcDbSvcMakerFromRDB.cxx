@@ -9,7 +9,6 @@
 #include "AmdcDb/AmdcDbSvc.h"
 #include "AmdcDb/AmdcDbRecordset.h"
 #include "AmdcDb/AmdcDbRecord.h"
-#include "boost/range/iterator_range.hpp"
 #include <iostream>
 #include <sstream>
 

@@ -37,7 +37,7 @@
 
 #include "tbb/tick_count.h"
 #include "yampl/SocketFactory.h"
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 #include <cassert>
 #include <ios>
@@ -1395,8 +1395,8 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
   // _____________________ Decode range string _____________________________
   // Expected the following format: [{KEY:VALUE[,KEY:VALUE]}]
   // First get rid of the leading '[{' and the trailing '}]'
-  if(boost::starts_with (range, "[{")) range=range.substr(2);
-  if(boost::ends_with (range, "}]")){
+  if(CxxUtils::starts_with (range, "[{")) range=range.substr(2);
+  if(CxxUtils::ends_with (range, "}]")){
     const int truncate = range.size()-2;
     leftString(range, truncate);
   }
@@ -1521,13 +1521,13 @@ void AthenaMtesEventLoopMgr::trimRangeStrings(std::string& str)
   // or
   // "\"" and "\""
   // Get rid of them!
-  if(boost::starts_with (str, "u\'")) {
+  if(CxxUtils::starts_with (str, "u\'")) {
     str = str.substr(2);
     if(str.rfind('\'')==str.size()-1) {
       str.pop_back();
     }
   }
-  else if(boost::starts_with (str, "\"")) {
+  else if(CxxUtils::starts_with (str, "\"")) {
     str = str.substr(1);
     if(str.rfind('\"')==str.size()-1) {
       str.pop_back();

@@ -25,7 +25,7 @@
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/TokenAddress.h"
-#include <boost/algorithm/string/predicate.hpp>
+#include "CxxUtils/starts_with.h"
 
 namespace {
 
@@ -70,7 +70,7 @@ StatusCode AthenaOutputStreamTool::initialize() {
    if (m_dataHeaderKey.empty()) {
       m_dataHeaderKey.setValue(name());
       // Remove "ToolSvc." from m_dataHeaderKey.
-      if (boost::starts_with (m_dataHeaderKey.value(), "ToolSvc.")) {
+      if (CxxUtils::starts_with (m_dataHeaderKey.value(), "ToolSvc.")) {
          m_dataHeaderKey.setValue(m_dataHeaderKey.value().substr(8));
          // Remove "Tool" from m_dataHeaderKey.
          if (m_dataHeaderKey.value().find("Tool") == m_dataHeaderKey.size() - 4) {

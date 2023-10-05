@@ -7,7 +7,8 @@
 #include "AthContainers/AuxTypeRegistry.h"
 
 #include "GaudiKernel/AttribStringParser.h"
-#include "boost/algorithm/string/case_conv.hpp"
+#include <algorithm>
+#include <string>
 #include "TROOT.h"
 
 const std::string AthAnalysisHelper::UNDEFINED = "__UNDEFINED__";
@@ -114,7 +115,8 @@ TFile* AthAnalysisHelper::getOutputFile(const std::string& streamName) {
 
     //got here .. means we found the stream ...
     for(auto attrib : Gaudi::Utils::AttribStringParser(output.substr(output.find(' ')+1))) {
-      auto TAG = boost::algorithm::to_upper_copy(attrib.tag);
+      auto TAG = attrib.tag;
+      std::transform(TAG.begin(), TAG.end(), TAG.begin(), [](unsigned char c){ return std::toupper(c); });
 
       if(TAG=="FILE" || TAG=="DATAFILE") {
 	fileName = attrib.value;

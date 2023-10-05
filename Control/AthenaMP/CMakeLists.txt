@@ -3,16 +3,12 @@
 # Declare the package name:
 atlas_subdir( AthenaMP )
 
-# External dependencies:
-find_package( Boost )
-
 # Component(s) in the package:
 atlas_add_component( AthenaMP
                      src/*.cxx
                      src/components/*.cxx
                      src/memory-profiler/getPss.cc
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} AthenaBaseComps AthenaInterprocess AthenaMPToolsLib GaudiKernel StoreGateLib )
+                     LINK_LIBRARIES  AthenaBaseComps AthenaInterprocess AthenaMPToolsLib GaudiKernel StoreGateLib )
 
 atlas_add_executable( getSharedMemory
                       src/memory-profiler/getSharedMemory.cc
