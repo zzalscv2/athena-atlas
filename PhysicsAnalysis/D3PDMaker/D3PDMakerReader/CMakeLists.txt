@@ -4,15 +4,14 @@
 atlas_subdir( D3PDMakerReader )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 # Component(s) in the package:
 atlas_add_library( D3PDMakerReaderLib
                    src/*.cxx
                    NO_PUBLIC_HEADERS
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel D3PDMakerInterfaces D3PDMakerUtils )
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel D3PDMakerInterfaces D3PDMakerUtils )
 
 atlas_add_component( D3PDMakerReader
                      src/components/*.cxx

@@ -6,7 +6,7 @@
 #include "GaudiKernel/EventIDBase.h"
 #include "AthenaKernel/StoreID.h"
 #include "AthenaKernel/BaseInfo.h"
-#include "boost/algorithm/string.hpp"
+#include "CxxUtils/starts_with.h"
 
 
 //---------------------------------------------------------------------------
@@ -360,7 +360,7 @@ CondSvc::isValidID(const EventContext& ctx, const DataObjID& id) const {
 
   // FIXME: this is ugly, but we need to strip out the name of the store.
   std::string sk = id.key();
-  if (boost::starts_with (sk, StoreID::storeName(StoreID::CONDITION_STORE))) {
+  if (CxxUtils::starts_with (sk, StoreID::storeName(StoreID::CONDITION_STORE))) {
     sk.erase(0,15);
   }
 

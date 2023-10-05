@@ -247,8 +247,7 @@ namespace {
          result.resize( result.size() - 10 );
       }
       // Turn the string into all lower case:
-      boost::algorithm::to_lower( result );
-
+      std::transform(result.begin(), result.end(), result.begin(),[](unsigned char c){ return std::tolower(c); });
       return result;
    }
 

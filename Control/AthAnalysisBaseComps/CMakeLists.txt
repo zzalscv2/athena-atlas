@@ -4,7 +4,6 @@
 atlas_subdir( AthAnalysisBaseComps )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core RIO )
 
 # Component(s) in the package:
@@ -12,7 +11,6 @@ atlas_add_library( AthAnalysisBaseCompsLib
                    src/*.cxx
                    PUBLIC_HEADERS AthAnalysisBaseComps
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps IOVDbDataModel GaudiKernel StoreGateLib AthContainers
                    PRIVATE_LINK_LIBRARIES CxxUtils )
 

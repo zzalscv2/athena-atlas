@@ -4,14 +4,12 @@
 atlas_subdir( IOVSvc )
 
 # External dependencies:
-find_package( Boost )
 find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_library( IOVSvcLib
                    src/*.cxx
                    PUBLIC_HEADERS IOVSvc
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel SGTools
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PersistentDataModel StoreGateLib xAODEventInfo RootUtils )

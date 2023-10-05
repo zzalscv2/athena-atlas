@@ -17,7 +17,6 @@
 #include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
-#include "boost/algorithm/string/predicate.hpp"
 
 MuonAlignmentCondAlg::MuonAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthReentrantAlgorithm(name, pSvcLocator) {

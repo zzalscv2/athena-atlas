@@ -32,7 +32,6 @@
 #include <functional>
 
 #include <filesystem>
-#include <boost/algorithm/string.hpp>
 
 namespace athenaMP_MemHelper
 {
