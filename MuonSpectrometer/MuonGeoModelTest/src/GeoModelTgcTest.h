@@ -13,6 +13,8 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
+#include "MuonTesterTree/CoordTransformBranch.h"
 
 namespace MuonGM {
 
@@ -27,6 +29,7 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
 
    private:
      
+     void dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr);
      StatusCode dumpToTree(const EventContext& ctx, const TgcReadoutElement* readoutEle);
 
     /// MuonDetectorManager from the conditions store
@@ -48,13 +51,16 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
      /// Write a TTree for validation purposes
     MuonVal::MuonTesterTree m_tree{"TgcGeoModelTree", "GEOMODELTESTER"};
 
+    Gaudi::Property<std::string> m_readoutXML{this, "ReadoutXML", "" ,
+                                    "Path to the XML containing the readout element structure."};
+
     /// Identifier of the readout element
     MuonVal::ScalarBranch<unsigned short>& m_stIndex{m_tree.newScalar<unsigned short>("stationIndex")};
     MuonVal::ScalarBranch<short>& m_stEta{m_tree.newScalar<short>("stationEta")};
     MuonVal::ScalarBranch<short>& m_stPhi{m_tree.newScalar<short>("stationPhi")};
   
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
-    MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "ElementTransform"};   
+    MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "ElementTransform"};   
     
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
@@ -66,21 +72,31 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
 
     
     MuonVal::ThreeVectorBranch m_stripCenter{m_tree,"stripCenter"};
+    MuonVal::ThreeVectorBranch m_stripBottom{m_tree,"stripBottom"};
+    MuonVal::ThreeVectorBranch m_stripTop{m_tree,"stripTop"};
+
+    MuonVal::TwoVectorBranch m_locStripCenter{m_tree, "stripLocalCenter"};
+    MuonVal::TwoVectorBranch m_locStripBottom{m_tree, "stripLocalBottom"};
+    MuonVal::TwoVectorBranch m_locStripTop{m_tree, "stripLocalTop"};
+    
+    
     MuonVal::VectorBranch<uint8_t>& m_stripGasGap{m_tree.newVector<uint8_t>("stripGasGap")};
     MuonVal::VectorBranch<unsigned int>& m_stripNum{m_tree.newVector<unsigned int>("stripNumber")};
+    MuonVal::VectorBranch<float>& m_stripShortWidth{m_tree.newVector<float>("stripShortWidth")};
+    MuonVal::VectorBranch<float>& m_stripLongWidth{m_tree.newVector<float>("stripLongWidth")};
+    MuonVal::VectorBranch<float>& m_stripPitch{m_tree.newVector<float>("stripPitch")};
     
+    MuonVal::VectorBranch<float>& m_stripLength{m_tree.newVector<float>("stripLength")};
+   
     MuonVal::ThreeVectorBranch m_gangCenter{m_tree, "gangCenter"};
+    MuonVal::TwoVectorBranch m_locGangPos{m_tree, "gangLocalPos"};
+    
     MuonVal::VectorBranch<uint8_t>& m_gangGasGap{m_tree.newVector<uint8_t>("gangGasGap")};
     MuonVal::VectorBranch<unsigned int>& m_gangNum{m_tree.newVector<unsigned int>("gangNumber")};
     MuonVal::VectorBranch<uint8_t>& m_gangNumWires{m_tree.newVector<uint8_t>("gangNumWires")};
     MuonVal::VectorBranch<float>& m_gangLength{m_tree.newVector<float>("gangLength")};
-   
-
       
-    MuonVal::ThreeVectorBranch m_layCenter{m_tree,"layerCenter"};
-    MuonVal::ThreeVectorBranch m_layTransColX{m_tree, "layerLinearCol1"};
-    MuonVal::ThreeVectorBranch m_layTransColY{m_tree, "layerLinearCol2"};
-    MuonVal::ThreeVectorBranch m_layTransColZ{m_tree, "layerLinearCol3"};
+    MuonVal::CoordSystemsBranch m_layTans{m_tree, "layer"};   
     MuonVal::VectorBranch<bool>& m_layMeasPhi{m_tree.newVector<bool>("layerMeasPhi")};
     MuonVal::VectorBranch<uint8_t>& m_layNumber{m_tree.newVector<uint8_t>("layerNumber")};
 

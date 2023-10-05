@@ -13,7 +13,7 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
-
+#include "MuonTesterTree/CoordTransformBranch.h"
 namespace MuonGM {
 
 class GeoModelCscTest : public AthHistogramAlgorithm {
@@ -54,7 +54,7 @@ class GeoModelCscTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<short>& m_stMultiLayer{m_tree.newScalar<short>("stationMultiLayer")};
   
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
-    MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "ElementTransform"};   
+    MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "ElementTransform"};   
     
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
@@ -65,10 +65,7 @@ class GeoModelCscTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
 
     
-    MuonVal::ThreeVectorBranch m_layCenter{m_tree,"LayerCenter"};
-    MuonVal::ThreeVectorBranch m_layTransColX{m_tree, "LayerLinearCol1"};
-    MuonVal::ThreeVectorBranch m_layTransColY{m_tree, "LayerLinearCol2"};
-    MuonVal::ThreeVectorBranch m_layTransColZ{m_tree, "LayerLinearCol3"};
+    MuonVal::CoordSystemsBranch m_layerTrans{m_tree,"Layer"};
     MuonVal::VectorBranch<bool>& m_layMeasPhi{m_tree.newVector<bool>("LayerMeasPhi")};
     MuonVal::VectorBranch<uint8_t>& m_layNumber{m_tree.newVector<uint8_t>("LayerNumber")};
 

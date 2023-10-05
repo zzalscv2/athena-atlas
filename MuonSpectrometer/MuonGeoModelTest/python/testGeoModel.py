@@ -23,6 +23,12 @@ def SetupArgParser():
     parser.add_argument("--chambers", default=["all"
     ], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="GeoModelDump.root", help="Output ROOT file to dump the geomerty")
+    parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
+    parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
+    parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
+    parser.add_argument("--noMM", help="Disable the MMs from the geometry", action='store_true', default = False)
+    parser.add_argument("--noSTGC", help="Disable the sTgcs from the geometry", action='store_true', default = False)
+    
     return parser
 
 def setupHistSvc(flags, out_file="MdtGeoDump.root"):
@@ -89,22 +95,29 @@ if __name__=="__main__":
     from MuonCondTest.MdtCablingTester import setupServicesCfg
     cfg = setupServicesCfg(flags)
     cfg.merge(setupHistSvc(flags, out_file = args.outRootFile))
-    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
-    cfg.merge(MdtCondDbAlgCfg(flags))
-    cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [], 
-                                        dumpSurfaces = False ))
-
     
-    cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
-    cfg.merge(GeoModelMmTestCfg(flags))
-    cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
-    cfg.merge(GeoModelTgcTestCfg(flags))
+    chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
+    if not args.noMdt:
+        from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+        cfg.merge(MdtCondDbAlgCfg(flags))
+        cfg.merge(GeoModelMdtTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"], 
+                                            dumpSurfaces = False ))
+    if not args.noRpc:
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"]))
+    if not args.noTgc:
+        cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"]))
+
+    if not args.noMM:
+        cfg.merge(GeoModelMmTestCfg(flags))    
+    
+    if not args.noSTGC:
+        cfg.merge(GeoModelsTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "S"]))
+   
     cfg.merge(GeoModelCscTestCfg(flags))
     
     cfg.printConfig(withDetails=True, summariseProps=True)
     flags.dump()
    
     if not cfg.run(1).isSuccess():
-        import sys
-        sys.exit("Execution failed")
-  
+        print("Execution failed")
+        exit(1)  
