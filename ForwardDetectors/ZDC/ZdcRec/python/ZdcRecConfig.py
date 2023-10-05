@@ -18,6 +18,7 @@ from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 from TrigConfigSvc.TriggerConfigAccess import getL1MenuAccess
 # added getRun3NavigationContainerFromInput as per Tim Martin's suggestions
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+    
 
 def ZdcRecOutputCfg(flags):
 
@@ -143,9 +144,9 @@ def ZdcRecRun3Cfg(flags):
         config = "pp2023"
     elif flags.Input.ProjectName == "data23_hi":
         config = "PbPb2023"
+        doCalib = True
 
     print('ZdcRecRun3Cfg: doCalib = '+str(doCalib)+' for project '+flags.Input.ProjectName)
-    
     
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
     centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
@@ -207,14 +208,16 @@ def ZdcNtupleRun3Cfg(flags):
     zdcNtuple = CompFactory.ZdcNtuple("ZdcNtuple")
     zdcNtuple.useGRL  = False
     zdcNtuple.zdcOnly = True
-    zdcNtuple.lhcf2022 = True
-    zdcNtuple.lhcf2022zdc = True
+    zdcNtuple.lhcf2022 = False
+    zdcNtuple.lhcf2022zdc = False
+    zdcNtuple.lhcf2022afp = False
     zdcNtuple.enableTrigger = False if flags.Input.isMC else True
     zdcNtuple.enableOutputSamples = True
     zdcNtuple.enableOutputTree = True
     zdcNtuple.writeOnlyTriggers = False
     zdcNtuple.enableRPD = True
     zdcNtuple.enableCentroid = True
+    zdcNtuple.reprocZdc = False
     acc.addEventAlgo(zdcNtuple)
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
     #acc.setAppProperty("HistogramPersistency","ROOT")
@@ -335,12 +338,15 @@ if __name__ == '__main__':
     flags.fillFromArgs()
     
     # check for LED running, and configure appropriately    
-    isLED = False
-    if (flags.Input.TriggerStream == "calibration_ZDCLEDCalib"):
-       isLED = True
+
+    isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
+    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or flags.Input.TriggerStream == "physics_MinBias" or flags.Input.TriggerStream == "express_express" )
+
     if (isLED):
        print('ZdcRecConfig: Running LED data!')
-
+    if (isCalib):
+       print('ZdcRecConfig: Running ZDC calibration data!')
+ 
     # supply missing metadata based on project name
     pn = flags.Input.ProjectName
     if not isLED:
@@ -376,10 +382,12 @@ if __name__ == '__main__':
     else:
         acc.merge(ZdcRecCfg(flags))
 
+
     if not flags.Input.isMC:
        from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-       acc.merge(ZdcMonitoringConfig(flags,'pp'))
-       acc.merge(ZdcNtupleCfg(flags))
+       acc.merge(ZdcMonitoringConfig(flags,'pbpb')) #PbPb only
+       if (isCalib): # don't configure ntuple for typical reco jobs
+           acc.merge(ZdcNtupleCfg(flags))
 
     acc.printConfig(withDetails=True)
 
