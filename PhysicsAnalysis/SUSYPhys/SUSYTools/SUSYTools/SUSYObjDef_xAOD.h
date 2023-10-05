@@ -199,14 +199,12 @@ namespace ST {
     StatusCode MergeMuons(const  xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const override final;
     const xAOD::MuonContainer* prompt_muons = nullptr;
     const xAOD::MuonContainer* lrt_muons = nullptr;
-    mutable xAOD::Muon* newMuon = nullptr;
 
     StatusCode prepareLRTMuons(const xAOD::MuonContainer* inMuons, xAOD::MuonContainer* copy) const override final;
 
     StatusCode MergeElectrons(const  xAOD::ElectronContainer & electrons, xAOD::ElectronContainer* outputCol, const std::set<const xAOD::Electron *> &ElectronsToRemove) const override final;
     const xAOD::ElectronContainer* prompt_electrons = nullptr;
     const xAOD::ElectronContainer* lrt_electrons = nullptr;
-    mutable xAOD::Electron* newElectron = nullptr;
 
     StatusCode prepareLRTElectrons(const xAOD::ElectronContainer* inMuons, xAOD::ElectronContainer* copy) const override final;
 
