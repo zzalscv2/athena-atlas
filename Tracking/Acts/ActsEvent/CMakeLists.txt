@@ -37,8 +37,8 @@ atlas_add_test( MultiTrajectorySE_test
 				LINK_LIBRARIES TestTools ActsEventLib
 				POST_EXEC_SCRIPT nopost.sh)				
 
-atlas_add_test( TrackBackendContainer_test
-				SOURCES test/TrackBackendContainer_test.cxx
+atlas_add_test( TrackStorageContainer_test
+				SOURCES test/TrackStorageContainer_test.cxx
 				LINK_LIBRARIES TestTools ActsEventLib
 				POST_EXEC_SCRIPT nopost.sh)
  

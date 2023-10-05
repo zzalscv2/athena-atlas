@@ -351,7 +351,7 @@ const Acts::Surface* ActsTrk::MutableMultiTrajectory::referenceSurface_impl(Inde
 
 /////////////////////////////////////////////////////////
 // ReadOnly MTJ
-ActsTrk::ConstMultiTrajectory::ConstMultiTrajectory(
+ActsTrk::MultiTrajectory::MultiTrajectory(
     DataLink<xAOD::TrackStateContainer> trackStates,
     DataLink<xAOD::TrackParametersContainer> trackParameters,
     DataLink<xAOD::TrackJacobianContainer> trackJacobians,
@@ -376,30 +376,30 @@ ActsTrk::ConstMultiTrajectory::ConstMultiTrajectory(
         if ( *typeInfo == typeid(float) ) {
           m_decorations.emplace_back( name,
             static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<float>, this,
+            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<float>, this,
                       _1, _2));
         } else if ( *typeInfo == typeid(double) ) {
           m_decorations.emplace_back( name,
             static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<double>, this,
+            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<double>, this,
                       _1, _2));
 
         } else if ( *typeInfo == typeid(short) ) {
           m_decorations.emplace_back( name,
             static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<short>, this,
+            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<short>, this,
                       _1, _2));
         } else if ( *typeInfo == typeid(uint32_t) ) {
           m_decorations.emplace_back( name,
             static_cast<ActsTrk::detail::Decoration::SetterType>(nullptr),
-            std::bind(&ActsTrk::ConstMultiTrajectory::decorationGetter<uint32_t>, this,
+            std::bind(&ActsTrk::MultiTrajectory::decorationGetter<uint32_t>, this,
                       _1, _2));
         }
 
     }
 }
 
-bool ActsTrk::ConstMultiTrajectory::has_impl(Acts::HashedString key,
+bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
                                              ActsTrk::IndexType istate) const {
   using namespace Acts::HashedStringLiteral;
   const auto& trackStates = *m_trackStates;
@@ -411,7 +411,7 @@ bool ActsTrk::ConstMultiTrajectory::has_impl(Acts::HashedString key,
   return false;
 }
 
-const std::any ActsTrk::ConstMultiTrajectory::component_impl(
+const std::any ActsTrk::MultiTrajectory::component_impl(
     Acts::HashedString key, ActsTrk::IndexType istate) const {
   using namespace Acts::HashedStringLiteral;
   const auto& trackStates = *m_trackStates;
@@ -449,12 +449,12 @@ const std::any ActsTrk::ConstMultiTrajectory::component_impl(
           return  d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("ConstMultiTrajectory no such component " + std::to_string(key));
+      throw std::runtime_error("MultiTrajectory no such component " + std::to_string(key));
     }
   }
 }
 
-bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
+bool ActsTrk::MultiTrajectory::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
   switch (key) {
@@ -481,24 +481,24 @@ bool ActsTrk::ConstMultiTrajectory::hasColumn_impl(
 }
 
   ActsTrk::IndexType
-  ActsTrk::ConstMultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
+  ActsTrk::MultiTrajectory::calibratedSize_impl(ActsTrk::IndexType istate) const {
     const ActsTrk::IndexType i = (*m_trackStates)[istate]->calibrated();
     return (*m_trackMeasurements)[i]->size();
   }
 
 
 typename Acts::SourceLink
-ActsTrk::ConstMultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const {
+ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const {
   auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
   return Acts::SourceLink(el);
 }
 
-void ActsTrk::ConstMultiTrajectory::fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
+void ActsTrk::MultiTrajectory::fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
   m_surfaces = std::move(mtj->m_surfaces);
 }
 
 
-void ActsTrk::ConstMultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext ) {
+void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext ) {
   if ( not m_surfaces.empty() )
     return;
   m_surfaces.resize(m_trackStates->size(), nullptr);
@@ -520,7 +520,7 @@ void ActsTrk::ConstMultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* g
 }
 
 
-const Acts::Surface* ActsTrk::ConstMultiTrajectory::referenceSurface_impl(IndexType istate) const {
-  if ( istate >= m_surfaces.size() ) throw std::out_of_range("ConstMultiTrajectory index out of range when accessing reference surface");
+const Acts::Surface* ActsTrk::MultiTrajectory::referenceSurface_impl(IndexType istate) const {
+  if ( istate >= m_surfaces.size() ) throw std::out_of_range("MultiTrajectory index out of range when accessing reference surface");
   return toSurfacePtr(m_surfaces[istate]);
 }

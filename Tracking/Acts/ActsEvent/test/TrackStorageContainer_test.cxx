@@ -8,7 +8,7 @@
 #include <Acts/EventData/TrackContainer.hpp>
 
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/TrackBackendContainer.h"
+#include "ActsEvent/TrackStorageContainer.h"
 #include "xAODTracking/TrackBackendContainer.h"
 #include "xAODTracking/TrackBackendAuxContainer.h"
 
@@ -16,30 +16,25 @@ BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
 BOOST_AUTO_TEST_CASE(ConstCompilesWithInterface) {
   ACTS_STATIC_CHECK_CONCEPT(Acts::ConstTrackContainerBackend,
-                            ActsTrk::ConstTrackBackendContainer);
-
-  // Doesn't compile --- ConstTrackContainerBackend is not sufficient
-  // to meet the requirements of TrackContainer.
-  //using ConstTrackContainer = Acts::TrackContainer<ActsTrk::ConstTrackBackendContainer, ActsTrk::ConstMultiTrajectory>;
-
+                            ActsTrk::TrackStorageContainer);
 }
 
 BOOST_AUTO_TEST_CASE(MutableCompilesWithInterface) {
   ACTS_STATIC_CHECK_CONCEPT(Acts::TrackContainerBackend,
-                            ActsTrk::MutableTrackBackendContainer);
+                            ActsTrk::MutableTrackStorageContainer);
 
-  using MutableTrackContainer = Acts::TrackContainer<ActsTrk::MutableTrackBackendContainer, ActsTrk::MutableMultiTrajectory>;
+  using MutableTrackContainer = Acts::TrackContainer<ActsTrk::MutableTrackStorageContainer, ActsTrk::MutableMultiTrajectory>;
 }
 
 struct EmptyBackend {
   EmptyBackend() {
-    m = std::make_unique<ActsTrk::MutableTrackBackendContainer>();
+    m = std::make_unique<ActsTrk::MutableTrackStorageContainer>();
     c = m.get();
   }
 
 
-  std::unique_ptr<ActsTrk::MutableTrackBackendContainer> m;
-  const ActsTrk::ConstTrackBackendContainer* c = nullptr;
+  std::unique_ptr<ActsTrk::MutableTrackStorageContainer> m;
+  const ActsTrk::TrackStorageContainer* c = nullptr;
 };
 
 BOOST_FIXTURE_TEST_CASE(BareContainerFill, EmptyBackend) {

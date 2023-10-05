@@ -113,7 +113,7 @@ const std::any ActsTrk::MutableMultiTrajectory::decorationGetter(
 
 
 template <typename T>
-const std::any ActsTrk::ConstMultiTrajectory::decorationGetter(
+const std::any ActsTrk::MultiTrajectory::decorationGetter(
     ActsTrk::IndexType idx, const std::string& name) const {
   const auto& trackStates = *m_trackStates;
   const SG::AuxElement* el = trackStates[idx];

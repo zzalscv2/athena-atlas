@@ -71,9 +71,9 @@ StatusCode DumpEventDataToJsonAlg::initialize() {
 }
 
 // Specialisation for TrackProxy
-// TODO understand why this is not matching: ActsTrk::future::ConstTrackContainer::TrackProxy
+// TODO understand why this is not matching: ActsTrk::future::TrackContainer::TrackProxy
 template <>
-nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::ConstTrackBackendContainer, ActsTrk::ConstMultiTrajectory, ActsTrk::future::ConstDataLinkHolder, true> &track) {
+nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::TrackStorageContainer, ActsTrk::MultiTrajectory, ActsTrk::future::DataLinkHolder, true> &track) {
   nlohmann::json data;
 
   Acts::GeometryContext gctx = m_trackingGeometryTool->getGeometryContext(getContext()).context();
@@ -95,7 +95,7 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::C
   ATH_MSG_VERBOSE("Track has " << nTrackStates << " states.");
   // Unfortunately actsTracks are stored in reverse order, so we need to do some gymnastics
   // (There is certainly a more elegant way to do this, but since this will all be changed soon I don't think it matters)
-  std::vector<ActsTrk::ConstMultiTrajectory::ConstTrackStateProxy> trackStates;
+  std::vector<ActsTrk::MultiTrajectory::ConstTrackStateProxy> trackStates;
   trackStates.reserve(nTrackStates);
   for (auto trackstate : track.trackStates()) {
     trackStates.push_back(trackstate);
@@ -159,13 +159,13 @@ StatusCode DumpEventDataToJsonAlg::execute() {
   auto tcHandles = m_trackContainerKeys.makeHandles();
 
 
-  for ( SG::ReadHandle<ActsTrk::future::ConstTrackContainer>& tcHandle: tcHandles ) {
+  for ( SG::ReadHandle<ActsTrk::future::TrackContainer>& tcHandle: tcHandles ) {
     // Temporary debugging information
     ATH_MSG_VERBOSE("TrackStateContainer has "<< tcHandle->size() << " elements");
 
     
     ATH_MSG_VERBOSE("Trying to load " << tcHandle.key() << " with " << tcHandle->size() << " tracks");
-    const ActsTrk::future::ConstTrackContainer* tc = tcHandle.get();
+    const ActsTrk::future::TrackContainer* tc = tcHandle.get();
     for (auto track : *tc) {
       nlohmann::json tmp = getData(track);
       j["TrackContainers"][tcHandle.key()].push_back(tmp);

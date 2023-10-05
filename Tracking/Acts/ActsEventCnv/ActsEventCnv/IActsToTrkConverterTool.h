@@ -67,7 +67,7 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
 
 
   virtual void trkTrackCollectionToActsTrackContainer(
-      ActsTrk::future::TrackContainer &tc,
+      ActsTrk::future::MutableTrackContainer &tc,
       const TrackCollection& trackColl,
       const Acts::GeometryContext& gctx) const = 0;
 

@@ -30,9 +30,9 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ATH_MSG_VERBOSE("create containers");
 
   ATH_MSG_VERBOSE("About to create trackContainer");
-  ActsTrk::MutableTrackBackendContainer tb;
+  ActsTrk::MutableTrackStorageContainer tb;
   ActsTrk::MutableMultiTrajectory mtj;
-  ActsTrk::future::TrackContainer tc(tb, mtj);
+  ActsTrk::future::MutableTrackContainer tc(tb, mtj);
   Acts::GeometryContext tgContext = m_convertorTool->trackingGeometryTool()
                                             ->getGeometryContext(ctx)
                                             .context();
@@ -52,7 +52,7 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ATH_MSG_VERBOSE("TrackStateContainer has  " << mtj.trackStates().size() << " states");
   ATH_MSG_VERBOSE("TrackParametersContainer has  " << mtj.trackParameters().size() << " parameters");
 
-  std::unique_ptr<ActsTrk::future::ConstTrackContainer> constTrackContainer = m_trackContainerBackends.convertToConst(tc, ctx);
+  std::unique_ptr<ActsTrk::future::TrackContainer> constTrackContainer = m_trackContainerBackends.moveToConst(std::move(tc), ctx);
   auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
   ATH_MSG_VERBOSE("Saving " << constTrackContainer->size() << " tracks to "<< trackContainerHandle.key());
   ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
