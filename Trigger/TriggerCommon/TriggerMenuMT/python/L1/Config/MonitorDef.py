@@ -357,7 +357,6 @@ class MonitorDef:
                 "L1_MBTS_1_ZDC_A_VZDC_C_VTE200",
                 "L1_MBTS_1_VZDC_A_ZDC_C_VTE200",
                 # LAr Zee
-                "L1_LAR-ZEE",
                 "L1_LAR-ZEE-eEM",
                 # Background
                 "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
@@ -431,9 +430,11 @@ class MonitorDef:
                 "L1_jJ40p31ETA49", "L1_jJ50p31ETA49", "L1_jJ60p31ETA49",
                 "L1_jJ90p31ETA49",
                 #
+                "L1_gLJ80p0ETA25", "L1_gXEJWOJ100",
+                #
                 "L1_jTE200",
                 #
-                "L1_eEM9_AFP_A_AND_C", "L1_eEM9_AFP_A_OR_C",
+                "L1_eEM9_AFP_A_AND_C", #"L1_eEM9_AFP_A_OR_C",
                 # Addtional L1 items added for 2022 Nov HI test run
                 "L1_MBTS_1_VTE5", "L1_VTE5", 
                 "L1_J12_VTE100", 
