@@ -94,13 +94,13 @@ public:
               std::optional<AmgSymMatrix(DIM)> covariance = std::nullopt);
 
   /** Copy constructor */
-  ParametersT(const ParametersT<DIM, T, S>& rhs);
+  ParametersT(const ParametersT<DIM, T, S>& rhs) = default;
 
   /** Move constructor */
   ParametersT(ParametersT<DIM, T, S>&& rhs) noexcept = default;
 
   /** Assignment operator */
-  ParametersT<DIM, T, S>& operator=(const ParametersT<DIM, T, S>& rhs);
+  ParametersT<DIM, T, S>& operator=(const ParametersT<DIM, T, S>& rhs) = default;
 
   /** Move assignment operator */
   ParametersT<DIM, T, S>& operator=(ParametersT<DIM, T, S>&& rhs) noexcept = default;

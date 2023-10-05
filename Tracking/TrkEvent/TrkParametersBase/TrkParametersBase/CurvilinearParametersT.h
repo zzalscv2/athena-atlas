@@ -80,14 +80,14 @@ public:
     unsigned int cIdenfier = 0);
 
   /** Copy Constructor */
-  CurvilinearParametersT(const CurvilinearParametersT<DIM, T, S>&);
+  CurvilinearParametersT(const CurvilinearParametersT<DIM, T, S>&) = default;
 
   /** Move Constructor */
   CurvilinearParametersT(CurvilinearParametersT<DIM, T, S>&&) noexcept = default;
 
   /** Assignment operator*/
   CurvilinearParametersT<DIM, T, S>& operator=(
-    const CurvilinearParametersT<DIM, T, S>&);
+    const CurvilinearParametersT<DIM, T, S>&) = default;
 
   /** Move assignment operator*/
   CurvilinearParametersT<DIM, T, S>& operator=(
