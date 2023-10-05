@@ -571,7 +571,18 @@ McEventCollectionCnv_p5::createGenVertex( const McEventCollection_p5& persEvt,
 #ifdef HEPMC3
   vtx->set_position(HepMC::FourVector( persVtx.m_x , persVtx.m_y , persVtx.m_z ,persVtx.m_t ));
   //AV ID cannot be assigned in HepMC3. And its meaning in HepMC2 is not clear.
-  vtx->set_status(HepMC::new_vertex_status_from_old(persVtx.m_id, persVtx.m_barcode)); // UPDATED STATUS VALUE TO NEW SCHEME
+  int persVtxStatus(persVtx.m_id);
+  // GenVertex "status" (id in HepMC2) was not set for some of
+  // MC15/MC16 due to a bug in that production release.
+  if (persVtxStatus == 0 && HepMC::BarcodeBased::is_simulation_vertex(persVtx.m_barcode)) {
+    // Status values for GenVertex objects created during simulation
+    // should have been set to 1000 + Geant4 process in the old
+    // scheme. Overriding the value to 1000, means that status-based
+    // recognition of simulated vertices will work, while still
+    // indicating that the process was not set. (ATLASSIM-6901)
+    persVtxStatus = 1000;
+    }
+  vtx->set_status(HepMC::new_vertex_status_from_old(persVtxStatus, persVtx.m_barcode)); // UPDATED STATUS VALUE TO NEW SCHEME
   // cast from std::vector<float> to std::vector<double>
   std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
   vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
@@ -594,7 +605,18 @@ McEventCollectionCnv_p5::createGenVertex( const McEventCollection_p5& persEvt,
   vtx->m_position.setT( persVtx.m_t );
   vtx->m_particles_in.clear();
   vtx->m_particles_out.clear();
-  vtx->m_id      = HepMC::new_vertex_status_from_old(persVtx.m_id, persVtx.m_barcode); // UPDATED STATUS VALUE TO NEW SCHEME
+  int persVtxStatus(persVtx.m_id);
+  // GenVertex "status" (id in HepMC2) was not set for some of
+  // MC15/MC16 due to a bug in that production release.
+  if (persVtxStatus == 0 && HepMC::BarcodeBased::is_simulation_vertex(persVtx.m_barcode)) {
+    // Status values for GenVertex objects created during simulation
+    // should have been set to 1000 + Geant4 process in the old
+    // scheme. Overriding the value to 1000, means that status-based
+    // recognition of simulated vertices will work, while still
+    // indicating that the process was not set. (ATLASSIM-6901)
+    persVtxStatus = 1000;
+  }
+  vtx->m_id      = HepMC::new_vertex_status_from_old(persVtxStatus, persVtx.m_barcode); // UPDATED STATUS VALUE TO NEW SCHEME
   vtx->m_weights.m_weights.reserve( persVtx.m_weights.size() );
   vtx->m_weights.m_weights.assign ( persVtx.m_weights.begin(),
                                     persVtx.m_weights.end() );
