@@ -751,7 +751,7 @@ void test4_Reader::operator()()
   std::shared_lock<std::shared_timed_mutex> lock (start_mutex);
 
   while (true) {
-    for (size_t i = 0; ; ++i) {
+    for (size_t i = 0; i < nwrites; ++i) {
       TestMapu::const_iterator it = m_map.find (key(i));
       if (it == m_map.end()) break;
       assert(it->second == i || it->second == i+10*nwrites || it->second == i+20*nwrites);
