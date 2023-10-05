@@ -12,12 +12,6 @@ log = logging.getLogger("NavConverterConfig")
 def NavConverterCfg(flags, chainsFilter = []):
     """Configures Run 1/2 to Run 3 navigation conversion algorithm for all triggers"""
 
-    # this is intentionally commented and left for further filtering
-    # chainsFilter = list(filter(lambda x : "tau" not in x, chainList))
-    chainsFilter = ['HLT_mu4'] # single chain passing tests overwriting chainsFilter
-    # commented chains below are left here intentionally - case study for the present fix, it will be removed later
-    # chainsFilter = ['HLT_mu22', 'HLT_mu22_mu8noL1']
-    # chainsFilter = ['HLT_tau35_medium1_tracktwo_tau25_medium1_tracktwo_tautsf_L1DR-TAU20ITAU12I-J25'] 
     acc = ComponentAccumulator()
 
     if flags.Trigger.EDMVersion >= 3:
