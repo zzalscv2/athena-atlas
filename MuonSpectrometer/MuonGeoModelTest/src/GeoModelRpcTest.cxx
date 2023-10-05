@@ -99,6 +99,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
    m_doubletR   = readoutEle->getDoubletR();
    m_doubletZ   = readoutEle->getDoubletZ();
    m_doubletPhi = readoutEle->getDoubletPhi();
+   m_chamberDesign = readoutEle->getStationType();
 
    m_numStripsEta = readoutEle->Nstrips(false);
    m_numStripsPhi = readoutEle->Nstrips(true);
@@ -116,11 +117,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
    const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
 
    const Amg::Transform3D& trans{readoutEle->transform()};
-   m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
-   m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
-   m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-   m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
-
+   m_readoutTransform = trans;
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
    if (station->hasALines()) { 
         m_ALineTransS = station->getALine_tras();
@@ -133,7 +130,8 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
 
     const int numGaps = std::max(readoutEle->NgasGaps(false), 
                                  readoutEle->NgasGaps(true));
-    for (int doubPhi = readoutEle->getDoubletPhi(); doubPhi <= readoutEle->NphiStripPanels(); ++doubPhi) {
+    const int maxDoubPhi = std::max(readoutEle->getDoubletPhi(), readoutEle->NphiStripPanels());
+    for (int doubPhi = readoutEle->getDoubletPhi(); doubPhi <= maxDoubPhi; ++doubPhi) {
         for (int gap = 1; gap <= numGaps; ++gap) {   
             for (bool measPhi : {false, true}) {
                 unsigned int numStrip = readoutEle->Nstrips(measPhi);
@@ -156,9 +154,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx, const RpcReadout
 
                     if (strip != 1) continue;
                     const Amg::Transform3D locToGlob = readoutEle->transform(stripID);
-                    m_stripRotColX.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitX()});
-                    m_stripRotColY.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitY()});
-                    m_stripRotColZ.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitZ()});
+                    m_stripRot.push_back(locToGlob);                    
                     m_stripRotGasGap.push_back(gap);
                     m_stripRotMeasPhi.push_back(measPhi);
                     m_stripRotDblPhi.push_back(doubPhi); 

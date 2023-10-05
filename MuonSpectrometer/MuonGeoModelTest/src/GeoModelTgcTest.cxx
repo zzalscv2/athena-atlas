@@ -10,9 +10,19 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 
 namespace MuonGM {
+
+struct TgcChamberLayout {
+    Identifier gasGap{};
+    std::vector<double> botStripPos{};
+    std::vector<double> topStripPos{};
+    std::vector<unsigned int> wireGangLayout{};
+    double wirePitch{0.};
+};
+
 
 GeoModelTgcTest::GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocator):
     AthHistogramAlgorithm{name, pSvcLocator} {}
@@ -27,7 +37,7 @@ StatusCode GeoModelTgcTest::initialize() {
     ATH_CHECK(m_tree.init(this));
     const TgcIdHelper& id_helper{m_idHelperSvc->tgcIdHelper()};
     for (const std::string& testCham : m_selectStat) {
-        if (testCham.size() != 6) {
+        if (testCham.size() != 7) {
             ATH_MSG_FATAL("Wrong format given " << testCham);
             return StatusCode::FAILURE;
         }
@@ -35,7 +45,7 @@ StatusCode GeoModelTgcTest::initialize() {
         std::string statName = testCham.substr(0, 3);
         unsigned int statEta = std::atoi(testCham.substr(3, 1).c_str()) *
                                (testCham[4] == 'A' ? 1 : -1);
-        unsigned int statPhi = std::atoi(testCham.substr(5, 1).c_str());
+        unsigned int statPhi = std::atoi(testCham.substr(5, 2).c_str());
         bool is_valid{false};
         const Identifier eleId =
             id_helper.elementID(statName, statEta, statPhi, is_valid);
@@ -62,6 +72,7 @@ StatusCode GeoModelTgcTest::execute() {
                       << m_detMgrKey.fullKey());
         return StatusCode::FAILURE;
     }
+    dumpReadoutXML(**detMgr);
     for (const Identifier& test_me : m_testStations) {
         ATH_MSG_VERBOSE("Test retrieval of Mdt detector element " 
                         << m_idHelperSvc->toStringDetEl(test_me));
@@ -77,6 +88,22 @@ StatusCode GeoModelTgcTest::execute() {
                           << m_idHelperSvc->toStringDetEl(reElement->identify()));
             return StatusCode::FAILURE;
         }
+        if (reElement->center().z() > 0. && reElement->center().z() < 7.5 * Gaudi::Units::m ) {
+            const Identifier prevId = reElement->getStationPhi() > 1 ? m_idHelperSvc->tgcIdHelper().elementID(m_idHelperSvc->stationNameString(test_me),
+                                                                             reElement->getStationEta(),
+                                                                             reElement->getStationPhi() - 1) : test_me;
+            const TgcReadoutElement* prevRE = detMgr->getTgcReadoutElement(prevId);
+            const Amg::Vector3D center = reElement->center();
+            ATH_MSG_ALWAYS("Tgc element "<<m_idHelperSvc->toString(reElement->identify())
+                         <<" position "<<Amg::toString(center, 2)
+                         <<" perp: "<<center.perp()
+                         <<" phi: "<<(center.phi() / Gaudi::Units::deg)
+                         <<" theta: "<<(center.theta() / Gaudi::Units::deg)
+                         <<" rSize: "<<reElement->getRsize()<<"/"<<reElement->getLongRsize()
+                         <<" sSize: "<<reElement->getSsize()<<"/"<<reElement->getLongSsize()
+                         <<" zSize: "<<reElement->getZsize()<<"/"<<reElement->getLongZsize()
+                         <<" dPhi: "<<(prevRE->center().deltaPhi(center) / Gaudi::Units::deg));
+        }
         ATH_CHECK(dumpToTree(ctx, reElement));
     }
     return StatusCode::SUCCESS;
@@ -90,10 +117,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
 
     const Amg::Transform3D& trans{readoutEle->transform()};
-    m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
+    m_readoutTransform = trans;
 
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
    if (station->hasALines()){ 
@@ -105,31 +129,62 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
         m_ALineRotZ   = station->getALine_rott();
     }
 
-    for (bool measPhi : {false, true}) {        
-        for (int layer = 1 ; layer <= readoutEle->numberOfLayers(measPhi); ++layer){
-
-            const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, measPhi,1);
-            const Amg::Transform3D layerTransform = readoutEle->localToGlobalTransf(layerId);
-            m_layCenter.push_back(Amg::Vector3D(layerTransform.translation()));
-            m_layTransColX.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitX()));
-            m_layTransColY.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitY()));
-            m_layTransColZ.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitZ()));
-            m_layMeasPhi.push_back(measPhi);
-            m_layNumber.push_back(layer);            
+    for (bool isStrip : {false, true}) {        
+        for (int layer = 1 ; layer <= readoutEle->numberOfLayers(isStrip); ++layer){
+            const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, isStrip,1);
+            m_layTans.push_back(readoutEle->localToGlobalTransf(layerId));
+            m_layMeasPhi.push_back(isStrip);
+            m_layNumber.push_back(layer);
             
-            if (measPhi) {
-                for (int strip = 1; strip<= readoutEle->getNStrips(layer); ++strip) {
+            if (isStrip) {
+                for (int strip = 1; strip < readoutEle->getNStrips(layer); ++strip) {
                     bool is_valid{false};
-                    const Identifier stripId = idHelper.channelID(readoutEle->identify(), layer, measPhi, strip, is_valid);
+                    const Identifier stripId = idHelper.channelID(readoutEle->identify(), layer, isStrip, strip, is_valid);
                     if (!is_valid) continue;
-                    Amg::Vector3D globStripPos = readoutEle->channelPos(stripId);
+                    
+                    /// Strip center
+                    const Amg::Vector3D globStripPos = readoutEle->channelPos(stripId);
+                    Amg::Vector2D locStripPos{Amg::Vector2D::Zero()};
+                    const Trk::Surface& surf{readoutEle->surface(stripId)};
+                    if (!surf.globalToLocal(globStripPos, Amg::Vector3D::Zero(), locStripPos)){
+                        ATH_MSG_FATAL("Failed to build local strip position "<<m_idHelperSvc->toString(stripId));
+                        return StatusCode::FAILURE;
+                    }
+                    m_locStripCenter.push_back(locStripPos);
                     m_stripCenter.push_back(globStripPos);
+                    /// Strip bottom & top edges
+                    const double stripHalfLength = readoutEle->stripLength(layer, strip) / 2.;
+
+                    const Amg::Vector2D locStripBot{readoutEle->getStripPositionOnShortBase(strip), -stripHalfLength};                    
+                    const Amg::Vector2D locStripTop{readoutEle->getStripPositionOnLargeBase(strip), stripHalfLength};
+                    const Amg::Vector3D globStripBot{surf.localToGlobal(locStripBot)};
+                    const Amg::Vector3D globStripTop{surf.localToGlobal(locStripTop)};
+                    
+                    m_stripBottom.push_back(globStripBot);
+                    m_stripTop.push_back(globStripTop);
+    
+                    m_locStripBottom.push_back(locStripBot);
+                    m_locStripTop.push_back(locStripTop);
+  
                     m_stripGasGap.push_back(layer);
                     m_stripNum.push_back(strip);
+                    m_stripLength.push_back(stripHalfLength * 2.);
+                    m_stripPitch.push_back(readoutEle->stripPitch(layer,strip));
+                    m_stripShortWidth.push_back(readoutEle->stripShortWidth(layer, strip));
+                    m_stripLongWidth.push_back(readoutEle->stripLongWidth(layer, strip));
                 }
-            } else {                
-                for (int gang = 1; gang <= readoutEle->nGangs(layer); ++gang) {
-                       m_gangCenter.push_back(readoutEle->gangPos(layer, gang));
+            } else {
+                for (int gang = 1; gang < readoutEle->nGangs(layer); ++gang) {
+                       const Identifier gangId{idHelper.channelID(readoutEle->identify(), layer, isStrip, gang)};
+                       const Trk::Surface& surf{readoutEle->surface(gangId)};
+                       const Amg::Vector3D globPos{readoutEle->gangPos(layer, gang)};
+                       Amg::Vector2D locPos{Amg::Vector2D::Zero()};
+                       if (!surf.globalToLocal(globPos,Amg::Vector3D::Zero(),locPos)) {
+                           ATH_MSG_FATAL("Failed to extract local position "<<m_idHelperSvc->toString(gangId));
+                           return StatusCode::FAILURE;
+                       }
+                       m_locGangPos.push_back(locPos);
+                       m_gangCenter.push_back(globPos);
                        m_gangGasGap.push_back(layer);
                        m_gangNum.push_back(gang);
                        m_gangNumWires.push_back(readoutEle->getNWires(layer, gang));
@@ -139,6 +194,24 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
         }    
    }
    return m_tree.fill(ctx) ? StatusCode::SUCCESS : StatusCode::FAILURE;
+}
+
+void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) {
+    if (m_readoutXML.empty()) {
+        return;
+    }
+    const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+    for (TgcIdHelper::const_id_iterator itr = idHelper.module_begin();
+                                        itr != idHelper.module_end(); ++itr) {
+        const MuonGM::TgcReadoutElement* reEle = detMgr.getTgcReadoutElement(*itr);
+        if (!reEle) continue;
+        for (bool isStrip : {false, true}) {        
+            for (int layer = 1 ; layer <= reEle->numberOfLayers(isStrip); ++layer){
+                const Identifier layerId = idHelper.channelID(reEle->identify(), layer, isStrip, 1);
+            }
+        }
+
+    }
 }
 
 

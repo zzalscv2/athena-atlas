@@ -13,6 +13,7 @@
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/IdentifierBranch.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
+#include "MuonTesterTree/CoordTransformBranch.h"
 
 namespace MuonGM {
 
@@ -67,7 +68,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
 
 
     /// Transformation of the underlying GeoModel element (Translation, ColX, ColY, ColZ)
-    MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "GeoModelTransform"};   
+    MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};   
     /// Number of tubes per layer
     MuonVal::ScalarBranch<unsigned short>& m_numTubes{m_tree.newScalar<unsigned short>("numTubes")};
     /// Number of tubes per layer
@@ -78,11 +79,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     MuonVal::VectorBranch<unsigned short>& m_tubeNum{m_tree.newVector<unsigned short>("tubeNumber")};
     /// Ideal transformations to the tube rest frame
 
-    MuonVal::ThreeVectorBranch m_tubeTransformTran{m_tree, "tubeTransformTranslation"};
-    MuonVal::ThreeVectorBranch m_tubeTransformColX{m_tree, "tubeTransformCol0"};
-    MuonVal::ThreeVectorBranch m_tubeTransformColY{m_tree, "tubeTransformCol1"};
-    MuonVal::ThreeVectorBranch m_tubeTransformColZ{m_tree, "tubeTransformCol2"};
-   
+    MuonVal::CoordSystemsBranch m_tubeTransform{m_tree, "tubeTransform"};
 
     MuonVal::VectorBranch<double>& m_tubeLength{m_tree.newVector<double>("tubeLength")};
     MuonVal::VectorBranch<double>& m_activeTubeLength{m_tree.newVector<double>("activeTubeLength")};
@@ -95,10 +92,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm {
     MuonVal::VectorBranch<unsigned short>& m_layDistTubeLay{m_tree.newVector<unsigned short>("DistTubeLayer")};
     MuonVal::VectorBranch<unsigned short>& m_layDistTubeNum{m_tree.newVector<unsigned short>("DistTubeNumber")};
     MuonVal::VectorBranch<double>& m_layDistPosAlongWire{m_tree.newVector<double>("DistPosAlongTube")};
-    MuonVal::ThreeVectorBranch m_layDistCenter{m_tree, "DistLayerCenter"};
-    MuonVal::ThreeVectorBranch m_layDistColX{m_tree, "DistLayerLinearCol1"};
-    MuonVal::ThreeVectorBranch m_layDistColY{m_tree, "DistLayerLinearCol2"};
-    MuonVal::ThreeVectorBranch m_layDistColZ{m_tree, "DistLayerLinearCol3"};
+    MuonVal::CoordSystemsBranch m_layDist{m_tree, "DistLayer"};
 
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};

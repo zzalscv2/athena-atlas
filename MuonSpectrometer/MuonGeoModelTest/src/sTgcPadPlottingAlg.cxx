@@ -10,9 +10,10 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/sTgcReadoutElement.h"
 #include "StoreGate/ReadCondHandle.h"
-#include "TFile.h"
-#include "TGraph.h"
-#include "TH2F.h"
+
+#include <TFile.h>
+#include <TGraph.h>
+#include <TH2F.h>
 
 using padCorners = MuonGM::MuonPadDesign::padCorners;
 using CornerArray = MuonGM::MuonPadDesign::CornerArray;
@@ -143,7 +144,6 @@ StatusCode sTgcPadPlottingAlg::initSTgcs() {
                                                                        800, padMinY - 0.25*dY, padMaxY + 0.25*dY);
                     ATH_MSG_DEBUG("Dimensions "<<padName(padId)<<" "<<padMinX<<" "<<padMaxX<<" -- "<<padMinY<<" "<<padMaxY);
                     m_nswPadDist[padId] = std::move(padH);
-                    return StatusCode::SUCCESS;
                 }
               }
           }

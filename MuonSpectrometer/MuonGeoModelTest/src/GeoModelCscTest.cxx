@@ -90,10 +90,7 @@ StatusCode GeoModelCscTest::dumpToTree(const EventContext& ctx, const CscReadout
    const CscIdHelper& idHelper{m_idHelperSvc->cscIdHelper()};
 
     const Amg::Transform3D& trans{readoutEle->transform()};
-    m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
+    m_readoutTransform = trans;
 
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
    if (station->hasALines()){ 
@@ -107,11 +104,7 @@ StatusCode GeoModelCscTest::dumpToTree(const EventContext& ctx, const CscReadout
     for (bool measPhi : {false, true}) {
         for (int layer = 1 ; layer <= readoutEle->numberOfLayers(measPhi); ++layer){
             const Identifier id = idHelper.channelID(readoutEle->identify(),readoutEle->ChamberLayer(),layer, measPhi,1);
-            const Amg::Transform3D layerTransform = readoutEle->localToGlobalTransf(id);
-            m_layCenter.push_back(Amg::Vector3D(layerTransform.translation()));
-            m_layTransColX.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitX()));
-            m_layTransColY.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitY()));
-            m_layTransColZ.push_back(Amg::Vector3D(layerTransform.linear()*Amg::Vector3D::UnitZ()));
+            m_layerTrans.push_back(readoutEle->localToGlobalTransf(id));            
             m_layMeasPhi.push_back(measPhi);
             m_layNumber.push_back(layer);
         }    

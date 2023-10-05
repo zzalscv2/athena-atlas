@@ -166,10 +166,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
 
 
     const Amg::Transform3D trans{readoutEle->getMaterialGeom()->getAbsoluteTransform()};
-    m_readoutTransform.push_back(Amg::Vector3D(trans.translation()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitX()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitY()));
-    m_readoutTransform.push_back(Amg::Vector3D(trans.linear()*Amg::Vector3D::UnitZ()));
+    m_readoutTransform = readoutEle->getMaterialGeom()->getAbsoluteTransform();
     
     const MdtIdHelper& id_helper{m_idHelperSvc->mdtIdHelper()};
 
@@ -190,11 +187,8 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
             m_tubeLay.push_back(lay);
             m_tubeNum.push_back(tube);
 
-            m_tubeTransformTran.push_back(Amg::Vector3D(layTransf.translation()));
-            m_tubeTransformColX.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitX()));
-            m_tubeTransformColY.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitY()));
-            m_tubeTransformColZ.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitZ()));
-            
+            m_tubeTransform.push_back(layTransf);
+
             const Amg::Vector3D tubePos = layTransf.translation();
             const Amg::Vector3D roPos = readoutEle->ROPos(tube_id);
             m_roPos.push_back(roPos);
@@ -214,10 +208,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx, const MdtReadout
                 m_layDistTubeNum.push_back(tube);
                 m_layDistPosAlongWire.push_back(l);
                 const Amg::Transform3D layTransf{sagged->transform()};
-                m_layDistCenter.push_back(Amg::Vector3D(layTransf.translation()));
-                m_layDistColX.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitX()));
-                m_layDistColY.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitY()));
-                m_layDistColZ.push_back(Amg::Vector3D(layTransf.linear()* Amg::Vector3D::UnitZ()));
+                m_layDist.push_back(layTransf);                
             }
         }
     }
