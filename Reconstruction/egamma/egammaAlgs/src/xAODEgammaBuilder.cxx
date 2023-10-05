@@ -26,6 +26,51 @@
 #include <memory>
 #include <vector>
 
+namespace {
+  template <typename SrcT, typename DestT>
+  void doContainerAmbiguityLinks(
+    const EventContext& ctx,
+    DataVector<SrcT> *srcContainer,
+    DataVector<DestT> *destContainer
+  ) {
+    /// Needs the same logic as the ambiguity after building the objects (make
+    /// sure they are all valid)
+    static const SG::AuxElement::Accessor<
+      std::vector<ElementLink<xAOD::CaloClusterContainer>>>
+      caloClusterLinks("constituentClusterLinks");
+
+    static const SG::AuxElement::Accessor<ElementLink<xAOD::EgammaContainer>>
+      ELink("ambiguityLink");
+
+    ElementLink<xAOD::EgammaContainer> dummylink;
+    for (SrcT *src : *srcContainer) {
+      ELink(*src) = dummylink;
+      if (src->author() != xAOD::EgammaParameters::AuthorAmbiguous) {
+        continue;
+      }
+
+      for (
+        size_t destIndex = 0;
+        destIndex < destContainer->size();
+        ++destIndex
+      ) {
+        DestT *dest = destContainer->at(destIndex);
+        if (dest->author() != xAOD::EgammaParameters::AuthorAmbiguous) {
+          continue;
+        }
+
+        if (caloClusterLinks(*(dest->caloCluster())).at(0) ==
+            caloClusterLinks(*(src->caloCluster())).at(0)) {
+          ElementLink<xAOD::EgammaContainer> link(
+            *destContainer, destIndex, ctx);
+          ELink(*dest) = link;
+          break;
+        }
+      }
+    }
+  }
+}
+
 xAODEgammaBuilder::xAODEgammaBuilder(const std::string& name,
                                      ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -281,63 +326,9 @@ xAODEgammaBuilder::doAmbiguityLinks(const EventContext& ctx,
                                     xAOD::ElectronContainer* electronContainer,
                                     xAOD::PhotonContainer* photonContainer)
 {
+  doContainerAmbiguityLinks(ctx, electronContainer, photonContainer);
+  doContainerAmbiguityLinks(ctx, photonContainer, electronContainer);
 
-  /// Needs the same logic as the ambiguity after building the objects (make
-  /// sure they are all valid)
-  static const SG::AuxElement::Accessor<
-    std::vector<ElementLink<xAOD::CaloClusterContainer>>>
-    caloClusterLinks("constituentClusterLinks");
-
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::EgammaContainer>>
-    ELink("ambiguityLink");
-
-  ElementLink<xAOD::EgammaContainer> dummylink;
-  for (xAOD::Photon* photon : *photonContainer) {
-    ELink(*photon) = dummylink;
-    if (photon->author() != xAOD::EgammaParameters::AuthorAmbiguous) {
-      continue;
-    }
-
-    for (size_t electronIndex = 0; electronIndex < electronContainer->size();
-         ++electronIndex) {
-
-      xAOD::Electron* electron = electronContainer->at(electronIndex);
-      if (electron->author() != xAOD::EgammaParameters::AuthorAmbiguous) {
-        continue;
-      }
-
-      if (caloClusterLinks(*(electron->caloCluster())).at(0) ==
-          caloClusterLinks(*(photon->caloCluster())).at(0)) {
-        ElementLink<xAOD::EgammaContainer> link(
-          *electronContainer, electronIndex, ctx);
-        ELink(*photon) = link;
-        break;
-      }
-    }
-  }
-
-  for (xAOD::Electron* electron : *electronContainer) {
-    ELink(*electron) = dummylink;
-    if (electron->author() != xAOD::EgammaParameters::AuthorAmbiguous) {
-      continue;
-    }
-    for (size_t photonIndex = 0; photonIndex < photonContainer->size();
-         ++photonIndex) {
-
-      xAOD::Photon* photon = photonContainer->at(photonIndex);
-      if (photon->author() != xAOD::EgammaParameters::AuthorAmbiguous) {
-        continue;
-      }
-
-      if (caloClusterLinks(*(electron->caloCluster())).at(0) ==
-          caloClusterLinks(*(photon->caloCluster())).at(0)) {
-        ElementLink<xAOD::EgammaContainer> link(
-          *photonContainer, photonIndex, ctx);
-        ELink(*electron) = link;
-        break;
-      }
-    }
-  }
   return StatusCode::SUCCESS;
 }
 
