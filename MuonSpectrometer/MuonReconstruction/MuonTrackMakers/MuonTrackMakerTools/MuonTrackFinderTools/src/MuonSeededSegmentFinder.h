@@ -1,17 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONSEEDEDSEGMENTFINDER_H
 #define MUON_MUONSEEDEDSEGMENTFINDER_H
 
 #include <set>
-#include <string>
-#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/MdtPrepDataCollection.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"

@@ -7,7 +7,6 @@
  This tool takes a track as input, extrapolates from the first hit to the next station
  Opens a cone around the center and tries to recover segments in the chambers involved.
  It returns a new track with a refined segment finding
- @author Giuseppe.Salamanna@cern.ch
 ************************************************/
 
 #ifndef MUON_MUONSEGMENTREGIONRECOVERYTOOL_H
@@ -15,12 +14,8 @@
 
 #include <map>
 #include <set>
-#include <string>
-#include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "IRegionSelector/IRegSelTool.h"
 #include "IRegionSelector/RegSelEnums.h"
 #include "MuidInterfaces/ICombinedMuonTrackFitter.h"
