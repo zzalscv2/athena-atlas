@@ -108,7 +108,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   std::unique_ptr<TRT_LoLumRawData> rdo1 = std::make_unique<TRT_LoLumRawData>(strawID1,strawWord1);
   collection1->push_back(rdo1.release());
   assert(trans1.addCollection(collection1.get(),elementHash1).isSuccess());
-  collection1.release(); // Now owned by trans1
+  (void)collection1.release(); // Now owned by trans1
   // Creating collection for second example module
   const IdentifierHash elementHash2(10027);
   const Identifier::value_type collIdValue2 = 0x16122c0000000000;
@@ -122,7 +122,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   std::unique_ptr<TRT_LoLumRawData> rdo2 = std::make_unique<TRT_LoLumRawData>(strawID2,strawWord2);
   collection2->push_back(rdo2.release());
   assert(trans1.addCollection(collection2.get(),elementHash2).isSuccess());
-  collection2.release(); // Now owned by trans1
+  (void)collection2.release(); // Now owned by trans1
   // Could add further modules/straws in the future, but I don't want to make this method unreadable.
   testit<TCnv, T>(trans1);
 }
