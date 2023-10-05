@@ -6,7 +6,7 @@
 #define ACTSTRKEVENT_FUTURETRACKCONTAINER_H 1
 
 #include "ActsEvent/MultiTrajectory.h"
-#include "ActsEvent/TrackBackendContainer.h"
+#include "ActsEvent/TrackStorageContainer.h"
 
 namespace ActsTrk {
 
@@ -14,26 +14,26 @@ namespace ActsTrk {
 namespace future {
 // Holder referring to data stored in StoreGate
 template <typename T>
-struct ConstDataLinkHolder {
+struct DataLinkHolder {
   DataLink<T> m_link;
-  ConstDataLinkHolder(const DataLink<T>& link) : m_link{link} {}
+  DataLinkHolder(const DataLink<T>& link) : m_link{link} {}
 
   const T& operator*() const { return *(m_link.cptr()); }
   const T* operator->() const { return m_link.cptr(); }
 };
 
-using ConstTrackContainer =
-    Acts::TrackContainer<ActsTrk::ConstTrackBackendContainer,
-                         ActsTrk::ConstMultiTrajectory,
-                         future::ConstDataLinkHolder>;
 using TrackContainer =
-    Acts::TrackContainer<ActsTrk::MutableTrackBackendContainer,
+    Acts::TrackContainer<ActsTrk::TrackStorageContainer,
+                         ActsTrk::MultiTrajectory,
+                         future::DataLinkHolder>;
+using MutableTrackContainer =
+    Acts::TrackContainer<ActsTrk::MutableTrackStorageContainer,
                          ActsTrk::MutableMultiTrajectory,
                          Acts::detail::RefHolder>;
 
 }
 }
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF( ActsTrk::future::ConstTrackContainer , 1231467572 , 1 )
+CLASS_DEF( ActsTrk::future::TrackContainer , 1100705412 , 1 )
 
 #endif

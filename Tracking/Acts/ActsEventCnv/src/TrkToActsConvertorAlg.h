@@ -36,7 +36,7 @@ class TrkToActsConvertorAlg : public AthReentrantAlgorithm {
   
   
 
-  SG::WriteHandleKey<ActsTrk::future::ConstTrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTrackContainer", "Location of the converted TrackContainer"};
+  SG::WriteHandleKey<ActsTrk::future::TrackContainer> m_trackContainerKey {this, "TrackContainerLocation", "ConvertedTrackContainer", "Location of the converted TrackContainer"};
   ActsTrk::MutableTrackContainerHandle<ActsTrk::TrkToActsConvertorAlg> m_trackContainerBackends{this, "", "Converted"};
 
 };

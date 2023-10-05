@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef ActsEvent_TrackBackendContainer_h
-#define ActsEvent_TrackBackendContainer_h
+#ifndef ActsEvent_TrackStorageContainer_h
+#define ActsEvent_TrackStorageContainer_h
 #include <type_traits>
 
 #include "Acts/EventData/MultiTrajectory.hpp"
@@ -16,8 +16,8 @@
 
 
 namespace ActsTrk {
-class MutableTrackBackendContainer;
-class ConstTrackBackendContainer;
+class MutableTrackStorageContainer;
+class TrackStorageContainer;
 }  // namespace ActsTrk
 
 namespace Acts {
@@ -32,11 +32,11 @@ template <typename T>
 struct IsReadOnlyTrackContainer<T&&> : IsReadOnlyTrackContainer<T> {};
 
 template <>
-struct IsReadOnlyTrackContainer<ActsTrk::ConstTrackBackendContainer>
+struct IsReadOnlyTrackContainer<ActsTrk::TrackStorageContainer>
     : std::true_type {};
 
 template <>
-struct IsReadOnlyTrackContainer<ActsTrk::MutableTrackBackendContainer>
+struct IsReadOnlyTrackContainer<ActsTrk::MutableTrackStorageContainer>
     : std::false_type {};
 }  // namespace Acts
 
@@ -47,13 +47,13 @@ using ConstCovariance = Acts::TrackStateTraits<3>::Covariance;
 using Parameters = Acts::TrackStateTraits<3, false>::Parameters;
 using Covariance = Acts::TrackStateTraits<3, false>::Covariance;
 
-class MutableTrackBackendContainer;
+class MutableTrackStorageContainer;
 
-class ConstTrackBackendContainer {
+class TrackStorageContainer {
  public:
   using IndexType = Acts::MultiTrajectoryTraits::IndexType;
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
-  ConstTrackBackendContainer(const DataLink<xAOD::TrackBackendContainer>& lin = nullptr);
+  TrackStorageContainer(const DataLink<xAOD::TrackBackendContainer>& lin = nullptr);
 
   /**
   * return true if the container has specific decoration
@@ -86,11 +86,11 @@ class ConstTrackBackendContainer {
   */
   ActsTrk::ConstCovariance covariance(ActsTrk::IndexType itrack) const;
 
-  void fillSurfaces(ActsTrk::MutableTrackBackendContainer& mtb);
+  void fillSurfaces(ActsTrk::MutableTrackStorageContainer& mtb);
 
   template<typename T>
   friend class MutableTrackContainerHandle;
-  friend class MutableTrackBackendContainer;
+  friend class MutableTrackStorageContainer;
 
  protected:
   void restoreDecorations();
@@ -101,9 +101,9 @@ class ConstTrackBackendContainer {
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
 };
 
-class MutableTrackBackendContainer : public ConstTrackBackendContainer {
+class MutableTrackStorageContainer : public TrackStorageContainer {
  public:
-  MutableTrackBackendContainer();
+  MutableTrackStorageContainer();
   /**
   * adds new track to the tail of the container
   */
@@ -124,7 +124,7 @@ class MutableTrackBackendContainer : public ConstTrackBackendContainer {
   * copies decorations from other container
   */
   void copyDynamicFrom_impl (ActsTrk::IndexType itrack,
-                             const MutableTrackBackendContainer& other,
+                             const MutableTrackStorageContainer& other,
                              ActsTrk::IndexType other_itrack);
 
 
@@ -133,25 +133,25 @@ class MutableTrackBackendContainer : public ConstTrackBackendContainer {
   */
   std::any component_impl(Acts::HashedString key,
                           ActsTrk::IndexType itrack);
-  using ConstTrackBackendContainer::component_impl;
+  using TrackStorageContainer::component_impl;
 
   /**
   * write access to parameters
   */
   ActsTrk::Parameters parameters(ActsTrk::IndexType itrack);
-  using ConstTrackBackendContainer::parameters;
+  using TrackStorageContainer::parameters;
 
   /**
   * write access to covariance
   */
   ActsTrk::Covariance covariance(ActsTrk::IndexType itrack);
-  using ConstTrackBackendContainer::covariance;
+  using TrackStorageContainer::covariance;
 
   /**
   * synchronizes decorations
   */
-  void ensureDynamicColumns_impl(const MutableTrackBackendContainer& other);
-  void ensureDynamicColumns_impl(const ConstTrackBackendContainer& other);
+  void ensureDynamicColumns_impl(const MutableTrackStorageContainer& other);
+  void ensureDynamicColumns_impl(const TrackStorageContainer& other);
 
   /**
   * preallocate number of track objects 
@@ -182,7 +182,7 @@ class MutableTrackBackendContainer : public ConstTrackBackendContainer {
 };
 
 
-constexpr bool ActsTrk::ConstTrackBackendContainer::hasColumn_impl(
+constexpr bool ActsTrk::TrackStorageContainer::hasColumn_impl(
     Acts::HashedString key) const {
   using namespace Acts::HashedStringLiteral;
   switch (key) {
@@ -207,7 +207,7 @@ constexpr bool ActsTrk::ConstTrackBackendContainer::hasColumn_impl(
 
 
 template <typename T>
-const std::any ConstTrackBackendContainer::decorationGetter(
+const std::any TrackStorageContainer::decorationGetter(
     ActsTrk::IndexType idx, const std::string& name) const {
   const SG::ConstAuxElement el(m_backend.cptr(), idx);  
   return &(el.auxdataConst<T>(name));
@@ -215,33 +215,33 @@ const std::any ConstTrackBackendContainer::decorationGetter(
 }
 
 template <typename T>
-std::any MutableTrackBackendContainer::decorationSetter(
+std::any MutableTrackStorageContainer::decorationSetter(
     ActsTrk::IndexType idx, const std::string& name) {
   const SG::AuxElement* el = (*m_backend)[idx];
   return &(el->auxdecor<T>(name));
 }
 
 template <typename T>
-constexpr void MutableTrackBackendContainer::addColumn_impl(
+constexpr void MutableTrackStorageContainer::addColumn_impl(
     const std::string& name) {
   if (not ActsTrk::detail::accepted_decoration_types<T>::value) {
     throw std::runtime_error(
-        "TrackBackendContainer::addColumn_impl: "
+        "TrackStorageContainer::addColumn_impl: "
         "unsupported decoration type");
   }
   using std::placeholders::_1;
   using std::placeholders::_2;
   m_decorations.push_back(ActsTrk::detail::Decoration(
       name,
-      std::bind(&ActsTrk::MutableTrackBackendContainer::decorationSetter<T>,
+      std::bind(&ActsTrk::MutableTrackStorageContainer::decorationSetter<T>,
                 this, _1, _2),
-      std::bind(&ActsTrk::ConstTrackBackendContainer::decorationGetter<T>, this,
+      std::bind(&ActsTrk::TrackStorageContainer::decorationGetter<T>, this,
                 _1, _2)));
 }
 
 }  // namespace ActsTrk
 
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF( ActsTrk::ConstTrackBackendContainer , 1333051576 , 1 )
+CLASS_DEF( ActsTrk::TrackStorageContainer , 1333051576 , 1 )
 
 #endif

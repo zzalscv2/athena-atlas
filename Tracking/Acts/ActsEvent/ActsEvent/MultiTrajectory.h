@@ -32,7 +32,7 @@
 
 namespace ActsTrk {
 class MutableMultiTrajectory;
-class ConstMultiTrajectory;
+class MultiTrajectory;
 }  // namespace ActsTrk
 
 namespace Acts {
@@ -47,7 +47,7 @@ template <typename T>
 struct IsReadOnlyMultiTrajectory<T&&> : IsReadOnlyMultiTrajectory<T> {};
 
 template <>
-struct IsReadOnlyMultiTrajectory<ActsTrk::ConstMultiTrajectory>
+struct IsReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory>
     : std::true_type {};
 
 template <>
@@ -68,12 +68,12 @@ using StoredSurface = std::variant<const Acts::Surface*, std::shared_ptr<const A
  * Backends lifetime are not maintained by this class.
  * except when objects are default constructed (this functionality will be removed). 
  * This class is meant to be used in track finding algorithms (e.g. CKF) and then converted
- * ConstMultiTrajectory variant. These conversion is meant to be costless. 
+ * MultiTrajectory variant. These conversion is meant to be costless. 
  */
 class MutableMultiTrajectory final
     : public Acts::MultiTrajectory<ActsTrk::MutableMultiTrajectory> {
  public:
-  friend ConstMultiTrajectory;
+  friend ActsTrk::MultiTrajectory;
   using TrackStateProxy = typename Acts::MultiTrajectory<
       ActsTrk::MutableMultiTrajectory>::TrackStateProxy;
   using ConstTrackStateProxy = typename Acts::MultiTrajectory<
@@ -393,11 +393,11 @@ class MutableMultiTrajectory final
  * The implementation is separate as the details are significantly different 
  * and in addition only const methods are ever needed
  */
-class ConstMultiTrajectory
-    : public Acts::MultiTrajectory<ConstMultiTrajectory> {
+class MultiTrajectory
+    : public Acts::MultiTrajectory<MultiTrajectory> {
  public:
 
-  ConstMultiTrajectory(
+  MultiTrajectory(
       DataLink<xAOD::TrackStateContainer> trackStates,
       DataLink<xAOD::TrackParametersContainer> trackParameters,
       DataLink<xAOD::TrackJacobianContainer> trackJacobians,
@@ -472,7 +472,7 @@ class ConstMultiTrajectory
 
 
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF(ActsTrk::ConstMultiTrajectory, 237752966, 1)
+CLASS_DEF( ActsTrk::MultiTrajectory , 51219308 , 1 )
 
 // These two lines shouldn't be here, but necessary until we have a proper
 // solution

@@ -74,13 +74,10 @@ public:
   actsTrackParametersToTrkParameters(const Acts::BoundTrackParameters &actsParameter, const Acts::GeometryContext& gctx) const override;
 
   /** Convert TrackCollection to Acts track container. 
-   * @param states The track state container
-   * @param jacobians The track jacobian container
-   * @param measurements The track measurement container
-   * @param parameters The track parameters container
+   * @param tc The track container to fill
   */
   virtual 
-  void trkTrackCollectionToActsTrackContainer(ActsTrk::future::TrackContainer &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
+  void trkTrackCollectionToActsTrackContainer(ActsTrk::future::MutableTrackContainer &tc, const TrackCollection& trackColl, const Acts::GeometryContext& gctx) const override;
 
   virtual
   const IActsTrackingGeometryTool*
