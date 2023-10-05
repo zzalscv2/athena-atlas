@@ -79,6 +79,7 @@ StreamAOD.ItemList+=["xAOD::MissingETAuxContainer#MET_Reference_AntiKt4EMTopoAux
 #######################################################
 log.info("==========================================================")
 log.info("Scheduling gFEXDriver")
+athAlgSeq += CfgMgr.LVL1__gTowerMakerFromGfexTowers('MygTowerMaker', IsMC=True)
 athAlgSeq += CfgMgr.LVL1__gFEXDriver('MygFEXDriver')
 athAlgSeq += CfgMgr.LVL1__gFEXNtupleWriter('MygFEXNtupleWriter')
 log.info("==========================================================")
