@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-
+from AthenaConfiguration.Enums import HIMode
 
 def createEgammaConfigFlags():
     egcf = AthConfigFlags()
@@ -12,7 +12,8 @@ def createEgammaConfigFlags():
 
     # do forward egamma
     egcf.addFlag("Egamma.doForward",
-                 lambda prevFlags: prevFlags.Detector.EnableCalo)
+                 lambda prevFlags: prevFlags.Detector.EnableCalo
+                 and prevFlags.Reco.HIMode is not HIMode.HI)
 
     # run the GSF refitting/egamma Tracking it is calo seeded
     egcf.addFlag("Egamma.doTracking",
@@ -45,7 +46,8 @@ def createEgammaConfigFlags():
                  lambda prevFlags: prevFlags.Egamma.doTracking)
 
     # Egamma runs in low <mu> mode (e.g UPC )
-    egcf.addFlag("Egamma.doLowMu", False)
+    egcf.addFlag("Egamma.doLowMu",  
+                 lambda prevFlags: prevFlags.Reco.HIMode is HIMode.UPC)
 
     # The cluster corrections/calib
     egcf.addFlag("Egamma.Calib.ClusterCorrectionVersion",

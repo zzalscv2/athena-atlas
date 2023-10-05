@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.Enums import HIMode
 
 def createCaloConfigFlags(): 
     ccf=AthConfigFlags()
@@ -24,7 +25,7 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.doTreatEnergyCutAsAbsolute", False)
     ccf.addFlag("Calo.TopoCluster.doTopoClusterLocalCalib", True)
     ccf.addFlag("Calo.TopoCluster.doTimeCut",
-                lambda prevFlags: not prevFlags.Trigger.doHLT)
+                lambda prevFlags: not prevFlags.Trigger.doHLT and not prevFlags.Reco.EnableHI)
     ccf.addFlag("Calo.TopoCluster.extendTimeCut",
                 lambda prevFlags: prevFlags.Calo.TopoCluster.doTimeCut)
     ccf.addFlag("Calo.TopoCluster.useUpperLimitForTimeCut",
@@ -38,7 +39,8 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.TopoCluster.doCalibHitMoments",False)
     ccf.addFlag("Calo.TopoCluster.writeCalibHitClusterMoments",False)
     ccf.addFlag("Calo.TopoCluster.doCellWeightCalib", False)
-    ccf.addFlag("Calo.TopoCluster.skipWriteList", [])
+    ccf.addFlag("Calo.TopoCluster.skipWriteList", lambda prevFlags:
+                ["CaloCalTopoClusters", "CaloTopoClusters"] if prevFlags.Reco.HIMode is HIMode.HI else [])
 
     #### Cluster correction flags:
     # If true, then reweight cells to prevent double-counting between clusters.
@@ -96,7 +98,8 @@ def createCaloConfigFlags():
     # Flags from Forward Towers:
     ccf.addFlag('Calo.FwdTower.prepareLCW', True)
     ccf.addFlag('Calo.FwdTower.clusterRange', 2.5)
-    ccf.addFlag('Calo.FwdTower.WriteToAOD', True)
+    ccf.addFlag('Calo.FwdTower.WriteToAOD', 
+                lambda prevFlags: prevFlags.Reco.HIMode is not HIMode.HI)
     
     # Flag for thinning negative energy clusters
     ccf.addFlag('Calo.Thin.NegativeEnergyCaloClusters', True)
