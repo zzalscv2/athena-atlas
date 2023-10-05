@@ -85,7 +85,7 @@ class BeamType(FlagEnum):
     SingleBeam = 'singlebeam'
     Cosmics = 'cosmics'
     TestBeam = 'testbeam'
-
+    
 
 class BunchStructureSource(FlagEnum):
     FILLPARAMS = 0
@@ -103,3 +103,10 @@ class MetadataCategory(FlagEnum):
     LumiBlockMetaData = auto()
     TriggerMenuMetaData = auto()
     TruthMetaData = auto()
+
+
+class HIMode(FlagEnum):
+    pp  = "pp"
+    HI  = "hi"
+    HIP = "hip"
+    UPC = "upc"

@@ -3,7 +3,7 @@
 #
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum
+from AthenaConfiguration.Enums import FlagEnum,HIMode
 
 _steeringFlags = [ 'doGlobalMon', 'doLVL1CaloMon', 'doLVL1InterfacesMon', 'doCTPMon', 'doHLTMon',
                    'doPixelMon', 'doSCTMon', 'doTRTMon', 'doInDetMon',
@@ -60,7 +60,9 @@ def createDQConfigFlags():
     # steering ...
     for flag in _steeringFlags + _lowLevelSteeringFlags:
         arg = True
-        if flag in ['doJetTagMon', 'doJetMon', 'doMissingEtMon', 'doTauMon']:
+        if flag in ['doJetTagMon', 'doMissingEtMon', 'doTauMon']:
+            arg = lambda x: x.DQ.DataType is not DQDataType.Cosmics and x.Reco.HIMode is not HIMode.HI # noqa: E731
+        if flag in [ 'doJetMon','doJetTagMon'] :
             arg = lambda x: x.DQ.DataType is not DQDataType.Cosmics # noqa: E731
         if flag == 'doHLTMon':
             # new HLT monitoring not yet compatible with pre-Run 3 data

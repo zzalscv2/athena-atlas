@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-
+from AthenaConfiguration.Enums import HIMode
 _all_domains = [
     "Trigger",
     "BeamSpotDecoration",
@@ -72,12 +72,15 @@ def createRecoConfigFlags():
         and prevFlags.Reco.EnableTracking
         and prevFlags.Reco.EnableEgamma
         and prevFlags.Reco.EnableCombinedMuon
-        and prevFlags.Reco.EnablePFlow))
+        and prevFlags.Reco.EnablePFlow
+        and prevFlags.Reco.HIMode is not HIMode.HI))
+
     # Enable Tau Reconstruction
     flags.addFlag("Reco.EnableTau", lambda prevFlags: prevFlags.Reco.EnableJet)
     # Enable BTagging Reconstruction
     flags.addFlag("Reco.EnableBTagging",
-                  lambda prevFlags: prevFlags.Reco.EnableJet)
+                  lambda prevFlags: prevFlags.Reco.EnableJet or 
+                   prevFlags.HeavyIon.doJet) 
     # Enable MET Reconstruction
     flags.addFlag("Reco.EnableMet", lambda prevFlags: (
         prevFlags.Reco.EnableJet
@@ -96,7 +99,8 @@ def createRecoConfigFlags():
                   prevFlags.Reco.EnableTracking)
     # Enable creation of "Rings" of calorimeter cells
     flags.addFlag("Reco.EnableCaloRinger",
-                  lambda prevFlags: prevFlags.Reco.EnableEgamma)
+                  lambda prevFlags: prevFlags.Reco.EnableEgamma and 
+                  not prevFlags.Reco.EnableHI)
 
     # This flags enables trigger data decoding (not trigger simulation)
     # EDMVersion > 0 check prevents this flag being true in jobs before
@@ -106,7 +110,9 @@ def createRecoConfigFlags():
 
     # enable automatically for HI data
     flags.addFlag("Reco.EnableHI",
-                  lambda prevFlags: "_hi" in prevFlags.Input.ProjectName)
+                  lambda prevFlags: prevFlags.Reco.HIMode is not HIMode.pp)
+
+    flags.addFlag("Reco.HIMode", _hiModeChoice, enum=HIMode)
 
     # Enable alg for decorating EventInfo with BeamSpot info
     # (maybe not always available for calibration runs, etc)
@@ -123,7 +129,9 @@ def createRecoConfigFlags():
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
                   prevFlags.Detector.EnableCalo and
                   prevFlags.Output.doWriteAOD and
-                  prevFlags.Calo.Thin.NegativeEnergyCaloClusters)
+                  prevFlags.Calo.Thin.NegativeEnergyCaloClusters and
+                  not prevFlags.Reco.EnableHI)
+
     flags.addFlag("Reco.PostProcessing.TRTAloneThinning",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
                   prevFlags.Reco.EnableTracking and
@@ -213,3 +221,16 @@ def _recoZDC(prevFlags):
         maskbits=maskbits[0] #Check the first input file
         detMask=DetectorMask(maskbits & 0xFFFFFFFFFFFFFFFF, maskbits >> 64) #DetectorMask constructor swallows two 64bit ints
         return detMask.is_set(SubDetector.FORWARD_ZDC)
+
+
+
+def _hiModeChoice(prevFlags):
+
+    if ("_hip" in prevFlags.Input.ProjectName):
+        return HIMode.HIP
+    elif ("_hi" in prevFlags.Input.ProjectName):
+        if (prevFlags.Input.TriggerStream == "physics_UPC"):
+            return HIMode.UPC
+        else:
+            return HIMode.HI
+    return HIMode.pp

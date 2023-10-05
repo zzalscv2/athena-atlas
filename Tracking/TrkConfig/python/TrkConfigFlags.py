@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum,HIMode
 
 
 class PrimaryPassConfig(FlagEnum):
@@ -274,9 +274,9 @@ def createTrackingConfigFlags():
     # Switch for running LowPtRoI settings
     icf.addFlag("Tracking.doLowPtRoI", False)
     # Switch for running UPC settings
-    icf.addFlag("Tracking.doUPC", False)
+    icf.addFlag("Tracking.doUPC", lambda prevFlags: prevFlags.Reco.HIMode is HIMode.UPC)
     # Switch for running HIP settings
-    icf.addFlag("Tracking.doHIP", False)
+    icf.addFlag("Tracking.doHIP", lambda prevFlags: prevFlags.Reco.HIMode is HIMode.HIP)
     # Switch for running MinBias settings (UPC or HIP turn this ON)
     icf.addFlag("Tracking.doMinBias", lambda prevFlags:
                 prevFlags.Tracking.doUPC or prevFlags.Tracking.doHIP)
