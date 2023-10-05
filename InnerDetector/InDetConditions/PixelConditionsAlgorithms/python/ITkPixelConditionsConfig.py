@@ -75,11 +75,20 @@ def ITkPixelChargeCalibCondAlgCfg(flags, name="ITkPixelChargeCalibCondAlg", **kw
     """Return a ComponentAccumulator with configured PixelChargeCalibCondAlg for ITk"""
     acc = ComponentAccumulator()
     acc.merge(ITkPixelModuleConfigCondAlgCfg(flags))
+    folderName = ""
+    if flags.ITk.Conditions.PixelChargeCalibTag:
+        folderName = "/ITk/PixelChargeCalib"
+        if flags.ITk.Conditions.PixelChargeCalibFile:
+            acc.merge(addFolders(flags, folderName, flags.ITk.Conditions.PixelChargeCalibFile, tag=flags.ITk.Conditions.PixelChargeCalibTag, db="OFLP200", className="CondAttrListCollection"))
+        else:
+            acc.merge(addFolders(flags, folderName, "INDET_OFL", tag=flags.ITk.Conditions.PixelChargeCalibTag, db="OFLP200", className="CondAttrListCollection"))
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc.merge(ITkPixelReadoutGeometryCfg(flags))
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
+    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
+    kwargs.setdefault("ReadKey", folderName)
     kwargs.setdefault("WriteKey", "ITkPixelChargeCalibCondData")
-    acc.addCondAlgo(CompFactory.ITkPixChargeCalibAlg(name, **kwargs))
+    acc.addCondAlgo(CompFactory.PixelChargeLUTCalibCondAlg(name, **kwargs))
     return acc
 
 def ITkPixelDCSCondHVAlgCfg(flags, name="ITkPixelDCSCondHVAlg", **kwargs):
