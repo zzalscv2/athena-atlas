@@ -32,8 +32,8 @@ public:
 
 private:
 
-  ToolHandleArray<IJetDecorator> m_decorators = {this , "Decorators", {}, "Jet decorators" };
-  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey= {this, "JetContainer", "", "Jet container name"};
+  ToolHandleArray<IJetDecorator> m_decorators{this , "Decorators", {}, "Jet decorators" };
+  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{this, "JetContainer", "", "Jet container name"};
 
 };
 

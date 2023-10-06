@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRec/JetDecorationAlg.h"
@@ -9,9 +9,12 @@
 StatusCode JetDecorationAlg::initialize() {
 
   ATH_CHECK(m_jetKey.initialize());
-
-  ATH_MSG_INFO("Initialize .... List of decorators:");
+  if (m_decorators.empty()){
+     ATH_MSG_FATAL("No decorators were given");
+     return StatusCode::FAILURE;
+  }
   ATH_CHECK(m_decorators.retrieve());
+  ATH_MSG_INFO("Initialize .... List of decorators:");
   for(const ToolHandle<IJetDecorator>& t : m_decorators){
     ATH_MSG_INFO("    --> : "<< t->name());
   }
