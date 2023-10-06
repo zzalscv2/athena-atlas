@@ -146,6 +146,13 @@ class xtalkEM2(JobProperty):
     allowedTypes=['bool']
     StoredValue=False
 
+class xtalkEM2D(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['bool']
+    StoredValue=False
+
 class xtalkEM2n(JobProperty):
     """
     """
@@ -202,6 +209,14 @@ class xtalkEtaEratio(JobProperty):
     allowedTypes=['float']
     StoredValue=4.
 
+class xtalk2DEratio(JobProperty):
+    """
+    """
+    statusOn=True
+    allowedTypes=['float']
+    StoredValue=4.
+
+
 
 # add the flags container to the top container 
 jobproperties.add_Container(CaloTopoClusterFlags)
@@ -228,6 +243,7 @@ list_jobproperties = [
     ,useUpperLimitForTimeCut
     ,timeCutUpperLimit
     ,xtalkEM2
+    ,xtalkEM2D
     ,xtalkEM2n
     ,xtalkEM3
     ,xtalkEMEta
@@ -236,6 +252,7 @@ list_jobproperties = [
     ,xtalk2Eratio2
     ,xtalk3Eratio
     ,xtalkEtaEratio
+    ,xtalk2DEratio
     ]
 
 for i in list_jobproperties:
