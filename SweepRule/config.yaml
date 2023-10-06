@@ -1,4 +1,4 @@
 sweep-targets:
-  'master':
+  'main':
     'NONE':
-      - 'master'
+      - 'main'
