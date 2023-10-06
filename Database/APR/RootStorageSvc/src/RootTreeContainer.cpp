@@ -140,9 +140,9 @@ DbStatus RootTreeContainer::isShapeSupported(const DbTypeInfo* typ) const  {
   return typ == m_type;
 }
 
-long long int RootTreeContainer::size()    {
+uint64_t RootTreeContainer::size()    {
   if (m_tree == nullptr) return 0;
-  long long int s = DbContainerImp::size();
+  auto s = DbContainerImp::size();
   if( isBranchContainer() ) {
      TBranch * pBranch = m_tree->GetBranch(m_branchName.c_str());
      if (pBranch == nullptr) return 0;
@@ -325,14 +325,15 @@ DbStatus RootTreeContainer::fetch(DbSelect& sel)  {
   return Error;
 }
 
+
 DbStatus
 RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
 {
-  long long evt_id = oid.second;
-  if( evt_id >= size() ) {
-     // OID is unsigned, so -1 from index is also covered by this case
+  auto evt_id = oid.second;
+  if( evt_id < 0 || (uint64_t)evt_id >= size() ) {
+     // -1 may be from a failed index lookup
      *obj_p = nullptr;
-     // do not return Error to avoid printouts in case someone just tries to iterate over OIDs
+     // do not return Error to avoid error printouts in case someone just tries to iterate over all OIDs
      return Success;
   }
   // lock access to this DB for MT safety

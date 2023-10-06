@@ -45,10 +45,10 @@ namespace pool {
       virtual DbStatus open(DbDatabase&, const std::string&, const DbTypeInfo*, DbAccessMode) override final;
 
       /// Number of entries within the container
-      virtual long long int nextRecordId() override final;
+      virtual uint64_t nextRecordId() override final;
 
       /// Suggest next Record ID for tbe next object written - for synced indexes
-      virtual void useNextRecordId(long long int) override final;
+      virtual void useNextRecordId( uint64_t ) override final;
 
       /// Find object by object identifier and load it into memory
       /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
@@ -67,10 +67,10 @@ namespace pool {
       /// Pointer to index branch
       TBranch*          m_indexBranch;
 
-      int64_t           m_index_entries;
+      uint64_t          m_index_entries;
 
       /// Index multiplier (e.g. pid - ppid), fill in c'tor
-      const int32_t     m_index_multi;
+      const uint32_t    m_index_multi;
 
       /// Index (64 bit) - using ROOT type that matches the earlier 'long long'
       Long64_t          m_index;

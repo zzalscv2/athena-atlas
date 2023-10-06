@@ -35,12 +35,12 @@ DbContainerImp::~DbContainerImp() {
 }
 
 /// Size of the container
-long long int DbContainerImp::size()  {
+uint64_t DbContainerImp::size()  {
   return m_writeSize;
 }
 
 /// Number of next record in the container (=size if no delete is allowed)
-long long int DbContainerImp::nextRecordId()   {
+uint64_t DbContainerImp::nextRecordId()   {
   return size();
 }
 
@@ -221,23 +221,23 @@ DbContainerImp::update(DbContainer& /* cntH */, const void* object, ShapeH shape
 
 // Fetch next object address of the selection to set token
 DbStatus DbContainerImp::fetch(DbSelect& sel) {
-  if ( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
-    Token::OID_t lnk = sel.link();
-    while ( lnk.second < size() ) {
-      if ( fetch(lnk, lnk).isSuccess() )  {
-        sel.link() = lnk;
-        return Success;
+   if( sel.criteria().length() == 0 || sel.criteria() == "*" )  {
+      Token::OID_t lnk = sel.link();
+      while( (uint64_t)lnk.second < size() ) {
+         if( fetch(lnk, lnk).isSuccess() )  {
+            sel.link() = lnk;
+            return Success;
+         }
+         lnk.second++;
       }
-      lnk.second++;
-    }
-    return Error;
-  }
-  DbPrint log( m_name );
-  log << DbPrintLvl::Error << "The chosen implementation does not allow to "
-      << "refine container scans."
-      << "The only valid selection criterium is: \"\" (empty string)"
-      << DbPrint::endmsg;
-  return Error;
+      return Error;
+   }
+   DbPrint log( m_name );
+   log << DbPrintLvl::Error << "The chosen implementation does not allow to "
+       << "refine container scans."
+       << "The only valid selection criterium is: \"\" (empty string)"
+       << DbPrint::endmsg;
+   return Error;
 } 
 
 /// Destroy persistent object in the container; does not touch transient!
@@ -258,40 +258,42 @@ DbStatus DbContainerImp::destroy(const Token::OID_t& linkH) {
   return Error;
 }
 
+
 // Fetch refined object address. Default implementation returns identity
 DbStatus DbContainerImp::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)  {
-  stmt.second = linkH.second;
-  return linkH.second >= 0 && linkH.second < size() ? Success : Error;
+   stmt.second = linkH.second;
+   return linkH.second >= 0 && (uint64_t)linkH.second < size() ? Success : Error;
 }
+
 
 // Read object (oid) from a container container (linkH)
 DbStatus DbContainerImp::load( void** ptr, ShapeH shape, 
                                const Token::OID_t& linkH, Token::OID_t& oid,
                                bool any_next )
 {
-  DbStatus sc = Error;
-  oid.second = linkH.second;
-  if ( any_next ) {
-    while ( oid.second < size() ) {
-      sc = fetch(linkH, oid);
-      if ( sc.isSuccess() )  {
-         sc = loadObject(ptr, shape, oid);
-         if ( sc.isSuccess() )  {
-            return sc;
+   DbStatus sc = Error;
+   oid.second = linkH.second;
+   if( any_next ) {
+      while( (uint64_t)oid.second < size() ) {
+         sc = fetch(linkH, oid);
+         if( sc.isSuccess() )  {
+            sc = loadObject(ptr, shape, oid);
+            if( sc.isSuccess() )  {
+               return sc;
+            }
          }
+         oid.second++;
       }
-      oid.second++;
-    }
-    if ( linkH.second < 0 || linkH.second <= size() ) {
-      DbPrint log( m_name );
-      log << DbPrintLvl::Debug << "No objects passing selection criteria..." 
-	  << " Container has " << size() << " Entries in total." << DbPrint::endmsg;
-    }
-  }
-  else {
-     sc = loadObject(ptr, shape, oid);
-  }
-  return sc;
+      if( linkH.second < 0 || (uint64_t)linkH.second <= size() ) {
+         DbPrint log( m_name );
+         log << DbPrintLvl::Debug << "No objects passing selection criteria..." 
+             << " Container has " << size() << " Entries in total." << DbPrint::endmsg;
+      }
+   }
+   else {
+      sc = loadObject(ptr, shape, oid);
+   }
+   return sc;
 }
 
 /// Access section identifier from OID

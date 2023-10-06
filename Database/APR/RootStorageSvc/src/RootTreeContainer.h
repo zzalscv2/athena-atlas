@@ -206,7 +206,7 @@ namespace pool  {
     virtual DbStatus select(DbSelect& criteria) override;
 
     /// Number of entries within the container
-    virtual long long int size() override;
+    virtual uint64_t size() override;
 
     /// return the TTree in which this container is stored
     TTree*      getTTree() { return m_tree; }

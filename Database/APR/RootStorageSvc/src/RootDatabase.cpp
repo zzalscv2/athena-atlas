@@ -929,7 +929,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
       if( m_indexMaster == "*" ) {
          // find the biggest index ID
          for( auto c : containers ) {
-            long long nextID = c->nextRecordId() & 0xFFFFFFFF;
+            uint64_t nextID = c->nextRecordId() & 0xFFFFFFFF;
             if( nextID > m_indexMasterID ) m_indexMasterID = nextID;
          }
       } else {
@@ -1048,7 +1048,7 @@ DbStatus RootDatabase::fillBranchContainerTrees()
             return Error;
          }
       } else { // not TreeFillMode
-         long long maxbranchlen = 0;
+         uint64_t maxbranchlen = 0;
          for( ContainerSet_t::iterator cIt = containers.begin(); cIt != containers.end(); ++cIt ) {
             maxbranchlen = max( maxbranchlen, (*cIt)->size() );
          }
@@ -1097,4 +1097,39 @@ RootDatabase::getNTupleWriter(std::string ntuple_name, bool create)
       writer->increaseClientCount();
    }
    return writer.get();
+}
+
+
+uint64_t RootDatabase::indexLookup([[maybe_unused]]RNTupleReader *reader, uint64_t idx_val) {
+#if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
+   if( m_ntupleIndexMap.find(reader) == m_ntupleIndexMap.end() ) {
+      // first access to RNTuple, read and store the index
+      DbPrint log( m_file->GetName() );
+      log << DbPrintLvl::Debug << "Reading index" << DbPrint::endmsg;
+      indexLookup_t &index = m_ntupleIndexMap[reader];
+      ROOT::Experimental::REntry *entry = reader->GetModel()->GetDefaultEntry();
+      auto val_i = entry->begin();
+      for(; val_i != entry->end(); ++val_i ) {
+         if( val_i->GetField()->GetName() == "index_ref" ) break;
+      }
+      if( val_i == entry->end() ) {
+         return idx_val;
+      }
+      uint64_t idx_size = reader->GetNEntries();
+      index.reserve(idx_size);
+      uint64_t idx;
+      auto rfv = val_i->GetField()->BindValue( &idx );
+      for(uint64_t row=0; row < idx_size; row++) {
+         rfv.Read(row);
+         index[idx] = row;
+      }
+   }
+   indexLookup_t &index = m_ntupleIndexMap[reader];
+   auto it = index.find(idx_val);
+   if( it != index.end() ) {
+      // cout << "MN: remapped OID=" << hex << idx_val << " to " << it->second << endl;
+      idx_val = it->second;
+   }
+#endif
+   return idx_val;
 }

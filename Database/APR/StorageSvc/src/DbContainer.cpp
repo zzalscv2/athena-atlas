@@ -75,8 +75,8 @@ DbDatabase& DbContainer::containedIn() {
   return m_ptr->database();
 }
 
-long long int DbContainer::size() {
-  return isValid() ? m_ptr->size() : -1;
+uint64_t DbContainer::size() {
+  return isValid() ? m_ptr->size() : 0;
 }
 
 /// Access to access mode member

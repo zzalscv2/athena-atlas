@@ -88,10 +88,10 @@ namespace pool  {
     /// name of the container with master index ('*' means use the biggest)
     std::string   m_indexMaster;
     /// nextID of the master index
-    long long     m_indexMasterID;
+    uint64_t      m_indexMasterID;
 
     /// Keep index sizes here, because Branches are emptied when fast merged by SharedWriter
-    std::map<TBranch*, int64_t>   m_indexSizeMap;
+    std::map<TBranch*, uint64_t>   m_indexSizeMap;
 
     /// marks if the index (for index Containers) was rebuilt for given TTree
     std::set< std::string > m_indexRebuilt;
@@ -115,6 +115,9 @@ namespace pool  {
 
     std::map<std::string, std::unique_ptr<RootAuxDynIO::IRNTupleWriter> >  m_ntupleWriterMap;
     std::map<std::string, std::unique_ptr<RNTupleReader> >                 m_ntupleReaderMap;
+
+    using indexLookup_t = std::unordered_map<uint64_t, uint64_t>;
+    std::map<RNTupleReader*, indexLookup_t>                                m_ntupleIndexMap;
 
   public:
     /// Standard Constuctor
@@ -150,13 +153,13 @@ namespace pool  {
     
     void        registerBranchContainer(RootTreeContainer*);
 
-    long long   currentIndexMasterID() const   { return m_indexMasterID; }
+    uint64_t    currentIndexMasterID() const   { return m_indexMasterID; }
 
     /// get index size for indexed containers
-    int64_t    indexSize(TBranch *branch) { return m_indexSizeMap[branch]; }
+    uint64_t    indexSize(TBranch *branch) { return m_indexSizeMap[branch]; }
 
     /// increase index size counter for indexed containers (by 1)
-    int64_t     indexSizeInc(TBranch *branch) { return ++m_indexSizeMap[branch]; }
+    uint64_t    indexSizeInc(TBranch *branch) { return ++m_indexSizeMap[branch]; }
 
 
     /// Check if a given TTree had its index rebuilt
@@ -224,6 +227,9 @@ namespace pool  {
     std::unique_ptr<RootAuxDynIO::IRootAuxDynReader>
                      getNTupleAuxDynReader(const std::string& ntuple_name, const std::string& field_name);
     RNTupleReader*   getNTupleReader(std::string ntuple_name);
+
+    // translate index value to row# for a given RNTuple  
+    uint64_t         indexLookup(RNTupleReader *r, uint64_t idx_val);
 
     /// return NTupleWriter for a given ntuple_name
     /// create a new one if needed when create==true

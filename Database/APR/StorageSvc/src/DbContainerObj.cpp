@@ -107,7 +107,7 @@ bool DbContainerObj::hasAccess()    {
 }
 
 // Retrieve container size
-long long int DbContainerObj::size()   {
+uint64_t DbContainerObj::size()   {
   if ( !hasAccess() )    {
     string id = database().isValid() ? database().logon() : name();
     DbPrint log( id );

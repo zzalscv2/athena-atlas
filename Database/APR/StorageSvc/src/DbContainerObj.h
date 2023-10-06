@@ -98,7 +98,7 @@ namespace pool  {
     /// Cancel transaction flag
     void cancelTransaction()                { }
     /// Size of the Database container (=# of objects)
-    long long int size();
+    uint64_t size();
     /// Open the container
     DbStatus open(const DbTypeInfo* typ);
     /// Close the container
