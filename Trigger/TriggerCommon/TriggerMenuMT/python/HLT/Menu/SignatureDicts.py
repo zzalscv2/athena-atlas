@@ -271,6 +271,8 @@ JetChainParts = {
                       'HT500',
                       'HT940',
                       'HT50',
+                      'HT300XX10ptXX0eta490',
+                      'HT300XX10ptXX0eta490XXveto',
                       'HT300XX15ptXX0eta490',
                       'HT300XX15ptXX0eta490XXveto',
                       'HT400XX15ptXX0eta490',
