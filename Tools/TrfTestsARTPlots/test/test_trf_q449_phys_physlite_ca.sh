@@ -10,12 +10,12 @@
 # art-html: ecube
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py \
+Reco_tf.py --CA \
   --AMI q449 \
   --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
-  --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
+  --preExec 'flags.Exec.FPE=10' \
   --maxEvents -1
 
 rc1=$?
