@@ -24,9 +24,9 @@ namespace DerivationFramework {
       if (tool->type() != "TauWPDecorator") continue;
 
       // check whether we must compute eVeto WPs, as this requires the recalculation of a variable
-      BooleanProperty useEleBDT("UseEleBDT", false);
-      ATH_CHECK( tool->getProperty(&useEleBDT) ); 
-      if (useEleBDT.value()) {
+      BooleanProperty useAbsEta("UseAbsEta", false);
+      ATH_CHECK( tool->getProperty(&useAbsEta) ); 
+      if (useAbsEta.value()) {
 	m_doEvetoWP = true;
       }
 

@@ -14,7 +14,7 @@
 //______________________________________________________________________________
 TauWPDecorator::TauWPDecorator(const std::string& name) :
   TauRecToolBase(name) {
-  declareProperty("UseEleBDT", m_electronMode = false);
+  declareProperty("UseAbsEta", m_useAbsEta = false);
   declareProperty("DefineWPs", m_defineWPs = false);
   declareProperty("ScoreName", m_scoreName = "");
   declareProperty("NewScoreName", m_scoreNameTrans = "");
@@ -196,7 +196,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
   
   // y variable is |eta| of leading track in electron mode, and pileup in other cases
   double yVariable = 0.0;
-  if (m_electronMode) {
+  if (m_useAbsEta) {
     static const SG::AuxElement::ConstAccessor<float> acc_absEta("ABS_ETA_LEAD_TRACK");
     yVariable = std::abs(acc_absEta(tau));
   } 
@@ -227,7 +227,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
 
   // make sure the dependent variables are within the range of calibration histograms
   ATH_MSG_DEBUG("original pT:\t" << xVariable);
-  if (m_electronMode) {
+  if (m_useAbsEta) {
     ATH_MSG_DEBUG("original |eta|:\t" << yVariable);
   }
   else {
@@ -238,7 +238,7 @@ StatusCode TauWPDecorator::execute(xAOD::TauJet& tau) const {
   yVariable = std::min(m_yMax.at(nProng), std::max(m_yMin.at(nProng), yVariable));
   
   ATH_MSG_DEBUG("final pT:\t" << xVariable);
-  if (m_electronMode) {
+  if (m_useAbsEta) {
     ATH_MSG_DEBUG("final |eta|:\t" << yVariable);
   }
   else {

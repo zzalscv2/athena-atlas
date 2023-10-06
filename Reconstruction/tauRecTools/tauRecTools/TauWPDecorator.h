@@ -72,7 +72,7 @@ class TauWPDecorator : public TauRecToolBase {
      */ 
     double transformScore(double score, double cutLow, double effLow, double cutHigh, double effHigh) const;
 
-    bool m_electronMode; //!< Whether we are flatterning electron veto WP
+    bool m_useAbsEta; //!< Whether we are flatterning electron veto WP
     bool m_defineWPs; //!< Whether to decorate the WPs
     
     std::string m_scoreName; //!< Name of the original score
