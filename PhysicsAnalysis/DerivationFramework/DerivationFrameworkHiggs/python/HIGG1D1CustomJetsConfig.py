@@ -166,18 +166,18 @@ def HIGG1D1CustomJetsCfg(ConfigFlags):
 
 
       JVFCustomVtx =             JetModifier("JetVertexFractionTool", "jvfCustomVtx",
-                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getJVFTool(jdef.context,"CustomVtx"),
+                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getJVFTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
                                         prereqs = ["input:JetTrackVtxAssocCustomVtx", "mod:TrackMomentsCustomVtx", f"input:{context['Vertices']}"] ,
                                              JetContainer = CustomPFJetContainerName),
 
       JVTCustomVtx =             JetModifier("JetVertexTaggerTool", "jvtCustomVtx",
-                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getJVTTool(jdef.context,"CustomVtx"),
+                                        createfn= lambda jdef,_ : JetMomentToolsConfig.getJVTTool(jdef,"CustomVtx"),
                                         modspec = "CustomVtx",
                                         prereqs = [ "mod:JVFCustomVtx" ],JetContainer = CustomPFJetContainerName),
 
       NNJVTCustomVtx =           JetModifier("JetVertexNNTagger", "nnjvtCustomVtx",
-                                              createfn=lambda jdef,_ :JetMomentToolsConfig.getNNJvtTool(jdef.context,"CustomVtx"),
+                                              createfn=lambda jdef,_ :JetMomentToolsConfig.getNNJvtTool(jdef,"CustomVtx"),
                                               prereqs = [ "mod:JVFCustomVtx" ],JetContainer = CustomPFJetContainerName),
 
       OriginSetPVCustomVtx =     JetModifier("JetOriginCorrectionTool", "origin_setpvCustomVtx",
