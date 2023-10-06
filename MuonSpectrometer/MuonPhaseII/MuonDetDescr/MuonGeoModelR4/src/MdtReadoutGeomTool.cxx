@@ -32,7 +32,7 @@ StatusCode MdtReadoutGeomTool::initialize() {
     ATH_CHECK(m_geoUtilTool.retrieve());
     return StatusCode::SUCCESS;
 }
-StatusCode MdtReadoutGeomTool::loadDimensions(MdtReadoutElement::defineArgs& define) {    
+StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, MdtReadoutElement::defineArgs& define) const {    
     
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
@@ -68,6 +68,7 @@ StatusCode MdtReadoutGeomTool::loadDimensions(MdtReadoutElement::defineArgs& def
     /// As a very wise person once said.. We simply take Bikini booottom
     /// and push it somewhere elseee
     define.toVolCenter = m_geoUtilTool->extractShifts(define.physVol);
+    define.readoutSide = facCache.readoutOnLeftSide.count(m_idHelperSvc->chamberId(define.detElId)) ? -1. : 1.;
     return StatusCode::SUCCESS;
 }
 StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
@@ -76,7 +77,9 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         ATH_MSG_FATAL("Error, the tool works exclusively from sqlite geometry inputs");
         return StatusCode::FAILURE;
     }
-    ATH_CHECK(readParameterBook());
+    FactoryCache facCache{};
+    ATH_CHECK(readParameterBook(facCache));
+    fillFlippedReadouts(facCache);
 
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     // Get the list of full phys volumes from SQLite, and create detector
@@ -117,23 +120,21 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);        
  
         /// Load first tube etc. from the parameter book table
-        ParamBookTable::const_iterator book_itr = m_parBook.find(define.chambDesign);
-        if (book_itr == m_parBook.end()) {
+        ParamBookTable::const_iterator book_itr = facCache.parBook.find(define.chambDesign);
+        if (book_itr == facCache.parBook.end()) {
             ATH_MSG_FATAL("There is no chamber called "<<define.chambDesign);
             return StatusCode::FAILURE;
         }
         static_cast<parameterBook&>(define) = book_itr->second;
         
         /// Chamber dimensions are given from the GeoShape
-        ATH_CHECK(loadDimensions(define));
+        ATH_CHECK(loadDimensions(facCache, define));
         std::unique_ptr<MdtReadoutElement> mdtDetectorElement = std::make_unique<MdtReadoutElement>(std::move(define));      
         ATH_CHECK(mgr.addMdtReadoutElement(std::move(mdtDetectorElement)));       
     }
     return StatusCode::SUCCESS;
 }
-StatusCode MdtReadoutGeomTool::readParameterBook() {
-    if (m_parBook.size())
-        return StatusCode::SUCCESS;
+StatusCode MdtReadoutGeomTool::readParameterBook(FactoryCache& cache) const {
     ServiceHandle<IRDBAccessSvc> accessSvc(m_geoDbTagSvc->getParamSvcName(),
                                            name());
     ATH_CHECK(accessSvc.retrieve());
@@ -155,8 +156,49 @@ StatusCode MdtReadoutGeomTool::readParameterBook() {
         unsigned int nLay = record->getInt("LAYMDT");
         const std::string key {record->getString("WMDT_TYPE")};
         ATH_MSG_DEBUG("Extracted parameters " <<pars<<" number of layers: "<<nLay<<" will be safed under key "<<key);
-        m_parBook[key] = std::move(pars);
+        cache.parBook[key] = std::move(pars);
     }   
     return StatusCode::SUCCESS;
+}
+
+void MdtReadoutGeomTool::fillFlippedReadouts(FactoryCache& facCache) const {
+    /// Potentially we want to publish this in a table
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    const int stIdxBEE = idHelper.stationNameIndex("BEE");
+    const int stIdxBIM = idHelper.stationNameIndex("BIM");
+    const int stIdxBIR = idHelper.stationNameIndex("BIR");
+    const int stIdxBIS = idHelper.stationNameIndex("BIS");
+    const int stIdxBOF = idHelper.stationNameIndex("BOF");
+    const int stIdxEIL = idHelper.stationNameIndex("EIL");
+    const int stIdxBOS = idHelper.stationNameIndex("BOS");
+    const int stIdxBOG = idHelper.stationNameIndex("BOG");
+    
+    
+    for (MdtIdHelper::const_id_iterator itr = idHelper.module_begin();
+         itr != idHelper.module_end(); ++itr) {
+
+      const Identifier& chId{*itr};
+      const int stIdx = idHelper.stationName(chId);
+      const int stEta = idHelper.stationEta(chId);      
+      const int stPhi = idHelper.stationPhi(chId);
+
+      const bool isBarrel{idHelper.isBarrel(chId)};
+      const bool sideA{stEta >= 0};
+      const bool isLarge{!idHelper.isSmall(chId)};
+      int sign = (isBarrel ? 1 : -1) * (sideA ? 1 : -1) * (isLarge ? -1 : 1);
+      /// Of course there're exceptions to this rule, otherwise it weren't a rule
+      if (stIdxBEE == stIdx ||  
+          (stIdxEIL == stIdx && !( stEta ==3  && stPhi ==6) )|| 
+          (stIdxBOS == stIdx && !sideA) ||
+          (stIdxBOG == stIdx && ( (stPhi == 7) || (stEta ==3) )) ||
+          (stIdxBOF == stIdx && stPhi != 6) ||
+          (stIdxBIM == stIdx && stPhi == 6) || 
+          (stIdxBIR == stIdx && stPhi == 6) || 
+          (stIdxBIS == stIdx && stPhi == 6)) sign = -sign;
+      if (sign == -1) {
+        ATH_MSG_VERBOSE("Readout of "<<m_idHelperSvc->toStringChamber(chId)<<" is at negative Z");
+        facCache.readoutOnLeftSide.insert(chId);
+      }
+    }
 }
 }  // namespace MuonGMR4

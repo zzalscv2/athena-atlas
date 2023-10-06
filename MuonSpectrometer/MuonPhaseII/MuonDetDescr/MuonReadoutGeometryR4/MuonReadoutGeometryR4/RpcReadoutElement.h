@@ -24,15 +24,15 @@ class RpcReadoutElement : public MuonReadoutElement {
         /// Half thickness of the Rpc module
         double halfThickness{0.};
         /// Elongation within the sector        
-        double halfWidth{0.};
-        
+        double halfWidth{0.};        
         /// The number of gas gaps (along the radial direction)
         /// in the RPC chamber (2 or 3) 
         unsigned int nGasGaps{0};
         /// Each gas gap is usually subdivided into 2 phi panels
         /// which is actually the sector granularity of the Rpc trigger
         int nGapsInPhi{0};
-        
+        /// A couple of gasgaps have been mounted upside-down into the muon station.
+        bool isUpsideDown{false};
         bool hasPhiStrips{true};
         std::vector<StripLayer> layers{};
 

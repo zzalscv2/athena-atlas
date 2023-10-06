@@ -43,9 +43,12 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// For the rectengular barrel chambers, the X length is read from longHalfX
         double shortHalfX{0.};
         double longHalfX{0.};
+        ///Length ~ number of tubes
         double halfY{0.};
         /// Height of the chamber ~ number of layers
-        double halfHeight{0.};        
+        double halfHeight{0.};
+        /// Is the readout chip at positive or negative Z?
+        double readoutSide{1.};
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,

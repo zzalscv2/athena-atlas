@@ -64,6 +64,15 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     
     ATH_MSG_VERBOSE("Load dimensions of "<<m_idHelperSvc->toString(define.detElId)
                      <<std::endl<<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
+    ///  There're gasgaps that have been mounted upside-down into the station. For the sake of simplicity, 
+    ///  a rotation around the Y-axis is applied in GeoModel. Instead of pointing out of the detector, 
+    ///  the local x-axis points towards the beampipe. The scalar product of the chamber origin with the
+    ///  x-axis rotated into the global frame should be hence negative.
+    if (define.physVol->getAbsoluteTransform().translation().dot(define.physVol->getAbsoluteTransform().linear() * Amg::Vector3D::UnitX()) < 0.) {
+        define.isUpsideDown = true;
+        ATH_MSG_DEBUG(m_idHelperSvc->toStringDetEl(define.detElId)<<" is built-in upside-down.");
+    }
+    
     const GeoShape* shape = m_geoUtilTool->extractShape(define.physVol);
     if (!shape) {
         ATH_MSG_FATAL("Failed to deduce a valid shape for "<<m_idHelperSvc->toString(define.detElId));
@@ -84,16 +93,17 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     /// Navigate through the GeoModel tree to find all gas volume leaves
     std::vector<physVolWithTrans> allGasGaps = m_geoUtilTool->findAllLeafNodesByName(define.physVol, "StripLayer");
     if (allGasGaps.empty()) {
-        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern StripLayer");
+        ATH_MSG_FATAL("The volume "<<m_idHelperSvc->toStringDetEl(define.detElId)<<" does not have any childern StripLayer"
+            <<std::endl<<m_geoUtilTool->dumpVolume(define.physVol));
         return StatusCode::FAILURE;
     }
     /// For one reason or another the x-axis points along the gasgap 
     /// and y along doublet phi
-    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [](const physVolWithTrans&a, const physVolWithTrans & b){
+    std::stable_sort(allGasGaps.begin(), allGasGaps.end(), [&define](const physVolWithTrans&a, const physVolWithTrans & b){
          const Amg::Vector3D cA = a.transform.translation();
          const Amg::Vector3D cB = b.transform.translation();
-         if (std::abs(cA.x() - cB.x()) > tolerance) return cA.x() < cB.x();
-         return cA.y() < cB.y();
+         if (std::abs(cA.x() - cB.x()) > tolerance) return (cA.x() < cB.x()) != define.isUpsideDown;
+         return (cA.y() < cB.y()) != define.isUpsideDown;
     });
     /// Now we need to associate the gasGap volumes with the gas gap number &
     /// the doublet Phi
@@ -139,7 +149,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
                                      paramBook.numEtaStrips);
         /// Define the box layout
         etaDesign->defineTrapezoid(gapBox->getYHalfLength(), gapBox->getYHalfLength(), gapBox->getZHalfLength());
-        gapVol.transform = gapVol.transform * Amg::Translation3D{-10, 0, 0} * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
+        gapVol.transform = gapVol.transform * Amg::getRotateY3D(-90. * Gaudi::Units::degree);
         
         etaDesign = (*factoryCache.stripDesigns.emplace(etaDesign).first);
         StripLayer etaLayer(gapVol.transform, etaDesign, 
@@ -155,7 +165,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
         phiDesign->defineTrapezoid(gapBox->getZHalfLength(), gapBox->getZHalfLength(), gapBox->getYHalfLength());
         /// Next build the phi layer
         phiDesign = (*factoryCache.stripDesigns.emplace(phiDesign).first);
-        StripLayer phiLayer(gapVol.transform  * Amg::getRotateZ3D(90. * Gaudi::Units::deg),
+        StripLayer phiLayer(gapVol.transform  * Amg::getRotateZ3D( (define.isUpsideDown ? -1. : 1)*90. * Gaudi::Units::deg),
                             phiDesign,
                             layerHash(define, gapVol.gasGap, gapVol.doubPhi, true));
         ATH_MSG_VERBOSE("Added new phi gap at "<<phiLayer);
@@ -215,16 +225,15 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         bool isValid{false};
         /// Retrieve first the station Identifier
         const Identifier elementID = idHelper.padID(idHelper.stationNameIndex(key_tokens[0].substr(0, 3)),
-                                                    atoi(key_tokens[2]),
-                                                    atoi(key_tokens[3]) + 1, 
-                                                    atoi(key_tokens[4]),
-                                                    atoi(key_tokens[6]),
-                                                    atoi(key_tokens[5]), 
+                                                    atoi(key_tokens[2]),      ///stationEta
+                                                    atoi(key_tokens[3]) + 1,  ///stationPhi
+                                                    atoi(key_tokens[4]),      ///DoubletR
+                                                    atoi(key_tokens[6]),      ///DoubletZ
+                                                    atoi(key_tokens[5]),      ///DoubletPhi
                                                     isValid);
-        if (!isValid){
+        if (!isValid) {
             ATH_MSG_FATAL("Failed to construct the station Identifier from "<<key);
             continue;
-            /// Keep it for this iteration
             // return StatusCode::FAILURE;
         }
         
@@ -243,7 +252,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
 StatusCode RpcReadoutGeomTool::readParameterBook(FactoryCache& cache) {
     ServiceHandle<IRDBAccessSvc> accessSvc(m_geoDbTagSvc->getParamSvcName(), name());
     ATH_CHECK(accessSvc.retrieve());
-    IRDBRecordset_ptr paramTable = accessSvc->getRecordsetPtr("TEST_WRPC", "");
+    IRDBRecordset_ptr paramTable = accessSvc->getRecordsetPtr("WRPC", "");
     if (paramTable->size() == 0) {
         ATH_MSG_FATAL("Empty parameter book table found");
         return StatusCode::FAILURE;
