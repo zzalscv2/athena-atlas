@@ -106,6 +106,7 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
   }
 
   state->setGeometryId(InvalidGeoID); // surface is invalid until set
+  m_surfaces.push_back(nullptr);
 
   return m_trackStates->size() - 1;
 }
