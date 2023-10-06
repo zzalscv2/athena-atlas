@@ -366,6 +366,8 @@ HLT_2j330_a10sd_cssk_pf_jes_ftf_35smcINF_presel2j225_L1jLJ140:
   eventCount: 0
 HLT_2j330_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CJ15:
   eventCount: 0
+HLT_2j330_a10sd_cssk_pf_jes_ftf_presel2j225_L1SC111-CjJ40:
+  eventCount: 0
 HLT_2j330_a10t_lcw_jes_35smcINF_L1J100:
   eventCount: 0
 HLT_2j330_a10t_lcw_jes_L1J100:
@@ -980,7 +982,11 @@ HLT_5j45c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn160_pf_ftf_presel5c25XXc25b85
   eventCount: 0
 HLT_5j65c_pf_ftf_presel5c50_L14J15:
   eventCount: 0
+HLT_5j65c_pf_ftf_presel5c50_L14jJ40:
+  eventCount: 0
 HLT_5j65c_pf_ftf_presel5c55_L14J15:
+  eventCount: 0
+HLT_5j65c_pf_ftf_presel5c55_L14jJ40:
   eventCount: 0
 HLT_5j70c_L14J15:
   eventCount: 0
@@ -4771,6 +4777,8 @@ HLT_j0_HT850XX0eta240_pf_ftf_preselj180_L1HT190-J15s5pETA21:
   eventCount: 0
 HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
   eventCount: 0
+HLT_j0_HT940_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21:
+  eventCount: 0
 HLT_j0_HT940_pf_ftf_preselj180_L1HT190-J15s5pETA21:
   eventCount: 0
 HLT_j0_HT940_pf_ftf_preselj180_L1HT190-jJ40s5pETA21:
@@ -5144,6 +5152,8 @@ HLT_j20_pf_ftf_presel6j40_PhysicsTLA_L14J15:
 HLT_j20_pf_ftf_preselcHT450_L1HT190-J15s5pETA21:
   eventCount: 0
 HLT_j20_pf_ftf_preselcHT450_PhysicsTLA_L1HT190-J15s5pETA21:
+  eventCount: 0
+HLT_j20_pf_ftf_preselcHT450_PhysicsTLA_L1HT190-jJ40s5pETA21:
   eventCount: 0
 HLT_j20_pf_ftf_preselcHT650_L1HT190-J15s5pETA21:
   eventCount: 0
