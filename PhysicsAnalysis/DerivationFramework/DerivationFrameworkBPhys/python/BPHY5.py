@@ -22,22 +22,20 @@ def BPHY5Cfg(flags):
        VertexContainer = "PrimaryVertices",
        TrackContainer = "InDetTrackParticles" )
 
-
-   from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-   acc.merge(LRTMuonMergerAlg( flags,
-                                PromptMuonLocation    = "Muons",
-                                LRTMuonLocation       = "MuonsLRT",
-                                OutputMuonLocation    = "StdWithLRTMuons",
-                                CreateViewCollection  = True))
-
-   from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
-   acc.merge(InDetLRTMergeCfg(flags))
-
-   mainMuonInput = "StdWithLRTMuons"
-   mainIDInput   = "InDetWithLRTTrackParticles"
-
-   toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"]
-   MuonReLink = [ "Muons", "MuonsLRT" ]
+   doLRT = flags.Tracking.doLargeD0
+   mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
+   mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
+   if doLRT:
+       from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+       acc.merge(LRTMuonMergerAlg( flags,
+                                   PromptMuonLocation    = "Muons",
+                                   LRTMuonLocation       = "MuonsLRT",
+                                   OutputMuonLocation    = mainMuonInput,
+                                   CreateViewCollection  = True))
+       from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+       acc.merge(InDetLRTMergeCfg(flags))
+   toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
+   MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
@@ -355,7 +353,7 @@ def BPHY5Cfg(flags):
    StaticContent += ["xAOD::VertexAuxContainer#BPHY5RefittedKstPrimaryVerticesAux."]
     
    ## ID track particles
-   AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"]
+   AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else ["InDetTrackParticles"]
     
    ## combined / extrapolated muon track particles 
    ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
@@ -364,7 +362,7 @@ def BPHY5Cfg(flags):
    AllVariables += ["ExtrapolatedMuonTrackParticles"]
    
    ## muon container
-   AllVariables += ["Muons", "MuonsLRT"] 
+   AllVariables += ["Muons", "MuonsLRT"] if doLRT else ["Muons"]
     
     
    ## Jpsi candidates 
