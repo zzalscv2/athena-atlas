@@ -9,11 +9,11 @@
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
-Reco_tf.py \
+Reco_tf.py --CA \
   --AMI q442 \
   --outputAODFile myAOD.pool.root \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
-  --postExec 'FPEAuditor.NStacktracesOnFPE=10;' \
+  --preExec 'flags.Exec.FPE=10' \
   --maxEvents -1
 
 rc1=$?
