@@ -1254,8 +1254,12 @@ void ZDCPulseAnalyzer::DoFit()
 	  //
 	  m_fitFailed = true;
 	}
-	
+
+	result_ptr = constrFit2Result_ptr;
 	fitWrapper->UnconstrainFit();
+      }
+      else {
+	result_ptr = unconstrFitResult_ptr;
       }
     }
   }
