@@ -13857,6 +13857,30 @@ HLT_j400_pf_ftf_preselj225_L1jJ180:
     0: 1
   stepFeatures:
     0: 1
+HLT_j40c_020jvt_j28c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 6
+    2: 5
+    3: 4
+  stepFeatures:
+    0: 45
+    1: 30
+    2: 110
+    3: 10
+HLT_j40c_020jvt_j40c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 6
+    2: 5
+    3: 4
+  stepFeatures:
+    0: 45
+    1: 30
+    2: 107
+    3: 10
 HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_L1J100:
   eventCount: 0
   stepCounts:
@@ -14429,6 +14453,30 @@ HLT_j55_0eta290_020jvt_bgn170_2j45f_pf_ftf_preselj45XX2f40_L1J25p0ETA23_2J15p31E
   eventCount: 0
 HLT_j55_0eta290_020jvt_bgn170_2j45f_pf_ftf_preselj45XX2f40_L1jJ55p0ETA23_2jJ40p31ETA49:
   eventCount: 0
+HLT_j55c_020jvt_j28c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 6
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 45
+    1: 30
+    2: 90
+    3: 9
+HLT_j55c_020jvt_j40c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 6
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 45
+    1: 30
+    2: 88
+    3: 9
 HLT_j55c_xe50_cell_L1J30_EMPTY:
   eventCount: 0
 HLT_j55c_xe50_cell_L1J30_FIRSTEMPTY:
@@ -14803,6 +14851,30 @@ HLT_j75_0eta290_020jvt_bgn170_j55_0eta290_020jvt_bgn185_j45f_pf_ftf_preselj60XXj
     0: 3
     1: 7
     2: 3
+HLT_j75c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 6
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 45
+    1: 30
+    2: 83
+    3: 9
+HLT_j75c_020jvt_j50c_020jvt_j20c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bgn177_pf_ftf_presel2c20XX2c20b85_L1MU8F_2J15_J20:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 6
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 45
+    1: 30
+    2: 80
+    3: 9
 ? HLT_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_2j20c_020jvt_bdl1d77_pf_ftf_presel2c20XX2c20b80_L1J45p0ETA21_3J15p0ETA25
 : eventCount: 7
   stepCounts:
