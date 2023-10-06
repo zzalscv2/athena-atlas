@@ -16,14 +16,15 @@ namespace MuonGMR4 {
     inline bool StripDesign::isFlipped() const { return m_isFlipped; }
     inline double StripDesign::stereoAngle() const {return m_stereoAngle; }
     inline int StripDesign::firstStripNumber() const { return m_channelShift; }
-            
     inline Amg::Vector2D StripDesign::stripPosition(int stripCh) const {
         return m_firstStripPos + (1.*stripCh) * stripPitch() *  Amg::Vector2D::UnitX();
     }
+    
     inline Amg::Vector2D StripDesign::leftInterSect(int stripCh, bool uncapped) const {
-        
         /// Nominal strip position position
-        const Amg::Vector2D stripPos = stripPosition(stripCh);       
+        return leftInterSect(stripPosition(stripCh), uncapped);       
+    }
+    inline Amg::Vector2D StripDesign::leftInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
         std::optional<double> lambda = MuonGM::intersect<2>(stripPos, m_stripDir, m_bottomLeft, m_dirBotEdge);
         if (!lambda) {
             ATH_MSG_WARNING("The strip "<<Amg::toString(stripPos,2)
@@ -44,10 +45,21 @@ namespace MuonGMR4 {
     }
 
     //============================================================================
+    inline double StripDesign::stripLength(int stripNumber) const {
+        const int stripCh = (stripNumber - m_channelShift);
+        if (stripCh < 0 ||  stripCh > numStrips()) {
+            ATH_MSG_WARNING("center() -- Invalid strip number given "<<stripNumber<<" allowed range ["
+                         <<m_channelShift<<";"<<numStrips()<<"]");
+            return 0.;
+        }
+        const Amg::Vector2D strip{stripPosition(stripCh)};
+        const Amg::Vector2D delta = rightInterSect(strip) - leftInterSect(strip);
+        return std::hypot(delta.x(), delta.y());
+    }
     inline Amg::Vector2D StripDesign::rightInterSect(int stripCh, bool uncapped) const {
-        
-        /// Nominal strip position position
-        const Amg::Vector2D stripPos = stripPosition(stripCh);       
+        return rightInterSect(stripPosition(stripCh), uncapped);
+    }
+    inline Amg::Vector2D StripDesign::rightInterSect(const Amg::Vector2D& stripPos, bool uncapped) const {
         /// We expect lambda to be positive
         const std::optional<double> lambda = MuonGM::intersect<2>(stripPos, m_stripDir, m_topRight, m_dirTopEdge);
         if (!lambda) {
