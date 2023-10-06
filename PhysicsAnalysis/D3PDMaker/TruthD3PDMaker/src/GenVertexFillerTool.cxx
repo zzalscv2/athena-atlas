@@ -13,7 +13,6 @@
 
 #include "GenVertexFillerTool.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "CLHEP/Geometry/Point3D.h"
 #include "AthenaKernel/errorcheck.h"
 
 

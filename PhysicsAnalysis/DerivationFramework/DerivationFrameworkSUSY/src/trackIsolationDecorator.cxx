@@ -11,8 +11,6 @@
 #include <vector>
 #include <string>
 
-#include "CLHEP/Units/SystemOfUnits.h"
-
 #include "xAODTracking/TrackingPrimitives.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
