@@ -106,9 +106,9 @@ struct TestTrackState {
 // @param [in] nMeasurements Dimension of the measurement
 template <typename track_state_t>
 void fillTrackState(const TestTrackState &pc, TrackStatePropMask mask,
-                    track_state_t &ts) {
+                    track_state_t &ts, bool checkSurf = true) {
   // always set the reference surface
-  // BOOST_CHECK_EQUAL(ts.hasReferenceSurface(), false); This currently fails (!)
+  if (checkSurf) BOOST_CHECK_EQUAL(ts.hasReferenceSurface(), false);
   ts.setReferenceSurface(pc.predicted.referenceSurface().getSharedPtr());
   BOOST_CHECK(ts.hasReferenceSurface());
 
@@ -663,9 +663,10 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
                                 TrackStatePropMask::Filtered |
                                 TrackStatePropMask::Jacobian);
   auto tso = mtj->getTrackState(i);
+
   fillTrackState(pc, TrackStatePropMask::Predicted, tso);
-  fillTrackState(pc, TrackStatePropMask::Filtered, tso);
-  fillTrackState(pc, TrackStatePropMask::Jacobian, tso);
+  fillTrackState(pc, TrackStatePropMask::Filtered, tso, false);
+  fillTrackState(pc, TrackStatePropMask::Jacobian, tso, false);
 
   BOOST_CHECK(tso.hasPredicted());
   BOOST_CHECK(tso.hasFiltered());
