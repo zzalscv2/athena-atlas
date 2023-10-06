@@ -8,7 +8,6 @@
 #include "../TrigEFTauMVHypoAlg.h"
 #include "../TrigTrkPrecHypoAlg.h"
 #include "../TrigTrkPrecHypoTool.h"
-#include "../TrigTauXComboHypoTool.h"
 #include "../TrigEFTauDiKaonHypoTool.h"
 
 DECLARE_COMPONENT( TrigTauCaloRoiUpdater )
@@ -21,5 +20,4 @@ DECLARE_COMPONENT( TrigTrkPrecHypoTool )
 DECLARE_COMPONENT( TrigTrkPrecHypoAlg )
 DECLARE_COMPONENT( TrigEFTauMVHypoAlg )
 DECLARE_COMPONENT( TrigEFTauMVHypoTool )
-DECLARE_COMPONENT( TrigTauXComboHypoTool )
 DECLARE_COMPONENT( TrigEFTauDiKaonHypoTool )

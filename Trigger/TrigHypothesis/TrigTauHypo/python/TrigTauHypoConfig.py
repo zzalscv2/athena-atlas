@@ -34,21 +34,6 @@ def tauTrackRoiUpdaterCfg(flags, inputRoIs, tracks):
     acc.addEventAlgo(alg)
     return acc
 
-@AccumulatorCache
-def tauTrackBDTRoiUpdaterCfg(flags, inputRoIs, tracks):
-    acc                               = ComponentAccumulator()
-    newflags = flags.Trigger.InDetTracking.tauIsoBDT
-    alg                               = CompFactory.TrigTauTrackRoiUpdater("TrackRoiUpdaterBDT",
-                                        etaHalfWidth                  = newflags.etaHalfWidth,
-                                        phiHalfWidth                  = newflags.phiHalfWidth,
-                                        z0HalfWidth                   = newflags.zedHalfWidth,
-                                        RoIInputKey                   = inputRoIs,
-                                        RoIOutputKey                  = "UpdatedTrackBDTRoI",
-                                        fastTracksKey                 = tracks,
-                                        BDTweights                    = f"{flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath}/{flags.Trigger.Offline.Tau.FTFTauCoreBDTConfig}",
-                                        Key_trigTauJetInputContainer  = "HLT_TrigTauRecMerged_CaloMVAOnly" )
-    acc.addEventAlgo(alg)
-    return acc
 
 @AccumulatorCache
 def tauLRTRoiUpdaterCfg(flags, inputRoIs, tracks):
