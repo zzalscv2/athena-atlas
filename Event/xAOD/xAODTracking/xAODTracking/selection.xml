@@ -143,17 +143,17 @@
           id="DDCD13AD-AB54-4D53-9D3F-6726AFF12CC7" />
    <typedef name="xAOD::TrackMeasurementAuxContainer" />
 
-   <!-- xAOD::TrackBackend interface type(s). -->
-   <class name="xAOD::TrackBackend_v1" />
-   <class name="xAOD::TrackBackendContainer_v1"
-          id="9422D96E-9DD1-44EE-9068-96BD64FB3118" />
-   <typedef name="xAOD::TrackBackend" />
-   <typedef name="xAOD::TrackBackendContainer" />
+   <!-- xAOD::TrackStorage interface type(s). -->
+   <class name="xAOD::TrackStorage_v1" />
+   <class name="xAOD::TrackStorageContainer_v1"
+          id="21C40007-DCB6-4D4C-93D1-DDBFAC344A6C" />
+   <typedef name="xAOD::TrackStorage" />
+   <typedef name="xAOD::TrackStorageContainer" />
 
-   <!-- xAOD::TrackBackend auxiliary type(s). -->
-   <class name="xAOD::TrackBackendAuxContainer_v1"
-          id="DFFB8821-70CB-4A13-A8Ef-94C87B96BACC" />
-   <typedef name="xAOD::TrackBackendAuxContainer" />
+   <!-- xAOD::TrackStorage auxiliary type(s). -->
+   <class name="xAOD::TrackStorageAuxContainer_v1"
+          id="4155ADB5-84BF-4A66-98E3-365BD7FCEA4C" />
+   <typedef name="xAOD::TrackStorageAuxContainer" />
 
    <!-- xAOD::TrackMeasurementValidation interface type(s). -->
    <class name="xAOD::TrackMeasurementValidation_v1" />
@@ -179,17 +179,17 @@
           id="797432BD-DBEE-4C08-BF8E-E0556434A3F3" />
    <typedef name="xAOD::TrackStateValidationAuxContainer" />
 
-   <!-- xAOD::SurfaceBackend interface type(s). -->
-   <class name="xAOD::SurfaceBackend_v1" />
-   <class name="xAOD::SurfaceBackendContainer_v1"
-          id="649aeb61-ffb0-4eee-97e4-c232e631a6bd" />
-   <typedef name="xAOD::SurfaceBackend" />
-   <typedef name="xAOD::SurfaceBackendContainer" />
+   <!-- xAOD::TrackSurface interface type(s). -->
+   <class name="xAOD::TrackSurface_v1" />
+   <class name="xAOD::TrackSurfaceContainer_v1"
+          id="787A1909-2C54-4296-B8B1-D6A786634368" />
+   <typedef name="xAOD::TrackSurface" />
+   <typedef name="xAOD::TrackSurfaceContainer" />
 
-   <!-- xAOD::SurfaceBackend auxiliary type(s). -->
-   <class name="xAOD::SurfaceBackendAuxContainer_v1"
-          id="54654d43-c918-42f6-840e-2b4feac21c75" />
-   <typedef name="xAOD::SurfaceBackendAuxContainer" />
+   <!-- xAOD::TrackSurface auxiliary type(s). -->
+   <class name="xAOD::TrackSurfaceAuxContainer_v1"
+          id="FF3EDC82-CBA1-4600-9CAC-2019E52E928A" />
+   <typedef name="xAOD::TrackSurfaceAuxContainer" />
    
    <!-- xAOD::SCTRawHitValidation interface type(s). -->
    <class name="xAOD::SCTRawHitValidation_v1" />

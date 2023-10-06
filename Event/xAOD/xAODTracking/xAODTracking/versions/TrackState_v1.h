@@ -8,7 +8,7 @@
 #include "AthContainers/AuxElement.h"
 #include "AthLinks/ElementLink.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
-#include "xAODTracking/SurfaceBackendContainer.h"
+#include "xAODTracking/TrackSurfaceContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
 
 namespace xAOD {
@@ -224,12 +224,12 @@ namespace xAOD {
         /**
          * @brief obtains link to the surface representation
          */
-        ElementLink<xAOD::SurfaceBackendContainer> surfaceLink() const;
+        ElementLink<xAOD::TrackSurfaceContainer> surfaceLink() const;
 
         /**
          * @brief sets link to the surface representation
          */
-        void setSurfaceLink(ElementLink<xAOD::SurfaceBackendContainer>);
+        void setSurfaceLink(ElementLink<xAOD::TrackSurfaceContainer>);
 
 
     };

@@ -16,8 +16,8 @@
 #include "xAODTracking/versions/TrackParametersContainer_v1.h"
 #include "xAODTracking/versions/TrackJacobianContainer_v1.h"
 #include "xAODTracking/versions/TrackMeasurementContainer_v1.h"
-#include "xAODTracking/versions/TrackBackendContainer_v1.h"
-#include "xAODTracking/versions/SurfaceBackendContainer_v1.h"
+#include "xAODTracking/versions/TrackStorageContainer_v1.h"
+#include "xAODTracking/versions/TrackSurfaceContainer_v1.h"
 
 // Set up the collection proxies:
 ADD_NS_DV_PROXY( xAOD, TrackParticleContainer_v1 );
@@ -30,5 +30,5 @@ ADD_NS_DV_PROXY( xAOD, TrackStateContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackParametersContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackJacobianContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackMeasurementContainer_v1 );
-ADD_NS_DV_PROXY( xAOD, TrackBackendContainer_v1 );
-ADD_NS_DV_PROXY( xAOD, SurfaceBackendContainer_v1 );
+ADD_NS_DV_PROXY( xAOD, TrackStorageContainer_v1 );
+ADD_NS_DV_PROXY( xAOD, TrackSurfaceContainer_v1 );

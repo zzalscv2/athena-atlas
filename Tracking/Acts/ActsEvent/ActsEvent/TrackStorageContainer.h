@@ -10,8 +10,8 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/HashedString.hpp"
 #include "ActsEvent/MultiTrajectory.h"
-#include "xAODTracking/TrackBackendContainer.h"
-#include "xAODTracking/TrackBackendAuxContainer.h"
+#include "xAODTracking/TrackStorageContainer.h"
+#include "xAODTracking/TrackStorageAuxContainer.h"
 
 
 
@@ -53,7 +53,7 @@ class TrackStorageContainer {
  public:
   using IndexType = Acts::MultiTrajectoryTraits::IndexType;
   static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
-  TrackStorageContainer(const DataLink<xAOD::TrackBackendContainer>& lin = nullptr);
+  TrackStorageContainer(const DataLink<xAOD::TrackStorageContainer>& lin = nullptr);
 
   /**
   * return true if the container has specific decoration
@@ -97,7 +97,7 @@ class TrackStorageContainer {
   template <typename T>
   const std::any decorationGetter(ActsTrk::IndexType, const std::string&) const;
   std::vector<ActsTrk::detail::Decoration> m_decorations;
-  DataLink<xAOD::TrackBackendContainer> m_backend = nullptr;
+  DataLink<xAOD::TrackStorageContainer> m_backend = nullptr;
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
 };
 
@@ -174,8 +174,8 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   friend class MutableTrackContainerHandle;
 
  private:
-  std::unique_ptr<xAOD::TrackBackendContainer> m_backend;
-  std::unique_ptr<xAOD::TrackBackendAuxContainer> m_backendAux;
+  std::unique_ptr<xAOD::TrackStorageContainer> m_backend;
+  std::unique_ptr<xAOD::TrackStorageAuxContainer> m_backendAux;
 
   template <typename T>
   std::any decorationSetter(ActsTrk::IndexType, const std::string&);

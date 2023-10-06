@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODTRACKING_VERSIONS_TRACKBACKEND_V1_H
-#define XAODTRACKING_VERSIONS_TRACKBACKEND_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKSTORAGE_V1_H
+#define XAODTRACKING_VERSIONS_TRACKSTORAGE_V1_H
 #include <cstdint>
 #include <vector>
 #include "AthLinks/ElementLink.h"
@@ -13,15 +13,15 @@
 namespace xAOD
 {
   /**
-   * @brief Track Backend for Acts MultiTrajectory
+   * @brief Track Storage for Acts MultiTrajectory
    **/
 
-  class TrackBackend_v1 : public SG::AuxElement
+  class TrackStorage_v1 : public SG::AuxElement
   {
   private:
     static const SG::AuxElement::Accessor<std::vector<double> > s_paramsAcc, s_covParamsAcc;
   public:
-    TrackBackend_v1() = default;
+    TrackStorage_v1() = default;
     /**
      * access track backend vector of const element
      **/

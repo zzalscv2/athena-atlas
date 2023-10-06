@@ -19,7 +19,7 @@
 #include "xAODTracking/TrackMeasurementAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
-#include "xAODTracking/SurfaceBackendAuxContainer.h"
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
 
 namespace {
 
@@ -170,9 +170,9 @@ struct EmptyMTJ {  // setup empty MTJ
         std::make_unique<xAOD::TrackMeasurementAuxContainer>();
     measurementsBackend->setStore(measurementsBackendAux.get());
 
-    surfacesBackend = std::make_unique<xAOD::SurfaceBackendContainer>();
+    surfacesBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
     surfacesBackendAux =
-        std::make_unique<xAOD::SurfaceBackendAuxContainer>();
+        std::make_unique<xAOD::TrackSurfaceAuxContainer>();
     surfacesBackend->setStore(surfacesBackendAux.get());
 
 
@@ -192,8 +192,8 @@ struct EmptyMTJ {  // setup empty MTJ
   std::unique_ptr<xAOD::TrackJacobianAuxContainer> jacobianBackendAux;
   std::unique_ptr<xAOD::TrackMeasurementContainer> measurementsBackend;
   std::unique_ptr<xAOD::TrackMeasurementAuxContainer> measurementsBackendAux;
-  std::unique_ptr<xAOD::SurfaceBackendContainer> surfacesBackend;
-  std::unique_ptr<xAOD::SurfaceBackendAuxContainer> surfacesBackendAux;
+  std::unique_ptr<xAOD::TrackSurfaceContainer> surfacesBackend;
+  std::unique_ptr<xAOD::TrackSurfaceAuxContainer> surfacesBackendAux;
 
   std::unique_ptr<ActsTrk::MutableMultiTrajectory> mtj;
   std::unique_ptr<ActsTrk::MultiTrajectory> ro_mtj;

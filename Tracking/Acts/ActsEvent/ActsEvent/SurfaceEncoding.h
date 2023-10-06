@@ -4,7 +4,7 @@
 #ifndef ActsEvent_SurfaceEncoding_h
 #define ActsEvent_SurfaceEncoding_h
 
-#include <xAODTracking/SurfaceBackend.h>
+#include <xAODTracking/TrackSurface.h>
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
@@ -22,13 +22,13 @@
 namespace ActsTrk {
 
 /**
- * Prepares persistifiable representation of surface into xAOD::SurfaceBackend
+ * Prepares persistifiable representation of surface into xAOD::TrackSurface
  * object
  * @warning supports only few types, unhandled surface type results in a
  * exception
  */
 
-void encodeSurface(xAOD::SurfaceBackend* backend, const Acts::Surface* surface,
+void encodeSurface(xAOD::TrackSurface* backend, const Acts::Surface* surface,
                    const ActsGeometryContext& geoContext);
 
 /**
@@ -37,7 +37,7 @@ void encodeSurface(xAOD::SurfaceBackend* backend, const Acts::Surface* surface,
  */
 
 std::shared_ptr<const Acts::Surface> decodeSurface(
-    const xAOD::SurfaceBackend* backend, const ActsGeometryContext& geoContext);
+    const xAOD::TrackSurface* backend, const ActsGeometryContext& geoContext);
 
 }  // namespace ActsTrk
 

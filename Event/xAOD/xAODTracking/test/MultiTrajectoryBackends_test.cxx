@@ -31,13 +31,13 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 
-#include "xAODTracking/TrackBackend.h"
-#include "xAODTracking/TrackBackendContainer.h"
-#include "xAODTracking/TrackBackendAuxContainer.h"
+#include "xAODTracking/TrackStorage.h"
+#include "xAODTracking/TrackStorageContainer.h"
+#include "xAODTracking/TrackStorageAuxContainer.h"
 
-#include "xAODTracking/SurfaceBackend.h"
-#include "xAODTracking/SurfaceBackendContainer.h"
-#include "xAODTracking/SurfaceBackendAuxContainer.h"
+#include "xAODTracking/TrackSurface.h"
+#include "xAODTracking/TrackSurfaceContainer.h"
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
 
 #include <any>
 
@@ -217,13 +217,13 @@ BOOST_AUTO_TEST_CASE(TrackJacobian_build) {
 BOOST_AUTO_TEST_CASE(TrackBackend_build) {
     constexpr static size_t sz = 6;
 
-    xAOD::TrackBackendContainer backend;
-    xAOD::TrackBackendAuxContainer aux;
+    xAOD::TrackStorageContainer backend;
+    xAOD::TrackStorageAuxContainer aux;
     backend.setStore(&aux);
 
     std::vector<double> semirandoms = {0.12, 0.92};
     for (const double sr : semirandoms) {    
-        auto par = new xAOD::TrackBackend();    
+        auto par = new xAOD::TrackStorage();    
         backend.push_back(par);
         par->resize();
         for ( size_t i = 0; i < sz; ++i) {
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(TrackBackend_build) {
     }
 
     for ( size_t p=0; p < semirandoms.size(); ++p) {
-        const xAOD::TrackBackend* par = backend.at(p);
+        const xAOD::TrackStorage* par = backend.at(p);
         for ( size_t i = 0; i < sz; ++i) {
             const double stored = par->paramsEigen()(i);
             const double expected = i * semirandoms[p];
@@ -252,15 +252,15 @@ BOOST_AUTO_TEST_CASE(TrackBackend_build) {
 
 
 // Test of surfaceBackend
-BOOST_AUTO_TEST_CASE(SurfaceBackend_build) {
+BOOST_AUTO_TEST_CASE(TrackSurface_build) {
 
-    xAOD::SurfaceBackendContainer backend;
-    xAOD::SurfaceBackendAuxContainer aux;
+    xAOD::TrackSurfaceContainer backend;
+    xAOD::TrackSurfaceAuxContainer aux;
     backend.setStore(&aux);
 
     std::vector<float> semirandoms = {0.12, 0.92, 0.33};
    
-    auto par = new xAOD::SurfaceBackend();    
+    auto par = new xAOD::TrackSurface();    
     backend.push_back(par);
     par->setTranslation(semirandoms);
     par->setRotation(semirandoms);
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(SurfaceBackend_build) {
     xAOD::SurfaceType type = xAOD::SurfaceType::Cylinder;
     par->setSurfaceType(type);
   
-    const xAOD::SurfaceBackend* outpar = backend.at(0);
+    const xAOD::TrackSurface* outpar = backend.at(0);
     for ( size_t p=0; p < semirandoms.size(); ++p) {
         const float expected = semirandoms[p];
         BOOST_CHECK_EQUAL(outpar->translation()[p], expected);

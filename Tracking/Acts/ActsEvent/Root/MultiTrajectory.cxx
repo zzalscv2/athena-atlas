@@ -24,8 +24,8 @@ ActsTrk::MutableMultiTrajectory::MutableMultiTrajectory() {
   m_trackMeasurementsAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
   m_trackMeasurements->setStore(m_trackMeasurementsAux.get());
 
-  m_surfacesBackend = std::make_unique<xAOD::SurfaceBackendContainer>();
-  m_surfacesBackendAux = std::make_unique<xAOD::SurfaceBackendAuxContainer>();
+  m_surfacesBackend = std::make_unique<xAOD::TrackSurfaceContainer>();
+  m_surfacesBackendAux = std::make_unique<xAOD::TrackSurfaceAuxContainer>();
   m_surfacesBackend->setStore(m_surfacesBackendAux.get());
   addColumn_impl<IndexType>("calibratedSourceLink");
 }
@@ -323,10 +323,10 @@ void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
 
   if (surface->geometryId().value() == 0) { // free surface, needs recording of properties
     m_surfaces[istate] = std::move(surface); // and memory management
-    auto surfaceBackend = new xAOD::SurfaceBackend();
+    auto surfaceBackend = new xAOD::TrackSurface();
     m_surfacesBackend->push_back(surfaceBackend);
     encodeSurface(surfaceBackend, surface.get(), m_geoContext); // TODO
-    auto el = ElementLink<xAOD::SurfaceBackendContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
+    auto el = ElementLink<xAOD::TrackSurfaceContainer>(*m_surfacesBackend, m_surfacesBackend->size()-1);
     trackStates()[istate]->setSurfaceLink(el);
 
   } else {
@@ -512,7 +512,7 @@ void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, c
       if ( geoID != 0 ) {
         m_surfaces[i] = geo->findSurface(geoID);
       } else {
-        ElementLink<xAOD::SurfaceBackendContainer> backendLink = (*m_trackStates)[i]->surfaceLink();
+        ElementLink<xAOD::TrackSurfaceContainer> backendLink = (*m_trackStates)[i]->surfaceLink();
         std::shared_ptr<const Acts::Surface> surface = decodeSurface( *backendLink, geoContext);
         m_surfaces[i] = surface; // TODO
 
