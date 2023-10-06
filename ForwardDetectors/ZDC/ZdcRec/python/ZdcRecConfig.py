@@ -68,7 +68,7 @@ def ZdcTrigValToolCfg(flags, config = 'LHCf2022'):
         name = 'ZdcTrigValTool',
         WriteAux = True,
         AuxSuffix = "",
-        filepath_LUT = "TrigT1ZDC/zdcRun3T1LUT_v1_30_05_2023.json")
+        filepath_LUT = flags.Trigger.ZdcLUT)
         
     trigValTool.TrigDecisionTool = acc.getPublicTool('TrigDecisionTool')
     

@@ -51,11 +51,11 @@ StatusCode ZdcTrigValidTool::initialize() {
    
   // Obtain LUTs from Calibration Area
   // A data member to hold the side A LUT values
-  std::array<unsigned int, 4096> sideALUT = data["LucrodLowGain"]["LUTs"]["sideA"];
+  std::array<unsigned int, 4096> sideALUT = data["LucrodHighGain"]["LUTs"]["sideA"];
   // A data member to hold the side C LUT values
-  std::array<unsigned int, 4096> sideCLUT = data["LucrodLowGain"]["LUTs"]["sideC"];
+  std::array<unsigned int, 4096> sideCLUT = data["LucrodHighGain"]["LUTs"]["sideC"];
   // A data member to hold the Combined LUT values
-  std::array<unsigned int, 256> combLUT = data["LucrodLowGain"]["LUTs"]["comb"];
+  std::array<unsigned int, 256> combLUT = data["LucrodHighGain"]["LUTs"]["comb"];
   
   //Construct Trigger Map
   m_triggerMap.insert({"L1_ZDC_BIT0",0});
@@ -67,8 +67,8 @@ StatusCode ZdcTrigValidTool::initialize() {
   m_simTrig = std::make_shared<ZDCTriggerSimModuleAmpls>(ZDCTriggerSimModuleAmpls(sideALUT, sideCLUT, combLUT));
   ATH_MSG_INFO(m_name<<" Initialised");
 
-  m_zdcModuleMaxADC = "ZdcModules.MaxADC"+m_auxSuffix;
-  ATH_CHECK(m_zdcModuleMaxADC.initialize());
+  m_zdcModuleAmp = "ZdcModules.Amplitude"+m_auxSuffix;
+  ATH_CHECK(m_zdcModuleAmp.initialize());
   m_trigValStatus = "ZdcSums.TrigValStatus"+m_auxSuffix;
   ATH_CHECK(m_trigValStatus.initialize());
 
@@ -81,7 +81,7 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
 { 
   std::vector<float> moduleEnergy = {0., 0., 0., 0., 0., 0., 0., 0.};
 
-  SG::ReadDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleMaxADC(m_zdcModuleMaxADC);
+  SG::ReadDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmp(m_zdcModuleAmp);
 
   bool trigMatch = false;
   for (const auto zdcModule : moduleContainer) {
@@ -89,12 +89,12 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
     
     // Side A
     if (zdcModule->zdcSide() > 0) {
-      moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleMaxADC(*zdcModule);
+      moduleEnergy.at(zdcModule->zdcModule()) = zdcModuleAmp(*zdcModule);
     }
     
     // Side C
     if (zdcModule->zdcSide() < 0) {
-      moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleMaxADC(*zdcModule);
+      moduleEnergy.at(zdcModule->zdcModule() + 4) = zdcModuleAmp(*zdcModule);
     }
   } 
   // Get Output as an integer (0-7)
@@ -108,6 +108,8 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
   
   // get trigger decision tool
   const auto &trigDecTool = m_trigDecTool;
+  unsigned int wordOutCTP = 0;
+  
   
   // iterate through zdc bit output from CTP, validate that they match above bitset
   for (const auto &trig : m_triggerList)
@@ -115,24 +117,22 @@ StatusCode ZdcTrigValidTool::recoZdcModules(const xAOD::ZdcModuleContainer& modu
 
       if (m_triggerMap.find(trig) == m_triggerMap.end())
         continue;
-      if (not trigDecTool->isPassed(trig, TrigDefs::requireDecision)) {
+      if (not trigDecTool->isPassed(trig, TrigDefs::Physics | TrigDefs::allowResurrectedDecision))
+      {
         ATH_MSG_DEBUG("Chain " << trig << " is passed: NO");
-        if (bin[m_triggerMap[trig]] == 0)
-          trigMatch = true;
         continue;
       }
       ATH_MSG_DEBUG("Chain " << trig << " is passed: YES");
-      if (bin[m_triggerMap[trig]] == 1 )
-        trigMatch = true;
+      wordOutCTP += 1 << m_triggerMap[trig];
     }
-  
+    
+  trigMatch = (wordOut == wordOutCTP) ? 1 : 0;
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> trigValStatus(m_trigValStatus);
 
   // write 1 if decision from ZDC firmware matches CTP, 0 otherwize  
   for(const auto zdc_sum : moduleSumContainer){
     if(m_writeAux) trigValStatus(*zdc_sum) = trigMatch;
   }
-
   ATH_MSG_DEBUG("ZDC Trigger Status: "  << trigMatch);
 
 return StatusCode::SUCCESS;
