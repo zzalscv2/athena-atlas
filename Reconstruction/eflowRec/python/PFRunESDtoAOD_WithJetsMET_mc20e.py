@@ -16,6 +16,8 @@ if __name__=="__main__":
     myList.remove('EMOriginTopoClusters')
     myList.remove('LCOriginTopoClusters')
     cfgFlags.Input.Collections = myList
+    cfgFlags.Tau.doTJVA = False #does not run from ESD - cannot access EventInfo (config problem in taau config?)
+    cfgFlags.Tau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
     cfgFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -45,10 +47,11 @@ if __name__=="__main__":
     cfg.merge(result)
 
     from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
+    from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow, AntiKt4LCTopo
     from JetRecConfig.JetConfigFlags import jetInternalFlags  
     jetInternalFlags.isRecoJob = True
     cfg.merge( JetRecCfg(cfgFlags,AntiKt4EMPFlow) )     
+    cfg.merge( JetRecCfg(cfgFlags,AntiKt4LCTopo) )
     
     #Now do MET config
 
@@ -61,6 +64,15 @@ if __name__=="__main__":
 
     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
     cfg.merge(PFGlobalFlowElementLinkingCfg(cfgFlags))
+
+
+    from tauRec.TauConfig import TauReconstructionCfg
+    cfg.merge(TauReconstructionCfg(cfgFlags))
+
+    from eflowRec.PFTauRemaps import PFTauRemaps
+    tauRemaps = PFTauRemaps()
+    for mapping in tauRemaps:
+        cfg.merge(mapping)
 
     #Now build the pflow MET association map and then add the METMaker algorithm
     from METReconstruction.METAssociatorCfg import METAssociatorCfg

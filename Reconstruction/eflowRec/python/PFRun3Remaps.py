@@ -4,6 +4,24 @@ def ListRemaps():
     #function to get all of the remapped names needed in PFRun3Config.py
     from SGComps.AddressRemappingConfig import InputRenameCfg
     list_remaps=[        
+        #Remap input containers, that we rebuild from the ESD
+        #Remap the calibrated and origin corrected topoclusters
+        InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters','CaloCalTopoClusters_renamed'),
+        InputRenameCfg ('xAOD::CaloClusterContainerAux','CaloCalTopoClustersAux.','CaloCalTopoClusters_renamedAux.'),
+        InputRenameCfg ('CaloClusterCellLinkContainer', 'CaloCalTopoClusters_links', 'CaloCalTopoClusters_links_renamed'),
+        InputRenameCfg ('xAOD::CaloClusterContainer','LCOriginTopoClusters','LCOriginTopoClusters_renamed'),
+        InputRenameCfg ('xAOD::ShallowAuxContainer', 'LCOriginTopoClustersAux.', 'LCOriginTopoClusters_renamedAux.'),
+        InputRenameCfg ('xAOD::CaloClusterContainer','EMOriginTopoClusters','EMOriginTopoClusters_renamed'),
+        InputRenameCfg( 'xAOD::ShallowAuxContainer', 'EMOriginTopoClustersAux.', 'EMOriginTopoClusters_renamedAux.'),
+
+        #Remap containers that pflow will rebuild
+        InputRenameCfg('xAOD::FlowElementContainer','JetETMissChargedParticleFlowObjects','JetETMissChargedParticleFlowObjects_renamed'),
+        InputRenameCfg('xAOD::FlowElementAuxContainer','JetETMissChargedParticleFlowObjectsAux.','JetETMissChargedParticleFlowObjects_renamedAux.'),
+        InputRenameCfg('xAOD::FlowElementContainer','JetETMissNeutralParticleFlowObjects','JetETMissNeutralParticleFlowObjects_renamed'),
+        InputRenameCfg('xAOD::FlowElementAuxContainer','JetETMissNeutralParticleFlowObjectsAux.','JetETMissNeutralParticleFlowObjects_renamedAux.'),
+
+        #Remap the decorations on other containers that pflow will recreate
+        #EGamma
         InputRenameCfg ('xAOD::ElectronContainer','Electrons.chargedFELinks','Electrons.chargedFELinks_renamed'),
         InputRenameCfg ('xAOD::ElectronContainer','Electrons.neutralFELinks','Electrons.neutralFELinks_renamed'),
         InputRenameCfg ('xAOD::PhotonContainer','Photons.chargedFELinks','Photons.chargedFELinks_renamed'),
@@ -12,20 +30,15 @@ def ListRemaps():
         InputRenameCfg ('xAOD::ElectronContainer','Electrons.chargedpfoLinks','Electrons.chargedpfoLinks_renamed'),
         InputRenameCfg ('xAOD::PhotonContainer','Photons.neutralpfoLinks','Photons.neutralpfoLinks_renamed'),
         InputRenameCfg ('xAOD::PhotonContainer','Photons.chargedpfoLinks','Photons.chargedpfoLinks_renamed'),
-        #Remap the Muon decorations for FE
+        #Muons
         InputRenameCfg ('xAOD::MuonContainer','Muons.chargedFELinks','Muons.chargedFELinks_renamed'),
         InputRenameCfg ('xAOD::MuonContainer','Muons.neutralFELinks','Muons.neutralFELinks_renamed'),
         InputRenameCfg ('xAOD::MuonContainer','Muons.muon_efrac_matched_FE','Muons.muon_efrac_matched_FE_renamed'),
-        InputRenameCfg ('xAOD::MuonContainer','Muons.ClusterInfo_deltaR','Muons.ClusterInfo_deltaR_renamed'),        
-        #Remap the Tau decorations for FE
+        InputRenameCfg ('xAOD::MuonContainer','Muons.ClusterInfo_deltaR','Muons.ClusterInfo_deltaR_renamed'),  
+        InputRenameCfg ('xAOD::CaloClusterContainer','MuonClusterCollection.constituentClusterLinks','MuonClusterCollection.constituentClusterLinks_renamed'),      
+        #Taus
         InputRenameCfg ('xAOD::TauJetContainer','TauJets.neutralFELinks','TauJets.neutralFELinks_renamed'),
         InputRenameCfg ('xAOD::TauJetContainer','TauJets.chargedFELinks','TauJets.chargedFELinks_renamed'),        
-        #Remap the calibrated and origin corrected topoclusters
-        InputRenameCfg ('xAOD::CaloClusterContainer','CaloCalTopoClusters','CaloCalTopoClusters_renamed'),
-        InputRenameCfg ('xAOD::CaloClusterContainer','LCOriginTopoClusters','LCOriginTopoClusters_renamed'),
-        InputRenameCfg ('xAOD::CaloClusterContainer','EMOriginTopoClusters','EMOriginTopoClusters_renamed'),
-        #Remap the muon cluster links to topoclusters
-        InputRenameCfg ('xAOD::CaloClusterContainer','MuonClusterCollection.constituentClusterLinks','MuonClusterCollection.constituentClusterLinks_renamed')
     ]
     
     return list_remaps
