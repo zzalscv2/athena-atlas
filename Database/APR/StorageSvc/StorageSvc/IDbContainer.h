@@ -56,7 +56,7 @@ namespace pool    {
     /// Release the technology specific implementation
     virtual void release() = 0;
     /// Access to container size
-    virtual long long int size() = 0;
+    virtual uint64_t size() = 0;
     /// Get container name
     virtual std::string name() const = 0;
     /// Ask if a given shape is supported
@@ -79,9 +79,9 @@ namespace pool    {
                             DbContainer&  cntH) = 0;
 
     /// Number of next record in the container (=size if no delete is allowed)
-    virtual long long int nextRecordId() = 0;
+    virtual uint64_t nextRecordId() = 0;
     /// Suggest next Record ID for tbe next object written - used only with synced indexes
-    virtual void useNextRecordId(long long int) = 0;
+    virtual void useNextRecordId(uint64_t) = 0;
 
     /// Close the container
     virtual DbStatus close() = 0;

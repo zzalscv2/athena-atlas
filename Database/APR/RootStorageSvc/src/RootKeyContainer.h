@@ -81,9 +81,9 @@ namespace pool  {
     /// Define selection criteria
     virtual DbStatus select(DbSelect& criteria);
     /// Number of entries within the container
-    virtual long long int size();
+    virtual uint64_t size();
     /// Number of record in the container
-    virtual long long int nextRecordId();
+    virtual uint64_t nextRecordId();
     /// Fetch next object address of the selection to set token
     virtual DbStatus fetch(DbSelect&      sel);
     /// Fetch a column identified by its link in the container

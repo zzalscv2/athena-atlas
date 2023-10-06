@@ -36,7 +36,7 @@ namespace RootAuxDynIO
       // store data ptr for the first row, when only creating the model
       std::map<std::string, void*>        m_attrDataMap;
 
-      std::unique_ptr<RNTupleModel>       m_model = RNTupleModel::Create();
+      std::unique_ptr<RNTupleModel>       m_model;
       std::unique_ptr<REntry>             m_entry;
       std::unique_ptr<RNTupleWriter>      m_ntupleWriter;
 
@@ -44,9 +44,11 @@ namespace RootAuxDynIO
       TFile*               m_tfile;
       RNTupleWriteOptions  m_opts;
       int                  m_rowN = 0;
+
       /// Count how many APR Containers are writing to this RNTuple (more than one makes a Group)
       int                  m_clients = 0;
       bool                 m_needsCommit = false;
+
 
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       /// default-constructed objects to fill out blanks

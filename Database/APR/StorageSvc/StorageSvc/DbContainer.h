@@ -99,7 +99,7 @@ namespace pool  {
     /// Mode of the handle (READ,WRITE,...)
     DbAccessMode openMode() const;
     /// Access to the size of the container
-    long long int size();
+    uint64_t size();
     /// Access to the Database the container resides in
     DbDatabase& containedIn();
     /// Allow access to the Database implementation

@@ -81,28 +81,31 @@ class RNTupleContainer : public DbContainerImp {
   };
 
  protected:
-  /// Reference to exact type description
-  const DbTypeInfo* m_type;
-  /// List of field descriptors
-  std::vector<FieldDesc> m_fieldDescs;
-  /// Parent Database handle
-  DbDatabase m_dbH;
-  /// Root database file reference
-  RootDatabase* m_rootDb;
-  /// Number of bytes written/read during last operation. Set to -1 if it
-  /// failed.
-  int m_ioBytes;
-  /// Flag set on writing to prevent double writes in the same commit
-  bool m_isDirty;
+   /// reference to exact type description
+   const DbTypeInfo*  m_type;
+   /// List of field descriptors
+   std::vector<FieldDesc>  m_fieldDescs;
+   /// Parent Database handle
+   DbDatabase         m_dbH;
+   /// Root database file reference
+   RootDatabase*      m_rootDb;
+   /// Number of bytes written/read during last operation. Set to -1 if it failed.
+   int                m_ioBytes;
+   /// flag set on writing to prevent double writes in the same commit
+   bool               m_isDirty;
 
-  RootAuxDynIO::IRNTupleWriter* m_ntupleWriter = nullptr;
-  RNTupleReader* m_ntupleReader = nullptr;
+   uint64_t           m_index;
+   uint64_t           m_indexSize;
+   int64_t            m_indexBump;
+   const uint32_t     m_indexMulti;
+
+   RootAuxDynIO::IRNTupleWriter*     m_ntupleWriter = nullptr;
+   RNTupleReader*                    m_ntupleReader = nullptr;
 
  public:
-  /// Standard constructor
+   /// Standard constructor
   RNTupleContainer();
 
-  /// Standard destructor
   virtual ~RNTupleContainer();
 
   /// Close the container and deallocate resources
@@ -131,7 +134,7 @@ class RNTupleContainer : public DbContainerImp {
   virtual DbStatus isShapeSupported(const DbTypeInfo* typ) const override final;
 
   /// Number of entries within the container
-  virtual long long int size() override final;
+  virtual uint64_t size() override final;
 
   /// Return the name of the container
   const std::string& getName() const { return m_name; }
@@ -158,6 +161,10 @@ class RNTupleContainer : public DbContainerImp {
 
   /// Commit single entry to container
   virtual DbStatus writeObject(ActionList::value_type&) override final;
+
+  virtual uint64_t nextRecordId() override final;
+
+  virtual void useNextRecordId(uint64_t nextID) override final;
 
   /// Define selection criteria
   virtual DbStatus select(DbSelect& criteria) override final;

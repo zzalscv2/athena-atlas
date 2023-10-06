@@ -117,14 +117,14 @@ namespace pool    {
     /// Attach sections to container object
     virtual void setSections(const Sections& sections) override { m_sections = sections; }
     /// Size of the container
-    virtual long long int size() override;
+    virtual uint64_t size() override;
     /// Get container name
     virtual std::string name() const override
     { return m_name; }
     /// Number of next record in the container (=size if no delete is allowed)
-    virtual long long int nextRecordId() override;
+    virtual uint64_t nextRecordId() override;
     /// Suggest next Record ID for tbe next object written - used only with synced indexes
-    virtual void useNextRecordId(long long int) override {};
+    virtual void useNextRecordId(uint64_t) override {};
     /// Close the container and deallocate resources
     virtual DbStatus close() override;
 

@@ -32,9 +32,9 @@ DbStatus RootTreeIndexContainer::open( DbDatabase& dbH,
 }
 
 
-long long int RootTreeIndexContainer::nextRecordId()
+uint64_t RootTreeIndexContainer::nextRecordId()
 {
-   int64_t  s = m_index_multi;
+   uint64_t  s = m_index_multi;
    s = s << 32;
    if (m_indexBranch == nullptr ) {
       s += RootTreeContainer::nextRecordId();
@@ -44,7 +44,7 @@ long long int RootTreeIndexContainer::nextRecordId()
    return s + m_indexBump;
 }
 
-void RootTreeIndexContainer::useNextRecordId(long long int nextID)
+void RootTreeIndexContainer::useNextRecordId(uint64_t nextID)
 {
    // Find out how this TTree index is behind the master index in the DB
    m_indexBump = m_indexBranch? nextID - m_rootDb->indexSize(m_indexBranch) : nextID;

@@ -54,31 +54,31 @@ RootKeyContainer::~RootKeyContainer()   {
   RootKeyContainer::close();
 }
 
-long long int RootKeyContainer::nextRecordId()    {
+uint64_t RootKeyContainer::nextRecordId()    {
   if ( m_dir )  {
     TList* list = m_dir->GetListOfKeys();
     if ( list ) {
-      int s1 = 0;
+      unsigned s1 = 0;
       TKey* k = (TKey*)list->Last();
       if ( k ) {
-        ::sscanf(k->GetName(), "_pool_valid_%08d", &s1);
+        ::sscanf(k->GetName(), "_pool_valid_%08u", &s1);
         ++s1;
       }
-      long long int s2 = DbContainerImp::size(); // Number of objects on commit stack
+      auto s2 = DbContainerImp::size(); // Number of objects on commit stack
       return s1+s2;
     }
   }
   return -1;
 }
 
-long long int RootKeyContainer::size()    {
+uint64_t RootKeyContainer::size()    {
   if ( m_dir )  {
     TList* list = m_dir->GetListOfKeys();
     if ( list ) {
       // Number of committed objects
-      long long int s1 = list->GetSize();
+      auto s1 = list->GetSize();
       // Number of objects on commit write stack
-      long long int s2 = DbContainerImp::size();
+      auto s2 = DbContainerImp::size();
       return s1+s2;
     }
   }
@@ -190,7 +190,7 @@ DbStatus RootKeyContainer::load( void** ptr, ShapeH shape,
     }
     oid.second++;
   }
-  if ( linkH.second < 0 || linkH.second <= size() ) {
+  if ( linkH.second < 0 || (uint64_t)linkH.second <= size() ) {
     DbPrint log( m_name );
     log << DbPrintLvl::Debug << "No objects passing selection criteria..." 
         << " Container has " << size() << " Entries in total." << DbPrint::endmsg;

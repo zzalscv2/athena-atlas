@@ -21,6 +21,7 @@ namespace RootAuxDynIO
 
    RNTupleAuxDynWriter::RNTupleAuxDynWriter(TFile* file, const std::string& ntupleName, int compression) :
          AthMessaging(std::string("RNTupleAuxDynWriter[")+ntupleName+"]"),
+         m_model( RNTupleModel::Create() ),
          m_ntupleName( ntupleName ),
          m_tfile( file )
       {
@@ -30,6 +31,7 @@ namespace RootAuxDynIO
          m_opts.SetCompression( compression );
          m_opts.SetUseBufferedWrite( false );
          m_model->SetDescription( ntupleName );
+         addField("index_ref", "std::uint64_t");
       }
 
 
@@ -94,7 +96,7 @@ namespace RootAuxDynIO
 #endif
    }
 
-   /// Add a new field to the RNTuple - for now only allowed before the first write
+   /// Add a new field to the RNTuple
    /// Used for data objects from RNTupleContainer, not for dynamic attributes
    void RNTupleAuxDynWriter::addField( const std::string& field_name, const std::string& attr_type )
    {
@@ -144,7 +146,7 @@ namespace RootAuxDynIO
 
 
    int RNTupleAuxDynWriter::commit()
-   {
+{
 #if ROOT_VERSION_CODE >= ROOT_VERSION( 6, 29, 0 )
       // write only if there was data added, ignore empty commits
       if( !needsCommit() ) {
@@ -153,6 +155,7 @@ namespace RootAuxDynIO
       }
       ATH_MSG_DEBUG("Commit, row=" << m_rowN << " : " << m_ntupleName );
       if( !m_entry ) makeNewEntry();
+      // update index field before commit 
 
       int num_bytes = 0;
       ATH_MSG_DEBUG(m_ntupleName << " has " <<  m_attrDataMap.size() << " attributes");
