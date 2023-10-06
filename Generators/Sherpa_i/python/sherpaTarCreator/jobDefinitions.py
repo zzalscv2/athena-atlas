@@ -54,7 +54,8 @@ def mkCreateLibsJob(options, prevJob):
     if not ("createLibs" in options.performOnly or "all" in options.performOnly):
         return None
 
-    if len(glob.glob("Process/*.db"))>0:
+    procName = "Process/*.db" if os.environ["SHERPAVER"].startswith('2.') else "Process/*.zip"
+    if len(glob.glob(procName)) > 0:
         return None
 
     job = options.batchSystemModule.batchJob("1.createLibs", hours=48, nCores=1, memMB=options.createLibsRAM, basedir=options.jobOptionDir[0])
@@ -165,12 +166,17 @@ def mkIntegrateJob(options, ecm, prevJob):
     job.cmds += ["source $AtlasSetup/scripts/asetup.sh "+options.athenaVersion]
     job.cmds += ["set -e"]
 
-    #write rundata into Run.dat file for integration
+    if os.environ["SHERPAVER"].startswith('3.'):
+        # write base fragment into Base.yaml
+        job.cmds += [options.Sherpa_i.BaseFragment]
+        job.cmds += ["cat > Base.yaml <<EOL"]
+        job.cmds += [options.Sherpa_i.BaseFragment]
+        job.cmds += ["EOL"]
+        # disable ATLAS RNG as integration job runs outside Athena
+        job.cmds += [r"sed '/.*EXTERNAL_RNG.*/d' -i Base.yaml"]
+    #write rundata into Run.dat/Sherpa.yaml file for integration
     configname = "Run.dat" if os.environ["SHERPAVER"].startswith('2.') else "Sherpa.yaml"
     job.cmds += ["cat > "+configname+" <<EOL"]
-    if os.environ["SHERPAVER"].startswith('3.'):
-        # prepend base fragment
-        job.cmds += [options.Sherpa_i.BaseFragment]
     job.cmds += [options.Sherpa_i.RunCard]
     job.cmds += ["EOL"]
     #append infos in options
@@ -189,9 +195,6 @@ def mkIntegrateJob(options, ecm, prevJob):
                 job.cmds += [r"sed '/.*\}(run).*/i\ \ "+s+"' -i Run.dat"]
             else:
                 job.cmds += [r"sed '/.*PROCESSES:.*/i"+s+"\\n' -i Sherpa.yaml"]
-    if os.environ["SHERPAVER"].startswith('3.'):
-        # disable ATLAS RNG as integration job runs outside Athena
-        job.cmds += [r"sed '/.*EXTERNAL_RNG.*/d' -i Sherpa.yaml"]
 
     olpath = str(os.environ['OPENLOOPSPATH'])
     lcglayer = olpath[olpath.find("LCG_"):olpath.find("/MCGenerators")]
@@ -219,12 +222,21 @@ def mkIntegrateJob(options, ecm, prevJob):
     job.cmds += ["export PATH="+openmpi_path+":$PATH"]
     job.cmds += ["export LHAPATH=/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current:/cvmfs/atlas.cern.ch/repo/sw/Generators/lhapdfsets/current/"]
     job.cmds += ["export OPAL_PREFIX="+opal_prefix]
-    job.cmds += ["export LD_LIBRARY_PATH="+ld_library_path+":"+sftbase+"/sqlite/*/${LCG_PLATFORM}/lib:"+sftbase+"/HepMC/*/${LCG_PLATFORM}/lib:"+sftlayer+"/MCGenerators/lhapdf/*/${LCG_PLATFORM}/lib:"+sftlayer+"/fastjet/*/${LCG_PLATFORM}/lib:"+olpath+"/lib:"+olpath+"/proclib:"+options.sherpaInstallPath+"/lib/SHERPA-MC:$LD_LIBRARY_PATH"]
+    job.cmds += ["export LD_LIBRARY_PATH="+ld_library_path+":" \
+                                          +sftbase+"/zlib/*/${LCG_PLATFORM}/lib:" \
+                                          +sftbase+"/sqlite/*/${LCG_PLATFORM}/lib:" \
+                                          +sftbase+"/HepMC/*/${LCG_PLATFORM}/lib:" \
+                                          +sftlayer+"/MCGenerators/lhapdf/*/${LCG_PLATFORM}/lib:" \
+                                          +sftlayer+"/fastjet/*/${LCG_PLATFORM}/lib:" \
+                                          +olpath+"/lib:"+olpath+"/proclib:" \
+                                          +options.sherpaInstallPath+"/lib/SHERPA-MC:$LD_LIBRARY_PATH"]
 
+    cmdLineOpts = "EVENTS=0 FRAGMENTATION=Off MI_HANDLER=None"
     if os.environ["SHERPAVER"].startswith('2.'):
-        job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa EVENTS=0 FRAGMENTATION=Off MI_HANDLER=None BEAM_ENERGY_1="+str(ecm/2.*1000)+" BEAM_ENERGY_2="+str(ecm/2.*1000)]
+        cmdLineOpts += " BEAM_ENERGY_1="+str(ecm/2.*1000)+" BEAM_ENERGY_2="+str(ecm/2.*1000)
     else:
-        job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa EVENTS=0 BEAM_ENERGIES="+str(ecm/2.*1000)]
+        cmdLineOpts += " \"RUNDATA: [Base.yaml, Sherpa.yaml]\" BEAM_ENERGIES="+str(ecm/2.*1000)
+    job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa "+cmdLineOpts]
 
     job.write(extraDirs=[options.jobOptionDir[0]])
     job.submit(dryRun=options.dryRun)
