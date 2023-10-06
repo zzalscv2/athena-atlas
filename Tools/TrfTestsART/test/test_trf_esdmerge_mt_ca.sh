@@ -1,24 +1,24 @@
 #!/bin/bash
 #
-# art-description: ESDMerge_tf.py mt
+# art-description: ESDMerge_tf.py mt and CA
 # art-type: grid
+# art-include: main/Athena
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 
-ESDMerge_tf.py \
+ESDMerge_tf.py --CA \
     --multithreaded="True" \
     --inputESDFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/DESDM_MCP.26614755._001203.pool.root.1,/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/DESDM_MCP.26614755._001208.pool.root.1 \
-    --postInclude="all:PyJobTransforms/UseFrontier.py" \
+    --preExec 'flags.Exec.FPE=10' \
     --autoConfiguration="everything" \
     --conditionsTag="all:CONDBR2-BLKPA-RUN2-11" \
     --geometryVersion="all:ATLAS-R2-2016-01-00-01" \
     --runNumber="358031" \
     --outputESD_MRGFile="DESDM_MCP.pool.root" \
-    --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
     --AMITag="p4756" 
 
 rc1=$?
-echo "art-result: ${rc1} ESDMerge_tf_mt"
+echo "art-result: ${rc1} ESDMerge_tf_mt_ca"
 
 # Check for FPEs in the logiles
 test_trf_check_fpe.sh
