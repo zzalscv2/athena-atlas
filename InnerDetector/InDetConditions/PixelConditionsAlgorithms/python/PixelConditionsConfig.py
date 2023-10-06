@@ -25,19 +25,10 @@ def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
             EndcapTimeOffset=[100.0,100.0,100.0],
             DBMTimeOffset=[100.0,100.0,100.0]
         )
-
-    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
-        # for data, make sure no Lorentz angle correction
-        CondArgs.update(
-            BarrelLorentzAngleCorr2016 = [  1.0,  1.0,  1.0,  1.0],
-            EndcapLorentzAngleCorr2016 = [  1.0,  1.0,  1.0],
-            BarrelLorentzAngleCorr2017 = [  1.0,  1.0,  1.0,  1.0],
-            EndcapLorentzAngleCorr2017 = [  1.0,  1.0,  1.0],
-            BarrelLorentzAngleCorr2018 = [  1.0,  1.0,  1.0,  1.0],
-            EndcapLorentzAngleCorr2018 = [  1.0,  1.0,  1.0],
-            BarrelLorentzAngleCorrRUN1 = [  1.0,  1.0,  1.0],
-            EndcapLorentzAngleCorrRUN1 = [  1.0,  1.0,  1.0],
-        )
+    
+    CondArgs.update(
+        PixelParameterConditionsFolder=flags.InDet.PixelConfig.version
+    )
 
     # Cabling parameters
     IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_2016.dat"

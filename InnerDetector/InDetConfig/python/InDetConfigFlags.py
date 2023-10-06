@@ -42,6 +42,7 @@ def createInDetConfigFlags():
                 prevFlags.Detector.EnableTRT)
     icf.addFlag("InDet.PixelDumpMode", 1)
     icf.addFlag("InDet.DRAWZSelection", False)
+    icf.addFlag("InDet.PixelConfig.version", 'PixelConditionsAlgorithms/v1/')
 
     # Save SiHitCollections to RDO
     icf.addFlag("InDet.savePixelSiHits", lambda prevFlags:

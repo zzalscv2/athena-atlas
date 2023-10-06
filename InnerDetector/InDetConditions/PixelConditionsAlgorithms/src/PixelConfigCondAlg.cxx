@@ -8,9 +8,9 @@
 #include <memory>
 #include <sstream>
 
-#include "PathResolver/PathResolver.h"
-#include "TFile.h"
+#include <fstream>
 
+#include "PathResolver/PathResolver.h"
 
 PixelConfigCondAlg::PixelConfigCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -53,6 +53,7 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setBarrelTimeJitter(m_BarrelTimeJitter);
   writeCdo -> setEndcapTimeJitter(m_EndcapTimeJitter);
   writeCdo -> setDBMTimeJitter(m_DBMTimeJitter);
+
   writeCdo -> setDefaultBarrelAnalogThreshold(m_BarrelAnalogThreshold);
   writeCdo -> setDefaultEndcapAnalogThreshold(m_EndcapAnalogThreshold);
   writeCdo -> setDefaultDBMAnalogThreshold(m_DBMAnalogThreshold);
@@ -105,323 +106,95 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   std::vector<std::string> mapsPath_list;
   std::vector<std::string> mapsPath_list3D;
 
+  // Year-dependent conditions
   int currentRunNumber = ctx.eventID().run_number();
-  if (currentRunNumber<222222) {
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThresholdRUN1);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatencyRUN1);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplicationRUN1);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToTRUN1);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTuneRUN1);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalkRUN1);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancyRUN1);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbabilityRUN1);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorrRUN1);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltageRUN1);
+  std::string filename = getFileName(currentRunNumber);
+  std::ifstream indata(filename.c_str());
 
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThresholdRUN1);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatencyRUN1);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplicationRUN1);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToTRUN1);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTuneRUN1);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalkRUN1);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancyRUN1);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbabilityRUN1);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorrRUN1);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltageRUN1);
-
-    writeCdo -> setBarrelNoiseShape({m_BLayerNoiseShapeRUN1, m_PixelNoiseShapeRUN1, m_PixelNoiseShapeRUN1});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShapeRUN1, m_PixelNoiseShapeRUN1, m_PixelNoiseShapeRUN1});
-
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluenceRUN1);
-    for (size_t i=0; i<m_BarrelFluenceMapRUN1.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMapRUN1[i]));
+  std::string sline;
+  std::vector<std::string> lBuffer;
+  std::string multiline = "";
+  while (getline(indata,sline)) {
+    if (!sline.empty()) {
+      if (sline.find("//")==std::string::npos) {
+        if (sline.find("{")!=std::string::npos && sline.find("}")!=std::string::npos) {
+          lBuffer.push_back(sline);
+        }
+        else if (sline.find("{")!=std::string::npos) {
+          multiline = sline;
+        }
+        else if (sline.find("}")!=std::string::npos) {
+          multiline += sline;
+          lBuffer.push_back(multiline);
+        }
+        else {
+          multiline += sline;
+        }
+      }
     }
-
   }
-  else if (currentRunNumber<240000) {  // RUN2 (mc15)
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2016);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2016);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2016);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2016);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2016);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2016);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2016);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2016);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2016);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2016);
 
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2016);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2016);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2016);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2016);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2016);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2016);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2016);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2016);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2016);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2016);
+  writeCdo -> setBarrelToTThreshold(getParameterInt("BarrelToTThreshold", lBuffer));
+  writeCdo -> setFEI3BarrelLatency(getParameterInt("FEI3BarrelLatency", lBuffer));
+  writeCdo -> setFEI3BarrelHitDuplication(getParameterBool("FEI3BarrelHitDuplication", lBuffer));
+  writeCdo -> setFEI3BarrelSmallHitToT(getParameterInt("FEI3BarrelSmallHitToT", lBuffer));
+  writeCdo -> setFEI3BarrelTimingSimTune(getParameterInt("FEI3BarrelTimingSimTune", lBuffer));
+  writeCdo -> setBarrelCrossTalk(getParameterDouble("BarrelCrossTalk", lBuffer));
+  writeCdo -> setBarrelNoiseOccupancy(getParameterDouble("BarrelNoiseOccupancy", lBuffer));
+  writeCdo -> setBarrelDisableProbability(getParameterDouble("BarrelDisableProbability", lBuffer));
+  writeCdo -> setBarrelLorentzAngleCorr(getParameterDouble("BarrelLorentzAngleCorr", lBuffer));
+  writeCdo -> setDefaultBarrelBiasVoltage(getParameterFloat("BarrelBiasVoltage", lBuffer));
 
-    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2016);
-    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2016);
-    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2016);
-    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2016);
-    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2016);
+  writeCdo -> setEndcapToTThreshold(getParameterInt("EndcapToTThreshold", lBuffer));
+  writeCdo -> setFEI3EndcapLatency(getParameterInt("FEI3EndcapLatency", lBuffer));
+  writeCdo -> setFEI3EndcapHitDuplication(getParameterBool("FEI3EndcapHitDuplication", lBuffer));
+  writeCdo -> setFEI3EndcapSmallHitToT(getParameterInt("FEI3EndcapSmallHitToT", lBuffer));
+  writeCdo -> setFEI3EndcapTimingSimTune(getParameterInt("FEI3EndcapTimingSimTune", lBuffer));
+  writeCdo -> setEndcapCrossTalk(getParameterDouble("EndcapCrossTalk", lBuffer));
+  writeCdo -> setEndcapNoiseOccupancy(getParameterDouble("EndcapNoiseOccupancy", lBuffer));
+  writeCdo -> setEndcapDisableProbability(getParameterDouble("EndcapDisableProbability", lBuffer));
+  writeCdo -> setEndcapLorentzAngleCorr(getParameterDouble("EndcapLorentzAngleCorr", lBuffer));
+  writeCdo -> setDefaultEndcapBiasVoltage(getParameterFloat("EndcapBiasVoltage", lBuffer));
 
-    /* 
-       So far, Gaudi::Property does not support 2D vector.
-       for (size_t i=0; i<m_BarrelNoiseShape.size(); i++) {
-       for (size_t j=0; j<m_BarrelNoiseShape[i].size(); j++) {
-       writeCdo -> setBarrelNoiseShape(i,m_BarrelNoiseShape[i][j]);
-       }
-       }
-     */
+  writeCdo -> setEndcapNoiseShape({getParameterFloat("PixelNoiseShape", lBuffer),
+                                   getParameterFloat("PixelNoiseShape", lBuffer),
+                                   getParameterFloat("PixelNoiseShape", lBuffer)});
 
-    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2016, m_BLayerNoiseShape2016, m_PixelNoiseShape2016, m_PixelNoiseShape2016});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2016, m_PixelNoiseShape2016, m_PixelNoiseShape2016});
-    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2016, m_IBLNoiseShape2016, m_IBLNoiseShape2016});
+  // Radiation damage simulation
+  writeCdo -> setFluenceLayer(getParameterDouble("BarrelFluence", lBuffer));
+  std::vector<std::string> barrelFluenceFile = getParameterString("BarrelRadiationFile", lBuffer);
+  for (auto fluence : barrelFluenceFile) {
+    mapsPath_list.push_back(PathResolverFindCalibFile(fluence));
+  }
 
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluence2016);
-    for (size_t i=0; i<m_BarrelFluenceMap2016.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2016[i]));
-    }
+  if (currentRunNumber<m_Run1IOV) {    // RUN1
+    writeCdo -> setBarrelNoiseShape({getParameterFloat("BLayerNoiseShape", lBuffer),
+                                     getParameterFloat("PixelNoiseShape", lBuffer),
+                                     getParameterFloat("PixelNoiseShape", lBuffer)});
+  }
+  else {     // RUN2
+    writeCdo -> setDBMToTThreshold(getParameterInt("DBMToTThreshold", lBuffer));
+    writeCdo -> setDBMCrossTalk(getParameterDouble("DBMCrossTalk", lBuffer));
+    writeCdo -> setDBMNoiseOccupancy(getParameterDouble("DBMNoiseOccupancy", lBuffer));
+    writeCdo -> setDBMDisableProbability(getParameterDouble("DBMDisableProbability", lBuffer));
+    writeCdo -> setDefaultDBMBiasVoltage(getParameterFloat("DBMBiasVoltage", lBuffer));
+
+    writeCdo -> setBarrelNoiseShape({getParameterFloat("IBLNoiseShape", lBuffer),
+                                     getParameterFloat("BLayerNoiseShape", lBuffer),
+                                     getParameterFloat("PixelNoiseShape", lBuffer),
+                                     getParameterFloat("PixelNoiseShape", lBuffer)});
+
+    writeCdo -> setDBMNoiseShape({getParameterFloat("IBLNoiseShape", lBuffer),
+                                  getParameterFloat("IBLNoiseShape", lBuffer),
+                                  getParameterFloat("IBLNoiseShape", lBuffer)});
 
     // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(m_3DFluence2016);
-    for (size_t i=0; i<m_3DFluenceMap2016.size(); i++) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2016[i]));
-    }
-
-  }
-  else if (currentRunNumber<300000) {  // RUN2 2015/2016 (mc16a)
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2016);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2016);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2016);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2016);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2016);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2016);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2016);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2016);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2016);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2016);
-
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2016);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2016);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2016);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2016);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2016);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2016);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2016);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2016);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2016);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2016);
-
-    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2016);
-    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2016);
-    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2016);
-    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2016);
-    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2016);
-
-    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2016, m_BLayerNoiseShape2016, m_PixelNoiseShape2016, m_PixelNoiseShape2016});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2016, m_PixelNoiseShape2016, m_PixelNoiseShape2016});
-    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2016, m_IBLNoiseShape2016, m_IBLNoiseShape2016});
-
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluence2016);
-    for (size_t i=0; i<m_BarrelFluenceMap2016.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2016[i]));
-    }
-
-    // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(m_3DFluence2016);
-    for (size_t i=0; i<m_3DFluenceMap2016.size(); i++) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2016[i]));
-    }
-
-  }
-  else if (currentRunNumber<310000) {  // RUN2 2017 (mc16d)
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2017);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2017);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2017);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2017);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2017);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2017);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2017);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2017);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2017);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2017);
-
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2017);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2017);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2017);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2017);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2017);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2017);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2017);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2017);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2017);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2017);
-
-    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2017);
-    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2017);
-    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2017);
-    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2017);
-    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2017);
-
-    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2017, m_BLayerNoiseShape2017, m_PixelNoiseShape2017, m_PixelNoiseShape2017});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2017, m_PixelNoiseShape2017, m_PixelNoiseShape2017});
-    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2017, m_IBLNoiseShape2017, m_IBLNoiseShape2017});
-
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluence2017);
-    for (size_t i=0; i<m_BarrelFluenceMap2017.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2017[i]));
-    }
-
-    // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(m_3DFluence2017);
-    for (size_t i=0; i<m_3DFluenceMap2017.size(); i++) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2017[i]));
-    }
-
-  }
-  else if (currentRunNumber<330000) {  // RUN2 2018 (mc16e)
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2018);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2018);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2018);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2018);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2018);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2018);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2018);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2018);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2018);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2018);
-
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2018);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2018);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2018);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2018);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2018);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2018);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2018);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2018);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2018);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2018);
-
-    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2018);
-    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2018);
-    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2018);
-    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2018);
-    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2018);
-
-    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2018, m_BLayerNoiseShape2018, m_PixelNoiseShape2018, m_PixelNoiseShape2018});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2018, m_PixelNoiseShape2018, m_PixelNoiseShape2018});
-    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2018, m_IBLNoiseShape2018, m_IBLNoiseShape2018});
-
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluence2018);
-    for (size_t i=0; i<m_BarrelFluenceMap2018.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2018[i]));
-    }
-
-    // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(m_3DFluence2018);
-    for (size_t i=0; i<m_3DFluenceMap2018.size(); i++) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2018[i]));
+    writeCdo -> setFluenceLayer3D(getParameterDouble("3DFluence", lBuffer));
+    std::vector<std::string> barrel3DFluenceFile = getParameterString("3DRadiationFile", lBuffer);
+    for (auto fluence3D : barrel3DFluenceFile) {
+      mapsPath_list3D.push_back(PathResolverFindCalibFile(fluence3D));
     }
   }
-  else if (currentRunNumber<450000) {  // RUN3 2022 (mc21a/mc23a)
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2022);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2022);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2022);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2022);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2022);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2022);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2022);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2022);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2022);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2022);
-
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2022);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2022);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2022);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2022);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2022);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2022);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2022);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2022);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2022);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2022);
-
-    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2022);
-    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2022);
-    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2022);
-    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2022);
-    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2022);
-
-    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2022, m_BLayerNoiseShape2022, m_PixelNoiseShape2022, m_PixelNoiseShape2022});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2022, m_PixelNoiseShape2022, m_PixelNoiseShape2022});
-    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2022, m_IBLNoiseShape2022, m_IBLNoiseShape2022});
-
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluence2022);
-    for (size_t i=0; i<m_BarrelFluenceMap2022.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2022[i]));
-    }
-
-    // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(m_3DFluence2022);
-    for (size_t i=0; i<m_3DFluenceMap2022.size(); i++) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2022[i]));
-    }
-  }
-  else {  // RUN3 2023 (mc23c)
-    writeCdo -> setBarrelToTThreshold(m_BarrelToTThreshold2023);
-    writeCdo -> setFEI3BarrelLatency(m_FEI3BarrelLatency2023);
-    writeCdo -> setFEI3BarrelHitDuplication(m_FEI3BarrelHitDuplication2023);
-    writeCdo -> setFEI3BarrelSmallHitToT(m_FEI3BarrelSmallHitToT2023);
-    writeCdo -> setFEI3BarrelTimingSimTune(m_FEI3BarrelTimingSimTune2023);
-    writeCdo -> setBarrelCrossTalk(m_BarrelCrossTalk2023);
-    writeCdo -> setBarrelNoiseOccupancy(m_BarrelNoiseOccupancy2023);
-    writeCdo -> setBarrelDisableProbability(m_BarrelDisableProbability2023);
-    writeCdo -> setBarrelLorentzAngleCorr(m_BarrelLorentzAngleCorr2023);
-    writeCdo -> setDefaultBarrelBiasVoltage(m_BarrelBiasVoltage2023);
-
-    writeCdo -> setEndcapToTThreshold(m_EndcapToTThreshold2023);
-    writeCdo -> setFEI3EndcapLatency(m_FEI3EndcapLatency2023);
-    writeCdo -> setFEI3EndcapHitDuplication(m_FEI3EndcapHitDuplication2023);
-    writeCdo -> setFEI3EndcapSmallHitToT(m_FEI3EndcapSmallHitToT2023);
-    writeCdo -> setFEI3EndcapTimingSimTune(m_FEI3EndcapTimingSimTune2023);
-    writeCdo -> setEndcapCrossTalk(m_EndcapCrossTalk2023);
-    writeCdo -> setEndcapNoiseOccupancy(m_EndcapNoiseOccupancy2023);
-    writeCdo -> setEndcapDisableProbability(m_EndcapDisableProbability2023);
-    writeCdo -> setEndcapLorentzAngleCorr(m_EndcapLorentzAngleCorr2023);
-    writeCdo -> setDefaultEndcapBiasVoltage(m_EndcapBiasVoltage2023);
-
-    writeCdo -> setDBMToTThreshold(m_DBMToTThreshold2023);
-    writeCdo -> setDBMCrossTalk(m_DBMCrossTalk2023);
-    writeCdo -> setDBMNoiseOccupancy(m_DBMNoiseOccupancy2023);
-    writeCdo -> setDBMDisableProbability(m_DBMDisableProbability2023);
-    writeCdo -> setDefaultDBMBiasVoltage(m_DBMBiasVoltage2023);
-
-    writeCdo -> setBarrelNoiseShape({m_IBLNoiseShape2023, m_BLayerNoiseShape2023, m_PixelNoiseShape2023, m_PixelNoiseShape2023});
-    writeCdo -> setEndcapNoiseShape({m_PixelNoiseShape2023, m_PixelNoiseShape2023, m_PixelNoiseShape2023});
-    writeCdo -> setDBMNoiseShape({m_IBLNoiseShape2023, m_IBLNoiseShape2023, m_IBLNoiseShape2023});
-
-    // Radiation damage simulation
-    writeCdo -> setFluenceLayer(m_BarrelFluence2023);
-    for (size_t i=0; i<m_BarrelFluenceMap2023.size(); i++) {
-      mapsPath_list.push_back(PathResolverFindCalibFile(m_BarrelFluenceMap2023[i]));
-    }
-
-    // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(m_3DFluence2023);
-    for (size_t i=0; i<m_3DFluenceMap2023.size(); i++) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(m_3DFluenceMap2023[i]));
-    }
-  }
-
   writeCdo -> setRadSimFluenceMapList(mapsPath_list);
   writeCdo -> setRadSimFluenceMapList3D(mapsPath_list3D);
 
@@ -443,4 +216,132 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
+std::vector<std::string> PixelConfigCondAlg::getParameterString(const std::string& varName, const std::vector<std::string>& buffer) const {
+  std::string sParam = "";
+  std::string sMessage = "";
+  for (size_t i=0; i<buffer.size(); i++) {
+    if (buffer[i].find(varName.c_str())!=std::string::npos) {
+      ATH_MSG_DEBUG("PixelConfigCondAlg::getParameterString() " << i << " " << buffer[i]);
+      std::istringstream iss(buffer[i]);
+      std::string s;
+      bool chkParam = false;
+      bool chkMessage = false;
+      while (iss >> s) {
+        if (s.find("{")!=std::string::npos && s.find("}")!=std::string::npos) {
+          sParam += s.substr(1,s.length()-1);
+        }
+        else if (s.find("{")!=std::string::npos) {
+          sParam += s.substr(1,s.length());
+          chkParam = true;
+        }
+        else if (s.find("}")!=std::string::npos) {
+          sParam += s.substr(0,s.length()-1);
+          chkParam = false;
+          chkMessage = true;
+        }
+        else if (chkParam==true) {
+          sParam += s;
+        }
+        else if (chkMessage==true) {
+          sMessage += " " + s;
+        }
+      }
+    }
+  }
+
+  if (sParam.empty()) {
+    ATH_MSG_FATAL("PixelConfigCondAlg::getParameterString() Input variable was not found. " << varName);
+  }
+
+  std::vector<std::string> vParam;
+  int offset = 0; 
+  for (;;) {
+    auto pos = sParam.find(",",offset);
+    if (pos==std::string::npos) {
+      vParam.push_back(sParam.substr(offset,pos));
+      break;
+    }
+    vParam.push_back(sParam.substr(offset,pos-offset));
+    offset = pos + 1;
+  }
+
+  std::vector<std::string> vvParam;
+  for (auto param : vParam) {
+    if (param.find("\"")!=std::string::npos) {
+      if (vParam.size()==1) {
+        vvParam.push_back(param.substr(1,param.length()-3));
+      }
+      else {
+        vvParam.push_back(param.substr(1,param.length()-2));
+      }
+    }
+    else {
+      vvParam.push_back(param);
+    }
+  }
+  return vvParam;
+}
+
+std::vector<double> PixelConfigCondAlg::getParameterDouble(const std::string& varName, const std::vector<std::string>& buffer) const {
+  std::vector<std::string> varString = getParameterString(varName, buffer);
+  std::vector<double> varDouble;
+  for (auto var : varString) {
+    varDouble.push_back(std::stod(var,nullptr));
+  }
+  return varDouble;
+}
+
+std::vector<float> PixelConfigCondAlg::getParameterFloat(const std::string& varName, const std::vector<std::string>& buffer) const {
+  std::vector<std::string> varString = getParameterString(varName, buffer);
+  std::vector<float> varFloat;
+  for (auto var : varString) {
+    varFloat.push_back(std::stof(var,nullptr));
+  }
+  return varFloat;
+}
+
+std::vector<int> PixelConfigCondAlg::getParameterInt(const std::string& varName, const std::vector<std::string>& buffer) const {
+  std::vector<std::string> varString = getParameterString(varName, buffer);
+  std::vector<int> varInt;
+  for (auto var : varString) {
+    varInt.push_back(std::stoi(var,nullptr));
+  }
+  return varInt;
+}
+
+std::vector<bool> PixelConfigCondAlg::getParameterBool(const std::string& varName, const std::vector<std::string>& buffer) const {
+  std::vector<std::string> varString = getParameterString(varName, buffer);
+  std::vector<bool> varBool;
+  for (auto var : varString) {
+    if (var.find("False")!=std::string::npos || var.find("false")!=std::string::npos) {
+      varBool.push_back(0);
+    }
+    else if (var.find("True")!=std::string::npos || var.find("true")!=std::string::npos) {
+      varBool.push_back(1);
+    }
+    else {
+      ATH_MSG_FATAL("PixelConfigCondAlg::getParameterBool() No matching boolean string " << var);
+    }
+  }
+  return varBool;
+}
+
+std::string PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
+  if (m_usePrivateFileName.empty()) {
+    std::ifstream indata(PathResolverFindCalibFile("PixelConditionsAlgorithms/v1/"+m_conditionsFileName));
+    int runNumber = 0;
+    std::string subfilename;
+    indata >> runNumber;
+    while (currentRunNumber>=runNumber) {
+      indata >> subfilename;
+      if (indata.eof()) { break; }
+      indata >> runNumber;
+    }
+    ATH_MSG_DEBUG("PixelConfigCondAlg::getFileName() RunNumber=" << currentRunNumber << " IOV=" << runNumber << " filename=" << subfilename);
+    return PathResolverFindCalibFile("PixelConditionsAlgorithms/v1/"+subfilename);
+  }
+  else {
+    return m_usePrivateFileName;
+  }
+}
 
