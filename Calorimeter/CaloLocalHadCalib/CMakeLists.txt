@@ -24,4 +24,5 @@ atlas_add_dictionary( CaloLocalHadCalibDict
 # Install files from the package:
 atlas_install_joboptions( share/*.txt share/*.py )
 atlas_install_runtime( share/CaloHadDMCoeff_init_v1.txt share/CaloHadDMCoeff_init_v2.txt )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
