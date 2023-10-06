@@ -9,7 +9,7 @@
 #include <AthenaBaseComps/AthMessaging.h>
 #include <optional>
 
-namespace MuonGMR4{
+namespace MuonGMR4 {
     /* 
      * Generic class describing the layout of a Muon strip detector (E.g. the Rpcs, Micromegas, Tgc, sTgc)
      * The local coordinate system is defined such that the strip lanes are parallel to the y-axis and the
@@ -29,6 +29,7 @@ namespace MuonGMR4{
     class StripDesign: public AthMessaging {
         public:
             StripDesign();
+            virtual ~StripDesign() = default;
 
             /// Distance between two adjacent strips
             double stripPitch() const;
@@ -85,18 +86,22 @@ namespace MuonGMR4{
             std::optional<Amg::Vector2D> center(int stripNumb) const;
             /// Odering operator
             bool operator<(const StripDesign& other) const;
+            /// Returns length of the strip
+            double stripLength(int stripNumb) const;
         protected:
             /// Calculates the position of a given strip (Local numbering scheme)
-            Amg::Vector2D stripPosition(int stripNum) const;
+            virtual Amg::Vector2D stripPosition(int stripNum) const;
             /// Returns the intersection of a given strip with the left or right edge of the trapezoid
             /// If uncapped is set to false and the strip is a routed strip, then the intersection onto
             /// the corresponding bottom / top edges are returned
             Amg::Vector2D leftInterSect(int stripNum, bool uncapped = false) const;
             Amg::Vector2D rightInterSect(int stripNum, bool uncapped = false) const;
+            
+            Amg::Vector2D leftInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
+            Amg::Vector2D rightInterSect(const Amg::Vector2D& stripPos, bool uncapped = false) const;
 
             /// Returns the geometrical center of a given strip
             Amg::Vector2D stripCenter(int stripNum) const;
-
         private:
             void setStereoAngle(double stereo);
             /// Shift between the 0-th readout channel and the first strip described by the panel
@@ -125,20 +130,22 @@ namespace MuonGMR4{
             AmgSymMatrix(2) m_stereoRotMat{AmgSymMatrix(2)::Identity()};
             /// Matrixt to translate from stereo -> nominal frame
             AmgSymMatrix(2) m_nominalRotMat{AmgSymMatrix(2)::Identity()};
-            
+        protected:    
             /// Bottom left point of the trapezoid
             Amg::Vector2D m_bottomLeft{Amg::Vector2D::Zero()};
-            /// Bottom right point of the trapezoid
-            Amg::Vector2D m_bottomRight{Amg::Vector2D::Zero()};
             /// Top right point of the trapezoid
             Amg::Vector2D m_topLeft{Amg::Vector2D::Zero()};
+        private:
             /// Bottom right point of the trapezoid
             Amg::Vector2D m_topRight{Amg::Vector2D::Zero()};
-
+           /// Bottom right point of the trapezoid
+            Amg::Vector2D m_bottomRight{Amg::Vector2D::Zero()};
+        protected:
             /// Vector describing the top edge of the trapzoid (top left -> top right)
             Amg::Vector2D m_dirTopEdge{Amg::Vector2D::Zero()};
             /// Vector describing the bottom edge of the trapezoid (bottom left -> bottom right)
             Amg::Vector2D m_dirBotEdge{Amg::Vector2D::Zero()};
+        private:   
             /// Vector describing the left adge of the trapezoid (bottom left -> top left)
             Amg::Vector2D m_dirLeftEdge{Amg::Vector2D::UnitY()};
             /// Vector describing the right edge of the trapezoid (bottom right -> top right)
