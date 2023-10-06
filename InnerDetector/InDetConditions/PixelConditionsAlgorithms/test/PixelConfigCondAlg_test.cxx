@@ -97,8 +97,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     PixelConfigCondAlg a("MyAlg", g.svcLoc);
     a.addRef();
     //add property definitions for later (normally in job opts)
-    BOOST_TEST(a.setProperty("BarrelCrossTalkRUN1","{0.1,0.2,0.3,0.4}").isSuccess());
-    BOOST_TEST(a.setProperty("BarrelToTThresholdRUN1","{100,200,300,400}").isSuccess());
+    BOOST_TEST(a.setProperty("BarrelThermalNoise","{110.0,120.0,130.0,140.0}").isSuccess());
+    BOOST_TEST(a.setProperty("DefaultBarrelAnalogThresholdSigma","{10,20,30,40}").isSuccess());
     //
     BOOST_TEST(a.sysInitialize().isSuccess() );
     ServiceHandle<StoreGateSvc> conditionStore ("ConditionStore", "PixelModuleData");
@@ -122,8 +122,9 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     //look at the ones we changed from default, to check
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.2f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 200);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 120.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 20.0f);
+    
     BOOST_TEST(data->getFluenceLayer()[layer] == 44000000000000);
 
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
@@ -141,8 +142,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 5);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 161000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
@@ -161,8 +162,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 5);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 161000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
@@ -180,8 +181,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 5);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 161000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
@@ -198,8 +199,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 5);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 342000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
@@ -216,8 +217,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 3);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 519000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
@@ -235,8 +236,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 3);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 680000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
@@ -253,8 +254,8 @@ BOOST_AUTO_TEST_SUITE(PixelConfigCondAlgTest )
     const auto & [data, cc] = getData(eid, conditionStore);
     constexpr int barrel_ec=0;
     constexpr int layer=1;
-    BOOST_TEST(data->getCrossTalk(barrel_ec, layer) == 0.12f);
-    BOOST_TEST(data->getToTThreshold(barrel_ec, layer) == 3);
+    BOOST_TEST(data->getThermalNoise(barrel_ec, layer) == 160.0f);
+    BOOST_TEST(data->getDefaultAnalogThresholdSigma(barrel_ec, layer) == 35.0f);
     BOOST_TEST(data->getFluenceLayer()[layer] == 920000000000000);
     BOOST_TEST(conditionStore->removeDataAndProxy(cc).isSuccess());
     BOOST_TEST(a.sysFinalize().isSuccess() );
