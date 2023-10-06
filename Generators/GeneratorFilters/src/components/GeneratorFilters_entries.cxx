@@ -35,7 +35,7 @@
 #include "GeneratorFilters/xAODFourLeptonMassFilter.h"
 #include "GeneratorFilters/xAODJetFilter.h"
 #include "GeneratorFilters/xAODParticleFilter.h"
-
+#include "GeneratorFilters/xAODParticleDecayFilter.h"
 
 // slimmers for 22.6
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
@@ -139,6 +139,7 @@ DECLARE_COMPONENT( xAODHTFilter )
 DECLARE_COMPONENT( xAODFourLeptonMassFilter)
 DECLARE_COMPONENT( xAODJetFilter)
 DECLARE_COMPONENT( xAODParticleFilter)
+DECLARE_COMPONENT( xAODParticleDecayFilter)
 
 //slimmers accepted for 22.6
 DECLARE_COMPONENT( PileupTruthParticleSlimmer )
@@ -203,5 +204,3 @@ DECLARE_COMPONENT( TruthJetFilter )
 DECLARE_COMPONENT( VBFHbbEtaSortingFilter )
 DECLARE_COMPONENT( ZtoLeptonFilter )
 DECLARE_COMPONENT( ParticleDecayFilter )
-DECLARE_COMPONENT( MuDstarFilter )
-
