@@ -47,7 +47,7 @@ class RpcReadoutGeomTool : public AthAlgTool,
        double stripWidthPhi{0.};
        /// Offset of the first phi strip
        double firstOffSetPhi{0.};
-       /// 
+       /// Offset of the first eta strip
        double firstOffSetEta{0.};
        /// Number of eta strips
        unsigned int numEtaStrips{0};

@@ -25,7 +25,9 @@ inline double RpcReadoutElement::stripPhiWidth() const { return (m_pars.phiDesig
 inline double RpcReadoutElement::stripEtaLength() const { return (m_pars.etaDesign ? m_pars.etaDesign->longHalfHeight()*2. : 0.);}
 inline double RpcReadoutElement::stripPhiLength() const { return (m_pars.phiDesign ? m_pars.phiDesign->longHalfHeight()*2. : 0.);}
 inline IdentifierHash RpcReadoutElement::measurementHash(const Identifier& measId) const {
-    if (idHelperSvc()->detElId(measId) != identify()) {
+    if (m_idHelper.doubletZ(measId) != doubletZ() ||
+        (doubletPhi() != 1 && m_idHelper.doubletPhi(measId) == 1) || 
+        m_idHelper.elementID(measId) != m_idHelper.elementID(identify()) ) {
         ATH_MSG_WARNING("The measurement " << idHelperSvc()->toString(measId)
                         << " picks the wrong readout element " << idHelperSvc()->toStringDetEl(identify()));
     }

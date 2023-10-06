@@ -151,9 +151,8 @@ Identifier RpcSensitiveDetector::getIdentifier(const MuonGMR4::RpcReadoutElement
    
   /// The 10 mm are introduced to match the old & new readout geometry. Revert the offset
   /// to ease the determination of the gasgap
-  const Amg::Vector3D locHitPos{Amg::Translation3D{0.,0.,10.} *
-                                 readOutEle->globalToLocalTrans(m_gctx, firstChan) * 
-                                 hitAtGapPlane};   
+  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(m_gctx, firstChan) * 
+                                hitAtGapPlane};   
   const double gapHalfWidth = readOutEle->stripEtaLength() / 2;
   const double gapHalfLength = readOutEle->stripPhiLength()/ 2;
   ATH_MSG_VERBOSE("Detector element: "<<m_detMgr->idHelperSvc()->toStringDetEl(firstChan)

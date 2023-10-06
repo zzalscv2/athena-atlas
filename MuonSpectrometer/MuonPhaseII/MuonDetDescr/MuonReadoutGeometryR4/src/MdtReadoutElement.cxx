@@ -134,7 +134,7 @@ Amg::Vector3D MdtReadoutElement::readOutPos(const ActsGeometryContext& ctx,
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube  = tubeNumber(hash);
    const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
-   const double length = -zeroT.tubeHalfLength(tube);
+   const double length = zeroT.tubeHalfLength(tube) * m_pars.readoutSide;
    return localToGlobalTrans(ctx) * zeroT.tubeTransform(tube)*(length * Amg::Vector3D::UnitZ());
 }
 
@@ -169,7 +169,9 @@ double MdtReadoutElement::distanceToReadout(const ActsGeometryContext& ctx,
     const unsigned int layer = layerNumber(measHash);
     const unsigned int tube = tubeNumber(measHash);
     const MdtTubeLayer& zeroT{m_pars.tubeLayers[layer]};
-    const Amg::Vector3D readOutPos = -zeroT.tubeHalfLength(tube) * Amg::Vector3D::UnitZ();
+    const Amg::Vector3D readOutPos = m_pars.readoutSide * 
+                                     zeroT.tubeHalfLength(tube) *
+                                     Amg::Vector3D::UnitZ();
     return readOutPos.z() - locPoint.z();
 }
 }  // namespace MuonGMR4

@@ -35,15 +35,20 @@ class MdtReadoutGeomTool : public AthAlgTool,
 
     PublicToolHandle<IMuonGeoUtilityTool> m_geoUtilTool{this,"GeoUtilTool", "" };
     using parameterBook = MdtReadoutElement::parameterBook;
+    using ParamBookTable = std::map<std::string, parameterBook>; 
     
+    struct FactoryCache {
+        ParamBookTable parBook{};
+        /// List of chambers that have the readout chip at 
+        /// negative Z
+        std::set<Identifier> readoutOnLeftSide{};
+    };
 
     /// Retrieves the auxillary tables from the database
-    StatusCode readParameterBook();
+    StatusCode readParameterBook(FactoryCache& facCache) const;
+    void fillFlippedReadouts(FactoryCache& facCache) const;
     /// Loads the chamber dimensions from GeoModel
-    StatusCode loadDimensions(MdtReadoutElement::defineArgs& args );
-  
-    using ParamBookTable = std::map<std::string, parameterBook>; 
-    ParamBookTable m_parBook{};
+    StatusCode loadDimensions(const FactoryCache& facCache, MdtReadoutElement::defineArgs& args) const;
 
 };
 

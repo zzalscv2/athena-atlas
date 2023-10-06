@@ -2,6 +2,7 @@
     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonReadoutGeometryR4/StringUtils.h>
+#include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 
 #include <charconv>
 #include <limits>
@@ -9,8 +10,6 @@
 #include <iostream>
 
 namespace MuonGMR4 {
-/// We should remove the MdtStringUtils class at some point
-/// https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonConditions/MuonCondGeneral/MuonCondSvc/src/MdtStringUtils.cxx
 std::vector<std::string> tokenize(const std::string& str,
                                   const std::string& delimiters) {
 
@@ -27,8 +26,6 @@ std::vector<std::string> tokenize(const std::string& str,
         lastPos = str.find_first_not_of(delimiters, pos);
         // Find next "non-delimiter"
         pos = str.find_first_of(delimiters, lastPos);
-        //	std::cout << "Added token : " << tokens[tokens.size()-1] << "!"
-        //<< std::endl;
     }
     return tokens;
 }
@@ -64,10 +61,19 @@ double stof(std::string_view str) {
 }
 std::string to_string(const Amg::Transform3D& trans) {
     std::stringstream sstr{};
-    sstr<<"translation: "<<Amg::toString(trans.translation(),2);
-    sstr<<", rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),3)<<",";
-    sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),3)<<",";
-    sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),3)<<"}";
+    bool printed{false};
+    if (trans.translation().mag() > std::numeric_limits<float>::epsilon()) {
+        sstr<<"translation: "<<Amg::toString(trans.translation(),2);
+        printed = true;
+    }
+    if (!doesNotDeform(trans)) {
+        if (printed) sstr<<", ";
+        sstr<<"rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),3)<<",";
+        sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),3)<<",";
+        sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),3)<<"}";
+        printed = true;
+    }
+    if (!printed) sstr<<"Identity matrix ";
     return sstr.str();
 }
 }  // namespace MuonGMR4
