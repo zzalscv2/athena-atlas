@@ -679,7 +679,7 @@ def getTauWPDecoratorEleRNN():
                                          ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNTight ],
                                        SigEff1P = [0.95, 0.90, 0.85],
                                        SigEff3P = [0.98, 0.95, 0.90],
-                                       UseEleBDT = True ,
+                                       UseAbsEta = True ,
                                        ScoreName = "RNNEleScore",
                                        NewScoreName = "RNNEleScoreSigTrans",
                                        DefineWPs = True,
