@@ -382,6 +382,33 @@ namespace dqi
 
   void HanOutput::setInput(TDirectory* input) { m_input = input; }
 
+  static bool include_hist(TObject* obj) { //Check if object a hist or include hist
+    bool result = false;
+
+    if ((strncmp(obj->ClassName(), "TH", 2) == 0) || (strncmp(obj->ClassName(), "TGraph", 6) == 0) ||
+        (strncmp(obj->ClassName(), "TProfile", 8) == 0) || (strncmp(obj->ClassName(), "TEfficiency", 11) == 0))
+    {
+      return true;
+    }
+
+    TSeqCollection* tmpList{};
+    tmpList = dynamic_cast<TSeqCollection*>(obj);
+    if (tmpList != 0)
+    { //If it is collection - check, that it contains histograms or not
+      TIter nextElem(tmpList);
+      TObject* tmpobj{};
+      while ((tmpobj = nextElem()) != 0)
+      {
+        result = include_hist(tmpobj);
+        if (result == true)
+        {
+          return result;
+        }
+      }
+    }
+    return result;
+  }
+
   static void WriteListToDirectory(
     TDirectory* dir, TSeqCollection* list, TFile* file, int level, int HanOutput_FileVersion)
   {
@@ -431,16 +458,29 @@ namespace dqi
           {  
             ///First: we need to know - are there any histograms storing in this dir (e.g. References).
             //If yes - we should save them in the upper level
-            TIter nextElem(tmpList);
+            TIter nextElemConfRes(tmpList);
             TObject* objInResultConfig;
-            while ((objInResultConfig = nextElem()) != 0)
+            while ((objInResultConfig = nextElemConfRes()) != 0)
             {
-              if ((strncmp(objInResultConfig->ClassName(), "TH", 2) == 0) || (strncmp(objInResultConfig->ClassName(), "TGraph", 6) == 0) ||
-                  (strncmp(objInResultConfig->ClassName(), "TProfile", 8) == 0) || (strncmp(objInResultConfig->ClassName(), "TEfficiency", 11) == 0) ||
-                  (strncmp(objInResultConfig->GetName(), "Reference", 9) == 0)) //Sometimes (not a commoon case) 'Reference' is not a name of histogam 
-                  //directly, but a TDirectory, containing histogram
+              if (include_hist(objInResultConfig))
               {
-                dir->WriteTObject(objInResultConfig);
+                //If the element consist of histograms
+                TSeqCollection* tmpList_ResConf{}; //it should be a collection type
+                tmpList_ResConf = dynamic_cast<TSeqCollection*>(objInResultConfig);
+                if ((tmpList_ResConf != 0) && (strncmp(tmpList_ResConf->GetName(), "TObjArray", 9) == 0))
+                { //Here is the special case. In case the object is an Array with the name "TObjArray", containing histograms,
+                  //we should not only store it on the upper level, but also extract all the hists from it.
+                  TIter nextEleminTObjArray(tmpList_ResConf);
+                  TObject* objInTObjArray;
+                  while ((objInTObjArray = nextEleminTObjArray()) != 0){
+                    dir->WriteTObject(objInTObjArray);
+                  }
+                  tmpList->Remove(objInResultConfig); //This Array should not participate in JSON formation
+                }
+                else //If the element is histogram (or other Array, containing hist)- just store this obj in a higher level
+                {
+                  dir->WriteTObject(objInResultConfig);
+                }
               }
             }
             // For the rest of the content - Convert them to JSON 
