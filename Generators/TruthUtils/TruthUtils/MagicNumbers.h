@@ -99,21 +99,12 @@ template <class T>  inline bool is_simulation_vertex(const T& v){ return (barcod
 #endif
   }
 
-template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
-inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1 && p2 && (p1->barcode() % SIM_REGENERATION_INCREMENT == p2->barcode() % SIM_REGENERATION_INCREMENT); }
-
-template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  std::is_arithmetic<T2>::value, bool> = true >
-inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1 && (p1->barcode() % SIM_REGENERATION_INCREMENT == p2 % SIM_REGENERATION_INCREMENT); }
-
-template <class T1,class T2, std::enable_if_t< std::is_arithmetic<T1>::value &&  std::is_arithmetic<T2>::value, bool> = true >
-inline bool is_same_generator_particle(const T1& p1,const T2& p2) { return p1 % SIM_REGENERATION_INCREMENT == p2 % SIM_REGENERATION_INCREMENT; }
+template <class T1,class T2>
+inline bool is_same_generator_particle(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return  b1% SIM_REGENERATION_INCREMENT == b2 % SIM_REGENERATION_INCREMENT; }
 
 /// @brief Method to check if the first particle is a descendant of the second in the simulation, i.e. particle p1 was produced simulations particle p2.
-template <class T1,class T2, std::enable_if_t< !std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
-inline bool is_sim_descendant(const T1& p1,const T2& p2) { return p1 && p2 && (p1->barcode() % SIM_REGENERATION_INCREMENT == p2->barcode());}
-
-template <class T1,class T2, std::enable_if_t< std::is_arithmetic<T1>::value &&  !std::is_arithmetic<T2>::value, bool> = true >
-inline bool is_sim_descendant(const T1& p1,const T2& p2) { return p2 && (p1 % SIM_REGENERATION_INCREMENT == p2->barcode()); }
+template <class T1,class T2>
+inline bool is_sim_descendant(const T1& p1,const T2& p2) { int b1 = barcode(p1); int b2 = barcode(p2); return b1 % SIM_REGENERATION_INCREMENT == b2;}
 
 template <class T> int  unique_id(const T& p1){ return p1->barcode();}
 #if  defined(HEPMC3) && !defined(XAOD_STANDALONE)
