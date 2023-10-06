@@ -25,7 +25,7 @@
 #include "TMessage.h"
 #include "TDirectory.h"
 
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 
 #define corENDL coral::MessageStream::endmsg
 
@@ -214,7 +214,7 @@ namespace pool {
       if( m_open ) close();
 
       if( !m_fileCatalog
-        && boost::starts_with (m_fileName, "PFN:")
+        && CxxUtils::starts_with (m_fileName, "PFN:")
         && m_description.connection().empty() )
       {
         // special case with no catalog and PFN specified

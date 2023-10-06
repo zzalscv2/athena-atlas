@@ -2,7 +2,7 @@
   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <boost/algorithm/string.hpp>
+#include "CxxUtils/starts_with.h"
 
 #include "StaticHistogramProvider.h"
 #include "LumiblockHistogramProvider.h"
@@ -26,7 +26,7 @@ using namespace Monitored;
 HistogramFiller* HistogramFillerFactory::create(const HistogramDef& def) {
   std::shared_ptr<IHistogramProvider> histogramProvider = createHistogramProvider(def);
   
-  if (boost::starts_with(def.type, "TH1")) {
+  if (CxxUtils::starts_with(def.type, "TH1")) {
     if (def.kCumulative) {
       return new CumulativeHistogramFiller1D(def, histogramProvider);
     } else if (def.kAddBinsDynamically || def.kRebinAxes) {
@@ -36,7 +36,7 @@ HistogramFiller* HistogramFillerFactory::create(const HistogramDef& def) {
     } else {
       return new HistogramFiller1D(def, histogramProvider);
     }
-  } else if (boost::starts_with(def.type, "TH2")) {
+  } else if (CxxUtils::starts_with(def.type, "TH2")) {
     if (def.kAddBinsDynamically || def.kRebinAxes) {
       return new HistogramFillerRebinable2D(def, histogramProvider);
     } else {

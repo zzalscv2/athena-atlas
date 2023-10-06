@@ -9,7 +9,7 @@
 #include "TROOT.h"
 #include <string>
 #include <iostream>
-#include <boost/algorithm/string/predicate.hpp>
+#include "CxxUtils/starts_with.h"
 #include "DataQualityInterfaces/HanUtils.h"
 
 namespace dqi {
@@ -90,7 +90,7 @@ dolsr(const TDirectory* dir, std::vector<std::string>& hists, const TDirectory* 
   std::string toppath(topdir->GetPath());
   std::string::size_type toppathlen = toppath.length();
   while ((key = dynamic_cast<TKey*>(keys())) != NULL) {
-    if (boost::algorithm::starts_with(key->GetClassName(), "TDirectory")) {
+    if (CxxUtils::starts_with(key->GetClassName(), "TDirectory")) {
       TDirectory* newdir = dynamic_cast<TDirectory*>(key->ReadObj());
       if (!newdir) {
       	std::cerr << "WARNING: cannot read directory " 
