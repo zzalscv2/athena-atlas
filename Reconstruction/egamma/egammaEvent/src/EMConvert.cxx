@@ -24,7 +24,6 @@ UPDATED:  Jul 30, 2010 (JM) Add ambiguity result
 #include "GaudiKernel/GaudiException.h"
 #include "AthenaKernel/ClassName.h"
 
-#include "CLHEP/Matrix/SymMatrix.h"
 #include "VxVertex/VxCandidate.h"
 #include "VxVertex/ExtendedVxCandidate.h"
 #include "VxVertex/VxTrackAtVertex.h"
