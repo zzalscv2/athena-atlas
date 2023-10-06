@@ -13,8 +13,6 @@
 #include <sstream>
 #include <algorithm>
 
-// Boost include(s):
-#include <boost/algorithm/string.hpp>
 
 // Gaudi/Athena include(s):
 #include "GaudiKernel/System.h"

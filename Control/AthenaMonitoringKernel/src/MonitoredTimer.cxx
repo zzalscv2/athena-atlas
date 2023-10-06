@@ -2,17 +2,14 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#include <boost/algorithm/string/predicate.hpp>
 #include "AthenaMonitoringKernel/MonitoredTimer.h"
+#include <stdexcept>
 
 namespace Monitored {
   void checkNamingConvention( const std::string& name ) {
     // Enforce some naming convention for timers
-    const char* TIMER_PREFIX = "TIME_"; //<! prefix required for all timers
-    if (!boost::algorithm::starts_with(name, TIMER_PREFIX)) {
-      throw std::runtime_error("Name of Timer \"" + name + "\" needs to start with \"" +
-                               TIMER_PREFIX + "\"");
+    if (name.size() < 5 || name.substr(0,5) != std::string("TIME_")) {
+      throw std::runtime_error("Name of Timer \"" + name + "\" needs to start with \"TIME_\"");
     }
 
   }

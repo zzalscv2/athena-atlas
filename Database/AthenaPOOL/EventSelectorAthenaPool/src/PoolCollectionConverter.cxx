@@ -24,7 +24,7 @@
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
 
-#include "boost/algorithm/string/predicate.hpp"
+#include "CxxUtils/starts_with.h"
 #include <assert.h>
 #include <exception>
 
@@ -78,9 +78,9 @@ StatusCode PoolCollectionConverter::initialize() {
    }
    if (collectionTypeString == "ImplicitCollection") {
       // Check if already prefixed
-      if (boost::starts_with (m_inputCollection, "PFN:")
-	      || boost::starts_with (m_inputCollection, "LFN:")
-	      || boost::starts_with (m_inputCollection, "FID:")) {
+      if (CxxUtils::starts_with (m_inputCollection, "PFN:")
+	      || CxxUtils::starts_with (m_inputCollection, "LFN:")
+	      || CxxUtils::starts_with (m_inputCollection, "FID:")) {
          // Aready prefixed
          m_connection = m_inputCollection;
       } else {
