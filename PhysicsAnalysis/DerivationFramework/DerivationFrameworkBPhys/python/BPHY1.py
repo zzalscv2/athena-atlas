@@ -11,16 +11,37 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY1"
 streamName = "StreamDAOD_BPHY1"
 
-def BPHY1Cfg(ConfigFlags):
+def BPHY1Cfg(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     acc = ComponentAccumulator()
-    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
-    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+
+    BPHY1_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
+       name = "BPHY1_AugOriginalCounts",
+       VertexContainer = "PrimaryVertices",
+       TrackContainer = "InDetTrackParticles" )
+    doLRT = flags.Tracking.doLargeD0
+    mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
+    mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
+    if doLRT:
+        from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+        acc.merge(LRTMuonMergerAlg( flags,
+                                    PromptMuonLocation    = "Muons",
+                                    LRTMuonLocation       = "MuonsLRT",
+                                    OutputMuonLocation    = mainMuonInput,
+                                    CreateViewCollection  = True))
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+        acc.merge(InDetLRTMergeCfg(flags))
+
+    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
+    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
+    
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName))        # VKalVrt vertex fitter
     acc.addPublicTool(vkalvrt)
     acc.addPublicTool(V0Tools)
-    TrackSelector = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    TrackSelector = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags, BPHYDerivationName))
     acc.addPublicTool(TrackSelector)
-    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName))
     acc.addPublicTool(vpest)
     BPHY1JpsiFinder = CompFactory.Analysis.JpsiFinder(
            name                        = "BPHY1JpsiFinder",
@@ -33,9 +54,9 @@ def BPHY1Cfg(ConfigFlags):
            Chi2Cut                     = 200.,
            oppChargesOnly               = True,
            atLeastOneComb              = True,
-           useCombinedMeasurement      = False, # Only takes effect if combOnly=True    
-           muonCollectionKey           = "Muons",
-           TrackParticleCollection     = "InDetTrackParticles",
+           useCombinedMeasurement      = False, # Only takes effect if combOnly=True
+           muonCollectionKey           = mainMuonInput,
+           TrackParticleCollection     = mainIDInput,
            useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
            TrkVertexFitterTool         = vkalvrt,
            V0VertexFitterTool          = None,
@@ -53,7 +74,9 @@ def BPHY1Cfg(ConfigFlags):
             RefitPV                = True,
             MaxPVrefit             = 100000,
             V0Tools                = V0Tools,
-            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+            RelinkTracks  =  toRelink,
+            RelinkMuons   =  MuonReLink,
+            PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
             DoVertexType           = 7)
 
     BPHY1_Select_Jpsi2mumu =CompFactory.DerivationFramework.Select_onia2mumu(
@@ -86,7 +109,7 @@ def BPHY1Cfg(ConfigFlags):
           MassMax               = 12500.0,
           Chi2Max               = 200,
           DoVertexType          = 7)
-    augTools = [BPHY1_Reco_mumu, BPHY1_Select_Jpsi2mumu, BPHY1_Select_Psi2mumu,  BPHY1_Select_Upsi2mumu]
+    augTools = [BPHY1_AugOriginalCounts, BPHY1_Reco_mumu, BPHY1_Select_Jpsi2mumu, BPHY1_Select_Psi2mumu,  BPHY1_Select_Upsi2mumu]
     for t in [BPHY1JpsiFinder] + augTools : acc.addPublicTool(t)
 
 
@@ -101,7 +124,7 @@ def BPHY1Cfg(ConfigFlags):
                                                                          StreamName = streamName,
                                                                          InDetTrackParticlesKey  = "InDetTrackParticles")
     BPHY1ThinningTools = [BPHY1Thin_vtxTrk, BPHY1MuonTPThinningTool]
-    if ConfigFlags.Input.isMC :
+    if flags.Input.isMC :
         TruthSelection ="TruthParticles.pdgId == 443 || TruthParticles.pdgId == 100443 || TruthParticles.pdgId == 553 || TruthParticles.pdgId == 100553 || TruthParticles.pdgId == 200553"
         BPHY1TruthThinTool = CompFactory.DerivationFramework.GenericTruthThinning(name = "BPHY1TruthThinTool",
                                StreamName = streamName,
@@ -134,7 +157,7 @@ def BPHY1Cfg(ConfigFlags):
     StaticContent += ["xAOD::VertexAuxContainer#BPHY1RefittedPrimaryVerticesAux."]
     
     ## ID track particles
-    AllVariables += ["InDetTrackParticles"]
+    AllVariables += ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else ["InDetTrackParticles"]
     
     ## combined / extrapolated muon track particles 
     ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
@@ -143,7 +166,7 @@ def BPHY1Cfg(ConfigFlags):
     AllVariables += ["ExtrapolatedMuonTrackParticles"]
     
     ## muon container
-    AllVariables += ["Muons", "MuonsLRT"]
+    AllVariables += ["Muons", "MuonsLRT"] if doLRT else ["Muons"]
     
     ## Jpsi candidates 
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY1_Reco_mumu.OutputVtxContainerName]
@@ -152,10 +175,10 @@ def BPHY1Cfg(ConfigFlags):
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY1_Reco_mumu.OutputVtxContainerName]
     
     # Truth information for MC only
-    if ConfigFlags.Input.isMC :
+    if flags.Input.isMC :
         AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
 
-    BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
     # Needed for trigger objects
     BPHY1SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY1SlimmingHelper.IncludeBPhysTriggerContent = True
@@ -164,7 +187,7 @@ def BPHY1Cfg(ConfigFlags):
     BPHY1SlimmingHelper.StaticContent = StaticContent
     BPHY1ItemList = BPHY1SlimmingHelper.GetItemList()
 
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY1", ItemList=BPHY1ItemList, AcceptAlgs=["BPHY1Kernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, "DAOD_BPHY1", AcceptAlgs=["BPHY1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
+    acc.merge(OutputStreamCfg(flags, "DAOD_BPHY1", ItemList=BPHY1ItemList, AcceptAlgs=["BPHY1Kernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, "DAOD_BPHY1", AcceptAlgs=["BPHY1Kernel"], createMetadata=[MetadataCategory.CutFlowMetaData]))
     acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
     return acc
