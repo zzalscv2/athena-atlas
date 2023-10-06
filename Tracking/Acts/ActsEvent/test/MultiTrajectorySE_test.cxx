@@ -21,9 +21,9 @@
 #include "xAODTracking/TrackParametersAuxContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 
-#include "xAODTracking/SurfaceBackend.h"
-#include "xAODTracking/SurfaceBackendContainer.h"
-#include "xAODTracking/SurfaceBackendAuxContainer.h"
+#include "xAODTracking/TrackSurface.h"
+#include "xAODTracking/TrackSurfaceContainer.h"
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
 
 #include "ActsEvent/SurfaceEncoding.h"
 #include "Acts/Surfaces/RectangleBounds.hpp"
@@ -64,11 +64,11 @@ BOOST_AUTO_TEST_CASE(InsertRefSurface) {
   transform *= Acts::AngleAxis3(rotation[2], Acts::Vector3(1., 0., 0.));  //rotX
 
 
-  xAOD::SurfaceBackendContainer backend;
-  xAOD::SurfaceBackendAuxContainer aux;
+  xAOD::TrackSurfaceContainer backend;
+  xAOD::TrackSurfaceAuxContainer aux;
   backend.setStore(&aux);
   
-  auto surfBackend = new xAOD::SurfaceBackend();
+  auto surfBackend = new xAOD::TrackSurface();
   backend.push_back(surfBackend);
 
   for (int i=0; i<7; i++){

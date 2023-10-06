@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODTRACKING_VERSIONS_SURFACEBACKEND_V1_H
-#define XAODTRACKING_VERSIONS_SURFACEBACKEND_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKSURFACE_V1_H
+#define XAODTRACKING_VERSIONS_TRACKSURFACE_V1_H
 
 #include "AthLinks/ElementLink.h"
 #include "AthContainers/AuxElement.h"
@@ -15,14 +15,14 @@
 namespace xAOD
 {
   /**
-   * @brief Surface Backend for Acts MultiTrajectory
+   * @brief TrackSurface for Acts MultiTrajectory and TrackStorage
    **/
 
-  class SurfaceBackend_v1 : public SG::AuxElement
+  class TrackSurface_v1 : public SG::AuxElement
   {
 
   public:
-    SurfaceBackend_v1() = default;
+    TrackSurface_v1() = default;
 
     /**
      * access translation parameters as plain vector

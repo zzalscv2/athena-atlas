@@ -9,8 +9,8 @@
 
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/TrackStorageContainer.h"
-#include "xAODTracking/TrackBackendContainer.h"
-#include "xAODTracking/TrackBackendAuxContainer.h"
+#include "xAODTracking/TrackStorageContainer.h"
+#include "xAODTracking/TrackStorageAuxContainer.h"
 
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 

@@ -5,7 +5,7 @@
 
 #include "ActsEvent/SurfaceEncoding.h"
 namespace ActsTrk {
-void encodeSurface(xAOD::SurfaceBackend* surfBackend, const Acts::Surface* surface,
+void encodeSurface(xAOD::TrackSurface* surfBackend, const Acts::Surface* surface,
                    const ActsGeometryContext& gctx) {
   // return if surf is a nullptr
   if (surface == nullptr) {
@@ -36,7 +36,7 @@ void encodeSurface(xAOD::SurfaceBackend* surfBackend, const Acts::Surface* surfa
     throw std::out_of_range(
         "encodeSurface this type " +
         std::to_string(static_cast<int>(surface->type())) +
-        " of Acts Surface can not be saved in xAOD::SurfaceBackend");
+        " of Acts Surface can not be saved in xAOD::TrackSurface");
     return;
   }
 
@@ -67,7 +67,7 @@ void encodeSurface(xAOD::SurfaceBackend* surfBackend, const Acts::Surface* surfa
 }
 
 
-std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::SurfaceBackend* surfBackend, const ActsGeometryContext& ) {
+std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::TrackSurface* surfBackend, const ActsGeometryContext& ) {
 
       // Translation and rotation
       auto translation = surfBackend->translation();
@@ -126,7 +126,7 @@ std::shared_ptr<const Acts::Surface> decodeSurface(const xAOD::SurfaceBackend* s
         throw std::out_of_range(
             "encodeSurface this type " +
             std::to_string(static_cast<int>(surfBackend->SurfaceType())) +
-            " of Acts Surface can not be saved in xAOD::SurfaceBackend");
+            " of Acts Surface can not be saved in xAOD::TrackSurface");
         return nullptr;
       }
       return nullptr; 

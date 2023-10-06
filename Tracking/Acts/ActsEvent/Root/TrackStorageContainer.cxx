@@ -3,9 +3,9 @@
 */
 #include "ActsEvent/TrackStorageContainer.h"
 
-#include "xAODTracking/TrackBackend.h"
+#include "xAODTracking/TrackStorage.h"
 
-ActsTrk::TrackStorageContainer::TrackStorageContainer(const DataLink<xAOD::TrackBackendContainer>& link) 
+ActsTrk::TrackStorageContainer::TrackStorageContainer(const DataLink<xAOD::TrackStorageContainer>& link) 
   : m_backend(link) {
 }
 
@@ -116,8 +116,8 @@ void ActsTrk::TrackStorageContainer::restoreDecorations() {
 // write api
 ////////////////////////////////////////////////////////////////////
 ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer()
-    : m_backend(std::make_unique<xAOD::TrackBackendContainer>()),
-      m_backendAux(std::make_unique<xAOD::TrackBackendAuxContainer>()) {
+    : m_backend(std::make_unique<xAOD::TrackStorageContainer>()),
+      m_backendAux(std::make_unique<xAOD::TrackStorageAuxContainer>()) {
   m_backend->setStore(m_backendAux.get());
   TrackStorageContainer::m_backend = m_backend.get();
 
@@ -125,7 +125,7 @@ ActsTrk::MutableTrackStorageContainer::MutableTrackStorageContainer()
 }
 
 ActsTrk::IndexType ActsTrk::MutableTrackStorageContainer::addTrack_impl() {
-  m_backend->push_back(std::make_unique<xAOD::TrackBackend>());
+  m_backend->push_back(std::make_unique<xAOD::TrackStorage>());
   m_backend->back()->resize();
   return m_backend->size() - 1;
 }

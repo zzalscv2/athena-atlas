@@ -58,7 +58,7 @@ class MutableMultiTrajectoryHandle {
   SG::WriteHandleKey<xAOD::TrackParametersContainer> m_parametersKey;
   SG::WriteHandleKey<xAOD::TrackJacobianContainer> m_jacobiansKey;
   SG::WriteHandleKey<xAOD::TrackMeasurementContainer> m_measurementsKey;
-  SG::WriteHandleKey<xAOD::SurfaceBackendContainer> m_surfacesKey;
+  SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_surfacesKey;
 };
 
 /**

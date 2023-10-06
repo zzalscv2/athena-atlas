@@ -6,9 +6,9 @@
 
 #include "AthContainers/DataVector.h"
 
-#include "xAODTracking/versions/TrackBackend_v1.h"
+#include "xAODTracking/versions/TrackStorage_v1.h"
 namespace xAOD {
-    typedef DataVector<xAOD::TrackBackend_v1> TrackBackendContainer_v1;
+    typedef DataVector<xAOD::TrackStorage_v1> TrackStorageContainer_v1;
 }
 
 

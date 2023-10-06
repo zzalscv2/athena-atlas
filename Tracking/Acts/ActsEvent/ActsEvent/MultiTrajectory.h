@@ -24,8 +24,8 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
-#include "xAODTracking/SurfaceBackendAuxContainer.h"
-#include "xAODTracking/SurfaceBackendContainer.h"
+#include "xAODTracking/TrackSurfaceAuxContainer.h"
+#include "xAODTracking/TrackSurfaceContainer.h"
 
 
 #include "ActsEvent/Decoration.h"
@@ -374,8 +374,8 @@ class MutableMultiTrajectory final
   std::unique_ptr<xAOD::TrackMeasurementContainer> m_trackMeasurements;
   std::unique_ptr<xAOD::TrackMeasurementAuxContainer> m_trackMeasurementsAux;
 
-  std::unique_ptr<xAOD::SurfaceBackendContainer> m_surfacesBackend;
-  std::unique_ptr<xAOD::SurfaceBackendAuxContainer> m_surfacesBackendAux;
+  std::unique_ptr<xAOD::TrackSurfaceContainer> m_surfacesBackend;
+  std::unique_ptr<xAOD::TrackSurfaceAuxContainer> m_surfacesBackendAux;
 
   std::vector<ActsTrk::detail::Decoration> m_decorations;
   //!< decoration accessors, one per type
