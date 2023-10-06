@@ -101,19 +101,24 @@ def AddSidebandEventShapeCfg(ConfigFlags):
 
     return acc
 
+def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", **kwargs):
+    acc = ComponentAccumulator()
+    # Decorate if jet passed JVT criteria
+    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
+    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, 'AntiKt4EMTopo'))
+    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
+    passJvtTool.SuppressOutputDependence = False
+    kwargs.setdefault("Decorators", [passJvtTool])
+    kwargs.setdefault("JetContainer", "AntiKt4EMTopoJets")
+    acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, **kwargs), primary = True)
+    return acc
+
 def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'LooseLLP']):
     """Add event cleaning flags"""
 
     acc = ComponentAccumulator()
+    acc.merge(AddJvtDecorationAlgCfg(ConfigFlags))
     
-    # Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
-    algName = "DFJet_EventCleaning_passJvtAlg"
-
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, 'AntiKt4EMTopo'))
-    passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
-
-    acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, JetContainer='AntiKt4EMTopoJets', Decorators=[passJvtTool]))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
     acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doLoose=True))
