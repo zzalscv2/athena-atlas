@@ -8,7 +8,9 @@
 # art-include: 22.0-mc20/Athena
 
 Reco_tf.py \
+--CA 'all:True' 'RDOtoRDOTrigger:False' \
 --AMI=q445 \
+--preExec "r2a:flags.DQ.Steering.HLT.doInDet=False; flags.Exec.FPE=500;" \
 --athenaopts "RDOtoRDOTrigger:--threads=1" \
 --maxEvents=100 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root \
