@@ -199,25 +199,25 @@ atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITE
    DEPENDS_SUCCESS DerivationRun3Data_PHYSLITE )
 
 atlas_add_citest( CPAlgorithmsRun3Data_PHYSLITEcomparison 
-   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run3Data_PHYSLITE.root TestJobOutput-Run3Data_PHYS.root
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis ../CPAlgorithmsRun3Data_PHYSLITE/TestJobOutput-Run3Data_PHYSLITE.root ../CPAlgorithmsRun3Data_PHYS/TestJobOutput-Run3Data_PHYS.root
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 900
    DEPENDS_SUCCESS CPAlgorithmsRun3Data_PHYSLITE CPAlgorithmsRun3Data_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun3MC_PHYSLITEcomparison 
-   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run3MC_PHYSLITE.root TestJobOutput-Run3MC_PHYS.root
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis ../CPAlgorithmsRun3MC_PHYSLITE/TestJobOutput-Run3MC_PHYSLITE.root ../CPAlgorithmsRun3MC_PHYS/TestJobOutput-Run3MC_PHYS.root
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 900
    DEPENDS_SUCCESS CPAlgorithmsRun3MC_PHYSLITE CPAlgorithmsRun3MC_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2Data_PHYSLITEcomparison 
-   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run2Data_PHYSLITE.root TestJobOutput-Run2Data_PHYS.root 
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis ../CPAlgorithmsRun2Data_PHYSLITE/TestJobOutput-Run2Data_PHYSLITE.root ../CPAlgorithmsRun2Data_PHYS/TestJobOutput-Run2Data_PHYS.root 
    POST_EXEC_SCRIPT nopost.sh 
    PROPERTIES TIMEOUT 900 
    DEPENDS_SUCCESS CPAlgorithmsRun2Data_PHYSLITE CPAlgorithmsRun2Data_PHYS )
 
 atlas_add_citest( CPAlgorithmsRun2MC_PHYSLITEcomparison 
-   SCRIPT acmd.py diff-root --error-mode resilient -t analysis TestJobOutput-Run2MC_PHYSLITE.root TestJobOutput-Run2MC_PHYS.root 
+   SCRIPT acmd.py diff-root --error-mode resilient -t analysis ../CPAlgorithmsRun2MC_PHYSLITE/TestJobOutput-Run2MC_PHYSLITE.root ../CPAlgorithmsRun2MC_PHYS/TestJobOutput-Run2MC_PHYS.root 
    POST_EXEC_SCRIPT nopost.sh
    PROPERTIES TIMEOUT 900
    DEPENDS_SUCCESS CPAlgorithmsRun2MC_PHYSLITE CPAlgorithmsRun2MC_PHYS )
