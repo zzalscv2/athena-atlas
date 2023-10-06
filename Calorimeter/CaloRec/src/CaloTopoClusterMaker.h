@@ -156,6 +156,10 @@ private:
     *  cut on Eneighbor/E to revover out of time layer 2 cell close in eta to energetic neighor cell */
    float m_xtalkEtaEratio;
 
+   /**
+     * cut on Eneighbor/E to remove out of time layer layer2 all 2D neighbors */
+   float m_xtalk2DEratio;
+
 
   /** @brief Key of the CaloNoise Conditions data object. Typical values 
       are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
@@ -276,13 +280,17 @@ private:
    */
   bool m_xtalkEM2;
 
+  /**
+    * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from  all 2D neighors
+    */
+   bool m_xtalkEM2D;
+
   /**                                                                                              
    * if set to true (together with m_xtalkEM2) we also extend the time window for 2nd phi neighbors
    */
   bool m_xtalkEM2n;
 
   /**                                                                                              
-
    * if set to true  we extend the time window for direct layer 3 neighbors of high energy layer 2 cells
    */
   bool m_xtalkEM3;
@@ -292,6 +300,7 @@ private:
     * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from direct neighbour cells in eta
     */
   bool m_xtalkEMEta;
+
 
   /** 
    * @brief vector of names of the calorimeter samplings to consider

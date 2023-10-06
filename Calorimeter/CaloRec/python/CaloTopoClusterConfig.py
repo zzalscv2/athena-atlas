@@ -256,6 +256,7 @@ def CaloTopoClusterToolCfg(flags, cellsname):
     TopoMaker.UseTimeCutUpperLimit = flags.Calo.TopoCluster.useUpperLimitForTimeCut
     TopoMaker.TimeCutUpperLimit = flags.Calo.TopoCluster.timeCutUpperLimit
     TopoMaker.XTalkEM2 = flags.Calo.TopoCluster.xtalkEM2
+    TopoMaker.XTalkEM2D = flags.Calo.TopoCluster.xtalkEM2D
     TopoMaker.XTalkEM2n = flags.Calo.TopoCluster.xtalkEM2n
     TopoMaker.XTalkEM3 = flags.Calo.TopoCluster.xtalkEM3
     TopoMaker.XTalkEMEta = flags.Calo.TopoCluster.xtalkEMEta
@@ -264,6 +265,7 @@ def CaloTopoClusterToolCfg(flags, cellsname):
     TopoMaker.XTalk2Eratio2 = flags.Calo.TopoCluster.xtalk2Eratio2
     TopoMaker.XTalk3Eratio = flags.Calo.TopoCluster.xtalk3Eratio
     TopoMaker.XTalkEtaEratio = flags.Calo.TopoCluster.xtalkEtaEratio
+    TopoMaker.XTalk2DEratio = flags.Calo.TopoCluster.xtalk2DEratio
     
     # note E or AbsE
     #
