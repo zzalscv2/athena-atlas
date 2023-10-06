@@ -1,15 +1,10 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/DataObject.h"
-#include "GaudiKernel/IRegistry.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/IToolSvc.h"
-
 
 // Athena includes 
 #include "AthenaKernel/StorableConversions.h"
@@ -31,6 +26,7 @@
 #include "TileByteStream/TileROD_Decoder.h"
 #include "TileByteStream/TileHid2RESrcID.h"
 #include "TileEvent/TileDigitsContainer.h"
+#include "TileCalibBlobObjs/TileCalibUtils.h"
 
 #include <vector> 
 #include <string> 
@@ -109,7 +105,7 @@ StatusCode TileDigitsContByteStreamCnv::createObjConst(IOpaqueAddress* pAddr, Da
     if (isTMDB) {
       newrob = m_hid2re->getRobFromTileMuRcvFragID(collID);
     } else if (isFELIX) {
-      newrob = m_hid2re->getRobFromFragID(collID + 0x1000);
+      newrob = m_hid2re->getRobFromFragID(collID + TileCalibUtils::FELIX_FRAGID_OFFSET);
     } else {
       newrob = m_hid2re->getRobFromFragID(collID);
     }

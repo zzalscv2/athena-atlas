@@ -5,17 +5,11 @@
 #include <iostream>
 #include <cassert>
 
-#include "TileByteStream/TileROD_Decoder.h" 
-#include "TileRecUtils/TileRawChannelBuilder.h"
-#include "TileRecUtils/TileCellBuilder.h"
-#include "TileByteStream/TileHid2RESrcID.h" 
+#include "TileByteStream/TileHid2RESrcID.h"
 #include "TileIdentifier/TileHWID.h"
 #include "TileIdentifier/TileTBFrag.h"
-#include "TileRecUtils/ITileRawChannelTool.h"
+#include "TileCalibBlobObjs/TileCalibUtils.h"
 
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include "eformat/SourceIdentifier.h" 
@@ -280,6 +274,10 @@ void TileHid2RESrcID::setROD2ROBmap (const eformat::FullEventFragment<const uint
                     }
                   }
                   break;
+                }
+
+                if (fragtype == 6) {
+                  fragid += TileCalibUtils::FELIX_FRAGID_OFFSET; // FELIX fragment
                 }
 
                 FRAGRODMAP::const_iterator it = m_frag2ROD.find(fragid); 

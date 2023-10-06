@@ -154,6 +154,7 @@ class TileCalibUtils{
   static const unsigned int TIMINGDMUBCOFFSET_DEFINITION_CHAN = 5;   /**< @brief Channel used for storing of affected timing channel definitions */
   static const unsigned int MAX_MINIDRAWER = 4;  /**< @brief Number of minidrawers */
   static const unsigned int MAX_MINIDRAWER_CHAN = 12;  /**< @brief Number of channels in minidrawer*/
+  static const unsigned int FELIX_FRAGID_OFFSET = 0x1000;  /**< @brief Offset for frag ID used for FELIX in frag ID to ROB ID map*/
 };
 
 #endif
