@@ -160,6 +160,7 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
       if ( name == vname.first ) {
 	m_validMoments.insert(vname);
 	isValid = true;
+        ATH_MSG_DEBUG( "Inserting " << name );
 	break;
       }
     }
@@ -283,6 +284,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                                        xAOD::CaloClusterContainer *theClusColl) const
 {  
 
+  ATH_MSG_DEBUG("Starting CaloCalibClusterMomentsMaker2::execute");
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloDetDescrMgrKey,ctx};
   const CaloDetDescrManager* calo_dd_man = *caloMgrHandle;
 
@@ -314,7 +316,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
       if (m_foundAllContainers) {
 	// print ERROR message only if there was at least one event with 
 	// all containers 
-	msg(MSG::ERROR) << "SG does not contain DM calibration hit container " << key.key() << endmsg;
+	ATH_MSG_ERROR("SG does not contain DM calibration hit container " << key.key());
       }
       foundAllContainers = false;
     }
@@ -327,6 +329,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
     m_foundAllContainers = true;
 
   if ( !foundAllContainers ) return StatusCode::SUCCESS;
+  ATH_MSG_DEBUG("SG has all containers ");
 
   // will contain detailed info about cluster calibration eneries
   ClusInfo_t clusInfoVec (theClusColl->size());
@@ -710,6 +713,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
         // now calculate the actual moments
         switch (vMomentsIter->second) { 
         case xAOD::CaloCluster::ENG_CALIB_TOT:
+          ATH_MSG_DEBUG("Inserting ENG_CALIB_TOT");
           myMoments[iMoment] = clusInfo.engCalibIn.engTot;
           break;
         case xAOD::CaloCluster::ENG_CALIB_OUT_L:
