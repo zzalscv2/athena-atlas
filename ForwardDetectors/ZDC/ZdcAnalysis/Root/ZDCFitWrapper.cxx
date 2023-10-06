@@ -8,6 +8,13 @@
 
 void ZDCFitWrapper::Initialize(float initialAmp, float initialT0, float ampMin, float ampMax)
 {
+  // Clear the errors on the TF1 because retaining the errors seems to affect 
+  //   the convergence of fits
+  //
+  unsigned int npar = GetWrapperTF1()->GetNpar();
+  std::vector<double> zeroVec(npar, 0.0);
+  GetWrapperTF1()->SetParErrors(&zeroVec[0]);
+
   // If we adjusted the time range on the previous event, restore to default
   //
   if (m_adjTLimitsEvent) {
@@ -24,6 +31,13 @@ void ZDCFitWrapper::Initialize(float initialAmp, float initialT0, float ampMin, 
 
 void ZDCFitWrapper::Initialize(float initialAmp, float initialT0, float ampMin, float ampMax, float fitTmin, float fitTmax, float fitTRef)
 {
+  // Clear the errors on the TF1 because retaining the errors seems to affect 
+  //   the convergence of fits
+  //
+  unsigned int npar = GetWrapperTF1()->GetNpar();
+  std::vector<double> zeroVec(npar, 0.0);
+  GetWrapperTF1()->SetParErrors(&zeroVec[0]);
+
   m_adjTLimitsEvent = true;
 
   m_tminAdjust = fitTRef;
@@ -175,6 +189,9 @@ void ZDCFitExpFermiVariableTausLHCf::UnconstrainFit()
   theTF1->ReleaseParameter(4);
   theTF1->ReleaseParameter(5);
   theTF1->ReleaseParameter(6);
+
+  theTF1->SetParLimits(6, -1e-4, 0.2);
+  theTF1->SetParameter(6, 0.1);
 }
 
 ZDCFitExpFermiFixedTaus::ZDCFitExpFermiFixedTaus(const std::string& tag, float tmin, float tmax, float tau1, float tau2) :
