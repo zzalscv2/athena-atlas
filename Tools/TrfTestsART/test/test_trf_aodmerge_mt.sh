@@ -2,8 +2,6 @@
 #
 # art-description: AODMerge_tf.py mt
 # art-type: grid
-# art-include: main/Athena
-
 # art-include: 23.0/Athena
 # art-athena-mt: 8
 

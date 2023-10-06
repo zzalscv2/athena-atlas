@@ -2,7 +2,6 @@
 #
 # art-description: Reco_tf.py q445 RAWtoALL in MT and ComponentAccumulator mode with RDO input
 # art-type: grid
-# art-include: main/Athena
 # art-athena-mt: 8
 
 mkdir ca
