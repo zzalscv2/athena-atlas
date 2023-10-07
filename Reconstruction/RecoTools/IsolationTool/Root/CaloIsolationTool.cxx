@@ -519,9 +519,11 @@ namespace xAOD {
     }
 
     // do pile-up correction
-    std::string type = "PFlow";
-    if (!EDCorrection(result,isoTypes,eta,type,nullptr))
-      ATH_MSG_WARNING("Could not apply ED correction to eflow isolation for muon");
+    if (!m_saveOnlyRequestedCorrections || result.corrlist.calobitset.test(static_cast<unsigned int>(Iso::pileupCorrection))) {
+      std::string type = "PFlow";
+      if (!EDCorrection(result,isoTypes,eta,type,nullptr))
+	ATH_MSG_WARNING("Could not apply ED correction to eflow isolation for muon");
+    }
 
     return true;
   }
