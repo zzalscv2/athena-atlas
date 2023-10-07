@@ -29,56 +29,60 @@ IsolationBuilder::initialize()
 
   std::set<xAOD::Iso::IsolationFlavour> runIsoType;
 
-  ATH_MSG_DEBUG("Initializing central electrons");
-  ATH_CHECK(initializeIso(runIsoType,
-                          &m_elCaloIso,
-                          &m_elTrackIso,
-                          m_ElectronContainerName,
-                          m_elisoInts,
-                          m_elcorInts,
-                          m_elcorIntsExtra,
-                          m_customConfigEl));
+  if (m_elisoInts.size()) {
+    ATH_MSG_DEBUG("Initializing central electrons");
+    ATH_CHECK(initializeIso(runIsoType,
+			    &m_elCaloIso,
+			    &m_elTrackIso,
+			    m_ElectronContainerName,
+			    m_elisoInts,
+			    m_elcorInts,
+			    m_elcorIntsExtra,
+			    m_customConfigEl));
+    declareIso(m_elCaloIso);
+    declareIso(m_elTrackIso);
+  }
 
-  ATH_MSG_DEBUG("Initializing central photons");
-  ATH_CHECK(initializeIso(runIsoType,
-                          &m_phCaloIso,
-                          &m_phTrackIso,
-                          m_PhotonContainerName,
-                          m_phisoInts,
-                          m_phcorInts,
-                          m_phcorIntsExtra,
-                          m_customConfigPh));
+  if (m_phisoInts.size()) {
+    ATH_MSG_DEBUG("Initializing central photons");
+    ATH_CHECK(initializeIso(runIsoType,
+			    &m_phCaloIso,
+			    &m_phTrackIso,
+			    m_PhotonContainerName,
+			    m_phisoInts,
+			    m_phcorInts,
+			    m_phcorIntsExtra,
+			    m_customConfigPh));
+    declareIso(m_phCaloIso);
+    declareIso(m_phTrackIso);
+  }
 
-  ATH_MSG_DEBUG("Initializing forward electrons");
-  ATH_CHECK(initializeIso(runIsoType,
-                          &m_feCaloIso,
-                          nullptr,
-                          m_FwdElectronContainerName,
-                          m_feisoInts,
-                          m_fecorInts,
-                          m_fecorIntsExtra,
-                          m_customConfigFwd));
+  if (m_feisoInts.size()) {
+    ATH_MSG_DEBUG("Initializing forward electrons");
+    ATH_CHECK(initializeIso(runIsoType,
+			    &m_feCaloIso,
+			    nullptr,
+			    m_FwdElectronContainerName,
+			    m_feisoInts,
+			    m_fecorInts,
+			    m_fecorIntsExtra,
+			    m_customConfigFwd));
+    declareIso(m_feCaloIso);
+  }
 
-  ATH_MSG_DEBUG("Initializing muons");
-  ATH_CHECK(initializeIso(runIsoType,
-                          &m_muCaloIso,
-                          &m_muTrackIso,
-                          m_MuonContainerName,
-                          m_muisoInts,
-                          m_mucorInts,
-                          m_mucorIntsExtra,
-                          m_customConfigMu));
-
-  // declare the dependencies
-  // (need to do this since the WriteDecorHandleKeys are not properties
-  declareIso(m_elCaloIso);
-  declareIso(m_phCaloIso);
-  declareIso(m_feCaloIso);
-  declareIso(m_muCaloIso);
-
-  declareIso(m_elTrackIso);
-  declareIso(m_phTrackIso);
-  declareIso(m_muTrackIso);
+  if (m_muisoInts.size()) {
+    ATH_MSG_DEBUG("Initializing muons");
+    ATH_CHECK(initializeIso(runIsoType,
+			    &m_muCaloIso,
+			    &m_muTrackIso,
+			    m_MuonContainerName,
+			    m_muisoInts,
+			    m_mucorInts,
+			    m_mucorIntsExtra,
+			    m_customConfigMu));
+    declareIso(m_muCaloIso);
+    declareIso(m_muTrackIso);
+  }
 
   // Retrieve the tools (there three Calo ones are the same in fact)
   if (!m_cellIsolationTool.empty() &&
@@ -143,21 +147,35 @@ IsolationBuilder::execute(const EventContext& ctx) const
   }
   // Compute isolations
 
-  ATH_MSG_DEBUG("About to execute Electron calo iso");
-  ATH_CHECK(executeCaloIso(m_elCaloIso, cellColl));
-  ATH_MSG_DEBUG("About to execute Photon calo iso");
-  ATH_CHECK(executeCaloIso(m_phCaloIso, cellColl));
-  ATH_MSG_DEBUG("About to execute Forwerd Electron calo iso");
-  ATH_CHECK(executeCaloIso(m_feCaloIso, cellColl));
-  ATH_MSG_DEBUG("About to execute muon calo iso");
-  ATH_CHECK(executeCaloIso(m_muCaloIso, cellColl));
+  if (m_elCaloIso.size()) {
+    ATH_MSG_DEBUG("About to execute Electron calo iso");
+    ATH_CHECK(executeCaloIso(m_elCaloIso, cellColl));
+  }
+  if (m_phCaloIso.size()) {
+    ATH_MSG_DEBUG("About to execute Photon calo iso");
+    ATH_CHECK(executeCaloIso(m_phCaloIso, cellColl));
+  }
+  if (m_feCaloIso.size()) {
+    ATH_MSG_DEBUG("About to execute Forward Electron calo iso");
+    ATH_CHECK(executeCaloIso(m_feCaloIso, cellColl));
+  }
+  if (m_muCaloIso.size()) {
+    ATH_MSG_DEBUG("About to execute muon calo iso");
+    ATH_CHECK(executeCaloIso(m_muCaloIso, cellColl));
+  }
 
-  ATH_MSG_DEBUG("About to execute Electron track iso");
-  ATH_CHECK(executeTrackIso(m_elTrackIso));
-  ATH_MSG_DEBUG("About to execute Photon track iso");
-  ATH_CHECK(executeTrackIso(m_phTrackIso));
-  ATH_MSG_DEBUG("About to execute Muon track iso");
-  ATH_CHECK(executeTrackIso(m_muTrackIso));
+  if (m_elTrackIso.size()) {
+    ATH_MSG_DEBUG("About to execute Electron track iso");
+    ATH_CHECK(executeTrackIso(m_elTrackIso));
+  }
+  if (m_phTrackIso.size()) {
+    ATH_MSG_DEBUG("About to execute Photon track iso");
+    ATH_CHECK(executeTrackIso(m_phTrackIso));
+  }
+  if (m_muTrackIso.size()) {
+    ATH_MSG_DEBUG("About to execute Muon track iso");
+    ATH_CHECK(executeTrackIso(m_muTrackIso));
+  }
 
   return StatusCode::SUCCESS;
 }
