@@ -18,9 +18,13 @@ def IsolationSteeringCfg(flags, name = 'IsolationSteering'):
         EMTopoInputAlgCfg, NFlowInputAlgCfg, DensityForIsoAlgCfg)
     if flags.Reco.EnableEgamma or flags.Reco.EnableCombinedMuon:
         if flags.Detector.EnableCalo:
-            acc.merge(EMTopoInputAlgCfg(flags))
-            acc.merge(DensityForIsoAlgCfg(flags))
-            acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityForTopoIso'))
+            # do not compute density if HI with subtracted clusters
+            # since no pu correction in this case
+            if not flags.HeavyIon.Egamma.doSubtractedClusters:
+                acc.merge(EMTopoInputAlgCfg(flags))
+                acc.merge(DensityForIsoAlgCfg(flags))
+                acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityForTopoIso'))
+        # should be switch off also for HI, but if done, crash sowewhere else...
         if flags.Reco.EnablePFlow:
             acc.merge(NFlowInputAlgCfg(flags))
             acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityForNFlowIso'))
