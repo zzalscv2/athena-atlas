@@ -29,8 +29,7 @@ StatusCode HIEventShapeMaker::initialize()
   ATH_CHECK(m_summaryKey.initialize(!m_summaryKey.key().empty()));
 
   // assure consistent setup of the input
-  ATH_CHECK(m_towerContainerKey.empty() == m_naviContainerKey.empty()); 
-  ATH_CHECK(m_towerContainerKey.empty() != m_cellContainerKey.empty());
+  ATH_CHECK(m_naviContainerKey.empty() != m_cellContainerKey.empty());
 
   //Create the HIEventShapeFillerTool
   if (!m_summaryOnly)
