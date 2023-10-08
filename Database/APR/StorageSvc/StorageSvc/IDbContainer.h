@@ -18,6 +18,7 @@
 #include "StorageSvc/Transaction.h"
 
 #include <vector>
+#include <cstdint>
 
 /*
  *   POOL namespace declaration

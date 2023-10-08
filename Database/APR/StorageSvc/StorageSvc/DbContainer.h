@@ -18,6 +18,8 @@
 #include "StorageSvc/DbHandleBase.h"
 #include "StorageSvc/Transaction.h"
 
+#include <cstdint>
+
 /*
  * POOL namespace declaration
  */
