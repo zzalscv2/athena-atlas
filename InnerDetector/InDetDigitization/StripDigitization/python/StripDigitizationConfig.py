@@ -1,6 +1,6 @@
 """Define methods to construct configured SCT Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -133,7 +133,7 @@ def ITkStripDigitizationToolSplitNoMergePUCfg(flags, name="ITkStripDigitizationT
 
 def ITkStripDigitizationToolGeantinoTruthCfg(flags, name="ITkStripGeantinoTruthDigitizationTool", **kwargs):
     """Return Geantino truth configured digitization tool"""
-    kwargs.setdefault("ParticleBarcodeVeto", 0)
+    kwargs.setdefault("VetoPileUpTruthLinks", False)
     return ITkStripDigitizationToolCfg(flags, name, **kwargs)
 
 

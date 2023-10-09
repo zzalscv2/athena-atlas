@@ -31,7 +31,7 @@ StatusCode CscDigitizationTool::initialize() {
   ATH_MSG_DEBUG ( "  Drift Velocity Set?       " << m_driftVelocity );
   ATH_MSG_DEBUG ( "  NInteraction per layer from poisson not from energyLoss?  " << m_NInterFixed );
   ATH_MSG_DEBUG ( "  IncludePileUpTruth        " << m_includePileUpTruth );
-  ATH_MSG_DEBUG ( "  ParticleBarcodeVeto       " << m_vetoThisBarcode );
+  ATH_MSG_DEBUG ( "  VetoPileUpTruthLinks      " << m_vetoPileUpTruthLinks );
 
   ATH_MSG_DEBUG ( "  RndmSvc                   " << m_rndmSvc.typeAndName() );
   ATH_MSG_DEBUG ( "  cscCalibTool              " << m_pcalib.typeAndName() );
@@ -205,8 +205,7 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
         zpos = zi + f*dz;
       }
 
-      if (!m_includePileUpTruth &&
-          ((phit->trackNumber() == 0) || (phit->trackNumber() == m_vetoThisBarcode))) {
+      if (!m_includePileUpTruth && HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) {
         hashVec.clear();
         continue;
       }

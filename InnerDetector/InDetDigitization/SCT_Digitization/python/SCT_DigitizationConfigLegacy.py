@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 import AthenaCommon.SystemOfUnits as Units
@@ -219,7 +219,7 @@ def SCT_DigitizationTool(name="SCT_DigitizationTool", **kwargs):
 ######################################################################################
 
 def SCT_GeantinoTruthDigitizationTool(name="SCT_GeantinoTruthDigitizationTool", **kwargs):
-    kwargs.setdefault("ParticleBarcodeVeto", 0)
+    kwargs.setdefault("VetoPileUpTruthLinks", False)
     return SCT_DigitizationTool(name,**kwargs)
 
 ######################################################################################

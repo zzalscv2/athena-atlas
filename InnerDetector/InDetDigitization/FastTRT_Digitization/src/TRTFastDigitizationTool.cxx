@@ -405,8 +405,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
       m_driftCircleMap.insert( std::multimap< Identifier, InDet::TRT_DriftCircle * >::value_type( straw_id, trtDriftCircle ) );
 
       if ( hit->particleLink().isValid() ) {
-        const int barcode( hit->particleLink().barcode() );
-        if ( barcode !=0 && barcode != m_vetoThisBarcode ) {
+        if (!HepMC::ignoreTruthLink(hit->particleLink(), m_vetoPileUpTruthLinks)) {
           trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), hit->particleLink() ) );
           ATH_MSG_DEBUG( "Truth map filled with cluster " << trtDriftCircle << " and link = " << hit->particleLink() );
         }

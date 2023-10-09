@@ -1,6 +1,6 @@
 """Define methods to construct configured TRT Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -104,7 +104,7 @@ def TRT_DigitizationGeantinoTruthToolCfg(flags, name="TRT_GeantinoTruthDigitizat
     else:
         kwargs.setdefault("MergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
-    kwargs.setdefault("ParticleBarcodeVeto", 0)
+    kwargs.setdefault("VetoPileUpTruthLinks", False)
     tool = acc.popToolsAndMerge(TRT_DigitizationToolCfg(flags, name, **kwargs))
     acc.setPrivateTools(tool)
     return acc

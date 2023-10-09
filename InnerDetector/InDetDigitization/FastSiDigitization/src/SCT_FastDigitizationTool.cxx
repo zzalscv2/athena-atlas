@@ -858,11 +858,10 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
 
             // Build Truth info for current cluster
             if (currentSiHit->particleLink().isValid()) {
-                const int barcode(currentSiHit->particleLink().barcode());
-                if (barcode != 0 && barcode != m_vetoThisBarcode) {
-                  sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentSiHit->particleLink()));
-                  ATH_MSG_DEBUG("Truth map filled with cluster" << potentialCluster << " and link = " << currentSiHit->particleLink());
-                }
+              if (!HepMC::ignoreTruthLink(currentSiHit->particleLink(), m_vetoPileUpTruthLinks)) {
+                sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentSiHit->particleLink()));
+                ATH_MSG_DEBUG("Truth map filled with cluster" << potentialCluster << " and link = " << currentSiHit->particleLink());
+              }
             }
           else
             {

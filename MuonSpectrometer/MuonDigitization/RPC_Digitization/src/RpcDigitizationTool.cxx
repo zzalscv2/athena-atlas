@@ -125,7 +125,7 @@ StatusCode RpcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("FileName_GoodPanels    " << m_FileName_GoodPanels);
     ATH_MSG_DEBUG("ValidationSetup        " << m_validationSetup);
     ATH_MSG_DEBUG("IncludePileUpTruth     " << m_includePileUpTruth);
-    ATH_MSG_DEBUG("ParticleBarcodeVeto    " << m_vetoThisBarcode);
+    ATH_MSG_DEBUG("VetoPileUpTruthLinks   " << m_vetoPileUpTruthLinks);
 
     ATH_CHECK(detStore()->retrieve(m_GMmgr, "Muon"));
     ATH_MSG_DEBUG("Retrieved GeoModel from DetectorStore.");
@@ -674,22 +674,22 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                 //				     MuonMCData((*b),G4Time+bunchTime+proptime          )); // store tof+strip_propagation
 
                 // Do not store pile-up truth information
-                if (m_includePileUpTruth || !((phit->trackNumber() == 0) || (phit->trackNumber() == m_vetoThisBarcode))) {
-                    if (std::abs(hit.particleEncoding()) == 13 || hit.particleEncoding() == 0) {
-                        auto channelSimDataMapPos = channelSimDataMap.find(atlasId);
-                        if (channelSimDataMapPos == channelSimDataMap.end()) {
-                            const Amg::Vector3D& ppos = hit.postLocalPosition();
-                            Amg::Vector3D gppos = ele->localToGlobalCoords(ppos, atlasId);
-                            Amg::Vector3D gdir = gppos - gpos;
-                            Trk::Intersection intersection = ele->surface(atlasId).straightLineIntersection(gpos, gdir, false, false);
-                            SimDataContent& content = channelSimDataMap[atlasId];
-                            content.channelId = atlasId;
-                            content.deposits.push_back(deposit);
-                            content.gpos = intersection.position;
-                            content.simTime = hitTime(phit);
-                            ATH_MSG_VERBOSE("adding SDO entry: r " << content.gpos.perp() << " z " << content.gpos.z());
-                        }
+                if (m_includePileUpTruth || !HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) {
+                  if (std::abs(hit.particleEncoding()) == 13 || hit.particleEncoding() == 0) {
+                    auto channelSimDataMapPos = channelSimDataMap.find(atlasId);
+                    if (channelSimDataMapPos == channelSimDataMap.end()) {
+                      const Amg::Vector3D& ppos = hit.postLocalPosition();
+                      Amg::Vector3D gppos = ele->localToGlobalCoords(ppos, atlasId);
+                      Amg::Vector3D gdir = gppos - gpos;
+                      Trk::Intersection intersection = ele->surface(atlasId).straightLineIntersection(gpos, gdir, false, false);
+                      SimDataContent& content = channelSimDataMap[atlasId];
+                      content.channelId = atlasId;
+                      content.deposits.push_back(deposit);
+                      content.gpos = intersection.position;
+                      content.simTime = hitTime(phit);
+                      ATH_MSG_VERBOSE("adding SDO entry: r " << content.gpos.perp() << " z " << content.gpos.z());
                     }
+                  }
                 }
 
                 if (imeasphi == 0 && m_SetEtaOn == 0) continue;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripDigitizationTool.h"
@@ -885,7 +885,7 @@ void StripDigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Wri
     for (list_t::const_iterator i_ListOfCharges{charges.begin()}; i_ListOfCharges != EndOfChargeList; ++i_ListOfCharges) {
       const HepMcParticleLink& trkLink{i_ListOfCharges->particleLink()};
       const int barcode{trkLink.barcode()};
-      if ((barcode == 0) or (barcode == m_vetoThisBarcode)) {
+      if (HepMC::ignoreTruthLink(barcode, m_vetoPileUpTruthLinks)) {
         continue;
       }
       if (not real_particle_hit) {
@@ -898,7 +898,7 @@ void StripDigitizationTool::addSDO(SiChargedDiodeCollection* collection, SG::Wri
         // processType()==SiCharge::cut_track
         // Tracks With Truth:            barcode!=0 and
         // processType()==SiCharge::track
-        if (barcode != 0 and i_ListOfCharges->processType() == SiCharge::track) {
+        if (!HepMC::no_truth_link(barcode) and i_ListOfCharges->processType() == SiCharge::track) {
           real_particle_hit = true;
         }
       }

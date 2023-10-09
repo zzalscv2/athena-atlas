@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTruthCreatorTools/DetailedTrackTruthBuilder.h"
@@ -9,7 +9,7 @@
 
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
-#include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -445,7 +445,7 @@ void DetailedTrackTruthBuilder::makeTruthToRecMap( PRD_InverseTruth& result, con
     // i.second = HepMcParticleLink
     auto pa = i.second.cptr();
     if( !pa ) { continue; } // skip noise
-    if(  pa->pdg_id()==999  && HepMC::barcode(pa)==HepMC::crazyParticleBarcode ) { continue; } // skip geantinos
+    if(  MC::isGeantino(pa) && HepMC::is_truth_suppressed_pileup(pa) ) { continue; } // skip geantinos
     result.insert(std::make_pair(i.second, i.first));
   }
 }
@@ -470,7 +470,7 @@ SubDetHitStatistics DetailedTrackTruthBuilder::countPRDsOnTruth(const TruthTraje
        ATH_MSG_WARNING( "HepMcParticleLink " << *p << " in truth trajectory does not point to a valid GenParticle.");
        continue;
     }
-    if( (*p)->pdg_id()==999 ) { continue; } 
+    if( MC::isGeantino(*p) ) { continue; }
     using iter = PRD_InverseTruth::const_iterator;
     std::pair<iter,iter> range = inverseTruth.equal_range(*p);
     for(iter i = range.first; i != range.second; ++i) {

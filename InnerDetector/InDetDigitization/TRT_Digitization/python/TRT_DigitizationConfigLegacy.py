@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 # The earliest bunch crossing time for which interactions will be sent
@@ -87,7 +87,7 @@ def TRTDigitizationTool(name="TRTDigitizationTool",**kwargs):
     return BasicTRTDigitizationTool(name,**kwargs)
 
 def TRTGeantinoTruthDigitizationTool(name="TRTGeantinoTruthDigitizationTool",**kwargs):
-    kwargs.setdefault("ParticleBarcodeVeto", 0)
+    kwargs.setdefault("VetoPileUpTruthLinks", False)
     return TRTDigitizationTool(name,**kwargs)
 
 def TRTDigitizationToolHS(name="TRTDigitizationToolHS",**kwargs):

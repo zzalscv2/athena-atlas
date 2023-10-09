@@ -483,8 +483,7 @@ StatusCode SiSmearedDigitizationTool::FillTruthMap(PRD_MultiTruthCollection * ma
 
   ATH_MSG_DEBUG("Truth map filling with cluster " << *cluster << " and link = " << hit->particleLink());
   if (hit->particleLink().isValid()){
-    const int barcode( hit->particleLink().barcode());
-    if ( barcode !=0 && barcode != m_vetoThisBarcode ) {
+    if (!HepMC::ignoreTruthLink(hit->particleLink(), m_vetoPileUpTruthLinks)) {
       map->insert(std::make_pair(cluster->identify(), hit->particleLink()));
       ATH_MSG_DEBUG("Truth map filled with cluster " << *cluster << " and link = " << hit->particleLink());
     }
