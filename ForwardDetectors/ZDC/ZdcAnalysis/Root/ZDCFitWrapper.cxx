@@ -163,6 +163,20 @@ void ZDCFitExpFermiVariableTausLHCf::DoInitialize(float initialAmp, float initia
 
   if (!m_fixTau1) theTF1->SetParameter(2, m_tau1);
   if (!m_fixTau2) theTF1->SetParameter(3, m_tau2);
+
+  // Set the parameter errors which ROOT now uses <<<to set the initial step sizes>>>
+  //
+  double ampStep = std::min(0.05*initialAmp, std::abs(ampMax - initialAmp)/2.);
+  
+  theTF1->SetParError(0, ampStep);
+  theTF1->SetParError(1, 1.0);
+
+  if (!m_fixTau1) theTF1->SetParError(2, 0.05);
+  if (!m_fixTau2) theTF1->SetParError(3, 0.25);
+
+  theTF1->SetParError(4, 2);
+  theTF1->SetParError(5, 0.25);
+  theTF1->SetParError(6, 0.05);
 }
 
 void ZDCFitExpFermiVariableTausLHCf::SetT0FitLimits(float t0Min, float t0Max)
@@ -190,6 +204,7 @@ void ZDCFitExpFermiVariableTausLHCf::UnconstrainFit()
   theTF1->ReleaseParameter(5);
   theTF1->ReleaseParameter(6);
 
+  theTF1->SetParLimits(5, 5, 8);
   theTF1->SetParLimits(6, -1e-4, 0.2);
   theTF1->SetParameter(6, 0.1);
 }
@@ -273,7 +288,7 @@ ZDCFitExpFermiPrePulse::ZDCFitExpFermiPrePulse(const std::string& tag, float tmi
 
   // BAC, parameter 0 limits now is set in DoInitialize
   theTF1->SetParLimits(1, tmin, tmax);
-  theTF1->SetParLimits(2, 1, 4096); // Increase the upper range to 4 times of ADC range to deal with large exponential tail case of pre-pulse.
+  theTF1->SetParLimits(2, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
   theTF1->SetParLimits(3, -20, 10);
 
   theTF1->SetParName(0, "Amp");
@@ -281,8 +296,6 @@ ZDCFitExpFermiPrePulse::ZDCFitExpFermiPrePulse(const std::string& tag, float tmi
   theTF1->SetParName(2, "Amp_{pre}");
   theTF1->SetParName(3, "T0_{pre}");
   theTF1->SetParName(4, "C");
-
-
 }
 
 void ZDCFitExpFermiPrePulse::ConstrainFit()
@@ -299,6 +312,8 @@ void ZDCFitExpFermiPrePulse::UnconstrainFit()
   std::shared_ptr<TF1> theTF1 = GetWrapperTF1();
   theTF1->ReleaseParameter(2);
   theTF1->ReleaseParameter(4);
+
+  theTF1->SetParLimits(2, 1, 8196); // Increase the upper range to 2 times of ADC range to deal with large exponential tail case of pre-pulse.
 }
 
 void ZDCFitExpFermiPrePulse::SetPrePulseT0Range(float tmin, float tmax)
@@ -324,6 +339,15 @@ void ZDCFitExpFermiPrePulse::DoInitialize(float initialAmp, float initialT0, flo
   GetWrapperTF1()->SetParameter(4, 0);
 
   GetWrapperTF1()->SetParLimits(0, ampMin, ampMax);
+
+  // Set parameter errors for fit step size
+  //
+  double ampStep = std::min(0.05*initialAmp, std::abs(ampMax - initialAmp)/2.);
+  GetWrapperTF1()->SetParError(0, ampStep);
+  GetWrapperTF1()->SetParError(1, 1.0);
+  GetWrapperTF1()->SetParError(2, 2);
+  GetWrapperTF1()->SetParError(3, 1.0);
+  GetWrapperTF1()->SetParError(4, 1.0);
 }
 
 void ZDCFitExpFermiPrePulse::SetT0FitLimits(float t0Min, float t0Max)
