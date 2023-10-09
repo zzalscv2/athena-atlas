@@ -148,16 +148,6 @@ private:
   virtual void updateParametersHelper(const AmgVector(DIM) &) override final;
 
 protected:
-  /*
-   * Add dependent names into scope
-   */
-  using ParametersBase<DIM, T>::m_parameters;
-  using ParametersBase<DIM, T>::m_covariance;
-  using ParametersBase<DIM, T>::m_chargeDef;
-  using SurfaceUniqHolderImpl<S>::m_associatedSurface;
-  Amg::Vector3D m_position; //!< point on track
-  Amg::Vector3D m_momentum; //!< momentum at this point on track
-
   /**
    * @brief Constructor for persistency
    */

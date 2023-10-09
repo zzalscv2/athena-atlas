@@ -131,6 +131,8 @@ protected:
   using ParametersCommon<DIM, T>::m_parameters;
   using ParametersCommon<DIM, T>::m_covariance;
   using ParametersCommon<DIM, T>::m_chargeDef;
+  Amg::Vector3D m_position; //!< point on track
+  Amg::Vector3D m_momentum; //!< momentum at this point on track
 };
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug
