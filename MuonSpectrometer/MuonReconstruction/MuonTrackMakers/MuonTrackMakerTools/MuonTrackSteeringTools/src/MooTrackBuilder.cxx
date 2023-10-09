@@ -338,7 +338,7 @@ namespace Muon {
         return combineWithSegmentFinding(ctx, *candidate, *segInfo, externalPhiHits);
     }
 
-    Trk::TrackParameters* MooTrackBuilder::findClosestParameters(const Trk::Track& track, const Amg::Vector3D& pos) const {
+    std::unique_ptr<Trk::TrackParameters> MooTrackBuilder::findClosestParameters(const Trk::Track& track, const Amg::Vector3D& pos) const {
         // are we in the endcap?
         bool isEndcap = m_edmHelperSvc->isEndcap(track);
 
@@ -376,7 +376,7 @@ namespace Muon {
 
             // calculate position parameters and compare with position segment
             double posPars = isEndcap ? pars->position().z() : pars->position().perp();
-            double diffPos = fabs(posPars - posSeg);
+            double diffPos = std::abs(posPars - posSeg);
 
             // accept if measured parameters or the current accepted parameters are not yet measured
             if ((isMeasured && !closestIsMeasured) || diffPos < closest) {
@@ -390,21 +390,21 @@ namespace Muon {
         }
 
         // return clone of parameters
-        if (closestParameters) return closestParameters->clone();
+        if (closestParameters) return closestParameters->uniqueClone();
         return nullptr;
     }
 
-    Trk::TrackParameters* MooTrackBuilder::getClosestParameters(const MuPatCandidateBase& candidate, const Trk::Surface& surf) const {
+    std::unique_ptr<Trk::TrackParameters> MooTrackBuilder::getClosestParameters(const MuPatCandidateBase& candidate, const Trk::Surface& surf) const {
         // cast to segment, return segment parameters if cast success
         const MuPatSegment* segCandidate = dynamic_cast<const MuPatSegment*>(&candidate);
-        if (segCandidate) return segCandidate->entryPars().clone();
+        if (segCandidate) return segCandidate->entryPars().uniqueClone();
 
         // for a track candidate, return the closest parameter on the track
         const MuPatTrack& trkCandidate = dynamic_cast<const MuPatTrack&>(candidate);
         return getClosestParameters(trkCandidate.track(), surf);
     }
 
-    Trk::TrackParameters* MooTrackBuilder::getClosestParameters(const Trk::Track& track, const Trk::Surface& surf) const {
+    std::unique_ptr<Trk::TrackParameters> MooTrackBuilder::getClosestParameters(const Trk::Track& track, const Trk::Surface& surf) const {
         return MuonGetClosestParameters::closestParameters(track, surf);
     }
 
@@ -1118,14 +1118,14 @@ namespace Muon {
         double sinTheta1 = sin(pars1->momentum().theta());
         double sinTheta2 = sin(pars2->momentum().theta());
         double deltaSinTheta = sinTheta1 - sinTheta2;
-        if (fabs(deltaSinTheta) > 1.) {
+        if (std::abs(deltaSinTheta) > 1.) {
             ATH_MSG_DEBUG(" too large opening angle in theta " << deltaSinTheta);
             // return false;
         }
         double sinPhi1 = sin(pars1->momentum().phi());
         double sinPhi2 = sin(pars2->momentum().phi());
         double deltaSinPhi = sinPhi1 - sinPhi2;
-        if (fabs(deltaSinPhi) > 1.) {
+        if (std::abs(deltaSinPhi) > 1.) {
             ATH_MSG_DEBUG(" too large opening angle in phi " << deltaSinPhi);
             // return false;
         }
@@ -1207,7 +1207,7 @@ namespace Muon {
                 continue;
             } else {
                 const Trk::TrackParameters* closestPars = nullptr;
-                if (prevPars && fabs(prevDist) < fabs(dist)) {
+                if (prevPars && std::abs(prevDist) < std::abs(dist)) {
                     closestPars = prevPars;
                 } else {
                     closestPars = parsRef;
@@ -1281,7 +1281,7 @@ namespace Muon {
                             ATH_MSG_WARNING("globalToLocal failed");
                         }
 
-                        if (inBounds && (fabs(residual) < 20. || fabs(pull) < 10.)) {
+                        if (inBounds && (std::abs(residual) < 20. || std::abs(pull) < 10.)) {
                             ATH_MSG_VERBOSE(" --> matching ");
                             ++nmatching;
                         } else {

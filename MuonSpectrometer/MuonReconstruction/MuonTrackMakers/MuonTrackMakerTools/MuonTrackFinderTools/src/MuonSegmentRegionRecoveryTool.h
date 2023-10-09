@@ -37,7 +37,6 @@
 #include "MuonRecToolInterfaces/IMuonHoleRecoveryTool.h"
 #include "MuonRecToolInterfaces/IMuonSeededSegmentFinder.h"
 #include "MuonRecToolInterfaces/IMuonTrackSegmentMatchingTool.h"
-#include "MuonTrackMakerUtils/TrackStateOnSurfaceComparisonFunction.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkParameters/TrackParameters.h"

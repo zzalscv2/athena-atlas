@@ -29,10 +29,7 @@ namespace Muon {
 
     public:
         /** access to tool interface */
-        static const InterfaceID& interfaceID() {
-            static const InterfaceID IID_IMuonSegmentTrackBuilder("Muon::IMuonSegmentTrackBuilder", 1, 0);
-            return IID_IMuonSegmentTrackBuilder;
-        }
+        DeclareInterfaceID(Muon::IMuonSegmentTrackBuilder, 1, 0);
 
         /** @brief refit track
             @param track the track
@@ -55,8 +52,10 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the combined segment, will return zero if combination failed. Ownership passed to user.
         */
-        virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
-                                              const PrepVec& patternPhiHits) const = 0;
+        virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, 
+                                                              const MuonSegment& seg1, 
+                                                              const MuonSegment& seg2,
+                                                              const PrepVec& patternPhiHits) const = 0;
 
         /** @brief combine two segments to a track
             @param seg1 the first segment
@@ -64,7 +63,9 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
-        virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const MuonSegment& seg1, const MuonSegment& seg2,
+        virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, 
+                                                    const MuonSegment& seg1, 
+                                                    const MuonSegment& seg2,
                                                     const PrepVec& patternPhiHits) const = 0;
 
         /** @brief combine a track with a segment
@@ -73,7 +74,9 @@ namespace Muon {
             @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
-        virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, const Trk::Track& track, const MuonSegment& seg,
+        virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, 
+                                                    const Trk::Track& track, 
+                                                    const MuonSegment& seg,
                                                     const PrepVec& patternPhiHits) const = 0;
 
         /** @brief find closest TrackParameters to the position. Closest is defined as closest in z in the endcap and
@@ -82,14 +85,16 @@ namespace Muon {
              @param pos a reference to a GlobalPosition
              @return a pointer to TrackParameters, the ownership of the parameters is passed to the client calling the tool.
           */
-        virtual Trk::TrackParameters* findClosestParameters(const Trk::Track& track, const Amg::Vector3D& pos) const = 0;
+        virtual std::unique_ptr<Trk::TrackParameters> findClosestParameters(const Trk::Track& track, 
+                                                                            const Amg::Vector3D& pos) const = 0;
 
         /** @brief find closest TrackParameters to the surface. The distance is calculated along the track
             @param track a reference to a Track
             @param pos a reference to a Surface
             @return a pointer to TrackParameters, the ownership of the parameters is passed to the client calling the tool.
          */
-        virtual Trk::TrackParameters* getClosestParameters(const Trk::Track& track, const Trk::Surface& surf) const = 0;
+        virtual std::unique_ptr<Trk::TrackParameters> getClosestParameters(const Trk::Track& track, 
+                                                                           const Trk::Surface& surf) const = 0;
 
         virtual ~IMuonSegmentTrackBuilder() = default;
     };
