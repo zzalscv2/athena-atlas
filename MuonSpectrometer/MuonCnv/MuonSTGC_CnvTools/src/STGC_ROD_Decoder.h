@@ -8,6 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MuonSTGC_CnvTools/ISTGC_ROD_Decoder.h"
 #include "MuonCondData/NswDcsDbData.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 class sTgcIdHelper;
 
@@ -29,7 +30,8 @@ class STGC_ROD_Decoder : virtual public ISTGC_ROD_Decoder, public AthAlgTool
 
   protected:
     const sTgcIdHelper* m_stgcIdHelper{nullptr};
-    
+    SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager",
+                                                                            "Key of input MuonDetectorManager condition data"}; 
     SG::ReadCondHandleKey<NswDcsDbData> m_dscKey{this, "DcsKey", "NswDcsDbData",
         "Key of NswDcsDbData object containing DCS conditions data"};
 

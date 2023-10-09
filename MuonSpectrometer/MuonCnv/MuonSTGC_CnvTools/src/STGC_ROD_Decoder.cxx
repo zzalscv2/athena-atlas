@@ -8,6 +8,7 @@
 #include "MuonRDO/STGC_RawData.h"
 #include "MuonRDO/STGC_RawDataContainer.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
+#include "MuonReadoutGeometry/sTgcReadoutElement.h"
 
 #include "MuonNSWCommonDecode/NSWCommonDecoder.h"
 #include "MuonNSWCommonDecode/NSWElink.h"
@@ -32,6 +33,7 @@ Muon::STGC_ROD_Decoder::STGC_ROD_Decoder(const std::string& t, const std::string
 StatusCode Muon::STGC_ROD_Decoder::initialize()
 {
   ATH_CHECK(detStore()->retrieve(m_stgcIdHelper, "STGCIDHELPER"));
+  ATH_CHECK(m_DetectorManagerKey.initialize());
   ATH_CHECK(m_dscKey.initialize(!m_dscKey.empty()));
   return StatusCode::SUCCESS;
 }
@@ -67,6 +69,15 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
      dcsData = readCondHandle.cptr();
   }
 
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muonGeoMgrHandle{m_DetectorManagerKey, ctx};
+
+  if (!muonGeoMgrHandle.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve the detector manager from the conditions store");
+      return StatusCode::FAILURE;
+  }
+
+  const MuonGM::MuonDetectorManager* muonGeoMgr = *muonGeoMgrHandle;
+
   // if the vector of hashes is not empty, then we are in seeded mode
   bool seeded_mode(!rdoIdhVect.empty());
 
@@ -94,7 +105,7 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
 
     IdentifierHash module_hashID;
     m_stgcIdHelper->get_module_hash(module_ID, module_hashID);
-
+    const MuonGM::sTgcReadoutElement* roElement = muonGeoMgr->getsTgcReadoutElement(module_ID);
     // if we are in ROI-seeded mode, check if this hashID is requested
     if (seeded_mode && std::find(rdoIdhVect.begin(), rdoIdhVect.end(), module_hashID) == rdoIdhVect.end()) continue;
     std::unique_ptr<STGC_RawDataCollection>& rdo = rdo_map[module_hashID];
@@ -108,7 +119,14 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const EventContext& ctx,
        if (channel_number == 0) continue; // skip disconnected vmm channels
 
        const Identifier channel_ID = m_stgcIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_type, channel_number); // not validating the IDs (too slow)
-       if (dcsData && !dcsData->isGood(channel_ID)) continue;
+       bool isOuterQ1{false};
+       if(std::abs(station_eta)==1 && dcsData){ // only the innermost quad is split in two hv sections, no need to check the others, also no need to check if no dcs data is loaded
+          Amg::Vector2D localPos{Amg::Vector2D::Zero()};
+          if (!roElement->stripPosition(channel_ID, localPos)) continue; // can also handle wires and pads
+          isOuterQ1 = !(roElement->isEtaZero(channel_ID, localPos));
+       }
+
+       if (dcsData && !dcsData->isGood(ctx, channel_ID, isOuterQ1)) continue;
        bool timeAndChargeInCounts = true; // always true for data from detector
        rdo->push_back(new STGC_RawData(channel_ID, channel->rel_bcid(), channel->tdo(), channel->pdo(), false,timeAndChargeInCounts)); // isDead = false (ok?)
     }

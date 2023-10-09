@@ -59,6 +59,7 @@ private:
 
 	bool buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
 	bool buildChannelIdForTDaq(Identifier& channelId, uint& elink, const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
+        bool buildChannelIdForEltx(Identifier& channelId ,const DcsTechType tech0, const std::string& chanName, bool& isOK) const;
 
 	ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
 	ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
@@ -68,12 +69,14 @@ private:
 	readKey_t m_readKey_mmg_hv {this, "ReadKey_MMG_HV", "/MMG/DCS/HV", "Key of input MMG condition data for HV"};
 	readKey_t m_readKey_stg_hv {this, "ReadKey_STG_HV", "/STG/DCS/HV", "Key of input STG condition data for HV"};
 
-	readKey_t m_readKey_mmg_tdaq{this, "ReadKey_MMG_TDAQ", "/MDT/MM/ELinks", "Key of input MMG condition data for TDAQ"};
-	readKey_t m_readKey_stg_tdaq{this, "ReadKey_STG_TDAQ", "/TGC/NSW/ELinks", "Key of input STG condition data for TDAQ"};
+	readKey_t m_readKey_mmg_tdaq{this, "ReadKey_MMG_TDAQ", "", "Key of input MMG condition data for TDAQ"};
+	readKey_t m_readKey_stg_tdaq{this, "ReadKey_STG_TDAQ", "", "Key of input STG condition data for TDAQ"};
 	
-	readKey_t m_readKey_mmg_eltx{this, "ReadKey_MMG_ELTX", "/MMG/DCS/TSELTX", "Key of input MMG condition data for  SCA status"};
+	readKey_t m_readKey_mmg_eltx{this, "ReadKey_MMG_ELTX", "", "Key of input MMG condition data for  SCA status"};
+	readKey_t m_readKey_stg_eltx{this, "ReadKey_STG_ELTX", "", "Key of input STG condition data for  SCA status"};
 
-	Gaudi::Property<bool> m_loadScas{this, "LoadSCAs",false,"enable the processing of SCAs in the NswDcsDbAlg"};
+	Gaudi::Property<bool> m_loadTdaq{this, "LoadTdaq",false,"enable the processing of Elinks in the NswDcsDbAlg"};
+	Gaudi::Property<bool> m_loadEltx{this, "LoadEltx",false,"enable the processing of SCAs in the NswDcsDbAlg"};
 
 	const MuonGM::MuonDetectorManager *m_muDetMgrFromDetStore; 
  

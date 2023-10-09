@@ -27,7 +27,7 @@ NswDcsDbData::NswDcsDbData(const MmIdHelper& mmIdHelper, const sTgcIdHelper& stg
 }
 
 std::ostream& operator<<(std::ostream& ostr, const NswDcsDbData::TDaqConstants& obj) {
-    ostr  << " lbSince " << obj.lbSince << " lbUntil " << obj.lbUntil << " elink " << obj.elink;
+    ostr  << " timeSince " << obj.timeSince << " timeUntil " << obj.timeUntil << " elink " << obj.elink;
     return ostr;
 }
 
@@ -88,15 +88,24 @@ NswDcsDbData::setDataHv(const DcsTechType tech, const Identifier& chnlId, DcsCon
 
 // setDataTDaq
 void
-NswDcsDbData::setDataTDaq(const DcsTechType tech, const Identifier& chnlId, unsigned int lbSince, unsigned int lbUntil, unsigned int elink) {
+NswDcsDbData::setDataTDaq(const DcsTechType tech, const Identifier& chnlId, uint64_t timeSince, uint64_t timeUntil, unsigned int elink, bool permanentlyDisabled) {
     ChannelTDaqMap& data = tech == DcsTechType::MMG ? m_data_tdaq_mmg : m_data_tdaq_stg;
     const unsigned int array_idx = identToModuleIdx(chnlId);
     if (array_idx >= data.size()) data.resize(array_idx + 1);
     TDaqConstants x;
-    x.lbSince = lbSince;
-    x.lbUntil = lbUntil;
+    x.timeSince = timeSince;
+    x.timeUntil = timeUntil;
     x.elink = elink;
+    x.permanentlyDisabled = permanentlyDisabled;
     data[array_idx][chnlId].insert(x);
+}
+
+void
+NswDcsDbData::setDataEltx(const DcsTechType tech, const Identifier& channelId) {
+    ChannelEltxMap& data = tech == DcsTechType::MMG ? m_data_eltx_mmg : m_data_eltx_stg;
+    const uint array_idx = identToModuleIdx(channelId);
+    if (array_idx >= data.size()) data.resize(array_idx + 1);
+    data[array_idx].insert(channelId);
 }
 
 
@@ -137,30 +146,44 @@ NswDcsDbData::getChannelIdsHv(const DcsTechType tech, const std::string& side) c
 }
 
 const NswDcsDbData::DcsConstants* 
-NswDcsDbData::getDataForChannelHv(const DcsTechType tech, const Identifier& channelId) const {
-    if(tech == DcsTechType::MMG || tech == DcsTechType::MMD){
+NswDcsDbData::getDataForChannelHv(const DcsTechType tech, const Identifier& channelId, bool issTgcQ1OuterHv) const {
+    if(tech == DcsTechType::MMG){
         if(!m_mmIdHelper.is_mm(channelId)) return nullptr;
-        const ChannelDcsMap& dcsMap = tech==DcsTechType::MMG ? m_data_hv_mmg : m_data_hv_mmd; // later add something like: type == DcsDataType::HV ? m_data_hv : m_data_lv;
-        const unsigned int array_idx = identToModuleIdx(channelId);
-        const unsigned int channel = m_mmIdHelper.channel(channelId) -1;
+        Identifier dcsChannelIdStripHv = m_mmIdHelper.pcbID(channelId);
+        const ChannelDcsMap& dcsMap = m_data_hv_mmg; // later add something like: type == DcsDataType::HV ? m_data_hv : m_data_lv;
+        const unsigned int array_idx = identToModuleIdx(dcsChannelIdStripHv);
+        const unsigned int channel = m_mmIdHelper.channel(dcsChannelIdStripHv) -1;
+        if (dcsMap.size() > array_idx && dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
+    } else if (tech == DcsTechType::MMD) {
+        if(!m_mmIdHelper.is_mm(channelId)) return nullptr;
+        Identifier dcsChannelIdDriftHv = m_mmIdHelper.multilayerID(channelId);
+        const ChannelDcsMap& dcsMap = m_data_hv_mmd;
+        const unsigned int array_idx = identToModuleIdx(dcsChannelIdDriftHv);
+        const unsigned int channel = m_mmIdHelper.channel(dcsChannelIdDriftHv) -1;
         if (dcsMap.size() > array_idx && dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
     } else if(tech == DcsTechType::STG){
         if(!m_stgcIdHelper.is_stgc(channelId)) return nullptr;
-        const ChannelDcsMap& dcsMap = m_data_hv_stg; // later add something like: type == DcsDataType::HV ? m_data_hv_stg : m_data_lv_stg;
-        const unsigned int array_idx = identToModuleIdx(channelId);
-        const unsigned int channel = m_stgcIdHelper.channel(channelId) -1;
+        
+        // the parameter issTgcQ1OuterHv is only relevant for the Q1s of the stgcs. So set it to false if we are not in Q1, just in case
+        if(std::abs(m_stgcIdHelper.stationEta(channelId))!= 1) {issTgcQ1OuterHv=false;}
+        Identifier dcsChannelId = m_stgcIdHelper.channelID(channelId,m_stgcIdHelper.multilayer(channelId), m_stgcIdHelper.gasGap(channelId), 1, (issTgcQ1OuterHv ? 100:1));
+        const ChannelDcsMap& dcsMap = m_data_hv_stg;
+        const unsigned int array_idx = identToModuleIdx(dcsChannelId);
+        const unsigned int channel = m_stgcIdHelper.channel(dcsChannelId) -1;
         if (dcsMap.size() > array_idx && dcsMap.at(array_idx).channels.size() > channel && dcsMap[array_idx].channels[channel]) return dcsMap[array_idx].channels[channel].get();
     }
     return nullptr;
 }
 
 
-bool NswDcsDbData::isGood(const Identifier& channelId, bool issTgcQ1OuterHv) const {
+bool NswDcsDbData::isGood(const EventContext& ctx, const Identifier& channelId, bool issTgcQ1OuterHv) const {
     // here we will check the different DCS components that need to be good to declare a detector region as good
     // for now we only we only have the HV data
     if(!isGoodHv(channelId, issTgcQ1OuterHv)) return false;
-    //while the isGoodTDaq is under validation it should not reject any hits in recosntruction, therefore keep it commented for now 
-    //if(!isGoodTDaq(ctx, channelId)) return false;
+    //isGoodEltx and isGoodTdaq are still under validation, but since they are switched off in the NswDcsAlg their data will be empty so they do not reject hits for now.
+    bool permanentlyDisabled{false};
+    if(!isGoodTDaq(ctx, channelId, permanentlyDisabled)) return false;
+    if(!isGoodEltx(channelId)) return false;
     if(!isConnectedChannel(channelId))  return false;
     return true;
 
@@ -169,20 +192,14 @@ bool NswDcsDbData::isGood(const Identifier& channelId, bool issTgcQ1OuterHv) con
 
 bool NswDcsDbData::isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv) const {
     if (m_stgcIdHelper.is_stgc(channelId)){
-        // the parameter issTgcQ1OuterHv is only relevant for the Q1s of the stgcs. So set it to false if we are not in Q1, just in case
-        if(std::abs(m_stgcIdHelper.stationEta(channelId))!= 1) {issTgcQ1OuterHv=false;}
-        Identifier dcsChannelId = m_stgcIdHelper.channelID(channelId,m_stgcIdHelper.multilayer(channelId), m_stgcIdHelper.gasGap(channelId), 1, (issTgcQ1OuterHv ? 100:1));
-        const NswDcsDbData::DcsConstants* dcs = getDataForChannelHv(DcsTechType::STG, dcsChannelId);
+        const NswDcsDbData::DcsConstants* dcs = getDataForChannelHv(DcsTechType::STG, channelId, issTgcQ1OuterHv);
         /// For the moment do not kill the hit if there's no dcs data
         return !dcs || dcs->fsmState == DcsFsmState::ON;
     } else if (m_stgcIdHelper.is_mm(channelId)){
-        Identifier dcsChannelIdDriftHv = m_mmIdHelper.multilayerID(channelId);
-        Identifier dcsChannelIdStripHv = m_mmIdHelper.pcbID(channelId);
-
-        const NswDcsDbData::DcsConstants* dcsDrift = getDataForChannelHv(DcsTechType::MMD, dcsChannelIdDriftHv);
+        const NswDcsDbData::DcsConstants* dcsDrift = getDataForChannelHv(DcsTechType::MMD, channelId, issTgcQ1OuterHv);
         bool driftHvIsGood = (!dcsDrift || dcsDrift->fsmState == DcsFsmState::ON);
 
-        const NswDcsDbData::DcsConstants* dcsStrips = getDataForChannelHv(DcsTechType::MMG, dcsChannelIdStripHv);
+        const NswDcsDbData::DcsConstants* dcsStrips = getDataForChannelHv(DcsTechType::MMG, channelId, issTgcQ1OuterHv);
         bool stripHvIsGood = (!dcsStrips || dcsStrips->fsmState == DcsFsmState::ON);
         
         return  driftHvIsGood && stripHvIsGood; 
@@ -190,8 +207,7 @@ bool NswDcsDbData::isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv) c
     return false;
 }
 
-
-bool NswDcsDbData::isGoodTDaq(const EventContext& ctx, const Identifier& channelId) const {
+bool NswDcsDbData::isGoodTDaq(const EventContext& ctx, const Identifier& channelId, bool &permanentlyDisabled) const {
     const ChannelTDaqMap & data = m_stgcIdHelper.is_mm(channelId) ? m_data_tdaq_mmg : m_data_tdaq_stg;
     const unsigned int array_idx = identToModuleIdx(channelId);
     if(data.size()<=array_idx || data[array_idx].empty()) return true; // for this ro element no bad elink have been recorded 
@@ -212,12 +228,26 @@ bool NswDcsDbData::isGoodTDaq(const EventContext& ctx, const Identifier& channel
     auto elm = dataInRoElement.find(mapIdentifier);
     if(elm == dataInRoElement.end()) return true; // channel in question was not deactivated at all
     TDaqConstants x;
-    x.lbSince = ctx.eventID().lumi_block();
-    x.lbUntil = ctx.eventID().lumi_block();
+    uint64_t evtTime = ctx.eventID().time_stamp()*1e9; // go from seconds to nanoseconds
+    evtTime += ctx.eventID().time_stamp_ns_offset();
+    x.timeSince = evtTime;
+    x.timeUntil = evtTime;
     x.elink = elink;
 
-    if(elm->second.find(x) != elm->second.end()) return false; // elink was deactivated for this time period
+    auto disabledLink = elm->second.find(x);
+    if(disabledLink != elm->second.end()){// elink was deactivated for this time period
+        permanentlyDisabled = disabledLink->permanentlyDisabled;
+        return false;
+    } 
     return true; // checked the channel in question, not deactivated for given run and lumi block combination, all good
+}
+
+bool NswDcsDbData::isGoodEltx(const Identifier& channelId) const{
+    const ChannelTDaqMap & data = m_stgcIdHelper.is_mm(channelId) ? m_data_tdaq_mmg : m_data_tdaq_stg;
+    const unsigned int array_idx = identToModuleIdx(channelId);
+    if(data.size()<=array_idx || data[array_idx].empty()) return true; // for this ro element no bad elink have been recorded 
+    if(data[array_idx].find(channelId) != data[array_idx].end()) return false;
+    return true;
 }
 
 
