@@ -50,6 +50,17 @@ def EGammaCaloIsolationToolCfg(flags, **kwargs):
             phi_size=7,
             cells_name=flags.Egamma.Keys.Input.CaloCells)
         kwargs['CaloFillRectangularClusterTool'] = cfrc
+
+    # default is to read calocaltopoclusters.
+    # In HI, if subtracted clusters, use them instead, and do not do pu correction
+    if flags.HeavyIon.Egamma.doSubtractedClusters:
+        ccict = CompFactory.xAOD.CaloClustersInConeTool(
+            name="topoiso_CaloClustersInConeTool",
+            CaloClusterLocation=flags.Egamma.Keys.Input.TopoClusters)
+        kwargs['ClustersInConeTool'] = ccict
+        # No pileup correction, and do not save it
+        kwargs['InitializeReadHandles'] = False
+        kwargs['saveOnlyRequestedCorrections'] = True
         
     kwargs.setdefault('name','egCaloIsolationTool')
     kwargs.setdefault('ParticleCaloExtensionTool',None)
@@ -70,9 +81,17 @@ def MuonCaloIsolationToolCfg(flags, **kwargs):
         kwargs['FlowElementsInConeTool'] = CompFactory.xAOD.FlowElementsInConeTool(
             name='FlowElementsInConeTool')
 
-    from CaloIdentifier import SUBCALO 
-    kwargs.setdefault('EMCaloNums',[SUBCALO.LAREM])
-    kwargs.setdefault('HadCaloNums',[SUBCALO.LARHEC, SUBCALO.TILE])
+    # default is to read calocaltopoclusters.
+    # In HI, if subtracted clusters, use them instead, and do not do pu correction
+    if flags.HeavyIon.Egamma.doSubtractedClusters:
+        ccict = CompFactory.xAOD.CaloClustersInConeTool(
+            name="topoiso_CaloClustersInConeTool",
+            CaloClusterLocation=flags.Egamma.Keys.Input.TopoClusters)
+        kwargs['ClustersInConeTool'] = ccict
+        # No pileup correction, and do not save it
+        kwargs['InitializeReadHandles'] = False
+        kwargs['saveOnlyRequestedCorrections'] = True
+
     kwargs.setdefault('ParticleCaloCellAssociationTool',None)
     kwargs.setdefault('UseEtaDepPUCorr',False)
     kwargs.setdefault('name','muonCaloIsolationTool')

@@ -49,7 +49,7 @@ def HIEventShapeMakerCfg(flags, name="HIEventShapeMaker", doWeighted=False, **kw
     towerMaker = acc.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
 
     kwargs.setdefault("NaviTowerKey", towerMaker.TowerContainerName)
-    kwargs.setdefault("InputTowerKey", towerMaker.TowerContainerName)
+    kwargs.setdefault("InputTowerKey", "")
     kwargs.setdefault("OutputContainerKey", "HIEventShape")
     if "HIEventShapeFillerTool" not in kwargs:
         name_esft="HIEventShapeFillerTool_Weighted" if doWeighted else "HIEventShapeFillerTool"

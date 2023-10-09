@@ -52,6 +52,9 @@ def egIsolationCfg(flags, name='egIsolation', noCalo=False, **kwargs):
             [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ])
         isoCor.append(
             [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ])
+        # do not do pileup correction if HI with subtracted clusters
+        if flags.HeavyIon.Egamma.doSubtractedClusters:
+            isoCor[-1] = [ x for x in isoCor[-1] if x != isoPar.pileupCorrection ]
         isoExCor.append([])
         if 'CaloTopoIsolationTool' not in kwargs:
             kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(
@@ -96,6 +99,9 @@ def muIsolationCfg(flags, name='muIsolation', noCalo=False, **kwargs):
         isoType.append(
             [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ])
         isoCor.append([ isoPar.coreCone, isoPar.pileupCorrection ])
+        # do not do pileup correction if HI with subtracted clusters
+        if flags.HeavyIon.Egamma.doSubtractedClusters:
+            isoCor[-1] = [ x for x in isoCor[-1] if x != isoPar.pileupCorrection ]
         isoExCor.append([])
         if ('CaloTopoIsolationTool' not in kwargs) or (
                 'PFlowIsolationTool' not in kwargs):
@@ -106,6 +112,10 @@ def muIsolationCfg(flags, name='muIsolation', noCalo=False, **kwargs):
             isoType.append(
                 [ isoPar.neflowisol20, isoPar.neflowisol30, isoPar.neflowisol40 ])
             isoCor.append([ isoPar.coreCone, isoPar.pileupCorrection ])
+            # do not do pileup correction for HI reco...
+            # and pflow iso is more than experimental in such reco anyway
+            if flags.HeavyIon.Egamma.doSubtractedClusters:
+                isoCor[-1] = [ x for x in isoCor[-1] if x != isoPar.pileupCorrection ]
             isoExCor.append([])
             kwargs['PFlowIsolationTool'] = cisoTool
 
