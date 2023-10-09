@@ -18,6 +18,7 @@
 #include <set>
 #include <map>
 #include <mutex>
+#include <unordered_map>
 
 // Forward declarations
 namespace ROOT { namespace Experimental { class RNTupleReader; } }
