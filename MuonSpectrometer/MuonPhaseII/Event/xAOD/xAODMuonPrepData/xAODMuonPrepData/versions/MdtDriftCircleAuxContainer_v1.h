@@ -21,11 +21,13 @@ class MdtDriftCircleAuxContainer_v1 : public AuxContainerBase {
    private:
     /// @name Defining Mdt Drift Circle parameters
     /// @{
-    std::vector<Identifier::value_type> identifier;
-    std::vector<IdentifierHash::value_type> identifierHash;
-    std::vector<PosAccessor<1>::element_type> localPosition;
-    std::vector<CovAccessor<1>::element_type> localCovariance;
+    std::vector<DetectorIdentType> identifier{};
+    std::vector<DetectorIDHashType> identifierHash{};
+    std::vector<PosAccessor<1>::element_type> localPosition{};
+    std::vector<CovAccessor<1>::element_type> localCovariance{};
 
+    std::vector<PosAccessor<3>::element_type> tubePosInStation{};
+    
     std::vector<int16_t> tdc{};
     std::vector<int16_t> adc{};
     std::vector<uint16_t> driftTube{};

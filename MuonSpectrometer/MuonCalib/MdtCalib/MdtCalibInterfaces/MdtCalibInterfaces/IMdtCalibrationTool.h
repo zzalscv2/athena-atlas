@@ -30,6 +30,8 @@ public:
       CollisionData = 3,  /// 10, 30
       CollisionFitT0 = 4, /// 50, 100
   };
+  /// Conversion to go from tdc counts -> drift Time
+  static constexpr double tdcBinSize = 0.78125;  //25/32; exact number: (1000.0/40.079)/32.0
 
   /** destructor */
   virtual ~IMdtCalibrationTool() = default;

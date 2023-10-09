@@ -25,7 +25,6 @@
 
 namespace {
   static double const twoBySqrt12 = 2/std::sqrt(12);
-  static constexpr double TdcBinSize = 0.78125;  //25/32; exact number: (1000.0/40.079)/32.0
 }
 
 using SingleTubeCalib = MuonCalib::MdtTubeCalibContainer::SingleTubeCalib;
@@ -152,7 +151,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   }
   
   /// calculate drift time
-  const double driftTime = calibIn.tdc() * TdcBinSize 
+  const double driftTime = calibIn.tdc() * tdcBinSize 
                          - (m_doTof ? calibIn.timeOfFlight() : 0.)
                          - calibIn.triggerTime()
                          - calibResult.tubeT0() 
@@ -306,8 +305,8 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
   const Identifier& primId = primHit.identify();
   const Identifier& twinId = twinHit.identify();
   // get 'raw' drifttimes of twin pair; we don't use timeofFlight or propagationTime cause they are irrelevant for twin coordinate
-  double primdriftTime = primHit.tdc()*TdcBinSize - primResult.tubeT0();
-  double twinDriftTime = twinHit.tdc()*TdcBinSize - twinResult.tubeT0();
+  double primdriftTime = primHit.tdc()*tdcBinSize - primResult.tubeT0();
+  double twinDriftTime = twinHit.tdc()*tdcBinSize - twinResult.tubeT0();
 
   /// Get the calibration constatns from the conditions store
   SG::ReadCondHandle<MuonCalib::MdtCalibDataContainer> calibDataContainer{m_calibDbKey, ctx};

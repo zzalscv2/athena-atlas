@@ -11,6 +11,7 @@ atlas_add_component( xAODMuonSimHitCnv
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES  AthenaBaseComps GeoPrimitives MuonIdHelpersLib  
-                                     MuonSimEvent xAODMuonSimHit StoreGateLib)
+                                     MuonSimEvent xAODMuonSimHit StoreGateLib MdtCalibSvcLib
+                                     xAODMuonPrepData MuonStationGeoHelpersLib)
 
 atlas_install_python_modules( python/*.py)

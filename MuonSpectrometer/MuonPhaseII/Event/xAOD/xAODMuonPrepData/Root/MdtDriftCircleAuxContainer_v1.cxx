@@ -8,7 +8,7 @@
 #include "xAODMuonPrepData/versions/MdtDriftCircleAuxContainer_v1.h"
 
 namespace {
-   static const std::string preFixStr{"MDT_"};
+   static const std::string preFixStr{"Mdt_"};
 }
 #define PRD_AUXVARIABLE(VAR) \
    do { \
@@ -27,6 +27,7 @@ MdtDriftCircleAuxContainer_v1::MdtDriftCircleAuxContainer_v1()
     AUX_MEASUREMENTVAR(localCovariance, 1)
     
     /// Names may be shared across different subdetectors
+    PRD_AUXVARIABLE(tubePosInStation);
     PRD_AUXVARIABLE(tdc);
     PRD_AUXVARIABLE(adc);
     PRD_AUXVARIABLE(driftTube);
