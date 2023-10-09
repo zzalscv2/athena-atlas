@@ -2,8 +2,6 @@
 #
 # art-description: Reco_tf.py q443 HITStoRDO,RAWtoALL/TRIGtoALL in MT mode, RDOtoRDOTrigger in 21.0/MP
 # art-type: grid
-# art-include: main/Athena
-
 # art-athena-mt: 8
 
 Reco_tf.py \
