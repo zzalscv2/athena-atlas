@@ -4,5 +4,9 @@
 */
 #include "../MdtSimHitToxAODCnvAlg.h"
 #include "../xAODSimHitToMdtCnvAlg.h"
+#include "../xAODSimHitToMdtMeasCnvAlg.h"
+
+
 DECLARE_COMPONENT(MdtSimHitToxAODCnvAlg)
 DECLARE_COMPONENT(xAODSimHitToMdtCnvAlg)
+DECLARE_COMPONENT(xAODSimHitToMdtMeasCnvAlg)

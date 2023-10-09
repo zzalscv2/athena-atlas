@@ -10,8 +10,9 @@
 #include "xAODMuonPrepData/versions/MdtDriftCircle_v1.h"
 
 namespace {
-    static const std::string preFixStr{"MDT_"};
+    static const std::string preFixStr{"Mdt_"};
     static const SG::AuxElement::Accessor<uint8_t> accDriftStatus{preFixStr + "status"};
+    static const xAOD::PosAccessor<3> accTubePos{preFixStr + "tubePosInStation"};
 }
 #define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
       DTYPE MdtDriftCircle_v1::GETTER() const {                                  \
@@ -60,6 +61,15 @@ void MdtDriftCircle_v1::setDriftRadius(float r) {
 void MdtDriftCircle_v1::setDriftRadCov(float cov) {
     localCovariance<1>()(Trk::locR, Trk::locR) = cov;
 }
+void MdtDriftCircle_v1::setTubePosInStation(const MeasVector<3>& pos){
+    VectorMap<3> v{accTubePos(*this).data()};
+    v = pos;
+}
+ConstVectorMap<3> MdtDriftCircle_v1::tubePosInStation() const {
+    return ConstVectorMap<3>{accTubePos(*this).data()};
+}
+
+
 
 }  // namespace xAOD
 #undef IMPLEMENT_SETTER_GETTER

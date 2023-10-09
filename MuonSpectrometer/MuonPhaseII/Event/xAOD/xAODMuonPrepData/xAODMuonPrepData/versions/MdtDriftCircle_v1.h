@@ -46,6 +46,10 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     float driftRadiusCov() const;
     /** @brief Returns the uncertainty on the drift radius*/
     float driftRadiusUncert() const;
+    /** @brief Returns the local position of the tube within
+     *        the Muon Station (I.e. the center plane between 2 multilayers)
+     */
+    ConstVectorMap<3> tubePosInStation() const;
 
     /// Setter methods
 
@@ -63,6 +67,8 @@ class MdtDriftCircle_v1 : public UncalibratedMeasurement_v1 {
     void setDriftRadius(float r);
     /** @brief Sets the covariance on the drift circle */
     void setDriftRadCov(float cov);
+    /** @brief Sets the position of the tube within a muon station*/
+    void setTubePosInStation(const MeasVector<3>& pos);
 };
 
 }  // namespace xAOD

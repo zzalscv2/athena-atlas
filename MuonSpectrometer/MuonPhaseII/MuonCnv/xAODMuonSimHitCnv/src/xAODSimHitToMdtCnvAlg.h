@@ -33,10 +33,6 @@ class xAODSimHitToMdtCnvAlg: public AthReentrantAlgorithm {
         SG::WriteHandleKey<MDTSimHitCollection> m_writeKey{this, "OutputCollection", "MDTHits", 
                                                         "Name of the legacy SimHit collection"};
 
-        Gaudi::Property<bool> m_useNewGeo{this, "UseR4DetMgr", false,
-                                         "Switch between the legacy and the new geometry"};
-
-
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         /// IdHelper needed to decode the legacy sim hit Identifier
         const MdtHitIdHelper* m_muonHelper{nullptr};
