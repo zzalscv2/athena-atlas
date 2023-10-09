@@ -145,11 +145,6 @@ protected:
   /*
    * Add dependent names into scope
    */
-  using ParametersBase<DIM, T>::m_parameters;
-  using ParametersBase<DIM, T>::m_covariance;
-  using ParametersBase<DIM, T>::m_chargeDef;
-  Amg::Vector3D m_position; //!< point on track
-  Amg::Vector3D m_momentum; //!< momentum at this point on track
   S m_surface;              //!< surface template
   /** the curvilinear parameters identifier */
   unsigned int m_cIdentifier = 0;
