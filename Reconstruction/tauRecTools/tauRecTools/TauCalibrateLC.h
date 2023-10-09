@@ -47,7 +47,6 @@ class TauCalibrateLC : public TauRecToolBase {
     std::string m_calibrationFile; // energy calibration file
     bool m_doPtResponse; // switch for pt response vs pt, if false, use E response vs E
     bool m_doVertexCorrection; // switch for vertex correction
-    bool m_isCaloOnly;   // switch for CaloOnly corrections
 
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_aveIntPerXKey {this, 
         "averageInteractionsPerCrossingKey", 
