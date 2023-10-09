@@ -7,11 +7,12 @@
 
 #include <chrono>
 #include <vector>
+#include <string_view>
 
 #include "AthenaMonitoringKernel/IMonitoredVariable.h"
 
 namespace Monitored {
-  void checkNamingConvention( const std::string& name );
+  void checkNamingConvention( std::string_view name );
   /**
    * A monitored timer.
    *

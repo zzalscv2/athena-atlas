@@ -4,14 +4,17 @@
 
 #include "AthenaMonitoringKernel/MonitoredTimer.h"
 #include <stdexcept>
+#include <string_view>
 
 namespace Monitored {
-  void checkNamingConvention( const std::string& name ) {
+  void checkNamingConvention( std::string_view name ) {
     // Enforce some naming convention for timers
-    if (name.size() < 5 || name.substr(0,5) != std::string("TIME_")) {
-      throw std::runtime_error("Name of Timer \"" + name + "\" needs to start with \"TIME_\"");
+    if ( name.substr(0,5) != "TIME_") {
+      std::string error("Name of Timer \"");
+      error+= name;
+      error+=  "\" needs to start with \"TIME_\"";
+      throw std::runtime_error(error);
     }
-
   }
 
 } // namespace Monitored
