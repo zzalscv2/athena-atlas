@@ -9,8 +9,6 @@
 #include "egammaUtils/egammaEnergyPositionAllSamples.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-#include <cmath>
-
 StatusCode
 egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
                                const CaloDetDescrManager& cmgr,
@@ -38,10 +36,6 @@ egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
   const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::PreSamplerB : CaloSampling::PreSamplerE;
   const CaloSampling::CaloSample sam2 = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;
 
-  double eta = 0;
-  double phi = 0;
-  double deta = 0;
-  double dphi = 0;
   //
   // From the original (eta,phi) position, find the location
   // (sampling, barrel/end-cap, granularity)
@@ -53,11 +47,11 @@ egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
 
   // Fetch eta and phi of the sampling
   // Note that we use m_sam2 in the 2nd sampling, not in presampler
-  eta = cluster.etamax(sam2);
-  phi = cluster.phimax(sam2);
+  double eta = cluster.etamax(sam2);
+  double phi = cluster.phimax(sam2);
 
   // bad patch to avoid crash with dde
-  if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
+  if ((eta == 0. && phi == 0.) || std::abs(eta) > 100) {
     return StatusCode::SUCCESS;
   }
   // granularity in (eta,phi) in the pre sampler
@@ -65,8 +59,7 @@ egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
   bool barrel = false;
   int sampling_or_module = 0;
   // CaloCellList needs both enums: subCalo and CaloSample
-  CaloDetDescrManager::decode_sample(
-    subcalo, barrel, sampling_or_module, (CaloCell_ID::CaloSample)sam);
+  CaloDetDescrManager::decode_sample(subcalo, barrel, sampling_or_module, sam);
 
   // Get the corresponding grannularities : needs to know where you are
   //                  the easiest is to look for the CaloDetDescrElement
@@ -77,8 +70,8 @@ egammaPreSamplerShape::execute(const xAOD::CaloCluster& cluster,
     return StatusCode::SUCCESS;
   }
   // local granularity
-  deta = dde->deta();
-  dphi = dde->dphi();
+  double deta = dde->deta();
+  double dphi = dde->dphi();
   // change eta,phi values
   eta = dde->eta_raw();
   phi = dde->phi_raw();

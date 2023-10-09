@@ -23,7 +23,6 @@ struct egammaPreSamplerShape
 
   struct Info
   {
-  public:
     double e011 = 0;
     double e033 = 0;
   };
