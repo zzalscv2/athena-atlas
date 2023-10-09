@@ -20,7 +20,6 @@ TauCalibrateLC::TauCalibrateLC(const std::string& name) :
   declareProperty("calibrationFile", m_calibrationFile = "");
   declareProperty("doPtResponse", m_doPtResponse = true);
   declareProperty("VertexCorrection", m_doVertexCorrection = true);
-  declareProperty("isCaloOnly", m_isCaloOnly = false);
 }
 
 /********************************************************************/
@@ -191,10 +190,6 @@ StatusCode TauCalibrateLC::execute(xAOD::TauJet& tau) const
   tau.setP4( energyFinal * GeV, tau_p4.Eta(), tau_p4.Phi(), tau.m());
   tau.setP4(xAOD::TauJetParameters::TauEnergyScale, tau.pt(), tau.eta(), tau.phi(), tau.m());
   ATH_MSG_DEBUG("Energy at LC scale = " << energyLC << " pile-up offset " << offset << " calib. const. = " << calibConst << " final energy = " << energyFinal);
-     
-  if (m_isCaloOnly && inTrigger()) {
-    tau.setP4(xAOD::TauJetParameters::TrigCaloOnly, tau.pt(), tau.eta(), tau.phi(), tau.m());
-  }
 
   return StatusCode::SUCCESS;
 }
