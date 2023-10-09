@@ -107,12 +107,13 @@ StatusCode NswDcsTestAlg::retrieveData(const EventContext& ctx, const DcsDataTyp
     std::stringstream sstr{};
     if (!channelIds.empty()) {
         const Identifier& channel = channelIds[0];
-        const NswDcsDbData::DcsConstants& dcs_data = *readCdo->getDataForChannelHv(tech, channel);
+        const NswDcsDbData::DcsConstants& dcs_data = *readCdo->getDataForChannelHv(tech, channel, false);
         ATH_MSG_INFO("Checking channel 0 (Id = " << channel.get_compact() << ") "<<dcs_data);
         if (!m_logName.empty()){
             for (const Identifier& chan_id : channelIds) {
-                const NswDcsDbData::DcsConstants& thedata = *readCdo->getDataForChannelHv(tech, chan_id);
-                sstr<<m_idHelperSvc->toString(chan_id)<<" "<<thedata<<" "<<readCdo->isGood(chan_id)<< " " << readCdo->isGoodTDaq(ctx,chan_id) <<std::endl;
+                const NswDcsDbData::DcsConstants& thedata = *readCdo->getDataForChannelHv(tech, chan_id, false);
+                bool permanentlyDisabled{false};
+                sstr<<m_idHelperSvc->toString(chan_id)<<" "<<thedata<<" "<<readCdo->isGood(ctx, chan_id)<< " " << readCdo->isGoodTDaq(ctx,chan_id, permanentlyDisabled) <<std::endl;
             }                   
         }
     }

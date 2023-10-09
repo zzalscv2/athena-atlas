@@ -306,11 +306,28 @@ def NswDcsDbAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     if flags.GeoModel.Run!=LHCPeriod.Run3: return acc
     if flags.Input.isMC: return acc
+    kwargs.setdefault("LoadTdaq", False)
+    kwargs.setdefault("LoadEltx", False) 
     acc.merge(addFolders(flags, "/MMG/DCS/HV", "DCS_OFL", className="CondAttrListCollection"))
     acc.merge(addFolders(flags, "/STG/DCS/HV", "DCS_OFL", className="CondAttrListCollection"))
-    acc.merge(addFolders(flags, "/MDT/MM/ELinks", "MDT_OFL", className="CondAttrListCollection", tag="MdtMmElinks-2023-TEST"))
-    acc.merge(addFolders(flags, "/TGC/NSW/ELinks", detDb="TGC_OFL", className="CondAttrListCollection", tag="TgcNswElinks-2023-TEST"))
-    acc.merge(addFolders(flags, "/MMG/DCS/TSELTX", "DCS_OFL", className="CondAttrListCollection"))
+    
+    if(kwargs["LoadTdaq"]):
+        kwargs.setdefault("ReadKey_MMG_TDAQ","/MDT/MM/ELinks")
+        kwargs.setdefault("ReadKey_STG_TDAQ","/TGC/NSW/ELinks")
+        acc.merge(addFolders(flags, "/MDT/MM/ELinks", detDb="MDT_OFL", className="CondAttrListCollection", tag="MmElinks2023-TEST"))
+        acc.merge(addFolders(flags, "/TGC/NSW/ELinks", detDb="TGC_OFL", className="CondAttrListCollection", tag="sTgcElinks2023-TEST"))
+    kwargs.setdefault("ReadKey_MMG_TDAQ","/MDT/MM/ELinks")
+    kwargs.setdefault("ReadKey_STG_TDAQ","/TGC/NSW/Elinks")
+    
+    if(kwargs["LoadEltx"]):
+        kwargs.setdefault("ReadKey_MMG_ELTX","/MMG/DCS/TSELTX")
+        kwargs.setdefault("ReadKey_STG_ELTX","/STG/DCS/TSELTX")
+        acc.merge(addFolders(flags, kwargs["ReadKey_MMG_ELTX"], "DCS_OFL", className="CondAttrListCollection"))
+        acc.merge(addFolders(flags, kwargs["ReadKey_STG_ELTX"], "DCS_OFL", className="CondAttrListCollection"))
+    kwargs.setdefault("ReadKey_MMG_ELTX","")
+    kwargs.setdefault("ReadKey_STG_ELTX","")
+
+
     alg = CompFactory.NswDcsDbAlg("NswDcsDbAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc

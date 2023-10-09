@@ -121,7 +121,7 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const EventContext& ctx, const O
           channel_ID = (*correctedChannelId);
           channel_number = m_MmIdHelper->channel(channel_ID);
        }
-       if (dcsData && !dcsData->isGood(channel_ID)) continue;
+       if (dcsData && !dcsData->isGood(ctx,channel_ID)) continue;
        
        rdo->push_back(new MM_RawData(channel_ID, channel_number, channel->tdo(), 
                                      channel->pdo(), channel->rel_bcid(), true));      

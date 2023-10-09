@@ -30,12 +30,13 @@ public:
     
 
     struct TDaqConstants{
-        unsigned int lbSince{0};
-        unsigned int lbUntil{0};
+        uint64_t timeSince{0};
+        uint64_t timeUntil{0};
         unsigned int elink{0};
+        bool permanentlyDisabled{false};
         bool operator<(const NswDcsDbData::TDaqConstants& other)const{
            if(elink != other.elink) return elink < other.elink;
-           return lbUntil < other.lbSince;
+           return timeUntil < other.timeSince;
         }
     };
     
@@ -44,19 +45,21 @@ public:
 
     // setting functions
     void setDataHv(const DcsTechType tech, const Identifier& chnlId, DcsConstants constants);
-    void setDataTDaq(const DcsTechType tech, const Identifier& chnlId, unsigned int lbSince, unsigned int lbUntil, unsigned int elink);
+    void setDataTDaq(const DcsTechType tech, const Identifier& chnlId, uint64_t timeSince, uint64_t timeUntil, unsigned int elink, bool permanentlyDisabled);
+    void setDataEltx(const DcsTechType tech, const Identifier& chnlId);
     
     // retrieval functions
     
     //// Retrieves the list of all identifiers for which calibration channels are available
     std::vector<Identifier> getChannelIdsHv(const DcsTechType tech, const std::string& side) const;
     /// Retrieves the calibration constant for a particular readout channel.
-    const DcsConstants* getDataForChannelHv(const DcsTechType tech, const Identifier& channelId) const; 
+    const DcsConstants* getDataForChannelHv(const DcsTechType tech, const Identifier& channelId, bool issTgcQ1OuterHv) const; 
     
     /// Returns whether the channel is alive, i.e. DCS state on, etc...
-    bool isGood(const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
+    bool isGood(const EventContext& ctx, const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
     bool isGoodHv(const Identifier& channelId, bool issTgcQ1OuterHv = false) const;
-    bool isGoodTDaq(const EventContext& ctx, const Identifier& channelId) const;
+    bool isGoodTDaq(const EventContext& ctx, const Identifier& channelId, bool &permanentlyDisabled) const;
+    bool isGoodEltx(const Identifier& channelId) const;
     bool isConnectedChannel(const Identifier& channelId) const;
 
 private:
@@ -75,6 +78,9 @@ private:
     using ChannelTDaqMap = std::vector<std::map<Identifier, std::set<TDaqConstants>>>;
     ChannelTDaqMap m_data_tdaq_mmg{};
     ChannelTDaqMap m_data_tdaq_stg{};
+    using ChannelEltxMap = std::vector<std::set<Identifier>>;
+    ChannelEltxMap m_data_eltx_mmg{};
+    ChannelEltxMap m_data_eltx_stg{};
 
     // ID helpers
     const MmIdHelper&   m_mmIdHelper;
