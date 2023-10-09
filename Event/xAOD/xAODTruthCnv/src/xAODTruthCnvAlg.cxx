@@ -1,6 +1,11 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef HEPMC3
+#define private public
+#include "HepMC/GenEvent.h"
+#undef private
+#endif
 
 #include "AthenaKernel/errorcheck.h"
 #include "AthLinks/ElementLink.h"

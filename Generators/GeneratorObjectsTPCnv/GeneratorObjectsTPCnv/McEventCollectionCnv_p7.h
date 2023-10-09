@@ -6,7 +6,7 @@
 
 // McEventCollectionCnv_p7.h
 // Header file for class McEventCollectionCnv_p7
-// Author: S.Binet<binet@cern.ch>
+// Author: J.Chapman, P.Clark and A.Verbytskyi
 ///////////////////////////////////////////////////////////////////
 #ifndef GENERATOROBJECTSTPCNV_MCEVENTCOLLECTIONCNV_p7_H
 #define GENERATOROBJECTSTPCNV_MCEVENTCOLLECTIONCNV_p7_H
@@ -14,6 +14,12 @@
 // STL includes
 #include <unordered_map>
 
+#ifdef HEPMC3
+#include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenParticle.h"
+#include "HepMC3/Data/GenRunInfoData.h"
+#else
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wkeyword-macro"
@@ -28,8 +34,6 @@
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-#ifdef HEPMC3
-#include "HepMC3/Data/GenRunInfoData.h"
 #endif
 #include "GeneratorObjects/McEventCollection.h"
 
@@ -130,12 +134,9 @@ class McEventCollectionCnv_p7 : public T_AthenaPoolTPCnvBase<
    *  @c GenEvent.
    */
 #ifdef HEPMC3
-  static void writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
-                       McEventCollection_p7& persEvt ) ;
+  static void writeGenVertex( const HepMC::ConstGenVertexPtr& vtx, McEventCollection_p7& persEvt );
 #else
-  void writeGenVertex( const HepMC::GenVertex& vtx,
-                       McEventCollection_p7& persEvt ) const;
-
+  void writeGenVertex( const HepMC::GenVertex& vtx, McEventCollection_p7& persEvt ) const;
 #endif
   /** @brief Method to write a persistent @c GenParticle object
    *  It returns the index of the persistent @c GenParticle into the
@@ -143,19 +144,12 @@ class McEventCollectionCnv_p7 : public T_AthenaPoolTPCnvBase<
    *  persistent @c GenEvent
    */
 #ifdef HEPMC3
-  static int writeGenParticle( const HepMC::ConstGenParticlePtr& p,
-                        McEventCollection_p7& persEvt ) ;
+  static int writeGenParticle( const HepMC::ConstGenParticlePtr& p, McEventCollection_p7& persEvt );
 #else
-  int writeGenParticle( const HepMC::GenParticle& p,
-                        McEventCollection_p7& persEvt ) const;
+  int writeGenParticle( const HepMC::GenParticle& p, McEventCollection_p7& persEvt ) const;
 #endif
 
-  ///////////////////////////////////////////////////////////////////
-  // Protected data:
-  ///////////////////////////////////////////////////////////////////
- protected:
-
   bool m_isPileup;
-    ServiceHandle<IHepMCWeightSvc> m_hepMCWeightSvc;
+  ServiceHandle<IHepMCWeightSvc> m_hepMCWeightSvc;
 };
 #endif //> GENERATOROBJECTSTPCNV_MCEVENTCOLLECTIONCNV_p7_H
