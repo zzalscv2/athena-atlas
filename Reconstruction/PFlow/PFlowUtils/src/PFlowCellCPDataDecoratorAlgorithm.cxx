@@ -7,7 +7,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-#include "vector"
+#include <vector>
+#include <utility> //for std::pair
 
 //initialize
 StatusCode PFlowCellCPDataDecoratorAlgorithm::initialize() {
@@ -33,8 +34,8 @@ StatusCode PFlowCellCPDataDecoratorAlgorithm::execute(const EventContext& ctx) c
         //list of CaloCell that we will decorate the charged FE object with
         std::vector<ElementLink<CaloCellContainer> > cellsToDecorate;
 
-        for (auto thisPair : theOtherPairs_charged){
-            const xAOD::IParticle* theCluster_charged = thisPair.first;
+        for (const auto & [theCluster_charged, weight] : theOtherPairs_charged){
+            
 
             for (auto thisNeutralFE : *neutralPFOReadHandle){
                 std::vector<std::pair<const xAOD::IParticle*,float> > theOtherPairs_neutral = thisNeutralFE->otherObjectsAndWeights();
@@ -45,11 +46,19 @@ StatusCode PFlowCellCPDataDecoratorAlgorithm::execute(const EventContext& ctx) c
                 if (theCluster_charged == theCluster_neutral){
                     //get the list of calorimeter cells in the charged cluster
                     const xAOD::CaloCluster* chargedCluster = dynamic_cast<const xAOD::CaloCluster*>(theCluster_charged);
+                    if (not chargedCluster){
+                      ATH_MSG_WARNING("dynamic_cast to (charged) CaloCluster failed in execute");
+                      continue;
+                    }
                     const CaloClusterCellLink* chargedClusterCellLinks = chargedCluster->getCellLinks();
                     CaloClusterCellLink::const_iterator chargedClusterCellLinksItr = chargedClusterCellLinks->begin();
 
                     //get the list of calorimeter cells in the neutral cluster
                    const xAOD::CaloCluster* neutralCluster = dynamic_cast<const xAOD::CaloCluster*>(theCluster_neutral);
+                   if (not neutralCluster){
+                      ATH_MSG_WARNING("dynamic_cast to (neutral) CaloCluster failed in execute");
+                      continue;
+                   }
                    const CaloClusterCellLink* neutralClusterCellLinks = neutralCluster->getCellLinks();
 
                    //loop over the cells in the charged cluster
