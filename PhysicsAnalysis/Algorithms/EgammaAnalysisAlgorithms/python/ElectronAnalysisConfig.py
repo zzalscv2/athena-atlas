@@ -21,6 +21,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('ptSelectionOutput', False, type=bool)
         self.addOption ('isolationCorrection', False, type=bool)
         self.addOption ('trackSelection', True, type=bool)
+        self.addOption ('recalibratePhyslite', True, type=bool)
 
 
 
@@ -82,6 +83,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
+        if config.isPhyslite() and not self.recalibratePhyslite :
+            alg.skipNominal = True
 
         # Set up the the pt selection
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' + self.postfix )

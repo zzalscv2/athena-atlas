@@ -50,9 +50,15 @@ namespace CP
   {
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
-      ANA_CHECK (m_calibrationAndSmearingTool->applySystematicVariation (sys));
+      // always need to call `getCopy` first to ensure that the shallow copies
+      // are all there if requested
       xAOD::MuonContainer *muons = nullptr;
       ANA_CHECK (m_muonHandle.getCopy (muons, sys));
+
+      if (sys.empty() && m_skipNominal.value())
+        continue;
+
+      ANA_CHECK (m_calibrationAndSmearingTool->applySystematicVariation (sys));
       for (xAOD::Muon *muon : *muons)
       {
         if (m_preselection.getBool (*muon, sys))
