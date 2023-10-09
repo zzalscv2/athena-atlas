@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauCombinedTES.h"
@@ -205,7 +205,7 @@ bool TauCombinedTES::getUseCaloPtFlag(const xAOD::TauJet& tau) const {
 
 
 
-int TauCombinedTES::getEtaIndex(const float& eta) const {
+int TauCombinedTES::getEtaIndex(float eta) const {
   // It would be better to retrieve eta bins from the calibration file, e.g. for upgrade studies!
   if (std::abs(eta) < 0.3) {
     return 0;
@@ -238,7 +238,7 @@ xAOD::TauJetParameters::DecayMode TauCombinedTES::getDecayMode(const xAOD::TauJe
 
 
 
-int TauCombinedTES::getDecayModeIndex(const xAOD::TauJetParameters::DecayMode& decayMode) const {
+int TauCombinedTES::getDecayModeIndex(xAOD::TauJetParameters::DecayMode decayMode) const {
   return static_cast<int>(decayMode);
 }
 
@@ -262,15 +262,15 @@ bool TauCombinedTES::isValid(const xAOD::TauJet& tau) const {
 
 
 
-double TauCombinedTES::getCorrelation(const int& decayModeIndex, const int& etaIndex) const {
+double TauCombinedTES::getCorrelation(int decayModeIndex, int etaIndex) const {
   return m_correlationHists[decayModeIndex]->GetBinContent(etaIndex);
 }
 
 
 
-double TauCombinedTES::getCaloCalEt(const double& caloEt,
-				    const int& decayModeIndex,
-				    const int& etaIndex) const {
+double TauCombinedTES::getCaloCalEt(double caloEt,
+				    int decayModeIndex,
+				    int etaIndex) const {
   // ratio stored in the calibration graph equals (caloEt-truthEt)/caloEt
   double ratio = 0.0;
 
@@ -287,9 +287,9 @@ double TauCombinedTES::getCaloCalEt(const double& caloEt,
 
 
 
-double TauCombinedTES::getPanTauCalEt(const double& panTauEt,
-				      const int& decayModeIndex,
-				      const int& etaIndex) const {
+double TauCombinedTES::getPanTauCalEt(double panTauEt,
+				      int decayModeIndex,
+				      int etaIndex) const {
   // ratio stored in the calibration graph equals (panTauEt-truthEt)/panTauEt
   double ratio = 0.0;
 
@@ -323,7 +323,7 @@ double TauCombinedTES::getMvaEnergyResolution(const xAOD::TauJet& tau) const {
 
 
 
-double TauCombinedTES::getCaloResolution(const double& et, const int& decayModeIndex, const int& etaIndex) const {
+double TauCombinedTES::getCaloResolution(double et, int decayModeIndex, int etaIndex) const {
   double x = std::min(et, m_caloResMaxEt[decayModeIndex][etaIndex]);
   double resolution = m_caloRes[decayModeIndex][etaIndex]->Eval(x);
 
@@ -332,7 +332,7 @@ double TauCombinedTES::getCaloResolution(const double& et, const int& decayModeI
 
 
 
-double TauCombinedTES::getPanTauResolution(const double& et, const int& decayModeIndex, const int& etaIndex) const {
+double TauCombinedTES::getPanTauResolution(double et, int decayModeIndex, int etaIndex) const {
   double x = std::min(et, m_panTauResMaxEt[decayModeIndex][etaIndex]);
   double resolution = m_panTauRes[decayModeIndex][etaIndex]->Eval(x);
 
@@ -341,9 +341,9 @@ double TauCombinedTES::getPanTauResolution(const double& et, const int& decayMod
 
 
 
-double TauCombinedTES::getWeight(const double& caloSigma,
-				 const double& panTauSigma,
-				 const double& correlation) const {
+double TauCombinedTES::getWeight(double caloSigma,
+				 double panTauSigma,
+				 double correlation) const {
   double cov = correlation * caloSigma * panTauSigma;
   double caloWeight = std::pow(panTauSigma, 2) - cov;
   double panTauWeight = std::pow(caloSigma, 2) - cov;
@@ -355,9 +355,9 @@ double TauCombinedTES::getWeight(const double& caloSigma,
 
 
 
-double TauCombinedTES::getCombinedSigma(const double& caloSigma,
-					const double& panTauSigma,
-					const double& correlation) const {
+double TauCombinedTES::getCombinedSigma(double caloSigma,
+					double panTauSigma,
+					double correlation) const {
   double numerator = std::pow(caloSigma, 2) * std::pow(panTauSigma, 2) * (1 - std::pow(correlation, 2));
   double denominator = std::pow(caloSigma, 2) + std::pow(panTauSigma, 2)
                        - 2 * correlation * caloSigma * panTauSigma;
@@ -367,9 +367,9 @@ double TauCombinedTES::getCombinedSigma(const double& caloSigma,
 
 
 
-double TauCombinedTES::getCompatibilitySigma(const double& caloSigma,
-					     const double& panTauSigma,
-					     const double& correlation) const {
+double TauCombinedTES::getCompatibilitySigma(double caloSigma,
+					     double panTauSigma,
+					     double correlation) const {
   double compatibilitySigma2 = std::pow(caloSigma, 2) + std::pow(panTauSigma, 2) - 2 * correlation * caloSigma * panTauSigma;
 
   return std::sqrt(compatibilitySigma2);
@@ -377,7 +377,7 @@ double TauCombinedTES::getCompatibilitySigma(const double& caloSigma,
 
 
 
-double TauCombinedTES::getNsigmaCompatibility(const double& et, const int& decayModeIndex) const {
+double TauCombinedTES::getNsigmaCompatibility(double et, int decayModeIndex) const {
   double nsigma = m_nSigmaCompatibility.at(decayModeIndex)->Eval(et);
 
   if (nsigma < 0.) return 0.;
@@ -387,10 +387,10 @@ double TauCombinedTES::getNsigmaCompatibility(const double& et, const int& decay
 
 
 
-double TauCombinedTES::getCombinedEt(const double& caloEt,
-				     const double& panTauEt,
-				     const xAOD::TauJetParameters::DecayMode& decayMode,
-				     const float& eta,
+double TauCombinedTES::getCombinedEt(double caloEt,
+				     double panTauEt,
+				     xAOD::TauJetParameters::DecayMode decayMode,
+				     float eta,
 				     Variables& variables) const {
   // Obtain the index of calibration graph
   int decayModeIndex = getDecayModeIndex(decayMode);

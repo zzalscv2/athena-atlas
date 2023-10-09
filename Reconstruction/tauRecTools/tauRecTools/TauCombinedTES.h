@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TAUCOMBINEDTES_H
@@ -63,46 +63,45 @@ private:
   bool isValid(const xAOD::TauJet& tau) const;
 
   /** Get the index of eta in the calibration histogram */
-  int getEtaIndex(const float& eta) const;
+  int getEtaIndex(float eta) const;
 
   /** Get the decay mode of the tau candidate */
   xAOD::TauJetParameters::DecayMode getDecayMode(const xAOD::TauJet& tau) const;
   
   /** Get the index of decay mode in the calibration histogram */
-  int getDecayModeIndex(const xAOD::TauJetParameters::DecayMode& decayMode) const;
+  int getDecayModeIndex(xAOD::TauJetParameters::DecayMode decayMode) const;
 
   /** Get correlation coefficient between the calo TES and PanTau */
-  double getCorrelation(const int& decayModeIndex, const int& etaIndex) const;
+  double getCorrelation(int decayModeIndex, int etaIndex) const;
   
   /** Get the resolution of Et at the calo TES */
-  double getCaloResolution(const double& et, const int& decayModeIndex, const int& etaIndex) const;
+  double getCaloResolution(double et, int decayModeIndex, int etaIndex) const;
   
   /** Get the resolution of Et at PanTau */
-  double getPanTauResolution(const double& et, const int& decayModeIndex, const int& etaIndex) const;
+  double getPanTauResolution(double et, int decayModeIndex, int etaIndex) const;
   
   /** Get the Et at the calo TES after calibration correction */ 
-  double getCaloCalEt(const double& et, const int& decayModeIndex, const int& etaIndex) const;
+  double getCaloCalEt(double et, int decayModeIndex, int etaIndex) const;
 
   /** Get the Et at PanTau after calibration correction */ 
-  double getPanTauCalEt(const double& panTauEt, const int& decayModeIndex, 
-                          const int& etaIndex) const;
+  double getPanTauCalEt(double panTauEt, int decayModeIndex, int etaIndex) const;
  
   /** Get the weight of calo TES */
-  double getWeight(const double& caloSigma, const double& panTauSigma, const double& correlatioon) const;
+  double getWeight(double caloSigma, double panTauSigma, double correlatioon) const;
 
   /** Get the combined sigma of calo TES and PanTau */
-  double getCombinedSigma(const double& caloSigma, const double& panTauSigma, const double& correlation) const;
+  double getCombinedSigma(double caloSigma, double panTauSigma, double correlation) const;
 
   /** Get the compatibility sigma of calo TES and PanTau */
-  double getCompatibilitySigma(const double& caloSigma, const double& panTauSigma, const double& correlation) const;
+  double getCompatibilitySigma(double caloSigma, double panTauSigma, double correlation) const;
 
   /** Get the combined Et of calo TES and PanTau */
-  double getCombinedEt(const double& caloEt, const double& et_substructure,
-		       const xAOD::TauJetParameters::DecayMode& decayMode, const float& eta, 
+  double getCombinedEt(double caloEt, double et_substructure,
+		       xAOD::TauJetParameters::DecayMode decayMode, float eta,
                        Variables& variables) const;
   
   /** Get the allowed difference between calo TES and PanTau */ 
-  double getNsigmaCompatibility(const double& caloEt, const int& decayModeIndex) const;
+  double getNsigmaCompatibility(double caloEt, int decayModeIndex) const;
   
   /// Binning in the calibraction graph/hist
   enum Binning {DecayModeBinning = 5, EtaBinning = 5};
