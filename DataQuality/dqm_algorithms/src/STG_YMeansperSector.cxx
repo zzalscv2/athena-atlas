@@ -80,18 +80,20 @@ namespace dqm_algorithms {
 	        TProfile *h2 = histogram->ProfileX();
                 int Xbins = histogram->GetXaxis()->GetNbins();
                 int Ybins = histogram->GetYaxis()->GetNbins();
+
                 float Meanlow = 0;
                 float Meanhigh = 0.0;
                 float redMean = 0.0;
                 if (Ybins < 15) {
-                 Meanlow = 3.5; 
-                 Meanhigh = 5.5; 
-                 redMean = 9.0;
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), 3.5);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 5.5);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), 9.0);
+                 
                  
                 } else if (Ybins > 100) {
-                 Meanlow = -7.5; 
-                 Meanhigh = 17.5;
-                 redMean = 50.0;
+                 Meanlow = dqm_algorithms::tools::GetFirstFromMap( "MeanL", config.getParameters(), -7.5);
+                 Meanhigh = dqm_algorithms::tools::GetFirstFromMap( "MeanH", config.getParameters(), 17.5);
+                 redMean = dqm_algorithms::tools::GetFirstFromMap( "MeanRed", config.getParameters(), 50.0);
                 } 
 
 	        float MeanY[36];
