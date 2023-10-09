@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONGETCLOSESTPARAMETERS_H
@@ -13,24 +13,25 @@ namespace Muon {
 
     class MuonGetClosestParameters {
     public:
-        static Trk::TrackParameters* closestParameters(const Trk::Track& track, const Amg::Vector3D& pos, bool onlyUseMeasured = false) {
+        static double distance(const Trk::TrackParameters& pars, const Amg::Vector3D& pos) {
+            return (pars.position() - pos).dot(pars.momentum().unit());
+        }
+        static std::unique_ptr<Trk::TrackParameters> closestParameters(const Trk::Track& track, const Amg::Vector3D& pos, bool onlyUseMeasured = false) {
             const DataVector<const Trk::TrackParameters>* pars = track.trackParameters();
-            if (!pars || pars->empty()) { return 0; }
+            if (!pars || pars->empty()) { return nullptr; }
 
-            bool firstOk = onlyUseMeasured ? pars->front()->covariance() != 0 : true;
-	    bool lastOk = onlyUseMeasured ? pars->back()->covariance() !=0 : true;
+            bool firstOk = onlyUseMeasured ? pars->front()->covariance() != nullptr : true;
+	        bool lastOk = onlyUseMeasured ? pars->back()->covariance() != nullptr : true;
 
-            double distFront = (pars->front()->position() - pos).dot(pars->front()->momentum().unit());
-            if (distFront > 0. && firstOk) { return pars->front()->clone(); }
+            const double distFront = distance(*pars->front(), pos);
+            if (distFront > 0. && firstOk) { return pars->front()->uniqueClone(); }
 
-            double distBack = (pars->back()->position() - pos).dot(pars->back()->momentum().unit());
-            if (distBack < 0. && lastOk) { return pars->back()->clone(); }
+            const double distBack = distance(*pars->back(), pos);
+            if (distBack < 0. && lastOk) { return pars->back()->uniqueClone(); }
 
-            bool startFront = fabs(distFront) < distBack;
+            bool startFront = std::abs(distFront) < distBack;
 
-            const Trk::TrackParameters* result = 0;
-            const Trk::TrackParameters* prevresult = 0;
-
+            const Trk::TrackParameters* result{nullptr}, *prevresult{nullptr};
             if (startFront) {
                 double prevDist = distFront - 1.;
                 // loop over parameters, calculate distance
@@ -39,11 +40,10 @@ namespace Muon {
                 for (; it != it_end; ++it) {
                     if (onlyUseMeasured && !(*it)->covariance()) continue;
 
-                    double dist = ((*it)->position() - pos).dot((*it)->momentum().unit());
-
+                    double dist = distance(**it, pos);
                     // check whether dist flips sign, if this happens select either the current hit or the previous
                     if (dist > 0.) {
-                        if (fabs(dist) < fabs(prevDist))
+                        if (std::abs(dist) < std::abs(prevDist))
                             result = *it;
                         else if (it == pars->begin())
                             result = *it;
@@ -62,11 +62,10 @@ namespace Muon {
                 for (; it != it_end; ++it) {
                     if (onlyUseMeasured && !(*it)->covariance()) continue;
 
-                    double dist = ((*it)->position() - pos).dot((*it)->momentum().unit());
-
+                    const double dist = distance(**it, pos);
                     // check whether dist flips sign, if this happens select either the current hit or the previous
                     if (dist < 0.) {
-                        if (fabs(dist) < fabs(prevDist))
+                        if (std::abs(dist) < std::abs(prevDist))
                             result = *it;
                         else if (it == pars->rbegin())
                             result = *it;
@@ -79,15 +78,18 @@ namespace Muon {
                 }
             }
 
-            return result ? result->clone() : 0;
+            return result ? result->uniqueClone() : nullptr;
         }
 
-        static Trk::TrackParameters* closestParameters(const Trk::Track& track, const Trk::Surface& surf, bool onlyUseMeasured = false) {
+        static std::unique_ptr<Trk::TrackParameters> closestParameters(const Trk::Track& track, 
+                                                                       const Trk::Surface& surf, 
+                                                                       bool onlyUseMeasured = false) {
             return closestParameters(track, surf.center(), onlyUseMeasured);
         }
 
-        static Trk::TrackParameters* closestParameters(const Trk::Track& track, const Trk::TrackParameters& pars,
-                                                       bool onlyUseMeasured = false) {
+        static std::unique_ptr<Trk::TrackParameters> closestParameters(const Trk::Track& track, 
+                                                                       const Trk::TrackParameters& pars,
+                                                                       bool onlyUseMeasured = false) {
             return closestParameters(track, pars.position(), onlyUseMeasured);
         }
     };

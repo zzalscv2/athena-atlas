@@ -195,21 +195,21 @@ namespace Muon {
             @param pos a reference to a GlobalPosition
             @return a pointer to TrackParameters, the ownership of the parameters is passed to the client calling the tool.
          */
-        virtual Trk::TrackParameters* findClosestParameters(const Trk::Track& track, const Amg::Vector3D& pos) const override;
+        virtual std::unique_ptr<Trk::TrackParameters> findClosestParameters(const Trk::Track& track, const Amg::Vector3D& pos) const override;
 
         /** @brief find closest TrackParameters to the surface. The distance is calculated along the track
             @param track a reference to a Track
             @param pos a reference to a Surface
             @return a pointer to TrackParameters, the ownership of the parameters is passed to the client calling the tool.
          */
-        virtual Trk::TrackParameters* getClosestParameters(const Trk::Track& track, const Trk::Surface& surf) const override;
+        virtual std::unique_ptr<Trk::TrackParameters> getClosestParameters(const Trk::Track& track, const Trk::Surface& surf) const override;
 
         /** @brief find closest TrackParameters to the surface. The distance is calculated along the track
             @param track a reference to a MuPatCandidateBase
             @param pos a reference to a Surface
             @return a pointer to TrackParameters, the ownership of the parameters is passed to the client calling the tool.
          */
-        Trk::TrackParameters* getClosestParameters(const MuPatCandidateBase& candidate, const Trk::Surface& surf) const;
+        std::unique_ptr<Trk::TrackParameters> getClosestParameters(const MuPatCandidateBase& candidate, const Trk::Surface& surf) const;
 
         /** recalibrate hits on track */
         virtual std::unique_ptr<Trk::Track> recalibrateHitsOnTrack(const EventContext& ctx, const Trk::Track& track, bool doMdts,
