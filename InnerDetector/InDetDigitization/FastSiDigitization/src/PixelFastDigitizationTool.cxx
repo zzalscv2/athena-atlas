@@ -784,8 +784,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx,
       const PixelCluster* insertedCluster = it->second;
 
       if (hit->particleLink().isValid()) {
-        const int barcode(hit->particleLink().barcode());
-        if (barcode != 0 && barcode != m_vetoThisBarcode) {
+        if (!HepMC::ignoreTruthLink(hit->particleLink(), m_vetoPileUpTruthLinks)) {
           m_pixPrdTruth->insert(
               std::make_pair(insertedCluster->identify(), hit->particleLink()));
           ATH_MSG_DEBUG("Truth map filled with cluster"

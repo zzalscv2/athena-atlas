@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPTOOLS_PILEUPTOOLBASE_H
@@ -13,7 +13,7 @@
  */
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "PileUpTools/IPileUpTool.h"
-#include "TruthUtils/MagicNumbers.h" // for crazyParticleBarcode
+#include "TruthUtils/MagicNumbers.h"
 
 class PileUpToolBase :  public extends<AthAlgTool, IPileUpTool> {
 public:
@@ -55,8 +55,8 @@ protected:
       "First bunch-crossing in which det is live"};
   Gaudi::Property<int> m_lastXing {this, "LastXing", 999,
       "Last bunch-crossing in which det is live"};
-  Gaudi::Property<int> m_vetoThisBarcode{this, "ParticleBarcodeVeto", HepMC::crazyParticleBarcode,
-      "Barcode of particle to ignore"};
+  Gaudi::Property<int> m_vetoPileUpTruthLinks{this, "VetoPileUpTruthLinks", true,
+      "Ignore links to suppressed pile-up truth"};
   bool m_filterPassed{true}; ///stores whether the filter for this PileUpTool was passed.
 };
 #endif

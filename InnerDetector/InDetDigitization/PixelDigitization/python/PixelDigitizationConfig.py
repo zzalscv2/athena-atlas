@@ -1,6 +1,6 @@
 """Define methods to construct configured Pixel Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -232,7 +232,7 @@ def PixelGeantinoTruthDigitizationToolCfg(flags, name="PixelGeantinoTruthDigitiz
     else:
         kwargs.setdefault("PileUpMergeSvc", '')
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
-    kwargs.setdefault("ParticleBarcodeVeto", 0)
+    kwargs.setdefault("VetoPileUpTruthLinks", False)
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     PixelDigitizationTool = CompFactory.PixelDigitizationTool

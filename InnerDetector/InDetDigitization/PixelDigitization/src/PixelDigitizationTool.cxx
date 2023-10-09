@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDigitizationTool.h"
@@ -295,8 +295,7 @@ void PixelDigitizationTool::addSDO(SiChargedDiodeCollection* collection) {
     for (list_t::const_iterator i_ListOfCharges = charges.begin(); i_ListOfCharges != EndOfChargeList;
          ++i_ListOfCharges) {
       const HepMcParticleLink& trkLink = i_ListOfCharges->particleLink();
-      int barcode = trkLink.barcode();
-      if ((barcode == 0) || (barcode == m_vetoThisBarcode)) {
+      if (HepMC::ignoreTruthLink(trkLink, m_vetoPileUpTruthLinks)) {
         continue;
       }
       if (!real_particle_hit) {

@@ -54,6 +54,15 @@ constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 
 constexpr int INVALID_PARTICLE_BARCODE = -1;
 
+/// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up (TODO update to be status based)
+template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == crazyParticleBarcode);}
+
+/// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded (TODO update to be status based)
+template <class T>  inline bool no_truth_link(const T& p){ return (barcode(p) == 0);} // TODO potentially this could become id()==0?
+
+/// @brief Helper function for SDO creation in PileUpTools
+template <class T>  inline bool ignoreTruthLink(const T& p, bool vetoPileUp){ const int b = barcode(p);  return no_truth_link(b) || (vetoPileUp && is_truth_suppressed_pileup(b)); }
+
 /// @brief Method to establish if a particle (or barcode) was created during the simulation (TODO update to be status based)
 template <class T>  inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
 

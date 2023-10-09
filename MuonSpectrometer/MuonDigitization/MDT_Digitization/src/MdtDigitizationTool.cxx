@@ -99,7 +99,7 @@ StatusCode MdtDigitizationTool::initialize() {
         ATH_MSG_INFO("UseCosmicsOffSet2      " << m_useOffSet2);
     }
     ATH_MSG_INFO("IncludePileUpTruth     " << m_includePileUpTruth);
-    ATH_MSG_INFO("ParticleBarcodeVet     " << m_vetoThisBarcode);
+    ATH_MSG_INFO("VetoPileUpTruthLinks   " << m_vetoPileUpTruthLinks);
 
     // initialize transient detector store and MuonGeoModel OR MuonDetDescrManager
     if (detStore()->contains<MuonGM::MuonDetectorManager>("Muon")) {
@@ -776,7 +776,7 @@ bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& c
             ATH_MSG_VERBOSE(" createDigits() phit-" << &phit << " hit-" << hit.print() << "    localZPos = " << hit.localPosition().z());
 
             // Do not store pile-up truth information
-            if (!m_includePileUpTruth && ((phit->trackNumber() == 0) || (phit->trackNumber() == m_vetoThisBarcode))) { continue; }
+            if (!m_includePileUpTruth && HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) { continue; }
 
             // Create the Deposit for MuonSimData
             const EBC_EVCOLL evColl = EBC_MAINEVCOLL;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcDigitizationTool.h"
@@ -76,7 +76,7 @@ StatusCode TgcDigitizationTool::initialize()
   ATH_MSG_DEBUG("Output Digits: '"<<m_outputDigitCollectionKey.key()<<"'");
 
   ATH_MSG_DEBUG("IncludePileUpTruth: " << m_includePileUpTruth);
-  ATH_MSG_DEBUG("ParticleBarcodeVeto: " << m_vetoThisBarcode);
+  ATH_MSG_DEBUG("VetoPileUpTruthLinks: " << m_vetoPileUpTruthLinks);
 
   const IGeoModelSvc* geoModel = nullptr;
   CHECK( service("GeoModelSvc", geoModel) );
@@ -398,8 +398,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
           }
 
 	  // fill the SDO collection in StoreGate if not pile-up
-          if (!m_includePileUpTruth &&
-              ((phit->trackNumber() == 0) || (phit->trackNumber() == m_vetoThisBarcode))) {
+          if (!m_includePileUpTruth && HepMC::ignoreTruthLink(phit->particleLink(), m_vetoPileUpTruthLinks)) {
             continue;
           }
 

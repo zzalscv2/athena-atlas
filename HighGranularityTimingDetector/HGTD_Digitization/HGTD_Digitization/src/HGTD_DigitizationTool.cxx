@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_Digitization/src/HGTD_DigitizationTool.cxx
  *
@@ -421,9 +421,8 @@ void HGTD_DigitizationTool::createAndStoreSDO(
     for (; charge_list_itr != charge_list_itr_end; ++charge_list_itr) {
 
       const HepMcParticleLink &trkLink = charge_list_itr->particleLink();
-      const int barcode = trkLink.barcode();
-
-      if ((barcode == 0) or (barcode == m_vetoThisBarcode)) {
+      const int barcode = HepMC::barcode(trkLink);
+      if (HepMC::ignoreTruthLink(barcode, m_vetoPileUpTruthLinks)) {
         continue;
       }
       if (!real_particle_hit) {
@@ -436,7 +435,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
         // processType()==SiCharge::cut_track
         // Tracks With Truth:            barcode!=0 &&
         // processType()==SiCharge::track
-        if (barcode != 0 && charge_list_itr->processType() == SiCharge::track) {
+        if (!HepMC::no_truth_link(barcode) && charge_list_itr->processType() == SiCharge::track) {
           real_particle_hit = true;
         }
         // real_particle_hit = trkLink.isValid();
