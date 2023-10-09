@@ -9,7 +9,6 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloUtils/CaloLayerCalculator.h"
 #include "CaloUtils/CaloCellList.h"
-#include <cmath>
 
 StatusCode
 egammaBackShape::execute(const xAOD::CaloCluster& cluster,
@@ -34,7 +33,7 @@ egammaBackShape::execute(const xAOD::CaloCluster& cluster,
   double e3 = egammaEnergyPositionAllSamples::e3(cluster);
 
   // fraction of energy deposited in third sampling
-  info.f3 = fabs(eallsamples) > 0. ? e3 / eallsamples : 0.;
+  info.f3 = std::abs(eallsamples) > 0. ? e3 / eallsamples : 0.;
 
   // check if cluster is in barrel or end-cap
   const bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(cluster, 3);
@@ -43,10 +42,6 @@ egammaBackShape::execute(const xAOD::CaloCluster& cluster,
   const CaloSampling::CaloSample sam = in_barrel ? CaloSampling::EMB3 : CaloSampling::EME3;
   const CaloSampling::CaloSample sam2 = in_barrel ? CaloSampling::EMB2 : CaloSampling::EME2;
 
-  double eta = 0;
-  double phi = 0;
-  double deta = 0;
-  double dphi = 0;
   CaloCell_ID::SUBCALO subcalo = CaloCell_ID::LAREM;
   bool barrel = false;
   int sampling_or_module = 0;
@@ -61,17 +56,17 @@ egammaBackShape::execute(const xAOD::CaloCluster& cluster,
 
   // Fetch eta and phi of the sampling
   // Note that we use m_sam2 in the 2nd sampling, not in presampler
-  eta = cluster.etamax(sam2);
-  phi = cluster.phimax(sam2);
+  double eta = cluster.etamax(sam2);
+  double phi = cluster.phimax(sam2);
 
-  if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
+  if ((eta == 0. && phi == 0.) || std::abs(eta) > 100) {
     return StatusCode::SUCCESS;
   }
 
   // granularity in (eta,phi) in the pre sampler
   // CaloCellList needs both enums: subCalo and CaloSample
-  CaloDetDescrManager::decode_sample(
-    subcalo, barrel, sampling_or_module, (CaloCell_ID::CaloSample)sam);
+  CaloDetDescrManager::decode_sample(subcalo, barrel, sampling_or_module, sam);
+
   // Get the corresponding grannularities : needs to know where you are
   //                  the easiest is to look for the CaloDetDescrElement
   const CaloDetDescrElement* dde =
@@ -82,8 +77,8 @@ egammaBackShape::execute(const xAOD::CaloCluster& cluster,
   }
 
   // local granularity
-  deta = dde->deta();
-  dphi = dde->dphi();
+  double deta = dde->deta();
+  double dphi = dde->dphi();
   // change values of eta,phi
   eta = dde->eta_raw();
   phi = dde->phi_raw();

@@ -27,7 +27,6 @@ struct egammaStripsShape
 {
   struct Info
   {
-  public:
     double etamax = 0;
     double phimax = 0;
     double etaseed = 0;

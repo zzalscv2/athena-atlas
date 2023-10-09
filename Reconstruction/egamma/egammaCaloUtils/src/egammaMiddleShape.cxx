@@ -12,7 +12,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 
 #include "egammaUtils/egammaqweta2c.h"
-#include <cmath>
 
 StatusCode
 egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
@@ -44,24 +43,18 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
 
   // granularity in (eta,phi) in the pre sampler
   // CaloCellList needs both enums: subCalo and CaloSample
-  double eta = 0;
-  double phi = 0;
-  double deta = 0;
-  double dphi = 0;
-  float etacell = 0;
   bool barrel = false;
   CaloCell_ID::SUBCALO subcalo = CaloCell_ID::LAREM;
   int sampling_or_module = 0;
 
-  etacell = cluster.etamax(sam);
-  eta = cluster.etaSample(sam);
-  phi = cluster.phiSample(sam);
-  if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
+  float etacell = cluster.etamax(sam);
+  double eta = cluster.etaSample(sam);
+  double phi = cluster.phiSample(sam);
+  if ((eta == 0. && phi == 0.) || std::abs(eta) > 100) {
     return sc;
   }
 
-  CaloDetDescrManager::decode_sample(
-    subcalo, barrel, sampling_or_module, (CaloCell_ID::CaloSample)sam);
+  CaloDetDescrManager::decode_sample(subcalo, barrel, sampling_or_module, sam);
 
   // Get the corresponding grannularities : needs to know where you are
   //                  the easiest is to look for the CaloDetDescrElement
@@ -72,8 +65,8 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
     return sc;
   }
   // local granularity
-  deta = dde->deta();
-  dphi = dde->dphi();
+  double deta = dde->deta();
+  double dphi = dde->dphi();
 
   // Find the hottest cell
   // in a 7x7 (7deta,7*dphi) window 
@@ -86,18 +79,14 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
                  cluster.phiSample(sam),
                  7. * deta,
                  7. * dphi,
-                 (CaloSampling::CaloSample)sam);
+                 sam);
   double etamax = calc.etarmax();
   double phimax = calc.phirmax();
 
   //select the widest cell list we will use
   //i.e a 7x7 around the found hottest cell
   CaloCellList cell_list(&cmgr, &cell_container);
-  cell_list.select(etamax,
-                   phimax,
-                   7. * deta,
-                   7. * dphi,
-                   (CaloSampling::CaloSample)sam);
+  cell_list.select(etamax, phimax, 7. * deta, 7. * dphi, sam);
 
   // Using that list do the filling
   // of all the sub windows.
@@ -109,7 +98,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
             phimax,
             7. * deta,
             7. * dphi,
-            (CaloSampling::CaloSample)sam);
+            sam);
   info.e277 = calc.em();
   // 3X7
   calc.fill(cell_list.begin(),
@@ -118,7 +107,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
             phimax,
             3. * deta,
             7. * dphi,
-            (CaloSampling::CaloSample)sam);
+            sam);
   info.e237 = calc.em();
 
   if (!doRetaOnly) {
@@ -131,7 +120,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
               phimax,
               3. * deta,
               3. * dphi,
-              (CaloSampling::CaloSample)sam);
+              sam);
     info.e233 = calc.em();
     // 3X5
     calc.fill(cell_list.begin(),
@@ -140,7 +129,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
               phimax,
               3. * deta,
               5. * dphi,
-              (CaloSampling::CaloSample)sam);
+              sam);
     info.e235 = calc.em();
     double etaw = calc.etas();
     info.phiw = calc.phis();
@@ -154,7 +143,7 @@ egammaMiddleShape::execute(const xAOD::CaloCluster& cluster,
               phimax,
               5. * deta,
               5. * dphi,
-              (CaloSampling::CaloSample)sam);
+              sam);
     info.e255 = calc.em();
   }
   return sc;
