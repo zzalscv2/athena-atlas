@@ -190,12 +190,6 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
         from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
         kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(
             MuonSelectionToolCfg(flags, name='MuonRecoSelTool')))
-    # This tool needs MuonScatteringAngleSignificanceTool... which in turn needs TrackingVolumeSvc.
-    # FIXME - probably this should be someplace central.
-    trackingVolSvc = CompFactory.Trk.TrackingVolumesSvc(
-        name="TrackingVolumesSvc")
-    result.addService(trackingVolSvc)
-    
     kwargs.setdefault("RequireMSOEforSA", flags.Beam.Type is BeamType.Collisions)
     kwargs.setdefault("RequireCaloForSA", flags.Beam.Type is BeamType.Collisions)
  
@@ -676,6 +670,8 @@ def MuidErrorOptimisationToolCfg(flags, name='MuidErrorOptimisationTool', **kwar
 
 def MuonAlignmentUncertToolThetaCfg(flags, name="MuonAlignmentUncertToolTheta", **kwargs):
     result = ComponentAccumulator()
+    from MuonConfig.MuonGeometryConfig import TrackingVolumesSvcCfg
+    kwargs.setdefault("TrackingVolumesSvc", result.getPrimaryAndMerge(TrackingVolumesSvcCfg(flags)))
     kwargs.setdefault("HistoName", "ThetaScattering")
     kwargs.setdefault(
         "InFile", "MuonCombinedBaseTools/AlignmentUncertainties/201029_initial/ID_MS_Uncertainties.root")
@@ -687,6 +683,8 @@ def MuonAlignmentUncertToolThetaCfg(flags, name="MuonAlignmentUncertToolTheta", 
 def MuonAlignmentUncertToolPhiCfg(flags, name="MuonAlignmentUncertToolPhi", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("HistoName", "PhiScattering")
+    from MuonConfig.MuonGeometryConfig import TrackingVolumesSvcCfg
+    kwargs.setdefault("TrackingVolumesSvc", result.getPrimaryAndMerge(TrackingVolumesSvcCfg(flags)))
     kwargs.setdefault(
         "InFile", "MuonCombinedBaseTools/AlignmentUncertainties/201029_initial/ID_MS_Uncertainties.root")
     tool = CompFactory.Muon.MuonAlignmentUncertTool(name, **kwargs)
@@ -701,6 +699,10 @@ def CombinedMuonTrackBuilderCfg(flags, name='CombinedMuonTrackBuilder', **kwargs
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
 
     result = ComponentAccumulator()
+
+    from MuonConfig.MuonGeometryConfig import TrackingVolumesSvcCfg
+    kwargs.setdefault("TrackingVolumesSvc", result.getPrimaryAndMerge(TrackingVolumesSvcCfg(flags)))
+
     kwargs.setdefault("CaloEnergyParam", result.popToolsAndMerge(
         MuidCaloEnergyToolParamCfg(flags)))
     kwargs.setdefault("CaloTSOS",        result.popToolsAndMerge(
