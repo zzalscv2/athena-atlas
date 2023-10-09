@@ -315,15 +315,14 @@ def MuonChamberHoleRecoveryToolCfg(flags, name="MuonChamberHoleRecoveryTool", **
     # Not setting explicitly MuonStationIntersectSvc
 
     from TrkConfig.AtlasExtrapolatorConfig import MuonExtrapolatorCfg
-    acc = MuonExtrapolatorCfg(flags)
-    kwargs.setdefault("Extrapolator", result.popToolsAndMerge(acc))
+    kwargs.setdefault("Extrapolator", result.popToolsAndMerge(MuonExtrapolatorCfg(flags)))
+
+    from MuonConfig.MuonGeometryConfig import TrackingVolumesSvcCfg
+    kwargs.setdefault("TrackingVolumesSvc", result.getPrimaryAndMerge(TrackingVolumesSvcCfg(flags)))
 
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg
-    acc = MdtDriftCircleOnTrackCreatorCfg(flags)
-    mdt_dcot_creator = acc.getPrimary()
-    kwargs.setdefault("MdtRotCreator", mdt_dcot_creator)
-    result.merge(acc)
-
+    kwargs.setdefault("MdtRotCreator", result.getPrimaryAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
+  
     kwargs.setdefault("AddMeasurements",  not flags.Muon.doSegmentT0Fit )
     if flags.Detector.GeometryCSC:
         extrakwargs={}

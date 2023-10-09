@@ -7,6 +7,11 @@ from AthenaConfiguration.Enums import ProductionStep
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from AthenaConfiguration.Enums import LHCPeriod
 
+def TrackingVolumesSvcCfg(flags, name="TrackingVolumesSvc", **kwargs):
+    result = ComponentAccumulator()
+    trackingVolSvc = CompFactory.Trk.TrackingVolumesSvc(name=name, **kwargs)
+    result.addService(trackingVolSvc, primary=True)
+    return result
 def MuonIdHelperSvcCfg(flags):
     acc = ComponentAccumulator()
     acc.merge(GeoModelCfg(flags))
