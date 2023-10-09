@@ -2,10 +2,6 @@
 
 # art-description: MC+MC Overlay chain for MC20e, ttbar, full reco chain, 1000 events, AthenaMT
 # art-type: grid
-# art-include: main/Athena/x86_64-centos7-gcc11-opt
-# art-include: main/Athena/x86_64-centos7-clang13-opt
-
-# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 events=1000

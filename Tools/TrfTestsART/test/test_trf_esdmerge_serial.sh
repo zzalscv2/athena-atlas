@@ -2,8 +2,6 @@
 #
 # art-description: ESDMerge_tf.py serial
 # art-type: grid
-# art-include: main/Athena
-
 # art-include: 23.0/Athena
 
 ESDMerge_tf.py \

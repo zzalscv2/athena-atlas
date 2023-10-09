@@ -8,6 +8,7 @@
 # Run the old-style merge
 AODMerge_tf.py \
   --maxEvents 25 \
+  --preExec 'from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' \
   --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc20_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.recon.AOD.e3601_s3681_r13167/AOD.27312826._000061.pool.root.1 \
   --outputAOD_MRGFile std.aod.pool.root
 rc1=$?
