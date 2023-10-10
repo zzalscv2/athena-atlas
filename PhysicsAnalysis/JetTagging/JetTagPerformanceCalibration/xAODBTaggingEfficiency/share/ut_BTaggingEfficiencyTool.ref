@@ -1,0 +1,49 @@
+ CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
+CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
+ The total variance is 299.94 and the reduction captured 100% of this.
+ CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
+CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
+ The total variance is 299.94 and the reduction captured 100% of this.
+ CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
+CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
+ The total variance is 299.94 and the reduction captured 100% of this.
+ CDEV Constructor : info /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 AntiKt4EMPFlowJets
+CalibrationDataEigenVariations: Removing 298 eigenvector variations leading to sub-tolerance effects, retaining 2 variations
+ The total variance is 314.46 and the reduction captured 100% of this.
+Package.BtaggingEffici...INFO    Initialization of tool ToolSvc.BTagEffTest finished.
+ToolSvc.BTagEffTest      WARNING setMapIndex DSID 410470not found in config file
+Package.BtaggingEffici...INFO    -----------------------------------------------------
+Package.BtaggingEffici...INFO    Allowed systematics variations for tool ToolSvc.BTagEffTest:
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_B_0__1down                 :
+Package.BtaggingEffici...INFO     B
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_B_0__1up                   :
+Package.BtaggingEffici...INFO     B
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_B_1__1down                 :
+Package.BtaggingEffici...INFO     B
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_B_1__1up                   :
+Package.BtaggingEffici...INFO     B
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_C_0__1down                 :
+Package.BtaggingEffici...INFO     C
+Package.BtaggingEffici...INFO     T
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_C_0__1up                   :
+Package.BtaggingEffici...INFO     C
+Package.BtaggingEffici...INFO     T
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_C_1__1down                 :
+Package.BtaggingEffici...INFO     C
+Package.BtaggingEffici...INFO     T
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_C_1__1up                   :
+Package.BtaggingEffici...INFO     C
+Package.BtaggingEffici...INFO     T
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_Light_0__1down             :
+Package.BtaggingEffici...INFO     Light
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_Light_0__1up               :
+Package.BtaggingEffici...INFO     Light
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_Light_1__1down             :
+Package.BtaggingEffici...INFO     Light
+Package.BtaggingEffici...INFO    FT_EFF_Eigen_Light_1__1up               :
+Package.BtaggingEffici...INFO     Light
+Package.BtaggingEffici...INFO    FT_EFF_extrapolation_from_charm__1down  :
+Package.BtaggingEffici...INFO     T
+Package.BtaggingEffici...INFO    FT_EFF_extrapolation_from_charm__1up    :
+Package.BtaggingEffici...INFO     T
+Package.BtaggingEffici...INFO    b jet get scale factor succeeded: 1
