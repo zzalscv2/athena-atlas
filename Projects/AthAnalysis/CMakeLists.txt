@@ -20,8 +20,8 @@ set( ATLAS_PYTHON_CHECKER ""
 find_package( AtlasCMake QUIET )
 
 # Find the base project(s):
-find_package( AthAnalysisExternals ${_version} REQUIRED )
-find_package( Gaudi REQUIRED )
+find_package( AthAnalysisExternals REQUIRED )
+find_package( Gaudi )
 
 # Additional externals needed for the build/runtime:
 find_package( Xrootd )
