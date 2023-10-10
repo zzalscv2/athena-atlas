@@ -8,7 +8,6 @@ MetaDataSvc          INFO Initializing MetaDataSvc
 PoolSvc             DEBUG OutputLevel is 2
 PoolSvc             DEBUG POOL ReadCatalog is file:Catalog.xml
 AthenaPoolCnvSvc    DEBUG Setting StorageType to ROOTTREEINDEX
-AthenaPoolCnvSvc    DEBUG Registering all Tools in ToolHandleArray OutputStreamingTool
 EventSelector       DEBUG Initializing EventSelector
 EventSelector       DEBUG reinitialization...
 EventSelector        INFO EventSelection with query 

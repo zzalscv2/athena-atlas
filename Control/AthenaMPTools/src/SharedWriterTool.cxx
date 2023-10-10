@@ -20,11 +20,10 @@ SharedWriterTool::SharedWriterTool(const std::string& type
 				   , const IInterface* parent)
   : AthenaMPToolBase(type,name,parent)
   , m_rankId(0)
-  , m_writer(0)
   , m_sharedRankQueue(nullptr)
   , m_cnvSvc(0)
 {
-  m_subprocDirPrefix = "shared_writer_";
+  m_subprocDirPrefix = "shared_writer";
 }
 
 SharedWriterTool::~SharedWriterTool()
@@ -41,6 +40,14 @@ StatusCode SharedWriterTool::initialize()
   return StatusCode::SUCCESS;
 }
 
+StatusCode SharedWriterTool::finalize()
+{
+  ATH_MSG_DEBUG("In finalize");
+
+  delete m_sharedRankQueue;
+  return StatusCode::SUCCESS;
+}
+
 int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& topdir)
 {
   ATH_MSG_DEBUG("In makePool " << getpid());
@@ -53,23 +60,13 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   m_nprocs = (nprocs==-1?sysconf(_SC_NPROCESSORS_ONLN):nprocs) + 1;
   m_subprocTopDir = topdir;
 
-  m_writer = 0;
   IProperty* propertyServer = dynamic_cast<IProperty*>(m_cnvSvc);
   if(propertyServer==0) {
     ATH_MSG_ERROR("Unable to cast conversion service to IProperty");
     return -1;
   }
   else {
-    std::string propertyName("OutputStreamingTool");
-    std::vector<std::string> writeClients(m_writer);
-    StringArrayProperty writeClientsProp(propertyName,writeClients);
-    if(propertyServer->getProperty(&writeClientsProp).isFailure()) {
-      ATH_MSG_INFO("Conversion service does not have OutputStreamingTool property");
-    }
-    else {
-      m_writer = writeClientsProp.value().size();
-    }
-    propertyName = "ParallelCompression";
+    std::string propertyName = "ParallelCompression";
     bool parallelCompression(false);
     BooleanProperty parallelCompressionProp(propertyName,parallelCompression);
     if(propertyServer->getProperty(&parallelCompressionProp).isFailure()) {
@@ -90,19 +87,18 @@ int SharedWriterTool::makePool(int /*maxevt*/, int nprocs, const std::string& to
   }
 
   // Create rank queue and fill it
-  m_sharedRankQueue = new AthenaInterprocess::SharedQueue("SharedWriterTool_RankQueue_"+m_randStr,m_writer,sizeof(int));
-  for(int i=0; i<m_writer; ++i)
-    if(!m_sharedRankQueue->send_basic<int>(i)) {
-      ATH_MSG_ERROR("Unable to send int to the ranks queue!");
-      return -1;
-    }
+  m_sharedRankQueue = new AthenaInterprocess::SharedQueue("SharedWriterTool_RankQueue_"+m_randStr,1,sizeof(int));
+  if(!m_sharedRankQueue->send_basic<int>(0)) {
+    ATH_MSG_ERROR("Unable to send int to the ranks queue!");
+    return -1;
+  }
 
   // Create the process group and map_async bootstrap
-  m_processGroup = new AthenaInterprocess::ProcessGroup(m_writer);
-  ATH_MSG_INFO("Created Pool of " << m_writer << " shared writer processes");
+  m_processGroup = new AthenaInterprocess::ProcessGroup(1);
+  ATH_MSG_INFO("Created shared writer process");
   if(mapAsyncFlag(AthenaMPToolBase::FUNC_BOOTSTRAP))
     return -1;
-  ATH_MSG_INFO("Shared writer processes bootstraped");
+  ATH_MSG_INFO("Shared writer process bootstraped");
   return 1;
 }
 
@@ -125,13 +121,9 @@ StatusCode SharedWriterTool::exec()
 void SharedWriterTool::subProcessLogs(std::vector<std::string>& filenames)
 {
   filenames.clear();
-  for(int i=0; i<m_writer; ++i) {
-    std::ostringstream workerIndex;
-    workerIndex << i;
-    std::filesystem::path writer_rundir(m_subprocTopDir);
-    writer_rundir/= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
-    filenames.push_back(writer_rundir.string()+std::string("/AthenaMP.log"));
-  }
+  std::filesystem::path writer_rundir(m_subprocTopDir);
+  writer_rundir/= std::filesystem::path(m_subprocDirPrefix);
+  filenames.push_back(writer_rundir.string()+std::string("/AthenaMP.log"));
 }
 
 AthenaMP::AllWorkerOutputs_ptr SharedWriterTool::generateOutputReport()
@@ -179,12 +171,9 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> SharedWriterTool::bootstrap_f
     ATH_MSG_ERROR("Unable to get rank ID!");
     return outwork;
   }
-  std::ostringstream workerIndex;
-  workerIndex<<m_rankId;
-
   // Writer dir: mkdir
   std::filesystem::path writer_rundir(m_subprocTopDir);
-  writer_rundir /= std::filesystem::path(m_subprocDirPrefix+workerIndex.str());
+  writer_rundir /= std::filesystem::path(m_subprocDirPrefix);
 
   if(mkdir(writer_rundir.string().c_str(),S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH)==-1) {
     ATH_MSG_ERROR("Unable to make writer run directory: " << writer_rundir.string() << ". " << fmterror(errno));
