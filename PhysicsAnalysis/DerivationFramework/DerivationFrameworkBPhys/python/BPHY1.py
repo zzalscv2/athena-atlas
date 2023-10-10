@@ -24,11 +24,13 @@ def BPHY1Cfg(flags):
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
         from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+        from AthenaConfiguration.Enums import LHCPeriod
         acc.merge(LRTMuonMergerAlg( flags,
                                     PromptMuonLocation    = "Muons",
                                     LRTMuonLocation       = "MuonsLRT",
                                     OutputMuonLocation    = mainMuonInput,
-                                    CreateViewCollection  = True))
+                                    CreateViewCollection  = True,
+                                    UseRun3WP = flags.GeoModel.Run == LHCPeriod.Run3))
         from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
         acc.merge(InDetLRTMergeCfg(flags))
 
