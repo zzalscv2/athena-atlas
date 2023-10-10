@@ -68,6 +68,18 @@ if( XAOD_ANALYSIS )
       LINK_LIBRARIES AsgTools AsgMessagingLib FTagAnalysisInterfacesLib )
 endif()
 
+if( XAOD_STANDALONE )
+   atlas_add_test( ut_BTaggingSelectionTool_fixedcut
+      SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v14/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77 
+   )
+   atlas_add_test( ut_BTaggingSelectionTool_continuous
+      SCRIPT BTaggingSelectionToolTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/WorkflowReferences/main/mc_PHYS_Run3/v14/DAOD_PHYS.myOutput.pool.root xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP Continuous
+   )
+   atlas_add_test( ut_BTaggingEfficiencyTool
+      SCRIPT BTaggingEfficiencyToolTester xAODBTaggingEfficiency/13p6TeV/2023-22-13p6TeV-MC21-CDI_Test_2023-08-1_v1.root GN2v00NewAliasWP FixedCutBEff_77
+   )
+endif()
+
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
 atlas_install_runtime( share/*.root share/*.xml share/*.env )
