@@ -14,11 +14,8 @@
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <MuonCablingData/MdtCablingData.h>
 #include <MuonReadoutGeometryR4/StringUtils.h>
+#include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
-#include <string>
-#include <set>
-#include <vector>
-#include <map>
 #include <iostream>
 
 
@@ -26,15 +23,14 @@
 #include <TFile.h>
 #include <TTreeReader.h>
 
-
-
+using namespace MuonGMR4;
 /// Helper struct to represent a full Mdt chamber
 struct MdtChamber{
     /// Default constructor
     MdtChamber() = default;
     
     /// Identifier of the mdt chamber
-    using  chamberIdentifier = MdtCablingOffData;
+    using chamberIdentifier = MdtCablingOffData;
     chamberIdentifier id{};
 
     /// Sorting operator to insert the object into std::set
@@ -50,8 +46,9 @@ struct MdtChamber{
     unsigned int numTubes{0};
     /// Pitch between two tubes
     double tubePitch{0.};
-    /// Inner  tube radius
+    /// Inner tube radius
     double tubeRadius{0.};
+    
     
     struct TubePositioning{
         /// Layer to which the tube belongs
@@ -101,9 +98,24 @@ std::ostream& operator<<(std::ostream& ostr, const MdtChamber& chamb) {
     return ostr;
 } 
 
-
-
-
+constexpr double tolerance = 10 * Gaudi::Units::micrometer;
+ 
+#define TEST_BASICPROP(attribute, propName) \
+    if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
+        std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The chamber "<<test        \
+                 <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
+                 <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
+        chamberOkay = false;                                                          \
+    }
+          
+#define TEST_TUBEPROP(attribute, propName) \
+    if (std::abs(1.*refTube.attribute - 1.*testTube.attribute) > tolerance) {         \
+        std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The tubes ("<<layer<<","   \
+                 <<tube<<") in "<<test<<" differ w.r.t "<<propName<<". "              \
+                 << refTube.attribute <<" (ref) vs. " <<testTube.attribute            \
+                 << " (test)" << std::endl;                                           \
+        chamberOkay = false;                                                          \
+    }
 
 std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     std::set<MdtChamber> to_ret{};
@@ -145,17 +157,17 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> tubeTransformTransY{treeReader, "tubeTransformTranslationY"};
     TTreeReaderValue<std::vector<float>> tubeTransformTransZ{treeReader, "tubeTransformTranslationZ"};
     
-    TTreeReaderValue<std::vector<float>> tubeTransformCol0X{treeReader, "tubeTransformCol0X"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol0Y{treeReader, "tubeTransformCol0Y"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol0Z{treeReader, "tubeTransformCol0Z"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol0X{treeReader, "tubeTransformLinearCol1X"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol0Y{treeReader, "tubeTransformLinearCol1Y"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol0Z{treeReader, "tubeTransformLinearCol1Z"};
  
-    TTreeReaderValue<std::vector<float>> tubeTransformCol1X{treeReader, "tubeTransformCol1X"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol1Y{treeReader, "tubeTransformCol1Y"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol1Z{treeReader, "tubeTransformCol1Z"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol1X{treeReader, "tubeTransformLinearCol2X"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol1Y{treeReader, "tubeTransformLinearCol2Y"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol1Z{treeReader, "tubeTransformLinearCol2Z"};
  
-    TTreeReaderValue<std::vector<float>> tubeTransformCol2X{treeReader, "tubeTransformCol2X"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol2Y{treeReader, "tubeTransformCol2Y"};
-    TTreeReaderValue<std::vector<float>> tubeTransformCol2Z{treeReader, "tubeTransformCol2Z"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol2X{treeReader, "tubeTransformLinearCol3X"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol2Y{treeReader, "tubeTransformLinearCol3Y"};
+    TTreeReaderValue<std::vector<float>> tubeTransformCol2Z{treeReader, "tubeTransformLinearCol3Z"};
  
     TTreeReaderValue<std::vector<float>> readOutPosX{treeReader, "readOutPosX"};
     TTreeReaderValue<std::vector<float>> readOutPosY{treeReader, "readOutPosY"};
@@ -211,18 +223,6 @@ std::set<MdtChamber> readTreeDump(const std::string& inputFile) {
     return to_ret;
 }
 
-/// Returns true if the linear part of the transformation does not
-/// Apply a rotation or elongation
-bool doesNotDeform(const Amg::Transform3D& trans) {
-    for (unsigned int d = 0; d < 3 ; ++d) {
-        const double defLength = Amg::Vector3D::Unit(d).dot(trans.linear() * Amg::Vector3D::Unit(d));
-        if (std::abs(defLength - 1.) > std::numeric_limits<float>::epsilon()) {
-            return false;
-        }
-    }
-    return true;
-}
-
 int main( int argc, char** argv ) {
     std::string refFile{}, testFile{};
     
@@ -271,34 +271,22 @@ int main( int argc, char** argv ) {
         bool chamberOkay = true;
         const MdtChamber& test = {*test_itr};
         /// 
-        if (test.numLayers != reference.numLayers) {
-            std::cerr<<"The number of layers differs between reference "
-                     <<reference.numLayers<<" and test "<<test.numLayers
-                     <<" for "<<reference<<std::endl;
-            chamberOkay = false; 
-        }
-        if (test.numTubes != reference.numTubes) {
-            std::cerr<<"The number of tubes differs between reference "
-                     <<reference.numTubes<<" and test "<<test.numTubes
-                     <<" for "<<reference<<std::endl;
-            chamberOkay = false; 
-        }
-        if (std::abs(test.tubePitch - reference.tubePitch) > std::numeric_limits<float>::epsilon()) {
-            std::cerr<<"The tube pitch differ between reference "<<reference.tubePitch
-                     <<" and test "<<test.tubePitch<<" for "<<reference<<std::endl;
-            chamberOkay = false;
-        }
+        TEST_BASICPROP(numLayers, "number of layers");
+        TEST_BASICPROP(numTubes, "number of tubes");
+        TEST_BASICPROP(tubePitch, "tube pitch");
+        TEST_BASICPROP(tubeRadius, "tube radius");
+        
+
         const Amg::Transform3D distortion = test.geoModelTransform.inverse() * reference.geoModelTransform;
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not
-        if (!doesNotDeform(distortion) && 
-            !(reference.id.eta < 0 && doesNotDeform(distortion* Amg::getRotateX3D(M_PI)))) {   
-            std::cerr<<"The chamber coordinate systems rotate differently for  "
+        bool flippedChamb = {reference.id.eta < 0 && doesNotDeform(distortion * Amg::getRotateX3D(M_PI))};
+        if (!doesNotDeform(distortion) && !flippedChamb) {   
+            std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The chamber coordinate systems rotate differently for  "
                      <<reference<<". Difference in the coordinate transformation: "
-                     <<MuonGMR4::to_string(distortion)<<std::endl;
+                     <<to_string(distortion)<<std::endl;
             chamberOkay = false;            
         }
-        constexpr double tolerance = 10 * Gaudi::Units::micrometer;
         /// The ultimate goal is to have the tube positioned at the same place. 
         /// We maybe need the origin position later when we are adding the alignable transforms...
         if (false && distortion.translation().mag() > tolerance) {
@@ -313,26 +301,24 @@ int main( int argc, char** argv ) {
                 const TubePositioning& refTube = reference.getTube(layer, tube);
                 const TubePositioning& testTube = test.getTube(layer, tube);
                 const Amg::Transform3D tubeDistortion = testTube.localToGlobal.inverse() * refTube.localToGlobal;
-                if (!alignFailure && !(doesNotDeform(tubeDistortion)  || 
-                                       (reference.id.eta < 0 && doesNotDeform(tubeDistortion* Amg::getRotateX3D(M_PI))) )) {
-                    std::cerr<<"In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "<<tube
-                             <<") are not exactly aligned. "<<MuonGMR4::to_string(tubeDistortion)<<std::endl;                   
+                bool flippedTube{reference.id.eta < 0 && doesNotDeform(tubeDistortion * Amg::getRotateX3D(M_PI))};
+        
+                if (!alignFailure && !(doesNotDeform(tubeDistortion)  || flippedTube)) {
+                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "<<tube
+                             <<") are not exactly aligned. "<<to_string(tubeDistortion)<<std::endl;                   
                     alignFailure = true;
                 }
                 /// Remember the tube staggering is in the (x-y) plane. Allow for
                 /// deviations in the z-axis due to different cutouts
                 if (!stagFailure && tubeDistortion.translation().perp() > tolerance) {
-                    std::cerr<<"Misplaced staggering found in chamber "<<reference<<" the tube ("<<layer<<", "<<tube<<") "
+                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": Misplaced staggering found in chamber "<<reference<<" the tube ("<<layer<<", "<<tube<<") "
                              << Amg::toString(tubeDistortion.translation(), 2)<<std::endl;                    
                     stagFailure = true;
                 }
                 
-                if (std::abs(refTube.tubeLength - testTube.tubeLength) >= tolerance) {
-                    std::cerr<<"Different tube lengths found in chamber "
-                             <<reference<<" for the tubes ("<<layer<<", "<<tube<<") "
-                             <<refTube.tubeLength<<" vs. "<<testTube.tubeLength<<"."<<std::endl;
-                    chamberOkay = false;
-                }
+                // TEST_TUBEPROP(tubeLength, "tube length");
+                // TEST_TUBEPROP(wireLength, "wire length");
+                TEST_TUBEPROP(activeLength, "active length");
                 /// In cases where the tube coordinate systems are not aligned, 
                 /// there's no point in checking the position of the reaodout
                 if (alignFailure || readoutOrient) continue;
@@ -341,8 +327,8 @@ int main( int argc, char** argv ) {
                 const Amg::Vector3D refRO = refSystem * refTube.readoutPos;
                 const Amg::Vector3D testRO = refSystem* testTube.readoutPos;
                 if (refRO.z()* testRO.z() < 0.){
-                    std::cerr<<"The readout is on different sites for chamber: "<<reference<<". "
-                              <<Amg::toString(refRO, 2)<<" vs. "<<Amg::toString(testRO)<<std::endl;
+                    std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The readout is on different sites for chamber: "<<reference<<
+                             ", layer "<<layer<<", tube: "<<tube<<". " <<Amg::toString(refRO, 2)<<" vs. "<<Amg::toString(testRO)<<std::endl;
                     readoutOrient = true;
                 }
 

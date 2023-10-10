@@ -120,7 +120,7 @@ StatusCode GeoModelRpcTest::execute() {
                     /// Test the back and forth conversion of the Identifier
                     const IdentifierHash measHash = reElement->measurementHash(chId);
                     const IdentifierHash layHash = reElement->layerHash(chId);
-                    ATH_MSG_INFO("gasGap: "<<gasGap<<", doubletPhi: "<<doubPhi<<", measPhi: "<<measPhi
+                    ATH_MSG_VERBOSE("gasGap: "<<gasGap<<", doubletPhi: "<<doubPhi<<", measPhi: "<<measPhi
                                <<" --> layerHash: "<<static_cast<unsigned>(layHash));
                     const Identifier backCnv = reElement->measurementId(measHash);
                     if (backCnv != chId) {
@@ -134,7 +134,7 @@ StatusCode GeoModelRpcTest::execute() {
                                     layHash<<" vs. "<< reElement->layerHash(measHash));
                         return StatusCode::FAILURE;
                     }
-                    ATH_MSG_INFO("Channel "<<m_idHelperSvc->toString(chId)<<" strip position "
+                    ATH_MSG_VERBOSE("Channel "<<m_idHelperSvc->toString(chId)<<" strip position "
                                             <<Amg::toString(reElement->stripPosition(gctx, measHash)));
                 }                
             }
@@ -153,6 +153,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_doubletR   = reElement->doubletR();
    m_doubletZ   = reElement->doubletZ();
    m_doubletPhi = reElement->doubletPhi();
+   m_chamberDesign = reElement->chamberDesign();
    
    m_numGasGapsEta = reElement->nGasGaps();
    m_numGasGapsPhi = reElement->nGasGaps();
@@ -170,10 +171,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
  
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform{reElement->localToGlobalTrans(gctx)};
-   m_readoutTransform.push_back(Amg::Vector3D{transform.translation()});
-   m_readoutTransform.push_back(Amg::Vector3D{transform.linear()*Amg::Vector3D::UnitX()});
-   m_readoutTransform.push_back(Amg::Vector3D{transform.linear()*Amg::Vector3D::UnitY()});
-   m_readoutTransform.push_back(Amg::Vector3D{transform.linear()*Amg::Vector3D::UnitZ()});
+   m_readoutTransform = transform;
    const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
       
    for (int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
@@ -181,7 +179,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
             for (bool measPhi: {false, true}) {
                 unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :
                                                     reElement->nEtaStrips());
-                for (unsigned int strip = 1; strip < numStrip ; ++strip) {
+                for (unsigned int strip = 1; strip <= numStrip ; ++strip) {
 
                     bool isValid{false};
                     const Identifier stripID = id_helper.channelID(reElement->identify(), 
@@ -201,9 +199,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
 
                     if (strip != 1) continue;
                     const Amg::Transform3D locToGlob = reElement->localToGlobalTrans(gctx, stripID);
-                    m_stripRotColX.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitX()});
-                    m_stripRotColY.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitY()});
-                    m_stripRotColZ.push_back(Amg::Vector3D{locToGlob.linear()*Amg::Vector3D::UnitZ()});
+                    m_stripRot.push_back(locToGlob);
                     m_stripRotGasGap.push_back(gasGap);
                     m_stripRotMeasPhi.push_back(measPhi);
                     m_stripRotDblPhi.push_back(doubPhi);                
