@@ -15,6 +15,8 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
 #include <xAODInDetMeasurement/StripClusterContainer.h>
+#include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
+#include <IRegionSelector/IRegSelTool.h>
 
 namespace ActsTrk {
 
@@ -51,6 +53,13 @@ private:
 	"ITkStripDetectorElementCollection",
 	"SiDetectorElementCollection key for strip"
     };
+    // Support for Regional Tracking
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey {
+        this, 
+	"RoIs", 
+	"", 
+	"RoIs to read in"
+    };
     SG::WriteHandleKey<xAOD::StripClusterContainer> m_clusterContainerKey {
 	this,
 	"StripClustersKey",
@@ -74,6 +83,12 @@ private:
 	"MonTool",
 	"",
 	"Monitoring tool"
+    };
+    ToolHandle<IRegSelTool> m_regionSelector{
+        this, 
+        "RegSelTool", 
+        "", 
+        "region selector tool"
     };
     Gaudi::Property<bool> m_checkBadModules {
         this,

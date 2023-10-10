@@ -14,7 +14,9 @@
 #include <StoreGate/ReadHandleKey.h>
 #include <StoreGate/WriteHandleKey.h>
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
-
+#include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
+#include <IRegionSelector/IRegSelTool.h>
+#include <InDetReadoutGeometry/SiDetectorElementCollection.h>
 
 namespace ActsTrk {
 
@@ -30,10 +32,17 @@ private:
     PixelClusterizationAlg(const PixelClusterizationAlg&) = delete;
     PixelClusterizationAlg &operator=(const PixelClusterizationAlg&) = delete;
 
-    SG::ReadHandleKey<PixelRDO_Container> m_rdoContainerKey {this, "PixelRDOContainerKey", "PixelRDOs"};
-    SG::WriteHandleKey<xAOD::PixelClusterContainer> m_clusterContainerKey {this, "PixelClustersKey", "xAODpixelClusters", "Key of output xAOD pixel cluster container"};
+ private:
     ToolHandle<IPixelClusteringTool> m_clusteringTool {this, "PixelClusteringTool", "", "Pixel Clustering Tool"};
     ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
+    ToolHandle<IRegSelTool> m_regionSelector {this, "RegSelTool", "", "region selector tool"};
+
+    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey {this, "PixelDetEleCollKey", "ITkPixelDetectorElementCollection", 
+	"Key of SiDetectorElementCollection for Pixel"};
+
+    SG::ReadHandleKey<PixelRDO_Container> m_rdoContainerKey {this, "PixelRDOContainerKey", "PixelRDOs"};
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey {this, "RoIs", "", "RoIs to read in"};
+    SG::WriteHandleKey<xAOD::PixelClusterContainer> m_clusterContainerKey {this, "PixelClustersKey", "xAODpixelClusters", "Key of output xAOD pixel cluster container"};
 
     // expected number of clusters for RDO
     // This values is used for reserving enough memory of the cluster container

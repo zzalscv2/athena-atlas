@@ -31,11 +31,21 @@ def ActsITkStripClusteringToolCfg(flags, name="ActsITkStripClusteringTool", **kw
     acc.setPrivateTools(CompFactory.ActsTrk.StripClusteringTool(name, **kwargs))
     return acc
 
-def ActsITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizationAlg', **kwargs):
+def ActsITkPixelClusterizationAlgCfg(flags, 
+                                     name: str = 'ActsTrkITkPixelClusterizationAlg', 
+                                     **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("PixelRDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("PixelClustersKey", "ITkPixelClusters")
-    kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsITkPixelClusteringToolCfg(flags)))
+    # Regional selection
+    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+
+    if 'PixelClusteringTool' not in kwargs:
+        kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsITkPixelClusteringToolCfg(flags)))
 
     if flags.Acts.doMonitoring:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
@@ -44,7 +54,9 @@ def ActsITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizationA
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
     return acc
 
-def ActsITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationAlg', **kwargs):
+def ActsITkStripClusterizationAlgCfg(flags, 
+                                     name: str = 'ActsTrkITkStripClusterizationAlg', 
+                                     **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("StripRDOContainerKey", "ITkStripRDOs")
     kwargs.setdefault("StripClustersKey", "ITkStripClusters")
@@ -54,6 +66,12 @@ def ActsITkStripClusterizationAlgCfg(flags, name='ActsTrkITkStripClusterizationA
     kwargs.setdefault("checkBadModules", True)
     # Disable noisy modules suppression
     kwargs.setdefault("maxFiredStrips", 0)
+    # Regional selection
+    kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
+
+    if 'RegSelTool' not in kwargs:
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
 
     if flags.Acts.doMonitoring:
         from ActsConfig.ActsMonitoringConfig import ActsITkStripClusterizationMonitoringToolCfg

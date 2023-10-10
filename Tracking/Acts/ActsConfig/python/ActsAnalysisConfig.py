@@ -16,6 +16,9 @@ def ActsPixelClusterAnalysisAlgCfg(flags, name="ActsPixelClusterAnalysisAlg", **
     monitoringGroup.defineHistogram('globalZ,perp;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path="PixelClusters",
                                     xbins=1500, xmin=-3000, xmax=3000,
                                     ybins=400, ymin=0, ymax=400)
+    monitoringGroup.defineHistogram('globalX,globalY;h_globalXY', title="h_globalXY; x [mm]; y [mm]", type="TH2F", path="PixelClusters",
+                                    xbins=800, xmin=-400, xmax=400,
+                                    ybins=800, ymin=-400, ymax=400)
     monitoringGroup.defineHistogram('eta;h_etaCluster', title="h_etaCluster; cluster #eta", type="TH1F", path="PixelClusters",
                                     xbins=100, xmin=-5, xmax=5)
     
@@ -40,6 +43,9 @@ def ActsStripClusterAnalysisAlgCfg(flags, name="ActsStripClusterAnalysisAlg", **
     monitoringGroup.defineHistogram('globalZ,perp;h_globalZR', title="h_globalZR; z [mm]; r [mm]", type="TH2F", path="StripClusters",
                                     xbins=1500, xmin=-3000, xmax=3000,
                                     ybins=400, ymin=300, ymax=1100)    
+    monitoringGroup.defineHistogram('globalX,globalY;h_globalXY', title="h_globalXY; x [mm]; y [mm]", type="TH2F", path="StripClusters",
+                                    xbins=1600, xmin=-1100, xmax=1100,
+                                    ybins=1600, ymin=-1100, ymax=1100)
     monitoringGroup.defineHistogram('eta;h_etaCluster', title="h_etaCluster; cluster #eta", type="TH1F", path="StripClusters",
                                     xbins=100, xmin=-5, xmax=5)
 

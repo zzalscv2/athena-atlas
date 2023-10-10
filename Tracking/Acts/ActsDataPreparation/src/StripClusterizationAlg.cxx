@@ -6,6 +6,7 @@
 
 #include <AthenaMonitoringKernel/Monitored.h>
 #include <xAODInDetMeasurement/StripClusterAuxContainer.h>
+#include <xAODInDetMeasurement/ContainerAccessor.h>
 
 namespace ActsTrk {
 
@@ -23,12 +24,15 @@ StatusCode StripClusterizationAlg::initialize() {
   ATH_CHECK(m_clusteringTool.retrieve());
   ATH_CHECK(detStore()->retrieve(m_idHelper, "SCT_ID"));
 
+  // Regional Tracking
+  ATH_CHECK(m_roiCollectionKey.initialize());
+  ATH_CHECK(m_regionSelector.retrieve());
+
   bool disableSmry =
       !m_stripDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED;
   ATH_CHECK(m_summaryTool.retrieve(DisableTool{disableSmry}));
 
-  if (!m_monTool.empty())
-    ATH_CHECK(m_monTool.retrieve());
+  ATH_CHECK(m_monTool.retrieve(EnableTool{not m_monTool.empty()}));
 
   return StatusCode::SUCCESS;
 }
@@ -43,6 +47,12 @@ StatusCode StripClusterizationAlg::execute(const EventContext& ctx) const {
 
   SG::WriteHandle<xAOD::StripClusterContainer> clusterHandle =
       SG::makeHandle(m_clusterContainerKey, ctx);
+  ATH_CHECK(clusterHandle.record( std::make_unique<xAOD::StripClusterContainer>(),
+				  std::make_unique<xAOD::StripClusterAuxContainer>() ));
+  xAOD::StripClusterContainer *stripContainer = clusterHandle.ptr();
+  // Reserve space, estimate of mean clusters to reduce re-allocations
+  stripContainer->reserve(m_expectedClustersPerRDO.value() *
+                          rdoContainer->size());
 
   SG::ReadHandle<InDet::SiDetectorElementStatus> status;
   if (!m_stripDetElStatus.empty()) {
@@ -61,59 +71,74 @@ StatusCode StripClusterizationAlg::execute(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  std::unique_ptr<xAOD::StripClusterContainer> stripContainer =
-      std::make_unique<xAOD::StripClusterContainer>();
-  std::unique_ptr<xAOD::StripClusterAuxContainer> stripAuxContainer =
-      std::make_unique<xAOD::StripClusterAuxContainer>();
-  stripContainer->setStore(stripAuxContainer.get());
+  // This will allow us to access the already processed hash ids
+  // For now we are not using yet an update write handle, so the
+  // cluster container is empty
+  // Possibly, we need to find a more efficient solution
+  ContainerAccessor<xAOD::StripCluster, IdentifierHash, 1>
+    stripAccessor ( *stripContainer,
+		    [] (const xAOD::StripCluster& cl) -> IdentifierHash 
+		    { return cl.identifierHash(); },
+		    stripDetEle->size());
+  
+  // retrieve the RoI as provided from upstream algos
+  SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
+  ATH_CHECK(roiCollectionHandle.isValid());
+  const TrigRoiDescriptorCollection *roiCollection = roiCollectionHandle.cptr();
+  
+  // Get list of Hash Ids from the RoI
+  std::vector<IdentifierHash> listOfIds;
+  for (const auto* roi : *roiCollection) {
+    listOfIds.clear();
+    m_regionSelector->HashIDList(*roi, listOfIds);
+    // We'd need to first check the id hashes have not already been processed beforehand, and only then
+    // add it to the list of ids to be processed.
+    for (const IdentifierHash idHash : listOfIds) {
+      if (stripAccessor.isIdentifierPresent(idHash)) continue;
 
-  // Reserve space, estimate of mean clusters to reduce re-allocations
-  stripContainer->reserve(m_expectedClustersPerRDO.value() *
-                          rdoContainer->size());
+      // If not already processed, do it now
+      const InDetRawDataCollection<SCT_RDORawData>* rdos = rdoContainer->indexFindPtr(idHash);
 
-  for (const InDetRawDataCollection<SCT_RDORawData>* rdos : *rdoContainer) {
-    if (rdos == nullptr or rdos->empty()) {
-      ATH_MSG_DEBUG("No input strip RDOs for this container element");
-      continue;
-    }
-    IdentifierHash idHash = rdos->identifyHash();
-
-    bool goodModule = true;
-    if (m_checkBadModules.value()) {
-      if (!m_stripDetElStatus.empty()) {
-        goodModule = status->isGood(idHash);
-      } else {
-        goodModule = m_summaryTool->isGood(idHash, ctx);
-      }
-    }
-    VALIDATE_STATUS_ARRAY(
-        m_checkBadModules.value() && !m_stripDetElStatus.empty(),
-        status->isGood(idHash), m_summaryTool->isGood(idHash));
-
-    if (!goodModule) {
-      ATH_MSG_DEBUG("Strip module failed status check");
-      continue;
-    }
-
-    // If more than a certain number of RDOs set module to bad
-    // in this cas ewe skip clusterization
-    if (m_maxFiredStrips != 0u) {
-      unsigned int nFiredStrips = 0u;
-      for (const SCT_RDORawData* rdo : *rdos) {
-	nFiredStrips += rdo->getGroupSize();
-      }
-      if (nFiredStrips > m_maxFiredStrips)
+      if (rdos == nullptr or rdos->empty()) {
+	ATH_MSG_DEBUG("No input strip RDOs for this container element");
 	continue;
-    }
+      }
+      
+      bool goodModule = true;
+      if (m_checkBadModules.value()) {
+	if (!m_stripDetElStatus.empty()) {
+	  goodModule = status->isGood(idHash);
+	} else {
+	  goodModule = m_summaryTool->isGood(idHash, ctx);
+	}
+      }
+      VALIDATE_STATUS_ARRAY(
+			    m_checkBadModules.value() && !m_stripDetElStatus.empty(),
+			    status->isGood(idHash), m_summaryTool->isGood(idHash));
+      
+      if (!goodModule) {
+	ATH_MSG_DEBUG("Strip module failed status check");
+	continue;
+      }
+      
+      // If more than a certain number of RDOs set module to bad
+      // in this case we skip clusterization
+      if (m_maxFiredStrips != 0u) {
+	unsigned int nFiredStrips = 0u;
+	for (const SCT_RDORawData* rdo : *rdos) {
+	  nFiredStrips += rdo->getGroupSize();
+	}
+	if (nFiredStrips > m_maxFiredStrips)
+	  continue;
+      }
+      
+      ATH_CHECK(m_clusteringTool->clusterize(
+					     *rdos, *m_idHelper, stripDetEle->getDetectorElement(idHash),
+					     m_stripDetElStatus.empty() ? nullptr : status.cptr(),
+					     *stripContainer));
+    } // loop on ids 
+  } // loop on RoIs
 
-    ATH_CHECK(m_clusteringTool->clusterize(
-        *rdos, *m_idHelper, stripDetEle->getDetectorElement(idHash),
-        m_stripDetElStatus.empty() ? nullptr : status.cptr(),
-        *stripContainer.get()));
-  }
-
-  ATH_CHECK(clusterHandle.record(std::move(stripContainer),
-                                 std::move(stripAuxContainer)));
   return StatusCode::SUCCESS;
 }
 
