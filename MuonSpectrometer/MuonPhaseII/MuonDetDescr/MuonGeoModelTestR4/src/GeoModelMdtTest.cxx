@@ -111,7 +111,39 @@ StatusCode GeoModelMdtTest::execute() {
          }
       }      
    }
+   dumpReadoutSideXML();
    return StatusCode::SUCCESS;
+}
+void GeoModelMdtTest::dumpReadoutSideXML() const {
+   if (m_swapRead.empty()) return;
+   std::ofstream swapReadXML{m_swapRead};
+   if (!swapReadXML.good()) {
+      ATH_MSG_ERROR("Failed to create "<<m_swapRead);
+      return;
+   }
+   std::set<Identifier> chamberIDs{};
+   const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+   swapReadXML<<"<Table name=\"MdtTubeROSides\">"<<std::endl;
+   unsigned int counter{1};
+   for (MdtIdHelper::const_id_iterator itr = idHelper.detectorElement_begin();
+                                       itr != idHelper.detectorElement_end(); 
+                                       ++itr){
+      const Identifier swap{*itr};
+      const MdtReadoutElement* readoutEle = m_detMgr->getMdtReadoutElement(swap);
+      if(!readoutEle) continue;
+      if (!chamberIDs.insert(idHelper.elementID(swap)).second) continue;
+      const int side = readoutEle->getParameters().readoutSide;
+      swapReadXML<<"    <Row   ";
+      swapReadXML<<"MdtTubeROSides_DATA_ID=\""<<counter<<"\" ";
+      swapReadXML<<"stationName=\""<<m_idHelperSvc->stationNameString(swap)<<"\" ";
+      swapReadXML<<"stationEta=\""<<m_idHelperSvc->stationEta(swap)<<"\" ";
+      swapReadXML<<"stationPhi=\""<<m_idHelperSvc->stationPhi(swap)<<"\" ";
+      swapReadXML<<"side=\""<<side<<"\" ";
+      swapReadXML<<"/>"<<std::endl;
+      ++counter;
+   }
+   swapReadXML<<"</Table>"<<std::endl;
+
 }
 StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
                                        const ActsGeometryContext& gctx, 
@@ -130,10 +162,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
 
    /// Dump the local to global transformation of the readout element
    const Amg::Transform3D& transform {readoutEle->localToGlobalTrans(gctx)};
-   m_readoutTransform.push_back(Amg::Vector3D(transform.translation()));
-   m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitX()));
-   m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitY()));
-   m_readoutTransform.push_back(Amg::Vector3D(transform.linear()*Amg::Vector3D::UnitZ()));
+   m_readoutTransform = transform;
    
    /// Loop over the tubes
    for (unsigned int lay = 1; lay <= readoutEle->numLayers(); ++lay) {
@@ -142,10 +171,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
          const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTrans(gctx,measHash)};
          m_tubeLay.push_back(lay);
          m_tubeNum.push_back(tube);         
-         m_tubeTransformTran.push_back(Amg::Vector3D(tubeTransform.translation()));
-         m_tubeTransformColX.push_back(Amg::Vector3D(tubeTransform.linear()*Amg::Vector3D::UnitX()));
-         m_tubeTransformColY.push_back(Amg::Vector3D(tubeTransform.linear()*Amg::Vector3D::UnitY()));
-         m_tubeTransformColZ.push_back(Amg::Vector3D(tubeTransform.linear()*Amg::Vector3D::UnitZ()));
+         m_tubeTransform.push_back(tubeTransform);        
          m_roPos.push_back(readoutEle->readOutPos(gctx, measHash));
          m_tubeLength.push_back(readoutEle->tubeLength(measHash));
          m_activeTubeLength.push_back(readoutEle->activeTubeLength(measHash));

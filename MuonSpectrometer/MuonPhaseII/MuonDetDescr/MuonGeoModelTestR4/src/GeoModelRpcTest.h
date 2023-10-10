@@ -13,6 +13,7 @@
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+#include <MuonTesterTree/CoordTransformBranch.h>
 namespace MuonGMR4{
 
 class GeoModelRpcTest : public AthHistogramAlgorithm{
@@ -56,6 +57,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<uint8_t>& m_doubletR{m_tree.newScalar<uint8_t>("stationDoubletR")};
       MuonVal::ScalarBranch<uint8_t>& m_doubletZ{m_tree.newScalar<uint8_t>("stationDoubletZ")};
       MuonVal::ScalarBranch<uint8_t>& m_doubletPhi{m_tree.newScalar<uint8_t>("stationDoubletPhi")};
+      MuonVal::ScalarBranch<std::string>& m_chamberDesign{m_tree.newScalar<std::string>("chamberDesign")};
       /// Number of strips, strip pitch in eta & phi direction
       MuonVal::ScalarBranch<uint8_t>& m_numStripsEta{m_tree.newScalar<uint8_t>("numEtaStrips")};
       MuonVal::ScalarBranch<uint8_t>& m_numStripsPhi{m_tree.newScalar<uint8_t>("numPhiStrips")};
@@ -72,7 +74,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<uint8_t>& m_numGasGapsPhi{m_tree.newScalar<uint8_t>("numPhiGasGaps")};
       
       /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
-      MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "GeoModelTransform"};
+      MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
       
       /// Alignment parameters
       MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
@@ -83,9 +85,7 @@ class GeoModelRpcTest : public AthHistogramAlgorithm{
       MuonVal::ScalarBranch<float>& m_ALineRotZ{m_tree.newScalar<float>("ALineRotZ", 0.)};
       
       /// Rotation matrix of the respective layers
-      MuonVal::ThreeVectorBranch m_stripRotColX{m_tree, "stripRotCol0"};
-      MuonVal::ThreeVectorBranch m_stripRotColY{m_tree, "stripRotCol1"};
-      MuonVal::ThreeVectorBranch m_stripRotColZ{m_tree, "stripRotCol2"};
+      MuonVal::CoordSystemsBranch m_stripRot{m_tree, "stripRot"};      
       MuonVal::VectorBranch<uint8_t>& m_stripRotGasGap{m_tree.newVector<uint8_t>("stripRotGasGap")};
       MuonVal::VectorBranch<uint8_t>& m_stripRotDblPhi{m_tree.newVector<uint8_t>("stripRotDoubletPhi")};
       MuonVal::VectorBranch<bool>& m_stripRotMeasPhi{m_tree.newVector<bool>("stripRotMeasPhi")};

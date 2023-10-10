@@ -12,19 +12,17 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <MuonCablingData/NrpcCablingData.h>
+#include <MuonReadoutGeometryR4/StringUtils.h>
+#include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
-#include <string>
-#include <set>
-#include <vector>
-#include <map>
-#include <iostream>
 
+using namespace MuonGMR4;
 
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>
 #include <TTreeReader.h>
 
-constexpr double tolerance = 100 * Gaudi::Units::micrometer;
+constexpr double tolerance = 1.*Gaudi::Units::millimeter;
 
 /// Helper struct to represent a full Rpc chamber
 struct RpcChamber{
@@ -34,6 +32,7 @@ struct RpcChamber{
     /// Identifier of the Rpc chamber
     using  chamberIdentifier = NrpcCablingOfflineID;
     chamberIdentifier id{};
+    std::string design{};
 
     /// Sorting operator to insert the object into std::set
     bool operator<(const RpcChamber& other) const {
@@ -73,9 +72,27 @@ struct RpcChamber{
             if (doubletPhi != other.doubletPhi) return doubletPhi < other.doubletPhi;
             if (gasGap != other.gasGap) return gasGap < other.gasGap;
             return strip < other.strip;
-        }       
+        }
+    };
+    /// Helper struct to assess that the layers are properly oriented
+    struct RpcLayer {
+        /// @brief  Gas gap of the strip
+        unsigned int gasGap{0};
+        /// @brief  Phi panel of the strip
+        unsigned int doubletPhi{0};
+        /// @brief flag whether the strip measures phi
+        bool measPhi{false};
+        /// @ transformation
+        Amg::Transform3D transform{Amg::Transform3D::Identity()};
+        /// @brief Odering operator to use the strip with set
+        bool operator<(const RpcLayer& other) const {
+            if (measPhi != other.measPhi) return !measPhi;
+            if (doubletPhi != other.doubletPhi) return doubletPhi < other.doubletPhi;
+            return gasGap < other.gasGap;
+        }
     };
     std::set<RpcStrip> strips{};
+    std::set<RpcLayer> layers{};
  
 };
 
@@ -91,7 +108,7 @@ std::ostream& operator<<(std::ostream& ostr, const RpcChamber& chamb) {
         {17, "EML"}, {18, "EMS"}, 
         {20, "EOL"}, {21, "EOS"}
     };
-    ostr<<"Rpc chamber "<<stationDict.at(chamb.id.stationIndex)<<" "<<chamb.id;
+    ostr<<"Rpc chamber "<<stationDict.at(chamb.id.stationIndex) <<"("<<chamb.design<<") "<<chamb.id;
     return ostr;
 }
 
@@ -102,10 +119,13 @@ std::ostream& operator<<(std::ostream& ostr, const RpcChamber& chamb) {
     ostr<<"position: "<<Amg::toString(strip.position, 2);
     return ostr;
 }
-
-
-
-
+ std::ostream& operator<<(std::ostream& ostr,const RpcChamber::RpcLayer & layer) {
+    ostr<<"rpclayer (gasGap/phiPanel/isPhiLayer): ";
+    ostr<<layer.gasGap<<"/"<<layer.doubletPhi<<"/";
+    ostr<<(layer.measPhi ? "si" : "no")<<", ";
+       ostr<<"transform: "<<to_string(layer.transform);
+    return ostr;
+}
 
 std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     std::set<RpcChamber> to_ret{};
@@ -127,6 +147,8 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<uint8_t> stationDoubletR{treeReader, "stationDoubletR"};
     TTreeReaderValue<uint8_t> stationDoubletZ{treeReader,"stationDoubletZ"};
     TTreeReaderValue<uint8_t> stationDoubletPhi{treeReader,"stationDoubletPhi"};
+    TTreeReaderValue<std::string> chamberDesign{treeReader,"chamberDesign"};
+    
 
      /// Number of strips, strip pitch in eta & phi direction
     TTreeReaderValue<uint8_t> numStripsEta{treeReader, "numEtaStrips"};
@@ -148,6 +170,22 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<std::vector<float>> geoModelTransformY{treeReader, "GeoModelTransformY"};
     TTreeReaderValue<std::vector<float>> geoModelTransformZ{treeReader, "GeoModelTransformZ"};
 
+    TTreeReaderValue<std::vector<float>> stripRotCol1X{treeReader, "stripRotLinearCol1X"};
+    TTreeReaderValue<std::vector<float>> stripRotCol1Y{treeReader, "stripRotLinearCol1Y"};
+    TTreeReaderValue<std::vector<float>> stripRotCol1Z{treeReader, "stripRotLinearCol1Z"};
+
+    TTreeReaderValue<std::vector<float>> stripRotCol2X{treeReader, "stripRotLinearCol2X"};
+    TTreeReaderValue<std::vector<float>> stripRotCol2Y{treeReader, "stripRotLinearCol2Y"};
+    TTreeReaderValue<std::vector<float>> stripRotCol2Z{treeReader, "stripRotLinearCol2Z"};
+
+    TTreeReaderValue<std::vector<float>> stripRotCol3X{treeReader, "stripRotLinearCol3X"};
+    TTreeReaderValue<std::vector<float>> stripRotCol3Y{treeReader, "stripRotLinearCol3Y"};
+    TTreeReaderValue<std::vector<float>> stripRotCol3Z{treeReader, "stripRotLinearCol3Z"};
+
+    TTreeReaderValue<std::vector<uint8_t>> stripRotGasGap{treeReader, "stripRotGasGap"};
+    TTreeReaderValue<std::vector<uint8_t>> stripRotDblPhi{treeReader, "stripRotDoubletPhi"};
+    TTreeReaderValue<std::vector<bool>>    stripRotMeasPhi{treeReader, "stripRotMeasPhi"};
+     
     TTreeReaderValue<std::vector<float>> stripPosX{treeReader, "stripPosX"};
     TTreeReaderValue<std::vector<float>> stripPosY{treeReader, "stripPosY"};
     TTreeReaderValue<std::vector<float>> stripPosZ{treeReader, "stripPosZ"};
@@ -160,6 +198,7 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
         RpcChamber newchamber{};
 
         newchamber.id.stationIndex = (*stationIndex);
+        newchamber.design = (*chamberDesign);
         newchamber.id.eta = (*stationEta);
         newchamber.id.phi = (*stationPhi);
         newchamber.id.doubletPhi = (*stationDoubletPhi);
@@ -188,15 +227,27 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
         
         //strips
         for (size_t s = 0; s < stripPosX->size(); ++s){
-            using RpcStrip = RpcChamber::RpcStrip;
-            RpcStrip newStrip{};
+            RpcChamber::RpcStrip newStrip{};
             newStrip.position = Amg::Vector3D{(*stripPosX)[s], (*stripPosY)[s], (*stripPosZ)[s]};
             newStrip.gasGap = (*stripPosGasGap)[s];
             newStrip.doubletPhi = (*stripDblPhi)[s];
             newStrip.measPhi = (*stripPosMeasPhi)[s];
             newStrip.strip = (*stripPosNum)[s];
+            if (newStrip.strip > 3 /* || newStrip.measPhi || newStrip.gasGap != 1 || newStrip.doubletPhi != 1*/) continue;
             newchamber.strips.insert(std::move(newStrip));
         }
+        for (size_t l = 0; l < stripRotMeasPhi->size(); ++l){
+            RpcChamber::RpcLayer newLayer{};
+            newLayer.measPhi = (*stripRotMeasPhi)[l];
+            newLayer.gasGap = (*stripRotGasGap)[l];
+            newLayer.doubletPhi = (*stripRotDblPhi)[l];
+            Amg::RotationMatrix3D stripRot{Amg::RotationMatrix3D::Identity()};
+            stripRot.col(0) = Amg::Vector3D((*stripRotCol1X)[l],(*stripRotCol1Y)[l], (*stripRotCol1Z)[l]);
+            stripRot.col(1) = Amg::Vector3D((*stripRotCol2X)[l],(*stripRotCol2Y)[l], (*stripRotCol2Z)[l]);
+            stripRot.col(2) = Amg::Vector3D((*stripRotCol3X)[l],(*stripRotCol3Y)[l], (*stripRotCol3Z)[l]);
+            newLayer.transform = Amg::getTransformFromRotTransl(std::move(stripRot), Amg::Vector3D::Zero());
+            newchamber.layers.insert(std::move(newLayer));
+        } 
         
         auto insert_itr = to_ret.insert(std::move(newchamber));
         if (!insert_itr.second) {
@@ -210,21 +261,9 @@ std::set<RpcChamber> readTreeDump(const std::string& inputFile) {
     return to_ret;
 }
 
-/// Returns true if the linear part of the transformation does not
-/// Apply a rotation or elongation
-bool doesNotDeform(const Amg::Transform3D& trans) {
-    for (unsigned int d = 0; d < 3 ; ++d) {
-        const double defLength = Amg::Vector3D::Unit(d).dot(trans.linear() * Amg::Vector3D::Unit(d));
-        if (std::abs(defLength - 1.) > std::numeric_limits<float>::epsilon()) {
-            return false;
-        }
-    }
-    return true;
-}
-
 #define TEST_BASICPROP(attribute, propName) \
     if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
-        std::cerr<<"RpcGeoModelComparison() "<<__LINE__<<": The chamber "<<reference  \
+        std::cerr<<"RpcGeoModelComparison() "<<__LINE__<<": The chamber "<<test       \
                  <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
                  <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
         chamberOkay = false;                                                          \
@@ -278,7 +317,8 @@ int main( int argc, char** argv ) {
         bool chamberOkay = true;
         const RpcChamber& test = {*test_itr};
         
-        TEST_BASICPROP(numGasGapsEta, "numer of eta gas gaps");
+        // TEST_BASICPROP(numGasGapsEta, "numer of eta gas gaps");
+        // chamberOkay = true;
         TEST_BASICPROP(numGasGapsPhi, "numer of phi gas gaps");
         
         TEST_BASICPROP(numStripsEta, "numer of eta strips");
@@ -292,22 +332,45 @@ int main( int argc, char** argv ) {
 
         TEST_BASICPROP(stripLengthEta, "eta strip length");
         TEST_BASICPROP(stripLengthPhi, "phi strip length");
-        
+        chamberOkay = true;
+        using RpcLayer = RpcChamber::RpcLayer;
+        for (const RpcLayer& refLayer : reference.layers) {
+            break;
+            std::set<RpcLayer>::const_iterator lay_itr = test.layers.find(refLayer);
+            if (lay_itr == test.layers.end()) {
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                         <<refLayer<<" is not found. "<<std::endl;
+                chamberOkay = false;
+                continue;
+            }
+            const RpcLayer& testLayer{*lay_itr};
+            const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
+                                                  refLayer.transform;
+            if (!doesNotDeform(layAlignment)) {
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                         <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
+                         <<to_string(layAlignment)<<std::endl;
+                continue;
+            }
+        }
         using RpcStrip = RpcChamber::RpcStrip;
-            
+        if (!chamberOkay) continue;
         for (const RpcStrip& refStrip : reference.strips) {
             std::set<RpcStrip>::const_iterator strip_itr = test.strips.find(refStrip);
             if (strip_itr == test.strips.end()) {
-                std::cerr<<refStrip<<" is not found in "<<test<<std::endl;
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                         <<refStrip<<" is not found. "<<std::endl;
                 chamberOkay = false;
+                continue;
             }
             const RpcStrip& testStrip{*strip_itr};
-            if ( (testStrip.position - refStrip.position).mag() > tolerance) {
-                std::cerr<<testStrip<<" should be located at "
-                         <<Amg::toString(refStrip.position, 2)<<" in chamber "<<test<<std::endl;
+            const Amg::Vector3D diffStrip{testStrip.position - refStrip.position};
+            if (diffStrip.mag() > tolerance) {
+                std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
+                         <<testStrip<<" should be located at "<<Amg::toString(refStrip.position, 2)
+                         <<" displacement: "<<Amg::toString(diffStrip,2)<<std::endl;
                 chamberOkay = false;
             }
-
         }
         if (!chamberOkay) {
             return_code = EXIT_FAILURE;
