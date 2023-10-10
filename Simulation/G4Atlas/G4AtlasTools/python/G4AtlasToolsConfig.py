@@ -205,6 +205,34 @@ def EnvelopeSensitiveDetectorListCfg(flags):
     return result
 
 
+def SimHitContainerListCfg(flags):
+    writtenContainers =[]
+    if flags.Detector.GeometryMuon:
+        if flags.Muon.setupGeoModelXML:
+            from MuonSensitiveDetectorsR4.SensitiveDetectorsCfg import SimHitContainerListCfg
+            writtenContainers+= SimHitContainerListCfg(flags)
+        else:
+            from MuonG4SD.MuonG4SDConfig import SimHitContainerListCfg
+            writtenContainers += SimHitContainerListCfg(flags)
+    if flags.Detector.GeometryLAr:
+        writtenContainers += [("LArHitContainer", "LArHitEMB")]
+        writtenContainers += [("LArHitContainer", "LArHitEMEC")]
+        writtenContainers += [("LArHitContainer", "LArHitFCAL")]
+        writtenContainers += [("LArHitContainer", "LArHitHEC")]
+    if flags.Detector.GeometryTile:
+        writtenContainers += [("TileHitVector", "MBTSHits")]
+        writtenContainers += [("TileHitVector", "TileHitVec")]        
+    if flags.Detector.GeometryTRT:
+         writtenContainers += [("TRTUncompressedHitCollection", "TRTUncompressedHits")]
+    if flags.Detector.EnableBCM:
+       writtenContainers += [("SiHitCollection", "BCMHits")]
+       writtenContainers += [("SiHitCollection", "BLMHits")]
+    if flags.Detector.EnablePixel:
+       writtenContainers += [("SiHitCollection", "PixelHits")]
+    if flags.Detector.EnableSCT:
+       writtenContainers += [("SiHitCollection", "SCT_Hits")]
+    return writtenContainers
+
 def SensitiveDetectorListCfg(flags):
     result = ComponentAccumulator()
     tools = []

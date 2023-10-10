@@ -11,11 +11,14 @@ def setupTestOutputCfg(flags,**kwargs):
     # =============================
     # Define contents of the format
     # =============================
-    container_items = ["xAOD::MuonSimHitContainer#",
-                       "xAOD::MuonSimHitAuxContainer#",
-                       "xAOD::TruthParticleContainer#",
+    sim_containers = ["xMdtSimHits"]
+    container_items = ["xAOD::TruthParticleContainer#",
                        "xAOD::TruthParticleAuxContainer#",
                        "McEventCollection#"]
+    for cont in sim_containers:
+        container_items +=[ "xAOD::MuonSimHitContainer#{cont}".format(cont = cont),
+                            "xAOD::MuonSimHitAuxContainer#{cont}Aux.".format(cont = cont)]
+   
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     kwargs.setdefault("ItemList", container_items)
     result.merge(OutputStreamCfg(flags, **kwargs))
@@ -35,11 +38,11 @@ if __name__=="__main__":
     from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
     cfg.merge(G4AtlasAlgCfg(flags))
     ### Keep the Volume debugger commented for the moment
-    from G4DebuggingTools.PostIncludes import VolumeDebuggerAtlas
-    cfg.merge(VolumeDebuggerAtlas(flags, name="G4UA::UserActionSvc", 
-                                         PrintGeometry = True,
-                                         TargetVolume="BIS7_RPC26_7_0_1_1_1"
-                                        ))
+    #from G4DebuggingTools.PostIncludes import VolumeDebuggerAtlas
+    #cfg.merge(VolumeDebuggerAtlas(flags, name="G4UA::UserActionSvc", 
+    #                                     PrintGeometry = True,
+    #                                     TargetVolume="BIS7_RPC26_7_0_1_1_1"
+    #                                    ))
     
     ## xAOD TruthParticle conversion
     from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
