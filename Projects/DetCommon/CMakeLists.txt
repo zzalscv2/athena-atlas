@@ -29,7 +29,7 @@ set( LCG_COMPONENTS "externals"
 find_package( LCG ${LCG_VERSION_NUMBER} EXACT REQUIRED )
 
 # Set up tdaq-common explicitly.
-find_package( tdaq-common REQUIRED )
+find_package( tdaq-common )
 
 # Find some auxiliary packages:
 find_package( XercesC )

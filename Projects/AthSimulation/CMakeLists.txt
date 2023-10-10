@@ -23,7 +23,7 @@ find_package( AtlasCMake QUIET )
 
 # Find the base project(s):
 find_package( AthSimulationExternals REQUIRED )
-find_package( Gaudi REQUIRED )
+find_package( Gaudi )
 
 # External(s) needed at build and runtime:
 find_package( Frontier_Client )

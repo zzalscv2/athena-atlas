@@ -23,7 +23,7 @@ find_package( AtlasCMake QUIET )
 
 # Find the base project(s):
 find_package( AthGenerationExternals REQUIRED )
-find_package( Gaudi REQUIRED )
+find_package( Gaudi )
 
 # Additional externals needed for the build/runtime:
 find_package( Xrootd )

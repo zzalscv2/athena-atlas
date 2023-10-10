@@ -33,9 +33,9 @@ find_package( CxxUtilsSettings )
 find_package( AtlasCMake QUIET )
 
 # Find the base project(s):
-find_package( AthDerivationExternals ${_version} REQUIRED )
-find_package( Gaudi REQUIRED )
-find_package( tdaq-common REQUIRED )
+find_package( AthDerivationExternals REQUIRED )
+find_package( Gaudi )
+find_package( tdaq-common )
 
 # Additional externals needed for the build/runtime:
 find_package( Frontier_Client )
