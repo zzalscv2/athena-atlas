@@ -78,6 +78,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   int getSectors(const Identifier& id) const;
   int getLayer(const int multiplet, const int gasGap) const;
   int32_t sourceidToSector(uint32_t sourceid, bool isSideA) const;
+  int getSignedPhiId(const uint32_t phiid) const;
   std::optional<Identifier> getPadId(uint32_t sourceid, uint32_t pfeb, uint32_t tdschan) const;
   std::optional<std::tuple<Identifier, const Trk::RIO_OnTrack*>> getRotIdAndRotObject(const Trk::TrackStateOnSurface* trkState) const;
   std::optional<Identifier> getRotId(const Trk::TrackStateOnSurface* trkState) const;

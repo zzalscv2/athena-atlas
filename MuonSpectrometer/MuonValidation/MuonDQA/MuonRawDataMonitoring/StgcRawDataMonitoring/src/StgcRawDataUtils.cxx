@@ -20,7 +20,14 @@ int sTgcRawDataMonAlg::getLayer(int multiplet, int gasGap) const {
 
 int32_t sTgcRawDataMonAlg::sourceidToSector(uint32_t sourceid, bool isSideA) const {
   uint32_t sectorNumber = sourceid & 0xf;
-  return (isSideA) ? sectorNumber + 1: -sectorNumber - 2;
+  return (isSideA) ? sectorNumber + 1: -sectorNumber - 1;
+}
+
+int sTgcRawDataMonAlg::getSignedPhiId(const uint32_t phiid) const {
+  // 1 bit of sign (0 = positive) followed by 5 bits of phiid
+  constexpr size_t nbitsPhi{5};
+  constexpr size_t mask{(1 << nbitsPhi) - 1};
+  return std::pow(-1, phiid >> nbitsPhi) * (phiid & mask);
 }
 
 std::optional<Identifier> sTgcRawDataMonAlg::getPadId(uint32_t sourceid, uint32_t pfeb, uint32_t tdschan) const {
