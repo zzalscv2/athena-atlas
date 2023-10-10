@@ -43,3 +43,21 @@ def SetupSensitiveDetectorsCfg(flags):
 
     result.setPrivateTools(tools)
     return result
+
+
+def SimHitContainerListCfg(flags):
+    simHitContainers = []
+    if flags.Detector.EnableMDT:
+        simHitContainers+=[("MDTSimHitCollection", "MDT_Hits")]
+    if flags.Detector.EnableRPC:
+        simHitContainers+=[("RPCSimHitCollection", "RPC_Hits")]
+    if flags.Detector.EnableTGC:
+        simHitContainers+=[("TGCSimHitCollection", "TGC_Hits")]
+    if flags.Detector.EnableMM:
+        simHitContainers+=[("MMSimHitCollection", "MM_Hits")]
+    if flags.Detector.EnablesTGC:
+        simHitContainers+=[("sTGCSimHitCollection", "sTGC_Hits")]
+    if flags.Detector.EnableCSC:
+        simHitContainers+=[("CSCSimHitCollection", "CSC_Hits")]
+    return simHitContainers
+
