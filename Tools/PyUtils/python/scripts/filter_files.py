@@ -187,6 +187,8 @@ def main(args):
         cfg.is_esd() or
         cfg.is_aod()):
         # main jobos
+        from RecExConfig.RecFlags import rec
+        rec.runUnsupportedLegacyReco=True
         include ('RecExCond/RecExCommon_flags.py')
         include ('RecExCommon/RecExCommon_topOptions.py')
 
