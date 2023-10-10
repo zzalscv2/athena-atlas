@@ -112,6 +112,8 @@ def main(args):
         from AthenaCommon.DetFlags import DetFlags
         DetFlags.makeRIO.all_setOff()
         # FIXME -- end
+        from RecExConfig.RecFlags import rec
+        rec.runUnsupportedLegacyReco=True
         include ('RecExCommon/RecExCommon_topOptions.py')
         
     """ % args.__dict__

@@ -1176,6 +1176,8 @@ def merge_pool_files(input_files, output_file,
 
     if cfg.is_rdo() or cfg.is_esd() or cfg.is_aod() or cfg.is_tag():
         # main jobos
+        from RecExConfig.RecFlags import rec
+        rec.runUnsupportedLegacyReco=True
         include ('RecExCond/RecExCommon_flags.py')
         include ('RecExCommon/RecExCommon_topOptions.py')
     elif cfg.is_hits():
