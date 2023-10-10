@@ -23,10 +23,6 @@
 - graphics/VP1/VP1Plugins/VP1TriggerDecisionPlugin
 + graphics/VP1/.*
 
-- Generators/MCTester_i
-- Generators/ProtosLHEF_i
-- Generators/QGSJet_i
-+ Generators/.*
 
 # Some analysis packages that are not part of Athena
 - Control/AthLinksSA
