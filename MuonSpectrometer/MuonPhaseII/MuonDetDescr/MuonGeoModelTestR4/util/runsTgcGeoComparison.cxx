@@ -419,6 +419,7 @@ int main( int argc, char** argv ) {
             if (wireGroup_itr == test.channels.end()) {
                 std::cerr<<refWireGroup<<" is not found in "<<test<<std::endl;
                 chamberOkay = false;
+                continue;
             }
             const sTgcWireGroup& testWireGroup{*wireGroup_itr};
             if ( (testWireGroup.position - refWireGroup.position).mag() > tolerance) {
@@ -434,6 +435,7 @@ int main( int argc, char** argv ) {
             if (strip_itr == test.channels.end()) {
                 std::cerr<<refStrip<<" is not found in "<<test<<std::endl;
                 chamberOkay = false;
+                continue;
             }
             const sTgcStrip& testStrip{*strip_itr};
             if ( (testStrip.position - refStrip.position).mag() > tolerance) {
@@ -449,6 +451,7 @@ int main( int argc, char** argv ) {
             if (pad_itr == test.pads.end()) {
                 std::cerr<<refPad<<" is not found in "<<test<<std::endl;
                 chamberOkay = false;
+                continue;
             }
             const sTgcPad& testPad{*pad_itr};
             if ( (testPad.position - refPad.position).mag() > tolerance) {
