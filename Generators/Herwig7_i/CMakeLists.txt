@@ -9,6 +9,7 @@ find_package( Herwig3 COMPONENTS HerwigAPI )
 find_package( ThePEG COMPONENTS "ThePEG" "LesHouches${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 find_package( GSL )
 find_package( OpenLoops )
+find_package( TheP8I )
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
