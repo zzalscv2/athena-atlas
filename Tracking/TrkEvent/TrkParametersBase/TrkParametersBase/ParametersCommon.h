@@ -58,12 +58,6 @@ class ParametersCommon {
   const AmgSymMatrix(DIM) * covariance() const;
   AmgSymMatrix(DIM) * covariance();
 
-  /** Access method for transverse momentum */
-  double pT() const;
-
-  /** Access method for pseudorapidity - from momentum */
-  double eta() const;
-
   /** Returns true if Charged or false if Neutral
    */
   constexpr bool isCharged() const;
@@ -95,15 +89,6 @@ class ParametersCommon {
    * other data members
    */
   void updateParameters(const AmgVector(DIM) &);
-
-  /** Returns the charge */
-  virtual double charge() const = 0;
-
-  /** Access method for the position */
-  virtual Amg::Vector3D position() const = 0;
-
-  /** Access method for the momentum */
-  virtual Amg::Vector3D momentum() const = 0;
 
   /** Test to see if there's a not null surface ptr. */
   virtual bool hasSurface() const = 0;

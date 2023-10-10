@@ -58,31 +58,26 @@ public:
   ChargedParametersStub(const AmgVector(DIM)& parameters,
     std::optional<AmgSymMatrix(DIM)> covariance, const T chargeDef):
     Trk::ParametersBase<DIM,T>(parameters, std::move(covariance),chargeDef){
-    //nop
+    this->m_position = Amg::Vector3D(1, 1, 1);
+    this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
 
   explicit ChargedParametersStub(std::optional<AmgSymMatrix(DIM)> covariance):
     ParametersBase(std::move(covariance)){
-   //nop
+      this->m_position = Amg::Vector3D(1, 1, 1);
+      this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
 
   explicit ChargedParametersStub(const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)> covariance = std::nullopt):
     ParametersBase(parameters,std::move(covariance)){
-    //nop
+      this->m_position = Amg::Vector3D(1, 1, 1);
+      this->m_momentum = Amg::Vector3D(3, 4, 5);
   }
 
 
   ChargedParametersStub() = default;
 
-  Amg::Vector3D position() const override{
-    Amg::Vector3D p (1, 1, 1);
-    return p;
-  }
-  Amg::Vector3D momentum() const override{
-    Amg::Vector3D p (3, 4, 5); //45 degree, eta ~0.881374
-    return p;
-  }
   bool hasSurface() const override{
     return false;
   }

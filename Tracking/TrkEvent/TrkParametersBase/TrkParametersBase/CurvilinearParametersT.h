@@ -101,12 +101,6 @@ public:
 
   void setcIdentifier(unsigned int cIdentifier);
 
-  /** Access method for the position */
-  virtual Amg::Vector3D position() const override final;
-
-  /** Access method for the momentum */
-  virtual Amg::Vector3D momentum() const override final;
-
   /** Test to see if there's a surface there. */
   virtual bool hasSurface() const override final;
 

@@ -56,9 +56,9 @@ namespace Trk {
 
       // Methods from ParametersCommon
       virtual const Surface&  associatedSurface ()  const override final;
-      virtual Amg::Vector3D position() const override final;
-      virtual Amg::Vector3D momentum() const override final;
-      virtual double charge() const override final;
+      Amg::Vector3D position() const;
+      Amg::Vector3D momentum() const;
+      double charge() const;
       virtual bool hasSurface() const override final;
       virtual Amg::RotationMatrix3D measurementFrame() const override final;
       virtual PatternTrackParameters * clone() const override final;

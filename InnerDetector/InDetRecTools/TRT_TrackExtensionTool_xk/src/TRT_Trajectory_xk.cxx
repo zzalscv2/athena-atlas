@@ -91,14 +91,14 @@ void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed(
       A[1] = (*i).first.y()-(*i0).first.y();
       A[2] = (*i).first.z()-(*i0).first.z();
       double As = 1./std::sqrt(A[0]*A[0]+A[1]*A[1]+A[2]*A[2]);
-      A[0]*=As; A[1]*=As; A[2]*=As; 
-      i0=i; 
+      A[0]*=As; A[1]*=As; A[2]*=As;
+      i0=i;
       break;
     }
   }
 
   for(i=Gp.begin(); i!=ie; ++i) {
-    IdentifierHash id = (*d)->identifyHash(); 
+    IdentifierHash id = (*d)->identifyHash();
     const auto *w=(*TRTc).indexFindPtr(id);
     bool q;
     if(w!=nullptr && w->begin()!=w->end()) {
@@ -167,7 +167,7 @@ void InDet::TRT_Trajectory_xk::initiateForTRTSeed(
 
   // Primary trajectory direction calculation
   //
-  double A[4]={0.,0.,0.,Tp.parameters()[4]}; 
+  double A[4]={0.,0.,0.,Tp.parameters()[4]};
   for(; i!=ie; ++i) {
     if( (*i).second-(*i0).second > 1.) {
       A[0] = (*i).first.x()-(*i0).first.x();
@@ -398,7 +398,7 @@ bool InDet::TRT_Trajectory_xk::searchStartStop()
     throw std::runtime_error("Too many roads in InDet::TRT_Trajectory_xk::searchStartStop");
   }
   const double rs = 2.00, rse = 1.85, sr = 40;
-  
+
   int w[400]={};
   int W = 0;
 
@@ -540,7 +540,7 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
 {
 
   // Test quality of propagation to perigee
-  if(std::abs(m_parameters.pT()) < m_minTRTSegmentpT) return nullptr;
+  if(std::abs(m_parameters.momentum().perp()) < m_minTRTSegmentpT) return nullptr;
 
   const Trk::Surface* sur = &m_parameters.associatedSurface();
 
@@ -753,7 +753,7 @@ bool InDet::TRT_Trajectory_xk::fitter()
   const double trad = .003;
   double        rad =  0. ;
 
-  if(!trackParametersEstimationForLastPoint() || std::abs(m_parameters.pT()) < m_minTRTSegmentpT) return false;
+  if(!trackParametersEstimationForLastPoint() || std::abs(m_parameters.momentum().perp()) < m_minTRTSegmentpT) return false;
   double sin2 = 1./sin(m_parameters.parameters()[3]); sin2*= sin2        ;
   double P42  =        m_parameters.parameters()[4] ; P42  = P42*P42*134.;
 
