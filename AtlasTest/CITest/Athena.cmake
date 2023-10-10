@@ -18,8 +18,15 @@ atlas_add_citest( DuplicateClass
 atlas_add_citest( FastChain
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/FastChain.sh )
 
-atlas_add_citest( SimulationRun2AF3
-   SCRIPT RunWorkflowTests_Run2.py --CI -s -w AF3 )
+atlas_add_citest( SimulationRun3AF3
+   SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --threads 4 -e '--maxEvents 20' --run-only
+   LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( SimulationRun3AF3Checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --threads 4 -e '--maxEvents 20' --checks-only --output-path ../SimulationRun3AF3
+   LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
+   DEPENDS_SUCCESS SimulationRun3AF3 )
 
 atlas_add_citest( SimulationRun4FullSim
    SCRIPT RunWorkflowTests_Run4.py --CI -s -w FullSim -e '--maxEvents 5' --no-output-checks

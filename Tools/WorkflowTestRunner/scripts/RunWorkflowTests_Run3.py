@@ -29,7 +29,8 @@ def main():
             ami_tag = "s4006" if not options.ami_tag else options.ami_tag
             tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' --geometryVersion 'default:ATLAS-R3S-2021-03-02-00'"))
         if options.workflow is WorkflowType.AF3:
-            log.error("AF3 not supported yet")
+            ami_tag = "a913" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.AF3, ["EVNTtoHITS"], setup, options.extra_args + " --preExec 'EVNTtoHITS:flags.Sim.FastCalo.ParamsInputFilename=\"FastCaloSim/MC23/TFCSparam_dev_Hybrid_Ha_v5_all_baryons_0_500.root\"'"))
         if options.workflow is WorkflowType.HitsMerge:
             ami_tag = "s4007" if not options.ami_tag else options.ami_tag
             tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsMerge, ["HITSMerge"], setup, options.extra_args))

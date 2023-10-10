@@ -2,7 +2,7 @@
 from typing import List
 
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
-from .Inputs import input_EVNT, input_EVNT_AF3, input_HITS, \
+from .Inputs import input_EVNT, input_HITS, \
     input_HITS_unfiltered, \
     input_HITS_MC_overlay, input_RDO_BKG, \
     input_HITS_data_overlay, input_BS_SKIM, \
@@ -72,8 +72,6 @@ class SimulationTest(WorkflowTest):
                 input_argument = f"--inputHITSFile {input_HITS_unfiltered[run]}"
             elif type is WorkflowType.HitsMerge:
                 input_argument = f"--inputHITSFile {input_HITS[run]}"
-            elif type is WorkflowType.AF3:
-                input_argument = f"--inputEVNTFile {input_EVNT_AF3[run]}"
             else:
                 input_argument = f"--inputEVNTFile {input_EVNT[run]}"
 
