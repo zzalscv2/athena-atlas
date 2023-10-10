@@ -79,7 +79,7 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
                 from AthenaCommon.AppMgr import ServiceMgr as svcMgr
                 if 'AthenaPoolCnvSvc.WriteAthenaPool' in sys.modules:
                     from AthenaIPCTools.AthenaIPCToolsConf import AthenaSharedMemoryTool
-                    svcMgr.AthenaPoolCnvSvc.OutputStreamingTool += [ AthenaSharedMemoryTool("OutputStreamingTool_0", SharedMemoryName="OutputStream"+str(os.getpid())) ]
+                    svcMgr.AthenaPoolCnvSvc.OutputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool", SharedMemoryName="OutputStream"+str(os.getpid()))
                 svcMgr.AthenaPoolCnvSvc.ParallelCompression=use_parallel_compression
 
             from AthenaMPTools.AthenaMPToolsConf import SharedEvtQueueProvider

@@ -8,7 +8,6 @@ AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 MetaDataSvc          INFO Initializing MetaDataSvc
 PoolSvc             DEBUG OutputLevel is 2
 AthenaPoolCnvSvc    DEBUG Setting StorageType to ROOTTREEINDEX
-AthenaPoolCnvSvc    DEBUG Registering all Tools in ToolHandleArray OutputStreamingTool
 WriteData            INFO in initialize()
 WriteData           DEBUG data dependencies:
   + OUTPUT  ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 

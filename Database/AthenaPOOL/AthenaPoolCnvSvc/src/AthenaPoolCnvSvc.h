@@ -193,10 +193,8 @@ private: // data
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
    ServiceHandle<IAthenaSerializeSvc> m_serializeSvc{this,"AthenaRootSerializeSvc","AthenaRootSerializeSvc"};
    ToolHandle<IAthenaIPCTool>    m_inputStreamingTool{this,"InputStreamingTool",{}};
-   ToolHandleArray<IAthenaIPCTool>    m_outputStreamingTool;
-   //The following doesn't work because of Gaudi issue #122
-   //ToolHandleArray<IAthenaIPCTool>    m_outputStreamingTool{this,"OutputStreamingTool", {} };
-   std::size_t     m_streamServer=0;
+   ToolHandle<IAthenaIPCTool>    m_outputStreamingTool{this,"OutputStreamingTool",{}};
+   bool m_streamServerActive=false;
    int m_metadataClient=0;
 
    /// Map that holds chrono information
@@ -232,9 +230,6 @@ private: // properties
    /// to be printed each event
    StringArrayProperty m_inputPoolAttrPerEvent{this,"PrintInputAttrPerEvt",{}};
    std::vector<std::vector<std::string> > m_inputAttrPerEvent;
-
-   /// Output FileNames to be associated with Stream Clients
-   std::vector<std::string>   m_streamClientFiles;
 
    /// MaxFileSizes, vector with maximum file sizes for Athena POOL output files
    StringArrayProperty m_maxFileSizes{this,"MaxFileSizes",{}};
