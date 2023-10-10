@@ -123,20 +123,6 @@ CurvilinearParametersT<DIM, T, S>::setcIdentifier(unsigned int cIdentifier)
   m_cIdentifier = cIdentifier;
 }
 
-template<int DIM, class T, class S>
-inline Amg::Vector3D
-CurvilinearParametersT<DIM, T, S>::position() const
-{
-  return this->m_position;
-}
-
-template<int DIM, class T, class S>
-inline Amg::Vector3D
-CurvilinearParametersT<DIM, T, S>::momentum() const
-{
-  return this->m_momentum;
-}
-
 /** Test to see if there's a surface there. */
 template<int DIM, class T, class S>
 inline bool

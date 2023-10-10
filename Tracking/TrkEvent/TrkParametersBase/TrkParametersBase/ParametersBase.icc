@@ -27,30 +27,54 @@ int sgn(const T& val) {
 
 // Helper protected ctor*/
 template <int DIM, class T>
-inline ParametersBase<DIM, T>::ParametersBase(
+ParametersBase<DIM, T>::ParametersBase(
     const AmgVector(DIM) parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance, const T chargeDef)
     : ParametersCommon<DIM, T>(parameters, std::move(covariance), chargeDef) {}
 
 // Helper protected ctor
 template <int DIM, class T>
-inline ParametersBase<DIM, T>::ParametersBase(
+ParametersBase<DIM, T>::ParametersBase(
     std::optional<AmgSymMatrix(DIM)>&& covariance)
     : ParametersCommon<DIM, T>(std::move(covariance)) {}
 
 // Protected Constructor with local arguments - persistency only
 template <int DIM, class T>
-inline ParametersBase<DIM, T>::ParametersBase(
+ParametersBase<DIM, T>::ParametersBase(
     const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance)
     : ParametersCommon<DIM, T>(parameters, std::move(covariance)) {}
 
 
 template<int DIM, class T>
-inline double
+double
 ParametersBase<DIM, T>::charge() const
 {
   return m_chargeDef.charge();
+}
+
+template<int DIM, class T>
+const Amg::Vector3D&
+ParametersBase<DIM, T>::position() const
+{
+  return m_position;
+}
+
+template<int DIM, class T>
+const Amg::Vector3D&
+ParametersBase<DIM, T>::momentum() const
+{
+  return m_momentum;
+}
+
+template <int DIM, class T>
+double ParametersBase<DIM, T>::pT() const {
+  return momentum().perp();
+}
+
+template <int DIM, class T>
+double ParametersBase<DIM, T>::eta() const {
+  return momentum().eta();
 }
 
 /** equality operator */

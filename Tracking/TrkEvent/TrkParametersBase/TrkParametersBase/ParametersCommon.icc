@@ -10,7 +10,7 @@
 namespace Trk {
 // Helper protected ctor
 template <int DIM, class T>
-inline ParametersCommon<DIM, T>::ParametersCommon(
+ ParametersCommon<DIM, T>::ParametersCommon(
     const AmgVector(DIM) parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance, const T chargeDef)
     : m_parameters(parameters),
@@ -19,7 +19,7 @@ inline ParametersCommon<DIM, T>::ParametersCommon(
 
 // Helper protected ctor
 template <int DIM, class T>
-inline ParametersCommon<DIM, T>::ParametersCommon(
+ParametersCommon<DIM, T>::ParametersCommon(
     std::optional<AmgSymMatrix(DIM)>&& covariance)
     : m_parameters(),
     m_covariance(std::move(covariance)),
@@ -28,7 +28,7 @@ inline ParametersCommon<DIM, T>::ParametersCommon(
 
 // Protected Constructor with local arguments
 template <int DIM, class T>
-inline ParametersCommon<DIM, T>::ParametersCommon(
+ParametersCommon<DIM, T>::ParametersCommon(
     const AmgVector(DIM) & parameters,
     std::optional<AmgSymMatrix(DIM)>&& covariance)
     : m_parameters(parameters),
@@ -36,17 +36,17 @@ inline ParametersCommon<DIM, T>::ParametersCommon(
       m_chargeDef{} {}
 
 template <int DIM, class T>
-inline const AmgVector(DIM) & ParametersCommon<DIM, T>::parameters() const {
+ const AmgVector(DIM) & ParametersCommon<DIM, T>::parameters() const {
   return m_parameters;
 }
 
 template <int DIM, class T>
-inline AmgVector(DIM) & ParametersCommon<DIM, T>::parameters() {
+AmgVector(DIM) & ParametersCommon<DIM, T>::parameters() {
   return m_parameters;
 }
 
 template <int DIM, class T>
-inline const AmgSymMatrix(DIM) *ParametersCommon<DIM, T>::covariance() const {
+const AmgSymMatrix(DIM) *ParametersCommon<DIM, T>::covariance() const {
   if (m_covariance) {
     return &(*m_covariance);
   } else {
@@ -55,7 +55,7 @@ inline const AmgSymMatrix(DIM) *ParametersCommon<DIM, T>::covariance() const {
 }
 
 template <int DIM, class T>
-inline AmgSymMatrix(DIM) * ParametersCommon<DIM, T>::covariance() {
+AmgSymMatrix(DIM) * ParametersCommon<DIM, T>::covariance() {
   if (m_covariance) {
     return &(*m_covariance);
   } else {
@@ -64,17 +64,7 @@ inline AmgSymMatrix(DIM) * ParametersCommon<DIM, T>::covariance() {
 }
 
 template <int DIM, class T>
-inline double ParametersCommon<DIM, T>::pT() const {
-  return momentum().perp();
-}
-
-template <int DIM, class T>
-inline double ParametersCommon<DIM, T>::eta() const {
-  return momentum().eta();
-}
-
-template <int DIM, class T>
-inline constexpr bool ParametersCommon<DIM, T>::isCharged() const {
+constexpr bool ParametersCommon<DIM, T>::isCharged() const {
   if constexpr (std::is_same<T, Trk::Neutral>::value) {
     return false;
   } else {
@@ -83,30 +73,30 @@ inline constexpr bool ParametersCommon<DIM, T>::isCharged() const {
 }
 
 template <int DIM, class T>
-inline Amg::Vector2D ParametersCommon<DIM, T>::localPosition() const {
+Amg::Vector2D ParametersCommon<DIM, T>::localPosition() const {
   return Amg::Vector2D(m_parameters[Trk::loc1], m_parameters[Trk::loc2]);
 }
 
 template <int DIM, class T>
-inline void ParametersCommon<DIM, T>::setParameters(
+void ParametersCommon<DIM, T>::setParameters(
   const AmgVector(DIM) & param) {
   m_parameters = param;
 }
 
 template <int DIM, class T>
-inline void ParametersCommon<DIM, T>::setCovariance(
+void ParametersCommon<DIM, T>::setCovariance(
   const AmgSymMatrix(DIM) & cov) {
   m_covariance = cov;
 }
 
 template <int DIM, class T>
-inline void ParametersCommon<DIM, T>::updateParameters(
+void ParametersCommon<DIM, T>::updateParameters(
   const AmgVector(DIM)& updatedParameters) {
   this->updateParametersHelper(updatedParameters);
 }
 
 template <int DIM, class T>
-inline void ParametersCommon<DIM, T>::updateParameters(
+void ParametersCommon<DIM, T>::updateParameters(
   const AmgVector(DIM) &updatedParameters,
   const AmgSymMatrix(DIM) & updatedCovariance) {
   m_covariance = updatedCovariance;

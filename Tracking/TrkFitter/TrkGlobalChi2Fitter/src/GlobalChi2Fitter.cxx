@@ -3027,7 +3027,7 @@ namespace Trk {
      * a line and a disc.
      */
     double field[3];
-    double * pos = parforextrap.position().data();
+    const double * pos = parforextrap.position().data();
     double currentqoverp = (matEffects != Trk::electron) ? parforextrap.parameters()[Trk::qOverP] : refpar2.parameters()[Trk::qOverP];
     cache.m_field_cache.getFieldZR(pos, field);
     double sinphi = std::sin(parforextrap.parameters()[Trk::phi0]);
@@ -3074,7 +3074,7 @@ namespace Trk {
      * intersections with cylinders.
      */
     double field[3];
-    double * pos = parforextrap.position().data();
+    const double * pos = parforextrap.position().data();
     double currentqoverp = (matEffects != Trk::electron) ? parforextrap.parameters()[Trk::qOverP] : refpar2.parameters()[Trk::qOverP];
     cache.m_field_cache.getFieldZR(pos, field);
     double sinphi = std::sin(parforextrap.parameters()[Trk::phi0]);

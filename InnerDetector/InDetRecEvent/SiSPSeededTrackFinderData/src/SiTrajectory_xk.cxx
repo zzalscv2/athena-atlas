@@ -448,7 +448,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
           Amg::Vector3D gp = m_elements[m].parametersUF().position();
           ra = sqrt(gp.x()*gp.x()+gp.y()*gp.y());
           fa = atan2(gp.y(),gp.x());
-          pt = m_elements[m].parametersUF().pT      ();
+          pt = m_elements[m].parametersUF().momentum().perp();
           tz = m_elements[m].parametersUF().cotTheta();
         }
         else {
@@ -456,7 +456,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
           Amg::Vector3D gp = m_elements[m].parametersPF().position();
           ra = sqrt(gp.x()*gp.x()+gp.y()*gp.y());
           fa = atan2(gp.y(),gp.x());
-          pt = m_elements[m].parametersPF().pT      ();
+          pt = m_elements[m].parametersPF().momentum().perp();
           tz = m_elements[m].parametersPF().cotTheta();
         }
       }
@@ -467,7 +467,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
           Amg::Vector3D gp = m_elements[m].parametersUB().position();
           ra = sqrt(gp.x()*gp.x()+gp.y()*gp.y());
           fa = atan2(gp.y(),gp.x());
-          pt = m_elements[m].parametersUB().pT      ();
+          pt = m_elements[m].parametersUB().momentum().perp();
           tz = m_elements[m].parametersUB().cotTheta();
         }
         else {
@@ -475,7 +475,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
           Amg::Vector3D gp = m_elements[m].parametersPB().position();
           ra = sqrt(gp.x()*gp.x()+gp.y()*gp.y());
           fa = atan2(gp.y(),gp.x());
-          pt = m_elements[m].parametersPB().pT      ();
+          pt = m_elements[m].parametersPB().momentum().perp();
           tz = m_elements[m].parametersPB().cotTheta();
         }
       }
@@ -493,7 +493,7 @@ std::ostream& InDet::SiTrajectory_xk::dump( std::ostream& out ) const
           Amg::Vector3D gp = SM.position();
           ra = sqrt(gp.x()*gp.x()+gp.y()*gp.y());
           fa = atan2(gp.y(),gp.x());
-          pt = SM.pT      ();
+          pt = SM.momentum().perp();
           tz = SM.cotTheta();
         }
       }
@@ -567,7 +567,7 @@ double InDet::SiTrajectory_xk::pTseed
     if(!m_elements[n].ForwardPropagationWithoutSearch(m_elements[n-1], ctx)) return 0.;
     if( m_elements[n].xi2F()      >      Xi2cut                       ) return 0.;
   }
-  return m_elements[n].parametersUF().pT();
+  return m_elements[n].parametersUF().momentum().perp();
 }
 
 
@@ -2229,7 +2229,7 @@ double InDet::SiTrajectory_xk::pTfirst() const
   n     = m_elementsMap[n]; if (n <0 || n>=300) return 0.;
   int s = m_elements[n].status();
   if (s<=1) return 0.;
-  return m_elements[n].parametersUB().pT();
+  return m_elements[n].parametersUB().momentum().perp();
 }
 
 /// Helper method to determine the hole search outcome for use in the later reco

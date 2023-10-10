@@ -177,20 +177,6 @@ Trk::ParametersT<DIM, T, S>::ParametersT(const Amg::Vector3D& pos,
   this->m_parameters << lPosition[Trk::loc1], lPosition[Trk::loc2], phi, theta, qop;
 }
 
-template<int DIM, class T, class S>
-inline Amg::Vector3D
-ParametersT<DIM, T, S>::position() const
-{
-  return this->m_position;
-}
-
-template<int DIM, class T, class S>
-inline Amg::Vector3D
-ParametersT<DIM, T, S>::momentum() const
-{
-  return this->m_momentum;
-}
-
 /** Test to see if there's a surface there. */
 template<int DIM, class T, class S>
 inline bool

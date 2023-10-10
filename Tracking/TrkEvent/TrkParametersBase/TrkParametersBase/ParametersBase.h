@@ -58,15 +58,21 @@ public:
   virtual ~ParametersBase() = default;
 
   /** Returns the charge */
-  virtual double charge() const override final;
+  double charge() const;
 
   /** Access method for the position */
-  virtual Amg::Vector3D position() const override = 0;
+  const Amg::Vector3D& position() const;
 
   /** Access method for the momentum */
-  virtual Amg::Vector3D momentum() const override =0 ;
+  const Amg::Vector3D& momentum() const;
 
-  //** equality operator */
+  /** Access method for transverse momentum */
+  double pT() const;
+
+  /** Access method for pseudorapidity - from momentum */
+  double eta() const;
+
+  /** equality operator */
   virtual bool operator==(const ParametersBase<DIM, T>&) const;
 
   /** Test to see if there's a not null surface ptr. */
