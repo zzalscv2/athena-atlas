@@ -6,7 +6,7 @@ atlas_subdir( AnalysisAlgorithmsConfig )
 
 atlas_install_python_modules( python/*.py )
 
-
+set( CONFIG_PATH "${CMAKE_CURRENT_LIST_DIR}/data/for_compare.yaml" )
 
 if( XAOD_STANDALONE )
 
@@ -18,7 +18,7 @@ if( XAOD_STANDALONE )
          SCRIPT FullCPAlgorithmsTest_eljob.py --data-type ${DATA_TYPE} --direct-driver --submission-dir submitDir-${NAME} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
          PROPERTIES TIMEOUT 900 )
-      
+
    endfunction()
 
    function( add_test_compare NAME DATA_TYPE NAME1 NAME2 )
@@ -52,7 +52,7 @@ else()
          SCRIPT FullCPAlgorithmsTest_CA.py --evtMax=500 --force-output TestJobOutput-${NAME}-CA.hist.root --data-type ${DATA_TYPE} ${ARGN}
          POST_EXEC_SCRIPT nopost.sh
          PROPERTIES TIMEOUT 900 )
-   
+
    endfunction()
 
    function( add_test_compare NAME DATA_TYPE NAME1 NAME2 )
@@ -75,18 +75,24 @@ endif()
 
 add_test_job( TestJobDataSequence data --for-compare --no-systematics )
 add_test_job( TestJobDataConfig   data --for-compare --block-config --no-systematics )
+add_test_job( TestJobDataTextConfig data --for-compare --text-config ${CONFIG_PATH} --no-systematics )
 add_test_job( TestJobDataFull     data --block-config --no-systematics )
 add_test_compare( TestJobDataCompare data TestJobDataSequence TestJobDataConfig )
+add_test_compare( TestJobDataCompareConfig data TestJobDataConfig TestJobDataTextConfig )
 
 add_test_job( TestJobFullSimSequence mc --for-compare )
 add_test_job( TestJobFullSimConfig   mc --for-compare --block-config )
+add_test_job( TestJobFullSimTextConfig  mc --for-compare --text-config ${CONFIG_PATH} )
 add_test_job( TestJobFullSimFull     mc --block-config )
 add_test_compare( TestJobFullSimCompare mc TestJobFullSimSequence TestJobFullSimConfig )
+add_test_compare( TestJobFullSimCompareConfig mc TestJobFullSimConfig TestJobFullSimTextConfig )
 
 add_test_job( TestJobFastSimSequence afii --for-compare )
 add_test_job( TestJobFastSimConfig   afii --for-compare --block-config )
+add_test_job( TestJobFastSimTextConfig   afii --for-compare --text-config ${CONFIG_PATH} )
 add_test_job( TestJobFastSimFull     afii --block-config )
 add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastSimConfig )
+add_test_compare( TestJobFastSimCompareConfig afii TestJobFastSimConfig TestJobFastSimTextConfig )
 
 
 
@@ -97,18 +103,22 @@ add_test_compare( TestJobFastSimCompare afii TestJobFastSimSequence TestJobFastS
 
 add_test_job( TestJobDataSequenceLite data --for-compare --physlite --no-physlite-broken --no-systematics )
 add_test_job( TestJobDataConfigLite   data --for-compare --block-config --physlite --no-physlite-broken --no-systematics )
+add_test_job( TestJobDataTextConfigLite data --for-compare --text-config ${CONFIG_PATH} --physlite --no-physlite-broken --no-systematics )
 add_test_job( TestJobDataFullLite     data --block-config --physlite --no-physlite-broken --no-systematics )
 #add_test_compare( TestJobDataCompareLite data TestJobDataSequenceLite TestJobDataConfigLite )
+#add_test_compare( TestJobDataCompareConfigLite data TestJobDataConfigLite TestJobDataTextConfigLite )
 
 if( XAOD_STANDALONE )
 
 add_test_job( TestJobFullSimSequenceLite mc --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimConfigLite   mc --for-compare --block-config --physlite --no-physlite-broken )
+add_test_job( TestJobFullSimTextConfigLite mc --for-compare --text-config ${CONFIG_PATH} --physlite --no-physlite-broken )
 add_test_job( TestJobFullSimFullLite     mc --block-config --physlite --no-physlite-broken )
 add_test_compare( TestJobFullSimCompareLite mc TestJobFullSimSequenceLite TestJobFullSimConfigLite )
 
 add_test_job( TestJobFastSimSequenceLite afii --for-compare --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimConfigLite   afii --for-compare --block-config --physlite --no-physlite-broken )
+add_test_job( TestJobFastSimTextConfigLite afii --for-compare --text-config ${CONFIG_PATH} --physlite --no-physlite-broken )
 add_test_job( TestJobFastSimFullLite     afii --block-config --physlite --no-physlite-broken )
 add_test_compare( TestJobFastSimCompareLite afii TestJobFastSimSequenceLite TestJobFastSimConfigLite )
 

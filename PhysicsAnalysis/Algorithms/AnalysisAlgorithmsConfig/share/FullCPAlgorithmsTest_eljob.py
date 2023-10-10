@@ -39,6 +39,9 @@ parser.add_option( '--hard-cuts', dest='hard_cuts',
 parser.add_option( '--block-config', dest='block_config',
                    action = 'store_true', default = False,
                    help = 'Configure the job with block configuration' )
+parser.add_option( '--text-config', dest='text_config',
+                   action = 'store', default = '',
+                   help = 'Configure the job with the provided text configuration' )
 parser.add_option( '--for-compare', dest='for_compare',
                    action = 'store_true', default = False,
                    help = 'Configure the job for comparison of sequences vs blocks' )
@@ -65,6 +68,7 @@ ROOT.xAOD.TauJetContainer()
 
 dataType = options.data_type
 blockConfig = options.block_config
+textConfig = options.text_config
 forCompare = options.for_compare
 isPhyslite = options.physlite
 noPhysliteBroken = options.no_physlite_broken
@@ -104,7 +108,7 @@ if options.algorithm_timer :
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
-algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
+algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
                        noPhysliteBroken=noPhysliteBroken, geometry=geometry)

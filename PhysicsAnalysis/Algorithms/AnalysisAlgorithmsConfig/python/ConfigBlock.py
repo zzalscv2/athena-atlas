@@ -3,9 +3,10 @@
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
 
-    def __init__ (self, type, info, duplicateAction) :
+    def __init__ (self, type, info, duplicateAction, required=False) :
         self.type = type
         self.info = info
+        self.required = required
         self.duplicateAction = duplicateAction
 
 
@@ -79,7 +80,7 @@ class ConfigBlock:
 
 
     def addOption (self, name, defaultValue,
-                   *, type, info='', duplicateAction='set') :
+                   *, type, info='', duplicateAction='set', required=False) :
         """declare the given option on the configuration block
 
         This should only be called in the constructor of the
@@ -91,12 +92,12 @@ class ConfigBlock:
         """
         if name in self._options :
             raise KeyError ('duplicate option: ' + name)
-        if type not in [str, bool, int, float, None] :
+        if type not in [str, bool, int, float, list, None] :
             raise TypeError ('unknown option type: ' + str (type))
         if duplicateAction not in ['skip', 'set', 'error'] :
             raise ValueError ('unknown duplicateAction: ' + duplicateAction)
         setattr (self, name, defaultValue)
-        self._options[name] = ConfigBlockOption (type=type, info=info, duplicateAction=duplicateAction)
+        self._options[name] = ConfigBlockOption (type=type, info=info, duplicateAction=duplicateAction, required=required)
 
 
     def setOptionValue (self, name, value,
@@ -132,6 +133,11 @@ class ConfigBlock:
             raise ValueError ('passed None for setting option ' + name + ' with noneAction=error')
         else :
             raise Exception ('should not get here')
+
+
+    def getOptions(self):
+        """Return a copy of the options associated with the block"""
+        return self._options.copy()
 
 
     def hasOption (self, name) :

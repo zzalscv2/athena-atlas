@@ -18,6 +18,9 @@ athArgsParser.add_argument("--data-type", action = "store", dest = "data_type",
 athArgsParser.add_argument( '--block-config', dest='block_config',
                             action = 'store_true', default = False,
                             help = 'Configure the job with block configuration' )
+athArgsParser.add_argument( '--text-config', dest='text_config',
+                            action = 'store', default = '', 
+                            help = 'Configure the job with the provided text configuration' )
 athArgsParser.add_argument( '--for-compare', dest='for_compare',
                             action = 'store_true', default = False,
                             help = 'Configure the job for comparison of sequences vs blocks' )
@@ -34,6 +37,7 @@ athArgs = athArgsParser.parse_args()
 
 dataType = athArgs.data_type
 blockConfig = athArgs.block_config
+textConfig = athArgs.text_config
 forCompare = athArgs.for_compare
 isPhyslite = athArgs.physlite
 noPhysliteBroken = athArgs.no_physlite_broken
@@ -66,7 +70,7 @@ flags.lock()
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
-algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
+algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
                        isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
                        autoconfigFromFlags=flags)
