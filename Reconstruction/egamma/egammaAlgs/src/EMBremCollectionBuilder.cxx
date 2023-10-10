@@ -300,24 +300,19 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       ElementLink<xAOD::TruthParticleContainer>>
       tPL("truthParticleLink");
     if (tPL.isAvailable(original)) {
-      const ElementLink<xAOD::TruthParticleContainer>& linkToTruth =
-        tPL(original);
-      tPL(created) = linkToTruth;
+      tPL(created) = tPL(original);
     }
     static const SG::AuxElement::Accessor<float> tMP("truthMatchProbability");
     if (tMP.isAvailable(original)) {
-      float originalProbability = tMP(original);
-      tMP(created) = originalProbability;
+      tMP(created) = tMP(original);
     }
     static const SG::AuxElement::Accessor<int> tT("truthType");
     if (tT.isAvailable(original)) {
-      int truthType = tT(original);
-      tT(created) = truthType;
+      tT(created) = tT(original);
     }
     static const SG::AuxElement::Accessor<int> tO("truthOrigin");
     if (tO.isAvailable(original)) {
-      int truthOrigin = tO(original);
-      tO(created) = truthOrigin;
+      tO(created) = tO(original);
     }
   }
   
@@ -336,15 +331,12 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       copySummaryValue(original, created, xAOD::numberOfPixelDeadSensors);
 
       // Figure the new number of holes
-      int nPixHitsRefitted = summaryValueInt(created, xAOD::numberOfPixelHits, -1);
-      int nPixOutliersRefitted = summaryValueInt(created, xAOD::numberOfPixelOutliers, -1);
-      int nPixHitsOriginal = summaryValueInt(original, xAOD::numberOfPixelHits, -1);
-      int nPixOutliersOriginal = summaryValueInt(original, xAOD::numberOfPixelOutliers, -1);
-      int nPixHolesOriginal = summaryValueInt(original, xAOD::numberOfPixelHoles, -1);
-
-      uint8_t nPixHolesRefitted = nPixHitsOriginal + nPixHolesOriginal +
-                                  nPixOutliersOriginal - nPixOutliersRefitted -
-                                  nPixHitsRefitted;
+      uint8_t nPixHolesRefitted = 
+        - summaryValueInt(created, xAOD::numberOfPixelHits, -1)
+        - summaryValueInt(created, xAOD::numberOfPixelOutliers, -1)
+        + summaryValueInt(original, xAOD::numberOfPixelHits, -1)
+        + summaryValueInt(original, xAOD::numberOfPixelOutliers, -1)
+        + summaryValueInt(original, xAOD::numberOfPixelHoles, -1);
 
       created.setSummaryValue(nPixHolesRefitted, xAOD::numberOfPixelHoles);
     }
@@ -353,28 +345,22 @@ EMBremCollectionBuilder::copyOverInfo(xAOD::TrackParticle& created,
       copySummaryValue(original, created, xAOD::numberOfSCTDeadSensors);
       copySummaryValue(original, created, xAOD::numberOfSCTDoubleHoles);
 
-      int nSCTHitsRefitted = summaryValueInt(created, xAOD::numberOfSCTHits, -1);
-      int nSCTOutliersRefitted = summaryValueInt(created, xAOD::numberOfSCTOutliers, -1);
-      int nSCTHitsOriginal = summaryValueInt(original, xAOD::numberOfSCTHits, -1);
-      int nSCTHolesOriginal = summaryValueInt(original, xAOD::numberOfSCTHoles, -1);
-      int nSCTOutliersOriginal = summaryValueInt(original, xAOD::numberOfSCTOutliers, -1);
-
-      uint8_t nSCTHolesRefitted = nSCTHitsOriginal + nSCTHolesOriginal +
-                                  nSCTOutliersOriginal - nSCTOutliersRefitted -
-                                  nSCTHitsRefitted;
+      uint8_t nSCTHolesRefitted = 
+        - summaryValueInt(created, xAOD::numberOfSCTHits, -1)
+        - summaryValueInt(created, xAOD::numberOfSCTOutliers, -1)
+        + summaryValueInt(original, xAOD::numberOfSCTHits, -1)
+        + summaryValueInt(original, xAOD::numberOfSCTHoles, -1)
+        + summaryValueInt(original, xAOD::numberOfSCTOutliers, -1);
 
       created.setSummaryValue(nSCTHolesRefitted, xAOD::numberOfSCTHoles);
     }
     if (m_doTRT) {
-      int nTRTHitsRefitted = summaryValueInt(created, xAOD::numberOfTRTHits, -1);
-      int nTRTOutliersRefitted = summaryValueInt(created, xAOD::numberOfTRTOutliers, -1);
-      int nTRTHitsOriginal = summaryValueInt(original, xAOD::numberOfTRTHits, -1);
-      int nTRTHolesOriginal = summaryValueInt(original, xAOD::numberOfTRTHoles, -1);
-      int nTRTOutliersOriginal = summaryValueInt(original, xAOD::numberOfTRTOutliers, -1);
-
-      uint8_t nTRTHolesRefitted = nTRTHitsOriginal + nTRTHolesOriginal +
-                                  nTRTOutliersOriginal - nTRTOutliersRefitted -
-                                  nTRTHitsRefitted;
+      uint8_t nTRTHolesRefitted = 
+        - summaryValueInt(created, xAOD::numberOfTRTHits, -1)
+        - summaryValueInt(created, xAOD::numberOfTRTOutliers, -1)
+        + summaryValueInt(original, xAOD::numberOfTRTHits, -1)
+        + summaryValueInt(original, xAOD::numberOfTRTHoles, -1)
+        + summaryValueInt(original, xAOD::numberOfTRTOutliers, -1);
 
       created.setSummaryValue(nTRTHolesRefitted, xAOD::numberOfTRTHoles);
     }
