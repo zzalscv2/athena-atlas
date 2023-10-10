@@ -208,11 +208,16 @@ class InDetTrigSequence:
 
       #Clusterisation
       from InDetConfig.InDetPrepRawDataFormationConfig import TrigPixelClusterizationCfg
-      acc.merge(TrigPixelClusterizationCfg(self.__flags,name="InDetPixelClusterization" + signature, RoIs=self.__rois))
+      acc.merge(TrigPixelClusterizationCfg(self.__flags,
+                                           self.__rois,
+                                           name=f"InDetPixelClusterization_{signature}"))
+
       
       from InDetConfig.InDetPrepRawDataFormationConfig import TrigSCTClusterizationCfg
-      acc.merge(TrigSCTClusterizationCfg(self.__flags, name="InDetSCTClusterization" + signature, RoIs = self.__rois))
-
+      acc.merge(TrigSCTClusterizationCfg(self.__flags,
+                                         self.__rois, 
+                                         name=f"InDetSCTClusterization_{signature}"))
+                                         
       return acc
 
   def dataPreparationTRT(self) ->ComponentAccumulator:
@@ -233,7 +238,10 @@ class InDetTrigSequence:
         acc.merge(SGInputLoaderCfg(self.__flags, Load=loadRDOs))
 
       from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
-      acc.merge(TrigTRTRIOMakerCfg(self.__flags, RoIs = self.__rois))
+      signature = self.__flags.Tracking.ActiveConfig.input_name
+      acc.merge(TrigTRTRIOMakerCfg(self.__flags,
+                                   self.__rois,
+                                   name=f"TrigTRTDriftCircleMaker_{signature}"))
       
 
       return acc
