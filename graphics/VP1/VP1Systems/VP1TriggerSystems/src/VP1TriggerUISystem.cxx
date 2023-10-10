@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -47,10 +47,10 @@ void VP1TriggerUISystem::create(StoreGateSvc*) {log_verbose("create()");}
 
 //Load Trigger Data from StoreGate (after new event loaded)
 //_____________________________________________________________________________________________
-void VP1TriggerUISystem::refresh(StoreGateSvc* m_storeGate)
+void VP1TriggerUISystem::refresh(StoreGateSvc* storeGate)
 {
   log_verbose("refresh()");
-  m_triggertool->process(m_storeGate);
+  m_triggertool->process(storeGate);
 }
 
 

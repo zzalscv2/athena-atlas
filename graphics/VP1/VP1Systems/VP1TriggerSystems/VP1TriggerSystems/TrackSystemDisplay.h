@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKSYSTEMDISPLAY_H
@@ -51,7 +51,7 @@ protected:
   Imp * d;
 */
 private:
-  std::map<SoNode*,Trk::Track *> m_nodeToTrack;
+  std::map<SoNode*,const Trk::Track *> m_nodeToTrack;
   std::map<SoSwitch*,double> m_switchToPt;
   
   double m_ptcut;

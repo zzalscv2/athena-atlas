@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-#ifndef Q_MOC_RUN
 
 #ifndef VP1TRIGGERUISYSTEM_H
 #define VP1TRIGGERUISYSTEM_H
@@ -38,14 +36,11 @@ public:
   
   //System mains ---------------------------------->
   void create(StoreGateSvc*);
-  void refresh(StoreGateSvc* m_storeGate);
+  void refresh(StoreGateSvc* storeGate);
   void erase();
   //-----------------------------------------------<
     
   //Access to trigger tool
   VP1Trig::VP1TriggerTool * m_triggertool;
 };
-#endif
-
-
 #endif
