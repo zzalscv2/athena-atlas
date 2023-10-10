@@ -22,6 +22,9 @@ athArgsParser.add_argument("--data-type", action = "store", dest = "data_type",
 athArgsParser.add_argument( '--block-config', dest='block_config',
                             action = 'store_true', default = False,
                             help = 'Configure the job with block configuration' )
+athArgsParser.add_argument( '--text-config', dest='text_config',
+                            action = 'store', default = '',
+                            help = 'Configure the job with the provided text configuration' )
 athArgsParser.add_argument( '--for-compare', dest='for_compare',
                             action = 'store_true', default = False,
                             help = 'Configure the job for comparison of sequences vs blocks' )
@@ -38,6 +41,7 @@ athArgs = flags.fillFromArgs(parser=athArgsParser)
 
 dataType = athArgs.data_type
 blockConfig = athArgs.block_config
+textConfig = athArgs.text_config
 forCompare = athArgs.for_compare
 isPhyslite = athArgs.physlite
 noPhysliteBroken = athArgs.no_physlite_broken
@@ -72,7 +76,7 @@ cfg.merge(PoolReadCfg(flags))
 from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
 cfg.merge(CutFlowSvcCfg(flags))
 
-cp_cfg = makeSequence (dataType, blockConfig, forCompare=forCompare,
+cp_cfg = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = athArgs.no_systematics,
                        isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
                        autoconfigFromFlags=flags)
@@ -80,10 +84,12 @@ cp_cfg = makeSequence (dataType, blockConfig, forCompare=forCompare,
 cfg.merge(cp_cfg)
 
 # Set up a histogram output file for the job:
-if not blockConfig :
-    outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsTest." + dataType + ".hist.root' OPT='RECREATE'"
-else :
+if blockConfig :
     outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsConfigTest." + dataType + ".hist.root' OPT='RECREATE'"
+elif textConfig :
+    outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsTextConfigTest." + dataType + ".hist.root' OPT='RECREATE'"
+else :
+    outputFile = "ANALYSIS DATAFILE='FullCPAlgorithmsTest." + dataType + ".hist.root' OPT='RECREATE'"
 if athArgs.force_output :
     outputFile = "ANALYSIS DATAFILE='" + athArgs.force_output + "' OPT='RECREATE'"
 from AthenaConfiguration.ComponentFactory import CompFactory

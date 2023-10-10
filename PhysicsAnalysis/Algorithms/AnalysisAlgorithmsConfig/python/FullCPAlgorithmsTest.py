@@ -106,7 +106,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         if autoconfigFromFlags is not None:
             campaign = autoconfigFromFlags.Input.MCCampaign
             files = autoconfigFromFlags.Input.Files
-            useDefaultConfig = True 
+            useDefaultConfig = True
         else:
             prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
@@ -581,7 +581,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         if autoconfigFromFlags is not None:
             campaign = autoconfigFromFlags.Input.MCCampaign
             files = autoconfigFromFlags.Input.Files
-            useDefaultConfig = True 
+            useDefaultConfig = True
         else:
             prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
@@ -795,7 +795,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         # provide a preselection for the objects in subsequent algorithms
         configSeq.setOptionValue ('.selectionName', '')
         configSeq.setOptionValue ('.addPreselection', True)
-    
+
     # Include and set up a basic run of the event selection algorithm config:
     if not forCompare:
         # configSeq += makeConfig( 'EventSelection', None )
@@ -809,7 +809,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
                                           met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
                                           selectionCutsDict = exampleSelectionCuts, noFilter = True)
 
-        
+
     configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
     configSeq.setOptionValue ('.selectionName', 'loose')
     configSeq.setOptionValue ('.outputName', 'OutElectrons')
@@ -879,7 +879,7 @@ def printSequenceAlgs (sequence) :
         print (sequence)
 
 
-def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None) :
+def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False, geometry = None, autoconfigFromFlags = None) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -898,15 +898,20 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
     algSeq = AlgSequence()
 
     ca = None
-    if not useBlocks :
-        ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
-                              isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
-    else :
+    if useBlocks :
         ca = makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                                  isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
                                  geometry=geometry,
                                  autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
+    elif yamlPath :
+        from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
+        ca = makeSequenceText(yamlPath, dataType, algSeq,
+                              isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                              noSystematics=noSystematics)
+    else :
+        ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
+                              isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
+                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
 
     if ca is not None:
         return ca
