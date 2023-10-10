@@ -61,9 +61,10 @@ public:
   egammaSuperClusterBuilder(const std::string& name, ISvcLocator* pSvcLocator);
 
   virtual StatusCode initialize() override final;
-  virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
+  xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const override final;
+
   /** Return extra clusters that can be added to make supercluster
    * @param egammaInd: index of the EgammaRec object in the input container
    *corresponding to the seed
@@ -82,7 +83,7 @@ private:
   std::vector<std::size_t> searchForSecondaryClusters(
     std::size_t egammaInd,
     const EgammaRecContainer* egammaRecs,
-    std::vector<bool>& isUsed) const;
+    std::vector<bool>& isUsed) const override final;
 
   xAOD::EgammaParameters::EgammaType m_egTypeForCalibration;
 
