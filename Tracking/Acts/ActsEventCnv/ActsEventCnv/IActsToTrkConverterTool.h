@@ -58,7 +58,7 @@ class IActsToTrkConverterTool : virtual public IAlgTool {
       const Acts::GeometryContext& gctx, const Trk::Track& track) const = 0;
 
   virtual const Acts::BoundTrackParameters trkTrackParametersToActsParameters(
-      const Trk::TrackParameters& atlasParameter, const Acts::GeometryContext& gctx) const = 0;
+      const Trk::TrackParameters& atlasParameter, const Acts::GeometryContext& gctx, Trk::ParticleHypothesis hypothesis = Trk::pion) const = 0;
 
   virtual std::unique_ptr<Trk::TrackParameters>
   actsTrackParametersToTrkParameters(

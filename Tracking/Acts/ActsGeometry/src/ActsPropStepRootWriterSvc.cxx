@@ -146,8 +146,8 @@ ActsPropStepRootWriterSvc::doWrite(const StepVector& steps, size_t evtNum)
         volumeID    = geoID.volume();
       }
       // a current volume overwrites the surface tagged one
-      if (step.volume) {
-        volumeID = step.volume->geometryId().volume();
+      if (step.geoID != Acts::GeometryIdentifier()) {
+        volumeID = step.geoID.volume();
       }
       // now fill
       m_s_sensitiveID.push_back(sensitiveID);

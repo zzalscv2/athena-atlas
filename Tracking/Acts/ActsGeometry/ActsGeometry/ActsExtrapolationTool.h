@@ -73,16 +73,14 @@ public:
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    Acts::Direction navDir = Acts::Direction::Forward,
-                   double pathLimit = std::numeric_limits<double>::max(),
-                   Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
+                   double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
   std::optional<const Acts::CurvilinearTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             Acts::Direction navDir = Acts::Direction::Forward,
-            double pathLimit = std::numeric_limits<double>::max(),
-            Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
+            double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
   ActsPropagationOutput
@@ -90,8 +88,7 @@ public:
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
                    Acts::Direction navDir = Acts::Direction::Forward,
-                   double pathLimit = std::numeric_limits<double>::max(),
-                   Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
+                   double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
   std::optional<const Acts::BoundTrackParameters>
@@ -99,8 +96,7 @@ public:
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,
             Acts::Direction navDir = Acts::Direction::Forward,
-            double pathLimit = std::numeric_limits<double>::max(),
-            Trk::ParticleHypothesis particleHypo = Trk::pion) const override;
+            double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
   const IActsTrackingGeometryTool*

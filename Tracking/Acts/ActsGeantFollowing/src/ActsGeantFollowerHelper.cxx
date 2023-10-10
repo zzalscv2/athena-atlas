@@ -187,6 +187,10 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   // construct the initial parameters
   Amg::Vector3D npos(pos.x(),pos.y(),pos.z());
   Amg::Vector3D nmom(mom.x(),mom.y(),mom.z());
+
+  // Use the G4 pdgId as the particle hypothesis
+  Trk::ParticleHypothesis particleHypo = m_pdgToParticleHypothesis.convert(m_treeData->m_t_pdg, m_treeData->m_t_charge);
+
   if(m_treeData->m_g4_steps == 0 && m_tNonSensitiveCache == 0){
     ATH_MSG_INFO("Initial step ... preparing event cache.");
     m_treeData->m_t_x        = pos.x();
@@ -207,9 +211,17 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
         Acts::Surface::makeShared<Acts::PerigeeSurface>(
         npos);
 
+
+    float mass = Trk::ParticleMasses::mass[particleHypo] * Acts::UnitConstants::MeV;
+
     Acts::Vector4 actsStart(pos.x(),pos.y(),pos.z(),0);
     Acts::Vector3 dir = nmom.normalized();
-    m_actsParameterCache = std::make_optional<Acts::BoundTrackParameters>(Acts::BoundTrackParameters::create(surface, gctx.context(), actsStart, dir, mom.mag()/1000, charge).value());
+    Acts::ParticleHypothesis hypothesis{Acts::makeAbsolutePdgParticle(static_cast<Acts::PdgParticle>(pdg)), 
+                                        mass, 
+                                        Acts::AnyCharge{static_cast<float>(charge)}};
+    m_actsParameterCache = Acts::GenericBoundTrackParameters<Acts::ParticleHypothesis>::create(
+        surface, gctx.context(), actsStart, dir, charge/(mom.mag()/1000), std::nullopt, hypothesis)
+      .value();
   }
 
   // Store material in cache
@@ -233,8 +245,6 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     ATH_MSG_WARNING("Maximum number of " << MAXPROBES << " reached, step is ignored.");
     return;
   }
-  // Use the G4 pdgId as the particle hypothesis
-  Trk::ParticleHypothesis particleHypo = m_pdgToParticleHypothesis.convert(m_treeData->m_t_pdg, m_treeData->m_t_charge);
   // parameters of the G4 step point
   Trk::CurvilinearParameters* g4Parameters = new Trk::CurvilinearParameters(npos, nmom, m_treeData->m_t_charge);
   // destination surface
@@ -260,15 +270,13 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 											   *m_actsParameterCache, 
 											   *destinationSurfaceActs, 
 											   Acts::Direction::Forward,
-											   std::numeric_limits<double>::max(),
-											   particleHypo);
+											   std::numeric_limits<double>::max());
 
   float X0Acts = m_actsExtrapolator->propagationSteps(ctx,
                                                        *m_actsParameterCache, 
                                                        *destinationSurfaceActs,
                                                        Acts::Direction::Forward,
-                                                       std::numeric_limits<double>::max(),
-                                                       particleHypo).second.materialInX0;
+                                                       std::numeric_limits<double>::max()).second.materialInX0;
                                                        
   if(not actsParameters.has_value()){
     ATH_MSG_ERROR("Error in the Acts extrapolation, skip the current step");  

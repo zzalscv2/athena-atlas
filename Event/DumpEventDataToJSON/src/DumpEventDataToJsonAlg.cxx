@@ -85,7 +85,7 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::T
   
   // Add dparams positions to the output
   const Acts::BoundTrackParameters trackparams(track.referenceSurface().getSharedPtr(),
-                                                         track.parameters());
+                                                         track.parameters(), std::nullopt, Acts::ParticleHypothesis::pion());
   auto trackPosition = trackparams.position(gctx);;
   data["pos"].push_back(trackPosition.x());
   data["pos"].push_back(trackPosition.y());
@@ -97,7 +97,7 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::T
   // (There is certainly a more elegant way to do this, but since this will all be changed soon I don't think it matters)
   std::vector<ActsTrk::MultiTrajectory::ConstTrackStateProxy> trackStates;
   trackStates.reserve(nTrackStates);
-  for (auto trackstate : track.trackStates()) {
+  for (auto trackstate : track.trackStatesReversed()) {
     trackStates.push_back(trackstate);
   }
 
@@ -108,8 +108,9 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Acts::TrackProxy<ActsTrk::T
     // Currently only converting smoothed states, but we will extend this later.
     if (trackstate.hasSmoothed() && trackstate.hasReferenceSurface()) {
       const Acts::BoundTrackParameters params(trackstate.referenceSurface().getSharedPtr(),
-                                                         trackstate.smoothed(),
-                                                         trackstate.smoothedCovariance());
+                                                     trackstate.smoothed(),
+                                                     trackstate.smoothedCovariance(), 
+                                                     Acts::ParticleHypothesis::pion());
       ATH_MSG_VERBOSE("Track parameters: "<<params.parameters());
 
       auto pos = params.position(gctx);

@@ -64,7 +64,7 @@ StatusCode ActsGaussianSumFitter::initialize() {
   Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator> propagator(std::move(stepper), 
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
-  Acts::Experimental::AtlasBetheHeitlerApprox<6, 5> bha = Acts::Experimental::makeDefaultBetheHeitlerApprox();
+  Acts::AtlasBetheHeitlerApprox<6, 5> bha = Acts::makeDefaultBetheHeitlerApprox();
 
   m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
               logger().cloneWithSuffix("GaussianSumFitter"));
@@ -116,7 +116,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::TrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext, 
@@ -159,7 +159,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::TrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext, 
@@ -239,7 +239,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::TrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext,
@@ -316,7 +316,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::TrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext,
@@ -394,7 +394,8 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
       ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.predicted(),
-             state.predictedCovariance());
+             state.predictedCovariance(),
+             acts_track.particleHypothesis());
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
       
@@ -420,7 +421,8 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
       ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.filtered(),
-             state.filteredCovariance());
+             state.filteredCovariance(),
+             acts_track.particleHypothesis());
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       typePattern.set(Trk::TrackStateOnSurface::Outlier);
     }
@@ -430,7 +432,8 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
 
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.smoothed(),
-             state.smoothedCovariance());
+             state.smoothedCovariance(),
+             acts_track.particleHypothesis());
       
       actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
@@ -456,7 +459,8 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   // Convert the perigee state and add it to the trajectory
   const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
                  acts_track.parameters(), 
-             acts_track.covariance());
+                 acts_track.covariance(),
+                 acts_track.particleHypothesis());
   std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Perigee);
@@ -483,7 +487,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   return newtrack;
 }
 
-const Acts::Experimental::GsfExtensions<typename ActsTrk::TrackStateBackend>& 
+const Acts::GsfExtensions<typename ActsTrk::TrackStateBackend>& 
 ActsGaussianSumFitter::getExtensions() const 
 { 
   return m_gsfExtensions; 
@@ -496,7 +500,7 @@ ActsGaussianSumFitter::logger() const
   return *m_logger; 
 }
 
-Acts::Experimental::GsfOptions<typename ActsTrk::TrackStateBackend> 
+Acts::GsfOptions<typename ActsTrk::TrackStateBackend> 
 ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 				      const Acts::MagneticFieldContext& mfContext,
 				      const Acts::CalibrationContext& calContext,
@@ -505,7 +509,7 @@ ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
 
-  Acts::Experimental::GsfOptions<typename ActsTrk::TrackStateBackend> gsfOptions{tgContext, mfContext, calContext, m_gsfExtensions, std::move(propagationOption)};
+  Acts::GsfOptions<typename ActsTrk::TrackStateBackend> gsfOptions{tgContext, mfContext, calContext, m_gsfExtensions, std::move(propagationOption)};
   gsfOptions.referenceSurface = &surface;
 
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
@@ -517,7 +521,7 @@ ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 std::unique_ptr<Trk::Track> 
 ActsGaussianSumFitter::performFit(const EventContext& ctx,
 				  const Acts::GeometryContext& tgContext,
-				  const Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
+				  const Acts::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
 				  const std::vector<Acts::SourceLink>& trackSourceLinks,
 				  const Acts::BoundTrackParameters& initialParams) const
 {

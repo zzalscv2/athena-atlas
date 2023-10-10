@@ -118,7 +118,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
       // Perigee, no alignment -> default geo context
       ActsGeometryContext gctx = m_extrapolationTool->trackingGeometryTool()
                                      ->getNominalGeometryContext();
-      Acts::BoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov));
+      Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
       output = m_extrapolationTool->propagationSteps(ctx, startParameters);
       if(output.first.size() == 0) {
         ATH_MSG_WARNING("Got ZERO steps from the extrapolation tool");

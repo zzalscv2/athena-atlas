@@ -152,7 +152,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackToSourceLinks(
 
 const Acts::BoundTrackParameters
 ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
-    const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext & gctx) const {
+    const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext & gctx, Trk::ParticleHypothesis hypothesis) const {
 
   using namespace Acts::UnitLiterals;
   std::shared_ptr<const Acts::Surface> actsSurface;
@@ -210,8 +210,16 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
     }
   }
 
+  // convert hypotheses
+  float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
+  Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(
+      static_cast<Acts::PdgParticle>(
+        m_pdgToParticleHypothesis.convert(hypothesis, atlasParameter.charge())));
+  Acts::ParticleHypothesis actsHypothesis{
+    absPdg, mass, Acts::AnyCharge{static_cast<float>(atlasParameter.charge())}};
+
   return Acts::BoundTrackParameters(actsSurface, params,
-                                    atlasParameter.charge(), cov);
+                                    cov, actsHypothesis);
 }
 
 std::unique_ptr<Trk::TrackParameters>

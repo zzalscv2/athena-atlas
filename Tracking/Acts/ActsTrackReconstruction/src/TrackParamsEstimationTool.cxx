@@ -98,13 +98,12 @@ namespace ActsTrk {
       return std::nullopt;
 
     const auto& params = params_opt.value();
-    double charge = std::copysign(1, params[Acts::eBoundQOverP]);
 
     // Create BoundTrackParameters
     return Acts::BoundTrackParameters(surface.getSharedPtr(),
                                       params,
-                                      charge,
-                                      covariance);
+                                      covariance,
+                                      Acts::ParticleHypothesis::pion());
   }
   
 }

@@ -279,14 +279,16 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
       Acts::GeometryIdentifier layerID;
       if (surface) {
         const ActsGeometryContext& gctx{m_trackingGeometrySvc->getNominalContext()};
-        auto sfIntersection = surface->intersect(
-            gctx.context(), mint.position, mint.direction, true);
+        auto sfIntersection = surface
+          ->intersect(gctx.context(), mint.position,
+                      mint.direction, true)
+          .closest();
         layerID = surface->geometryId();
         m_sur_id.push_back(layerID.value());
         m_sur_type.push_back(surface->type());
-        m_sur_x.push_back(sfIntersection.intersection.position.x());
-        m_sur_y.push_back(sfIntersection.intersection.position.y());
-        m_sur_z.push_back(sfIntersection.intersection.position.z());
+        m_sur_x.push_back(sfIntersection.position().x());
+        m_sur_y.push_back(sfIntersection.position().y());
+        m_sur_z.push_back(sfIntersection.position().z());
 
         const Acts::SurfaceBounds& surfaceBounds = surface->bounds();
         const Acts::RadialBounds* radialBounds =
@@ -324,10 +326,10 @@ ActsMaterialTrackWriterSvc::doWrite(const Acts::RecordedMaterialTrack& mTrack)
     }
     // store volume information
     if (m_storeVolume) {
-      const Acts::Volume* volume = mint.volume;
+      const Acts::InteractionVolume& volume = mint.volume;
       Acts::GeometryIdentifier vlayerID;
-      if (volume) {
-        vlayerID = volume->geometryId();
+      if (!volume.empty()) {
+        vlayerID = volume.geometryId();
         m_vol_id.push_back(vlayerID.value());
       } else {
         vlayerID.setVolume(0);
