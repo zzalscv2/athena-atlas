@@ -52,7 +52,7 @@ def PixelClusterizationPUCfg(flags, name="InDetPixelClusterizationPU", **kwargs)
     kwargs.setdefault("AmbiguitiesMap", "PixelClusterAmbiguitiesMapPU")
     return PixelClusterizationCfg(flags, name, **kwargs)
 
-def TrigPixelClusterizationCfg(flags, name="InDetPixelClusterization", **kwargs):
+def TrigPixelClusterizationCfg(flags, RoIs, name="InDetPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
    
     if "RegSelTool" not in kwargs:
@@ -73,10 +73,12 @@ def TrigPixelClusterizationCfg(flags, name="InDetPixelClusterization", **kwargs)
     kwargs.setdefault("AmbiguitiesMap", "TrigPixelClusterAmbiguitiesMap")
     kwargs.setdefault("ClustersName", "PixelTrigClusters")
     kwargs.setdefault("isRoI_Seeded", True)
+    kwargs.setdefault("RoIs", RoIs)
     kwargs.setdefault("ClusterContainerCacheKey", "PixelTrigClustersCache")
     kwargs.setdefault("useDataPoolWithCache", True)
-
-    acc.addEventAlgo(CompFactory.InDet.PixelClusterization(name, **kwargs))
+    kwargs.setdefault("name", f"{name}_{RoIs}")
+    
+    acc.addEventAlgo(CompFactory.InDet.PixelClusterization(**kwargs))
     return acc
 
 def ITkPixelClusterizationCfg(flags, name = "ITkPixelClusterization", **kwargs):
@@ -143,7 +145,7 @@ def SCTClusterizationPUCfg(flags, name="InDetSCT_ClusterizationPU", **kwargs):
     kwargs.setdefault("ClustersName", "SCT_PU_Clusters")
     return SCTClusterizationCfg(flags, name, **kwargs)
 
-def TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization", roisKey="", signature="", **kwargs):
+def TrigSCTClusterizationCfg(flags, RoIs, name="InDetSCT_Clusterization", **kwargs):
     acc = ComponentAccumulator()
 
     if "RegSelTool" not in kwargs:
@@ -164,11 +166,13 @@ def TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization", roisKey="", 
     kwargs.setdefault("DataObjectName", 'SCT_RDOs')
     kwargs.setdefault("ClustersName", 'SCT_TrigClusters')
     kwargs.setdefault("isRoI_Seeded", True)
+    kwargs.setdefault("RoIs", RoIs)
     kwargs.setdefault("ClusterContainerCacheKey", "SCT_ClustersCache")
     kwargs.setdefault("FlaggedCondCacheKey", "")
     kwargs.setdefault("useDataPoolWithCache", True)
-
-    acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(name+signature, **kwargs))
+    kwargs.setdefault("name", f"{name}_{RoIs}")
+    
+    acc.addEventAlgo(CompFactory.InDet.SCT_Clusterization(**kwargs))
     return acc
 
 def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
@@ -252,7 +256,7 @@ def InDetTRT_RIO_MakerPUCfg(flags, name = "InDetTRT_RIO_MakerPU", **kwargs):
     kwargs.setdefault("TRTRIOLocation", 'TRT_PU_DriftCircles')
     return InDetTRT_RIO_MakerCfg(flags, name, **kwargs)
 
-def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
+def TrigTRTRIOMakerCfg(flags, RoIs, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     acc = ComponentAccumulator()
 
     if "RegSelTool" not in kwargs:
@@ -268,12 +272,13 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     kwargs.setdefault("TRTRIOLocation", "TRT_TrigDriftCircles")
     kwargs.setdefault("TRTRDOLocation", "TRT_RDOs_TRIG" if flags.Input.Format is Format.BS else "TRT_RDOs")
     kwargs.setdefault("isRoI_Seeded", True)
-    kwargs.setdefault("RoIs", flags.Tracking.ActiveConfig.roi)
+    kwargs.setdefault("RoIs", RoIs)
     
     kwargs.setdefault("TRT_DriftCircleCache", "TRT_DriftCircleCache")
     kwargs.setdefault("useDataPoolWithCache", True)
-    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(
-        name+"_"+flags.Tracking.ActiveConfig.input_name, **kwargs))
+
+    kwargs.setdefault("name", f"{name}_{RoIs}")
+    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(**kwargs))
     return acc
 
 def AthenaTrkClusterizationCfg(flags):
