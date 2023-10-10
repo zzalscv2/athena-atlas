@@ -124,3 +124,8 @@ atlas_add_test( TileTBPulseMonitorAlgorithm_test
                 SCRIPT python -m TileMonitoring.TileTBPulseMonitorAlgorithm --nsamples 7 --demo-cabling 0 --channels '' --use-sqlite ''
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileTBMonitorAlgorithm_test
+                SCRIPT python -m TileMonitoring.TileTBMonitorAlgorithm --use-sqlite ''
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
