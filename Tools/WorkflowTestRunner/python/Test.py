@@ -154,14 +154,10 @@ class WorkflowTest:
         self.logger.info(f"Finished validation in rel {self.setup.release_validation}")
         self.logger.info(f"\"{self.command}\"")
 
-    def run_checks(self, fpe_check: WorkflowCheck, performance_checks: List[WorkflowCheck]) -> bool:
+    def run_checks(self, performance_checks: List[WorkflowCheck]) -> bool:
         self.logger.info("-----------------------------------------------------")
         self.logger.info(f"----------- Post-processing of {self.ID} Test -----------")
         result = True
-
-        # FPE check
-        if fpe_check:
-            result = fpe_check.run(self) and result
 
         # digest checks
         for check in self.digest_checks:
