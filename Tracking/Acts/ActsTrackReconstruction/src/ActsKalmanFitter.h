@@ -16,6 +16,7 @@
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IBoundaryCheckTool.h"
+#include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 
 
 #include "TrkToolInterfaces/IRIO_OnTrackCreator.h"
@@ -195,6 +196,8 @@ private:
   ToolHandle<Trk::IRIO_OnTrackCreator> m_ROTcreator {this, "RotCreatorTool", "", ""};
   //Gaudi Property to choose from PRD or ROT measurment ReFit
   Gaudi::Property<bool> m_doReFitFromPRD{this, "DoReFitFromPRD", false, "Do Refit From PRD instead of ROT"};
+
+  Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
 
 
 }; // end of namespace

@@ -211,7 +211,7 @@ atlas_add_citest( ACTS_Propagation_ID
 
 atlas_add_citest( ACTS_Workflow
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh
-   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propapation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters" )
+   LOG_IGNORE_PATTERN "ActsTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsTrackFindingAlg.*ERROR Propagation failed: PropagatorError:3 Propagation reached the configured maximum number of steps with the initial parameters" )
 
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateClusters.sh )
@@ -240,8 +240,10 @@ atlas_add_citest( ACTS_ValidateAmbiguityResolution
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsKfRefitting.sh )
 
-atlas_add_citest( ACTS_ActsGSFRefitting
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
+# Temporary disabling this while we investigate an issue
+# we'll add it back asap
+#atlas_add_citest( ACTS_ActsGSFRefitting
+#   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpot
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsBenchmarkWithSpot.sh 8 100

@@ -63,7 +63,8 @@ void PRDSourceLinkCalibrator::calibrate(const Acts::GeometryContext& gctx,
 
     const Acts::BoundTrackParameters actsParam(trackState.referenceSurface().getSharedPtr(),
              trackState.predicted(),
-             trackState.predictedCovariance());      
+             trackState.predictedCovariance(),
+             Acts::ParticleHypothesis::pion());
     std::unique_ptr<const Trk::TrackParameters> trkParam = converterTool->actsTrackParametersToTrkParameters(actsParam, gctx);
     
     //RIO_OnTrack creation from the PrepRawData
@@ -276,9 +277,13 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);
   }
 
+  // @TODO: Synchronize with prtHypothesis
+  Acts::ParticleHypothesis hypothesis = Acts::ParticleHypothesis::pion();
+
   const Acts::BoundTrackParameters scaledInitialParams(initialParams.referenceSurface().getSharedPtr(),
                                                        initialParams.parameters(),
-                                                       scaledCov);
+                                                       scaledCov,
+                                                       hypothesis);
 
   ActsTrk::TrackContainer tracks{
     ActsTrk::TrackBackend{},
@@ -600,7 +605,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   const Acts::BoundTrackParameters scaledInitialParams(initialParams.referenceSurface().getSharedPtr(),
                                                        initialParams.parameters(),
-                                                       scaledCov);
+                                                       scaledCov,
+                                                       Acts::ParticleHypothesis::pion());
 
 
   ActsTrk::TrackContainer tracks{
@@ -677,7 +683,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
       ATH_MSG_VERBOSE("State is a hole (no associated measurement), use predicted parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.predicted(),
-             state.predictedCovariance());
+             state.predictedCovariance(),
+             acts_track.particleHypothesis());
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
       
@@ -703,7 +710,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
       ATH_MSG_VERBOSE("The state was tagged as an outlier or was missed in the reverse filtering, use filtered parameters");
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.filtered(),
-             state.filteredCovariance());
+             state.filteredCovariance(),
+             acts_track.particleHypothesis());
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
       typePattern.set(Trk::TrackStateOnSurface::Outlier);
     }
@@ -713,7 +721,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
 
       const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
              state.smoothed(),
-             state.smoothedCovariance());
+             state.smoothedCovariance(),
+             acts_track.particleHypothesis());
       
       actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
       parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
@@ -769,7 +778,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx,
   // Convert the perigee state and add it to the trajectory
   const Acts::BoundTrackParameters actsPer(acts_track.referenceSurface().getSharedPtr(), 
                                           acts_track.parameters(), 
-                                          acts_track.covariance());
+                                          acts_track.covariance(),
+                                          acts_track.particleHypothesis());
   std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
   typePattern.set(Trk::TrackStateOnSurface::Perigee);

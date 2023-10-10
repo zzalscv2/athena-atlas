@@ -18,6 +18,7 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
+#include "TrkEventPrimitives/PdgToParticleHypothesis.h"
 
 // PACKAGE
 #include "ActsEventCnv/IActsToTrkConverterTool.h"
@@ -65,7 +66,7 @@ public:
   /// Take care of unit conversion between the two.  
   virtual
   const Acts::BoundTrackParameters
-  trkTrackParametersToActsParameters(const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext& gctx) const override;
+  trkTrackParametersToActsParameters(const Trk::TrackParameters &atlasParameter, const Acts::GeometryContext& gctx, Trk::ParticleHypothesis = Trk::pion) const override;
 
   /// Create ATLAS TrackParameter from Acts one.
   /// Take care of unit conversion between the two.  
@@ -99,6 +100,8 @@ private:
  Gaudi::Property<bool> m_visualDebugOutput{
      this, "VisualDebugOutput", false,
      "Print additional output for debug plots"};
+
+  Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
 };
 
 }; // namespace ActsTrk

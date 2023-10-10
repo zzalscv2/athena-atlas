@@ -38,16 +38,14 @@ class IActsExtrapolationTool : virtual public IAlgTool {
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    Acts::Direction navDir = Acts::Direction::Forward,
-                   double pathLimit = std::numeric_limits<double>::max(),
-                   Trk::ParticleHypothesis particleHypo = Trk::pion) const = 0;
+                   double pathLimit = std::numeric_limits<double>::max()) const = 0;
 
   virtual
   std::optional<const Acts::CurvilinearTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             Acts::Direction navDir = Acts::Direction::Forward,
-            double pathLimit = std::numeric_limits<double>::max(),
-                   Trk::ParticleHypothesis particleHypo = Trk::pion) const = 0;
+            double pathLimit = std::numeric_limits<double>::max()) const = 0;
 
   virtual
   ActsPropagationOutput
@@ -55,8 +53,7 @@ class IActsExtrapolationTool : virtual public IAlgTool {
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
                    Acts::Direction navDir = Acts::Direction::Forward,
-                   double pathLimit = std::numeric_limits<double>::max(),
-                   Trk::ParticleHypothesis particleHypo = Trk::pion) const = 0;
+                   double pathLimit = std::numeric_limits<double>::max()) const = 0;
 
   virtual
   std::optional<const Acts::BoundTrackParameters>
@@ -64,8 +61,7 @@ class IActsExtrapolationTool : virtual public IAlgTool {
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,
             Acts::Direction navDir = Acts::Direction::Forward,
-            double pathLimit = std::numeric_limits<double>::max(),
-                   Trk::ParticleHypothesis particleHypo = Trk::pion) const = 0;
+            double pathLimit = std::numeric_limits<double>::max()) const = 0;
 
   virtual
   const IActsTrackingGeometryTool*

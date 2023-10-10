@@ -34,6 +34,7 @@
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/TrackParametrization.hpp"
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
+#include "Acts/EventData/ParticleHypothesis.hpp"
 
 // OTHER
 #include "CLHEP/Random/RandomEngine.h"
@@ -291,7 +292,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
     // Perigee, no alignment -> default geo context
     ActsGeometryContext gctx = m_extrapolationTool->trackingGeometryTool()->getNominalGeometryContext();
     auto anygctx = gctx.context();
-    const Acts::BoundTrackParameters* startParameters = new const Acts::BoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov));
+    const auto* startParameters = new const Acts::GenericBoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov), Acts::ParticleHypothesis::pion());
     
     for (unsigned int surface = 0; surface < m_actsReferenceSurfaceTriples.size(); surface++) {
       n_extraps++;

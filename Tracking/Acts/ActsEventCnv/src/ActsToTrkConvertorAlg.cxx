@@ -94,10 +94,12 @@ namespace ActsTrk
       int numberOfDeadPixel = 0;
       int numberOfDeadSCT = 0;
 
+      Acts::ParticleHypothesis hypothesis = track.particleHypothesis();
+
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [this, &tgContext, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT](const typename ActsTrk::ConstTrackStateBackend::ConstTrackStateProxy &state) -> void
+          [this, &tgContext, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::ConstTrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.referenceSurface().associatedDetectorElement())
@@ -114,7 +116,8 @@ namespace ActsTrk
             {
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                          state.predicted(),
-                                                         state.predictedCovariance());
+                                                         state.predictedCovariance(),
+                                                         hypothesis);
               parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               auto boundaryCheck = m_boundaryCheckTool->boundaryCheck(*parm);
 
@@ -148,7 +151,8 @@ namespace ActsTrk
             {
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                          state.filtered(),
-                                                         state.filteredCovariance());
+                                                         state.filteredCovariance(),
+                                                         hypothesis);
               parm = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsParam, tgContext);
               typePattern.set(Trk::TrackStateOnSurface::Outlier);
             }
@@ -157,7 +161,8 @@ namespace ActsTrk
             {
               const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                          state.smoothed(),
-                                                         state.smoothedCovariance());
+                                                         state.smoothedCovariance(),
+                                                         hypothesis);
 
               // is it really necessary to keep our own copy of all the smoothed parameters?
               actsSmoothedParam.push_back(std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters(actsParam)));
@@ -189,7 +194,8 @@ namespace ActsTrk
       // Convert the perigee state and add it to the trajectory
       const Acts::BoundTrackParameters actsPer(track.referenceSurface().getSharedPtr(),
                                                track.parameters(),
-                                               track.covariance());
+                                               track.covariance(),
+                                               hypothesis);
 
       std::unique_ptr<Trk::TrackParameters> per = m_ATLASConverterTool->actsTrackParametersToTrkParameters(actsPer, tgContext);
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;

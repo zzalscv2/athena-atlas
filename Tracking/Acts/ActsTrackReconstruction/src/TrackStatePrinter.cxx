@@ -537,7 +537,8 @@ namespace ActsTrk
 
       const Acts::BoundTrackParameters per(track.referenceSurface().getSharedPtr(),
                                            track.parameters(),
-                                           track.covariance());
+                                           track.covariance(),
+                                           track.particleHypothesis());
       std::cout << std::setw(5) << lastMeasurementIndex << ' '
                 << std::left
                 << std::setw(4) << "parm" << ' '

@@ -102,14 +102,14 @@ public:
   // Private methods:
   ///////////////////////////////////////////////////////////////////
 private:
-  Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend> prepareOptions(const Acts::GeometryContext& tgContext,
+  Acts::GsfOptions<ActsTrk::TrackStateBackend> prepareOptions(const Acts::GeometryContext& tgContext,
 									    const Acts::MagneticFieldContext& mfContext,
 									    const Acts::CalibrationContext& calContext,
 									    const Acts::PerigeeSurface& surface) const;
   
   std::unique_ptr<Trk::Track> performFit(const EventContext& ctx,
 					 const Acts::GeometryContext& tgContext,
-					 const Acts::Experimental::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
+					 const Acts::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
 					 const std::vector<Acts::SourceLink>& trackSourceLinks,
 					 const Acts::BoundTrackParameters& initialParams) const;
 
@@ -119,7 +119,7 @@ private:
           ActsTrk::TrackContainer& tracks,
           Acts::Result<typename ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const;
 
-  const Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend>& getExtensions() const;
+  const Acts::GsfExtensions<ActsTrk::TrackStateBackend>& getExtensions() const;
 
   /// Private access to the logger
   const Acts::Logger& logger() const;
@@ -141,8 +141,8 @@ private:
       "Maximum number of steps for one propagate call"};
 
   /// Type erased track fitter function.
-  using Fitter = Acts::Experimental::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
-                                                        Acts::Experimental::AtlasBetheHeitlerApprox<6, 5>,
+  using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
+                                                        Acts::AtlasBetheHeitlerApprox<6, 5>,
                                                         ActsTrk::TrackStateBackend>;
 
   std::unique_ptr<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>> m_calibrator;
@@ -150,7 +150,7 @@ private:
 
 
   ATLASSourceLinkSurfaceAccessor m_surfaceAccessor{};
-  Acts::Experimental::GsfExtensions<ActsTrk::TrackStateBackend> m_gsfExtensions;
+  Acts::GsfExtensions<ActsTrk::TrackStateBackend> m_gsfExtensions;
 
   ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
 

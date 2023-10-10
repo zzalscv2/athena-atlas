@@ -142,11 +142,9 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       actor.selectHitSurface = selectHitSurface;
       actor.initialParticle = particle;
       // use AnyCharge to be able to handle neutral and charged parameters
-      Acts::GenericCurvilinearTrackParameters<Acts::AnyCharge> startPoint(
+      Acts::GenericCurvilinearTrackParameters startPoint(
           particle.fourPosition(), particle.direction(),
-          particle.absoluteMomentum(), particle.charge());
-      options.absPdgCode = Acts::makeAbsolutePdgParticle(particle.pdg());
-      options.mass = particle.mass();
+          particle.qOverP(), std::nullopt, particle.hypothesis());
       options.pathLimit = pathLimit * Acts::UnitConstants::cm;
       options.loopProtection = Acts::VectorHelpers::perp(startPoint.momentum()) 
                               < ptLoopers * Acts::UnitConstants::MeV;
