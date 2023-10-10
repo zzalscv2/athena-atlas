@@ -23,3 +23,4 @@ DECLARE_COMPONENT(ActsTrk::StripClusteringTool)
 DECLARE_COMPONENT(ActsTrk::PixelSpacePointFormationTool)
 DECLARE_COMPONENT(ActsTrk::ActsCoreStripSpacePointFormationTool)
 DECLARE_COMPONENT(ActsTrk::ActsTrkStripSpacePointFormationTool)
+

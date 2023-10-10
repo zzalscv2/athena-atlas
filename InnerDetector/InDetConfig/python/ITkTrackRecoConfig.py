@@ -184,6 +184,14 @@ def ITkTrackRecoCfg(flags):
         # TODO: ITk BS providers
         raise RuntimeError("ByteStream inputs not supported")
 
+    # If ACTS is activated, then schedule RoI creator 
+    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
+    configuration_settings = TrackingComponentConfigurer(flags)
+    
+    if configuration_settings.doActsCluster:
+         from ActsConfig.ActsViewConfig import EventViewCreatorAlgCfg
+         result.merge(EventViewCreatorAlgCfg(flags))
+
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
     result.merge(ITkRecPreProcessingSiliconCfg(flags))
 

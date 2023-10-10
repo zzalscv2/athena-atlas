@@ -35,4 +35,6 @@ atlas_add_component( ActsDataPreparation
 			SiSpacePointFormationLib
 			InDetCondTools
 			ReadoutGeometryBase
+			TrigSteeringEvent
+			ActsViewLib
 			)
