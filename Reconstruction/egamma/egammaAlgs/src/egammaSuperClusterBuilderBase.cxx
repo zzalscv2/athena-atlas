@@ -23,6 +23,8 @@
 
 #include <cmath>
 
+using xAOD::EgammaHelpers::summaryValueInt;
+
 namespace {
 /**
  * Duplicate code
@@ -373,6 +375,144 @@ egammaSuperClusterBuilderBase::initialize()
                << "(L2 neg extend - " << m_extraL0L1PhiSize << " , "
                << "L2 pos extend + " << m_extraL0L1PhiSize << ")");
 
+  return StatusCode::SUCCESS;
+}
+
+StatusCode
+egammaSuperClusterBuilderBase::execute(const EventContext& ctx) const
+{
+  SG::ReadHandle<EgammaRecContainer> egammaRecs(m_inputEgammaRecContainerKey,
+                                                ctx);
+  // check is only used for serial running; remove when MT scheduler used
+  ATH_CHECK(egammaRecs.isValid());
+
+  // Have to register cluster container in order to properly get cluster
+  // links.
+  SG::WriteHandle<xAOD::CaloClusterContainer> outputClusterContainer(
+    m_outputSuperClusterCollectionName, ctx);
+
+  ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(outputClusterContainer));
+
+  // Create the new Electron Super Cluster based EgammaRecContainer
+  SG::WriteHandle<EgammaRecContainer> newEgammaRecs(
+    m_outputEgammaRecContainerKey, ctx);
+  ATH_CHECK(newEgammaRecs.record(std::make_unique<EgammaRecContainer>()));
+
+  size_t inputSize = egammaRecs->size();
+  outputClusterContainer->reserve(inputSize);
+  newEgammaRecs->reserve(inputSize);
+
+  std::optional<SG::WriteHandle<xAOD::CaloClusterContainer>> precorrClustersH;
+  if (!m_precorrClustersKey.empty()) {
+    precorrClustersH.emplace(m_precorrClustersKey, ctx);
+    ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(*precorrClustersH));
+    precorrClustersH->ptr()->reserve(inputSize);
+  }
+
+  // The calo Det Descr manager
+  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle{
+    m_caloDetDescrMgrKey, ctx
+  };
+  ATH_CHECK(caloDetDescrMgrHandle.isValid());
+  const CaloDetDescrManager* calodetdescrmgr = *caloDetDescrMgrHandle;
+
+  // If no input return
+  if (egammaRecs->empty()) {
+    return StatusCode::SUCCESS;
+  }
+
+  // Figure the cellCont we need to point to
+  const DataLink<CaloCellContainer>& cellCont =
+    (*egammaRecs)[0]->caloCluster()->getCellLinks()->getCellContainerLink();
+
+  // Loop over input egammaRec objects, build superclusters.
+  size_t numInput = egammaRecs->size();
+  std::vector<bool> isUsed(numInput, false);
+  std::vector<bool> isUsedRevert(numInput, false);
+
+  for (std::size_t i = 0; i < egammaRecs->size(); ++i) {
+    if (isUsed[i]) {
+      continue;
+    }
+    const auto* egRec = (*egammaRecs)[i];
+    // check for good seed cluster
+    const xAOD::CaloCluster* clus = egRec->caloCluster();
+    if (!seedClusterSelection(clus)) {
+      continue;
+    }
+    
+    if (!egammaRecPassesSelection(egRec)) {
+      continue; 
+    }
+
+    // save status in case we fail to create supercluster
+    isUsedRevert = isUsed;
+    // Mark seed as used,
+    isUsed[i] = true;
+
+    // Start accumulating the clusters from the seed
+    std::vector<const xAOD::CaloCluster*> accumulatedClusters;
+    accumulatedClusters.push_back(clus);
+
+    // Now we find all the secondary cluster for this seed
+    // and we accumulate them
+    const std::vector<std::size_t> secondaryIndices =
+      searchForSecondaryClusters(i, egammaRecs.cptr(), isUsed);
+    for (const auto& secClusIndex : secondaryIndices) {
+      const auto* const secRec = (*egammaRecs)[secClusIndex];
+      accumulatedClusters.push_back(secRec->caloCluster());
+    }
+    ATH_MSG_DEBUG("Total clusters " << accumulatedClusters.size());
+
+    // Create the new cluster
+    bool clusterAdded =
+      createNewCluster(ctx,
+                       accumulatedClusters,
+                       cellCont,
+                       *calodetdescrmgr,
+                       getEgammaRecType(egRec),
+                       outputClusterContainer.ptr(),
+                       precorrClustersH ? precorrClustersH->ptr() : nullptr);
+
+    // If we failed to create a cluster revert isUsed for the cluster
+    if (!clusterAdded) {
+      isUsed.swap(isUsedRevert);
+      continue;
+    }
+
+    // Add the cluster links to the super cluster
+    ElementLink<xAOD::CaloClusterContainer> clusterLink(
+      *outputClusterContainer, outputClusterContainer->size() - 1, ctx);
+    std::vector<ElementLink<xAOD::CaloClusterContainer>> elClusters{
+      clusterLink
+    };
+
+    // Make egammaRec object, and push it back into output container.
+    auto newEgRec = std::make_unique<egammaRec>(*egRec);
+    if (newEgRec) {
+      newEgRec->setCaloClusters(elClusters);
+      newEgammaRecs->push_back(std::move(newEgRec));
+    } else {
+      ATH_MSG_FATAL("Couldn't make an egammaRec object");
+      return StatusCode::FAILURE;
+    }
+  } // End loop on egammaRecs
+
+  ATH_CHECK(redoMatching(ctx, newEgammaRecs));
+
+  return StatusCode::SUCCESS;
+}
+
+bool 
+egammaSuperClusterBuilderBase::egammaRecPassesSelection([[maybe_unused]] const egammaRec *egRec) const { 
+  return true;
+}
+
+StatusCode 
+egammaSuperClusterBuilderBase::redoMatching(
+  [[maybe_unused]] const EventContext &ctx, 
+  [[maybe_unused]] SG::WriteHandle<EgammaRecContainer> &newEgammaRecs
+) const {
   return StatusCode::SUCCESS;
 }
 

@@ -118,12 +118,11 @@ def AthenaMPCfg(flags):
                     flags.Output.doWriteDAOD,
                     flags.Output.doWriteRDO)) or flags.Output.HITSFileName!='':
                 AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
-                outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool_0",
+                outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool",
                                                              SharedMemoryName=f"OutputStream{str(os.getpid())}")
 
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(flags,
-                                                 OutputStreamingTool=[outputStreamingTool]))
+                result.merge(AthenaPoolCnvSvcCfg(flags, OutputStreamingTool=outputStreamingTool))
 
         queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
                                                             IsPileup=mpevtloop.IsPileup,

@@ -316,7 +316,8 @@ namespace CP {
             if(isRun3())
             {
                 
-                if(m_quality!=1 && m_quality!=2 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium and highpt (in the barrel) WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
+                if(m_quality!=0 && m_quality!=1 && m_quality!=2 && m_quality!=4) ATH_MSG_WARNING("muonSelectionTool currently only supports loose, medium, tight and highpt WPs for run 3 data/MC, all other WPs can currently only be used for tests using Expert mode");
+                if(m_quality==0 && !m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)) ATH_MSG_WARNING("for run3, Tight WP is only supported when ExcludeNSWFromPrecisionLayers=False and RecalcPrecisionLayerswNSW=True");
             }
             isFirstRun3Check=false;
         }
@@ -416,8 +417,8 @@ namespace CP {
 
     xAOD::Muon::Quality MuonSelectionTool::getQuality(const xAOD::Muon& mu) const {
         ATH_MSG_VERBOSE("Evaluating muon quality...");
-        static const std::set<int> run3_qual{xAOD::Muon::Loose, xAOD::Muon::Medium ,4};
-        //currently allow only medium, loose and highpt(barrel) when note in expert mode for run3
+        static const std::set<int> run3_qual{xAOD::Muon::Loose, xAOD::Muon::Medium, xAOD::Muon::Tight, 4};
+        //currently allow only tight, medium, loose and highpt when not in expert mode for run3
         if(isRun3() && !m_developMode && !run3_qual.count(m_quality))
         {
           ATH_MSG_VERBOSE("tool configured with quality="<<m_quality<<" which is currently only supported in expert mode for run3");
@@ -1286,8 +1287,8 @@ namespace CP {
 
     bool MuonSelectionTool::passTight(const xAOD::Muon& mu, float rho, float oneOverPSig) const {
       
-        if(isRun3() && !m_developMode){
-          ATH_MSG_VERBOSE("Tight WP is currently only supported in expert mode for run3");
+        if(isRun3() && !m_developMode && (m_excludeNSWFromPrecisionLayers || !m_recalcPrecisionLayerswNSW)){
+          ATH_MSG_VERBOSE("for run3, Tight WP is only supported when ExcludeNSWFromPrecisionLayers=False and RecalcPrecisionLayerswNSW=True");
           return false;
         }
         float symmetric_eta = std::abs(mu.eta());

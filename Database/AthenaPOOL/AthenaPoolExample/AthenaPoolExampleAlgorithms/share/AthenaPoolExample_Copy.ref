@@ -7,7 +7,6 @@ EventInfoCnvAlg      INFO Initializing EventInfoCnvAlg
 MetaDataSvc          INFO Initializing MetaDataSvc
 PoolSvc             DEBUG OutputLevel is 2
 AthenaPoolCnvSvc    DEBUG Setting StorageType to ROOTTREEINDEX
-AthenaPoolCnvSvc    DEBUG Registering all Tools in ToolHandleArray OutputStreamingTool
 EventSelector       DEBUG Initializing EventSelector
 EventSelector       DEBUG reinitialization...
 EventSelector        INFO EventSelection with query 

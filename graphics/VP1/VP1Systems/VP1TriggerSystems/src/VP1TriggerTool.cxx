@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -47,14 +47,14 @@ VP1Trig::VP1TriggerTool::~VP1TriggerTool()
 
 //Load Trigger Data from StoreGate (after new event loaded)
 //_____________________________________________________________________________________________
-void VP1Trig::VP1TriggerTool::process(StoreGateSvc* m_storeGate)
+void VP1Trig::VP1TriggerTool::process(StoreGateSvc* storeGate)
 {
   if(m_status)
     clear();
   
   log_info("Load trigger data from StoreGate");
   if(m_triggerprocessor->getInitStatus()) {
-    m_triggerprocessor->loadData(m_storeGate);
+    m_triggerprocessor->loadData(storeGate);
     m_status=true;
     log_info("Successfully retrieved the VP1TriggerTool!");
   }

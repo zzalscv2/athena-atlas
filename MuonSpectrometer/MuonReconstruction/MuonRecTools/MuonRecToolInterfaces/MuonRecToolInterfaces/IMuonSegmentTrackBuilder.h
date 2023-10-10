@@ -49,7 +49,7 @@ namespace Muon {
         /** @brief combine two segments to a super segment
             @param seg1 the first segment
             @param seg2 the second segment
-            @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
+            @param patternPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the combined segment, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<MuonSegment> combineToSegment(const EventContext& ctx, 
@@ -60,7 +60,7 @@ namespace Muon {
         /** @brief combine two segments to a track
             @param seg1 the first segment
             @param seg2 the second segment
-            @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
+            @param patternPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, 
@@ -71,7 +71,7 @@ namespace Muon {
         /** @brief combine a track with a segment
             @param track a track
             @param seg a segment
-            @param externalPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
+            @param patternPhiHits if provided, the external phi hits will be used instead of the phi hits on the segment
             @return a pointer to the resulting track, will return zero if combination failed. Ownership passed to user.
         */
         virtual std::unique_ptr<Trk::Track> combine(const EventContext& ctx, 

@@ -71,6 +71,19 @@ protected:
   /** should be called by the derived class in the initialize phase */
   virtual StatusCode initialize() override;
 
+  /** should be called by the derived class in the execute phase */
+  virtual StatusCode execute(const EventContext &ctx) const override;
+  virtual xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const = 0;
+  virtual bool egammaRecPassesSelection(const egammaRec *egRec) const;
+  virtual StatusCode redoMatching(
+    const EventContext &ctx,
+    SG::WriteHandle<EgammaRecContainer> &newEgammaRecs
+  ) const;
+
+  virtual std::vector<std::size_t> searchForSecondaryClusters(
+    std::size_t egammaInd,
+    const EgammaRecContainer* egammaRecs,
+    std::vector<bool>& isUsed) const = 0;
   /**
    * @brief Is clus in window center around ref?
    *

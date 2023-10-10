@@ -13,6 +13,7 @@
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
+#include <MuonTesterTree/CoordTransformBranch.h>
 namespace MuonGMR4{
 
 class GeoModelMdtTest : public AthHistogramAlgorithm{
@@ -30,6 +31,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
         unsigned int cardinality() const override final {return 1;}
 
     private:
+      void dumpReadoutSideXML() const;
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
@@ -44,7 +46,8 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       
       const MuonDetectorManager* m_detMgr{nullptr};
 
-     
+      Gaudi::Property<std::string> m_swapRead{this, "ReadoutSideXML", ""};
+
       StatusCode dumpToTree(const EventContext& ctx,
                             const ActsGeometryContext& gctx, const MdtReadoutElement* readoutEle);
      
@@ -61,7 +64,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
 
 
       /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
-      MuonVal::ThreeVectorBranch m_readoutTransform{m_tree, "GeoModelTransform"};   
+      MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};   
       /// Number of tubes per layer
       MuonVal::ScalarBranch<unsigned short>& m_numTubes{m_tree.newScalar<unsigned short>("numTubes")};
       /// Number of tubes per layer
@@ -72,10 +75,7 @@ class GeoModelMdtTest : public AthHistogramAlgorithm{
       MuonVal::VectorBranch<unsigned short>& m_tubeNum{m_tree.newVector<unsigned short>("tubeNumber")};
 
       /// Transformation to each tube
-      MuonVal::ThreeVectorBranch m_tubeTransformTran{m_tree, "tubeTransformTranslation"};
-      MuonVal::ThreeVectorBranch m_tubeTransformColX{m_tree, "tubeTransformCol0"};
-      MuonVal::ThreeVectorBranch m_tubeTransformColY{m_tree, "tubeTransformCol1"};
-      MuonVal::ThreeVectorBranch m_tubeTransformColZ{m_tree, "tubeTransformCol2"};
+      MuonVal::CoordSystemsBranch m_tubeTransform{m_tree, "tubeTransform"};     
 
       MuonVal::VectorBranch<double>& m_tubeLength{m_tree.newVector<double>("tubeLength")};
       MuonVal::VectorBranch<double>& m_activeTubeLength{m_tree.newVector<double>("activeTubeLength")};

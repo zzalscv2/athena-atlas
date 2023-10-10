@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -39,7 +39,7 @@ VP1Trig::VP1TriggerProcessor::VP1TriggerProcessor()
     m_daqStatus(false),
     m_trigLvl("all"),
     m_dataFormat('v'),
-    L1_QData{}, L2_QData{}, EF_QData{} {
+    m_L1_QData{}, m_L2_QData{}, m_EF_QData{} {
      log_verbose("constructor");
     }
 
@@ -65,14 +65,14 @@ void VP1Trig::VP1TriggerProcessor::initialize()
 
 //Load Trigger Data
 //_____________________________________________________________________________________________
-void VP1Trig::VP1TriggerProcessor::loadData(StoreGateSvc* m_storeGate)
+void VP1Trig::VP1TriggerProcessor::loadData(StoreGateSvc* storeGate)
 {
   QString method="loadData(): ";
   log_info("Loading trigger data via VP1TriggerSystem");
   
   //--- Note: Filling trigger handle (L1, L2, EF) objects via the VP1TriggerSystem. ---
   if(m_initStatus) {
-    m_daqStatus = m_triggersystem->loadTriggerHandles(m_storeGate, m_trigLvl);
+    m_daqStatus = m_triggersystem->loadTriggerHandles(storeGate, m_trigLvl);
     if(m_daqStatus)
       processData();
     else
@@ -119,8 +119,8 @@ void VP1Trig::VP1TriggerProcessor::processData()
       if(m_dataFormat=='q') {
 	log_verbose("processing sector for QTree format");
 	//************************* INIT *************************//
-	L1_QData = new QTreeWidgetItem(0);
-	L1_QData->setText(0, QString("L1 Data"));
+	m_L1_QData = new QTreeWidgetItem(0);
+	m_L1_QData->setText(0, QString("L1 Data"));
 	
 	//************************* FILL *************************//
 	for(l1it=handleL1.begin(); l1it!=handleL1.end(); ++l1it) {
@@ -134,13 +134,13 @@ void VP1Trig::VP1TriggerProcessor::processData()
               L1_triggers->addChild(l1it->m_qtrigitem);
 	  }
 	}
-	L1_QData->addChild(L1_triggers);
+	m_L1_QData->addChild(L1_triggers);
 	
 	//************************* DIST *************************//
-	m_trigLvlDataSet << L1_QData;
+	m_trigLvlDataSet << m_L1_QData;
 	
 	//General processing status update
-	if(int(L1_QData->childCount())>0)
+	if(int(m_L1_QData->childCount())>0)
 	  l1status=true;
 	else
 	  log_warning("L1 QTree has no children");
@@ -186,19 +186,19 @@ void VP1Trig::VP1TriggerProcessor::processData()
 	log_verbose("processing sector for QTree format");
 	//************************* FILL *************************//	
 	if(l2it->processQTrigItem())
-	  L2_QData = l2it->m_qtrigData;
+	  m_L2_QData = l2it->m_qtrigData;
 	else
-	  L2_QData = new QTreeWidgetItem(0);
-	L2_QData->setText(0, QString("L2 Data"));
+	  m_L2_QData = new QTreeWidgetItem(0);
+	m_L2_QData->setText(0, QString("L2 Data"));
 
 	if(int(L2_triggers->childCount())>0)
-          L2_QData->insertChild(0,L2_triggers); //from L1 processor
+          m_L2_QData->insertChild(0,L2_triggers); //from L1 processor
 	
 	//************************* DIST *************************//
-	m_trigLvlDataSet << L2_QData;
+	m_trigLvlDataSet << m_L2_QData;
 	
 	//General processing status update
-        if(int(L2_QData->childCount())>0)
+        if(int(m_L2_QData->childCount())>0)
           l2status=true;
         else
           log_warning("L2 QTree has no children");
@@ -234,22 +234,22 @@ void VP1Trig::VP1TriggerProcessor::processData()
       if(m_dataFormat=='q') {
 	      log_verbose("processing sector for QTree format");
         //************************* INIT *************************//
-        EF_QData = new QTreeWidgetItem(0);
-        EF_QData->setText(0, QString("EF Data"));
+        m_EF_QData = new QTreeWidgetItem(0);
+        m_EF_QData->setText(0, QString("EF Data"));
 	
         //************************* FILL *************************//
         if(int(EF_triggers->childCount())>0)
-	  EF_QData->addChild(EF_triggers); //from L1 processor
+	  m_EF_QData->addChild(EF_triggers); //from L1 processor
 	for(efit=handleEF.begin(); efit!=handleEF.end(); ++efit) {
 	  if(efit->processQTrigItem())
-	    EF_QData->addChild(efit->m_qtrigData);
+	    m_EF_QData->addChild(efit->m_qtrigData);
 	}
 	
         //************************* DIST *************************//
-        m_trigLvlDataSet << EF_QData;
+        m_trigLvlDataSet << m_EF_QData;
 
 	//General processing status update
-        if(int(EF_QData->childCount())>0)
+        if(int(m_EF_QData->childCount())>0)
           efstatus=true;
         else
           log_warning("EF QTree has no children");
@@ -304,9 +304,9 @@ void VP1Trig::VP1TriggerProcessor::clearSystem()
   
   m_trigLvlDataSet.clear();
   
-  L1_QData->takeChildren();
-  L2_QData->takeChildren();
-  EF_QData->takeChildren();
+  m_L1_QData->takeChildren();
+  m_L2_QData->takeChildren();
+  m_EF_QData->takeChildren();
 }//END: clearSystem
 
 
@@ -375,15 +375,15 @@ QList<QTreeWidgetItem *> VP1Trig::VP1TriggerProcessor::getQTrigData(QString trig
 	if(triglvl.compare("ALL", Qt::CaseInsensitive)==0)
 	  return m_trigLvlDataSet;
 	else if(triglvl.compare("L1", Qt::CaseInsensitive)==0) {
-	  customDataSet << L1_QData;
+	  customDataSet << m_L1_QData;
 	  return customDataSet;
 	}
 	else if(triglvl.compare("L2", Qt::CaseInsensitive)==0) {
-	  customDataSet << L2_QData;
+	  customDataSet << m_L2_QData;
 	  return customDataSet;
 	}
 	else if(triglvl.compare("EF", Qt::CaseInsensitive)==0) {
-	  customDataSet << EF_QData;
+	  customDataSet << m_EF_QData;
 	  return customDataSet;
 	}
       }//all available

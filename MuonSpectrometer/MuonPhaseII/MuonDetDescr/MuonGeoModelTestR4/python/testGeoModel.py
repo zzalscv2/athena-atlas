@@ -17,6 +17,11 @@ def SetupArgParser():
     parser.add_argument("--chambers", default=["all"], nargs="+", help="Chambers to check. If string is all, all chambers will be checked")
     parser.add_argument("--outRootFile", default="MdtGeoDump.root", help="Output ROOT file to dump the geomerty")
     parser.add_argument("--nEvents", help="Number of events to rum", type = int ,default = 1)
+    parser.add_argument("--noMdt", help="Disable the Mdts from the geometry", action='store_true', default = False)
+    parser.add_argument("--noRpc", help="Disable the Rpcs from the geometry", action='store_true', default = False)
+    parser.add_argument("--noTgc", help="Disable the Tgcs from the geometry", action='store_true', default = False)
+    parser.add_argument("--noMM", help="Disable the MMs from the geometry", action='store_true', default = False)
+    parser.add_argument("--noSTGC", help="Disable the sTgcs from the geometry", action='store_true', default = False)
     return parser
 
 def setupServicesCfg(flags):
@@ -108,11 +113,11 @@ def setupGeoR4TestCfg(args):
     flags.Detector.GeometryCalo = False
     ### Muon spectrometer
     flags.Detector.GeometryCSC = False
-    flags.Detector.GeometrysTGC = False
-    flags.Detector.GeometryMM = True
-    flags.Detector.GeometryTGC = False
-    flags.Detector.GeometryRPC = False
-    flags.Detector.GeometryMDT = False
+    flags.Detector.GeometrysTGC = not args.noSTGC
+    flags.Detector.GeometryMM = not args.noMM
+    flags.Detector.GeometryTGC = not args.noTgc
+    flags.Detector.GeometryRPC = not args.noRpc
+    flags.Detector.GeometryMDT = not args.noMdt
 
     flags.Muon.setupGeoModelXML = True
 
@@ -154,15 +159,15 @@ if __name__=="__main__":
     cfg.merge(ActsGeomContextAlgCfg(flags,AlignKeys=[]))  
     #### 
     cfg.merge(setupHistSvcCfg(flags, out_file = args.outRootFile))
+    chambToTest =  args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []
+    
     if flags.Detector.GeometryMDT:
         cfg.merge(GeoModelMdtTestCfg(flags, 
-                                     TestStations = args.chambers if len([x for x in args.chambers if x =="all"]) ==0 else []))
+                                     TestStations = [ch for ch in chambToTest if ch[0] == "B" or ch[0] == "E"],
+                                     ReadoutSideXML="ReadoutSides.xml"))
 
     if flags.Detector.GeometryRPC: 
-        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = []))
+        cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"]))
 
     
     executeTest(cfg, num_events = args.nEvents)
-    
-   
-  

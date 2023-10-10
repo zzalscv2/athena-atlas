@@ -17,6 +17,7 @@
 // Fwd declarations
 #include "egammaInterfaces/IEMTrackMatchBuilder.h"
 #include "egammaRecEvent/egammaRecContainer.h"
+#include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 
@@ -66,6 +67,8 @@
  * \see photonSuperClusterBuilder
  */
 
+using xAOD::EgammaHelpers::summaryValueInt;
+
 class electronSuperClusterBuilder : public egammaSuperClusterBuilderBase
 {
 
@@ -76,9 +79,11 @@ public:
 
   // Tool standard routines.
   virtual StatusCode initialize() override final;
-  StatusCode execute(const EventContext& ctx) const override final;
 
 private:
+  bool egammaRecPassesSelection(const egammaRec *egRec) const override final;
+  xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const override final;
+  StatusCode redoMatching(const EventContext &ctx, SG::WriteHandle<EgammaRecContainer> &newEgammaRecs) const override final;
   static bool matchSameTrack(const xAOD::TrackParticle& seedTrack,
                              const egammaRec& sec);
 
