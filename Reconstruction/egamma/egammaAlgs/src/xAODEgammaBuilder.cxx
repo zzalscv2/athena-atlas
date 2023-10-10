@@ -28,7 +28,7 @@
 
 namespace {
   template <typename SrcT, typename DestT>
-  void doContainerAmbiguityLinks(
+  void doAmbiguityLinks(
     const EventContext& ctx,
     DataVector<SrcT> *srcContainer,
     DataVector<DestT> *destContainer
@@ -289,23 +289,25 @@ xAODEgammaBuilder::execute(const EventContext& ctx) const
   // Tools for ToolHandleArrays
   // First common photon/electron tools*/
   for (const auto& tool : m_egammaTools) {
-    ATH_CHECK(CallTool(ctx, tool, electrons, photons));
+    ATH_CHECK(CallTool(ctx, tool, electrons));
+    ATH_CHECK(CallTool(ctx, tool, photons));
   }
   // Tools for only electrons
   if (m_doElectrons) {
     for (const auto& tool : m_electronTools) {
-      ATH_CHECK(CallTool(ctx, tool, electrons, nullptr));
+      ATH_CHECK(CallTool(ctx, tool, electrons));
     }
   }
   // Tools for only photons
   if (m_doPhotons) {
     for (const auto& tool : m_photonTools) {
-      ATH_CHECK(CallTool(ctx, tool, nullptr, photons));
+      ATH_CHECK(CallTool(ctx, tool, photons));
     }
   }
   // Do the ambiguity Links
   if (m_doElectrons && m_doPhotons) {
-    ATH_CHECK(doAmbiguityLinks(ctx, electrons, photons));
+    doAmbiguityLinks(ctx, electrons, photons);
+    doAmbiguityLinks(ctx, photons, electrons);
   }
 
   if (m_doDummyElectrons) {
@@ -321,41 +323,19 @@ xAODEgammaBuilder::execute(const EventContext& ctx) const
   return StatusCode::SUCCESS;
 }
 
-StatusCode
-xAODEgammaBuilder::doAmbiguityLinks(const EventContext& ctx,
-                                    xAOD::ElectronContainer* electronContainer,
-                                    xAOD::PhotonContainer* photonContainer)
-{
-  doContainerAmbiguityLinks(ctx, electronContainer, photonContainer);
-  doContainerAmbiguityLinks(ctx, photonContainer, electronContainer);
-
-  return StatusCode::SUCCESS;
-}
-
+template <typename T>
 StatusCode
 xAODEgammaBuilder::CallTool(
   const EventContext& ctx,
   const ToolHandle<IegammaBaseTool>& tool,
-  xAOD::ElectronContainer* electronContainer /* = 0*/,
-  xAOD::PhotonContainer* photonContainer /* = 0*/) const
+  DataVector<T> *container) const
 {
+  if (container) {
+    for (T *egamma : *container) {
+      ATH_CHECK(tool->execute(ctx, egamma));
+    }
+  }
 
-  if (electronContainer) {
-    for (xAOD::Electron* electron : *electronContainer) {
-      if (tool->execute(ctx, electron).isFailure()) {
-        ATH_MSG_ERROR("Problem executing tool on electrons: " << tool);
-        return StatusCode::FAILURE;
-      }
-    }
-  }
-  if (photonContainer) {
-    for (xAOD::Photon* photon : *photonContainer) {
-      if (tool->execute(ctx, photon).isFailure()) {
-        ATH_MSG_ERROR("Problem executing tool on photons: " << tool);
-        return StatusCode::FAILURE;
-      }
-    }
-  }
   return StatusCode::SUCCESS;
 }
 
@@ -365,7 +345,6 @@ xAODEgammaBuilder::getElectron(const egammaRec* egRec,
                                const unsigned int author,
                                const uint8_t type) const
 {
-
   if (!egRec || !electronContainer) {
     return false;
   }
