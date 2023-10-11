@@ -114,6 +114,10 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
         double eTot = 0;
         double time = 0;
         for (auto constit : mergedGhostConstits){
+            if (constit==nullptr) {
+                ATH_MSG_INFO("Invalid constituent link, skipping ...");
+                continue;
+            }
             // Filter constituents on negative energy
             if (constit->e()<0) {ATH_MSG_INFO("################## Negative energy cluster"); continue;}
             constituents.push_back( fastjet::PseudoJet(constit->p4()) );
@@ -134,8 +138,32 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
             m_moments->dec_timing(*jet) = time/eTot;
         }
 
+        // Get number of constituents
+        int nConstit = constituents.size();
+        
+        // Run clustering on constituents if not empty
+        fastjet::PseudoJet groomed_jet;
+        if (nConstit!=0) {
+            auto jet_def = fastjet::JetDefinition(fastjet::antikt_algorithm, 1.5);
+            fastjet::ClusterSequence cs(constituents, jet_def);
+            fastjet::PseudoJet recluster_jet = cs.inclusive_jets(0.0).front();
+
+            // Apply grooming to reclustered jet
+            if (m_grooming=="Trimming"){
+                groomed_jet = m_trimmer->result(recluster_jet);
+            }  else if (m_grooming=="SoftDrop"){
+                groomed_jet = m_softdropper->result(recluster_jet);
+            } else {
+                ATH_MSG_DEBUG(" No grooming requested or wrong one, will not apply grooming");
+                groomed_jet = recluster_jet;
+            }
+
+            // update nConstit
+            nConstit = groomed_jet.constituents().size();
+        }
+
         // Fill substructure vars with default values when no constituents in jet
-        if (constituents.size()==0) {
+        if (nConstit==0) {
             m_moments->dec_Qw(*jet) = -999;
 
             m_moments->dec_Tau1(*jet) = -999;
@@ -166,21 +194,6 @@ StatusCode DerivationFramework::RCJetSubstructureAug::addBranches() const
 
 		    return StatusCode::SUCCESS;
 	    }
-
-        // Run clustering on constituents
-        auto jet_def = fastjet::JetDefinition(fastjet::antikt_algorithm, 1.5);
-        fastjet::ClusterSequence cs(constituents, jet_def);
-	    fastjet::PseudoJet recluster_jet = cs.inclusive_jets(0.0).front();
-
-        // Apply grooming to reclustered jet
-        fastjet::PseudoJet groomed_jet = recluster_jet;
-        if (m_grooming=="Trimming"){
-            groomed_jet = m_trimmer->result(recluster_jet);
-        }  else if (m_grooming=="SoftDrop"){
-            groomed_jet = m_softdropper->result(recluster_jet);
-        } else {
-            ATH_MSG_DEBUG(" No grooming requested or wrong one, will not apply grooming");
-        }
         
         // Save reclustered jet infos
         m_moments->dec_pT(*jet) = groomed_jet.pt();
