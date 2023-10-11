@@ -20,6 +20,7 @@
 #include <AsgAnalysisAlgorithms/AsgViewFromSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
+#include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
@@ -51,6 +52,7 @@ DECLARE_COMPONENT (CP::AsgUnionSelectionAlg)
 DECLARE_COMPONENT (CP::AsgViewFromSelectionAlg)
 DECLARE_COMPONENT (CP::AsgxAODNTupleMakerAlg)
 DECLARE_COMPONENT (CP::AsgxAODMetNTupleMakerAlg)
+DECLARE_COMPONENT (CP::BootstrapGeneratorAlg)
 DECLARE_COMPONENT (CP::EventFlagSelectionAlg)
 DECLARE_COMPONENT (CP::EventStatusSelectionAlg)
 DECLARE_COMPONENT (CP::EventSelectionByObjectFlagAlg)

@@ -846,6 +846,11 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         configSeq.setOptionValue ('.photons', 'AnaPhotons' )
         configSeq.setOptionValue ('.muons', 'AnaMuons' )
 
+    if not forCompare:
+        configSeq += makeConfig ('Bootstraps', None )
+        configSeq.setOptionValue ('.nReplicas', 2000 )
+        configSeq.setOptionValue ('.runOnMC', True )
+
     configSeq += makeConfig ('Output.Simple', 'Output')
     configSeq.setOptionValue ('.treeName', 'analysis')
     configSeq.setOptionValue ('.vars', vars)

@@ -24,6 +24,7 @@
 #include <AsgAnalysisAlgorithms/AsgViewFromSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODNTupleMakerAlg.h>
 #include <AsgAnalysisAlgorithms/AsgxAODMetNTupleMakerAlg.h>
+#include <AsgAnalysisAlgorithms/BootstrapGeneratorAlg.h>
 #include <AsgAnalysisAlgorithms/EventFlagSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventStatusSelectionAlg.h>
 #include <AsgAnalysisAlgorithms/EventSelectionByObjectFlagAlg.h>
