@@ -108,8 +108,8 @@ namespace G4DebuggingHelpers {
          ||     nomstr.contains("MDT")
          ||     nomstr.contains("station") ) {
 #else
-         ||     G4StrUtil::contains(nom, "MDT")
-         ||     G4StrUtil::contains(nom, "station") ) {
+         ||     G4StrContains(nom, "MDT")
+         ||     G4StrContains(nom, "station") ) {
 #endif
       return "Muon";
     }
