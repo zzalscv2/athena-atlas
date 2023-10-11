@@ -177,7 +177,7 @@ InDet::SimpleTRT_SeededSpacePointFinder_ATL::find2Sp(const EventContext& ctx,
       /* output for debug purposes, deactivated now. Once development is finished, it will be removed.
        */
       Amg::Vector3D r0 = directionTRT.position();
-      Amg::Vector3D v0(directionTRT.momentum());
+      const Amg::Vector3D& v0(directionTRT.momentum());
       msg(MSG::VERBOSE) << "------------------------------------------------------------------------------------------" << endmsg;
       msg(MSG::VERBOSE) << "Final SpacePoint pairs: " << listOfSpacePointPairsBuffer.size() << endmsg;
       msg(MSG::VERBOSE) << "   Position of initial vector:  ( " << r0.x() << ", " << r0.y() << ", "<< r0.z() << " ) " << endmsg;
@@ -492,7 +492,7 @@ bool InDet::SimpleTRT_SeededSpacePointFinder_ATL::pairIsOk(const Trk::SpacePoint
   Amg::Vector3D s1 = sp1->globalPosition();
   Amg::Vector3D s2 = sp2->globalPosition();
   //Amg::Vector3D r0 = directionTRT.position();
-  Amg::Vector3D v0(directionTRT.momentum());
+  const Amg::Vector3D& v0(directionTRT.momentum());
   Amg::Vector3D s1s2 = s2-s1;  // vector from s1 to s2
   
   msg(MSG::VERBOSE) << "Checking Space Point Pair at ( "<< s1.x() << ", " << s1.y() << ", " << s1.z()
@@ -560,103 +560,103 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::setupLookUpTable()
    
   */
 
-  m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,13));
+  m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,13);
   if (m_maxHoles > 0 )
     {
-      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,12));
-      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,13));
-      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,12));
+      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,12);
+      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,13);
+      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,12);
     }
   if (m_maxHoles > 1 )
     {
-      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,13));
-      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,11));
+      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,13);
+      m_modulLookupTable[0+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,11);
     }
 
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,13));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,12));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,11));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,1));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,1));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,1));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,1));
-  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,2));
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,13);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,12);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,11);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,1);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,1);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,1);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,1);
+  m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,2);
   if (m_maxHoles > 0 )
     {
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,13));
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,12));
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,2));
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,2));
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,2));
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,2));
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,13);
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,12);
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,2);
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,2);
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,2);
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,2);
     }
   if (m_maxHoles > 1 )
     {
-      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,13));
+      m_modulLookupTable[1+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,13);
     }
 
   //  TRT wheels 2 and 3
   for (int i = 2; i<4 ; ++ i)
     {
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,13));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,2));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,3));
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,13);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,2);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,3);
       if (m_maxHoles > 0 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,12));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,3));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,12);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,3);
 	}
       if (m_maxHoles > 1 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,11));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,12));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,3));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,11);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,12);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,3);
 	}
     }
 
   // TRT wheels 4 - 6
   for (int i = 4 ; i < 7 ; ++i )
     {
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,13));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,1));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,2));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,3));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,4));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,5));
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,13);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,1);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,2);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,3);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,4);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,5);
       if (m_maxHoles > 0 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,13));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,12));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,5));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,13);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,12);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,5);
 	}
       if (m_maxHoles > 1 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(11,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(10,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,5));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(11,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(10,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,5);
 	}
     }
 
@@ -664,25 +664,25 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::setupLookUpTable()
   // TRT wheels 7 - 9
   for ( int i = 7 ;  i < 10 ; ++i)
     {
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,3));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,4));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,5));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(5,6));  
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,3);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,4);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,5);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(5,6);  
       if (m_maxHoles > 0 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,2));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,5));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,6));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,2);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,5);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,6);
 	}
       if (m_maxHoles > 1 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(13,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(12,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(1,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,5));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,6));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(13,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(12,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(1,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,5);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,6);
 	}
     }
 
@@ -690,23 +690,23 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::setupLookUpTable()
   // TRT wheels 10 - 12
   for (int i = 10 ; i < 13 ; ++i )
     {
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,5));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(5,6));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(6,7));
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,5);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(5,6);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(6,7);
       if (m_maxHoles > 0 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,5));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,6));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(5,7));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,5);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,6);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(5,7);
 	}
       if (m_maxHoles > 1 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,3));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(2,5));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,6));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,7));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,3);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(2,5);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,6);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,7);
 	}
     }
 
@@ -714,23 +714,23 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::setupLookUpTable()
   // TRT - wheels 13 and 14
   for (int i = 13 ; i < 15 ; ++i )
     {
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(5,6));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(6,7));
-      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(7,8));
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(5,6);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(6,7);
+      m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(7,8);
       if (m_maxHoles > 0 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,5));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,6));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(5,7));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(6,8));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,5);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,6);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(5,7);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(6,8);
 	}
       if (m_maxHoles > 0 )
 	{
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,4));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,5));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(3,6));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(4,7));
-	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(5,8));
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,4);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,5);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(3,6);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(4,7);
+	  m_modulLookupTable[i+SIMPLE_TRT_INDEX_OFFSET].emplace_back(5,8);
 	}
     }
 
@@ -746,7 +746,7 @@ void InDet::SimpleTRT_SeededSpacePointFinder_ATL::setupLookUpTable()
 	  int j = itList->second;
 	  if (i<10) i*=-1;   // don't change the sign of the barrel modules...
 	  if (j<10) j*=-1;
-	  m_modulLookupTable[-1*iTable+SIMPLE_TRT_INDEX_OFFSET].push_back(std::make_pair(i,j));
+	  m_modulLookupTable[-1*iTable+SIMPLE_TRT_INDEX_OFFSET].emplace_back(i,j);
 	}
     }	  
 

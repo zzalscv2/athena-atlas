@@ -39,7 +39,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
     ATH_CHECK( m_verticesKey.initialize() );
     ATH_CHECK( m_jetsKey.initialize() );
 
-    if(m_jetCollection!="")
+    if(!m_jetCollection.empty())
     {
       //from https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/Event/xAOD/xAODTrackingCnv/src/TrackParticleCnvAlg.cxx
       m_trackReadDecorKeyTCTScore = "InDetTrackParticles.TCTScore_"+m_jetCollection;
@@ -76,7 +76,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
    StatusCode TCTDecorCheckInTool::execute() 
    {  
       ATH_MSG_DEBUG( "Executing..." );
-      if(m_jetCollection==""){ ATH_MSG_FATAL("No JetCollection selected! ");}
+      if(m_jetCollection.empty()){ ATH_MSG_FATAL("No JetCollection selected! ");}
       SG::ReadDecorHandle< xAOD::TrackParticleContainer, std::vector<float> > trackReadDecorHandleTCTScore (m_trackReadDecorKeyTCTScore);
       SG::ReadDecorHandle< xAOD::TrackParticleContainer, ElementLink<xAOD::JetContainer> > trackReadDecorHandleJetLink (m_trackReadDecorKeyJetLink);
 
@@ -136,7 +136,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
       for(trackItr = trackTES->begin(); trackItr != trackItrE; ++trackItr){
         const xAOD::TrackParticle* itrk = (*trackItr);
         std::vector<float> v_tctScoresDeco = trackReadDecorHandleTCTScore(*itrk);
-        ElementLink<xAOD::JetContainer> v_jetLinks = trackReadDecorHandleJetLink(*itrk);
+        const ElementLink<xAOD::JetContainer>& v_jetLinks = trackReadDecorHandleJetLink(*itrk);
 
           ATH_MSG_DEBUG("TCT score from decoration: " << v_tctScoresDeco.at(0) << ", " << v_tctScoresDeco.at(1) << ", "<< v_tctScoresDeco.at(2));
           std::vector<float> v_tctScore = m_trackClassificationTool->trkTypeWgts(itrk,*primVertex,(*v_jetLinks)->p4());

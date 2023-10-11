@@ -223,7 +223,7 @@ namespace {
         // d0 cut
         if (m_d0_cut >= 0 && absD0(trk) > m_d0_cut) return false;
       }
-      return !(m_dzSinTheta_cut >= 0 && absDzSinTheta(trk, vtx) > m_dzSinTheta_cut);
+      return m_dzSinTheta_cut < 0 || absDzSinTheta(trk, vtx) <= m_dzSinTheta_cut;
     }
   private:
     float m_d0_cut;

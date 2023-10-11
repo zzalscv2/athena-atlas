@@ -230,7 +230,7 @@ InDet::PixelClusterOnTrackTool::correctDefault
       dynamic_cast<const InDetDD::PixelModuleDesign *>(&element->design());
 
     // get candidate track angle in module local frame
-    Amg::Vector3D my_track = trackPar.momentum();
+    const Amg::Vector3D& my_track = trackPar.momentum();
     const Amg::Vector3D& my_normal = element->normal();
     const Amg::Vector3D& my_phiax = element->phiAxis();
     const Amg::Vector3D& my_etaax = element->etaAxis();
@@ -579,7 +579,7 @@ InDet::PixelClusterOnTrackTool::correctNN
   if (m_doNotRecalibrateNN) {
     Amg::Vector3D glob(pixelPrepCluster->globalPosition());
 
-    Amg::Vector3D my_track = trackPar.momentum();
+    const Amg::Vector3D& my_track = trackPar.momentum();
     const Amg::Vector3D& my_normal = element->normal();
     const Amg::Vector3D& my_phiax = element->phiAxis();
     const Amg::Vector3D& my_etaax = element->etaAxis();
@@ -625,7 +625,7 @@ InDet::PixelClusterOnTrackTool::correctNN
       << " y: " << finalposition[1] << " +/- "
       <<std::sqrt(finalerrormatrix(1, 1)) );
 
-  Amg::Vector3D my_track = trackPar.momentum();
+  const Amg::Vector3D& my_track = trackPar.momentum();
   Amg::Vector3D my_normal = element->normal();
   Amg::Vector3D my_phiax = element->phiAxis();
   Amg::Vector3D my_etaax = element->etaAxis();

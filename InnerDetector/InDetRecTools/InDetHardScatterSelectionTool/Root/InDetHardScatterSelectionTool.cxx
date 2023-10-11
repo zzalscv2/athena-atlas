@@ -167,7 +167,7 @@ const xAOD::Vertex* InDet::InDetHardScatterSelectionTool::getHardScatter(const x
 
   float maxsum = -999.0;
   const xAOD::Vertex* hardscatter = nullptr;
-  for (const auto vtx : *vtxCont) {
+  for (const auto *const vtx : *vtxCont) {
     float sum = 0.;
     // If we are redoing the hardscatter determination:
     if (m_redoHardScatter) {

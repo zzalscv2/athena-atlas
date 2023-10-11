@@ -366,7 +366,7 @@ void InDet::TRT_TrackExtensionToolCosmics::analyze_tpars(const std::vector<const
 namespace InDet{
 class tp_sort_cosmics{
           public:
-          tp_sort_cosmics(double theta){m_theta=theta;}
+          explicit tp_sort_cosmics(double theta){m_theta=theta;}
           bool operator()(const Trk::TrackParameters *par1,const Trk::TrackParameters *par2) const{
             if (m_theta>M_PI_2) return (par1->position().z()>par2->position().z());
             else return (par1->position().z()<par2->position().z());

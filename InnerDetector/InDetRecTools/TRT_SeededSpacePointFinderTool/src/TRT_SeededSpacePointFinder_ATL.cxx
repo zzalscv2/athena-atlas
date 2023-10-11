@@ -446,7 +446,7 @@ namespace {
     class StreamState
     {
     public:
-      StreamState(std::ostream& out)
+      explicit StreamState(std::ostream& out)
            : m_out(out), m_prec(out.precision())
        {
        }
@@ -1037,7 +1037,7 @@ InDet::TRT_SeededSpacePointFinder_ATL::cutTPb(const invar_bypass_struct  &tmp_in
 #endif
   }
 
-  return !(phi_rating < pmin || phi_rating > pmax);
+  return phi_rating >= pmin && phi_rating <= pmax;
 }
 
 // // // // // // // // // // // // // // // // // // // // // // // // // //

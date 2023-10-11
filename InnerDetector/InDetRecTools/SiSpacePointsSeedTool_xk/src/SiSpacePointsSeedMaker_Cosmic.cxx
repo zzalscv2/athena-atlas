@@ -1046,7 +1046,7 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_Cosmic::newSpacePoint
     sps = &(*data.i_spforseed++);
     sps->set(sp, r);
   } else {
-    data.l_spforseed.emplace_back(InDet::SiSpacePointForSeed(sp, r));
+    data.l_spforseed.emplace_back(sp, r);
     sps = &(data.l_spforseed.back());
     data.i_spforseed = data.l_spforseed.end();
   }
@@ -1072,7 +1072,7 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_Cosmic::newSpacePoint
     sps = &(*data.i_spforseed++);
     sps->set(sp, r, sc);
   } else {
-    data.l_spforseed.emplace_back(InDet::SiSpacePointForSeed(sp, r, sc));
+    data.l_spforseed.emplace_back(sp, r, sc);
     sps = &(data.l_spforseed.back());
     data.i_spforseed = data.l_spforseed.end();
   }

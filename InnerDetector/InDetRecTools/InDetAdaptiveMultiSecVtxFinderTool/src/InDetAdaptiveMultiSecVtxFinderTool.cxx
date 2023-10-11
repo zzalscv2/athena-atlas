@@ -160,7 +160,8 @@ namespace InDet {
 
             std::vector<const Trk::TrackParameters*> perigeeList;
 
-            for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_back((seedtrkAtVtxIter)->parameters()); }
+            perigeeList.reserve(seedTracks.size());
+for (const Trk::ITrackLink* seedtrkAtVtxIter : seedTracks) { perigeeList.push_back((seedtrkAtVtxIter)->parameters()); }
 
             ATH_MSG_DEBUG("Going to seed finder");
 
@@ -224,7 +225,7 @@ namespace InDet {
                     ATH_MSG_DEBUG("No tracks found near seed, while at least two tracks were expected.");
 
                     if (VTAV.isAvailable(*actualCandidate)) {
-                        for (auto tav : VTAV(*actualCandidate)) {
+                        for (auto *tav : VTAV(*actualCandidate)) {
                             if (tav == nullptr) continue;
 
                             (static_cast<Trk::MVFVxTrackAtVertex*>(tav))->setLinkToVertices(nullptr);
@@ -274,7 +275,7 @@ namespace InDet {
 
                 if (actualCandidate) {
                     if (VTAV.isAvailable(*actualCandidate)) {
-                        for (auto tav : VTAV(*actualCandidate)) {
+                        for (auto *tav : VTAV(*actualCandidate)) {
                             if (tav == nullptr) continue;
 
                             (static_cast<Trk::MVFVxTrackAtVertex*>(tav))->setLinkToVertices(nullptr);
@@ -335,7 +336,7 @@ namespace InDet {
             for (Trk::VxTrackAtVertex* MVFtrkIter : VTAV(*cand)) {
                 (static_cast<Trk::MVFVxTrackAtVertex*>(MVFtrkIter))->setLinkToVertices(nullptr);
                 delete MVFtrkIter;
-                MVFtrkIter = 0;
+                MVFtrkIter = nullptr;
             }
 
             delete MvfFitInfo(*cand);
@@ -457,7 +458,7 @@ namespace InDet {
 
         ATH_MSG_DEBUG(" getVertexMomenta ... #Tracks associated at vertex : " << tracksAtVertex->size());
 
-        for (Trk::VxTrackAtVertex tracksAtVertexIter : *tracksAtVertex) {
+        for (const Trk::VxTrackAtVertex& tracksAtVertexIter : *tracksAtVertex) {
             if ((tracksAtVertexIter).weight() <= m_minWghtAtVtx) continue;
             {
                 const Trk::TrackParameters* sv_perigee = (tracksAtVertexIter).perigeeAtVertex();
@@ -470,7 +471,7 @@ namespace InDet {
                 double theta = sv_perigee->parameters()[Trk::theta];
                 double phi = sv_perigee->parameters()[Trk::phi];
 
-                TrkAtVtxMomenta.push_back(Amg::Vector3D(qp * sin(theta) * cos(phi), qp * sin(theta) * sin(phi), qp * cos(theta)));
+                TrkAtVtxMomenta.emplace_back(qp * sin(theta) * cos(phi), qp * sin(theta) * sin(phi), qp * cos(theta));
             }
         }
 
@@ -487,10 +488,10 @@ namespace InDet {
             if ((trkAtVtxIter)->weight() > m_minWghtAtVtx) { ntracks += 1; }
         }
 
-        ATH_MSG_DEBUG(" xAOD::Vertex : " << (actualCandidate != 0 ? 1 : 0) << ",  #dof = " << ndf
+        ATH_MSG_DEBUG(" xAOD::Vertex : " << (actualCandidate != nullptr ? 1 : 0) << ",  #dof = " << ndf
                                          << ",  #tracks (weight>0.01) = " << ntracks);
 
-        return (actualCandidate != 0 && ndf > 0 && ntracks >= 2);
+        return (actualCandidate != nullptr && ndf > 0 && ntracks >= 2);
     }
 
     int InDetAdaptiveMultiSecVtxFinderTool::removeTracksFromSeeds(xAOD::Vertex* actualCandidate,

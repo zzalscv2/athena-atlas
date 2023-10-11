@@ -65,9 +65,9 @@ namespace InDet {
 
     // pass the input order for the FastGraph
     lwt::atlas::InputOrder order;
-    order.scalar.push_back( std::make_pair("NNinputs", m_variableOrder) );
+    order.scalar.emplace_back("NNinputs", m_variableOrder );
     // sequence not needed for NN (more for RNN, but set anyway)
-    order.sequence.push_back( std::make_pair("NNinputs", m_variableOrder) );
+    order.sequence.emplace_back("NNinputs", m_variableOrder );
 
     // Build the network
     try {

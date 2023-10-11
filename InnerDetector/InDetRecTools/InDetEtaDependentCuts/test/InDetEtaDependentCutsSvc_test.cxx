@@ -29,7 +29,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY; // This is unit test and a static variable is
 static const std::string testJobOptionsFile("InDetEtaDependentCutsTestJobOpts.txt");
 
 struct GaudiKernelFixture:public IDEDC_GaudiFixtureBase{
-  GaudiKernelFixture(const std::string & joFilename):IDEDC_GaudiFixtureBase(joFilename){
+  explicit GaudiKernelFixture(const std::string & joFilename):IDEDC_GaudiFixtureBase(joFilename){
     //nop, everything in base.
   }
 };
