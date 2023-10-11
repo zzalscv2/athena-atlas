@@ -60,7 +60,7 @@ class ParamsInputFilename(JobProperty):
     """ Filename of the input parametrizations file. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_run2_reprocessing.root'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_AF3_MC23_Sep23.root'
 
 class RunOnGPU(JobProperty):
     """Determines if run the FastCaloSim on GPU or not"""
