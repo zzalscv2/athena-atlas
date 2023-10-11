@@ -21,7 +21,19 @@
 #include <cmath>
 #include <memory>
 
-using xAOD::EgammaHelpers::summaryValueInt;
+
+namespace{
+
+bool matchSameTrack(const xAOD::TrackParticle& seedTrack,
+                    const egammaRec& sec) {
+  const xAOD::TrackParticle* secTrack = sec.trackParticle();
+  if (secTrack) {
+    // Check that the tracks are the same.
+    return seedTrack.index() == secTrack->index();
+  }
+  return false;
+}
+}  // namespace
 
 electronSuperClusterBuilder::electronSuperClusterBuilder(
   const std::string& name,
@@ -55,9 +67,8 @@ bool electronSuperClusterBuilder::egammaRecPassesSelection(const egammaRec *egRe
   if (egRec->getNumberOfTrackParticles() == 0) {
     return false;
   }
-
   const xAOD::TrackParticle *trackParticle = egRec->trackParticle(0);
-
+  using xAOD::EgammaHelpers::summaryValueInt;
   // with possible pixel
   uint8_t nPixelHits = summaryValueInt(*trackParticle, xAOD::numberOfPixelDeadSensors, 0);
   nPixelHits += summaryValueInt(*trackParticle, xAOD::numberOfPixelHits, 0); 
@@ -67,11 +78,7 @@ bool electronSuperClusterBuilder::egammaRecPassesSelection(const egammaRec *egRe
   // and with silicon (add SCT to pixel)
   uint8_t nSiHits = nPixelHits;
   nSiHits += summaryValueInt(*trackParticle, xAOD::numberOfSCTHits, 0);
-  if (nSiHits < m_numberOfSiHits) {
-    return false;
-  }
-
-  return true;
+  return nSiHits >= m_numberOfSiHits;
 };
 
 xAOD::EgammaParameters::EgammaType 
@@ -135,16 +142,4 @@ electronSuperClusterBuilder::searchForSecondaryClusters(
   return secondaryIndices;
 }
 
-bool
-electronSuperClusterBuilder::matchSameTrack(
-  const xAOD::TrackParticle& seedTrack,
-  const egammaRec& sec)
-{
-  const xAOD::TrackParticle* secTrack = sec.trackParticle();
-  if (secTrack) {
-    // Check that the tracks are the same.
-    return seedTrack.index() == secTrack->index();
-  }
-  return false;
-}
 
