@@ -26,6 +26,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
 {
   ASG_TOOL_CLASS(RpdSubtractCentroidTool, ZDC::IZdcAnalysisTool)
 
+public:
   /**
    * The centroid calculation is invalid (ValidBit -> 0) if:
    * - ZDC or RPD analysis failed
@@ -40,14 +41,14 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
    */
   enum {
     ValidBit = 0,              // the output for the given side is valid
-	  ZDCValidBit = 1,           // the ZDC analysis on this side was valid, i.e. not failed
-	  RPDValidBit = 2,           // the RPD analysis on this side was valid, i.e. not failed
-	  MinimumZDCEnergyBit = 3,   // there was less than the minimum ZDC energy (!m_useEmCut) / minimum EM amplitude (m_useEmCut) on this side
-	  ExcessiveZDCEnergyBit = 4, // there was more than the maximum ZDC energy (!m_useEmCut) / minimum EM amplitude (m_useEmCut) on this side
-	  PileupBit = 5,             // pileup was detected on at least one channel
-	  ExcessivePileupBit = 6,    // pileup exceeding specified limit on at least one channel
-	  SubtrUnderflowBit = 7,     // the subtraction yielded excessively negative values in at least one channel
-	  ZeroSumBit = 8,            // a total amplitude sum was zero/negative => undefined/nonsense centroid
+    ZDCValidBit = 1,           // the ZDC analysis on this side was valid, i.e. not failed
+    RPDValidBit = 2,           // the RPD analysis on this side was valid, i.e. not failed
+    MinimumZDCEnergyBit = 3,   // there was less than the minimum ZDC energy (!m_useEmCut) / minimum EM amplitude (m_useEmCut) on this side
+    ExcessiveZDCEnergyBit = 4, // there was more than the maximum ZDC energy (!m_useEmCut) / minimum EM amplitude (m_useEmCut) on this side
+    PileupBit = 5,             // pileup was detected on at least one channel
+    ExcessivePileupBit = 6,    // pileup exceeding specified limit on at least one channel
+    SubtrUnderflowBit = 7,     // the subtraction yielded excessively negative values in at least one channel
+    ZeroSumBit = 8,            // a total amplitude sum was zero/negative => undefined/nonsense centroid
 
     ZeroSumRow0Bit =  9, // amplitude sum over row 0 was zero/negative => undefined/nonsense row 0 x centroid
     ZeroSumRow1Bit = 10, // amplitude sum over row 1 was zero/negative => undefined/nonsense row 1 x centroid
@@ -58,8 +59,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     ZeroSumCol2Bit = 15, // amplitude sum over col 2 was zero/negative => undefined/nonsense col 2 y centroid
     ZeroSumCol3Bit = 16, // amplitude sum over col 3 was zero/negative => undefined/nonsense col 3 y centroid
   };
-    
-public:
+
   RpdSubtractCentroidTool(const std::string& name);
   virtual ~RpdSubtractCentroidTool() override;
 
