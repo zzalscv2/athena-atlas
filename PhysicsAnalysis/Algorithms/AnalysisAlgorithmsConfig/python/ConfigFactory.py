@@ -191,6 +191,9 @@ def makeConfig (factoryName, groupName,
         from AsgAnalysisAlgorithms.SystObjectLinkConfig import makeSystObjectLinkConfig
         makeSystObjectLinkConfig(configSeq, containerName)
 
+    elif factoryName == 'Bootstraps':
+        from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import makeBootstrapGeneratorConfig
+        makeBootstrapGeneratorConfig(configSeq)
 
     else :
         raise ValueError ('unknown factory: ' + factoryName)
