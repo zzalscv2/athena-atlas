@@ -573,7 +573,7 @@ class ComponentAccumulator(AccumulatorCachable):
         return self.__getOne( self._conditionsAlgs, name, "conditions algorithms")
 
     def addService(self, newSvc, primary=False, create=False):
-        """Add service"""
+        """Add service and return the deduplicated instance"""
         if not isinstance(newSvc, (GaudiConfig2._configurables.Configurable,
                                    AthenaPython.Configurables.CfgPyService)):
             raise TypeError(f"Attempt to add wrong type: {type(newSvc).__name__} as service")
@@ -599,10 +599,11 @@ class ComponentAccumulator(AccumulatorCachable):
                 self._servicesToCreate.append(sname)
         if "trackService" in  ComponentAccumulator.debugMode:
             self._componentsContext[newSvc.name] = shortCallStack()
+        return self.__getOne( self._services, newSvc.name, "Services")
 
 
     def addAuditor(self, auditor):
-        """Add Auditor to ComponentAccumulator.
+        """Add Auditor to ComponentAccumulator and return the deduplicated instance.
         This function will also create the required AuditorSvc."""
         if not isinstance(auditor, (GaudiConfig2._configurables.Configurable,
                                     AthenaPython.Configurables.CfgPyAud)):
@@ -614,12 +615,13 @@ class ComponentAccumulator(AccumulatorCachable):
         context = createContextForDeduplication("Merging with existing auditors", auditor.name, self._componentsContext) # noqa : F841
 
         deduplicate(auditor, self._auditors)  #may raise on conflict
-        self.addService(CompFactory.AuditorSvc(Auditors=[auditor.getFullJobOptName()]))
+        newAuditor = self.addService(CompFactory.AuditorSvc(Auditors=[auditor.getFullJobOptName()]))
         self._lastAddedComponent = auditor.name
+        return newAuditor
 
 
     def addPublicTool(self, newTool, primary=False):
-        """Add public tool"""
+        """Add public tool and return the deduplicated instance."""
         if not isinstance(newTool, (GaudiConfig2._configurables.Configurable,
                                     AthenaPython.Configurables.CfgPyAlgTool)):
             raise TypeError(f"Attempt to add wrong type: {type(newTool).__name__} as public AlgTool")
@@ -640,6 +642,8 @@ class ComponentAccumulator(AccumulatorCachable):
         self._lastAddedComponent=newTool.name
         if "trackPublicTool" in ComponentAccumulator.debugMode:
             self._componentsContext[newTool.name] = shortCallStack()
+        # return the new public tool
+        return self.__getOne(self._publicTools, newTool.name, "Public Tool")
 
 
     def getPrimary(self):
