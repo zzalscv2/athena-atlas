@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 import glob
 import os
 
@@ -51,7 +51,11 @@ if not hasattr(svcMgr, "MuonIdHelperSvc"):
 ###################################################
 # Initialize the trigger related things
 ###################################################
-include('TrigT1NSW/TrigT1NSW_jobOptions.py')
+from AthenaCommon.AlgSequence import AlgSequence
+topSequence = AlgSequence()
+
+from TrigT1NSW.TrigT1NSWConf import NSWL1__NSWL1Simulation
+topSequence += NSWL1__NSWL1Simulation("NSWL1Simulation")
 
 #Switch on and off trigger simulaton components sTGC / MicroMegas
 topSequence.NSWL1Simulation.DosTGC=True
