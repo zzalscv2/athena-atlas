@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Constants import INFO
 
 
 def MainServicesMiniCfg(flags, loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
@@ -282,6 +283,10 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     cfg.setAppProperty('AuditAlgorithms', True)
     cfg.setAppProperty('InitializationLoopCheck', False)
     cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)
+    if flags.Exec.OutputLevel > INFO:
+        # this turns off the appMgr spalsh
+        cfg.setAppProperty('AppName', '')
+    cfg.setAppProperty('OutputLevel', flags.Exec.OutputLevel)
 
     if flags.Exec.DebugStage != "":
         cfg.setDebugStage(flags.Exec.DebugStage)
