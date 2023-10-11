@@ -114,7 +114,7 @@ private:
     StringProperty m_randomStream{this, "RandomStream", "MDTCALIBDBALG"};
     ATHRNG::RNGWrapper* m_RNGWrapper{nullptr};
 
-    StringProperty m_RTfileName{this, "RT_InputFile", "DC2_rt_default.dat",
+    StringProperty m_RTfileName{this, "RT_InputFile", "MuonCondAlg/Muon_RT_default.data",
                                  "single input ascii file for default RT to be applied in absence of DB information"};  // temporary!!!
 
     static std::unique_ptr<MuonCalib::RtResolutionLookUp> getRtResolutionInterpolation(const std::vector<MuonCalib::SamplePoint>& sample_points);

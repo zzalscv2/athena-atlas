@@ -147,7 +147,7 @@ StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
 
 StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, LoadedRtMap& loadedRts) const {
     ATH_MSG_DEBUG("defaultRt " << name());
-    std::string fileName = PathResolver::find_file(m_RTfileName, "DATAPATH");
+    std::string fileName = PathResolver::find_calib_file(m_RTfileName);
     std::ifstream inputFile(fileName);
     if (!inputFile) {
         ATH_MSG_ERROR("Unable to open RT Ascii file: " << fileName);

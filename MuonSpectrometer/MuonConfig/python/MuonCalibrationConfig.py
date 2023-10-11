@@ -116,7 +116,6 @@ def MdtCalibDbAlgCfg(flags,name="MdtCalibDbAlg",**kwargs):
     else:
        kwargs.setdefault("ReadKeyTube", "/MDT/T0"+ mdt_folder_name_appendix)
        kwargs.setdefault("ReadKeyRt", "/MDT/RT"+ mdt_folder_name_appendix)
-    kwargs.setdefault("RT_InputFile" , "Muon_RT_default.data")
     if flags.Input.isMC is False: # Should be " if flags.Input.isMC=='data' " ?
         kwargs.setdefault("defaultT0", 40)
     else:
