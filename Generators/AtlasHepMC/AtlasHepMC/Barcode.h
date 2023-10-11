@@ -12,8 +12,9 @@
 #include "HepMC3/GenEvent.h"
 #endif
 namespace HepMC {
-template <class T, std::enable_if_t<std::is_pointer<T>::value, bool> = true > inline int barcode(const T& p){ return p->barcode(); }
-template <class T, std::enable_if_t<std::is_same<T, int>::value, bool > = true>  inline int barcode(const T& p){ return p;}
+template <class T>
+inline int barcode(const T* p){ return p->barcode(); }
+inline int barcode(int p){ return p; }
 #ifdef HEPMC3
 template <class T, std::enable_if_t< !std::is_pointer<T>::value &&
                            !std::is_same<T, HepMC3::GenParticlePtr>::value &&
