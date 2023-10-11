@@ -115,13 +115,6 @@ private:
   bool isPromptEgammaParticle(const EventContext& ctx,
                               const xAOD::TruthParticle* truth) const;
 
-  /** @brief Return the truth particle in the egamma truth container that
-   * corresponds to the given truth particle (egammaTruthContainer is non-const
-   * reference because returning non-const pointer) **/
-  static xAOD::TruthParticle* getEgammaTruthParticle(
-    const xAOD::TruthParticle* truth,
-    xAOD::TruthParticleContainer& egammaTruthContainer) ;
-
   /** @brief Create egamma truth container? **/
   Gaudi::Property<bool> m_doEgammaTruthContainer{
     this,

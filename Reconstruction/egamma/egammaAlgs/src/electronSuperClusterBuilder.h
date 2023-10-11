@@ -84,9 +84,6 @@ private:
   bool egammaRecPassesSelection(const egammaRec *egRec) const override final;
   xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const override final;
   StatusCode redoMatching(const EventContext &ctx, SG::WriteHandle<EgammaRecContainer> &newEgammaRecs) const override final;
-  static bool matchSameTrack(const xAOD::TrackParticle& seedTrack,
-                             const egammaRec& sec);
-
   /**
    * @brief Search for secondary clusters
    *

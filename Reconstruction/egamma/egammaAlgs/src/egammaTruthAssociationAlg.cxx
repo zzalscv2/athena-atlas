@@ -16,6 +16,39 @@
 
 #include <memory>
 
+namespace {
+/** @brief Return the truth particle in the egamma truth container that
+ * corresponds to the given truth particle (egammaTruthContainer is non-const
+ * reference because returning non-const pointer) **/
+xAOD::TruthParticle* getEgammaTruthParticle(
+    const xAOD::TruthParticle* truth,
+    xAOD::TruthParticleContainer& egammaTruthContainer) {
+  if (!truth) {
+    return nullptr;
+  }
+  // Find the original truth particle for electrons from conversions
+  for (unsigned int i = 0;
+       i < 100 && truth && HepMC::is_simulation_particle(truth); ++i) {
+    if (truth->prodVtx() && truth->prodVtx()->nIncomingParticles()) {
+      truth = truth->prodVtx()->incomingParticle(0);
+    } else {
+      break;
+    }
+  }
+
+  // In case truth became null in the above loop
+  if (!truth) {
+    return nullptr;
+  }
+  for (auto egammaTruth : egammaTruthContainer) {
+    if (truth->barcode() == egammaTruth->barcode()) {
+      return egammaTruth;
+    }
+  }
+  return nullptr;
+}
+}  // namespace
+
 using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
 using ClusterLink_t = ElementLink<xAOD::CaloClusterContainer>;
 using ElectronLink_t = ElementLink<xAOD::ElectronContainer>;
@@ -243,35 +276,6 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   auto info = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
   accType(*truthParticle) = static_cast<int>(info.first);
   accOrigin(*truthParticle) = static_cast<int>(info.second);
-}
-
-xAOD::TruthParticle*
-egammaTruthAssociationAlg::getEgammaTruthParticle(
-  const xAOD::TruthParticle* truth,
-  xAOD::TruthParticleContainer& egammaTruthContainer) 
-{
-  if (!truth) {
-    return nullptr;
-  }
-  // Find the original truth particle for electrons from conversions
-  for (unsigned int i = 0; i < 100 && truth && HepMC::is_simulation_particle(truth); ++i) {
-    if (truth->prodVtx() && truth->prodVtx()->nIncomingParticles()) {
-      truth = truth->prodVtx()->incomingParticle(0);
-    } else {
-      break;
-    }
-  }
-
-  // In case truth became null in the above loop
-  if (!truth) {
-    return nullptr;
-  }
-  for (auto egammaTruth : egammaTruthContainer) {
-    if (truth->barcode() == egammaTruth->barcode()) {
-      return egammaTruth;
-    }
-  }
-  return nullptr;
 }
 
 //// The templated functions
