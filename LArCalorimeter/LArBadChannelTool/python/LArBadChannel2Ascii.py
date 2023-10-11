@@ -51,7 +51,7 @@ def LArBadChannel2AsciiCfg(flags,OutputFile,dbname="LAR_OFL",folder=None,tag=Non
     
     theLArBadChannels2Ascii=CompFactory.LArBadChannel2Ascii(SkipDisconnected=True)
     theLArBadChannels2Ascii.FileName=OutputFile
-    theLArBadChannels2Ascii.WithMissing=False if summaryfile=="" else True
+    theLArBadChannels2Ascii.WithMissing=False if (summaryfile=="" and not flags.LArCalib.isSC) else True
     theLArBadChannels2Ascii.ExecutiveSummaryFile=summaryfile
     theLArBadChannels2Ascii.BFKey="LArKnownBadFEBs"
     if (flags.LArCalib.isSC):
