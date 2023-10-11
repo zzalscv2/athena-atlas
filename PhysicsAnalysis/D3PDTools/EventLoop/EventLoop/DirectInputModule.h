@@ -11,6 +11,7 @@
 #include <EventLoop/Module.h>
 #include <optional>
 #include <vector>
+#include <cstdint>
 
 namespace EL
 {
