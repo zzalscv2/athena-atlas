@@ -142,10 +142,10 @@ def trigInDetPrecisionTrackingCfg( inflags, rois, signatureName, in_view=True ):
   from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
   seq = InDetTrigSequence(flags, 
                           flags.Tracking.ActiveConfig.input_name, 
-                          rois = rois, 
+                          rois = flags.Tracking.ActiveConfig.roi, 
                           inView = verifier.getName() if in_view else '')
   
-  acc.merge(seq.sequenceAfterPattern())
+  acc.merge(seq.sequenceAfterPattern(rois = rois))
 
   return acc
 

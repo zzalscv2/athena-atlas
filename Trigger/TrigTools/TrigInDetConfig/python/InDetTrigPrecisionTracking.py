@@ -19,6 +19,9 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     flags = getFlagsForActiveConfig(inflags, config.input_name, log)
 
+    if flags.Tracking.ActiveConfig.roi != rois:
+      log.info( "makeInDetTrigPrecisionTracking:: {} {} {} must be subvolume! ".format(  config.input_name, flags.Tracking.ActiveConfig.roi, rois ) )
+    
     #temporary until imports of public tools via CAtoLegacyPublicToolWrapper not needed anymore  
     from TrigInDetConfig import InDetTrigCA
     InDetTrigCA.InDetTrigConfigFlags = flags
@@ -39,7 +42,7 @@ def makeInDetTrigPrecisionTracking( inflags, config=None, verifier=False, rois='
                             rois = rois, 
                             inView = verifier.getName() if verifier else '')
     
-    ca = seq.sequenceAfterPattern()
+    ca = seq.sequenceAfterPattern(rois = rois)
     sequence = extractAlgorithmsAndAppendCA(ca)
     ptAlgs.extend(sequence)
 
