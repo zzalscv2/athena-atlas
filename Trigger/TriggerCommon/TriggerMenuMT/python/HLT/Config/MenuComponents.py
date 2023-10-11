@@ -1233,9 +1233,9 @@ def appendMenuSequenceCAToAthena(msca, flags):
         return old
 
     sequence = _convertSeq(msca.ca.topSequence())
-    msca.ca._algorithms = {}
+    msca.ca._algorithms.clear()
     msca.ca._sequence = None
-    msca.ca._allSequences = []
+    msca.ca._allSequences.clear()
     appendCAtoAthena(msca.ca)
     if msca.globalRecoCA:
         appendCAtoAthena(msca.globalRecoCA)
