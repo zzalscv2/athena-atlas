@@ -1128,8 +1128,8 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   //
   if (m_fail || !m_havePulse) return false;
 
-  if (!m_useDelayed) DoFit();
-  else DoFitCombined();
+  if (!m_useDelayed) DoFit(maxChisqDivAmp);
+  else DoFitCombined(maxChisqDivAmp);
   
   if (FitFailed()) {
     m_fail = true;
@@ -1163,7 +1163,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   return !m_fitFailed;
 }
 
-void ZDCPulseAnalyzer::DoFit()
+void ZDCPulseAnalyzer::DoFit(double maxChisqDivAmp)
 {
   float fitAmpMin = (m_useLowGain ? m_fitAmpMinLG : m_fitAmpMinHG);
   float fitAmpMax = (m_useLowGain ? m_fitAmpMaxLG : m_fitAmpMaxHG);
@@ -1215,14 +1215,16 @@ void ZDCPulseAnalyzer::DoFit()
   //  Fit the data with the function provided by the fit wrapper
   //
   TFitResultPtr result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-
   int fitStatus = result_ptr;
+  
+  double chisqTest = result_ptr->Chi2()/fitWrapper->GetAmplitude();
 
   //
   // If the first fit failed, also check the EDM. If sufficiently small, the failure is almost surely due
   //   to parameter limits and we just accept the result
   //
-  if (fitStatus != 0 && result_ptr->Edm() > 0.001) {
+  if ((fitStatus != 0 && result_ptr->Edm() > 0.001) || chisqTest > maxChisqDivAmp) // soon: pass the maxChisqDivAmp in so not hard-coded
+    {
     //
     // We contstrain the fit and try again
     //
@@ -1284,7 +1286,7 @@ void ZDCPulseAnalyzer::DoFit()
   m_fitAmpError = fitWrapper->GetAmpError();
 }
 
-void ZDCPulseAnalyzer::DoFitCombined()
+void ZDCPulseAnalyzer::DoFitCombined(double)
 {
   float fitAmpMin = (m_useLowGain ? m_fitAmpMinLG : m_fitAmpMinHG);
   float fitAmpMax = (m_useLowGain ? m_fitAmpMaxLG : m_fitAmpMaxHG);
