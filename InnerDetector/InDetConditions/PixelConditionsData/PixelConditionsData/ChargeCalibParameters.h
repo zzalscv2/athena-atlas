@@ -11,6 +11,7 @@
 #ifndef ChargeCalibParameters_h
 #define ChargeCalibParameters_h
 #include <cmath>
+#include <iosfwd>
  
 namespace PixelChargeCalib{
   
@@ -18,8 +19,15 @@ namespace PixelChargeCalib{
     float A = 0.f;
     float E = 0.f;
     float C = 0.f;
+    LegacyFitParameters() = default;
     LegacyFitParameters(float a, float e, float c):A(a), E(e), C(c){
       //nop
+    }
+    bool operator == (const LegacyFitParameters & o){
+      return ((o.A == A) and (o.E == E) and (o.C == C));
+    }
+    bool operator != (const LegacyFitParameters & o){
+      return not operator == (o);
     }
     ///Return Time-over-threshold given charge Q
     float ToT(float Q) const{
@@ -45,6 +53,12 @@ namespace PixelChargeCalib{
     LinearFitParameters(float f, float g):F(f), G(g){
       //nop
     }
+    bool operator == (const LinearFitParameters & o){
+      return ((o.F == F) and (o.G == G) );
+    }
+    bool operator != (const LinearFitParameters & o){
+      return not operator == (o);
+    }
     float ToT(float Q) const{
       if (F != 0.0f){
         return (Q - G) / F;
@@ -61,8 +75,15 @@ namespace PixelChargeCalib{
     int sigma = 0;
     int noise = 0;
     int inTimeValue = 0;
+    Thresholds() = default;
     Thresholds (int v, int s, int n, int i):value(v), sigma(s), noise(n), inTimeValue(i){
       //nop
+    }
+    bool operator == (const Thresholds & o){
+      return ((o.value == value) and (o.sigma == sigma) and (o.noise == noise) and (o.inTimeValue == inTimeValue));
+    }
+    bool operator != (const Thresholds & o){
+      return not operator == (o);
     }
   };
   
@@ -73,10 +94,21 @@ namespace PixelChargeCalib{
     Resolutions(float r1, float r2):res1(r1), res2(r2){
       //nop
     }
+    bool operator == (const Resolutions & o){
+      return ((o.res1 == res1) and (o.res2 == res2) );
+    }
+    bool operator != (const Resolutions & o){
+      return not operator == (o);
+    }
     float total(float Q) const {
       return res1 + res2 * Q;
     }
   };
+  
+  std::ostream & operator << (std::ostream & out, const LegacyFitParameters & legFitPar);
+  std::ostream & operator << (std::ostream & out, const LinearFitParameters & linFitParam);
+  std::ostream & operator << (std::ostream & out, const Thresholds & t);
+  std::ostream & operator << (std::ostream & out, const Resolutions & r); 
 }
 
 #endif
