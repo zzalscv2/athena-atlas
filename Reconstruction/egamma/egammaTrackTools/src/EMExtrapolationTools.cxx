@@ -26,19 +26,6 @@
 #include <tuple>
 
 namespace {
-const CaloExtensionHelpers::LayersToSelect barrelLayers = {
-  CaloSampling::PreSamplerB,
-  CaloSampling::EMB1,
-  CaloSampling::EMB2,
-  CaloSampling::EMB3
-};
-
-const CaloExtensionHelpers::LayersToSelect endCapLayers = {
-  CaloSampling::PreSamplerE,
-  CaloSampling::EME1,
-  CaloSampling::EME2,
-  CaloSampling::EME3
-};
 /*
  * Create Rescaled Perigee Parametrs
  */
@@ -56,6 +43,19 @@ getRescaledPerigee(const xAOD::TrackParticle& trkPB,
 
   return perigee;
 }
+
+template <std::size_t N>
+void
+getClusterLayers(const std::array<CaloSampling::CaloSample, N>& srcLayers,
+                 std::vector<CaloSampling::CaloSample>& destLayers,
+                 const xAOD::CaloCluster& cluster) {
+  for (const CaloSampling::CaloSample lay : srcLayers) {
+    if (cluster.hasSampling(lay)) {
+      destLayers.emplace_back(lay);
+    }
+  }
+}
+
 } // end of anonymous namespace
 
 EMExtrapolationTools::EMExtrapolationTools(const std::string& type,
@@ -123,50 +123,25 @@ EMExtrapolationTools::getClusterLayerSurfaces(
     CaloSampling::FCAL0,
   };
 
-  // figure which layers we  want to shoot at
-  bool isBarrel = false;
-  if (cluster.inBarrel() && cluster.inEndcap()) {
-    isBarrel = cluster.eSample(CaloSampling::EMB2) >=
-               cluster.eSample(CaloSampling::EME2);
-  } else if (cluster.inBarrel()) {
-    isBarrel = true;
-  }
-
-  bool isEMEC = false;
-  if (!isBarrel && cluster.eSample(CaloSampling::EME2) >
-                     cluster.eSample(CaloSampling::FCAL0)) {
-    isEMEC = true;
-  }
-
   std::vector<CaloSampling::CaloSample> clusterLayers;
   clusterLayers.reserve(4);
-  if (isBarrel) {
-    for (const CaloSampling::CaloSample lay : barrelLayers) {
-      if (cluster.hasSampling(lay)) {
-        clusterLayers.emplace_back(lay);
-      }
+
+  if (cluster.inBarrel() && (!cluster.inEndcap() || 
+                             cluster.eSample(CaloSampling::EMB2) >=
+                             cluster.eSample(CaloSampling::EME2))) {
+      getClusterLayers(barrelLayers, clusterLayers, cluster);
+  }
+  else if (cluster.eSample(CaloSampling::EME2) >
+           cluster.eSample(CaloSampling::FCAL0)) {
+    if(std::abs(cluster.eta()) < 2.5){
+      getClusterLayers(endcapLayers, clusterLayers, cluster);
     }
-  } else if (isEMEC) {
-      if(std::abs(cluster.eta()) < 2.5){
-        for (const CaloSampling::CaloSample lay : endcapLayers) {
-          if (cluster.hasSampling(lay)) {
-            clusterLayers.emplace_back(lay);
-          }
-        }
-      }
-      else {
-        for (const CaloSampling::CaloSample lay : endcapLayersAboveEta2p5) {
-          if (cluster.hasSampling(lay)) {
-            clusterLayers.emplace_back(lay);
-          }
-        }
-      }
-  } else {
-    for (const CaloSampling::CaloSample lay : forwardLayers) {
-      if (cluster.hasSampling(lay)) {
-        clusterLayers.emplace_back(lay);
-      }
+    else {
+      getClusterLayers(endcapLayersAboveEta2p5, clusterLayers, cluster);
     }
+  }
+  else {
+    getClusterLayers(forwardLayers, clusterLayers, cluster);
   }
 
   std::vector<std::unique_ptr<Trk::Surface>> caloSurfaces =
