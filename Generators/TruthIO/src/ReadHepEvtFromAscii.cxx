@@ -52,9 +52,9 @@ bool ReadHepEvtFromAscii::read_hepevt_particle( int i)
     const size_t       max_v_buffer_size=512;
     char buf_p[max_p_buffer_size];
     char buf_v[max_v_buffer_size];
-    int   intcodes[6];
-    double fltcodes1[5];
-    double fltcodes2[4];
+    std::array<int, 6> intcodes {};
+    std::array<double, 5> fltcodes1 {};
+    std::array<double, 4> fltcodes2 {};
     m_file.getline(buf_p,max_p_buffer_size);
     if( strlen(buf_p) == 0 ) return false;
     m_file.getline(buf_v,max_v_buffer_size);

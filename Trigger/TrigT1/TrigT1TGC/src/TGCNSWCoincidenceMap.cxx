@@ -221,8 +221,8 @@ namespace LVL1TGCTrigger {
       std::istringstream cont(field);
       std::string word;
       int shift=0;
-      int phi_shift[4];
-      int eta_shift[37];
+      std::array<int, 4> phi_shift {};
+      std::array<int, 37> eta_shift {};
 
       if(side!=m_side || triggerSector!=m_sector){ continue; }
       for(int phiN=0; phiN!=4; phiN++){
