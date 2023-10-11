@@ -98,12 +98,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> sigCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -132,12 +132,12 @@ namespace OverlayTesting {
     inputSigDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> sigCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),sigElementHash);
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -174,12 +174,12 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> sigDigit = std::make_unique<MdtDigit>(Identifier(12),sigTDC,sigADC,false);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -220,7 +220,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> sigDigit = std::make_unique<MdtDigit>(Identifier(12),sigTDC,sigADC,false);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
@@ -228,7 +228,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> bkgDigit = std::make_unique<MdtDigit>(Identifier(12),bkgTDC,bkgADC,false);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -277,7 +277,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> sigDigit = std::make_unique<MdtDigit>(Identifier(12),sigTDC,sigADC,false);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
@@ -285,7 +285,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> bkgDigit = std::make_unique<MdtDigit>(Identifier(13),bkgTDC,bkgADC,false);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -331,7 +331,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> sigDigit = std::make_unique<MdtDigit>(Identifier(12),sigTDC,sigADC,false);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
@@ -339,7 +339,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> bkgDigit = std::make_unique<MdtDigit>(Identifier(12),bkgTDC,bkgADC,false);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -380,7 +380,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> sigDigit = std::make_unique<MdtDigit>(Identifier(12),sigTDC,sigADC,false);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
@@ -388,7 +388,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> bkgDigit = std::make_unique<MdtDigit>(Identifier(12),bkgTDC,bkgADC,false);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";
@@ -429,7 +429,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> sigDigit = std::make_unique<MdtDigit>(Identifier(12),sigTDC,sigADC,false);
     sigCollection->push_back(sigDigit.release());
     ASSERT_TRUE(inputSigDataHandle->addCollection(sigCollection.get(),sigElementHash).isSuccess());
-    sigCollection.release(); // Now owned by inputSigDataHandle
+    (void)sigCollection.release(); // Now owned by inputSigDataHandle
     SG::WriteHandle<MdtDigitContainer> inputBkgDataHandle{"StoreGateSvc+MDT_DIGITS_BKG"};
     inputBkgDataHandle = std::make_unique<MdtDigitContainer>(containerSize);
     std::unique_ptr<MdtDigitCollection> bkgCollection = std::make_unique<MdtDigitCollection>(Identifier(1234),bkgElementHash);
@@ -437,7 +437,7 @@ namespace OverlayTesting {
     std::unique_ptr<MdtDigit> bkgDigit = std::make_unique<MdtDigit>(Identifier(12),bkgTDC,bkgADC,false);
     bkgCollection->push_back(bkgDigit.release());
     ASSERT_TRUE(inputBkgDataHandle->addCollection(bkgCollection.get(),bkgElementHash).isSuccess());
-    bkgCollection.release(); // Now owned by inputBkgDataHandle
+    (void)bkgCollection.release(); // Now owned by inputBkgDataHandle
 
     // ordering A, C, B is on purpose to test for unintended alphabetic ordering
     std::string  inputSigPropertyValue = "'StoreGateSvc+MDT_DIGITS_SIG'";

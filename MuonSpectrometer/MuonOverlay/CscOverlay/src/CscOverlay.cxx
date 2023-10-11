@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscOverlay.h"
@@ -103,7 +103,7 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        bkgCollection.release();
+        (void)bkgCollection.release();
       }
     } else {
       // Flip the overlap flag
@@ -207,7 +207,7 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
       ATH_MSG_ERROR("Adding overlaid Collection with hashId " << hashId << " failed");
       return StatusCode::FAILURE;
     } else {
-      outputCollection.release();
+      (void)outputCollection.release();
     }
   }
 
