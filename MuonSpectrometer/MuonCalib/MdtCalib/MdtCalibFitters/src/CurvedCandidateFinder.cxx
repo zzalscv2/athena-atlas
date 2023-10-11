@@ -39,7 +39,7 @@ const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double
     std::array<MdtHitPtr, 3> hit;          // three hits defining the candidate line
     double min_z, max_z, dist(0.0);        // auxialiary variables to define the points
     std::vector<Amg::Vector3D> points(3);  // points defining the curved candidate line
-    int sign[3];                           // auxiliary sign array
+    std::array<int,3> sign {};             // auxiliary sign array
     Amg::Vector3D null(0.0, 0.0, 0.0);     // auxiliary 0 vector
     Amg::Vector3D xhat(1.0, 0.0, 0.0);     // auxiliary unit vector
     Amg::Vector3D shift_vec(0.0, est_dir.z(), -est_dir.y());
