@@ -34,11 +34,10 @@
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "TrkVertexFitterInterfaces/IVertexSeedFinder.h"
 
+#include "AthContainers/DataVector.h"
+#include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "VxVertex/RecVertex.h"
 #include "VxVertex/VxTrackAtVertex.h"
-#include "AthContainers/DataVector.h"
-#include "TrkEventPrimitives/ParamDefs.h"
-#include "TrkVertexFitterInterfaces/IVertexFitter.h"
 
 #include "TrkTrackLink/ITrackLink.h"
 #include "TrkTrack/LinkToTrack.h"
@@ -442,7 +441,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
     m_dir = -99999.9 ;
     m_hif = -1.0 ;
 
-    if (perigeesToFit.size()==0)
+    if (perigeesToFit.empty())
     {
       
       ATH_MSG_DEBUG( " No good seed found. Exiting search for vertices..." );
@@ -492,10 +491,10 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
 
     m_v0mass = -199.9 ;
 
-    bool goodVertex = myxAODVertex != 0 && m_ndf >0 && m_ntracks >=2 ;
+    bool goodVertex = myxAODVertex != nullptr && m_ndf >0 && m_ntracks >=2 ;
 
     
-    ATH_MSG_DEBUG( " xAOD::Vertex : " << ( myxAODVertex != 0 ? 1 : 0 ) 
+    ATH_MSG_DEBUG( " xAOD::Vertex : " << ( myxAODVertex != nullptr ? 1 : 0 ) 
          << ",  #dof = " << m_ndf << ",  #tracks (weight>0.01) = " << m_ntracks );
     
 
@@ -609,7 +608,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
             
           const Trk::TrackParameters* trackPerigee=(*tracksIter).initialPerigee();
                         
-          if (trackPerigee==0)
+          if (trackPerigee==nullptr)
           {
             ATH_MSG_ERROR( " Cast to perigee gives 0 pointer, cannot continue " );
             return invalidResponse;
@@ -715,7 +714,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
           
         countTracksAndNdf( myxAODVertex, m_ndf, m_ntracks);
           
-        goodVertex = myxAODVertex != 0 && m_ndf >0 && m_ntracks >=2 ;
+        goodVertex = myxAODVertex != nullptr && m_ndf >0 && m_ntracks >=2 ;
 
         
         ATH_MSG_DEBUG( " Refitted xAODVertex is pointer: " << myxAODVertex << 
@@ -867,7 +866,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
           {
 //              removeCompatibleTracks( groomed,  perigeesToFit,  seedTracks);
             delete groomed ;
-            groomed=0;
+            groomed=nullptr;
           }
 
           removeCompatibleTracks( myxAODVertex,  perigeesToFit,  seedTracks);
@@ -879,7 +878,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
 //        myxAODVertex->setTrackParticleLinks( groomed->trackParticleLinks() ) ;
 
         delete groomed ;
-        groomed=0;
+        groomed=nullptr;
 
         ATH_MSG_DEBUG( " new vertex after grooming with reminded tracks : " << ngroom  
            << " with Chi2/dof " << myxAODVertex->chiSquared()/myxAODVertex->numberDoF() );
@@ -918,7 +917,7 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
         ATH_MSG_DEBUG( " radiiPattern filter hasn't affect in tracks : " << m_ntracks 
            << " with VxType : " << myxAODVertex->vertexType() );
         delete groomed ;
-        groomed = 0 ;
+        groomed = nullptr ;
 #ifdef MONITORTUNES
         mDecor_HitsFilter( *myxAODVertex ) = m_hif ;
 #endif
@@ -1377,11 +1376,11 @@ bool InDetIterativeSecVtxFinderTool::passHitsFilter(
 
     Amg::VectorX tpperigee = m_trkdefiPars.at(p) ;
 
-    if ( ! (    tpperigee[4] == perigee->parameters()[Trk::qOverP]
-            &&  tpperigee[3] == perigee->parameters()[Trk::theta]
-            &&  tpperigee[2]  == perigee->parameters()[Trk::phi]
-            &&  tpperigee[1] == perigee->parameters()[Trk::z0]
-           )
+    if (    tpperigee[4] != perigee->parameters()[Trk::qOverP]
+            ||  tpperigee[3] != perigee->parameters()[Trk::theta]
+            ||  tpperigee[2]  != perigee->parameters()[Trk::phi]
+            ||  tpperigee[1] != perigee->parameters()[Trk::z0]
+           
        ) continue ;
 // for each perigee only single element in trkdefiPars is expected
 
@@ -1524,7 +1523,7 @@ StatusCode InDetIterativeSecVtxFinderTool::initialize()
     printParameterSettings();
 
 #ifdef MONITORTUNES
-    ITHistSvc*     hist_root=0;
+    ITHistSvc*     hist_root=nullptr;
 
     m_leastmodes = new std::vector<int>() ;
     m_sdFsmwX = new std::vector< std::vector < float > >() ;
@@ -1671,18 +1670,18 @@ StatusCode InDetIterativeSecVtxFinderTool::finalize()
     
     delete m_seedac ;
 
-    m_leastmodes = 0 ;
-    m_sdFsmwX = 0 ;
-    m_sdFsmwY = 0 ;
-    m_sdFsmwZ = 0 ;
-    m_sdcrsWght = 0 ;
-    m_nperiseed = 0 ;
-    m_seedX = 0 ;
-    m_seedY = 0 ;
-    m_seedZ = 0 ;
-    m_seedXYdist = 0 ;
-    m_seedZdist = 0 ;
-    m_seedac = 0 ;
+    m_leastmodes = nullptr ;
+    m_sdFsmwX = nullptr ;
+    m_sdFsmwY = nullptr ;
+    m_sdFsmwZ = nullptr ;
+    m_sdcrsWght = nullptr ;
+    m_nperiseed = nullptr ;
+    m_seedX = nullptr ;
+    m_seedY = nullptr ;
+    m_seedZ = nullptr ;
+    m_seedXYdist = nullptr ;
+    m_seedZdist = nullptr ;
+    m_seedac = nullptr ;
 
 #endif
 
@@ -1722,7 +1721,7 @@ double InDetIterativeSecVtxFinderTool::compatibility(const Trk::TrackParameters 
   returnValue += trackParameters2D.dot(weightReduced*trackParameters2D);
   
   delete myLinearizedTrack;
-  myLinearizedTrack=0;
+  myLinearizedTrack=nullptr;
 
   return returnValue;
 }
@@ -1905,7 +1904,7 @@ const std::vector< Amg::Vector3D > InDetIterativeSecVtxFinderTool::getVertexMome
       double theta = sv_perigee->parameters()[Trk::theta];
       double phi = sv_perigee->parameters()[Trk::phi];
 
-      m_TrkAtVtxMomenta.push_back( Amg::Vector3D( qp*sin(theta)*cos(phi), qp*sin(theta)*sin(phi), qp*cos(theta) ) ) ;
+      m_TrkAtVtxMomenta.emplace_back( qp*sin(theta)*cos(phi), qp*sin(theta)*sin(phi), qp*cos(theta) ) ;
 
     }
 
@@ -2024,7 +2023,7 @@ void InDetIterativeSecVtxFinderTool::removeCompatibleTracks(xAOD::Vertex * myxAO
     
     const Trk::TrackParameters* myPerigee=(*perigeesToFitIter);
     
-    if (myPerigee==0)
+    if (myPerigee==nullptr)
     {
       ATH_MSG_ERROR( " Cast to perigee gives 0 pointer " );
       return;

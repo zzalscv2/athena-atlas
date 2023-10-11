@@ -82,7 +82,7 @@ InDet::PixelCluster newInDetpixelCluster(const Identifier& RDOId,
 // to not crash
 class AddNewxAODpixelCluster {
 public:
-    AddNewxAODpixelCluster(xAOD::PixelCluster& cluster)
+    explicit AddNewxAODpixelCluster(xAOD::PixelCluster& cluster)
 	: m_cluster(&cluster) {}
 
     xAOD::PixelCluster* operator()(const Identifier& /*RDOId*/,

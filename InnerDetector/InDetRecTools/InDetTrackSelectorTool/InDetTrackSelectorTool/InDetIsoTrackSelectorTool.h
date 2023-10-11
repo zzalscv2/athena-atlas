@@ -59,8 +59,8 @@ namespace InDet
       /** Sophisticated cut window setting : d0/z0 significance - only when robustCuts off*/
       double                                m_d0Significance;
       double                                m_z0Significance;
-      double                                m_d0Significance2;
-      double                                m_z0Significance2;
+      double                                m_d0Significance2 = 0.0;
+      double                                m_z0Significance2 = 0.0;
 
       ToolHandle<Trk::IExtrapolator>        m_extrapolator;      //<! Extrapolator tool
       /** Extra checks on hits & holes */

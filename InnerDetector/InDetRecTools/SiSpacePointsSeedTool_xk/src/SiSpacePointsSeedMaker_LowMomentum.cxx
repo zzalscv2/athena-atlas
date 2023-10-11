@@ -1101,7 +1101,7 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_LowMomentum::newSpaceP
     sps = &(*data.i_spforseed++);
     sps->set(sp, r);
   } else {
-    data.l_spforseed.emplace_back(InDet::SiSpacePointForSeed(sp, r));
+    data.l_spforseed.emplace_back(sp, r);
     sps = &(data.l_spforseed.back());
     data.i_spforseed = data.l_spforseed.end();
   }
@@ -1125,7 +1125,7 @@ void InDet::SiSpacePointsSeedMaker_LowMomentum::newSeed
     s->add(p2);
     s->setZVertex(static_cast<double>(z));
   } else {
-    data.l_seeds.emplace_back(InDet::SiSpacePointsSeed(p1, p2, z));
+    data.l_seeds.emplace_back(p1, p2, z);
     data.i_seede = data.l_seeds.end();
   }
 }
@@ -1147,7 +1147,7 @@ void InDet::SiSpacePointsSeedMaker_LowMomentum::newSeed
     s->add(p3);
     s->setZVertex(static_cast<double>(z));
   } else {
-    data.l_seeds.emplace_back(InDet::SiSpacePointsSeed(p1, p2, p3, z));
+    data.l_seeds.emplace_back(p1, p2, p3, z);
     data.i_seede = data.l_seeds.end();
   }
 }
@@ -1167,7 +1167,7 @@ void InDet::SiSpacePointsSeedMaker_LowMomentum::fillSeeds(EventData& data)
       InDet::SiSpacePointsSeed* s = &(*data.i_seede++);
       *s = *(*l).second;
     } else {
-      data.l_seeds.emplace_back(InDet::SiSpacePointsSeed(*(*l).second));
+      data.l_seeds.emplace_back(*(*l).second);
       data.i_seede = data.l_seeds.end();
     }
   }

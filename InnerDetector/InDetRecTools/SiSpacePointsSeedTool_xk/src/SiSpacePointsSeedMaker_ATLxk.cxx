@@ -1998,7 +1998,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3Sp
             data.SP[t]->setPt(std::sqrt(onePlusAsquare/BSquare)/(1000.f*data.K)); 
           }
           /// record one possible seed candidate, sort by the curvature 
-          data.CmSp.emplace_back(std::make_pair(B/std::sqrt(onePlusAsquare), data.SP[t]));
+          data.CmSp.emplace_back(B/std::sqrt(onePlusAsquare), data.SP[t]);
           /// store the transverse IP, will later be used as a quality estimator 
 
         }
@@ -2198,7 +2198,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3SpTrigger
         float df = std::abs(std::atan2(ay*y-ax*x,ax*y+ay*x)-data.ftrig);
         if (df > M_PI) df = twoPi-df;
         if (df > data.ftrigW) continue;
-        data.CmSp.emplace_back(std::make_pair(B/std::sqrt(onePlusAsquare), data.SP[t]));
+        data.CmSp.emplace_back(B/std::sqrt(onePlusAsquare), data.SP[t]);
         data.SP[t]->setParam(Im);
       }
       if (!data.CmSp.empty()) {
@@ -2426,7 +2426,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::fillSeeds(EventData& data) const
       *theSeed = *(*it_seedCandidate).second;
     } else {
       /// otherwise, extend the seed list and update the iterators 
-      data.l_seeds_Pro.emplace_back(SiSpacePointsProSeed(*(*it_seedCandidate).second));
+      data.l_seeds_Pro.emplace_back(*(*it_seedCandidate).second);
       theSeed = &(data.l_seeds_Pro.back());
       data.i_seede_Pro = data.l_seeds_Pro.end();
     }
@@ -2568,7 +2568,7 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_ATLxk::newSpacePoint
     sps->set(sp,&(r[0]));
   } else {
     /// otherwise, the list needs to grow
-    data.l_spforseed.emplace_back(InDet::SiSpacePointForSeed(sp, &(r[0])));
+    data.l_spforseed.emplace_back(sp, &(r[0]));
     /// set our return pointer 
     sps = &(data.l_spforseed.back());
     /// and make sure to update the iterator 
@@ -2591,7 +2591,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newSeed
     SiSpacePointsProSeed* s = &(*data.i_seede_Pro++);
     s->set(p1, p2, p3, z);
   } else {
-    data.l_seeds_Pro.emplace_back(SiSpacePointsProSeed(p1, p2, p3, z));
+    data.l_seeds_Pro.emplace_back(p1, p2, p3, z);
     data.i_seede_Pro = data.l_seeds_Pro.end();
   }
 }

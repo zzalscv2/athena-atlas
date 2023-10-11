@@ -45,7 +45,7 @@ StatusCode HitsToxAODCopier::exportPixel(const EventContext& context) const {
   static const SG::AuxElement::Accessor<int> barrel_ec("barrel_ec");
   static const SG::AuxElement::Accessor<uint64_t> id("detid");
 
-  for (auto collection : *rdoContainer) {
+  for (const auto *collection : *rdoContainer) {
     const InDetDD::SiDetectorElement* element =
         m_pixelRDOTool->checkCollection(*collection, context);
     if (element != nullptr) {
@@ -89,10 +89,10 @@ StatusCode HitsToxAODCopier::exportStrip(const EventContext& context) const {
   static const SG::AuxElement::Accessor<int> barrel_ec("barrel_ec");
   static const SG::AuxElement::Accessor<uint64_t> id("detid");
 
-  for ( auto collection: *rdoContainer) {
+  for ( const auto *collection: *rdoContainer) {
     if ( collection == nullptr) continue;
     // const IdentifierHash idHash = rdos->identifyHash();
-    for ( auto hit: *collection) {
+    for ( const auto *hit: *collection) {
         auto* item = new SG::AuxElement();
         output->push_back(item);
         strip(*item) = m_stripIdHelper->strip(hit->identify());

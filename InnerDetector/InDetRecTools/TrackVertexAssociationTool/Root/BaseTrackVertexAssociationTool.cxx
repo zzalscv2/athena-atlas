@@ -159,7 +159,7 @@ bool BaseTrackVertexAssociationTool::isMatch(const xAOD::TrackParticle &trk,
 
   // calculate Δz * sin θ
   dzSinTheta = fabs((trk_z0 - vx_z0 + beamspot_z0) * sin(theta));
-  return !(m_dzSinTheta_cut >= 0 && dzSinTheta > m_dzSinTheta_cut);
+  return m_dzSinTheta_cut < 0 || dzSinTheta <= m_dzSinTheta_cut;
 }
 
 template <typename U, typename V>

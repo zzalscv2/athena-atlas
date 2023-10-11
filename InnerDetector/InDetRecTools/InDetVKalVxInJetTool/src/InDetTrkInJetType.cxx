@@ -86,7 +86,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
       v_BDTName.at(e_ptjet1to2TeV) = "BDTG_1000_2000GeV";
       v_BDTName.at(e_ptjet2to7TeV) = "BDTG_gt2000GeV";
 
-      for(auto bdtname : v_BDTName)
+      for(const auto& bdtname : v_BDTName)
       {
         std::unique_ptr<TTree> training((TTree*)rootFile->Get(bdtname.c_str()));
         m_vTrkClassBDT.push_back(std::make_unique<MVAUtils::BDT>(training.get()));
@@ -107,7 +107,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
         return StatusCode::SUCCESS;
      }
 
-     if(m_jetCollection!="")
+     if(!m_jetCollection.empty())
      {
 
      //from https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/Event/xAOD/xAODTrackingCnv/src/TrackParticleCnvAlg.cxx
@@ -236,7 +236,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
 
     void InDetTrkInJetType::decorateTrack(const xAOD::TrackParticle* trk, const xAOD::Vertex & PV, const xAOD::JetContainer & jets, const xAOD::Jet* curjet) const
     {
-      if(m_jetCollection=="") {ATH_MSG_FATAL("No JetContainer chosen for decorating tracks!"); }
+      if(m_jetCollection.empty()) {ATH_MSG_FATAL("No JetContainer chosen for decorating tracks!"); }
 
       SG::WriteDecorHandle< xAOD::TrackParticleContainer, std::vector<float> > trackWriteDecorHandleTCTScore (m_trackWriteDecorKeyTCTScore);
       SG::WriteDecorHandle< xAOD::TrackParticleContainer, ElementLink<xAOD::JetContainer> > trackWriteDecorHandleJetLink (m_trackWriteDecorKeyJetLink);
@@ -250,11 +250,11 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
    
     void InDetTrkInJetType::decorateJet(const std::vector<const xAOD::TrackParticle*> & trks, const xAOD::TrackParticleContainer& trkContainer, const xAOD::Vertex & PV, const xAOD::Jet* curjet) const
    {
-    if(m_jetCollection=="") {ATH_MSG_FATAL("No JetContainer chosen for decorating tracks!"); }
+    if(m_jetCollection.empty()) {ATH_MSG_FATAL("No JetContainer chosen for decorating tracks!"); }
     SG::WriteDecorHandle< xAOD::JetContainer, std::vector<std::vector<float>> > jetWriteDecorHandleTCTScore (m_jetWriteDecorKeyTCTScore);
     SG::WriteDecorHandle< xAOD::JetContainer, std::vector<ElementLink<xAOD::TrackParticleContainer>> > jetWriteDecorHandleTrackLink (m_jetWriteDecorKeyTrackLink);
 
-    for(auto itrk : trks)
+    for(const auto *itrk : trks)
     {
       std::vector<float> v_tctScore = trkTypeWgts(itrk,PV,curjet->p4());
       jetWriteDecorHandleTCTScore(*curjet).push_back(v_tctScore);

@@ -2030,7 +2030,7 @@ void SiSpacePointsSeedMaker::production3SpPPP(EventData &data,
           data.ITkSP[t]->setParam(d0);
 
           /// record one possible seed candidate, sort by the curvature
-          data.ITkCmSp.emplace_back(std::make_pair(B / std::sqrt(onePlusAsquare), data.ITkSP[t]));
+          data.ITkCmSp.emplace_back(B / std::sqrt(onePlusAsquare), data.ITkSP[t]);
           /// store the transverse IP, will later be used as a quality estimator
           if (data.ITkCmSp.size() == 500)
             break;
@@ -2470,7 +2470,7 @@ void SiSpacePointsSeedMaker::production3SpSSS(EventData &data,
           data.ITkSP[t]->setDR(DR);
 
           /// record one possible seed candidate, sort by the curvature
-          data.ITkCmSp.emplace_back(std::make_pair(B / std::sqrt(onePlusAsquare), data.ITkSP[t]));
+          data.ITkCmSp.emplace_back(B / std::sqrt(onePlusAsquare), data.ITkSP[t]);
           /// store the transverse IP, will later be used as a quality estimator
           if (data.ITkCmSp.size() == 500)
             break;
@@ -2736,7 +2736,7 @@ void SiSpacePointsSeedMaker::fillSeeds(EventData &data)
     else
     {
       /// otherwise, extend the seed list and update the iterators
-      data.i_ITkSeeds.emplace_back(SiSpacePointsProSeed(*(*it_seedCandidate).second));
+      data.i_ITkSeeds.emplace_back(*(*it_seedCandidate).second);
       theSeed = &(data.i_ITkSeeds.back());
       data.i_ITkSeedEnd = data.i_ITkSeeds.end();
     }
@@ -2869,7 +2869,7 @@ SiSpacePointForSeed *SiSpacePointsSeedMaker::newSpacePoint(EventData &data, cons
   else
   {
     /// otherwise, the list needs to grow
-    data.l_ITkSpacePointForSeed.emplace_back(SiSpacePointForSeed(sp, &(r[0])));
+    data.l_ITkSpacePointForSeed.emplace_back(sp, &(r[0]));
     /// set our return pointer
     sps = &(data.l_ITkSpacePointForSeed.back());
     /// and make sure to update the iterator
@@ -2895,7 +2895,7 @@ void SiSpacePointsSeedMaker::newSeed(EventData &data,
   }
   else
   {
-    data.i_ITkSeeds.emplace_back(SiSpacePointsProSeed(p1, p2, p3, z));
+    data.i_ITkSeeds.emplace_back(p1, p2, p3, z);
     data.i_ITkSeedEnd = data.i_ITkSeeds.end();
   }
 }

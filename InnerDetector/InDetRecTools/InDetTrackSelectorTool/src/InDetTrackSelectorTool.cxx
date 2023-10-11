@@ -127,7 +127,7 @@ bool InDetTrackSelectorTool::decision(const Trk::TrackParticleBase & track, cons
 
   int nBLayerHits =  summary->get(Trk::numberOfInnermostPixelLayerHits);
 
-  return !(nPixelHits+nPixelDead<m_numberOfPixelHits || nBLayerHits<m_numberOfBLayerHits);
+  return nPixelHits+nPixelDead>=m_numberOfPixelHits && nBLayerHits>=m_numberOfBLayerHits;
 }
 
 //_______________________________________________________________________________
