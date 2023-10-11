@@ -10,6 +10,8 @@
 @brief TrigHLTMonitoring top-level files
 '''
 
+from AthenaConfiguration.Enums import HIMode
+
 def createHLTDQConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     acf=AthConfigFlags()
@@ -24,7 +26,7 @@ def createHLTDQConfigFlags():
     acf.addFlag('DQ.Steering.HLT.doEgamma', True) 
     acf.addFlag('DQ.Steering.HLT.doInDet', True)
     acf.addFlag('DQ.Steering.HLT.doJet', lambda flags: flags.Input.Format is Format.POOL or (flags.Input.Format is Format.BS and flags.Beam.Type is BeamType.Collisions))
-    acf.addFlag('DQ.Steering.HLT.doMET', True) 
+    acf.addFlag('DQ.Steering.HLT.doMET', lambda flags: flags.Reco.HIMode is not HIMode.HI) 
     acf.addFlag('DQ.Steering.HLT.doMinBias', True) 
     acf.addFlag('DQ.Steering.HLT.doMuon', True) 
     acf.addFlag('DQ.Steering.HLT.doTau', True) 
