@@ -52,7 +52,7 @@ if DetFlags.detdescr.ID_on():
 
 # functionality : Muon reconstruction
 pdr.flag_domain('muon')
-if DetFlags.detdescr.Muon_on() :
+if rec.doESD() and DetFlags.detdescr.Muon_on() :
     try:
         from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
         from MuonRecExample.MuonRecFlags import muonRecFlags
@@ -64,23 +64,14 @@ if DetFlags.detdescr.Muon_on() :
 # hack the merged jobo should test on rec.ScopingLevel=5 to run cosmic reco
 #    4 the essential collision reco 3 high priority 2 medium priodity 1 nice to have
 
-    if  muonRecFlags.useNewConfig():
-        logRecExCommon_topOptions.info('Wrapping Muon new configuration')
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        from MuonConfig.MuonReconstructionConfig import MuonReconstructionCfg
-        # TODO Keep here for the moment, since we still have debugging to do.
-        # from AthenaCommon.Logging import logging
-        # log = logging.getLogger( "Py:conf2toConfigurable" )
-        # log.setLevel(DEBUG)
-        CAtoGlobalWrapper(MuonReconstructionCfg,ConfigFlags)
-    else:
-        try:    
-            include ("MuonRecExample/MuonRec_jobOptions.py")
-        except Exception:
-            treatException("Problem with MuonRecExample/MuonRec_jobOptions.py. Switching off Moore and Muonboy")
-            from MuonRecExample.MuonRecFlags import muonRecFlags
-            muonRecFlags.doStandalone=False
-
+    logRecExCommon_topOptions.info('Wrapping Muon new configuration')
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from MuonConfig.MuonReconstructionConfig import MuonReconstructionCfg
+    # TODO Keep here for the moment, since we still have debugging to do.
+    # from AthenaCommon.Logging import logging
+    # log = logging.getLogger( "Py:conf2toConfigurable" )
+    # log.setLevel(DEBUG)
+    CAtoGlobalWrapper(MuonReconstructionCfg,ConfigFlags)
 else:
     from MuonRecExample.MuonRecFlags import muonRecFlags
     muonRecFlags.doStandalone=False

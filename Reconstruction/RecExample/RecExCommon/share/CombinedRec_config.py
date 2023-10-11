@@ -46,7 +46,7 @@ AODFix_postEgammaRec()
 # to be used  in tau, pflow, e/gamma
 #
 pdr.flag_domain('CaloExtensionBuilder')
-if  (rec.doESD()) and (recAlgs.doEFlow() or rec.doTau() or rec.doMuonCombined()):  # or rec.readESD()
+if  (rec.doESD()) and (recAlgs.doEFlow() or rec.doTau() or rec.doMuonCombined()):    
     try:
         from TrackToCalo.CaloExtensionBuilderAlgConfig import CaloExtensionBuilder
         CaloExtensionBuilder(False)
@@ -66,9 +66,10 @@ if  (rec.doESD()) and (recAlgs.doEFlow() or rec.doTau() or rec.doMuonCombined())
 # functionality : Muon combined reconstruction
 #
 pdr.flag_domain('muoncomb')
-if rec.doMuonCombined() and DetFlags.Muon_on() and DetFlags.ID_on():
+if rec.doESD() and rec.doMuonCombined() and DetFlags.Muon_on() and DetFlags.ID_on():
     try:
-        include ("MuonCombinedRecExample/MuonCombinedRec_config.py")
+        from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedReconstructionCfg
+        CAtoGlobalWrapper(MuonCombinedReconstructionCfg, ConfigFlags)
     except Exception:
         treatException("Could not set up combined muon reconstruction. Switched off !")
         rec.doMuonCombined = False
