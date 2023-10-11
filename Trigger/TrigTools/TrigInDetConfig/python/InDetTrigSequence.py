@@ -17,6 +17,7 @@ class InDetTrigSequence:
     self.__flags = flags
     self.__signature = signature
     self.__rois = rois
+    self.__lastRois = rois
     self.__inView = inView
     self.__lastTrkCollection = self.__flags.Tracking.ActiveConfig.trkTracks_FTF
     self.__ambiPrefix = "TrigAmbi"
@@ -58,11 +59,16 @@ class InDetTrigSequence:
     
       return ca
 
-  def sequenceAfterPattern(self, recoType : str = "PrecisionTracking") -> ComponentAccumulator:
+  def sequenceAfterPattern(self, recoType : str = "PrecisionTracking", rois : str = "") -> ComponentAccumulator:
     with ConfigurableCABehavior():
     
       ca = ComponentAccumulator()
 
+      if rois:
+        self.__lastRois = rois
+        if self.__lastRois != self.__rois:
+          self.__log.info(f"Sequence after patternReco for signature: {self.__signature} RoIs: {self.__rois} inview: {self.__inView} with new RoIs {self.__lastRois} - they must be a subvolume.")
+          
       ca.merge(self.ambiguitySolver())
 
       if self.__flags.Tracking.ActiveConfig.doTRT:
@@ -229,10 +235,9 @@ class InDetTrigSequence:
       
       if self.__flags.Input.Format == Format.BS:
         from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TrigTRTRawDataProviderCfg
-        acc.merge(TrigTRTRawDataProviderCfg(self.__flags, RoIs=self.__rois))
+        acc.merge(TrigTRTRawDataProviderCfg(self.__flags, RoIs=self.__lastRois))
 
       elif not self.__inView:
-        self.__log.info(f"DataPrepTRT signature: {self.__signature} rois: {self.__rois} inview: {self.__inView}")
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         loadRDOs = [( 'TRT_RDO_Container' , 'StoreGateSvc+TRT_RDOs' )]
         acc.merge(SGInputLoaderCfg(self.__flags, Load=loadRDOs))
@@ -240,7 +245,7 @@ class InDetTrigSequence:
       from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
       signature = self.__flags.Tracking.ActiveConfig.input_name
       acc.merge(TrigTRTRIOMakerCfg(self.__flags,
-                                   self.__rois,
+                                   self.__lastRois,
                                    name=f"TrigTRTDriftCircleMaker_{signature}"))
       
 
