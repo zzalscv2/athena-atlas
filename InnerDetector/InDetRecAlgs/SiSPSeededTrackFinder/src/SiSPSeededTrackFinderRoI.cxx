@@ -20,6 +20,46 @@
 #include <fstream>
 #include <string>
 
+namespace {
+///////////////////////////////////////////////////////////////////
+// Track quality calculation
+///////////////////////////////////////////////////////////////////
+
+double trackQuality(const Trk::Track* Tr) {
+
+  double quality = 0.;
+  double baseScorePerHit = 17.;
+  /// check all hits on the track
+  for (const Trk::TrackStateOnSurface* m : *(Tr->trackStateOnSurfaces())) {
+    /// exclude anything which is not an actual hit
+    if (not m->type(Trk::TrackStateOnSurface::Measurement))
+      continue;
+    /// retrieve the fit quality for a given hit
+    const Trk::FitQualityOnSurface fq = m->fitQualityOnSurface();
+    if (!fq)
+      continue;
+
+    double x2 = fq.chiSquared();
+    double hitQualityScore;
+    /// score the hit based on the technology (pixels get higher score) and
+    /// the local chi2 for the hit
+    if (fq.numberDoF() == 2)
+      hitQualityScore = (1.2 * (baseScorePerHit - x2 * .5));  // pix
+    else
+      hitQualityScore = (baseScorePerHit - x2);  // sct
+    if (hitQualityScore < 0.)
+      hitQualityScore =
+          0.;  // do not allow a bad hit to decrement the overall score
+    quality += hitQualityScore;
+  }
+  /// penalise brem tracks
+  if (Tr->info().trackProperties(Trk::TrackInfo::BremFit))
+    quality *= 0.7;
+
+  return quality;
+}
+}  // namespace
+   //
 ///////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////
@@ -73,7 +113,7 @@ namespace InDet {
   class ExtendedSiTrackMakerEventData_xk : public InDet::SiTrackMakerEventData_xk
   {
   public:
-    ExtendedSiTrackMakerEventData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) { 
+    explicit ExtendedSiTrackMakerEventData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) { 
       if (!key.key().empty()) {
         m_prdToTrackMap = SG::ReadHandle<Trk::PRDtoTrackMap>(key);
         setPRDtoTrackMap(m_prdToTrackMap.cptr());
@@ -205,7 +245,7 @@ StatusCode InDet::SiSPSeededTrackFinderRoI::execute(const EventContext& ctx) con
   ERR = false;
   Counter_t counter{};
   std::multimap<double,Trk::Track*>    qualitySortedTrackCandidates;
-  const InDet::SiSpacePointsSeed* seed = 0;
+  const InDet::SiSpacePointsSeed* seed = nullptr;
 
   while((seed = m_seedsmaker->next(ctx, seedEventData))) {
     ++counter[kNSeeds];
@@ -348,38 +388,6 @@ MsgStream& InDet::SiSPSeededTrackFinderRoI::dumpevent( MsgStream& out, const InD
     out<<"|-------------------------------------------------------------------|" <<std::endl;
   }
   return out;
-}
-
-///////////////////////////////////////////////////////////////////
-// Track quality calculation
-///////////////////////////////////////////////////////////////////
-
-double InDet::SiSPSeededTrackFinderRoI::trackQuality(const Trk::Track* Tr) const
-{
- double quality = 0. ;
- double baseScorePerHit       = 17.;
-
-  /// check all hits on the track
- for (const Trk::TrackStateOnSurface* m: *(Tr->trackStateOnSurfaces())) {
-   /// exclude anything which is not an actual hit 
-   if (not m->type(Trk::TrackStateOnSurface::Measurement)) continue;
-  /// retrieve the fit quality for a given hit
-   const Trk::FitQualityOnSurface fq = m->fitQualityOnSurface();
-   if (!fq) continue;
-  
-   double x2 = fq.chiSquared();
-   double hitQualityScore;
-   /// score the hit based on the technology (pixels get higher score) and 
-   /// the local chi2 for the hit 
-   if (fq.numberDoF() == 2) hitQualityScore = (1.2*(baseScorePerHit-x2*.5));   // pix
-   else                      hitQualityScore =      (baseScorePerHit-x2    );   // sct
-   if (hitQualityScore < 0.) hitQualityScore = 0.;    // do not allow a bad hit to decrement the overall score 
-   quality += hitQualityScore;
- }
-  /// penalise brem tracks 
- if (Tr->info().trackProperties(Trk::TrackInfo::BremFit)) quality *= 0.7;
-
- return quality;
 }
 
 ///////////////////////////////////////////////////////////////////

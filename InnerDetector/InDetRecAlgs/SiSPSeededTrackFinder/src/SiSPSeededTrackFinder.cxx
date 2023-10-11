@@ -13,6 +13,50 @@
 
 #include <set>
 
+namespace {
+/** \brief assign a quality score to track candidates.
+ *
+ * The score is increased for each hit, depending on the
+ * technology (pix/sct) and the chi2 of the hit.
+ * A hit will never *reduce* the total score compared to having no hit at all.
+ * @param [in] track Track to evaluate the quality of
+ **/
+
+double trackQuality(const Trk::Track* Tr) {
+
+  double quality = 0.;
+  double baseScorePerHit = 17.;
+  /// check all hits on the track
+  for (const Trk::TrackStateOnSurface* m : *(Tr->trackStateOnSurfaces())) {
+    /// exclude anything which is not an actual hit
+    if (not m->type(Trk::TrackStateOnSurface::Measurement))
+      continue;
+    /// retrieve the fit quality for a given hit
+    const Trk::FitQualityOnSurface fq = m->fitQualityOnSurface();
+    if (!fq)
+      continue;
+
+    double x2 = fq.chiSquared();
+    double hitQualityScore;
+    /// score the hit based on the technology (pixels get higher score) and
+    /// the local chi2 for the hit
+    if (fq.numberDoF() == 2)
+      hitQualityScore = (1.2 * (baseScorePerHit - x2 * .5));  // pix
+    else
+      hitQualityScore = (baseScorePerHit - x2);  // sct
+    if (hitQualityScore < 0.)
+      hitQualityScore =
+          0.;  // do not allow a bad hit to decrement the overall score
+    quality += hitQualityScore;
+  }
+  /// penalise brem tracks
+  if (Tr->info().trackProperties(Trk::TrackInfo::BremFit))
+    quality *= 0.7;
+
+  return quality;
+}
+}  // namespace
+
 ///////////////////////////////////////////////////////////////////
 /// Constructor
 ///////////////////////////////////////////////////////////////////
@@ -116,7 +160,7 @@ namespace InDet {
   class ExtendedSiTrackMakerEventData_xk : public InDet::SiTrackMakerEventData_xk
   {
   public:
-    ExtendedSiTrackMakerEventData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) { 
+    explicit ExtendedSiTrackMakerEventData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) { 
       if (!key.key().empty()) {
         m_prdToTrackMap = SG::ReadHandle<Trk::PRDtoTrackMap>(key);
         setPRDtoTrackMap(m_prdToTrackMap.cptr());
@@ -803,38 +847,6 @@ bool InDet::SiSPSeededTrackFinder::isGoodEvent(const EventContext& ctx) const {
   }
 
   return true;
-}
-
-///////////////////////////////////////////////////////////////////
-// Track quality calculation
-///////////////////////////////////////////////////////////////////
-
-double InDet::SiSPSeededTrackFinder::trackQuality(const Trk::Track* Tr) 
-{
- double quality = 0. ;
- double baseScorePerHit       = 17.;
-
-  /// check all hits on the track
- for (const Trk::TrackStateOnSurface* m: *(Tr->trackStateOnSurfaces())) {
-   /// exclude anything which is not an actual hit 
-   if (not m->type(Trk::TrackStateOnSurface::Measurement)) continue;
-  /// retrieve the fit quality for a given hit
-   const Trk::FitQualityOnSurface fq = m->fitQualityOnSurface();
-   if (!fq) continue;
-  
-   double x2 = fq.chiSquared();
-   double hitQualityScore;
-   /// score the hit based on the technology (pixels get higher score) and 
-   /// the local chi2 for the hit 
-   if (fq.numberDoF() == 2) hitQualityScore = (1.2*(baseScorePerHit-x2*.5));   // pix
-   else                      hitQualityScore =      (baseScorePerHit-x2    );   // sct
-   if (hitQualityScore < 0.) hitQualityScore = 0.;    // do not allow a bad hit to decrement the overall score 
-   quality += hitQualityScore;
- }
-  /// penalise brem tracks 
- if (Tr->info().trackProperties(Trk::TrackInfo::BremFit)) quality *= 0.7;
-
- return quality;
 }
 
 ///////////////////////////////////////////////////////////////////
