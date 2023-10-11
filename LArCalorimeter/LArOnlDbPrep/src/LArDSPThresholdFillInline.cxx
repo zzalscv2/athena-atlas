@@ -262,6 +262,24 @@ StatusCode LArDSPThresholdFillInline::stop() {
 	ptrigSumBlob[hs]=QtThr*m_sigmaNoiseQt;
 
       }// end if NOISE
+
+      if( m_scaleIW > 0.) {
+         int slot = m_onlineID->slot(chid);
+         if (m_onlineID->isEMECIW(chid) || m_onlineID->isFCALchannel(chid) || 
+               (m_onlineID->isHECchannel(chid) && (slot==9 || slot==10) )  ||
+               (m_onlineID->isEMECchannel(chid) && (slot==6||slot==7||slot==14||slot==15))
+            ) {
+            ptQThrBlob[hs] *= m_scaleIW;
+            psamplesBlob[hs] *= m_scaleIW;
+            ptrigSumBlob[hs] *= m_scaleIW;
+         } else if ( (m_onlineID->isHECchannel(chid) && (slot==7 || slot==8) )  ||
+                     (m_onlineID->isEMECchannel(chid) && (slot==12||slot==13)) ) {
+            ptQThrBlob[hs] *= m_scaleIW/2.;
+            psamplesBlob[hs] *= m_scaleIW/2.;
+            ptrigSumBlob[hs] *= m_scaleIW/2.;
+         }
+      } // scaling IW
+
     }//end loop over cells
   }//end if FILL
   

@@ -251,14 +251,19 @@ do
   if [[ "$t" == *"UPD1"* ]]; then 
       database="LAR_ONL"
       folder="/LAR/BadChannels/BadChannels"
-      tagname=
+      folderofl="/LAR/BadChannelsOfl/BadChannels"
+      outputSql=${outputSqliteOnl}
   else
       database="LAR_OFL"
       folder="/LAR/BadChannelsOfl/BadChannels"
+      outputSql=${outputSqlite}
   fi
   if [ $issc == 1 ];
       then
       folder=${folder}"SC"
+      if [[ "$t" == *"UPD1"* ]]; then 
+         folderofl=${folderofl}"SC"
+      fi   
   fi
   echo "Running athena to read current database content...with run number " $runnumber
 
@@ -298,8 +303,8 @@ do
 
   echo "Running athena to build sqlite database file ..."
   echo "Parameters..."
-  echo "Parameters: -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
-  python -m LArBadChannelTool.LArBadChannelDBAlg -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber -f ${folder} $SCParam ${inputTextFile} $iovEnd > ascii2sqlite_$t.log 2>&1
+  echo "Parameters: -o ${outputSql} -t $t -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
+  python -m LArBadChannelTool.LArBadChannelDBAlg -o ${outputSql} -t $t -r $runnumber -l $lbnumber -f ${folder} $SCParam ${inputTextFile} $iovEnd > ascii2sqlite_$t.log 2>&1
   if [ $? -ne 0 ];  then
     echo "Athena reported an error! Please check ascii2sqlite_$t.log!"
     exit 12
@@ -317,7 +322,7 @@ do
   fi
 
   echo "Running athena to test readback of sqlite database file"
-  python -m LArBadChannelTool.LArBadChannel2Ascii -o $outputTextFile -d $outputSqlite -t $t -f ${folder} -r $runnumber -l $lbnumber  $SCParam > sqlite2ascii_$t.log 2>&1
+  python -m LArBadChannelTool.LArBadChannel2Ascii -o $outputTextFile -d $outputSql -t $t -f ${folder} -r $runnumber -l $lbnumber  $SCParam > sqlite2ascii_$t.log 2>&1
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii_$t.log!"
       exit 14
@@ -334,13 +339,13 @@ do
   if [ $t == ${upd4TagName} ]
   then
      echo "Copying UPD4 to Bulk as well..."
-     AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  "sqlite://;schema=${outputSqlite};dbname=CONDBR2"  -f ${folder} -t ${folder//\//}-${upd4TagName} -of ${folder} -ot ${folder//\//}-${BulkTagName}  -c > AtlCoolCopy.ofl.log 2>&1
+     AtlCoolCopy "sqlite://;schema=${outputSql};dbname=CONDBR2"  "sqlite://;schema=${outputSql};dbname=CONDBR2"  -f ${folder} -t ${folder//\//}-${upd4TagName} -of ${folder} -ot ${folder//\//}-${BulkTagName}  -c > AtlCoolCopy.ofl.log 2>&1
   fi   
 
   if [ $t == ${upd1TagName} ]
       then
-      echo "Copying UPD1 for online database..."
-      AtlCoolCopy "sqlite://;schema=${outputSqlite};dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${folder} -t ${folder//\//}-${upd1TagName} -of  ${folder} -ot ${folder//\//}-${upd1TagName} -a -c > AtlCoolCopy.onl.log 2>&1
+      echo "Copying UPD1 to offline database..."
+      AtlCoolCopy "sqlite://;schema=${outputSql};dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${folder} -t ${folder//\//}-${upd1TagName} -of  ${folderofl} -ot ${folderofl//\//}-${upd1TagName} -c > AtlCoolCopy.onl.log 2>&1
       
       if [ $? -ne 0 ];  then
 	  echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.onl.log!"

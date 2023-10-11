@@ -1,5 +1,8 @@
 fill=True
 
+if 'IWscale' not in dir():
+   IWscale=0.
+
 import AthenaCommon.AtlasUnixGeneratorJob
 ## get a handle to the default top-level algorithm sequence
 from AthenaCommon.AlgSequence import AlgSequence
@@ -27,7 +30,7 @@ DetFlags.digitize.all_setOff()
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
 
-svcMgr.IOVDbSvc.GlobalTag = "CONDBR2-BLKPA-2022-02"
+svcMgr.IOVDbSvc.GlobalTag = "CONDBR2-BLKPA-2023-02"
 
 #Get identifier mapping (needed by LArConditionsContainer)
 include("LArConditionsCommon/LArIdMap_comm_jobOptions.py")
@@ -44,7 +47,9 @@ fileName=ModeType+tag
 setName="-".join(tag.split("-")[1:])
 
 from CaloTools.CaloNoiseFlags import jobproperties
+# in case of fixed lumi:
 #jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(1.45*30/8)
+# otherwise reading from folder:
 jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(-1.)
 
 # Turn this off before configuring CaloNoiseCondAlg.
@@ -73,6 +78,7 @@ if 'RunSince' not in dir():
 from LArOnlDbPrep.LArOnlDbPrepConf import LArDSPThresholdFillInline
 theLArDSPThresholdFillAlg=LArDSPThresholdFillInline()
 theLArDSPThresholdFillAlg.OutputLevel=INFO
+theLArDSPThresholdFillAlg.ScaleIW=IWscale
 theLArDSPThresholdFillAlg.Key=folder
 theLArDSPThresholdFillAlg.OutFile=fileName+".txt"
 theLArDSPThresholdFillAlg.mode=ModeType
