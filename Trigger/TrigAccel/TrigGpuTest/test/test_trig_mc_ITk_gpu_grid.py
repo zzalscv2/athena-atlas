@@ -3,7 +3,7 @@
 
 # art-description: Trigger AthenaMT test running new-style job options
 # art-type: grid
-# art-include: master/Athena
+# art-include: main/Athena
 # art-architecture: '#&nvidia'
 # If you create a grid version, check art-output in existing grid tests.
 # art-output: *.txt
