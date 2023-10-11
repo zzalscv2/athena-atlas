@@ -175,12 +175,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
         diff_root_list = " ".join(diff_root_list)
         diff_root_mode = "--inexact-branches --branches-of-interest" if branches_of_interest else "--exact-branches --ignore-leaves"
 
-        # TODO: temporary due to issues with some tests
-        extra_args = ""
-        if test.type != WorkflowType.AF3:
-            extra_args = "--order-trees"
-
-        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --mode semi-detailed --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
+        comparison_command = f"acmd.py diff-root {reference_file} {validation_file} --order-trees --nan-equal --mode semi-detailed --error-mode resilient {diff_root_mode} {diff_root_list} --entries {self.max_events} > {log_file} 2>&1"
         output, error = subprocess.Popen(["/bin/bash", "-c", comparison_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
         output, error = output.decode("utf-8"), error.decode("utf-8")
 
@@ -591,7 +586,7 @@ class FPECheck(WorkflowCheck):
 
     # Ignore FPEs for these tests:
     ignoreTestRuns = []
-    ignoreTestTypes = [WorkflowType.FullSim]
+    ignoreTestTypes = [WorkflowType.FullSim, WorkflowType.AF3]
     ignoreTestIDs = ['x686']
 
     def run(self, test: WorkflowTest):

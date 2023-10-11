@@ -34,9 +34,6 @@ input_EVNT = {
     WorkflowRun.Run3: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1",
     WorkflowRun.Run4: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc21_14TeV.601190.PhPy8EG_AZNLO_Zmumu.evgen.EVNT.e8481/EVNT.30802236._000313.pool.root.1",
 }
-input_EVNT_AF3 = {
-    WorkflowRun.Run2: "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc15_13TeV.ParticleGun.EVNT.pool.root",
-}
 
 # overlay
 input_HITS_MC_overlay = {
