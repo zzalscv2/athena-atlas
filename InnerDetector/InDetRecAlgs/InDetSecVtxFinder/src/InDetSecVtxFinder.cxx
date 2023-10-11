@@ -87,7 +87,7 @@ namespace InDet
     
     if(vtxCont.isValid()){
       const xAOD::Vertex *privtx = static_cast< const xAOD::Vertex * >( *(vtxCont->begin()) );
-      if(!( privtx->vertexType() == xAOD::VxType::PriVtx && privtx->nTrackParticles() >= 2 && privtx->isAvailable<float> ("z"))){
+      if( privtx->vertexType() != xAOD::VxType::PriVtx || privtx->nTrackParticles() < 2 || !privtx->isAvailable<float> ("z")){
         ATH_MSG_WARNING(" Illed Primary vertex, keeping privtx_z0 = 0  ");
       }
       else{

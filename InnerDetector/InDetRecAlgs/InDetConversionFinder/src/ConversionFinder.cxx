@@ -99,7 +99,7 @@ namespace InDet
   class cleanup_pair : public std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>
   {
   public:
-    cleanup_pair(const std::pair<xAOD::VertexContainer*,
+    explicit cleanup_pair(const std::pair<xAOD::VertexContainer*,
                                  xAOD::VertexAuxContainer*>& a_pair)
       : std::pair<xAOD::VertexContainer*, xAOD::VertexAuxContainer*>(a_pair)
     {}

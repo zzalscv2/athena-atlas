@@ -117,15 +117,6 @@ namespace InDet {
     // Protected methods
     ///////////////////////////////////////////////////////////////////
     
-    /** \brief assign a quality score to track candidates. 
-    * 
-    * The score is increased for each hit, depending on the 
-    * technology (pix/sct) and the chi2 of the hit. 
-    * A hit will never *reduce* the total score compared to having no hit at all. 
-    * @param [in] track Track to evaluate the quality of 
-    **/   
-    double trackQuality(const Trk::Track*) const;
-
     /** \brief cleans up the collection of quality filtered tracks. 
     * 
     * Candidates which share most of their hits (steered by m_freeCut) 

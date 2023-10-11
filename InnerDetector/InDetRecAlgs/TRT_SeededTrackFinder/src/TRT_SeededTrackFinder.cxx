@@ -137,7 +137,7 @@ namespace InDet {
   class ExtendedSiCombinatorialTrackFinderData_xk : public InDet::SiCombinatorialTrackFinderData_xk
   {
   public:
-    ExtendedSiCombinatorialTrackFinderData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) {
+    explicit ExtendedSiCombinatorialTrackFinderData_xk(const SG::ReadHandleKey<Trk::PRDtoTrackMap> &key) {
       if (!key.key().empty()) {
         m_prdToTrackMap = SG::ReadHandle<Trk::PRDtoTrackMap>(key);
         setPRDtoTrackMap(m_prdToTrackMap.cptr());
