@@ -4,7 +4,6 @@
 atlas_subdir( LArReadoutGeometry )
 
 # External dependencies:
-find_package( Boost )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 
@@ -12,8 +11,8 @@ find_package( GeoModel COMPONENTS GeoModelKernel )
 atlas_add_library( LArReadoutGeometry
                    src/*.cxx
                    PUBLIC_HEADERS LArReadoutGeometry
-                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS  ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel GeoPrimitives Identifier LArHV StoreGateLib CxxUtils
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} GeoModelUtilities GaudiKernel RDBAccessSvcLib GeoModelInterfaces )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GeoModelUtilities GaudiKernel RDBAccessSvcLib GeoModelInterfaces )
 
