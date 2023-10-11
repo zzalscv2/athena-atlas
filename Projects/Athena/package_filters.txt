@@ -41,11 +41,6 @@
 - Reconstruction/Jet/JetReclustering
 - Trigger/TrigAnalysis/TrigTauAnalysis/TrigTauMatching
 
-# Data quality packages that would generally go to AthDataQuality, but should be built in Athena
-# until we have Run 3 Tier-0 ops
-#- DataQuality/DataQualityConfigurations
-#- DataQuality/DCSCalculator2
-
 # Don't build PerfMonVTune which has external Intel tool dependency
 - Control/PerformanceMonitoring/PerfMonVTune
 
