@@ -14,6 +14,7 @@
 #include "GenEventGenParticleAssociationTool.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "AthenaKernel/errorcheck.h"
 
 
@@ -83,7 +84,7 @@ const HepMC::GenParticle* GenEventGenParticleAssociationTool::next()
     int barcode = HepMC::barcode(*m_it);
     
     // are we at parton/hadron level?
-    if ( (*m_it)->status()!=3 && pdg_id > HepMC::PARTONPDGMAX && !m_haveSeenAHadron ) {
+    if ( (*m_it)->status()!=3 && (MC::isHadron(pdg_id) || MC::isBSM(pdg_id)) && !m_haveSeenAHadron ) {
       m_haveSeenAHadron = true;
       m_firstHadronBarcode = barcode;
     }
@@ -93,14 +94,14 @@ const HepMC::GenParticle* GenEventGenParticleAssociationTool::next()
       ok = true;
 
     //  OK if we should select hadrons and are in hadron range 
-    if( m_doHadrons && m_haveSeenAHadron && barcode < HepMC::PHOTOSMIN )
+    if( m_doHadrons && m_haveSeenAHadron)
       ok = true;
  
     // PHOTOS range: check whether photons come from parton range or 
     // hadron range
     int motherBarcode = 999999999;
     HepMC::ConstGenVertexPtr vprod = (*m_it)->production_vertex();
-    if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(*m_it) && vprod ) {
+    if( !HepMC::is_simulation_particle(*m_it) && vprod ) {
 #ifdef HEPMC3
       if (vprod->particles_in().size() > 0) {
 	auto mother = vprod->particles_in().front();

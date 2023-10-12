@@ -323,12 +323,15 @@ StatusCode TruthHitAnalysis::execute() {
 	  m_h_part_eta->Fill(mom.eta());
 	  m_h_part_phi->Fill(mom.phi());
 	  ++npart_prim; 
+	  m_h_n_generations->Fill(1);
+/* The conditions don't make any sense.
 	  if (currentGenParticlebarcode < HepMC::PHOTOSMIN) {
 	    m_h_n_generations->Fill(0);
 	  }
 	  else {
 	    m_h_n_generations->Fill(1);
 	  }
+*/
 	} //End simulation particle
 	else {
 	  m_h_part_pdgid_sec->Fill(pdg);

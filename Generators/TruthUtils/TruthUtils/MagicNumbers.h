@@ -35,12 +35,6 @@ constexpr int SIM_STATUS_INCREMENT = 100000;
 /// @brief Constant definiting the status threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
 constexpr int SIM_STATUS_THRESHOLD = 20000;
 
-constexpr int PARTONPDGMAX = 43;
-constexpr int NPPDGMIN = 1000000;
-constexpr int NPPDGMAX = 8999999;
-/// @brief Constant defining the barcode threshold for particles from PHOTOS
-constexpr int PHOTOSMIN = 10000;
-
 /// @brief Constant that the meaning of which is currently lost, to be recovered...
 constexpr int SPECIALSTATUS = 902;
 constexpr int EVTGENUNDECAYEDSTATUS = 899;
@@ -50,12 +44,12 @@ constexpr int PYTHIA8NOENDVERTEXSTATUS = 201;
 constexpr int FORWARDTRANSPORTMODELSTATUS = 212;
 
 /// @brief This barcode is used by objects matched to particles from pile-up interactions in standard MC Production
-constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
+constexpr int SUPPRESSED_PILEUP_BARCODE(std::numeric_limits<int32_t>::max());
 
 constexpr int INVALID_PARTICLE_BARCODE = -1;
 
 /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up (TODO update to be status based)
-template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == crazyParticleBarcode);}
+template <class T>  inline bool is_truth_suppressed_pileup(const T& p){ return (barcode(p) == SUPPRESSED_PILEUP_BARCODE);}
 
 /// @brief Method to establish if a if the object is linked to something which was never saved to the HepMC Truth - for example particle was too low energy to be recorded (TODO update to be status based)
 template <class T>  inline bool no_truth_link(const T& p){ return (barcode(p) == 0);} // TODO potentially this could become id()==0?

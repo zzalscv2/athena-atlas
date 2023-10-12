@@ -65,7 +65,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
   genPart->set_pdg_id(999); //Geantino
   genPart->set_status(1); //!< set decay status
-  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode);
+  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE);
 
   HepMC::GenVertexPtr genVertex=HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);

@@ -21,7 +21,7 @@
 // CLHEP
 #include "GeoPrimitives/GeoPrimitives.h"
 
-#include "TruthUtils/MagicNumbers.h" // for crazyParticleBarcode
+#include "TruthUtils/MagicNumbers.h" // for SUPPRESSED_PILEUP_BARCODE
 
 McEventCollectionFilter::McEventCollectionFilter(const std::string &name, ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator)
@@ -72,7 +72,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   genPart->set_pdg_id(m_pileUpParticlePDGID); //Geantino
   genPart->set_status(1); //!< set decay status
 #ifndef HEPMC3
-  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode );
+  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
 #endif
   HepMC::GenVertexPtr genVertex = HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);
@@ -160,7 +160,7 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   //.....add new vertex with geantino
   evt->add_vertex(genVertex);
 #ifdef HEPMC3
-  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode );
+  HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
 #endif
   int referenceBarcode = HepMC::barcode(genPart);
   ATH_MSG_DEBUG("Reference barcode: " << referenceBarcode);

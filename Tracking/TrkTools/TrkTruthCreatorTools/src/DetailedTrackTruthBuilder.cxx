@@ -464,7 +464,7 @@ SubDetHitStatistics DetailedTrackTruthBuilder::countPRDsOnTruth(const TruthTraje
     // sum over hits from all particles that arise from this pile-up
     // collision. the result is useless. don't do it.
     // in release 20, geantinos have
-    //   barcode==HepMC::crazyParticleBarcode
+    //   barcode==HepMC::SUPPRESSED_PILEUP_BARCODE
     //   pdg_id==999
     if (!(*p).cptr()) {
        ATH_MSG_WARNING( "HepMcParticleLink " << *p << " in truth trajectory does not point to a valid GenParticle.");
