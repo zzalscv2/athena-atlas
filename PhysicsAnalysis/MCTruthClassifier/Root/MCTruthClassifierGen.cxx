@@ -598,47 +598,37 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
       NumOfNucFr != 0)
     return ElMagProc;
 
-  if (numOfParents == 1 && abs(motherPDG) == 211 && numOfDaug > 2 && NumOfNucFr != 0)
-    return ElMagProc;
+  if (numOfParents == 1 && abs(motherPDG) == 211 && numOfDaug > 2 && NumOfNucFr != 0) return ElMagProc;
 
   // nuclear photo fission
-  if (motherPDG == 22 && numOfDaug > 4 && NumOfNucFr != 0)
-    return ElMagProc;
+  if (motherPDG == 22 && numOfDaug > 4 && NumOfNucFr != 0) return ElMagProc;
 
   // unknown process el(pos)->el+pos??
-  if (abs(motherPDG) == 11 && numOfDaug == 2 && NumOfEl == 1 && NumOfPos == 1)
-    return ElMagProc;
+  if (abs(motherPDG) == 11 && numOfDaug == 2 && NumOfEl == 1 && NumOfPos == 1) return ElMagProc;
 
   // unknown process el->el+el??
-  if (motherPDG == 11 && numOfDaug == 2 && NumOfEl == 2 && NumOfPos == 0)
-    return ElMagProc;
+  if (motherPDG == 11 && numOfDaug == 2 && NumOfEl == 2 && NumOfPos == 0) return ElMagProc;
 
   // unknown process pos->pos+pos??
-  if (motherPDG == -11 && numOfDaug == 2 && NumOfEl == 0 && NumOfPos == 2)
-    return ElMagProc;
+  if (motherPDG == -11 && numOfDaug == 2 && NumOfEl == 0 && NumOfPos == 2) return ElMagProc;
 
   // unknown process pos/el->pos/el??
-  if (abs(motherPDG) == 11 && !MC::isDecayed(mother) && motherPDG == thePriPart->pdgId() && numOfDaug == 1 && !samePart)
-    return ElMagProc;
+  if (abs(motherPDG) == 11 && !MC::isDecayed(mother) && motherPDG == thePriPart->pdgId() && numOfDaug == 1 && !samePart) return ElMagProc;
 
   // pi->pi+e+/e-; mu->mu+e+/e- ;
   // gamma+ atom->gamma(the same) + e (compton scattering)
-  if (numOfDaug == 2 && (NumOfEl == 1 || NumOfPos == 1) && abs(motherPDG) != 11 && samePart)
-    return ElMagProc;
+  if (numOfDaug == 2 && (NumOfEl == 1 || NumOfPos == 1) && abs(motherPDG) != 11 && samePart) return ElMagProc;
 
   if ((motherPDG == 111 && numOfDaug == 3 && NumOfPhot == 1 && NumOfEl == 1 && NumOfPos == 1) ||
       (motherPDG == 111 && numOfDaug == 4 && NumOfPhot == 0 && NumOfEl == 2 && NumOfPos == 2))
     return DalitzDec;
 
   // Quark weak decay
-  if (abs(motherPDG) < 7 && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && NumOfElNeut == 1)
-    return QuarkWeakDec;
+  if (abs(motherPDG) < 7 && numOfParents == 1 && numOfDaug == 3 && NumOfquark == 1 && NumOfElNeut == 1) return QuarkWeakDec;
 
-  if (abs(motherPDG) == 13 && NumOfNucFr != 0)
-    return ElMagProc;
+  if (abs(motherPDG) == 13 && NumOfNucFr != 0) return ElMagProc;
 
-  if (abs(motherPDG) == 6)
-    return top;
+  if (abs(motherPDG) == 6) return top;
 
   if (abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
 
@@ -649,12 +639,14 @@ MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer* mcTruth
       prodVert = ptrPart->hasProdVtx() ? ptrPart->prodVtx() : nullptr;
     } while (abs(ptrPart->pdgId()) == 24 && prodVert != nullptr);
 
-    if (prodVert && prodVert->nIncomingParticles() == 1 && abs(ptrPart->pdgId()) == 9900012) return NuREle;
-    if (prodVert && prodVert->nIncomingParticles() == 1 && abs(ptrPart->pdgId()) == 9900014) return NuRMu;
-    if (prodVert && prodVert->nIncomingParticles() == 1 && abs(ptrPart->pdgId()) == 9900016) return NuRTau;
+    if (prodVert && prodVert->nIncomingParticles() == 1) { 
+      if (abs(ptrPart->pdgId()) == 9900012) return NuREle;
+      if (abs(ptrPart->pdgId()) == 9900014) return NuRMu;
+      if (abs(ptrPart->pdgId()) == 9900016) return NuRTau;
+    }
     return WBoson;
   } 
-  if (abs(motherPDG) == 24)return WBoson;
+  if (abs(motherPDG) == 24) return WBoson;
   if (abs(motherPDG) == 23) return ZBoson;
 
   //-- Exotics
@@ -1013,7 +1005,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
     return WBoson;
   }
   if (abs(motherPDG) == 24) return WBoson;
-  if (std::abs(motherPDG) == 23) return ZBoson;
+  if (abs(motherPDG) == 23) return ZBoson;
 
   if (motherPDG == 22 && numOfDaug == 2 && NumOfMuMin == 1 && NumOfMuPl == 1) {
     return PhotonConv;
@@ -1682,10 +1674,8 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
       NumOfPht > 0)
     return FSRPhot;
 
-  if (abs(motherPDG) == 9900024 && NumOfPht > 0) return FSRPhot;
-  if (abs(motherPDG) == 9900012 && NumOfPht > 0) return FSRPhot;
-  if (abs(motherPDG) == 9900014 && NumOfPht > 0) return FSRPhot;
-  if (abs(motherPDG) == 9900016 && NumOfPht > 0) return FSRPhot;
+  if (NumOfPht > 0 && (abs(motherPDG) == 9900024 || abs(motherPDG) == 9900012 || abs(motherPDG) == 9900014 || abs(motherPDG) == 9900016)) return FSRPhot;
+  
   if (numOfParents == 2 && NumOfLQ == 1)         return FSRPhot;
 
   //--- other process
@@ -1704,11 +1694,13 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
         prodVert = itrP->hasProdVtx() ? itrP->prodVtx() : nullptr;
       } while (abs(itrP->pdgId()) == 24 && prodVert != nullptr);
 
-      if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 15) return TauLep;
-      if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 13) return Mu;
-      if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900012) return NuREle;
-      if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900014) return NuRMu;
-      if (prodVert && prodVert->nIncomingParticles() == 1 && abs(itrP->pdgId()) == 9900016) return NuRTau;
+      if (prodVert && prodVert->nIncomingParticles() == 1 ) {
+        if ( abs(itrP->pdgId()) == 15) return TauLep;
+        if ( abs(itrP->pdgId()) == 13) return Mu;
+        if ( abs(itrP->pdgId()) == 9900012) return NuREle;
+        if ( abs(itrP->pdgId()) == 9900014) return NuRMu;
+        if ( abs(itrP->pdgId()) == 9900016) return NuRTau;
+      }
     } else
       return WBoson;
   }
@@ -1753,12 +1745,8 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
 
   //--Sherpa ZZ,ZW+FSR
   if (numOfParents == 4 && (numOfDaug - NumOfPht) == 4 && (NumOfLep + NumOfNeut == 4)) {
-    int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
-    int pdg3 = partOriVert->incomingParticle(2)->pdgId();
-    int pdg4 = partOriVert->incomingParticle(3)->pdgId();
-    if (abs(pdg1) < 17 && abs(pdg1) > 10 && abs(pdg2) < 17 && abs(pdg2) > 10 && abs(pdg3) < 17 && abs(pdg3) > 10 &&
-        abs(pdg4) < 17 && abs(pdg4) > 10)
+    if (MC::isSMLepton(partOriVert->incomingParticle(0))&&MC::isSMLepton(partOriVert->incomingParticle(1)) 
+     && MC::isSMLepton(partOriVert->incomingParticle(2))&&MC::isSMLepton(partOriVert->incomingParticle(3)))
       return FSRPhot;
   }
 
