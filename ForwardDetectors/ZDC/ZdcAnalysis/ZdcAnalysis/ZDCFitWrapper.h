@@ -245,7 +245,8 @@ public:
     double amp = theTF1->GetParameter(0);
     double constant = theTF1->GetParameter(4);
 
-    return constant / amp;
+    if (amp > 0) return constant / amp;
+    else return -1;
   }
 
   virtual double operator()(const double *x, const double *p)  override{
@@ -388,6 +389,8 @@ public:
     double maxTime = GetTime();
 
     double amp = theTF1->GetParameter(0);
+    if (amp <= 0) return -1;
+    
     double preAmp = theTF1->GetParameter(2);
     double preT0 = theTF1->GetParameter(3);
     double slope = theTF1->GetParameter(4);

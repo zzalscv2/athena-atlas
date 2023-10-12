@@ -322,8 +322,8 @@ private:
     }
   }
 
-  void DoFit();
-  void DoFitCombined();
+  void DoFit(double maxChisqDivAmp);
+  void DoFitCombined(double maxChisqDivAmp);
 
   static std::unique_ptr<TFitter> MakeCombinedFitter(TF1* func);
 

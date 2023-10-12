@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetDRAssociationTool.h"
@@ -48,7 +48,7 @@ StatusCode HIJetDRAssociationTool::modify(xAOD::JetContainer& jets) const
   auto etaToIndex = [etaMin, this](double eta) -> size_t { return (eta-etaMin)/m_DR; };
   auto phiToIndex = [phiMin, this](double phi) -> size_t { return (phi-phiMin)/m_DR; };
   
-  auto neighborsInEta = [this, &grid, etaMin, etaToIndex](double eta) -> std::vector<size_t> {
+  auto neighborsInEta = [&grid, etaToIndex](double eta) -> std::vector<size_t> {
     const size_t etaIndex = etaToIndex(eta);
     if ( etaIndex == 0){      
       return {etaIndex, etaIndex+1};
@@ -59,7 +59,7 @@ StatusCode HIJetDRAssociationTool::modify(xAOD::JetContainer& jets) const
     return {etaIndex-1, etaIndex, etaIndex+1};
   };
 
-  auto neighborsInPhi = [this, &grid, phiMin, phiToIndex](double phi) -> std::vector<size_t> {
+  auto neighborsInPhi = [&grid, phiToIndex](double phi) -> std::vector<size_t> {
     const size_t phiIndex = phiToIndex(phi);
     if ( phiIndex == 0){      
       return  {grid[0].size()-1, phiIndex, phiIndex+1};
