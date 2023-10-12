@@ -328,7 +328,7 @@ std::vector<bool> PixelConfigCondAlg::getParameterBool(const std::string& varNam
 
 std::string PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
   if (m_usePrivateFileName.empty()) {
-    std::ifstream indata(PathResolverFindCalibFile("PixelConditionsAlgorithms/v1/"+m_conditionsFileName));
+    std::ifstream indata(PathResolverFindCalibFile(m_conditionsFolder+m_conditionsFileName));
     int runNumber = 0;
     std::string subfilename;
     indata >> runNumber;
@@ -338,7 +338,7 @@ std::string PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
       indata >> runNumber;
     }
     ATH_MSG_DEBUG("PixelConfigCondAlg::getFileName() RunNumber=" << currentRunNumber << " IOV=" << runNumber << " filename=" << subfilename);
-    return PathResolverFindCalibFile("PixelConditionsAlgorithms/v1/"+subfilename);
+    return PathResolverFindCalibFile(m_conditionsFolder+subfilename);
   }
   else {
     return m_usePrivateFileName;
