@@ -66,16 +66,17 @@ def JetTagMonitorConfig(inputFlags):
     #objects collections
     jetTagMonAlg.MuonsCollection = "Muons"
     jetTagMonAlg.ElectronsCollection = "Electrons"
+    jetTagMonAlg.JetsCollection = "AntiKt4EMPFlowJets" #Standard jet collection
 
     #Skip jet filter selection in case of ion-ion or proton-ion collisions
-    if inputFlags.DQ.DataType is DQDataType.HeavyIon:
-        jetTagMonAlg.SkipPreSelection = True
-        jetTagMonAlg.SkipJetFilter = True
-        jetTagMonAlg.JetsCollection = "AntiKt4HIJets" #Heavy Ion jet collection
-    else:
-        jetTagMonAlg.SkipPreSelection = False
-        jetTagMonAlg.SkipJetFilter = False
-        jetTagMonAlg.JetsCollection = "AntiKt4EMPFlowJets" #Standard jet collection
+    if inputFlags.Reco.EnableHI:
+        if inputFlags.Tracking.doUPC:
+            jetTagMonAlg.SkipPreSelection = True
+            jetTagMonAlg.SkipJetFilter = True
+        else:
+            jetTagMonAlg.SkipPreSelection = True
+            jetTagMonAlg.SkipJetFilter = True
+            jetTagMonAlg.JetsCollection = "AntiKt4HIJets" #Heavy Ion jet collection
 
     #Early runs (Low number of bunchs): Temporary skipping 1 isolated lepton requirement
     jetTagMonAlg.SkipPreSelection = True
@@ -458,18 +459,13 @@ if __name__=='__main__':
 
     #Select the input (data or MC) and output files
     
-    #Data r22 ART input working:
-    #ConfigFlags.Input.Files = ["/afs/cern.ch/work/a/alaperto/dq_test/dq_r22_ORD22/run/DQ_ARTs/myESD.data15HI.15Mar.root"] #ESD from ART test, 15 Mar 22, data15_heavy_ion
-    ConfigFlags.Input.Files = ["/afs/cern.ch/work/a/alaperto/dq_test/dq_r22_JUN22/run/DQ_ARTs/myESD.data18.26May.root"] #ESD from 22.0 ART, 25 May 22, data18_13TeV
-    #ConfigFlags.Input.Files = ["/eos/user/m/mtanasin/DQ/dq_devel/run/AOD_folder/AOD.27639508._001258.pool.root.1"] #AOD, data18_13TeV
     ConfigFlags.Input.isMC = False
 
-    #MC r22 ART input working:
-    #ConfigFlags.Input.Files = [""/afs/cern.ch/user/m/mtanasin/public/DQ/dq_devel/myAOD.pool.root""] #AOD from ART test, 15 Feb 22, data18
-    #ConfigFlags.Input.isMC = True
+    #Heavy Ions UPC AOD. Change this to what needed for your test.
+    ConfigFlags.Input.Files = ["/afs/cern.ch/work/m/mtanasin/dq_devel/run/gridAOD/data23_hi.00461669.physics_UPC.merge.AOD.f1395_m2203._lb0036-lb0051._0001.1"] #AOD, data23_hi
 
-    #Output file
-    ConfigFlags.Output.HISTFileName = 'data18.00348885.physics_Main.HIST.root'
+    #Output file. Change the name with something meaningful related to the input file when testing.
+    ConfigFlags.Output.HISTFileName = 'data23_hi.00461669.physics_UPC.HIST.root'
     ConfigFlags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
