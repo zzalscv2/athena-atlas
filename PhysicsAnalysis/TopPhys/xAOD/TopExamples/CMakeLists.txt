@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of this package:
 atlas_subdir( TopExamples )
 
 # This package uses ROOT:
-find_package( ROOT REQUIRED COMPONENTS Core Hist RIO Tree )
+find_package( ROOT COMPONENTS Core Hist RIO Tree )
 
 # Install the Python modules of the package:
 atlas_install_python_modules( python/*.py )

@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of this package.
 atlas_subdir( TopEvent )
 
 # Externals.
 find_package( Boost )
-find_package( ROOT REQUIRED COMPONENTS Core MathCore )
+find_package( ROOT COMPONENTS Core MathCore )
 find_package( FastJet COMPONENTS fastjetplugins fastjettools )
 find_package( FastJetContrib COMPONENTS EnergyCorrelator Nsubjettiness )
 find_package( xAODUtilities )
