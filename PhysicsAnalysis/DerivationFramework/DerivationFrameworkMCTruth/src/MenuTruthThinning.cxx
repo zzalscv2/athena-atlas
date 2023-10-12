@@ -318,8 +318,7 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         ok = true;
     
     // OK if we select partons and are at beginning of event record
-    if( m_writePartons &&
-       (pdg_id <= HepMC::PARTONPDGMAX || (pdg_id >= HepMC::NPPDGMIN && pdg_id <= HepMC::NPPDGMAX) ) &&
+    if( m_writePartons && !MC::isHadron(pdg_id) &&
        (m_partonPtThresh<0 || p->pt()>m_partonPtThresh) )
         ok = true;
     
@@ -341,7 +340,8 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     // PHOTOS range: check whether photons come from parton range or
     // hadron range
     int motherPDGID = 999999999;
-    if( p->barcode() > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(p) &&
+    // AV: dropped the HepMC::PHOTOSMIN condition
+    if(!HepMC::is_simulation_particle(p) &&
        p->hasProdVtx() )
     {
         const xAOD::TruthVertex* vprod = p->prodVtx();
