@@ -17,6 +17,7 @@
 
 #include "Minuit2/Minuit2Minimizer.h"
 #include "Math/Functor.h"
+#include "TMath.h"
 #include <functional>
 
 #include <iostream>
