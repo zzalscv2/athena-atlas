@@ -242,8 +242,8 @@ class TextConfig():
                 seq, funcOpts = makeConfig(blockName, options)
                 if not seq._blocks:
                     continue
+                algOpts = setOptions(seq, options)
                 configSeq += seq
-                algOpts = setOptions(configSeq, options)
 
                 # check to see if there are unused parameters 
                 algOpts = [i['name'] for i in algOpts]
@@ -392,6 +392,19 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     return
 
 
+def printOptions(configSeq):
+    """
+    Prints options and their values for each config block in a config sequence
+    """
+    for config in configSeq:
+        print(config)
+        try:
+            options = [(opt, getattr(config, opt)) for opt in config._options]
+            for k, v in options:
+                print(f"    {k}: {v}")
+        except Exception as e:
+            print(e)
+
 def makeSequence(configPath, dataType, algSeq,
                  isPhyslite=False, noPhysliteBroken=False, noSystematics=False):
     """
@@ -415,6 +428,9 @@ def makeSequence(configPath, dataType, algSeq,
     # defaults are added to config as algs are configured
     print(">>> Configuration used:")
     config.printConfig()
+
+    print(">>> ConfigBlocks and their configuration")
+    printOptions(configSeq)
 
     # compile
     configAccumulator = ConfigAccumulator(dataType, algSeq, isPhyslite=isPhyslite)
