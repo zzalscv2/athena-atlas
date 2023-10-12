@@ -82,6 +82,7 @@ def setupGeoR4TestCfg(args):
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads
+    flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     flags.Input.Files = args.inputFile 
     from os import path, system
     if args.geoModelFile.startswith("root://"):
@@ -130,7 +131,7 @@ def setupGeoR4TestCfg(args):
    
 
     flags.lock()
-    flags.dump()
+    flags.dump(evaluate = True)
 
 
     cfg = setupServicesCfg(flags)
