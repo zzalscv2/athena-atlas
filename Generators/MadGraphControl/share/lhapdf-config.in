@@ -4,6 +4,14 @@
 ## this custom config is required to find both the lhapdf installation dir and the actual pdf set data from LHAPDF_DATA_PATH 
 ## in the default configuration the installation dir is hardcoded
 
+# short cut: version only we can get from env, this avoids some timeout issues
+if [ "$#" -eq 1 ]; then
+    if [ "$1" = "--version" ]; then
+	echo $LHAPDFVER
+	exit
+    fi
+fi
+
 prefix=
 datapath=
 # to find the prefix we searh LHAPATH before LHAPDF_DATA_PATH because the latter is more likely to change
