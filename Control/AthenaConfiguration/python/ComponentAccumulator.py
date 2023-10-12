@@ -809,12 +809,22 @@ class ComponentAccumulator(AccumulatorCachable):
                 "Attempted to merge a top level ComponentAccumulator. Revert the order of merging\n"))
 
         def mergeSequences( dest, src ):
+
+            # Ensure sequences of same name have same properties. This is called many times
+            # and is highly optimized. Make sure you profile before modifying this code.
             if dest.name == src.name:
-                for seqProp in dest._descriptors.keys():
-                    if getattr(dest, seqProp) != getattr(src, seqProp) and seqProp != "Members":
+                # Compare all set properties ignoring 'Members'
+                props = (dest._properties.keys() | src._properties.keys()) - {'Members'}
+                for seqProp in props:
+                    try:
+                        if dest._properties[seqProp] != src._properties[seqProp]:
+                            raise RuntimeError(
+                                f"Merging two sequences with name '{dest.name}' but property '{seqProp}' "
+                                f"has different values: {getattr(dest, seqProp)} vs {getattr(src, seqProp)}")
+                    except KeyError as e:
                         raise RuntimeError(
-                            f"merge called with sequences: '{(dest.name, src.name)}' having property '{seqProp}'"
-                            f"of different values {getattr(dest, seqProp)} vs {getattr(src, seqProp)}")
+                            f"Merging two sequences with name '{dest.name}' but property '{e}' is not "
+                            f"set in one of them")
 
             for childIdx, c in enumerate(src.Members):
                 if isSequence( c ):
