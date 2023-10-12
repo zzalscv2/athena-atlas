@@ -51,7 +51,7 @@ LArFastShower::LArFastShower(const std::string& name, const FastShowerConfigStru
    * showers will be read from the library instead of being simulated.*/
   m_generate_starting_points = (!m_configuration.m_generated_starting_points_file.empty());
   if (m_generate_starting_points) {
-    std::string hepmcFileName = m_configuration.m_generated_starting_points_file.c_str();
+    std::string hepmcFileName = m_configuration.m_generated_starting_points_file;
     
     // In multi-thread run, multiple hepmc files are created.
     // To distinguish between them we add thread_id in their name. 
