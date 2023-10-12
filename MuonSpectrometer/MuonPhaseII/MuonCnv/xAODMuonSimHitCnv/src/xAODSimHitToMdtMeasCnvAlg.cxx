@@ -51,6 +51,8 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
     CLHEP::HepRandomEngine* rndEngine = getRandomEngine(ctx);
     for (const xAOD::MuonSimHit* simHit : *simHitContainer) {
         const Identifier hitId = simHit->identify();
+        // ignore radiation for now
+        if (std::abs(simHit->pdgId()) != 13) continue;
         
        
         xAOD::MdtDriftCircle* prd = new xAOD::MdtDriftCircle();
@@ -72,10 +74,9 @@ StatusCode xAODSimHitToMdtMeasCnvAlg::execute(const EventContext& ctx) const {
         const double driftTime = tubeContants->rtRelation->tr()->tFromR(lHitPos.perp(), bound);
         const double resol = tubeContants->rtRelation->rtRes()->resolution(driftTime);
         // Project and smear the hit
-        Amg::Vector3D smearedHit{lHitPos.x(), lHitPos.y(), 0.};
-        smearedHit = CLHEP::RandGaussZiggurat::shoot(rndEngine, 1., resol) *smearedHit;
-        prd->setDriftRadius(smearedHit.perp());
-        prd->setDriftRadCov(resol);
+        double smearedDriftRadius = CLHEP::RandGaussZiggurat::shoot(rndEngine, lHitPos.perp(), resol);
+        prd->setDriftRadius(std::min(readOutEle->innerTubeRadius(), std::max(0.,smearedDriftRadius)));
+        prd->setDriftRadCov(resol*resol);
         /// The sMdts have HPTDC chips built in which run at a 4 times higher frequency than the chips currently
         /// in use for the Run 3 data taking. We have to reassess this once, I've read about the chip design in 
         /// use for Phase II

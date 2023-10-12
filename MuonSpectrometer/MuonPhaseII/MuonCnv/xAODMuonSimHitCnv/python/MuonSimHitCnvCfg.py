@@ -21,8 +21,12 @@ def xAODSimHitToMdtMeasCnvAlgCfg(flags,name = "SimHitToMdtMeasurementCnvAlg", **
     result = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibDbAlgCfg
     result.merge(MdtCalibDbAlgCfg(flags))
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags)))
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import MuonLaySurfaceToolCfg
+    kwargs.setdefault("LayerGeoTool", result.getPrimaryAndMerge(MuonLaySurfaceToolCfg(flags))) 
     the_alg = CompFactory.xAODSimHitToMdtMeasCnvAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

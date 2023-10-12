@@ -37,10 +37,10 @@ def setupServicesCfg(flags):
     result.merge(MuonIdHelperSvcCfg(flags))
     return result
 
-def setupHistSvcCfg(flags, out_file="MdtGeoDump.root"):
+def setupHistSvcCfg(flags, out_file="MdtGeoDump.root", out_stream="GEOMODELTESTER"):
     result = ComponentAccumulator()
     if len(out_file) == 0: return result
-    histSvc = CompFactory.THistSvc(Output=["GEOMODELTESTER DATAFILE='{out_file}', OPT='RECREATE'".format(out_file = out_file)])
+    histSvc = CompFactory.THistSvc(Output=[f"{out_stream} DATAFILE='{out_file}', OPT='RECREATE'"])
     result.addService(histSvc, primary=True)
     return result
 
@@ -82,6 +82,7 @@ def setupGeoR4TestCfg(args):
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = args.threads
     flags.Concurrency.NumConcurrentEvents = args.threads
+    flags.Input.isMC = args.condTag.find("OFLCOND") != -1
     flags.Input.Files = args.inputFile 
     from os import path, system
     if args.geoModelFile.startswith("root://"):
@@ -130,7 +131,7 @@ def setupGeoR4TestCfg(args):
    
 
     flags.lock()
-    flags.dump()
+    flags.dump(evaluate = True)
 
 
     cfg = setupServicesCfg(flags)

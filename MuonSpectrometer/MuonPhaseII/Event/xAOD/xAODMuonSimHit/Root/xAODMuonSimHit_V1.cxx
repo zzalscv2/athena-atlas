@@ -8,24 +8,37 @@
 #include <xAODMuonSimHit/versions/MuonSimHit_v1.h>
 
 namespace {
-   static const SG::AuxElement::Accessor<Identifier::value_type> acc_Identifier{"identifier"};
+   static const std::string preFixStr{"MuSim_"};
+   static const SG::AuxElement::Accessor<Identifier::value_type> acc_Identifier{preFixStr+"identifier"};
    static const xAOD::PosAccessor<3> acc_localPos{"localPositionDim3"};
    static const xAOD::PosAccessor<3> acc_localDir{"localDirectionDim3"};
 
-   static const SG::AuxElement::Accessor<unsigned short> acc_mcEventIndex{"mcEventIndex"};
-   static const SG::AuxElement::Accessor<unsigned int> acc_mcBarcode{"mcBarcode"};
-   static const SG::AuxElement::Accessor<char> acc_mcCollectionType{"mcCollectionType"};
+   static const SG::AuxElement::Accessor<unsigned short> acc_mcEventIndex{preFixStr+"mcEventIndex"};
+   static const SG::AuxElement::Accessor<unsigned int> acc_mcBarcode{preFixStr+"mcBarcode"};
+   static const SG::AuxElement::Accessor<char> acc_mcCollectionType{preFixStr+"mcCollectionType"};
 }
+
+#define IMPLEMENT_SETTER_GETTER( DTYPE, GETTER, SETTER)                          \
+      DTYPE MuonSimHit_v1::GETTER() const {                                  \
+         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         return acc(*this);                                                      \
+      }                                                                          \
+                                                                                 \
+      void MuonSimHit_v1::SETTER(DTYPE value) {                        \
+         static const SG::AuxElement::Accessor<DTYPE> acc{preFixStr + #GETTER};  \
+         acc(*this) = value;                                                     \
+      }
+          
 namespace xAOD {
 
 Identifier MuonSimHit_v1::identify() const { return Identifier{acc_Identifier(*this)}; }    
 void MuonSimHit_v1::setIdentifier(const Identifier& id) { acc_Identifier(*this) = id.get_compact(); }
 
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, globalTime, setGlobalTime)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, int, pdgId, setPdgId)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, energyDeposit, setEnergyDeposit)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, kineticEnergy, setKineticEnergy)
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(MuonSimHit_v1, float, stepLength, setStepLength)
+IMPLEMENT_SETTER_GETTER(float, globalTime, setGlobalTime)
+IMPLEMENT_SETTER_GETTER(int, pdgId, setPdgId)
+IMPLEMENT_SETTER_GETTER(float, energyDeposit, setEnergyDeposit)
+IMPLEMENT_SETTER_GETTER(float, kineticEnergy, setKineticEnergy)
+IMPLEMENT_SETTER_GETTER(float, stepLength, setStepLength)
 
 void MuonSimHit_v1::setLocalPosition(MeasVector<3> vec) {
    VectorMap<3> lPos{acc_localPos(*this).data()};
@@ -63,3 +76,4 @@ void MuonSimHit_v1::setGenParticleLink(const HepMcParticleLink& link) {
 }
 
 }
+#undef IMPLEMENT_SETTER_GETTER
