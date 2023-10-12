@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 # set of utilities allowing to get a better context information when issues with CA occur
@@ -36,13 +36,13 @@ def shortCallStack():
         compact +=   "{}:{}({}) ".format(frameInfo.filename.split('/')[-1], frameInfo.frame.f_lineno, frameInfo.function)
     return compact
 
-def createContextForDeduplication(message, compName, destContext):
-    return Context("{} : {} : {}".format(message, compName, (destContext.get(compName, Context.hint))))
 
+def createContextForDeduplication(message, compName, destContext):
+    return Context(f"{message} : {compName} : {destContext.get(compName, Context.hint)}")
 
 
 def raiseWithCurrentContext(exception):
     """
     Raises the exception with the message supplemented with context information
     """
-    raise type(exception)(str(exception) + '\nWith the context:\n{}'.format(Context.complete()) )    
+    raise type(exception)(str(exception) + '\nWith the context:\n{}'.format(Context.complete()) )
