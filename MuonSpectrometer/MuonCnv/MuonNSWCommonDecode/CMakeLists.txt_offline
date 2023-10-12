@@ -6,7 +6,7 @@ atlas_subdir( MuonNSWCommonDecode )
 # Use tdaq-common packages
 find_package( tdaq-common COMPONENTS DataReader EventStorage eformat eformat_write ers)
 find_package( Boost COMPONENTS unit_test_framework)
-find_package( ROOT REQUIRED COMPONENTS Core Hist Tree RIO Gpad Graf )
+find_package( ROOT COMPONENTS Core Hist Tree RIO Gpad Graf )
 find_package( GTest )
 
 # Component(s) in the package:
@@ -15,8 +15,8 @@ atlas_add_library (MuonNSWCommonDecode
                    PUBLIC_HEADERS MuonNSWCommonDecode
                    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${FMT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES} CxxUtils)
-                   
-                   
+
+
 atlas_add_test(NSWMMTPDecodeBitmaps_test
   SOURCES test/NSWMMTPDecodeBitmaps_test.cxx
   INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  MuonNSWCommonDecode
@@ -60,7 +60,7 @@ atlas_add_test(gt_STGTPPadPackets
           INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
           LINK_LIBRARIES AsgTestingLib MuonNSWCommonDecode TestTools ${GTEST_LIBRARIES}
           POST_EXEC_SCRIPT noerror.sh)
-    
+
 atlas_add_test(gt_STGTPSegmentPackets
           SOURCES test/gt_STGTPSegmentPackets.cxx
           INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}

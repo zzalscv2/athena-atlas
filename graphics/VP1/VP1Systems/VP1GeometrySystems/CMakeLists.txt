@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1GeometrySystems )
@@ -9,20 +9,20 @@ find_package( Coin3D )
 find_package( Qt5 COMPONENTS Core Gui Widgets Sql )
 find_package( GeoModel COMPONENTS GeoModelKernel )
 if( APPLE )
-  find_package(OpenGL REQUIRED)
+  find_package(OpenGL)
 endif()
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Generate UI files automatically:
 # Note: add the "Widgets" component to "find_package( Qt5 ...)" if you have UI files, otherwise UIC, even if CMAKE_AUTOUIC is set to ON, is not run
-set( CMAKE_AUTOUIC ON ) 
+set( CMAKE_AUTOUIC ON )
 # Generate MOC files automatically:
 set( CMAKE_AUTOMOC ON )
 # Generate resource files automatically:
 set( CMAKE_AUTORCC ON )
 
-### Build the library. 
+### Build the library.
 # Remember: the auto-generated UI files are put under
 # CMAKE_CURRENT_BINARY_DIR, so it needs to be added explicitly to the
 # declaration of PRIVATE_INCLUDE_DIRS.
@@ -31,8 +31,8 @@ if(NOT BUILDVP1LIGHT)
 atlas_add_library( VP1GeometrySystems
    VP1GeometrySystems/*.h src/*.cxx
    PUBLIC_HEADERS VP1GeometrySystems
-   INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS} 
-   PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}  
+   INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}
    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${COIN3D_LIBRARIES} ${GEOMODEL_LIBRARIES} MuonReadoutGeometry TruthUtils xAODTruth VP1Base GL Qt5::Core Qt5::Widgets
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GeoModelUtilities VP1HEPVis VP1Utils Qt5::Gui )

@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of this package:
 atlas_subdir( TopEventReconstructionTools )
 
 # This package uses ROOT:
-find_package( ROOT REQUIRED COMPONENTS Core Gpad Tree Hist RIO Math MathMore MathCore Graf Minuit Minuit2 )
+find_package( ROOT COMPONENTS Core Gpad Tree Hist RIO Math MathMore MathCore Graf Minuit Minuit2 )
 
 # Find KLFitter package. As of May '18, included via atlasexternals,
 # source code pulled from https://www.github.com/KLFitter/KLFitter.
@@ -18,7 +18,7 @@ atlas_add_root_dictionary( TopEventReconstructionTools _cintDictSource
 # Build a library that other components can link against:
 atlas_add_library( TopEventReconstructionTools Root/*.cxx Root/*.h Root/*.icc
                    TopEventReconstructionTools/*.h TopEventReconstructionTools/*.icc TopEventReconstructionTools/*/*.h
-                   TopEventReconstructionTools/*/*.icc ${_cintDictSource} 
+                   TopEventReconstructionTools/*/*.icc ${_cintDictSource}
                    PUBLIC_HEADERS TopEventReconstructionTools
                    INCLUDE_DIRS  ${KLFITTER_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${KLFITTER_LIBRARIES}

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1HEPVis )
@@ -7,7 +7,7 @@ atlas_subdir( VP1HEPVis )
 find_package( Coin3D  )
 #find_package( OpenGL ) # not needed for SLC6. But is it needed for Ubuntu?
 if ( APPLE )
-	find_package(OpenGL REQUIRED)
+	find_package(OpenGL)
 endif()
 
 #message("VP1HEPVis: '${COIN3D_FOUND}' '${COIN3D_INCLUDE_DIRS}'

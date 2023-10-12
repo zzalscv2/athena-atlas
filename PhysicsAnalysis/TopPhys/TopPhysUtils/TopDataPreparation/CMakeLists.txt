@@ -1,8 +1,10 @@
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+
 # Declare the name of this package:
 atlas_subdir( TopDataPreparation )
 
 # This package uses ROOT:
-find_package( ROOT REQUIRED COMPONENTS Core Gpad Tree Hist RIO MathCore Graf )
+find_package( ROOT COMPONENTS Core Gpad Tree Hist RIO MathCore Graf )
 
 # Generate a CINT dictionary source file:
 atlas_add_root_dictionary( TopDataPreparation _cintDictSource

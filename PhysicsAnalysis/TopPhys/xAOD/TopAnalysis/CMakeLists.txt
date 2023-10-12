@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of this package:
 atlas_subdir( TopAnalysis )
 
 # External dependencies:
 find_package( Boost COMPONENTS regex )
-find_package( ROOT REQUIRED COMPONENTS Core )
+find_package( ROOT COMPONENTS Core )
 
 # Generate a CINT dictionary source file:
 atlas_add_root_dictionary( TopAnalysis _cintDictSource

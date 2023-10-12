@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( AthCUDAServices )
 
 # External(s).
-find_package( TBB REQUIRED )
+find_package( TBB )
 
 # Component(s) in the package.
 atlas_add_component( AthCUDAServices

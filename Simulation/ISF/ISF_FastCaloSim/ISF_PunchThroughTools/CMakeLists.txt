@@ -1,6 +1,4 @@
-################################################################################
-# Package: ISF_PunchThroughTools
-################################################################################
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_PunchThroughTools )
@@ -10,7 +8,7 @@ find_package( CLHEP )
 find_package( Eigen )
 find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( LibXml2 REQUIRED)
+find_package( LibXml2 )
 find_package( lwtnn )
 
 

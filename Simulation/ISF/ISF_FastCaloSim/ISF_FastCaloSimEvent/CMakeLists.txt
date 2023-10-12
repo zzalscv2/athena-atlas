@@ -1,4 +1,4 @@
-#Copyright(C) 2002 - 2022 CERN for the benefit of the ATLAS collaboration
+#Copyright(C) 2002 - 2023 CERN for the benefit of the ATLAS collaboration
 
 #Declare the package name:
 atlas_subdir( ISF_FastCaloSimEvent )
@@ -8,7 +8,7 @@ find_package( Boost )
 find_package( CLHEP )
 find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore MathMore Hist RIO Matrix Physics )
-find_package( lwtnn REQUIRED )
+find_package( lwtnn )
 find_package( LibXml2 )
 
 option(USE_GPU "whether to run FCS on GPU or not" OFF)

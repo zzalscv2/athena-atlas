@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #Declare the package name:
 atlas_subdir( HGTD_PrepRawData )
 
 # External(s).
-find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+find_package(Boost COMPONENTS unit_test_framework)
 
 # Component(s) in the package.
 atlas_add_library( HGTD_PrepRawData
