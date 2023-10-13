@@ -27,6 +27,7 @@
 #include "RooCBShape.h"
 #include "RooFFTConvPdf.h"
 #include "RooGlobalFunc.h"
+#include "RooFitResult.h"
 
 namespace dqutils {
 
