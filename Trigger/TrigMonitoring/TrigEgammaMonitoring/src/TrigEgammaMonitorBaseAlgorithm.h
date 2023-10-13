@@ -54,6 +54,7 @@ typedef struct _triginfo
     bool etcut; // Et cut only chain
     bool nogsf; // GSF chain
     bool lrt; // LRT chain
+    bool ion; // Heavy Ion chain
 
     std::string isolation;
     bool isolated;

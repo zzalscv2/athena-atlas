@@ -216,6 +216,7 @@ asg::AcceptData TrigEgammaMonitorBaseAlgorithm::setAccept( const TrigCompositeUt
                     std::string key = match()->key("PrecisionCalo_Electron");
                     if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
                     if(info.lrt) key = match()->key("PrecisionCalo_LRT");
+                    if(info.ion) key = match()->key("PrecisionCalo_HI");
 
                     passedEFCalo = match()->ancestorPassed<xAOD::CaloClusterContainer>(dec, trigger, key, condition);
 
@@ -607,6 +608,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
         bool etcut; // Et cut only chain
         bool nogsf; // chain without gsf reconstruction
         bool lrt; // LRT chain
+        bool ion; // Heavy Ion chain
         std::string isolation;
         bool isolated;
     } TrigInfo;
@@ -631,6 +633,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
     bool nogsf = false;
     bool lrt = false;
+    bool ion = false;
     bool etcut = false;
     bool idperf = false;
     bool isolated = false;
@@ -676,8 +679,9 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
 
     // extra information
-    nogsf = boost::contains(trigger,"nogsf");
-    lrt = boost::contains(trigger,"lrt");
+    nogsf   = boost::contains(trigger,"nogsf");
+    lrt     = boost::contains(trigger,"lrt");
+    ion     = boost::contains(trigger,"ion");
 
     for(auto& iso : isoNames){
         if(boost::contains(trigger, iso)){
@@ -704,12 +708,13 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     ATH_MSG_DEBUG( "idperf      : " << (idperf?"Yes":"No"));
     ATH_MSG_DEBUG( "nogsf       : " << (nogsf?"Yes":"No"));
     ATH_MSG_DEBUG( "lrt         : " << (lrt?"Yes":"No"));
+    ATH_MSG_DEBUG( "HeavyIon    : " << (ion?"Yes":"No"));
     ATH_MSG_DEBUG( "Isolation   : " << isolation);
     ATH_MSG_DEBUG( "Isolated    : " << (isolated?"Yes":"No"));
     ATH_MSG_DEBUG( "L1Seed      : " << l1seed << " (Is Legacy? " << (l1legacy?"Yes":"No") << ")");
     ATH_MSG_DEBUG("========================================================");
 
-    TrigInfo info{l1legacy,l1seed,trigger,signature,threshold,pidname,idperf,etcut,nogsf,lrt,isolation, isolated};
+    TrigInfo info{l1legacy,l1seed,trigger,signature,threshold,pidname,idperf,etcut,nogsf,lrt,ion,isolation,isolated};
     m_trigInfo[trigger] = info;
 
 }
