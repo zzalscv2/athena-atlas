@@ -1,12 +1,7 @@
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
-from AthenaCommon.CFElements import parOR
-from AthenaCommon.CFElements import seqAND
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
 import AthenaCommon.SystemOfUnits as Units
 from TrigMinBias.TrigMinBiasMonitoring import MbtsHypoToolMonitoring
 
@@ -55,8 +50,7 @@ def TrackCountHypoToolGen(chainDict):
         else:
             return int(v)
 
-    from TrigMinBias.TrigMinBiasConf import TrackCountHypoTool
-    hypo = TrackCountHypoTool(chainDict["chainName"])
+    hypo = CompFactory.TrackCountHypoTool(chainDict["chainName"])
     if "hmt" in chainDict["chainName"]:
         hypo.minNtrks = int(chainDict["chainParts"][0]["hypoTrkInfo"].strip("trk"))
         hypo.minPt = 200*Units.MeV
@@ -113,7 +107,7 @@ def MinBiasSPSel(flags):
 
     from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
     seq = InDetTrigSequence(minBiasFlags,
-                            minBiasFlags.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would nto need to pass it in the future?
+                            minBiasFlags.Tracking.ActiveConfig.input_name, # this is already in the flags, maybe we would not need to pass it in the future?
                             rois   = str(reco.inputMaker().InViewRoIs),
                             inView = str(reco.inputMaker().Views))
     spMakingCA = seq.sequence("spacePointFormation")
@@ -154,43 +148,23 @@ def MinBiasZVertexFinderSequenceCfg(flags):
     return MenuSequenceCA(flags, selAcc, HypoToolGen = TrigZVertexHypoToolGen)
 
 
-def MinBiasTrkSequence(flags):
+def MinBiasTrkSequenceCfg(flags):
+    recoAcc = InViewRecoCA(name="MBTrackReco", InViewRoIs="InputRoI", RequireParentView=True)
 
-        trkInputMakerAlg = EventViewCreatorAlgorithm("IM_TrkEventViewCreator")
-        trkInputMakerAlg.ViewFallThrough = True
-        trkInputMakerAlg.RoITool = ViewCreatorInitialROITool()
-        trkInputMakerAlg.InViewRoIs = "InputRoI" # contract with the consumer
-        trkInputMakerAlg.Views = "TrkView"
-        trkInputMakerAlg.RequireParentView = True
+    from TrigInDetConfig.utils import getFlagsForActiveConfig
+    flagsWithTrk = getFlagsForActiveConfig(flags, "minBias", log)
 
-        from TrigInDetConfig.utils import getFlagsForActiveConfig
-        flagsWithTrk = getFlagsForActiveConfig(flags, "minBias", log)
+    from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
+    trkSeq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
+                                rois = "InputRoI", inView = "VDVMinBiasIDTracking") # here
+    recoAcc.mergeReco(trkSeq.sequence("OfflineNoDataPrep"))
 
-        from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
-        seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
-                                rois = trkInputMakerAlg.InViewRoIs, inView = "VDVMinBiasIDTracking")
-
-        from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
-        algs = extractAlgorithmsAndAppendCA(seq.sequence("OfflineNoDataPrep"))
-
-        #vdv = algs[0]
-        #assert vdv.DataObjects, "Likely not ViewDataVerifier, does not have DataObjects property"
-        #vdv.DataObjects += [("xAOD::TrigCompositeContainer", "HLT_vtx_z")]
-
-
-        from ..Config.MenuComponents import algorithmCAToGlobalWrapper # this will disappear once whole sequence would be configured at once
-        from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
-        trackCountHypo = algorithmCAToGlobalWrapper(TrackCounterHypoAlgCfg, flags)[0]
-
-        trkRecoSeq = parOR("TrkRecoSeq", algs)
-        trkSequence = seqAND("TrkSequence", [trkInputMakerAlg, trkRecoSeq])
-        trkInputMakerAlg.ViewNodeName = trkRecoSeq.name()
-
-        return MenuSequence(flags,
-                            Sequence    = trkSequence,
-                            Maker       = trkInputMakerAlg,
-                            Hypo        = trackCountHypo,
-                            HypoToolGen = TrackCountHypoToolGen)
+    selAcc = SelectionCA("MBTrackCountSel")
+    selAcc.mergeReco(recoAcc)
+    from TrigMinBias.MinBiasCountersConfig import TrackCounterHypoAlgCfg
+    trackCountHypoAlgo = TrackCounterHypoAlgCfg(flags)
+    selAcc.mergeHypo(trackCountHypoAlgo)
+    return MenuSequenceCA(flags, selAcc, HypoToolGen = TrackCountHypoToolGen)
 
 def MinBiasMbtsSequenceCfg(flags):
     recoAcc = InEventRecoCA(name="Mbts")

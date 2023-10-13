@@ -62,7 +62,5 @@ StatusCode TrigLArNoiseBurstAlg::execute( const EventContext& context ) const {
     ATH_CHECK( tool->decide( toolInput ) );
   }
   
-  ATH_CHECK( hypoBaseOutputProcessing(outputHandle) );
-
   return StatusCode::SUCCESS;
 }

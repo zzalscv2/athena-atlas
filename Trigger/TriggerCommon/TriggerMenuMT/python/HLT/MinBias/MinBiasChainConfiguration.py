@@ -9,7 +9,7 @@ from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBa
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 from TriggerMenuMT.HLT.MinBias.MinBiasMenuSequences import (MinBiasSPSequenceCfg, 
-                                                            MinBiasTrkSequence,
+                                                            MinBiasTrkSequenceCfg,
                                                             MinBiasMbtsSequenceCfg,
                                                             MinBiasZVertexFinderSequenceCfg)
 from TriggerMenuMT.HLT.MinBias.ALFAMenuSequences import ALFAPerfSequence
@@ -20,12 +20,13 @@ from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequence, AFPGlobalS
 # so let's make them functions already now
 #----------------------------------------------------------------
 
-def MinBiasSPCfg(flags):
+def MinBiasSPCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper 
     return menuSequenceCAToGlobalWrapper(MinBiasSPSequenceCfg, flags)   
 
-def MinBiasTrkSequenceCfg(flags):
-    return MinBiasTrkSequence(flags)
+def MinBiasTrkSequenceCfgWrap(flags):
+    from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper 
+    return menuSequenceCAToGlobalWrapper(MinBiasTrkSequenceCfg, flags)
 
 def MinBiasMbtsEmptySequenceCfg(flags):
     return EmptyMenuSequence("EmptyMbts")
@@ -33,23 +34,23 @@ def MinBiasMbtsEmptySequenceCfg(flags):
 def MinBiasZFindEmptySequenceCfg(flags):
     return EmptyMenuSequence("EmptyZFind")
 
-def AFPGlobalSequenceCfg(flags):
+def AFPGlobalSequenceCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(AFPGlobalSequence, flags)
 
-def AFPTrkSequenceCfg(flags):
+def AFPTrkSequenceCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(AFPTrkSequence, flags)
 
-def ALFAPerfSequenceCfg(flags):
+def ALFAPerfSequenceCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(ALFAPerfSequence, flags)
 
-def MinBiasZVertexFinderCfg(flags):
+def MinBiasZVertexFinderCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(MinBiasZVertexFinderSequenceCfg, flags)
 
-def MinBiasMbtsCfg(flags):
+def MinBiasMbtsCfgWrap(flags):
     from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
     return menuSequenceCAToGlobalWrapper(MinBiasMbtsSequenceCfg, flags)
 
@@ -74,9 +75,11 @@ class MinBiasChainConfig(ChainConfigurationBase):
 
             if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl']:
                 steps.append(self.getStep(flags,2,'SPCount',[MinBiasSPSequenceCfg]))
+            if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl']:
+                steps.append(self.getStep(flags, 3, "ZFind", [MinBiasZVertexFinderSequenceCfg]))
+                steps.append(self.getStep(flags, 4, "TrkCount", [MinBiasTrkSequenceCfg]))
 
         else:
-
             if "mbts" == self.chainPart['recoAlg'][0] or "mbts" in self.chainName:
                 steps.append(self.getMinBiasMbtsStep(flags))
             elif "afprec" == self.chainPart['recoAlg'][0]:
@@ -100,28 +103,28 @@ class MinBiasChainConfig(ChainConfigurationBase):
         return self.buildChain(steps)
 
     def getMinBiasMbtsStep(self, flags):
-        return self.getStep(flags,1,'Mbts',[MinBiasMbtsCfg])
+        return self.getStep(flags,1,'Mbts',[MinBiasMbtsCfgWrap])
 
     def getMinBiasEmptyMbtsStep(self, flags):
         return self.getStep(flags,1,'EmptyMbts',[MinBiasMbtsEmptySequenceCfg])
 
     def getMinBiasSpStep(self, flags):
-        return self.getStep(flags,2,'SPCount',[MinBiasSPCfg])
+        return self.getStep(flags,2,'SPCount',[MinBiasSPCfgWrap])
 
     def getMinBiasZFindStep(self, flags):
-        return self.getStep(flags,3,'ZFind',[MinBiasZVertexFinderCfg])
+        return self.getStep(flags,3,'ZFind',[MinBiasZVertexFinderCfgWrap])
 
     def getMinBiasEmptyZFindStep(self, flags):
         return self.getStep(flags,3,'EmptyZFind',[MinBiasZFindEmptySequenceCfg])
 
     def getMinBiasTrkStep(self, flags):
-        return self.getStep(flags,4,'TrkCount',[MinBiasTrkSequenceCfg])
+        return self.getStep(flags,4,'TrkCount',[MinBiasTrkSequenceCfgWrap])
 
     def getAFPTrkStep(self, flags):
-         return self.getStep(flags,1,'AFPTrk',[AFPTrkSequenceCfg])
+         return self.getStep(flags,1,'AFPTrk',[AFPTrkSequenceCfgWrap])
 
     def getAFPGlobalStep(self, flags):
-         return self.getStep(flags,1,'AFPGlobal',[AFPGlobalSequenceCfg])
+         return self.getStep(flags,1,'AFPGlobal',[AFPGlobalSequenceCfgWrap])
 
     def getALFAPerfStep(self, flags):
-        return self.getStep(flags,1,'ALFAPerf',[ALFAPerfSequenceCfg])
+        return self.getStep(flags,1,'ALFAPerf',[ALFAPerfSequenceCfgWrap])

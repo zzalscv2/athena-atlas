@@ -63,7 +63,7 @@ def getLArNoiseBurst(flags):
 def getCaloAllEMLayersPSSequenceCfg(flags,doAllorAllEM=False):
 
     from TrigT2CaloCommon.CaloDef import fastCaloVDVCfg
-    nameselAcc = "LArPSSequence_AllEM"
+    nameselAcc = "LArPSSequence_All"
     namerecoAcc = "fastCaloInViewSequenceAllEM"
     hypoAlgName = "TrigL2CaloLayersAlg_AllEM"
     output = "HLT_LArPS_AllCaloEMClusters"
