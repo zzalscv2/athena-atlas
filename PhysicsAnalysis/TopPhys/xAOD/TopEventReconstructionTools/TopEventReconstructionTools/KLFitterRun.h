@@ -9,6 +9,11 @@
 #include "TopEventSelectionTools/EventSelectorBase.h"
 #include "TopEventReconstructionTools/KLFitterTool.h"
 
+#include <utility>
+#include <string>
+#include <memory>
+
+
 namespace top {
   class Event;
   class TopConfig;
@@ -23,16 +28,18 @@ namespace top {
     std::string name() const override;
 
   private:
-      enum jetPos { CANBEB=0, CANBELF , JETTYPESIZE};
 
-      bool hasAutoSetOption(const std::string curtom_parameters);
+    std::pair<bool,bool> hasAutoSetOption(const std::string &curtom_parameters);
 
       std::string m_name;
 
       bool m_useJetAutoSet;
+      bool m_useJetAutoSetPCBT;
       int m_Njcut;
       int m_nb;
       int m_delta;
+      int m_Nbmin;
+      int m_N5max;
 
       std::unique_ptr<top::KLFitterTool> m_myFitter;
   };
