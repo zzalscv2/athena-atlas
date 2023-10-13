@@ -50,25 +50,26 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     if dataType not in ["data", "mc", "afii"] :
         raise ValueError ("invalid data type: " + dataType)
 
-    if generator not in ["default", "Pythia8", "Sherpa221", "Sherpa228", "Sherpa2210", "Herwig7", "Herwig713", "Herwig721", "amc@NLO"]:
+    if generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
         raise ValueError ("invalid generator type: " + generator)
 
     # MC/MC scale factors configuration
     DSID = "default"
     if generator == "Sherpa221":
         DSID = "410250"
-    elif generator == "Sherpa228":
-        DSID = "421152"
     elif generator == "Sherpa2210":
         DSID = "700122"
-    elif generator == "Herwig7":
-        DSID = "410558"
+    elif generator == "Sherpa2212":
+        DSID = "700660"
     elif generator == "Herwig713":
         DSID = "411233"
     elif generator == "Herwig721":
         DSID = "600666"
-    elif generator == "amc@NLO":
+    elif generator == "amcAtNLOPythia":
         DSID = "410464"
+    elif generator == "amcAtNLOHerwig":
+        DSID = "412116"
+
 
     if legacyRecommendations:
         # Remove b-tagging calibration from the container name
@@ -81,7 +82,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21
         bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root"
     else:
-        bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
+        bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
 
     # This is the new calibration file, but it seems to have issues in some cases
     #bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
