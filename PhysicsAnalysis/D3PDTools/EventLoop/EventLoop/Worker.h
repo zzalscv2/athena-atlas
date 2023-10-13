@@ -237,7 +237,7 @@ namespace EL
     ::StatusCode batchExecute (unsigned job_id, const char *confFile);
 
   public:
-    ::StatusCode gridExecute (const std::string& sampleName);
+    ::StatusCode gridExecute (const std::string& sampleName, Long64_t SkipEvents, Long64_t nEventsPerJob);
 
   private:    
     enum GridErrorCodes {
