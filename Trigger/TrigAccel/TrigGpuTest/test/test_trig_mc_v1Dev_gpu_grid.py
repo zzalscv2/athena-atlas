@@ -26,6 +26,8 @@ ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'ttbar'
 ex.args = '-c "setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\';doWriteBS=False;doWriteRDOTrigger=True;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.InDetTracking.doGPU=True"'
+ex.threads = 1
+ex.concurrent_events = 1
 
 test = Test.Test()
 test.art_type = 'grid'

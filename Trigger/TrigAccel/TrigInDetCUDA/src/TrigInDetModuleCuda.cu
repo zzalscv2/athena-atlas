@@ -49,6 +49,7 @@ void TrigInDetModuleCuda::getNumberOfGPUs() {
     cudaError_t error = cudaGetLastError();
     if(error != cudaSuccess) {
       maxDevice = 0;
+      std::cout << "ERROR: " << cudaGetErrorString( error ) << std::endl;
     }
     // send the value on the write-descriptor
     write(fd[1], &maxDevice, sizeof(maxDevice)); 

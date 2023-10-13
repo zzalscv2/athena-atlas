@@ -25,6 +25,8 @@ ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data'
+ex.threads = 1
+ex.concurrent_events = 1
 ex.max_events = 2000
 ex.args = '-c "setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\';doWriteBS=False;doL1Sim=True;doWriteRDOTrigger=True;doRuntimeNaviVal=True;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.InDetTracking.doGPU=True"'
 
