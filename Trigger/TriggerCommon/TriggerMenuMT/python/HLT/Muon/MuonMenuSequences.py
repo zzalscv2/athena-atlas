@@ -441,7 +441,7 @@ def muEFCBAlgSequence(flags):
     #By default the EFCB sequence will run both outside-in and
     #(if zero muons are found) inside-out reconstruction
     from TrigMuonEF.TrigMuonEFConf import MuonFilterAlg, MergeEFMuonsAlg
-    from .MuonRecoSequences import muEFCBRecoSequence, muEFInsideOutRecoSequenceCfg
+    from .MuonRecoSequences import muEFCBRecoSequenceCfg, muEFInsideOutRecoSequenceCfg
 
     efcbViewsMaker = EventViewCreatorAlgorithm("IMefcbtotal")
     #
@@ -458,7 +458,8 @@ def muEFCBAlgSequence(flags):
 
     #outside-in reco sequence
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    muEFCBRecoSequence, sequenceOutCB = muEFCBRecoSequence(muonflagsCB, efcbViewsMaker.InViewRoIs, "RoI" )
+    muEFCBRecoSequence = algorithmCAToGlobalWrapper(muEFCBRecoSequenceCfg, muonflagsCB, efcbViewsMaker.InViewRoIs, "RoI" )
+    sequenceOutCB = muNames.EFCBOutInName
 
     #Algorithm to filter events with no muons
     muonFilter = MuonFilterAlg("FilterZeroMuons")
@@ -547,7 +548,7 @@ def muEFIDtpSequence(flags, is_probe_leg=False):
 
 def muEFCBLRTAlgSequence(flags):
 
-    from .MuonRecoSequences import muEFCBRecoSequence
+    from .MuonRecoSequences import muEFCBRecoSequenceCfg
 
     efcbViewsMaker = EventViewCreatorAlgorithm("IMefcblrttotal")
     #
@@ -563,7 +564,9 @@ def muEFCBLRTAlgSequence(flags):
 
     #outside-in reco sequence
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    muEFCBRecoSequence, sequenceOut = muEFCBRecoSequence(muonflagsCB, efcbViewsMaker.InViewRoIs, "LRT" )
+    muEFCBRecoAlgSequence = algorithmCAToGlobalWrapper(muEFCBRecoSequenceCfg, muonflagsCB, efcbViewsMaker.InViewRoIs, "LRT" )
+    muEFCBRecoSequence = parOR("efcbViewNode_LRT", [muEFCBRecoAlgSequence])
+    sequenceOut = muNamesLRT.EFCBName
 
     #Final sequence running in view
     efcbViewsMaker.ViewNodeName = muEFCBRecoSequence.name()
@@ -682,11 +685,12 @@ def muEFCBFSAlgSequence(flags):
     efcbfsInputMaker.InViewMuonCandidates = "MuonCandidates_FS"
 
     from TrigMuonEF.TrigMuonEFConf import MuonFilterAlg, MergeEFMuonsAlg
-    from .MuonRecoSequences import muEFCBRecoSequence, muEFInsideOutRecoSequenceCfg
+    from .MuonRecoSequences import muEFCBRecoSequenceCfg, muEFInsideOutRecoSequenceCfg
     #outside-in reco sequence
     muonflagsCB = flags.cloneAndReplace('Muon', 'Trigger.Offline.Muon').cloneAndReplace('MuonCombined', 'Trigger.Offline.Combined.MuonCombined')
-    muEFCBFSRecoSequence, sequenceOutCB = muEFCBRecoSequence(muonflagsCB, efcbfsInputMaker.InViewRoIs, "FS" )
-    
+    muEFCBFSRecoSequence = algorithmCAToGlobalWrapper(muEFCBRecoSequenceCfg, muonflagsCB, efcbfsInputMaker.InViewRoIs, "FS" )
+    sequenceOutCB = muNamesFS.EFCBOutInName
+
     #Alg fitltering for no muon events
     muonFilter =  MuonFilterAlg("FilterZeroMuonsEFCBFS")
     muonFilter.MuonContainerLocation = sequenceOutCB
