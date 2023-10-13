@@ -452,12 +452,17 @@ void McEventCollectionCnv_p7::transToPers( const McEventCollection* transObj,
      }
      persEvt.m_r_attribute_name.clear();
      persEvt.m_r_attribute_string.clear();
+     persEvt.m_r_tool_name.clear();
+     persEvt.m_r_tool_version.clear();
+     persEvt.m_r_tool_description.clear();
+     persEvt.m_r_weight_names.clear();
      if (ri) {
        persEvt.m_r_attribute_string = std::move(ri_data.attribute_string);
        persEvt.m_r_attribute_name = std::move(ri_data.attribute_name);
        persEvt.m_r_tool_name = std::move(ri_data.tool_name);
        persEvt.m_r_tool_version = std::move(ri_data.tool_version);
        persEvt.m_r_tool_description = std::move(ri_data.tool_description);
+       persEvt.m_r_weight_names = std::move(ri_data.weight_names);       
      }
     //Actually, with this piece there is no need to treat the CS and HI separately.
     }

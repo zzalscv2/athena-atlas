@@ -72,6 +72,7 @@ public:
                ,const std::vector<std::string>& r_tool_name = std::vector<std::string>()
                ,const std::vector<std::string>& r_tool_version = std::vector<std::string>()
                ,const std::vector<std::string>& r_tool_description = std::vector<std::string>()
+               ,const std::vector<std::string>& r_weight_names = std::vector<std::string>()
                );
 
   ///////////////////////////////////////////////////////////////////
@@ -179,6 +180,7 @@ protected:
   std::vector<std::string> m_r_tool_name; ///< Name of the used tool
   std::vector<std::string> m_r_tool_version; ///< Version of the used tool
   std::vector<std::string> m_r_tool_description; ///< Description of the used tool
+  std::vector<std::string> m_r_weight_names; ///< The weight names
 };
 
 ///////////////////////////////////////////////////////////////////
@@ -218,6 +220,7 @@ inline GenEvent_p7::GenEvent_p7():
   ,m_r_tool_name(    )
   ,m_r_tool_version(    )
   ,m_r_tool_description(    )
+  ,m_r_weight_names(    )
 {}
 
 inline GenEvent_p7::GenEvent_p7( int signalProcessId,
@@ -253,6 +256,7 @@ inline GenEvent_p7::GenEvent_p7( int signalProcessId,
                                  ,const std::vector<std::string>& r_tool_name
                                  ,const std::vector<std::string>& r_tool_version
                                  ,const std::vector<std::string>& r_tool_description
+                                 ,const std::vector<std::string>& r_weight_names
                                  ) :
   m_signalProcessId  ( signalProcessId ),
   m_eventNbr         ( eventNbr ),
@@ -287,6 +291,7 @@ inline GenEvent_p7::GenEvent_p7( int signalProcessId,
   ,m_r_tool_name( r_tool_name )
   ,m_r_tool_version( r_tool_version )
   ,m_r_tool_description( r_tool_description )
+  ,m_r_weight_names( r_weight_names )
 {}
 
 #endif //> GENERATOROBJECTSTPCNV_GENEVENT_p7_H
