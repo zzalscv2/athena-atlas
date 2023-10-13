@@ -63,9 +63,9 @@ namespace ActsTrk
 
     // I/O
     ATH_MSG_DEBUG("Retrieving input track collection '" << m_tracksContainerKey.key() << "' ...");
-    SG::ReadHandle<ActsTrk::ConstTrackContainer> inputTracksHandle = SG::makeHandle(m_tracksContainerKey, ctx);
+    SG::ReadHandle<ActsTrk::TrackContainer> inputTracksHandle = SG::makeHandle(m_tracksContainerKey, ctx);
     ATH_CHECK(inputTracksHandle.isValid());
-    const ActsTrk::ConstTrackContainer *inputTracks = inputTracksHandle.cptr();
+    const ActsTrk::TrackContainer *inputTracks = inputTracksHandle.cptr();
 
     std::unique_ptr<::TrackCollection> trackCollection = std::make_unique<::TrackCollection>();
 
@@ -81,11 +81,11 @@ namespace ActsTrk
 
   StatusCode ActsToTrkConvertorAlg::makeTracks(const EventContext &ctx,
 					       const Acts::GeometryContext &tgContext,
-                                           const ActsTrk::ConstTrackContainer &tracks,
+                                           const ActsTrk::TrackContainer &tracks,
                                            ::TrackCollection &tracksContainer) const
   {
 
-    for (const typename ActsTrk::ConstTrackContainer::ConstTrackProxy &track : tracks)
+    for (const typename ActsTrk::TrackContainer::ConstTrackProxy &track : tracks)
     {
       const auto lastMeasurementIndex = track.tipIndex();
 
@@ -99,7 +99,7 @@ namespace ActsTrk
       std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [this, &tgContext, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::ConstTrackStateBackend::ConstTrackStateProxy &state) -> void
+          [this, &tgContext, &finalTrajectory, &actsSmoothedParam, &numberOfDeadPixel, &numberOfDeadSCT, &hypothesis](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // First only consider states with an associated detector element
             if (!state.referenceSurface().associatedDetectorElement())

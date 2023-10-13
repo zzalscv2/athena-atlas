@@ -47,7 +47,7 @@ class TrackingSurfaceHelper;
 namespace
 {
   // Forward-declare internal classes defined in TrackFindingData.h and used only in TrackFindingAlg.cxx.
-  // Define in the anonymous namespace to prevent unneccessary external linkage.
+  // Define in the anonymous namespace to prevent unnecessary external linkage.
   class TrackFindingMeasurements;
   class DuplicateSeedDetector;
 }
@@ -87,7 +87,7 @@ namespace ActsTrk
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_pixelEstimatedTrackParametersKey{this, "PixelEstimatedTrackParameters", "", "estimated track parameters from pixel seeding"};
     SG::ReadHandleKey<ActsTrk::BoundTrackParametersContainer> m_stripEstimatedTrackParametersKey{this, "StripEstimatedTrackParameters", "", "estimated track parameters from strip seeding"};
 
-    SG::WriteHandleKey<ActsTrk::ConstTrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
+    SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer", "Output track collection (ActsTrk variant)"};
 
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
@@ -147,14 +147,14 @@ namespace ActsTrk
                DuplicateSeedDetector &duplicateSeedDetector,
                const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                const ActsTrk::SeedContainer *seeds,
-               ActsTrk::TrackContainer &tracksContainer,
+               ActsTrk::MutableTrackContainer &tracksContainer,
                size_t seedCollectionIndex,
                const char *seedType,
                std::vector< std::array<unsigned int, kNStat> > &event_stat) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
-    StatusCode storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
-                             const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+    StatusCode storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
+                             const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                              DuplicateSeedDetector &duplicateSeedDetector) const;
 
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
