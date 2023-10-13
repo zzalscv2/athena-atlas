@@ -1,19 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-/// Author: Ketevi A. Assamagan, Woochun Park
-/// BNL, April 03 2005
-
-/// algorithm to decode RDO into PrepRawData
 
 #include "CscRdoToCscPrepDataToolMT.h"
 
-#include "CscCalibTools/ICscCalibTool.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "GaudiKernel/ThreadLocalContext.h"
-#include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
-#include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
+#include "MuonIdHelpers/CscIdHelper.h"
 #include "MuonRDO/CscRawData.h"
 #include "MuonRDO/CscRawDataCollection.h"
 #include "MuonRDO/CscRawDataContainer.h"
@@ -26,23 +19,91 @@ using namespace Trk;
 using namespace Muon;
 
 CscRdoToCscPrepDataToolMT::CscRdoToCscPrepDataToolMT(const std::string& type, const std::string& name, const IInterface* parent) :
-    base_class(type, name, parent) {
-    declareProperty("CscStripPrdContainerCacheKey", m_prdContainerCacheKey, "Optional external cache for the CSC RDO container");
-}
+    base_class(type, name, parent) {}
 
-CscRdoToCscPrepDataToolMT::~CscRdoToCscPrepDataToolMT() {}
 
 StatusCode CscRdoToCscPrepDataToolMT::initialize() {
-    ATH_MSG_VERBOSE("Starting init");
-    ATH_CHECK(CscRdoToCscPrepDataToolCore::initialize());
+    ATH_CHECK(m_cscCalibTool.retrieve());
+    ATH_CHECK(m_cscRdoDecoderTool.retrieve());
+    ATH_CHECK(m_idHelperSvc.retrieve());
+    ATH_CHECK(m_cabling.retrieve());
+    // check if initializing of DataHandle objects success
+    ATH_CHECK(m_rdoContainerKey.initialize());
+    ATH_CHECK(m_outputCollectionKey.initialize());
+    ATH_CHECK(m_muDetMgrKey.initialize());
     ATH_CHECK(m_prdContainerCacheKey.initialize(!m_prdContainerCacheKey.key().empty()));
-    ATH_MSG_DEBUG("initialize() successful in " << name());
     return StatusCode::SUCCESS;
 }
 
-StatusCode CscRdoToCscPrepDataToolMT::finalize() { return CscRdoToCscPrepDataToolCore::finalize(); }
+void CscRdoToCscPrepDataToolMT::printPrepDataImpl(const Muon::CscStripPrepDataContainer* outputCollection) const {
+    ATH_MSG_INFO("***************************************************************");
+    ATH_MSG_INFO("****** Listing Csc(Strip)PrepData collections content *********");
 
-StatusCode CscRdoToCscPrepDataToolMT::decode(std::vector<IdentifierHash>& givenIdhs, std::vector<IdentifierHash>& decodedIdhs) const {
+    if (outputCollection->size() <= 0)
+        ATH_MSG_INFO("No Csc(Strip)PrepRawData collections found");
+    else {
+        ATH_MSG_INFO("Number of Csc(Strip)PrepRawData collections found in this event is " << outputCollection->size());
+
+        int ict = 0;
+        int ncoll = 0;
+        ATH_MSG_INFO("-------------------------------------------------------------");
+        for (IdentifiableContainer<Muon::CscStripPrepDataCollection>::const_iterator icscColl = outputCollection->begin();
+             icscColl != outputCollection->end(); ++icscColl) {
+            const Muon::CscStripPrepDataCollection* cscColl = *icscColl;
+
+            if (cscColl->size() <= 0) continue;
+
+            ATH_MSG_INFO("PrepData Collection ID " << m_idHelperSvc->cscIdHelper().show_to_string(cscColl->identify())
+                                                   << " with size = " << cscColl->size());
+            CscStripPrepDataCollection::const_iterator it_cscStripPrepData;
+            int icc = 0;
+            int iccphi = 0;
+            int icceta = 0;
+            for (it_cscStripPrepData = cscColl->begin(); it_cscStripPrepData != cscColl->end(); ++it_cscStripPrepData) {
+                icc++;
+                ict++;
+                if (m_idHelperSvc->cscIdHelper().measuresPhi((*it_cscStripPrepData)->identify()))
+                    iccphi++;
+                else
+                    icceta++;
+
+                ATH_MSG_INFO(ict << " in this coll. " << icc
+                                 << " prepData id = " << m_idHelperSvc->cscIdHelper().show_to_string((*it_cscStripPrepData)->identify()));
+            }
+            ncoll++;
+            ATH_MSG_INFO("*** Collection " << ncoll << " Summary: " << iccphi << " phi hits / " << icceta << " eta hits ");
+            ATH_MSG_INFO("-------------------------------------------------------------");
+        }
+    }
+}
+
+void CscRdoToCscPrepDataToolMT::printInputRdo(const EventContext&) const { return; }
+StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext&, const std::vector<uint32_t>&) const { 
+   ATH_MSG_FATAL("ROB based decoding is not supported....");
+   return StatusCode::FAILURE;
+}
+StatusCode CscRdoToCscPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const{
+    /// Recording the PRD container in StoreGate
+    SG::WriteHandle<Muon::CscStripPrepDataContainer> outputHandle(m_outputCollectionKey, ctx);
+
+    // Caching of PRD container
+    if (m_prdContainerCacheKey.key().empty()) {
+        // without the cache we just record the container
+        ATH_CHECK(outputHandle.record(std::make_unique<Muon::CscStripPrepDataContainer>(m_idHelperSvc->cscIdHelper().module_hash_max())));
+        ATH_MSG_DEBUG("Created container " << m_outputCollectionKey.key());
+    } else {
+        // use the cache to get the container
+        SG::UpdateHandle<CscStripPrepDataCollection_Cache> update(m_prdContainerCacheKey, ctx);
+        if (!update.isValid()) {
+            ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKey.key());
+            return StatusCode::FAILURE;
+        }
+        ATH_CHECK(outputHandle.record(std::make_unique<Muon::CscStripPrepDataContainer>(update.ptr())));
+        ATH_MSG_DEBUG("Created container using cache for " << m_prdContainerCacheKey.key());
+    }
+    return StatusCode::SUCCESS;
+}
+StatusCode CscRdoToCscPrepDataToolMT::decode(const EventContext& ctx, std::vector<IdentifierHash>& givenIdhs, std::vector<IdentifierHash>& decodedIdhs) const {
     // WARNING : Trigger Part is not finished.
     unsigned int sizeVectorRequested = givenIdhs.size();
     ATH_MSG_DEBUG("decode for " << sizeVectorRequested << " offline collections called");
@@ -51,32 +112,21 @@ StatusCode CscRdoToCscPrepDataToolMT::decode(std::vector<IdentifierHash>& givenI
     decodedIdhs.clear();
 
     /// Recording the PRD container in StoreGate
-    SG::WriteHandle<Muon::CscStripPrepDataContainer> outputHandle(m_outputCollectionKey);
+    SG::WriteHandle<Muon::CscStripPrepDataContainer> outputHandle(m_outputCollectionKey, ctx);
 
     // Caching of PRD container
-    const bool externalCachePRD = !m_prdContainerCacheKey.key().empty();
-    if (!externalCachePRD) {
+    if (m_prdContainerCacheKey.key().empty()) {
         // without the cache we just record the container
-        StatusCode status =
-            outputHandle.record(std::make_unique<Muon::CscStripPrepDataContainer>(m_idHelperSvc->cscIdHelper().module_hash_max()));
-        if (status.isFailure() || !outputHandle.isValid()) {
-            ATH_MSG_FATAL("Could not record container of CSC PrepData Container at " << m_outputCollectionKey.key());
-            return StatusCode::FAILURE;
-        }
+        ATH_CHECK(outputHandle.record(std::make_unique<Muon::CscStripPrepDataContainer>(m_idHelperSvc->cscIdHelper().module_hash_max())));
         ATH_MSG_DEBUG("Created container " << m_outputCollectionKey.key());
     } else {
         // use the cache to get the container
-        SG::UpdateHandle<CscStripPrepDataCollection_Cache> update(m_prdContainerCacheKey);
+        SG::UpdateHandle<CscStripPrepDataCollection_Cache> update(m_prdContainerCacheKey, ctx);
         if (!update.isValid()) {
             ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKey.key());
             return StatusCode::FAILURE;
         }
-        StatusCode status = outputHandle.record(std::make_unique<Muon::CscStripPrepDataContainer>(update.ptr()));
-        if (status.isFailure() || !outputHandle.isValid()) {
-            ATH_MSG_FATAL("Could not record container of CSC PrepData Container using cache " << m_prdContainerCacheKey.key() << " - "
-                                                                                              << m_outputCollectionKey.key());
-            return StatusCode::FAILURE;
-        }
+        ATH_CHECK(outputHandle.record(std::make_unique<Muon::CscStripPrepDataContainer>(update.ptr())));
         ATH_MSG_DEBUG("Created container using cache for " << m_prdContainerCacheKey.key());
     }
     // Pass the container from the handle
@@ -87,7 +137,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decode(std::vector<IdentifierHash>& givenI
     // or
     // will activate the TP converter for reading from pool root the RDO container and recording it in SG
 
-    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey);
+    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
     if (!rdoContainerHandle.isValid()) {
         ATH_MSG_WARNING("No CSC RDO container in StoreGate!");
         return StatusCode::SUCCESS;
@@ -459,9 +509,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
     return StatusCode::SUCCESS;
 }
 
-void CscRdoToCscPrepDataToolMT::printPrepData() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+void CscRdoToCscPrepDataToolMT::printPrepData(const EventContext& ctx) const {
     SG::ReadHandleKey<Muon::CscStripPrepDataContainer> k(m_prdContainerCacheKey.key());
     k.initialize().ignore();
     printPrepDataImpl(SG::makeHandle(k, ctx).get());

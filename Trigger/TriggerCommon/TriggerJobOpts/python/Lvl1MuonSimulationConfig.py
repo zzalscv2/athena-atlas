@@ -139,29 +139,24 @@ def MuonRdo2PrdConfig(flags):
         acc.merge(SGInputLoaderCfg(flags, Load=rdoInputs))
     ### CSC RDO data ###
     if flags.Detector.GeometryCSC:
-        CscRdoToCscPrepDataTool = CompFactory.Muon.CscRdoToCscPrepDataToolMT(name = "CscRdoToCscPrepDataToolMT" + postFix, RDOContainer = "CSCRDO"+suffix)
-        CscRdoToCscPrepData = CompFactory.CscRdoToCscPrepData(name = "CscRdoToCscPrepData" + postFix,
-                                                              CscRdoToCscPrepDataTool = CscRdoToCscPrepDataTool)
-        acc.addEventAlgo(CscRdoToCscPrepData)
+        from MuonConfig.MuonRdoDecodeConfig import CscRDODecodeCfg
+        acc.merge(CscRDODecodeCfg(flags,name= "CscRdoToCscPrepData" + postFix, RDOContainer = "CSCRDO"+suffix))
         CscClusterBuilderTool = CompFactory.CscThresholdClusterBuilderTool(name = "CscThresholdClusterBuilderTool" + postFix)
         CscClusterBuilder = CompFactory.CscThresholdClusterBuilder(name = "CscThresholdClusterBuilder"+postFix,
                                                                    cluster_builder = CscClusterBuilderTool)
         acc.addEventAlgo(CscClusterBuilder)
     ### MDT RDO data ###
-    MdtRdoToMdtPrepDataTool = CompFactory.Muon.MdtRdoToPrepDataToolMT(name = "MdtRdoToPrepDataToolMT" + postFix, RDOContainer = "MDTCSM"+suffix)
-    MdtRdoToMdtPrepData = CompFactory.MdtRdoToMdtPrepData(name = "MdtRdoToMdtPrepData" + postFix,
-                                                          DecodingTool = MdtRdoToMdtPrepDataTool)
-    acc.addEventAlgo(MdtRdoToMdtPrepData)
+    from MuonConfig.MuonRdoDecodeConfig import MdtRDODecodeCfg
+    acc.merge(MdtRDODecodeCfg(flags, name = "MdtRdoToMdtPrepData" + postFix,
+                                     RDOContainer = "MDTCSM"+suffix ))
     ### RPC RDO data ###
-    RpcRdoToRpcPrepDataTool = CompFactory.Muon.RpcRdoToPrepDataToolMT(name = "RpcRdoToPrepDataToolMT" + postFix, OutputCollection = "RPCPAD"+suffix)
-    RpcRdoToRpcPrepData = CompFactory.RpcRdoToRpcPrepData(name = "RpcRdoToRpcPrepData" + postFix,
-                                                          DecodingTool = RpcRdoToRpcPrepDataTool)
-    acc.addEventAlgo(RpcRdoToRpcPrepData)
+    from MuonConfig.MuonRdoDecodeConfig import RpcRDODecodeCfg
+    acc.merge(RpcRDODecodeCfg(flags, name = "RpcRdoToRpcPrepData" + postFix, 
+                                     RDOContainer = "RPCPAD"+suffix))
     ### TGC RDO data ###
-    TgcRdoToTgcPrepDataTool = CompFactory.Muon.TgcRdoToPrepDataToolMT(name = "TgcRdoToPrepDataToolMT" + postFix, RDOContainer = "TGCRDO"+suffix)
-    TgcRdoToTgcPrepData = CompFactory.TgcRdoToTgcPrepData(name = "TgcRdoToTgcPrepData" + postFix,
-                                                          DecodingTool = TgcRdoToTgcPrepDataTool)
-    acc.addEventAlgo(TgcRdoToTgcPrepData)
+    from MuonConfig.MuonRdoDecodeConfig import TgcRDODecodeCfg
+    acc.merge(TgcRDODecodeCfg(flags, name = "TgcRdoToPrepData" + postFix, 
+                                     RDOContainer = "TGCRDO"+suffix))
     return acc
 
 def RecoMuonSegmentSequence(flags):

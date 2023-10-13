@@ -39,15 +39,15 @@ namespace Muon {
         virtual StatusCode initialize() override;
 
         // debugging
-        virtual void printInputRdo() const override;
+        virtual void printInputRdo(const EventContext& ctx) const override;
         void printPrepDataImpl(const Muon::RpcPrepDataContainer& rpcPrepDataContainer,
                                const Muon::RpcCoinDataContainer& rpcCoinDataContainer) const;
         void printCoinDataImpl(const Muon::RpcCoinDataContainer& rpcCoinDataContainer) const;
 
-        virtual StatusCode decode(std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const override;
-        virtual StatusCode decode(const std::vector<uint32_t>& robIds) const override;
-
-        virtual void printPrepData() const override;
+        virtual StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const override;
+        virtual StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override;
+        virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
+        virtual void printPrepData(const EventContext& ctx) const override;
 
     protected:
         struct State;
@@ -134,7 +134,7 @@ namespace Muon {
         /// RpcCoinData containers
         SG::WriteHandleKey<Muon::RpcCoinDataContainer> m_rpcCoinDataContainerKey{this,"TriggerOutputCollection", "RPC_triggerHits" };
 
-        SG::ReadHandleKey<RpcPadContainer> m_rdoContainerKey{this, "InputCollection", "RPCPAD"};
+        SG::ReadHandleKey<RpcPadContainer> m_rdoContainerKey{this, "RDOContainer", "RPCPAD"};
 
         // Rob Data Provider handle
         ToolHandle<Muon::IRPC_RDO_Decoder> m_rpcRdoDecoderTool{this, "RdoDecoderTool", "Muon::RpcRDO_Decoder"};

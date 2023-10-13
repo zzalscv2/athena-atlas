@@ -68,12 +68,12 @@ namespace Muon
        *  @param requestedIdHashVect          Vector of hashes to convert i.e. the hashes of ROD collections in a 'Region of Interest'  
        *  @return selectedIdHashVect This is the subset of requestedIdVect which were actually found to contain data   
        *  (i.e. if you want you can use this vector of hashes to optimise the retrieval of data in subsequent steps.) */ 
-      virtual StatusCode decode(std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect) const override;
+      virtual StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect) const override;
 
       /** Print Input RDO for debugging */ 
-      virtual void printInputRdo() const override;
+      virtual void printInputRdo(const EventContext& ctx) const override;
 
-      virtual void printPrepData() const override;      
+      virtual void printPrepData(const EventContext& ctx) const override;      
       
     protected:
       /** The number of recorded Bunch Crossings (BCs) FOR HITS is 3 (Previous, Current, and Next BCs) */
@@ -84,12 +84,13 @@ namespace Muon
 
       struct State {
         /** TgcPrepRawData (hit PRD) containers */
-        TgcPrepDataContainer* m_tgcPrepDataContainer[NBC_HIT+1] = {0};   // +1 for AllBCs
+        TgcPrepDataContainer* m_tgcPrepDataContainer[NBC_HIT+1] = {};   // +1 for AllBCs
         std::unordered_map<Identifier, TgcPrepDataCollection*> m_tgcPrepDataCollections[NBC_HIT+1];
         /** TgcCoinData (coincidence PRD) containers */ 
-        TgcCoinDataContainer* m_tgcCoinDataContainer[NBC_TRIG] = {0};
+        TgcCoinDataContainer* m_tgcCoinDataContainer[NBC_TRIG] = {};
         std::unordered_map<Identifier, TgcCoinDataCollection*> m_tgcCoinDataCollections[NBC_TRIG];
       };
+      StatusCode setupState(const EventContext& ctx, State& state) const;
 
       struct CablingInfo {
         const ITGCcablingSvc* m_tgcCabling = nullptr;
@@ -108,82 +109,82 @@ namespace Muon
       };
       
       /** SLB bit position 
-	  /code
-	  Large R   <--> Small R
-	  Large phi <--> Small phi for A side forward chambers and C side backward chambers
-	  Small phi <--> Large phi for A side backward chambers and C side forward chambers
-	  A-input :  40 -  75,  42 -  73 are valid.
-	  B-input :  76 - 111,  78 - 109 are valid.
-	  C-input : 112 - 155, 118 - 149 are valid. 
-	  D-input : 156 - 199, 162 - 193 are valid. 
+      /code
+      Large R   <--> Small R
+      Large phi <--> Small phi for A side forward chambers and C side backward chambers
+      Small phi <--> Large phi for A side backward chambers and C side forward chambers
+      A-input :  40 -  75,  42 -  73 are valid.
+      B-input :  76 - 111,  78 - 109 are valid.
+      C-input : 112 - 155, 118 - 149 are valid. 
+      D-input : 156 - 199, 162 - 193 are valid. 
 
-	  Channel in this code : Large R                  15  14  13  12  11 ...   0  15 ...   3   2   1   0                 Small R
+      Channel in this code : Large R                  15  14  13  12  11 ...   0  15 ...   3   2   1   0                 Small R
                                                            (it is better to be reverted to avoid confusion)
           ASD channel order    :  15 ... ...   0 (there are shifts dependent on position)
-	  PS board channel     :                           0   1   2   3   4 ...  15  16 ...  28  29  30  31 
-	  A-Input              :                  40  41  42  43  44  45  46 ...  57  58 ...  70  71  72  73  74  75
-	  B-Input              :                  76  77  78  79  80  81  82 ...  93  94 ... 106 107 108 109 110 111
-	  C-Input              : 112 113 114 115 116 117 118 119 120 121 122 ... 133 134 ... 146 147 148 149 150 151 152 153 154 155
-	  D-Input              : 156 157 158 159 160 161 162 163 164 165 166 ... 177 178 ... 190 191 192 193 194 195 196 197 198 199
-	  /endcode
-	  - https://twiki.cern.ch/twiki/bin/view/Main/TgcDocument
-	  - https://twiki.cern.ch/twiki/pub/Main/TgcDocument/celladdress2_asic_rev2.pdf
-	  - https://twiki.cern.ch/twiki/pub/Main/TgcDocument/psboard_table_v070119.xls
-	  - https://twiki.cern.ch/twiki/pub/Main/TgcDocument/psboard_table_v070119.pdf
+      PS board channel     :                           0   1   2   3   4 ...  15  16 ...  28  29  30  31 
+      A-Input              :                  40  41  42  43  44  45  46 ...  57  58 ...  70  71  72  73  74  75
+      B-Input              :                  76  77  78  79  80  81  82 ...  93  94 ... 106 107 108 109 110 111
+      C-Input              : 112 113 114 115 116 117 118 119 120 121 122 ... 133 134 ... 146 147 148 149 150 151 152 153 154 155
+      D-Input              : 156 157 158 159 160 161 162 163 164 165 166 ... 177 178 ... 190 191 192 193 194 195 196 197 198 199
+      /endcode
+      - https://twiki.cern.ch/twiki/bin/view/Main/TgcDocument
+      - https://twiki.cern.ch/twiki/pub/Main/TgcDocument/celladdress2_asic_rev2.pdf
+      - https://twiki.cern.ch/twiki/pub/Main/TgcDocument/psboard_table_v070119.xls
+      - https://twiki.cern.ch/twiki/pub/Main/TgcDocument/psboard_table_v070119.pdf
       */
       enum BIT_POS {
-	BIT_POS_ASD_SIZE = 16,
-	BIT_POS_NUM_ASD = 2,
-	BIT_POS_INPUT_SIZE = BIT_POS_ASD_SIZE*BIT_POS_NUM_ASD,
-	BIT_POS_OFFSET_LARGE_R = BIT_POS_ASD_SIZE,
-	BIT_POS_OFFSET_LARGE_PHIFOR_A_FWD_C_BWD = BIT_POS_OFFSET_LARGE_R,
-	BIT_POS_A_INPUT_ORIGIN =  73,
-	BIT_POS_B_INPUT_ORIGIN = 109,
-	BIT_POS_C_INPUT_ORIGIN = 149,
-	BIT_POS_D_INPUT_ORIGIN = 193,
-	
-	/* CHannel starts from 00 at the small R side (the same as ASD). */
-	BIT_POS_B_INPUT_LARGE_R_CH15 = BIT_POS_B_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R - 15, //  78
-	BIT_POS_A_INPUT_LARGE_R_CH08 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R -  8, //  49
-	BIT_POS_B_INPUT_LARGE_R_CH07 = BIT_POS_B_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R -  7, //  86
-	BIT_POS_A_INPUT_LARGE_R_CH00 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R,      //  57
-	BIT_POS_B_INPUT_SMALL_R_CH15 = BIT_POS_B_INPUT_ORIGIN                          - 15, //  94
-	BIT_POS_A_INPUT_SMALL_R_CH08 = BIT_POS_A_INPUT_ORIGIN                          -  8, //  65
-	BIT_POS_B_INPUT_SMALL_R_CH07 = BIT_POS_B_INPUT_ORIGIN                          -  7, // 102
-	BIT_POS_A_INPUT_SMALL_R_CH00 = BIT_POS_A_INPUT_ORIGIN,                               //  73
+    BIT_POS_ASD_SIZE = 16,
+    BIT_POS_NUM_ASD = 2,
+    BIT_POS_INPUT_SIZE = BIT_POS_ASD_SIZE*BIT_POS_NUM_ASD,
+    BIT_POS_OFFSET_LARGE_R = BIT_POS_ASD_SIZE,
+    BIT_POS_OFFSET_LARGE_PHIFOR_A_FWD_C_BWD = BIT_POS_OFFSET_LARGE_R,
+    BIT_POS_A_INPUT_ORIGIN =  73,
+    BIT_POS_B_INPUT_ORIGIN = 109,
+    BIT_POS_C_INPUT_ORIGIN = 149,
+    BIT_POS_D_INPUT_ORIGIN = 193,
+    
+    /* CHannel starts from 00 at the small R side (the same as ASD). */
+    BIT_POS_B_INPUT_LARGE_R_CH15 = BIT_POS_B_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R - 15, //  78
+    BIT_POS_A_INPUT_LARGE_R_CH08 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R -  8, //  49
+    BIT_POS_B_INPUT_LARGE_R_CH07 = BIT_POS_B_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R -  7, //  86
+    BIT_POS_A_INPUT_LARGE_R_CH00 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R,      //  57
+    BIT_POS_B_INPUT_SMALL_R_CH15 = BIT_POS_B_INPUT_ORIGIN                          - 15, //  94
+    BIT_POS_A_INPUT_SMALL_R_CH08 = BIT_POS_A_INPUT_ORIGIN                          -  8, //  65
+    BIT_POS_B_INPUT_SMALL_R_CH07 = BIT_POS_B_INPUT_ORIGIN                          -  7, // 102
+    BIT_POS_A_INPUT_SMALL_R_CH00 = BIT_POS_A_INPUT_ORIGIN,                               //  73
 
-	BIT_POS_B_INPUT_SMALL_R_CH05 = BIT_POS_B_INPUT_ORIGIN                          -  5, // 104
-	BIT_POS_A_INPUT_SMALL_R_CH03 = BIT_POS_A_INPUT_ORIGIN                          -  3, //  70
-	BIT_POS_B_INPUT_LARGE_R_CH12 = BIT_POS_B_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R - 12, //  81
+    BIT_POS_B_INPUT_SMALL_R_CH05 = BIT_POS_B_INPUT_ORIGIN                          -  5, // 104
+    BIT_POS_A_INPUT_SMALL_R_CH03 = BIT_POS_A_INPUT_ORIGIN                          -  3, //  70
+    BIT_POS_B_INPUT_LARGE_R_CH12 = BIT_POS_B_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R - 12, //  81
 
-	BIT_POS_A_INPUT_SMALL_R_CH04 = BIT_POS_A_INPUT_ORIGIN                          -  4, //  69
-	BIT_POS_A_INPUT_LARGE_R_CH12 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R - 12, //  45
-	BIT_POS_A_INPUT_LARGE_R_CH04 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R -  4, //  53
-	BIT_POS_A_INPUT_SMALL_R_CH12 = BIT_POS_A_INPUT_ORIGIN                          - 12, //  61
+    BIT_POS_A_INPUT_SMALL_R_CH04 = BIT_POS_A_INPUT_ORIGIN                          -  4, //  69
+    BIT_POS_A_INPUT_LARGE_R_CH12 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R - 12, //  45
+    BIT_POS_A_INPUT_LARGE_R_CH04 = BIT_POS_A_INPUT_ORIGIN - BIT_POS_OFFSET_LARGE_R -  4, //  53
+    BIT_POS_A_INPUT_SMALL_R_CH12 = BIT_POS_A_INPUT_ORIGIN                          - 12, //  61
 
-	/* CHannel starts from 00 
-	   at the small phi side for A side forward chambers and C side backward chambers and 
-	   at the large phi side for A side backward chambers and C side forward chambers (the same as ASD). */
-	BIT_POS_B_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH15 = BIT_POS_B_INPUT_LARGE_R_CH15,   //  78
-	BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH08 = BIT_POS_A_INPUT_LARGE_R_CH08,   //  49
-	BIT_POS_B_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH07 = BIT_POS_B_INPUT_LARGE_R_CH07,   //  86
-	BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH00 = BIT_POS_A_INPUT_LARGE_R_CH00,   //  57
-	BIT_POS_B_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH15 = BIT_POS_B_INPUT_SMALL_R_CH15,   //  94
-	BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH08 = BIT_POS_A_INPUT_SMALL_R_CH08,   //  65
-	BIT_POS_B_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH07 = BIT_POS_B_INPUT_SMALL_R_CH07,   // 102
-	BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH00 = BIT_POS_A_INPUT_SMALL_R_CH00,   //  73
+    /* CHannel starts from 00 
+       at the small phi side for A side forward chambers and C side backward chambers and 
+       at the large phi side for A side backward chambers and C side forward chambers (the same as ASD). */
+    BIT_POS_B_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH15 = BIT_POS_B_INPUT_LARGE_R_CH15,   //  78
+    BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH08 = BIT_POS_A_INPUT_LARGE_R_CH08,   //  49
+    BIT_POS_B_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH07 = BIT_POS_B_INPUT_LARGE_R_CH07,   //  86
+    BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH00 = BIT_POS_A_INPUT_LARGE_R_CH00,   //  57
+    BIT_POS_B_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH15 = BIT_POS_B_INPUT_SMALL_R_CH15,   //  94
+    BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH08 = BIT_POS_A_INPUT_SMALL_R_CH08,   //  65
+    BIT_POS_B_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH07 = BIT_POS_B_INPUT_SMALL_R_CH07,   // 102
+    BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH00 = BIT_POS_A_INPUT_SMALL_R_CH00,   //  73
 
-	BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH12 = BIT_POS_A_INPUT_LARGE_R_CH12,   //  45
-	BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH04 = BIT_POS_A_INPUT_LARGE_R_CH04,   //  53
-	BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH12 = BIT_POS_A_INPUT_SMALL_R_CH12,   //  61
-	BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH04 = BIT_POS_A_INPUT_SMALL_R_CH04    //  69
+    BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH12 = BIT_POS_A_INPUT_LARGE_R_CH12,   //  45
+    BIT_POS_A_INPUT_LARGE_PHI_FOR_A_FWD_C_BWD_CH04 = BIT_POS_A_INPUT_LARGE_R_CH04,   //  53
+    BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH12 = BIT_POS_A_INPUT_SMALL_R_CH12,   //  61
+    BIT_POS_A_INPUT_SMALL_PHI_FOR_A_FWD_C_BWD_CH04 = BIT_POS_A_INPUT_SMALL_R_CH04    //  69
       };
       
       /** Bit map sizes */
       enum MAP_SIZE {
         WT_MAP_SIZE = 3*BIT_POS_INPUT_SIZE,
         ST_MAP_SIZE = 2*BIT_POS_INPUT_SIZE,
-	SD_MAP_SIZE = 2*BIT_POS_INPUT_SIZE,
+    SD_MAP_SIZE = 2*BIT_POS_INPUT_SIZE,
         WD_MAP_SIZE = 2*BIT_POS_INPUT_SIZE
       };
 
@@ -288,7 +289,7 @@ namespace Muon
                             const int* bitpos_o, int* slbchannel_o) const;
       /** Get bitPos etc of wire for SL */
       void getBitPosWire(const TgcRawData& rd, const int hitId_w, const int sub_w, int& subMatrix_w, 
-			 int* bitpos_w) const;
+             int* bitpos_w) const;
       /** Get bitPos etc of strip for SL */
       void getBitPosStrip(const int hitId_s, const int sub_s, int& subMatrix_s, int* bitpos_s) const;
       
@@ -302,12 +303,12 @@ namespace Muon
       double getWidthWire(const MuonGM::TgcReadoutElement* descriptor, const int gasGap, const int channel) const;
       /** Get the width of a strip channel in the phi direction */
       double getWidthStrip(const MuonGM::TgcReadoutElement* descriptor, const int gasGap, const int channel, 
-			   const Identifier channelId) const;
+               const Identifier channelId) const;
       /** Get wire geometry (width, r, z) for SL */ 
       bool getSLWireGeometry(const Identifier* channelId_wire, double& width_wire, double& r_wire, double& z_wire) const;
       /** Get strip geometry (width, theta) for SL */ 
       bool getSLStripGeometry(const Identifier* channelId_strip, const bool isBackWard, const bool isAside, 
-			      double& width_strip, double& theta_strip) const;
+                  double& width_strip, double& theta_strip) const;
       /** Get position and offline ID of TGC3 wire for HiPt */ 
       bool getPosAndIdWireOut(const MuonGM::TgcReadoutElement** descriptor_o, const Identifier* channelIdOut,
                               const int* gasGap_o, const int* channel_o,
@@ -336,22 +337,22 @@ namespace Muon
 
       /** Get ReadoutID of SL from RDO */  
       bool getSLIds(const bool isStrip, const TgcRawData& rd, Identifier* channelId, 
-		    int& index, int& chip, int& hitId, int& sub, int& sswId, int& sbLoc, int& subMatrix, int *bitpos, 
-		    const bool isBoundary=false, const TgcRdo* rdoColl=0, 
-		    const int index_w=-1, const int chip_w=-1, const int hitId_w=-1, const int sub_w=-1) const;
+            int& index, int& chip, int& hitId, int& sub, int& sswId, int& sbLoc, int& subMatrix, int *bitpos, 
+            const bool isBoundary=false, const TgcRdo* rdoColl=0, 
+            const int index_w=-1, const int chip_w=-1, const int hitId_w=-1, const int sub_w=-1) const;
       /** Get strip sbLoc of Endcap chamber boundary from HiPt Strip */
       bool getSbLocOfEndcapStripBoundaryFromHiPt(const TgcRawData& rd,
                                                  int& sbLoc,
-						 const TgcRdo* rdoColl, 
-						 const int index_w, const int chip_w, const int hitId_w, const int sub_w) const;
+                         const TgcRdo* rdoColl, 
+                         const int index_w, const int chip_w, const int hitId_w, const int sub_w) const;
       /** Get strip sbLoc of Endcap chamber boundary from Tracklet Strip */
       bool getSbLocOfEndcapStripBoundaryFromTracklet(const TgcRawData& rd,
                                                      int& sbLoc,
-						     const TgcRdo* rdoColl, 
-						     const int index_w, const int chip_w, const int hitId_w, const int sub_w) const;
+                             const TgcRdo* rdoColl, 
+                             const int index_w, const int chip_w, const int hitId_w, const int sub_w) const;
       /** Get trackletIds of three Tracklet Strip candidates in the Endcap boudary */ 
       void getEndcapStripCandidateTrackletIds(const int roi, int &trackletIdStripFirst, 
-					      int &trackletIdStripSecond, int &trackletIdStripThird) const;
+                          int &trackletIdStripSecond, int &trackletIdStripThird) const;
 
       const CablingInfo*  getCabling() const;
 
@@ -369,28 +370,28 @@ namespace Muon
       const ITGCcablingSvc* m_tgcCabling = nullptr;
 
       /** TgcPrepRawData container key for current BC */ 
-      std::string m_outputCollectionLocation;      
+      Gaudi::Property<std::string> m_outputCollectionLocation{this, "OutputCollection", "TGC_Measurements"};      
       
       /** TgcCoinData container key for current BC */ 
-      std::string m_outputCoinCollectionLocation;
+      Gaudi::Property<std::string> m_outputCoinCollectionLocation{this, "OutputCoinCollection", "TrigT1CoinDataCollection"};
       
       /** Identifier hash offset */
-      int m_tgcOffset;
+      Gaudi::Property<int> m_tgcOffset{this, "TGCHashIdOffset", 26000};
 
       /** Switch for the decoding of TGC RDO into TgcPrepData */
-      bool m_decodeData; 
+      Gaudi::Property<bool> m_decodeData{this, "DecodeData", true}; 
       /** Switch for the coincince decoding */
-      bool m_fillCoinData; 
+      Gaudi::Property<bool> m_fillCoinData{this, "FillCoinData", true}; 
       
       /** Switch for error message disabling on one invalid channel in 
-	  sector A09 seen in 2008 data, at least run 79772 - 91800. 
-	  bug #48828: TgcRdoToTgcDigit WARNING ElementID not found for 
-	  sub=103 rod=9 ssw=6 slb=20 bitpos=151 +offset=0 orFlag=0
+      sector A09 seen in 2008 data, at least run 79772 - 91800. 
+      bug #48828: TgcRdoToTgcDigit WARNING ElementID not found for 
+      sub=103 rod=9 ssw=6 slb=20 bitpos=151 +offset=0 orFlag=0
       */
-      bool m_show_warning_level_invalid_A09_SSW6_hit;
+      Gaudi::Property<bool> m_show_warning_level_invalid_A09_SSW6_hit{this, "show_warning_level_invalid_A09_SSW6_hit", false};
 
       /** Flag for dropping PRD's with zero widths */
-      bool m_dropPrdsWithZeroWidth;
+      Gaudi::Property<bool> m_dropPrdsWithZeroWidth{this, "dropPrdsWithZeroWidth", true};
       /** Cut value for zero widths */ 
       const static double s_cutDropPrdsWithZeroWidth; // 0.1 mm
 
@@ -406,42 +407,42 @@ namespace Muon
       mutable std::atomic<long> m_nSLRDOs{0};  
       mutable std::atomic<long> m_nSLPRDs{0}; 
 
-      SG::ReadHandleKey<TgcRdoContainer> m_rdoContainerKey;//"TGCRDO"
+      SG::ReadHandleKey<TgcRdoContainer> m_rdoContainerKey{this, "RDOContainer", "TGCRDO" ,"TgcRdoContainer to retrieve"};
 
       // Write handle keys for CoinDataContainers, need 3, for current, previous and next BC
-      SG::WriteHandleKeyArray<Muon::TgcCoinDataContainer> m_outputCoinKeys;
+      SG::WriteHandleKeyArray<Muon::TgcCoinDataContainer> m_outputCoinKeys{this, "outputCoinKey", {}};
       // Write handle keys for PrepDataContainers, need 4, for current, previous, next and all BC
-      SG::WriteHandleKeyArray<Muon::TgcPrepDataContainer> m_outputprepdataKeys;
+      SG::WriteHandleKeyArray<Muon::TgcPrepDataContainer> m_outputprepdataKeys{this, "prepDataKeys", {}};
         
       /// Keys for the PRD cache containers, 4 needed for different BC
-      TgcPrdUpdateHandles m_prdContainerCacheKeys;
+      TgcPrdUpdateHandles m_prdContainerCacheKeys{this, "UpdateKeysPrd", {}};
       /// Keys for the Coin cache containers, 3 needed for different BC
-      TgcCoinUpdateHandles m_coinContainerCacheKeys;
+      TgcCoinUpdateHandles m_coinContainerCacheKeys{this, "UpdateKeysCoin", {}};
 
       // TgcPrepRawData container cache key prefix (code automatically creates three keys with from this string if it is non-empty)
       Gaudi::Property<std::string> m_prdContainerCacheKeyStr{this, "PrdCacheString", "", "Prefix for names of PRD cache collections"};
       // TgcCoinData container cache key prefix (code automatically creates three keys with from this string if it is non-empty)
       Gaudi::Property<std::string> m_coinContainerCacheKeyStr{this, "CoinCacheString", "", "Prefix for names of Coin cache collections"};
 
-      /** Aboid compiler warning **/
-      virtual StatusCode decode( const std::vector<uint32_t>& /*robIds*/ ) const override {return StatusCode::FAILURE;}
-
+      /** Avoid compiler warning **/
+      virtual StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override; 
+      virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
       // Run3->Run2 conversion of rodId and sector
       void convertToRun2(const TgcRawData* rd, uint16_t& newrodId, uint16_t& newsector) const {
-	newrodId = rd->rodId();
-	newsector = rd->sector();
-	if (rd->rodId()>12){ // Run3 rodID is 17..19 while Run2 rodId is 1..12
-	  if(rd->isForward()){
-	    newrodId = rd->sector() / 2 + 1 + (rd->rodId()-17) * 4;
-	    newsector = (rd->sector() + (rd->rodId()-17)*8) % 2;
-	  }else{
-	    newrodId = rd->sector() / 4 + 1 + (rd->rodId()-17) * 4;
-	    newsector = (rd->sector() + (rd->rodId()-17)*16) % 4;
-	  }
-	}
+        newrodId = rd->rodId();
+        newsector = rd->sector();
+        if (rd->rodId()>12){ // Run3 rodID is 17..19 while Run2 rodId is 1..12
+          if(rd->isForward()){
+            newrodId = rd->sector() / 2 + 1 + (rd->rodId()-17) * 4;
+            newsector = (rd->sector() + (rd->rodId()-17)*8) % 2;
+          }else{
+            newrodId = rd->sector() / 4 + 1 + (rd->rodId()-17) * 4;
+            newsector = (rd->sector() + (rd->rodId()-17)*16) % 4;
+          }
+        }
       }
       void convertToRun2(const TgcRawData& rd, uint16_t& newrodId, uint16_t& newsector) const {
-	convertToRun2(&rd,newrodId,newsector);
+    convertToRun2(&rd,newrodId,newsector);
       }
 
    }; 

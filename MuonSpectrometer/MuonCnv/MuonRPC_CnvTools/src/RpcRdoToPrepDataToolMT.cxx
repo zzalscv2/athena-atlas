@@ -114,8 +114,9 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::loadProcessedChambers(const EventContex
     return StatusCode::SUCCESS;
 }
 /// This code is thread-safe as we will propagate local thread collection contents to a thread-safe one
-StatusCode Muon::RpcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const EventContext&ctx,
+                                                std::vector<IdentifierHash>& idVect, 
+                                                std::vector<IdentifierHash>& selectedIdVect) const {
     ATH_MSG_DEBUG("Calling Core decode function from MT decode function (hash vector)");
     State state{m_idHelperSvc->rpcIdHelper()};
     ATH_CHECK(loadProcessedChambers(ctx, state));
@@ -129,8 +130,8 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& idV
 }
 
 /// This code is thread-safe as we will propagate local thread collection contents to a thread-safe one
-StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const std::vector<uint32_t>& robIds) const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const EventContext& ctx,
+                                                const std::vector<uint32_t>& robIds) const {
     ATH_MSG_DEBUG("Calling Core decode function from MT decode function (ROB vector)");
     State state{m_idHelperSvc->rpcIdHelper()};
     ATH_CHECK(loadProcessedChambers(ctx, state));
@@ -141,6 +142,13 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decode(const std::vector<uint32_t>& rob
     ATH_CHECK(transferAndRecordPrepData(ctx, state));
     ATH_CHECK(transferAndRecordCoinData(ctx, state));
     return StatusCode::SUCCESS;
+}
+StatusCode Muon::RpcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
+   State state{m_idHelperSvc->rpcIdHelper()};
+   ATH_CHECK(loadProcessedChambers(ctx, state));
+   ATH_CHECK(transferAndRecordPrepData(ctx, state));
+   ATH_CHECK(transferAndRecordCoinData(ctx, state));
+   return StatusCode::SUCCESS;
 }
 
 StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext& ctx, State& state) const {
@@ -191,6 +199,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::transferAndRecordCoinData(const EventCo
     SG::WriteHandle<Muon::RpcCoinDataContainer> rpcCoinHandle{m_rpcCoinDataContainerKey, ctx};
     ATH_CHECK(rpcCoinHandle.record(std::move(state.m_coinDataCont)));
 
+    ATH_MSG_DEBUG("Created container " << m_rpcCoinDataContainerKey.key());
     // For additional information on the contents of the cache-based container, this function can be used
     // printMTCoinData (*rpcCoinHandle);
 
@@ -293,8 +302,7 @@ void Muon::RpcRdoToPrepDataToolMT::printMTCoinData(const Muon::RpcCoinDataContai
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
 }
 
-void Muon::RpcRdoToPrepDataToolMT::printPrepData() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+void Muon::RpcRdoToPrepDataToolMT::printPrepData(const EventContext& ctx) const {
     printPrepDataImpl(*SG::makeHandle(m_rpcPrepDataContainerKey, ctx), *SG::makeHandle(m_rpcCoinDataContainerKey, ctx));
 }
 
@@ -625,7 +633,7 @@ StatusCode Muon::RpcRdoToPrepDataToolMT::decodeImpl(const EventContext& ctx, Sta
 }
 
 //___________________________________________________________________________
-void Muon::RpcRdoToPrepDataToolMT::printInputRdo() const {
+void Muon::RpcRdoToPrepDataToolMT::printInputRdo(const EventContext& ctx) const {
     ATH_MSG_INFO("********************************************************************************************************");
     ATH_MSG_INFO("***************** Listing RpcPad Collections --- i.e. input RDO ****************************************");
 
@@ -633,7 +641,7 @@ void Muon::RpcRdoToPrepDataToolMT::printInputRdo() const {
     IdContext rpcContext = m_idHelperSvc->rpcIdHelper().module_context();
     /// RPC RDO container --- assuming it is available
     ATH_MSG_DEBUG("Retrieving Rpc PAD container from the store");
-    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey);
+    auto rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
     if (!rdoContainerHandle.isValid()) {
         ATH_MSG_WARNING("Retrieval of RPC RDO container failed !");
         return;
@@ -649,7 +657,7 @@ void Muon::RpcRdoToPrepDataToolMT::printInputRdo() const {
 
     int ipad = 0;
     const RpcPad* rdoColl = nullptr;
-    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
+    SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo, ctx);
     for (RpcPadContainer::const_iterator rdoColli = rdoContainerHandle->begin(); rdoColli != rdoContainerHandle->end(); ++rdoColli) {
         // loop over all elements of the pad container
         rdoColl = *rdoColli;
