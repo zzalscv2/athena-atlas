@@ -56,7 +56,7 @@ namespace {
       {
 	//std::cout << "Looping over vertex daughters: "<< vprod->particles_out_size() << std::endl;
 	for( const auto& elTruth : vprod->outgoingParticleLinks() ){
-	  if((abs((*elTruth)->pdgId())>10 && abs((*elTruth)->pdgId())<17) ) nDecay++;
+	  if ((abs((*elTruth)->pdgId())>10 && abs((*elTruth)->pdgId())<17) ) nDecay++;
 	}
       }
 
@@ -84,7 +84,7 @@ namespace {
         // Only exclude photons within deltaR of leptons (if m_photonCone<0, exclude all photons)
         if( pdg_id == 22 && photonCone2>0)
           {
-            if(MC::isStable(p) && (abs(p->pdgId())==22) ) {
+            if(MC::isStable(p) && MC::isPhoton(p)) {
 	      // std::cout << "isWZDecay: found pdgId: " << p->pdgId() << " status: " << p->status() << std::endl;
 	      // std::cout << "isWZDecay: have " << wzLeptons.size() << " W/Z leptons" << std::endl;
 	    }
@@ -111,12 +111,7 @@ namespace {
 
     int pdg = part->pdgId();
 
-    if(abs(pdg) != 11 &&
-       abs(pdg) != 12 &&
-       abs(pdg) != 13 &&
-       abs(pdg) != 14 &&
-       abs(pdg) != 15 &&
-       abs(pdg) != 16) return false; // all leptons including tau.
+    if(!MC::isSMLepton(pdg)) return false; // all leptons including tau.
     if(!part->hasProdVtx()) return false;
     const xAOD::TruthVertex* prod = part->prodVtx();
     if(!prod) return false; // no parent.
@@ -231,18 +226,18 @@ bool JetTruthParticleSelectorTool::passKinematics(const xAOD::TruthParticle* tru
 bool JetTruthParticleSelectorTool::selector(const xAOD::TruthParticle* truthPart) {
 
   bool result = false;
-  if (MC::isGeantino(truthPart->pdgId()))  return false; // protect against unexpected geantinos
+  if (MC::isGeantino(truthPart))  return false; // protect against unexpected geantinos
 
   switch( m_selectionMode) { // For now only 4 modes used in practice for jets...
                              // a switch statement is probably not optimal here...
   case StableNoMuonNoNu:
-    result =( MC::jettruthparticleselectortool_isInteracting(truthPart) && passKinematics(truthPart) && !MC::isMuon(truthPart->pdg_id()) );
+    result =( MC::jettruthparticleselectortool_isInteracting(truthPart) && passKinematics(truthPart) && !MC::isMuon(truthPart) );
     break;
   case NuOnly:
     result= ( MC::jettruthparticleselectortool_isStable(truthPart) && passKinematics(truthPart) && !MC::jettruthparticleselectortool_isInteracting(truthPart) );
     break;
   case MuonOnly:
-    result = MC::isMuon(truthPart->pdg_id());
+    result = MC::isMuon(truthPart);
     break;
   case NoWZDecay:
     result = ( MC::jettruthparticleselectortool_isStable(truthPart) && passKinematics(truthPart) &&
