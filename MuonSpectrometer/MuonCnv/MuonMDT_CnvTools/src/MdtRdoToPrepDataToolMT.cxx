@@ -134,8 +134,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MdtRdoToPrepDataToolMT::decode(const std::vector<uint32_t>& robIds) const {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const {
         SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey, ctx};
         const MuonMDT_CablingMap* readCdo{*readHandle};
         if (!readCdo) {
@@ -154,7 +153,9 @@ namespace Muon {
         ATH_MSG_WARNING("Retrieval of Mdt RDO container failed !");
         return nullptr;
     }
-
+    StatusCode MdtRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const{
+        return setupMdtPrepDataContainer(ctx).prd_cont ? StatusCode::SUCCESS : StatusCode::FAILURE;
+    }
     StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, const std::vector<IdentifierHash>& multiLayerHashInRobs) const {
         // setup output container
         ModfiablePrdColl mdtPrepDataContainer = setupMdtPrepDataContainer(ctx);
@@ -205,10 +206,11 @@ namespace Muon {
         return true;
     }
 
-    StatusCode MdtRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& idWithDataVect) const {
+    StatusCode MdtRdoToPrepDataToolMT::decode(const EventContext& ctx, 
+                                              std::vector<IdentifierHash>& idVect, 
+                                              std::vector<IdentifierHash>& idWithDataVect) const {
         // clear output vector of selected data collections containing data
         idWithDataVect.clear();
-        const EventContext& ctx = Gaudi::Hive::currentContext();
         ATH_MSG_DEBUG("decodeMdtRDO for " << idVect.size() << " offline collections called");
 
         // setup output container
@@ -225,7 +227,7 @@ namespace Muon {
         } else {
             /// Construct the hashes from the existing RDOs
             std::vector<IdentifierHash> rdoHashes{};
-            const MdtCsmContainer* rdoContainer = getRdoContainer(Gaudi::Hive::currentContext());
+            const MdtCsmContainer* rdoContainer = getRdoContainer(ctx);
             if (!rdoContainer || !rdoContainer->size()) return StatusCode::SUCCESS;
             rdoHashes.reserve(rdoContainer->size());
             for (const MdtCsm* csm : *rdoContainer) rdoHashes.push_back(csm->identifyHash());
@@ -238,11 +240,11 @@ namespace Muon {
     }
 
     // dump the RDO in input
-    void MdtRdoToPrepDataToolMT::printInputRdo() const {
+    void MdtRdoToPrepDataToolMT::printInputRdo(const EventContext& ctx) const {
         ATH_MSG_DEBUG("******************************************************************************************");
         ATH_MSG_DEBUG("***************** Listing MdtCsmContainer collections content ********************************");
 
-        const MdtCsmContainer* rdoContainer = getRdoContainer(Gaudi::Hive::currentContext());
+        const MdtCsmContainer* rdoContainer = getRdoContainer(ctx);
 
         if (!rdoContainer->size()) ATH_MSG_DEBUG("MdtCsmContainer is Empty");
 
@@ -688,8 +690,7 @@ namespace Muon {
         // Pass the container from the handle
         return ModfiablePrdColl{handle.ptr()};
     }
-    void Muon::MdtRdoToPrepDataToolMT::printPrepData() const {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
+    void Muon::MdtRdoToPrepDataToolMT::printPrepData(const EventContext& ctx ) const {
         SG::ReadHandleKey<Muon::MdtPrepDataContainer> k(m_mdtPrepDataContainerKey.key());
         k.initialize().ignore();
         printPrepDataImpl(SG::makeHandle(k, ctx).get());

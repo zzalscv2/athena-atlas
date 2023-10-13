@@ -21,34 +21,19 @@ namespace{
     using namespace xAOD::P4Helpers;
 }
 Muon::TgcRdoToPrepDataToolMT::TgcRdoToPrepDataToolMT(const std::string& t, const std::string& n, const IInterface* p)
-  : base_class(t, n, p)
-{
-  // tools
-  declareProperty("TGCHashIdOffset", m_tgcOffset = 26000);  
-  declareProperty("FillCoinData", m_fillCoinData = true);
-  declareProperty("OutputCollection", m_outputCollectionLocation="TGC_Measurements");
-  declareProperty("OutputCoinCollection", m_outputCoinCollectionLocation="TrigT1CoinDataCollection");
-  declareProperty("DecodeData", m_decodeData = true);  // !< toggle on/off the decoding of TGC RDO into TgcPrepData 
-  declareProperty("show_warning_level_invalid_A09_SSW6_hit", m_show_warning_level_invalid_A09_SSW6_hit = false); 
-  declareProperty("dropPrdsWithZeroWidth", m_dropPrdsWithZeroWidth = true);
-  declareProperty("outputCoinKey", m_outputCoinKeys);
-  declareProperty("prepDataKeys", m_outputprepdataKeys);
-  // DataHandle
-  declareProperty("RDOContainer",   m_rdoContainerKey = std::string("TGCRDO"),"TgcRdoContainer to retrieve");
-}  
+  : base_class(t, n, p) {}  
 
 //================ Initialization =================================================
 
 StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
 {
-  ATH_CHECK(AthAlgTool::initialize());
   ATH_CHECK(m_idHelperSvc.retrieve());
 
   m_outputprepdataKeys.resize(NBC_HIT+1);
   for (int ibc=0; ibc < NBC_HIT+1; ibc++) {
     int bcTag = ibc+1;
     std::ostringstream location;
-    location << m_outputCollectionLocation
+    location << m_outputCollectionLocation.value()
              << (bcTag==TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
              << (bcTag==TgcDigit::BC_CURRENT ? "" : "")
 	     << (bcTag==TgcDigit::BC_NEXT ? "NextBC" : "")
@@ -60,7 +45,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
   for (int ibc=0; ibc < NBC_TRIG; ibc++) {
     int bcTag = ibc+1;
     std::ostringstream location;
-    location << m_outputCoinCollectionLocation
+    location << m_outputCoinCollectionLocation.value()
              << (bcTag==TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
              << (bcTag==TgcDigit::BC_NEXT ? "NextBC" : "")
              << (bcTag==TgcDigit::BC_NEXTNEXT ? "NextNextBC" : "");
@@ -133,28 +118,20 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::finalize()
 }
 
 //================ Decoding =================================================
-StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& requestedIdHashVect, 
-  std::vector<IdentifierHash>& selectedIdHashVect) const
-{
-  // Object to hold the containers for this decode call
-  State state;
+StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext&, const std::vector<uint32_t>& /*robIds*/ ) const {
+   ATH_MSG_FATAL("ROB based decoding is not supported....");
+   return StatusCode::FAILURE;
+}
 
-  int sizeVectorRequested = requestedIdHashVect.size();
-  ATH_MSG_DEBUG("decode for " << sizeVectorRequested << " offline collections called");
-
-  // clear output vector of selected data collections containing data 
-  selectedIdHashVect.clear(); 
-
-  const CablingInfo* cinfo = getCabling();
-  if (!cinfo) {
-    return StatusCode::FAILURE;
-  }
-  const ITGCcablingSvc* tgcCabling = cinfo->m_tgcCabling;
-
-  /// clean up containers for Hits
+StatusCode Muon::TgcRdoToPrepDataToolMT::provideEmptyContainer(const EventContext& ctx) const {
+   State state{};   
+   return setupState(ctx, state);
+}
+StatusCode Muon::TgcRdoToPrepDataToolMT::setupState(const EventContext& ctx, State& state) const{
+     /// clean up containers for Hits
   for(unsigned int ibc=0; ibc < NBC_HIT+1; ibc++) {   //  +1 for AllBCs
     // initialize with false
-    SG::WriteHandle<TgcPrepDataContainer>  handle(m_outputprepdataKeys[ibc]);
+    SG::WriteHandle<TgcPrepDataContainer>  handle(m_outputprepdataKeys[ibc], ctx);
 
     const bool externalCachePRD = (m_prdContainerCacheKeys.size()>ibc) and (not m_prdContainerCacheKeys[ibc].key().empty());
     if (!externalCachePRD) {
@@ -170,7 +147,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
       state.m_tgcPrepDataContainer[ibc] = handle.ptr();
     } else {
       // use the cache to get the container
-      SG::UpdateHandle<TgcPrepDataCollection_Cache> update(m_prdContainerCacheKeys[ibc]);
+      SG::UpdateHandle<TgcPrepDataCollection_Cache> update(m_prdContainerCacheKeys[ibc], ctx);
       if (!update.isValid()){
         ATH_MSG_FATAL("Invalid UpdateHandle " << m_prdContainerCacheKeys[ibc].key());
         return StatusCode::FAILURE;
@@ -184,14 +161,35 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
       state.m_tgcPrepDataContainer[ibc] = handle.ptr();
       ATH_MSG_DEBUG("Created container using cache for " << m_prdContainerCacheKeys[ibc].key());
     }
+   }
+   return StatusCode::SUCCESS;
+}
+StatusCode Muon::TgcRdoToPrepDataToolMT::decode(const EventContext& ctx, std::vector<IdentifierHash>& requestedIdHashVect, 
+  std::vector<IdentifierHash>& selectedIdHashVect) const
+{
+  // Object to hold the containers for this decode call
+  State state;
+  ATH_CHECK(setupState(ctx, state));
+
+  int sizeVectorRequested = requestedIdHashVect.size();
+  ATH_MSG_DEBUG("decode for " << sizeVectorRequested << " offline collections called");
+
+  // clear output vector of selected data collections containing data 
+  selectedIdHashVect.clear(); 
+
+  const CablingInfo* cinfo = getCabling();
+  if (!cinfo) {
+    return StatusCode::FAILURE;
   }
+  const ITGCcablingSvc* tgcCabling = cinfo->m_tgcCabling;
+
   std::vector<const TgcRdo*> decodedRdoCollVec;
   std::vector<bool> decodedOnlineId (cinfo->m_MAX_N_ROD, false);
 
   /// clean up containers for Coincidence
   for (unsigned int ibc=0; ibc < NBC_TRIG; ibc++) {
     // prepare write handle for this BC
-    SG::WriteHandle<TgcCoinDataContainer>  handle(m_outputCoinKeys[ibc]);
+    SG::WriteHandle<TgcCoinDataContainer>  handle(m_outputCoinKeys[ibc], ctx);
 
     const bool externalCacheCoin = (m_coinContainerCacheKeys.size()>ibc) and (not m_coinContainerCacheKeys[ibc].key().empty());
     if(!externalCacheCoin) {
@@ -206,7 +204,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
       }
     } else {
       // Using the cache (trigger case)
-      SG::UpdateHandle<TgcCoinDataCollection_Cache> update(m_coinContainerCacheKeys[ibc]);
+      SG::UpdateHandle<TgcCoinDataCollection_Cache> update(m_coinContainerCacheKeys[ibc], ctx);
 
       if (!update.isValid()) {
         ATH_MSG_FATAL("Invalid UpdateHandle " << m_coinContainerCacheKeys[ibc].key());
@@ -235,7 +233,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
 
   // retrieve the collection of RDO
   ATH_MSG_DEBUG("Retriving TGC RDO container from the store");
-  auto rdoContainer = SG::makeHandle(m_rdoContainerKey);
+  auto rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
   if(!rdoContainer.isValid()) {
     ATH_MSG_WARNING("No TGC RDO container in StoreGate!");
     return StatusCode::SUCCESS;
@@ -485,7 +483,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
   return StatusCode::SUCCESS;
 }
 
-void Muon::TgcRdoToPrepDataToolMT::printInputRdo() const
+void Muon::TgcRdoToPrepDataToolMT::printInputRdo(const EventContext& ctx) const
 {
   ATH_MSG_INFO("***************** Listing input TgcRdo Collections *****************************************");
 
@@ -493,7 +491,7 @@ void Muon::TgcRdoToPrepDataToolMT::printInputRdo() const
   IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
 
   /// TGC RDO container --- assuming it is available
-  auto rdoContainer = SG::makeHandle(m_rdoContainerKey);
+  auto rdoContainer = SG::makeHandle(m_rdoContainerKey, ctx);
   if(!rdoContainer.isValid()) {
     ATH_MSG_WARNING("*** Retrieval of TGC RDO container for debugging purposes failed !");
     return;
@@ -3765,10 +3763,9 @@ const Amg::Vector2D* Muon::TgcRdoToPrepDataToolMT::getSLLocalPosition(const Muon
   return new Amg::Vector2D(locX, locY); 
 } 
 
-void Muon::TgcRdoToPrepDataToolMT::printPrepData() const
+void Muon::TgcRdoToPrepDataToolMT::printPrepData(const EventContext& ctx) const
 {
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-
+ 
   const TgcPrepDataContainer* tgcPrepDataContainer[NBC_HIT+1] = {nullptr};
   for (int ibc=0; ibc < NBC_HIT+1; ibc++) {
     SG::ReadHandleKey<TgcPrepDataContainer> k (m_outputprepdataKeys[ibc].key());

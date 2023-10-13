@@ -51,14 +51,15 @@ namespace Muon {
         virtual StatusCode initialize() override;
 
         /** Decode method - declared in Muon::IMuonRdoToPrepDataTool*/
-        virtual StatusCode decode(std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const override;
+        virtual StatusCode decode(const EventContext& ctx, std::vector<IdentifierHash>& idVect, std::vector<IdentifierHash>& selectedIdVect) const override;
+        virtual StatusCode provideEmptyContainer(const EventContext& ctx) const override;
         // new decode method for Rob based readout
-        virtual StatusCode decode(const std::vector<uint32_t>& robIds) const override;
+        virtual StatusCode decode(const EventContext& ctx, const std::vector<uint32_t>& robIds) const override;
 
         // dump methods for debugging
-        virtual void printInputRdo() const override;
+        virtual void printInputRdo(const EventContext& ctx) const override;
 
-        virtual void printPrepData() const override;
+        virtual void printPrepData(const EventContext& ctx) const override;
  
     protected:
         void printPrepDataImpl(const Muon::MdtPrepDataContainer* mdtPrepDataContainer) const;

@@ -42,25 +42,26 @@ def MuonPrdCacheCfg(flags):
     acc.addEventAlgo( cacheCreator, primary=True )
     return acc
 
-
+def MuonRdoToPrepDataAlgCfg(flags, name="MuonRdoToPrepDataAlg", **kwargs):
+    result = ComponentAccumulator()
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    result.merge(MuonGeoModelCfg(flags))
+    
+    kwargs.setdefault("DoSeededDecoding", flags.Common.isOnline)
+    the_alg = CompFactory.MuonRdoToPrepDataAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
 ## This configuration function sets up everything for decoding RPC RDO to PRD conversion
 #
 # The function returns a ComponentAccumulator and the data-converting algorithm, which should be added to the right sequence by the user
-def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", **kwargs):
+def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
-
-    # Make sure muon geometry is configured
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
-
     # We need the RPC cabling to be setup
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
-    acc.merge( RPCCablingConfigCfg(flags))
+    acc.merge(RPCCablingConfigCfg(flags))
 
     # Conditions not needed for online
-    if not flags.Common.isOnline:
-        from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
-        acc.merge(RpcCondDbAlgCfg(flags))
 
     tool_kwargs={}
     if not flags.Input.isMC:
@@ -69,51 +70,58 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", **kwargs):
         tool_kwargs["overlap_timeTolerance"] = 1000
         tool_kwargs["solvePhiAmbiguities"] = True
         tool_kwargs["etaphi_coincidenceTime"] = 1000
+    if not flags.Common.isOnline:
+        tool_kwargs["RpcPrdContainerCacheKey"] = ""
+        tool_kwargs["RpcCoinDataContainerCacheKey"] = ""
 
+        from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
+        acc.merge(RpcCondDbAlgCfg(flags))
+    else:
+        tool_kwargs["RPCInfoFromDb"] = False
+    
+    if RDOContainer:
+        tool_kwargs["RDOContainer"] = RDOContainer
+    
+
+    
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",
-                                                                              ReadKey="RpcCondDbData" if not flags.Common.isOnline else "",
-                                                                              RpcPrdContainerCacheKey="",
-                                                                              RpcCoinDataContainerCacheKey="",
                                                                               **tool_kwargs))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg
-    kwargs.setdefault("RegSel_RPC", acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags)))
-
-    if flags.Muon.MuonTrigger:
-        kwargs.setdefault("PrintPrepData", False)
-
+    kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_RPC_Cfg(flags)))
+    kwargs.setdefault("useROBs", False)
+    
     # Add the RDO -> PRD alorithm
-    acc.addEventAlgo(CompFactory.RpcRdoToRpcPrepData(name, **kwargs))
+    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
 
 
-def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", **kwargs):
+def TgcRDODecodeCfg(flags, name="TgcRdoToTgcPrepData", RDOContainer = None,  **kwargs):
     acc = ComponentAccumulator()
-
-    # Make sure muon geometry is configured
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
 
     # We need the TGC cabling to be setup
     from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
     acc.merge(TGCCablingConfigCfg(flags))
 
     # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool",
-                                                                              PrdCacheString = "",
-                                                                              CoinCacheString = ""))
+    tool_args = {}
+    if not flags.Common.isOnline:
+       tool_args.setdefault("PrdCacheString", "")
+       tool_args.setdefault("CoinCacheString", "")
+    
+    if RDOContainer: tool_args.setdefault("RDOContainer", RDOContainer)
+    kwargs.setdefault("DecodingTool", CompFactory.Muon.TgcRdoToPrepDataToolMT(name="TgcPrepDataProviderTool", **tool_args))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_TGC_Cfg
-    kwargs.setdefault("RegSel_TGC", acc.popToolsAndMerge(regSelTool_TGC_Cfg(flags)))
+    kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_TGC_Cfg(flags)))
+    kwargs.setdefault("useROBs", False)
+   
 
-    if flags.Muon.MuonTrigger:
-        kwargs.setdefault("PrintPrepData", False)
-
-    # Add the RDO -> PRD alorithm
-    acc.addEventAlgo(CompFactory.TgcRdoToTgcPrepData(name, **kwargs))
+    ## Add the RDO -> PRD alorithm
+    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
 
 def TgcPrepDataReplicationToolAllBCto3BC(flags, name = "TgcPrepDataAllBCto3BCTool", **kwargs):
@@ -145,19 +153,14 @@ def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
 
 def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
     acc = ComponentAccumulator()
-
-    # Make sure muon geometry is configured
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
-
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(StgcRdoToPrepDataToolCfg(flags)))
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_STGC_Cfg
-    kwargs.setdefault("RegionSelectorTool", acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags)))
-
-    # Add the RDO -> PRD alorithm
-    acc.addEventAlgo(CompFactory.StgcRdoToStgcPrepData(name, **kwargs))
+    kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_STGC_Cfg(flags)))
+    kwargs.setdefault("useROBs", False)
+    ## Add the RDO -> PRD alorithm
+    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
 
 
@@ -165,7 +168,7 @@ def StgcRDODecodeCfg(flags, name="StgcRdoToStgcPrepData", **kwargs):
 
 def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.MmCache if flags.Muon.MuonTrigger else "")
+    kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.MmCache if flags.Common.isOnline else "")
 
     from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
     kwargs.setdefault("ClusterBuilderTool",result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags)))
@@ -177,61 +180,43 @@ def MMRdoToPrepDataToolCfg(flags, name="MmRdoToPrepDataTool", **kwargs):
 
 def MMRDODecodeCfg(flags, name="MM_RdoToMM_PrepData", **kwargs):
     acc = ComponentAccumulator()
-
-    # Make sure muon geometry is configured
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
-
-    # Get the RDO -> PRD tool
+    ## Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", acc.popToolsAndMerge(MMRdoToPrepDataToolCfg(flags)))
-    if flags.Muon.MuonTrigger:
-        kwargs.setdefault("PrintPrepData", False)
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_MM_Cfg
-    kwargs.setdefault("RegionSelectorTool", acc.popToolsAndMerge(regSelTool_MM_Cfg(flags)))
-
+    kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_MM_Cfg(flags)))
+    kwargs.setdefault("useROBs", False)
     # Add the RDO -> PRD alorithm
-    acc.addEventAlgo(CompFactory.MM_RdoToMM_PrepData(name, **kwargs))
+    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
 
 
-def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", **kwargs):
+def MdtRDODecodeCfg(flags, name="MdtRdoToMdtPrepData", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
     from MuonConfig.MuonCalibrationConfig import MdtCalibrationToolCfg
-
-    # Make sure muon geometry is configured
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
 
     # We need the MDT cabling to be setup
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     acc.merge(MDTCablingConfigCfg(flags))
 
+    tool_kwargs = {}
+    tool_kwargs["UseTwin"] = True
+    tool_kwargs["CalibrationTool"] = acc.popToolsAndMerge(MdtCalibrationToolCfg(flags, TimeWindowSetting = 2, DoPropagationCorrection = False))
+    if RDOContainer: tool_kwargs["RDOContainer"] = RDOContainer
     # Get the RDO -> PRD tool
-    kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool",
-                                                                              UseTwin=True,
-                                                                              CalibrationTool=acc.popToolsAndMerge(MdtCalibrationToolCfg(flags,
-                                                                                                                                         TimeWindowSetting = 2,
-                                                                                                                                         DoPropagationCorrection = False))))
+    kwargs.setdefault("DecodingTool", CompFactory.Muon.MdtRdoToPrepDataToolMT(name="MdtPrepDataProviderTool", **tool_kwargs))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
-    kwargs.setdefault("RegSel_MDT", acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags)))
-
-    if flags.Muon.MuonTrigger:
-        kwargs.setdefault("PrintPrepData", False)
+    kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags)))
 
     # Add the RDO -> PRD alorithm
-    acc.addEventAlgo(CompFactory.MdtRdoToMdtPrepData(name, **kwargs))
+    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
 
 
-def CscRDODecodeCfg(flags, name="CscRdoToCscPrepData", **kwargs):
+def CscRDODecodeCfg(flags, name="CscRdoToCscPrepData", RDOContainer = None, **kwargs):
     acc = ComponentAccumulator()
-
-    # Make sure muon geometry is configured
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))
 
     # We need the CSC cabling to be setup
     from MuonConfig.MuonCablingConfig import CSCCablingConfigCfg # Not yet been prepared
@@ -241,19 +226,17 @@ def CscRDODecodeCfg(flags, name="CscRdoToCscPrepData", **kwargs):
     acc.merge(CscCondDbAlgCfg(flags))
 
     # Get the RDO -> PRD tool
-    # TODO: setup dependencies properly
-    kwargs.setdefault("CscRdoToCscPrepDataTool", CompFactory.Muon.CscRdoToCscPrepDataToolMT(name="CscPrepDataProviderTool"))
-
+    
+    kwargs.setdefault("useROBs", False)
+    kwargs.setdefault("DecodingTool", CompFactory.Muon.CscRdoToCscPrepDataToolMT(name="CscPrepDataProviderTool"))
+    if RDOContainer:
+        kwargs["DecodingTool"].RDOContainer = RDOContainer
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_CSC_Cfg
-    kwargs.setdefault("RegSel_CSC", acc.popToolsAndMerge(regSelTool_CSC_Cfg(flags)))
-
-    if flags.Muon.MuonTrigger:
-        # Set the algorithm to RoI mode
-        kwargs.setdefault("PrintPrepData", False)
+    kwargs.setdefault("RegSelector", acc.popToolsAndMerge(regSelTool_CSC_Cfg(flags)))
 
     # Add the RDO -> PRD alorithm
-    acc.addEventAlgo(CompFactory.CscRdoToCscPrepData(name, **kwargs))
+    acc.merge(MuonRdoToPrepDataAlgCfg(flags, name, **kwargs))
     return acc
 
 
@@ -305,6 +288,9 @@ def MuonRDOtoPRDConvertorsCfg(flags):
     # Schedule RDO conversion
     acc = ComponentAccumulator()
 
+    if flags.Detector.GeometryMDT:
+        acc.merge(MdtRDODecodeCfg(flags))
+
     if flags.Detector.GeometryRPC:
         acc.merge(RpcRDODecodeCfg(flags))
 
@@ -317,8 +303,6 @@ def MuonRDOtoPRDConvertorsCfg(flags):
     if flags.Detector.GeometryMM:
         acc.merge(MMRDODecodeCfg(flags))
 
-    if flags.Detector.GeometryMDT:
-        acc.merge(MdtRDODecodeCfg(flags))
 
     if flags.Detector.GeometryCSC:
         acc.merge(CscRDODecodeCfg(flags))
