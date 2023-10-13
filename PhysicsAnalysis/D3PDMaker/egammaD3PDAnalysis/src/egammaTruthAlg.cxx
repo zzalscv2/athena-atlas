@@ -127,14 +127,10 @@ bool egammaTruthAlg::isAccepted (const xAOD::TruthParticle& tp,
   int aid = abs(id);
   int barcode = tp.barcode();
 
-  if (aid == abs(MC::ELECTRON)) {
-    if (tp.pt() < m_electronPtMin) return false;
-  }
-  else if (aid == abs(MC::PHOTON)) {
-    if (tp.pt() < m_photonPtMin) return false;
-  }
-  else
-    return false;
+  if (aid != abs(MC::ELECTRON) && !MC::isPhoton(aid)) return false;
+  if (aid == abs(MC::ELECTRON) && tp.pt() < m_electronPtMin) return false;
+  if (MC::isPhoton(aid) && tp.pt() < m_photonPtMin) return false;
+
 
   if (fabs(tp.eta()) > m_etaMax) return false;
 
