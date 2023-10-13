@@ -57,7 +57,9 @@ private:
     "Module ID of HLT result ROB, default 0 is the main HLT result, others are for TLA, calibration etc." };
   Gaudi::Property<int> m_initialSerialisationBufferSize{ this, "InitialSerialisationBufferSize", 1024*1024,
     "Initial serialisation buffer size in bytes, can be set large to avoid reallocations in every event" };
-  
+  Gaudi::Property<bool> m_skipDuplicates{ this, "SkipDuplicateRecords", false,
+    "Silently ignore collections that ware already in StoreGate (when handling multiple HLT results)" };
+
   ServiceHandle<IClassIDSvc> m_clidSvc{ this, "ClassIDSvc", "ClassIDSvc",
     "Service to translate CLID to class name" };
 

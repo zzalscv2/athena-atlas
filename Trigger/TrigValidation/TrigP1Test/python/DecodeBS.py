@@ -20,8 +20,20 @@ flags.lock()
 cfg = MainServicesCfg(flags)
 cfg.merge( ByteStreamReadCfg(flags) )
 
+from TrigEDMConfig.DataScoutingInfo import (
+    getAllDataScoutingResultIDs, getAllDataScoutingIdentifiers
+)
+# Map selected module ID to the data scouting type or default HLT result
+id_to_dstype = {
+    id: dstype for id, dstype in zip(getAllDataScoutingResultIDs(), getAllDataScoutingIdentifiers())
+}
+id_to_dstype.update({0:''}) # Default HLT result
+dstype = id_to_dstype[args.moduleID]
+print(f'Expecting to deserialise {dstype if dstype else "default HLT result"}')
+
+# Check that this is in fact what we autoconfigured from the stream info in the file
 acc_bs = Run3TriggerBSUnpackingCfg(flags)
-acc_bs.getEventAlgo('TrigDeserialiser').ModuleID = args.moduleID
+assert acc_bs.getEventAlgo(f'TrigDeserialiser{dstype}').ModuleID == args.moduleID
 cfg.merge(acc_bs)
 
 cfg.merge( TriggerEDMCfg(flags) )

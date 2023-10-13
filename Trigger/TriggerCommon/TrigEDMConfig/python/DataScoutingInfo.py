@@ -19,12 +19,18 @@ CostMonDS, PhysicsTLA
 # If you add new entries also add a corresponding entry to EventBuildingInfo.py.
 # WARNING: Never change the module IDs during data taking!
 # WARNING: ID=0 is reserved for full HLT result
-DataScoutingIdentifiers = {
+_DataScoutingIdentifiers = {
     'CostMonDS': 1,
     'PhysicsTLA': 5,
     'JetPEBPhysicsTLA': 6,
 }
 
+# Each stream should correspond to exactly one event building type
+_DataScoutingStreams = {
+    'calibration_CostMonitoring': 'CostMonDS',
+    'physics_TLA': 'PhysicsTLA',
+    'physics_TLAJetPEB': 'JetPEBPhysicsTLA',
+}
 
 # Truncation thresholds (in bytes) for each HLT result type
 TruncationThresholds = {
@@ -37,14 +43,25 @@ TruncationThresholds = {
 
 
 def getDataScoutingResultID(name):
-    if name in DataScoutingIdentifiers:
-        return DataScoutingIdentifiers[name]
+    if name in _DataScoutingIdentifiers:
+        return _DataScoutingIdentifiers[name]
     else:
         log.error('Unknown name %s, cannot assign result ID', name)
 
 
+def getDataScoutingStreams():
+    return list(_DataScoutingStreams.keys())
+
+
+def getDataScoutingTypeFromStream(streamname):
+    if streamname in _DataScoutingStreams:
+        return _DataScoutingStreams[streamname]
+    else:
+        log.error('Unknown name %s, not a data scouting stream', streamname)
+
+
 def getAllDataScoutingResultIDs():
-    return DataScoutingIdentifiers.values()
+    return _DataScoutingIdentifiers.values()
 
 
 def getFullHLTResultID():
@@ -54,4 +71,4 @@ def getFullHLTResultID():
 
 
 def getAllDataScoutingIdentifiers():
-    return list(DataScoutingIdentifiers.keys())
+    return list(_DataScoutingIdentifiers.keys())
