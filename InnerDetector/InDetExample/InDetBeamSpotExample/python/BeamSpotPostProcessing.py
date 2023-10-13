@@ -100,7 +100,7 @@ class T0VertexTestProcessing(PostProcessingStep):
 
 class ReprocVertexDefaultProcessing(PostProcessingStep):
     def run(self):
-        postProcSteps = ' MergeNt BeamSpotNt PlotBeamSpot PlotBeamSpotCompareReproc LinkResults AveBeamSpot DQBeamSpotReproc'
+        postProcSteps = 'PlotBeamSpotMon MergeNt BeamSpotNt PlotBeamSpot PlotBeamSpotCompareReproc LinkResults AveBeamSpot DQBeamSpotReproc'
         for step in postProcSteps.split():
             self.log('Running postprocessing step:  %s' % step)
             self.executedSteps  = runPostProcStep(self.taskman,self.taskDict,self.oldStatus,self.executedSteps,step,self.postprocLib,self.jobName)
@@ -427,7 +427,7 @@ class BeamSpotNtNoAve(PostProcessingStep):
         ntFileName = self.getFileName('-nt.root','MergeNt')
         bsNtFileName = self.getFileName('-nt.root','BeamSpotNt')
         if os.path.exists('/'.join([self.taskDir,ntFileName])):
-            self.logExec("cd %s; rm -f %s; beamspotnt.py -f %s --status '' --fillCOOL merge %s" % (self.taskDir,bsNtFileName,bsNtFileName,ntFileName))
+            self.logExec("cd %s; rm -f %s; beamspotnt.py -f %s --status '' --fillCOOL --addScanVars merge %s" % (self.taskDir,bsNtFileName,bsNtFileName,ntFileName))
             self.addResult(bsNtFileName)
         else:
             raise PostProcessingError('ERROR: No merged ntuple file %s - did MergeNt step run?\n' % ntFileName,self.executedSteps)

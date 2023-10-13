@@ -265,12 +265,13 @@ class BeamSpotValue:
 
     # Class variables
     coolQuery   = None
-    propertyList = ['sigmaXY', 'sigmaXYErr','thetaXY','thetaXYErr', 'defects', 'fullCorrelations']
+    propertyList = ['sigmaXY', 'sigmaXYErr','thetaXY','thetaXYErr', 'defects', 'fullCorrelations', 'addScanVars']
     pseudoLbDict = {} 
     defectData = None
 
-    def __init__(self, fullCorrelations=False):
+    def __init__(self, fullCorrelations=False, addScanVars=False):
         self.fullCorrelations = fullCorrelations
+        self.addScanVars = addScanVars
 
         # Run info etc
         self.run = 0
@@ -375,12 +376,16 @@ class BeamSpotValue:
         # Data quality info
         self.defectWord = 0
 
-        # Pileup
-        #self.pileup = 0
-
-        # Scan info
-        self.separation = 0.
-        #self.acquisitionFlag = 0.
+        # Additional Luminosity variables (required mainly for VdM scans)
+        if self.addScanVars :
+            self.nominalSeparation = 0.
+            self.acquisitionFlag = 0
+            self.scanningIP = 0
+            self.nominalSeparationPlane = 0
+            self.B1DeltaXSet = 0.
+            self.B2DeltaXSet = 0.
+            self.B1DeltaYSet = 0.
+            self.B2DeltaYSet = 0.
 
     @property
     def sigmaXY(self):
@@ -429,11 +434,40 @@ class BeamSpotValue:
         except Exception:
             pass
         try:
-            self.timeEnd = BeamSpotValue.coolQuery.lbTime(self.run,self.lbEnd-1)[1]
+            self.timeEnd = BeamSpotValue.coolQuery.lbTime(self.run,self.lbEnd)[1]
         except Exception:
             pass
         try:
             self.fill = BeamSpotValue.coolQuery.getLHCInfo(self.timeStart).get('FillNumber',0)
+        except Exception:
+            pass
+    
+    def fillScanData(self):
+        if not BeamSpotValue.coolQuery:
+            from InDetBeamSpotExample.COOLUtils import COOLQuery
+            BeamSpotValue.coolQuery = COOLQuery()
+        try:
+            scanPars = BeamSpotValue.coolQuery.scanInfo(self.run,self.lbStart) 
+            if scanPars is not None:
+                self.scanningIP = scanPars[0]
+                self.acquisitionFlag = scanPars[1]
+                self.nominalSeparation = scanPars[2]
+                self.nominalSeparationPlane = scanPars[3]
+                self.B1DeltaXSet = scanPars[4]
+                self.B2DeltaXSet = scanPars[5]
+                self.B1DeltaYSet = scanPars[6]
+                self.B2DeltaYSet = scanPars[7]
+            else:
+                print('Scan info is not available for ',self.run,self.lbStart)
+                self.scanningIP = 0
+                self.acquisitionFlag = 0
+                self.nominalSeparation = 0.
+                self.nominalSeparationPlane = 0
+                self.B1DeltaXSet = 0.
+                self.B2DeltaXSet = 0. 
+                self.B1DeltaYSet = 0. 
+                self.B2DeltaYSet = 0. 
+                
         except Exception:
             pass
     
@@ -876,22 +910,23 @@ class BeamSpotContainer:
 
 
 
-ROOT.gROOT.ProcessLine(BeamSpotValue(fullCorrelations=True).getROOTStruct())
+ROOT.gROOT.ProcessLine(BeamSpotValue(fullCorrelations=True,addScanVars=True).getROOTStruct())
 from ROOT import BeamSpotNtBuf
 from cppyy.ll import cast
 
 class BeamSpotNt(BeamSpotContainer):
     """BeamSpotContainer for master beam spot ntuple."""
 
-    def __init__(self,fileName,update=False,fullCorrelations=False):
+    def __init__(self,fileName,update=False,fullCorrelations=False,addScanVars=False):
         BeamSpotContainer.__init__(self)
         self.treeName = 'BeamSpotNt'
         self.fileName = fileName
         self.update = update
         self.fullCorrelations = fullCorrelations
+        self.addScanVars = addScanVars
 
         if update:
-            bs = BeamSpotValue(self.fullCorrelations)
+            bs = BeamSpotValue(self.fullCorrelations,self.addScanVars)
             self.rootFile = ROOT.TFile(fileName,'UPDATE')
             self.ntbuf = BeamSpotNtBuf()   # Not intialized
             self.nt = self.rootFile.Get(self.treeName)
