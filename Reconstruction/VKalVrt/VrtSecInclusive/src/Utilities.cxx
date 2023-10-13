@@ -811,6 +811,7 @@ namespace VKalVrtAthena {
     declareProperty("TrackToVertexTool",               m_trackToVertexTool                                                  );
     declareProperty("TrackToVertexIPEstimatorTool",    m_trackToVertexIPEstimatorTool                                       );
     declareProperty("VertexMapper",                    m_vertexMapper                                                       );
+    declareProperty("TruthToTrack",                    m_truthToTrack                                                       );
     
   }
   
