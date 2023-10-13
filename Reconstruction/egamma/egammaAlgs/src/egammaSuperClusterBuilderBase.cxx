@@ -351,15 +351,12 @@ egammaSuperClusterBuilderBase::initialize()
   } else {
     m_egammaCheckEnergyDepositTool.disable();
   }
-  m_addCellsWindowEtaBarrel =
-    m_addCellsWindowEtaCellsBarrel * s_cellEtaSize * 0.5;
-  m_addCellsWindowEtaEndcap =
-    m_addCellsWindowEtaCellsEndcap * s_cellEtaSize * 0.5;
-  // The +- to account for the different L3 eta granularity
-  m_extraL3EtaSize = m_extraL3EtaSizeCells * s_cellEtaSize * 0.5;
+  if (!m_egammaCellRecoveryTool.empty()) {
+    ATH_CHECK(m_egammaCellRecoveryTool.retrieve());
+  } else {
+    m_egammaCellRecoveryTool.disable();
+  }
 
-  // the + is to account for different L0/L1 phi granularity
-  m_extraL0L1PhiSize = m_extraL0L1PhiSizeCells * s_cellPhiSize;
   ATH_MSG_INFO("e/gamma super clusters"
                << '\n'
                << "--> Eta Window size for L0/L1/L2 cells : "
@@ -874,6 +871,29 @@ egammaSuperClusterBuilderBase::fillClusterConstrained(
       tofill.addCell(cell_itr.index(), cell_itr.weight());
     } // Cell Loop for L0/L1
   }   // Cluster loop for L0/L1
+
+  if (!m_egammaCellRecoveryTool.empty()) {
+    IegammaCellRecoveryTool::Info info;
+    if (cp0.emaxB > cp0.emaxEC) {
+      info.etamax = cp0.etaB;
+      info.phimax = cp0.phiB;
+    } else {
+      info.etamax = cp0.etaEC;
+      info.phimax = cp0.phiEC;
+    }
+    if (m_egammaCellRecoveryTool->execute(tofill,info).isFailure()) {
+      ATH_MSG_WARNING("Issue trying to recover cells");
+    }
+
+    // And finally add the recovered cells
+    const CaloCellContainer* inputcells =
+      tofill.getCellLinks()->getCellContainer();
+    for (auto c : info.addedCells) {
+      int index = inputcells->findIndex(c->caloDDE()->calo_hash());
+      tofill.addCell(index, 1.);
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 

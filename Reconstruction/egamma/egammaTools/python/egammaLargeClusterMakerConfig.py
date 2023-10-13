@@ -16,8 +16,6 @@ def egammaLargeClusterMakerCfg(flags, name="egammaLCMakerTool",  **kwargs):
     kwargs.setdefault("CellsName", flags.Egamma.Keys.Input.CaloCells)
     kwargs.setdefault("InputClusterCollection",
                       flags.Egamma.Keys.Output.CaloClusters)
-    kwargs.setdefault("InputClusterCollection",
-                      flags.Egamma.Keys.Output.CaloClusters)
     acc.setPrivateTools(CompFactory.egammaLargeClusterMaker(name, **kwargs))
 
     return acc

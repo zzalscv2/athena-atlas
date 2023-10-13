@@ -17,6 +17,7 @@
 //
 #include "EgammaAnalysisInterfaces/IegammaMVASvc.h"
 #include "egammaInterfaces/IegammaCheckEnergyDepositTool.h"
+#include "egammaInterfaces/IegammaCellRecoveryTool.h"
 #include "egammaInterfaces/IegammaSwTool.h"
 #include "egammaRecEvent/egammaRecContainer.h"
 //
@@ -403,6 +404,16 @@ private:
     "",
     "Optional tool that performs basic checks of viability of cluster"
   };
+
+  /** @brief Pointer to the egammaCellRecoveryTool*/
+  ToolHandle<IegammaCellRecoveryTool> m_egammaCellRecoveryTool{
+    this,
+    "egammaCellRecoveryTool",
+    "",
+    "Optional tool that adds cells in L2 or L3 "
+    "that could have been rejected by timing cut"
+  };
+
 };
 
 #endif

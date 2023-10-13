@@ -34,7 +34,8 @@ DerivationFramework::EGammaClusterCoreCellRecovery::initialize()
 {
   ATH_MSG_VERBOSE("initialize() ...");
 
-  ATH_CHECK(m_SGKey_caloCells.initialize());
+  // The main tool
+  ATH_CHECK(m_egammaCellRecoveryTool.retrieve());
   
   if (m_SGKey_photons.key().empty() && m_SGKey_electrons.key().empty()) {
     ATH_MSG_FATAL("No e-gamma collection provided for thinning. At least one "
@@ -90,30 +91,25 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
 {
   const EventContext& ctx = Gaudi::Hive::currentContext();
   
-  SG::ReadHandle<CaloCellContainer> caloCellContainer(m_SGKey_caloCells,ctx);
-  
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, char>> decon;
   std::vector<SG::WriteDecorHandle<xAOD::EgammaContainer, float>> decoE;
   decon.reserve(2);
   decoE.reserve(2);
-  
+
   // Photon decorations
   if (!m_SGKey_photons.key().empty()) {
-    
+
     for (int i = 0; i < 2; i++) {
-      decon.emplace_back(
-			     m_SGKey_photons_decorations[i * 2], ctx);
-      decoE.emplace_back(
-			     m_SGKey_photons_decorations[i * 2 + 1], ctx);
+      decon.emplace_back(m_SGKey_photons_decorations[i * 2], ctx);
+      decoE.emplace_back(m_SGKey_photons_decorations[i * 2 + 1], ctx);
     }
-    
+
     // Retrieve photon container
     SG::ReadHandle<xAOD::EgammaContainer> photonContainer(m_SGKey_photons, ctx);
 
     // Decorate photons
     for (const auto* photon : *photonContainer.ptr()) {
-      DerivationFramework::EGammaClusterCoreCellRecovery::missCoreInfo res =
-        decorateObject(caloCellContainer.ptr(), photon);
+      IegammaCellRecoveryTool::Info res = decorateObject(photon);
       for (int i = 0; i < 2; i++) {
 	decon[i](*photon) = res.nCells[i];
 	decoE[i](*photon) = res.eCells[i];
@@ -124,21 +120,21 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
   // Electron decorations
   if (!m_SGKey_electrons.key().empty()) {
 
+    decon.clear(); decon.reserve(2);
+    decoE.clear(); decoE.reserve(2);
+
     for (int i = 0; i < 2; i++) {
-      decon[i] = SG::WriteDecorHandle<xAOD::EgammaContainer, char>(
-            m_SGKey_electrons_decorations[i * 2], ctx);
-      decoE[i] = SG::WriteDecorHandle<xAOD::EgammaContainer, float>(
-            m_SGKey_electrons_decorations[i * 2 + 1], ctx);
+      decon.emplace_back(m_SGKey_electrons_decorations[i * 2], ctx);
+      decoE.emplace_back(m_SGKey_electrons_decorations[i * 2 + 1], ctx);
     }
 
     // Retrieve electron container
     SG::ReadHandle<xAOD::EgammaContainer> electronContainer(m_SGKey_electrons,
                                                             ctx);
-    
+
     // Decorate electrons
     for (const auto* electron : *electronContainer.ptr()) {
-      DerivationFramework::EGammaClusterCoreCellRecovery::missCoreInfo res =
-        decorateObject(caloCellContainer.ptr(), electron);
+      IegammaCellRecoveryTool::Info res = decorateObject(electron);
       for (int i = 0; i < 2; i++) {
 	decon[i](*electron) = res.nCells[i];
 	decoE[i](*electron) = res.eCells[i];
@@ -149,160 +145,37 @@ DerivationFramework::EGammaClusterCoreCellRecovery::addBranches() const
   return StatusCode::SUCCESS;
 }
 
-DerivationFramework::EGammaClusterCoreCellRecovery::missCoreInfo
+IegammaCellRecoveryTool::Info
 DerivationFramework::EGammaClusterCoreCellRecovery::decorateObject(
-  const CaloCellContainer* caloCells, const xAOD::Egamma*& egamma) const
+  const xAOD::Egamma*& egamma) const
 {
-  DerivationFramework::EGammaClusterCoreCellRecovery::missCoreInfo result{};
+  IegammaCellRecoveryTool::Info info{};
+
+  ATH_MSG_DEBUG("Trying to recover cell for object of type " << egamma->type()
+		<< " pT = " << egamma->pt()
+		<< " eta = " << egamma->eta()
+		<< " phi = " << egamma->phi());
 
   const xAOD::CaloCluster *clus = egamma->caloCluster();
   if (!clus) {
     ATH_MSG_WARNING("No associated egamma cluster. Do nothing");
-    return result;
+    return info;
   }
  
   // Find max energy cell in layer 2
   double etamax = -999., phimax = -999.;
   if (findMaxECell(clus,etamax,phimax).isFailure()) {
     ATH_MSG_WARNING("Problem in finding maximum energy cell in layer 2");
-    return result;
+    return info;
   }
 
-  // Build rectangular cluster arount it (and also in L3)
-  DerivationFramework::EGammaClusterCoreCellRecovery::existingCells arrayCells =
-    buildCellArrays(clus, etamax, phimax);
-
-  // Now compare with the cells stored in the CaloCell container
-  // and compute the energy from missed cells
-
-  // define required size = 3x7 in barrel and 5x7 in endcap for layer 2
-  int iphi1 = 0, iphi2 = 6;
-  int ieta1 = 0, ieta2 = 4;
-  if (std::abs(etamax) < 1.475) { 
-    ieta1 = 1;
-    ieta2 = 3;
+  info.etamax = etamax;
+  info.phimax = phimax;
+  if (m_egammaCellRecoveryTool->execute(*clus,info).isFailure()) {
+    ATH_MSG_WARNING("Issue trying to recover cells");
   }
-  
-  for (const auto * cell : *caloCells) {
-    //const CaloCell* cell = (*first_cell);
-    if (!cell->caloDDE()) {
-      ATH_MSG_WARNING("Calo cell without detector element ?? eta = "
-		      << cell->eta() << " phi = " << cell->phi());
-      continue;
-    }
-
-    double deta = cell->caloDDE()->eta_raw()-etamax;
-    double dphi = cell->caloDDE()->phi_raw()-phimax;
-    if (dphi < -M_PI) dphi += 2*M_PI;
-    if (dphi > M_PI)  dphi -= 2*M_PI;
-    
-    if (std::abs(deta) > 0.1 || std::abs(dphi) > 0.1) continue;
-
-    int layer = cell->caloDDE()->getSampling();
-    if (layer != CaloSampling::EMB2 && layer != CaloSampling::EME2 &&
-	layer != CaloSampling::EMB3 && layer != CaloSampling::EME3)
-      continue;
-    
-    if ((layer == CaloSampling::EMB2 || layer == CaloSampling::EME2) &&
-	std::abs(deta) < 0.07 && std::abs(dphi) < 0.085) {
-      int ieta = (int)((deta+0.052)/0.025);
-      int iphi = (int)((dphi+0.075)/m_phiSize);
-      if (ieta >= ieta1 && ieta <= ieta2 && iphi >= iphi1 && iphi <= iphi2) {
-	int index = 7*ieta+iphi;
-	if (!arrayCells.existL2[index]) {
-	  if (std::abs(cell->time())>12.) {      // TBC: is this safe enough given the rounding of time ?
-	    result.nCells[0]++;
-	    result.eCells[0] += cell->energy();
-	  } // would have been rejected by time cut
-	}   // cell not in cluster
-      }     // eta-phi window cut
-    } else if ((layer == CaloSampling::EMB3 || layer == CaloSampling::EME3) &&
-	       std::abs(deta) < 0.05 && std::abs(dphi) < 0.06) {
-      int ieta = (int)(std::abs(deta)/0.025);
-      int iphi = (int)((dphi+0.05)/m_phiSize);
-      if (ieta <= 1 && iphi >= 0 && iphi <= 4) {
-	int index = 5*ieta+iphi;
-	if (!arrayCells.existL3[index]) {
-	  if (std::abs(cell->time())>12.) {
-	    result.nCells[1]++;
-	    result.eCells[1] += cell->energy();
-	  }
-	}
-      }
-    } 
-  }  // loop over cell container
-  
-  ATH_MSG_DEBUG("Added cells in L2, n = " << result.nCells[0] << " E = " << result.eCells[0]
-		<< " and in L3, n = " << result.nCells[1] << " E = " << result.eCells[1]);
-  return result;
+  return info;
 }
-
-DerivationFramework::EGammaClusterCoreCellRecovery::existingCells
-DerivationFramework::EGammaClusterCoreCellRecovery::buildCellArrays(
-  const xAOD::CaloCluster *clus, double etamax, double phimax) const {
-
-  DerivationFramework::EGammaClusterCoreCellRecovery::existingCells result{};
-  // Just to be sure. But should not be needed
-  for (int i = 0; i < m_nL2; i++)
-    { result.existL2[i] = 0; }
-  for (int i = 0; i < m_nL3; i++)
-    { result.existL3[i] = 0; }
-  
-  const CaloClusterCellLink* cellLinks = clus->getCellLinks();
-  if (!cellLinks) {
-    ATH_MSG_WARNING("No cell link for cluster. Do nothing");
-    return result;
-  }
-
-  CaloClusterCellLink::const_iterator it_cell = cellLinks->begin(),
-    it_cell_e = cellLinks->end();
-
-  for (; it_cell != it_cell_e; ++it_cell) {
-    const CaloCell* cell = (*it_cell);
-    if (cell) {
-      if (!cell->caloDDE()) {
-	ATH_MSG_WARNING("Calo cell without detector element ?? eta = "
-			<< cell->eta() << " phi = " << cell->phi());
-	continue;
-      }
-      int layer = cell->caloDDE()->getSampling();
-      if (layer != CaloSampling::EMB2 && layer != CaloSampling::EME2 &&
-	  layer != CaloSampling::EMB3 && layer != CaloSampling::EME3)
-	continue;
-      
-      double deta = cell->caloDDE()->eta_raw() - etamax;
-      double dphi = cell->caloDDE()->phi_raw() - phimax;
-      if (dphi < -M_PI) dphi += 2*M_PI;
-      if (dphi > M_PI)  dphi -= 2*M_PI;
-      if ((layer == CaloSampling::EMB2 || layer == CaloSampling::EME2) && 
-	  std::abs(deta) < 0.07 && std::abs(dphi) < 0.085) {
-	int ieta = (int)((deta+0.052)/0.025);
-	int iphi = (int)((dphi+0.075)/m_phiSize);
-	if (ieta < 0 || ieta > 4 || iphi < 0 || iphi > 6) {
-	  ATH_MSG_WARNING("Should never happen ieta = " << ieta
-			  << " iphi = " << iphi);
-	} else {
-	  int index = 7*ieta+iphi;
-	  result.existL2[index] = true;
-	}
-      } else if ((layer == CaloSampling::EMB3 || layer == CaloSampling::EME3) &&
-		 std::abs(deta) < 0.05 && std::abs(dphi) < 0.06) {
-	int ieta = (int)(std::abs(deta)/0.025);
-	int iphi = (int)((dphi+0.05)/m_phiSize);
-	if (ieta > 1 || iphi < 0 || iphi > 4) {
-	  ATH_MSG_WARNING("Should never happen ieta = " << ieta
-			  << " iphi = " << iphi);
-	} else {
-	  int index = 5*ieta+iphi;
-	  result.existL3[index] = true; 
-	}
-      } // L2 or L3, in window vs max
-    }   // cell exists
-  }     // loop over cells
-
-  return result;
-}
-
 
 StatusCode
 DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
@@ -311,14 +184,15 @@ DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
   const CaloClusterCellLink* cellLinks = clus->getCellLinks();
   if (!cellLinks) {
     ATH_MSG_WARNING("No cell link for cluster. Do nothing");
-    return StatusCode::SUCCESS;
+    return StatusCode::FAILURE;
   }
 
   CaloClusterCellLink::const_iterator it_cell = cellLinks->begin(),
     it_cell_e = cellLinks->end();
 
   // find maximum cell energy in layer 2
-  double emax   = 0.;
+  double emax = 0.;
+  std::pair<const CaloCell*,double> maxcell{nullptr,0}; //just for debug
   for(; it_cell != it_cell_e; ++it_cell) {
     const CaloCell* cell = (*it_cell);
     if (cell) {
@@ -329,21 +203,36 @@ DerivationFramework::EGammaClusterCoreCellRecovery::findMaxECell(
       }
       int layer = cell->caloDDE()->getSampling();
       if (layer == CaloSampling::EMB2 || layer == CaloSampling::EME2) {
-	if (cell->energy() > emax) {
-	  emax   = cell->energy();
-	  etamax = cell->caloDDE()->eta_raw();
-	  phimax = cell->caloDDE()->phi_raw();
+	double w     = it_cell.weight();
+	double eCell = cell->energy();
+	if (m_UseWeightForMaxCell) eCell *= w;
+	if (eCell > emax) {
+	  emax           = eCell;
+	  maxcell.first  = cell;
+	  maxcell.second = w;
 	}
       }
     }
   }
-  if (msgLvl(MSG::DEBUG)) {
-    if (emax > 0) {
-      ATH_MSG_DEBUG("Maximum layer 2 energy cell, E = " << emax
-		    << " eta = " << etamax << " phi = " << phimax);
-    } else {
-      ATH_MSG_DEBUG("No layer 2 cell ! Should never happen");
+
+  if (emax > 0) {
+    etamax = maxcell.first->caloDDE()->eta_raw();
+    phimax = maxcell.first->caloDDE()->phi_raw();
+    if (msgLvl(MSG::DEBUG)) {
+      CaloSampling::CaloSample sam = maxcell.first->caloDDE()->getSampling();
+      double etaAmax = clus->etamax(sam);
+      double phiAmax = clus->phimax(sam);
+      double vemax   = clus->energy_max(sam);
+      ATH_MSG_DEBUG("Cluster energy in sampling 2 = " << clus->energyBE(2)
+		    << " maximum layer 2 energy cell, E = " << maxcell.first->energy()
+		    << " check E = " << vemax
+		    << " w = " << maxcell.second << "\n"
+		    << " in calo  frame, eta = " << etamax << " phi = " << phimax << "\n"
+		    << " in ATLAS frame, eta = " << etaAmax << " phi = " << phiAmax);
     }
+  } else {
+    ATH_MSG_WARNING("No layer 2 cell with positive energy ! Should never happen");
+    return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
 }
