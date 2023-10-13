@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SGCOMPS_ADDRESSREMAPPINGSVC_H
@@ -21,6 +21,7 @@
 #include "GaudiKernel/IAlgResourcePool.h" 
 #include "AthenaBaseComps/AthService.h"
 #include "SGTools/TransientAddress.h"
+#include "CxxUtils/CachedValue.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <vector>
@@ -75,8 +76,6 @@ public: // Non-static members
    */
   virtual const IInputRename::InputRenameRCU_t* inputRenameMap() const override;
 
-private:
-   CLID getClid(std::string type) const;
 
 private: // Data
    ServiceHandle<IClassIDSvc> m_clidSvc;
@@ -90,6 +89,13 @@ private: // Data
   StringArrayProperty m_overwriteMaps{this,"TypeKeyOverwriteMaps",{},"","OrderedSet<std::string>"};
   std::vector<SG::TransientAddress> m_oldTads;
   std::vector<SG::TransientAddress> m_newTads;
+
+  // The old and new TADS list, possibly cleaned of nonexistent CLIDs.
+  // If SkipBadRemappings is true, then for the first event, we defer
+  // preloading the TADS until loadAddresses, where we can compare them
+  // against what's in the event store.
+  CxxUtils::CachedValue<std::vector<SG::TransientAddress> > m_oldTadsCleaned;
+  CxxUtils::CachedValue<std::vector<SG::TransientAddress> > m_newTadsCleaned;
 
    /// Property: list of requested input renames.
   Gaudi::Property<std::vector<std::string> >m_typeKeyRenameMaps{this,"TypeKeyRenameMaps",{},
@@ -110,16 +116,23 @@ private: // Data
   Gaudi::Property<bool> m_skipBadRemappings{this,"SkipBadRemappings",false,
       "If true, will delay the remapping setup until the first load, and will check against the given file"};
 
-   bool m_haveDeletes=false;
+   // This mutex protects the two following members.
+   mutable std::mutex m_deletesMutex;
+   std::atomic<bool> m_haveDeletes=false;
    std::unordered_multimap<std::string, CLID> m_deletes;
-
-   // FIXME: calling getFlatAlgList() can result in a recursive call!
-   typedef std::recursive_mutex mutex_t;
-   typedef std::lock_guard<mutex_t> lock_t;
-   mutable mutex_t m_mutex;
 
 
 private:
+   CLID getClid(std::string type) const;
+
+   StatusCode preLoadAddressesConst(StoreID::type storeID, IAddressProvider::tadList& tads) const;
+
+   StatusCode updateAddressConst(StoreID::type /*storeID*/,
+                                 SG::TransientAddress* pTad,
+                                 const EventContext& ctx) const;
+
+  StatusCode loadAddressesConst(IAddressProvider::tadList& tads) const;
+
   /**
    * @brief Merge in additional input rename mappings.
    * @param toadd Mappings to add.
@@ -127,14 +140,14 @@ private:
    * Additional sgkey->sgkey input rename mappings are merged into the rename map,
    * using RCU synchronization.
    */
-   void addInputRenames (const InputRenameMap_t& toadd);
+   void addInputRenames (const InputRenameMap_t& toadd) const;
 
 
    /**
     * @brief Set up input rename mappings during initialization.
     */
    StatusCode initInputRenames ATLAS_NOT_THREAD_SAFE ();
-   StatusCode renameTads (IAddressProvider::tadList& tads);
+   StatusCode renameTads (IAddressProvider::tadList& tads) const;
 
    void initDeletes();
    bool isDeleted (const SG::TransientAddress& tad) const;
