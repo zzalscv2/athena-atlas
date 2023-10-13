@@ -161,7 +161,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     vars += [
         'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select',
     ]
-    if dataType != 'data' :
+    if dataType != 'data' and not forCompare:
         vars += [
             'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
         ]
@@ -174,7 +174,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
         vars += [
             'OutJets_NOSYS.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select',
         ]
-        if dataType != 'data' :
+        if dataType != 'data' and not forCompare:
             vars += [
                 'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_legacy_eff_%SYS%'
             ]
@@ -617,7 +617,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
     configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
-    configSeq.setOptionValue ('.noEffSF', False)
+    configSeq.setOptionValue ('.noEffSF', forCompare)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
@@ -625,7 +625,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         btagger_legacy = "DL1r"
         btagWP_legacy = "FixedCutBEff_77"
         configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
-        configSeq.setOptionValue ('.noEffSF', False)
+        configSeq.setOptionValue ('.noEffSF', forCompare)
         configSeq.setOptionValue ('.legacyRecommendations', True)
         configSeq.setOptionValue ('.btagger', btagger_legacy)
         configSeq.setOptionValue ('.btagWP', btagWP_legacy)

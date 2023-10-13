@@ -12,12 +12,12 @@ Jets:
     runNNJvtUpdate: True
     FlavourTagging:
       - postfix: 'ftag'
-        noEffSF: False
+        noEffSF: True
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
         kinematicSelection: True
       - postfix: 'ftag_legacy'
-        noEffSF: False
+        noEffSF: True
         legacyRecommendations: True
         btagger: 'DL1r'
         btagWP: 'FixedCutBEff_77'

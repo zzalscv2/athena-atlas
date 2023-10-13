@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 class FTagConfig (ConfigBlock):
@@ -44,25 +45,29 @@ class FTagConfig (ConfigBlock):
             elif "VR" in jetCollection:
                 minPt = 10e3
 
-        if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa228", "Sherpa2210", "Herwig7", "Herwig713", "Herwig721", "amc@NLO"]:
-            raise ValueError ("invalid generator type: " + self.generator)
+        if config.geometry() == LHCPeriod.Run2:
+            if self.generator not in ["default", "Pythia8", "Sherpa221", "Sherpa2210", "Sherpa2212", "Herwig713", "Herwig721", "amcAtNLOPythia", "amcAtNLOHerwig"]:
+                raise ValueError ("invalid generator type: " + self.generator)
+        elif config.geometry() == LHCPeriod.Run3:
+            if self.generator not in ["default", "Pythia8", "Sherpa2212", "Herwig713"]:
+                raise ValueError ("invalid generator type: " + self.generator)
 
         # MC/MC scale factors configuration
         DSID = "default"
         if self.generator == "Sherpa221":
             DSID = "410250"
-        elif self.generator == "Sherpa228":
-            DSID = "421152"
         elif self.generator == "Sherpa2210":
             DSID = "700122"
-        elif self.generator == "Herwig7":
-            DSID = "410558"
+        elif self.generator == "Sherpa2212":
+            DSID = "700660"
         elif self.generator == "Herwig713":
             DSID = "411233"
         elif self.generator == "Herwig721":
             DSID = "600666"
-        elif self.generator == "amc@NLO":
+        elif self.generator == "amcAtNLOPythia":
             DSID = "410464"
+        elif self.generator == "amcAtNLOHerwig":
+            DSID = "412116"
 
         if self.legacyRecommendations:
             # The CDI file does not have PV0 in the key
@@ -77,7 +82,10 @@ class FTagConfig (ConfigBlock):
             # Supports DL1r on VR track jets
             bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2021-12-02_v2.root"
         else:
-            bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
+            if config.geometry() == LHCPeriod.Run2:
+                bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2023-22-13TeV-MC20-CDI-2023-09-13_v1.root"
+            elif config.geometry() >= LHCPeriod.Run3:
+                bTagCalibFile = "xAODBTaggingEfficiency/13p6TeV/2023-22-13TeV-MC21-CDI-2023-09-13_v1.root"
 
         if self.kinematicSelection:
             # Set up the ftag kinematic selection algorithm(s):
