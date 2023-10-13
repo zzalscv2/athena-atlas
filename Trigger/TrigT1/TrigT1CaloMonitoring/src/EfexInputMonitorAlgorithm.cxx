@@ -186,10 +186,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               for(size_t i=0;i<counts.size();i++) {
                   TowerSlot = i; TowerCount = counts[i];
                   TowerSlotSplitHad = i + (i==10 && std::abs(Towereta)>1.5);
-		  if (m_fillTree) {
-		    fill(m_packageName+"_RefCompareTree",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad);
-		  }
-		  fill(m_packageName+"_RefCompareTreeHist",lbnString,Towereta,Towerphi,TowerCount,TowerRefCount,TowerSlotSplitHad);
+                  fill(m_packageName+"_RefCompareTreeHist",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad);
               }
               continue;
           }
@@ -201,10 +198,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               for(size_t i=ecounts.size();i<counts.size();i++) {
                   TowerSlot = i; TowerCount = counts[i];
                   TowerSlotSplitHad = i + (i==10 && std::abs(Towereta)>1.5);
-		  if (m_fillTree) {
-		    fill(m_packageName+"_RefCompareTree",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad);
-		  }
-		  fill(m_packageName+"_RefCompareTreeHist",lbnString,Towereta,Towerphi,TowerCount,TowerRefCount,TowerSlotSplitHad);
+                  fill(m_packageName+"_RefCompareTreeHist",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad);
               }
               continue;
           }
@@ -240,14 +234,30 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           s = itr->second.second;
                       }
                       SlotSCID = s;
-		      if (m_fillTree) {
-			fill(m_packageName + "_RefCompareTree", evtNumber, lbnString, TowerId, Towereta, Towerphi,
-			     Toweremstatus, Towerhadstatus, TowerSlot, TowerCount, TowerRefCount, TowerSlotSplitHad,
-			     SlotSCID);
-		      }
-		      fill(m_packageName + "_RefCompareTreeHist", lbnString, Towereta, Towerphi,
-			   TowerCount, TowerRefCount, TowerSlotSplitHad,
-			   SlotSCID);
+                      fill(m_packageName + "_RefCompareTreeHist", evtNumber, lbnString, TowerId, Towereta, Towerphi,
+                           Toweremstatus, Towerhadstatus, TowerSlot, TowerCount, TowerRefCount, TowerSlotSplitHad,
+                           SlotSCID);
+
+                      if (counts[i]!=0) {
+                          // this is *not* a simple case of noisy-input suppression
+                          // log these cases separately with more info
+                          if( (m_debugEvtCount++) < 20) {
+                              std::string s = lbnString;
+                              lbnString += ":" + std::to_string(counts[i]) + ":" + std::to_string(ecounts[i]) + ":" +
+                                           std::to_string(evtNumber);
+                              fill(m_packageName + "_RefCompareTreeHistNonZero", lbnString, SlotSCID);
+                              lbnString = s;
+                          }
+                      } else {
+                          // probably a temporarily masked noisy tower
+                          if( (m_debugEvtCount2++) < 20) {
+                              std::string s = lbnString;
+                              lbnString += ":" + std::to_string(counts[i]) + ":" + std::to_string(ecounts[i]) + ":" + std::to_string(evtNumber);
+                              fill(m_packageName + "_RefCompareTreeHistZero", lbnString, SlotSCID);
+                              lbnString = s;
+                          }
+
+                      }
                   }
               }
               if (doneCounts.find(std::pair(coord,i))==doneCounts.end()) {
@@ -260,7 +270,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               ATH_MSG_DEBUG(eeTower->id() << " calo:" << ecStr.str());
           }
           Monitored::Scalar<float> weight( "Weight", 1.-float(mismatch));
-	  fill(m_packageName+"_RefCompareFrac",Towereta,Towerphi,weight);
+          fill(m_packageName+"_RefCompareFrac",Towereta,Towerphi,weight);
       }
   }
 

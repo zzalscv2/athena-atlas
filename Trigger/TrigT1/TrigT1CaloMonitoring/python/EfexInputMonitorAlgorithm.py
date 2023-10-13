@@ -24,7 +24,6 @@ def EfexInputMonitoringConfig(inputFlags):
     mainDir = 'L1Calo'
     trigPath = 'EfexInput/'
 
-
     # add monitoring algorithm to group, with group name and main directory 
     eventsGroup = helper.addGroup(EfexInputMonAlg, groupName , mainDir)
     eventsGroup.defineHistogram('NEfexTowers;h_fexTowers', title='Number of eFex towers;nEfexTowers;Events',
@@ -56,14 +55,17 @@ def EfexInputMonitoringConfig(inputFlags):
                             type='TH2F',path=trigPath+"fexTowers/", xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
     refCompareFracGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareFrac", mainDir)
-    refCompareTreeGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTree", mainDir)
     refCompareTreeHistGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTreeHist", mainDir)
+    refCompareTreeHistZeroGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTreeHistZero", mainDir)
+    refCompareTreeHistNonZeroGroup = helper.addGroup(EfexInputMonAlg,groupName+"_RefCompareTreeHistNonZero", mainDir)
 
     refCompareTreeHistGroup.defineHistogram('TowerEta,TowerPhi;h_phi_vs_eta',title="location of mismatches;#eta;#phi;mismatches",type='TH2I',
                              path=trigPath+"mismatches/",xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
     refCompareFracGroup.defineHistogram('TowerEta,TowerPhi,Weight;h_phi_vs_eta',title="fraction of matches;#eta;#phi;Fraction of matches",type='TProfile2D',
                                     path=trigPath+"fexTowers_matchedFrac/",xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
-    refCompareTreeGroup.defineTree('EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID;mismatched',
+    if not any([x in inputFlags.DQ.Environment for x in ['tier0','online']]):
+        # never output the debugging tree in tier0 or online environments (should only make if running offline)
+        refCompareTreeHistGroup.defineTree('EventNumber,TowerId,TowerEta,TowerPhi,TowerEmstatus,TowerHadstatus,TowerSlot,TowerCount,RefTowerCount,SlotSCID;mismatched',
                                    "eventNumber/l:id/I:eta/F:phi/F:em_status/i:had_status/i:slot/I:count/I:ref_count/I:scid/string",
                                    title="mismatched",path=trigPath+"mismatches/")
     refCompareTreeHistGroup.defineHistogram('LBNString,TowerSlotSplitHad;h_slot_vs_lbn', path=trigPath+"mismatches/", type='TH2I',
@@ -76,6 +78,16 @@ def EfexInputMonitoringConfig(inputFlags):
                                         xbins=1, xmin=0, xmax=1, xlabels=[""],
                                         ybins=1, ymin=0, ymax=1, ylabels=[""],
                                         opt=['kCanRebin'])
+    refCompareTreeHistZeroGroup.defineHistogram('LBNString,SlotSCID;h_scid_vs_lbn_zeroFexCount', path=trigPath+"mismatches/", type='TH2I',
+                                                   title='Mismatched counts where fexCount=0;LB:fexCount:caloCount:evtNum;SCID;mismatches',
+                                                   xbins=1, xmin=0, xmax=1, xlabels=[""],
+                                                   ybins=1, ymin=0, ymax=1, ylabels=[""],
+                                                   opt=['kCanRebin'])
+    refCompareTreeHistNonZeroGroup.defineHistogram('LBNString,SlotSCID;h_scid_vs_info_nonZeroFexCount', path=trigPath+"mismatches/", type='TH2I',
+                                            title='Mismatched counts where fexCount>0;LB:fexCount:caloCount:evtNum;SCID;mismatches',
+                                            xbins=1, xmin=0, xmax=1, xlabels=[""],
+                                            ybins=1, ymin=0, ymax=1, ylabels=[""],
+                                            opt=['kCanRebin'])
     refCompareTreeHistGroup.defineHistogram('TowerCount,RefTowerCount;h_caloCount_vs_fexCount', path=trigPath+"mismatches/", type='TH2I',
                                         title='Mismatched counts;Fex Readout;Calo Readout;mismatches',
                                         xbins=60, xmin=-0.5, xmax=59.5,
