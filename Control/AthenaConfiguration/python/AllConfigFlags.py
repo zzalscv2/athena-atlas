@@ -464,6 +464,12 @@ def initConfigFlags():
         return createEGammaDFConfigFlags()
     _addFlagsCategory(acf, "Derivation.Egamma", __egammaDerivation, 'DerivationFrameworkEGamma' )
 
+#llp derivation Flags:
+    def __llpDerivation():
+        from DerivationFrameworkLLP.LLPDFConfigFlags import createLLPDFConfigFlags
+        return createLLPDFConfigFlags()
+    _addFlagsCategory(acf, "Derivation.LLP", __llpDerivation, 'DerivationFrameworkLLP' )
+
     # For AnalysisBase, pick up things grabbed in Athena by the functions above
     if not isGaudiEnv():
         def EDMVersion(flags):

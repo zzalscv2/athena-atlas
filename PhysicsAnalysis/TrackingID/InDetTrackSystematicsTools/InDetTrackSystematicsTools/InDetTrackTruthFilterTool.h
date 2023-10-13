@@ -85,6 +85,7 @@ namespace InDet {
     float m_fFromC = 1.;
     float m_fFromB = 1.;
     float m_trkEffSystScale = 1.;
+    bool m_doLRTSystematics = false;
 
     TH2 *m_fPrimHistogram = nullptr;
     TH2 *m_fSecHistogram = nullptr;

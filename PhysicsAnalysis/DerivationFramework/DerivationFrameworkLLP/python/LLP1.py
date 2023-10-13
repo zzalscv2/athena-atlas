@@ -147,7 +147,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     LLP1VrtSecInclusiveSuffixes.append("")
 
 
-    if flags.Input.isMC:
+    if flags.Input.isMC and flags.Derivation.LLP.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
         TrackSystSuffix = "_TRK_EFF_LARGED0_GLOBAL__1down"
         acc.merge(TrackSystematicsAlgCfg(
@@ -553,8 +553,10 @@ def LLP1Cfg(flags):
                                               "Muons.TruthLink",
                                               "MuonsLRT.TruthLink",
                                               "Photons.TruthLink"]
-
+        if flags.Derivation.LLP.saveFullTruth:
+            LLP1SlimmingHelper.ExtraVariables += ['TruthParticles', 'TruthVertices']
         StaticContent += ["xAOD::JetContainer#AntiKt10TruthRCJets","xAOD::JetAuxContainer#AntiKt10TruthRCJetsAux.-PseudoJet"]
+
 
     LLP1SlimmingHelper.StaticContent = StaticContent
 
