@@ -33,7 +33,7 @@ namespace InDetDD {
 
 namespace ActsTrk
 {
-  class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter>
+class TrackStatePrinter : public extends<AthAlgTool, ActsTrk::ITrackStatePrinter>
   {
   public:
     TrackStatePrinter(const std::string &type, const std::string &name,
@@ -59,8 +59,8 @@ namespace ActsTrk
 
     void
     printTracks(const Acts::GeometryContext &tgContext,
-                const ActsTrk::TrackContainer &tracks,
-                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                const ActsTrk::MutableTrackContainer &tracks,
+                const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &offset) const override;
 
     using MeasurementInfo = std::tuple<size_t,

@@ -145,8 +145,8 @@ private:
   // Create a track from the fitter result
   std::unique_ptr<Trk::Track> makeTrack(const EventContext& ctx, 
           Acts::GeometryContext& tgContext, 
-          ActsTrk::TrackContainer& tracks,
-          Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType = false) const;
+          ActsTrk::MutableTrackContainer& tracks,
+          Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType = false) const;
   //parameter (bool) SourceLinkType to distinguish between ATLASSourceLink and PRDSourceLink implementation. 
   //bool SourceLinkType = false for ATLASSourceLink
   //bool SourceLinkType = true for PRDSourceLink
@@ -173,13 +173,13 @@ private:
   Gaudi::Property<double> m_overstepLimit{this, "OverstepLimit", 100 * Acts::UnitConstants::mm, 
       "Overstep limit / tolerance for the Eigen stepper (use ACTS units!)"};
 
-  std::unique_ptr<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>> m_calibrator;
+  std::unique_ptr<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>> m_calibrator;
 
   /// Type erased track fitter function.
-    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::TrackStateBackend>;
+    using Fitter = Acts::KalmanFitter<Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>, ActsTrk::MutableTrackStateBackend>;
     std::unique_ptr<Fitter> m_fitter;
 
-    Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> m_kfExtensions;
+    Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> m_kfExtensions;
 
     ActsTrk::FitterHelperFunctions::ATLASOutlierFinder m_outlierFinder{0};
     ActsTrk::FitterHelperFunctions::ReverseFilteringLogic m_reverseFilteringLogic{0};

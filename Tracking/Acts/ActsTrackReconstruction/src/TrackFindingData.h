@@ -40,22 +40,22 @@ namespace
 
   static Acts::Result<void>
   gainMatrixUpdate(const Acts::GeometryContext &gctx,
-                   typename ActsTrk::TrackStateBackend::TrackStateProxy trackState,
+                   typename ActsTrk::MutableTrackStateBackend::TrackStateProxy trackState,
                    Acts::Direction direction,
                    const Acts::Logger &logger)
   {
     Acts::GainMatrixUpdater updater;
-    return updater.template operator()<ActsTrk::TrackStateBackend>(gctx, trackState, direction, logger);
+    return updater.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trackState, direction, logger);
   }
 
   static Acts::Result<void>
   gainMatrixSmoother(const Acts::GeometryContext &gctx,
-                     ActsTrk::TrackStateBackend &trajectory,
+                     ActsTrk::MutableTrackStateBackend &trajectory,
                      size_t entryIndex,
                      const Acts::Logger &logger)
   {
     Acts::GainMatrixSmoother smoother;
-    return smoother.template operator()<ActsTrk::TrackStateBackend>(gctx, trajectory, entryIndex, logger);
+    return smoother.template operator()<ActsTrk::MutableTrackStateBackend>(gctx, trajectory, entryIndex, logger);
   }
 
   // Helper class to describe ranges of measurements
@@ -183,7 +183,7 @@ namespace
   using Stepper = Acts::EigenStepper<>;
   using Navigator = Acts::Navigator;
   using Propagator = Acts::Propagator<Stepper, Navigator>;
-  using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::TrackStateBackend>;
+  using CKF = Acts::CombinatorialKalmanFilter<Propagator, ActsTrk::MutableTrackStateBackend>;
 
   // Small holder class to keep CKF and related objects.
   // Keep a unique_ptr<CKF_pimpl> in TrackFindingAlg, so we don't have to expose the
@@ -196,7 +196,7 @@ namespace
     // CKF configuration
     Acts::MeasurementSelector measurementSelector;
     Acts::PropagatorPlainOptions pOptions;
-    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::TrackStateBackend> ckfExtensions;
+    Acts::CombinatorialKalmanFilterExtensions<ActsTrk::MutableTrackStateBackend> ckfExtensions;
     Acts::TrackSelector trackSelector;
   };
 

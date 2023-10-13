@@ -50,8 +50,8 @@ namespace ActsTrk
 
     virtual void
     printTracks(const Acts::GeometryContext &tgContext,
-                const ActsTrk::TrackContainer &tracks,
-                const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                const ActsTrk::MutableTrackContainer &tracks,
+                const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                 const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &offset) const = 0;
   };
 

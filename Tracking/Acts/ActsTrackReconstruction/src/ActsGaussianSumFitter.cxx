@@ -69,15 +69,15 @@ StatusCode ActsGaussianSumFitter::initialize() {
   m_fitter = std::make_unique<Fitter>(std::move(propagator), std::move(bha),
               logger().cloneWithSuffix("GaussianSumFitter"));
 
-  m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::TrackStateBackend>>();
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>>(*m_ATLASConverterTool);
+  m_gsfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>>(*m_ATLASConverterTool);
   m_gsfExtensions.calibrator.connect(*m_calibrator);
 
   m_surfaceAccessor.m_converterTool = &(*m_ATLASConverterTool);
   m_gsfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&m_surfaceAccessor);
   
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
-  m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::TrackStateBackend>>(&m_outlierFinder);
+  m_gsfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
 
   return StatusCode::SUCCESS;
 }
@@ -116,7 +116,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext, 
@@ -159,7 +159,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext, 
@@ -239,7 +239,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext,
@@ -316,7 +316,7 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
   Acts::CalibrationContext calContext{};
 
   // Set the GaussianSumFitter options
-  Acts::GsfOptions<ActsTrk::TrackStateBackend>
+  Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>
     gsfOptions = prepareOptions(tgContext, 
 				mfContext, 
 				calContext,
@@ -337,8 +337,8 @@ ActsGaussianSumFitter::fit(const EventContext& ctx,
 std::unique_ptr<Trk::Track> 
 ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
           const Acts::GeometryContext& tgContext,
-          ActsTrk::TrackContainer& tracks,
-          Acts::Result<typename ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult) const {
+          ActsTrk::MutableTrackContainer& tracks,
+          Acts::Result<typename ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult) const {
   if (not fitResult.ok()) 
     return nullptr;    
 
@@ -487,7 +487,7 @@ ActsGaussianSumFitter::makeTrack(const EventContext& ctx,
   return newtrack;
 }
 
-const Acts::GsfExtensions<typename ActsTrk::TrackStateBackend>& 
+const Acts::GsfExtensions<typename ActsTrk::MutableTrackStateBackend>& 
 ActsGaussianSumFitter::getExtensions() const 
 { 
   return m_gsfExtensions; 
@@ -500,7 +500,7 @@ ActsGaussianSumFitter::logger() const
   return *m_logger; 
 }
 
-Acts::GsfOptions<typename ActsTrk::TrackStateBackend> 
+Acts::GsfOptions<typename ActsTrk::MutableTrackStateBackend> 
 ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 				      const Acts::MagneticFieldContext& mfContext,
 				      const Acts::CalibrationContext& calContext,
@@ -509,7 +509,7 @@ ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
 
-  Acts::GsfOptions<typename ActsTrk::TrackStateBackend> gsfOptions{tgContext, mfContext, calContext, m_gsfExtensions, std::move(propagationOption)};
+  Acts::GsfOptions<typename ActsTrk::MutableTrackStateBackend> gsfOptions{tgContext, mfContext, calContext, m_gsfExtensions, std::move(propagationOption)};
   gsfOptions.referenceSurface = &surface;
 
   // Set abortOnError to false, else the refitting crashes if no forward propagation is done. Here, we just skip the event and continue.
@@ -521,7 +521,7 @@ ActsGaussianSumFitter::prepareOptions(const Acts::GeometryContext& tgContext,
 std::unique_ptr<Trk::Track> 
 ActsGaussianSumFitter::performFit(const EventContext& ctx,
 				  const Acts::GeometryContext& tgContext,
-				  const Acts::GsfOptions<ActsTrk::TrackStateBackend>& gsfOptions,
+				  const Acts::GsfOptions<ActsTrk::MutableTrackStateBackend>& gsfOptions,
 				  const std::vector<Acts::SourceLink>& trackSourceLinks,
 				  const Acts::BoundTrackParameters& initialParams) const
 {
@@ -530,9 +530,7 @@ ActsGaussianSumFitter::performFit(const EventContext& ctx,
     return nullptr;
   }
 
-  Acts::TrackContainer tracks{
-    Acts::VectorTrackContainer{},
-    Acts::VectorMultiTrajectory{}};
+  ActsTrk::MutableTrackContainer tracks;
 
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),

@@ -394,7 +394,7 @@ namespace ActsTrk
 
   static void
   printTrackState(const Acts::GeometryContext &tgContext,
-                  const Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy &state,
+                  const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state,
                   const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &container_offset)
   {
     ptrdiff_t index = -1;
@@ -510,20 +510,20 @@ namespace ActsTrk
 
   void
   TrackStatePrinter::printTracks(const Acts::GeometryContext &tgContext,
-                                 const ActsTrk::TrackContainer &tracks,
-                                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+                                 const ActsTrk::MutableTrackContainer &tracks,
+                                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                                  const std::vector<std::pair<const xAOD::UncalibratedMeasurementContainer *, size_t> > &container_offset) const
   {
     for (auto &track : fitResult)
     {
       const auto lastMeasurementIndex = track.tipIndex();
       // to print track states from inside outward, we need to reverse the order of visitBackwards().
-      std::vector<Acts::MultiTrajectory<ActsTrk::TrackStateBackend>::ConstTrackStateProxy> states;
+      std::vector<ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy> states;
       states.reserve(lastMeasurementIndex + 1); // could be an overestimate
       size_t npixel = 0, nstrip = 0;
       tracks.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&states, &npixel, &nstrip](const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          [&states, &npixel, &nstrip](const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             if (state.hasCalibrated())
             {

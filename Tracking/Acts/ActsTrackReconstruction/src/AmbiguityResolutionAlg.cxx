@@ -63,7 +63,7 @@ namespace ActsTrk
     auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto mon = Monitored::Group( m_monTool, timer );
 
-    SG::ReadHandle<ActsTrk::ConstTrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
+    SG::ReadHandle<ActsTrk::TrackContainer> trackHandle = SG::makeHandle(m_tracksKey, ctx);
     ATH_CHECK(trackHandle.isValid());
 
     Acts::GreedyAmbiguityResolution::State state;
@@ -75,7 +75,7 @@ namespace ActsTrk
     ATH_MSG_DEBUG("Resolved to " << state.selectedTracks.size() << " tracks from "
                   << trackHandle->size());
 
-    ActsTrk::TrackContainer solvedTracks { Acts::VectorTrackContainer{}, Acts::VectorMultiTrajectory{} };
+    ActsTrk::MutableTrackContainer solvedTracks;
     solvedTracks.ensureDynamicColumns(*trackHandle);
 
     for (auto iTrack : state.selectedTracks) {
@@ -83,9 +83,9 @@ namespace ActsTrk
        destProxy.copyFrom(trackHandle->getTrack(state.trackTips.at(iTrack)));
     }
 
-    SG::WriteHandle<ActsTrk::ConstTrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);
-    std::unique_ptr<ActsTrk::ConstTrackContainer>
-       output_tracks( new ActsTrk::ConstTrackContainer{ Acts::ConstVectorTrackContainer(std::move(solvedTracks.container())),
+    SG::WriteHandle<ActsTrk::TrackContainer> resolvedTrackHandle(m_resolvedTracksKey, ctx);
+    std::unique_ptr<ActsTrk::TrackContainer>
+       output_tracks( new ActsTrk::TrackContainer{ Acts::ConstVectorTrackContainer(std::move(solvedTracks.container())),
                                                         Acts::ConstVectorMultiTrajectory(std::move(solvedTracks.trackStateContainer())) } );
 
     if (resolvedTrackHandle.record( std::move(output_tracks)).isFailure()) {

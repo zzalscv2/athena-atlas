@@ -155,7 +155,7 @@ namespace ActsTrk
 
     trackFinder().ckfExtensions.updater.connect<&gainMatrixUpdate>();
     trackFinder().ckfExtensions.smoother.connect<&gainMatrixSmoother>();
-    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::TrackStateBackend>>(&trackFinder().measurementSelector);
+    trackFinder().ckfExtensions.measurementSelector.connect<&Acts::MeasurementSelector::select<ActsTrk::MutableTrackStateBackend>>(&trackFinder().measurementSelector);
 
     if (!m_statEtaBins.empty()) {
        m_useAbsEtaForStat=(m_statEtaBins[0]>0.);
@@ -530,7 +530,7 @@ namespace ActsTrk
 
     auto trackContainerHandle = SG::makeHandle(m_trackContainerKey, ctx);
 
-    Acts::TrackContainer tracksContainer{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
+    ActsTrk::MutableTrackContainer tracksContainer;
     ATH_MSG_DEBUG("    \\__ Tracks Container `" << m_trackContainerKey.key() << "` created ...");
 
     // ================================================== //
@@ -591,9 +591,9 @@ namespace ActsTrk
     // ===================== STORE OUTPUT =============== //
     // ================================================== //
     // TODO once have final version of containers, they need to have movable backends also here
-    ActsTrk::ConstTrackStateBackend trackStateBackend(tracksContainer.trackStateContainer());
-    ActsTrk::ConstTrackBackend trackBackend(tracksContainer.container());
-    auto constTrackContainer = std::make_unique<ActsTrk::ConstTrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
+    ActsTrk::TrackStateBackend trackStateBackend(tracksContainer.trackStateContainer());
+    ActsTrk::TrackBackend trackBackend(tracksContainer.container());
+    auto constTrackContainer = std::make_unique<ActsTrk::TrackContainer>(std::move(trackBackend), std::move(trackStateBackend));
     ATH_CHECK(trackContainerHandle.record(std::move(constTrackContainer)));
     if (!trackContainerHandle.isValid())
     {
@@ -611,7 +611,7 @@ namespace ActsTrk
                               DuplicateSeedDetector &duplicateSeedDetector,
                               const ActsTrk::BoundTrackParametersContainer &estimatedTrackParameters,
                               const ActsTrk::SeedContainer *seeds,
-                              ActsTrk::TrackContainer &tracksContainer,
+                              ActsTrk::MutableTrackContainer &tracksContainer,
                               size_t typeIndex,
                               const char *seedType,
                               std::vector< std::array<unsigned int, kNStat> > &event_stat) const
@@ -639,7 +639,7 @@ namespace ActsTrk
     slAccessorDelegate.connect<&UncalibSourceLinkAccessor::range>(&slAccessor);
 
     // Set the CombinatorialKalmanFilter options
-    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, ActsTrk::TrackStateBackend>;
+    using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<UncalibSourceLinkAccessor::Iterator, ActsTrk::MutableTrackStateBackend>;
     TrackFinderOptions options(tgContext,
                                mfContext,
                                calContext,
@@ -648,9 +648,9 @@ namespace ActsTrk
                                trackFinder().pOptions,
                                &(*pSurface));
 
-    Acts::TrackContainer tracksContainerTemp{Acts::VectorTrackContainer{}, ActsTrk::TrackStateBackend{}};
+    ActsTrk::MutableTrackContainer tracksContainerTemp;
 
-    UncalibratedMeasurementCalibrator<ActsTrk::TrackStateBackend> calibrator(*m_ATLASConverterTool, tracking_surface_helper);
+    UncalibratedMeasurementCalibrator<ActsTrk::MutableTrackStateBackend> calibrator(*m_ATLASConverterTool, tracking_surface_helper);
     options.extensions.calibrator.connect(calibrator);
 
     // Perform the track finding for all initial parameters
@@ -754,8 +754,8 @@ namespace ActsTrk
   }
 
   StatusCode
-  TrackFindingAlg::storeSeedInfo(const ActsTrk::TrackContainer &tracksContainer,
-                                 const std::vector<ActsTrk::TrackContainer::TrackProxy> &fitResult,
+  TrackFindingAlg::storeSeedInfo(const ActsTrk::MutableTrackContainer &tracksContainer,
+                                 const std::vector<ActsTrk::MutableTrackContainer::TrackProxy> &fitResult,
                                  DuplicateSeedDetector &duplicateSeedDetector) const
   {
     for (auto &track : fitResult)
@@ -765,7 +765,7 @@ namespace ActsTrk
 
       tracksContainer.trackStateContainer().visitBackwards(
           lastMeasurementIndex,
-          [&duplicateSeedDetector](const ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
+          [&duplicateSeedDetector](const ActsTrk::MutableTrackStateBackend::ConstTrackStateProxy &state) -> void
           {
             // Check there is a source link
             if (not state.hasUncalibratedSourceLink())

@@ -196,18 +196,18 @@ StatusCode ActsKalmanFitter::initialize() {
   m_fitter = std::make_unique<Fitter>(std::move(propagator),
               logger().cloneWithSuffix("KalmanFitter"));
 
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>>(*m_ATLASConverterTool);
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>>(*m_ATLASConverterTool);
   m_kfExtensions.calibrator.connect(*m_calibrator);
 
   m_outlierFinder.StateChiSquaredPerNumberDoFCut = m_option_outlierChi2Cut;
   m_reverseFilteringLogic.momentumMax = m_option_ReverseFilteringPt;
 
-  m_kfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::TrackStateBackend>>(&m_outlierFinder);
+  m_kfExtensions.outlierFinder.connect<&ActsTrk::FitterHelperFunctions::ATLASOutlierFinder::operator()<ActsTrk::MutableTrackStateBackend>>(&m_outlierFinder);
 
-  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::TrackStateBackend>>(&m_reverseFilteringLogic);
-  m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::TrackStateBackend>>();
-  m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<ActsTrk::TrackStateBackend>>();
-  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::TrackStateBackend>>(*m_ATLASConverterTool);
+  m_kfExtensions.reverseFilteringLogic.connect<&ActsTrk::FitterHelperFunctions::ReverseFilteringLogic::operator()<ActsTrk::MutableTrackStateBackend>>(&m_reverseFilteringLogic);
+  m_kfExtensions.updater.connect<&ActsTrk::FitterHelperFunctions::gainMatrixUpdate<ActsTrk::MutableTrackStateBackend>>();
+  m_kfExtensions.smoother.connect<&ActsTrk::FitterHelperFunctions::gainMatrixSmoother<ActsTrk::MutableTrackStateBackend>>();
+  m_calibrator = std::make_unique<TrkMeasurementCalibrator<ActsTrk::MutableTrackStateBackend>>(*m_ATLASConverterTool);
   m_kfExtensions.calibrator.connect(*m_calibrator);
 
   return StatusCode::SUCCESS;
@@ -246,7 +246,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   // CalibrationContext converter not implemented yet.
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-  Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
+  Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
   ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
   kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
@@ -285,9 +285,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                                                        scaledCov,
                                                        hypothesis);
 
-  ActsTrk::TrackContainer tracks{
-    ActsTrk::TrackBackend{},
-    ActsTrk::TrackStateBackend{}};
+  ActsTrk::MutableTrackContainer tracks;
   
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -324,7 +322,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   // CalibrationContext converter not implemented yet.
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-  Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
+  Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
   ATLASSourceLinkSurfaceAccessor surfaceAccessor{&(*m_ATLASConverterTool)};
   kfExtensions.surfaceAccessor.connect<&ATLASSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
@@ -352,9 +350,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 
   const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
-  ActsTrk::TrackContainer tracks{
-    ActsTrk::TrackBackend{},
-    ActsTrk::TrackStateBackend{}};
+  ActsTrk::MutableTrackContainer tracks;
 
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
@@ -388,13 +384,13 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     // CalibrationContext converter not implemented yet.
     Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-    Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
+    Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
     PRDSourceLinkCalibrator calibrator{}; // @TODO: Set tool pointers
     calibrator.rotCreator =m_ROTcreator.get();
     calibrator.broadRotCreator = m_broadROTcreator.get();
     calibrator.converterTool = m_ATLASConverterTool.get();
-    kfExtensions.calibrator.connect<&PRDSourceLinkCalibrator::calibrate<ActsTrk::TrackStateBackend>>(&calibrator);
+    kfExtensions.calibrator.connect<&PRDSourceLinkCalibrator::calibrate<ActsTrk::MutableTrackStateBackend>>(&calibrator);
 
     PRDSourceLinkSurfaceAccessor surfaceAccessor{m_ATLASConverterTool.get()};
     kfExtensions.surfaceAccessor.connect<&PRDSourceLinkSurfaceAccessor::operator()>(&surfaceAccessor);
@@ -425,10 +421,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     const auto& initialParams = m_ATLASConverterTool->trkTrackParametersToActsParameters(estimatedStartParameters, tgContext); 
 
 
-    ActsTrk::TrackContainer tracks{
-      ActsTrk::TrackBackend{},
-      ActsTrk::TrackStateBackend{}};
-
+    ActsTrk::MutableTrackContainer tracks;
     // Perform the fit
     auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
       initialParams, kfOptions, tracks);
@@ -481,7 +474,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   // CalibrationContext converter not implemented yet.
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-  Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
+  Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -505,10 +498,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
     return track;
   }
 
-  ActsTrk::TrackContainer tracks{
-    ActsTrk::TrackBackend{},
-    ActsTrk::TrackStateBackend{}};
-
+  ActsTrk::MutableTrackContainer tracks;
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
     initialParams, kfOptions, tracks);
@@ -573,7 +563,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
   // CalibrationContext converter not implemented yet.
   Acts::CalibrationContext calContext = Acts::CalibrationContext();
 
-  Acts::KalmanFitterExtensions<ActsTrk::TrackStateBackend> kfExtensions = m_kfExtensions;
+  Acts::KalmanFitterExtensions<ActsTrk::MutableTrackStateBackend> kfExtensions = m_kfExtensions;
 
   Acts::PropagatorPlainOptions propagationOption;
   propagationOption.maxSteps = m_option_maxPropagationStep;
@@ -609,10 +599,7 @@ ActsKalmanFitter::fit(const EventContext& ctx,
                                                        Acts::ParticleHypothesis::pion());
 
 
-  ActsTrk::TrackContainer tracks{
-    ActsTrk::TrackBackend{},
-    ActsTrk::TrackStateBackend{}};
-
+  ActsTrk::MutableTrackContainer tracks;
   // Perform the fit
   auto result = m_fitter->fit(trackSourceLinks.begin(), trackSourceLinks.end(),
     scaledInitialParams, kfOptions, tracks);
@@ -625,8 +612,8 @@ ActsKalmanFitter::fit(const EventContext& ctx,
 std::unique_ptr<Trk::Track> 
 ActsKalmanFitter::makeTrack(const EventContext& ctx,
           Acts::GeometryContext& tgContext,
-          ActsTrk::TrackContainer& tracks,
-          Acts::Result<ActsTrk::TrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType) const {
+          ActsTrk::MutableTrackContainer& tracks,
+          Acts::Result<ActsTrk::MutableTrackContainer::TrackProxy, std::error_code>& fitResult, bool SourceLinkType) const {
         
   if (not fitResult.ok()) 
     return nullptr;    

@@ -35,7 +35,7 @@ namespace ActsTrk
   private:
     StatusCode makeTracks(const EventContext &ctx,
                           const Acts::GeometryContext &tgContext,
-                          const ActsTrk::ConstTrackContainer &tracks,
+                          const ActsTrk::TrackContainer &tracks,
                           ::TrackCollection &tracksContainer) const;
 
     std::unique_ptr<Trk::MeasurementBase>
@@ -49,7 +49,7 @@ namespace ActsTrk
     ToolHandle<Trk::IRIO_OnTrackCreator> m_RotCreatorTool{this, "RotCreatorTool", "", "optional RIO_OnTrack creator tool"};
     ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool{this, "SummaryTool", "ToolHandle for track summary tool"};
 
-    SG::ReadHandleKey<ActsTrk::ConstTrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer",
+    SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer",
                                                                          "Output track collection (ActsTrk variant)"};
     SG::WriteHandleKey<::TrackCollection> m_tracksKey{this, "TracksLocation", "SiSPSeededActsTracks",
                                                       "Output track collection"};
