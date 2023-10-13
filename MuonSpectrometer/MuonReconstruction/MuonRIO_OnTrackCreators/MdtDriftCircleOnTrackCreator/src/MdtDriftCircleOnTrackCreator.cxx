@@ -127,7 +127,7 @@ StatusCode MdtDriftCircleOnTrackCreator::initialize() {
 
     if (m_timeCorrectionType == COSMICS_TOF) {
         if (!m_errorStrategy.creationParameter(MuonDriftCircleErrorStrategy::TofCorrection)) {
-            ATH_MSG_ERROR("Detected bad default configuration, using Cosmic TOF witout "
+            ATH_MSG_ERROR("Detected bad default configuration, using Cosmic TOF without "
                         <<"time of flight corrections does not work");
             return StatusCode::FAILURE;
         }
