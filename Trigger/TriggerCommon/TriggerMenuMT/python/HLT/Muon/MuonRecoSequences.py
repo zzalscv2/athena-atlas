@@ -390,12 +390,11 @@ def VDVPrecMuTrkCfg(flags, name):
   vdvName = "VDVMuTrkLRT" if "LRT" in name else "VDVMuTrk"
   trkname = "LRT" if "LRT" in name else ''
   dataObjects = [( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+getIDTracks(flags, trkname) ),
-                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) ),
-                 ]
+                 ( 'xAOD::IParticleContainer' , 'StoreGateSvc+'+ getIDTracks(flags, trkname) )]
+
   if not flags.Input.isMC:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
-                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' ),
-                    ]
+                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
 
   alg = CompFactory.AthViews.ViewDataVerifier( name = vdvName,
                                                DataObjects = dataObjects)
@@ -404,69 +403,50 @@ def VDVPrecMuTrkCfg(flags, name):
 
 
 
-def muEFCBRecoSequence( flags, RoIs, name ):
+def muEFCBRecoSequenceCfg( flags, RoIs, name ):
 
 
-  from AthenaCommon.CFElements import parOR
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
   from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg, MuonCombinedAlgCfg, MuonCombinedInDetCandidateAlgCfg
+  acc = ComponentAccumulator()
 
-  muEFCBRecoSequence = parOR("efcbViewNode_"+name)
+  acc.merge(VDVEFMuCBCfg(flags, RoIs, name))
 
-  muEFCBRecoSequence += algorithmCAToGlobalWrapper(VDVEFMuCBCfg,flags, RoIs, name)
 
-  from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-  signatureName = 'muon{}'.format( 'FS' if 'FS' in name else 'LRT' if 'LRT' in name else '' ) 
-  IDTrigConfig = getInDetTrigConfig( signatureName )
 
-  ViewVerifyTrk = algorithmCAToGlobalWrapper(VDVPrecMuTrkCfg, flags, name)
+
   if "FS" in name:
     #Need to run tracking for full scan chains
-    from TrigInDetConfig.InDetTrigFastTracking import makeInDetTrigFastTracking
-    viewAlgs, viewVerify = makeInDetTrigFastTracking(flags, config = IDTrigConfig, rois = RoIs)
+    from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
+    acc.merge(trigInDetFastTrackingCfg( flags, roisKey=RoIs, signatureName="muonFS" ))
 
-    for viewAlg in viewAlgs:
-      muEFCBRecoSequence += viewAlg
   else:
-    muEFCBRecoSequence += ViewVerifyTrk
+    acc.merge(VDVPrecMuTrkCfg(flags, name))
 
 
   #Precision Tracking
-  PTAlgs = [] #List of precision tracking algs
-  PTTracks = [] #List of TrackCollectionKeys
-  PTTrackParticles = [] #List of TrackParticleKeys
-
-  from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
+  from TrigInDetConfig.TrigInDetConfig import trigInDetPrecisionTrackingCfg
   #When run in a different view than FTF some data dependencies needs to be loaded through verifier
   #Pass verifier as an argument and it will automatically append necessary DataObjects
   #@NOTE: Don't provide any verifier if loaded in the same view as FTF
-  if 'FS' in name:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs, verifier = False)
-    PTSeq = parOR("precisionTrackingInMuonsFS", PTAlgs  )
-    muEFCBRecoSequence += PTSeq
-    trackParticles = PTTrackParticles[-1]
+  if isCosmic(flags) and 'LRT' not in name:
+    trackParticles = getIDTracks(flags)
   elif 'LRT' in name:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk[0] )
-    PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
-    muEFCBRecoSequence += PTSeq
-    trackParticles = PTTrackParticles[-1]
-  #In case of cosmic Precision Tracking has been already called before hence no need to call here just retrieve the correct collection of tracks
-  elif isCosmic(flags):
-    if 'LRT' in name:
-      PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk[0] )
-      PTSeq = parOR("precisionTrackingInMuonsLRT", PTAlgs  )
-      muEFCBRecoSequence += PTSeq
-      trackParticles = PTTrackParticles[-1]
-    else:
-      trackParticles = getIDTracks(flags)
+    flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonLRT")
+    acc.merge(trigInDetPrecisionTrackingCfg(flags, rois= RoIs, signatureName="muonLRT"))
+    trackParticles = flags.Trigger.InDetTracking.muonLRT.tracks_IDTrig
+  elif 'FS' in name:
+    flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muonFS")
+    acc.merge(trigInDetPrecisionTrackingCfg(flags, rois= RoIs, signatureName="muonFS", in_view=False))
+    trackParticles = flags.Trigger.InDetTracking.muonFS.tracks_IDTrig
   else:
-    PTTracks, PTTrackParticles, PTAlgs = makeInDetTrigPrecisionTracking( flags, config = IDTrigConfig, rois = RoIs,  verifier = ViewVerifyTrk[0] )
-    PTSeq = parOR("precisionTrackingInMuons", PTAlgs  )
-    muEFCBRecoSequence += PTSeq
-    trackParticles = PTTrackParticles[-1]
+    flags.cloneAndReplace("Tracking.ActiveConfig", "Trigger.InDetTracking.muon")
+    acc.merge(trigInDetPrecisionTrackingCfg(flags, rois= RoIs, signatureName="muon"))
+    trackParticles = flags.Trigger.InDetTracking.muon.tracks_IDTrig
+
 
   #Make InDetCandidates
-  theIndetCandidateAlg = algorithmCAToGlobalWrapper(MuonCombinedInDetCandidateAlgCfg, flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles], InDetCandidateLocation="InDetCandidates_"+name)
+  acc.merge(MuonCombinedInDetCandidateAlgCfg(flags, name="TrigMuonCombinedInDetCandidateAlg_"+name,TrackParticleLocation = [trackParticles], InDetCandidateLocation="InDetCandidates_"+name))
 
 
   #MS ID combination
@@ -474,7 +454,7 @@ def muEFCBRecoSequence( flags, RoIs, name ):
   if 'FS' in name:
     candidatesName = "MuonCandidates_FS"
 
-  theMuonCombinedAlg = algorithmCAToGlobalWrapper(MuonCombinedAlgCfg, flags,name="TrigMuonCombinedAlg_"+name, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name)
+  acc.merge(MuonCombinedAlgCfg(flags,name="TrigMuonCombinedAlg_"+name, MuonCandidateLocation=candidatesName, InDetCandidateLocation="InDetCandidates_"+name))
 
   cbMuonName = muNames.EFCBOutInName
   if 'FS' in name:
@@ -483,21 +463,14 @@ def muEFCBRecoSequence( flags, RoIs, name ):
     cbMuonName = muNamesLRT.EFCBName
 
 
-  themuoncbcreatoralg = algorithmCAToGlobalWrapper(MuonCreatorAlgCfg, flags, name="TrigMuonCreatorAlgCB_"+name, MuonCandidateLocation=[candidatesName], TagMaps=["muidcoTagMap"], InDetCandidateLocation="InDetCandidates_"+name,
+  acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgCB_"+name, MuonCandidateLocation=[candidatesName], TagMaps=["muidcoTagMap"], InDetCandidateLocation="InDetCandidates_"+name,
                                        MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "CBExtrapolatedMuons",
                                        MSOnlyExtrapolatedLocation = "CBMSonlyExtrapolatedMuons", CombinedLocation = "HLT_CBCombinedMuon_"+name,
-                                       MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgCB_"+name))
-
-  #Add all algorithms
-  muEFCBRecoSequence+=theIndetCandidateAlg
-  muEFCBRecoSequence+=theMuonCombinedAlg
-  muEFCBRecoSequence+=themuoncbcreatoralg
+                                       MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgCB_"+name)))
 
 
-  sequenceOut = cbMuonName
 
-
-  return muEFCBRecoSequence, sequenceOut
+  return acc
 
 
 def VDVMuInsideOutCfg(flags, name, candidatesName):
