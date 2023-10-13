@@ -15,6 +15,7 @@ class CommonServicesConfig (ConfigBlock) :
     def __init__ (self) :
         super (CommonServicesConfig, self).__init__ ('CommonServices')
         self.addOption ('runSystematics', None, type=bool)
+        self.addOption ('filterSystematics', None, type=str)
 
     def makeAlgs (self, config) :
 
@@ -26,6 +27,8 @@ class CommonServicesConfig (ConfigBlock) :
             runSystematics = config.dataType() != 'data'
         if runSystematics :
             sysService.sigmaRecommended = 1
+            if self.filterSystematics is not None:
+                sysService.systematicsRegex = self.filterSystematics
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
 
 
