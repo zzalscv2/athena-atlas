@@ -69,7 +69,7 @@
 
 using xAOD::EgammaHelpers::summaryValueInt;
 
-class electronSuperClusterBuilder : public egammaSuperClusterBuilderBase
+class electronSuperClusterBuilder final : public egammaSuperClusterBuilderBase
 {
 
 public:
@@ -81,9 +81,15 @@ public:
   virtual StatusCode initialize() override final;
 
 private:
-  bool egammaRecPassesSelection(const egammaRec *egRec) const override final;
-  xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const override final;
-  StatusCode redoMatching(const EventContext &ctx, SG::WriteHandle<EgammaRecContainer> &newEgammaRecs) const override final;
+  virtual bool egammaRecPassesSelection(
+    const egammaRec *egRec) const override final;
+
+  virtual xAOD::EgammaParameters::EgammaType getEgammaRecType(
+    const egammaRec *egRec) const override final;
+
+  virtual StatusCode redoMatching(
+    const EventContext &ctx,
+    SG::WriteHandle<EgammaRecContainer> &newEgammaRecs) const override final;
   /**
    * @brief Search for secondary clusters
    *
@@ -102,10 +108,10 @@ private:
    * "MaxWindowDelEtaCells" and \ref electronSuperClusterBuilder.m_maxDelPhi
    * "MaxWindowDelPhiCells" and electronSuperClusterBuilder.matchSameTrack
    */
-  std::vector<std::size_t> searchForSecondaryClusters(
+  virtual std::vector<std::size_t> searchForSecondaryClusters(
     const size_t i,
     const EgammaRecContainer*,
-    std::vector<bool>& isUsed) const;
+    std::vector<bool>& isUsed) const override final;
 
   /** @brief Size of maximum search window in eta */
   Gaudi::Property<int> m_maxDelEtaCells{
@@ -147,10 +153,11 @@ private:
   };
 
   /** @brief private member flag to do the track matching */
-  Gaudi::Property<bool> m_doTrackMatching{ this,
-                                           "doTrackMatching",
-                                           true,
-                                           "Boolean to do track matching" };
+  Gaudi::Property<bool> m_doTrackMatching{
+    this,
+      "doTrackMatching",
+      true,
+      "Boolean to do track matching" };
 };
 
 #endif
