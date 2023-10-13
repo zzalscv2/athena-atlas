@@ -80,8 +80,8 @@ InDetBeamSpotVertex::InDetBeamSpotVertex( const std::string& type,
   declareProperty("InitParMaxZ",      m_init_max_z =0.0);
   declareProperty("InitParMaxAx",     m_init_max_ax=0.0);
   declareProperty("InitParMaxAy",     m_init_max_ay=0.0);
-  declareProperty("InitParMaxSigmaX", m_init_max_sx=0.7);
-  declareProperty("InitParMaxSigmaY", m_init_max_sy=0.7);
+  declareProperty("InitParMaxSigmaX", m_init_max_sx=2.0);
+  declareProperty("InitParMaxSigmaY", m_init_max_sy=2.0);
   declareProperty("InitParMaxSigmaZ", m_init_max_sz=3000.);
   declareProperty("InitParMaxK",      m_init_max_k =10.);
   declareProperty("InitParMaxRhoXY",  m_init_max_rhoxy=1.0);
@@ -263,7 +263,8 @@ InDetBeamSpotVertex::FitStatus InDetBeamSpotVertex::fit(std::vector< BeamSpot::V
 
   if (m_useLL) {
     m_getLLres =  true; //set system to use these results
-    llResult = solveLL();
+    bool printOut = true;
+    llResult = solveLL(printOut);
     if (!llResult) {
       ATH_MSG_WARNING( "Log-likelihood fit failed: Reverting to chi2 solution" );
       m_getLLres = false;
@@ -345,23 +346,23 @@ CLHEP::HepSymMatrix InDetBeamSpotVertex::getCov(double z) const { //x(z),y(z),ti
 }
 
 
-bool InDetBeamSpotVertex::solveLL() {
+bool InDetBeamSpotVertex::solveLL(bool printOut) {
 
   TMinuit * minuit = new TMinuit(m_NPARS);
   //setInitialPars( minuit);  
-  setParsFromChi2(minuit);
-  
+
   //Set Minuit output level
-  if (msg().level() > MSG::DEBUG)
+  if (msg().level() < MSG::DEBUG) {
+    printOut = true;
     minuit->SetPrintLevel(1);
-  else if (msg().level() == MSG::DEBUG)
+  } else if (msg().level() == MSG::DEBUG) {
+    printOut = true;
     minuit->SetPrintLevel(0);
-  else minuit->SetPrintLevel(-1);
+  } else {
+    minuit->SetPrintLevel(-1);
+  }
   
-  //  minuit->SetPrintLevel(0);
-  if (msgLvl(MSG::VERBOSE)) minuit->SetPrintLevel(1);
-  else if (msgLvl(MSG::INFO)) minuit->SetPrintLevel(-1);
-  else minuit->SetPrintLevel(0);
+  setParsFromChi2(minuit);
 
   minuit->SetErrorDef(0.5); // for Log-Likeihood: 0.5
 
@@ -387,7 +388,7 @@ bool InDetBeamSpotVertex::solveLL() {
 
   //tried this approach - we want to succeed, so if fail, try another approach
   if (!goodFit) {
-    doFit2(minuit);
+    doFit2(minuit,printOut);
     successfulFit(minuit, status);
     if ( status.first == 3 && ( status.second == "SUCCESSFUL" ||
         status.second == "CONVERGED " ||
@@ -1095,7 +1096,7 @@ void BeamSpot::myFCN_LLsolverNorm( Int_t &, Double_t *, Double_t & /*f*/, Double
 
 
 
-void InDetBeamSpotVertex::doFit2( TMinuit * minuit) {
+void InDetBeamSpotVertex::doFit2( TMinuit * minuit, bool printOut) {
   //second attempt to fit in a controlled way.
   //reset initial values
   setParsFromChi2(minuit);
@@ -1133,7 +1134,7 @@ void InDetBeamSpotVertex::doFit2( TMinuit * minuit) {
   minuit->Release(2);
   minuit->Release(3);
   minuit->Migrad();
-  minuit->SetPrintLevel(0);
+  if(printOut) minuit->SetPrintLevel(0);
   minuit->Migrad();
   //look at fit status from calling function
 }

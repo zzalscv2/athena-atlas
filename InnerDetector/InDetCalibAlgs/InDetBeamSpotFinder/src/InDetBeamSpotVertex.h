@@ -175,7 +175,7 @@ namespace InDet {
 
     FitStatus m_fitStatus;
     bool solveChi2();
-    bool solveLL();
+    bool solveLL(bool printOut = false);
     bool applyOutlierRemoval();
     double m_outlierChi2Tr;
     int m_maxOutlierLoops; // maximum number of resursive loops in outlier removal to perform
@@ -187,7 +187,7 @@ namespace InDet {
 
     bool successfulFit( TMinuit * , 
 			std::pair<int, std::string> & );
-    void doFit2(TMinuit * ); 
+    void doFit2(TMinuit * , bool printOut = false); 
 
     bool m_doFitSanityCheck; //<! determine that fit is really converged
     bool m_doChi2OutlierRemoval; //<! for chi2 only fit, run outlier removal as well.

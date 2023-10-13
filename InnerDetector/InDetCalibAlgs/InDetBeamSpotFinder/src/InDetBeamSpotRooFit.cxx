@@ -97,7 +97,8 @@ InDetBeamSpotRooFit::FitStatus InDetBeamSpotRooFit::fit(std::vector< BeamSpot::V
 
 
   m_vtxCutString = "abs(x) < 3 && abs(y) < 3 && abs(z) < 300";
-  m_vtxCutString += " && abs(vxx) < "+std::to_string(m_vtxResCut*m_vtxResCut)+" && abs(vyy) < "+std::to_string(m_vtxResCut*m_vtxResCut);
+  m_vtxCutString += " && abs(vxx) < "+std::to_string(m_vtxResCut*m_vtxResCut)+" && abs(vyy) < "+std::to_string(m_vtxResCut*m_vtxResCut)
+    + " && abs(vxy) < 1000.";
   const char *vtxCut = (const char*)m_vtxCutString.c_str();
 
   //Declare the RooDataSet and add data to it
@@ -178,7 +179,7 @@ InDetBeamSpotRooFit::FitStatus InDetBeamSpotRooFit::fit(std::vector< BeamSpot::V
   //repeat for y and z
 
 
-  RooFitResult *r = fitModel.fitTo( *(rfData.reduce(Cut(combinedCut))) ,ConditionalObservables(RooArgSet(vxx,vyy,vxy)),Save(),PrintLevel(-1));
+  RooFitResult *r = fitModel.fitTo( *(rfData.reduce(Cut(combinedCut))) ,ConditionalObservables(RooArgSet(vxx,vyy,vxy)),Save(),PrintLevel(-1),PrintEvalErrors(-1));
 
   r->Print();
   m_nUsed = rfData.reduce(Cut(combinedCut))->numEntries();
