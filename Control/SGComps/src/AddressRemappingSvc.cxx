@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AddressRemappingSvc.cxx
@@ -24,6 +24,7 @@
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainersInterfaces/IAuxStore.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <algorithm>
 
@@ -111,10 +112,12 @@ StatusCode AddressRemappingSvc::initialize() {
  * Additional sgkey->sgkey input rename mappings are merged into the rename map,
  * using RCU synchronization.
  */
-void AddressRemappingSvc::addInputRenames (const InputRenameMap_t& toadd)
+void AddressRemappingSvc::addInputRenames (const InputRenameMap_t& toadd) const
 {
   if (toadd.empty()) return;
-  Athena::RCUUpdate<InputRenameMap_t> u (*m_inputRenames);
+  // Ok, managed via RCU.
+  InputRenameRCU_t& inputRenames ATLAS_THREAD_SAFE = *m_inputRenames;
+  Athena::RCUUpdate<InputRenameMap_t> u (inputRenames);
   auto newmap = std::make_unique<InputRenameMap_t> (*u);
   for (const auto& p : toadd)
     newmap->insert (p);
@@ -180,21 +183,42 @@ StatusCode AddressRemappingSvc::finalize()
 }
 //________________________________________________________________________________
 StatusCode AddressRemappingSvc::preLoadAddresses(StoreID::type storeID,
-	IAddressProvider::tadList& tads) {
+	IAddressProvider::tadList& tads)
+{
+  return preLoadAddressesConst (storeID, tads);
+}
+StatusCode AddressRemappingSvc::preLoadAddressesConst(StoreID::type storeID,
+	IAddressProvider::tadList& tads) const
+{
+   if (storeID == StoreID::EVENT_STORE) {
+     ATH_CHECK( renameTads (tads) );
+   }
 
-  lock_t lock (m_mutex);
-  if (storeID == StoreID::EVENT_STORE) {
-    ATH_CHECK( renameTads (tads) );
-  }
-  
-  if(m_skipBadRemappings) return StatusCode::SUCCESS;
+   const std::vector<SG::TransientAddress>* oldTads = nullptr;
+   const std::vector<SG::TransientAddress>* newTads = nullptr;
+
+   if (m_skipBadRemappings) {
+     // We need to have the cleaned lists built in loadAddresses.
+     // If that hasn't already been done, return now.
+     if (!m_oldTadsCleaned.isValid() || ! m_newTadsCleaned.isValid()) {
+       return StatusCode::SUCCESS;
+     }
+     oldTads = m_oldTadsCleaned.ptr();
+     newTads = m_newTadsCleaned.ptr();
+   }
+   else {
+     // No cleaning needed.
+     oldTads = &m_oldTads;
+     newTads = &m_newTads;
+   }
+
    StatusCode status = m_proxyDict.retrieve();
    if (!status.isSuccess()) {
       ATH_MSG_ERROR("Unable to get the IProxyDict");
       return(status);
    }
-   for (std::vector<SG::TransientAddress>::const_iterator oldIter = m_oldTads.begin(),
-		   newIter = m_newTads.begin(), oldIterEnd = m_oldTads.end();
+   for (std::vector<SG::TransientAddress>::const_iterator oldIter = oldTads->begin(),
+		   newIter = newTads->begin(), oldIterEnd = oldTads->end();
 		   oldIter != oldIterEnd; ++oldIter, ++newIter) {
       SG::TransientAddress* tadd = new SG::TransientAddress(*oldIter);
       tads.push_back(tadd);
@@ -205,14 +229,24 @@ StatusCode AddressRemappingSvc::preLoadAddresses(StoreID::type storeID,
 }
 //________________________________________________________________________________
 StatusCode AddressRemappingSvc::loadAddresses(StoreID::type storeID,
-	IAddressProvider::tadList& tads) {
-  lock_t lock (m_mutex);
+                                              IAddressProvider::tadList& tads)
+{
   if (storeID == StoreID::EVENT_STORE) {
     initDeletes();
     ATH_CHECK( renameTads (tads) );
   }
+  return loadAddressesConst (tads);
+}
 
-  if(!m_skipBadRemappings) return(StatusCode::SUCCESS);
+StatusCode AddressRemappingSvc::loadAddressesConst(IAddressProvider::tadList& tads) const
+{
+   if(!m_skipBadRemappings) return(StatusCode::SUCCESS);
+   if (m_oldTadsCleaned.isValid() && m_newTadsCleaned.isValid()) {
+     return StatusCode::SUCCESS;
+   }
+
+   std::vector<SG::TransientAddress> oldTadsCleaned = m_oldTads;
+   std::vector<SG::TransientAddress> newTadsCleaned = m_newTads;
 
    //do same as in preLoadAddresses, except check each tad will have a valid proxy to remap to 
    StatusCode status = m_proxyDict.retrieve();
@@ -220,9 +254,10 @@ StatusCode AddressRemappingSvc::loadAddresses(StoreID::type storeID,
       ATH_MSG_ERROR("Unable to get the IProxyDict");
       return(status);
    }
-   for (std::vector<SG::TransientAddress>::iterator oldIter = m_oldTads.begin(),
-		   newIter = m_newTads.begin(), oldIterEnd = m_oldTads.end();
-		   oldIter != oldIterEnd; ++oldIter, ++newIter) {
+   for (std::vector<SG::TransientAddress>::iterator oldIter = oldTadsCleaned.begin(),
+		   newIter = newTadsCleaned.begin(), oldIterEnd = oldTadsCleaned.end();
+		   oldIter != oldIterEnd; ++oldIter, ++newIter)
+   {
       CLID goodCLID = newIter->clID(); //newIter are the things we are remapping to 
       SG::TransientAddress::TransientClidSet clidvec(oldIter->transientID());
       std::set<CLID> clidToKeep (clidvec.begin(), clidvec.end());
@@ -267,46 +302,58 @@ StatusCode AddressRemappingSvc::loadAddresses(StoreID::type storeID,
    }
 
 
-   m_skipBadRemappings=false; //only do this once, not every event .. FIXME: Should I be rechecking every new file? For now, we assume will not chain together different sample types
+   //only do this once, not every event .. FIXME: Should I be rechecking every new file? For now, we assume will not chain together different sample types
+   m_oldTadsCleaned.set (std::move (oldTadsCleaned));
+   m_newTadsCleaned.set (std::move (newTadsCleaned));
+
    return StatusCode::SUCCESS;
 
 }
 //________________________________________________________________________________
-StatusCode AddressRemappingSvc::updateAddress(StoreID::type /*storeID*/,
+StatusCode AddressRemappingSvc::updateAddress(StoreID::type storeID,
 					      SG::TransientAddress* tad,
-                                              const EventContext& /*ctx*/)
+                                              const EventContext& ctx)
 {
-   SG::DataProxy* dataProxy=nullptr;
-   // do not lock the mutex yet because this may cause a deadlock when calling m_proxyDict->proxy
-   // VarHandleBase::typeless_dataPointer may call AddressRemappingSvc::updateAddress without passing through SGImplSvc
-   // and VarHandleBase::record_impl may call SGImplSvc::record_impl which may call AddressRemappingSvc::updateAddress
-   std::vector<SG::TransientAddress>::const_iterator the_new_tad_iter=m_newTads.end();
-   for (std::vector<SG::TransientAddress>::const_iterator oldIter = m_oldTads.begin(),
-		   newIter = m_newTads.begin(), oldIterEnd = m_oldTads.end();
+  return updateAddressConst (storeID, tad, ctx);
+}
+StatusCode AddressRemappingSvc::updateAddressConst(StoreID::type /*storeID*/,
+                                                   SG::TransientAddress* tad,
+                                                   const EventContext& /*ctx*/) const
+{
+   const std::vector<SG::TransientAddress>* oldTads = nullptr;
+   const std::vector<SG::TransientAddress>* newTads = nullptr;
+
+   if (m_skipBadRemappings && m_oldTadsCleaned.isValid() && m_newTadsCleaned.isValid()) {
+     oldTads = m_oldTadsCleaned.ptr();
+     newTads = m_newTadsCleaned.ptr();
+   }
+   else {
+     // No cleaning needed.
+     oldTads = &m_oldTads;
+     newTads = &m_newTads;
+   }
+
+   for (std::vector<SG::TransientAddress>::const_iterator oldIter = oldTads->begin(),
+		   newIter = newTads->begin(), oldIterEnd = oldTads->end();
 		   oldIter != oldIterEnd; ++oldIter, ++newIter) {
       if (oldIter->transientID(tad->clID())
 	      && (oldIter->name() == tad->name() || oldIter->alias().find(tad->name()) != oldIter->alias().end())) {
          ATH_MSG_DEBUG("Overwrite for: " << tad->clID() << "#" << tad->name() << " -> " << newIter->clID() << "#" << newIter->name());
-         dataProxy = m_proxyDict->proxy(newIter->clID(), newIter->name());
+         SG::DataProxy* dataProxy(m_proxyDict->proxy(newIter->clID(), newIter->name()));
          if (dataProxy == 0) {
             ATH_MSG_WARNING("Cannot get proxy for: " << newIter->clID() << "#" << newIter->name());
             return(StatusCode::FAILURE);
          }
-         the_new_tad_iter=newIter;
-         break;
-      }
-   }
-   if (dataProxy) {
-     lock_t lock (m_mutex);
-     GenericAddress* newGadd = 0;
-     if (dataProxy->isValidAddress()) newGadd = dynamic_cast<GenericAddress*>(dataProxy->address());
-     if (newGadd == 0) {
-            ATH_MSG_WARNING("Cannot get GenericAddress for: " << the_new_tad_iter->clID() << "#" << the_new_tad_iter->name());
+         GenericAddress* newGadd = 0;
+	 if (dataProxy->isValidAddress()) newGadd = dynamic_cast<GenericAddress*>(dataProxy->address());
+         if (newGadd == 0) {
+            ATH_MSG_WARNING("Cannot get GenericAddress for: " << newIter->clID() << "#" << newIter->name());
             return(StatusCode::FAILURE);
-     }
-     GenericAddress* oldGadd = new GenericAddress(newGadd->svcType(), tad->clID(), *newGadd->par(), tad->name(), *newGadd->ipar());
-     tad->setAddress(oldGadd);
-     return(StatusCode::SUCCESS);
+         }
+         GenericAddress* oldGadd = new GenericAddress(newGadd->svcType(), tad->clID(), *newGadd->par(), tad->name(), *newGadd->ipar());
+         tad->setAddress(oldGadd);
+         return(StatusCode::SUCCESS);
+      }
    }
    return(StatusCode::FAILURE);
 }
@@ -315,7 +362,7 @@ StatusCode AddressRemappingSvc::updateAddress(StoreID::type /*storeID*/,
  * @brief Scan TAD list and carry out any requested renamings.
  * @param tads list of TADs from previous providers.
  */
-StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads)
+StatusCode AddressRemappingSvc::renameTads (IAddressProvider::tadList& tads) const
 {
   // Fetch the current rename map using RCU.
   Athena::RCURead<InputRenameMap_t> r (*m_inputRenames);
@@ -451,9 +498,14 @@ AddressRemappingSvc::inputRenameMap() const
 void AddressRemappingSvc::initDeletes()
 {
   if (m_haveDeletes) return;
+
+  std::list<IAlgorithm*> algs = m_algResourcePool->getFlatAlgList();
+
+  std::scoped_lock lock (m_deletesMutex);
+  if (m_haveDeletes) return;
   m_haveDeletes = true;
 
-  for (IAlgorithm* ialg : m_algResourcePool->getFlatAlgList()) {
+  for (IAlgorithm* ialg : algs) {
     if (Gaudi::Algorithm* alg = dynamic_cast<Gaudi::Algorithm*> (ialg)) {
       // Need to ignore SGInputLoader; it'll have output deps
       // on everything being read.
@@ -490,6 +542,7 @@ void AddressRemappingSvc::initDeletes()
 bool AddressRemappingSvc::isDeleted (const SG::TransientAddress& tad) const
 {
   std::string key = tad.name();
+  std::scoped_lock lock (m_deletesMutex);
   for (auto p : boost::make_iterator_range (m_deletes.equal_range (key))) {
     CLID clid = p.second;
     if (tad.transientID (clid)) {
