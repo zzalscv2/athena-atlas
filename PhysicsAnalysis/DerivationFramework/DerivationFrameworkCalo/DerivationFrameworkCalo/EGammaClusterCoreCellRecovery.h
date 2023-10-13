@@ -18,9 +18,10 @@
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKeyArray.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "xAODEgamma/EgammaContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "egammaInterfaces/IegammaCellRecoveryTool.h"
+
 
 namespace DerivationFramework {
 
@@ -44,9 +45,6 @@ namespace DerivationFramework {
     SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_electrons
       { this, "SGKey_electrons", "Electrons", "SG key of electron container" };
 
-    SG::ReadHandleKey<CaloCellContainer> m_SGKey_caloCells
-      { this, "SGKey_caloCells", "AllCalo", "SG key of calo cell container" };
-    
     SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
       m_SGKey_photons_decorations{
       this,
@@ -63,27 +61,27 @@ namespace DerivationFramework {
 	"SG keys for electrons decorations not really configurable"
 	  };
 
-    // phi size of layer 2 and 3 cells
-    static constexpr double m_phiSize = 2*M_PI/256;
+    Gaudi::Property<bool> m_UseWeightForMaxCell{
+      this,
+	"UseWeightForMaxCell",
+	false,
+	"Use the cell weights when finding the L2 max energy cell"
+	};
 
-    // Sizes of the window to search for missing cells
-    static const int m_nL2 = 5*7;
-    static const int m_nL3 = 10;
 
-    struct existingCells {
-      bool existL2[m_nL2];
-      bool existL3[m_nL3];
-    };
-    struct missCoreInfo {
-      unsigned short nCells[2];
-      float eCells[2]; 
-    };
-    missCoreInfo decorateObject(const CaloCellContainer *caloCells,
-				const xAOD::Egamma*& egamma) const;
+    IegammaCellRecoveryTool::Info decorateObject(const xAOD::Egamma*& egamma) const;
     StatusCode findMaxECell(const xAOD::CaloCluster *clus,
 			    double &etamax, double &phimax) const;
-    existingCells buildCellArrays(const xAOD::CaloCluster *clus,
-				  double etamax, double phimax) const;
+
+    /** @brief Pointer to the egammaCellRecoveryTool*/
+    ToolHandle<IegammaCellRecoveryTool> m_egammaCellRecoveryTool{
+      this,
+      "egammaCellRecoveryTool",
+      "egammaCellRecoveryTool/egammaCellRecoveryTool",
+      "Optional tool that adds cells in L2 or L3 "
+      "that could have been rejected by timing cut"
+    };
+
   };
   
 }
