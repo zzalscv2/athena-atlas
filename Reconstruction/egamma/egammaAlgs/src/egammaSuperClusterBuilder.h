@@ -54,7 +54,7 @@
  * with egammaSuperClusterBuilderBase::createNewCluster which selects the cells
  * to be used.
  */
-class egammaSuperClusterBuilder : public egammaSuperClusterBuilderBase
+class egammaSuperClusterBuilder final : public egammaSuperClusterBuilderBase
 {
 
 public:
@@ -63,7 +63,8 @@ public:
   virtual StatusCode initialize() override final;
 
 private:
-  xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const override final;
+  virtual xAOD::EgammaParameters::EgammaType getEgammaRecType(
+    const egammaRec *egRec) const override final;
 
   /** Return extra clusters that can be added to make supercluster
    * @param egammaInd: index of the EgammaRec object in the input container
@@ -80,7 +81,7 @@ private:
    * The secondary cluster is added if it pass one of the functions:
    * - egammaSuperClusterBuilderBase::matchesInWindow
    **/
-  std::vector<std::size_t> searchForSecondaryClusters(
+  virtual std::vector<std::size_t> searchForSecondaryClusters(
     std::size_t egammaInd,
     const EgammaRecContainer* egammaRecs,
     std::vector<bool>& isUsed) const override final;

@@ -61,7 +61,7 @@
  *
  * \see electronSuperClusterBuilder
  */
-class photonSuperClusterBuilder : public egammaSuperClusterBuilderBase
+class photonSuperClusterBuilder final : public egammaSuperClusterBuilderBase
 {
 
 public:
@@ -70,8 +70,14 @@ public:
   virtual StatusCode initialize() override final;
 
 private:
-  xAOD::EgammaParameters::EgammaType getEgammaRecType(const egammaRec *egRec) const override final;
-  StatusCode redoMatching(const EventContext &ctx, SG::WriteHandle<EgammaRecContainer> &newEgammaRecs) const final override;
+
+
+  virtual xAOD::EgammaParameters::EgammaType getEgammaRecType(
+    const egammaRec *egRec) const override final;
+
+  virtual StatusCode redoMatching(
+    const EventContext &ctx,
+    SG::WriteHandle<EgammaRecContainer> &newEgammaRecs) const final override;
 
   /** Return extra clusters that can be added to make supercluster
    * @param photonInd: index of the EgammaRec object in the input container
@@ -102,10 +108,10 @@ private:
    *AddClustersMatchingVtx and AddClustrsMatchingVtxTracks.
    *
    **/
-  std::vector<std::size_t> searchForSecondaryClusters(
+  virtual std::vector<std::size_t> searchForSecondaryClusters(
     std::size_t photonInd,
     const EgammaRecContainer* egammaRecs,
-    std::vector<bool>& isUsed) const;
+    std::vector<bool>& isUsed) const override final;
 
   /** Does the cluster share conversion vertex? */
   bool matchesVtx(

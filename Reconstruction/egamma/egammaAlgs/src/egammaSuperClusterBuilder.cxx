@@ -42,7 +42,6 @@ egammaSuperClusterBuilder::initialize()
   return egammaSuperClusterBuilderBase::initialize();
 }
 
-
 xAOD::EgammaParameters::EgammaType
 egammaSuperClusterBuilder::getEgammaRecType([[maybe_unused]]const egammaRec *egRec) const {
   return m_egTypeForCalibration;
