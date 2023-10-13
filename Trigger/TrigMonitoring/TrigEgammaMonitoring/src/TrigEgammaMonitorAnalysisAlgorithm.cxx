@@ -273,7 +273,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                 if(abs(eta)<=0.8){
                     et_slice0_passed_vec.push_back(true);
                 }else if( abs(eta) > 0.80 && abs(eta) <= 1.37 ){
-		    et_slice1_passed_vec.push_back(true);
+		            et_slice1_passed_vec.push_back(true);
                 }else if( abs(eta) > 1.37 && abs(eta) <= 1.54 ){
                     et_slice2_passed_vec.push_back(true);
                 }else if( abs(eta) > 1.54 && abs(eta) <= 2.50 ){
@@ -315,12 +315,10 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiency( const std::string &subg
                 }
             } // Fails Trigger selection
 
-
         } // Passes offline pid, fill histograms
         iObj++;
     }
 
- 
     fill( monGroup, et_col, highet_col, pt_col, eta_col, phi_col, avgmu_col, npvtx_col,
           match_et_col, match_highet_col, match_pt_col, match_eta_col, match_phi_col, match_avgmu_col, match_npvtx_col,
           et_passed_col, et_failed_col, highet_passed_col, highet_failed_col, pt_passed_col, eta_passed_col, eta_failed_col, phi_passed_col, avgmu_passed_col, npvtx_passed_col,  
@@ -438,6 +436,7 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< s
     std::string key = match()->key("PrecisionCalo_Electron");
     if(info.signature == "Photon") key = match()->key("PrecisionCalo_Photon");
     if(info.lrt) key = match()->key("PrecisionCalo_LRT");
+    if(info.ion) key = match()->key("PrecisionCalo_HI");
     
     std::vector<const xAOD::CaloCluster* > clus_vec;
     auto vec =  tdt()->features<xAOD::CaloClusterContainer>(trigger,condition,key);      
