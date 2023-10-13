@@ -52,6 +52,11 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       const xAOD::eFexEMRoIContainer* emDataContPtr = eFexContainer.cptr();
       ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_LowPtCut", emDataContPtr, m_lowPtCut));
       ATH_CHECK(fillEMHistograms(m_packageName+'_'+key.key()+"_HiPtCut", emDataContPtr, m_hiPtCut));
+      auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
+      auto tobType = Monitored::Scalar<std::string>("tobType","em");
+      for(const xAOD::eFexEMRoI* roi : *emDataContPtr){
+        seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
+      }
     }
   } // Finished EM loop
   
@@ -70,6 +75,11 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
       const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
       ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_LowPtCut", tauDataContPtr, m_lowPtCut));
       ATH_CHECK(fillTauHistograms(m_packageName+'_'+key.key()+"_HiPtCut", tauDataContPtr, m_hiPtCut));
+      auto seedMax = Monitored::Scalar<int>(key.key() + "_seedMax",0);
+      auto tobType = Monitored::Scalar<std::string>("tobType","tau");
+      for(const xAOD::eFexTauRoI* roi : *tauDataContPtr){
+        seedMax = roi->seedMax();fill(m_packageName, tobType,seedMax);
+      }
     }
   } // Finished Tau loop
 
