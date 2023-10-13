@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_MONITORING_IAFPSILAYERMONITOR_H
@@ -38,7 +38,7 @@ public:
   virtual void setParentMonitor (AFPHitsMonitorTool* parent) = 0;
 
   /// @brief Creates, adds axes descriptions and books histograms filled by this monitor.
-  virtual void bookHistograms(ManagedMonitorToolBase* toolToStoreHistograms, std::string histsDirName = "") = 0;
+  virtual void bookHistograms(ManagedMonitorToolBase* toolToStoreHistograms, const std::string& histsDirName = "") = 0;
 
   /// @brief Fills histograms which have to be filled for each hit.
   virtual void fillHistograms(const xAOD::AFPSiHit& hit) = 0;
