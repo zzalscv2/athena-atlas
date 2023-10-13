@@ -63,7 +63,7 @@ namespace top {
       kLeadingSeven, kLeadingEight, kBtagPriorityThreeJets,
       kBtagPriorityFourJets, kBtagPriorityFiveJets, kBtagPrioritySixJets,
       kBtagPrioritySevenJets, kBtagPriorityEightJets,
-      kAutoSet
+      kAutoSet,kAutoSetPCBT
     };
   }
 
@@ -122,6 +122,7 @@ namespace top {
     float m_massTop;
     float m_bTagCutValue;
     bool m_isWorkingPoint;
+    std::string m_btagWP;
     bool findOption(std::vector<std::string> full_options, std::string option, std::string& op_value);
 
     // Tools and functions for btagging
@@ -158,9 +159,14 @@ namespace top {
     KLFitter::LikelihoodBase::BtaggingMethod m_bTaggingMethodKLFitterEnum;
 
     //added for AutoSet option   
+    bool m_isPCBT;
+    std::string m_ordVar;
     int m_Njcut;
     int m_nb;
     int m_delta;
+    int m_Nbmin;
+    int m_N5max;
+
     std::vector<unsigned int> m_canBeBJets; //for AutoSet option
     std::vector<unsigned int> m_canBeLFJets; //for AutoSet option
 

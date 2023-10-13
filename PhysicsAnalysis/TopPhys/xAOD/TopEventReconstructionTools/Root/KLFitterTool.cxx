@@ -37,6 +37,8 @@ namespace top {
     declareProperty("Njcut",m_Njcut=-1,"max number of jets to run on");
     declareProperty("Nb",m_nb=-1,"number of jets that can only be treated as b-jets");
     declareProperty("Delta",m_delta=-1,"number of jets that can be treated both as b and LF jets");
+    declareProperty("Nbmin",m_Nbmin=-1,"minimum number of jets that can be treated as b-jets");
+    declareProperty("N5max",m_N5max=-1,"maximum number of jets that can be treated ONLY as b-jets (lie in PCBT bin 5)");
   }
 
   /// Function initialising the tool
@@ -153,7 +155,8 @@ namespace top {
     if (findOption(custom_tokens, "KLFitterJetSelectionMode", temp_option)) JetSelectionMode = temp_option;
     else JetSelectionMode = m_config->KLFitterJetSelectionMode();
 
-    if(JetSelectionMode.find("kAutoSet")!=std::string::npos )  m_jetSelectionModeKLFitterEnum = top::KLFitterJetSelection::kAutoSet;
+    if(JetSelectionMode.find("kAutoSetPCBT")!=std::string::npos) m_jetSelectionModeKLFitterEnum = top::KLFitterJetSelection::kAutoSetPCBT;
+    else if(JetSelectionMode.find("kAutoSet")!=std::string::npos) m_jetSelectionModeKLFitterEnum = top::KLFitterJetSelection::kAutoSet;
     else if (JetSelectionMode == "kLeadingThree") m_jetSelectionModeKLFitterEnum = top::KLFitterJetSelection::kLeadingThree;
     else if (JetSelectionMode ==
              "kLeadingFour") m_jetSelectionModeKLFitterEnum = top::KLFitterJetSelection::kLeadingFour;
@@ -184,7 +187,7 @@ namespace top {
         top::KLFitterJetSelection::kBtagPriorityEightJets;
     else {
       ATH_MSG_ERROR(
-        "Please supply a valid JetSelectionMode : kLeadingFour , kLeadingFive , kLeadingSix , kLeadingSeven , kLeadingEight , kBtagPriorityFourJets , kBtagPriorityFiveJets , kBtagPrioritySixJets , kBtagPrioritySevenJets , kBtagPriorityEightJets, AutoSet");
+        "Please supply a valid JetSelectionMode : kLeadingFour , kLeadingFive , kLeadingSix , kLeadingSeven , kLeadingEight , kBtagPriorityFourJets , kBtagPriorityFiveJets , kBtagPrioritySixJets , kBtagPrioritySevenJets , kBtagPriorityEightJets, AutoSet, AutoSetPCBT");
       return StatusCode::FAILURE;
     }
 
@@ -194,19 +197,19 @@ namespace top {
         m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kBtagPrioritySevenJets &&
         m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kLeadingEight &&
         m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kBtagPriorityEightJets)
-      if (m_LHType == "ttH" || ((m_LHType == "ttbar_AllHadronic" || m_LHType == "ttbar_AllHadronic_SingleT") && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSet)) {
+      if (m_LHType == "ttH" || ((m_LHType == "ttbar_AllHadronic" || m_LHType == "ttbar_AllHadronic_SingleT") && (m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSet && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSetPCBT))) {
         ATH_MSG_ERROR(
-          "You want to run the ttH or ttbar_AllHadronic Likelihood, you need to use either : kLeadingSix , kBtagPrioritySixJets , kLeadingSeven , kBtagPrioritySevenJets , kLeadingEight , kBtagPriorityEightJets, AutoSet (only for ttbar_AllHadronic)");
+          "You want to run the ttH or ttbar_AllHadronic Likelihood, you need to use either : kLeadingSix , kBtagPrioritySixJets , kLeadingSeven , kBtagPrioritySevenJets , kLeadingEight , kBtagPriorityEightJets, AutoSet, AutoSetPCBT (latter two only for ttbar_AllHadronic)");
         return StatusCode::FAILURE;
       }
 
-    if(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet && m_LHType != "ttbar_AllHadronic" && m_LHType != "ttbar_AllHadronic_SingleT") {
+    if((m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet || m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSetPCBT) && m_LHType != "ttbar_AllHadronic" && m_LHType != "ttbar_AllHadronic_SingleT") {
       ATH_MSG_ERROR("AutoSet only works for fully hadronic ttbar");
       return StatusCode::FAILURE;
   }
 
-    if(m_LHType == "ttbar_AllHadronic_SingleT" && !(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet)) {
-      ATH_MSG_ERROR("SingleT option only tested for 'AutoSet' selection mode. Other selection types might lead to errors.");
+    if(m_LHType == "ttbar_AllHadronic_SingleT" && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSet && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSetPCBT) {
+      ATH_MSG_ERROR("SingleT option only tested for 'AutoSet' and 'AutoSetPCBT' selection mode. Other selection types might lead to errors.");
       return StatusCode::FAILURE;
     }
 
@@ -322,26 +325,45 @@ namespace top {
 
     // 6) Figure out the b tagging working point
     // All the blame for this horrible code rests with the b-tagging people
-    std::string btagWP = "";
-    if (findOption(custom_tokens, "KLFitterBTaggingWP", temp_option)) btagWP = temp_option;
-    else {
+
+    if (findOption(custom_tokens, "KLFitterBTaggingWP", temp_option)) {
+      m_btagWP = temp_option;
+    } else {
       if (m_config->bTagWP_available().size() != 1) {
         ATH_MSG_ERROR(
           m_config->bTagWP_available().size() <<
             " b-tagging WP - cannot pick b-jets. Please select only 1 WP or specify the desired one in your selection!");
         return StatusCode::FAILURE;
       }
-      btagWP = m_config->bTagWP_available()[0];
+      m_btagWP = m_config->bTagWP_available()[0];
     }
-    if (btagWP.find("Continuous") != std::string::npos) {
+
+    m_isPCBT=(m_btagWP.find("Continuous") != std::string::npos);
+
+    if (m_isPCBT && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSet && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSetPCBT) {
       ATH_MSG_ERROR(
         "KLFitter is not able to run with (pseudo)continuous b-tagging! Please specify a different WP either in your configuration file or in your selection!");
       return StatusCode::FAILURE;
     }
+    if (!m_isPCBT && m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSetPCBT) {
+      ATH_MSG_ERROR(
+        "AutoSetPCBT selection mode can only run with (pseudo)continuous b-tagging! Please specify the proper WP either in your configuration file or in your selection!");
+      return StatusCode::FAILURE;
+    }
 
-    if (m_isWorkingPoint || m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet) {
-      m_btagging_eff_tool = "BTaggingEfficiencyTool_" + btagWP + "_" + m_config->sgKeyJets();
+    if (m_isWorkingPoint || (!m_isPCBT &&  m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet)) {
+      m_btagging_eff_tool = "BTaggingEfficiencyTool_" + m_btagWP + "_" + m_config->sgKeyJets();
       top::check(m_btagging_eff_tool.retrieve(), "KLFitterTool:: Failed to retrieve b-tagging Efficiency tool");
+    }
+
+    //6b) use btagging info to figure KLF ordering
+    if(m_isPCBT) {
+      if(findOption(custom_tokens, "JetOrderingVariable", temp_option)) {
+	top::check((temp_option=="pt" || temp_option=="TrackSumPt" || temp_option=="SUM_NumTrkPt500" || temp_option=="NumTrkPt500" || temp_option=="SUM_NumTrkPt1000" || temp_option=="NumTrkPt1000"),"KLFitterTool: invalid JetOrderingVariable option. Accepted names are: 'pt', 'TrackSumPt', 'SUM_NumTrkPt500, NumTrkPt500,SUM_NumTrkPt1000, NumTrkPt1000'. (Default='pt')");
+	m_ordVar=temp_option;
+      } else {
+	m_ordVar="pt";
+      }
     }
 
     ATH_MSG_INFO("++++++++++++++++++++++++++++++");
@@ -352,6 +374,7 @@ namespace top {
     ATH_MSG_INFO("  Using Lepton \t\t" << m_leptonType);
     ATH_MSG_INFO("  Using JetSelectionMode \t" << JetSelectionMode);
     ATH_MSG_INFO("  Using BTaggingMethod \t" << BTaggingMethod);
+    if(m_isPCBT) ATH_MSG_INFO("  Using JetOrderingVariable \t" << m_ordVar);
     ATH_MSG_INFO("  Using TopMassFixed \t" << FixTopMass);
 
     if (m_config->KLFitterSaveAllPermutations()) ATH_MSG_INFO("  Saving All permutations");
@@ -537,7 +560,7 @@ namespace top {
     }
 
     // add the particles to the fitter
-    if(m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSet) { //NOTE: moving this inside loop on jet combinations. It only works for allHadronic ttbar (otherwise one looses the leptons
+    if(m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSet && m_jetSelectionModeKLFitterEnum != top::KLFitterJetSelection::kAutoSetPCBT) { //NOTE: moving this inside loop on jet combinations. It only works for allHadronic ttbar (otherwise one looses the leptons)
       if (!m_myFitter->SetParticles(myParticles)) {
 	ATH_MSG_ERROR("KLFitter: Error adding particles to fitter...");
 	return StatusCode::FAILURE;
@@ -577,7 +600,7 @@ namespace top {
 
     // loop over all permutations
     xAOD::KLFitterResult* result = nullptr;
-    if(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet) {
+    if(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet || m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSetPCBT) {
       if(m_LHType == "ttbar_AllHadronic_SingleT") {
 	if(!permutationLoopAutoSetSingleT(result,resultContainer,event)) {
 	  ATH_MSG_ERROR("KLFitter: error in the 'AutoSet' loop (SingleT option)");
@@ -793,7 +816,7 @@ namespace top {
   }
 
   bool KLFitterTool::setJets(const top::Event& event, KLFitter::Particles* inputParticles) {
-    if(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet) {
+    if(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSet || m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSetPCBT) {
       ATH_MSG_DEBUG("Only set the lists of jets. Jet selection will be done together with combination loop.");
       return setJetLists(event);
     }
@@ -1003,54 +1026,155 @@ namespace top {
   }
 
   bool KLFitterTool::setJetLists(const top::Event& event) {
+
     //first order in b-weight
+    double weight(-99.);
     unsigned int index(0);
-    std::vector<std::pair<unsigned int,std::pair<double,double> > > bwOrd_jets(0);
+    std::vector<std::pair<unsigned int,std::pair<double,double> >* > bwOrd_jets(0);
+    std::vector<std::vector<std::pair<unsigned int,std::pair<double,double> >* > > pcbtOrd_jets(5,std::vector<std::pair<unsigned int,std::pair<double,double> >* >(0));
+
+    static SG::AuxElement::ConstAccessor<int> PVIndexAccessor("PVIndex"); //needed later
+    int PVind=0;
+    if(m_ordVar.find("NumTrkPt")!=std::string::npos && m_ordVar.find("SUM")==std::string::npos) {
+      if ( PVIndexAccessor.isAvailable(*(event.m_info)) ) PVind = PVIndexAccessor(*(event.m_info)) ;
+      else ATH_MSG_WARNING("KLFitterTool:: WARNING! Could not find PV from eventInfo: using index 0");
+    }
+
     for (const auto& jet : event.m_jets) {
-      double weight(-99.);
+      if(m_isPCBT) { //bin 1=LF, bin 5=b-jet
+	// get the PCBT bin
+	long int PCBTbin=-2;
+	if (!jet->isAvailable<int>("tagWeightBin_" + m_btagWP)) ATH_MSG_ERROR("Failed to retrieve jet decoration tagWeightBin_" + m_btagWP);
+	else PCBTbin=-1+jet->auxdataConst<int>("tagWeightBin_" + m_btagWP);
+
+	//get the ordering variable
+	if(m_ordVar=="TrackSumPt") {
+	  top::check(jet->getAttribute<double>("TrackSumPt", weight), "KLFitterTool ERROR could not find 'TrackSumPt' jet attribute");
+	} else {
+	  if (m_ordVar.find("NumTrkPt")!=std::string::npos) {
+	    std::vector<int> nTrkVec;
+	    
+	    if(m_ordVar.find("500")!=std::string::npos) {
+	      top::check(jet->getAttribute(xAOD::JetAttribute::NumTrkPt500, nTrkVec), "KLFitterTool ERROR could not find 'NumTrkPt500' jet attribute");
+	    } else {
+	      top::check(jet->getAttribute(xAOD::JetAttribute::NumTrkPt1000, nTrkVec), "KLFitterTool ERROR could not find 'NumTrkPt1000' jet attribute");
+	    }
+	    
+	    if(m_ordVar.find("SUM")!=std::string::npos) {
+	      weight=0;
+	      for(int nt : nTrkVec) {
+		weight+=(double)nt;
+	      }
+	    } 
+	    else {
+	      weight=nTrkVec.at(PVind);
+	    }
+	  } 
+	  else {
+	    weight=jet->pt();
+	  }
+	}
+
+	//add info to the jet list
+	if(PCBTbin>=0 && PCBTbin<static_cast<long int>(pcbtOrd_jets.size())) pcbtOrd_jets[PCBTbin].push_back(new std::pair<unsigned int,std::pair<double,double> >(index,std::make_pair(weight,jet->pt())));
+      }
+      else {
       // THIS METHOD DOES NOT SET THE WEIGHT!!!      HasTag(*jet, weight);
       //let's pick it by hand for now:
-      const auto& btag_object = jet->btagging();
-      const auto& tagger_name =m_btagging_eff_tool->getTaggerName();
-      if (!btag_object || !btag_object->MVx_discriminant(tagger_name, weight)) {
-	ATH_MSG_ERROR("Failed to retrieve "+tagger_name+" weight!");
+	const auto& btag_object = jet->btagging();
+	const auto& tagger_name =m_btagging_eff_tool->getTaggerName();
+	
+	double mv_pb = 0;
+	bool bw_found=false;
+	if(tagger_name!="MV2c10" && tagger_name!="MV2c10mu" && tagger_name!="MV2c10rnn") {
+	  btag_object->pb(tagger_name,mv_pb); 
+	  weight=mv_pb;
+	  bw_found=true;
+	}
+	else {
+	  bw_found=btag_object->MVx_discriminant(tagger_name, weight);
+	}
+	if (!btag_object || !bw_found) {
+	  ATH_MSG_ERROR("Failed to retrieve "+tagger_name+" weight!");
+	}
+	bwOrd_jets.push_back(new std::pair<unsigned int,std::pair<double,double> >(index,std::make_pair(weight,jet->pt())));
       }
-      bwOrd_jets.push_back(std::make_pair(index,std::make_pair(weight,jet->pt())));
       index++;
     }
-    std::sort(bwOrd_jets.begin(), bwOrd_jets.end(), [](auto &left, auto &right) { return left.second.first > right.second.first; });
+
+    if(m_isPCBT) { //bin 1=LF, bin 5=b-jet  
+      for(int bb=pcbtOrd_jets.size()-1;bb>=0;bb--) {
+	//make sure that the jets are sorted in pt within each PCBT bin
+	std::sort(pcbtOrd_jets[bb].begin(), pcbtOrd_jets[bb].end(),  [](const auto &left, const auto &right) { return left->second.first > right->second.first; });
+	bwOrd_jets.insert(bwOrd_jets.end(),pcbtOrd_jets[bb].begin(),pcbtOrd_jets[bb].end());
+      }
+    } else {
+      std::sort(bwOrd_jets.begin(), bwOrd_jets.end(), [](auto &left, auto &right) { return left->second.first > right->second.first; });
+    }
 
     //then separate which jet can be what
-    std::vector<std::pair<unsigned int,std::pair<double,double> > > onlyBjets(bwOrd_jets.begin(),bwOrd_jets.begin()+m_nb);
-    std::vector<std::pair<unsigned int,std::pair<double,double> > > canbeBOTHjets(bwOrd_jets.begin()+m_nb,bwOrd_jets.begin()+m_nb+m_delta);
-    std::vector<std::pair<unsigned int,std::pair<double,double> > > onlyQjets(bwOrd_jets.begin()+m_nb+m_delta,bwOrd_jets.end()); 
+
+    std::vector<std::pair<unsigned int,std::pair<double,double> > *> onlyBjets;
+    std::vector<std::pair<unsigned int,std::pair<double,double> > *> canbeBOTHjets;
+    std::vector<std::pair<unsigned int,std::pair<double,double> > *> onlyQjets;
+
+    if(m_jetSelectionModeKLFitterEnum == top::KLFitterJetSelection::kAutoSetPCBT) {
+      //first, assign by PCBT bin (pre-ordered)
+
+      onlyBjets=pcbtOrd_jets[pcbtOrd_jets.size()-1];  //jets falling into bin 5 of pseudo-continuous b-tagging assigned to 'onlyBjets' list
+     
+      for(int bb=pcbtOrd_jets.size()-2;bb>0;bb--) canbeBOTHjets.insert(canbeBOTHjets.end(),pcbtOrd_jets[bb].begin(),pcbtOrd_jets[bb].end()); //jets falling into bins 4 to 2 of pseudo-continuous b-tagging assigned to 'canbeBOTHjets' list (can be passed to KLFitter as either a b or a light flavour jet, to test both hypothesis)
+
+      onlyQjets=pcbtOrd_jets[0];  //jets falling into bin 1 of pseudo-continuous b-tagging assigned to 'onlyQjets' list (considered light flavour)
+
+      //then, correct for too few b's
+      int availB=onlyBjets.size()+canbeBOTHjets.size();
+      if(availB<m_Nbmin) {
+	top::check(static_cast<int>(onlyQjets.size())>(m_Nbmin-availB),Form("Too few jets to run KLFitter with this parameters: AutoSetPCBT, Nbmin=%d, n. jets=%d",static_cast<int>(m_Nbmin),static_cast<int>(event.m_jets.size()))); //protect against out-of-range
+	canbeBOTHjets.insert(canbeBOTHjets.end(),onlyQjets.begin(),onlyQjets.begin()+(m_Nbmin-availB));
+	onlyQjets.erase(onlyQjets.begin(),onlyQjets.begin()+(m_Nbmin-availB));  
+      }
+
+      //then, correct for too many b's (i.e. too few LF)
+      int availBonly=onlyBjets.size();
+      if(m_N5max>0 && availBonly>m_N5max) {
+	canbeBOTHjets.insert(canbeBOTHjets.end(),onlyBjets.end()-(availBonly-m_N5max),onlyBjets.end());
+	onlyBjets.erase(onlyBjets.end()-(availBonly-m_N5max),onlyBjets.end());
+      }
+    }
+    else {
+      onlyBjets=std::vector<std::pair<unsigned int,std::pair<double,double> >* >(bwOrd_jets.begin(),bwOrd_jets.begin()+m_nb);
+      canbeBOTHjets=std::vector<std::pair<unsigned int,std::pair<double,double> >* >(bwOrd_jets.begin()+m_nb,bwOrd_jets.begin()+m_nb+m_delta);
+      onlyQjets=std::vector<std::pair<unsigned int,std::pair<double,double> >* >(bwOrd_jets.begin()+m_nb+m_delta,bwOrd_jets.end()); 
+    }
 
     //now cut away excess jets (if any)
     //always re-order the LF in pt, before cutting
-    std::sort(onlyQjets.begin(), onlyQjets.end(), [](auto &left, auto &right) { return left.second.second > right.second.second; }); 
+    std::sort(onlyQjets.begin(), onlyQjets.end(), [](auto &left, auto &right) { return left->second.second > right->second.second; }); 
 
     //remove the extra LF jets: 
-    int NLFjcut=m_Njcut-(m_nb+m_delta);
-    if((int)onlyQjets.size()>NLFjcut) onlyQjets.erase(onlyQjets.begin()+NLFjcut,onlyQjets.end());
+    int NLFjcut=m_Njcut-(onlyBjets.size()+canbeBOTHjets.size());
+    if(static_cast<int>(onlyQjets.size())>NLFjcut) onlyQjets.erase(onlyQjets.begin()+NLFjcut,onlyQjets.end());
 
     //now merge everything to prepare the lists
-    std::vector<std::pair<unsigned int,std::pair<double,double> > > Bjets = onlyBjets;
+    std::vector<std::pair<unsigned int,std::pair<double,double> >* > Bjets = onlyBjets;
     Bjets.insert(Bjets.end(),canbeBOTHjets.begin(),canbeBOTHjets.end());
-    std::vector<std::pair<unsigned int,std::pair<double,double> > > LFjets = onlyQjets;
+    std::vector<std::pair<unsigned int,std::pair<double,double> >* > LFjets = onlyQjets;
     LFjets.insert(LFjets.end(),canbeBOTHjets.begin(),canbeBOTHjets.end());
 
     //re-sort in pt because we like it more (won't change a thing on how KLFitter loops)
-    std::sort(Bjets.begin(), Bjets.end(), [](auto &left, auto &right) { return left.second.second > right.second.second; }); 
-    std::sort(LFjets.begin(), LFjets.end(), [](auto &left, auto &right) { return left.second.second > right.second.second; }); 
+    std::sort(Bjets.begin(), Bjets.end(), [](auto &left, auto &right) { return left->second.second > right->second.second; }); 
+    std::sort(LFjets.begin(), LFjets.end(), [](auto &left, auto &right) { return left->second.second > right->second.second; }); 
 
     //now fill the output lists
     m_canBeBJets.clear();
-    for(uint jj=0;jj<Bjets.size();jj++) m_canBeBJets.push_back(Bjets.at(jj).first);
+    for(uint jj=0;jj<Bjets.size();jj++) m_canBeBJets.push_back(Bjets.at(jj)->first);
     m_canBeLFJets.clear();
-    for(uint jj=0;jj<LFjets.size();jj++) m_canBeLFJets.push_back(LFjets.at(jj).first);
+    for(uint jj=0;jj<LFjets.size();jj++) m_canBeLFJets.push_back(LFjets.at(jj)->first);
 
     return (m_canBeBJets.size()>=2 && m_canBeLFJets.size()>=4);
   }
+
 
   bool KLFitterTool::setJetsFromAutoSet(const top::Event& event,KLFitter::Particles* inputParticles,std::vector<uint> BjetsToRun,std::vector<uint> LFjetsToRun)
   {
