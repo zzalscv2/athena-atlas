@@ -76,6 +76,7 @@ def createTrackingConfigFlags():
 
     # Turn on running of Brem Recovery in tracking
     icf.addFlag("Tracking.doBremRecovery", lambda prevFlags: (
+        prevFlags.Detector.EnableCalo and
         not (prevFlags.Tracking.PrimaryPassConfig in
              [PrimaryPassConfig.VtxLumi, PrimaryPassConfig.VtxBeamSpot] or
              prevFlags.Tracking.doLowMu or
