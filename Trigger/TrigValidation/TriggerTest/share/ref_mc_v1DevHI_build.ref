@@ -1004,6 +1004,14 @@ HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200:
   eventCount: 0
 HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200:
   eventCount: 0
+HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200:
+  eventCount: 4
+  stepCounts:
+    0: 5
+    1: 4
+  stepFeatures:
+    0: 10
+    1: 49
 HLT_j0_HT300XX15ptXX0eta490XXveto_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200:
   eventCount: 4
   stepCounts:
@@ -1018,6 +1026,14 @@ HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200:
   eventCount: 0
 HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200:
   eventCount: 0
+HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200:
+  eventCount: 4
+  stepCounts:
+    0: 5
+    1: 4
+  stepFeatures:
+    0: 10
+    1: 38
 HLT_j0_HT300XX15ptXX0eta490XXveto_j30a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200:
   eventCount: 4
   stepCounts:
@@ -1032,6 +1048,14 @@ HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200:
   eventCount: 0
 HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200:
   eventCount: 0
+HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200:
+  eventCount: 4
+  stepCounts:
+    0: 5
+    1: 4
+  stepFeatures:
+    0: 10
+    1: 36
 HLT_j0_HT300XX15ptXX0eta490XXveto_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200:
   eventCount: 4
   stepCounts:
@@ -1244,6 +1268,14 @@ HLT_j20a_pf_jes_ftf_L1TE5_VTE200:
   stepFeatures:
     0: 5
     1: 74
+HLT_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200:
+  eventCount: 5
+  stepCounts:
+    0: 5
+    1: 5
+  stepFeatures:
+    0: 5
+    1: 74
 HLT_j20a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5_VTE200:
   eventCount: 5
   stepCounts:
@@ -1277,6 +1309,14 @@ HLT_j30a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200:
 HLT_j30a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200:
   eventCount: 0
 HLT_j30a_pf_jes_ftf_L1TE5_VTE200:
+  eventCount: 5
+  stepCounts:
+    0: 5
+    1: 5
+  stepFeatures:
+    0: 5
+    1: 44
+HLT_j30a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200:
   eventCount: 5
   stepCounts:
     0: 5
@@ -1336,6 +1376,14 @@ HLT_j40a_pf_jes_ftf_L11ZDC_NZDC_TE5_VTE200:
   eventCount: 0
 HLT_j40a_pf_jes_ftf_L15ZDC_A_5ZDC_C_TE5_VTE200:
   eventCount: 0
+HLT_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE10_VTE200:
+  eventCount: 5
+  stepCounts:
+    0: 5
+    1: 5
+  stepFeatures:
+    0: 5
+    1: 24
 HLT_j40a_pf_jes_ftf_L1VZDC_A_VZDC_C_TE5:
   eventCount: 20
   stepCounts:
