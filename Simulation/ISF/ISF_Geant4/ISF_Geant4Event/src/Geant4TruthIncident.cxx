@@ -329,7 +329,13 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
   const HepMC::FourVector fourMomentum( mom.x(), mom.y(), mom.z(), energy);
 
   const HepMC::GenParticlePtr parent = m_atlasG4EvtUserInfo->GetCurrentlyTraced();
-  const int status = (secondary) ? 1 + HepMC::SIM_STATUS_THRESHOLD : parent->status() + HepMC::SIM_STATUS_INCREMENT;
+  int status = (secondary) ? 1 + HepMC::SIM_STATUS_THRESHOLD : parent->status() + HepMC::SIM_STATUS_INCREMENT;
+  // Treat child particles of pre-defined decays differently
+  if (this->interactionClassification() == ISF::QS_PREDEF_VTX) {
+    const G4DynamicParticle* dynPart = track->GetDynamicParticle();
+    bool hasPredefinedDecay = (dynPart && (nullptr!=(dynPart->GetPreAssignedDecayProducts())));
+    status = (hasPredefinedDecay)? 2 : 1;
+  }
   HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(fourMomentum, pdgCode, status);
 
 #ifndef HEPMC3
