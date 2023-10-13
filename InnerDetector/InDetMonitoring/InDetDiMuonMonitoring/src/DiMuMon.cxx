@@ -24,6 +24,7 @@
 #include "RooFFTConvPdf.h"
 #include "RooGlobalFunc.h"
 #include "RooArgList.h"
+#include "RooFitResult.h"
 
 
 //using namespace Analysis;
