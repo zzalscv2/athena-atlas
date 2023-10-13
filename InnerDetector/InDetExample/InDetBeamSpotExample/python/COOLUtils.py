@@ -125,6 +125,7 @@ class COOLQuery:
 
         self.tdaqdbname='COOLONL_TDAQ/CONDBR2'
         self.coolpath='/TDAQ/RunCtrl'
+        self.coolScanPath='/TDAQ/OLC/LHC/SCANDATA'
 
         self.trigdbname='COOLONL_TRIGGER/CONDBR2'
         self.coollbpath='/TRIGGER/LUMI/LBLB'
@@ -143,6 +144,7 @@ class COOLQuery:
         self.cooldcsdb = AtlCoolLib.indirectOpen(self.dcsdbname, True, self.oracle, self.debug)
          
         self.lbDictCache = {'runnr': None, 'lbDict': None}
+        self.scanDictCache = {'runnr': None, 'scanDict': None}
 
     def __del__(self):
         try:
@@ -156,7 +158,7 @@ class COOLQuery:
         """Get start time of run in Unix time (seconds since epoch)."""
         iov=runnr << 32
         if (iov>cool.ValidityKeyMax): iov=cool.ValidityKeyMax
-        folderSOR_Params = self.cooldb.getFolder(self.coolpath+'/SOR_Params')
+        folderSOR_Params = self.cooldb.getFolder(self.coolpath+'/SOR')
         itr = folderSOR_Params.browseObjects(iov, iov, cool.ChannelSelection.all())
         try:
             itr.goToNext()
@@ -179,7 +181,8 @@ class COOLQuery:
             info = { 'FillNumber': 0,
                      'StableBeams': False,
                      'BeamEnergyGeV': 0,
-                     'NumBunchColl': 0 }
+                     'NumBunchColl': 0 ,
+                     'BetaStar': 0}
             itr.goToNext()
             obj = itr.currentRef()
             for k in info.keys():
@@ -235,6 +238,45 @@ class COOLQuery:
             self.lbDictCache['lbDict'] = self.getLbTimes(runnr)
             self.lbDictCache['runnr'] = runnr
         return self.lbDictCache['lbDict'].get(lbnr,None)
+
+    def getScanInfo(self,runnr):
+        """Get dict of scan info"""
+        iov1 = self.getRunStartTime(runnr)*1000000000
+        iov2 = self.getRunEndTime(runnr)*1000000000
+        if (iov2>cool.ValidityKeyMax): iov2=cool.ValidityKeyMax
+        folderScan_Params = self.cooldb.getFolder(self.coolScanPath)
+        itr = folderScan_Params.browseObjects(iov1, iov2, cool.ChannelSelection.all())
+        scanDict = { }
+        while itr.goToNext():
+            obj = itr.currentRef()
+            runLB = obj.payload()['RunLB']
+            run = runLB >> 32
+            if (run != runnr): continue
+            lb = runLB & 0xFFFFFFFF
+            channelId = obj.channelId()
+            scanningIP = obj.payload()['ScanningIP']
+            # Select only the channel corresponding to IP
+            mask = 1 << channelId
+            if(scanningIP & mask == 0): continue
+            acquisitionFlag = obj.payload()['AcquisitionFlag']
+            nominalSeparation = obj.payload()['NominalSeparation']
+            nominalSeparationPlane = obj.payload()['NominalSeparationPlane']
+            B1DeltaXSet = obj.payload()['B1DeltaXSet']
+            B2DeltaXSet = obj.payload()['B2DeltaXSet']
+            B1DeltaYSet = obj.payload()['B1DeltaYSet']
+            B2DeltaYSet = obj.payload()['B2DeltaYSet']
+            scanDict[lb] = (scanningIP,acquisitionFlag,nominalSeparation,nominalSeparationPlane,B1DeltaXSet,B2DeltaXSet,B1DeltaYSet,B2DeltaYSet)
+        return scanDict
+
+    def scanInfo(self,runnr,lbnr):
+        """Get scan information for a given LB. The LB information is cached
+           for the last run, in order make this efficient for querying for the
+           times of individual LBs."""
+        runnr = int(runnr)
+        if self.scanDictCache['runnr']!=runnr:
+            self.scanDictCache['scanDict'] = self.getScanInfo(runnr)
+            self.scanDictCache['runnr'] = runnr
+        return self.scanDictCache['scanDict'].get(lbnr,None)
 
 def resolveCurrentAlias(tagtype='ST'):
     "Resolve the current BLK tag alias"

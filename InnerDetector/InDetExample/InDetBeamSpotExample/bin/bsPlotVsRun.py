@@ -35,7 +35,7 @@ from CoolLumiUtilities.CoolDataReader import CoolDataReader
 import ROOT
 ROOT.gROOT.SetBatch(1)
 
-lumiTag_default = 'OflLumi-Run3-001' # For Run 2 was OflPrefLumi-RUN2-UPD4-12
+lumiTag_default = 'OflPrefLumi-RUN3-UPD4-02'
 indetbsTag_default = 'IndetBeampos-RUN3-ES1-UPD2-02' # For Run 2 was IndetBeampos-RUN2-ES1-UPD2-15
 
 from optparse import OptionParser
@@ -63,9 +63,7 @@ if options.plot:
     varPlot.append(options.plot)
 else:
     varColl = ['posX','posY','posZ','sigmaX','sigmaY','sigmaZ']
-    varPlot.append(options.plot)
-
-
+    varPlot = ['posX','posY','posZ','sigmaX','sigmaY','sigmaZ']
 
 def main():
     f1 = "%s::%s" % (db1, options.folderBS)
@@ -122,7 +120,8 @@ def main():
     ntuple = ROOT.TNtupleD( 'BeamspotLumi', 'BeamSpotLumi', "x:y:z:sigma_x:sigma_y:sigma_z:run:mu:lumi:year:month:day:hour:minute:epoch" )
 
 
-    runs  =  set()
+    #runs  =  set()
+    runs  =  list()
     while itrBS.goToNext():
 
        obj = itrBS.currentRef()
@@ -139,8 +138,9 @@ def main():
        status = int(obj.payloadValue('status'))
        if status != 59:
            continue
-       
-       runs.add(runBegin)
+
+       if runs.count(runBegin) < 1:
+           runs.append(runBegin)
 
        if since < startRLB:
            startRLB = since
@@ -154,30 +154,26 @@ def main():
            values[var+'Err'] =  float(obj.payloadValue(var+'Err'))
        values['until'] = until
        lbDict[since] = values
-    
+
+    runs.sort()
     print( 'Runs: ',runs )
 
     lumi = array('d')
     xd = array('d')
     exd =  array('d')
+    bstar = array('d')
+    runsLB = array('d')
+    fillsLB = array('d')
     ydDict = {}
     eydDict = {}
     ydDict2 = {}
+    
     
     sqtrt2pi = math.sqrt(2*math.pi) 
     
     lblb = CoolDataReader('COOLONL_TRIGGER/CONDBR2', '/TRIGGER/LUMI/LBLB')
     from DQUtils.sugar import RANGEIOV_VAL, RunLumi
     from DQUtils import IOVSet
-
-    # 2022 GRL
-    grlIOVs=IOVSet.from_grl("/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20221123/data22_13p6TeV.periodEFH_DetStatus-v108-pro28-01_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore__TRIG_HLT_MUO_Upstream_Barrel_problem__TRIG_HLT_MUO_Upstream_Endcap_problem__TRIG_L1_MUB_coverage__TRIG_L1_MUE_misconf_electronics__TRIG_L1_MUB_lost_sync.xml")
-
-    # Run 2 GRLs
-    #grlIOVs=IOVSet.from_grl("data15_13TeV.periodAllYear_DetStatus-v89-pro21-02_Unknown_PHYS_StandardGRL_All_Good_25ns.xml")
-    #grlIOVs+=IOVSet.from_grl("data16_13TeV.periodAllYear_DetStatus-v89-pro21-01_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns.xml")
-    #grlIOVs+=IOVSet.from_grl("data17_13TeV.periodAllYear_DetStatus-v99-pro22-01_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml")
-    #grlIOVs+=IOVSet.from_grl("data18_13TeV.periodAllYear_DetStatus-v102-pro22-04_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml")
 
     for run in runs: 
       iov1 = run << 32
@@ -203,27 +199,14 @@ def main():
           since = obj.since()
           runBegin = since >> 32
           lumiBegin = since & 0xFFFFFFFF
-  
+
           until = obj.until()
           runUntil = until >> 32
           lumiUntil = until & 0xFFFFFFFF
          
           inGRL = False
-          for sinceGRL, untilGRL, grl_states in process_iovs(grlIOVs):
-              if grl_states[0].since==None:
-                  continue
-              if ( sinceGRL.run <= runBegin and  untilGRL.run >= runUntil  and sinceGRL.lumi <= lumiBegin and  untilGRL.lumi >= lumiUntil ):
-                  inGRL = True
-                  break
-         
-          if not inGRL:
-              continue
-         
           mu  =  float(obj.payloadValue('LBAvEvtsPerBX'))
           instlumi  =  float(obj.payloadValue('LBAvInstLumi'))
-        
-          #if( mu <  10 or mu > 65 ):
-          #    print('Mu: %2.1f Run : %d  LB: %d - %d Lumi: %f' % (mu,runBegin,lumiBegin,lumiUntil,instlumi))
         
           if since in lbDict:
               if lbDict[ since  ]['sigmaX'] > 0.1 :
@@ -253,15 +236,21 @@ def main():
                       ydDict[var].append( lbDict[ since  ][var] )
                       eydDict[var].append( lbDict[ since  ][var+'Err'] )
   
+              timeSt = coolQuery.lbTime( int(since >> 32), int(since & 0xFFFFFFFF) )[0]
+              betaStar  = coolQuery.getLHCInfo(timeSt).get('BetaStar',0)
+              fillSt = coolQuery.getLHCInfo(timeSt).get('FillNumber',0)
+              bstar.append(betaStar)
+              runsLB.append(run)
+              fillsLB.append(fillSt)
+              #print('Add LB: ',run,' ',lumiBegin,' ',mu,' ',betaStar,' ',fillSt,' ', lbDict[since]['sigmaZ'])
               if checkNtupleProd and lbDict[ since  ]['sigmaZErr'] < 5 :
                   ntuple.Fill( lbDict[ since  ][ 'posX'], lbDict[ since  ][ 'posY'], lbDict[ since  ][ 'posZ'], lbDict[ since  ][ 'sigmaX'], lbDict[ since  ][ 'sigmaY'], lbDict[ since  ][ 'sigmaZ'],runBegin, mu, mylumi, year, month, day,hour, mins, startTime /1.e9 )
-
 
     runStart  = startRLB >> 32
     runEnd    = endRLB >> 32
     fillStart = fillEnd = 0
     timeStart = timeEnd = 0
-    beamEnergy = 13.6
+    beamEnergy = 10.0
     try:
         timeStart = coolQuery.lbTime( int(startRLB >> 32), int(startRLB & 0xFFFFFFFF) )[0]
     except:
@@ -276,6 +265,11 @@ def main():
         pass
     try:
         fillEnd   = coolQuery.getLHCInfo(timeEnd).get('FillNumber',0)
+    except:
+        pass
+    try:
+        beamEnergy  = coolQuery.getLHCInfo(timeStart).get('BeamEnergyGeV',0)
+        beamEnergy *= 2e-3
     except:
         pass
 
@@ -296,6 +290,34 @@ def main():
     if not options.plotGraph:
         ROOT.gPad.SetRightMargin(0.15)
 
+
+    #Profile histogram for beam size v.s. run
+
+    #Find non-empty fills with beta* = 30
+    fillsFilled = list()
+    for runLB, betaStar in zip(fillsLB,bstar):
+        if betaStar < 31. :
+            try:
+                pos = fillsFilled.index(runLB)
+            except:
+                fillsFilled.append(int(runLB))
+    fillsFilled.sort()
+    print("Fills with beta* = 30 cm",fillsFilled)
+    length = len(fillsFilled)
+    print('Number of fills with beta* = 30 cm: ',length)
+
+    #Find non-empty fills with beta* = 120
+    fillsFilled120 = list()
+    for runLB, betaStar in zip(fillsLB,bstar):
+        if betaStar > 119. and betaStar < 121 :
+            try:
+                pos = fillsFilled120.index(runLB)
+            except:
+                fillsFilled120.append(int(runLB))
+    fillsFilled120.sort()
+    print("Fills with beta* = 120 cm",fillsFilled120)
+    length120 = len(fillsFilled120)
+    print('Number of fills with beta* = 120 cm: ',length120)
 
     #Plot each variable   
     for var in varPlot:
@@ -352,6 +374,59 @@ def main():
         histoW1D.GetXaxis().SetTitle(varDef(var,'atit',var))
         histoW1D.GetYaxis().SetTitle('Integrated Luminosity (fb^{-1}/bin)')
 
+        yminP = ymin
+        ymaxP = ymax
+        yminB = ymin
+        ymaxB = ymax
+        if var == 'sigmaZ':
+            yminP = 25.
+            ymaxP = 50.
+            yminB = 25.
+            ymaxB = 50.
+        elif var == 'sigmaX':
+            yminP = 0.000
+            ymaxP = 0.020
+            yminB = 0.000
+            ymaxB = 0.020
+        elif var == 'sigmaY':
+            yminP = 0.000
+            ymaxP = 0.020
+            yminB = 0.000
+            ymaxB = 0.020
+        elif var == 'posZ':
+            yminP = -20.00
+            ymaxP =  30.00
+        elif var == 'posX':
+            yminP = -0.80
+            ymaxP = -0.20
+        elif var == 'posY':
+            yminP = -0.60
+            ymaxP =  0.00
+            
+        #histoP = ROOT.TProfile('hdP'+var, 'hdP'+var, length,runsDouble)
+        histoP = ROOT.TProfile('hdP'+var, 'hdP'+var, length,0.,length)
+        histoP.GetYaxis().SetTitle(varDef(var,'atit',var))
+        histoP.GetXaxis().SetTitle('Fill Number')
+        histoP.SetMinimum(yminP)
+        histoP.SetMaximum(ymaxP)
+
+        histoB = ROOT.TH2D('hdB'+var, 'hdB'+var, 100, 20., 150., 100, yminB, ymaxB)
+        histoB.GetYaxis().SetTitle(varDef(var,'atit',var))
+        histoB.GetXaxis().SetTitle('#beta*')
+        histoB.GetZaxis().SetTitle('Entries')
+
+        #set names of the bins as run numbers
+        i = 0
+        irate = int(length/10)+1
+        for run in fillsFilled:
+            i += 1
+            if int((i-1)/irate)*irate == i-1:
+                histoP.GetXaxis().SetBinLabel(i,str(run))
+            else:
+                histoP.GetXaxis().SetBinLabel(i,'')
+        
+        i = 0
+        irate = int(length120/10)+1
         histo.Draw();
         if options.plotGraph:
             gr.Draw("p");
@@ -363,6 +438,17 @@ def main():
             for mu, x, l in zip(xd, ydDict2[var], lumi):
                 histo2.Fill( mu, x )
                 histo2W.Fill( mu,x, l)
+            for runLB, betaStar, x in zip(fillsLB,bstar,ydDict[var]):
+                #exclude runs from Period G
+                if runLB < 435229 or runLB > 435777 :
+                    histoB.Fill( betaStar, x )
+                    if betaStar < 31. :
+                        pos = fillsFilled.index(runLB)
+                        histoP.Fill(pos+0.5,x)
+                    if betaStar > 119. and betaStar < 121 :
+                        pos = fillsFilled120.index(runLB)
+#                        histoP120.Fill(pos+0.5,x)
+                    
             histo.Draw("colz")
      
         histo.Write()
@@ -370,6 +456,9 @@ def main():
         histo2.Write()
         histo2W.Write()
         histoW1D.Write()
+        histoP.Write()
+#        histoP120.Write()
+        histoB.Write()
 
         # Add some information to the graph
         ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
@@ -397,61 +486,26 @@ def main():
         ROOTUtils.drawText(0.18,0.81,0.05,';'.join(comments),font=42)
 
         canvas.Print( "Run_%d_%sVsMu.png" % ( options.runMin,var ) )
-        canvas.Print( "Run_%d_%sVsMu.pdf" % ( options.runMin,var ) )
+        #canvas.Print( "Run_%d_%sVsMu.pdf" % ( options.runMin,var ) )
         if not options.plotGraph:
-            canvas.SetLogz(True)
-            canvas.Print( "Run_%d_%sVsMuLog.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_%sVsMuLog.pdf" % ( options.runMin,var ) )
             canvas.SetLogz(False)
 
-            histo2.Draw("colz");
-            ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
-            ROOTUtils.drawText(0.18,0.87,0.055, "Interaction density" )
-            ROOTUtils.drawText(0.18,0.81,0.05,';'.join(comments),font=42)
-            canvas.Print( "Run_%d_Mu%sVsMu.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_Mu%sVsMu.pdf" % ( options.runMin,var ) )
-            canvas.SetLogz(True)
-            canvas.Print( "Run_%d_Mu%sVsMuLog.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_Mu%sVsMuLog.pdf" % ( options.runMin,var ) )
-            canvas.SetLogz(False)
-
-            histoW.Draw("colz");
-            histoW.SetMinimum(0.005);
-            ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
-            ROOTUtils.drawText(0.18,0.87,0.055, varDef(var,'title',var) )
-            ROOTUtils.drawText(0.18,0.81,0.05,';'.join(comments),font=42)
-            canvas.Print( "Run_%d_%sVsMuW.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_%sVsMuW.pdf" % ( options.runMin,var ) )
-            canvas.SetLogz(True)
-            canvas.Print( "Run_%d_%sVsMuWLog.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_%sVsMuWLog.pdf" % ( options.runMin,var ) )
-            canvas.SetLogz(False)
-
-            histo2W.Draw("colz");
-            histo2W.SetMinimum(0.01);
-
-            ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
-            ROOTUtils.drawText(0.18,0.87,0.055, "Interaction density" )
-            ROOTUtils.drawText(0.18,0.81,0.05,';'.join(comments),font=42)
-            canvas.Print( "Run_%d_Mu%sVsMuW.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_Mu%sVsMuW.pdf" % ( options.runMin,var ) )
-            canvas.SetLogz(True)
-            canvas.Print( "Run_%d_Mu%sVsMuWLog.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_Mu%sVsMuWLog.pdf" % ( options.runMin,var ) )
-            canvas.SetLogz(False)
-        
-            histoW1D.Draw("colz");
-            ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
-            ROOTUtils.drawText(0.18,0.87,0.055, varDef(var,'title',var) )
-            ROOTUtils.drawText(0.18,0.81,0.05,"#mu=%2.4f RMS=%2.4f" % ( histoW1D.GetMean(), histoW1D.GetRMS() ),font=42)
-            canvas.Print( "Run_%d_%s1D.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_%s1D.pdf" % ( options.runMin,var ) )
-            canvas.SetLogy(True)
-            canvas.Print( "Run_%d_%s1DLog.png" % ( options.runMin,var ) )
-            canvas.Print( "Run_%d_%s1DLog.pdf" % ( options.runMin,var ) )
             canvas.SetLogy(False)
 
+            histoP.Draw("colz");
+            ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
+            ROOTUtils.drawText(0.18,0.87,0.055, varDef(var,'title',var) )
+            ROOTUtils.drawText(0.18,0.81,0.055, "#beta* = 30 cm" )            
+            ROOTUtils.drawText(0.18,0.75,0.05,';'.join(comments),font=42)
+            canvas.Print( "Run_%d_%sVsFill.png" % ( options.runMin,var ) )
+            canvas.SetLogy(False)
 
+            histoB.Draw("colz");
+            ROOTUtils.atlasLabel( 0.53,0.87,False,offset=0.12,isForApproval=False,customstring="Internal",energy='%2.1f' % beamEnergy,size=0.055)
+            ROOTUtils.drawText(0.18,0.87,0.055, varDef(var,'title',var) )
+            ROOTUtils.drawText(0.18,0.81,0.05,';'.join(comments),font=42)
+            canvas.Print( "Run_%d_%sVsBetaStar.png" % ( options.runMin,var ) )
+            canvas.SetLogy(False)
 
 if __name__ == "__main__":
     main()
