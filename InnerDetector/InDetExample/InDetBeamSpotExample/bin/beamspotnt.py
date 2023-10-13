@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -147,6 +147,7 @@ parser.add_option('', '--overlayScans', dest='overlayScans', default = False, ac
 parser.add_option('', '--useAve', dest='useAve', action='store_true', default=False, help='Average over poor fits in the beamspot -- performed during merging step')
 parser.add_option('', '--database', dest='database', default='COOLOFL_INDET/CONDBR2', help='DB to read beamspot info from when -s BeamSpotCOOL is enabled and running merge')
 parser.add_option('', '--dbfolder', dest='dbfolder', default='/Indet/Beampos', help='Folder to read beamspot info from when -s BeamSpotCOOL is enabled and running merge')
+parser.add_option('', '--addScanVars', dest='addScanVars', action='store_true', default=False, help='Add variables for VdM scan')
 
 (options,args) = parser.parse_args()
 if len(args) < 1:
@@ -417,7 +418,7 @@ class Plots(ROOTUtils.PlotLibrary):
     def __init__(self,nt):
         ROOTUtils.PlotLibrary.__init__(self,options.name)
         self.nt = nt
-        self.whatList = ['posX','posY','posZ','sigmaX','sigmaY','sigmaZ','tiltX','tiltY','rhoXY','k']
+        self.whatList = ['posX','posY','posZ','sigmaX','sigmaY','sigmaZ','tiltX','tiltY','rhoXY','k','nValid']
 
     def writeText(self, var, legendList=[],
                   showRuns=True, showFills=True, showTime=True, otherTitle=None, otherComment=None,
@@ -745,10 +746,6 @@ class Plots(ROOTUtils.PlotLibrary):
                     legendList.append([tgraph,text,'PLE'])
             tgraph.Draw('P')
             
-        # Indicate if legend incomplete
-        if len(grDict)>options.maxlegends:
-            legendList.append([None,'...',''])
-
         # Fit data, if desired
         if options.fit and len(grDict)==1:
             ROOT.gStyle.SetOptFit(1111)
@@ -1179,7 +1176,7 @@ if cmd=='merge' and len(args)==2:
     setCuts(srcNt)
     print ('\nImporting from '+srcNt.summary())
     print (srcNt.cutSummary())
-    dstNt = ntClass(options.ntname,True,fullCorrelations=options.fullCorrelations)
+    dstNt = ntClass(options.ntname,True,fullCorrelations=options.fullCorrelations,addScanVars=options.addScanVars)
     print ('\nMerging into '+dstNt.summary())
     
     totalEntries = 0 
@@ -1213,6 +1210,8 @@ if cmd=='merge' and len(args)==2:
     for b in allBSResultsInNt:
         if options.fillcooldata:
             b.fillDataFromCOOL()
+        if options.addScanVars:
+            b.fillScanData()
         if options.pseudoLbFile:
             b.fillDataFromPseudoLb(options.pseudoLbFile, float(options.pseudoLbTimeUnit))        
         if options.filldqdata:

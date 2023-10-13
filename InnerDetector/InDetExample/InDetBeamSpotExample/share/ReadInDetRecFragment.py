@@ -161,7 +161,11 @@ from AthenaCommon.BeamFlags import jobproperties
 # TODO: Is any of the following needed?
 #jobproperties.Beam.energy             = 900.*Units.GeV
 #jobproperties.Beam.beamType           = 'collisions'
-
+try: 
+  jobproperties.Beam.bunchStructureSource  = 0
+except:
+  printfunc ('ReadInDetRecFragment INFO Unable to set jobproperties.Beam.bunchStructureSource  = 0')
+  
 
 #--------------------------------------------------------------
 # Set Detector setup
@@ -335,7 +339,10 @@ TrackCollectionTruthKeys   = [InDetKeys.TracksTruth()]
 #--------------------------------------------------------------
 # load master joboptions file
 #--------------------------------------------------------------
-  
+
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
+
 include("InDetRecExample/InDetRec_all.py")
 
 #--------------------------------------------------------------

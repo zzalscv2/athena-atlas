@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -49,6 +49,7 @@ mctag STATUS POSX POSY POSZ             Create an sqlite file containing a MC ta
 proddir = '/afs/cern.ch/user/a/atlidbs/jobs'
 produserfile = '/afs/cern.ch/user/a/atlidbs/private/produsers.dat'
 prodcoolpasswdfile = '/afs/cern.ch/user/a/atlidbs/private/coolinfo.dat'
+flaskcoolpasswdfile = '/afs/cern.ch/user/a/atlidbs/private/flaskinfo.dat'
 proddqcoolpasswdfile = '/afs/cern.ch/user/a/atlidbs/private/cooldqinfo.dat'
 tier0dbinfofile = '/afs/cern.ch/user/a/atlidbs/private/t0dbinfo.dat'
 beamspottag = ''
@@ -234,7 +235,6 @@ def run_jobs(script, ds_name, task_name, params, *args):
     print (subprocess.list2cmdline(arg_list))
     subprocess.check_call(arg_list)
 
-
 #
 # Upload any SQLite file to COOL (independent of task, w/o book keeping)
 #
@@ -248,6 +248,12 @@ if cmd == 'upload' and len(cmdargs) == 1:
     except:
         fail('Unable to determine COOL upload password')
 
+    try:
+        with open(flaskcoolpasswdfile, 'r') as flaskpasswdfile:
+            flaskpasswd = flaskpasswdfile.read().strip()
+    except:
+        fail('Unable to determine FLASK upload password')
+
     print()
     print ('Beam spot file:   ', dbfile)
     print ('Uploading to tag: ', options.beamspottag)
@@ -257,7 +263,8 @@ if cmd == 'upload' and len(cmdargs) == 1:
         dbfile))
 
     print()
-    stat = os.system('/afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --nomail %s %s --folder /Indet/Beampos --tag %s --retag %s --destdb %s %s %s ATLAS_COOLWRITE ATLAS_COOLOFL_INDET_W %s' % (
+    stat = os.system('/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask --nobackup --client_id cool-flask-beamspot-client --client_secret %s --nomail %s %s --folder /Indet/Beampos --tag %s --retag %s --destdb %s %s %s ATONR_COOLOFL_GPN ATLAS_COOLOFL_INDET_W %s' % (
+        flaskpasswd,
         '--batch' if options.batch else '',
         ('--ignoremode %s' % options.ignoremode) if options.ignoremode else '',
         options.srctag,
@@ -337,14 +344,25 @@ if cmd=='runMon' and len(args)==3:
                 '--directory', dataset,
                 '--queue', '"tomorrow"')
     else:
-        queue = options.batch_queue or '"longlunch"'
+        queue = options.batch_queue or '"tomorrow"'
         print('Queue: ', queue )
-        run_jobs(options.monjoboptions, dsname, '{}.{}'.format(options.montaskname, tag),
-                {
-                    'cmdjobpreprocessing' : 'export STAGE_SVCCLASS=atlcal; export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase',
-                    'useBeamSpot' : True,
-                    'beamspottag' : options.beamspottag,
-                    },
+
+        params = {
+            'cmdjobpreprocessing' : 'export STAGE_SVCCLASS=atlcal; export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase',
+            'useBeamSpot' : True,
+            'beamspottag' : options.beamspottag
+            }
+        
+        # Additional job parameters
+        for s in options.params.split(', '):
+            if s:
+                try:
+                    p = s.split('=',1)
+                    params[p[0].strip()] = eval(p[1].strip())
+                except:
+                    print ('\nERROR parsing user parameter',p,'- parameter will be ignored')
+
+        run_jobs(options.monjoboptions, dsname, '{}.{}'.format(options.montaskname, tag),params,
                 '--lbperjob', 20,
                 '--match', options.filter,
                 '--exclude', r'.*\.TMP\.log.*',
@@ -533,13 +551,19 @@ if cmd=='upload' and len(args)==3:
         except:
             sys.exit('ERROR: Unable to determine COOL upload password')
 
+        try:
+            with open(flaskcoolpasswdfile, 'r') as flaskpasswdfile:
+                flaskpasswd = flaskpasswdfile.read().strip()
+        except:
+            fail('Unable to determine FLASK upload password')
+
         print ('\nData set:         ',dsname)
         print ('Beam spot file:   ',dbfile[0])
         print ('Uploading to tag: ',options.beamspottag)
         os.system('dumpBeamSpot.py -d %s -t %s %s' % (options.srcdbname,options.srctag,dbfile[0]))
 
         if options.ignoremode:
-            ignoremode = '--ignoremode %s' % options.ignoremode
+            ignoremode = '--passopt="--appendlocked --ignoremode %s"' % options.ignoremode
         else:
             ignoremode = ''
         if options.batch:
@@ -547,7 +571,8 @@ if cmd=='upload' and len(args)==3:
         else:
             batchmode = ''
 
-        stat = os.system('/afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --nomail  %s %s --folder /Indet/Beampos --tag %s --retag %s --destdb %s %s %s ATLAS_COOLWRITE ATLAS_COOLOFL_INDET_W %s' % (batchmode,ignoremode,options.srctag,options.beamspottag,options.destdbname,dbfile[0],options.srcdbname,passwd))
+        print('command: /afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask --nobackup --client_id cool-flask-beamspot-client --client_secret <flaskpassword> --nomail  %s %s --folder /Indet/Beampos --tag %s --retag %s --destdb %s %s %s ATONR_COOLOFL_GPN ATLAS_COOLOFL_INDET_W <password>' % (batchmode,ignoremode,options.srctag,options.beamspottag,options.destdbname,dbfile[0],options.srcdbname))
+        stat = os.system('/afs/cern.ch/user/a/atlcond/utilsproxy/AtlCoolMerge.py --flask --nobackup --client_id cool-flask-beamspot-client --client_secret %s --nomail  %s %s --folder /Indet/Beampos --tag %s --retag %s --destdb %s %s %s ATONR_COOLOFL_GPN ATLAS_COOLOFL_INDET_W %s' % (flaskpasswd,batchmode,ignoremode,options.srctag,options.beamspottag,options.destdbname,dbfile[0],options.srcdbname,passwd))
 
         if stat:
             print ("\n\nERROR: UPLOADING TO COOL FAILED - PLEASE CHECK CAREFULLY!\n\n")
@@ -667,7 +692,6 @@ if cmd=='queryT0' and len(args)==3:
 #
 # Run command over set of matching tasks
 #
-print (len(args))
 if cmd=='runCmd' and len(args)==4:
     dssel = args[1]
     tasksel = args[2]
@@ -799,10 +823,10 @@ if cmd=='runMonJobs' and len(args)<3:
 
             if useRun:
                 try:
-                    m = taskman.taskIterDict('*',['where RUNNR =',DbParam(runnr),'and DSNAME =',DbParam(dsname),'and TASKNAME =',DbParam(monTaskName),'order by UPDATED desc']).next()
-                    print ('       %-10s  %s'% (runnr,monTaskName))
+                    m = next(taskman.taskIterDict('*',["where RUNNR =",DbParam(runnr),"and DSNAME =",DbParam(dsname),"and TASKNAME =",DbParam(monTaskName),"order by UPDATED desc"]))
+                    print ('       %-10s  %s %s'% (runnr,dsname,monTaskName))
                 except:
-                    print ('    *  %-10s  %s'% (runnr,'--- no monitoring task found ---'))
+                    print ('    *  %-10s  %s %s'% (runnr,dsname,'--- no monitoring task found ---'))
                     taskList.append(t)
                     pass
 
@@ -879,8 +903,12 @@ if cmd=='runMonJobs' and len(args)<3:
             if int(runnr)<240000:
                 print ('   ',r)
             print ('... Submitting monitoring task')
-            queue = options.batch_queue or '\'\"longlunch\"\''
-            cmd = 'beamspotman --eospath=%s -p %s -s %s -f \'.*\\.%s\\..*\' -t %s --queue %s --montaskname %s runMon %i %s' % (eospath,ptag,stream,filter,bstag,queue,monTaskName,int(runnr),datatag)
+            queue = options.batch_queue or '\'\"tomorrow\"\''
+            paramValues = ''
+            if options.params:
+                paramValues = '--params \''+options.params+'\''
+
+            cmd = 'beamspotman --eospath=%s -p %s -s %s -f \'.*\\.%s\\..*\' -t %s --queue %s %s --montaskname %s runMon %i %s' % (eospath,ptag,stream,filter,bstag,queue,paramValues,monTaskName,int(runnr),datatag)
             print (cmd)
             sys.stdout.flush()
             status = os.system(cmd) >> 8   # Convert to standard Unix exit code
@@ -917,7 +945,7 @@ if cmd=='archive' and len(args)==3:
         path = archivepath
         onDiskCode = TaskManager.OnDiskCodes.get('ALLONDISK',None)
         archivedCode = TaskManager.OnDiskCodes.get('RESULTSONDISK',None) if options.resultsondisk else TaskManager.OnDiskCodes.get('ARCHIVED',None)
-        exceptList = ['*dqflags.txt', '*.gif', '*.pdf', '*.config.py*', '*.argdict.gpickle', '*.AveBeamSpot.log', '*.PlotBeamSpotCompareReproc.log', '*.sh', '*.BeamSpotNt.*', '*.BeamSpotGlobalNt.log', '*.status.*', '*.exit.*']
+        exceptList = ['*dqflags.txt', '*.gif', '*.pdf', '*.config.py*', '*.argdict.gpickle', '*.AveBeamSpot.log', '*.PlotBeamSpotCompareReproc.log', '*.sh', '*.BeamSpotNt*', '*.BeamSpotGlobalNt.log', '*.status.*', '*.exit.*']
 
         for (dsname,taskname) in taskList:
             t = taskman.getTaskDict(dsname,taskname)
@@ -1510,7 +1538,7 @@ if cmd=='runBCIDJobs' and len(args)<3:
             bcidTaskName = 'BCID.%s.%s' % (taskName,datatag)
 
             try:
-                m = taskman.taskIterDict('*',['where RUNNR =',DbParam(runnr),'and DSNAME =',DbParam(dsname),'and TASKNAME =',DbParam(bcidTaskName),'order by UPDATED desc']).next()
+                m = next(taskman.taskIterDict('*',['where RUNNR =',DbParam(runnr),'and DSNAME =',DbParam(dsname),'and TASKNAME =',DbParam(bcidTaskName),'order by UPDATED desc']))
                 print ('       %-10s  %s'% (runnr,bcidTaskName))
             except:
                 print ('    *  %-10s  %s'% (runnr,'--- no BCID task found ---'))
