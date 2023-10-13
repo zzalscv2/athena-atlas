@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArCaliWaveAverage.h"
@@ -224,7 +224,7 @@ StatusCode LArCaliWaveAverage::stop() {
   SymmetricChannels() returns a vector of HWIdentifier corresponding 
   to the list of channels in the same et/phi position in all other FTs
 */
-std::vector<HWIdentifier> LArCaliWaveAverage::SymmetricChannels(HWIdentifier ChID, std::vector<unsigned> ChannelsNotToUse, const LArOnOffIdMapping* cabling) 
+std::vector<HWIdentifier> LArCaliWaveAverage::SymmetricChannels(HWIdentifier ChID, const std::vector<unsigned>& ChannelsNotToUse, const LArOnOffIdMapping* cabling) 
 {
   ATH_MSG_VERBOSE ( "Seeking symmetric cells for channel 0x" << MSG::hex << ChID << MSG::dec );
   

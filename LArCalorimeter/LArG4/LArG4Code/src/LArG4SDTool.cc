@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4SDTool.h"
@@ -81,7 +81,7 @@ void LArG4SDTool::setupHelpers( LArG4CalibSD* an_sd ) const
   an_sd->setupHelpers( m_larEmID, m_larFcalID, m_larHecID, m_caloDmID );
 }
 
-void LArG4SDTool::setupAllSDs(std::map<G4VSensitiveDetector*,std::vector<std::string>*> configuration) const
+void LArG4SDTool::setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<std::string>*>& configuration) const
 {
   //  // Grab the user detector construction
   //  G4RunManager* rm = G4RunManager::GetRunManager();

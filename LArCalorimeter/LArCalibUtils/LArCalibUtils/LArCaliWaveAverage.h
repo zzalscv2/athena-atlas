@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,7 +49,7 @@ private:
   
   std::vector<unsigned> m_chids;
 
-  std::vector<HWIdentifier> SymmetricChannels(HWIdentifier ChID,std::vector<unsigned> ChannelsNotToUse, const LArOnOffIdMapping* cabling );
+  std::vector<HWIdentifier> SymmetricChannels(HWIdentifier ChID,const std::vector<unsigned>& ChannelsNotToUse, const LArOnOffIdMapping* cabling );
   LArCaliWave WaveAverage(std::vector<LArCaliWave> ToBeAveraged);
 
 };

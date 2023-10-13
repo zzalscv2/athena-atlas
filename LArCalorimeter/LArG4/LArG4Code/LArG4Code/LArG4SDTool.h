@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4BARRELSDTOOL_H
@@ -62,9 +62,8 @@ class LArG4SDTool : public SensitiveDetectorBase
 
   /// Method actually doing the work to assign all of these SDs
   /// FIXME: this argument type is nasty:
-  ///  - passed by value instead of ref-to-const
   ///  - non-const ptr to list of strings
-  void setupAllSDs(std::map<G4VSensitiveDetector*,std::vector<std::string>*> configuration) const;
+  void setupAllSDs(const std::map<G4VSensitiveDetector*,std::vector<std::string>*>& configuration) const;
 
   /// Pointers to the identifier helpers
   const LArEM_ID*       m_larEmID;
