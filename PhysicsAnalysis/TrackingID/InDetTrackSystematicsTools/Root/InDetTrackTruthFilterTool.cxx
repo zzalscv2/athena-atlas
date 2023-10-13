@@ -61,6 +61,7 @@ namespace InDet {
     declareProperty("fFromC", m_fFromC);
     declareProperty("fFromB", m_fFromB);
     declareProperty("trkEffSystScale", m_trkEffSystScale);
+    declareProperty("doLRTSystematics", m_doLRTSystematics);
 
     declareProperty("calibFileNomEff", m_calibFileNomEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
     declareProperty("calibFileLRTEff", m_calibFileLRTEff = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root");
@@ -103,25 +104,27 @@ namespace InDet {
            m_calibFileNomEff,
            "OneMinusRatioEfficiencyVSEtaPt_AfterRebinning_NominalVSQGSP_BIC_TightPrimary") );
 
-    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-           m_trkEffHistLRTGlobal,
-           m_calibFileLRTEff,
-           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp5Overall_LRT") );
-    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-           m_trkEffHistLRTIBL,
-           m_calibFileLRTEff,
-           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp10IBL_LRT") );
-    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-           m_trkEffHistLRTPP0,
-           m_calibFileLRTEff,
-           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp25PP0_LRT") );
-    ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
-           m_trkEffHistLRTPhysModel,
-           m_calibFileLRTEff,
-           "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSQGSP_LRT") );
-
     ATH_MSG_INFO( "Using for nominal track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileNomEff) );
-    ATH_MSG_INFO( "Using for LRT track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileLRTEff) );
+
+    if(m_doLRTSystematics) {
+      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+             m_trkEffHistLRTGlobal,
+             m_calibFileLRTEff,
+             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp5Overall_LRT") );
+      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+             m_trkEffHistLRTIBL,
+             m_calibFileLRTEff,
+             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp10IBL_LRT") );
+      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+             m_trkEffHistLRTPP0,
+             m_calibFileLRTEff,
+             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSp25PP0_LRT") );
+      ATH_CHECK ( initTrkEffSystHistogram( m_trkEffSystScale,
+             m_trkEffHistLRTPhysModel,
+             m_calibFileLRTEff,
+             "OneMinusRatioEfficiencyVSEtaProdR_AfterRebinning_NominalVSQGSP_LRT") );
+      ATH_MSG_INFO( "Using for LRT track efficiency the calibration file " << PathResolverFindCalibFile(m_calibFileLRTEff) );
+    }
 
     ATH_CHECK ( m_trackOriginTool.retrieve() );
 
@@ -148,10 +151,12 @@ namespace InDet {
     delete m_trkEffHistTightIBL;
     delete m_trkEffHistTightPP0;
     delete m_trkEffHistTightPhysModel;
-    delete m_trkEffHistLRTGlobal;
-    delete m_trkEffHistLRTIBL;
-    delete m_trkEffHistLRTPP0;
-    delete m_trkEffHistLRTPhysModel;
+    if(m_doLRTSystematics) {
+      delete m_trkEffHistLRTGlobal;
+      delete m_trkEffHistLRTIBL;
+      delete m_trkEffHistLRTPP0;
+      delete m_trkEffHistLRTPhysModel;
+    }
 
     m_fPrimHistogram = nullptr;
     m_fSecHistogram = nullptr;
@@ -276,34 +281,35 @@ namespace InDet {
       }
     }
 
-    const ElementLink< xAOD::TruthParticleContainer > &truthParticleLink = track->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
-    if(truthParticleLink.isValid()) {
-      const xAOD::TruthParticle *truthParticle = *truthParticleLink;
-      double eta = truthParticle->eta();
+    if(m_doLRTSystematics) {
+      const ElementLink< xAOD::TruthParticleContainer > &truthParticleLink = track->auxdata< ElementLink< xAOD::TruthParticleContainer > >("truthParticleLink");
+      if(truthParticleLink.isValid()) {
+        const xAOD::TruthParticle *truthParticle = *truthParticleLink;
+        double eta = truthParticle->eta();
 
-      const ElementLink< xAOD::TruthVertexContainer > &truthVertexLink = truthParticle->auxdata< ElementLink< xAOD::TruthVertexContainer > >("prodVtxLink");
-      if(truthVertexLink.isValid()) {
-        const xAOD::TruthVertex *truthVertex = *truthVertexLink;
-        double prodR = truthVertex->perp();
+        const ElementLink< xAOD::TruthVertexContainer > &truthVertexLink = truthParticle->auxdata< ElementLink< xAOD::TruthVertexContainer > >("prodVtxLink");
+        if(truthVertexLink.isValid()) {
+          const xAOD::TruthVertex *truthVertex = *truthVertexLink;
+          double prodR = truthVertex->perp();
+          if ( isActive( TRK_EFF_LARGED0_GLOBAL ) ) {
+            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTGlobal, eta, prodR, false);
+            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+          }
 
-        if ( isActive( TRK_EFF_LARGED0_GLOBAL ) ) {
-          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTGlobal, eta, prodR, false);
-          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-        }
+          if ( isActive( TRK_EFF_LARGED0_IBL ) ) {
+            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTIBL, eta, prodR, false);
+            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+          }
 
-        if ( isActive( TRK_EFF_LARGED0_IBL ) ) {
-          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTIBL, eta, prodR, false);
-          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-        }
+          if ( isActive( TRK_EFF_LARGED0_PP0 ) ) {
+            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPP0, eta, prodR, false);
+            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+          }
 
-        if ( isActive( TRK_EFF_LARGED0_PP0 ) ) {
-          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPP0, eta, prodR, false);
-          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
-        }
-
-        if ( isActive( TRK_EFF_LARGED0_PHYSMODEL ) ) {
-          float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPhysModel, eta, prodR, false);
-          if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+          if ( isActive( TRK_EFF_LARGED0_PHYSMODEL ) ) {
+            float fTrkEffSyst = getFractionDropped(1.0, m_trkEffHistLRTPhysModel, eta, prodR, false);
+            if(m_rnd->Uniform(0, 1) < fTrkEffSyst) return false;
+          }
         }
       }
     }
