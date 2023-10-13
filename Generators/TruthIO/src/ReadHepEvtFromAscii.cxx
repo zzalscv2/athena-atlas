@@ -4,7 +4,7 @@
 #ifndef HEPMC3
 /// This class is only needed for HepMC2-based builds
 
-#include <set>
+
 
 #include "TruthIO/ReadHepEvtFromAscii.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -15,7 +15,8 @@
 #include "GaudiKernel/DataSvc.h"
 
 #include "StoreGate/StoreGateSvc.h"
-
+#include <set>
+#include <array>
 
 
 bool ReadHepEvtFromAscii::read_hepevt_event_header()
@@ -48,8 +49,8 @@ bool ReadHepEvtFromAscii::read_hepevt_event_header()
 }
 bool ReadHepEvtFromAscii::read_hepevt_particle( int i)
 {
-    const size_t       max_p_buffer_size=512;
-    const size_t       max_v_buffer_size=512;
+    static constexpr size_t max_p_buffer_size=512;
+    static constexpr size_t max_v_buffer_size=512;
     char buf_p[max_p_buffer_size];
     char buf_v[max_v_buffer_size];
     std::array<int, 6> intcodes {};
