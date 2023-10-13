@@ -1,21 +1,13 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
+from RecJobTransforms.RecoSteering import RecoSteering
 
-def fromRunArgs(runArgs):
-
-    from AthenaCommon.Logging import logging
-    log = logging.getLogger('RAWtoDAOD_TLA')
-    log.info('****************** STARTING TLA RAW Decoding (RAWtoDAOD_TLA) *****************')
-
-    log.info('**** Transformation run arguments')
-    log.info(str(runArgs))
-
-    import time
-    timeStart = time.time()
+from AthenaCommon.Logging import logging
+log = logging.getLogger('RAWtoDAOD_TLA')
 
 
-
+def configureFlags(runArgs):
     # some basic settings here...
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
@@ -36,9 +28,28 @@ def fromRunArgs(runArgs):
 
 
     # Set non-default flags 
-    flags.Trigger.decodeHLT = False
-    flags.Trigger.L1.doCTP = False
+    flags.Trigger.doLVL1=False
     flags.Trigger.DecisionMakerValidation.Execute = False
+    flags.Trigger.doNavigationSlimming = False
+    flags.Trigger.AODEDMSet='PhysicsTLA'
+
+    from AthenaConfiguration.Enums import ProductionStep
+    flags.Common.ProductionStep=ProductionStep.Reconstruction
+
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import disableDetectors, allDetectors
+    disableDetectors(
+        flags, toggle_geometry=True,
+        detectors=allDetectors,
+    )
+
+    # Print reco domain status
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(flags)
+
+    # Setup perfmon flags from runargs
+    from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # process pre-include/exec
     processPreInclude(runArgs, flags)
@@ -50,20 +61,40 @@ def fromRunArgs(runArgs):
     # Lock flags
     flags.lock()
 
+    return flags
+
+
+
+def fromRunArgs(runArgs):
+
+    log.info('****************** STARTING TLA RAW Decoding + PEB reconstruction (RAWtoDAOD_TLABTAGPEB) *****************')
+
+    log.info('**** Transformation run arguments')
+    log.info(str(runArgs))
+
+    import time
+    timeStart = time.time()
+
+    flags = configureFlags(runArgs)
     log.info("Configuring according to flag values listed below")
     flags.dump()
-    
-    # import the main config
-    from TrigTLAMonitoring.decodeBS_TLA_AOD import setupDecodeCfgCA as TLADecodeConfig
-    cfg = TLADecodeConfig(flags)
 
-    # process post-include/exec
+    cfg = RecoSteering(flags)
+
+    # import the TLA decoding
+    cfg.flagPerfmonDomain('Trigger')
+    from TrigTLAMonitoring.decodeBS_TLA_AOD import outputCfg
+    cfg.merge( outputCfg(flags) )
+
+    # Post-include
     processPostInclude(runArgs, flags, cfg)
+
+    # Post-exec
     processPostExec(runArgs, flags, cfg)
 
-    # run the job
-    import sys
-    sys.exit(cfg.run().isFailure())
+    from AthenaCommon.Constants import INFO
+    if flags.Exec.OutputLevel <= INFO:
+        cfg.printConfig()
 
     # Run the final accumulator
     sc = cfg.run()
@@ -71,4 +102,4 @@ def fromRunArgs(runArgs):
     log.info("Run RAWtoDAOD_TLA_skeleton in %d seconds", timeFinal - timeStart)
 
     import sys
-    sys.exit(not sc.isSuccess())
+    sys.exit(sc.isFailure())

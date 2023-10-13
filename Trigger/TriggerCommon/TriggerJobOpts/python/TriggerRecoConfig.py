@@ -58,8 +58,7 @@ def TriggerRecoCfgData(flags):
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run1Run2DecisionMakerCfg
         acc.merge (Run1Run2DecisionMakerCfg(flags) )
 
-        acc.merge(Run2Run1NavigationSlimingCfg(flags))
-
+        acc.merge(Run2Run1NavigationSlimmingCfg(flags))
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
 
@@ -115,7 +114,7 @@ def TriggerRecoCfgMC(flags):
     acc = ComponentAccumulator()
 
     # This will kick into action for Run 2 (Run-1 gets blocked above)
-    acc.merge(Run2Run1NavigationSlimingCfg(flags))
+    acc.merge(Run2Run1NavigationSlimmingCfg(flags))
 
     # This may kick into action for Run 2, based on flags.Trigger.doEDMVersionConversion
     from TrigNavTools.NavConverterConfig import NavConverterCfg
@@ -199,16 +198,16 @@ def TriggerEDMCfg(flags):
 
     return acc
 
-def Run2Run1NavigationSlimingCfg(flags):
+def Run2Run1NavigationSlimmingCfg(flags):
     """Configures legacy Run1/2 navigation slimming"""
     acc = ComponentAccumulator()
 
     if flags.Trigger.decodeHLT is False:
-        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.decodeHLT is False")
+        log.debug("Run2Run1NavigationSlimmingCfg: Nothing to do as Trigger.decodeHLT is False")
         return acc
 
     if flags.Trigger.doNavigationSlimming is False:
-        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.doNavigationSlimming is False")
+        log.debug("Run2Run1NavigationSlimmingCfg: Nothing to do as Trigger.doNavigationSlimming is False")
         return acc
 
     if flags.Trigger.EDMVersion >= 3:
@@ -368,21 +367,70 @@ def Run3TriggerBSUnpackingCfg(flags):
         return acc
 
     from AthenaCommon.CFElements import seqAND
-    decoder = CompFactory.HLTResultMTByteStreamDecoderAlg()
-    deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TrigDeserialiser")
-
-    acc.addSequence( seqAND("HLTDecodingSeq") )
-    acc.addEventAlgo( decoder, "HLTDecodingSeq")
-    acc.addEventAlgo( deserialiser, "HLTDecodingSeq")
-
-    # Create empty EDM collections for types not created online
+    from TrigEDMConfig.DataScoutingInfo import (
+        getDataScoutingStreams, getDataScoutingTypeFromStream,
+        getFullHLTResultID, getDataScoutingResultID,
+    )
     from TriggerJobOpts.TriggerConfig import triggerEDMGapFillerCfg
-    gapFiller = triggerEDMGapFillerCfg(flags, edmSet=['BS'])
-    # Add output dependency on Navigation to enforce ordering
     from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
-    gapFiller.getPrimary().ExtraOutputs += [('xAOD::TrigCompositeContainer',
-                                             'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
-    acc.merge( gapFiller, "HLTDecodingSeq" )
+    ids_to_decode = []
+
+    # Map the trigger stream to the event building type
+    if flags.Input.TriggerStream in getDataScoutingStreams():
+        dstype = getDataScoutingTypeFromStream(flags.Input.TriggerStream)
+        # If writing a Data Scouting EDM format, only decode that ID
+        log.info(f'Configuring BS decoding/deserialisation of HLT result for \'{dstype}\' only')
+        ids_to_decode = [getDataScoutingResultID(dstype)]
+        id_to_deserialise = {dstype: getDataScoutingResultID(dstype)}
+    else:
+        # Set up to read the full HLT result ID
+        ids_to_decode = [getFullHLTResultID()]
+        id_to_deserialise = {'': getFullHLTResultID()}
+
+        # In addition, decode any available IDs. We need to check which streams were active in the file.
+        log.debug('Configuring BS decoding of all HLT results and deserialisation of full HLT')
+        partialHLT_streams = [
+            stream for stream in getDataScoutingStreams() if stream.split('_')[1] in flags.Input.ProcessingTags
+        ]
+        partialHLT_dstypes = [
+            getDataScoutingTypeFromStream(stream) for stream in partialHLT_streams
+        ]
+        partialHLT_dsids = [
+            getDataScoutingResultID(dstype) for dstype in partialHLT_dstypes
+        ]
+        log.debug(f'Configuring BS decoding and deserialisation of all HLT results: full HLT + {partialHLT_dstypes}')
+
+        ids_to_decode += partialHLT_dsids
+        # A bit ugly but avoid importing the actual dict to ensure we never modify it
+        id_to_deserialise.update({
+            dstype:dsid for dstype,dsid in zip(partialHLT_dstypes, partialHLT_dsids)
+        })
+
+    decoder = CompFactory.HLTResultMTByteStreamDecoderAlg(ModuleIdsToDecode=ids_to_decode)
+    acc.addSequence(seqAND("HLTDecodingSeq"))
+    acc.addEventAlgo( decoder, "HLTDecodingSeq")
+    for dstype, id in id_to_deserialise.items():
+        deserialiser = CompFactory.TriggerEDMDeserialiserAlg(
+            f"TrigDeserialiser{dstype}",
+            ModuleID=id,
+        )
+        # Full HLT result also has slimmed navigation summary
+        if dstype == '':
+            deserialiser.ExtraOutputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
+        else:
+            deserialiser.SkipDuplicateRecords = True
+        acc.addEventAlgo( deserialiser, "HLTDecodingSeq")
+
+        if dstype=='':
+            # Create empty EDM collections for types not created online
+            gapFiller = triggerEDMGapFillerCfg(flags, edmSet=['BS'])
+            # Add output dependency on Navigation to enforce ordering
+            gapFiller.getPrimary().ExtraOutputs += [('xAOD::TrigCompositeContainer',
+                                                    'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
+        else:
+            # Create empty EDM collections for types not created online
+            gapFiller = triggerEDMGapFillerCfg(flags, edmSet=[dstype])
+        acc.merge( gapFiller, "HLTDecodingSeq" )
 
     log.debug("Configured HLT result BS decoding sequence")
     return acc

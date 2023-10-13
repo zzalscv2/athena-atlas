@@ -276,6 +276,13 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
     const std::string key{ descr[1] };
     const size_t bsize{ PayloadHelpers::dataSize( start ) };
 
+    if( m_skipDuplicates && evtStore()->contains(clid,m_prefix+key) ) {
+      ATH_MSG_DEBUG("Skipping duplicate record " << m_prefix+key);
+      // Advance
+      start = PayloadHelpers::toNextFragment( start );
+      continue;
+    }
+
     ATH_MSG_DEBUG( "fragment #" << fragmentCount <<
                    " type: "<< transientTypeName << " (" << transientTypeInfoName << ")" <<
                    " persistent type: " << persistentTypeName << " key: " << key << " size: " << bsize );
@@ -381,9 +388,13 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
       }
 
     } else if ( isxAODDecoration ) {
-      ATH_CHECK( currentAuxStore != nullptr and xAODInterfaceContainer != nullptr );
-      ATH_CHECK( deserialiseDynAux( transientTypeName, persistentTypeName, key, obj,
-                                    currentAuxStore, xAODInterfaceContainer ) );
+      if(m_skipDuplicates and (currentAuxStore == nullptr || xAODInterfaceContainer == nullptr)) {
+        ATH_MSG_DEBUG("Decoration " << key << " encountered with no active container. Assume this was already handled.");
+      } else {
+        ATH_CHECK( currentAuxStore != nullptr and xAODInterfaceContainer != nullptr );
+        ATH_CHECK( deserialiseDynAux( transientTypeName, persistentTypeName, key, obj,
+                                      currentAuxStore, xAODInterfaceContainer ) );
+      }
     }
     previousKey = key;
   }
