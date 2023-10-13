@@ -216,7 +216,7 @@ ActsTrk::ActsToTrkConverterTool::trkTrackParametersToActsParameters(
       static_cast<Acts::PdgParticle>(
         m_pdgToParticleHypothesis.convert(hypothesis, atlasParameter.charge())));
   Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{static_cast<float>(atlasParameter.charge())}};
+    absPdg, mass, Acts::AnyCharge{std::abs(static_cast<float>(atlasParameter.charge()))}};
 
   return Acts::BoundTrackParameters(actsSurface, params,
                                     cov, actsHypothesis);
