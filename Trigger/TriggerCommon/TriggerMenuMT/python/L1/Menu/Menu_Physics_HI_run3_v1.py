@@ -139,7 +139,7 @@ def defineMenu():
         'L1_eEM1_VTE200', 'L1_2eEM1_VTE200', 'L1_2eEM2_VTE200', 'L1_eEM9_VTE200',
         
         #UPC - calo, MBTS, calo  
-        'L1_ZDC_XOR_VTE200', 'L1_VZDC_A_VZDC_C_TE5_VTE200',
+        'L1_ZDC_XOR_VTE200', 'L1_VZDC_A_VZDC_C_TE5_VTE200', 'L1_VZDC_A_VZDC_C_TE10_VTE200',
         'L1_ZDC_A_VZDC_C_VTE200', 'L1_VZDC_A_ZDC_C_VTE200',
         'L1_MBTS_1_ZDC_A_VZDC_C_VTE200', 'L1_MBTS_1_VZDC_A_ZDC_C_VTE200',
         

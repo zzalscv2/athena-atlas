@@ -1350,6 +1350,7 @@ class ItemDef:
 
         MenuItem('L1_VZDC_A_VZDC_C_TE5_VTE200' ).setLogic( PHYS_VZDC_A_VZDC_C & d.TE5 & Not(d.TE200)   & physcond)
         MenuItem('L1_VZDC_A_VZDC_C_jTE5_VjTE200' ).setLogic( PHYS_VZDC_A_VZDC_C & d.jTE5 & Not(d.jTE200)   & physcond)
+        MenuItem('L1_VZDC_A_VZDC_C_TE10_VTE200' ).setLogic( PHYS_VZDC_A_VZDC_C & d.TE10 & Not(d.TE200)   & physcond)
         MenuItem('L1_ZDC_5XOR_TE5_VTE200'      ).setLogic( PHYS_ZDC_5XOR & d.TE5 & Not(d.TE200)    & physcond)
         MenuItem('L1_ZDC_5XOR_jTE5_VjTE200'      ).setLogic( PHYS_ZDC_5XOR & d.jTE5 & Not(d.jTE200)    & physcond)
         MenuItem('L1_ZDC_XOR4_TE5_VTE200'   ).setLogic( PHYS_ZDC_XOR4 & d.TE5 & Not(d.TE200)    & physcond)
