@@ -51,6 +51,7 @@ if not 'ConstantKFactor' in jobConfig:            jobConfig['ConstantKFactor'] =
 
 #Fit Options for official fit only
 if not 'MaxSigmaTr' in jobConfig:                    jobConfig['MaxSigmaTr'] = 20.
+if not 'MaxSigmaVtx' in jobConfig:                   jobConfig['MaxSigmaVtx'] = 2.0
 if not 'TruncatedRMS' in jobConfig:                  jobConfig['TruncatedRMS'] = True
 if not 'SetInitialRMS' in jobConfig:                 jobConfig['SetInitialRMS'] = False
 if not 'OutlierChi2Tr' in jobConfig:                 jobConfig['OutlierChi2Tr'] = 20.
@@ -62,12 +63,32 @@ if not 'RooFitMaxTransverseErr' in jobConfig:        jobConfig['RooFitMaxTransve
 if not 'FixWidth' in jobConfig:                      jobConfig['FixWidth'] =  False
 
 # General job setup
+#------------------------------
+# The following lines is the reminder on how different levels of messages should be setup
+# Please do not remove these lines as they can be useful in the future
+#from AthenaCommon.Logging import log
+#from AthenaCommon.Constants import DEBUG
+#from AthenaCommon.Constants import INFO
+#from AthenaCommon.Constants import WARNING
+#log.setLevel(INFO)
+#------------------------------
+
 from AthenaCommon.ConcurrencyFlags import jobproperties as jp
 print ( 'Number of threads: ',jp.ConcurrencyFlags.NumThreads()  )   
 
 include("InDetBeamSpotExample/AutoConfFragment.py")
 include("InDetBeamSpotExample/ReadInDetRecFragment.py")
 include("InDetBeamSpotExample/JobSetupFragment.py")
+
+#Suppress using beamspot information in xAOD (it is not used for calibration)
+lumiDataKey = ''
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
+from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvTool, xAODMaker__EventInfoCnvAlg
+tool = xAODMaker__EventInfoCnvTool (LumiDataKey = lumiDataKey)
+tool.DisableBeamSpot = True
+alg = xAODMaker__EventInfoCnvAlg (CnvTool = tool)
+condSeq += alg
 
 if 'UseBCID' in jobConfig and jobConfig['UseBCID'] != []:
     import InDetBeamSpotExample.FilterUtils as FilterUtils
@@ -95,6 +116,8 @@ ToolSvc += CfgMgr.InDet__InDetBeamSpotVertex(name            = 'InDetBeamSpotVer
                                              FixWidth        = jobConfig['FixWidth'],
                                              TruncatedRMS    = jobConfig['TruncatedRMS'],
                                              SetInitialRMS   = jobConfig['SetInitialRMS'],
+                                             InitParMaxSigmaX = jobConfig['MaxSigmaVtx'],
+                                             InitParMaxSigmaY = jobConfig['MaxSigmaVtx'],
                                              OutputLevel     = min(INFO,jobConfig['outputlevel']))
 
 

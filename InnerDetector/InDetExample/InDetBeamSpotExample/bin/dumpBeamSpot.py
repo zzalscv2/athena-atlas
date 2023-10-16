@@ -13,7 +13,7 @@ from CoolConvUtilities import AtlCoolTool
 
 from optparse import OptionParser
 parser = OptionParser(usage=__usage__, version=__version__)
-parser.add_option('-d', '--dbname', dest='dbname', default='BEAMSPOT', help='database instance name (default: BEAMSPOT)')
+parser.add_option('-d', '--dbname', dest='dbname', default='CONDBR2', help='database instance name (default: CONDBR2)')
 parser.add_option('-c', '--connstring', dest='connstring', action='store_true', help='use beamspotfile as connectionstring (e.g. COOLOFL_INDET/OFLP200)')
 parser.add_option('-f', '--folder', dest='folder', default='/Indet/Beampos', help='COOL folder (default: /Indet/Beampos)')
 parser.add_option('-t', '--tag', dest='tag', default='nominal', help='folder tag')

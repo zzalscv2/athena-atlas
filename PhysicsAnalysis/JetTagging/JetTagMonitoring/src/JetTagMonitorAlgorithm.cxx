@@ -80,7 +80,6 @@ StatusCode JetTagMonitorAlgorithm::initialize() {
   ATH_CHECK(m_MuonPtIsoDecorKey.initialize());
   ATH_CHECK(m_EleEtIsoDecorKey.initialize());
   ATH_CHECK(m_ElePtIsoDecorKey.initialize());
-
   return StatusCode::SUCCESS;
 }
 
