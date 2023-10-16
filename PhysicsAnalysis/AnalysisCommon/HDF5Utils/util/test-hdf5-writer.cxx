@@ -11,10 +11,12 @@ struct out_t
   double dtype;
   float ftype;
   char ctype;
+  short stype;
   int itype;
   long ltype;
   long long lltype;
   unsigned char uctype;
+  unsigned short ustype;
   unsigned int uitype;
   unsigned long ultype;
   unsigned long long ulltype;
@@ -24,20 +26,20 @@ using consumer_t = H5Utils::Consumers<const out_t&>;
 
 consumer_t getConsumers() {
   consumer_t consumers;
-  consumers.add(
-    "half",
-    [](const out_t& o) -> float { return o.ftype; },
-    0,
-    H5Utils::Compression::HALF_PRECISION);
+  auto half = H5Utils::Compression::HALF_PRECISION;
+  consumers.add("half" , [](const out_t& o) { return o.ftype; }, 0, half);
+  consumers.add("dhalf", [](const out_t& o) { return o.dtype; }, 0, half);
 #define ADD(NAME) consumers.add(#NAME, [](const out_t& o){ return o.NAME;}, 0)
   ADD(ftype);
   ADD(dtype);
   ADD(btype);
   ADD(ctype);
+  ADD(stype);
   ADD(itype);
   ADD(ltype);
   ADD(lltype);
   ADD(uctype);
+  ADD(ustype);
   ADD(uitype);
   ADD(ultype);
   ADD(ulltype);
@@ -57,10 +59,12 @@ std::vector<out_t> getOutputs(int offset, size_t length, float factor) {
     out.dtype = factored;
     out.ftype = factored;
     out.ctype = shifted;
+    out.stype = shifted;
     out.itype = shifted;
     out.ltype = shifted;
     out.lltype = shifted;
     out.uctype = shifted;
+    out.ustype = shifted;
     out.uitype = shifted;
     out.ultype = shifted;
     out.ulltype = shifted;
