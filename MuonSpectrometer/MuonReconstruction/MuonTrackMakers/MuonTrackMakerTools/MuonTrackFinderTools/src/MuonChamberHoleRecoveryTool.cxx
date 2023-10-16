@@ -201,20 +201,21 @@ namespace Muon {
             /// New chamber added
             if (chambInStation.insert(m_idHelperSvc->chamberId(trkRecov.tsosId)).second) {
                 if (m_idHelperSvc->isMdt(trkRecov.tsosId)) {
-                    recoverMdtHits(ctx, *trkRecov.tsos()->trackParameters(), 
+                    recoverMdtHits(ctx, trkRecov.tsosId, *trkRecov.tsos()->trackParameters(), 
                                    trkRecov.chamberStates, trkRecov.layersOnTrk);
                 } else {
-                    recoverClusterHits(ctx, *trkRecov.tsos()->trackParameters(), 
+                    recoverClusterHits(ctx, trkRecov.tsosId, *trkRecov.tsos()->trackParameters(), 
                                        trkRecov.chamberStates, trkRecov.layersOnTrk);
                 }
             }
         } while (getNextMuonMeasurement(trkRecov, RecoveryState::CopyTarget::ChamberTrkStates));
         trkRecov.finalizeChamber();
     }
-    void MuonChamberHoleRecoveryTool::recoverMdtHits(const EventContext& ctx, const Trk::TrackParameters& pars,
+    void MuonChamberHoleRecoveryTool::recoverMdtHits(const EventContext& ctx, 
+                                                     const Identifier& chId,
+                                                     const Trk::TrackParameters& pars,
                                                      NewTrackStates& newStates, std::set<Identifier>& knownLayers) const {
         
-        const Identifier chId = pars.associatedSurface().associatedDetectorElementIdentifier();
                 
         std::set<Identifier> chHoles = holesInMdtChamber(ctx, pars.position(), pars.momentum().unit(), chId, knownLayers);
         ATH_MSG_VERBOSE(" chamber " << m_idHelperSvc->toStringChamber(chId) << " has holes " << chHoles.size());
@@ -292,21 +293,22 @@ namespace Muon {
             newStates.emplace_back(MuonTSOSHelper::createHoleTSOS(std::move(exPars)));
         }    
     }
-    void MuonChamberHoleRecoveryTool::recoverClusterHits(const EventContext& ctx, const Trk::TrackParameters& pars,
+    void MuonChamberHoleRecoveryTool::recoverClusterHits(const EventContext& ctx, 
+                                                         const Identifier& chambId,
+                                                         const Trk::TrackParameters& pars,
                                                          NewTrackStates& states, std::set<Identifier>& knownLayers) const {
 
-        const Identifier chambId = pars.associatedSurface().associatedDetectorElementIdentifier();
         NewTrackStates recovered{};
         if (m_idHelperSvc->isRpc(chambId)) {
-            recovered = recoverChamberClusters(ctx, m_key_rpc, pars, knownLayers);        
+            recovered = recoverChamberClusters(ctx, m_key_rpc, chambId, pars, knownLayers);        
         } else if (m_idHelperSvc->isTgc(chambId)) {
-            recovered = recoverChamberClusters(ctx, m_key_tgc, pars, knownLayers);
+            recovered = recoverChamberClusters(ctx, m_key_tgc, chambId, pars, knownLayers);
         } else if (m_idHelperSvc->isCsc(chambId)) {
-            recovered = recoverChamberClusters(ctx, m_key_csc, pars, knownLayers);
+            recovered = recoverChamberClusters(ctx, m_key_csc, chambId, pars, knownLayers);
         } else if (m_idHelperSvc->isMM(chambId)) {
-            recovered = recoverChamberClusters(ctx, m_key_mm, pars, knownLayers);
+            recovered = recoverChamberClusters(ctx, m_key_mm, chambId, pars, knownLayers);
         } else if (m_idHelperSvc->issTgc(chambId)) {
-            recovered = recoverChamberClusters(ctx, m_key_stgc, pars, knownLayers);
+            recovered = recoverChamberClusters(ctx, m_key_stgc, chambId, pars, knownLayers);
         }
         states.insert(states.end(), std::make_move_iterator(recovered.begin()), 
                                     std::make_move_iterator(recovered.end()));
@@ -317,7 +319,7 @@ namespace Muon {
                                                                       std::set<Identifier>& layIds,
                                                                       NewTrackStates& states) const {
         ATH_MSG_VERBOSE(" performing holes search in chamber " << m_idHelperSvc->toString(detElId));
-        recoverClusterHits(ctx, pars, states, layIds);
+        recoverClusterHits(ctx, detElId, pars, states, layIds);
     }
 
 
@@ -489,10 +491,10 @@ namespace Muon {
     }
     template <class Prd> NewTrackStates MuonChamberHoleRecoveryTool::recoverChamberClusters(const EventContext& ctx,
                                                                                             const SG::ReadHandleKey<MuonPrepDataContainerT<Prd>>& prdKey,
+                                                                                            const Identifier& detElId,
                                                                                             const Trk::TrackParameters& parsInChamb,
                                                                                             std::set<Identifier>& knownLayers) const {
         NewTrackStates recoveredStates{};
-        const Identifier detElId = parsInChamb.associatedSurface().associatedDetectorElementIdentifier();
         const std::set<Identifier> missingLayers = getHoleLayerIds(detElId, knownLayers);
         std::vector<const Prd*> prdCandidates = loadPrepDataHits(ctx, prdKey, missingLayers);
         //// Next extrapolate once the TrackParameters onto the surfaces

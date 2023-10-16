@@ -117,12 +117,18 @@ namespace Muon {
         std::set<Identifier> holesInMdtChamber(const EventContext& ctx, const Amg::Vector3D& position, const Amg::Vector3D& direction, 
                                                const Identifier& chId, const std::set<Identifier>& tubeIds) const;
 
-        void recoverMdtHits(const EventContext& ctx, const Trk::TrackParameters& pars,
-                            NewTrackStates& newStates, std::set<Identifier>& knownLayers) const;
+        void recoverMdtHits(const EventContext& ctx, 
+                            const Identifier& chId,
+                            const Trk::TrackParameters& pars,
+                            NewTrackStates& newStates, 
+                            std::set<Identifier>& knownLayers) const;
 
         
-        void recoverClusterHits(const EventContext& ctx, const Trk::TrackParameters& chambPars,
-                                NewTrackStates& newStates, std::set<Identifier>& knownLayers) const;
+        void recoverClusterHits(const EventContext& ctx, 
+                                const Identifier& chId,
+                                const Trk::TrackParameters& chambPars,
+                                NewTrackStates& newStates, 
+                                std::set<Identifier>& knownLayers) const;
 
 
 
@@ -140,6 +146,7 @@ namespace Muon {
         /// @brief Attempts to recover all missing hits in a chamber.
         template <class Prd> NewTrackStates recoverChamberClusters(const EventContext& ctx,
                                                                    const SG::ReadHandleKey<MuonPrepDataContainerT<Prd>>& prdKey,
+                                                                   const Identifier& chambId,
                                                                    const Trk::TrackParameters& parsInChamb,
                                                                    std::set<Identifier>& knownLayers) const;
         
