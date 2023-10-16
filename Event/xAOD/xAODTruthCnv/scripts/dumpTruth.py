@@ -86,5 +86,5 @@ if __name__=='__main__':
     from AthenaConfiguration.Utils import setupLoggingLevels
     setupLoggingLevels(flags, acc)
 
-    statusCode = acc.run(maxEvents = 1)
+    statusCode = acc.run()
     assert statusCode.isSuccess() is True, "Application execution did not succeed"
