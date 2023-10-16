@@ -7,11 +7,6 @@ atlas_subdir( RootFileTools )
 find_package( ROOT COMPONENTS RIO Core Tree )
 
 # Component(s) in the package:
-atlas_add_executable( mergePOOL
-   src/merge.cxx
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} PersistentDataModel )
-
 atlas_add_executable( compressionTool
    src/compressionTool.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

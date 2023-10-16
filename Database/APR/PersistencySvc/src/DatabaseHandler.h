@@ -69,9 +69,6 @@ namespace pool {
       /// Returns the file identifier
       const std::string& fid() const;
 
-      /// Returns the merged file identifier
-      pool::DbDatabase::Redirections redirections();
-
       /// Returns the technology identifier
       long technology() const;
 

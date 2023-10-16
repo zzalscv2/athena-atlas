@@ -51,7 +51,6 @@ class AODMergetest(unittest.TestCase):
         cmd.extend(inputs)
         cmd.extend(['--outputAOD_MRGFile', 'slowmerged.AOD.pool.root'])
         cmd.extend(['--outputTAGFile', 'slowTAG.pool.root'])
-        cmd.extend(['--fastPoolMerge', 'False'])
         cmd.extend(['--reportName', 'jobReportSlow'])
         msg.info('Will run this transform: {0}'.format(cmd))
         p = subprocess.Popen(cmd, shell = False, stdout = subprocess.PIPE, stderr = subprocess.STDOUT, bufsize = 1)

@@ -177,17 +177,6 @@ DbStatus DbStorageExplorer::dbParams( FileDescriptor& refDB,Parameters& vals)  {
   return Error;
 }
 
-/// Retrieve association link from token with redirection when file is merged.
-DbStatus DbStorageExplorer::dbRedirections(FileDescriptor& refDB, pool::DbDatabase::Redirections& redirections)  {
-  const DbConnection* dbc = dynamic_cast<const DbConnection*>(refDB.dbc());
-  if ( dbc )   {
-    DbDatabase  dbH(__DB(refDB));
-    redirections = dbH.redirections();
-    return Success;
-  }
-  return Error;
-}
-
 /// Access options for a given database domain.
 DbStatus DbStorageExplorer::getDomainOption( const SessionH  sessionH, DbOption& opt) {
   return m_pOuter->getDomainOption(sessionH, opt);

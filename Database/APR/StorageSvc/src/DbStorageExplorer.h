@@ -219,16 +219,6 @@ namespace pool  {
     virtual DbStatus dbParams(    FileDescriptor& refDB,
                                   Parameters& vals);
 
-    /// Retrieve association link from token with redirection when file is merged.
-    /** Retrieve all user parameters from the database.
-      *
-      *  @param   refDB      [IN] Reference to Database descriptor 
-      *  @param   redirections [OUT] Vector containing all parameter nam/value pairs.
-      *  @return                     DbStatus code indicating success or failure.
-      */
-    virtual DbStatus dbRedirections(FileDescriptor& refDB,
-                                    pool::DbDatabase::Redirections& redirections);
-
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the
       * database technology and not to a particular connection.

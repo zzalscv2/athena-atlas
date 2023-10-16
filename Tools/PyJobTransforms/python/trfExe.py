@@ -6,13 +6,11 @@
 # @details Standard transform executors
 # @author atlas-comp-transforms-dev@cern.ch
 
-import copy
 import json
 import math
 import os
 import os.path as path
 import re
-import shutil
 import signal
 import subprocess
 import sys
@@ -1744,17 +1742,11 @@ class hybridPOOLMergeExecutor(athenaExecutor):
     #  @param inputEventTest Boolean switching the skipEvents < inputEvents test
     #  @param perfMonFile Name of perfmon file for this substep (used to retrieve vmem/rss information)
     #  @param tryDropAndReload Boolean switch for the attempt to add '--drop-and-reload' to athena args
-    #  @param hybridMerge Boolean activating hybrid merger (if set to 'None' then the hybridMerge will
-    #  be used if n_inputs <= 16, otherwise a classic merge will happen for better downstream i/o 
-    #  performance) 
     def __init__(self, name = 'hybridPOOLMerge', trf = None, conf = None, skeletonFile = 'RecJobTransforms/skeleton.MergePool_tf.py', skeletonCA=None,
                  inData = set(), outData = set(), exe = 'athena.py', exeArgs = ['athenaopts'], substep = None, inputEventTest = True,
-                 perfMonFile = None, tryDropAndReload = True, hybridMerge = None, extraRunargs = {},
+                 perfMonFile = None, tryDropAndReload = True, extraRunargs = {},
                  manualDataDictionary = None, memMonitor = True):
         
-        # By default we will do a hybridMerge
-        self._hybridMerge = hybridMerge
-        self._hybridMergeTmpFile = 'events.pool.root'
         super(hybridPOOLMergeExecutor, self).__init__(name, trf=trf, conf=conf, skeletonFile=skeletonFile, skeletonCA=skeletonCA,
                                                       inData=inData, outData=outData, exe=exe, exeArgs=exeArgs, substep=substep,
                                                       inputEventTest=inputEventTest, perfMonFile=perfMonFile, 
@@ -1763,76 +1755,12 @@ class hybridPOOLMergeExecutor(athenaExecutor):
     
     def preExecute(self, input = set(), output = set()):
         self.setPreExeStart()
-        # Now check to see if the fastPoolMerger option was set
-        if 'fastPoolMerge' in self.conf.argdict:
-            msg.info('Setting hybrid merge to {0}'.format(self.conf.argdict['fastPoolMerge'].value))
-            self._hybridMerge =  self.conf.argdict['fastPoolMerge'].value
-        else:
-            # Hybrid merging really needs some proper validation, so only use
-            # it if specifically requested
-            msg.info("Automatic hybrid merging is disabled use the '--fastPoolMerge' flag if you want to switch it on")
-            self._hybridMerge = False
-            
-        if self._hybridMerge:
-            # If hybridMerge is activated then we process no events at the athena step,
-            # so set a ridiculous skipEvents value
-            msg.info("Setting skipEvents=1000000 to skip event processing during athena metadata merge")
-            self._extraRunargs.update({'skipEvents': 1000000})
-        
         super(hybridPOOLMergeExecutor, self).preExecute(input=input, output=output)
 
     
     def execute(self):
         # First call the parent executor, which will manage the athena execution for us
         super(hybridPOOLMergeExecutor, self).execute()
-        
-        # Now, do we need to do the fast event merge?
-        if not self._hybridMerge:
-            return
-        
-        # Save the stub file for debugging...
-        stubFile = self.conf.dataDictionary[list(self._output)[0]].value[0]
-        stubFileSave = stubFile + ".tmp"
-        msg.info('Saving metadata stub file {0} to {1}'.format(stubFile, stubFileSave))
-        shutil.copy(stubFile, stubFileSave)
-
-        # Now do the hybrid merge steps - note we disable checkEventCount for this - it doesn't make sense here
-        fastConf = copy.copy(self.conf)
-        fastConf.addToArgdict('checkEventCount', trfArgClasses.argSubstepBool("all:False", runarg=False))
-        fastEventMerge1 = scriptExecutor(name='fastEventMerge_step1', conf=fastConf, inData=self._inData, outData=self._outData,
-                                        exe='mergePOOL', exeArgs=None)
-        fastEventMerge1._cmd = ['mergePOOL', '-o', self._hybridMergeTmpFile]
-        for fname in self.conf.dataDictionary[list(self._input)[0]].value:
-            fastEventMerge1._cmd.extend(['-i', fname])
-        fastEventMerge1._cmd.extend(['-e', 'MetaData', '-e', 'MetaDataHdrDataHeaderForm', '-e', 'MetaDataHdrDataHeader', '-e', 'MetaDataHdr', '-e', 'MetaDataHdrForm'])
-
-        msg.debug('Constructed this command line for fast event merge step 1: {0}'.format(fastEventMerge1._cmd))
-        fastEventMerge1.doAll()
-        
-
-        fastEventMerge2 = scriptExecutor(name='fastEventMerge_step2', conf=fastConf, inData=self._inData, outData=self._outData,
-                                        exe='mergePOOL', exeArgs=None)
-        fastEventMerge2._cmd = ['mergePOOL', '-o', self._hybridMergeTmpFile]
-        fastEventMerge2._cmd.extend(['-i', self.conf.dataDictionary[list(self._output)[0]].value[0]])
-
-        msg.debug('Constructed this command line for fast event merge step 2: {0}'.format(fastEventMerge2._cmd))
-        fastEventMerge2.doAll()
-        
-        # Ensure we count all the mergePOOL stuff in the resource report
-        self._exeStop = os.times()
-        msg.debug('exeStop time is {0}'.format(self._exeStop))
-
-        # And finally...
-        msg.info('Renaming {0} to {1}'.format(self._hybridMergeTmpFile, self.conf.dataDictionary[list(self._output)[0]].value[0]))
-        try:
-            os.rename(self._hybridMergeTmpFile, self.conf.dataDictionary[list(self._output)[0]].value[0])
-            self.conf.dataDictionary[list(self._output)[0]]._resetMetadata()
-            # Stupid PoolFileCatalog now has the wrong GUID for the output file. Delete it for safety.
-            if os.access('PoolFileCatalog.xml', os.R_OK):
-                os.unlink('PoolFileCatalog.xml')
-        except (IOError, OSError) as e:
-            raise trfExceptions.TransformExecutionException(trfExit.nameToCode('TRF_OUTPUT_FILE_ERROR'), 
-                                                            'Exception raised when renaming {0} to {1}: {2}'.format(self._hybridMergeTmpFile, self.conf.dataDictionary[list(self._output)[0]].value[0], e))
 
 
 ## @brief Specialist executor to manage the handling of multiple implicit input

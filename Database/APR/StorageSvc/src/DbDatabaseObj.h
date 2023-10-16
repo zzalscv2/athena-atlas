@@ -21,7 +21,6 @@
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/DbSection.h"
 
 // STL include files
 #include <map>
@@ -51,12 +50,6 @@ namespace pool    {
   private:
     /// Reflection class identifier
     typedef RootType                            TypeH;
-    /// Database redirection definition
-    typedef std::pair<size_t,std::string>            Redirection;
-    typedef std::map<std::string,Redirection>        Redirections;
-    /// Database section container definition
-    typedef std::vector<DbSection>                   ContainerSections;
-    typedef std::map<std::string,ContainerSections>  Sections;
     /// Database parameter definition
     typedef std::pair<std::string, std::string>      Parameter;
     /// Database parameter container definition
@@ -108,10 +101,6 @@ namespace pool    {
     int                           m_fileAge;
     /// Token describing the object
     Token*                        m_token;
-    /// The section of merged files indexed by container name
-    Sections                      m_sections;
-    /// The section of merged files indexed by database name
-    Redirections                  m_redirects;
 
   private:
     /// Perform cleanup of internal data structures
@@ -138,8 +127,6 @@ namespace pool    {
     int  age()  const                 {  return m_fileAge;      }
     /// Access the token of the database object
     const Token* token() const        {  return m_token;        }
-    /// Access to all token redirections from merged files
-    const Redirections& redirections() const { return m_redirects; }
 
     /// Open Database object
     DbStatus open();
@@ -156,10 +143,8 @@ namespace pool    {
 
     /// read an object referenced by the token
     DbStatus read(const Token& token, ShapeH shape, void** object);
-    /// Calculate new OID from the source OID (oid) for a given merge section
-    DbStatus getRedirection(const Token::OID_t& oid, int merge_section, Token::OID_t& shift);
-    /// Expand OID into a full Token, based on the Links table. For merged files provide links section#
-    DbStatus getLink(const Token::OID_t& oid, int merge_section, Token* pTok);
+    /// Expand OID into a full Token, based on the Links table.
+    DbStatus getLink(const Token::OID_t& oid, Token* pTok);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token);
     /// Add association link to link container
@@ -193,8 +178,6 @@ namespace pool    {
     DbStatus setOption(const DbOption& refOpt);
     /// Access options
     DbStatus getOption(DbOption& refOpt);
-    /// Access to sections if availible
-    const ContainerSections& sections(const std::string& cnt);
 
     /// Update database age
     void setAge(int value);

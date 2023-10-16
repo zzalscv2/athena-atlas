@@ -236,12 +236,3 @@ pool::PersistencySvc::DatabaseHandler::setAttribute( const std::string& attribut
     return true;
   }
 }
-
-
-pool::DbDatabase::Redirections
-pool::PersistencySvc::DatabaseHandler::redirections()
-{
-  pool::DbDatabase::Redirections redirections;
-  m_storageExplorer.dbRedirections( m_fileDescriptor, redirections );
-  return redirections;
-}

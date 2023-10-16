@@ -22,7 +22,7 @@ from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
-ListOfDefaultPositionalKeys=['--DBRelease', '--amiConfig', '--amiMetadataTag', '--asetup', '--athena', '--athenaopts', '--autoConfiguration', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--fastPoolMerge', '--geometryVersion', '--ignoreErrors', '--ignoreFilters', '--ignorePatterns', '--inputESDFile', '--maxEvents', '--noimf', '--notcmalloc', '--outputESD_MRGFile', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation']
+ListOfDefaultPositionalKeys=['--DBRelease', '--amiConfig', '--amiMetadataTag', '--asetup', '--athena', '--athenaopts', '--autoConfiguration', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--geometryVersion', '--ignoreErrors', '--ignoreFilters', '--ignorePatterns', '--inputESDFile', '--maxEvents', '--noimf', '--notcmalloc', '--outputESD_MRGFile', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation']
 
 @stdTrfExceptionHandler
 @sigUsrStackTrace
@@ -61,9 +61,6 @@ def addMyArgs(parser):
     parser.add_argument('--outputESD_MRGFile', '--outputESDFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
                         help='Output merged ESD file', group='ESDMerge_tf')
-    parser.add_argument('--fastPoolMerge', type=trfArgClasses.argFactory(trfArgClasses.argBool),
-                        help='Hybrid POOL merging switch')
-
 
 if __name__ == '__main__':
     main()

@@ -150,7 +150,6 @@ DbStatus DbContainerObj::open(const DbTypeInfo* typ)   {
         }
         m_tokH = database().cntToken(name());
         if ( m_tokH )    {
-	  m_info->setSections(database().sections(name()));
           m_isOpen = true;
           return Success;
         }

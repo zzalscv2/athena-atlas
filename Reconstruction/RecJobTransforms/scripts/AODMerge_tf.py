@@ -23,7 +23,7 @@ from RecJobTransforms.recTransformUtils import addCommonRecTrfArgs
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
-ListOfDefaultPositionalKeys=['--DBRelease', '--amiConfig', '--amiMetadataTag', '--asetup', '--athena', '--athenaopts', '--autoConfiguration', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--fastPoolMerge', '--geometryVersion', '--ignoreErrors', '--ignoreFilters', '--ignorePatterns', '--inputAODFile', '--maxEvents', '--noimf', '--notcmalloc', '--outputAOD_MRGFile', '--outputTAGFile', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation']
+ListOfDefaultPositionalKeys=['--DBRelease', '--amiConfig', '--amiMetadataTag', '--asetup', '--athena', '--athenaopts', '--autoConfiguration', '--beamType', '--checkEventCount', '--command', '--conditionsTag', '--env', '--eventAcceptanceEfficiency', '--execOnly', '--geometryVersion', '--ignoreErrors', '--ignoreFilters', '--ignorePatterns', '--inputAODFile', '--maxEvents', '--noimf', '--notcmalloc', '--outputAOD_MRGFile', '--outputTAGFile', '--postExec', '--postInclude', '--preExec', '--preInclude', '--reportName', '--runNumber', '--showGraph', '--showPath', '--showSteps', '--skipEvents', '--skipFileValidation', '--skipInputFileValidation', '--skipOutputFileValidation']
 
 @stdTrfExceptionHandler
 @sigUsrStackTrace
@@ -70,9 +70,6 @@ def addMyArgs(parser):
     parser.add_argument('--outputTAGFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argTAGFile, io='output', type='tag'), 
                         help='Output TAG file', group='AODMerge_tf')
-    parser.add_argument('--fastPoolMerge', type=trfArgClasses.argFactory(trfArgClasses.argBool),
-                        help='Hybrid POOL merging switch (default True)')
-
 
 if __name__ == '__main__':
     main()

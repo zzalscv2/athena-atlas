@@ -20,10 +20,6 @@ pool::PersistencySvc::DatabaseRegistry::registerDbHandler( pool::PersistencySvc:
   if ( iDatabase == m_databases.end() ) {
     iDatabase = m_databases.insert( dbHandler ).first;
     m_fidToDb.insert( std::make_pair( dbHandler->fid(), dbHandler ) );
-    const pool::DbDatabase::Redirections& redirections = dbHandler->redirections();
-    for (pool::DbDatabase::Redirections::const_iterator iter = redirections.begin(), iterEnd = redirections.end(); iter != iterEnd; ++iter) {
-        m_fidToDb.insert( std::make_pair( iter->first, dbHandler ) );
-    }
     m_pfnToDb.insert( std::make_pair( dbHandler->pfn(), dbHandler ) );
     m_fidToLfns.insert( std::make_pair( dbHandler->fid(),
                                         std::set< std::string >() ) );
@@ -55,10 +51,6 @@ pool::PersistencySvc::DatabaseRegistry::deregisterDatabaseHandler( pool::Persist
   std::set< pool::PersistencySvc::DatabaseHandler* >::iterator idb = m_databases.find( dbHandler );
   if ( idb != m_databases.end() ) {
     m_fidToDb.erase( (*idb)->fid() );
-    const pool::DbDatabase::Redirections& redirections = dbHandler->redirections();
-    for (pool::DbDatabase::Redirections::const_iterator iter = redirections.begin(), iterEnd = redirections.end(); iter != iterEnd; ++iter) {
-        m_fidToDb.erase( iter->first );
-    }
     m_pfnToDb.erase( (*idb)->pfn() );
 
     std::map< std::string, std::set< std::string > >::iterator iLfnSet = m_fidToLfns.find( (*idb)->fid() );

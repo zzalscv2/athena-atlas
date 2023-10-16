@@ -295,19 +295,3 @@ DbStatus DbContainerImp::load( void** ptr, ShapeH shape,
    }
    return sc;
 }
-
-/// Access section identifier from OID
-const DbSection& DbContainerImp::getSection(const Token::OID_t& oid)  const {
-  for(size_t i=0; i < m_sections.size(); ++i) {
-    const DbSection& s = m_sections[i];
-    if ( s.length != INVALID && s.start+s.length > oid.second ) {
-      return m_sections[i];
-    }
-    else if ( s.length == INVALID && s.start > oid.second && i>0 ) {
-      return m_sections[i-1];
-    }
-  }
-  if ( m_sections.size() > 0 ) return m_sections[0];
-  static const DbSection s;
-  return s;
-}

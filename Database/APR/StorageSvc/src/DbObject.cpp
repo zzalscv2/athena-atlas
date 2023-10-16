@@ -88,8 +88,7 @@ const Token::OID_t& DbObjectAccessor::objectOid(const DbObject* pObj) {
 DbStatus DbObjectAccessor::read( void**                  ptr,
                                  ShapeH                  shape,
                                  DbContainer&            cntH, 
-                                 const Token::OID_t&     oid,
-                                 int                     /* merge_section_n */ )
+                                 const Token::OID_t&     oid )
 {
    return cntH.load(ptr, shape, oid);
 }
