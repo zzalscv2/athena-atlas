@@ -328,7 +328,7 @@ std::vector<bool> PixelConfigCondAlg::getParameterBool(const std::string& varNam
 
 std::string PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
   if (m_usePrivateFileName.empty()) {
-    std::ifstream indata(PathResolverFindCalibFile(m_conditionsFolder+m_conditionsFileName));
+    std::ifstream indata(PathResolverFindCalibFile(static_cast<std::string>(m_conditionsFolder)+m_conditionsFileName));
     int runNumber = 0;
     std::string subfilename;
     indata >> runNumber;
