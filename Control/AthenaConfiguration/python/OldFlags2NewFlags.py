@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def getNewConfigFlags():
     """Create new ConfigFlags from old-style jobproperties. Usage:
@@ -100,6 +100,7 @@ def getNewConfigFlags():
         ConfigFlags.Tracking.doTIDE_Ambi = InDetFlags.doTIDE_Ambi()
         ConfigFlags.InDet.useDCS = InDetFlags.useDCS()
         ConfigFlags.Tracking.doVertexFinding = InDetFlags.doVertexFinding()
+        ConfigFlags.Tracking.doForwardTracks = InDetFlags.doForwardTracks()
     except ImportError:
         log.info('InDetRecExample not available, "ConfigFlags.Tracking.doTIDE_Ambi", "ConfigFlags.InDet.useDCS" and "ConfigFlags.Tracking.doVertexFinding" not set')
         pass
