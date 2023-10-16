@@ -5,39 +5,6 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
-from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
-from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorInitialROITool
-from AthenaCommon.CFElements import seqAND
-
-
-#----------------------------------------------------------------
-# fragments generating configuration will be functions in New JO, 
-# so let's make them functions already now
-#----------------------------------------------------------------
-
-def StreamingSequenceCfg( flags ):    
-    return StreamingMenuSequence(flags)
-
-def StreamingMenuSequence(flags):
-
-    inputMakerAlg = InputMakerForRoI("IM_streamerInputMaker")
-    inputMakerAlg.RoITool = ViewCreatorInitialROITool()
-    inputMakerAlg.RoIs="streamerInputRoIs"
-    streamingSequence = seqAND("streamerSequence", [inputMakerAlg])
-
-    #hypo
-    streamerHypoAlg = TrigStreamerHypoAlg("StreamerHypoAlg")
-    streamerHypoAlg.RuntimeValidation = False #Needed to avoid the ERROR ! Decision has no 'feature' ElementLink
-    streamerHypoToolGen= StreamerHypoToolGenerator
-    
-    return  MenuSequence( flags,
-                          Sequence    = streamingSequence,
-                          Maker       = inputMakerAlg,
-                          Hypo        = streamerHypoAlg,
-                          HypoToolGen = streamerHypoToolGen )
-
 
 #----------------------------------------------------------------
 # Class to configure chain
