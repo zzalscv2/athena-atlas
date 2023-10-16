@@ -43,9 +43,8 @@ namespace DerivationFramework {
         bool isFromTau(const xAOD::TruthParticle*,
                        std::unordered_set<int>& barcode_trace) const;
         static bool isttHFHadron(const xAOD::TruthParticle*) ;
-        bool isBoson(const xAOD::TruthParticle*) const;
         bool isFsrFromLepton(const xAOD::TruthParticle*) const;
-	bool parentIsLongLived(const xAOD::TruthParticle*) const;
+        bool parentIsLongLived(const xAOD::TruthParticle*) const;
 
 
     private:
