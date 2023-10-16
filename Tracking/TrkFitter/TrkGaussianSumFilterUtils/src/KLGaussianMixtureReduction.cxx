@@ -7,10 +7,8 @@
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
 #include "CxxUtils/assume_aligned.h"
-#include "CxxUtils/features.h"
 #include "CxxUtils/restrict.h"
 #include "CxxUtils/vec.h"
-#include "CxxUtils/vectorize.h"
 //
 #include <cmath>
 #include <limits>
@@ -18,7 +16,6 @@
 #include <stdexcept>
 #include <vector>
 
-ATH_ENABLE_VECTORIZATION;
 /**
  * @file  KLGaussianMixtureReduction.cxx
  * @author Anthony Morley , Christos Anastopoulos
