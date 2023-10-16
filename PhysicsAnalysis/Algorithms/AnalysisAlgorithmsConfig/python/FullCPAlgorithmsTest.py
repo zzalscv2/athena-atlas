@@ -128,6 +128,12 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     # Add the pileup sequence to the job:
     vars += [ 'EventInfo.runNumber     -> runNumber',
              'EventInfo.eventNumber   -> eventNumber', ]
+    if dataType != 'data':
+        vars += [ 'EventInfo.mcChannelNumber -> mcChannelNumber' ]
+    if not isPhyslite and dataType == 'mc':
+        vars += [ 'EventInfo.PileupWeight_%SYS% -> weight_pileup_%SYS%' ]
+    if not isPhyslite and dataType in ['mc', 'afii']:
+        vars += [ 'EventInfo.beamSpotWeight -> weight_beamspot' ]
 
 
     # Skip events with no primary vertex:
@@ -486,7 +492,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
             makeGeneratorAnalysisSequence
         generatorSequence = makeGeneratorAnalysisSequence( dataType, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
         algSeq += generatorSequence
-        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
+        vars += [ 'EventInfo.generatorWeight_%SYS% -> weight_mc_%SYS%', ]
 
 
     # disabling comparisons for triggers, because the config blocks do a lot
@@ -596,7 +602,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
         # ideally the above block would work both for PHYS and PHYSLITE, but
         # since we disabled it we need to add these variables manually.
         vars += [ 'EventInfo.runNumber     -> runNumber',
-                'EventInfo.eventNumber   -> eventNumber', ]
+                  'EventInfo.eventNumber   -> eventNumber',
+                  'EventInfo.mcChannelNumber -> mcChannelNumber']
 
 
     # Skip events with no primary vertex,
