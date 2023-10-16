@@ -29,6 +29,9 @@ def fillAtlasMetadata(flags, dbFiller):
             if "RunOnGPU" in flag and not flags.Sim.ISF.Simulator.usesFastCaloSim():
                 # This flag is only written to metadata when FastCaloSim/FastCaloGAN is enabled
                 continue
+            if "FastCalo.ParamsInputFilename" in flag and not flags.Sim.ISF.Simulator.usesFastCaloSim():
+                # This flag is only written to metadata when FastCaloSim/FastCaloGAN is enabled
+                continue
             key = flag.split(".")[-1] #use final part of flag as the key
             value = flags._get(flag)
             if isinstance(value, FlagEnum):
