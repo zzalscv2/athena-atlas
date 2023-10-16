@@ -26,6 +26,8 @@ StatusCode ZdcLEDMonitorAlgorithm::initialize() {
     ATH_CHECK( m_eventTypeKey.initialize() );
     ATH_CHECK( m_DAQModeKey.initialize() );
 
+    ATH_CHECK( m_robBCIDKey.initialize() );
+
     ATH_CHECK( m_LEDTypeKey.initialize() );
     ATH_CHECK( m_LEDPresampleADCKey.initialize() );
     ATH_CHECK( m_LEDADCSumKey.initialize() );
@@ -45,7 +47,7 @@ StatusCode ZdcLEDMonitorAlgorithm::initialize() {
 }
 
 
-StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms( const EventContext& ctx ) const {
+StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const EventContext& ctx ) const {
 
     ATH_MSG_DEBUG("calling the fillLEDHistograms function");
 // ______________________________________________________________________________
@@ -54,8 +56,38 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms( const EventContext& ctx ) 
 
     // lumi block 
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_EventInfoKey, ctx); // already checked in fillHistograms that eventInfo is valid
+ 
     auto lumiBlock = Monitored::Scalar<uint32_t>("lumiBlock", eventInfo->lumiBlock());
-    
+    auto bcid = Monitored::Scalar<unsigned int>("bcid", eventInfo->bcid());
+
+
+    if (DAQMode == ZdcEventInfo::Standalone) {  
+        SG::ReadDecorHandle<xAOD::ZdcModuleContainer, std::vector<uint16_t> > robBCIDHandle(m_robBCIDKey, ctx);
+        if (!robBCIDHandle.isValid()) return StatusCode::FAILURE;
+
+        const xAOD::ZdcModule* moduleSumEventInfo_ptr = 0;
+
+        SG::ReadHandle<xAOD::ZdcModuleContainer> zdcSums(m_ZdcSumContainerKey, ctx); // already checked in fillHistograms that zdcSums is valid
+        for (const auto& zdcSum : *zdcSums) { 
+            if (zdcSum->zdcSide() == 0){
+                moduleSumEventInfo_ptr = zdcSum;
+            }
+        }
+        
+        const std::vector<uint16_t>& robBCIDvec = robBCIDHandle(*moduleSumEventInfo_ptr);
+        if (robBCIDHandle->size() == 0) return StatusCode::FAILURE;
+
+        unsigned int checkBCID = robBCIDvec[0];
+        for (unsigned int bcid : robBCIDvec) {
+            if (bcid != checkBCID) {
+                ATH_MSG_ERROR("Inconsistent BCIDs in rob header, cannot continue in standalone mode");
+                return StatusCode::FAILURE;
+            }
+        }
+
+        bcid = checkBCID;
+    }
+
 
     // LED type (event-level info saved in the glocal sum entry of zdcSums)
     unsigned int iLEDType = 1000;
@@ -126,7 +158,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms( const EventContext& ctx ) 
             zdcLEDMaxSample = LEDMaxSampleHandle(*zdcMod);
             zdcLEDAvgTime = LEDAvgTimeHandle(*zdcMod);
 
-            fill(m_tools[m_ZDCModuleLEDToolIndices[iLEDType][iside][imod]], lumiBlock, zdcLEDADCSum, zdcLEDMaxADC, zdcLEDMaxSample, zdcLEDAvgTime);
+            fill(m_tools[m_ZDCModuleLEDToolIndices[iLEDType][iside][imod]], lumiBlock, bcid, zdcLEDADCSum, zdcLEDMaxADC, zdcLEDMaxSample, zdcLEDAvgTime);
         } 
         else if (zdcMod->zdcType() == 1) { // rpd
             int ichannel = zdcMod->zdcChannel();
@@ -139,7 +171,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms( const EventContext& ctx ) 
             rpdLEDMaxSample = LEDMaxSampleHandle(*zdcMod);
             rpdLEDAvgTime = LEDAvgTimeHandle(*zdcMod);
 
-            fill(m_tools[m_RPDChannelLEDToolIndices[iLEDType][iside][ichannel]], lumiBlock, rpdLEDADCSum, rpdLEDMaxADC, rpdLEDMaxSample, rpdLEDAvgTime);
+            fill(m_tools[m_RPDChannelLEDToolIndices[iLEDType][iside][ichannel]], lumiBlock, bcid, rpdLEDADCSum, rpdLEDMaxADC, rpdLEDMaxSample, rpdLEDAvgTime);
         }
     }
     
@@ -196,7 +228,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
     }
 
     if (eventType == ZdcEventInfo::ZdcEventLED){
-        return fillLEDHistograms(ctx);
+        return fillLEDHistograms(DAQMode, ctx);
     }
     
     ATH_MSG_WARNING("Event type should be LED but it is NOT");
