@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,39 +18,35 @@ def NITimedExtrapolatorCfg(flags, name="ISF_NITimedExtrapolator", **kwargs):
     from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
     result.merge(LArElecCalibDBCfg(flags, ["fSampl"]))
 
-    TimedPropagators = []
-    TimedUpdators    = []
+    TimedPropagators = [] # PublicToolHandleArray
+    TimedUpdators = [] # PublicToolHandleArray
 
     # NAVIGATOR
-    Navigator = result.popToolsAndMerge(TC.FastSimNavigatorCfg(flags))
-    result.addPublicTool(Navigator)
-    kwargs.setdefault("Navigator", Navigator)
+    kwargs.setdefault("Navigator", result.addPublicTool(result.popToolsAndMerge(TC.FastSimNavigatorCfg(flags))))
 
     # PROPAGATORS
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
     AtlasRungeKuttaPropagator = result.popToolsAndMerge(RungeKuttaPropagatorCfg(flags))
-    TimedPropagators  += [AtlasRungeKuttaPropagator]
+    TimedPropagators  += [result.addPublicTool(AtlasRungeKuttaPropagator)]
 
     from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasNoMatSTEP_PropagatorCfg
     AtlasSTEP_Propagator = result.popToolsAndMerge(AtlasNoMatSTEP_PropagatorCfg(flags))
-    result.addPublicTool(AtlasSTEP_Propagator)
-    TimedPropagators += [AtlasSTEP_Propagator]
-    kwargs.setdefault("STEP_Propagator", AtlasSTEP_Propagator)
+    TimedPropagators += [result.addPublicTool(AtlasSTEP_Propagator)]
+    kwargs.setdefault("STEP_Propagator", result.getPublicTool(AtlasSTEP_Propagator.name)) # PublicToolHandle
 
     # UPDATORS
     MaterialEffectsUpdator = result.popToolsAndMerge(TC.AtlasMaterialEffectsUpdatorCfg(flags))
     result.addPublicTool(MaterialEffectsUpdator)
 
     NIMatEffUpdator = result.popToolsAndMerge(TC.NIMatEffUpdatorCfg(flags))
-    result.addPublicTool(NIMatEffUpdator)
-    TimedUpdators    += [NIMatEffUpdator]
+    TimedUpdators += [result.addPublicTool(NIMatEffUpdator)]
     # kwargs.setdefault("MaterialEffectsUpdators", [result.getPublicTool(NIMatEffUpdator.name)])
     kwargs.setdefault("ApplyMaterialEffects", False)
 
     # CONFIGURE PROPAGATORS/UPDATORS ACCORDING TO GEOMETRY SIGNATURE
 
-    TimedSubPropagators = []
-    TimedSubUpdators    = []
+    TimedSubPropagators = [] # Array of names
+    TimedSubUpdators = [] # Array of names
 
     # -------------------- set it depending on the geometry ----------------------------------------------------
     # default for Global is (Rk,Mat)
@@ -77,16 +73,15 @@ def NITimedExtrapolatorCfg(flags, name="ISF_NITimedExtrapolator", **kwargs):
     TimedSubPropagators += [ AtlasRungeKuttaPropagator.name ]
     TimedSubUpdators    += [ MaterialEffectsUpdator.name ]
 
+    # ----------------------------------------------------------------------------------------------------------
+
+    kwargs.setdefault("MaterialEffectsUpdators",  TimedUpdators) # PublicToolHandleArray
+    kwargs.setdefault("Propagators", TimedPropagators) # PublicToolHandleArray
+    kwargs.setdefault("SubPropagators", TimedSubPropagators) # vector of strings
+    kwargs.setdefault("SubMEUpdators",  TimedSubUpdators) # vector of strings
     from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasEnergyLossUpdatorCfg
-    AtlasELossUpdater = result.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags))
-
-    # ----------------------------------------------------------------------------------------------------------       
-
-    kwargs.setdefault("MaterialEffectsUpdators",  TimedUpdators)
-    kwargs.setdefault("Propagators", TimedPropagators)
-    kwargs.setdefault("SubPropagators", TimedSubPropagators)
-    kwargs.setdefault("SubMEUpdators",  TimedSubUpdators)
-    kwargs.setdefault("EnergyLossUpdater", AtlasELossUpdater)
+    kwargs.setdefault("EnergyLossUpdater",
+                      result.addPublicTool(result.popToolsAndMerge(AtlasEnergyLossUpdatorCfg(flags)))) # PublicToolHandle
 
     result.setPrivateTools(CompFactory.Trk.TimedExtrapolator(name, **kwargs))
     return result
@@ -119,13 +114,10 @@ def FastShowerCellBuilderToolBaseCfg(flags, name="ISF_FastShowerCellBuilderTool"
     kwargs.setdefault("ParticleParametrizationFileName", "")
 
     if "Extrapolator" not in kwargs:
-        Extrapolator = acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))
-        acc.addPublicTool(Extrapolator)
-        kwargs.setdefault("Extrapolator", acc.getPublicTool(Extrapolator.name))
+        kwargs.setdefault("Extrapolator", acc.addPublicTool(acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
 
     # New kwarg from old FastCaloSimFactory
-    from TrkDetDescrSvc.TrkDetDescrJobProperties import TrkDetFlags
-    kwargs.setdefault("CaloEntrance", TrkDetFlags.InDetContainerName())
+    kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector') #TrkDetFlags.InDetContainerName()
 
     #######################################################################################################
     # kwargs.setdefault("Invisibles", [12, 14, 16, 1000022])
