@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 class CommonServicesConfig (ConfigBlock) :
@@ -107,6 +108,12 @@ class PileupReweightingBlock (ConfigBlock):
         config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
         config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
 
+        if config.dataType() != 'data':
+            config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
+            if toolConfigFiles:
+                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
+            if config.geometry() == LHCPeriod.Run2:
+                config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
 
 
 class GeneratorAnalysisBlock (ConfigBlock):
@@ -114,17 +121,18 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
     def __init__ (self) :
         super (GeneratorAnalysisBlock, self).__init__ ('Generator')
-        self.addOption ('saveCutBookkeepers', False, type=bool)
-        self.addOption ('runNumber', 0, type=int)
-        self.addOption ('cutBookkeepersSystematics', False, type=bool)
+        self.addOption ('saveCutBookkeepers', True, type=bool)
+        self.addOption ('runNumber', 284500, type=int)
+        self.addOption ('cutBookkeepersSystematics', True, type=bool)
 
     def makeAlgs (self, config) :
 
-        if config.dataType() not in ["mc", "afii"] :
-            raise ValueError ("invalid data type: " + config.dataType())
+        if config.dataType() == 'data':
+            # there are no generator weights in data!
+            return
 
         if self.saveCutBookkeepers and not self.runNumber:
-            raise ValueError ("invalid run number: " + 0)
+            raise ValueError ("invalid run number: " + str(self.runNumber))
 
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
@@ -137,8 +145,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
-        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'generatorWeight')
-
+        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc')
 
 
 class PtEtaSelectionBlock (ConfigBlock):

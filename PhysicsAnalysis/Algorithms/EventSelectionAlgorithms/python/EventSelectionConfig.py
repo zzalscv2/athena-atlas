@@ -8,7 +8,7 @@ class EventSelectionMergerConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionMergerConfig, self).__init__('EventSelectionMerger')
-        self.addOption('selections', [], type=str)
+        self.addOption('selections', [], type=list)
         self.addOption('noFilter', False, type=bool)
 
     def makeAlgs(self, config):
@@ -23,9 +23,8 @@ class EventSelectionMergerConfig(ConfigBlock):
 class EventSelectionConfig(ConfigBlock):
     """ConfigBlock for interpreting text-based event selections"""
 
-    def __init__(self, blockname):
-        super(EventSelectionConfig, self).__init__('EventSelection_'+blockname)
-        self.addOption('name', "", type=str)
+    def __init__(self, name):
+        super(EventSelectionConfig, self).__init__('EventSelection_'+name)
         self.addOption('electrons', "", type=str)
         self.addOption('muons', "", type=str)
         self.addOption('jets', "", type=str)
@@ -38,6 +37,7 @@ class EventSelectionConfig(ConfigBlock):
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []
+        self.name = name
 
     def makeAlgs(self, config):
         # need to re-initialize here to deal with multiple passes
@@ -423,7 +423,6 @@ def makeEventSelectionConfig(seq,
     """
 
     config = EventSelectionConfig(name)
-    config.setOptionValue ('name', name)
     config.setOptionValue ('electrons', electrons, noneAction='ignore')
     config.setOptionValue ('muons', muons, noneAction='ignore')
     config.setOptionValue ('jets', jets, noneAction='ignore')

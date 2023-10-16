@@ -95,8 +95,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('runFJvtSelection', False, type=bool)
         self.addOption ('runJvtEfficiency', True, type=bool)
         self.addOption ('runFJvtEfficiency', False, type=bool)
-        self.addOption ('reduction', "Global", type=str)
-        self.addOption ('JEROption', "Simple", type=str)
+        self.addOption ('systematicsModelJES', "Global", type=str)
+        self.addOption ('systematicsModelJER', "Simple", type=str)
         self.addOption ('recalibratePhyslite', True, type=bool)
 
 
@@ -144,20 +144,20 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         # Jet uncertainties
         # Prepare the config file
-        if self.reduction == "All" and self.JEROption == "All":
+        if self.systematicsModelJES == "All" and self.systematicsModelJER == "All":
             alg.uncertaintiesTool.ConfigFile = "R4_AllNuisanceParameters_AllJERNP.config"
-        elif "Scenario" in self.reduction:
-            if self.JEROption != "Simple":
+        elif "Scenario" in self.systematicsModelJES:
+            if self.systematicsModelJER != "Simple":
                 raise ValueError(
-                    "Invalid uncertainty configuration - Scenario* reductions can "
-                    "only be used together with the Simple JEROption")
-            configFile = "R4_{0}_SimpleJER.config".format(self.reduction)
-        elif self.reduction in ["Global", "Category"] and self.JEROption in ["Simple", "Full"]:
-            configFile = "R4_{0}Reduction_{1}JER.config".format(self.reduction, self.JEROption)
+                    "Invalid uncertainty configuration - Scenario* systematicsModelJESs can "
+                    "only be used together with the Simple systematicsModelJER")
+            configFile = "R4_{0}_SimpleJER.config".format(self.systematicsModelJES)
+        elif self.systematicsModelJES in ["Global", "Category"] and self.systematicsModelJER in ["Simple", "Full"]:
+            configFile = "R4_{0}Reduction_{1}JER.config".format(self.systematicsModelJES, self.systematicsModelJER)
         else:
             raise ValueError(
-                "Invalid combination of reduction and JEROption settings: "
-                "reduction: {0}, JEROption: {1}".format(self.reduction, self.JEROption) )
+                "Invalid combination of systematicsModelJES and systematicsModelJER settings: "
+                "systematicsModelJES: {0}, systematicsModelJER: {1}".format(self.systematicsModelJES, self.systematicsModelJER) )
 
         alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
         config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
@@ -495,7 +495,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
                                  runJvtUpdate = None, runNNJvtUpdate = None, runFJvtUpdate = None,
                                  runJvtSelection = None, runFJvtSelection = None,
                                  runJvtEfficiency = None, runFJvtEfficiency = None,
-                                 reduction = None, JEROption = None):
+                                 systematicsModelJES = None, systematicsModelJER = None):
     """Add algorithms for the R=0.4 jets.
 
       Keyword arguments
@@ -510,8 +510,8 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         runFJvtSelection -- Determines whether or not to run forward JVT selection on the jets
         runJvtEfficiency -- Determines whether or not to calculate the JVT efficiency
         runFJvtEfficiency -- Determines whether or not to calculate the forward JVT efficiency
-        reduction -- Which NP reduction scheme should be used (All, Global, Category, Scenario)
-        JEROption -- Which variant of the reduction should be used (All, Full, Simple). Note that not all combinations of reduction and JEROption are valid!
+        systematicsModelJES -- Which NP systematicsModelJES scheme should be used (All, Global, Category, Scenario)
+        systematicsModelJER -- Which variant of the systematicsModelJES should be used (All, Full, Simple). Note that not all combinations of systematicsModelJES and systematicsModelJER are valid!
     """
 
     if jetInput not in ["EMTopo", "EMPFlow"]:
@@ -536,10 +536,10 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         config.setOptionValue ('runJvtEfficiency', runJvtEfficiency)
     if runFJvtEfficiency is not None :
         config.setOptionValue ('runFJvtEfficiency', runFJvtEfficiency)
-    if reduction is not None :
-        config.setOptionValue ('reduction', reduction)
-    if JEROption is not None :
-        config.setOptionValue ('JEROption', JEROption)
+    if systematicsModelJES is not None :
+        config.setOptionValue ('systematicsModelJES', systematicsModelJES)
+    if systematicsModelJER is not None :
+        config.setOptionValue ('systematicsModelJER', systematicsModelJER)
     seq.append (config)
 
 

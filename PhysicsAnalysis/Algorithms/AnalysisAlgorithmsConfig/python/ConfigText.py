@@ -327,8 +327,9 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     config.addAlgConfigBlock(algName="Jets", alg=makeJetAnalysisConfig)
     from JetAnalysisAlgorithms.JetJvtAnalysisConfig import JetJvtAnalysisConfig
     config.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig)
-    from FTagAnalysisAlgorithms.FTagAnalysisConfig import FTagConfig
-    config.addAlgConfigBlock(algName="FlavourTagging", alg=FTagConfig)
+    from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
+    config.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
+        defaults={'postfix': ''})
 
     # met
     from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig
@@ -344,20 +345,8 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     config.addAlgConfigBlock(algName="EventCleaning", alg=EventCleaningBlock)
 
     # generator level analysis
-    #from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
-    #config.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=GeneratorAnalysisBlock)
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeGeneratorAnalysisConfig 
-    def makeGeneratorLevelAnalysis(seq, dataType):
-        if dataType == 'data':
-            return
-        makeGeneratorAnalysisConfig(seq)
-        seq.setOptionValue ('.saveCutBookkeepers', True)
-        seq.setOptionValue ('.runNumber', 284500)
-        seq.setOptionValue ('.cutBookkeepersSystematics', True)
-        #vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
-        return seq
-    config.addAlgConfigBlock(algName="GeneratorLevelAnalysis",
-        alg=makeGeneratorLevelAnalysis, defaults={'dataType': dataType})
+    config.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=makeGeneratorAnalysisConfig)
 
     # trigger
     from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import TriggerAnalysisBlock
@@ -367,7 +356,7 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     # pT/Eta Selection
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
     config.addAlgConfigBlock(algName="PtEtaSelection", alg=makePtEtaSelectionConfig,
-        defaults={'selectionName': '', 'selectionDecoration':'selectPtEta'})
+        defaults={'selectionName': ''})
 
     # thinning
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import OutputThinningBlock
@@ -385,9 +374,26 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
         makeCommonServicesConfig(seq)
         seq.setOptionValue ('.runSystematics', not noSystematics)
         return seq
-    #config.addAlgConfigBlock(algName="CommonServices", alg=makeCommonServicesConfig)
     config.addAlgConfigBlock(algName="CommonServices", alg=CommonServices,
         defaults={'noSystematics': noSystematics})
+
+    # object-based cutflow
+    from AsgAnalysisAlgorithms.AsgAnalysisConfig import ObjectCutFlowBlock
+    config.addAlgConfigBlock(algName='ObjectCutFlow', alg=ObjectCutFlowBlock)
+
+    # event-based cutflow
+    from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
+    config.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
+        defaults={'containerName': 'EventInfo', 'selectionName': ''})
+
+    # event selection
+    from EventSelectionAlgorithms.EventSelectionConfig import EventSelectionConfig, EventSelectionMergerConfig
+    config.addAlgConfigBlock(algName='EventSelection', alg=EventSelectionConfig)
+    config.addAlgConfigBlock(algName='EventSelectionMerger', alg=EventSelectionMergerConfig)
+
+    # bootstraps
+    from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import BootstrapGeneratorConfig
+    config.addAlgConfigBlock(algName='Bootstraps', alg=BootstrapGeneratorConfig)
 
     return
 
