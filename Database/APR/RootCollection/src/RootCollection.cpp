@@ -4,7 +4,6 @@
 
 #include "RootCollection.h"
 #include "RootCollectionQuery.h"
-#include "RootCollectionMetadata.h"
 
 #include "PersistentDataModel/Token.h"
 #include "POOLCore/Exception.h"
@@ -67,7 +66,6 @@ namespace pool {
       m_poolOut( "RootCollection"),
       m_schemaEditor( 0 ),
       m_dataEditor( 0 ),
-	m_metadata( 0 ),
 	m_fileMgr( 0 )
     {
        RootCollection::open();
@@ -140,22 +138,10 @@ namespace pool {
 
            m_poolOut << "   bytes written to TTree " << (size_t)bytes
                      << coral::MessageStream::endmsg;
-           if( m_metadata )
-              m_metadata->commit();
         }
      }
 
      
-    void RootCollection::rollback()
-    {
-      if( m_open ) {
-         // reopen
-        open();
-      }
-    }
-
-     
-
     void RootCollection::close()
     {
        m_poolOut << coral::Info << "Closing " << (m_open? "open":"not open")
@@ -203,7 +189,6 @@ namespace pool {
        m_open = false;
        delete m_schemaEditor;   m_schemaEditor = 0;
        delete m_dataEditor;   m_dataEditor = 0;
-       delete m_metadata;  m_metadata = 0;
     }       
        
      
@@ -519,93 +504,5 @@ namespace pool {
        return new RootCollectionQuery( m_description, m_tree );
     }
 
-     
-    ICollectionMetadata&   RootCollection::metadata()
-    {
-      if( !m_metadata ) {
-         delayedFileOpen("metadata");
-         m_metadata = new RootCollectionMetadata();
-         m_metadata->initialize( m_file, m_mode );
-      }
-      return *m_metadata;
-    }
-
-     
-     // Checks for the existence of a fragment in the collection 
-     bool
-     RootCollection::exists( const std::string& fragmentName,
-                             bool /* setForUpdate */,
-                             bool /* checkChildFragments  */) const
-     {
-        try{
-           m_description.collectionFragment( fragmentName );
-           return true;
-        }catch( pool::Exception& ) {
-           return false;
-        }
-     }
-
-     
-
-     void methodNotImplemented(const std::string &method)
-     {
-        throw pool::Exception( std::string("method not implemented"),
-                               std::string("RootCollection::") + method,
-                               "RootCollection" );
-     }
-
-          
-    bool
-      RootCollection::drop( const std::string& /* fragmentName */,
-      bool /* dropChildFragments */,
-      bool /* ignoreExternalDependencies */)
-    {
-      methodNotImplemented("drop");
-      return false;
-    }
-
-    bool
-      RootCollection::rename( const std::string& /* oldName */,
-      const std::string& /* newName  */)
-    {
-      methodNotImplemented("rename");
-      return false;
-    }
-
-    bool
-      RootCollection::grantToUser( const std::string& /* userName */,
-      pool::ICollection::Privilege /* privilege */,
-      const std::string& /* fragmentName */,
-      bool /* grantForChildFragments */)
-    {
-      methodNotImplemented("grantToUser");
-      return false;
-    }
-
-    bool
-      RootCollection::revokeFromUser( const std::string& /* userName */,
-      pool::ICollection::Privilege /* privilege */,
-      const std::string& /* fragmentName */,
-      bool /* revokeForChildFragments */)
-    {
-      methodNotImplemented("revokeFromUser");
-      return false;
-    }
-
-    bool
-      RootCollection::grantToPublic( const std::string& /* fragmentName */,
-      bool /* grantForChildFragments */)
-    {
-      methodNotImplemented("grantToPublic");
-      return false;
-    }
-
-    bool
-      RootCollection::revokeFromPublic( const std::string& /* fragmentName */,
-      bool /* revokeForChildFragments */)
-    {
-      methodNotImplemented("revokeFromPublic");
-      return false;
-    }
   }
 }

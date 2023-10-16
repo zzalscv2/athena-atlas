@@ -64,8 +64,6 @@ namespace pool
 	   ++at)
 	 markers["-src"].desc << *at << std::endl;
       markers["-srcconnect"].desc << "[Input database connection string] " << std::endl
-				  << "(Note: The default value is \"\" and this argument MUST "
-				  << "be specified for RelationalCollection." << std::endl
 				  << "The connection string will be looked up in $CORAL_DBLOOKUP_PATH/dblookup.xml" << std::endl
 				  << "Database user authentication is done using CORAL_AUTH_PATH/authentication.xml" << std::endl
 				  << " or CORAL_AUTH_USER and CORAL_AUTH_PASSWORD variables" << std::endl;
@@ -94,8 +92,8 @@ namespace pool
 	 while( i < ilast ) {
 	    srcCollName = std::string(argv[i]); ++i;
 	    srcCollType = std::string(argv[i]);
-	    // First check if it is a RelationalCollection
-	    // Or is it a file based or logical type collection
+	    // First check if it is a:
+	    // file based or logical type collection
 	    // Or is it gibberish, and they need to try again.
 	    if ( std::find(this->allowedTypes().begin(),
 			   this->allowedTypes().end(),
@@ -110,17 +108,6 @@ namespace pool
 	    ++i;
 	 } // end of m_nameAndTypeVec loop
       } // end of -src Qual
-
-      // Check that connection is available for any RDB collections
-      if(std::find(m_TypeVec.begin(),m_TypeVec.end(),"RelationalCollection") != m_TypeVec.end() )
-      {
-	 if(m_connection.size()==0) {
-	    std::cerr << " ERROR Found at least one RDB source collection, "
-		      << "but -srcconnect is not set" << std::endl;
-	    retc = false;
-	    m_argsfine = false;
-	 }
-      }
 
       return retc;
 

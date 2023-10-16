@@ -13,7 +13,6 @@ atlas_add_library( CollectionUtilities
   src/ArgQual.cpp
   src/CmdLineArgs2.cpp
   src/Args2Container.cpp
-  src/CollectionMetadataParser.cpp
   src/CatalogInfo.cpp
   src/CollectionPool.cpp
   src/CollSplitByGUIDBase.cpp
@@ -22,9 +21,6 @@ atlas_add_library( CollectionUtilities
   src/UtilityFuncs.cpp
   src/MaxEventsInfo.cpp
   src/QueryInfo.cpp
-  src/MetaInfo.cpp
-  src/GenericMetaHandler.cpp
-  src/CollMetaRegistry.cpp
   PUBLIC_HEADERS CollectionUtilities
   INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
   PRIVATE_INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
@@ -44,12 +40,9 @@ endmacro( collection_utility )
 collection_utility( coll_insertGuidToCatalog )
 collection_utility( CollAppend )
 collection_utility( CollListAttrib )
-collection_utility( CollListFileGUID )
-collection_utility( CollListMetadata )
 collection_utility( CollListPFN )
 collection_utility( CollListToken )
 collection_utility( CollQuery )
-collection_utility( CollRemove )
 collection_utility( CollSplitByGUID )
 
 # Install files from the package:

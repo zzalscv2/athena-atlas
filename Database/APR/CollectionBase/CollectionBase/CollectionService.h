@@ -17,7 +17,7 @@ namespace pool {
    * @class CollectionService CollectionService.h CollectionBase/CollectionService.h
    *
    * A service for creating, accessing and managing an ensemble of collections of event 
-   * references and their associated metadata. In many cases, the individual unit managed 
+   * references. In many cases, the individual unit managed 
    * by the service may simply consist of a collection fragment containing only a subset 
    * of the metadata of an existing collection. Note that a class that inherits from this 
    * interface must also inherit from the SEAL Service base class. 
@@ -57,12 +57,10 @@ namespace pool {
      *
      * @param description Specification of collection properties.
      * @param overwrite Flag to distinguish creation and overwrite open modes.
-     * @param metadata Reference to collection level metadata.
      */
     virtual ICollection* createAndRegister( const ICollectionDescription& description,
                                             bool overwrite = false,
-                                            std::string logicalName = "",
-                                            MetaDataEntry* metadata = 0 );
+                                            std::string logicalName = "" );
 
 
     virtual ICollection* open( const std::string& name,
@@ -84,13 +82,11 @@ namespace pool {
      * @param name Name of collection.
      * @param type Storage technology type of collection.
      * @param connection Connection to database containing collection.
-     * @param metadata Reference to collection level metadata.
      */
     virtual bool registerExisting( const std::string& name,
                                    const std::string& type,
                                    std::string connection = "",
-                                   std::string logicalName = "",
-                                   MetaDataEntry* metadata = 0 );
+                                   std::string logicalName = "" );
 
 
     /**
@@ -100,12 +96,10 @@ namespace pool {
      * @param collection The collection to register
      * @param overwrite If true attempt to overwrite catalog entry for the same collection name
      * @param logicalName Logical name of the collection to store in the catalog
-     * @param metadata Reference to collection level metadata to store in the catalog
      */
     virtual bool registerExisting( ICollection* collection,
 				   bool overwrite = false,
-                                   std::string logicalName = "",
-                                   MetaDataEntry* metadata = 0 );
+                                   std::string logicalName = "" );
 
     /**
      * Retrieves a handle to an existing collection or collection fragment for read or update
@@ -161,111 +155,6 @@ namespace pool {
      */
     virtual ICollection* openWithGuid( const std::string& guid,
                                        bool readOnly = true );
-
-    /**
-     * Checks for the existence of a collection or collection fragment.
-     *
-     * @param name Name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment.
-     * @param connection Connection to database containing collection or collection fragment.
-     * @param setForUpdate Flag indicating whether to lock the collection for update if it exists.
-     * @param checkChildFragments Flag to check for existence of all child fragments.
-     */
-    virtual bool exists( const std::string& name,
-                         const std::string& type,
-                         std::string connection = "",
-			 bool setForUpdate = false,
-                         bool checkChildFragments = false ) const;
-
-    /**
-     * Drops a collection or collection fragment. Returns false if collection or collection
-     * fragment cannot be found.
-     *
-     * @param name Name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment.
-     * @param connection Connection to database containing collection or collection fragment.
-     * @param dropChildFragments Flag indicating whether to drop all child fragments.
-     * @param ignoreExternalDependencies Flag indicating whether to check for dependencies on fragment by external fragments.
-     */
-    virtual bool drop( const std::string& name,
-                       const std::string& type,
-                       std::string connection = "",
-                       bool dropChildFragments = false,
-                       bool ignoreExternalDependencies = false );
-
-    /**
-     * Renames a collection or collection fragment. Returns false if collection or collection
-     * fragment cannot be found.
-     *
-     * @param oldName Old name of collection or collection fragment.
-     * @param newName New name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment
-     * @param connection Connection to database containing collection of collection fragment.
-     */
-    virtual bool rename( const std::string& oldName,
-                         const std::string& newName,
-                         const std::string& type,
-                         std::string connection = "" );
-
-    /*
-     * Grants an access privilege to a user for one or more collection fragments.
-     *
-     * @param userName Name of user to which to grant the privilege.
-     * @param privilege Type of privilege to grant.
-     * @param name Name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment.
-     * @param connection Connection to database containing collection or collection fragment.
-     * @param grantForChildFragments Flag indicating whether to grant same access for all child fragments of specified collection fragment.
-     */
-    virtual bool grantToUser( const std::string& userName,
-                              pool::ICollection::Privilege privilege,
-                              const std::string& name,
-                              const std::string& type,
-                              std::string connection = "",
-                              bool grantToChildFragments = false );
-
-    /*
-     * Revokes an access privilege from a user for one or more collection fragments.
-     *
-     * @param userName Name of user from which to revoke the privilege.
-     * @param privilege Type of privilege to revoke.
-     * @param name Name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment.
-     * @param connection Connection to database containing collection or collection fragment.
-     * @param revokeForChildFragments Flag indicating whether to revoke same access for all child fragments of specified collection fragment.
-     */
-    virtual bool revokeFromUser( const std::string& userName,
-                                 pool::ICollection::Privilege privilege,
-                                 const std::string& name,
-                                 const std::string& type,
-                                 std::string connection = "",
-                                 bool revokeForChildFragments = false );
-
-    /*
-     * Grants SELECT access to the public for one or more collection fragments.
-     *
-     * @param name Name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment.
-     * @param connection Connection to database containing collection or collection fragment.
-     * @param grantForChildFragments Flag indicating whether to grant same access for all child fragments of specified collection fragment.
-     */
-    virtual bool grantToPublic( const std::string& name,
-				const std::string& type,
-				std::string connection = "",
-                                bool grantForChildFragments = false );
-
-    /*
-     * Revokes SELECT access from the public for one or more collection fragments.
-     *
-     * @param name Name of collection or collection fragment.
-     * @param type Storage technology type of collection or collection fragment.
-     * @param connection Connection to database containing collection or collection fragment.
-     * @param revokeForChildFragments Flag indicating whether to revoke same access for all child fragments of specified collection fragment.
-     */
-    virtual bool revokeFromPublic( const std::string& name,
-                                   const std::string& type,
-                                   std::string connection = "",
-                                   bool revokeForChildFragments = false );
 
     /// Sets default values for the write and read collection catalogs.
     virtual bool setDefaultCatalog();

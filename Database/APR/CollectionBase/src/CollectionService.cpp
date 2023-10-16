@@ -64,8 +64,7 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
 pool::ICollection*
 pool::CollectionService::createAndRegister( const pool::ICollectionDescription& description,
                                             bool overwrite,
-                                            std::string logicalName,
-                                            MetaDataEntry* metadata )
+                                            std::string logicalName )
 {
    if( description.name().empty() )  {
       std::string errorMsg = "Must specify name of collection in description input argument.";
@@ -91,8 +90,7 @@ pool::CollectionService::createAndRegister( const pool::ICollectionDescription& 
    return CollectionFactory::get()->createAndRegister( description,
 						       0,
 						       overwrite,
-						       logicalName,
-						       metadata );
+						       logicalName );
 }
 
 
@@ -100,8 +98,7 @@ bool
 pool::CollectionService::registerExisting( const std::string& name,
                                            const std::string& type,
                                            std::string connection,
-                                           std::string logicalName,
-                                           MetaDataEntry* metadata )
+                                           std::string logicalName )
 {
    if( name.empty() )  {
     std::string errorMsg = "Must specify name of collection as input.";
@@ -128,8 +125,7 @@ pool::CollectionService::registerExisting( const std::string& name,
 
   return CollectionFactory::get()->registerExisting( description,
 						     0,
-						     logicalName,
-						     metadata );
+						     logicalName );
 }
 
 
@@ -137,14 +133,12 @@ pool::CollectionService::registerExisting( const std::string& name,
 bool
 pool::CollectionService::registerExisting( ICollection* collection,
 					   bool overwrite,
-                                           std::string logicalName,
-                                           MetaDataEntry* metadata )
+                                           std::string logicalName )
 {
   return CollectionFactory::get()->registerExisting( collection,
 						     overwrite,
 						     0,
-						     logicalName,
-						     metadata );
+						     logicalName );
 }
 
 
@@ -186,95 +180,6 @@ pool::CollectionService::openWithGuid( const std::string& guid, bool readOnly )
 {
    return pool::CollectionFactory::get()->openWithGuid( guid, 0, readOnly );
 }
-
-
-bool
-pool::CollectionService::exists( const std::string& name,
-                                 const std::string& type,
-                                 std::string connection,
-                                 bool setForUpdate,
-                                 bool checkChildFragments ) const
-{
-   ICollection* collection = handle( name, type, connection );
-   bool res = collection->exists( name, setForUpdate, checkChildFragments );
-   delete collection;
-   return res;
-}
-
-
-bool
-pool::CollectionService::drop( const std::string& name,
-                               const std::string& type,
-                               std::string connection,
-                               bool dropChildFragments,
-                               bool ignoreExternalDependencies )
-{
-   ICollection* collection = handle( name, type, connection, false );
-   bool res = collection->drop( collection->description().name(),  dropChildFragments, ignoreExternalDependencies );
-   delete collection;
-   return res;
-}
-
-
-bool
-pool::CollectionService::rename( const std::string& oldName,
-                                 const std::string& newName,
-                                 const std::string& type,
-                                 std::string connection )
-{
-   return this->handle( oldName, type, connection, false )->rename( oldName, newName );
-}
-
-
-bool
-pool::CollectionService::grantToUser( const std::string& userName,
-                                      pool::ICollection::Privilege privilege,
-                                      const std::string& name,
-                                      const std::string& type,
-                                      std::string connection,
-                                      bool grantForChildFragments )
-{
-   return this->handle( name, type, connection, false )->grantToUser( userName, 
-                                                                      privilege, 
-                                                                      name, 
-                                                                      grantForChildFragments );
-}
-
-
-bool
-pool::CollectionService::revokeFromUser( const std::string& userName,
-                                         pool::ICollection::Privilege privilege,
-                                         const std::string& name,
-                                         const std::string& type,
-                                         std::string connection,
-                                         bool revokeForChildFragments )
-{
-  return this->handle( name, type, connection, false )->revokeFromUser( userName, 
-                                                                        privilege, 
-                                                                        name, 
-                                                                        revokeForChildFragments );
-}
-
-
-bool
-pool::CollectionService::grantToPublic( const std::string& name,
-                                        const std::string& type,
-                                        std::string connection,
-                                        bool grantForChildFragments )
-{
-  return this->handle( name, type, connection, false )->grantToPublic( name, grantForChildFragments );
-}
-
-
-bool
-pool::CollectionService::revokeFromPublic( const std::string& name,
-                                           const std::string& type,
-                                           std::string connection,
-                                           bool revokeForChildFragments )
-{
-  return this->handle( name, type, connection, false )->revokeFromPublic( name, revokeForChildFragments );
-}
-
 
 
 bool

@@ -159,92 +159,66 @@ int main(int argc, const char *argv[])
          }
          log << coral::Debug << "Creating query for the collection" << coral::MessageStream::endmsg;
 
-         if( collection->description().type() == "RelationalCollection" ) {
-            // the fast query version for relational collections
-            // (gets only references to the Link table)
-            ICollectionRelationalExtensions* relcoll = 
-              dynamic_cast<ICollectionRelationalExtensions*>(collection);
-            if (!relcoll)
-              std::abort();
-            unique_ptr<pool::ICollectionGUIDQuery>
-               collQuery( relcoll->newGUIDQuery() );
-            collQuery->setCondition( queryinfo.query(i) );
-            if( mainToken ) {
-               collQuery->addToOutputList( collection->description().eventReferenceColumnName() );
-            } else if( queryinfo.queryOptions().size() ) {
-               collQuery->addToOutputList( queryinfo.queryOptions() );
-            } else {
-               collQuery->selectAllTokens();
-            }
-            log << coral::Debug << "Executing fast GUID query for a relational collection"
-                << coral::MessageStream::endmsg;
-            if( countGroupedGuids ) {
-               printGroupedGuids( collQuery->getGroupedGUIDs() );
-            } else {
-               printCountedGuids( collQuery->getGroupedGUIDs() );
-            }
+         // standard query version - read all rows and collect GUIDs
+         pool::ICollectionQuery *collQuery = collection->newQuery();
+         collQuery->setRowCacheSize( 10000 );
+         collQuery->setCondition( queryinfo.query(i) );
+         if( mainToken ) {
+            // get the main token only by default
+         } else if( queryinfo.queryOptions().size() ) {
+            collQuery->skipEventReference( true );
+            collQuery->addToOutputList( queryinfo.queryOptions() );
          } else {
-            // standard query version - read all rows and collect GUIDs
-            pool::ICollectionQuery *collQuery = collection->newQuery();
-            collQuery->setRowCacheSize( 10000 );
-            collQuery->setCondition( queryinfo.query(i) );
-            if( mainToken ) {
-               // get the main token only by default
-            } else if( queryinfo.queryOptions().size() ) {
-               collQuery->skipEventReference( true );
-               collQuery->addToOutputList( queryinfo.queryOptions() );
-            } else {
-               collQuery->selectAllTokens();
-            }
-            log << coral::Debug
-                << ">> Executing the query " << coral::MessageStream::endmsg;
-            pool::ICollectionCursor& cursor = collQuery->execute();
+            collQuery->selectAllTokens();
+         }
+         log << coral::Debug
+             << ">> Executing the query " << coral::MessageStream::endmsg;
+         pool::ICollectionCursor& cursor = collQuery->execute();
 
-            while( cursor.next() ) {
-               if( ++row_count % 10000 == 0 ) {
-                  log << coral::Debug
-                      << "Read in " << row_count << " rows" << coral::MessageStream::endmsg;
-               }
-               const pool::TokenList &tokens = cursor.currentRow().tokenList();
-               for( pool::TokenList::const_iterator iter = tokens.begin();
-                    iter != tokens.end(); ++iter ) {
-                  Guid fileId = iter->dbID();
-                  if( fileId != Guid::null() ) {
-                     map< Guid, int >::iterator mapIter = fileIdMap.find( fileId );
-                     if( mapIter == fileIdMap.end() ) {
-                        fileIdMap[ fileId ] = 1;
-                        guidtoNameMap[ fileId ] = iter.tokenName();
-                     } else {
-                        ++(mapIter->second);
-                     }
+         while( cursor.next() ) {
+            if( ++row_count % 10000 == 0 ) {
+               log << coral::Debug
+                   << "Read in " << row_count << " rows" << coral::MessageStream::endmsg;
+            }
+            const pool::TokenList &tokens = cursor.currentRow().tokenList();
+            for( pool::TokenList::const_iterator iter = tokens.begin();
+                 iter != tokens.end(); ++iter ) {
+               Guid fileId = iter->dbID();
+               if( fileId != Guid::null() ) {
+                  map< Guid, int >::iterator mapIter = fileIdMap.find( fileId );
+                  if( mapIter == fileIdMap.end() ) {
+                     fileIdMap[ fileId ] = 1;
+                     guidtoNameMap[ fileId ] = iter.tokenName();
                   } else {
-                     // empty token - count them
-                     map< string, int >::iterator mapIter = emptyTokensCount.find( iter.tokenName() );
-                     if( mapIter == emptyTokensCount.end() ) {
-                        emptyTokensCount[iter.tokenName()] = 1;
-                     } else {
-                        ++(mapIter->second);
-                     }
+                     ++(mapIter->second);
+                  }
+               } else {
+                  // empty token - count them
+                  map< string, int >::iterator mapIter = emptyTokensCount.find( iter.tokenName() );
+                  if( mapIter == emptyTokensCount.end() ) {
+                     emptyTokensCount[iter.tokenName()] = 1;
+                  } else {
+                     ++(mapIter->second);
                   }
                }
             }
+         }
 
-            std::map<Guid, int>::iterator it = fileIdMap.begin();
-            while( it!=fileIdMap.end() ) {
-               std::string tName = "UNKNOWN";
-               std::map<Guid, std::string>::iterator name_it = guidtoNameMap.find(it->first);
-               if( name_it != guidtoNameMap.end() )
-                  tName = name_it->second;
-               std::cout << it->first.toString() << " " << setw(20) << setiosflags(ios::left) << tName
-                         << "  (" << it->second << ")" << std::endl;
-               ++it;
-            }
-            map< string, int >::iterator it2 = emptyTokensCount.begin();
-            while( it2 != emptyTokensCount.end() ) {
-               std::cout << "00000000-0000-0000-0000-000000000000" << " " << setw(20) << setiosflags(ios::left)
-                         << it2->first << "  (" << it2->second << ")" << std::endl;
-               ++it2;
-            }
+         std::map<Guid, int>::iterator it = fileIdMap.begin();
+         while( it!=fileIdMap.end() ) {
+            std::string tName = "UNKNOWN";
+            std::map<Guid, std::string>::iterator name_it = guidtoNameMap.find(it->first);
+            if( name_it != guidtoNameMap.end() )
+               tName = name_it->second;
+            std::cout << it->first.toString() << " " << setw(20) << setiosflags(ios::left) << tName
+                      << "  (" << it->second << ")" << std::endl;
+            ++it;
+         }
+         map< string, int >::iterator it2 = emptyTokensCount.begin();
+         while( it2 != emptyTokensCount.end() ) {
+            std::cout << "00000000-0000-0000-0000-000000000000" << " " << setw(20) << setiosflags(ios::left)
+                      << it2->first << "  (" << it2->second << ")" << std::endl;
+            ++it2;
          }
          collection->close();
          delete collection;

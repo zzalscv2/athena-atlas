@@ -5,7 +5,6 @@
 #include "CollectionBase/CollectionFactory.h"
 #include "CollectionBase/CollectionDescription.h"
 #include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/ICollectionMetadata.h"
 #include "CollectionBase/CollectionBaseNames.h"
 #include "CollectionBase/boost_tokenizer_headers.h"
 
@@ -113,7 +112,6 @@ pool::CollectionFactory::create( const ICollectionDescription& _description,
       log << coral::Debug << "Generated new ID for collection " <<  description.name()
 	  << " GUID=" << guid_str << endl
 	  << coral::MessageStream::endmsg;
-      coll->metadata().setValueForKey( CollectionBaseNames::CollIDMdataKey(), guid_str );
       coll->commit( true );
    }
    return coll;
@@ -128,7 +126,6 @@ pool::CollectionFactory::createAndRegister( const pool::ICollectionDescription& 
                                             pool::IFileCatalog* collectionCatalog,
                                             bool overwrite,
                                             std::string logicalName,
-                                            pool::MetaDataEntry*,
                                             pool::ISession* session ) const
 {
   if( !_description.hasEventReferenceColumn() )  {
@@ -186,7 +183,6 @@ pool::CollectionFactory::createAndRegister( const pool::ICollectionDescription& 
      collectionCatalog->registerLFN( guid, logicalName );
   }
   // add collection ID
-  collection->metadata().setValueForKey( CollectionBaseNames::CollIDMdataKey(), guid );
   collection->commit( true ); 
   collectionCatalog->commit();
 
@@ -198,7 +194,6 @@ bool
 pool::CollectionFactory::registerExisting( const pool::ICollectionDescription& description,
                                            pool::IFileCatalog* collectionCatalog,
                                            std::string logicalName,
-                                           pool::MetaDataEntry* metadata,
                                            pool::ISession* session ) const
 {
    if( !description.hasEventReferenceColumn() )  {
@@ -221,37 +216,8 @@ pool::CollectionFactory::registerExisting( const pool::ICollectionDescription& d
                                                          pool::ICollection::READ,
                                                          session );
 
-   if( !collection || !collection->exists( description.name(), false, true ) )  {
-      std::string errorMsg = "Collection with physical name `" + physicalName + 
-         "' does not exist. Cannot register it in collection catalog.";
-      throw pool::Exception( errorMsg,
-                             "CollectionFactory::registerExisting", 
-                             "CollectionBase" );
-   }
-   bool	has_id = collection->metadata().existsKey( CollectionBaseNames::CollIDMdataKey() );
-   if( !has_id ) {
-      // no GUID in this collection (old collection?)
-      // see if we can open it for update
-      try {
-	 pool::ICollection* collection_upd = openWithPhysicalName( physicalName,
-								   collectionCatalog,
-								   pool::ICollection::UPDATE,
-								   session );
-	 collection->close();
-	 delete collection;
-	 collection = collection_upd;
-      }
-      catch( pool::Exception& e) {
-	 // update mode did not work
-	 coral::MessageStream log( thisModule ); 
-	 log << coral::Warning << "Could not open collection " << physicalName
-	     << " for update, to store the new GUID. The error was: "  << e.what()
-	     << coral::MessageStream::endmsg;
-      }
-   }
-
    bool overwrite( true );
-   bool rc = registerExisting( collection, overwrite, collectionCatalog, logicalName, metadata, session );
+   bool rc = registerExisting( collection, overwrite, collectionCatalog, logicalName, session );
    delete collection;   collection = 0;
    return rc;
 }
@@ -262,7 +228,6 @@ pool::CollectionFactory::registerExisting( pool::ICollection* collection,
 					   bool overwrite,
                                            pool::IFileCatalog* collectionCatalog,
                                            std::string logicalName,
-                                           pool::MetaDataEntry*,
                                            pool::ISession* ) const
 {
    if( !collectionCatalog) collectionCatalog = getDefaultCatalog();
@@ -279,19 +244,10 @@ pool::CollectionFactory::registerExisting( pool::ICollection* collection,
 
    if( !collection->isOpen() )
       collection->open();
-   bool	has_id = collection->metadata().existsKey( CollectionBaseNames::CollIDMdataKey() );
-   string coll_id;
-   if( has_id ) {
-      coll_id = collection->metadata().getValueForKey( CollectionBaseNames::CollIDMdataKey() );
-   }
 
    log << coral::Debug << " ---  found catalog guid=" << guid << coral::MessageStream::endmsg;
-   log << coral::Debug << " ---     collection guid=" << coll_id << coral::MessageStream::endmsg;
    
    if( guid.length() )  {
-      if( guid == coll_id )
-	 // already in the catalog, nothing to do
-	 return true;
 
       if( !overwrite ) {
 	 std::string errorMsg = "Collection with physical name `" + physicalName + "' is already registered in collection catalog.";
@@ -306,19 +262,14 @@ pool::CollectionFactory::registerExisting( pool::ICollection* collection,
       collectionCatalog->commit();
    }
 
-   // if the collection has a GUID already, we will register it
-   // - if not, the catalog will generate one
-   guid = coll_id;
-   
    collectionCatalog->start();
    collectionCatalog->registerPFN( physicalName, c_fileType, guid );
    if( logicalName.length() )  {
       collectionCatalog->registerLFN( guid, logicalName );
    }
    collectionCatalog->commit();
-   if( !has_id && collection->openMode() != ICollection::READ ) try {
+   if( collection->openMode() != ICollection::READ ) try {
       // try to update the collection ID with the one generated by the catalog
-      collection->metadata().setValueForKey( CollectionBaseNames::CollIDMdataKey(), guid );
       collection->commit();
    } catch( pool::Exception& e) {
       log << coral::Warning << "Failed to update collection ID for collection " << collection->description().name() <<  ".  The error was: " << e.what() <<  coral::MessageStream::endmsg;

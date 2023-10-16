@@ -4,7 +4,6 @@
 
 #include "ImplicitCollection.h"
 #include "ImplicitCollectionIterator.h"
-#include "ImplicitCollectionMetadata.h"
 
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/IDatabase.h"
@@ -29,8 +28,7 @@ namespace pool {
                        ICollection::OpenMode mode )
          :
          m_container( 0 ),
-         m_description( name,"ImplicitCollection", connection ),
-         m_metadata( 0 )
+         m_description( name,"ImplicitCollection", connection )
    {
       open( mode, session );
    }
@@ -42,8 +40,7 @@ namespace pool {
                        ISession* session )
          :
          m_container( 0 ),
-         m_description( *description ),
-         m_metadata( 0 )
+         m_description( *description )
    {
       open( mode, session );
    }
@@ -155,7 +152,6 @@ namespace pool {
    ImplicitCollection::~ImplicitCollection()
    {
       delete m_container;
-      delete m_metadata;
    }
 
    
@@ -185,12 +181,6 @@ namespace pool {
 
    void
    ImplicitCollection::commit(bool)
-   {
-   }
-
-
-   void
-   ImplicitCollection::rollback()
    {
    }
 
@@ -242,74 +232,4 @@ namespace pool {
                        "ImplicitCollection" );
       // NOT REACHED
    }
-
-   ICollectionMetadata& ImplicitCollection::metadata()
-   {
-      if( !m_metadata ) {
-         m_metadata = new ImplicitCollectionMetadata();
-      }
-      return *m_metadata;
-   } 
-
-   void methodNotImplemented(const std::string &method)
-   {
-      throw Exception( std::string("method not implemented"),
-                       std::string("ImplicitCollection::") + method,
-                       "ImplicitCollection" );
-   }
-
-   bool
-   ImplicitCollection::exists( const std::string& /*name*/, bool, bool ) const
-   {
-      methodNotImplemented("exists");
-      return false;
-   }
-      
-   bool
-   ImplicitCollection::drop( const std::string&, bool, bool)
-   {
-      methodNotImplemented("drop");
-      return false;
-   }
-      
-   bool
-   ImplicitCollection::rename( const std::string&, const std::string&)
-   {
-      methodNotImplemented("rename");
-      return false;
-   }
-      
-   bool
-   ImplicitCollection::grantToUser( const std::string&,
-                                ICollection::Privilege,
-                                const std::string&,
-                                bool)
-   {
-      methodNotImplemented("grantToUser");
-      return false;
-   }
-      
-   bool
-   ImplicitCollection::revokeFromUser( const std::string&,
-                                   ICollection::Privilege,
-                                   const std::string&,
-                                   bool)
-   {
-      methodNotImplemented("revokeFromUser");
-      return false;
-   }
-      
-   bool
-   ImplicitCollection::grantToPublic( const std::string&, bool)
-   {
-      methodNotImplemented("grantToPublic");
-      return false;
-   }
-            
-   bool
-   ImplicitCollection::revokeFromPublic( const std::string&, bool )
-   {
-      methodNotImplemented("revokeFromPublic");
-      return false;
-   }      
 }

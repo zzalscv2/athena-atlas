@@ -21,7 +21,6 @@ namespace pool {
    class ICollectionQuery;
    class ICollectionIterator;
    class ImplicitCollectionIterator;
-   class ImplicitCollectionMetadata;
 
   /// An implicit collection implementation of the ICollection interface
   class ATLAS_NOT_THREAD_SAFE ImplicitCollection : virtual public ICollection
@@ -84,38 +83,6 @@ namespace pool {
     bool isOpen() const;
 
 
-    virtual bool exists( const std::string& fragmentName,
-                         bool setForUpdate = false,
-                         bool checkChildFragments = false ) const;
-
-    virtual bool drop( const std::string& fragmentName,
-                       bool dropChildFragments = false,
-                       bool ignoreExternalDependencies = false );
-
-
-    virtual bool rename( const std::string& oldName,
-                         const std::string& newName );
-
-
-    virtual bool grantToUser( const std::string& userName,
-                              pool::ICollection::Privilege privilege,
-                              const std::string& fragmentName = "",
-                              bool grantForChildFragments = false );
-
-
-    virtual bool revokeFromUser( const std::string& userName,
-                                 pool::ICollection::Privilege privilege,
-                                 const std::string& fragmentName = "",
-                                 bool revokeForChildFragments = false );
-
-    virtual bool grantToPublic( const std::string& fragmentName = "",
-                                bool grantForChildFragments = false );
-
-    virtual bool revokeFromPublic( const std::string& fragmentName = "",
-                                   bool revokeForChildFragments = false );
- 
-
-
     /// Returns an object used to describe the collection properties.
     virtual const ICollectionDescription& description() const;
 
@@ -130,9 +97,6 @@ namespace pool {
     /// Returns an object used to query the collection.
     virtual ICollectionQuery*                 newQuery();
 
-    /// Returns an object used to access collection metadata
-    virtual ICollectionMetadata&        metadata();
-
  protected:
 
     void open( ICollection::OpenMode mode, ISession* session );
@@ -143,8 +107,6 @@ namespace pool {
     IContainer                        *m_container;
 
     CollectionDescription        m_description;
-
-    ImplicitCollectionMetadata*        m_metadata;
   };
 }
 

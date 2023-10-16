@@ -41,7 +41,6 @@ int main(int argc, char** )
 //  const string collConnection = "./";
   const string collConnection = "";
   const string collType = "RootCollection";
-  MetaDataEntry* collMetaData = 0;
   
   Token* token = new Token();
   token->fromString("[DB=AEC1DFE2-010B-D811-9832-000347F31C25]"
@@ -84,7 +83,7 @@ int main(int argc, char** )
       }else {
 	 cout << "createAndRegister collection " << i << endl;
 	 CollectionDescription	desc( collName, collType, collConnection );
-	 collection = factory->createAndRegister( desc, 0, authorizeReplace, logicalName, collMetaData );
+	 collection = factory->createAndRegister( desc, 0, authorizeReplace, logicalName );
       }
       
 //      collection->add(*token,attList);
@@ -175,7 +174,7 @@ int main(int argc, char** )
 	  collection = factory->create(/*"PHYSICAL_NAME",*/ desc, ICollection::CREATE_AND_OVERWRITE);
        } else {
     	  CollectionDescription	desc( "Collection1", collType, collConnection ); 
-	  collection = factory->createAndRegister( desc, 0, true, "", collMetaData );
+	  collection = factory->createAndRegister( desc, 0, true, "" );
        }
        cout << "ERROR: this shouldn't work" << endl;
     }catch( std::exception&){
@@ -192,7 +191,7 @@ int main(int argc, char** )
 	  collection = factory->create(/*"PHYSICAL_NAME",*/ desc, ICollection::CREATE_AND_OVERWRITE);
        } else {
      	  CollectionDescription	desc( "Collection0", collType, collConnection ); 
-	  collection = factory->createAndRegister( desc, 0, true, "", collMetaData );
+	  collection = factory->createAndRegister( desc, 0, true, "" );
        }
        delete collection;
        collection = nullptr;

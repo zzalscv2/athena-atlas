@@ -15,7 +15,6 @@ Adding 30 elements to the collection.
 >>  writing uint64: 9223372036854841344  9.22337e+18   9223372036854841344
 >>  writing uint64: 9223372036854841345  9.22337e+18   9223372036854841344
 >>  writing uint64: 17293822569102770177  1.72938e+19   17293822569102770176
-Collection author metadata inserted: This collection has been created by readTest from RootCollection package
 Done.
 Commiting the collection.
 Closing the collection.
@@ -61,12 +60,3 @@ Meta data : [attr64bit (unsigned long long) : 9223372036854841345]
 Meta data : [attr64bit (unsigned long long) : 17293822569102770177]
 10 records read back
 
-Collection author metadata: This collection has been created by readTest from RootCollection package
-
-Dumping all metadata
-  Metadata Key=Author,  Value=This collection has been created by readTest from RootCollection package
-  Metadata Key=POOLCollectionID [0x00000000],  Value=D8D6A57C-6F82-9C40-9AED-295F80ED938A
-  Metadata Key=empty,  Value=
-  Metadata Key=last,  Value=xxx
-  Metadata Key=random1,  Value=overwritten random metadata 1
-  Metadata Key=random5,  Value=random metadata 5

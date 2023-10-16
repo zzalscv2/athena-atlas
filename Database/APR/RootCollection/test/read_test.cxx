@@ -16,7 +16,6 @@
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionDataEditor.h"
-#include "CollectionBase/ICollectionMetadata.h"
 #include "RootCollection/AttributeListLayout.h"
 
 #include "PersistentDataModel/Token.h"
@@ -240,22 +239,6 @@ TestDriver::write ATLAS_NOT_THREAD_SAFE ()
       collection->dataEditor().insertRow( rowBuffer );
    }
 
-   ICollectionMetadata& metadata( collection->metadata() );
-   metadata.setValueForKey("Author", "This collection has been created by readTest from RootCollection package");
-
-   const char *author = metadata.getValueForKey("Author");
-   if( !author ) {
-      throw std::runtime_error("The collection has no Author key in the metadata");
-   } else {
-      cout << "Collection author metadata inserted: " << author << endl;
-   }
-
-   metadata.setValueForKey("random1", "random metadata 1");
-   metadata.setValueForKey("random5", "random metadata 5");
-   metadata.setValueForKey("random1", "overwritten random metadata 1");
-   metadata.setValueForKey("empty", "");
-   metadata.setValueForKey("last", "xxx");
-      
    cout << "Done." << endl;
    cout << "Commiting the collection." << endl;
    collection->commit();
@@ -389,28 +372,6 @@ TestDriver::read ATLAS_NOT_THREAD_SAFE ()
   delete query3;
   */
 
-  const char *author = collection->metadata().getValueForKey("Author");
-  //std::string crashtest = collection->metadata().getValueForKey("afwefagfadrg");
-  if( !author ) {
-     cout << "The collection has no Author key in the metadata" << endl;
-  } else {
-     cout << "Collection author metadata: " << author << endl;
-  }
-
-  std::cout << endl << "Dumping all metadata" << std::endl;
-  ICollectionMetadata::const_iterator  mdIter
-     = collection->metadata().begin();
-  while( mdIter !=  collection->metadata().end() ) {
-     cout << "  Metadata Key=" << mdIter.key();
-     if (mdIter.key() == "POOLCollectionID") {
-       // The contents of this line will vary from run to run.
-       // Add this to prevent post.sh from comparing it.
-       cout << " [0x00000000]";
-     }
-     cout << ",  Value=" << mdIter.value() << endl;
-     ++mdIter;
-  }
-  
   // Close collection.
   collection->close();
   delete collection;

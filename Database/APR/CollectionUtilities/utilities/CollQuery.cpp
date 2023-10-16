@@ -17,7 +17,6 @@
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/ICollectionMetadata.h"
 #include "CollectionBase/CollectionService.h"
 
 #include "POOLCore/Exception.h"

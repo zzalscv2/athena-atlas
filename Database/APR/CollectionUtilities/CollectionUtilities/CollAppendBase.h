@@ -24,7 +24,6 @@
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionDataEditor.h"
-#include "CollectionBase/ICollectionMetadata.h"
 #include "CollectionBase/CollectionBaseNames.h"
 
 #include "CoralBase/MessageStream.h"
@@ -45,7 +44,6 @@
 
 namespace pool
 {
-   class MetaInfo;
    class CollectionService;
    
    class ATLAS_NOT_THREAD_SAFE CollAppendBase
@@ -87,12 +85,6 @@ namespace pool
 
      virtual void 		copyData();
 
-     /// supply user specialization of MetaInfo class for metadata processing - BEFORE init()
-     virtual void               setMetaInfo( MetaInfo* minfo );
-     virtual void 		readMetadata();
-     virtual void 		addMetadata();
-     virtual void	 	writeMetadata();
-
      virtual void	 	closeCollections();
      virtual void	 	finalize();
 
@@ -133,7 +125,6 @@ namespace pool
      QueryInfo   	m_queryinfo; 
      DstInfo     	m_dstinfo;
      SrcInfo     	m_srcinfo; 
-     MetaInfo*          m_metainfo;
      Progress    	m_progress; 
 
      bool		m_committed;
