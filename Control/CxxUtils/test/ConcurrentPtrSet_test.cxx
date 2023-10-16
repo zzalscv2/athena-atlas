@@ -535,7 +535,7 @@ void test4_Reader::operator()()
   std::shared_lock<std::shared_timed_mutex> lock (start_mutex);
 
   while (true) {
-    for (int i = 0; ; ++i) {
+    for (int i = 0; i < static_cast<int>(nwrites); ++i) {
       TestSet::const_iterator it = m_set.find (key(i));
       if (it == m_set.end()) break;
       assert(**it == i);
