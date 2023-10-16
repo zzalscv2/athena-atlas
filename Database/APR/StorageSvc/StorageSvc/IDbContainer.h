@@ -14,7 +14,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/DbObject.h"
-#include "StorageSvc/DbSection.h"
 #include "StorageSvc/Transaction.h"
 
 #include <vector>
@@ -46,9 +45,6 @@ namespace pool    {
     * @version 1.0
     */
   class IDbContainer    {
-  public:
-    /// Sections definition
-    typedef std::vector<DbSection>  Sections;
   protected:
     /// Destructor (called only by sub-classes)
     virtual ~IDbContainer()   {     }
@@ -165,9 +161,6 @@ namespace pool    {
 
     /// Query the pending transaction stack
     virtual bool updatesPending() const = 0;
-
-    /// Attach sections to container object
-    virtual void setSections(const Sections& sections) = 0;
   };
 }      // End namespace pool
 #endif // POOL_IDBCONTAINER_H

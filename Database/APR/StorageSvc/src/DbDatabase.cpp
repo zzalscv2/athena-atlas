@@ -142,23 +142,13 @@ bool DbDatabase::isOpen() const
 DbStatus DbDatabase::makeLink(Token* pToken, Token::OID_t& refLink)
 {  return isValid() ? ptr()->makeLink(pToken, refLink) : Error;         }
 
-/// Access to all token redirections from merged files
-const DbDatabase::Redirections& DbDatabase::redirections() const { 
-  static const Redirections s_redirects;
-  return isValid() ? ptr()->redirections() : s_redirects; 
-}
-
 /// read an object referenced by the token
 DbStatus DbDatabase::read(const Token& token, ShapeH shape, void** object)
 {  return isValid() ? ptr()->read(token, shape, object) : Error;  }
 
-/// Calculate required OID modification (shift) for source OID (oid) for a given merge section 
-DbStatus DbDatabase::getRedirection(const Token::OID_t& oid, int merge_section, Token::OID_t& shift)
-{  return isValid() ? ptr()->getRedirection(oid, merge_section, shift) : Error;  }
-
-/// Expand OID into a full Token, based on the Links table. For merged files provide links section#
-DbStatus DbDatabase::getLink(const Token::OID_t& oid, int merge_section, Token* pTok)
-{  return isValid() ? ptr()->getLink(oid, merge_section, pTok) : Error;  }
+/// Expand OID into a full Token, based on the Links table.
+DbStatus DbDatabase::getLink(const Token::OID_t& oid, Token* pTok)
+{  return isValid() ? ptr()->getLink(oid, pTok) : Error;  }
 
 /// Access local container token (if container exists)
 std::string DbDatabase::cntName(Token& token)
@@ -176,12 +166,6 @@ DbStatus DbDatabase::setOption(const DbOption& refOpt)
 /// Pass options from the implementation to the user
 DbStatus DbDatabase::getOption(DbOption& refOpt)
 {  return isValid() ? ptr()->getOption(refOpt) : Error;                 }
-
-/// Access to sections if availible
-const DbDatabase::ContainerSections& DbDatabase::sections(const string& cnt)   {
-  static const ContainerSections s_sect;
-  return isValid() ? ptr()->sections(cnt) : s_sect;
-}
 
 /// Add persistent type to the Database
 DbStatus DbDatabase::addShape(const DbTypeInfo* refType)   

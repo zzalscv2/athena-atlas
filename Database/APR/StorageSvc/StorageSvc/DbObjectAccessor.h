@@ -40,8 +40,7 @@ namespace pool  {
     static DbStatus read( void**                    ptr,
                           ShapeH                    shape,
                           DbContainer&              cntH,
-                          const Token::OID_t&       oid,
-                          int                       merge_section );
+                          const Token::OID_t&       oid );
 
     /// Retrieve hosting container
     static const DbContainer& containedIn(const DbObject* pObj);

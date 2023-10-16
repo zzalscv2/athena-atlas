@@ -16,7 +16,6 @@
 #include "PersistentDataModel/Token.h"
 #include "DataModelRoot/RootType.h"
 #include "StorageSvc/pool.h"
-#include "StorageSvc/DbSection.h"
 #include "StorageSvc/DbHandleBase.h"
 #include "StorageSvc/Transaction.h"
 
@@ -52,13 +51,6 @@ namespace pool  {
    * @version 1.0
    */
   class DbDatabase : public DbHandleBase<DbDatabaseObj> {
-  public:
-    /// Sections definition
-    typedef std::vector<DbSection>              ContainerSections;
-    /// Database redirection definition
-    typedef std::pair<size_t,std::string>       Redirection;
-    typedef std::map<std::string,Redirection>   Redirections;
-
   protected:
     /// Parameter definition
     typedef std::pair<std::string, std::string> Parameter;
@@ -164,21 +156,15 @@ namespace pool  {
     DbStatus param(const std::string& nam, std::string& val);
     /// Retrieve all parameters
     DbStatus params(Parameters& vals);
-    /// Access to all token redirections from merged files
-    const Redirections& redirections() const;
 
     /// read an object referenced by the token
     DbStatus read(const Token& token, ShapeH shape, void** object);
-    /// Calculate required OID modification (shift) for source OID (oid) for a given merge section 
-    DbStatus getRedirection(const Token::OID_t& oid, int merge_section, Token::OID_t& shift);
-    /// Expand OID into a full Token, based on the Links table. For merged files provide links section#
-    DbStatus getLink(const Token::OID_t& oid, int merge_section, Token* pTok);
+    /// Expand OID into a full Token, based on the Links table.
+    DbStatus getLink(const Token::OID_t& oid, Token* pTok);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token);
     /// Add association link to link container
     DbStatus makeLink(Token* pToken, Token::OID_t& linkH);
-    /// Access to sections if availible
-    const ContainerSections& sections(const std::string& cnt);
     /// Add persistent shape to the Database
     DbStatus addShape (const DbTypeInfo* pShape);
     /// Retrieve persistent type information by class handle

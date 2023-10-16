@@ -60,9 +60,6 @@ def addMyArgs(parser):
     parser.add_argument('--PileUpPresampling',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool),
                         help='Run digitization with pile-up presampling configuration.', group='RDOMerge_tf')
-#     parser.add_argument('--fastPoolMerge', type=trfArgClasses.argFactory(trfArgClasses.argBool),
-#                         help='Hybrid POOL merging switch (default True)')
-
 
 if __name__ == '__main__':
     main()

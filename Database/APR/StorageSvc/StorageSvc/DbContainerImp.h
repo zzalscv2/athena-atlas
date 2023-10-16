@@ -78,8 +78,6 @@ namespace pool    {
     bool                  m_canUpdate;
     /// Flag to indicate if object removals are supported
     bool                  m_canDestroy;
-    /// Section buffer for merged tables
-    Sections              m_sections;
 
     /// Standard destructor
     virtual ~DbContainerImp();
@@ -107,15 +105,10 @@ namespace pool    {
     /// Execute object modification requests during a transaction
     virtual DbStatus commitTransaction();
 
-    /// Access section identifier from OID
-    virtual const DbSection& getSection(const Token::OID_t& oid) const;
-
   public:
     DbContainerImp();
     /// Release instance (Abstract interfaces do not expose destructor!)
     virtual void release() override                    { delete this;           }
-    /// Attach sections to container object
-    virtual void setSections(const Sections& sections) override { m_sections = sections; }
     /// Size of the container
     virtual uint64_t size() override;
     /// Get container name
