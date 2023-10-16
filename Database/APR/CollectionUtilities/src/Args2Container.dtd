@@ -22,7 +22,6 @@
     <CliArg name="SrcInfo" option="-srcconnect">
       <datum>oracle://tagspic.pic.es/ATLAS_TAGS_DATA_F_2010</datum>
     </CliArg>
-    <CliArg name="MetaInfo" option="-merge"/>
   </ToolInfo>
 
 </ArgList>

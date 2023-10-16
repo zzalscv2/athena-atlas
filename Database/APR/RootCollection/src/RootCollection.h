@@ -41,7 +41,6 @@ namespace pool {
 
       class Attribute;
       class AttributeSpecification;
-      class RootCollectionMetadata;
   
       /**
          @brief Collection (and CollectionProxy) implementation based on ROOT trees
@@ -128,44 +127,9 @@ namespace pool {
         /// Commits the last changes made to the collection
         virtual void commit( bool restartTransaction = false );
     
-        /// Aborts the last changes made to the collection
-        virtual void rollback();
-    
         /// Explicitly closes the collection
         virtual void close();
     
-        virtual bool exists( const std::string& fragmentName,
-                             bool setForUpdate = false,
-                             bool checkChildFragments = false ) const;
-
-        virtual bool drop( const std::string& fragmentName,
-                           bool dropChildFragments = false,
-                           bool ignoreExternalDependencies = false );
-
-
-        virtual bool rename( const std::string& oldName,
-                             const std::string& newName );
-
-
-        virtual bool grantToUser( const std::string& userName,
-                                  pool::ICollection::Privilege privilege,
-                                  const std::string& fragmentName = "",
-                                  bool grantForChildFragments = false );
-
-
-        virtual bool revokeFromUser( const std::string& userName,
-                                     pool::ICollection::Privilege privilege,
-                                     const std::string& fragmentName = "",
-                                     bool revokeForChildFragments = false );
-
-        virtual bool grantToPublic( const std::string& fragmentName = "",
-                                    bool grantForChildFragments = false );
-
-        virtual bool revokeFromPublic( const std::string& fragmentName = "",
-                                       bool revokeForChildFragments = false );
- 
-
-
         /// Returns an object used to describe the collection properties.
         virtual const ICollectionDescription& description() const;
 
@@ -178,9 +142,6 @@ namespace pool {
         /// Returns an object used to query the collection.
         virtual ICollectionQuery*         newQuery();
 
-        /// Returns an object used to access collection metadata
-        virtual ICollectionMetadata&        metadata();
-        
      private:
     
         /// copying unimplemented in this class.
@@ -231,8 +192,6 @@ namespace pool {
 
         RootCollectionSchemaEditor*        m_schemaEditor;
         RootCollectionDataEditor*        m_dataEditor;
-
-        RootCollectionMetadata*                m_metadata;
 
 	IFileMgr*                         m_fileMgr;
 

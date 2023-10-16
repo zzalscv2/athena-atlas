@@ -18,15 +18,13 @@ namespace pool {
    
    class ICollectionDescription;
    class ISession;
-   class MetaDataEntry;
    class ICollectionCursor;
 
    /**
    * @class CollectionFactory CollectionFactory.h CollectionFactory/CollectionFactory.h
    *  
    * A plugin factory for the creation of storage technology specific collections or 
-   * collection fragments, the latter of which contain a subset of the metadata of a 
-   * full collection.
+   * collection fragments.
    */
   class ATLAS_NOT_THREAD_SAFE CollectionFactory
   // not thread-safe due to constness violations wrt the catalog.
@@ -59,14 +57,12 @@ namespace pool {
      * @param collectionCatalog Collection catalog manager.
      * @param overwrite Flag indicating whether to overwrite existing collection.
      * @param logicalName Optional logical name assigned to collection in collection catalog.
-     * @param metadata Optional collection catalog metadata.
      * @param session Reference to database session (place holder for factory).
      */
     virtual ICollection* createAndRegister( const ICollectionDescription& description,
                                             IFileCatalog* collectionCatalog,
                                             bool overwrite = false,
                                             std::string logicalName = "",
-                                            MetaDataEntry* metadata = 0,
                                             ISession* session = 0 ) const;
     
     /**
@@ -80,13 +76,11 @@ namespace pool {
      * @param description Specification of collection properties.
      * @param collectionCatalog Collection catalog manager.
      * @param logicalName Optional logical name assigned to collection in collection catalog.
-     * @param metadata Optional collection catalog metadata.
      * @param session Reference to database session (place holder for factory).
      */
     virtual bool registerExisting( const ICollectionDescription& description,
                                    IFileCatalog* collectionCatalog,
                                    std::string logicalName = "",
-                                   MetaDataEntry* metadata = 0,
                                    ISession* session = 0 ) const;
 
     /**
@@ -97,14 +91,12 @@ namespace pool {
      * @param overwrite If true overwrite catalog entry for the same collection name
      * @param collectionCatalog Collection catalog manager.
      * @param logicalName Optional logical name assigned to collection in collection catalog.
-     * @param metadata Optional collection catalog metadata.
      * @param session Reference to database session (place holder for factory).
      */
     virtual bool registerExisting( ICollection* collection,
 				   bool overwrite,
                                    IFileCatalog* collectionCatalog,
                                    std::string logicalName = "",
-                                   MetaDataEntry* metadata = 0,
                                    ISession* session = 0 ) const;
     
     /**

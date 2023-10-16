@@ -10,7 +10,6 @@
  */
 
 #include "CollectionUtilities/CollAppendBase.h"
-#include "CollectionUtilities/MetaInfo.h"
 #include "CollectionUtilities/MaxEventsInfo.h"
 
 #include "CoralBase/Attribute.h"
@@ -51,7 +50,6 @@ CollAppendBase::CollAppendBase(const std::string& name) :
       m_initialized( false )
 {
    SystemTools::initGaudi();
-   m_metainfo = new MetaInfo();
 
    // attempt to shut up Coverity, MN
    time(&m_starttime); 
@@ -60,22 +58,8 @@ CollAppendBase::CollAppendBase(const std::string& name) :
 
 CollAppendBase::~CollAppendBase()
 {
-   delete m_metainfo;
    delete m_collectionService;
 }
-
-void CollAppendBase::setMetaInfo( MetaInfo* minfo )
-{
-   if( m_initialized ) {
-      m_log << coral::Error
-            << "CollAppendBase::setMetaInfo() can not be used after init()"
-            <<  coral::MessageStream::endmsg;
-      std::abort();
-   }
-   delete m_metainfo;
-   m_metainfo = minfo;
-}
-
 
 int
 CollAppendBase::execute( std::vector<std::string> argv_v )
@@ -86,11 +70,7 @@ CollAppendBase::execute( std::vector<std::string> argv_v )
 
       time(&m_starttime); 
       copyData();
-      readMetadata(); 
       time(&m_endtime);
-      
-      addMetadata( );
-      writeMetadata();
       
       closeCollections();
       finalize();
@@ -141,18 +121,8 @@ CollAppendBase::chkExistingDst(vector<bool>& existVec)
 		<<  coral::MessageStream::endmsg;
 	 }
 	 existVec[i] = true; 
-	 if( m_metainfo->copyMode() != ICollMetaHandler::merge ) {
-	    m_log << coral::Error << "Destination collection '" << m_dstinfo.name(i)
-		<< "' exists, and the copy mode was not 'merge'. "
-		<< "Remove the existing collection first"
-		<< coral::MessageStream::endmsg;
-	    exit(1);
-	 }
       }
       catch ( pool::Exception& ) {
-	 if( m_metainfo->copyMode() == ICollMetaHandler::merge )
-	    m_log << coral::Warning << "Destination Collection `" << m_dstinfo.name(i)
-		  << "' does not exist; A new one will be created; "  << corENDL;
 	 existVec[i] = false; 
       }
    }
@@ -255,14 +225,10 @@ CollAppendBase::createDestCollection( const pool::ICollectionDescription& destDe
    } catch( pool::Exception& ) {
       m_log << coral::Info <<"Could not create destination collection " << name
 	  << " - testing again if the collection exists already " << coral::MessageStream::endmsg;
-      if( m_collectionService->exists( name, type, connect ) ) {
 	 m_log << coral::Info << "Opening destination collection " << name
 	     << " in update mode" << coral::MessageStream::endmsg;
 	 bool forUpdate(false);
 	 collection = m_collectionService->handle( name, type, connect, forUpdate );
-      } else {  
-	 throw;
-      }
    }
    return collection;
 }
@@ -406,15 +372,9 @@ CollAppendBase::openSrcCollection( const std::string& name,
 
 
 std::string
-CollAppendBase::readCollectionGUID( pool::ICollection* collection )
+CollAppendBase::readCollectionGUID( pool::ICollection* /*collection*/ )
 {
-   if( (!m_extendProv && m_metainfo->noMetadata() )
-       || !collection->metadata().existsKey(CollectionBaseNames::CollIDMdataKey()) )
-      return string("NOTFOUND") ;
-   string GUID = collection->metadata().getValueForKey(CollectionBaseNames::CollIDMdataKey());
-   m_log << coral::Debug << "Collection " << collection->description().name() << " GUID= "
-       << GUID << corENDL;
-   return GUID;
+   return string("NOTFOUND") ;
 }
 
 
@@ -566,8 +526,7 @@ CollAppendBase::init( std::vector<std::string> argv_v )
      
    m_argsVec.desc << "Takes one or more collections (of varying formats) and "
                   << "merges them and writes the results to one or more output "
-                  << "collections (of varying formats). " << endl
-                  << "Infile Metadata handling depends on -copy, -extract and -merge options." << endl;
+                  << "collections (of varying formats). " << endl;
  
    // list of CollAppend *specific* cli keys and their argument properties
    QualList markers;
@@ -597,7 +556,6 @@ CollAppendBase::init( std::vector<std::string> argv_v )
    m_argsVec.push_back(&m_queryinfo);
    m_argsVec.push_back(&m_srcinfo);
    m_argsVec.push_back(&m_dstinfo);
-   m_argsVec.push_back(m_metainfo);
    m_argsVec.push_back(&m_progress);
    MaxEventsInfo maxEvents;
    m_argsVec.push_back(&maxEvents);
@@ -673,10 +631,6 @@ CollAppendBase::init( std::vector<std::string> argv_v )
          }
       }
    }
-   if( m_metainfo->copyMode() == ICollMetaHandler::copy && m_srcinfo.nSrc() > 1 ) {
-      m_log << coral::Error << "Copy mode: 'copy' supports only one source collection" << corENDL;
-      return false;
-   }
    
    m_catinfo.setCatalogs( m_collectionService );
    m_initialized = true;
@@ -684,55 +638,6 @@ CollAppendBase::init( std::vector<std::string> argv_v )
 }
 
 
-void
-CollAppendBase::readMetadata()
-{
-   m_progress.print("Metadata processing", 0);
-   if( m_metainfo->checkMetadata( m_srcCollections, m_destCollections ) ) {
-      // only read metadata if "check" did not report any conflicts in the dest collections
-      m_metainfo->readMetadata( m_srcCollections );
-   }
-}
-
-
-void
-CollAppendBase::addMetadata( )
-{
-   // add extract information
-   if( !m_metainfo->noMetadata() && m_metainfo->copyMode() == ICollMetaHandler::extract ) {
-      string user; if (getenv("USER")!=NULL) user = getenv("USER");
-      string host; if (getenv("HOST")!=NULL) host = getenv("HOST");
-      string userhost = user + "@" + host;
-      stringstream stimestr, etimestr;
-
-      std::string inputCollections  = m_srcinfo.name(0);
-      for( size_t i=1; i<m_srcinfo.nSrc(); i++ ) 
-	 inputCollections += ":"+m_srcinfo.name(i);
-      std::string outputCollections = m_dstinfo.name(0);
-      for( size_t i=1; i<m_dstinfo.nDst(); i++ ) 
-	 outputCollections += ":"+m_dstinfo.name(i);
-      stimestr << m_starttime; etimestr << m_endtime;
-
-      m_metainfo->addMetaEntry( "TimeBegin", stimestr.str() );
-      m_metainfo->addMetaEntry( "TimeEnd", etimestr.str() );
-      m_metainfo->addMetaEntry( "ExtractNode", userhost );
-      m_metainfo->addMetaEntry( "InputCollections", inputCollections );
-      m_metainfo->addMetaEntry( "OutputCollections", outputCollections );
-      m_metainfo->addMetaEntry( "Query", (m_queryinfo.query().length() ? m_queryinfo.query() : "1=1") );
-   }
-}
-
-
-/// write all metadata
-void
-CollAppendBase::writeMetadata( )
-{
-   m_progress.print("Metadata writing", 0);
-   m_metainfo->writeMetadata( m_destCollections );
-}
-
-
-      
 void
 CollAppendBase::closeCollections( )
 {

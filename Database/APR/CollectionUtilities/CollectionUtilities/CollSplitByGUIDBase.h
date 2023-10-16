@@ -13,7 +13,6 @@
 #include "CollectionUtilities/SrcInfo.h"
 #include "CollectionUtilities/QueryInfo.h"
 #include "CollectionUtilities/CatalogInfo.h"
-#include "CollectionUtilities/MetaInfo.h"
 #include "CxxUtils/checker_macros.h"
 
 
@@ -72,7 +71,6 @@ namespace pool
      CatalogInfo 	m_catinfo;
      QueryInfo   	m_queryinfo; 
      SrcInfo     	m_srcinfo; 
-     MetaInfo    	m_metainfo;
     
      pool::CollectionService* m_collectionService;
      coral::MessageStream m_log;
@@ -89,7 +87,6 @@ namespace pool
      virtual void	openSourceCollections();
      virtual void	openDestCollections();
      virtual void	copyRows();
-     virtual void	copyMetadata();
      virtual void	finalize();
 
      /// read user-prepared list of GUIDs and output collection names

@@ -19,7 +19,6 @@
 #include "CollectionBase/ICollectionQuery.h"
 #include "CollectionBase/ICollectionCursor.h"
 #include "CollectionBase/ICollectionDataEditor.h"
-#include "CollectionBase/ICollectionMetadata.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/MessageStream.h"
@@ -84,7 +83,6 @@ CollSplitByGUIDBase::execute( std::vector<std::string> argv_v )
 	 openDestCollections();
 	 copyRows();
 	 //time(&m_endtime);
-	 copyMetadata();
 	 finalize();
       }
 
@@ -141,7 +139,6 @@ CollSplitByGUIDBase::init( std::vector<std::string> argv_v )
    m_argsVec.push_back(&m_catinfo);
    m_argsVec.push_back(&m_queryinfo);
    m_argsVec.push_back(&m_srcinfo);
-   m_argsVec.push_back(&m_metainfo);
 
     // Check that all cmd line args are valid
    if( !m_argsVec.evalArgs(argv_v) ) return false;
@@ -394,21 +391,6 @@ CollSplitByGUIDBase::copyRows()
       m_log << coral::Info << "Finished writing all events from input collection " << collection->description().name() << coral::MessageStream::endmsg;
    }
 }
-
-
-// Example of a copy metadata methos
-// this one does nothing very useful
-void
-CollSplitByGUIDBase::copyMetadata()
-{
-   CollectionPool::flushing_iterator i( m_collectionPool );
-   i.forceOpen();  // ensures all accessed collections are open
-   while( i.isValid() ) {
-      i->metadata().setValueForKey( "CreatedBy", m_thisProgram );
-      ++i;
-   }
-}
-
 
 
 void
