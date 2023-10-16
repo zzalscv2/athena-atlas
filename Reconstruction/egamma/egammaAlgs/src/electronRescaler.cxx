@@ -33,16 +33,6 @@ electronRescaler::finalize()
 
 StatusCode
 electronRescaler::execute(const EventContext& ctx) const {
-
-  //const EgammaRecContainer* inputElRecs = nullptr;
-  //const EgammaRecContainer* inputPhRecs = nullptr;
-  //xAOD::ElectronContainer* electrons = nullptr;
-  //xAOD::PhotonContainer* photons = nullptr;
-  /*
-   * From here on if a Read/Write handle
-   * is retrieved the above will be !=
-   * nullptr for electron or photons or both
-   */
   SG::ReadHandle<xAOD::ElectronContainer> inputContainer(m_electronInputKey,ctx);
   SG::WriteHandle<xAOD::ElectronContainer> outputContainer(m_electronOutputKey,ctx);
   ATH_CHECK(outputContainer.record(std::make_unique<xAOD::ElectronContainer>(),
@@ -57,5 +47,4 @@ electronRescaler::execute(const EventContext& ctx) const {
   }
   
   return StatusCode::SUCCESS;
- 
 }
