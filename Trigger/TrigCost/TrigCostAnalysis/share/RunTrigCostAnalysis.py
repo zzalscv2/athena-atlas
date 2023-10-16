@@ -123,7 +123,7 @@ def decodingCfg(flags):
   acc.addEventAlgo(CompFactory.HLTResultMTByteStreamDecoderAlg(), "Decoding")
 
   costDataDeserialiser = CompFactory.TriggerEDMDeserialiserAlg("CostDataTrigDeserialiser")
-  costDataDeserialiser.ModuleID = DataScoutingInfo.DataScoutingIdentifiers["CostMonDS"]
+  costDataDeserialiser.ModuleID = DataScoutingInfo.getDataScoutingResultID("CostMonDS")
   acc.addEventAlgo(costDataDeserialiser, "Decoding")
 
   return acc

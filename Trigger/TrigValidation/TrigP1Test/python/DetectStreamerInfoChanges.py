@@ -42,8 +42,8 @@ if __name__ == '__main__':
     objects = []
     if doTrigEDMOnly:
         from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3
-        from TrigEDMConfig.DataScoutingInfo import DataScoutingIdentifiers
-        BS_destinations = ["BS"] + list(DataScoutingIdentifiers.keys())
+        from TrigEDMConfig.DataScoutingInfo import getAllDataScoutingIdentifiers
+        BS_destinations = ["BS"] + getAllDataScoutingIdentifiers()
         log.warning("BS_destinations = {}".format(BS_destinations))
         for item in TriggerHLTListRun3:
             if any(bs in item[1].split() for bs in BS_destinations):
