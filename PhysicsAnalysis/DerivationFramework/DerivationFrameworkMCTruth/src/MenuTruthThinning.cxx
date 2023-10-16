@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -297,25 +297,19 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
 
     // All explicitly requested PDG IDs of long lived particles, this is needed
     // because their childrens barcodes can be above the cut off m_geantOffset
-    if(!m_longLivedPdgIds.empty() && parentIsLongLived(p)){
-      ok=true;
-    }
+    if(!m_longLivedPdgIds.empty() && parentIsLongLived(p)) ok = true; 
 
 
     if (HepMC::is_simulation_particle(p) && !m_writeGeant && !m_writeEverything && !ok) {
-        if (! (pdg_id == 22/*PDG::gamma*/ &&
-               m_geantPhotonPtThresh >= 0 &&
-               p->pt() > m_geantPhotonPtThresh) )
+        if (!(MC::isPhoton(pdg_id) && m_geantPhotonPtThresh >= 0 && p->pt() > m_geantPhotonPtThresh) )
             return false;
     }
     
     // Do we want to save everything?
-    if (m_writeEverything)
-        ok = true;
+    if (m_writeEverything) ok = true;
     
     // Save status code 3 particles
-    if (m_writeStatus3 && p->status()==3)
-        ok = true;
+    if (m_writeStatus3 && p->status()==3) ok = true;
     
     // OK if we select partons and are at beginning of event record
     if( m_writePartons && !MC::isHadron(pdg_id) &&
@@ -324,18 +318,15 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     
     //  OK if we should select hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeHadrons && MC::isHadron (pdg_id) && !HepMC::is_simulation_particle(p) )
-        ok = true;
+    if( m_writeHadrons && MC::isHadron (pdg_id) && !HepMC::is_simulation_particle(p) ) ok = true;
     
     // OK if we should select b hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(p) && MC::isBottomHadron (pdg_id))
-        ok= true;
+    if( m_writeBHadrons &&  !HepMC::is_simulation_particle(p) && MC::isBottomHadron (pdg_id)) ok = true;
 
     // OK if we should select c hadrons and are in hadron range
     // JRC: cut changed from PHOTOSMIN to m_geantOffset
-    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(p) && MC::isCharmHadron (pdg_id))
-        ok= true;
+    if( m_writeCHadrons &&  !HepMC::is_simulation_particle(p) && MC::isCharmHadron (pdg_id)) ok = true;
 
     // PHOTOS range: check whether photons come from parton range or
     // hadron range
@@ -349,21 +340,16 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
             const xAOD::TruthParticle* mother = vprod->incomingParticle(0);
             if (mother) motherPDGID = mother->pdgId();
         }
-        if( m_writePartons && !MC::isHadron( motherPDGID ) )
-            ok = true;
-        if( m_writeHadrons && MC::isHadron( motherPDGID ) )
-            ok = true;
+        if( m_writePartons && !MC::isHadron( motherPDGID ) ) ok = true;
+        if( m_writeHadrons && MC::isHadron( motherPDGID ) ) ok = true;
     }
     
     // OK if we should select G4 particles and are in G4 range
-    if( m_writeGeant && HepMC::is_simulation_particle(p) )
-        ok = true;
+    if( m_writeGeant && HepMC::is_simulation_particle(p) ) ok = true;
     
-    if(isLeptonFromTau(p))
-        ok = true;
+    if(isLeptonFromTau(p)) ok = true;
     
-    if(isFsrFromLepton(p))
-        ok = true;
+    if(isFsrFromLepton(p)) ok = true;
     
     // Hadronic tau decays
     if(m_writeTauHad){
@@ -373,31 +359,25 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
     }
     
     // Bosons
-    if(m_writeBosons && isBoson(p))
-        ok = true;
+    if(m_writeBosons && (MC::isZ(p)||MC::isW(p)||MC::isHiggs(p) || (MC::isPhoton(p) && p->pt()>m_photonPtCut) )) ok = true;
     
     // BSM particles
-    if(m_writeBSM && MC::isBSM(p))
-        ok = true;
+    if(m_writeBSM && MC::isBSM(p)) ok = true;
     
     // tt+HF hadrons
-    if (m_writettHFHadrons && isttHFHadron(p))
-        ok = true;
+    if (m_writettHFHadrons && isttHFHadron(p)) ok = true;
     
     // Top quarks
-    if(m_writeTopAndDecays && pdg_id==6)
-        ok = true;
+    if(m_writeTopAndDecays && MC::isTop(p)) ok = true;
     
     // All leptons
-    if(m_writeAllLeptons && (pdg_id>10 && pdg_id<19)) // Include 4th generation...
-        ok = true;
-    
+    if(m_writeAllLeptons && MC::isLepton(p))ok = true; // Include 4th generation...
+
     // All stable
-    if (m_writeAllStable && MC::isStable(p) && !HepMC::is_simulation_particle(p))
-        ok = true;
+    if (m_writeAllStable && MC::isStable(p) && !HepMC::is_simulation_particle(p)) ok = true;
     
     // All leptons not from hadron decays
-    if(!ok && m_writeLeptonsNotFromHadrons && (pdg_id>10 && pdg_id<19) && MC::isStable(p)) {// Include 4th generation...
+    if(!ok && m_writeLeptonsNotFromHadrons && MC::isLepton(p) && MC::isStable(p)) {// Include 4th generation...
         ok = !(matchHadronIncTau(p) || matchQuarkIncTau(p) || isOrphanIncTau(p));
     }
     
@@ -407,8 +387,8 @@ bool DerivationFramework::MenuTruthThinning::isAccepted(const xAOD::TruthParticl
         for(unsigned int itr=0; itr<nIncoming; ++itr) {
             const xAOD::TruthParticle* incomingParticle = prodVtx->incomingParticle(itr);
             if (!incomingParticle) continue;
-            if ((m_writeBSMProducts && MC::isBSM( (incomingParticle) )) ||
-                (m_writeBosonProducts && isBoson( (incomingParticle) )) ||
+            if ((m_writeBSMProducts && MC::isBSM(incomingParticle)) ||
+                (m_writeBosonProducts && (MC::isZ(incomingParticle)||MC::isW(incomingParticle)||MC::isHiggs(incomingParticle) || (MC::isPhoton(incomingParticle) && incomingParticle->pt()>m_photonPtCut) )) ||
                 (m_writeTopAndDecays && abs(incomingParticle->pdgId())==6) ){
                 ok = true;
                 break;
@@ -553,12 +533,7 @@ bool DerivationFramework::MenuTruthThinning::isLeptonFromTau(const xAOD::TruthPa
     
     int pdg = part->pdgId();
     
-    if(abs(pdg) != 11 &&
-       abs(pdg) != 12 &&
-       abs(pdg) != 13 &&
-       abs(pdg) != 14 &&
-       abs(pdg) != 15 &&
-       abs(pdg) != 16) return false; // all leptons including tau.
+    if(!MC::isSMLepton(part)) return false; // all leptons including tau.
     
     const xAOD::TruthVertex* prod = part->prodVtx();
     if(!prod) return false; // no parent.
@@ -664,23 +639,10 @@ bool DerivationFramework::MenuTruthThinning::isttHFHadron(const xAOD::TruthParti
     return false;
 }
 
-bool DerivationFramework::MenuTruthThinning::isBoson(const xAOD::TruthParticle* part) const{
-    
-    int pdg = part->pdgId();
-    
-    if(abs(pdg) != 22  &&
-       abs(pdg) != 23 &&
-       abs(pdg) != 24 &&
-       abs(pdg) != 25 ) return false;
-    
-    if(abs(pdg)==22 && part->pt()<m_photonPtCut) return false;
-    
-    return true;
-}
 
 bool DerivationFramework::MenuTruthThinning::isFsrFromLepton(const xAOD::TruthParticle* part) const {
     int pdg = part->pdgId();
-    if(abs(pdg) != 22) return false; // photon
+    if(!MC::isPhoton(part)) return false;
     if(HepMC::is_simulation_particle(part) ) return false; // Geant photon
     const xAOD::TruthVertex* prod = part->prodVtx();
     if(!prod) return false; // no parent.
