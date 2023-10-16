@@ -9,16 +9,11 @@ from FastCaloSim.FastCaloSimFactoryNew import NITimedExtrapolatorCfg
 def FastCaloSimCaloExtrapolationCfg(flags, name="FastCaloSimCaloExtrapolation", **kwargs):
     acc = ComponentAccumulator()
 
-    Extrapolator = acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))
-    acc.addPublicTool(Extrapolator)
-    GeometryHelper = acc.popToolsAndMerge(FastCaloSimGeometryHelperCfg(flags))
-    acc.addPublicTool(GeometryHelper)
-
     kwargs.setdefault("CaloBoundaryR", [1148.0, 120.0, 41.0])
     kwargs.setdefault("CaloBoundaryZ", [3550.0, 4587.0, 4587.0])
     kwargs.setdefault("CaloMargin", 100)
-    kwargs.setdefault("Extrapolator", acc.getPublicTool(Extrapolator.name))
-    kwargs.setdefault("CaloGeometryHelper", acc.getPublicTool(GeometryHelper.name))
+    kwargs.setdefault("Extrapolator", acc.addPublicTool(acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))))
+    kwargs.setdefault("CaloGeometryHelper", acc.addPublicTool(acc.popToolsAndMerge(FastCaloSimGeometryHelperCfg(flags))))
     kwargs.setdefault("CaloEntrance", 'InDet::Containers::InnerDetector')
 
     acc.setPrivateTools(CompFactory.FastCaloSimCaloExtrapolation(name, **kwargs))
