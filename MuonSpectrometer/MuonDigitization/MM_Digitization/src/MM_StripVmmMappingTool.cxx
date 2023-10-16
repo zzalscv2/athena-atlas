@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MM_Digitization/MM_StripVmmMappingTool.h"
@@ -12,7 +12,7 @@
 #include "GaudiKernel/MsgStream.h"
 
 // returns ADDC, MMFE, VMM
-int electronics::elec(int stripNumber, std::string tech, int off_stationEta, int chMax) {
+int electronics::elec(int stripNumber, const std::string& tech, int off_stationEta, int chMax) {
     off_stationEta = std::abs(off_stationEta);
 
     int MMFE_total = off_stationEta == 1 ? 10 : 6;
