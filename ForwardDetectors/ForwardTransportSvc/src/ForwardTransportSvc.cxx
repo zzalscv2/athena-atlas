@@ -179,8 +179,8 @@ void ForwardTransportSvc::addMcVertex(G4ThreeVector pos, double tim, G4ThreeVect
 
   int statusCode = (isTransported) ? 212 : 211;
   
-  HepMC::GenVertex*   gVertex   = new HepMC::GenVertex  (HepMC::FourVector(pos.x(), pos.y(), pos.z(), tim));
-  HepMC::GenParticle* gParticle = new HepMC::GenParticle(HepMC::FourVector(mom.x(), mom.y(), mom.z(), ene), pid, statusCode);
+  HepMC::GenVertexPtr   gVertex   = HepMC::newGenVertexPtr  (HepMC::FourVector(pos.x(), pos.y(), pos.z(), tim));
+  HepMC::GenParticlePtr gParticle = HepMC::newGenParticlePtr(HepMC::FourVector(mom.x(), mom.y(), mom.z(), ene), pid, statusCode);
   
   gVertex->add_particle_out(gParticle);
  
