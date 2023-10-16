@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/CachedValue.icc
@@ -21,8 +21,8 @@ namespace CxxUtils {
 template <class T>
 inline
 CachedValue<T>::CachedValue()
-  : m_cacheValid (INVALID),
-    m_val ()
+  : m_val (),
+    m_cacheValid (INVALID)
 {
 }
 
@@ -33,8 +33,8 @@ CachedValue<T>::CachedValue()
 template <class T>
 inline
 CachedValue<T>::CachedValue (const T& val)
-  : m_cacheValid (VALID),
-    m_val (val)
+  : m_val (val),
+    m_cacheValid (VALID)
 {
 }
 
@@ -45,8 +45,8 @@ CachedValue<T>::CachedValue (const T& val)
 template <class T>
 inline
 CachedValue<T>::CachedValue (T&& val) noexcept
-  : m_cacheValid (VALID),
-    m_val (std::move (val))
+  : m_val (std::move (val)),
+    m_cacheValid (VALID)
 {
 }
 
@@ -57,8 +57,8 @@ CachedValue<T>::CachedValue (T&& val) noexcept
 template <class T>
 inline
 CachedValue<T>::CachedValue (const CachedValue& other)
-  : m_cacheValid (INVALID),
-    m_val()
+  : m_val(),
+    m_cacheValid (INVALID)
 {
   // If the source is in the middle of an update, set this value
   // to invalid.  Don't copy the value itself unless the source is valid.
@@ -76,8 +76,8 @@ CachedValue<T>::CachedValue (const CachedValue& other)
 template <class T>
 inline
 CachedValue<T>::CachedValue (CachedValue&& other) noexcept
-  : m_cacheValid (INVALID),
-    m_val()
+  : m_val(),
+    m_cacheValid (INVALID)
 {
   if (other.m_cacheValid == VALID) {
     // If we get here, m_val should be properly initialized.

@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
-// $Id$
 /**
  * @file CxxUtils/CachedValue.h
  * @author scott snyder <snyder@bnl.gov>
@@ -27,7 +24,7 @@ namespace CxxUtils {
 
 
 /// State of the cached value; see below.
-enum CacheState {
+enum CacheState : unsigned char {
   INVALID = 0,
   UPDATING = 1,
   VALID = 2
@@ -132,16 +129,15 @@ public:
 
     
 private:
+  /// The cached value.
+  /// Do not return a pointer to this to the user unless the state is VALID.
+  mutable T m_val ATLAS_THREAD_SAFE;  //! Transient
+
   /// Current state of the cached value.
   ///   INVALID --- value has not been set.
   ///   VALID --- value has been set.
   ///   UPDATING --- value is in the process of being set by some thread.
   mutable std::atomic<CacheState> m_cacheValid;  //! Transient
-
-
-  /// The cached value.
-  /// Do not return a pointer to this to the user unless the state is VALID.
-  mutable T m_val ATLAS_THREAD_SAFE;  //! Transient
 };
 
 
