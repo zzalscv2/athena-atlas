@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CfgGetter import addTool
 ## GenParticle Filters
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticleFinalStateFilter",            "ISF_ParticleFinalStateFilter")
-addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticleSimWhiteList",                "ISF_ParticleSimWhiteList")
-addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticleSimWhiteList_ExtraParticles", "ISF_ParticleSimWhiteList_ExtraParticles")
+addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticleSimAcceptList",                "ISF_ParticleSimAcceptList")
+addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticleSimAcceptList_ExtraParticles", "ISF_ParticleSimAcceptList_ExtraParticles")
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getGenParticleSimQuasiStableFilter",     "ISF_GenParticleSimQuasiStableFilter")
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticlePositionFilterID",            "ISF_ParticlePositionFilterID")
 addTool("ISF_HepMC_Tools.ISF_HepMC_ToolsConfigLegacy.getParticlePositionFilterCalo",          "ISF_ParticlePositionFilterCalo")

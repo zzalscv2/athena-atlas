@@ -50,7 +50,7 @@ del ALINE1
 del ALINE2
 
 #--------------------------------------------------------------
-# Edit G4particle_whitelist.txt with monopole
+# Edit G4particle_acceptlist.txt with monopole
 #--------------------------------------------------------------
 
 ALINE1="%s   qb  %s.E+03 (Mev/c) lepton %s" % (PDG,mass,charge)
@@ -59,11 +59,11 @@ ALINE2="-%s  qbbar  %s.E+03 (Mev/c) lepton -%s" % (PDG,mass,charge)
 import os
 import sys
 
-pdgmod = os.path.isfile('G4particle_whitelist.txt')
+pdgmod = os.path.isfile('G4particle_acceptlist.txt')
 if pdgmod is True:
-    os.remove('G4particle_whitelist.txt')
-os.system('get_files -data G4particle_whitelist.txt')
-f=open('G4particle_whitelist.txt','a')
+    os.remove('G4particle_acceptlist.txt')
+os.system('get_files -data G4particle_acceptlist.txt')
+f=open('G4particle_acceptlist.txt','a')
 f.writelines(str(ALINE1))
 f.writelines('\n')
 f.writelines(str(ALINE2))

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 Simulation-specific flags.
@@ -898,11 +898,11 @@ class TruthService(JobProperty):
     allowedTypes = ['str']
     StoredValue  = 'ISF_TruthService'
 
-class ParticleSimWhiteList(JobProperty):
-    """Steering of ISF: set the ParticleSimWhiteList tool"""
+class ParticleSimAcceptList(JobProperty):
+    """Steering of ISF: set the ParticleSimAcceptList tool"""
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'ISF_ParticleSimWhiteList'
+    StoredValue  = 'ISF_ParticleSimAcceptList'
 
 class ExtraParticlesPDGTABLE(JobProperty):
     """Steering of ISF: set filename of PDGTABLE"""

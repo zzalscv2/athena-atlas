@@ -21,10 +21,10 @@ def ParticleFinalStateFilterCfg(flags, name="ISF_ParticleFinalStateFilter", **kw
     return result
 
 
-def ParticleSimWhiteListCfg(flags, name="ISF_ParticleSimWhiteList", **kwargs):
+def ParticleSimAcceptListCfg(flags, name="ISF_ParticleSimAcceptList", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
-    result.setPrivateTools(CompFactory.ISF.GenParticleSimWhiteList(name, **kwargs))
+    result.setPrivateTools(CompFactory.ISF.GenParticleSimAcceptList(name, **kwargs))
     return result
 
 
@@ -35,20 +35,20 @@ def GenParticleSimQuasiStableFilterCfg(flags, name="ISF_GenParticleSimQuasiStabl
 
 
 @AccumulatorCache
-def ParticleSimWhiteList_ExtraParticlesCfg(flags, name="ISF_ParticleSimWhiteList_ExtraParticles", **kwargs):
+def ParticleSimAcceptList_ExtraParticlesCfg(flags, name="ISF_ParticleSimAcceptList_ExtraParticles", **kwargs):
     result = ComponentAccumulator()
-    whiteLists = ["G4particle_whitelist.txt"]
+    acceptLists = ["G4particle_acceptlist.txt"]
     # Basically a copy of code from ExtraParticles.ExtraParticlesConfig for now.
     from ExtraParticles import PDGHelpers
     if PDGHelpers.getPDGTABLE('PDGTABLE.MeV'):
         parser = PDGHelpers.PDGParser('PDGTABLE.MeV', '111-556,1112-9090226')
         parser.createList() # NB ignore output here
-        whiteLists += ["G4particle_whitelist_ExtraParticles.txt"]
+        acceptLists += ["G4particle_acceptlist_ExtraParticles.txt"]
     else:
         print ('ERROR Failed to find PDGTABLE.MeV file')
-    kwargs.setdefault("WhiteLists" , whiteLists )
+    kwargs.setdefault("AcceptLists" , acceptLists )
     kwargs.setdefault("UseShadowEvent", flags.Sim.UseShadowEvent)
-    result.setPrivateTools(CompFactory.ISF.GenParticleSimWhiteList(name, **kwargs))
+    result.setPrivateTools(CompFactory.ISF.GenParticleSimAcceptList(name, **kwargs))
     return result
 
 
@@ -145,7 +145,7 @@ def GenParticleFilterToolsCfg(flags):
     result = ComponentAccumulator()
     genParticleFilterList = []
     if flags.Sim.ISF.Simulator.isQuasiStable():
-        genParticleFilterList += [result.popToolsAndMerge(ParticleSimWhiteList_ExtraParticlesCfg(flags))]
+        genParticleFilterList += [result.popToolsAndMerge(ParticleSimAcceptList_ExtraParticlesCfg(flags))]
     else:
         genParticleFilterList += [result.popToolsAndMerge(ParticleFinalStateFilterCfg(flags))]
     if "ATLAS" in flags.GeoModel.Layout or "atlas" in flags.GeoModel.Layout:

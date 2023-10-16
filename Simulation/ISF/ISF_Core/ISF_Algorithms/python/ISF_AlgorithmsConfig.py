@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import ParticleSimWhiteList_ExtraParticlesCfg, ParticleFinalStateFilterCfg, GenParticleInteractingFilterCfg, EtaPhiFilterCfg, ParticlePositionFilterDynamicCfg
+from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import ParticleSimAcceptList_ExtraParticlesCfg, ParticleFinalStateFilterCfg, GenParticleInteractingFilterCfg, EtaPhiFilterCfg, ParticlePositionFilterDynamicCfg
 AthSequencer=CompFactory.AthSequencer
 
 def SimEventFilterCfg(flags, name="ISF_SimEventFilter", sequenceName='SimSequence', **kwargs):
@@ -14,7 +14,7 @@ def SimEventFilterCfg(flags, name="ISF_SimEventFilter", sequenceName='SimSequenc
                                                     result.popToolsAndMerge(EtaPhiFilterCfg(flags)),
                                                     result.popToolsAndMerge(GenParticleInteractingFilterCfg(flags))] )
     kwargs.setdefault( "GenParticleOldFilters", [result.popToolsAndMerge(ParticleFinalStateFilterCfg(flags))] )
-    kwargs.setdefault( "GenParticleNewFilters", [result.popToolsAndMerge(ParticleSimWhiteList_ExtraParticlesCfg(flags))] )
+    kwargs.setdefault( "GenParticleNewFilters", [result.popToolsAndMerge(ParticleSimAcceptList_ExtraParticlesCfg(flags))] )
 
     result.addEventAlgo(CompFactory.ISF.SimEventFilter(name, **kwargs), sequenceName) # TODO Need to ensure that sequence has been created
     return result

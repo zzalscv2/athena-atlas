@@ -21,12 +21,12 @@ def getParticleFinalStateFilter(name="ISF_ParticleFinalStateFilter", **kwargs):
     kwargs.setdefault("CheckGenInteracting", G4NotInUse)
     return CfgMgr.ISF__GenParticleFinalStateFilter(name, **kwargs)
 
-def getParticleSimWhiteList(name="ISF_ParticleSimWhiteList", **kwargs):
-    # GenParticleSimWhiteList
+def getParticleSimAcceptList(name="ISF_ParticleSimAcceptList", **kwargs):
+    # GenParticleSimAcceptList
     from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
     kwargs.setdefault("MinimumDecayRadiusQS", simFlags.QuasiStableParticleRadius.get_Value())
-    return CfgMgr.ISF__GenParticleSimWhiteList(name, **kwargs)
+    return CfgMgr.ISF__GenParticleSimAcceptList(name, **kwargs)
 
 def getGenParticleSimQuasiStableFilter(name="ISF_GenParticleSimQuasiStableFilter", **kwargs):
     # GenParticleSimQuasiStableFilter
@@ -36,13 +36,13 @@ def getGenParticleSimQuasiStableFilter(name="ISF_GenParticleSimQuasiStableFilter
     kwargs.setdefault("MinDecayRadius", [QSP_radius, QSP_radius] )
     return CfgMgr.ISF__GenParticleSimQuasiStableFilter(name, **kwargs)
 
-def getParticleSimWhiteList_ExtraParticles(name="ISF_ParticleSimWhiteList_ExtraParticles", **kwargs):
-    # GenParticleSimWhiteList_LongLived
+def getParticleSimAcceptList_ExtraParticles(name="ISF_ParticleSimAcceptList_ExtraParticles", **kwargs):
+    # GenParticleSimAcceptList_LongLived
     from G4AtlasApps.SimFlags import simFlags
     kwargs.setdefault("UseShadowEvent", simFlags.UseShadowEvent())
     kwargs.setdefault("MinimumDecayRadiusQS", simFlags.QuasiStableParticleRadius.get_Value())
-    kwargs.setdefault('WhiteLists' , ['G4particle_whitelist.txt', 'G4particle_whitelist_ExtraParticles.txt'] )
-    return CfgMgr.ISF__GenParticleSimWhiteList(name, **kwargs)
+    kwargs.setdefault('AcceptLists' , ['G4particle_acceptlist.txt', 'G4particle_acceptlist_ExtraParticles.txt'] )
+    return CfgMgr.ISF__GenParticleSimAcceptList(name, **kwargs)
 
 def getParticlePositionFilter(name="ISF_ParticlePositionFilter", **kwargs):
     # ParticlePositionFilter
@@ -128,7 +128,7 @@ def getGenParticleFilters(isQS=False):
     genParticleFilterList = []
     from G4AtlasApps.SimFlags import simFlags
     if isQS:
-        genParticleFilterList = [simFlags.ParticleSimWhiteList.get_Value()]
+        genParticleFilterList = [simFlags.ParticleSimAcceptList.get_Value()]
     else:
         genParticleFilterList = ['ISF_ParticleFinalStateFilter'] # not used for Quasi-stable particle simulation
     from G4AtlasApps.SimFlags import simFlags

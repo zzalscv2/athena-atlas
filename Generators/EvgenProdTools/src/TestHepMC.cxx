@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAOD_ANALYSIS
 
@@ -190,9 +190,9 @@ StatusCode TestHepMC::initialize() {
 
   } // End of histogramming setup
 
-  // open the files and read G4particle_whitelist.txt
+  // open the files and read G4particle_acceptlist.txt
 
-  const std::string& fileLocation = PathResolverFindDataFile ( "G4particle_whitelist.txt" );
+  const std::string& fileLocation = PathResolverFindDataFile ( "G4particle_acceptlist.txt" );
   std::ifstream G4file;
   G4file.open(fileLocation);
   std::string line;
@@ -206,13 +206,13 @@ StatusCode TestHepMC::initialize() {
     G4file.close();
   }
   else {
-    ATH_MSG_WARNING("Failed to open G4particle_whitelist.txt, checking that all particles are known by Genat4 cannot be performed");
+    ATH_MSG_WARNING("Failed to open G4particle_acceptlist.txt, checking that all particles are known by Genat4 cannot be performed");
   }
 
-  // Open the param file (G4 white list)
+  // Open the param file (G4 accept list)
   G4file.open(m_paramFile.c_str());
   if (!G4file.fail()){
-    ATH_MSG_INFO("extra white list for G4 found " << m_paramFile.c_str());
+    ATH_MSG_INFO("extra accept list for G4 found " << m_paramFile.c_str());
     while(std::getline(G4file,line)){
       std::stringstream ss(line);
       ss >> G4pdgID;
@@ -221,7 +221,7 @@ StatusCode TestHepMC::initialize() {
     G4file.close();
   }
   else {
-    ATH_MSG_INFO("extra white list for G4 not provided ");
+    ATH_MSG_INFO("extra accept list for G4 not provided ");
   }
 
   // Open the files and read susyParticlePdgid.txt
@@ -245,7 +245,7 @@ StatusCode TestHepMC::initialize() {
   pdgFile.open(m_unknownPDGIDFile.c_str());
   int pdgID;
   if (!pdgFile.fail()){
-    ATH_MSG_INFO("extra white list for PDG IDs found " << m_unknownPDGIDFile.c_str());
+    ATH_MSG_INFO("extra accept list for PDG IDs found " << m_unknownPDGIDFile.c_str());
     while(std::getline(pdgFile,line)){
       std::stringstream ss(line);
       ss >> pdgID;
@@ -254,7 +254,7 @@ StatusCode TestHepMC::initialize() {
     pdgFile.close();
   }
   else {
-    ATH_MSG_INFO("extra white list for PDG IDs not provided");
+    ATH_MSG_INFO("extra accept list for PDG IDs not provided");
   }
 
   return StatusCode::SUCCESS;

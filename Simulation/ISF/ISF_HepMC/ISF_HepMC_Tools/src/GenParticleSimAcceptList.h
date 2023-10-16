@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ISF_HEPMC_GENPARTICLESIMWHITELIST_H
-#define ISF_HEPMC_GENPARTICLESIMWHITELIST_H 1
+#ifndef ISF_HEPMC_GENPARTICLESIMACCEPTLIST_H
+#define ISF_HEPMC_GENPARTICLESIMACCEPTLIST_H 1
 
 // FrameWork includes
 #include "GaudiKernel/ToolHandle.h"
@@ -21,21 +21,21 @@ namespace ISF {
 
   class ISFParticle;
 
-  /** @class GenParticleSimWhiteList
+  /** @class GenParticleSimAcceptList
 
       Stable/Interacting particle filter for HepMC particles to be used in the
       stack filling process.  Checks this particle and all daughters.
 
       @author ZLMarshall -at- lbl.gov
   */
-  class GenParticleSimWhiteList : public extends<AthAlgTool, IGenParticleFilter> {
+  class GenParticleSimAcceptList : public extends<AthAlgTool, IGenParticleFilter> {
 
   public:
     //** Constructor with parameters */
-    GenParticleSimWhiteList( const std::string& t, const std::string& n, const IInterface* p );
+    GenParticleSimAcceptList( const std::string& t, const std::string& n, const IInterface* p );
 
     /** Destructor */
-    ~GenParticleSimWhiteList(){}
+    ~GenParticleSimAcceptList(){}
 
     /** Athena algtool's Hooks */
     virtual StatusCode  initialize() override final;
@@ -49,13 +49,13 @@ namespace ISF {
 #endif
 
   private:
-    /** returns true if the the particle and all daughters are on the white list */
+    /** returns true if the the particle and all daughters are on the accept list */
 #ifdef HEPMC3
     bool pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const;
 #else
     bool pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const;
 #endif
-    StringArrayProperty m_whiteLists{this, "WhiteLists", {"G4particle_whitelist.txt"} }; //!< The location of the white lists
+    StringArrayProperty m_acceptLists{this, "AcceptLists", {"G4particle_acceptlist.txt"} }; //!< The location of the accept lists
     std::vector<long int>             m_pdgId;                //!< Allowed PDG IDs
     BooleanProperty m_qs{this, "QuasiStableSim", true}; //!< Switch for quasi-stable particle simulation
     BooleanProperty m_useShadowEvent{this, "UseShadowEvent", false, "New approach to selecting particles for simulation" };
@@ -65,4 +65,4 @@ namespace ISF {
 }
 
 
-#endif //> !ISF_HEPMC_GENPARTICLESIMWHITELIST_H
+#endif //> !ISF_HEPMC_GENPARTICLESIMACCEPTLIST_H

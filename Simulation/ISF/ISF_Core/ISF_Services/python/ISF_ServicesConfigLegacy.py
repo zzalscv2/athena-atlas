@@ -74,7 +74,7 @@ def getInputConverter(name="ISF_InputConverter", **kwargs):
 
 def getLongLivedInputConverter(name="ISF_LongLivedInputConverter", **kwargs):
     from G4AtlasApps.SimFlags import simFlags
-    kwargs.setdefault("GenParticleFilters"      , [ simFlags.ParticleSimWhiteList.get_Value(),
+    kwargs.setdefault("GenParticleFilters"      , [ simFlags.ParticleSimAcceptList.get_Value(),
                                                     'ISF_ParticlePositionFilterDynamic',
                                                     'ISF_EtaPhiFilter',
                                                     'ISF_GenParticleInteractingFilter', ] )

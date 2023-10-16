@@ -3,7 +3,7 @@
 */
 
 // class header include
-#include "GenParticleSimWhiteList.h"
+#include "GenParticleSimAcceptList.h"
 
 // HepMC includes
 #include "AtlasHepMC/GenParticle.h"
@@ -20,7 +20,7 @@
 #include <cstdlib>
 
 /** Constructor **/
-ISF::GenParticleSimWhiteList::GenParticleSimWhiteList( const std::string& t,
+ISF::GenParticleSimAcceptList::GenParticleSimAcceptList( const std::string& t,
                                                        const std::string& n,
                                                        const IInterface* p )
   : base_class(t,n,p)
@@ -28,20 +28,20 @@ ISF::GenParticleSimWhiteList::GenParticleSimWhiteList( const std::string& t,
 }
 
 // Athena algtool's Hooks
-StatusCode  ISF::GenParticleSimWhiteList::initialize()
+StatusCode  ISF::GenParticleSimAcceptList::initialize()
 {
     ATH_MSG_VERBOSE("Initializing ...");
 
     // Initialize the list
     m_pdgId.clear();
 
-    for (auto &whiteList : m_whiteLists) {
+    for (auto &acceptList : m_acceptLists) {
       // Get the appropriate file handle
-      std::string resolvedFilename = PathResolver::find_file( whiteList , "DATAPATH" );
+      std::string resolvedFilename = PathResolver::find_file( acceptList , "DATAPATH" );
       std::ifstream white_list;
       white_list.open( resolvedFilename );
       if (!white_list.is_open()){
-        ATH_MSG_ERROR("Could not find white list " << whiteList);
+        ATH_MSG_ERROR("Could not find accept list " << acceptList);
         return StatusCode::FAILURE;
       }
 
@@ -54,7 +54,7 @@ StatusCode  ISF::GenParticleSimWhiteList::initialize()
         if (std::find(m_pdgId.begin(), m_pdgId.end(), pdg) == m_pdgId.end()) {
           m_pdgId.push_back(pdg);
         } else {
-          ATH_MSG_DEBUG("pdgId " << pdg << " already in whitelist. Will not add it again.");
+          ATH_MSG_DEBUG("pdgId " << pdg << " already in acceptlist. Will not add it again.");
         }
       }
 
@@ -68,7 +68,7 @@ StatusCode  ISF::GenParticleSimWhiteList::initialize()
 
 /** passes through to the private version of the filter */
 #ifdef HEPMC3
-bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& particle) const
+bool ISF::GenParticleSimAcceptList::pass(const HepMC::ConstGenParticlePtr& particle) const
 {
 
   ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
@@ -94,7 +94,7 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& partic
   return so_far_so_good;
 }
 #else
-bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle) const
+bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle) const
 {
 
   ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
@@ -121,11 +121,11 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle) cons
 }
 #endif
 
-/** returns true if the the particle and all daughters are on the white list */
+/** returns true if the the particle and all daughters are on the accept list */
 #ifdef HEPMC3
-bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const
+bool ISF::GenParticleSimAcceptList::pass(const HepMC::ConstGenParticlePtr& particle , std::vector<int> & used_vertices ) const
 {
-  // See if the particle is in the white list
+  // See if the particle is in the accept list
   bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle->pdg_id() ) || MC::isNucleus( particle->pdg_id() );
   // Remove documentation particles
   passFilter = passFilter && MC::isPhysical(particle);
@@ -154,20 +154,20 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::ConstGenParticlePtr& partic
     }
   } // particle had daughters
   if (!m_useShadowEvent && !particle->end_vertex() && MC::isDecayed(particle)) { // no daughters... No end vertex... Check if this isn't trouble
-    ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
+    ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the accept list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");
+    throw std::runtime_error("GenParticleSimAcceptList: Particle with no end vertex and not in acceptlist");
   }
 
   return passFilter;
 }
 #else
-bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const
+bool ISF::GenParticleSimAcceptList::pass(const HepMC::GenParticle& particle , std::vector<int> & used_vertices ) const
 {
-  // See if the particle is in the white list
+  // See if the particle is in the accept list
   bool passFilter = std::binary_search( m_pdgId.begin() , m_pdgId.end() , particle.pdg_id() ) || MC::isNucleus( particle.pdg_id() );
   // Remove documentation particles
   passFilter = passFilter && MC::isPhysical(&particle);
@@ -197,19 +197,19 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle , std
     }
   } // particle had daughters
   if (!m_useShadowEvent && !particle.end_vertex() && MC::isDecayed(&particle)) { // no daughters... No end vertex... Check if this isn't trouble
-    ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
+    ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the accept list." );
     ATH_MSG_ERROR( "This is VERY likely pointing to a problem with either the configuration you ");
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");
+    throw std::runtime_error("GenParticleSimAcceptList: Particle with no end vertex and not in acceptlist");
   }
 
   return passFilter;
 }
 #endif
 
-StatusCode  ISF::GenParticleSimWhiteList::finalize()
+StatusCode  ISF::GenParticleSimAcceptList::finalize()
 {
     ATH_MSG_VERBOSE("Finalizing ...");
     return StatusCode::SUCCESS;

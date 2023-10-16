@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 ## Generators providing input events via the LHEF format (MC@NLO produces LHEF
 ## when used in connection with Herwig++, which is fine since this variable is
@@ -130,7 +130,7 @@ class EvgenConfig(TransformConfig):
     def __init__(self, name="evgenConfig"):
         TransformConfig.__init__(self, name)
         self.contact = ["MC group"]
-        self.auxfiles = ["PDGTABLE.MeV", "pdt.table", "DECAY.DEC", "Bdecays0.dat", "Bs2Jpsiphi.DEC","G4particle_whitelist.txt","susyParticlePdgid.txt"]
+        self.auxfiles = ["PDGTABLE.MeV", "pdt.table", "DECAY.DEC", "Bdecays0.dat", "Bs2Jpsiphi.DEC","G4particle_acceptlist.txt","susyParticlePdgid.txt"]
         self.nEventsPerJob = 10000
         self.maxeventsstrategy = "ABORT"
         self.specialConfig = "NONE"
