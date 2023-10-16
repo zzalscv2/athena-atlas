@@ -118,6 +118,7 @@ def PHYSVALCfg(ConfigFlags):
                                            "BTagging_AntiKt4EMPFlowSecVtx",
                                            "BTagging_AntiKt4EMPFlowSecVtxFlip", #Flip version of SV1
                                            "TauJets",
+                                           "TauTracks",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets","AntiKt10LCTopoJets","AntiKt4LCTopoJets","AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
