@@ -11,7 +11,7 @@
 # art-output: test.*.HITS.pool.root
 # art-output: log.*
 # art-output: Config*.pkl
-# art-output: G4particle_whitelist_ExtraParticles.txt.C*
+# art-output: G4particle_acceptlist_ExtraParticles.txt.C*
 # art-output: PDGTABLE.MeV.C*
 
 export ATHENA_PROC_NUMBER=8
@@ -37,7 +37,7 @@ Sim_tf.py \
 
 rc=$?
 mv log.EVNTtoHITS log.EVNTtoHITS.CA
-mv G4particle_whitelist_ExtraParticles.txt G4particle_whitelist_ExtraParticles.txt.CA
+mv G4particle_acceptlist_ExtraParticles.txt G4particle_acceptlist_ExtraParticles.txt.CA
 mv PDGTABLE.MeV PDGTABLE.MeV.CA
 echo  "art-result: $rc simCA"
 status=$rc
@@ -81,7 +81,7 @@ Sim_tf.py \
 
 rc2=$?
 mv log.EVNTtoHITS log.EVNTtoHITS.CG
-mv G4particle_whitelist_ExtraParticles.txt G4particle_whitelist_ExtraParticles.txt.CG
+mv G4particle_acceptlist_ExtraParticles.txt G4particle_acceptlist_ExtraParticles.txt.CG
 mv PDGTABLE.MeV PDGTABLE.MeV.CG
 if [ $status -eq 0]
 then

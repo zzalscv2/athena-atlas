@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -61,7 +61,7 @@ def getSimEventFilter(name="ISF_SimEventFilter", **kwargs):
     kwargs.setdefault( "InputHardScatterCollection", "BeamTruthEvent")
     kwargs.setdefault( "GenParticleCommonFilters", ['ISF_ParticlePositionFilterDynamic','ISF_EtaPhiFilter','ISF_GenParticleInteractingFilter'] )
     kwargs.setdefault( "GenParticleOldFilters", ['ISF_ParticleFinalStateFilter'] )
-    kwargs.setdefault( "GenParticleNewFilters", ['ISF_ParticleSimWhiteList_ExtraParticles'] )
+    kwargs.setdefault( "GenParticleNewFilters", ['ISF_ParticleSimAcceptList_ExtraParticles'] )
     return CfgMgr.ISF__SimEventFilter(name, **kwargs)
 
 def getInvertedSimEventFilter(name="ISF_InvertedSimEventFilter", **kwargs):

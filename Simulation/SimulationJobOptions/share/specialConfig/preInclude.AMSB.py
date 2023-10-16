@@ -57,8 +57,8 @@ C1Mass = eval(simdict["AMSBC1Mass"])
 N1Mass = eval(simdict["AMSBN1Mass"])
 # patching PDGTABLE
 get_and_fix_PDGTABLE([(1000022, N1Mass, '~chi(0,1)', '0'), (1000024, C1Mass, '~chi(+,1)', '+')])
-from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
-updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', [1000022,-1000024,1000024])
+from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', [1000022,-1000024,1000024])
 
 if doG4SimConfig:
     from G4AtlasApps.SimFlags import simFlags

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ namespace ISF {
 #endif
 
      private:
-      /** returns true if the the particle and all daughters are on the white list */
+      /** returns true if the the particle and all daughters are on the accept list */
       std::vector< int >    m_statuscode = {1,2};                 //!< status codes to accept
       std::vector< double > m_minProdRadius = {30.19*Gaudi::Units::mm,0.0*Gaudi::Units::mm};           //!< minimum production radius below which particles should be ignored
       std::vector< double > m_minDecayRadius = {30.19*Gaudi::Units::mm,30.19*Gaudi::Units::mm};         //!< minimum decay radius below which particles should be ignored

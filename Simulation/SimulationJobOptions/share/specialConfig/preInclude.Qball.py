@@ -68,8 +68,8 @@ assert "MASS" in simdict
 assert "CHARGE" in simdict
 load_files_for_qball_scenario(simdict["MASS"], simdict["CHARGE"])
 pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
-from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
-updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
 
 if doG4SimConfig:
     from G4AtlasApps.SimFlags import simFlags

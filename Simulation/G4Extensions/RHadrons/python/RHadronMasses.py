@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # This file contains a number of helper functions for defining R-hadron mass spectra
 # A large data table at the top is then used in several of the helper functions
@@ -282,8 +282,8 @@ def update_PDG_table(input_file, pdg_table, mass_spectrum=1):
     update.write(''.join(lines))
     update.close()
 
-    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
-    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+    from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+    updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
     # Nothing to return
 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Parser for the PDGTABLE.MeV file
 
@@ -44,23 +44,23 @@ def getPDGTABLE(table):
 
 
 @lru_cache
-def getExtraParticleWhiteList(whitelist):
+def getExtraParticleAcceptList(acceptlist):
     # Delete a local file if present
-    if os.path.isfile(whitelist):
-        os.remove(whitelist)
+    if os.path.isfile(acceptlist):
+        os.remove(acceptlist)
     #create blank file
-    blank = open('G4particle_whitelist_ExtraParticles.txt', 'x')
+    blank = open('G4particle_acceptlist_ExtraParticles.txt', 'x')
     blank.close()
     return True
 
 
-def updateExtraParticleWhiteList(listName='G4particle_whitelist_ExtraParticles.txt', pdgcodes=[]):
-    if getExtraParticleWhiteList(listName):
+def updateExtraParticleAcceptList(listName='G4particle_acceptlist_ExtraParticles.txt', pdgcodes=[]):
+    if getExtraParticleAcceptList(listName):
         import shutil
         shutil.copy(listName, listName+'.org')
     existingpdgcodes = [int(x) for x in open(listName).readlines()]
     newpdgcodes = list(set(pdgcodes).difference(existingpdgcodes))
-    # update the whitelist for GenParticleSimWhiteList
+    # update the acceptlist for GenParticleSimAcceptList
     with open(listName, 'a') as writer:
         for pdg in newpdgcodes:
             writer.write('%s\n' % pdg)
@@ -219,7 +219,7 @@ class PDGParser(object):
 
     def createList(self):
         pdgcodes = [ self.extraParticles[name].pdg for name in self.extraParticles ]
-        updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+        updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
 
         # generate output in correct format
         outDict = dict()

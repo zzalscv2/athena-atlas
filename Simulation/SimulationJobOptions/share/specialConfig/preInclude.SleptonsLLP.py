@@ -80,8 +80,8 @@ def load_files_for_sleptonLLP_scenario(simdict):
                 ])
         pdgcodes += [1000022]
 
-    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
-    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+    from ExtraParticles.PDGHelpers import updateExtraParticleAcceptList
+    updateExtraParticleAcceptList('G4particle_acceptlist_ExtraParticles.txt', pdgcodes)
 
 doG4SimConfig = True
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
