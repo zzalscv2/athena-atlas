@@ -190,9 +190,9 @@ class MonitorDef:
             ]
 
             alfa_monitems = [
-                "L1_ALFA_ANY",
-                "L1_ALFA_B7L1U", "L1_ALFA_B7L1L",
-                "L1_ALFA_A7L1U", "L1_ALFA_A7L1L",
+                # "L1_ALFA_ANY",
+                # "L1_ALFA_B7L1U", "L1_ALFA_B7L1L",
+                # "L1_ALFA_A7L1U", "L1_ALFA_A7L1L",
                 "L1_ALFA_A7R1U", "L1_ALFA_A7R1L",
                 "L1_ALFA_B7R1U", "L1_ALFA_B7R1L",
             ]
@@ -214,7 +214,9 @@ class MonitorDef:
                     "L1_TRT_FILLED",
                     "L1_BPTX0_BGRP12", "L1_BPTX1_BGRP12",
                     "L1_NSW_MONITOR",
-                    "L1_BCM_Wide_EMPTY", "L1_BCM_AC_UNPAIRED_ISO", "L1_BCM_CA_UNPAIRED_ISO",
+                    "L1_BCM_Wide", "L1_BCM_Wide_EMPTY", "L1_BCM_Wide_BGRP12",
+                    "L1_BCM_2A_UNPAIREDB1", "L1_BCM_2C_UNPAIREDB1", "L1_BCM_2A_UNPAIREDB2", "L1_BCM_2C_UNPAIREDB2",
+                    "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
                     "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
                     "L1_AFP_A_AND_C_TOF_T0T1",
                     "L1_AFP_FSA_BGRP12", "L1_AFP_FSC_BGRP12",
@@ -359,9 +361,10 @@ class MonitorDef:
                 # LAr Zee
                 "L1_LAR-ZEE-eEM",
                 # Background
+                "L1_BCM_Wide", "L1_BCM_Wide_EMPTY", "L1_BCM_Wide_BGRP12",
+                "L1_BCM_2A_UNPAIREDB1", "L1_BCM_2C_UNPAIREDB1", "L1_BCM_2A_UNPAIREDB2", "L1_BCM_2C_UNPAIREDB2",
+                "L1_BCM_2A_FIRSTINTRAIN", "L1_BCM_2C_FIRSTINTRAIN",
                 "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
-                "L1_BCM_AC_CA_BGRP12", "L1_BCM_AC_UNPAIRED_ISO", "L1_BCM_CA_UNPAIRED_ISO",
-                "L1_BCM_Wide_BGRP12",
                 # Muons
                 "L1_MU3V", "L1_MU5VF",
                 "L1_MU8F", "L1_MU8VF",
@@ -444,8 +447,9 @@ class MonitorDef:
 
             alfa_monitems = [
                 # ALFA
-                "L1_ALFA_ANY",
-                "L1_ALFA_A7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7R1L", "L1_ALFA_A7R1U",
+                # "L1_ALFA_ANY",
+                # "L1_ALFA_A7L1L", "L1_ALFA_A7L1U",
+                # "L1_ALFA_A7R1L", "L1_ALFA_A7R1U",
                 "L1_ALFA_B7L1L", "L1_ALFA_B7L1U", "L1_ALFA_B7R1L", "L1_ALFA_B7R1U",
                 "L1_ALFA_ELAST15", "L1_ALFA_ELAST18",
                 "L1_ALFA_SYST9", "L1_ALFA_SYST10", "L1_ALFA_SYST11",
@@ -468,13 +472,12 @@ class MonitorDef:
 
 
         monItemsHF[TBP|TAP|TAV] = [
-           "L1_BCM_AC_UNPAIRED_ISO",
-           "L1_BCM_CA_UNPAIRED_ISO",
+           "L1_BCM_2A_FIRSTINTRAIN",
+           "L1_BCM_2C_FIRSTINTRAIN",
            "L1_J12",
            "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
-           "L1_BCM_2A_UNPAIRED_ISO",
-           "L1_BCM_2C_UNPAIRED_ISO",
-            ]
+           "L1_BCM_Wide",
+        ]
 
 
 

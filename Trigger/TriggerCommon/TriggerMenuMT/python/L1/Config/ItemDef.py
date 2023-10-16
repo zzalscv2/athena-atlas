@@ -1497,25 +1497,27 @@ class ItemDef:
         MenuItem('L1_BCM_Wide'                   ).setLogic( d.BCM_Wide & physcond )
         MenuItem('L1_BCM_Wide_BGRP12'            ).setLogic( d.BCM_Wide & bgrp12cond )
         MenuItem('L1_BCM_Wide_EMPTY'             ).setLogic( d.BCM_Wide & cosmiccond )
-        MenuItem('L1_BCM_Wide_UNPAIRED_ISO'      ).setLogic( d.BCM_Wide & unpaired_isocond )
-        MenuItem('L1_BCM_Wide_UNPAIRED_NONISO'   ).setLogic( d.BCM_Wide & unpaired_nonisocond )
+        MenuItem('L1_BCM_Wide_UNPAIRED_ISO'      ).setLogic( d.BCM_Wide & unpaired_isocond ) # no needed anymore
+        MenuItem('L1_BCM_Wide_UNPAIRED_NONISO'   ).setLogic( d.BCM_Wide & unpaired_nonisocond ) # no needed anymore
+        MenuItem('L1_BCM_Wide_UNPAIREDB1'        ).setLogic( d.BCM_Wide & bgrp13cond )
+        MenuItem('L1_BCM_Wide_UNPAIREDB2'        ).setLogic( d.BCM_Wide & bgrp14cond )
 
         MenuItem('L1_BCM_HT_BGRP12'               ).setLogic( d.BCM_Comb.x(7) & bgrp12cond)
         MenuItem('L1_BCM_AC_CA_BGRP12'            ).setLogic((d.BCM_AtoC | d.BCM_CtoA) & bgrp12cond )
         MenuItem('L1_BCM_AC_CA_UNPAIRED_ISO'     ).setLogic((d.BCM_AtoC | d.BCM_CtoA) & unpaired_isocond)
 
-        MenuItem('L1_BCM_AC_UNPAIRED_ISO'        ).setLogic( d.BCM_AtoC & unpaired_isocond)
-        MenuItem('L1_BCM_CA_UNPAIRED_ISO'        ).setLogic( d.BCM_CtoA & unpaired_isocond)
+        MenuItem('L1_BCM_AC_UNPAIRED_ISO'        ).setLogic( d.BCM_AtoC & unpaired_isocond) # no needed anymore
+        MenuItem('L1_BCM_CA_UNPAIRED_ISO'        ).setLogic( d.BCM_CtoA & unpaired_isocond) # no needed anymore
 
-        MenuItem('L1_BCM_AC_UNPAIRED_NONISO'     ).setLogic( d.BCM_AtoC & unpaired_nonisocond)
-        MenuItem('L1_BCM_CA_UNPAIRED_NONISO'     ).setLogic( d.BCM_CtoA & unpaired_nonisocond)
+        MenuItem('L1_BCM_AC_UNPAIRED_NONISO'     ).setLogic( d.BCM_AtoC & unpaired_nonisocond) # no needed anymore
+        MenuItem('L1_BCM_CA_UNPAIRED_NONISO'     ).setLogic( d.BCM_CtoA & unpaired_nonisocond) # no needed anymore
 
         MenuItem('L1_BCM_AC_CALIB'     ).setLogic( d.BCM_AtoC & calibcond)
         MenuItem('L1_BCM_CA_CALIB'     ).setLogic( d.BCM_CtoA & calibcond)
-        MenuItem('L1_BCM_Wide_CALIB'   ).setLogic( d.BCM_Wide & calibcond)
+        MenuItem('L1_BCM_Wide_CALIB'   ).setLogic( d.BCM_Wide & calibcond) # no needed anymore
 
-        MenuItem('L1_BCM_AC_UNPAIREDB1'  ).setLogic( d.BCM_AtoC & bgrp13cond)
-        MenuItem('L1_BCM_CA_UNPAIREDB2'  ).setLogic( d.BCM_CtoA & bgrp14cond)
+        MenuItem('L1_BCM_AC_UNPAIREDB1'  ).setLogic( d.BCM_AtoC & bgrp13cond) # no needed anymore
+        MenuItem('L1_BCM_CA_UNPAIREDB2'  ).setLogic( d.BCM_CtoA & bgrp14cond) # no needed anymore
 
         MenuItem('L1_BCM_2A_EMPTY' ).setLogic( d.BCM6 & cosmiccond)
         MenuItem('L1_BCM_2C_EMPTY' ).setLogic( d.BCM7 & cosmiccond)

@@ -47,19 +47,13 @@ RequiredL1Items = [
         'L1_TGC_BURST',
         
         # BCM
-        'L1_BCM_Wide_BGRP12', 'L1_BCM_AC_CA_BGRP12', 'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_UNPAIRED_ISO', 'L1_BCM_Wide_UNPAIRED_NONISO',
-        'L1_BCM_AC_UNPAIRED_ISO','L1_BCM_CA_UNPAIRED_ISO',
-        'L1_BCM_AC_UNPAIRED_NONISO','L1_BCM_CA_UNPAIRED_NONISO',
-        'L1_BCM_Wide_CALIB',
-        'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
+        'L1_BCM_Wide', 'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_BGRP12', 'L1_BCM_Wide_UNPAIREDB1', 'L1_BCM_Wide_UNPAIREDB2', 
+        'L1_BCM_AC_CA_UNPAIRED_ISO', 'L1_BCM_AC_CA_BGRP12',
+        'L1_BCM_2A_CALIB', 'L1_BCM_2C_CALIB',
         'L1_BCM_2A_EMPTY', 'L1_BCM_2C_EMPTY',
-        'L1_BCM_2A_UNPAIRED_ISO', 'L1_BCM_2C_UNPAIRED_ISO', 'L1_BCM_2A_UNPAIRED_NONISO', 'L1_BCM_2C_UNPAIRED_NONISO',
+        'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB2',
         'L1_BCM_2A_FIRSTINTRAIN', 'L1_BCM_2C_FIRSTINTRAIN',
-        # Expected to be needed later after commissioning of the BCM_2A,2C items in other BCIDs
-        # 'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB2',
-        # 'L1_BCM_2C_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB2',
-        # 'L1_BCM_2A_CALIB', 'L1_BCM_2C_CALIB',
-
+            
         # RNDM
         'L1_RD0_FILLED', 'L1_RD0_UNPAIRED_ISO',  'L1_RD0_EMPTY',
         'L1_RD0_FIRSTEMPTY', 'L1_RD0_BGRP10', 'L1_RD0_BGRP11',
@@ -85,14 +79,14 @@ FixedIDMap = {
         # 8 items with the high frequency per-bunch monitoring counters (HF:111)
         # should be in consecutive cpid, starting a ctpid number with ctpid%16 = 0
         # ATR-23836
-        "L1_BCM_AC_UNPAIRED_ISO":480,
-        "L1_BCM_CA_UNPAIRED_ISO":481,
+        "L1_BCM_2A_FIRSTEMPTY":480,
+        "L1_BCM_2C_FIRSTEMPTY":481,
         "L1_J12":482,
         "L1_MBTS_1":483,
         "L1_MBTS_2":484,
         "L1_MBTS_1_1":485,
-        "L1_BCM_2A_UNPAIRED_ISO":486,
-        "L1_BCM_2C_UNPAIRED_ISO":487,
+        "L1_BCM_Wide":486,
+        # "L1_BCM_Wide":487,
         #
         "L1_ZB_eEM": 508,
         #

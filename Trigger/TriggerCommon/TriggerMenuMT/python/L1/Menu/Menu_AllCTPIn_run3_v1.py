@@ -65,14 +65,14 @@ def defineMenu():
         # 8 items with the high frequency per-bunch monitoring counters (HF:111)
         # should be in consecutive cpid, starting a ctpid number with ctpid%16 = 0
         # ATR-23836
-        "L1_BCM_AC_UNPAIRED_ISO":480,
-        "L1_BCM_CA_UNPAIRED_ISO":481,
+        "L1_BCM_2A_FIRSTINTRAIN":480,
+        "L1_BCM_2C_FIRSTINTRAIN":481,
         "L1_J12":482,
         "L1_MBTS_1":483,
         "L1_MBTS_2":484,
         "L1_MBTS_1_1":485,
-        "L1_BCM_2A_UNPAIRED_ISO":486,
-        "L1_BCM_2C_UNPAIRED_ISO":487,
+        "L1_BCM_Wide":486,
+        # "L1_BCM_Wide":487,
         #
         "L1_ZB_eEM18": 508
     }
