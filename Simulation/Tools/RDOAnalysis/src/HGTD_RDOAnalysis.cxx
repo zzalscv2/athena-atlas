@@ -52,8 +52,7 @@ StatusCode HGTD_RDOAnalysis::initialize() {
     m_tree->Branch("m_rdo_hit_toa", &m_rdo_hit_toa);
     m_tree->Branch("m_rdo_hit_sdo_deposit_time", &m_rdo_hit_sdo_deposit_time);
     m_tree->Branch("m_rdo_hit_truth", &m_rdo_hit_truth);
-  }
-  else {
+  } else {
     ATH_MSG_ERROR("No tree found!");
   }
   /*
@@ -102,15 +101,16 @@ StatusCode HGTD_RDOAnalysis::execute() {
     for ( HGTD_RDO_Container::const_iterator rdoCont_itr =  p_RDO_cont->begin(); rdoCont_itr != p_RDO_cont->end(); ++rdoCont_itr ) {
 
       const HGTD_RDO_Collection* p_RDO_coll(*rdoCont_itr);
-      const Identifier rdoIDColl(p_RDO_coll->identify());
-      const InDetDD::HGTD_DetectorElement *element = m_HGTD_Manager->getDetectorElement(rdoIDColl);
-      InDetDD::SiLocalPosition localPos = element->rawLocalPositionOfCell(rdoIDColl);
-      Amg::Vector3D globalPos = element->globalPosition(localPos);
+      const Identifier rdoIDColl((*rdoCont_itr)->identify());
+        
+      const InDetDD::HGTD_DetectorElement *elementColl = m_HGTD_Manager->getDetectorElement(rdoIDColl);
+      InDetDD::SiLocalPosition localPosColl = elementColl->rawLocalPositionOfCell(rdoIDColl);
+      Amg::Vector3D globalPosColl = elementColl->globalPosition(localPosColl);
 
-      // To fix this as the method cannot be used straightforward for HGTD.
-      m_rdo_hit_module_x.push_back(globalPos[Amg::x]);
-      m_rdo_hit_module_y.push_back(globalPos[Amg::y]);
-      m_rdo_hit_module_z.push_back(globalPos[Amg::z]);
+      m_rdo_hit_module_x.push_back(globalPosColl[Amg::x]);
+      m_rdo_hit_module_y.push_back(globalPosColl[Amg::y]);
+      m_rdo_hit_module_z.push_back(globalPosColl[Amg::z]);
+
       m_rdo_hit_module_layer.push_back(m_HGTD_ID->layer(rdoIDColl));
 
       for ( HGTD_RDO_Collection::const_iterator rdo_itr= p_RDO_coll->begin(); rdo_itr != p_RDO_coll->end(); ++rdo_itr ) {

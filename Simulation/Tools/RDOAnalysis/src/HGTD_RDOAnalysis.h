@@ -79,6 +79,7 @@ private:
   std::vector<float> m_rdo_hit_toa;  //in ns
   std::vector<float> m_rdo_hit_sdo_deposit_time;  //in ns
   std::vector<int>   m_rdo_hit_truth; // signal=1, pileup=2, secondary=3
+
 };
 
 #endif // HGTD_RDO_ANALYSIS_H
