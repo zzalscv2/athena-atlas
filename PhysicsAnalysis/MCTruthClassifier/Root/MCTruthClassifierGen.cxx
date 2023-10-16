@@ -898,11 +898,9 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
           mother = MotherParent;
           if (info){
             info->mother = mother;
-            if (mother){
-              info->motherStatus = mother->status();
-              info->motherPDG = mother->pdg_id();
-              info->motherBarcode = mother->barcode();
-            }
+            info->motherStatus = mother->status();
+            info->motherPDG = mother->pdg_id();
+            info->motherBarcode = mother->barcode();
           }
         }
       }
