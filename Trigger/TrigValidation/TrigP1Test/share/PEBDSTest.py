@@ -25,8 +25,9 @@ EventBuildingInfo._PartialEventBuildingIdentifiers |= {'TestPEBOne'       : Fals
                                                        'TestPEBFour'      : True,
                                                        'ElectronDSTest'   : False,
                                                        'ElectronDSPEBTest': False}
-DataScoutingInfo.DataScoutingIdentifiers['ElectronDSTest'] = 3
-DataScoutingInfo.DataScoutingIdentifiers['ElectronDSPEBTest'] = 3
+# Modify these private maps only for the purposes of this test
+DataScoutingInfo._DataScoutingIdentifiers['ElectronDSTest'] = 3
+DataScoutingInfo._DataScoutingIdentifiers['ElectronDSPEBTest'] = 3
 DataScoutingInfo.TruncationThresholds[3] = 5*(1024**2) # 5 MB
 
 # Override the setupMenu function from Dev_pp_run3_v1

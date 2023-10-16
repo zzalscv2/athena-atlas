@@ -46,8 +46,8 @@ def update_streamerinfos(objects, updated_objects):
 
   if doEDM:
     from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3
-    from TrigEDMConfig.DataScoutingInfo import DataScoutingIdentifiers
-    BS_destinations = ["BS"] + list(DataScoutingIdentifiers)
+    from TrigEDMConfig.DataScoutingInfo import getAllDataScoutingIdentifiers
+    BS_destinations = ["BS"] + getAllDataScoutingIdentifiers()
     print("BS_destinations = {}".format(BS_destinations))
     for item in TriggerHLTListRun3:
       if any(bs in item[1].split() for bs in BS_destinations):
