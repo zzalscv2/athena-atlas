@@ -4,7 +4,7 @@ def createFPGATrackSimConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     cf = AthConfigFlags()
     cf.addFlag('algoTag', 'Hough')
-    cf.addFlag('wrapperFileName', [])
+    cf.addFlag('wrapperFileName', "Wrapper.root")
 
     def __httHough1DFlags():
         """Additional function delays import"""
