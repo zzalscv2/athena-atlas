@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import re
 import argparse
@@ -37,6 +37,7 @@ errorRegex = [
     r'pure virtual method called',
     r'Selected dynamic Aux atribute.*not found in the registry',
     r'FPEAuditor.*WARNING FPE',
+    r'CUDA error',
 ]
 
 # Add list of all builtin Python errors
@@ -205,4 +206,3 @@ def printResults():
 
 if __name__ == "__main__":
     main()
-
