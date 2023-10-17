@@ -18,14 +18,15 @@ HITS_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc1
 RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1713/RDO.26811885._035498.pool.root.1"
 
 Reco_tf.py \
+--CA "all:True" "RDOtoRDOTrigger:False" \
 --autoConfiguration everything \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02a \
 --geometryVersion default:ATLAS-R2-2016-01-00-01 \
 --maxEvents ${events} --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---preInclude "all:Campaigns/MC20a.py" \
---postInclude "default:PyJobTransforms/UseFrontier.py" \
+--preInclude "all:Campaigns.MC20a" \
+--postInclude "default:PyJobTransforms.UseFrontier" \
 --runNumber 410470 \
 --steering "doOverlay" "doRDO_TRIG" \
 --triggerConfig "RDOtoRDOTrigger=MCRECO:DBF:TRIGGERDBMC:2283,35,327" --asetup "RDOtoRDOTrigger:Athena,21.0-mc16a,latest" \
