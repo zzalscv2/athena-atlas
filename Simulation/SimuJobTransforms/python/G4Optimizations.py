@@ -37,16 +37,25 @@ def enableG4Optimizations(flags):
     # the G4GammaGeneralProcess therefore the FixG4CreatorProcessTool
     # must be added if it's not done before (see lines above) 
     # More info: https://its.cern.ch/jira/browse/ATLASSIM-5079
-    flags.Sim.G4Commands+=["/process/em/useWoodcockTracking EMECPara"]
+    flags.Sim.G4Commands+=["/process/em/useWoodcockTracking EMEC"]
 
 
 def WoodcockTrackingInEMEC(flags):
-    # Use Woodcock Tracking in the EMEC rather than EMECPara
+    # Use Woodcock Tracking in the EMEC rather than the EMECPara
     # G4Region. This preInclude should be added at the end of the list
     # of preIncludes.
     commands = flags.Sim.G4Commands
     commands.remove("/process/em/useWoodcockTracking EMECPara")
     flags.Sim.G4Commands = commands + ["/process/em/useWoodcockTracking EMEC"]
+
+
+def WoodcockTrackingInEMECPara(flags):
+    # Use Woodcock Tracking in the EMECPara rather than the EMEC
+    # G4Region. This preInclude should be added at the end of the list
+    # of preIncludes.
+    commands = flags.Sim.G4Commands
+    commands.remove("/process/em/useWoodcockTracking EMEC")
+    flags.Sim.G4Commands = commands + ["/process/em/useWoodcockTracking EMECPara"]
 
 
 def PostIncludeTweakPhysicsRegionsCfg(flags, cfg):
