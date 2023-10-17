@@ -42,7 +42,7 @@ class TrigSpacePointConversionTool : virtual public ITrigSpacePointConversionToo
 
  protected:
 
-  ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool;
+  ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberTool"};
 
   const AtlasDetectorID* m_atlasId = nullptr;
   const SCT_ID*  m_sctId = nullptr;

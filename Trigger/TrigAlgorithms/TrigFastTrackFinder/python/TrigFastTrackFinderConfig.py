@@ -245,54 +245,61 @@ def TrigZFinderCfg(flags : AthConfigFlags, numberingTool) -> ComponentAccumulato
   )
   return acc
 
-
-@AccumulatorCache
-def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, RoIs: str, inputTracksName:str = None) -> ComponentAccumulator:
+def TrigL2LayerNumberToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+  kwargs.setdefault("UseNewLayerScheme", True)
+  acc.setPrivateTools(CompFactory.TrigL2LayerNumberTool(**kwargs))
+  return acc
+  
+def TrigSpacePointConversionToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
 
-  from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-  config = getInDetTrigConfig( slice_name )
+  kwargs.setdefault("UseNewLayerScheme", True)
 
-  remapped_type = config.name
-  isCosmicConfig = (remapped_type=="cosmics")
+  if "layerNumberTool" not in kwargs:
+    ntargs = {"UseNewLayerScheme" : kwargs.get("UseNewLayerScheme")}
+    kwargs.setdefault("layerNumberTool",acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,**ntargs)))
+  
+  kwargs.setdefault("DoPhiFiltering", flags.Tracking.ActiveConfig.DoPhiFiltering)
+  kwargs.setdefault("UseBeamTilt", False)
+  kwargs.setdefault("PixelSP_ContainerName", "PixelTrigSpacePoints")
+  kwargs.setdefault("SCT_SP_ContainerName", "SCT_TrigSpacePoints")
+  kwargs.setdefault("UsePixelSpacePoints",flags.Tracking.ActiveConfig.UsePixelSpacePoints)
 
-  #Global keys/names for collections
-  from TrigInDetConfig.InDetTrigCollectionKeys import TrigPixelKeys, TrigSCTKeys
+  from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg
 
+  if "RegSelTool_Pixel" not in kwargs:
+    kwargs.setdefault("RegSelTool_Pixel", acc.popToolsAndMerge( regSelTool_Pixel_Cfg( flags)))
 
-  useNewLayerNumberScheme = True
-  acc.addPublicTool(CompFactory.TrigL2LayerNumberTool(name="TrigL2LayerNumberTool_FTF",
-                                                      UseNewLayerScheme = useNewLayerNumberScheme))
-  numberingTool = acc.getPublicTool("TrigL2LayerNumberTool_FTF")
+  if "RegSelTool_SCT" not in kwargs:
+    kwargs.setdefault("RegSelTool_SCT", acc.popToolsAndMerge( regSelTool_SCT_Cfg( flags)))
+
+  # Spacepoint conversion
+  acc.setPrivateTools(CompFactory.TrigSpacePointConversionTool(**kwargs))
+
+  return acc
+
+  
+@AccumulatorCache
+def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTracksName:str = None) -> ComponentAccumulator:
+  acc = ComponentAccumulator()
+
+  signature = flags.Tracking.ActiveConfig.input_name
+  isCosmicConfig = (signature=="cosmics")
+
   
   # GPU offloading config begins - perhaps set from configure
   if flags.Trigger.InDetTracking.doGPU:
     acc.addPublicTool(CompFactory.TrigInDetAccelerationTool(name = "TrigInDetAccelerationTool_FTF"))
   # GPU offloading config ends
 
-
-  # Spacepoint conversion
-  from RegionSelector.RegSelToolConfig import regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg
-  
-  acc.addPublicTool(
-      CompFactory.TrigSpacePointConversionTool(name = 'TrigSpacePointConversionTool_' + remapped_type,
-                                               DoPhiFiltering        = config.DoPhiFiltering,
-                                               UseNewLayerScheme     = useNewLayerNumberScheme,
-                                               UseBeamTilt           = False,
-                                               PixelSP_ContainerName = TrigPixelKeys.SpacePoints,
-                                               SCT_SP_ContainerName  = TrigSCTKeys.SpacePoints,
-                                               layerNumberTool       = numberingTool,
-                                               UsePixelSpacePoints   = config.UsePixelSpacePoints,
-                                               RegSelTool_Pixel = acc.popToolsAndMerge( regSelTool_Pixel_Cfg( flags) ),
-                                               RegSelTool_SCT = acc.popToolsAndMerge( regSelTool_SCT_Cfg( flags) ),
-                                               )
-  )
-
-  spTool = acc.getPublicTool('TrigSpacePointConversionTool_' + remapped_type)
+  useNewLayerNumberScheme = True
+  spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
+  numberingTool = acc.popToolsAndMerge(TrigL2LayerNumberToolCfg(flags,UseNewLayerScheme=useNewLayerNumberScheme))
 
   from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
   TrackMaker_FTF = acc.popToolsAndMerge(
-      TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+slice_name)
+      TrigSiTrackMaker_xkCfg(flags, name = 'InDetTrigSiTrackMaker_FTF_'+signature)
   )
   acc.addPublicTool(TrackMaker_FTF)
 
@@ -302,21 +309,21 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   
   acc.addPublicTool(
       CompFactory.TrigInDetTrackFitter(
-          name = "TrigInDetTrackFitter_"+remapped_type,
+          name = "TrigInDetTrackFitter_"+signature,
           doBremmCorrection = flags.Tracking.ActiveConfig.doBremRecoverySi,
           correctClusterPos = True,  #improved err(z0) estimates in Run 2
           ROTcreator = TrigRotCreator,
       )
   )
-  theTrigInDetTrackFitter = acc.getPublicTool("TrigInDetTrackFitter_"+remapped_type)
+  theTrigInDetTrackFitter = acc.getPublicTool("TrigInDetTrackFitter_"+signature)
   
   if (flags.Tracking.ActiveConfig.doZFinder):
     theTrigZFinder = acc.popToolsAndMerge(TrigZFinderCfg(flags,numberingTool))
   
-  if not config.doZFinderOnly:
+  if not flags.Tracking.ActiveConfig.doZFinderOnly:
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
-    if config.holeSearch_FTF :
+    if flags.Tracking.ActiveConfig.holeSearch_FTF :
       trackSummaryTool = acc.popToolsAndMerge(InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool"))
     else:
       trackSummaryTool = acc.popToolsAndMerge(InDetTrigFastTrackSummaryToolCfg(flags,name="InDetTrigFastTrackSummaryTool"))
@@ -360,23 +367,20 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
         RoIs = RoIs,
     )
     
-  if config.LRT_D0Min is not None:
-    ftf.LRT_D0Min = config.LRT_D0Min
-
-  if config.LRT_HardMinPt is not None:
-    ftf.LRT_HardMinPt = config.LRT_HardMinPt
+  ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min
+  ftf.LRT_HardMinPt = flags.Tracking.ActiveConfig.LRT_HardPtMin
   
-  ftf.UseTrigSeedML = config.UseTrigSeedML
+  ftf.UseTrigSeedML = flags.Tracking.ActiveConfig.UseTrigSeedML
 
   if isCosmicConfig:
     ftf.Doublet_FilterRZ = False
 
   from TrigEDMConfig.TriggerEDMRun3 import recordable
-  if config.dodEdxTrk:
+  if flags.Tracking.ActiveConfig.dodEdxTrk:
     ftf.dEdxTrk = recordable("HLT_dEdxTrk")
     ftf.dEdxHit = recordable("HLT_dEdxHit")
 
-  if config.doDisappearingTrk:
+  if flags.Tracking.ActiveConfig.doDisappearingTrk:
     ftf.DisTrkCand = recordable("HLT_DisTrkCand")
     from TrkConfig.TrkGlobalChi2FitterConfig import InDetTrigGlobalChi2FitterCfg
     InDetTrigTrackFitter = acc.popToolsAndMerge(InDetTrigGlobalChi2FitterCfg(flags))
@@ -384,7 +388,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
     ftf.DisTrackFitter = InDetTrigTrackFitter
 
   if flags.Tracking.ActiveConfig.doZFinder:
-    ftf.doZFinderOnly = config.doZFinderOnly
+    ftf.doZFinderOnly = flags.Tracking.ActiveConfig.doZFinderOnly
     ftf.trigZFinder = theTrigZFinder
     ftf.zVertexResolution = 20 if flags.Tracking.ActiveConfig.name == "jetSuper" else 1
     ftf.zVertexResolutionEndcap = 150 if flags.Tracking.ActiveConfig.name == "jetSuper" else ftf.zVertexResolution
@@ -397,3 +401,4 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, slice_name: str, Ro
   return acc
 
     
+

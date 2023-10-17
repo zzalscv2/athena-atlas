@@ -23,15 +23,13 @@
 TrigSpacePointConversionTool::TrigSpacePointConversionTool(const std::string& t, 
 					     const std::string& n,
 					     const IInterface*  p ) : 
-  AthAlgTool(t,n,p),
-  m_layerNumberTool("TrigL2LayerNumberTool")
+  AthAlgTool(t,n,p)
 {
   declareInterface< ITrigSpacePointConversionTool >( this );
 
   declareProperty( "DoPhiFiltering",         m_filter_phi = true );
   declareProperty( "UseBeamTilt",            m_useBeamTilt = true );
   declareProperty( "UseNewLayerScheme",      m_useNewScheme = false );
-  declareProperty( "layerNumberTool",        m_layerNumberTool);
   declareProperty( "PixelSP_ContainerName",  m_pixelSpacePointsContainerKey = std::string("PixelTrigSpacePoints"));
   declareProperty( "SCT_SP_ContainerName",   m_sctSpacePointsContainerKey = "SCT_TrigSpacePoints" );
   declareProperty( "UsePixelSpacePoints",    m_usePixelSpacePoints = true );

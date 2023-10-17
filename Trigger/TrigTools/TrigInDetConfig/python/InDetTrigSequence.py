@@ -287,7 +287,7 @@ class InDetTrigSequence:
     
       from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigFastTrackFinderCfg
       acc.merge(TrigFastTrackFinderCfg(flags, "TrigFastTrackFinder_" + signature, 
-                                       signature, self.__rois, **ftfargs))
+                                       self.__rois, **ftfargs))
       
       if not flags.Tracking.ActiveConfig.doZFinderOnly:
         from TrigInDetConfig.TrigInDetConfig import trackFTFConverterCfg
