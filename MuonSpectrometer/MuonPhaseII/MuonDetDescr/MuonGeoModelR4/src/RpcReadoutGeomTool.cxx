@@ -210,6 +210,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
    
+    SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::RectangleBounds>>();
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
@@ -238,6 +239,7 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         }
         
         defineArgs define{};
+        define.layerBounds = layerBounds;
         define.physVol = pv;
         define.chambDesign = key_tokens[1];
         define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);

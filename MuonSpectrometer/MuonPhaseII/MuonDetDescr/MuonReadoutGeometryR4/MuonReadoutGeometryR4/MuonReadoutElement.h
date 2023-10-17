@@ -13,6 +13,11 @@
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonReadoutGeometryR4/MuonTransformCache.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
+#include <MuonReadoutGeometryR4/MuonSurfaceCache.h>
+
+#include "Acts/Surfaces/LineBounds.hpp"
+#include "Acts/Surfaces/PlanarBounds.hpp"
+
 #include <mutex>
 namespace MuonGMR4 {
 ///   The MuonReadoutElement is an abstract class representing the geometry
@@ -140,15 +145,36 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      /// the center of the volume
      const Amg::Transform3D& toCenterTrans() const;
      
+    
+    /// Returns the surface associated to the readout element plane
+    const Acts::Surface& surface() const override final;
+    Acts::Surface& surface() override final;
+
+    /// Returns the sufrface associated to a wire / measurement plane in the detector
+    const Acts::Surface& surface(const IdentifierHash& hash) const;
+    Acts::Surface& surface(const IdentifierHash& hash);
+
+    /// Returns the pointer associated to a certain wire / plane
+    std::shared_ptr<Acts::Surface> surfacePtr(const IdentifierHash& hash) const;
+
+
    protected:
      using TransformMaker = MuonTransformCache::TransformMaker;
+
       
-      /// Inserts a transfomration for caching
-      StatusCode insertTransform(const IdentifierHash& hash,
+     /// Inserts a transfomration for caching
+     StatusCode insertTransform(const IdentifierHash& hash,
                                  TransformMaker make);
 
-      /// Returns the transformation into the center of the readout volume
-      Amg::Transform3D toStation(ActsTrk::RawGeomAlignStore* alignStore) const;
+     /// Returns the transformation into the center of the readout volume
+     Amg::Transform3D toStation(ActsTrk::RawGeomAlignStore* alignStore) const;
+
+     //Creates a MuonSurfaceCache for straw surfaces using the given Bounds and Identifier Hash
+     StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::LineBounds> lBounds);
+
+     //Creates a MuonSurfaceCache for plane surface using the given Bounds and Identifier Hash
+     StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::PlanarBounds> pBounds);
+
    private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
@@ -167,8 +193,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     /// Cache all global to local transformations
     MuonTransformSet m_globalToLocalCaches{};
-    /// Cache all local to gloabl transformations
+    /// Cache all local to global transformations
     MuonTransformSet m_localToGlobalCaches{};
+    ///Cache of all associated surfaces
+    MuonSurfaceSet m_surfaces{};
 };
 }  // namespace MuonGMR4
 #include <MuonReadoutGeometryR4/MuonReadoutElement.icc>

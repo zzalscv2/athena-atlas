@@ -6,6 +6,8 @@
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/MdtTubeLayer.h>
+#include "Acts/Surfaces/LineBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
 
 namespace MuonGMR4 {
 
@@ -49,6 +51,11 @@ class MdtReadoutElement : public MuonReadoutElement {
         double halfHeight{0.};
         /// Is the readout chip at positive or negative Z?
         double readoutSide{1.};
+        
+        SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds{};
+        SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
+
+
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,
@@ -63,9 +70,6 @@ class MdtReadoutElement : public MuonReadoutElement {
     }
     /// Overload from the Acts::DetectorElement (2 * halfheight)
     double thickness() const override final;
-    /// Overload from the Acts::DetectorElement (dummy implementation)
-    const Acts::Surface& surface() const override final;
-    Acts::Surface& surface() override final;
 
     StatusCode initElement() override final;
     /// Returns the multi layer of the MdtReadoutElement

@@ -91,6 +91,9 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
     alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
+
+    SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds = std::make_shared<SurfaceBoundSet<Acts::LineBounds>>();
+    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
@@ -104,6 +107,8 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             continue;
 
         MdtReadoutElement::defineArgs define{};
+        define.tubeBounds = tubeBounds;
+        define.layerBounds = layerBounds;
         bool isValid{false};
         define.detElId = idHelper.channelID(key_tokens[0].substr(0, 3), 
                                             atoi(key_tokens[2]),
@@ -117,8 +122,8 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         /// Skip the endcap chambers
         define.physVol = pv;
         define.chambDesign = key_tokens[1];
-        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);        
- 
+        define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);   
+       
         /// Load first tube etc. from the parameter book table
         ParamBookTable::const_iterator book_itr = facCache.parBook.find(define.chambDesign);
         if (book_itr == facCache.parBook.end()) {

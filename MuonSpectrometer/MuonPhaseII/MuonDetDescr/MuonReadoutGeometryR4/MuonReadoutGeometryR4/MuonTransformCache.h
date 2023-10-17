@@ -60,7 +60,6 @@ inline bool operator<(const std::unique_ptr<MuonTransformCache>& a,
                       const IdentifierHash& b) {
     return a->hash() < b;
 }
-using MuonTransformSet =
-    std::set<std::unique_ptr<MuonTransformCache>, std::less<>>;
+using MuonTransformSet = std::set<std::unique_ptr<MuonTransformCache>, std::less<>>;
 }  // namespace MuonGMR4
 #endif

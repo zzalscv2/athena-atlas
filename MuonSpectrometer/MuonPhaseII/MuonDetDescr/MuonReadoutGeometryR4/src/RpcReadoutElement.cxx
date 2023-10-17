@@ -8,10 +8,9 @@
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
+
+#include "Acts/Surfaces/RectangleBounds.hpp"
 using namespace ActsTrk;
-
-
-
 
 namespace MuonGMR4 {
 using parameterBook = RpcReadoutElement::parameterBook;
@@ -34,6 +33,7 @@ StatusCode RpcReadoutElement::initElement() {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
        return StatusCode::FAILURE;
     }
+
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
       if (m_pars.layers[layer].hash() != layHash) {
@@ -44,6 +44,8 @@ StatusCode RpcReadoutElement::initElement() {
                                  [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
+      ATH_CHECK(planeSurfaceFactory(layHash, *m_pars.layerBounds->insert(std::make_shared<Acts::RectangleBounds>(m_pars.layers[layer].design().halfWidth(),
+       m_pars.layers[layer].design().shortHalfHeight())).first));
     }
     m_gasThickness = (chamberStripPos(createHash(1, 2, 1, false)) - 
                       chamberStripPos(createHash(1, 1, 1, false))).mag();
@@ -77,22 +79,6 @@ Amg::Vector3D RpcReadoutElement::chamberStripPos(const IdentifierHash& measHash)
    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The layer hash "<<layIdx
                  <<" is out of range. Maximum range "<<m_pars.layers.size());
    return Amg::Vector3D::Zero();
-}
-    
-
-
-const Acts::Surface& RpcReadoutElement::surface() const{
-   static const std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
-                                                                                                   Amg::Vector3D::UnitY())};
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
-   return *dummy;
-}
-
-Acts::Surface& RpcReadoutElement::surface() {
-   std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
-                                                                                      Amg::Vector3D::UnitY())};
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
-   return *dummy;
 }
 
 }

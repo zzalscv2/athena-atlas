@@ -30,9 +30,6 @@ class sTgcReadoutElement : public MuonReadoutElement {
     }
     /// Overload from the Acts::DetectorElement (2 * halfheight)
     double thickness() const override final {return 0.;};
-    /// Overload from the Acts::DetectorElement (dummy implementation)
-    const Acts::Surface& surface() const override final;
-    Acts::Surface& surface() override final;
 
     StatusCode initElement() override final;
     /// Returns the multi layer of the sTgcReadoutElement
