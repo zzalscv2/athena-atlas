@@ -13,6 +13,7 @@
 #undef NDEBUG
 
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/inline_hints.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "CxxUtils/SealDebug.h"
@@ -278,18 +279,13 @@ void sethooks()
   nomalloc = true;
 }
 
-#if defined(__GNUC__) || defined(__clang__)
-__attribute__ ((noinline))
-#endif
+ATH_NOINLINE
 void resethooks() 
 {
   nomalloc = false;
 }
 
-
-#if defined(__GNUC__) || defined(__clang__)
-__attribute__ ((noinline))
-#endif
+ATH_NOINLINE
 void fromhere() 
 {
   char pat[] = "stacktrace_testXXXXXX";
@@ -355,9 +351,7 @@ struct Foo
 };
     
 
-#if defined(__GNUC__) || defined(__clang__)
-__attribute__ ((noinline))
-#endif
+ATH_NOINLINE
 double crashMe NO_SANITIZE_UNDEFINED (const Foo* f)
 {
   return f->a() + f->b();

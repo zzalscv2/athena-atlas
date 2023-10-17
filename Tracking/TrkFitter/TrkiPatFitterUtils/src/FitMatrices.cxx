@@ -34,6 +34,8 @@
 #include "TrkiPatFitterUtils/FitMeasurement.h"
 #include "TrkiPatFitterUtils/FitParameters.h"
 
+#include "CxxUtils/inline_hints.h"
+
 namespace Trk {
 
 FitMatrices::FitMatrices(bool constrainedAlignmentEffects)
@@ -589,14 +591,12 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
   return fitCode;
 }
 
-#if defined(FLATTEN) && defined(__GNUC__)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__((flatten))
-#endif
+ATH_FLATTEN
     bool
     FitMatrices::solveEquations(void) {
   // use Eigen Matrix multiplication ATR-15723

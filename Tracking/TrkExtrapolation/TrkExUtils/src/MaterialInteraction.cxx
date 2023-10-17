@@ -8,6 +8,7 @@
 #include "TrkExUtils/MaterialInteraction.h"
 
 #include <cmath>
+#include "CxxUtils/inline_hints.h"
 
 /**
  * References :
@@ -54,20 +55,21 @@
 namespace {
 
 constexpr double s_me = Trk::ParticleMasses::mass[Trk::electron];
+
+//The following were repeated in the code.
+//Now moved to helpers, lets keep the same
+//semantics as before for all builds.
+
 // mean excitation energy --> I
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-inline double
+ATH_ALWAYS_INLINE
+double
 MeanExcitationEnergy(const Trk::Material& mat) {
   // 16 eV * Z**0.9 - bring to MeV
   return 16.e-6 * std::pow(mat.averageZ(), 0.9);
 }
 
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-inline double
+ATH_ALWAYS_INLINE
+double
 DensityEffect(const double zOverAtimesRho, const double eta,
               const double gamma, const double I) {
 
@@ -79,26 +81,22 @@ DensityEffect(const double zOverAtimesRho, const double eta,
     double eplasma = 28.816e-6 * std::sqrt(1000. * zOverAtimesRho);
     // PDG 2022 Eq. 34.6
     //2. * std::log(eplasma / I) + std::log(eta2) - 1.
-    //applying logarithmic identities becomes 
+    //applying logarithmic identities becomes
     // 2*(log(eplasma/I) + log(eta))  = 2*log(eplasma*eta/I)
     return 2. * std::log(eplasma*eta / I) - 1.;
   }
   return 0;
 }
 
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-inline double
+ATH_ALWAYS_INLINE
+double
 KAZ(const double zOverAtimesRho) {
   // K/A*Z = 0.5 * 30.7075MeV/(g/mm2) * Z/A * rho[g/mm3]
   return 0.5 * 30.7075 * zOverAtimesRho;
 }
 
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-inline double
+ATH_ALWAYS_INLINE
+double
 LandauMPV(const double kazL, const double eta2, const double I,
           const double beta, const double delta) {
   // PDG 2022 Eq 34.12

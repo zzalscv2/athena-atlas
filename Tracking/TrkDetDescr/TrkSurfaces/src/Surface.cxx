@@ -12,6 +12,9 @@
 
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
+
+//CxxUtils
+#include "CxxUtils/inline_hints.h"
 // STD
 #include <iomanip>
 #include <iostream>
@@ -28,14 +31,7 @@ Trk::Surface::Surface()
 {
 }
 
-#if defined(__GNUC__)
-// We compile this function with optimization, even in debug builds; otherwise,
-// the heavy use of Eigen makes it too slow.  However, from here we may call
-// to out-of-line Eigen code that is linked from other DSOs; in that case,
-// it would not be optimized.  Avoid this by forcing all Eigen code
-// to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 Trk::Surface::Surface(const Amg::Transform3D& tform)
   : Trk::ObjectCounter<Trk::Surface>()
   , m_transforms(std::make_unique<Transforms>(tform))
@@ -70,14 +66,12 @@ Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement,
 {
 }
 
-#if defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 // copy constructor - Attention! sets the associatedDetElement to 0 and the
 // identifier to invalid
 Trk::Surface::Surface(const Surface& sf)
@@ -91,14 +85,12 @@ Trk::Surface::Surface(const Surface& sf)
 {
 }
 
-#if defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 // copy constructor with shift - Attention! sets the associatedDetElement to 0
 // and the identifier to invalid also invalidates the material layer
 Trk::Surface::Surface(const Surface& sf, const Amg::Transform3D& shift)

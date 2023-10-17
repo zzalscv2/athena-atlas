@@ -60,6 +60,7 @@
 
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "TrkEventPrimitives/unique_clone.h"
+#include "CxxUtils/inline_hints.h"
 
 #include "LayerSort.h"
 #include "TrkVolumes/VolumeBounds.h"
@@ -166,14 +167,12 @@ namespace {
     }
   }
 
-#if defined(__GNUC__)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
   void
   calculateJac(Eigen::Matrix<double, 5, 5> &jac,
                Eigen::Matrix<double, 5, 5> &out,

@@ -15,6 +15,7 @@
 #include "TrkGaussianSumFilterUtils/QuickCloseComponentsMultiStateMerger.h"
 //
 #include "CxxUtils/phihelper.h"
+#include "CxxUtils/inline_hints.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"
 
@@ -266,9 +267,7 @@ const Trk::ComponentParameters& addThis)
 // The following does heave use of Eigen
 // for covariance. Avoid out-of-line calls
 // to Eigen
-#if defined(__GNUC__)
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 void
 Trk::MultiComponentStateCombiner::combineParametersWithWeight(
   AmgVector(5) & firstParameters,
