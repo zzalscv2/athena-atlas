@@ -46,10 +46,9 @@ evtStream = augStream.GetEventStream()
 augmentationTools = []
 from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__TauSelectionWrapper
 HIGG6D2TauWrapper = DerivationFramework__TauSelectionWrapper(name = "HIGG6D2TauSelectionWrapper",
-															#IsTauFlag			= IsTauFlag.JetBDTSigLoose,
-															IsTauFlag			= 19,
+															IsTauFlag	        = 29,
 															CollectionName		= "TauJets",
-															StoreGateEntryName	= "HIGG6D2JetBDTSigLoose")
+															StoreGateEntryName	= "HIGG6D2JetRNNSigLoose")
 ToolSvc += HIGG6D2TauWrapper
 augmentationTools.append(HIGG6D2TauWrapper)
 #=======================================

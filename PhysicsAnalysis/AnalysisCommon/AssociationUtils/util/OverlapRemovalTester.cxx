@@ -107,8 +107,8 @@ template<> void selectObjects<xAOD::TauJetContainer>
 (const xAOD::TauJetContainer* taus)
 {
   for(auto tau : *taus){
-    bool pass = (tau->isTau(xAOD::TauJetParameters::JetBDTSigLoose) &&
-                 tau->isTau(xAOD::TauJetParameters::EleBDTLoose) &&
+    bool pass = (tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose) &&
+                 tau->isTau(xAOD::TauJetParameters::EleRNNLoose) &&
                  tau->pt() > 20000. && fabs(tau->eta()) < 2.5);
     selectDec(*tau) = pass;
   }

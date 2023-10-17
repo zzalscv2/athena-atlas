@@ -47,10 +47,9 @@ augmentationTools = []
 
 from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__TauSelectionWrapper
 HIGG6D1TauWrapper = DerivationFramework__TauSelectionWrapper(name = "HIGG6D1TauSelectionWrapper",
-															#IsTauFlag			= IsTauFlag.JetBDTSigLoose,
-															IsTauFlag			= 19,
+															IsTauFlag	        = 29,
 															CollectionName		= "TauJets",
-															StoreGateEntryName	= "HIGG6D1JetBDTSigLoose")
+															StoreGateEntryName	= "HIGG6D1JetRNNSigLoose")
 ToolSvc += HIGG6D1TauWrapper
 augmentationTools.append(HIGG6D1TauWrapper)
 

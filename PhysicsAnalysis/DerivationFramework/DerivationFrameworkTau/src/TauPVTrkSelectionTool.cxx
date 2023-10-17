@@ -80,7 +80,7 @@ namespace DerivationFramework {
     // loop over tau container to select tracks for the PV refit
     for (auto pTau: *tau_cont ) {
       int tauNtracks = pTau->nTracks();
-      bool good_tau = pTau->isTau(xAOD::TauJetParameters::JetBDTSigMedium);
+      bool good_tau = pTau->isTau(xAOD::TauJetParameters::JetRNNSigMedium);
       float tau_pt  = pTau->pt();
       float tau_eta = pTau->eta();
       bool pass_selection = false;

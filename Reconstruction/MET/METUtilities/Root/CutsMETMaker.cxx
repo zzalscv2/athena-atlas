@@ -107,8 +107,8 @@ StatusCode CutsMETMaker::accept(const xAOD::TauJet* tau)
 
   if(tau->pt()<20e3 || fabs(tau->eta())>2.5) return StatusCode::FAILURE;
   // need to accommodate more than one of these?
-  if(!tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::JetBDTSigMedium) )) return StatusCode::FAILURE;
-  if(tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::EleBDTMedium) )) return StatusCode::FAILURE;
+  if(!tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::JetRNNSigMedium) )) return StatusCode::FAILURE;
+  if(tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::EleRNNMedium) )) return StatusCode::FAILURE;
   if(tau->isTau( xAOD::TauJetParameters::IsTauFlag(xAOD::TauJetParameters::MuonVeto) )) return StatusCode::FAILURE;
 
   return StatusCode::SUCCESS;

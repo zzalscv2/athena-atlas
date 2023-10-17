@@ -26,20 +26,19 @@ def setup(HIGG4DxName, ToolSvc):
 
     # TAU SELECTOR TOOL
     from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__TauSelectionWrapper
-    HIGG4DxJetBDTSigMediumSelectionWrapper = DerivationFramework__TauSelectionWrapper( name                    = "HIGG4DxJetBDTSigMediumSelectionWrapper",
-                                                                                       #IsTauFlag              = IsTauFlag.JetBDTSigMedium,
-                                                                                       IsTauFlag               = 20,
+    HIGG4DxJetRNNSigMediumSelectionWrapper = DerivationFramework__TauSelectionWrapper( name                    = "HIGG4DxJetRNNSigMediumSelectionWrapper",
+                                                                                       IsTauFlag               = 30,
                                                                                        CollectionName          = "TauJets",
-                                                                                       StoreGateEntryName      = "HIGG4DxJetBDTSigMedium")
-    ToolSvc += HIGG4DxJetBDTSigMediumSelectionWrapper
-    augmentationTools.append(HIGG4DxJetBDTSigMediumSelectionWrapper)
+                                                                                       StoreGateEntryName      = "HIGG4DxJetRNNSigMedium")
+    ToolSvc += HIGG4DxJetRNNSigMediumSelectionWrapper
+    augmentationTools.append(HIGG4DxJetRNNSigMediumSelectionWrapper)
 
-    HIGG4DxJetBDTSigLooseSelectionWrapper = DerivationFramework__TauSelectionWrapper( name                   = "HIGG4DxJetBDTSigLooseSelectionWrapper",
-                                                                                     IsTauFlag               = 19,
+    HIGG4DxJetRNNSigLooseSelectionWrapper = DerivationFramework__TauSelectionWrapper( name                   = "HIGG4DxJetRNNSigLooseSelectionWrapper",
+                                                                                     IsTauFlag               = 29,
                                                                                      CollectionName          = "TauJets",
-                                                                                     StoreGateEntryName      = "HIGG4DxJetBDTSigLoose")
-    ToolSvc += HIGG4DxJetBDTSigLooseSelectionWrapper
-    augmentationTools.append(HIGG4DxJetBDTSigLooseSelectionWrapper)
+                                                                                     StoreGateEntryName      = "HIGG4DxJetRNNSigLoose")
+    ToolSvc += HIGG4DxJetRNNSigLooseSelectionWrapper
+    augmentationTools.append(HIGG4DxJetRNNSigLooseSelectionWrapper)
 
 
 
