@@ -49,6 +49,13 @@ StatusCode StripClusteringTool::initialize()
     ATH_CHECK(m_conditionsTool.retrieve());
     ATH_CHECK(m_lorentzAngleTool.retrieve());
     ATH_CHECK(decodeTimeBins());
+
+    bool disableSmry =
+	!m_stripDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED;
+    ATH_CHECK(m_summaryTool.retrieve(DisableTool{disableSmry}));
+    ATH_CHECK(m_stripDetElStatus.initialize(!m_stripDetElStatus.empty()));
+    ATH_CHECK(m_stripDetEleCollKey.initialize());
+
     return StatusCode::SUCCESS;
 }
 
@@ -72,12 +79,65 @@ StatusCode StripClusteringTool::decodeTimeBins()
 }
 
 StatusCode
-StripClusteringTool::clusterize(const InDetRawDataCollection<StripRDORawData>& RDOs,
-				const StripID& stripID,
-				const InDetDD::SiDetectorElement* element,
-				const InDet::SiDetectorElementStatus *stripDetElStatus,
-				xAOD::StripClusterContainer& container) const
+StripClusteringTool::clusterize(const RawDataCollection& RDOs,
+				const IDHelper& stripID,
+				const EventContext& ctx,
+				ClusterContainer& container) const
 {
+    IdentifierHash idHash = RDOs.identifyHash();
+
+    SG::ReadHandle<InDet::SiDetectorElementStatus> status;
+    if (!m_stripDetElStatus.empty()) {
+	status = SG::makeHandle(m_stripDetElStatus, ctx);
+	if (!status.isValid()) {
+	    ATH_MSG_FATAL("Invalid SiDetectorelementStatus");
+	    return StatusCode::FAILURE;
+	}
+    }
+
+    bool goodModule = true;
+    if (m_checkBadModules.value()) {
+	if (!m_stripDetElStatus.empty()) {
+	    goodModule = status->isGood(idHash);
+	} else {
+	    goodModule = m_summaryTool->isGood(idHash, ctx);
+	}
+    }
+    VALIDATE_STATUS_ARRAY(
+	m_checkBadModules.value() && !m_stripDetElStatus.empty(),
+	status->isGood(idHash), m_summaryTool->isGood(idHash));
+      
+    if (!goodModule) {
+	ATH_MSG_DEBUG("Strip module failed status check");
+	return StatusCode::SUCCESS;
+    }
+      
+    // If more than a certain number of RDOs set module to bad
+    // in this case we skip clusterization
+    if (m_maxFiredStrips != 0u) {
+	unsigned int nFiredStrips = 0u;
+	for (const SCT_RDORawData* rdo : RDOs) {
+	    nFiredStrips += rdo->getGroupSize();
+	}
+	if (nFiredStrips > m_maxFiredStrips)
+	    return StatusCode::SUCCESS;
+    }
+
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> stripDetEleHandle(
+	m_stripDetEleCollKey, ctx);
+    ATH_CHECK( stripDetEleHandle.isValid() );
+    const InDetDD::SiDetectorElementCollection* stripDetEle(*stripDetEleHandle);
+    if (stripDetEle == nullptr) {
+	ATH_MSG_FATAL("Invalid SiDetectorElementCollection");
+	return StatusCode::FAILURE;
+    }
+
+    const InDetDD::SiDetectorElement* element =
+	stripDetEle->getDetectorElement(idHash);
+
+    const InDet::SiDetectorElementStatus *stripDetElStatus =
+	m_stripDetElStatus.empty() ? nullptr : status.cptr();
+
     std::optional<std::pair<CellCollection,bool>> unpckd
 	= unpackRDOs(RDOs, stripID, stripDetElStatus);
     if (not unpckd.has_value()) {
@@ -131,7 +191,7 @@ std::tuple<
     Eigen::Matrix<float,3,1>>
 computePosition(const StripClusteringTool::Cluster& cluster,
 		double lorentzShift,
-		const StripID& stripID,
+		const IStripClusteringTool::IDHelper& stripID,
 		const InDetDD::SiDetectorElement* element)
 {
     size_t size = cluster.ids.size();
