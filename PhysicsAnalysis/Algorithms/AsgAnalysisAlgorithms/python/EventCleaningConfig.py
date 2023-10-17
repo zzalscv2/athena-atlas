@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class EventCleaningBlock (ConfigBlock):
@@ -21,7 +22,7 @@ class EventCleaningBlock (ConfigBlock):
 
     def makeAlgs (self, config) :
 
-        if config.dataType() == 'data' :
+        if config.dataType() is DataType.Data:
             grlFiles = self.userGRLFiles[:]
 
             # Set up the GRL selection:
@@ -39,7 +40,7 @@ class EventCleaningBlock (ConfigBlock):
 
         # Set up the event cleaning selection:
         if self.runEventCleaning:
-            if config.dataType() == 'data':
+            if config.dataType() is DataType.Data:
                 alg = config.createAlgorithm( 'CP::EventStatusSelectionAlg', 'EventStatusSelectionAlg' )
                 alg.FilterKey = 'EventErrorState'
                 alg.FilterDescription = 'selecting events without any error state set'

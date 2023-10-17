@@ -7,6 +7,7 @@ from AnaAlgorithm.DualUseConfig import createAlgorithm, createService
 from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 def makeSequence (dataType) :
 
@@ -61,7 +62,7 @@ def makeSequence (dataType) :
     ntupleMaker.Branches = [ 'AnalysisMuons_NOSYS.eta -> mu_eta',
                              'AnalysisMuons_NOSYS.phi -> mu_phi',
                              'AnalysisMuons_%SYS%.pt  -> mu_%SYS%_pt', ]
-    if dataType != 'data':
+    if DataType(dataType) != DataType.Data:
         ntupleMaker.Branches += [ 'AnalysisMuons_%SYS%.muon_reco_effSF_tight_%SYS% -> mu_%SYS%_reco_effSF' ]
     ntupleMaker.OutputLevel = 2  # For output validation
     algSeq += ntupleMaker

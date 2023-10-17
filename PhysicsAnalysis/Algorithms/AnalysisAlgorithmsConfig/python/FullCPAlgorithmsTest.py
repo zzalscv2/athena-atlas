@@ -864,7 +864,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.metVars', metVars)
     configSeq.setOptionValue ('.containers', outputContainers)
 
-    configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite, geometry)
+    configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags)
     configSeq.fullConfigure (configAccumulator)
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator

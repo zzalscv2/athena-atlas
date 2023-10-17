@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 import ROOT
 
@@ -59,7 +60,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addSelection (self.containerName, '', alg.selectionDecoration)
 
         # Setup shower shape fudge
-        if self.recomputeIsEM and config.dataType() == 'mc':
+        if self.recomputeIsEM and config.dataType() is DataType.FullSim:
             alg = config.createAlgorithm( 'CP::PhotonShowerShapeFudgeAlg',
                                           'PhotonShowerShapeFudgeAlg' + postfix )
             config.addPrivateTool( 'showerShapeFudgeTool',
@@ -96,7 +97,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() == 'afii' )
+        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() is DataType.FastSim )
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -118,8 +119,8 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                       'PhotonIsolationCorrectionAlg' + postfix )
         config.addPrivateTool( 'isolationCorrectionTool',
                                'CP::IsolationCorrectionTool' )
-        alg.isolationCorrectionTool.IsMC = config.dataType() != 'data'
-        alg.isolationCorrectionTool.AFII_corr = config.dataType() == 'afii'
+        alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
+        alg.isolationCorrectionTool.AFII_corr = config.dataType() is DataType.FastSim
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -203,16 +204,16 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
         # Set up the ID/reco photon efficiency correction algorithm:
-        if config.dataType() != 'data' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgID' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_id_effSF' + postfix + '_%SYS%'
-            if config.dataType() == 'afii':
+            if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full  # no AFII ID SFs for now
-            elif config.dataType() == 'mc':
+            elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             if config.geometry() == LHCPeriod.Run2:
@@ -224,16 +225,16 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
 
         # Set up the ISO photon efficiency correction algorithm:
-        if config.dataType() != 'data' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
                                    'AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_isol_effSF' + postfix + '_%SYS%'
-            if config.dataType() == 'afii':
+            if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full  # no AFII ID SFs for now
-            elif config.dataType() == 'mc':
+            elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP.replace("FixedCut","")

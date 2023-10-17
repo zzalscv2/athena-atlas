@@ -54,6 +54,9 @@ parser.add_option( '--no-physlite-broken', dest='no_physlite_broken',
 parser.add_option( '--geometry', dest='geometry',
                    action = 'store', type = 'string', default = 'RUN2',
                    help = 'LHC Run period to run over. Valid options are RUN2, RUN3' )
+parser.add_option( '--use-flags', dest='use_flags',
+                   action = 'store_true', default = False,
+                   help = 'Use Athena-style configuration flags to set up the config blocks')
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -91,12 +94,19 @@ else :
     inputfile = {"data": 'ASG_TEST_FILE_DATA',
                  "mc":   'ASG_TEST_FILE_MC',
                  "afii": 'ASG_TEST_FILE_MC_AFII'}
+testFile = os.getenv (inputfile[dataType])
 if options.force_input :
-    sample.add (options.force_input)
-else :
-    sample.add (os.getenv (inputfile[dataType]))
+    testFile = options.force_input
+sample.add (testFile)
 sh.add (sample)
 sh.printContent()
+
+flags = None
+if options.use_flags:
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = [testFile]
+    flags.lock()
 
 # Create an EventLoop job.
 job = ROOT.EL.Job()
@@ -111,7 +121,8 @@ from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSeq
 algSeq = makeSequence (dataType, blockConfig, textConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
-                       noPhysliteBroken=noPhysliteBroken, geometry=geometry)
+                       noPhysliteBroken=noPhysliteBroken, geometry=geometry,
+                       autoconfigFromFlags=flags)
 printSequenceAlgs( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 

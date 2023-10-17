@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 # E/gamma import(s).
 from xAODEgamma.xAODEgammaParameters import xAOD
@@ -79,7 +80,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                'CP::EgammaCalibrationAndSmearingTool' )
         alg.calibrationAndSmearingTool.ESModel = 'es2022_R22_PRE'
         alg.calibrationAndSmearingTool.decorrelationModel = '1NP_v1'
-        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() == 'afii' )
+        alg.calibrationAndSmearingTool.useAFII = int( config.dataType() is DataType.FastSim )
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -102,8 +103,8 @@ class ElectronCalibrationConfig (ConfigBlock) :
                                           'ElectronIsolationCorrectionAlg' + self.postfix )
             config.addPrivateTool( 'isolationCorrectionTool',
                                    'CP::IsolationCorrectionTool' )
-            alg.isolationCorrectionTool.IsMC = config.dataType() != 'data'
-            alg.isolationCorrectionTool.AFII_corr = config.dataType() == 'afii'
+            alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
+            alg.isolationCorrectionTool.AFII_corr = config.dataType() is DataType.FastSim
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
@@ -230,7 +231,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
         # Set up the RECO electron efficiency correction algorithm:
-        if config.dataType() != 'data' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -238,10 +239,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
-            if config.dataType() == 'afii':
+            if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Fast
-            elif config.dataType() == 'mc':
+            elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             if config.geometry() == LHCPeriod.Run2:
@@ -253,7 +254,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
 
         # Set up the ID electron efficiency correction algorithm:
-        if config.dataType() != 'data' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgID' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -261,10 +262,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
-            if config.dataType() == 'afii':
+            if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Fast
-            elif config.dataType() == 'mc':
+            elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             if config.geometry() == LHCPeriod.Run2:
@@ -276,7 +277,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
 
         # Set up the ISO electron efficiency correction algorithm:
-        if config.dataType() != 'data' and self.isolationWP != 'NonIso' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -285,10 +286,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             alg.efficiencyCorrectionTool.IdKey = self.likelihoodWP.replace("LH","")
             alg.efficiencyCorrectionTool.IsoKey = self.isolationWP
             alg.efficiencyCorrectionTool.CorrelationModel = "TOTAL"
-            if config.dataType() == 'afii':
+            if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Fast
-            elif config.dataType() == 'mc':
+            elif config.dataType() is DataType.FullSim:
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     PATCore.ParticleDataType.Full
             if config.geometry() == LHCPeriod.Run2:

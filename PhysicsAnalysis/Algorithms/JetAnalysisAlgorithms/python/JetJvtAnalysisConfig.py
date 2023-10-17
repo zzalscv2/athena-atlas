@@ -3,6 +3,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class JetJvtAnalysisConfig (ConfigBlock) :
@@ -27,7 +28,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             raise ValueError ("per-event scale factors needs to be computed when doing a JVT selection")
 
         # Set up the per-event jet efficiency scale factor calculation algorithm
-        if config.dataType() != 'data' and self.globalSF:
+        if config.dataType() is not DataType.Data and self.globalSF:
             alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'JvtEventScaleFactorAlg' + postfix )
             preselection = config.getPreselection (self.containerName, '')
             alg.preselection = preselection + '&&no_jvt' if preselection else 'no_jvt'

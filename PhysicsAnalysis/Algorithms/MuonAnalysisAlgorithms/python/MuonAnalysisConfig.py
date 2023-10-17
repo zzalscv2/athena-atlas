@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
 import ROOT
 
@@ -151,7 +152,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                  preselection=self.qualitySelectionOutput)
 
         # Set up the reco/ID efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and (not self.noEffSF or self.onlyRecoEffSF):
+        if config.dataType() is not DataType.Data and (not self.noEffSF or self.onlyRecoEffSF):
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgReco' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -168,7 +169,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'reco_effSF' + postfix)
 
         # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and self.quality == 'HighPt' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgBMVHighPt' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -185,7 +186,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'BadMuonVeto_effSF' + postfix)
 
         # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() != 'data' and self.isolation != 'NonIso' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -202,7 +203,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'isol_effSF' + postfix)
 
         # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() != 'data' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.onlyRecoEffSF and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgTTVA' + postfix )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
