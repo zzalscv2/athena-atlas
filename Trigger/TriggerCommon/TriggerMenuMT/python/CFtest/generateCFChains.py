@@ -84,7 +84,10 @@ def generateCFChains(flags, opt):
         step3muEFSA=makeChainStep("Step3_muEFSA", [ muEFSAS ])
         #/step3muIso =makeChainStep("Step3_muIso",  [ muIsoSequence() ])
         # step4
-        muEFCBS = muEFCBSequence(flags)
+        if isComponentAccumulatorCfg():
+            muEFCBS = muEFCBSequence(flags)
+        else:
+            muEFCBS = menuSequenceCAToGlobalWrapper(muEFCBSequence, flags)
         step4muEFCB=makeChainStep("Step4_muEFCB", [ muEFCBS ])
 
         emptyStep=makeChainStep("Step2_empty", multiplicity=[])
@@ -115,10 +118,12 @@ def generateCFChains(flags, opt):
         # Full scan MS tracking step
         if isComponentAccumulatorCfg():
             muEFSAFSS = muEFSAFSSequence(flags)
+            muEFCBFSS = muEFCBFSSequence(flags)
         else:
             muEFSAFSS = menuSequenceCAToGlobalWrapper(muEFSAFSSequence,flags)
+            muEFCBFSS = menuSequenceCAToGlobalWrapper(muEFCBFSSequence,flags)
         stepFSmuEFSA=makeChainStep("Step_FSmuEFSA", [muEFSAFSS])
-        stepFSmuEFCB=makeChainStep("Step_FSmuEFCB", [muEFCBFSSequence(flags)])
+        stepFSmuEFCB=makeChainStep("Step_FSmuEFCB", [muEFCBFSS])
         MuonChains += [ makeChain(flags, name='HLT_mu6noL1_L1MU5VF', L1Thresholds=["FSNOSEED"],  ChainSteps=[stepFSmuEFSA, stepFSmuEFCB])]
 
         menu.chainsInMenu['Muon'] += MuonChains
@@ -243,8 +248,14 @@ def generateCFChains(flags, opt):
             muEFSAS = muEFSASequence(flags)
         else:
             muEFSAS = menuSequenceCAToGlobalWrapper(muEFSASequence,flags)
+
+        if isComponentAccumulatorCfg():
+            muEFCBS = muEFCBSequence(flags)
+        else:
+            muEFCBS = menuSequenceCAToGlobalWrapper(muEFCBSequence, flags)
+
         step3_dimuEFSA=makeChainStep("Step3_dimuEFSA", [muEFSAS], multiplicity=[2])
-        step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBSequence(flags)], multiplicity=[2], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
+        step4_dimuEFCB=makeChainStep("Step4_dimuEFCB", [muEFCBS], multiplicity=[2], comboHypoCfg=functools.partial(DimuEFComboHypoCfg,flags))
         steps = [step1_dimufast, step2_dimuComb, step3_dimuEFSA, step4_dimuEFCB]
 
         menu.chainsInMenu['Bphysics'] = [
