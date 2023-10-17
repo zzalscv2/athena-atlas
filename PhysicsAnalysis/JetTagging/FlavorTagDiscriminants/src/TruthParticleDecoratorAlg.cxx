@@ -30,10 +30,10 @@ namespace FlavorTagDiscriminants {
     // Initialize Container keys
     ATH_MSG_DEBUG( "Inizializing containers:"            );
     ATH_MSG_DEBUG( "    ** " << m_TruthContainerKey      );
-    ATH_MSG_DEBUG( "    ** " << m_TruthEventsKey      );
+    ATH_MSG_DEBUG( "    ** " << m_TruthPVsKey      );
 
     ATH_CHECK( m_TruthContainerKey.initialize() );
-    ATH_CHECK( m_TruthEventsKey.initialize() );
+    ATH_CHECK( m_TruthPVsKey.initialize() );
 
     // Prepare decorators
     m_dec_origin_label = m_TruthContainerKey.key() + "." + m_dec_origin_label.key();
@@ -61,18 +61,23 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandle<TPC> truth_particles(m_TruthContainerKey,ctx);
     CHECK( truth_particles.isValid() );
     ATH_MSG_DEBUG( "Retrieved " << truth_particles->size() << " truth_particles..." );
-    SG::ReadHandle<xAOD::TruthEventContainer> truth_events(m_TruthEventsKey,ctx);
-    CHECK( truth_events.isValid() );
-    ATH_MSG_DEBUG( "Retrieved " << truth_events->size() << " truth events..." );
+    SG::ReadHandle<xAOD::TruthVertexContainer> truth_PVs(m_TruthPVsKey, ctx);
+    CHECK( truth_PVs.isValid() );
+    ATH_MSG_DEBUG( "Retrieved " << truth_PVs->size() << " truth PVs..." );
     
+    // get the truth primary vertex
+    if (truth_PVs->size() != 1) {
+      ATH_MSG_ERROR( "Truth PVs != 1" );
+      return StatusCode::FAILURE;
+    }
+    const xAOD::TruthVertex* truth_PV = truth_PVs->at(0);
+
+
     // instantiate decorators
     SG::WriteDecorHandle<TPC, int> dec_origin_label(m_dec_origin_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_type_label(m_dec_type_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_vertex_index(m_dec_vertex_index, ctx);
     SG::WriteDecorHandle<TPC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
-
-    // get the truth primary vertex
-    const xAOD::TruthVertex* truth_PV = truth_events->at(0)->truthVertex(0);
 
     // sort the particles by pt to ensure the vertex clustering is deterministic
     std::vector<const xAOD::TruthParticle*> sorted_truth_particles;
@@ -88,6 +93,7 @@ namespace FlavorTagDiscriminants {
       if ( (!MC::isStable(truth_particle) or truth_particle->pt() < 500) and !truth_particle->isCharmHadron()) {
         dec_origin_label(*truth_particle) = InDet::ExclusiveOrigin::Pileup;
         dec_type_label(*truth_particle) = TruthDecoratorHelpers::ExclusiveType::NoTruth;
+        tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
         dec_parent_barcode(*truth_particle) = -1;
         continue;
@@ -110,12 +116,19 @@ namespace FlavorTagDiscriminants {
       dec_type_label(*truth_particle) = TruthDecoratorHelpers::get_truth_type(truth_particle);
     }
 
+    // check sorted_truth_particles and tp_truth_vertices have the same length
+    if ( sorted_truth_particles.size() != tp_truth_vertices.size() ) {
+      ATH_MSG_ERROR( "sorted_truth_particles and tp_truth_vertices have different lengths" );
+      return StatusCode::FAILURE;
+    }
+
     // decorate particle with truth vertex info
     auto seen_vertices = std::vector<const xAOD::TruthVertex*>();
     for ( size_t i = 0; i != tp_truth_vertices.size(); i++) {
       auto this_vert = tp_truth_vertices.at(i);
       auto this_tp = sorted_truth_particles.at(i);
-      dec_vertex_index(*this_tp) = TruthDecoratorHelpers::get_vertex_index(this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance);
+      dec_vertex_index(*this_tp) = TruthDecoratorHelpers::get_vertex_index(
+        this_vert, truth_PV, seen_vertices, m_truthVertexMergeDistance);
     }
     return StatusCode::SUCCESS;
   }

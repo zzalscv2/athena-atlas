@@ -12,7 +12,7 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 
 #include "xAODTruth/TruthParticleContainerFwd.h"
-#include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthVertexContainerFwd.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 
 
@@ -32,9 +32,9 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandleKey< xAOD::TruthParticleContainer > m_TruthContainerKey {
       this, "truthContainer", "TruthParticles",
         "Key for the input truth particle collection"};
-    SG::ReadHandleKey< xAOD::TruthEventContainer > m_TruthEventsKey {
-      this, "truthEvents", "TruthEvents",
-        "Key for the input truth event collection"};
+    SG::ReadHandleKey< xAOD::TruthVertexContainer > m_TruthPVsKey {
+      this, "TruthPrimaryVertices", "TruthPrimaryVertices",
+        "Key for the input truth PV collection"};
 
     // Decorators for truth particles
     SG::WriteDecorHandleKey< xAOD::TruthParticleContainer > m_dec_origin_label {
