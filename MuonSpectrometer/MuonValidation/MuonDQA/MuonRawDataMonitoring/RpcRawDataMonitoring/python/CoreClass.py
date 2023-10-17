@@ -670,7 +670,7 @@ class Draw_Occupancy(Draw_Base):
 
   # -----------------------------------------------------------------------
   def __getTimeScale(self):
-    timeScale = 200e-9
+    timeScale = 100e-9
     return timeScale
 
   # -----------------------------------------------------------------------

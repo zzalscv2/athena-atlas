@@ -63,7 +63,7 @@ def RpcMonitoringConfig(inputFlags):
                         title="Number of RPC Hit;Time;NHit",
                         type='TH1D', 
                         path='RpcOccupancy',
-                        xbins=67, xmin=-104.6875, xmax=104.6875)
+                        xbins=36, xmin=-101.5625, xmax=10.9375)
 
     myGroup_track.defineHistogram('prd_sec,prd_layer;NPRDHit_sectorVSlayer', 
                         title="NPRDHit_sectorVSlayer;Sector(- for C side, + for A side);layer((dbR-1)*2+gasGap);NHit",
@@ -245,8 +245,7 @@ def RpcMonitoringConfig(inputFlags):
                 title='Hit time on {0};Hit time;NHits',
                 type='TH1I',
                 path='TrackMatch/PRDHitTime',
-                xbins=67, xmin=-104.6875, xmax=104.6875)
-
+                xbins=36, xmin=-101.5625, xmax=10.9375)
 
     ######################################################################################################
     ## Rpc lv1 trigger
