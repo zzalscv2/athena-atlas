@@ -64,7 +64,7 @@ def defaultTestFlags(configFlags, args):
     configFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
     configFlags.Sim.ISFRun = True
     configFlags.Sim.ISF.Simulator = SimulationFlavour.ATLFAST3MT
-    configFlags.Sim.FastCalo.ParamsInputFilename = "FastCaloSim/MC16/TFCSparam_run2_reprocessing.root"
+    configFlags.Sim.FastCalo.ParamsInputFilename = "FastCaloSim/MC23/TFCSparam_AF3_MC23_Sep23.root"
     configFlags.Sim.FastCalo.CaloCellsName = "AllCalo"
 
     configFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"

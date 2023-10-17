@@ -231,7 +231,7 @@ def createSimConfigFlags():
 
     scf.addFlag("Sim.ISF.HITSMergingRequired", _decideHITSMerging)
 
-    scf.addFlag("Sim.FastCalo.ParamsInputFilename", "FastCaloSim/MC16/TFCSparam_run2_reprocessing.root") # filename of the input parametrizations file
+    scf.addFlag("Sim.FastCalo.ParamsInputFilename", "FastCaloSim/MC23/TFCSparam_AF3_MC23_Sep23.root") # filename of the input parametrizations file
     scf.addFlag("Sim.FastCalo.RunOnGPU", False) # Determines if run the FastCaloSim on GPU or not
     scf.addFlag("Sim.FastCalo.CaloCellsName", "AllCalo") # StoreGate collection name for FastCaloSim hits
 

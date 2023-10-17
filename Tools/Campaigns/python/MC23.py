@@ -157,6 +157,8 @@ def MC23SimulationNoIoV(flags):
     from SimuJobTransforms.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
 
+    flags.Sim.FastCalo.ParamsInputFilename = 'FastCaloSim/MC23/TFCSparam_dev_Hybrid_Ha_v5_all_baryons_0_500.root'
+
 
 def MC23SimulationLowMuRun(flags):
     """MC23 flags for low mu run simulation"""
