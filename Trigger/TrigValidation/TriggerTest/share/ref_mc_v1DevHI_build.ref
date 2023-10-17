@@ -2837,6 +2837,8 @@ HLT_noalg_eb_L1RD1_FILLED:
   eventCount: 0
 HLT_noalg_eb_L1TAU1_TE4_VTE200:
   eventCount: 0
+HLT_noalg_eb_L1TAU1_TRT_VTE50:
+  eventCount: 0
 HLT_noalg_eb_L1TE50:
   eventCount: 0
 HLT_noalg_eb_L1TE50_VTE200:
@@ -2844,6 +2846,10 @@ HLT_noalg_eb_L1TE50_VTE200:
 HLT_noalg_eb_L1TE5_VTE200:
   eventCount: 0
 HLT_noalg_eb_L1TE8000p0ETA49:
+  eventCount: 0
+HLT_noalg_eb_L1TRT_ZDC_A_VTE50:
+  eventCount: 0
+HLT_noalg_eb_L1TRT_ZDC_C_VTE50:
   eventCount: 0
 HLT_noalg_eb_L1VTE200:
   eventCount: 0
