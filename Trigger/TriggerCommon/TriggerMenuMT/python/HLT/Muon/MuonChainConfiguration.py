@@ -12,12 +12,10 @@ log = logging.getLogger(__name__)
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isComponentAccumulatorCfg():
-    from .generateMuon import muEFCBSequence
-else: 
-    from .MuonMenuSequences import muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, muEFIDtpSequence
+if not isComponentAccumulatorCfg():
+    from .MuonMenuSequences import muEFIsoSequence, muEFMSIsoSequence
 
-from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence, efLateMuSequence
+from .MuonMenuSequences import muFastSequence, muFastCalibSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muCombLRTSequence, muEFSASequence, muEFSAFSSequence, efLateMuSequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFCBFSSequence, muEFIDtpSequence
 
 from .MuonMenuSequences import efLateMuRoISequence, muRoiClusterSequence
 from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
@@ -82,19 +80,34 @@ def muEFSASequenceCfg(flags,is_probe_leg=False):
         return menuSequenceCAToGlobalWrapper(muEFSASequence,flags, is_probe_leg=is_probe_leg)
 
 def muEFCBSequenceCfg(flags,is_probe_leg=False):
-    return muEFCBSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFCBSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFCBSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFCBIDperfSequenceCfg(flags,is_probe_leg=False):
-    return muEFCBIDperfSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFCBIDperfSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFCBIDperfSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFIDtpSequenceCfg(flags,is_probe_leg=False):
-    return muEFIDtpSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFIDtpSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFIDtpSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFCBLRTSequenceCfg(flags,is_probe_leg=False):
-    return muEFCBLRTSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFCBLRTSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return  menuSequenceCAToGlobalWrapper(muEFCBLRTSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFCBLRTIDperfSequenceCfg(flags,is_probe_leg=False):
-    return muEFCBLRTIDperfSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFCBLRTIDperfSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFCBLRTIDperfSequence, flags, is_probe_leg=is_probe_leg)
 
 def FSmuEFSASequenceCfg(flags,is_probe_leg=False):
     if isComponentAccumulatorCfg():
@@ -103,7 +116,10 @@ def FSmuEFSASequenceCfg(flags,is_probe_leg=False):
         return menuSequenceCAToGlobalWrapper(muEFSAFSSequence, flags, is_probe_leg=is_probe_leg)
 
 def FSmuEFCBSequenceCfg(flags,is_probe_leg=False):
-    return muEFCBFSSequence(flags, is_probe_leg=is_probe_leg)
+    if isComponentAccumulatorCfg():
+        return muEFCBFSSequence(flags, is_probe_leg=is_probe_leg)
+    else:
+        return menuSequenceCAToGlobalWrapper(muEFCBFSSequence, flags, is_probe_leg=is_probe_leg)
 
 def muEFIsoSequenceCfg(flags,is_probe_leg=False):
     return muEFIsoSequence(flags, is_probe_leg=is_probe_leg)
