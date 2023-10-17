@@ -83,8 +83,6 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
   int btdc[16] = {0};
   int btdcHitsN[16] = {0};
 
-  double totalMuonEnergy = 0.;
-
   SG::ReadHandle<TileBeamElemContainer> beamElemContainer(m_beamElemContainerKey, ctx);
   ATH_CHECK( beamElemContainer.isValid() );
 
@@ -126,7 +124,6 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
           if(channel >= 0 && channel < 8) {
             muonWall[channel] = amplitude;
-            totalMuonEnergy += amplitude;
           } else {
             errorWrongChannel(frag, channel);
           }
@@ -137,7 +134,6 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
            if(channel >= 0 && channel < 6) {
             muonWall[8 + channel] = amplitude;
-            totalMuonEnergy += amplitude;
           } else {
             errorWrongChannel(frag, channel);
           }
@@ -202,12 +198,10 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
                 sCounter[channel] = amplitude;
               } else if (channel == 2) {
                 muonWall[10] = amplitude;
-                totalMuonEnergy += amplitude;
               } else if (channel < 6) {
                 cherenkov[channel - 3] = amplitude;
               } else {
                 muonWall[channel - 6] = amplitude;
-                totalMuonEnergy += amplitude;
               }
             } else {
               errorWrongChannel(frag, channel);
@@ -237,7 +231,6 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
             if(channel >= 0 && channel < 16) {
               muonWall[channel] = amplitude;
-              totalMuonEnergy += amplitude;
             } else if (channel > 31) {
               errorWrongChannel(frag, channel);
             }
