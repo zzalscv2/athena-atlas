@@ -92,7 +92,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     return false;
   };
 
-  inline bool HLTMatching(const TLorentzVector offline_part, std::vector<TLorentzVector> online_parts, float threshold) const
+  inline bool HLTMatching(const TLorentzVector& offline_part, const std::vector<TLorentzVector>& online_parts, float threshold) const
   {
     for(auto online_part: online_parts){
       float deltaR = online_part.DeltaR(offline_part);
