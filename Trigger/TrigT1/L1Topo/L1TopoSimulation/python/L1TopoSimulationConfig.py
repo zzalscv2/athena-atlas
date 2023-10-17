@@ -272,6 +272,7 @@ if __name__ == '__main__':
   parser.add_argument("-hdwMon","--algoHdwMon",action="store_true", dest="algoHdwMon", help="Fill algorithm histograms based on hardware decision.",default=False, required=False)
   parser.add_argument("-perfMon","--perfMonitoring",action="store_true", dest="perfmon", help="Enable performance monitoring",default=False, required=False)
   parser.add_argument("-l","--logLevel",action="store", dest="log", help="Log level.",default="warning", required=False)
+  parser.add_argument("-leg","--doLegacy", action="store_true", dest="doLegacy", help="Also run simulation and monitoring for legay L1Topo", default=False, required=False)
   parser.add_argument("-n","--nevent", type=int, action="store", dest="nevent", help="Maximum number of events will be executed.",default=0, required=False)
   parser.add_argument("-s","--skipEvents", type=int, action="store", dest="skipEvents", help="How many events will be skipped.",default=0, required=False)
   parser.add_argument("-d","--enableL1TopoDump", type=bool, action="store", dest="enableL1TopoDump", help="Whether to output events into inputdump.txt",default=False, required=False) 
@@ -446,11 +447,12 @@ if __name__ == '__main__':
   from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoByteStreamCfg
   acc.merge(L1TopoByteStreamCfg(flags), sequenceName='AthAlgSeq')
   outputEDM += addEDM('xAOD::L1TopoRawDataContainer', 'L1TopoRawData')
-  acc.merge(L1LegacyTopoSimulationCfg(flags), sequenceName='AthAlgSeq')
-  if args.algoHdwMon:
-      acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
-      acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
-  outputEDM += addEDM('xAOD::L1TopoSimResultsContainer','L1_LegacyTopoSimResults')
+  if args.doLegacy:
+      acc.merge(L1LegacyTopoSimulationCfg(flags), sequenceName='AthAlgSeq')
+      if args.algoHdwMon:
+          acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
+          acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
+      outputEDM += addEDM('xAOD::L1TopoSimResultsContainer','L1_LegacyTopoSimResults')
 
   acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM,doMuons=('Muons' in subsystem)), sequenceName='AthAlgSeq')
   if args.algoHdwMon:
@@ -464,9 +466,10 @@ if __name__ == '__main__':
       TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,True,True,True,args.forceCtp,algLogLevel),
       sequenceName="AthAlgSeq"
   )
-  # legacy mon
-  acc.addEventAlgo(TopoMonConfig.getL1TopoLegacyOnlineMonitor(flags,'L1/L1LegacyTopoOffline',configBS=False,logLevel=algLogLevel),
-                   sequenceName="AthAlgSeq")
+  if args.doLegacy:
+      # legacy mon
+      acc.addEventAlgo(TopoMonConfig.getL1TopoLegacyOnlineMonitor(flags,'L1/L1LegacyTopoOffline',configBS=False,logLevel=algLogLevel),
+                       sequenceName="AthAlgSeq")
 
 
   from GaudiSvc.GaudiSvcConf import THistSvc # noqa: F401
