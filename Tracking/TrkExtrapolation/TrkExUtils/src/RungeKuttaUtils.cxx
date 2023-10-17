@@ -190,12 +190,12 @@ mult3x5Helper(double* ATH_RESTRICT Jac,
 
   vec4 P1 = { P[1], P[8], P[15], P[22] };
   res += V[1] * P1;
- 
+
   vec4 P2 = { P[2], P[9], P[16], P[23] };
   res += V[2] * P2;
- 
+
   CxxUtils::vstore(&Jac[0], res);
-  
+
   // The 5th element
   Jac[4] = V[0] * P[28] + V[1] * P[29] + V[2] * P[30];
 }
@@ -1099,10 +1099,6 @@ Trk::RungeKuttaUtils::transformLocalToGlobal(bool useJac,
                                              const Trk::TrackParameters& Tp,
                                              double* ATH_RESTRICT P)
 {
-  const Trk::TrackParameters* pTp = &Tp;
-  if (!pTp)
-    return false;
-
   return transformLocalToGlobal(
     useJac, &Tp.associatedSurface(), Tp.parameters(), P);
 }
@@ -1117,10 +1113,6 @@ Trk::RungeKuttaUtils::transformLocalToGlobal(bool useJac,
                                              const Trk::NeutralParameters& Tp,
                                              double* ATH_RESTRICT P)
 {
-  const Trk::NeutralParameters* pTp = &Tp;
-  if (!pTp)
-    return false;
-
   return transformLocalToGlobal(
     useJac, &Tp.associatedSurface(), Tp.parameters(), P);
 }
