@@ -135,7 +135,9 @@ def check_file():
   cd_command = ""
   for line in f:
     if not line.startswith("#"):
-      cd,cd_cmd,set_commands,read_commands,create_commands,insert_commands = sort_commands(line,cd_in_line,cd_command,set_commands,read_commands,create_commands,insert_commands)
+      cd,cd_cmd,set_commands,read_commands,create_commands,insert_commands = sort_commands(line,
+         cd_in_line,cd_command,set_commands,
+         read_commands,create_commands,insert_commands)
       cd_in_line,cd_command = cd,cd_cmd
     else:
       continue
@@ -166,16 +168,21 @@ def check_file():
 
   # Now loop over the snippets
   for file in read_files:
-    f = open(file, "r")
-    cd_in_line = False
-    cd_command = ""
-    for line in f:
-      if not line.startswith("#"):
-        cd,cd_cmd,set_commands,read_commands,create_commands,insert_commands = sort_commands(line,cd_in_line,cd_command,set_commands,read_commands,create_commands,insert_commands)
-        cd_in_line,cd_command = cd,cd_cmd
-      else:
-        continue
-    f.close()
+    if ".in" not in file:
+      athMsgLog.info("Skipping file " + file + " since it does not contain any in-file")
+      athMsgLog.info("It is just a directory, can be ignored.")
+      continue
+    else:
+      f = open(file, "r")
+      cd_in_line = False
+      cd_command = ""
+      for line in f:
+        if not line.startswith("#"):
+          cd,cd_cmd,set_commands,read_commands,create_commands,insert_commands = sort_commands(line,cd_in_line,cd_command,set_commands,read_commands,create_commands,insert_commands)
+          cd_in_line,cd_command = cd,cd_cmd
+        else:
+          continue
+      f.close()
 
   # remove the "set", "create" and "read" parts as well as the snippet prefix
   set_commands    = clean_string(set_commands,"set ","")
