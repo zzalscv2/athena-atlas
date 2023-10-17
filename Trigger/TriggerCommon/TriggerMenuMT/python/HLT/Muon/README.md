@@ -65,6 +65,4 @@ Modules in this directory
 * [MuonRecoSequences](MuonRecoSequences.py)
   * Assembles the sequences for each stage of reconstruction
   * For more information on the algorithms, see [MuonTriggerDocumentation](https://twiki.cern.ch/twiki/bin/view/Atlas/MuonTriggerDocumentation)
-* [generateMuon](generateMuon.py)
-  * NewJO chain configuration
 

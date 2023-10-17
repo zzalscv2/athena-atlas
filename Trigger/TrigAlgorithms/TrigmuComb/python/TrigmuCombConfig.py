@@ -54,25 +54,3 @@ def muCombCfg(flags, postFix="", useBackExtrp=True, L2StandAloneMuonContainerNam
 
     return acc
 
-    
-def l2MuCombRecoCfg(flags, name="L2MuCombReco", is_probe_leg=False):
-
-    from TriggerMenuMT.HLT.Config.MenuComponents import InViewRecoCA
-    ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
-    reco = InViewRecoCA(name, 
-                        RequireParentView = True, 
-                        RoITool = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="Roi_L2SAMuon", InViewRoIs = "RoIs_fromL2SAViews"),
-                        isProbe=is_probe_leg)
-
-    reco.mergeReco(muCombCfg(flags, L2StandAloneMuonContainerName=muFastInfo, L2CombinedMuonContainerName = muCombInfo, TrackParticleContainerName = flags.Tracking.ActiveConfig.tracks_FTF))
-
-
-    return reco
-
-def l2MuCombHypoCfg(flags, name="UNSPECIFIED", muCombInfo="UNSPECIFIED"):
-
-    TrigmuCombHypoAlg=CompFactory.TrigmuCombHypoAlg
-    muCombHypo = TrigmuCombHypoAlg(name)
-    muCombHypo.MuonL2CBInfoFromMuCombAlg=muCombInfo
-
-    return muCombHypo
