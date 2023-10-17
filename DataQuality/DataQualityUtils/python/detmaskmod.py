@@ -6,7 +6,7 @@ from functools import reduce
 
 
 detmaskmap_defects = {
-    #'FORWARD_AFP': 'AFP_DISABLED', # not yet functional
+    'FORWARD_AFP': 'AFP_DISABLED', # not yet functional
     'FORWARD_ALPHA': 'ALFA_DISABLED',
     #'FORWARD_LUCID': 'LCD_DISABLED', # LUCID now operates outside ATLAS partition
     'FORWARD_ZDC': 'ZDC_DISABLED',
