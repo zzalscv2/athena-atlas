@@ -18,6 +18,7 @@
 #include "TrkSurfaces/StraightLineSurface.h"
 
 #include "CxxUtils/vec.h"
+#include "CxxUtils/inline_hints.h"
 #include "CxxUtils/vectorize.h"
 ATH_ENABLE_VECTORIZATION;
 
@@ -1417,9 +1418,7 @@ Trk::RungeKuttaUtils::stepEstimator(
 // New covariance matrix calculation from old matrix and jacobian
 // We use Eigen so we use flatten to avoid out of line calls
 /////////////////////////////////////////////////////////////////////////////////
-#if defined(__GNUC__)
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 AmgSymMatrix(5) Trk::RungeKuttaUtils::newCovarianceMatrix(
   const double* ATH_RESTRICT J,
   const AmgSymMatrix(5) & ATH_RESTRICT M)

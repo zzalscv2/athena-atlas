@@ -17,6 +17,7 @@
 #include "TrkGaussianSumFilterUtils/QuickCloseComponentsMultiStateMerger.h"
 
 #include "TrkParameters/ComponentParameters.h"
+#include "CxxUtils/inline_hints.h"
 //
 #include "TrkGeometry/Layer.h"
 #include "TrkGeometry/MaterialProperties.h"
@@ -24,10 +25,7 @@
 
 namespace {
 
-#if defined(__GNUC__)
-[[gnu::flatten]]
-// Avoid out-of-line Eigen calls
-#endif
+ATH_FLATTEN
 inline void
 dummyCacheElement(GsfMaterial::Combined& elem)
 {

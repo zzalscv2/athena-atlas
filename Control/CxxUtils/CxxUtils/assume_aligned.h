@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 
 /**
@@ -20,14 +20,13 @@
 #define CXXUTILS_ASSUME_ALIGNED_H
 
 #include <cstddef>
+#include "CxxUtils/inline_hints.h"
 
 namespace CxxUtils {
 template<size_t Align, typename T>
 [[nodiscard]]
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-inline T*
+ATH_ALWAYS_INLINE
+T*
 assume_aligned(T* ptr) noexcept
 {
   static_assert((Align != 0 && (Align & (Align - 1)) == 0),

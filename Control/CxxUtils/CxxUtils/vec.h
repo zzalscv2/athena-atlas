@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/vec.h
@@ -70,7 +70,7 @@
  *                          to the element type of dst.
  *                          dst[i] = static_cast<vec_type_t<VEC1>>(src[i])
  *
- *  Functions that construct a permutation of elements from one or two vectors
+*  Functions that construct a permutation of elements from one or two vectors
  *  and return a vector of the same type as the input vector(s).
  *  The mask has the same element count  as the vectors.
  *  Intentionally kept compatible with gcc's _builtin_shuffle.
@@ -113,6 +113,7 @@
 #define CXXUTILS_VEC_H
 
 #include "CxxUtils/features.h"
+#include "CxxUtils/inline_hints.h"
 #include <cstdlib>
 #include <cstring>
 #include <type_traits>
@@ -204,7 +205,8 @@ using vec_mask_type_t = typename vec_mask_type<VEC>::type;
  * @brief Return the number of elements in a vectorized type.
  */
 template<class VEC>
-inline constexpr size_t
+ATH_ALWAYS_INLINE
+constexpr size_t
 vec_size()
 {
   typedef vec_type_t<VEC> ELT;
@@ -215,7 +217,8 @@ vec_size()
  * @brief Return the number of elements in a vectorized type.
  */
 template<class VEC>
-inline constexpr size_t
+ATH_ALWAYS_INLINE
+constexpr size_t
 vec_size(const VEC&)
 {
   typedef vec_type_t<VEC> ELT;
@@ -226,7 +229,8 @@ vec_size(const VEC&)
  * @brief Copy a scalar to each element of a vectorized type.
  */
 template<typename VEC, typename T>
-inline void
+ATH_ALWAYS_INLINE
+void
 vbroadcast(VEC& v, T x)
 {
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
@@ -246,7 +250,8 @@ vbroadcast(VEC& v, T x)
  * Used memcpy to avoid alignment issues
  */
 template<typename VEC>
-inline void
+ATH_ALWAYS_INLINE
+void
 vload(VEC& dst, vec_type_t<VEC> const* src)
 {
   std::memcpy(&dst, src, sizeof(VEC));
@@ -258,7 +263,8 @@ vload(VEC& dst, vec_type_t<VEC> const* src)
  * Uses memcpy to avoid alignment issues
  */
 template<typename VEC>
-inline void
+ATH_ALWAYS_INLINE
+void
 vstore(vec_type_t<VEC>* dst, const VEC& src)
 {
   std::memcpy(dst, &src, sizeof(VEC));
@@ -270,7 +276,8 @@ vstore(vec_type_t<VEC>* dst, const VEC& src)
  * dst[i] = mask[i] ? a[i] : b[i]
  */
 template<typename VEC>
-inline void
+ATH_ALWAYS_INLINE
+void
 vselect(VEC& dst, const VEC& a, const VEC& b, const vec_mask_type_t<VEC>& mask)
 {
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
@@ -288,7 +295,8 @@ vselect(VEC& dst, const VEC& a, const VEC& b, const vec_mask_type_t<VEC>& mask)
  * copies to @c dst[i]  the min(a[i],b[i])
  */
 template<typename VEC>
-inline void
+ATH_ALWAYS_INLINE
+void
 vmin(VEC& dst, const VEC& a, const VEC& b)
 {
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
@@ -306,7 +314,8 @@ vmin(VEC& dst, const VEC& a, const VEC& b)
  * copies to @c dst[i]  the max(a[i],b[i])
  */
 template<typename VEC>
-inline void
+ATH_ALWAYS_INLINE
+void
 vmax(VEC& dst, const VEC& a, const VEC& b)
 {
 #if !HAVE_VECTOR_SIZE_ATTRIBUTE || WANT_VECTOR_FALLBACK
@@ -320,7 +329,8 @@ vmax(VEC& dst, const VEC& a, const VEC& b)
 }
 
 template<typename VEC1, typename VEC2>
-inline void
+ATH_ALWAYS_INLINE
+void
 vconvert(VEC1& dst, const VEC2& src)
 {
   static_assert((vec_size<VEC1>() == vec_size<VEC2>()),
@@ -352,7 +362,7 @@ using all_true = std::is_same<bool_pack<bs..., true>, bool_pack<true, bs...>>;
  * into any or multiple position inside dst.
  */
 template<size_t... Indices, typename VEC>
-inline void
+ATH_ALWAYS_INLINE void
 vpermute(VEC& dst, const VEC& src)
 {
 
@@ -378,7 +388,7 @@ vpermute(VEC& dst, const VEC& src)
  * into any or multiple position inside dst.
  */
 template<size_t... Indices, typename VEC>
-inline void
+ATH_ALWAYS_INLINE void
 vpermute2(VEC& dst, const VEC& src1, const VEC& src2)
 {
   constexpr size_t N = vec_size<VEC>();

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef Jacobian__Helper__H
-#define Jacobian__Helper__H
+#ifndef JACOBIAN__HELPER__H
+#define JACOBIAN__HELPER__H
 
 #include "CxxUtils/restrict.h"
+#include "CxxUtils/inline_hints.h"
 #include "CxxUtils/vec.h"
 
 namespace Trk {
@@ -35,10 +36,8 @@ namespace Trk {
 /// A0, A3, A4, and A6 represent cross products of the direction
 ///  with the field across the 3 points. Each is a 3-vector.
 /// S3 is a step length
-#if (defined(__GNUC__) || defined(__clang__))
-[[gnu::always_inline]]
-#endif
-inline void
+ATH_ALWAYS_INLINE
+void
 propJacobian(double* ATH_RESTRICT P,
              const double* ATH_RESTRICT H0,
              const double* ATH_RESTRICT H1,

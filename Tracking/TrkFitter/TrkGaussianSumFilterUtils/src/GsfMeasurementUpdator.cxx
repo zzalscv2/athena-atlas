@@ -15,6 +15,9 @@
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
+
+#include "CxxUtils/inline_hints.h"
+
 #include <memory>
 
 namespace {
@@ -305,9 +308,7 @@ calculateFilterStep_T(Trk::TrackParameters& TP,
  * Also does heavy use of Eigen
  * so we use flatten
  */
-#if defined(__GNUC__)
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 bool
 filterStep(Trk::TrackParameters& trackParameters,
            Trk::FitQualityOnSurface& fitQos,
