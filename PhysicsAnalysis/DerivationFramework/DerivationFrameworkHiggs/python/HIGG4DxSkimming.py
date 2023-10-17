@@ -37,7 +37,7 @@ def setup(HIGG4DxName, ToolSvc):
         tauTrks = '( (TauJets.nTracks + TauJets.nWideTracks >= 1) && (TauJets.nTracks + TauJets.nWideTracks <= 8) )'
         tauLead = '(TauJets.pt > 33.0*GeV)'
         tauSubl = '(TauJets.pt > 23.0*GeV)'
-        tauId   = 'HIGG4DxJetBDTSigLoose'
+        tauId   = 'HIGG4DxJetRNNSigLoose'
         tauReq0 = '(count( '+tauSubl+' && '+tauTrks+' ) >= 2)'
         tauReq1 = '(count( '+tauSubl+' && '+tauTrks+' && '+tauId+' ) >= 1)'
         tauReq2 = '(count( '+tauLead+' && '+tauTrks+' ) >= 1)'

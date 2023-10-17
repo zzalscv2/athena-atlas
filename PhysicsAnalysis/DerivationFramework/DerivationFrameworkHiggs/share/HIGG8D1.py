@@ -37,9 +37,9 @@ augmentationTools = []
 
 from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__TauSelectionWrapper
 HIGG8D1TauWrapper = DerivationFramework__TauSelectionWrapper(name = "HIGG8D1TauSelectionWrapper",
-                                                             IsTauFlag			= 19,
+                                                             IsTauFlag			= 29,
                                                              CollectionName		= "TauJets",
-                                                             StoreGateEntryName	= "HIGG8D1JetBDTSigLoose")
+                                                             StoreGateEntryName	= "HIGG8D1JetRNNSigLoose")
 ToolSvc += HIGG8D1TauWrapper
 augmentationTools.append(HIGG8D1TauWrapper)
 
@@ -211,7 +211,7 @@ eleRequirements = '(Electrons.pt > 5*GeV) && (abs(Electrons.eta) < 2.6) && (Elec
 leadElectron = eleRequirements + ' && (Electrons.pt > 15*GeV)'
 muRequirements = '(Muons.DFCommonGoodMuon) && (Muons.muonType == 0) && (Muons.pt > 5*GeV) && (abs(Muons.eta) < 2.6)'
 leadMuon = muRequirements + ' && (Muons.pt > 15*GeV)'
-tauRequirements = '(TauJets.pt > 15*GeV) && HIGG8D1JetBDTSigLoose && (abs(TauJets.charge)==1.0) && ((TauJets.nTracks == 1) || (TauJets.nTracks == 3))'
+tauRequirements = '(TauJets.pt > 15*GeV) && HIGG8D1JetRNNSigLoose && (abs(TauJets.charge)==1.0) && ((TauJets.nTracks == 1) || (TauJets.nTracks == 3))'
 
 eeSelection = '((count('+eleRequirements+') >= 2) && (count('+leadElectron+') >= 1))'
 mmSelection = '((count('+muRequirements+') >= 2) && (count('+leadMuon+') >= 1))'
