@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class TauCalibrationConfig (ConfigBlock):
@@ -26,7 +27,7 @@ class TauCalibrationConfig (ConfigBlock):
             config.setSourceName (self.containerName, "TauJets")
 
         # Set up the tau truth matching algorithm:
-        if self.rerunTruthMatching and config.dataType() != 'data':
+        if self.rerunTruthMatching and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
                                           'TauTruthMatchingAlg' + postfix )
             config.addPrivateTool( 'matchingTool',
@@ -39,7 +40,7 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
-        alg.smearingTool.isAFII = config.dataType() == 'afii'
+        alg.smearingTool.isAFII = config.dataType() is DataType.FastSim
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -125,14 +126,14 @@ class TauWorkingPointConfig (ConfigBlock) :
 
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
-        if config.dataType() != 'data' and not self.noEffSF:
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlg' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
                 ( selectionTool.getType(), selectionTool.getName() )
-            alg.efficiencyCorrectionsTool.isAFII = config.dataType() == 'afii'
+            alg.efficiencyCorrectionsTool.isAFII = config.dataType() is DataType.FastSim
             alg.scaleFactorDecoration = 'tau_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + selectionPostfix

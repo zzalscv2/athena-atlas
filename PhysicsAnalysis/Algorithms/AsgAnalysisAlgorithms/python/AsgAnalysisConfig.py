@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class CommonServicesConfig (ConfigBlock) :
@@ -25,7 +26,7 @@ class CommonServicesConfig (ConfigBlock) :
         if self.runSystematics is not None :
             runSystematics = self.runSystematics
         else :
-            runSystematics = config.dataType() != 'data'
+            runSystematics = config.dataType() is not DataType.Data
         if runSystematics :
             sysService.sigmaRecommended = 1
             if self.filterSystematics is not None:
@@ -72,12 +73,12 @@ class PileupReweightingBlock (ConfigBlock):
 
         if campaign:
             if self.userPileupConfigs is None:
-                if config.dataType() == 'data':
+                if config.dataType() is DataType.Data:
                     log.info('Data needs no configuration files')
                 else:
                     from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
                     toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
-                                                            data_type=config.dataType())
+                                                            data_type=config.dataType().value)
                     log.info('Setting PRW configuration based on input files')
 
                     if toolConfigFiles:
@@ -100,7 +101,7 @@ class PileupReweightingBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
         config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
         alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
-        if not toolConfigFiles and config.dataType() != "data":
+        if not toolConfigFiles and config.dataType() is not DataType.Data:
             log.info("No PRW config files provided. Disabling reweighting")
             # Setting the weight decoration to the empty string disables the reweighting
             alg.pileupWeightDecoration = ""
@@ -108,7 +109,7 @@ class PileupReweightingBlock (ConfigBlock):
         config.addOutputVar ('EventInfo', 'runNumber', 'runNumber', noSys=True)
         config.addOutputVar ('EventInfo', 'eventNumber', 'eventNumber', noSys=True)
 
-        if config.dataType() != 'data':
+        if config.dataType() is not DataType.Data:
             config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
             if toolConfigFiles:
                 config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
@@ -127,7 +128,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
     def makeAlgs (self, config) :
 
-        if config.dataType() == 'data':
+        if config.dataType() is DataType.Data:
             # there are no generator weights in data!
             return
 

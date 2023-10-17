@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class MetAnalysisConfig (ConfigBlock):
@@ -48,7 +49,7 @@ class MetAnalysisConfig (ConfigBlock):
 
         if self.useFJVT:
             alg.makerTool.JetRejectionDec = 'passFJVT'
-        if config.dataType() != "data" :
+        if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
         alg.metCore = 'MET_Core_' + metSuffix
         alg.metAssociation = 'METAssoc_' + metSuffix
@@ -76,7 +77,7 @@ class MetAnalysisConfig (ConfigBlock):
         config.addPrivateTool( 'significanceTool', 'met::METSignificance' )
         alg.significanceTool.SoftTermParam = 0
         alg.significanceTool.TreatPUJets = self.treatPUJets
-        alg.significanceTool.IsAFII = config.dataType() == "afii"
+        alg.significanceTool.IsAFII = config.dataType() is DataType.FastSim
         alg.met = config.readName (self.containerName)
 
         config.addOutputVar (self.containerName, 'met', 'met')

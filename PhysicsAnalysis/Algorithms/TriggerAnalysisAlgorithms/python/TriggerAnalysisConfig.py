@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from AthenaConfiguration.Enums import LHCPeriod
 
 
@@ -67,7 +68,7 @@ class TriggerAnalysisBlock (ConfigBlock):
             config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
 
         # Calculate trigger prescales
-        if config.dataType() == 'data' and self.prescaleLumiCalcFiles:
+        if config.dataType() is DataType.Data and self.prescaleLumiCalcFiles:
             alg = config.createAlgorithm( 'CP::TrigPrescalesAlg', 'TrigPrescalesAlg' )
             config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
             alg.pileupReweightingTool.LumiCalcFiles = self.prescaleLumiCalcFiles
@@ -95,7 +96,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         alg.scaleFactorDecoration = 'globalTriggerEffSF_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch_%SYS%'
         alg.eventDecisionOutputDecoration = 'dontsave_%SYS%'
-        alg.doMatchingOnly = config.dataType() == 'data' or noSF
+        alg.doMatchingOnly = config.dataType() is DataType.Data or noSF
         alg.noFilter = self.noFilter
         alg.electronID = self.electronID
         alg.electronIsol = self.electronIsol
@@ -108,7 +109,7 @@ class TriggerAnalysisBlock (ConfigBlock):
         if self.photons:
             alg.photons, alg.photonSelection = config.readNameAndSelection(self.photons)
 
-        if config.dataType != 'data' and not alg.doMatchingOnly:
+        if config.dataType() != DataType.Data and not alg.doMatchingOnly:
             config.addOutputVar ('EventInfo', alg.scaleFactorDecoration, 'globalTriggerEffSF')
         config.addOutputVar ('EventInfo', alg.matchingDecoration, 'globalTriggerMatch', noSys=True)
 

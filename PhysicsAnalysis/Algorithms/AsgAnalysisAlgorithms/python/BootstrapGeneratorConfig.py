@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 class BootstrapGeneratorConfig(ConfigBlock):
     '''ConfigBlock for the bootstrap generator'''
@@ -13,14 +14,14 @@ class BootstrapGeneratorConfig(ConfigBlock):
         self.addOption ('runOnMC', False, type=bool)
     
     def makeAlgs(self, config):
-        if config.dataType() != 'data' and not self.runOnMC:
+        if config.dataType() is not DataType.Data and not self.runOnMC:
             print("Skipping the configuration of CP::BootstrapGeneratorAlg since we are not running on data. "
                   "Set the option 'runOnMC' to True if you want to force the bootstrapping of MC too.")
             return
         
         alg = config.createAlgorithm( 'CP::BootstrapGeneratorAlg', 'BootstrapGenerator')
         alg.nReplicas = self.nReplicas
-        alg.isData = config.dataType() == 'data'
+        alg.isData = config.dataType() is DataType.Data
         if self.decoration:
             alg.decorationName = self.decoration
         else:

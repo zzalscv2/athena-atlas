@@ -5,6 +5,7 @@ from __future__ import print_function
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 import re
 
 
@@ -59,7 +60,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         # need to change
         if self.runTruthJetTagging or (
             self.runTruthJetTagging is None
-            and config.dataType() != 'data'
+            and config.dataType() is not DataType.Data
         ):
             alg = config.createAlgorithm('CP::JetTruthTagAlg', f'JetTruthTagAlg{postfix}')
             alg.jets = config.readName(self.containerName)
@@ -125,20 +126,20 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             if self.jetInput == "EMPFlow":
                 configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
             else:
-                if config.dataType == 'afii':
+                if config.dataType() == DataType.FastSim:
                     configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
                 else:
                     configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
                 configFile = configFile.format(self.jetInput)
             alg.calibrationTool.ConfigFile = configFile
-            if config.dataType() == 'data':
+            if config.dataType() is DataType.Data:
                 alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
             else:
                 if self.jetInput == "EMPFlow":
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
                 else:
                     alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
-            alg.calibrationTool.IsData = (config.dataType() == 'data')
+            alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
 
@@ -164,8 +165,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         # Add the correct directory on the front
         alg.uncertaintiesTool.ConfigFile = "rel21/Fall2018/"+configFile
-        alg.uncertaintiesTool.MCType = "AFII" if config.dataType() == "afii" else "MC16"
-        alg.uncertaintiesTool.IsData = (config.dataType() == 'data')
+        alg.uncertaintiesTool.MCType = "AFII" if config.dataType() is DataType.FastSim else "MC16"
+        alg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
@@ -216,7 +217,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.selectionDecoration = "jvt_selection,as_char"
             alg.particles = config.readName(self.containerName)
 
-            if self.runJvtEfficiency and config.dataType() != "data":
+            if self.runJvtEfficiency and config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
                 config.addPrivateTool( 'efficiencyTool', 'CP::NNJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
@@ -242,7 +243,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )
             config.addSelection (self.containerName, 'fjvt', 'fjvt_selection,as_char', preselection=False)
 
-            if self.runFJvtEfficiency and self.config.dataType() != "data":
+            if self.runFJvtEfficiency and self.config.dataType() is not DataType.Data:
                 alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'FJvtEfficiencyAlg'+postfix )
                 config.addPrivateTool( 'efficiencyTool', 'CP::FJvtEfficiencyTool' )
                 alg.efficiencyTool.JetContainer = config.readName(self.containerName)
@@ -293,11 +294,11 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             alg.calibrationTool.ConfigFile = \
                 "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
-            if config.dataType() == 'data':
+            if config.dataType() is DataType.Data:
                 alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
             else:
                 alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
-            alg.calibrationTool.IsData = (config.dataType() == 'data')
+            alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
             # Logging would be good
             print("WARNING: uncertainties for R-Scan jets are not yet released!")
@@ -347,19 +348,19 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
         if self.jetInput == "LCTopo":
             if self.largeRMass == "Comb":
-                if config.dataType() == "data":
+                if config.dataType() is DataType.Data:
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-                if config.dataType() == "mc":
+                if config.dataType() is DataType.FullSim:
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config"
             elif self.largeRMass == "Calo":
-                if config.dataType() == "data":
+                if config.dataType() is DataType.Data:
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-                if config.dataType() == "mc":
+                if config.dataType() is DataType.FullSim:
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config "
             elif self.largeRMass == "TA":
-                if config.dataType() == "data":
+                if config.dataType() is DataType.Data:
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-                if config.dataType() == "mc":
+                if config.dataType() is DataType.FullSim:
                     configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
 
         if self.jetInput == "UFO":
@@ -371,11 +372,11 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
             alg.calibrationTool.JetCollection = jetCollectionName[:-4]
             alg.calibrationTool.ConfigFile = configFile
-            if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() == "mc":
+            if self.jetInput == "TrackCaloCluster" or self.jetInput == "UFO" or config.dataType() is DataType.FullSim:
                 alg.calibrationTool.CalibSequence = "EtaJES_JMS"
-            elif config.dataType() == "data":
+            elif config.dataType() is DataType.Data:
                 alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
-            alg.calibrationTool.IsData = (config.dataType() == "data")
+            alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName (self.containerName)
 
         # Jet uncertainties
@@ -394,7 +395,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.uncertaintiesTool.ConfigFile = \
                 "rel21/Moriond2018/R10_{0}Mass_all.config".format(self.largeRMass)
             alg.uncertaintiesTool.MCType = "MC16a"
-            alg.uncertaintiesTool.IsData = (config.dataType() == "data")
+            alg.uncertaintiesTool.IsData = (config.dataType() is DataType.Data)
 
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)

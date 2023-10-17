@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaConfiguration.Enums import LHCPeriod
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class FTagConfig (ConfigBlock):
@@ -127,7 +128,7 @@ class FTagConfig (ConfigBlock):
             alg.jets = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'ftag_quantile_' + selectionName, selectionName + '_quantile', noSys=True)
 
-        if not self.noEffSF and config.dataType() != 'data':
+        if not self.noEffSF and config.dataType() is not DataType.Data:
             # Set up the efficiency calculation algorithm:
             alg = config.createAlgorithm( 'CP::BTaggingEfficiencyAlg',
                                           'FTagEfficiencyScaleFactorAlg' + postfix )

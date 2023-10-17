@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 class DiTauCalibrationConfig (ConfigBlock):
@@ -28,7 +29,7 @@ class DiTauCalibrationConfig (ConfigBlock):
         alg.preselection = config.getSelection (self.containerName, '')
 
         # Set up the tau truth matching algorithm:
-        if self.rerunTruthMatching and config.dataType() != 'data':
+        if self.rerunTruthMatching and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::DiTauTruthMatchingAlg',
                                    'DiTauTruthMatchingAlg' + postfix )
             config.addPrivateTool( 'matchingTool',
@@ -76,7 +77,7 @@ class DiTauWorkingPointConfig (ConfigBlock) :
 
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
-        if config.dataType() != 'data':
+        if config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::DiTauEfficiencyCorrectionsAlg',
                                    'DiTauEfficiencyCorrectionsAlg' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
