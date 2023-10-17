@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // =================================================================================
@@ -45,6 +45,7 @@ CaloRingsBuilder::CaloRingsBuilder(const std::string& type,
     m_nRingSets(0)
 {
   declareInterface<ICaloRingsBuilder>(this);
+  declareProperty("doTransverseEnergy", m_doTransverseEnergy, "True for build features with cell ET. False for to use raw energy.");
 }
 
 // =====================================================================================
@@ -67,9 +68,6 @@ StatusCode CaloRingsBuilder::initialize()
 
     auto end_itr = itr + rsNLayers;
 
-    // Unfortunately, as we can't declare property to a
-    // std::vector<CaloSampling::CaloSample>, we will have to do this to
-    // convert the types:
     const auto& caloSampleItr = reinterpret_cast<
         std::vector<CaloSampling::CaloSample>::iterator&
       >(itr);
@@ -349,7 +347,11 @@ StatusCode CaloRingsBuilder::buildRingSet(
       // Round to nearest integer:
       ringNumber = static_cast<unsigned int>(std::floor(deltaGreater + .5));
       if ( ringNumber < nRings ){
-        rs->at(ringNumber) += cell->energy()/cosh(cell->eta());
+        if(m_doTransverseEnergy){
+          rs->at(ringNumber) += cell->energy()/cosh(cell->eta()); 
+        }else{
+          rs->at(ringNumber) += cell->energy();
+        }
       }
     }
   }
@@ -359,6 +361,3 @@ StatusCode CaloRingsBuilder::buildRingSet(
 
 
 } // namespace Ringer
-
-
-

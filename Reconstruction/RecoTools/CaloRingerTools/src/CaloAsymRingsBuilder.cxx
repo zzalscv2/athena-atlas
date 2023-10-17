@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // =================================================================================
@@ -213,7 +213,11 @@ StatusCode CaloAsymRingsBuilder::buildRingSet(
       }
 
       if ( ringNumber < nRings ){
-        rs->at(ringNumber) += cell->energy()/cosh(cell->eta());
+        if(m_doTransverseEnergy){
+          rs->at(ringNumber) += cell->energy()/cosh(cell->eta());
+        }else{
+          rs->at(ringNumber) += cell->energy();
+        }
       }
 
     }
@@ -223,6 +227,3 @@ StatusCode CaloAsymRingsBuilder::buildRingSet(
 
 
 } // namespace Ringer
-
-
-
