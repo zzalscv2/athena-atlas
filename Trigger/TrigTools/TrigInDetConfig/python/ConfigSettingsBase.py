@@ -45,8 +45,8 @@ class _ConfigSettingsBase() :
       self._nClustersMin        = 7
       self._roi                 = None
       self._isLRT               = False
-      self._LRTD0Min            = None
-      self._LRTHardPtMin        = None
+      self._LRT_D0Min            = 2.0
+      self._LRT_HardPtMin        = 1.0*GeV
       self._doRecord            = True
       self._vertex              = None
       self._adaptiveVertex      = False
@@ -228,11 +228,11 @@ class _ConfigSettingsBase() :
 
    @property
    def LRT_D0Min(self):
-       return self._LRTD0Min
+       return self._LRT_D0Min
 
    @property
    def LRT_HardMinPt(self):
-       return self._LRTHardPtMin
+       return self._LRT_HardPtMin
 
    @property
    def roi(self):
@@ -397,8 +397,8 @@ class _ConfigSettingsBase() :
       log.info( "   TrackZ0Max            : %s", self._TrackZ0Max )
       log.info( "   adaptiveVertex        : %s", self._adaptiveVertex )
       log.info( "   isLRT                 : %s", self._isLRT )
-      log.info( "   LRTD0Min              : %s", self._LRTD0Min )
-      log.info( "   LRTHardPtmin          : %s", self._LRTHardPtMin )
+      log.info( "   LRTD0Min              : %s", self._LRT_D0Min )
+      log.info( "   LRTHardPtmin          : %s", self._LRT_HardPtMin )
       log.info( "   doHitDV               : %s", self._doHitDV )
       log.info( "   nClustersMin          : %s", self._nClustersMin )
       log.info( "   suffix                : %s", self._suffix )

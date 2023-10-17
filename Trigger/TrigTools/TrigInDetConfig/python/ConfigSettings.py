@@ -410,8 +410,6 @@ class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
       self._DoubletDR_Max         = 200
       self._nClustersMin          = 8
       self._isLRT                 = True
-      self._LRTD0Min              = 2.0
-      self._LRTHardPtMin          = 1.0*GeV
       #pt config
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
@@ -445,8 +443,6 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
       self._DoubletDR_Max         = 200
       self._nClustersMin          = 8
       self._isLRT                 = True
-      self._LRTD0Min              = 2.0
-      self._LRTHardPtMin          = 1.0*GeV
       #pt config
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
@@ -480,8 +476,6 @@ class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
       self._DoubletDR_Max         = 200
       self._nClustersMin          = 8
       self._isLRT                 = True
-      self._LRTD0Min              = 2.0
-      self._LRTHardPtMin          = 1.0*GeV
       #pt config
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.

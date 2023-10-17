@@ -58,8 +58,6 @@
 TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* pSvcLocator) :
 
   AthReentrantAlgorithm(name, pSvcLocator),
-  m_numberingTool("TrigL2LayerNumberTool"),
-  m_spacePointTool("TrigSpacePointConversionTool"),
   m_trackMaker("InDet::SiTrackMaker_xk/InDetTrigSiTrackMaker"),
   m_trigInDetTrackFitter("TrigInDetTrackFitter"),
   m_trigZFinder("TrigZFinder/TrigZFinder", this ),
@@ -158,8 +156,6 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty("RoIs", m_roiCollectionKey = std::string("OutputRoIs"), "RoIs to read in");
 
   //* Tools */
-  declareProperty( "SpacePointProviderTool", m_spacePointTool  );
-  declareProperty( "LayerNumberTool", m_numberingTool  );
   declareProperty( "initialTrackMaker", m_trackMaker);
   declareProperty( "trigInDetTrackFitter",   m_trigInDetTrackFitter );
   declareProperty( "trigZFinder",   m_trigZFinder );

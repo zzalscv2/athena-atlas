@@ -140,8 +140,8 @@ protected:
 
   // AlgTools and Services
 
-  ToolHandle<ITrigL2LayerNumberTool> m_numberingTool;
-  ToolHandle<ITrigSpacePointConversionTool> m_spacePointTool;
+  ToolHandle<ITrigL2LayerNumberTool> m_numberingTool         {this, "LayerNumberTool", "TrigL2LayerNumberTool"}; 
+  ToolHandle<ITrigSpacePointConversionTool> m_spacePointTool {this, "SpacePointProviderTool", "TrigSpacePointConversionTool"};
   ToolHandle<InDet::ISiTrackMaker> m_trackMaker;
   ToolHandle<ITrigInDetTrackFitter> m_trigInDetTrackFitter;
   ToolHandle<ITrigZFinder> m_trigZFinder;
