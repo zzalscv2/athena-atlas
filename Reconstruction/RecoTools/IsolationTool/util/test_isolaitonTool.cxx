@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Mindlessly copied from CPAnalysisExamples
@@ -77,7 +77,6 @@ int main(int argc, char** argv ){
     const TString tag = "t2_";
     Info( APP_NAME, "Opening file: %s", fileName.Data() );
     std::unique_ptr< TFile > ifile( TFile::Open( fileName, "READ" ) );
-    ifile.get();
     
     CP::IsolationHelper *m_helperTool = new CP::IsolationHelper("helperTool");
   
