@@ -80,7 +80,7 @@ def createRecoConfigFlags():
     # Enable BTagging Reconstruction
     flags.addFlag("Reco.EnableBTagging",
                   lambda prevFlags: prevFlags.Reco.EnableJet or 
-                   prevFlags.HeavyIon.doJet) 
+                   (prevFlags.Reco.HIMode is HIMode.HI and prevFlags.HeavyIon.doJet)) 
     # Enable MET Reconstruction
     flags.addFlag("Reco.EnableMet", lambda prevFlags: (
         prevFlags.Reco.EnableJet
