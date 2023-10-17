@@ -109,4 +109,4 @@ simFlags.OptionalUserActionList.addAction("G4UA::FixG4CreatorProcessTool")
 ##########################################################
 
 from G4AtlasApps.SimFlags import simFlags
-simFlags.G4Commands+=["/process/em/useWoodcockTracking EMECPara"];
+simFlags.G4Commands+=["/process/em/useWoodcockTracking EMEC"];
