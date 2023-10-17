@@ -12,9 +12,6 @@
  **/
 
 #include "T_AthenaPoolCustomCnv.h"
-#include "InDetEventAthenaPool/InDetSimDataCollection_p2.h"
-#include "InDetEventAthenaPool/InDetSimDataCollection_p3.h"
-
 
 /**
  * @class T_AthenaPoolTwoPersCnv
@@ -25,8 +22,8 @@
 template<class TRANS, class PERS, class PERSOLD>
 class T_AthenaPoolTwoPersCnv : public T_AthenaPoolCustomCnv< TRANS, PERS >
 {
-   typedef T_AthenaPoolCustomCnv<TRANS, PERS>  BaseCnv;
-   typedef T_AthenaPoolCustomCnv<TRANS, PERSOLD>  BaseOldCnv;
+   typedef T_AthenaPoolCustomCnv<TRANS, PERS>    BaseCnv;
+   typedef T_AthenaPoolCustomCnv<TRANS, PERSOLD> BaseOldCnv;
 
    // define an AthenaPool converter for the old representation PERSOLD
    class OldCnv : public BaseOldCnv
@@ -49,24 +46,26 @@ class T_AthenaPoolTwoPersCnv : public T_AthenaPoolCustomCnv< TRANS, PERS >
    };
 
    // this is the converter that knows how to produce and manage PERSOLD representations
-   OldCnv   m_oldAPCnv;
+   std::unique_ptr<OldCnv>   m_oldAPCnv;
 
 public:
-   T_AthenaPoolTwoPersCnv( ISvcLocator* svcloc ) : BaseCnv(svcloc), m_oldAPCnv(svcloc, this) {}
-
-   /// initialize this and the internal converter
-   virtual StatusCode initialize() override final {
-      StatusCode sc = BaseCnv::initialize();
-      if( !sc.isSuccess() ) return sc;
-      return  m_oldAPCnv.initialize();
-   }
+   T_AthenaPoolTwoPersCnv( ISvcLocator* svcloc ) : BaseCnv(svcloc)  { }
    
 protected:
    /// DataObjectToPool() that dispatches to the right converter based on writeOldPers()
    virtual StatusCode DataObjectToPool(IOpaqueAddress* pAddr, DataObject* pObj) override final {
-      return writeOldPers()?
-         m_oldAPCnv.DataObjectToPool( pAddr, pObj )
-         : BaseCnv::DataObjectToPool( pAddr, pObj );
+      if( writeOldPers() ) {
+         if( !m_oldAPCnv ) {
+            m_oldAPCnv = std::make_unique<OldCnv>( this->serviceLocator() , this );
+            StatusCode sc = m_oldAPCnv->initialize();
+            if( !sc.isSuccess() ) {
+               ATH_MSG_ERROR("Failed to initialize old converter");
+               return sc;
+            }
+         }
+         return m_oldAPCnv->DataObjectToPool( pAddr, pObj );
+      }
+      return BaseCnv::DataObjectToPool( pAddr, pObj );
    }
    
    /// standard user-supplied methods to create TRANS and PERS representattions
