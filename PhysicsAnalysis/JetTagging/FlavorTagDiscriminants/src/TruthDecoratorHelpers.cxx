@@ -21,7 +21,7 @@ namespace FlavorTagDiscriminants {
 
             // no vertex
             const xAOD::TruthVertex* truth_vertex = truth->prodVtx();
-            if ( not truth_vertex || truth_vertex->perp() > 440.0 ) { 
+            if ( not truth_vertex || truth_vertex->perp() > 440.0 ) {
                 return nullptr;
             }
 
@@ -109,11 +109,11 @@ namespace FlavorTagDiscriminants {
                 return 0;
             }
             // have we already seen this vertex?
-            for ( size_t j = 0; j != seen_vertices.size(); j++) {
-                float dr = get_distance(seen_vertices.at(j), this_vertex);
+            for ( size_t i = 0; i != seen_vertices.size(); i++) {
+                float dr = get_distance(seen_vertices.at(i), this_vertex);
                 if ( dr < truthVertexMergeDistance ) {
                     // a vertex is nearby, reuse it
-                    return j + 1;
+                    return i + 1;
                 }
             }
             seen_vertices.push_back(this_vertex);
