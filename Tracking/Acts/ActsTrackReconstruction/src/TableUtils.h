@@ -216,7 +216,7 @@ namespace TableUtils {
       StatTable &dumpHeader(bool value=true) { m_dumpHeader=value; return *this;}
       StatTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       StatTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
-      StatTable &labelPrefix(std::string value) { m_labelPrefix=value; return *this;}
+      StatTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
 
       std::string        m_labelPrefix {};
       unsigned int       m_columnWidth=12;
@@ -237,7 +237,7 @@ namespace TableUtils {
       MultiColumnTable &dumpHeader(bool value=true) { m_dumpHeader=value; return *this;}
       MultiColumnTable &dumpFooter(bool value=true) { m_dumpFooter=value; return *this;}
       MultiColumnTable &separateLastRow(bool value=true) { m_separateLastRow=value; return *this;}
-      MultiColumnTable &labelPrefix(std::string value) { m_labelPrefix=value; return *this;}
+      MultiColumnTable &labelPrefix(const std::string& value) { m_labelPrefix=value; return *this;}
 
       std::string        m_labelPrefix {};
       unsigned int       m_columnWidth=12;
