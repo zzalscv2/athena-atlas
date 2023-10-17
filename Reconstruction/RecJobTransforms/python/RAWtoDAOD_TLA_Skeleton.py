@@ -28,9 +28,12 @@ def configureFlags(runArgs):
 
 
     # Set non-default flags 
+    flags.Trigger.decodeHLT=False
     flags.Trigger.doLVL1=False
     flags.Trigger.DecisionMakerValidation.Execute = False
     flags.Trigger.doNavigationSlimming = False
+    flags.Trigger.L1.doCalo=False
+    flags.Trigger.L1.doCTP=False
     flags.Trigger.AODEDMSet='PhysicsTLA'
 
     from AthenaConfiguration.Enums import ProductionStep
@@ -67,7 +70,7 @@ def configureFlags(runArgs):
 
 def fromRunArgs(runArgs):
 
-    log.info('****************** STARTING TLA RAW Decoding + PEB reconstruction (RAWtoDAOD_TLABTAGPEB) *****************')
+    log.info('****************** STARTING TLA RAW Decoding (RAWtoDAOD_TLA) *****************')
 
     log.info('**** Transformation run arguments')
     log.info(str(runArgs))
