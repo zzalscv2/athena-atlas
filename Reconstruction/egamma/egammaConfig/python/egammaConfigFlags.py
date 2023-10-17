@@ -185,7 +185,7 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Keys.Output.FwdTrkPartContainerName", 
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.TrkPartContainerName + 'Fwd'))
-
+                     
     return egcf
 
 

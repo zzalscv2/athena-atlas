@@ -458,6 +458,11 @@ def initConfigFlags():
         return createPhysValConfigFlags()
     _addFlagsCategory(acf, "PhysVal", __physVal , "PhysValMonitoring")
 
+    def __caloRinger():
+        from CaloRingerAlgs.CaloRingerFlags import createCaloRingerConfigFlags
+        return createCaloRingerConfigFlags()
+    _addFlagsCategory(acf, "CaloRinger", __caloRinger, 'CaloRingerAlgs' )
+
 #egamma derivation Flags:
     def __egammaDerivation():
         from DerivationFrameworkEGamma.EGammaDFConfigFlags import createEGammaDFConfigFlags

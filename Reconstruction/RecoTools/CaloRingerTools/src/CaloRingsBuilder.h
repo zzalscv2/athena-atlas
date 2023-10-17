@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALORINGERTOOLS_CALORINGSBUILDER_H
@@ -234,6 +234,13 @@ class CaloRingsBuilder : public ::AthAlgTool,
             "Switch to use shower barycenter for each layer, "
             "instead of the cluster center."};
 
+    /**
+     * @brief Switch to use raw cell energy instead ET.
+     **/
+    Gaudi::Property<bool> m_doTransverseEnergy{this,
+            "doTransverseEnergy", false,
+            "Switch to use raw cell energy, "
+            "instead of cells ET."};
 
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"}; 
 
@@ -274,5 +281,4 @@ class CaloRingsBuilder : public ::AthAlgTool,
 } // namespace Ringer
 
 #endif
-
 
