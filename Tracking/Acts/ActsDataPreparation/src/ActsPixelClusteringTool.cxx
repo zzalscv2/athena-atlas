@@ -137,10 +137,10 @@ PixelClusteringTool::makeCluster(const PixelClusteringTool::Cluster &cluster,
 
 
 StatusCode
-PixelClusteringTool::clusterize(const InDetRawDataCollection<PixelRDORawData>& RDOs,
+PixelClusteringTool::clusterize(const RawDataCollection& RDOs,
 				const PixelID& pixelID,
 				const EventContext& ctx,
-				xAOD::PixelClusterContainer& container) const
+				ClusterContainer& container) const
 {
     const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(RDOs, ctx);
     if (element == nullptr)

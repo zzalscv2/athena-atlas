@@ -56,8 +56,7 @@ public:
     virtual StatusCode
     clusterize(const InDetRawDataCollection<StripRDORawData>& RDOs,
 	       const StripID& stripID,
-	       const InDetDD::SiDetectorElement* element,
-	       const InDet::SiDetectorElementStatus *stripDetElStatus,
+	       const EventContext& ctx,
 	       xAOD::StripClusterContainer& container) const override;
 
 private:
@@ -99,6 +98,41 @@ private:
 	"Tool to retreive Lorentz angle of Si detector module"
     };
 
+    // TODO this one should be removed?
+    SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_stripDetElStatus {
+	this,
+	"StripDetElStatus",
+	"",
+	"SiDetectorElementStatus for strip"
+    };
+
+    ToolHandle<IInDetConditionsTool> m_summaryTool{
+	this,
+	"conditionsTool",
+	"SCT_ConditionsSummaryTool/ITkStripConditionsSummaryTool",
+	"Conditions summary tool"
+    };
+
+    Gaudi::Property<bool> m_checkBadModules {
+        this,
+	"checkBadModules",
+	true,
+	"Check bad modules using the conditions summary tool"
+    };
+
+    Gaudi::Property<unsigned int> m_maxFiredStrips {
+        this, 
+	"maxFiredStrips", 
+	384u, 
+	"Threshold of number of fired strips per wafer. 0 disables the per-wafer cut."
+    };
+
+    SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_stripDetEleCollKey {
+	this,
+	"StripDetEleCollKey",
+	"ITkStripDetectorElementCollection",
+	"SiDetectorElementCollection key for strip"
+    };
 
     int m_timeBinBits[3]{-1, -1, -1};
 

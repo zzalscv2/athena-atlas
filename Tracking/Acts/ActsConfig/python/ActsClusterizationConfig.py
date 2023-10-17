@@ -22,6 +22,10 @@ def ActsITkStripClusteringToolCfg(flags, name="ActsITkStripClusteringTool", **kw
     acc = ComponentAccumulator()
     kwargs.setdefault("StripConditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)))
+    kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
+    kwargs.setdefault("checkBadModules", True)
+    # Disable noisy modules suppression
+    kwargs.setdefault("maxFiredStrips", 0)
 
     if flags.ITk.selectStripIntimeHits:
         from AthenaConfiguration.Enums import BeamType
@@ -35,8 +39,11 @@ def ActsITkPixelClusterizationAlgCfg(flags,
                                      name: str = 'ActsTrkITkPixelClusterizationAlg', 
                                      **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("PixelRDOContainerKey", "ITkPixelRDOs")
-    kwargs.setdefault("PixelClustersKey", "ITkPixelClusters")
+    kwargs.setdefault("SiDetectorElementCollectionKey", "ITkPixelDetectorElementCollection")
+    kwargs.setdefault("expectedClustersPerRDO", 32)
+    kwargs.setdefault("IDHelper", "PixelID")
+    kwargs.setdefault("RDOContainerKey", "ITkPixelRDOs")
+    kwargs.setdefault("ClustersKey", "ITkPixelClusters")
     # Regional selection
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
@@ -44,8 +51,8 @@ def ActsITkPixelClusterizationAlgCfg(flags,
         from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
         kwargs.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
 
-    if 'PixelClusteringTool' not in kwargs:
-        kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsITkPixelClusteringToolCfg(flags)))
+    if 'ClusteringTool' not in kwargs:
+        kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsITkPixelClusteringToolCfg(flags)))
 
     if flags.Acts.doMonitoring:
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelClusterizationMonitoringToolCfg
@@ -58,14 +65,13 @@ def ActsITkStripClusterizationAlgCfg(flags,
                                      name: str = 'ActsTrkITkStripClusterizationAlg', 
                                      **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("StripRDOContainerKey", "ITkStripRDOs")
-    kwargs.setdefault("StripClustersKey", "ITkStripClusters")
-    kwargs.setdefault("StripDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("StripClusteringTool", acc.popToolsAndMerge(ActsITkStripClusteringToolCfg(flags)))
-    kwargs.setdefault("conditionsTool", acc.popToolsAndMerge(ITkStripConditionsSummaryToolCfg(flags)))
-    kwargs.setdefault("checkBadModules", True)
-    # Disable noisy modules suppression
-    kwargs.setdefault("maxFiredStrips", 0)
+    kwargs.setdefault("RDOContainerKey", "ITkStripRDOs")
+    kwargs.setdefault("ClustersKey", "ITkStripClusters")
+    kwargs.setdefault("SiDetectorElementCollectionKey", "ITkStripDetectorElementCollection")
+    if 'ClusteringTool' not in kwargs:
+        kwargs.setdefault("ClusteringTool", acc.popToolsAndMerge(ActsITkStripClusteringToolCfg(flags)))
+    kwargs.setdefault("expectedClustersPerRDO", 6)
+    kwargs.setdefault("IDHelper", "SCT_ID")
     # Regional selection
     kwargs.setdefault('RoIs', 'OfflineFullScanRegion')
 
