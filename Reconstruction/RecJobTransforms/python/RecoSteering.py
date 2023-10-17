@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.Enums import Format, MetadataCategory
+from AthenaConfiguration.Enums import Format, MetadataCategory, HIMode
 
 
 def RecoSteering(flags):
@@ -304,5 +304,11 @@ def RecoPostProcessingCfg(flags):
             ThinGeantTruthCfg)
         acc.merge(ThinGeantTruthCfg(flags))
         pass
+
+    if flags.Output.doWriteAOD and flags.Reco.HIMode in [HIMode.UPC, HIMode.HIP]:
+        from HIGlobal.RecordExtraInfoConfig import addMBTS, addSpacePoints
+        acc.merge(addMBTS(flags))
+        if flags.Reco.HIMode is HIMode.UPC:
+            acc.merge(addSpacePoints(flags))
 
     return acc
