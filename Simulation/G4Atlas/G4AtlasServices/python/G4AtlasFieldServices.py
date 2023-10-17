@@ -22,9 +22,7 @@ def ForwardFieldSvcCfg(flags, name="ForwardField", **kwargs):
 def ForwardRegionFieldSvcCfg(flags, name="ForwardRegionFieldSvc", **kwargs):
     result = ComponentAccumulator()
     from ForwardRegionProperties.ForwardRegionPropertiesConfig import ForwardRegionPropertiesCfg
-    tool = result.popToolsAndMerge(ForwardRegionPropertiesCfg(flags))
-    result.addPublicTool(tool)
-    kwargs.setdefault("ForwardRegionProperties", result.getPublicTool(tool.name))
+    kwargs.setdefault("ForwardRegionProperties", result.addPublicTool(result.popToolsAndMerge(ForwardRegionPropertiesCfg(flags))))
     result.addService(CompFactory.MagField.ForwardRegionFieldSvc(name, **kwargs),
                       primary=True)
     return result

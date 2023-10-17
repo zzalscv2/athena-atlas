@@ -51,8 +51,7 @@ def FullG4TrackProcessorUserActionToolCfg(flags, name="FullG4TrackProcessorUserA
         tool = result.popToolsAndMerge(EntryLayerToolMTCfg(flags))
     else:
         tool = result.popToolsAndMerge(EntryLayerToolCfg(flags))
-    result.addPublicTool(tool)
-    kwargs.setdefault("EntryLayerTool", result.getPublicTool(tool.name))
+    kwargs.setdefault("EntryLayerTool", result.addPublicTool(tool))
     kwargs.setdefault("GeoIDSvc", result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name)
     if flags.Detector.GeometryCavern:
         kwargs.setdefault("TruthVolumeLevel", 2)

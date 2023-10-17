@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -13,10 +13,7 @@ from TRT_TR_Process.TRT_TR_ProcessConfig import TRTPhysicsToolCfg
 
 def DetectorGeometrySvcCfg(flags, name="DetectorGeometrySvc", **kwargs):
     result = ComponentAccumulator()
-    detConstTool = result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))
-    result.addPublicTool(detConstTool)
-    kwargs.setdefault("DetectorConstruction", result.getPublicTool(detConstTool.name))
-
+    kwargs.setdefault("DetectorConstruction", result.addPublicTool(result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))))
     result.addService(CompFactory.DetectorGeometrySvc(name, **kwargs), primary = True)
     return result
 
