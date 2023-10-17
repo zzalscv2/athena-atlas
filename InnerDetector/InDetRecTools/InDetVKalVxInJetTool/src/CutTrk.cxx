@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // Author: Vadim Kostyukhin (vadim.kostyukhin@cern.ch)
 
@@ -14,29 +14,29 @@ namespace InDet{
 
 
 
-  StatusCode InDetVKalVxInJetTool::cutTrk(std::unordered_map<std::string,double> TrkVarDouble,
-                                          std::unordered_map<std::string,int> TrkVarInt,
+  StatusCode InDetVKalVxInJetTool::cutTrk(const std::unordered_map<std::string,double>& TrkVarDouble,
+                                          const std::unordered_map<std::string,int>& TrkVarInt,
 					  float evtWgt)
   const
   {
 
-    double eta         = TrkVarDouble["eta"];
-    double PInvVert    = TrkVarDouble["PInvVert"];
-    double ThetaVert   = TrkVarDouble["ThetaVert"];
-    double A0Vert      = TrkVarDouble["A0Vert"];
-    double ZVert       = TrkVarDouble["ZVert"];
-    double Chi2        = TrkVarDouble["Chi2"];
-    double ConeDist    = TrkVarDouble["ConeDist"];
-    double CovTrkMtx11 = TrkVarDouble["CovTrkMtx11"];
-    double CovTrkMtx22 = TrkVarDouble["CovTrkMtx22"];
-    double trkP        = TrkVarDouble["trkP"];
-    double trkPErr     = TrkVarDouble["trkPErr"];
+    double eta         = TrkVarDouble.at("eta");
+    double PInvVert    = TrkVarDouble.at("PInvVert");
+    double ThetaVert   = TrkVarDouble.at("ThetaVert");
+    double A0Vert      = TrkVarDouble.at("A0Vert");
+    double ZVert       = TrkVarDouble.at("ZVert");
+    double Chi2        = TrkVarDouble.at("Chi2");
+    double ConeDist    = TrkVarDouble.at("ConeDist");
+    double CovTrkMtx11 = TrkVarDouble.at("CovTrkMtx11");
+    double CovTrkMtx22 = TrkVarDouble.at("CovTrkMtx22");
+    double trkP        = TrkVarDouble.at("trkP");
+    double trkPErr     = TrkVarDouble.at("trkPErr");
 
-    int PixelHits  = TrkVarInt["PixelHits"];
-    int SctHits    = TrkVarInt["SctHits"];
-    int BLayHits   = TrkVarInt["BLayHits"];
-    int SharedHits = TrkVarInt["SharedHits"];
-    int badHits    = TrkVarInt["badHits"];
+    int PixelHits  = TrkVarInt.at("PixelHits");
+    int SctHits    = TrkVarInt.at("SctHits");
+    int BLayHits   = TrkVarInt.at("BLayHits");
+    int SharedHits = TrkVarInt.at("SharedHits");
+    int badHits    = TrkVarInt.at("badHits");
 
     if ( CovTrkMtx11 > m_a0TrkErrorCut*m_a0TrkErrorCut )  return StatusCode::FAILURE;
     if ( CovTrkMtx22 > m_zTrkErrorCut*m_zTrkErrorCut )    return StatusCode::FAILURE;

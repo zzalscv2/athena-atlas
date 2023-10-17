@@ -383,8 +383,8 @@ namespace InDet {
       void printWrkSet(const std::vector<WrkVrt> * WrkSet, const std::string& name ) const;
 
 
-      StatusCode cutTrk(std::unordered_map<std::string,double> TrkVarDouble,
-                        std::unordered_map<std::string,int> TrkVarInt,
+      StatusCode cutTrk(const std::unordered_map<std::string,double>& TrkVarDouble,
+                        const std::unordered_map<std::string,int>& TrkVarInt,
 			float evtWgt=1.) const;
       static double coneDist(const AmgVector(5) & , const TLorentzVector & ) ;
 //

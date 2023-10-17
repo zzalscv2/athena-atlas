@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardPFlowJvtTool.h
@@ -105,7 +105,7 @@ namespace pflow {
 
     virtual StatusCode decorate(const xAOD::JetContainer& jetCont) const override;
 
-    float getFJVT(const xAOD::Jet *jet,std::vector<TVector2> pileupMomenta) const;
+    float getFJVT(const xAOD::Jet *jet,const std::vector<TVector2>& pileupMomenta) const;
     bool isForwardJet(const xAOD::Jet *jet) const;
     bool isCentralJet(const xAOD::Jet *jet) const;
 

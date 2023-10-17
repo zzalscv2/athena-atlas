@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardPFlowJvtTool.cxx
@@ -118,7 +118,7 @@
     return StatusCode::SUCCESS;
   }
 
-  float JetForwardPFlowJvtTool::getFJVT(const xAOD::Jet *jet, std::vector<TVector2> pileupMomenta) const {
+  float JetForwardPFlowJvtTool::getFJVT(const xAOD::Jet *jet, const std::vector<TVector2>& pileupMomenta) const {
     TVector2 fjet(jet->pt()*cos(jet->phi()),jet->pt()*sin(jet->phi()));
     double fjvt = 0;
     for (const TVector2& pu : pileupMomenta) {
