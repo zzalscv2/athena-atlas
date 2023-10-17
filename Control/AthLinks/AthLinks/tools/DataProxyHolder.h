@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/tools/DataProxyHolder.h
@@ -359,6 +359,7 @@ public:
    *
    * Returns @c true if the index was changed; @c false otherwise.
    */
+  static
   bool thin (sgkey_t& sgkey, size_t& index,
              const SG::ThinningCache* thinningCache);
 
