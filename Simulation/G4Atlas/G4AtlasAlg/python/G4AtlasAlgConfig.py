@@ -62,14 +62,10 @@ def G4AtlasAlgCfg(flags, name="G4AtlasAlg", **kwargs):
         kwargs.setdefault("QuasiStablePatcher", result.getPrimaryAndMerge(ZeroLifetimePositionerCfg(flags)).name )
 
     #sensitive detector master tool
-    SensitiveDetector = result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))
-    result.addPublicTool(SensitiveDetector)
-    kwargs.setdefault("SenDetMasterTool", result.getPublicTool(SensitiveDetector.name))
+    kwargs.setdefault("SenDetMasterTool", result.addPublicTool(result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))))
 
     #fast simulation master tool
-    FastSimulation = result.popToolsAndMerge(FastSimulationMasterToolCfg(flags))
-    result.addPublicTool(FastSimulation)
-    kwargs.setdefault("FastSimMasterTool", result.getPublicTool(FastSimulation.name))
+    kwargs.setdefault("FastSimMasterTool", result.addPublicTool(result.popToolsAndMerge(FastSimulationMasterToolCfg(flags))))
 
     #Write MetaData container and make it available to the job
     result.merge(writeSimulationParametersMetadata(flags))

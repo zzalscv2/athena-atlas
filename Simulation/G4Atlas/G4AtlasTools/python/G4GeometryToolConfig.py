@@ -698,9 +698,8 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
     kwargs.setdefault("GeometryConfigurationTools", result.popToolsAndMerge(GeometryConfigurationToolsCfg(flags)))
 
     if "SenDetMasterTool" not in kwargs:
-        tool = result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))
-        result.addPublicTool(tool)
-        kwargs.setdefault("SenDetMasterTool", result.getPublicTool(tool.name))
+        kwargs.setdefault("SenDetMasterTool",
+                          result.addPublicTool(result.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))))
 
     if flags.Beam.Type is BeamType.TestBeam:
         # Tile test beam

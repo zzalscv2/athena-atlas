@@ -1,6 +1,6 @@
 """Geant4 tools config for ISF with ComponentAccumulator
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -46,13 +46,9 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     kwargs.setdefault("G4Commands", flags.Sim.G4Commands)
     kwargs.setdefault("PrintTimingInfo", flags.Sim.ISF.DoTimeMonitoring)
     if "SenDetMasterTool" not in kwargs:
-        tool = acc.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))
-        acc.addPublicTool(tool)
-        kwargs.setdefault("SenDetMasterTool", acc.getPublicTool(tool.name))
+        kwargs.setdefault("SenDetMasterTool", acc.addPublicTool(acc.popToolsAndMerge(SensitiveDetectorMasterToolCfg(flags))))
     if "FastSimMasterTool" not in kwargs:
-        tool = acc.popToolsAndMerge(FastSimulationMasterToolCfg(flags))
-        acc.addPublicTool(tool)
-        kwargs.setdefault("FastSimMasterTool", acc.getPublicTool(tool.name))
+        kwargs.setdefault("FastSimMasterTool", acc.addPublicTool(acc.popToolsAndMerge(FastSimulationMasterToolCfg(flags))))
 
     # PhysicsListSvc
     kwargs.setdefault("PhysicsListSvc", acc.getPrimaryAndMerge(PhysicsListSvcCfg(flags)).name)
@@ -62,9 +58,7 @@ def Geant4ToolCfg(flags, name="ISF_Geant4Tool", **kwargs):
     if flags.Sim.ISF.Simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.ATLFAST3MT, SimulationFlavour.ATLFAST3MT_QS]:
         acc.setPrivateTools(CompFactory.iGeant4.G4TransportTool(name, **kwargs))
     else:
-        tool = acc.popToolsAndMerge(G4RunManagerHelperCfg(flags))
-        acc.addPublicTool(tool)
-        kwargs.setdefault("G4RunManagerHelper", acc.getPublicTool(tool.name))
+        kwargs.setdefault("G4RunManagerHelper", acc.addPublicTool(acc.popToolsAndMerge(G4RunManagerHelperCfg(flags))))
         acc.setPrivateTools(CompFactory.iGeant4.G4LegacyTransportTool(name, **kwargs))
     return acc
 
