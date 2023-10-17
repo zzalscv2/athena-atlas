@@ -171,26 +171,25 @@ unsigned long TSU::Kinematics::quadraticSumBW(int i1, int i2){
   return result;
 }
 
-unsigned int TSU::Kinematics::calcXi1(const TCS::GenericTOB* tob1, const TCS::GenericTOB* tob2) {
-  double scale = 1.4; // this will be converted MeV and unsigned when unit is right
-  double shift = 20; // this will be converted MeV and unsigned when unit is right
-  TSU::L1TopoDataTypes<15,0> bit_Et1(static_cast<unsigned>(scale*tob1->Et()+shift));
-  TSU::L1TopoDataTypes<15,0> bit_Et2(static_cast<unsigned>(scale*tob2->Et()+shift));
-  auto bit_eeta1 = TSU::L1TopoDataTypes<20,10>(TSU::Expo::E.at(tob1->eta()));
-  auto bit_eeta2 = TSU::L1TopoDataTypes<20,10>(TSU::Expo::E.at(tob2->eta()));
+unsigned int TSU::Kinematics::calcXi1(const TCS::GenericTOB* tob1, const TCS::GenericTOB* tob2, unsigned ptShift, unsigned ptScale) {
+  //firmware: 19 bits unsigned + 1 sign bit due to L1TopoDataTypes assuming to be signed
+  TSU::L1TopoDataTypes<20,0> bit_Et1(static_cast<unsigned>(ptScale*tob1->Et()+ptShift));
+  TSU::L1TopoDataTypes<20,0> bit_Et2(static_cast<unsigned>(ptScale*tob2->Et()+ptShift));
+  
+  //10 bits *unsigned* integer + 10 bits decimals + 1 sign bit since L1TopoDataTypes always assumes to represent signed values!
+  auto bit_eeta1 = TSU::L1TopoDataTypes<21,10>(TSU::Expo::E.at(tob1->eta()));
+  auto bit_eeta2 = TSU::L1TopoDataTypes<21,10>(TSU::Expo::E.at(tob2->eta()));
 
   auto xi_bit = bit_Et1*bit_eeta1+bit_Et2*bit_eeta2;
-
+  
   return static_cast<unsigned>(xi_bit);
 }
 
-unsigned int TSU::Kinematics::calcXi2(const TCS::GenericTOB* tob1, const TCS::GenericTOB* tob2) {
-  double scale = 1.4; // this will be converted MeV and unsigned when unit is right
-  double shift = 20; // this will be converted MeV and unsigned when unit is right
-  TSU::L1TopoDataTypes<15,0> bit_Et1(static_cast<unsigned>(scale*tob1->Et()+shift));
-  TSU::L1TopoDataTypes<15,0> bit_Et2(static_cast<unsigned>(scale*tob2->Et()+shift));
-  auto bit_eeta1 = TSU::L1TopoDataTypes<20,10>(TSU::Expo::E.at(-tob1->eta()));
-  auto bit_eeta2 = TSU::L1TopoDataTypes<20,10>(TSU::Expo::E.at(-tob2->eta()));
+unsigned int TSU::Kinematics::calcXi2(const TCS::GenericTOB* tob1, const TCS::GenericTOB* tob2, unsigned ptShift, unsigned ptScale) {
+  TSU::L1TopoDataTypes<20,0> bit_Et1(static_cast<unsigned>(ptScale*tob1->Et()+ptShift));
+  TSU::L1TopoDataTypes<20,0> bit_Et2(static_cast<unsigned>(ptScale*tob2->Et()+ptShift));
+  auto bit_eeta1 = TSU::L1TopoDataTypes<21,10>(TSU::Expo::E.at(-tob1->eta()));
+  auto bit_eeta2 = TSU::L1TopoDataTypes<21,10>(TSU::Expo::E.at(-tob2->eta()));
 
   auto xi_bit = bit_Et1*bit_eeta1+bit_Et2*bit_eeta2;
 

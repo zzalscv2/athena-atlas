@@ -121,9 +121,9 @@ TCS::ExclusiveJets::processBitCorrect( const std::vector<TCS::TOBArray const *> 
                  ++tob2) {
 	      
 	      //In the ticket ATR-17320, pT_offline were defined as A*pT_L1+B, where A=1.4 and B=20 for run2
-	      //A and B definition might change according to run3 configuration.               
-	      unsigned int xi_1 = TSU::Kinematics::calcXi1(*tob1,*tob2);
-	      unsigned int xi_2 = TSU::Kinematics::calcXi2(*tob1,*tob2);
+	      //A and B definition might change according to run3 configuration -> menu parameter             
+	      unsigned int xi_1 = TSU::Kinematics::calcXi1(*tob1,*tob2, p_PtShift, p_PtScale);
+	      unsigned int xi_2 = TSU::Kinematics::calcXi2(*tob1,*tob2, p_PtShift, p_PtScale);
 	      
 	      const int eta1 = (*tob1)->eta();
 	      const int eta2 = (*tob2)->eta();
@@ -133,11 +133,12 @@ TCS::ExclusiveJets::processBitCorrect( const std::vector<TCS::TOBArray const *> 
 		bool accept = false;
 		if( parType_t((*tob1)->Et()) <= p_MinET1[i]) continue; // ET cut
 		if( parType_t((*tob2)->Et()) <= p_MinET1[i]) continue; // ET cut
-		if(p_ApplyEtaCut[i] &&
-		   ((aeta1 < p_MinEta1[i] || aeta1 > p_MaxEta1[i] ) ||
-		    (aeta2 < p_MinEta2[i] || aeta2 > p_MaxEta2[i] ) ))  continue;
+		if(p_ApplyEtaCut[i] && //skip if not in range. eta ranges are inclusive at lower edge, exclusive at upper edge
+		   ((aeta1 < p_MinEta1[i] || aeta1 >= p_MaxEta1[i] ) || 
+		    (aeta2 < p_MinEta2[i] || aeta2 >= p_MaxEta2[i] ) ))  continue;
 		
-		accept = (xi_1 >p_XiMin[i]) && (xi_1 < p_XiMax[i]) && (xi_2 > p_XiMin[i]) && (xi_2 < p_XiMax[i]); //
+		//ExclusiveJets algo definition is inclusive of both edges for Xi
+		accept = (xi_1 >= p_XiMin[i]) && (xi_1 <= p_XiMax[i]) && (xi_2 >= p_XiMin[i]) && (xi_2 <= p_XiMax[i]); //
 		const bool fillAccept = fillHistos() and (fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept);
 		const bool fillReject = fillHistos() and not fillAccept;
 		const bool alreadyFilled = decision.bit(i);
