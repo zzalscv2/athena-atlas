@@ -46,6 +46,15 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     
     //Write handle 
     SG::WriteCondHandle<jFEXDBCondData> writeCHandle(m_jFEXDBParamsKey, ctx);
+
+    // Date from which jFEX database parameters should be used
+    // noise cuts fix: 2023-09-19
+    bool validTimeStamp = (ctx.eventID().time_stamp() < 1695127624) ? false : true;
+
+    // Set DB to false if any of keys not provided
+    bool anyKeyEmpty = ( m_JfexModuleSettingsKey.empty() ||  m_JfexNoiseCutsKey.empty() || m_JfexSystemSettingsKey.empty() );
+
+    bool useDBparams = (!anyKeyEmpty && validTimeStamp);
     
     /***************************************/
     /*                                     */
@@ -54,7 +63,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     /***************************************/
     int jJCalibParams[6][9]={{0}};
     
-    if(!m_JfexModuleSettingsKey.empty()){
+    if(!m_JfexModuleSettingsKey.empty() && useDBparams){
         SG::ReadCondHandle <CondAttrListCollection> load_jFexModuleSet{m_JfexModuleSettingsKey, ctx };
         
         // we should check if it is valid and the size is 6 (corresponding to the 6 jfex modules)
@@ -123,7 +132,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     int PileUpThresholdHighFcal          = jDBdefaults::PileUpThresholdHighFcal;    
       
 
-    if(!m_JfexSystemSettingsKey.empty()) {
+    if(!m_JfexSystemSettingsKey.empty() && useDBparams) {
         SG::ReadCondHandle <CondAttrListCollection> load_SystemSet{m_JfexSystemSettingsKey, ctx};
 
         const std::vector<std::string> myStrings{ "PileUpCorrectionJet", "PileUpCorrectionMET", "PileUpThresholdLowEm", "PileUpThresholdHighEm", "PileUpThresholdLowHadLar", "PileUpThresholdHighHadLar", "PileUpThresholdLowHadHecOverlap", "PileUpThresholdHighHadHecOverlap", "PileUpThresholdLowHadTrex", "PileUpThresholdHighHadTrex", "PileUpThresholdLowFcal", "PileUpThresholdHighFcal" };
@@ -204,7 +213,7 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     std::unordered_map< uint16_t, std::array<uint16_t,4> > PileUpWeight;    
       
     
-    if(!m_JfexNoiseCutsKey.empty()) {
+    if(!m_JfexNoiseCutsKey.empty() && useDBparams) {
         
         SG::ReadCondHandle <CondAttrListCollection> load_jFexNoiseCut{m_JfexNoiseCutsKey, ctx };
 
@@ -293,7 +302,10 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     if(m_printVals){
 
         std::stringstream myprint;
-        myprint << "Parameters obtained from m_JfexModuleSettingsKey: "<< m_JfexModuleSettingsKey << std::endl;
+	if (useDBparams)
+	  myprint << "Parameters obtained from m_JfexModuleSettingsKey: "<< m_JfexModuleSettingsKey << std::endl;
+	else
+	  myprint << "JfexModuleSettings obtained from jDBdefaults"<< std::endl;
         myprint << "jJCalibParam:" << std::endl;
 
         for(int mod=0; mod<6; mod++) {
@@ -310,7 +322,11 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
 
         std::stringstream myprint1;
 
-        myprint1 << "Parameters obtained from m_JfexSystemSettingsKey: "<< m_JfexSystemSettingsKey << std::endl;
+	if (useDBparams)
+	  myprint1 << "Parameters obtained from m_JfexSystemSettingsKey: "<< m_JfexSystemSettingsKey << std::endl;
+	else
+	  myprint1 << "JfexSystemSettings obtained from jDBdefaults"<< std::endl;
+
         myprint1 << "System setting parameters: " <<std::endl;
         myprint1 << "PileUpCorrectionJet: "             << writeDBTool->get_doPileUpJet()           <<std::endl;
         myprint1 << "PileUpCorrectionMET: "             << writeDBTool->get_doPileUpMet()           <<std::endl;
@@ -329,7 +345,10 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
 
         std::stringstream myprint2;
         
-        myprint2 << "Parameters obtained from m_JfexNoiseCutsKey: "<< m_JfexNoiseCutsKey << std::endl;
+	if (useDBparams)
+	  myprint2 << "Parameters obtained from m_JfexNoiseCutsKey: "<< m_JfexNoiseCutsKey << std::endl;
+	else
+	  myprint2 << "JfexNoiseCuts obtained from jDBdefaults"<< std::endl;
 
         for( const auto& [key, value] : NoiseCuts) {
             const auto [CutJetEM, CutJetHad, CutMetEM, CutMetHad] = value;
@@ -344,8 +363,8 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
 
 
     
-    // If parameters not loaded, valid for infinity and beyond!
-    if(m_JfexModuleSettingsKey.empty() and m_JfexNoiseCutsKey.empty() and m_JfexSystemSettingsKey.empty() ){
+    // If DB parameters not loaded, valid for infinity and beyond!
+    if (!useDBparams) {
         writeCHandle.addDependency(IOVInfiniteRange::infiniteRunLB()); // Use infinite IOV    
     }
     

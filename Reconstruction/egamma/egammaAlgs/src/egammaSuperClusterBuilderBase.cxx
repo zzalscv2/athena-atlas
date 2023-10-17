@@ -977,6 +977,12 @@ egammaSuperClusterBuilderBase::calibrateCluster(
   }
   ATH_CHECK(m_clusterCorrectionTool->execute(
     ctx, newCluster, egType, xAOD::EgammaHelpers::isBarrel(newCluster)));
+  double aeta = std::abs(newCluster->eta());
+  if (aeta > 10) {
+    ATH_MSG_DEBUG("Too large eta after S-shape corrections. "
+		  "SuperCluster rejected");
+    return StatusCode::FAILURE;
+  }
   newCluster->setRawE(newCluster->e());
   newCluster->setRawEta(newCluster->eta());
   newCluster->setRawPhi(newCluster->phi());

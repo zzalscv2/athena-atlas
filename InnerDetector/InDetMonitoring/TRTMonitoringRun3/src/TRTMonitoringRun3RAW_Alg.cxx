@@ -61,7 +61,6 @@ TRTMonitoringRun3RAW_Alg::TRTMonitoringRun3RAW_Alg( const std::string& name, ISv
     declareProperty("doTracksMon",                    m_doTracksMon      = true);
     declareProperty("doRDOsMon",                      m_doRDOsMon        = true);
     declareProperty("doShift",                        m_doShift          = true);
-    declareProperty("doEfficiency",                   m_doEfficiency     = true);
     declareProperty("doMaskStraws",                   m_doMaskStraws     = true);
     declareProperty("useHoleFinder",                  m_useHoleFinder    = true);
     declareProperty("DoHitsMon",                      m_doHitsMon        = true);
@@ -126,7 +125,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::initialize() {
         ATH_MSG_DEBUG("Retrieved succesfully the track summary tool" << m_TrackSummaryTool);
 
     // Retrieve TRTTrackHoleSearchTool
-    if (m_doEfficiency || m_doExpert) {
+    if (m_useHoleFinder || m_doExpert) {
       ATH_CHECK( m_trt_hole_finder.retrieve() );
     }
     else {
@@ -2739,7 +2738,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillHistograms( const EventContext& ctx ) c
         }
     } else passEventBurst = true;
 
-    if (m_doEfficiency) {
+    if (m_useHoleFinder) {
         if (!combTrackCollection.isValid()) {
             ATH_MSG_ERROR("Could not find track collection " << m_combTrackCollectionKey.key() <<
                           " in store");

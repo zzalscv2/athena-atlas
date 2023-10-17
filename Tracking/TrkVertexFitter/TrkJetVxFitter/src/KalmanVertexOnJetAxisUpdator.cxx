@@ -235,7 +235,9 @@ namespace Trk{
 
     //vertex to be updated, needs to be copied
     myPosition = candidateToUpdate.getRecVertexPositions();
-    if (myPosition.covariancePosition().determinant() ==0.0) {
+    const Amg::MatrixX & old_full_vrt_cov = myPosition.covariancePosition();
+    Eigen::FullPivLU<Amg::MatrixX> lu_decomp(old_full_vrt_cov);
+    if(!lu_decomp.isInvertible()){
       ATH_MSG_WARNING ("The vertex-positions covariance matrix is not invertible");
       ATH_MSG_WARNING ("The copy of initial vertex returned");
       return Trk::RecVertexPositions(myPosition);
@@ -244,7 +246,7 @@ namespace Trk{
     const Amg::VectorX & old_full_vrt_pos = myPosition.position();
     Amg::VectorX old_vrt_pos = old_full_vrt_pos.segment(0,numrow_toupdate+1);
 
-    const Amg::MatrixX & old_full_vrt_weight = myPosition.covariancePosition().inverse();
+    const Amg::MatrixX & old_full_vrt_weight = old_full_vrt_cov.inverse();
 
     if (trackParametersWeight.determinant()<=0) {
       ATH_MSG_WARNING(" The determinant of the track covariance matrix is zero or negative: " << trackParametersWeight.determinant());

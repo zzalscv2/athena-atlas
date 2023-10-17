@@ -69,6 +69,7 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumCalibEnergyKey {this, "ZdcSumCalibEnergyKey", m_zdcSumContainerName + ".CalibEnergy" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumAverageTimeKey {this, "ZdcSumAverageTimeKey", m_zdcSumContainerName + ".AverageTime" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumUncalibSumKey {this, "ZdcSumUncalibSumKey", m_zdcSumContainerName + ".UncalibSum" + m_auxSuffix};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcSumModuleMaskKey {this, "ZdcSumModuleMaskKey", m_zdcSumContainerName + ".ModuleMask" + m_auxSuffix};
     
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleStatusKey {this, "ZdcModuleStatusKey", m_zdcModuleContainerName + ".Status" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleAmplitudeKey {this, "ZdcModuleAmplitudeKey", m_zdcModuleContainerName + ".Amplitude" + m_auxSuffix};
@@ -82,6 +83,28 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCKey {this, "RPDChannelMaxADCKey", m_zdcModuleContainerName + ".RPDChannelMaxADC" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelStatusKey {this, "RPDChannelStatusKey", m_zdcModuleContainerName + ".RPDChannelStatus" + m_auxSuffix};
     
+    
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDrowKey { // needed since the subtracted amplitudes for each side are written in a nrow * ncol matrix and saved in zdcSums
+        this, "rowKey", m_zdcModuleContainerName + ".row" + m_auxSuffix, // need to convert channel to row & column to plot the subtracted amplitudes using rpdChannelMonToolArr (reading in the row and column for each RPD channel, instead of using an analytical expression, allows flexibility for future different RPD geometry / run conditions)
+        "Row index of RPD channel"
+    };
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDcolKey { // needed since the subtracted amplitudes for each side are written in a nrow * ncol matrix and saved in zdcSums
+        this, "colKey", m_zdcModuleContainerName + ".col" + m_auxSuffix, // need to convert channel to row & column to plot the subtracted amplitudes using rpdChannelMonToolArr (reading in the row and column for each RPD channel, instead of using an analytical expression, allows flexibility for future different RPD geometry / run conditions)
+        "Column index of RPD channel"
+    };
+
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFitParamsKey{
+        this, "RpdChannelPileupFitParams", m_zdcModuleContainerName+".RPDChannelPileupFitParams"+m_auxSuffix, 
+        "RPD Channel Pileup Fit Parameters: exp([0] + [1]*sample)"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFracKey{
+        this, "RPDChannelPileupFrac", m_zdcModuleContainerName+".RPDChannelPileupFrac"+m_auxSuffix, 
+        "RPD Channel Pileup as Fraction of Sum"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDsubAmpKey {
+        this, "rpdSubAmpKey", m_zdcSumContainerName + ".RpdSubAmp" + m_auxSuffix,
+        "Subtracted RPD amplitudes, index row then column"};
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDsubAmpSumKey {
+        this, "rpdSubAmpSumKey", m_zdcSumContainerName + ".RpdSubAmpSum" + m_auxSuffix,
+        "Sum of subtracted RPD amplitudes"};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDxCentroidKey {
         this, "xCentroidKey", m_zdcSumContainerName + ".xCentroid" + m_auxSuffix, 
         "X position of centroid in beamline coordinates (after geometry corrections)"};

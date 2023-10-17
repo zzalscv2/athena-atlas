@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_EFEXINPUTMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_EFEXINPUTMONITORALGORITHM_H
@@ -28,7 +28,9 @@ private:
 
   std::map<std::pair<std::pair<int,int>,int>,std::pair<std::set<unsigned long long>,std::string>> m_scMap;
 
-  Gaudi::Property<bool> m_fillTree{this,"fillTree",false,"fill and write the debug tree"};
+  // some counters to avoid filling debugging histograms more than 20 times
+  mutable std::atomic<size_t> m_debugEvtCount = 0;
+  mutable std::atomic<size_t> m_debugEvtCount2 = 0;
 
 };
 #endif

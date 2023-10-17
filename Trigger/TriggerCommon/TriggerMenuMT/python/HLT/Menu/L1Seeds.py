@@ -41,22 +41,17 @@ def Lvl1ItemByTriggerType(l1object, triggertype_pattern, triggertype_bitmask):
 ##############################
 def getL1BackgroundSeed():
     return [
-        'L1_BCM_AC_CA_BGRP12',
-        'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_UNPAIRED_ISO', 'L1_BCM_Wide_UNPAIRED_NONISO',
-        'L1_J30p31ETA49_UNPAIRED_ISO',
-        'L1_J12_UNPAIRED_ISO', 'L1_J12_UNPAIRED_NONISO',
-        'L1_BCM_AC_UNPAIRED_ISO', 'L1_BCM_CA_UNPAIRED_ISO',
-        'L1_BCM_AC_UNPAIRED_NONISO', 'L1_BCM_CA_UNPAIRED_NONISO',
-        'L1_J30p31ETA49_UNPAIRED_NONISO',
-        'L1_BCM_Wide_CALIB',
-        'L1_J50_UNPAIRED_ISO', 'L1_J50_UNPAIRED_NONISO',
-        'L1_J12_EMPTY', 'L1_J12_BGRP12',
-        'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
+        'L1_BCM_AC_CA_BGRP12', 'L1_BCM_AC_CA_UNPAIRED_ISO',
+        'L1_BCM_Wide', 'L1_BCM_Wide_BGRP12', 'L1_BCM_Wide_EMPTY', 'L1_BCM_Wide_UNPAIREDB1', 'L1_BCM_Wide_UNPAIREDB2',
+        'L1_BCM_2A_CALIB', 'L1_BCM_2C_CALIB',
         'L1_BCM_2A_EMPTY', 'L1_BCM_2C_EMPTY',
+        'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB2',
         'L1_BCM_2A_FIRSTINTRAIN', 'L1_BCM_2C_FIRSTINTRAIN',
-        'L1_BCM_2A_UNPAIRED_ISO', 'L1_BCM_2C_UNPAIRED_ISO', 'L1_BCM_2A_UNPAIRED_NONISO', 'L1_BCM_2C_UNPAIRED_NONISO',
-        # 'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB2',
-        # 'L1_BCM_2A_CALIB', 'L1_BCM_2C_CALIB',
+        'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
+        'L1_J12_UNPAIRED_ISO', 'L1_J12_UNPAIRED_NONISO',
+        'L1_J50_UNPAIRED_ISO', 'L1_J50_UNPAIRED_NONISO',
+        'L1_J12_EMPTY', 'L1_J12_FIRSTEMPTY', 'L1_J12_BGRP12',
+        'L1_J12_UNPAIREDB1', 'L1_J12_UNPAIREDB2',
         ]
 
 ##############################
@@ -164,13 +159,19 @@ def getEBnoL1PSSeed(l1items, l1seedname):
         'UNPAIRED_ISO':
         [
             'L1_J12_UNPAIRED_ISO', 'L1_J15p31ETA49_UNPAIRED_ISO',
-            'L1_BCM_Wide_UNPAIRED_ISO', 'L1_BCM_AC_UNPAIRED_ISO', 'L1_BCM_CA_UNPAIRED_ISO',
             'L1_MU3V_UNPAIRED_ISO', 'L1_eEM9_UNPAIRED_ISO', 'L1_TAU8_UNPAIRED_ISO', 'L1_TAU40_UNPAIRED_ISO'
         ],
         'UNPAIRED_NONISO':
         [
-            'L1_J12_UNPAIRED_NONISO', 'L1_BCM_Wide_UNPAIRED_NONISO',
-            'L1_BCM_AC_UNPAIRED_NONISO', 'L1_BCM_CA_UNPAIRED_NONISO'
+            'L1_J12_UNPAIRED_NONISO',
+        ],
+        'UNPAIREDB1':
+        [
+            'L1_BCM_Wide_UNPAIREDB1', 'L1_BCM_2A_UNPAIREDB1', 'L1_BCM_2C_UNPAIREDB1'
+        ],
+        'UNPAIREDB2':
+        [
+            'L1_BCM_Wide_UNPAIREDB2', 'L1_BCM_2A_UNPAIREDB2', 'L1_BCM_2C_UNPAIREDB2'
         ],
         'ABORTGAPNOTCALIB': [] # No more items defined in this historical bunchgroup
     }[ebitem]
@@ -345,7 +346,7 @@ valid_multiseeds = [
     # EnhancedBias
     'L1_PhysicsHigh_noPS', 'L1_PhysicsVeryHigh_noPS',
     'L1_EMPTY_noPS', 'L1_FIRSTEMPTY_noPS',
-    'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_ABORTGAPNOTCALIB_noPS',
+    'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_UNPAIREDB1_noPS', 'L1_UNPAIREB2_noPS', 'L1_ABORTGAPNOTCALIB_noPS',
     # Trigger types
     'L1_Calo', 'L1_Calo_EMPTY',
     'L1_Muon', 'L1_Muon_EMPTY',
@@ -369,7 +370,7 @@ def getSpecificL1Seeds(l1seedname, l1itemobject, menu_name):
         L1Seed = getL1TopoSeed(l1items)
     elif l1seedname == 'L1_TAU':
         L1Seed = getL1TauSeed(l1items)
-    elif (l1seedname in ['L1_PhysicsHigh_noPS', 'L1_PhysicsVeryHigh_noPS', 'L1_EMPTY_noPS', 'L1_FIRSTEMPTY_noPS', 'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_ABORTGAPNOTCALIB_noPS']):
+    elif (l1seedname in ['L1_PhysicsHigh_noPS', 'L1_PhysicsVeryHigh_noPS', 'L1_EMPTY_noPS', 'L1_FIRSTEMPTY_noPS', 'L1_UNPAIRED_ISO_noPS', 'L1_UNPAIRED_NONISO_noPS', 'L1_UNPAIREDB1_noPS', 'L1_UNPAIREB2_noPS', 'L1_ABORTGAPNOTCALIB_noPS']):
         L1Seed =  getEBnoL1PSSeed(l1items, l1seedname)
     elif (l1seedname in ['L1_Calo', 'L1_Calo_EMPTY']):
         L1Seed = getL1CaloSeed(l1seedname, l1itemobject)
