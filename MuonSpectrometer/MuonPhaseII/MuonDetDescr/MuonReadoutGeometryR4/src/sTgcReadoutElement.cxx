@@ -27,19 +27,7 @@ StatusCode sTgcReadoutElement::initElement() {
   m_init = true;
   return StatusCode::SUCCESS;
 }
-const Acts::Surface& sTgcReadoutElement::surface() const{
-   static const std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
-                                                                                                   Amg::Vector3D::UnitY())};
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
-   return *dummy;
-}
 
-Acts::Surface& sTgcReadoutElement::surface() {
-   std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
-                                                                                      Amg::Vector3D::UnitY())};
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
-   return *dummy;
-}
 IdentifierHash sTgcReadoutElement::measurementHash(const Identifier& /*measId*/) const { return IdentifierHash{};}
 IdentifierHash sTgcReadoutElement::layerHash(const Identifier& /*measId*/) const { return  IdentifierHash{};}
 

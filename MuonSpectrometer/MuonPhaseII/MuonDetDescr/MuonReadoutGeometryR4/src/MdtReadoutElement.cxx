@@ -8,6 +8,7 @@
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
+
 using namespace ActsTrk;
 
 namespace MuonGMR4 {
@@ -45,16 +46,20 @@ StatusCode MdtReadoutElement::initElement() {
      ATH_MSG_FATAL("The tubes of "<<idHelperSvc()->toStringDetEl(identify())<<" will fall together on a single point. Please check "<<std::endl<<m_pars);
      return StatusCode::FAILURE;
   }
+
   /// Coordinate system of the trapezoid is in the center while the tubes are defined 
   /// w.r.t. to the chamber edge. Move first tube into the proper position
+
   std::optional<Amg::Vector3D> prevLayPos{std::nullopt};
   for (unsigned int lay =1 ; lay <= numLayers() ; ++lay){
      /// Cache the transformations to the chamber layers
-     ATH_CHECK(insertTransform(measurementHash(lay, 0), 
+    const IdentifierHash layHash = measurementHash(lay,0);
+     ATH_CHECK(insertTransform(layHash, 
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
                     return toStation(store) * toChamberLayer(hash)*toCenter; 
                 }));
+     ATH_CHECK(planeSurfaceFactory(layHash, *m_pars.layerBounds->insert(std::make_shared<Acts::TrapezoidBounds>(m_pars.shortHalfX, m_pars.longHalfX, m_pars.halfY)).first));
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
     for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
@@ -63,6 +68,7 @@ StatusCode MdtReadoutElement::initElement() {
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     return toStation(store) * toTubeFrame(hash); 
                 }));
+      ATH_CHECK(strawSurfaceFactory(idHash, *m_pars.tubeBounds->insert(std::make_shared<Acts::LineBounds>(innerTubeRadius(), 0.5*tubeLength(idHash))).first));
       ///Ensure that all linear transformations are rotations
       const AmgSymMatrix(3) tubeRot = toTubeFrame(idHash).linear();
       if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
@@ -103,22 +109,11 @@ StatusCode MdtReadoutElement::initElement() {
       if (!prevTubePos) prevLayPos = std::make_optional<Amg::Vector3D>(tubePos);
       prevTubePos = std::make_optional<Amg::Vector3D>(tubePos);
     }
-  }
+ }
   m_init = true;
+  m_pars.tubeBounds.reset();
+  m_pars.layerBounds.reset();
   return StatusCode::SUCCESS;
-}
-const Acts::Surface& MdtReadoutElement::surface() const{
-   static const std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
-                                                                                                   Amg::Vector3D::UnitY())};
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
-   return *dummy;
-}
-
-Acts::Surface& MdtReadoutElement::surface() {
-   std::shared_ptr<Acts::Surface> dummy{Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Vector3D::UnitX(), 
-                                                                                      Amg::Vector3D::UnitY())};
-   ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<"I am a dummy method ");
-   return *dummy;
 }
 
 Amg::Vector3D MdtReadoutElement::globalTubePos(const ActsGeometryContext& ctx,

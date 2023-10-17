@@ -39,6 +39,8 @@ class RpcReadoutElement : public MuonReadoutElement {
         StripDesignPtr phiDesign{nullptr};
         StripDesignPtr etaDesign{nullptr};
 
+        SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds{};
+
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,
@@ -53,9 +55,6 @@ class RpcReadoutElement : public MuonReadoutElement {
     }
     /// Overload from the Acts::DetectorElement (2 * halfheight)
     double thickness() const override final;
-    /// Overload from the Acts::DetectorElement (dummy implementation)
-    const Acts::Surface& surface() const override final;
-    Acts::Surface& surface() override final;
 
     StatusCode initElement() override final;
 
