@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -587,7 +587,7 @@ namespace Analysis {
                   continue;
                 }
                 h->SetDirectory(nullptr);
-                hPointer.release();
+                (void)hPointer.release();
                 if (tagger == "IP2D" || tagger == "IP3D" || tagger == "SV1") {
                   ATH_MSG_VERBOSE("#BTAG# Smoothing histogram " << hname << " ...");
                   smoothAndNormalizeHistogram(h, hname);
