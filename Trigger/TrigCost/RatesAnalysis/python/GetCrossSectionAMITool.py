@@ -81,7 +81,7 @@ class GetCrossSectionAMI:
     self.log.info(f'Looking up details of {self.dataset} on AMI')
 
     # search for EVNT file
-    fields = 'cross_section,generator_filter_efficienty' # Yes, "efficienty"... there's a typo in the field definition
+    fields = 'cross_section,generator_filter_efficiency'
     try:
       res_l = self.ami_api.list_datasets(self.ami_client, patterns=self.dataset, fields=fields)
     except Exception as reason:
@@ -99,7 +99,7 @@ class GetCrossSectionAMI:
       exit()
 
     xsec = res_l[0]['cross_section']
-    gfe = res_l[0]['generator_filter_efficienty']
+    gfe = res_l[0]['generator_filter_efficiency']
 
     if xsec == 'NULL' or gfe == 'NULL':
       self.log.fatal(f'NULL cross section/filter efficiency values set on AMI for the dataset "{dataset}"')
