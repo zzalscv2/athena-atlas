@@ -25,7 +25,7 @@ public:
     virtual ~ZdcLEDMonitorAlgorithm();
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
-    StatusCode fillLEDHistograms( const EventContext& ctx ) const;
+    StatusCode fillLEDHistograms(unsigned int DAQMode, const EventContext& ctx ) const;
 
 private:
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
@@ -55,6 +55,9 @@ private:
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_eventTypeKey {this, "ZdcEventTypeKey", m_zdcSumContainerName + ".EventType" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_DAQModeKey {this, "ZdcDAQModeKey", m_zdcSumContainerName + ".DAQMode" + m_auxSuffix};
     
+    SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_robBCIDKey {this, "ROBBCIDKey", m_zdcSumContainerName + ".rodBCID" + m_auxSuffix, "BCID from LUCROD ROB headers"};
+
+
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDTypeKey{this, "ZdcLEDTypeKey", m_zdcSumContainerName + ".LEDType" + m_auxSuffix}; // recorded in the global sum
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDPresampleADCKey{this, "ZdcLEDPresampleADCKey", m_zdcModuleContainerName + ".Presample" + m_auxSuffix};
     SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_LEDADCSumKey{this, "ZdcLEDADCSumKey", m_zdcModuleContainerName + ".ADCSum" + m_auxSuffix};

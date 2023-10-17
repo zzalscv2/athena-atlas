@@ -11,8 +11,7 @@ def jFexDBConfig(flags, name="jFEXCondAlgo"):
     acc=ComponentAccumulator()
     DBCond = CompFactory.LVL1.jFEXCondAlgo(name)
     
-     # The "False" must be removed whenever ready to use the DB - After internal discussion
-    if not flags.Input.isMC and False:
+    if not flags.Input.isMC:
         
         ModSettings_folder  = "/TRIGGER/L1Calo/V1/Calibration/JfexModuleSettings"
         NoiseCut_folder     = "/TRIGGER/L1Calo/V1/Calibration/JfexNoiseCuts"

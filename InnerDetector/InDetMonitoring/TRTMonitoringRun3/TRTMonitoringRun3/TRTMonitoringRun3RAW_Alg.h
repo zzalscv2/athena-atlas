@@ -85,7 +85,6 @@ private:
     bool m_doRDOsMon;
     bool m_doShift;
     bool m_doMaskStraws;
-    bool m_doEfficiency;
     bool m_useHoleFinder;
     bool m_doHitsMon;
     float m_DistToStraw;

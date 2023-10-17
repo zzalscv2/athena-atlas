@@ -47,6 +47,7 @@ StatusCode TrigEgammaMatchingToolMT::initialize()
   m_keys[ "PrecisionCalo_Electron"]   = "HLT_CaloEMClusters_Electron";
   m_keys[ "PrecisionCalo_Photon"]     = "HLT_CaloEMClusters_Photon";
   m_keys[ "PrecisionCalo_LRT"]        = "HLT_CaloEMClusters_LRT" ; // lrt
+  m_keys[ "PrecisionCalo_HI"]         = "HLT_HICaloEMClusters" ; // ion chains
 
   // Fast steps
   m_keys[ "FastElectrons"]            = "HLT_FastElectrons" ;
@@ -157,6 +158,9 @@ bool TrigEgammaMatchingToolMT::matchHLTCalo(const xAOD::Egamma *eg,const std::st
   if(boost::contains(trigger,"lrt")){
     ATH_MSG_DEBUG("Matched HLT PrecisionCalo LRT");
     return closestObject<xAOD::CaloClusterContainer>( eg, dec, trigger, key("PrecisionCalo_LRT"), m_dR, condition );
+  }else if(boost::contains(trigger,"ion")){
+    ATH_MSG_DEBUG("Matched HLT PrecisionCalo Heavy Ion");
+    return closestObject<xAOD::CaloClusterContainer>( eg, dec, trigger, key("PrecisionCalo_HI"), m_dR, condition );
   }else if(xAOD::EgammaHelpers::isElectron(eg)){
     ATH_MSG_DEBUG("Matched HLT PrecisionCalo Electron");
     return closestObject<xAOD::CaloClusterContainer>( eg, dec, trigger, key("PrecisionCalo_Electron"), m_dR, condition );

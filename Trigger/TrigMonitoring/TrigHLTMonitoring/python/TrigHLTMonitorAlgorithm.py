@@ -29,7 +29,7 @@ def createHLTDQConfigFlags():
     acf.addFlag('DQ.Steering.HLT.doMET', lambda flags: flags.Reco.HIMode is not HIMode.HI) 
     acf.addFlag('DQ.Steering.HLT.doMinBias', True) 
     acf.addFlag('DQ.Steering.HLT.doMuon', True) 
-    acf.addFlag('DQ.Steering.HLT.doTau', True) 
+    acf.addFlag('DQ.Steering.HLT.doTau', lambda flags: flags.Beam.Type is BeamType.Collisions and (flags.Reco.HIMode is not HIMode.HI)) 
 
     return acf
 
