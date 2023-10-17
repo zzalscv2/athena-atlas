@@ -5094,6 +5094,7 @@ namespace Trk {
     if (cache.m_fittercode != FitterStatusCode::Success) {
       ATH_MSG_DEBUG("Silicon cleaner failed, returning null...");
       if (finaltrajectory != &trajectory) {
+        // cppcheck-suppress autovarInvalidDeallocation; false positive
         delete finaltrajectory;
       }
       return nullptr;
@@ -6331,7 +6332,7 @@ namespace Trk {
     GXFTrajectory *newtrajectory = nullptr;
     std::unique_ptr < GXFTrajectory > cleanup_newtrajectory;
 
-    // the oldtracjectory will be returned, so in case newtrajectory==oldtrajectory
+    // the oldtrajectory will be returned, so in case newtrajectory==oldtrajectory
     // the cleanup_newtrajectory == NULL and cleanup_oldtrajectory = oldtrajectory, otherwise
     // cleanup_newtrajectory will destroy the object oldtrajectory is pointing to.
 
@@ -6760,7 +6761,7 @@ namespace Trk {
                 return nullptr;
               }
               
-              cleanup_oldtrajectory.release();
+              (void)cleanup_oldtrajectory.release();
               return oldtrajectory;
             }
             if (oldtrajectory != newtrajectory) {
@@ -6806,7 +6807,7 @@ namespace Trk {
       return nullptr;
     }
     
-    cleanup_oldtrajectory.release();
+    (void)cleanup_oldtrajectory.release();
     return oldtrajectory;
   }
 
