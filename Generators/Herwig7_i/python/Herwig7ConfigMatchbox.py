@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## \file Herwig7ConfigMatchbox.py
 ## \brief Configuration class for Matchbox runs with %Herwig7
@@ -401,7 +401,9 @@ saverun {} /Herwig/Generators/EventGenerator
       raise RuntimeError(hw7Utils.ansi_format_error("Parameter 'bin_sampler' must be one of {}!".format(bin_samplers)))
 
     self.commands += """
+##################################################
 ## Sampler Configuration
+##################################################
 set /Herwig/Samplers/Sampler:BinSampler /Herwig/Samplers/{}
 set /Herwig/Samplers/Sampler:BinSampler:InitialPoints {}
 set /Herwig/Samplers/Sampler:BinSampler:NIterations {}
