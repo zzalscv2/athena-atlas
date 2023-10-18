@@ -11,25 +11,25 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v7",
+    "s3761": "v8",
     "s3779": "v2",
-    "s4005": "v4",
-    "s4006": "v7",
-    "s4007": "v5",
+    "s4005": "v5",
+    "s4006": "v8",
+    "s4007": "v6",
     "s4008": "v1",
-    "a913": "v2",
+    "a913": "v3",
     # Overlay
     "d1590": "v1",
     "d1726": "v1",
-    "d1759": "v3",
+    "d1759": "v4",
     # Reco
-    "q442": "v25",
+    "q442": "v26",
     "q443": "v22",
-    "q445": "v30",
-    "q449": "v34",
+    "q445": "v31",
+    "q449": "v35",
     # Derivations
-    "data_PHYS_Run2": "v11",
-    "data_PHYS_Run3": "v10",
-    "mc_PHYS_Run2": "v14",
-    "mc_PHYS_Run3": "v14",
+    "data_PHYS_Run2": "v12",
+    "data_PHYS_Run3": "v11",
+    "mc_PHYS_Run2": "v15",
+    "mc_PHYS_Run3": "v15",
 }
