@@ -5,11 +5,14 @@ from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
 import re
 
 
-def mapUserName (name) :
+def mapUserName (name, *, noSysSuffix) :
     """map an internal name to a name for systematics data handles
 
     Right now this just means appending a _%SYS% to the name."""
-    return name + "_%SYS%"
+    if not noSysSuffix :
+        return name + "_%SYS%"
+    else :
+        return name
 
 
 class DataType(FlagEnum):
@@ -54,10 +57,11 @@ class ContainerConfig :
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName, *, originalName = None) :
+    def __init__ (self, name, sourceName, *, originalName = None, noSysSuffix) :
         self.name = name
         self.sourceName = sourceName
         self.originalName = originalName
+        self.noSysSuffix = noSysSuffix
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
@@ -71,8 +75,8 @@ class ContainerConfig :
                 raise Exception ("should not get here, reading container name before created: " + self.name)
             return self.sourceName
         if self.maxIndex and self.index == self.maxIndex :
-            return mapUserName(self.name)
-        return mapUserName(self.name + "_STEP" + str(self.index))
+            return mapUserName(self.name, noSysSuffix = self.noSysSuffix)
+        return mapUserName(self.name + "_STEP" + str(self.index), noSysSuffix = self.noSysSuffix)
 
 
     def nextPass (self) :
@@ -101,7 +105,8 @@ class ConfigAccumulator :
     used.
     """
 
-    def __init__ (self, dataType, algSeq, isPhyslite=False, geometry=LHCPeriod.Run2, dsid=0, autoconfigFromFlags=None):
+    def __init__ (self, dataType, algSeq, isPhyslite=False, geometry=LHCPeriod.Run2, dsid=0,
+                  autoconfigFromFlags=None, noSysSuffix=False):
         if autoconfigFromFlags is not None:
             if autoconfigFromFlags.Input.isMC:
                 if autoconfigFromFlags.Sim.ISF.Simulator.usesFastCaloSim():
@@ -124,6 +129,7 @@ class ConfigAccumulator :
         self._geometry = geometry
         self._dsid = dsid
         self._algSeq = algSeq
+        self._noSysSuffix = noSysSuffix
         self._containerConfig = {}
         self._outputContainers = {}
         self._pass = 0
@@ -140,7 +146,10 @@ class ConfigAccumulator :
         if DualUseConfig.useComponentAccumulator:
             from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
             self.CA = ComponentAccumulator()
-            self.CA.addSequence(algSeq)
+            # if we have a component accumulator the user is not required to pass
+            # in a sequence, but if they do let's add it
+            if algSeq :
+                self.CA.addSequence(algSeq)
 
 
     def dataType (self) :
@@ -171,7 +180,10 @@ class ConfigAccumulator :
                 alg = DualUseConfig.createAlgorithm (type, name)
 
             if DualUseConfig.useComponentAccumulator:
-                self.CA.addEventAlgo(alg,self._algSeq.name)
+                if self._algSeq :
+                    self.CA.addEventAlgo(alg,self._algSeq.name)
+                else :
+                    self.CA.addEventAlgo(alg)
             else:
                 self._algSeq += alg
             self._algorithms[name] = alg
@@ -181,6 +193,8 @@ class ConfigAccumulator :
             if name not in self._algorithms :
                 raise Exception ('unknown algorithm requested: ' + name)
             self._currentAlg = self._algorithms[name]
+            if self.CA and self._currentAlg != self.CA.getEventAlgo(name) :
+                raise Exception ('change to algorithm object: ' + name)
             return self._algorithms[name]
 
 
@@ -254,14 +268,14 @@ class ConfigAccumulator :
         operate on.
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, originalName = originalName)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, noSysSuffix = self._noSysSuffix, originalName = originalName)
 
 
     def writeName (self, containerName, *, isMet=None) :
         """register that the given container will be made and return
         its name"""
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None, noSysSuffix = self._noSysSuffix)
         if self._containerConfig[containerName].sourceName is not None :
             raise Exception ("trying to write container configured for input: " + containerName)
         if self._containerConfig[containerName].index != 0 :
@@ -498,7 +512,7 @@ class ConfigAccumulator :
         if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
             raise ValueError ('invalid selection name: ' + selectionName)
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, containerName)
+            self._containerConfig[containerName] = ContainerConfig (containerName, containerName, noSysSuffix=self._noSysSuffix)
         config = self._containerConfig[containerName]
         selection = SelectionConfig (selectionName, decoration, **kwargs)
         config.selections.append (selection)

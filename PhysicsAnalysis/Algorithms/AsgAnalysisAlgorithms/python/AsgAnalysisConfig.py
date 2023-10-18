@@ -257,6 +257,8 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('selection', '', type=str)
         self.addOption ('selectionName', '', type=str)
         self.addOption ('outputName', None, type=str)
+        self.addOption ('deepCopy', False, type=bool)
+        self.addOption ('noUniformSelection', False, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -270,11 +272,12 @@ class OutputThinningBlock (ConfigBlock):
         elif self.selection != '' :
             selection = selection + '&&' + self.selection
 
-        if selection != '' :
+        if selection != '' and not self.noUniformSelection :
             alg = config.createAlgorithm( 'CP::AsgUnionSelectionAlg', 'UnionSelectionAlg' + self.containerName + postfix)
             alg.preselection = selection
             alg.particles = config.readName (self.containerName)
             alg.selectionDecoration = 'outputSelect' + postfix
+            selection = 'outputSelect' + postfix
 
         alg = config.createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'DeepCopyAlg' + self.containerName + postfix )
         alg.input = config.readName (self.containerName)
@@ -284,10 +287,10 @@ class OutputThinningBlock (ConfigBlock):
         else :
             alg.output = config.copyName (self.containerName)
         if selection != '' :
-            alg.selection = ['outputSelect' + postfix]
+            alg.selection = [selection]
         else :
             alg.selection = []
-        alg.deepCopy = False
+        alg.deepCopy = self.deepCopy
 
 
 
