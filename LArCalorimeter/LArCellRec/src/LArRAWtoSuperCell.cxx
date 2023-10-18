@@ -114,7 +114,7 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		}
 		// similarly for OTF-masked cells
 		if(maskedchannel) {
-			LArBadChannel bc = badchannel->offlineStatus(off_id);
+			LArBadChannel bc = maskedchannel->offlineStatus(off_id);
 			if ( !bc.good() && bc.statusBad(LArBadChannel::LArBadChannelSCEnum::maskedOSUMBit) ){
 				cell->setProvenance(cell->provenance()|0x80);
 			}
