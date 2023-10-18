@@ -60,8 +60,9 @@ atlas_add_citest( OverlayRun3MC_Legacy
 atlas_add_citest( RecoRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA True --maxEvents 25 --conditionsTag CONDBR2-BLKPA-RUN2-11 --preExec pass' )
 
-atlas_add_citest( RecoRun2MC
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--CA "all:True" "RDOtoRDOTrigger:False" --conditionsTag "default:OFLCOND-MC16-SDR-RUN2-11" "RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02" --maxEvents 25' )
+# Temporarily disabled for el9 migration: ATR-28398
+#atlas_add_citest( RecoRun2MC
+#   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--CA "all:True" "RDOtoRDOTrigger:False" --conditionsTag "default:OFLCOND-MC16-SDR-RUN2-11" "RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02" --maxEvents 25' )
 
 atlas_add_citest( RecoRun2MC_PileUp
    SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--CA True --maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root --conditionsTag OFLCOND-MC16-SDR-RUN2-11 --preExec="flags.Exec.FPE=500;" ' --no-output-checks  # go two levels up as the test runs in a subfolder
