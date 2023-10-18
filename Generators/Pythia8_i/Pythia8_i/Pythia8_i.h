@@ -97,6 +97,9 @@ protected:
   std::unique_ptr<Pythia8::Pythia> m_pythia;
   HepMC::Pythia8ToHepMC m_pythiaToHepMC;
 
+  unsigned int m_maxFailures;
+
+
 private:
 
   static std::string findValue(const std::string &command, const std::string &key);
@@ -129,8 +132,7 @@ private:
   double m_nMerged;
   double m_sigmaTotal;
   double m_conversion;
-  
-  unsigned int m_maxFailures;
+
   unsigned int m_failureCount;
   
   std::map<std::string, PDGID> m_particleIDs;
