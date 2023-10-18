@@ -68,8 +68,8 @@ def ZdcTrigValToolCfg(flags, config = 'LHCf2022'):
     trigValTool = CompFactory.ZDC.ZdcTrigValidTool(
         name = 'ZdcTrigValTool',
         WriteAux = True,
-        AuxSuffix = "",
-        filepath_LUT = "TrigT1ZDC/zdcRun3T1LUT_v1_30_05_2023.json")
+        AuxSuffix = '',
+        filepath_LUT = 'TrigT1ZDC/zdc_json_PbPb5.36TeV_2023.json') # changed on Oct 13 to accomodate Zdc 1n peak shift
         
     trigValTool.TrigDecisionTool = acc.getPublicTool('TrigDecisionTool')
     
@@ -151,12 +151,11 @@ def ZdcRecRun3Cfg(flags):
     anaTool = acc.popToolsAndMerge(ZdcAnalysisToolCfg(flags,3,config,doCalib,doTimeCalib,doTrigEff))
     centroidTool = acc.popToolsAndMerge(RpdSubtractCentroidToolCfg(flags))
 
-    if (not flags.Input.isMC):
-        trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))    
-        zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
-        #zdcTools = [anaTool,centroidTool] # expand list as needed
-    else:
+    if ( (flags.Input.isMC) or (flags.Trigger.doZDC) ): # if doZDC flag is true we are in a trigger reprocessing -> no TrigValidTool
         zdcTools = [anaTool] # expand list as needed
+    else:
+        trigTool = acc.popToolsAndMerge(ZdcTrigValToolCfg(flags,config))   
+        zdcTools = [anaTool,trigTool,centroidTool] # expand list as needed
         
     if flags.Input.Format is Format.BS:
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
