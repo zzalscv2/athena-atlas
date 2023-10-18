@@ -52,7 +52,6 @@ Pythia8B_i::Pythia8B_i
     declareProperty("pT0timesMPI", m_pt0timesMPI=1.0);
     declareProperty("numberAlphaS", m_numberAlphaS=3.0);
     declareProperty("useSameAlphaSasMPI", m_sameAlphaSAsMPI=false);
-    declareProperty("MaxFailures", m_maxFailures = 10); // consecutive failures limit
 
     m_totalBQuark = 0;
     m_totalBBarQuark = 0;
