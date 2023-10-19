@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
 
 
 def trigOpMonitorCfg(flags):
@@ -10,6 +11,7 @@ def trigOpMonitorCfg(flags):
       LuminosityCondDataKey = 'LuminosityCondData',
       AtlasFieldMapCondDataKey = 'fieldMapCondObj' )
 
+   cfg.merge( AtlasFieldCacheCondAlgCfg(flags) )
    cfg.addEventAlgo( opmon )
    return cfg
 
