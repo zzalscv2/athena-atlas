@@ -22,7 +22,7 @@ class L1CorrelationAlg : public AthReentrantAlgorithm {
 
  private:
   ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc{this, "ROBDataProviderSvc", "ROBDataProviderSvc", "Name of the ROB data provider"};
-  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_trigCompositeKey{this, "TrigCompositeWrieHandleKey", "L1CorrelationTrigComposite", "Name of TrigComposite write handle"};
+  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_trigCompositeKey{this, "TrigCompositeWriteHandleKey", "L1CorrelationTrigComposite", "Name of TrigComposite write handle"};
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_l1AKey{this, "l1AKey", "L1CorrelationTrigComposite.l1a_type", "L1 accept type"};
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_otherTypeKey{this, "otherTypeKey", "L1CorrelationTrigComposite.other_type", "Other type"};
   SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_beforeAfterKey{this, "beforeAfterKey", "L1CorrelationTrigComposite.beforeafterflag", "flag if BC is before or after nominal"};
