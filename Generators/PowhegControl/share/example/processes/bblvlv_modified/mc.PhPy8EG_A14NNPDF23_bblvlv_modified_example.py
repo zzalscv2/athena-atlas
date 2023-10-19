@@ -9,28 +9,14 @@
 #--------------------------------------------------------------
 # EVGEN configuration
 #--------------------------------------------------------------
-evgenConfig.description = "POWHEG+Pythia8 gg4l production with A14 NNPDF2.3 tune."
-evgenConfig.keywords = ["SM", "gg4l", "gluonfusion", "Higgs"]
-evgenConfig.contact = ["andrej.saibel@cern.ch"]
+evgenConfig.description = "POWHEG+Pythia8 bblvlv_modified production with A14 NNPDF2.3 tune."
+evgenConfig.keywords = ["SM", "WW", "2jet", "bottom"]
+evgenConfig.contact = ["james.robinson@cern.ch"]
 
 # --------------------------------------------------------------
-# Load ATLAS defaults for the Powheg gg4l process
-# -----------------------------------------------------------
-include("PowhegControl/PowhegControl_gg4l_Common.py")
-#set 0 if massiveloops = 0
-PowhegConfig.mass_b = 0 
-PowhegConfig.proc = "WW"		# 'ZZ' or 'WW'
-PowhegConfig.contr = "full"		# 'full', 'only_h', 'no_h' or 'interf_h'
-PowhegConfig.vdecaymodeV1 = 11 # decay mode of first vector boson
-PowhegConfig.vdecaymodeV2 = 13  # decay mode of second vector boson
-#test settings for integration
-PowhegConfig.ncall1 = 50
-PowhegConfig.ncall1btlbrn = 50
-PowhegConfig.ncall2 = 50
-PowhegConfig.ncall2btlbrn = 50
-PowhegConfig.nubound = 50
-
-
+# Load ATLAS defaults for the Powheg bblvlv_modified process
+# --------------------------------------------------------------
+include("PowhegControl/PowhegControl_bblvlv_modified_Common.py")
 
 # --------------------------------------------------------------
 # Generate events
@@ -42,4 +28,3 @@ PowhegConfig.generate()
 #--------------------------------------------------------------
 include("Pythia8_i/Pythia8_A14_NNPDF23LO_EvtGen_Common.py")
 include("Pythia8_i/Pythia8_Powheg.py")
-
