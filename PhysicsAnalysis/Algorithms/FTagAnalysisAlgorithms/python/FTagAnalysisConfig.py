@@ -26,6 +26,8 @@ class FTagConfig (ConfigBlock):
     def makeAlgs (self, config) :
 
         jetCollection = config.originalName (self.containerName)
+        if(jetCollection=="AnalysisJets") :
+            jetCollection="AntiKt4EMPFlowJets"
 
         selectionName = self.postfix
         if selectionName is None or selectionName == '' :
