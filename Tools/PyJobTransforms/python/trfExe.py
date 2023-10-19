@@ -857,6 +857,7 @@ class athenaExecutor(scriptExecutor):
     #  @param disableMT Ensure that AthenaMT is not used
     #  @param disableMP Ensure that AthenaMP is not used
     #  @param onlyMP Ensure that MP is always used, even if MT is requested
+    #  @param onlyMT Ensure that MT is used even if MP is requested
     #  @param onlyMPWithRunargs Ensure that MP is always used, even if MT is requested when one of the listed
     #  runargs is provided
     #  @note The difference between @c extraRunargs, @c runtimeRunargs and @c literalRunargs is that: @c extraRunargs 
@@ -867,7 +868,7 @@ class athenaExecutor(scriptExecutor):
                  inData = set(), outData = set(), inputDataTypeCountCheck = None, exe = 'athena.py', exeArgs = ['athenaopts'], 
                  substep = None, inputEventTest = True, perfMonFile = None, tryDropAndReload = True, extraRunargs = {}, runtimeRunargs = {},
                  literalRunargs = [], dataArgs = [], checkEventCount = False, errorMaskFiles = None,
-                 manualDataDictionary = None, memMonitor = True, disableMT = False, disableMP = False, onlyMP = False, onlyMPWithRunargs = None):
+                 manualDataDictionary = None, memMonitor = True, disableMT = False, disableMP = False, onlyMP = False, onlyMT = False, onlyMPWithRunargs = None):
         
         self._substep = forceToAlphaNum(substep)
         self._inputEventTest = inputEventTest
@@ -881,6 +882,7 @@ class athenaExecutor(scriptExecutor):
         self._disableMT = disableMT
         self._disableMP = disableMP
         self._onlyMP = onlyMP
+        self._onlyMT = onlyMT
         self._onlyMPWithRunargs = onlyMPWithRunargs
         self._skeletonCA=skeletonCA
 
@@ -942,6 +944,14 @@ class athenaExecutor(scriptExecutor):
     def onlyMP(self, value):
         self._onlyMP = value
         
+    @property
+    def onlyMT(self):
+        return self._onlyMT
+
+    @onlyMT.setter
+    def onlyMT(self, value):
+        self._onlyMT = value
+
     def preExecute(self, input = set(), output = set()):
         self.setPreExeStart()
         msg.debug('Preparing for execution of {0} with inputs {1} and outputs {2}'.format(self.name, input, output))
@@ -1028,6 +1038,14 @@ class athenaExecutor(scriptExecutor):
                     self._athenaMP = self._athenaMT
                 self._athenaMT = 0
                 self._athenaConcurrentEvents = 0
+
+            # Check that we actually support MP
+            if self._onlyMT and self._athenaMP > 0:
+                    msg.info("This configuration does not support MP, using MT")
+                    if self._athenaMT == 0:
+                        self._athenaMT = self._athenaMP
+                        self._athenaConcurrentEvents = self._athenaMP
+                    self._athenaMP = 0
 
         # Small hack to detect cases where there are so few events that it's not worthwhile running in MP mode
         # which also avoids issues with zero sized files
