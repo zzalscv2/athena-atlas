@@ -991,6 +991,11 @@ namespace CP {
 
             //::: BEE
             if (isBEE(etaMS, phiMS)) {
+                // in Run3, large mis-alignment on the BEE chamber was found. temporarily mask the BEE region
+                if (isRun3()) {
+                    ATH_MSG_VERBOSE("Muon is in BEE eta/phi region - fail high-pT");
+                    return false;
+                }
                 // Muon falls in the BEE eta-phi region: asking for 4 good precision layers
                 // if( nGoodPrecLayers < 4 ) return false; // postponed (further studies needed)
                 if (summary.nprecisionLayers < 4) {
