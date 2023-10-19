@@ -24,7 +24,8 @@ def FPGATrackSimSGInputCfg(flags):
     acc.addPublicTool(FPGATrackSimSGInputTool)
 
     wrapperAlg = CompFactory.TrigFPGATrackSimRawHitsWrapperAlg(
-        InputTool=FPGATrackSimSGInputTool, OutFileName=flags.Trigger.FPGATrackSim.wrapperFileName
+        InputTool=FPGATrackSimSGInputTool, OutFileName=flags.Trigger.FPGATrackSim.wrapperFileName,
+        WrapperMetaData=flags.Trigger.FPGATrackSim.wrapperMetaData
     )
     acc.addEventAlgo(wrapperAlg)
 

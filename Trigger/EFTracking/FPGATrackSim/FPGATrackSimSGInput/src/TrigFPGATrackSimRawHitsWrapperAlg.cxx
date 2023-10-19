@@ -27,11 +27,12 @@ StatusCode TrigFPGATrackSimRawHitsWrapperAlg::initialize()
   ATH_MSG_DEBUG("Setting FPGATrackSim_SGHitInput tool");
 
   ATH_MSG_INFO("Creating output file: " << m_outpath);
+  TNamed meta("metadata",m_metaData.value().c_str());
   m_outfile = TFile::Open(m_outpath.value().c_str(), "recreate");
-
+  meta.Write();
   m_eventHeader = new FPGATrackSimEventInputHeader();
 
-  ATH_MSG_DEBUG("instantiaiting tree");
+  ATH_MSG_DEBUG("instantiating tree");
   m_EventTree = new TTree("FPGATrackSimEventTree", "data");
 
   ATH_MSG_DEBUG("Setting branch");

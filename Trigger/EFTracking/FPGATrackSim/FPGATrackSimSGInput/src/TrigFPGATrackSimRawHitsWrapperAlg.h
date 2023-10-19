@@ -31,6 +31,7 @@ private:
   // configuration parameters  
   ToolHandle<IFPGATrackSimInputTool> m_hitInputTool { this, "InputTool", "FPGATrackSimSGToRawHitsTool/FPGATrackSimInputTool", "HitInput Tool" };
   Gaudi::Property<std::string> m_outpath { this, "OutFileName", "httsim_smartwrapper.root", "output path" };
+  Gaudi::Property<std::string> m_metaData { this, "WrapperMetaData", "", "meta data" };
 
   // internal pointers
   FPGATrackSimEventInputHeader* m_eventHeader = nullptr;
