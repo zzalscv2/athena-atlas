@@ -22,8 +22,10 @@
 #include "Identifier/Identifier.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
-// STD
+//CxxUtils
 #include "CxxUtils/sincos.h"
+#include "CxxUtils/inline_hints.h"
+// STD
 #include <iomanip>
 #include <iostream>
 #include <cmath>
@@ -43,13 +45,13 @@ Trk::PlaneSurface::PlaneSurface(const PlaneSurface& psf, const Amg::Transform3D&
   , m_bounds(psf.m_bounds)
 {}
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
+ATH_FLATTEN
 #endif
 // constructor from CurvilinearUVT
 Trk::PlaneSurface::PlaneSurface(const Amg::Vector3D& position, const CurvilinearUVT& curvUVT)
@@ -198,10 +200,8 @@ Trk::PlaneSurface::createUniqueNeutralParameters(
     position, momentum, charge, *this, std::move(cov));
 }
 
-#if defined(__GNUC__)
-[[gnu::flatten]]
 // Avoid out-of-line Eigen calls
-#endif
+ATH_FLATTEN
 void
 Trk::PlaneSurface::localToGlobal(const Amg::Vector2D& locpos,
                                  const Amg::Vector3D&,

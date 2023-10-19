@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,8 @@
 #include "TrkSurfaces/CylinderBounds.h"
 // Identifier
 #include "Identifier/Identifier.h"
+// CxxUtils
+#include "CxxUtils/inline_hints.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // STD
@@ -131,10 +133,8 @@ Trk::StraightLineSurface::createUniqueNeutralParameters(
 }
 
 // true local to global method - fully defined
-#if defined(__GNUC__)
-[[gnu::flatten]]
 //Avoid out-of-line eigen calls
-#endif
+ATH_FLATTEN
 void
 Trk::StraightLineSurface::localToGlobal(const Amg::Vector2D& locpos,
                                         const Amg::Vector3D& glomom,
@@ -175,13 +175,13 @@ Trk::StraightLineSurface::globalToLocal(const Amg::Vector3D& glopos,
   return true;
 }
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
+ATH_FLATTEN
 #endif
 // isOnSurface check
 bool

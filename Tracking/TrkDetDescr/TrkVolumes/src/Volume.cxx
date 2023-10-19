@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,8 @@
 #include "TrkVolumes/Volume.h"
 #include "TrkDetDescrUtils/ObjectAccessor.h"
 #include "TrkVolumes/VolumeBounds.h"
+//CxxUtils
+#include "CxxUtils/inline_hints.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
 // STD
@@ -78,14 +80,12 @@ Trk::Volume::clone() const
   return new Trk::Volume(*this);
 }
 
-#if defined(__GNUC__)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 bool
 Trk::Volume::inside(const Amg::Vector3D& gp, double tol) const
 {

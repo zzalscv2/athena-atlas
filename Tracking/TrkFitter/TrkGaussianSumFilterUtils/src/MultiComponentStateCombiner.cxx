@@ -293,9 +293,7 @@ Trk::MultiComponentStateCombiner::combineParametersWithWeight(
 // The following does heave use of Eigen
 // for covariance. Avoid out-of-line calls
 // to Eigen
-#if defined(__GNUC__)
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 void
 Trk::MultiComponentStateCombiner::combineCovWithWeight(
   const AmgVector(5) & firstParameters,
@@ -319,9 +317,7 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
 // The following does heave use of Eigen
 // for covariance. Avoid out-of-line calls
 // to Eigen
-#if defined(__GNUC__)
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 Trk::MultiComponentState
 Trk::MultiComponentStateCombiner::combineWithSmoother(
   const Trk::MultiComponentState& forwardsMultiState,
