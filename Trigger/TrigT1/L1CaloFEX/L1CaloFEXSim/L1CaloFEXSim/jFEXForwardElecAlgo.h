@@ -6,6 +6,7 @@
 //                              -------------------
 //     begin                : 16 11 2021
 //     email                : Sergi.Rodriguez@cern.ch
+//     email                : sjolin@cern.ch
 //***************************************************************************
 
 #ifndef jFEXForwardElecAlgo_H
@@ -23,7 +24,6 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
-
 
 namespace LVL1 {
 
@@ -43,28 +43,16 @@ namespace LVL1 {
     virtual StatusCode safetyTest() override;
     virtual StatusCode reset() override;
    
-    virtual void setup(int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], int jfex, int fpga ) override;
+    virtual void setup(
+      int inputTable[FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width],
+      int jfex, int fpga ) override;
     
-    //virtual std::array<float,4> getEtaPhiEt(uint) override;
-    virtual std::array<float,2> getEtaPhi(uint) override;
-    virtual std::array<uint,2> getEtEmHad(uint) override;
-
-    virtual std::unordered_map<uint, jFEXForwardElecInfo> ClusterTTIDLists() override;
-    virtual std::unordered_map<uint, jFEXForwardElecInfo> LocalMaxima() override;
     virtual std::unordered_map<uint, jFEXForwardElecInfo> calculateEDM() override;
-
-    virtual bool isNeighbour(float aeta, int deltaNeta, float deltaPhi) override;  
+    virtual void setFPGAEnergy(
+      std::unordered_map<int,std::vector<int> > etmapEM,
+      std::unordered_map<int,std::vector<int> > etmapHAD) override; 
     
-	
-    // Need to add the seeding, local maxima, clustering, calculation of etiso, etem , ethad etc 
-    virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > etmapEM,std::unordered_map<int,std::vector<int> > etmapHAD) override;
-
-    
-    
-    
-  private:
-    
-    
+  private:        
     SG::ReadHandleKey<LVL1::jTowerContainer> m_jTowerContainerKey {this, "MyjTowers", "jTowerContainer", "jTower input container"};
     SG::ReadHandle<jTowerContainer> m_jTowerContainer;
     std::unordered_map<int,std::vector<int> > m_map_Etvalues_EM;
@@ -80,7 +68,24 @@ namespace LVL1 {
     const int m_Edge_dR3 = std::round( (std::pow(3*M_PI/32,2)) * 1e5  );
     const int m_Edge_dR4 = std::round( (std::pow(4*M_PI/32,2)) * 1e5  );
         
-        
+    Gaudi::Property<std::string> m_SeedRingStr {this, "SeedRingMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_seed.dat"   , "Contains Trigger tower in seed"};
+    Gaudi::Property<std::string> m_1stRingStr  {this, "Energy1stRingMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_1stRing.dat" , "Contains Trigger tower in 1st Energy ring"};
+    Gaudi::Property<std::string> m_SearchGStr  {this, "SearchGMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchG.dat" , "Contains Trigger tower to find local max (greater than)"};
+    Gaudi::Property<std::string> m_SearchGeStr {this, "SearchGeMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGe.dat", "Contains Trigger tower to find local max (greater or equal than)"};
+    Gaudi::Property<std::string> m_SearchGTauStr  {this, "SearchGTauMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGTau.dat" , "Contains Trigger tower to find local max (greater than)"};
+    Gaudi::Property<std::string> m_SearchGeTauStr {this, "SearchGeTauMap", "Run3L1CaloSimulation/JetMaps/2023_02_10/jFEX_FWD_searchGeTau.dat", "Contains Trigger tower to find local max (greater or equal than)"};
+       
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SeedRingMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_1stRingMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGTauMap;
+    std::unordered_map<unsigned int, std::vector<unsigned int> > m_SearchGeTauMap;
+    
+    std::array<float,2> getEtaPhi(uint);
+    std::array<uint,2> getEtEmHad(uint);
+    std::unordered_map<uint, jFEXForwardElecInfo> eleClusterList(void);
+    StatusCode ReadfromFile(const std::string& , std::unordered_map<unsigned int, std::vector<unsigned int> >&);
   };
   
 }//end of namespace
