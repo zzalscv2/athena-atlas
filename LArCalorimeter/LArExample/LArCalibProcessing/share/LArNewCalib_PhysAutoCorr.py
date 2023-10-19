@@ -59,6 +59,7 @@ if __name__=='__main__':
    flags.LArCalib.OFC.Nsamples = 5
    from AthenaCommon.SystemOfUnits import ns
    flags.Beam.BunchSpacing = 25.*ns
+   flags.Beam.NumberOfCollisions = flags.LArCalib.OFC.Ncoll
 
    # others flags settings
    flags.LArCalib.isSC = args.supercells
@@ -98,8 +99,5 @@ if __name__=='__main__':
    
    cfg.merge(LArPileUpAutoCorrCfg(flags))
 
-   #from AthenaCommon.Constants import DEBUG
-   #cfg.getService("MessageSvc").OutputLevel = DEBUG
-   #run the application
    cfg.run(1) 
 

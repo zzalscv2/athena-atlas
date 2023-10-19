@@ -37,10 +37,12 @@ def LArPileUpAutoCorrCfg(flags):
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
     rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
-    PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
-    RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
-    MpMcTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
-    PhysAutoCorrTag= rs.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
+    # FIXME commented out tags has to be re-enabled in 2024:
+    #PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
+    #RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
+    #MpMcTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
+    rsac=FolderTagResolver(dbname="COOLOFL_LAR/CONDBR2")
+    PhysAutoCorrTag= rsac.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     nColl=flags.LArCalib.OFC.Ncoll
     if (nColl>0):
         #Insert mu in tag-name:
@@ -50,18 +52,21 @@ def LArPileUpAutoCorrCfg(flags):
 
     del rs
 
-    result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags), 
+    # FIXME Commented out folders has to be re-enabled in 2024:
+    #result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags), 
+    #                        className="LArAutoCorrComplete"))
+    result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb="LAR_OFL", tag=AutoCorrTag, modifiers=chanSelStr(flags), 
                             className="LArAutoCorrComplete"))
-    result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags), 
-                            className="LArPedestalComplete"))
-    result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
-                            className="LArRampComplete"))
-    result.merge(addFolders(flags,flags.LArCalib.MPhysOverMCal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
-                            className="LArMphysOverMcalComplete"))
+    #result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags), 
+    #                        className="LArPedestalComplete"))
+    #result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
+    #                        className="LArRampComplete"))
+    #result.merge(addFolders(flags,flags.LArCalib.MPhysOverMCal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
+    #                        className="LArMphysOverMcalComplete"))
 
     #Need ADC2MeV values for AutoCorrCondAlg ... 
     #use current production values as input conditions
-    requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr"]
+    requiredConditions=["MphysOverMcal","Pedestal","Ramp","DAC2uA","uA2MeV","HVScaleCorr"]
     if flags.LArCalib.isSC:
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
        result.merge(LArElecCalibDBSCCfg(flags,requiredConditions))
@@ -74,7 +79,7 @@ def LArPileUpAutoCorrCfg(flags):
        mapKey="LArOnOffIdMap"
        bcKey = "LArBadChannel"
 
-    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey,CompleteDetector=False))
+    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey,CompleteDetector=False,isSuperCell=flags.LArCalib.isSC,))
 
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
     theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples  
@@ -85,7 +90,7 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.LArAutoCorrObjKey="LArAutoCorr"
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
     theLArAutoCorrTotalCondAlg.LArOnOffIdMappingObjKey=mapKey
-    theLArAutoCorrTotalCondAlg.LArPedestalObjKey="Pedestal"
+    theLArAutoCorrTotalCondAlg.LArPedestalObjKey="LArPedestal"
     if flags.LArCalib.isSC:
        theLArAutoCorrTotalCondAlg.LArShapeObjKey = "LArShapeSC"
        theLArAutoCorrTotalCondAlg.LArfSamplObjKey = "LArfSamplSC"

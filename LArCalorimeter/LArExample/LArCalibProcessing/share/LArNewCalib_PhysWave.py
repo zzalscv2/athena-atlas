@@ -98,7 +98,7 @@ if __name__=='__main__':
 
    #Copying the FCAL phys wave to sqlite here 
    if "HEC" in args.subdet.upper():
-      copycmd='AtlCoolCopy "COOLOFL_LAR/CONDBR2" '+flags.IOVDb.DBConnection+' -f /LAR/ElecCalibOfl/PhysWaves/FCALFromTB -t LARElecCalibOflPhysWavesFCALFromTB-calib-01 -of /LAR/ElecCalibOfl/PhysWaves/RTM  -ot LARElecCalibOflPhysWavesRTM-RUN2-UPD3-00  -a '
+      copycmd='AtlCoolCopy "COOLOFL_LAR/CONDBR2" "'+flags.IOVDb.DBConnection+'" -f /LAR/ElecCalibOfl/PhysWaves/FCALFromTB -t LARElecCalibOflPhysWavesFCALFromTB-calib-01 -of /LAR/ElecCalibOfl/PhysWaves/RTM  -ot LARElecCalibOflPhysWavesRTM-RUN2-UPD3-00  -a '
       from subprocess import getstatusoutput
       stat,out=getstatusoutput(copycmd)
  
