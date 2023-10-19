@@ -4,18 +4,14 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-from AthenaCommon.CFElements import seqAND, parOR
-from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
-from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
 
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-from ..Config.MenuComponents import algorithmCAToGlobalWrapper
+from ..Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA, InViewRecoCA, menuSequenceCAToGlobalWrapper
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -23,59 +19,55 @@ from ..Config.MenuComponents import algorithmCAToGlobalWrapper
 #----------------------------------------------------------------
 
 def trkFS_trkfast_Cfg( flags ):
+    if isComponentAccumulatorCfg():
         return allTE_trkfast( flags, signature="FS" )
+    else:
+        return menuSequenceCAToGlobalWrapper(allTE_trkfast, flags, signature="FS" )
 
-def allTE_trkfast_Cfg( flags ):
+def allTE_trkfast_Cfg(flags):
+    if isComponentAccumulatorCfg():
         return allTE_trkfast( flags, signature="beamSpot" )
+    else:
+        return menuSequenceCAToGlobalWrapper(allTE_trkfast, flags, signature="beamSpot" )
+
 
 def allTE_trkfast( flags, signature="FS" ):
-        inputMakerAlg = EventViewCreatorAlgorithm("IM_beamspot_"+signature)
-        inputMakerAlg.ViewFallThrough = True
-        inputMakerAlg.RoIsLink = "initialRoI"
-        inputMakerAlg.RoITool = ViewCreatorInitialROITool()
-        inputMakerAlg.InViewRoIs = "beamspotViewRoI_"+signature
-        inputMakerAlg.Views      = "beamspotViewRoI_"+signature
 
-        from TrigT2BeamSpot.T2VertexBeamSpotConfig import T2VertexBeamSpot_activeAllTE
+
 
         _signature=signature
         if(signature == "FS"):
             _signature = "beamSpotFS"
 
-        flagsWithTrk = getFlagsForActiveConfig(flags, signature, log)
-        viewAlgs = algorithmCAToGlobalWrapper(
-                trigInDetFastTrackingCfg,
-                flagsWithTrk,
-                inputMakerAlg.InViewRoIs,
-                signatureName=_signature,
-        )
+        beamspotSequence = InViewRecoCA('beamspotSequence_'+signature)
 
-        vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+signature )
+        flagsWithTrk = getFlagsForActiveConfig(flags, _signature, log)
+        beamspotSequence.mergeReco(trigInDetFastTrackingCfg(flagsWithTrk, 
+                                                            roisKey=beamspotSequence.inputMaker().InViewRoIs,
+                                                            signatureName=_signature))
+
+        from TrigT2BeamSpot.T2VertexBeamSpotConfig import T2VertexBeamSpot_activeAllTE
+        vertexAlg = T2VertexBeamSpot_activeAllTE(flags, "vertex_"+_signature )
         vertexAlg.TrackCollection = flagsWithTrk.Tracking.ActiveConfig.trkTracks_FTF
 
-        # Make sure this is still available at whole-event level
-        from AthenaCommon.AlgSequence import AlgSequence
-        topSequence = AlgSequence()
-        topSequence.SGInputLoader.Load += [( 'TagInfo' , 'DetectorStore+ProcessingTags' )]
 
-        beamspotSequence = parOR( "beamspotSequence_"+signature, viewAlgs+[vertexAlg] )
-        inputMakerAlg.ViewNodeName = beamspotSequence.name()
-        beamspotViewsSequence = seqAND( "beamspotViewsSequence"+signature, [ inputMakerAlg, beamspotSequence ])
+        beamspotSequence.addRecoAlgo(vertexAlg)
+        beamspotViewsSequence = SelectionCA('beamspotViewsSequence'+_signature)
+        beamspotViewsSequence.mergeReco(beamspotSequence)
 
 
         #hypo
-        beamspotHypoAlg = CompFactory.TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
+        beamspotHypoAlg = CompFactory.TrigStreamerHypoAlg("BeamspotHypoAlg_"+_signature)
         beamspotHypoAlg.RuntimeValidation = False #Needed to avoid the ERROR ! Decision has no 'feature' ElementLink
+
+        beamspotViewsSequence.addHypoAlgo(beamspotHypoAlg)
 
         # Accept every event
         beamspotHypoToolGen = StreamerHypoToolGenerator
 
-
-        return  MenuSequence( flags,
-                              Sequence    = beamspotViewsSequence,
-                              Maker       = inputMakerAlg,
-                              Hypo        = beamspotHypoAlg,
-                              HypoToolGen = beamspotHypoToolGen )
+        return  MenuSequenceCA( flags,
+                                beamspotViewsSequence,
+                                HypoToolGen = beamspotHypoToolGen )
 
 
 def getBeamspotVtx(flags):
@@ -84,12 +76,9 @@ def getBeamspotVtx(flags):
         from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
         IDTrigConfig = getInDetTrigConfig("fullScan")
 
-        #-- Setting up inputMakerAlg
-        from DecisionHandling.DecisionHandlingConf import InputMakerForRoI
-
         # run at event level
-        inputMakerAlg         = InputMakerForRoI("IM_beamspotJet_"+signature)
-        inputMakerAlg.RoITool = ViewCreatorInitialROITool()
+        inputMakerAlg         = CompFactory.InputMakerForRoI("IM_beamspotJet_"+signature)
+        inputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
 
         #-- Configuring Beamspot vertex alg
         from TrigT2BeamSpot.T2VertexBeamSpotConfig import T2VertexBeamSpot_activeAllTE
@@ -97,24 +86,30 @@ def getBeamspotVtx(flags):
         vertexAlg.TrackCollection = IDTrigConfig.trkTracks_FTF()
 
         #-- Setting up beamspotSequence
-        beamspotSequence = parOR( "beamspotJetSequence_"+signature, [vertexAlg] )
-        beamspotViewsSequence = seqAND( "beamspotJetViewsSequence"+signature, [ inputMakerAlg, beamspotSequence ])
+        beamspotSequence = InEventRecoCA('beamspotJetSequence_'+signature,inputMaker=inputMakerAlg)
+        beamspotSequence.addRecoAlgo(vertexAlg)
+        beamspotViewsSequence = SelectionCA('beamspotJetViewsSequence'+signature)
+        beamspotViewsSequence.mergeReco(beamspotSequence)
 
         #-- HypoAlg and Tool
         beamspotHypoAlg = CompFactory.TrigStreamerHypoAlg("BeamspotHypoAlg_"+signature)
+
+        beamspotViewsSequence.addHypoAlgo(beamspotHypoAlg)
+
         # Reject every event
         def getRejectingHypoTool(chainDict): 
                 return CompFactory.TrigStreamerHypoTool(chainDict['chainName'],Pass=False)
 
-        return  MenuSequence( flags,
-                              Sequence    = beamspotViewsSequence,
-                              Maker       = inputMakerAlg,
-                              Hypo        = beamspotHypoAlg,
-                              HypoToolGen = getRejectingHypoTool )
+        return  MenuSequenceCA( flags,
+                                beamspotViewsSequence,
+                                HypoToolGen = getRejectingHypoTool )
 
 
 def getBeamspotVtxCfg( flags ):
-        return getBeamspotVtx(flags)
+        if isComponentAccumulatorCfg():
+            return getBeamspotVtx(flags)
+        else:
+            return menuSequenceCAToGlobalWrapper(getBeamspotVtx, flags)
 
 
 #----------------------------------------------------------------
