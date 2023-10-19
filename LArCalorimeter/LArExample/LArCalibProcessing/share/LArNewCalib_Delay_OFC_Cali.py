@@ -130,6 +130,10 @@ if __name__=='__main__':
    OutputCaliWaveRootFileName = args.outrwaveprefix + "_" + args.run
    OutputPoolFileName = args.outpprefix + "_" + args.run
    OutputOFCCaliRootFileName = args.outrofcprefix + "_" + args.run
+   if args.subdet != "":
+      OutputCaliWaveRootFileName += "_"+args.subdet
+      OutputPoolFileName += "_"+args.subdet
+      OutputOFCCaliRootFileName += "_"+args.subdet
 
    if args.subdet != "" and not flags.LArCalib.isSC:
       OutputCaliWaveRootFileName += "_"+args.subdet

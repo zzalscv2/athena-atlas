@@ -773,6 +773,7 @@ StatusCode LArRampBuilder::rampfit(unsigned deg, const std::vector<LArRawRamp::R
     for (unsigned int DACIndex=1;DACIndex<linRange;DACIndex++){
       thisslope = (data[DACIndex].ADC - data[DACIndex-1].ADC)/(data[DACIndex].DAC - data[DACIndex-1].DAC);
 
+      //FIXME: this causes some HEC channels to have rampfrom 2 points only !!!!
       if ( (satpoint == -1) && ((meanslope-thisslope) > meanslope/10.) ) { satpoint = DACIndex; } // saturation was reached
 
       meanslope = ( thisslope + (DACIndex-1)*(accslope[DACIndex-1]) )/DACIndex;
@@ -878,7 +879,13 @@ StatusCode LArRampBuilder::rampfit(unsigned deg, const std::vector<LArRawRamp::R
   // Output for Dugging:
   for (unsigned i=1;i<data.size();i++)
     std::cout << data[i].DAC << " " << data[i].ADC << " " << std::endl;
-  std::cout << "LinRange=" << linRange << std::endl;
+  std::cout << "LinRange= " << linRange << " satpoint= " << satpoint<<std::endl;
+  for (unsigned k=0;k<deg;k++) {
+     std::cout<<"Beta "<<k<<" "<<beta[k]<<std::endl;
+     for (unsigned j=0;j<=k;j++) {
+            std::cout<<"Alpha "<<j<<" "<<alpha(k,j)<<std::endl;
+     }
+  }
   
   //Calculate error:
   double sigma=0;

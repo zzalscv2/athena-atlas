@@ -56,7 +56,7 @@ if __name__=='__main__':
       if args.rawdata:
             partstr += "-RawData"
       # here - add optional nsamples
-      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-32s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-32s-"+gain+"-"+partstr+".daq.RAW/"
+      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-7s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-7s-"+gain+"-"+partstr+".daq.RAW/"
 
    
    #Import the configution-method we want to use (here: Pedestal and AutoCorr)

@@ -103,7 +103,7 @@ def LArRampCfg(flags):
     theLArRampBuilder.isSC = flags.LArCalib.isSC
     theLArRampBuilder.BadChanKey = bcKey
 
-    if flags.LArCalib.Input.SubDet == "HEC":
+    if "HEC" in flags.LArCalib.Input.SubDet:
         theLArRampBuilder.isHEC = True
         theLArRampBuilder.HECKey = "LArHEC_PAmap"
         result.merge(addFolders(flags,'/LAR/ElecCalibOfl/HecPAMap','LAR_OFL'))
