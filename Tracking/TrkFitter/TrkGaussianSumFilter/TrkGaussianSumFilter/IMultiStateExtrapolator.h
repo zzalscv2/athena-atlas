@@ -42,15 +42,15 @@ struct StateAtBoundarySurface
 {
   /** Data members */
   const MultiComponentState* stateAtBoundary = nullptr;
-  const TrackParameters* navigationParameters = nullptr;
+  std::unique_ptr<TrackParameters> navigationParameters = nullptr;
   const TrackingVolume* trackingVolume = nullptr;
   /** Update State at Boundary Surface Information */
   void updateBoundaryInformation(const MultiComponentState* boundaryState,
-                                 const TrackParameters* navParameters,
+                                 std::unique_ptr<TrackParameters> navParameters,
                                  const TrackingVolume* nextVolume)
   {
     stateAtBoundary = boundaryState;
-    navigationParameters = navParameters;
+    navigationParameters = std::move(navParameters);
     trackingVolume = nextVolume;
   }
 };
