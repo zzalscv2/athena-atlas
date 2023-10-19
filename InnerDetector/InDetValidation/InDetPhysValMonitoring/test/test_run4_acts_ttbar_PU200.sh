@@ -42,9 +42,9 @@ run "Reconstruction" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsArtFlags" \
-    --postInclude "ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-    --preExec "flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
+    --postInclude "ActsConfig.ActsViewConfig.EventViewCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsSpacePointFormationCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
+    --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --ignorePatterns "${ignore_pattern}" \
     --maxEvents 20 \
     --perfmon fullmonmt \
