@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetVertexNNTagger.h"
@@ -25,6 +25,12 @@
 using xAOD::JetContainer;
 
 namespace JetPileupTag {
+
+    JetVertexNNTagger::JetVertexNNTagger(const std::string& name)
+    : asg::AsgTool(name) {}
+
+    JetVertexNNTagger::~JetVertexNNTagger() {}
+
     StatusCode JetVertexNNTagger::initialize()
     {
 

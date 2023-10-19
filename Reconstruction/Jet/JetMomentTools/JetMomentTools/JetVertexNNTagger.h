@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETVERTEXNNTAGGER_H
@@ -48,14 +48,17 @@ namespace JetPileupTag {
     ASG_TOOL_CLASS(JetVertexNNTagger,IJetDecorator)
 
     public:
-      using asg::AsgTool::AsgTool;
+      /// Constructor with a tool name
+      JetVertexNNTagger(const std::string& name);
+      /// Destructor
+      ~JetVertexNNTagger();
 
       // Called in parent initialize()
       virtual StatusCode initialize() override;
 
       // Inherited method to decorate a jet container
       virtual StatusCode decorate(const xAOD::JetContainer& jetCont) const override;
-  
+
     private:
 
       // Retrieve hard scatter vertex for its index. Return nullptr if one cannot be found
