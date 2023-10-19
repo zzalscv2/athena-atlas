@@ -11,15 +11,17 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY1"
 streamName = "StreamDAOD_BPHY1"
 
-def BPHY1Cfg(flags):
+OniaContainerName = "BPHY1OniaCandidates"
+
+def BPHY1Kernel(flags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     acc = ComponentAccumulator()
-
+    doLRT = flags.Tracking.doLargeD0
     BPHY1_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
        name = "BPHY1_AugOriginalCounts",
        VertexContainer = "PrimaryVertices",
-       TrackContainer = "InDetTrackParticles" )
-    doLRT = flags.Tracking.doLargeD0
+       TrackContainer = "InDetTrackParticles",
+       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "" )
     mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
@@ -70,7 +72,7 @@ def BPHY1Cfg(flags):
     BPHY1_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
             name                   = "BPHY1_Reco_mumu",
             VertexSearchTool       = BPHY1JpsiFinder,
-            OutputVtxContainerName = "BPHY1OniaCandidates",
+            OutputVtxContainerName = OniaContainerName,
             PVContainerName        = "PrimaryVertices",
             RefPVContainerName     = "BPHY1RefittedPrimaryVertices",
             RefitPV                = True,
@@ -144,7 +146,11 @@ def BPHY1Cfg(flags):
                             ThinningTools     = BPHY1ThinningTools,
                             AugmentationTools = augTools))
     for tool in BPHY1ThinningTools : acc.addPublicTool(tool)
+    return acc
 
+def BPHY1Cfg(flags):
+    doLRT = flags.Tracking.doLargeD0
+    acc = BPHY1Kernel(flags)
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
@@ -171,10 +177,10 @@ def BPHY1Cfg(flags):
     AllVariables += ["Muons", "MuonsLRT"] if doLRT else ["Muons"]
     
     ## Jpsi candidates 
-    StaticContent += ["xAOD::VertexContainer#%s"        % BPHY1_Reco_mumu.OutputVtxContainerName]
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY1_Reco_mumu.OutputVtxContainerName]
+    StaticContent += ["xAOD::VertexContainer#%s"        % OniaContainerName]
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux." % OniaContainerName]
     ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY1_Reco_mumu.OutputVtxContainerName]
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % OniaContainerName]
     
     # Truth information for MC only
     if flags.Input.isMC :

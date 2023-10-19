@@ -12,17 +12,20 @@ from AthenaConfiguration.Enums import MetadataCategory
 BPHYDerivationName = "BPHY5"
 streamName = "StreamDAOD_BPHY5"
 
-def BPHY5Cfg(flags):
+JpsiContainerName = "BPHY5JpsiCandidates"
+BsJpsiPhiContainerName   = "BPHY5BsJpsiKKCandidates"
+BPlusContainerName   = "BPHY5BpmJpsiKpmCandidates"
+BpipiContainerName   = "BPHY5BJpsipipiXCandidates"
+BdJpsiKstContainerName = "BPHY5BdJpsiKstCandidates"
+
+def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    isSimulation = flags.Input.isMC
-   BPHY5_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name = "BPHY5_AugOriginalCounts",
-       VertexContainer = "PrimaryVertices",
-       TrackContainer = "InDetTrackParticles" )
 
    doLRT = flags.Tracking.doLargeD0
+   if not doLRT : print("BPHY5: LRT tracks disabled")
    mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
    mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
    if doLRT:
@@ -36,6 +39,12 @@ def BPHY5Cfg(flags):
                                    UseRun3WP = flags.GeoModel.Run == LHCPeriod.Run3))
        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
        acc.merge(InDetLRTMergeCfg(flags))
+
+   BPHY5_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
+       name = "BPHY5_AugOriginalCounts",
+       VertexContainer = "PrimaryVertices",
+       TrackContainer = "InDetTrackParticles",
+       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "")
    toRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
    MuonReLink = [ "Muons", "MuonsLRT" ] if doLRT else []
 
@@ -52,7 +61,7 @@ def BPHY5Cfg(flags):
        muAndMu                     = True,
        muAndTrack                  = False,
        TrackAndTrack               = False,
-       assumeDiMuons               = True, 
+       assumeDiMuons               = True,
        invMassUpper                = 3600.0,
        invMassLower                = 2600.0,
        Chi2Cut                     = 30.,
@@ -72,7 +81,7 @@ def BPHY5Cfg(flags):
 
    BPHY5JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5JpsiSelectAndWrite",
                                                        VertexSearchTool       = BPHY5JpsiFinder,
-                                                       OutputVtxContainerName = "BPHY5JpsiCandidates",
+                                                       OutputVtxContainerName = JpsiContainerName,
                                                        PVContainerName        = "PrimaryVertices",
                                                        V0Tools                = V0Tools,
                                                        PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
@@ -85,7 +94,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
          name                  = "BPHY5_Select_Jpsi2mumu",
          HypothesisName        = "Jpsi",
-         InputVtxContainerName = "BPHY5JpsiCandidates",
+         InputVtxContainerName = JpsiContainerName,
          V0Tools               = V0Tools,
          VtxMassHypo           = 3096.916,
          MassMin               = 2000.0,
@@ -106,7 +115,7 @@ def BPHY5Cfg(flags):
          Chi2Cut                     = 15.0,
          TrkQuadrupletMassUpper      = 6000.0,
          TrkQuadrupletMassLower      = 4800.0,
-         JpsiContainerKey            = "BPHY5JpsiCandidates",
+         JpsiContainerKey            = JpsiContainerName,
          TrackParticleCollection     = mainIDInput,
          MuonsUsedInJpsi             = mainMuonInput,
          TrkVertexFitterTool         = vkalvrt,
@@ -124,7 +133,7 @@ def BPHY5Cfg(flags):
          BThresholdPt            = 5000.,
          BMassLower              = 4300.0,
          BMassUpper              = 6300.0,
-         JpsiContainerKey        = "BPHY5JpsiCandidates",
+         JpsiContainerKey        = JpsiContainerName,
          TrackParticleCollection = mainIDInput,
          #MuonsUsedInJpsi      = "Muons", #Don't remove all muons, just those in J/psi candidate (see the following cut)
          ExcludeCrossJpsiTracks  = False,   #setting this to False rejects the muons from J/psi candidate
@@ -148,7 +157,7 @@ def BPHY5Cfg(flags):
          Chi2Cut                         = 15.0,
          TrkTrippletMassUpper            = 8000,
          TrkTrippletMassLower            = 4000,
-         JpsiContainerKey        = "BPHY5JpsiCandidates",
+         JpsiContainerKey        = JpsiContainerName,
          TrackParticleCollection         = mainIDInput,
          MuonsUsedInJpsi         = mainMuonInput,
          VertexPointEstimator        = vpest,
@@ -171,7 +180,7 @@ def BPHY5Cfg(flags):
          Chi2Cut                     = 15.0,
          TrkQuadrupletMassUpper      = 5800.0,
          TrkQuadrupletMassLower      = 3400.0,
-         JpsiContainerKey            = "BPHY5JpsiCandidates",
+         JpsiContainerKey            = JpsiContainerName,
          TrackParticleCollection     = mainIDInput,
          MuonsUsedInJpsi             = mainMuonInput,
          VertexPointEstimator        = vpest,
@@ -183,7 +192,7 @@ def BPHY5Cfg(flags):
    acc.addPublicTool(BPHY5BJpsipipiX )
    BPHY5BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5BsKKSelectAndWrite",
                         VertexSearchTool         = BPHY5BsJpsiKK,
-                        OutputVtxContainerName   = "BPHY5BsJpsiKKCandidates",
+                        OutputVtxContainerName   = BsJpsiPhiContainerName,
                         PVContainerName          = "PrimaryVertices",
                         V0Tools                  = V0Tools,
                         PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
@@ -194,7 +203,7 @@ def BPHY5Cfg(flags):
 
    BPHY5BplKplSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name    = "BPHY5BplKplSelectAndWrite",
                                                               VertexSearchTool      =  BPHY5BplJpsiKpl,
-                                                              OutputVtxContainerName    = "BPHY5BpmJpsiKpmCandidates",
+                                                              OutputVtxContainerName    = BPlusContainerName,
                                                               PVContainerName           = "PrimaryVertices",
                                                               V0Tools                   = V0Tools,
                                                               PVRefitter                = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
@@ -205,7 +214,7 @@ def BPHY5Cfg(flags):
 
    BPHY5BpipiXSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name  = "BPHY5BpipiXSelectAndWrite",
                                                            VertexSearchTool       = BPHY5BJpsipipiX,
-                                                           OutputVtxContainerName   = "BPHY5BJpsipipiXCandidates",
+                                                           OutputVtxContainerName   = BpipiContainerName,
                                                            PVContainerName          = "PrimaryVertices",
                                                            V0Tools                  = V0Tools,
                                                            PVRefitter               = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
@@ -217,7 +226,7 @@ def BPHY5Cfg(flags):
    BPHY5BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
                                  name                   = "BPHY5BdKstSelectAndWrite",
                                  VertexSearchTool       = BPHY5BdJpsiKst,
-                                 OutputVtxContainerName = "BPHY5BdJpsiKstCandidates",
+                                 OutputVtxContainerName = BdJpsiKstContainerName,
                                  V0Tools                = V0Tools,
                                  PVRefitter             = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags)),
                                  PVContainerName        = "PrimaryVertices",
@@ -230,7 +239,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_Bd2JpsiKst = CompFactory.DerivationFramework.Select_onia2mumu(
                                  name                       = "BPHY5_Select_Bd2JpsiKst",
                                  HypothesisName             = "Bd",
-                                 InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
+                                 InputVtxContainerName      = BdJpsiKstContainerName,
                                  V0Tools                    = V0Tools,
                                  TrkMasses                  = [105.658, 105.658, 493.677, 139.570],
                                  VtxMassHypo                = 5279.6,
@@ -241,7 +250,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_Bd2JpsiKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
                                  name                       = "BPHY5_Select_Bd2JpsiKstbar",
                                  HypothesisName             = "Bdbar",
-                                 InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
+                                 InputVtxContainerName      = BdJpsiKstContainerName,
                                  V0Tools                    = V0Tools,
                                  TrkMasses                  = [105.658, 105.658, 139.570, 493.677],
                                  VtxMassHypo                = 5279.6,
@@ -252,7 +261,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_Bs2JpsiKK = CompFactory.DerivationFramework.Select_onia2mumu(
                                  name                       = "BPHY5_Select_Bs2JpsiKK",
                                  HypothesisName             = "Bs",
-                                 InputVtxContainerName      = "BPHY5BsJpsiKKCandidates",
+                                 InputVtxContainerName      = BsJpsiPhiContainerName,
                                  V0Tools                    = V0Tools,
                                  TrkMasses                  = [105.658, 105.658, 493.677, 493.677],
                                  VtxMassHypo                = 5366.3,
@@ -263,7 +272,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_Bpl2JpsiKpl  = CompFactory.DerivationFramework.Select_onia2mumu(
                                  name                       = "BPHY5_Select_Bpl2JpsiKpl",
                                  HypothesisName             = "Bplus",
-                                 InputVtxContainerName      = "BPHY5BpmJpsiKpmCandidates",
+                                 InputVtxContainerName      = BPlusContainerName,
                                  V0Tools                    = V0Tools,
                                  TrkMasses                  = [105.658, 105.658, 493.677],
                                  VtxMassHypo                = 5279.26,
@@ -274,7 +283,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_Bpl2JpsiPi  = CompFactory.DerivationFramework.Select_onia2mumu(
                                  name                       = "BPHY5_Select_Bpl2JpsiPi",
                                  HypothesisName             = "Bc",
-                                 InputVtxContainerName      = "BPHY5BpmJpsiKpmCandidates",
+                                 InputVtxContainerName      = BPlusContainerName,
                                  V0Tools                    = V0Tools,
                                  TrkMasses                  = [105.658, 105.658, 139.570],
                                  VtxMassHypo                = 6275.1, Do3d = False,
@@ -285,7 +294,7 @@ def BPHY5Cfg(flags):
    BPHY5_Select_B2JpsipipiX = CompFactory.DerivationFramework.Select_onia2mumu(
                                 name                       = "BPHY5_Select_B2JpsipipiX",
                                 HypothesisName             = "pipiJpsi",
-                                InputVtxContainerName      = "BPHY5BJpsipipiXCandidates",
+                                InputVtxContainerName      = BpipiContainerName,
                                 V0Tools                    = V0Tools,
                                 TrkMasses                  = [105.658, 105.658, 139.570, 139.570],
                                 VtxMassHypo                = 4260,
@@ -296,41 +305,49 @@ def BPHY5Cfg(flags):
    if not isSimulation: #Only Skim Data
         BPHY5_SelectBsJpsiKKEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
           name = "BPHY5_SelectBsJpsiKKEvent",
-          expression = "count(BPHY5BsJpsiKKCandidates.passed_Bs > 0) > 0")
+          expression = f"count({BsJpsiPhiContainerName}.passed_Bs > 0) > 0")
 
         BPHY5_SelectBplJpsiKplEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBplJpsiKplEvent",
-                                                                         expression = "count(BPHY5BpmJpsiKpmCandidates.passed_Bplus>0) > 0")
+                                       expression = f"count({BPlusContainerName}.passed_Bplus>0) > 0")
      
         BPHY5_SelectBplJpsiKplEventBc = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBplJpsiKplEventBc",
-                                                                         expression = "count(BPHY5BpmJpsiKpmCandidates.passed_Bc>0) > 0")
+                                       expression = f"count({BPlusContainerName}.passed_Bc>0) > 0")
         
         BPHY5_SelectBdKstarEventBd = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBdKstarEventBd",
-                                                                         expression = "count(BPHY5BdJpsiKstCandidates.passed_Bd>0) > 0")
+                                       expression = f"count({BdJpsiKstContainerName}.passed_Bd>0) > 0")
      
         BPHY5_SelectBdKstarEventBdBar = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY5_SelectBdKstarEventBdbar",
-                                                                         expression = "count(BPHY5BdJpsiKstCandidates.passed_Bdbar>0) > 0")
+                                       expression = f"count({BdJpsiKstContainerName}.passed_Bdbar>0) > 0")
         #====================================================================
         # Make event selection based on an OR of the input skimming tools
         #====================================================================
-        filterlist = [BPHY5_SelectBsJpsiKKEvent, BPHY5_SelectBplJpsiKplEvent, BPHY5_SelectBplJpsiKplEventBc,
-                                              BPHY5_SelectBdKstarEventBd, BPHY5_SelectBdKstarEventBdBar]
+        filterlist = []
+        if "Bs" in Decays : filterlist.append(BPHY5_SelectBsJpsiKKEvent)
+        if "B+" in Decays : filterlist += [ BPHY5_SelectBplJpsiKplEvent,BPHY5_SelectBplJpsiKplEventBc]
+        if "BdKst" in Decays : filterlist += [BPHY5_SelectBdKstarEventBd, BPHY5_SelectBdKstarEventBdBar]
         
         BPHY5SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR("BPHY5SkimmingOR",
                                               FilterList = filterlist)
         for t in filterlist +[BPHY5SkimmingOR]: acc.addPublicTool(t)
 
-   augTools =   [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu,
-                               BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK,
-                               BPHY5BplKplSelectAndWrite, BPHY5BpipiXSelectAndWrite,
-                               BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi, BPHY5_Select_B2JpsipipiX,
-                               BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar,
-                               BPHY5_AugOriginalCounts]
+   augTools =   [BPHY5JpsiSelectAndWrite,  BPHY5_Select_Jpsi2mumu, BPHY5_AugOriginalCounts]
+   if "Bs" in Decays : augTools += [BPHY5BsKKSelectAndWrite,  BPHY5_Select_Bs2JpsiKK]
+   if "B+" in Decays : augTools += [BPHY5BplKplSelectAndWrite, BPHY5_Select_Bpl2JpsiKpl, BPHY5_Select_Bpl2JpsiPi]
+   if "BdKst" in Decays : augTools += [ BPHY5BdKstSelectAndWrite, BPHY5_Select_Bd2JpsiKst, BPHY5_Select_Bd2JpsiKstbar]
+   if "BpipiX" in Decays : augTools+= [ BPHY5BpipiXSelectAndWrite, BPHY5_Select_B2JpsipipiX]
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY5Kernel",
                                                     AugmentationTools = augTools,
                                                     #Only skim if not MC
                                                     SkimmingTools     = [BPHY5SkimmingOR] if not isSimulation else [],
                                                     ThinningTools     = []))
    for t in  augTools : acc.addPublicTool(t)
+   return acc
+
+
+def BPHY5Cfg(flags):
+   doLRT = flags.Tracking.doLargeD0
+   isSimulation = flags.Input.isMC
+   acc = BPHY5Kernel(flags)
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
@@ -368,21 +385,21 @@ def BPHY5Cfg(flags):
     
     
    ## Jpsi candidates 
-   StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5JpsiSelectAndWrite.OutputVtxContainerName]
+   StaticContent += ["xAOD::VertexContainer#%s"        %                 JpsiContainerName]
    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
-   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5JpsiSelectAndWrite.OutputVtxContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % JpsiContainerName]
     
-   StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5BsKKSelectAndWrite.OutputVtxContainerName]
-   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BsKKSelectAndWrite.OutputVtxContainerName]
+   StaticContent += ["xAOD::VertexContainer#%s"        %                 BsJpsiPhiContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BsJpsiPhiContainerName]
    
-   StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5BplKplSelectAndWrite.OutputVtxContainerName]
-   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BplKplSelectAndWrite.OutputVtxContainerName]
+   StaticContent += ["xAOD::VertexContainer#%s"        %                 BPlusContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPlusContainerName]
    
-   StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5BpipiXSelectAndWrite.OutputVtxContainerName]
-   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BpipiXSelectAndWrite.OutputVtxContainerName]
+   StaticContent += ["xAOD::VertexContainer#%s"        %                 BpipiContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BpipiContainerName]
    
-   StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
-   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
+   StaticContent += ["xAOD::VertexContainer#%s"        %                 BdJpsiKstContainerName]
+   StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BdJpsiKstContainerName]
    
    # Tagging information (in addition to that already requested by usual algorithms)
    AllVariables += ["GSFTrackParticles",  "MuonSpectrometerTrackParticles" ]
