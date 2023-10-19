@@ -43,9 +43,9 @@
 #include "GaudiKernel/PhysicalConstants.h"
 //
 #include <cmath>
-/// enables -ftree-vectorize in gcc
-#include "CxxUtils/vectorize.h"
-ATH_ENABLE_VECTORIZATION;
+
+
+#include "CxxUtils/inline_hints.h"
 
 
 
@@ -493,14 +493,12 @@ covarianceContribution(Cache& cache,
 // This is the default STEP method
 /////////////////////////////////////////////////////////////////////////////////
 
-#if defined(__GNUC__)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 bool
 rungeKuttaStep(Cache& cache,
                bool errorPropagation,

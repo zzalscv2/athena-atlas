@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,9 +11,9 @@
 #include "TrkSurfaces/RealQuadraticEquation.h"
 // Gaudi
 #include "GaudiKernel/MsgStream.h"
+//CxxUtils
+#include "CxxUtils/inline_hints.h"
 // STD
-//#include <iostream>
-//#include <iomanip>
 #include <cassert>
 
 // default constructor
@@ -187,10 +187,8 @@ Trk::ConeSurface::measurementFrame(const Amg::Vector3D& pos, const Amg::Vector3D
   // return it
   return mFrame;
 }
-#if defined(__GNUC__)
-[[gnu::flatten]]
 // Avoid out-of-line-eigen calls
-#endif
+ATH_FLATTEN
 void
 Trk::ConeSurface::localToGlobal(const Amg::Vector2D& locpos, const Amg::Vector3D&, Amg::Vector3D& glopos) const
 {
