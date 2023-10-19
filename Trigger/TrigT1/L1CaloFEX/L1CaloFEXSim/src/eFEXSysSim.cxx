@@ -412,7 +412,7 @@ namespace LVL1 {
     while (iter != m_allEmTobObjects.end()) {
         std::vector<std::unique_ptr<eFEXegTOB>> tobsSort = std::move(iter->second);
         // sort tobs by their et (last 12 bits of the 32 bit tob word)
-        std::sort (tobsSort.begin(), tobsSort.end(), TOBetSort<std::unique_ptr<eFEXegTOB>>);
+        std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<eFEXegTOB>>, std::placeholders::_1, std::placeholders::_2, false));
         // Truncate at 6 TOBs per eFEX
         if (tobsSort.size() > 6) tobsSort.resize(6);
         // Append to system TOB list
@@ -485,7 +485,7 @@ namespace LVL1 {
     while (iterTau != allTauTobObjects.end()) {
         std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort = std::move(iterTau->second);
         // sort tobs by their et (last 12 bits of the 32 bit tob word)
-        std::sort (tobsSort.begin(), tobsSort.end(), TOBetSort<std::unique_ptr<eFEXtauTOB>>);
+        std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<eFEXtauTOB>>, std::placeholders::_1, std::placeholders::_2, true));
         // Truncate at 6 TOBs per eFEX
         if (tobsSort.size() > 6) tobsSort.resize(6);
         // Append to system TOB list

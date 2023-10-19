@@ -39,7 +39,9 @@ source /afs/cern.ch/user/a/atlasdqm/DQCalculators/DCSCalc/prodarea/build/$BINARY
 export CORAL_AUTH_PATH=/afs/cern.ch/user/a/atlasdqm/private
 export CORAL_DBLOOKUP_PATH=/afs/cern.ch/user/a/atlasdqm/private
 #export FRONTIER_LOG_LEVEL=debug
+export PBEAST_SERVER='https://pc-atlas-www.cern.ch'
 export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos
+export PBEAST_SERVER_HTTPS_PROXY='atlasgw.cern.ch:3128'
 export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
 
 #dcsc.py -h

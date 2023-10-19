@@ -1,7 +1,13 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import libpbeastpy; pbeast = libpbeastpy.ServerProxy('https://atlasop.cern.ch')
+import os
+pbeastDefaultServer = 'https://pc-atlas-www.cern.ch' if os.getenv('PBEAST_SERVER_HTTPS_PROXY', '').startswith('atlasgw') else 'https://atlasop.cern.ch'
+pbeastServer = os.getenv('PBEAST_SERVER', pbeastDefaultServer)
+
+import libpbeastpy; pbeast = libpbeastpy.ServerProxy(pbeastServer)
 import logging; log = logging.getLogger("DCSCalculator2.variable")
+
+from itertools import chain
 
 from DQUtils.general import timer
 from DQUtils.sugar import IOVSet, RANGEIOV_VAL, RunLumi, TimestampType, define_iov_type, make_iov_type
@@ -95,11 +101,14 @@ class TDAQC_Variable(DCSC_Variable):
     def timePBeast2COOL(timestamp):
         return TimestampType(timestamp*TDAQC_Variable.TIME_RATIO)
 
-    def __init__(self, query, evaluator, *, regex=False):
+    def __init__(self, query, evaluator, *, regex=False, mapping=dict(), force_mapping=False, empty_value=None):
+        super().__init__(query, evaluator)
         self.regex = regex
+        self.mapping = mapping
+        self.force_mapping = force_mapping
+        self.empty_value = empty_value
         self.query = query
         self.partition, self.className, self.attribute, self.path = query.split('.', 3)
-        self.evaluator = evaluator
         self.input_hashes = []
     
     def __repr__(self):
@@ -116,13 +125,20 @@ class TDAQC_Variable(DCSC_Variable):
         since, until = query_range
         since, until = TDAQC_Variable.timeCOOL2PBeast(since), TDAQC_Variable.timeCOOL2PBeast(until)
         
-        data = pbeast.get_data(partition, className, attribute, path, regex, since, until)[0].data
+        query_data = pbeast.get_data(partition, className, attribute, path, regex, since, until)
+        data = dict.fromkeys(self.mapping.keys()) if self.force_mapping else dict()
+        if query_data:
+            data.update(query_data[0].data)
+
         def instantiate(since, until, channel, value):
+            if isinstance(value, list):
+                value = tuple(value)
             return PBeastIOV(TDAQC_Variable.timePBeast2COOL(since), TDAQC_Variable.timePBeast2COOL(until), channel, value)
 
         iovs = []
         for channel, entries in data.items():
             if not entries:
+                iovs.append(PBeastIOV(*query_range, channel, self.empty_value))
                 continue
             first = entries[0]
             since = first.ts
@@ -175,6 +191,14 @@ class TDAQC_Variable(DCSC_Variable):
         self.iovs = iovs
         return self
 
+    def make_good_iov(self, iov):
+        """
+        Determine if one input iov is good.
+        """
+        giov = GoodIOV(iov.since, iov.until, self.mapping.get(iov.channel, iov.channel), self.evaluator(iov))
+        giov._orig_iov = iov
+        return giov
+    
 class TDAQC_Multi_Channel_Variable(TDAQC_Variable):
     def make_good_iov(self, iov):
         """
@@ -197,79 +221,152 @@ class TDAQC_Multi_Channel_Variable(TDAQC_Variable):
         return IOVSet(sum(zip(*results), ())) # Sort by channel first
 
 class TDAQC_Bit_Flag_Variable(TDAQC_Multi_Channel_Variable):
-    def __init__(self, query, evaluator, *, regex=False, mapping=dict()):
-        super().__init__(query, evaluator, regex=regex)
-        self.mapping = mapping
-
     def make_good_iov(self, iov):
         """
         Determine if channels in one input iov are good.
         """
         giov = []
         for bit, channel in self.mapping.get(iov.channel, dict()).items():
-            test_iov = PBeastIOV(iov.since, iov.until, channel, ((iov.value >> bit) & 1) == 1)
+            iov_value = (((iov.value >> bit) & 1) == 1) if iov.value is not None else None
+            test_iov = PBeastIOV(iov.since, iov.until, channel, iov_value)
             current = GoodIOV(iov.since, iov.until, channel, self.evaluator(test_iov))
             current._orig_iov = iov
             giov.append(current)
         return giov
         
+class TDAQC_Array_Variable(TDAQC_Multi_Channel_Variable):
+    def make_good_iov(self, iov):
+        """
+        Determine if channels in one input iov are good.
+        """
+        giov = []
+        for index, channel in self.mapping.get(iov.channel, dict()).items():
+            iov_value = iov.value[index] if iov.value is not None else None
+            test_iov = PBeastIOV(iov.since, iov.until, channel, iov_value)
+            current = GoodIOV(iov.since, iov.until, channel, self.evaluator(test_iov))
+            current._orig_iov = iov
+            giov.append(current)
+        return giov
+
 # DCS channels
+A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE = 101, 105, 109, 113
 A_FAR_SIT_HV, A_NEAR_SIT_HV, C_FAR_SIT_HV, C_NEAR_SIT_HV =   1,   5,   9,  13
 A_FAR_SIT_LV, A_NEAR_SIT_LV, C_FAR_SIT_LV, C_NEAR_SIT_LV =  21,  25,  29,  33
 A_FAR_TOF_HV,                C_FAR_TOF_HV                =  51,       59
 A_FAR_TOF_LV,                C_FAR_TOF_LV                =  71,       79
-A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE = 101, 105, 109, 113
 
 # TDAQ channels
+TTC_RESTART        = 1000
+NOT_IN_COMBINED    = -1000
+STOPLESSLY_REMOVED = 5000
+
 A_FAR_SIT_DISABLED, A_NEAR_SIT_DISABLED, C_FAR_SIT_DISABLED, C_NEAR_SIT_DISABLED = 1001, 1005, 1009, 1013
 A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED                      = 1051,       1059
+
+# Channel groups
+GARAGE = [A_FAR_GARAGE, A_NEAR_GARAGE, C_FAR_GARAGE, C_NEAR_GARAGE]
+SIT_HV = [A_FAR_SIT_HV, A_NEAR_SIT_HV, C_FAR_SIT_HV, C_NEAR_SIT_HV]
+SIT_LV = [A_FAR_SIT_LV, A_NEAR_SIT_LV, C_FAR_SIT_LV, C_NEAR_SIT_LV]
+TOF_HV = [A_FAR_TOF_HV,                C_FAR_TOF_HV]
+TOF_LV = [A_FAR_TOF_LV,                A_FAR_TOF_LV]
+
+SIT_DISABLED = [A_FAR_SIT_DISABLED, A_NEAR_SIT_DISABLED, C_FAR_SIT_DISABLED, C_NEAR_SIT_DISABLED]
+TOF_DISABLED = [A_FAR_TOF_DISABLED,                      C_FAR_TOF_DISABLED]
 
 # Thresholds
 SIT_HV_DEAD_BAND = 0.05
 TOF_HV_DEAD_BAND = 0.90
 
+SIT_HV_CURRENT_LOW = -59.7
+
 SIT_LV_CURRENT_LOW, SIT_LV_CURRENT_HIGH = 0.4, 0.6
+
+def mapChannels(*mapseqArgs):
+    return dict(chain(*[zip(channels, range(defectChannel, defectChannel + len(channels))) for channels, defectChannel in mapseqArgs]))
+
+def mapTranslatorCounts(countMap):
+    result = dict()
+    for count, channels in countMap.items():
+        for channel in channels:
+            result[channel] = range(channel, channel + count)
+    return result
 
 def remove_None(value, default):
     return value if value is not None else default
 
-def disabledEvaluator(iov):
-    diff = 8 if '4' == iov.channel[-1] else 0
-    outlinks = [8, 10, 12, 14, 0, 2, 4, 6, 9, 11]
-    mapping = list(range(1001, 1009)) + [1051, 1052]
-    mapping = list(map(lambda x: x+diff, mapping))
-    return [(c, (iov.value >> o) & 1 == 0) for o, c in zip(outlinks, mapping)]
-
 class AFP(DCSC_DefectTranslate_Subdetector):
     folder_base = '/AFP/DCS'
     variables = [
+        #######################################################################
+        # DCS Defects
+        #######################################################################
+
+        # AFP_(A|C)_(FAR|NEAR)_IN_GARAGE
+        DCSC_Variable_With_Mapping('STATION', lambda iov: iov.inphysics is True),
+
+        # AFP_(A|C)_(FAR|NEAR)_SIT_(PARTIALLY|NOT)_OPERATIONAL_HV
         DCSC_Merged_Variable(
-            lambda iov: -remove_None(iov.hv.voltage, 0) > iov.hv_voltage_set.voltageSet - SIT_HV_DEAD_BAND,
+            lambda iov: -remove_None(iov.hv.voltage, 0) > iov.hv_voltage_set.voltageSet - SIT_HV_DEAD_BAND, # or iov.hv.current < SIT_HV_CURRENT_LOW,
             ['SIT/HV', 'SIT/HV_VOLTAGE_SET'],
             mapping={
-                'SIT/HV': dict(zip([6,7,1,2,8,3,4,9,10,11,12,5,13,14,15,16], range(1,17)))
+                'SIT/HV': mapChannels(([ 6,  7,  1,  2], A_FAR_SIT_HV ),
+                                      ([ 8,  3,  4,  9], A_NEAR_SIT_HV),
+                                      ([10, 11, 12,  5], C_FAR_SIT_HV ),
+                                      ([13, 14, 15, 16], C_NEAR_SIT_HV))
             }
         ),
+
+        # AFP_(A|C)_(FAR|NEAR)_SIT_(PARTIALLY|NOT)_OPERATIONAL_LV
         DCSC_Variable_With_Mapping('SIT/LV', lambda iov: SIT_LV_CURRENT_LOW <= remove_None(iov.current, 0) <= SIT_LV_CURRENT_HIGH),
+
+        # AFP_(A|C)_FAR_TOF_NOT_OPERATIONAL_HV
         DCSC_Merged_Variable(
             lambda iov: -remove_None(iov.tof.pmt_voltage, 0) > iov.tof_pmt_voltage_set.pmt_voltageSet - TOF_HV_DEAD_BAND,
             ['TOF', 'TOF_PMT_VOLTAGE_SET'],
             mapping={
-                'TOF': {1: A_FAR_TOF_HV, 2: C_FAR_TOF_HV},
+                'TOF':                 {1: A_FAR_TOF_HV, 2: C_FAR_TOF_HV},
                 'TOF_PMT_VOLTAGE_SET': {1: A_FAR_TOF_HV, 2: C_FAR_TOF_HV},
             }
         ),
-        DCSC_Variable_With_Mapping('STATION', lambda iov: iov.inphysics is True),
-        #TDAQC_Multi_Channel_Variable('ATLAS.RceMonitoring.Disabled.Monitoring.RceMonitoring_RCE[34]', disabledEvaluator, regex=True),
+
+        #######################################################################
+        # TDAQ Defects
+        #######################################################################
+
+        # Prepared in case the hancool will not be operational.
+        # # AFP_DISABLED
+        # TDAQC_Variable(
+        #     'ATLAS.RCStateInfo.state.RunCtrl.AFP',
+        #     lambda iov: iov.value != 'NOT INCLUDED',
+        #     mapping={'RunCtrl.AFP': NOT_IN_COMBINED},
+        #     force_mapping=True,
+        #     empty_value='NOT INCLUDED'
+        # ),
+
+        # AFP_TTC_RESTART
+        TDAQC_Variable(
+            'ATLAS.RCStateInfo.state.RunCtrl.AFP',
+            lambda iov: iov.value == 'RUNNING',
+            mapping={'RunCtrl.AFP': TTC_RESTART}
+        ),
+
+        # AFP_STOPLESSLY_REMOVED
+        TDAQC_Array_Variable(
+            'ATLAS.RODBusyIS.BusyEnabled.Monitoring.afp_rodBusy-VLDB/RODBusy',
+            lambda iov: iov.value is not False,
+            mapping={'Monitoring.afp_rodBusy-VLDB/RODBusy': {6: STOPLESSLY_REMOVED}}
+        ),
+
+        # AFP_(A|C)_(FAR|NEAR)_(PARTIALLY|NOT)_OPERATIONAL_TDAQ
         TDAQC_Bit_Flag_Variable(
-            'ATLAS.RceMonitoring.Disabled.Monitoring.RceMonitoring_RCE[34]',
-            lambda iov: iov.value is False,
+            'ATLAS.RceMonitoring.DisabledPerm.Monitoring.RceMonitoring_RCE[34]',
+            lambda iov: iov.value is not True,
             regex=True,
             mapping={
-                'Monitoring.RceMonitoring_RCE3': dict(zip([8, 10, 12, 14, 0, 2, 4, 6, 9, 11],list(range(1001, 1009)) + [1051, 1053])),
-                'Monitoring.RceMonitoring_RCE4': dict(zip([8, 10, 12, 14, 0, 2, 4, 6, 9, 11],list(range(1009, 1014)) + [1059, 1061])),
+                'Monitoring.RceMonitoring_RCE3': mapChannels(([0, 2, 4, 6], A_NEAR_SIT_DISABLED), ([8, 10, 12, 14], A_FAR_SIT_DISABLED), ([9, 11], A_FAR_TOF_DISABLED)),
+                'Monitoring.RceMonitoring_RCE4': mapChannels(([0, 2, 4, 6], C_NEAR_SIT_DISABLED), ([8, 10, 12, 14], C_FAR_SIT_DISABLED), ([9, 11], C_FAR_TOF_DISABLED)),
             }
-        )
+        ),
     ]
 
     equality_breaker = 0.0001
@@ -277,23 +374,24 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     dead_fraction_caution = 0 + equality_breaker
     dead_fraction_bad = 0.25 + equality_breaker
 
-    mapping = {
-        A_FAR_SIT_HV:  range( 1,  5), A_NEAR_SIT_HV: range( 5,  9),
-        C_FAR_SIT_HV:  range( 9, 13), C_NEAR_SIT_HV: range(13, 17),
+    mapping = mapTranslatorCounts({
+        1: [*GARAGE, *TOF_HV, TTC_RESTART, NOT_IN_COMBINED, STOPLESSLY_REMOVED],
+        2: TOF_DISABLED,
+        4: [*SIT_HV, *SIT_LV, *SIT_DISABLED],
+    })
         
-        A_FAR_SIT_LV:  range(21, 25), A_NEAR_SIT_LV: range(25, 29),
-        C_FAR_SIT_LV:  range(29, 33), C_NEAR_SIT_LV: range(33, 37),
+    def merge_variable_states(self, states):
+        """
+        Merge input channel states across variables, taking the worst.
+        
+        Ignore configuration variables and variables without channel.
+        """
 
-        A_FAR_TOF_HV: [A_FAR_TOF_HV], C_FAR_TOF_HV: [C_FAR_TOF_HV],
-
-        A_FAR_GARAGE: [A_FAR_GARAGE], A_NEAR_GARAGE: [A_NEAR_GARAGE],
-        C_FAR_GARAGE: [C_FAR_GARAGE], C_NEAR_GARAGE: [C_NEAR_GARAGE],
-
-        A_FAR_SIT_DISABLED: range(1001, 1005), A_NEAR_SIT_DISABLED: range(1005, 1009),
-        C_FAR_SIT_DISABLED: range(1009, 1013), C_NEAR_SIT_DISABLED: range(1013, 1017),
-
-        A_FAR_TOF_DISABLED: [1051, 1053], C_FAR_TOF_DISABLED: [1059, 1061]
-    }
+        # Remove variables without channel
+        states = [state for state in states if state and state.channel is not None]
+                
+        # More simplistic way of doing the above, but cannot handle config vars:
+        return min(state.good for state in states) if len(states) > 0 else None
 
     @staticmethod
     def color_to_defect_translator(channel, defect, color, comment):
@@ -310,6 +408,14 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         self.set_input_mapping('STATION', dict(zip([1, 2, 3, 4], [C_FAR_GARAGE, C_NEAR_GARAGE, A_FAR_GARAGE, A_NEAR_GARAGE])))
         self.translators = [AFP.color_to_defect_translator(*cdcc)
                             for cdcc in [
+                                ###############################################
+                                # DCS Defects
+                                ###############################################
+                                (C_FAR_GARAGE,  'AFP_C_FAR_IN_GARAGE',  RED, AFP.comment_GARAGE),
+                                (C_NEAR_GARAGE, 'AFP_C_NEAR_IN_GARAGE', RED, AFP.comment_GARAGE),
+                                (A_FAR_GARAGE,  'AFP_A_FAR_IN_GARAGE',  RED, AFP.comment_GARAGE),
+                                (A_NEAR_GARAGE, 'AFP_A_NEAR_IN_GARAGE', RED, AFP.comment_GARAGE),
+
                                 (C_FAR_SIT_HV,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_HV',  YELLOW, AFP.comment_SIT_HV),
                                 (C_FAR_SIT_HV,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_HV',        RED,    AFP.comment_SIT_HV),
                                 (C_NEAR_SIT_HV, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_HV', YELLOW, AFP.comment_SIT_HV),
@@ -331,23 +437,33 @@ class AFP(DCSC_DefectTranslate_Subdetector):
                                 (A_FAR_TOF_HV, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_HV', RED, AFP.comment_TOF_HV),
                                 (C_FAR_TOF_HV, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_HV', RED, AFP.comment_TOF_HV),
 
-                                (C_FAR_GARAGE,  'AFP_C_FAR_IN_GARAGE',  RED, AFP.comment_GARAGE),
-                                (C_NEAR_GARAGE, 'AFP_C_NEAR_IN_GARAGE', RED, AFP.comment_GARAGE),
-                                (A_FAR_GARAGE,  'AFP_A_FAR_IN_GARAGE',  RED, AFP.comment_GARAGE),
-                                (A_NEAR_GARAGE, 'AFP_A_NEAR_IN_GARAGE', RED, AFP.comment_GARAGE),
+                                ###############################################
+                                # TDAQ Defects
+                                ###############################################
+                                (NOT_IN_COMBINED,    'AFP_DISABLED',           RED, AFP.comment_NOT_IN_COMBINED),
+                                (TTC_RESTART,        'AFP_TTC_RESTART',        RED, AFP.comment_TTC_RESTART),
+                                (STOPLESSLY_REMOVED, 'AFP_STOPLESSLY_REMOVED', RED, AFP.comment_STOPLESSLY_REMOVED),
 
-                                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  YELLOW, AFP.comment_SIT_DISABLED),
-                                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_TDAQ',        RED,    AFP.comment_SIT_DISABLED),
-                                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', YELLOW, AFP.comment_SIT_DISABLED),
-                                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_TDAQ',       RED,    AFP.comment_SIT_DISABLED),
                                 (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  YELLOW, AFP.comment_SIT_DISABLED),
                                 (A_FAR_SIT_DISABLED,  'AFP_A_FAR_SIT_NOT_OPERATIONAL_TDAQ',        RED,    AFP.comment_SIT_DISABLED),
                                 (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', YELLOW, AFP.comment_SIT_DISABLED),
                                 (A_NEAR_SIT_DISABLED, 'AFP_A_NEAR_SIT_NOT_OPERATIONAL_TDAQ',       RED,    AFP.comment_SIT_DISABLED),
+                                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_PARTIALLY_OPERATIONAL_TDAQ',  YELLOW, AFP.comment_SIT_DISABLED),
+                                (C_FAR_SIT_DISABLED,  'AFP_C_FAR_SIT_NOT_OPERATIONAL_TDAQ',        RED,    AFP.comment_SIT_DISABLED),
+                                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_PARTIALLY_OPERATIONAL_TDAQ', YELLOW, AFP.comment_SIT_DISABLED),
+                                (C_NEAR_SIT_DISABLED, 'AFP_C_NEAR_SIT_NOT_OPERATIONAL_TDAQ',       RED,    AFP.comment_SIT_DISABLED),
 
                                 (A_FAR_TOF_DISABLED, 'AFP_A_FAR_TOF_NOT_OPERATIONAL_TDAQ', RED, AFP.comment_TOF_DISABLED),
                                 (C_FAR_TOF_DISABLED, 'AFP_C_FAR_TOF_NOT_OPERATIONAL_TDAQ', RED, AFP.comment_TOF_DISABLED),
                             ]]
+        
+    ###########################################################################
+    # DCS Defects
+    ###########################################################################
+
+    @staticmethod
+    def comment_GARAGE(iov):
+        return 'Station not in physics'
 
     @staticmethod
     def comment_SIT_HV(iov):
@@ -359,11 +475,23 @@ class AFP(DCSC_DefectTranslate_Subdetector):
 
     @staticmethod
     def comment_TOF_HV(iov):
-        return 'ToF out of nominal voltage'
+        return 'ToF PMT out of nominal voltage'
+    
+    ###########################################################################
+    # TDAQ Defects
+    ###########################################################################
 
     @staticmethod
-    def comment_GARAGE(iov):
-        return 'Station not in physics'
+    def comment_NOT_IN_COMBINED(iov):
+        return 'AFP not included in the ATLAS partition'
+
+    @staticmethod
+    def comment_TTC_RESTART(iov):
+        return 'AFP not in the RUNNING state'
+
+    @staticmethod
+    def comment_STOPLESSLY_REMOVED(iov):
+        return 'AFP stoplessly removed from the run'
     
     @staticmethod
     def comment_SIT_DISABLED(iov):
@@ -373,6 +501,10 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     def comment_TOF_DISABLED(iov):
         return AFP.comment_device(iov, 'ToF TDC', 'removed from readout')
     
+    ###########################################################################
+    # Comment templates
+    ###########################################################################
+
     @staticmethod
     def comment_planes(iov, message):
         return AFP.comment_device(iov, 'SiT plane', message)
@@ -380,17 +512,6 @@ class AFP(DCSC_DefectTranslate_Subdetector):
     @staticmethod
     def comment_device(iov, device, message):
         count = iov.NConfig - iov.NWorking
-        return '%d %s%s %s' % (count, device, '' if count == 1 else 's', message)
-        
-    def merge_variable_states(self, states):
-        """
-        Merge input channel states across variables, taking the worst.
-        
-        Ignore configuration variables and variables without channel.
-        """
-
-        # Remove variables without channel
-        states = [state for state in states if state and state.channel is not None]
-                
-        # More simplistic way of doing the above, but cannot handle config vars:
-        return min(state.good for state in states) if len(states) > 0 else None
+        if count != 1:
+            device += 's'
+        return f"{count} {device} {message}"

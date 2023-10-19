@@ -84,7 +84,7 @@ def EfexMonitoringHistConfig(inputFlags, eFexAlg):
                                 type='TH1I', path=trigPath+tobStr+'/', xbins=10,xmin=0,xmax=10)
         noCutGroup.defineHistogram("tobType,"+containerKey + "_seedMax;h_tauTob_seedMax", title='Seedmax bit;tobType;value;Number of TOBs',
                                    type='TH2I',path=trigPath+tobStr+'/', xbins=2,xmin=0,xmax=2,xlabels=["em","tau"],ybins=2,ymin=-0.5,ymax=1.5)
-    
+
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):
         cut_title_addition = '' if (cut_val == 0.0) else ' (Et>' + '%.1f'%(cut_val/1000) + 'GeV cut)'

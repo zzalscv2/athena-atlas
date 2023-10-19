@@ -1232,7 +1232,7 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx,
         const int measuresPhi = rpcIdHelper.measuresPhi(id);
 
         isOutTime = false;
-        if (std::abs(i_hit.second->time()) > m_outtime) {
+        if (std::abs(i_hit.second->time()+50.) > m_outtime) {
             isOutTime = true;
         }
 
