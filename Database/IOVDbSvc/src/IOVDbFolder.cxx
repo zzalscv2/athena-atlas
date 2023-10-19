@@ -356,12 +356,18 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
       m_crest_tag = completeTag;
       m_tag_info = cfunctions.getTagInfo(completeTag);
     }
-    const auto & specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
 
+    const std::string& nodeDescription = cfunctions.getTagInfoElement(m_tag_info,"node_description");
+    if(nodeDescription.find("CondAttrListVec") != std::string::npos) {
+      basicFolder.setVectorPayloadFlag(true);
+    }
+
+    const std::string& specString = cfunctions.getTagInfoElement(m_tag_info,"payload_spec");
     if (specString.empty()){
       ATH_MSG_FATAL("Reading payload spec from "<<m_foldername<<" failed.");
       return false;
     }
+
     //basic folder now contains the info
     Json2Cool inputJson(ss, basicFolder, specString, &(iovHashVect[indIOV].first));
     if (basicFolder.empty()){
@@ -801,7 +807,6 @@ IOVDbFolder::getAddress(const cool::ValidityKey reftime,
     unsigned int nobj=0;
     // keep track of closest neighbouring IOVs
     std::tie(naystart, naystop) = m_iovs.getCacheBounds();
-
     for (unsigned int ic=0; ic!=m_iovs.size();++ic) {
       const auto & thisIov  = m_iovs.at(ic);
       if (thisIov.first<=reftime && reftime<thisIov.second) {

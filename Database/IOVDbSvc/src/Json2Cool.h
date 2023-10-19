@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef IOVDbSvc_Json2Cool_h
-#define IOVDbSvc_Json2Cool_h
+#ifndef IOVDBSVC_JSON2COOL_H
+#define IOVDBSVC_JSON2COOL_H
 
 #include "CoolKernel/StorageType.h"
 #include <string>
@@ -17,10 +17,14 @@ namespace cool{
   class Record;
 }
 
-
 namespace IOVDbNamespace {
 
-  //@brief Produces cool objects from their JSON representation, storing them in a 'BasicFolder'
+  /**
+   * @class Json2Cool
+   * @brief Produces cool objects from their JSON representation, storing them in a 'BasicFolder'
+   *
+   */
+
   class Json2Cool {
   public:
     
@@ -36,9 +40,6 @@ namespace IOVDbNamespace {
   private:
     void init(std::istream & stream, const std::string & specString, const IovStore::Iov_t* iov);
     cool::RecordSpecification * m_sharedSpec = nullptr;
-    //
-    bool m_isVectorPayload = false;
-    //
     BasicFolder &m_basicFolder;
     
 

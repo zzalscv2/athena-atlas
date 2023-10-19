@@ -70,31 +70,27 @@ namespace IOVDbNamespace{
       m_sharedSpec = parsePayloadSpec(specString);
       const auto & payload=j["data"];//payload is an object in any case, of form {"0":["datastring"]}
       //keep these lines for reference: iov handling is not yet implemented, but should be
-      //m_basicFolder.setVectorPayloadFlag(m_isVectorPayload);
       //const auto & iovFromFile=j["iov"];//iov is a two-element array
       //const std::pair<cool::ValidityKey, cool::ValidityKey> iov(iovFromFile[0], iovFromFile[1]);
-      m_isVectorPayload = false;
       if(iov) {
 	m_basicFolder.setIov(*iov);
       }
       else {
 	m_basicFolder.setIov(IovStore::Iov_t(0, cool::ValidityKeyMax));
       }
-      if (m_isVectorPayload){
+      if (m_basicFolder.isVectorPayload()){
         for (json::const_iterator k=payload.begin();k!=payload.end();++k){ //k are {"0":}
           const json& f=k.value(); //channel id
+          const std::string& ks=k.key();
+          const long long key=std::stoll(ks);
           std::vector<coral::AttributeList> tempVector;//can optimise this by pre constructing it and using 'clear'
           for (json::const_iterator i=f.begin();i!=f.end();++i){
-            const std::string& keyString=i.key();
-            const long long key=std::stoll(keyString);
-            const auto & val=i.value();
-            for (const auto & aList:val){        
-              auto r=createAttributeList(m_sharedSpec,aList);
-              const auto & attList=r.attributeList();
-              tempVector.push_back(attList);
-            }
-            m_basicFolder.addChannelPayload(key, tempVector);
+            const json& arrayElem=i.value();
+            auto r=createAttributeList(m_sharedSpec,arrayElem);
+            const auto & attList=r.attributeList();
+            tempVector.push_back(attList);
           }
+          m_basicFolder.addChannelPayload(key, tempVector);
           //add payload with channelId here
         }
       } else {
@@ -157,68 +153,75 @@ namespace IOVDbNamespace{
           att.setNull();
           continue;
         }
-	
 	cool::StorageType::TypeId typespec = f.storageType().id();
+        std::string strVal=thisVal.get<std::string>();
 
+        if((strVal.compare("NULL")==0||strVal.compare("null")==0)&&
+	  (typespec==StorageType::Bool || typespec==StorageType::Int16 || typespec==StorageType::UInt16
+          || typespec==StorageType::Int32 || typespec==StorageType::UInt32
+          || typespec==StorageType::Int64 || typespec==StorageType::UInt63
+          || typespec==StorageType::Float || typespec==StorageType::Double)){
+          att.setNull();
+          continue;
+        }
         switch (typespec) {
 	case StorageType::Bool:
 	  {
-	    const bool newVal=(thisVal.get<std::string>() == "true");
+	    const bool newVal=(strVal == "true");
 	    att.setValue<bool>(newVal);
 	    break;
 	  }
 	case StorageType::UChar:
 	  {
-	    const unsigned char newVal=std::stoul(thisVal.get<std::string>());
+	    const unsigned char newVal=std::stoul(strVal);
 	    att.setValue<unsigned char>(newVal);
 	    break;
 	  }
 	case StorageType::Int16:
 	  {
-	    const short newVal=std::stol(thisVal.get<std::string>());
+	    const short newVal=std::stol(strVal);
 	    att.setValue<short>(newVal);
 	    break;
 	  }
 	case StorageType::UInt16:
 	  {
-	    const unsigned short newVal=std::stoul(thisVal.get<std::string>());
+	    const unsigned short newVal=std::stoul(strVal);
 	    att.setValue<unsigned short>(newVal);
 	    break;
 	  }
 	case StorageType::Int32:
 	  {
-	    const int newVal=std::stoi(thisVal.get<std::string>());
+	    const int newVal=std::stoi(strVal);
 	    att.setValue<int>(newVal);
 	    break;
 	  }
 	case StorageType::UInt32:
 	  {
-	    const std::string valString=thisVal.get<std::string>();
-	    const unsigned int newVal=std::stoull(valString);
+	    const unsigned int newVal=std::stoull(strVal);
 	    att.setValue<unsigned int>(newVal);
 	    break;
 	  }
 	case StorageType::UInt63:
 	  {
-	    const unsigned long long newVal=thisVal;
+	    const  unsigned long long newVal=std::stoull(strVal);
 	    att.setValue<unsigned long long>(newVal);
 	    break;
 	  }
 	case StorageType::Int64:
 	  {
-	    const  long long newVal=std::stoll(thisVal.get<std::string>());
+	    const  long long newVal=std::stoll(strVal);
 	    att.setValue< long long>(newVal);
 	    break;
 	  }
 	case StorageType::Float:
 	  {
-	    const  float newVal=std::stof(thisVal.get<std::string>());;
+	    const  float newVal=std::stof(strVal);
 	    att.setValue<float>(newVal);
 	    break;
 	  }
 	case StorageType::Double:
 	  {
-	    const  double newVal=std::stod(thisVal.get<std::string>());
+	    const  double newVal=std::stod(strVal);
 	    att.setValue<double>(newVal);
 	    break;
 	  }
@@ -227,15 +230,13 @@ namespace IOVDbNamespace{
 	case StorageType::String64k:
 	case StorageType::String16M:
 	  {
-	    const  std::string newVal=thisVal;
-	    att.setValue<std::string>(newVal);
+	    att.setValue<std::string>(strVal);
 	    break;
 	  }
 	case StorageType::Blob16M:
 	case StorageType::Blob64k:
 	  {
-	    const std::string & s = thisVal.get<std::string>();
-	    auto blob = base64Decode(s);
+	    auto blob = base64Decode(strVal);
 	    att.setValue<coral::Blob>(blob);
 	    break;
 	  }
