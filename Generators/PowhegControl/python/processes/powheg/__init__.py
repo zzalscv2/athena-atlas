@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # flake8: noqa
 
 from .bb import bb
 from .bbH import bbH
 from .bblvlv import bblvlv
+from .bblvlv_modified import bblvlv_modified 
 from .chi0chi0 import chi0chi0
 from .chi0chi1 import chi0chi1
 from .chi1chi1 import chi1chi1

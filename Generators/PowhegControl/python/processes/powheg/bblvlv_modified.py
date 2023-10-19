@@ -8,12 +8,12 @@ from ..powheg_RES import PowhegRES
 logger = Logging.logging.getLogger("PowhegControl")
 
 
-class bblvlv(PowhegRES):
+class bblvlv_modified(PowhegRES):
     """! Default Powheg configuration for top pair and Wt production including non-resonant and interference effects.
-
+    This is the modified version that contains all dilepton decay channels in one sample.
     Create a configurable object with all applicable Powheg options.
 
-    @author James Robinson  <james.robinson@cern.ch>
+    @author Andrej Saibel <Andrej.Saibel@cern.ch>
     """
 
     def __init__(self, base_directory, **kwargs):
@@ -22,7 +22,7 @@ class bblvlv(PowhegRES):
         @param base_directory: path to PowhegBox code.
         @param kwargs          dictionary of arguments from Generate_tf.
         """
-        super(bblvlv, self).__init__(base_directory, "b_bbar_4l", **kwargs)
+        super(bblvlv_modified, self).__init__(base_directory, "b_bbar_4l_modified", **kwargs)
 
         # This is a hacky fix that's needed at the moment...
         self.manually_set_openloops_paths()
