@@ -127,7 +127,7 @@ def ZdcRecRun2Cfg(flags):
 def ZdcRecRun3Cfg(flags):
 
     acc = ComponentAccumulator()
-    config = "pp2023"
+    config = "PbPb2023"
     doCalib = False
     doTimeCalib = False
     doTrigEff = False
@@ -383,10 +383,14 @@ if __name__ == '__main__':
 
 
     if not flags.Input.isMC:
-       from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-       acc.merge(ZdcMonitoringConfig(flags,'pbpb')) #PbPb only
-       if (isCalib): # don't configure ntuple for typical reco jobs
-           acc.merge(ZdcNtupleCfg(flags))
+        if (isLED):
+            from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
+            acc.merge(ZdcLEDMonitoringConfig(flags,'PbPb2023'))
+        else:
+            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
+            acc.merge(ZdcMonitoringConfig(flags,'PbPb2023'))
+        if (isCalib): # don't configure ntuple for typical reco jobs
+            acc.merge(ZdcNtupleCfg(flags))
 
     acc.printConfig(withDetails=True)
 
