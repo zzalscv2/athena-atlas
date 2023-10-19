@@ -129,13 +129,15 @@ def getNewConfigFlags():
     # Muon reco flags
     try:
         from RecExConfig.RecAlgsFlags import recAlgs
-        ConfigFlags.MuonCombined.doMuGirl = recAlgs.doMuGirl()
+        if not recAlgs.doMuGirl():
+            ConfigFlags.MuonCombined.doMuGirl = False
     except ImportError:
         log.info('RecExConfig not available, "ConfigFlags.MuonCombined.doMuGirl" not set')
         pass
     try:
         from MuonCombinedRecExample.MuonCombinedRecFlags import muonCombinedRecFlags
-        ConfigFlags.MuonCombined.doMuGirlLowBeta = muonCombinedRecFlags.doMuGirlLowBeta()
+        if not muonCombinedRecFlags.doMuGirlLowBeta():
+            ConfigFlags.MuonCombined.doMuGirlLowBeta = False
     except ImportError:
         log.info('MuonCombinedRecExample not available, "ConfigFlags.MuonCombined.doMuGirlLowBeta" not set')
         pass
