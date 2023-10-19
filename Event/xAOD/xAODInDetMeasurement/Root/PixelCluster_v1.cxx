@@ -64,32 +64,15 @@ void xAOD::PixelCluster_v1::setOmegas(float omegaX, float omegaY) {
 AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, omegaX)
 AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, omegaY)
 
-void xAOD::PixelCluster_v1::setToTlist(const std::vector<int>& tots) {
-    static const SG::AuxElement::Accessor<std::vector<int> > totsAcc("totList");
-    totsAcc(*this) = tots;
-    int totalToT = 0;
-    for (auto& tot : tots)
-        totalToT += tot;
-    static const SG::AuxElement::Accessor<int> totalToTAcc("totalToT");
-    totalToTAcc(*this) = totalToT;
-}
+AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totList,
+				  setToTlist)
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, int, totalToT,
+				     setTotalToT)
 
-AUXSTORE_OBJECT_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totList)
-AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, int, totalToT)
-
-void xAOD::PixelCluster_v1::setChargelist(const std::vector<float>& charges) {
-    static const SG::AuxElement::Accessor<std::vector<float> > chargesAcc(
-        "chargeList");
-    chargesAcc(*this) = charges;
-    float totalCharge = 0;
-    for (auto& charge : charges)
-        totalCharge += charge;
-    static const SG::AuxElement::Accessor<float> totalChargeAcc("totalCharge");
-    totalChargeAcc(*this) = totalCharge;
-}
-
-AUXSTORE_OBJECT_GETTER(xAOD::PixelCluster_v1, std::vector<float>, chargeList)
-AUXSTORE_PRIMITIVE_GETTER(xAOD::PixelCluster_v1, float, totalCharge)
+AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<float>, chargeList,
+				  setChargelist)
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, totalCharge,
+				     setTotalCharge)
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, energyLoss,
                                      setEnergyLoss)
