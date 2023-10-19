@@ -1605,12 +1605,19 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
 
     char name[128];
 
-    std::string filename = PathResolverFindCalibFile( ("ZdcAnalysis/" + m_zdcEnergyCalibFileName).c_str() );
-
-    // Needs a smarter configuration, but run 3 will use one calibration file per run, to mesh better with the calibration loop
-    if (runNumber >= 400000)
+    std::string filename;
+    if (m_LHCRun==3)
       {
 	filename = PathResolverFindCalibFile( ("ZdcAnalysis/ZdcCalib_Run"+TString::Itoa(runNumber,10)+".root").Data() );
+      }
+    else if (m_LHCRun==2)
+      {
+	filename = PathResolverFindCalibFile( ("ZdcAnalysis/" + m_zdcEnergyCalibFileName).c_str() );
+      }
+    else
+      {
+	ATH_MSG_WARNING("No LHC Run defined, so no calibration allowed");
+	return;
       }
 
     ATH_MSG_INFO("Opening energy calibration file " << filename);
@@ -1628,26 +1635,27 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
     {
         for (int imod = 0; imod < 4; imod++)
         {
-            sprintf(name, "ZDC_Gcalib_run%u_s%d_m%d", runNumber, iside, imod);
-            ATH_MSG_DEBUG("Searching for graph " << name);
-            TGraph* g = (TGraph*) fCalib->GetObjectChecked(name, "TGraph");
-            if (!g && m_doCalib)
+            sprintf(name, "ZDC_Ecalib_run%u_s%d_m%d", runNumber, iside, imod);
+            ATH_MSG_DEBUG("Searching for spline " << name);
+            TSpline3* s = (TSpline3*) fCalib->GetObjectChecked(name, "TSpline3");
+            if (!s && m_doCalib)
             {
                 ATH_MSG_WARNING("No calibrations for run " << runNumber);
                 m_doCalib = false;
             }
 
-            if (g)
+            if (s)
             {
-                splines[iside][imod].reset (new TSpline3(name, g));
+                splines[iside][imod].reset (s);
             }
             else
             {
-                ATH_MSG_WARNING("No graph " << name);
+                ATH_MSG_WARNING("No spline " << name);
             }
         }
     }
     fCalib->Close();
+
     if (m_doCalib) m_zdcDataAnalyzer->LoadEnergyCalibrations(splines);
 
     return;
@@ -1655,13 +1663,29 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
 
 void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
 {
+    std::string filename;
+
+    if (m_LHCRun==3)
+      {
+	filename = PathResolverFindCalibFile( ("ZdcAnalysis/ZdcCalib_Run"+TString::Itoa(runNumber,10)+".root").Data() );
+      }
+    else if (m_LHCRun==2)
+      {
+	filename = PathResolverFindCalibFile( "ZdcAnalysis/" + m_zdcTimeCalibFileName );
+      }
+    else
+      {
+	ATH_MSG_WARNING("No LHC Run defined, so no time calibration allowed");
+	return;
+      }
+
     char name[128] = {0};
-    std::string filename = PathResolverFindCalibFile( "ZdcAnalysis/" + m_zdcTimeCalibFileName );
     ATH_MSG_INFO("Opening time calibration file " << filename);
     std::unique_ptr<TFile> fCalib (TFile::Open(filename.c_str(), "READ"));
 
     if (fCalib && !fCalib->IsZombie())
     {
+      bool success = true;
         std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> T0HGOffsetSplines;
         std::array<std::array<std::unique_ptr<TSpline>, 4>, 2> T0LGOffsetSplines;
         std::unique_ptr<TSpline3> spline;
@@ -1678,6 +1702,7 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
                 else
                 {
                     ATH_MSG_WARNING("No time calib. spline " << name);
+		    success = false;
                 }
 
                 sprintf(name, "ZDC_T0calib_run%u_LG_s%d_m%d", runNumber, iside, imod);
@@ -1689,10 +1714,16 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
                 else
                 {
                     ATH_MSG_WARNING("No time calib. spline " << name);
+		    success = false;
                 }
             }
         }
-        m_zdcDataAnalyzer->LoadT0Calibrations(T0HGOffsetSplines, T0LGOffsetSplines);
+
+        if (success) 
+	  m_zdcDataAnalyzer->LoadT0Calibrations(T0HGOffsetSplines, T0LGOffsetSplines);
+	else
+	  ATH_MSG_WARNING("Time calibration failed - no T0 offsets loaded " << name);
+
         fCalib->Close();
     }
     else

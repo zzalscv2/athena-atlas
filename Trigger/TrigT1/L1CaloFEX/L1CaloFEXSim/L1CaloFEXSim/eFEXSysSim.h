@@ -65,7 +65,31 @@ namespace LVL1 {
     /** Internal data */
   private:
     // TOB sorting function
-    template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j ) {return (((i->getTobword() >> 0 ) & 0xfff)>((j->getTobword() >> 0 ) & 0xfff)); }
+    template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j, bool isTau ) {
+      auto et_i = (i->getTobword() >> 0 ) & 0xfff;
+      auto et_j = (j->getTobword() >> 0 ) & 0xfff;
+      if(et_i > et_j) return true;
+      if(et_i==et_j) {
+        // resolve ties with procNumber (2,1,3,0 for em, 2,1,0,3 for tau), then phi, then eta
+        auto procOrder = (isTau) ? std::map<unsigned int,unsigned int>{{2,3},{1,2},{0,1},{3,0}} :
+                                   std::map<unsigned int,unsigned int>{{2,3},{1,2},{3,1},{0,0}};
+        auto proc_i = procOrder.at((i->getTobword()) >> 30);
+        auto proc_j = procOrder.at((j->getTobword()) >> 30);
+        if(proc_i > proc_j) return true;
+        if (proc_i == proc_j) {
+          auto phi_i = (i->getTobword()) & 0x07000000;
+          auto phi_j = (j->getTobword()) & 0x07000000;
+          if(phi_i > phi_j) return true;
+          if(phi_i == phi_j) {
+            auto eta_i = (i->getTobword()) & 0x38000000;
+            auto eta_j = (j->getTobword()) & 0x38000000;
+            if(eta_i > eta_j) return true;
+          }
+
+        }
+      }
+      return false;
+    }
 
     // Auxiliary for storing EDMs of both tau algos
     StatusCode StoreTauTOBs(std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> >& allTauTobObjects,
