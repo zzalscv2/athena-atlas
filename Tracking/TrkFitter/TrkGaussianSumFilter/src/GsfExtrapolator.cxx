@@ -36,6 +36,21 @@
 namespace {
 const bool useBoundaryMaterialUpdate(true);
 
+// In this code we have ptr that initially point
+// to a not owned input.
+// But then need to change to owning.
+// Lets try to do a small helper
+bool convertToOwningPlain(const bool isOwning,
+                          const Trk::MultiComponentState*& out,
+                          Trk::MultiComponentState&& in) {
+  // if is owning delete what is there
+  if (isOwning) {
+    delete out;
+  }
+  out = std::make_unique<Trk::MultiComponentState>(std::move(in)).release();
+  return true;
+}
+
 inline void
 setRecallInformation(Trk::IMultiStateExtrapolator::Cache& cache,
                      const Trk::Surface& recallSurface,
@@ -68,21 +83,10 @@ throwIntoRecycleBin(Trk::IMultiStateExtrapolator::Cache& cache,
 }
 
 inline void
-throwIntoRecycleBin(Trk::IMultiStateExtrapolator::Cache& cache,
-                    const Trk::TrackParameters* garbage)
-{
-  if (garbage) {
-    std::unique_ptr<const Trk::TrackParameters> sink(garbage);
-    cache.m_tpRecycleBin.push_back(std::move(sink));
-  }
-}
-
-inline void
 emptyRecycleBins(Trk::IMultiStateExtrapolator::Cache& cache)
 {
   // Reset the boundary information
-  Trk::StateAtBoundarySurface freshState;
-  cache.m_stateAtBoundarySurface = freshState;
+  cache.m_stateAtBoundarySurface = Trk::StateAtBoundarySurface{};
   cache.m_mcsRecycleBin.clear();
   cache.m_tpRecycleBin.clear();
 }
@@ -498,16 +502,8 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
   Trk::ParticleHypothesis particleHypothesis) const
 {
 
-  // MultiComponentState propagation and material effects
   const Trk::MultiComponentState* currentState = &multiComponentState;
-
-  // Determine the current layer - the state combiner is required
-
-  if (!currentState) {
-    ATH_MSG_WARNING(
-      "extrapolateToVolumeBoundary: Trying to extrapolate nothing?? -  return");
-    return;
-  }
+  bool currentStateOwns = false;
 
   const Trk::TrackParameters* combinedState =
     currentState->begin()->first.get();
@@ -535,14 +531,10 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
                                     particleHypothesis);
 
     if (!updatedState.empty()) {
-      currentState =
-        std::make_unique<Trk::MultiComponentState>(std::move(updatedState))
-          .release();
+      currentStateOwns = convertToOwningPlain(currentStateOwns, currentState,
+                                              std::move(updatedState));
     }
   }
-
-  // Clean up memory used by the combiner
-  combinedState = nullptr;
 
   Trk::MultiComponentState nextState{};
   // If an associated surface can be found, extrapolation within the tracking
@@ -561,13 +553,8 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
     if (!nextState.empty()) {
       // We can delete the currentState as long as it does not point to the
       // input
-      if (currentState != &multiComponentState) {
-        delete currentState;
-      }
-      // currentState now owns the ptr
-      currentState =
-        std::make_unique<Trk::MultiComponentState>(std::move(nextState))
-          .release();
+      currentStateOwns = convertToOwningPlain(currentStateOwns, currentState,
+                                              std::move(nextState));
     }
   }
 
@@ -577,24 +564,21 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
 
   Trk::NavigationCell nextNavigationCell(nullptr, nullptr);
 
-  combinedState = currentState->begin()->first->clone();
+  combinedState = currentState->begin()->first.get();
 
   const Trk::TrackingVolume* nextVolume = nullptr;
   const Trk::TrackParameters* navigationParameters =
     cache.m_stateAtBoundarySurface.navigationParameters
-      ? cache.m_stateAtBoundarySurface.navigationParameters
+      ? cache.m_stateAtBoundarySurface.navigationParameters.get()
       : combinedState;
 
   nextNavigationCell = m_navigator->nextTrackingVolume(
     ctx, *m_propagator, *navigationParameters, direction, trackingVolume);
 
   nextVolume = nextNavigationCell.nextVolume;
-  navigationParameters = nextNavigationCell.parametersOnBoundary.release();
 
-  // Clean up memory allocated by the combiner
-  if (navigationParameters != combinedState) {
-    delete combinedState;
-  }
+  std::unique_ptr<Trk::TrackParameters> nextNavigationParameters =
+      std::move(nextNavigationCell.parametersOnBoundary);
 
   if (!nextVolume) {
     // Reset the layer recall
@@ -613,12 +597,10 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
         ? (nextNavigationCell.parametersOnBoundary->associatedSurface())
             .materialLayer()
         : nullptr;
-    const Trk::TrackParameters* matUpdatedParameters = nullptr;
     Trk::MultiComponentState matUpdatedState{};
 
     if (nextVolume && layerAtBoundary) {
       if (layerAtBoundary->layerMaterialProperties()) {
-        assert(currentState);
         matUpdatedState =
           m_materialUpdator->postUpdate(cache.m_materialEffectsCaches,
                                         *currentState,
@@ -631,30 +613,20 @@ Trk::GsfExtrapolator::extrapolateToVolumeBoundary(
     // If state has changed due to boundary material, modify state, parameters
     // accordingly.
     if (!matUpdatedState.empty()) {
-      // Clean out memory, update state.
-      delete currentState;
-      currentState =
-        std::make_unique<Trk::MultiComponentState>(std::move(matUpdatedState))
-          .release();
-      // Update navigation parameters (?).
-      matUpdatedParameters = currentState->begin()->first->clone();
-      if (matUpdatedParameters != navigationParameters) {
-        delete navigationParameters;
-        navigationParameters = matUpdatedParameters;
-      }
+      currentStateOwns = convertToOwningPlain(currentStateOwns, currentState,
+                                              std::move(matUpdatedState));
+      nextNavigationParameters = currentState->begin()->first->uniqueClone();
       // Add to material vector.
     }
   }
 
   // Update the boundary information in the cache
   cache.m_stateAtBoundarySurface.updateBoundaryInformation(
-    currentState, navigationParameters, nextVolume);
+      currentState, std::move(nextNavigationParameters), nextVolume);
 
-  // Make sure navigation parameters
-  // and currentstate (if is not the same as input)
-  // are added to the list of garbage to be collected
-  throwIntoRecycleBin(cache, navigationParameters);
-  if (currentState != &multiComponentState) {
+  // Make sure navigation currentstate (if owned)
+  // is added to the list of garbage to be collected
+  if (currentStateOwns) {
     throwIntoRecycleBin(cache, currentState);
   }
 }
