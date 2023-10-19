@@ -119,17 +119,15 @@ Acts::Surface& MuonReadoutElement::surface() { return surface(stationHash); }
 const Acts::Surface& MuonReadoutElement::surface(const IdentifierHash& hash) const { return *surfacePtr(hash); }
 Acts::Surface& MuonReadoutElement::surface(const IdentifierHash& hash) { return *surfacePtr(hash); }
 
-
-
 StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<
     Acts::LineBounds> lBounds){
 
     //get the local to global transform cache
     MuonTransformSet::const_iterator transformCache = m_localToGlobalCaches.find(hash);
 
-    if (transformCache != m_localToGlobalCaches.end()) {
+    if (transformCache == m_localToGlobalCaches.end()) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
-                   <<" has already a transformation cached for hash "<<hash);
+                   <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }
 
@@ -142,9 +140,7 @@ StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash, s
     }
 
     //Create straw surface for the surface cache
-    auto straw = Acts::Surface::makeShared<Acts::StrawSurface>(lBounds, **insert_itr.first);
-    (*insert_itr.first)->setSurface(straw);
-
+    (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::StrawSurface>(lBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
 
 }
@@ -154,24 +150,20 @@ StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash, s
     //get the local to global transform cache
     MuonTransformSet::const_iterator transformCache = m_localToGlobalCaches.find(hash);
 
-    if (transformCache != m_localToGlobalCaches.end()) {
+    if (transformCache == m_localToGlobalCaches.end()) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
-                   <<" has already a transformation cached for hash "<<hash);
+                   <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }
-
+    
     auto insert_itr = m_surfaces.insert(std::make_unique<MuonSurfaceCache>((*transformCache).get(),detectorType()));
-
     if(!insert_itr.second){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
         return StatusCode::FAILURE;
     }
-
     //Create a plane surface for the surface cache
-    auto plane = Acts::Surface::makeShared<Acts::PlaneSurface>(pBounds, **insert_itr.first);
-    (*insert_itr.first)->setSurface(plane);
-
+    (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::PlaneSurface>(pBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
 }
 
