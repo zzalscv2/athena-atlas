@@ -1,58 +1,13 @@
 #! /usr/bin/env bash
 ## -*- sh -*-   
 ## lhapdf-config for MadGraph use in Athena
-## this custom config is required to find both the lhapdf installation dir and the actual pdf set data from LHAPDF_DATA_PATH 
-## in the default configuration the installation dir is hardcoded
+## this custom config is required to find lhapdf installation dir, version, and the actual pdf set data from env variables
+## in the default configuration this is hardcoded
 
-# short cut: version only we can get from env, this avoids some timeout issues
-if [ "$#" -eq 1 ]; then
-    if [ "$1" = "--version" ]; then
-	echo $LHAPDFVER
-	exit
-    fi
-fi
-
-prefix=
-datapath=
-# to find the prefix we searh LHAPATH before LHAPDF_DATA_PATH because the latter is more likely to change
-for p in $(echo "${LHAPATH}:${LHAPDF_DATA_PATH}" | tr ":" "\n")
-do
-    # if LHAPDF libraries can be found from this dir and prefix is not yet defined
-    if [[ -d "${p}/../../lib" ]] && [[ -z $prefix ]]
-    then
-	# we assume this is the lhapdf installation dir (and not the data dir)
-	prefix=${p}/../..
-    fi
-done
-
-# data is first searched in LHAPDF_DATA_PATH
-for p in $(echo "${LHAPDF_DATA_PATH}:${LHAPATH}" | tr ":" "\n")
-do
-    # if this directory exists and datapath is not yet defined and its not the prefix dir
-    if [[ -d ${p} ]] && [[ -z $datapath ]] && [[ ${p}/../.. != ${prefix} ]]
-    then
-	datapath=$p
-    fi
-done
-
-# if no datapath is found we try the prefix path
-if [[ -z $datapath ]] && [ -d $prefix/share/LHAPDF ]
-then
-    datapath=$prefix/share/LHAPDF
-fi
-
-if [ -z $prefix ]
-then
-    echo "WARNING: lhapdf-config could not get valid lhapdf prefix from LHAPDF_DATA_PATH"
-fi
-
+prefix=$LHAPDF_INSTAL_PATH
+datapath=$(echo $LHAPDF_DATA_PATH | cut -d':' -f1)
 exec_prefix=${prefix}
-
 version=$LHAPDFVER
-if [ -z $version ] 
-then
-    version=$(echo "$prefix" | awk '{split($1,a,"lhapdf/"); split(a[2],b,"/");print b[1];}')
-fi
 
 #find boost
 boost=@Boost_INCLUDE_PATH@
