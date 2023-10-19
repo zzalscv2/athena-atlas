@@ -158,7 +158,7 @@ protected:
 
 
   ///Simplify the retrieval of registered TEfficiency
-  inline TEfficiency* efficiency( const std::string& effName, const std::string& tDir="", const std::string& stream="" );
+  TEfficiency* efficiency( const std::string& effName, const std::string& tDir="", const std::string& stream="" );
 
 
   ///////////////////////////////////////////////////////////////////
