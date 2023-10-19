@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopParticleLevel/ParticleLevelPhotonObjectSelector.h"
@@ -92,7 +92,7 @@ namespace top {
     // --------------------------------------------------
     // Apply particle origin cut.
     if (m_opt.origin.size()) {
-      unsigned int origin;
+      unsigned int origin = 0;
       if (truthParticle.isAvailable<unsigned int>("particleOrigin")) {
         origin = truthParticle.auxdata<unsigned int>("particleOrigin");
       } else if (truthParticle.isAvailable<unsigned int>("classifierParticleOrigin")) {
