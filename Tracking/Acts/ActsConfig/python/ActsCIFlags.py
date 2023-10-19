@@ -60,12 +60,6 @@ def actsValidateGSFFlags(flags):
     from ActsConfig.ActsConfigFlags import TrackFitterType
     flags.Acts.trackFitterType = TrackFitterType.GaussianSumFitter
 
-def actsArtFlags(flags):
-    """flags for Reco_tf with CA used in ART test: add Acts workflow to reco sequence"""
-    flags.Reco.EnableHGTDExtension = False
-    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
-                                TrackingComponent.ActsChain]
-
 def actsBenchmarkSpotFlags(flags):
     """flags for Reco_tf with CA used for becnkmarking with SPOT"""
     flags.Reco.EnableHGTDExtension = False
