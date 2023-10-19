@@ -8,6 +8,7 @@
 // Local include(s):
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
+#include "xAODInDetMeasurement/Utilities.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
@@ -61,6 +62,7 @@ void fill( xAOD::PixelCluster& pixelCluster) {
 
     pixelCluster.globalPosition() = globalPosition;
     pixelCluster.setToTlist(tots);
+    pixelCluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(tots) );
     pixelCluster.setChannelsInPhiEta(3, 2);
     pixelCluster.setWidthInEta(0.05);
 
