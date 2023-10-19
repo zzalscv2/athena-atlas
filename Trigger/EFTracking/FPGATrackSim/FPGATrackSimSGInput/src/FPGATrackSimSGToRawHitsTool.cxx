@@ -743,7 +743,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
 void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_iterator& iter,
   FPGATrackSimInputUtils::ParentBitmask& parentMask,
   HepMcParticleLink::ExtendedBarCode& bestExtcode,
-  HepMC::ConstGenParticlePtr bestParent) {
+  HepMC::ConstGenParticlePtr& bestParent) {
 
   const InDetSimData& sdo(iter->second);
   const std::vector<InDetSimData::Deposit>& deposits(sdo.getdeposits());
@@ -765,11 +765,12 @@ void FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::co
       bestParent = particleLink.cptr();
       bestExtcode = HepMcParticleLink::ExtendedBarCode(particleLink.barcode(), particleLink.eventIndex());
     }
-#ifdef HEPMC3
-    parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(std::shared_ptr<const HepMC3::GenParticle>(particleLink.cptr()));
-#else
-    parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(particleLink.cptr());
-#endif
-    // check SDO
+ #ifdef HEPMC3
+     parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(std::shared_ptr<const HepMC3::GenParticle>(particleLink.cptr()));
+ #else
+     parentMask |= FPGATrackSimInputUtils::construct_truth_bitmap(particleLink.cptr());
+ #endif
+     // check SDO
   } // end for each contributing particle
+
 }

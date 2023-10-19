@@ -101,7 +101,7 @@ private:
   StatusCode dumpPixelClusters(HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext);
 
   // To get truth information from simulation
-  void getTruthInformation(InDetSimDataCollection::const_iterator& iter, FPGATrackSimInputUtils::ParentBitmask& parentMask, HepMcParticleLink::ExtendedBarCode& bestExtcode, HepMC::ConstGenParticlePtr bestParent);
+  void getTruthInformation(InDetSimDataCollection::const_iterator& iter, FPGATrackSimInputUtils::ParentBitmask& parentMask, HepMcParticleLink::ExtendedBarCode& bestExtcode, HepMC::ConstGenParticlePtr& bestParent);
   FPGATrackSimEventInputHeader*        m_eventHeader = nullptr;
 };
 

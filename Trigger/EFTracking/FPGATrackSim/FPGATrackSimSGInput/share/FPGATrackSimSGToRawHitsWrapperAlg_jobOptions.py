@@ -17,6 +17,12 @@ else :
     OutputNTUP_FPGATrackSimIPFile = "fpgatracksim_rawhits_wrap.root"
 print "Output file", OutputNTUP_FPGATrackSimIPFile
 
+if hasattr(runArgs,"FPGATrackSimWrapperMetaData") :
+    FPGATrackSimWrapperMetaData = runArgs.FPGATrackSimWrapperMetaData
+else :
+    FPGATrackSimWrapperMetaData = "Meta Data"
+           
+
 from AthenaCommon.AppMgr import ToolSvc
 from FPGATrackSimSGInput.FPGATrackSimSGInputConf import FPGATrackSimSGToRawHitsTool
 FPGATrackSimSGInput = FPGATrackSimSGToRawHitsTool( maxEta= 3.2, minPt= 0.8*GeV)
@@ -26,7 +32,8 @@ ToolSvc += FPGATrackSimSGInput
 
 from FPGATrackSimSGInput.FPGATrackSimSGInputConf import TrigFPGATrackSimRawHitsWrapperAlg
 wrapper = TrigFPGATrackSimRawHitsWrapperAlg(OutputLevel = DEBUG,
-                             OutFileName = OutputNTUP_FPGATrackSimIPFile)
+                                            OutFileName = OutputNTUP_FPGATrackSimIPFile,
+                                            WrapperMetaData = FPGATrackSimWrapperMetaData)
 
 wrapper.InputTool = FPGATrackSimSGInput
 theJob += wrapper
