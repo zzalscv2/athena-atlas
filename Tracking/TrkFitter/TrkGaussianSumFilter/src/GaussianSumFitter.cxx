@@ -859,13 +859,19 @@ Trk::GaussianSumFitter::smootherFit(
   // state on surface  in this reverse direction
   GSFTrajectory::const_reverse_iterator trackStateOnSurface =
     forwardTrajectory.rbegin();
+  bool foundMeasurement = false;
   for (; trackStateOnSurface != forwardTrajectory.rend();
        ++trackStateOnSurface) {
     if (!(*trackStateOnSurface)->type(TrackStateOnSurface::Measurement)) {
       smoothedTrajectory.push_back((*trackStateOnSurface)->clone());
     } else {
+      foundMeasurement = true;
       break;
     }
+  }
+
+  if(!foundMeasurement){
+    return GSFTrajectory();
   }
   // This is the 1st track state on surface for a measurement
   // in the reverse direction. Our starting point for the smoother
