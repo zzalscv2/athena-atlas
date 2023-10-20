@@ -17,6 +17,7 @@
 #include <sstream>
 #include <string>
 
+using namespace ActsTrk;
 namespace MuonGMR4{
 using alignedPhysNodes = IMuonGeoUtilityTool::alignedPhysNodes;
 using geoShapeWithShift = IMuonGeoUtilityTool::geoShapeWithShift;

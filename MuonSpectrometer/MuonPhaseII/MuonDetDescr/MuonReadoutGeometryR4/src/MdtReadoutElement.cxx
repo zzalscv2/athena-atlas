@@ -84,7 +84,7 @@ StatusCode MdtReadoutElement::initElement() {
       /// Ensure that all tubes have the same pitch
       const Amg::Vector3D tubePos = toTubeFrame(idHash).translation();
       
-      constexpr double pitchTolerance = 10. * Gaudi::Units::micrometer;
+      constexpr double pitchTolerance = 20. * Gaudi::Units::micrometer;
       if (prevTubePos) {
          const double dR = std::abs((tubePos - (*prevTubePos)).z());
          /// BOG & few BMS chambers have a cut tube. Therefore, accept the tube staggering if

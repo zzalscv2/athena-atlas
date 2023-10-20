@@ -24,6 +24,7 @@ namespace {
     constexpr double tolerance = 0.001 * Gaudi::Units::mm;
 }
 
+using namespace ActsTrk;
 namespace MuonGMR4 {
 
 using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;
@@ -232,18 +233,17 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
                                                     isValid);
         if (!isValid) {
             ATH_MSG_FATAL("Failed to construct the station Identifier from "<<key);
-            continue;
-            // return StatusCode::FAILURE;
+            return StatusCode::FAILURE;
         }
         
-        defineArgs define{};
-        define.layerBounds = layerBounds;
+        defineArgs define{};        
         define.physVol = pv;
         define.chambDesign = key_tokens[1];
         define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);
         define.detElId = elementID;
         ATH_MSG_VERBOSE("Key  "<<key<<" lead to Identifier "<<m_idHelperSvc->toStringDetEl(elementID));
         ATH_CHECK(loadDimensions(define, facCache));
+        define.layerBounds = layerBounds;
         std::unique_ptr<RpcReadoutElement> readoutEle = std::make_unique<RpcReadoutElement>(std::move(define));
         ATH_CHECK(mgr.addRpcReadoutElement(std::move(readoutEle)));
     }    

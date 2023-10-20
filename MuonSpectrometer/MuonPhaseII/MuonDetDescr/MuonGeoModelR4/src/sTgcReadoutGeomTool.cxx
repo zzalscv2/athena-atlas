@@ -20,6 +20,7 @@
 
 #include <MuonReadoutGeometryR4/StringUtils.h>
 #include <RDBAccessSvc/IRDBRecord.h>
+using namespace ActsTrk;
 
 namespace MuonGMR4 {
 

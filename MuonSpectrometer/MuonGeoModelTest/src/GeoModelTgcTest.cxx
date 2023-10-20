@@ -163,6 +163,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
     m_stIndex = readoutEle->getStationIndex();
     m_stEta   = readoutEle->getStationEta();
     m_stPhi   = readoutEle->getStationPhi();
+    m_nGasGaps = readoutEle->Ngasgaps();
     ATH_MSG_DEBUG("Dump readout element "<<m_idHelperSvc->toString(readoutEle->identify()));
 
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
