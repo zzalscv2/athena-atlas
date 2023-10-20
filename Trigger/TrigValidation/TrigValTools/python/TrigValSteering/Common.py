@@ -19,7 +19,8 @@ trigvalsteering_logging_level = logging.INFO
 package_prefix_dict = {'TriggerTest':         'trig_',
                        'TrigP1Test':          'trigP1_',
                        'TrigAnalysisTest':    'trigAna_',
-                       'TrigInDetValidation': 'trigID_'}
+                       'TrigInDetValidation': 'trigID_',
+                       'TrigGpuTest':         'trigGPU_',}
 
 # Log file with all art-result statements
 art_result_summary = 'art-result-summary.log'
