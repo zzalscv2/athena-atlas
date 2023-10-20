@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsExtrapolationAlg.h"
@@ -144,7 +144,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
 
 
 void ActsExtrapolationAlg::writeStepsObj(
-    std::vector<Acts::detail::Step> steps) const {
+    const std::vector<Acts::detail::Step>& steps) const {
 
   std::lock_guard<std::mutex> lock(m_writeMutex);
 
