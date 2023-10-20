@@ -45,10 +45,6 @@ struct Component
 double
 gaus(double x, double mean, double sigma)
 {
-  // gauss = 1/(sigma * sqrt(2*pi)) * exp  ( -0.5 * ((x-mean)/sigma)^2 )
-  // = (1/sqrt(2*pi))* (1/sigma)  * exp  (-0.5 * ((x-mean)*(1/sigma)) *
-  // ((x-mean)*(1/sigma)) )
-  //= invsqrt2PI * invertsigma * exp (-0.5 *z * z)
   const double invertsigma = 1. / sigma;
   const double z = (x - mean) * invertsigma;
   return (invsqrt2PI * invertsigma) * exp(-0.5 * z * z);
@@ -72,21 +68,20 @@ struct pdfAndDeriv
   double deriv1 = 0.;
   double deriv2 = .0;
 };
-/** @brief method to determine the pdf of the cashed mixture and its first 2
+/** @brief method to determine the pdf of the  mixture and its first 2
  * derivatives at a given value*/
-pdfAndDeriv
-fullPdf(double x, int i, const std::array<std::vector<Component>, 5>& mixture)
-{
+pdfAndDeriv fullPdf(double x, int i,
+                    const std::array<std::vector<Component>, 5>& mixture) {
   pdfAndDeriv pdf{};
   auto component = mixture[i].begin();
   for (; component != mixture[i].end(); ++component) {
     double componentgaus = gaus(x, component->mean, component->sigma);
     pdf.value += component->weight * componentgaus;
-    const double z = (x - component->mean) / component->sigma;
-    pdf.deriv1 +=
-      -1. * component->weight * z * componentgaus / component->sigma;
-    pdf.deriv2 += component->weight / (component->sigma * component->sigma) *
-                  (z * z - 1.) * componentgaus;
+    const double invertSigma = 1. / component->sigma;
+    const double z = (x - component->mean) * invertSigma;
+    pdf.deriv1 += -1. * component->weight * z * componentgaus * invertSigma;
+    pdf.deriv2 += component->weight * invertSigma * invertSigma * (z * z - 1.) *
+                  componentgaus;
   }
   return pdf;
 }
