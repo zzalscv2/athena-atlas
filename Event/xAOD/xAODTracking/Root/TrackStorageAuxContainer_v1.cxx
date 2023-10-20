@@ -10,7 +10,7 @@ namespace xAOD {
     AUX_VARIABLE(covParams);
     AUX_VARIABLE(nMeasurements);
     AUX_VARIABLE(nHoles);
-    AUX_VARIABLE(chi2);
+    AUX_VARIABLE(chi2f);
     AUX_VARIABLE(ndf);
     AUX_VARIABLE(nOutliers);
     AUX_VARIABLE(nSharedHits);    

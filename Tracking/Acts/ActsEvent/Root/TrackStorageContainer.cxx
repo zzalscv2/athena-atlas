@@ -31,7 +31,7 @@ std::any component_impl(C& container, Acts::HashedString key,
     case "nHoles"_hash:
       return container.at(itrack)->nHolesPtr();
     case "chi2"_hash:
-      return container.at(itrack)->chi2Ptr();
+      return container.at(itrack)->chi2fPtr();
     case "ndf"_hash:
       return container.at(itrack)->ndfPtr();
     case "nOutliers"_hash:
@@ -139,9 +139,9 @@ void ActsTrk::MutableTrackStorageContainer::removeTrack_impl(
 }
 
 void ActsTrk::MutableTrackStorageContainer::copyDynamicFrom_impl(
-    ActsTrk::IndexType itrack, const MutableTrackStorageContainer& other,
+    ActsTrk::IndexType itrack, const ActsTrk::TrackStorageContainer& other,
     ActsTrk::IndexType other_itrack) {
-  m_backend->at(itrack) = other.m_backend->at(other_itrack);
+  *(m_backend->at(itrack)) = *(other.m_backend->at(other_itrack));
 }
 
 std::any ActsTrk::MutableTrackStorageContainer::component_impl(
