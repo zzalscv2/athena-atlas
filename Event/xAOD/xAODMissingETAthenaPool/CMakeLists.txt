@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODMissingETAthenaPool )
@@ -30,7 +30,7 @@ find_package( AthenaPoolUtilitiesTest )
 
 if( ATHENAPOOLUTILITIESTEST_FOUND )
   set( XAODMISSINGETATHENAPOOL_REFERENCE_TAG
-       xAODMissingETAthenaPoolReference-01-02-00 )
+       xAODMissingETAthenaPoolReference-01-03-00 )
   run_tpcnv_test( xAODMissingETAthenaPool_20.1.7.2   AOD-20.1.7.2-full
                    REQUIRED_LIBRARIES xAODMissingETAthenaPoolPoolCnv
                    REFERENCE_TAG ${XAODMISSINGETATHENAPOOL_REFERENCE_TAG} )
