@@ -46,7 +46,6 @@ class MdtReadoutGeomTool : public AthAlgTool,
 
     /// Retrieves the auxillary tables from the database
     StatusCode readParameterBook(FactoryCache& facCache) const;
-    void fillFlippedReadouts(FactoryCache& facCache) const;
     /// Loads the chamber dimensions from GeoModel
     StatusCode loadDimensions(const FactoryCache& facCache, MdtReadoutElement::defineArgs& args) const;
 

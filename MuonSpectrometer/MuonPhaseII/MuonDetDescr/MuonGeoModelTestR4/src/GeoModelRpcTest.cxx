@@ -80,8 +80,7 @@ StatusCode GeoModelRpcTest::execute() {
     for (const Identifier& test_me : m_testStations) {
       ATH_MSG_DEBUG("Test retrieval of Rpc detector element "<<m_idHelperSvc->toStringDetEl(test_me));
       const RpcReadoutElement* reElement = m_detMgr->getRpcReadoutElement(test_me);
-      if (!reElement) {
-         ATH_MSG_WARNING("Detector element "<<m_idHelperSvc->toStringDetEl(test_me)<<" is invalid");
+      if (!reElement) {         
          continue;
       }
       /// Check that we retrieved the proper readout element

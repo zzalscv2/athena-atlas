@@ -105,7 +105,8 @@ if __name__=="__main__":
     if not args.noRpc:
         cfg.merge(GeoModelRpcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "B"]))
     if not args.noTgc:
-        cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"]))
+        cfg.merge(GeoModelTgcTestCfg(flags, TestStations = [ch for ch in chambToTest if ch[0] == "T"],
+                                            ReadoutXML="TgcStripStructure.xml"))
 
     if not args.noMM:
         cfg.merge(GeoModelMmTestCfg(flags))    

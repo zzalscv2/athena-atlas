@@ -79,8 +79,6 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     }
     FactoryCache facCache{};
     ATH_CHECK(readParameterBook(facCache));
-    fillFlippedReadouts(facCache);
-
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     // Get the list of full phys volumes from SQLite, and create detector
     // elements
@@ -162,48 +160,32 @@ StatusCode MdtReadoutGeomTool::readParameterBook(FactoryCache& cache) const {
         const std::string key {record->getString("WMDT_TYPE")};
         ATH_MSG_DEBUG("Extracted parameters " <<pars<<" number of layers: "<<nLay<<" will be safed under key "<<key);
         cache.parBook[key] = std::move(pars);
-    }   
+    }
+    /// Load the chamber that have their readout on the negative z-side
+    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    paramTable = accessSvc->getRecordsetPtr("MdtTubeROSides" ,"");
+     if (paramTable->size() == 0) {
+        ATH_MSG_FATAL("Empty parameter book table found");
+        return StatusCode::FAILURE;
+    }
+    ATH_MSG_VERBOSE("Found the " << paramTable->nodeName() << " ["
+                                << paramTable->tagName() << "] table with "
+                                << paramTable->size() << " records");
+    for (IRDBRecord* record : *paramTable) {
+        const std::string stName = record->getString("stationName");
+        const int stEta = record->getInt("stationEta");
+        const int stPhi = record->getInt("stationPhi");
+        const int side = record->getInt("side");
+        if (side == -1) {
+            bool isValid{false};            
+            cache.readoutOnLeftSide.insert(idHelper.elementID(stName,stEta,stPhi, isValid));
+            if (!isValid) {
+                ATH_MSG_FATAL("station "<<stName<<" eta: "<<stEta<<" phi: "<<stPhi<<" is unknown.");
+                return StatusCode::FAILURE;
+            }
+        }
+    }
     return StatusCode::SUCCESS;
 }
 
-void MdtReadoutGeomTool::fillFlippedReadouts(FactoryCache& facCache) const {
-    /// Potentially we want to publish this in a table
-    const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
-    const int stIdxBEE = idHelper.stationNameIndex("BEE");
-    const int stIdxBIM = idHelper.stationNameIndex("BIM");
-    const int stIdxBIR = idHelper.stationNameIndex("BIR");
-    const int stIdxBIS = idHelper.stationNameIndex("BIS");
-    const int stIdxBOF = idHelper.stationNameIndex("BOF");
-    const int stIdxEIL = idHelper.stationNameIndex("EIL");
-    const int stIdxBOS = idHelper.stationNameIndex("BOS");
-    const int stIdxBOG = idHelper.stationNameIndex("BOG");
-    
-    
-    for (MdtIdHelper::const_id_iterator itr = idHelper.module_begin();
-         itr != idHelper.module_end(); ++itr) {
-
-      const Identifier& chId{*itr};
-      const int stIdx = idHelper.stationName(chId);
-      const int stEta = idHelper.stationEta(chId);      
-      const int stPhi = idHelper.stationPhi(chId);
-
-      const bool isBarrel{idHelper.isBarrel(chId)};
-      const bool sideA{stEta >= 0};
-      const bool isLarge{!idHelper.isSmall(chId)};
-      int sign = (isBarrel ? 1 : -1) * (sideA ? 1 : -1) * (isLarge ? -1 : 1);
-      /// Of course there're exceptions to this rule, otherwise it weren't a rule
-      if (stIdxBEE == stIdx ||  
-          (stIdxEIL == stIdx && !( stEta ==3  && stPhi ==6) )|| 
-          (stIdxBOS == stIdx && !sideA) ||
-          (stIdxBOG == stIdx && ( (stPhi == 7) || (stEta ==3) )) ||
-          (stIdxBOF == stIdx && stPhi != 6) ||
-          (stIdxBIM == stIdx && stPhi == 6) || 
-          (stIdxBIR == stIdx && stPhi == 6) || 
-          (stIdxBIS == stIdx && stPhi == 6)) sign = -sign;
-      if (sign == -1) {
-        ATH_MSG_VERBOSE("Readout of "<<m_idHelperSvc->toStringChamber(chId)<<" is at negative Z");
-        facCache.readoutOnLeftSide.insert(chId);
-      }
-    }
-}
 }  // namespace MuonGMR4

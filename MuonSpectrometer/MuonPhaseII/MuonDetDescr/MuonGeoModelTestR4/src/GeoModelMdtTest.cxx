@@ -77,7 +77,6 @@ StatusCode GeoModelMdtTest::execute() {
       ATH_MSG_DEBUG("Test retrieval of Mdt detector element "<<detStr);
       const MdtReadoutElement* reElement = m_detMgr->getMdtReadoutElement(test_me);
       if (!reElement) {
-         ATH_MSG_WARNING ("Detector element "<<detStr<<" is invalid");
          continue;
       }
       /// Check that we retrieved the proper readout element
@@ -134,7 +133,7 @@ void GeoModelMdtTest::dumpReadoutSideXML() const {
       if (!chamberIDs.insert(idHelper.elementID(swap)).second) continue;
       const int side = readoutEle->getParameters().readoutSide;
       swapReadXML<<"    <Row   ";
-      swapReadXML<<"MdtTubeROSides_DATA_ID=\""<<counter<<"\" ";
+      swapReadXML<<"MDTTUBEROSIDES_DATA_ID=\""<<counter<<"\" ";
       swapReadXML<<"stationName=\""<<m_idHelperSvc->stationNameString(swap)<<"\" ";
       swapReadXML<<"stationEta=\""<<m_idHelperSvc->stationEta(swap)<<"\" ";
       swapReadXML<<"stationPhi=\""<<m_idHelperSvc->stationPhi(swap)<<"\" ";

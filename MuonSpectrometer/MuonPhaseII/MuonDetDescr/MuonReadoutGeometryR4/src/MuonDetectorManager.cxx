@@ -4,6 +4,7 @@
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
 #include "MuonReadoutGeometryR4/RpcReadoutElement.h"
 #include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
@@ -65,13 +66,14 @@ MuonDetectorManager::MuonDetectorManager()
  std::vector<const MuonReadoutElement*> MuonDetectorManager::getAllReadoutElements() const {
     std::vector<const MuonReadoutElement*> allEles{};
     insert(getAllMdtReadoutElements(), allEles);
+    insert(getAllTgcReadoutElements(), allEles);
     insert(getAllRpcReadoutElements(), allEles);
     insert(getAllsTgcReadoutElements(), allEles);
     return allEles;
 }
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
+ADD_DETECTOR(TgcReadoutElement, m_tgcEles);
 ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
-
 ADD_DETECTOR(sTgcReadoutElement, m_sTgcEles);
 
 unsigned int MuonDetectorManager::getNumTreeTops() const {
@@ -91,8 +93,9 @@ const Muon::IMuonIdHelperSvc* MuonDetectorManager::idHelperSvc() const {
 std::vector<ActsTrk::DetectorType> MuonDetectorManager::getDetectorTypes() const {
     std::vector<ActsTrk::DetectorType> types{};
     if (!m_mdtEles.empty()) types.push_back(ActsTrk::DetectorType::Mdt);
-    if (!m_mdtEles.empty()) types.push_back(ActsTrk::DetectorType::sTgc);
+    if (!m_tgcEles.empty()) types.push_back(ActsTrk::DetectorType::Tgc);
     if (!m_rpcEles.empty()) types.push_back(ActsTrk::DetectorType::Rpc);
+    if (!m_sTgcEles.empty()) types.push_back(ActsTrk::DetectorType::sTgc);
     return types;
 }
 

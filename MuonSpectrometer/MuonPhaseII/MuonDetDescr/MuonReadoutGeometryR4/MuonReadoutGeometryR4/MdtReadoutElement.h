@@ -51,7 +51,8 @@ class MdtReadoutElement : public MuonReadoutElement {
         double halfHeight{0.};
         /// Is the readout chip at positive or negative Z?
         double readoutSide{1.};
-        
+        /// Sets of surface bounds which is shared amongst all readout elements used
+        /// to assign the same bound objects if 2 surfaces share the same dimensions.
         SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds{};
         SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
 
@@ -70,7 +71,7 @@ class MdtReadoutElement : public MuonReadoutElement {
     }
     /// Overload from the Acts::DetectorElement (2 * halfheight)
     double thickness() const override final;
-
+    
     StatusCode initElement() override final;
     /// Returns the multi layer of the MdtReadoutElement
     unsigned int multilayer() const;
