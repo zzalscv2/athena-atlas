@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSEXTRAPOLATIONALG_H
@@ -65,7 +65,7 @@ private:
   mutable std::mutex m_writeMutex;
   mutable size_t m_objVtxCount ATLAS_THREAD_SAFE {0};
 
-  void writeStepsObj(std::vector<Acts::detail::Step> steps) const;
+  void writeStepsObj(const std::vector<Acts::detail::Step>& steps) const;
 
 };
 
