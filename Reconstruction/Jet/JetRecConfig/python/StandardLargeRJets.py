@@ -99,6 +99,11 @@ AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
                                       Beta = 1., ZCut= 0.1,
                                      )
 
+AntiKt10UFOCSSKSoftDrop_trigger = JetSoftDrop(AntiKt10UFOCSSK,
+                                            modifiers = ("Calib:SoftDrop:mc","Filter:50000","Sort","ConstitFourMom"),
+                                            Beta = 1., ZCut= 0.1,
+                                            )
+
 
 
 AntiKt10Truth = JetDefinition("AntiKt",1.0,cst.Truth,
