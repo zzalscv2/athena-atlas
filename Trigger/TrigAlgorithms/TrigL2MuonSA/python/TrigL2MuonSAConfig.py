@@ -244,7 +244,6 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
         **kwargs )
 
     # Default backextrapolator is for MC Misaligned Detector
-    # Based on MuonBackExtrapolatorForMisalignedDet at TrigMuonBackExtrapolator/TrigMuonBackExtrapolatorConfig.py
     TrigMuonBackExtrapolator=CompFactory.TrigMuonBackExtrapolator
     muFastAlg.BackExtrapolator = TrigMuonBackExtrapolator( name        = "MisalignedBackExtrapolator",
                                                            Aligned     = False,
