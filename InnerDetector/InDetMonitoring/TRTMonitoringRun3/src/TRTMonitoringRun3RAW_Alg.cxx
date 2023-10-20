@@ -62,7 +62,7 @@ TRTMonitoringRun3RAW_Alg::TRTMonitoringRun3RAW_Alg( const std::string& name, ISv
     declareProperty("doRDOsMon",                      m_doRDOsMon        = true);
     declareProperty("doShift",                        m_doShift          = true);
     declareProperty("doMaskStraws",                   m_doMaskStraws     = true);
-    declareProperty("useHoleFinder",                  m_useHoleFinder    = true);
+    declareProperty("useHoleFinder",                  m_useHoleFinder    = false);
     declareProperty("DoHitsMon",                      m_doHitsMon        = true);
     declareProperty("DistanceToStraw",                m_DistToStraw      = 0.4);
     declareProperty("totalEvents",                    m_usedEvents      = -1);
