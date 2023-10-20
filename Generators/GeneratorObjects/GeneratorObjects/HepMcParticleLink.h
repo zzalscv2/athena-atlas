@@ -9,13 +9,13 @@
  *
  * @see McEventCollection, GenEvent, ElementLink
  * @author Paolo Calafiura
- * $Id: HepMcParticleLink.h,v 1.11 2007-09-13 05:53:34 dquarrie Exp $
  **/
 
-#include "GeneratorObjects/CachedParticlePtr.h"
 #include "SGTools/DataProxy.h"
 #include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/ExtendedEventContext.h"
+#include "CxxUtils/CachedValue.h"
+#include "CxxUtils/no_unique_address.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/EventContext.h"
 #include <cassert>
@@ -26,12 +26,12 @@
 #include <vector>
 
 #include "AtlasHepMC/GenEvent_fwd.h"
-#include "AtlasHepMC/GenParticle_fwd.h"
+#include "AtlasHepMC/GenParticle.h"
 
 class IProxyDict;
 class McEventCollection;
 
-enum EBC_EVCOLL{
+enum EBC_EVCOLL : unsigned char {
   EBC_MAINEVCOLL=0,   //Usually contains the HS GenEvent
   EBC_FIRSTPUEVCOLL,  //Low pt minbias PU, or full PU collection where applicable (i.e. Fast Chain)
   EBC_SECONDPUEVCOLL, //High pt minbias PU
@@ -78,7 +78,8 @@ enum EBC_EVCOLL{
  * SG::CurrentEventStore::store()) is stored when the link is constructed;
  * however, an explicit IProxyDict* or EventContext may also be specified.
  */
-class HepMcParticleLink {
+class HepMcParticleLink
+{
 public:
   typedef uint32_t barcode_type;
   typedef uint32_t index_type;
@@ -661,8 +662,12 @@ public:
   IProxyDict* m_store;
 
 
-  /// Transient part.  Either a GenParticle* or an IProxyDict*.
-  GeneratorObjects::CachedParticlePtr m_ptr;
+  /// Transient part.  Pointer to the particle.
+  // This qualifier allows m_extBarcode to overlap the trailing padding
+  // of @c CachedValue.  On x86_64, this reduces the size
+  // of @c HepMcParticleLink from 48 to 40.
+  ATH_NO_UNIQUE_ADDRESS
+  CxxUtils::CachedValue<HepMC::ConstGenParticlePtr> m_ptr;
 
 
   /// Persistent part: barcode and location of target GenEvent.

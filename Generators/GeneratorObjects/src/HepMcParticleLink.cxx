@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -172,7 +172,7 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
   if (!is_valid && !m_store) {
     return nullptr;
   }
-  if (is_valid) return m_ptr.get();
+  if (is_valid) return *m_ptr.ptr();
     if (0 == barcode()) {
 #if 0
       MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
@@ -263,7 +263,7 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
       }
       if (pEvt) {
         const int event_number = pEvt->event_number();
-        // Be sure to update m_extBarcode before m_ptrs.
+        // Be sure to update m_extBarcode before m_ptr.
         // Otherwise, if two threads run this method simultaneously,
         // one thread could see index == UNDEFINED, but where m_ptr
         // is already updated so we get nullptr back for sg.

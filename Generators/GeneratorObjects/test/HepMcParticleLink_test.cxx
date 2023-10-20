@@ -870,6 +870,14 @@ namespace MCTesting {
     ASSERT_EQ(particle2,testLink2d.cptr());
   }
 
+  TEST_F(HepMcParticleLink_test, size) {
+    // We may potentially have a lot of these objects.
+    // Make sure we know if the size increases.
+    if (sizeof (void*) <= 8) {
+      ASSERT_LE( sizeof(HepMcParticleLink), 40u );
+    }
+  }
+
 } // <-- namespace MCTesting
 
 
