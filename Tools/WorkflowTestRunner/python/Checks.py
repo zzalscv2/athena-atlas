@@ -86,6 +86,9 @@ class FailedOrPassedCheck(WorkflowCheck):
                 for line in file:
                     if '"successful run"' in line:
                         counter += 1
+                    elif (step == "DQHistogramMerge"  # DQ merge hack
+                          and "Writing file: myHIST.root" in line):
+                        counter += 1
 
             if counter:
                 self.logger.info(f"{step} reference test step successful")
