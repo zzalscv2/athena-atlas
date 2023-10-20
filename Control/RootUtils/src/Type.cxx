@@ -538,6 +538,44 @@ void Type::swap (void* a, void* b) const
 
 
 /**
+ * @brief Swap a range of objects between vectors.
+ * @param a Pointer to the start of the first vector's data.
+ * @param aindex Index of the first object in the first vector.
+ * @param b Pointer to the start of the second vector's data.
+ * @param bindex Index of the second object in the second vector.
+ * @param n Number of objects to swap.
+ *
+ * @c a and @ b can be either the same or different.
+ * However, the ranges should not overlap.
+ */
+void Type::swapRange (void* a, size_t a_index,
+                      void* b, size_t b_index,
+                      size_t n) const
+{
+  char* aptr = reinterpret_cast<char*>(a) + m_size * a_index;
+  char* bptr = reinterpret_cast<char*>(b) + m_size * b_index;
+
+  if (m_assign.call() != nullptr) {
+    void* tmp = create();
+    for (size_t i = 0; i < n; i++) {
+      assign (tmp, aptr);
+      assign (aptr, bptr);
+      assign (bptr, tmp);
+      aptr += m_size;
+      bptr += m_size;
+    }
+    destroy (tmp);
+  }
+  else {
+    std::vector<char> tmp (m_size * n);
+    memcpy (tmp.data(), aptr, m_size * n);
+    memcpy (aptr, bptr, m_size * n);
+    memcpy (bptr, tmp.data(), m_size * n);
+  }
+}
+
+
+/**
  * @brief Initialize an object from a string.
  * @param p Pointer to the object to initialize.
  * @param s String from which to initialize.
