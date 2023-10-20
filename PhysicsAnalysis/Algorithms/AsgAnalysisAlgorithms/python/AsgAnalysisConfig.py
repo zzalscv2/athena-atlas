@@ -93,9 +93,12 @@ class PileupReweightingBlock (ConfigBlock):
             toolLumicalcFiles = self.userLumicalcFiles[:]
             log.info(f'Using user-provided lumicalc files: {", ".join(toolLumicalcFiles)}')
         else:
-            from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
-            toolLumicalcFiles = getLumicalcFiles(campaign)
-            log.info(f'Using autoconfigured lumicalc files: {", ".join(toolLumicalcFiles)}')
+            if config.dataType() is DataType.Data:
+                log.info('Data needs no lumicalc files and none were provided, not configuring lumicalc')
+            else:
+                from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
+                toolLumicalcFiles = getLumicalcFiles(campaign)
+                log.info(f'Using autoconfigured lumicalc files: {", ".join(toolLumicalcFiles)}')
 
         # Set up the only algorithm of the sequence:
         alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
