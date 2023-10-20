@@ -32,15 +32,28 @@ namespace FlavorTagDiscriminants {
 
     ATH_CHECK( m_ElectronContainerKey.initialize() );
 
-    // Prepare decorators
+    // Initialise accessors
+    m_acc_origin_label = "TruthParticles." + m_acc_origin_label.key();
+    m_acc_type_label = "TruthParticles." + m_acc_type_label.key();
+    m_acc_source_label = "TruthParticles." + m_acc_source_label.key();
+    m_acc_vertex_index = "TruthParticles." + m_acc_vertex_index.key();
+    m_acc_parent_barcode = "TruthParticles." + m_acc_parent_barcode.key();
+    ATH_CHECK( m_acc_origin_label.initialize() );
+    ATH_CHECK( m_acc_type_label.initialize() );
+    ATH_CHECK( m_acc_source_label.initialize() );
+    ATH_CHECK( m_acc_vertex_index.initialize() );
+    ATH_CHECK( m_acc_parent_barcode.initialize() );
+
+    // Initialise decorators
     m_dec_origin_label = m_ElectronContainerKey.key() + "." + m_dec_origin_label.key();
-    m_dec_type_label = m_ElectronContainerKey.key() + "." + m_dec_type_label.key();    
+    m_dec_type_label = m_ElectronContainerKey.key() + "." + m_dec_type_label.key();
+    m_dec_source_label = m_ElectronContainerKey.key() + "." + m_dec_source_label.key();
     m_dec_vertex_index = m_ElectronContainerKey.key() + "." + m_dec_vertex_index.key();
     m_dec_barcode = m_ElectronContainerKey.key() + "." + m_dec_barcode.key();
     m_dec_parent_barcode = m_ElectronContainerKey.key() + "." + m_dec_parent_barcode.key();
-
     ATH_CHECK( m_dec_origin_label.initialize() );
     ATH_CHECK( m_dec_type_label.initialize() );
+    ATH_CHECK( m_dec_source_label.initialize() );
     ATH_CHECK( m_dec_vertex_index.initialize() );
     ATH_CHECK( m_dec_barcode.initialize() );
     ATH_CHECK( m_dec_parent_barcode.initialize() );
@@ -57,10 +70,18 @@ namespace FlavorTagDiscriminants {
     SG::ReadHandle<EC> electrons(m_ElectronContainerKey,ctx);
     ATH_CHECK( electrons.isValid() );
     ATH_MSG_DEBUG( "Retrieved " << electrons->size() << " electrons..." );
+
+    // instantiate accessors
+    SG::ReadDecorHandle<EC, int> acc_origin_label(m_acc_origin_label, ctx);
+    SG::ReadDecorHandle<EC, int> acc_type_label(m_acc_type_label, ctx);
+    SG::ReadDecorHandle<EC, int> acc_source_label(m_acc_source_label, ctx);
+    SG::ReadDecorHandle<EC, int> acc_vertex_index(m_acc_vertex_index, ctx);
+    SG::ReadDecorHandle<EC, int> acc_parent_barcode(m_acc_parent_barcode, ctx);
     
     // instantiate decorators
     SG::WriteDecorHandle<EC, int> dec_origin_label(m_dec_origin_label, ctx);
     SG::WriteDecorHandle<EC, int> dec_type_label(m_dec_type_label, ctx);
+    SG::WriteDecorHandle<EC, int> dec_source_label(m_dec_source_label, ctx);
     SG::WriteDecorHandle<EC, int> dec_vertex_index(m_dec_vertex_index, ctx);
     SG::WriteDecorHandle<EC, int> dec_barcode(m_dec_barcode, ctx);
     SG::WriteDecorHandle<EC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
@@ -69,12 +90,13 @@ namespace FlavorTagDiscriminants {
     for ( const auto& electron : el_vector ) {
 
       // get the linked truth particle
-      ElementLink<xAOD::TruthParticleContainer> truth_link = m_truthParticleLink(*electron);
+      const auto truth_link = m_truthParticleLink(*electron);
       
       if (!truth_link || !truth_link.isValid()) {
         // if the truth link is broken, assume PU
         dec_origin_label(*electron) = InDet::ExclusiveOrigin::Pileup;
-        dec_type_label(*electron) = TruthDecoratorHelpers::ExclusiveType::NoTruth;
+        dec_type_label(*electron) = TruthDecoratorHelpers::TruthType::Label::NoTruth;
+        dec_source_label(*electron) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         dec_vertex_index(*electron) = -2;
         dec_barcode(*electron) = -2;
         dec_parent_barcode(*electron) = -2;
@@ -83,16 +105,17 @@ namespace FlavorTagDiscriminants {
         int electron_type = m_classifierParticleType(*truth);
 
         if (m_valid_types.count(electron_type)) {
-          dec_origin_label(*electron) = m_acc_truthOriginLabel(*truth);
+          dec_origin_label(*electron) = acc_origin_label(*truth);
         }
         else {
           dec_origin_label(*electron) = InDet::ExclusiveOrigin::Fake;
         }
 
-        dec_vertex_index(*electron) = m_acc_truthVertexIndex(*truth);
-        dec_type_label(*electron) = m_acc_truthTypeLabel(*truth);
+        dec_vertex_index(*electron) = acc_vertex_index(*truth);
+        dec_type_label(*electron) = acc_type_label(*truth);
+        dec_source_label(*electron) = acc_source_label(*truth);
         dec_barcode(*electron) = truth->barcode();
-        dec_parent_barcode(*electron) = m_acc_truthParentBarcode(*truth);
+        dec_parent_barcode(*electron) = acc_parent_barcode(*truth);
       }
     }
     return StatusCode::SUCCESS;

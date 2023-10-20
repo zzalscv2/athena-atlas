@@ -75,27 +75,54 @@ namespace FlavorTagDiscriminants {
 
         int get_truth_type(const xAOD::TruthParticle* truth_particle) {
             if (!truth_particle) {
-                return ExclusiveType::NoTruth;
+                return TruthType::Label::NoTruth;
             }
-            // simple pdgid check for pion/kaon based on 
+            // simple pdgid check for pion based on 
             // PhysicsAnalysis/MCTruthClassifier/Root/MCTruthClassifierGen.cxx#L1159
             if (std::abs(truth_particle->pdgId()) == 211) {
-                return ExclusiveType::Pion * truth_particle->charge();
+                return TruthType::Label::Pion * truth_particle->charge();
             }
-            if (std::abs(truth_particle->pdgId()) == 321) {
-                return ExclusiveType::Kaon * truth_particle->charge();
+            else if (truth_particle->isStrangeMeson()) {
+                return TruthType::Label::Kaon * truth_particle->charge();
             }
-            if (truth_particle->isElectron()) {
-                return ExclusiveType::Electron * truth_particle->charge() * -1;
+            if (std::abs(truth_particle->pdgId()) == 3122) {
+                return TruthType::Label::Lambda;
             }
-            if (truth_particle->isMuon()) {
-                return ExclusiveType::Muon * truth_particle->charge() * -1;
+            else if (truth_particle->isElectron()) {
+                return TruthType::Label::Electron * truth_particle->charge() * -1;
             }
-            if (std::abs(truth_particle->pdgId()) == 22) {
-                return ExclusiveType::Photon;
+            else if (truth_particle->isMuon()) {
+                return TruthType::Label::Muon * truth_particle->charge() * -1;
             }
-            return ExclusiveType::Other;
+            else if (truth_particle->isPhoton()) {
+                return TruthType::Label::Photon;
+            }
+            return TruthType::Label::Other;
         }
+
+        int get_source_type(const xAOD::TruthParticle* truth_particle) {
+            /* this label gives information about the immediate parent 
+            of the truth particle */
+            if (!truth_particle or truth_particle->nParents() != 1) {
+                return TruthSource::Label::NoTruth;
+            }
+            const auto parent = truth_particle->parent(0);
+            if (!parent) {
+                return TruthSource::Label::NoTruth;
+            }
+            else if (parent->isStrangeMeson()) {
+                return TruthSource::Label::KaonDecay;
+            }
+            else if (std::abs(parent->pdgId()) == 3122) {
+                return TruthSource::Label::LambdaDecay;
+            }
+            else if (parent->isPhoton()) {
+                return TruthSource::Label::Conversion;
+            }
+
+            return TruthSource::Label::Other;
+        }
+
         int get_vertex_index(const xAOD::TruthVertex* this_vertex, 
                              const xAOD::TruthVertex* truth_PV, 
                              std::vector<const xAOD::TruthVertex*>& seen_vertices,
