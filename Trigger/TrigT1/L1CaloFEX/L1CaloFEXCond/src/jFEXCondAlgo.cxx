@@ -46,6 +46,10 @@ StatusCode jFEXCondAlgo::execute(const EventContext& ctx) const {
     
     //Write handle 
     SG::WriteCondHandle<jFEXDBCondData> writeCHandle(m_jFEXDBParamsKey, ctx);
+    if (writeCHandle.isValid()) {
+        ATH_MSG_DEBUG("Existing jfex condition data is still valid");
+        return StatusCode::SUCCESS;
+    }
 
     // Date from which jFEX database parameters should be used
     // noise cuts fix: 2023-09-19
