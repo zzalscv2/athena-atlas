@@ -168,7 +168,6 @@ def mkIntegrateJob(options, ecm, prevJob):
 
     if os.environ["SHERPAVER"].startswith('3.'):
         # write base fragment into Base.yaml
-        job.cmds += [options.Sherpa_i.BaseFragment]
         job.cmds += ["cat > Base.yaml <<EOL"]
         job.cmds += [options.Sherpa_i.BaseFragment]
         job.cmds += ["EOL"]
