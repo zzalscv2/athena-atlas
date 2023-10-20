@@ -35,21 +35,43 @@ namespace FlavorTagDiscriminants {
       this, "electronContainer", "Electrons",
         "Key for the input electron collection"};
 
+    // Accessors for truth particles
+    using RDHK = SG::ReadDecorHandleKey< xAOD::TruthParticleContainer >;
+    RDHK m_acc_origin_label {
+      this, "acc_ftagTruthOriginLabel", "ftagTruthOriginLabel", 
+        "Accessor for the truth origin label of the truth particle"};
+    RDHK m_acc_type_label {
+      this, "acc_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+        "Accessor for the truth type label of the truth particle"};
+    RDHK m_acc_source_label {
+      this, "acc_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+        "Accessor for the truth source label of the truth particle"};
+    RDHK m_acc_vertex_index {
+      this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+        "Accessor for the truth vertex index of the truth particle"};
+    RDHK m_acc_parent_barcode {
+      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
+        "Accessor for the truth parent barcode of the truth particle"};
+
     // Decorators for electrons
-    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_origin_label {
-      this, "ftagTruthOriginLabel", "ftagTruthOriginLabel", 
+    using WDHK = SG::WriteDecorHandleKey< xAOD::ElectronContainer >;
+    WDHK m_dec_origin_label {
+      this, "dec_ftagTruthOriginLabel", "ftagTruthOriginLabel", 
         "Exclusive origin label of the electron"};
-    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_type_label {
-      this, "ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+    WDHK m_dec_type_label {
+      this, "dec_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
         "Exclusive truth type label of the electron"};
-    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_vertex_index {
-      this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+    WDHK m_dec_source_label {
+      this, "dec_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+        "Exclusive truth label for the immedate parent of the truth particle"};
+    WDHK m_dec_vertex_index {
+      this, "dec_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "Truth vertex index of the electron"};
-    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_barcode {
-      this, "ftagTruthBarcode", "ftagTruthBarcode", 
+    WDHK m_dec_barcode {
+      this, "dec_ftagTruthBarcode", "ftagTruthBarcode", 
         "Barcode of linked truth particle"};
-    SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_parent_barcode {
-      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode", 
+    WDHK m_dec_parent_barcode {
+      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
         "Barcode of parent of linked truth particle"};
 
     // truth origin tool
@@ -65,10 +87,6 @@ namespace FlavorTagDiscriminants {
     template <typename T> using Acc = SG::AuxElement::ConstAccessor<T>;
     Acc<unsigned int> m_classifierParticleType{"classifierParticleType"};
     Acc<ElementLink<xAOD::TruthParticleContainer>> m_truthParticleLink{"truthParticleLink"};
-    Acc<int> m_acc_truthOriginLabel{"ftagTruthOriginLabel"};
-    Acc<int> m_acc_truthTypeLabel{"ftagTruthTypeLabel"};
-    Acc<int> m_acc_truthVertexIndex{"ftagTruthVertexIndex"};
-    Acc<int> m_acc_truthParentBarcode{"ftagTruthParentBarcode"};
   };
 }
 

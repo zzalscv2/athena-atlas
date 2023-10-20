@@ -37,12 +37,15 @@ namespace FlavorTagDiscriminants {
 
     // Prepare decorators
     m_dec_origin_label = m_TruthContainerKey.key() + "." + m_dec_origin_label.key();
-    m_dec_type_label = m_TruthContainerKey.key() + "." + m_dec_type_label.key();    
+    m_dec_type_label = m_TruthContainerKey.key() + "." + m_dec_type_label.key();
+    m_dec_source_label = m_TruthContainerKey.key() + "." + m_dec_source_label.key();
     m_dec_vertex_index = m_TruthContainerKey.key() + "." + m_dec_vertex_index.key();
     m_dec_parent_barcode = m_TruthContainerKey.key() + "." + m_dec_parent_barcode.key();
 
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_type_label.initialize() );
+    CHECK( m_dec_source_label.initialize() );
+    CHECK( m_dec_source_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
     
@@ -76,6 +79,7 @@ namespace FlavorTagDiscriminants {
     // instantiate decorators
     SG::WriteDecorHandle<TPC, int> dec_origin_label(m_dec_origin_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_type_label(m_dec_type_label, ctx);
+    SG::WriteDecorHandle<TPC, int> dec_source_label(m_dec_source_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_vertex_index(m_dec_vertex_index, ctx);
     SG::WriteDecorHandle<TPC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
 
@@ -92,7 +96,8 @@ namespace FlavorTagDiscriminants {
       // c-hadrons are exempt and always labelled so we can trace the b->c decay chains
       if ( (!MC::isStable(truth_particle) or truth_particle->pt() < 500) and !truth_particle->isCharmHadron()) {
         dec_origin_label(*truth_particle) = InDet::ExclusiveOrigin::Pileup;
-        dec_type_label(*truth_particle) = TruthDecoratorHelpers::ExclusiveType::NoTruth;
+        dec_type_label(*truth_particle) = TruthDecoratorHelpers::TruthType::Label::NoTruth;
+        dec_source_label(*truth_particle) = TruthDecoratorHelpers::TruthSource::Label::NoTruth;
         tp_truth_vertices.push_back(nullptr);
         dec_vertex_index(*truth_particle) = -1;
         dec_parent_barcode(*truth_particle) = -1;
@@ -114,6 +119,9 @@ namespace FlavorTagDiscriminants {
 
       // decorate truth type
       dec_type_label(*truth_particle) = TruthDecoratorHelpers::get_truth_type(truth_particle);
+
+      // decorate truth source
+      dec_source_label(*truth_particle) = TruthDecoratorHelpers::get_source_type(truth_particle);
     }
 
     // check sorted_truth_particles and tp_truth_vertices have the same length

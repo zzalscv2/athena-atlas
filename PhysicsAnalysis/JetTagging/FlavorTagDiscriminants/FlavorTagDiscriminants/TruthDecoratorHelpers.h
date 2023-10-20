@@ -10,19 +10,31 @@
 
 
 namespace FlavorTagDiscriminants {
-
     namespace TruthDecoratorHelpers {
-        enum ExclusiveType {
-            NoTruth  = 0,
-            Other    = 1,
-            Pion     = 2,
-            Kaon     = 3,
-            Electron = 4,
-            Muon     = 5,
-            Photon   = 6
-        };
+        namespace TruthType {
+            enum Label {
+                NoTruth  = 0,
+                Other    = 1,
+                Pion     = 2,
+                Kaon     = 3,
+                Lambda   = 4,
+                Electron = 5,
+                Muon     = 6,
+                Photon   = 7
+            };
+        }
+        namespace TruthSource {
+            enum Label {
+                NoTruth     = 0,
+                Other       = 1,
+                KaonDecay   = 2,
+                LambdaDecay = 3,
+                Conversion  = 4
+            };
+        }
         bool sort_particles(const xAOD::IParticle* particle_A, const xAOD::IParticle* particle_B);
         int get_truth_type(const xAOD::TruthParticle* truth_particle);
+        int get_source_type(const xAOD::TruthParticle* truth_particle);
         
         bool is_bc_hadron(const xAOD::TruthParticle* truth_particle, int flavour);
         bool is_weakly_decaying_hadron(const xAOD::TruthParticle* truth_particle);

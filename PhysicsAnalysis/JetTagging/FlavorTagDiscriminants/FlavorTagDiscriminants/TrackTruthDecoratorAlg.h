@@ -29,38 +29,49 @@ namespace FlavorTagDiscriminants {
   private:
     // Input Containers
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_TrackContainerKey {
-      this,"trackContainer", "InDetTrackParticles",
+      this, "trackContainer", "InDetTrackParticles",
         "Key for the input track collection"};
 
+    // Accessors for truth particles
+    using RDHK = SG::ReadDecorHandleKey< xAOD::TruthParticleContainer >;
+    RDHK m_acc_type_label {
+      this, "acc_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+        "Accessor for the truth type label of the truth particle"};
+    RDHK m_acc_source_label {
+      this, "acc_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+        "Accessor for the truth label for the immedate parent of the truth particle"};
+    RDHK m_acc_vertex_index {
+      this, "acc_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+        "Accessor for the vertex index of the truth particle"};
+    RDHK m_acc_parent_barcode {
+      this, "acc_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
+        "Accessor for the barcode of the parent of linked truth particle"};
+
     // Decorators for tracks
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_origin_label {
-      this, "ftagTruthOriginLabel", "ftagTruthOriginLabel", 
+    using WDHK = SG::WriteDecorHandleKey< xAOD::TrackParticleContainer >;
+    WDHK m_dec_origin_label {
+      this, "dec_ftagTruthOriginLabel", "ftagTruthOriginLabel", 
         "Exclusive origin label of the track"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_type_label {
-      this, "ftagTruthTypeLabel", "ftagTruthTypeLabel", 
+    WDHK m_dec_type_label {
+      this, "dec_ftagTruthTypeLabel", "ftagTruthTypeLabel", 
         "Exclusive truth type label of the track"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_vertex_index {
-      this, "ftagTruthVertexIndex", "ftagTruthVertexIndex", 
+    WDHK m_dec_source_label {
+      this, "dec_ftagTruthSourceLabel", "ftagTruthSourceLabel", 
+        "Exclusive truth label for the immedate parent of the truth particle"};
+    WDHK m_dec_vertex_index {
+      this, "dec_ftagTruthVertexIndex", "ftagTruthVertexIndex", 
         "ftagTruth vertex index of the track"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_barcode {
-      this, "ftagTruthBarcode", "ftagTruthBarcode", 
+    WDHK m_dec_barcode {
+      this, "dec_ftagTruthBarcode", "ftagTruthBarcode", 
         "Barcode of linked truth particle"};
-    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_parent_barcode {
-      this, "ftagTruthParentBarcode", "ftagTruthParentBarcode", 
+    WDHK m_dec_parent_barcode {
+      this, "dec_ftagTruthParentBarcode", "ftagTruthParentBarcode", 
         "Barcode of parent of linked truth particle"};
 
     // Truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {
       this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", 
         "track truth origin tool"};
-
-    // Accessors
-    template <typename T> using Acc = SG::AuxElement::ConstAccessor<T>;
-    Acc<int> m_acc_truthOriginLabel{"ftagTruthOriginLabel"};
-    Acc<int> m_acc_truthTypeLabel{"ftagTruthTypeLabel"};
-    Acc<int> m_acc_truthVertexIndex{"ftagTruthVertexIndex"};
-    Acc<int> m_acc_truthParentBarcode{"ftagTruthParentBarcode"};
-
   };
 }
 
