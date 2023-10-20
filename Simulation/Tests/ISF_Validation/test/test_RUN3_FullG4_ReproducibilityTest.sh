@@ -1,10 +1,10 @@
 #!/bin/sh
 #
 # art-description: MC21-style simulation using FullG4, checking that the SkipEvents argument works (7 TeV ttbar input - needs updating)
-# art-include: 22.0/Athena
-# art-include: 22.0/AthSimulation
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
+# art-include: 24.0/Athena
+# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -21,7 +21,7 @@ Sim_tf.py \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
 --outputHITSFile 'hitsFull.ttbar.pool.root' \
 --maxEvents '10' \
@@ -35,7 +35,7 @@ Sim_tf.py \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
 --outputHITSFile 'hitsHalf1.ttbar.pool.root' \
 --maxEvents '5' \
@@ -49,7 +49,7 @@ Sim_tf.py \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
---geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-02-00_VALIDATION' \
 --inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc12_valid.110401.PowhegPythia_P2012_ttbar_nonallhad.evgen.EVNT.e3099.01517252._000001.pool.root.1' \
 --outputHITSFile 'hitsHalf2.ttbar.pool.root' \
 --maxEvents '5' \
