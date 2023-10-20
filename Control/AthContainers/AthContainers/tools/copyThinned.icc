@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,8 +19,9 @@ namespace SG {
  * @param dummy Dummy argument for overload resolution.
  * @param info Thinning information for this object (or nullptr).
  *
- * This overload handles @c DataVector types.  It returns a view container
- * copy of @c orig, from which any thinned elements are removed.
+ * This is the generic version of @c copyThinned, which matches types
+ * for which there is not a more specific overload.  It simply makes
+ * a copy of @c orig using the copy constructor.
  */
 template <class CONTAINER>
 std::unique_ptr<CONTAINER>
