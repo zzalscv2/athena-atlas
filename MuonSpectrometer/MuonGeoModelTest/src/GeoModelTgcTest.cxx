@@ -207,7 +207,7 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
         if (!reEle) continue;
         for (bool isStrip : {false, true}) {        
             for (int layer = 1 ; layer <= reEle->numberOfLayers(isStrip); ++layer){
-                const Identifier layerId = idHelper.channelID(reEle->identify(), layer, isStrip, 1);
+                const Identifier layerId [[maybe_unused]] = idHelper.channelID(reEle->identify(), layer, isStrip, 1);
             }
         }
 
