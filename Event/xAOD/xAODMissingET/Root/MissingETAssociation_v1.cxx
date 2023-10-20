@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODMissingET/versions/MissingETAssociation_v1.h"
@@ -599,13 +599,16 @@ namespace xAOD {
 
   bool MissingETAssociation_v1::identifyOverlaps()
   {
+    using bitmask_t = MissingETBase::Types::bitmask_t;
     this->resetContrib();
     std::map<MissingETBase::Types::bitmask_t,MissingETBase::Types::constvec_t> trkOverlaps;
     std::map<MissingETBase::Types::bitmask_t,MissingETBase::Types::constvec_t> calOverlaps;
-    std::map<ElementLink<IParticleContainer>,MissingETBase::Types::bitmask_t> objects;
+    std::map<ElementLink<IParticleContainer>,bitmask_t> objects;
     for(size_t iObj=0; iObj<this->objectLinks().size(); ++iObj) {
       const vector<ElementLink<IParticleContainer> >& myConst = m_objConstLinks[iObj];
-      for (size_t iConst=0; iConst<myConst.size(); ++iConst) objects[myConst[iConst]] |= 1 << iObj;
+      for (size_t iConst=0; iConst<myConst.size(); ++iConst) {
+        objects[myConst[iConst]] |= static_cast<bitmask_t>(1) << iObj;
+      }
     }
     for (const auto& objpair : objects) {
       const IParticle* obj = *objpair.first;
