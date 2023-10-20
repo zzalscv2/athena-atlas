@@ -1024,8 +1024,13 @@ namespace LVL1 {
 
     //iterate over all Forward Elec Tobs and fill EDM 
     for( auto const& [jfex, MODULE_tobs] : m_allfwdElTobs ) {
+        const int fpga_map[4]={0,1,3,2}; // No FPGA info available in FWD EL TOB
         uint8_t fpgaNum =0;
         for(auto &FPGA_tob : MODULE_tobs) {
+            if (fpgaNum>3) {
+              ATH_MSG_ERROR("FPGA larger than 4 in Forward electron EDM!");
+              continue;
+            }
             for(size_t it = 0; it<FPGA_tob.size();it++) {
                 float_t eta = -99;
                 float_t phi = -99;
@@ -1037,9 +1042,9 @@ namespace LVL1 {
                 
                 if(it<5){
                     istob=1;
-                    ATH_CHECK(fillFwdElEDM(jfex,fpgaNum, FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, tobContainer_jEM));
+                    ATH_CHECK(fillFwdElEDM(jfex,fpga_map[fpgaNum], FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, tobContainer_jEM));
                 }
-                ATH_CHECK(fillFwdElEDM(jfex,fpgaNum, FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, xtobContainer_jEM));
+                ATH_CHECK(fillFwdElEDM(jfex,fpga_map[fpgaNum], FPGA_tob.at(it).at(0),istob, jFwdElResolution, eta, phi, xtobContainer_jEM));
             }
             fpgaNum++;
         }
