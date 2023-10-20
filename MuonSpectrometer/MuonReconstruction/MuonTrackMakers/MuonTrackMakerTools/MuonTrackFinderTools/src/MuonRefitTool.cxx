@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRefitTool.h"
@@ -1499,13 +1499,11 @@ namespace Muon {
         if (m_muonExtrapolator.empty()) { return perigee; }
         Trk::PerigeeSurface persurf(pars.position());
         std::unique_ptr<Trk::TrackParameters> exPars{m_muonExtrapolator->extrapolateDirectly(ctx, pars, persurf)};
-        Trk::Perigee* pp = dynamic_cast<Trk::Perigee*>(exPars.get());
-        if (!pp) {
+        perigee.reset (dynamic_cast<Trk::Perigee*>(exPars.release()));
+        if (!perigee) {
             ATH_MSG_WARNING(" Extrapolation to Perigee surface did not return a perigee!! ");
             return perigee;
         }
-        perigee.reset(pp);
-        exPars.release();
         return perigee;
     }
 
