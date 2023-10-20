@@ -225,7 +225,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'id_effSF' + postfix)
 
         # Set up the ISO photon efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolationWP != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgIsol' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionTool',
