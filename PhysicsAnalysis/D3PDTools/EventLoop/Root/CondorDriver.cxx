@@ -22,7 +22,7 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
-#include <filesystem>
+#include <boost/filesystem.hpp>
 
 //
 // method implementations
@@ -94,11 +94,11 @@ namespace EL
             file << "transfer_input_files    = submit/" << tarballName << ", submit/segments, submit/config.root\n";
             file << "transfer_output_files   = fetch, status\n";
             if (char* x509userproxy = std::getenv("X509_USER_PROXY")) {
-              std::filesystem::path proxyPath(x509userproxy);
-              std::filesystem::path proxyPathDestination(data.submitDir + "/submit/" + proxyPath.filename().string());
-              std::filesystem::copy(proxyPath,
+              boost::filesystem::path proxyPath(x509userproxy);
+              boost::filesystem::path proxyPathDestination(data.submitDir + "/submit/" + proxyPath.filename().string());
+              boost::filesystem::copy_file(proxyPath,
                                     proxyPathDestination,
-                                    std::filesystem::copy_options::overwrite_existing);
+                                    boost::filesystem::copy_option::overwrite_if_exists);
               file << "x509userproxy           = " << proxyPathDestination.string() <<"\n";
             }
             else {
