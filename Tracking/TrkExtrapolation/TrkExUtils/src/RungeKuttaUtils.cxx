@@ -19,8 +19,6 @@
 
 #include "CxxUtils/vec.h"
 #include "CxxUtils/inline_hints.h"
-#include "CxxUtils/vectorize.h"
-ATH_ENABLE_VECTORIZATION;
 
 namespace {
 /*

@@ -27,10 +27,6 @@
 #include "TrkPatternParameters/PatternTrackParameters.h"
 
 #include "CxxUtils/restrict.h"
-/// enables -ftree-vectorize in gcc
-#include "CxxUtils/vectorize.h"
-ATH_ENABLE_VECTORIZATION;
-
 
 namespace {
 /*
