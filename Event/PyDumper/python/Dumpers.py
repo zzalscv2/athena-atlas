@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ##
 #
@@ -4895,7 +4895,7 @@ def generic_dump_auxitem (x, auxid, f):
         try:
              x.container().getConstStore().getData(auxid)[0]
         except IndexError:
-            fprint (f, '<unavailable>')
+            fprint (f, '<unavailable 1>')
             return
             
     reg=ROOT.SG.AuxTypeRegistry.instance()
@@ -4904,7 +4904,7 @@ def generic_dump_auxitem (x, auxid, f):
     try:
         buf = ac(x)
     except TypeError:
-        fprint (f, '<unavailable>')
+        fprint (f, '<unavailable 2>')
         return
     try:
         obj = ROOT.TPython.CPPInstance_FromVoidPtr (buf, tname)
@@ -4919,12 +4919,13 @@ def dump_auxitem (x, auxid, f = sys.stdout):
     if hasattr (x, 'container'):
         auxdata = x.container().getConstStore().getData(auxid)
         if not auxdata:
+            # Expected if a dynamic variable is missing for an event.
             fprint (f, '<unavailable>')
             return
         try:
             auxdata[0]
         except IndexError:
-            fprint (f, '<unavailable>')
+            fprint (f, '<unavailable 4>')
             return
 
     reg=ROOT.SG.AuxTypeRegistry.instance()
@@ -4941,7 +4942,7 @@ def dump_auxitem (x, auxid, f = sys.stdout):
             val = ac(x)
         except TypeError:
             # Can happen due to schema evolution
-            val = '<unavailable>'
+            val = '<unavailable 5>'
         fprint (f,  format_obj(val))
     else:
         generic_dump_auxitem (x, auxid, f)
@@ -5297,8 +5298,8 @@ dumpspecs = [
     ['xAOD::EventInfo',                      dump_xAODObject],
     ['xAOD::EventShape_v1',                  dump_xAODObjectNL],
     ['xAOD::EventShape',                     dump_xAODObjectNL],
-    ['xAOD::MissingETAssociationMap_v1',     dump_xAODObjectNL],
-    ['xAOD::MissingETAssociationMap',        dump_xAODObjectNL],
+    ['xAOD::MissingETAssociationMap_v1',     dump_xAOD],
+    ['xAOD::MissingETAssociationMap',        dump_xAOD],
     ['xAOD::TrigDecision_v1',                dump_xAODObject],
     ['xAOD::TrigConfKeys_v1',                dump_TrigConfKeys],
     ['xAOD::JetEtRoI_v1',                    dump_xAODObject],
