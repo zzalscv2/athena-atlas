@@ -11,8 +11,7 @@
 using namespace ActsTrk;
 using SubDetAlignments = ActsGeometryContext::SubDetAlignments;
 namespace {
-    /// Identifier used to access the transformation into the Detector center
-    static const IdentifierHash stationHash{static_cast<unsigned>(~0)-1};
+   
     /// Dummy transformation
     static const Amg::Transform3D dummyTrans{Amg::Transform3D::Identity()};
 
@@ -31,9 +30,13 @@ MuonReadoutElement::MuonReadoutElement(defineArgs&& args)
     m_stPhi = m_idHelperSvc->stationPhi(identify());
     m_detElHash = m_idHelperSvc->detElementHash(identify());
     m_chIdx = m_idHelperSvc->chamberIndex(identify());
-    insertTransform(stationHash,[this](RawGeomAlignStore* store, const IdentifierHash&){
+    insertTransform(geoTransformHash(), [this](RawGeomAlignStore* store, const IdentifierHash&){
             return toStation(store);
     }).ignore();
+}
+IdentifierHash MuonReadoutElement::geoTransformHash() {     
+    static const IdentifierHash hash{static_cast<unsigned>(~0)-1};
+    return hash;
 }
 
 const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx, 
@@ -60,15 +63,11 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
                <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
     return dummyTrans;
 }
-std::shared_ptr<Acts::Surface> MuonReadoutElement::surfacePtr(const IdentifierHash& hash) const{
-
+std::shared_ptr<Acts::Surface> MuonReadoutElement::surfacePtr(const IdentifierHash& hash) const {
     MuonSurfaceSet::const_iterator cache = m_surfaces.find(hash);
-
     if(cache != m_surfaces.end()) return (*cache)->getSurface();
-
     ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
-               <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));   
-
+               <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));
     return nullptr;
 }
 
@@ -78,7 +77,7 @@ Amg::Transform3D MuonReadoutElement::toStation(RawGeomAlignStore* alignStore) co
 }
 const Acts::Transform3& MuonReadoutElement::transform(const Acts::GeometryContext& anygctx) const {
     const ActsGeometryContext *gctx = anygctx.get<const ActsGeometryContext *>();
-    return localToGlobalTrans(*gctx, stationHash);
+    return localToGlobalTrans(*gctx, geoTransformHash());
 }
 
 StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
@@ -86,7 +85,7 @@ StatusCode MuonReadoutElement::insertTransform(const IdentifierHash& hash,
     
     MuonTransformSet::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) {
-        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
+        ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toStringDetEl(identify())
                    <<" has already a transformation cached for hash "<<hash);
         return StatusCode::FAILURE;
     }
@@ -108,37 +107,34 @@ bool MuonReadoutElement::storeAlignment(RawGeomAlignStore& store) const{
     return true;
 }
 const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometryContext& ctx) const {
-    return globalToLocalTrans(ctx, stationHash);
+    return globalToLocalTrans(ctx, geoTransformHash());
 }
 const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx) const {
-    return localToGlobalTrans(ctx, stationHash);
+    return localToGlobalTrans(ctx, geoTransformHash());
 }
 
-const Acts::Surface& MuonReadoutElement::surface() const { return surface(stationHash); }
-Acts::Surface& MuonReadoutElement::surface() { return surface(stationHash); }
+const Acts::Surface& MuonReadoutElement::surface() const { return surface(geoTransformHash()); }
+Acts::Surface& MuonReadoutElement::surface() { return surface(geoTransformHash()); }
 const Acts::Surface& MuonReadoutElement::surface(const IdentifierHash& hash) const { return *surfacePtr(hash); }
 Acts::Surface& MuonReadoutElement::surface(const IdentifierHash& hash) { return *surfacePtr(hash); }
 
-StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<
-    Acts::LineBounds> lBounds){
+StatusCode MuonReadoutElement::strawSurfaceFactory(const IdentifierHash& hash, 
+                                                   std::shared_ptr<Acts::LineBounds> lBounds) {
 
     //get the local to global transform cache
     MuonTransformSet::const_iterator transformCache = m_localToGlobalCaches.find(hash);
-
     if (transformCache == m_localToGlobalCaches.end()) {
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" no transform cache available for hash "<<hash);
         return StatusCode::FAILURE;
     }
 
-    auto insert_itr = m_surfaces.insert(std::make_unique<MuonSurfaceCache>((*transformCache).get(),detectorType()));
-
+    auto insert_itr = m_surfaces.insert(std::make_unique<MuonSurfaceCache>((*transformCache).get(), detectorType()));
     if(!insert_itr.second){
         ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" - "<<idHelperSvc()->toString(identify())
                    <<" Insertion to muon surface cache failed for hash "<<hash);
         return StatusCode::FAILURE;
     }
-
     //Create straw surface for the surface cache
     (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::StrawSurface>(lBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
@@ -166,6 +162,5 @@ StatusCode MuonReadoutElement::planeSurfaceFactory(const IdentifierHash& hash, s
     (*insert_itr.first)->setSurface(Acts::Surface::makeShared<Acts::PlaneSurface>(pBounds, **insert_itr.first));
     return StatusCode::SUCCESS;
 }
-
 
 }  // namespace MuonGMR4

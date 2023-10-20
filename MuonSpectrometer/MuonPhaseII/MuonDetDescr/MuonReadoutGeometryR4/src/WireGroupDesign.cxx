@@ -15,9 +15,10 @@ namespace MuonGMR4{
         return static_cast<const StripDesign&>(*this) < other;
     }
     void WireGroupDesign::declareGroup(const unsigned int numWires) {
-        const unsigned int accumWires = m_groups.empty() ? 0 : 
-                                        m_groups.back().accumlWires + m_groups.back().numWires;
-        m_groups.emplace_back(numWires, accumWires);
+        m_groups.emplace_back(numWires, nAllWires());
+    }
+    unsigned int WireGroupDesign::nAllWires() const {
+        return m_groups.empty() ? 0 : m_groups.back().accumlWires + m_groups.back().numWires;
     }
     /// Returns the number of wires in a given group.
     unsigned int WireGroupDesign::numWiresInGroup(unsigned int groupNum) const {
@@ -33,12 +34,12 @@ namespace MuonGMR4{
     Amg::Vector2D WireGroupDesign::stripPosition(int groupNum) const {
         if (groupNum >= static_cast<int>(m_groups.size())) {
             ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" The wire group number "<<groupNum
-                           <<"is out of range.");
+                           <<" is out of range.");
             return Amg::Vector2D::Zero();
         }
         const wireGroup& wireGrp = m_groups[groupNum];
         return StripDesign::stripPosition(0) + 
-               (wireGrp.accumlWires + wireGrp.numWires /2)*stripPitch() * Amg::Vector2D::UnitX();
+               (wireGrp.accumlWires + wireGrp.numWires/2)*stripPitch() * Amg::Vector2D::UnitX();
     }
     Amg::Vector2D WireGroupDesign::wirePosition(unsigned int groupNum, 
                                                 unsigned int wireNum) const {

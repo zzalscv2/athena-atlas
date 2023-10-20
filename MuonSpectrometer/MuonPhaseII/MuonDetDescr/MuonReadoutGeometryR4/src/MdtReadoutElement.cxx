@@ -4,6 +4,7 @@
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <GaudiKernel/SystemOfUnits.h>
@@ -46,20 +47,23 @@ StatusCode MdtReadoutElement::initElement() {
      ATH_MSG_FATAL("The tubes of "<<idHelperSvc()->toStringDetEl(identify())<<" will fall together on a single point. Please check "<<std::endl<<m_pars);
      return StatusCode::FAILURE;
   }
-
+  /// Create bounds that are representing the surface planes of each tube layer & the readout element itself
+  std::shared_ptr<Acts::TrapezoidBounds> planeBounds = std::make_shared<Acts::TrapezoidBounds>(m_pars.shortHalfX, m_pars.longHalfX, m_pars.halfY);
+  planeBounds = *m_pars.layerBounds->insert(planeBounds).first;
+  ATH_CHECK(planeSurfaceFactory(geoTransformHash(), planeBounds));
   /// Coordinate system of the trapezoid is in the center while the tubes are defined 
   /// w.r.t. to the chamber edge. Move first tube into the proper position
 
   std::optional<Amg::Vector3D> prevLayPos{std::nullopt};
-  for (unsigned int lay =1 ; lay <= numLayers() ; ++lay){
+  for (unsigned int lay =1 ; lay <= numLayers() ; ++lay) {
      /// Cache the transformations to the chamber layers
-    const IdentifierHash layHash = measurementHash(lay,0);
+     const IdentifierHash layHash = measurementHash(lay,0);
      ATH_CHECK(insertTransform(layHash, 
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
                     return toStation(store) * toChamberLayer(hash)*toCenter; 
                 }));
-     ATH_CHECK(planeSurfaceFactory(layHash, *m_pars.layerBounds->insert(std::make_shared<Acts::TrapezoidBounds>(m_pars.shortHalfX, m_pars.longHalfX, m_pars.halfY)).first));
+     ATH_CHECK(planeSurfaceFactory(layHash, planeBounds));
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
     for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
@@ -74,9 +78,7 @@ StatusCode MdtReadoutElement::initElement() {
       if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
          ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Transformation matrix is not a pure rotation for "<<
                        idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
-                       <<"transformation: {"<<Amg::toString(tubeRot*Amg::Vector3D::UnitX(),3)<<","
-                                            <<Amg::toString(tubeRot*Amg::Vector3D::UnitY(),3)<<","
-                                            <<Amg::toString(tubeRot*Amg::Vector3D::UnitZ(),3)<<"}.");
+                       <<to_string(toTubeFrame(idHash)));
          return StatusCode::FAILURE;
       }
       /// Ensure that all tubes have the same pitch

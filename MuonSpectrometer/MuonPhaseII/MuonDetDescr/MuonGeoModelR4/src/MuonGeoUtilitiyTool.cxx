@@ -98,7 +98,7 @@ std::string MuonGeoUtilityTool::dumpShape(const GeoShape* shape) const {
   if (shape->typeID() == GeoTrd::getClassTypeID()){
       const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
       sstr<<"Trapezoidal geometry shape with width: "<<trd->getXHalfLength1()
-          <<", height: "<<trd->getXHalfLength2()<<" -- short/long tube length: "
+          <<", height: "<<trd->getXHalfLength2()<<" -- short/long length: "
           <<trd->getYHalfLength1()<<"/" <<trd->getYHalfLength2()<<", chamber width: "<<trd->getZHalfLength();
   } else if (shape->typeID() == GeoBox::getClassTypeID()){
       const GeoBox* box = static_cast<const GeoBox*>(shape);

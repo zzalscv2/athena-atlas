@@ -15,14 +15,66 @@
 
 namespace MuonGM {
 
+template<typename VType> bool isEqual(const std::vector<VType>& a,
+                                      const std::vector<VType>&b){
+    if (a.size() != b.size()) {
+        return false;
+    }
+    for (size_t k =0 ; k < a.size() ; ++k) {
+        if ( std::abs(a[k] - b[k]) > std::numeric_limits<VType>::epsilon()){
+            return false;
+        }
+    }
+    return true;
+}
+template <typename VType> std::ostream& operator<<(std::ostream& ostr, const std::vector<VType>& v){
+    for (size_t k = 0 ; k <v.size(); ++k){
+        ostr<<v[k];
+        if ( k+1 != v.size())ostr<<",";
+    } 
+    return ostr;
+}
+template <typename VType> std::ostream& operator<<(std::ostream& ostr, const std::set<VType>& s){
+    unsigned int k=1;
+    for (const VType& ele : s){
+        ostr<<ele;
+        if (k != s.size()) ostr<<";";
+        ++k;
+    } 
+    return ostr;
+}
 struct TgcChamberLayout {
     Identifier gasGap{};
+    std::string techType{};
     std::vector<double> botStripPos{};
     std::vector<double> topStripPos{};
-    std::vector<unsigned int> wireGangLayout{};
+    std::vector<int> wireGangLayout{};
     double wirePitch{0.};
-};
 
+    bool operator==(const TgcChamberLayout& other) const{
+        return isEqual(botStripPos, other.botStripPos) &&
+               isEqual(topStripPos, other.topStripPos) && 
+               isEqual(wireGangLayout, other.wireGangLayout) &&
+               std::abs(wirePitch - other.wirePitch) < std::numeric_limits<float>::epsilon();
+    }
+};
+struct ChamberGrp {
+    ChamberGrp(const TgcChamberLayout& grp):
+            m_lay{grp} {m_gaps[grp.techType].insert(grp.gasGap);}
+    bool addChamber(const TgcChamberLayout& lay){
+        if (m_lay == lay) { 
+            m_gaps[lay.techType].insert(lay.gasGap);
+            return true;
+        }
+        return false;
+    }
+    const std::map<std::string, std::set<Identifier>>& allGaps() const{ return m_gaps; }
+    const TgcChamberLayout& layout() const { return m_lay; }
+    private:
+        TgcChamberLayout m_lay{};
+        std::map<std::string, std::set<Identifier>> m_gaps{};
+    
+};
 
 GeoModelTgcTest::GeoModelTgcTest(const std::string& name, ISvcLocator* pSvcLocator):
     AthHistogramAlgorithm{name, pSvcLocator} {}
@@ -88,22 +140,21 @@ StatusCode GeoModelTgcTest::execute() {
                           << m_idHelperSvc->toStringDetEl(reElement->identify()));
             return StatusCode::FAILURE;
         }
-        if (reElement->center().z() > 0. && reElement->center().z() < 7.5 * Gaudi::Units::m ) {
-            const Identifier prevId = reElement->getStationPhi() > 1 ? m_idHelperSvc->tgcIdHelper().elementID(m_idHelperSvc->stationNameString(test_me),
-                                                                             reElement->getStationEta(),
-                                                                             reElement->getStationPhi() - 1) : test_me;
-            const TgcReadoutElement* prevRE = detMgr->getTgcReadoutElement(prevId);
-            const Amg::Vector3D center = reElement->center();
-            ATH_MSG_ALWAYS("Tgc element "<<m_idHelperSvc->toString(reElement->identify())
-                         <<" position "<<Amg::toString(center, 2)
-                         <<" perp: "<<center.perp()
-                         <<" phi: "<<(center.phi() / Gaudi::Units::deg)
-                         <<" theta: "<<(center.theta() / Gaudi::Units::deg)
-                         <<" rSize: "<<reElement->getRsize()<<"/"<<reElement->getLongRsize()
-                         <<" sSize: "<<reElement->getSsize()<<"/"<<reElement->getLongSsize()
-                         <<" zSize: "<<reElement->getZsize()<<"/"<<reElement->getLongZsize()
-                         <<" dPhi: "<<(prevRE->center().deltaPhi(center) / Gaudi::Units::deg));
-        }
+       
+        const Identifier prevId = reElement->getStationPhi() > 1 ? m_idHelperSvc->tgcIdHelper().elementID(m_idHelperSvc->stationNameString(test_me),
+                                                                                                          reElement->getStationEta(),
+                                                                                                          reElement->getStationPhi() - 1) : test_me;
+        const TgcReadoutElement* prevRE = detMgr->getTgcReadoutElement(prevId);
+        const Amg::Vector3D center = reElement->center();
+        ATH_MSG_DEBUG("Tgc element "<<m_idHelperSvc->toString(reElement->identify())
+                        <<" position "<<Amg::toString(center, 2)
+                        <<" perp: "<<center.perp()
+                        <<" phi: "<<(center.phi() / Gaudi::Units::deg)
+                        <<" theta: "<<(center.theta() / Gaudi::Units::deg)
+                        <<" rSize: "<<reElement->getRsize()<<"/"<<reElement->getLongRsize()
+                        <<" sSize: "<<reElement->getSsize()<<"/"<<reElement->getLongSsize()
+                        <<" zSize: "<<reElement->getZsize()<<"/"<<reElement->getLongZsize()
+                        <<" dPhi: "<<(prevRE->center().deltaPhi(center) / Gaudi::Units::deg));        
         ATH_CHECK(dumpToTree(ctx, reElement));
     }
     return StatusCode::SUCCESS;
@@ -118,6 +169,10 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
 
     const Amg::Transform3D& trans{readoutEle->transform()};
     m_readoutTransform = trans;
+    m_shortWidth = readoutEle->shortWidth();
+    m_longWidth = readoutEle->longWidth();
+    m_height = readoutEle->length();
+    m_thickness = readoutEle->thickness();
 
    const MuonGM::MuonStation* station = readoutEle->parentMuonStation();
    if (station->hasALines()){ 
@@ -131,12 +186,21 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
 
     for (bool isStrip : {false, true}) {        
         for (int layer = 1 ; layer <= readoutEle->numberOfLayers(isStrip); ++layer){
-            const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, isStrip,1);
-            m_layTans.push_back(readoutEle->localToGlobalTransf(layerId));
+            const unsigned int nChan = isStrip ? readoutEle->getNStrips(layer) :
+                                                 readoutEle->nGangs(layer);
+            if (!nChan) continue;
+            const Identifier layerId = idHelper.channelID(readoutEle->identify(),layer, isStrip, 1);
+            m_layTans.push_back(readoutEle->surface(layerId).transform());
             m_layMeasPhi.push_back(isStrip);
             m_layNumber.push_back(layer);
+            m_layHeight.push_back(readoutEle->length());
+            m_layShortWidth.push_back(readoutEle->shortWidth() /*- readoutEle->frameXwidth() * 2. */);
+            m_layLongWidth.push_back(readoutEle->longWidth()   /*- readoutEle->frameXwidth() * 2. */);
+            unsigned int numWires = !isStrip ? readoutEle->getTotalWires(layer) : 0;
+            m_layNumWires.push_back(numWires);
             
             if (isStrip) {
+                /// The last strip is for one reason always 0
                 for (int strip = 1; strip < readoutEle->getNStrips(layer); ++strip) {
                     bool is_valid{false};
                     const Identifier stripId = idHelper.channelID(readoutEle->identify(), layer, isStrip, strip, is_valid);
@@ -174,6 +238,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
                     m_stripLongWidth.push_back(readoutEle->stripLongWidth(layer, strip));
                 }
             } else {
+                /// The last gang is for one reason always 0
                 for (int gang = 1; gang < readoutEle->nGangs(layer); ++gang) {
                        const Identifier gangId{idHelper.channelID(readoutEle->identify(), layer, isStrip, gang)};
                        const Trk::Surface& surf{readoutEle->surface(gangId)};
@@ -188,7 +253,8 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx, const TgcReadout
                        m_gangGasGap.push_back(layer);
                        m_gangNum.push_back(gang);
                        m_gangNumWires.push_back(readoutEle->getNWires(layer, gang));
-                       m_gangLength.push_back(readoutEle->gangLength(layer,gang));
+                       m_gangLength.push_back(0.5 *(readoutEle->gangShortWidth(layer, gang) + 
+                                                    readoutEle->gangLongWidth(layer, gang) ));
                 }
             }
         }    
@@ -200,18 +266,88 @@ void GeoModelTgcTest::dumpReadoutXML(const MuonGM::MuonDetectorManager& detMgr) 
     if (m_readoutXML.empty()) {
         return;
     }
+    std::ofstream xmlStream{m_readoutXML};
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+    std::map<Identifier, TgcChamberLayout> allLayouts{};
     for (TgcIdHelper::const_id_iterator itr = idHelper.module_begin();
                                         itr != idHelper.module_end(); ++itr) {
         const MuonGM::TgcReadoutElement* reEle = detMgr.getTgcReadoutElement(*itr);
         if (!reEle) continue;
-        for (bool isStrip : {false, true}) {        
+        for (bool isStrip : {false, true}) {
             for (int layer = 1 ; layer <= reEle->numberOfLayers(isStrip); ++layer){
-                const Identifier layerId [[maybe_unused]] = idHelper.channelID(reEle->identify(), layer, isStrip, 1);
+                const Identifier layerId = idHelper.channelID(reEle->identify(), layer, isStrip, 1);
+                TgcChamberLayout& chambLayout = allLayouts[m_idHelperSvc->gasGapId(layerId)];
+                chambLayout.gasGap = m_idHelperSvc->gasGapId(layerId);
+                chambLayout.techType = reEle->getTechnologyName();
+                if (isStrip) {
+                   for (int strip = 1; strip < reEle->getNStrips(layer); ++strip) {
+                        /// Note the slight shift in the coordinate system given that the positions in the legacy
+                        /// are given w.r.t. strip center while for the new geometry we need them w.r.t. strip edge
+                        chambLayout.botStripPos.push_back(reEle->getStripPositionOnShortBase(strip) + 0.5*reEle->getSsize());
+                        chambLayout.topStripPos.push_back(reEle->getStripPositionOnLargeBase(strip) + 0.5*reEle->getLongSsize());
+                   }
+                } else {
+                    unsigned int accumlWires{0};
+                    chambLayout.wirePitch = reEle->WirePitch(layer);
+                    /// Another reason to love AMDB. Summing up the number of wires in a gang does not match the
+                    /// number of wires in the gasgap, because the last gang has always 0 entries. However, the total
+                    /// number of wires is used in the legacy geometry to calculate the position of the first wire. I am
+                    /// amazed about the precision to get the N/2 wire right into the center of the chamber. Anyhow, let's 
+                    /// insert this hack to have a proper number of wires in the last gang.
+                    for (int gang = 1; gang <= reEle->getNGangs(layer); ++gang) {
+                        unsigned int nWires = reEle->getNWires(layer , gang);
+                        accumlWires+=nWires;
+                        if (nWires) {
+                            chambLayout.wireGangLayout.push_back(nWires);
+                        } else {
+                            chambLayout.wireGangLayout.push_back(reEle->getTotalWires(layer) - accumlWires);
+                            break;
+                        }
+                    }
+                }
             }
         }
-
     }
+    /// Select the set of all layouts that are belonging together
+    std::vector<ChamberGrp> groupies{};
+    for (const auto& lay : allLayouts) {
+        bool added{false};
+        for (ChamberGrp& grp : groupies) {
+            if (grp.addChamber(lay.second)){
+                added = true;
+                break;
+            }
+        }
+        if (!added) groupies.emplace_back(lay.second);
+    }
+    allLayouts.clear();
+    std::stable_sort(groupies.begin(),groupies.end(), 
+                    [](const ChamberGrp& a, const ChamberGrp& b){
+                        return a.layout().techType < b.layout().techType;
+                    });
+    /// All added
+    ATH_MSG_INFO("Found in total "<<groupies.size()<<" different chamber layouts");
+    xmlStream<<"<Table name=\"TgcSensorLayout\">"<<std::endl;
+    unsigned int counter{1};
+    for (const ChamberGrp& grp : groupies) {
+        for (const auto& [tech_type, gapIds]: grp.allGaps() ){
+            std::set<int> gaps{};            
+            for (const Identifier gapId : gapIds) {
+                gaps.insert(m_idHelperSvc->gasGap(gapId));
+            }
+            xmlStream<<"    <Row ";
+            xmlStream<<"TGCSENSORLAYOUT_DATA_ID=\""<<counter<<"\" ";
+            xmlStream<<"technology=\""<<tech_type<<"\" ";
+            xmlStream<<"gasGap=\""<<gaps<<"\" ";
+            xmlStream<<"wirePitch=\""<<grp.layout().wirePitch<<"\" ";
+            xmlStream<<"wireGangs=\""<<grp.layout().wireGangLayout<<"\" ";
+            xmlStream<<"bottomStrips=\""<<grp.layout().botStripPos<<"\" ";
+            xmlStream<<"topStrips=\""<<grp.layout().topStripPos<<"\" ";
+            xmlStream<<" />"<<std::endl;
+            ++counter;
+        }
+    }
+    xmlStream<<"</Table> "<<std::endl;
 }
 
 

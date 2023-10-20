@@ -50,6 +50,7 @@
     std::vector<const ELE_TYPE*> getAll##ELE_TYPE##s() const;          
 namespace MuonGMR4 {
 class MdtReadoutElement;
+class TgcReadoutElement;
 class RpcReadoutElement;
 class sTgcReadoutElement;
 
@@ -65,6 +66,7 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
     using ElementStorage = std::vector<ElementPtr<MuonDetectorType>>;
 
     DECLARE_ELEMENT(MdtReadoutElement)
+    DECLARE_ELEMENT(TgcReadoutElement)    
     DECLARE_ELEMENT(RpcReadoutElement)
     DECLARE_ELEMENT(sTgcReadoutElement)
 
@@ -87,6 +89,7 @@ class MuonDetectorManager : public GeoVDetectorManager, public AthMessaging {
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonDetectorManager"};
 
     ElementStorage<MdtReadoutElement> m_mdtEles{};
+    ElementStorage<TgcReadoutElement> m_tgcEles{};    
     ElementStorage<RpcReadoutElement> m_rpcEles{};
     ElementStorage<sTgcReadoutElement> m_sTgcEles{};
 

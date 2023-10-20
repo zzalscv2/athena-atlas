@@ -29,6 +29,8 @@ class WireGroupDesign: public StripDesign {
         void declareGroup(const unsigned int numWires);
         /// Returns the number of wires in a given group.
         unsigned int numWiresInGroup(unsigned int groupNum) const;
+        /// Returns the number of all wires
+        unsigned int nAllWires() const;
         /// Returns the positition of the i-th wire in the g-th group
         /// groupNum    [1; numStrips()
         /// wire number [1; numWiresInGroup()

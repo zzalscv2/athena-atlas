@@ -5,19 +5,19 @@
 #define MUONREADOUTGEOMETRY_MUONDETECTORMANAGER_ICC
 
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
+#include <MuonReadoutGeometryR4/TgcReadoutElement.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
 #define WRITE_GETTERS(ELE_TYPE, GETTER_FUNC, STORAGE_VEC, ATTR)                                \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const Identifier& id) ATTR {        \
-        return GETTER_FUNC(m_idHelperSvc->detElementHash(id));                                                     \
+        ATTR ELE_TYPE* reEle = GETTER_FUNC(m_idHelperSvc->detElementHash(id));                 \
+        if (!reEle) ATH_MSG_WARNING("Failed to retrieve "<<m_idHelperSvc->toStringDetEl(id));  \
+        return reEle;                                                                          \
     }                                                                                          \
     inline ATTR ELE_TYPE* MuonDetectorManager::GETTER_FUNC(const IdentifierHash& hash) ATTR {  \
         const size_t idx = static_cast<unsigned int>(hash);                                    \
-        if (idx < STORAGE_VEC.size() && STORAGE_VEC[idx])                                      \
-            return STORAGE_VEC[idx].get();                                                     \
-        ATH_MSG_WARNING("Failed to retrieve " << #ELE_TYPE << " number "<< idx);               \
-        return nullptr;                                                                        \
+        return idx < STORAGE_VEC.size() ? STORAGE_VEC[idx].get() : nullptr;                    \
     }
 #define ADD_DETECTOR(ELE_TYPE, STORAGE_VEC)                       \
     WRITE_GETTERS(ELE_TYPE, get##ELE_TYPE, STORAGE_VEC, )         \
@@ -25,8 +25,8 @@
 
 namespace MuonGMR4 {
 ADD_DETECTOR(MdtReadoutElement, m_mdtEles);
+ADD_DETECTOR(TgcReadoutElement, m_tgcEles);
 ADD_DETECTOR(RpcReadoutElement, m_rpcEles);
-
 ADD_DETECTOR(sTgcReadoutElement, m_sTgcEles);
 }
 #undef ELEMENT_GETTERSETTER

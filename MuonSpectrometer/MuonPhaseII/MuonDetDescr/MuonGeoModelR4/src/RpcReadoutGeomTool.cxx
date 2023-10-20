@@ -22,8 +22,6 @@
 
 namespace {
     constexpr double tolerance = 0.001 * Gaudi::Units::mm;
-    
-
 }
 
 namespace MuonGMR4 {
@@ -35,8 +33,8 @@ using defineArgs = RpcReadoutElement::defineArgs;
 /// gas gap volumes
 struct gapVolume: public physVolWithTrans {
     gapVolume(physVolWithTrans&& physVol,
-                unsigned int gap,
-                unsigned int phi):
+              unsigned int gap,
+              unsigned int phi):
         physVolWithTrans{std::move(physVol)},
         gasGap{gap},
         doubPhi{phi} {}

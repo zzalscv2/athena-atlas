@@ -26,13 +26,15 @@ RpcReadoutElement::RpcReadoutElement(defineArgs&& args)
 }
 
 const parameterBook& RpcReadoutElement::getParameters() const { return m_pars; }
-StatusCode RpcReadoutElement::initElement() {
-    
+
+StatusCode RpcReadoutElement::initElement() {    
     ATH_MSG_DEBUG("Parameter book "<<parameterBook());
     if (m_pars.layers.empty()) {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
        return StatusCode::FAILURE;
     }
+    
+    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), *m_pars.layerBounds->insert(std::make_shared<Acts::RectangleBounds>(m_pars.halfLength, m_pars.halfWidth)).first));
 
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
@@ -44,11 +46,14 @@ StatusCode RpcReadoutElement::initElement() {
                                  [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
-      ATH_CHECK(planeSurfaceFactory(layHash, *m_pars.layerBounds->insert(std::make_shared<Acts::RectangleBounds>(m_pars.layers[layer].design().halfWidth(),
-       m_pars.layers[layer].design().shortHalfHeight())).first));
+      const StripDesign& design{m_pars.layers[layer].design()};
+      std::shared_ptr<Acts::RectangleBounds> lBounds = std::make_shared<Acts::RectangleBounds>(design.halfWidth(),
+                                                                                               design.shortHalfHeight());
+      ATH_CHECK(planeSurfaceFactory(layHash, *m_pars.layerBounds->insert(lBounds).first));
     }
     m_gasThickness = (chamberStripPos(createHash(1, 2, 1, false)) - 
                       chamberStripPos(createHash(1, 1, 1, false))).mag();
+    m_pars.layerBounds.reset();
     return StatusCode::SUCCESS;
 }
 

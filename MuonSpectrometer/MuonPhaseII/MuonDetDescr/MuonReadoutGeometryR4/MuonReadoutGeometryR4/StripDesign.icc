@@ -54,6 +54,8 @@ namespace MuonGMR4 {
         }
         const Amg::Vector2D strip{stripPosition(stripCh)};
         const Amg::Vector2D delta = rightInterSect(strip) - leftInterSect(strip);
+        ATH_MSG_VERBOSE("Strip "<<stripNumber<<" right edge: "<<Amg::toString(rightInterSect(strip), 2)
+                     <<" left edge: "<<Amg::toString(leftInterSect(strip),2)<<" length: "<<std::hypot(delta.x(), delta.y()));
         return std::hypot(delta.x(), delta.y());
     }
     inline Amg::Vector2D StripDesign::rightInterSect(int stripCh, bool uncapped) const {

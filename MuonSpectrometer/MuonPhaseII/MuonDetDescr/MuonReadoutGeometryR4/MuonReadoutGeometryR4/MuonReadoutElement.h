@@ -47,8 +47,6 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
         /// Basic transformation to be applied on top in order 
         /// to reach the center of the volume from the GeoModel transform
         Amg::Transform3D toVolCenter{Amg::Transform3D::Identity()};
-
-
     };
     
 
@@ -114,9 +112,9 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     ///   Transformations to translate between local <-> global coordinates.
     ///   They follow the common ATLAS conventations that the origin is located
     ///   in the center of the detector layer
-    ///     --- x_axis: Points along the primary coordinate
-    ///     --- y_axis:
-    ///     --- z_axis: Points towards the surface normal
+    ///         x-axis: Points towards the sky
+    ///         y-axis: Points towards the edges of ATLAS
+    ///         z-axis: Points along the beamline
     ///   The transformations always include the corrections from the A-Lines of
     ///   the alignment system
     /// Returns the global to local transformation into the rest frame of the
@@ -160,7 +158,6 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
    protected:
      using TransformMaker = MuonTransformCache::TransformMaker;
-
       
      /// Inserts a transfomration for caching
      StatusCode insertTransform(const IdentifierHash& hash,
@@ -174,7 +171,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
      //Creates a MuonSurfaceCache for plane surface using the given Bounds and Identifier Hash
      StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::PlanarBounds> pBounds);
-
+     
+     /// Returns the hash that is associated with the surface cache holding the transformation that is
+     /// placing the ReadoutElement inside the ATLAS coordinate system.
+     static IdentifierHash geoTransformHash();
    private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         "Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MuonReadoutElement"};
