@@ -159,8 +159,6 @@ def MessageSvcCfg(flags):
     if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction]:
         msgsvc.Format = "% F%18W%S%7W%R%T %0W%M" # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs
     if flags.Concurrency.NumThreads>0:
-        # Migrated code from AtlasThreadedJob.py
-        msgsvc.defaultLimit = 0
         msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(flags.Common.MsgSourceLength)
     if flags.Exec.VerboseMessageComponents:
         msgsvc.verboseLimit=0

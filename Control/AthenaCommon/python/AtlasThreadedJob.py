@@ -18,7 +18,6 @@ def _setupAtlasThreadedJob():
         # InertMessageSvc doesn't play nice with MP
         theApp.MessageSvcType = "MessageSvc"
 
-    svcMgr.MessageSvc.defaultLimit = 0
     svcMgr.MessageSvc.Format = "% F%50W%C%6W%R%e%s%8W%R%T %0W%M"
 
     numStores = jps.ConcurrencyFlags.NumConcurrentEvents()
