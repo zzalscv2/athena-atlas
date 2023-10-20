@@ -9,10 +9,10 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
 
-    def __init__ (self, containerName, postfix) :
-        super (FTagConfig, self).__init__ (containerName + '.' + postfix)
+    def __init__ (self, containerName, selectionName) :
+        super (FTagConfig, self).__init__ (containerName + '.' + selectionName)
         self.containerName = containerName
-        self.postfix = postfix
+        self.postfix = selectionName
         self.addOption ('btagWP', "FixedCutBEff_77", type=str)
         self.addOption ('btagger', "DL1r", type=str)
         self.addOption ('generator', "default", type=str)
@@ -155,7 +155,7 @@ class FTagConfig (ConfigBlock):
 
 
 def makeFTagAnalysisConfig( seq, containerName,
-                            postfix,
+                            selectionName,
                             btagWP = None,
                             btagger = None,
                             generator = None,
@@ -175,7 +175,7 @@ def makeFTagAnalysisConfig( seq, containerName,
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
-    config = FTagConfig (containerName, postfix)
+    config = FTagConfig (containerName, selectionName)
     if btagWP is not None :
         config.setOptionValue ('btagWP', btagWP)
     if btagger is not None :

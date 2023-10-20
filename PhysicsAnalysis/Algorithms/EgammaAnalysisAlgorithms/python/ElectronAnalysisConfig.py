@@ -121,10 +121,10 @@ class ElectronWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (29 Aug 22)."""
 
-    def __init__ (self, containerName, postfix) :
-        super (ElectronWorkingPointConfig, self).__init__ (containerName + '.' + postfix)
+    def __init__ (self, containerName, selectionName) :
+        super (ElectronWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
         self.containerName = containerName
-        self.selectionName = postfix
+        self.selectionName = selectionName
         self.addOption ('postfix', None, type=str)
         self.addOption ('likelihoodWP', None, type=str)
         self.addOption ('isolationWP', None, type=str)
@@ -339,7 +339,7 @@ def makeElectronCalibrationConfig( seq, containerName, postfix = None,
 
 
 def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
-                                    postfix,
+                                    selectionName,
                                     recomputeLikelihood = None,
                                     chargeIDSelection = None,
                                     noEffSF = None ):
@@ -347,7 +347,7 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
 
     Keyword arguments:
       workingPoint -- The working point to use
-      postfix -- a postfix to apply to decorations and algorithm
+      selectionName -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
@@ -357,7 +357,7 @@ def makeElectronWorkingPointConfig( seq, containerName, workingPoint,
     """
 
 
-    config = ElectronWorkingPointConfig (containerName, postfix)
+    config = ElectronWorkingPointConfig (containerName, selectionName)
     if workingPoint is not None :
         splitWP = workingPoint.split ('.')
         if len (splitWP) != 2 :
