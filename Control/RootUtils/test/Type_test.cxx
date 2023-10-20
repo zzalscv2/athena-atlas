@@ -77,10 +77,17 @@ void testit (const RootUtils::Type& type)
   assert (v[8] == fromInt<T>(6));
 
   // 0 1 2 3 4 2 8 1 6 9
+  type.swapRange (v.data(), 1, v.data(), 5, 2);
+  assert (v[1] == fromInt<T>(2));
+  assert (v[2] == fromInt<T>(8));
+  assert (v[5] == fromInt<T>(1));
+  assert (v[6] == fromInt<T>(2));
+
+  // 0 2 8 3 4 1 2 1 6 9
   type.copyRange (&v[1], &v[3], 5);
-  checkit (v, {0, 3, 4, 2, 8, 1, 8, 1, 6, 9});
+  checkit (v, {0, 3, 4, 1, 2, 1, 2, 1, 6, 9});
   type.copyRange (&v[3], &v[1], 5);
-  checkit (v, {0, 3, 4, 3, 4, 2, 8, 1, 6, 9});
+  checkit (v, {0, 3, 4, 3, 4, 1, 2, 1, 6, 9});
 }
 
 

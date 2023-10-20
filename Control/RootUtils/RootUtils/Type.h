@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file RootUtils/Type.h
  * @author scott snyder <snyder@bnl.gov>
@@ -261,6 +258,22 @@ public:
    * @param b Pointer to the second object.
    */
   void swap (void* a, void* b) const;
+
+
+  /**
+   * @brief Swap a range of objects between vectors.
+   * @param a Pointer to the start of the first vector's data.
+   * @param aindex Index of the first object in the first vector.
+   * @param b Pointer to the start of the second vector's data.
+   * @param bindex Index of the second object in the second vector.
+   * @param n Number of objects to swap.
+   *
+   * @c a and @ b can be either the same or different.
+   * However, the ranges should not overlap.
+   */
+  void swapRange (void* a, size_t a_index,
+                  void* b, size_t b_index,
+                  size_t n) const;
 
 
   /**
