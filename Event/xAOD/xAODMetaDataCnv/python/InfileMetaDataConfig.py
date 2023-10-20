@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format, MetadataCategory
+from AthenaConfiguration.Enums import Format, MetadataCategory, ProductionStep
 from OutputStreamAthenaPool.OutputStreamConfig import addToMetaData
 
 
@@ -125,7 +125,9 @@ def propagateMetaData(flags, streamName="", category=None, *args, **kwargs):
             f"{outputStreamName}_MakeEventStreamInfo",
             Key=outputStreamName,
             DataHeaderKey=outputStreamName,
-            EventInfoKey="EventInfo",
+            EventInfoKey=f"{flags.Overlay.BkgPrefix}EventInfo"
+            if flags.Common.ProductionStep == ProductionStep.PileUpPresampling
+            else "EventInfo",
         )
         tools.mdItems += [
             f"EventStreamInfo#{outputStreamName}",
