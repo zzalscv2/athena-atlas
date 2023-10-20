@@ -27,6 +27,6 @@ def jFexDBConfig(flags, name="jFEXCondAlgo"):
         DBCond.JfexSystemSettings = SysSettingst_folder
     
     
-    acc.addEventAlgo(DBCond)
+    acc.addCondAlgo(DBCond)
 
     return acc
