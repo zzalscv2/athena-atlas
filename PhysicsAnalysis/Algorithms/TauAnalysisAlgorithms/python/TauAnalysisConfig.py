@@ -58,10 +58,10 @@ class TauWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (16 Mar 22)."""
 
-    def __init__ (self, containerName, postfix) :
-        super (TauWorkingPointConfig, self).__init__ (containerName + '.' + postfix)
+    def __init__ (self, containerName, selectionName) :
+        super (TauWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
         self.containerName = containerName
-        self.selectionName = postfix
+        self.selectionName = selectionName
         self.addOption ('postfix', None, type=str)
         self.addOption ('quality', None, type=str)
         self.addOption ('legacyRecommendations', False, type=bool)
@@ -169,21 +169,21 @@ def makeTauCalibrationConfig( seq, containerName, postfix = None,
 
 
 
-def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
+def makeTauWorkingPointConfig( seq, containerName, workingPoint, selectionName,
                                legacyRecommendations = None,
                                noEffSF = None ):
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
       legacyRecommendations -- use legacy tau BDT and electron veto recommendations
-      postfix -- a postfix to apply to decorations and algorithm
+      selectionName -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
       noEffSF -- Disables the calculation of efficiencies and scale factors
     """
 
-    config = TauWorkingPointConfig (containerName, postfix)
+    config = TauWorkingPointConfig (containerName, selectionName)
     if workingPoint is not None :
         splitWP = workingPoint.split ('.')
         if len (splitWP) != 1 :

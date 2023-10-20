@@ -85,11 +85,11 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (10 Mar 22)."""
 
-    def __init__ (self, containerName, postfix) :
-        super (MuonWorkingPointConfig, self).__init__ (containerName + '.' + postfix)
+    def __init__ (self, containerName, selectionName) :
+        super (MuonWorkingPointConfig, self).__init__ (containerName + '.' + selectionName)
         self.containerName = containerName
-        self.selectionName = postfix
-        self.addOption ('postfix', postfix, type=str)
+        self.selectionName = selectionName
+        self.addOption ('postfix', selectionName, type=str)
         self.addOption ('quality', None, type=str)
         self.addOption ('isolation', None, type=str)
         self.addOption ('qualitySelectionOutput', True, type=bool)
@@ -256,7 +256,7 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 
 
-def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
+def makeMuonWorkingPointConfig( seq, containerName, workingPoint, selectionName,
                                 qualitySelectionOutput = None,
                                 systematicBreakdown = None,
                                 noEffSF = None,
@@ -265,7 +265,7 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
 
     Keyword arguments:
       workingPoint -- The working point to use
-      postfix -- a postfix to apply to decorations and algorithm
+      selectionName -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
                  names are unique.
@@ -277,7 +277,7 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
     """
 
 
-    config = MuonWorkingPointConfig (containerName, postfix)
+    config = MuonWorkingPointConfig (containerName, selectionName)
     if workingPoint is not None :
         splitWP = workingPoint.split ('.')
         if len (splitWP) != 2 :

@@ -12,12 +12,12 @@ Jets:
     runJvtUpdate: False
     runNNJvtUpdate: True
     FlavourTagging:
-      - postfix: 'ftag'
+      - selectionName: 'ftag'
         noEffSF: False
         btagger: 'DL1dv01'
         btagWP: 'FixedCutBEff_60'
         kinematicSelection: True
-      - postfix: 'ftag_legacy'
+      - selectionName: 'ftag_legacy'
         noEffSF: False
         btagger: 'DL1r'
         btagWP: 'FixedCutBEff_77'
@@ -29,7 +29,7 @@ Jets:
 Electrons:
   - containerName: 'AnaElectrons'
     ElectronWP:
-      - postfix: 'loose'
+      - selectionName: 'loose'
         likelihoodWP: 'LooseBLayerLH'
         isolationWP: 'Loose_VarRad'
         recomputeLikelihood: False
@@ -40,7 +40,7 @@ Photons:
   - containerName: 'AnaPhotons'
     recomputeIsEM: False
     PhotonWP:
-      - postfix: 'tight'
+      - selectionName: 'tight'
         qualityWP: 'Tight'
         isolationWP: 'FixedCutTight'
         recomputeIsEM: False
@@ -50,7 +50,7 @@ Photons:
 Muons:
   - containerName: 'AnaMuons'
     MuonWP:
-      - postfix: 'medium'
+      - selectionName: 'medium'
         quality: 'Medium'
         isolation: 'Loose_VarRad'
     PtEtaSelection: {}
@@ -58,27 +58,27 @@ Muons:
 TauJets:
   - containerName: 'AnaTauJets'
     TauJetWP:
-      - postfix: 'tight'
+      - selectionName: 'tight'
         quality: 'Tight'
     PtEtaSelection: {}
 
 GeneratorLevelAnalysis: {}
 
-# containerName and postfix must be defined in their respective blocks
+# containerName and selectionName must be defined in their respective blocks
 MissingET:
   - containerName: 'AnaMET'
-    # Format should follow Object: '<containerName>.<postfix>'
+    # Format should follow Object: '<containerName>.<selectionName>'
     jets: 'AnaJets'
     taus: 'AnaTauJets.tight'
     electrons: 'AnaElectrons.loose'
     photons: 'AnaPhotons.tight'
     muons: 'AnaMuons.medium'
 
-# containerName and postfix must be defined in their respective blocks
+# containerName and selectionName must be defined in their respective blocks
 OverlapRemoval:
     inputLabel: 'preselectOR'
     outputLabel: 'passesOR'
-    # Format should follow Object: '<containerName>.<postfix>'
+    # Format should follow Object: '<containerName>.<selectionName>'
     jets: 'AnaJets'
     taus: 'AnaTauJets.tight'
     electrons: 'AnaElectrons.loose'

@@ -329,7 +329,7 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     config.addAlgConfigBlock(algName="JVT", alg=JetJvtAnalysisConfig)
     from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
     config.addAlgConfigBlock(algName="FlavourTagging", alg=makeFTagAnalysisConfig,
-        defaults={'postfix': ''})
+        defaults={'selectionName': ''})
 
     # met
     from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig

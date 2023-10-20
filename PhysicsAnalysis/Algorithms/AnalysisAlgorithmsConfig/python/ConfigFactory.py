@@ -33,7 +33,7 @@ def makeConfig (factoryName, groupName,
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeMuonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+        makeMuonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
 
 
     elif factoryName == 'Electrons' :
@@ -45,7 +45,7 @@ def makeConfig (factoryName, groupName,
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeElectronWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+        makeElectronWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
 
 
     elif factoryName == 'Photons' :
@@ -57,7 +57,7 @@ def makeConfig (factoryName, groupName,
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makePhotonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+        makePhotonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
 
 
     elif factoryName == 'TauJets' :
@@ -69,7 +69,7 @@ def makeConfig (factoryName, groupName,
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeTauWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+        makeTauWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, selectionName=groupSplit[1])
 
 
     elif factoryName == 'Jets' :
@@ -90,7 +90,7 @@ def makeConfig (factoryName, groupName,
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
-        makeFTagAnalysisConfig( configSeq, groupSplit[0], postfix = groupSplit[1])
+        makeFTagAnalysisConfig( configSeq, groupSplit[0], selectionName = groupSplit[1])
 
 
     elif factoryName == 'MissingET' :
