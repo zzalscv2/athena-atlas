@@ -61,6 +61,13 @@ namespace xAOD {
          */
         void setTypeFlags(uint64_t);
 
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const uint64_t* typeFlagsPtr() const;
+        uint64_t* typeFlagsPtr();
+
         /**
          * @brief set the index of preceding TrackState 
          * TrackStates in the collection from multitude of short one-directional linked lists pointing from state to an earlier state.

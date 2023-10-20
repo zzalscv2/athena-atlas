@@ -35,8 +35,8 @@ constexpr std::optional<bool> has_impl(
       return trackStates[istate]->calibrated() < kInvalid;
     case "measdim"_hash:
       return trackStates[istate]->measDim() < kInvalid;
-    case "uncalibratedSourceLink"_hash:
-      return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
+      // TODO restore once only the EL Source Links are in use 
+      // return !trackStates[istate]->uncalibratedMeasurementLink().isDefault();
   }
   return std::optional<bool>();
 }
@@ -109,8 +109,6 @@ const std::any ActsTrk::MutableMultiTrajectory::decorationGetter(
   const SG::AuxElement* el = trackStates[idx];
   return &(el->auxdecor<T>(name));
 }
-
-
 
 template <typename T>
 const std::any ActsTrk::MultiTrajectory::decorationGetter(

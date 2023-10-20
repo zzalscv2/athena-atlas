@@ -109,16 +109,16 @@ namespace xAOD
     /**
      * access chi2
      **/
-    double chi2() const;
+    float chi2f() const;
     /**
      * access set chi2
      **/
-    void setChi2(double m);
+    void setChi2f(float m);
     /**
     * @brief pointers API needed by MTJ
     */
-    const double* chi2Ptr() const;
-    double* chi2Ptr();
+    const float* chi2fPtr() const;
+    float* chi2fPtr();
 
     /**
      * access ndf

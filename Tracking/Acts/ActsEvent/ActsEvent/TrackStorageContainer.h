@@ -124,7 +124,7 @@ class MutableTrackStorageContainer : public TrackStorageContainer {
   * copies decorations from other container
   */
   void copyDynamicFrom_impl (ActsTrk::IndexType itrack,
-                             const MutableTrackStorageContainer& other,
+                             const ActsTrk::TrackStorageContainer& other,
                              ActsTrk::IndexType other_itrack);
 
 

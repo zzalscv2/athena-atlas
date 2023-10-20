@@ -90,11 +90,6 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
 
   state->setCalibrated(kInvalid);
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
-    xAOD::TrackMeasurement* meas = new xAOD::TrackMeasurement();
-    m_trackMeasurements->push_back(meas);
-    state->setCalibrated(m_trackMeasurements->size() - 1);
-  }
-  if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
     state->setCalibrated(addMeasurement());
     // TODO: in Acts there is m_projections collection
     // https://github.com/acts-project/acts/blob/main/Core/src/EventData/VectorMultiTrajectory.cpp#L83
@@ -107,6 +102,7 @@ ActsTrk::IndexType ActsTrk::MutableMultiTrajectory::addTrackState_impl(
 
   state->setGeometryId(InvalidGeoID); // surface is invalid until set
   m_surfaces.push_back(nullptr);
+  m_sourceLinks.resize(m_trackStates->size());
 
   return m_trackStates->size() - 1;
 }
@@ -228,13 +224,15 @@ std::any ActsTrk::MutableMultiTrajectory::component_impl(
           ->projectorPtr();
     case "measdim"_hash:
       return (*m_trackStates)[istate]->measDimPtr();
+    case "typeFlags"_hash:
+      return (*m_trackStates)[istate]->typeFlagsPtr();
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
           return d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("MutableMultiTrajectory no such component " + std::to_string(key));
+      throw std::runtime_error("MutableMultiTrajectory::component_impl no such component " + std::to_string(key));
     }
   }
 }
@@ -274,13 +272,15 @@ const std::any ActsTrk::MutableMultiTrajectory::component_impl(
     }
     case "measdim"_hash:
       return trackStates[istate]->measDimPtr();
+    case "typeFlags"_hash:
+      return trackStates[istate]->typeFlagsPtr();
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
           return d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("MutableMultiTrajectory no such component " + std::to_string(key));
+      throw std::runtime_error("MutableMultiTrajectory::component_impl const no such component " + std::to_string(key));
     }
   }
 }
@@ -292,6 +292,13 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
       ActsTrk::details::has_impl(trackStates, key, istate);
   if (inTrackState.has_value())
     return inTrackState.value();
+
+  // TODO remove once EL based source links are in use only
+  using namespace Acts::HashedStringLiteral;
+  if (key == "uncalibratedSourceLink"_hash)
+      return m_sourceLinks[istate].has_value();
+
+
   for (auto& d : m_decorations) {
     if (d.hash == key) {
       return true;
@@ -304,14 +311,19 @@ bool ActsTrk::MutableMultiTrajectory::has_impl(
 typename Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
     ActsTrk::IndexType istate) const {
-  auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  return Acts::SourceLink(el);
+  // TODO see setUncalibratedSourceLink_impl
+  // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
+  // return Acts::SourceLink(el);
+  return m_sourceLinks[istate].value();
 }
 Acts::SourceLink
 ActsTrk::MutableMultiTrajectory::getUncalibratedSourceLink_impl(
     ActsTrk::IndexType istate) {
-  auto el = trackStates()[istate]->uncalibratedMeasurementLink();
-  return Acts::SourceLink(el);
+  // TODO see setUncalibratedSourceLink_impl
+  // auto el = trackStates()[istate]->uncalibratedMeasurementLink();
+  // return Acts::SourceLink(el);
+  return m_sourceLinks[istate].value();
+
 }
 
 void ActsTrk::MutableMultiTrajectory::setReferenceSurface_impl(IndexType istate,
@@ -402,12 +414,16 @@ ActsTrk::MultiTrajectory::MultiTrajectory(
 
 bool ActsTrk::MultiTrajectory::has_impl(Acts::HashedString key,
                                              ActsTrk::IndexType istate) const {
-  using namespace Acts::HashedStringLiteral;
   const auto& trackStates = *m_trackStates;
   std::optional<bool> inTrackState =
       ActsTrk::details::has_impl(trackStates, key, istate);
   if (inTrackState.has_value())
     return inTrackState.value();
+  // TODO remove once EL based source links are in use only
+  using namespace Acts::HashedStringLiteral;
+  if (key == "uncalibratedSourceLink"_hash)
+      return m_sourceLinks[istate].has_value();
+
 
   return false;
 }
@@ -444,13 +460,15 @@ const std::any ActsTrk::MultiTrajectory::component_impl(
     }
     case "measdim"_hash:
       return trackStates[istate]->measDimPtr();
+    case "typeFlags"_hash:
+      return trackStates[istate]->typeFlagsPtr();
     default: {
       for (auto& d : m_decorations) {
         if (d.hash == key) {
           return  d.getter(istate, d.name);
         }
       }
-      throw std::runtime_error("MultiTrajectory no such component " + std::to_string(key));
+      throw std::runtime_error("MultiTrajectory::component_impl no such component " + std::to_string(key));
     }
   }
 }
@@ -471,6 +489,7 @@ bool ActsTrk::MultiTrajectory::hasColumn_impl(
     case "calibrated"_hash:
     case "calibratedCov"_hash:
     case "measdim"_hash:
+    case "typeFlags"_hash:
       return true;
   }
   for (auto& d : m_decorations) {
@@ -490,14 +509,20 @@ bool ActsTrk::MultiTrajectory::hasColumn_impl(
 
 typename Acts::SourceLink
 ActsTrk::MultiTrajectory::getUncalibratedSourceLink_impl(ActsTrk::IndexType istate) const {
-  auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
-  return Acts::SourceLink(el);
+  // TODO restore this implementation, see other methods like this
+  // auto el = (*m_trackStates)[istate]->uncalibratedMeasurementLink();
+  // return Acts::SourceLink(el);
+  return m_sourceLinks[istate].value();
 }
 
 void ActsTrk::MultiTrajectory::fillSurfaces(const ActsTrk::MutableMultiTrajectory* mtj) {
   m_surfaces = std::move(mtj->m_surfaces);
 }
 
+// TODO remove this implementation once tracking uses only sourceLinks with EL
+void ActsTrk::MultiTrajectory::fillLinks(const ActsTrk::MutableMultiTrajectory* mtj) {
+  m_sourceLinks = std::move(mtj->m_sourceLinks);
+}
 
 void ActsTrk::MultiTrajectory::fillSurfaces(const Acts::TrackingGeometry* geo, const ActsGeometryContext& geoContext ) {
   if ( not m_surfaces.empty() )

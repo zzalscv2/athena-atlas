@@ -187,6 +187,7 @@ MutableMultiTrajectoryHandle<C>::moveToConst(
       DataLink<xAOD::TrackMeasurementContainer>(m_measurementsKey.key(),
                                                 context));
   cmtj->fillSurfaces(&mmtj);
+  cmtj->fillLinks(&mmtj);
   return cmtj;
 }
 
