@@ -278,6 +278,11 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
     cfg.merge(FPEAndCoreDumpCfg(flags))
 
+    # Avoid stack traces to the exception handler. These traces
+    # aren't very useful since they just point to the handler, not
+    # the original bug.
+    cfg.addService(CompFactory.ExceptionSvc(Catch="NONE"))
+
     # ApplicationMgr properties:
     cfg.setAppProperty('OutStreamType', 'AthenaOutputStream')
     cfg.setAppProperty('AuditAlgorithms', True)
