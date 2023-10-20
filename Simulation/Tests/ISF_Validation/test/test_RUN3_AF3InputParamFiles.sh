@@ -2,8 +2,8 @@
 #
 # art-description: MC21-style simulation using FullG4 for producing input samples needed for the Fast Calorimeter Simulation parametrisation
 # art-type: build
-# art-include: 22.0/Athena
 # art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 
 # Full chain with special flags
