@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -38,26 +38,8 @@ class TrackStateOnSurface;
   tracking volumes
   */
 
-struct StateAtBoundarySurface
-{
-  /** Data members */
-  const MultiComponentState* stateAtBoundary = nullptr;
-  std::unique_ptr<TrackParameters> navigationParameters = nullptr;
-  const TrackingVolume* trackingVolume = nullptr;
-  /** Update State at Boundary Surface Information */
-  void updateBoundaryInformation(const MultiComponentState* boundaryState,
-                                 std::unique_ptr<TrackParameters> navParameters,
-                                 const TrackingVolume* nextVolume)
-  {
-    stateAtBoundary = boundaryState;
-    navigationParameters = std::move(navParameters);
-    trackingVolume = nextVolume;
-  }
-};
-
 static const InterfaceID IID_IMultiStateExtrapolator("IMultiStateExtrapolator",
-                                                     1,
-                                                     0);
+                                                     1, 0);
 
 class IMultiStateExtrapolator : virtual public IAlgTool
 {
@@ -80,17 +62,16 @@ public:
     const Layer* m_recallLayer = nullptr;
     //!< Tracking volume for recall (not owning)
     const TrackingVolume* m_recallTrackingVolume = nullptr;
-    //!< Instance of structure describing the state
-    //!< at a boundary of tracking volumes
-    StateAtBoundarySurface m_stateAtBoundarySurface;
     // Vector of combined material effects
     std::vector<GsfMaterial::Combined> m_materialEffectsCaches;
     //!< Recycle bin for MultiComponentState objects,keep track of them
-    //!< and delete at the end
-    std::vector<std::unique_ptr<const MultiComponentState>> m_mcsRecycleBin;
-    //!< Recycle bin for TrackParameter objects, keep track of them
-    //!< and delete at the end
-    std::vector<std::unique_ptr<const TrackParameters>> m_tpRecycleBin;
+    std::vector<MultiComponentState> m_mcsRecycleBin;
+
+    //Element we point at each step
+    const MultiComponentState* m_stateAtBoundary = nullptr;
+    std::unique_ptr<TrackParameters> m_navigationParameters = nullptr;
+    const TrackingVolume* m_trackingVolume = nullptr;
+
 
     Cache() { m_materialEffectsCaches.reserve(12); }
   };
