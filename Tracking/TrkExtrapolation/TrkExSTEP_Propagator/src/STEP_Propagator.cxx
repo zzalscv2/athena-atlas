@@ -44,6 +44,9 @@
 //
 #include <cmath>
 
+/// enables -ftree-vectorize in gcc prior to 12
+#include "CxxUtils/vectorize.h"
+ATH_ENABLE_VECTORIZATION;
 
 #include "CxxUtils/inline_hints.h"
 
