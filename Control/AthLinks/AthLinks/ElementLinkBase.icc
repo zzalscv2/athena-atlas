@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/ElementLinkBase.icc
@@ -360,6 +360,21 @@ ElementLinkBase::ElementLinkBase (const ElementLinkBase& other,
   : m_persKey (other.m_persKey),
     m_persIndex (static_cast<stored_index_type>(elemID)),
     m_proxy (other.m_proxy)
+{
+}
+
+
+/**
+ * @brief Construct a link from a DataLink and an index.
+ * @param dlink Link to the container.
+ * @param index The index of the element within the container.
+ */
+inline
+ElementLinkBase::ElementLinkBase (const DataLinkBase& dlink,
+                                  index_type index)
+  : m_persKey (dlink.key()),
+    m_persIndex (static_cast<stored_index_type>(index)),
+    m_proxy (dlink.m_proxy)
 {
 }
 

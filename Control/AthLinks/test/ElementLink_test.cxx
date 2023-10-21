@@ -4,6 +4,7 @@
 
 #undef NDEBUG
 #include "AthLinks/ElementLink.h"
+#include "AthLinks/DataLink.h"
 #include "AthLinks/ElementLinkVector.h"
 #include "AthLinks/DeclareIndexingPolicy.h"
 #include "AthLinks/exceptions.h"
@@ -575,6 +576,19 @@ void testit (SGTest::TestStore& store,
   assert (el13.getDataPtr() == cont);
   EXPECT_EXCEPTION (SG::ExcConstStorable, el13.getDataNonConstPtr());
 
+  DataLink<CONT> dl14 (sgkey, &store);
+  Link el14 (dl14, index1);
+  assert (!el14.isDefault());
+  assert (el14.index() == index1);
+  assert (el14.isValid());
+  assert (!!el14);
+  assert (*el14.cptr() == doindex(cont, index1));
+  assert (el14.getDataPtr() == cont);
+  EXPECT_EXCEPTION (SG::ExcConstStorable, el14.getDataNonConstPtr());
+  assert (el14.dataID() == key);
+  assert (el14.key() == sgkey);
+  assert (el14.source() == &store);
+
   el12.reset();
   assert (el12.isDefault());
   assert (el12.index() == null_index);
@@ -588,14 +602,14 @@ void testit (SGTest::TestStore& store,
   assert (el12.source() == 0);
 
   // Using an invalid index throws in isValid()
-  Link el14 (key, invalid_index);
-  EXPECT_EXCEPTION (std::runtime_error, el14.isValid());
+  Link el15 (key, invalid_index);
+  EXPECT_EXCEPTION (std::runtime_error, el15.isValid());
 
   // except if the container is empty
   store.record(new CONT, "emptycont");
-  Link el15 ("emptycont", invalid_index);
-  assert (!el15.isValid());
-  EXPECT_EXCEPTION (std::runtime_error, *el15);
+  Link el16 ("emptycont", invalid_index);
+  assert (!el16.isValid());
+  EXPECT_EXCEPTION (std::runtime_error, *el16);
 }
 
 

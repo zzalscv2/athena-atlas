@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,6 +18,7 @@
 
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/tools/selection_ns.h"
+#include "AthLinks/DataLinkBase.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/checker_macros.h"
 
@@ -289,6 +290,15 @@ protected:
    */
   GenericElementLinkBase (const GenericElementLinkBase& other,
                           const index_type& elemID);
+
+
+  /**
+   * @brief Construct a link from a DataLink and an index.
+   * @param dlink Link to the container.
+   * @param index The index of the element within the container.
+   */
+  GenericElementLinkBase (const DataLinkBase& dlink,
+                          const index_type& index);
 
 
   /**

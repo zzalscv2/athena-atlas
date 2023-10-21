@@ -355,6 +355,14 @@ public:
   ElementLink (const ElementLink& other, index_type elemID);
 
 
+  /**
+   * @brief Construct a link from a DataLink and an index.
+   * @param dlink Link to the container.
+   * @param index The index of the element within the container.
+   */
+  ElementLink (const DataLink<STORABLE>& dlink, index_type index);
+
+
   // Use default copy ctor.
 
 

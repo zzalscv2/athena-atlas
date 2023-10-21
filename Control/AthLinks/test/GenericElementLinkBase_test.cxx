@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,6 +12,7 @@
 
 #undef NDEBUG
 #include "AthLinks/GenericElementLinkBase.h"
+#include "AthLinks/DataLinkBase.h"
 #include "AthLinks/exceptions.h"
 #include "SGTools/CurrentEventStore.h"
 #include "AthLinks/tools/MapIndexingPolicy.h"
@@ -128,6 +129,9 @@ public:
   ElementLinkBaseT_test(const ElementLinkBaseT_test& other,
                         const index_type& index)
     : Base (other, index) {}
+  ElementLinkBaseT_test(const DataLinkBase& other,
+                        const index_type& index)
+    : Base (other, index) {}
   template <class OTHER_POLICY, class FROM_STORABLE, class TO_STORABLE>
   ElementLinkBaseT_test (const SG::GenericElementLinkBase<OTHER_POLICY>& other,
                          FROM_STORABLE* from, TO_STORABLE* to)
@@ -156,6 +160,16 @@ public:
 
 typedef ElementLinkBaseT_test<SG::MapIndexingPolicy<StrMap> >
   ElementLinkBase_test;
+
+
+class DataLinkBase_test
+  : public DataLinkBase
+{
+public:
+  using DataLinkBase::DataLinkBase;
+  DataLinkBase_test (sgkey_t key, CLID link_clid, IProxyDict* sg)
+    : DataLinkBase (key, link_clid, sg) {}
+};
 
 
 void test1 (SGTest::TestStore& store)
@@ -370,6 +384,16 @@ void test1 (SGTest::TestStore& store)
   assert (el13.key() == sgkey);
   assert (el13.source() == &store);
   assert (el13.storableBase (0, clid, true) == cont);
+
+  DataLinkBase_test dl14 (sgkey, clid, &store);
+  Link el14 (dl14, index1);
+  assert (!el14.hasCachedElement());
+  assert (!el14.isDefault());
+  assert (el14.index() == index1);
+  assert (el14.dataID() == key);
+  assert (el14.key() == sgkey);
+  assert (el14.source() == &store);
+  assert (el14.storableBase (0, clid, true) == cont);
 
   el12.reset();
   assert (el12.isDefault());
