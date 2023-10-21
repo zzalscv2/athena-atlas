@@ -18,9 +18,9 @@ namespace {
     std::ostringstream os;
     if (main_input_SCT) {
       for (unsigned i=0; i<maxprint; i++) {
-        SCT_RDO_Container::const_iterator p = main_input_SCT->indexFind(i);
-        if (p != main_input_SCT->end()) {
-          os<<" "<< (*p)->size();
+        const auto* p = main_input_SCT->indexFindPtr(i);
+        if (p != nullptr) {
+          os<<" "<< p->size();
         }
         else {
           os<<" *";

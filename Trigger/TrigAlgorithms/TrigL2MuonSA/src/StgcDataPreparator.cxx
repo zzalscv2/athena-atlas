@@ -74,19 +74,19 @@ StatusCode TrigL2MuonSA::StgcDataPreparator::prepareData(const TrigRoiDescriptor
       // Get sTGC collections
       for(const IdentifierHash& id : stgcHashList) {
 
-	Muon::sTgcPrepDataContainer::const_iterator STGCcoll = stgcPrds->indexFind(id);
+	const auto* STGCcoll = stgcPrds->indexFindPtr(id);
 
-	if( STGCcoll == stgcPrds->end() ) {
+	if( STGCcoll == nullptr ) {
 	  continue;
 	}
 
-	if( (*STGCcoll)->size() == 0) {
+	if( STGCcoll->size() == 0) {
 	  ATH_MSG_DEBUG("Empty STGC list");
 	  continue;
 	}
 
 	stgcHashList_cache.push_back(id);
-	stgcCols.push_back(*STGCcoll);
+	stgcCols.push_back(STGCcoll);
       }
     }
 

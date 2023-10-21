@@ -74,19 +74,19 @@ StatusCode TrigL2MuonSA::MmDataPreparator::prepareData(const TrigRoiDescriptor* 
       // Get MM collections
       for(const IdentifierHash& id : mmHashList) {
 
-	Muon::MMPrepDataContainer::const_iterator MMcoll = mmPrds->indexFind(id);
+	const auto* MMcoll = mmPrds->indexFindPtr(id);
 
-	if( MMcoll == mmPrds->end() ) {
+	if( MMcoll == nullptr ) {
 	  continue;
 	}
 
-	if( (*MMcoll)->size() == 0) {
+	if( MMcoll->size() == 0) {
 	  ATH_MSG_DEBUG("Empty MM list");
 	  continue;
 	}
 
 	mmHashList_cache.push_back(id);
-	mmCols.push_back(*MMcoll);
+	mmCols.push_back(MMcoll);
       }
     }
 

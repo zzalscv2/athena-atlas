@@ -356,15 +356,14 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
     {
       data.maxSeedsPerSP = m_maxOneSizePPP;
 
-      SpacePointContainer::const_iterator spce = spacepointsPixel->end();
       // Loop through all trigger collections
       //
       for (const IdentifierHash &l : vPixel)
       {
-        auto w = spacepointsPixel->indexFind(l);
-        if (w == spce)
+        auto w = spacepointsPixel->indexFindPtr(l);
+        if (w == nullptr)
           continue;
-        for (const Trk::SpacePoint *sp : **w)
+        for (const Trk::SpacePoint *sp : *w)
         {
           float r = sp->r();
           if ((prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr)) || r > m_r_rmax || r < m_r_rmin)
@@ -393,16 +392,14 @@ void SiSpacePointsSeedMaker::newRegion(const EventContext &ctx, EventData &data,
     if (spacepointsStrip.isValid())
     {
 
-      SpacePointContainer::const_iterator spce = spacepointsStrip->end();
-
       // Loop through all trigger collections
       //
       for (const IdentifierHash &l : vStrip)
       {
-        auto w = spacepointsStrip->indexFind(l);
-        if (w == spce)
+        auto w = spacepointsStrip->indexFindPtr(l);
+        if (w == nullptr)
           continue;
-        for (const Trk::SpacePoint *sp : **w)
+        for (const Trk::SpacePoint *sp : *w)
         {
           float r = sp->r();
           if ((prd_to_track_map_cptr && isUsed(sp, *prd_to_track_map_cptr)) || r > m_r_rmax || r < m_r_rmin)
