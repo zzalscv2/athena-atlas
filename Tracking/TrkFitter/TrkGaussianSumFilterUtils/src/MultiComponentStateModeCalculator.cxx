@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,9 +11,13 @@
  */
 
 #include "TrkGaussianSumFilterUtils/MultiComponentStateModeCalculator.h"
+#include "TrkGaussianSumFilterUtils/GsfConstants.h"
 //
 #include "CxxUtils/phihelper.h"
 #include <cmath>
+
+#include<boost/container/static_vector.hpp>
+
 
 namespace {
 constexpr double invsqrt2PI =
@@ -39,6 +43,15 @@ struct Component
   double sigma = 0;
 };
 
+using VecOfComponents =
+    boost::container::static_vector<Component,
+                                    GSFConstants::maxNumberofStateComponents>;
+struct pdfAndDeriv
+{
+  double value = 0.;
+  double deriv1 = 0.;
+  double deriv2 = .0;
+};
 
 /** bried method to determine the value of the a gaussian distribution at a
  * given value */
@@ -52,7 +65,7 @@ gaus(double x, double mean, double sigma)
 
 /** @brief method to determine the pdf of the cashed mixture at a given value*/
 double
-pdf(double x, int i, const std::array<std::vector<Component>, 5>& mixture)
+pdf(double x, int i, const std::array<VecOfComponents, 5>& mixture)
 {
   double pdf(0.);
   auto component = mixture[i].begin();
@@ -62,16 +75,11 @@ pdf(double x, int i, const std::array<std::vector<Component>, 5>& mixture)
   return pdf;
 }
 
-struct pdfAndDeriv
-{
-  double value = 0.;
-  double deriv1 = 0.;
-  double deriv2 = .0;
-};
-/** @brief method to determine the pdf of the  mixture and its first 2
+/** @brief method to determine the pdf of the cashed mixture and its first 2
  * derivatives at a given value*/
-pdfAndDeriv fullPdf(double x, int i,
-                    const std::array<std::vector<Component>, 5>& mixture) {
+pdfAndDeriv
+fullPdf(double x, int i, const std::array<VecOfComponents, 5>& mixture)
+{
   pdfAndDeriv pdf{};
   auto component = mixture[i].begin();
   for (; component != mixture[i].end(); ++component) {
@@ -89,7 +97,7 @@ pdfAndDeriv fullPdf(double x, int i,
 /** bried method to determine the width of the a gaussian distribution at a
  * given value */
 double
-width(int i, const std::array<std::vector<Component>, 5>& mixture)
+width(int i, const std::array<VecOfComponents, 5>& mixture)
 {
   double pdf(0.);
   auto component = mixture[i].begin();
@@ -101,30 +109,23 @@ width(int i, const std::array<std::vector<Component>, 5>& mixture)
 
 void
 fillMixture(const Trk::MultiComponentState& multiComponentState,
-            std::array<std::vector<Component>, 5>& mixture)
+            std::array<VecOfComponents, 5>& mixture)
 {
   constexpr Trk::ParamDefs parameter[5] = {
     Trk::d0, Trk::z0, Trk::phi, Trk::theta, Trk::qOverP
   };
-
-  const size_t componentsNum = multiComponentState.size();
-  for (size_t i = 0; i < 5; ++i) {
-    mixture[i].clear();
-    mixture[i].reserve(componentsNum);
-  }
 
   // Loop over all the components in the multi-component state
   for (const Trk::ComponentParameters& component : multiComponentState) {
 
     // And then for each component over each 5 parameters
     for (size_t i = 0; i < 5; ++i) {
-
       const Trk::TrackParameters* componentParameters = component.first.get();
       const AmgSymMatrix(5)* measuredCov = componentParameters->covariance();
       if (!measuredCov) {
         return;
       }
-      // Enums for Perigee //
+      // Enums for Perigee
       // d0=0, z0=1, phi0=2, theta=3, qOverP=4,
       double weight = component.second;
       double mean = componentParameters->parameters()[parameter[i]];
@@ -150,7 +151,7 @@ fillMixture(const Trk::MultiComponentState& multiComponentState,
 double
 findMode(double xStart,
          int i,
-         const std::array<std::vector<Component>, 5>& mixture)
+         const std::array<VecOfComponents, 5>& mixture)
 {
 
   bool converged = false;
@@ -202,7 +203,7 @@ findRoot(double& result,
          double xhi,
          double value,
          double i,
-         const std::array<std::vector<Component>, 5>& mixture)
+         const std::array<VecOfComponents, 5>& mixture)
 {
   // Do the root finding using the Brent-Decker method. Returns a boolean
   // status and loads 'result' with our best guess at the root if true.
@@ -311,7 +312,7 @@ findRoot(double& result,
  * @ brief method to evaluate the Mode
  */
 std::array<double, 10>
-evaluateMode(const std::array<std::vector<Component>, 5>& mixture)
+evaluateMode(const std::array<VecOfComponents, 5>& mixture)
 {
   std::array<double, 10> modes{};
   /* loop over the 5 direction , d0,z0,phi,theta,qOverP*/
@@ -389,7 +390,7 @@ Trk::MultiComponentStateModeCalculator::calculateMode(
   if (!MultiComponentStateHelpers::allHaveCovariance(multiComponentState)) {
     return {};
   }
-  std::array<std::vector<Component>, 5> mixture;
+  std::array<VecOfComponents, 5> mixture;
 
   fillMixture(multiComponentState, mixture);
   return evaluateMode(mixture);
