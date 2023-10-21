@@ -2,6 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "CxxUtils/inline_hints.h"
 namespace Trk {
 
 inline bool
@@ -263,20 +264,16 @@ Surface::associateLayer(const Layer& lay)
   m_associatedLayer = (&lay);
 }
 
-#if defined(__GNUC__)
-[[gnu::flatten]]
 // Avoid out-of-line-eigen calls
-#endif
+ATH_FLATTEN
 inline Amg::Transform3D
 Surface::inverseTransformHelper() const
 {
   return transform().inverse();
 }
 
-#if defined(__GNUC__)
-[[gnu::flatten]]
 // Avoid out-of-line-eigen calls
-#endif
+ATH_FLATTEN
 inline Amg::Vector3D
 Surface::inverseTransformMultHelper(const Amg::Vector3D& pos) const
 {
