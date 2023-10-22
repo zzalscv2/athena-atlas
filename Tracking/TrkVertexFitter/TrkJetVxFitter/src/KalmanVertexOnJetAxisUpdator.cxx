@@ -238,8 +238,8 @@ namespace Trk{
     const Amg::MatrixX & old_full_vrt_cov = myPosition.covariancePosition();
     Eigen::FullPivLU<Amg::MatrixX> lu_decomp(old_full_vrt_cov);
     if(!lu_decomp.isInvertible()){
-      ATH_MSG_WARNING ("The vertex-positions covariance matrix is not invertible");
-      ATH_MSG_WARNING ("The copy of initial vertex returned");
+      ATH_MSG_DEBUG ("The vertex-positions covariance matrix is not invertible");
+      ATH_MSG_DEBUG ("The copy of initial vertex returned");
       return Trk::RecVertexPositions(myPosition);
     }
 
