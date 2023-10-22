@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMaker.h
@@ -29,8 +29,6 @@
 // Tracking Tool
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-// Jvt Tool
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 // Forward declaration
 
@@ -231,7 +229,7 @@ namespace met {
     double m_muIDPTJetPtRatioMuOlap;
 
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkseltool;
-    ToolHandle<CP::IJetJvtEfficiency>  m_JvtTool;
+    ToolHandle<IAsgSelectionTool> m_JvtTool;
 
     /// Default constructor:
     METMaker();

@@ -213,9 +213,9 @@ namespace met {
     // do not setup Jvt tool if we use the fallback option, i.e. apply Jvt requirements manually
     if (!m_useR21JvtFallback) {
       if (m_JvtTool.empty()) {
-        asg::AsgToolConfig config_jvt ("CP::JetJvtEfficiency/JvtTool");
+        asg::AsgToolConfig config_jvt ("CP::NNJvtSelectionTool/JvtSelTool");
         ATH_CHECK(config_jvt.setProperty("WorkingPoint", m_JvtWP));
-        ATH_CHECK(config_jvt.setProperty("TaggingAlg", CP::JvtTagger::NNJvt));
+        ATH_CHECK(config_jvt.setProperty("JvtMomentName", "NNJvt"));
         ATH_CHECK(config_jvt.setProperty("MaxPtForJvt", m_JvtPtMax));
         ATH_CHECK(config_jvt.makePrivateTool(m_JvtTool));
       }
@@ -751,7 +751,7 @@ namespace met {
           if (!m_useR21JvtFallback) {
             // intrinsically checks that is within range to apply Jvt requirement
             // use nominal calibrated jets instead
-            JVT_reject  = !m_JvtTool->passesJvtCut(*nominal_jet);
+            JVT_reject  = !bool(m_JvtTool->accept(nominal_jet));
           }
           else {
             if(jet->pt()<m_JvtPtMax && std::abs(jet->eta())<m_JetEtaForw) {
