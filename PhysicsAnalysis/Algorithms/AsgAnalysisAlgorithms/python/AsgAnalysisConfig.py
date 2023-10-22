@@ -23,10 +23,13 @@ class CommonServicesConfig (ConfigBlock) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if self.runSystematics is not None :
-            runSystematics = self.runSystematics
-        else :
-            runSystematics = config.dataType() is not DataType.Data
+        if config.dataType() is not DataType.Data:
+            if self.runSystematics is not None :
+                runSystematics = self.runSystematics
+            else :
+                runSystematics = True
+        else:
+            runSystematics = False
         if runSystematics :
             sysService.sigmaRecommended = 1
             if self.filterSystematics is not None:
