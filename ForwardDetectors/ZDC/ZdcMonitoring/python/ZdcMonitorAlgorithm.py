@@ -210,7 +210,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle', title=';Cos (#Delta #phi_{AorC});Events',
                             cutmask='bothSubAmpSumPositive', # only require subtracted amplitude sum on both sides to be positive
                             xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
-    genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle_requireValid', title=';Cos (#Delta #phi_{AorC});Events',
+    genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle;rpdCosDeltaReactionPlaneAngle_requireValid', title=';Cos (#Delta #phi_{AorC});Events',
                             cutmask='bothReactionPlaneAngleValid', # require centroid calculation on both sides to be valid
                             xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
 
@@ -319,7 +319,13 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_amp_xmax / 2.)
     zdcModuleMonToolArr.defineHistogram('zdcModuleFract',title=';Module Amplitude Fraction;Events',
                             xbins=50,xmin=0.0,xmax=1.)
-    zdcModuleMonToolArr.defineHistogram('zdcEnergySumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
+    zdcModuleMonToolArr.defineHistogram('zdcModuleFract; zdcModuleFract_above20N',title=';Module Amplitude Fraction;Events',
+                            cutmask='zdcAbove20NCurrentSide',
+                            xbins=50,xmin=0.0,xmax=1.)
+    zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
+                            xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax / 2.,
+                            ybins=50,ymin=0.0,ymax=1.)
+    zdcModuleMonToolArr.defineHistogram('zdcUncalibSumCurrentSide, zdcModuleFract;zdcModuleFract_vs_zdcUncalibSumCurrentSide_zoomedin', type='TH2F', title=';Amplitude Sum Current Side [ADC Counts];Module Amplitude Fraction',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
                             ybins=50,ymin=0.0,ymax=1.)
 
@@ -455,16 +461,21 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    import sys
     directory = ''
     inputfile = 'myAOD.pool.root'
     ConfigFlags.Input.Files = [directory+inputfile]
     ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'ZdcMonitorOutput_HI2023_462494.root'
-    ConfigFlags.fillFromArgs(sys.argv[1:])
-    
+    parser = ConfigFlags.getArgumentParser()
+    parser.add_argument('--runNumber',default=None,help="specify to select a run number")
+    parser.add_argument('--streamTag',default="ZDCCalib",help="ZDCCalib or MinBias")
+    args = ConfigFlags.fillFromArgs(parser=parser)
+    if args.runNumber is not None: # streamTag has default but runNumber doesn't
+        ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
+    else:
+        ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
     ConfigFlags.lock()
 
+    print('Output', ConfigFlags.Output.HISTFileName)
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
