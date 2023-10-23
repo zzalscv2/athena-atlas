@@ -43,8 +43,8 @@ def DRAW_EGZKernelCfg(configFlags, name='DRAW_EGZKernel', **kwargs):
         'eeMass3',
         '(count(eeMass3 > 55*GeV) >=1'
         ' && count(Electrons.pt > 20*GeV && Electrons.LHMedium)'
-        ' && count(ForwardElectrons.pt > 20*GeV && ForwardElectrons.Medium))',
-        'ForwardElectrons.pt > 20*GeV && ForwardElectrons.Medium']
+        ' && count(ForwardElectrons.pt > 20*GeV && ForwardElectrons.Loose))',
+        'ForwardElectrons.pt > 20*GeV && ForwardElectrons.Loose']
     # Augmentation tools for the di-lepton mass computations
     EventSels = []
     augmentationTools = []
