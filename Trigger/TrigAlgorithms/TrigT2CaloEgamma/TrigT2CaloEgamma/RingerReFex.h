@@ -17,8 +17,8 @@
 #include "xAODTrigRinger/TrigRingerRingsContainer.h"
 #include "xAODTrigRinger/TrigRingerRingsAuxContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
-#include "helpers/PhiComps.h"
-#include "helpers/VectorVectorIntParser.h"
+#include "../src/helpers/PhiComps.h"
+#include "../src/helpers/VectorVectorIntParser.h"
 #include "CaloConditions/CaloNoise.h" 
 
 
@@ -70,6 +70,11 @@ class RingerReFex : public IReAlgToolCalo
                                const IRoiDescriptor& roi,
                                const CaloDetDescrElement*& /*caloDDE*/,
                                const EventContext& context) const override;
+
+    StatusCode prepareRinger(std::vector<RingerReFex::RingSet>& vec_rs,
+				const xAOD::TrigEMCluster& emCluster,
+                                const IRoiDescriptor& roi,
+                                const EventContext& context) const;
 
   private:
 

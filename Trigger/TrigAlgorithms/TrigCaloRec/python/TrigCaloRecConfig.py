@@ -122,6 +122,22 @@ def hltCaloCellSeedlessMakerCfg(flags, roisKey='UNSPECIFIED'):
     return acc
 
 
+@AccumulatorCache
+def L0CaloGlobalRoIBuilderCfg(flags):
+    acc = ComponentAccumulator()
+    from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import RingerReFexConfig
+    ringer = RingerReFexConfig(flags,'RingerGlobalFex',RingerKey='testRKey',
+          ClustersName='CaloClustersGlobal')
+    L0CaloGlobalRoIBuilderAlg = CompFactory.CaloGlobalRoIBuilder("L0CaloGlobalRoIBuilder",
+                      Cells ="SeedLessFS", ClustersName='CaloClustersGlobal',
+                      RingerTool=ringer )
+    acc.addEventAlgo(L0CaloGlobalRoIBuilderAlg)
+
+    from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
+    acc.merge(CaloNoiseCondAlgCfg(flags))
+
+    return acc
+
 def hltCaloLocalCalib(flags, name = "TrigLocalCalib"):
     det_version_is_rome = flags.GeoModel.AtlasVersion.startswith("Rome")
     localCalibTool = CompFactory.CaloLCWeightTool("TrigLCWeight",
@@ -440,15 +456,53 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Input.Files = defaultTestFiles.RAW_RUN3
-    flags.Input.isMC=False
+    print("FILE : ",flags.Input.Files)
+    #flags.Input.isMC=False
     flags.GeoModel.Run=LHCPeriod.Run3
+    flags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
+    flags.Common.isOnline = True
+    #outputContainers = [
+    outputContainers = ["CaloCellContainer#SeedLessFS",
+              "xAOD::EventInfo#EventInfo",
+              "xAOD::TrigEMClusterContainer#CaloClustersGlobal",
+              "xAOD::TrigEMClusterAuxContainer#CaloClustersGlobalAux.",
+              "xAOD::TrigRingerRingsContainer#Global_FastCaloRinger",
+              "xAOD::TrigRingerRingsAuxContainer#Global_FastCaloRingerAux."]
+    flags.Output.ESDFileName='TrigCaloRecCheck'
+    
+    flags.fillFromArgs()
+    flags.dump()
     flags.lock()    
-    CAs = [hltCaloCellSeedlessMakerCfg(flags),
-           hltCaloCellMakerCfg(flags, "SthFS"),
-           hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topo"),
-           hltCaloTopoClusterCalibratorCfg(flags,"Calibrator",
-                                           clustersin="clustersIn",clustersout="clustersOut")]
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
+    cfg = MainServicesCfg(flags)
+
+    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+    cfg.merge(LArGMCfg(flags))
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    cfg.merge(TileGMCfg(flags))
+
+    from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
+    cfg.merge(DetDescrCnvSvcCfg(flags))
+
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    cfg.merge(ByteStreamReadCfg(flags))
+    cfg.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
+
+    storeGateSvc = cfg.getService("StoreGateSvc")
+    storeGateSvc.Dump=True
+    theL0CaloGlobalRoIBuilderCfg = L0CaloGlobalRoIBuilderCfg(flags)
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    
+    CAs = [hltCaloCellSeedlessMakerCfg(flags,roisKey=''),
+           theL0CaloGlobalRoIBuilderCfg,
+           hltCaloCellMakerCfg(flags, "SthFS",roisKey=''),
+           OutputStreamCfg(flags,flags.Output.ESDFileName,ItemList=outputContainers)]
+           #hltTopoClusterMakerCfg(flags, "TrigCaloClusterMaker_topoFS")]
 
     for ca in CAs:
         ca.printConfig(withDetails=True, summariseProps=True)
-        ca.wasMerged()
+        #ca.wasMerged()
+        cfg.merge(ca)
+
+
+    cfg.run(50)
