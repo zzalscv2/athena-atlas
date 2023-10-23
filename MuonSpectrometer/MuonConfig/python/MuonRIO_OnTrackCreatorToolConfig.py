@@ -104,9 +104,15 @@ def MuonClusterOnTrackCreatorCfg(flags, name="MuonClusterOnTrackCreator", **kwar
 
     if flags.Detector.EnablesTGC or flags.Detector.EnableMM:
         from MuonConfig.MuonCalibrationConfig import NSWCalibToolCfg
-        from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
         kwargs.setdefault("NSWCalibTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
-        kwargs.setdefault("SimpleMMClusterBuilder", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags))) 
+
+        from MuonConfig.MuonConfigFlags import MMClusterBuilderEnum
+        if flags.Muon.MMClusterCalibRecoTool == MMClusterBuilderEnum.Centroid:
+            from MuonConfig.MuonRecToolsConfig import SimpleMMClusterBuilderToolCfg
+            kwargs.setdefault("MMClusterBuilder", result.popToolsAndMerge(SimpleMMClusterBuilderToolCfg(flags))) 
+        elif flags.Muon.MMClusterCalibRecoTool == MMClusterBuilderEnum.ClusterTimeProjection:
+            from MuonConfig.MuonRecToolsConfig import  ClusterTimeProjectionMMClusterBuilderToolCfg
+            kwargs.setdefault("MMClusterBuilder", result.popToolsAndMerge(ClusterTimeProjectionMMClusterBuilderToolCfg(flags))) 
             
     muon_cluster_rot_creator = CompFactory.Muon.MuonClusterOnTrackCreator(name, **kwargs)
     result.setPrivateTools(muon_cluster_rot_creator)

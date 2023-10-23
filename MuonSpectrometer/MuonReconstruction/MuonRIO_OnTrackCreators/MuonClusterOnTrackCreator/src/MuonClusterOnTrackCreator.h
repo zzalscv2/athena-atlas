@@ -81,7 +81,7 @@ namespace Muon {
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         ToolHandle<Muon::INSWCalibTool> m_calibToolNSW{this, "NSWCalibTool", ""};
-        ToolHandle<Muon::IMMClusterBuilderTool> m_clusterBuilderToolMM{this, "SimpleMMClusterBuilder", "Muon::SimpleMMClusterBuilderTool/SimpleMMClusterBuilderTool"};
+        ToolHandle<Muon::IMMClusterBuilderTool> m_clusterBuilderToolMM{this, "MMClusterBuilder", "Muon::SimpleMMClusterBuilderTool/SimpleMMClusterBuilderTool"};
 
         MuonClusterOnTrack* calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
         MuonClusterOnTrack* calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
