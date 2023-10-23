@@ -147,8 +147,10 @@ TileTBStat::TileTBStat(const std::string& name, ISvcLocator* pSvcLocator)
   , m_spillPattern(0)
   , m_nSpill(0)
   , m_nEvt()
-  , m_cisBeg()
   , m_cisPar()
+  , m_cis1st()
+  , m_cisBeg()
+  , m_cisEnd()
 {
   declareProperty("TileDigitsContainer", m_digitsContainer = "TileDigitsCnt");    
   declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
@@ -184,8 +186,10 @@ StatusCode TileTBStat::initialize() {
   m_runNo = m_evTime = m_evtNo = m_trigType = m_nSpill = m_timeBegin = m_timeLast = m_evtMax = 0;
   m_calibMode = m_prevTrig = m_spillPattern = m_evtMin = 0xFFFFFFFF;
   memset(m_nEvt, 0, sizeof(m_nEvt));
-  memset(m_cisBeg, 0, sizeof(m_cisBeg));
   memset(m_cisPar, 0, sizeof(m_cisPar));
+  memset(m_cis1st, 0, sizeof(m_cis1st));
+  memset(m_cisBeg, 0, sizeof(m_cisBeg));
+  memset(m_cisEnd, 0, sizeof(m_cisEnd));
   memset(m_nEventsPerTrigger, 0, sizeof(m_nEventsPerTrigger));
 
   m_timeStart = time(0);
@@ -228,6 +232,7 @@ StatusCode TileTBStat::execute() {
       m_fragMap.clear();
 
       uint32_t nrob = event->nchildren();
+      uint32_t L1type = event->lvl1_trigger_type();
 
       for (size_t irob=0; irob<nrob; ++irob) {
         const uint32_t* fprob;
@@ -235,6 +240,7 @@ StatusCode TileTBStat::execute() {
         const eformat::ROBFragment<const uint32_t*> robf(fprob);
 
         T_RobRodFragMap ROBfrag;
+        ROBfrag.L1type = L1type;
         ROBfrag.ROBid = robf.source_id();
         ROBfrag.RODid = robf.rod_source_id();
 
@@ -292,15 +298,26 @@ StatusCode TileTBStat::execute() {
           }
         }
         m_fragMap.push_back(ROBfrag);
+        if ((ROBfrag.RODid & 0xFF0000) == 0x500000) {
+          size_t i=0;
+          for ( ; i<m_beamFragMap.size(); ++i) {
+            if (m_beamFragMap[i].ROBid == ROBfrag.ROBid && m_beamFragMap[i].L1type == ROBfrag.L1type) break;
+          }
+          if (i==m_beamFragMap.size()) {
+            m_beamFragMap.push_back(ROBfrag);
+          }
+        }
       }
 
       if (m_printAllEvents)
-        std::cout << "Fragments found in event " << m_beamCnv->eventFragment()->global_id() << "  calib mode=" << dqStatus->calibMode() << std::endl;
+        std::cout << "Fragments found in event " << m_beamCnv->eventFragment()->global_id();
       else if (firstORsecond)
-        std::cout << "Fragments found in first event, calib mode=" << dqStatus->calibMode() << std::endl;
+        std::cout << "Fragments found in first event";
       else
-        std::cout << "Fragments found in second event, calib mode=" << dqStatus->calibMode() << std::endl;
-      std::cout << "  ROB ID   ROD ID   Frag IDs" << std::endl;
+        std::cout << "Fragments found in second event";
+      std::cout << "  L1 trigger type " << L1type << " (0x"<< std::hex << L1type << std::dec << ")"
+                << "  calib mode=" << dqStatus->calibMode() << std::endl
+                << "  ROB ID   ROD ID   Frag IDs" << std::endl;
       for (unsigned int i = 0; i < nrob; ++i) {
         std::cout << std::hex << " 0x" << m_fragMap[i].ROBid << " 0x" << m_fragMap[i].RODid;
         for (unsigned int j = 0; j < m_fragMap[i].fragID.size(); ++j)
@@ -333,6 +350,16 @@ StatusCode TileTBStat::execute() {
   
   const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent();
 
+  if (testsum!=0) {
+    memcpy(m_cisEnd,m_cisPar,sizeof(m_cisPar));
+    m_cisEnd[16] = event->global_id();
+    m_cisEnd[17] = m_evtNr;
+    m_cisEnd[18] = 1;
+    if (m_cisBeg[18] == 0) {
+      memcpy(m_cisBeg,m_cisEnd,sizeof(m_cisEnd));
+    }
+  }
+
   m_evTime = event->bc_time_seconds();
   if (m_evTime >= m_timeStart || m_evTime < 1054321000 ) {
     if (m_evtNr == 0)
@@ -362,10 +389,51 @@ StatusCode TileTBStat::execute() {
     m_timeBegin = m_evTime;
     m_evtBegin  = m_evtNo;
     m_calibMode = dqStatus->calibMode();
-    memcpy(m_cisBeg,m_cisPar,sizeof(m_cisBeg));
+    memcpy(m_cis1st,m_cisPar,sizeof(m_cisPar));
   } else if (m_evtNr == 1) {
     // once again, first event can be junk
     m_calibMode = dqStatus->calibMode();
+  }
+
+  if (! m_printAllEvents) {
+    // check if new Laser or CIS fragments appear in events with different L1 trigger types
+    bool first_header=true;
+    for (size_t irob=0; irob<event->nchildren(); ++irob) {
+      const uint32_t* fprob;
+      event->child(fprob, irob);
+      const eformat::ROBFragment<const uint32_t*> robf(fprob);
+
+      T_RobRodFragMap ROBfrag;
+      ROBfrag.L1type = event->lvl1_trigger_type();
+      ROBfrag.ROBid = robf.source_id();
+      ROBfrag.RODid = robf.rod_source_id();
+
+      if ((ROBfrag.RODid & 0xFF0000) == 0x500000) {
+        size_t i=0;
+        for ( ; i<m_beamFragMap.size(); ++i) {
+          if (m_beamFragMap[i].ROBid == ROBfrag.ROBid && m_beamFragMap[i].L1type == ROBfrag.L1type) break;
+        }
+        if (i==m_beamFragMap.size()) {
+          unsigned int size = robf.rod_ndata();
+          if ( size > 0 ) {
+            const uint32_t * data;
+            robf.rod_data(data);
+            find_frag(data, size, ROBfrag);
+            m_beamFragMap.push_back(ROBfrag);
+            if (first_header) {
+              first_header=false;
+              std::cout << "Beam Fragments found in event " << m_evtNo << " ( " << m_evtNr << " )  L1 trigger type "
+                        << ROBfrag.L1type << " (0x"<< std::hex << ROBfrag.L1type << std::dec << ")" << std::endl
+                        << "  ROB ID   ROD ID   Frag IDs" << std::endl;
+            }
+            std::cout << std::hex << " 0x" << ROBfrag.ROBid << " 0x" << ROBfrag.RODid;
+            for (unsigned int j = 0; j < ROBfrag.fragID.size(); ++j)
+              std::cout << std::hex << " 0x" << ROBfrag.fragID[j];
+            std::cout << std::dec << std::endl;
+          }
+        }
+      }
+    }
   }
 
   if ( ( m_evTime < m_timeBegin && (m_timeBegin - m_evTime) < 10*24*3600 ) ||  // less then 10 days shift in neg direction
@@ -509,22 +577,68 @@ StatusCode TileTBStat::finalize() {
   
   std::cout << std::endl << "Ngains " << ( (m_calibMode == 1) ? 2 : 1 ) << std::endl;
 
+  bool cisdiff = false;
+  for (int i = 0; i < 16; ++i) {
+    cisdiff |= (m_cis1st[i] != m_cisBeg[i]);
+    cisdiff |= (m_cisEnd[i] != m_cisPar[i]);
+  }
+
+  if (cisdiff) {
+    std::cout << "CISpar first ";
+    for (int i = 0; i < 16; ++i)
+      std::cout << m_cis1st[i] << "  ";
+    std::cout << std::endl << "CISpar last  ";
+    for (int i = 0; i < 16; ++i)
+      std::cout << m_cisPar[i] << "  ";
+    std::cout << std::endl;
+  }
   std::cout << "CISpar begin ";
   for (int i = 0; i < 16; ++i)
     std::cout << m_cisBeg[i] << "  ";
+  if (cisdiff) {
+    std::cout << " \tevent " << m_cisBeg[16] << " \teventNr " << m_cisBeg[17];
+  }
   std::cout << std::endl << "CISpar end   ";
   for (int i = 0; i < 16; ++i)
-    std::cout << m_cisPar[i] << "  ";
+    std::cout << m_cisEnd[i] << "  ";
+  if (cisdiff) {
+    std::cout << " \tevent " << m_cisEnd[16] << " \teventNr " << m_cisEnd[17];
+  }
   std::cout << std::endl << std::endl;
-  
-  std::cout << "Spills " << m_nSpill  << std::endl;
-  std::cout << "Events " << m_evtNr   << std::endl;
-  std::cout << "Phy    " << m_nEvt[0] << std::endl;
-  std::cout << "Las    " << m_nEvt[1] << std::endl;
-  std::cout << "Ped    " << m_nEvt[2] << std::endl;
-  std::cout << "CIS    " << m_nEvt[3] << std::endl;
-  std::cout << "Bad    " << m_nEvt[4] << std::endl;
-  std::cout << std::endl << std::endl;
+
+  uint32_t nphy=0;
+  uint32_t nlas=m_nEventsPerTrigger[52];
+  uint32_t nped=m_nEventsPerTrigger[49];
+  uint32_t ncis=m_nEventsPerTrigger[50];
+  uint32_t nbad=0;
+  for (int i = 0; i < 128; ++i) {
+    nbad += m_nEventsPerTrigger[i];
+  }
+  for (int i = 128; i < 256; ++i) {
+    nphy += m_nEventsPerTrigger[i];
+  }
+  nbad -= nlas+nped+ncis;
+  nbad += m_nEventsPerTrigger[256];
+
+  if (m_nEvt[1]+m_nEvt[2]+m_nEvt[3]==0 && nlas+nped+ncis>0) {
+    std::cout << "Spills " << m_nSpill  << std::endl;
+    std::cout << "Events " << m_evtNr   << std::endl;
+    std::cout << "Phy    " << nphy << std::endl;
+    std::cout << "Las    " << nlas << std::endl;
+    std::cout << "Ped    " << nped << std::endl;
+    std::cout << "CIS    " << ncis << std::endl;
+    std::cout << "Bad    " << nbad << std::endl;
+    std::cout << std::endl << std::endl;
+  } else {
+    std::cout << "Spills " << m_nSpill  << std::endl;
+    std::cout << "Events " << m_evtNr   << std::endl;
+    std::cout << "Phy    " << m_nEvt[0] << std::endl;
+    std::cout << "Las    " << m_nEvt[1] << std::endl;
+    std::cout << "Ped    " << m_nEvt[2] << std::endl;
+    std::cout << "CIS    " << m_nEvt[3] << std::endl;
+    std::cout << "Bad    " << m_nEvt[4] << std::endl;
+    std::cout << std::endl << std::endl;
+  }
 
   std::cout << "Number of events per trigger:" << std::endl;
   for (int i = 0; i < 256; ++i) {

@@ -89,8 +89,10 @@ void TileHid2RESrcID::initialize(uint32_t runnum)
   if (runnum>318000) {
     // new frag->ROB mapping since March 2017 
     m_frag2ROD[0x16] = 0x520020;
+    m_frag2ROD[0xff] = 0x520020;
   } else {
     m_frag2ROD[0x16] = 0x520010;
+    m_frag2ROD[0xff] = 0x520010;
   }
   m_frag2ROD[0x17] = 0;
 }
