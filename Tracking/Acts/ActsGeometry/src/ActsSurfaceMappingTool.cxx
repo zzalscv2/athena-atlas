@@ -8,7 +8,7 @@
 #include "GaudiKernel/IInterface.h"
 // PACKAGE
 #include "ActsInterop/Logger.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 

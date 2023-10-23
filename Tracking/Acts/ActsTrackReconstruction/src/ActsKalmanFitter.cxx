@@ -37,7 +37,7 @@
 #include "ActsEvent/TrackContainer.h"
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsGeometry/ATLASSourceLinkSurfaceAccessor.h"
 #include "ActsInterop/Logger.h"

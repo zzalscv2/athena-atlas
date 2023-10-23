@@ -10,7 +10,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/IInterface.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 
 

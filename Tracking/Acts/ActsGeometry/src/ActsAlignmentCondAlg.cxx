@@ -5,9 +5,9 @@
 #include "ActsAlignmentCondAlg.h"
 
 // PACKAGE
-#include "ActsGeometry/ActsAlignmentStore.h"
+#include "ActsGeometryInterfaces/AlignmentStore.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 
 // ATHENA

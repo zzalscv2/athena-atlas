@@ -13,8 +13,8 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 // PACKAGE
-#include "ActsGeometry/ActsAlignmentStore.h" // ReadCondHandleKey wants complete type
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/AlignmentStore.h" // ReadCondHandleKey wants complete type
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 

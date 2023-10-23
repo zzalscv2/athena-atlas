@@ -3,7 +3,7 @@
 */
 
 #include "ActsGeometry/ActsMaterialTrackWriterSvc.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "GaudiKernel/IInterface.h"
 
 #include "TTree.h"

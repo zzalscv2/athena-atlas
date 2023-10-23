@@ -19,7 +19,7 @@
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsInterop/IdentityHelper.h"

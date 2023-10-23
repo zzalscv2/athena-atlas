@@ -1,16 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_IACTSMATERIALJSONWRITERTOOL_H
 #define ACTSGEOMETRY_IACTSMATERIALJSONWRITERTOOL_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IInterface.h"
+
 #include "GaudiKernel/IAlgTool.h"
-
-#include "ActsGeometry/ActsGeometryContext.h"
-
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
 
 namespace Acts {

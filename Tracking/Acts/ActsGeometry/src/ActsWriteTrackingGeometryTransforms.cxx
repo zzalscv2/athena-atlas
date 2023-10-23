@@ -6,7 +6,7 @@
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 
 
 // ATHENA

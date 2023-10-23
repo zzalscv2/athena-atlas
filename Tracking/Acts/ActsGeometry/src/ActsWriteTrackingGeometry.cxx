@@ -13,7 +13,7 @@
 // PACKAGE
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 
 // STL
 #include <string>

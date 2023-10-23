@@ -12,7 +12,7 @@
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 
 // PACKAGE
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
 
 // ACTS
