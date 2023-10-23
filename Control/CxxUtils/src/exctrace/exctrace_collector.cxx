@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/src/exctrace/exctrace_collector.cxx
@@ -21,6 +21,7 @@
 #include <typeinfo>
 #include <utility>
 #include <algorithm>
+#include <exception>
 #include "CxxUtils/checker_macros.h"
 
 // Maximum stack depth.
@@ -34,6 +35,16 @@ static thread_local void* exctrace_last_trace[bt_depth];
 // The real __cxa_throw function.
 typedef void throwfn (void*, void*, void (*dest)(void*));
 static throwfn* old_throw;
+
+
+// Force a dependency on libstdc++ so that we will be able to find
+// __cxa_throw via dlsym.  Otherwise the link dependency may be removed
+// since we usually link with as-needed.
+void extrace_force_libstd_link()
+{
+  std::terminate();
+}
+
 
 extern "C" {
   // Function to retrieve the last trace.
