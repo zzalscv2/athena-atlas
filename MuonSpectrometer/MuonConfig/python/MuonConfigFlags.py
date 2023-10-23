@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep, Project
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep, Project, FlagEnum
     
 import re
 
@@ -19,6 +19,12 @@ import re
 # https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonStandaloneFlags.py
 # - MuonRecFlags.py - necessary, but needs cleaning up.
 # https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecFlags.py
+
+
+class MMClusterBuilderEnum(FlagEnum):
+    """Flag values for Muon.MMClusterCalibRecoTool"""
+    Centroid = "Centroid"
+    ClusterTimeProjection = "ClusterTimeProjection"
 
 def _muonAlignMode(flags):
     # Small function that determines if the alignment flags should be true or false
@@ -134,6 +140,9 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.doWriteRpcRDO", True)
 
     mcf.addFlag("Muon.writeSDOs", lambda prevFlags : prevFlags.Output.doWriteESD and prevFlags.Input.isMC)
+
+    # configure the MM cluster reco method that is used in the cluster calibration step
+    mcf.addFlag("Muon.MMClusterCalibRecoTool", MMClusterBuilderEnum.Centroid ,enum = MMClusterBuilderEnum)
 
     # TODO - add configuration for above    
         
