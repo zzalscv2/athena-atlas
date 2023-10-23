@@ -432,6 +432,29 @@ def createITkTrackingPassFlags():
     icf.addFlag("doBremRecoverySi", lambda pcf: pcf.Tracking.doBremRecovery)
     icf.addFlag("minPTBrem"               , [1. * Units.GeV])
 
+    # --- handle ACTS workflow coexistence
+    # Athena components
+    icf.addFlag("doAthenaCluster", True)
+    icf.addFlag("doAthenaSpacePoint", True)
+    icf.addFlag("doAthenaSeed", True)
+    icf.addFlag("doAthenaTrack", True)
+    icf.addFlag("doAthenaAmbiguityResolution", True)
+    # Acts components
+    icf.addFlag("doActsCluster", False)
+    icf.addFlag("doActsSpacePoint", False)
+    icf.addFlag("doActsSeed", False)
+    icf.addFlag("doActsTrack", False)
+    icf.addFlag("doActsAmbiguityResolution", False)
+    # Athena -> Acts EDM converters
+    icf.addFlag("doAthenaToActsCluster", False)
+    icf.addFlag("doAthenaToActsSpacePoint", False)
+    # Acts -> Athena EDM converters
+    icf.addFlag("doActsToAthenaCluster", False)
+    icf.addFlag("doActsToAthenaSpacePoint", False)
+    icf.addFlag("doActsToAthenaSeed", False)
+    icf.addFlag("doActsToAthenaTrack", False)
+    icf.addFlag("doActsToAthenaResolvedTrack", False)
+
     return icf
 
 
@@ -1137,7 +1160,7 @@ def printActiveConfig(flags):
     print("************************************************************************")
 
     print("******************** Tracking reconstruction Config ********************")
-    print("                     Active Config is ",flags.Tracking.ActiveConfig.extension)
+    print("                     Active Config is",flags.Tracking.ActiveConfig.extension)
     flags.dump(pattern="Tracking.ActiveConfig.*", evaluate=True)
     print("************************************************************************")
     return

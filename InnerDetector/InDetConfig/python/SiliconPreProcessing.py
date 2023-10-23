@@ -105,31 +105,26 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     if flags.Detector.EnableBCMPrime:
         from InDetConfig.BCM_ZeroSuppressionConfig import BCM_ZeroSuppressionCfg
         acc.merge(BCM_ZeroSuppressionCfg(flags))
-
-    #
-    # --- Deducing configuration from the flags
-    #
-    from ActsConfig.TrackingComponentConfigurer import (
-        TrackingComponentConfigurer)
-    configuration_settings = TrackingComponentConfigurer(flags)
-
     #
     # -- Clusterization Algorithms
     #
-    if configuration_settings.doAthenaCluster:
+    if flags.Tracking.ActiveConfig.doAthenaCluster:
         from InDetConfig.InDetPrepRawDataFormationConfig import (
             AthenaTrkClusterizationCfg)
         acc.merge(AthenaTrkClusterizationCfg(flags))
+        
+    if flags.Tracking.ActiveConfig.doActsCluster:
+        # If ACTS clusterization is activated, then schedule RoI creator
+        from ActsConfig.ActsViewConfig import EventViewCreatorAlgCfg
+        acc.merge(EventViewCreatorAlgCfg(flags))
 
-    if configuration_settings.doActsCluster:
-        from ActsConfig.ActsClusterizationConfig import (
-            ActsClusterizationCfg)
+        from ActsConfig.ActsClusterizationConfig import ActsClusterizationCfg
         acc.merge(ActsClusterizationCfg(flags))
 
     #
     # ---  Cluster EDM converters
     #
-    if configuration_settings.doAthenaToActsCluster:
+    if flags.Tracking.ActiveConfig.doAthenaToActsCluster:
         #
         # --- InDet -> xAOD Cluster EDM converter
         #
@@ -137,7 +132,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
             ITkInDetToXAODClusterConversionCfg)
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
 
-    if configuration_settings.doActsToAthenaCluster:
+    if flags.Tracking.ActiveConfig.doActsToAthenaCluster:
         #
         # --- xAOD -> InDet Cluster EDM converter
         #
@@ -148,7 +143,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     #
     # ----------- form SpacePoints from clusters in SCT and Pixels
     #
-    if configuration_settings.doAthenaSpacePoint:
+    if flags.Tracking.ActiveConfig.doAthenaSpacePoint:
         if flags.Tracking.doITkFastTracking:
             from InDetConfig.SiSpacePointFormationConfig import (
                 ITkFastSiTrackerSpacePointFinderCfg)
@@ -158,7 +153,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
                 ITkSiTrackerSpacePointFinderCfg)
             acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
 
-    if configuration_settings.doActsSpacePoint:
+    if flags.Tracking.ActiveConfig.doActsSpacePoint:
         from ActsConfig.ActsSpacePointFormationConfig import (
             ActsSpacePointFormationCfg)
         acc.merge(ActsSpacePointFormationCfg(flags))
@@ -166,7 +161,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     #
     # --- Space Point EDM converters
     #
-    if configuration_settings.AthenaToActsSpacePointConverter:
+    if flags.Tracking.ActiveConfig.doAthenaToActsSpacePoint:
         #
         # --- InDet -> xAOD Space Point EDM converter
         #

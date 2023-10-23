@@ -28,7 +28,7 @@ def ActsToTrkConvertorAlgCfg(flags,
 
     # convert proper ACTS track collection
     # this depends on the ambi resol. activation
-    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ActsTracksResolved')
+    kwargs.setdefault('ACTSTracksLocation', 'ActsTracks' if not flags.Acts.doAmbiguityResolution else 'ResolvedActsTracks')
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
     kwargs.setdefault("TrackingGeometryTool", acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))

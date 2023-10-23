@@ -125,9 +125,6 @@ def ActsSiSpacePointsSeedMakerCfg(flags,
     kwargs.setdefault('ActsSpacePointsStripName'    , "ITkStripSpacePoints")
     kwargs.setdefault('ActsSpacePointsOverlapName'  , "ITkStripOverlapSpacePoints")
 
-    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
-    configuration_settings = TrackingComponentConfigurer(flags)
-
     # The code will need to use Trk::SpacePoint object for downstream Athena tracking
     # If we run this tool we have two options to retrieve this:
     #     (1) Have the Athena->Acts Space Point Converter scheduled beforehand
@@ -135,7 +132,7 @@ def ActsSiSpacePointsSeedMakerCfg(flags,
     # In case (1) the link xAOD -> Trk Space Point will be used to retrieve the Trk::SpacePoints
     # In case (2) the link xAOD -> InDet Cluster will be used to create the Trk::SpacePoints
     # If none of the above conditions are met, it means there is a misconfiguration of the algorithms
-    useClusters = configuration_settings.doAthenaToActsCluster and not configuration_settings.doAthenaToActsSpacePoint
+    useClusters = flags.Tracking.ActiveConfig.doAthenaToActsCluster and not flags.Tracking.ActiveConfig.doAthenaToActsSpacePoint
     kwargs.setdefault('useClustersForSeedConversion', useClusters)
 
     if flags.Tracking.ActiveConfig.usePrdAssociationTool:

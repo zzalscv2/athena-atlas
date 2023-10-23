@@ -50,16 +50,10 @@ def ITkTrackingSiPatternCfg(flags,
         #
         # ------------------------------------------------------------
 
-        #
-        # --- Deducing configuration from the flags
-        #
-        from ActsConfig.TrackingComponentConfigurer import (
-            TrackingComponentConfigurer)
-        configuration_settings = TrackingComponentConfigurer(flags)
-        runTruth = configuration_settings.doAthenaTrack or configuration_settings.doActsToAthenaTrack
+        runTruth = flags.Tracking.ActiveConfig.doAthenaTrack or flags.Tracking.ActiveConfig.doActsToAthenaTrack
 
         # Athena Track
-        if configuration_settings.doAthenaTrack:
+        if flags.Tracking.ActiveConfig.doAthenaTrack:
 
             from InDetConfig.SiSPSeededTrackFinderConfig import (
                 ITkSiSPSeededTrackFinderCfg)
@@ -74,7 +68,7 @@ def ITkTrackingSiPatternCfg(flags,
                 TracksLocation=SiSPSeededTrackCollectionKey))
 
         # ACTS seed
-        if configuration_settings.doActsSeed:
+        if flags.Tracking.ActiveConfig.doActsSeed:
 
             from ActsConfig.ActsSeedingConfig import (
                 ActsSeedingCfg)
@@ -87,13 +81,12 @@ def ITkTrackingSiPatternCfg(flags,
                     'ROI-based track-finding is not available yet in ACTS, so the default one is used')
 
         # ACTS track
-        if configuration_settings.doActsTrack:
+        if flags.Tracking.ActiveConfig.doActsTrack:
             from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
             acc.merge(ActsTrackFindingCfg(flags))
 
-
         # Convert Tracks Acts -> Athena (before ambi)
-        if configuration_settings.doActsToAthenaTrack:
+        if flags.Tracking.ActiveConfig.doActsToAthenaTrack:
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
                                                TracksLocation=SiSPSeededTrackCollectionKey))
@@ -111,6 +104,7 @@ def ITkTrackingSiPatternCfg(flags,
     # ---------- Ambiguity solving
     #
     # ------------------------------------------------------------
+    runTruth = True
 
     if flags.Tracking.doITkFastTracking:
 
@@ -123,7 +117,7 @@ def ITkTrackingSiPatternCfg(flags,
 
     else:
         # If we run Athena tracking we also want CTIDE ambi
-        if configuration_settings.doAthenaAmbiguityResolution:
+        if flags.Tracking.ActiveConfig.doAthenaAmbiguityResolution:
             # with Acts.doAmbiguityResolution the converter will directly produce
             # tracks with the key ResolvedTrackCollectionKey
             from TrkConfig.TrkAmbiguitySolverConfig import (
@@ -136,19 +130,24 @@ def ITkTrackingSiPatternCfg(flags,
             acc.merge(ITkTrkAmbiguitySolverCfg(
                 flags,
                 ResolvedTrackCollectionKey=ResolvedTrackCollectionKey))
+            
+            runTruth = True
 
         # If we run Acts tracking we may want Acts ambi, depending on the flag
-        if configuration_settings.doActsAmbiguityResolution:
+        if flags.Tracking.ActiveConfig.doActsAmbiguityResolution:
             # Schedule ACTS ambi. resolution and eventually the track convertions  
             from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
             acc.merge(ActsAmbiguityResolutionCfg(flags))
-            
-        if configuration_settings.doActsToAthenaResolvedTrack:
+            runTruth = False
+
+        if flags.Tracking.ActiveConfig.doActsToAthenaResolvedTrack:
             from ActsConfig.ActsEventCnvConfig import ActsToTrkConvertorAlgCfg
             acc.merge(ActsToTrkConvertorAlgCfg(flags,
                                                TracksLocation=ResolvedTrackCollectionKey))                
+            runTruth = False
+        
 
-    if flags.Tracking.doTruth:
+    if flags.Tracking.doTruth and runTruth:
         acc.merge(ITkTrackTruthCfg(
             flags,
             Tracks=ResolvedTrackCollectionKey,
