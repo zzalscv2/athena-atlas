@@ -7,10 +7,10 @@
 #include "GaudiKernel/EventIDRange.h"
 #include <memory>
 #include <sstream>
-
 #include <fstream>
-
+#include "PixelConditionsData/PixelModuleDataStream.h"
 #include "PathResolver/PathResolver.h"
+
 
 PixelConfigCondAlg::PixelConfigCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -102,102 +102,13 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   writeCdo -> setCablingMapToFile(m_cablingMapToFile);
   writeCdo -> setCablingMapFileName(m_cablingMapFileName);
 
-  // mapping files for radiation damage simulation
-  std::vector<std::string> mapsPath_list;
-  std::vector<std::string> mapsPath_list3D;
-
   // Year-dependent conditions
   int currentRunNumber = ctx.eventID().run_number();
   std::string filename = getFileName(currentRunNumber);
   std::ifstream indata(filename.c_str());
-
-  std::string sline;
-  std::vector<std::string> lBuffer;
-  std::string multiline = "";
-  while (getline(indata,sline)) {
-    if (!sline.empty()) {
-      if (sline.find("//")==std::string::npos) {
-        if (sline.find("{")!=std::string::npos && sline.find("}")!=std::string::npos) {
-          lBuffer.push_back(sline);
-        }
-        else if (sline.find("{")!=std::string::npos) {
-          multiline = sline;
-        }
-        else if (sline.find("}")!=std::string::npos) {
-          multiline += sline;
-          lBuffer.push_back(multiline);
-        }
-        else {
-          multiline += sline;
-        }
-      }
-    }
-  }
-
-  writeCdo -> setBarrelToTThreshold(getParameterInt("BarrelToTThreshold", lBuffer));
-  writeCdo -> setFEI3BarrelLatency(getParameterInt("FEI3BarrelLatency", lBuffer));
-  writeCdo -> setFEI3BarrelHitDuplication(getParameterBool("FEI3BarrelHitDuplication", lBuffer));
-  writeCdo -> setFEI3BarrelSmallHitToT(getParameterInt("FEI3BarrelSmallHitToT", lBuffer));
-  writeCdo -> setFEI3BarrelTimingSimTune(getParameterInt("FEI3BarrelTimingSimTune", lBuffer));
-  writeCdo -> setBarrelCrossTalk(getParameterDouble("BarrelCrossTalk", lBuffer));
-  writeCdo -> setBarrelNoiseOccupancy(getParameterDouble("BarrelNoiseOccupancy", lBuffer));
-  writeCdo -> setBarrelDisableProbability(getParameterDouble("BarrelDisableProbability", lBuffer));
-  writeCdo -> setBarrelLorentzAngleCorr(getParameterDouble("BarrelLorentzAngleCorr", lBuffer));
-  writeCdo -> setDefaultBarrelBiasVoltage(getParameterFloat("BarrelBiasVoltage", lBuffer));
-
-  writeCdo -> setEndcapToTThreshold(getParameterInt("EndcapToTThreshold", lBuffer));
-  writeCdo -> setFEI3EndcapLatency(getParameterInt("FEI3EndcapLatency", lBuffer));
-  writeCdo -> setFEI3EndcapHitDuplication(getParameterBool("FEI3EndcapHitDuplication", lBuffer));
-  writeCdo -> setFEI3EndcapSmallHitToT(getParameterInt("FEI3EndcapSmallHitToT", lBuffer));
-  writeCdo -> setFEI3EndcapTimingSimTune(getParameterInt("FEI3EndcapTimingSimTune", lBuffer));
-  writeCdo -> setEndcapCrossTalk(getParameterDouble("EndcapCrossTalk", lBuffer));
-  writeCdo -> setEndcapNoiseOccupancy(getParameterDouble("EndcapNoiseOccupancy", lBuffer));
-  writeCdo -> setEndcapDisableProbability(getParameterDouble("EndcapDisableProbability", lBuffer));
-  writeCdo -> setEndcapLorentzAngleCorr(getParameterDouble("EndcapLorentzAngleCorr", lBuffer));
-  writeCdo -> setDefaultEndcapBiasVoltage(getParameterFloat("EndcapBiasVoltage", lBuffer));
-
-  writeCdo -> setEndcapNoiseShape({getParameterFloat("PixelNoiseShape", lBuffer),
-                                   getParameterFloat("PixelNoiseShape", lBuffer),
-                                   getParameterFloat("PixelNoiseShape", lBuffer)});
-
-  // Radiation damage simulation
-  writeCdo -> setFluenceLayer(getParameterDouble("BarrelFluence", lBuffer));
-  std::vector<std::string> barrelFluenceFile = getParameterString("BarrelRadiationFile", lBuffer);
-  for (auto fluence : barrelFluenceFile) {
-    mapsPath_list.push_back(PathResolverFindCalibFile(fluence));
-  }
-
-  if (currentRunNumber<m_Run1IOV) {    // RUN1
-    writeCdo -> setBarrelNoiseShape({getParameterFloat("BLayerNoiseShape", lBuffer),
-                                     getParameterFloat("PixelNoiseShape", lBuffer),
-                                     getParameterFloat("PixelNoiseShape", lBuffer)});
-  }
-  else {     // RUN2
-    writeCdo -> setDBMToTThreshold(getParameterInt("DBMToTThreshold", lBuffer));
-    writeCdo -> setDBMCrossTalk(getParameterDouble("DBMCrossTalk", lBuffer));
-    writeCdo -> setDBMNoiseOccupancy(getParameterDouble("DBMNoiseOccupancy", lBuffer));
-    writeCdo -> setDBMDisableProbability(getParameterDouble("DBMDisableProbability", lBuffer));
-    writeCdo -> setDefaultDBMBiasVoltage(getParameterFloat("DBMBiasVoltage", lBuffer));
-
-    writeCdo -> setBarrelNoiseShape({getParameterFloat("IBLNoiseShape", lBuffer),
-                                     getParameterFloat("BLayerNoiseShape", lBuffer),
-                                     getParameterFloat("PixelNoiseShape", lBuffer),
-                                     getParameterFloat("PixelNoiseShape", lBuffer)});
-
-    writeCdo -> setDBMNoiseShape({getParameterFloat("IBLNoiseShape", lBuffer),
-                                  getParameterFloat("IBLNoiseShape", lBuffer),
-                                  getParameterFloat("IBLNoiseShape", lBuffer)});
-
-    // Radiation damage simulation for 3D sensor
-    writeCdo -> setFluenceLayer3D(getParameterDouble("3DFluence", lBuffer));
-    std::vector<std::string> barrel3DFluenceFile = getParameterString("3DRadiationFile", lBuffer);
-    for (auto fluence3D : barrel3DFluenceFile) {
-      mapsPath_list3D.push_back(PathResolverFindCalibFile(fluence3D));
-    }
-  }
-  writeCdo -> setRadSimFluenceMapList(mapsPath_list);
-  writeCdo -> setRadSimFluenceMapList3D(mapsPath_list3D);
-
+  SoshiFormat formatter(currentRunNumber < m_Run1IOV);
+  //stream through Soshi format to writeCdo
+  indata>> formatter >>(*writeCdo);
   //=======================
   // Combine time interval
   //=======================
@@ -216,117 +127,9 @@ StatusCode PixelConfigCondAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
-std::vector<std::string> PixelConfigCondAlg::getParameterString(const std::string& varName, const std::vector<std::string>& buffer) const {
-  std::string sParam = "";
-  std::string sMessage = "";
-  for (size_t i=0; i<buffer.size(); i++) {
-    if (buffer[i].find(varName.c_str())!=std::string::npos) {
-      ATH_MSG_DEBUG("PixelConfigCondAlg::getParameterString() " << i << " " << buffer[i]);
-      std::istringstream iss(buffer[i]);
-      std::string s;
-      bool chkParam = false;
-      bool chkMessage = false;
-      while (iss >> s) {
-        if (s.find("{")!=std::string::npos && s.find("}")!=std::string::npos) {
-          sParam += s.substr(1,s.length()-1);
-        }
-        else if (s.find("{")!=std::string::npos) {
-          sParam += s.substr(1,s.length());
-          chkParam = true;
-        }
-        else if (s.find("}")!=std::string::npos) {
-          sParam += s.substr(0,s.length()-1);
-          chkParam = false;
-          chkMessage = true;
-        }
-        else if (chkParam==true) {
-          sParam += s;
-        }
-        else if (chkMessage==true) {
-          sMessage += " " + s;
-        }
-      }
-    }
-  }
 
-  if (sParam.empty()) {
-    ATH_MSG_FATAL("PixelConfigCondAlg::getParameterString() Input variable was not found. " << varName);
-  }
-
-  std::vector<std::string> vParam;
-  int offset = 0; 
-  for (;;) {
-    auto pos = sParam.find(",",offset);
-    if (pos==std::string::npos) {
-      vParam.push_back(sParam.substr(offset,pos));
-      break;
-    }
-    vParam.push_back(sParam.substr(offset,pos-offset));
-    offset = pos + 1;
-  }
-
-  std::vector<std::string> vvParam;
-  for (auto param : vParam) {
-    if (param.find("\"")!=std::string::npos) {
-      if (vParam.size()==1) {
-        vvParam.push_back(param.substr(1,param.length()-3));
-      }
-      else {
-        vvParam.push_back(param.substr(1,param.length()-2));
-      }
-    }
-    else {
-      vvParam.push_back(param);
-    }
-  }
-  return vvParam;
-}
-
-std::vector<double> PixelConfigCondAlg::getParameterDouble(const std::string& varName, const std::vector<std::string>& buffer) const {
-  std::vector<std::string> varString = getParameterString(varName, buffer);
-  std::vector<double> varDouble;
-  for (auto var : varString) {
-    varDouble.push_back(std::stod(var,nullptr));
-  }
-  return varDouble;
-}
-
-std::vector<float> PixelConfigCondAlg::getParameterFloat(const std::string& varName, const std::vector<std::string>& buffer) const {
-  std::vector<std::string> varString = getParameterString(varName, buffer);
-  std::vector<float> varFloat;
-  for (auto var : varString) {
-    varFloat.push_back(std::stof(var,nullptr));
-  }
-  return varFloat;
-}
-
-std::vector<int> PixelConfigCondAlg::getParameterInt(const std::string& varName, const std::vector<std::string>& buffer) const {
-  std::vector<std::string> varString = getParameterString(varName, buffer);
-  std::vector<int> varInt;
-  for (auto var : varString) {
-    varInt.push_back(std::stoi(var,nullptr));
-  }
-  return varInt;
-}
-
-std::vector<bool> PixelConfigCondAlg::getParameterBool(const std::string& varName, const std::vector<std::string>& buffer) const {
-  std::vector<std::string> varString = getParameterString(varName, buffer);
-  std::vector<bool> varBool;
-  for (auto var : varString) {
-    if (var.find("False")!=std::string::npos || var.find("false")!=std::string::npos) {
-      varBool.push_back(0);
-    }
-    else if (var.find("True")!=std::string::npos || var.find("true")!=std::string::npos) {
-      varBool.push_back(1);
-    }
-    else {
-      ATH_MSG_FATAL("PixelConfigCondAlg::getParameterBool() No matching boolean string " << var);
-    }
-  }
-  return varBool;
-}
-
-std::string PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
+std::string 
+PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
   if (m_usePrivateFileName.empty()) {
     std::ifstream indata(PathResolverFindCalibFile(static_cast<std::string>(m_conditionsFolder)+m_conditionsFileName));
     int runNumber = 0;
@@ -339,8 +142,7 @@ std::string PixelConfigCondAlg::getFileName(const int currentRunNumber) const {
     }
     ATH_MSG_DEBUG("PixelConfigCondAlg::getFileName() RunNumber=" << currentRunNumber << " IOV=" << runNumber << " filename=" << subfilename);
     return PathResolverFindCalibFile(m_conditionsFolder+subfilename);
-  }
-  else {
+  } else {
     return m_usePrivateFileName;
   }
 }

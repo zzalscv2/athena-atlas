@@ -4,9 +4,13 @@
 
 #include "PixelConditionsData/PixelModuleDataStream.h"
 #include "PixelConditionsData/PixelModuleData.h"
+#include "PixelConditionsData/PixelConditionsDataStringUtils.h"
+#include "PathResolver/PathResolver.h"
 #include <vector>
 #include <type_traits>
 #include <sstream>
+
+using namespace PixelConditionsData;
 
 namespace{
   template <typename T>
@@ -468,3 +472,97 @@ operator >> (std::istream &in, PixelModuleData &c){
   }
   return in;
 }
+
+std::istream & operator >>(SoshiFormat & f, PixelModuleData & md){
+  std::istream *i = f.m_is;
+  std::string sline;
+  std::vector<std::string> lBuffer;
+  std::string multiline = "";
+  std::vector<std::string> mapsPath_list;
+  std::vector<std::string> mapsPath_list3D;
+  while (getline(*i,sline)) {
+    if (!sline.empty()) {
+      if (sline.find("//")==std::string::npos) {
+        if (sline.find("{")!=std::string::npos && sline.find("}")!=std::string::npos) {
+          lBuffer.push_back(sline);
+        }
+        else if (sline.find("{")!=std::string::npos) {
+          multiline = sline;
+        }
+        else if (sline.find("}")!=std::string::npos) {
+          multiline += sline;
+          lBuffer.push_back(multiline);
+        }
+        else {
+          multiline += sline;
+        }
+      }
+    }
+  }
+
+  md.setBarrelToTThreshold(getParameter<int>("BarrelToTThreshold", lBuffer));
+  md.setFEI3BarrelLatency(getParameter<int>("FEI3BarrelLatency", lBuffer));
+  md.setFEI3BarrelHitDuplication(getParameter<bool>("FEI3BarrelHitDuplication", lBuffer));
+  md.setFEI3BarrelSmallHitToT(getParameter<int>("FEI3BarrelSmallHitToT", lBuffer));
+  md.setFEI3BarrelTimingSimTune(getParameter<int>("FEI3BarrelTimingSimTune", lBuffer));
+  md.setBarrelCrossTalk(getParameter<double>("BarrelCrossTalk", lBuffer));
+  md.setBarrelNoiseOccupancy(getParameter<double>("BarrelNoiseOccupancy", lBuffer));
+  md.setBarrelDisableProbability(getParameter<double>("BarrelDisableProbability", lBuffer));
+  md.setBarrelLorentzAngleCorr(getParameter<double>("BarrelLorentzAngleCorr", lBuffer));
+  md.setDefaultBarrelBiasVoltage(getParameter<float>("BarrelBiasVoltage", lBuffer));
+
+  md.setEndcapToTThreshold(getParameter<int>("EndcapToTThreshold", lBuffer));
+  md.setFEI3EndcapLatency(getParameter<int>("FEI3EndcapLatency", lBuffer));
+  md.setFEI3EndcapHitDuplication(getParameter<bool>("FEI3EndcapHitDuplication", lBuffer));
+  md.setFEI3EndcapSmallHitToT(getParameter<int>("FEI3EndcapSmallHitToT", lBuffer));
+  md.setFEI3EndcapTimingSimTune(getParameter<int>("FEI3EndcapTimingSimTune", lBuffer));
+  md.setEndcapCrossTalk(getParameter<double>("EndcapCrossTalk", lBuffer));
+  md.setEndcapNoiseOccupancy(getParameter<double>("EndcapNoiseOccupancy", lBuffer));
+  md.setEndcapDisableProbability(getParameter<double>("EndcapDisableProbability", lBuffer));
+  md.setEndcapLorentzAngleCorr(getParameter<double>("EndcapLorentzAngleCorr", lBuffer));
+  md.setDefaultEndcapBiasVoltage(getParameter<float>("EndcapBiasVoltage", lBuffer));
+
+  md.setEndcapNoiseShape({getParameter<float>("PixelNoiseShape", lBuffer),
+                                   getParameter<float>("PixelNoiseShape", lBuffer),
+                                   getParameter<float>("PixelNoiseShape", lBuffer)});
+
+  // Radiation damage simulation
+  md.setFluenceLayer(getParameter<double>("BarrelFluence", lBuffer));
+  std::vector<std::string> barrelFluenceFile = getParameterString("BarrelRadiationFile", lBuffer);
+  for (const auto & fluence : barrelFluenceFile) {
+    mapsPath_list.push_back(PathResolverFindCalibFile(fluence));
+  }
+
+  if (f.run1) {    // RUN1
+    md.setBarrelNoiseShape({getParameter<float>("BLayerNoiseShape", lBuffer),
+                                     getParameter<float>("PixelNoiseShape", lBuffer),
+                                     getParameter<float>("PixelNoiseShape", lBuffer)});
+  } else {     // RUN2
+    md.setDBMToTThreshold(getParameter<int>("DBMToTThreshold", lBuffer));
+    md.setDBMCrossTalk(getParameter<double>("DBMCrossTalk", lBuffer));
+    md.setDBMNoiseOccupancy(getParameter<double>("DBMNoiseOccupancy", lBuffer));
+    md.setDBMDisableProbability(getParameter<double>("DBMDisableProbability", lBuffer));
+    md.setDefaultDBMBiasVoltage(getParameter<float>("DBMBiasVoltage", lBuffer));
+
+    md.setBarrelNoiseShape({getParameter<float>("IBLNoiseShape", lBuffer),
+                                     getParameter<float>("BLayerNoiseShape", lBuffer),
+                                     getParameter<float>("PixelNoiseShape", lBuffer),
+                                     getParameter<float>("PixelNoiseShape", lBuffer)});
+
+    md.setDBMNoiseShape({getParameter<float>("IBLNoiseShape", lBuffer),
+                                  getParameter<float>("IBLNoiseShape", lBuffer),
+                                  getParameter<float>("IBLNoiseShape", lBuffer)});
+
+    // Radiation damage simulation for 3D sensor
+    md.setFluenceLayer3D(getParameter<double>("3DFluence", lBuffer));
+    std::vector<std::string> barrel3DFluenceFile = getParameterString("3DRadiationFile", lBuffer);
+    for (const auto & fluence3D : barrel3DFluenceFile) {
+      mapsPath_list3D.push_back(PathResolverFindCalibFile(fluence3D));
+    }
+  }
+  md.setRadSimFluenceMapList(mapsPath_list);
+  md.setRadSimFluenceMapList3D(mapsPath_list3D);
+  return *i;
+
+}
+

@@ -59,4 +59,5 @@ namespace PixelConditionsAlgorithms{
     //
     return result;
   }
-}
+  
+} 

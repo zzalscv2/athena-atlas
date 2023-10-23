@@ -14,7 +14,7 @@ atlas_add_library( PixelConditionsData
                    PUBLIC_HEADERS PixelConditionsData
                    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES AthenaKernel AthenaPoolUtilities GeoPrimitives Identifier InDetByteStreamErrors InDetIdentifier PixelReadoutDefinitionsLib PixelReadoutGeometryLib CxxUtils
+                   LINK_LIBRARIES AthenaKernel AthenaPoolUtilities GeoPrimitives Identifier InDetByteStreamErrors InDetIdentifier PixelReadoutDefinitionsLib PixelReadoutGeometryLib CxxUtils PathResolver
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} )
                    
 atlas_add_test( PixelChargeCondData_test
@@ -26,7 +26,7 @@ atlas_add_test( PixelChargeCondData_test
 atlas_add_test( PixelModuleDataStream_test
                 SOURCES test/PixelModuleDataStream_test.cxx 
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                LINK_LIBRARIES PixelConditionsData PathResolver ${Boost_LIBRARIES}
+                LINK_LIBRARIES PixelConditionsData  ${Boost_LIBRARIES}
                 POST_EXEC_SCRIPT nopost.sh)
                 
 atlas_add_test( PixelChargeCalibParameters_test
