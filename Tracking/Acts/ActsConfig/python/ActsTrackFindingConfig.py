@@ -2,6 +2,8 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+import AthenaCommon.SystemOfUnits as Units
+from ActsInterop import UnitConstants
 
 # Tools
 
@@ -69,15 +71,24 @@ def ActsTrackFindingCfg(flags,
 
     kwargs.setdefault("maxPropagationStep", 10000)
     kwargs.setdefault("skipDuplicateSeeds", flags.Acts.skipDuplicateSeeds)
-    kwargs.setdefault("etaBins", [])
+    # bins in |eta|, used for both MeasurementSelectorCuts and TrackSelector::EtaBinnedConfig
+    if flags.Detector.GeometryITk:
+        kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
     kwargs.setdefault("chi2CutOff", [flags.Acts.trackFindingChi2CutOff])
     kwargs.setdefault("numMeasurementsCutOff", [3])
 
     if flags.Acts.doTrackFindingTrackSelector:
-        # TrackSelector no tighter than createITkTrackingPassFlags() (https://gitlab.cern.ch/atlas/athena/-/blob/main/Tracking/TrkConfig/python/TrackingPassFlags.py#L383)
-        kwargs.setdefault("absEtaMax", 4.0)
-        kwargs.setdefault("ptMin", 0.4)
-        kwargs.setdefault("minMeasurements", 7)
+        def tolist(c):
+            return c if isinstance(c, list) else [c]
+        kwargs.setdefault("absEtaMax", flags.Tracking.ActiveConfig.maxEta)
+        kwargs.setdefault("ptMin",
+                          [p / Units.GeV * UnitConstants.GeV for p in tolist(flags.Tracking.ActiveConfig.minPT)])
+        kwargs.setdefault("minMeasurements",
+                          tolist(flags.Tracking.ActiveConfig.minClusters))
+        if flags.Acts.doTrackFindingTrackSelector == 2:
+            # use the same cut for all eta for comparison with previous behaviour
+            kwargs["ptMin"] = [min(kwargs["ptMin"])]
+            kwargs["minMeasurements"] = [min(kwargs["minMeasurements"])]
 
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg, ActsTrackingGeometryToolCfg
     kwargs.setdefault(
@@ -100,11 +111,11 @@ def ActsTrackFindingCfg(flags,
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsTrackStatePrinterCfg(flags)),
         )
-    kwargs.setdefault("SeedLabels",["PPP","SSS"])
+    kwargs.setdefault("SeedLabels", ["PPP", "SSS"])
     # there is always an over and underflow bin so the first bin will be 0. - 0.5 the last bin 3.5 - inf.
-    # if all eta bins are >=0. the counter will be categorized qby abs(eta) otherwise eta
-    kwargs.setdefault("StatisticEtaBins",[ eta/10. for eta in range(5,40,5)]) # eta 0.0 - 4.0 in steps of 0.5
-    kwargs.setdefault("DumpEtaBinsForAll",False)
+    # if all eta bins are >=0. the counter will be categorized by abs(eta) otherwise eta
+    kwargs.setdefault("StatisticEtaBins", [eta/10. for eta in range(5, 40, 5)]) # eta 0.0 - 4.0 in steps of 0.5
+    kwargs.setdefault("DumpEtaBinsForAll", False)
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackFindingAlg(name, **kwargs))
     return acc

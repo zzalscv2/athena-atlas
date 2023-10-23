@@ -92,22 +92,22 @@ namespace ActsTrk
     // Configuration
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
-    // Selection cuts for associating measurements with predicted track parameters on a surface.
-    Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "MeasurementSelector: bins in |eta| to specify variable selections"};
-    Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {std::numeric_limits<double>::max()}, "MeasurementSelector: maximum local chi2 contribution"};
-    Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {1}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+    Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};
+    // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
+    Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
+    Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
-    Gaudi::Property<double> m_phiMin{this, "phiMin", -std::numeric_limits<double>::max(), "TrackSelector: phiMin"};
-    Gaudi::Property<double> m_phiMax{this, "phiMax", std::numeric_limits<double>::max(), "TrackSelector: phiMax"};
-    Gaudi::Property<double> m_etaMin{this, "etaMin", -std::numeric_limits<double>::max(), "TrackSelector: etaMin"};
-    Gaudi::Property<double> m_etaMax{this, "etaMax", std::numeric_limits<double>::max(), "TrackSelector: etaMax"};
+    Gaudi::Property<std::vector<double>> m_phiMin{this, "phiMin", {}, "TrackSelector: phiMin"};
+    Gaudi::Property<std::vector<double>> m_phiMax{this, "phiMax", {}, "TrackSelector: phiMax"};
+    Gaudi::Property<std::vector<double>> m_etaMin{this, "etaMin", {}, "TrackSelector: etaMin"};
+    Gaudi::Property<std::vector<double>> m_etaMax{this, "etaMax", {}, "TrackSelector: etaMax"};
     Gaudi::Property<double> m_absEtaMin{this, "absEtaMin", 0.0, "TrackSelector: absEtaMin"};
     Gaudi::Property<double> m_absEtaMax{this, "absEtaMax", std::numeric_limits<double>::max(), "TrackSelector: absEtaMax"};
-    Gaudi::Property<double> m_ptMin{this, "ptMin", 0.0, "TrackSelector: ptMin"};
-    Gaudi::Property<double> m_ptMax{this, "ptMax", std::numeric_limits<double>::max(), "TrackSelector: ptMax"};
-    Gaudi::Property<std::size_t> m_minMeasurements{this, "minMeasurements", 0, "TrackSelector: minMeasurements"};
+    Gaudi::Property<std::vector<double>> m_ptMin{this, "ptMin", {}, "TrackSelector: ptMin"};
+    Gaudi::Property<std::vector<double>> m_ptMax{this, "ptMax", {}, "TrackSelector: ptMax"};
+    Gaudi::Property<std::vector<std::size_t>> m_minMeasurements{this, "minMeasurements", {}, "TrackSelector: minMeasurements"};
 
     // configuration of statistics tables
     Gaudi::Property<std::vector<float> > m_statEtaBins

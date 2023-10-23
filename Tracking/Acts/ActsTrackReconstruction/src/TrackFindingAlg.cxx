@@ -135,19 +135,61 @@ namespace ActsTrk
     Navigator navigator(cfg);
     Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
-    Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(),
-                                                              {m_etaBins, m_chi2CutOff, m_numMeasurementsCutOff}}};
+    std::vector<double> etaBins;
+    // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
+    if (m_etaBins.size() > 2)
+      etaBins.assign(m_etaBins.begin() + 1, m_etaBins.end() - 1);
+    Acts::MeasurementSelectorCuts measurementSelectorCuts{etaBins};
 
-    Acts::TrackSelector::Config trackSelectorCfg;
-    trackSelectorCfg.phiMin = m_phiMin;
-    trackSelectorCfg.phiMax = m_phiMax;
-    trackSelectorCfg.etaMin = m_etaMin;
-    trackSelectorCfg.etaMax = m_etaMax;
-    trackSelectorCfg.absEtaMin = m_absEtaMin;
-    trackSelectorCfg.absEtaMax = m_absEtaMax;
-    trackSelectorCfg.ptMin = m_ptMin;
-    trackSelectorCfg.ptMax = m_ptMax;
-    trackSelectorCfg.minMeasurements = m_minMeasurements;
+    if (!m_chi2CutOff.empty())
+      measurementSelectorCuts.chi2CutOff = m_chi2CutOff;
+    if (!m_numMeasurementsCutOff.empty())
+      measurementSelectorCuts.numMeasurementsCutOff = m_numMeasurementsCutOff;
+
+    Acts::MeasurementSelector::Config measurementSelectorCfg{{Acts::GeometryIdentifier(), std::move(measurementSelectorCuts)}};
+
+    std::vector<double> absEtaEdges;
+    absEtaEdges.reserve(etaBins.size() + 2);
+    if (etaBins.empty())
+    {
+      absEtaEdges.push_back(0.0);
+      absEtaEdges.push_back(std::numeric_limits<double>::infinity());
+    }
+    else
+    {
+      absEtaEdges.push_back(m_absEtaMin);
+      absEtaEdges.insert(absEtaEdges.end(), etaBins.begin(), etaBins.end());
+      absEtaEdges.push_back(m_absEtaMax);
+    }
+
+    auto setCut = [](auto &cfgVal, const auto &cuts, size_t ind) -> void
+    {
+      if (cuts.empty())
+        return;
+      cfgVal = (ind < cuts.size()) ? cuts[ind] : cuts[cuts.size() - 1];
+    };
+
+    Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg{std::move(absEtaEdges)};
+    if (etaBins.empty())
+    {
+      assert(trackSelectorCfg.size() == 1);
+      trackSelectorCfg.cutSets[0].absEtaMin = m_absEtaMin;
+      trackSelectorCfg.cutSets[0].absEtaMax = m_absEtaMax;
+    }
+    size_t cutIndex = 0;
+    for (auto &cfg : trackSelectorCfg.cutSets)
+    {
+      setCut(cfg.phiMin, m_phiMin, cutIndex);
+      setCut(cfg.phiMax, m_phiMax, cutIndex);
+      setCut(cfg.etaMin, m_etaMin, cutIndex);
+      setCut(cfg.etaMax, m_etaMax, cutIndex);
+      setCut(cfg.ptMin, m_ptMin, cutIndex);
+      setCut(cfg.ptMax, m_ptMax, cutIndex);
+      setCut(cfg.minMeasurements, m_minMeasurements, cutIndex);
+      ++cutIndex;
+    }
+
+    ATH_MSG_DEBUG(trackSelectorCfg);
 
     m_trackFinder.reset(new CKF_pimpl{CKF_config{{std::move(propagator), logger().cloneWithSuffix("CKF")}, measurementSelectorCfg, {}, {}, trackSelectorCfg}});
 

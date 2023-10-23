@@ -47,7 +47,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
     actscf.addFlag('Acts.trackFindingChi2CutOff', 15.0)
-    actscf.addFlag('Acts.doTrackFindingTrackSelector', True)
+    actscf.addFlag('Acts.doTrackFindingTrackSelector', 1) # 0=no selection, 1=default track selection, 2=no eta-dependant cuts
 
     actscf.addFlag('Acts.doAmbiguityResolution', True)
 
