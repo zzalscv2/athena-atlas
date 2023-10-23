@@ -135,7 +135,9 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
    m_stEta      = reElement->stationEta();
    m_stPhi      = reElement->stationPhi();
    m_stLayout   = reElement->chamberDesign();
+   m_nGasGaps   = reElement->nGasGaps();
    m_readoutTransform = reElement->localToGlobalTrans(gctx);
+
 
    m_shortWidth = reElement->moduleWidthS();
    m_longWidth = reElement->moduleWidthL();

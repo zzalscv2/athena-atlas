@@ -65,7 +65,7 @@ class GeoModelTgcTest : public AthHistogramAlgorithm {
     MuonVal::ScalarBranch<float>& m_longWidth{m_tree.newScalar<float>("ChamberWidthL")};
     MuonVal::ScalarBranch<float>& m_height{m_tree.newScalar<float>("ChamberHeight")};
     MuonVal::ScalarBranch<float>& m_thickness{m_tree.newScalar<float>("ChamberThickness")};
-    
+    MuonVal::ScalarBranch<uint8_t>& m_nGasGaps{m_tree.newScalar<uint8_t>("nGasGaps")};
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
     MuonVal::ScalarBranch<float>& m_ALineTransT{m_tree.newScalar<float>("ALineTransT", 0.)};

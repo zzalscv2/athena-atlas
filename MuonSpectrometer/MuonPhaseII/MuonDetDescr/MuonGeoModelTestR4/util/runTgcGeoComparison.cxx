@@ -38,6 +38,7 @@ struct TgcChamber{
     unsigned stIdx{0};
     int eta{0};
     unsigned phi{0};
+    unsigned nGasGaps{0};
     ///
     float shortWidth{0.f};
     float longWidth{0.f};
@@ -139,6 +140,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
     TTreeReaderValue<unsigned short> stationIndex{treeReader, "stationIndex"};
     TTreeReaderValue<short> stationEta{treeReader, "stationEta"};
     TTreeReaderValue<short> stationPhi{treeReader, "stationPhi"};
+    TTreeReaderValue<uint8_t> nGasGaps{treeReader, "nGasGaps"};
 
     TTreeReaderValue<float> shortWidth{treeReader, "ChamberWidthS"};
     TTreeReaderValue<float> longWidth{treeReader, "ChamberWidthL"};
@@ -196,6 +198,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
         newchamber.longWidth= (*longWidth);
         newchamber.height = (*height);
         newchamber.thickness = (*thickness);
+        newchamber.nGasGaps = (*nGasGaps);
         Amg::Vector3D geoTrans{(*geoModelTransformX)[0], (*geoModelTransformY)[0], (*geoModelTransformZ)[0]};
         Amg::RotationMatrix3D geoRot{Amg::RotationMatrix3D::Identity()};
         geoRot.col(0) = Amg::Vector3D((*geoModelTransformX)[1], (*geoModelTransformY)[1], (*geoModelTransformZ)[1]);
@@ -310,6 +313,7 @@ int main( int argc, char** argv ) {
         const TgcChamber& test{*test_itr};
         bool chambOk{true};
         /// Check the chamber dimensions
+        TEST_BASICPROP(nGasGaps, "number of gasgaps");
         TEST_BASICPROP(thickness, "chamber thickness");
         TEST_BASICPROP(shortWidth, "chamber short width");
         TEST_BASICPROP(longWidth, "chamber long width");

@@ -3,7 +3,6 @@
 */
 
 #include <MuonGeoModelR4/MdtReadoutGeomTool.h>
-
 #include <GaudiKernel/SystemOfUnits.h>
 #include <RDBAccessSvc/IRDBAccessSvc.h>
 #include <RDBAccessSvc/IRDBRecordset.h>
@@ -18,6 +17,8 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/StringUtils.h>
 #include <RDBAccessSvc/IRDBRecord.h>
+
+using namespace ActsTrk;
 
 namespace MuonGMR4 {
 MdtReadoutGeomTool::MdtReadoutGeomTool(const std::string& type,
@@ -105,8 +106,6 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             continue;
 
         MdtReadoutElement::defineArgs define{};
-        define.tubeBounds = tubeBounds;
-        define.layerBounds = layerBounds;
         bool isValid{false};
         define.detElId = idHelper.channelID(key_tokens[0].substr(0, 3), 
                                             atoi(key_tokens[2]),
@@ -129,6 +128,9 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             return StatusCode::FAILURE;
         }
         static_cast<parameterBook&>(define) = book_itr->second;
+        
+        define.tubeBounds = tubeBounds;
+        define.layerBounds = layerBounds;
         
         /// Chamber dimensions are given from the GeoShape
         ATH_CHECK(loadDimensions(facCache, define));

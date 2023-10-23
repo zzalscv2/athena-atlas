@@ -57,6 +57,7 @@ class GeoModelTgcTest : public AthHistogramAlgorithm{
     MuonVal::ScalarBranch<short>& m_stEta{m_tree.newScalar<short>("stationEta")};
     MuonVal::ScalarBranch<short>& m_stPhi{m_tree.newScalar<short>("stationPhi")};
     MuonVal::ScalarBranch<std::string>& m_stLayout{m_tree.newScalar<std::string>("stationDesign")};
+    MuonVal::ScalarBranch<uint8_t>& m_nGasGaps{m_tree.newScalar<uint8_t>("nGasGaps")};
   
     /// Transformation of the readout element (Translation, ColX, ColY, ColZ)
     MuonVal::CoordTransformBranch m_readoutTransform{m_tree, "GeoModelTransform"};
@@ -64,9 +65,7 @@ class GeoModelTgcTest : public AthHistogramAlgorithm{
     MuonVal::ScalarBranch<float>& m_longWidth{m_tree.newScalar<float>("ChamberWidthL")};
     MuonVal::ScalarBranch<float>& m_height{m_tree.newScalar<float>("ChamberHeight")};
     MuonVal::ScalarBranch<float>& m_thickness{m_tree.newScalar<float>("ChamberThickness")};
-    
- 
-    
+
     /// Alignment parameters
     MuonVal::ScalarBranch<float>& m_ALineTransS{m_tree.newScalar<float>("ALineTransS", 0.)};
     MuonVal::ScalarBranch<float>& m_ALineTransT{m_tree.newScalar<float>("ALineTransT", 0.)};

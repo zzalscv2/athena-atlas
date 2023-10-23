@@ -21,6 +21,7 @@
 
 #include <RDBAccessSvc/IRDBRecord.h>
 
+using namespace ActsTrk;
 namespace {
     constexpr double tolerance = 0.001 * Gaudi::Units::mm;
 }
@@ -57,6 +58,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
     if (shape->typeID() != GeoTrd::getClassTypeID()) {
         ATH_MSG_FATAL("The shape of "<<m_idHelperSvc->toStringDetEl(define.detElId)
                     <<" is expected to be a trapezoid "<<m_geoUtilTool->dumpShape(shape));
+        return StatusCode::FAILURE;
     }
     const GeoTrd* chambTrd = static_cast<const GeoTrd*>(shape);
     define.halfWidthShort = std::min(chambTrd->getYHalfLength1(), chambTrd->getYHalfLength2());
@@ -71,7 +73,6 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
         return StatusCode::FAILURE;
     }
     unsigned int gasGap{0};
-
     for (const physVolWithTrans& pVolTrans : allGasGaps) {
         std::stringstream key{};
         key<<define.chambDesign<<"_"<<(gasGap+1);
