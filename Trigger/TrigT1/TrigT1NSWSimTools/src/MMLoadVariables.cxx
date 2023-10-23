@@ -208,6 +208,8 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const EventContext& ctx,
           if(std::all_of(stNames.begin(), stNames.end(), [&] (const std::string & name) { return name == stNames[0]; })) {
             entries[std::make_pair(event,digit_particles)]=entries_tmp;
             digit_particles++;
+          } else {
+            ATH_MSG_WARNING("Digits belonging to different stations, skipping items");
           }
           stNames.clear();
         }
