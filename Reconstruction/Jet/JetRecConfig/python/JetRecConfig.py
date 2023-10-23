@@ -583,6 +583,8 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
     seqname = "ConstitMod{0}_{1}".format(sequenceshort,constitSeq.name)
     inputcontainer = str(constitSeq.inputname)
     outputcontainer = str(constitSeq.containername)
+
+
     if (inputtype == xAODType.FlowElement or inputtype == xAODType.ParticleFlow):
         # Tweak PF names because ConstModSequence needs to work with
         # up to 4 containers
@@ -594,12 +596,35 @@ def getConstitModAlg(parentjetdef, constitSeq, monTool=None):
         inputcontainer = chopPFO(inputcontainer)
         outputcontainer = chopPFO(outputcontainer)
 
+
     doByVertex = constitSeq.byVertex
+
+    inChargedFEDecorKeys = []
+    inNeutralFEDecorKeys = []
+
+    if doByVertex:
+        # For by-vertex jet reconstruction, we are performing deep copies of neutral PFOs
+        # Need to schedule this algorithm after all decorations have been apllied by using ReadDecorHandleKeys
+
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/PFlow/PFlowUtils/src/PFlowCellCPDataDecoratorAlgorithm.h
+
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/PFlow/PFlowUtils/src/PFlowCalibPFODecoratorAlgorithm.h
+
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFEGamFlowElementAssoc.h
+
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFMuonFlowElementAssoc.h
+
+        # https://gitlab.cern.ch/atlas/athena/-/blob/main/Reconstruction/eflowRec/eflowRec/PFTauFlowElementAssoc.h
+
+        inChargedFEDecorKeys += ["cellCPData", "FE_ElectronLinks", "FE_PhotonLinks", "FE_TauLinks", "FE_MuonLinks"]
+        inNeutralFEDecorKeys += ["calpfo_NLeadingTruthParticleBarcodeEnergyPairs", "FE_ElectronLinks", "FE_PhotonLinks", "FE_TauLinks", "FE_MuonLinks"]
 
     modseq = CompFactory.JetConstituentModSequence(seqname,
                                                    InputType=inputtype,
                                                    OutputContainer = outputcontainer,
                                                    InputContainer= inputcontainer,
+                                                   InChargedFEDecorKeys = inChargedFEDecorKeys,
+                                                   InNeutralFEDecorKeys = inNeutralFEDecorKeys,
                                                    Modifiers = modlist,
                                                    DoByVertex = doByVertex
     )

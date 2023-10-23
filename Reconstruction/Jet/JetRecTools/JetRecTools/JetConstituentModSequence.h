@@ -23,8 +23,10 @@
 #include "JetInterface/IJetConstituentModifier.h"
 #include "AsgTools/ToolHandleArray.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKeyArray.h"
 #include "AsgDataHandles/WriteHandleKey.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 #include "xAODCore/ShallowCopy.h"
 #include "AsgTools/PropertyWrapper.h"
 
@@ -96,6 +98,11 @@ protected:
   SG::WriteHandleKey<xAOD::FlowElementContainer> m_outNeutralFEKey{this, "OutNeutralFEKey", "", "WriteHandleKey for modified Neutral FlowElements"};
 
   SG::WriteHandleKey<xAOD::FlowElementContainer> m_outAllFEKey{this, "OutAllFEKey", "", "WriteHandleKey for all modified FlowElements"};
+
+  // this ReadDecorHandleKeyArray holds necessary ReadDecorHandleKeys to make sure this algorithm is scheduled after all the relevant decorations are applied
+  // otherwise FEs can be simultaneously decorated in other algorithms and deep-copied here, causing std::bad_array_new_length exceptions
+  SG::ReadDecorHandleKeyArray<xAOD::FlowElementContainer> m_inChargedFEDecorKeys{this, "InChargedFEDecorKeys", {}, "Dummy keys that force all neccessary charged FlowElement decorations to be applied before running this algorithm"};
+  SG::ReadDecorHandleKeyArray<xAOD::FlowElementContainer> m_inNeutralFEDecorKeys{this, "InNeutralFEDecorKeys", {}, "Dummy keys that force all neccessary neutral FlowElement decorations to be applied before running this algorithm"};
 
   /// helper function to cast, shallow copy and record a container.
 
@@ -182,40 +189,55 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
 
   // Copy the input containers individually, set I/O option and record
   // Charged elements
+  SG::WriteHandle<T> outChargedHandle = makeHandle(outChargedKey);
+
   std::pair<T*, xAOD::ShallowAuxContainer* > chargedCopy = xAOD::shallowCopyContainer(*inChargedHandle);
   chargedCopy.second->setShallowIO(m_saveAsShallow);
   xAOD::setOriginalObjectLink(*inChargedHandle, *chargedCopy.first);
 
-  SG::WriteHandle<T> outChargedHandle = makeHandle(outChargedKey);
   ATH_CHECK(outChargedHandle.record(std::unique_ptr<T>(chargedCopy.first),
                                     std::unique_ptr<xAOD::ShallowAuxContainer>(chargedCopy.second)));
 
-  SG::WriteHandle<T> outNeutralHandle = makeHandle(outNeutralKey);
-  // Define the accessor which will add the index
-  const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
-
-  // Create the new container and its auxiliary store.
-  auto neutralCopies = std::make_unique<T>();
-  auto neutralCopiesAux = std::make_unique<xAOD::AuxContainerBase>();
-  neutralCopies->setStore(neutralCopiesAux.get()); //< Connect the two
-  // Is it possible to make the neutral copies shallow ..?
-  // neutralCopiesAux->setShallowIO(m_saveAsShallow);
-
   // Neutral elements
-  // Create N copies and set copy index
-  for (unsigned i = 0; i < numNeutralCopies; i++){
-    for (const U* fe : *inNeutralHandle) {
-        U* copy = new U();
-        neutralCopies->push_back(copy);
-        *copy = *fe;
-        copyIndex(*copy) = i;
-        xAOD::setOriginalObjectLink(*fe, *copy);
-    }
-  }
+  SG::WriteHandle<T> outNeutralHandle = makeHandle(outNeutralKey);
 
-  ATH_CHECK(outNeutralHandle.record(std::move(neutralCopies),
-                                      std::move(neutralCopiesAux))
-  );
+  // Shallow copy
+  if (m_saveAsShallow){
+
+    std::pair<T*, xAOD::ShallowAuxContainer* > neutralCopy = xAOD::shallowCopyContainer(*inNeutralHandle);
+    chargedCopy.second->setShallowIO(true);
+    xAOD::setOriginalObjectLink(*inNeutralHandle, *neutralCopy.first);
+
+    ATH_CHECK(outNeutralHandle.record(std::unique_ptr<T>(neutralCopy.first),
+                                      std::unique_ptr<xAOD::ShallowAuxContainer>(neutralCopy.second)));
+
+  }
+  // Deep copy
+  else{
+    // Define the accessor which will add the index
+    const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+
+    // Create the new container and its auxiliary store.
+    auto neutralCopies = std::make_unique<T>();
+    auto neutralCopiesAux = std::make_unique<xAOD::AuxContainerBase>();
+    neutralCopies->setStore(neutralCopiesAux.get()); //< Connect the two
+
+    // Create N copies and set copy index
+    // Necessary for by-vertex jet reconstruction
+    for (unsigned i = 0; i < numNeutralCopies; i++){
+      for (const U* fe : *inNeutralHandle) {
+          U* copy = new U();
+          neutralCopies->push_back(copy);
+          *copy = *fe;
+          copyIndex(*copy) = i;
+          xAOD::setOriginalObjectLink(*fe, *copy);
+      }
+    }
+
+    ATH_CHECK(outNeutralHandle.record(std::move(neutralCopies),
+                                        std::move(neutralCopiesAux))
+    );
+  }
 
 
   // 2. Set up output handle for merged (view) container and record

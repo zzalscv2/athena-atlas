@@ -42,6 +42,11 @@ StatusCode JetConstituentModSequence::initialize() {
   ATH_CHECK( m_modifiers.retrieve() );
   ATH_CHECK(m_vertexContainerKey.initialize(m_byVertex));
 
+  // Shallow copies are not supported for by-vertex jet reconstruction
+  if (m_byVertex){
+    m_saveAsShallow = false;
+  }
+
 #ifndef XAOD_ANALYSIS
   ATH_CHECK( m_monTool.retrieve( DisableTool{m_monTool.empty()} ) );
 #endif
@@ -145,12 +150,32 @@ StatusCode JetConstituentModSequence::initialize() {
       if(pos == std::string::npos) m_outAllFEKey = outputContainerBase + subString;
       else m_outAllFEKey = outputContainerBase;
 
-
       ATH_CHECK(m_inChargedFEKey.initialize());
       ATH_CHECK(m_inNeutralFEKey.initialize());
+
       ATH_CHECK(m_outChargedFEKey.initialize());
       ATH_CHECK(m_outNeutralFEKey.initialize());
       ATH_CHECK(m_outAllFEKey.initialize());
+
+      // It is enough to initialise the ReadDecorHandleKeys for thread-safety
+      // We are not actually accessing the decorations, only ensuring they are present at runtime
+      // Hence, ReadDecorHandles are not explicitly required to be created
+
+      // Prepend the FE input container name to the decorations
+      for (auto& key : m_inChargedFEDecorKeys) {
+        const std::string keyString = m_inChargedFEKey.key() + "." + key.key();
+        ATH_CHECK(key.assign(keyString));
+
+      }
+
+      for (auto& key : m_inNeutralFEDecorKeys) {
+        const std::string keyString = m_inNeutralFEKey.key() + "." + key.key();
+        ATH_CHECK(key.assign(keyString));
+      }
+
+      ATH_CHECK(m_inChargedFEDecorKeys.initialize());
+      ATH_CHECK(m_inNeutralFEDecorKeys.initialize());
+
       break;
     }
   default:
