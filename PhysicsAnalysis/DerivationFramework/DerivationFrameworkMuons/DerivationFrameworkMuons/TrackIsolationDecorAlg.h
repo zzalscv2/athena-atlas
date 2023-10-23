@@ -28,6 +28,7 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
+    static bool isSame(const xAOD::IParticle* a, const xAOD::IParticle* b);
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_idTrkKey{this, "IdTrackCollection", "InDetTrackParticles",
                                                                 "Collection of track particles making up the isolation cones"};
     
