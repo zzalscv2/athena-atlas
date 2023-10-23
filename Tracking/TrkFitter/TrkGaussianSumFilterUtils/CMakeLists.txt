@@ -2,45 +2,31 @@
 
 #Declare the package name:
 atlas_subdir( TrkGaussianSumFilterUtils )
-
+find_package( Boost COMPONENTS container)
 #Component(s) in the package:
 atlas_add_library( TrkGaussianSumFilterUtilsLib
                    src/*.cxx
 		   PUBLIC_HEADERS TrkGaussianSumFilterUtils
 		   LINK_LIBRARIES EventPrimitives TrkParameters 
 		                  TrkEventPrimitives TrkMeasurementBase
-                      TrkGeometry PathResolver
-       PRIVATE_LINK_LIBRARIES CxxUtils PathResolver TrkExUtils)
-
-#Executables for tests
-atlas_add_executable( GSF_testAlignedDynArray
-	test/testAlignedDynArray.cxx 
-	LINK_LIBRARIES TrkGaussianSumFilterUtilsLib)
-
-atlas_add_executable( GSF_testMergeComponents
-	test/testMergeComponents.cxx
-        LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib)
-
-atlas_add_executable( GSF_testFindMode
-	test/testFindMode.cxx 
-        LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib)
-
-atlas_add_executable( GSF_testHorner
-  test/testHorner.cxx 
-  LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib PathResolver TrkExUtils)
-
-
+                          TrkGeometry PathResolver
+           PRIVATE_LINK_LIBRARIES CxxUtils PathResolver TrkExUtils
+           PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
 #Tests
 atlas_add_test(ut_GSF_testAlignedDynArray
-	SCRIPT GSF_testAlignedDynArray)
+    SOURCES test/testAlignedDynArray.cxx
+    LINK_LIBRARIES TrkGaussianSumFilterUtilsLib)
 
 atlas_add_test(ut_GSF_testMergeComponents
-	SCRIPT GSF_testMergeComponents)
+    SOURCES test/testMergeComponents.cxx
+    LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib)
 
 atlas_add_test(ut_GSF_testFindMode
-	SCRIPT GSF_testFindMode)
+    SOURCES test/testFindMode.cxx
+    LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib)
 
 atlas_add_test(ut_GSF_testHorner
-	SCRIPT GSF_testHorner)
+    SOURCES test/testHorner.cxx
+	LINK_LIBRARIES CxxUtils TrkGaussianSumFilterUtilsLib PathResolver TrkExUtils)
 
