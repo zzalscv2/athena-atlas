@@ -312,11 +312,6 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     Gaudi::Property<std::string> m_cablingMapFileName
     {this, "CablingMapFileName", "PixelCabling/Pixels_Atlas_IdMapping_2016.dat", "Read cabling map from file"};
 
-    std::vector<std::string> getParameterString(const std::string& varName, const std::vector<std::string>& buffer) const;
-    std::vector<double>      getParameterDouble(const std::string& varName, const std::vector<std::string>& buffer) const;
-    std::vector<float>       getParameterFloat(const std::string& varName, const std::vector<std::string>& buffer) const;
-    std::vector<int>         getParameterInt(const std::string& varName, const std::vector<std::string>& buffer) const;
-    std::vector<bool>        getParameterBool(const std::string& varName, const std::vector<std::string>& buffer) const;
     std::string getFileName(const int currentRunNumber) const;
 
 };

@@ -31,7 +31,7 @@ atlas_add_test( PixelModuleConfigCondAlg_test
 )
 
 atlas_add_test( PixelConfigCondAlg_test
-  SOURCES test/PixelConfigCondAlg_test.cxx src/PixelConfigCondAlg.cxx
+  SOURCES test/PixelConfigCondAlg_test.cxx src/PixelConfigCondAlg.cxx src/StringUtilities.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
   LINK_LIBRARIES ${Boost_LIBRARIES} TestTools AthenaBaseComps GaudiKernel AthenaPoolUtilities PixelConditionsData PathResolver StoreGateLib
   POST_EXEC_SCRIPT "nopost.sh"
