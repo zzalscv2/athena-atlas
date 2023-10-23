@@ -11,7 +11,7 @@
 // Gaudi / Athena
 #include "GaudiKernel/IInterface.h"
 
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 // ACTS
 #include "Acts/Geometry/TrackingGeometry.hpp"
 

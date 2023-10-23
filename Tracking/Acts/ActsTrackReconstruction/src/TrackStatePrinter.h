@@ -17,7 +17,7 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 
 // PACKAGE
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsEventCnv/IActsToTrkConverterTool.h"

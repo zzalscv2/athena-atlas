@@ -22,7 +22,7 @@
 #include "TrkExInterfaces/IExtrapolator.h"
 // ACTS
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "TrkExAlgs/PropResultRootWriterSvc.h"
 #include "Acts/EventData/TrackParameters.hpp"
 // STL

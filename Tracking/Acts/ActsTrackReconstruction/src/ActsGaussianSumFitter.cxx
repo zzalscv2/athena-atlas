@@ -32,7 +32,7 @@
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 
 // STL
 #include <vector>

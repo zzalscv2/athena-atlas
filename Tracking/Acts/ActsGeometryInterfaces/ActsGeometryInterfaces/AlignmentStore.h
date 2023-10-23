@@ -15,18 +15,7 @@
 #include "GeoModelUtilities/TransformMap.h"
 
 namespace ActsTrk {
-
-    class AlignmentStore {
-    public:
-        AlignmentStore() = default;
-
-        void setTransform(const void* key, const Acts::Transform3&);
-        const Acts::Transform3* getTransform(const void* key) const;
-
-    private:
-        TransformMap<void, Acts::Transform3> m_transforms;
-    };
-
+    using AlignmentStore = TransformMap<void, Acts::Transform3>;
 }  // namespace ActsTrk
 
 CLASS_DEF(ActsTrk::AlignmentStore, 134756361, 1);

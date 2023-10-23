@@ -19,7 +19,7 @@
 #include "Acts/Utilities/Logger.hpp"
 
 // PACKAGE
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/IActsPropStepRootWriterSvc.h"
 #include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
 #include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"

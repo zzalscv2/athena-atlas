@@ -31,7 +31,7 @@
 
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometry/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ActsGeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/TrackingSurfaceHelper.h"
 #include "ActsInterop/Logger.h"
