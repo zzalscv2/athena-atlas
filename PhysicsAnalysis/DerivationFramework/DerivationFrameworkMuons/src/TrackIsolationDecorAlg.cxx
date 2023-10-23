@@ -2,8 +2,10 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <AthContainers/ConstDataVector.h>
+
 #include <DerivationFrameworkMuons/TrackIsolationDecorAlg.h>
 #include <xAODMuon/MuonContainer.h>
+#include <xAODBase/IParticleHelpers.h>
 #include <xAODTracking/TrackParticleContainer.h>
 
 //**********************************************************************
@@ -41,6 +43,14 @@ StatusCode TrackIsolationDecorAlg::initialize() {
     ATH_CHECK(m_trkSelKeys.initialize());
 
     return StatusCode::SUCCESS;
+}
+bool TrackIsolationDecorAlg::isSame(const xAOD::IParticle* P, const xAOD::IParticle* P1) {
+    if (P == P1) { return true; }
+    const xAOD::IParticle* OrigP1 = xAOD::getOriginalObject(*P1);
+    const xAOD::IParticle* OrigP = xAOD::getOriginalObject(*P);
+    if (OrigP == OrigP1) { return OrigP != nullptr; }
+    return (OrigP == P1 || OrigP1 == P);
+
 }
 StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
     SG::ReadHandle<xAOD::TrackParticleContainer> idTracks{m_idTrkKey, ctx};
@@ -97,10 +107,12 @@ StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
         sector_mapping.getSectors(trk->phi(), sectors);
         TrkViewContainer iso_tracks{SG::VIEW_ELEMENTS};
         iso_tracks.reserve(tracks->size());
-        for (const int& sector : sectors) {
+        for (const int sector : sectors) {
             view_map::iterator itr = track_sectors.find(sector);
             if (itr == track_sectors.end()) continue;
-            for (const xAOD::TrackParticle* to_copy : itr->second) { iso_tracks.push_back(to_copy); }
+            for (const xAOD::TrackParticle* to_copy : itr->second) { 
+                if(!isSame(trk, to_copy)) iso_tracks.push_back(to_copy); 
+            }
         }
         xAOD::TrackIsolation result;
         if (trk->pt() < m_pt_min) continue;
