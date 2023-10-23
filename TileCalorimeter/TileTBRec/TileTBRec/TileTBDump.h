@@ -111,6 +111,8 @@ class TileTBDump: public AthAlgorithm {
     int m_nlvl1_trigger_info;
     int m_digi_mode;
 
+    std::vector<int> m_all_lvl1_trigger_types;
+
     /* the ROD data sub-fragment */
     typedef struct T_RodDataFrag {
         unsigned int size;
