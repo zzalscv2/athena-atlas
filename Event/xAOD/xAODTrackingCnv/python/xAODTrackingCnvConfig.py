@@ -62,16 +62,15 @@ def TrackCollectionCnvToolCfg(flags, name="TrackCollectionCnvTool", **kwargs):
         CompFactory.xAODMaker.TrackCollectionCnvTool(name, **kwargs))
     return result
 
-def ITkTrackCollectionCnvToolCfg(flags, name="ITkTrackCollectionCnvTool", **kwargs):
+def ITkTrackCollectionCnvToolCfg(flags, name="ITkTrackCollectionCnvTool", 
+                                 isActsAmbi: bool = False,
+                                 **kwargs):
     result = ComponentAccumulator()
 
     if "TrackParticleCreator" not in kwargs:
-        from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
-        is_acts_ambi = TrackingComponentConfigurer(flags).doActsTrack and flags.Acts.doAmbiguityResolution
-
         from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
         TrackParticleCreator = result.popToolsAndMerge(
-            ITkTrackParticleCreatorToolCfg(flags, RunningTIDE_Ambi = not is_acts_ambi ))
+            ITkTrackParticleCreatorToolCfg(flags, RunningTIDE_Ambi = not isActsAmbi ))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -284,6 +283,7 @@ def ObserverTrackParticleCnvAlgCfg(flags, name="ObserverTrackParticleCnvAlg",
 def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
                               ClusterSplitProbabilityName = "",
                               AssociationMapName = "",
+                              isActsAmbi: bool = False,
                               **kwargs):
     result = ComponentAccumulator()
 
@@ -293,16 +293,13 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
 
     if "TrackParticleCreator" not in kwargs:
-        from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
-        is_acts_ambi = TrackingComponentConfigurer(flags).doActsTrack and flags.Acts.doAmbiguityResolution
-
         from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
         kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
             ITkTrackParticleCreatorToolCfg(
                 flags,
                 name = kwargs["xAODTrackParticlesFromTracksContainerName"] \
                 + "CreatorTool",
-                ClusterSplitProbabilityName = ClusterSplitProbabilityName if not is_acts_ambi else "",
+                ClusterSplitProbabilityName = ClusterSplitProbabilityName if not isActsAmbi else "",
                 AssociationMapName = AssociationMapName)))
 
     if "TrackCollectionCnvTool" not in kwargs:
@@ -310,7 +307,8 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
         kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
             ITkTrackCollectionCnvToolCfg(
                 flags,
-                TrackParticleCreator = kwargs["TrackParticleCreator"])))
+                TrackParticleCreator = kwargs["TrackParticleCreator"],
+                isActsAmbi = isActsAmbi)))
 
     if flags.Tracking.doTruth:
         kwargs.setdefault("TrackTruthContainerName",

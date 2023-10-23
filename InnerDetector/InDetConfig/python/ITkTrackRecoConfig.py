@@ -8,20 +8,40 @@ from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
 
 _flags_set = []  # For caching
 
-
 def CombinedTrackingPassFlagSets(flags):
-
     global _flags_set
     if _flags_set:
         return _flags_set
 
     flags_set = []
 
-    # Primary Pass
-    flags = flags.cloneAndReplace(
-        "Tracking.ActiveConfig",
-        f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")
-    flags_set += [flags]
+    # Primary Pass(es)
+    from TrkConfig.TrkConfigFlags import TrackingComponent
+    validation_configurations = {
+        TrackingComponent.ValidateActsClusters : "ValidateActsClusters",
+        TrackingComponent.ValidateActsSpacePoints : "ValidateActsSpacePoints",
+        TrackingComponent.ValidateActsSeeds : "ValidateActsSeeds",
+        TrackingComponent.ValidateActsTracks : "ValidateActsTracks",
+        TrackingComponent.BenchmarkSpot : "ActsBenchmarkSpot"
+    }
+    
+    # Athena Pass
+    if TrackingComponent.AthenaChain in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")]
+
+    # Acts Pass
+    if TrackingComponent.ActsChain in flags.Tracking.recoChain:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsPass")]
+
+    # Acts Validation Passes
+    for [configuration, key] in validation_configurations.items():
+        if configuration in flags.Tracking.recoChain:
+            toAdd = eval(f"flags.cloneAndReplace('Tracking.ActiveConfig', 'Tracking.ITk{key}Pass')")
+            flags_set += [toAdd]
 
     # LRT
     if flags.Tracking.doLargeD0:
@@ -53,7 +73,7 @@ def CombinedTrackingPassFlagSets(flags):
 def ITkClusterSplitProbabilityContainerName(flags):
     flags_set = CombinedTrackingPassFlagSets(flags)
     extension = flags_set[-1].Tracking.ActiveConfig.extension
-    ClusterSplitProbContainer = "ITkAmbiguityProcessorSplitProb" + extension
+    ClusterSplitProbContainer = "ITkAmbiguityProcessorSplitProb" + extension    
     return ClusterSplitProbContainer
 
 
@@ -87,11 +107,20 @@ def ITkStoreTrackSeparateContainerCfg(flags, TrackContainer="",
 
 # Returns CA + ClusterSplitProbContainer
 def ITkTrackRecoPassCfg(flags, extension="",
-                        InputCombinedITkTracks=[],
-                        InputExtendedITkTracks=[],
-                        StatTrackCollections=[],
-                        StatTrackTruthCollections=[],
+                        InputCombinedITkTracks=None,
+                        InputExtendedITkTracks=None,
+                        StatTrackCollections=None,
+                        StatTrackTruthCollections=None,
                         ClusterSplitProbContainer=""):
+    if InputCombinedITkTracks is None:
+        InputCombinedITkTracks = []
+    if InputExtendedITkTracks is None:
+        InputExtendedITkTracks = []
+    if StatTrackCollections is None:
+        StatTrackCollections = []
+    if StatTrackTruthCollections is None:
+        StatTrackTruthCollections = []
+
     result = ComponentAccumulator()
 
     TrackContainer = "Resolved" + extension + "Tracks"
@@ -116,17 +145,26 @@ def ITkTrackRecoPassCfg(flags, extension="",
     else:
         ClusterSplitProbContainer = (
             "ITkAmbiguityProcessorSplitProb" + extension)
-        InputCombinedITkTracks += [TrackContainer]
+        if extension != 'Acts':
+            InputCombinedITkTracks += [TrackContainer]
 
-    InputExtendedITkTracks += [TrackContainer]
-
+    if extension != 'Acts':
+        InputExtendedITkTracks += [TrackContainer]
+        
     return result, ClusterSplitProbContainer
 
 
 def ITkTrackFinalCfg(flags,
-                     InputCombinedITkTracks=[],
-                     StatTrackCollections=[],
-                     StatTrackTruthCollections=[]):
+                     InputCombinedITkTracks=None,
+                     StatTrackCollections=None,
+                     StatTrackTruthCollections=None):
+    if InputCombinedITkTracks is None:
+        InputCombinedITkTracks = []
+    if StatTrackCollections is None:
+        StatTrackCollections = []
+    if StatTrackTruthCollections is None:
+        StatTrackTruthCollections = []
+
     result = ComponentAccumulator()
 
     TrackContainer = "CombinedITkTracks"
@@ -158,15 +196,17 @@ def ITkTrackFinalCfg(flags,
             flags,
             TrackLocation=[TrackContainer]))
 
+    splitProbName = ITkClusterSplitProbabilityContainerName(flags)
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
     result.merge(ITkTrackParticleCnvAlgCfg(
         flags,
         ClusterSplitProbabilityName=(
             "" if flags.Tracking.doITkFastTracking else
-            ITkClusterSplitProbabilityContainerName(flags)),
+            splitProbName),
         AssociationMapName=(
             "" if flags.Tracking.doITkFastTracking else
-            f"PRDtoTrackMap{TrackContainer}")))
+            f"PRDtoTrackMap{TrackContainer}"),
+        isActsAmbi = 'ValidateActsAmbiguityResolution' in splitProbName or ('Acts' in  splitProbName and 'Validate' not in splitProbName) ))
 
     return result
 
@@ -184,17 +224,6 @@ def ITkTrackRecoCfg(flags):
         # TODO: ITk BS providers
         raise RuntimeError("ByteStream inputs not supported")
 
-    # If ACTS is activated, then schedule RoI creator 
-    from ActsConfig.TrackingComponentConfigurer import TrackingComponentConfigurer
-    configuration_settings = TrackingComponentConfigurer(flags)
-    
-    if configuration_settings.doActsCluster:
-         from ActsConfig.ActsViewConfig import EventViewCreatorAlgCfg
-         result.merge(EventViewCreatorAlgCfg(flags))
-
-    from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
-    result.merge(ITkRecPreProcessingSiliconCfg(flags))
-
     flags_set = CombinedTrackingPassFlagSets(flags)
     # Tracks to be ultimately merged in InDetTrackParticle collection
     InputCombinedITkTracks = []
@@ -204,6 +233,7 @@ def ITkTrackRecoCfg(flags):
     StatTrackCollections = []  # To be passed to the InDetRecStatistics alg
     StatTrackTruthCollections = []
 
+    from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
 
     for current_flags in flags_set:
@@ -211,6 +241,15 @@ def ITkTrackRecoCfg(flags):
 
         extension = current_flags.Tracking.ActiveConfig.extension
 
+        # Data Preparation
+        # According to the tracking pass we have different data preparation 
+        # sequences. We may have:
+        # (1) Full Athena data preparation  
+        # (2) Full Acts data preparation 
+        # (3) Hybrid configurations with EDM converters
+        result.merge(ITkRecPreProcessingSiliconCfg(current_flags))
+
+        # Track Reco
         acc, ClusterSplitProbContainer = ITkTrackRecoPassCfg(
             current_flags, extension=extension,
             InputCombinedITkTracks=InputCombinedITkTracks,
@@ -308,7 +347,7 @@ def ITkTrackRecoCfg(flags):
 
     # output
     result.merge(ITkTrackRecoOutputCfg(flags))
-
+    result.printConfig(withDetails = False, summariseProps = False)
     return result
 
 

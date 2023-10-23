@@ -430,6 +430,29 @@ def createTrackingConfigFlags():
     icf.addFlagsCategory ("Tracking.ITkFTFPass",
                           createITkFTFPassFlags, prefix=True)
 
+    # Acts
+    from ActsConfig.ActsTrackingPassFlags import (
+        createActsTrackingPassFlags,
+        createValidateActsClustersTrackingPassFlags,
+        createValidateActsSpacePointsTrackingPassFlags,
+        createValidateActsSeedsTrackingPassFlags,
+        createValidateActsTracksTrackingPassFlags,
+        createActsBenchmarkSpotTrackingPassFlags
+    )
+
+    icf.addFlagsCategory ("Tracking.ITkActsPass",
+                          createActsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkValidateActsClustersPass",
+                          createValidateActsClustersTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkValidateActsSpacePointsPass",
+                          createValidateActsSpacePointsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkValidateActsSeedsPass",
+                          createValidateActsSeedsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkValidateActsTracksPass",
+                          createValidateActsTracksTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory ("Tracking.ITkActsBenchmarkSpotPass",
+                          createActsBenchmarkSpotTrackingPassFlags, prefix=True)
+
     ####################################################################
 
     # Vertexing flags

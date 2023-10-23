@@ -114,7 +114,7 @@ def ActsAmbiguityResolutionCfg(flags, name: str = "ActsAmbiguityResolution", **k
     acc = ComponentAccumulator()
 
     kwargs.setdefault('TracksLocation', 'ActsTracks')
-    kwargs.setdefault('ResolvedTracksLocation', 'ActsTracksResolved')
+    kwargs.setdefault('ResolvedTracksLocation', 'ResolvedActsTracks')
     kwargs.setdefault('MaximumSharedHits', 3)
     kwargs.setdefault('MaximumIterations', 10000)
     kwargs.setdefault('NMeasurementsMin', 7)
