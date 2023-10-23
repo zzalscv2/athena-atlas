@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJetVxFitter/KalmanVertexOnJetAxisSmoother.h"
@@ -138,8 +138,9 @@ namespace Trk
       // Hack the JetFitter EDM... avoid to invert big cov matrix at each iteration
       // by storing position --> weight*position
       // and        covariance -> weightmatrix
-      if (final_vrt_covariance.determinant() == 0.0) {
-        ATH_MSG_WARNING("Jet vertex positions matrix not invertible right at start of smoother!" <<
+      Eigen::FullPivLU<Amg::MatrixX> lu_decomp(final_vrt_covariance);
+      if (!lu_decomp.isInvertible()) {
+        ATH_MSG_DEBUG("Jet vertex positions matrix not invertible right at start of smoother!" <<
                       " -> stop smoothing.");
         return;
       }
