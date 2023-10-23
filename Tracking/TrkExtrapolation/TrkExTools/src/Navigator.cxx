@@ -47,7 +47,7 @@ Trk::Navigator::Navigator(const std::string &t, const std::string &n, const IInt
   m_searchWithDistance(true),
   m_fastField(false)
   {
-  declareInterface<INavigator>(this); 
+  declareInterface<INavigator>(this);
   // steering of algorithms
   declareProperty("InsideVolumeTolerance", m_insideVolumeTolerance);
   declareProperty("IsOnSurfaceTolerance", m_isOnSurfaceTolerance);
@@ -161,11 +161,9 @@ Trk::Navigator::nextBoundarySurface(const EventContext& ctx,
     if (trackPar) {
       ATH_MSG_VERBOSE(
         "  [N] --> next BoundarySurface found with Parameters: " << *trackPar);
-      //delete trackPar;
       return currentBoundary;
     }
   }
-
   return nullptr;
 }
 
@@ -208,7 +206,6 @@ Trk::Navigator::nextTrackingVolume(const EventContext& ctx,
   // loop over boundary surfaces
   int tryBoundary = 0;
 
-
   for (const Trk::ObjectAccessor::value_type& surface_id : surfAcc) {
     ++tryBoundary;
     // get the boundary surface associated to the surfaceAccessor
@@ -245,25 +242,9 @@ Trk::Navigator::nextTrackingVolume(const EventContext& ctx,
     if (trackPar) {
       // the next volume pointer
       nextVolume = currentBoundary->attachedVolume(
-        trackPar->position(), trackPar->momentum().normalized(), dir);
-      // ----------------- output to screen if outputLevel() says so --------
-      if (msgLvl(MSG::VERBOSE)) {
-        ATH_MSG_VERBOSE("  [N] --> next BoundarySurface found with Parameters: "
-                        << *trackPar);
-        ATH_MSG_VERBOSE("  [N] This corresponds to [r,z] = [ "
-                        << trackPar->position().perp() << ", "
-                        << trackPar->position().z() << "]");
-
-        // log of the boundary surface
-        currentBoundary->debugInfo(msg(MSG::VERBOSE));
-        ATH_MSG_VERBOSE("[N] --> Quering the BoundarySurface for the "
-                        "associated TrackingVolume: ");
-        ATH_MSG_VERBOSE(
-          '\t' << '\t' << (nextVolume ? nextVolume->volumeName() : "None"));
-      }
-
-      return {
-        nextVolume, std::move(trackPar), Trk::BoundarySurfaceFace(surface_id)};
+          trackPar->position(), trackPar->momentum().normalized(), dir);
+      return {nextVolume, std::move(trackPar),
+              Trk::BoundarySurfaceFace(surface_id)};
     }
 
     // ---------------------------------------------------
@@ -284,7 +265,6 @@ Trk::Navigator::nextTrackingVolume(const EventContext& ctx,
   return {nullptr, nullptr};
 }
 
-
 bool
 Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
                                  const Trk::TrackingVolume* vol,
@@ -293,7 +273,6 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
                                  double tol) const
 {
   bool isAtBoundary = false;
-
   nextVol = nullptr;
   if (!vol) {
     return isAtBoundary;
@@ -319,7 +298,7 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
           nextVol = attachedVol;
         }
         // double good solution indicate tangential intersection : revert the attached volumes
-        if (distSol.numberOfSolutions() > 1 && fabs(distSol.first()) < tol && fabs(distSol.second()) < tol) {
+        if (distSol.numberOfSolutions() > 1 && std::abs(distSol.first()) < tol && std::abs(distSol.second()) < tol) {
          if (!nextVol) {
            ATH_MSG_WARNING("Tracking volume "
                            << (*vol)
@@ -329,9 +308,9 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
                            << " failed. Please consult the experts or have a "
                               "look at ATLASRECTS-7147");
            continue;
-          } 
+          }
           //surfing the beampipe seems to happen particularly often in a Trigger test, see https://its.cern.ch/jira/browse/ATR-24234
-          //in this case, I downgrade the 'warning' to 'verbose'          
+          //in this case, I downgrade the 'warning' to 'verbose'
           const bool surfingTheBeamPipe = (vol->geometrySignature() == Trk::BeamPipe) or (nextVol->geometrySignature() == Trk::BeamPipe);
           if (not surfingTheBeamPipe) {
             ATH_MSG_WARNING("navigator detects tangential intersection: switch of volumes reverted ");
@@ -427,9 +406,9 @@ Trk::Navigator::closestParameters(const EventContext& ctx,
       Trk::DistanceSolution currentDistance = sf.straightLineDistanceEstimate((*tpIter)->position(), tpDirection);
       if (currentDistance.numberOfSolutions() > 0) {
         // get the one/two solution(s)
-        double firstDistance = fabs(currentDistance.first());
+        double firstDistance = std::abs(currentDistance.first());
         double secondDistance = currentDistance.numberOfSolutions() >
-                                1 ? fabs(currentDistance.second()) : firstDistance;
+                                1 ? std::abs(currentDistance.second()) : firstDistance;
         // now do the check
         if (firstDistance < closestDistance || secondDistance < closestDistance) {
           currentClosestParameters = (*tpIter);
@@ -442,25 +421,20 @@ Trk::Navigator::closestParameters(const EventContext& ctx,
     return currentClosestParameters;
   }
 
-  const Trk::CylinderSurface *ccsf = dynamic_cast<const Trk::CylinderSurface *>(&sf);
-  if (ccsf) {
-    Trk::TrkParametersComparisonFunction tParFinderCylinder(ccsf->bounds().r());
+  if (sf.type() == Trk::SurfaceType::Cylinder) {
+    Trk::TrkParametersComparisonFunction tParFinderCylinder(sf.bounds().r());
     closestTrackParameters =
-      *(std::min_element(measuredParameters.begin(), measuredParameters.end(), tParFinderCylinder));
-
+        *(std::min_element(measuredParameters.begin(), measuredParameters.end(),
+                           tParFinderCylinder));
     return closestTrackParameters;
   }
 
-  const Trk::StraightLineSurface *slsf = dynamic_cast<const Trk::StraightLineSurface *>(&sf);
-  const Trk::PerigeeSurface *persf = nullptr;
-  if (!slsf) {
-    persf = dynamic_cast<const Trk::PerigeeSurface *>(&sf);
-  }
-
-  if (slsf || persf) {
-    Trk::TrkParametersComparisonFunction tParFinderLine(sf.center(), sf.transform().rotation().col(2));
-    closestTrackParameters = *(std::min_element(measuredParameters.begin(), measuredParameters.end(), tParFinderLine));
-
+  if (sf.type() == Trk::SurfaceType::Line ||
+      sf.type() == Trk::SurfaceType::Perigee) {
+    Trk::TrkParametersComparisonFunction tParFinderLine(
+        sf.center(), sf.transform().rotation().col(2));
+    closestTrackParameters = *(std::min_element(
+        measuredParameters.begin(), measuredParameters.end(), tParFinderLine));
     return closestTrackParameters;
   }
 
@@ -493,4 +467,3 @@ Trk::Navigator::trackingGeometry(const EventContext& ctx) const
     return trackingGeometry;
   }
 }
-
