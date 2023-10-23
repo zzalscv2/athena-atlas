@@ -1,24 +1,21 @@
 #!/bin/sh
 #
-# art-description: MC23-style RUN3 simulation using ATLFAST3MT in AthenaMT
-# art-include: 23.0/Athena
+# art-description: MC23-style RUN3 simulation using ATLFASTIIMT in serial Athena
 # art-include: main/Athena
 # art-type: grid
-# art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'
 # art-output: test.*.HITS.pool.root
 # art-output: log.*
 # art-output: Config*.pkl
 
-export ATHENA_CORE_NUMBER=8
+unset ATHENA_CORE_NUMBER
 
 # RUN3 setup
 # ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
-    --multithreaded \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ATLFAST3MT' \
+    --simulator 'ATLFASTIIMT' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
@@ -36,9 +33,8 @@ status=$rc
 
 rc2=-9999
 Sim_tf.py \
-    --multithreaded \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ATLFAST3MT' \
+    --simulator 'ATLFASTIIMT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
@@ -50,9 +46,8 @@ Sim_tf.py \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
-    --multithreaded \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ATLFAST3MT' \
+    --simulator 'ATLFASTIIMT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
@@ -73,22 +68,21 @@ fi
 rc3=-9999
 if [ $status -eq 0 ]
 then
-    # Compare the outputs
-    acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root \
-        --error-mode resilient \
-        --mode semi-detailed \
-        --order-trees
-    rc3=$?
-    status=$rc3
+  # Compare the outputs
+  acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root \
+    --error-mode resilient \
+    --mode semi-detailed
+  rc3=$?
+  status=$rc3
 fi
-echo "art-result: $rc3 OLDvsCA"
 
+echo "art-result: $rc3 OLDvsCA"
 rc4=-9999
 if [ $rc2 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --mode=semi-detailed --diff-root --file=test.CG.HITS.pool.root
+    art.py compare grid --entries 4 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --file=test.CG.HITS.pool.root
     rc4=$?
     status=$rc4
 fi

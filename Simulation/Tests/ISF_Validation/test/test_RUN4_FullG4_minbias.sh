@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: MC21-style simulation using FullG4 and RUN4 geometry, minimum bias
-# art-include: 24.0/Athena
+# art-include: 23.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'

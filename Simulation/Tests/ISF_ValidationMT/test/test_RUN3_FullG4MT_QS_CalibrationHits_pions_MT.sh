@@ -3,8 +3,6 @@
 # art-description: MC23-style RUN3 simulation using FullG4MT_QS in AthenaMT, reading single pion events, writing HITS including full CaloCalibrationHit information
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: 24.0/Athena
-# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -17,7 +15,7 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC16-SDR-RUN3-05
 Sim_tf.py \
     --CA \
     --multithreaded \
@@ -26,8 +24,8 @@ Sim_tf.py \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoVCalibrationHits' \
     --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
     --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -45,8 +43,8 @@ Sim_tf.py \
     --outputHITSFile 'test.CA.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --preExec 'EVNTtoHITS:simFlags.ReleaseGeoModel=False;' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
@@ -60,8 +58,8 @@ Sim_tf.py \
     --outputHITSFile 'test.HITS.pool.root' \
     --maxEvents '10' \
     --skipEvents '0' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --preExec 'EVNTtoHITS:simFlags.ReleaseGeoModel=False;' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoVCalibrationHits.py' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \

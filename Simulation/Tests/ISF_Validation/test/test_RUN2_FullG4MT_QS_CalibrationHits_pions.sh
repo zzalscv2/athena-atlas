@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# art-description: MC23-style RUN2 simulation using best knowledge geometry and FullG4MT_QS simulator, reading single pion events, writing HITS including full CaloCalibrationHit information
-# art-include: 24.0/Athena
+# art-description: Run simulation using ISF with the FullG4MT_QS simulator, reading single pion events, writing HITS including full CaloCalibrationHit information, using RUN2 geometry and conditions
+# art-include: 23.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
@@ -10,10 +10,10 @@
 # art-output: Config*.pkl
 
 # RUN2 setup
-# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-02-01 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \
@@ -31,7 +31,7 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
@@ -44,7 +44,7 @@ Sim_tf.py \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \

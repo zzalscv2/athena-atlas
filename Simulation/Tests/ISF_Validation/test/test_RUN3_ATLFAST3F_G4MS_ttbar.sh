@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 # art-description: MC23-style RUN3 simulation using ATLFAST3F_G4MS in serial Athena
-# art-include: 24.0/Athena
+# art-include: 23.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
@@ -12,14 +12,14 @@
 unset ATHENA_CORE_NUMBER
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3F_G4MS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
@@ -34,11 +34,11 @@ status=$rc
 
 rc2=-9999
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3F_G4MS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
@@ -47,11 +47,11 @@ Sim_tf.py \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3F_G4MS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
     --maxEvents 50 \

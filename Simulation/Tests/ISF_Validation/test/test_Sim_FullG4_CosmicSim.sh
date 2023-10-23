@@ -1,8 +1,8 @@
 #!/bin/sh
 #
 # art-description: Run cosmics simulation using ISF with the FullG4 simulator, generating events on-the-fly, using 2015 geometry and conditions
+# art-include: 21.0/Athena
 # art-include: 23.0/Athena
-# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'

@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# art-description: MC23-style RUN2 simulation using best knowledge geometry and FullG4MT in serial Athena
-# art-include: 24.0/Athena
-# art-include: 24.0/AthSimulation
+# art-description: MC23-style RUN2 simulation using FullG4MT in serial Athena
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -12,10 +12,10 @@
 # art-output: Config*
 
 # RUN3 setup
-# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-02-01 and OFLCOND-MC21-SDR-RUN3-07
   Sim_tf.py \
       --CA \
-      --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+      --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
       --simulator 'FullG4MT' \
       --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
       --postInclude 'default:PyJobTransforms.UseFrontier' \
@@ -33,7 +33,7 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
@@ -46,7 +46,7 @@ Sim_tf.py \
     --athenaopts '"--config-only=ConfigCG.pkl"'
 
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \

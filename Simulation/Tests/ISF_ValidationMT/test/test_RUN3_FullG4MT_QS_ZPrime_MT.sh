@@ -3,8 +3,6 @@
 # art-description: MC23-style Run3 simulation using FullG4MT_QS (13.6 TeV Zprime input) in AthenaMT
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: 24.0/Athena
-# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -18,11 +16,11 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
@@ -42,7 +40,7 @@ status=$rc
 
 Sim_tf.py \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
@@ -57,7 +55,7 @@ Sim_tf.py \
 
 Sim_tf.py \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \

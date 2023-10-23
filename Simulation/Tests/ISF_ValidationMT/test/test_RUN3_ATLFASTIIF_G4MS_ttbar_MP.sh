@@ -1,9 +1,9 @@
 #!/bin/sh
 #
-# art-description: MC23-style RUN3 simulation using ATLFAST3MT in AthenaMT
+# art-description: MC23-style Run3 simulation using ATLFASTIIF_G4MS in AthenaMP
+# art-type: grid
 # art-include: 23.0/Athena
 # art-include: main/Athena
-# art-type: grid
 # art-athena-mt: 8
 # art-architecture:  '#x86_64-intel'
 # art-output: test.*.HITS.pool.root
@@ -16,54 +16,53 @@ export ATHENA_CORE_NUMBER=8
 # ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
-    --multithreaded \
+    --multiprocess \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ATLFAST3MT' \
+    --simulator 'ATLFASTIIF_G4MS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
+    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
-    --jobNumber 1 \
-    --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+    --postExec 'EVNTtoHITS:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
     --imf False
 
 rc=$?
 mv log.EVNTtoHITS log.EVNTtoHITS.CA
+mv log.HITSMergeAthenaMP0 log.HITSMergeAthenaMP0.CA
 echo  "art-result: $rc simCA"
 status=$rc
 
 rc2=-9999
 Sim_tf.py \
-    --multithreaded \
+    --multiprocess \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ATLFAST3MT' \
+    --simulator 'ATLFASTIIF_G4MS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 50 \
-    --jobNumber 1 \
     --imf False \
-    --athenaopts '"--config-only=ConfigSimCG.pkl"'
+    --athenaopts 'EVNTtoHITS:"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
-    --multithreaded \
+    --multiprocess \
     --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-    --simulator 'ATLFAST3MT' \
+    --simulator 'ATLFASTIIF_G4MS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
     --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
     --maxEvents 50 \
-    --jobNumber 1 \
     --imf False
 
 rc2=$?
 mv log.EVNTtoHITS log.EVNTtoHITS.CG
+mv log.HITSMergeAthenaMP0 log.HITSMergeAthenaMP0.CG
 echo "art-result: $rc2 simOLD"
 if [ $status -eq 0 ]
 then
@@ -81,8 +80,8 @@ then
     rc3=$?
     status=$rc3
 fi
-echo "art-result: $rc3 OLDvsCA"
 
+echo "art-result: $rc3 OLDvsCA"
 rc4=-9999
 if [ $rc2 -eq 0 ]
 then

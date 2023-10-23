@@ -3,8 +3,6 @@
 # art-description: Run MT and ST simulation, reading ttbar events, writing HITS, using MC23a geometry and conditions
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
-# art-include: 24.0/Athena
-# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -23,7 +21,7 @@ Sim_tf.py \
     --outputHITSFile "test.MT.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
@@ -37,7 +35,7 @@ Sim_tf.py \
     --outputHITSFile "test.MT.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
@@ -56,7 +54,7 @@ Sim_tf.py \
     --outputHITSFile "test.ST.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \
@@ -69,7 +67,7 @@ Sim_tf.py \
     --outputHITSFile "test.ST.HITS.pool.root" \
     --maxEvents 50 \
     --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py' \

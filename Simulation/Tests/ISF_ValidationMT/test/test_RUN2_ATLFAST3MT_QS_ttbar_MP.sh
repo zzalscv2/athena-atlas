@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# art-description: MC23-style RUN2 simulation using best knowledge geometry and ATLFAST3MT_QS in AthenaMP
-# art-include: 24.0/Athena
+# art-description: MC23-style RUN2 simulation using ATLFAST3MT_QS in AthenaMP
+# art-include: 23.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-athena-mt: 8
@@ -13,11 +13,11 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R2-2016-01-02-01 and OFLCOND-MC23-SDR-RUN3-01
+# ATLAS-R2-2016-01-02-01 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationNoIoV' \
@@ -37,7 +37,7 @@ status=$rc
 
 Sim_tf.py \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
@@ -51,7 +51,7 @@ Sim_tf.py \
 
 Sim_tf.py \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \

@@ -2,7 +2,6 @@
 #
 # art-description: Run simulation using ISF with the FullG4MT_QS simulator, reading ttbar events, building ATLAS-R3S-2021-03-00-00 geometry from SQLite database
 # art-include: 23.0/Athena
-# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-architecture:  '#x86_64-intel'

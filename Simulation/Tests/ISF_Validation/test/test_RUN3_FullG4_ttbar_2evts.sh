@@ -1,23 +1,24 @@
 #!/bin/sh
 #
-# art-description: MC23a-style simulation using FullG4 (13 TeV ttbar input - needs updating)
+# art-description: MC21-style simulation using FullG4 (13 TeV ttbar input - needs updating)
 # art-type: build
-# art-include: 24.0/Athena
-# art-include: 24.0/AthSimulation
+# art-include: 22.0/Athena
+# art-include: 22.0/AthSimulation
+# art-include: 23.0/Athena
+# art-include: 23.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 
-# RUN3 setup
-# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
+# RUN3 setup - Frozen Showers currently off by default
+# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-03
 Sim_tf.py \
-    --CA \
-    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
-    --simulator 'FullG4MT_QS' \
-    --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
-    --outputHITSFile "test.HITS.pool.root" \
-    --maxEvents 2
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+--simulator 'FullG4' \
+--postInclude 'default:PyJobTransforms/UseFrontier.py' \
+--preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-01-00_VALIDATION' \
+--inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
+--outputHITSFile "test.HITS.pool.root" \
+--maxEvents 2
 
 echo  "art-result: $? simulation"
