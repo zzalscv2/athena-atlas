@@ -5,7 +5,7 @@
 #include "../EgammaReSamp1Fex.h"
 #include "../EgammaReEmEnFex.h"
 #include "../EgammaReHadEnFex.h"
-#include "../RingerReFex.h"
+#include "TrigT2CaloEgamma/RingerReFex.h"
 #include "../EgammaAllFex.h"
 
 DECLARE_COMPONENT( T2CaloEgammaReFastAlgo )

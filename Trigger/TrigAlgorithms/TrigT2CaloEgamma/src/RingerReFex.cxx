@@ -15,7 +15,7 @@
 #include <map>
 #include <cmath>
 #include <numeric>
-#include "RingerReFex.h"
+#include "TrigT2CaloEgamma/RingerReFex.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
@@ -90,6 +90,118 @@ StatusCode RingerReFex::initialize()
 
 
 
+StatusCode RingerReFex::prepareRinger(std::vector<RingerReFex::RingSet>& vec_rs,
+				const xAOD::TrigEMCluster& emCluster,
+				const IRoiDescriptor& roi,
+                                const EventContext& context) const{
+
+  SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey,context};
+  const CaloNoise* noiseCDO=*noiseHdl;
+  for (unsigned rs = 0; rs < m_nRings.size(); ++rs) {
+
+    auto obj = RingerReFex::RingSet( m_nRings[rs],
+                                     m_deltaEta[rs],
+                                     m_deltaPhi[rs],
+                                     m_detectors[rs],
+                                     m_samplings[rs],
+                                     m_samples[rs],
+                                     m_doQuarter[rs],
+                                     m_doEtaAxesDivision[rs],
+                                     m_doPhiAxesDivision[rs]);
+    vec_rs.push_back( obj );
+  }
+
+  std::vector<const CaloCell*> vec_tile_cells;
+  // Get all cells for the Tile calorimeter
+  std::vector<const TileCell*> sel;
+  std::vector<const TileCell*>::const_iterator it, itBegin, itEnd;
+
+  if( m_dataSvc->loadCollections( context, roi, sel ).isFailure() ){
+     ATH_MSG_ERROR( "Error retrieving TileCalorimeter cells!" );
+     return StatusCode::FAILURE;
+  }
+
+  itBegin = sel.begin();
+  itEnd = sel.end();
+  for(it = itBegin; it != itEnd; ++it)
+  {
+      if(!*it)  continue;
+      vec_tile_cells.push_back(static_cast<const CaloCell *>(*it));
+  }
+
+  // This is the main loop
+  for( auto& rs : vec_rs ){
+
+    const CaloCell* hotCell = nullptr;
+    double ehot=-999e30;
+
+    for ( auto det : rs.detectors() ){
+
+      DETID det_id= static_cast<DETID>(det.first);
+      int sampling = det.second;
+
+      if( det_id == TILE ){
+
+        for (std::vector<const CaloCell *>::const_iterator it = vec_tile_cells.begin(); it != vec_tile_cells.end(); ++it)
+        {
+          if( !rs.isValid(*it) ) continue;
+
+          rs.push_back(*it);
+          if( !m_globalCenter ){
+            if( maxCell( *it, ehot, emCluster.eta(), emCluster.phi() ) )
+              hotCell=*it;
+          }
+        }
+
+
+      }else{// TTEM, TTHEC, FCALEM and FCALHAD
+
+        // Load all cells
+        LArTT_Selector<LArCellCont> sel;
+        LArTT_Selector<LArCellCont>::const_iterator it, itBegin, itEnd;
+        if( m_dataSvc->loadCollections( context, roi, det_id, sampling, sel ).isFailure() )
+        {
+          ATH_MSG_ERROR( "Failure while trying to retrieve cell information for the "<< det_id <<" calorimeter." );
+          return StatusCode::FAILURE;
+        }
+
+        itBegin = sel.begin();
+        itEnd   = sel.end();
+
+        // Loop over all LAr cells
+        // Append all valid cells and search the hottest cell
+        for(it = itBegin; it != itEnd; ++it)
+        {
+          if(!*it) continue;
+          // LAr object to CaloCell
+          const CaloCell *it_tmp = static_cast<const CaloCell*>(*it);
+
+          // Check if the current cells is allow into this rs
+          if( !rs.isValid( it_tmp ) ) continue;
+          rs.push_back(it_tmp);
+
+          if( !m_globalCenter ){
+            if( maxCell( *it, ehot, emCluster.eta(), emCluster.phi() ) )
+              hotCell=*it;
+          }
+        }
+
+      }// Is TILE?
+
+    }// Loop over all det configs
+
+
+    // Use all Tile cells in cache
+    if (m_globalCenter || !hotCell) {
+      rs.buildRings( emCluster.eta(), emCluster.phi(),noiseCDO,m_noiseFactor,m_doNoiseThrRings);
+    }else {
+      rs.buildRings( hotCell->eta(), hotCell->phi(),noiseCDO,m_noiseFactor,m_doNoiseThrRings);
+    }
+
+  }// Loop over all ringer sets
+  return StatusCode::SUCCESS;
+
+}
 
 //!=================================================================================
 
@@ -108,8 +220,6 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
  
   SG::WriteHandle<xAOD::TrigRingerRingsContainer> ringsCollection = 
   SG::WriteHandle<xAOD::TrigRingerRingsContainer>( m_ringerContainerKey, context );
-  SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey,context};
-  const CaloNoise* noiseCDO=*noiseHdl;
 
   ATH_CHECK( ringsCollection.record( std::make_unique<xAOD::TrigRingerRingsContainer>(),  
              std::make_unique<xAOD::TrigRingerRingsAuxContainer>() ) );
@@ -131,129 +241,9 @@ StatusCode RingerReFex::execute( xAOD::TrigEMCluster &emCluster,
   
 
   std::vector<RingerReFex::RingSet> vec_rs;
-
-  for (unsigned rs = 0; rs < m_nRings.size(); ++rs) {  
-
-    auto obj = RingerReFex::RingSet( m_nRings[rs], 
-                                     m_deltaEta[rs], 
-                                     m_deltaPhi[rs], 
-                                     m_detectors[rs], 
-                                     m_samplings[rs], 
-                                     m_samples[rs],
-                                     m_doQuarter[rs], 
-                                     m_doEtaAxesDivision[rs], 
-                                     m_doPhiAxesDivision[rs]);
-    vec_rs.push_back( obj );
-  }
-
-
-
-  std::vector<const CaloCell*> vec_tile_cells;
- 
-  // Cache all Tile cells for instance
-  if ( m_useTile ){
-
-    // Get all cells for the Tile calorimeter
-    std::vector<const TileCell*> sel;
-    std::vector<const TileCell*>::const_iterator it, itBegin, itEnd;
- 
-    load_cells_time.start();
-    if( m_dataSvc->loadCollections( context, roi, sel ).isFailure() ){
-      load_cells_time.stop();
-      ATH_MSG_ERROR( "Error retrieving TileCalorimeter cells!" );
-      return StatusCode::FAILURE;
-    }
-    load_cells_time.stop();
-
-    itBegin = sel.begin();
-    itEnd = sel.end();
-    for(it = itBegin; it != itEnd; ++it) 
-    {
-      if(!*it)  continue;
-      vec_tile_cells.push_back(static_cast<const CaloCell *>(*it));
-    }
-  }
-
-
-  // This is the main loop
-  for( auto& rs : vec_rs ){
- 
-    const CaloCell* hotCell = nullptr;
-    double ehot=-999e30;
-    
-    for ( auto det : rs.detectors() ){
-
-      DETID det_id= static_cast<DETID>(det.first);
-      int sampling = det.second;
-
-      if( det_id == TILE ){
-
-        for (std::vector<const CaloCell *>::const_iterator it = vec_tile_cells.begin(); it != vec_tile_cells.end(); ++it) 
-        {
-          if( !rs.isValid(*it) ) continue;
-          
-          rs.push_back(*it);
-
-          if( !m_globalCenter ){
-            if( maxCell( *it, ehot, emCluster.eta(), emCluster.phi() ) )
-              hotCell=*it;
-          }
-        }
-
-
-      }else{// TTEM, TTHEC, FCALEM and FCALHAD
-
-        // Load all cells
-        LArTT_Selector<LArCellCont> sel;
-        LArTT_Selector<LArCellCont>::const_iterator it, itBegin, itEnd;
-        load_cells_time.start();
-        if( m_dataSvc->loadCollections( context, roi, det_id, sampling, sel ).isFailure() )
-        {
-          load_cells_time.stop();
-          ATH_MSG_ERROR( "Failure while trying to retrieve cell information for the "<< det_id <<" calorimeter." );
-          return StatusCode::FAILURE;
-        }
-      
-        load_cells_time.stop();
-
-        itBegin = sel.begin();
-        itEnd   = sel.end();
-       
-        // Loop over all LAr cells
-        // Append all valid cells and search the hottest cell
-        for(it = itBegin; it != itEnd; ++it) 
-        {
-          if(!*it) continue;
-          // LAr object to CaloCell
-          const CaloCell *it_tmp = static_cast<const CaloCell*>(*it);
-
-          // Check if the current cells is allow into this rs
-          if( !rs.isValid( it_tmp ) ) continue;
-          rs.push_back(it_tmp);
-        
-          if( !m_globalCenter ){
-            if( maxCell( *it, ehot, emCluster.eta(), emCluster.phi() ) )
-              hotCell=*it;
-          }
-
-        }
-
-      }// Is TILE?
-
-    }// Loop over all det configs
-
-
-    // Use all Tile cells in cache
-    if (m_globalCenter || !hotCell) {
-      rs.buildRings( emCluster.eta(), emCluster.phi(),noiseCDO,m_noiseFactor,m_doNoiseThrRings);
-    }else {
-      rs.buildRings( hotCell->eta(), hotCell->phi(),noiseCDO,m_noiseFactor,m_doNoiseThrRings);
-    }
-
-  }// Loop over all ringer sets
-
-
-
+  load_cells_time.start();
+  ATH_CHECK(prepareRinger(vec_rs,emCluster,roi,context));
+  load_cells_time.stop();
   
   std::vector<float> ref_rings;
   for (std::vector<RingerReFex::RingSet>::iterator it=vec_rs.begin(); it!=vec_rs.end(); ++it)
