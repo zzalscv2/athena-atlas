@@ -34,6 +34,8 @@ inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int l
 }
 
 using namespace MuonGMR4;
+using namespace MuonGM;
+using namespace ActsTrk;
 
 
 // construction/destruction
@@ -108,7 +110,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   
   
   // The middle of the gas gap is at X= 0
-  std::optional<double> travelDist = MuonGM::intersect<3>(localVertex1, localDir, Amg::Vector3D::UnitX(), 0.);
+  std::optional<double> travelDist = intersect<3>(localVertex1, localDir, Amg::Vector3D::UnitX(), 0.);
   if (!travelDist) return true;
   const Amg::Vector3D locGapCross = localVertex1 + (*travelDist) * localDir;
   ATH_MSG_VERBOSE("Propagation to the gas gap center: "<<Amg::toString(locGapCross, 2));
@@ -122,16 +124,16 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   }
   const double globalTime = preStep->GetGlobalTime() + (*travelDist) / preStep->GetVelocity();
   const Amg::Transform3D& gapTrans{readOutEle->globalToLocalTrans(m_gctx, etaHitID)};
-  const Amg::Vector3D dir = gapTrans*(globalVertex2 - globalVertex1).unit();
-  const Amg::Vector3D locDir = gapTrans * gapCenterCross;
+  const Amg::Vector3D locHitDir = gapTrans.linear() * (globalVertex2 - globalVertex1).unit();
+  const Amg::Vector3D locHitPos = gapTrans * gapCenterCross;
   
   xAOD::MuonSimHit* hit = new xAOD::MuonSimHit();
   m_writeHandle->push_back(hit);  
   
   TrackHelper trHelp(aStep->GetTrack());
   hit->setIdentifier(etaHitID); 
-  hit->setLocalPosition(xAOD::toStorage(locDir));  
-  hit->setLocalDirection(xAOD::toStorage(dir));
+  hit->setLocalPosition(xAOD::toStorage(locHitPos));  
+  hit->setLocalDirection(xAOD::toStorage(locHitDir));
   hit->setStepLength(aStep->GetStepLength());
   hit->setGlobalTime(globalTime);
   hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());

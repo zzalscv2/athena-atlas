@@ -31,6 +31,15 @@ namespace {
           
 namespace xAOD {
 
+MuonSimHit_v1& MuonSimHit_v1::operator=(const MuonSimHit_v1& other) {
+   if (this != &other) {
+      static_cast<SG::AuxElement&>(*this) = other;
+#ifndef __CLING__
+      m_hepMCLink.release();
+#endif
+   }
+   return (*this);
+}
 Identifier MuonSimHit_v1::identify() const { return Identifier{acc_Identifier(*this)}; }    
 void MuonSimHit_v1::setIdentifier(const Identifier& id) { acc_Identifier(*this) = id.get_compact(); }
 

@@ -25,6 +25,8 @@ class MuonSimHitSortingAlg: public AthReentrantAlgorithm{
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         Gaudi::Property<bool> m_writeDeepCopy{this, "deepCopy", false, 
                             "If set to true. A new xAOD container is created instead of a VIEW_ELEMENTS version"};
+        Gaudi::Property<bool> m_removeDuplicates{this, "removeDuplicates", true, 
+                                                "If set to true. Duplcates of primary hits in the same sensitive detector are removed"};
 };
 
 
