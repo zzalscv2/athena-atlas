@@ -106,6 +106,11 @@ elif RUN2:     jobproperties.Global.DetDescrVersion = "ATLAS-R2-2016-01-00-01"
 else:          jobproperties.Global.DetDescrVersion = "ATLAS-R1-2012-03-02-00"
 log.info( "DetDescrVersion = %s" % (jobproperties.Global.DetDescrVersion()) )
 
+from RecExConfig.RecFlags import rec
+projectName = FileNameVec[0].split('/').pop().split('.')[0]
+rec.projectName = projectName
+rec.RunNumber = int(RunNumber)
+
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
 from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
@@ -113,14 +118,9 @@ GeoModelSvc = GeoModelSvc()
 GeoModelSvc.IgnoreTagDifference = True
 log.info( "GeoModelSvc.AtlasVersion = %s" % (GeoModelSvc.AtlasVersion) )
 
-from RecExConfig.RecFlags import rec
-if RUN3:   rec.projectName = "data22_tilecomm"
-elif RUN2: rec.projectName = "data15_tilecomm"
-else:      rec.projectName = "data12_tilecomm"
-
 from IOVDbSvc.CondDB import conddb
-if MC:     conddb.setGlobalTag("OFLCOND-MC23-SDR-RUN3-01")
-elif RUN3: conddb.setGlobalTag("CONDBR2-BLKPA-2023-01")
+if MC:     conddb.setGlobalTag("OFLCOND-MC23-SDR-RUN3-02")
+elif RUN3: conddb.setGlobalTag("CONDBR2-BLKPA-2023-02")
 elif RUN2: conddb.setGlobalTag("CONDBR2-BLKPA-2018-16")
 else:      conddb.setGlobalTag("COMCOND-BLKPA-RUN1-06")
 

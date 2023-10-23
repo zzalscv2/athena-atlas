@@ -219,27 +219,27 @@ StatusCode TileTBDump::finalize() {
 StatusCode TileTBDump::execute() {
 
   static std::atomic<bool> notFirst = false;
-  if (m_dumpOnce && notFirst) return StatusCode::SUCCESS;
-  notFirst = true;
-  boost::io::ios_base_all_saver coutsave(std::cout);
-  std::cout << std::fixed;
-  
+
   ATH_MSG_DEBUG( "execute()" );
 
   const EventContext &ctx = Gaudi::Hive::currentContext();
 
-  int verbosity = 0;
-  if ( msgLvl(MSG::NIL) ) {
-    verbosity = 7;
-  } else if ( msgLvl(MSG::VERBOSE) ) {
-    verbosity = 2;
-  } else if ( msgLvl(MSG::DEBUG) ) {
-    verbosity = 1;
-  }
-  
   // take full event
   const eformat::FullEventFragment<const uint32_t*> * event = m_RobSvc->getEvent();
   
+  if (m_dumpOnce) {
+    if (m_lvl1_trigger_type<0) {
+      // dump once all Level1 trigger types found in data
+      int lvl1tt = event->lvl1_trigger_type();
+      if (std::find(m_all_lvl1_trigger_types.begin(), m_all_lvl1_trigger_types.end(), lvl1tt) != m_all_lvl1_trigger_types.end()) {
+        return StatusCode::SUCCESS;
+      } else {
+        m_all_lvl1_trigger_types.push_back(lvl1tt);
+        notFirst = false;
+      }
+    }
+  }
+
   if (m_bc_time_seconds     >=0 && m_bc_time_seconds     != (int32_t)event->bc_time_seconds()) return StatusCode::SUCCESS;
   if (m_bc_time_nanoseconds >=0 && m_bc_time_nanoseconds != (int32_t)event->bc_time_nanoseconds()) return StatusCode::SUCCESS;
   if (m_global_id           >=0 && m_global_id           != (int32_t)event->global_id()) return StatusCode::SUCCESS;
@@ -250,6 +250,21 @@ StatusCode TileTBDump::execute() {
   if (m_bc_id               >=0 && m_bc_id               != (int32_t)event->bc_id()) return StatusCode::SUCCESS;
   if (m_lvl1_trigger_type   >=0 && m_lvl1_trigger_type   != (int32_t)event->lvl1_trigger_type()) return StatusCode::SUCCESS;
   if (m_nlvl1_trigger_info  >=0 && m_nlvl1_trigger_info  != (int32_t)event->nlvl1_trigger_info()) return StatusCode::SUCCESS;
+
+  if (m_dumpOnce && notFirst) return StatusCode::SUCCESS;
+  notFirst = true;
+
+  int verbosity = 0;
+  if ( msgLvl(MSG::NIL) ) {
+    verbosity = 7;
+  } else if ( msgLvl(MSG::VERBOSE) ) {
+    verbosity = 2;
+  } else if ( msgLvl(MSG::DEBUG) ) {
+    verbosity = 1;
+  }
+
+  boost::io::ios_base_all_saver coutsave(std::cout);
+  std::cout << std::fixed;
 
   std::cout << "============================" << std::endl;
   std::cout << "Event time (sec): " << (uint32_t)event->bc_time_seconds() << std::endl;
