@@ -12,17 +12,128 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
+
+
+def CPAlgorithmsCfg(flags):
+    """do the CP algorithm configuration for PHYSLITE"""
+
+    from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
+    from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
+    configSeq = ConfigSequence ()
+
+    # Set up the systematics loader/handler algorithm:
+    subConfig = makeConfig ('CommonServices', None)
+    subConfig.setOptionValue ('.runSystematics', False)
+    configSeq += subConfig
+
+    # Create a pile-up analysis config
+    if flags.Input.isMC:
+        # setup config and lumicalc files for pile-up tool
+        configSeq += makeConfig ('Event.PileupReweighting', None)
+        configSeq.setOptionValue ('.campaign', flags.Input.MCCampaign)
+        configSeq.setOptionValue ('.files', flags.Input.Files)
+        configSeq.setOptionValue ('.useDefaultConfig', True)
+
+    # set up the electron analysis config (For SiHits electrons, use: LooseLHElectronSiHits.NonIso):
+    subConfig = makeConfig ('Electrons', 'AnalysisElectrons')
+    subConfig.setOptionValue ('.trackSelection', False)
+    subConfig.setOptionValue ('.isolationCorrection', True)
+    configSeq += subConfig
+    subConfig = makeConfig ('Electrons.Selection', 'AnalysisElectrons.loose')
+    subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
+    subConfig.setOptionValue ('.isolationWP', 'NonIso')
+    subConfig.setOptionValue ('.noEffSF', True)
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisElectrons.loose')
+    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    # set up the photon analysis config:                                       
+    subConfig = makeConfig ('Photons', 'AnalysisPhotons')
+    subConfig.setOptionValue ('.recomputeIsEM', False)
+    configSeq += subConfig
+    subConfig = makeConfig ('Photons.Selection', 'AnalysisPhotons.loose')
+    subConfig.setOptionValue ('.qualityWP', 'Loose')
+    subConfig.setOptionValue ('.isolationWP', 'Undefined')
+    subConfig.setOptionValue ('.recomputeIsEM', False)
+    subConfig.setOptionValue ('.noEffSF', True)
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisPhotons.loose')
+    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    # set up the muon analysis algorithm config:
+    subConfig = makeConfig ('Muons', 'AnalysisMuons')
+    subConfig.setOptionValue ('.trackSelection', False)
+    configSeq += subConfig
+    subConfig = makeConfig ('Muons.Selection', 'AnalysisMuons.loose')
+    subConfig.setOptionValue ('.quality', 'Loose')
+    subConfig.setOptionValue ('.isolation', 'NonIso')
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisMuons.loose')
+    subConfig.setOptionValue ('.selectionName', 'loose')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    # set up the tau analysis algorithm config:                                                    
+    # Commented for now due to use of public tools
+    subConfig = makeConfig ('TauJets', 'AnalysisTauJets')
+    configSeq += subConfig
+    subConfig = makeConfig ('TauJets.Selection', 'AnalysisTauJets.baseline')
+    subConfig.setOptionValue ('.quality', 'Baseline')
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisTauJets.baseline')
+    subConfig.setOptionValue ('.selectionName', 'baseline')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    # set up the jet analysis algorithm config:
+    jetContainer = 'AntiKt4EMPFlowJets'
+    subConfig = makeConfig ('Jets', 'AnalysisJets', jetCollection=jetContainer)
+    subConfig.setOptionValue ('.runFJvtUpdate', False)
+    subConfig.setOptionValue ('.runFJvtSelection', False)
+    subConfig.setOptionValue ('.runJvtSelection', False)
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisJets.')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    largeRjetContainer='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
+    subConfig = makeConfig ('Jets', 'AnalysisLargeRJets', jetCollection=largeRjetContainer)
+    subConfig.setOptionValue ('.runGhostMuonAssociation', False)
+    subConfig.setOptionValue ('.postfix', 'largeR_jets' )
+    configSeq += subConfig
+    subConfig = makeConfig ('Output.Thinning', 'AnalysisLargeRJets.')
+    subConfig.setOptionValue ('.deepCopy', True)
+    subConfig.setOptionValue ('.noUniformSelection', True)
+    configSeq += subConfig
+
+    from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
+    configAccumulator = ConfigAccumulator (dataType=None, algSeq=None, autoconfigFromFlags=flags,
+                                           noSysSuffix=True)
+    configSeq.fullConfigure (configAccumulator)
+    return configAccumulator.CA
+
+
+
 # Main algorithm config
-def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
+def PHYSLITEKernelCfg(flags, name='PHYSLITEKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYSLITE"""
     acc = ComponentAccumulator()
 
     # This block does the common physics augmentation  which isn't needed (or possible) for PHYS->PHYSLITE
     # Ensure block only runs for AOD input
-    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+    if 'StreamAOD' in flags.Input.ProcessingTags:
         # Common augmentations
         from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-        acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+        acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
     # Thinning tools
     # These are set up in PhysCommonThinningConfig. Only thing needed here the list of tools to schedule 
@@ -35,7 +146,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
         'PhotonGSFTPThinningToolName'         : "PHYSLITEPhotonGSFTPThinningTool"
     }
     # whereas these are only needed if the input is AOD since they are applied already in PHYS
-    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+    if 'StreamAOD' in flags.Input.ProcessingTags:
         thinningToolsArgs.update({
             'TrackParticleThinningToolName'       : "PHYSLITETrackParticleThinningTool",
             'MuonTPThinningToolName'              : "PHYSLITEMuonTPThinningTool",
@@ -47,7 +158,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
         })
     # Configure the thinning tools
     from DerivationFrameworkPhys.PhysCommonThinningConfig import PhysCommonThinningCfg
-    acc.merge(PhysCommonThinningCfg(ConfigFlags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
+    acc.merge(PhysCommonThinningCfg(flags, StreamName = kwargs['StreamName'], **thinningToolsArgs))
     # Get them from the CA so they can be added to the kernel
     thinningTools = []
     for key in thinningToolsArgs:
@@ -58,95 +169,31 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     # For PhysLite, must run CloseBy BEFORE running analysis sequences to be able to 'pass through' to the shallow copy the added isolation values
     # Here we only run the augmentation algs
     # These do not need to be run if PhysLite is run from Phys (i.e. not from 'StreamAOD')
-    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+    if 'StreamAOD' in flags.Input.ProcessingTags:
         # running from AOD
         ## Higgs - create 4l vertex
         from DerivationFrameworkHiggs.HiggsPhysContent import  HiggsAugmentationAlgsCfg
-        acc.merge(HiggsAugmentationAlgsCfg(ConfigFlags))
+        acc.merge(HiggsAugmentationAlgsCfg(flags))
          
         ## CloseByIsolation correction augmentation
         from IsolationSelection.IsolationSelectionConfig import  IsoCloseByAlgsCfg
-        acc.merge(IsoCloseByAlgsCfg(ConfigFlags, isPhysLite = True))
+        acc.merge(IsoCloseByAlgsCfg(flags, isPhysLite = True))
 
     #==============================================================================
     # Analysis-level variables 
     #==============================================================================
 
-    # Set up the systematics loader/handler algorithm:
-    from AsgAnalysisAlgorithms.CommonServiceSequence import makeCommonServiceSequence
-    makeCommonServiceSequence (None, runSystematics = False, ca=acc)
-
-    dataType = "data"
-    if ConfigFlags.Input.isMC: dataType = "mc"
-
     # Needed in principle to support MET association when running PHYS->PHYSLITE, 
     # but since this doesn't work for PHYS->PHYSLITE anyway, commenting for now
-    #if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags
+    #if 'StreamDAOD_PHYS' in flags.Input.ProcessingTags
     #    from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    #    acc.merge(GeoModelCfg(ConfigFlags))    
+    #    acc.merge(GeoModelCfg(flags))    
 
-    # Create a pile-up analysis sequence
-    if ConfigFlags.Input.isMC:
-        # setup config and lumicalc files for pile-up tool
-        from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
-        pileupSequence = makePileupAnalysisSequence( dataType, campaign=ConfigFlags.Input.MCCampaign, files=ConfigFlags.Input.Files, useDefaultConfig=True )
-        pileupSequence.configure( inputName = {}, outputName = {} )
-        for element in pileupSequence.getGaudiConfig2Components():
-            acc.addEventAlgo(element)
-
-    # Include, and then set up the electron analysis sequence (For SiHits electrons, use: LooseLHElectronSiHits.NonIso):
-    from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import  makeElectronAnalysisSequence
-    electronSequence = makeElectronAnalysisSequence( dataType, 'LooseLHElectron.NonIso', shallowViewOutput = False, deepCopyOutput = True, trackSelection = False, isolationCorrection = True )
-    electronSequence.configure( inputName = 'Electrons',
-                                outputName = 'AnalysisElectrons' )
-    for element in electronSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
-
-    # Include, and then set up the photon analysis sequence:                                       
-    from EgammaAnalysisAlgorithms.PhotonAnalysisSequence import makePhotonAnalysisSequence
-    photonSequence = makePhotonAnalysisSequence( dataType, 'Loose.Undefined', deepCopyOutput = True, shallowViewOutput = False, recomputeIsEM=False )
-    photonSequence.configure( inputName = 'Photons',
-                              outputName = 'AnalysisPhotons' )
-    for element in photonSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
-
-    # Include, and then set up the muon analysis algorithm sequence:
-    from MuonAnalysisAlgorithms.MuonAnalysisSequence import makeMuonAnalysisSequence
-    isRun3Geo = False
-    from AthenaConfiguration.Enums import LHCPeriod
-    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run3: isRun3Geo = True 
-    muonSequence = makeMuonAnalysisSequence( dataType, shallowViewOutput = False, deepCopyOutput = True, workingPoint = 'Loose.NonIso', isRun3Geo = isRun3Geo, trackSelection = False)
-    muonSequence.configure( inputName = 'Muons',
-                            outputName = 'AnalysisMuons' )
-    for element in muonSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
-
-    # Include, and then set up the tau analysis algorithm sequence:                                                    
-    # Commented for now due to use of public tools
-    from TauAnalysisAlgorithms.TauAnalysisSequence import makeTauAnalysisSequence
-    tauSequence = makeTauAnalysisSequence( dataType, 'Baseline', shallowViewOutput = False, deepCopyOutput = True )
-    tauSequence.configure( inputName = 'TauJets', outputName = 'AnalysisTauJets' )
-    for element in tauSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
-
-    # Include, and then set up the jet analysis algorithm sequence:
-    jetContainer = 'AntiKt4EMPFlowJets'
-    from JetAnalysisAlgorithms.JetAnalysisSequence import makeJetAnalysisSequence
-    jetSequence = makeJetAnalysisSequence( dataType, jetContainer, deepCopyOutput = True, shallowViewOutput = False, runFJvtUpdate = False, runFJvtSelection = False, runJvtSelection = False)
-    jetSequence.configure( inputName = jetContainer, outputName = 'AnalysisJets' )
-    for element in jetSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
-
-    largeRjetContainer='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
-    largeRjetSequence = makeJetAnalysisSequence( dataType, largeRjetContainer, postfix="largeR",
-                                                     deepCopyOutput = True, shallowViewOutput = False,
-                                                     runGhostMuonAssociation = False)
-    largeRjetSequence.configure( inputName = largeRjetContainer, outputName = 'AnalysisLargeRJets')
-    for element in largeRjetSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
+    # add CP algorithms to job
+    acc.merge(CPAlgorithmsCfg(flags))
 
     # Build MET from our analysis objects
-    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+    if 'StreamAOD' in flags.Input.ProcessingTags:
         from METReconstruction.METAssocCfg import AssocConfig, METAssocConfig
         from METReconstruction.METAssociatorCfg import getAssocCA
         associators = [AssocConfig('PFlowJet', 'AnalysisJets'),
@@ -156,16 +203,16 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
                        AssocConfig('Tau', 'AnalysisTauJets'),
                        AssocConfig('Soft', '')]
         PHYSLITE_cfg = METAssocConfig('AnalysisMET',
-                                      ConfigFlags,
+                                      flags,
                                       associators,
                                       doPFlow=True,
                                       usePFOLinks=True)
         components_PHYSLITE_cfg = getAssocCA(PHYSLITE_cfg,METName='AnalysisMET')
         acc.merge(components_PHYSLITE_cfg)
-    elif 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags:
+    elif 'StreamDAOD_PHYS' in flags.Input.ProcessingTags:
         from DerivationFrameworkJetEtMiss.METCommonConfig import METRemappingCfg
 
-        METRemap_cfg = METRemappingCfg(ConfigFlags)
+        METRemap_cfg = METRemappingCfg(flags)
         acc.merge(METRemap_cfg)
 
     # The derivation kernel itself
@@ -175,7 +222,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     return acc
 
 
-def PHYSLITECfg(ConfigFlags):
+def PHYSLITECfg(flags):
 
     acc = ComponentAccumulator()
 
@@ -184,13 +231,13 @@ def PHYSLITECfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSLITETriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    PHYSLITETriggerListsHelper = TriggerListsHelper(flags)
 
     # Set the stream name - varies depending on whether the input is AOD or DAOD_PHYS
-    streamName = 'StreamDAOD_PHYSLITE' if 'StreamAOD' in ConfigFlags.Input.ProcessingTags else 'StreamD2AOD_PHYSLITE' 
+    streamName = 'StreamDAOD_PHYSLITE' if 'StreamAOD' in flags.Input.ProcessingTags else 'StreamD2AOD_PHYSLITE' 
 
     # Common augmentations
-    acc.merge(PHYSLITEKernelCfg(ConfigFlags, name="PHYSLITEKernel", StreamName = streamName, TriggerListsHelper = PHYSLITETriggerListsHelper))
+    acc.merge(PHYSLITEKernelCfg(flags, name="PHYSLITEKernel", StreamName = streamName, TriggerListsHelper = PHYSLITETriggerListsHelper))
 
     # ============================
     # Define contents of the format
@@ -199,7 +246,7 @@ def PHYSLITECfg(ConfigFlags):
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
+    PHYSLITESlimmingHelper = SlimmingHelper("PHYSLITESlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
 
     # Trigger content
     PHYSLITESlimmingHelper.IncludeTriggerNavigation = False
@@ -215,10 +262,10 @@ def PHYSLITECfg(ConfigFlags):
     
     # Trigger matching
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         # Need to re-run matching so that new Analysis<X> containers are matched to triggers
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
-        acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
+        acc.merge(TriggerMatchingCommonRun2Cfg(flags, 
                                                name = "PHYSLITETrigMatchNoTau", 
                                                OutputContainerPrefix = "AnalysisTrigMatch_", 
                                                ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau,
@@ -226,7 +273,7 @@ def PHYSLITECfg(ConfigFlags):
                                                InputPhotons = "AnalysisPhotons",
                                                InputMuons = "AnalysisMuons",
                                                InputTaus = "AnalysisTauJets"))
-        acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
+        acc.merge(TriggerMatchingCommonRun2Cfg(flags, 
                                                name = "PHYSLITETrigMatchTau", 
                                                OutputContainerPrefix = "AnlaysisTrigMatch_", 
                                                ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesTau, 
@@ -245,7 +292,7 @@ def PHYSLITECfg(ConfigFlags):
                                          TriggerList = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau)
 
     # Run 3, or Run 2 with navigation conversion
-    if ConfigFlags.Trigger.EDMVersion == 3 or (ConfigFlags.Trigger.EDMVersion == 2 and ConfigFlags.Trigger.doEDMVersionConversion):
+    if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         # No need to run matching: just keep navigation so matching can be done by analysts
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSLITESlimmingHelper)
@@ -297,7 +344,7 @@ def PHYSLITECfg(ConfigFlags):
         'GSFTrackParticles.chiSquared.phi.d0.theta.qOverP.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.z0.vz.charge.vertexLink.numberOfPixelHits.numberOfSCTHits.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.numberOfInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerHits.originalTrackParticle',
         'GSFConversionVertices.trackParticleLinks.x.y.z.px.py.pz.pt1.pt2.neutralParticleLinks.minRfirstHit',
         'egammaClusters.calE.calEta.calPhi.calM.e_sampl.eta_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks',
-        "AnalysisMuons.{var_string}".format(var_string = ".".join(MuonVariablesCfg(ConfigFlags))),
+        "AnalysisMuons.{var_string}".format(var_string = ".".join(MuonVariablesCfg(flags))),
         'CombinedMuonTrackParticles.qOverP.d0.z0.vz.phi.theta.truthOrigin.truthType.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfSCTDeadSensors.numberOfSCTHits.numberOfSCTHoles.numberOfTRTHits.numberOfTRTOutliers.chiSquared.numberDoF',
         'ExtrapolatedMuonTrackParticles.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.truthOrigin.truthType.qOverP.theta.phi',
         'MuonSpectrometerTrackParticles.phi.d0.z0.vz.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.vertexLink.theta.qOverP.truthParticleLink',
@@ -319,19 +366,19 @@ def PHYSLITECfg(ConfigFlags):
 
     # Truth extra content
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSLITESlimmingHelper)
 
     # add in extra values for Higgs 
     from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsSlimmingVariables
-    setupHiggsSlimmingVariables(ConfigFlags, PHYSLITESlimmingHelper)
+    setupHiggsSlimmingVariables(flags, PHYSLITESlimmingHelper)
 
     # Output stream    
     PHYSLITEItemList = PHYSLITESlimmingHelper.GetItemList()
-    formatString = 'D2AOD_PHYSLITE' if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags else 'DAOD_PHYSLITE'
-    acc.merge(OutputStreamCfg(ConfigFlags, formatString, ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
-    acc.merge(SetupMetaDataForStreamCfg(ConfigFlags, formatString, AcceptAlgs=["PHYSLITEKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
+    formatString = 'D2AOD_PHYSLITE' if 'StreamDAOD_PHYS' in flags.Input.ProcessingTags else 'DAOD_PHYSLITE'
+    acc.merge(OutputStreamCfg(flags, formatString, ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
+    acc.merge(SetupMetaDataForStreamCfg(flags, formatString, AcceptAlgs=["PHYSLITEKernel"], createMetadata=[MetadataCategory.CutFlowMetaData, MetadataCategory.TruthMetaData]))
 
     return acc
 

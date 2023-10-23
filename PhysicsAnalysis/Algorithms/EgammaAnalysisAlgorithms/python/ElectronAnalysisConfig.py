@@ -106,7 +106,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.IsMC = config.dataType() is not DataType.Data
             alg.isolationCorrectionTool.AFII_corr = config.dataType() is DataType.FastSim
             alg.egammas = config.readName (self.containerName)
-            alg.egammasOut = config.readName (self.containerName)
+            alg.egammasOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
