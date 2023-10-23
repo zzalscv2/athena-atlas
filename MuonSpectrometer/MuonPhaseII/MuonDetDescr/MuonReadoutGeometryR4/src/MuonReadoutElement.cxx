@@ -47,8 +47,8 @@ const Amg::Transform3D& MuonReadoutElement::globalToLocalTrans(const ActsGeometr
 
     MuonTransformSet::const_iterator cache = m_globalToLocalCaches.find(hash);
     if (cache != m_globalToLocalCaches.end()) return (*cache)->getTransform(store);
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
-                <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
+    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
+                <<idHelperSvc()->toString(measurementId(hash))<<" is unknown.");
     return dummyTrans;
 }
 const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometryContext& ctx, 
@@ -59,8 +59,8 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTrans(const ActsGeometr
 
     MuonTransformSet::const_iterator cache = m_localToGlobalCaches.find(hash);
     if (cache != m_localToGlobalCaches.end()) return (*cache)->getTransform(store);
-    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- Hash "<<hash
-               <<" is unknown to "<<idHelperSvc()->toStringDetEl(identify()));    
+    ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" "<<__func__<<"() -- "
+                <<idHelperSvc()->toString(measurementId(hash))<<" is unknown.");
     return dummyTrans;
 }
 std::shared_ptr<Acts::Surface> MuonReadoutElement::surfacePtr(const IdentifierHash& hash) const {

@@ -89,14 +89,18 @@ public:
     /** construction/destruction */
     MdtSensitiveDetector(const std::string& name, const std::string& output_key,
                          const MuonGMR4::MuonDetectorManager* detMgr);
-    ~MdtSensitiveDetector()=default;
+    ~MdtSensitiveDetector() = default;
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
     G4bool ProcessHits(G4Step* aStep, G4TouchableHistory* ROhist) override final;
     
 private:
-   Identifier getIdentifier(const G4TouchableHistory* touchHist);
+   /// Retrieves the matching readout element to a G4 hit
+   const MuonGMR4::MdtReadoutElement* getReadoutElement(const G4TouchableHistory* touchHist) const;
+   /// Retrieves from the Readoutelement & the touchable history the Identifier
+   Identifier getIdentifier(const MuonGMR4::MdtReadoutElement* reElement,
+                            const G4TouchableHistory* touchHist) const;
     /* For the moment use write handles because the sensitive detectors are 
      *  managed by a service which must not have a data dependency
     */
@@ -105,13 +109,6 @@ private:
     const ActsGeometryContext m_gctx{};
     /// Pointer to the underlying detector manager
     const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-
-    
-    double m_driftR{std::numeric_limits<double>::max()};
-    double m_globalTime{0.};
-    Amg::Transform3D m_trans{Amg::Transform3D::Identity()};
-    Amg::Vector3D m_locPos{Amg::Vector3D::Zero()};
-    Amg::Vector3D m_locDir{Amg::Vector3D::Zero()};
 
 };
 

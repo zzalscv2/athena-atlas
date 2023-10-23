@@ -27,7 +27,7 @@ namespace MuonValR4{
   class MDTFastDigiTester : public AthHistogramAlgorithm {
   public:
     MDTFastDigiTester(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~MDTFastDigiTester() override;
+    virtual ~MDTFastDigiTester()  = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
@@ -46,16 +46,17 @@ namespace MuonValR4{
 
     // output tree - allows to compare the sim and fast-digitised hits
     MuonVal::MuonTesterTree m_tree{"FastSmearingResults","MuonFastDigiTest"}; 
-    MuonVal::ScalarBranch<int> m_out_stationName{m_tree,"stationName",-1};
-    MuonVal::ScalarBranch<int> m_out_stationEta{m_tree,"stationEta",-1};
-    MuonVal::ScalarBranch<int> m_out_stationPhi{m_tree,"stationPhi",-1};
-    MuonVal::ScalarBranch<int> m_out_multilayer{m_tree,"multilayer",-1};
-    MuonVal::ScalarBranch<int> m_out_tubeLayer{m_tree,"tubeLayer",-1};
-    MuonVal::ScalarBranch<int> m_out_tube{m_tree,"tube",-1};    
-    MuonVal::ScalarBranch<double> m_out_simDriftRadius{m_tree, "sim_driftRadius", 0.0}; 
-    MuonVal::ScalarBranch<bool> m_out_hasDigi{m_tree, "hasDigi", false}; 
-    MuonVal::ScalarBranch<double> m_out_digiDriftRadius{m_tree, "digi_driftRadius", 0.0}; 
-    MuonVal::ScalarBranch<double> m_out_digiDriftRadiusCov{m_tree, "digi_driftRadiusCov", 0.0}; 
+    MuonVal::ScalarBranch<int>& m_out_stationName{m_tree.newScalar<int>("stationName")};
+    MuonVal::ScalarBranch<int>& m_out_stationEta{m_tree.newScalar<int>("stationEta")};
+    MuonVal::ScalarBranch<int>& m_out_stationPhi{m_tree.newScalar<int>("stationPhi")};
+    MuonVal::ScalarBranch<int>& m_out_multilayer{m_tree.newScalar<int>("multilayer")};
+    MuonVal::ScalarBranch<int>& m_out_tubeLayer{m_tree.newScalar<int>("tubeLayer")};
+    MuonVal::ScalarBranch<int>& m_out_tube{m_tree.newScalar<int>("tube")}; 
+    MuonVal::ScalarBranch<float>& m_out_barcode{m_tree.newScalar<float>("barcode")};   
+    MuonVal::ScalarBranch<float>& m_out_simDriftRadius{m_tree.newScalar<float>("sim_driftRadius")}; 
+    MuonVal::ScalarBranch<bool>& m_out_hasDigi{m_tree.newScalar<bool>("hasDigi", false)}; 
+    MuonVal::ScalarBranch<float>& m_out_digiDriftRadius{m_tree.newScalar<float>("digi_driftRadius", 0.0)}; 
+    MuonVal::ScalarBranch<float>& m_out_digiDriftRadiusCov{m_tree.newScalar<float>("digi_driftRadiusCov", 0.0)}; 
   };
 }
 

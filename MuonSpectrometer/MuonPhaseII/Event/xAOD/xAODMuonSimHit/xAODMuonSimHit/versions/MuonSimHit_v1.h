@@ -19,6 +19,7 @@ class MuonSimHit_v1 : public SG::AuxElement {
     public:
     
     MuonSimHit_v1() = default;
+    MuonSimHit_v1& operator=(const MuonSimHit_v1& other);
     
     ///@brief Sets the local position of the traversing particle
     void setLocalPosition(MeasVector<3> vec);
