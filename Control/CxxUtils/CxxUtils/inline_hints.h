@@ -24,19 +24,19 @@
  * - The always_inline attibute disables inlining heuristics and inlining is
  * always attempted regardless of optimization level.
  *
- * These can and will affect debug and optimised builds
+ * These can and will affect debug and optimized builds
  *
  * As an example :
  * - We use flatten quite a bit to avoid out of line eigen calls
  * - We use always_inline for helpers containing code that was repeated in
  *   different methods and we factorized it in a separate function.
- *   But we want to keep the semantics of the original
+ *   But we want to keep the semantics of the original code
  * - We use noinline to avoid the compiler being too smart
  *
  * More or less all these assume that given a context one knows something more
  * than the compiler. Inlining (the optimization) can improve or worsen the
- * performance, it can reduce or increase the code size. Check carefully
- * before deciding and confirm.
+ * performance, it can reduce or increase the code size etc
+ * Check carefully before deciding and confirm.
  *
  *
  */
@@ -44,22 +44,15 @@
 #ifndef CXXUTILS_ALWAYS_INLINE_H
 #define CXXUTILS_ALWAYS_INLINE_H
 
-#if (defined(__GNUC__) || defined(__clang__))
+#if defined(__GNUC__)
 #define ATH_FLATTEN [[gnu::flatten]]
-#else
-#define ATH_FLATTEN
-#endif
-
-#if (defined(__GNUC__) || defined(__clang__))
 #define ATH_ALWAYS_INLINE [[gnu::always_inline]] inline
-#else
-#define ATH_ALWAYS_INLINE inline
-#endif
-
-#if (defined(__GNUC__) || defined(__clang__))
 #define ATH_NOINLINE [[gnu::noinline]]
 #else
+#define ATH_FLATTEN
+#define ATH_ALWAYS_INLINE inline
 #define ATH_NOINLINE
 #endif
+
 
 #endif

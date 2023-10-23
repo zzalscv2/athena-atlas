@@ -40,13 +40,13 @@ Trk::PerigeeSurface::PerigeeSurface(const Amg::Transform3D& tTransform)
     std::make_unique<Transforms>(tTransform, tTransform.translation(), s_xAxis);
 }
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
+ATH_FLATTEN
 #endif
 Trk::PerigeeSurface::PerigeeSurface(const PerigeeSurface& pesf)
   : Surface(pesf)
@@ -160,14 +160,12 @@ Trk::PerigeeSurface::localToGlobal(const Trk::LocalParameters& locpars) const
   return {0., 0., locpars[Trk::z0] + (center().z())};
 }
 
-#if defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-[[gnu::flatten]]
-#endif
+ATH_FLATTEN
 // true local to global method/
 void
 Trk::PerigeeSurface::localToGlobal(const Amg::Vector2D& locpos,

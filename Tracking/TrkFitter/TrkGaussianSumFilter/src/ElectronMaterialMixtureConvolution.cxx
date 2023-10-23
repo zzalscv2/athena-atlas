@@ -35,10 +35,8 @@ dummyCacheElement(GsfMaterial::Combined& elem)
   elem.deltaCovariances[0] = AmgSymMatrix(5)::Zero();
 }
 
-#if defined(__GNUC__)
-[[gnu::flatten]]
 // Avoid out-of-line Eigen calls
-#endif
+ATH_FLATTEN
 inline void
 updateCacheElement(GsfMaterial::Combined& update,
                    size_t index,
