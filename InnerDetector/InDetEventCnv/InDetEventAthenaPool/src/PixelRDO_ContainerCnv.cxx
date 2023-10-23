@@ -18,9 +18,9 @@ namespace {
     std::ostringstream os;
     if(main_input_Pixel) {
       for(unsigned i=0; i<maxprint; i++) {
-	PixelRDO_Container::const_iterator p = main_input_Pixel->indexFind(i);
-	if(p != main_input_Pixel->end()) {
-	  os<<" "<< (*p)->size();
+	const auto* p = main_input_Pixel->indexFindPtr(i);
+	if(p != nullptr) {
+	  os<<" "<< p->size();
 	}
 	else {
 	  os<<" *";

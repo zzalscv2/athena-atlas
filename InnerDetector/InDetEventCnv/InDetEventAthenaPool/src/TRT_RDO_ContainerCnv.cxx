@@ -17,9 +17,9 @@ namespace {
     std::ostringstream os;
     if(main_input_TRT) {
       for(unsigned i=0; i<maxprint; i++) {
-	TRT_RDO_Container::const_iterator p = main_input_TRT->indexFind(i);
-	if(p != main_input_TRT->end()) {
-	  os<<" "<< (*p)->size();
+	const auto* p = main_input_TRT->indexFindPtr(i);
+	if(p != nullptr) {
+	  os<<" "<< p->size();
 	}
 	else {
 	  os<<" *";
