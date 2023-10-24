@@ -216,8 +216,7 @@ void MaterialAllocator::addLeadingMaterial(
     // delimiter
     // FIXME: currently only for indet
     // first create the fitted perigee (ignoring the leading material)
-    Perigee* perigee =
-        new Perigee(fitParameters.position(), p * fitParameters.direction(),
+    Perigee perigee(fitParameters.position(), p * fitParameters.direction(),
                     charge, fitParameters.vertex());
     bool haveMaterial = false;
     const std::vector<const TrackStateOnSurface*>* indetMaterial = nullptr;
@@ -233,7 +232,7 @@ void MaterialAllocator::addLeadingMaterial(
       }
 
       // extrapolateM from perigee to get leading material
-      indetMaterial = extrapolatedMaterial(m_extrapolator, *perigee, *surface,
+      indetMaterial = extrapolatedMaterial(m_extrapolator, perigee, *surface,
                                            alongMomentum, false,
                                            particleHypothesis, garbage);
 
@@ -270,15 +269,15 @@ void MaterialAllocator::addLeadingMaterial(
       const std::vector<const TrackStateOnSurface*>* indetMaterialR = nullptr;
       CurvilinearUVT uvt(intersection->direction());
       Amg::Vector2D localPos;
-      PlaneSurface* plane = new PlaneSurface(intersection->position(), uvt);
-      if (plane->globalToLocal(intersection->position(),
+      PlaneSurface plane(intersection->position(), uvt);
+      if (plane.globalToLocal(intersection->position(),
                                intersection->direction(), localPos)) {
         AtaPlane parameters(localPos[locR], localPos[locZ],
                             intersection->direction().phi(),
-                            intersection->direction().theta(), qOverP, *plane);
+                            intersection->direction().theta(), qOverP, plane);
 
         indetMaterialR = extrapolatedMaterial(
-            m_extrapolator, parameters, perigee->associatedSurface(),
+            m_extrapolator, parameters, perigee.associatedSurface(),
             oppositeMomentum, false, particleHypothesis, garbage);
 
         if (indetMaterialR && !indetMaterialR->empty()) {
@@ -305,66 +304,7 @@ void MaterialAllocator::addLeadingMaterial(
         }
       }
       delete indetMaterialR;
-      delete plane;
     }
-
-    // debug
-    /** Commented out because indetMaterial is NULL at this point (coverity
-     25126) if (haveDelimiter && msgLvl(MSG::VERBOSE))
-       {
-        Amg::Vector3D direction     = intersection->direction();
-        Amg::Vector3D startPosition = intersection->position();
-        double p1             = perigee->momentum().mag();
-
-        for (std::vector<const TrackStateOnSurface*>::const_iterator s =
-     indetMaterial->begin(); s != indetMaterial->end();
-     ++s)
-        {
-        if (! (**s).trackParameters()) continue;
-        double distance	= direction.dot((**s).trackParameters()->position() -
-     startPosition); double deltaE	= 0.; double thickness= 0.; const
-     MaterialEffectsOnTrack* materialEffects = dynamic_cast<const
-     MaterialEffectsOnTrack*>((**s).materialEffectsOnTrack()); if
-     ((**s).materialEffectsOnTrack())
-        {
-            if (materialEffects) deltaE =
-     materialEffects->energyLoss()->deltaE(); thickness =
-     (**s).materialEffectsOnTrack()->thicknessInX0();
-        }
-        else
-        {
-            ATH_MSG_VERBOSE( std::setiosflags(std::ios::fixed) << " delimiter:
-     RZ"
-                     << std::setw(9) << std::setprecision(3)
-                     << (**s).trackParameters()->position().perp()
-                     << std::setw(10) << std::setprecision(3)
-                     << (**s).trackParameters()->position().z()
-                     << "   distance " << std::setw(10) << std::setprecision(3)
-                     << distance
-                     << "   pt " << std::setw(8) << std::setprecision(3)
-                     <<
-     (**s).trackParameters()->momentum().perp()/Gaudi::Units::GeV); continue;
-        }
-
-        double p2		= (**s).trackParameters()->momentum().mag();
-        ATH_MSG_VERBOSE( std::setiosflags(std::ios::fixed) << " material: RZ"
-                 << std::setw(9) << std::setprecision(3)
-                 << (**s).trackParameters()->position().perp()
-                 << std::setw(10) << std::setprecision(3)
-                 << (**s).trackParameters()->position().z()
-                 << "   distance " << std::setw(10) << std::setprecision(3)
-                 << distance
-                 << "   pt " << std::setw(8) << std::setprecision(3)
-                 << (**s).trackParameters()->momentum().perp()/Gaudi::Units::GeV
-                 << "  X0thickness " << std::setw(8) << std::setprecision(4)
-                 << thickness
-                 << "  deltaE " << std::setw(8) << std::setprecision(4)
-                 << deltaE
-                 << " diffP " << std::setw(8) << std::setprecision(4) << p2 - p1
-     ); p1			= p2;
-        }
-       }
-     **/
 
     // create scatterer FitMeasurement's corresponding to leading material
     // (intersector running inwards to give parameters with qOverP update)
@@ -484,10 +424,10 @@ void MaterialAllocator::addLeadingMaterial(
       if (m_useStepPropagator == 99) {
         const TrackSurfaceIntersection* newIntersectionSTEP =
             m_stepPropagator->intersectSurface(
-                ctx, perigee->associatedSurface(), intersection, qOverP,
+                ctx, perigee.associatedSurface(), intersection, qOverP,
                 Trk::MagneticFieldProperties(Trk::FullField), Trk::muon);
         intersection = m_intersector->intersectSurface(
-            perigee->associatedSurface(), intersection, qOverP);
+            perigee.associatedSurface(), intersection, qOverP);
         if (newIntersectionSTEP && intersection) {
           delete newIntersectionSTEP;
         }
@@ -495,16 +435,15 @@ void MaterialAllocator::addLeadingMaterial(
         intersection =
             m_useStepPropagator >= 1
                 ? m_stepPropagator->intersectSurface(
-                      ctx, perigee->associatedSurface(), intersection, qOverP,
+                      ctx, perigee.associatedSurface(), intersection, qOverP,
                       m_stepField, Trk::muon)
-                : m_intersector->intersectSurface(perigee->associatedSurface(),
+                : m_intersector->intersectSurface(perigee.associatedSurface(),
                                                   intersection, qOverP);
       }
     } else {
       delete intersection;
       intersection = nullptr;
     }
-    delete perigee;
     deleteMaterial(indetMaterial, garbage);
     indetMaterial = nullptr;
   }
@@ -1546,24 +1485,27 @@ MaterialAllocator::materialAggregation(
     return std::pair<FitMeasurement*, FitMeasurement*>(measurement1,
                                                        measurement2);
 
-  Amg::Vector3D* referencePosition = nullptr;
 
   int adjacentScatterers = 0;
   std::vector<FitMeasurement*> aggregateScatterers;
+  bool hasReferencePosition = false;
+  Amg::Vector3D referencePosition;
   bool haveAggregation = false;
   //     bool makeAggregation		= false;
   //     double maxDistance			= 0.;
   for (std::vector<const TrackStateOnSurface*>::const_reverse_iterator tsos =
            material.rbegin();
        tsos != material.rend(); ++tsos) {
-    if (!(**tsos).trackParameters() || !(**tsos).materialEffectsOnTrack())
+    if (!(**tsos).trackParameters() || !(**tsos).materialEffectsOnTrack()){
       continue;
+    }
     ++adjacentScatterers;
-    if (!referencePosition)
-      referencePosition =
-          new Amg::Vector3D((**tsos).trackParameters()->position());
+    if (!hasReferencePosition) {
+      referencePosition = Amg::Vector3D((**tsos).trackParameters()->position());
+      hasReferencePosition = true;
+    }
     double distance =
-        ((**tsos).trackParameters()->position() - *referencePosition).mag();
+        ((**tsos).trackParameters()->position() - referencePosition).mag();
     double weight = (**tsos).materialEffectsOnTrack()->thicknessInX0();
 
     ATH_MSG_INFO(" material position " << (**tsos).trackParameters()->position()
@@ -1579,7 +1521,6 @@ MaterialAllocator::materialAggregation(
   if (haveAggregation) {
   }
 
-  delete referencePosition;
   return std::pair<FitMeasurement*, FitMeasurement*>(measurement1,
                                                      measurement2);
 }
