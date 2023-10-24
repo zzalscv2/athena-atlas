@@ -23,6 +23,7 @@
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 
+#include <array>
 namespace {
 
 ATH_FLATTEN
@@ -306,7 +307,10 @@ Trk::ElectronMaterialMixtureConvolution::update(
 
   GSFUtils::Component1DArray componentsArray;
   componentsArray.numComponents = n;
-  std::vector<std::pair<size_t, size_t>> indices(n);
+  std::array<std::pair<size_t, size_t>,
+             GSFConstants::maxComponentsAfterConvolution>
+      indices{};
+
   size_t k(0);
   for (size_t i(0); i < inputState.size(); ++i) {
     for (size_t j(0); j < caches[i].numEntries; ++j) {
