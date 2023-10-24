@@ -28,12 +28,15 @@ CLASS_DEF (std::vector<int*>, 28374627, 0)
 template <class T>
 T makeT(int x=0) { return T(x); }
 
-bool makeT(int x=0) { return (x&1) != 0; }
+template<>
+bool makeT<bool>(int x) { return (x&1) != 0; }
 
 
 template <class T, template<typename> class ALLOC = std::allocator>
 void test_vector()
 {
+  auto makeT = [] (int x = 0) { return ::makeT<T>(x); };
+
   SG::AuxTypeVectorFactory<T, ALLOC<T> > fac;
   assert (fac.getEltSize() == sizeof(T));
   assert (!fac.isDynamic());
@@ -84,6 +87,8 @@ void test_vector()
 template <class T, template<typename> class ALLOC = std::allocator>
 void test_vector2()
 {
+  auto makeT = [] (int x = 0) { return ::makeT<T>(x); };
+
   SG::AuxTypeVectorFactory<T, ALLOC<T> > fac;
   auto vec4 = new SG::PackedContainer<T, ALLOC<T> >;
   vec4->push_back (makeT(4));
