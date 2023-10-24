@@ -36,6 +36,7 @@ private:
     Gaudi::Property<std::string> m_zdcModuleContainerName {this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
     Gaudi::Property<std::string> m_zdcSumContainerName {this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
     Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Append this tag onto end of AuxData"};
+    Gaudi::Property<float> m_expected1N{this, "Expected1NADC", 1000., "Expected 1N position in ADC"}; // only needs to indicate the rough scale, only used in the >20N cut mask
 
     // single side triggers - less error-prone if defined as separate properties then in a vector (where order would be crucial)
     Gaudi::Property<std::string> m_triggerSideA{this, "triggerSideA", "L1_ZDC_A", "Trigger on side A, needed for 1N-peak monitoring on side C"};

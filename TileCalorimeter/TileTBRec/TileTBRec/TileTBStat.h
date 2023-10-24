@@ -133,11 +133,14 @@ class TileTBStat: public AthAlgorithm {
     uint32_t m_spillPattern;
     uint32_t m_nSpill;
     uint32_t m_nEvt[5];
-    uint32_t m_cisBeg[16];
     uint32_t m_cisPar[16];
+    uint32_t m_cis1st[16];
+    uint32_t m_cisBeg[19];
+    uint32_t m_cisEnd[19];
 
     /* the ROD data sub-fragment */
     typedef struct T_RobRodFragMap {
+        uint32_t L1type;
         uint32_t ROBid;
         uint32_t RODid;
         std::vector<uint32_t> fragID;
@@ -151,6 +154,7 @@ class TileTBStat: public AthAlgorithm {
     } T_RodDataFrag;
 
     std::vector<T_RobRodFragMap> m_fragMap;
+    std::vector<T_RobRodFragMap> m_beamFragMap;
 
     void find_frag(const uint32_t* data, unsigned int size, T_RobRodFragMap & ROBfrag);
 

@@ -231,7 +231,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
 
     auto zdcModuleAmp = Monitored::Scalar<float>("zdcModuleAmp", -1000.0);
     auto zdcModuleFract = Monitored::Scalar<float>("zdcModuleFract", -1000.0);
-    auto zdcEnergySumCurrentSide = Monitored::Scalar<float>("zdcEnergySumCurrentSide", -1000.0);
+    auto zdcUncalibSumCurrentSide = Monitored::Scalar<float>("zdcUncalibSumCurrentSide", -1000.0);
+    auto zdcAbove20NCurrentSide = Monitored::Scalar<bool>("zdcAbove20NCurrentSide", false);
     auto zdcModuleTime = Monitored::Scalar<float>("zdcModuleTime", -1000.0);
     auto zdcModuleChisq = Monitored::Scalar<float>("zdcModuleChisq", -1000.0);
     auto zdcModuleChisqOverAmp = Monitored::Scalar<float>("zdcModuleChisqOverAmp", -1000.0);
@@ -286,15 +287,16 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 zdcModuleChisq = zdcModuleChisqHandle(*zdcMod);
                 zdcModuleCalibAmp = zdcModuleCalibEnergyHandle(*zdcMod);
                 zdcModuleCalibTime = zdcModuleCalibTimeHandle(*zdcMod);
-                zdcEnergySumCurrentSide = (zdcMod->zdcSide() > 0)? 1. * zdcUncalibSumA : 1. * zdcUncalibSumC;
-                zdcModuleFract = (zdcEnergySumCurrentSide == 0)? -1000. : zdcModuleAmp / zdcEnergySumCurrentSide;
+                zdcUncalibSumCurrentSide = (zdcMod->zdcSide() > 0)? 1. * zdcUncalibSumA : 1. * zdcUncalibSumC;
+                zdcAbove20NCurrentSide = (zdcUncalibSumCurrentSide > 20 * m_expected1N);
+                zdcModuleFract = (zdcUncalibSumCurrentSide == 0)? -1000. : zdcModuleAmp / zdcUncalibSumCurrentSide;
                 zdcModuleChisqOverAmp = (zdcModuleAmp == 0)? -1000. : zdcModuleChisq / zdcModuleAmp;
                 zdcModuleLG = (status & 1 << ZDCPulseAnalyzer::LowGainBit);
                 zdcModuleHG = !(zdcModuleLG);
 
                 if (imod == 0) zdcEMModuleEnergy[iside] = zdcModuleCalibAmp;
 
-                fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleFract, zdcEnergySumCurrentSide, zdcModuleTime, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, lumiBlock, bcid);
+                fill(m_tools[m_ZDCModuleToolIndices[iside][imod]], zdcModuleAmp, zdcModuleFract, zdcUncalibSumCurrentSide, zdcAbove20NCurrentSide, zdcModuleTime, zdcModuleChisq, zdcModuleChisqOverAmp, zdcModuleCalibAmp, zdcModuleCalibTime, zdcModuleLG, zdcModuleHG, lumiBlock, bcid);
             } 
         } 
     }
