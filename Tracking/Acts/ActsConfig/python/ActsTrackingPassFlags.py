@@ -97,9 +97,10 @@ def createActsBenchmarkSpotTrackingPassFlags():
     icf.doAthenaToActsCluster = True
     icf.doActsSpacePoint = True
     icf.doActsSeed = True
-    icf.doActsToAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaAmbiguityResolution = True
+    icf.doActsTrack = True
+    icf.doActsAmbiguityResolution = True
+    icf.doActsToAthenaResolvedTrack = True
     return icf
 
 
+    
