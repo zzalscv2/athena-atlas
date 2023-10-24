@@ -3,10 +3,10 @@
 //  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 //
 
-// MyPackage includes
-#include "AthAsgExUnittest/MyPackageTool.h"
+// AthAsgExUnittest includes
+#include "AthAsgExUnittest/AthAsgExUnittestTool.h"
 
-MyPackageTool::MyPackageTool( const std::string& name ) : asg::AsgTool( name ) {
+AthAsgExUnittestTool::AthAsgExUnittestTool( const std::string& name ) : asg::AsgTool( name ) {
   //example property declarations with default values
   declareProperty( "Property", m_nProperty = 3.0,
                    "Please describe the property here" );
@@ -14,7 +14,7 @@ MyPackageTool::MyPackageTool( const std::string& name ) : asg::AsgTool( name ) {
                    "Please define enums inside your classes, not just in namespaces" );
 }
 
-StatusCode MyPackageTool::initialize() {
+StatusCode AthAsgExUnittestTool::initialize() {
     ATH_MSG_INFO( "Initializing " << name() << "..." );
     ATH_MSG_INFO( "Property = " << m_nProperty );
   //
@@ -24,6 +24,6 @@ StatusCode MyPackageTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-double MyPackageTool::useTheProperty() {
+double AthAsgExUnittestTool::useTheProperty() {
   return m_nProperty;
 }
