@@ -54,6 +54,7 @@ StatusCode Muon::NSWCalibTool::initialize()
   ATH_MSG_DEBUG("In initialize()");
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_condTdoPdoKey.initialize());
+  ATH_CHECK(m_condT0Key.initialize(m_applyMmT0Calib || m_applysTgcT0Calib));
   ATH_CHECK(m_fieldCondObjInputKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
   ATH_CHECK(m_muDetMgrKey.initialize( m_idHelperSvc->hasMM() && m_idHelperSvc->hasSTGC() ));
 
@@ -177,6 +178,11 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
   // historically the peak time is included in the time determined by the MM digitization and therefore added back in the tdoToTime function
   // in order to not break the RDO to digit conversion needed for the trigger and the overlay
   calibStrip.time       = time - globalPos.norm() * reciprocalSpeedOfLight - mmPeakTime();
+  // applying T0 calibration, cannot be done inside the the tdo to time function since the tof correction was included when deriving the calibration constants
+  if(m_applyMmT0Calib){
+    calibStrip.time = applyT0Calibration(ctx, rdoId, calibStrip.time);
+  }
+
   calibStrip.identifier = rdoId;
 
   ATH_MSG_DEBUG("Calibrating RDO " << m_idHelperSvc->toString(rdoId) << "with pdo: " << mmRawData->charge() << " tdo: "<< mmRawData->time() << " relBCID "<< mmRawData->relBcid() << " charge and time in counts  " <<
@@ -224,6 +230,11 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
     calibStrip.charge     = charge;
   }
   calibStrip.time       = time - stgcPeakTime();
+
+  if(m_applysTgcT0Calib){
+    calibStrip.time = applyT0Calibration(ctx, rdoId, calibStrip.time);
+  }
+
   calibStrip.identifier = rdoId;
   calibStrip.locPos = locPos;
   return StatusCode::SUCCESS;
@@ -371,6 +382,25 @@ Muon::NSWCalibTool::timeToTdoSTGC(const NswCalibDbTimeChargeData* tdoPdoData, co
   tdo = tdoTime*calib.slope + calib.intercept;
   return true;
 }
+
+float Muon::NSWCalibTool::applyT0Calibration(const EventContext& ctx, const Identifier& id, float time) const {
+  SG::ReadCondHandle<NswT0Data> readT0{m_condT0Key, ctx};
+  if(!readT0.isValid()){
+    ATH_MSG_ERROR("Cannot find conditions data container for T0s!");
+  }
+  float t0 {0};
+  bool isGood = readT0->getT0(id, t0);
+  if(!isGood || t0==0){
+    ATH_MSG_DEBUG("failed to retrieve good t0 from database, skipping t0 calibration");
+    return time;
+  } else {
+    float targetT0 = (m_idHelperSvc->isMM(id) ? m_mmT0TargetValue  : m_stgcT0TargetValue);
+    float newTime = time + (targetT0 - t0);
+    ATH_MSG_DEBUG("doing T0 calibration for RDO " << m_idHelperSvc->toString(id) << " time " << time <<" t0 from  database " <<  t0  << " t0 target " << targetT0  << " new time " <<  newTime);
+    return newTime;
+  }
+}
+
 
 bool 
 Muon::NSWCalibTool::tdoToTime(const EventContext& ctx, const bool inCounts, const int tdo, const Identifier& chnlId, float& time, const int relBCID) const {

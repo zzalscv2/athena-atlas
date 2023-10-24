@@ -115,7 +115,12 @@ def createMuonConfigFlags():
     # 't0MT'         : do MT t0 calibration
     # 'rtClassic'    : do classic rt calibration
     # 'rtAnalytic'   : do analytic rt calibration
-    mcf.addFlag("Muon.Calib.mdtMode", "ntuple")  
+    mcf.addFlag("Muon.Calib.mdtMode", "ntuple")
+
+    # for now the T0 calibration in the NSW should be disabled by default until a final calibration is available. Introducing the flags anyhow to allow for studies of the calibration 
+    # do not apply NSW T0 calibration if we are running online or MC or a RUN4 geometry 
+    mcf.addFlag("Muon.Calib.applyMmT0Correction",   lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False)
+    mcf.addFlag("Muon.Calib.applysTgcT0Correction", lambda prevFlags: prevFlags.GeoModel.Run<LHCPeriod.Run4  and not prevFlags.Common.isOnline and not prevFlags.Input.isMC and False) 
     
     # Muon Align flags
     

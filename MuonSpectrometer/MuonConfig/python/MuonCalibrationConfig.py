@@ -145,7 +145,9 @@ def NSWCalibToolCfg(flags, name="NSWCalibTool", **kwargs):
     result.merge(NswCalibDbAlgCfg(flags))
     kwargs.setdefault("isData", not flags.Input.isMC)
     kwargs.setdefault("mmPeakTime",200)
-    kwargs.setdefault("sTgcPeakTime",0)    
+    kwargs.setdefault("sTgcPeakTime",0)
+    kwargs.setdefault("applyMmT0Calib", flags.Muon.Calib.applyMmT0Correction)    
+    kwargs.setdefault("applysTgcT0Calib", flags.Muon.Calib.applysTgcT0Correction)    
     the_tool = CompFactory.Muon.NSWCalibTool(name,**kwargs)
     result.setPrivateTools(the_tool)
     return result

@@ -5,6 +5,7 @@
 #include "MuonCondAlg/NswCalibDbAlg.h"
 
 #include "TTree.h"
+#include "TFile.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "CoralBase/Blob.h"
 #include "CoralUtilities/blobaccess.h"
@@ -13,7 +14,9 @@
 #include "MuonNSWCommonDecode/NSWElink.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
+#include "AthenaKernel/IOVInfiniteRange.h"
 
+#include<ctime>
 
 // Initialize
 StatusCode
@@ -37,12 +40,16 @@ NswCalibDbAlg::initialize(){
   ATH_CHECK(m_readKey_stgc_sidec_pdo.initialize(!m_readKey_stgc_sidec_pdo.empty()             ));
   ATH_CHECK(m_readKey_stgc_sidea_thr.initialize(!m_readKey_stgc_sidea_thr.empty() && !m_isData));
   ATH_CHECK(m_readKey_stgc_sidec_thr.initialize(!m_readKey_stgc_sidec_thr.empty() && !m_isData));
+  ATH_CHECK(m_readKey_mm_t0.initialize(!m_readKey_mm_t0.empty() && m_loadMmT0Data));
+  ATH_CHECK(m_readKey_stgc_t0.initialize(!m_readKey_stgc_t0.empty() && m_loadsTgcT0Data));
 
   // write key for time/charge data
   ATH_CHECK(m_writeKey_tdopdo.initialize());
 
   // write key for threshold data
   ATH_CHECK(m_writeKey_thr.initialize(!m_isData));
+
+  ATH_CHECK(m_writeKey_nswT0.initialize(m_loadMmT0Data || m_loadsTgcT0Data));
 
   return StatusCode::SUCCESS;
 }
@@ -56,6 +63,7 @@ NswCalibDbAlg::execute(const EventContext& ctx) const {
 
   if(processTdoPdoData(ctx).isFailure()) return StatusCode::FAILURE;
   if(processThrData   (ctx).isFailure()) return StatusCode::FAILURE;
+  if(m_loadMmT0Data || m_loadsTgcT0Data) ATH_CHECK(processNSWT0Data(ctx));
 
   return StatusCode::SUCCESS;
 
@@ -134,6 +142,169 @@ NswCalibDbAlg::processThrData(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Recorded new " << wrHdl.key() << " with range " << wrHdl.getRange() << " into Conditions Store");
 
   return StatusCode::SUCCESS;
+}
+
+// processMmT0Data
+StatusCode 
+NswCalibDbAlg::processNSWT0Data(const EventContext& ctx) const {
+  // set up write handles for MmT0 data
+  writeHandleT0_t wrHdl{m_writeKey_nswT0, ctx};
+  if (wrHdl.isValid()) {
+    ATH_MSG_DEBUG("CondHandle " << wrHdl.fullKey() << " is already valid."
+        << " In theory this should not be called, but may happen"
+        << " if multiple concurrent events are being processed out of order.");
+    return StatusCode::SUCCESS;
+  }
+  ATH_MSG_DEBUG("Range of MmT0 output is " << wrHdl.getRange());
+  std::unique_ptr<NswT0Data> wrCdo{std::make_unique<NswT0Data>(m_idHelperSvc->mmIdHelper(), m_idHelperSvc->stgcIdHelper())};
+  if(m_loadMmT0Data){
+    if(!m_mmT0FilePath.empty()  ){ // let's read the constants from a  file
+      wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
+      std::unique_ptr<TFile> file (TFile::Open(m_mmT0FilePath.value().c_str()));
+      if(!file || file->IsZombie()){
+        ATH_MSG_FATAL("Failed to open file containing the MM T0Data. Filepath: "<<m_mmT0FilePath);
+        return StatusCode::FAILURE;
+      }
+      std::unique_ptr<TTree> tree{(TTree*)file->Get("tree_ch")};
+      if(!tree){
+        ATH_MSG_FATAL("Failed to load tree containing the NswT0Data.");
+        return StatusCode::FAILURE;
+      }
+      ATH_CHECK(loadT0Data(tree, wrCdo.get(), T0Tech::MM));
+
+    } else if(!m_readKey_mm_t0.empty()){
+      ATH_MSG_DEBUG("LOAD NSW MM T0 FROM DB");
+      std::unique_ptr<TTree> tree; 
+      ATH_CHECK(loadT0ToTree(ctx, m_readKey_mm_t0, wrHdl, tree));
+      ATH_CHECK(loadT0Data(tree, wrCdo.get(), T0Tech::MM));
+
+    } else {
+      ATH_MSG_ERROR("Neither a database folder nor a file have been provided to read the MM T0 constants");
+      return StatusCode::FAILURE;
+    }
+  }
+  if(m_loadsTgcT0Data){
+    if(!m_stgcT0FilePath.empty()  ){ // let's read the constants from a  file
+      wrHdl.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
+      std::unique_ptr<TFile> file (TFile::Open(m_stgcT0FilePath.value().c_str()));
+      if(!file || file->IsZombie()){
+        ATH_MSG_FATAL("Failed to open file containing the MM T0Data. Filepath: "<<m_stgcT0FilePath);
+        return StatusCode::FAILURE;
+      }
+      std::unique_ptr<TTree> tree{(TTree*)file->Get("tree_ch")};
+      if(!tree){
+        ATH_MSG_FATAL("Failed to load tree containing the NswT0Data.");
+        return StatusCode::FAILURE;
+      }
+      ATH_CHECK(loadT0Data(tree, wrCdo.get(), T0Tech::STGC));
+
+    } else if(!m_readKey_stgc_t0.empty()){
+      ATH_MSG_DEBUG("LOAD NSW sTGC T0 FROM DB");
+      std::unique_ptr<TTree> tree; 
+      ATH_CHECK(loadT0ToTree(ctx, m_readKey_mm_t0, wrHdl, tree));
+      ATH_CHECK(loadT0Data(tree, wrCdo.get(), T0Tech::STGC));
+
+    } else {
+      ATH_MSG_ERROR("Neither a database folder nor a file have been provided to read the sTGC T0 constants");
+      return StatusCode::FAILURE;
+    }
+  }
+  
+  // insert/write data for NswT0Data data
+  ATH_CHECK(wrHdl.record(std::move(wrCdo)));
+  ATH_MSG_DEBUG("Recorded new " << wrHdl.key() << " with range " << wrHdl.getRange() << " into Conditions Store");
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode NswCalibDbAlg::loadT0ToTree(const EventContext& ctx, const readKey_t& readKey, writeHandleT0_t& writeHandle, std::unique_ptr<TTree>& tree) const{
+  // set up read handle
+  SG::ReadCondHandle<CondAttrListCollection> readHandle{readKey, ctx};
+  const CondAttrListCollection* readCdo{*readHandle}; 
+  if(!readCdo){
+    ATH_MSG_ERROR("Null pointer to the read conditions object");
+    return StatusCode::FAILURE; 
+  } 
+  writeHandle.addDependency(readHandle);
+  ATH_MSG_DEBUG("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
+  ATH_MSG_DEBUG("Range of input is " << readHandle.getRange() << ", range of output is " << writeHandle.getRange());
+
+  // iterate through data
+  CondAttrListCollection::const_iterator itr;
+  for(itr = readCdo->begin(); itr != readCdo->end(); ++itr) {
+
+    // retrieve blob
+    const coral::AttributeList& atr = itr->second;
+    if(atr["data"].specification().type() != typeid(coral::Blob)) {
+      ATH_MSG_FATAL( "Data column is not of type blob!" );
+      return StatusCode::FAILURE;
+    }
+    coral::Blob blob = atr["data"].data<coral::Blob>();
+    if(!CoralUtilities::readBlobAsTTree(blob, tree)) {
+      ATH_MSG_FATAL( "Cannot retrieve data from coral blob!" );
+      return StatusCode::FAILURE;
+    }
+  }
+  return StatusCode::SUCCESS;
+}
+
+StatusCode NswCalibDbAlg::loadT0Data(const std::unique_ptr<TTree>& tree, NswT0Data* writeCdo, const T0Tech tech) const{
+    int sector{0}, layer{0}, channel{0}, channelType{0}, stationEta{0};
+    double time{0};
+  tree->SetBranchAddress("sector" , &sector   );
+  tree->SetBranchAddress("layer"  , &layer    );
+  tree->SetBranchAddress("channel", &channel  );
+  tree->SetBranchAddress("mean"   , &time     );
+  tree->SetBranchAddress("stationEta"   , &stationEta);
+  tree->SetBranchAddress("channel_type", &channelType);
+  tree->Print();
+
+  ATH_MSG_DEBUG("NSW t0 calibration tree has "<< tree->GetEntries() <<" entries for tech " << (tech==T0Tech::MM ? "MM" : "sTGC"));
+  
+  for(uint i_channel=0; i_channel<tree->GetEntries(); i_channel++){
+    tree->GetEntry(i_channel);
+    
+    int stationPhi = ((std::abs(sector)-1)/2)+1;
+    uint multilayer = (layer<4 ? 1:2); // multilayer 1  corresponds to layers 0-3, ML 2 to layers 4-7
+    uint gasGap = layer - (multilayer-1)*4 + 1;
+
+    Identifier id{0};
+
+    if(tech==T0Tech::MM){
+      std::string stationName = (sector%2==1 ? "MML" : "MMS");
+      bool isValid{true};
+      id = m_idHelperSvc->mmIdHelper().channelID(stationName, stationEta, stationPhi,multilayer,gasGap, channel
+      // checking the validity of the identifier in production code is too expensiv, therefore only check it in debug build
+      #ifndef NDEBUG 
+      , isValid
+      #endif
+      );
+
+      if(!isValid){
+        ATH_MSG_ERROR("MM sector "<< sector <<" layer " << layer<< " channel "<< channel << " mean "<< time << " stationEta " << stationEta << " stationPhi " << stationPhi <<" stationName "<< stationName << " multilayer " << multilayer << " gas gap "<< gasGap << " channel " << channel);
+        ATH_MSG_ERROR("Failed to build identifier");
+        return StatusCode::FAILURE;
+      }
+    } else {
+      std::string stationName = (sector%2==1 ? "STL" : "STS");
+      bool isValid{true};
+      id = m_idHelperSvc->stgcIdHelper().channelID(stationName, stationEta, stationPhi, multilayer, gasGap, channelType, channel
+      // checking the validity of the identifier in production code is too expensiv, therefore only check it in debug build
+      #ifndef NDEBUG 
+      , isValid
+      #endif
+      );
+      if(!isValid){
+        ATH_MSG_ERROR("Failed to build identifier");
+        ATH_MSG_DEBUG("STG sector "<< sector <<" layer " << layer<< " channel "<< channel << " mean "<< time << " stationEta " << stationEta << " stationPhi " << stationPhi <<" stationName "<< stationName << " multilayer " << multilayer << " gas gap "<< gasGap << " channel " << channel << " channel type" << channelType);
+         return StatusCode::FAILURE;
+      }
+    }
+
+    writeCdo->setData(id, time);
+  }
+  return StatusCode::SUCCESS;
+
 }
 
 
