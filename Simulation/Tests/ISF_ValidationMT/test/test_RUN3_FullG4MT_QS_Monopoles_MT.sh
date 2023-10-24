@@ -3,6 +3,8 @@
 # art-description: MC23-style RUN3 simulation of monopole samples using FullG4MT_QS
 # art-include: 23.0/Athena
 # art-include: 23.0/AthSimulation
+# art-include: 24.0/Athena
+# art-include: 24.0/AthSimulation
 # art-include: main/Athena
 # art-include: main/AthSimulation
 # art-type: grid
@@ -24,7 +26,7 @@ Sim_tf.py \
     --preInclude "EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV,G4DebuggingTools.DebugMonopole" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
     --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
@@ -50,7 +52,7 @@ Sim_tf.py \
     --preInclude "EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
     --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
@@ -69,7 +71,7 @@ Sim_tf.py \
     --preInclude "EVNTtoHITS:Campaigns/MC23aSimulationMultipleIoV.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
     --skipEvents="0" \
     --randomSeed="41" \
-    --conditionsTag "default:OFLCOND-MC21-SDR-RUN3-07" \
+    --conditionsTag "default:OFLCOND-MC23-SDR-RUN3-01" \
     --geometryVersion="default:ATLAS-R3S-2021-03-02-00" \
     --runNumber="950542" \
     --AMITag="s3890" \
