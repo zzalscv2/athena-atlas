@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONTRACKTRUTHTOOL_H
@@ -106,7 +106,7 @@ namespace Muon {
 
         /** create truth tree from sim data */
         virtual const TruthTree createTruthTree(const TrackRecordCollection* truthTrackCol, const McEventCollection* mcEventCollection,
-                                                std::vector<const MuonSimDataCollection*> muonSimData,
+                                                const std::vector<const MuonSimDataCollection*>& muonSimData,
                                                 const CscSimDataCollection* cscSimDataMap) const = 0;
 
         /** @brief get track truth */

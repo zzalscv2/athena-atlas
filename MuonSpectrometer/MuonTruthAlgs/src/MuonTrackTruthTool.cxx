@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthAlgs/MuonTrackTruthTool.h"
@@ -114,7 +114,7 @@ namespace Muon {
 
     const MuonTrackTruthTool::TruthTree MuonTrackTruthTool::createTruthTree(const TrackRecordCollection* truthTrackCol,
                                                                             const McEventCollection* mcEventCollection,
-                                                                            std::vector<const MuonSimDataCollection*> muonSimData,
+                                                                            const std::vector<const MuonSimDataCollection*>& muonSimData,
                                                                             const CscSimDataCollection* cscSimDataMap) const {
         std::map<int, int> barcode_map;
         MuonTrackTruthTool::TruthTree truth_tree;
