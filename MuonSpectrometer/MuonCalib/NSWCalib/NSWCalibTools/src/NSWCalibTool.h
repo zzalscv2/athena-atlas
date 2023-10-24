@@ -16,6 +16,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MuonCondData/NswCalibDbTimeChargeData.h"
+#include "MuonCondData/NswT0Data.h"
 
 #include "TRandom3.h"
 #include "TTree.h"
@@ -63,10 +64,13 @@ namespace Muon {
     bool timeToTdoMM(const NswCalibDbTimeChargeData* tdoPdoData, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const;
     bool timeToTdoSTGC(const NswCalibDbTimeChargeData* tdoPdoData, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const;
 
+    float applyT0Calibration(const EventContext& ctx, const Identifier& id, float time) const;
+
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
     SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj"};
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey {this, "DetectorManagerKey", "MuonDetectorManager", "Key of input MuonDetectorManager condition data"}; 
     SG::ReadCondHandleKey<NswCalibDbTimeChargeData> m_condTdoPdoKey {this, "condTdoPdoKey", "NswCalibDbTimeChargeData", "Key of NswCalibDbTimeChargeData object containing calibration data (TDO and PDO)"};
+    SG::ReadCondHandleKey<NswT0Data> m_condT0Key{this, "condT0Key", "NswT0Data", "Key of NswT0Data containing the t0 calibration data"};
 
     Gaudi::Property<bool> m_isData{this, "isData", false, "Processing data"};
 
@@ -88,6 +92,14 @@ namespace Muon {
     
     Gaudi::Property<float> m_stgcLatencyMC{this,"stgcLatencyMC",-50};
     Gaudi::Property<float> m_stgcLatencyData{this,"stgcLatencyData",-50}; //this is temporary, need to align with what we find in data
+
+
+  Gaudi::Property<bool> m_applyMmT0Calib {this, "applyMmT0Calib", false, "apply the MM t0 calibration"};
+  Gaudi::Property<bool> m_applysTgcT0Calib {this, "applysTgcT0Calib", false, "apply the sTGC t0 calibration"};
+
+	  Gaudi::Property<float> m_mmT0TargetValue {this,  "mmT0TargetValue", 50.0, "target mean value for the MM t0 calibration"};
+	  Gaudi::Property<float> m_stgcT0TargetValue {this,"stgcT0TargetValue", 0.0 ,"target mean value for the  sTGC t0 calibration"};
+
 
     double m_interactionDensitySigma{0.0F};
     double m_interactionDensityMean{0.0F};

@@ -109,7 +109,7 @@ NswCalibDbTimeChargeData::setData(CalibDataType type, const Identifier& chnlId, 
 
 // setZeroData
 void
-NswCalibDbTimeChargeData::setZero(CalibDataType type, CalibTechType tech,  CalibConstants constants) {
+NswCalibDbTimeChargeData::setZero(CalibDataType type, MuonCond::CalibTechType tech,  CalibConstants constants) {
     ZeroCalibMap& calibMap = m_zero[tech];    
     calibMap.insert(std::make_pair(type, std::move(constants)));
 }
@@ -156,12 +156,12 @@ const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getCal
     const unsigned int channel = (m_mmIdHelper.is_mm(channelId) ? m_mmIdHelper.channel(channelId) : m_stgcIdHelper.channel(channelId)) -1;
     if (calibMap.at(array_idx).channels.size() > channel && calibMap[array_idx].channels[channel]) return calibMap[array_idx].channels[channel].get();
     // search for data for channel zero
-    const CalibTechType tech = (m_stgcIdHelper.is_stgc(channelId))? CalibTechType::STGC : CalibTechType::MM;
+    const MuonCond::CalibTechType tech = (m_stgcIdHelper.is_stgc(channelId))? MuonCond::CalibTechType::STGC : MuonCond::CalibTechType::MM;
     return getZeroCalibChannel(type, tech);        
 
 }
-const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getZeroCalibChannel(const CalibDataType type, const CalibTechType tech) const{   
-    std::map<CalibTechType, ZeroCalibMap>::const_iterator itr = m_zero.find(tech);
+const NswCalibDbTimeChargeData::CalibConstants* NswCalibDbTimeChargeData::getZeroCalibChannel(const CalibDataType type, const MuonCond::CalibTechType tech) const{   
+    std::map<MuonCond::CalibTechType, ZeroCalibMap>::const_iterator itr = m_zero.find(tech);
     if(itr != m_zero.end()) {
         const ZeroCalibMap& zeroMap = itr->second;
         ZeroCalibMap::const_iterator type_itr = zeroMap.find(type);

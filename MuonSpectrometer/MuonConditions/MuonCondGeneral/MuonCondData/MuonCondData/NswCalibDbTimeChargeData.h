@@ -12,15 +12,12 @@
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonCondData/Defs.h"
 
 
 class NswCalibDbTimeChargeData {  
 
 public:
-    enum class CalibTechType{
-        MM,
-        STGC        
-    };
     enum class CalibDataType{
         TDO,
         PDO        
@@ -39,7 +36,7 @@ public:
 
 	// setting functions
 	void setData(CalibDataType type, const Identifier& chnlId, CalibConstants constants);
-	void setZero(CalibDataType type, CalibTechType tech,  CalibConstants constants);
+	void setZero(CalibDataType type, MuonCond::CalibTechType tech,  CalibConstants constants);
 
 	// retrieval functions
 	
@@ -49,7 +46,7 @@ public:
     /// then the zero calibChannel is returned.
     const CalibConstants* getCalibForChannel(const CalibDataType type, const Identifier& channelId) const; 
     /// Returns the dummy calibration constant for the given technology type
-    const CalibConstants* getZeroCalibChannel(const CalibDataType type, const CalibTechType tech) const;
+    const CalibConstants* getZeroCalibChannel(const CalibDataType type, const MuonCond::CalibTechType tech) const;
  
 private:
     
@@ -84,7 +81,7 @@ private:
     ChannelCalibMap m_tdo_data{};
 
     using ZeroCalibMap = std::map<CalibDataType, CalibConstants>;
-    std::map<CalibTechType, ZeroCalibMap> m_zero{};
+    std::map<MuonCond::CalibTechType, ZeroCalibMap> m_zero{};
 
 	// ID helpers
 	const MmIdHelper&   m_mmIdHelper;

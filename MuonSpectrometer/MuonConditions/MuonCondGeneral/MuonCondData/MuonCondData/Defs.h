@@ -33,7 +33,13 @@ namespace MuonCond {
        float readyVolt{0.f};
        DcsFsmState fsmState{DcsFsmState::NONE};
     };
- 
+
+    enum class CalibTechType{
+        MM,
+        STGC        
+    };
+
+
     DcsFsmState getFsmStateEnum(const std::string& fsmState);
     std::string getFsmStateStrg(DcsFsmState fsmState); 
     

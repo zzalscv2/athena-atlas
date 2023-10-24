@@ -32,7 +32,8 @@ NswCondTestAlg::~NswCondTestAlg() = default;
 StatusCode NswCondTestAlg::initialize() {
     ATH_MSG_INFO("Calling initialize");
     ATH_CHECK(m_readKey_tdopdo.initialize());
-    ATH_CHECK(m_readKey_vmm.initialize());
+    ATH_CHECK(m_readKey_vmm.initialize(m_isMC));
+    ATH_CHECK(m_readKey_t0.initialize(!m_isMC));
     ATH_CHECK(m_idHelperSvc.retrieve());
     return StatusCode::SUCCESS;
 }
@@ -54,20 +55,22 @@ StatusCode NswCondTestAlg::execute(const EventContext& ctx) const {
     std::chrono::duration<double> retrieving_STGC_PDO_C{};
     std::chrono::duration<double> retrieving_STGC_VMM_A{};
     std::chrono::duration<double> retrieving_STGC_VMM_C{};
+    std::chrono::duration<double> retrieving_T0{};
 
     // retrieve all folders
-    if (!retrieveTdoPdo(ctx, TimeChargeType::PDO, "MM", "A", retrieving_MM_PDO_A).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::PDO, "MM", "C", retrieving_MM_PDO_C).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::TDO, "MM", "A", retrieving_MM_TDO_A).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::TDO, "MM", "C", retrieving_MM_TDO_C).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveVmm(ctx, "MM", "A", retrieving_MM_VMM_A).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveVmm(ctx, "MM", "C", retrieving_MM_VMM_C).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::TDO, "STGC", "A", retrieving_STGC_TDO_A).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::TDO, "STGC", "C", retrieving_STGC_TDO_C).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::PDO, "STGC", "A", retrieving_STGC_PDO_A).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveTdoPdo(ctx, TimeChargeType::PDO, "STGC", "C", retrieving_STGC_PDO_C).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveVmm(ctx, "STGC", "A", retrieving_STGC_VMM_A).isSuccess()) return StatusCode::FAILURE;
-    if (!retrieveVmm(ctx, "STGC", "C", retrieving_STGC_VMM_C).isSuccess()) return StatusCode::FAILURE;
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::PDO, "MM", "A", retrieving_MM_PDO_A));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::PDO, "MM", "C", retrieving_MM_PDO_C));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::TDO, "MM", "A", retrieving_MM_TDO_A));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::TDO, "MM", "C", retrieving_MM_TDO_C));
+    if(m_isMC) ATH_CHECK(retrieveVmm(ctx, "MM", "A", retrieving_MM_VMM_A));
+    if(m_isMC) ATH_CHECK(retrieveVmm(ctx, "MM", "C", retrieving_MM_VMM_C));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::TDO, "STGC", "A", retrieving_STGC_TDO_A));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::TDO, "STGC", "C", retrieving_STGC_TDO_C));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::PDO, "STGC", "A", retrieving_STGC_PDO_A));
+    ATH_CHECK(retrieveTdoPdo(ctx, TimeChargeType::PDO, "STGC", "C", retrieving_STGC_PDO_C));
+    if(m_isMC) ATH_CHECK(retrieveVmm(ctx, "STGC", "A", retrieving_STGC_VMM_A));
+    if(m_isMC) ATH_CHECK(retrieveVmm(ctx, "STGC", "C", retrieving_STGC_VMM_C));
+    if(!m_isMC) ATH_CHECK(retrieveT0(ctx,retrieving_T0));
 
     // postprocess
     ATH_MSG_INFO("Retrieving time for (MM  , TDO, Side A) = "
@@ -78,10 +81,13 @@ StatusCode NswCondTestAlg::execute(const EventContext& ctx) const {
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_MM_PDO_A).count() * 1.0) << "s ");
     ATH_MSG_INFO("Retrieving time for (MM  , PDO, Side C) = "
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_MM_PDO_C).count() * 1.0) << "s ");
-    ATH_MSG_INFO("Retrieving time for (MM  , VMM, Side A) = "
+    if(m_isMC){
+        ATH_MSG_INFO("Retrieving time for (MM  , VMM, Side A) = "
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_MM_VMM_A).count() * 1.0) << "s ");
-    ATH_MSG_INFO("Retrieving time for (MM  , VMM, Side C) = "
+        ATH_MSG_INFO("Retrieving time for (MM  , VMM, Side C) = "
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_MM_VMM_C).count() * 1.0) << "s ");
+    }
+
     ATH_MSG_INFO("Retrieving time for (STGC, TDO, Side A) = "
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_TDO_A).count() * 1.0) << "s ");
     ATH_MSG_INFO("Retrieving time for (STGC, TDO, Side C) = "
@@ -90,10 +96,17 @@ StatusCode NswCondTestAlg::execute(const EventContext& ctx) const {
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_PDO_A).count() * 1.0) << "s ");
     ATH_MSG_INFO("Retrieving time for (STGC, PDO, Side C) = "
                  << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_PDO_C).count() * 1.0) << "s ");
-    ATH_MSG_INFO("Retrieving time for (STGC, VMM, Side A) = "
-                 << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_VMM_A).count() * 1.0) << "s ");
-    ATH_MSG_INFO("Retrieving time for (STGC, VMM, Side C) = "
-                 << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_VMM_C).count() * 1.0) << "s ");
+    if(m_isMC) {
+        ATH_MSG_INFO("Retrieving time for (STGC, VMM, Side A) = "
+               << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_VMM_A).count() * 1.0) << "s ");
+        ATH_MSG_INFO("Retrieving time for (STGC, VMM, Side C) = "
+               << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_STGC_VMM_C).count() * 1.0) << "s ");
+    }
+
+    if(!m_isMC){
+        ATH_MSG_INFO("retrieving time for T0 for NSW = "
+               << (std::chrono::duration_cast<std::chrono::microseconds>(retrieving_T0).count() * 1.0) << "s ");
+    }
 
     ATH_MSG_INFO("MADE IT TO THE END!!");
     return StatusCode::SUCCESS;
@@ -205,6 +218,63 @@ StatusCode NswCondTestAlg::retrieveVmm(const EventContext& ctx, const std::strin
     }
     if (!m_logName.empty()){
         std::ofstream ostr{m_logName+"_THRESH_"+tech+side+".txt"};
+        ostr<<sstr.str()<<std::endl;
+    }
+
+    auto end1 = std::chrono::high_resolution_clock::now();
+    timer += end1 - start1;
+    ATH_MSG_INFO("Ending at " << timestamp());
+    return StatusCode::SUCCESS;
+}
+
+// retrieve T0
+StatusCode NswCondTestAlg::retrieveT0(const EventContext& ctx, 
+                                       std::chrono::duration<double>& timer) const {
+    ATH_MSG_INFO("Starting to retrieve T0 values at " << timestamp());
+    auto start1 = std::chrono::high_resolution_clock::now();
+
+    // Start with an infinte range and narrow it down as needed
+    EventIDRange rangeW = IOVInfiniteRange::infiniteMixed();
+
+    // Retrieve Data Object
+    SG::ReadCondHandle<NswT0Data> readHandle{m_readKey_t0,ctx};
+    const NswT0Data* readCdo{*readHandle};
+    if (!readCdo) {
+        ATH_MSG_ERROR("Null pointer to the read conditions object");
+        return StatusCode::FAILURE;
+    }
+
+    EventIDRange range;
+    if (!readHandle.range(range)) {
+        ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandle.key());
+        return StatusCode::FAILURE;
+    }
+
+    // Intersect validity range of this obj with the validity of already-loaded objs
+    rangeW = EventIDRange::intersect(range, rangeW);
+
+    std::stringstream sstr {};
+    const MmIdHelper& id_helper = m_idHelperSvc->mmIdHelper();
+    auto it = id_helper.detectorElement_begin();
+    for(; it!= id_helper.detectorElement_end(); it++){
+        for(int i_layer=id_helper.gasGapMin(*it); i_layer <= id_helper.gasGapMax(*it); i_layer++){
+            Identifier layerId  = id_helper.channelID(*it,id_helper.multilayer(*it), i_layer,1);
+            for(int i_channel=id_helper.channelMin(layerId); i_channel <  id_helper.channelMax(layerId); i_channel++){
+                Identifier  channelId = id_helper.channelID(layerId,id_helper.multilayer(*it), i_layer, i_channel);
+                float t0{0};
+                if(!readCdo->getT0(channelId, t0)){
+                    ATH_MSG_ERROR("Failed to retrieve t0 calibration for channel"<< m_idHelperSvc->toString(channelId));
+                    return StatusCode::FAILURE;
+                }
+                if (!m_logName.empty()){
+                    sstr<<m_idHelperSvc->toString(channelId)<<" T0 "<< t0 <<std::endl;
+                }  
+            }
+        }
+    }
+    
+    if (!m_logName.empty()){
+        std::ofstream ostr{m_logName+"_T0.txt"};
         ostr<<sstr.str()<<std::endl;
     }
 
