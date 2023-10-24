@@ -24,12 +24,13 @@ void ElementModelSTGC::transform(const ParameterVector& parvec, VectorSetRef loc
   }
 
   // Apply the deformation component
-  /*
-   * old-style (reference) implementation: not optimized
-  for (int i=0; i< local.cols(); ++i) {
-    applyDeformation(parvec, local.col(i));
-  }
-  */
+  
+  // old-style (reference) implementation: not optimized, provided for comparison purposes
+  // for (int i=0; i< local.cols(); ++i) {
+  //   applyDeformation(parvec, local.col(i));
+  // }
+
+
   // Eigen-style implementation: optimized
   applyDeformation2(parvec, local);
 
@@ -44,8 +45,8 @@ void ElementModelSTGC::transform(const ParameterVector& parvec, VectorSetRef loc
 void ElementModelSTGC::cacheTransform(ParameterVector& parvec) const {
   const auto& pars = parvec.parameters;
   parvec.transformCache
-    = Eigen::Translation3d(pars[X], pars[Y]+pars[OFF], pars[Z])
-    * Eigen::AngleAxisd(pars[THZ]+pars[ROT], Eigen::Vector3d::UnitZ())
+    = Eigen::Translation3d(pars[X], pars[Y], pars[Z])
+    * Eigen::AngleAxisd(pars[THZ], Eigen::Vector3d::UnitZ())
     * Eigen::AngleAxisd(pars[THY], Eigen::Vector3d::UnitY())
     * Eigen::AngleAxisd(pars[THX], Eigen::Vector3d::UnitX());
   parvec.transformCacheValid = true;
@@ -84,25 +85,35 @@ std::string ElementModelSTGC::getParameterName(ipar_t ipar) const {
   }
 }
 
-Amg::Vector3D ElementModelSTGC::stgcScale(double scl, Amg::Vector3D d0) const {
-// Scale measured by CMM/Faro at construction sites
-  return d0.array() * Eigen::Array3d{0., scl*0.001, 0.};
+Amg::Vector3D ElementModelSTGC::stgcOffset(double off) const {
+// Offset extracted from combined fit of X-ray data and by CMM/Faro measurement at construction sites
+  return off * Amg::Vector3D::UnitY();
 }
 
-Amg::Vector3D ElementModelSTGC::stgcNonPar(double npar, Amg::Vector3D d0) const {
+Amg::Vector3D ElementModelSTGC::stgcRotation(double rot, const Amg::Vector3D& d0) const {
+// Rotation extracted from combined fit of X-ray data and by CMM/Faro measurement at construction sites
+  return -rot * d0.cross(Amg::Vector3D::UnitZ());
+}
+
+Amg::Vector3D ElementModelSTGC::stgcScale(double scl, const Amg::Vector3D& d0) const {
+// Scale measured by CMM/Faro at construction sites
+  return d0.array() * Eigen::Array3d{0., scl/m_lenY, 0.};
+}
+
+
+Amg::Vector3D ElementModelSTGC::stgcNonPar(double npar, const Amg::Vector3D& d0) const {
 // Non-parallelism measured by CMM/Faro at construction sites
-  double npar_eff = npar * d0[1]/(0.5*m_lenY);
-  constexpr double DivBy1k = 1.e-3;
-  double delta = npar_eff * d0[0]*DivBy1k;
+  double delta = npar*d0[0]*d0[1]/(m_lenY*m_lenY);
   return Amg::Vector3D(0., delta, 0.);
 }
-
 
 void ElementModelSTGC::applyDeformation(const ParameterVector& parvec, Eigen::Ref<Amg::Vector3D> local) const {
   // Applies the deformation to the set of local vectors given as argument
   // This old-style implementation is the reference implementation
   Amg::Vector3D d0 = local - m_defo0;
   local = local
+    + stgcOffset(parvec[OFF])
+    + stgcRotation(parvec[ROT], d0)
     + stgcScale(parvec[SCL], d0)
     + stgcNonPar(parvec[NPAR], d0)
     ;
@@ -116,22 +127,21 @@ void ElementModelSTGC::applyDeformation2(const ParameterVector& parvec, VectorSe
   // d0 = local - defo0
   VectorSet d0 = local.colwise() - m_defo0;
 
-  // r = {d0.x/(0.5*lenX), d0.y/(0.5*lenY), (d0.z)}
-  // r.x is (-1,+1) at X=(-0.5*lenX, 0.5*lenX), similarly for Y
-  VectorSet r = d0.array().colwise() * Eigen::Array3d{1.0/(0.5*m_lenX), 1.0/(0.5*m_lenY), 1.0};
+  double off = parvec[OFF];
+  double rot = parvec[ROT];
+  double scl = parvec[SCL]/m_lenY;
+  double npar = parvec[NPAR]/(m_lenY*m_lenY);
 
-  // p2.{x,y,z} = 1 - r.{x,y,z}^2
-  // p2.x = 1 at r.x = 0 and p2.x = 0 at r.x = +-0.5*lenX, similarly for Y
-//  VectorSet p2 = -1.0*(r.array().square().colwise() - Eigen::Array3d::Ones());
-
-  double scl = parvec[SCL];
-  double npar = parvec[NPAR];
+  // OFF:
+  local.array().colwise() += Eigen::Array3d{0. ,off, 0.};
+ 
+  // ROT
+  local.topRows<2>().array() += d0.topRows<2>().array().colwise().reverse().colwise() * Eigen::Array2d{0., rot};
 
   // SCL:
-  local.array() += d0.array().colwise() * Eigen::Array3d{0., scl*0.001, 0.};
+  local.array() += d0.array().colwise() * Eigen::Array3d{0., scl, 0.};
 
   // NPAR:
-  local.topRows<2>().array() += (d0.topRows<2>().array() * r.topRows<2>().array().colwise().reverse()).colwise() * Eigen::Array2d{0., npar*0.001};
-
+  local.topRows<2>().array() +=  (d0.topRows<2>().array().colwise().reverse() * d0.topRows<2>().array()).colwise() * Eigen::Array2d{0., npar};
 }
 

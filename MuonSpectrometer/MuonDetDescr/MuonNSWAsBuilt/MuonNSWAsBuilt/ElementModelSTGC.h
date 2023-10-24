@@ -67,17 +67,21 @@ namespace NswAsBuilt {
       // implementation, which does not make use of Eigen optimizations
       // Not actually used, provided for comparison purposes
       void applyDeformation(const ParameterVector& parvec, Eigen::Ref<Amg::Vector3D> local) const;
-      // The actual implementation: applyDeformation makes use of the Eigen
+  
+      // The actual implementation: applyDeformation2 makes use of the Eigen
       // optimizations.
       void applyDeformation2(const ParameterVector& parvec, VectorSetRef local) const;
-
-      Amg::Vector3D stgcScale(double scl, Amg::Vector3D d0) const;
-      Amg::Vector3D stgcNonPar(double npar, Amg::Vector3D d0) const;
-
+      
+      Amg::Vector3D stgcOffset(double off) const;
+      Amg::Vector3D stgcRotation(double rot, const Amg::Vector3D& d0) const;
+      Amg::Vector3D stgcScale(double scl, const Amg::Vector3D& d0) const;
+      Amg::Vector3D stgcNonPar(double npar, const Amg::Vector3D& d0) const;
+      
       // Properties and scales needed for the calculation
       double m_lenX{0.};
       double m_lenY{0.};
       Amg::Vector3D m_defo0 {Amg::Vector3D::Zero()};
+
   };
 }
 
