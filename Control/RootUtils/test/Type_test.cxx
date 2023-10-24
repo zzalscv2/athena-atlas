@@ -61,6 +61,17 @@ void testit (const RootUtils::Type& type)
   assert (v[6] == fromInt<T>(6));
   assert (v[8] == fromInt<T>(8));
 
+  type.clearRange (v.data(), 2);
+  assert (v[0] == T());
+  assert (v[1] == T());
+  assert (v[2] == fromInt<T>(2));
+  type.clearRange (v.data(), 8, 2);
+  assert (v[8] == T());
+  assert (v[9] == T());
+
+  for (size_t i = 0; i < n; i++)
+    v[i] = fromInt<T>(i);
+
   type.assign (&v[5], &v[1]);
   assert (v[5] == fromInt<T>(1));
   type.assign (v.data(), 7, v.data(), 2);
