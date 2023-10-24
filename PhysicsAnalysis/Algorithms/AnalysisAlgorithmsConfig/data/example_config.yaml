@@ -28,7 +28,7 @@ Jets:
 
 Electrons:
   - containerName: 'AnaElectrons'
-    ElectronWP:
+    WorkingPoint:
       - selectionName: 'loose'
         likelihoodWP: 'LooseBLayerLH'
         isolationWP: 'Loose_VarRad'
@@ -39,7 +39,7 @@ Electrons:
 Photons:
   - containerName: 'AnaPhotons'
     recomputeIsEM: False
-    PhotonWP:
+    WorkingPoint:
       - selectionName: 'tight'
         qualityWP: 'Tight'
         isolationWP: 'FixedCutTight'
@@ -49,7 +49,7 @@ Photons:
 
 Muons:
   - containerName: 'AnaMuons'
-    MuonWP:
+    WorkingPoint:
       - selectionName: 'medium'
         quality: 'Medium'
         isolation: 'Loose_VarRad'
@@ -57,7 +57,7 @@ Muons:
 
 TauJets:
   - containerName: 'AnaTauJets'
-    TauJetWP:
+    WorkingPoint:
       - selectionName: 'tight'
         quality: 'Tight'
     PtEtaSelection: {}
