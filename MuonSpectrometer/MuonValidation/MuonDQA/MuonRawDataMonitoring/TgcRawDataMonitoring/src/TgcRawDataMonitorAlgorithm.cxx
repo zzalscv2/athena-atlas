@@ -13,7 +13,6 @@
 namespace {
   // Cut values on pt bein exploited throughout the monitoring
   constexpr double pt_30_cut = 30. * Gaudi::Units::GeV;
-  constexpr double pt_20_cut = 20. * Gaudi::Units::GeV;
   constexpr double pt_15_cut = 15. * Gaudi::Units::GeV;
   constexpr double pt_10_cut = 10. * Gaudi::Units::GeV;
   constexpr double pt_4_cut = 4. * Gaudi::Units::GeV;
@@ -2040,7 +2039,7 @@ return (m.muon->charge()>0);
 
 	      tgcTrig.muonMatched = 0;
 	      for(const auto& ext : extpositions_pivot){
-		if(ext.muon->pt() < pt_20_cut )continue;
+		if(ext.muon->pt() < m_pTCutOnTrigExtrapolation.value() )continue;
 		if(data->isAside() && ext.extPos.z()<0)continue;
 		if(!data->isAside()&& ext.extPos.z()>0)continue;
 		if( Amg::deltaR(posOut,ext.extPos) > m_l1trigMatchWindowPt15 )continue;
@@ -3040,7 +3039,7 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoinEff(const std::string & type,
 						std::vector<Monitored::ObjectsCollection<std::vector<ExtTrigInfo>, double>>& varowner,
 						MonVariables& variables) const {
   for(const auto& ext : extpositions_pivot){
-    if(ext.muon->pt() < pt_20_cut )continue;
+    if(ext.muon->pt() < m_pTCutOnTrigExtrapolation.value() )continue;
     bool matched = false;
     bool matchedQ = false;
     bool matchedF = false;

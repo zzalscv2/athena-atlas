@@ -1,9 +1,9 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
-#include "AthAsgExUnittest/MyPackageTool.h"
-#include "../MyPackageAlg.h"
+#include "AthAsgExUnittest/AthAsgExUnittestTool.h"
+#include "../AthAsgExUnittestAlg.h"
 
-DECLARE_COMPONENT( MyPackageAlg )
-DECLARE_COMPONENT( MyPackageTool )
+DECLARE_COMPONENT( AthAsgExUnittestAlg )
+DECLARE_COMPONENT( AthAsgExUnittestTool )

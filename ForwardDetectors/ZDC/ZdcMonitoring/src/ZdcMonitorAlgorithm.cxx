@@ -139,6 +139,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     std::array<float, 2> rpdAmplitudeCalibSum = {0,0};
     std::array<float, 2> rpdMaxADCSum = {0,0};
 
+    std::array<float, m_nRpdCentroidStatusBits> centroidStatusBitsCountCurSide;
+
     if (! zdcSums.isValid() ) {
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcSumContainerKey);
        return StatusCode::SUCCESS;
@@ -164,16 +166,15 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 rpdReactionPlaneAngleCurSide = RPDreactionPlaneAngleHandle(*zdcSum);
                 
                 unsigned int rpdCentroidStatusCurSide = RPDcentroidStatusHandle(*zdcSum);
-                int rpdSubtractCentroidTool_ValidBit = 0; // to be changed into RpdSubtractCentroidTool::ValidBit soon
-                int rpdSubtractCentroidTool_ZeroSumBit = 8; // to be changed into RpdSubtractCentroidTool::ZeroSumBit soon
 
-                centroidValid = (rpdCentroidStatusCurSide & 1 << rpdSubtractCentroidTool_ValidBit);
-                bool subAmpSumCurSidePostive = (!(rpdCentroidStatusCurSide & 1 << rpdSubtractCentroidTool_ZeroSumBit));
+                centroidValid = (rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ValidBit);
+                bool subAmpSumCurSidePostive = (!(rpdCentroidStatusCurSide & 1 << ZDC::RpdSubtractCentroidTool::ZeroSumBit));
 
                 bothReactionPlaneAngleValid &= centroidValid;
                 bothSubAmpSumPositive &= subAmpSumCurSidePostive;
 
-                std::array<float, m_nRpdCentroidStatusBits> centroidStatusBitsCountCurSide;
+                
+                for (int bit = 0; bit < m_nRpdCentroidStatusBits; bit++) centroidStatusBitsCountCurSide[bit] = 0; // reset
                 for (int bit = 0; bit < m_nRpdCentroidStatusBits; bit++){
                     if (rpdCentroidStatusCurSide & 1 << bit){
                         centroidStatusBitsCountCurSide[bit] += 1;
@@ -257,6 +258,8 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
     auto zdcEMModuleEnergySameSideBelow0 = Monitored::Scalar<bool>("zdcEMModuleEnergySameSideBelow0", false);
     auto zdcEMModuleEnergySameSideBelow70 = Monitored::Scalar<bool>("zdcEMModuleEnergySameSideBelow70", false);
 
+    std::array<float, m_nZdcStatusBits> zdcStatusBitsCount;
+    std::array<float, m_nRpdStatusBits> rpdStatusBitsCount;
     
     if (! zdcModules.isValid() ) {
        ATH_MSG_WARNING("evtStore() does not contain Collection with name "<< m_ZdcModuleContainerKey);
@@ -271,7 +274,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
             int imod = zdcMod->zdcModule();
             int status = zdcModuleStatusHandle(*zdcMod);
             
-            std::array<float, m_nZdcStatusBits> zdcStatusBitsCount;
+            for (int bit = 0; bit < m_nZdcStatusBits; bit++) zdcStatusBitsCount[bit] = 0; // reset
             for (int bit = 0; bit < m_nZdcStatusBits; bit++){
                 if (status & 1 << bit){
                     zdcStatusBitsCount[bit] += 1;
@@ -313,7 +316,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
             int col = RPDcolHandle(*zdcMod);
             int status = RPDChannelStatusHandle(*zdcMod);
 
-            std::array<float, m_nRpdStatusBits> rpdStatusBitsCount;
+            for (int bit = 0; bit < m_nRpdStatusBits; bit++) rpdStatusBitsCount[bit] = 0; // reset
             for (int bit = 0; bit < m_nRpdStatusBits; bit++){
                 if (status & 1 << bit){
                     rpdStatusBitsCount[bit] += 1;

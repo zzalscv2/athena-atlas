@@ -28,6 +28,7 @@ public:
     StatusCode fillPhysicsDataHistograms( const EventContext& ctx ) const;
 
 private:
+
     // see the standalone version of the Gaudi::Property class (a wrapper in AsgTools) at
     // athena/Control/AthToolSupport/AsgTools/AsgTools/PropertyWrapper.h
     // input to constructor: owner, name, value, title = "" (by default)

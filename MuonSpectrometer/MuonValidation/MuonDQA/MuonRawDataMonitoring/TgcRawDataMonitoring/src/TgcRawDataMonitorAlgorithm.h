@@ -285,6 +285,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   BooleanProperty m_useOnlyMuidCoStacoMuons{this,"UseOnlyMuidCoStacoMuons",false,"use only MuidCo and Staco Muons"};
   BooleanProperty m_useMuonSelectorTool{this,"UseMuonSelectorTool",true,"use MuonSelectorTool"};
   DoubleProperty m_pTCutOnExtrapolation{this,"pTCutOnExtrapolation",5000.,"pT [in MeV] cut on the extrapolation tracks"};
+  DoubleProperty m_pTCutOnTrigExtrapolation{this,"pTCutOnTrigExtrapolation",20000.,"pT [in MeV] cut on the extrapolation tracks for trigger validation"};
   DoubleProperty m_M1_Z{this,"M1_Z",13436.5,"z-position of TGC M1-station in mm for track extrapolate"}; 
   DoubleProperty m_M2_Z{this,"M2_Z",14728.2,"z-position of TGC M2-station in mm for track extrapolate"};
   DoubleProperty m_M3_Z{this,"M3_Z",15148.2,"z-position of TGC M3-station in mm for track extrapolate"};

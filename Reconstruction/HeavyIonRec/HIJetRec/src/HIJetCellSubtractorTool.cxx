@@ -63,9 +63,9 @@ void HIJetCellSubtractorTool::subtract(xAOD::IParticle::FourMom_t& subtr_mom, co
   }
   //rare case E_cl==0 is also handled by setSubtractedEtaPhi
   float E_unsubtr=cl->e(HIJetRec::unsubtractedClusterState());
-  setSubtractedEtaPhi(E_cl,eta_cl,phi_cl
-,eta0,phi0,E_cl/E_unsubtr);
-  float ET_cl=E_cl/std::cosh(eta_cl);
+  float sig=(E_unsubtr!=0. ? E_cl/E_unsubtr : 0.);
+  setSubtractedEtaPhi(E_cl,eta_cl,phi_cl,eta0,phi0,sig);
+  float ET_cl=(std::abs(eta_cl)>99. ? 0. : E_cl/std::cosh(eta_cl));
   subtr_mom.SetPxPyPzE(ET_cl*std::cos(phi_cl),ET_cl*std::sin(phi_cl),ET_cl*std::sinh(eta_cl),E_cl);
 }
 
@@ -181,9 +181,9 @@ void HIJetCellSubtractorTool::subtractWithMoments(xAOD::CaloCluster* cl, const x
   }
   //rare case E_cl==0 is also handled by setSubtractedEtaPhi
   float E_unsubtr=cl->e(HIJetRec::unsubtractedClusterState());
-  setSubtractedEtaPhi(E_cl,eta_cl,phi_cl,eta0,phi0,E_cl/E_unsubtr);
-
-  float ET_cl=E_cl/std::cosh(eta_cl);
+  float sig=(E_unsubtr!=0. ? E_cl/E_unsubtr : 0.);
+  setSubtractedEtaPhi(E_cl,eta_cl,phi_cl,eta0,phi0,sig);
+  float ET_cl=(std::abs(eta_cl)>99. ? 0. : E_cl/std::cosh(eta_cl));
   xAOD::IParticle::FourMom_t subtr_mom;
   subtr_mom.SetPxPyPzE(ET_cl*std::cos(phi_cl),ET_cl*std::sin(phi_cl),ET_cl*std::sinh(eta_cl),E_cl);
   HIJetRec::setClusterP4(subtr_mom,cl,HIJetRec::subtractedClusterState());

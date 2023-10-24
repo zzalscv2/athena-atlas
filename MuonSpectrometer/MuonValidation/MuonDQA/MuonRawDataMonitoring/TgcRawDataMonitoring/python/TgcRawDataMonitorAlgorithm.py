@@ -1437,7 +1437,7 @@ if __name__=='__main__':
         flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
     if not flags.Input.isMC:
-        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-01"
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2023-02"
 
     flags.lock()
     flags.dump()
@@ -1469,6 +1469,7 @@ if __name__=='__main__':
     cfg.getEventAlgo('TgcRawDataMonAlg').TagMuonInDifferentSystem = False
     cfg.getEventAlgo('TgcRawDataMonAlg').StreamerFilter = '' # such as 'HLT_noalg_L1MU14FCH'
     cfg.getEventAlgo('TgcRawDataMonAlg').doExpressProcessing = False
+    cfg.getEventAlgo('TgcRawDataMonAlg').pTCutOnTrigExtrapolation = 20000.
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))

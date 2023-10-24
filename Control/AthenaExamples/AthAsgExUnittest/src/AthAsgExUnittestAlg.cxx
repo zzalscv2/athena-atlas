@@ -1,16 +1,16 @@
 
 //
-//  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 
-// MyPackage includes
-#include "MyPackageAlg.h"
+// AthAsgExUnittest includes
+#include "AthAsgExUnittestAlg.h"
 
-MyPackageAlg::MyPackageAlg( const std::string& name, 
+AthAsgExUnittestAlg::AthAsgExUnittestAlg( const std::string& name, 
 			    ISvcLocator* pSvcLocator ) : 
   AthAnalysisAlgorithm( name, pSvcLocator ),
   m_property( 1 ),
-  m_tool( "MyPackageTool/MyTool", this ) {
+  m_tool( "AthAsgExUnittestTool/MyTool", this ) {
   addRef(); // workaround until fix in Gaudi
   // example property declarations
   declareProperty( "MyProperty", m_property ); 
@@ -18,22 +18,22 @@ MyPackageAlg::MyPackageAlg( const std::string& name,
 }
 
 
-MyPackageAlg::~MyPackageAlg() {}
+AthAsgExUnittestAlg::~AthAsgExUnittestAlg() {}
 
 
-StatusCode MyPackageAlg::initialize() {
+StatusCode AthAsgExUnittestAlg::initialize() {
   ATH_MSG_INFO( "Initializing " << name() << "..." );
   ATH_MSG_INFO( "MyProperty = " << m_property );
   CHECK(m_tool.retrieve());
   return StatusCode::SUCCESS;
 }
 
-StatusCode MyPackageAlg::finalize() {
+StatusCode AthAsgExUnittestAlg::finalize() {
   ATH_MSG_INFO( "Finalizing " << name() << "..." );
   return StatusCode::SUCCESS;
 }
 
-StatusCode MyPackageAlg::execute() {  
+StatusCode AthAsgExUnittestAlg::execute() {  
   ATH_MSG_DEBUG( "Executing " << name() << "..." );
   setFilterPassed(false); //optional: start with algorithm not passed
 
