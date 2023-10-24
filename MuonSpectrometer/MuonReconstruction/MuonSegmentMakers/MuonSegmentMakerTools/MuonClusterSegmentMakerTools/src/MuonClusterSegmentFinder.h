@@ -189,7 +189,7 @@ namespace Muon {
                              candEvent* theEvent) const;
         void findOverlap(std::map<int, bool>& themap, candEvent* theEvent) const;
         void processSpacePoints(candEvent* theEvent, std::vector<std::vector<ClusterSeg::SpacePoint>>& sPoints) const;
-        void resolveCollections(std::map<int, bool> themap, candEvent* theEvent) const;
+        void resolveCollections(const std::map<int, bool>& themap, candEvent* theEvent) const;
         void getSegments(candEvent* theEvent, const Muon::MdtPrepDataContainer* mdtPrdCont, Trk::SegmentCollection* segColl) const;
         bool getLayerData(int sector, MuonStationIndex::DetectorRegionIndex regionIndex, MuonStationIndex::LayerIndex layerIndex,
                           const Muon::MdtPrepDataContainer* input, std::vector<const MdtPrepDataCollection*>& output) const;
