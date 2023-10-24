@@ -13,8 +13,6 @@ from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.CommonSequences import EventBuildingSequences
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from libpyeformat_helper import SubDetector, SourceIdentifier
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaCommon.Include import include
 from AthenaCommon.Logging import logging
 log = logging.getLogger('dataScoutingTest')
 
@@ -138,7 +136,6 @@ def myPebInfoWriterToolCfg(flags, name, eventBuildType):
 
     return acc
 
-
 EventBuildingSequences.pebInfoWriterToolCfg = myPebInfoWriterToolCfg
 
 # Define streams and override StreamInfo
@@ -166,11 +163,14 @@ for collectionConfig in TriggerEDMRun3.TriggerHLTListRun3:
         myTriggerHLTListRun3.append(collectionConfig)
 TriggerEDMRun3.TriggerHLTListRun3 = myTriggerHLTListRun3
 
-# Set menu flag and slice options for runHLT_standalone
-ConfigFlags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
-doEmptyMenu = True
-doEgammaSlice = True
-doMuonSlice = True
 
-# Set up everything to run HLT
-include('TriggerJobOpts/runHLT_standalone.py')  # noqa: F821
+def run(flags):
+    from TriggerJobOpts import runHLT
+    # Set and customize default flags
+    runHLT.set_flags(flags)
+    flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
+    flags.Trigger.enabledSignatures = ['Egamma','Muon']
+    flags.Trigger.doLVL1 = True
+    flags.lock()
+    acc = runHLT.runHLTCfg(flags)
+    return acc
