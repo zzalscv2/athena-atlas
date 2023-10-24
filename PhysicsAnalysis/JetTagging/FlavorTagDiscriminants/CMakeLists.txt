@@ -14,6 +14,7 @@ find_package( Boost )
 find_package( lwtnn )
 find_package( ROOT COMPONENTS Core MathCore )
 find_package( onnxruntime )
+find_package( nlohmann_json )
 
 # Build a shared library:
 atlas_add_library( FlavorTagDiscriminants
@@ -46,6 +47,7 @@ atlas_add_library( FlavorTagDiscriminants
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils
   LINK_LIBRARIES ${Boost_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
+    nlohmann_json::nlohmann_json
     AsgTools
     AthContainers
     AthLinks
