@@ -15,8 +15,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "AsgTools/StandaloneToolHandle.h"
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
 
-#include "AthAsgExUnittest/IMyPackageTool.h"
-#include "AthAsgExUnittest/MyPackageTool.h"
+#include "AthAsgExUnittest/IAthAsgExUnittestTool.h"
+#include "AthAsgExUnittest/AthAsgExUnittestTool.h"
 
 #include "GaudiKernel/IAlgManager.h"
 #include "Gaudi/Algorithm.h"
@@ -30,19 +30,19 @@ namespace Athena_test {
 
   // Tool test suite:
 
-  class MyPackageToolTest : public ::testing::Test  {
+  class AthAsgExUnittestToolTest : public ::testing::Test  {
   public:
-    MyPackageToolTest() : myTool( "MyTool" ) {}
-    ~MyPackageToolTest() {}
-    MyPackageTool myTool;
+    AthAsgExUnittestToolTest() : myTool( "MyTool" ) {}
+    ~AthAsgExUnittestToolTest() {}
+    AthAsgExUnittestTool myTool;
   };
 
   // cppcheck-suppress syntaxError
-  TEST_F( MyPackageToolTest, initialise ) {
+  TEST_F( AthAsgExUnittestToolTest, initialise ) {
     EXPECT_TRUE( myTool.initialize().isSuccess() );
   }
 
-  TEST_F( MyPackageToolTest, property ) {
+  TEST_F( AthAsgExUnittestToolTest, property ) {
     EXPECT_TRUE( myTool.setProperty( "Property", 42.0 ).isSuccess() );
     EXPECT_TRUE( myTool.initialize().isSuccess() );
     std::string prop;
@@ -50,48 +50,48 @@ namespace Athena_test {
     EXPECT_EQ( std::stod( prop ), 42.0 );
   }
 
-  TEST_F( MyPackageToolTest, enumProperty ) {
-    EXPECT_TRUE( myTool.setProperty( "EnumProperty", IMyPackageTool::Val2 ).isSuccess() );
+  TEST_F( AthAsgExUnittestToolTest, enumProperty ) {
+    EXPECT_TRUE( myTool.setProperty( "EnumProperty", IAthAsgExUnittestTool::Val2 ).isSuccess() );
     EXPECT_TRUE( myTool.initialize().isSuccess() );
     std::string prop;
     EXPECT_TRUE( myTool.getProperty( "EnumProperty", prop ).isSuccess() );
-    EXPECT_EQ( std::stoi( prop ), IMyPackageTool::Val2 );
+    EXPECT_EQ( std::stoi( prop ), IAthAsgExUnittestTool::Val2 );
   }
 
   // Algorithm test suite:
 
-  class MyPackageAlgTest : public InitGaudiGoogleTest {
+  class AthAsgExUnittestAlgTest : public InitGaudiGoogleTest {
   public:
     virtual void SetUp() override {
       // Algorithm and Tool properties via service:
       // see: Control/AthAnalysisBaseComps/AthAnalysisBaseComps/AthAnalysisHelper.h
-      EXPECT_TRUE( AthAnalysisHelper::addPropertyToCatalogue( "MyPackageAlg",
+      EXPECT_TRUE( AthAnalysisHelper::addPropertyToCatalogue( "AthAsgExUnittestAlg",
                                                               "MyProperty",
                                                               21 ).isSuccess() );
-      EXPECT_TRUE( AthAnalysisHelper::addPropertyToCatalogue( "MyPackageAlg",
+      EXPECT_TRUE( AthAnalysisHelper::addPropertyToCatalogue( "AthAsgExUnittestAlg",
                                                               "MyTool",
-                                                              "MyPackageTool/AnotherName" ).isSuccess() );
+                                                              "AthAsgExUnittestTool/AnotherName" ).isSuccess() );
       // Set property on the tool
-      EXPECT_TRUE( AthAnalysisHelper::addPropertyToCatalogue( "MyPackageAlg.AnotherName",
+      EXPECT_TRUE( AthAnalysisHelper::addPropertyToCatalogue( "AthAsgExUnittestAlg.AnotherName",
                                                               "Property",
                                                               42.0 ).isSuccess() );
       // Create instance of my algorithm through Gaudi.
       IAlgManager* algMgr = svcMgr.as< IAlgManager >();
       EXPECT_TRUE( algMgr != nullptr );
       IAlgorithm* alg = nullptr;
-      EXPECT_TRUE( algMgr->createAlgorithm( "MyPackageAlg", "MyPackageAlg",
+      EXPECT_TRUE( algMgr->createAlgorithm( "AthAsgExUnittestAlg", "AthAsgExUnittestAlg",
                                             alg ).isSuccess() );
       EXPECT_TRUE( alg != nullptr );
       myAlg = dynamic_cast< Algorithm* >( alg );
       EXPECT_TRUE( myAlg != nullptr );
     }
 
-    MyPackageTool* getMyTool() {
-      ToolHandle<IMyPackageTool> toolHandle( "", myAlg );
+    AthAsgExUnittestTool* getMyTool() {
+      ToolHandle<IAthAsgExUnittestTool> toolHandle( "", myAlg );
       toolHandle.setTypeAndName( myAlg->getProperty( "MyTool" ).toString() );
       EXPECT_TRUE( toolHandle.retrieve().isSuccess() );
-      IMyPackageTool* impt= toolHandle.get();
-      MyPackageTool* mpt= dynamic_cast<MyPackageTool*>( impt );
+      IAthAsgExUnittestTool* impt= toolHandle.get();
+      AthAsgExUnittestTool* mpt= dynamic_cast<AthAsgExUnittestTool*>( impt );
       return mpt;
     }
 
@@ -99,11 +99,11 @@ namespace Athena_test {
 
   };
 
-  TEST_F( MyPackageAlgTest, initialise ) {
+  TEST_F( AthAsgExUnittestAlgTest, initialise ) {
     EXPECT_TRUE( myAlg->initialize().isSuccess() );
   }
 
-  TEST_F( MyPackageAlgTest, setProperty ) {
+  TEST_F( AthAsgExUnittestAlgTest, setProperty ) {
     EXPECT_TRUE( myAlg->setProperty( "MyProperty", 5 ).isSuccess() );
     EXPECT_TRUE( myAlg->initialize().isSuccess() );
     std::string prop;
@@ -111,17 +111,17 @@ namespace Athena_test {
     EXPECT_EQ( prop, "5" );
   }
 
-  TEST_F( MyPackageAlgTest, sysInitialize ) {
+  TEST_F( AthAsgExUnittestAlgTest, sysInitialize ) {
     EXPECT_TRUE( myAlg->sysInitialize().isSuccess() );
     std::string prop;
     EXPECT_TRUE( myAlg->getProperty( "MyProperty", prop ).isSuccess() );
     EXPECT_EQ( std::stoi( prop ), 21 );
   }
 
-  TEST_F( MyPackageAlgTest, toolProperty ) {
+  TEST_F( AthAsgExUnittestAlgTest, toolProperty ) {
     // sysInitialize() gets properties then call initialize()
     EXPECT_TRUE( myAlg->sysInitialize().isSuccess() );
-    MyPackageTool* mpt= getMyTool();
+    AthAsgExUnittestTool* mpt= getMyTool();
     std::string prop;
     EXPECT_TRUE( mpt->getProperty( "Property", prop ).isSuccess() );
     EXPECT_EQ( std::stod( prop ), 42.0 );

@@ -1,1 +1,1 @@
-## Hook for MyPackage genConf module
+## Hook for AthAsgExUnittest genConf module
