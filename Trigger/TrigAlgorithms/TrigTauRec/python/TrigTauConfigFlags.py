@@ -9,9 +9,6 @@ def createTrigTauConfigFlags():
 
     flags.Trigger.Offline.Tau.tauRecToolsCVMFSPath = 'TrigTauRec/00-11-02'
 
-    # deprecated and should be phased out
-    flags.Trigger.Offline.Tau.CalibrateLCConfig = 'TES2016_LC_online_inc.root'
-
     flags.Trigger.Offline.Tau.MvaTESConfig = 'OnlineMvaTES_BRT_MC23a_v2.weights.root'
 
     flags.Trigger.Offline.Tau.TauJetRNNConfig = ['DeepSetID_MC23_v2_0p.json',
@@ -24,7 +21,6 @@ def createTrigTauConfigFlags():
 
     # these flags only exists in the trigger, but 'cloneAndReplace' in 'addFlagsCategory'
     # assumes a 'Trigger.Offline.Tau' structure
-    flags.addFlag("Trigger.Offline.Tau.FTFTauCoreBDTConfig", 'FTF_tauCore_BDT_v1.root')
 
     flags.addFlag("Trigger.Offline.Tau.TauJetRNNTargetEff", [ [0.98,  0.90, 0.65,  0.50],    # 0p WPs: VL, L, M, T
                                                               [0.992, 0.99, 0.97,  0.94],    # 1p WPs: VL, L, M, T
@@ -53,9 +49,9 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.RAW_RUN2
 
     flags.lock()
-    flags.Tau.CalibrateLCConfig
+    flags.Tau.MvaTESConfig
     flags.Trigger.doLVL1
     flags.dump("Tau|Trigger")
 
-    assert flags.Tau.CalibrateLCConfig != flags.Trigger.Offline.Tau.CalibrateLCConfig, "No difference between trigger customization"
+    assert flags.Tau.MvaTESConfig != flags.Trigger.Offline.Tau.MvaTESConfig, "No difference between trigger customization"
     flags.dump("Tau|Trigger")
