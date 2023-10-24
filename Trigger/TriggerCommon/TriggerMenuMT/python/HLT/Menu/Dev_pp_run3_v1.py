@@ -844,10 +844,6 @@ def getDevSignatures():
 
     ]
 
-    chains['Monitor'] = [
-       ChainProp(name='HLT_l1topodebug_legacy_L1All', l1SeedThresholds=['FSNOSEED'], stream=['L1TopoMismatches'], groups=['PS:Online', 'PS:NoHLTRepro', 'RATE:Monitoring', 'BW:Other']),
-    ]
-
     chains['UnconventionalTracking'] = [
         #Isolated High Pt Trigger Test chain for optimisation studies
         ChainProp(name='HLT_isotrk50_L1XE50', groups=UnconvTrkGroup+DevGroup, l1SeedThresholds=['FSNOSEED']),

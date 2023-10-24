@@ -16701,8 +16701,6 @@ HLT_j95_0eta290_020jvt_bgn160_pf_ftf_xe50_cell_xe85_tcpufit_L1XE55:
     0: 18
     1: 6
     2: 1
-HLT_l1topodebug_legacy_L1All:
-  eventCount: 0
 HLT_mu10_L1MU8F:
   eventCount: 10
   stepCounts:
