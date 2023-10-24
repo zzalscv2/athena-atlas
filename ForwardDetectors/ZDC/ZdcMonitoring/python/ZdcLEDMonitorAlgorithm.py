@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
@@ -122,14 +123,22 @@ if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    import sys
     directory = ''
     inputfile = 'myLEDAOD.pool.root'
     ConfigFlags.Input.Files = [directory+inputfile]
     ConfigFlags.Input.isMC = False
     ConfigFlags.Output.HISTFileName = 'ZdcLEDMonitorOutput_2018PbPb.root'
-    ConfigFlags.fillFromArgs(sys.argv[1:])
-    
+    parser = ConfigFlags.getArgumentParser()
+    parser.add_argument('--runNumber',default=None,help="specify to select a run number")
+    parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
+    args = ConfigFlags.fillFromArgs(parser=parser)
+    if args.runNumber is not None: # streamTag has default but runNumber doesn't
+        ConfigFlags.Output.HISTFileName = f'ZdcLEDMonitorOutput_HI2023_{args.runNumber}.root'
+    else:
+        ConfigFlags.Output.HISTFileName = 'ZdcLEDMonitorOutput_HI2023.root'    
+
+    if args.outputHISTFile is not None: # overwrite the output HIST file name to be match the name set in the grid job
+        ConfigFlags.Output.HISTFileName = f'{args.outputHISTFile}'
     ConfigFlags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
