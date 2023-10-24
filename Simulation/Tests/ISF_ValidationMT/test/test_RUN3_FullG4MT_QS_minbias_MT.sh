@@ -2,6 +2,7 @@
 #
 # art-description: MC23-style RUN3 simulation using FullG4MT_QS in AthenaMT
 # art-include: 23.0/Athena
+# art-include: 24.0/Athena
 # art-include: main/Athena
 # art-type: grid
 # art-athena-mt: 8
@@ -13,16 +14,16 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-01-00 and OFLCOND-MC21-SDR-RUN3-07
+# ATLAS-R3S-2021-03-02-00 and OFLCOND-MC23-SDR-RUN3-01
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:from IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"))' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC23SimulationSingleIoV' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 200 \
@@ -37,12 +38,12 @@ status=$rc
 rc2=-9999
 Sim_tf.py \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:conddb.addOverride("/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002");' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 200 \
@@ -51,12 +52,12 @@ Sim_tf.py \
 
 Sim_tf.py \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+    --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:conddb.addOverride("/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002");' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationSingleIoV.py' \
-    --geometryVersion 'default:ATLAS-R3S-2021-03-01-00' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc22_pre/valid2.900311.Epos_minbias_inelastic_lowjetphoton.evgen.EVNT.e8480/EVNT.30415957._001017.pool.root.1" \
     --outputHITSFile "test.CG.HITS.pool.root" \
     --maxEvents 200 \
