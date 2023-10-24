@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "xAODBase/IParticleContainer.h"
 #include "xAODBTagging/BTaggingContainer.h"
 #include "xAODBTagging/BTagVertexContainer.h"
@@ -166,7 +170,8 @@ auto floatAccessors = initAccessors<float>(
   "vsiHypo_nVtx", "vsiHypo_pTcut", "vsiHypo_rCut", "vsiHypo_nTrkCut", "vsiHypo_counts",
   "eProbabilityNN",
   "trk_d0","cl_eta2","cl_phi2", "deltaEta1PearDistortion",
-  "ClusterEta", "ClusterPhi"
+  "ClusterEta", "ClusterPhi",
+  "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",
