@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVKalVrtFitter/src/TrkVKalVrtFitterTestAlg.cxx
@@ -23,7 +23,7 @@
 #include  "TrkVKalVrtFitter/IVKalState.h" //unique_ptr needs the deleter
 
 #include <cassert>
-
+#include <cmath>
 
 #include "CLHEP/Vector/LorentzVector.h"
 
@@ -286,7 +286,7 @@ void compareVertex (const xAOD::Vertex& a, const xAOD::Vertex& b,
   assert (Athena_test::isEqual (a.numberDoF(), b.numberDoF(), 1e-5) );
   assert (a.covariance().size() == b.covariance().size());
   for (unsigned int i = 0; i < a.covariance().size(); i++) {
-    if (isinf(a.covariance()[i]) && isinf(b.covariance()[i])) continue;
+    if (std::isinf(a.covariance()[i]) && std::isinf(b.covariance()[i])) continue;
     assert (Athena_test::isEqual (a.covariance()[i], b.covariance()[i], 2e-2) );
   }
 

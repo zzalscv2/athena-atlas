@@ -1,8 +1,10 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GlobReco/AFP_ProtonRecoBase.h"
+#include <cmath>
+
 
 AFP_ProtonRecoBase::AFP_ProtonRecoBase (const std::string &type, const std::string &name, const IInterface *parent)
  : base_class(type, name, parent)
@@ -93,7 +95,7 @@ xAOD::AFPProton * AFP_ProtonRecoBase::createProton(const Momentum& momentum, con
 {
 
   // Return nullptr if any of momentum components is not a number
-  if ( std::any_of(begin(momentum), end(momentum), [](auto& el) { return !isfinite(el); }) )
+  if ( std::any_of(begin(momentum), end(momentum), [](auto& el) { return !std::isfinite(el); }) )
     return nullptr;
 
   const auto [px, py, pz] = momentum;

@@ -157,7 +157,7 @@ bool MMT_Hit::verifyHit() const {
    * Put here all Hit checks, probably redundant if digitization is ok
    */
   if (this->getBC() < 0.) return false;
-  else if (isinf(this->getRZSlope())) return false;
+  else if (std::isinf(this->getRZSlope())) return false;
   else if (this->getChannel() < 1 || this->getChannel() > 8192) return false;
   else return true;
 }

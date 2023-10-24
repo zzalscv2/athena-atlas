@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandFlat.h"
@@ -16,6 +16,8 @@
 
 #include "HepPDT/ParticleData.hh"
 #include "HepPDT/ParticleDataTable.hh"
+
+#include <cmath>
 
 //=============================================
 //======= TFCSHistoLateralShapeParametrization =========
@@ -39,7 +41,7 @@ void TFCSHistoLateralShapeParametrization::set_geometry(ICaloGeometry *geo) {
   if (!m_hist.get_HistoContents().empty()) {
     int first_fix_bin = -1;
     for (int i = (int)(m_hist.get_HistoContents().size() - 1); i >= 0; --i) {
-      if (isnan(m_hist.get_HistoContents()[i])) {
+      if (std::isnan(m_hist.get_HistoContents()[i])) {
         ATH_MSG_DEBUG("nan in histo content for "
                       << GetTitle() << ", bin[" << i
                       << "]=" << m_hist.get_HistoContents()[i] << " -> 1");
@@ -58,7 +60,7 @@ void TFCSHistoLateralShapeParametrization::set_geometry(ICaloGeometry *geo) {
     } else {
       int last_fix_bin = -1;
       for (size_t i = 0; i < m_hist.get_HistoContents().size(); ++i) {
-        if (isnan(m_hist.get_HistoContents()[i])) {
+        if (std::isnan(m_hist.get_HistoContents()[i])) {
           ATH_MSG_DEBUG("nan in histo content for "
                         << GetTitle() << ", bin[" << i
                         << "]=" << m_hist.get_HistoContents()[i] << " -> 0");

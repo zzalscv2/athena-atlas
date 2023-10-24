@@ -21,6 +21,8 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <cmath>
+
 
 TFCSGANEtaSlice::TFCSGANEtaSlice() {}
 
@@ -127,7 +129,7 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
         TFitResultPtr res(0);
 
         res = h1->Fit("expo", "SQ");
-        if (res >= 0 && !isnan(res->Parameter(0))) {
+        if (res >= 0 && !std::isnan(res->Parameter(0))) {
           result = res->Parameter(1);
         }
       }

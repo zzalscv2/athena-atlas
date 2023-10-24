@@ -23,7 +23,7 @@
 #include "TestTools/FLOATassert.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include <cassert>
-
+#include <cmath>
 
 #include "CLHEP/Vector/LorentzVector.h"
 
@@ -221,7 +221,7 @@ void compareVertex (const xAOD::Vertex& a, const xAOD::Vertex& b)
 
   assert (a.covariance().size() == b.covariance().size());
   for (unsigned int i = 0; i < a.covariance().size(); i++) {
-    if (isinf(a.covariance()[i]) && isinf(b.covariance()[i])) continue;
+    if (std::isinf(a.covariance()[i]) && std::isinf(b.covariance()[i])) continue;
     assert (Athena_test::isEqual (a.covariance()[i], b.covariance()[i], 2e-2) );
   }
 }

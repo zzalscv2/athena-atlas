@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -18,7 +18,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 
 #include <algorithm>
-//#include <math.h>
+#include <cmath>
 
 namespace Trk
 {
@@ -89,7 +89,7 @@ namespace Trk
     for (std::vector<const Trk::Track*>::const_iterator iter=begin;
 	 iter!=end;++iter)
     {
-      if (isnan((*iter)->perigeeParameters()->parameters()[Trk::d0]))
+      if (std::isnan((*iter)->perigeeParameters()->parameters()[Trk::d0]))
       {
 	continue;
       }
