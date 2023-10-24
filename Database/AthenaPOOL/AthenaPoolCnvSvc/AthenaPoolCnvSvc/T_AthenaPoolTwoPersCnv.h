@@ -68,13 +68,13 @@ protected:
       return BaseCnv::DataObjectToPool( pAddr, pObj );
    }
    
-   /// standard user-supplied methods to create TRANS and PERS representattions
+   /// standard user-supplied methods to create TRANS and PERS representations
    virtual TRANS*       createTransient () override = 0;
    virtual PERS*        createPersistent( TRANS* ) override = 0;
 
    /// additional user-supplied method that creates PERSOLD representation 
    virtual PERSOLD*     createOldPersistent( TRANS* ) = 0;
-   /// user-supplied method that makes this converter write PERS repr. if true or PERSOLD if false
+   /// user-supplied method that makes this converter write PERS if False or PERSOLD if True
    /// in the current Athena configuration for Event data layout it should returned
    /// a fixed value throughout the whole job
    virtual bool         writeOldPers() = 0; 
