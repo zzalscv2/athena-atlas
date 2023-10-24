@@ -10,6 +10,28 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+
+def calibCosmicMonSignatures():
+    return ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
+
+def combinedSignatures():
+    return ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking','HeavyIon']
+
+def jointSignatures():
+    return ['Bjet', 'Egamma']
+
+def defaultSignatures():
+    return ['Streaming']
+
+def testSignatures():
+    return ['Test']
+
+def bphysicsSignatures():
+    return ['Bphysics']
+
+def allSignatures():
+    return set(calibCosmicMonSignatures() + combinedSignatures() + jointSignatures() + bphysicsSignatures() + defaultSignatures() + testSignatures())
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
@@ -22,18 +44,13 @@ class Singleton(type):
 class GenerateMenuMT(object, metaclass=Singleton):
 
     # Applicable to all menu instances
-    calibCosmicMonSigs = ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
-    combinedSigs = ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking','HeavyIon']
-    defaultSigs = ['Streaming']  # for noalg chains
+    calibCosmicMonSigs = calibCosmicMonSignatures()
+    combinedSigs = combinedSignatures()
+    defaultSigs = defaultSignatures()  # for noalg chains
 
     # Define which signatures (folders) are required for each slice
     def getRequiredSignatures(theslice):
-        # All possible signatures
-        allSigs = [
-            'Test','Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias',
-            'Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','Bphysics',
-            'MinBias','UnconventionalTracking', 'HeavyIon'
-        ]
+        allSigs = allSignatures()
         signatureDeps = {sig:[sig] for sig in allSigs}
         # Special cases
         signatureDeps.update({
@@ -43,7 +60,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             'Egamma': ['Electron','Photon'],
             'Combined': GenerateMenuMT.combinedSigs,
         })
-        return set(signatureDeps[theslice]+['Streaming']) # always allow streamers
+        return set(signatureDeps[theslice]+GenerateMenuMT.defaultSigs) # always allow streamers
 
     def __init__(self):
         self.chainsInMenu = {}  # signature : [chains]

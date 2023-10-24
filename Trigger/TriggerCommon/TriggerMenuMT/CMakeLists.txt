@@ -120,7 +120,7 @@ endfunction()
 
 # test for CA menu
 atlas_test_ca_trigger_menu( Dev_pp_run3_v1 )
-atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.L1.doAlfaCtpin=True )
+atlas_test_ca_trigger_menu( PhysicsP1_pp_lowMu_run3_v1 Trigger.L1.doAlfaCtpin=True Trigger.disabledSignatures=["Cosmics"] )
 atlas_test_ca_trigger_menu( Dev_HI_run3_v1 Trigger.L1.doAlfaCtpin=True )
 
 # test for menu name consistency
