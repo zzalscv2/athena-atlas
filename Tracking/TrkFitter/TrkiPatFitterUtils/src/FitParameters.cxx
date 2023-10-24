@@ -635,54 +635,16 @@ TrackParameters* FitParameters::trackParameters(
     theta = M_PI - theta;
   }
 
-  // finally can create the appropriate 'concrete' TrackParameters
-  TrackParameters* parameters = nullptr;
-  const StraightLineSurface* line =
-      dynamic_cast<const StraightLineSurface*>(measurement.surface());
-  if (line) {
-    parameters =
-        new AtaStraightLine(localPos[locR], localPos[locZ], phi, theta,
-                            measurement.qOverP(), *line, std::move(covMatrix));
-    return parameters;
+  if (!measurement.surface()) {
+    log << MSG::WARNING
+        << "FitParameters::trackParameters - unrecognized surface" << endmsg;
+    return nullptr;
   }
-
-  const PlaneSurface* plane =
-      dynamic_cast<const PlaneSurface*>(measurement.surface());
-  if (plane) {
-    parameters =
-        new AtaPlane(localPos[locR], localPos[locZ], phi, theta,
-                     measurement.qOverP(), *plane, std::move(covMatrix));
-    return parameters;
-  }
-
-  const CylinderSurface* cylinder =
-      dynamic_cast<const CylinderSurface*>(measurement.surface());
-  if (cylinder) {
-    parameters =
-        new AtaCylinder(localPos[locR], localPos[locZ], phi, theta,
-                        measurement.qOverP(), *cylinder, std::move(covMatrix));
-    return parameters;
-  }
-
-  const DiscSurface* disc =
-      dynamic_cast<const DiscSurface*>(measurement.surface());
-  if (disc) {
-    parameters = new AtaDisc(localPos[locR], localPos[locZ], phi, theta,
-                             measurement.qOverP(), *disc, std::move(covMatrix));
-    return parameters;
-  }
-
-  const PerigeeSurface* peri =
-      dynamic_cast<const PerigeeSurface*>(measurement.surface());
-  if (peri) {
-    parameters = new Perigee(localPos[locR], localPos[locZ], phi, theta,
-                             measurement.qOverP(), *peri, std::move(covMatrix));
-    return parameters;
-  }
-
-  log << MSG::WARNING << "FitParameters::trackParameters - unrecognized surface"
-      << endmsg;
-  return nullptr;
+  // finally can create the appropriate TrackParameters based on the surface
+  return measurement.surface()
+      ->createUniqueTrackParameters(localPos[locR], localPos[locZ], phi, theta,
+                                    measurement.qOverP(), std::move(covMatrix))
+      .release();
 }
 
 void FitParameters::update(const Amg::VectorX& differences) {
