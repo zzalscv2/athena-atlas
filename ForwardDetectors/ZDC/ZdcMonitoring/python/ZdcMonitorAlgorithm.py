@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
@@ -250,7 +251,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
                             ybins=n_time_centroid_bins_default,ymin=-10.0,ymax=10.0)
 
     zdcSideMonToolArr.defineHistogram('centroidStatusBits',title=';;Events',
-                            xbins=18,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
+                            xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
                             xlabels=['ValidBit', 'ZDCValidBit', 'RPDValidBit', 'MinimumZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'PileupBit', 'ExcessivePileupBit', 'SubtrUnderflowBit', 'ZeroSumBit', 'ZeroSumRow0Bit', 'ZeroSumRow1Bit', 'ZeroSumRow2Bit', 'ZeroSumRow3Bit', 'ZeroSumCol0Bit', 'ZeroSumCol1Bit', 'ZeroSumCol2Bit', 'ZeroSumCol3Bit'])
 
     zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
@@ -309,7 +310,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     zdcModuleMonToolArr = helper.addArray([nSides,nModules],zdcMonAlg,'ZdcModuleMonitor')
 
     zdcModuleMonToolArr.defineHistogram('zdcStatusBits',title=';;Events',
-                            xbins=18,xmin=0.0,xmax=nZdcStatusBits,opt='kVec',
+                            xbins=nZdcStatusBits,xmin=0.0,xmax=nZdcStatusBits,opt='kVec',
                             xlabels=['PulseBit', 'LowGainBit', 'FailBit', 'HGOverflowBit', 'HGUnderflowBit', 'PSHGOverUnderflowBit', 'LGOverflowBit', 'LGUnderflowBit', 'PrePulseBit', 'PostPulseBit', 'FitFailedBit', 'BadChisqBit', 'BadT0Bit', 'ExcludeEarlyLGBit', 'ExcludeLateLGBit', 'preExpTailBit', 'FitMinAmpBit', 'RepassPulseBit'])
 
 
@@ -468,11 +469,15 @@ if __name__=='__main__':
     parser = ConfigFlags.getArgumentParser()
     parser.add_argument('--runNumber',default=None,help="specify to select a run number")
     parser.add_argument('--streamTag',default="ZDCCalib",help="ZDCCalib or MinBias")
+    parser.add_argument('--outputHISTFile',default=None,help="specify output HIST file name")
     args = ConfigFlags.fillFromArgs(parser=parser)
     if args.runNumber is not None: # streamTag has default but runNumber doesn't
         ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}_{args.runNumber}.root'
     else:
         ConfigFlags.Output.HISTFileName = f'ZdcMonitorOutput_HI2023_{args.streamTag}.root'    
+    
+    if args.outputHISTFile is not None: # overwrite the output HIST file name to be match the name set in the grid job
+        ConfigFlags.Output.HISTFileName = f'{args.outputHISTFile}'
     ConfigFlags.lock()
 
     print('Output', ConfigFlags.Output.HISTFileName)
