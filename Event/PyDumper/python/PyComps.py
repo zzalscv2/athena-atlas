@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # @file:    PyDumper/python/PyComps.py
 # @purpose: A set of PyAthena components to test reading/writing EDM classes
@@ -42,6 +42,9 @@ def _decode_item_list(lst, msg):
                     msg.error(err)
                     raise ValueError(err)
                 items.append(item)
+            elif isinstance(i, str) and i.count('#')==0:
+                # (type, key)
+                items.append ((None, i))
             elif (isinstance(i, tuple) and len(i)==2 and 
                   isinstance(i[0], str) and 
                   isinstance(i[1], str)):
