@@ -1135,6 +1135,7 @@ void MaterialAllocator::indetMaterial(
   Amg::Vector3D startDirection = startParameters.momentum().unit();
   Amg::Vector3D startPosition = startParameters.position();
   const TrackParameters* parameters = &startParameters;
+  std::unique_ptr<AtaPlane> newParameters;
 
   std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
   if ((**m).isVertex())
@@ -1145,8 +1146,6 @@ void MaterialAllocator::indetMaterial(
     if (m_indetVolume->inside((**m).position())) {
       // quit if pre-existing indet material
       if ((**m).isScatterer()) {
-        if (parameters != &startParameters)
-          delete parameters;  // parameters was 'newed'
         return;
       }
 
@@ -1194,11 +1193,10 @@ void MaterialAllocator::indetMaterial(
         if (intersection &&
             plane.globalToLocal(intersection->position(),
                                 intersection->direction(), localPos)) {
-          if (parameters != &startParameters)
-            delete parameters;  // parameters was 'newed' already
-          parameters = new AtaPlane(
+          newParameters = std::make_unique<AtaPlane>(
               localPos[locR], localPos[locZ], intersection->direction().phi(),
               intersection->direction().theta(), qOverP, plane);
+          parameters = newParameters.get();
           startDirection = intersection->direction();
           startPosition = intersection->position();
         }
@@ -1217,8 +1215,6 @@ void MaterialAllocator::indetMaterial(
     }
   }
   if (!endIndetMeasurement) {
-    if (parameters != &startParameters)
-      delete parameters;
     return;
   }
 
@@ -1237,8 +1233,6 @@ void MaterialAllocator::indetMaterial(
                            *endIndetMeasurement->surface(), alongMomentum,
                            false, particleHypothesis, garbage);
 
-  if (parameters != &startParameters)
-    delete parameters;
   if (!indetMaterial || indetMaterial->empty()) {
     deleteMaterial(indetMaterial, garbage);
     return;
