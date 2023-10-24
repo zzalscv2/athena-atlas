@@ -30,6 +30,13 @@ def generateDefaultMonitoringJSON(flags):
                                   HLTMenuConfig.dictsList(), 
                                   getHLTMonitoringFileName(flags))
 
+def generateDefaultMonitoringJSON_newJO(flags, chainDicts):
+    __log.info("Generating HLT Monitoring JSON in the new JO")
+
+    return generateMonitoringJSON(flags.Trigger.triggerMenuSetup,
+                                  chainDicts,
+                                  getHLTMonitoringFileName(flags))
+
 def generateMonitoringJSON(menuName, chainDicts, fileName):
 
     #create a summary file 

@@ -136,6 +136,9 @@ def makeHLTTree(flags):
     from TriggerMenuMT.HLT.Config.JSON.HLTPrescaleJSON import generateJSON_newJO as generatePrescaleJSON_newJO
     generatePrescaleJSON_newJO(flags, HLTMenuConfig.dictsList(), HLTMenuConfig.configsList())
 
+    from TriggerMenuMT.HLT.Config.JSON.HLTMonitoringJSON import generateDefaultMonitoringJSON_newJO
+    generateDefaultMonitoringJSON_newJO(flags, HLTMenuConfig.dictsList())
+
     from AthenaCommon.CFElements import checkSequenceConsistency 
     checkSequenceConsistency(steps)
     return acc
