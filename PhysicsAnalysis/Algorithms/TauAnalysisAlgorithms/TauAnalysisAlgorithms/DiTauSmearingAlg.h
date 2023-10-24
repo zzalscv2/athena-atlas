@@ -4,9 +4,7 @@
 
 /// @author Nils Krumnack
 
-
-// TODO: re-enable when IDiTauSmearingTool is available
-#ifdef TAU_ANALYSIS_ALGORITHMS__DI_TAU_CALIBRATION_AND_SMEARING_ALG_H
+#ifndef TAU_ANALYSIS_ALGORITHMS__DI_TAU_CALIBRATION_AND_SMEARING_ALG_H
 #define TAU_ANALYSIS_ALGORITHMS__DI_TAU_CALIBRATION_AND_SMEARING_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
