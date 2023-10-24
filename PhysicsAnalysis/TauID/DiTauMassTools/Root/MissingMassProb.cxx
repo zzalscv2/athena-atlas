@@ -8,6 +8,7 @@
 // Local include(s):
 #include "DiTauMassTools/MissingMassProb.h"
 #include "PathResolver/PathResolver.h"
+#include <cmath>
 
 using namespace DiTauMassTools;
 
@@ -106,7 +107,7 @@ double MissingMassProb::dTheta3d_probabilityNewWrapper( MissingMassProb* prob, M
     Prob*=prob_tmp;
   }
   // very rare cases where parametrisation flips
-  if (isnan(Prob)) Prob = 0.;
+  if (std::isnan(Prob)) Prob = 0.;
   return Prob;
 }
 
@@ -120,7 +121,7 @@ double MissingMassProb::TauProbabilityNewWrapper( MissingMassProb* prob, Missing
   Prob*=prob->GetFormulaRatio1()->Eval(R1);
   Prob*=prob->GetFormulaRatio2()->Eval(R2);
   // not observed, just a protection
-  if (isnan(Prob)) Prob = 0.;
+  if (std::isnan(Prob)) Prob = 0.;
   return Prob;
 }
 
@@ -137,7 +138,7 @@ double MissingMassProb::MnuProbabilityNewWrapper( MissingMassProb* prob, Missing
     }
   }
   // not observed, just a protection
-  if (isnan(Prob)) Prob = 0.;
+  if (std::isnan(Prob)) Prob = 0.;
   return Prob;
 }
 
