@@ -23,6 +23,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
         self.addOption ('isolationCorrection', False, type=bool)
         self.addOption ('trackSelection', True, type=bool)
         self.addOption ('recalibratePhyslite', True, type=bool)
+        self.addOption ('minPt', 4.5e3, type=float)
 
 
 
@@ -87,15 +88,16 @@ class ElectronCalibrationConfig (ConfigBlock) :
         if config.isPhyslite() and not self.recalibratePhyslite :
             alg.skipNominal = True
 
-        # Set up the the pt selection
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' + self.postfix )
-        alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
-        config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.minPt = 4.5e3
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             preselection=self.ptSelectionOutput)
+        if self.minPt > 0 :
+            # Set up the the pt selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronPtCutAlg' + self.postfix )
+            alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+            alg.selectionTool.minPt = self.minPt
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                preselection=self.ptSelectionOutput)
 
         # Set up the isolation correction algorithm:
         if self.isolationCorrection:
