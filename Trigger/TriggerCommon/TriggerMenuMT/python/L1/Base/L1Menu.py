@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from .CTP import CTP
 from .Items import MenuItemsCollection
@@ -21,14 +21,15 @@ class L1Menu(object):
     This class holds everything that is needed to define the menu
     """
 
-    def __init__(self, menuName, do_alfa=False, do_HI_tob_thresholds=False):
+    def __init__(self, menuName, flags):
         self.menuName = menuName
 
         # items in menu
         self.items = MenuItemsCollection()
         
         # all thresholds that are in menu (new and legacy)
-        self.thresholds = MenuThresholdsCollection(do_HI_tob_thresholds)
+        self.do_HI_tob_thresholds = flags.Trigger.L1.doHeavyIonTobThresholds
+        self.thresholds = MenuThresholdsCollection(self.do_HI_tob_thresholds)
 
         # all thresholds that are in menu (new and legacy)
         self.topoAlgos = MenuTopoAlgorithmsCollection()
@@ -40,10 +41,8 @@ class L1Menu(object):
         self.boards = MenuBoardsCollection()
 
         # CTP Info in the menu
-        self.ctp = CTP(do_alfa)
+        self.ctp = CTP(do_alfa = flags.Trigger.L1.doAlfaCtpin)
 
-        self.do_HI_tob_thresholds = do_HI_tob_thresholds
-        
         if self.menuName:
             smk_psk_Name = get_smk_psk_Name(self.menuName)
             self.items.menuName = smk_psk_Name["smkName"]

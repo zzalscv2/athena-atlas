@@ -197,11 +197,7 @@ def generateL1Menu( flags ):
 
     log.info("Generating L1 menu %s", flags.Trigger.triggerMenuSetup)
     from TriggerMenuMT.L1.L1MenuConfig import L1MenuConfig
-    l1cfg = L1MenuConfig(
-        menuName = flags.Trigger.triggerMenuSetup,
-        do_alfa = flags.Trigger.L1.doAlfaCtpin,
-        do_HI_tob_thresholds = flags.Trigger.L1.doHeavyIonTobThresholds,
-    )
+    l1cfg = L1MenuConfig(flags)
     l1cfg.writeJSON(outputFile    = getL1MenuFileName(flags),
                     bgsOutputFile = getBunchGroupSetFileName(flags))
 
