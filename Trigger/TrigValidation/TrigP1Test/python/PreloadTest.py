@@ -1,14 +1,21 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigValTools.TrigValSteering import Input, ExecStep, PyStep, Test
 from TrigP1Test import TrigP1TestSteps
 from contextlib import suppress
+import eformat
 import json
 import os
 
 
 def test_trigP1_preload(menu):
     """Fully configured _preload test for given menu"""
+
+    # Get run/LB number from input file
+    input_file = Input.get_input('data').paths[0]
+    first_event = eformat.istream(input_file)[0]
+    run = first_event.run_no()
+    lb = first_event.lumi_block()
 
     # 1) Delete any previous bytestream file
     def cleanup():
@@ -22,14 +29,16 @@ def test_trigP1_preload(menu):
     ex_bs.type = 'other'
     ex_bs.input = ''
     ex_bs.executable = 'trigbs_modifyEvent.py'
-    ex_bs.args = '-n 50 --runNumber 999999 --incLB 6 --firstLB 4 --eventsPerLB=3 -o raw %s' % Input.get_input('data').paths[0]
+    ex_bs.args = '-n 50 --runNumber 999999 --incLB 6 --firstLB 4 --eventsPerLB=3 -o raw %s' % input_file
 
     # 3) Create configuration JSON based on original data file
     ex_dump = ExecStep.ExecStep('dump-config')
     ex_dump.type = 'athenaHLT'
-    ex_dump.job_options = 'TriggerJobOpts/runHLT_standalone.py'
+    ex_dump.job_options = 'TriggerJobOpts.runHLT'
     ex_dump.input = 'data'
-    ex_dump.args = f'-M --dump-config-exit -c "setMenu=\'{menu}\';forceConditions=True;forceAFPLinkNum=True;"'
+    ex_dump.args = '-M --dump-config-exit'
+    ex_dump.args += f' -C "from TriggerJobOpts import PostExec; PostExec.forceConditions({run},{lb})"'
+    ex_dump.flags = [f'Trigger.triggerMenuSetup="{menu}"']
     ex_dump.perfmon = False
 
     # 4) Fix the Json produced in the previous step
@@ -40,7 +49,7 @@ def test_trigP1_preload(menu):
           cfg = json.load(f)
 
        cfg['properties']['IOVDbSvc']['Folders'] = cfg['properties']['IOVDbSvc']['Folders'].replace(
-          '/TRIGGER/HLT/PrescaleKey','/TRIGGER/HLT/PrescaleKey<forceRunNumber>360026</forceRunNumber>')
+          '/TRIGGER/HLT/PrescaleKey',f'/TRIGGER/HLT/PrescaleKey<forceRunNumber>{run}</forceRunNumber>')
 
        with open('HLTJobOptions.fixPS.json','w') as f:
           json.dump(cfg, f)
@@ -59,6 +68,7 @@ def test_trigP1_preload(menu):
     ex.args += ' HLTJobOptions.fixPS.json'
     ex.perfmon = False  # Cannot use PerfMon with -M
 
+    # Checks
     test = Test.Test()
     test.art_type = 'build'
     test.exec_steps = [ex_rm, ex_bs, ex_dump, ex_fix, ex]
