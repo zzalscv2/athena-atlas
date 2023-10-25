@@ -149,6 +149,7 @@ def BarrelFEI3SimToolCfg(flags, name="BarrelFEI3SimTool", **kwargs):
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
+    kwargs.setdefault("HitDuplication", (flags.GeoModel.Run is LHCPeriod.Run1))
     FEI3SimTool = CompFactory.FEI3SimTool
     acc.setPrivateTools(FEI3SimTool(name, **kwargs))
     return acc
@@ -166,6 +167,7 @@ def EndcapFEI3SimToolCfg(flags, name="EndcapFEI3SimTool", **kwargs):
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)))
+    kwargs.setdefault("HitDuplication", (flags.GeoModel.Run is LHCPeriod.Run1))
     FEI3SimTool = CompFactory.FEI3SimTool
     acc.setPrivateTools(FEI3SimTool(name, **kwargs))
     return acc
