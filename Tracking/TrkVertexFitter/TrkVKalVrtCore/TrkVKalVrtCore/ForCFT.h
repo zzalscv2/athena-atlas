@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCore_ForCFT_H
@@ -9,7 +9,7 @@
 
 namespace Trk {
 
-  struct ForCFT 
+  struct ForCFT
   {
 //
     int useMassCnst;
@@ -26,14 +26,14 @@ namespace Trk {
     double wm[vkalNTrkM];
     double wmfit[vkalMaxNMassCnst];
     double localbmag;
-// Since 20/09/2009 - Vertex in plane constraint 
+// Since 20/09/2009 - Vertex in plane constraint
     double Ap,Bp,Cp,Dp;
 
 //
 // Vertex, covariance and it's weight (inverse covariance)
 // Used for pointing and a priori vertex constraints
-// Since 15/03/2009: 
-//    For "passing near" vrt+covvrt+charge from ForVrtClose structure is used. 
+// Since 15/03/2009:
+//    For "passing near" vrt+covvrt+charge from ForVrtClose structure is used.
 //    For pointing cnst vertex from constraint object itself is used
 //---------------------------------------------------------------------------
     double vrt[3], covvrt[6], wgtvrt[6];
@@ -46,8 +46,8 @@ namespace Trk {
     int indtrkmc[vkalMaxNMassCnst][vkalNTrkM];
     int IterationNumber;
     double IterationPrecision;
- 
-    void prcfit( long int ntrk, double  *wm, double  *wmfit, double  bmag, const double  *vrt, const double  *vrte) noexcept;
+
+    void prcfit( long int ntrk, double  *wm, const double  *wmfit, double  bmag, const double  *vrt, const double  *vrte) noexcept;
 
     void vksetIterationNum(long int Iter) noexcept;
     void vksetIterationPrec(double Prec) noexcept;

@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/VKvFast.h"
 #include "TrkVKalVrtCore/CommonPars.h"
+#include "TrkVKalVrtCore/cfMomentum.h"
 #include <cmath>
 
 namespace Trk {
@@ -23,12 +25,9 @@ void vkvfast_(double *p1, double *p2, const double *dbmag, double *out)
 
 double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double *out)
 {
-    extern void vkPerigeeToP( const double*, double*, double );
     double d__1;
-
     double diff, coef, cent1[2], cent2[2], angle, cross[6];/* was [3][2] */
     double r1, r2, z1, z2, a01[3], a02[3], dc, an[2];
-    extern double vkvang_(double *, double *, const double *, const double *, const double *);
     double ar1, ar2, xd1, xd2, yd1, yd2, dz1, dz2, pt1, pt2, pz1, pz2, det;
     double loc_bmag;
 
@@ -43,7 +42,7 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
 
     /* Function Body */
     loc_bmag = dbmag;
-    if (dbmag <= .1) {loc_bmag = 0.1;}  // To avoid ZERO magnetic field 
+    if (dbmag <= .1) {loc_bmag = 0.1;}  // To avoid ZERO magnetic field
 /* ---- */
     double psum[3]={0.,0.,0.}; double ptmp[3]={0.,0.,0.};
     vkPerigeeToP(&p1[3],ptmp,loc_bmag); psum[0]+=ptmp[0];psum[1]+=ptmp[1];psum[2]+=ptmp[2];
@@ -51,8 +50,8 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
 /*------*/
     r1 = 1. / p1[5];
     r2 = 1. / p2[5];
-    ar1 = fabs(r1);
-    ar2 = fabs(r2);
+    ar1 = std::abs(r1);
+    ar2 = std::abs(r2);
 //    pt1 = ar1 * loc_bmag * .00299979; // For GeV and CM
 //    pt2 = ar2 * loc_bmag * .00299979;
 //    pt1 = ar1 * loc_bmag * .299979;  // For MeV and MM
@@ -86,7 +85,7 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
     an[0] /= dc;
     an[1] /= dc;
 /* -- Single point*/
-    if (dc <= fabs(ar1 - ar2)) {
+    if (dc <= std::abs(ar1 - ar2)) {
 	if (ar1 < ar2) {
 	    cross_ref(1, 1) = ar1 / dc * (cent1[0] - cent2[0]) + cent1[0];
 	    cross_ref(1, 2) = ar2 / dc * (cent1[0] - cent2[0]) + cent2[0];
@@ -102,7 +101,7 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
 	z1 = pz1 * r1 * angle / pt1 + a01[2];
 	angle = vkvang_(&cross_ref(1, 2), cent2, &r2, &xd2, &yd2);
 	z2 = pz2 * r2 * angle / pt2 + a02[2];
-	//diffz = fabs(z2 - z1);
+	//diffz = std::abs(z2 - z1);
 	out[1] = (cross_ref(1, 1) + cross_ref(1, 2)) / 2.;
 	out[2] = (cross_ref(2, 1) + cross_ref(2, 2)) / 2.;
 	out[3] = (z1 + z2) / 2.;
@@ -130,17 +129,17 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
 	z1 = pz1 * r1 * angle / pt1 + a01[2];
 	angle = vkvang_(&cross_ref(1, 1), cent2, &r2, &xd2, &yd2);
 	z2 = pz2 * r2 * angle / pt2 + a02[2];
-	dz1 = fabs(z2 - z1);
+	dz1 = std::abs(z2 - z1);
 	cross_ref(3, 1) = (z1 + z2) / 2.;
 /* -Second cross */
 	angle = vkvang_(&cross_ref(1, 2), cent1, &r1, &xd1, &yd1);
 	z1 = pz1 * r1 * angle / pt1 + a01[2];
 	angle = vkvang_(&cross_ref(1, 2), cent2, &r2, &xd2, &yd2);
 	z2 = pz2 * r2 * angle / pt2 + a02[2];
-	dz2 = fabs(z2 - z1);
+	dz2 = std::abs(z2 - z1);
 	cross_ref(3, 2) = (z1 + z2) / 2.;
 /* if reterence vertex is present  -> check 2D mom direction -> must be avay from it*/
-        if(vRef && fabs(dz1-dz2)<5.){
+        if(vRef && std::abs(dz1-dz2)<5.){
           double dir1=ptmp[0]*(cross_ref(1,1)-vRef[0])+ptmp[1]*(cross_ref(2,1)-vRef[1]);
           double dir2=ptmp[0]*(cross_ref(1,2)-vRef[0])+ptmp[1]*(cross_ref(2,2)-vRef[1]);
           if(dir1*dir2<0){   // points are on different sides of ref. vertex
@@ -177,7 +176,7 @@ double vkvFastV(double *p1, double *p2, const double* vRef, double dbmag, double
 	bestZdiff = std::abs(z1 - z2);
     }
     return bestZdiff;
-} 
+}
 #undef cross_ref
 
 
@@ -198,7 +197,7 @@ double vkvang_(double *crs, double *centr, const double *r__, const double *xd, 
 /* scalar prod. */
     ret_val = atan2(sinp, cosp);
     return ret_val;
-} 
+}
 
 
 } /* End of VKalVrtCore namespace */

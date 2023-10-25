@@ -1,22 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/RobTest.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
+#include "TrkVKalVrtCore/Matrix.h"
 #include <cmath>
 #include <iostream>
 #include <vector>
 
 namespace Trk {
 
- 
-extern void vkGetEigVect(const double ci[], double d[], double vect[], int n);
-
-void robtest(VKVertex * vk, int ifl, int nIteration=10)
+void robtest(VKVertex * vk, int ifl, int nIteration/*=10*/)
 {
     long int i, j, k, kk, it;
     double rob, res, c[5], darg, absX, roba[5];
- 
+
 /* ------------------------------------------------------------ */
 /*  Robustification procedure for weight matrix */
 /*  IROB  = 0  - Standard chi^2 */
@@ -81,7 +80,7 @@ void robtest(VKVertex * vk, int ifl, int nIteration=10)
 	  if(irob == 4)rob = 4.*(sqrt(darg / 2. + 1.) - 1.)/darg;                  /* L1-L2 */
 	  if(irob == 5)rob = 2.*C2*(absX/C - log(absX/C + 1.))/darg;               /* Fair */
 	  if(irob == 6)rob = C>absX ? 1. : (2*C/absX - C*C/darg) ;                 /* Huber */
-	  if(irob == 7)rob = halfPi>(absX/C) ? 2*C*C*(1-cos(absX/C))/darg : 
+	  if(irob == 7)rob = halfPi>(absX/C) ? 2*C*C*(1-cos(absX/C))/darg :
                                                2*(C*absX+C*C*(1.-halfPi))/darg;    /* Modified Huber */
           roba[k] = rob;
           if(rob>0.99)roba[k] = 1.; //To improve precision
@@ -101,7 +100,7 @@ void robtest(VKVertex * vk, int ifl, int nIteration=10)
 	vk->vk_fitterControl->vk_forcft.robres[it] = roba[0] * roba[1] * roba[2] * roba[3] * roba[4];
 	if(vk->vk_fitterControl->vk_forcft.robres[it]>1.)vk->vk_fitterControl->vk_forcft.robres[it]=1.;
     }
-} 
+}
 
 
 } /* End of namespace */

@@ -6,17 +6,12 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
+#include "TrkVKalVrtCore/cfImp.h"
 //-------------------------------------------------
 //
 #include<iostream>
 
-namespace Trk {
- extern   
-  void cfimp(long int TrkID, long int  ICH, int IFL, double* PAR, const double* ERR,
-              double* VRT, double* VCOV,
-	      double* RIMP, double* RCOV, double*  SIGN, VKalVrtControlBase * FitCONTROL );
 
-}
 //
 //__________________________________________________________________________
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -55,12 +50,12 @@ namespace Trk{
     //
     //------  extract information about selected tracks
     //
-    int ntrk=0; 
+    int ntrk=0;
     StatusCode sc = CvtPerigee(InpPerigeeList, ntrk, state);
     if(sc.isFailure() || ntrk != 1) {    //Something is wrong in conversion
         Impact.assign(5,1.e10);
         ImpactError.assign(3,1.e20);
-        return 1.e10; 
+        return 1.e10;
      }
     long int vkCharge = state.m_ich[0];
     if(Charge==0) vkCharge=0;
@@ -111,7 +106,7 @@ namespace Trk{
 //
 //------  extract information about selected tracks
 //
-    int ntrk=0; 
+    int ntrk=0;
     StatusCode sc = CvtTrackParticle(InpTrkList,ntrk,state);
     if(sc.isFailure() ||  ntrk != 1   )  {       //Something is wrong in conversion
         Impact.assign(5,1.e10);
@@ -128,7 +123,7 @@ namespace Trk{
 //
 // Target vertex in ref.frame defined by track itself
 //
-    double VrtInp[3]={Vertex.x() -state.m_refFrameX, Vertex.y() -state.m_refFrameY, Vertex.z() -state.m_refFrameZ}; 
+    double VrtInp[3]={Vertex.x() -state.m_refFrameX, Vertex.y() -state.m_refFrameY, Vertex.z() -state.m_refFrameZ};
     double VrtCov[6]={0.,0.,0.,0.,0.,0.};
 //
 //

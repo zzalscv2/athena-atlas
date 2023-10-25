@@ -1,21 +1,22 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/VtDeriv.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/Propagator.h"
+#include "TrkVKalVrtCore/Matrix.h"
+#include "TrkVKalVrtCore/Utilities.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
 
-
 namespace Trk {
 
-extern const vkalPropagator  myPropagator;
+//extern variables
 extern const vkalMagFld      myMagFld;
 
-
-void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *covi, double *vrtref, double *covvrtref, 
+void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *covi, double *vrtref, double *covvrtref,
       double *drdpar, double *dwgt, double *rv0, VKalVrtControl * FitCONTROL)
 {
     /* Initialized data */
@@ -33,11 +34,6 @@ void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *cov
     double cs, pp, sn, pt, rho;
     double covdtr[15], ctg, par[5], cnv[36];	/* was [6][6] */
 
-
-    extern int cfdinv(double *, double *, long int);
-    extern void tdasatVK(const double *, const double *, double *, long int, long int);
-
-
 #define rvec_ref(a_1,a_2) rvec[(a_2)*2 + (a_1) - 1]
 #define drdpar_ref(a_1,a_2) drdpar[(a_2)*2 + (a_1)]
 #define cnv_ref(a_1,a_2) cnv[(a_2)*6 + (a_1) - 7]
@@ -52,7 +48,7 @@ void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *cov
 /* 		  BMAG      -  magnetic field                 */
 /*     UseTrackErr =false  Fitted track is assumed errorless  */
 /*                         only vertex error is used          */
-/*                          may be used for constraint        */        
+/*                          may be used for constraint        */
 /*                  =true  Fitted track error is added        */
 /*       Output:                                              */
 /*                Deriv(6)  -  Chi2 derivatives for debugging */
@@ -67,7 +63,7 @@ void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *cov
     /* Function Body */
 /* --------------------- */
     double constB =FitCONTROL->vk_forcft.localbmag * vkalMagCnvCst ;
-    
+
     for (ip = 0; ip <= 4*6; ++ip) {    // Number of points * Number of parameters
 /* --  Input parameters */
 	pari[0] = pari0[0];
@@ -144,7 +140,7 @@ void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *cov
 	tdasatVK(cnv, &covi[0], covd, 5, 6);
 
 /* -- Translation to New Reference Point */
-        myPropagator.Propagate(-999, Charge, par, covd, pari, vrtref, paro, covdtr, FitCONTROL);
+        Trk::vkalPropagator::Propagate(-999, Charge, par, covd, pari, vrtref, paro, covdtr, FitCONTROL);
 
 
 
@@ -177,8 +173,8 @@ void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *cov
 	   dcov[1] += covdtr[1];
 	   dcov[2] += covdtr[2];
         }
-/*---------------------------------------------------------------- */	
-//     Weight matrix and chi2 for given shift	
+/*---------------------------------------------------------------- */
+//     Weight matrix and chi2 for given shift
 //
 	int jerr=cfdinv(dcov, &dwgt[0], -2); if(jerr){jerr=cfdinv(dcov, &dwgt[0], 2); if(jerr){dwgt[0]=dwgt[2]=1.e6; dwgt[1]=0.;}};
 	//dchi2[ip] = sqrt(fabs(dwgt[0]*paro[0]*paro[0] + 2.*dwgt[1]*paro[0]*paro[1] + dwgt[2]*paro[1]*paro[1]));
@@ -216,9 +212,8 @@ void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *cov
 
 //std::cout<<" VpDerivR,Z="<<rv0[0]<<", "<<rv0[1]<<'\n';
 //std::cout<<" Ref="<<vrtref[0]<<", "<<vrtref[1]<<", "<<vrtref[2]<<'\n';
-} 
 #undef cnv_ref
 #undef drdpar_ref
 #undef rvec_ref
-
+}
 } /* End of namespace */

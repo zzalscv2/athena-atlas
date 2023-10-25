@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/cfMomentum.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
@@ -11,8 +12,6 @@
 
 namespace Trk {
 
-extern const vkalMagFld      myMagFld;
-
 void vkPerigeeToP( const double *perig3, double *pp, double BMAG)
 {
     double constB =BMAG  * vkalMagCnvCst;
@@ -21,9 +20,7 @@ void vkPerigeeToP( const double *perig3, double *pp, double BMAG)
     pp[0] = pt * cos(phiv);
     pp[1] = pt * sin(phiv);
     pp[2] = pt / tan(perig3[0]);
-} 
-
-
+}
 
 std::array<double, 4> getFitParticleMom( const VKTrack * trk, const VKVertex *vk)
 {
@@ -32,7 +29,7 @@ std::array<double, 4> getFitParticleMom( const VKTrack * trk, const VKVertex *vk
     fieldPos[0]=vk->refIterV[0]+vk->fitV[0];
     fieldPos[1]=vk->refIterV[1]+vk->fitV[1];
     fieldPos[2]=vk->refIterV[2]+vk->fitV[2];
-    double magConst =myMagFld.getMagFld(fieldPos,(vk->vk_fitterControl).get())  * myMagFld.getCnvCst();
+    double magConst =Trk::vkalMagFld::getMagFld(fieldPos,(vk->vk_fitterControl).get())  * Trk::vkalMagFld::getCnvCst();
 
     double cth = 1. / tan( trk->fitP[0]);
     double phi      = trk->fitP[1];
@@ -63,7 +60,7 @@ std::array<double, 4> getFitParticleMom(const VKTrack * trk, double BMAG)
 std::array<double, 4> getIniParticleMom( const VKTrack * trk, const VKVertex *vk)
 {
     std::array<double, 4> p{};
-    double magConst = myMagFld.getMagFld(vk->refIterV,(vk->vk_fitterControl).get())  * myMagFld.getCnvCst();
+    double magConst = Trk::vkalMagFld::getMagFld(vk->refIterV,(vk->vk_fitterControl).get())  * Trk::vkalMagFld::getCnvCst();
 
     double cth = 1. / tan( trk->iniP[0]);
     double phi      =      trk->iniP[1];
@@ -99,7 +96,7 @@ std::array<double, 4> getCnstParticleMom( const VKTrack * trk, const VKVertex *v
     cnstPos[0]=vk->refIterV[0]+vk->cnstV[0];
     cnstPos[1]=vk->refIterV[1]+vk->cnstV[1];
     cnstPos[2]=vk->refIterV[2]+vk->cnstV[2];
-    double magConst = myMagFld.getMagFld(cnstPos,(vk->vk_fitterControl).get())  * myMagFld.getCnvCst();
+    double magConst = Trk::vkalMagFld::getMagFld(cnstPos,(vk->vk_fitterControl).get())  * Trk::vkalMagFld::getCnvCst();
 
     double cth = 1. / tan( trk->cnstP[0]);
     double phi      =      trk->cnstP[1];

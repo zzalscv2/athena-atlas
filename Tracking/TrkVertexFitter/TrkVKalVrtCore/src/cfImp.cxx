@@ -1,23 +1,22 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/cfImp.h"
+#include "TrkVKalVrtCore/Matrix.h"
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include <cmath>
 
 namespace Trk {
 
-extern const vkalPropagator  myPropagator;
-extern int cfdinv(double *, double *, long int); 
 
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
 
-
- void   cfimp(long int TrkID, long int ich, int IFL, double *par, 
-	const double *err, double *vrt, double *vcov, double *rimp, 
-	double *rcov, double *sign , VKalVrtControlBase * FitCONTROL )
+void   cfimp(long int TrkID, long int ich, int IFL, double *par,
+             const double *err, double *vrt, double *vcov, double *rimp,
+             double *rcov, double *sign , VKalVrtControlBase * FitCONTROL )
 {
     double dcov[3], errd[15], paro[5];
     double dwgt[3], errn[15];
@@ -55,7 +54,7 @@ extern int cfdinv(double *, double *, long int);
 
     double Ref0[3]={0.,0.,0.};  //base reference point for standard perigee
 
-    myPropagator.Propagate(TrkID, ich, par, errd, Ref0, vrt, paro, errn, FitCONTROL);
+    Trk::vkalPropagator::Propagate(TrkID, ich, par, errd, Ref0, vrt, paro, errn, FitCONTROL);
 
 //std::cout <<" CFImp new par R,Z="<<paro[0]<<", "<<paro[1]<<'\n';
 /* ---------- */
@@ -102,13 +101,13 @@ extern int cfdinv(double *, double *, long int);
     }
     int jerr=cfdinv(rcov, dwgt, -2);
     if (jerr) {jerr=cfdinv(rcov, dwgt, 2); if(jerr){dwgt[0]=dwgt[2]=1.e6; dwgt[1]=0.;}}
-    (*sign) = sqrt(fabs(dwgt[0] * rimp[0] * rimp[0] + dwgt[1] * 2. * rimp[0] * rimp[1] + 
+    (*sign) = sqrt(std::abs(dwgt[0] * rimp[0] * rimp[0] + dwgt[1] * 2. * rimp[0] * rimp[1] +
 	    dwgt[2] * rimp[1] * rimp[1]));
-} 
+}
 
 
- void   cfimpc(long int TrkID, long int ich, int IFL, double *par, 
-	const double *err, double *vrt, double *vcov, double *rimp, 
+ void   cfimpc(long int TrkID, long int ich, int IFL, double *par,
+	const double *err, double *vrt, double *vcov, double *rimp,
 	double *rcov, double *sign, VKalVrtControlBase * FitCONTROL )
 {
     double dcov[3], errd[15], paro[5];
@@ -127,7 +126,7 @@ extern int cfdinv(double *, double *, long int);
     for (int ii = 0; ii < 15; ++ii) {errd[ii] = err[ii];}
 
     double Ref0[3]={0.,0.,0.};  //base reference point for standard perigee
-    myPropagator.Propagate(TrkID, ich, par, errd, Ref0, vrt, paro, errn, FitCONTROL);
+    Trk::vkalPropagator::Propagate(TrkID, ich, par, errd, Ref0, vrt, paro, errn, FitCONTROL);
 
     double tmpVrt[3]={0.,0.,0.}; double ClosestPnt[3];
     cfClstPnt( paro, tmpVrt, ClosestPnt);
@@ -176,9 +175,9 @@ extern int cfdinv(double *, double *, long int);
     }
     int jerr=cfdinv(rcov, dwgt, -2);
     if (jerr) {jerr=cfdinv(rcov, dwgt, 2);if(jerr){dwgt[0]=dwgt[2]=1.e6; dwgt[1]=0.;}}
-    (*sign) = sqrt(fabs(dwgt[0] * rimp[0] * rimp[0] + dwgt[1] * 2. * rimp[0] * rimp[1] + 
+    (*sign) = sqrt(std::abs(dwgt[0] * rimp[0] * rimp[0] + dwgt[1] * 2. * rimp[0] * rimp[1] +
 	    dwgt[2] * rimp[1] * rimp[1]));
-} 
+}
 
 } /* end of namespace */
 

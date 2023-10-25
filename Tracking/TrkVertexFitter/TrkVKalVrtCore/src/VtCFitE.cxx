@@ -1,8 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/VtCFitE.h"
 #include "TrkVKalVrtCore/CommonPars.h"
+#include "TrkVKalVrtCore/Matrix.h"
+#include "TrkVKalVrtCore/FullMtx.h"
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <cmath>
@@ -17,8 +20,6 @@ namespace Trk {
 
 #define ader_ref(a_1,a_2) ader[(a_2)*(vkalNTrkM*3+3) + (a_1) - (vkalNTrkM*3+4)]
 #define dcv_ref(a_1,a_2)  dcv[(a_2)*6 + (a_1) - 7]
-
-
 #define useWeightScheme 1
 
 int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6][6])
@@ -28,11 +29,6 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 
     long int ic, jc, it, jt;
     double  cnt = 1e8;
-
-
-    extern void dsinv(long int, double  *, long int , long int *) noexcept;
-    extern void FullMTXfill( VKVertex* , double *);
-    extern void vkSVDCmp(double**, int, int, double*, double**);
 
     TWRK    * t_trk=nullptr;
     long int NTRK = vk->TrackList.size();
@@ -117,7 +113,7 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 	        ader_ref(it*3 + 2, jt*3 + 3) += cnt * tf0ti.Y * tf0tj.Z;
 	        ader_ref(it*3 + 3, jt*3 + 3) += cnt * tf0ti.Z * tf0tj.Z;
 	      }
-	    }	    
+	    }
 	  }
 	}
 /* symmetrisation */
@@ -142,7 +138,7 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 //    for(j=1; j<=NVar; j++)std::cout<<ader_ref(j,i)<<", "; std::cout<<'\n';}
 //}
 //-------------------------------------------------------------------------
-// Weight matrix ready. Invert.  Beware - DSINV destroys initial matrix!  
+// Weight matrix ready. Invert.  Beware - DSINV destroys initial matrix!
         noinit_vector<double*> ta (NVar+1);
         noinit_vector<double> tab ((NVar+1)*(NVar+1));
         for(i=0; i<NVar+1; i++){  ta[i] = tab.data() + i*(NVar+1);}
@@ -158,12 +154,12 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 
           vkSVDCmp( ta.data(), NVar, NVar, tw.data(), tv.data());
 
-          double tmax=0; 
-          for(i=1; i<NVar+1; i++) if(fabs(tw[i])>tmax)tmax=fabs(tw[i]); 
+          double tmax=0;
+          for(i=1; i<NVar+1; i++) if(fabs(tw[i])>tmax)tmax=fabs(tw[i]);
           for(i=1; i<NVar+1; i++) if(fabs(tw[i])/tmax < 1.e-18) tw[i]=0.;
           for(i=1; i<=NVar; i++){ for(j=1; j<=NVar; j++){
             tr[i][j]=0.; for(int k=1; k<=NVar; k++)  if(tw[k]!=0.) tr[i][j] += ta[i][k]*tv[j][k]/tw[k];
-          }} 
+          }}
 
           for (i=1; i<=NVar; ++i) for (j=1; j<=NVar; ++j) ader_ref(i,j)=tr[i][j];
 
@@ -200,32 +196,32 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 
 	for (it=1; it<=NTRK; it++) {
             t_trk=vk->tmpArr[it-1].get();
-	    ader_ref(1, it*3 + 1) = -vcov[0] * t_trk->wbci[0] 
-	                           - vcov[1] * t_trk->wbci[1] 
+	    ader_ref(1, it*3 + 1) = -vcov[0] * t_trk->wbci[0]
+	                           - vcov[1] * t_trk->wbci[1]
 				   - vcov[3] * t_trk->wbci[2];
-	    ader_ref(2, it*3 + 1) = -vcov[1] * t_trk->wbci[0] 
-	                           - vcov[2] * t_trk->wbci[1] 
+	    ader_ref(2, it*3 + 1) = -vcov[1] * t_trk->wbci[0]
+	                           - vcov[2] * t_trk->wbci[1]
 				   - vcov[4] * t_trk->wbci[2];
-	    ader_ref(3, it*3 + 1) = -vcov[3] * t_trk->wbci[0] 
-	                           - vcov[4] * t_trk->wbci[1] 
+	    ader_ref(3, it*3 + 1) = -vcov[3] * t_trk->wbci[0]
+	                           - vcov[4] * t_trk->wbci[1]
 				   - vcov[5] * t_trk->wbci[2];
-	    ader_ref(1, it*3 + 2) = -vcov[0] * t_trk->wbci[3] 
-	                           - vcov[1] * t_trk->wbci[4] 
+	    ader_ref(1, it*3 + 2) = -vcov[0] * t_trk->wbci[3]
+	                           - vcov[1] * t_trk->wbci[4]
 		                   - vcov[3] * t_trk->wbci[5];
-	    ader_ref(2, it*3 + 2) = -vcov[1] * t_trk->wbci[3] 
-	                           - vcov[2] * t_trk->wbci[4] 
+	    ader_ref(2, it*3 + 2) = -vcov[1] * t_trk->wbci[3]
+	                           - vcov[2] * t_trk->wbci[4]
 				   - vcov[4] * t_trk->wbci[5];
-	    ader_ref(3, it*3 + 2) = -vcov[3] * t_trk->wbci[3] 
-	                           - vcov[4] * t_trk->wbci[4] 
+	    ader_ref(3, it*3 + 2) = -vcov[3] * t_trk->wbci[3]
+	                           - vcov[4] * t_trk->wbci[4]
 				   - vcov[5] * t_trk->wbci[5];
-	    ader_ref(1, it*3 + 3) = -vcov[0] * t_trk->wbci[6] 
-	                           - vcov[1] * t_trk->wbci[7] 
+	    ader_ref(1, it*3 + 3) = -vcov[0] * t_trk->wbci[6]
+	                           - vcov[1] * t_trk->wbci[7]
 				   - vcov[3] * t_trk->wbci[8];
-	    ader_ref(2, it*3 + 3) = -vcov[1] * t_trk->wbci[6] 
-	                           - vcov[2] * t_trk->wbci[7] 
+	    ader_ref(2, it*3 + 3) = -vcov[1] * t_trk->wbci[6]
+	                           - vcov[2] * t_trk->wbci[7]
 				   - vcov[4] * t_trk->wbci[8];
-	    ader_ref(3, it*3 + 3) = -vcov[3] * t_trk->wbci[6]  
-		                   			- vcov[4] * t_trk->wbci[7] 
+	    ader_ref(3, it*3 + 3) = -vcov[3] * t_trk->wbci[6]
+		                   			- vcov[4] * t_trk->wbci[7]
 				   			- vcov[5] * t_trk->wbci[8];
 	    ader_ref(it*3 + 1, 1) = ader_ref(1, it*3 + 1);
 	    ader_ref(it*3 + 1, 2) = ader_ref(2, it*3 + 1);
@@ -266,7 +262,7 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 		}
 	    }
 	}
-//for(int ii=1; ii<=9; ii++)std::cout<<ader_ref(ii,ii)<<", "; std::cout<<__func__<<" fast full m NEW"<<'\n';        
+//for(int ii=1; ii<=9; ii++)std::cout<<ader_ref(ii,ii)<<", "; std::cout<<__func__<<" fast full m NEW"<<'\n';
         if( !vk->ConstraintList.empty()  && !useWeightScheme ){
 //---------------------------------------------------------------------
 // Covariance matrix with constraints a la Avery.
@@ -290,8 +286,8 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
             }
           }
 // R,RC[ic][i]
-	  double **R =new double*[totNC]; for(ic=0; ic<totNC; ic++) R[ic]=new double[NVar]; 
-	  double **RC=new double*[totNC]; for(ic=0; ic<totNC; ic++)RC[ic]=new double[NVar]; 
+	  double **R =new double*[totNC]; for(ic=0; ic<totNC; ic++) R[ic]=new double[NVar];
+	  double **RC=new double*[totNC]; for(ic=0; ic<totNC; ic++)RC[ic]=new double[NVar];
 	  double *RCRt=new double[totNC*totNC];
 	  for(ic=0; ic<totNC; ic++){
 	    R[ic][0]=th0t[ic].X;
@@ -334,13 +330,13 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
          for(ic=0; ic<totNC; ic++) delete[] RC[ic];
          delete[] RC;
 	 delete[] RCRt;
-//for(int ii=1; ii<=9; ii++)std::cout<<ader_ref(ii,ii)<<", "; std::cout<<__func__<<" avery full m NEW"<<'\n';        
+//for(int ii=1; ii<=9; ii++)std::cout<<ader_ref(ii,ii)<<", "; std::cout<<__func__<<" avery full m NEW"<<'\n';
        }  //end of Avery matrix
 
 
 
     }  // End of global IF() for matrix type selection
-    
+
 //if(NTRK==2){
 //  for(i=1; i<=NVar; i++){std::cout<<__func__" new covfull=";
 //    for(j=1; j<=NVar; j++)std::cout<<ader_ref(j,i)<<", "; std::cout<<'\n';}
@@ -359,10 +355,10 @@ int getFullVrtCov(VKVertex * vk, double *ader, const double *dcv, double verr[6]
 	    }
 	}
     }
-//for(int ii=1; ii<=6; ii++)std::cout<<verr[ii-1][ii-1]<<", "; std::cout<<" final m NEW"<<'\n';        
+//for(int ii=1; ii<=6; ii++)std::cout<<verr[ii-1][ii-1]<<", "; std::cout<<" final m NEW"<<'\n';
     vk->existFullCov = 1;
     return 0;
-} 
+}
 #undef dcv_ref
 #undef ader_ref
 

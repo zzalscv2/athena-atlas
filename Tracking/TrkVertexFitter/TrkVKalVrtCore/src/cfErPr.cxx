@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/cfErPr.h"
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
+#include "TrkVKalVrtCore/Utilities.h"
 #include <cmath>
 
 namespace Trk {
-
 
 void cferpr(const long int ich, double  *par, double  *ref, const double  s0, double  *errold, double  *errnew)
 {
@@ -15,10 +16,6 @@ void cferpr(const long int ich, double  *par, double  *ref, const double  s0, do
     double  r__, dsphi, dseps, dsrho, cs, sn, xp, yp;
     double  derivm[25];	/* was [5][5] */
     double  ctg, dsq, dyp, d__3;
-
-    extern void tdasatVK(const double  *, const double  *, double  *, long int , long int );
-
-
 /*     ------------------------------------------ */
 /*       This routine propagates the trajectory error matrix */
 /*       originally evaluated at s=0 to the curved abcissa S */
@@ -79,9 +76,9 @@ void cferpr(const long int ich, double  *par, double  *ref, const double  s0, do
 	derivm[8] = -yp * ctg;              //dZ/dPhi
     }
     tdasatVK(derivm, &errold[0], &errnew[0], 5, 5);
-   
-} 
+
+}
 
 
-}  /* End of VKalVrtCore namespace */
+}  //end of namespace Trk
 

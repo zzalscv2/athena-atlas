@@ -4,22 +4,20 @@
 
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
-#include "TrkVKalVrtCore/TrkVKalVrtCore.h"
+#include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/IChronoStatSvc.h"
+#include "TrkExInterfaces/IExtrapolator.h"
+#include "TrkParticleBase/LinkToTrackParticleBase.h"
+#include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkTrack/LinkToTrack.h"
 #include "TrkTrack/Track.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "TrkParticleBase/TrackParticleBase.h"
-#include "TrkParticleBase/LinkToTrackParticleBase.h"
+#include "TrkVKalVrtCore/TrkVKalVrtCore.h"
+#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "VxVertex/VxTrackAtVertex.h"
-#include "TrkExInterfaces/IExtrapolator.h"
-#include "GaudiKernel/IChronoStatSvc.h"
-#include "GaudiKernel/EventContext.h"
-#include  "TrkTrack/Track.h"
 #include  "xAODTracking/NeutralParticleContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include  "xAODTracking/VertexContainer.h"
 
-#include "GaudiKernel/EventContext.h"
 
 //-------------------------------------------------
 // Other stuff

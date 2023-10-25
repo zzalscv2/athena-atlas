@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/CommonPars.h"
@@ -40,7 +40,7 @@ namespace Trk {
 /*   STPCNV :   track momentum from track (theta,phi,1/r) at vertex       	*/
 /*------------------------------------------------------------------------------*/
 
-void ForCFT::prcfit( long int ntrk, double  *wm, double  *wmfit, double  bmag, const double  *vrt, const double  *vrte) noexcept
+void ForCFT::prcfit( long int ntrk, double  *wm, const double  *wmfit, double  bmag, const double  *vrt, const double  *vrte) noexcept
 {
     long int i__1;
     double   summ;
@@ -81,8 +81,8 @@ void ForCFT::prcfit( long int ntrk, double  *wm, double  *wmfit, double  bmag, c
     summ = 0.;
     i__1 = ntrk<vkalNTrkM ? ntrk: vkalNTrkM;
     for (int i=0; i<i__1; ++i) {
-	this->wm[i] =  fabs(wm[i]);
-	summ += wm[i];
+      this->wm[i] =  std::abs(wm[i]);
+      summ += wm[i];
     }
     if ((*wmfit) > summ) {
 /*  Set general mass constraint based on ALL tracks */
@@ -117,7 +117,7 @@ this->useAprioriVrt = 0;
 this->usePointingCnst = 0;
 this->usePassNear = 0;
 //forcft_1.usePlaneCnst = 0;   //Used only on demand=> must NOT be reset here!!!
-} 
+}
 
 ForCFT::ForCFT() noexcept{
   nmcnst=0;
@@ -133,7 +133,7 @@ ForCFT::ForCFT() noexcept{
      robres[it] = 1.;
      for(int ic=0; ic<vkalMaxNMassCnst; ic++) indtrkmc[ic][it]=0;
   }
-  localbmag=1.997;   // Safety: standard magnetic field in ID 
+  localbmag=1.997;   // Safety: standard magnetic field in ID
 }
 
 
@@ -167,7 +167,7 @@ void ForCFT::vksetRobustness(long int Rob) noexcept
 
 void ForCFT::vksetUseMassCnst() noexcept { useMassCnst = 1;}
 void ForCFT::vksetUsePhiCnst()  noexcept { usePhiCnst = 1;}
-void ForCFT::vksetUsePlaneCnst(double a, double b, double c, double d) noexcept  { 
+void ForCFT::vksetUsePlaneCnst(double a, double b, double c, double d) noexcept  {
   if(a+b+c+d == 0.){  usePlaneCnst = 0;
   }else{              usePlaneCnst = 1; }
   Ap = a; Bp = b; Cp = c; Dp = d;

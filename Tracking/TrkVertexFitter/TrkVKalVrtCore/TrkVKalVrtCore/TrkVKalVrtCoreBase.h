@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCoreBase_VKalVrtCore_H
@@ -13,11 +13,11 @@
 
 namespace Trk {
 
-  
+
    class VKConstraintBase;
    class VKVertex;
 
-   class CascadeEvent 
+   class CascadeEvent
    {
      public:
        int cascadeNV;
@@ -27,9 +27,9 @@ namespace Trk {
        double getAccuracyConstraint() const { return m_accuracyConstraint; };
        void   setAccuracyConstraint(double C) { m_accuracyConstraint=C; };
        std::unique_ptr<double[]> fullCovMatrix;
-       std::vector< std::unique_ptr<VKVertex> > cascadeVertexList; 
+       std::vector< std::unique_ptr<VKVertex> > cascadeVertexList;
        std::vector<int> matrixPnt;
-       CascadeEvent():cascadeNV(0), nearPrmVertex(0), fullCovMatrix(0), cascadeVertexList(0), 
+       CascadeEvent():cascadeNV(0), nearPrmVertex(0), fullCovMatrix(0), cascadeVertexList(0),
                       matrixPnt(0), m_SCALE(1.), m_accuracyConstraint(1.e-4) {};
       ~CascadeEvent() = default;
 
@@ -40,8 +40,8 @@ namespace Trk {
 
    };
 
-   class TWRK       // collection of temporary arrays for 
-   {   
+   class TWRK       // collection of temporary arrays for
+   {
     public:
       TWRK() { }; //bypass initialization
      ~TWRK() = default;//default destructor allows compiler to optimize out method in this case.
@@ -49,7 +49,7 @@ namespace Trk {
      public:
        double   tt[3];    // U_i vector (see Billoir...)
        double   wb[9];
-       double   wc[6]; 
+       double   wc[6];
        double  wci[6];
        double wbci[9];
        double drdp[2][3]; // for "pass near" constraint
@@ -80,9 +80,9 @@ namespace Trk {
        double cnstP[3]{};
 
                // ALL is estimated at VKVErtex->iniV posision - start position of the fit
-       double iniP[3]{};     //perigee parameters assuming that track passes through iniXYZ 
+       double iniP[3]{};     //perigee parameters assuming that track passes through iniXYZ
 
-               // ALL is estimated at VKVErtex->refIterV posision - iteration reference position 
+               // ALL is estimated at VKVErtex->refIterV posision - iteration reference position
        double Perig[5]{};         //perigee parameters prepared for vertex estimation
        double WgtM[15]{};         //symmetric weight matrix prepared for vertex estimation
        double WgtM_save[15]{};    //copy of weight matrix for speed optimisation
@@ -94,7 +94,7 @@ namespace Trk {
 
                // ALL is estimated at VKVErtex->refXYZ posision - reference position for vertex fit
        double refPerig[5]{};  //perigee parameters
-       double refCovar[15]{}; //symmetric covariance matrix 
+       double refCovar[15]{}; //symmetric covariance matrix
 
      public:
        double getMass() const  {return m_mass;}
@@ -111,9 +111,9 @@ namespace Trk {
        double r_invR()  const  { return refPerig[4];}
 
      public:
-       void setCurrent  ( const double[], const double[]); // set iteration (current) track parameters 
-       void setReference( const double[], const double[]); // set reference track parameters 
-       void restoreCurrentWgt();               // restore track WGT from saved copy 
+       void setCurrent  ( const double[], const double[]); // set iteration (current) track parameters
+       void setReference( const double[], const double[]); // set reference track parameters
+       void restoreCurrentWgt();               // restore track WGT from saved copy
 
      private:
 
@@ -121,11 +121,11 @@ namespace Trk {
        double m_mass;      //track mass
 
    };
-  
+
 
 
    class VKVertex
-   {   
+   {
     public:
       VKVertex(const VKalVrtControl &);
       VKVertex(VKVertex &&) noexcept = default;
@@ -150,11 +150,11 @@ namespace Trk {
 
        int useApriorVertex;   //for a priory vertex position knowledge usage
        double apriorV[3]{};     //global coordinates (the same as refV and refIterV)
-       double apriorVWGT[6]{};  //weight matrix of a priori vertex   
+       double apriorVWGT[6]{};  //weight matrix of a priori vertex
 
 
        bool passNearVertex;       // needed for "passing near vertex" constraint
-       bool passWithTrkCov;       //  Vertex, CovVertex, Charge and derivatives 
+       bool passWithTrkCov;       //  Vertex, CovVertex, Charge and derivatives
        double fitMom[3]{};          //   are in ForVrtClose structure
        double fitCovXYZMom[21]{};   //  Mom and CovMom are here because they are used also for other purposes
        ForVrtClose FVC;
@@ -163,7 +163,7 @@ namespace Trk {
        double T[3]{};           // save T(see Billoir) vector for futher use
        double wa[6]{};          // save WA matrix for futher use
        double dxyz0[3]{};       // unconstrained shift of vertex on current iteration. Needed for PostFit
-      
+
        std::vector<std::unique_ptr<VKTrack> > TrackList;
        std::vector<std::unique_ptr<TWRK> >    tmpArr;
        std::vector<std::unique_ptr<VKConstraintBase> > ConstraintList;
@@ -179,8 +179,8 @@ namespace Trk {
        VKVertex * nextCascadeVrt;
        std::vector<VKVertex*> includedVrt;  // these vertices are NOT owned by given object.
        double savedVrtMomCov[21]{}; // saved covariance WITHOUT pointing constraint
-				  // for correct cascade error definition 
-     public: 
+				  // for correct cascade error definition
+     public:
 
        bool truncatedStep;
        int  existFullCov;
@@ -190,7 +190,7 @@ namespace Trk {
      public:        // Object with defining information for VKalVrtCore library.
                     // Each vertex has a copy of VKalVrtControl object what allows
                     // to fit it independently with individual set of constraints.
-                    // See Cascade code. 
+                    // See Cascade code.
        std::unique_ptr<VKalVrtControl>  vk_fitterControl;
    };
 

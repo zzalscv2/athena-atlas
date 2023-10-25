@@ -3,10 +3,10 @@
 */
 
 //  Convert TrkTrack parameters to internal VKalVrt parameters
-// and sets up common reference system for ALL tracks 
+// and sets up common reference system for ALL tracks
 // even if in the beginning in was different
 
-//------------------------------------------------------------------ 
+//------------------------------------------------------------------
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
@@ -15,8 +15,6 @@
 #include <iostream>
 
 namespace Trk{
-
-  extern const vkalPropagator  myPropagator;
 
   //--------------------------------------------------------------------
   //
@@ -103,7 +101,7 @@ namespace Trk{
 				 perGlobalPos.z(),
 				 fx, fy, BMAG_FIXED);
       if(std::abs(BMAG_FIXED) < 0.01) BMAG_FIXED = 0.01;
- 
+
       double CovVertTrk[15];
       std::fill(CovVertTrk,CovVertTrk+15,0.);
       // No good covariance matrix!
@@ -137,7 +135,7 @@ namespace Trk{
 	for(int i=0; i<15;i++) covi[i] = state.m_awgt[ntrk][i];
 	long int Charge = (long int) mPer->charge();
 	long int TrkID = ntrk;
-	myPropagator.Propagate(TrkID, Charge, pari, covi,
+	Trk::vkalPropagator::Propagate(TrkID, Charge, pari, covi,
 			       vrtini, vrtend, &state.m_apar[ntrk][0],
 			       &state.m_awgt[ntrk][0],
 			       &state.m_vkalFitControl);
@@ -243,8 +241,8 @@ namespace Trk{
 				      surface,
 				      std::move(CovMtx));
   }
-       
-} // end of namespace      
-       
-       
+
+} // end of namespace
+
+
 

@@ -6,6 +6,9 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
+#include "TrkVKalVrtCore/CFit.h"
+#include "TrkVKalVrtCore/XYZtrp.h"
+#include "TrkVKalVrtCore/cfPEst.h"
 //-------------------------------------------------
 // Other stuff
 #include "GaudiKernel/IChronoStatSvc.h"
@@ -14,16 +17,6 @@
 #include <cmath>
 
  namespace Trk {
-
- extern void cfpest( int ntrk, double *vrt, long int *Charge, double (*part)[5], double (*par0)[3]);
- extern void xyztrp( const long int Charge, double* vrt, double* Mom, double* CovVrtMom, double BMAG, double* Perig, double* CovPerig );
-
- extern int CFit(VKalVrtControl *FitCONTROL, int ifCovV0, int NTRK,
-	      long int *ich, double xyz0[3], double (*par0)[3],
-	      double (*inp_Trk5)[5], double (*inp_CovTrk5)[15],
-	      double xyzfit[3], double (*parfs)[3], double ptot[4],
-              double covf[21], double & chi2, double *chi2tr);
-
 
 //__________________________________________________________________________
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
