@@ -4,32 +4,21 @@
 
 #include <cmath>
 #include <iostream>
-double getEffParam_LRT(float abstrketa, float trkpt, double d0, bool debug=false) {
+double getEffParam_LRT( double absd0, double lowd0_cut, double highd0_cut, bool debug=false) {
 
-  double eff = 1;
-  if (d0 > 3) eff = 0.1;
-  if (abstrketa<0.5) {
-    if (trkpt<2.)
-      eff = 0.89;
-    else if (trkpt<3.)
-      eff = 0.91;
-    else 
-      eff = 0.92;
-  } else if (abstrketa<1.5) {
-    if (trkpt<2.)
-      eff = 0.87;
-    else if (trkpt<3.)
-      eff = 0.90;
-    else
-      eff = 0.91;
-  } else {
-    if (trkpt<2.)
-      eff = 0.77;
-    else if (trkpt<3.)
-      eff = 0.80;
-    else
-      eff = 0.80;
-  }
+  double eff = 1.;
+
+  // 100%, 80% and 20%
+  
+  // step function example (commented out for now)
+  /*
+  if (absd0 > lowd0_cut && absd0 <= highd0_cut) eff = 0.8;
+  else if (absd0 > highd0_cut) eff = 0.2;
+  */
+  
+  // can be also: double inverted Fermi can do the job?
+  
+  eff= (0.2/(1. + std::exp(0.5*(absd0-lowd0_cut))) + 0.6/(1. + std::exp(0.05*(absd0-highd0_cut))) + 0.2);
 
   if (debug) printf("eff = %f\n", eff);
   return eff;

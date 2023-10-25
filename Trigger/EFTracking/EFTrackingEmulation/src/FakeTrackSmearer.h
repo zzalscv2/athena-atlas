@@ -77,6 +77,11 @@ class FakeTrackSmearer
     name="z0ref_pt"+m_baseName;
     z0ref_pt=new TF1(name.c_str(),[&](double*x,double*p){return z0RefFunc(p[0]=1.,x[0],0); },1.0,200.0,1);
    
+    name="effLRT_d0"+m_baseName;
+    m_parameterizedEfficiency_lowd0_LRT = 10.;
+    m_parameterizedEfficiency_highd0_LRT = 400.;
+    effLRT_d0=new TF1(name.c_str(),[&](double*x, double*p){p[0]=1.;return effFuncLRT(x[0],0); },0.,600.0,1);
+ 
   }
 
 
@@ -144,10 +149,10 @@ double effFunc(double eta,double pt,int verbose)
     return FitFunctions::getEffParam_N(eta,pt,verbose);
   }
   
-double effFuncLRT(double eta,double pt, double d0, int verbose)
+double effFuncLRT(double d0, int verbose)
   {
     // add here other efficiency functions
-    return FitFunctions::getEffParam_LRT(eta,pt,d0,verbose);
+    return FitFunctions::getEffParam_LRT(d0, m_parameterizedEfficiency_lowd0_LRT, m_parameterizedEfficiency_highd0_LRT, verbose);
   }
 
   void InitArray(double *a,int n,const double in[])
@@ -185,8 +190,9 @@ double effFuncLRT(double eta,double pt, double d0, int verbose)
     // input curv is in GeV    
     bool verbose=m_verbose;
       
-    double abseta=std::abs(eta);
-    double abspt=std::abs(1.0/curv); //GeV
+    double abseta = std::abs(eta);
+    double abspt = std::abs(1.0/curv); //GeV
+    double absd0 = std::abs(d0);
     if (verbose) printf("Smearer::AddTrack:  Initial track: curv = %f, phi=%f, eta=%f, d0=%f, z0=%f (pt=%f)\n", curv, phi, eta, d0, z0, abspt);
     
  
@@ -230,7 +236,7 @@ double effFuncLRT(double eta,double pt, double d0, int verbose)
       eff = eff * effFunc(abseta,abspt,verbose);
     } 
     else if (m_parameterizedEfficiency_LRT) {
-      eff = eff * effFuncLRT(abseta,abspt, d0, verbose);
+      eff = eff * effFuncLRT( absd0, verbose);
     } 
     
     int ntracks=( m_myRandom->Rndm()<eff)?1:0;
@@ -341,6 +347,16 @@ double effFuncLRT(double eta,double pt, double d0, int verbose)
     m_parameterizedEfficiency_LRT=param;
   }
 
+  void SetParameterizedEfficiency_highd0_LRT(double d0)
+  {
+    m_parameterizedEfficiency_highd0_LRT = d0;
+  }
+  
+  void SetParameterizedEfficiency_lowd0_LRT(double d0)
+  {
+    m_parameterizedEfficiency_lowd0_LRT = d0;
+  }
+
   std::vector<EFTrackingSmearing::FTS_Track> Tracks;
   double z0(int idx)    {return Tracks[idx].z0();};
   double d0(int idx)    {return Tracks[idx].d0();};
@@ -365,6 +381,7 @@ double effFuncLRT(double eta,double pt, double d0, int verbose)
   TF1 *z0ref_pt = nullptr;
   TF1 *curvres_eta = nullptr;
   TF1 *curvres_pt = nullptr;
+  TF1 *effLRT_d0 = nullptr;
 
 
  private:
@@ -391,6 +408,9 @@ double effFuncLRT(double eta,double pt, double d0, int verbose)
   double m_resolutionPtCutOff=0.0;
   double m_inPtCut = 0.0;
   double m_outPtCut = 1.0;
+  double m_parameterizedEfficiency_highd0_LRT = 0.;
+  double m_parameterizedEfficiency_lowd0_LRT = 0.;
+  
 
 };
 

@@ -20,10 +20,14 @@ def EFTrackingSmearingCfg(flags, name = "EFTrackingSmearingAlg", **kwargs):
       SmearTruthParticle = kwargs['smearTruthParticle'],
       OutputTracksPtCutGeV = kwargs['trkpTCut'],
       EnableMonitoring = kwargs['EnableMonitoring'],
-      RootStreamName = name, 
+      RootStreamName = name,
       RootDirName = "/EFTSmearing/"
       )
 
+    if 'parameterizedTrackEfficiency_LRT' in kwargs:
+       alg.ParameterizedTrackEfficiency_LRT = kwargs['parameterizedTrackEfficiency_LRT']
+       alg.SmearedTrackEfficiency_d0low_LRT = kwargs['smearedTrackEfficiency_d0low_LRT'] 
+       alg.SmearedTrackEfficiency_d0high_LRT= kwargs['smearedTrackEfficiency_d0high_LRT']  
     
     if kwargs['smearTruthParticle']:       
       alg.OutputTruthParticleContainer = "TruthParticle_smeared_SF"+str(kwargs['smearFactor'])
@@ -62,17 +66,20 @@ if __name__ == "__main__":
     acc.merge(AddDecoratorCfg(flags))
     
     TestsmearFactor = 2
-    # example to smear the track particles with smearing factor =2 and efficiency 90%
+    TestEfficiencyFactor=1
+    # example to smear the track particles 
     smearerTrack = EFTrackingSmearingCfg(flags, name="testTrack", trkpTCut=1, smearFactor=TestsmearFactor, InputTrackParticle="InDetTrackParticles",
-                                    trackEfficiency=0.9, parameterizeEfficiency=False, smearTruthParticle=False,
+                                    trackEfficiency=TestEfficiencyFactor, parameterizeEfficiency=False, smearTruthParticle=False,
                                     EnableMonitoring=True, OutputLevel=INFO)
     acc.merge(smearerTrack)
     
     
-    # example to smear the truth particles with smearing factor =2 and efficiency 90%
+    # example to smear the truth particles 
     smearerTruth = EFTrackingSmearingCfg(flags, name="testTruth", trkpTCut=1, smearFactor=TestsmearFactor, InputTruthParticle="TruthParticles",
-                                    trackEfficiency=0.9, parameterizeEfficiency=False, ParameterizedTrackEfficiencyLRT = True, smearTruthParticle=True,
-                                    EnableMonitoring=True, OutputLevel=INFO)
+                                    trackEfficiency=TestEfficiencyFactor, parameterizeEfficiency=False, 
+                                    parameterizedTrackEfficiency_LRT = True, smearTruthParticle=True,
+                                    smearedTrackEfficiency_d0low_LRT=.001, smearedTrackEfficiency_d0high_LRT=400.,
+                                    EnableMonitoring=True, OutputLevel=2)
     acc.merge(smearerTruth)
     
     

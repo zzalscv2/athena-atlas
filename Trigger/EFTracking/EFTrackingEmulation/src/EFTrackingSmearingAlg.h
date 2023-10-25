@@ -52,11 +52,14 @@ class EFTrackingSmearingAlg: public ::AthHistogramAlgorithm {
   DoubleProperty   m_inputTracksPtCut      {this, "InputTracksPtCutGeV", 0.0, "Set input track pT cut"};
   DoubleProperty   m_outputTracksPtCut     {this, "OutputTracksPtCutGeV", 1.0, "Set the output track pT cut"};
   DoubleProperty   m_smearedTrackEfficiency{this, "SmearedTrackEfficiency", 1.0, "Set track efficiency for smearing"};
-  BooleanProperty  m_parameterizedTrackEfficiency{this, "ParameterizedTrackEfficiency", false, "Enable parameterized efficiency for smearing"};
-  BooleanProperty  m_parameterizedTrackEfficiency_LRT{this, "ParameterizedTrackEfficiencyLRT", false, "Enable parameterized efficiency for LRT smearing"};
+  BooleanProperty  m_parameterizedTrackEfficiency{this, "ParameterizedTrackEfficiency", false, "Enable parameterized efficiency for smearing"};  
   BooleanProperty  m_enableMonitoring      {this, "EnableMonitoring", false, "Enable debugging monitoring of the algorithm"};
   BooleanProperty  m_smearTruthParticle    {this, "SmearTruthParticle", false, "Enable smearing on truth particles, disabling the track smearing"};
- 
+  // this is for LRT
+  BooleanProperty  m_parameterizedTrackEfficiency_LRT{this, "ParameterizedTrackEfficiency_LRT", false, "Enable parameterized efficiency for LRT smearing"};
+  DoubleProperty   m_smearedTrackEfficiency_d0high_LRT{this, "SmearedTrackEfficiency_d0high_LRT", 1.0, "Set high d0 value for smeared track efficiency LRT"};
+  DoubleProperty   m_smearedTrackEfficiency_d0low_LRT{this, "SmearedTrackEfficiency_d0low_LRT", 1.0, "Set low d0 value for smeared track efficiency LRT"};
+  
   // these are for fake emulations
   BooleanProperty  m_EnableFakes      {this,"IncludeDuplicatesAndFakes",false,"Enable fake track production"};
   BooleanProperty  m_FakeKillerEnable {this,"FakeKillerEnable",false, "disable inclusion of broad fakes"};
