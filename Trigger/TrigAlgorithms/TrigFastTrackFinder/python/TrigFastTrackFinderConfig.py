@@ -365,6 +365,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         MonTool = TrigFastTrackFinderMonitoring(flags),
         Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
         RoIs = RoIs,
+        FixSeedPhi = flags.Trigger.InDetTracking.fixSeedPhi
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min
