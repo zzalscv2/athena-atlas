@@ -62,17 +62,16 @@ public:
     const Layer* m_recallLayer = nullptr;
     //!< Tracking volume for recall (not owning)
     const TrackingVolume* m_recallTrackingVolume = nullptr;
+    // Current State at boundary (not owning)
+    const MultiComponentState* m_stateAtBoundary = nullptr;
+    // Current Navigation parameters
+    std::unique_ptr<TrackParameters> m_navigationParameters = nullptr;
+    // Ptr to current volume (not owning)
+    const TrackingVolume* m_trackingVolume = nullptr;
+    //!< keep track of the MultiComponentStates
+    std::vector<MultiComponentState> m_mcsRecycleBin;
     // Vector of combined material effects
     std::vector<GsfMaterial::Combined> m_materialEffectsCaches;
-    //!< Recycle bin for MultiComponentState objects,keep track of them
-    std::vector<MultiComponentState> m_mcsRecycleBin;
-
-    //Element we point at each step
-    const MultiComponentState* m_stateAtBoundary = nullptr;
-    std::unique_ptr<TrackParameters> m_navigationParameters = nullptr;
-    const TrackingVolume* m_trackingVolume = nullptr;
-
-
     Cache() { m_materialEffectsCaches.reserve(12); }
   };
 

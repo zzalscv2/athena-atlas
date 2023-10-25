@@ -91,7 +91,7 @@ correctWeights(BH::MixtureParameters& mixture, const int numberOfComponents)
 }
 
 BH::MixtureParameters
-getTranformedMixtureParameters(
+getTransformedMixtureParameters(
   const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
     polynomialWeights,
   const std::array<BH::Polynomial, GSFConstants::maxNumberofMatComponents>&
@@ -434,7 +434,7 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
   MixtureParameters mixture;
   if (pathlengthInX0 > s_xOverRange) {
     if (m_BHtransformationCodeHighX0) {
-      mixture = getTranformedMixtureParameters(m_BHpolynomialWeightsHighX0,
+      mixture = getTransformedMixtureParameters(m_BHpolynomialWeightsHighX0,
                                                m_BHpolynomialMeansHighX0,
                                                m_BHpolynomialVariancesHighX0,
                                                pathlengthInX0,
@@ -448,7 +448,7 @@ Trk::ElectronCombinedMaterialEffects::BetheHeitler(
     }
   } else {
     if (m_BHtransformationCode) {
-      mixture = getTranformedMixtureParameters(m_BHpolynomialWeights,
+      mixture = getTransformedMixtureParameters(m_BHpolynomialWeights,
                                                m_BHpolynomialMeans,
                                                m_BHpolynomialVariances,
                                                pathlengthInX0,
