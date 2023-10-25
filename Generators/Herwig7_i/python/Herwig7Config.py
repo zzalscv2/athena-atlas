@@ -312,7 +312,7 @@ set /Herwig/Partons/RemnantPDF:MaxFlav {}
   ## \param[in] ps_tune_name name identifying the PS/hadronization tune
   ## \param[in] ue_tune_name name identifying the UE/MPI tune
   ## \return    Nothing, adds the corresponding commands directly to the generator configuration object
-  def tune_commands(self, ps_tune_name = "H7-PS-MMHT2014LO", ue_tune_name = "H7.1-Default"):
+  def tune_commands(self, ps_tune_name = "H7-PS-MMHT2014LO", ue_tune_name = "H7.2-Default"):
 
     cmds = """
 ## -------------
@@ -358,15 +358,15 @@ set /Herwig/Partons/RemnantPDF:MaxFlav {}
   ##
   ## \param[in] tune_name name identifying the UE/MPI tune
   ## \return    Nothing, adds the corresponding commands directly to the generator configuration object
-  def ue_tune_commands(self, tune_name = "H7.1-Default"):
+  def ue_tune_commands(self, tune_name = "H7.2-Default"):
 
     cmds = """
 ## Underlying event tune settings
 """
 
-    if tune_name == "H7.1-Default":
+    if tune_name == "H7.2-Default":
       cmds += """
-# > The underlying event tune "H7.1-Default" is already
+# > The underlying event tune "H7.2-Default" is already
 # > configured in Herwig7 via the default settings.
 """
     # elif tune_name == "some-other-name":
