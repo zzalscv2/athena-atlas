@@ -27,7 +27,7 @@ FitParameters::FitParameters(const Perigee& perigee)
     : m_cosPhi1(0.),
       m_cosTheta1(0.),
       m_d0(perigee.parameters()[Trk::d0]),
-      m_differences(nullptr),
+      m_differences{},
       m_extremeMomentum(false),
       m_finalCovariance(nullptr),
       m_firstAlignmentParameter(0),
@@ -69,7 +69,6 @@ FitParameters::FitParameters(double d0, double z0, double cosPhi, double sinPhi,
       m_cosTheta1(0.),
       m_cotTheta(cotTheta),
       m_d0(d0),
-      m_differences(nullptr),
       m_extremeMomentum(false),
       m_finalCovariance(nullptr),
       m_firstAlignmentParameter(0),
@@ -111,7 +110,6 @@ FitParameters::FitParameters(const FitParameters& parameters)
       m_cosTheta1(parameters.m_cosTheta1),
       m_cotTheta(parameters.m_cotTheta),
       m_d0(parameters.m_d0),
-      m_differences(nullptr),
       m_extremeMomentum(parameters.m_extremeMomentum),
       m_finalCovariance(parameters.m_finalCovariance),
       m_firstAlignmentParameter(parameters.m_firstAlignmentParameter),
@@ -139,13 +137,11 @@ FitParameters::FitParameters(const FitParameters& parameters)
       m_surface(parameters.m_surface),
       m_vertex(parameters.m_vertex),
       m_z0(parameters.m_z0) {
-  if (parameters.m_differences)
-    m_differences = new Amg::VectorX(*(parameters.m_differences));
+  if (parameters.m_differences.size() != 0)
+    m_differences = Amg::VectorX(parameters.m_differences);
 }
 
-FitParameters::~FitParameters(void) {
-  delete m_differences;
-}
+FitParameters::~FitParameters() = default;
 
 void FitParameters::addAlignment(bool constrained, double angle,
                                  double offset) {
@@ -247,21 +243,20 @@ void FitParameters::performCutStep(double cutStep) {
   // revert parameters to previous parameter change with cutStep*value
   // i.e. 0 < cutstep < 1 such that cutStep = 0 gives complete reversion
 
-  Amg::VectorX cutDifferences(*m_differences);
+  Amg::VectorX cutDifferences(m_differences);
   cutDifferences *= (cutStep - 1.);
-  Amg::VectorX oldDifferences(*m_differences);
+  Amg::VectorX oldDifferences(m_differences);
   oldDifferences *= cutStep;
 
   // leave phi alone when unstable
   if (m_phiInstability) {
     cutDifferences(2) = 0.;
-    oldDifferences(2) = (*m_differences)(2);
+    oldDifferences(2) = (m_differences)(2);
   }
 
   // apply cut
   update(cutDifferences);
-  delete m_differences;
-  m_differences = new Amg::VectorX(oldDifferences);
+  m_differences = Amg::VectorX(oldDifferences);
 
   m_numberOscillations = 0;
   m_oldDifference = 0.;
@@ -342,8 +337,8 @@ void FitParameters::printCovariance(MsgStream& log) const {
 void FitParameters::printVerbose(MsgStream& log) const {
   log << std::endl;
 
-  if (m_differences && m_differences->size()) {
-    const Amg::VectorX& differences = *m_differences;
+  if (m_differences.size() != 0) {
+    const Amg::VectorX& differences = m_differences;
     log << "      dParams ====" << std::setiosflags(std::ios::fixed)
         << std::setw(10) << std::setprecision(4) << differences(0) << " (0) "
         << std::setw(10) << std::setprecision(4) << differences(1) << " (1) "
@@ -486,12 +481,11 @@ void FitParameters::reset(const FitParameters& parameters) {
   }
 
   // restore difference history
-  delete m_differences;
-  if (parameters.m_differences) {
-    m_differences = new Amg::VectorX(*parameters.m_differences);
+  if (parameters.m_differences.size() != 0) {
+    m_differences = Amg::VectorX(parameters.m_differences);
   } else {
-    m_differences = new Amg::VectorX(m_numberParameters);
-    m_differences->setZero();
+    m_differences = Amg::VectorX(m_numberParameters);
+    m_differences.setZero();
   }
 
   m_numberOscillations = 0;
@@ -654,8 +648,7 @@ void FitParameters::update(const Amg::VectorX& differences) {
   } else {
     m_numberOscillations = 1;
   }
-  delete m_differences;
-  m_differences = new Amg::VectorX(differences);
+  m_differences = Amg::VectorX(differences);
   m_oldDifference = differences(4);
 
   // misalignment parameters
