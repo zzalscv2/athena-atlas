@@ -73,7 +73,6 @@ namespace Analysis {
         bool m_excludeCrossJpsiTracks; //Added by Matteo Bedognetti
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
-        ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
         Trk::TrkVKalVrtFitter* m_VKVFitter;
         bool m_useMassConst;
         double m_altMassConst;

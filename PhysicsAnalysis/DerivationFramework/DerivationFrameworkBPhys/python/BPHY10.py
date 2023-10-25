@@ -86,7 +86,6 @@ def BPHY10Cfg(flags):
                              ExcludeCrossJpsiTracks  = False,   #setting this to False rejects the muons from J/psi candidate
                              TrkVertexFitterTool     = vkalvrt,
                              TrackSelectorTool       = trackselect,
-                             VertexPointEstimator    = vpest,
                              UseMassConstraint       = True,
                              Chi2Cut                 = 10.0,
                              DiTrackPt               = 500.,

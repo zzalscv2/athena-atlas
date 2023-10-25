@@ -40,8 +40,6 @@ namespace Analysis {
         // Get the track selector tool from ToolSvc
         ATH_CHECK(m_trkSelector.retrieve());
 
-        // Get the vertex point estimator tool from ToolSvc
-        ATH_CHECK(m_vertexEstimator.retrieve());
 
         ATH_CHECK(m_jpsiCollectionKey.initialize());
         ATH_CHECK(m_TrkParticleCollection.initialize());
@@ -107,7 +105,6 @@ namespace Analysis {
     m_excludeCrossJpsiTracks(false),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_trkSelector("InDet::TrackSelectorTool"),
-    m_vertexEstimator("InDet::VertexPointEstimator"),
     m_useMassConst(true),
     m_altMassConst(-1.0),
     m_diTrackMassUpper(-1.0),
@@ -148,7 +145,6 @@ namespace Analysis {
         declareProperty("AlternativeMassConstraint",m_altMassConst);
         declareProperty("DiTrackMassUpper",m_diTrackMassUpper);
         declareProperty("DiTrackMassLower",m_diTrackMassLower);
-        declareProperty("VertexPointEstimator", m_vertexEstimator);
         // additional cuts by Daniel Scheirich
         declareProperty("Chi2Cut",m_chi2cut);
         declareProperty("DiTrackPt",m_diTrackPt);
@@ -452,12 +448,11 @@ namespace Analysis {
 
         // Do the fit itself.......
         // Starting point (use the J/psi position)
-        const Trk::Perigee& aPerigee1 = inputTracks[0]->perigeeParameters();
-        const Trk::Perigee& aPerigee2 = inputTracks[1]->perigeeParameters();
-        int sflag = 0;
-        int errorcode = 0;
-        Amg::Vector3D startingPoint = m_vertexEstimator->getCirclesIntersectionPoint(&aPerigee1,&aPerigee2,sflag,errorcode);
-        if (errorcode != 0) {startingPoint(0) = 0.0; startingPoint(1) = 0.0; startingPoint(2) = 0.0;}
+        Amg::Vector3D startingPoint(0,0,0);
+        StatusCode sc=m_VKVFitter->VKalVrtFitFast(inputTracks, startingPoint, *state);
+        if(sc.isFailure()){
+            startingPoint = Amg::Vector3D(0,0,0);
+        }
         xAOD::Vertex* theResult = m_VKVFitter->fit(inputTracks, startingPoint, *state);
 
         // Added by ASC
