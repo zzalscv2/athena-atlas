@@ -18,7 +18,6 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 using namespace ActsTrk;
 

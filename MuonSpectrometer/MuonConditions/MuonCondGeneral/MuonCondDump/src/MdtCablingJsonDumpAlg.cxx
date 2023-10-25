@@ -4,7 +4,7 @@
 #include "MdtCablingJsonDumpAlg.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "ActsGeoUtils/ArrayHelper.h"
 #include "MuonCablingData/MdtMezzanineCard.h"
 #include <fstream>
 

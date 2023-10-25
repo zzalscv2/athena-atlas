@@ -6,9 +6,10 @@
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 #include <MuonReadoutGeometryR4/MdtTubeLayer.h>
-#include "Acts/Surfaces/LineBounds.hpp"
-#include "Acts/Surfaces/TrapezoidBounds.hpp"
 
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
 namespace MuonGMR4 {
 
 class MdtReadoutElement : public MuonReadoutElement {
@@ -53,9 +54,10 @@ class MdtReadoutElement : public MuonReadoutElement {
         double readoutSide{1.};
         /// Sets of surface bounds which is shared amongst all readout elements used
         /// to assign the same bound objects if 2 surfaces share the same dimensions.
-        SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds{};
-        SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
-
+#ifndef SIMULATIONBASE
+        ActsTrk::SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds{};
+        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
+#endif
 
     };
 
@@ -71,7 +73,7 @@ class MdtReadoutElement : public MuonReadoutElement {
     }
     /// Overload from the Acts::DetectorElement (2 * halfheight)
     double thickness() const override final;
-    
+
     StatusCode initElement() override final;
     /// Returns the multi layer of the MdtReadoutElement
     unsigned int multilayer() const;

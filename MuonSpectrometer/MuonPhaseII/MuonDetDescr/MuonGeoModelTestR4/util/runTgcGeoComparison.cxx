@@ -9,7 +9,6 @@
  *  
 */
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <MuonReadoutGeometryR4/StripDesign.h>
 
 #include <GeoPrimitives/GeoPrimitives.h>
@@ -29,6 +28,7 @@
 constexpr double tolerance = 100 * Gaudi::Units::micrometer;
 
 using namespace MuonGMR4;
+using namespace ActsTrk;
 /// Helper struct to represent a full Rpc chamber
 struct TgcChamber{
     /// Default constructor

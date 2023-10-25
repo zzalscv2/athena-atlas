@@ -8,9 +8,9 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 /// Then load the Acts TypeDef definitions for Eigen
 #include <string>
-
-#include "Acts/Definitions/Algebra.hpp"
-
+#ifndef SIMULATIONBASE 
+#   include "Acts/Definitions/Algebra.hpp"
+#endif
 namespace ActsTrk {
     /// Simple enum to Identify the Type of the
     /// ACTS sub detector

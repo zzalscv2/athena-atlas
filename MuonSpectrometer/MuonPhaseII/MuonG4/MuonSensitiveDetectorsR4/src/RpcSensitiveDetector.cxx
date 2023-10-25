@@ -14,7 +14,6 @@
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
-#include "MuonReadoutGeometryR4/StringUtils.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 inline std::ostream& operator<<(std::ostream& ostr, const G4StepPoint& step) {
@@ -34,7 +33,6 @@ inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int l
 }
 
 using namespace MuonGMR4;
-using namespace MuonGM;
 using namespace ActsTrk;
 
 

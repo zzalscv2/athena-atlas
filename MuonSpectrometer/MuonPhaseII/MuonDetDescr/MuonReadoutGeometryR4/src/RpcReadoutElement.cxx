@@ -5,11 +5,11 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/RpcReadoutElement.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
-#include <Acts/Surfaces/PlaneSurface.hpp>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
-
-#include "Acts/Surfaces/RectangleBounds.hpp"
+#ifndef SIMULATIONBASE
+#  include "Acts/Surfaces/RectangleBounds.hpp"
+#endif
 using namespace ActsTrk;
 
 namespace MuonGMR4 {
@@ -33,9 +33,10 @@ StatusCode RpcReadoutElement::initElement() {
        ATH_MSG_FATAL("The readout element "<<idHelperSvc()->toStringDetEl(identify())<<" doesn't have any layers defined");
        return StatusCode::FAILURE;
     }
-    
-    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), *m_pars.layerBounds->insert(std::make_shared<Acts::RectangleBounds>(m_pars.halfLength, m_pars.halfWidth)).first));
-
+#ifndef SIMULATIONBASE
+    ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.halfLength, 
+                                                                                      m_pars.halfWidth)));
+#endif
     for (unsigned int layer = 0; layer < m_pars.layers.size(); ++layer) {
       IdentifierHash layHash{layer};
       if (m_pars.layers[layer].hash() != layHash) {
@@ -46,14 +47,17 @@ StatusCode RpcReadoutElement::initElement() {
                                  [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
+#ifndef SIMULATIONBASE
       const StripDesign& design{m_pars.layers[layer].design()};
-      std::shared_ptr<Acts::RectangleBounds> lBounds = std::make_shared<Acts::RectangleBounds>(design.halfWidth(),
-                                                                                               design.shortHalfHeight());
-      ATH_CHECK(planeSurfaceFactory(layHash, *m_pars.layerBounds->insert(lBounds).first));
+      ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(design.halfWidth(),
+                                                                             design.shortHalfHeight())));
+#endif
     }
     m_gasThickness = (chamberStripPos(createHash(1, 2, 1, false)) - 
                       chamberStripPos(createHash(1, 1, 1, false))).mag();
+#ifndef SIMULATIONBASE
     m_pars.layerBounds.reset();
+#endif
     return StatusCode::SUCCESS;
 }
 

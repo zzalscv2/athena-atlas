@@ -6,14 +6,19 @@
 
 /// Includes the GeoPrimitives
 #include "ActsGeometryInterfaces/GeometryDefs.h"
-/// To be put first
-
-#include "Acts/Geometry/DetectorElementBase.hpp"
+/// In AthSimulation, the Acts core library is not available yet
+#ifndef SIMULATIONBASE 
+#   include "Acts/Geometry/DetectorElementBase.hpp"
+#endif
 #include "ActsGeometryInterfaces/RawGeomAlignStore.h"
 #include "Identifier/Identifier.h"
 
 namespace ActsTrk {
-    class IDetectorElement : public Acts::DetectorElementBase {
+    class IDetectorElement
+#ifndef SIMULATIONBASE    
+     : public Acts::DetectorElementBase
+#endif 
+                                      {
     public:
         virtual ~IDetectorElement() = default;
 

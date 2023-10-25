@@ -34,7 +34,7 @@
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
 
-#include "MuonReadoutGeometryR4/StringUtils.h"
+#include "ActsGeoUtils/StringUtils.h"
 
 
 #include <fstream>
@@ -310,7 +310,7 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
         data = *(static_cast<const std::string *>((attr["data"]).addressOfData()));
         delim = " ";
     }
-    const std::vector<std::string> tokens = MuonGMR4::tokenize(data, delim);
+    const std::vector<std::string> tokens = ActsTrk::tokenize(data, delim);
     if (tokens.size() < 2) {
         ATH_MSG_FATAL("The line "<<data<<" cannot be resolved into header & payload");
         return StatusCode::FAILURE;
@@ -324,7 +324,7 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
     channel["appliedRT"] = rt_ts_applied;
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     {       
-       std::vector<int> tokensHeader = MuonGMR4::tokenizeInt(data, ",");
+       std::vector<int> tokensHeader = ActsTrk::tokenizeInt(data, ",");
        if(tokensHeader.size()< 2){
             ATH_MSG_FATAL("Failed to deduce extract number of points & calib Identifier from "<<header);
             return StatusCode::FAILURE;
@@ -350,7 +350,7 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
        channel["tube"] = idHelper.tube(athenaId);
     }
     /// Next convert the rt relations to 
-    const std::vector<double> dataPoints = MuonGMR4::tokenizeDouble(payload, ",");
+    const std::vector<double> dataPoints = ActsTrk::tokenizeDouble(payload, ",");
     std::vector<double> radii{}, times{}, resos{};
     radii.reserve(numPoints);
     times.reserve(numPoints);
@@ -659,7 +659,7 @@ StatusCode MdtCalibDbAlg::legacyTubePayloadToJSON(const coral::AttributeList& at
     } else {
         data = *(static_cast<const std::string *>((attr["data"]).addressOfData()));
     }
-    std::vector<std::string> tokens = MuonGMR4::tokenize(data, "\n");
+    std::vector<std::string> tokens = ActsTrk::tokenize(data, "\n");
     if (tokens.size() < 2) {
         ATH_MSG_FATAL("The line "<<data<<" cannot be resolved into header & payload");
         return StatusCode::FAILURE;
@@ -675,10 +675,10 @@ StatusCode MdtCalibDbAlg::legacyTubePayloadToJSON(const coral::AttributeList& at
     int eta{0}, phi{0}, nTubes{0};
     {
         std::replace(header.begin(), header.end(),'_', ',');
-        const std::vector<std::string> headerTokens = MuonGMR4::tokenize(header, ",");
-        phi = MuonGMR4::atoi(headerTokens[1]);
-        eta = MuonGMR4::atoi(headerTokens[2]);
-        nTubes = MuonGMR4::atoi(headerTokens[5]);
+        const std::vector<std::string> headerTokens = ActsTrk::tokenize(header, ",");
+        phi = ActsTrk::atoi(headerTokens[1]);
+        eta = ActsTrk::atoi(headerTokens[2]);
+        nTubes = ActsTrk::atoi(headerTokens[5]);
     }
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
     bool isValid{false};
@@ -699,7 +699,7 @@ StatusCode MdtCalibDbAlg::legacyTubePayloadToJSON(const coral::AttributeList& at
     channel["eta"] = eta;
     channel["phi"] = phi;
 
-    const std::vector<double> payLoadData = MuonGMR4::tokenizeDouble(payload, ",");
+    const std::vector<double> payLoadData = ActsTrk::tokenizeDouble(payload, ",");
     std::vector<double> tzeros{}, meanAdcs{};
     std::vector<int> statusCodes{};
     /// The payload comes along in triplets. The first element of the triplet represents the

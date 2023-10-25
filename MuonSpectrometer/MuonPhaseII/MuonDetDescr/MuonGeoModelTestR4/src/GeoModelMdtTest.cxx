@@ -3,13 +3,12 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelMdtTest.h"
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
 
-
+using namespace ActsTrk;
 namespace MuonGMR4{
 
 GeoModelMdtTest::GeoModelMdtTest(const std::string& name, ISvcLocator* pSvcLocator):

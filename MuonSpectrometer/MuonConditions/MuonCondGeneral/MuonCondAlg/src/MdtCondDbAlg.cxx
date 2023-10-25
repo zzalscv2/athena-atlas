@@ -5,7 +5,7 @@
 #include "MuonCondAlg/MdtCondDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
-#include "MuonReadoutGeometryR4/StringUtils.h"
+#include "ActsGeoUtils/StringUtils.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
@@ -159,11 +159,11 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
         if (atr.size() == 1) {
             hv_name = *(static_cast<const std::string*>((atr["fsm_currentState"]).addressOfData()));
             
-            auto tokens = MuonGMR4::tokenize(hv_name, " ");
-            auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
+            auto tokens = ActsTrk::tokenize(hv_name, " ");
+            auto tokens2 = ActsTrk::tokenize(hv_payload, "_");
 
             if (tokens[0] != "ON" && tokens[0] != "STANDBY" && tokens[0] != "UNKNOWN") {
-                int multilayer = MuonGMR4::atoi(tokens2[3]);
+                int multilayer = ActsTrk::atoi(tokens2[3]);
                 const auto  &chamber_name = tokens2[2];
                 Identifier ChamberId = identifyChamber(chamber_name);
                 if (ChamberId.is_valid()) {
@@ -174,7 +174,7 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
                 }
             }
             if (tokens[0] == "STANDBY") {
-                int multilayer = MuonGMR4::atoi(tokens2[3]);
+                int multilayer = ActsTrk::atoi(tokens2[3]);
                 const auto &chamber_name = tokens2[2];
                 Identifier ChamberId = identifyChamber(chamber_name);
                 if (ChamberId.is_valid()) {
@@ -223,9 +223,9 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
         if (atr_v0.size() == 1) {
             setPointsV0_name = *(static_cast<const float*>((atr_v0["readBackSettings_v0"]).addressOfData()));
             
-            auto tokens2 = MuonGMR4::tokenize(setPointsV0_payload, "_");
+            auto tokens2 = ActsTrk::tokenize(setPointsV0_payload, "_");
 
-            int multilayer = MuonGMR4::atoi(tokens2[3]);
+            int multilayer = ActsTrk::atoi(tokens2[3]);
             const auto &chamber_name = tokens2[2];
             Identifier ChamberId = identifyChamber(chamber_name);
             Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
@@ -245,9 +245,9 @@ StatusCode MdtCondDbAlg::loadDataPsHv(const EventContext& ctx, MdtCondDbData& wr
             setPointsV1_name = *(static_cast<const float*>((atr_v1["readBackSettings_v1"]).addressOfData()));
 
             
-            auto tokens2= MuonGMR4::tokenize(setPointsV1_payload, "_");
+            auto tokens2= ActsTrk::tokenize(setPointsV1_payload, "_");
 
-            int multilayer = MuonGMR4::atoi(tokens2[3]);
+            int multilayer = ActsTrk::atoi(tokens2[3]);
             const auto &chamber_name = tokens2[2];
             Identifier ChamberId = identifyChamber(chamber_name);
             Identifier MultiLayerId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, multilayer, 1, 1);
@@ -288,8 +288,8 @@ StatusCode MdtCondDbAlg::loadDataPsLv(const EventContext& ctx, MdtCondDbData& wr
         if (!atr.size()) { continue; }
         hv_name = *(static_cast<const std::string*>((atr["fsm_currentState"]).addressOfData()));
         
-        auto tokens = MuonGMR4::tokenize(hv_name, " ");        
-        auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
+        auto tokens = ActsTrk::tokenize(hv_name, " ");        
+        auto tokens2 = ActsTrk::tokenize(hv_payload, "_");
         if (tokens[0] != "ON") {
             const auto &chamber_name = tokens2[2];
             Identifier ChamberId = identifyChamber(chamber_name);
@@ -358,7 +358,7 @@ StatusCode MdtCondDbAlg::loadDataLv(const EventContext& ctx, MdtCondDbData& writ
             continue;
         }
         ATH_MSG_VERBOSE("Channel "<<lv_name<<" "<<lv_payload);
-        auto tokens = MuonGMR4::tokenize(lv_name, " "); 
+        auto tokens = ActsTrk::tokenize(lv_name, " "); 
 
         if (tokens[0] != "ON") {
            Identifier ChamberId = identifyChamber(lv_payload);
@@ -384,7 +384,7 @@ StatusCode MdtCondDbAlg::loadDroppedChambers(const EventContext& ctx, MdtCondDbD
         const coral::AttributeList& atr = itr.second;
         const std::string& chamber_dropped{*(static_cast<const std::string*>((atr["Chambers_disabled"]).addressOfData()))};
         
-        auto tokens = MuonGMR4::tokenize(chamber_dropped, " ");
+        auto tokens = ActsTrk::tokenize(chamber_dropped, " ");
         for (auto & token : tokens) {
             if (token != "0") {
                 const auto &chamber_name = token;
@@ -415,16 +415,16 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(const EventContext& ctx, MdtCondDbDa
         const std::string& list_tube{*(static_cast<const std::string*>((atr["Dead_tube"]).addressOfData()))};
 
         Identifier ChamberId = identifyChamber(chamber_name);
-        auto tokens = MuonGMR4::tokenize(list_tube, " ");
-        auto tokens_mlayer = MuonGMR4::tokenize(list_mlayer, " ");
-        auto tokens_layer = MuonGMR4::tokenize(list_layer, " ");
+        auto tokens = ActsTrk::tokenize(list_tube, " ");
+        auto tokens_mlayer = ActsTrk::tokenize(list_mlayer, " ");
+        auto tokens_layer = ActsTrk::tokenize(list_layer, " ");
 
         for (auto & token : tokens) {
             
             if (token != "0") {
-                int ml = MuonGMR4::atoi(token.substr(0, 1));
-                int layer = MuonGMR4::atoi(token.substr(1, 2));
-                int tube = MuonGMR4::atoi(token.substr(2));
+                int ml = ActsTrk::atoi(token.substr(0, 1));
+                int layer = ActsTrk::atoi(token.substr(1, 2));
+                int tube = ActsTrk::atoi(token.substr(2));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, tube);
                 writeCdo.setDeadTube(ChannelId);
                 writeCdo.setDeadChamber(ChamberId);
@@ -433,7 +433,7 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(const EventContext& ctx, MdtCondDbDa
 
         for (unsigned int i = 0; i < tokens_mlayer.size(); i++) {
             if (tokens_mlayer[i] != "0") {
-                int ml = MuonGMR4::atoi(tokens_mlayer[i].substr(0));
+                int ml = ActsTrk::atoi(tokens_mlayer[i].substr(0));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, 1, 1);
                 writeCdo.setDeadMultilayer(ChannelId);
                 writeCdo.setDeadChamber(ChamberId);
@@ -442,8 +442,8 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(const EventContext& ctx, MdtCondDbDa
 
         for (unsigned int i = 0; i < tokens_layer.size(); i++) {
             if (tokens_layer[i] != "0") {
-                int ml = MuonGMR4::atoi(tokens_layer[i].substr(0, 1));
-                int layer = MuonGMR4::atoi(tokens_layer[i].substr(1));
+                int ml = ActsTrk::atoi(tokens_layer[i].substr(0, 1));
+                int layer = ActsTrk::atoi(tokens_layer[i].substr(1));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, 1);
                 writeCdo.setDeadLayer(ChannelId);
                 writeCdo.setDeadChamber(ChamberId);
@@ -471,13 +471,13 @@ StatusCode MdtCondDbAlg::loadMcDeadTubes(const EventContext& ctx, MdtCondDbData&
         std::string dead_tube = *(static_cast<const std::string*>((atr["DeadTube_List"]).addressOfData()));
         std::string chamber_name = *(static_cast<const std::string*>((atr["Chamber_Name"]).addressOfData()));
 
-        auto tokens = MuonGMR4::tokenize(dead_tube, " ");
+        auto tokens = ActsTrk::tokenize(dead_tube, " ");
         Identifier ChamberId = identifyChamber(chamber_name);
 
         for (auto & token : tokens) {
-            int ml = MuonGMR4::atoi(token.substr(0, 1));
-            int layer = MuonGMR4::atoi(token.substr(1, 2));
-            int tube = MuonGMR4::atoi(token.substr(2));
+            int ml = ActsTrk::atoi(token.substr(0, 1));
+            int layer = ActsTrk::atoi(token.substr(1, 2));
+            int tube = ActsTrk::atoi(token.substr(2));
             Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, tube);
             writeCdo.setDeadTube(ChannelId);
         }
@@ -504,9 +504,9 @@ StatusCode MdtCondDbAlg::loadMcNoisyChannels(const EventContext& ctx, MdtCondDbD
         const std::string& hv_payload = readCdo->chanName(chanNum);
         const std::string& hv_name{*(static_cast<const std::string*>((atr["fsm_currentState"]).addressOfData()))};
         
-        auto tokens = MuonGMR4::tokenize(hv_name, " ");
+        auto tokens = ActsTrk::tokenize(hv_name, " ");
         
-        auto tokens2 = MuonGMR4::tokenize(hv_payload, "_");
+        auto tokens2 = ActsTrk::tokenize(hv_payload, "_");
 
         if (tokens[0] != "ON") {
             Identifier ChamberId = identifyChamber(tokens2[2]);

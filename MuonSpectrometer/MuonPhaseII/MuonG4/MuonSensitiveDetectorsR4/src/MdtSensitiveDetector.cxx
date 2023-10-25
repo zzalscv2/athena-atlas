@@ -13,7 +13,7 @@
 #include <GaudiKernel/MsgStream.h>
 #include <GeoPrimitives/CLHEPtoEigenConverter.h>
 #include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
+
 #include <GaudiKernel/SystemOfUnits.h>
 
 inline std::ostream& operator<<(std::ostream& ostr, const G4Track& step) {
@@ -31,7 +31,6 @@ inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int l
             Amg::CLHEPRotationToEigen(*history->GetRotation(level)).inverse();
 }
 using namespace MuonGMR4;
-using namespace MuonGM;
 using namespace ActsTrk;
 namespace MuonG4R4{
 

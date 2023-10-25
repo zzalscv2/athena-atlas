@@ -4,9 +4,7 @@
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
-#include <Acts/Surfaces/PlaneSurface.hpp>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
 
@@ -47,10 +45,12 @@ StatusCode MdtReadoutElement::initElement() {
      ATH_MSG_FATAL("The tubes of "<<idHelperSvc()->toStringDetEl(identify())<<" will fall together on a single point. Please check "<<std::endl<<m_pars);
      return StatusCode::FAILURE;
   }
+#ifndef SIMULATIONBASE
   /// Create bounds that are representing the surface planes of each tube layer & the readout element itself
-  std::shared_ptr<Acts::TrapezoidBounds> planeBounds = std::make_shared<Acts::TrapezoidBounds>(m_pars.shortHalfX, m_pars.longHalfX, m_pars.halfY);
-  planeBounds = *m_pars.layerBounds->insert(planeBounds).first;
-  ATH_CHECK(planeSurfaceFactory(geoTransformHash(), planeBounds));
+  ATH_CHECK(planeSurfaceFactory(geoTransformHash(), m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
+                                                                                    m_pars.longHalfX, 
+                                                                                    m_pars.halfY)));
+#endif
   /// Coordinate system of the trapezoid is in the center while the tubes are defined 
   /// w.r.t. to the chamber edge. Move first tube into the proper position
 
@@ -63,7 +63,11 @@ StatusCode MdtReadoutElement::initElement() {
                     const Amg::Translation3D toCenter{m_pars.halfY * Amg::Vector3D::UnitY()};
                     return toStation(store) * toChamberLayer(hash)*toCenter; 
                 }));
-     ATH_CHECK(planeSurfaceFactory(layHash, planeBounds));
+#ifndef SIMULATIONBASE
+     ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(m_pars.shortHalfX, 
+                                                                            m_pars.longHalfX, 
+                                                                            m_pars.halfY)));
+#endif
     /// Cache the transformations to the tube layers
     std::optional<Amg::Vector3D> prevTubePos{std::nullopt};
     for (unsigned int tube = 1; tube <= numTubesInLay(); ++ tube) {
@@ -72,7 +76,9 @@ StatusCode MdtReadoutElement::initElement() {
                 [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                     return toStation(store) * toTubeFrame(hash); 
                 }));
-      ATH_CHECK(strawSurfaceFactory(idHash, *m_pars.tubeBounds->insert(std::make_shared<Acts::LineBounds>(innerTubeRadius(), 0.5*tubeLength(idHash))).first));
+#ifndef SIMULATIONBASE
+      ATH_CHECK(strawSurfaceFactory(idHash, m_pars.tubeBounds->make_bounds(innerTubeRadius(), 0.5*tubeLength(idHash))));
+#endif
       ///Ensure that all linear transformations are rotations
       const AmgSymMatrix(3) tubeRot = toTubeFrame(idHash).linear();
       if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
@@ -113,8 +119,10 @@ StatusCode MdtReadoutElement::initElement() {
     }
  }
   m_init = true;
+#ifndef SIMULATIONBASE
   m_pars.tubeBounds.reset();
   m_pars.layerBounds.reset();
+#endif
   return StatusCode::SUCCESS;
 }
 

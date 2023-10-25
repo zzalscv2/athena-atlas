@@ -2,7 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonGeoModelR4/MuonGeoUtilityTool.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
+
+#include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GeoModelKernel/GeoBox.h>
 #include <GeoModelKernel/GeoTrd.h>
 #include <GeoModelKernel/GeoShapeShift.h>

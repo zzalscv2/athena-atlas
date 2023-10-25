@@ -3,12 +3,12 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelTgcTest.h"
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
 
+using namespace ActsTrk;
 
 namespace MuonGMR4{
 

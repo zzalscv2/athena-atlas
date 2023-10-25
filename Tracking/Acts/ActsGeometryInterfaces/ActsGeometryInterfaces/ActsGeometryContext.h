@@ -7,10 +7,13 @@
 
 #include <map>
 #include <memory>
-/// Includes the GeoPrimitives
+/// Include the GeoPrimitives which need to be put first
 #include "ActsGeometryInterfaces/GeometryDefs.h"
-/// To be put first
-#include "Acts/Geometry/GeometryContext.hpp"
+/// If the package is loaded in AthSimulation, the Acts library is not avaialble
+#ifndef SIMULATIONBASE 
+#   include "Acts/Geometry/GeometryContext.hpp"
+#endif
+
 #include "ActsGeometryInterfaces/AlignmentStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
@@ -26,8 +29,9 @@ public:
     using SubDetAlignments = std::map<DetectorType, GeoModel::TransientConstSharedPtr<AlignmentStore>>;
 
     SubDetAlignments alignmentStores{};
-
+#ifndef SIMULATIONBASE 
     Acts::GeometryContext context() const { return Acts::GeometryContext(this); }
+#endif
 };
 
 CLASS_DEF(ActsGeometryContext, 51464195, 1)

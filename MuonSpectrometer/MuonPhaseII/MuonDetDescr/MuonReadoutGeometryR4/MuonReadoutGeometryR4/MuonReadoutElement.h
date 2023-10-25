@@ -11,14 +11,15 @@
 #include <GeoModelKernel/GeoVDetectorElement.h>
 #include <GeoModelKernel/GeoAlignableTransform.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <MuonReadoutGeometryR4/MuonTransformCache.h>
+
+#include <ActsGeoUtils/TransformCache.h>
+#include <ActsGeoUtils/SurfaceCache.h>
 #include <ActsGeometryInterfaces/IDetectorElement.h>
-#include <MuonReadoutGeometryR4/MuonSurfaceCache.h>
 
-#include "Acts/Surfaces/LineBounds.hpp"
-#include "Acts/Surfaces/PlanarBounds.hpp"
-
-#include <mutex>
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/LineBounds.hpp"
+#   include "Acts/Surfaces/PlanarBounds.hpp"
+#endif
 namespace MuonGMR4 {
 ///   The MuonReadoutElement is an abstract class representing the geometry
 ///   representing the muon detector. The segmentation of the detectors varies
@@ -40,13 +41,10 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
         GeoVFullPhysVol* physVol{nullptr};
         /// Pointer to the alignable transformation 
         const GeoAlignableTransform* alignTransform{nullptr};
-        /// chamber design name (see below for explanation)
+        /// chamber design name as it's occuring in the parameter book tables E.g. BMS5, RPC10, etc.
         std::string chambDesign{""};
         /// ATLAS identifier
         Identifier detElId{0};        
-        /// Basic transformation to be applied on top in order 
-        /// to reach the center of the volume from the GeoModel transform
-        Amg::Transform3D toVolCenter{Amg::Transform3D::Identity()};
     };
     
 
@@ -137,13 +135,9 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     const Amg::Transform3D& localToGlobalTrans(const ActsGeometryContext& ctx,
                                                const IdentifierHash& id) const;
 
-     
-     const Acts::Transform3& transform(const Acts::GeometryContext& gctx) const override final;
-     /// Returns the transformation from the origin given by GeoModel to 
-     /// the center of the volume
-     const Amg::Transform3D& toCenterTrans() const;
-     
-    
+#ifndef SIMULATIONBASE
+    /// Returns the transformation to the origin of the chamber coordinate system
+    const Acts::Transform3& transform(const Acts::GeometryContext& gctx) const override final;    
     /// Returns the surface associated to the readout element plane
     const Acts::Surface& surface() const override final;
     Acts::Surface& surface() override final;
@@ -154,10 +148,14 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
     /// Returns the pointer associated to a certain wire / plane
     std::shared_ptr<Acts::Surface> surfacePtr(const IdentifierHash& hash) const;
-
+#else
+    /// In AthSimulation there's no Acts::DetectorElement which is declaring this method
+    /// in its interface.
+    virtual double thickness() const = 0;
+#endif
 
    protected:
-     using TransformMaker = MuonTransformCache::TransformMaker;
+     using TransformMaker = ActsTrk::TransformCache::TransformMaker;
       
      /// Inserts a transfomration for caching
      StatusCode insertTransform(const IdentifierHash& hash,
@@ -165,13 +163,13 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 
      /// Returns the transformation into the center of the readout volume
      Amg::Transform3D toStation(ActsTrk::RawGeomAlignStore* alignStore) const;
-
+#ifndef SIMULATIONBASE
      //Creates a MuonSurfaceCache for straw surfaces using the given Bounds and Identifier Hash
      StatusCode strawSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::LineBounds> lBounds);
 
      //Creates a MuonSurfaceCache for plane surface using the given Bounds and Identifier Hash
      StatusCode planeSurfaceFactory(const IdentifierHash& hash, std::shared_ptr<Acts::PlanarBounds> pBounds);
-     
+#endif     
      /// Returns the hash that is associated with the surface cache holding the transformation that is
      /// placing the ReadoutElement inside the ATLAS coordinate system.
      static IdentifierHash geoTransformHash();
@@ -192,11 +190,13 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     int m_stPhi{-1};
 
     /// Cache all global to local transformations
-    MuonTransformSet m_globalToLocalCaches{};
+    ActsTrk::TransformCacheSet m_globalToLocalCaches{};
     /// Cache all local to global transformations
-    MuonTransformSet m_localToGlobalCaches{};
+    ActsTrk::TransformCacheSet m_localToGlobalCaches{};
+#ifndef SIMULATIONBASE
     ///Cache of all associated surfaces
-    MuonSurfaceSet m_surfaces{};
+    ActsTrk::SurfaceCacheSet m_surfaces{};
+#endif
 };
 }  // namespace MuonGMR4
 #include <MuonReadoutGeometryR4/MuonReadoutElement.icc>

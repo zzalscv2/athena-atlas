@@ -17,7 +17,6 @@
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
 namespace {
@@ -208,8 +207,9 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
     alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
-   
+#ifndef SIMULATIONBASE
     SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::RectangleBounds>>();
+#endif
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
@@ -243,7 +243,9 @@ StatusCode RpcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         define.detElId = elementID;
         ATH_MSG_VERBOSE("Key  "<<key<<" lead to Identifier "<<m_idHelperSvc->toStringDetEl(elementID));
         ATH_CHECK(loadDimensions(define, facCache));
+#ifndef SIMULATIONBASE
         define.layerBounds = layerBounds;
+#endif
         std::unique_ptr<RpcReadoutElement> readoutEle = std::make_unique<RpcReadoutElement>(std::move(define));
         ATH_CHECK(mgr.addRpcReadoutElement(std::move(readoutEle)));
     }    

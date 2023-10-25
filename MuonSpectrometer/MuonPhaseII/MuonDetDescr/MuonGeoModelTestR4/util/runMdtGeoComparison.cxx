@@ -13,7 +13,6 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <MuonCablingData/MdtCablingData.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <iostream>
@@ -24,6 +23,7 @@
 #include <TTreeReader.h>
 
 using namespace MuonGMR4;
+using namespace ActsTrk;
 /// Helper struct to represent a full Mdt chamber
 struct MdtChamber{
     /// Default constructor
