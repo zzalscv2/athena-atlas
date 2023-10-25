@@ -11,7 +11,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def VTuneProfilerServiceCfg(flags, **kwargs):
     """Configure VTune profiler"""
     kwargs.setdefault("ResumeEvent", flags.Concurrency.NumThreads + 1)
-    kwargs.setdefault("ProfiledAlgs", flags.PerfMon.ProfiledAlgs)
+    kwargs.setdefault("ProfiledAlgs", flags.PerfMon.VTune.ProfiledAlgs)
 
     VTuneProfilerService = CompFactory.VTuneProfilerService
     acc = ComponentAccumulator()
