@@ -122,15 +122,15 @@ class FitParameters {
   double m_cosTheta1;
   double m_cotTheta;
   double m_d0;
-  Amg::VectorX* m_differences;
+  Amg::VectorX m_differences{};
   bool m_eigen{};
   bool m_extremeMomentum;
-  Amg::MatrixX* m_finalCovariance;
+  Amg::MatrixX* m_finalCovariance;//not owning ptr
   int m_firstAlignmentParameter;
   int m_firstScatteringParameter;
   bool m_fitEnergyDeposit;
   bool m_fitMomentum;
-  const Amg::MatrixX* m_fullCovariance;
+  const Amg::MatrixX* m_fullCovariance;//not owning ptr
   double m_minEnergyDeposit;
   int m_numberAlignments;
   int m_numberOscillations;
@@ -188,14 +188,15 @@ inline double FitParameters::d0(void) const {
 }
 
 inline double FitParameters::difference(int param) const {
-  if (!m_differences)
+  if (m_differences.size() == 0) {
     return 0.;
+  }
   /// Use as_const to avoid compiler warning
-  return std::as_const(*m_differences)(param);
+  return std::as_const(m_differences)(param);
 }
 
 inline const Amg::VectorX& FitParameters::differences(void) const {
-  return *m_differences;
+  return m_differences;
 }
 
 inline Amg::Vector3D FitParameters::direction(void) const {
