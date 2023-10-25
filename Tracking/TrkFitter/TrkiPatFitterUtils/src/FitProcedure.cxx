@@ -370,7 +370,7 @@ const FitProcedureQuality& FitProcedure::execute(
   cache.numberParameters = parameters->numberParameters();
   cache.worstMeasurement = 0;
   MeasurementProcessor measurementProcessor(
-      asymmetricCaloEnergy, *cache.fitMatrices->derivativeMatrix(), intersector,
+      asymmetricCaloEnergy, cache.fitMatrices->derivativeMatrix(), intersector,
       measurements, parameters, m_rungeKuttaIntersector, m_stepPropagator,
       m_useStepPropagator);
 
@@ -593,14 +593,14 @@ const FitProcedureQuality& FitProcedure::execute(
     // field integral
     const Amg::MatrixX* fullCovariance = cache.fitMatrices->fullCovariance();
     if (fullCovariance) {
-      Amg::MatrixX* finalCovariance = cache.fitMatrices->finalCovariance();
+      Amg::MatrixX& finalCovariance = cache.fitMatrices->finalCovariance();
       if (!for_iPatTrack) {
         if (!m_lineFit)
           measurementProcessor.fieldIntegralUncertainty(*cache.log,
-                                                        *finalCovariance);
+                                                        finalCovariance);
         measurementProcessor.propagationDerivatives();
       }
-      parameters->covariance(finalCovariance, fullCovariance);
+      parameters->covariance(&finalCovariance, fullCovariance);
 
       // fit quality
       if (perigeeQuality) {
