@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -42,10 +42,14 @@ class FitMatrices {
  public:
   FitMatrices(bool constrainedAlignmentEffects);
 
-  ~FitMatrices(void);
-
-  // forbidden copy constructor
-  // forbidden assignment operator
+  // copy, assignment deleted
+  FitMatrices(const FitMatrices&) = delete;
+  FitMatrices& operator=(const FitMatrices&) = delete;
+  //move defaulted
+  FitMatrices(FitMatrices&&) = default;
+  FitMatrices& operator=(FitMatrices&&) = default;
+  //dtor default
+  ~FitMatrices() = default ;
 
   // debugging aid: check 'smart' pointers
   void checkPointers(MsgStream& log) const;
@@ -54,13 +58,13 @@ class FitMatrices {
   static double chiSquaredChange(void);
 
   // accessor to DerivativeMatrix (eigen)
-  Amg::MatrixX* derivativeMatrix(void);
+  Amg::MatrixX& derivativeMatrix();
 
   // accessor to final covariance (5*5)
   //   includes leading material effects on construction, but
   //   field gradient effects have to be added by MeasurementProcessor as
   //   'extrapolation aware'
-  Amg::MatrixX* finalCovariance(void);
+  Amg::MatrixX& finalCovariance();
 
   // produce full covariance (including scatterer parameters) i.e. invert weight
   // matrix NOTE: this does not contain the external errors which will be
@@ -103,11 +107,7 @@ class FitMatrices {
   void usePerigee(const FitMeasurement& measurement);
 
  private:
-  // copy, assignment: no semantics, no implementation
-  FitMatrices(const FitMatrices&) = delete;
-  FitMatrices& operator=(const FitMatrices&) = delete;
-
-  // add perigee measurement
+   // add perigee measurement
   void addPerigeeMeasurement(void);
   // fix for momentum singularity
   void avoidMomentumSingularity(void);  // using Eigen
@@ -115,35 +115,35 @@ class FitMatrices {
   fitMatrix m_fitMatrix;
   int m_columnsDM;
   bool m_constrainedAlignmentEffects;
-  Amg::MatrixX* m_covariance;
-  Amg::MatrixX* m_derivativeMatrix;
-  Amg::MatrixX* m_finalCovariance;
+  Amg::MatrixX m_covariance{};
+  Amg::MatrixX m_derivativeMatrix{};
+  Amg::MatrixX m_finalCovariance{};
   std::vector<int> m_firstRowForParameter;
   double m_largePhiWeight;
   std::vector<int> m_lastRowForParameter;
   bool m_matrixFromCLHEP;
-  std::vector<FitMeasurement*>* m_measurements;
+  std::vector<FitMeasurement*>* m_measurements;  // not owning ptr
   int m_numberDoF;
   int m_numberDriftCircles;
   int m_numberPerigee;
   FitParameters* m_parameters;
-  const Amg::VectorX* m_perigee;
+  const Amg::VectorX* m_perigee;  // not owning ptr
   Amg::MatrixX m_perigeeDifference;
-  const Amg::MatrixX* m_perigeeWeight;
-  std::vector<double>* m_residuals;
+  const Amg::MatrixX* m_perigeeWeight;  // not owning ptr
+  std::vector<double> m_residuals;
   int m_rowsDM;
   bool m_usePerigee;
-  Amg::MatrixX* m_weight;
-  Amg::VectorX* m_weightedDifference;
+  Amg::MatrixX m_weight;
+  Amg::VectorX m_weightedDifference;
 };
 
 //<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 
-inline Amg::MatrixX* FitMatrices::derivativeMatrix(void) {
+inline Amg::MatrixX& FitMatrices::derivativeMatrix(void) {
   return m_derivativeMatrix;
 }
 
-inline Amg::MatrixX* FitMatrices::finalCovariance(void) {
+inline Amg::MatrixX& FitMatrices::finalCovariance(void) {
   return m_finalCovariance;
 }
 

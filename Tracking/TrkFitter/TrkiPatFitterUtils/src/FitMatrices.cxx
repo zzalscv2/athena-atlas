@@ -42,9 +42,6 @@ FitMatrices::FitMatrices(bool constrainedAlignmentEffects)
     : m_fitMatrix{},
       m_columnsDM(0),
       m_constrainedAlignmentEffects(constrainedAlignmentEffects),
-      m_covariance(nullptr),
-      m_derivativeMatrix(nullptr),
-      m_finalCovariance(nullptr),
       m_largePhiWeight(10000.),  // arbitrary - equiv to 10um
       m_matrixFromCLHEP(false),
       m_measurements(nullptr),
@@ -55,20 +52,8 @@ FitMatrices::FitMatrices(bool constrainedAlignmentEffects)
       m_perigee(nullptr),
       m_perigeeDifference(Amg::MatrixX(1, m_numberPerigee)),
       m_perigeeWeight(nullptr),
-      m_residuals(nullptr),
       m_rowsDM(0),
-      m_usePerigee(false),
-      m_weight(nullptr),
-      m_weightedDifference(nullptr) {}
-
-FitMatrices::~FitMatrices(void) {
-  delete m_covariance;
-  delete m_derivativeMatrix;
-  delete m_finalCovariance;
-  delete m_residuals;
-  delete m_weight;
-  delete m_weightedDifference;
-}
+      m_usePerigee(false){}
 
 void FitMatrices::checkPointers(MsgStream& log) const {
   // debugging: check smart pointers
@@ -102,10 +87,10 @@ double FitMatrices::chiSquaredChange(void) {
 
 const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   // return result if matrix already inverted
-  if (m_covariance) {
-    return m_covariance;
+  if (m_covariance.size()!=0) {
+    return &m_covariance;
   }
-  m_covariance = new Amg::MatrixX(m_columnsDM, m_columnsDM);
+  m_covariance = Amg::MatrixX(m_columnsDM, m_columnsDM);
 
   // fix weighting    ???? shouldn't we just remove large phi weight?
   if (m_parameters->phiInstability()) {
@@ -113,7 +98,7 @@ const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   }
 
   // invert weight matrix
-  Amg::MatrixX& covariance = *m_covariance;
+  Amg::MatrixX& covariance = m_covariance;
   // avoid singularity through ill-defined momentum   ???? again
   avoidMomentumSingularity();
 
@@ -127,13 +112,12 @@ const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   weight.selfadjointView<0x2>();
 
   // check if m_weights makes sense before inverting
-  if (!Amg::saneCovarianceDiagonal(*m_weight)) {
-    delete m_covariance;
-    m_covariance = nullptr;
+  if (!Amg::saneCovarianceDiagonal(m_weight)) {
+    m_covariance.resize(0, 0);
     return nullptr;
   }
 
-  weight = (*m_weight).inverse();
+  weight = (m_weight).inverse();
   for (int row = 0; row != m_columnsDM; ++row) {
     for (int col = 0; col != m_columnsDM; ++col)
       covariance(row, col) = weight(col, row);
@@ -164,16 +148,15 @@ const Amg::MatrixX* FitMatrices::fullCovariance(void) {
   // FIXME: errors underestimated on d0,z0 when large scatterer precedes precise
   // measurements final covariance starts with 5*5 representing perigee from
   // full covariance
-  delete m_finalCovariance;
-  m_finalCovariance = new Amg::MatrixX(5, 5);
+  m_finalCovariance = Amg::MatrixX(5, 5);
   for (int i = 0; i != 5; ++i) {
     for (int j = 0; j != 5; ++j) {
-      (*m_finalCovariance)(i, j) = covariance(i, j);
+      (m_finalCovariance)(i, j) = covariance(i, j);
     }
   }
 
   // return pointer to full covariance
-  return m_covariance;
+  return &m_covariance;
 }
 
 double FitMatrices::perigeeChiSquared(void) {
@@ -276,7 +259,7 @@ void FitMatrices::printWeightMatrix(void) {
               << row << " col  0     ";
     for (int col = 0; col <= row; ++col) {
       std::cout << std::setiosflags(std::ios::scientific) << std::setbase(10)
-                << std::setw(10) << (*m_weight)(row, col) << "  ";
+                << std::setw(10) << (m_weight)(row, col) << "  ";
 
       if ((col + 1) % 13 == 0 && col < row)
         std::cout << std::endl
@@ -306,12 +289,9 @@ void FitMatrices::refinePointers(void) {
 }
 
 void FitMatrices::releaseMemory(void) {
-  delete m_derivativeMatrix;
-  delete m_weight;
-  delete m_weightedDifference;
-  m_derivativeMatrix = nullptr;
-  m_weight = nullptr;
-  m_weightedDifference = nullptr;
+  m_derivativeMatrix.resize(0,0);
+  m_weight.resize(0,0);
+  m_weightedDifference.resize(0,0);
 }
 
 int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
@@ -328,8 +308,7 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
   m_lastRowForParameter.clear();
   m_lastRowForParameter.reserve(128);
   m_parameters = parameters;
-  delete m_residuals;
-  m_residuals = new std::vector<double>(2 * measurements.size(), 0.);
+  m_residuals = std::vector<double>(2 * measurements.size(), 0.);
   m_numberDriftCircles = 0;
   bool haveMeasurement = false;
   bool haveVertex = false;
@@ -348,7 +327,7 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
 
     // set pointers into big matrix
     (**m).derivative(&m_fitMatrix.derivative[row][0]);
-    (**m).residual(row + m_residuals->begin());
+    (**m).residual(row + m_residuals.begin());
     ++row;
     if ((**m).is2Dimensional()) {
       m_firstRowForParameter[row] = row;
@@ -410,7 +389,7 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
 
     // set pointers into big matrix
     (**m).derivative(&m_fitMatrix.derivative[row][0]);
-    (**m).residual(row + m_residuals->begin());
+    (**m).residual(row + m_residuals.begin());
     ++row;
     if ((**m).is2Dimensional()) {
       (**m).derivative2(&m_fitMatrix.derivative[row][0]);
@@ -426,7 +405,7 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
 
     // set pointers into big matrix
     (**m).derivative(&m_fitMatrix.derivative[row][0]);
-    (**m).residual(row + m_residuals->begin());
+    (**m).residual(row + m_residuals.begin());
     ++row;
     if ((**m).is2Dimensional()) {
       (**m).derivative2(&m_fitMatrix.derivative[row][0]);
@@ -541,7 +520,7 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
       for (int i = 0; i != numberParameters; ++i)
         m_fitMatrix.derivative[row][i] = 0.;
       (**m).derivative(&m_fitMatrix.derivative[row][0]);
-      (**m).residual(row + m_residuals->begin());
+      (**m).residual(row + m_residuals.begin());
       ++row;
     }
     for (int i = 0; i != numberParameters; ++i)
@@ -562,30 +541,25 @@ int FitMatrices::setDimensions(std::vector<FitMeasurement*>& measurements,
     ++m_numberDoF;
 
   // we don't have any fit results yet
-  delete m_covariance;
-  m_covariance = nullptr;
-  delete m_finalCovariance;
-  m_finalCovariance = nullptr;
+  m_covariance.resize(0,0);
+  m_finalCovariance.resize(0,0);
 
   // reallocate to get correct matrix sizes
-  if (!m_derivativeMatrix || !m_weight || numberParameters != m_columnsDM) {
+  if (m_derivativeMatrix.size() == 0 || m_weight.size() == 0 ||
+      numberParameters != m_columnsDM) {
     m_columnsDM = numberParameters;
-    delete m_derivativeMatrix;
-    m_derivativeMatrix = new Amg::MatrixX(m_rowsDM, m_columnsDM);
-    delete m_weight;
-    m_weight = new Amg::MatrixX(m_columnsDM, m_columnsDM);
+    m_derivativeMatrix = Amg::MatrixX(m_rowsDM, m_columnsDM);
+    m_weight = Amg::MatrixX(m_columnsDM, m_columnsDM);
     // isn't this faster?  indicating that we have a symmetric matrix <0x2> =
     // <Upper> any gain seems to be negated by additional for loop copies to
     // recover full cov matrix introduces some rounding differences - keep for
     // release 21 to respect strict Tier0 policy
-    (*m_weight).selfadjointView<0x2>();
-
-    delete m_weightedDifference;
-    m_weightedDifference = new Amg::VectorX(m_columnsDM);
+    (m_weight).selfadjointView<0x2>();
+    m_weightedDifference = Amg::VectorX(m_columnsDM);
   }
 
   // this should never happen
-  if (!m_derivativeMatrix)
+  if (m_derivativeMatrix.size()==0)
     fitCode = 13;
 
   return fitCode;
@@ -604,12 +578,12 @@ ATH_FLATTEN
   // storage
   //       hence the loops are nested to optimise row-major and to form the
   //       Eigen transpose
-  Amg::MatrixX& weight = *m_weight;
-  Amg::VectorX& weightedDifference = *m_weightedDifference;
+  Amg::MatrixX& weight = m_weight;
+  Amg::VectorX& weightedDifference = m_weightedDifference;
   Amg::MatrixX fitMatrixDerivativeT(m_columnsDM, m_rowsDM);
   Amg::MatrixX residuals(m_rowsDM, 1);
   for (int row = 0; row < m_rowsDM; ++row) {
-    residuals(row, 0) = (*m_residuals)[row];
+    residuals(row, 0) = (m_residuals)[row];
     for (int col = 0; col < m_columnsDM; ++col) {
       fitMatrixDerivativeT(col, row) = m_fitMatrix.derivative[row][col];
     }
@@ -626,10 +600,10 @@ ATH_FLATTEN
 
   // solve is faster than inverse: wait for explicit request for covariance
   // before inversion
-  *m_weightedDifference =
+  m_weightedDifference =
       weight.colPivHouseholderQr().solve(weightedDifference);
 
-  m_parameters->update(*m_weightedDifference);
+  m_parameters->update(m_weightedDifference);
   return true;
 }
 
@@ -659,7 +633,7 @@ void FitMatrices::addPerigeeMeasurement(void) {
 
 void FitMatrices::avoidMomentumSingularity(void) {
   // fix momentum if line-fit or fit attempted with negligible field integral
-  Amg::MatrixX& weight = *m_weight;
+  Amg::MatrixX& weight = m_weight;
   if (m_parameters->fitEnergyDeposit() &&
       weight(5, 5) < 1. / Gaudi::Units::TeV) {
     for (int i = 0; i != m_columnsDM; ++i) {
