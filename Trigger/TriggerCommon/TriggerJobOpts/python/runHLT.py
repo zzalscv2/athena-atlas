@@ -63,7 +63,7 @@ def set_flags(flags):
    # FIXME: disable coherent prescales during development phase to allow menu with single-chain CPS groups
    flags.Trigger.disableCPS = True
    #These signatures cause a Python crash - wait for CA migration
-   flags.Trigger.disabledSignatures = ["UnconventionalTracking", "Monitor", "Cosmics"]
+   flags.Trigger.disabledSignatures = ["UnconventionalTracking"]
 
 
 def runHLTCfg(flags):
