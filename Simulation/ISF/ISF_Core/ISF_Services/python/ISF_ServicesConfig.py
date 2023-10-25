@@ -16,7 +16,8 @@ from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
     TruthStrategyGroupIDCfg,
     TruthStrategyGroupIDHadIntCfg,
     TruthStrategyGroupCaloMuBremCfg,
-    ValidationTruthStrategyCfg
+    ValidationTruthStrategyCfg,
+    FCSParamTruthStrategyCfg
 )
 from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
 from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import (
@@ -213,6 +214,9 @@ def MC15TruthServiceCfg(flags, name="ISF_MC15TruthService", **kwargs):
             TruthStrategyGroupIDHadInt_MC15Cfg,
             TruthStrategyGroupCaloMuBremCfg, # FIXME - should be TruthStrategyGroupCaloMuBrem_MC15Cfg but keeping this for consistency with old style
             TruthStrategyGroupCaloDecay_MC15Cfg ]
+        if flags.Sim.RecordStepInfo:
+            # Override Truth strategies for FCS Parameterization input samples
+            truthCfgs = [ FCSParamTruthStrategyCfg ]
         truthStrats = [result.popToolsAndMerge(cfg(flags)) for cfg in truthCfgs]
         kwargs.setdefault("TruthStrategies", truthStrats)
 

@@ -12,7 +12,10 @@ from ISF_Tools.ISF_ToolsConfig import EntryLayerFilterCfg
 def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):
     result = ComponentAccumulator()
     kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name
-    kwargs.setdefault("ParticleFilters", [result.addPublicTool(result.popToolsAndMerge(EntryLayerFilterCfg(flags)))])
+
+    if not flags.Sim.RecordStepInfo:
+        # No filtering for FCS Parameterization input samples
+        kwargs.setdefault("ParticleFilters", [result.addPublicTool(result.popToolsAndMerge(EntryLayerFilterCfg(flags)))])
 
     if flags.GeoModel.Run < LHCPeriod.Run4:
         kwargs.setdefault("CaloEntryVolumeString", "IDET::IDET")
@@ -33,8 +36,10 @@ def EntryLayerToolMTCfg(flags, name="ISF_EntryLayerToolMT", **kwargs):
     result = ComponentAccumulator()
     kwargs["GeoIDSvc"] = result.getPrimaryAndMerge(GeoIDSvcCfg(flags)).name
 
-    filt = result.popToolsAndMerge(EntryLayerFilterCfg(flags))
-    kwargs.setdefault("ParticleFilters", [filt])
+    if not flags.Sim.RecordStepInfo:
+        # No filtering for FCS Parameterization input samples
+        filt = result.popToolsAndMerge(EntryLayerFilterCfg(flags))
+        kwargs.setdefault("ParticleFilters", [filt])
 
     if flags.GeoModel.Run < LHCPeriod.Run4:
         kwargs.setdefault("CaloEntryVolumeString", "IDET::IDET")

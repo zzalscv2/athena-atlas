@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def FCS_StepInfoSDToolCfg(name="FCS_StepInfoSensitiveDetector", **kwargs):
+def FCS_StepInfoSDToolCfg(flags, name="FCS_StepInfoSensitiveDetector", **kwargs):
     kwargs.setdefault("StacVolumes", ["LArMgr::LAr::EMB::STAC"])
     kwargs.setdefault("PresamplerVolumes", ["LArMgr::LAr::Barrel::Presampler::Module"])
     kwargs.setdefault("NegIWVolumes", ["LArMgr::LAr::EMEC::Neg::InnerWheel"])
@@ -24,3 +24,14 @@ def FCS_StepInfoSDToolCfg(name="FCS_StepInfoSensitiveDetector", **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.FCS_Param.FCS_StepInfoSDTool(name, **kwargs))
     return result
+
+
+def PostIncludeParametrizationInputSim_1mm(flags, cfg):
+    stepInfoSDTool = cfg.getPublicTool("SensitiveDetectorMasterTool").SensitiveDetectors['FCS_StepInfoSensitiveDetector']
+    stepInfoSDTool.shift_lar_subhit=True #default
+    stepInfoSDTool.shorten_lar_step=True
+    stepInfoSDTool.maxRadiusFine=1. #default (for EMB1 and EME1)
+    stepInfoSDTool.maxRadius=25. #default
+    stepInfoSDTool.maxRadiusTile=25. #default
+    stepInfoSDTool.maxTime=25. #default
+    stepInfoSDTool.maxTimeTile=100. #default
