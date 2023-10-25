@@ -161,7 +161,6 @@ def makeTriggerAnalysisConfig( seq,
     """Create a basic trigger analysis algorithm sequence
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
       triggerChainsPerYear -- a dictionary with key (str) the year and value (list of strings) the trigger chains
       triggerChainsForSelection -- a list of trigger chains to be used for trigger selection, only set it if you need a different setup than for SFs!
       prescaleLumiCalcFiles -- a list of lumicalc files to calculate trigger prescales

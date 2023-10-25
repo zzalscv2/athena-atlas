@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from Campaigns.Utils import Campaign, getMCCampaign
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 
 def getLumicalcFiles(campaign):
@@ -115,15 +116,15 @@ def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, 
                 simulation_flavour = GetFileMD(files).get('Simulator', '')
                 if not simulation_flavour:
                     simulation_flavour = GetFileMD(files).get('SimulationFlavour', '')
-                data_type = 'mc' if (not simulation_flavour or 'FullG4' in simulation_flavour) else 'afii'
+                data_type = DataType.FullSim if (not simulation_flavour or 'FullG4' in simulation_flavour) else DataType.FastSim
 
-    # data_type as in pileup analysis sequence: either 'data' or ('mc' or 'afii')
-    if data_type == 'data':
+    # data_type as in pileup analysis sequence: either 'data' or ('fullsim' or 'afii')
+    if data_type is DataType.Data:
         raise ValueError('Data is not supported')
 
-    if data_type == 'mc':
+    if data_type is DataType.FullSim:
         simulation_type = 'FS'
-    elif data_type == 'afii':
+    elif data_type is DataType.FastSim:
         simulation_type = 'AFII'
     else:
         raise ValueError(f'Invalid data_type {data_type}')

@@ -11,6 +11,7 @@ import inspect
 from collections import namedtuple
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 # class for config block information
 node = namedtuple("ConfigBlock", ['alg', 'algName', 'options', 'defaults', 'subAlgs'])
@@ -334,7 +335,8 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
             return
         campaign, files, prwfiles, lumicalcfiles = None, None, None, None
         useDefaultConfig = False
-        prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
+        # need to allow for conversion of dataType from string to enum for the call to pileupConfigFiles
+        prwfiles, lumicalcfiles = pileupConfigFiles(  {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, dataType) )
 
         makePileupReweightingConfig(seq)
         seq.setOptionValue ('.campaign', campaign, noneAction='ignore')

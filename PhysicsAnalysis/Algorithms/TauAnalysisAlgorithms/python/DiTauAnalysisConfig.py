@@ -102,7 +102,6 @@ def makeDiTauCalibrationConfig( seq, containerName, postfix = '',
     between the working points.
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
       postfix -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
                  sequence with multiple working points to ensure all
@@ -123,7 +122,6 @@ def makeDiTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
       legacyRecommendations -- use legacy tau BDT and electron veto recommendations
       postfix -- a postfix to apply to decorations and algorithm
                  names.  this is mostly used/needed when using this
