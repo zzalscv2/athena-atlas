@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelHitDiscCnfgAlg.h
  * @author Soshi Tsuno <Soshi.Tsuno@cern.ch>
  * @date November, 2019
- * @brief Store FEI4 HitDiscCofig parameter in PixelHitDiscCnfgData.
+ * @brief Store FEI4 HitDiscConfig parameter in PixelHitDiscCnfgData.
  */
 
 #ifndef PIXELHITDISCCNFGALG_H
@@ -14,13 +14,11 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
 
 #include "StoreGate/WriteCondHandleKey.h"
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelHitDiscCnfgData.h"
 
-#include "Gaudi/Property.h"
 
 class PixelHitDiscCnfgAlg : public AthReentrantAlgorithm {
   public:
@@ -31,8 +29,6 @@ class PixelHitDiscCnfgAlg : public AthReentrantAlgorithm {
     virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
-    SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey
-    {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
 
     SG::ReadCondHandleKey<AthenaAttributeList> m_readKey
     {this, "ReadKey", "/PIXEL/HitDiscCnfg", "Input HitDiscCnfg folder"};

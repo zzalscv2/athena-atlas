@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelHitDiscCnfgAlg.h"
@@ -8,9 +8,6 @@
 #include "CoralBase/Blob.h"
 
 #include <cstdint>
-#include <istream>
-#include <map>
-#include <string>
 
 PixelHitDiscCnfgAlg::PixelHitDiscCnfgAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -20,7 +17,6 @@ PixelHitDiscCnfgAlg::PixelHitDiscCnfgAlg(const std::string& name, ISvcLocator* p
 StatusCode PixelHitDiscCnfgAlg::initialize() {
   ATH_MSG_DEBUG("PixelHitDiscCnfgAlg::initialize()");
 
-  ATH_CHECK(m_moduleDataKey.initialize());
   ATH_CHECK(m_readKey.initialize());
   ATH_CHECK(m_writeKey.initialize());
 
@@ -96,11 +92,9 @@ StatusCode PixelHitDiscCnfgAlg::execute(const EventContext& ctx) const {
     }
   }
   // Take average.
-  SG::ReadCondHandle<PixelModuleData> moduleDataHandle(m_moduleDataKey, ctx);
-  const PixelModuleData *moduleData = *moduleDataHandle;
-
-  double aveHitPL = moduleData->getFEI4HitDiscConfig(0, 0);
-  double aveHit3D = moduleData->getFEI4HitDiscConfig(0, 0);
+  //FEI4EndcapHitDiscConfig = 2, FEI4BarrelHitDiscConfig = 2
+  double aveHitPL = 2.;
+  double aveHit3D = 2.;
 
   if (nhitPL) { aveHitPL = hitPL/(1.0*nhitPL); }
 

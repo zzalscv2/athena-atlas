@@ -275,7 +275,6 @@ def PixelHitDiscCnfgAlgCfg(flags, name="PixelHitDiscCnfgAlg", **kwargs):
         acc.merge(addFolders(flags, "/PIXEL/HitDiscCnfg", "PIXEL", className="AthenaAttributeList"))
     elif flags.Input.isMC and flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3]:
         acc.merge(addFoldersSplitOnline(flags,"PIXEL","/PIXEL/HitDiscCnfg","/PIXEL/HitDiscCnfg", className="AthenaAttributeList"))
-    kwargs.setdefault("PixelModuleData", "PixelModuleData")
     kwargs.setdefault("ReadKey", "/PIXEL/HitDiscCnfg")
     kwargs.setdefault("WriteKey", "PixelHitDiscCnfgData")
     acc.addCondAlgo(CompFactory.PixelHitDiscCnfgAlg(name, **kwargs))
