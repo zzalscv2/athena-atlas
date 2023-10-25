@@ -964,9 +964,8 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
       if(dt2 > covdt+frac*dCov) continue;
 
       //4. d0 cut
-
-      const double d0_partial = B*pS_r - A;//Pre-calculate for use in phi check
-      const double fabs_d0 = std::fabs(pS_r*(d0_partial));
+      const double B_pS_r = B*pS_r;//Pre-calculate for use in phi check
+      const double fabs_d0 = std::fabs(pS_r*(B_pS_r - A));
 
       if(fabs_d0 > m_settings.m_tripletD0Max) continue;
 
@@ -980,9 +979,16 @@ void TrigTrackSeedGenerator::createTripletsNew(const TrigSiSpacePointBase* pS, i
       //5. phi0 cut
 
       if ( !fullPhi ) {
-        /// TODO: Check if uc calculation is correct; 
-        /// inconsistent with other versions of createSeeds
-        const double uc = 2*d0_partial;
+        double uc;
+
+        //TODO: remove once decision made
+        //for now put this change behind a flag
+        if(m_settings.m_fix_seed_phi){
+          uc = 2*B_pS_r - A;
+        }else{
+          uc = 2*(B*pS_r - A);
+        }
+
         const double phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
 
         if ( !RoiUtil::containsPhi( *roiDescriptor, phi0 ) ) {
