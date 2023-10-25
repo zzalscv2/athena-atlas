@@ -12,6 +12,10 @@ from TriggerJobOpts import runHLT
 import AthenaConfiguration.AllConfigFlags
 del AthenaConfiguration.AllConfigFlags.ConfigFlags
 
+# Prevent usage of legacy job properties
+from AthenaCommon import JobProperties
+JobProperties.jobPropertiesDisallowed = True
+
 # Set flags
 flags = initConfigFlags()
 runHLT.set_flags(flags)

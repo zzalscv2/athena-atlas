@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict as odict
 from itertools import groupby
 
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.Enums import BeamType
 
 from .Limits import Limits
 from .L1MenuFlags import L1MenuFlags
@@ -23,7 +24,7 @@ def createDefaultBunchGroupSetMC():
     return bgs
 
 
-def createDefaultBunchGroupSet():
+def createDefaultBunchGroupSet(flags):
     """
     sets default bunchgroups for all menus, needed for simulation.
     """
@@ -33,10 +34,8 @@ def createDefaultBunchGroupSet():
         bgs = BunchGroupSet(name)
         bgs.addBunchGroup( BunchGroupSet.BunchGroup(name = 'BCRVeto', internalNumber = 0).addRange(0,3539).addRange(3561,3563).normalize() )\
            .addBunchGroup( BunchGroupSet.BunchGroup(name = 'Paired', internalNumber = 1).addTrain(0,3445).addTrain(3536,4).addTrain(3561,3).normalize() )
-        from AthenaCommon.BeamFlags import jobproperties
-        if jobproperties.Beam.beamType == 'cosmics':
+        if flags.Beam.Type is BeamType.Cosmics:
             bgs.addBunchGroup( BunchGroupSet.BunchGroup(name = 'EMPTY', internalNumber = 3).addTrain(0,3564).normalize() )
-
 
         bunchgroupnames = L1MenuFlags.BunchGroupNames()[:Limits.NumBunchgroups]
         bunchgroupnames += ['NotUsed'] * (Limits.NumBunchgroups - len(bunchgroupnames))

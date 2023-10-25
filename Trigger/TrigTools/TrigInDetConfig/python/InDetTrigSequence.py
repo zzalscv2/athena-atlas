@@ -1,6 +1,5 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from InDetRecExample.InDetKeys import InDetKeys
 from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -114,8 +113,8 @@ class InDetTrigSequence:
 
       isByteStream = self.__flags.Input.Format == Format.BS
       if not isByteStream:
-        ViewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , InDetKeys.PixelRDOs() ),
-                                           ( 'SCT_RDO_Container' , InDetKeys.SCT_RDOs() )]
+        ViewDataVerifier.DataObjects +=   [( 'PixelRDO_Container' , 'PixelRDOs' ),
+                                           ( 'SCT_RDO_Container' , 'SCT_RDOs' )]
 
       ViewDataVerifier.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % self.__rois )]
 

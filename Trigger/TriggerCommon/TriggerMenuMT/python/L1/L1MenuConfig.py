@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import re
 from importlib import import_module
@@ -37,9 +37,9 @@ log = logging.getLogger(__name__)
 
 class L1MenuConfig(object):
 
-    def __init__(self, menuName, inputFile = None, do_alfa = False, do_HI_tob_thresholds = False ):
+    def __init__(self, flags, inputFile = None):
 
-        L1MenuFlags.MenuSetup = menuName
+        L1MenuFlags.MenuSetup = flags.Trigger.triggerMenuSetup
 
         self.menuFullName    = L1MenuFlags.MenuSetup()
         self.menuFilesToLoad = self._menuToLoad()
@@ -63,16 +63,17 @@ class L1MenuConfig(object):
 
         # menu
         L1MenuFlags.CTPVersion = 4 # this needs to be done here already, since L1Menu depends on it during init
-        self.l1menu = L1Menu(self.menuName, do_alfa, do_HI_tob_thresholds)
+        self.l1menu = L1Menu(self.menuName, flags)
+
         self.l1menu.setBunchGroupSplitting() # store bunchgroups separate from other item inputs
 
         if not self._checkMenuExistence():
             log.error("Generating L1 menu %s is not possible", self.menuName)
         else:
             log.info("=== Generating L1 menu %s ===", self.menuName)
-            self._generate()
+            self._generate(flags)
 
-    def _generate(self):
+    def _generate(self, flags):
 
         log.info("=== Reading definition of algorithms, thresholds, and items ===")
 
@@ -87,7 +88,7 @@ class L1MenuConfig(object):
 
         self._generateTopoMenu()
 
-        self._generateMenu()
+        self._generateMenu(flags)
 
         self.generated = True
         
@@ -499,7 +500,7 @@ class L1MenuConfig(object):
 
 
 
-    def _generateMenu(self):
+    def _generateMenu(self, flags):
 
         if len(self.l1menu.items) > 0:
             log.info("L1MenuConfig.generate() has already been called. Will ignore")
@@ -513,7 +514,7 @@ class L1MenuConfig(object):
         # Bunchgroups
         # ------------------
         from .Base.BunchGroupSet import createDefaultBunchGroupSet
-        self.l1menu.ctp.bunchGroupSet = createDefaultBunchGroupSet()
+        self.l1menu.ctp.bunchGroupSet = createDefaultBunchGroupSet(flags)
 
 
         # ------------------

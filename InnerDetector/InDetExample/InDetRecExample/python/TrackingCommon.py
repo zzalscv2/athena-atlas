@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrackingCommon')
 
@@ -724,6 +723,7 @@ def getInDetPrdAssociationTool_setup(name='InDetPrdAssociationTool_setup',**kwar
 
 def getInDetPixelConditionsSummaryTool(name = "PixelConditionsSummaryTool",**kwargs) :
     the_name = makeName( name, kwargs)
+    from AthenaCommon.GlobalFlags import globalflags
     from InDetRecExample.InDetJobProperties import InDetFlags
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     from RecExConfig.AutoConfiguration import IsInInputFile
@@ -758,6 +758,7 @@ def getPixelActiveDetectorElementStatusTool(name = "PixelActiveDetectorElementSt
 
 def getPixelByteStreamErrorDetectorElementStatusTool(name = "PixelByteStreamErrorDetectorElementStatusTool",**kwargs) :
     the_name = makeName( name, kwargs)
+    from AthenaCommon.GlobalFlags import globalflags
     from RecExConfig.AutoConfiguration import IsInInputFile
     from OverlayCommonAlgs.OverlayFlags import overlayFlags
 
@@ -1005,6 +1006,7 @@ def getInDetSCT_DetectorElementStatusCondDataTool(name="InDetSCT_DetectorElement
 
 def getInDetSCT_DetectorElementStatusAddByteStreamErrorsTool(name ='InDetSCT_DetectorElementStatusAddByteStreamErrorsTool', **kwargs) :
     the_name = makeName(name, kwargs)
+    from AthenaCommon.GlobalFlags import globalflags
     from SCT_ConditionsTools.SCT_ConditionsToolsConf import SCT_ConditionsSummaryTool
     from SCT_ConditionsTools.SCT_ConditionsToolsHelper import getSCT_ByteStreamErrorsTool
 
@@ -1148,6 +1150,7 @@ def getInDetPixelToTPIDTool(name = "InDetPixelToTPIDTool", **kwargs) :
 
 @makePublicTool
 def getInDetTRTStrawStatusSummaryTool(name = "InDetTRT_StrawStatusSummaryTool", **kwargs) :
+    from AthenaCommon.GlobalFlags import globalflags
     the_name = makeName( name, kwargs)
     kwargs = setDefaults( kwargs, isGEANT4 = (globalflags.DataSource == 'geant4'))
     from TRT_ConditionsServices.TRT_ConditionsServicesConf import TRT_StrawStatusSummaryTool
@@ -1175,6 +1178,7 @@ def getInDetTRT_LocalOccupancy(name ="InDet_TRT_LocalOccupancy", **kwargs) :
 def getInDetTRT_dEdxTool(name = "InDetTRT_dEdxTool", **kwargs) :
     the_name = makeName( name, kwargs)
     from AthenaCommon.DetFlags import DetFlags
+    from AthenaCommon.GlobalFlags import globalflags
     from InDetRecExample.InDetJobProperties import InDetFlags
     if not DetFlags.haveRIO.TRT_on() or InDetFlags.doHighPileup() \
             or  InDetFlags.useExistingTracksAsInput(): # TRT_RDOs (used by the TRT_LocalOccupancy tool) are not present in ESD

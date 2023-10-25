@@ -4,6 +4,14 @@
 import sys
 
 def main():
+    # Make sure nobody uses deprecated global ConfigFlags
+    import AthenaConfiguration.AllConfigFlags
+    del AthenaConfiguration.AllConfigFlags.ConfigFlags
+
+    # Prevent usage of legacy job properties
+    from AthenaCommon import JobProperties
+    JobProperties.jobPropertiesDisallowed = True
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
 
@@ -31,7 +39,7 @@ def main():
         from TriggerMenuMT.L1.Base.Limits import Limits
         from TriggerMenuMT.L1.Base.BunchGroupSet import createDefaultBunchGroupSet
         Limits.setLimits(CTPVersion=4)
-        bgs = createDefaultBunchGroupSet()
+        bgs = createDefaultBunchGroupSet(flags)
         bgs.writeJSON(outputFile = "L1BunchGroupSet.json")
     else:
         # L1 menu generation
