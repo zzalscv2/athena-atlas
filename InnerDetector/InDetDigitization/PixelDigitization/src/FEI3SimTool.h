@@ -32,7 +32,9 @@ public:
   virtual void process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Collection& rdoCollection,
                        CLHEP::HepRandomEngine* rndmEngine);
 private:
-  FEI3SimTool();
+  Gaudi::Property<bool> m_duplication{
+    this, "HitDuplication", false, "Turn on Hit Duplication in subsequent timebin for small hits"
+  };
 
   int relativeBunch2009(const double threshold, const double intimethreshold, const SiTotalCharge& totalCharge,
                         CLHEP::HepRandomEngine* rndmEngine) const;

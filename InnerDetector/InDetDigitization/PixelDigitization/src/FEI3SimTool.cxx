@@ -214,14 +214,14 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     if (bunch >= 0 && bunch < m_numberOfBcid) {
       rdoCollection.push_back(new Pixel1RawData(id_readout, nToT, bunch, 0, bunch));
     }
-
+    
     // Duplication mechanism for FEI3 small hits :
-    if (moduleData->getFEI3HitDuplication(barrel_ec, layerIndex)) {
+    if (m_duplication) {//is true for run1 only
+      static constexpr int smallHitThreshold{7}; //constant for both barrel and endcap, never changes
       bool smallHitChk = false;
-      if (nToT <= moduleData->getFEI3SmallHitToT(barrel_ec, layerIndex)) {
+      if (nToT <= smallHitThreshold) {
         smallHitChk = true;
       }
-
       if (smallHitChk && bunch > 0 && bunch <= m_numberOfBcid) {
         rdoCollection.push_back(new Pixel1RawData(id_readout, nToT, bunch - 1, 0, bunch - 1));
       }
