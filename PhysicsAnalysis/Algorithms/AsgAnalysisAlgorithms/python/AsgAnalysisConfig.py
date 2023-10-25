@@ -81,7 +81,7 @@ class PileupReweightingBlock (ConfigBlock):
                 else:
                     from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
                     toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
-                                                            data_type=config.dataType().value)
+                                                            data_type=config.dataType())
                     log.info('Setting PRW configuration based on input files')
 
                     if toolConfigFiles:

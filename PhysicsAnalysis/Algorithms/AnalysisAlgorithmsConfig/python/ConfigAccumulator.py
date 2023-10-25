@@ -18,8 +18,8 @@ def mapUserName (name, *, noSysSuffix) :
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
     Data = 'data'
-    FullSim = 'mc'
-    FastSim = 'afii'
+    FullSim = 'fullsim'
+    FastSim = 'fastsim'
 
 class SelectionConfig :
     """all the data for a given selection that has been registered
@@ -119,7 +119,14 @@ class ConfigAccumulator :
             geometry = autoconfigFromFlags.GeoModel.Run
             dsid = autoconfigFromFlags.Input.MCChannelNumber
         else:
-            dataType = DataType(dataType)
+            # legacy mappings of string arguments
+            if isinstance(dataType, str):
+                if dataType == 'mc':
+                    dataType = DataType.FullSim
+                elif dataType == 'afii':
+                    dataType = DataType.FastSim
+                else:
+                    dataType = DataType(dataType)
             # allow possible string argument for `geometry` and convert it to enum
             geometry = LHCPeriod(geometry)
             if geometry not in [LHCPeriod.Run2, LHCPeriod.Run3] :
@@ -153,7 +160,7 @@ class ConfigAccumulator :
 
 
     def dataType (self) :
-        """the data type we run on (data, mc, afii)"""
+        """the data type we run on (data, fullsim, fastsim)"""
         return self._dataType
 
 

@@ -6,7 +6,7 @@ from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
-from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
+from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator, DataType
 
 # Config:
 triggerChainsPerYear = {
@@ -108,7 +108,8 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
             files = autoconfigFromFlags.Input.Files
             useDefaultConfig = True
         else:
-            prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
+            # need to convert dataType from string to enum for the call to pileupConfigFiles
+            prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, None) )
 
         from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
             makePileupAnalysisSequence
@@ -589,7 +590,8 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
             files = autoconfigFromFlags.Input.Files
             useDefaultConfig = True
         else:
-            prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
+            # need to allow for conversion of dataType from string to enum for the call to pileupConfigFiles
+            prwfiles, lumicalcfiles = pileupConfigFiles( {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, dataType) )
 
         configSeq += makeConfig ('Event.PileupReweighting', None)
         configSeq.setOptionValue ('.campaign', campaign, noneAction='ignore')
@@ -724,7 +726,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig('SystObjectLink', 'SystObjectLink.AnaTauJets')
 
 
-    if dataType != 'data' :
+    if dataType is not DataType.Data :
         # Include, and then set up the generator analysis sequence:
         configSeq += makeConfig( 'Event.Generator', None)
         configSeq.setOptionValue ('.saveCutBookkeepers', True)

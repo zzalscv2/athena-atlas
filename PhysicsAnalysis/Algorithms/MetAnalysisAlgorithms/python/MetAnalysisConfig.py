@@ -104,7 +104,6 @@ def makeMetAnalysisConfig( seq, containerName,
     Selections on each container can also be defined
 
     Keyword arguments:
-      dataType -- The data type to run on ("data", "mc" or "afii")
       useFJVT -- Use FJVT decision for the calculation
       treatPUJets -- Treat pile-up jets in the MET significance calculation
       setMuonJetEMScale -- Use consituent scale and subtract muon eloss for jets overlapping muons

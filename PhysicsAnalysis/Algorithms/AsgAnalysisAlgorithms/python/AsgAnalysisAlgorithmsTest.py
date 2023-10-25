@@ -5,6 +5,7 @@
 
 from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, createService
+from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 
 def makeOverlapSequence (dataType) :
     algSeq = AlgSequence()
@@ -229,7 +230,7 @@ def makeGeneratorAlgorithmsSequence (dataType) :
 
 def pileupConfigFiles(dataType):
     """Return the PRW config files and lumicalc files for tests"""
-    if dataType == "data":
+    if dataType is DataType.Data:
         prwfiles = []
         lumicalcfiles = []
     else:
@@ -237,7 +238,7 @@ def pileupConfigFiles(dataType):
             "GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
             "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
         ]
-        if dataType == "mc":
+        if dataType is DataType.FullSim:
             prwfiles = [
                 "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root"
             ]
