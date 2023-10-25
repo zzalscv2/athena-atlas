@@ -4,43 +4,34 @@ from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
-from AthenaCommon.CFElements import parOR
-from AthenaCommon.CFElements import seqAND
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, EmptyMenuSequence, EmptyMenuSequenceCA, menuSequenceCAToGlobalWrapper
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 import AthenaCommon.SystemOfUnits as Units
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 
 def TrackCountHypoToolGen(chainDict):
-    from TrigMinBias.TrigMinBiasConf import TrackCountHypoTool
-    hypo = TrackCountHypoTool(chainDict["chainName"])
+    hypo = CompFactory.TrackCountHypoTool(chainDict["chainName"])
     hypo.minNtrks = 1
     return hypo
 
-def CosmicsTrkSequence(flags):
-    from TrigMinBias.TrigMinBiasConf import TrackCountHypoAlg
-    from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-    from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool
-    
-    trkInputMakerAlg = EventViewCreatorAlgorithm("IMCosmicTrkEventViewCreator")
-    trkInputMakerAlg.ViewFallThrough = True
-    trkInputMakerAlg.RoITool = ViewCreatorInitialROITool()
-    trkInputMakerAlg.InViewRoIs = "CosmicRoIs" # contract with the consumer
-    trkInputMakerAlg.Views = "CosmicViewRoIs"
-    trkInputMakerAlg.RequireParentView = False
+def CosmicsTrkSequenceCfg(flags):
+
+    trkRecoSeq = InViewRecoCA("CosmicTrkRecoSeq", InViewRoIs = "CosmicRoIs")
 
     from TrigInDetConfig.utils import getFlagsForActiveConfig
     flagsWithTrk = getFlagsForActiveConfig(flags, "cosmics", log)
 
     from TrigInDetConfig.InDetTrigSequence import InDetTrigSequence
     seq = InDetTrigSequence(flagsWithTrk, flagsWithTrk.Tracking.ActiveConfig.input_name, 
-                            rois = trkInputMakerAlg.InViewRoIs, inView = "VDVCosmicsIDTracking")
+                            rois ="CosmicRoIs", inView = "VDVCosmicsIDTracking")
 
-    from TriggerMenuMT.HLT.Config.MenuComponents import extractAlgorithmsAndAppendCA
-    idTrackingAlgs = extractAlgorithmsAndAppendCA(seq.sequence("Offline"))
 
-    trackCountHypo = TrackCountHypoAlg("CosmicsTrackCountHypoAlg", 
+    idTrackingAlgs = seq.sequence("Offline")
+    trkRecoSeq.mergeReco(idTrackingAlgs)
+
+    trackCountHypo = CompFactory.TrackCountHypoAlg("CosmicsTrackCountHypoAlg", 
         minPt = [100*Units.MeV],
         maxZ0 = [401*Units.mm],
         vertexZ = [803*Units.mm])
@@ -51,20 +42,27 @@ def CosmicsTrkSequence(flags):
     from TrigMinBias.TrigMinBiasMonitoring import TrackCountMonitoring
     trackCountHypo.MonTool = TrackCountMonitoring(flags, trackCountHypo) # monitoring tool configures itself using config of the hypo alg
 
-    trkRecoSeq = parOR("CosmicTrkRecoSeq", idTrackingAlgs)
-    trkSequence = seqAND("CosmicTrkSequence", [trkInputMakerAlg, trkRecoSeq])
-    trkInputMakerAlg.ViewNodeName = trkRecoSeq.name()
+    
+    trkSequence = SelectionCA("CosmicTrkSequence")
+    trkSequence.mergeReco(trkRecoSeq)
+    trkSequence.addHypoAlgo(trackCountHypo)
     log.debug("Prepared ID tracking sequence")
     log.debug(trkSequence)
-    return MenuSequence(flags,
-                        Sequence    = trkSequence,
-                        Maker       = trkInputMakerAlg,
-                        Hypo        = trackCountHypo,
-                        HypoToolGen = TrackCountHypoToolGen)
+    return MenuSequenceCA(flags,
+                          trkSequence,
+                          HypoToolGen = TrackCountHypoToolGen)
+
+def CosmicsTrkSequence(flags):
+    if isComponentAccumulatorCfg():
+        return CosmicsTrkSequenceCfg(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(CosmicsTrkSequenceCfg, flags)
 
 def EmptyMSBeforeCosmicID(flags):
-    from TriggerMenuMT.HLT.Config.MenuComponents import EmptyMenuSequence
-    return EmptyMenuSequence("EmptyBeforeCosmicID")
+    if isComponentAccumulatorCfg():
+        return EmptyMenuSequenceCA("EmptyBeforeCosmicID")
+    else:
+        return EmptyMenuSequence("EmptyBeforeCosmicID")
 
 #----------------------------------------------------------------
 class CosmicChainConfiguration(ChainConfigurationBase):
