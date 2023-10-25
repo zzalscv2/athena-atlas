@@ -118,13 +118,16 @@ def BeamEffectsAlgCfg(flags, name="BeamEffectsAlg", **kwargs):
     # Set (todo) the appropriate manipulator tools
     manipulators = []
     manipulators.append(acc.popToolsAndMerge(ValidityCheckerCfg(flags)))
-    from SimulationConfig.SimEnums import CavernBackground
-    if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam] and flags.Sim.CavernBackground is not CavernBackground.Read:
-        manipulators.append(acc.popToolsAndMerge(GenEventVertexPositionerCfg(flags)))
-    # manipulators.append(acc.popToolsAndMerge(GenEventBeamEffectBoosterCfg(flags))) # todo segmentation violation
-    # manipulators.append(acc.popToolsAndMerge(VertexPositionFromFileCfg(flags))) # todo
-    # manipulators.append(acc.popToolsAndMerge(CrabKissingVertexPositionerCfg(flags))) # todo Callback registration failed
-    # manipulators.append(acc.popToolsAndMerge(LongBeamspotVertexPositionerCfg(flags))) # todo Callback registration failed
+    from SimulationConfig.SimEnums import VertexSource
+    if not flags.Sim.VertexSource == VertexSource.AsGenerated:
+        # Vertex manipulation required
+        from SimulationConfig.SimEnums import CavernBackground
+        if flags.Beam.Type not in [BeamType.Cosmics, BeamType.TestBeam] and flags.Sim.CavernBackground is not CavernBackground.Read:
+            manipulators.append(acc.popToolsAndMerge(GenEventVertexPositionerCfg(flags)))
+        # manipulators.append(acc.popToolsAndMerge(GenEventBeamEffectBoosterCfg(flags))) # todo segmentation violation
+        # manipulators.append(acc.popToolsAndMerge(VertexPositionFromFileCfg(flags))) # todo
+        # manipulators.append(acc.popToolsAndMerge(CrabKissingVertexPositionerCfg(flags))) # todo Callback registration failed
+        # manipulators.append(acc.popToolsAndMerge(LongBeamspotVertexPositionerCfg(flags))) # todo Callback registration failed
     kwargs.setdefault("GenEventManipulators", manipulators)
 
     acc.addEventAlgo(CompFactory.Simulation.BeamEffectsAlg(name, **kwargs), primary=True)

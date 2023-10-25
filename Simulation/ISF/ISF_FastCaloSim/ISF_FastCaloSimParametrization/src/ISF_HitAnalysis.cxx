@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimParametrization/ISF_HitAnalysis.h"
@@ -34,7 +34,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IToolSvc.h"
 
 #include "ISF_FastCaloSimEvent/FCS_StepInfoCollection.h"
 
@@ -49,7 +48,6 @@
 
 
 //####################
-#include "GaudiKernel/ListItem.h"
 #include "CaloDetDescr/CaloDepthTool.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/CylinderSurface.h"
@@ -70,42 +68,9 @@
 #include <iostream>
 
 ISF_HitAnalysis::ISF_HitAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
-   : AthAlgorithm(name, pSvcLocator)
-
-
-
-   //######################
-
+: AthAlgorithm(name, pSvcLocator)
   //Note that m_xxx are pointers to vectors set to 0, not set to empty vector! see note around TBranch
 {
-  declareProperty("NtupleFileName", m_ntupleFileName);
-  declareProperty("NtupleTreeName", m_ntupleTreeName);
-  declareProperty("GeoFileName", m_geoFileName);
-  declareProperty("MetadataTreeName", m_metadataTreeName);
-  declareProperty("NTruthParticles", m_NtruthParticles=1, "Number of truth particles saved from the truth collection, -1 to save all");
-
-  declareProperty("FastCaloSimCaloExtrapolation",   m_FastCaloSimCaloExtrapolation );
-
-  //###########################
-  declareProperty("CaloBoundaryR", m_CaloBoundaryR);
-  declareProperty("CaloBoundaryZ", m_CaloBoundaryZ);
-  declareProperty("CaloMargin", m_calomargin);
-  //######################
-
-  declareProperty("Extrapolator",                   m_extrapolator );
-  declareProperty("CaloEntrance",                   m_caloEntranceName );
-
-  declareProperty("MetaDataSim", m_MC_SIM_PARAM );
-  declareProperty("MetaDataDigi", m_MC_DIGI_PARAM );
-
-  declareProperty("SaveAllBranches", m_saveAllBranches = false);
-  declareProperty("DoAllCells", m_doAllCells = false);
-  declareProperty("DoClusterInfo", m_doClusterInfo = false);
-  declareProperty("DoLayers", m_doLayers = true);
-  declareProperty("DoLayerSums", m_doLayerSums = true);
-  declareProperty("DoG4Hits", m_doG4Hits = false);
-  declareProperty("TimingCut", m_TimingCut = 999999);
-
   m_surfacelist.resize(0);
   m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerB);
   m_surfacelist.push_back(CaloCell_ID_FCS::PreSamplerE);
@@ -194,30 +159,14 @@ StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
 
   ATH_CHECK(m_caloMgrKey.initialize());
 
-  // Retrieve Tools
-  IToolSvc* p_toolSvc = nullptr;
-  ATH_CHECK(service("ToolSvc",p_toolSvc));
-  IAlgTool* algTool = nullptr;
-
   // Get TimedExtrapolator  ***************************************************************************************************
   if (!m_extrapolator.empty() && m_extrapolator.retrieve().isFailure()) {
     return StatusCode::FAILURE;
   }
-  else { 
-    ATH_MSG_DEBUG("Extrapolator retrieved "<< m_extrapolator);
-  }
+  ATH_MSG_DEBUG("Extrapolator retrieved "<< m_extrapolator);
 
-  std::string CaloCoordinateTool_name="TBCaloCoordinate";
-  ListItem CaloCoordinateTool(CaloCoordinateTool_name);
-  ATH_CHECK(p_toolSvc->retrieveTool(CaloCoordinateTool.type(),CaloCoordinateTool.name(), algTool, this));
-  m_calo_tb_coord = dynamic_cast<ICaloCoordinateTool*>(algTool);
-  if(!m_calo_tb_coord ) {
-    ATH_MSG_ERROR("Cannot retrieve " << CaloCoordinateTool_name);
-    return StatusCode::FAILURE;
-  }
-  else {
-    ATH_MSG_INFO("retrieved " << CaloCoordinateTool_name);
-  } //tools
+  ATH_CHECK(m_calo_tb_coord.retrieve());
+  ATH_MSG_INFO("retrieved " << m_calo_tb_coord);
 
   if( detStore()->contains< AthenaAttributeList >( m_MC_DIGI_PARAM ) )
     {

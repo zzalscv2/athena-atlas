@@ -283,6 +283,14 @@ def ValidationTruthStrategyCfg(flags, name="ISF_ValidationTruthStrategy", **kwar
     return result
 
 
+def FCSParamTruthStrategyCfg(flags, name="ISF_ValidationTruthStrategy", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParentMinP", 150.*MeV)
+    kwargs.setdefault("Regions", [3])
+    result.setPrivateTools(CompFactory.ISF.ValidationTruthStrategy(name, **kwargs))
+    return result
+
+
 def LLPTruthStrategyCfg(flags, name="ISF_LLPTruthStrategy", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("PassProcessCodeRangeLow",  200)
