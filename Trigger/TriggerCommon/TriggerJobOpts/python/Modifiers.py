@@ -66,16 +66,6 @@ class doCosmics(_modifier):
        flags.Beam.Type = BeamType.Cosmics
 
 
-class enableALFAMon(_modifier):
-    """
-    turn on ALFA monitoring in the HLT
-    """
-    def postSetup(self, flags):
-        from TrigOnlineMonitor.TrigOnlineMonitorConfig import TrigALFAROBMonitor
-        from AthenaCommon.AlgSequence import AlgSequence
-        topSequence = AlgSequence()
-        topSequence += TrigALFAROBMonitor(flags)
-
 class fpeAuditor(_modifier):
     """
     Turn on FPEAuditor
