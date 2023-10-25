@@ -27,12 +27,16 @@ fi
 
 #If script, try to find it locally or in PYTHONPATH
 if [ -n "${topscriptfile}" ]; then
-    for pp in . ${PYTHONPATH//:/ }; do
-	    if [ -f "${pp}/${topscriptfile}" ]; then
-	        topscript="${pp}/${topscriptfile}"
-	        break
-	    fi
-    done
+    if [ -f "${topscriptfile}" ]; then
+        topscript="${topscriptfile}"
+    else
+        for pp in . ${PYTHONPATH//:/ }; do
+	            if [ -f "${pp}/${topscriptfile}" ]; then
+	                topscript="${pp}/${topscriptfile}"
+	                break
+	            fi
+        done
+    fi
     if [ -z "$topscript" ]; then
         echo "Could not find python script $topscriptfile"
         exit 1
