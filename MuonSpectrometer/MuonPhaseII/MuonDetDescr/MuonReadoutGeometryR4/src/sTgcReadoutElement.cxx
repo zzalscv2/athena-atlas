@@ -5,7 +5,7 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
-#include <Acts/Surfaces/PlaneSurface.hpp>
+
 using namespace ActsTrk;
 
 namespace MuonGMR4 {

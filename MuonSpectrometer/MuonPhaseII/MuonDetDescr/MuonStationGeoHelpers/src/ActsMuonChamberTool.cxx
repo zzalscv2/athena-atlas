@@ -5,7 +5,6 @@
 
 #include "ActsMuonChamberTool.h"
 ///
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <Acts/Geometry/CuboidVolumeBounds.hpp>
 
@@ -13,6 +12,7 @@
 namespace {
     constexpr double tolerance = 10 * Gaudi::Units::micrometer;
 }
+using namespace ActsTrk;
 namespace MuonGMR4{
   using defineArgs = MuonChamber::defineArgs;
   using ReadoutSet = MuonChamber::ReadoutSet;

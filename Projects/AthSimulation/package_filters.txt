@@ -283,6 +283,8 @@
 + MuonSpectrometer/MuonIdHelpers
 + MuonSpectrometer/MuonSimEvent
 + MuonSpectrometer/MuonStationIndex
++ MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonReadoutGeometryR4
++ MuonSpectrometer/MuonPhaseII/MuonDetDescr/MuonGeoModelR4
 + Reconstruction/RecAlgs
 + Reconstruction/RecEvent
 + Reconstruction/RecEventAthenaPool
@@ -386,6 +388,8 @@
 + Tracking/TrkEvent/TrkNeutralParameters
 + Tracking/TrkEvent/TrkParametersBase
 
++ Tracking/Acts/ActsGeometryInterfaces
++ Tracking/Acts/ActsGeoUtils
 
 # Ignore everything else
 - .*

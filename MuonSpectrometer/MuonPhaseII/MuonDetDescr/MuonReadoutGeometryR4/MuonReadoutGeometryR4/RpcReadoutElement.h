@@ -38,9 +38,9 @@ class RpcReadoutElement : public MuonReadoutElement {
 
         StripDesignPtr phiDesign{nullptr};
         StripDesignPtr etaDesign{nullptr};
-
-        SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds{};
-
+#ifndef SIMULATIONBASE
+        ActsTrk::SurfaceBoundSetPtr<Acts::RectangleBounds> layerBounds{};
+#endif
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,
@@ -137,7 +137,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         /// Auxillary variables to translate the Identifier to a measurement hash and back
         const unsigned int m_hashShiftDbl{m_pars.hasPhiStrips ? 1u :0u};
         const unsigned int m_hashShiftGap{m_hashShiftDbl + (nPhiPanels() <= m_doubletPhi ? 0u : 1u)};
-        const unsigned int m_hashShiftStr{m_hashShiftGap + MuonGM::maxBit(nGasGaps()) + 1};
+        const unsigned int m_hashShiftStr{m_hashShiftGap + maxBit(nGasGaps()) + 1};
 
         /// Distance between 2 gas gaps (Radial direction)
         double m_gasThickness{0.};

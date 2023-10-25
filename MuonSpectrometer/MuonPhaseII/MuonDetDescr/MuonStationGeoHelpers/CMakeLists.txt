@@ -11,14 +11,14 @@ atlas_add_library( MuonStationGeoHelpersLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonStationGeoHelpers
                    LINK_LIBRARIES AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel   MuonGeoModelR4Lib
-                                  ActsGeometryInterfacesLib ActsGeometryLib MuonReadoutGeometryR4 MuonIdHelpersLib 
+                                  ActsGeometryInterfacesLib MuonReadoutGeometryR4 MuonIdHelpersLib 
                                   GeoModelUtilities CxxUtils)
 
 atlas_add_component( MuonStationGeoHelpers
                      src/components/*.cxx src/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                      LINK_LIBRARIES MuonStationGeoHelpersLib AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel  
-                     ActsGeometryInterfacesLib ActsGeometryLib MuonReadoutGeometryR4 MuonIdHelpersLib 
+                     ActsGeometryInterfacesLib  MuonReadoutGeometryR4 MuonIdHelpersLib 
                      GeoModelUtilities CxxUtils)
 
 # Install files from the package:

@@ -3,9 +3,7 @@
 */
 
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <AthenaBaseComps/AthCheckMacros.h>
-#include <Acts/Surfaces/PlaneSurface.hpp>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <optional>
 using namespace ActsTrk;

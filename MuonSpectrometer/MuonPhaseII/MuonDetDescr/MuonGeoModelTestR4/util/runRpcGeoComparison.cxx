@@ -12,11 +12,11 @@
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 #include <MuonCablingData/NrpcCablingData.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
 #include <GaudiKernel/SystemOfUnits.h>
 
 using namespace MuonGMR4;
+using namespace ActsTrk;
 
 #include <PathResolver/PathResolver.h>
 #include <TFile.h>

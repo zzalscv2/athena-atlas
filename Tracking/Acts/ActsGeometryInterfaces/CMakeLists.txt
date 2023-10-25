@@ -4,7 +4,14 @@
 atlas_subdir( ActsGeometryInterfaces )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core )
+set( extra_libs )
+if( NOT SIMULATIONBASE )
+    find_package( Acts COMPONENTS Core )
+    set( extra_libs ActsCore TrkGeometry)
+endif()
+
+
+
 
 # Component(s) in the package:
 atlas_add_library( ActsGeometryInterfacesLib
@@ -15,6 +22,5 @@ atlas_add_library( ActsGeometryInterfacesLib
                    AthenaBaseComps
                    AthenaKernel
                    GeoModelUtilities
-                   ActsCore
-                   GaudiKernel
-                   TrkGeometry )
+                   ${extra_libs}
+                   GaudiKernel)

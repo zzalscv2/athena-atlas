@@ -11,8 +11,6 @@ inline Identifier MuonReadoutElement::identify() const { return m_args.detElId; 
 inline IdentifierHash MuonReadoutElement::identHash() const { return m_detElHash;}
 inline std::string MuonReadoutElement::chamberDesign() const { return m_args.chambDesign; }
 inline const Muon::IMuonIdHelperSvc* MuonReadoutElement::idHelperSvc() const { return m_idHelperSvc.get(); }
-
-inline const Amg::Transform3D& MuonReadoutElement::toCenterTrans() const { return m_args.toVolCenter; }
 inline Muon::MuonStationIndex::ChIndex MuonReadoutElement::chamberIndex() const { return m_chIdx; }
 inline int MuonReadoutElement::stationName() const { return m_stName; }
 inline int MuonReadoutElement::stationEta() const { return m_stEta; }

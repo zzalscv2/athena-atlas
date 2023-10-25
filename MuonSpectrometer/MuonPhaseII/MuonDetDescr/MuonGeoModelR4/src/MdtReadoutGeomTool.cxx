@@ -15,7 +15,6 @@
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
 using namespace ActsTrk;
@@ -66,9 +65,6 @@ StatusCode MdtReadoutGeomTool::loadDimensions(const FactoryCache& facCache, MdtR
                        std::endl<<std::endl<<m_geoUtilTool->dumpVolume(layerVol));
         define.tubeLayers.emplace_back(layerVol);
     }
-    /// As a very wise person once said.. We simply take Bikini booottom
-    /// and push it somewhere elseee
-    define.toVolCenter = m_geoUtilTool->extractShifts(define.physVol);
     define.readoutSide = facCache.readoutOnLeftSide.count(m_idHelperSvc->chamberId(define.detElId)) ? -1. : 1.;
     return StatusCode::SUCCESS;
 }
@@ -90,9 +86,10 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     physNodeMap mapFPV = sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Muon");
     alignNodeMap mapAlign = sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Muon");
     alignedPhysNodes alignedNodes = m_geoUtilTool->selectAlignableVolumes(mapFPV, mapAlign);
-
+#ifndef SIMULATIONBASE
     SurfaceBoundSetPtr<Acts::LineBounds> tubeBounds = std::make_shared<SurfaceBoundSet<Acts::LineBounds>>();
     SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+#endif
     for (auto& [key, pv] : mapFPV) {
         /// The keys should be formatted like
         /// <STATION_NAME>_<MUON_CHAMBERTYPE>_etc. The <MUON_CHAMBERTYPE> also
@@ -128,10 +125,10 @@ StatusCode MdtReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
             return StatusCode::FAILURE;
         }
         static_cast<parameterBook&>(define) = book_itr->second;
-        
+#ifndef SIMULATIONBASE        
         define.tubeBounds = tubeBounds;
         define.layerBounds = layerBounds;
-        
+ #endif       
         /// Chamber dimensions are given from the GeoShape
         ATH_CHECK(loadDimensions(facCache, define));
         std::unique_ptr<MdtReadoutElement> mdtDetectorElement = std::make_unique<MdtReadoutElement>(std::move(define));      

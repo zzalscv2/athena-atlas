@@ -15,7 +15,6 @@
 
 #include <GeoModelRead/ReadGeoModel.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonReadoutGeometryR4/StringUtils.h>
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
 

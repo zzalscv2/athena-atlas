@@ -11,11 +11,10 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CondCont.h"
-#include "GeoModelUtilities/GeoAlignmentStore.h"
 #include "GeoModelUtilities/TransformMap.h"
 
 namespace ActsTrk {
-    using AlignmentStore = TransformMap<void, Acts::Transform3>;
+    using AlignmentStore = TransformMap<void, Amg::Transform3D>;
 }  // namespace ActsTrk
 
 CLASS_DEF(ActsTrk::AlignmentStore, 134756361, 1);

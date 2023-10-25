@@ -5,7 +5,6 @@
 #define MUONSTATIONLAYERSURFACESVC_StationCenterCache_H
 
 #include <MuonReadoutGeometryR4/MuonDetectorDefs.h>
-#include <MuonReadoutGeometryR4/MuonTransformCache.h>
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
 
 #include <Identifier/IdentifierHash.h>
@@ -68,11 +67,11 @@ namespace MuonGMR4{
             IdentifierHash m_surfA{};
             IdentifierHash m_surfB{};
 
-            MuonTransformCache m_localToGlobal{m_surfA,
+            ActsTrk::TransformCache m_localToGlobal{m_surfA,
                     [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash&){
                         return fromLayerToGlobal(store);
             }};
-            MuonTransformCache m_globalToLocal{m_surfA, 
+            ActsTrk::TransformCache m_globalToLocal{m_surfA, 
                     [this](ActsTrk::RawGeomAlignStore* store, const IdentifierHash& hash){
                         return m_localToGlobal.transformMaker()(store,hash).inverse();
             }};
