@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/VKgrkuta.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
@@ -10,14 +11,12 @@
 
 namespace Trk {
 
-extern const vkalMagFld  myMagFld;
-
 void vkgrkuta_(const double charge, const double step, double *vect, double *vout, VKalVrtControlBase* CONTROL)
 {
     double equiv_2[3], equiv_5[3];
     long int iter, ncut, j;
     double cost, pinv, rest, sint, a, b, c, f[4], hst;
-    double hnorm, secxs[4], secys[4], seczs[4], f1, f2, h2, f3, h4, f4; 
+    double hnorm, secxs[4], secys[4], seczs[4], f1, f2, h2, f3, h4, f4;
     double g1, g2, g3, g4, g5, g6, at, bt, ct, ph, hp, fx, fy, fz, tl;
     double ph2, cba, rho, est, tet, hxp[3], dxt, dyt, dzt, ang2, rho1;
 
@@ -69,9 +68,9 @@ void vkgrkuta_(const double charge, const double step, double *vect, double *vou
 
 L20:
     rest = step - tl;
-    if (fabs(hst) > fabs(rest)) hst = rest;
+    if (std::abs(hst) > std::abs(rest)) hst = rest;
 /* *****      CALL GUFLD(VOUT,F) */
-    myMagFld.getMagFld( vout[1], vout[2], vout[3], fx, fy, fz, CONTROL);
+    Trk::vkalMagFld::getMagFld( vout[1], vout[2], vout[3], fx, fy, fz, CONTROL);
     f[0] = fx*10.;   //VK Convert returned field in Tesla into kGauss for old code
     f[1] = fy*10.;
     f[2] = fz*10.;
@@ -103,12 +102,12 @@ L20:
 
 /*  Second intermediate point */
 
-    est = fabs(dxt) + fabs(dyt) + fabs(dzt);
+    est = std::abs(dxt) + std::abs(dyt) + std::abs(dzt);
     if (est > hst)	goto L30;
-    
-    
+
+
 /* *****      CALL GUFLD(XYZT,F) */
-    myMagFld.getMagFld( xyzt[0], xyzt[1], xyzt[2], fx, fy, fz, CONTROL);
+    Trk::vkalMagFld::getMagFld( xyzt[0], xyzt[1], xyzt[2], fx, fy, fz, CONTROL);
     f[0] = fx*10.;   //VK Convert returned field in Tesla into kGauss for old code
     f[1] = fy*10.;
     f[2] = fz*10.;
@@ -135,10 +134,10 @@ L20:
     bt = b + secys[2] * 2.;
     ct = c + seczs[2] * 2.;
 
-    est = fabs(dxt) + fabs(dyt) + fabs(dzt);
-    if (est > fabs(hst) * 2.)          goto L30;
+    est = std::abs(dxt) + std::abs(dyt) + std::abs(dzt);
+    if (est > std::abs(hst) * 2.)          goto L30;
 /* *****      CALL GUFLD(XYZT,F) */
-    myMagFld.getMagFld( xyzt[0], xyzt[1], xyzt[2], fx, fy, fz, CONTROL);
+    Trk::vkalMagFld::getMagFld( xyzt[0], xyzt[1], xyzt[2], fx, fy, fz, CONTROL);
     f[0] = fx*10.; //VK Convert returned field in Tesla into kGauss for old code
     f[1] = fy*10.;
     f[2] = fz*10.;
@@ -154,11 +153,11 @@ L20:
     b  += (secys[0] + secys[3] + (secys[1] + secys[2]) * 2.) /3.;
     c  += (seczs[0] + seczs[3] + (seczs[1] + seczs[2]) * 2.) /3.;
 
-    est = fabs(secxs[0] + secxs[3] - (secxs[1] + secxs[2])) 
-        + fabs(secys[0] + secys[3] - (secys[1] + secys[2])) 
-	+ fabs(seczs[0] + seczs[3] - (seczs[1] + seczs[2]));
+    est = std::abs(secxs[0] + secxs[3] - (secxs[1] + secxs[2]))
+        + std::abs(secys[0] + secys[3] - (secys[1] + secys[2]))
+	+ std::abs(seczs[0] + seczs[3] - (seczs[1] + seczs[2]));
 
-    if (est > 1e-4 && fabs(hst) > 1e-4)    goto L30;
+    if (est > 1e-4 && std::abs(hst) > 1e-4)    goto L30;
     ++iter;
     ncut = 0;
 
@@ -167,7 +166,7 @@ L20:
     if (iter > 1992)  	goto L40;
 
     tl += hst;
-    if (est < 3.125e-6)  
+    if (est < 3.125e-6)
     hst *= 2.;
     cba = 1. / sqrt(a * a + b * b + c * c);
     vout[1] = *x;
@@ -178,7 +177,7 @@ L20:
     vout[6] = cba * c;
     rest = step - tl;
     if (step < 0.)  rest = -rest;
-    if (rest > fabs(step) * 1e-5)	goto L20;
+    if (rest > std::abs(step) * 1e-5)	goto L20;
 
     return;
 
@@ -235,7 +234,7 @@ L40:
 
     }
 
-    } 
+    }
 #undef xyz
 #undef zt
 #undef yt

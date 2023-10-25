@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVKALVRTCORE_VKALVRTCORE_H
@@ -16,7 +16,7 @@ namespace Trk {
 //
 //   Main class to control TrkVKalVrtCore package
 //  If references to external Propagator/Mag.Field are present - the package uses them,
-//  otherwise default internal fixed_field/simple_propagator are used. 
+//  otherwise default internal fixed_field/simple_propagator are used.
 //--------------------------------------------------------------------
 
    class CascadeEvent;
@@ -81,12 +81,12 @@ namespace Trk {
 
      private:
 
-       std::unique_ptr<double[]> m_fullCovariance;   // On vertex fit exit contains full covariance matrix 
+       std::unique_ptr<double[]> m_fullCovariance;   // On vertex fit exit contains full covariance matrix
                                     // (x,y,z,px_0,py_0,pz_0,....,px_n,py_n,pz_n)
                                     // in symmetric form
        double m_vrtMassTot;
        double m_vrtMassError;
-       CascadeEvent * m_cascadeEvent=nullptr;       
+       CascadeEvent * m_cascadeEvent=nullptr;
      public:
        ForCFT vk_forcft;
        bool m_frozenVersionForBTagging = false;

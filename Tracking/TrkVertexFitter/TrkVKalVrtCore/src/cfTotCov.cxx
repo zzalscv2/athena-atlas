@@ -1,28 +1,29 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calculates COVF(21) - symmetric 6x6 covariance matrix
-// for combined (X,Y,Z,Px,Py,Pz) vector after vertex fit 
+// for combined (X,Y,Z,Px,Py,Pz) vector after vertex fit
 //
 //-----------------------------------------------------
+#include "TrkVKalVrtCore/cfTotCov.h"
 #include "TrkVKalVrtCore/CommonPars.h"
+#include "TrkVKalVrtCore/VtCFitE.h"
+#include "TrkVKalVrtCore/Utilities.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
 
 namespace Trk {
-
+//extern variable
+extern const vkalMagFld      myMagFld;
 //
-//  Function calculates complete error matrix ADER and derivatives 
+//  Function calculates complete error matrix ADER and derivatives
 //   of fitted track parameters with respect to initial ones.
 //    It calculates also combined momentum and (VxVyVzPxPyPz) covarinace
 //  Complete error matrix is recalculated here via getFullVrtCov,
 //            so CPU CONSUMING!!!
 //--------------------------------------------------------------
-extern int getFullVrtCov(VKVertex *, double *, const double *, double[6][6]);
-extern void cfsetdiag(long int , double *, double ) noexcept;
-extern const vkalMagFld      myMagFld;
 
 int afterFit(VKVertex *vk, double *ader, double * dcv, double * ptot, double * VrtMomCov, const VKalVrtControlBase* CONTROL )
 {
@@ -39,13 +40,13 @@ int afterFit(VKVertex *vk, double *ader, double * dcv, double * ptot, double * V
     ptot[0] = 0.;
     ptot[1] = 0.;
     ptot[2] = 0.;
-    double constBF = myMagFld.getMagFld(vk->refIterV,CONTROL) * myMagFld.getCnvCst() ;
+    double constBF = Trk::vkalMagFld::getMagFld(vk->refIterV,CONTROL) * Trk::vkalMagFld::getCnvCst() ;
 
     for (i = 1; i <= NTRK; ++i) {
         VKTrack *trk=vk->TrackList[i-1].get();
         invR = trk->fitP[2];
 	cth = 1. / tan(trk->fitP[0]);
-	pt = constBF / fabs(invR);
+	pt = constBF / std::abs(invR);
 	px = pt * cos(trk->fitP[1]);
 	py = pt * sin(trk->fitP[1]);
 	pz = pt * cth;
@@ -73,7 +74,7 @@ int afterFit(VKVertex *vk, double *ader, double * dcv, double * ptot, double * V
     return 0;
 }
 
-//   The same as afterFit(), but instead of fitted track parameters 
+//   The same as afterFit(), but instead of fitted track parameters
 //          it uses guessed track parameters. ( it's needed for cascade)
 //  Complete error matrix is recalculated here via getFullVrtCov,
 //            so CPU CONSUMING!!!
@@ -94,13 +95,13 @@ int afterFitWithIniPar(VKVertex *vk, double *ader, double * dcv, double * ptot, 
     ptot[0] = 0.;
     ptot[1] = 0.;
     ptot[2] = 0.;
-    double constBF = myMagFld.getMagFld(vk->refIterV,CONTROL) * myMagFld.getCnvCst() ;
+    double constBF = Trk::vkalMagFld::getMagFld(vk->refIterV,CONTROL) * Trk::vkalMagFld::getCnvCst() ;
 
     for (i = 1; i <= NTRK; ++i) {
         VKTrack *trk=vk->TrackList[i-1].get();
         invR = trk->iniP[2];
 	cth = 1. / tan(trk->iniP[0]);
-	pt = constBF / fabs(invR);
+	pt = constBF / std::abs(invR);
 	px = pt * cos(trk->iniP[1]);
 	py = pt * sin(trk->iniP[1]);
 	pz = pt * cth;

@@ -1,9 +1,9 @@
 /*
-  Calculate mass and mass error for any subset of tracks
-
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+//Calculate mass and mass error for any subset of tracks
+#include "TrkVKalVrtCore/cfMassErr.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <cmath>
@@ -25,7 +25,7 @@ void cfmasserr(VKVertex * vk, const int *list, double BMAG, double *MASS, double
 
   for(int it=0; it<NTRK; it++){
     if (list[it]) {
-       pmom[it][4] = pt = constBF / fabs(vk->TrackList[it]->fitP[2]);
+       pmom[it][4] = pt = constBF / std::abs(vk->TrackList[it]->fitP[2]);
        pmom[it][5] = cth = 1. /tan(vk->TrackList[it]->fitP[0]);
        pmom[it][0] = px = pt * cos(vk->TrackList[it]->fitP[1]);
        pmom[it][1] = py = pt * sin(vk->TrackList[it]->fitP[1]);
@@ -35,7 +35,7 @@ void cfmasserr(VKVertex * vk, const int *list, double BMAG, double *MASS, double
        ptot[0] += px;
        ptot[1] += py;
        ptot[2] += pz;
-       ptot[3] += pmom[it][3];   
+       ptot[3] += pmom[it][3];
     }
   }
 
@@ -46,7 +46,7 @@ void cfmasserr(VKVertex * vk, const int *list, double BMAG, double *MASS, double
        px = pmom[it][0];
        py = pmom[it][1];
        pz = pmom[it][2];
-       ee = pmom[it][3]; 
+       ee = pmom[it][3];
        dm2dpx = (ptot[3] / ee * px - ptot[0]) * 2.;
        dm2dpy = (ptot[3] / ee * py - ptot[1]) * 2.;
        dm2dpz = (ptot[3] / ee * pz - ptot[2]) * 2.;
@@ -96,7 +96,7 @@ void cfmasserrold_(const long int ntrk, long int *list, double *parfs,
     for (i__ = 1; i__ <= ntrk; ++i__) {
 	if (list[i__] == 1) {
 	    i3 = i__ * 3;
-	    pt = fabs(parfs[i3 + 3]);
+	    pt = std::abs(parfs[i3 + 3]);
 	    pt = constB / pt;
 	    cth = 1. /tan(parfs[i3 + 1]);
 	    px = pt * cos(parfs[i3 + 2]);
@@ -113,7 +113,7 @@ void cfmasserrold_(const long int ntrk, long int *list, double *parfs,
     for (i__ = 1; i__ <= ntrk; ++i__) {
 	i3 = i__ * 3;
 	if (list[i__] == 1) {
-	    pt = fabs(parfs[i3+3]);
+	    pt = std::abs(parfs[i3+3]);
 	    pt = constB / pt;
 	    cth = 1. / tan(parfs[i3+1]);
 	    px  = pt * cos(parfs[i3+2]);
@@ -149,7 +149,7 @@ void cfmasserrold_(const long int ntrk, long int *list, double *parfs,
     if((*dm)<1.e-6)  (*dm) = 1.e-6;
     (*dm)   = sqrt(*dm);
     (*sigm) = sqrt(covarm2) / 2. / (*dm);
-} 
+}
 
 
 

@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/cfNewP.h"
 #include <cmath>
 
 namespace Trk {
 
 void cfnewp(const long int ich, double *parold, double *ref, double *s, double *parnew, double *per)
 {
- 
+
     double dphi, coth, hper, zper, zeps, r__, cs, xc, yc, sn, sipart, eps;
 
 /* ------------------------------------------------------------*/
@@ -16,7 +17,7 @@ void cfnewp(const long int ich, double *parold, double *ref, double *s, double *
 /*       w.r.t to a new reference point.                       */
 /*   RETURNED POSITION IS NOT A POSITION OF CLOSEST APPROACH   */
 /*   BUT PERIGEE ASSUMIMG THAT REF IS 			       */
-/*            A CENTER OF COORDINATE SYSTEM                    */                         
+/*            A CENTER OF COORDINATE SYSTEM                    */
 /*							       */
 /*        INPUT:  ICH    Charge(-1,0,1)                        */
 /* 		 PAROLD Initial parameters(EPS,H,THE,PHI,1./R) */
@@ -54,7 +55,7 @@ void cfnewp(const long int ich, double *parold, double *ref, double *s, double *
 	hper = r__ - sipart * sqrt(xc*xc + yc*yc);
 /* -- Phi */
         double tmp_prec=  - eps - cs*ref[2] + sn*ref[1];
-	dphi = atan2(sipart * (ref[1]*cs + ref[2]*sn), 
+	dphi = atan2(sipart * (ref[1]*cs + ref[2]*sn),
                      sipart * (r__ + tmp_prec) );
 	(*s) = r__*dphi;
 /* -- Z at VXOLD */
@@ -75,7 +76,7 @@ void cfnewp(const long int ich, double *parold, double *ref, double *s, double *
     per[1] = ref[1] + sin(parold[4] + dphi) * hper;
     per[2] = ref[2] - cos(parold[4] + dphi) * hper;
     per[3] = ref[3] + zper;
-} 
+}
 
 
 } /* End of VKalVrtCore namespace */

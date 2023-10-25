@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _TrkVKalVrtCore_ForVrtClose_H
@@ -11,7 +11,7 @@ namespace Trk {
 
 //
 // Structure needed for "passing near other vertex" constraint
-//  Vertex+cov.matrix+Charge themselves are also here 
+//  Vertex+cov.matrix+Charge themselves are also here
 //   (previously were in ForCFT structure!!!)
 //
 //  Constraint usage is controlled by "passNearVertex" and "passWithTrkCov" flags
@@ -19,9 +19,9 @@ namespace Trk {
 //--------------------------------------------------------------------------------
 
   struct ForVrtClose{
-    long int Charge;          // Charge of summary track for propagation 
+    long int Charge;          // Charge of summary track for propagation
     double vrt[3], covvrt[6];
-    double dcovf[21];         // XYZPxPyPz covariance matrix 
+    double dcovf[21];         // XYZPxPyPz covariance matrix
                               // for constraint calculation.
 			      // Its dependance on vertex position is small,
 			      // so it is calculated on previous iteration and

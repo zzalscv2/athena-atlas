@@ -1,21 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/cfNewPm.h"
+#include "TrkVKalVrtCore/cfNewP.h"
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
+#include "TrkVKalVrtCore/ForCFT.h"
+#include "TrkVKalVrtCore/VKgrkuta.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
 
 namespace Trk {
-
-extern const vkalMagFld  myMagFld;
-
-
-extern double d_sign(double, double);
-extern void cfnewp(const long int, double *, double *, double *, double *, double *);
-extern void vkgrkuta_(const double, const double, double *, double *, VKalVrtControlBase* =nullptr );
-
 
 void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double ustep, double *parn, double *closePoint, VKalVrtControlBase * CONTROL)
 {
@@ -49,7 +45,7 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double u
     vect[1] = -cos(par[4]) * par[1]   +xyzStart[1];
     vect[2] = par[2]                  +xyzStart[2];
 
-    double constB = myMagFld.getMagFld(vect,CONTROL) * myMagFld.getCnvCst();
+    double constB = Trk::vkalMagFld::getMagFld(vect,CONTROL) * Trk::vkalMagFld::getCnvCst();
 
     double pt = constB / fabs(par[5]);
     double px = pt * cos(par[4]);
@@ -90,7 +86,7 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double u
 /* --- Now we are in the new point. Calculate track parameters */
 /*   at new point with new mag.field */
 
-    constB = myMagFld.getMagFld(xyzEnd,CONTROL) * myMagFld.getCnvCst() ;
+    constB = Trk::vkalMagFld::getMagFld(xyzEnd,CONTROL) * Trk::vkalMagFld::getCnvCst() ;
     if(std::abs(constB)<0.001)constB=0.001; //Protection against zero field
 
     dpar0[0] = 0.;
@@ -107,13 +103,10 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double u
     xyzst[1] = xyzEnd[1] - vout[1];
     xyzst[2] = xyzEnd[2] - vout[2];
 
-    cfnewp(ich, dpar0, xyzst, &dp, parn, perig); // Last step of propagation 
+    cfnewp(ich, dpar0, xyzst, &dp, parn, perig); // Last step of propagation
     closePoint[0] = perig[0] + vout[0];                  // with simple program
     closePoint[1] = perig[1] + vout[1];
     closePoint[2] = perig[2] + vout[2];
-} 
-
-
-
+}
 
 } /* End of namespace */

@@ -20,8 +20,6 @@
 
 namespace Trk {
 
- extern const vkalPropagator  myPropagator;
-
 //--------------------------------------------------------------------
 //  Extract xAOD::TrackParticles
 //
@@ -227,7 +225,7 @@ namespace Trk {
 
 //----------------------------------------------------------------------------------------------------------
 
-  const Perigee* TrkVKalVrtFitter::GetPerigee( const TrackParameters* i_ntrk)  
+  const Perigee* TrkVKalVrtFitter::GetPerigee( const TrackParameters* i_ntrk)
   {
        const Perigee* mPer = nullptr;
        if(i_ntrk->surfaceType()==Trk::SurfaceType::Perigee && i_ntrk->covariance()!= nullptr ) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -11,8 +11,10 @@
 #include "VxVertex/ExtendedVxCandidate.h"
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
-#include  "xAODTracking/TrackParticleContainer.h"
-#include  "TrkVKalVrtFitter/IVKalState.h"
+#include "TrkVKalVrtCore/CFitCascade.h"
+#include "TrkVKalVrtCore/CascadeDefinition.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "TrkVKalVrtFitter/IVKalState.h"
 #include "GaudiKernel/EventContext.h"
 
 //-------------------------------------------------
@@ -20,27 +22,8 @@
 #include<iostream>
 
 namespace Trk {
-    extern int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich, double *wm, double *inp_Trk5, double *inp_CovTrk5,
-                   const std::vector< std::vector<int> > &vertexDefinition,
-                   const std::vector< std::vector<int> > &cascadeDefinition,
-		   double definedCnstAccuracy=1.e-4);
-    extern int processCascade(CascadeEvent &);
-    extern int processCascade(CascadeEvent &, double *);
-    extern int processCascade(CascadeEvent &, const double *, const double *);
-    extern int processCascadePV(CascadeEvent &, const double *, const double *);
-    extern void getFittedCascade( CascadeEvent &,
-                                  std::vector< Vect3DF > &, 
-		                  std::vector<std::vector<double> >& ,
-                                  std::vector< std::vector< VectMOM> > & ,
-		                  std::vector< std::vector<double> > & ,
-		                  std::vector<double> & ,
-		                  std::vector<double> & );
-    extern int setCascadeMassConstraint(CascadeEvent &, long int IV, double Mass);
-    extern int setCascadeMassConstraint(CascadeEvent &, long int IV, std::vector<int> &, std::vector<int> &, double Mass);
 
-
-
-   /** Interface for  cascade fit*/
+/** Interface for  cascade fit*/
 //-----------------------------------------------------------------------------------------
 // First vertex in cascade
 //
@@ -50,7 +33,7 @@ namespace Trk {
 //  cascadeV -  structure with cascade vertex description. It contains
 //               vID                            - VertexID of the vertex
 //               vector<int>      trkInVrt      - used tracks
-//               vector<VertexID> inPointingV   - used vertices (pseudo-tracks from them really) or vertices pointing to the current one. 
+//               vector<VertexID> inPointingV   - used vertices (pseudo-tracks from them really) or vertices pointing to the current one.
 //               VertexID         outPointingV  - vertex to which the current vertex points
 //
 //  PartialMassConstraint - structure for mass constraint description. It contains
@@ -72,7 +55,7 @@ namespace Trk {
 //----------   Their sizes are SimpleCascade sise.                                                                         ---------
 //
 //  vector< vector <int> > vertexDefinition   -  list of pointers to REAL tracks (in m_partListForConstraints ) for SimpleCascade
-//  vector< vector <int> > cascadeDefinition  -  simple vertices pointing to the current one. Contains indices (integer) to itself!  
+//  vector< vector <int> > cascadeDefinition  -  simple vertices pointing to the current one. Contains indices (integer) to itself!
 //
 //
 //----------------------------------------------------------------------------------------
@@ -94,7 +77,7 @@ VertexID TrkVKalVrtFitter::startVertex(const  std::vector<const xAOD::TrackParti
 //
 // Calculate total number of degrees of freedom for cascade WITHOUT pointing to primary vertex
 //
-int TrkVKalVrtFitter::getCascadeNDoF (const CascadeState& cstate) 
+int TrkVKalVrtFitter::getCascadeNDoF (const CascadeState& cstate)
 {
 
 // get Tracks, Vertices and Pointings in cascade
@@ -151,7 +134,7 @@ VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackPartic
        newV.trkInVrt.push_back(it+presentNT);
     }
     cstate.m_cascadeVList.push_back(std::move(newV));
-//--------------------------------------------------------------  
+//--------------------------------------------------------------
     return new_vID;
 }
 
@@ -172,7 +155,7 @@ VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackPartic
     VertexID vID=nextVertex( list, particleMass, istate, massConstraint);
 //
     int lastC=cstate.m_partMassCnstForCascade.size()-1;   // Check if full vertex mass constraint exist
-    if( lastC>=0 ){    if(  cstate.m_partMassCnstForCascade[lastC].VRT == vID ){ 
+    if( lastC>=0 ){    if(  cstate.m_partMassCnstForCascade[lastC].VRT == vID ){
                          for(int iv=0; iv<(int)precedingVertices.size(); iv++){
                             cstate.m_partMassCnstForCascade[lastC].pseudoInVrt.push_back(precedingVertices[iv]); }
                        }
@@ -184,7 +167,7 @@ VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackPartic
        cstate.m_cascadeVList[lastV].inPointingV.push_back(precedingVertices[iv]); // fill preceding vertices list
     }
 //--
-    return vID;     
+    return vID;
 }
 
 
@@ -197,7 +180,7 @@ VertexID TrkVKalVrtFitter::nextVertex(const  std::vector<const xAOD::TrackPartic
 //------------------------
 void TrkVKalVrtFitter::makeSimpleCascade(std::vector< std::vector<int> > & vrtDef,
                                          std::vector< std::vector<int> > & cascadeDef,
-                                         CascadeState& cstate) 
+                                         CascadeState& cstate)
 {
     int iv,ip,it, nVAdd, iva;
     vrtDef.clear();
@@ -252,9 +235,9 @@ void TrkVKalVrtFitter::makeSimpleCascade(std::vector< std::vector<int> > & vrtDe
 //--------------------------------------------------------------------------------
 //   Printing of cascade structure
 //
-void TrkVKalVrtFitter::printSimpleCascade(std::vector< std::vector<int> > & vrtDef, 
+void TrkVKalVrtFitter::printSimpleCascade(std::vector< std::vector<int> > & vrtDef,
                                           std::vector< std::vector<int> > & cascadeDef,
-                                          const CascadeState& cstate) 
+                                          const CascadeState& cstate)
 {
       int kk,kkk;
       for(kk=0; kk<(int)vrtDef.size(); kk++){
@@ -262,13 +245,13 @@ void TrkVKalVrtFitter::printSimpleCascade(std::vector< std::vector<int> > & vrtD
          for(kkk=0; kkk<(int)vrtDef[kk].size(); kkk++){
 	                 std::cout<<vrtDef[kk][kkk]<<", ";}  std::cout<<" pseu=";
          for(kkk=0; kkk<(int)cascadeDef[kk].size(); kkk++){
-	                 std::cout<<cascadeDef[kk][kkk]<<", ";}  
+	                 std::cout<<cascadeDef[kk][kkk]<<", ";}
       } std::cout<<'\n';
-//---      
+//---
       for(kk=0; kk<(int)vrtDef.size(); kk++){
          std::cout<<" Vertex("<<kk<<"):: trkM=";
          for(kkk=0; kkk<(int)vrtDef[kk].size(); kkk++){
-             std::cout<<cstate.m_partMassForCascade[vrtDef[kk][kkk]]<<", ";}  
+             std::cout<<cstate.m_partMassForCascade[vrtDef[kk][kkk]]<<", ";}
       }std::cout<<'\n';
 //--
       for (const PartialMassConstraint& c : cstate.m_partMassCnstForCascade) {
@@ -318,7 +301,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
           }else{
             ATH_MSG_DEBUG("No FirstMeasuredPoint on track in CascadeFitter. Stop fit");
             { CLEANCASCADE();  return nullptr; }
-          }	      
+          }
        }
        sc=CvtTrackParameters(baseInpTrk,ntrk,state);
        if(sc.isFailure()){ntrk=0; sc=CvtTrackParticle(cstate.m_partListForCascade,ntrk,state);}
@@ -362,7 +345,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
        printSimpleCascade(vertexDefinition,cascadeDefinition, cstate);
     }
 //
-//     At last fit of cascade  
+//     At last fit of cascade
 //   primVrt == 0            - no primary vertex
 //   primVrt is <Vertex*>    - exact pointing to primary vertex
 //   primVrt is <RecVertex*> - summary track pass near primary vertex
@@ -412,7 +395,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
 	        +(cVertices[ivFrom].Y-cVertices[ivTo].Y)*py
 	        +(cVertices[ivFrom].Z-cVertices[ivTo].Z)*pz;
           if(Sign<0) break;
-       }  
+       }
        if(Sign<0) break;
     }
 //
@@ -453,7 +436,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
                 IERR = findPositions(tmpI, new_cascadeDefinition[index], indexVV);
 		if(IERR)break;
                 indexV.insert (indexV.end(), indexVV.begin(), indexVV.end());
-             }							 
+             }
          }   if(IERR)break;
          //std::cout<<"trk2="; for(int I=0; I<(int)indexT.size(); I++)std::cout<<indexT[I]; std::cout<<'\n';
          //std::cout<<"pse="; for(int I=0; I<(int)indexV.size(); I++)std::cout<<indexV[I]; std::cout<<'\n';
@@ -488,7 +471,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
        std::vector< std::vector< VectMOM> > t_fittedParticles;
        std::vector< std::vector<double> >   t_fittedCovariance;
        std::vector<double>   t_fitFullCovariance;
-       getFittedCascade(*(state.m_vkalFitControl.getCascadeEvent()), t_cVertices, t_covVertices, t_fittedParticles, 
+       getFittedCascade(*(state.m_vkalFitControl.getCascadeEvent()), t_cVertices, t_covVertices, t_fittedParticles,
                          t_fittedCovariance, particleChi2, t_fitFullCovariance);
        cVertices.clear(); covVertices.clear();
 //
@@ -517,7 +500,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
          for(it=0; it<(int)cstate.m_cascadeVList[iv].trkInVrt.size(); it++){
 	    int numTrk=cstate.m_cascadeVList[iv].trkInVrt[it];                 //track itself
             for(itmp=0; itmp<(int)new_vertexDefinition[index].size(); itmp++) if(numTrk==new_vertexDefinition[index][itmp])break;
-            fittedParticles[iv][it]=t_fittedParticles[index][itmp];    
+            fittedParticles[iv][it]=t_fittedParticles[index][itmp];
 //Update only particle covariance. Cross particle covariance remains old.
             fittedCovariance[iv][SymIndex(it,0,0)]=t_fittedCovariance[index][SymIndex(itmp,0,0)];
             fittedCovariance[iv][SymIndex(it,1,0)]=t_fittedCovariance[index][SymIndex(itmp,1,0)];
@@ -526,7 +509,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
             fittedCovariance[iv][SymIndex(it,2,1)]=t_fittedCovariance[index][SymIndex(itmp,2,1)];
             fittedCovariance[iv][SymIndex(it,2,2)]=t_fittedCovariance[index][SymIndex(itmp,2,2)];
          }
-         fittedCovariance[iv][SymIndex(0,0,0)]=t_fittedCovariance[index][SymIndex(0,0,0)];    // Update also vertex 
+         fittedCovariance[iv][SymIndex(0,0,0)]=t_fittedCovariance[index][SymIndex(0,0,0)];    // Update also vertex
          fittedCovariance[iv][SymIndex(0,1,0)]=t_fittedCovariance[index][SymIndex(0,1,0)];    // covarinace
          fittedCovariance[iv][SymIndex(0,1,1)]=t_fittedCovariance[index][SymIndex(0,1,1)];
          fittedCovariance[iv][SymIndex(0,2,0)]=t_fittedCovariance[index][SymIndex(0,2,0)];
@@ -548,11 +531,11 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
                 tmpMom.Px += fittedParticles[tmpIndexV][it].Px; tmpMom.Py += fittedParticles[tmpIndexV][it].Py;
                 tmpMom.Pz += fittedParticles[tmpIndexV][it].Pz; tmpMom.E  += fittedParticles[tmpIndexV][it].E;
               }
-              fittedParticles[iv][ip+NTrkInVrt]=tmpMom;	    
+              fittedParticles[iv][ip+NTrkInVrt]=tmpMom;
             }else{
               int indexS=getSimpleVIndex( cstate.m_cascadeVList[iv].inPointingV[ip], cstate );   //index of inPointing vertex in simplified structure
               for(itmp=0; itmp<(int)new_cascadeDefinition[index].size(); itmp++) if(indexS==new_cascadeDefinition[index][itmp])break;
-              fittedParticles[iv][ip+NTrkInVrt]=t_fittedParticles[index][itmp+new_vertexDefinition[index].size()];	    
+              fittedParticles[iv][ip+NTrkInVrt]=t_fittedParticles[index][itmp+new_vertexDefinition[index].size()];
             }
          }
        }
@@ -590,7 +573,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
     std::vector<xAOD::Vertex*> xaodVrtList(0);
     double phi, theta, invP, mom, fullChi2=0.;
 
-    int NDOF=getCascadeNDoF(cstate); if(NDOFsqueezed) NDOF=NDOFsqueezed; 
+    int NDOF=getCascadeNDoF(cstate); if(NDOFsqueezed) NDOF=NDOFsqueezed;
     if(primVrt){ if(FirstDecayAtPV){ NDOF+=3; }else{ NDOF+=2; } }
 
     for(iv=0; iv<(int)cVertices.size(); iv++){
@@ -616,17 +599,17 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
       int NRealT=vertexDefinition[iv].size();
       Amg::MatrixX genCOV( NRealT*3+3, NRealT*3+3 );     // Fill cov. matrix for vertex
       for( it=0; it<NRealT*3+3; it++){                                 // (X,Y,Z,px1,py1,....pxn,pyn,pzn)
-        for( jt=0; jt<=it; jt++){                                      // 
+        for( jt=0; jt<=it; jt++){                                      //
            genCOV(it,jt) = genCOV(jt,it) = fittedCovariance[iv][it*(it+1)/2+jt];      // for real tracks only
       } }                                                              // (first in the list)
       Amg::MatrixX *fullDeriv=nullptr;
       if( m_makeExtendedVertex ){
          //VK fullDeriv=new CLHEP::HepMatrix( NRealT*3+3, NRealT*3+3, 0); // matrix is filled by zeros
-         fullDeriv=new Amg::MatrixX( NRealT*3+3, NRealT*3+3);       
+         fullDeriv=new Amg::MatrixX( NRealT*3+3, NRealT*3+3);
          (*fullDeriv)=Amg::MatrixX::Zero(NRealT*3+3, NRealT*3+3);    // matrix is filled by zeros
 	 (*fullDeriv)(0,0)=(*fullDeriv)(1,1)=(*fullDeriv)(2,2)=1.;
       }
-      for( it=0; it<NRealT; it++) {  
+      for( it=0; it<NRealT; it++) {
          mom= sqrt(  fittedParticles[iv][it].Pz*fittedParticles[iv][it].Pz
                     +fittedParticles[iv][it].Py*fittedParticles[iv][it].Py
                     +fittedParticles[iv][it].Px*fittedParticles[iv][it].Px);
@@ -695,16 +678,16 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
 //
 //  Save momenta of all particles including combined at vertex positions
 //
-    std::vector<TLorentzVector>                     tmpMoms;   
-    std::vector<std::vector<TLorentzVector> >       particleMoms;   
-    std::vector<Amg::MatrixX>                       particleCovs;   
+    std::vector<TLorentzVector>                     tmpMoms;
+    std::vector<std::vector<TLorentzVector> >       particleMoms;
+    std::vector<Amg::MatrixX>                       particleCovs;
     int allFitPrt=0;
     for(iv=0; iv<(int)cVertices.size(); iv++){
       tmpMoms.clear();
       int NTrkF=fittedParticles[iv].size();
-      for(it=0; it< NTrkF; it++) { 
-         tmpMoms.emplace_back( fittedParticles[iv][it].Px, fittedParticles[iv][it].Py, 
-                                            fittedParticles[iv][it].Pz, fittedParticles[iv][it].E   );            
+      for(it=0; it< NTrkF; it++) {
+         tmpMoms.emplace_back( fittedParticles[iv][it].Px, fittedParticles[iv][it].Py,
+                                            fittedParticles[iv][it].Pz, fittedParticles[iv][it].E   );
       }
       //CLHEP::HepSymMatrix COV( NTrkF*3+3, 0 );
       Amg::MatrixX COV(NTrkF*3+3,NTrkF*3+3); COV=Amg::MatrixX::Zero(NTrkF*3+3,NTrkF*3+3);
@@ -718,7 +701,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
     }
 //
     int NAPAR=(allFitPrt+cVertices.size())*3; //Full size of complete covariance matrix
-    //CLHEP::HepSymMatrix FULL( NAPAR, 0 ); 
+    //CLHEP::HepSymMatrix FULL( NAPAR, 0 );
     Amg::MatrixX FULL(NAPAR,NAPAR); FULL.setZero();
     if( !NDOFsqueezed ){                //normal cascade
       for( it=0; it<NAPAR; it++){
@@ -726,14 +709,14 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
            FULL(it,jt) = FULL(jt,it) = fitFullCovariance[it*(it+1)/2+jt];
       } }
     }else{    //squeezed cascade
-     //int mcount=1;                                          //Indexing in SUB starts from 1 !!!! 
-       int mcount=0;                                          //Indexing in BLOCK starts from 0 !!!! 
+     //int mcount=1;                                          //Indexing in SUB starts from 1 !!!!
+       int mcount=0;                                          //Indexing in BLOCK starts from 0 !!!!
        for(iv=0; iv<(int)cstate.m_cascadeVList.size(); iv++){
         //FULL.sub(mcount,particleCovs[iv]); mcount += particleCovs[iv].num_col();
           FULL.block(mcount,mcount,particleCovs[iv].rows(),particleCovs[iv].cols())=particleCovs[iv];
 	  mcount += particleCovs[iv].rows();
        }
-    }    
+    }
 //
 //
 //    VxCascadeInfo * recCascade= new VxCascadeInfo(vxVrtList,particleMoms,particleCovs, NDOF ,fullChi2);
@@ -745,10 +728,10 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
 
 #undef CLEANCASCADE
 
- 
+
 StatusCode  TrkVKalVrtFitter::addMassConstraint(VertexID Vertex,
                                  const std::vector<const xAOD::TrackParticle*> & tracksInConstraint,
-                                 const std::vector<VertexID> &pseudotracksInConstraint, 
+                                 const std::vector<VertexID> &pseudotracksInConstraint,
                                  IVKalState& istate,
 				 double massConstraint ) const
 {
@@ -759,16 +742,16 @@ StatusCode  TrkVKalVrtFitter::addMassConstraint(VertexID Vertex,
     int ivc, it, itc;
     //int NV=m_cstate.cascadeVList.size();              // cascade size
 //----
-    if(Vertex <   0) return StatusCode::FAILURE;   
+    if(Vertex <   0) return StatusCode::FAILURE;
     //if(Vertex >= NV) return StatusCode::FAILURE;  //Now this check is WRONG. Use indexInV(..) instead
 //
-//---- real tracks 
+//---- real tracks
 //
     int cnstNTRK=tracksInConstraint.size();                  // number of real tracks in constraints
     int indexV = indexInV(Vertex, cstate);                   // index of vertex in cascade structure
     if(indexV<0) return StatusCode::FAILURE;
     int NTRK    = cstate.m_cascadeVList[indexV].trkInVrt.size();    // number of real tracks in chosen vertex
-    int totNTRK = cstate.m_partListForCascade.size();               // total number of real tracks 
+    int totNTRK = cstate.m_partListForCascade.size();               // total number of real tracks
     if( cnstNTRK > NTRK ) return StatusCode::FAILURE;
 //-
     PartialMassConstraint  tmpMcnst;
@@ -776,28 +759,28 @@ StatusCode  TrkVKalVrtFitter::addMassConstraint(VertexID Vertex,
     tmpMcnst.VRT          = Vertex;
 //
     double totMass=0;
-    for(itc=0; itc<cnstNTRK; itc++) { 
-       for(it=0; it<totNTRK; it++) if(tracksInConstraint[itc]==cstate.m_partListForCascade[it]) break;  
+    for(itc=0; itc<cnstNTRK; itc++) {
+       for(it=0; it<totNTRK; it++) if(tracksInConstraint[itc]==cstate.m_partListForCascade[it]) break;
        if(it==totNTRK) return StatusCode::FAILURE;  //track in constraint doesn't correspond to any track in vertex
        tmpMcnst.trkInVrt.push_back(it);
        totMass += cstate.m_partMassForCascade[it];
     }
     if(totMass > massConstraint)return StatusCode::FAILURE;
 //
-//---- pseudo tracks 
+//---- pseudo tracks
 //
     int cnstNVP = pseudotracksInConstraint.size();               // number of pseudo-tracks in constraints
     int NVP     = cstate.m_cascadeVList[indexV].inPointingV.size();     // number of pseudo-tracks in chosen vertex
     if( cnstNVP > NVP ) return StatusCode::FAILURE;
 //-
-    for(ivc=0; ivc<cnstNVP; ivc++) { 
+    for(ivc=0; ivc<cnstNVP; ivc++) {
        int tmpV = indexInV(pseudotracksInConstraint[ivc], cstate);                           // index of vertex in cascade structure
        if( tmpV< 0) return StatusCode::FAILURE;  //pseudotrack in constraint doesn't correspond to any pseudotrack in vertex
        tmpMcnst.pseudoInVrt.push_back( pseudotracksInConstraint[ivc] );
     }
 
     cstate.m_partMassCnstForCascade.push_back(std::move(tmpMcnst));
-  
+
     return StatusCode::SUCCESS;
 }
 
@@ -805,8 +788,8 @@ StatusCode  TrkVKalVrtFitter::addMassConstraint(VertexID Vertex,
 //----------------------------------------------------------------------------------------
 //   Looks for index of each element of inputList in refList
 //
-int TrkVKalVrtFitter::findPositions(const std::vector<int> &inputList,const std::vector<int> &refList, std::vector<int> &index) 
-{   
+int TrkVKalVrtFitter::findPositions(const std::vector<int> &inputList,const std::vector<int> &refList, std::vector<int> &index)
+{
    int R,I;
    index.clear();
    int nI=inputList.size();   if(nI==0) return 0;        //all ok
@@ -816,14 +799,14 @@ int TrkVKalVrtFitter::findPositions(const std::vector<int> &inputList,const std:
    for(I=0; I<nI; I++){
       for(R=0; R<nR; R++) if(inputList[I]==refList[R]){index.push_back(R); break;}
       if(R==nR) return -1;                              //input element not found in reference list
-   }   
+   }
    return 0;
-} 
+}
 //-----------------------------------------------------------------
 //   Get index of given vertex in simplified cascade structure
 //
 int TrkVKalVrtFitter::getSimpleVIndex( const VertexID & vrt,
-                                       const CascadeState& cstate) 
+                                       const CascadeState& cstate)
 {
     int NVRT=cstate.m_cascadeVList.size();
 
@@ -831,18 +814,18 @@ int TrkVKalVrtFitter::getSimpleVIndex( const VertexID & vrt,
     if(iv<0) return -1;  //not found
 
     int ivv=0;
-    if(cstate.m_cascadeVList[iv].mergedTO){ 
-       for(ivv=0; ivv<NVRT; ivv++) if(cstate.m_cascadeVList[iv].mergedTO == cstate.m_cascadeVList[ivv].vID) break; 
+    if(cstate.m_cascadeVList[iv].mergedTO){
+       for(ivv=0; ivv<NVRT; ivv++) if(cstate.m_cascadeVList[iv].mergedTO == cstate.m_cascadeVList[ivv].vID) break;
        if(iv==NVRT) return -1;  //not found
        iv=ivv;
     }
     return cstate.m_cascadeVList[iv].indexInSimpleCascade;
-} 
+}
 //-----------------------------------------------------------------
 //   Get index of given vertex in full cascade structure
 //
 int TrkVKalVrtFitter::indexInV( const VertexID & vrt,
-                                const CascadeState& cstate) 
+                                const CascadeState& cstate)
 {  int icv;   int NVRT=cstate.m_cascadeVList.size();
    for(icv=0; icv<NVRT; icv++)  if(vrt==cstate.m_cascadeVList[icv].vID)break;
    if(icv==NVRT)return -1;

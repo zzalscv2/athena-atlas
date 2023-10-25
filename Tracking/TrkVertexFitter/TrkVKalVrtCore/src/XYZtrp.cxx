@@ -1,22 +1,21 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/XYZtrp.h"
 #include "TrkVKalVrtCore/CommonPars.h"
+#include "TrkVKalVrtCore/Utilities.h"
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
 
 namespace Trk {
 
-extern const vkalPropagator  myPropagator;
-extern void tdasatVK(const double *, const double *, double *, long int, long int);
-
 #define cnv_ref(a_1,a_2) cnv[(a_2)*6 + (a_1) - 7]
 
 void  xyztrp(const long int ich, double *vrt0, double *pv0, double *covi, double BMAG, double *paro, double *errt)
 {
-    double covd[15],par[5], cnv[36];	/* was [6][6] */ 
+    double covd[15],par[5], cnv[36];	/* was [6][6] */
 /* ---------------------------------------------------------- */
 /*       Subroutine for convertion                            */
 /*           (X,Y,Z,PX,PY,PZ) --> (eps,z,theta,phi,1/r)       */
@@ -37,7 +36,7 @@ void  xyztrp(const long int ich, double *vrt0, double *pv0, double *covi, double
 /* Author: V.Kostyukhin                                       */
 /* ---------------------------------------------------------- */
 
-    double constBF =BMAG * vkalMagCnvCst; 
+    double constBF =BMAG * vkalMagCnvCst;
 
     double pt = sqrt(pv0[0]*pv0[0] + pv0[1]*pv0[1]);
     double pp = pt*pt + pv0[2]*pv0[2];                   // p**2
@@ -106,9 +105,9 @@ void  xyztrp(const long int ich, double *vrt0, double *pv0, double *covi, double
 
 /* -- Translation to (0,0,0) (BackPropagation) --*/
     double Ref0[3]={0.,0.,0.};
-    myPropagator.Propagate(-999, ich, par, covd, vrt0, Ref0, paro, errt, nullptr);
+    Trk::vkalPropagator::Propagate(-999, ich, par, covd, vrt0, Ref0, paro, errt, nullptr);
 
-} 
+}
 
 
 void  combinedTrack(long int ICH, double *pv0, double *covi, double BMAG, double *par, double *covo)
@@ -198,7 +197,7 @@ void  combinedTrack(long int ICH, double *pv0, double *covi, double BMAG, double
     cnv_ref(5, 5) = dRho_dPy;
     cnv_ref(6, 5) = dRho_dPz;
     tdasatVK(cnv, covi , covo, 5, 6);
-} 
+}
 #undef cnv_ref
 
 } /* End of VKalVrtCore namespace */

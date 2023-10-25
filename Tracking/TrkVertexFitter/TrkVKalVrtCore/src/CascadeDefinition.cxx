@@ -1,7 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/CascadeDefinition.h"
+#include "TrkVKalVrtCore/CFitCascade.h"
+#include "TrkVKalVrtCore/VKvFast.h"
+#include "TrkVKalVrtCore/Matrix.h"
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
@@ -10,19 +14,8 @@
 
 namespace Trk {
 
-extern const vkalMagFld      myMagFld;
-
-extern int cfdinv(double *, double *, long int );
-extern int cfInv5(double *cov, double *wgt );
-extern int translateToFittedPos(CascadeEvent &,double Step=1.);
-extern double vkvFastV( double* , double* , const double*, double , double*);
-extern long int  vtcfit( VKVertex * vk);
-extern void cfdcopy(double *source, double *target, int);
-
-int initCascadeEngine(CascadeEvent &);
- 
 VKVertex* startCascade( std::unique_ptr<VKVertex> vk)
-{  
+{
    auto *ptr = vk.get();
    ptr->vk_fitterControl->getCascadeEvent()->cascadeNV=1;
    ptr->vk_fitterControl->getCascadeEvent()->nearPrmVertex=0;
@@ -40,7 +33,7 @@ VKVertex* addCascadeEntry( std::unique_ptr<VKVertex> vk)
 }
 
 VKVertex* addCascadeEntry( std::unique_ptr<VKVertex> vk, const std::vector<int> &index)
-{ 
+{
    for(int i=0; i<(int)index.size(); i++){
      VKVertex * predecessor =  vk->vk_fitterControl->getCascadeEvent()->cascadeVertexList.at(index[i]).get();
      if(predecessor->nextCascadeVrt) std::cout <<"VKalVrtCore: ERROR 1 in CASCADE creation !!!"<<'\n';
@@ -54,13 +47,9 @@ VKVertex* addCascadeEntry( std::unique_ptr<VKVertex> vk, const std::vector<int> 
    return ptr->vk_fitterControl->getCascadeEvent()->cascadeVertexList.back().get();
 }
 
-
-
-
-
 //=================================================================================================
 //   Main cascade definition entry
-//   
+//
 //  Reference and iteration reference points are set to (0,0,0). Track weight matrices are computed.
 //
 //  If predessor vertices point to current one, container tracks are created for combined particles
@@ -68,11 +57,11 @@ VKVertex* addCascadeEntry( std::unique_ptr<VKVertex> vk, const std::vector<int> 
 //
 //  vertexDefinition[iv][it]   - list of real track to vertex associacion
 //  cascadeDefinition[iv][ipv] - for given vertex IV the list of previous vertices pointing to it.
-// 
+//
 int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich, double *wm, double *inp_Trk5, double *inp_CovTrk5,
                    const std::vector< std::vector<int> > &vertexDefinition,
                    const std::vector< std::vector<int> > &cascadeDefinition,
-		   double definedCnstAccuracy=1.e-4)
+                   double definedCnstAccuracy/*=1.e-4*/)
 {
     long int  tk;
     int iv,it;
@@ -80,18 +69,18 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
        std::cout<<" WRONG INPUT!!!"<<'\n';
        return  -1;
     }
- 
+
     long int IERR;
     int NV=vertexDefinition.size();
-    double xyz[3]={0.}; 
-    double tmp[15]={0.}; 
+    double xyz[3]={0.};
+    double tmp[15]={0.};
     double tmpWgt[15],out[3];
-    double vBx,vBy,vBz; 
+    double vBx,vBy,vBz;
     VKTrack  * trk;
     int vEstimDone=0;
 
-    for(iv=0; iv<NV; iv++){ 
-      auto VRT = std::make_unique< VKVertex >(FitCONTROL); 
+    for(iv=0; iv<NV; iv++){
+      auto VRT = std::make_unique< VKVertex >(FitCONTROL);
       VRT->setRefV(xyz);                               //ref point
       VRT->setRefIterV(xyz);                           //iteration ref. point
       VRT->setIniV(xyz); VRT->setCnstV(xyz);           // initial guess. 0 of course.
@@ -101,7 +90,7 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
         tk=vertexDefinition[iv][it];
         if( tk >= NTRK ) {
           return -1;
-        } 
+        }
         VRT->TrackList.emplace_back(new VKTrack(tk, &inp_Trk5[tk*5], &inp_CovTrk5[tk*15] , VRT.get(), wm[tk]));
         VRT->tmpArr.emplace_back(new TWRK());
         trk = VRT->TrackList[it].get();
@@ -109,8 +98,8 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
         trk->iniP[0]=trk->cnstP[0]=trk->fitP[0]=inp_Trk5[tk*5+2];   //initial guess
         trk->iniP[1]=trk->cnstP[1]=trk->fitP[1]=inp_Trk5[tk*5+3];
         trk->iniP[2]=trk->cnstP[2]=trk->fitP[2]=inp_Trk5[tk*5+4];
-        IERR=cfInv5(&inp_CovTrk5[tk*15], tmpWgt);  
-        if (IERR) IERR=cfdinv(&inp_CovTrk5[tk*15], tmpWgt, 5); 
+        IERR=cfInv5(&inp_CovTrk5[tk*15], tmpWgt);
+        if (IERR) IERR=cfdinv(&inp_CovTrk5[tk*15], tmpWgt, 5);
         if (IERR) { return  -1; }
         trk->setCurrent(&inp_Trk5[tk*5],tmpWgt);
         arr[it*5]=inp_Trk5[tk*5];arr[it*5+1]=inp_Trk5[tk*5+1];arr[it*5+2]=inp_Trk5[tk*5+2];
@@ -118,11 +107,11 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
       }
       if(NTv>1){   //First estimation of vertex position if vertex has more than 2 tracks
         vEstimDone=1;
-        myMagFld.getMagFld(VRT->refIterV[0],VRT->refIterV[1],VRT->refIterV[2],vBx,vBy,vBz,(VRT->vk_fitterControl).get());
+        Trk::vkalMagFld::getMagFld(VRT->refIterV[0],VRT->refIterV[1],VRT->refIterV[2],vBx,vBy,vBz,(VRT->vk_fitterControl).get());
         double aVrt[3]={0.,0.,0.};
         for(int i=0; i<NTv-1;i++) for(int j=i+1; j<NTv; j++){
            vkvFastV(&arr[i*5],&arr[j*5],xyz,vBz,out);
-           aVrt[0]+=out[0]; aVrt[1]+=out[1]; aVrt[2]+=out[2];	   
+           aVrt[0]+=out[0]; aVrt[1]+=out[1]; aVrt[2]+=out[2];
         }
         aVrt[0]/=(NTv*(NTv-1)/2); aVrt[1]/=(NTv*(NTv-1)/2); aVrt[2]/=(NTv*(NTv-1)/2);
         VRT->setRefIterV(aVrt);                       //iteration ref. point
@@ -130,7 +119,7 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
       if(iv==0){                           // start cascade creation
          startCascade( std::move(VRT) );
          continue;
-      } 
+      }
       int includeNV=cascadeDefinition[iv].size();
       if(!includeNV) {                     // no predecessors
         addCascadeEntry( std::move(VRT) );
@@ -140,11 +129,11 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
           vrttemp->TrackList.emplace_back(new VKTrack(-999, tmp, tmp , vrttemp, 0.));
           vrttemp->tmpArr.emplace_back(new TWRK());
         }
-      }        
+      }
     }
 //
 // ----------------  If some vertex positions are different from (0,0,0) - move tracks there
-    if(vEstimDone){ 
+    if(vEstimDone){
       IERR = translateToFittedPos(*(FitCONTROL.getCascadeEvent()),1.); if(IERR)return IERR;
       for( iv=0; iv<FitCONTROL.getCascadeEvent()->cascadeNV; iv++){
         auto *VRT=FitCONTROL.getCascadeEvent()->cascadeVertexList[iv].get();
@@ -169,12 +158,9 @@ int makeCascade(VKalVrtControl & FitCONTROL, long int NTRK, const long int *ich,
 //==================================================================================
 //  Creation of VKalVrtCore arrays and structures needed for fit and first fit
 //   without any constraints to get approximate vertices and track parameters
-// 
+//
 int initCascadeEngine(CascadeEvent & cascadeEvent_)
 {
-  extern int setVTrackMass(VKVertex * vk );
-  extern int fitVertexCascade( VKVertex * vk, int Pointing);
-
   VKVertex * VRT;
   long int IERR=0, iv, i;
 //---------------------Some check-----------
@@ -196,7 +182,7 @@ int initCascadeEngine(CascadeEvent & cascadeEvent_)
   for( i=0; i<4; i++){
     for(iv=0; iv<cascadeEvent_.cascadeNV; iv++){
        VRT = cascadeEvent_.cascadeVertexList[iv].get();
-       IERR = fitVertexCascade( VRT, 0);     if(IERR)return IERR;   //fit 
+       IERR = fitVertexCascade( VRT, 0);     if(IERR)return IERR;   //fit
        IERR = setVTrackMass(VRT);            if(IERR)return IERR;   //mass of combined particle
        if(!VRT->includedVrt.empty()){  // Save fitted vertex as target for "pass near" constraint in previous vertex
          for(int pseu=0; pseu<(int)VRT->includedVrt.size(); pseu++){
@@ -207,14 +193,14 @@ int initCascadeEngine(CascadeEvent & cascadeEvent_)
          }
        }
     }
-    IERR = translateToFittedPos(cascadeEvent_);           if(IERR)return IERR; 
+    IERR = translateToFittedPos(cascadeEvent_);           if(IERR)return IERR;
   }
   return IERR;
 }
 
 //==================================================================================
 //  Mass constraints for DEFINED cascade. So may be called only after makeCascade!!!
-//   
+//
 //          For complete vertex
 int setCascadeMassConstraint(CascadeEvent & cascadeEvent_, long int IV, double Mass)
 {
@@ -243,7 +229,7 @@ int setCascadeMassConstraint(CascadeEvent & cascadeEvent_, long int IV, std::vec
 //
 //-- Real tracks
 //
-    if( (int)trkInVrt.size() > NTRK) return -1;            //checks...    
+    if( (int)trkInVrt.size() > NTRK) return -1;            //checks...
     for(it=0; it<(int)trkInVrt.size(); it++){
        if(trkInVrt[it] <   0  ) return -1;
        if(trkInVrt[it] >= NTRK) return -1;
@@ -252,7 +238,7 @@ int setCascadeMassConstraint(CascadeEvent & cascadeEvent_, long int IV, std::vec
 //
 //-- Pseudo tracks
 //
-    if( (int)pseudoInVrt.size() > NTRK) return -1;            //checks...    
+    if( (int)pseudoInVrt.size() > NTRK) return -1;            //checks...
     for(int it=0; it<(int)pseudoInVrt.size(); it++){
        if(pseudoInVrt[it] <   0  ) return -1;
        if(pseudoInVrt[it] >= NTRK) return -1;
@@ -260,7 +246,7 @@ int setCascadeMassConstraint(CascadeEvent & cascadeEvent_, long int IV, std::vec
     }
 
     vk->ConstraintList.emplace_back(new VKMassConstraint( NTRK, Mass, std::move(tmpIndex), vk));
-    return 0; 
+    return 0;
 }
 
 } /* End of VKalVrtCore namespace */

@@ -1,8 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/VtCFitC.h"
 #include "TrkVKalVrtCore/CommonPars.h"
+#include "TrkVKalVrtCore/Matrix.h"
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/ForCFT.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
@@ -10,10 +12,6 @@
 #include <iostream>
 
 namespace Trk {
-
-
-    extern void dsinv(long int, double *, long int , long int *) noexcept;
-
 
 int vtcfitc( VKVertex * vk )
 {
@@ -39,7 +37,7 @@ int vtcfitc( VKVertex * vk )
     std::vector< double >               taa;   // derivative collectors
     th0t.reserve(vk->ConstraintList.size() * vk->ConstraintList[0]->NCDim);
     tf0t.reserve(vk->ConstraintList.size());
-	
+
     for(ii=0; ii<(int)vk->ConstraintList.size();ii++){
        totNC += vk->ConstraintList[ii]->NCDim;
        for(ic=0; ic<(int)vk->ConstraintList[ii]->NCDim; ic++){
@@ -48,9 +46,9 @@ int vtcfitc( VKVertex * vk )
          std::vector< const Vect3DF* > tmpVec;
          tmpVec.reserve(vk->ConstraintList[ii]->f0t.size());
          for(it=0; it<(int)vk->ConstraintList[ii]->f0t.size(); it++){
-	    tmpVec.push_back( &(vk->ConstraintList[ii]->f0t[it][ic]) );
+           tmpVec.push_back( &(vk->ConstraintList[ii]->f0t[it][ic]) );
          }
-	 tf0t.push_back( std::move(tmpVec) );
+         tf0t.push_back( std::move(tmpVec) );
        }
     }
     if(totNC==0)return 0;
@@ -87,7 +85,7 @@ int vtcfitc( VKVertex * vk )
 	al0[ic].X -=  th0t[ic]->X;
 	al0[ic].Y -=  th0t[ic]->Y;
 	al0[ic].Z -=  th0t[ic]->Z;
-	anum[ic] = 2.*anum[ic] + dxyz[0] * 2. * th0t[ic]->X 
+	anum[ic] = 2.*anum[ic] + dxyz[0] * 2. * th0t[ic]->X
 	                       + dxyz[1] * 2. * th0t[ic]->Y
 		               + dxyz[2] * 2. * th0t[ic]->Z
 		               + taa[ic];
@@ -103,44 +101,44 @@ int vtcfitc( VKVertex * vk )
 /*  calculation (AL0)t * VCOV * AL0 and (F0T)t * WCI * F0T */
     for (ic=0; ic<totNC; ++ic) {
 	for (jc=0; jc<totNC; ++jc) {
-	    denom[ic][jc] =     al0[ic].X * vk->fitVcov[0] * al0[jc].X 
-	                      + al0[ic].Y * vk->fitVcov[1] * al0[jc].X 
-			      + al0[ic].Z * vk->fitVcov[3] * al0[jc].X 
-			      + al0[ic].X * vk->fitVcov[1] * al0[jc].Y 
-			      + al0[ic].Y * vk->fitVcov[2] * al0[jc].Y 
-			      + al0[ic].Z * vk->fitVcov[4] * al0[jc].Y 
-			      + al0[ic].X * vk->fitVcov[3] * al0[jc].Z 
-			      + al0[ic].Y * vk->fitVcov[4] * al0[jc].Z 
-			      + al0[ic].Z * vk->fitVcov[5] * al0[jc].Z 
-			      + al0[jc].X * vk->fitVcov[0] * al0[ic].X 
-			      + al0[jc].Y * vk->fitVcov[1] * al0[ic].X 
-			      + al0[jc].Z * vk->fitVcov[3] * al0[ic].X 
-			      + al0[jc].X * vk->fitVcov[1] * al0[ic].Y 
-			      + al0[jc].Y * vk->fitVcov[2] * al0[ic].Y 
-			      + al0[jc].Z * vk->fitVcov[4] * al0[ic].Y 
-			      + al0[jc].X * vk->fitVcov[3] * al0[ic].Z 
-			      + al0[jc].Y * vk->fitVcov[4] * al0[ic].Z 
+	    denom[ic][jc] =     al0[ic].X * vk->fitVcov[0] * al0[jc].X
+	                      + al0[ic].Y * vk->fitVcov[1] * al0[jc].X
+			      + al0[ic].Z * vk->fitVcov[3] * al0[jc].X
+			      + al0[ic].X * vk->fitVcov[1] * al0[jc].Y
+			      + al0[ic].Y * vk->fitVcov[2] * al0[jc].Y
+			      + al0[ic].Z * vk->fitVcov[4] * al0[jc].Y
+			      + al0[ic].X * vk->fitVcov[3] * al0[jc].Z
+			      + al0[ic].Y * vk->fitVcov[4] * al0[jc].Z
+			      + al0[ic].Z * vk->fitVcov[5] * al0[jc].Z
+			      + al0[jc].X * vk->fitVcov[0] * al0[ic].X
+			      + al0[jc].Y * vk->fitVcov[1] * al0[ic].X
+			      + al0[jc].Z * vk->fitVcov[3] * al0[ic].X
+			      + al0[jc].X * vk->fitVcov[1] * al0[ic].Y
+			      + al0[jc].Y * vk->fitVcov[2] * al0[ic].Y
+			      + al0[jc].Z * vk->fitVcov[4] * al0[ic].Y
+			      + al0[jc].X * vk->fitVcov[3] * al0[ic].Z
+			      + al0[jc].Y * vk->fitVcov[4] * al0[ic].Z
 			      + al0[jc].Z * vk->fitVcov[5] * al0[ic].Z;
 
 	    for (it=0; it<NTRK; ++it) {
                 TWRK * t_trk=vk->tmpArr[it].get();
-		denom[ic][jc] +=          tf0t[ic][it]->X * t_trk->wci[0] * tf0t[jc][it]->X 
-					+ tf0t[ic][it]->Y * t_trk->wci[1] * tf0t[jc][it]->X 
-					+ tf0t[ic][it]->Z * t_trk->wci[3] * tf0t[jc][it]->X 
-					+ tf0t[ic][it]->X * t_trk->wci[1] * tf0t[jc][it]->Y 
-					+ tf0t[ic][it]->Y * t_trk->wci[2] * tf0t[jc][it]->Y 
-					+ tf0t[ic][it]->Z * t_trk->wci[4] * tf0t[jc][it]->Y 
-					+ tf0t[ic][it]->X * t_trk->wci[3] * tf0t[jc][it]->Z 
-					+ tf0t[ic][it]->Y * t_trk->wci[4] * tf0t[jc][it]->Z 
-					+ tf0t[ic][it]->Z * t_trk->wci[5] * tf0t[jc][it]->Z 
-					+ tf0t[jc][it]->X * t_trk->wci[0] * tf0t[ic][it]->X 
-					+ tf0t[jc][it]->Y * t_trk->wci[1] * tf0t[ic][it]->X 
-					+ tf0t[jc][it]->Z * t_trk->wci[3] * tf0t[ic][it]->X 
-					+ tf0t[jc][it]->X * t_trk->wci[1] * tf0t[ic][it]->Y 
-					+ tf0t[jc][it]->Y * t_trk->wci[2] * tf0t[ic][it]->Y 
-					+ tf0t[jc][it]->Z * t_trk->wci[4] * tf0t[ic][it]->Y 
-					+ tf0t[jc][it]->X * t_trk->wci[3] * tf0t[ic][it]->Z 
-					+ tf0t[jc][it]->Y * t_trk->wci[4] * tf0t[ic][it]->Z 
+		denom[ic][jc] +=          tf0t[ic][it]->X * t_trk->wci[0] * tf0t[jc][it]->X
+					+ tf0t[ic][it]->Y * t_trk->wci[1] * tf0t[jc][it]->X
+					+ tf0t[ic][it]->Z * t_trk->wci[3] * tf0t[jc][it]->X
+					+ tf0t[ic][it]->X * t_trk->wci[1] * tf0t[jc][it]->Y
+					+ tf0t[ic][it]->Y * t_trk->wci[2] * tf0t[jc][it]->Y
+					+ tf0t[ic][it]->Z * t_trk->wci[4] * tf0t[jc][it]->Y
+					+ tf0t[ic][it]->X * t_trk->wci[3] * tf0t[jc][it]->Z
+					+ tf0t[ic][it]->Y * t_trk->wci[4] * tf0t[jc][it]->Z
+					+ tf0t[ic][it]->Z * t_trk->wci[5] * tf0t[jc][it]->Z
+					+ tf0t[jc][it]->X * t_trk->wci[0] * tf0t[ic][it]->X
+					+ tf0t[jc][it]->Y * t_trk->wci[1] * tf0t[ic][it]->X
+					+ tf0t[jc][it]->Z * t_trk->wci[3] * tf0t[ic][it]->X
+					+ tf0t[jc][it]->X * t_trk->wci[1] * tf0t[ic][it]->Y
+					+ tf0t[jc][it]->Y * t_trk->wci[2] * tf0t[ic][it]->Y
+					+ tf0t[jc][it]->Z * t_trk->wci[4] * tf0t[ic][it]->Y
+					+ tf0t[jc][it]->X * t_trk->wci[3] * tf0t[ic][it]->Z
+					+ tf0t[jc][it]->Y * t_trk->wci[4] * tf0t[ic][it]->Z
 					+ tf0t[jc][it]->Z * t_trk->wci[5] * tf0t[ic][it]->Z;
 	    }
 	}
@@ -189,14 +187,14 @@ int vtcfitc( VKVertex * vk )
     //This is deliberately written without make_unqiue to bypass auto intialization!!
     auto tmpVec = std::unique_ptr<Vect3DF[]>(new  Vect3DF[totNC]);
     for (ic=0; ic<totNC; ++ic) {
-	tmpVec[ic].X =     vk->fitVcov[0] * al0[ic].X 
-	                 + vk->fitVcov[1] * al0[ic].Y 
+	tmpVec[ic].X =     vk->fitVcov[0] * al0[ic].X
+	                 + vk->fitVcov[1] * al0[ic].Y
 		         + vk->fitVcov[3] * al0[ic].Z;
-	tmpVec[ic].Y =     vk->fitVcov[1] * al0[ic].X 
-			 + vk->fitVcov[2] * al0[ic].Y 
+	tmpVec[ic].Y =     vk->fitVcov[1] * al0[ic].X
+			 + vk->fitVcov[2] * al0[ic].Y
 			 + vk->fitVcov[4] * al0[ic].Z;
-	tmpVec[ic].Z =     vk->fitVcov[3] * al0[ic].X 
-			 + vk->fitVcov[4] * al0[ic].Y 
+	tmpVec[ic].Z =     vk->fitVcov[3] * al0[ic].X
+			 + vk->fitVcov[4] * al0[ic].Y
 			 + vk->fitVcov[5] * al0[ic].Z;
 	dxyz[0] += coef[ic] * tmpVec[ic].X;
 	dxyz[1] += coef[ic] * tmpVec[ic].Y;
@@ -216,13 +214,13 @@ int vtcfitc( VKVertex * vk )
 	tmp[1] = 0.;
 	tmp[2] = 0.;
 	for (ic=0; ic<totNC; ++ic) {
-	    tmp[0] += coef[ic] * ( tf0t[ic][it]->X + t_trk->wb[0]*tmpVec[ic].X 
-	    		 			  + t_trk->wb[1]*tmpVec[ic].Y 
+	    tmp[0] += coef[ic] * ( tf0t[ic][it]->X + t_trk->wb[0]*tmpVec[ic].X
+	    		 			  + t_trk->wb[1]*tmpVec[ic].Y
 						  + t_trk->wb[2]*tmpVec[ic].Z);
-	    tmp[1] += coef[ic] * ( tf0t[ic][it]->Y + t_trk->wb[3]*tmpVec[ic].X 
-	    					  + t_trk->wb[4]*tmpVec[ic].Y 
+	    tmp[1] += coef[ic] * ( tf0t[ic][it]->Y + t_trk->wb[3]*tmpVec[ic].X
+	    					  + t_trk->wb[4]*tmpVec[ic].Y
 						  + t_trk->wb[5]*tmpVec[ic].Z);
-	    tmp[2] += coef[ic] * ( tf0t[ic][it]->Z + t_trk->wb[6]*tmpVec[ic].X 
+	    tmp[2] += coef[ic] * ( tf0t[ic][it]->Z + t_trk->wb[6]*tmpVec[ic].X
 	    					  + t_trk->wb[7]*tmpVec[ic].Y
 						  + t_trk->wb[8]*tmpVec[ic].Z);
 	}
@@ -238,10 +236,10 @@ int vtcfitc( VKVertex * vk )
    }
 /* =================================================================== */
     return 0;
-} 
+}
 
 //
-//  Get sum of squared aa[ic]  for all constraints. It's needed for postfit. 
+//  Get sum of squared aa[ic]  for all constraints. It's needed for postfit.
 //
 double getCnstValues2( VKVertex * vk ) noexcept
 {

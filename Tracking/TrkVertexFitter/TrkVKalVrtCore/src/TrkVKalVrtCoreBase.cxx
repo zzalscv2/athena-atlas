@@ -15,12 +15,12 @@
 
 namespace Trk {
 
-  VKalVrtControlBase::VKalVrtControlBase(baseMagFld* baseFld,   const addrMagHandler addrFld, 
+  VKalVrtControlBase::VKalVrtControlBase(baseMagFld* baseFld,   const addrMagHandler addrFld,
                                          const basePropagator* baseP, const addrPropagator addrP,
-                                         IVKalState* istate): 
+                                         IVKalState* istate):
        vk_objMagFld(baseFld),
        vk_funcMagFld(addrFld),
-       vk_objProp(baseP), 
+       vk_objProp(baseP),
        vk_funcProp(addrP),
        vk_istate(istate)
   {}
@@ -32,7 +32,7 @@ namespace Trk {
       m_cascadeEvent(nullptr),
       vk_forcft(),
       m_frozenVersionForBTagging(false)
-  { 
+  {
   }
   VKalVrtControl::VKalVrtControl(const VKalVrtControl & src)
     : VKalVrtControlBase(src),
@@ -41,7 +41,7 @@ namespace Trk {
       m_cascadeEvent(src.m_cascadeEvent),
       vk_forcft(src.vk_forcft),
       m_frozenVersionForBTagging(src.m_frozenVersionForBTagging)
-  { 
+  {
   }
 
   VKTrack::VKTrack(long int iniId,
@@ -89,7 +89,7 @@ namespace Trk {
 //     for(int i=0; i<5;  i++) {Perig[i]=src.Perig[i];refPerig[i]=src.refPerig[i];}
 //     for(int i=0; i<15; i++) {refCovar[i]=src.refCovar[i];WgtM[i]=src.WgtM[i];}
 //     for(int i=0; i<3;  i++) {fitP[i]=src.fitP[i];}
-//  }  
+//  }
 
   std::ostream &  operator << ( std::ostream& out, const VKTrack& track  )
   {
@@ -118,19 +118,19 @@ namespace Trk {
 	    << track.WgtM[9]<<std::endl;
 	out << track.WgtM[10]<<", "<<track.WgtM[11]<<", "<<track.WgtM[12]<<", "
 	    << track.WgtM[13]<<", "<<track.WgtM[14]<<std::endl;
-	return out;                                 
-  }                                              
+	return out;
+  }
 
 
 
 
-  VKVertex::VKVertex(const VKalVrtControl & FitControl): VKVertex() 
+  VKVertex::VKVertex(const VKalVrtControl & FitControl): VKVertex()
   {    vk_fitterControl = std::make_unique<VKalVrtControl>(FitControl);  }
 
-  VKVertex::VKVertex(): 
-     useApriorVertex(0), passNearVertex(false), passWithTrkCov(false), 
+  VKVertex::VKVertex():
+     useApriorVertex(0), passNearVertex(false), passWithTrkCov(false),
      TrackList(0), tmpArr(0), ConstraintList(0),nextCascadeVrt(nullptr),includedVrt(0)
-  { 
+  {
      for(int i=0; i<3; i++) apriorV[i]=refV[i]=iniV[i]=fitV[i]=cnstV[i]=fitMom[i]=0.;
      for(int i=0; i<6; i++) apriorVWGT[i]=0.;
      for(int i=0; i<21; i++) fitCovXYZMom[i]=savedVrtMomCov[i]=0.;
@@ -141,10 +141,8 @@ namespace Trk {
      existFullCov=0;
   }
 
-  VKVertex::~VKVertex()
-  {  
-//       for( int i=0; i<(int)includedVrt.size(); i++) includedVrt[i]=0;  // these vertice are not owned, then must not be deleted.
-  }
+  VKVertex::~VKVertex() = default;
+
   void VKVertex::setRefV(double v[3]) noexcept { std::copy(v, v+3, refV);}
   void VKVertex::setRefIterV(double v[]) noexcept { std::copy(v, v+3, refIterV); }
   void VKVertex::setIniV(double v[3]) noexcept { std::copy(v, v+3, iniV); }
@@ -156,9 +154,9 @@ namespace Trk {
   Chi2(src.Chi2),                         // vertex Chi2
   useApriorVertex(src.useApriorVertex),   //for a priory vertex position knowledge usage
   passNearVertex(src.passNearVertex),     // needed for "passing near vertex" constraint
-  passWithTrkCov(src.passWithTrkCov),     //  Vertex, CovVertex, Charge and derivatives 
+  passWithTrkCov(src.passWithTrkCov),     //  Vertex, CovVertex, Charge and derivatives
   FVC(src.FVC),
-  TrackList(0), 
+  TrackList(0),
   ConstraintList(0)
   {
     for( int i=0; i<6; i++) {
@@ -202,7 +200,7 @@ namespace Trk {
       Chi2=src.Chi2;                         // vertex Chi2
       useApriorVertex=src.useApriorVertex;    //for a priory vertex position knowledge usage
       passNearVertex=src.passNearVertex;      // needed for "passing near vertex" constraint
-      passWithTrkCov=src.passWithTrkCov;      //  Vertex, CovVertex, Charge and derivatives 
+      passWithTrkCov=src.passWithTrkCov;      //  Vertex, CovVertex, Charge and derivatives
       FVC=src.FVC;
       for( int i=0; i<6; i++) {
         fitVcov[i]    =src.fitVcov[i];  // range[0:5]
@@ -296,7 +294,7 @@ namespace Trk {
   }
 
   void VKalVrtControl::setUsePhiCnst()   { vk_forcft.usePhiCnst = 1;}
-  void VKalVrtControl::setUsePlaneCnst(double a, double b, double c, double d)   { 
+  void VKalVrtControl::setUsePlaneCnst(double a, double b, double c, double d)   {
     if(a+b+c+d == 0.){  vk_forcft.usePlaneCnst = 0;
     }else{              vk_forcft.usePlaneCnst = 1; }
     vk_forcft.Ap = a; vk_forcft.Bp = b; vk_forcft.Cp = c; vk_forcft.Dp = d;
@@ -305,11 +303,11 @@ namespace Trk {
   void VKalVrtControl::setUseAprioriVrt(){ vk_forcft.useAprioriVrt = 1;}
   void VKalVrtControl::setUsePointingCnst(int iType = 1 ) { vk_forcft.usePointingCnst = iType<2 ? 1 : 2 ;}
   void VKalVrtControl::setUsePassNear(int iType = 1 ) { vk_forcft.usePassNear = iType<2 ? 1 : 2 ;}
-  void VKalVrtControl::renewCascadeEvent(CascadeEvent * newevt) { 
+  void VKalVrtControl::renewCascadeEvent(CascadeEvent * newevt) {
      if(m_cascadeEvent)delete m_cascadeEvent;
      m_cascadeEvent=newevt;
   }
-  void VKalVrtControl::renewFullCovariance(double * newarray) { 
+  void VKalVrtControl::renewFullCovariance(double * newarray) {
      m_fullCovariance.reset(newarray);
   }
 

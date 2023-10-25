@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVKALVRTCORE_TRKVKALUTILS_H
@@ -11,7 +11,7 @@
 
 namespace Trk {
 
-  struct Vect3DF{ 
+  struct Vect3DF{
     double X; double Y; double Z;
     Vect3DF() noexcept  { X=Y=Z=0.; }
     void Set(double arr[3]) noexcept { X=arr[0]; Y=arr[1]; Z=arr[2]; }
@@ -27,7 +27,7 @@ namespace Trk {
     { return sqrt( (V2[0]-V1[0])*(V2[0]-V1[0]) + (V2[1]-V1[1])*(V2[1]-V1[1]) + (V2[2]-V1[2])*(V2[2]-V1[2]) ); }
 
 
-//  
+//
 //  Implementation of fortran function SIGN()
 //------------------------------------------------
   inline double d_sign(double value, double sign)

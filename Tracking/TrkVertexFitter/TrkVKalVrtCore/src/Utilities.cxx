@@ -1,25 +1,32 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/Utilities.h"
+#include "TrkVKalVrtCore/VtDeriv.h"
+#include "TrkVKalVrtCore/cfNewP.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <algorithm>
 #include <cmath>
 
+namespace {
+// Helpers go to the anonymous
+
+inline int sIndexVK(int i, int j) {
+  return i > j ? i * (i + 1) / 2 + j : j * (j + 1) / 2 + i;
+}
+}  // namespace
+
 namespace Trk {
 
+//     Chi2 calculation for 5-par. track
+//     XYZT(3)-vertex , ICH - charge , PART(3) -track pass. XYZT vertex
+//     PAR0(5) - fitted track
+// ------------------------------------------------------------
 
-
-//     Chi2 calculation for 5-par. track 
-//     XYZT(3)-vertex , ICH - charge , PART(3) -track pass. XYZT vertex 
-//     PAR0(5) - fitted track 
-// ------------------------------------------------------------ 
-
-double cfchi2(double *xyzt, const long int ich, double *part, 
+double cfchi2(double *xyzt, const long int ich, double *part,
 	const double *par0, double *wgt, double *rmnd)
 {
-
-    extern void cfnewp(const long int*, double*, double*, double*, double*, double*);
     double phif, epsf, d1, d2, d3, d4, d5, sr, uu, vv, res, zpf;
 
     /* Parameter adjustments */
@@ -43,32 +50,32 @@ double cfchi2(double *xyzt, const long int ich, double *part,
 // -----------------------Check of propagation
 //    double paro[5],parn[5],s,ref[3],peri[3];
 //    paro[0]=0.; paro[1]=0.; paro[2]=part[1]; paro[3]=part[2]; paro[4]=part[3];
-//    ref[0]=-xyzt[1]; ref[1]=-xyzt[2]; ref[2]=-xyzt[3]; 
+//    ref[0]=-xyzt[1]; ref[1]=-xyzt[2]; ref[2]=-xyzt[3];
 //    cfnewp(ich, paro, ref, &s, parn, peri);
 //    d1 =  par0[0] - parn[0]; d2 =  par0[1] - parn[1]; d3 =  par0[2] - parn[2];
 //    d4 =  par0[3] - parn[3]; d5 =  par0[4] - parn[4];
 //    std::cout<<" testp0="<<parn[0]<<", "<<parn[1]<<", "<<parn[3]<<", "<<s<<'\n';
 //    std::cout<<" testp1="<<(*ich)<<", "<<epsf<<", "<<zpf<<", "<<phif<<", "<<res<<'\n';
 //--------------------------------------------------------------------
-    res = wgt[1] * (d1 * d1) + wgt[3] * (d2 * d2) + wgt[6] * (d3 * d3) 
-       + wgt[10] * (d4 * d4) + wgt[15] * (d5 * d5) + (d2 * 
+    res = wgt[1] * (d1 * d1) + wgt[3] * (d2 * d2) + wgt[6] * (d3 * d3)
+       + wgt[10] * (d4 * d4) + wgt[15] * (d5 * d5) + (d2 *
 	    d1 * wgt[2] + d3 * (d1 * wgt[4] + d2 * wgt[5]) + d4 * (d1 * wgt[7]
-	    + d2 * wgt[8] + d3 * wgt[9]) + d5 * (d1 * wgt[11] + d2 * wgt[12] 
+	    + d2 * wgt[8] + d3 * wgt[9]) + d5 * (d1 * wgt[11] + d2 * wgt[12]
 	    + d3 * wgt[13] + d4 * wgt[14])) * 2;
     rmnd[0] = d1;
     rmnd[1] = d2;
     rmnd[2] = d3;
     rmnd[3] = d4;
     rmnd[4] = d5;
-    return  (fabs(res) < 1.e12 ? fabs(res) : 1.e12);
-} 
+    return  (std::abs(res) < 1.e12 ? std::abs(res) : 1.e12);
+}
 
 
-//     Chi2 calculation for 5-par. track 
-//     VRTT(3)-vertex ,  PART(3) - parameters of track pass. through VRTT vertex 
+//     Chi2 calculation for 5-par. track
+//     VRTT(3)-vertex ,  PART(3) - parameters of track pass. through VRTT vertex
 // Procedure assumes that VRTT(3) is in system where track reference point is (0,0,0).
 // So it transfers fitted parameters to (0,0,0) and compares with reference track parameters
-// ------------------------------------------------------------ 
+// ------------------------------------------------------------
 
 double cfchi2(const double *vrtt, const double * part, VKTrack * trk)
 {
@@ -90,11 +97,11 @@ double cfchi2(const double *vrtt, const double * part, VKTrack * trk)
     d5 = invR_f  - trk->Perig[4];
     if(d4 >  M_PI)d4-=2.*M_PI;
     if(d4 < -M_PI)d4+=2.*M_PI;
-    double res = trk->WgtM[0] * (d1*d1) 
-               + trk->WgtM[2] * (d2*d2) 
-               + trk->WgtM[5] * (d3*d3) 
-               + trk->WgtM[9] * (d4*d4) 
-               + trk->WgtM[14]* (d5*d5) 
+    double res = trk->WgtM[0] * (d1*d1)
+               + trk->WgtM[2] * (d2*d2)
+               + trk->WgtM[5] * (d3*d3)
+               + trk->WgtM[9] * (d4*d4)
+               + trk->WgtM[14]* (d5*d5)
             +(d2 *  d1*trk->WgtM[1]
 	    + d3 * (d1*trk->WgtM[3]  + d2*trk->WgtM[4])
 	    + d4 * (d1*trk->WgtM[6]  + d2*trk->WgtM[7]  + d3*trk->WgtM[8])
@@ -108,13 +115,13 @@ double cfchi2(const double *vrtt, const double * part, VKTrack * trk)
 //std::cout<<trk->Perig[0]<<", "<<trk->Perig[1]<<", "<<trk->Perig[2]<<", "<<trk->Perig[3]<<", "<<trk->Perig[4]<<'\n';
 //std::cout<<theta_f<<", "<<phi_f<<", "<<invR_f<<'\n';
 //std::cout<<trk->WgtM[0]<<", "<<trk->WgtM[2]<<", "<<trk->WgtM[5]<<", "<<trk->WgtM[9]<<", "<<trk->WgtM[14]<<'\n';
-    return  (fabs(res) < 1.e12 ? fabs(res) : 1.e12);
-} 
+    return  (std::abs(res) < 1.e12 ? std::abs(res) : 1.e12);
+}
 
 
 
 
-//  
+//
 //   Function returns a position of minimum X in parabolic approximation
 //         based on 3 measured points (X,Y)
 //----------------------------------------------------------------------------
@@ -129,7 +136,7 @@ double finter(double y0, double y1, double y2, double x0, double x1, double x2)
 /* ------------------------*/
     b1 = (y1 - y0) / (x1 - x0);
     b2 = (y2 - y0 - b1 * (x2 - x0)) / (x2 - x0) / (x2 - x1);
-    if (fabs(b2) < 1e-8) {
+    if (std::abs(b2) < 1e-8) {
 	if (y2 <= y0 && y2 < y1) {
 	    ret_val = x2;
 	} else if (y1 <= y0 && y1 < y2) {
@@ -148,11 +155,11 @@ double finter(double y0, double y1, double y2, double x0, double x1, double x2)
 //        if (ret_val <= NegativeLim) ret_val = NegativeLim;
 //    }
     return ret_val/2.;
-} 
+}
 
 
 
-//  R=A*S*A'   where A.i.j == A(j,i) -> summation over first index of A 
+//  R=A*S*A'   where A.i.j == A(j,i) -> summation over first index of A
 //   Dimension S(N,N)!!!   OBSOLETE!
 //---------------------------------------------------------------------
 /*void tdasat(double *a, double *s, double *r__, long int M, long int N)
@@ -205,7 +212,6 @@ L40:
     return;
 }*/
 
-inline int sIndexVK(int i, int j){ return i>j ? i*(i+1)/2+j : j*(j+1)/2+i;}
 //
 //  Dimensions  input: CovI(N,N), output: CovF(M,M), input: Der(N,M)-first index runs first
 //
@@ -242,16 +248,16 @@ void cfsetdiag(long int n, double *matr, double value) noexcept
 	    }
 	}
     }
-} 
+}
 
 // Functions for 2D parabolic fit
 //
-//   Decomposition of Chi2 function: G(x,y) 
+//   Decomposition of Chi2 function: G(x,y)
 //double Chi2Taylor(double a, double b, double c, double d, double e, double f,
 //double x, double y) { return a + b*x + d*y + c*x*x + e*y*y + f*x*y;}
 
 
-void abcCoef(double g1, double g2, double g3, 
+void abcCoef(double g1, double g2, double g3,
              double &a, double &b, double &c)
 /* Function assumes g1(x=0), g2(x=0.5), g3(x=1.) */
 {
@@ -260,12 +266,12 @@ void abcCoef(double g1, double g2, double g3,
    b=(g3-g1) - c;
 }
 
-void efdCoef(double Ga0, double Gamb, double Gab, double Gw0, double Gwb, 
+void efdCoef(double Ga0, double Gamb, double Gab, double Gw0, double Gwb,
              double alf, double bet, double w,
 	     double &d, double &e, double &f)
 /* Function assumes Ga0(x=alf, y=0), Gamb(x=alf, y=-bet), Gab(x=alf, y=+bet),*/
 /*                    Gw0(x=w, y=0), Gwb( x=w, y=bet)*/
-{ 
+{
 
    e = (Gab + Gamb - 2.*Ga0)/bet/bet/2.;
    f = (Gwb + Gamb - 2.*e*bet*bet - Gw0 - Ga0)/bet/(w-alf);
@@ -277,7 +283,7 @@ void ParaMin( double b, double c, double d, double e, double f,
               double &xmin, double &ymin)
 {
     ymin =  (f*b-2.*c*d)/(4.*c*e - f*f);
-    if( fabs(f) > fabs(c) ) {  xmin = - (2.*e*ymin + d)/f;}
+    if( std::abs(f) > std::abs(c) ) {  xmin = - (2.*e*ymin + d)/f;}
     else                    {  xmin = - (f*ymin+b)/(2.*c);}
     }
 
@@ -289,16 +295,16 @@ void cfTrkCovarCorr(double *cov){
 //        ", "<<cov[13]*cov[13]/cov[9]/cov[14]<<'\n';
    double Lim=0.99; double Lim2=Lim*Lim;
    bool i0,i1,i2,i3,i4; i0=i1=i2=i3=i4=false;
-   if( fabs(cov[1]*cov[1])/cov[0]/cov[2] > Lim2 ){ i0=true; i1=true;}
-   if( fabs(cov[3]*cov[3])/cov[0]/cov[5] > Lim2 ){ i0=true; i2=true;}
-   if( fabs(cov[4]*cov[4])/cov[2]/cov[5] > Lim2 ){ i1=true; i2=true;}
-   if( fabs(cov[6]*cov[6])/cov[0]/cov[9] > Lim2 ){ i0=true; i3=true;}
-   if( fabs(cov[7]*cov[7])/cov[2]/cov[9] > Lim2 ){ i1=true; i3=true;}
-   if( fabs(cov[8]*cov[8])/cov[5]/cov[9] > Lim2 ){ i2=true; i3=true;}
-   if( fabs(cov[10]*cov[10])/cov[0]/cov[14] > Lim2 ){ i0=true; i4=true;}
-   if( fabs(cov[11]*cov[11])/cov[2]/cov[14] > Lim2 ){ i1=true; i4=true;}
-   if( fabs(cov[12]*cov[12])/cov[5]/cov[14] > Lim2 ){ i2=true; i4=true;}
-   if( fabs(cov[13]*cov[13])/cov[9]/cov[14] > Lim2 ){ i3=true; i4=true;}
+   if( std::abs(cov[1]*cov[1])/cov[0]/cov[2] > Lim2 ){ i0=true; i1=true;}
+   if( std::abs(cov[3]*cov[3])/cov[0]/cov[5] > Lim2 ){ i0=true; i2=true;}
+   if( std::abs(cov[4]*cov[4])/cov[2]/cov[5] > Lim2 ){ i1=true; i2=true;}
+   if( std::abs(cov[6]*cov[6])/cov[0]/cov[9] > Lim2 ){ i0=true; i3=true;}
+   if( std::abs(cov[7]*cov[7])/cov[2]/cov[9] > Lim2 ){ i1=true; i3=true;}
+   if( std::abs(cov[8]*cov[8])/cov[5]/cov[9] > Lim2 ){ i2=true; i3=true;}
+   if( std::abs(cov[10]*cov[10])/cov[0]/cov[14] > Lim2 ){ i0=true; i4=true;}
+   if( std::abs(cov[11]*cov[11])/cov[2]/cov[14] > Lim2 ){ i1=true; i4=true;}
+   if( std::abs(cov[12]*cov[12])/cov[5]/cov[14] > Lim2 ){ i2=true; i4=true;}
+   if( std::abs(cov[13]*cov[13])/cov[9]/cov[14] > Lim2 ){ i3=true; i4=true;}
 
    if(i0){               cov[1]*=Lim;  cov[3]*=Lim;  cov[6]*=Lim;  cov[10]*=Lim; }
    if(i1){ cov[1]*=Lim;                cov[4]*=Lim;  cov[7]*=Lim;  cov[11]*=Lim; }

@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/DerclcAng.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
@@ -25,11 +26,11 @@ void calcPhiConstraint( VKPhiConstraint * cnst)
     int NTRK = vk->TrackList.size();
     int i,j;
     double Scale=1.;   // Scaling for better precision VK 28.03.2011 Wrong for error matrix!!! Should always be 1.!!!
- 
+
     double diff=0., aa=0;
     std::vector<double> deriv(NTRK,0);
     for(i=0; i<NTRK-1; i++){
-       for(j=i+1; j<NTRK; j++){  
+       for(j=i+1; j<NTRK; j++){
           diff  = vk->TrackList[i]->cnstP[1] - vk->TrackList[j]->cnstP[1];
           while(diff >  M_PI) diff -= 2.*M_PI;
           while(diff < -M_PI) diff += 2.*M_PI;
@@ -64,11 +65,11 @@ void calcThetaConstraint( VKThetaConstraint * cnst)
     int NTRK = vk->TrackList.size();
     int i,j;
     double Scale=1.;   // Scaling for better precision  VK 28.03.2011 Wrong for error matrix!!! Should always be 1.!!!
- 
+
     double diff=0., der=0., aa=0;
     std::vector<double> deriv(NTRK,0);
     for(i=0; i<NTRK-1; i++){
-       for(j=i+1; j<NTRK; j++){  
+       for(j=i+1; j<NTRK; j++){
           diff = sin(vk->TrackList[i]->cnstP[0] - vk->TrackList[j]->cnstP[0])*Scale;
           der  =                                                              Scale;
           aa +=  diff;
@@ -101,8 +102,8 @@ void calcPlaneConstraint( VKPlaneConstraint * cnst)
     const VKVertex * vk=cnst->getOriginVertex();
     int NTRK = vk->TrackList.size();
     double curV[3] = {vk->refIterV[0]+vk->cnstV[0], vk->refIterV[1]+vk->cnstV[1],vk->refIterV[2]+vk->cnstV[2]};
- 
- 
+
+
     int numCNST=0;   //constraint number. Single constraint in this case
     base_cnst->h0t[numCNST].X = cnst->getA();
     base_cnst->h0t[numCNST].Y = cnst->getB();

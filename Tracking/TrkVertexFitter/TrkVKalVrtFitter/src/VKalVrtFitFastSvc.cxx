@@ -5,6 +5,7 @@
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
+#include "TrkVKalVrtCore/VKvFast.h"
 //-------------------------------------------------
 //
 #include "TrkTrack/TrackInfo.h"
@@ -26,16 +27,12 @@ namespace{
     } else {
       const double mid2 = *it;
       //the following works because v is partially sorted by std::nth_element
-      const double mid1 = *std::max_element(v.begin(), it); 
+      const double mid1 = *std::max_element(v.begin(), it);
       return (mid1 + mid2) *0.5; //return the average of the two neighbouring mid elements
     }
   }
 }
 
-
-namespace Trk {
- extern double vkvFastV( double* , double* , const double* vRef, double dbmag, double*);
-}
 //
 //__________________________________________________________________________
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -49,10 +46,10 @@ namespace Trk{
 
 
   StatusCode TrkVKalVrtFitter::VKalVrtFitFast(const std::vector<const xAOD::TrackParticle*>& InpTrk,
-                                              Amg::Vector3D& Vertex, 
+                                              Amg::Vector3D& Vertex,
                                               IVKalState& istate) const
   {
-    double minDZ=0.;  
+    double minDZ=0.;
     return VKalVrtFitFast(InpTrk,Vertex,minDZ,istate);
   }
 
@@ -66,9 +63,9 @@ namespace Trk{
 //
 //  Convert particles and setup reference frame
 //
-    int ntrk=0; 
+    int ntrk=0;
     StatusCode sc = CvtTrackParticle(InpTrk,ntrk,state);
-    if(sc.isFailure() || ntrk<1 ) return StatusCode::FAILURE; 
+    if(sc.isFailure() || ntrk<1 ) return StatusCode::FAILURE;
     double fx,fy,BMAG_CUR;
     state.m_fitField.getMagFld(0.,0.,0.,fx,fy,BMAG_CUR);
     if(fabs(BMAG_CUR) < 0.1) BMAG_CUR=0.1;
@@ -81,7 +78,7 @@ namespace Trk{
 //
 //
     double xyz0[3]={ -state.m_refFrameX, -state.m_refFrameY, -state.m_refFrameZ};
-    if(ntrk==2){	 
+    if(ntrk==2){
       minDZ=Trk::vkvFastV(&state.m_apar[0][0],&state.m_apar[1][0], xyz0, BMAG_CUR, out);
     } else {
       for(int i=0;i<ntrk-1; i++){
@@ -117,9 +114,9 @@ namespace Trk{
 //
 //  Convert particles and setup reference frame
 //
-    int ntrk=0; 
+    int ntrk=0;
     StatusCode sc = CvtTrackParameters(InpTrk,ntrk,state);
-    if(sc.isFailure() || ntrk<1 ) return StatusCode::FAILURE; 
+    if(sc.isFailure() || ntrk<1 ) return StatusCode::FAILURE;
     double fx,fy,BMAG_CUR;
     state.m_fitField.getMagFld(0.,0.,0.,fx,fy,BMAG_CUR);
     if(fabs(BMAG_CUR) < 0.1) BMAG_CUR=0.1;
@@ -132,7 +129,7 @@ namespace Trk{
 //
 //
     double xyz0[3]={ -state.m_refFrameX, -state.m_refFrameY, -state.m_refFrameZ};
-    if(ntrk==2){	 
+    if(ntrk==2){
       Trk::vkvFastV(&state.m_apar[0][0],&state.m_apar[1][0], xyz0, BMAG_CUR, out);
     } else {
       for(int i=0;i<ntrk-1; i++){

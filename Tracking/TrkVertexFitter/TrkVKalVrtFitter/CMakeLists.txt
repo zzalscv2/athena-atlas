@@ -30,4 +30,5 @@ atlas_install_joboptions( share/*.py )
 # Test(s) in the package.
 atlas_add_test( TrkVKalVrtFitter_test
    SCRIPT athena.py TrkVKalVrtFitter/TrkVKalVrtFitter_test.py
+   PROPERTIES TIMEOUT 600
    POST_EXEC_SCRIPT noerror.sh )

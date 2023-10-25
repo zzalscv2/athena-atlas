@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/CommonPars.h"
@@ -37,38 +37,38 @@ void FullMTXfill(VKVertex * vk, double * ader)
 
 
     for (it=0; it<NTRK; ++it) {
-	ader_ref(0, it*3 + 3) += vk->tmpArr[it]->wb[0];
-	ader_ref(1, it*3 + 3) += vk->tmpArr[it]->wb[1];
-	ader_ref(2, it*3 + 3) += vk->tmpArr[it]->wb[2];
-	ader_ref(0, it*3 + 4) += vk->tmpArr[it]->wb[3];
-	ader_ref(1, it*3 + 4) += vk->tmpArr[it]->wb[4];
-	ader_ref(2, it*3 + 4) += vk->tmpArr[it]->wb[5];
-	ader_ref(0, it*3 + 5) += vk->tmpArr[it]->wb[6];
-	ader_ref(1, it*3 + 5) += vk->tmpArr[it]->wb[7];
-	ader_ref(2, it*3 + 5) += vk->tmpArr[it]->wb[8];
+      ader_ref(0, it*3 + 3) += vk->tmpArr[it]->wb[0];
+      ader_ref(1, it*3 + 3) += vk->tmpArr[it]->wb[1];
+      ader_ref(2, it*3 + 3) += vk->tmpArr[it]->wb[2];
+      ader_ref(0, it*3 + 4) += vk->tmpArr[it]->wb[3];
+      ader_ref(1, it*3 + 4) += vk->tmpArr[it]->wb[4];
+      ader_ref(2, it*3 + 4) += vk->tmpArr[it]->wb[5];
+      ader_ref(0, it*3 + 5) += vk->tmpArr[it]->wb[6];
+      ader_ref(1, it*3 + 5) += vk->tmpArr[it]->wb[7];
+      ader_ref(2, it*3 + 5) += vk->tmpArr[it]->wb[8];
     }
 
     for (it=0; it<NTRK; ++it) {
-	ader_ref(it*3 + 3, it*3 + 3) += vk->tmpArr[it]->wc[0];
-	ader_ref(it*3 + 3, it*3 + 4) += vk->tmpArr[it]->wc[1];
-	ader_ref(it*3 + 4, it*3 + 4) += vk->tmpArr[it]->wc[2];
-	ader_ref(it*3 + 3, it*3 + 5) += vk->tmpArr[it]->wc[3];
-	ader_ref(it*3 + 4, it*3 + 5) += vk->tmpArr[it]->wc[4];
-	ader_ref(it*3 + 5, it*3 + 5) += vk->tmpArr[it]->wc[5];
-	ader_ref(it*3 + 4, it*3 + 3) += vk->tmpArr[it]->wc[1];
-	ader_ref(it*3 + 5, it*3 + 3) += vk->tmpArr[it]->wc[3];
-	ader_ref(it*3 + 5, it*3 + 4) += vk->tmpArr[it]->wc[4];
+      ader_ref(it*3 + 3, it*3 + 3) += vk->tmpArr[it]->wc[0];
+      ader_ref(it*3 + 3, it*3 + 4) += vk->tmpArr[it]->wc[1];
+      ader_ref(it*3 + 4, it*3 + 4) += vk->tmpArr[it]->wc[2];
+      ader_ref(it*3 + 3, it*3 + 5) += vk->tmpArr[it]->wc[3];
+      ader_ref(it*3 + 4, it*3 + 5) += vk->tmpArr[it]->wc[4];
+      ader_ref(it*3 + 5, it*3 + 5) += vk->tmpArr[it]->wc[5];
+      ader_ref(it*3 + 4, it*3 + 3) += vk->tmpArr[it]->wc[1];
+      ader_ref(it*3 + 5, it*3 + 3) += vk->tmpArr[it]->wc[3];
+      ader_ref(it*3 + 5, it*3 + 4) += vk->tmpArr[it]->wc[4];
     }
 /* symmetrisation */
     for (i=0; i<NPar-1; i++) {
-	for (j=i+1; j<NPar; ++j) {
-	    ader_ref(j, i) = ader_ref(i, j);
-	}
+      for (j=i+1; j<NPar; ++j) {
+        ader_ref(j, i) = ader_ref(i, j);
+      }
     }
 //std::cout<<" FULLMTX NEW="<<ader_ref(0, 0)<<", "<<ader_ref(1, 1)<<", "<<ader_ref(2, 2)<<", "
 //                          <<ader_ref(3, 3)<<", "<<ader_ref(4, 4)<<", "<<ader_ref(5, 5)<<", "
-//                          <<ader_ref(0, 3)<<", "<<ader_ref(1, 4)<<", "<<ader_ref(3, 5)<<'\n'; 
-} 
+//                          <<ader_ref(0, 3)<<", "<<ader_ref(1, 4)<<", "<<ader_ref(3, 5)<<'\n';
+}
 
 #undef ader_ref
 
@@ -84,7 +84,7 @@ int FullMCNSTfill(VKVertex * vk, double * ader, double * LSide)
 
     int totNC=0;  //total number of constraints
     for(i=0; i<(int)vk->ConstraintList.size();i++)totNC += vk->ConstraintList[i]->NCDim;
- 
+
     int NTRK = vk->TrackList.size();
     int NPar = 3*NTRK+3+totNC;
 //    int NPar=3*NTrkM+3;
@@ -149,7 +149,7 @@ int FullMCNSTfill(VKVertex * vk, double * ader, double * LSide)
     }
 //
 //  For "passing near" constraint
-    if (vk->passNearVertex){ 
+    if (vk->passNearVertex){
       double drdpy[2][3],dpipj[3][3];
       for (it = 0; it < NTRK; ++it) {
 	drdpy[0][0] = vk->tmpArr[it]->drdp[0][0] * vk->FVC.ywgt[0] + vk->tmpArr[it]->drdp[1][0] * vk->FVC.ywgt[1];
@@ -199,9 +199,9 @@ int FullMCNSTfill(VKVertex * vk, double * ader, double * LSide)
 //  Left part
 //
 //    double *LSide = new double[NPar];
-    LSide[0]=vk->T[0]; 
-    LSide[1]=vk->T[1]; 
-    LSide[2]=vk->T[2]; 
+    LSide[0]=vk->T[0];
+    LSide[1]=vk->T[1];
+    LSide[2]=vk->T[2];
     for (it=0; it<NTRK; ++it) {
        LSide[it*3+3+0]=vk->tmpArr[it]->tt[0];
        LSide[it*3+3+1]=vk->tmpArr[it]->tt[1];
@@ -218,7 +218,7 @@ int FullMCNSTfill(VKVertex * vk, double * ader, double * LSide)
     //for(it=0; it<NTRK; it++)std::cout<<" trk="<<LSide[it*3+3+0]<<", "
     //                      <<LSide[it*3+3+1]<<", "<<LSide[it*3+3+2]<<'\n';
     return NPar;
-} 
+}
 
 
 }  /* End of namespace */

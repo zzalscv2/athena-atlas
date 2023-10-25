@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "TrkVKalVrtCore/Derclc1.h"
+#include "TrkVKalVrtCore/cfMomentum.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include <array>
 #include <algorithm>
-#include <cmath> 
+#include <cmath>
 #include <iostream>
 
 namespace Trk {
@@ -19,14 +21,11 @@ namespace Trk {
 //
 //      cnstV and cnstP values are used!!!
 //-----------------------------------------------
-
-extern std::array<double, 4> getCnstParticleMom( const VKTrack *, const VKVertex * );
-
 void  calcMassConstraint( VKMassConstraint * cnst )
 {
     int it,itc;
-    double ptot[4]={0.,0.,0.,0.};  
-    double cth, invR, pp2, pt; 
+    double ptot[4]={0.,0.,0.,0.};
+    double cth, invR, pp2, pt;
     VKConstraintBase * base_cnst = (VKConstraintBase*) cnst;
     const VKVertex * vk=cnst->getOriginVertex();
     const std::vector<int> &usedParticles=cnst->getUsedParticles();
@@ -37,15 +36,15 @@ void  calcMassConstraint( VKMassConstraint * cnst )
       it = usedParticles[itc];
       trk = vk->TrackList.at(it).get();
       pp[itc]=getCnstParticleMom( trk , vk);
-      ptot[0] += pp[itc][0];    
-      ptot[1] += pp[itc][1];    
-      ptot[2] += pp[itc][2];    
-      ptot[3] += pp[itc][3];    
+      ptot[0] += pp[itc][0];
+      ptot[1] += pp[itc][1];
+      ptot[2] += pp[itc][2];
+      ptot[3] += pp[itc][3];
    }
-   
+
    double temp = 1.e-10;
-   int ip=0; if( fabs(ptot[1]) > fabs(ptot[ip]) )ip=1; if( fabs(ptot[2]) > fabs(ptot[ip]) )ip=2;
-   int im=0; if( fabs(ptot[1]) < fabs(ptot[im]) )im=1; if( fabs(ptot[2]) < fabs(ptot[im]) )im=2;
+   int ip=0; if( std::abs(ptot[1]) > std::abs(ptot[ip]) )ip=1; if( std::abs(ptot[2]) > std::abs(ptot[ip]) )ip=2;
+   int im=0; if( std::abs(ptot[1]) < std::abs(ptot[im]) )im=1; if( std::abs(ptot[2]) < std::abs(ptot[im]) )im=2;
    int id=4; for(int i=0;i<3;i++) if(i!=ip && i!=im)id=i;
    if(id==4){
      std::cout<<"ERROR in mass constraint!!!"<<'\n';
@@ -61,8 +60,8 @@ void  calcMassConstraint( VKMassConstraint * cnst )
 //
     int numCNST=0;   //constraint number. Single constraint in this case
 //
-//Difference   
-   base_cnst->aa[numCNST] = ( temp - cnst->getTargetMass() ) * ( temp + cnst->getTargetMass() ); 
+//Difference
+   base_cnst->aa[numCNST] = ( temp - cnst->getTargetMass() ) * ( temp + cnst->getTargetMass() );
 //
 //Derivatives               Here pp[][3] - particle energy, pp[][4] - squared particle mom
     for( itc=0; itc<usedNTRK; itc++){
@@ -72,13 +71,13 @@ void  calcMassConstraint( VKMassConstraint * cnst )
       cth  = 1. / tan( trk->cnstP[0] );
       pt   = sqrt(pp[itc][0]*pp[itc][0] + pp[itc][1]*pp[itc][1]);
       pp2  =      pp[itc][0]*pp[itc][0] + pp[itc][1]*pp[itc][1] + pp[itc][2]*pp[itc][2];
-      base_cnst->f0t[it][numCNST].X =  ptot[3] * (-pp2* cth / pp[itc][3]) 
+      base_cnst->f0t[it][numCNST].X =  ptot[3] * (-pp2* cth / pp[itc][3])
 			             - ptot[2] * (-pt   * (cth*cth + 1.));
-      base_cnst->f0t[it][numCNST].Y = -ptot[0] * (-pp[itc][1]) 
+      base_cnst->f0t[it][numCNST].Y = -ptot[0] * (-pp[itc][1])
 			             - ptot[1] *   pp[itc][0];
-      base_cnst->f0t[it][numCNST].Z =  ptot[3] * (-pp2/ (invR * pp[itc][3])) 
-	                             - ptot[0] * (-pp[itc][0] / invR) 
-			             - ptot[1] * (-pp[itc][1] / invR) 
+      base_cnst->f0t[it][numCNST].Z =  ptot[3] * (-pp2/ (invR * pp[itc][3]))
+	                             - ptot[0] * (-pp[itc][0] / invR)
+			             - ptot[1] * (-pp[itc][1] / invR)
 			             - ptot[2] * (-pp[itc][2] / invR);
 
     }
