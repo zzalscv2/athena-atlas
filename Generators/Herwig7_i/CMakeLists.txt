@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Herwig7_i )
@@ -9,7 +9,6 @@ find_package( Herwig3 COMPONENTS HerwigAPI )
 find_package( ThePEG COMPONENTS "ThePEG" "LesHouches${CMAKE_SHARED_LIBRARY_SUFFIX}" )
 find_package( GSL )
 find_package( OpenLoops )
-find_package( TheP8I )
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
@@ -63,3 +62,10 @@ atlas_install_runtime( share/file/*.pdt share/file/*.dat )
 set( Herwig7Environment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of Herwig7Environment.cmake" )
 find_package( Herwig7Environment )
+
+# Set up some environment variables for TheP8I hadronisation hook.
+set( TheP8IEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   CACHE PATH "Location of TheP8IEnvironment.cmake" )
+find_package( TheP8IEnvironment )
+
+
