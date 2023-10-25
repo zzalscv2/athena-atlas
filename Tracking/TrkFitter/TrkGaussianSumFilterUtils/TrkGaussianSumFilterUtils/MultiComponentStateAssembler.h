@@ -21,6 +21,7 @@
 #ifndef MultiComponentStateAssembler_H
 #define MultiComponentStateAssembler_H
 
+#include "TrkGaussianSumFilterUtils/GsfConstants.h"
 #include "TrkParameters/ComponentParameters.h"
 #include <vector>
 
@@ -31,22 +32,15 @@ namespace Trk {
  * state under assembly
  */
 namespace MultiComponentStateAssembler {
-struct Cache
-{
-  Cache()
-    : multiComponentState{}
-    , validWeightSum{ 0 }
-    , invalidWeightSum{ 0 }
-    , minimumValidFraction{ 0.01 }
-    , minimumFractionalWeight{ 1e-09 }
-  {
-    multiComponentState.reserve(72);
+struct Cache {
+  Cache() {
+    multiComponentState.reserve(GSFConstants::maxNumberofStateComponents);
   }
-  Trk::MultiComponentState multiComponentState;
-  double validWeightSum;
-  double invalidWeightSum;
-  const double minimumValidFraction;
-  const double minimumFractionalWeight;
+  Trk::MultiComponentState multiComponentState{};
+  double validWeightSum = 0;
+  double invalidWeightSum = 0;
+  static constexpr double minimumValidFraction = 0.01;
+  static constexpr double minimumFractionalWeight = 1e-09;
 };
 
 /** Method to add a single set of Trk::ComponentParameters to the cached
