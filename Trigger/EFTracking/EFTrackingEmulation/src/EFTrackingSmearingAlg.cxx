@@ -123,7 +123,9 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ATH_MSG_INFO("------- SmearingSigma: "<<m_SigmaScaleFactor);  
   ATH_MSG_INFO("------- trackEfficiency: "<<m_smearedTrackEfficiency);  
   ATH_MSG_INFO("------- parameterizedEfficiency: "<<m_parameterizedTrackEfficiency);
-  ATH_MSG_INFO("------- parameterizedEfficiency LRT: "<<m_parameterizedTrackEfficiency_LRT);    
+  ATH_MSG_INFO("------- parameterizedEfficiency LRT: "<<m_parameterizedTrackEfficiency_LRT);  
+  ATH_MSG_INFO("------- parameterizedEfficiency LRT high d0 cut: "<<m_smearedTrackEfficiency_d0high_LRT );  
+  ATH_MSG_INFO("------- parameterizedEfficiency LRT low d0 cut: "<<m_smearedTrackEfficiency_d0low_LRT );  
   ATH_MSG_INFO("------- UseResolutionPtCutOff: "<<m_UseResolutionPtCutOff);
   ATH_MSG_INFO("------- SetResolutionPtCutOff: "<<m_SetResolutionPtCutOff);
   ATH_MSG_INFO("------- EnableMonitoring:" <<m_enableMonitoring);
@@ -152,7 +154,10 @@ StatusCode EFTrackingSmearingAlg::initialize() {
   ((FakeTrackSmearer *) m_mySmearer)->SetOutputTracksPtCut(m_outputTracksPtCut);
   ((FakeTrackSmearer *) m_mySmearer)->SetTrackingEfficiency(m_smearedTrackEfficiency);
   ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency(m_parameterizedTrackEfficiency);
-  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_LRT(m_parameterizedTrackEfficiency_LRT);
+  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_LRT(m_parameterizedTrackEfficiency_LRT); 
+  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_highd0_LRT(m_smearedTrackEfficiency_d0high_LRT); 
+  ((FakeTrackSmearer *) m_mySmearer)->SetParameterizedEfficiency_lowd0_LRT(m_smearedTrackEfficiency_d0low_LRT); 
+  
   ((FakeTrackSmearer *) m_mySmearer)->SetSigmaScaleFactor(m_SigmaScaleFactor.value());
   ((FakeTrackSmearer *) m_mySmearer)->UseResolutionPtCutOff(m_UseResolutionPtCutOff.value());
   ((FakeTrackSmearer *) m_mySmearer)->SetResolutionPtCutOff(m_SetResolutionPtCutOff.value());
@@ -170,18 +175,22 @@ StatusCode EFTrackingSmearingAlg::initialize() {
     TF1 *d0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->d0res_pt;
     TF1 *z0res_pt  = ((FakeTrackSmearer *) m_mySmearer)->z0res_pt;
     TF1 *curvres_pt  = ((FakeTrackSmearer *) m_mySmearer)->curvres_pt;
-    CHECK(book(new TH1F("d0res_function_vs_eta","#eta of track (p_T=10GeV);#eta",100, 0.0,4.0)));
-    CHECK(book(new TH1F("z0res_function_vs_eta","#eta of track (p_T=10GeV);#eta",100, 0.0,4.0)));
-    CHECK(book(new TH1F("curvres_function_vs_eta","#eta of track (p_T=10GeV);#eta",100, 0.0,4.0)));
-    CHECK(book(new TH1F("d0res_function_vs_pt","#pt of track (#eta=1);p_T [GeV]",100, 1.0,200.0)));
-    CHECK(book(new TH1F("z0res_function_vs_pt","#pt of track (#eta=1);p_T [GeV]",100, 1.0,200.0)));
-    CHECK(book(new TH1F("curvres_function_vs_pt","#pt of track (#eta=1);p_T [GeV]",100, 1.0,200.0)));
+    TF1 *effLRT_d0  = ((FakeTrackSmearer *) m_mySmearer)->effLRT_d0;
+
+    CHECK(book(new TH1F("d0res_function_vs_eta","#eta of track (p_{T}=10GeV);#eta",100, 0.0,4.0)));
+    CHECK(book(new TH1F("z0res_function_vs_eta","#eta of track (p_{T}=10GeV);#eta",100, 0.0,4.0)));
+    CHECK(book(new TH1F("curvres_function_vs_eta","#eta of track (p_{T}=10GeV);#eta",100, 0.0,4.0)));
+    CHECK(book(new TH1F("d0res_function_vs_pt","p_{T} of track (#eta=1);p_{T} [GeV]",100, 1.0,200.0)));
+    CHECK(book(new TH1F("z0res_function_vs_pt","p_{T} of track (#eta=1);p_{T} [GeV]",100, 1.0,200.0)));
+    CHECK(book(new TH1F("curvres_function_vs_pt","p_{T} of track (#eta=1);p_{T} [GeV]",100, 1.0,200.0)));
+    CHECK(book(new TH1F("effLRT_function_vs_d0","d_{0} of track;d_{0} [mm]",100, 0.001,600.0)));
     hist("d0res_function_vs_eta")->Add(d0res_eta);
     hist("z0res_function_vs_eta")->Add(z0res_eta);
     hist("curvres_function_vs_eta")->Add(curvres_eta);
     hist("d0res_function_vs_pt")->Add(d0res_pt);
     hist("z0res_function_vs_pt")->Add(z0res_pt);
     hist("curvres_function_vs_pt")->Add(curvres_pt);
+    hist("effLRT_function_vs_d0")->Add(effLRT_d0);
     // book historgams
     CHECK(book_histograms());
   }
@@ -267,13 +276,16 @@ StatusCode EFTrackingSmearingAlg::smearTruthParticles(const EventContext& ctx) {
                 xAOD::TruthParticle * newtrk = new xAOD::TruthParticle(*part);
                 outputTruth->push_back(newtrk); 
                 *newtrk = *part;
-                // set the decorators                  
-                d0Decorator(*newtrk) = otrack.d0();
-                z0Decorator(*newtrk) = otrack.z0();
-                ptDecorator(*newtrk) = otrack.pt()*1000.; 
-                //TrackParticle has already ::pt(), so the smeared value is in the decorator 
-                // and can be accessed by                
-                auto newpt = newtrk->auxdata<float>("pt");
+                auto newpt = part->pt();
+                if (m_SigmaScaleFactor !=0) {
+                  // set the decorators                  
+                  d0Decorator(*newtrk) = otrack.d0();
+                  z0Decorator(*newtrk) = otrack.z0();
+                  ptDecorator(*newtrk) = otrack.pt()*1000.; //MeV
+                  //TrackParticle has already ::pt(), so the smeared value is in the decorator 
+                  // and can be accessed by                
+                  newpt = newtrk->auxdata<float>("pt");
+                }
                 if (newpt==0.) continue;
                 ATH_MSG_DEBUG ("Smeared Truth: "
                       <<" curv=" << 1./newpt
