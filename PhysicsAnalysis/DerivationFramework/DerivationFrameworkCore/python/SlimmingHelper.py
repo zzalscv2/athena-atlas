@@ -100,11 +100,13 @@ class SlimmingHelper:
                 self.IncludeEGammaTriggerContent = False
                 self.IncludeJetTauEtMissTriggerContent = False
                 self.IncludeJetTriggerContent = False
+                self.IncludeTrackingTriggerContent = False
                 self.IncludeTauTriggerContent = False
                 self.IncludeEtMissTriggerContent = False
                 self.IncludeBJetTriggerContent = False
                 self.IncludeBPhysTriggerContent = False
                 self.IncludeMinBiasTriggerContent = False
+                self.OverrideJetTriggerContentWithTLAContent = False
                 # Choice of whether user provided a typed container list or not (CA vs non-CA) 
                 if "NamesAndTypes" in kwargs.keys(): self.NamesAndTypes = buildNamesAndTypes(kwargs["NamesAndTypes"])
                 else: self.NamesAndTypes = buildNamesAndTypes()
@@ -190,6 +192,11 @@ class SlimmingHelper:
                         from DerivationFrameworkCore.JetTriggerFixContent import JetTriggerFixContent
                         for item in JetTriggerFixContent:
                                 self.FinalItemList.append(item)
+
+                if (self.IncludeTrackingTriggerContent is True):
+                        triggerContent = True
+                        self.SmartCollections.append("HLT_IDVertex_FS")
+                        self.SmartCollections.append("HLT_IDTrack_FS_FTF")
 
                 if (self.IncludeEtMissTriggerContent is True):
                         triggerContent = True
@@ -573,6 +580,12 @@ class SlimmingHelper:
                 elif collectionName=="HLT_xAOD__JetContainer_a4tcemsubjesFS":
                         from DerivationFrameworkCore.JetTriggerContent import JetTriggerContent
                         items.extend(JetTriggerContent)
+                elif collectionName=="HLT_IDVertex_FS":
+                        from DerivationFrameworkCore.TrackingTriggerContent import TrackingTriggerContent
+                        items.extend(TrackingTriggerContent)
+                elif collectionName=="HLT_IDTrack_FS_FTF":
+                        from DerivationFrameworkCore.TrackingTriggerContent import TrackingTriggerContent
+                        items.extend(TrackingTriggerContent)
                 elif collectionName=="HLT_xAOD__TrigMissingETContainer_TrigEFMissingET":
                         from DerivationFrameworkCore.EtMissTriggerContent import EtMissTriggerContent
                         items.extend(EtMissTriggerContent)
@@ -590,7 +603,12 @@ class SlimmingHelper:
                         items.extend(MinBiasTriggerContent)
                 elif collectionName=="HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf":
                         from DerivationFrameworkCore.JetTriggerContentRun3 import JetTriggerContentRun3
-                        items.extend(JetTriggerContentRun3)
+                        from DerivationFrameworkCore.JetTriggerContentRun3TLA import JetTriggerContentRun3TLA
+                        if not self.OverrideJetTriggerContentWithTLAContent:
+                                items.extend(JetTriggerContentRun3)
+                        else:
+                                items.extend(JetTriggerContentRun3TLA)
+
                 else:
                         raise RuntimeError("Smart slimming container "+collectionName+" does not exist or does not have a smart slimming list")
                 return items
