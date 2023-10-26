@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -76,14 +76,14 @@ StatusCode Trk::ExtrapolationEngine::finalize()
 /** charged extrapolation */
 Trk::ExtrapolationCode Trk::ExtrapolationEngine::extrapolate(ExCellCharged& ecCharged,
                                                         const Surface* sf,
-                                                        BoundaryCheck bcheck) const
+                                                        const BoundaryCheck& bcheck) const
 { return extrapolateT<TrackParameters>(ecCharged,sf,ecCharged.propDirection,bcheck); }
 
 
 /** neutral extrapolation */
 Trk::ExtrapolationCode Trk::ExtrapolationEngine::extrapolate(ExCellNeutral& ecNeutral,
                                                         const Surface* sf,
-                                                        BoundaryCheck bcheck) const
+                                                        const BoundaryCheck& bcheck) const
 { return extrapolateT<NeutralParameters>(ecNeutral,sf,ecNeutral.propDirection,bcheck); }
 
 void Trk::ExtrapolationEngine::throwFailedToGetTrackingGeomtry() const {

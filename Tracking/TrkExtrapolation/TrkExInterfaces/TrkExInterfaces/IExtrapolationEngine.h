@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,13 +45,13 @@ namespace Trk {
        /** charged extrapolation */
        virtual ExtrapolationCode extrapolate(ExCellCharged& ecCharged,
                                              const Surface* sf = 0,
-                                             BoundaryCheck bcheck = true) const = 0;
+                                             const BoundaryCheck& bcheck = true) const = 0;
 
 
        /** neutral extrapolation */
        virtual ExtrapolationCode extrapolate(ExCellNeutral& ecNeutral,
                                              const Surface* sf = 0,
-                                             BoundaryCheck bcheck = true) const = 0;
+                                             const BoundaryCheck& bcheck = true) const = 0;
                                 
                                 
       /** define for which GeometrySignature this extrapolator is valid */

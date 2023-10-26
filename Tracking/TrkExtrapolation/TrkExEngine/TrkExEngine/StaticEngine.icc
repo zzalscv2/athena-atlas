@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@
 template <class T> Trk::ExtrapolationCode Trk::StaticEngine::extrapolateT(Trk::ExtrapolationCell<T>& eCell,
                                                                           const Trk::Surface* sf,
                                                                           Trk::PropDirection pDir,
-                                                                          Trk::BoundaryCheck bcheck) const
+                                                                          const Trk::BoundaryCheck& bcheck) const
 {
     Trk::ExtrapolationCode eCode = Trk::ExtrapolationCode::InProgress;
     // ---- [0] check the direct propagation exit

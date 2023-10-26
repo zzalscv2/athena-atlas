@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -61,29 +61,29 @@ namespace Trk {
         StepEngine(const std::string&,const std::string&,const IInterface*);
         
         /** Destructor */
-        ~StepEngine();
+        virtual ~StepEngine();
 
         /** AlgTool initialize method */
-        StatusCode initialize();
+        virtual StatusCode initialize() override;
         
         /** AlgTool finalize method */
-        StatusCode finalize();
+        virtual StatusCode finalize() override;
         
         using IExtrapolationEngine::extrapolate;
         
         /** charged extrapolation - public interface */
         virtual ExtrapolationCode extrapolate(ExCellCharged& ecCharged,
                                               const Surface* sf = 0,
-                                              BoundaryCheck bcheck = true) const;
+                                              const BoundaryCheck& bcheck = true) const override;
 
 
         /** neutral extrapolation - public interface */
         virtual ExtrapolationCode extrapolate(ExCellNeutral& ecNeutral,
                                               const Surface* sf = 0,
-                                              BoundaryCheck bcheck = true) const;
+                                              const BoundaryCheck& bcheck = true) const override;
                          
         /** define for which GeometrySignature this extrapolator is valid - this is GLOBAL */
-        GeometryType geometryType() const;                             
+        virtual GeometryType geometryType() const override;
                          
      private:
         /** main loop extrapolation method */
@@ -91,7 +91,7 @@ namespace Trk {
 							       Trk::TargetSurfaceVector& ts,
 							       bool trueOrderedIntersections, 
 							       const Surface* sf = 0,
-							       BoundaryCheck bcheck = true ) const;
+							       const BoundaryCheck& bcheck = true ) const;
 
 	template<class T> Trk::ExtrapolationCode resolveFrameBoundaryT(ExtrapolationCell<T>& eCell,
 								       Amg::Vector3D position,
