@@ -232,8 +232,13 @@ StatusCode TriggerEDMDeserialiserAlg::execute(const EventContext& context) const
   
   const Payload* dataptr = nullptr;
   if ( resultHandle->getSerialisedData( m_moduleID, dataptr ).isFailure() ) {
-    ATH_MSG_ERROR("No payload available with moduleId " << m_moduleID << " in this event");
-    return StatusCode::FAILURE;
+    if ( m_permitMissingModule ) {
+      ATH_MSG_DEBUG("No payload available with moduleId " << m_moduleID << " in this event, ignored");
+      return StatusCode::SUCCESS;
+    } else {
+      ATH_MSG_ERROR("No payload available with moduleId " << m_moduleID << " in this event");
+      return StatusCode::FAILURE;
+    }
   }
   ATH_CHECK( deserialise( dataptr ) );
   return StatusCode::SUCCESS;

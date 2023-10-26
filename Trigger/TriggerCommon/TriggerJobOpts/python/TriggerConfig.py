@@ -548,7 +548,7 @@ def triggerMergeViewsCfg( flags, viewMakers ):
     return acc
 
 
-def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[] ):
+def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[], extraInputs=[], extraOutputs=[] ):
     """Configure the EDM gap filler"""
 
     from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, Alias
@@ -568,6 +568,8 @@ def triggerEDMGapFillerCfg( flags, edmSet, decObj=[], decObjHypoOut=[] ):
     tool = CompFactory.HLTEDMCreator(f"GapFiller_{'' if edmSet==['BS'] else '_'+'_'.join(edmSet)}")
     alg = CompFactory.HLTEDMCreatorAlg("EDMCreatorAlg",
                                        OutputTools = [tool])
+    alg.ExtraInputs = list(extraInputs)
+    alg.ExtraOutputs = list(extraOutputs)
 
     if len(edmSet) != 0:
         groupedByType = defaultdict( list )

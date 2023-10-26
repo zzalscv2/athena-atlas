@@ -416,17 +416,22 @@ def Run3TriggerBSUnpackingCfg(flags):
         )
         # Full HLT result also has slimmed navigation summary
         if dstype == '':
-            deserialiser.ExtraOutputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
+            deserialiser.ExtraOutputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+DummyForGapFiller')]
         else:
             deserialiser.SkipDuplicateRecords = True
+            deserialiser.PermitMissingModule = True
         acc.addEventAlgo( deserialiser, "HLTDecodingSeq")
 
         if dstype=='':
             # Create empty EDM collections for types not created online
-            gapFiller = triggerEDMGapFillerCfg(flags, edmSet=['BS'])
             # Add output dependency on Navigation to enforce ordering
-            gapFiller.getPrimary().ExtraOutputs += [('xAOD::TrigCompositeContainer',
-                                                    'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags))]
+            gapFiller = triggerEDMGapFillerCfg(
+                flags, edmSet=['BS'],
+                extraInputs=[('xAOD::TrigCompositeContainer' , 'StoreGateSvc+DummyForGapFiller')],
+                extraOutputs=[(
+                    'xAOD::TrigCompositeContainer',
+                    'StoreGateSvc+'+getRun3NavigationContainerFromInput(flags)
+                )])
         else:
             # Create empty EDM collections for types not created online
             gapFiller = triggerEDMGapFillerCfg(flags, edmSet=[dstype])
