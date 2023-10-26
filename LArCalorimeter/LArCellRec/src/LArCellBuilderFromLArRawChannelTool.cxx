@@ -136,7 +136,7 @@ LArCellBuilderFromLArRawChannelTool::process (CaloCellContainer* theCellContaine
     theCellContainer->clear();
   }
 
-  DataPool<LArCell> pool (ctx);
+  DataPool<LArCell> pool (ctx,m_initialDataPoolSize);
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey, ctx);
   const LArOnOffIdMapping* cabling=*cablingHdl;

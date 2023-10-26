@@ -53,13 +53,10 @@ def EfexSimMonitoringConfig(flags):
 
     for key in [EfexSimMonAlg.eFexEMRoIContainer,EfexSimMonAlg.eFexTauRoIContainer,EfexSimMonAlg.eFexEMRoISimContainer,EfexSimMonAlg.eFexTauSimRoIContainer]:
         sKey = str(key) if "+" not in str(key) else str(key)[str(key).index('+')+1:] # strip storegate name
-        for suffix,inputType in ["","caloReadout"],["2","fexReadout"]:
-            matchedFracGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_mismatchedFrac" + suffix, mainDir)
+        for suffix,inputType in ["","caloReadout"],["2","fexReadout"],["3","dodgy_caloReadout"]:
             matchedGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_matched" + suffix, mainDir)
             partmatchedGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_partmatched" + suffix, mainDir) # right location but wrong energy or other flags
             unmatchedGrp = helper.addGroup(EfexSimMonAlg, groupName+"_"+sKey+"_unmatched" + suffix, mainDir)
-            matchedFracGrp.defineHistogram("tobEta,tobPhi,tobMismatched;h_mismatchedFrac", title=f"Mismatched Fraction {sKey} ({inputType} simput);#eta;#phi", type='TProfile2D', path=trigPath+inputType+"/" + sKey + "/",
-                                           xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
             matchedGrp.defineHistogram("tobEta,tobPhi;h_matched", title=f"Matched {sKey} ({inputType} simput);#eta;#phi;matched "+sKey, type='TH2F', path=trigPath+inputType+"/" + sKey + "/",
                                    xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
             partmatchedGrp.defineHistogram("tobEta,tobPhi;h_locationOnly_matched", title=f"LocationOnly-matched {sKey} ({inputType} simput);#eta;#phi", type='TH2F', path=trigPath+inputType+"/" + sKey + "/",
@@ -71,8 +68,8 @@ def EfexSimMonitoringConfig(flags):
     myGroup.defineHistogram('LBNString,tobAndReadoutType;h_mismatchedTobTypes_vs_lbn', path=trigPath, type='TH2I', weight='nTOBs',
                             title='TOBs;LB;Tob Type (simput Type);Events',
                             xbins=1, xmin=0, xmax=1, xlabels=[""],
-                            ybins=4, ymin=-0.5, ymax=3.5, ylabels=["em (calo)","tau (calo)","em (fex)","tau (fex)"],
-                            opt=['kCanRebin'])
+                            ybins=6, ymin=-0.5, ymax=5.5, ylabels=["em (calo)","tau (calo)","em (fex)","tau (fex)","em (dodgy calo)","tau (dodgy calo)"],
+                            opt=['kCanRebin'],merge='merge')
     #
     def bookSimCompHistos(simtype, leptype='eEM'):
         """

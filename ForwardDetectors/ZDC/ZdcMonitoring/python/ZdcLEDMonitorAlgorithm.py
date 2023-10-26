@@ -35,8 +35,8 @@ def ZdcLEDMonitoringConfig(inputFlags, run_type):
 
 # --------------------------------------------------------------------------------------------------
 
-    zdcModLEDMonToolArr = helper.addArray([nLEDs,nSides,nModules],zdcLEDMonAlg,'ZdcModLEDMonitor', topPath='ZDCLED/')
-    rpdChanLEDMonToolArr = helper.addArray([nLEDs,nSides,nChannels],zdcLEDMonAlg,'RPDChanLEDMonitor', topPath='RPDLED/')
+    zdcModLEDMonToolArr = helper.addArray([nLEDs,nSides,nModules],zdcLEDMonAlg,'ZdcModLEDMonitor', topPath='ZDC/ZDCLED/')
+    rpdChanLEDMonToolArr = helper.addArray([nLEDs,nSides,nChannels],zdcLEDMonAlg,'RPDChanLEDMonitor', topPath='ZDC/RPDLED/')
 
  
     zdcModLEDMonToolArr.defineHistogram('zdcLEDADCSum', title='LED ADC Sum [ADC Counts];Events',

@@ -17,6 +17,8 @@
 #include "xAODTrigL1Calo/eFexTower.h"
 #include "FourMomUtils/P4Helpers.h"
 
+#include "LArRecConditions/LArBadChannelCont.h"
+
 class EfexSimMonitorAlgorithm : public AthMonitorAlgorithm {
 public:EfexSimMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~EfexSimMonitorAlgorithm()=default;
@@ -38,9 +40,16 @@ private:
   // SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
   SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerKey{this,"eFexTowerContainer","L1_eFexDataTowers","SG key of the primary eFex tower container, which should be populated if fex readout occurring"};
 
+  SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };
+
   StatusCode fillEmErrorHistos(const std::string &errName, const xAOD::eFexEMRoIContainer *emcont, const std::set<uint32_t> &simEqDataCoords) const;
   StatusCode fillTauErrorHistos(const std::string &errName, const xAOD::eFexTauRoIContainer *taucont, const std::set<uint32_t> &simEqDataCoords) const;
 
+    struct SortableTob {
+        SortableTob(unsigned int w, float e, float p) : word0(w),eta(e),phi(p) { }
+        unsigned int word0;
+        float eta,phi;
+    };
 
     template <typename T> void fillVectors(const SG::ReadHandleKey<T>& key, const EventContext& ctx, std::vector<float>& etas, std::vector<float>& phis, std::vector<unsigned int>& word0s) const {
         etas.clear();phis.clear();word0s.clear();
@@ -49,13 +58,20 @@ private:
             etas.reserve(tobs->size());
             phis.reserve(tobs->size());
             word0s.reserve(tobs->size());
+            std::vector<SortableTob> sortedTobs;
+            sortedTobs.reserve(tobs->size());
             for(auto tob : *tobs) {
-                etas.push_back(tob->eta());
-                phis.push_back(tob->phi());
-                word0s.push_back(tob->word0());
+                sortedTobs.emplace_back(SortableTob{tob->word0(),tob->eta(),tob->phi()});
+            }
+            std::sort(sortedTobs.begin(),sortedTobs.end(),[](const SortableTob& lhs, const SortableTob& rhs) { return lhs.word0<rhs.word0; });
+            for(auto& tob : sortedTobs) {
+                etas.push_back(tob.eta);
+                phis.push_back(tob.phi);
+                word0s.push_back(tob.word0);
             }
         }
     }
+
 
   template <typename T> unsigned int fillHistos(const SG::ReadHandleKey<T>& key1, const SG::ReadHandleKey<T>& key2, const std::string& groupSuffix, const EventContext& ctx ) const {
       SG::ReadHandle<T> tobs1{key1, ctx};
@@ -94,7 +110,6 @@ private:
                   fill(groupPrefix+"_matched"+groupSuffix,tobEta,tobPhi);
                   tobMismatched=0;
               }
-              fill(groupPrefix+"_mismatchedFrac"+groupSuffix,tobEta,tobPhi,tobMismatched);
               if(tobMismatched && this->msgLevel(MSG::DEBUG)) {
                   const xAOD::eFexTowerContainer* towers = nullptr;
                   evtStore()->retrieve(towers,groupSuffix=="2" ? "L1_eFexDataTowers" : "L1_eFexEmulatedTowers").ignore();
