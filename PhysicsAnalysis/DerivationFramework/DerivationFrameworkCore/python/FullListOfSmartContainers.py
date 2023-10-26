@@ -58,7 +58,9 @@ def FullListOfSmartContainers(flags=None):
       "HLT_xAOD__BTaggingContainer_HLTBjetFex",
       "HLT_xAOD__TrigBphysContainer_EFBMuMuFex",
       "HLT_xAOD__TrigVertexCountsContainer_vertexcounts",
-      "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf"
+      "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
+      "HLT_IDVertex_FS",
+      "HLT_IDTrack_FS_FTF"
    ]
 
    if flags is not None and flags.Tracking.doPseudoTracking:
