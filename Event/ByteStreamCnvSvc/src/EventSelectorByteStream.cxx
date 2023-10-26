@@ -402,18 +402,21 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
          }
          ATH_MSG_WARNING("Continue with bad event");
       }
-      // Build a DH for use by other components
-      StatusCode rec_sg = m_eventSource->generateDataHeader();
-      if (rec_sg != StatusCode::SUCCESS) {
-         ATH_MSG_ERROR("Fail to record BS DataHeader in StoreGate. Skipping events?! " << rec_sg);
-      }
 
       // Check whether properties or tools reject this event
       if ( m_NumEvents > m_skipEvents.value() &&
            (m_skipEventSequence.empty() || m_NumEvents != m_skipEventSequence.front()) ) {
-         StatusCode status(StatusCode::SUCCESS);
+
+         // Build a DH for use by other components
+         StatusCode rec_sg = m_eventSource->generateDataHeader();
+         if (rec_sg != StatusCode::SUCCESS) {
+            ATH_MSG_ERROR("Fail to record BS DataHeader in StoreGate. Skipping events?! " << rec_sg);
+         }
+
          // Build event info attribute list
          if (recordAttributeListImpl(lock).isFailure()) ATH_MSG_WARNING("Unable to build event info att list");
+
+         StatusCode status(StatusCode::SUCCESS);
          for (const ToolHandle<IAthenaSelectorTool>& tool : m_helperTools) {
             StatusCode toolStatus = tool->postNext();
             if (toolStatus.isRecoverable()) {
@@ -460,9 +463,14 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
          if (!m_skipEventSequence.empty() && m_NumEvents == m_skipEventSequence.front()) {
             m_skipEventSequence.erase(m_skipEventSequence.begin());
          }
-         ATH_MSG_DEBUG("Skipping event " << m_NumEvents - 1);
+         if ( m_NumEvents % 1'000 == 0 ) {
+            ATH_MSG_INFO("Skipping event " << m_NumEvents - 1);
+         } else {
+            ATH_MSG_DEBUG("Skipping event " << m_NumEvents - 1);
+         }
       }
    } // for loop
+
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) { // For SharedReader Server, put event into SHM
       const RawEvent* pre = m_eventSource->currentEvent();
       StatusCode sc;
