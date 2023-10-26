@@ -7,8 +7,8 @@ from AthenaConfiguration.Enums import Format
 
 
 if __name__ == '__main__':
-    
-    
+
+
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import logging
     import glob
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     
     # Creates the TriggerTower container
     acc.merge(TriggerTowersInputCfg(flags))
-    
+
     if "eFex" in args.outputs:
         
         ##################################################
@@ -383,6 +383,9 @@ if __name__ == '__main__':
     
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))
+
+    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
+    acc.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
     
     acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
 
