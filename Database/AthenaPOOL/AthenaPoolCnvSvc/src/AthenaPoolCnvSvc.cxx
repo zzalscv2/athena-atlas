@@ -90,7 +90,7 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    if( m_dbType == TEST_StorageType ) {
       ATH_MSG_FATAL("Unknown StorageType rquested: " << m_storageTechProp.value());
       return StatusCode::FAILURE;
-   } 
+   }
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
@@ -992,6 +992,9 @@ AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const
    } else if (CxxUtils::starts_with (fileSpec, "ROOTTREEINDEX:")) {
       outputTech = pool::ROOTTREEINDEX_StorageType.type();
       fileSpec.erase(0, 14);
+   } else if (CxxUtils::starts_with (fileSpec, "ROOTRNTUPLE:")) {
+      outputTech = pool::ROOTRNTUPLE_StorageType.type();
+      fileSpec.erase(0, 12);
    } else if (outputTech == 0) {
       outputTech = m_dbType.type();
    }

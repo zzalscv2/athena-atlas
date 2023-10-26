@@ -32,8 +32,12 @@ def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
    result.merge(PoolWriteCfg(flags))
 
    # define athena output stream
-   writingTool = CompFactory.AthenaOutputStreamTool(f"Stream{streamName}Tool",
-                                                    DataHeaderKey=outputStreamName)
+   writingTool = CompFactory.AthenaOutputStreamTool(
+      f"Stream{streamName}Tool",
+      DataHeaderKey=outputStreamName,
+      MetaDataPoolContainerPrefix=f"{flags.Output.StorageTechnology.MetaData}:MetaData",
+      MetaDataOutputCollection="MetaDataHdr",
+   )
 
    # If we're running in augmentation mode, configure the writing tool accordingly
    parentStream = f"Output.{streamName}ParentStream"

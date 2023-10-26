@@ -187,7 +187,7 @@ private: // member functions
 
 private: // data
    /// decoded storage tech requested in "StorageTechnology" property
-   pool::DbType                  m_dbType;  
+   pool::DbType                  m_dbType;
    std::string                   m_lastInputFileName;
    ServiceHandle<IPoolSvc>       m_poolSvc{this,"PoolSvc","PoolSvc"};
    ServiceHandle<IClassIDSvc>    m_clidSvc{this,"ClassIDSvc","ClassIDSvc"};
@@ -207,7 +207,6 @@ private: // properties
 
    /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
    StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTTREEINDEX"};
-   //StringProperty  m_storageTechProp{this,"StorageTechnology", "ROOTRNTUPLE"};
    /// PoolContainerPrefix, prefix for top level POOL container: default = "POOLContainer"
    StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","CollectionTree"};
    /// TopLevelContainerName, naming hint policy for top level POOL container: default = "<type>"

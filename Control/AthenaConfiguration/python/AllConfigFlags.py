@@ -257,7 +257,8 @@ def initConfigFlags():
     acf.addFlag('Output.doJiveXML',  False) # write out a JiveXML file
 
     acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
-    acf.addFlag('Output.StorageTechnology', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology
+    acf.addFlag('Output.StorageTechnology.EventData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for event data
+    acf.addFlag('Output.StorageTechnology.MetaData', 'ROOTTREEINDEX')  # Set the underlying POOL storage technology for metadata
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py

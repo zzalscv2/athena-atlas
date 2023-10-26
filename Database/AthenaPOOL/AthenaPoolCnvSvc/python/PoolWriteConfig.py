@@ -159,5 +159,5 @@ def PoolWriteCfg(flags):
     return AthenaPoolCnvSvcCfg(flags,
                                PoolAttributes=PoolAttributes,
                                ParallelCompression=useParallelCompression,
-                               StorageTechnology=flags.Output.StorageTechnology,
+                               StorageTechnology=flags.Output.StorageTechnology.EventData,
                                OutputMetadataContainers=OutputMetadataContainers)
