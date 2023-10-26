@@ -62,7 +62,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
 
   int maxFEI4SmallHit = 2;
-  int overflowToT = moduleData->getFEI4OverflowToT(barrel_ec, layerIndex);
+  int overflowToT = calibData->getFEI4OverflowToT();
 
   std::vector<std::unique_ptr<Pixel1RawData>> p_rdo_small_fei4;
   int nSmallHitsFEI4 = 0;

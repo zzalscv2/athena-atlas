@@ -147,8 +147,8 @@ InDet::PixelToTPIDTool::dEdx(const EventContext& ctx,
 
             //loop over ToT and check if anyone is overflow (ToT==14) check for IBL cluster overflow
             int overflowIBLToT =
-              SG::ReadCondHandle<PixelModuleData>(m_moduleDataKey, ctx)
-                ->getFEI4OverflowToT(0, 0);
+              SG::ReadCondHandle<PixelChargeCalibCondData>(m_moduleDataKey, ctx)
+                ->getFEI4OverflowToT();
             const std::vector<int>& ToTs = pixclus->prepRawData()->totList();
 
             for (int pixToT : ToTs) {

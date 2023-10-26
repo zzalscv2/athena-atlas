@@ -17,7 +17,7 @@
 #include "TrkToolInterfaces/IPixelToTPIDTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
-#include "PixelConditionsData/PixelModuleData.h"
+#include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelConditionsData/PixeldEdxData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -60,8 +60,8 @@ namespace InDet {
       const PixelID* m_pixelid;
       double m_conversionfactor;
 
-      SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey
-      {this, "PixelModuleData", "PixelModuleData", "Output key of pixel module"};
+      SG::ReadCondHandleKey<PixelChargeCalibCondData> m_moduleDataKey
+      {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "ChargeCalibration data, for ToT overflow setting"};
 
       SG::ReadCondHandleKey<PixeldEdxData> m_dedxKey
       {this, "PixeldEdxData", "PixeldEdxData", "Output key of pixel dEdx"};
