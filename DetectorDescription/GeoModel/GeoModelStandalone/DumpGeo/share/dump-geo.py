@@ -80,7 +80,11 @@ if (vp1InputFiles == []):
 
     # # Set geometry version
     if (not "DetDescrVersion" in dir()):
-        DetDescrVersion = "ATLAS-R2-2016-01-00-01" # "ATLAS-R2-2015-03-01-00" for Rel. 21
+        
+        #DetDescrVersion = "ATLAS-R2-2015-03-01-00" # default for Rel. 21
+        #DetDescrVersion = "ATLAS-R2-2016-01-00-01" # default Run 2 geometry
+        DetDescrVersion = "ATLAS-R3S-2021-03-01-00" # default Run 3 geometry, with symmetric NSW
+
         os.environ["DUMPGEODETDESCRTAGDEFAULT"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
         os.environ["DUMPGEODETDESCRTAG"] = DetDescrVersion # save to an env var, for later use in GeoModelStandalone/GeoExporter
     globalflags.DetDescrVersion = DetDescrVersion
@@ -234,6 +238,15 @@ if vp1ToyDetector:
 #  - Muon is ON
 #  - Major geometry version is greater than 10
 if (vp1Muon):
+
+    
+    # This fixes the same error reported and fixed in ATLASVPONE-641
+    # Details: https://its.cern.ch/jira/browse/ATLASVPONE-641
+    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+    if not hasattr(svcMgr, "MuonIdHelperSvc"):
+        from MuonIdHelpers.MuonIdHelpersConfigLegacy import MuonIdHelperSvc
+        svcMgr += MuonIdHelperSvc("MuonIdHelperSvc")
+
 
     from AtlasGeoModel import Agdd2Geo
 
