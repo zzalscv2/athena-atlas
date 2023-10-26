@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ElectronCombinedMaterialEffects.cxx
@@ -84,9 +84,10 @@ correctWeights(BH::MixtureParameters& mixture, const int numberOfComponents)
   for (int i = 0; i < numberOfComponents; ++i) {
     weightSum += mixture[i].weight;
   }
+  double norm = 1. / weightSum;
   // Rescale so that total weighting is 1
   for (int i = 0; i < numberOfComponents; ++i) {
-    mixture[i].weight /= weightSum;
+    mixture[i].weight *= norm;
   }
 }
 
