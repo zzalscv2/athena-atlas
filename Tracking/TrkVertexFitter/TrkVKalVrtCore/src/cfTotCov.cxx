@@ -15,8 +15,6 @@
 #include <cmath>
 
 namespace Trk {
-//extern variable
-extern const vkalMagFld      myMagFld;
 //
 //  Function calculates complete error matrix ADER and derivatives
 //   of fitted track parameters with respect to initial ones.

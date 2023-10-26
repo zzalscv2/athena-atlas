@@ -7,7 +7,17 @@
 //  Potentially could be more powerful that currently implemented scheme with exact pointing
 //  Currently is LESS efficient, so for the moment left for future work
 //==========================================================================================
+#include "TrkVKalVrtCore/CFitCascadeScale.h"
+#include "TrkVKalVrtCore/CFitCascade.h"
+#include "TrkVKalVrtCore/CascadeUtils.h"
+#include "TrkVKalVrtCore/XYZtrp.h"
+#include "TrkVKalVrtCore/VtCFit.h"
+#include "TrkVKalVrtCore/stCnst.h"
+#include "TrkVKalVrtCore/FullMtx.h"
+#include "TrkVKalVrtCore/VtDeriv.h"
 #include "TrkVKalVrtCore/Derivt.h"
+#include "TrkVKalVrtCore/cfTotCov.h"
+#include "TrkVKalVrtCore/Matrix.h"
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
@@ -16,24 +26,6 @@
 
 
 namespace Trk {
-
-
-extern int cfdinv(double *, double *, long int );
-extern int cfInv5(double *cov, double *wgt );
-extern int  vtcfit( VKVertex * vk);
-extern void  combinedTrack(long int ICH, double *pv0, double *covi, double BMAG, double *paro, double *covo);
-extern int afterFit(VKVertex *, double *, double *, double *, double *, const VKalVrtControlBase* = nullptr);
-extern void applyConstraints(VKVertex * vk);
-extern void FullMTXfill(VKVertex * , double * );
-extern  int FullMCNSTfill(VKVertex * , double * , double * );
-
-extern int getCascadeNPar(CascadeEvent &, int Type=0);
-extern VKTrack * getCombinedVTrack(VKVertex *);
-extern void vpderiv(bool, long int , const double *, double *, double *, double *, double *, double *, double *,VKalVrtControl * =nullptr);
-extern std::vector<double> transformCovar(int , double **, const std::vector<double>& );
-extern double cfVrtDstSig( VKVertex * , bool );
-extern long int getVertexCharge( VKVertex *);
-extern      int setVTrackMass(VKVertex * );
 //
 //  Rescale covariance matrices for cascade vertices used as pointing targets
 //
@@ -136,8 +128,6 @@ int fitVertexCascadeScale( VKVertex * vk, double & distToVertex )
 //
  int processCascadeScale(CascadeEvent & cascadeEvent_ )
 {
-  extern int translateToFittedPos(CascadeEvent &, double Step=1.);
-
   VKVertex * vk=nullptr;
   long int Iter, IERR, iv;
   cascadeEvent_.setSCALE(1.);                    // Safety

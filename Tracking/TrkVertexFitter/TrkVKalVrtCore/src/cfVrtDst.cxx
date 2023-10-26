@@ -3,6 +3,9 @@
 */
 
 #include "TrkVKalVrtCore/cfVrtDst.h"
+#include "TrkVKalVrtCore/Matrix.h"
+#include "TrkVKalVrtCore/XYZtrp.h"
+#include "TrkVKalVrtCore/cfMomentum.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
@@ -32,10 +35,6 @@ double cfVrtDstSig( VKVertex * vk, bool UseTrkErr)
     int i,j,ij,it;
     double parV0[5], covParV0[15];
     double Signif;
-
-    extern void combinedTrack(long int ICH, double *pv0, double *covi, double BMAG, double *paro, double *covo);
-    extern std::array<double, 4> getCnstParticleMom(const VKTrack * , const VKVertex *);
-    extern int cfdinv(double *, double *, long int);
  /* ------------------------------------------------------------------- */
 
     double ptot[3]= {0.,0.,0.};
