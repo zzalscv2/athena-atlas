@@ -612,10 +612,18 @@ namespace EL
     if(!data.sharedFileSystem)
     {
       std::ostringstream cmd;
-      cmd << "tar --dereference -C " << WORKDIR_DIR << " -czf " << tarballName << " .";
-      // suppress the output from the tarball command
+      //cmd << "tar --dereference -C " << WORKDIR_DIR << " -czf " << tarballName << " .";
+      cmd << "cpack -D CPACK_INSTALL_PREFIX=. -G TGZ --config $TestArea/CPackConfig.cmake";
+
+      // suppress the output from the command
       if (gSystem->Exec (cmd.str().c_str()) != 0){
         RCU_THROW_MSG (("failed to execute: " + cmd.str()).c_str());
+      }
+
+      std::ostringstream mv_command;
+      mv_command << "mv WorkDir_" << std::getenv("WorkDir_VERSION") << "_" << std::getenv("WorkDir_PLATFORM") << ".tar.gz " << tarballName;
+      if (gSystem->Exec (mv_command.str().c_str()) != 0){
+        RCU_THROW_MSG (("failed to execute: " + mv_command.str()).c_str());
       }
     }
 
@@ -654,7 +662,6 @@ namespace EL
         file << "  exit 1\n";
         file << "}\n\n";
 
-        file << "test \"$TMPDIR\" == \"\" && TMPDIR=/tmp\n";
 
         file << "EL_JOBSEG=`grep \"^$EL_JOBID \" \"" << data.batchSubmitLocation << "/segments\" | awk ' { print $2 }'`\n";
         file << "test \"$EL_JOBSEG\" != \"\" || abortJob\n";
@@ -665,20 +672,18 @@ namespace EL
 
         if(!data.sharedFileSystem)
         { // Create output transfer directories
-          file << "mkdir \"${TMPDIR}/fetch\" || abortJob\n";
-          file << "mkdir \"${TMPDIR}/status\" || abortJob\n";
+          file << "mkdir \"fetch\" || abortJob\n";
+          file << "mkdir \"status\" || abortJob\n";
           file << "\n";
         }
 
         if(data.sharedFileSystem)
         {
+          file << "test \"$TMPDIR\" == \"\" && TMPDIR=/tmp\n";
           file << "RUNDIR=${TMPDIR}/EventLoop-Worker-$EL_JOBSEG-`date +%s`-$$\n";
           file << "mkdir \"$RUNDIR\" || abortJob\n";
-        } else
-        {
-          file << "RUNDIR=${TMPDIR}\n";
+          file << "cd \"$RUNDIR\" || abortJob\n";
         }
-        file << "cd \"$RUNDIR\" || abortJob\n";
 
         if (!data.batchSkipReleaseSetup)
           file << defaultReleaseSetup (data);
