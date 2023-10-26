@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELCALIBALGS_PIXELCHARGETOTCONVERSION_H
@@ -7,10 +7,8 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
-#include "InDetPrepRawData/PixelCluster.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include "PixelGeoModel/IBLParameterSvc.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
@@ -42,8 +40,6 @@ class ATLAS_NOT_THREAD_SAFE PixelChargeToTConversion : public AthAlgorithm{
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
 
-  SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey
-  {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
 
   SG::ReadCondHandleKey<PixelChargeCalibCondData> m_chargeDataKey
   {this, "PixelChargeCalibCondData", "PixelChargeCalibCondData", "Charge calibration"};

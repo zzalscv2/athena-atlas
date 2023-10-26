@@ -59,15 +59,11 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
   SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
   const PixelChargeCalibCondData *calibData = *calibDataHandle;
 
-  //int maxRD53SmallHit = 0; unused
-  int overflowToT = moduleData->getFEI4OverflowToT(barrel_ec, layerIndex);
+  int overflowToT = calibData->getFEI4OverflowToT();
 
   std::vector<Pixel1RawData*> p_rdo_small_fei4;
-  //int nSmallHitsRD53 = 0; unused
   std::vector<int> row, col;
-  // const int maxRow = p_design->rowsPerCircuit();
-  // const int maxCol = p_design->columnsPerCircuit();
-  // std::vector<std::vector<int> > RD53Map(maxRow + 16, std::vector<int>(maxCol + 16));
+  
 
   // Add cross-talk
   crossTalk(moduleData->getCrossTalk(barrel_ec, layerIndex), chargedDiodes);
@@ -166,73 +162,11 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     InDetDD::SiReadoutCellId cellId = (*i_chargedDiode).second.getReadoutCell();
     const Identifier id_readout = chargedDiodes.element()->identifierFromCellId(cellId);
 
-    // int iirow = cellId.phiIndex();
-    // int iicol = cellId.etaIndex();
-    // if (iicol >= maxCol) {
-    //   iicol = iicol - maxCol;
-    // } // RD53 copy mechanism works per FE.
-
     // Front-End simulation
     if (bunch >= 0 && bunch < m_numberOfBcid) {
       Pixel1RawData* p_rdo = new Pixel1RawData(id_readout, nToT, bunch, 0, bunch);
-      //see commented code below for clarification why this is always executed
       rdoCollection.push_back(p_rdo);
-      // RD53Map[iirow][iicol] = 2; //Flag for "big hits"
-      //
-      //
-      /**
-         if (nToT>maxRD53SmallHit) { //this must be true, since maxRD53SmallHit is zero, and
-                                  // nToT is at least 1
-         rdoCollection.push_back(p_rdo);
-         RD53Map[iirow][iicol] = 2; //Flag for "big hits"
-         }
-         //So the following code is never reached; I leave it here assuming the developer will
-         //revisit it.
-         else {
-         p_rdo_small_fei4.push_back(p_rdo);
-         row.push_back(iirow);
-         col.push_back(iicol);
-         RD53Map[iirow][iicol] = 1; //Flag for low hits
-         nSmallHitsRD53++;
-         } **/
       p_rdo = nullptr;
     }
   }
-  // again, the following code is never reached but left here for the developer to comment
-  // Copy mechanism for IBL small hits:
-  /**
-     if (nSmallHitsRD53>0) {
-     bool recorded = false;
-
-     //First case: Record small hits which are in the same Pixel Digital Region than a big hit:
-     for (int ismall=0; ismall<nSmallHitsRD53; ismall++) {
-      int rowPDR = row[ismall]/2;
-      int colPDR = col[ismall]/2;
-      for (int rowBigHit=2*rowPDR; rowBigHit!=2*rowPDR+2 && rowBigHit<maxRow; ++rowBigHit) {
-        for (int colBigHit=2*colPDR; colBigHit!=2*colPDR+2 && colBigHit<maxCol; ++colBigHit) {
-          ATH_MSG_DEBUG("rowBig = " << rowBigHit << " colBig = " << colBigHit << " Map Content = " <<
-             RD53Map[rowBigHit][colBigHit]);
-          if (RD53Map[rowBigHit][colBigHit]==2 && !recorded) {
-            rdoCollection.push_back(p_rdo_small_fei4[ismall]);
-            recorded = true;
-          }
-        }
-      }
-
-      // Second case: Record small hits which are phi-neighbours with a big hit:
-      if (!recorded && row[ismall]<maxRow-1) {
-        if (RD53Map[row[ismall]+1][col[ismall]]==2) {
-          rdoCollection.push_back(p_rdo_small_fei4[ismall]);
-          recorded = true;
-        }
-      }
-      if (!recorded && row[ismall]!=0) {
-        if (RD53Map[row[ismall]-1][col[ismall]]==2) {
-          rdoCollection.push_back(p_rdo_small_fei4[ismall]);
-          recorded = true;
-        }
-      }
-     }
-     }
-   **/
-  }
+}

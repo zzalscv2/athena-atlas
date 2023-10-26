@@ -134,7 +134,7 @@ FrontEndSimTool::randomNoise(SiChargedDiodeCollection& chargedDiodes, const Pixe
       // protection to the overflow ToT, that depends on the sensor technology
       float overflowToT = std::numeric_limits<float>::max();
       if (p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI4) {
-        overflowToT = moduleData->getFEI4OverflowToT(barrel_ec, layerIndex);
+        overflowToT = chargeCalibData->getFEI4OverflowToT();
       }
       else if (p_design->getReadoutTechnology()==InDetDD::PixelReadoutTechnology::FEI3) {
         overflowToT = moduleData->getFEI3Latency(barrel_ec, layerIndex);
