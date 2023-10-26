@@ -175,7 +175,6 @@ def NswCalibDbAlgCfg(flags, **kwargs):
 
     kwargs.setdefault("loadMmT0Data",flags.Muon.Calib.applyMmT0Correction)
     kwargs.setdefault("loadsTgcT0Data", flags.Muon.Calib.applysTgcT0Correction)
-    print(kwargs)
     if(kwargs["loadMmT0Data"] and not kwargs['MmT0FileName'] ):
         kwargs.setdefault('ReadKey_MM_T0', "/MDT/MM/T0")
     kwargs.setdefault('ReadKey_MM_T0', "")
