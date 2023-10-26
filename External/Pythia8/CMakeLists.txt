@@ -31,6 +31,10 @@ atlas_install_generic( ${xmldoc_dir}/*.xml ${xmldoc_dir}/*.dat
    DESTINATION share/Pythia8/xmldoc
    TYPENAME XmlDoc )
 
+# Set the PYTHIA8DATA environment variable:
+set( PYTHIA8_ENVIRONMENT
+   FORCESET PYTHIA8DATA ${xmldoc_dir} )
+
 # Install the files from the pdfdata directory into the offline release. New in Pythia8.3
 set( pdfdata_dir "${PYTHIA8_LCGROOT}/share/Pythia8/pdfdata" )
 if( NOT IS_DIRECTORY ${pdfdata_dir} )
