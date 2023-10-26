@@ -16,7 +16,6 @@
 #include "TrigT1NSWSimTools/IStripTdsTool.h"
 #include "TrigT1NSWSimTools/IStripClusterTool.h"
 #include "TrigT1NSWSimTools/IStripSegmentTool.h"
-#include "TrigT1NSWSimTools/IMMStripTdsTool.h"
 #include "TrigT1NSWSimTools/IMMTriggerTool.h"
 #include "TrigT1NSWSimTools/IPadTriggerLogicTool.h"
 #include "TrigT1NSWSimTools/IPadTriggerLookupTool.h"
@@ -70,8 +69,6 @@ namespace NSWL1 {
     ToolHandle <IStripTdsTool>         m_strip_tds{this, "StripTdsTool", "NSWL1::StripTdsOfflineTool", "Tool simulating the functionalities of the sTGC Strip TDS"};
     ToolHandle <IStripClusterTool>     m_strip_cluster{this, "StripClusterTool", "NSWL1::StripClusterTool", "Tool simulating the sTGC Strip Clustering"};
     ToolHandle <IStripSegmentTool>     m_strip_segment{this, "StripSegmentTool", "NSWL1::StripSegmentTool", "Tool simulating the sTGC Segment finding"};
-    // FIXME: this m_mmstrip_tds tool seems no longer used, drop it?
-    ToolHandle <IMMStripTdsTool>       m_mmstrip_tds{this, "MMStripTdsTool", "NSWL1::MMStripTdsOfflineTool", "Tool simulating the functionalities of the MM Strip TDS"};
     ToolHandle <IMMTriggerTool>        m_mmtrigger{this, "MMTriggerTool", "NSWL1::MMTriggerTool", "Tool simulating the MM Trigger"};
     ToolHandle <TriggerProcessorTool>  m_trigProcessor{this, "MMTriggerProcessorTool", "NSWL1::TriggerProcessorTool", "Tool simulating the TP"};
 

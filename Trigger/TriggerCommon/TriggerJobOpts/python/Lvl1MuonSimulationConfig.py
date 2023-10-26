@@ -273,7 +273,6 @@ def NSWTriggerConfig(flags):
     StripTdsTool = CompFactory.NSWL1.StripTdsOfflineTool("NSWL1__StripTdsOfflineTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches,IsMC=flags.Input.isMC,sTGC_DigitContainerName="sTGC_DIGITS_L1")
     StripClusterTool = CompFactory.NSWL1.StripClusterTool("NSWL1__StripClusterTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches,IsMC=flags.Input.isMC)
     StripSegmentTool = CompFactory.NSWL1.StripSegmentTool("NSWL1__StripSegmentTool",DoNtuple=flags.Trigger.L1MuonSim.WritesTGCBranches)
-    MMStripTdsTool = CompFactory.NSWL1.MMStripTdsOfflineTool("NSWL1__MMStripTdsOfflineTool",DoNtuple=False)
     MMTriggerTool = CompFactory.NSWL1.MMTriggerTool("NSWL1__MMTriggerTool",DoNtuple=flags.Trigger.L1MuonSim.WriteMMBranches, IsMC = flags.Input.isMC, MmDigitContainer="MM_DIGITS_L1")
     TriggerProcessorTool = CompFactory.NSWL1.TriggerProcessorTool("NSWL1__TriggerProcessorTool")
 
@@ -296,7 +295,6 @@ def NSWTriggerConfig(flags):
                                                StripTdsTool = StripTdsTool,
                                                StripClusterTool = StripClusterTool,
                                                StripSegmentTool = StripSegmentTool,
-                                               MMStripTdsTool = MMStripTdsTool,
                                                MMTriggerTool = MMTriggerTool,
                                                MMTriggerProcessorTool = TriggerProcessorTool,
                                                NSWTrigRDOContainerName = "L1_NSWTrigContainer" )
