@@ -16,6 +16,10 @@
 #if __has_include( <features.h> )
 # include <features.h>
 #endif
+// cppcheck-suppress preprocessorErrorDirective
+#if __has_include( <version> )
+# include <version>
+#endif
 
 // If we're using glibc, this should have been defined by features.h.
 // Otherwise, define a dummy.
@@ -117,5 +121,13 @@
 #else
 # define HAVE_FEENABLEEXCEPT 0
 #endif
+
+// Do we have C++20 ranges?
+#if __cpp_lib_ranges
+# define HAVE_STD_RANGES 1
+#else
+# define HAVE_STD_RANGES 0
+#endif
+
 
 #endif // not CXXUTILS_FEATURES_H
