@@ -10,7 +10,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def ValkyrieProfilerServiceCfg(flags, **kwargs):
     """Configure Valkyrie/Valgrind profiler"""
 
-    kwargs.setdefault("ProfiledAlgs", flags.PerfMon.ProfiledAlgs)
+    kwargs.setdefault("ProfiledAlgs", flags.PerfMon.Valgrind.ProfiledAlgs)
     from AthenaCommon.Constants import VERBOSE
     kwargs.setdefault("OutputLevel", VERBOSE)
 
