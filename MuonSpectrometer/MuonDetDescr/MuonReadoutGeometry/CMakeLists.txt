@@ -21,7 +21,8 @@ atlas_add_library( MuonReadoutGeometry
                    src/*.c*
                    PUBLIC_HEADERS MuonReadoutGeometry
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel MuonAlignmentData TrkDetElementBase TrkDistortedSurfaces TrkSurfaces MuonIdHelpersLib StoreGateLib GeoModelUtilities CxxUtils ${extra_libs}
+                   LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaBaseComps AthenaKernel GeoPrimitives Identifier GaudiKernel 
+                   MuonAlignmentData TrkDetElementBase TrkDistortedSurfaces TrkSurfaces MuonIdHelpersLib StoreGateLib GeoModelUtilities CxxUtils ${extra_libs}
                    PRIVATE_LINK_LIBRARIES AGDDModel MuonAGDDDescription)
 
 

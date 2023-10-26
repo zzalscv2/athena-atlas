@@ -28,6 +28,7 @@
 #include "TrkSurfaces/RectangleBounds.h"
 #include "TrkSurfaces/TrapezoidBounds.h"
 
+#include "CxxUtils/inline_hints.h"
 // From Dan Levin: MDT
 // linear density of wire: lambda=wireLinearDensity=19.3 [gm/cm^3] * PI*
 //(25 *10^-4 )^2 [CLHEP::cm^2] = 378.954 microgram/CLHEP::cm
@@ -62,7 +63,7 @@ namespace MuonGM {
         setCachingFlag(mgr->cachingFlag());
 
         m_inBarrel = stName[0]== 'B';
-       
+
         setStationName(stName);
     }
       bool MdtReadoutElement::barrel() const {
@@ -658,13 +659,13 @@ namespace MuonGM {
 
     Amg::Vector3D MdtReadoutElement::localToGlobalCoords(const Amg::Vector3D& x, const Identifier& id) const { return transform(id) * x; }
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
     // We compile this package with optimization, even in debug builds; otherwise,
     // the heavy use of Eigen makes it too slow.  However, from here we may call
     // to out-of-line Eigen code that is linked from other DSOs; in that case,
     // it would not be optimized.  Avoid this by forcing all Eigen code
     // to be inlined here if possible.
-    __attribute__((flatten))
+    ATH_FLATTEN
 #endif
 
     Amg::Transform3D
@@ -804,13 +805,13 @@ namespace MuonGM {
         return *ptr;
     }
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
     // We compile this package with optimization, even in debug builds; otherwise,
     // the heavy use of Eigen makes it too slow.  However, from here we may call
     // to out-of-line Eigen code that is linked from other DSOs; in that case,
     // it would not be optimized.  Avoid this by forcing all Eigen code
     // to be inlined here if possible.
-    __attribute__((flatten))
+    ATH_FLATTEN
 #endif
     Amg::Transform3D
     MdtReadoutElement::deformedTransform(int multilayer, int tubelayer, int tube) const {
@@ -933,12 +934,12 @@ namespace MuonGM {
         double height = m_inBarrel ? m_Zsize : m_Rsize;
         double thickness = m_inBarrel ? m_Rsize : m_Zsize;
         using Parameter = BLinePar::Parameter;
-        return posOnDefChamWire(locAMDBPos, m_Ssize, m_LongSsize, height, thickness, 
-                                bLine->getParameter(Parameter::bz), bLine->getParameter(Parameter::bp), 
+        return posOnDefChamWire(locAMDBPos, m_Ssize, m_LongSsize, height, thickness,
+                                bLine->getParameter(Parameter::bz), bLine->getParameter(Parameter::bp),
                                 bLine->getParameter(Parameter::bn), bLine->getParameter(Parameter::sp),
-                                bLine->getParameter(Parameter::sn), bLine->getParameter(Parameter::tw), 
-                                bLine->getParameter(Parameter::pg), bLine->getParameter(Parameter::tr), 
-                                bLine->getParameter(Parameter::eg), bLine->getParameter(Parameter::ep), 
+                                bLine->getParameter(Parameter::sn), bLine->getParameter(Parameter::tw),
+                                bLine->getParameter(Parameter::pg), bLine->getParameter(Parameter::tr),
+                                bLine->getParameter(Parameter::eg), bLine->getParameter(Parameter::ep),
                                 bLine->getParameter(Parameter::en), fixedPoint);
     }
 
@@ -1095,13 +1096,13 @@ namespace MuonGM {
 // Function to apply AsBuilt parameter correction to wire center and end position
 // For definitions of AsBuilt parameters see Florian Bauer's talk:
 // http://atlas-muon-align.web.cern.ch/atlas-muon-align/endplug/asbuilt.pdf
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
     // We compile this package with optimization, even in debug builds; otherwise,
     // the heavy use of Eigen makes it too slow.  However, from here we may call
     // to out-of-line Eigen code that is linked from other DSOs; in that case,
     // it would not be optimized.  Avoid this by forcing all Eigen code
     // to be inlined here if possible.
-    __attribute__((flatten))
+    ATH_FLATTEN
 #endif
     void
     MdtReadoutElement::wireEndpointsAsBuilt(Amg::Vector3D& locAMDBWireEndP, Amg::Vector3D& locAMDBWireEndN, const int multilayer,
@@ -1126,7 +1127,7 @@ namespace MuonGM {
         static constexpr int nsid = 2;
         static constexpr std::array<tubeSide_t, nsid> tubeSide {tubeSide_t::POS, tubeSide_t::NEG};
         std::array<Amg::Vector3D, nsid> wireEnd{locAMDBWireEndP, locAMDBWireEndN};
-        
+
         multilayer_t ml = (multilayer == 1) ? multilayer_t::ML1 : multilayer_t::ML2;
 
         for (int isid = 0; isid < nsid; ++isid) {  // first s>0 then s<0
