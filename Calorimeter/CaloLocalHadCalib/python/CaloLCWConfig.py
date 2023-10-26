@@ -52,8 +52,6 @@ if __name__=="__main__":
     flags.Calo.TopoCluster.doCellWeightCalib = False
     flags.Calo.TopoCluster.doCalibHitMoments = True
 
-    flags.Calo.TopoCluster.doCalibHitMoments = True
-
     # choose which part to do
     flags.LCW.doClassification = True
     flags.LCW.doWeighting = True
