@@ -3,23 +3,21 @@
 */
 
 #include "TGCDigitizer.h"
+
 #include "PileUpTools/IPileUpTool.h"
 
-
-TGCDigitizer::TGCDigitizer(const std::string& name,
-                           ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-{
-}
+TGCDigitizer::TGCDigitizer(const std::string& name, ISvcLocator* pSvcLocator)
+    : AthAlgorithm(name, pSvcLocator) {}
 
 StatusCode TGCDigitizer::initialize() {
-  ATH_CHECK(m_digTool.retrieve());
-  ATH_MSG_DEBUG("Retrieved TgcDigitizationTool (" << m_digTool->name() << ").");
+    ATH_CHECK(m_digTool.retrieve());
+    ATH_MSG_DEBUG("Retrieved TgcDigitizationTool (" << m_digTool->name()
+                                                    << ").");
 
-  return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode TGCDigitizer::execute() {
-  ATH_MSG_DEBUG("in execute()");
-  return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
+    ATH_MSG_DEBUG("in execute()");
+    return m_digTool->processAllSubEvents(Gaudi::Hive::currentContext());
 }
