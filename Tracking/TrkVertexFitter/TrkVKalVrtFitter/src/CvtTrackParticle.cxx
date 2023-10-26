@@ -8,7 +8,6 @@
 //------------------------------------------------------------------
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 //-------------------------------------------------
 // Other stuff

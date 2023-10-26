@@ -3,17 +3,16 @@
 */
 
 // Convert TrackParameters and NeutralParameters to internal VKalVrt parameters
-// and sets up common reference system for ALL tracks 
+// and sets up common reference system for ALL tracks
 // even if in the beginning in was different
-//------------------------------------------------------------------ 
+//------------------------------------------------------------------
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 //-------------------------------------------------
 // Other stuff
 //----
 #include  "TrkParameters/TrackParameters.h"
-#include <iostream> 
+#include <iostream>
 
 namespace Trk {
 
@@ -119,7 +118,7 @@ namespace Trk {
 						  &refGVertex,
 						  state);
          if(trkparN == nullptr) return StatusCode::FAILURE;
-         mPer = dynamic_cast<const Trk::Perigee*>(trkparN); 
+         mPer = dynamic_cast<const Trk::Perigee*>(trkparN);
          if(mPer == nullptr) {
            delete trkparN;
            return StatusCode::FAILURE;
@@ -152,7 +151,7 @@ namespace Trk {
 
        // Neutral track
        if( trkparO==nullptr ) {
-         state.m_ich[ntrk]=0; 
+         state.m_ich[ntrk]=0;
          if(state.m_apar[ntrk][4]<0){
            // Charge=0 is always equal to Charge=+1
            state.m_apar[ntrk][4]  = -state.m_apar[ntrk][4];

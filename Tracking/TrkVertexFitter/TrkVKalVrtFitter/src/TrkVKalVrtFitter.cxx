@@ -12,11 +12,10 @@
 #include "TrkTrack/LinkToTrack.h"
 #include "TrkTrack/Track.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "VxVertex/VxTrackAtVertex.h"
-#include  "xAODTracking/NeutralParticleContainer.h"
+#include "xAODTracking/NeutralParticleContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include  "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 
 //-------------------------------------------------
@@ -670,7 +669,7 @@ xAOD::Vertex * TrkVKalVrtFitter::fit(const std::vector<const  TrackParameters*> 
             (VxVyVzPxPyPz)                                      */
 
 // Fills 5x5 matrix. Input Matrix is track covariance only.
-void TrkVKalVrtFitter::FillMatrixP(AmgSymMatrix(5)& CovMtx, std::vector<double> & Matrix) 
+void TrkVKalVrtFitter::FillMatrixP(AmgSymMatrix(5)& CovMtx, std::vector<double> & Matrix)
 {
     CovMtx.setIdentity();
     if( Matrix.size() < 21) return;
@@ -685,7 +684,7 @@ void TrkVKalVrtFitter::FillMatrixP(AmgSymMatrix(5)& CovMtx, std::vector<double> 
 }
 
 // Fills 5x5 matrix.  Input Matrix is a full covariance
-void TrkVKalVrtFitter::FillMatrixP(int iTrk, AmgSymMatrix(5)& CovMtx, std::vector<double> & Matrix) 
+void TrkVKalVrtFitter::FillMatrixP(int iTrk, AmgSymMatrix(5)& CovMtx, std::vector<double> & Matrix)
 {
     int iTmp=(iTrk+1)*3;
     int NContent = Matrix.size();
@@ -705,7 +704,7 @@ void TrkVKalVrtFitter::FillMatrixP(int iTrk, AmgSymMatrix(5)& CovMtx, std::vecto
 
 
 
-Amg::MatrixX * TrkVKalVrtFitter::GiveFullMatrix(int NTrk, std::vector<double> & Matrix) 
+Amg::MatrixX * TrkVKalVrtFitter::GiveFullMatrix(int NTrk, std::vector<double> & Matrix)
 {
    Amg::MatrixX * mtx = new Amg::MatrixX(3+3*NTrk,3+3*NTrk);
    long int ij=0;

@@ -21,8 +21,9 @@
 #include  "xAODTracking/TrackParticleFwd.h"
 #include  "xAODTracking/NeutralParticleFwd.h"
 #include  "TrkVKalVrtFitter/IVKalState.h" //base class
+#include  "TrkVKalVrtFitter/VKalAtlasMagFld.h" //for Trk::VKalAtlasMagFld (member)
+#include  "TrkVKalVrtFitter/VKalExtPropagator.h" //for Trk::VKalExtPropagator (member)
 
-#include  "TrkVKalVrtFitter/VKalVrtAtlas.h" //for Trk::VKalAtlasMagFld (member)
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"  //for VKalVrtControl (member)
 
 //
@@ -36,7 +37,6 @@ namespace Trk{
   typedef std::vector<double> dvect;
   class IExtrapolator;
   class IMagneticFieldTool;
-  class VKalExtPropagator;
   class Track;
   class TrackParticleBase;
 
