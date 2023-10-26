@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/tools/threading.h
  * @author scott snyder <snyder@bnl.gov>
@@ -34,6 +31,12 @@ namespace AthContainers_detail {
  * @brief No-op definition of @c mutex.
  */
 class mutex {};
+
+
+/**
+ * @brief No-op definition of @c recursive_mutex.
+ */
+class recursive_mutex {};
 
 
 /**
@@ -155,6 +158,7 @@ using boost::upgrade_mutex;
 using boost::thread_specific_ptr;
 
 using std::mutex;
+using std::recursive_mutex;
 using std::lock_guard;
 using std::thread;
 using std::atomic;
