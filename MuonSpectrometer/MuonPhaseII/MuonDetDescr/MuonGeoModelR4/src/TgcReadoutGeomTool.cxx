@@ -167,6 +167,9 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
     FactoryCache facCache{};
     ATH_CHECK(readParameterBook(facCache));
 
+#ifndef SIMULATIONBASE
+    SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds = std::make_shared<SurfaceBoundSet<Acts::TrapezoidBounds>>();
+#endif    
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
     // Get the list of full phys volumes from SQLite, and create detector
     // elements
@@ -199,6 +202,9 @@ StatusCode TgcReadoutGeomTool::buildReadOutElements(MuonDetectorManager& mgr) {
         define.detElId = elementID;
         define.chambDesign = key_tokens[0];
         define.alignTransform = m_geoUtilTool->findAlignableTransform(define.physVol, alignedNodes);
+#ifndef SIMULATIONBASE
+        define.layerBounds = layerBounds;
+#endif
         ATH_MSG_DEBUG("Key  "<<key<<" lead to Identifier "<<m_idHelperSvc->toStringDetEl(define.detElId));
         ATH_CHECK(loadDimensions(define, facCache));
         std::unique_ptr<TgcReadoutElement> readoutEle = std::make_unique<TgcReadoutElement>(std::move(define));
