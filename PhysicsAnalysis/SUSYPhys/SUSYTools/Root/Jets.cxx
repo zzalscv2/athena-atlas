@@ -1061,9 +1061,14 @@ namespace ST {
     ATH_MSG_DEBUG( btagSelTool->name() << " b-tag weight: " << weight );
 
     double btag_pb(-10), btag_pc(-10), btag_pu(-10);
-    xAOD::BTaggingUtilities::getBTagging(input)->pb(btagTagger, btag_pb);
-    xAOD::BTaggingUtilities::getBTagging(input)->pc(btagTagger, btag_pc);
-    xAOD::BTaggingUtilities::getBTagging(input)->pu(btagTagger, btag_pu);
+    // following name change is needed given different name is used for GN2v00 in derivation and in CDI
+    std::string actualTagger = btagTagger;
+    if (btagTagger == "GN2v00LegacyWP" || btagTagger == "GN2v00NewAliasWP"){
+      actualTagger = "GN2v00";
+    }
+    xAOD::BTaggingUtilities::getBTagging(input)->pb(actualTagger, btag_pb);
+    xAOD::BTaggingUtilities::getBTagging(input)->pc(actualTagger, btag_pc);
+    xAOD::BTaggingUtilities::getBTagging(input)->pu(actualTagger, btag_pu);
     dec_btag_pb(input) = btag_pb;
     dec_btag_pc(input) = btag_pc;
     dec_btag_pu(input) = btag_pu;
