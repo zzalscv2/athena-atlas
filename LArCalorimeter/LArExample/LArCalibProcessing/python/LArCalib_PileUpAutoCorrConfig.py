@@ -15,13 +15,13 @@ def LArPileUpAutoCorrCfg(flags):
     #load fsampl, MinBias Average and PulseShape 32 samples from OFLP200
     if flags.LArCalib.isSC:
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBMCSCCfg
-       result.merge(LArElecCalibDBMCSCCfg(flags,["fSamplSC","ShapeSC","MinBiasSC"]))
+       # for the SC we need uA2MeV also from MC, because the one used for data are weighted with E->ET conversion
+       result.merge(LArElecCalibDBMCSCCfg(flags,["fSamplSC","ShapeSC","MinBiasSC","uA2MeVSC"]))
     else:
        result.merge(addFolders(flags,"/LAR/ElecCalibMC/Shape",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCShapeLArPileupShape-RUN2-2018",className="LArShape32MC"))
        result.merge(addFolders(flags,"/LAR/ElecCalibMC/fSampl",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCfSampl-G4101-20371-FTFP_BERT_BIRK_v2",className="LArfSamplMC"))
        result.merge(addFolders(flags,"/LAR/ElecCalibMC/MinBias",detDb="LAR_OFL", db="OFLP200",tag="LARElecCalibMCMinBias-mc16-Epos-A3-s3687",className="LArMinBiasMC"))
 
-    if not flags.LArCalib.isSC:
        result.addCondAlgo(CompFactory.LArMCSymCondAlg())
 
        LArShapeSymAlg =  CompFactory.getComp("LArSymConditionsAlg<LArShape32MC, LArShape32Sym>")
@@ -37,14 +37,15 @@ def LArPileUpAutoCorrCfg(flags):
     FolderTagResolver._globalTag=flags.IOVDb.GlobalTag
     rs=FolderTagResolver(dbname="sqlite://;schema=%s;dbname=CONDBR2"%flags.LArCalib.Input.Database)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
-    # FIXME commented out tags has to be re-enabled in 2024:
-    #PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
-    #RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
-    #MpMcTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
+    # FIXME these tags has to be re-enabled in 2024 also for main readout:
+    if flags.LArCalib.isSC:
+       PedestalTag=rs.getFolderTag(flags.LArCalib.Pedestal.Folder)
+       RampTag=rs.getFolderTag(flags.LArCalib.Ramp.Folder)
+       MpMcTag=rs.getFolderTag(flags.LArCalib.MPhysOverMCal.Folder)
     rsac=FolderTagResolver(dbname="COOLOFL_LAR/CONDBR2")
     PhysAutoCorrTag= rsac.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     nColl=flags.LArCalib.OFC.Ncoll
-    if (nColl>0):
+    if (nColl>0 and "mu" not in PhysAutoCorrTag):
         #Insert mu in tag-name:
         elems=PhysAutoCorrTag.split("-")
         PhysAutoCorrTag="-".join([elems[0]+"_mu_%i"%nColl,]+elems[1:])
@@ -52,34 +53,43 @@ def LArPileUpAutoCorrCfg(flags):
 
     del rs
 
-    # FIXME Commented out folders has to be re-enabled in 2024:
-    #result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags), 
-    #                        className="LArAutoCorrComplete"))
-    result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb="LAR_OFL", tag=AutoCorrTag, modifiers=chanSelStr(flags), 
+    result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags), 
                             className="LArAutoCorrComplete"))
-    #result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags), 
-    #                        className="LArPedestalComplete"))
-    #result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
-    #                        className="LArRampComplete"))
-    #result.merge(addFolders(flags,flags.LArCalib.MPhysOverMCal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
-    #                        className="LArMphysOverMcalComplete"))
+    # FIXME these folders has to be re-enabled in 2024 also for Main readout:
+    if flags.LArCalib.isSC:
+        result.merge(addFolders(flags,flags.LArCalib.Pedestal.Folder,detDb=flags.LArCalib.Input.Database, tag=PedestalTag, modifiers=chanSelStr(flags), 
+                            className="LArPedestalComplete"))
+        result.merge(addFolders(flags,flags.LArCalib.Ramp.Folder,detDb=flags.LArCalib.Input.Database, tag=RampTag, modifiers=chanSelStr(flags), 
+                            className="LArRampComplete"))
+        result.merge(addFolders(flags,flags.LArCalib.MPhysOverMCal.Folder,detDb=flags.LArCalib.Input.Database, tag=MpMcTag, modifiers=chanSelStr(flags), 
+                            className="LArMphysOverMcalComplete"))
 
     #Need ADC2MeV values for AutoCorrCondAlg ... 
     #use current production values as input conditions
-    requiredConditions=["MphysOverMcal","Pedestal","Ramp","DAC2uA","uA2MeV","HVScaleCorr"]
+    if flags.LArCalib.isSC:
+       requiredConditions=["DAC2uA","HVScaleCorr"]
+    else:   
+       requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr","Ramp","Pedestal","MphysOverMcal"]
+       # in 2024 put:
+       #requiredConditions=["DAC2uA","uA2MeV","HVScaleCorr"]
     if flags.LArCalib.isSC:
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBSCCfg
        result.merge(LArElecCalibDBSCCfg(flags,requiredConditions))
        mapKey="LArOnOffIdMapSC"
        bcKey = "LArBadChannelSC"
+       uAKey = "LAruA2MeVSC"
+       DACKey = "LArDAC2uASC"
+       HVKey = "LArHVScaleCorrSC"
     else:
        from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDBCfg
-       #requiredConditions=["Ramp","DAC2uA","uA2MeV","MphysOverMcal","HVScaleCorr","Pedestal"]
        result.merge(LArElecCalibDBCfg(flags,requiredConditions))
        mapKey="LArOnOffIdMap"
        bcKey = "LArBadChannel"
+       uAKey = "LAruA2MeV"
+       DACKey = "LArDAC2uA"
+       HVKey = "LArHVScaleCorr"
 
-    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey,CompleteDetector=False,isSuperCell=flags.LArCalib.isSC,))
+    result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False,LArOnOffIdMappingKey=mapKey,CompleteDetector=False,LAruA2MeVKey=uAKey,LArDAC2uAKey=DACKey,LArHVScaleCorrKey=HVKey,isSuperCell=flags.LArCalib.isSC))
 
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
     theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples  
@@ -90,11 +100,13 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.LArAutoCorrObjKey="LArAutoCorr"
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
     theLArAutoCorrTotalCondAlg.LArOnOffIdMappingObjKey=mapKey
-    theLArAutoCorrTotalCondAlg.LArPedestalObjKey="LArPedestal"
     if flags.LArCalib.isSC:
+       theLArAutoCorrTotalCondAlg.LArPedestalObjKey="Pedestal"
        theLArAutoCorrTotalCondAlg.LArShapeObjKey = "LArShapeSC"
        theLArAutoCorrTotalCondAlg.LArfSamplObjKey = "LArfSamplSC"
        theLArAutoCorrTotalCondAlg.LArMinBiasObjKey = "LArMinBiasSC"
+    else:   
+       theLArAutoCorrTotalCondAlg.LArPedestalObjKey="LArPedestal"
 
     result.addCondAlgo(theLArAutoCorrTotalCondAlg)
     

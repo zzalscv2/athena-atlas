@@ -67,7 +67,10 @@ def LArDelay_OFCCaliCfg(flags):
           from LArCabling.LArCablingConfig import LArCalibIdMappingCfg,LArOnOffIdMappingCfg
           result.merge(LArOnOffIdMappingCfg(flags))
           result.merge(LArCalibIdMappingCfg(flags))
-          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, LATOMEDecoder = theLArLATOMEDecoder, ))
+          result.addEventAlgo(CompFactory.LArRawSCCalibDataReadingAlg(LArSCAccCalibDigitKey = digKey, 
+                                                                      CalibCablingKeyLeg="LArCalibLineMap",
+                                                                      OnOffMapLeg="LArOnOffIdMap",
+                                                                      LATOMEDecoder = theLArLATOMEDecoder, ))
 
     bcKey = "LArBadChannelSC" if flags.LArCalib.isSC else "LArBadChannel"     
 
@@ -76,13 +79,11 @@ def LArDelay_OFCCaliCfg(flags):
     theLArCaliWaveBuilder.KeyOutput="LArCaliWave"
     theLArCaliWaveBuilder.GroupingType     = flags.LArCalib.GroupingType
     theLArCaliWaveBuilder.SubtractPed      = True
-    theLArCaliWaveBuilder.CheckEmptyPhases = True
+    theLArCaliWaveBuilder.CheckEmptyPhases = not flags.LArCalib.isSC 
     theLArCaliWaveBuilder.NBaseline        = 0 # to avoid the use of the baseline when Pedestal are missing
     theLArCaliWaveBuilder.UseDacAndIsPulsedIndex = False # should have an impact only for HEC
     theLArCaliWaveBuilder.RecAllCells      = False
     theLArCaliWaveBuilder.isSC       = flags.LArCalib.isSC
-    if flags.LArCalib.isSC:
-       theLArCaliWaveBuilder.CablingKey="LArOnOffIdMapSC"
     result.addEventAlgo(theLArCaliWaveBuilder)
     
 
@@ -109,11 +110,12 @@ def LArDelay_OFCCaliCfg(flags):
 
     if flags.LArCalib.CorrectBadChannels:
         theLArCaliWavePatcher=CompFactory.getComp("LArCalibPatchingAlg<LArCaliWaveContainer>")("LArCaliWavePatch")
-        theLArCaliWavePatcher.ContainerKey= "LArCaliWave"
-        theLArCaliWavePatcher.BadChanKey=bcKey 
+        theLArCaliWavePatcher.ContainerKey = "LArCaliWave"
+        theLArCaliWavePatcher.BadChanKey = bcKey 
+        theLArCaliWavePatcher.SuperCell = flags.LArCalib.isSC 
         #theLArCaliWavePatcher.PatchMethod="PhiNeighbor" ##take the first neigbour
-        theLArCaliWavePatcher.PatchMethod="PhiAverage" ##do an aveage in phi after removing bad and empty event
-        theLArCaliWavePatcher.ProblemsToPatch=[
+        theLArCaliWavePatcher.PatchMethod = "PhiAverage" ##do an aveage in phi after removing bad and empty event
+        theLArCaliWavePatcher.ProblemsToPatch = [
             "deadCalib","deadReadout","deadPhys","almostDead","short",
         ]
 
@@ -142,6 +144,7 @@ def LArDelay_OFCCaliCfg(flags):
        theCaliWaveValidationAlg.PatchMissingFEBs=True
        theCaliWaveValidationAlg.UseCorrChannels=False
        theCaliWaveValidationAlg.BadChanKey =  bcKey
+       theCaliWaveValidationAlg.SuperCell =  flags.LArCalib.isSC
 
        if flags.LArCalib.isSC:
           theCaliWaveValidationAlg.CablingKey = "LArOnOffIdMapSC"

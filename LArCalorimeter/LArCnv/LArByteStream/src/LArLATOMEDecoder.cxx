@@ -957,10 +957,10 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
       }
       else if (pattype==0x4b || pattype==0x4c){
 	if(m_decoder->m_onlineId->isHECchannel(SCID)){
-	  calibParams=calibParams2;
+	  calibParams=calibParams1;
 	}
 	else{
-	  calibParams=calibParams1;
+	  calibParams=calibParams2;
 	}
       }
       else{
@@ -988,7 +988,24 @@ void LArLATOMEDecoder::EventProcess::fillCalib(const LArLATOMEMapping *map,
       	if(m_decoder->m_keepPulsed) continue;
 	isPulsed_value=false;
       }
-      DAC_value=calibParams->DAC(eventNb,SCID);
+      DAC_value=calibParams->DAC(eventNb,SCID)*numPulsedLeg;
+      // Here we want to change the DAC value to reflect the incorrect factors applied in HEC, where some of the cells are much smaller yet have DAC2MeV factors which came from averaging over many cells
+      int ft = m_decoder->m_onlineId->feedthrough(SCID);
+      int slot = m_decoder->m_onlineId->slot(SCID);
+      int channel = m_decoder->m_onlineId->channel(SCID);
+      if( m_decoder->m_onlineId->barrel_ec(SCID)==1 && ( ft==3 || ft==10 || ft==16 || ft==22 ) ) {
+        // if it's HEC 
+        if ( slot == 1 ){
+           if ( channel >= 16 && channel <= 31 ){ // eta 1.65 bin
+                DAC_value = DAC_value / 1.363;
+                m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel "<<SCID<<"by 1/1.363" << endmsg;
+           }else if ( channel >= 32 && channel <= 47 ){ // eta 1.75 bin
+                DAC_value = DAC_value / 1.206;
+                m_decoder->msg(MSG::DEBUG) << "Multiplying DAC for channel "<<SCID<<"by 1/1.206" << endmsg;
+           }
+        }
+      }
+      
       delay_value=calibParams->Delay(eventNb,SCID);     
       LArAccumulatedCalibDigit *accdigi = new LArAccumulatedCalibDigit(SCID,gain,
 								       sum,sum2,ntmin,

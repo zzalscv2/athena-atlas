@@ -17,7 +17,7 @@ if __name__=='__main__':
    parser.add_argument('-k','--outpdir', dest='outpdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/poolFiles", help='Output root file directory', type=str)
    parser.add_argument('-l','--outprefix', dest='outprefix', default="LArRTMParams_DefaultExtraction", help='Output root file name', type=str)
    parser.add_argument('-n','--outsqlite', dest='outsql', default="mysql_delay.db", help='Output sqlite file, in pool output dir.', type=str)
-   parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
+   parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file for bad channels', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)

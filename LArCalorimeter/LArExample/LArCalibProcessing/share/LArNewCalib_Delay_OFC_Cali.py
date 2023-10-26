@@ -29,6 +29,8 @@ if __name__=='__main__':
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
    parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
    parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, action="store_true", help='is raw data ?')
+   parser.add_argument('-x','--ignoreBarrel', dest='ignoreB', default=False, action="store_true", help='ignore Barrel channels ?')
+   parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
 
    args = parser.parse_args()
@@ -130,10 +132,6 @@ if __name__=='__main__':
    OutputCaliWaveRootFileName = args.outrwaveprefix + "_" + args.run
    OutputPoolFileName = args.outpprefix + "_" + args.run
    OutputOFCCaliRootFileName = args.outrofcprefix + "_" + args.run
-   if args.subdet != "":
-      OutputCaliWaveRootFileName += "_"+args.subdet
-      OutputPoolFileName += "_"+args.subdet
-      OutputOFCCaliRootFileName += "_"+args.subdet
 
    if args.subdet != "" and not flags.LArCalib.isSC:
       OutputCaliWaveRootFileName += "_"+args.subdet
@@ -157,6 +155,9 @@ if __name__=='__main__':
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
+   #validation not working for SC because no reference in OFL DB
+   if args.supercells:
+      flags.LArCalib.doValidation=False
 
    #Other potentially useful flags-settings:
    
@@ -182,6 +183,11 @@ if __name__=='__main__':
       # block standard patching for this CB
       cfg.getEventAlgo("LArCaliWavePatch").DoNotPatchCBs=[0x3df70000]
 
+   # ignore some channels ?
+   if args.ignoreB:
+         cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
+   if args.ignoreE:
+         cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
 
    #run the application
    cfg.run() 

@@ -17,7 +17,7 @@ if __name__=='__main__':
    parser.add_argument('-k','--outpdir', dest='outpdir', default="/eos/atlas/atlascerngroupdisk/det-larg/Temp/Weekly/poolFiles", help='Output root file directory', type=str)
    parser.add_argument('-l','--outprefix', dest='outprefix', default="LArPhysAutoCorr", help='Output root file name', type=str)
    parser.add_argument('-n','--outsqlite', dest='outsql', default="mysql_acorr.db", help='Output sqlite file, in pool output dir.', type=str)
-   parser.add_argument('-c','--isSC', dest='supercells', default=False, help='is SC data ?', type=bool)
+   parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Input sqlite file for bad channels', type=str)
    parser.add_argument('-m','--subdet', dest='subdet', default="EMB", help='Subdetector, EMB, EMEC, HEC or FCAL', type=str)
    parser.add_argument('-s','--side', dest='side', default="C", help='Detector side empty (means both), C or A', type=str)
@@ -56,7 +56,7 @@ if __name__=='__main__':
 
    # pileup normalisation
    flags.LArCalib.OFC.Ncoll = 60
-   flags.LArCalib.OFC.Nsamples = 5
+   flags.LArCalib.OFC.Nsamples = 32
    from AthenaCommon.SystemOfUnits import ns
    flags.Beam.BunchSpacing = 25.*ns
    flags.Beam.NumberOfCollisions = flags.LArCalib.OFC.Ncoll
@@ -90,8 +90,8 @@ if __name__=='__main__':
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
    #Define the global output Level:
-   from AthenaCommon.Constants import INFO 
-   flags.Exec.OutputLevel = INFO
+   from AthenaCommon.Constants import DEBUG
+   flags.Exec.OutputLevel = DEBUG
    
    flags.lock()
    
@@ -99,5 +99,11 @@ if __name__=='__main__':
    
    cfg.merge(LArPileUpAutoCorrCfg(flags))
 
+   # uncomment in case a debug is needed:
+   #from AthenaCommon.Constants import DEBUG
+   #cfg.getService("MessageSvc").OutputLevel = DEBUG
+   cfg.getService("MessageSvc").defaultLimit = 9999999  # all messages
+
+   #run the application
    cfg.run(1) 
 

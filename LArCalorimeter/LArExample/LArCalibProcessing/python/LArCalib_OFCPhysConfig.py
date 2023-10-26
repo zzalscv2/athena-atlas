@@ -23,7 +23,8 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     LArPhysOFCAlg.FillShape = True
     LArPhysOFCAlg.TimeShift = False
     LArPhysOFCAlg.AddTimeOffset = -1.0*12.0#TimeShiftGuardRegion
-    LArPhysOFCAlg.LArPhysWaveBinKey = "LArPhysWaveShift"
+    if not flags.LArCalib.isSC:
+       LArPhysOFCAlg.LArPhysWaveBinKey = "LArPhysWaveShift"
     LArPhysOFCAlg.UseDelta = flags.LArCalib.OFC.useDelta
     LArPhysOFCAlg.KeyOFC   = "LArOFC_"+postfix
     LArPhysOFCAlg.KeyShape = "LArShape_"+postfix
@@ -153,8 +154,12 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
     else:
         key1=""
 
-    result.merge(_ofcAlg(flags,"3ns%s"%key1,"%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
-    result.merge(_ofcAlg(flags,"1ns","%isamples%s"%(flags.LArCalib.OFC.Nsamples,key1),nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
+    if flags.LArCalib.isSC:
+       result.merge(_ofcAlg(flags,"3ns%s"%key1,"%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=17,dPhases=3,nDelays=24,nColl=nColl))
+       result.merge(_ofcAlg(flags,"1ns","%isamples%s"%(flags.LArCalib.OFC.Nsamples,key1),nPhases=50,dPhases=1,nDelays=24,nColl=nColl))
+    else:
+       result.merge(_ofcAlg(flags,"3ns%s"%key1,"%isamples3bins17phases"%flags.LArCalib.OFC.Nsamples,nPhases=8,dPhases=3,nDelays=24,nColl=nColl))
+       result.merge(_ofcAlg(flags,"1ns","%isamples%s"%(flags.LArCalib.OFC.Nsamples,key1),nPhases=24,dPhases=1,nDelays=24,nColl=nColl))
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))

@@ -118,20 +118,25 @@ def LArRampCfg(flags):
         theLArRampPatcher.ContainerKey="LArRamp"
         theLArRampPatcher.BadChanKey=bcKey
         theLArRampPatcher.PatchMethod="PhiAverage"
+        theLArRampPatcher.SuperCell=flags.LArCalib.isSC
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
-        theLArRampPatcher.UseCorrChannels=True
+        theLArRampPatcher.UseCorrChannels=False
         result.addEventAlgo(theLArRampPatcher)
 
     # Validation + CB patching 
     if flags.LArCalib.doValidation:
        
-       fldr="/LAR/ElecCalibFlat/Ramp"
+       if flags.LArCalib.isSC:
+         fldr="/LAR/ElecCalibFlatSC/Ramp"
+         rmpFlt=CompFactory.getComp("LArFlatConditionsAlg<LArRampSC>")("RampFltVal")
+       else:  
+         fldr="/LAR/ElecCalibFlat/Ramp"
+         rmpFlt=CompFactory.getComp("LArFlatConditionsAlg<LArRampFlat>")("RampFltVal")
        result.merge(addFolders(flags,fldr,"LAR_ONL"))
        condLoader=result.getCondAlgo("CondInputLoader")
        condLoader.Load.append(("CondAttrListCollection",fldr))
 
-       rmpFlt=CompFactory.getComp("LArFlatConditionsAlg<LArRampFlat>")("RampFltVal")
        rmpFlt.ReadKey=fldr
        rmpFlt.WriteKey="LArRampRef"
        result.addCondAlgo(rmpFlt)
@@ -145,7 +150,11 @@ def LArRampCfg(flags):
        theRampValidationAlg.ProblemsToMask=["deadReadout","deadCalib","deadPhys","almostDead",
                                             "highNoiseHG","highNoiseMG","highNoiseLG"]
        theRampValidationAlg.KeyList=[digKey,]
-       theRampValidationAlg.PatchMissingFEBs=True
+       if flags.LArCalib.isSC:
+          theRampValidationAlg.PatchMissingFEBs = False
+          theRampValidationAlg.CheckCompletness = False
+       else:   
+          theRampValidationAlg.PatchMissingFEBs=True
        theRampValidationAlg.UseCorrChannels=False
        theRampValidationAlg.ValidationKey="LArRamp"
        theRampValidationAlg.ReferenceKey="LArRampRef"
@@ -154,6 +163,7 @@ def LArRampCfg(flags):
        theRampValidationAlg.ListOfDevFEBs="rampFebs.txt"
 
        theRampValidationAlg.BadChanKey =  bcKey
+       theRampValidationAlg.SuperCells = flags.LArCalib.isSC 
 
        if flags.LArCalib.isSC:
           theRampValidationAlg.CablingKey = "LArOnOffIdMapSC"
