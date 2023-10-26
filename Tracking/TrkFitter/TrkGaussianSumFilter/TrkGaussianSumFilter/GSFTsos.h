@@ -44,7 +44,8 @@ struct GSFTsos {
       std::unique_ptr<Trk::MeasurementBase> inMeasurementBase,
       std::unique_ptr<Trk::TrackParameters> inTrackParameters,
       Trk::MultiComponentState&& inMultiComponentState,
-      std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
+      const
+      std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>&
           inTypeFlags)
       : multiComponentState(std::move(inMultiComponentState)),
         trackParameters(std::move(inTrackParameters)),

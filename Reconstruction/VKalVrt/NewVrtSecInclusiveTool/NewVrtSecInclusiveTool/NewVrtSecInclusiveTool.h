@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -312,7 +312,7 @@ namespace Rec {
 
       int   nTrkCommon( std::vector<WrkVrt> *WrkVrtSet, int indexV1, int indexV2) const;
       double minVrtVrtDist( std::vector<WrkVrt> *WrkVrtSet, int & indexV1, int & indexV2, std::vector<double> & check) const;
-      bool isPart( std::deque<long int> test, std::deque<long int> base) const;
+      bool isPart( const std::deque<long int>& test, std::deque<long int> base) const;
       std::vector<double> estimVrtPos( int nTrk, std::deque<long int> &selTrk, std::map<long int,std::vector<double>> & vrt) const;
 
       double vrtVrtDist(const xAOD::Vertex & primVrt, const Amg::Vector3D & secVrt, 
