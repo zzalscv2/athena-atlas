@@ -5,8 +5,9 @@
 #ifndef DetectorElement_H
 #define DetectorElement_H
 
-#include "GeoModelInterfaces/StoredMaterialManager.h"
+#include "GeoPrimitives/GeoPrimitives.h"
 
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include <string>
 
 namespace MuonGM {

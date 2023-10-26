@@ -13,6 +13,7 @@
 #ifndef MUONGEOMODEL_DBREADER_H
 #define MUONGEOMODEL_DBREADER_H
 
+#include "MuonReadoutGeometry/GlobalUtilities.h"
 //<<<<<< INCLUDES                                                       >>>>>>
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -99,7 +100,6 @@
 #include "MuonGeoModel/TGC_Technology.h"
 #include "MuonGeoModel/Technology.h"
 #include "MuonGeoModel/TgcComponent.h"
-#include "MuonReadoutGeometry/GlobalUtilities.h"
 
 #define verbose_posmap false
 #define verbose_alimap false

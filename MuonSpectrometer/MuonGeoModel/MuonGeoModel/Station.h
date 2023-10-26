@@ -7,8 +7,9 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaBaseComps/AthMessaging.h"
-#include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoPrimitives/GeoPrimitives.h"
+///
+#include "GeoModelKernel/GeoDefinitions.h"
 #include "MuonGeoModel/AlignPos.h"
 #include "MuonGeoModel/Component.h"
 #include "MuonGeoModel/Cutout.h"
