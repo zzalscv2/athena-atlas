@@ -8,9 +8,12 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
 
+#include "LArRecConditions/LArBadChannelCont.h"
 //
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 #include "xAODTrigL1Calo/eFexTower.h"
+
+#include "LArCabling/LArOnOffIdMapping.h"
 
 class EfexInputMonitorAlgorithm : public AthMonitorAlgorithm {
 public:EfexInputMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -31,6 +34,9 @@ private:
   // some counters to avoid filling debugging histograms more than 20 times
   mutable std::atomic<size_t> m_debugEvtCount = 0;
   mutable std::atomic<size_t> m_debugEvtCount2 = 0;
+
+
+    SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };
 
 };
 #endif
