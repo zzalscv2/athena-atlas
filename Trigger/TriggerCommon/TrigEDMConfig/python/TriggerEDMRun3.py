@@ -835,7 +835,7 @@ TriggerHLTListRun3 = [
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowJets_nojcalib_ftfAux.'+JetVars,        'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftf',                'BS ESD AODFULL', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+LargeRJetVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftf',                       'BS ESD AODCOMM', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKJets_nojcalib_ftfAux.'+JetVars,        'BS ESD AODCOMM', 'Jet'),
@@ -844,7 +844,7 @@ TriggerHLTListRun3 = [
     ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.'+JetVars, 'BS ESD AODFULL', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf',                'BS ESD AODFULL AODSLIM', 'Jet'),
-    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.'+JetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::JetAuxContainer#HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.'+LargeRJetVars, 'BS ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftf',                        'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
     ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.'+JetCopyVars, 'BS ESD AODFULL', 'Jet'),
