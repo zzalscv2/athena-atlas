@@ -16,7 +16,7 @@ DebugInfoCollector::DebugInfoCollector(const std::string& name,
   m_timer.start();
 }
 
-DebugInfoCollector::~DebugInfoCollector(){write();}
+DebugInfoCollector::~DebugInfoCollector(){DebugInfoCollector::write();}
 
 void DebugInfoCollector::collect(const std::string& key,
                                  const std::string& info){
