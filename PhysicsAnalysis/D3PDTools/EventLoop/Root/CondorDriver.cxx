@@ -22,6 +22,7 @@
 #include <fstream>
 #include <memory>
 #include <sstream>
+#include <cstdlib>
 #include <filesystem>
 
 //
@@ -104,7 +105,6 @@ namespace EL
             else {
               ANA_MSG_INFO("X509_USER_PROXY not set");
             }
-
           }
           file << "arguments               = $(Item)\n";
           file << "\n" << data.options.castString (Job::optCondorConf) << "\n";
