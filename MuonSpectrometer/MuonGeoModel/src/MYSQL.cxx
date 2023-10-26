@@ -4,8 +4,8 @@
 
 #include "MuonGeoModel/MYSQL.h"
 
+
 #include "MuonGeoModel/Technology.h"
-#include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "MuonReadoutGeometry/TgcReadoutParams.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "CxxUtils/checker_macros.h"

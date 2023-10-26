@@ -6,6 +6,8 @@
 #define MYSQL_H
 
 #include "AthenaBaseComps/AthMessaging.h"
+
+#include "MuonReadoutGeometry/GlobalUtilities.h"
 #include "MuonGeoModel/Position.h"
 #include "MuonGeoModel/Station.h"
 #include "MuonGeoModel/Technology.h"
