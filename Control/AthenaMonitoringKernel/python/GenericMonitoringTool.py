@@ -302,19 +302,22 @@ def _options(opt):
         settings.update(opt) # update the default dictionary
     elif isinstance(opt, str) and len(opt)>0:
         # If the user provides a comma- or space-separated string of options.
-        from argparse import ArgumentParser # a module to parse a string of options
-        parser = ArgumentParser()
-        for settingName, settingValue in settings.items():
-            opt = opt.replace(settingName, '--'+settingName)
-            if isinstance(settingValue, bool):
-                parser.add_argument('--'+settingName, action='store_true')
+        unknown = []
+        for o in opt.replace(',',' ').split():
+            kv = o.split('=', maxsplit=1)
+            key = kv[0]
+            if len(kv)==2:
+                value = False if kv[1]=='False' else int(kv[1])  # only bool and int supported
             else:
-                settingType = type(settingValue)
-                parser.add_argument('--'+settingName, default=settingValue, type=settingType)
-        known, unknown = parser.parse_known_args(opt.replace(',',' ').split(' '))
-        assert len(unknown)==0,\
-            f'Unknown option(s) provided: {", ".join(unknown)}.'
-        settings = vars(known)
+                value = True
+            if key in settings:
+                assert(type(settings[key])==type(value))  # ensure same type as in defaults
+                settings[key] = value
+            else:
+                unknown.append(key)
+
+        assert len(unknown)==0, f'Unknown option(s) provided: {", ".join(unknown)}.'
+
     elif isinstance(opt,str):
         # empty string case 
         pass

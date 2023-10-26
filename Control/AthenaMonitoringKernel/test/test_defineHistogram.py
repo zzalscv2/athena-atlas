@@ -124,11 +124,15 @@ class Test( unittest.TestCase ):
       check = defineHistogram(flags, 'var', opt='Sumw2,kLBNHistoryDepth=9')
       true = '{"alias": "var", "allvars": ["var"], "convention": "", "merge": "", "path": "", "title": "var", "treeDef": "", "type": "TH1F", "weight": "", "cutMask": "", "xarray": [], "xbins": 100, "xlabels": [], "xmax": 1, "xmin": 0, "xvar": "var", "yarray": [], "ybins": 0.0, "ylabels": [], "ymax": 0.0, "ymin": 0.0, "yvar": "", "zbins": 0.0, "zlabels": [], "zmax": 0.0, "zmin": 0.0, "zvar": "", "Sumw2": true, "kLBNHistoryDepth": 9, "kAddBinsDynamically": false, "kRebinAxes": false, "kCanRebin": false, "kVec": false, "kVecUO": false, "kCumulative": false, "kLive": 0, "kAlwaysCreate": false}'
       self.assertEqual(json.loads(check), json.loads(true))
-      with self.assertRaises(SystemExit):
+
+      check = defineHistogram(flags, 'var', opt='Sumw2 kLBNHistoryDepth=9')
+      self.assertEqual(json.loads(check), json.loads(true))
+
+      with self.assertRaises(AssertionError):
          defineHistogram(flags, 'var', opt='Sumw2,kLBNHistoryDepth=False')
-      with self.assertRaises(SystemExit):
+      with self.assertRaises(ValueError):
          defineHistogram(flags, 'var', opt='Sumw2,kLBNHistoryDepth=xxx')
-      with self.assertRaises(SystemExit):
+      with self.assertRaises(AssertionError):
          defineHistogram(flags, 'var', opt='Sumw2=1,kLBNHistoryDepth=1')
       with self.assertRaises(AssertionError):
          defineHistogram(flags, 'var', opt='xxx=0')
