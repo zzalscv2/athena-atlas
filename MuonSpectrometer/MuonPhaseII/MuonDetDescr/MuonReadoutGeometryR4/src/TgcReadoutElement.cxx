@@ -49,20 +49,45 @@ StatusCode TgcReadoutElement::initElement() {
          ATH_MSG_FATAL("No sensor structure is provided to "<<idHelperSvc()->toStringDetEl(identify()));
          return StatusCode::FAILURE;
     }
-    for (unsigned int gap = 1; gap <= nGasGaps(); ++gap){
+#ifndef SIMULATIONBASE
+    ATH_CHECK(planeSurfaceFactory(geoTransformHash(),
+                                  m_pars.layerBounds->make_bounds(m_pars.halfWidthShort,
+                                                                  m_pars.halfWidthLong,
+                                                                  m_pars.halfHeight)));
+#endif
+    for (unsigned int gap = 1; gap <= nGasGaps(); ++gap) {
          if (numWireGangs(gap)) {
-            ATH_CHECK(insertTransform(constructHash(0, gap, false), 
+            const IdentifierHash layHash{constructHash(0, gap, false)}; 
+            ATH_CHECK(insertTransform(layHash, 
                                  [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
+#ifndef SIMULATIONBASE
+            const StripDesign& layout{wireGangLayout(gap)};
+            ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
+                                                                                   layout.longHalfHeight(),
+                                                                                   layout.halfWidth())));
+#endif
          }
          if (numStrips(gap)) {
-            ATH_CHECK(insertTransform(constructHash(0, gap, true), 
+            const IdentifierHash layHash{constructHash(0, gap, true)}; 
+            ATH_CHECK(insertTransform(layHash, 
                                  [this](RawGeomAlignStore* store, const IdentifierHash& hash){
                                     return toStation(store) * fromGapToChamOrigin(hash); 
                                  }));
+#ifndef SIMULATIONBASE
+            const StripDesign& layout{stripLayout(gap)};
+            /// We probably need a rotated version of these bounds. However, that's not part
+            /// of Acts yet
+            ATH_CHECK(planeSurfaceFactory(layHash, m_pars.layerBounds->make_bounds(layout.shortHalfHeight(),
+                                                                                   layout.longHalfHeight(),
+                                                                                   layout.halfWidth())));
+#endif
          }
     }
+#ifndef SIMULATIONBASE
+    m_pars.layerBounds.reset();
+#endif
     return StatusCode::SUCCESS;
 }
 

@@ -8,7 +8,9 @@
 #include <MuonReadoutGeometryR4/WireGroupDesign.h>
 #include <MuonReadoutGeometryR4/RadialStripDesign.h>
 #include <MuonReadoutGeometryR4/StripLayer.h>
-
+#ifndef SIMULATIONBASE
+#   include "Acts/Surfaces/TrapezoidBounds.hpp"
+#endif
 namespace MuonGMR4 {
 
 class TgcReadoutElement : public MuonReadoutElement {
@@ -31,7 +33,10 @@ class TgcReadoutElement : public MuonReadoutElement {
         unsigned int nGasGaps{0};
         /// We have maximum 3 gasgaps times eta / phi measurement
         std::array<StripLayerPtr, 6> sensorLayouts{};
-
+#ifndef SIMULATIONBASE
+        /// Set of surface boundaries
+        ActsTrk::SurfaceBoundSetPtr<Acts::TrapezoidBounds> layerBounds{};
+#endif
     };
 
     struct defineArgs : public MuonReadoutElement::defineArgs,
