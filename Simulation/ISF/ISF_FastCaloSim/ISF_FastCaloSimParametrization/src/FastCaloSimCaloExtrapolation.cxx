@@ -7,6 +7,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IPartPropSvc.h"
 
+#include "CxxUtils/inline_hints.h"
 /* Header include */
 #include "FastCaloSimCaloExtrapolation.h"
 
@@ -769,13 +770,13 @@ void FastCaloSimCaloExtrapolation::findPCA(float cylR, float cylZ, Amg::Vector3D
 }
 
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+ATH_FLATTEN
 #endif
 void FastCaloSimCaloExtrapolation::getIterativePCA(float cylR, float cylZ, Amg::Vector3D& BoundA, Amg::Vector3D& BoundB, Amg::Vector3D& PCA) const{
 
@@ -895,13 +896,13 @@ int FastCaloSimCaloExtrapolation::circleLineIntersection2D(float circR, Amg::Vec
 }
 
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+ATH_FLATTEN
 #endif
 Amg::Vector3D FastCaloSimCaloExtrapolation::projectOnCylinder(float cylR, float cylZ, Amg::Vector3D& hitPos) {
         
@@ -1115,13 +1116,13 @@ int FastCaloSimCaloExtrapolation::whichIntersection(float cylR, float cylZ, Amg:
   }
 } 
 
-#if defined(FLATTEN) && defined(__GNUC__)
+#if defined(FLATTEN)
 // We compile this package with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+ATH_FLATTEN
 #endif
 double FastCaloSimCaloExtrapolation::getPointLineSegmentDistance(Amg::Vector3D& point, Amg::Vector3D& hitPos1, Amg::Vector3D& hitPos2) {
 
