@@ -9,10 +9,9 @@
 #include "xAODTracking/TrackParticle.h"
 
 namespace VKalVrtAthena {
-  
-  extern bool isAssociatedToVertices( const xAOD::TrackParticle *trk, const xAOD::VertexContainer* vertices );
-  
-  extern double vtxVtxDistance( const Amg::Vector3D& v1, const Amg::Vector3D& v2 );
+
+  bool isAssociatedToVertices( const xAOD::TrackParticle *trk, const xAOD::VertexContainer* vertices );
+  double vtxVtxDistance( const Amg::Vector3D& v1, const Amg::Vector3D& v2 );
 
 }
 
