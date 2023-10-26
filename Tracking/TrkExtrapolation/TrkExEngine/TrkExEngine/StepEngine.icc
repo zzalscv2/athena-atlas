@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,7 +19,7 @@ template<class T> Trk::ExtrapolationCode Trk::StepEngine::targetSurfacesT(Trk::E
 	       	                                           Trk::TargetSurfaceVector& ts,		 
                                                            bool trueOrderedIntersections,
               	                                           const Trk::Surface* sf,
-							   Trk::BoundaryCheck bcheck ) const					
+							   const Trk::BoundaryCheck& bcheck ) const					
 {
     // evaluate the initial distance and save for the propagator/transport step
     Amg::Vector3D gp  = eCell.leadParameters->position();	

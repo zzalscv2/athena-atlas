@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -67,36 +67,36 @@ namespace Trk {
         StaticEngine(const std::string&,const std::string&,const IInterface*);
         
         /** Destructor */
-        ~StaticEngine();
+        virtual ~StaticEngine();
 
         /** AlgTool initialize method */
-        StatusCode initialize();
+        virtual StatusCode initialize() override;
         
         /** AlgTool finalize method */
-        StatusCode finalize();
+        virtual StatusCode finalize() override;
         
         using IExtrapolationEngine::extrapolate;
         
         /** charged extrapolation - public interface */
         virtual ExtrapolationCode extrapolate(ExCellCharged& ecCharged,
                                               const Surface* sf = 0,
-                                              BoundaryCheck bcheck = true) const;
+                                              const BoundaryCheck& bcheck = true) const override;
 
 
         /** neutral extrapolation - public interface */
         virtual ExtrapolationCode extrapolate(ExCellNeutral& ecNeutral,
                                               const Surface* sf = 0,
-                                              BoundaryCheck bcheck = true) const;
+                                              const BoundaryCheck& bcheck = true) const override;
                          
         /** define for which GeometrySignature this extrapolator is valid - this is GLOBAL */
-        GeometryType geometryType() const;                             
+        virtual GeometryType geometryType() const override;
                          
      private:
         /** main loop extrapolation method */
         template <class T> ExtrapolationCode extrapolateT(ExtrapolationCell<T>& eCell,
                                                           const Surface* sf = 0,
                                                           PropDirection dir=alongMomentum,
-                                                          BoundaryCheck bcheck = true) const;
+                                                          const BoundaryCheck& bcheck = true) const;
                                                                   
         /** init Navigation for static setup */
         template <class T> ExtrapolationCode initNavigationT(ExtrapolationCell<T>& eCell,
