@@ -38,6 +38,7 @@ def CPAlgorithmsCfg(flags):
     subConfig = makeConfig ('Electrons', 'AnalysisElectrons')
     subConfig.setOptionValue ('.trackSelection', False)
     subConfig.setOptionValue ('.isolationCorrection', True)
+    subConfig.setOptionValue ('.minPt', 0.)
     configSeq += subConfig
     subConfig = makeConfig ('Electrons.Selection', 'AnalysisElectrons.loose')
     subConfig.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
@@ -53,6 +54,7 @@ def CPAlgorithmsCfg(flags):
     # set up the photon analysis config:                                       
     subConfig = makeConfig ('Photons', 'AnalysisPhotons')
     subConfig.setOptionValue ('.recomputeIsEM', False)
+    subConfig.setOptionValue ('.minPt', 0.)
     configSeq += subConfig
     subConfig = makeConfig ('Photons.Selection', 'AnalysisPhotons.loose')
     subConfig.setOptionValue ('.qualityWP', 'Loose')

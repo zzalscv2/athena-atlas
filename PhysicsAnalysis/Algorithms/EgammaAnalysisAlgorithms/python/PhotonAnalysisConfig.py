@@ -25,6 +25,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('recomputeIsEM', False, type=bool)
         self.addOption ('ptSelectionOutput', False, type=bool)
         self.addOption ('recalibratePhyslite', True, type=bool)
+        self.addOption ('minPt', 10e3, type=float)
 
 
     def makeAlgs (self, config) :
@@ -104,15 +105,16 @@ class PhotonCalibrationConfig (ConfigBlock) :
         if config.isPhyslite() and not self.recalibratePhyslite :
             alg.skipNominal = True
 
-        # Set up the the pt selection
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonPtCutAlg' + postfix )
-        alg.selectionDecoration = 'selectPt' + postfix + ',as_bits'
-        config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.selectionTool.minPt = 10e3
-        alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
-                             preselection=self.ptSelectionOutput)
+        if self.minPt > 0:
+            # Set up the the pt selection
+            alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonPtCutAlg' + postfix )
+            alg.selectionDecoration = 'selectPt' + postfix + ',as_bits'
+            config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+            alg.selectionTool.minPt = self.minPt
+            alg.particles = config.readName (self.containerName)
+            alg.preselection = config.getPreselection (self.containerName, '')
+            config.addSelection (self.containerName, '', alg.selectionDecoration,
+                                preselection=self.ptSelectionOutput)
 
         # Set up the isolation correction algorithm.
         alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
