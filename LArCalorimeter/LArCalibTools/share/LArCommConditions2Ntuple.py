@@ -298,7 +298,10 @@ if doObj("RAMP"):
   elif IsFlat: 
     conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibFlat/Ramp"))
   else:  
-    conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOfl/Ramps/RampLinea"))
+    if SuperCells:
+       conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOflSC/Ramps/RampLinea"))
+    else:   
+       conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOfl/Ramps/RampLinea"))
   LArRamps2Ntuple.RawRamp = False
   LArRamps2Ntuple.AddFEBTempInfo=False
   LArRamps2Ntuple.isSC = SuperCells

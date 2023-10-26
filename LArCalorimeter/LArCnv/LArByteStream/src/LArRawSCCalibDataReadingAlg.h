@@ -26,7 +26,7 @@ class IROBDataProviderSvc;
 
 class LArRawSCCalibDataReadingAlg : public  AthReentrantAlgorithm {
  public:
-  LArRawSCCalibDataReadingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  LArRawSCCalibDataReadingAlg(const std::string& name, ISvcLocator* pSvcLocator): AthReentrantAlgorithm(name, pSvcLocator) {};
 
   StatusCode initialize() override;
   StatusCode execute(const EventContext& ctx) const override;
@@ -34,8 +34,8 @@ class LArRawSCCalibDataReadingAlg : public  AthReentrantAlgorithm {
  private:
   // Mapping input
   SG::ReadCondHandleKey<LArLATOMEMapping> m_mapKey {this,"MappingKey","LArLATOMEMap"};
-  SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibCablingKey","LArCalibLineMap","SG Key of LArCalibLineMapping object"};
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMap", "LArOnOffIdMap", "SG key for mapping object"};
+  SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibCablingKeyLeg","LArCalibLineMap","SG Key of LArCalibLineMapping object"};
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this, "OnOffMapLeg", "LArOnOffIdMap", "SG key for legacy mapping object"};
 
   //Event output:
   SG::WriteHandleKey<LArAccumulatedDigitContainer> m_accDigitKey{this,"LArSCAccDigitKey",""};
@@ -56,7 +56,7 @@ class LArRawSCCalibDataReadingAlg : public  AthReentrantAlgorithm {
 
 
   // The LATOME Decoder tool
-  ToolHandle<LArLATOMEDecoder> m_latomeDecoder;
+  ToolHandle<LArLATOMEDecoder> m_latomeDecoder{this, "LATOMEDecoder", "LArByteStream/LATOMEDecoder", "decoder instance"};
 
   //Switches set in initialize() based of SG keys of output object
   bool m_doAccDigits=false;

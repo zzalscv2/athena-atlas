@@ -212,6 +212,14 @@ StatusCode LArADC2MeVCondAlg::execute(const EventContext& ctx) const{
 	  continue;
 	}
       
+        ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+                            << " gain (" << igain<< ") "
+                            << " uA2MeV (" << uA2MeV << ") "
+                            << " DAC2uA (" << DAC2uA << ") "
+                            << " factorGain (" << factorGain[igain] << ") "
+                            << " adc2dac (" << adc2dac[0]<<" " << adc2dac[1]<< ") "
+                     );
+
 	ADC2MeV.resize(adc2dac.size());
 
 	//Determine if the intercept is to be used:

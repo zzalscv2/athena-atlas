@@ -30,6 +30,9 @@ if __name__=='__main__':
    parser.add_argument('-c','--isSC', dest='supercells', default=False, action="store_true", help='is SC data ?')
    parser.add_argument('-a','--isRawdata', dest='rawdata', default=False, action="store_true", help='is raw data ?')
    parser.add_argument('-b','--badchansqlite', dest='badsql', default="SnapshotBadChannel.db", help='Output sqlite file, in pool output dir.', type=str)
+   parser.add_argument('-x','--ignoreBarrel', dest='ignoreB', default=False, action="store_true", help='ignore Barrel channels ?')
+   parser.add_argument('-v','--ignoreEndcap', dest='ignoreE', default=False, action="store_true", help='ignore Endcap channels ?')
+
 
    args = parser.parse_args()
    if help in args and args.help is not None and args.help:
@@ -56,7 +59,10 @@ if __name__=='__main__':
       if args.rawdata:
             partstr += "-RawData"
       # here - add optional nsamples
-      InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-7s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-7s-"+gain+"-"+partstr+".daq.RAW/"
+      if args.supercells:
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-32s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-32s-"+gain+"-"+partstr+".daq.RAW/"
+      else:
+         InputDir = args.dprefix+args.fprefix+"/calibration_LArElec-Ramp-7s-"+gain+"-"+partstr+"/"+args.run+"/"+args.fprefix+"."+args.run+".calibration_LArElec-Ramp-7s-"+gain+"-"+partstr+".daq.RAW/"
 
    
    #Import the configution-method we want to use (here: Pedestal and AutoCorr)
@@ -138,6 +144,7 @@ if __name__=='__main__':
       if flags.LArCalib.Input.SubDet=="EM":
          OutputRampRootFileName += args.side
          OutputRampPoolFileName += args.side
+
    OutputRampRootFileName += ".root"
    OutputRampPoolFileName += ".pool.root"
 
@@ -148,7 +155,6 @@ if __name__=='__main__':
    #The global tag we are working with
    flags.IOVDb.GlobalTag = "LARCALIB-RUN2-00"
    
-
    #Other potentially useful flags-settings:
    
    #Define the global output Level:
@@ -171,6 +177,12 @@ if __name__=='__main__':
 
       # block standard patching for this CB
       cfg.getEventAlgo("LArRampPatcher").DoNotPatchCBs=[0x3df70000]
+
+   # ignore some channels ?
+   if args.ignoreB:
+       cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreBarrelChannels=args.ignoreB
+   if args.ignoreE:
+       cfg.getEventAlgo("LArRawSCCalibDataReadingAlg").LATOMEDecoder.IgnoreEndcapChannels=args.ignoreE
 
 
    #run the application

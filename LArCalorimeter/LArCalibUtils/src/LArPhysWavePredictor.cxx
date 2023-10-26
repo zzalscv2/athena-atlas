@@ -531,6 +531,7 @@ StatusCode LArPhysWavePredictor::stop()
           wfParams.setFlag( 0 ) ;  // this should contain the method used to find parameters and the gain
           wfParams.setTdiff(Tdiff);
 	  	  
+	  ATH_MSG_VERBOSE( "wfParams: " << Tcali << " " <<Fstep<<" " <<Tdrift<<" "<<Omega0<<" "<<Taur<<" "<<Tdiff<<" "<<layer<<" "<<region );
           // calibration pulse normalization 
 	  // (should be done here instead than in LArPhysWaveTool to get 
 	  // the correct Mphys/Mcali in case of double triangle prediction)
@@ -559,15 +560,18 @@ StatusCode LArPhysWavePredictor::stop()
 	    const LArPhysWave& laridealPhysWave = larIdealPhysWaveContainer -> get(chid,gain);
 	    int LArWaveFlag=LArWave::predCali;    // 111 - for HEC Wave
 	    //int LArIdealPhysWaveFlag=LArWave::predCali;    // 111 - for HEC Wave
+	    ATH_MSG_DEBUG( "Using HEC tool to predict LArPhysWave for channel " <<  chid.get_identifier32().get_compact());
 	    
 	    sc = larPhysWaveHECTool->makeLArPhysWaveHEC(wfParams,theLArCaliWave,larPhysWave,laridealPhysWave,MphysMcali,chid,gain,LArWaveFlag);
 	    
 	    //laridealPhysWave.setFlag( LArIdealPhysWaveFlag ) ;
 	  }
-	  else 
+	  else {
+	    ATH_MSG_DEBUG( "Using EM tool to predict LArPhysWave for channel 0x" << chid.get_identifier32().get_compact() );
 	    sc = larPhysWaveTool->makeLArPhysWave(wfParams,theLArCaliWave,region,layer,larPhysWave,MphysMcali);
+          }
 	  if (sc.isFailure()) {
-	    ATH_MSG_FATAL( "Cannot predict LArPhysWave for channel 0x" << MSG::hex << chid << MSG::dec );
+	    ATH_MSG_FATAL( "Cannot predict LArPhysWave for channel " << chid.get_identifier32().get_compact() );
 	    continue;
 	  }
 	  larPhysWave.setFlag( LArWave::predCali ) ;

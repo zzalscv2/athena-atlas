@@ -41,7 +41,10 @@ def LArPhysWavePredictionCfg(flags):
     #Retrieve inputs 
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     result.merge(addFolders(flags,flags.LArCalib.CaliWave.Folder,detDb=flags.LArCalib.Input.Database, tag=CaliWaveTag, modifiers=chanSelStr(flags)))
-    result.merge(addFolders(flags,"/LAR/ElecCalibOfl/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflTdriftComputed-calib-03"))
+    if flags.LArCalib.isSC:
+       result.merge(addFolders(flags,"/LAR/ElecCalibOflSC/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflSCTdriftComputed-000"))
+    else:   
+       result.merge(addFolders(flags,"/LAR/ElecCalibOfl/Tdrift/Computed",detDb="LAR_OFL",tag="LARElecCalibOflTdriftComputed-calib-03"))
     
 
     if isHEC:

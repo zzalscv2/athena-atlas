@@ -13,14 +13,8 @@
 #include "eformat/index.h"
 
 
-LArRawSCCalibDataReadingAlg::LArRawSCCalibDataReadingAlg(const std::string& name, ISvcLocator* pSvcLocator) :  
-  AthReentrantAlgorithm(name, pSvcLocator),
-  m_latomeDecoder ("LArByteStream/LATOMEDecoder", this) {
 
-	declareProperty("LATOMEDecoder", m_latomeDecoder);
-}
-
-  StatusCode LArRawSCCalibDataReadingAlg::initialize() {
+StatusCode LArRawSCCalibDataReadingAlg::initialize() {
 
 
   if (m_accDigitKey.key().size()>0) {

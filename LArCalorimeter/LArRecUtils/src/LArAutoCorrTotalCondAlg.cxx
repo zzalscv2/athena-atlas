@@ -256,6 +256,13 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
             }
             fSigma2 = 0.;
           }
+           ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+                                            << ")  fSampl (" << fSampl << ") "
+                                            << ")  SigmaNoise (" << SigmaNoise << ") "
+                                            << ")  Adc2MeV (" << Adc2MeV << ") "
+
+                        );
+
           // warning: MinBiasRMS is in MeV (at the scale of the hits)
           //         SigmaNoise is in ADC counts
           //  so MinBiasRMS/fScale and SigmaNoise*Adc2MeV are the same scale
@@ -266,6 +273,9 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
         // autocorrelation matrix
         int nsize_tot = (nsamples_AC_OFC - 1) * (nsamples_AC_OFC) / 2;
 
+        ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+                                          << ")  fSigma2 (" << fSigma2 << ") "
+                                          << ")  nsamples_AC_OFC ( " << nsamples_AC_OFC);
         std::vector<float> vTerms;
 
         vTerms.resize(2 * nsize_tot + nsamples_AC_OFC, 0.);
@@ -280,6 +290,8 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
           }
         }
 
+        ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+                                          << ")  vTerms[1] (" << vTerms[1] << ") ");
         // 2nd terms :
         for (int j1 = 0; j1 < nsamples_AC_OFC - 1; ++j1) {
           for (int j2 = j1 + 1; j2 < nsamples_AC_OFC; j2++) {
@@ -297,6 +309,8 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
             vTerms[nsize_tot + index] = fSigma2 * Rij;
           }
         }
+        ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+                                          << ")  vTerms[mid] (" << vTerms[vTerms.size()/2] << ") ");
 
         // 3rd term : RMS of pileup per samples (multiplied by fSigma2)
         for (int j1 = 0; j1 < nsamples_AC_OFC; j1++) {
@@ -309,6 +323,9 @@ StatusCode LArAutoCorrTotalCondAlg::execute() {
           }
           vTerms[2 * nsize_tot + j1] = fSigma2 * Rms2i;
         }
+        ATH_MSG_DEBUG(chid.get_identifier32().get_compact()
+                                          << ")  vTerms[last] (" << vTerms[vTerms.size()-1] << ") ");
+
 
         // storage
         larAutoCorrTotal->set(hid, igain, vTerms);
