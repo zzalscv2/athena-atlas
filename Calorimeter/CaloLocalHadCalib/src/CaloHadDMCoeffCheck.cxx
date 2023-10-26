@@ -305,15 +305,16 @@ int CaloHadDMCoeffCheck::process(CaloHadDMCoeffData *myData, CaloLocalHadCoeff *
     double engClusSumCalibInPresampler = 0.0;
 
     for(int i_cls=0; i_cls<m_data->m_ncls; i_cls++){ // loop over clusters
-      engClusSumCalib += (*m_data->m_cls_engcalib)[i_cls];
-      engClusSumOOC += (*m_data->m_cls_oocener)[i_cls];
-      engClusSumCalibInPresampler += (*m_data->m_cls_engcalibpres)[i_cls];
+      engClusSumCalib += m_data->m_cls_engcalib ? (*m_data->m_cls_engcalib)[i_cls] : 0.0;
+      engClusSumOOC += m_data->m_cls_oocener ? (*m_data->m_cls_oocener)[i_cls] : 0.0;
+      engClusSumCalibInPresampler += m_data->m_cls_engcalibpres ? (*m_data->m_cls_engcalibpres)[i_cls] : 0.0;
       for(int i_area=0; i_area<m_HadDMCoeff->getSizeAreaSet(); i_area++){
         engDmRecSumClus[i_area] += engDmReco[i_cls][i_area];
-        engDmTrueSumClus[i_area] += (*m_data->m_cls_dmener)[i_cls][i_area];
+        engDmTrueSumClus[i_area] += m_data->m_cls_dmener ? (*m_data->m_cls_dmener)[i_cls][i_area] : 0.0;
         engDmRecSumClus[m_HadDMCoeff->getSizeAreaSet()] += engDmReco[i_cls][i_area];
-        engDmTrueSumClus[m_HadDMCoeff->getSizeAreaSet()] += (*m_data->m_cls_dmener)[i_cls][i_area];
-        engClusSumDM += (*m_data->m_cls_dmener)[i_cls][i_area];
+        engDmTrueSumClus[m_HadDMCoeff->getSizeAreaSet()] += 
+                                     m_data->m_cls_dmener ? (*m_data->m_cls_dmener)[i_cls][i_area] : 0.0;
+        engClusSumDM += m_data->m_cls_dmener ? (*m_data->m_cls_dmener)[i_cls][i_area] : 0.0;
       }
     }
     for(int i_area=0; i_area<m_HadDMCoeff->getSizeAreaSet()+1; i_area++){
@@ -623,7 +624,7 @@ void CaloHadDMCoeffCheck::getDmReco(std::vector<std::vector<double > > &engDmRec
         double ecalonew = 0.0;
         double ecaloold = 0.0;
         for(int i_smp=0; i_smp<CaloSampling::Unknown; i_smp++){
-          float smpener = (*m_data->m_cls_smpener_unw)[i_cls][i_smp];
+          float smpener = m_data->m_cls_smpener_unw ? (*m_data->m_cls_smpener_unw)[i_cls][i_smp] : 0.;
           ecaloold += smpener;
           ecalonew += smpener * (*pars)[i_smp];
         }

@@ -249,9 +249,11 @@ CaloLocalHadCoeff * CaloHadDMCoeffMinim::process(CaloHadDMCoeffData *myData, Cal
         ev->ibin = iBin;
         ev->edmtrue = (*m_data->m_cls_dmener)[i_cls][m_area_index];
         if(ev->edmtrue<0) ev->edmtrue=0.0;
-        ev->clsm_smp_energy_unw.resize((*m_data->m_cls_smpener_unw)[i_cls].size());
-        for(unsigned int i_smp=0; i_smp<(*m_data->m_cls_smpener_unw)[i_cls].size(); i_smp++){
-          ev->clsm_smp_energy_unw[i_smp] = (*m_data->m_cls_smpener_unw)[i_cls][i_smp];
+        if(m_data->m_cls_smpener_unw) {
+           ev->clsm_smp_energy_unw.resize((*m_data->m_cls_smpener_unw)[i_cls].size());
+           for(unsigned int i_smp=0; i_smp<(*m_data->m_cls_smpener_unw)[i_cls].size(); i_smp++){
+             ev->clsm_smp_energy_unw[i_smp] = (*m_data->m_cls_smpener_unw)[i_cls][i_smp];
+           }
         }
         // Calculation of cluster weight, which shows siginicance of it for chi2 calculation
         double clus_weight = 1.0;
