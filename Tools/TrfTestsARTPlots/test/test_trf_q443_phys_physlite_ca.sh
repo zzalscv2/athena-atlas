@@ -11,12 +11,11 @@
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q443 \
-  --sharedWriter True \
-  --steering 'doRDO_TRIG' 'doTRIGtoALL' \
+  --steering doRAWtoALL \
   --outputAODFile myAOD.pool.root \
-  --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \
+  --athenaopts "HITtoRDO:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "RDOtoRDOTrigger:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" \
   --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10;' \
-  --preExec 'HITtoRDO:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' 'RAWtoALL:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' 'AODtoDAOD:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' \
+  --preExec 'HITtoRDO:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' 'RAWtoALL:from RecExConfig.RecFlags import rec;rec.runUnsupportedLegacyReco=True' \
   --runNumber=310000 \
   --DataRunNumber=310000 \
   --maxEvents 2000
