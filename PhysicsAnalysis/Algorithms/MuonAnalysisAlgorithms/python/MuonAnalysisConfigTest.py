@@ -62,7 +62,8 @@ def makeSequence (dataType) :
     ntupleMaker.Branches = [ 'AnalysisMuons_NOSYS.eta -> mu_eta',
                              'AnalysisMuons_NOSYS.phi -> mu_phi',
                              'AnalysisMuons_%SYS%.pt  -> mu_%SYS%_pt', ]
-    if DataType(dataType) != DataType.Data:
+    # need to allow for conversion of dataType from string to enum
+    if {'data': DataType.Data, 'mc': DataType.FullSim, 'afii': DataType.FastSim}.get(dataType, dataType) is not DataType.Data:
         ntupleMaker.Branches += [ 'AnalysisMuons_%SYS%.muon_reco_effSF_tight_%SYS% -> mu_%SYS%_reco_effSF' ]
     ntupleMaker.OutputLevel = 2  # For output validation
     algSeq += ntupleMaker
