@@ -13,9 +13,6 @@
 
 namespace Trk {
 
-//extern variables
-extern const vkalMagFld      myMagFld;
-
 void vpderiv(bool UseTrackErr, long int Charge, const double *pari0, double *covi, double *vrtref, double *covvrtref,
       double *drdpar, double *dwgt, double *rv0, VKalVrtControl * FitCONTROL)
 {
