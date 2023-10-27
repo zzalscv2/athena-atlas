@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ## \file Herwig7Control.py
 ## \brief Main python interface for %Herwig7 for preparing the event generation
 ## \author Daniel Rauch (daniel.rauch@desy.de)
+## \author Lukas Kretschmann (lukas.kretschmann@cern.ch)
 ##
 ## This part of the interface provides functionality for running all the tasks
 ## necessary to initialize and prepare the event generation.
@@ -87,14 +88,12 @@ def matchbox_run(gen_config, integration_jobs, cleanup_herwig_scratch):
 ## or extract it and generate events from it
 ##
 ## \param[in] cleanup_herwig_scratch Remove `Herwig-scratch` or 'Herwig-cache' folder after event generation to save disk space
-def matchbox_run_gridpack(gen_config, integration_jobs, gridpack_name, cleanup_herwig_scratch):
-
-  gridpack_exists = hasattr(gen_config.runArgs, 'inputGenConfFile')
+def matchbox_run_gridpack(gen_config, integration_jobs, gridpack_name, cleanup_herwig_scratch, integrate):
 
   ## print start banner including version numbers
   log(message=start_banner())
 
-  if not gridpack_exists:
+  if not gridpack_name or integrate:
 
     ## create infile from jobOption commands
     write_infile(gen_config)
@@ -112,7 +111,8 @@ def matchbox_run_gridpack(gen_config, integration_jobs, gridpack_name, cleanup_h
   else:
 
     ## unpack the gridpack
-    do_uncompress_gridpack(gen_config.runArgs.inputGenConfFile)
+    DSIS_dir = getattr(gen_config.runArgs, 'jobConfig')[0]+"/"
+    do_uncompress_gridpack(DSIS_dir+gridpack_name)
     athMsgLog.info("Finished unpacking the gridpack")
 
     ## start the event generation
