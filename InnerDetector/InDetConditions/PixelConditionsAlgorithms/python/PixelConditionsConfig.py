@@ -327,10 +327,7 @@ def PixelSiliconConditionsTestAlgCfg(flags, name="PixelSiliconConditionsTestAlg"
     acc = ComponentAccumulator()
     acc.merge(PixelDCSCondTempAlgCfg(flags))
     acc.merge(PixelDCSCondHVAlgCfg(flags))
-    if flags.GeoModel.Run >= LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    acc.merge(PixelChargeCalibCondCfg(flags))    
     acc.merge(PixelDistortionAlgCfg(flags))
     from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
@@ -407,6 +404,14 @@ def PixelDetectorElementStatusAlgActiveOnlyCfg(flags, name = "PixelDetectorEleme
                                             ActiveOnly = True)
 
 
+def PixelChargeCalibCondCfg(flags):
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg
+        return ITkPixelChargeCalibCondAlgCfg(flags)
+    elif flags.GeoModel.Run == LHCPeriod.Run3:
+        return PixelChargeLUTCalibCondAlgCfg(flags)
+    return PixelChargeCalibCondAlgCfg(flags)
+    
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
