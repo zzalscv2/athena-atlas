@@ -41,3 +41,6 @@ genSeq.Pythia8.Commands += ["Merging:doKTMerging = on",
                             "Merging:Dparameter = %f" % PYTHIA8_Dparameter,
                             "Merging:nQuarksMerge = %i" % PYTHIA8_nQuarksMerge]
 
+if "computeEfficiency" in genSeq.Pythia8.__slots__.keys():
+    genSeq.Pythia8.computeEfficiency = True
+

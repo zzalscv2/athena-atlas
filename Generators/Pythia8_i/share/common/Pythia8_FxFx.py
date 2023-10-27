@@ -30,5 +30,7 @@ genSeq.Pythia8.Commands += ["JetMatching:merge            = on",
    
 genSeq.Pythia8.UserHooks += [ 'JetMatchingMadgraph']
 genSeq.Pythia8.FxFxXS = True
+if "computeEfficiency" in genSeq.Pythia8.__slots__.keys():
+    genSeq.Pythia8.computeEfficiency = True
 
 

@@ -44,3 +44,6 @@ genSeq.Pythia8.Commands += ["JetMatching:merge            = on",
                             "JetMatching:etaJetMax        = 1000.0",
                             "JetMatching:nJetMax          = %i" % PYTHIA8_nJetMax ]
 
+if "computeEfficiency" in genSeq.Pythia8.__slots__.keys():
+    genSeq.Pythia8.computeEfficiency = True
+

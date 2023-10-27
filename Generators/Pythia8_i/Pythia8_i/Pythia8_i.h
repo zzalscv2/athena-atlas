@@ -121,6 +121,7 @@ private:
   BooleanProperty m_storeLHE{this, "StoreLHE", false};
   BooleanProperty m_doCKKWLAcceptance{this, "CKKWLAcceptance", false};
   BooleanProperty m_doFxFxXS{this, "FxFxXS", false};
+  BooleanProperty m_computeEfficiency{this, "computeEfficiency", false};
   double m_nAccepted{0.};
   double m_nMerged{0.};
   double m_sigmaTotal{0.};
