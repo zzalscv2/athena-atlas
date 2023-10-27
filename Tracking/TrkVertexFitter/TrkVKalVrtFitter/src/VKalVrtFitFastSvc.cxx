@@ -4,7 +4,6 @@
 
 // Header include
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtCore/VKvFast.h"
 //-------------------------------------------------
 //

@@ -1,26 +1,23 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //
-// The VKalExtPropagator object is created if ATHENA propagator exists 
+// The VKalExtPropagator object is created if ATHENA propagator exists
 // and is supplied via jobOptions. A pointer to it is supplied to VKalVrtCore
 // for every vertex fit via VKalVrtControlBase object.
 // VKalVrtCore uses it to extrapolate tracks for a vertex fit.
-// 
-// If ATHENA propagator doesn't exist, the VKalVrtCore uses its internal 
-// propagator without material. 
 //
-// myPropagator object exists always in VKalVrtCore and should be used
-// by default for track propagation in VKalVrtFitter.
-//------------------------------------------------------------------------- 
-
+// If ATHENA propagator doesn't exist, the VKalVrtCore uses its internal
+// propagator without material.
+//
+//-------------------------------------------------------------------------
 
 
 // Header include
+#include "TrkVKalVrtFitter/VKalExtPropagator.h"
+
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkSurfaces/CylinderSurface.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/StraightLineSurface.h"
 //-------------------------------------------------
 #include<iostream>
@@ -30,7 +27,7 @@
 //                  External propagator access for VKalVrt
 
 namespace Trk {
- 
+
   // Constructor
   VKalExtPropagator::VKalExtPropagator( TrkVKalVrtFitter* pnt)
   {
@@ -49,7 +46,7 @@ namespace Trk {
 //
   double VKalExtPropagator::Protection(const double *RefEnd,
                                        const IVKalState& istate) const
-  {   
+  {
       const TrkVKalVrtFitter::State& state = static_cast<const TrkVKalVrtFitter::State&> (istate);
 
       double Xend=RefEnd[0] + state.m_refFrameX;
@@ -71,18 +68,18 @@ namespace Trk {
       return Protection(RefEnd, istate) <= 1.;
   }
 /*----------------------------------------------------------------------------------*/
-//  Addres of this fuction is supplied to TrkVKalVrtCore for ATLAS InDet extrapolation 
-//  with material. Each time VKalVrt needs propagation - it calls it. 
+//  Addres of this fuction is supplied to TrkVKalVrtCore for ATLAS InDet extrapolation
+//  with material. Each time VKalVrt needs propagation - it calls it.
 //
 //   In case of usage with first measured point
-//    it always use this point as starting point, 
+//    it always use this point as starting point,
 //     so ParOld,CovOld,RefStart are irrelevant
 //
 //  VKalVrtCore works in relative coordinates wrt (state.m_refFrameX,state.m_refFrameY,state.m_refFrameZ)
 //  For ATLAS propagator the Core coordinates must be moved back to global ref.frame
 /*------------------------------------------------------------------------------------*/
-  void VKalExtPropagator::Propagate( long int trkID, long int Charge, 
-                                     double *ParOld, double *CovOld, double *RefStart, 
+  void VKalExtPropagator::Propagate( long int trkID, long int Charge,
+                                     double *ParOld, double *CovOld, double *RefStart,
                                      double *RefEnd, double *ParNew, double *CovNew,
                                      IVKalState& istate) const
   {
@@ -105,9 +102,9 @@ namespace Trk {
       }else{
 //        for(int i=0; i<15;i++) CovPerigeeIni.push_back(0.);
         CovPerigeeIni[0]=1.e6;CovPerigeeIni[2]=1.e6;CovPerigeeIni[5]=1.;CovPerigeeIni[9]=1.;CovPerigeeIni[14]=fabs(PerigeeIni[4]);
-      }        
+      }
       //--- This creates Perigee in GLOBAL frame from input in realtive coordinates
-      const Perigee* inpPer = 
+      const Perigee* inpPer =
           m_vkalFitSvc->CreatePerigee( RefStart[0], RefStart[1], RefStart[2], PerigeeIni, CovPerigeeIni, state).release();
       const TrackParameters * inpPar= (const TrackParameters*) inpPer;
 //
@@ -134,14 +131,14 @@ namespace Trk {
       AmgVector(5) VectPerig; VectPerig.setZero();
       const AmgSymMatrix(5) *CovMtx=nullptr;
       if( mPer ){
-        VectPerig = mPer->parameters(); 
+        VectPerig = mPer->parameters();
         CovMtx    = mPer->covariance();
-      } 
+      }
       if( Line ){
-        VectPerig = Line->parameters(); 
+        VectPerig = Line->parameters();
         CovMtx    = Line->covariance();
-      }      
-      if( (Line==nullptr && mPer==nullptr) || CovMtx==nullptr ){         
+      }
+      if( (Line==nullptr && mPer==nullptr) || CovMtx==nullptr ){
         ParNew[0]=0.; ParNew[1]=0.;ParNew[2]=0.;ParNew[3]=0.;ParNew[4]=0.;
         delete inpPer; return;
       }
@@ -150,7 +147,7 @@ namespace Trk {
         ParNew[0]=0.; ParNew[1]=0.;ParNew[2]=0.;ParNew[3]=0.;ParNew[4]=0.;
         delete inpPer; delete endPer;
         return;
-      }        
+      }
       double CovVertTrk[15];
       long int locCharge=Charge;
       CovVertTrk[ 0] =(*CovMtx)(0,0);
@@ -170,7 +167,7 @@ namespace Trk {
       CovVertTrk[14] =(*CovMtx)(4,4);
 //std::cout<<" extrapPoint="<<endPer->position().x()<<", "<<endPer->position().y()<<", "<<endPer->position().y()<<'\n';
 //std::cout<<" extrapCov="<<(*CovMtx)(0,0)<<", "<<(*CovMtx)(1,1)<<", "<<(*CovMtx)(2,2)<<
-//                                          ", "<<(*CovMtx)(3,3)<<", "<<(*CovMtx)(4,4)<<'\n';          
+//                                          ", "<<(*CovMtx)(3,3)<<", "<<(*CovMtx)(4,4)<<'\n';
 
       if(CovNew != nullptr) {
          m_vkalFitSvc->VKalTransform( BMAG_FIXED, VectPerig(0), VectPerig(1),
@@ -183,7 +180,7 @@ namespace Trk {
                       locCharge,  &ParNew[0] , CovVertTrkTmp);
       }
       delete inpPer; delete endPer;
-  }						    
+  }
 
 
 /*--------------------------------------------------------------------------------------*/
@@ -197,11 +194,11 @@ namespace Trk {
 /*   and NOT from parameters provided by VKalVrtCore. More CPU time but better precision*/
 /*   Only combined (TrkID<0) tracks use VKalVrtCore parameters for start		*/
 /*--------------------------------------------------------------------------------------*/
-  const TrackParameters* VKalExtPropagator::myExtrapWithMatUpdate(long int TrkID, 
+  const TrackParameters* VKalExtPropagator::myExtrapWithMatUpdate(long int TrkID,
                                                                   const TrackParameters *inpPer,
                                                                   Amg::Vector3D * endPoint,
                                                                   const IVKalState& istate) const
-  {   
+  {
       const TrkVKalVrtFitter::State& state = static_cast<const TrkVKalVrtFitter::State&> (istate);
       const EventContext& ctx = (state.m_eventContext)
                                   ? *(state.m_eventContext)
@@ -260,7 +257,7 @@ namespace Trk {
           ctx, *pntOnTrk, surfEnd, dir, true, prtType, addNoise).release();
         return endPer;
       }
-      // 
+      //
       // Extrapolation for any measured point
       //
       if (Strategy == 1) {
@@ -350,12 +347,12 @@ namespace Trk {
 /*    All points are in GLOBAL Atlas frame here!					*/
 /*         DOESN't WORK FOR COMBINED TRACKS!						*/
 /*--------------------------------------------------------------------------------------*/
-  const TrackParameters* VKalExtPropagator::myExtrapToLine(long int TrkID, 
+  const TrackParameters* VKalExtPropagator::myExtrapToLine(long int TrkID,
                                                            const TrackParameters *inpPer,
                                                            Amg::Vector3D * endPoint,
                                                            StraightLineSurface  &lineTarget,
                                                            const IVKalState& istate) const
-  {   
+  {
       const TrkVKalVrtFitter::State& state = static_cast<const TrkVKalVrtFitter::State&> (istate);
       const EventContext& ctx = (state.m_eventContext)
                                   ? *(state.m_eventContext)
@@ -373,7 +370,7 @@ namespace Trk {
 // Extrapolation for new track - no material at all
 //
       const TrackParameters *pntOnTrk=nullptr;
-      if(TrkID<0){  
+      if(TrkID<0){
         return endPer;
       }
         pntOnTrk=dynamic_cast<const TrackParameters*> (state.m_trkControl.at(TrkID).TrkPnt);
@@ -388,28 +385,28 @@ namespace Trk {
         prtType=muon;                   // Muon hypothesis is always used for extrapolation
         iniPoint =  pntOnTrk->position();
         step  = (*endPoint) - iniPoint;
-      
+
       Amg::Vector3D pmom=pntOnTrk->momentum();
 //
 // Extrapolation for first measured point strategy. Start from it and always add material
 //
-      if( Strategy == 0) {  
+      if( Strategy == 0) {
         PropDirection dir=alongMomentum; if(pmom.dot(step)<0) dir=oppositeMomentum;
         endPer = m_extrapolator->extrapolate(ctx, *pntOnTrk, lineTarget, dir, true, prtType, addNoise).release();
         if (!endPer)
           endPer = m_extrapolator->extrapolateDirectly(ctx, *pntOnTrk, lineTarget, dir, true, prtType).release();
         return endPer;
       }
-// 
+//
 // Extrapolation for any measured point
 //
-      if( Strategy == 1 || Strategy == 2) {  
+      if( Strategy == 1 || Strategy == 2) {
          PropDirection dir=alongMomentum;  MaterialUpdateMode mmode=addNoise;
 	 if(pmom.dot(step)<0){ dir=oppositeMomentum; mmode=removeNoise;}
          endPer = m_extrapolator->extrapolate(ctx, *pntOnTrk, lineTarget, dir, true, prtType, mmode).release();
-         return endPer; 
+         return endPer;
       }
-      return endPer; 
+      return endPer;
   }
 
 /*--------------------------------------------------------------------------------------*/
@@ -417,7 +414,7 @@ namespace Trk {
 /*--------------------------------------------------------------------------------------*/
   const NeutralParameters* VKalExtPropagator::myExtrapNeutral( const NeutralParameters *inpPer,
                                                                Amg::Vector3D * endPoint) const
-  {   
+  {
       const Trk::NeutralParameters* endPer=nullptr;
 //End surface
       PerigeeSurface surfEnd( *endPoint );
@@ -437,30 +434,30 @@ namespace Trk {
     if(!xprt->isAvailable<float>("radiusOfFirstHit")) return nullptr;  // No radiusOfFirstHit on track
 
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    const Trk::Perigee*  mPer = &(xprt->perigeeParameters()); 
-    Amg::Transform3D trnsf; 
+    const Trk::Perigee*  mPer = &(xprt->perigeeParameters());
+    Amg::Transform3D trnsf;
     trnsf.setIdentity();
-    CylinderSurface surfacePntOnTrk( trnsf, xprt->radiusOfFirstHit(), 20000.);        
+    CylinderSurface surfacePntOnTrk( trnsf, xprt->radiusOfFirstHit(), 20000.);
     ParticleHypothesis prtType = pion;
-    
-    const TrackParameters *hitOnTrk = 
-          m_extrapolator->extrapolate(ctx, 
-                                      *mPer, 
-                                      surfacePntOnTrk, 
-                                      alongMomentum, 
+
+    const TrackParameters *hitOnTrk =
+          m_extrapolator->extrapolate(ctx,
+                                      *mPer,
+                                      surfacePntOnTrk,
+                                      alongMomentum,
                                       true, prtType, removeNoise).release();
 //std::cout<<" Radius="<<xprt->radiusOfFirstHit()<<" extrap="<<hitOnTrk<<'\n';
-    if(hitOnTrk==nullptr)hitOnTrk=m_extrapolator->extrapolateDirectly(ctx, 
-                                                                      *mPer, 
-                                                                      surfacePntOnTrk, 
-                                                                      alongMomentum, 
+    if(hitOnTrk==nullptr)hitOnTrk=m_extrapolator->extrapolateDirectly(ctx,
+                                                                      *mPer,
+                                                                      surfacePntOnTrk,
+                                                                      alongMomentum,
                                                                       true, prtType).release();
     if(hitOnTrk==nullptr)return nullptr;
 
-    //convert result to Perigee 
+    //convert result to Perigee
     PerigeeSurface surfacePerigee( hitOnTrk->position() );
     const TrackParameters *hitOnTrkPerig = m_extrapolator->extrapolate(ctx,
-                                                                       *hitOnTrk, 
+                                                                       *hitOnTrk,
                                                                        surfacePerigee).release();
     delete hitOnTrk;  // Delete temporary results
     if(hitOnTrkPerig==nullptr)return nullptr;

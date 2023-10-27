@@ -5,7 +5,6 @@
 // Header include
 #include  "VxVertex/Vertex.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
 #include "VxVertex/VxTrackAtVertex.h"
 #include "VxVertex/ExtendedVxCandidate.h"
