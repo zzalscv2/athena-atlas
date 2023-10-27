@@ -83,7 +83,7 @@ if (vp1InputFiles == []):
         
         #DetDescrVersion = "ATLAS-R2-2015-03-01-00" # default for Rel. 21
         #DetDescrVersion = "ATLAS-R2-2016-01-00-01" # default Run 2 geometry
-        DetDescrVersion = "ATLAS-R3S-2021-03-01-00" # default Run 3 geometry, with symmetric NSW
+        DetDescrVersion = "ATLAS-R3S-2021-03-02-00" # default Run 3 geometry, with symmetric NSW
 
         os.environ["DUMPGEODETDESCRTAGDEFAULT"] = "1" # save to an env var, for later use in GeoModelStandalone/GeoExporter
         os.environ["DUMPGEODETDESCRTAG"] = DetDescrVersion # save to an env var, for later use in GeoModelStandalone/GeoExporter
