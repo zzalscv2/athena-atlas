@@ -58,7 +58,6 @@ namespace DerivationFramework {
       Gaudi::Property<double> m_maxAbsEta{this, "MaxAbsMuonEta", 1.7};
       Gaudi::Property<double> m_isoCone{this, "IsoCone", 0.4};
       Gaudi::Property<double> m_maxRelEtrkInIsoCone{this, "MaxRelETrkInIsoCone", 0.1};
-      Gaudi::Property<bool> m_saveTileCellMuonInfo{this, "SaveTileCellMuonInfo", true};
       Gaudi::Property<double> m_gapCrackCellsInDeltaEta{this, "GapCrackCellsInDeltaEta", 0.5};
       Gaudi::Property<double> m_gapCrackCellsInDeltaPhi{this, "GapCrackCellsInDeltaPhi", 0.5};
 

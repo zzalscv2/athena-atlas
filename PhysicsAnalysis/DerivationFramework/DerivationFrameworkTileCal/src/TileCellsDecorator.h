@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // TileCellsDecorator.h
@@ -45,7 +45,7 @@ namespace DerivationFramework {
       // Athena algtool's Hooks
       StatusCode initialize() override final;
 
-    StatusCode decorate(const xAOD::IParticle* particle, std::vector<const CaloCell*>& cells, const EventContext& ctx) const;
+    StatusCode decorate(const std::map<const xAOD::IParticle*, std::vector<const CaloCell*>>& muonCellsMap, const EventContext& ctx) const;
 
     static const InterfaceID& interfaceID();
 
@@ -53,8 +53,6 @@ namespace DerivationFramework {
 
       Gaudi::Property<std::string> m_prefix{this, "Prefix", "TCAL1_"};
       Gaudi::Property<std::string> m_muonContainer{this, "MuonContainer", "Muons"};
-      Gaudi::Property<bool> m_saveTileCellPmtInfo{this, "SaveTileCellPmtInfo", true};
-      Gaudi::Property<bool> m_saveTileCellPositionAndDimention{this, "SaveTileCellPositionAndDimention", true};
 
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_cellsEnergyKey{this, "CellsEnergy", "cells_energy"};
       SG::WriteDecorHandleKey<xAOD::MuonContainer> m_cellsEtKey{this, "CellsEt", "cells_et"};

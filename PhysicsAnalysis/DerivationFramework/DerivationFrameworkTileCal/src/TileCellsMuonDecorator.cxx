@@ -40,40 +40,40 @@ namespace DerivationFramework {
     ATH_CHECK( m_econeMuKey.initialize() );
 
     m_cellsMuonXKey = baseName + m_prefix + m_cellsMuonXKey.key();
-    ATH_CHECK( m_cellsMuonXKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonXKey.initialize() );
 
     m_cellsMuonYKey = baseName + m_prefix + m_cellsMuonYKey.key();
-    ATH_CHECK( m_cellsMuonYKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonYKey.initialize() );
 
     m_cellsMuonZKey = baseName + m_prefix + m_cellsMuonZKey.key();
-    ATH_CHECK( m_cellsMuonZKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonZKey.initialize() );
 
     m_cellsMuonEtaKey = baseName + m_prefix + m_cellsMuonEtaKey.key();
-    ATH_CHECK( m_cellsMuonEtaKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonEtaKey.initialize() );
 
     m_cellsMuonPhiKey = baseName + m_prefix + m_cellsMuonPhiKey.key();
-    ATH_CHECK( m_cellsMuonPhiKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonPhiKey.initialize() );
 
     m_cellsToMuonDxKey = baseName + m_prefix + m_cellsToMuonDxKey.key();
-    ATH_CHECK( m_cellsToMuonDxKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsToMuonDxKey.initialize() );
 
     m_cellsToMuonDyKey = baseName + m_prefix + m_cellsToMuonDyKey.key();
-    ATH_CHECK( m_cellsToMuonDyKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsToMuonDyKey.initialize() );
 
     m_cellsToMuonDzKey = baseName + m_prefix + m_cellsToMuonDzKey.key();
-    ATH_CHECK( m_cellsToMuonDzKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsToMuonDzKey.initialize() );
 
     m_cellsToMuonDetaKey = baseName + m_prefix + m_cellsToMuonDetaKey.key();
-    ATH_CHECK( m_cellsToMuonDetaKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsToMuonDetaKey.initialize() );
 
     m_cellsToMuonDphiKey = baseName + m_prefix + m_cellsToMuonDphiKey.key();
-    ATH_CHECK( m_cellsToMuonDphiKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsToMuonDphiKey.initialize() );
 
     m_cellsMuonDxKey = baseName + m_prefix + m_cellsMuonDxKey.key();
-    ATH_CHECK( m_cellsMuonDxKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonDxKey.initialize() );
 
     m_cellsMuonDeDxKey = baseName + m_prefix + m_cellsMuonDeDxKey.key();
-    ATH_CHECK( m_cellsMuonDeDxKey.initialize(m_saveTileCellMuonInfo) );
+    ATH_CHECK( m_cellsMuonDeDxKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -92,11 +92,26 @@ namespace DerivationFramework {
       cellContainer = caloCells.cptr();
     }
 
-    std::vector<const CaloCell*> cells;
-
     SG::WriteDecorHandle<xAOD::MuonContainer, int> selected_mu(m_selectedMuKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, float> econe_mu(m_econeMuKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonX(m_cellsMuonXKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonY(m_cellsMuonYKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonZ(m_cellsMuonZKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonEta(m_cellsMuonEtaKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonPhi(m_cellsMuonPhiKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDx(m_cellsToMuonDxKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDy(m_cellsToMuonDyKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDz(m_cellsToMuonDzKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDeta(m_cellsToMuonDetaKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDphi(m_cellsToMuonDphiKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonDx(m_cellsMuonDxKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonDeDx(m_cellsMuonDeDxKey, ctx);
+
+    std::map<const xAOD::IParticle*, std::vector<const CaloCell*>> muonCellsMap;
 
     for ( const xAOD::Muon* mu : *muons ) {
+
+      std::vector<const CaloCell*> cells;
 
       std::vector< float > cells_mu_x;
       std::vector< float > cells_mu_y;
@@ -134,7 +149,6 @@ namespace DerivationFramework {
           if (track != mu_track) e_trk_in_isocone += track->e();
         }
 
-        SG::WriteDecorHandle<xAOD::MuonContainer, float> econe_mu(m_econeMuKey, ctx);
         econe_mu(*mu) = e_trk_in_isocone;
 
         if (m_selectMuons && (e_trk_in_isocone > m_maxRelEtrkInIsoCone * mu_track->e())) {
@@ -176,97 +190,68 @@ namespace DerivationFramework {
 
         for (const CaloCell* cell : cells) {
 
-          if (m_saveTileCellMuonInfo) {
-            std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, cell);
+          std::vector<double> coordinates = m_trackInCalo->getXYZEtaPhiInCellSampling(mu_track, cell);
 
-            if (coordinates.size() == 5 ) {
+          if (coordinates.size() == 5 ) {
 
-              float path_length = m_trackInCalo->getPathInsideCell(mu_track, cell);
-              cells_mu_dx.push_back( path_length );
-              cells_mu_dedx.push_back( (path_length > 0 ? (cell->energy() / path_length) : -1.0) );
+            float path_length = m_trackInCalo->getPathInsideCell(mu_track, cell);
+            cells_mu_dx.push_back( path_length );
+            cells_mu_dedx.push_back( (path_length > 0 ? (cell->energy() / path_length) : -1.0) );
 
-              cells_mu_x.push_back(coordinates[0]);
-              cells_mu_y.push_back(coordinates[1]);
-              cells_mu_z.push_back(coordinates[2]);
-              cells_mu_eta.push_back(coordinates[3]);
-              cells_mu_phi.push_back(coordinates[4]);
+            cells_mu_x.push_back(coordinates[0]);
+            cells_mu_y.push_back(coordinates[1]);
+            cells_mu_z.push_back(coordinates[2]);
+            cells_mu_eta.push_back(coordinates[3]);
+            cells_mu_phi.push_back(coordinates[4]);
 
-              cells_to_mu_dx.push_back(cell->x() - coordinates[0]);
-              cells_to_mu_dy.push_back(cell->y() - coordinates[1]);
-              cells_to_mu_dz.push_back(cell->z() - coordinates[2]);
-              cells_to_mu_deta.push_back(cell->eta() - coordinates[3]);
-              cells_to_mu_dphi.push_back( KinematicUtils::deltaPhi(coordinates[4], cell->phi()) );
+            cells_to_mu_dx.push_back(cell->x() - coordinates[0]);
+            cells_to_mu_dy.push_back(cell->y() - coordinates[1]);
+            cells_to_mu_dz.push_back(cell->z() - coordinates[2]);
+            cells_to_mu_deta.push_back(cell->eta() - coordinates[3]);
+            cells_to_mu_dphi.push_back( KinematicUtils::deltaPhi(coordinates[4], cell->phi()) );
 
-            } else {
+          } else {
 
-              cells_mu_dx.push_back( 0.0 );
-              cells_mu_dedx.push_back( -2.0 );
+            cells_mu_dx.push_back( 0.0 );
+            cells_mu_dedx.push_back( -2.0 );
 
-              cells_mu_x.push_back(0.0);
-              cells_mu_y.push_back(0.0);
-              cells_mu_z.push_back(0.0);
-              cells_mu_eta.push_back(0.0);
-              cells_mu_phi.push_back(0.0);
+            cells_mu_x.push_back(0.0);
+            cells_mu_y.push_back(0.0);
+            cells_mu_z.push_back(0.0);
+            cells_mu_eta.push_back(0.0);
+            cells_mu_phi.push_back(0.0);
 
-              cells_to_mu_dx.push_back(0.0);
-              cells_to_mu_dy.push_back(0.0);
-              cells_to_mu_dz.push_back(0.0);
-              cells_to_mu_deta.push_back(0.0);
-              cells_to_mu_dphi.push_back(0.0);
-
-            }
+            cells_to_mu_dx.push_back(0.0);
+            cells_to_mu_dy.push_back(0.0);
+            cells_to_mu_dz.push_back(0.0);
+            cells_to_mu_deta.push_back(0.0);
+            cells_to_mu_dphi.push_back(0.0);
 
           }
         }
 
-        ATH_CHECK( m_cellsDecorator->decorate(mu, cells, ctx) );
+        muonCellsMap[mu] = cells;
 
       } else {
         selected_mu(*mu) = 0;
       }
 
-
-      if (m_saveTileCellMuonInfo) {
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonX(m_cellsMuonXKey, ctx);
-        cellsMuonX(*mu) = std::move(cells_mu_x);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonY(m_cellsMuonYKey, ctx);
-        cellsMuonY(*mu) = std::move(cells_mu_y);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonZ(m_cellsMuonZKey, ctx);
-        cellsMuonZ(*mu) = std::move(cells_mu_z);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonEta(m_cellsMuonEtaKey, ctx);
-        cellsMuonEta(*mu) = std::move(cells_mu_eta);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonPhi(m_cellsMuonPhiKey, ctx);
-        cellsMuonPhi(*mu) = std::move(cells_mu_phi);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDx(m_cellsToMuonDxKey, ctx);
-        cellsToMuonDx(*mu) = std::move(cells_to_mu_dx);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDy(m_cellsToMuonDyKey, ctx);
-        cellsToMuonDy(*mu) = std::move(cells_to_mu_dy);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDz(m_cellsToMuonDzKey, ctx);
-        cellsToMuonDz(*mu) = std::move(cells_to_mu_dz);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDeta(m_cellsToMuonDetaKey, ctx);
-        cellsToMuonDeta(*mu) = std::move(cells_to_mu_deta);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsToMuonDphi(m_cellsToMuonDphiKey, ctx);
-        cellsToMuonDphi(*mu) = std::move(cells_to_mu_dphi);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonDx(m_cellsMuonDxKey, ctx);
-        cellsMuonDx(*mu) = std::move(cells_mu_dx);
-
-        SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsMuonDeDx(m_cellsMuonDeDxKey, ctx);
-        cellsMuonDeDx(*mu) = std::move(cells_mu_dedx);
-
-      }
+      cellsMuonX(*mu) = std::move(cells_mu_x);
+      cellsMuonY(*mu) = std::move(cells_mu_y);
+      cellsMuonZ(*mu) = std::move(cells_mu_z);
+      cellsMuonEta(*mu) = std::move(cells_mu_eta);
+      cellsMuonPhi(*mu) = std::move(cells_mu_phi);
+      cellsToMuonDx(*mu) = std::move(cells_to_mu_dx);
+      cellsToMuonDy(*mu) = std::move(cells_to_mu_dy);
+      cellsToMuonDz(*mu) = std::move(cells_to_mu_dz);
+      cellsToMuonDeta(*mu) = std::move(cells_to_mu_deta);
+      cellsToMuonDphi(*mu) = std::move(cells_to_mu_dphi);
+      cellsMuonDx(*mu) = std::move(cells_mu_dx);
+      cellsMuonDeDx(*mu) = std::move(cells_mu_dedx);
 
     }
+
+    ATH_CHECK( m_cellsDecorator->decorate(muonCellsMap, ctx) );
 
     return StatusCode::SUCCESS;
   }

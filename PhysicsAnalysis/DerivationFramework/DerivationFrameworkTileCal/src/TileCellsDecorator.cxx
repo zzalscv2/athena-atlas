@@ -75,196 +75,245 @@ namespace DerivationFramework {
     ATH_CHECK( m_cellsQualityKey.initialize() );
 
     m_cellsSinThKey = baseName + m_prefix + m_cellsSinThKey.key();
-    ATH_CHECK( m_cellsSinThKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsSinThKey.initialize() );
 
     m_cellsCosThKey = baseName + m_prefix + m_cellsCosThKey.key();
-    ATH_CHECK( m_cellsCosThKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsCosThKey.initialize() );
 
     m_cellsCotThKey = baseName + m_prefix + m_cellsCotThKey.key();
-    ATH_CHECK( m_cellsCotThKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsCotThKey.initialize() );
 
     m_cellsXKey = baseName + m_prefix + m_cellsXKey.key();
-    ATH_CHECK( m_cellsXKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsXKey.initialize() );
 
     m_cellsYKey = baseName + m_prefix + m_cellsYKey.key();
-    ATH_CHECK( m_cellsYKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsYKey.initialize() );
 
     m_cellsZKey = baseName + m_prefix + m_cellsZKey.key();
-    ATH_CHECK( m_cellsZKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsZKey.initialize() );
 
     m_cellsRKey = baseName + m_prefix + m_cellsRKey.key();
-    ATH_CHECK( m_cellsRKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsRKey.initialize() );
 
     m_cellsDxKey = baseName + m_prefix + m_cellsDxKey.key();
-    ATH_CHECK( m_cellsDxKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsDxKey.initialize() );
 
     m_cellsDyKey = baseName + m_prefix + m_cellsDyKey.key();
-    ATH_CHECK( m_cellsDyKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsDyKey.initialize() );
 
     m_cellsDzKey = baseName + m_prefix + m_cellsDzKey.key();
-    ATH_CHECK( m_cellsDzKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsDzKey.initialize() );
 
     m_cellsDrKey = baseName + m_prefix + m_cellsDrKey.key();
-    ATH_CHECK( m_cellsDrKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsDrKey.initialize() );
 
     m_cellsVolumeKey = baseName + m_prefix + m_cellsVolumeKey.key();
-    ATH_CHECK( m_cellsVolumeKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsVolumeKey.initialize() );
 
     m_cellsDetaKey = baseName + m_prefix + m_cellsDetaKey.key();
-    ATH_CHECK( m_cellsDetaKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsDetaKey.initialize() );
 
     m_cellsDphiKey = baseName + m_prefix + m_cellsDphiKey.key();
-    ATH_CHECK( m_cellsDphiKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsDphiKey.initialize() );
 
     m_cellsSideKey = baseName + m_prefix + m_cellsSideKey.key();
-    ATH_CHECK( m_cellsSideKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsSideKey.initialize() );
 
     m_cellsSectionKey = baseName + m_prefix + m_cellsSectionKey.key();
-    ATH_CHECK( m_cellsSectionKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsSectionKey.initialize() );
 
     m_cellsModuleKey = baseName + m_prefix + m_cellsModuleKey.key();
-    ATH_CHECK( m_cellsModuleKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsModuleKey.initialize() );
 
     m_cellsTowerKey = baseName + m_prefix + m_cellsTowerKey.key();
-    ATH_CHECK( m_cellsTowerKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsTowerKey.initialize() );
 
     m_cellsSampleKey = baseName + m_prefix + m_cellsSampleKey.key();
-    ATH_CHECK( m_cellsSampleKey.initialize(m_saveTileCellPositionAndDimention) );
+    ATH_CHECK( m_cellsSampleKey.initialize() );
 
     m_cellsPmt1RosKey = baseName + m_prefix + m_cellsPmt1RosKey.key();
-    ATH_CHECK( m_cellsPmt1RosKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1RosKey.initialize() );
 
     m_cellsPmt2RosKey = baseName + m_prefix + m_cellsPmt2RosKey.key();
-    ATH_CHECK( m_cellsPmt2RosKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2RosKey.initialize() );
 
     m_cellsPmt1DrawerKey = baseName + m_prefix + m_cellsPmt1DrawerKey.key();
-    ATH_CHECK( m_cellsPmt1DrawerKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1DrawerKey.initialize() );
 
     m_cellsPmt2DrawerKey = baseName + m_prefix + m_cellsPmt2DrawerKey.key();
-    ATH_CHECK( m_cellsPmt2DrawerKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2DrawerKey.initialize() );
 
     m_cellsPmt1ChannelKey = baseName + m_prefix + m_cellsPmt1ChannelKey.key();
-    ATH_CHECK( m_cellsPmt1ChannelKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1ChannelKey.initialize() );
 
     m_cellsPmt2ChannelKey = baseName + m_prefix + m_cellsPmt2ChannelKey.key();
-    ATH_CHECK( m_cellsPmt2ChannelKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2ChannelKey.initialize() );
 
     m_cellsPmt1EnergyKey = baseName + m_prefix + m_cellsPmt1EnergyKey.key();
-    ATH_CHECK( m_cellsPmt1EnergyKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1EnergyKey.initialize() );
 
     m_cellsPmt2EnergyKey = baseName + m_prefix + m_cellsPmt2EnergyKey.key();
-    ATH_CHECK( m_cellsPmt2EnergyKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2EnergyKey.initialize() );
 
     m_cellsPmt1TimeKey = baseName + m_prefix + m_cellsPmt1TimeKey.key();
-    ATH_CHECK( m_cellsPmt1TimeKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1TimeKey.initialize() );
 
     m_cellsPmt2TimeKey = baseName + m_prefix + m_cellsPmt2TimeKey.key();
-    ATH_CHECK( m_cellsPmt2TimeKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2TimeKey.initialize() );
 
     m_cellsPmt1QualityKey = baseName + m_prefix + m_cellsPmt1QualityKey.key();
-    ATH_CHECK( m_cellsPmt1QualityKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1QualityKey.initialize() );
 
     m_cellsPmt2QualityKey = baseName + m_prefix + m_cellsPmt2QualityKey.key();
-    ATH_CHECK( m_cellsPmt2QualityKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2QualityKey.initialize() );
 
     m_cellsPmt1QbitKey = baseName + m_prefix + m_cellsPmt1QbitKey.key();
-    ATH_CHECK( m_cellsPmt1QbitKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1QbitKey.initialize() );
 
     m_cellsPmt2QbitKey = baseName + m_prefix + m_cellsPmt2QbitKey.key();
-    ATH_CHECK( m_cellsPmt2QbitKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2QbitKey.initialize() );
 
     m_cellsPmt1BadKey = baseName + m_prefix + m_cellsPmt1BadKey.key();
-    ATH_CHECK( m_cellsPmt1BadKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1BadKey.initialize() );
 
     m_cellsPmt2BadKey = baseName + m_prefix + m_cellsPmt2BadKey.key();
-    ATH_CHECK( m_cellsPmt2BadKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2BadKey.initialize() );
 
     m_cellsPmt1GainKey = baseName + m_prefix + m_cellsPmt1GainKey.key();
-    ATH_CHECK( m_cellsPmt1GainKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt1GainKey.initialize() );
 
     m_cellsPmt2GainKey = baseName + m_prefix + m_cellsPmt2GainKey.key();
-    ATH_CHECK( m_cellsPmt2GainKey.initialize(m_saveTileCellPmtInfo) );
+    ATH_CHECK( m_cellsPmt2GainKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TileCellsDecorator::decorate(const xAOD::IParticle* particle, std::vector<const CaloCell*>& cells, const EventContext& ctx) const {
+  StatusCode TileCellsDecorator::decorate(const std::map<const xAOD::IParticle*, std::vector<const CaloCell*>>& muonCellsMap, const EventContext& ctx) const {
 
-    std::vector< float > cells_energy;
-    std::vector< float > cells_et;
-    std::vector< float > cells_eta;
-    std::vector< float > cells_phi;
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsEnergy(m_cellsEnergyKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsEt(m_cellsEtKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsEta(m_cellsEtaKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPhi(m_cellsPhiKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<int>> cellsGain(m_cellsGainKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<bool>> cellsBad(m_cellsBadKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<int>> cellsSampling(m_cellsSamplingKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsTime(m_cellsTimeKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsQuality(m_cellsQualityKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsSinTh(m_cellsSinThKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsCosTh(m_cellsCosThKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsCotTh(m_cellsCotThKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsX(m_cellsXKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsY(m_cellsYKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsZ(m_cellsZKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsR(m_cellsRKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDx(m_cellsDxKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDy(m_cellsDyKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDz(m_cellsDzKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDr(m_cellsDrKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsVolume(m_cellsVolumeKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDeta(m_cellsDetaKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDphi(m_cellsDphiKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<int>> cellsSide(m_cellsSideKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsSection(m_cellsSectionKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsModule(m_cellsModuleKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsTower(m_cellsTowerKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsSample(m_cellsSampleKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Ros(m_cellsPmt1RosKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Ros(m_cellsPmt2RosKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Drawer(m_cellsPmt1DrawerKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Drawer(m_cellsPmt2DrawerKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Channel(m_cellsPmt1ChannelKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Channel(m_cellsPmt2ChannelKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt1Energy(m_cellsPmt1EnergyKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt2Energy(m_cellsPmt2EnergyKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt1Time(m_cellsPmt1TimeKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt2Time(m_cellsPmt2TimeKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Quality(m_cellsPmt1QualityKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Quality(m_cellsPmt2QualityKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1_Qbit(m_cellsPmt1QbitKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2_Qbit(m_cellsPmt2QbitKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<bool>> cellsPmt1Bad(m_cellsPmt1BadKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<bool>> cellsPmt2Bad(m_cellsPmt2BadKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Gain(m_cellsPmt1GainKey, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Gain(m_cellsPmt2GainKey, ctx);
 
-    std::vector< int > cells_gain;
-    std::vector< bool > cells_bad;
-    std::vector< int > cells_sampling;
-    std::vector< float > cells_time;
-    std::vector< unsigned short > cells_quality;
+    for (std::pair<const xAOD::IParticle*, const std::vector<const CaloCell*>> particleCellsPair : muonCellsMap) {
 
-    std::vector< float > cells_sinTh;
-    std::vector< float > cells_cosTh;
-    std::vector< float > cells_cotTh;
-    std::vector< float > cells_x;
-    std::vector< float > cells_y;
-    std::vector< float > cells_z;
+      const xAOD::IParticle* particle = particleCellsPair.first;
+      const std::vector<const CaloCell*>& cells = particleCellsPair.second;
 
-    std::vector< float > cells_r;
-    std::vector< float > cells_dx;
-    std::vector< float > cells_dy;
-    std::vector< float > cells_dz;
-    std::vector< float > cells_dr;
-    std::vector< float > cells_volume;
-    std::vector< float > cells_dphi;
-    std::vector< float > cells_deta;
+      std::vector< float > cells_energy;
+      std::vector< float > cells_et;
+      std::vector< float > cells_eta;
+      std::vector< float > cells_phi;
 
-    std::vector< int > cells_side;
-    std::vector< unsigned short > cells_section;
-    std::vector< unsigned short > cells_module;
-    std::vector< unsigned short > cells_tower;
-    std::vector< unsigned short > cells_sample;
+      std::vector< int > cells_gain;
+      std::vector< bool > cells_bad;
+      std::vector< int > cells_sampling;
+      std::vector< float > cells_time;
+      std::vector< unsigned short > cells_quality;
 
-    std::vector< unsigned short > cells_pmt1_ros;
-    std::vector< unsigned short > cells_pmt2_ros;
-    std::vector< unsigned short > cells_pmt1_drawer;
-    std::vector< unsigned short > cells_pmt2_drawer;
-    std::vector< unsigned short > cells_pmt1_channel;
-    std::vector< unsigned short > cells_pmt2_channel;
+      std::vector< float > cells_sinTh;
+      std::vector< float > cells_cosTh;
+      std::vector< float > cells_cotTh;
+      std::vector< float > cells_x;
+      std::vector< float > cells_y;
+      std::vector< float > cells_z;
 
-    std::vector< float > cells_pmt1_energy;
-    std::vector< float > cells_pmt2_energy;
-    std::vector< float > cells_pmt1_time;
-    std::vector< float > cells_pmt2_time;
+      std::vector< float > cells_r;
+      std::vector< float > cells_dx;
+      std::vector< float > cells_dy;
+      std::vector< float > cells_dz;
+      std::vector< float > cells_dr;
+      std::vector< float > cells_volume;
+      std::vector< float > cells_dphi;
+      std::vector< float > cells_deta;
 
-    std::vector< unsigned short > cells_pmt1_quality;
-    std::vector< unsigned short > cells_pmt2_quality;
-    std::vector< unsigned short > cells_pmt1_qbit;
-    std::vector< unsigned short > cells_pmt2_qbit;
+      std::vector< int > cells_side;
+      std::vector< unsigned short > cells_section;
+      std::vector< unsigned short > cells_module;
+      std::vector< unsigned short > cells_tower;
+      std::vector< unsigned short > cells_sample;
 
-    std::vector< bool > cells_pmt1_bad;
-    std::vector< bool > cells_pmt2_bad;
-    std::vector< unsigned short > cells_pmt1_gain;
-    std::vector< unsigned short > cells_pmt2_gain;
+      std::vector< unsigned short > cells_pmt1_ros;
+      std::vector< unsigned short > cells_pmt2_ros;
+      std::vector< unsigned short > cells_pmt1_drawer;
+      std::vector< unsigned short > cells_pmt2_drawer;
+      std::vector< unsigned short > cells_pmt1_channel;
+      std::vector< unsigned short > cells_pmt2_channel;
 
+      std::vector< float > cells_pmt1_energy;
+      std::vector< float > cells_pmt2_energy;
+      std::vector< float > cells_pmt1_time;
+      std::vector< float > cells_pmt2_time;
 
-    for (const CaloCell* cell : cells) {
+      std::vector< unsigned short > cells_pmt1_quality;
+      std::vector< unsigned short > cells_pmt2_quality;
+      std::vector< unsigned short > cells_pmt1_qbit;
+      std::vector< unsigned short > cells_pmt2_qbit;
 
-      const CaloDetDescrElement* cell_dde = cell->caloDDE();
-
-      // Cell energy and eta/phi
-      cells_energy.push_back( cell->energy() );
-      cells_et.push_back( cell->et() );
-      cells_eta.push_back( cell->eta() );
-      cells_phi.push_back( cell->phi() );
-
-
-      cells_gain.push_back( cell->gain() );
-      cells_bad.push_back( cell->badcell() );
-      cells_sampling.push_back( cell_dde->getSampling() );
-      cells_time.push_back( cell->time() );
-      cells_quality.push_back( cell->quality() );
+      std::vector< bool > cells_pmt1_bad;
+      std::vector< bool > cells_pmt2_bad;
+      std::vector< unsigned short > cells_pmt1_gain;
+      std::vector< unsigned short > cells_pmt2_gain;
 
 
-      if (m_saveTileCellPositionAndDimention) {
+      for (const CaloCell* cell : cells) {
+
+        const CaloDetDescrElement* cell_dde = cell->caloDDE();
+
+        // Cell energy and eta/phi
+        cells_energy.push_back( cell->energy() );
+        cells_et.push_back( cell->et() );
+        cells_eta.push_back( cell->eta() );
+        cells_phi.push_back( cell->phi() );
+
+
+        cells_gain.push_back( cell->gain() );
+        cells_bad.push_back( cell->badcell() );
+        cells_sampling.push_back( cell_dde->getSampling() );
+        cells_time.push_back( cell->time() );
+        cells_quality.push_back( cell->quality() );
 
         // Cell positioning
         cells_sinTh.push_back( cell->sinTh() );
@@ -289,10 +338,6 @@ namespace DerivationFramework {
         cells_module.push_back( m_tileID->module(cell->ID()) );
         cells_tower.push_back( m_tileID->tower(cell->ID()) );
         cells_sample.push_back( m_tileID->sample(cell->ID()) );
-
-      }
-
-      if (m_saveTileCellPmtInfo) {
 
         // Tile PMT information
         const TileCell* tile_cell = dynamic_cast<const TileCell*> (cell);
@@ -335,156 +380,56 @@ namespace DerivationFramework {
         cells_pmt2_gain.push_back( tile_cell->gain2() );
       }
 
-    }
+      cellsEnergy(*particle) = std::move(cells_energy);
+      cellsEt(*particle) = std::move(cells_et);
+      cellsEta(*particle) = std::move(cells_eta);
+      cellsPhi(*particle) = std::move(cells_phi);
+      cellsGain(*particle) = std::move(cells_gain);
+      cellsBad(*particle) = std::move(cells_bad);
+      cellsSampling(*particle) = std::move(cells_sampling);
+      cellsTime(*particle) = std::move(cells_time);
+      cellsQuality(*particle) = std::move(cells_quality);
 
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsEnergy(m_cellsEnergyKey, ctx);
-    cellsEnergy(*particle) = std::move(cells_energy);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsEt(m_cellsEtKey, ctx);
-    cellsEt(*particle) = std::move(cells_et);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsEta(m_cellsEtaKey, ctx);
-    cellsEta(*particle) = std::move(cells_eta);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPhi(m_cellsPhiKey, ctx);
-    cellsPhi(*particle) = std::move(cells_phi);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<int>> cellsGain(m_cellsGainKey, ctx);
-    cellsGain(*particle) = std::move(cells_gain);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<bool>> cellsBad(m_cellsBadKey, ctx);
-    cellsBad(*particle) = std::move(cells_bad);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<int>> cellsSampling(m_cellsSamplingKey, ctx);
-    cellsSampling(*particle) = std::move(cells_sampling);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsTime(m_cellsTimeKey, ctx);
-    cellsTime(*particle) = std::move(cells_time);
-
-    SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsQuality(m_cellsQualityKey, ctx);
-    cellsQuality(*particle) = std::move(cells_quality);
-
-
-    if (m_saveTileCellPositionAndDimention) {
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsSinTh(m_cellsSinThKey, ctx);
       cellsSinTh(*particle) = std::move(cells_sinTh);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsCosTh(m_cellsCosThKey, ctx);
       cellsCosTh(*particle) = std::move(cells_cosTh);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsCotTh(m_cellsCotThKey, ctx);
       cellsCotTh(*particle) = std::move(cells_cotTh);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsX(m_cellsXKey, ctx);
       cellsX(*particle) = std::move(cells_x);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsY(m_cellsYKey, ctx);
       cellsY(*particle) = std::move(cells_y);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsZ(m_cellsZKey, ctx);
       cellsZ(*particle) = std::move(cells_z);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsR(m_cellsRKey, ctx);
       cellsR(*particle) = std::move(cells_r);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDx(m_cellsDxKey, ctx);
       cellsDx(*particle) = std::move(cells_dx);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDy(m_cellsDyKey, ctx);
       cellsDy(*particle) = std::move(cells_dy);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDz(m_cellsDzKey, ctx);
       cellsDz(*particle) = std::move(cells_dz);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDr(m_cellsDrKey, ctx);
       cellsDr(*particle) = std::move(cells_dr);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsVolume(m_cellsVolumeKey, ctx);
       cellsVolume(*particle) = std::move(cells_volume);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDeta(m_cellsDetaKey, ctx);
       cellsDeta(*particle) = std::move(cells_deta);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsDphi(m_cellsDphiKey, ctx);
       cellsDphi(*particle) = std::move(cells_dphi);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<int>> cellsSide(m_cellsSideKey, ctx);
       cellsSide(*particle) = std::move(cells_side);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsSection(m_cellsSectionKey, ctx);
       cellsSection(*particle) = std::move(cells_section);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsModule(m_cellsModuleKey, ctx);
       cellsModule(*particle) = std::move(cells_module);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsTower(m_cellsTowerKey, ctx);
       cellsTower(*particle) = std::move(cells_tower);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsSample(m_cellsSampleKey, ctx);
       cellsSample(*particle) = std::move(cells_sample);
 
-    }
-
-
-    if (m_saveTileCellPmtInfo) {
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Ros(m_cellsPmt1RosKey, ctx);
       cellsPmt1Ros(*particle) = std::move(cells_pmt1_ros);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Ros(m_cellsPmt2RosKey, ctx);
       cellsPmt2Ros(*particle) = std::move(cells_pmt2_ros);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Drawer(m_cellsPmt1DrawerKey, ctx);
       cellsPmt1Drawer(*particle) = std::move(cells_pmt1_drawer);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Drawer(m_cellsPmt2DrawerKey, ctx);
       cellsPmt2Drawer(*particle) = std::move(cells_pmt2_drawer);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Channel(m_cellsPmt1ChannelKey, ctx);
       cellsPmt1Channel(*particle) = std::move(cells_pmt1_channel);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Channel(m_cellsPmt2ChannelKey, ctx);
       cellsPmt2Channel(*particle) = std::move(cells_pmt2_channel);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt1Energy(m_cellsPmt1EnergyKey, ctx);
       cellsPmt1Energy(*particle) = std::move(cells_pmt1_energy);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt2Energy(m_cellsPmt2EnergyKey, ctx);
       cellsPmt2Energy(*particle) = std::move(cells_pmt2_energy);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt1Time(m_cellsPmt1TimeKey, ctx);
       cellsPmt1Time(*particle) = std::move(cells_pmt1_time);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<float>> cellsPmt2Time(m_cellsPmt2TimeKey, ctx);
       cellsPmt2Time(*particle) = std::move(cells_pmt2_time);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Quality(m_cellsPmt1QualityKey, ctx);
       cellsPmt1Quality(*particle) = std::move(cells_pmt1_quality);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Quality(m_cellsPmt2QualityKey, ctx);
       cellsPmt2Quality(*particle) = std::move(cells_pmt2_quality);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1_Qbit(m_cellsPmt1QbitKey, ctx);
       cellsPmt1_Qbit(*particle) = std::move(cells_pmt1_qbit);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2_Qbit(m_cellsPmt2QbitKey, ctx);
       cellsPmt2_Qbit(*particle) = std::move(cells_pmt2_qbit);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<bool>> cellsPmt1Bad(m_cellsPmt1BadKey, ctx);
       cellsPmt1Bad(*particle) = std::move(cells_pmt1_bad);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<bool>> cellsPmt2Bad(m_cellsPmt2BadKey, ctx);
       cellsPmt2Bad(*particle) = std::move(cells_pmt2_bad);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt1Gain(m_cellsPmt1GainKey, ctx);
       cellsPmt1Gain(*particle) = std::move(cells_pmt1_gain);
-
-      SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned short>> cellsPmt2Gain(m_cellsPmt2GainKey, ctx);
       cellsPmt2Gain(*particle) = std::move(cells_pmt2_gain);
 
     }
-
 
     return StatusCode::SUCCESS;
   }
