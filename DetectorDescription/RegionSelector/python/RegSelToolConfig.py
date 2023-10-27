@@ -9,6 +9,7 @@
 #                 
 #   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration#                 
 #
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
@@ -223,31 +224,35 @@ def regSelToolCfg(flags, detector, algorithm, readout_geometry=None, conditions=
     ca.addCondAlgo(the_alg)
     return ca
 
-
 # inner detector
+@AccumulatorCache
 def regSelTool_Pixel_Cfg(flags):
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
     from PixelConditionsAlgorithms.PixelConditionsConfig import PixelCablingCondAlgCfg
     return regSelToolCfg(flags, "Pixel", CompFactory.SiRegSelCondAlg,
                          readout_geometry=PixelReadoutGeometryCfg(flags), conditions=PixelCablingCondAlgCfg(flags))
 
+@AccumulatorCache
 def regSelTool_SCT_Cfg(flags):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     from SCT_Cabling.SCT_CablingConfig import SCT_CablingCondAlgCfg
     return regSelToolCfg(flags, "SCT", CompFactory.SiRegSelCondAlg,
                          readout_geometry=SCT_ReadoutGeometryCfg(flags), conditions=SCT_CablingCondAlgCfg(flags))
 
+@AccumulatorCache
 def regSelTool_TRT_Cfg(flags):
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
     return regSelToolCfg(flags, "TRT", CompFactory.TRT_RegSelCondAlg,
                          readout_geometry=TRT_ReadoutGeometryCfg(flags))
 
 # ITk
+@AccumulatorCache
 def regSelTool_ITkPixel_Cfg(flags):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     return regSelToolCfg(flags, "ITkPixel", CompFactory.SiRegSelCondAlg,
                          readout_geometry=ITkPixelReadoutGeometryCfg(flags))
 
+@AccumulatorCache
 def regSelTool_ITkStrip_Cfg(flags):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     return regSelToolCfg(flags, "ITkStrip", CompFactory.SiRegSelCondAlg,
@@ -255,6 +260,7 @@ def regSelTool_ITkStrip_Cfg(flags):
 
 
 # muon spectrometer
+@AccumulatorCache
 def regSelTool_MDT_Cfg(flags):
     from MuonConfig.MuonCablingConfig import MDTCablingConfigCfg
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
@@ -269,6 +275,7 @@ def regSelTool_MDT_Cfg(flags):
     return regSelToolCfg(flags, "MDT", CompFactory.MDT_RegSelCondAlg,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_RPC_Cfg(flags):
     from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
@@ -280,6 +287,7 @@ def regSelTool_RPC_Cfg(flags):
     return regSelToolCfg(flags, "RPC", CompFactory.RPC_RegSelCondAlg,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_TGC_Cfg(flags):
     from MuonConfig.MuonCablingConfig import TGCCablingConfigCfg
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
@@ -291,6 +299,7 @@ def regSelTool_TGC_Cfg(flags):
     return regSelToolCfg(flags, "TGC", CompFactory.TGC_RegSelCondAlg,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_CSC_Cfg(flags):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     from MuonConfig.MuonCablingConfig import CSCCablingConfigCfg
@@ -302,18 +311,21 @@ def regSelTool_CSC_Cfg(flags):
     return regSelToolCfg(flags, "CSC", CompFactory.CSC_RegSelCondAlg,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_STGC_Cfg(flags):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     return regSelToolCfg(flags, "sTGC", CompFactory.sTGC_RegSelCondAlg,
                          conditions=MuonGeoModelCfg(flags))
 
+@AccumulatorCache
 def regSelTool_MM_Cfg(flags):
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     return regSelToolCfg(flags, "MM", CompFactory.MM_RegSelCondAlg,
                          conditions=MuonGeoModelCfg(flags))
 
 
-# calo 
+# calo
+@AccumulatorCache
 def regSelTool_TTEM_Cfg(flags):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
@@ -325,6 +337,7 @@ def regSelTool_TTEM_Cfg(flags):
     return regSelToolCfg(flags, "TTEM", CompFactory.RegSelCondAlg_LAr,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_TTHEC_Cfg(flags):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
@@ -336,6 +349,7 @@ def regSelTool_TTHEC_Cfg(flags):
     return regSelToolCfg(flags, "TTHEC", CompFactory.RegSelCondAlg_LAr,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_FCALEM_Cfg(flags):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
@@ -347,6 +361,7 @@ def regSelTool_FCALEM_Cfg(flags):
     return regSelToolCfg(flags, "FCALEM", CompFactory.RegSelCondAlg_LAr,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_FCALHAD_Cfg(flags):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArRecUtils.LArRecUtilsConfig import LArRoIMapCondAlgCfg
@@ -358,6 +373,7 @@ def regSelTool_FCALHAD_Cfg(flags):
     return regSelToolCfg(flags, "FCALHAD", CompFactory.RegSelCondAlg_LAr,
                          conditions=conditions)
 
+@AccumulatorCache
 def regSelTool_TILE_Cfg(flags):
     from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
     return regSelToolCfg(flags, "TILE", CompFactory.RegSelCondAlg_Tile,
