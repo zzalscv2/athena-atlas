@@ -8,9 +8,8 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('RDOtoRDO_TRIG')
 
 # force no legacy job properties
-# We want this but need to clear them out of the L1 menu generation first
-# from AthenaCommon import JobProperties
-# JobProperties.jobPropertiesDisallowed = True
+from AthenaCommon import JobProperties
+JobProperties.jobPropertiesDisallowed = True
 
 
 def configureFlags(runArgs):
