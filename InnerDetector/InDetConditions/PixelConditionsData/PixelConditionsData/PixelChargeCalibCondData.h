@@ -101,11 +101,6 @@ class PixelChargeCalibCondData
     //
     float 
     getToTLUTFEI4(unsigned int moduleHash, unsigned int FE, float Q) const;
-    
-    inline constexpr int 
-    getFEI4OverflowToT() const {
-      return 16;
-    }
 
   private:
     std::size_t m_sizeOfHashVector = 0;

@@ -27,6 +27,7 @@ def ITkPixelChargeToTConversionCfg(flags, name='ITkPixelChargeToTConversion', **
     
     kwargs.setdefault("PixelClusterContainer", "ITkPixelClusters")
     kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
+    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("IBLParameterSvc", "")

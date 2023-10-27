@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // conditions
@@ -36,6 +36,7 @@ StatusCode PixelChargeToTConversion::initialize(){
   m_doIBL = !m_IBLParameterSvc.empty() && m_IBLParameterSvc->containsIBL();
 
   ATH_CHECK(m_pixelReadout.retrieve());
+  ATH_CHECK(m_moduleDataKey.initialize());
   ATH_CHECK(m_chargeDataKey.initialize());
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
   ATH_CHECK(m_pixelsClustersKey.initialize());
@@ -52,13 +53,14 @@ StatusCode PixelChargeToTConversion::execute(){
       return StatusCode::RECOVERABLE;
     }
   ATH_MSG_DEBUG( "Pixel Cluster container found:  " << pixel_container->size() << " collections" );
-  SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
-  const PixelChargeCalibCondData *calibData = *calibDataHandle;
-  
+
   int overflowIBLToT=0;
   if(m_doIBL) {
-    overflowIBLToT = calibData->getFEI4OverflowToT();
+    overflowIBLToT = SG::ReadCondHandle<PixelModuleData>(m_moduleDataKey)->getFEI4OverflowToT(0,0);
   }
+
+  SG::ReadCondHandle<PixelChargeCalibCondData> calibDataHandle(m_chargeDataKey, ctx);
+  const PixelChargeCalibCondData *calibData = *calibDataHandle;
 
   typedef InDet::PixelClusterContainer::const_iterator ClusterIter;
   ClusterIter itrCluster;
