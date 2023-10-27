@@ -189,7 +189,7 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
                 }
                 
                 
-                ATH_MSG_INFO("The current side is " << iside << ", the module mask is " << zdcModuleMaskCurSide);
+                ATH_MSG_DEBUG("The current side is " << iside << ", the module mask is " << zdcModuleMaskCurSide);
 
                 if (zdcSum->zdcSide() == 1){
                     zdcEnergySumA = ZdcSumCalibEnergyHandle(*zdcSum);
@@ -345,9 +345,6 @@ StatusCode ZdcMonitorAlgorithm::fillPhysicsDataHistograms( const EventContext& c
             rpdAmplitudeCalibSum[iside] += rpdChannelAmplitudeCalib;
             rpdMaxADCSum[iside] += rpdChannelMaxADC;
 
-            if (rpdChannelPileupFrac == -1){
-                ATH_MSG_INFO("pile up fraction == -1: the negative pileup hist should be filled");
-            }
             fill(m_tools[m_RPDChannelToolIndices[iside][ichannel]], rpdChannelSubAmp, rpdChannelAmplitude, rpdChannelAmplitudeCalib, rpdChannelMaxADC, rpdStatusBits, rpdChannelPileupFitSlope, absRpdChannelAmplitude, rpdChannelPileupFrac, zdcEMModuleEnergySameSide, zdcEMModuleSameSideHasPulse, zdcEMModuleEnergySameSideBelow0, zdcEMModuleEnergySameSideBelow70, rpdChannelNegativeAmp, rpdChannelNegativePileup, rpdChannelNoPileup, lumiBlock, bcid);
         }
     }

@@ -14,7 +14,7 @@ find_package( ROOT COMPONENTS Core MathCore MathMore Minuit Minuit2 Matrix )
 atlas_add_component( CaloRec
    src/components/*.cxx src/*.cxx  CaloRec/*.h
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent CaloGeoHelpers
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent TileEvent LArRecEvent CaloGeoHelpers
    CaloIdentifier AthenaBaseComps AthenaKernel CxxUtils AthenaPoolUtilities
    Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib
    StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib

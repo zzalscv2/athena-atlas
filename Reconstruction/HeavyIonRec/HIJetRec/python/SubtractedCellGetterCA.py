@@ -8,7 +8,7 @@ __log = logging.getLogger('SubtractedCellGetterCA')
 def SubtractedCellGetterCfgCA(flags, modulator):
     acc=ComponentAccumulator()
     
-    cellCopyTool = acc.popToolsAndMerge(CaloCellFastCopyToolCfg(flags,name="HICellCopyTool"))
+    cellCopyTool=CompFactory.CaloCellContCopyTool(name="HICellCopyTool")
     
     cellSubtrTool = acc.popToolsAndMerge(HISubtractedCellMakerToolCfg(flags, name="HISubtractedCellMakerTool", Modulator=modulator))
     
@@ -17,9 +17,10 @@ def SubtractedCellGetterCfgCA(flags, modulator):
     cellMakerTools=[cellCopyTool,cellSubtrTool,cellFinalizerTool]
 
     cellAlgo = CompFactory.CaloCellMaker("HICaloCellCopier",
-                                          CaloCellMakerToolNames=cellMakerTools,
-                                          CaloCellsOutputName=flags.HeavyIon.Egamma.SubtractedCells,
-                                          OwnPolicy=0)
+                                         CaloCellMakerToolNames=cellMakerTools,
+                                         CaloCellsOutputName=flags.HeavyIon.Egamma.SubtractedCells,
+                                         EnableChronoStat=(flags.Concurrency.NumThreads == 0))
+
     
     acc.addEventAlgo(cellAlgo)
     return acc

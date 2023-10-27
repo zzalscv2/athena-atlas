@@ -71,19 +71,19 @@ def EfexMonitoringHistConfig(inputFlags, eFexAlg):
         tobTypeStr += "copy" if 'Copy' in containerKey else ""
         simStr = "Sim" if ('Sim' in containerKey) else ""
         tobStr = tobTypeStr + simStr
-        noCutGroup.defineHistogram(containerKey + '_nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s;EM '+tobStr+'s;Number of EM '+tobStr+'s',
-                                type='TH1I', path=trigPath+tobStr+'/', xbins=10,xmin=0,xmax=10)
-        noCutGroup.defineHistogram("tobType,"+containerKey + "_seedMax;h_emTob_seedMax", title='Seedmax bit;tobType;value;Number of TOBs',
-                                   type='TH2I',path=trigPath+tobStr+'/', xbins=2,xmin=0,xmax=2,xlabels=["em","tau"],ybins=2,ymin=-0.5,ymax=1.5)
+        noCutGroup.defineHistogram(containerKey + '_nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s;Number of EM '+tobStr+'s;Events',
+                                type='TH1I', path=trigPath+tobStr+'/', xbins=100,xmin=-0.5,xmax=99.5)
+        noCutGroup.defineHistogram(containerKey + "_seedMax;h_emTob_seedMax", title='EM TOB Seedmax bit;Seedmax bit;Number of TOBs',
+                                   type='TH1I',path=trigPath+tobStr+'/', xbins=2,xmin=-0.5,xmax=1.5)
     for containerKey in EfexMonAlg.eFexTauTobKeyList:
         tobTypeStr = "xTOB" if ('xRoI' in containerKey) else "TOB"
         tobTypeStr += "copy" if 'Copy' in containerKey else ""
         simStr = "Sim" if ('Sim' in containerKey) else ""
         tobStr = tobTypeStr + simStr
-        noCutGroup.defineHistogram(containerKey + '_nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s;Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
-                                type='TH1I', path=trigPath+tobStr+'/', xbins=10,xmin=0,xmax=10)
-        noCutGroup.defineHistogram("tobType,"+containerKey + "_seedMax;h_tauTob_seedMax", title='Seedmax bit;tobType;value;Number of TOBs',
-                                   type='TH2I',path=trigPath+tobStr+'/', xbins=2,xmin=0,xmax=2,xlabels=["em","tau"],ybins=2,ymin=-0.5,ymax=1.5)
+        noCutGroup.defineHistogram(containerKey + '_nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s;Number of Tau '+tobStr+'s;Events',
+                                type='TH1I', path=trigPath+tobStr+'/', xbins=100,xmin=-0.5,xmax=99.5)
+        noCutGroup.defineHistogram(containerKey + "_seedMax;h_tauTob_seedMax", title='Tau TOB SeedMax;Seedmax bit;Number of TOBs',
+                                   type='TH1I',path=trigPath+tobStr+'/', xbins=2,xmin=-0.5,xmax=1.5)
 
     # Now define the histograms with low/hi Pt cut
     for cut_name, cut_val in zip(cut_names, cut_vals):

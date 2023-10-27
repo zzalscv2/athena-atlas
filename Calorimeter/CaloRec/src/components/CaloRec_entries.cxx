@@ -23,6 +23,7 @@
 #include "../CaloTopoTowerAlg.h"
 #include "../Blob2ToolConstants.h"
 #include "../CaloCellFastCopyTool.h"
+#include "../CaloCellContCopyTool.h"
 #include "../CaloTowerxAODFromCells.h"
 #include "../CaloTowerxAODFromClusters.h"
 #include "../CaloClusterSnapshot.h"
@@ -77,6 +78,7 @@ DECLARE_COMPONENT( CaloCellContainerFromClusterTool )
 //DECLARE_COMPONENT( CaloClusterLockVars )
 DECLARE_COMPONENT( Blob2ToolConstants )
 DECLARE_COMPONENT( CaloCellFastCopyTool )
+DECLARE_COMPONENT( CaloCellContCopyTool )
 DECLARE_COMPONENT( CaloClusterSnapshot )
 
 DECLARE_COMPONENT( CaloBCIDAvgAlg )

@@ -22,6 +22,8 @@ StatusCode EfexInputMonitorAlgorithm::initialize() {
   ATH_CHECK( m_eFexTowerContainerKey.initialize() );
   ATH_CHECK( m_eFexTowerContainerRefKey.initialize() );
 
+    ATH_CHECK( m_bcContKey.initialize() );
+
 
   // load the scid map
     if (auto fileName = PathResolverFindCalibFile( "L1CaloFEXByteStream/2023-02-13/scToEfexTowers.root" ); !fileName.empty()) {
@@ -133,6 +135,18 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
   auto lbnString = Monitored::Scalar<std::string>("LBNString",std::to_string(GetEventInfo(ctx)->lumiBlock()));
 
+    // mismatches can be caused by recent/imminent OTF maskings, so track timings
+    auto timeSince = Monitored::Scalar<int>("timeSince", -1);
+    auto timeUntil = Monitored::Scalar<int>("timeUntil", -1);
+    SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, ctx };
+    if(larBadChan.isValid()) {
+        timeSince = ctx.eventID().time_stamp() - larBadChan.getRange().start().time_stamp();
+        timeUntil = larBadChan.getRange().stop().time_stamp() - ctx.eventID().time_stamp();
+    }
+    auto predictableMismatch = Monitored::Scalar<bool>("predictable",(timeSince>=0&&timeSince<10) || (timeUntil>=0&&timeUntil<10));
+    auto unexpectedMismatch = Monitored::Scalar<bool>("unexpected",!((timeSince>=0&&timeSince<10) || (timeUntil>=0&&timeUntil<10)));
+
+
   ATH_MSG_VERBOSE("number of efex towers = "<< eFexTowerContainer->size());
 
 
@@ -186,7 +200,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               for(size_t i=0;i<counts.size();i++) {
                   TowerSlot = i; TowerCount = counts[i];
                   TowerSlotSplitHad = i + (i==10 && std::abs(Towereta)>1.5);
-                  fill(m_packageName+"_RefCompareTreeHist",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad);
+                  fill(m_packageName+"_Mismatches",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad,predictableMismatch,unexpectedMismatch);
               }
               continue;
           }
@@ -198,7 +212,7 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               for(size_t i=ecounts.size();i<counts.size();i++) {
                   TowerSlot = i; TowerCount = counts[i];
                   TowerSlotSplitHad = i + (i==10 && std::abs(Towereta)>1.5);
-                  fill(m_packageName+"_RefCompareTreeHist",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad);
+                  fill(m_packageName+"_Mismatches",evtNumber,lbnString,TowerId,Towereta,Towerphi,Toweremstatus,Towerhadstatus,TowerSlot,TowerCount,TowerRefCount,TowerSlotSplitHad,predictableMismatch,unexpectedMismatch);
               }
               continue;
           }
@@ -234,30 +248,18 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                           s = itr->second.second;
                       }
                       SlotSCID = s;
-                      fill(m_packageName + "_RefCompareTreeHist", evtNumber, lbnString, TowerId, Towereta, Towerphi,
-                           Toweremstatus, Towerhadstatus, TowerSlot, TowerCount, TowerRefCount, TowerSlotSplitHad,
-                           SlotSCID);
+                      s = lbnString;
 
-                      if (counts[i]!=0) {
-                          // this is *not* a simple case of noisy-input suppression
-                          // log these cases separately with more info
-                          if( (m_debugEvtCount++) < 20) {
-                              std::string s = lbnString;
-                              lbnString += ":" + std::to_string(counts[i]) + ":" + std::to_string(ecounts[i]) + ":" +
-                                           std::to_string(evtNumber);
-                              fill(m_packageName + "_RefCompareTreeHistNonZero", lbnString, SlotSCID);
-                              lbnString = s;
-                          }
-                      } else {
-                          // probably a temporarily masked noisy tower
-                          if( (m_debugEvtCount2++) < 20) {
-                              std::string s = lbnString;
-                              lbnString += ":" + std::to_string(counts[i]) + ":" + std::to_string(ecounts[i]) + ":" + std::to_string(evtNumber);
-                              fill(m_packageName + "_RefCompareTreeHistZero", lbnString, SlotSCID);
-                              lbnString = s;
-                          }
-
+                      // only fill first 20 mismatches with detailed evtInfo, to avoid overpopulating debug histograms
+                      if( (predictableMismatch && (m_debugEvtCount++) < 20) || (!predictableMismatch && (m_debugEvtCount2++) < 20) ) {
+                          lbnString += ":" + std::to_string(counts[i]) + ":" + std::to_string(ecounts[i]) + ":" +
+                                       std::to_string(evtNumber);
                       }
+                      fill(m_packageName + "_Mismatches", evtNumber, lbnString, TowerId, Towereta, Towerphi,
+                           Toweremstatus, Towerhadstatus, TowerSlot, TowerCount, TowerRefCount, TowerSlotSplitHad,
+                           SlotSCID, timeSince, timeUntil,predictableMismatch,unexpectedMismatch);
+                      lbnString = s;
+
                   }
               }
               if (doneCounts.find(std::pair(coord,i))==doneCounts.end()) {
@@ -269,8 +271,11 @@ StatusCode EfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
               ATH_MSG_DEBUG(eTower->id() << " efex:" << cStr.str());
               ATH_MSG_DEBUG(eeTower->id() << " calo:" << ecStr.str());
           }
-          Monitored::Scalar<float> weight( "Weight", 1.-float(mismatch));
-          fill(m_packageName+"_RefCompareFrac",Towereta,Towerphi,weight);
+
+
+
+
+
       }
   }
 

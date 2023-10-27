@@ -64,6 +64,7 @@ class CaloCellContainer : public DataVector<CaloCell>
  friend class CaloCompactCellTool; 
  friend class FullCaloCellContMaker;
  friend class EmptyCellBuilderTool;
+ friend class CaloCellContCopyTool;
  public:
 
 

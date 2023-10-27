@@ -118,131 +118,131 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     n_rpd_sub_amp_bins = int((abs(rpd_sub_amp_min) + rpd_sub_amp_max) / rpd_sub_amp_max * n_energy_bins_default)
 
     genZdcMonTool.defineHistogram('zdcEnergySumA',title='ZDC Side A Energy Sum;E_{ZDC,A}[GeV];Events',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax) # 2.5TeV * 80 neutrons
     genZdcMonTool.defineHistogram('zdcEnergySumC',title='ZDC Side C Energy Sum;E_{ZDC,C}[GeV];Events',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax)
     genZdcMonTool.defineHistogram('zdcEnergySumA;zdcEnergySumA_zoomin_wTrigSelec',title='ZDC Side A Energy Sum (few neutrons, triggered on side C);E_{ZDC,A}[GeV];Events',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             cutmask = 'passTrigSideC', 
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax) # 2.5TeV * 8 neutrons
     genZdcMonTool.defineHistogram('zdcEnergySumC;zdcEnergySumC_zoomin_wTrigSelec',title='ZDC Side C Energy Sum (few neutrons, triggered on side A);E_{ZDC,C}[GeV];Events',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             cutmask = 'passTrigSideA', 
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax)
     genZdcMonTool.defineHistogram('zdcEnergySumA;zdcEnergySumA_zoomin_noTrigSelec',title='ZDC Side A Energy Sum (few neutrons, no trigger selection);E_{ZDC,A}[GeV];Events',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax) # 2.5TeV * 8 neutrons
     genZdcMonTool.defineHistogram('zdcEnergySumC;zdcEnergySumC_zoomin_noTrigSelec',title='ZDC Side C Energy Sum (few neutrons, no trigger selection);E_{ZDC,C}[GeV];Events',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_zoomin_xmax)
     
     genZdcMonTool.defineHistogram('zdcUncalibSumA',title='ZDC Side A Uncalibrated Sum;[ADC Counts];Events',
-                            path='ZDC/PerArm/UncalibAmp/SideA',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax)
     genZdcMonTool.defineHistogram('zdcUncalibSumC',title='ZDC Side C Uncalibrated Sum;[ADC Counts];Events',
-                            path='ZDC/PerArm/UncalibAmp/SideC',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=zdc_amp_sum_xmax)
 
     # 2D vars: x vs y
 
     genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumA;zdcEnergySumA_vs_lb_noTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumC;zdcEnergySumC_vs_lb_noTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumA;zdcEnergySumA_vs_lb_wTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcEnergySumC;zdcEnergySumC_vs_lb_wTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_noTrig', type='TH2F', title=';lumi block;ZDC amp A[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideA',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_noTrig', type='TH2F', title=';lumi block;ZDC amp C[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideC',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_wTrig', type='TH2F', title=';lumi block;ZDC amp A[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideA',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_wTrig', type='TH2F', title=';lumi block;ZDC amp C[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideC',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
     genZdcMonTool.defineHistogram('bcid, zdcEnergySumA;zdcEnergySumA_vs_bcid_noTrig', type='TH2F', title=';BCID;E_{ZDC,A} [GeV]',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('bcid, zdcEnergySumC;zdcEnergySumC_vs_bcid_noTrig', type='TH2F', title=';BCID;E_{ZDC,C} [GeV]',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('bcid, zdcEnergySumA;zdcEnergySumA_vs_bcid_wTrig', type='TH2F', title=';BCID;E_{ZDC,A} [GeV]',
-                            path='ZDC/PerArm/Energy/SideA',
+                            path='ZDC/ZDC/PerArm/Energy/SideA',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideC',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('bcid, zdcEnergySumC;zdcEnergySumC_vs_bcid_wTrig', type='TH2F', title=';BCID;E_{ZDC,C} [GeV]',
-                            path='ZDC/PerArm/Energy/SideC',
+                            path='ZDC/ZDC/PerArm/Energy/SideC',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideA',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
     genZdcMonTool.defineHistogram('bcid, zdcUncalibSumA;zdcUncalibSumA_vs_bcid_noTrig', type='TH2F', title=';BCID;ZDC amp A[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideA',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('bcid, zdcUncalibSumC;zdcUncalibSumC_vs_bcid_noTrig', type='TH2F', title=';BCID;ZDC amp C[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideC',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('bcid, zdcUncalibSumA;zdcUncalibSumA_vs_bcid_wTrig', type='TH2F', title=';BCID;ZDC amp A[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideA',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideC',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('bcid, zdcUncalibSumC;zdcUncalibSumC_vs_bcid_wTrig', type='TH2F', title=';BCID;ZDC amp C[ADC counts]',
-                            path='ZDC/PerArm/UncalibAmp/SideC',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC',
                             xbins=bcid_max,xmin=0.0,xmax=bcid_max, cutmask = 'passTrigSideA',
                             ybins=n_energy_bins_default,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
 
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_160bins_noTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/PerArm/UncalibAmp/SideA/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA/LBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_160bins_noTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/PerArm/UncalibAmp/SideC/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC/LBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumA;zdcUncalibSumA_vs_lb_160bins_wTrig', type='TH2F', title=';lumi block;E_{ZDC,A} [GeV]',
-                            path='ZDC/PerArm/UncalibAmp/SideA/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideA/LBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideC',
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     genZdcMonTool.defineHistogram('lumiBlock, zdcUncalibSumC;zdcUncalibSumC_vs_lb_160bins_wTrig', type='TH2F', title=';lumi block;E_{ZDC,C} [GeV]',
-                            path='ZDC/PerArm/UncalibAmp/SideC/LBdep',
+                            path='ZDC/ZDC/PerArm/UncalibAmp/SideC/LBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max, cutmask = 'passTrigSideA',
                             ybins=160,ymin=0.0,ymax=uncalib_amp_sum_zoomin_xmax) # for lumi dependence, only focus on the few-neutron peaks
     
     genZdcMonTool.defineHistogram('zdcEnergySumA, zdcEnergySumC', type='TH2F', title=';E_{ZDC,A} [GeV];E_{ZDC,C} [GeV]',
-                            path='Global/SideACCorr',
+                            path='ZDC/Global/SideACCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
 
     genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle', title=';Cos (#Delta #phi_{AorC});Events',
-                            path='Global/ReactionPlane',
+                            path='ZDC/Global/ReactionPlane',
                             cutmask='bothSubAmpSumPositive', # only require subtracted amplitude sum on both sides to be positive
                             xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
     genZdcMonTool.defineHistogram('rpdCosDeltaReactionPlaneAngle;rpdCosDeltaReactionPlaneAngle_requireValid', title=';Cos (#Delta #phi_{AorC});Events',
-                            path='Global/ReactionPlane',
+                            path='ZDC/Global/ReactionPlane',
                             cutmask='bothReactionPlaneAngleValid', # require centroid calculation on both sides to be valid
                             xbins=n_time_centroid_bins_default,xmin=-1,xmax=1)
 
@@ -250,15 +250,15 @@ def ZdcMonitoringConfig(inputFlags, run_type):
     # to be run on min bias stream
     if (zdcMonAlg.CalInfoOn):
         genZdcMonTool.defineHistogram('fcalEtA, zdcEnergySumA', type='TH2F', title=';E_{FCal, A} [GeV];E_{ZDC,A} [GeV]',
-                            path='Global/ZDCFcalCorr',
+                            path='ZDC/Global/ZDCFcalCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
         genZdcMonTool.defineHistogram('fcalEtC, zdcEnergySumC', type='TH2F', title=';E_{FCal, C} [GeV];E_{ZDC,C} [GeV]',
-                            path='Global/ZDCFcalCorr',
+                            path='ZDC/Global/ZDCFcalCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=energy_sum_xmax)
         genZdcMonTool.defineHistogram('fcalEtA, fcalEtC', type='TH2F', title=';E_{FCal, A} [GeV];E_{FCal, C} [GeV]',
-                            path='Global/SideACCorr',
+                            path='ZDC/Global/SideACCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=5000,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=5000)
 
@@ -277,88 +277,88 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
 
     zdcSideMonToolArr.defineHistogram('zdcAvgTime',title='ZDC Side Average Time;t[ns];Events', cutmask = 'zdcModuleMask',
-                            path='ZDC/PerArm/AvgTime',
+                            path='ZDC/ZDC/PerArm/AvgTime',
                             xbins=n_time_centroid_bins_default,xmin=-10.0,xmax=10.0)
 
     zdcSideMonToolArr.defineHistogram('lumiBlock, zdcAvgTime;zdcAvgTime_vs_lb', type='TH2F', title='ZDC Side Average Time versus Lumi block;lumi block;t[ns]',
-                            path='ZDC/PerArm/AvgTime',
+                            path='ZDC/ZDC/PerArm/AvgTime',
                             cutmask = 'zdcModuleMask',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_centroid_bins_default,ymin=-10.0,ymax=10.0)
 
     zdcSideMonToolArr.defineHistogram('centroidStatusBits',title=';;Events',
-                            path='Global/Centroid',
+                            path='ZDC/Global/Centroid',
                             xbins=nRpdCentroidStatusBits,xmin=0.0,xmax=nRpdCentroidStatusBits,opt='kVec',
                             xlabels=['ValidBit', 'ZDCValidBit', 'RPDValidBit', 'MinimumZDCEnergyBit', 'ExcessiveZDCEnergyBit', 'PileupBit', 'ExcessivePileupBit', 'SubtrUnderflowBit', 'ZeroSumBit', 'ZeroSumRow0Bit', 'ZeroSumRow1Bit', 'ZeroSumRow2Bit', 'ZeroSumRow3Bit', 'ZeroSumCol0Bit', 'ZeroSumCol1Bit', 'ZeroSumCol2Bit', 'ZeroSumCol3Bit'])
 
     zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
-                            path='Global/Centroid',
+                            path='ZDC/Global/Centroid',
                             xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
     zdcSideMonToolArr.defineHistogram('xDetCentroidUnsub, yDetCentroidUnsub',type='TH2F',title=';Centroid x position unsubtracted;Centroid y position unsubtracted',
-                            path='Global/Centroid',
+                            path='ZDC/Global/Centroid',
                             xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
     zdcSideMonToolArr.defineHistogram('ReactionPlaneAngle',title=';Reaction Plane Angle;Events',
-                            path='Global/ReactionPlane',
+                            path='ZDC/Global/ReactionPlane',
                             xbins=64,xmin=-3.141593,xmax=3.141593)
 
     zdcSideMonToolArr.defineHistogram('xCentroid, yCentroid;yCentroid_vs_xCentroid_requireValid',type='TH2F',title=';Centroid x position [mm];Centroid y position [mm]',
-                            path='Global/Centroid',
+                            path='ZDC/Global/Centroid',
                             cutmask='centroidValid',
                             xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
     zdcSideMonToolArr.defineHistogram('xDetCentroidUnsub, yDetCentroidUnsub;yDetCentroidUnsub_vs_xDetCentroidUnsub_requireValid',type='TH2F',title=';Centroid x position unsubtracted;Centroid y position unsubtracted',
-                            path='Global/Centroid',
+                            path='ZDC/Global/Centroid',
                             cutmask='centroidValid',
                             xbins=n_time_centroid_bins_default,xmin=x_centroid_min,xmax=x_centroid_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
     zdcSideMonToolArr.defineHistogram('ReactionPlaneAngle;ReactionPlaneAngle_requireValid',title=';Reaction Plane Angle;Events',
-                            path='Global/ReactionPlane',
+                            path='ZDC/Global/ReactionPlane',
                             cutmask='centroidValid',
                             xbins=64,xmin=-3.141593,xmax=3.141593)
 
 
     zdcSideMonToolArr.defineHistogram('lumiBlock, xCentroid;xCentroid_vs_lb', type='TH2F', title=';lumi block;Centroid x position [mm]',
-                            path='Global/CentroidLBdep',
+                            path='ZDC/Global/CentroidLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_centroid_bins_default,ymin=x_centroid_min,ymax=x_centroid_max)
     zdcSideMonToolArr.defineHistogram('lumiBlock, yCentroid;yCentroid_vs_lb', type='TH2F', title=';lumi block;Centroid y position [mm]',
-                            path='Global/CentroidLBdep',
+                            path='ZDC/Global/CentroidLBdep',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
 
     zdcSideMonToolArr.defineHistogram('lumiBlock, xCentroid;xCentroid_vs_lb_requireValid', type='TH2F', title=';lumi block;Centroid x position [mm]',
-                            path='Global/CentroidLBdep',
+                            path='ZDC/Global/CentroidLBdep',
                             cutmask='centroidValid',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_centroid_bins_default,ymin=x_centroid_min,ymax=x_centroid_max)
     zdcSideMonToolArr.defineHistogram('lumiBlock, yCentroid;yCentroid_vs_lb_requireValid', type='TH2F', title=';lumi block;Centroid y position [mm]',
-                            path='Global/CentroidLBdep',
+                            path='ZDC/Global/CentroidLBdep',
                             cutmask='centroidValid',
                             xbins=lumi_block_max,xmin=0.0,xmax=lumi_block_max,
                             ybins=n_time_centroid_bins_default,ymin=y_centroid_min,ymax=y_centroid_max)
 
     zdcSideMonToolArr.defineHistogram('rpdSubAmpSum', title=';RPD Subtracted Amp Sum (AorC) [ADC counts]',
-                            path='RPD/PerArm',
+                            path='ZDC/RPD/PerArm',
                             xbins=n_energy_bins_default,xmin = - rpd_amp_sum_xmax / 16., xmax=rpd_amp_sum_xmax / 4.) # try a value for now
 
     zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdMaxADCSum', type='TH2F', title=';E ZDC side [TeV];RPD Max ADC Sum (AorC) [ADC counts]',
-                            path='ZdcRpdPerSideCorr',
+                            path='ZDC/ZdcRpdPerSideCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_max_adc_sum_xmax) # try a value for now
     zdcSideMonToolArr.defineHistogram('zdcEnergySum, rpdAmplitudeCalibSum', type='TH2F', title=';E ZDC side [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
-                            path='ZdcRpdPerSideCorr',
+                            path='ZDC/ZdcRpdPerSideCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=energy_sum_xmax,
                             ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
     zdcSideMonToolArr.defineHistogram('zdcEMModuleEnergy, rpdAmplitudeCalibSum', type='TH2F', title=';E EM module AorC [GeV];RPD Calib Amp Sum (AorC) [ADC counts]',
-                            path='ZdcRpdPerSideCorr',
+                            path='ZDC/ZdcRpdPerSideCorr',
                             xbins=n_energy_bins_default,xmin=0.0,xmax=module_calib_amp_xmax / 2., # divide by 2 to make a more zoomed-in plot (not full range)
                             ybins=n_energy_bins_default,ymin=0.0,ymax=rpd_amp_sum_xmax) # try a value for now
 
 # --------------------------------------------------------------------------------------------------
 
-    zdcModuleMonToolArr = helper.addArray([nSides,nModules],zdcMonAlg,'ZdcModuleMonitor', topPath='ZDC/ZdcModule/')
+    zdcModuleMonToolArr = helper.addArray([nSides,nModules],zdcMonAlg,'ZdcModuleMonitor', topPath='ZDC/ZDC/ZdcModule/')
 
     zdcModuleMonToolArr.defineHistogram('zdcStatusBits',title=';;Events',
                             path='ModuleStatusBits',
@@ -446,7 +446,7 @@ def ZdcMonitoringConfig(inputFlags, run_type):
 
 # --------------------------------------------------------------------------------------------------
 
-    rpdChannelMonToolArr = helper.addArray([nSides,nChannels],zdcMonAlg,'RpdChannelMonitor', topPath='RPD/RPDChannel/')
+    rpdChannelMonToolArr = helper.addArray([nSides,nChannels],zdcMonAlg,'RpdChannelMonitor', topPath='ZDC/RPD/RPDChannel/')
 
     rpdChannelMonToolArr.defineHistogram('RPDStatusBits',title=';;Events',
                             path='StatusBits',

@@ -28,6 +28,7 @@ StatusCode EfexSimMonitorAlgorithm::initialize() {
   //m_decorKey = "EventInfo.eTowerMakerFromEfexTowers_usedSecondary";
   //ATH_CHECK( m_decorKey.initialize() );
   ATH_CHECK( m_eFexTowerContainerKey.initialize(SG::AllowEmpty) );
+  ATH_CHECK( m_bcContKey.initialize() );
   
   return AthMonitorAlgorithm::initialize();
 }
@@ -45,9 +46,19 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
             fexReadout = 1;
         }
     }
-
+    // mismatches can be caused by recent/imminent OTF maskings, so track timings
+    auto timeSince = Monitored::Scalar<int>("timeSince", -1);
+    auto timeUntil = Monitored::Scalar<int>("timeUntil", -1);
+    SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, ctx };
+    if(larBadChan.isValid()) {
+        timeSince = ctx.eventID().time_stamp() - larBadChan.getRange().start().time_stamp();
+        timeUntil = larBadChan.getRange().stop().time_stamp() - ctx.eventID().time_stamp();
+    }
+    auto predictableMismatch = Monitored::Scalar<bool>("predictable",(timeSince>=0&&timeSince<10) || (timeUntil>=0&&timeUntil<10));
+    auto unexpectedMismatch = Monitored::Scalar<bool>("unexpected",!((timeSince>=0&&timeSince<10) || (timeUntil>=0&&timeUntil<10)));
 
     std::string groupSuffix = (fexReadout==0) ? "" : "2";
+    if (fexReadout==0 && predictableMismatch) groupSuffix = "3";
 
     unsigned int nUnmatched_em = 0;
     nUnmatched_em += fillHistos(m_eFexEmContainerKey,m_eFexEmSimContainerKey,groupSuffix,ctx); // match data to sim
@@ -55,6 +66,7 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     unsigned int nUnmatched_tau = 0;
     nUnmatched_tau += fillHistos(m_eFexTauContainerKey,m_eFexTauSimContainerKey,groupSuffix,ctx); // match data to sim
     nUnmatched_tau += fillHistos(m_eFexTauSimContainerKey,m_eFexTauContainerKey,groupSuffix,ctx); // match sim to data
+
 
     if( (nUnmatched_em || nUnmatched_tau) && (m_maxDebugTreeEntries==-1 || m_treeEntries < m_maxDebugTreeEntries) ) {
         // record all tobs to the debug tree .. one entry in the tree = 1 tobType for 1 event
@@ -74,19 +86,20 @@ StatusCode EfexSimMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
         auto tobType = Monitored::Scalar<unsigned int>("tobType",0);
         auto tobAndReadoutType = Monitored::Scalar<unsigned int>("tobAndReadoutType",tobType+fexReadout*2);
+        if(!fexReadout && predictableMismatch) tobAndReadoutType += 4; // indicates dodgy calo input (because near an OTF masking change)
         if(nUnmatched_em) {
             fillVectors(m_eFexEmContainerKey,ctx,detas,dphis,dword0s);
             fillVectors(m_eFexEmSimContainerKey,ctx,setas,sphis,sword0s);
             nTOBs = nUnmatched_em;
-            fill(m_packageName,lbn,lbnString,tobAndReadoutType,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,nTOBs);
+            fill(m_packageName,lbn,lbnString,tobAndReadoutType,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,nTOBs,timeSince,timeUntil,predictableMismatch,unexpectedMismatch);
         }
         if(nUnmatched_tau) {
             tobType = 1;
-            tobAndReadoutType = tobType+fexReadout*2;
+            tobAndReadoutType += 1;
             fillVectors(m_eFexTauContainerKey,ctx,detas,dphis,dword0s);
             fillVectors(m_eFexTauSimContainerKey,ctx,setas,sphis,sword0s);
             nTOBs = nUnmatched_tau;
-            fill(m_packageName,lbn,lbnString,tobAndReadoutType,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,nTOBs);
+            fill(m_packageName,lbn,lbnString,tobAndReadoutType,evtNumber,tobType,dtobEtas,dtobPhis,dtobWord0s,stobEtas,stobPhis,stobWord0s,fexReadout,nTOBs,timeSince,timeUntil,predictableMismatch,unexpectedMismatch);
         }
 
 
