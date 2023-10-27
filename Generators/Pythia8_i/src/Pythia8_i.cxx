@@ -660,6 +660,12 @@ StatusCode Pythia8_i::genFinalize(){
     std::cout<<std::endl;
   }
 
+  if (m_computeEfficiency){
+        if (info.nTried()>0) ATH_MSG_INFO("Pythia8 efficiency (nAccepted/nTried %) = " << info.nAccepted()*100./info.nTried());
+        else ATH_MSG_INFO("Pythia8 efficiency cannot be computed, nTried <=0");
+  }
+      
+
   return StatusCode::SUCCESS;
 }
 
