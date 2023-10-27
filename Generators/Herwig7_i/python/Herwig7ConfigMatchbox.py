@@ -3,6 +3,7 @@
 ## \file Herwig7ConfigMatchbox.py
 ## \brief Configuration class for Matchbox runs with %Herwig7
 ## \author Daniel Rauch (daniel.rauch@desy.de)
+## \author Lukas Kretschmann (lukas.kretschmann@cern.ch)
 
 import os
 
@@ -322,12 +323,12 @@ saverun {} /Herwig/Generators/EventGenerator
   ## \warning Please do not modify the generator configuration in the job options after calling the `run()` function as
   ##          the modified settings would not be applied in the event generation
   ##
-  def run(self, integration_jobs=1, gridpack=None, cleanup_herwig_scratch=True):
+  def run(self, integration_jobs=1, gridpack=None, cleanup_herwig_scratch=True, integrate=False):
 
     self.__configure()
 
     if gridpack:
-      hw7Control.matchbox_run_gridpack(self, integration_jobs, gridpack, cleanup_herwig_scratch)
+      hw7Control.matchbox_run_gridpack(self, integration_jobs, gridpack, cleanup_herwig_scratch, integrate)
     else:
       hw7Control.matchbox_run(self, integration_jobs, cleanup_herwig_scratch)
 
