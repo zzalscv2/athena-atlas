@@ -172,7 +172,7 @@ namespace ActsTrk
     Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg{std::move(absEtaEdges)};
     if (etaBins.empty())
     {
-      assert(trackSelectorCfg.size() == 1);
+      assert(trackSelectorCfg.cutSets.size() == 1);
       trackSelectorCfg.cutSets[0].absEtaMin = m_absEtaMin;
       trackSelectorCfg.cutSets[0].absEtaMax = m_absEtaMax;
     }
