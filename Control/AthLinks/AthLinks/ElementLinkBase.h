@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/ElementLinkBase.h
@@ -17,6 +17,7 @@
 
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/tools/ForwardIndexingPolicy.h"
+#include "AthLinks/DataLinkBase.h"
 #include "AthenaKernel/getThinningCache.h"
 #include "CxxUtils/sgkey_t.h"
 #include "CxxUtils/CachedPointer.h"
@@ -323,6 +324,14 @@ protected:
    * as @c other, but it will refer to element @c elemID.
    */
   ElementLinkBase (const ElementLinkBase& other, index_type elemID);
+
+
+  /**
+   * @brief Construct a link from a DataLink and an index.
+   * @param dlink Link to the container.
+   * @param index The index of the element within the container.
+   */
+  ElementLinkBase (const DataLinkBase& dlink, index_type index);
 
 
   /**

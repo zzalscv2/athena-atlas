@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/DataLinkBase.h
@@ -21,6 +21,7 @@
 
 namespace SG {
 class DataProxy;
+template <class INDEXING_POLICY> class GenericElementLinkBase;
 }
 class IProxyDict;
 
@@ -199,6 +200,10 @@ public:
 
 
 protected:
+  // To get m_proxy from the ctors taking a DataLink+index.
+  friend class ElementLinkBase;
+  template <class INDEXING_POLICY> friend class SG::GenericElementLinkBase;
+
   /// For component testing.
   friend class DataLinkBase_test;
 

@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthLinks/tools/ElementLinkTraits.h
  * @author scott snyder <snyder@bnl.gov>
@@ -97,6 +94,8 @@ namespace SG {
 //   Make link from an index and a pointer to the container.
 //  Base(const ElementLink<OTHER>&, FROM_TRAITS*, TO_TRAITS*)
 //   Derived->base link conversion.
+//  Base(const Base& other, const index_type& elemID);
+//  Base(const DataLinkBase& other, const index_type& elemID);
 //  SG::DataProxy* proxy() const
 //   Return the SG proxy for the container holding the element.
 //  void* storableBase(castfn_t*, CLID)

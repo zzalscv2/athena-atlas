@@ -284,6 +284,20 @@ ElementLink<STORABLE>::ElementLink (const ElementLink& other,
 
 
 /**
+ * @brief Construct a link from a DataLink and an index.
+ * @param dlink Link to the container.
+ * @param index The index of the element within the container.
+ */
+template <class STORABLE>
+inline
+ElementLink<STORABLE>::ElementLink (const DataLink<STORABLE>& dlink,
+                                    index_type index)
+  : Base (dlink, index)
+{
+}
+
+
+/**
  * @brief Constructor allowing a derived -> base conversion.
  */
 template <class STORABLE>
