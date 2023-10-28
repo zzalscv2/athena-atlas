@@ -9,6 +9,7 @@
 #include <MuonStationGeoHelpers/IActsMuonChamberTool.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/IDetectorVolumeSvc.h>
 #include <StoreGate/ReadCondHandleKey.h>
 
 namespace MuonGMR4 { 
@@ -30,7 +31,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
 
         SG::ReadCondHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
-
+        ServiceHandle<ActsTrk::IDetectorVolumeSvc> m_detVolSvc{this,"DetectorVolumeSvc", "DetectorVolumeSvc"};
+        
         PublicToolHandle<MuonGMR4::IActsMuonChamberTool> m_chambTool{this, "ChamberTool", "" };
 
         const MuonDetectorManager* m_detMgr{nullptr};

@@ -15,6 +15,7 @@
 */
 
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
+#include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Geometry/Volume.hpp>
 
 #include <set>
@@ -30,7 +31,8 @@ namespace MuonGMR4 {
                 PVConstLink chamberVol{nullptr};
                 /// Definition of the surrounding box
                 double halfX{0.};
-                double halfY{0.};
+                double halfYLong{0.};
+                double halfYShort{0.};
                 double halfZ{0.};
                 /// Transformation to the chamber volume
                 Amg::Transform3D centerTrans{Amg::Transform3D::Identity()};
@@ -50,12 +52,15 @@ namespace MuonGMR4 {
             const ReadoutSet& readOutElements() const;
             /// Returns the transformation of the MuonChamber
             Amg::Transform3D localToGlobalTrans(const ActsGeometryContext& gctx) const;
+            Amg::Transform3D globalToLocalTrans(const ActsGeometryContext& gctx) const;
             /// Surrounding box dimensions
+            double halfYLong() const;
+            double halfYShort() const;
             double halfX() const;
-            double halfY() const;
             double halfZ() const;
 
             std::shared_ptr<Acts::Volume> boundingVolume(const ActsGeometryContext& gctx) const;
+            std::shared_ptr<Acts::TrapezoidVolumeBounds> bounds() const;
 
         private:
            const defineArgs m_args{};

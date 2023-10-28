@@ -2,7 +2,7 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonStationGeoHelpers/MuonChamber.h>
-#include <Acts/Geometry/CuboidVolumeBounds.hpp>
+#include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 
 namespace MuonGMR4{
 
@@ -18,19 +18,27 @@ const ReadoutSet& MuonChamber::readOutElements() const{ return m_args.readoutEle
 Amg::Transform3D MuonChamber::localToGlobalTrans(const ActsGeometryContext& gctx) const {
     return m_args.readoutEles[0]->localToGlobalTrans(gctx) * m_args.centerTrans;
 }
+Amg::Transform3D MuonChamber::globalToLocalTrans(const ActsGeometryContext& gctx) const{
+    return localToGlobalTrans(gctx).inverse();
+}
+
 double MuonChamber::halfX() const{ return m_args.halfX; }
-double MuonChamber::halfY() const{ return m_args.halfY; }
+double MuonChamber::halfYLong() const{ return m_args.halfYLong; }
+double MuonChamber::halfYShort() const{ return m_args.halfYShort; }
 double MuonChamber::halfZ() const{ return m_args.halfZ; }
 
 std::shared_ptr<Acts::Volume> MuonChamber::boundingVolume(const ActsGeometryContext& gctx) const {
-    Acts::VolumeBoundsPtr bounds = std::make_shared<Acts::CuboidVolumeBounds>(halfX(), halfY(), halfZ());
-    return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds);
+    return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
+}
+
+std::shared_ptr<Acts::TrapezoidVolumeBounds> MuonChamber::bounds() const {
+    return std::make_shared<Acts::TrapezoidVolumeBounds>(halfYShort(), halfYLong(), halfX(), halfZ());
 }
 
 
 #define CHAMBER_SORTING(a, b)                             \
-    if (a.chamberIndex() != b.chamberIndex()) {           \
-        return a.chamberIndex() < b.chamberIndex();       \
+    if (a.stationName() != b.stationName()) {             \
+        return a.stationName() < b.stationName();         \
     }                                                     \
     if (a.stationEta() != b.stationEta()) {               \
         return a.stationEta() < b.stationEta();           \
