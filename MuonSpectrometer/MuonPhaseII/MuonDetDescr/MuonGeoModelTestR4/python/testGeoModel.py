@@ -79,6 +79,8 @@ def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     result = ComponentAccumulator()
     from MuonStationGeoHelpers.MuonStationGeoHelpersCfg import ActsMuonChamberToolCfg
     kwargs.setdefault("ChamberTool", result.getPrimaryAndMerge(ActsMuonChamberToolCfg(flags)))
+    from ActsGeometry.DetectorVolumeSvcCfg import DetectorVolumeSvcCfg
+    kwargs.setdefault("DetectorVolumeSvc", result.getPrimaryAndMerge(DetectorVolumeSvcCfg(flags)))
     the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)    
     return result

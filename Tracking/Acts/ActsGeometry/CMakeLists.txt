@@ -20,6 +20,8 @@ atlas_add_library( ActsGeometryLib
                    src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
                    src/ATLASSourceLink.cxx
+                   src/DetectorVolumeSvc.cxx
+                   src/SimpleCylinderDetBuilderTool.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}

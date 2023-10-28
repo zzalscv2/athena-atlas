@@ -7,6 +7,7 @@
 #include "../ActsAlignmentCondAlg.h"
 #include "../ActsDetAlignCondAlg.h"
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
+#include "ActsGeometry/DetectorVolumeSvc.h"
 #include "ActsGeometry/ActsExtrapolationAlg.h"
 #include "ActsGeometry/ActsExtrapolationTool.h"
 #include "ActsGeometry/ActsMaterialJsonWriterTool.h"
@@ -21,6 +22,7 @@
 #include "ActsGeometry/ActsVolumeMappingTool.h"
 #include "ActsGeometry/ActsWriteTrackingGeometry.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
+#include "../SimpleCylinderDetBuilderTool.h"
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
 DECLARE_COMPONENT(ActsWriteTrackingGeometry)
@@ -43,3 +45,5 @@ DECLARE_COMPONENT(ActsPropStepRootWriterSvc)
 DECLARE_COMPONENT(ActsAlignmentCondAlg)
 DECLARE_COMPONENT(ActsDetAlignCondAlg)
 DECLARE_COMPONENT(ActsCaloTrackingVolumeBuilder)
+DECLARE_COMPONENT(ActsTrk::DetectorVolumeSvc)
+DECLARE_COMPONENT(ActsTrk::SimpleCylinderDetBuilderTool)
