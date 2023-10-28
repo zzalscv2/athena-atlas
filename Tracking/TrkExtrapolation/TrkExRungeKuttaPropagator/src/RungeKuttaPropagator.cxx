@@ -1333,7 +1333,7 @@ propagateRungeKutta(Cache& cache,
   //
   if (useJac) {
     AmgSymMatrix(5) newCov =
-      Trk::PatternTrackParameters::newCovarianceMatrix(*Ta.covariance(), Jac);
+        Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *Ta.covariance());
     Tb.setParametersWithCovariance(&Su, p, newCov);
     const AmgSymMatrix(5)& cv = *Tb.covariance();
     if (cv(0, 0) <= 0. || cv(1, 1) <= 0. || cv(2, 2) <= 0. || cv(3, 3) <= 0. ||

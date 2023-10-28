@@ -72,69 +72,6 @@ bool Trk::PatternTrackParameters::production(const Trk::ParametersBase<5,Trk::Ch
   return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// Covariance matrix production using jacobian cov(this) = J*( Tp cov)*Jt
-///////////////////////////////////////////////////////////////////
-
-
-AmgSymMatrix(5) Trk::PatternTrackParameters::newCovarianceMatrix
-(const AmgSymMatrix(5) & V, const double * Jac)
-{
-  AmgSymMatrix(5) rv;
-
-  double a11 = (Jac[ 0]*V(0, 0)+Jac[ 1]*V(0, 1)+Jac[ 2]*V(0, 2))+(Jac[ 3]*V(0, 3)+Jac[ 4]*V(0, 4));
-  double a12 = (Jac[ 0]*V(0, 1)+Jac[ 1]*V(1, 1)+Jac[ 2]*V(1, 2))+(Jac[ 3]*V(1, 3)+Jac[ 4]*V(1, 4));
-  double a13 = (Jac[ 0]*V(0, 2)+Jac[ 1]*V(1, 2)+Jac[ 2]*V(2, 2))+(Jac[ 3]*V(2, 3)+Jac[ 4]*V(2, 4));
-  double a14 = (Jac[ 0]*V(0, 3)+Jac[ 1]*V(1, 3)+Jac[ 2]*V(2, 3))+(Jac[ 3]*V(3, 3)+Jac[ 4]*V(3, 4));
-  double a15 = (Jac[ 0]*V(0, 4)+Jac[ 1]*V(1, 4)+Jac[ 2]*V(2, 4))+(Jac[ 3]*V(3, 4)+Jac[ 4]*V(4, 4));
-
-  rv.fillSymmetric(0, 0, (a11*Jac[ 0]+a12*Jac[ 1]+a13*Jac[ 2])+(a14*Jac[ 3]+a15*Jac[ 4]));
-
-  double a21 = (Jac[ 5]*V(0, 0)+Jac[ 6]*V(0, 1)+Jac[ 7]*V(0, 2))+(Jac[ 8]*V(0, 3)+Jac[ 9]*V(0, 4));
-  double a22 = (Jac[ 5]*V(0, 1)+Jac[ 6]*V(1, 1)+Jac[ 7]*V(1, 2))+(Jac[ 8]*V(1, 3)+Jac[ 9]*V(1, 4));
-  double a23 = (Jac[ 5]*V(0, 2)+Jac[ 6]*V(1, 2)+Jac[ 7]*V(2, 2))+(Jac[ 8]*V(2, 3)+Jac[ 9]*V(2, 4));
-  double a24 = (Jac[ 5]*V(0, 3)+Jac[ 6]*V(1, 3)+Jac[ 7]*V(2, 3))+(Jac[ 8]*V(3, 3)+Jac[ 9]*V(3, 4));
-  double a25 = (Jac[ 5]*V(0, 4)+Jac[ 6]*V(1, 4)+Jac[ 7]*V(2, 4))+(Jac[ 8]*V(3, 4)+Jac[ 9]*V(4, 4));
-
-  rv.fillSymmetric(1, 0, (a21*Jac[ 0]+a22*Jac[ 1]+a23*Jac[ 2])+(a24*Jac[ 3]+a25*Jac[ 4]));
-  rv.fillSymmetric(1, 1, (a21*Jac[ 5]+a22*Jac[ 6]+a23*Jac[ 7])+(a24*Jac[ 8]+a25*Jac[ 9]));
-
-  double a31 = (Jac[10]*V(0, 0)+Jac[11]*V(0, 1)+Jac[12]*V(0, 2))+(Jac[13]*V(0, 3)+Jac[14]*V(0, 4));
-  double a32 = (Jac[10]*V(0, 1)+Jac[11]*V(1, 1)+Jac[12]*V(1, 2))+(Jac[13]*V(1, 3)+Jac[14]*V(1, 4));
-  double a33 = (Jac[10]*V(0, 2)+Jac[11]*V(1, 2)+Jac[12]*V(2, 2))+(Jac[13]*V(2, 3)+Jac[14]*V(2, 4));
-  double a34 = (Jac[10]*V(0, 3)+Jac[11]*V(1, 3)+Jac[12]*V(2, 3))+(Jac[13]*V(3, 3)+Jac[14]*V(3, 4));
-  double a35 = (Jac[10]*V(0, 4)+Jac[11]*V(1, 4)+Jac[12]*V(2, 4))+(Jac[13]*V(3, 4)+Jac[14]*V(4, 4));
-
-  rv.fillSymmetric(2, 0, (a31*Jac[ 0]+a32*Jac[ 1]+a33*Jac[ 2])+(a34*Jac[ 3]+a35*Jac[ 4]));
-  rv.fillSymmetric(2, 1, (a31*Jac[ 5]+a32*Jac[ 6]+a33*Jac[ 7])+(a34*Jac[ 8]+a35*Jac[ 9]));
-  rv.fillSymmetric(2, 2, (a31*Jac[10]+a32*Jac[11]+a33*Jac[12])+(a34*Jac[13]+a35*Jac[14]));
-
-  double a41 = (Jac[15]*V(0, 0)+Jac[16]*V(0, 1)+Jac[17]*V(0, 2))+(Jac[18]*V(0, 3)+Jac[19]*V(0, 4));
-  double a42 = (Jac[15]*V(0, 1)+Jac[16]*V(1, 1)+Jac[17]*V(1, 2))+(Jac[18]*V(1, 3)+Jac[19]*V(1, 4));
-  double a43 = (Jac[15]*V(0, 2)+Jac[16]*V(1, 2)+Jac[17]*V(2, 2))+(Jac[18]*V(2, 3)+Jac[19]*V(2, 4));
-  double a44 = (Jac[15]*V(0, 3)+Jac[16]*V(1, 3)+Jac[17]*V(2, 3))+(Jac[18]*V(3, 3)+Jac[19]*V(3, 4));
-  double a45 = (Jac[15]*V(0, 4)+Jac[16]*V(1, 4)+Jac[17]*V(2, 4))+(Jac[18]*V(3, 4)+Jac[19]*V(4, 4));
-
-  rv.fillSymmetric(3, 0, (a41*Jac[ 0]+a42*Jac[ 1]+a43*Jac[ 2])+(a44*Jac[ 3]+a45*Jac[ 4]));
-  rv.fillSymmetric(3, 1, (a41*Jac[ 5]+a42*Jac[ 6]+a43*Jac[ 7])+(a44*Jac[ 8]+a45*Jac[ 9]));
-  rv.fillSymmetric(3, 2, (a41*Jac[10]+a42*Jac[11]+a43*Jac[12])+(a44*Jac[13]+a45*Jac[14]));
-  rv.fillSymmetric(3, 3, (a41*Jac[15]+a42*Jac[16]+a43*Jac[17])+(a44*Jac[18]+a45*Jac[19]));
-
-  double a51 = Jac[20]*V(0, 4);
-  double a52 = Jac[20]*V(1, 4);
-  double a53 = Jac[20]*V(2, 4);
-  double a54 = Jac[20]*V(3, 4);
-  double a55 = Jac[20]*V(4, 4);
-
-  rv.fillSymmetric(4, 0, (a51*Jac[ 0]+a52*Jac[ 1]+a53*Jac[ 2])+(a54*Jac[ 3]+a55*Jac[ 4]));
-  rv.fillSymmetric(4, 1, (a51*Jac[ 5]+a52*Jac[ 6]+a53*Jac[ 7])+(a54*Jac[ 8]+a55*Jac[ 9]));
-  rv.fillSymmetric(4, 2, (a51*Jac[10]+a52*Jac[11]+a53*Jac[12])+(a54*Jac[13]+a55*Jac[14]));
-  rv.fillSymmetric(4, 3, (a51*Jac[15]+a52*Jac[16]+a53*Jac[17])+(a54*Jac[18]+a55*Jac[19]));
-  rv.fillSymmetric(4, 4,                                                    a55*Jac[20]);
-
-  return rv;
-}
-
 ///////////////////////////////////////////////////////////////////
 // Global position of simple track parameters
 ///////////////////////////////////////////////////////////////////
