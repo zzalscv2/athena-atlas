@@ -651,7 +651,7 @@ double TrigmuCombHypoTool::invMass(double m1, double pt1, double eta1, double ph
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigmuCombHypoTool::chooseBestMuon(std::vector<TrigmuCombHypoTool::CombinedMuonInfo*>& input, std::vector<unsigned int> mucombResult) const
+StatusCode TrigmuCombHypoTool::chooseBestMuon(std::vector<TrigmuCombHypoTool::CombinedMuonInfo*>& input, const std::vector<unsigned int>& mucombResult) const
 {
   const double ZERO_LIMIT = 1e-4;
   size_t numMuon = input.size();

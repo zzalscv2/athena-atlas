@@ -681,7 +681,7 @@ double TrigMufastHypoTool::invMass(double m1, double pt1, double eta1, double ph
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
 
-StatusCode TrigMufastHypoTool::chooseBestMuon(std::vector<TrigMufastHypoTool::MuonClusterInfo*>& input, std::vector<unsigned int> mufastResult) const
+StatusCode TrigMufastHypoTool::chooseBestMuon(std::vector<TrigMufastHypoTool::MuonClusterInfo*>& input, const std::vector<unsigned int>& mufastResult) const
 {
   size_t numMuon = input.size();
   unsigned int i,j,k;

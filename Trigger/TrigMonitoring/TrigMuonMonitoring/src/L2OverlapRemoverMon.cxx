@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2OverlapRemoverMon.h"
@@ -157,7 +157,7 @@ bool L2OverlapRemoverMon :: isOverlap(const std::string &chain, const ElementLin
 }
 
 
-StatusCode L2OverlapRemoverMon::chooseBestMuon(const std::string &chain, std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> > featureCont, std::vector<unsigned int> muResult) const
+StatusCode L2OverlapRemoverMon::chooseBestMuon(const std::string &chain, const std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> >& featureCont, const std::vector<unsigned int>& muResult) const
 {
   unsigned int i,j,k;
 
@@ -221,7 +221,7 @@ StatusCode L2OverlapRemoverMon::chooseBestMuon(const std::string &chain, std::ve
   return StatusCode::SUCCESS;
 }
 
-StatusCode L2OverlapRemoverMon::chooseBestMuon(const std::string &chain, std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer> > featureCont, std::vector<unsigned int> muResult) const
+StatusCode L2OverlapRemoverMon::chooseBestMuon(const std::string &chain, const std::vector< TrigCompositeUtils::LinkInfo<xAOD::L2CombinedMuonContainer> >& featureCont, const std::vector<unsigned int>& muResult) const
 {
   unsigned int i,j,k;
 

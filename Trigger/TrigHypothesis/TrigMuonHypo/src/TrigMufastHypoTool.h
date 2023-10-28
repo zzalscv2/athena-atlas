@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONHYPO_TRIGMUFASTHYPOTOOL_H 
@@ -81,7 +81,7 @@ class TrigMufastHypoTool: public ::AthAlgTool {
     double dR(double eta1, double phi1, double eta2, double phi2) const;
     double invMass(double m1, double pt1, double eta1, double phi1,
                    double m2, double pt2, double eta2, double phi2) const;
-    StatusCode chooseBestMuon(std::vector<TrigMufastHypoTool::MuonClusterInfo*>& input, std::vector<unsigned int> mufastResult) const;
+    StatusCode chooseBestMuon(std::vector<TrigMufastHypoTool::MuonClusterInfo*>& input, const std::vector<unsigned int>& mufastResult) const;
 
     float getLocalPhi(float, float, float) const;
 
