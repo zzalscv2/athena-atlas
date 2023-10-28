@@ -5,8 +5,9 @@
 #include "SiSPSeededTrackFinderData/SiTrajectoryElement_xk.h"
 
 #include "TrkSurfaces/PerigeeSurface.h" 
-#include "TrkSurfaces/AnnulusBounds.h" 
-#include "TrkExUtils/JacobianHelper.h" 
+#include "TrkSurfaces/AnnulusBounds.h"
+#include "TrkExUtils/JacobianHelper.h"
+#include "TrkExUtils/RungeKuttaUtils.h" 
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 #include "TrkEventPrimitives/FitQualityOnSurface.h"
@@ -1637,7 +1638,7 @@ bool InDet::SiTrajectoryElement_xk::transformGlobalToPlane
     Jac[20] = 1.;                         // dCM /dCM
 
     /// covariance matrix production using jacobian - CovNEW = J*CovOLD*Jt
-    AmgSymMatrix(5) newCov = Trk::PatternTrackParameters::newCovarianceMatrix(*startingParameters.covariance(), Jac);
+    AmgSymMatrix(5) newCov = Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, *startingParameters.covariance());
     outputParameters.setParametersWithCovariance(m_surface, p, newCov);
 
     /// check for negative diagonals in the cov

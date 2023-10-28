@@ -84,9 +84,6 @@ namespace Trk {
       void addNoise   (const NoiseOnSurface&,PropDirection);
       void removeNoise(const NoiseOnSurface&,PropDirection);
 
-      // Covariance matrix production using jacobian CovNEW = J*CovOLD*Jt
-      static AmgSymMatrix(5) newCovarianceMatrix(const AmgSymMatrix(5) &, const double *);
-
       // Print
       std::ostream& dump(std::ostream&) const;
       MsgStream&    dump(MsgStream&   ) const;
