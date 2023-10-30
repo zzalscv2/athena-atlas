@@ -1,52 +1,15 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/TgcCondDbData.h"
 
-// constructor
-TgcCondDbData::TgcCondDbData(){
+TgcCondDbData::TgcCondDbData(const Muon::IMuonIdHelperSvc* idHelperSvc):
+        m_idHelperSvc{idHelperSvc}{}
+
+void TgcCondDbData::setDeadGasGap(const Identifier& Id) { 
+    m_cachedDeadStationsId.insert(m_idHelperSvc->gasGapId(Id)); 
 }
-
-
-// --- writing identifiers -------
-
-// setDeadStation
-void
-TgcCondDbData::setDeadStation(Identifier Id){
-    if(std::binary_search(m_cachedDeadStationsId.begin(), m_cachedDeadStationsId.end(), Id, Compare)) return;
-    m_cachedDeadStationsId.push_back(Id  );
+bool TgcCondDbData::isGood(const Identifier & Id) const { 
+    return !m_cachedDeadStationsId.count(m_idHelperSvc->gasGapId(Id)); 
 }
-
-
-// --- reading identifiers -------
-
-// getDeadStationsId
-const 
-std::vector<Identifier>& TgcCondDbData::getDeadStationsId() const{
-    if(m_cachedDeadStationsId.size()!=0) return m_cachedDeadStationsId;
-    return m_emptyIds;
-}
-
-
-// --- probing identifiers -------
-
-// isGood
-bool 
-TgcCondDbData::isGood(const Identifier & Id) const{
-    // probing id in all lists
-    if(not isGoodStation   (Id)) return false;
-    return true;
-}
-
-// isGoodStation
-bool
-TgcCondDbData::isGoodStation(const Identifier & Id) const{
-    if(m_cachedDeadStationsId.size()==0) return true;
-    bool found = std::binary_search(m_cachedDeadStationsId.begin(), m_cachedDeadStationsId.end(), Id, Compare);
-    return !found;
-} 
-
-
-
-

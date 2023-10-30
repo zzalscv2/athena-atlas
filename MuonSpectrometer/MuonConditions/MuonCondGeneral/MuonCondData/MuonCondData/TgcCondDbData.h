@@ -1,54 +1,38 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef MUONCONDDATA_TGCCONDDBDATA_H
 #define MUONCONDDATA_TGCCONDDBDATA_H
 
 //STL includes
 #include <string>
-#include <vector>
+#include <set>
 
 //Athena includes
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "Identifier/Identifier.h"
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
 
-
-//forward declarations
-class Identifier;
-
-
+/**
+ *  Conditions object to mark switched-off Tgc gasGaps
+*/
 class TgcCondDbData {
 
-  friend class TgcCondDbAlg;
-
 public:
-
-    TgcCondDbData();
+    TgcCondDbData(const Muon::IMuonIdHelperSvc* idHelperSvc);
     virtual ~TgcCondDbData() = default;
+    /// Declare all channels wires + strips in a gasGap as dead
+    void setDeadGasGap(const Identifier& id);
+    /// Returns whether the channelId does not belong to a dead gasGap
+    bool isGood(const Identifier & channelId) const;
 
-    void setDeadStation(Identifier);
-
-    const std::vector<Identifier>& getDeadStationsId() const;
-
-    bool isGood          (const Identifier & Id) const;
-    bool isGoodStation   (const Identifier & Id) const;
-
-
- 
 private:
-
-    std::vector<Identifier> m_cachedDeadStationsId;
-
-    std::vector<std::string> m_emptyNames;
-    std::vector<Identifier> m_emptyIds; 
-
-    static bool Compare(const Identifier &a, const Identifier &b) {return (a>b);}
+    const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
+    std::unordered_set<Identifier> m_cachedDeadStationsId{};
 
 };
 
-CLASS_DEF( TgcCondDbData, 130737053, 1)
-CLASS_DEF( CondCont<TgcCondDbData>, 178252645, 0)
-
+CLASS_DEF( TgcCondDbData, 130737053, 1);
+CONDCONT_DEF( TgcCondDbData , 178252645 );
 #endif

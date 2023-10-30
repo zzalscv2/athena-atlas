@@ -51,3 +51,18 @@ atlas_add_test( NSWDcsTest
                 SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/testNSWDcsAlg.sh 
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+
+
+atlas_add_test( TgcCondTest
+                SCRIPT python -m MuonCondDump.dumpTgcDigiDeadChambers  &&  python -m MuonCondTest.TgcCondTester
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
+atlas_add_test( TgcDigiThresholdTest
+                SCRIPT python -m MuonCondDump.dumpTgcDigiThreshold  &&  python -m MuonCondTest.TgcDigiThresholdTester
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TgcDigiJitterTest
+                SCRIPT python -m MuonCondDump.dumpTgcDigiJitter  &&  python -m MuonCondTest.TgcDigiJitterTester
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)

@@ -2,16 +2,16 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MDTConditionsTestAlgMT.h"
+#include "MdtConditionsTestAlg.h"
 
 // Constructor
-MDTConditionsTestAlgMT::MDTConditionsTestAlgMT(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
+MdtConditionsTestAlg::MdtConditionsTestAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
 
 // Destructor
-MDTConditionsTestAlgMT::~MDTConditionsTestAlgMT() = default;
+MdtConditionsTestAlg::~MdtConditionsTestAlg() = default;
 
 // Initialize
-StatusCode MDTConditionsTestAlgMT::initialize() {
+StatusCode MdtConditionsTestAlg::initialize() {
     ATH_MSG_INFO("Calling initialize");
     ATH_CHECK(m_readKey.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -19,7 +19,7 @@ StatusCode MDTConditionsTestAlgMT::initialize() {
 }
 
 // Execute
-StatusCode MDTConditionsTestAlgMT::execute() {   
+StatusCode MdtConditionsTestAlg::execute() {   
 
     ATH_MSG_INFO("Calling execute");
    

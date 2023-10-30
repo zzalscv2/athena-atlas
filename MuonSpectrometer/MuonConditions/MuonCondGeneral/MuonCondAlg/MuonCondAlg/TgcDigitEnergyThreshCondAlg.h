@@ -2,47 +2,40 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONCONDALG_TGCCONDDBALG_H
-#define MUONCONDALG_TGCCONDDBALG_H
-
-// STL includes
-#include <zlib.h>
+#ifndef TGCDIGITENERGYTHRESHOLDALG_H
+#define TGCDIGITENERGYTHRESHOLDALG_H
 
 
-// Gaudi includes
 #include <nlohmann/json.hpp>
 
-// Athena includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "MuonCondData/TgcCondDbData.h"
-#include "MuonCondSvc/MdtStringUtils.h"
+#include "MuonCondData/TgcDigitThresholdData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-
-
-class TgcCondDbAlg : public AthReentrantAlgorithm {
-public:
-    TgcCondDbAlg(const std::string& name, ISvcLocator* svc);
-    virtual ~TgcCondDbAlg() = default;
+class TgcDigitEnergyThreshCondAlg : public AthReentrantAlgorithm
+{
+ public:
+    TgcDigitEnergyThreshCondAlg (const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~TgcDigitEnergyThreshCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
     virtual bool isReEntrant() const override { return false; }
-
-private:
-    /// Load the detector status from cool
+ private:
+    /// Load the threshold constants from the JSON blob
     StatusCode parseDataFromJSON(const nlohmann::json& lines,
-                                 TgcCondDbData& deadChannels) const;
+                                 TgcDigitThresholdData& deadChannels) const;
    
-    /// Load the detector status from a JSON file
+    /// Use an external file to load the Jitter constants from.
     Gaudi::Property<std::string> m_readFromJSON{this, "readFromJSON", "" };
     
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-    SG::WriteCondHandleKey<TgcCondDbData> m_writeKey{this, "WriteKey", "TgcCondDbData", "Key of output TGC condition data"};
-    SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "", "Key of input TGC condition data"};
+    SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "", "SG key for Tgc energy thresholds"};
+    SG::WriteCondHandleKey<TgcDigitThresholdData> m_writeKey{this, "WriteKey", "TgcEnergyThresholds", "SG Key of TGCDigit AsdPos"};
 };
 
 #endif
+
+
