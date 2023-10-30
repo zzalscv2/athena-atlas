@@ -24,8 +24,6 @@ constexpr int ndigits = 100;
 constexpr int Ncontainers = 5000;
 constexpr int Nevents = 50;
 
-std::mutex abortedlock;
-
 
 class MyID
 {
@@ -44,13 +42,13 @@ class MyDigit
 
 public:
     MyDigit(int d) :m_digit(d) {
-        s_total++;
+        s_total.fetch_add(1, std::memory_order_relaxed);
     }
     int val() const {
         return m_digit ;
     }
     ~MyDigit() {
-        s_total--;
+        s_total.fetch_sub(1, std::memory_order_relaxed);
     }
     static std::atomic<int> s_total;
 private:
@@ -382,7 +380,10 @@ int main() {
         x+=50;
         highestvalue = std::max(highestvalue, x+1000);
     }
-
+    if(highestvalue > Ncontainers) {
+        std::cout << "Increase Ncontainers size over " << highestvalue << std::endl;
+        std::abort();
+    }
     std::mt19937 genabort(0);
     std::uniform_int_distribution<> abort(0, highestvalue);
     std::set<size_t> abortedhashes;
