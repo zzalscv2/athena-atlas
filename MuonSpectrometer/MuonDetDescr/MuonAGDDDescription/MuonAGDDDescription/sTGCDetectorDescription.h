@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef sTGCDetectorDescription_H
 #define sTGCDetectorDescription_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AGDDKernel/AGDDDetector.h"
 #include "MuonAGDDDescription/sTGC_Technology.h"
 #include <string>
@@ -15,35 +17,35 @@ class GeoMaterial;
 class AGDDDetectorStore;
 
 struct sTGCReadoutParameters {
-    double sPadWidth;
-    double lPadWidth;
-    double sStripWidth;
-    double lStripWidth;
-    std::vector<double> padH;
-    std::vector<int> nPadPhi;
-    double anglePadPhi;
-    std::vector<double> firstPadPhiDivision_A;
-    std::vector<double> firstPadPhiDivision_C;
-    std::vector<double> PadPhiShift_A;
-    std::vector<double> PadPhiShift_C;
-    std::vector<double> nPadH;
-    std::vector<double> firstPadH;
-    std::vector<int> firstPadRow;
-    std::vector<int> nWires;
-    std::vector<double> wireCutout;
-    std::vector<double> firstWire;
-    int wireGroupWidth;
-    int nStrips;
-    std::vector<int> firstTriggerBand;
-    std::vector<int> nTriggerBands;
-    std::vector<int> firstStripInTrigger;
-    std::vector<double> firstStripWidth;
-    std::vector<int> StripsInBandsLayer1;
-    std::vector<int> StripsInBandsLayer2;
-    std::vector<int> StripsInBandsLayer3;
-    std::vector<int> StripsInBandsLayer4;
-    std::vector<int> nWireGroups;
-    std::vector<int> firstWireGroup;
+    double sPadWidth{0.};
+    double lPadWidth{0.};
+    double sStripWidth{0.};
+    double lStripWidth{0.};
+    std::vector<double> padH{};
+    std::vector<int> nPadPhi{};
+    double anglePadPhi{0.};
+    std::vector<double> firstPadPhiDivision_A{};
+    std::vector<double> firstPadPhiDivision_C{};
+    std::vector<double> PadPhiShift_A{};
+    std::vector<double> PadPhiShift_C{};
+    std::vector<double> nPadH{};
+    std::vector<double> firstPadH{};
+    std::vector<int> firstPadRow{};
+    std::vector<int> nWires{};
+    std::vector<double> wireCutout{};
+    std::vector<double> firstWire{};
+    int wireGroupWidth{0};
+    int nStrips{0};
+    std::vector<int> firstTriggerBand{};
+    std::vector<int> nTriggerBands{};
+    std::vector<int> firstStripInTrigger{};
+    std::vector<double> firstStripWidth{};
+    std::vector<int> StripsInBandsLayer1{};
+    std::vector<int> StripsInBandsLayer2{};
+    std::vector<int> StripsInBandsLayer3{};
+    std::vector<int> StripsInBandsLayer4{};
+    std::vector<int> nWireGroups{};
+    std::vector<int> firstWireGroup{};
 };
 
 class sTGCDetectorDescription: public AGDDDetector {
@@ -102,15 +104,15 @@ public:
 
 protected:
 
-	double m_yCutout;
-	double m_stripPitch = 0.0;
-	double m_wirePitch = 0.0;
-	double m_stripWidth = 0.0;
-	double m_yCutoutCathode = 0.0;
+	double m_yCutout{0.};
+	double m_stripPitch{0.};
+	double m_wirePitch{0.};
+	double m_stripWidth{0.};
+	double m_yCutoutCathode{0.};
 
-	double m_xFrame = 0.0;
-	double m_ysFrame = 0.0;
-	double m_ylFrame = 0.0;
+	double m_xFrame{0.};
+	double m_ysFrame{0.};
+	double m_ylFrame{0.};
 
         AGDDDetectorStore& m_ds;
 

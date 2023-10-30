@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDMuonStation_H
 #define AGDDMuonStation_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AGDDKernel/AGDDVolume.h"
 #include <string>
 #include <vector>
@@ -17,7 +19,7 @@ public:
 	AGDDMuonStation(const std::string& s,
                         AGDDVolumeStore& vs,
                         AGDDSectionStore& ss)
-          : AGDDVolume(s,vs,ss),m_small_x(0),m_large_x(0),m_y(0),m_z(0) {}
+          : AGDDVolume(s,vs,ss) {}
 	void SetXYZ(const std::vector<double>& v) 
 	{
 		m_small_x=v[0];
@@ -36,12 +38,12 @@ public:
         virtual void CreateVolume (AGDDBuilder& builder) override;
 	virtual void CreateSolid (const AGDDBuilder& builder) override;
 private:
-	double m_small_x;
-	double m_large_x;
-	double m_y;
-	double m_z;
+	double m_small_x{0.};
+	double m_large_x{0.};
+	double m_y{0.};
+	double m_z{0.};
 	
-        const GeoMaterial* GetMMMaterial(const std::string&) const;
+	const GeoMaterial* GetMMMaterial(const std::string&) const;
 };
 
 #endif

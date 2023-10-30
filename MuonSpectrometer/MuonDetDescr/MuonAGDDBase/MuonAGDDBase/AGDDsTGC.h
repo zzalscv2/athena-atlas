@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDsTGC_H
 #define AGDDsTGC_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "MuonAGDDDescription/sTGCDetectorDescription.h"
 #include "AGDDKernel/AGDDVolume.h"
 #include <string>

@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_Technology_H
 #define MM_Technology_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AGDDKernel/AGDDTechnology.h"
 #include <vector>
 namespace MuonGM {
@@ -13,16 +15,16 @@ namespace MuonGM {
 
 class MM_Technology: public AGDDTechnology {
 public:
-	double thickness;
-	int nlayers;
-	double gasThickness;
-	double pcbThickness;
-	double roThickness;
-	double f1Thickness;
-	double f2Thickness;
-	double f3Thickness;
+	double thickness{0.};
+	int nlayers{0};
+	double gasThickness{0.};
+	double pcbThickness{0.};
+	double roThickness{0.};
+	double f1Thickness{0.};
+	double f2Thickness{0.};
+	double f3Thickness{0.};
 
-	int geoLevel;
+	int geoLevel{0};
 
 
 	// inner structure parameters (to be defined)
@@ -34,12 +36,8 @@ public:
 };
 
 MM_Technology::MM_Technology(const std::string& s,
-                             AGDDDetectorStore& ds): AGDDTechnology(s, ds),
-  thickness(0.), nlayers(0), gasThickness(0.), pcbThickness(0.),
-  roThickness(0), f1Thickness(0.), f2Thickness(0.), f3Thickness(0.),
-  geoLevel(0)
-{
-}
+                             AGDDDetectorStore& ds): AGDDTechnology(s, ds){}
+
 
 double MM_Technology::Thickness() const
 {
