@@ -4,6 +4,7 @@
 
 from MuonConfig.MuonCondAlgConfig import CscCondDbAlgCfg, NswCalibDbAlgCfg
 from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
@@ -79,6 +80,7 @@ def _setupMdtCondDB(flags):
     return result, mdt_folder_name_appendix
 # end of function setupMdtCondDB()
 
+@AccumulatorCache
 def MdtCalibrationToolCfg(flags, name= "MdtCalibrationTool",  **kwargs):
     result=ComponentAccumulator()
     result.merge(MdtCalibDbAlgCfg(flags))

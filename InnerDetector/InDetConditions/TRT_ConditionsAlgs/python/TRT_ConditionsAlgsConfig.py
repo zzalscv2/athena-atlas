@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
@@ -28,14 +29,20 @@ def TRTAlignCondAlgCfg(flags, name="TRTAlignCondAlg", **kwargs):
 def TRTStrawStatusCondAlgCfg(flags, name="TRTStrawStatusCondAlg", **kwargs):
     """Return a ComponentAccumulator for TRTStrawStatusCondAlg algorithm"""
     acc = ComponentAccumulator()
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/Status", "/TRT/Cond/Status", className="TRTCond::StrawStatusMultChanContainer"))
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/StatusPermanent", "/TRT/Cond/StatusPermanent", className="TRTCond::StrawStatusMultChanContainer"))
-    # Argon straw list
-    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/StatusHT", "/TRT/Cond/StatusHT", className="TRTCond::StrawStatusMultChanContainer"))
+    acc.merge(addFoldersSplitOnline(flags, "TRT",
+                                    onlineFolders  = ["/TRT/Onl/Cond/Status",
+                                                      "/TRT/Onl/Cond/StatusPermanent",
+                                                      "/TRT/Onl/Cond/StatusHT"], # Argon straw list
+                                    offlineFolders = ["/TRT/Cond/Status",
+                                                      "/TRT/Cond/StatusPermanent",
+                                                      "/TRT/Cond/StatusHT"], # Argon straw list
+                                    className = "TRTCond::StrawStatusMultChanContainer"))
+
     acc.addCondAlgo(CompFactory.TRTStrawStatusCondAlg(name, **kwargs))
     return acc
 
 
+@AccumulatorCache
 def TRTStrawCondAlgCfg(flags, name="TRTStrawCondAlg", **kwargs):
     """Return a ComponentAccumulator for TRTStrawCondAlg algorithm"""
     acc = TRTAlignCondAlgCfg(flags)
@@ -45,6 +52,7 @@ def TRTStrawCondAlgCfg(flags, name="TRTStrawCondAlg", **kwargs):
     return acc
 
 
+@AccumulatorCache
 def TRTActiveCondAlgCfg(flags, name="TRTActiveCondAlg", **kwargs):
     """Return a ComponentAccumulator for TRTActiveCondAlg algorithm"""
     acc = TRTAlignCondAlgCfg(flags)

@@ -1,7 +1,8 @@
 """Define a function to configure PixelConditionsSummaryCfg
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -11,6 +12,8 @@ from PixelConditionsAlgorithms.PixelConditionsConfig import (
 )
 from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
 
+
+@AccumulatorCache
 def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
     """Return configured ComponentAccumulator with tool for Pixel Conditions"""
     acc = PixelReadoutManagerCfg(flags)

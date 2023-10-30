@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -97,6 +97,7 @@ def MuonDetectorToolCfg(flags, name = "MuonDetectorTool", **kwargs):
     acc.setPrivateTools(detTool)
     return acc
 
+
 def MuonAlignmentCondAlgCfg(flags, name="MuonAlignmentCondAlg", **kwargs):
     acc = ComponentAccumulator()
     from IOVDbSvc.IOVDbSvcConfig import addFolders    
@@ -188,7 +189,10 @@ def CscILineCondAlgCfg(flags, name="CscILinesCondAlg", **kwargs):
     
     the_alg = CompFactory.CscILinesCondAlg(name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
-    return result 
+    return result
+
+
+@AccumulatorCache
 def MuonDetectorCondAlgCfg(flags, name = "MuonDetectorCondAlg", **kwargs):
     result = ComponentAccumulator()
 

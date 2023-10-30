@@ -1,8 +1,10 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    
+
+@AccumulatorCache
 def AtlasFieldCacheCondAlgCfg(flags, **kwargs):
     '''
     Configure the CondAlgsfor the ATLAS magnetic field.
