@@ -62,7 +62,8 @@ StatusCode ChargedTracksWeightFilter::filterEvent() {
     int nChargedTracks = 0;
 
     // Loop over all events in McEventCollection
-    for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
+    for (McEventCollection::const_iterator itr = events_const()->begin(); itr != events_const()->end(); ++itr) {
+
         HepMC::GenEvent* genEvt = *itr;
 
         // Loop over all particles in event
@@ -129,7 +130,8 @@ StatusCode ChargedTracksWeightFilter::filterEvent() {
             return StatusCode::FAILURE;
         }
 
-        double rnd = m_rndmGen->flat();
+
+        const double rnd = m_rndmGen->flat();
         if(weight>rnd) {
             accept = true;
         }
@@ -169,7 +171,7 @@ double ChargedTracksWeightFilter::get_nch_weight(int nch) const {
 
 void ChargedTracksWeightFilter::weight_event(double weight) {
 
-    for (auto event : *(events())){
+    for (auto event : *(events_const())){
         if(!event) continue;
 
         if (event->weights().empty()) {
