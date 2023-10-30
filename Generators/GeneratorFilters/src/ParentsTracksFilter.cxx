@@ -53,6 +53,7 @@ ParentsTracksFilter::ParentsTracksFilter(const std::string& name,
       ISvcLocator* pSvcLocator): GenFilter(name,pSvcLocator) {
   //--------------------------------------------------------------------------    
   declareProperty("PDGParent",m_PDGParent); 
+  declareProperty("AllowChargeConjParent",m_AllowChargeConjParent = true);
   declareProperty("PtMinParent",m_PtMinParent = 0.); 
   declareProperty("PtMaxParent",m_PtMaxParent = 1e9);
   declareProperty("MassMinParent",m_MassMinParent = -1e9);
@@ -134,7 +135,9 @@ StatusCode ParentsTracksFilter::filterEvent() {
       // Parent
       int okPDGParent=0;
       for(int i=0;i<int(m_PDGParent.size());i++) 
-	if(abs((*pitr)->pdg_id()) == m_PDGParent[i]) okPDGParent=1;
+	if( ( (*pitr)->pdg_id() == m_PDGParent[i] ) 
+	  || ( m_AllowChargeConjParent && ( abs((*pitr)->pdg_id() ) == m_PDGParent[i] ) ) 
+        ) okPDGParent=1;
       if( ( (m_PDGParent[0] == 0) || okPDGParent )
 	  && ((*pitr)->momentum().perp() >= m_PtMinParent)
           && ((*pitr)->momentum().perp() < m_PtMaxParent)

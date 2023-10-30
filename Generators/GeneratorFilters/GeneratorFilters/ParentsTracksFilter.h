@@ -36,6 +36,7 @@ private:
 
 	// Local Member Data:-
 	std::vector<int> m_PDGParent;
+	bool m_AllowChargeConjParent;
 	double m_PtMinParent;
         double m_PtMaxParent;
         double m_MassMinParent;
