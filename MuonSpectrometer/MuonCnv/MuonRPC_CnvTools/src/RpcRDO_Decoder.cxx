@@ -62,7 +62,7 @@ std::vector<Identifier> Muon::RpcRDO_Decoder::getOfflineData(const RpcFiredChann
     // BCzero=3 and ROOffset=2 in
     // Trigger/TrigT1/TrigT1RPChardware/src/Matrix.cxx
     // need to find a better way than hard-coding
-    time = (fChan->bcid() - 3) * 25 + (fChan->time() + 0.5 - 2) * 3.125;
+    time = (fChan->bcid() - 1) * 25 + (fChan->time() + 0.5 - 2) * 3.125;
 
     // skip the trigger hits
     if (ijk == 7) { return rpcIdVec; }
