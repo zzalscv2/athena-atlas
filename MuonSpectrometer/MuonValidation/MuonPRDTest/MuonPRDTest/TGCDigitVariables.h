@@ -7,6 +7,7 @@
 
 #include "MuonDigitContainer/TgcDigitContainer.h"
 #include "MuonPRDTest/PrdTesterModule.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
 namespace MuonPRDTest{
     class TgcDigitVariables : public PrdTesterModule {
     public:
@@ -20,10 +21,10 @@ namespace MuonPRDTest{
     
     private:
         SG::ReadHandleKey<TgcDigitContainer> m_key{};
-        ScalarBranch<unsigned int>& m_TGC_nDigits{parent().newScalar<unsigned int>("N_Digits_TGC")};
-        VectorBranch<float>& m_TGC_dig_localPosX{parent().newVector<float>("Digits_TGC_localPosX")};
-        VectorBranch<float>& m_TGC_dig_localPosY{parent().newVector<float>("Digits_TGC_localPosY")};
+        ScalarBranch<unsigned int>& m_TGC_nDigits{parent().newScalar<unsigned int>("N_Digits_TGC")};        
         ThreeVectorBranch m_TGC_dig_globalPos{parent(), "Digits_TGC_globalPos"};
+        TwoVectorBranch m_TGC_dig_localPos{parent(), "Digits_TGC_localPos"};
+        VectorBranch<uint8_t>& m_TGC_dig_bcId{parent().newVector<uint8_t>("Digits_TGC_bcId")};
         TgcIdentifierBranch m_TGC_dig_id{parent(), "Digits_TGC"};
     };
 };

@@ -25,10 +25,8 @@ namespace MuonPRDTest {
         unsigned int n_digits{0};
         for (const TgcDigitCollection* coll : *TgcDigitContainer) {
             ATH_MSG_DEBUG("processing collection with size " << coll->size());
-            for (unsigned int digitNum = 0; digitNum < coll->size(); digitNum++) {
-                const TgcDigit* digit = coll->at(digitNum);
+            for (const TgcDigit* digit : *coll) {
                 Identifier Id = digit->identify();
-
                 ATH_MSG_DEBUG("TGC Digit Offline id:  " << idHelperSvc()->toString(Id));
 
                 const MuonGM::TgcReadoutElement* rdoEl = MuonDetMgr->getTgcReadoutElement(Id);
@@ -37,19 +35,16 @@ namespace MuonPRDTest {
                     return false;
                 }
 
-                Amg::Vector3D gpos{0., 0., 0.};
-                Amg::Vector2D lpos(0., 0.);
+                Amg::Vector3D gpos{Amg::Vector3D::Zero()};
+                Amg::Vector2D lpos{Amg::Vector2D::Zero()};
 
-                const bool stripPosition = rdoEl->stripPosition(Id, lpos);              
-
-                if (!stripPosition) {                   
+                if (!rdoEl->stripPosition(Id, lpos)) {                   
                     continue;
                 }
-
                 rdoEl->surface(Id).localToGlobal(lpos, gpos, gpos);
                 m_TGC_dig_globalPos.push_back(gpos);
-                m_TGC_dig_localPosX.push_back(lpos.x());
-                m_TGC_dig_localPosY.push_back(lpos.y());
+                m_TGC_dig_localPos.push_back(lpos);
+                m_TGC_dig_bcId.push_back(digit->bcTag());
                 m_TGC_dig_id.push_back(Id);
                 ++n_digits;
             }
