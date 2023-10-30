@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -17,6 +18,7 @@ def SCT_CablingFoldersCfg(flags):
     return cfg, path
 
 
+@AccumulatorCache
 def SCT_CablingCondAlgCfg(flags, name="SCT_CablingCondAlgFromCoraCool"):
     cfg = ComponentAccumulator()
     foldersCfg, path = SCT_CablingFoldersCfg(flags)

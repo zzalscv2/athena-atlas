@@ -1,16 +1,20 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
 
+@AccumulatorCache
 def SCT_AlignCondAlgCfg(flags, name="SCT_AlignCondAlg", **kwargs):
     """Return a configured SCT_AlignCondAlg"""
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_GeoModelCfg
     acc = SCT_GeoModelCfg(flags)
     if flags.GeoModel.Align.Dynamic:
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/AlignL1/ID", "/Indet/AlignL1/ID", className="CondAttrListCollection"))
-        acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/AlignL2/SCT", "/Indet/AlignL2/SCT", className="CondAttrListCollection"))
+        acc.merge(addFoldersSplitOnline(flags, "INDET",
+                                        ["/Indet/Onl/AlignL1/ID", "/Indet/Onl/AlignL2/SCT"],
+                                        ["/Indet/AlignL1/ID", "/Indet/AlignL2/SCT"],
+                                        className="CondAttrListCollection"))
         acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/AlignL3", "/Indet/AlignL3", className="AlignableTransformContainer"))
     else:
         acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", "/Indet/Align", className="AlignableTransformContainer"))
@@ -39,20 +43,12 @@ def SCT_ConfigurationCondAlgCfg(flags, name="SCT_ConfigurationCondAlg", **kwargs
 
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="SCT",
-                                    onlineFolders=channelFolder,
-                                    offlineFolders=channelFolder,
-                                    className="CondAttrListVec",
-                                    splitMC=True))
-    acc.merge(addFoldersSplitOnline(flags,
-                                    detDb="SCT",
-                                    onlineFolders=f"{config_folder_prefix}Module",
-                                    offlineFolders=f"{config_folder_prefix}Module",
-                                    className="CondAttrListVec",
-                                    splitMC=True))
-    acc.merge(addFoldersSplitOnline(flags,
-                                    detDb="SCT",
-                                    onlineFolders=f"{config_folder_prefix}MUR",
-                                    offlineFolders=f"{config_folder_prefix}MUR",
+                                    onlineFolders=[channelFolder,
+                                                   f"{config_folder_prefix}Module",
+                                                   f"{config_folder_prefix}MUR"],
+                                    offlineFolders=[channelFolder,
+                                                    f"{config_folder_prefix}Module",
+                                                    f"{config_folder_prefix}MUR"],
                                     className="CondAttrListVec",
                                     splitMC=True))
 
@@ -66,9 +62,8 @@ def SCT_ConfigurationCondAlgCfg(flags, name="SCT_ConfigurationCondAlg", **kwargs
     return acc
 
 
-
+@AccumulatorCache
 def SCT_DetectorElementCondAlgCfg(flags, name="SCT_DetectorElementCondAlg", **kwargs):
-    from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConfig import SCT_AlignCondAlgCfg
     acc = SCT_AlignCondAlgCfg(flags)
 
     # FIXME

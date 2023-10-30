@@ -1,12 +1,15 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## Configuration Access to OFFLINE DB (COMP200)
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 from AthenaConfiguration.Enums import LHCPeriod
 
+
+@AccumulatorCache
 def MdtCondDbAlgCfg(flags, **kwargs):
     result  = ComponentAccumulator()
     folders = []
@@ -167,6 +170,8 @@ def TgcDigitCondAlgCfg(flags):
         result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], tag='TgcDigitXTalk-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
     return result
 
+
+@AccumulatorCache
 def NswCalibDbAlgCfg(flags, **kwargs):
     result = ComponentAccumulator()
 

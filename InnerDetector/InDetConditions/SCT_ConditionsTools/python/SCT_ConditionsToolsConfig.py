@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
@@ -67,6 +68,8 @@ def SCT_DetectorElementStatusAddByteStreamErrorsToolCfg(flags, name="InDetSCT_De
     acc.setPrivateTools( acc.popToolsAndMerge( SCT_ConditionsSummaryToolBaseCfg( flags, name, **kwargs) ) )
     return acc
 
+
+@AccumulatorCache
 def SCT_ConditionsSummaryToolCfg(flags, name="InDetSCT_ConditionsSummaryTool", **kwargs):
     acc = ComponentAccumulator()
 
@@ -112,7 +115,7 @@ def SCT_ConditionsSummaryToolCfg(flags, name="InDetSCT_ConditionsSummaryTool", *
     return acc
 
 
-
+@AccumulatorCache
 def SCT_ConfigurationConditionsToolCfg(flags, name="InDetSCT_ConfigurationConditionsTool", **kwargs):
     # Load conditions configuration service and load folders and algorithm for it
     # Load folders that have to exist for both MC and Data

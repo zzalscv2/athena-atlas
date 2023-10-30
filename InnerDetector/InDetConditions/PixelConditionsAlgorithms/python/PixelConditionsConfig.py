@@ -2,6 +2,7 @@
 
 Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
@@ -76,15 +77,17 @@ def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
     acc.addCondAlgo(CompFactory.PixelConfigCondAlg(name, **CondArgs))
     return acc
 
-
+@AccumulatorCache
 def PixelAlignCondAlgCfg(flags, name="PixelAlignCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelAlignCondAlg"""
     from PixelGeoModel.PixelGeoModelConfig import PixelGeoModelCfg
     acc = PixelGeoModelCfg(flags)
 
     if flags.GeoModel.Align.Dynamic:
-        acc.merge(addFoldersSplitOnline(flags,"INDET","/Indet/Onl/AlignL1/ID","/Indet/AlignL1/ID",className="CondAttrListCollection"))
-        acc.merge(addFoldersSplitOnline(flags,"INDET","/Indet/Onl/AlignL2/PIX","/Indet/AlignL2/PIX",className="CondAttrListCollection"))
+        acc.merge(addFoldersSplitOnline(flags,"INDET",
+                                        ["/Indet/Onl/AlignL1/ID","/Indet/Onl/AlignL2/PIX"],
+                                        ["/Indet/AlignL1/ID","/Indet/AlignL2/PIX"],
+                                        className="CondAttrListCollection"))
         acc.merge(addFoldersSplitOnline(flags,"INDET","/Indet/Onl/AlignL3","/Indet/AlignL3",className="AlignableTransformContainer"))
     else:
         acc.merge(addFoldersSplitOnline(flags,"INDET","/Indet/Onl/Align","/Indet/Align",className="AlignableTransformContainer"))
