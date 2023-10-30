@@ -57,7 +57,7 @@ namespace ActsTrk {
         "Theta angular resolution"};
     Gaudi::Property< double > m_sigmaQOverP {this, "sigmaQOverP", 0.1 / Acts::UnitConstants::GeV,
         "q/p resolution"};
-    Gaudi::Property< double > m_sigmaT0 {this, "sigmaT0", 1400 * Acts::UnitConstants::s,
+    Gaudi::Property< double > m_sigmaT0 {this, "sigmaT0", 1 * Acts::UnitConstants::ns,
         "Time resolution"};
     Gaudi::Property< std::vector<double> > m_initialVarInflation {this, "initialVarInflation", {1., 1., 1., 1., 1., 1.},
         "Inflate tracks"};
