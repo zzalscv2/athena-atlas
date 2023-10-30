@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -238,12 +238,13 @@ def main():
     log.debug("Start and end timestamps: {0} {1}".format(startOfRange, endOfRange))
 
     # Read prescales and groups to save in the csv summary
+    # The format of the configuration is defined in https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigCost/TrigCostAnalysis/python/CostMetadataUtil.py#L238
     from TrigCostAnalysis.CostMetadataUtil import readHLTConfigKeysFromCOOL
     configMetadata = readHLTConfigKeysFromCOOL(args.runNumber)
 
     # The start and stop lumiblock should not include the lumiblocks where we did the keys change
-    hltAvailableKeys = findKeysForRange(configMetadata[4]["HLTPSK"], args.lbStart, args.lbEnd)
-    l1AvailableKeys = findKeysForRange(configMetadata[5]["LVL1PSK"], args.lbStart, args.lbEnd)
+    hltAvailableKeys = findKeysForRange(configMetadata[3]["HLTPSK"], args.lbStart, args.lbEnd)
+    l1AvailableKeys = findKeysForRange(configMetadata[4]["LVL1PSK"], args.lbStart, args.lbEnd)
 
     # Create list of key ranges - it will store tuples (l1Psk, hltPsk, rangeStart, rangeEnd)
     # Four cases are handled: L1 range starts before HLT range and ends later, HLT range starts before L1 range and ends later, 
@@ -267,7 +268,7 @@ def main():
                 keyRangesList.append((l1Entry[0], hltEntry[0], hltLbStart, hltLbEnd))
 
     log.debug("Available key ranges are {0}".format(keyRangesList))
-    chainGroups = readChainsGroups(configMetadata[1]["SMK"], configMetadata[2]["DB"])
+    chainGroups = readChainsGroups(configMetadata[2]["SMK"], configMetadata[0]["DB"])
 
     pbeast = None
     try:
@@ -288,8 +289,8 @@ def main():
         endOfKeysRange = readLbEndFromCool(args.runNumber, lbEnd)
         log.debug("Current range is {0}-{1}. Timestamps are {2}-{3}".format(lbStart, lbEnd, ctime(startOfKeysRange/1E6), ctime(endOfKeysRange/1E6)))
 
-        hltPrescales = readHLTPrescales(keysRange[1], configMetadata[2]["DB"])
-        l1Prescales = readL1Prescales(keysRange[0], configMetadata[2]["DB"])
+        hltPrescales = readHLTPrescales(keysRange[1], configMetadata[0]["DB"])
+        l1Prescales = readL1Prescales(keysRange[0], configMetadata[0]["DB"])
 
         # Read prescaled IS rates from pbeast and calculate unprescaled rates
         # Queries are based on TRP grafana dashboard
@@ -384,8 +385,8 @@ def main():
         {'RunNumber' : args.runNumber},
         {"First lumiblock" : args.lbStart},
         {"Last lumiblock" : args.lbEnd},
-        {'SMK' :  configMetadata[1]["SMK"]},
-        {'DB' : configMetadata[2]["DB"]},
+        {'SMK' :  configMetadata[2]["SMK"]},
+        {'DB' : configMetadata[0]["DB"]},
         {'LVL1PSK' :  l1AvailableKeys},
         {'HLTPSK' : hltAvailableKeys}
     ]
