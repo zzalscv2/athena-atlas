@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMDetectorDescription_H
 #define MMDetectorDescription_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AGDDKernel/AGDDDetector.h"
 #include "MuonAGDDDescription/MM_Technology.h"
 #include <string>
@@ -14,30 +16,30 @@
 class AGDDDetectorStore;
 
 struct MMReadoutParameters {
-    double stripPitch;
-    double gasThickness;
-    double pcbThickness;
-    double driftThickness;
-    std::vector<double> stereoAngle;
-    std::vector<int> readoutSide;
-    double zpos;
-    double distanceFromZAxis;  //inner radius: distance from the IP till the bottom part of the module
-    double roLength;   //module's radial size
-    double activeBottomLength;  // active area: bottom length
-    double activeTopLength;    //active area: top length
-    double activeH;            //active area: radial size
-     double minYPhiR;          //active area: the distance between the first eta and stereo strips (active) [R:right, L:left, min:bottom part, max:top part]. LM1 is the special case as there is no space to route any strips at the bottom, we use two distances (left and right).
-    double minYPhiL;
-    double maxYPhi;
-    int nMissedTopEta;      //number of strips that are not connected at any FE board (eta layer)
-    int nMissedBottomEta;
-    int nMissedTopStereo;   //number of strips that are not connected at any FE board (stereo layer)
-    int nMissedBottomStereo;
-    int nRoutedTop;     // number of strips needed to cover the low efficient parts of the module (these strips are shorter in lenght than the normal ones)
-    int nRoutedBottom;
-    double dlStereoTop;
-    double dlStereoBottom;
-    int tStrips; //total strips per module (disconnected strips are included)
+    double stripPitch{0.};
+    double gasThickness{0.};
+    double pcbThickness{0.};
+    double driftThickness{0.};
+    std::vector<double> stereoAngle{};
+    std::vector<int> readoutSide{};
+    double zpos{0.};
+    double distanceFromZAxis{0.};  //inner radius: distance from the IP till the bottom part of the module
+    double roLength{0.};   //module's radial size
+    double activeBottomLength{0.};  // active area: bottom length
+    double activeTopLength{0.};    //active area: top length
+    double activeH{0.};            //active area: radial size
+    double minYPhiR{0.};          //active area: the distance between the first eta and stereo strips (active) [R:right, L:left, min:bottom part, max:top part]. LM1 is the special case as there is no space to route any strips at the bottom, we use two distances (left and right).
+    double minYPhiL{0.};
+    double maxYPhi{0.};
+    int nMissedTopEta{0};      //number of strips that are not connected at any FE board (eta layer)
+    int nMissedBottomEta{0};
+    int nMissedTopStereo{0};   //number of strips that are not connected at any FE board (stereo layer)
+    int nMissedBottomStereo{0};
+    int nRoutedTop{0};     // number of strips needed to cover the low efficient parts of the module (these strips are shorter in lenght than the normal ones)
+    int nRoutedBottom{0};
+    double dlStereoTop{0.};
+    double dlStereoBottom{0.};
+    int tStrips{0}; //total strips per module (disconnected strips are included)
 };
 
 class MMDetectorDescription: public AGDDDetector {

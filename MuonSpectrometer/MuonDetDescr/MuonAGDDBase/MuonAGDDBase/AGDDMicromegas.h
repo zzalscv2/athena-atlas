@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AGDDMicromegas_H
 #define AGDDMicromegas_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "MuonAGDDDescription/MMDetectorDescription.h"
 #include "AGDDKernel/AGDDVolume.h"
 #include <string>

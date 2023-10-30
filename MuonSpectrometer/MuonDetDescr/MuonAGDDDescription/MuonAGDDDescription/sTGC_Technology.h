@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef sTGC_Technology_H
 #define sTGC_Technology_H
 
+#include "GeoPrimitives/GeoPrimitives.h"
+///
 #include "AGDDKernel/AGDDTechnology.h"
 #include <vector>
 namespace MuonGM {
@@ -13,20 +15,20 @@ namespace MuonGM {
 
 class sTGC_Technology: public AGDDTechnology {
 public:
-	double thickness;
-	int nlayers;
-	double gasThickness;
-	double pcbThickness; // Included for Backwards Compatibility
-	double pcbThickness150;
-	double pcbThickness200;
-	double coverThickness;
-	double f4Thickness;
-  double f5Thickness;
-  double f6Thickness;
+	double thickness{0.};
+	int nlayers{0};
+	double gasThickness{0.};
+	double pcbThickness{0.}; // Included for Backwards Compatibility
+	double pcbThickness150{0.};
+	double pcbThickness200{0.};
+	double coverThickness{0.};
+	double f4Thickness{0.};
+  	double f5Thickness{0.};
+  	double f6Thickness{0.};
 
 
 
-	int geoLevel;
+	int geoLevel{0};
 
 	// inner structure parameters (to be defined)
 
@@ -37,8 +39,7 @@ public:
 };
 
 sTGC_Technology::sTGC_Technology(const std::string& s,
-                                 AGDDDetectorStore& ds): AGDDTechnology(s, ds),
-  geoLevel(0)
+                                 AGDDDetectorStore& ds): AGDDTechnology(s, ds)
 {
 }
 
