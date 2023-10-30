@@ -64,6 +64,7 @@ void cfmasserr(VKVertex * vk, const int *list, double BMAG, double *MASS, double
        covM2 += deriv[i] * ARR2D_FS(vk->ader, vkalNTrkM*3+3, i+3, j+3) *deriv[j];
      }
   }
+  if(covM2<1.e-10)covM2=1.e-10;
 //----
   (*MASS) = (ptot[3]-ptot[2])*(ptot[3]+ptot[2])-ptot[1]*ptot[1]-ptot[0]*ptot[0];
   if((*MASS)<1.e-10)  (*MASS) = 1.e-10;
