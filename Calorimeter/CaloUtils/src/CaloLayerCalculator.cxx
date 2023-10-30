@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: CaloLayerCalculator.cxx,v 1.1 2006-03-20 17:42:26 ssnyder Exp $
@@ -275,7 +275,8 @@ CaloLayerCalculator::Helper::~Helper()
     // if the negative energy within the window nearly cancels
     // the positive energy.
     if (std::abs (m_calc.m_etamr - m_eta) > m_deta ||
-        CaloPhiRange::fix (m_calc.m_phimr - m_phi) > m_dphi)
+        std::abs (m_calc.m_etam) > 10 ||
+        std::abs (CaloPhiRange::fix (m_calc.m_phimr - m_phi)) > m_dphi)
     {
       m_calc.resetOnNegativeEnergy(m_eta,m_phi);
     }
