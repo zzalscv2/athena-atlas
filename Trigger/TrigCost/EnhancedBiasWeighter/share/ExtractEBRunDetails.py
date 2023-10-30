@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 import eformat
@@ -169,8 +169,8 @@ def createLumiBlockNodes(xmlRoot, runNumber, lbStart, lbEnd, deadTimeData):
 def createLbNode(xmlRoot, lbId, lumi, mu, nEvents, avgDeadtime):
     l = xmlRoot.createElement('lb')
     l.setAttribute('id', str(lbId))
-    l.setAttribute('lumi', str(round(lumi, 3)))
-    l.setAttribute('mu', str(round(mu, 3)))
+    l.setAttribute('lumi', str(round(lumi, 3 if lumi > 1 else 6)))
+    l.setAttribute('mu', str(round(mu, 3 if mu > 1 else 6)))
     l.setAttribute('deadtime', str(round(avgDeadtime, 3)))
     l.appendChild(xmlRoot.createTextNode(str(nEvents))) 
 
@@ -210,6 +210,8 @@ if __name__=='__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level: 1 - VERBOSE, 2 - DEBUG, 3 - INFO')
+    parser.add_argument('--physicsDeadtimeItem', type=str, default="L1_eEM26M--enabled", help='Physics Deadtime Item')
+    parser.add_argument('-s','--server', default='https://atlasop.cern.ch', help="Pbeast server url. For GPN: https://atlasop.cern.ch, for P1: http://pc-tdq-bst-05.cern.ch:8080")
     parser.add_argument('flags', nargs='*', help='Config flag overrides')  
     args = parser.parse_args()
 
@@ -242,7 +244,7 @@ if __name__=='__main__':
 
     lbRanges = readTimestampsOfLb(runNumber, min(lumiblocks), max(lumiblocks))
     (startOfRun, endOfRun) = (lbRanges[min(lumiblocks)]["start"], lbRanges[max(lumiblocks)]["end"])
-    lumiValNode = createDeadtimeNode(root, readDeadtimeFromIS(startOfRun, endOfRun))
+    lumiValNode = createDeadtimeNode(root, readDeadtimeFromIS(startOfRun, endOfRun, args.server))
     xml.appendChild(lumiValNode)
 
     # Retrieve bunchgroup data
@@ -250,7 +252,7 @@ if __name__=='__main__':
     xml.appendChild(bgNode)
 
     # Retireve lumiblocks info
-    deadTimeData = getPhysicsDeadtimePerLB(startOfRun, endOfRun, lbRanges)
+    deadTimeData = getPhysicsDeadtimePerLB(startOfRun, endOfRun, lbRanges, args.physicsDeadtimeItem, args.server)
     lumiNode = createLumiBlockNodes(root, runNumber, min(lumiblocks), max(lumiblocks), deadTimeData)
     xml.appendChild(lumiNode)
 

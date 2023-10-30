@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -50,7 +50,8 @@ if __name__=='__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--maxEvents', type=int, help='Maximum number of events to process')
-    parser.add_argument('--skipEvents',type=int, help='Number of events to skip')
+    parser.add_argument('--skipEvents', type=int, help='Number of events to skip')
+    parser.add_argument('--skipHLTSeeds', action="store_true", help='Read HLT seeds for EB items, used for pp EB runs')
     parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level: 1 - VERBOSE, 2 - DEBUG, 3 - INFO')
     parser.add_argument('flags', nargs='*', help='Config flag overrides')  
     args = parser.parse_args()
@@ -77,7 +78,7 @@ if __name__=='__main__':
         cfg.merge(TriggerRecoCfg(ConfigFlags))
 
     configKeys = getConfigKeys(ConfigFlags.Input.Files)
-    itemsMap = readHLTSeeds(smk = configKeys["SMK"], db = configKeys["DB"])
+    itemsMap = {} if args.skipHLTSeeds else readHLTSeeds(smk = configKeys["SMK"], db = configKeys["DB"]) 
     cfg.merge(ebComputingAlg(ConfigFlags, itemsMap))
 
     eventLoop = CompFactory.AthenaEventLoopMgr()
@@ -88,5 +89,5 @@ if __name__=='__main__':
     # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    sc = cfg.run(args.maxEvents, args.loglevel)
+    sc = cfg.run(args.maxEvents)
     sys.exit(0 if sc.isSuccess() else 1)
