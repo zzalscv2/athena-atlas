@@ -131,40 +131,59 @@ def CscCondDbAlgCfg(flags, **kwargs):
     result.addCondAlgo(alg)
     return result
 
-###def TgcCondDbAlgCfg(flags, **kwargs):
-###    result  = ComponentAccumulator()
-###    folders = [] # which folders?
-###    if flags.Common.isOnline:
-###        return result ## avoid adding algo to the component accumulator
-###        kwargs["isOnline"] = True
-###    else:
-###        kwargs["isOnline"] = False
-###        if flags.Input.isMC:
-###            kwargs['isData'] = False
-###        else:
-###            kwargs['isData'] = True
-###            kwargs['isRun1'] = flags.IOVDb.DatabaseInstance == 'COMP200'
-###    alg = TgcCondDbAlg(**kwargs)
-###    result.merge( addFolders(flags, folders , detDb="DCS_OFL", className='CondAttrListCollection') )
-###    result.addCondAlgo(alg)
-###    return result
+def TgcCondDbAlgCfg(flags,name="TgcCondDbAlg", **kwargs):
+    result  = ComponentAccumulator()
+    ### TO DO define the COOL folder
+    the_alg = CompFactory.TgcCondDbAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
 
+def TgcEnergyThresholdCondAlgCfg(flags, name = "TgcEnergyThresholdCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    ### TO DO define the COOL folder
+    the_alg = CompFactory.TgcDigitEnergyThreshCondAlg(name= name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
+
+def TgcDigitJitterCondAlgCfg(flags, name = "TgcDigitJitterCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.TgcDigitJitterCondAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
+
+def TgcDigitASDposCondAlgCfg(flags, name="TgcDigitASDposCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    if flags.Digitization.UseUpdatedTGCConditions:
+        result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    else:
+        result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], tag='TgcDigitAsdPos-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    the_alg = CompFactory.TgcDigitASDposCondAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
+
+def TgcDigitTimeOffsetCondAlgCfg(flags, name = "TgcDigitTimeOffsetCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    result.merge(addFolders(flags, ["/TGC/DIGIT/TOFFSET"], tag='TgcDigitTimeOffset-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    the_alg = CompFactory.TgcDigitTimeOffsetCondAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
+
+def TgcDigitCrosstalkCondAlgCfg(flags, name = "TgcDigitCrosstalkCondAlg", **kwargs):
+    result = ComponentAccumulator()
+    result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], tag='TgcDigitXTalk-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    the_alg = CompFactory.TgcDigitCrosstalkCondAlg(name = name, **kwargs)
+    result.addCondAlgo(the_alg, primary = True)
+    return result
 
 def TgcDigitCondAlgCfg(flags):
     result  = ComponentAccumulator()
-    result.addCondAlgo(CompFactory.TgcDigitASDposCondAlg())
-    result.addCondAlgo(CompFactory.TgcDigitTimeOffsetCondAlg())
-    result.addCondAlgo(CompFactory.TgcDigitCrosstalkCondAlg())
-
-    if flags.Digitization.UseUpdatedTGCConditions:
-        result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-        # TODO: Below the explicit tag will be removed, once this is available in the global tag.
-        result.merge(addFolders(flags, ["/TGC/DIGIT/TOFFSET"], tag='TgcDigitTimeOffset-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-        result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], tag='TgcDigitXTalk-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-    else:  # need explicit tags, since the folder new and not defined at the presented global tag. It can be removed if the folder is available in all global tags.
-        result.merge(addFolders(flags, ["/TGC/DIGIT/ASDPOS"], tag='TgcDigitAsdPos-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-        result.merge(addFolders(flags, ["/TGC/DIGIT/TOFFSET"], tag='TgcDigitTimeOffset-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
-        result.merge(addFolders(flags, ["/TGC/DIGIT/XTALK"], tag='TgcDigitXTalk-00-01', detDb="TGC_OFL", db="OFLP200", className="CondAttrListCollection"))
+    result.merge(TgcDigitASDposCondAlgCfg(flags))    
+    result.merge(TgcDigitTimeOffsetCondAlgCfg(flags))
+    result.merge(TgcDigitCrosstalkCondAlgCfg(flags))
+    return result
+    result.merge(TgcCondDbAlgCfg(flags))
+    result.merge(TgcEnergyThresholdCondAlgCfg(flags))
+    result.merge(TgcDigitJitterCondAlgCfg(flags))
     return result
 
 def NswCalibDbAlgCfg(flags, **kwargs):

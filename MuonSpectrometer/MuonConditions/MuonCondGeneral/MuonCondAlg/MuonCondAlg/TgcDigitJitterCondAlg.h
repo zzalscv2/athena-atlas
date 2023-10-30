@@ -2,12 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONCONDALG_TGCCONDDBALG_H
-#define MUONCONDALG_TGCCONDDBALG_H
-
-// STL includes
-#include <zlib.h>
-
+#ifndef MUONCONDALG_TGCDIGITJITTERCONDALG_H
+#define MUONCONDALG_TGCDIGITJITTERCONDALG_H
 
 // Gaudi includes
 #include <nlohmann/json.hpp>
@@ -15,33 +11,29 @@
 // Athena includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "MuonCondData/TgcCondDbData.h"
-#include "MuonCondSvc/MdtStringUtils.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonCondData/TgcDigitJitterData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
 
 
-class TgcCondDbAlg : public AthReentrantAlgorithm {
+class TgcDigitJitterCondAlg : public AthReentrantAlgorithm {
 public:
-    TgcCondDbAlg(const std::string& name, ISvcLocator* svc);
-    virtual ~TgcCondDbAlg() = default;
+    TgcDigitJitterCondAlg(const std::string& name, ISvcLocator* svc);
+    virtual ~TgcDigitJitterCondAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
     virtual bool isReEntrant() const override { return false; }
 
 private:
-    /// Load the detector status from cool
+    /// Load the Jitter constants from the JSON format
     StatusCode parseDataFromJSON(const nlohmann::json& lines,
-                                 TgcCondDbData& deadChannels) const;
+                                 TgcDigitJitterData& jitterChannels) const;
    
-    /// Load the detector status from a JSON file
+    /// Use an external JSON file to load the Jitter constants from
     Gaudi::Property<std::string> m_readFromJSON{this, "readFromJSON", "" };
-    
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-    SG::WriteCondHandleKey<TgcCondDbData> m_writeKey{this, "WriteKey", "TgcCondDbData", "Key of output TGC condition data"};
+    SG::WriteCondHandleKey<TgcDigitJitterData> m_writeKey{this, "WriteKey", "TgcJitterData", "Key of output TGC condition data"};
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDb{this, "ReadKey", "", "Key of input TGC condition data"};
 };
 

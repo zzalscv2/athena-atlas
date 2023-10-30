@@ -35,32 +35,17 @@ StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
   }
 
   SG::ReadCondHandle<CondAttrListCollection> readHandle_ASDpos{m_readKey_ASDpos, ctx};
-  if (readHandle_ASDpos.cptr() == nullptr) {
+  if (!readHandle_ASDpos.isValid()) {
     ATH_MSG_ERROR("Null pointer to the read conditions object");
     return StatusCode::FAILURE;
   }
-
-  ATH_MSG_DEBUG("Size of CondAttrListCollection" << readHandle_ASDpos.fullKey() << " = " << readHandle_ASDpos->size());
-
-  EventIDRange rangeW_ASDpos;
-  if (!readHandle_ASDpos.range(rangeW_ASDpos)) {
-    ATH_MSG_ERROR("Failed to retrieve validity range for " << readHandle_ASDpos.key());
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("Range of input is " << rangeW_ASDpos);
-
-  // write condition object
-  EventIDRange rangeIntersection = EventIDRange::intersect(rangeW_ASDpos);
-  if(rangeIntersection.start()>rangeIntersection.stop()) {
-    ATH_MSG_ERROR("Invalid intersection range: " << rangeIntersection);
-    return StatusCode::FAILURE;
-  }
+  writeHandle.addDependency(readHandle_ASDpos);
 
   // Fill
   auto outputCdo = std::make_unique<TgcDigitASDposData>();
   using namespace MuonCalib;
   char delimiter{';'};
-  for(const auto &[channel, attribute] : *readHandle_ASDpos.cptr()) {
+  for(const auto &[channel, attribute] : **readHandle_ASDpos) {
     const coral::Blob& blob = attribute["bASDPos"].data<coral::Blob>();
     const char *blobCStr = reinterpret_cast<const char *>(blob.startingAddress());
     std::string_view blobline(blobCStr, blob.size()/sizeof(char));
@@ -91,13 +76,8 @@ StatusCode TgcDigitASDposCondAlg::execute(const EventContext& ctx) const
   }  // end of for(attrmap)
 
   // Record
-  if (writeHandle.record(rangeIntersection, std::move(outputCdo)).isFailure()) {
-    ATH_MSG_FATAL("Could not record TgcDigitASDposData " << writeHandle.key()
-		  << " with EventRange " << rangeIntersection
-		  << " into Conditions Store");
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("recorded new " << writeHandle.key() << " with range " << rangeIntersection << " into Conditions Store");
+  ATH_CHECK(writeHandle.record(std::move(outputCdo)));
+  ATH_MSG_DEBUG("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
 
   return StatusCode::SUCCESS;
 }

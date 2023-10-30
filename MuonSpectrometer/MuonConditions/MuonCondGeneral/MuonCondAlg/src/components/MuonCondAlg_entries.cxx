@@ -11,6 +11,8 @@
 #include "MuonCondAlg/TgcDigitASDposCondAlg.h"
 #include "MuonCondAlg/TgcDigitTimeOffsetCondAlg.h"
 #include "MuonCondAlg/TgcDigitCrosstalkCondAlg.h"
+#include "MuonCondAlg/TgcDigitEnergyThreshCondAlg.h"
+#include "MuonCondAlg/TgcDigitJitterCondAlg.h"
 #include "MuonCondAlg/NswCalibDbAlg.h"
 #include "MuonCondAlg/NswDcsDbAlg.h"
 #include "MuonCondAlg/NswPassivationDbAlg.h"
@@ -29,6 +31,8 @@ DECLARE_COMPONENT(MdtCalibDbAlg)
 DECLARE_COMPONENT(TgcDigitASDposCondAlg)
 DECLARE_COMPONENT(TgcDigitTimeOffsetCondAlg)
 DECLARE_COMPONENT(TgcDigitCrosstalkCondAlg)
+DECLARE_COMPONENT(TgcDigitEnergyThreshCondAlg)
+DECLARE_COMPONENT(TgcDigitJitterCondAlg)
 DECLARE_COMPONENT(NswCalibDbAlg)
 DECLARE_COMPONENT(NswDcsDbAlg)
 DECLARE_COMPONENT(NswPassivationDbAlg)

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MDTConditionsTestAlgMT_H
-#define MDTConditionsTestAlgMT_H
+#ifndef TgcDigtThresholdTestAlg_H
+#define TgcDigtThresholdTestAlg_H
 
 // STL
 #include <sstream>
@@ -15,19 +15,19 @@
 
 // Athena
 #include "Identifier/Identifier.h"
-#include "MuonCondData/MdtCondDbData.h"
+#include "MuonCondData/TgcDigitThresholdData.h"
 
-/// Example class to show calling the MDTConditionsTestAlgMT
-class MDTConditionsTestAlgMT : public AthAlgorithm {
+/// Example class to show calling the MdtConditionsTestAlg
+class TgcDigtThresholdTestAlg : public AthAlgorithm {
 public:
-    MDTConditionsTestAlgMT(const std::string &name, ISvcLocator *pSvcLocator);
-    virtual ~MDTConditionsTestAlgMT();
+    TgcDigtThresholdTestAlg(const std::string &name, ISvcLocator *pSvcLocator);
+    virtual ~TgcDigtThresholdTestAlg();
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
 
 private:
-    SG::ReadCondHandleKey<MdtCondDbData> m_readKey{this, "ReadKey", "MdtCondDbData", "Key of MdtCondDbData"};
+    SG::ReadCondHandleKey<TgcDigitThresholdData> m_readKey{this, "ReadKey", "TgcEnergyThresholds", "Key of the Energy threshold data"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

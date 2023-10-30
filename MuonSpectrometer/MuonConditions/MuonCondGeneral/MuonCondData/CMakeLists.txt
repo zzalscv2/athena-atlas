@@ -2,6 +2,9 @@
 # Package: MuonCondData
 ################################################################################
 
+
+# External dependencies:
+find_package( CLHEP )
 # Declare the package name:
 atlas_subdir( MuonCondData )
 
@@ -9,6 +12,8 @@ atlas_subdir( MuonCondData )
 atlas_add_library( MuonCondData
                    src/*.cxx
                    PUBLIC_HEADERS MuonCondData
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthContainers AthenaPoolUtilities Identifier GaudiKernel StoreGateLib MuonIdHelpersLib 
+                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel 
+                                   AthenaPoolUtilities MuonIdHelpersLib 
                    PRIVATE_LINK_LIBRARIES EventInfo MuonReadoutGeometry MuonNSWCommonDecode )
 
