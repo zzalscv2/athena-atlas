@@ -25,11 +25,9 @@ namespace MuonPRDTest {
 
         if (tgcprdContainer->size() == 0) ATH_MSG_DEBUG(" TGC PRD Container empty ");
         unsigned int n_PRD{0};
-        for(auto it : *tgcprdContainer ) {
-            const Muon::TgcPrepDataCollection*coll = it;
-            for (auto prd: *coll) {
+        for(const Muon::TgcPrepDataCollection* coll : *tgcprdContainer ) {
+            for (const Muon::TgcPrepData* prd: *coll) {
                 Identifier Id = prd->identify();
-
                 const MuonGM::TgcReadoutElement* det = MuonDetMgr->getTgcReadoutElement(Id);
                 if (!det) {
                    ATH_MSG_ERROR("The TGC hit "<<idHelperSvc()->toString(Id)<<" does not have a detector element attached. That should actually never happen");
@@ -38,15 +36,11 @@ namespace MuonPRDTest {
 
                 m_TGC_PRD_id.push_back(Id);
                 Amg::Vector3D pos = prd->globalPosition();
-                Amg::Vector2D loc_pos(0., 0.);
-
-                det->surface(Id).globalToLocal(pos, Amg::Vector3D(0., 0., 0.), loc_pos);
-
+                Amg::Vector2D loc_pos{Amg::Vector2D::Zero()};
+                det->surface(Id).globalToLocal(pos, Amg::Vector3D::Zero(), loc_pos);
                 m_TGC_PRD_globalPos.push_back(pos);
-
-                m_TGC_PRD_localPosX.push_back(loc_pos[0]);
-                m_TGC_PRD_localPosY.push_back(loc_pos[1]);
-
+                m_TGC_PRD_localPos.push_back(loc_pos);                
+                m_TGC_PRD_bcId.push_back(prd->getBcBitMap());
                 ++n_PRD;
             }
         }

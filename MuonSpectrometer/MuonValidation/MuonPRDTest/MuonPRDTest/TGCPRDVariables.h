@@ -7,6 +7,7 @@
 
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "MuonPRDTest/PrdTesterModule.h"
+#include "MuonTesterTree/TwoVectorBranch.h"
 
 namespace MuonPRDTest{
     class TGCPRDVariables : public PrdTesterModule {
@@ -22,10 +23,11 @@ namespace MuonPRDTest{
     private:
         SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_key{};
         ScalarBranch<unsigned int>& m_TGC_nPRD{parent().newScalar<unsigned int>("N_PRD_TGC")};
-        VectorBranch<float>& m_TGC_PRD_localPosX{parent().newVector<float>("PRD_TGC_localPosX")};
-        VectorBranch<float>& m_TGC_PRD_localPosY{parent().newVector<float>("PRD_TGC_localPosY")};
+
         ThreeVectorBranch m_TGC_PRD_globalPos{parent(), "PRD_TGC_globalPos"};
+        TwoVectorBranch m_TGC_PRD_localPos{parent(), "PRD_TGC_localPos"};
         TgcIdentifierBranch m_TGC_PRD_id{parent(), "PRD_TGC"};
+        VectorBranch<uint8_t>& m_TGC_PRD_bcId{parent().newVector<uint8_t>("PRD_TGC_bcId")};
     };
 };
 
