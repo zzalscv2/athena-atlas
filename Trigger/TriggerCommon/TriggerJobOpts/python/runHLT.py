@@ -50,15 +50,6 @@ def set_flags(flags):
    flags.Input.FailOnUnknownCollections = True
    flags.Scheduler.AutoLoadUnmetDependencies = False
 
-   # Additional flags to filter chains
-
-   #By default, set enabledSignatures to all signatures
-   from TriggerMenuMT.HLT.Config.GenerateMenuMT import allSignatures
-   flags.addFlag("Trigger.enabledSignatures", allSignatures())
-   flags.addFlag("Trigger.disabledSignatures",[])
-   flags.addFlag("Trigger.selectChains",[])
-   flags.addFlag("Trigger.disableChains",[])
-
    ### TEMPORARY settings:
    # FIXME: disable coherent prescales during development phase to allow menu with single-chain CPS groups
    flags.Trigger.disableCPS = True
