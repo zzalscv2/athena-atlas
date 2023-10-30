@@ -9,6 +9,7 @@
  *
  * @brief This class is a general container which can hold objects of
  * accessed by an IdentifierHash
+ * For more information for the use of this class see https://atlassoftwaredocs.web.cern.ch/guides/trigger/idc/
  *
  * @author A E Barton <abarton@cern.ch>
  *
@@ -44,7 +45,9 @@ public:
            std::swap(a.m_IDC_ptr, b.m_IDC_ptr);
            std::swap(a.m_hashId, b.m_hashId);
            std::swap(a.m_atomic, b.m_atomic);
+#ifndef __cpp_lib_atomic_wait
            std::swap(a.m_mut, b.m_mut);
+#endif
         }
         IDC_WriteHandle(IDC_WriteHandle&& other) : IDC_WriteHandle() {
            Swap(*this, other);

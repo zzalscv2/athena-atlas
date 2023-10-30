@@ -23,32 +23,50 @@ namespace EventContainers {
 const void* const INVALID = reinterpret_cast<const void*>(IdentifiableCacheBase::INVALIDflag);
 const void* const ABORTED = reinterpret_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
 
+
+#ifndef __cpp_lib_atomic_wait
 IdentifiableCacheBase::IdentifiableCacheBase (IdentifierHash maxHash,
                                               const IMaker* maker)
   : IdentifiableCacheBase(maxHash, maker, s_defaultBucketSize)
 {
 }
+#endif
 
 IdentifiableCacheBase::IdentifiableCacheBase (IdentifierHash maxHash,
-                                              const IMaker* maker, size_t lockBucketSize)
+                                              const IMaker* maker
+#ifndef __cpp_lib_atomic_wait
+                                              , size_t lockBucketSize
+#endif
+                                              )
   : m_vec(maxHash),
-    m_maker (maker), m_NMutexes(lockBucketSize), m_currentHashes(0)
+    m_maker (maker),
+#ifndef __cpp_lib_atomic_wait
+    m_NMutexes(lockBucketSize),
+#endif
+    m_currentHashes(0)
 {
+#ifndef __cpp_lib_atomic_wait
+    //Mutexes are not necessary when we have atomic waiting
    if(m_NMutexes>0) m_HoldingMutexes = std::make_unique<mutexPair[]>(m_NMutexes);
+#endif
 }
 
 
 IdentifiableCacheBase::~IdentifiableCacheBase()=default;
 
 int IdentifiableCacheBase::tryLock(IdentifierHash hash, IDC_WriteHandleBase &lock, std::vector<IdentifierHash> &wait){
-   assert(m_NMutexes > 0);
    const void *ptr1 =nullptr;
 
    if(m_vec[hash].compare_exchange_strong(ptr1, INVALID, std::memory_order_relaxed, std::memory_order_relaxed)){//atomic swap (replaces ptr1 with value)
       //First call
+#ifndef __cpp_lib_atomic_wait
       size_t slot = hash % m_NMutexes;
       auto &mutexpair = m_HoldingMutexes[slot];
       lock.LockOn(&m_vec[hash], &mutexpair);
+#else
+      //Setup the IDC_WriteHandle to "lock" on this hash's pointer
+      lock.LockOn(&m_vec[hash]);
+#endif
       return 0;
    }
 
@@ -108,27 +126,32 @@ int IdentifiableCacheBase::itemInProgress (IdentifierHash hash){
 const void* IdentifiableCacheBase::find (IdentifierHash hash) noexcept
 {
   if (ATH_UNLIKELY(hash >= m_vec.size())) return nullptr;
-  const void* p = m_vec[hash].load(std::memory_order_relaxed);
+  const void* p = m_vec[hash].load(std::memory_order_acquire);
   if (p >= ABORTED)
     return nullptr;
-  //Now we know it is a real pointer we can ensure the data is synced
-  std::atomic_thread_fence(std::memory_order_acquire);
   return p;
 }
 
 const void* IdentifiableCacheBase::waitFor(IdentifierHash hash)
 {
-   const void* item = m_vec[hash].load(std::memory_order_acquire);
-   if(m_NMutexes ==0) return item;
-   size_t slot = hash % m_NMutexes;
-   if(item == INVALID){
+   std::atomic<const void*> &myatomic = m_vec[hash];
+   const void* item = myatomic.load(std::memory_order_acquire);
+#ifndef __cpp_lib_atomic_wait
+   if(m_NMutexes != 0 && item == INVALID){
+      size_t slot = hash % m_NMutexes;
       mutexPair &mutpair = m_HoldingMutexes[slot];
       uniqueLock lk(mutpair.mutex);
-      while( (item =m_vec[hash].load(std::memory_order_relaxed)) ==  INVALID){
+      while( (item =myatomic.load(std::memory_order_acquire)) ==  INVALID){
         mutpair.condition.wait(lk);
       }
    }
-   std::atomic_thread_fence(std::memory_order_acquire);
+#else
+   //Wait until pointer is set then retrieve and verify
+   while(item == INVALID){//Loop to check for spurious wakeups
+      myatomic.wait(item, std::memory_order_relaxed);
+      item = myatomic.load(std::memory_order_acquire);
+   }
+#endif
    return item;
 }
 
@@ -142,10 +165,15 @@ const void* IdentifiableCacheBase::findWait (IdentifierHash hash)
 
 void IdentifiableCacheBase::notifyHash(IdentifierHash hash)
 {
+#ifndef __cpp_lib_atomic_wait
+    if(m_NMutexes==0) return;
     size_t slot = hash % m_NMutexes;
     mutexPair &mutpair = m_HoldingMutexes[slot];
     lock_t lk(mutpair.mutex);
     mutpair.condition.notify_all();
+#else
+    m_vec[hash].notify_all();
+#endif
 }
 
 const void* IdentifiableCacheBase::get (IdentifierHash hash)
@@ -168,7 +196,7 @@ const void* IdentifiableCacheBase::get (IdentifierHash hash)
      }
      catch (...) {
        // FIXME: Can this be done with RAII?
-       if(m_NMutexes >0) notifyHash(hash);
+       notifyHash(hash);
        throw;
      }
      assert(m_vec[hash] == INVALID);
@@ -178,7 +206,7 @@ const void* IdentifiableCacheBase::get (IdentifierHash hash)
      }else{
         m_vec[hash].store( ABORTED );
      }
-     if(m_NMutexes >0) notifyHash(hash);
+     notifyHash(hash);
   }
   else if(ptr == INVALID){
      ptr= waitFor(hash);
@@ -228,6 +256,7 @@ std::pair<bool, const void*> IdentifiableCacheBase::add (IdentifierHash hash, co
   const void* invalid = INVALID;
   if(m_vec[hash].compare_exchange_strong(invalid, p, std::memory_order_release, std::memory_order_acquire)){
      m_currentHashes.fetch_add(1, std::memory_order_relaxed);
+     notifyHash(hash);
      return std::make_pair(true, p);
   }
   return std::make_pair(false, invalid);
@@ -242,6 +271,7 @@ std::pair<bool, const void*> IdentifiableCacheBase::addLock (IdentifierHash hash
   const void* invalid = INVALID;
   if(m_vec[hash].compare_exchange_strong(invalid, p, std::memory_order_release, std::memory_order_relaxed)){
      m_currentHashes.fetch_add(1, std::memory_order_relaxed);
+     notifyHash(hash);
      return std::make_pair(true, p);
   }
   const void* nul=nullptr;
