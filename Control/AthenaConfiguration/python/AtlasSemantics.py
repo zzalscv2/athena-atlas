@@ -5,9 +5,8 @@ from GaudiKernel.GaudiHandles import PrivateToolHandleArray, PublicToolHandle, S
 from GaudiKernel.DataHandle import DataHandle
 import re
 import copy
+from collections.abc import Sequence
 
-from collections import abc
-Sequence = abc.Sequence
 
 class AppendListSemantics(GaudiConfig2.semantics.SequenceSemantics):
     '''
@@ -17,8 +16,8 @@ class AppendListSemantics(GaudiConfig2.semantics.SequenceSemantics):
     in the string that forms the fifth argument. 
     '''
     __handled_types__ = (re.compile(r"^appendList<.*>$"),)
-    def __init__(self, cpp_type, name=None):
-        super(AppendListSemantics, self).__init__(cpp_type, name)
+    def __init__(self, cpp_type):
+        super(AppendListSemantics, self).__init__(cpp_type)
 
     def merge(self,b,a):
         a.extend(b)
@@ -31,8 +30,8 @@ class MapMergeNoReplaceSemantics(GaudiConfig2.semantics.MappingSemantics):
     to invoke this merging method.
     '''
     __handled_types__ = (re.compile(r"^mapMergeNoReplace<.*>$"),)
-    def __init__(self, cpp_type, name=None):
-        super(MapMergeNoReplaceSemantics, self).__init__(cpp_type, name)
+    def __init__(self, cpp_type):
+        super(MapMergeNoReplaceSemantics, self).__init__(cpp_type)
 
     def merge(self,a,b):
         for k in b.keys():
@@ -48,8 +47,8 @@ class VarHandleKeySemantics(GaudiConfig2.semantics.PropertySemantics):
     '''
     __handled_types__ = (re.compile(r"SG::.*HandleKey<.*>$"),)
 
-    def __init__(self, cpp_type, name=None):
-        super().__init__(cpp_type, name)
+    def __init__(self, cpp_type):
+        super().__init__(cpp_type)
         # Deduce actual handle type
         self._type = next(GaudiConfig2.semantics.extract_template_args(cpp_type))
         self._isCond = 'CondHandle' in cpp_type
@@ -81,8 +80,8 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
     class _ItemSemantics(GaudiConfig2.semantics.StringSemantics):
         """Semantics for an item (DataHandle) in a VarHandleKeyArray converting to string"""
 
-        def __init__(self, name=None):
-            super().__init__("std::string", name)
+        def __init__(self):
+            super().__init__("std::string")
 
         def store(self, value):
             if isinstance(value, DataHandle):
@@ -93,8 +92,8 @@ class VarHandleArraySematics(GaudiConfig2.semantics.SequenceSemantics):
                 raise TypeError(f"cannot assign {value!r} ({type(value)}) to {self.name}"
                                 ", expected string or DataHandle")
 
-    def __init__(self, cpp_type, name=None):
-        super().__init__(cpp_type, name, valueSem = self._ItemSemantics())
+    def __init__(self, cpp_type):
+        super().__init__(cpp_type, valueSem = self._ItemSemantics())
 
     def merge(self,bb,aa):
         for b in bb:
@@ -108,8 +107,8 @@ class ToolHandleSemantics(GaudiConfig2.semantics.PropertySemantics):
     Private alg-tools need recusive merging (de-duplication):
     ''' 
     __handled_types__ = ("PrivateToolHandle",)
-    def __init__(self,cpp_type,name=None):
-        super(ToolHandleSemantics, self).__init__(cpp_type,name)
+    def __init__(self,cpp_type):
+        super(ToolHandleSemantics, self).__init__(cpp_type)
         
 
     def merge(self,b,a):
@@ -124,8 +123,8 @@ class PublicHandleSemantics(GaudiConfig2.semantics.PropertySemantics):
     '''
     __handled_types__ = ("PublicToolHandle","ServiceHandle")
        
-    def __init__(self,cpp_type,name=None):
-        super(PublicHandleSemantics, self).__init__(cpp_type,name)
+    def __init__(self,cpp_type):
+        super(PublicHandleSemantics, self).__init__(cpp_type)
         
     def default(self,value):
         return value.typeAndName
@@ -155,8 +154,8 @@ class PublicHandleArraySemantics(GaudiConfig2.semantics.PropertySemantics):
     Semantics for arrays of string-based pointers to components defined elsewhere
     '''
     __handled_types__ = ("PublicToolHandleArray","ServiceHandleArray")
-    def __init__(self,cpp_type,name=None):
-        super(PublicHandleArraySemantics, self).__init__(cpp_type,name)
+    def __init__(self,cpp_type):
+        super(PublicHandleArraySemantics, self).__init__(cpp_type)
         
     def store(self, value):
         if not isinstance(value,Sequence) and not isinstance(value,set):
@@ -201,8 +200,8 @@ class ToolHandleArraySemantics(GaudiConfig2.semantics.PropertySemantics):
     Private alg-tools need recusive merging (de-duplication):
     ''' 
     __handled_types__ = ("PrivateToolHandleArray",)
-    def __init__(self,cpp_type,name=None):
-        super(ToolHandleArraySemantics, self).__init__(cpp_type,name)
+    def __init__(self,cpp_type):
+        super(ToolHandleArraySemantics, self).__init__(cpp_type)
     
     def default(self,value):
         return copy.copy(value)
@@ -225,8 +224,8 @@ class ToolHandleArraySemantics(GaudiConfig2.semantics.PropertySemantics):
 
 class SubAlgoSemantics(GaudiConfig2.semantics.PropertySemantics):
     __handled_types__  = ("SubAlgorithm",)
-    def __init__(self,cpp_type,name=None):
-        super(SubAlgoSemantics, self).__init__(cpp_type,name)
+    def __init__(self,cpp_type):
+        super(SubAlgoSemantics, self).__init__(cpp_type)
         
     def store(self,value):
         if not isinstance(value,Sequence):
