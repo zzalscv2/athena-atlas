@@ -132,8 +132,8 @@ MuonSegmentConverterTool::convert(const MuonSegment& seg, xAOD::MuonSegmentConta
 
     // hit counts
     IMuonSegmentHitSummaryTool::HitCounts hitCounts = m_hitSummaryTool->getHitCounts(seg);
-    xaodSeg->setNHits(hitCounts.nmdtHits()+ hitCounts.nmmHits() + hitCounts.ncscHits.netaHits,
-                      hitCounts.nphiTrigHitLayers, hitCounts.netaTrigHitLayers);
+    xaodSeg->setNHits(hitCounts.nmdtHits()+ hitCounts.nmmHits() + hitCounts.nstgcHits.netaHits + hitCounts.ncscHits.netaHits,
+                      hitCounts.nphiTrigHitLayers + hitCounts.nstgcHits.nphiHits, hitCounts.netaTrigHitLayers);
 
     // MDT + cluster timing
     if (seg.hasFittedT0()) xaodSeg->setT0Error(seg.time(), seg.errorTime());
