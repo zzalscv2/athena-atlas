@@ -728,6 +728,17 @@ public:
   bool clearDecorations() const;
 
 
+protected:
+  /**
+   * @brief Explicitly set a cache pointer.
+   * @param auxid Variable ID to set.
+   * @param ptr Pointer to which the cache entry should be set.
+   *
+   * For internal use; do not use from user code.
+   */
+  void setCache (SG::auxid_t auxid, void* ptr);
+
+
   //@}
 
 
