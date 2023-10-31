@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECConstruction
@@ -360,7 +360,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
             electrodes.push_back(innerName + "::Electrode");
         } else if(m_innerWheelVariant == "Slices"){
             innerName += "Slice";
-            char slice = 0; // To silence warnings use character datatype, limited between -128 and 127, sufficient.
+            uint8_t slice = 0; // To silence Wformat-truncation use datatype with 3-digit range
             do {
                 char buf[4];
                 snprintf(buf, 4, "%02d", slice);
@@ -429,7 +429,7 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
             outerName += "Cones";
         } else if(m_outerWheelVariant == "Slices"){
             outerName += "Slice";
-            char slice = 0; // To silence warnings use character datatype, limited between -128 and 127, sufficient.
+            uint8_t slice = 0; // To silence Wformat-truncation use datatype with 3-digit range
             do {
                 char buf[4];
                 snprintf(buf, 4, "%02d", slice);
