@@ -99,6 +99,15 @@
   <class name="DataVector<Muon::STGC_RawDataCollection>" id="693ACD72-6796-4251-A932-9ABAF679A2B3" />
   <class name="STGC_RawDataCollection_Cache" />
 
+  <class name="RpcSectorLogicContainer" />
+  <class name="DataVector<RpcSectorLogic>" />
+  <class name="RpcSectorLogic" />
+  <class name="DataVector<RpcSLTriggerHit>" />
+  <class name="RpcSLTriggerHit" />
+
+  <class name="Muon::NSW_PadTriggerDataContainer"/>
+  <class name="IdentifiableContainer<Muon::NSW_PadTriggerData>"/>
+  
 
 
 </lcgdict>
