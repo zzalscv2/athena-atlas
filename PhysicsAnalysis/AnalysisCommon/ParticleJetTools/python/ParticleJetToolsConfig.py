@@ -189,3 +189,11 @@ def getJetTruthLabelTool(jetdef, modspec):
                                                          TruthLabelName = truthLabel)
 
     return jetTruthLabelTool
+
+def getJetPileupLabelTool(jetdef, modspec):
+
+    jetPileupLabelTool = CompFactory.JetPileupLabelingTool('pileuplabeler',
+                                                           RecoJetContainer = jetdef.fullname(),
+                                                           TruthJetContainer= "AntiKt4TruthDressedWZJets")
+
+    return jetPileupLabelTool

@@ -15,4 +15,5 @@
   <class name="JetParticleShrinkingConeAssociation" />  
   <class name="JetParticleCenterOfMassAssociation" />  
   <class name="JetTruthLabelingTool" />
+  <class name="JetPileupLabelingTool" />
 </lcgdict>

@@ -209,6 +209,9 @@ AntiKt4TruthDressedWZ = JetDefinition("AntiKt",0.4, cst.TruthDressedWZ,
                                       lock = True,
 )
 
+# These jets are used as input for the JetPileupLabel modifier, so they also need to be defined as constituents: 
+registerAsInputConstit(AntiKt4TruthDressedWZ)
+
 AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
                                      ghostdefs = flavourghosts,
                                      modifiers = ("Sort",)+truthmods,

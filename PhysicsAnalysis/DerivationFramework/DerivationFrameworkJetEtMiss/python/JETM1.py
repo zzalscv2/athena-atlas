@@ -331,7 +331,7 @@ def JETM1Cfg(ConfigFlags):
 
     JETM1SlimmingHelper.ExtraVariables  = ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
-                                           "AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt",
+                                           "AntiKt4EMPFlowJets.passOnlyBJVT.DFCommonJets_bJvt.isJvtHS.isJvtPU",
                                            "InDetTrackParticles.truthMatchProbability",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.zg.rg.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack",
                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets.zg.rg",

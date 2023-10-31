@@ -219,8 +219,13 @@ stdJetModifiers.update(
                                        filterfn=isMC,
                                        createfn=ParticleJetToolsConfig.getJetTruthLabelTool,
                                       ),
-)
 
+    JetPileupLabel = JetModifier("JetPileupLabel", "pileuplabeler_{mods}",
+                                 filterfn=isMC,
+                                 createfn=ParticleJetToolsConfig.getJetPileupLabelTool,
+                                 prereqs=["input:AntiKt4TruthDressedWZJets"]
+                                 ),
+)
 
 
 

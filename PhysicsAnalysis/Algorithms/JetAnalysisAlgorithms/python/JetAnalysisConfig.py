@@ -62,9 +62,13 @@ class PreJetAnalysisConfig (ConfigBlock) :
             self.runTruthJetTagging is None
             and config.dataType() is not DataType.Data
         ):
-            alg = config.createAlgorithm('CP::JetTruthTagAlg', f'JetTruthTagAlg{postfix}')
-            alg.jets = config.readName(self.containerName)
-            alg.truthJets = "AntiKt4TruthDressedWZJets"
+            # Decorate jets with isHS labels (required to retrieve Jvt SFs)
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg'+postfix )
+            config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
+            alg.decorator.RecoJetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
+            alg.decorator.SuppressOutputDependence=True
 
         # Set up shallow copy if needed and not yet done
         if config.wantCopy (self.containerName) :
