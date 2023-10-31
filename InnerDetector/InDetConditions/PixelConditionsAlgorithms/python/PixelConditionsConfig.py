@@ -407,13 +407,14 @@ def PixelDetectorElementStatusAlgActiveOnlyCfg(flags, name = "PixelDetectorEleme
                                             ActiveOnly = True)
 
 
-def PixelChargeCalibCondCfg(flags):
+def PixelChargeCalibCondCfg(flags, **kwargs):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
-        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import ITkPixelChargeCalibCondAlgCfg
-        return ITkPixelChargeCalibCondAlgCfg(flags)
+        from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
+            ITkPixelChargeCalibCondAlgCfg)
+        return ITkPixelChargeCalibCondAlgCfg(flags, **kwargs)
     elif flags.GeoModel.Run == LHCPeriod.Run3:
-        return PixelChargeLUTCalibCondAlgCfg(flags)
-    return PixelChargeCalibCondAlgCfg(flags)
+        return PixelChargeLUTCalibCondAlgCfg(flags, **kwargs)
+    return PixelChargeCalibCondAlgCfg(flags, **kwargs)
     
 if __name__ == '__main__':
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

@@ -10,9 +10,8 @@ from Digitization.PileUpToolsConfig import PileUpToolsCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from PixelConditionsAlgorithms.PixelConditionsConfig import (
-    PixelConfigCondAlgCfg, PixelChargeCalibCondAlgCfg,
-    PixelDistortionAlgCfg, PixelRadSimFluenceMapAlgCfg,
-    PixelChargeLUTCalibCondAlgCfg
+    PixelConfigCondAlgCfg, PixelChargeCalibCondCfg,
+    PixelDistortionAlgCfg, PixelRadSimFluenceMapAlgCfg
 )
 from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
 from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
@@ -105,10 +104,7 @@ def BarrelFEI4SimToolCfg(flags, name="BarrelFEI4SimTool", **kwargs):
     """Return a FEI4SimTool configured for Barrel"""
     acc = PixelReadoutManagerCfg(flags)
     acc.merge(PixelConfigCondAlgCfg(flags))
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    acc.merge(PixelChargeCalibCondCfg(flags))
     kwargs.setdefault("BarrelEC", 0)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
@@ -123,10 +119,7 @@ def DBMFEI4SimToolCfg(flags, name="DBMFEI4SimTool", **kwargs):
     """Return a FEI4SimTool configured for Endcap"""
     acc = PixelReadoutManagerCfg(flags)
     acc.merge(PixelConfigCondAlgCfg(flags))
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    acc.merge(PixelChargeCalibCondCfg(flags))
     kwargs.setdefault("BarrelEC", 4)
     kwargs.setdefault("DoNoise", flags.Digitization.DoInnerDetectorNoise)
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
@@ -141,10 +134,7 @@ def BarrelFEI3SimToolCfg(flags, name="BarrelFEI3SimTool", **kwargs):
     """Return a FEI3SimTool configured for Barrel"""
     acc = PixelReadoutManagerCfg(flags)
     acc.merge(PixelConfigCondAlgCfg(flags))
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    acc.merge(PixelChargeCalibCondCfg(flags))
     kwargs.setdefault("BarrelEC", 0)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
@@ -159,10 +149,7 @@ def EndcapFEI3SimToolCfg(flags, name="EndcapFEI3SimTool", **kwargs):
     """Return a FEI3SimTool configured for Endcap"""
     acc = PixelReadoutManagerCfg(flags)
     acc.merge(PixelConfigCondAlgCfg(flags))
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    acc.merge(PixelChargeCalibCondCfg(flags))
     kwargs.setdefault("BarrelEC", 2)
     kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
