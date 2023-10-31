@@ -99,7 +99,7 @@ atlas_add_citest( RecoRun3Data_Checks
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_Legacy
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA False --maxEvents 100 --postExec="FPEAuditor.NStacktracesOnFPE=500;"' --threads 8 --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA False --maxEvents 100 --preExec="all:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig=\"DB\"" --postExec="FPEAuditor.NStacktracesOnFPE=500;"' --threads 8 --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3Data q449
@@ -214,7 +214,7 @@ atlas_add_citest( DataQuality_Run3Data_Postprocessing
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( DataQuality_Run3Data_AODtoHIST
-   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root  --athenaopts='--threads=1'
+   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root  --athenaopts='--threads=1' --preExec='all:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig="DB"'
    DEPENDS_SUCCESS RecoRun3Data )
 
 
