@@ -72,19 +72,21 @@ namespace FlavorTagDiscriminants {
     ATH_MSG_DEBUG( "Retrieved " << electrons->size() << " electrons..." );
 
     // instantiate accessors
-    SG::ReadDecorHandle<EC, int> acc_origin_label(m_acc_origin_label, ctx);
-    SG::ReadDecorHandle<EC, int> acc_type_label(m_acc_type_label, ctx);
-    SG::ReadDecorHandle<EC, int> acc_source_label(m_acc_source_label, ctx);
-    SG::ReadDecorHandle<EC, int> acc_vertex_index(m_acc_vertex_index, ctx);
-    SG::ReadDecorHandle<EC, int> acc_parent_barcode(m_acc_parent_barcode, ctx);
+    using RDH = SG::ReadDecorHandle<xAOD::TruthParticleContainer, int>;
+    RDH acc_origin_label(m_acc_origin_label, ctx);
+    RDH acc_type_label(m_acc_type_label, ctx);
+    RDH acc_source_label(m_acc_source_label, ctx);
+    RDH acc_vertex_index(m_acc_vertex_index, ctx);
+    RDH acc_parent_barcode(m_acc_parent_barcode, ctx);
     
     // instantiate decorators
-    SG::WriteDecorHandle<EC, int> dec_origin_label(m_dec_origin_label, ctx);
-    SG::WriteDecorHandle<EC, int> dec_type_label(m_dec_type_label, ctx);
-    SG::WriteDecorHandle<EC, int> dec_source_label(m_dec_source_label, ctx);
-    SG::WriteDecorHandle<EC, int> dec_vertex_index(m_dec_vertex_index, ctx);
-    SG::WriteDecorHandle<EC, int> dec_barcode(m_dec_barcode, ctx);
-    SG::WriteDecorHandle<EC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
+    using WDH = SG::WriteDecorHandle<EC, int>;
+    WDH dec_origin_label(m_dec_origin_label, ctx);
+    WDH dec_type_label(m_dec_type_label, ctx);
+    WDH dec_source_label(m_dec_source_label, ctx);
+    WDH dec_vertex_index(m_dec_vertex_index, ctx);
+    WDH dec_barcode(m_dec_barcode, ctx);
+    WDH dec_parent_barcode(m_dec_parent_barcode, ctx);
 
     std::vector<const xAOD::Electron*> el_vector(electrons->begin(), electrons->end());
     for ( const auto& electron : el_vector ) {
