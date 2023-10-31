@@ -259,6 +259,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
     # GSF vertices and tracks
     if isNotPool:
         StaticContent += ["xAOD::VertexContainer#GSFConversionVertices"]
+        StaticContent += ["xAOD::VertexAuxContainer#GSFConversionVerticesAux."]
         # we have to disable vxTrackAtVertex branch since it is not xAOD compatible
         StaticContent += ["xAOD::VertexAuxContainer#GSFConversionVerticesAux.-vxTrackAtVertex"]
         #

@@ -175,7 +175,7 @@ def TrigNavSlimmingMTCfg(flags):
     esdSlim.ChainsFilter = []
     ca.addEventAlgo(esdSlim)
     #
-    collections = [f"xAOD::TrigCompositeContainer#{esdSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{esdSlim.OutputCollection}Aux.-"]
+    collections = [f"xAOD::TrigCompositeContainer#{esdSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{esdSlim.OutputCollection}Aux."]
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD
     ca.merge(addToESD(flags, collections))
     #
@@ -209,7 +209,7 @@ def TrigNavSlimmingMTCfg(flags):
       log.info("Producing AODSLIM Trigger Navigation Collection. Reading {} and writing {}".format(aodSlim.PrimaryInputCollection, aodSlim.OutputCollection))
     ca.addEventAlgo(aodSlim)
     #
-    collections = [f"xAOD::TrigCompositeContainer#{aodSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{aodSlim.OutputCollection}Aux.-"]
+    collections = [f"xAOD::TrigCompositeContainer#{aodSlim.OutputCollection}", f"xAOD::TrigCompositeAuxContainer#{aodSlim.OutputCollection}Aux."]
     from OutputStreamAthenaPool.OutputStreamConfig import addToAOD
     ca.merge(addToAOD(flags, collections))
     #
