@@ -8,6 +8,32 @@
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include <cmath>
 
+namespace {
+//anonymous namespace.
+//For internal methods
+void cfClstPnt(double *par, const double *Vrt, double *ClstPnt) noexcept {
+  double e[3];  // Track direction at perigee
+  e[0] = cos(par[3]);
+  e[1] = sin(par[3]);
+  e[2] = 1. / tan(par[2]);
+  double e2 = 1. + e[2] * e[2];  // vector length squared
+
+  double Per[3];  // Perigee position
+  Per[0] = sin(par[3]) * par[0];
+  Per[1] = -cos(par[3]) * par[0];
+  Per[2] = par[1];
+
+  double u = (Vrt[0] - Per[0]) * e[0] + (Vrt[1] - Per[1]) * e[1] +
+             (Vrt[2] - Per[2]) * e[2];
+  u = u / e2;
+
+  ClstPnt[0] = Per[0] + u * e[0];
+  ClstPnt[1] = Per[1] + u * e[1];
+  ClstPnt[2] = Per[2] + u * e[2];
+}
+}
+
+
 namespace Trk {
 
 
@@ -77,29 +103,29 @@ void   cfimp(long int TrkID, long int ich, int IFL, double *par,
     dcov[1] = 0.;
     dcov[2] = 0.;
     for (i__ = 1; i__ <= 3; ++i__) {
-	for (j = 1; j <= 3; ++j) {
-	    ij = max(i__,j);
-	    ij = ij * (ij - 1) / 2 + min(i__,j);
-	    dcov[0] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 2] * vcov[ij];
-	    dcov[2] += cnv[(i__ << 1) - 1] * cnv[(j << 1) - 1] * vcov[ij];
-	    dcov[1] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 1] * vcov[ij];
-	}
+      for (j = 1; j <= 3; ++j) {
+        ij = max(i__, j);
+        ij = ij * (ij - 1) / 2 + min(i__, j);
+        dcov[0] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 2] * vcov[ij];
+        dcov[2] += cnv[(i__ << 1) - 1] * cnv[(j << 1) - 1] * vcov[ij];
+        dcov[1] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 1] * vcov[ij];
+      }
     }
-/* --------------------------------------------------------------- */
+    /* --------------------------------------------------------------- */
     if (IFL == 1) {
-	rcov[0] = errn[0] + dcov[0];
-	rcov[1] = errn[1] + dcov[1];
-	rcov[2] = errn[2] + dcov[2];
+      rcov[0] = errn[0] + dcov[0];
+      rcov[1] = errn[1] + dcov[1];
+      rcov[2] = errn[2] + dcov[2];
     } else if (IFL == -1) {
-	rcov[0] = errn[0] - dcov[0];
-	rcov[1] = errn[1] - dcov[1];
-	rcov[2] = errn[2] - dcov[2];
+      rcov[0] = errn[0] - dcov[0];
+      rcov[1] = errn[1] - dcov[1];
+      rcov[2] = errn[2] - dcov[2];
     } else {
-	rcov[0] = errn[0];
-	rcov[1] = errn[1];
-	rcov[2] = errn[2];
+      rcov[0] = errn[0];
+      rcov[1] = errn[1];
+      rcov[2] = errn[2];
     }
-    int jerr=cfdinv(rcov, dwgt, -2);
+    int jerr = cfdinv(rcov, dwgt, -2);
     if (jerr) {jerr=cfdinv(rcov, dwgt, 2); if(jerr){dwgt[0]=dwgt[2]=1.e6; dwgt[1]=0.;}}
     (*sign) = sqrt(std::abs(dwgt[0] * rimp[0] * rimp[0] + dwgt[1] * 2. * rimp[0] * rimp[1] +
 	    dwgt[2] * rimp[1] * rimp[1]));
@@ -116,7 +142,6 @@ void   cfimp(long int TrkID, long int ich, int IFL, double *par,
 
 
     double cs, sn;
-    extern void cfClstPnt(double *p, const double *, double *) noexcept;
 /* --------------------------------------------------------- */
 /*    SIGNIFICANCE IS CALCULATED FOR THE CLOSEST POINT NOW!!!*/
 /* Author: V.Kostyukhin                                      */
@@ -151,33 +176,40 @@ void   cfimp(long int TrkID, long int ich, int IFL, double *par,
     dcov[1] = 0.;
     dcov[2] = 0.;
     for (i__ = 1; i__ <= 3; ++i__) {
-	for (j = 1; j <= 3; ++j) {
-	    ij = max(i__,j);
-	    ij = ij * (ij - 1) / 2 + min(i__,j);
-	    dcov[0] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 2] * vcov[ij];
-	    dcov[2] += cnv[(i__ << 1) - 1] * cnv[(j << 1) - 1] * vcov[ij];
-	    dcov[1] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 1] * vcov[ij];
-	}
+        for (j = 1; j <= 3; ++j) {
+            ij = max(i__, j);
+            ij = ij * (ij - 1) / 2 + min(i__, j);
+            dcov[0] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 2] * vcov[ij];
+            dcov[2] += cnv[(i__ << 1) - 1] * cnv[(j << 1) - 1] * vcov[ij];
+            dcov[1] += cnv[(i__ << 1) - 2] * cnv[(j << 1) - 1] * vcov[ij];
+        }
     }
-/* --------------------------------------------------------------- */
+    /* --------------------------------------------------------------- */
     if (IFL == 1) {
-	rcov[0] = errn[0] + dcov[0];
-	rcov[1] = errn[1] + dcov[1];
-	rcov[2] = errn[2] + dcov[2];
+        rcov[0] = errn[0] + dcov[0];
+        rcov[1] = errn[1] + dcov[1];
+        rcov[2] = errn[2] + dcov[2];
     } else if (IFL == -1) {
-	rcov[0] = errn[0] - dcov[0];
-	rcov[1] = errn[1] - dcov[1];
-	rcov[2] = errn[2] - dcov[2];
+        rcov[0] = errn[0] - dcov[0];
+        rcov[1] = errn[1] - dcov[1];
+        rcov[2] = errn[2] - dcov[2];
     } else {
-	rcov[0] = errn[0];
-	rcov[1] = errn[1];
-	rcov[2] = errn[2];
+        rcov[0] = errn[0];
+        rcov[1] = errn[1];
+        rcov[2] = errn[2];
     }
-    int jerr=cfdinv(rcov, dwgt, -2);
-    if (jerr) {jerr=cfdinv(rcov, dwgt, 2);if(jerr){dwgt[0]=dwgt[2]=1.e6; dwgt[1]=0.;}}
-    (*sign) = sqrt(std::abs(dwgt[0] * rimp[0] * rimp[0] + dwgt[1] * 2. * rimp[0] * rimp[1] +
-	    dwgt[2] * rimp[1] * rimp[1]));
-}
+    int jerr = cfdinv(rcov, dwgt, -2);
+    if (jerr) {
+        jerr = cfdinv(rcov, dwgt, 2);
+        if (jerr) {
+            dwgt[0] = dwgt[2] = 1.e6;
+            dwgt[1] = 0.;
+        }
+    }
+    (*sign) = sqrt(std::abs(dwgt[0] * rimp[0] * rimp[0] +
+                            dwgt[1] * 2. * rimp[0] * rimp[1] +
+                            dwgt[2] * rimp[1] * rimp[1]));
+ }
 
 } /* end of namespace */
 
