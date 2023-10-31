@@ -362,9 +362,29 @@ StatusCode TrigmuCombHypoTool::applyOverlapRemoval(std::vector<TrigmuCombHypoToo
 
   std::vector<TrigmuCombHypoTool::CombinedMuonInfo*> input;
 
+  // set pT threshold for events where so many muons
+  // in such events, muons are removed if pT < pTthreshold
+  // pT threshold is set to the pT value of m_numMuonThreshold-th leading muon
+  float pTthreshold = 0;
+  std::vector<float> pTvec;
   for ( auto& i: toolInput ) {
-    if ( TrigCompositeUtils::passed( m_decisionId.numeric(), i.previousDecisionIDs) ){
-      input.emplace_back(&i);
+    if ( TrigCompositeUtils::passed( m_decisionId.numeric(), i.previousDecisionIDs) &&
+	 i.muComb!=nullptr ){
+      pTvec.emplace_back(i.muComb->pt());
+    }
+  }
+  if(pTvec.size() > m_numMuonThreshold) {
+    std::sort(pTvec.begin(),pTvec.end(), std::greater<float>{});
+    pTthreshold = pTvec.at(m_numMuonThreshold);
+  }
+
+  for ( auto& i: toolInput ) {
+    if ( TrigCompositeUtils::passed( m_decisionId.numeric(), i.previousDecisionIDs) &&
+	 i.muComb!=nullptr ){
+      if(i.muComb->pt() > pTthreshold)
+	input.emplace_back(&i);
+      else // set isOR for removed muons
+	i.isOR.insert(m_decisionId.numeric());
     }
   }
 
