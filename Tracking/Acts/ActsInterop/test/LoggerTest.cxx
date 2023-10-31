@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( loglevel_propagation )
     BOOST_CHECK_EQUAL(lvl, msg->level());
 
     auto filter = std::make_unique<ActsAthenaFilterPolicy>(msg);
-    auto print = std::make_unique<ActsAthenaPrintPolicy>(msg, name);
+    auto print = std::make_unique<ActsAthenaPrintPolicy>(msgSvc, msg, name);
     const auto logger = std::make_unique<const Acts::Logger>(std::move(print), std::move(filter));
     
     BOOST_CHECK_EQUAL(logger->name(), name);
@@ -64,10 +64,12 @@ BOOST_AUTO_TEST_CASE( loglevel_propagation )
     // make a clone
     auto clonedLogger = logger->clone("ClonedLogger");
     BOOST_CHECK_EQUAL(logger->level(), clonedLogger->level());
+    BOOST_CHECK_EQUAL(clonedLogger->name(), "ClonedLogger");
 
     // make a clone with suffix
-    auto clonedWithSuffixLogger = logger->cloneWithSuffix("ClonedLogger");
+    auto clonedWithSuffixLogger = logger->cloneWithSuffix("Cloned");
     BOOST_CHECK_EQUAL(logger->level(), clonedWithSuffixLogger->level());
+    BOOST_CHECK_EQUAL(clonedWithSuffixLogger->name(), logger->name()+"Cloned");
   }
 } 
 

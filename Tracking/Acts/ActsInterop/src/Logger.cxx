@@ -33,8 +33,9 @@ ActsAthenaPrintPolicy::name() const
 std::unique_ptr<Acts::Logging::OutputPrintPolicy> 
 ActsAthenaPrintPolicy::clone(const std::string& name) const
 {
-  auto msg = std::make_shared<MsgStream>(*m_msg.get());
-  return std::make_unique<ActsAthenaPrintPolicy>(msg, name);
+  auto msg = std::make_shared<MsgStream>(m_svc, name);
+  msg->setLevel(m_msg->level());
+  return std::make_unique<ActsAthenaPrintPolicy>(m_svc, msg, name);
 }
 
 bool
@@ -72,7 +73,7 @@ makeActsAthenaLogger(IMessageSvc *svc, const std::string& name, int level, std::
   auto msg = std::make_shared<MsgStream>(svc, full_name);
   msg->setLevel(level);
   auto filter = std::make_unique<ActsAthenaFilterPolicy>(msg);
-  auto print = std::make_unique<ActsAthenaPrintPolicy>(msg, full_name);
+  auto print = std::make_unique<ActsAthenaPrintPolicy>(svc, msg, full_name);
   return std::make_unique<const Acts::Logger>(std::move(print), std::move(filter));
 }
 

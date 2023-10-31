@@ -60,7 +60,8 @@ StatusCode ActsGaussianSumFitter::initialize() {
 
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
   Acts::MultiEigenStepperLoop<> stepper(field);
-  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() } );     
+  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
+                             logger().cloneWithSuffix("Navigator") );     
   Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator> propagator(std::move(stepper), 
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));
