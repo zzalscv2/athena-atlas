@@ -13,12 +13,8 @@ def ClusterMakerToolCfg(flags, name="InDetClusterMakerTool", **kwargs):
     # This directly needs the following Conditions data:
     # PixelChargeCalibCondData & PixelOfflineCalibData
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
-        PixelChargeLUTCalibCondAlgCfg, PixelChargeCalibCondAlgCfg,
-        PixelOfflineCalibCondAlgCfg)
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+        PixelChargeCalibCondCfg, PixelOfflineCalibCondAlgCfg)
+    acc.merge(PixelChargeCalibCondCfg(flags))
     acc.merge(PixelOfflineCalibCondAlgCfg(flags))
 
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
@@ -225,11 +221,8 @@ def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
     acc = ComponentAccumulator()
 
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
-        PixelChargeLUTCalibCondAlgCfg, PixelChargeCalibCondAlgCfg)
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+        PixelChargeCalibCondCfg)
+    acc.merge(PixelChargeCalibCondCfg(flags))
 
     if flags.GeoModel.Run is LHCPeriod.Run1:
         acc.merge(PixelClusterNnCondAlgCfg(flags))
@@ -272,11 +265,8 @@ def TrigNnClusterizationFactoryCfg(flags, name="TrigNnClusterizationFactory"):
     kwargs = {}
 
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
-        PixelChargeLUTCalibCondAlgCfg, PixelChargeCalibCondAlgCfg)
-    if flags.GeoModel.Run is LHCPeriod.Run3:
-        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-    else:
-        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+        PixelChargeCalibCondCfg)
+    acc.merge(PixelChargeCalibCondCfg(flags))
 
     acc.merge(PixelClusterNnCondAlgCfg(flags))
     acc.merge(PixelClusterNnWithTrackCondAlgCfg(flags))

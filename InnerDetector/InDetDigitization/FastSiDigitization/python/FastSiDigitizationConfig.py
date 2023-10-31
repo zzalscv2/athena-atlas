@@ -1,8 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod
 from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 
 
@@ -36,17 +35,13 @@ def FastClusterMakerToolCfg(flags, name="FastClusterMakerTool", **kwargs) :
     
     # This directly needs the following Conditions data:
     # PixelChargeCalibCondData & PixelOfflineCalibData
-    from PixelConditionsAlgorithms.PixelConditionsConfig import PixelChargeLUTCalibCondAlgCfg, PixelChargeCalibCondAlgCfg, PixelOfflineCalibCondAlgCfg
-    if 'SCT' in flags.Digitization.DoFastDigi and 'Pixel' not in flags.Digitization.DoFastDigi:
-        if flags.GeoModel.Run is LHCPeriod.Run3:
-            acc.merge(PixelChargeLUTCalibCondAlgCfg(flags, ReadKey=""))
-        else:
-            acc.merge(PixelChargeCalibCondAlgCfg(flags, ReadKey=""))
+    from PixelConditionsAlgorithms.PixelConditionsConfig import (
+        PixelChargeCalibCondCfg, PixelOfflineCalibCondAlgCfg)
+    if ('SCT' in flags.Digitization.DoFastDigi and
+        'Pixel' not in flags.Digitization.DoFastDigi):
+        acc.merge(PixelChargeCalibCondCfg(flags, ReadKey=""))
     else:
-        if flags.GeoModel.Run is LHCPeriod.Run3:
-            acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
-        else:
-            acc.merge(PixelChargeCalibCondAlgCfg(flags))
+        acc.merge(PixelChargeCalibCondCfg(flags))
     acc.merge(PixelOfflineCalibCondAlgCfg(flags))
 
     from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
