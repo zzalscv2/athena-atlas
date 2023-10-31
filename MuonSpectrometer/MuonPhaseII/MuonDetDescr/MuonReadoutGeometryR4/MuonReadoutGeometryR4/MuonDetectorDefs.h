@@ -5,12 +5,13 @@
 #define MUONGEOMODELR4_MUONDETECTORDEFS_H
 
 #include <GeoPrimitives/GeoPrimitives.h>
+#include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
 ///
-#include <ActsGeoUtils/ArrayHelper.h>
+#include <CxxUtils/ArrayHelper.h>
 #include <ActsGeoUtils/SurfaceBoundSet.h>
-#include <ActsGeoUtils/AlgebraHelpers.h>
-#include <ActsGeoUtils/StringUtils.h>
-#include <ActsGeoUtils/BitUtils.h>
+
+#include <CxxUtils/StringUtils.h>
+#include<CxxUtils/bitscan.h>
 
 #include <GeoPrimitives/GeoPrimitivesHelpers.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>

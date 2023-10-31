@@ -11,7 +11,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"

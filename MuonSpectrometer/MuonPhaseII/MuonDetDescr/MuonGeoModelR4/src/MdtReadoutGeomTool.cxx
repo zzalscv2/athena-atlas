@@ -17,6 +17,7 @@
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <RDBAccessSvc/IRDBRecord.h>
 
+using namespace CxxUtils;
 using namespace ActsTrk;
 
 namespace MuonGMR4 {

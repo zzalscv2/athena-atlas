@@ -14,7 +14,7 @@
 #include "MuonReadoutGeometry/MuonClusterReadoutElement.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "MuonReadoutGeometry/MuonStripDesign.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 class GeoVFullPhysVol;
 
 namespace Muon {

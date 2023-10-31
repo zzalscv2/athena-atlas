@@ -212,7 +212,7 @@ StatusCode NSWGeoPlottingAlg::execute() {
         const Amg::Vector3D u_dir = (u_left - u_right).unit();
 
         std::optional<double> uv_isect =
-            MuonGM::intersect<3>(v_center, v_dir, u_center, u_dir);
+            Amg::intersect<3>(v_center, v_dir, u_center, u_dir);
 
         if (!uv_isect) {
           ATH_MSG_ERROR("Failed to intersect the uv strips for identifiers "
@@ -243,7 +243,7 @@ StatusCode NSWGeoPlottingAlg::execute() {
                                                   << to_string(x_center));
 
         std::optional<double> ux_isect =
-            MuonGM::intersect<3>(u_center, u_dir, x_center, x_dir);
+            Amg::intersect<3>(u_center, u_dir, x_center, x_dir);
         if (!ux_isect) {
           ATH_MSG_ERROR("Failed to intersect the ux strips for identifiers "
                         << std::endl
@@ -258,7 +258,7 @@ StatusCode NSWGeoPlottingAlg::execute() {
                       << to_string(x_center));
 
         std::optional<double> vx_isect =
-            MuonGM::intersect<3>(v_center, v_dir, x_center, x_dir);
+            Amg::intersect<3>(v_center, v_dir, x_center, x_dir);
         if (!ux_isect) {
           ATH_MSG_ERROR("Failed to intersect the vx strips for identifiers "
                         << std::endl

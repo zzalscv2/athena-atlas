@@ -84,7 +84,7 @@ StatusCode MdtReadoutElement::initElement() {
       if (std::abs(tubeRot.determinant()- 1.) > std::numeric_limits<float>::epsilon()){
          ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Transformation matrix is not a pure rotation for "<<
                        idHelperSvc()->toStringDetEl(identify())<<" in layer: "<<lay<<", tube: "<<tube
-                       <<to_string(toTubeFrame(idHash)));
+                       <<Amg::toString(toTubeFrame(idHash)));
          return StatusCode::FAILURE;
       }
       /// Ensure that all tubes have the same pitch

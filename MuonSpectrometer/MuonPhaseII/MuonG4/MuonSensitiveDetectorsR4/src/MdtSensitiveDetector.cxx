@@ -31,6 +31,7 @@ inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int l
             Amg::CLHEPRotationToEigen(*history->GetRotation(level)).inverse();
 }
 using namespace MuonGMR4;
+using namespace CxxUtils;
 using namespace ActsTrk;
 namespace MuonG4R4{
 
@@ -115,7 +116,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     const Amg::Vector3D trackLocDir{globalToLocal.linear()* trackDirection};
   
     /// Calculate the closest approach of the track w.r.t the z-axis
-    const double lambda = intersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
+    const double lambda = Amg::intersect<3>(Amg::Vector3D::Zero(), Amg::Vector3D::UnitZ(),
                                        trackLocPos, trackLocDir).value_or(0);
   
     const Amg::Vector3D driftHit{trackLocPos + lambda * trackLocDir};
@@ -175,8 +176,8 @@ Identifier MdtSensitiveDetector::getIdentifier(const MuonGMR4::MdtReadoutElement
    
     const Amg::Transform3D closureCheck{readOutEle->globalToLocalTrans(m_gctx, 
                                     readOutEle->measurementHash(layer, tube))*localToGlobal};
-    if (!isIdentity(closureCheck)) {
-        ATH_MSG_VERBOSE("Correction needed "<<layer<<","<<tube<<" "<<to_string(closureCheck));
+    if (!Amg::isIdentity(closureCheck)) {
+        ATH_MSG_VERBOSE("Correction needed "<<layer<<","<<tube<<" "<<Amg::toString(closureCheck));
         if (closureCheck.translation().y() > 0) ++tube;
         else --tube;
     }
@@ -185,18 +186,18 @@ Identifier MdtSensitiveDetector::getIdentifier(const MuonGMR4::MdtReadoutElement
    const Identifier tubeId = readOutEle->measurementId(tubeHash);
    {
         const Amg::Transform3D closureCheck{readOutEle->globalToLocalTrans(m_gctx, tubeHash)*localToGlobal};
-        if (!isIdentity(closureCheck)) {
+        if (!Amg::isIdentity(closureCheck)) {
             ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" It seems that the tube position "
                              <<Amg::toString(refTubePos, 2)<<", perp: "<<refTubePos.perp()
                              <<" is outside of the volume envelope "
                              <<m_detMgr->idHelperSvc()->toStringDetEl(readOutEle->identify())<<". "
                              <<"Layer: "<<layer<<", tube: "<<tube
-                             <<to_string(closureCheck));
+                             <<Amg::toString(closureCheck));
             throw std::runtime_error("Tube hit in Nirvana");
         }
    }
    ATH_MSG_VERBOSE("Tube & layer number candidate "<<tube<<", "<<layer<<" back and forth transformation "
-                     <<to_string(closureCheck));
+                     <<Amg::toString(closureCheck));
    return tubeId;  
 }
 

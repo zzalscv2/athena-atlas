@@ -102,7 +102,7 @@ StatusCode GeoModelRpcTest::execute() {
          }         
       }
       const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
-      for (int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
+      for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
         for (int doubPhi = reElement->doubletPhi(); doubPhi <= reElement->doubletPhiMax(); ++doubPhi) {
             for (bool measPhi: {false, true}) {
                 unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :
@@ -172,7 +172,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_readoutTransform = transform;
    const RpcIdHelper& id_helper{m_idHelperSvc->rpcIdHelper()};
       
-   for (int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
+   for (unsigned int gasGap = 1; gasGap <= reElement->nGasGaps(); ++gasGap) {
         for (int doubPhi = reElement->doubletPhi(); doubPhi <= reElement->doubletPhiMax(); ++doubPhi) {
             for (bool measPhi: {false, true}) {
                 unsigned int numStrip =  (measPhi ? reElement->nPhiStrips() :

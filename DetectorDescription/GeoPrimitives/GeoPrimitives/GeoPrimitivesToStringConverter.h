@@ -12,6 +12,8 @@
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
+
 #ifndef XAOD_STANDALONE
 #   include "CLHEP/Geometry/Transform3D.h"
 #   include "CLHEP/Geometry/Point3D.h"
@@ -35,22 +37,29 @@ namespace Amg {
 
   */
 
-  inline std::string toString( const Amg::Translation3D& translation, int precision = 4 ){
-    Amg::Vector3D trans;
-    trans[0] = translation.x();
-    trans[1] = translation.y();
-    trans[2] = translation.z();
+  inline std::string toString( const Translation3D& translation, int precision = 4 ){
+    Vector3D trans{translation.x(), translation.y(), translation.z()};
     return toString( trans, precision );
   }
 
 
-  inline std::string toString( const Amg::Transform3D& transform, int precision = 4, const std::string& offset="" ){
-    std::ostringstream sout;
-    sout << "Translation : " << toString( transform.translation(), precision ) << std::endl;
-    std::string rotationOffset = offset + "              ";
-    sout << offset << "Rotation    : " << toString( transform.rotation(), precision+2, rotationOffset );
-    return sout.str();
-  }
+  inline std::string toString( const Transform3D& transform, int precision = 4, const std::string rotOffSet = "") {
+    std::stringstream sstr{};
+    bool printed{false};
+    if (transform.translation().mag() > std::numeric_limits<float>::epsilon()) {
+        sstr<<"translation: "<<toString(transform.translation(), precision);
+        printed = true;
+    }
+    if (Amg::doesNotDeform(transform)) {
+        if (printed) sstr<<rotOffSet<<", ";
+        sstr<<"rotation: {"<<toString(transform.linear()*Vector3D::UnitX(), precision)<<",";
+        sstr<<toString(transform.linear()*Vector3D::UnitY(), precision)<<",";
+        sstr<<toString(transform.linear()*Vector3D::UnitZ(), precision)<<"}";
+        printed = true;
+    }
+    if (!printed) sstr<<"Identity matrix ";
+    return sstr.str();
+}
 
 #ifndef XAOD_STANDALONE
 

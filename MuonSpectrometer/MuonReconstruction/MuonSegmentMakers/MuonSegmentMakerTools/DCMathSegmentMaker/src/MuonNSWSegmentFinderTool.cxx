@@ -1161,7 +1161,7 @@ namespace Muon {
                                                                     lengths[1] *base_seed[1].dir() - (*seg_pos)).unit());
                         ATH_MSG_VERBOSE("Direction "<<to_string(*seg_dir));
                     }
-                    std::optional<double> mu_crossing = MuonGM::intersect<3>(*seg_pos, *seg_dir, base_seed[i].pos(),base_seed[i].dir());
+                    std::optional<double> mu_crossing = Amg::intersect<3>(*seg_pos, *seg_dir, base_seed[i].pos(),base_seed[i].dir());
                     ATH_MSG_VERBOSE(" ----- "<<(i+1)<<" at "<<to_string(base_seed[i].pos() + lengths[i]*base_seed[i].dir())
                                 << " ("<< std::string( halfLength > std::abs(lengths[i]) ? "inside" : "outside")<<" wedge) "
                                 << halfLength <<" vs. "<<std::abs(lengths[i])<<" crossing point: "<<std::abs(*mu_crossing));

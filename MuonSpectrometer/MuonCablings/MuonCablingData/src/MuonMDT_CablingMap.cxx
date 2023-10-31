@@ -9,7 +9,7 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 #include "StoreGate/StoreGateSvc.h"
 
 namespace {

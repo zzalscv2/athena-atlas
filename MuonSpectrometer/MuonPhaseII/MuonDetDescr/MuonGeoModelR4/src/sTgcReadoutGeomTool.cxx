@@ -19,6 +19,8 @@
 #include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
 
 #include <RDBAccessSvc/IRDBRecord.h>
+
+using namespace CxxUtils;
 using namespace ActsTrk;
 
 namespace MuonGMR4 {

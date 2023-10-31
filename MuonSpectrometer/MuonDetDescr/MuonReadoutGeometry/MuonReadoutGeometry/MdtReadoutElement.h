@@ -8,7 +8,7 @@
 #include "CxxUtils/CachedUniquePtr.h"
 #include "CxxUtils/CachedValue.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
 #include "TrkDistortedSurfaces/SaggedLineSurface.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"

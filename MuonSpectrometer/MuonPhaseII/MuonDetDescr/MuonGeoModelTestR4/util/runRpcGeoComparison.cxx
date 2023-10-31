@@ -123,7 +123,7 @@ std::ostream& operator<<(std::ostream& ostr, const RpcChamber& chamb) {
     ostr<<"rpclayer (gasGap/phiPanel/isPhiLayer): ";
     ostr<<layer.gasGap<<"/"<<layer.doubletPhi<<"/";
     ostr<<(layer.measPhi ? "si" : "no")<<", ";
-       ostr<<"transform: "<<to_string(layer.transform);
+       ostr<<"transform: "<<Amg::toString(layer.transform);
     return ostr;
 }
 
@@ -346,10 +346,10 @@ int main( int argc, char** argv ) {
             const RpcLayer& testLayer{*lay_itr};
             const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
                                                   refLayer.transform;
-            if (!doesNotDeform(layAlignment)) {
+            if (Amg::doesNotDeform(layAlignment)) {
                 std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": in chamber "<<test<<" "
                          <<"the layer "<<testLayer<<" is misaligned w.r.t. reference by "
-                         <<to_string(layAlignment)<<std::endl;
+                         <<Amg::toString(layAlignment)<<std::endl;
                 continue;
             }
         }

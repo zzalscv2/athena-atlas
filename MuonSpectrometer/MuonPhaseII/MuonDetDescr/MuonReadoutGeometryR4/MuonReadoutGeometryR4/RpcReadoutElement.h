@@ -66,7 +66,7 @@ class RpcReadoutElement : public MuonReadoutElement {
     int doubletPhi() const;
 
     /// Returns the number of gasgaps described by this ReadOutElement (usally 2 or 3)
-    int nGasGaps() const;
+    unsigned int nGasGaps() const;
     /// Returns the number of phi panels (1 or 2)
     int nPhiPanels() const;
     /// Returns the maximum phi panel
@@ -137,7 +137,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         /// Auxillary variables to translate the Identifier to a measurement hash and back
         const unsigned int m_hashShiftDbl{m_pars.hasPhiStrips ? 1u :0u};
         const unsigned int m_hashShiftGap{m_hashShiftDbl + (nPhiPanels() <= m_doubletPhi ? 0u : 1u)};
-        const unsigned int m_hashShiftStr{m_hashShiftGap + maxBit(nGasGaps()) + 1};
+        const unsigned int m_hashShiftStr{m_hashShiftGap + CxxUtils::count_leading_zeros(nGasGaps()) + 1};
 
         /// Distance between 2 gas gaps (Radial direction)
         double m_gasThickness{0.};
