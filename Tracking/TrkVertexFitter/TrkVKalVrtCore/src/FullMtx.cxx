@@ -211,7 +211,6 @@ int FullMCNSTfill(VKVertex * vk, double * ader, double * LSide)
        LSide[NTRK*3+3+ic]=taa[ic];
     }
 //--------------------------------------------------
-    //extern int vkMSolve(double *a, double *b, long int n, double* =0);
     //int IERR = vkMSolve(ader, LSide, NPar);
     //std::cout<<"global="<<NPar<<" err="<<IERR<<'\n';
     //std::cout<<" Vrt="<<LSide[0]<<", "<<LSide[1]<<", "<<LSide[2]<<'\n';
