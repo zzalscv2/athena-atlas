@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SiLorentzAngleTool/PixelSiLorentzAngleCondAlg.h
  * @author Soshi Tsuno <Soshi.Tsuno@cern.ch>
- * @date November, 2019
+ * @date November, 2023
  * @brief Return Lorentz angle information for pixel.
  */
 
@@ -16,16 +16,15 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "GeoPrimitives/GeoPrimitives.h" //for Amg::Vector3D
+
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
-#include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelDCSHVData.h"
 #include "PixelConditionsData/PixelDCSTempData.h"
-#include "GaudiKernel/SystemOfUnits.h"
+#include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units::tesla
 #include "SiPropertiesTool/ISiPropertiesTool.h"
 
 #include "SiLorentzAngleTool/SiLorentzAngleCondData.h"
-#include "InDetIdentifier/PixelID.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // MagField cache
@@ -46,9 +45,7 @@ class PixelSiLorentzAngleCondAlg: public AthReentrantAlgorithm {
     Gaudi::Property<std::string> m_pixelIDName
     {this, "PixelIDName", "PixelID", "Pixel ID name"};
 
-    SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey
-    {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
-
+   
     SG::ReadCondHandleKey<PixelDCSTempData> m_readKeyTemp
     {this, "ReadKeyeTemp", "PixelDCSTempCondData", "Key of input sensor temperature conditions folder"};
 

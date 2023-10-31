@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelSiLorentzAngleCondAlg.h"
 
 #include "GaudiKernel/PhysicalConstants.h"
+#include "InDetIdentifier/PixelID.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -23,7 +24,6 @@ StatusCode PixelSiLorentzAngleCondAlg::initialize() {
 
   m_maxHash = idHelper->wafer_hash_max();
 
-  ATH_CHECK(m_moduleDataKey.initialize());
   ATH_CHECK(m_readKeyTemp.initialize());
   ATH_CHECK(m_readKeyHV.initialize());
   ATH_CHECK(m_writeKey.initialize());
@@ -52,9 +52,6 @@ PixelSiLorentzAngleCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid." << " In theory this should not be called, but may happen" << " if multiple concurrent events are being processed out of order.");
     return StatusCode::SUCCESS;
   }
-
-  SG::ReadCondHandle<PixelModuleData> moduleDataHandle(m_moduleDataKey, ctx);
-  const PixelModuleData *moduleData = *moduleDataHandle;
 
   // Read Cond Handle (temperature)
   SG::ReadCondHandle<PixelDCSTempData> readHandleTemp(m_readKeyTemp, ctx);
@@ -138,12 +135,6 @@ PixelSiLorentzAngleCondAlg::execute(const EventContext& ctx) const {
 
     const InDetDD::PixelModuleDesign* p_design = dynamic_cast<const InDetDD::PixelModuleDesign*>(&element->design());
 
-    const PixelID* pixelId = static_cast<const PixelID *>(element->getIdHelper());
-    int barrel_ec   = pixelId->barrel_ec(element->identify());
-    int layerIndex  = pixelId->layer_disk(element->identify());
-
-    double LACorr = moduleData->getLorentzAngleCorr(barrel_ec,layerIndex);
-
     if (not p_design){
       ATH_MSG_FATAL("Dynamic cast to PixelModuleDesign* failed in PixelSiLorentzAngleCondAlg::execute");
       return StatusCode::FAILURE;
@@ -165,25 +156,25 @@ PixelSiLorentzAngleCondAlg::execute(const EventContext& ctx) const {
     // The hit depth axis is pointing from the readout side to the backside if  m_design->readoutSide() < 0
     // The hit depth axis is pointing from the backside to the readout side if  m_design->readoutSide() > 0
     double tanLorentzAnglePhi = forceLorentzToZero*element->design().readoutSide()*mobility*element->hitDepthDirection()*element->hitPhiDirection()*(element->normal().cross(magneticField)).dot(element->phiAxis());
-    writeCdo->setTanLorentzAngle(elementHash, LACorr*tanLorentzAnglePhi);
+    writeCdo->setTanLorentzAngle(elementHash, tanLorentzAnglePhi);
 
     // This gives the effective correction in the reconstruction frame hence the extra hitPhiDirection()
     // as the angle above is in the hit frame.
     double lorentzCorrectionPhi = -0.5*element->hitPhiDirection()*tanLorentzAnglePhi*depletionDepth;
-    writeCdo->setLorentzShift(elementHash, LACorr*lorentzCorrectionPhi);
+    writeCdo->setLorentzShift(elementHash, lorentzCorrectionPhi);
  
     // The Lorentz eta shift very small and so can be ignored, but we include it for completeness.
     double tanLorentzAngleEta = forceLorentzToZero*element->design().readoutSide()*mobility*element->hitDepthDirection()*element->hitEtaDirection()*(element->normal().cross(magneticField)).dot(element->etaAxis());
-    writeCdo->setTanLorentzAngleEta(elementHash, LACorr*tanLorentzAngleEta);
+    writeCdo->setTanLorentzAngleEta(elementHash, tanLorentzAngleEta);
     double lorentzCorrectionEta = -0.5*element->hitPhiDirection()*tanLorentzAngleEta*depletionDepth;
-    writeCdo->setLorentzShiftEta(elementHash, LACorr*lorentzCorrectionEta);
+    writeCdo->setLorentzShiftEta(elementHash, lorentzCorrectionEta);
 
     // Monitoring value
     writeCdo->setBiasVoltage(elementHash, biasVoltage/CLHEP::volt);
     writeCdo->setTemperature(elementHash, temperature-273.15);
     writeCdo->setDepletionVoltage(elementHash, deplVoltage/CLHEP::volt);
 
-    ATH_MSG_DEBUG("Hash = " << elementHash << " tanPhi = " << lorentzCorrectionPhi << " shiftPhi = " << writeCdo->getLorentzShift(elementHash) << " Factor = " << LACorr << " Depletion depth = " << depletionDepth);
+    ATH_MSG_DEBUG("Hash = " << elementHash << " tanPhi = " << lorentzCorrectionPhi << " shiftPhi = " << writeCdo->getLorentzShift(elementHash) << " Factor = 1.0 Depletion depth = " << depletionDepth);
     ATH_MSG_DEBUG("Hash = " << elementHash << " tanPhi = " << lorentzCorrectionPhi << " shiftPhi = " << writeCdo->getLorentzShift(elementHash) << "Depletion depth = " << depletionDepth);
     ATH_MSG_VERBOSE("Temperature (C), bias voltage, depletion voltage: " << temperature-273.15 << ", " << biasVoltage/CLHEP::volt << ", " << deplVoltage/CLHEP::volt);
     ATH_MSG_VERBOSE("Depletion depth: " << depletionDepth/CLHEP::mm);
@@ -211,15 +202,9 @@ StatusCode PixelSiLorentzAngleCondAlg::finalize() {
 
 Amg::Vector3D PixelSiLorentzAngleCondAlg::getMagneticField(MagField::AtlasFieldCache& fieldCache, const InDetDD::SiDetectorElement* element) const {
   if (m_useMagFieldCache) {
-    Amg::Vector3D pointvec = element->center();
-
     ATH_MSG_VERBOSE("Getting magnetic field from MT magnetic field service.");
-    double point[3];
-    point[0] = pointvec[0];
-    point[1] = pointvec[1];
-    point[2] = pointvec[2];
-    double field[3];
-    fieldCache.getField(point, field);
+    double field[3]; //in/out parameter
+    fieldCache.getField(element->center().data(), field);
     return Amg::Vector3D(field[0], field[1], field[2]);
   } 
   else {
