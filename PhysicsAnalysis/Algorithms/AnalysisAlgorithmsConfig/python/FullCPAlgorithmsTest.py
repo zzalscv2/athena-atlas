@@ -198,7 +198,6 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken,
     algSeq += jetSequence
     algSeq += jvtSequence
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
-             'OutJets_%SYS%.m   -> jet_m_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta', ]
     if dataType != 'data' :
@@ -866,7 +865,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq.setOptionValue ('.metVars', metVars)
     configSeq.setOptionValue ('.containers', outputContainers)
 
-    configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags)
+    configAccumulator = ConfigAccumulator (algSeq, dataType, isPhyslite, geometry, autoconfigFromFlags=autoconfigFromFlags)
     configSeq.fullConfigure (configAccumulator)
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
@@ -919,9 +918,9 @@ def makeSequence (dataType, useBlocks, yamlPath, forCompare, noSystematics, hard
                                  autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     elif yamlPath :
         from AnalysisAlgorithmsConfig.ConfigText import makeSequence as makeSequenceText
-        ca = makeSequenceText(yamlPath, dataType, algSeq,
+        ca = makeSequenceText(yamlPath, dataType, algSeq, geometry=geometry,
                               isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,
-                              noSystematics=noSystematics)
+                              autoconfigFromFlags=autoconfigFromFlags, noSystematics=noSystematics)
     else :
         ca = makeSequenceOld (dataType, algSeq, forCompare=forCompare,
                               isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken,

@@ -73,7 +73,6 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.output = config.copyName (self.containerName)
  
         config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'm', 'm')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
@@ -401,6 +400,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', 'outOfValidity')
+
+        config.addOutputVar (self.containerName, 'm', 'm')
 
 
 

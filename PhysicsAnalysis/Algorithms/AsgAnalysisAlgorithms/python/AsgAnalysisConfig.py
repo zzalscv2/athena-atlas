@@ -74,6 +74,9 @@ class PileupReweightingBlock (ConfigBlock):
                 else:
                     log.info('Campaign could not be determined.')
 
+        if self.files is None and campaign is None:
+            campaign = config.campaign()
+
         if campaign:
             if self.userPileupConfigs is None:
                 if config.dataType() is DataType.Data:
@@ -119,7 +122,7 @@ class PileupReweightingBlock (ConfigBlock):
             config.addOutputVar ('EventInfo', 'mcChannelNumber', 'mcChannelNumber', noSys=True)
             if toolConfigFiles:
                 config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
-            if config.geometry() == LHCPeriod.Run2:
+            if config.geometry() is LHCPeriod.Run2:
                 config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
 
 
