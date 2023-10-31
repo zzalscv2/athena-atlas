@@ -14,7 +14,19 @@
 //
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
+#include <array>
 #include <algorithm>
+
+
+namespace{
+  double
+  getSigma(int tot){
+    constexpr std::array<double,17> sigmas{0.0,0.50,0.50,0.50,0.50,0.50,0.60,0.60,0.60,0.60,0.65,0.70,0.75,0.80,0.80,0.80,0.80};
+    return sigmas.at(tot);
+  }
+
+}
+
 
 
 FEI4SimTool::FEI4SimTool(const std::string& type, const std::string& name, const IInterface* parent) :
@@ -93,16 +105,16 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
     double charge = diode.charge();
 
     // charge scaling function applied. (Reference: ATL-COM-INDET-2018-052)
-    if (moduleData->getUseFEI4SpecialScalingFunction()) {
-      double corrQ = 1.11 *
-                     (1.0 - (-7.09 * 1000.0) / (23.72 * 1000.0 + charge) + (-0.22 * 1000.0) /
-                      (-0.42 * 1000.0 + charge));
-      if (corrQ < 1.0) {
-        corrQ = 1.0;
-      }
-      charge *= 1.0 / corrQ;
+ 
+    double corrQ = 1.11 *
+                   (1.0 - (-7.09 * 1000.0) / (23.72 * 1000.0 + charge) + (-0.22 * 1000.0) /
+                    (-0.42 * 1000.0 + charge));
+    if (corrQ < 1.0) {
+      corrQ = 1.0;
     }
-    charge *= moduleData->getFEI4ChargScaling();
+    charge *= 1.0 / corrQ;
+  
+    //could scale if necessary
 
     unsigned int FE = m_pixelReadout->getFE(diodeID, moduleID);
     InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(diodeID);
@@ -145,7 +157,7 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
 
     // This is for new IBL calibration, since above method (stat_cast) is not effective.
     if (totsig==0.0) {
-      double totIBLsig = moduleData->getFEI4ToTSigma(nToT);
+      double totIBLsig = getSigma(nToT);
       if (totIBLsig) {
         if (CLHEP::RandFlat::shoot(rndmEngine,0.0,1.0)<std::exp(-0.5/totIBLsig/totIBLsig)) {
           if (CLHEP::RandFlat::shoot(rndmEngine,0.0,1.0)<0.5) { nToT--; }
