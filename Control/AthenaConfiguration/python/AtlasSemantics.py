@@ -244,8 +244,6 @@ class SubAlgoSemantics(GaudiConfig2.semantics.PropertySemantics):
         return []
 
 
-from AthenaServices.ItemListSemantics import OutputStreamItemListSemantics
-
 GaudiConfig2.semantics.SEMANTICS.append(AppendListSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleKeySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(VarHandleArraySematics)
@@ -255,4 +253,3 @@ GaudiConfig2.semantics.SEMANTICS.append(PublicHandleSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(PublicHandleArraySemantics)
 GaudiConfig2.semantics.SEMANTICS.append(SubAlgoSemantics)
 GaudiConfig2.semantics.SEMANTICS.append(MapMergeNoReplaceSemantics)
-GaudiConfig2.semantics.SEMANTICS.append(OutputStreamItemListSemantics)

@@ -9,7 +9,6 @@ from AthenaCommon.Logging import logging
 def OutputStreamCfg(flags, streamName, ItemList=[], MetadataItemList=[],
                     disableEventTag=False, trigNavThinningSvc=None, takeItemsFromInput=False,
                     AcceptAlgs=[], HelperTools=[]):
-   # activate the merge semantics for the ItemList
    eventInfoKey = "EventInfo"
    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
       eventInfoKey = f"{flags.Overlay.BkgPrefix}EventInfo"
@@ -164,5 +163,3 @@ def addToMetaData(flags, streamName, itemOrList, AcceptAlgs=[], HelperTools=[], 
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
    return OutputStreamCfg(flags, streamName, MetadataItemList=items,
                           AcceptAlgs=AcceptAlgs, HelperTools=HelperTools, **kwargs)
-
-
