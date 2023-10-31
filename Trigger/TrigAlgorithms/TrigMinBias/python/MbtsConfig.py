@@ -7,13 +7,15 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def MbtsFexCfg(flags, name="MbtsFex", MbtsBitsKey=None):
     """Configures MBTS Fex with monitoring"""
     acc = ComponentAccumulator()
-    from TrigT2CaloCommon.TrigCaloDataAccessConfig import CaloDataAccessSvcDependencies
+    from TrigT2CaloCommon.TrigCaloDataAccessConfig import CaloDataAccessSvcDependencies, trigCaloDataAccessSvcCfg
+
 
     alg = CompFactory.MbtsFex(name,
         MbtsBitsKey=MbtsBitsKey,
         MonTool = MbtsFexMonitoring(flags), 
         ExtraInputs = CaloDataAccessSvcDependencies)
     acc.addEventAlgo(alg, primary=True)
+    acc.merge(trigCaloDataAccessSvcCfg(flags))
     return acc
     
 def MbtsSGInputCfg(flags):

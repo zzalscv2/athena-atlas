@@ -4,7 +4,6 @@
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TriggerMenuMT.HLT.Config.MenuComponents import InEventRecoCA, SelectionCA, MenuSequenceCA
 
@@ -13,8 +12,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import InEventRecoCA, SelectionCA, 
 def AFPTrkRecoBaseSequenceCA(flags):
     recoAcc = InEventRecoCA(name='AFPTrackingFS')
 
-    from AthenaCommon.GlobalFlags import globalflags
-    if globalflags.InputFormat.is_bytestream():
+    if not flags.Input.isMC:
         acc = ComponentAccumulator()
 
         # Bytestream converter
@@ -43,7 +41,7 @@ def AFPTrkRecoBaseSequenceCA(flags):
 @AccumulatorCache
 def AFPTrkSequence(flags):
     def trigStreamerAFPHypoTool(chainDict):
-        return conf2toConfigurable(CompFactory.TrigStreamerHypoTool(chainDict['chainName']))
+        return CompFactory.TrigStreamerHypoTool(chainDict['chainName'])
 
     recoAcc = AFPTrkRecoBaseSequenceCA(flags)
 
@@ -57,9 +55,8 @@ def AFPTrkSequence(flags):
 
 
 def TrigAFPDijetComboHypoToolCfg(flags, chainDict):
-    from TrigAFPHypo.TrigAFPHypoConf import TrigAFPDijetComboHypoTool
     name = chainDict['chainName']
-    tool = TrigAFPDijetComboHypoTool(name)
+    tool = CompFactory.TrigAFPDijetComboHypoTool(name)
 
     tool.maxProtonDiff_x = 2.5 
     tool.maxProtonDiff_y = 100.0
@@ -125,8 +122,7 @@ def AFPGlobalRecoSequenceCA(flags):
 @AccumulatorCache
 def AFPGlobalSequence(flags):
     def AFPTOFHypoToolGen(chain_dict):
-        from TrigAFPHypo.TrigAFPHypoConf import TrigAFPToFHypoTool
-        return TrigAFPToFHypoTool(chain_dict['chainName'])
+        return CompFactory.TrigAFPToFHypoTool(chain_dict['chainName'])
 
     recoAcc = AFPGlobalRecoSequenceCA(flags)
 
