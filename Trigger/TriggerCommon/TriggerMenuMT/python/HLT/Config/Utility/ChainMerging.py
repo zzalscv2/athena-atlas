@@ -285,7 +285,7 @@ def isFullScanRoI(inputL1Nav):
 def noPrecedingStepsPreMerge(newsteps,chain_index,ileg):
     for step in newsteps:
         seq = step[chain_index].sequences[ileg]
-        if type(seq).__name__ == 'EmptyMenuSequence':
+        if isinstance(seq, EmptyMenuSequence):
             continue
         else:
             #if there's a non-empty sequence in a step before, there is clearly a
@@ -296,7 +296,7 @@ def noPrecedingStepsPreMerge(newsteps,chain_index,ileg):
 def noPrecedingStepsPostMerge(newsteps, ileg):
     for step in newsteps:
         seq = step.sequences[ileg]
-        if type(seq).__name__ == 'EmptyMenuSequence':
+        if isinstance(seq, EmptyMenuSequence):
             continue
         else:
             #if there's a non-empty sequence in a step before, there is clearly a
@@ -309,7 +309,7 @@ def getCurrentAG(chainStep):
     filled_seq_ag = []
     for iseq,seq in enumerate(chainStep.sequences):
         # In the case of dummy configs, they are all empty
-        if type(seq).__name__ == 'EmptyMenuSequence':
+        if isinstance(seq, EmptyMenuSequence):
             continue
         else:
             # get the alignment group of the leg that is running a non-empty sequence
@@ -476,10 +476,10 @@ def checkStepContent(parallel_steps):
     return True if any step contains a real Sequence
     """
     for step in parallel_steps:
-        if step is None:
+        if step is None or step.isEmpty:
             continue
         for seq in step.sequences:
-            if type(seq).__name__ != 'EmptyMenuSequence':
+            if not isinstance(seq, EmptyMenuSequence):
                 return True    
     return False   
 
