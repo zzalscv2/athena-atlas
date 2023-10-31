@@ -8,7 +8,7 @@
 #include "MuonReadoutGeometry/MuonChannelDesign.h"
 #include "MuonReadoutGeometry/MuonClusterReadoutElement.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 #include "MuonAlignmentData/NswPassivationDbData.h"
 
 class BLinePar;

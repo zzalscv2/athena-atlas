@@ -13,7 +13,7 @@ inline double  RpcReadoutElement::gasGapThickness() const {return m_gasThickness
 inline int RpcReadoutElement::doubletZ() const{ return m_doubletZ; }
 inline int RpcReadoutElement::doubletR() const{ return m_doubletR; }
 inline int RpcReadoutElement::doubletPhi() const{ return m_doubletPhi; }
-inline int RpcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
+inline unsigned int RpcReadoutElement::nGasGaps() const { return m_pars.nGasGaps; }
 inline int RpcReadoutElement::nPhiPanels() const { return m_pars.nGapsInPhi; }
 inline int RpcReadoutElement::doubletPhiMax() const {return std::max(nPhiPanels(), doubletPhi()); }
 inline unsigned int RpcReadoutElement::nEtaStrips() const { return (m_pars.etaDesign ? m_pars.etaDesign->numStrips(): 0u); }

@@ -6,7 +6,7 @@
 #define MUONCABLINGDATA_MDTMEZZANINECARD_H
 
 #include <GaudiKernel/MsgStream.h>
-#include <MuonReadoutGeometry/ArrayHelper.h>
+#include <CxxUtils/ArrayHelper.h>
 
 #include <array>
 #include <iostream>

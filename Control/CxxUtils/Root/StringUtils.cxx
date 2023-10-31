@@ -1,16 +1,29 @@
 /*
     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#include <ActsGeoUtils/StringUtils.h>
-#include <ActsGeoUtils/AlgebraHelpers.h>
-#include <GeoPrimitives/GeoPrimitivesToStringConverter.h>
+#include <CxxUtils/StringUtils.h>
 
-#include <charconv>
 #include <limits>
+#include <array>
 #include <functional>
 #include <iostream>
+#include <sstream>
 
-namespace ActsTrk {
+namespace {
+    static constexpr std::array<char, 3> allowedChars{'.', '+', '-'};
+}
+
+#define TEST_STRING(THE_STR)                                                                             \
+    for (const char ch : THE_STR){                                                                       \
+        if (std::isdigit(ch)|| std::isspace(ch)  ||                                                      \
+            std::find(allowedChars.begin(), allowedChars.end(), ch)!= allowedChars.end()) continue;      \
+        std::stringstream except_str{};                                                                  \
+        except_str<<"CxxUtils::"<<__func__<<"()  "<<__LINE__<<": ";                                      \
+        except_str<<"Invalid character detected in "<<THE_STR;                                           \
+        throw std::runtime_error(except_str.str());                                                      \
+    }                                                                                                    \
+
+namespace CxxUtils {
     std::vector<std::string> tokenize(const std::string& str,
                                       const std::string& delimiters) {
                                     
@@ -36,7 +49,7 @@ namespace ActsTrk {
         std::vector<double> toReturn{};
         std::transform(strTokens.begin(), strTokens.end(), std::back_inserter(toReturn), 
                     [](const std::string& token){
-                        return stof(token);
+                        return atof(token);
                     });
         return toReturn;
     }
@@ -51,32 +64,25 @@ namespace ActsTrk {
                         });
         return toReturn;
     }
+
     int atoi(std::string_view str) {
+        TEST_STRING(str);
+        if (str.empty()) return 0;
         int result{std::numeric_limits<int>::max()};
-        std::from_chars(str.data(), str.data() + str.size(), result);
+        std::stringstream sstr{};
+        sstr<<str;
+        sstr>>result;
         return result;
     }
 
-    double stof(std::string_view str) {
+    double atof(std::string_view str) {
+        TEST_STRING(str);
+        if (str.empty()) return 0.;
         double result{std::numeric_limits<double>::max()};
-        std::from_chars(str.data(), str.data() + str.size(), result);
+        std::stringstream sstr{};
+        sstr<<str;
+        sstr>>result;       
         return result;
     }
-    std::string to_string(const Amg::Transform3D& trans, unsigned int prec) {
-        std::stringstream sstr{};
-        bool printed{false};
-        if (trans.translation().mag() > std::numeric_limits<float>::epsilon()) {
-            sstr<<"translation: "<<Amg::toString(trans.translation(),prec);
-            printed = true;
-        }
-        if (!doesNotDeform(trans)) {
-            if (printed) sstr<<", ";
-            sstr<<"rotation: {"<<Amg::toString(trans.linear()*Amg::Vector3D::UnitX(),prec)<<",";
-            sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitY(),prec)<<",";
-            sstr<<Amg::toString(trans.linear()*Amg::Vector3D::UnitZ(),prec)<<"}";
-            printed = true;
-        }
-        if (!printed) sstr<<"Identity matrix ";
-        return sstr.str();
-    }
 }
+#undef TEST_STRING

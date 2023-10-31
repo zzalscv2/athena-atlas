@@ -138,6 +138,11 @@ atlas_add_test( exctrace2_test
    LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}"
 )
 
+atlas_add_test( stringUtilsTest
+                SOURCES test/StringUtils_test.cxx
+                LINK_LIBRARIES CxxUtils 
+                POST_EXEC_SCRIPT nopost.sh)
+
 
 atlas_add_test( CachedValueTiming_test
   SOURCES test/CachedValueTiming_test.cxx

@@ -106,7 +106,7 @@ std::ostream& operator<<(std::ostream& ostr, const TgcChamber::WireGang& gang) {
 }
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber::LayerTrans& lTrans) {
     ostr<<"layer transform (gap/measPhi) "<<lTrans.gasGap<<"/"<<(lTrans.measPhi ? "si" : "no");
-    // ostr<<"  "<<to_string(lTrans.trans);
+    // ostr<<"  "<<Amg::toString(lTrans.trans);
     return ostr;
 }
 std::ostream& operator<<(std::ostream& ostr, const TgcChamber& chamb) {
@@ -331,9 +331,9 @@ int main( int argc, char** argv ) {
             const TgcChamber::LayerTrans& testTrans{*l_test_itr};
             /// check whether the transformations lead to the same point
             const Amg::Transform3D layTest = testTrans.trans.inverse() * refTrans.trans;
-            if (!doesNotDeform(layTest)) {
+            if (Amg::doesNotDeform(layTest)) {
                 std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<" "<<refTrans
-                         <<", the transformations are orientated diffrently "<<to_string(layTest)<<std::endl;
+                         <<", the transformations are orientated diffrently "<<Amg::toString(layTest)<<std::endl;
                 chambOk = false;  
                 break;              
             }

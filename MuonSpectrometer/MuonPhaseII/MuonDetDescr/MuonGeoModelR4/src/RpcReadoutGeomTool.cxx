@@ -23,7 +23,9 @@ namespace {
     constexpr double tolerance = 0.001 * Gaudi::Units::mm;
 }
 
+using namespace CxxUtils;
 using namespace ActsTrk;
+
 namespace MuonGMR4 {
 
 using physVolWithTrans = IMuonGeoUtilityTool::physVolWithTrans;

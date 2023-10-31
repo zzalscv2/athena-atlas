@@ -122,7 +122,7 @@ Amg::Vector2D MuonPadDesign::distanceToPad(const Amg::Vector2D& pos, int channel
     Amg::Vector2D leftEdge = corners[topLeft] - corners[botLeft];
     const double lenLeft = std::hypot(leftEdge.x(), leftEdge.y());
     leftEdge /= lenLeft;
-    const double leftIsect = MuonGM::intersect<2>(pos, Amg::Vector2D::UnitX(),
+    const double leftIsect = Amg::intersect<2>(pos, Amg::Vector2D::UnitX(),
                                                  corners[botLeft], leftEdge).value_or(1.e9);
 
     const Amg::Vector2D leftPad = corners[botLeft] + leftIsect * leftEdge;

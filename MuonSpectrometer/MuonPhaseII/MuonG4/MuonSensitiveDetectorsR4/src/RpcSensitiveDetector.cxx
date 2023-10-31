@@ -33,6 +33,7 @@ inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int l
 }
 
 using namespace MuonGMR4;
+using namespace CxxUtils;
 using namespace ActsTrk;
 
 
@@ -94,7 +95,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   const Amg::Transform3D globalToLocal = getTransform(currentTrack->GetTouchable(), 0).inverse();
   ATH_MSG_VERBOSE(" Track is inside volume "
                  <<currentTrack->GetTouchable()->GetHistory()->GetTopVolume()->GetName()
-                 <<" transformation: "<<to_string(globalToLocal));
+                 <<" transformation: "<<Amg::toString(globalToLocal));
   // transform pre and post step positions to local positions
   const Amg::Vector3D globalVertex1{Amg::Hep3VectorToEigen(preStep->GetPosition())};
   const Amg::Vector3D globalVertex2{Amg::Hep3VectorToEigen(postStep->GetPosition())};
@@ -108,7 +109,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   
   
   // The middle of the gas gap is at X= 0
-  std::optional<double> travelDist = intersect<3>(localVertex1, localDir, Amg::Vector3D::UnitX(), 0.);
+  std::optional<double> travelDist = Amg::intersect<3>(localVertex1, localDir, Amg::Vector3D::UnitX(), 0.);
   if (!travelDist) return true;
   const Amg::Vector3D locGapCross = localVertex1 + (*travelDist) * localDir;
   ATH_MSG_VERBOSE("Propagation to the gas gap center: "<<Amg::toString(locGapCross, 2));

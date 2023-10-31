@@ -5,7 +5,7 @@
 #define ACTSGEOUTILS_DEFS_H
 /// Header file to manage the common inlcudes
 #include <GeoPrimitives/GeoPrimitives.h>
-#include <EventPrimitives/EventPrimitives.h>
+#include <GeoPrimitives/GeoPrimitivesHelpers.h>
 
 #include <ActsGeometryInterfaces/ActsGeometryContext.h>
 #include <ActsGeometryInterfaces/RawGeomAlignStore.h>

@@ -426,13 +426,13 @@ namespace MuonGM {
            return true;
         }
        
-        std::optional<double>  lambda =intersect<2>(chanPos, m_stereoDir, m_bottomLeft, m_bottomEdge);
+        std::optional<double>  lambda = Amg::intersect<2>(chanPos, m_stereoDir, m_bottomLeft, m_bottomEdge);
         if (!lambda) return false;
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
         if (!uncapped && m_hasStereo && ( (*lambda) < 0. || (*lambda) > m_maxHorSize)) { 
             const Amg::Vector2D e_y{0., 1.};          
-            const std::optional<double> bottom_line =intersect<2>(m_stereoDir.x() > 0.? m_bottomLeft:  m_bottomRight, e_y, chanPos, m_stereoDir);
+            const std::optional<double> bottom_line = Amg::intersect<2>(m_stereoDir.x() > 0.? m_bottomLeft:  m_bottomRight, e_y, chanPos, m_stereoDir);
             if (bottom_line)  {
                 pos = chanPos + (*bottom_line)* m_stereoDir;
                 return true;
@@ -455,13 +455,13 @@ namespace MuonGM {
         }       
        
         /// We expect lambda to be positive
-        const std::optional<double> lambda =intersect<2>(chanPos, m_stereoDir, m_topRight, m_topEdge);
+        const std::optional<double> lambda =Amg::intersect<2>(chanPos, m_stereoDir, m_topRight, m_topEdge);
         if (!lambda) return false;
         /// If the channel is a stereo channel && lamda is either smaller 0 or longer
         /// then the bottom edge, then it's a routed strip
         if (!uncapped && m_hasStereo&& ( (*lambda) < 0  || (*lambda) > m_maxHorSize)) { 
             const Amg::Vector2D e_y{0., 1.};              
-            const std::optional<double> top_line =intersect<2>(m_stereoDir.x() >  0. ? m_topRight: m_topLeft, e_y, chanPos, m_stereoDir);
+            const std::optional<double> top_line =Amg::intersect<2>(m_stereoDir.x() >  0. ? m_topRight: m_topLeft, e_y, chanPos, m_stereoDir);
             if (top_line) {
                 pos = chanPos + (*top_line) * m_stereoDir;
                 return true;

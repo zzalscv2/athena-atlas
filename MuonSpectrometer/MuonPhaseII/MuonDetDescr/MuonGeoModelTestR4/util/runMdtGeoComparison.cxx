@@ -280,11 +280,11 @@ int main( int argc, char** argv ) {
         const Amg::Transform3D distortion = test.geoModelTransform.inverse() * reference.geoModelTransform;
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not
-        bool flippedChamb = {reference.id.eta < 0 && doesNotDeform(distortion * Amg::getRotateX3D(M_PI))};
-        if (!doesNotDeform(distortion) && !flippedChamb) {   
+        bool flippedChamb = {reference.id.eta < 0 && Amg::doesNotDeform(distortion * Amg::getRotateX3D(M_PI))};
+        if (Amg::doesNotDeform(distortion) && !flippedChamb) {   
             std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The chamber coordinate systems rotate differently for  "
                      <<reference<<". Difference in the coordinate transformation: "
-                     <<to_string(distortion)<<std::endl;
+                     <<Amg::toString(distortion)<<std::endl;
             chamberOkay = false;            
         }
         /// The ultimate goal is to have the tube positioned at the same place. 
@@ -301,11 +301,11 @@ int main( int argc, char** argv ) {
                 const TubePositioning& refTube = reference.getTube(layer, tube);
                 const TubePositioning& testTube = test.getTube(layer, tube);
                 const Amg::Transform3D tubeDistortion = testTube.localToGlobal.inverse() * refTube.localToGlobal;
-                bool flippedTube{reference.id.eta < 0 && doesNotDeform(tubeDistortion * Amg::getRotateX3D(M_PI))};
+                bool flippedTube{reference.id.eta < 0 && Amg::doesNotDeform(tubeDistortion * Amg::getRotateX3D(M_PI))};
         
-                if (!alignFailure && !(doesNotDeform(tubeDistortion)  || flippedTube)) {
+                if (!alignFailure && !(Amg::doesNotDeform(tubeDistortion)  || flippedTube)) {
                     std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": In chamber "<<reference<<" the tube reference systems for ("<<layer<<", "<<tube
-                             <<") are not exactly aligned. "<<to_string(tubeDistortion)<<std::endl;                   
+                             <<") are not exactly aligned. "<<Amg::toString(tubeDistortion)<<std::endl;                   
                     alignFailure = true;
                 }
                 /// Remember the tube staggering is in the (x-y) plane. Allow for

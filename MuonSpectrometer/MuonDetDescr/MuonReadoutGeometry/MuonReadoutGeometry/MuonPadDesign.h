@@ -16,7 +16,7 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "MuonReadoutGeometry/ArrayHelper.h"
+#include "CxxUtils/ArrayHelper.h"
 #include "MuonIdHelpers/sTgcIdHelper.h"
 #include "AthenaBaseComps/AthMessaging.h"
 namespace MuonGM {

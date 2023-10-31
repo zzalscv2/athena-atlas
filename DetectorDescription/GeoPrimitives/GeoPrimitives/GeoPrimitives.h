@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,12 +9,7 @@
 #ifndef GEOPRIMITIVES_GEOPRIMITIVES_H
 #define GEOPRIMITIVES_GEOPRIMITIVES_H
 
-#define EIGEN_MATRIXBASE_PLUGIN "EventPrimitives/AmgMatrixBasePlugin.h"
-#define EIGEN_MATRIX_PLUGIN "EventPrimitives/AmgMatrixPlugin.h"
-#define EIGEN_TRANSFORM_PLUGIN "EventPrimitives/AmgTransformPlugin.h"
-
-#include <unistd.h>
-#include <Eigen/Geometry>
+#include "EventPrimitives/EventPrimitives.h"
 
 /** Definition of ATLAS Math & Geometry primitives (Amg) 
 
@@ -45,13 +40,13 @@ namespace Amg {
         pz = 2
     };
 
-    typedef Eigen::Quaternion<double>                   Rotation3D;
-    typedef Eigen::Translation<double, 3>               Translation3D;
-    typedef Eigen::AngleAxisd                           AngleAxis3D;
-    typedef Eigen::Affine3d                             Transform3D;
-    typedef Eigen::Matrix<double, 3, 1>                 Vector3D;
-    typedef Eigen::Matrix<double, 2, 1>                 Vector2D;
-    typedef Eigen::Matrix<double, 3, 3>                 RotationMatrix3D;
+    using Rotation3D            = Eigen::Quaternion<double>;
+    using Translation3D         = Eigen::Translation<double, 3>;
+    using AngleAxis3D           = Eigen::AngleAxisd;
+    using Transform3D           = Eigen::Affine3d;
+    using Vector3D              = Eigen::Matrix<double, 3, 1>;
+    using Vector2D              = Eigen::Matrix<double, 2, 1>;
+    using RotationMatrix3D      = Eigen::Matrix<double, 3, 3>;
     
    
 
