@@ -373,6 +373,13 @@ def createTriggerFlags(doTriggerRecoFlags):
 def createTriggerRecoFlags():
     flags = AthConfigFlags()
 
+    # Additional flags to filter chains
+    from TriggerMenuMT.HLT.Config.GenerateMenuMT import allSignatures
+    flags.addFlag("Trigger.enabledSignatures", allSignatures(), help='list of enabled trigger signatures')
+    flags.addFlag("Trigger.disabledSignatures", [], help='list of disabled trigger signatures')
+    flags.addFlag("Trigger.selectChains", [], help='list of enabled chains')
+    flags.addFlag("Trigger.disableChains", [], help='list of disabled chains')
+
     def __egamma():
         from TriggerMenuMT.HLT.Egamma.TrigEgammaConfigFlags import createTrigEgammaConfigFlags
         return createTrigEgammaConfigFlags()
