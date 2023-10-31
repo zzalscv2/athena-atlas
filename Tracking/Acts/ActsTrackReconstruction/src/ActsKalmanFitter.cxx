@@ -188,7 +188,8 @@ StatusCode ActsKalmanFitter::initialize() {
 
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
   Acts::EigenStepper<> stepper(field, m_overstepLimit);
-  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() } );     
+  Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometryTool->trackingGeometry() },
+                             logger().cloneWithSuffix("Navigator") );     
   Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator> propagator(std::move(stepper), 
                      std::move(navigator),
                      logger().cloneWithSuffix("Prop"));

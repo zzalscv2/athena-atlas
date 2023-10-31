@@ -17,8 +17,8 @@ class ActsAthenaPrintPolicy final : public Acts::Logging::OutputPrintPolicy
 {
 public:
 
- ActsAthenaPrintPolicy(std::shared_ptr<MsgStream> msg, const std::string& name) 
-   : m_msg(msg), m_name(name) {}
+ ActsAthenaPrintPolicy(IMessageSvc* svc, std::shared_ptr<MsgStream> msg, const std::string& name) 
+   : m_svc{svc}, m_msg(msg), m_name(name) {}
 
   void
   flush(const Acts::Logging::Level& lvl, const std::string& input) override;
@@ -32,6 +32,7 @@ public:
     clone(const std::string& name) const override;
 
 private:
+  IMessageSvc* m_svc;
   std::shared_ptr<MsgStream> m_msg;
   std::string m_name;
 };

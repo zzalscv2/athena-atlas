@@ -132,7 +132,7 @@ namespace ActsTrk
     cfg.resolvePassive = false;
     cfg.resolveMaterial = true;
     cfg.resolveSensitive = true;
-    Navigator navigator(cfg);
+    Navigator navigator(cfg, logger().cloneWithSuffix("Navigator"));
     Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
 
     std::vector<double> etaBins;
