@@ -100,6 +100,9 @@ class TrigmuCombHypoTool: public ::AthAlgTool {
     Gaudi::Property< double > m_chi2MaxID {
 	this, "MaxChi2IDPik", 3.5, "" };
 
+    Gaudi::Property< size_t > m_numMuonThreshold {
+	this, "numMuonThreshold", 50, "Threshold of the number of muons" };
+
     // Apply strategy dependent pT cuts (B/T/S = 0 fields, L1 seeded, ...)
     // strategy dependent pT cuts
     //0: Std
