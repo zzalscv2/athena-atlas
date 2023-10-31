@@ -832,7 +832,7 @@ int GetLCSinglePionsPerf::fill_reco (const xAOD::CaloClusterContainer& clusColl,
       }else if(recoStatus.checkStatus(CaloRecoStatus::TAGGEDUNKNOWN) ) {
         engClusSumCalibTagged[kTAGUNK] += mx_calib_tot;
       }else{
-        //std::cout << "CheckSinglePionsReco::execute() -> Error! Unkown classification status " << recoStatus.getStatusWord()<< std::endl;
+        ATH_MSG_ERROR("CheckSinglePionsReco::execute() -> Error! Unkown classification status " << recoStatus.getStatusWord());
       }
 
       if(clusIsGood){
@@ -944,6 +944,7 @@ to check moments assignment
 int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusColl,
                                         const EventContext& ctx)
 {
+  ATH_MSG_DEBUG("GetLCSinglePionsPerf::fill_moments got cont. size: "<<clusColl.size()); 
   /* ********************************************
   reading calibration containers
   ******************************************** */
@@ -968,13 +969,13 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
     for (const CaloCalibrationHit* hit : *cchc) {
       Identifier myId = hit->cellID();
       if(!myId.is_valid()) {
-        std::cout << "Error! Bad identifier " << myId << " in container '" << cchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_WARNING("Error! Bad identifier " << myId << " in container '" << cchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       if(!m_id_helper->is_lar(myId) && !m_id_helper->is_tile(myId)) {
-        std::cout << "Error! Bad identifier (nor lar or tile) " << myId << " in container '" << cchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_WARNING("Error! Bad identifier (nor lar or tile) " << myId << " in container '" << cchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
 
@@ -993,13 +994,13 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
     for (const CaloCalibrationHit* hit : *dmcchc) {
       Identifier myId = hit->cellID();
       if(!myId.is_valid()) {
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier " << myId << " in container '" << dmcchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier " << myId << " in container '" << dmcchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       if(!m_id_helper->is_lar_dm(myId) && !m_id_helper->is_tile_dm(myId)) {
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier (nor lar_dm or tile_dm) " << myId << " in container '" << dmcchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier (nor lar_dm or tile_dm) " << myId << " in container '" << dmcchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       engCalibDeadTot += hit->energyTotal();
@@ -1007,7 +1008,7 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
       CaloDmDescrElement* myCDDE(nullptr);
       myCDDE = m_caloDmDescrManager->get_element(myId);
       if( !myCDDE ) {
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Absent DM description element!" << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Absent DM description element!");
         continue;
       }
       int nDmArea = m_caloDmDescrManager->get_dm_area(myId);
@@ -1040,7 +1041,7 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
       if( theCluster->retrieveMoment((*im).second, mx) ) {
         clsMoments[iClus][iMoment] = mx;
       }else{
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Can't retrieve moment " << (*im).first << " " << (*im).second << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Can't retrieve moment " << (*im).first << " " << (*im).second);
       }
       clsMomentsSum[iMoment] += clsMoments[iClus][iMoment];
     }
@@ -1048,13 +1049,13 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
     if(theCluster->retrieveMoment( xAOD::CaloCluster::ENG_CALIB_TOT, mx ) ){
       engClusSumCalib += mx;
     }else{
-      std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Can't retrieve moment xAOD::CaloCluster::ENG_CALIB_TOT " << std::endl;
+      ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Can't retrieve moment xAOD::CaloCluster::ENG_CALIB_TOT ");
     }
     double mx_calib_emb0, mx_calib_eme0, mx_calib_tileg3;
     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_EMB0, mx_calib_emb0)
          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_EME0, mx_calib_eme0)
          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_TILEG3, mx_calib_tileg3)){
-      std::cout << "One of the moment ENG_CALIB_EMB0, ENG_CALIB_EME0, ENG_CALIB_TILEG3 is absent"  << std::endl;
+      ATH_MSG_WARNING("One of the moment ENG_CALIB_EMB0, ENG_CALIB_EME0, ENG_CALIB_TILEG3 is absent");
     }else{
       engClusSumCalibPresOnly += (mx_calib_emb0+mx_calib_eme0+mx_calib_tileg3);
     }
@@ -1132,7 +1133,7 @@ int GetLCSinglePionsPerf::fill_moments (const xAOD::CaloClusterContainer& clusCo
         xnorm = eng_calib_dead_unclass;
         break;
       default:
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Not implemented for " << (*im).first << " " << (*im).second << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Not implemented for " << (*im).first << " " << (*im).second);
         break;
     }
     if(m_doClusMoments && xnorm > m_mc_ener*0.0001) {
@@ -1188,13 +1189,13 @@ int GetLCSinglePionsPerf::fill_calibhits (const xAOD::CaloClusterContainer& clus
     for (const CaloCalibrationHit* hit : *cchc) {
       Identifier myId = hit->cellID();
       if(!myId.is_valid()) {
-        std::cout << "Error! Bad identifier " << myId << " in container '" << cchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_ERROR("Error! Bad identifier " << myId << " in container '" << cchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       if(!m_id_helper->is_lar(myId) && !m_id_helper->is_tile(myId)) {
-        std::cout << "Error! Bad identifier (nor lar or tile) " << myId << " in container '" << cchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_ERROR("Error! Bad identifier (nor lar or tile) " << myId << " in container '" << cchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       engCalibTot += hit->energyTotal();
@@ -1209,13 +1210,13 @@ int GetLCSinglePionsPerf::fill_calibhits (const xAOD::CaloClusterContainer& clus
     for (const CaloCalibrationHit* hit : *dmcchc) {
       Identifier myId = hit->cellID();
       if(!myId.is_valid()) {
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier " << myId << " in container '" << dmcchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier " << myId << " in container '" << dmcchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       if(!m_id_helper->is_lar_dm(myId) && !m_id_helper->is_tile_dm(myId)) {
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier (nor lar_dm or tile_dm) " << myId << " in container '" << dmcchc->Name() << "',"
-        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'" << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Bad dead material identifier (nor lar_dm or tile_dm) " << myId << " in container '" << dmcchc->Name() << "',"
+        << " AtlasDetectorID says '" << m_id_helper->show_to_string(myId) << "'");
         continue;
       }
       engCalibDeadTot += hit->energyTotal();
@@ -1223,7 +1224,7 @@ int GetLCSinglePionsPerf::fill_calibhits (const xAOD::CaloClusterContainer& clus
       CaloDmDescrElement* myCDDE(nullptr);
       myCDDE = m_caloDmDescrManager->get_element(myId);
       if( !myCDDE ) {
-        std::cout << "GetLCSinglePionsPerf::fill_moments() -> Error! Absent DM description element!" << std::endl;
+        ATH_MSG_ERROR("GetLCSinglePionsPerf::fill_moments() -> Error! Absent DM description element!");
         continue;
       }
       int nDmArea = m_caloDmDescrManager->get_dm_area(myId);
@@ -1240,16 +1241,16 @@ int GetLCSinglePionsPerf::fill_calibhits (const xAOD::CaloClusterContainer& clus
 //     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_TOT, mx_calib_tot)
 //          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_OUT_L, mx_calib_ooc)
 //          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_DEAD_TOT mx_calib_dm)){
-//       std::cout << "One of the moment ENG_CALIB_TOT, ENG_CALIB_OUT_L, ENG_CALIB_DEAD_TOT is absent"  << std::endl;
+//       ATH_MSG_ERROR("One of the moment ENG_CALIB_TOT, ENG_CALIB_OUT_L, ENG_CALIB_DEAD_TOT is absent");
 //     }
     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_TOT, mx_calib_tot) ){
-      std::cout << "Moment ENG_CALIB_TOT is absent"  << std::endl;
+      ATH_MSG_WARNING("Moment ENG_CALIB_TOT is absent");
     }
     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_OUT_L, mx_calib_ooc) ){
-      std::cout << "Moment ENG_CALIB_OUT_L is absent"  << std::endl;
+      ATH_MSG_WARNING("Moment ENG_CALIB_OUT_L is absent" );
     }
     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_DEAD_TOT, mx_calib_dm) ){
-      std::cout << "Moment ENG_CALIB_DEAD_TOT is absent"  << std::endl;
+      ATH_MSG_WARNING("Moment ENG_CALIB_DEAD_TOT is absent");
     }
     engCalibAssigned += (mx_calib_tot + mx_calib_ooc + mx_calib_dm);
 
@@ -1257,7 +1258,7 @@ int GetLCSinglePionsPerf::fill_calibhits (const xAOD::CaloClusterContainer& clus
     if( !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_EMB0, mx_calib_emb0)
          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_EME0, mx_calib_eme0)
          || !theCluster->retrieveMoment(xAOD::CaloCluster::ENG_CALIB_TILEG3, mx_calib_tileg3)){
-      std::cout << "One of the moment ENG_CALIB_EMB0, ENG_CALIB_EME0, ENG_CALIB_TILEG3 is absent"  << std::endl;
+      ATH_MSG_WARNING("One of the moment ENG_CALIB_EMB0, ENG_CALIB_EME0, ENG_CALIB_TILEG3 is absent");
     }else{
       engClusSumCalibPresOnly += (mx_calib_emb0+mx_calib_eme0+mx_calib_tileg3);
     }

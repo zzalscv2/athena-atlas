@@ -459,6 +459,25 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     return result
 
+def addSnapshot(topomaker, corrName,contName):
+    from AthenaCommon.Logging import logging
+    mlog = logging.getLogger('CaloTopoClusterConfig:addSnapshot')
+    corrTools=topomaker.ClusterCorrectionTools
+    newCorrTools=[]
+    found=False
+    for t in corrTools:
+        newCorrTools.append(t)
+        if (t.getName()==corrName):
+            newSnapshot=CompFactory.CaloClusterSnapshot("Snapshot_"+corrName,OutputName=contName)
+            newCorrTools.append(newSnapshot)
+            found=True
+    if not found:
+        mlog.error("Did not find cluster correction tool %s", corrName)
+    else:
+        mlog.info("Added cluster snapshot after correction tool %s", corrName)
+        topomaker.ClusterCorrectionTools = newCorrTools
+        topomaker.ClusterCorrectionTools += [newSnapshot]
+    return   
 
 
 if __name__=="__main__":
