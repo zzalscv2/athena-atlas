@@ -18,6 +18,9 @@ if [ -n "$TCMALLOCDIR" ]; then
 fi
 
 # parse command line arguments
+# If the first .py file we encounter starts with a shebang, then assume
+# this is a CA file.
+firstpy=1
 for a in "$@"
 do
     case "$a" in
@@ -31,6 +34,14 @@ do
         --preloadlib*)     export ATHENA_ADD_PRELOAD=${a#*=};;
         --drop-and-reload) ATHENA_DROP_RELOAD=1;;
         --CA)              USECA=1;;
+        *.py)            if [ $firstpy -eq 1 -a -r "$a" ]; then
+                             head=`head -c2 "$a"`
+                             if [ "${head}" = "#!" ]; then
+                                 USECA=1
+                             fi
+                             firstpy=0
+                         fi
+                         otherargs+=("$a");;
         *)               otherargs+=("$a");;
     esac
 done
