@@ -327,10 +327,10 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
     config.addAlgConfigBlock(algName="CommonServices", alg=CommonServices,
         defaults={'noSystematics': noSystematics})
 
-    # pileup
+    # pileup for CI tests
     from AsgAnalysisAlgorithms.AsgAnalysisAlgorithmsTest import pileupConfigFiles
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePileupReweightingConfig
-    def makePileupConfig(seq, dataType, isPhyslite):
+    def makePileupTestConfig(seq, dataType, isPhyslite):
         if isPhyslite :
             return
         campaign, files, prwfiles, lumicalcfiles = None, None, None, None
@@ -345,8 +345,18 @@ def addDefaultAlgs(config, dataType, isPhyslite, noPhysliteBroken, noSystematics
         seq.setOptionValue ('.userPileupConfigs', prwfiles, noneAction='ignore')
         seq.setOptionValue ('.userLumicalcFiles', lumicalcfiles, noneAction='ignore')
         return seq
-    config.addAlgConfigBlock(algName="PileupReweighting", alg=makePileupConfig,
+    config.addAlgConfigBlock(algName="PileupReweightingTest", alg=makePileupTestConfig,
         defaults={'dataType':dataType,'isPhyslite':isPhyslite})
+
+    # pileup for users
+    def makePileupConfig(seq, isPhyslite):
+        if isPhyslite:
+            return
+        makePileupReweightingConfig(seq)
+        seq.setOptionValue ('.useDefaultConfig', True)
+        return seq
+    config.addAlgConfigBlock(algName="PileupReweighting", alg=makePileupConfig,
+        defaults={'isPhyslite':isPhyslite})
 
     # event cleaning
     from AsgAnalysisAlgorithms.EventCleaningConfig import EventCleaningBlock
@@ -459,7 +469,7 @@ def printOptions(configSeq):
         except Exception as e:
             print(e)
 
-def makeSequence(configPath, dataType, algSeq,
+def makeSequence(configPath, dataType, algSeq, geometry=None, autoconfigFromFlags=None,
                  isPhyslite=False, noPhysliteBroken=False, noSystematics=False):
     """
     """
@@ -487,7 +497,7 @@ def makeSequence(configPath, dataType, algSeq,
     printOptions(configSeq)
 
     # compile
-    configAccumulator = ConfigAccumulator(dataType, algSeq, isPhyslite=isPhyslite)
+    configAccumulator = ConfigAccumulator(algSeq, dataType, isPhyslite=isPhyslite, geometry=geometry, autoconfigFromFlags=autoconfigFromFlags)
     configSeq.fullConfigure(configAccumulator)
 
     from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator

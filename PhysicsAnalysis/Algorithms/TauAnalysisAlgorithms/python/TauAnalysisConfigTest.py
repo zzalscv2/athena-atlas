@@ -36,7 +36,7 @@ def makeSequence (dataType) :
     # makeDiTauWorkingPointConfig (configSeq, 'AnalysisDiTauJets', workingPoint='Tight', postfix='tight')
 
 
-    configAccumulator = ConfigAccumulator (dataType, algSeq)
+    configAccumulator = ConfigAccumulator (algSeq, dataType, geometry="RUN2")
     configSeq.fullConfigure (configAccumulator)
 
     return algSeq

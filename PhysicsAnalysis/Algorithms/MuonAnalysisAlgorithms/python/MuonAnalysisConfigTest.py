@@ -44,7 +44,7 @@ def makeSequence (dataType) :
     makeMuonWorkingPointConfig (configSeq, 'AnalysisMuons', workingPoint='Medium.Loose_VarRad', selectionName='medium')
     makeMuonWorkingPointConfig (configSeq, 'AnalysisMuons', workingPoint='Tight.Loose_VarRad', selectionName='tight')
 
-    configAccumulator = ConfigAccumulator (dataType, algSeq)
+    configAccumulator = ConfigAccumulator (algSeq, dataType, geometry="RUN2")
     configSeq.fullConfigure (configAccumulator)
 
 

@@ -105,7 +105,7 @@ class ConfigAccumulator :
     used.
     """
 
-    def __init__ (self, dataType, algSeq, isPhyslite=False, geometry=LHCPeriod.Run2, dsid=0,
+    def __init__ (self, algSeq, dataType=None, isPhyslite=False, geometry=None, dsid=0, campaign=None,
                   autoconfigFromFlags=None, noSysSuffix=False):
         if autoconfigFromFlags is not None:
             if autoconfigFromFlags.Input.isMC:
@@ -116,8 +116,13 @@ class ConfigAccumulator :
             else:
                 dataType = DataType.Data
             isPhyslite = 'StreamDAOD_PHYSLITE' in autoconfigFromFlags.Input.ProcessingTags
-            geometry = autoconfigFromFlags.GeoModel.Run
-            dsid = autoconfigFromFlags.Input.MCChannelNumber
+            if geometry is None:
+                geometry = autoconfigFromFlags.GeoModel.Run
+            if dsid == 0 and dataType is not DataType.Data:
+                dsid = autoconfigFromFlags.Input.MCChannelNumber
+            if campaign is None:
+                campaign = autoconfigFromFlags.Input.MCCampaign
+            generatorInfo = autoconfigFromFlags.Input.GeneratorsInfo
         else:
             # legacy mappings of string arguments
             if isinstance(dataType, str):
@@ -127,14 +132,17 @@ class ConfigAccumulator :
                     dataType = DataType.FastSim
                 else:
                     dataType = DataType(dataType)
-            # allow possible string argument for `geometry` and convert it to enum
-            geometry = LHCPeriod(geometry)
-            if geometry not in [LHCPeriod.Run2, LHCPeriod.Run3] :
-                raise ValueError ("invalid Run geometry: %s" % geometry.value)
+            generatorInfo = None
+        # allow possible string argument for `geometry` and convert it to enum
+        geometry = LHCPeriod(geometry)
+        if geometry not in [LHCPeriod.Run2, LHCPeriod.Run3] :
+            raise ValueError ("invalid Run geometry: %s" % geometry.value)
         self._dataType = dataType
         self._isPhyslite = isPhyslite
         self._geometry = geometry
         self._dsid = dsid
+        self._campaign = campaign
+        self._generatorInfo = generatorInfo
         self._algSeq = algSeq
         self._noSysSuffix = noSysSuffix
         self._containerConfig = {}
@@ -163,7 +171,6 @@ class ConfigAccumulator :
         """the data type we run on (data, fullsim, fastsim)"""
         return self._dataType
 
-
     def isPhyslite (self) :
         """whether we run on PHYSLITE"""
         return self._isPhyslite
@@ -175,6 +182,14 @@ class ConfigAccumulator :
     def dsid(self) :
         """the mcChannelNumber or DSID of the sample we run on"""
         return self._dsid
+
+    def campaign(self) :
+        """the MC campaign we run on"""
+        return self._campaign
+
+    def generatorInfo(self) :
+        """the dictionary of MC generators and their versions for the sample we run on"""
+        return self._generatorInfo
 
     def createAlgorithm (self, type, name, reentrant=False) :
         """create a new algorithm and register it as the current algorithm"""
