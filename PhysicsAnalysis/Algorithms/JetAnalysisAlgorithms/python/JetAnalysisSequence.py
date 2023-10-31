@@ -190,10 +190,14 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         assert jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
 
     if (runJvtEfficiency or runFJvtEfficiency) and dataType != "data":
-        # Do the jet <-> truth jet matching before calibration
-        alg = createAlgorithm("CP::JetTruthTagAlg", "JetTruthTagAlg" + postfix)
-        alg.truthJets = "AntiKt4TruthDressedWZJets"
-        seq.append(alg, inputPropName = 'jets', stageName = 'calibration')
+        # Decorate jets with isHS labels (required to retrieve Jvt SFs)
+        alg = createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg'+postfix )
+        addPrivateTool( alg, 'decorator', 'JetPileupLabelingTool' )
+        alg.decorator.RecoJetContainer = jetCollection
+        alg.decorator.SuppressOutputDependence=True
+
+        seq.append(alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'selection')
+        seq.addDecorAwareTool(tool=alg.decorator,parent=alg,outputPropName='RecoJetContainer')
 
     # Prepare the jet calibration algorithm
     alg = createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )

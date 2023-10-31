@@ -13,6 +13,7 @@
 #include "ParticleJetTools/JetParticleShrinkingConeAssociation.h"
 #include "ParticleJetTools/JetParticleCenterOfMassAssociation.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
+#include "ParticleJetTools/JetPileupLabelingTool.h"
 
 using namespace Analysis;
 
@@ -32,4 +33,4 @@ DECLARE_COMPONENT( ParticleJetGhostLabelTool )
 DECLARE_COMPONENT( JetParticleShrinkingConeAssociation )
 DECLARE_COMPONENT( JetParticleCenterOfMassAssociation )
 DECLARE_COMPONENT( JetTruthLabelingTool )
-
+DECLARE_COMPONENT( JetPileupLabelingTool )
