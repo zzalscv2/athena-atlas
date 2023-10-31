@@ -38,7 +38,8 @@ def test_trigP1_preload(menu):
     ex_dump.input = 'data'
     ex_dump.args = '-M --dump-config-exit'
     ex_dump.args += f' -C "from TriggerJobOpts import PostExec; PostExec.forceConditions({run},{lb})"'
-    ex_dump.flags = [f'Trigger.triggerMenuSetup="{menu}"']
+    ex_dump.flags = [f'Trigger.triggerMenuSetup="{menu}"',
+                     'Trigger.doLVL1=True']
     ex_dump.perfmon = False
 
     # 4) Fix the Json produced in the previous step
