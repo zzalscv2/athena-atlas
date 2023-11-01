@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
-from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg, LArMaskedSCCfg
 
 def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellContainerOut="SCell_ET",bcidShift=0):
     result=ComponentAccumulator()
@@ -29,13 +29,8 @@ def LArRAWtoSuperCellCfg(configFlags,name='LArRAWtoSuperCell', mask=True,SCellCo
 
     if mask and not configFlags.Input.isMC:
         # also setup to read OTF masked supercells if running on data
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders(configFlags,"/LAR/BadChannels/MaskedSC","LAR_ONL",tag="LARBadChannelsMaskedSC-RUN3-UPD1-00",
-                                className="CondAttrListCollection",extensible=configFlags.Common.isOnline )) # when run online, need folder to be extensible to force reload each event
-        condAlgo = CompFactory.LArBadChannelCondAlg(name="MaskedSCCondAlg",ReadKey="/LAR/BadChannels/MaskedSC",isSC=True,
-                                                    CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC",ReloadEveryEvent=configFlags.Common.isOnline)
-        result.addCondAlgo(condAlgo)
-        algo.LArMaskedChannelKey=condAlgo.WriteKey
+        result.merge(LArMaskedSCCfg(configFlags))
+        algo.LArMaskedChannelKey="LArMaskedSC"
 
     if ( SCInput == ""):
        mlog.info("Not setting SCInput container name")
