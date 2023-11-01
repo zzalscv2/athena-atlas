@@ -72,7 +72,6 @@ def PLR_DCSCondTempAlgCfg(flags, name="PLR_DCSCondTempAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(PLR_ConfigCondAlgCfg(flags))
     kwargs.setdefault("ReadKey", "")  # disabled for now
-    kwargs.setdefault("PixelModuleData", "PLR_ModuleData")
     kwargs.setdefault("WriteKey", "PLR_DCSTempCondData")
     acc.addCondAlgo(CompFactory.PixelDCSCondTempAlg(name, **kwargs))
     return acc

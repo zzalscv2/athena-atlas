@@ -122,7 +122,6 @@ def ITkPixelDCSCondTempAlgCfg(flags, name="ITkPixelDCSCondTempAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(ITkPixelModuleConfigCondAlgCfg(flags))
     kwargs.setdefault("ReadKey", "")  # disable for ITk for now
-    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("WriteKey", "ITkPixelDCSTempCondData")
     acc.addCondAlgo(CompFactory.PixelDCSCondTempAlg(name, **kwargs))
     return acc

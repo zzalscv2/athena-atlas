@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelDCSCondTempAlg.h
@@ -17,7 +17,6 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h" //template argument
 
 #include "StoreGate/WriteCondHandleKey.h"  //templated member
-#include "PixelConditionsData/PixelModuleData.h" //template argument
 #include "PixelConditionsData/PixelDCSTempData.h" //template argument
 
 
@@ -35,9 +34,9 @@ class PixelDCSCondTempAlg : public AthReentrantAlgorithm {
   private:
     const PixelID* m_pixelID{nullptr};
 
-    SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey
-    {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
-
+    Gaudi::Property<float> m_defaultTemperature
+    {this, "DefaultTemperature", -7.0, "Default module temperature when no measured value is available"};
+    
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
     {this, "ReadKey", "/PIXEL/DCS/TEMPERATURE", "Key of input (raw) temperature conditions folder"};
 

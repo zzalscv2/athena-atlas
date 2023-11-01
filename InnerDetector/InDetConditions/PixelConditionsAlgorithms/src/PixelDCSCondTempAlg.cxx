@@ -23,7 +23,6 @@ StatusCode PixelDCSCondTempAlg::initialize() {
 
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
 
-  ATH_CHECK(m_moduleDataKey.initialize());
   ATH_CHECK(m_readKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_writeKey.initialize());
 
@@ -43,9 +42,6 @@ StatusCode PixelDCSCondTempAlg::execute(const EventContext& ctx) const {
   // Construct the output Cond Object and fill it in
   std::unique_ptr<PixelDCSTempData> writeCdo(std::make_unique<PixelDCSTempData>());
 
-  SG::ReadCondHandle<PixelModuleData> modDataHdl(m_moduleDataKey,ctx);
-  const PixelModuleData* modData=(*modDataHdl);
-  ATH_MSG_INFO("Range of input PixelModule data is " << modDataHdl.getRange()); 
 
   const EventIDBase start{EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, 0,                       0,                       EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
   const EventIDBase stop {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
@@ -54,7 +50,7 @@ StatusCode PixelDCSCondTempAlg::execute(const EventContext& ctx) const {
   //
   std::vector<int> channelsOutOfRange{}; //keep track of which channels are out of range, if any
   std::vector<int> channelsWithNoMeasurement{}; //similar for those with no value
-  const float defaultTemperature = modData->getDefaultTemperature();
+  const float defaultTemperature = m_defaultTemperature;
   int countChannels=0;
   if (!m_readKey.empty()) {
     SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey, ctx);

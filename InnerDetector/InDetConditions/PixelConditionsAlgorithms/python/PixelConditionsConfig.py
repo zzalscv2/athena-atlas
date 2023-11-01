@@ -207,7 +207,6 @@ def PixelDCSCondTempAlgCfg(flags, name="PixelDCSCondTempAlg", **kwargs):
     else:
         kwargs.setdefault("ReadKey", "/PIXEL/DCS/TEMPERATURE")
         acc.merge(addFolders(flags, kwargs["ReadKey"], "DCS_OFL", className="CondAttrListCollection"))
-    kwargs.setdefault("PixelModuleData", "PixelModuleData")
     kwargs.setdefault("WriteKey", "PixelDCSTempCondData")
     acc.addCondAlgo(CompFactory.PixelDCSCondTempAlg(name, **kwargs))
     return acc
