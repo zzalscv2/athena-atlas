@@ -152,6 +152,7 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._doTRT           = False
       self._DoubletDR_Max   = 200
       self._SeedRadBinWidth = 10
+      self._doSeedRedundancyCheck = True
       self._TripletDoPPS    = False
       self._nClustersMin    = 8
       self._UseTrigSeedML   = 4
@@ -209,13 +210,13 @@ class ConfigSettings_fullScan( _ConfigSettingsBase ):
       self._doTRT           = False
       self._DoubletDR_Max   = 200
       self._SeedRadBinWidth = 10
+      self._doSeedRedundancyCheck = True
       self._TripletDoPPS    = False
       self._nClustersMin    = 8
       self._UseTrigSeedML   = 4
       self._dodEdxTrk         = True
       self._doHitDV           = True
       self._doDisappearingTrk = True
-
 
 class ConfigSettings_beamSpotFS( _ConfigSettingsBase ):
    def __init__( self ):
