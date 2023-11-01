@@ -10,7 +10,6 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-
 def calibCosmicMonSignatures():
     return ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
 
@@ -407,10 +406,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
             import itertools   
             
             # check if there are not migrated steps between migrated ones
-            # if built-up steps are not consecutive, do not build the chain because it's incomplete  
-            leg_not_migrated = (chainPartConfig is None or  \
-                len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1)                    
+            # if built-up steps are not consecutive, do not build the chain because it's incomplete
+            leg_not_migrated = ( (chainPartConfig is None ) or  \
+                len([k for k, g in itertools.groupby(["_MissingCA" in step.name for step in chainPartConfig.steps]) if k==0])!=1) \
+                and 'noalg' not in chainPartDict['chainName'] # no alg chains should be excluded as they do not have any configureation
+
             not_migrated |= leg_not_migrated
+
             if isCAMenu() and leg_not_migrated:
                 if chainPartConfig is None:
                     log.debug(str(NoCAmigration("[__generateChainConfigs] Chain {0} chainPartConfig is None, because of failure of merging chains".format(chainPartDict['chainName'])) ))                    
