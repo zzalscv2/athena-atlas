@@ -4936,7 +4936,7 @@ HLT_j15_pf_ftf_L1RD0_FILLED:
     1: 40
   stepFeatures:
     0: 50
-    1: 166
+    1: 167
 HLT_j15f_L1RD0_FILLED:
   eventCount: 10
   stepCounts:
@@ -5074,15 +5074,15 @@ HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1J15:
     1: 44
     2: 44
 HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1RD0_FILLED:
-  eventCount: 24
+  eventCount: 25
   stepCounts:
     0: 50
-    1: 24
-    2: 24
+    1: 25
+    2: 25
   stepFeatures:
     0: 50
-    1: 67
-    2: 67
+    1: 68
+    2: 68
 HLT_j20_0eta290_020jvt_boffperf_pf_ftf_L1jJ30:
   eventCount: 17
   stepCounts:
@@ -5830,7 +5830,7 @@ HLT_j45_pf_ftf_preselj20_L1J15:
     1: 10
   stepFeatures:
     0: 14
-    1: 23
+    1: 22
 HLT_j45_pf_ftf_preselj20_L1RD0_FILLED:
   eventCount: 11
   stepCounts:
@@ -5838,7 +5838,7 @@ HLT_j45_pf_ftf_preselj20_L1RD0_FILLED:
     1: 11
   stepFeatures:
     0: 41
-    1: 24
+    1: 23
 HLT_j45_pf_ftf_preselj20_L1jJ40:
   eventCount: 10
   stepCounts:
@@ -5846,7 +5846,7 @@ HLT_j45_pf_ftf_preselj20_L1jJ40:
     1: 10
   stepFeatures:
     0: 14
-    1: 23
+    1: 22
 HLT_j45f_L1J15p31ETA49:
   eventCount: 1
   stepCounts:
@@ -8590,7 +8590,7 @@ HLT_tau20_mediumRNN_tracktwoMVA_probe_j45_pf_ftf_preselj20_03dRAB_L1J15:
     6: 2
   stepFeatures:
     0: 14
-    1: 23
+    1: 22
     2: 20
     3: 20
     4: 20
@@ -8608,7 +8608,7 @@ HLT_tau20_mediumRNN_tracktwoMVA_probe_j45_pf_ftf_preselj20_03dRAB_L1jJ40:
     6: 2
   stepFeatures:
     0: 14
-    1: 23
+    1: 22
     2: 20
     3: 20
     4: 20
