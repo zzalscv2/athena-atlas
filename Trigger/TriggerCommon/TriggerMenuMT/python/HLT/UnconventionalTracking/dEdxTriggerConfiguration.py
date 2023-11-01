@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
-from AthenaCommon.CFElements import seqAND
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
 from AthenaCommon.Logging import logging
 
 logging.getLogger().info("Importing %s",__name__)
@@ -9,18 +8,21 @@ log = logging.getLogger(__name__)
 
 def dEdxTriggerHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import TrigdEdxTrackHypoToolFromDict
-        from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import createTrigdEdxTrackHypoAlg
+        from TrigLongLivedParticlesHypo.TrigdEdxTrackHypoConfig import TrigdEdxTrackHypoAlgCfg
+
+        selAcc = SelectionCA('dEdxSeq')
+
         
-        thedEdxTrackHypo = createTrigdEdxTrackHypoAlg(flags, "dEdxTrack")
-
-        from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+        thedEdxTrackHypo = TrigdEdxTrackHypoAlgCfg(flags, "dEdxTrack")
+        
         from AthenaConfiguration.ComponentFactory import CompFactory
-        DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_dEdxTrack_HypoOnlyStep" ))
-        DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
+        DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_dEdxTrack_HypoOnlyStep" )
+        DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
+        reco = InEventRecoCA('dEdxEmptyStep',inputMaker=DummyInputMakerAlg)
+        selAcc.mergeReco(reco)
+        selAcc.mergeHypo(thedEdxTrackHypo)
 
-        return MenuSequence( flags,
-                             Sequence    = seqAND("dEdxEmptyStep",[DummyInputMakerAlg]),
-                             Maker       = DummyInputMakerAlg,
-                             Hypo        = thedEdxTrackHypo,
-                             HypoToolGen = TrigdEdxTrackHypoToolFromDict,
-                     )
+        return MenuSequenceCA( flags,
+                               selAcc,
+                               HypoToolGen = TrigdEdxTrackHypoToolFromDict
+                              )

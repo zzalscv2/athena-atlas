@@ -1,10 +1,14 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.CFElements import seqAND
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaCommon.Logging import logging
 
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 from TrigInDetConfig.TrigInDetConfig import trigInDetLRTCfg
+
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InViewRecoCA, InEventRecoCA
+
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -16,76 +20,79 @@ vtxCountName = "HLT_TrigDV_VtxCount"
 def DVRecoFragment(flags):
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
-    FSConfig = getInDetTrigConfig("fullScan")
-    LRTConfig = getInDetTrigConfig( "DVtxLRT" )
+    fscfg = getInDetTrigConfig("fullScan")
+    lrtcfg = getInDetTrigConfig( 'DVtxLRT' )
 
-    from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-    from DecisionHandling.DecisionHandlingConf import (ViewCreatorDVROITool)
+
+    selAcc = SelectionCA("DVRecoSequence1")
+    
     from TrigEDMConfig.TriggerEDMRun3 import recordable
-    inputMakerAlg = EventViewCreatorAlgorithm(
+    inputMakerAlg = CompFactory.EventViewCreatorAlgorithm(
         "IMDVRoILRT",
         mergeUsingFeature = False,
-        RoITool = ViewCreatorDVROITool(
+        RoITool = CompFactory.ViewCreatorDVROITool(
             'ViewCreatorDVRoI',
-            RoisWriteHandleKey  = recordable( LRTConfig.roi ),
-            RoIEtaWidth = LRTConfig.etaHalfWidth,
-            RoIPhiWidth = LRTConfig.phiHalfWidth,
+            RoisWriteHandleKey  = recordable( lrtcfg.roi ),
+            RoIEtaWidth = lrtcfg.etaHalfWidth,
+            RoIPhiWidth = lrtcfg.phiHalfWidth,
         ),
         Views = "DVRoIViews",
         InViewRoIs = "InViewRoIs",
         RequireParentView = False,
-        ViewFallThrough = True)
-
-    fscfg = getInDetTrigConfig("fullScan")
-    lrtcfg = getInDetTrigConfig( 'DVtxLRT' )
+        ViewFallThrough = True,
+        ViewNodeName = selAcc.name+'InView',
+    )
+    
+    reco = InViewRecoCA('DVRecoStep',viewMaker=inputMakerAlg)
 
     flagsWithTrk = getFlagsForActiveConfig(flags, lrtcfg.name, log)
 
-    lrt_algs = algorithmCAToGlobalWrapper(
-        trigInDetLRTCfg,
+    lrt_algs = trigInDetLRTCfg(
         flagsWithTrk,
         fscfg.trkTracks_FTF(),
         inputMakerAlg.InViewRoIs,
         in_view=True,
         extra_view_inputs=[
-            ( 'xAOD::TrackParticleContainer' , FSConfig.tracks_FTF() ),
-            ( 'xAOD::VertexContainer' ,        FSConfig.vertex ),
+            ( 'xAOD::TrackParticleContainer' , fscfg.tracks_FTF() ),
+            ( 'xAOD::VertexContainer' ,        fscfg.vertex ),
         ]
     )
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
     vertexingAlgs = TrigVrtSecInclusiveCfg( flags, "TrigVrtSecInclusive_TrigDV",
-                                            FirstPassTracksName = FSConfig.tracks_FTF(),
-                                            SecondPassTracksName = LRTConfig.tracks_FTF(),
-                                            PrimaryVertexInputName = FSConfig.vertex,
+                                            FirstPassTracksName = fscfg.tracks_FTF(),
+                                            SecondPassTracksName = lrtcfg.tracks_FTF(),
+                                            PrimaryVertexInputName = fscfg.vertex,
                                             VxCandidatesOutputName = recordable(vtxOutName),
                                             TrkPairOutputName = recordable(trkPairOutName) )
 
-    recoAlgSequence = seqAND("DVRecoSequence", [lrt_algs, vertexingAlgs])
-    inputMakerAlg.ViewNodeName = recoAlgSequence.name()
+    recoAlgSequence = seqAND("DVRecoSeq")
+    acc = ComponentAccumulator()
 
-    algSequence = seqAND("TrigDVRecoSequence", [inputMakerAlg, recoAlgSequence])
-    sequenceOut = vtxOutName
-
-    return (algSequence, inputMakerAlg, sequenceOut)
+    acc.addSequence(recoAlgSequence)
+    
+    acc.merge(lrt_algs)
+    acc.merge(vertexingAlgs)
+    
+    reco.mergeReco(acc)
+    selAcc.mergeReco(reco)
+    return selAcc
 
 
 
 
 def DVRecoSequence(flags):
-    from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(DVRecoFragment,flags)
+    selAcc = DVRecoFragment(flags)
 
-    HypoAlg = TrigStreamerHypoAlg("TrigDVRecoDummyStream")
+    HypoAlg = CompFactory.TrigStreamerHypoAlg("TrigDVRecoDummyStream")
+    selAcc.addHypoAlgo(HypoAlg)
 
     log.debug("Building the Step dictinary for TrigDV reco")
-    return MenuSequence(flags,
-                        Sequence    = TrkSeq,
-                        Maker       = InputMakerAlg,
-                        Hypo        = HypoAlg,
+    return MenuSequenceCA(flags,
+                        selAcc,
                         HypoToolGen = StreamerHypoToolGenerator
                         )
 
@@ -94,24 +101,27 @@ def DVRecoSequence(flags):
 
 def DVTriggerEDSequence(flags):
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import TrigVSIHypoToolFromDict
-    from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlg
+    from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlgCfg
 
-    theHypoAlg = createTrigVSIHypoAlg(flags, "TrigDVHypoAlg")
+    selAcc = SelectionCA("TrigDVEDEmptyStep")
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
-    theHypoAlg.verticesKey = vtxOutName
-    theHypoAlg.vtxCountKey = recordable(vtxCountName)
+    theHypoAlg = createTrigVSIHypoAlgCfg(flags, "TrigDVHypoAlg",
+                                         verticesKey = recordable(vtxOutName),
+                                         vtxCountKey = recordable(vtxCountName))
+
 
     #run at the event level
-    from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    inputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_TrigDV_ED" ))
-    inputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
+    inputMakerAlg = CompFactory.InputMakerForRoI( "IM_TrigDV_ED" )
+    inputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
+
+    reco = InEventRecoCA('DVEDStep',inputMaker=inputMakerAlg)
+
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(theHypoAlg)
 
     log.info("Building the Step dictinary for DisVtxTrigger!")
-    return MenuSequence(flags,
-                        Sequence    = seqAND("TrigDVEDEmptyStep",[inputMakerAlg]),
-                        Maker       = inputMakerAlg,
-                        Hypo        = theHypoAlg,
-                        HypoToolGen = TrigVSIHypoToolFromDict,
-                        )
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = TrigVSIHypoToolFromDict,
+                          )

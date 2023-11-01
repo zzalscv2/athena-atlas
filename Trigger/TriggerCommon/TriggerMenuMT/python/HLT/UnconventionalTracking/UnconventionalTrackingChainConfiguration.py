@@ -7,6 +7,9 @@ log = logging.getLogger(__name__)
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
 from TrigLongLivedParticlesHypo.TrigDJHypoConfig import (TrigDJComboHypoToolFromDict)
 
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+from ..Config.MenuComponents import menuSequenceCAToGlobalWrapper
+
 
 #----------------------------------------------------------------
 # Class to configure chain
@@ -19,9 +22,12 @@ class UnconventionalTrackingChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self, flags):
+    def assembleChainImpl(self, inflags):
         log.debug("Assembling chain %s", self.chainName)
-
+        
+        from TrigInDetConfig.utils import getFlagsForActiveConfig
+        flags = getFlagsForActiveConfig(inflags, "fullScan", log)
+        
         chainSteps = []
 
         stepDictionary = self.getStepDictionary()
@@ -108,23 +114,38 @@ def IsoHPtTrackTriggerCfg(flags):
 
 def FTFRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getFullScanRecoOnlySequence
-    return getFullScanRecoOnlySequence(flags)
+    if isComponentAccumulatorCfg():
+        return getFullScanRecoOnlySequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(getFullScanRecoOnlySequence,flags)
 
 def FSLRTTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.FullScanLRTTrackingConfiguration import FullScanLRTTriggerMenuSequence
-    return FullScanLRTTriggerMenuSequence(flags)
-
+    if isComponentAccumulatorCfg():
+        return FullScanLRTTriggerMenuSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(FullScanLRTTriggerMenuSequence,flags)
+    
 def VSITriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.VrtSecInclusiveConfiguration import VrtSecInclusiveMenuSequence
-    return VrtSecInclusiveMenuSequence(flags)
+    if isComponentAccumulatorCfg():
+        return VrtSecInclusiveMenuSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(VrtSecInclusiveMenuSequence,flags)
 
 def dEdxTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.dEdxTriggerConfiguration import dEdxTriggerHypoSequence
-    return dEdxTriggerHypoSequence(flags)
-
+    if isComponentAccumulatorCfg():
+        return dEdxTriggerHypoSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(dEdxTriggerHypoSequence, flags)
+        
 def HitDVTriggerCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import HitDVHypoSequence
-    return HitDVHypoSequence(flags)
+    if isComponentAccumulatorCfg():
+        return HitDVHypoSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(HitDVHypoSequence, flags)
 
 def JetRecoOnlyCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.HitDVConfiguration import UTTJetRecoSequence
@@ -144,8 +165,15 @@ def DJDispStepCfg(flags):
 
 def DVRecoStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVRecoSequence
-    return DVRecoSequence(flags)
+    if isComponentAccumulatorCfg():
+        return DVRecoSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(DVRecoSequence, flags)
+
 
 def DVEDStepCfg(flags):
     from TriggerMenuMT.HLT.UnconventionalTracking.DVTriggerConfiguration import DVTriggerEDSequence
-    return DVTriggerEDSequence(flags)
+    if isComponentAccumulatorCfg():
+        return DVTriggerEDSequence(flags)
+    else:
+        return menuSequenceCAToGlobalWrapper(DVTriggerEDSequence, flags)

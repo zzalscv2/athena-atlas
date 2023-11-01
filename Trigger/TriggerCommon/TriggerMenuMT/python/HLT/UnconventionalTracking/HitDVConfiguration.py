@@ -11,6 +11,11 @@ log = logging.getLogger(__name__)
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg
 from TriggerMenuMT.HLT.Config.MenuComponents import algorithmCAToGlobalWrapper, extractAlgorithmsAndAppendCA
 
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+
+
 def UTTJetRecoSequence(flags):
 
         topoClusterSequence = algorithmCAToGlobalWrapper(jetmetTopoClusteringCfg,
@@ -49,18 +54,26 @@ def UTTJetRecoSequence(flags):
 
 def HitDVHypoSequence(flags):
         from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoToolFromDict
-        from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import createTrigHitDVHypoAlg
+        from TrigLongLivedParticlesHypo.TrigHitDVHypoConfig import TrigHitDVHypoAlgCfg
 
-        theHitDVHypo = createTrigHitDVHypoAlg(flags, "HitDV")
+#                                     Sequence    = seqAND("HitDVEmptyStep",[DummyInputMakerAlg]),
 
-        from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        DummyInputMakerAlg = conf2toConfigurable(CompFactory.InputMakerForRoI( "IM_HitDV_HypoOnlyStep" ))
-        DummyInputMakerAlg.RoITool = conf2toConfigurable(CompFactory.ViewCreatorInitialROITool())
+        selAcc = SelectionCA('HitDVSeq')
 
-        return MenuSequence( flags,
-                             Sequence    = seqAND("HitDVEmptyStep",[DummyInputMakerAlg]),
-                             Maker       = DummyInputMakerAlg,
-                             Hypo        = theHitDVHypo,
-                             HypoToolGen = TrigHitDVHypoToolFromDict,
-                         )
+
+        theHitDVHypo = TrigHitDVHypoAlgCfg(flags, "HitDV")
+
+
+
+        DummyInputMakerAlg = CompFactory.InputMakerForRoI( "IM_HitDV_HypoOnlyStep" )
+        DummyInputMakerAlg.RoITool = CompFactory.ViewCreatorInitialROITool()
+        reco = InEventRecoCA('HitDVEmptyStep',inputMaker=DummyInputMakerAlg)
+
+        selAcc.mergeReco(reco)
+        selAcc.mergeHypo(theHitDVHypo)
+
+
+        return MenuSequenceCA( flags,
+                               selAcc,
+                               HypoToolGen = TrigHitDVHypoToolFromDict
+                              )

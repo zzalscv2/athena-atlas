@@ -1,8 +1,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def TrigVrtSecInclusiveMonitoring(flags, name):
 
@@ -91,32 +91,26 @@ def TrigVrtSecInclusive_VSIMonitoring(flags, name):
     return montool
 
 
-def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksName, PrimaryVertexInputName, VxCandidatesOutputName, TrkPairOutputName):
+def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksName, PrimaryVertexInputName, VxCandidatesOutputName, TrkPairOutputName, recordTrkPair=True):
 
+    acc = ComponentAccumulator()
 
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    from TrigInDetConfig.InDetTrigCAWrappers import CAtoLegacyPublicToolWrapper
-    InDetTrigExtrapolator = CAtoLegacyPublicToolWrapper(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
+    InDetTrigExtrapolator = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags,name="InDetTrigExtrapolator"))
 
-    VertexFitter = CompFactory.Trk__TrkVKalVrtFitter(
+    VertexFitter = CompFactory.Trk.TrkVKalVrtFitter(
         name = 'VKalVrtFitter_'+name,
         Extrapolator    = InDetTrigExtrapolator,
         IterationNumber = 30
     )
 
-    from AthenaCommon.AppMgr import ToolSvc
-
-    ToolSvc += VertexFitter
-
-    VertexPointEstimator = CompFactory.InDet__VertexPointEstimator(
+    VertexPointEstimator = CompFactory.InDet.VertexPointEstimator(
         name = 'VertexPointEstimator_'+name,
         MinDeltaR = [-10000., -10000., -10000.],
         MaxDeltaR = [ 10000.,  10000.,  10000.],
         MaxPhi    = [ 10000.,  10000.,  10000.])
 
-    ToolSvc += VertexPointEstimator
-
-    tool = CompFactory.TrigVSI__TrigVrtSecInclusive(
+    alg = CompFactory.TrigVSI.TrigVrtSecInclusive(
         name = name,
         FirstPassTracksName    = FirstPassTracksName,
         SecondPassTracksName   = SecondPassTracksName,
@@ -124,9 +118,12 @@ def TrigVrtSecInclusiveCfg(flags, name, FirstPassTracksName, SecondPassTracksNam
         VxCandidatesOutputName = VxCandidatesOutputName,
         TrkPairOutputName      = TrkPairOutputName,
         VertexFitter           = VertexFitter,
-        VertexPointEstimator   = VertexPointEstimator)
+        VertexPointEstimator   = VertexPointEstimator,
+        recordTrkPair          = recordTrkPair,
+        )
 
     # monitoring
-    tool.MonTool = TrigVrtSecInclusive_VSIMonitoring(flags, 'jet')
+    alg.MonTool = TrigVrtSecInclusive_VSIMonitoring(flags, 'jet')
 
-    return tool
+    acc.addEventAlgo(alg)
+    return acc

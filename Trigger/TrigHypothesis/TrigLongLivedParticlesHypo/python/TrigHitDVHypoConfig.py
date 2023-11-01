@@ -2,27 +2,25 @@
 
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-from TrigInDetConfig.InDetTrigCollectionKeys import TrigPixelKeys, TrigSCTKeys
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
 # Default name of HitDV output
 hitDVName = "HLT_HitDV"
 
-def createTrigHitDVHypoAlg(flags, name):
-    # make the Hypo
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (TrigHitDVHypoAlg)
+def TrigHitDVHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
 
     # Setup the hypothesis algorithm
-    theHitDVHypo = TrigHitDVHypoAlg(name)
+    theHitDVHypo = CompFactory.TrigHitDVHypoAlg(name)
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     theHitDVHypo.HitDV = recordable(hitDVName)
 
-    if flags.Input.isMC:
-        theHitDVHypo.isMC = True
-    else:
-        theHitDVHypo.isMC = False
+    theHitDVHypo.isMC = flags.Input.isMC
 
-    # monioring
+    # monitoring
     monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('jet_pt',        type='TH1F', path='EXPERT', title="p_{T}^{jet} [GeV];p_{T}^{jet} [GeV];Nevents", xbins=50, xmin=0, xmax=200)
     monTool.defineHistogram('jet_eta',       type='TH1F', path='EXPERT', title="#eta^{jet};#eta^{jet};Nevents", xbins=50, xmin=-5.0, xmax=5.0)
@@ -60,33 +58,17 @@ def createTrigHitDVHypoAlg(flags, name):
     theHitDVHypo.MonTool = monTool
     theHitDVHypo.RecJetRoI = "HLT_RecJETRoIs"
 
-    from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigL2LayerNumberTool
-    numberingTool = TrigL2LayerNumberTool(name = "TrigL2LayerNumberTool_HitDV")
-    numberingTool.UseNewLayerScheme = False
-    from AthenaCommon.AppMgr import ToolSvc
-    ToolSvc += numberingTool
-
-    # Spacepoint conversion
-    from TrigOnlineSpacePointTool.TrigOnlineSpacePointToolConf import TrigSpacePointConversionTool
-    spTool = TrigSpacePointConversionTool().clone('TrigSpacePointConversionTool_HitDV')
-    spTool.DoPhiFiltering        = False
-    spTool.UseNewLayerScheme     = False
-    spTool.UseBeamTilt           = False
-    spTool.PixelSP_ContainerName = TrigPixelKeys.SpacePoints
-    spTool.SCT_SP_ContainerName  = TrigSCTKeys.SpacePoints
-    spTool.layerNumberTool       = numberingTool
-
-    from RegionSelector.RegSelToolConfig import makeRegSelTool_Pixel
-    from RegionSelector.RegSelToolConfig import makeRegSelTool_SCT
-
-    spTool.RegSelTool_Pixel = makeRegSelTool_Pixel()
-    spTool.RegSelTool_SCT   = makeRegSelTool_SCT()
-
-    ToolSvc += spTool
+    useNewLayerNumberScheme = False
+    from TrigFastTrackFinder.TrigFastTrackFinderConfig import TrigSpacePointConversionToolCfg
+    spTool = acc.popToolsAndMerge(TrigSpacePointConversionToolCfg(flags,
+                                                                  UseNewLayerScheme=useNewLayerNumberScheme,
+                                                                  DoPhiFiltering        = False,
+                                                                  UseBeamTilt           = False,                                                                                                       ))
 
     theHitDVHypo.SpacePointProviderTool = spTool
 
-    return theHitDVHypo
+    acc.addEventAlgo(theHitDVHypo)
+    return acc
 
 
 def TrigHitDVHypoToolFromDict( chainDict ):
