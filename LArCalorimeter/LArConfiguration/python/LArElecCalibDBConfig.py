@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator,ConfigurationError
-from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg,addFolderList
+from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg,addFolderList, getSqliteContent
 
 
 #Import LArSymConditionsAlgs: Templated on the payload-type they handle
@@ -44,25 +44,27 @@ LArMphysOverMcalSCCondAlg    =  CompFactory.getComp("LArFlatConditionsAlg<LArMph
 LArOFCSCCondAlg              =  CompFactory.getComp("LArFlatConditionsAlg<LArOFCSC>")
 
 
-def LArElecCalibDBCfg(ConfigFlags,condObjs,sqlite=None):
+def LArElecCalibDBCfg(flags,condObjs):
     
     #Check MC case
-    if ConfigFlags.Input.isMC:
-        return LArElecCalibDBMCCfg(ConfigFlags,condObjs)
+    if flags.Input.isMC:
+        return LArElecCalibDBMCCfg(flags,condObjs)
     
     from AthenaConfiguration.Enums import LHCPeriod
 
     #Check run 1 case:    
-    if ConfigFlags.GeoModel.Run < LHCPeriod.Run2 :
-        return LArElecCalibDBRun1Cfg(ConfigFlags,condObjs)
+    if flags.GeoModel.Run < LHCPeriod.Run2 :
+        return LArElecCalibDBRun1Cfg(flags,condObjs)
 
     #Everything else, eg run 2 (and 3?) data
-    return LArElecCalibDBRun2Cfg(ConfigFlags,condObjs,sqlite)
+    return LArElecCalibDBRun2Cfg(flags,condObjs)
     
 
     
 
-def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs,sqlite=None):
+def LArElecCalibDBRun2Cfg(flags,condObjs):
+
+    sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,flags.IOVDb.SqliteFolders,flags.IOVDb.DatabaseInstance)
 
     _larCondDBFoldersDataR2 = {"Ramp":("LArRamp","/LAR/ElecCalibFlat/Ramp", LArRampCondAlg ),
                                "DAC2uA":("LArDAC2uA","/LAR/ElecCalibFlat/DAC2uA",LArDAC2uACondAlg),
@@ -75,35 +77,36 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs,sqlite=None):
                                "fSampl":("LArfSamplSym","/LAR/ElecCalibMC/fSampl",LArfSamplSymAlg),
                            }
 
-    result=IOVDbSvcCfg(ConfigFlags)
+    result=IOVDbSvcCfg(flags)
     iovDbSvc=result.getService("IOVDbSvc")
     condLoader=result.getCondAlgo("CondInputLoader")
-
-    if sqlite and 'dbname' not in sqlite:
-        sqlite="sqlite://;schema="+sqlite+";dbname=CONDBR2"
-
 
     for condData in condObjs:
         try:
             outputKey,fldr,calg=_larCondDBFoldersDataR2[condData]
         except KeyError:
             raise ConfigurationError("No conditions data %s found for Run-2 data" % condData)
-            
+        
+        if fldr in sqliteFolders:
+            sqlite=sqliteFolders[fldr]
+        else:
+            sqlite=None
+        
 
         persClass="CondAttrListCollection"
         # Potential special treatment for OFC/Shape: Load them from offline DB
-        if ConfigFlags.LAr.OFCShapeFolder and condData == "OFC":
-            fldr="/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ConfigFlags.LAr.OFCShapeFolder
+        if flags.LAr.OFCShapeFolder and condData == "OFC":
+            fldr="/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+flags.LAr.OFCShapeFolder
             dbString=sqlite or "<db>COOLOFL_LAR/CONDBR2</db>"
             persClass="LArOFCComplete"
             calg = None
-        elif ConfigFlags.LAr.OFCShapeFolder and condData == "Shape":
-            fldr="/LAR/ElecCalibOfl/Shape/RTM/"+ConfigFlags.LAr.OFCShapeFolder
+        elif flags.LAr.OFCShapeFolder and condData == "Shape":
+            fldr="/LAR/ElecCalibOfl/Shape/RTM/"+flags.LAr.OFCShapeFolder
             dbString=sqlite or "<db>COOLOFL_LAR/CONDBR2</db>"
             persClass="LArShapeComplete"
             calg = None
         elif condData == "fSampl":
-            if not ConfigFlags.Overlay.DataOverlay:
+            if not flags.Overlay.DataOverlay:
                 raise ConfigurationError("fSampl is only supported for data overlay")
             dbString="<db>COOLOFL_LAR/OFLP200</db>"
             persClass="LArfSamplMC"
@@ -111,16 +114,18 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs,sqlite=None):
             result.addCondAlgo(calg(ReadKey="LArfSampl", WriteKey=outputKey))
             calg = None
         else:
-            dbString="<db>COOLONL_LAR/CONDBR2</db>"            
+            dbString=sqlite or "<db>COOLONL_LAR/CONDBR2</db>"            
 
-        iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
+        iovDbSvc.Folders.append(fldr+dbString)# (addFolder(flags,fldr,"LAR_ONL",'CondAttrListCollection'))
         condLoader.Load.append((persClass,fldr))
         if calg is not None:
             result.addCondAlgo(calg (ReadKey=fldr, WriteKey=outputKey))
 
     return result
 
-def LArElecCalibDBSCCfg(ConfigFlags,condObjs,sqlite=None):
+def LArElecCalibDBSCCfg(flags,condObjs,sqlite=None):
+
+    sqliteFolders=getSqliteContent(flags.IOVDb.sqliteInput,tuple(flags.IOVDb.sqliteFolders),flags.IOVDb.DatabaseInstance)
 
     _larCondDBFoldersDataSC = {"Ramp":("LArRampSC","/LAR/ElecCalibFlatSC/Ramp", LArRampSCCondAlg ),
                                "DAC2uA":("LArDAC2uASC","/LAR/ElecCalibFlatSC/DAC2uA",LArDAC2uASCCondAlg),
@@ -133,21 +138,21 @@ def LArElecCalibDBSCCfg(ConfigFlags,condObjs,sqlite=None):
                                "fSampl":("LArfSamplSC","/LAR/ElecCalibMCSC/fSampl",LArfSamplSCCondAlg),
                            }
 
-    result=IOVDbSvcCfg(ConfigFlags)
+    result=IOVDbSvcCfg(flags)
     iovDbSvc=result.getService("IOVDbSvc")
     condLoader=result.getCondAlgo("CondInputLoader")
-
-    if sqlite and 'dbname' not in sqlite:
-        sqlite="sqlite://;schema="+sqlite+";dbname=CONDBR2"
-
 
     for condData in condObjs:
         try:
             outputKey,fldr,calg=_larCondDBFoldersDataSC[condData]
         except KeyError:
             raise ConfigurationError("No conditions data %s found for SCdata" % condData)
-            
 
+        if fldr in sqliteFolders:
+            sqlite=sqliteFolders[fldr]
+        else:
+            sqlite=None
+            
         persClass="CondAttrListCollection"
         if condData == "fSampl":
             #Sampling Fraction is always read from MC-db
@@ -156,7 +161,7 @@ def LArElecCalibDBSCCfg(ConfigFlags,condObjs,sqlite=None):
             calg = None
         else:
             dbString=sqlite or "<db>COOLONL_LAR/CONDBR2</db>"
-        iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
+        iovDbSvc.Folders.append(fldr+dbString)# (addFolder(flags,fldr,"LAR_ONL",'CondAttrListCollection'))
         condLoader.Load.append((persClass,fldr))
         if calg is not None:
             result.addCondAlgo(calg (ReadKey=fldr, WriteKey=outputKey))
@@ -165,7 +170,7 @@ def LArElecCalibDBSCCfg(ConfigFlags,condObjs,sqlite=None):
 
 
 
-def LArElecCalibDBRun1Cfg(ConfigFlags,condObjs):
+def LArElecCalibDBRun1Cfg(flags,condObjs):
 
     _larCondDBFoldersDataR1 = {"Ramp":("/LAR/ElecCalibOnl/Ramp","LAR_ONL","LArRampComplete",None),
                                "DAC2uA":("/LAR/ElecCalibOnl/DAC2uA","LAR_ONL","LArDAC2uAMC",LArDAC2uASymAlg),
@@ -173,8 +178,8 @@ def LArElecCalibDBRun1Cfg(ConfigFlags,condObjs):
                                "uA2MeV":("/LAR/ElecCalibOfl/uA2MeV/Symmetry","LAR_OFL", "LAruA2MeVMC",LAruA2MeVSymAlg),
                                "MphysOverMcal":("/LAR/ElecCalibOfl/MphysOverMcal/RTM","LAR_OFL","LArMphysOverMcalComplete",None),
                                "HVScaleCorr":("/LAR/ElecCalibOnl/HVScaleCorr","LAR_ONL","LArHVScaleCorrComplete",None),
-                               "OFC":("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/5samples1phase","LAR_OFL","LArOFCComplete",None),
-                               "Shape":("/LAR/ElecCalibOfl/Shape/RTM/"+ ConfigFlags.LAr.OFCShapeFolder if len(ConfigFlags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/Shape/RTM/5samples1phase","LAR_OFL","LArShapeComplete",None),
+                               "OFC":("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ flags.LAr.OFCShapeFolder if len(flags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/5samples1phase","LAR_OFL","LArOFCComplete",None),
+                               "Shape":("/LAR/ElecCalibOfl/Shape/RTM/"+ flags.LAr.OFCShapeFolder if len(flags.LAr.OFCShapeFolder)>0 else "/LAR/ElecCalibOfl/Shape/RTM/5samples1phase","LAR_OFL","LArShapeComplete",None),
                            }
 
 
@@ -191,12 +196,12 @@ def LArElecCalibDBRun1Cfg(ConfigFlags,condObjs):
             if obj.endswith ('MC'):
                 obj = obj[:-2]
             result.addCondAlgo(calg(ReadKey=obj,WriteKey=obj+"Sym"))
-    result.merge(addFolderList(ConfigFlags,folderlist))
+    result.merge(addFolderList(flags,folderlist))
                      
     return result
 
 
-def LArElecCalibDBMCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
+def LArElecCalibDBMCCfg(flags,folders,detdb="LAR_OFL"):
     _larCondDBFoldersMC = {
                            "Ramp":("LArRampMC","/LAR/ElecCalibMC/Ramp","LArRamp", LArRampSymAlg ),
                            "AutoCorr":("LArAutoCorrMC","/LAR/ElecCalibMC/AutoCorr","LArAutoCorr", LArAutoCorrSymAlg),
@@ -215,7 +220,7 @@ def LArElecCalibDBMCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
     result=ComponentAccumulator()
     #Add cabling
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    result.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    result.merge(LArOnOffIdMappingCfg(flags))
     LArMCSymCondAlg=CompFactory.LArMCSymCondAlg
     result.addCondAlgo(LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
     folderlist=[]
@@ -229,11 +234,11 @@ def LArElecCalibDBMCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=key,WriteKey=key+"Sym"))
 
-    result.merge(addFolderList(ConfigFlags,folderlist,db="OFLP200"))
+    result.merge(addFolderList(flags,folderlist,db="OFLP200"))
     return result
 
 
-def LArElecCalibDBMCSCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
+def LArElecCalibDBMCSCCfg(flags,folders,detdb="LAR_OFL"):
     _larCondDBFoldersMC = {
                            "RampSC":('CondAttrListCollection',"/LAR/ElecCalibMCSC/Ramp","LArRampSC", LArRampSCCondAlg ),
                            "DAC2uASC":('CondAttrListCollection',"/LAR/ElecCalibMCSC/DAC2uA","LArDAC2uASC",LArDAC2uASCCondAlg),
@@ -259,7 +264,7 @@ def LArElecCalibDBMCSCCfg(ConfigFlags,folders,detdb="LAR_OFL"):
         if calg is not None:
             result.addCondAlgo(calg(ReadKey=fldr,WriteKey=key))
 
-    result.merge(addFolderList(ConfigFlags,folderlist,db="OFLP200"))
+    result.merge(addFolderList(flags,folderlist,db="OFLP200"))
     return result
 
 
