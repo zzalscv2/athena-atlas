@@ -4,7 +4,10 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, Confi
 import os
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from AthenaCommon.Logging import logging
+from functools import cache
 
+msg = logging.getLogger('IOVDbSvcCfg')
 
 def CondInputLoaderCfg(flags, **kwargs):
     result = ComponentAccumulator()
@@ -16,20 +19,6 @@ def CondInputLoaderCfg(flags, **kwargs):
 def IOVDbSvcCfg(flags, **kwargs):
     # Add the conditions loader, must be the first in the sequence
     result = CondInputLoaderCfg(flags)
-
-    # Properties of IOVDbSvc to be set here:
-    # online-mode, DBInstance (slite)
-
-    # Services it (sometimes) depends upon:
-    # m_h_IOVSvc     ("IOVSvc", name),
-    # m_h_sgSvc      ("StoreGateSvc", name),
-    # m_h_detStore   ("DetectorStore", name),
-    # m_h_metaDataStore ("StoreGateSvc/MetaDataStore", name),
-    # m_h_persSvc    ("EventPersistencySvc", name),
-    # m_h_clidSvc    ("ClassIDSvc", name),
-    # m_h_poolSvc    ("PoolSvc", name),
-    # m_h_metaDataTool("IOVDbMetaDataTool"),
-    # m_h_tagInfoMgr("TagInfoMgr", name),
 
     kwargs.setdefault('OnlineMode', flags.Common.isOnline)
     kwargs.setdefault('dbConnection', flags.IOVDb.DBConnection)
@@ -103,13 +92,22 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
     This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
     loadFolders = []
     folders = []
+    sqliteFolders=getSqliteContent(flags.IOVDb.SqliteInput,
+                                   flags.IOVDb.SqliteFolders,
+                                   flags.IOVDb.DatabaseInstance)
 
     for (fs, detDb, className) in listOfFolderInfoTuple:
+        fse= _extractFolder(fs)
         # Add class-name to CondInputLoader (if reqired)
         if className is not None:
-            loadFolders.append((className, _extractFolder(fs)))
+            loadFolders.append((className, fse))
 
-        if detDb is not None and fs.find('<db>') == -1:
+
+        if fse in sqliteFolders:
+            msg.warning(f'Reading folder {fs} from sqlite, bypassing production database')
+            fs+=sqliteFolders[fse]
+        elif detDb is not None and fs.find('<db>') == -1:
+
             if db:  # override database name if provided
                 dbName=db
             else:
@@ -251,6 +249,42 @@ def _extractFolder(folderString):
                 folderName = folderName + folderString[ix : ix2]
             ix = ix2
     return folderName.strip()
+
+
+@cache #Fill only once
+def getSqliteContent(sqliteInput,takeFolders,databaseInstance):
+    if sqliteInput == "": return []
+    sqliteFolders=dict()
+    if isinstance(takeFolders, str):
+        takeFolders=[takeFolders,]
+    dbStr="sqlite://;schema="+ sqliteInput+";dbname="+databaseInstance
+    from PyCool import cool
+    dbSvc = cool.DatabaseSvcFactory.databaseService()
+    db = dbSvc.openDatabase(dbStr)
+    nodelist=db.listAllNodes()
+    for node in nodelist:
+        if db.existsFolder(node):
+            if (len(takeFolders)>0 and str(node) not in takeFolders): continue
+            connStr="<db>"+dbStr+"</db>"
+            f=db.getFolder(node)
+            if f.versioningMode is not cool.FolderVersioning.SINGLE_VERSION:
+                tags=f.listTags()
+                if len(tags)==1:
+                    connStr+="<tag>"+tags[0]+"</tag>"
+            sqliteFolders[str(node)]=connStr
+    db.closeDatabase()
+    
+    if len(takeFolders)>0:
+        missedFolders=set(takeFolders)-set(sqliteFolders.keys())
+        if len(missedFolders):
+            msg.error("The following folders were requested via the flag IOVSvc.sqliteFolder but not found in the sqlite file %s",(sqliteInput))
+            for f in missedFolders:
+                msg.error(f)
+    
+    msg.info("The following folders/tags are read from sqlite:")
+    for v in sqliteFolders.items():
+        msg.info("\t"+str(v))
+    return sqliteFolders
 
 
 if __name__ == '__main__':

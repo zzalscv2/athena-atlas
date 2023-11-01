@@ -328,6 +328,8 @@ def initConfigFlags():
         acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance)
         #For HLT-jobs, the ring-size should be 0 (eg no cleaning at all since there are no IOV-updates during the job)
         acf.addFlag("IOVDb.CleanerRingSize",lambda prevFlags : 0 if prevFlags.Trigger.doHLT else 2*max(1, prevFlags.Concurrency.NumConcurrentEvents))
+        acf.addFlag("IOVDb.SqliteInput","",help="Folders found in this file will be used instead of the production db")
+        acf.addFlag("IOVDb.SqliteFolders",(),help="Folders listed here will be taken from the IOVDb.SqliteInput file instead of the production db. If empty, all folders found in the file are used.")
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0)
 
