@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
@@ -584,17 +584,16 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // Replace any spaces with underscores (this is to make ROOT browsing happy).
       // Also, remove the "extrapolation" uncertainty from the list (it will be added later under Extrapolation rather than SFNamed).
 
-      bool hasExtrapolation = false; int extrap_index{0};
+      auto it = std::remove (systematics.begin(), systematics.end(),
+                             "extrapolation");
+      bool hasExtrapolation = (it != systematics.end());
+      systematics.erase (it, systematics.end());
+      // C++20 alternative:
+      //bool hasExtrapolation = std::erase (systematics, "extrapolation") > 0;
+      
       for (auto& systematic : systematics) {
-        if (systematic == "extrapolation") {
-                hasExtrapolation = true;
-                systematics.erase(systematics.begin() + extrap_index); // don't forget to decrement j
-        } else {
-          std::replace_if(systematic.begin(), systematic.end(), [] (char c) { return c == ' '; }, '_'); // <--- This just replaces spaces with underscores
-          // We don't add suffixes here but only for EV variations (see JIRA: AFT-343)
-          // systematics[i].append(suffixes[i]);
-        }
-        extrap_index += 1; // increment index searching for 'extrapolation'
+        std::replace_if(systematic.begin(), systematic.end(), [] (char c) { return c == ' '; }, '_'); // <--- This just replaces spaces with underscores
+        // We don't add suffixes here but only for EV variations (see JIRA: AFT-343)
       }
       
       if (!addSystematics(systematics, flavourID, SFNamed)) { // Add the SFNamed to m_systematicsInfo
