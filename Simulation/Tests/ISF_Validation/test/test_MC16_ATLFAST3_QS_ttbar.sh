@@ -17,7 +17,7 @@ Sim_tf.py \
     --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-01' \
     --simulator 'ATLFAST3_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC23aSimulationSingleIoV.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC23SimulationNoIoV.py' \
     --DataRunNumber '284500' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
