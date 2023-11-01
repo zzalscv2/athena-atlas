@@ -16,7 +16,7 @@
 #include "TrigT1CaloCalibConditions/L1CaloCoolChannelId.h"
 
 class CondAttrListCollection;
-class L1CaloPprChanCalibV1;
+#include "TrigT1CaloCalibConditions/L1CaloPprChanCalibV1.h"
 
 /***
 * Container of L1CaloPprChanCalibV1 objects. Automatically created using:
