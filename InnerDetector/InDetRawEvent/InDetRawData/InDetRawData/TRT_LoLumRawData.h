@@ -18,6 +18,7 @@
 
 // Base class
 #include "InDetRawData/TRT_RDORawData.h"
+#include "CxxUtils/CachedValue.h"
 
 // Data members classes
 
@@ -44,30 +45,35 @@ public:
 
  // Time over threshold in ns for valid digits; zero otherwise:
  virtual double timeOverThreshold() const override final {
-   return timeOverThreshold(m_word);
-  };
+   unsigned int leadingEdge = driftTimeBin();
+   unsigned int trailingEdge = this->trailingEdge();
+   if (leadingEdge && trailingEdge) {
+     return (trailingEdge - leadingEdge + 1) * m_driftTimeBinWidth;
+   };
+   return 0.;
+ };
 
   // drift time in bin
   virtual int driftTimeBin() const override final {
-    return driftTimeBin(m_word);
+    if (!m_island.isValid()) {
+     Island tmpIsland;
+     findLargestIsland(m_word, tmpIsland);
+     m_island.set(tmpIsland);
+   }
+   return m_island.ptr()->m_leadingEdge;
   };
 
   int trailingEdge() const {
-    return trailingEdge(m_word);
+    if (!m_island.isValid()) {
+     Island tmpIsland;
+     findLargestIsland(m_word, tmpIsland);
+     m_island.set(tmpIsland);
+   }
+   return m_island.ptr()->m_trailingEdge;
   };
 
   bool firstBinHigh() const;  // True if first time bin is high
   bool lastBinHigh() const;   // True if last time bin is high
-
-
-  ///////////////////////////////////////////////////////////////////
-  // Virtual methods
-  ///////////////////////////////////////////////////////////////////
-
-
-  ///////////////////////////////////////////////////////////////////
-  // Static methods:
-  ///////////////////////////////////////////////////////////////////
 
 protected:
   // width of the drift time bins
@@ -83,18 +89,12 @@ public:
     return m_driftTimeBinWidth;
   };
 
+  struct Island {
+    unsigned int m_leadingEdge = 0;
+    unsigned int m_trailingEdge = 0;
+  };
   // Find the relevant island of bits from the bit pattern, defined as the largest island with the latest leading edge
-  static bool findLargestIsland(unsigned int word, unsigned int& leadingEdge, unsigned int& trailingEdge);
-
-  // Determine the drift time bin, i.e. the leading edge of the relevant island, from the bit pattern
-  static unsigned int driftTimeBin(unsigned int word);
-
-  // Determine the trailing edge of the relevant island from the bit pattern
-  static unsigned int trailingEdge(unsigned int word);
-
-  // Determine the time over threshold, i.e. width of the relevant island, in ns from the bit pattern
-  static double timeOverThreshold(unsigned int word);
-
+  static void findLargestIsland(unsigned int word, Island& island);
   // Check if the middle HT bit is set
   inline
   static bool highLevel(unsigned int word) {
@@ -111,6 +111,7 @@ public:
   // Private data:
   ///////////////////////////////////////////////////////////////////
 private:
+  CxxUtils::CachedValue<Island> m_island{};
 
 };
 
@@ -123,7 +124,7 @@ private:
  * Returns true if there is a high threshold hit in the middle bunch crossing, false
  * otherwise
  */
-inline 
+inline
 bool TRT_LoLumRawData::highLevel() const
 {
   return highLevel(m_word);
@@ -132,10 +133,10 @@ bool TRT_LoLumRawData::highLevel() const
 /*
  * highLevel( BX ) -
  * Returns true if there is a high threshold hit in bunch crossing BX, false
- * otherwise.  BX is 1 for the earliest bunch crossing and 3 for the latest 
+ * otherwise.  BX is 1 for the earliest bunch crossing and 3 for the latest
  * bunch crossing.
  */
-inline 
+inline
 bool TRT_LoLumRawData::highLevel(int BX) const
 {
   if ( (BX < 1) || (BX > 3) )
@@ -150,8 +151,8 @@ bool TRT_LoLumRawData::highLevel(int BX) const
  * Returns true if the first low threshold time bin it high, false otherwise.
  */
 inline bool
-TRT_LoLumRawData::firstBinHigh() const 
-{ 
+TRT_LoLumRawData::firstBinHigh() const
+{
   return (m_word & 0x02000000);
 }
 

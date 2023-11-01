@@ -37,6 +37,7 @@ class TRT_DriftCircle final : public Trk::PrepRawData
   // Public methods:
   ///////////////////////////////////////////////////////////////////
 public:
+  using Island = TRT_LoLumRawData::Island;
   TRT_DriftCircle();
   TRT_DriftCircle(const TRT_DriftCircle&) = default;
   TRT_DriftCircle& operator=(const TRT_DriftCircle&) = default;
@@ -149,6 +150,7 @@ private:
   // not owning plain ptr
   const InDetDD::TRT_BaseElement* m_detEl;
   unsigned int m_word;
+  CxxUtils::CachedValue<Island> m_island{};
 };
 
 MsgStream&
