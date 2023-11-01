@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArCellsEmptyMonitoring
@@ -1031,7 +1031,7 @@ void LArCellsEmptyMonitoring::GetLimits_EqLB(const char* inputfile, int& lbmin, 
 }
 
 //____________________________________________________________________________________________________ USING ALL LBS
-std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(const char* inputfile, int lbmin, int lbmax, double nsigma, int nlb, std::vector<int, std::allocator<int> > DQLBList){
+std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(const char* inputfile, int lbmin, int lbmax, double nsigma, int nlb, const std::vector<int, std::allocator<int> >& DQLBList){
   std::map< std::pair<unsigned int, unsigned int>, unsigned int > eventCells_tot;
   std::map< std::pair<unsigned int, unsigned int>, double > eventEnergy_tot;
   std::map< std::pair<unsigned int, unsigned int>, unsigned int > eventLumiBlock;
@@ -1149,7 +1149,7 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
    m_RMS_checkBadLBs = RMS2;
    vector<int> BadLB;
    // vector<int> BadLB_tot;
-   vector<int> BadLB_tot=std::move(DQLBList);
+   vector<int> BadLB_tot=DQLBList;
 
    double value1 = (MEAN2+(RMS2*3.));
    int numberFlagged=0;
@@ -1186,7 +1186,7 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
 
 
 //____________________________________________________________________________________________________
-bool LArCellsEmptyMonitoring::CheckBadLBList(int lumiBlock, std::vector<int, std::allocator<int> > BadLBList){
+bool LArCellsEmptyMonitoring::CheckBadLBList(int lumiBlock, const std::vector<int, std::allocator<int> >& BadLBList){
 	for (unsigned int yy=0;yy<BadLBList.size();yy++){
 	  if (lumiBlock == BadLBList[yy]){
 	    return true;

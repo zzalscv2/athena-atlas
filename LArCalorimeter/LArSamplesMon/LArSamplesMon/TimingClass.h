@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArSamples_TimingClass_H
@@ -48,7 +48,7 @@ namespace LArSamples {
     double Median[2][32][16]{};
     double param[4][2][32][16]{};
     double error[4][2][32][16]{};
-    double getTimeWeightedMedian( std::vector<double> time, std::vector<double> time2, std::vector<double> weight, double totalW );
+    double getTimeWeightedMedian( std::vector<double> time, const std::vector<double>& time2, const std::vector<double>& weight, double totalW );
     
     std::vector< std::vector<double> > readTimingFiles(const std::string& file);
     
