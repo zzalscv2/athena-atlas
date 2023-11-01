@@ -26,22 +26,9 @@ namespace CP {
 
     /// Return calo pointing variables
     virtual std::pair<float, float> getCaloPointing(const xAOD::Egamma *egamma) const = 0;
-    
+
     /// Return conversion (HPV) pointing variables
     virtual std::pair<float, float> getConvPointing(const xAOD::Photon *photon) const = 0;
-
-    /// Return the corrected eta for primary vertex z-position
-    virtual float getCorrectedEta(const xAOD::CaloCluster &cluster, float PVz) const = 0;
-
-    /// Correct Egamma vector for primary vertex z-position
-    virtual StatusCode correctPrimaryVertex(xAOD::Egamma &egamma, float PVz) const = 0;
-
-    /// Get Egamma TLorentzVector corrected for primary vertex z-position
-    virtual TLorentzVector getCorrectedLV(const xAOD::Egamma &egamma, float PVz) const = 0;
-    
-    /// Return the invariant mass, using corrected Pt/Eta of each object for the
-    /// given vertex z-position
-    virtual float getCorrectedMass(const xAOD::EgammaContainer &egammas, float PVz) const = 0;
 
   }; // class IPhotonPointingTool
 

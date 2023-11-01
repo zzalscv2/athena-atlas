@@ -51,7 +51,7 @@ namespace CP {
     // 3 possible periods
     for (int i = 0; i < 3; i++) {
       // 2 simulation flavour
-      for (int j = 0; j < 2; j++) 
+      for (int j = 0; j < 2; j++)
 	      m_corrInitialized[i][j] = false;
     }
   }
@@ -126,10 +126,10 @@ namespace CP {
     float etaS1 = input.caloCluster()->etaBE(1);
     float etaCluster = input.caloCluster()->eta();
     float phiCluster = input.caloCluster()->phi();
-    
+
     if(part_type == IsolationCorrection::PHOTON && fabs(etaS2) > 2.37) return 0.;
     if(part_type == IsolationCorrection::ELECTRON && fabs(etaS2) > 2.47) return 0.;
-    
+
     if(fabs(etaS1) > 2.5) return 0.;
     if(fabs(phiCluster) > float(M_PI)) return 0.;
 
@@ -172,7 +172,7 @@ namespace CP {
       }
     }
     int author = input.author();
-    
+
     // for test
     if (part_type == IsolationCorrection::ELECTRON && m_forcePartType) {
       if (input.phi() > 0)
@@ -180,7 +180,7 @@ namespace CP {
       else
 	      author = 16;
     }
-    
+
     //using std::optional
     auto etaPointing = m_shower->getCaloPointingEta(etaS1, etaS2, phiCluster, is_mc);
     if (!etaPointing.has_value()) return 0.;
@@ -189,7 +189,7 @@ namespace CP {
     bool is_topo = xAOD::Iso::isolationFlavour(isol) == xAOD::Iso::topoetcone;
 
     if(is_topo){
-    
+
       isolation_ptcorrection = GetPtCorrectionTopo(  energy,
 						     etaS2,
 						     etaPointing.value(),
@@ -217,7 +217,7 @@ namespace CP {
     return isolation_ptcorrection;
   }
 
-  float IsolationCorrection::getPtAtFirstMeasurement( const xAOD::TrackParticle* tp) 
+  float IsolationCorrection::getPtAtFirstMeasurement( const xAOD::TrackParticle* tp)
   {
     if (!tp) return 0;
     for (unsigned int i = 0; i < tp->numberOfParameters(); ++i)
@@ -241,13 +241,13 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
     return StatusCode::SUCCESS;
 
   ATH_MSG_VERBOSE("Will setup the tool to retrieve " << year << " DD corrections");
-  
+
   m_previousYear  = year;
   if (year == "2015") {
     m_feta_bins_dd = &m_feta_bins_dd_2015;
     m_crackBin     = 2;
     m_graph_dd_cone40_unconv_photon_shift = &m_graph_dd_2015_cone40_unconv_photon_shift;
-    m_graph_dd_cone40_conv_photon_shift   = &m_graph_dd_2015_cone40_conv_photon_shift;  
+    m_graph_dd_cone40_conv_photon_shift   = &m_graph_dd_2015_cone40_conv_photon_shift;
     m_graph_dd_cone20_unconv_photon_shift = &m_graph_dd_2015_cone20_unconv_photon_shift;
     m_graph_dd_cone20_conv_photon_shift   = &m_graph_dd_2015_cone20_conv_photon_shift;
   } else if (year == "2015_2016") {
@@ -261,9 +261,9 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
     m_feta_bins_dd = &m_feta_bins_dd_2017;
     m_crackBin     = 4;
     m_graph_dd_cone40_unconv_photon_shift = m_AFII_corr ? &m_graph_afIIdd_2017_cone40_unconv_photon_shift : &m_graph_dd_2017_cone40_unconv_photon_shift;
-    m_graph_dd_cone40_conv_photon_shift   = m_AFII_corr ? &m_graph_afIIdd_2017_cone40_conv_photon_shift   : &m_graph_dd_2017_cone40_conv_photon_shift;  
+    m_graph_dd_cone40_conv_photon_shift   = m_AFII_corr ? &m_graph_afIIdd_2017_cone40_conv_photon_shift   : &m_graph_dd_2017_cone40_conv_photon_shift;
     m_graph_dd_cone20_unconv_photon_shift = m_AFII_corr ? &m_graph_afIIdd_2017_cone20_unconv_photon_shift : &m_graph_dd_2017_cone20_unconv_photon_shift;
-    m_graph_dd_cone20_conv_photon_shift   = m_AFII_corr ? &m_graph_afIIdd_2017_cone20_conv_photon_shift   : &m_graph_dd_2017_cone20_conv_photon_shift;  
+    m_graph_dd_cone20_conv_photon_shift   = m_AFII_corr ? &m_graph_afIIdd_2017_cone20_conv_photon_shift   : &m_graph_dd_2017_cone20_conv_photon_shift;
   } else {
     ATH_MSG_WARNING("Year " << year << " is not known in IsolationCorrection ! Check your input ! No correction is applied");
     return StatusCode::FAILURE;
@@ -272,7 +272,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
   if (!m_corrInitialized[ii][jj]) {
 
     ATH_MSG_VERBOSE("DD corrections for year " << year << " not loaded yet. Doing it know");
-    
+
     std::unique_ptr< TFile > file_ptleakagecorr( TFile::Open( m_corr_ddshift_file.c_str(), "READ" ) );
     if (!file_ptleakagecorr) {
       ATH_MSG_ERROR("file " << m_corr_ddshift_file << " not found ! Check your inputs");
@@ -304,11 +304,11 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
 		      << " dR = 0.4,   conv " << m_graph_dd_cone40_conv_photon_shift->at(ieta)->GetName() << "\n"
 		      << " dR = 0.2, unconv " << m_graph_dd_cone20_unconv_photon_shift->at(ieta)->GetName() << "\n"
 		      << " dR = 0.2,   conv " << m_graph_dd_cone20_conv_photon_shift->at(ieta)->GetName());
-		      
+
     }
     m_corrInitialized[ii][jj] = true;
   }
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -318,19 +318,19 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
     if (setupDD(year) == StatusCode::FAILURE) {
       return 0;
     }
-    
+
     // corrections only for MC and photon
     if(!m_is_mc || input.type() == xAOD::Type::Electron) return 0;
-    
+
     const xAOD::Photon* ph_input = ((const xAOD::Photon_v1*) &input);
     int convFlag_int = xAOD::EgammaHelpers::conversionType(ph_input);
-    
+
     bool converted = false;
     if(convFlag_int > 0) converted = true;
-    
+
     float etaS2  = input.eta();
     int eta_bin  = 0;
-    
+
     double feta = fabs(etaS2);
     for (unsigned int i = 0; i < m_feta_bins_dd->size()-1; i++) {
       if (feta >= m_feta_bins_dd->at(i) && feta < m_feta_bins_dd->at(i+1))
@@ -340,19 +340,19 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
       return 0;
     else if (eta_bin > m_crackBin)
       eta_bin -= 1;
-    
+
     if (eta_bin < 0) {
       ATH_MSG_WARNING("Strange cluster S2 eta for photon isolation DD correction ! eta = " << etaS2 << ". No correction");
       return 0;
     }
-    
-    if (input.pt() > 25e3) 
+
+    if (input.pt() > 25e3)
       ATH_MSG_VERBOSE("Getting correction for photon pt: " <<input.pt()
 		    << " eta: " << etaS2 << " etabin: " << eta_bin);
-    
+
     float pt_gev = input.pt()*0.001;
     if (pt_gev > 999.) pt_gev = 999. ;
-    
+
     float isolation_ddcorrection = 0;
     if (isol==xAOD::Iso::topoetcone40) {
       if (!converted)
@@ -401,7 +401,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
   // obsolete
   /*
   void IsolationCorrection::SetDD(bool apply_dd){
-    ATH_MSG_WARNING("The method SetDD is obsolete and not doing anything"); 
+    ATH_MSG_WARNING("The method SetDD is obsolete and not doing anything");
   }
   */
 
@@ -425,7 +425,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
   }
 
   // initialize the leakage corrections and DD only for rel17.2.
-  // Other DD are initialized once used for the first time 
+  // Other DD are initialized once used for the first time
   void IsolationCorrection::setIsolCorr(){
     if (m_tool_ver == REL17_2) {
       set2011Corr(); // in fact, this is for etcone
@@ -623,7 +623,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
         // ******************************
 	// Global fit corrections *******
 	// ******************************
-	
+
 	static const int nEta = 10;
 	static const TString etaLab[nEta] = { "0.0_0.1", "0.1_0.6", "0.6_0.8", "0.8_1.15", "1.15_1.37", "1.37_1.52", "1.52_1.81", "1.81_2.01", "2.01_2.37", "2.37_2.47" };
 	static const TString pLab[5]      = { "_unconverted", "_converted_ok", "_converted_trouble", "_author_1_electron", "_author_16_electron" };
@@ -655,7 +655,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
 	  m_graph_histoMean_2015_cone30_author_16_electron.resize(nEta);
 	  m_graph_histoMean_2015_cone20_author_16_electron.resize(nEta);
 	}
-	
+
 	for (int iPart = 0; iPart < 5; iPart++) {
 
 	  for (int iEta = 0; iEta < 10; iEta++) {
@@ -670,7 +670,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
 	      fN += dRLab[idR]; fN += "_eta_"; fN += etaLab[iEta]; fN += pLab[iPart];
 	      TString gN;
 	      // Trouble categories are converted_trouble photons and author 16 electrons. Below 250 GeV, one uses the mean of the leakage histo
-	      // instead of a fit to the mean of the CB vs ET 
+	      // instead of a fit to the mean of the CB vs ET
 	      if (m_trouble_categories && (iPart == 2 || iPart == 4)) {
 		gN = "mean_g_histo_topoetcone"; gN += dRLab[idR]; gN += "_eta_"; gN += etaLab[iEta]; gN += pLab[iPart];
 	      }
@@ -774,7 +774,7 @@ StatusCode IsolationCorrection::setupDD(const std::string& year) {
   void IsolationCorrection::loadDDCorr() {
     std::unique_ptr< TFile > file_ddshift_corr( TFile::Open( m_corr_ddshift_file.c_str(), "READ" ) );
     std::unique_ptr< TFile > file_ddsmearingcorr( TFile::Open( m_corr_ddsmearing_file.c_str(), "READ" ) );
-    
+
     if(!file_ddshift_corr || !file_ddsmearingcorr){
       ATH_MSG_WARNING("Correction file for data-driven corrections not found, tool not initialized for data-driven corrections\n");
       m_corr_ddshift_file = "";

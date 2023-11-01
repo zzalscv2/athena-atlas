@@ -39,9 +39,6 @@ namespace CP {
     ASG_TOOL_CLASS(PhotonPointingTool, CP::IPhotonPointingTool)
 
   private:
-    /// Tools
-    CP::ShowerDepthTool *m_showerTool;
-
     /// Correction histogram
     TH1F *m_zCorrection;
 
@@ -69,7 +66,7 @@ namespace CP {
       this,
       "HPV_zvertex",
       "Photons.HPV_zvertex",
-      "HPV z vertex"  
+      "HPV z vertex"
     };
     SG::WriteDecorHandleKey<xAOD::EgammaContainer> m_HPV_errz{
       this,
@@ -91,37 +88,23 @@ namespace CP {
 
     /// @name Function(s) implementing the asg::IAsgTool interface
     /// @{
-    
+
     /// Function initialising the tool
     virtual StatusCode initialize();
-      
+
     /// @}
 
     /// @name Function(s) implementing the IPhotonPointingTool interface
     /// @{
-    
+
     /// Add calo and conversion (HPV) pointing variables
     StatusCode updatePointingAuxdata(const xAOD::EgammaContainer &egammas) const ;
 
     /// Return calo pointing variables
     std::pair<float, float> getCaloPointing(const xAOD::Egamma *egamma) const ;
-    
+
     /// Return conversion (HPV) pointing variables
     std::pair<float, float> getConvPointing(const xAOD::Photon *photon) const ;
-    
-    /// Return the corrected eta for primary vertex z-position
-    float getCorrectedEta(const xAOD::CaloCluster &cluster, float PVz) const ;
-
-    /// Correct Egamma vector for primary vertex z-position
-    StatusCode correctPrimaryVertex(xAOD::Egamma &egamma, float PVz) const ;
-
-    /// Get Egamma TLorentzVector corrected for primary vertex z-position
-    TLorentzVector getCorrectedLV(const xAOD::Egamma &egamma, float PVz) const ;
-    
-    /// Return the invariant mass, using corrected Pt/Eta of each object for the
-    /// given vertex z-position
-    float getCorrectedMass(const xAOD::EgammaContainer &egammas, float PVz) const;
-
     /// @}
 
   }; // class PhotonPointingTool

@@ -19,6 +19,7 @@ atlas_add_library( IsolationCorrectionsLib
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgDataHandlesLib AsgTools 
    xAODEgamma xAODEventInfo xAODEventShape
    xAODPrimitives xAODTracking PATInterfaces PATCoreAcceptLib
+   egammaUtils
    PRIVATE_LINK_LIBRARIES PathResolver ${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
