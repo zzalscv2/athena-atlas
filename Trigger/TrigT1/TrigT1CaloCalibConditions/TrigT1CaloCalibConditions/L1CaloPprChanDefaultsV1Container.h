@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_L1CALOPPRCHANDEFAULTSV1CONTAINER_H
@@ -16,7 +16,7 @@
 #include "TrigT1CaloCalibConditions/L1CaloCoolChannelId.h"
 
 class CondAttrListCollection;
-class L1CaloPprChanDefaultsV1;
+#include "TrigT1CaloCalibConditions/L1CaloPprChanDefaultsV1.h"
 
 /***
 * Container of L1CaloPprChanDefaultsV1 objects. Automatically created using:
