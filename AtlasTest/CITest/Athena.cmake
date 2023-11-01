@@ -24,7 +24,7 @@ atlas_add_citest( SimulationRun3AF3
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( SimulationRun3AF3Checks
-   SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --threads 4 -e '--maxEvents 20' --checks-only --output-path ../SimulationRun3AF3
+   SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --checks-only --output-path ../SimulationRun3AF3
    LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
    DEPENDS_SUCCESS SimulationRun3AF3 )
 
@@ -73,7 +73,7 @@ atlas_add_citest( RecoRun3Data
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--CA True --maxEvents 100 --preExec pass' --checks-only --output-path ../RecoRun3Data
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --checks-only --output-path ../RecoRun3Data
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_Bulk
@@ -81,7 +81,7 @@ atlas_add_citest( RecoRun3Data_Bulk
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Bulk_Checks
-    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --threads 8 -e ' --CA True --skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data'  --checks-only --output-path ../RecoRun3Data_Bulk --no-output-checks
+    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1333 --checks-only --output-path ../RecoRun3Data_Bulk --no-output-checks
    DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
