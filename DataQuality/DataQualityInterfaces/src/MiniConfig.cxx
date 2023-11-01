@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -173,8 +173,12 @@ ReadFile( std::string fileName )
 
     // check for: keyword <identifier> {
     key = att;
-    const std::string& lokey = boost::algorithm::to_lower_copy(key);
-    //const std::string lokey = key;
+    // Don't use to_lower_copy in order to avoid gcc 13.1 bug
+    // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=109703
+    // (Should be fixed in 13.2.)
+    //const std::string& lokey = boost::algorithm::to_lower_copy(key);
+    std::string lokey = key;
+    boost::algorithm::to_lower (lokey);
     id = sep;
     linestream >> sep;
     if( !linestream ) {
