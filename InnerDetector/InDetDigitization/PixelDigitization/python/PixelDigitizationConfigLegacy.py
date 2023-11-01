@@ -107,7 +107,9 @@ def DBMFEI4SimTool(name="DBMFEI4SimTool", **kwargs):
     return CfgMgr.FEI4SimTool(name, **kwargs)
 
 def BarrelFEI3SimTool(name="BarrelFEI3SimTool", **kwargs):
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     kwargs.setdefault("BarrelEC", 0)
+    kwargs.setdefault("HitDuplication", (commonGeoFlags.Run() == "RUN1"))
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     pixelConditionsSummaryToolSetup = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
                                                                  UseByteStreamFEI4=False,
@@ -116,7 +118,9 @@ def BarrelFEI3SimTool(name="BarrelFEI3SimTool", **kwargs):
     return CfgMgr.FEI3SimTool(name, **kwargs)
 
 def EndcapFEI3SimTool(name="EndcapFEI3SimTool", **kwargs):
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
     kwargs.setdefault("BarrelEC", 2)
+    kwargs.setdefault("HitDuplication", (commonGeoFlags.Run() == "RUN1"))
     from PixelConditionsTools.PixelConditionsToolsConf import PixelConditionsSummaryTool
     pixelConditionsSummaryToolSetup = PixelConditionsSummaryTool("PixelConditionsSummaryTool",
                                                                  UseByteStreamFEI4=False,
