@@ -11,7 +11,7 @@
 #include "TObject.h"
 #include "TF1.h"
 
-#include "IsolationCorrections/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthTool.h"
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleFwd.h"
@@ -68,7 +68,7 @@ class IsolationCorrection : public asg::AsgMessaging{
     std::vector<float> m_feta_bins_dd_2017;
 
     StatusCode setupDD(const std::string& year);
-    
+
     bool m_is_mc;
     bool m_AFII_corr;
     bool m_set_mc;
@@ -146,7 +146,7 @@ class IsolationCorrection : public asg::AsgMessaging{
 
     void load2012Corr();
     void load2015Corr();
-    
+
     void setDDCorr(); // dedicated to run I, because there is an additional smearing in run I
     void loadDDCorr();
 
@@ -200,12 +200,12 @@ class IsolationCorrection : public asg::AsgMessaging{
     std::vector<TGraph*> m_graph_dd_2015_2016_cone40_conv_photon_shift;
     std::vector<TGraph*> m_graph_dd_2015_2016_cone20_unconv_photon_shift;
     std::vector<TGraph*> m_graph_dd_2015_2016_cone20_conv_photon_shift;
-    
+
     std::vector<TGraph*> m_graph_afIIdd_2015_2016_cone40_unconv_photon_shift;
     std::vector<TGraph*> m_graph_afIIdd_2015_2016_cone40_conv_photon_shift;
     std::vector<TGraph*> m_graph_afIIdd_2015_2016_cone20_unconv_photon_shift;
     std::vector<TGraph*> m_graph_afIIdd_2015_2016_cone20_conv_photon_shift;
-    
+
     // -------------------------------------------------------------------------------------------
     // ------------- data-driven corrections based on 2015 data ONLY ----------------------------------
     // corrections recomputed for topological isolation, 0.4/0.2 cone. special eta binning -------
@@ -257,7 +257,7 @@ class IsolationCorrection : public asg::AsgMessaging{
     std::vector<TGraph*> m_graph_histoMean_2015_cone40_author_16_electron;
     std::vector<TGraph*> m_graph_histoMean_2015_cone30_author_16_electron;
     std::vector<TGraph*> m_graph_histoMean_2015_cone20_author_16_electron;
-  
+
     // -------------------------------------------------------------------------------------------
     // ------------- full 2012 (rel 17.2) leakage corrections --------------------------------------
     // corrections recomputed for topological isolation: fine grained in eta, derived from MC12
@@ -279,7 +279,7 @@ class IsolationCorrection : public asg::AsgMessaging{
 
     // ---------------------------------------------------------------------------
     // ------------- full 2011 (rel 17) etcone leakage corrections ---------------
-    // 
+    //
     std::vector<float> m_mc_rel17_leakage_correction_slopes_electron_15;
     std::vector<float> m_mc_rel17_leakage_correction_slopes_electron_20;
     std::vector<float> m_mc_rel17_leakage_correction_slopes_electron_25;
@@ -301,7 +301,7 @@ class IsolationCorrection : public asg::AsgMessaging{
     std::vector<float> m_mc_rel17_leakage_correction_slopes_photon_converted_30;
     std::vector<float> m_mc_rel17_leakage_correction_slopes_photon_converted_35;
     std::vector<float> m_mc_rel17_leakage_correction_slopes_photon_converted_40;
- 
+
     std::vector<float> m_mc_rel17_leakage_correction_offsets_photon_converted_15;
     std::vector<float> m_mc_rel17_leakage_correction_offsets_photon_converted_20;
     std::vector<float> m_mc_rel17_leakage_correction_offsets_photon_converted_25;

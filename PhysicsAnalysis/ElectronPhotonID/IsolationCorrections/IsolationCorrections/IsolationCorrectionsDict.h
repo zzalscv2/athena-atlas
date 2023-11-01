@@ -12,7 +12,6 @@
 #define ISOLATIONCORRECTIONS_ISOLATIONCORRECTIONSDICT_H
 
 #include "IsolationCorrections/IsolationCorrectionTool.h"
-#include "IsolationCorrections/ShowerDepthTool.h"
 
 #endif
 

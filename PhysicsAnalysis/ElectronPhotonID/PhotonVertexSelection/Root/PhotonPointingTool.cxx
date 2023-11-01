@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -13,7 +13,8 @@
 #include "xAODMetaData/FileMetaData.h"
 
 // Framework includes
-#include "IsolationCorrections/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthTool.h"
+#include "egammaUtils/egPhotonWrtPoint.h"
 #include "PathResolver/PathResolver.h"
 
 // ROOT includes
@@ -28,9 +29,8 @@ namespace CP {
 //____________________________________________________________________________
 PhotonPointingTool::PhotonPointingTool(const std::string &name)
   : asg::AsgMetadataTool(name)
-    , m_showerTool(nullptr)
     , m_zCorrection(nullptr)
-{ 
+{
   declareProperty("isSimulation", m_isMC);
   declareProperty("zOscillationFileMC", m_zOscFileMC ="PhotonVertexSelection/v1/pointing_correction_mc.root");
   declareProperty("zOscillationFileData", m_zOscFileData ="PhotonVertexSelection/v1/pointing_correction_data.root");
@@ -40,7 +40,6 @@ PhotonPointingTool::PhotonPointingTool(const std::string &name)
 //____________________________________________________________________________
 PhotonPointingTool::~PhotonPointingTool()
 {
-  SafeDelete(m_showerTool);
   SafeDelete(m_zCorrection);
 }
 
@@ -62,18 +61,6 @@ StatusCode PhotonPointingTool::initialize()
   ATH_CHECK(m_errz.initialize());
   ATH_CHECK(m_HPV_zvertex.initialize());
   ATH_CHECK(m_HPV_errz.initialize());
-
-  // Shower depth tool
-  m_showerTool = new CP::ShowerDepthTool();
-  if (!m_showerTool->initialize()) {
-    ATH_MSG_ERROR("Couldn't initialize ShowerDepthTool, failed to initialize.");
-    return StatusCode::FAILURE;
-  }
-    
-
-  // Get the z-oscillation correction histogram
-  // FIXME: The files need to go to calib area
-
 
   // Determine if this is MC or data
   std::string dataType("");
@@ -116,7 +103,7 @@ StatusCode PhotonPointingTool::initialize()
   m_zCorrection = dynamic_cast<TH1F*>(temp->Clone("zCorrection"));
   SafeDelete(file);
   TH1::AddDirectory(status);
-    
+
   return StatusCode::SUCCESS;
 }
 
@@ -210,12 +197,13 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     double r0_with_beamSpot = d_beamSpot*cos(phis2 - phi_beamSpot);
 
     float s_zvertex = 0, s_errz = 0;
-    if (true) { // FIXME Was only for non AuthorFwd egamma? Can only find AuthorFwdElectron now...
-      s_zvertex = (RZ1.second*(RZ2.first - r0_with_beamSpot) - RZ2.second*(RZ1.first-r0_with_beamSpot)) / (RZ2.first - RZ1.first);
-      s_zvertex = getCorrectedZ(s_zvertex, etas2);
+    s_zvertex = (RZ1.second * (RZ2.first - r0_with_beamSpot) -
+                 RZ2.second * (RZ1.first - r0_with_beamSpot)) /
+                (RZ2.first - RZ1.first);
+    s_zvertex = getCorrectedZ(s_zvertex, etas2);
 
-      s_errz    = 0.5*(RZ2.first + RZ1.first)*(0.060/sqrt(cl_e*0.001)) / (sin(cl_theta)*sin(cl_theta));
-    }
+    s_errz = 0.5 * (RZ2.first + RZ1.first) * (0.060 / sqrt(cl_e * 0.001)) /
+             (sin(cl_theta) * sin(cl_theta));
 
     return std::make_pair(s_zvertex, s_errz);
   }
@@ -268,7 +256,7 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     // HPV pointing calculation
     double phi_Calo         = atan2(sin(phis2), cos(phis2));
     double r0_with_beamSpot = d_beamSpot*cos(phi_Calo - phi_beamSpot);
-    
+
     float s_zvertex = (RZ1.second*(conv_r - r0_with_beamSpot) - conv_z*(RZ1.first - r0_with_beamSpot)) / (conv_r - RZ1.first);
 
     float dist_vtx_to_conv = hypot(conv_r - r0_with_beamSpot, conv_z - s_zvertex);
@@ -282,79 +270,13 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
       // Barrel case
       float error_Z_Calo_1st_Sampling_barrel = error_etaS1*RZ1.first*fabs(cosh(etas1));
       s_errz = error_Z_Calo_1st_Sampling_barrel*dist_vtx_to_conv/dist_conv_to_s1;
-    } else { 
+    } else {
       // Endcap case
       float error_R_Calo_1st_Sampling_endcap = error_etaS1*cosh(etas1)*RZ1.first*RZ1.first/fabs(RZ1.second);
       s_errz = error_R_Calo_1st_Sampling_endcap*fabs(sinh(etas1))*dist_vtx_to_conv/dist_conv_to_s1;
     }
 
     return std::make_pair(s_zvertex, s_errz);
-  }
-
-  //____________________________________________________________________________
-  float PhotonPointingTool::getCorrectedEta(const xAOD::CaloCluster &cluster, float PVz) const
-  {
-    // Get R/Z positions from sampling layer one eta
-    std::pair<float, float> RZ1 = CP::ShowerDepthTool::getRZ(cluster.etaBE(1), 1);
-
-    // Return corrected eta from new vertex
-    return asinh((RZ1.second - PVz)/RZ1.first);
-  }
-
-  //____________________________________________________________________________
-  StatusCode PhotonPointingTool::correctPrimaryVertex(xAOD::Egamma &egamma, float PVz) const
-  {
-    const xAOD::CaloCluster *cluster = egamma.caloCluster();
-    if (cluster == nullptr) {
-      ATH_MSG_WARNING("Couldn't retrieve cluster from Egamma, not correcting object.");
-      return StatusCode::FAILURE;
-    }
-
-    float eta_corr = getCorrectedEta(*cluster, PVz);
-    
-    // Set corrected 4-vector
-    egamma.setP4(egamma.e()/cosh(eta_corr),
-                 eta_corr,
-                 egamma.phi(),
-                 egamma.m());
-
-    return StatusCode::SUCCESS;
-  }
-  
-  //____________________________________________________________________________
-  TLorentzVector PhotonPointingTool::getCorrectedLV(const xAOD::Egamma &egamma, float PVz) const
-  {
-    TLorentzVector vec = egamma.p4();
-
-    const xAOD::CaloCluster *cluster = egamma.caloCluster();
-    if (cluster == nullptr) {
-      ATH_MSG_WARNING("Couldn't retrieve cluster from Egamma, returning uncorrected object");
-      return vec;
-    }
-
-    float eta_corr = getCorrectedEta(*cluster, PVz);
-    
-    // Set corrected 4-vector
-    vec.SetPtEtaPhiM(egamma.e()/cosh(eta_corr),
-                     eta_corr,
-                     egamma.phi(),
-                     egamma.m());
-
-    return vec;
-  }
-  
-  //____________________________________________________________________________
-  float PhotonPointingTool::getCorrectedMass(const xAOD::EgammaContainer &egammas, float PVz) const
-  {
-    TLorentzVector v;
-    for (const auto *eg : egammas) {
-      if (!eg) {
-        ATH_MSG_WARNING("Null pointer to egamma object, skipping it in mass calculation");
-        continue;
-      }
-      v += getCorrectedLV(*eg, PVz);
-    }
-    return v.M();  
   }
 
 } // namespace CP

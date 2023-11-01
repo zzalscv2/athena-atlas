@@ -13,7 +13,7 @@
 #include "xAODTracking/VertexContainer.h"
 
 // Asg tools
-#include "IsolationCorrections/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthTool.h"
 
 // ROOT include(s).
 #include <TString.h>

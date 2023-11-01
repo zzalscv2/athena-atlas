@@ -16,7 +16,7 @@
 
 // Framework includes
 #include "PathResolver/PathResolver.h"
-#include "IsolationCorrections/ShowerDepthTool.h"
+#include "egammaUtils/ShowerDepthTool.h"
 
 // ROOT includes
 #include "TMVA/Reader.h"
@@ -58,7 +58,7 @@ namespace CP {
         m_configFileCase1 = "PhotonVertexSelection/v1/DiphotonVertex_case1.weights.xml");
     declareProperty("ConfigFileCase2",
         m_configFileCase2 = "PhotonVertexSelection/v1/DiphotonVertex_case2.weights.xml");
-    declareProperty("conversionPtCut"      , m_convPtCut       = 2e3 );    
+    declareProperty("conversionPtCut"      , m_convPtCut       = 2e3 );
     declareProperty("updatePointing", m_updatePointing=true, "Update pointing data?");
     declareProperty("derivationPrefix", m_derivationPrefix = "");
   }
@@ -81,17 +81,17 @@ namespace CP {
     // Get full path of configuration files for MVA
     m_configFileCase1  = PathResolverFindCalibFile( m_configFileCase1 );
     m_configFileCase2  = PathResolverFindCalibFile( m_configFileCase2 );
-    
+
     // Setup MVAs
-    std::vector<std::string> var_names = { "deltaZ := TMath::Min(abs(PrimaryVerticesAuxDyn.z-zCommon)/zCommonError,20)", 
-                                           "deltaPhi := abs(deltaPhi(PrimaryVerticesAuxDyn.phi,egamma_phi))"           , 
-                                           "logSumpt := log10(PrimaryVerticesAuxDyn.sumPt)"                            , 
-                                           "logSumpt2 := log10(PrimaryVerticesAuxDyn.sumPt2)" }; 
- 
+    std::vector<std::string> var_names = { "deltaZ := TMath::Min(abs(PrimaryVerticesAuxDyn.z-zCommon)/zCommonError,20)",
+                                           "deltaPhi := abs(deltaPhi(PrimaryVerticesAuxDyn.phi,egamma_phi))"           ,
+                                           "logSumpt := log10(PrimaryVerticesAuxDyn.sumPt)"                            ,
+                                           "logSumpt2 := log10(PrimaryVerticesAuxDyn.sumPt2)" };
+
     auto *mva1 = new TMVA::Reader(var_names, "!Silent:Color");
     mva1->BookMVA    ("MLP method"                                                                , m_configFileCase1 );
     m_mva1 = std::unique_ptr<TMVA::Reader>( mva1 );
-    
+
     auto mva2 = std::make_unique<TMVA::Reader>(var_names, "!Silent:Color");
     mva2->BookMVA    ("MLP method"                                                                , m_configFileCase2);
     m_mva2 = std::unique_ptr<TMVA::Reader>( std::move(mva2) );
@@ -105,7 +105,7 @@ namespace CP {
   //____________________________________________________________________________
   StatusCode PhotonVertexSelectionTool::decorateInputs(const xAOD::EgammaContainer &egammas, FailType* failType) const{
     auto fail = FailType::NoFail;
-    
+
     // Update calo pointing auxdata for photons
     // FIXME: Remove once variables properly included in derivations
     if (m_updatePointing and m_pointingTool->updatePointingAuxdata(egammas).isFailure()) {
@@ -117,10 +117,10 @@ namespace CP {
     static const SG::AuxElement::Decorator<float> sumPt(m_derivationPrefix + "sumPt");
     static const SG::AuxElement::Decorator<float> deltaPhi(m_derivationPrefix + "deltaPhi");
     static const SG::AuxElement::Decorator<float> deltaZ(m_derivationPrefix + "deltaZ");
-   
+
     // Get the EventInfo
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
-   
+
     // Find the common z-position from beam / photon pointing information
     std::pair<float, float> zCommon = xAOD::PVHelpers::getZCommonAndError(&*eventInfo, &egammas, m_convPtCut);
     // Vector sum of photons
@@ -145,7 +145,7 @@ namespace CP {
       // Get momentum vector of vertex
       TLorentzVector vmom = xAOD::PVHelpers::getVertexMomentum(vertex, true, m_derivationPrefix);
 
-      deltaPhi(*vertex) = (fail != FailType::FailEgamVect) ? std::abs(vmom.DeltaPhi(vegamma)) : -999.;      
+      deltaPhi(*vertex) = (fail != FailType::FailEgamVect) ? std::abs(vmom.DeltaPhi(vegamma)) : -999.;
       deltaZ(*vertex) = std::abs((zCommon.first - vertex->z())/zCommon.second);
 
     } // loop over vertices
@@ -162,7 +162,7 @@ namespace CP {
   {
     const xAOD::Vertex *vertex = nullptr;
     std::vector<std::pair<const xAOD::Vertex*, float> > vertexMLP;
-    yyVtxType vtxCase = yyVtxType::Unknown; 
+    yyVtxType vtxCase = yyVtxType::Unknown;
     FailType failType = FailType::NoFail;
     if (getVertexImp( egammas, vertex, ignoreConv, noDecorate, vertexMLP, vtxCase, failType ).isSuccess()) {
       std::sort(vertexMLP.begin(), vertexMLP.end(), sortMLP);
@@ -181,13 +181,13 @@ namespace CP {
                                                   bool ignoreConv) const
   {
     std::vector<std::pair<const xAOD::Vertex*, float> > vertexMLP;
-    yyVtxType vtxcase = yyVtxType::Unknown; 
+    yyVtxType vtxcase = yyVtxType::Unknown;
     FailType failType = FailType::NoFail;
     return getVertexImp( egammas, prime_vertex, ignoreConv, false, vertexMLP, vtxcase, failType );
-  } 
+  }
 
-  StatusCode PhotonVertexSelectionTool::getVertexImp(const xAOD::EgammaContainer &egammas, 
-                                                     const xAOD::Vertex* &prime_vertex, 
+  StatusCode PhotonVertexSelectionTool::getVertexImp(const xAOD::EgammaContainer &egammas,
+                                                     const xAOD::Vertex* &prime_vertex,
                                                      bool ignoreConv,
                                                      bool noDecorate,
                                                      std::vector<std::pair<const xAOD::Vertex*, float> >&  vertexMLP, yyVtxType& vtxCase, FailType& fail) const
@@ -199,13 +199,13 @@ namespace CP {
     SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainer);
 
 
-    if (!noDecorate && !decorateInputs(egammas).isSuccess()){   
+    if (!noDecorate && !decorateInputs(egammas).isSuccess()){
       return StatusCode::FAILURE;
     }
 
 
     // Check if a conversion photon has a track attached to a primary/pileup vertex
-    if (!ignoreConv && photons) { 
+    if (!ignoreConv && photons) {
       prime_vertex = getPrimaryVertexFromConv(photons);
       if (prime_vertex != nullptr) {
         vtxCase = yyVtxType::ConvTrack;
@@ -222,7 +222,7 @@ namespace CP {
       return StatusCode::SUCCESS;
     }
 
-  
+
     // Get the EventInfo
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo);
 
@@ -265,10 +265,10 @@ namespace CP {
       // Variables used as input into TMVA::Reader
       float sumPt2, sumPt, deltaPhi, deltaZ;
 
-      sumPt     = log10((sumPtA)(*vertex)); 
-      sumPt2    = log10((sumPt2A)(*vertex)); 
-      deltaPhi  = (deltaPhiA)(*vertex); 
-      deltaZ    = (deltaZA)(*vertex); 
+      sumPt     = log10((sumPtA)(*vertex));
+      sumPt2    = log10((sumPt2A)(*vertex));
+      deltaPhi  = (deltaPhiA)(*vertex);
+      deltaZ    = (deltaZA)(*vertex);
       ATH_MSG_VERBOSE("log(sumPt): " << sumPt <<
                       " log(sumPt2): " << sumPt2 <<
                       " deltaPhi: " << deltaPhi <<
@@ -301,9 +301,9 @@ namespace CP {
       prime_vertex = xAOD::PVHelpers::getHardestVertex(&*vertices);
       fail = FailType::NoGdCandidate;
       vertexMLP.clear();
-      vertexMLP.emplace_back(xAOD::PVHelpers::getHardestVertex(&*vertices), 20.);    
+      vertexMLP.emplace_back(xAOD::PVHelpers::getHardestVertex(&*vertices), 20.);
     }
-    
+
     ATH_MSG_VERBOSE("getVertex case "<< (int)vtxCase << " exit code "<< (int)fail);
     return StatusCode::SUCCESS;
   }
@@ -340,7 +340,7 @@ namespace CP {
         const auto *gsfTp = conversionVertex->trackParticle(i);
         if (gsfTp == nullptr) continue;
         if (!xAOD::PVHelpers::passConvSelection(*conversionVertex, i, m_convPtCut)) continue;
-        
+
         // Get trackParticle in InDet collection
         tp = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(gsfTp);
         if (tp == nullptr) continue;
