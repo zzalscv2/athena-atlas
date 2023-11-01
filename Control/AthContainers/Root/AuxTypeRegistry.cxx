@@ -177,7 +177,7 @@ AuxTypeRegistry::makeVector (SG::auxid_t auxid,
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   assert (factory != 0);
-  return factory->create (size, capacity);
+  return factory->create (auxid, size, capacity);
 }
 
 
@@ -203,7 +203,7 @@ AuxTypeRegistry::makeVectorFromData (SG::auxid_t auxid,
 {
   const SG::IAuxTypeVectorFactory* factory = getFactory (auxid);
   assert (factory != 0);
-  return factory->createFromData (data, isPacked, ownMode);
+  return factory->createFromData (auxid, data, isPacked, ownMode);
 }
 
 

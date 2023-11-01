@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file xAODRootAccess/test/ut_xaodrootaccess_tauxvector_test.cxx
@@ -32,7 +32,8 @@ void test1()
 
   TClass* cl_int = TClass::GetClass ("vector<int>");
   xAOD::TAuxVectorFactory fac_int (cl_int);
-  xAOD::TAuxVector vec_int = xAOD::TAuxVector (&fac_int, cl_int, 5, 5);
+  xAOD::TAuxVector vec_int = xAOD::TAuxVector (&fac_int, 1, cl_int, 5, 5);
+  assert (vec_int.auxid() == 1);
   int* ptr_int = reinterpret_cast<int*> (vec_int.toPtr());
 
   for (int i=0; i < 5; i++)
@@ -66,7 +67,8 @@ void test1()
 
   TClass* cl_str = TClass::GetClass ("vector<std::string>");
   xAOD::TAuxVectorFactory fac_str (cl_str);
-  xAOD::TAuxVector vec_str = xAOD::TAuxVector (&fac_str, cl_str, 5, 5);
+  xAOD::TAuxVector vec_str = xAOD::TAuxVector (&fac_str, 1, cl_str, 5, 5);
+  assert (vec_str.auxid() == 1);
   std::string* ptr_str = reinterpret_cast<std::string*> (vec_str.toPtr());
 
   for (int i=0; i < 5; i++)

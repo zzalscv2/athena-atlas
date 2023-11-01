@@ -732,7 +732,7 @@ namespace CP {
       }
 
       // Create the data object.
-      m_data = m_factory->create( 1, 1 );
+      m_data = m_factory->create( m_acc->auxid(), 1, 1 );
 
       // Pointer to the branch, to be created.
       TBranch* br = nullptr;
@@ -972,7 +972,7 @@ namespace CP {
       }
 
       // Create the data object.
-      m_data = m_factory->create( 0, 0 );
+      m_data = m_factory->create( m_acc->auxid(), 0, 0 );
 
       // Get a proper type name for the variable.
       const std::string typeName = SG::normalizedTypeinfoName( *vecTi );

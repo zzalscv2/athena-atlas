@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/src/RootAuxVectorFactory.cxx
@@ -54,13 +54,16 @@ namespace SG {
 /**
  * @brief Constructor.  Makes a new vector.
  * @param factory The factory object for this type.
+ * @param auxid The auxid of the variable this vector represents.
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
  */
 RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
+                              SG::auxid_t auxid,
                               size_t size, size_t /*capacity*/)
   : m_factory (factory),
-    m_ownFlag (true)
+    m_ownFlag (true),
+    m_auxid (auxid)
 {
   const TClass* vecClass = factory->vecClass();
   m_proxy = vecClass->GetCollectionProxy();
@@ -72,6 +75,8 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
 
 /**
  * @brief Constructor, from a pointer to a vector object.
+ * @param factory The factory object for this type.
+ * @param auxid The auxid of the variable this vector represents.
  * @param data The vector object.
  * @param isPacked If true, @c data is a @c PackedContainer.
  * @param ownFlag If true, then take ownership of @c data.
@@ -83,11 +88,13 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
  * must be false.
  */
 RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
+                              SG::auxid_t auxid,
                               void* data,
                               bool isPacked,
                               bool ownFlag)
   : m_factory (factory),
-    m_ownFlag (ownFlag)
+    m_ownFlag (ownFlag),
+    m_auxid (auxid)
 {
   if (isPacked) std::abort();
   const TClass* vecClass = factory->vecClass();
@@ -104,7 +111,8 @@ RootAuxVector::RootAuxVector (const RootAuxVectorFactory* factory,
 RootAuxVector::RootAuxVector (const RootAuxVector& other)
   : m_factory (other.m_factory),
     m_proxy (other.m_proxy),
-    m_ownFlag (true)
+    m_ownFlag (true),
+    m_auxid (other.m_auxid)
 {
   m_obj = m_factory->objClass()->New ();
   m_vec = reinterpret_cast<char*> (m_obj) + m_factory->offset();
@@ -143,6 +151,15 @@ RootAuxVector::~RootAuxVector()
 std::unique_ptr<SG::IAuxTypeVector> RootAuxVector::clone() const
 {
   return std::make_unique<RootAuxVector> (*this);
+}
+
+
+/**
+ * @brief Return the auxid of the variable this vector represents.
+ */
+SG::auxid_t RootAuxVector::auxid() const
+{
+  return m_auxid;
 }
 
 
@@ -404,18 +421,22 @@ RootAuxVectorFactory::~RootAuxVectorFactory()
 
 /**
  * @brief Create a vector object of this type.
+ * @param auxid ID for the variable being created.
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
  */
 std::unique_ptr<SG::IAuxTypeVector>
-RootAuxVectorFactory::create (size_t size, size_t capacity) const
+RootAuxVectorFactory::create (SG::auxid_t auxid,
+                              size_t size,
+                              size_t capacity) const
 {
-  return std::make_unique<RootAuxVector> (this, size, capacity);
+  return std::make_unique<RootAuxVector> (this, auxid, size, capacity);
 }
 
 
 /**
  * @brief Create a vector object of this type from a data blob.
+ * @param auxid ID for the variable being created.
  * @param data The vector object.
  * @param isPacked If true, @c data is a @c PackedContainer.
  * @param ownFlag If true, the newly-created IAuxTypeVector object
@@ -430,11 +451,12 @@ RootAuxVectorFactory::create (size_t size, size_t capacity) const
  * Returns a newly-allocated object.
  */
 std::unique_ptr<SG::IAuxTypeVector>
-RootAuxVectorFactory::createFromData (void* data,
+RootAuxVectorFactory::createFromData (SG::auxid_t auxid,
+                                      void* data,
                                       bool isPacked,
                                       bool ownFlag) const
 {
-  return std::make_unique<RootAuxVector> (this, data, isPacked, ownFlag);
+  return std::make_unique<RootAuxVector> (this, auxid, data, isPacked, ownFlag);
 }
 
 

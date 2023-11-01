@@ -36,17 +36,21 @@ class AuxTypeVectorFactory
 public:
   /**
    * @brief Create a vector object of this type.
+   * @param auxid ID for the variable being created.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
    *
    * Returns a newly-allocated object.
    */
   virtual
-  std::unique_ptr<IAuxTypeVector> create (size_t size, size_t capacity) const override;
+  std::unique_ptr<IAuxTypeVector> create (SG::auxid_t auxid,
+                                          size_t size,
+                                          size_t capacity) const override;
 
 
   /**
    * @brief Create a vector object of this type from a data blob.
+   * @param auxid ID for the variable being created.
    * @param data The vector object.
    * @param isPacked If true, @c data is a @c PackedContainer.
    * @param ownFlag If true, the newly-created IAuxTypeVector object
@@ -60,7 +64,8 @@ public:
    * Returns a newly-allocated object.
    */
   virtual
-  std::unique_ptr<IAuxTypeVector> createFromData (void* data,
+  std::unique_ptr<IAuxTypeVector> createFromData (SG::auxid_t auxid,
+                                                  void* data,
                                                   bool isPacked,
                                                   bool ownFlag) const override;
 
@@ -147,11 +152,11 @@ public:
 private:
   /// Helpers for creating vector from a data blob,
   std::unique_ptr<IAuxTypeVector>
-  createFromData (void* data, bool isPacked, bool ownFlag,
+  createFromData (auxid_t auxid, void* data, bool isPacked, bool ownFlag,
                   std::true_type) const;
 
   std::unique_ptr<IAuxTypeVector>
-  createFromData (void* data, bool isPacked, bool ownFlag,
+  createFromData (auxid_t auxid, void* data, bool isPacked, bool ownFlag,
                   std::false_type) const;
 };
 

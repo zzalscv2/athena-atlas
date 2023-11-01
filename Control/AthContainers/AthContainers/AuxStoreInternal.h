@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: AuxStoreInternal.h 793732 2017-01-24 19:42:30Z ssnyder $
 /**
  * @file AthContainers/AuxStoreInternal.h
  * @author scott snyder <snyder@bnl.gov>
@@ -385,14 +382,12 @@ protected:
 
   /**
    * @brief Explicitly add a vector to the store.
-   * @param auxid The identifier of the aux data item being added.
    * @param vec Vector data being added.
    * @param isDecoration Should this variable be marked as a decoration?
    *
    * For internal use.  The @c auxid must not already exist in the store.
    */
-  void addVector (SG::auxid_t auxid,
-                  std::unique_ptr<IAuxTypeVector> vec,
+  void addVector (std::unique_ptr<IAuxTypeVector> vec,
                   bool isDecoration);
 
 

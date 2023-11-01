@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_ICC
 #define XAODTRIGGER_VERSIONS_BYTESTREAMAUXCONTAINER_V1_ICC
@@ -48,7 +48,7 @@ namespace xAOD {
       }
 
       // Register the variable:
-      m_staticVecs[ auxid ] = new AuxPersVector< T >( vec );
+      m_staticVecs[ auxid ] = new AuxPersVector< T >( auxid, vec );
 
       // Remember that we are now handling this variable:
       m_auxids.insert( auxid );

@@ -43,11 +43,11 @@ namespace xAOD {
 
       /// Create a new vector in memory with the requested size and capacity
       virtual std::unique_ptr< SG::IAuxTypeVector >
-      create( size_t size, size_t capacity ) const override;
+      create( SG::auxid_t auxid, size_t size, size_t capacity ) const override;
 
       /// Create a vector object of this type from a data blob
       virtual std::unique_ptr< SG::IAuxTypeVector >
-      createFromData( void* data, bool isPacked,
+      createFromData( SG::auxid_t auxid, void* data, bool isPacked,
                       bool ownFlag ) const override;
 
       /// Copy one element from one location to another

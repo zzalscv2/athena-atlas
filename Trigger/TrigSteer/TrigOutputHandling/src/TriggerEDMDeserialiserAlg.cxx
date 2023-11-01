@@ -439,7 +439,7 @@ StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& tran
   ATH_CHECK( vec->size() == interfaceContainer->size_v() );
   if ( vec->size() != 0 ) {
     ATH_CHECK( currentAuxStore != nullptr );
-    currentAuxStore->addVector(id, std::move(vec), false);    
+    currentAuxStore->addVector(std::move(vec), false);    
     // trigger loading of the dynamic variables
     SG::AuxElement::TypelessConstAccessor accessor( decorationName );
     accessor.getDataArray( *interfaceContainer );

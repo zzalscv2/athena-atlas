@@ -58,14 +58,18 @@ void applyAuxThinning (std::vector<ElementLink<T> >* p)
 
 /**
  * @brief Constructor.
+ * @param auxid The auxid of the variable this vector represents.
  * @param vecPtr Pointer to the object (of type @c CONT).
  * @param ownFlag If true, take ownership of the object.
  */
 template <class T, class CONT>
 inline
-AuxTypeVectorHolder<T, CONT>::AuxTypeVectorHolder (vector_type* vecPtr, bool ownFlag)
+AuxTypeVectorHolder<T, CONT>::AuxTypeVectorHolder (auxid_t auxid,
+                                                   vector_type* vecPtr,
+                                                   bool ownFlag)
   : m_vecPtr (vecPtr),
-    m_ownFlag (ownFlag)
+    m_ownFlag (ownFlag),
+    m_auxid (auxid)
 {
 }
 
@@ -93,6 +97,7 @@ AuxTypeVectorHolder<T, CONT>::AuxTypeVectorHolder
 {
   // If we own the payload, then make a copy, else just use the same pointer.
   m_ownFlag = other.m_ownFlag;
+  m_auxid = other.m_auxid;
   if (other.m_ownFlag)
     m_vecPtr = new vector_type (*other.m_vecPtr);
   else
@@ -109,6 +114,7 @@ AuxTypeVectorHolder<T, CONT>::AuxTypeVectorHolder (AuxTypeVectorHolder&& other)
 {
   m_ownFlag = other.m_ownFlag;
   m_vecPtr = other.m_vecPtr;
+  m_auxid = other.m_auxid;
   other.m_ownFlag = false;
 }
 
@@ -124,6 +130,7 @@ AuxTypeVectorHolder<T, CONT>::operator= (const AuxTypeVectorHolder& other)
     if (m_ownFlag)
       delete m_vecPtr;
     m_ownFlag = other.m_ownFlag;
+    m_auxid = other.m_auxid;
     if (other.m_ownFlag)
       m_vecPtr = new vector_type (*other.m_vecPtr);
     else
@@ -145,6 +152,7 @@ AuxTypeVectorHolder<T, CONT>::operator= (AuxTypeVectorHolder&& other)
       delete m_vecPtr;
     m_ownFlag = other.m_ownFlag;
     m_vecPtr = other.m_vecPtr;
+    m_auxid = other.m_auxid;
     other.m_ownFlag = false;
   }
   return *this;
@@ -170,7 +178,18 @@ inline
 std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::clone() const
 {
   vector_type* vecPtr = new vector_type (*m_vecPtr);
-  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (vecPtr, true);
+  return std::make_unique<AuxTypeVectorHolder<T, CONT> > (m_auxid, vecPtr, true);
+}
+
+
+/**
+ * @brief Return the auxid of the variable this vector represents.
+ */
+template <class T, class CONT>
+inline
+auxid_t AuxTypeVectorHolder<T, CONT>::auxid() const
+{
+  return m_auxid;
 }
 
 
@@ -437,11 +456,13 @@ namespace DataModel_detail {
 
 /// Specialization for the case of types that can be packed.
 template <class T, class ALLOC>
-std::unique_ptr<SG::IAuxTypeVector> makePacked (std::vector<T, ALLOC>& v, std::true_type)
+std::unique_ptr<SG::IAuxTypeVector> makePacked (SG::auxid_t auxid,
+                                                std::vector<T, ALLOC>& v,
+                                                std::true_type)
 {
   // Make the new container and move our contents.
   auto iv =
-    std::make_unique<SG::AuxTypeVector<T, ALLOC, SG::PackedContainer<T, ALLOC> > > (0, 0);
+    std::make_unique<SG::AuxTypeVector<T, ALLOC, SG::PackedContainer<T, ALLOC> > > (auxid, 0, 0);
   iv->vec().swap (v);
 #ifdef __COVERITY__
   // Coverity gives a bogus complaint about the derived->base conversion here.
@@ -454,7 +475,7 @@ std::unique_ptr<SG::IAuxTypeVector> makePacked (std::vector<T, ALLOC>& v, std::t
 
 /// Specialization for the case of types that cannot be packed.
 template <class T, class FLAG>
-std::unique_ptr<SG::IAuxTypeVector> makePacked (T&, FLAG)
+std::unique_ptr<SG::IAuxTypeVector> makePacked (SG::auxid_t, T&, FLAG)
 {
   return nullptr;
 }
@@ -512,7 +533,7 @@ std::unique_ptr<IAuxTypeVector> AuxTypeVectorHolder<T, CONT>::toPacked()
   /// Use the proper instantiation depending on whether or not
   /// this type can be packed.
   return DataModel_detail::makePacked
-    (*m_vecPtr, typename DataModel_detail::can_pack<T>::type());
+    (m_auxid, *m_vecPtr, typename DataModel_detail::can_pack<T>::type());
 }
 
 
@@ -592,12 +613,15 @@ void AuxTypeVectorHolder<T, CONT>::clear (void* dst, size_t dst_index)
 
 /**
  * @brief Constructor.  Makes a new vector.
+ * @param auxid The auxid of the variable this vector represents.
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
  */
 template <class T, class ALLOC, class CONT>
-AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (size_t size, size_t capacity)
-  : Base (&m_vec, false)
+AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (auxid_t auxid,
+                                              size_t size,
+                                              size_t capacity)
+  : Base (auxid, &m_vec, false)
 {
   m_vec.reserve (capacity * Base::SCALE);
   m_vec.resize (size * Base::SCALE);
@@ -609,7 +633,7 @@ AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (size_t size, size_t capacity)
  */
 template <class T, class ALLOC, class CONT>
 AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (const AuxTypeVector& other)
-  : Base (&m_vec, false),
+  : Base (other.m_auxid, &m_vec, false),
     m_vec (other.m_vec)
 {
 }
@@ -620,7 +644,7 @@ AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (const AuxTypeVector& other)
  */
 template <class T, class ALLOC, class CONT>
 AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (AuxTypeVector&& other)
-  : Base (&m_vec, false),
+  : Base (other.m_auxid, &m_vec, false),
     m_vec (std::move (other.m_vec))
 {
 }
@@ -634,6 +658,7 @@ AuxTypeVector<T, ALLOC, CONT>&
 AuxTypeVector<T, ALLOC, CONT>::operator= (const AuxTypeVector& other)
 {
   if (this != &other) {
+    Base::m_auxid = other.m_auxid;
     m_vec = other.m_vec;
   }
   return *this;
@@ -648,6 +673,7 @@ AuxTypeVector<T, ALLOC, CONT>&
 AuxTypeVector<T, ALLOC, CONT>::operator= (AuxTypeVector&& other)
 {
   if (this != &other) {
+    Base::m_auxid = other.m_auxid;
     m_vec = std::move (other.m_vec);
   }
   return *this;
