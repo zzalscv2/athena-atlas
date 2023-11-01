@@ -263,6 +263,9 @@ StatusCode ISF::PunchThroughTool::initialize()
   if (m_R1==m_R2 || m_z1==m_z2) ATH_MSG_ERROR ("[punch-though] Bug in propagation calculation! R1="<<m_R1<<" R2 = "<<m_R2<<" z1="<<m_z1<<" z2= "<<m_z2 );
   else                  ATH_MSG_DEBUG ("calo-MS boundary coordinates: R1="<<m_R1<<" R2 = "<<m_R2<<" z1="<<m_z1<<" z2= "<<m_z2);
 
+  // close the file with the lookuptable
+  m_fileLookupTable->Close();
+
   ATH_MSG_INFO( "punchthrough initialization is successful" );
   return StatusCode::SUCCESS;
 }
@@ -274,14 +277,10 @@ StatusCode ISF::PunchThroughTool::initialize()
 
 StatusCode ISF::PunchThroughTool::finalize()
 {
-
+  ATH_MSG_DEBUG( "[punchthrough] finalize() starting" );
   for(auto & each : m_particles) {
     delete each.second;
   }
-
-
-  // close the file with the lookuptable
-  m_fileLookupTable->Close();
 
   ATH_MSG_DEBUG( "[punchthrough] finalize() successful" );
 
