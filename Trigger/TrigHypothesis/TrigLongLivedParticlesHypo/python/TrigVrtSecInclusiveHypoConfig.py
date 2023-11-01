@@ -1,21 +1,19 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigVrtSecIclusiveHypoTool')
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createTrigVSIHypoAlg(flags, name):
-    # make the Hypo
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (TrigVSIHypoAlg)
+def createTrigVSIHypoAlgCfg(flags: AthConfigFlags, name: str, **kwargs) ->CompFactory:
 
     # Setup the hypothesis algorithm
-    theHypoAlg = TrigVSIHypoAlg(name)
+    theHypoAlg = CompFactory.TrigVSIHypoAlg(name, **kwargs)
 
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
-    theHypoAlg.vtxCountKey = recordable("HLT_TrigVSI_VtxCount")
-
-    # monioring
+    # monitoring
     monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     #
     monTool.defineHistogram("nVtx",         type='TH1F', path='EXPERT', title="Nr of TrigVSI vertices;N TrigVSI vertices size;Nevents", xbins=50, xmin=0, xmax=500)

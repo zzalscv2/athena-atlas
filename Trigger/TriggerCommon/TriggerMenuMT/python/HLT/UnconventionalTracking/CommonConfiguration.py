@@ -1,11 +1,12 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaCommon.CFElements import seqAND, parOR
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from AthenaCommon.CFElements import seqAND
 from AthenaCommon.Logging import logging
-from ..Config.MenuComponents import algorithmCAToGlobalWrapper
-from ..CommonSequences.FullScanInDetSequences import getCommonInDetFullScanSequence
-from ..CommonSequences.FullScanInDetConfig import commonInDetLRTCfg
+from ..CommonSequences.FullScanInDetConfig import commonInDetFullScanCfg,commonInDetLRTCfg
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA, SelectionCA, InEventRecoCA
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -14,22 +15,32 @@ log = logging.getLogger(__name__)
 
 def getFullScanRecoOnlySequence(flags):
 
-    from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-    TrkSeq, sequenceOut = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
-
     from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    InputMakerAlg=getTrackingInputMaker("ftf")
+    reco = InEventRecoCA("UncTrkreco",inputMaker=getTrackingInputMaker("ftf"))
+    
 
-    HypoAlg = TrigStreamerHypoAlg("UncTrkDummyStream")
+    selAcc = SelectionCA("UncTrkrecoSel")
+
+    acc = ComponentAccumulator()
+    seqReco = seqAND("UncTrkrecoSeq")
+    acc.addSequence(seqReco)
+    
+    trkseq = commonInDetFullScanCfg(flags)
+    acc.merge(trkseq, sequenceName=seqReco.name)
+    
+    reco.mergeReco(acc)
+    selAcc.mergeReco(reco)
+    
+    HypoAlg = CompFactory.TrigStreamerHypoAlg("UncTrkDummyStream")
+    selAcc.addHypoAlgo(HypoAlg)
 
     log.debug("Building the menu sequence for FullScanRecoOnlySequence")
-    return MenuSequence( flags,
-                         Sequence    = seqAND("UncTrkrecoSeq", [InputMakerAlg]+TrkSeq),
-                         Maker       = InputMakerAlg,
-                         Hypo        = HypoAlg,
-                         HypoToolGen = StreamerHypoToolGenerator )
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = StreamerHypoToolGenerator)
+
 
 
 def getCommonInDetFullScanLRTSequence(flags):
@@ -37,17 +48,22 @@ def getCommonInDetFullScanLRTSequence(flags):
     std_cfg = getInDetTrigConfig("fullScan" )
     lrt_cfg = getInDetTrigConfig("fullScanLRT")
 
-    from TriggerMenuMT.HLT.Jet.JetMenuSequencesConfig import getTrackingInputMaker
-    InputMakerAlg=getTrackingInputMaker("ftf")
+    selAcc = SelectionCA("UncLRTSeq")
+    
+    from ..CommonSequences.FullScanDefs import  trkFSRoI
+    reco = InEventRecoCA(name="_Jet_TrackingStep",
+                         RoIs = trkFSRoI,
+                         RoITool = CompFactory.ViewCreatorInitialROITool())
 
-    #create two sequencers first contains everything apart from the final two algs
-    std_algs, std_trks = getCommonInDetFullScanSequence(flags)
-    std_seq = seqAND("UncTrkrecoSeq", [InputMakerAlg]+std_algs)
+    acc = ComponentAccumulator()
+    std_seq = seqAND("UncTrkrecoSeq")
+    acc.addSequence(std_seq)
+    acc.merge(commonInDetFullScanCfg(flags),sequenceName=std_seq.name)
+    
+    lrt_seq = seqAND("UncTrklrtstagerecoSeq")
+    acc.addSequence(lrt_seq)
+    acc.merge(commonInDetLRTCfg(flags, std_cfg, lrt_cfg))
+    
+    reco.mergeReco(acc)
 
-    lrt_algs = algorithmCAToGlobalWrapper(commonInDetLRTCfg, flags, std_cfg, lrt_cfg)
-
-    #sequence for the lrt objects final two algs
-    lrt_seq = seqAND("UncTrklrtstagerecoSeq", lrt_algs)
-    combined_seq = parOR("UncTrklrtrecoSeq", [std_seq, lrt_seq])
-
-    return (combined_seq, InputMakerAlg, lrt_cfg.tracks_FTF())
+    return (selAcc, reco)

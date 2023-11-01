@@ -42,12 +42,8 @@ using xAOD::JetContainer;
 TrigHitDVHypoAlg::TrigHitDVHypoAlg( const std::string& name,
 				    ISvcLocator* pSvcLocator ) :
    ::HypoBase( name, pSvcLocator ),
-   m_spacePointTool("TrigSpacePointConversionTool"),
-   
    m_lumiBlockMuTool("LumiBlockMuTool/LumiBlockMuTool") 
-   {
-      declareProperty( "SpacePointProviderTool", m_spacePointTool  );
-   }
+{}
 
 // ------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------

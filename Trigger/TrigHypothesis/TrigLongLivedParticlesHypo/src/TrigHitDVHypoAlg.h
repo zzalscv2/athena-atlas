@@ -69,9 +69,8 @@ public:
 
 private:
 
-   ToolHandle<ITrigSpacePointConversionTool> m_spacePointTool;
-
-   ToolHandleArray< TrigHitDVHypoTool >   m_hypoTools     {this, "HypoTools", {}, "Tools to perform selection"};
+  ToolHandle<ITrigSpacePointConversionTool> m_spacePointTool{this, "SpacePointProviderTool", "TrigSpacePointConversionTool"};
+  ToolHandleArray< TrigHitDVHypoTool >   m_hypoTools     {this, "HypoTools", {}, "Tools to perform selection"};
 
    // EDMs
    SG::ReadHandleKey< xAOD::JetContainer >          m_jetsKey      {this, "Jets",      "HLT_AntiKt4EMTopoJets_subjesIS", ""};

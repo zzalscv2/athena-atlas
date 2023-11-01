@@ -3,19 +3,21 @@
 from AthenaCommon.Logging import logging
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def createTrigdEdxTrackHypoAlg(flags, name):
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
-    # make the Hypo
-    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import TrigdEdxTrackHypoAlg
-    
+def TrigdEdxTrackHypoAlgCfg(flags : AthConfigFlags, name : str) -> ComponentAccumulator:
+
+    acc = ComponentAccumulator()
+
     # Setup the hypothesis algorithm
-    thedEdxTrackHypo = TrigdEdxTrackHypoAlg(name)
+    thedEdxTrackHypo = CompFactory.TrigdEdxTrackHypoAlg(name)
     
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     thedEdxTrackHypo.HPtdEdxTrk = recordable("HLT_HPtdEdxTrk")
 
-    # monioring
-
+    # monitoring
     monTool = GenericMonitoringTool(flags, "IM_MonTool"+name)
     monTool.defineHistogram('trackPtGeV', type='TH1F', path='EXPERT', title="Hypo p_{T}^{track};p_{T}^{track} [GeV];Nevents", xbins=50, xmin=0, xmax=100) 
     monTool.defineHistogram('trackEta',   type='TH1F', path='EXPERT', title="Hypo p_{T}^{track} (after p_{T} cut);eta;Nevents", xbins=60, xmin=-3.0, xmax=3.0) 
@@ -26,7 +28,8 @@ def createTrigdEdxTrackHypoAlg(flags, name):
     monTool.HistPath = 'dEdxTrackHypoAlg'
     thedEdxTrackHypo.MonTool = monTool
 
-    return thedEdxTrackHypo
+    acc.addEventAlgo(thedEdxTrackHypo)
+    return acc
 
 
 def TrigdEdxTrackHypoToolFromDict( chainDict ):

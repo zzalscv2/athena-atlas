@@ -1,7 +1,8 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.CFElements import parOR
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequenceCA
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
@@ -12,40 +13,44 @@ def VrtSecInclusiveSequence(flags):
     fscfg = getInDetTrigConfig("fullScan")
     lrtcfg = getInDetTrigConfig("fullScanLRT")
 
+    
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTSequence
+    selAcc,reco = getCommonInDetFullScanLRTSequence(flags)
 
-    ftf_seqs, im_alg, seqOut = RecoFragmentsPool.retrieve(getCommonInDetFullScanLRTSequence,flags)
+    acc = ComponentAccumulator()
 
     from TrigVrtSecInclusive.TrigVrtSecInclusiveConfig import TrigVrtSecInclusiveCfg
-    theVSI = TrigVrtSecInclusiveCfg(flags, "TrigVrtSecInclusive", fscfg.tracks_FTF(), lrtcfg.tracks_FTF(), fscfg.vertex, "HLT_TrigVSIVertex", "HLT_TrigVSITrkPair")
-    theVSI.recordTrkPair = False
-    vtx_reco_algs = [theVSI]
+    theVSI = TrigVrtSecInclusiveCfg(flags, "TrigVrtSecInclusive", fscfg.tracks_FTF(), lrtcfg.tracks_FTF(), fscfg.vertex, "HLT_TrigVSIVertex", "HLT_TrigVSITrkPair",recordTrkPair=False)
 
-    vsiseq = parOR("UncTrkrecoSeqVSI", [vtx_reco_algs])
-    TrkSeq = parOR("UncTrkrecoSeqLRTVSI", [ftf_seqs, vsiseq])
+    vsiseq = parOR("UncTrkrecoSeqVSI")
+    acc.addSequence(vsiseq)
+    acc.merge(theVSI)
+    
+    reco.mergeReco(acc)
+    
     sequenceOut = "HLT_TrigVSIVertex"
 
-    return (TrkSeq, im_alg, sequenceOut)
+    return (selAcc, reco, sequenceOut)
 
 
 
 
 def VrtSecInclusiveMenuSequence(flags):
     from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import TrigVSIHypoToolFromDict
-    from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlg
+    from TrigLongLivedParticlesHypo.TrigVrtSecInclusiveHypoConfig import createTrigVSIHypoAlgCfg
 
-    ( TrkSeq, im_alg, sequenceOut) = RecoFragmentsPool.retrieve(VrtSecInclusiveSequence,flags)
-
-    theHypoAlg = createTrigVSIHypoAlg(flags, "TrigVSIHypoAlg")
+    ( selAcc, reco, sequenceOut) = VrtSecInclusiveSequence(flags)
 
     from TrigEDMConfig.TriggerEDMRun3 import recordable
-    theHypoAlg.verticesKey = recordable(sequenceOut)
-    theHypoAlg.isViewBased = False
-
+    theHypoAlg = createTrigVSIHypoAlgCfg(flags, "TrigVSIHypoAlg",
+                                         verticesKey=recordable(sequenceOut),
+                                         vtxCountKey = recordable("HLT_TrigVSI_VtxCount"),
+                                         isViewBased=False)
+    selAcc.mergeReco(reco)
+    selAcc.addHypoAlgo(theHypoAlg)
+    
     log.info("Building the Step dictinary for TrigVSI!")
-    return MenuSequence(flags,
-                        Sequence    = TrkSeq,
-                        Maker       = im_alg,
-                        Hypo        = theHypoAlg,
-                        HypoToolGen = TrigVSIHypoToolFromDict,
-                        )
+    return MenuSequenceCA(flags,
+                          selAcc,
+                          HypoToolGen = TrigVSIHypoToolFromDict)
+                          
