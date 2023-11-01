@@ -23,7 +23,6 @@
 #include "JetInterface/IJetUpdateJvt.h"
 #include "JetInterface/IJetModifier.h"
 #include "JetInterface/IJetDecorator.h"
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #include "AsgAnalysisInterfaces/IEfficiencyScaleFactorTool.h"
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
@@ -478,65 +477,93 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetCleaningTool.retrieve() );
     } else if (m_jetCleaningTool.isUserConfigured()) ATH_CHECK( m_jetCleaningTool.retrieve() );
 
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise jet pileup labeling tool (required for labels used by JvtEfficiencyTools)
+
+    if(!m_jetPileupLabelingTool.isUserConfigured()){
+      toolName = "PileupLabelingTool";
+      m_jetPileupLabelingTool.setTypeAndName("JetPileupLabelingTool/"+toolName);
+      ATH_CHECK( m_jetPileupLabelingTool.setProperty("RecoJetContainer", m_defaultJets) );
+      ATH_CHECK( m_jetPileupLabelingTool.setProperty("TruthJetContainer", m_defaultTruthJets) );
+  #ifndef XAOD_STANDALONE
+      ATH_CHECK( m_jetPileupLabelingTool.setProperty("SuppressInputDependence", true) );
+      ATH_CHECK( m_jetPileupLabelingTool.setProperty("SuppressOutputDependence", true) );
+  #endif
+      ATH_CHECK( m_jetPileupLabelingTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetPileupLabelingTool.retrieve() );  
+    } else if (m_jetPileupLabelingTool.isUserConfigured()) ATH_CHECK( m_jetPileupLabelingTool.retrieve() );
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialise jet JVT efficiency tool (scale factors)
+    // Initialise jet NNJvt moment tool
 
     m_applyJVTCut = !m_JvtWP.empty();
-    if (!m_jetJvtEfficiencyTool.isUserConfigured() && m_applyJVTCut) {
-      toolName = "JVTEfficiencyTool";
-      m_jetJvtEfficiencyTool.setTypeAndName("CP::JetJvtEfficiency/"+toolName);
-
-      // build SFFile path with folder name from config
-      m_JvtConfig_SFFile = "JetJvtEfficiency/" + m_JvtConfig;
-      if (m_jetInputType == xAOD::JetInput::EMTopo) { m_JvtConfig_SFFile += "JvtSFFile_EMTopoJets.root"; }
-      else if (m_jetInputType == xAOD::JetInput::LCTopo) { m_JvtConfig_SFFile += "JvtSFFile_LC.root"; }
-      else if (m_jetInputType == xAOD::JetInput::EMPFlow) { m_JvtConfig_SFFile += "JvtSFFile_EMPFlowJets.root"; }
-      else {
-        ATH_MSG_ERROR("Cannot configure JVT uncertainties for unsupported jet input type (neither EM nor LC)");
-        return StatusCode::FAILURE;
-      }
-
-#ifndef XAOD_STANDALONE
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SuppressInputDependence", true) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SuppressOutputDependence", true) );
-#endif
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("WorkingPoint", m_JvtWP) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("MaxPtForJvt", m_JvtPtMax) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "jvtscalefact") ); // set decoration name
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SFFile", m_JvtConfig_SFFile) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("TaggingAlg", CP::JvtTagger::NNJvt) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetJvtEfficiencyTool.retrieve() );
-    } else if (m_jetJvtEfficiencyTool.isUserConfigured()) ATH_CHECK( m_jetJvtEfficiencyTool.retrieve() );
-
+    if (!m_jetNNJvtMomentTool.isUserConfigured() && m_applyJVTCut) {
+      toolName = "NNJvtMomentTool";
+      m_jetNNJvtMomentTool.setTypeAndName("JetPileupTag::JetVertexNNTagger/"+toolName);
+      ATH_CHECK( m_jetNNJvtMomentTool.setProperty("JetContainer", m_defaultJets) );
+  #ifndef XAOD_STANDALONE
+      ATH_CHECK( m_jetNNJvtMomentTool.setProperty("SuppressInputDependence", true) );
+      ATH_CHECK( m_jetNNJvtMomentTool.setProperty("SuppressOutputDependence", true) );
+  #endif
+      ATH_CHECK( m_jetNNJvtMomentTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetNNJvtMomentTool.retrieve() );
+    } else if (m_jetNNJvtMomentTool.isUserConfigured()) ATH_CHECK( m_jetNNJvtMomentTool.retrieve() );
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialise jet FwdJVT efficiency tool for scale factors
+    // Initialise jet NNJvt selection tool
 
-    if (!m_jetFwdJvtEfficiencyTool.isUserConfigured()) {
-      toolName = m_doFwdJVT ? m_metJetSelection+"_fJVT" : m_metJetSelection+"_NOfJVT";
-      m_jetFwdJvtEfficiencyTool.setTypeAndName("CP::JetJvtEfficiency/FJVTEfficiencyTool_"+toolName);
+    if (!m_jetNNJvtSelectionTool.isUserConfigured() && m_applyJVTCut) {
+      toolName = "NNJvtSelectionTool";
+      m_jetNNJvtSelectionTool.setTypeAndName("CP::NNJvtSelectionTool/"+toolName);
+      ATH_CHECK( m_jetNNJvtSelectionTool.setProperty("JetContainer", m_defaultJets) );      
+      ATH_CHECK( m_jetNNJvtSelectionTool.setProperty("WorkingPoint", m_JvtWP) );
+      ATH_CHECK( m_jetNNJvtSelectionTool.setProperty("MaxPtForJvt", m_JvtPtMax) );
+      ATH_CHECK( m_jetNNJvtSelectionTool.setProperty("JvtMomentName", "NNJvt") );
+      ATH_CHECK( m_jetNNJvtSelectionTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetNNJvtSelectionTool.retrieve() );
+    } else if (m_jetNNJvtSelectionTool.isUserConfigured()) ATH_CHECK( m_jetNNJvtSelectionTool.retrieve() );
 
-      // build SFFile path with folder name from config
-      m_fJvtConfig_SFFile = "JetJvtEfficiency/" + m_fJvtConfig;
-      if (m_jetInputType == xAOD::JetInput::EMTopo) { m_fJvtConfig_SFFile += "fJvtSFFile.EMtopo.root"; }
-      else if (m_jetInputType == xAOD::JetInput::EMPFlow) { m_fJvtConfig_SFFile += "fJvtSFFile.EMPFlow.root"; }
-      else {
-        ATH_MSG_ERROR("Cannot configure fJVT uncertainties for unsupported jet input type (neither EMTopo nor EMPFlow)");
-        return StatusCode::FAILURE;
-      }
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise jet NNJvt efficiency tool (scale factors)
 
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "fJVTSF") ); // set decoration name
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("WorkingPoint", m_fJvtWP) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("SFFile", m_fJvtConfig_SFFile) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("TaggingAlg", CP::JvtTagger::fJvt) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.retrieve() );
-    } else  ATH_CHECK( m_jetFwdJvtEfficiencyTool.retrieve() );
+    if (!m_jetNNJvtEfficiencyTool.isUserConfigured() && m_applyJVTCut) {
+      toolName = "NNJvtEfficiencyTool";
+      m_jetNNJvtEfficiencyTool.setTypeAndName("CP::NNJvtEfficiencyTool/"+toolName);
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("JetContainer", m_defaultJets) );  
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("WorkingPoint", m_JvtWP) );
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("MaxPtForJvt", m_JvtPtMax) );
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("SFFile", m_JvtConfig) );
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetNNJvtEfficiencyTool.retrieve() );
+    } else if (m_jetNNJvtEfficiencyTool.isUserConfigured()) ATH_CHECK( m_jetNNJvtEfficiencyTool.retrieve() );
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise jet fJvt selection tool
+
+    if (!m_jetfJvtSelectionTool.isUserConfigured() && m_doFwdJVT) {
+      toolName = "fJvtSelectionTool";
+      m_jetfJvtSelectionTool.setTypeAndName("CP::FJvtSelectionTool/"+toolName);
+      ATH_CHECK( m_jetfJvtSelectionTool.setProperty("JetContainer", m_defaultJets) );  
+      ATH_CHECK( m_jetfJvtSelectionTool.setProperty("WorkingPoint", m_fJvtWP) );
+      ATH_CHECK( m_jetfJvtSelectionTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
+      ATH_CHECK( m_jetfJvtSelectionTool.setProperty("JvtMomentName", "DFCommonJets_fJvt") );
+      ATH_CHECK( m_jetfJvtSelectionTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetfJvtSelectionTool.retrieve() );
+    } else if (m_jetfJvtSelectionTool.isUserConfigured()) ATH_CHECK( m_jetfJvtSelectionTool.retrieve() );
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Initialise jet fJvt efficiency tool for scale factors (scale factors)
+
+    if (!m_jetfJvtEfficiencyTool.isUserConfigured() && m_doFwdJVT) {
+      toolName = "fJvtEfficiencyTool";
+      m_jetfJvtEfficiencyTool.setTypeAndName("CP::FJvtEfficiencyTool/"+toolName);
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("JetContainer", m_defaultJets) );  
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("WorkingPoint", m_fJvtWP) );
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("SFFile", m_fJvtConfig) );
+      ATH_CHECK( m_jetfJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_jetfJvtEfficiencyTool.retrieve() );
+    } else  ATH_CHECK( m_jetfJvtEfficiencyTool.retrieve() );
   }
 
 

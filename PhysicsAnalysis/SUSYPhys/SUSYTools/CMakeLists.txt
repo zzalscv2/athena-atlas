@@ -19,7 +19,7 @@ atlas_add_library( SUSYToolsLib
    Root/*.cxx
    PUBLIC_HEADERS SUSYTools src
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${BOOST_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgTools xAODCore xAODEgamma xAODEventInfo
+   LINK_LIBRARIES AsgTools PATCoreLib xAODCore xAODEgamma xAODEventInfo
    xAODJet xAODMissingET xAODMuon xAODTau xAODTracking xAODTruth
    AssociationUtilsLib BoostedJetTaggersLib GoodRunsListsLib PATInterfaces TrigDecisionToolLib
    MCTruthClassifierLib JetJvtEfficiencyLib JetSubStructureUtils
@@ -28,7 +28,7 @@ atlas_add_library( SUSYToolsLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${BOOST_LIBRARIES}
    AthContainers EventPrimitives FourMomUtils xAODBTagging xAODBase
    xAODPrimitives xAODRootAccess
-   EgammaAnalysisHelpersLib FTagAnalysisInterfacesLib IsolationSelectionLib
+   EgammaAnalysisHelpersLib FTagAnalysisInterfacesLib IsolationSelectionLib 
    IsolationCorrectionsLib JetAnalysisInterfacesLib JetSelectorToolsLib
    JetCPInterfaces JetCalibToolsLib JetInterface
    InDetTrackSystematicsToolsLib

@@ -119,6 +119,7 @@ if ("data2" in options.type or "mc21" in options.type or "mc23" in options.type)
 if ("data" not in options.type): config.DoSyst = options.dosyst
 config.SUSYTools.DataSource = 1
 config.OutputLevel = outputlvl[options.log_level]
+config.SUSYTools.OutputLevel = outputlvl[options.log_level]
 config.SUSYTools.PRWLumiCalcFiles = []
 config.SUSYTools.AutoconfigurePRWTool = True
 config.SUSYTools.PRWUseCommonMCFiles = True

@@ -324,8 +324,12 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_fatjetUncertaintiesTool(""),
     m_jetCleaningTool(""),
     m_jetJvtUpdateTool(""),
-    m_jetJvtEfficiencyTool(""),
-    m_jetFwdJvtEfficiencyTool(""),
+    m_jetPileupLabelingTool(""),
+    m_jetNNJvtMomentTool(""),
+    m_jetNNJvtSelectionTool(""),
+    m_jetNNJvtEfficiencyTool(""),
+    m_jetfJvtSelectionTool(""),
+    m_jetfJvtEfficiencyTool(""),    
     //
     m_WTaggerTool(""),
     m_ZTaggerTool(""),
@@ -665,8 +669,12 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_TopTagjetUncertaintiesTool.declarePropertyFor( this, "TopJetUncertaintiesTool", "The JetUncertaintiesTool for large-R Top-tagged jets" );
   m_jetCleaningTool.declarePropertyFor( this, "JetCleaningTool", "The JetCleaningTool" );
   m_jetJvtUpdateTool.declarePropertyFor( this, "JetJvtUpdateTool", "The JetJvtUpdateTool" );
-  m_jetJvtEfficiencyTool.declarePropertyFor( this, "JetJvtEfficiencyTool", "The JetJvtEfficiencyTool" );
-  m_jetFwdJvtEfficiencyTool.declarePropertyFor( this, "JetFwdJvtEfficiencyTool", "The JetFwdJvtEfficiencyTool" );
+  m_jetPileupLabelingTool.declarePropertyFor( this, "JetPileupLabelingTool", "The JetPileupLabelingTool" );
+  m_jetNNJvtMomentTool.declarePropertyFor( this, "JetNNJvtMomentTool", "The JetNNJvtMomentTool" );
+  m_jetNNJvtSelectionTool.declarePropertyFor( this, "JetNNJvtSelectionTool", "The JetNNJvtSelectionTool" );
+  m_jetNNJvtEfficiencyTool.declarePropertyFor( this, "JetNNJvtEfficiencyTool", "The JetNNJvtEfficiencyTool" );
+  m_jetfJvtSelectionTool.declarePropertyFor( this, "JetfJvtSelectionTool", "The JetfJvtSelectionTool" );
+  m_jetfJvtEfficiencyTool.declarePropertyFor( this, "JetfJvtEfficiencyTool", "The JetfJvtEfficiencyTool" );
   //
   m_WTaggerTool.declarePropertyFor( this, "WTaggerTool", "The SmoothedWZTaggerTool" );
   m_ZTaggerTool.declarePropertyFor( this, "ZTaggerTool", "The SmoothedWZTaggerTool" );
@@ -1492,7 +1500,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);
   configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
-  configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "Moriond2018/");
+  configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "", true); // empty string means dummy SF
   configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel22/Summer2023_PreRec/R4_CategoryReduction_FullJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel22/
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
@@ -1526,7 +1534,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_fJvtWP, "FwdJet.JvtWP", rEnv, "Loose");
   configFromFile(m_fJvtPtMax, "FwdJet.JvtPtMax", rEnv, 120e3);
   configFromFile(m_fJvtEtaMin, "FwdJet.JvtEtaMin", rEnv, 2.5);
-  configFromFile(m_fJvtConfig, "FwdJet.JvtConfig", rEnv, "May2020/");
+  configFromFile(m_fJvtConfig, "FwdJet.JvtConfig", rEnv, "", true); // empty string means dummy SF
   configFromFile(m_fJvtRecalculate, "FwdJet.JvtRecalculate", rEnv, false);
   configFromFile(m_JMScalib, "Jet.JMSCalib", rEnv, false);
   //
@@ -2115,22 +2123,22 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
       ATH_MSG_VERBOSE("Configured (Fat)JetUncertaintiesTool (main) for systematic var. " << systConfig.name() );
     }
   }
-  if (!m_jetJvtEfficiencyTool.empty()) {
-    StatusCode ret = m_jetJvtEfficiencyTool->applySystematicVariation(systConfig);
+  if (!m_jetNNJvtEfficiencyTool.empty()) {
+    StatusCode ret = m_jetNNJvtEfficiencyTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
-      ATH_MSG_VERBOSE("Cannot configure JVTEfficiency for systematic var. " << systConfig.name() );
+      ATH_MSG_VERBOSE("Cannot configure NNJvtEfficiency for systematic var. " << systConfig.name() );
     } else {
-      ATH_MSG_VERBOSE("Configured JVTEfficiency for systematic var. " << systConfig.name() );
+      ATH_MSG_VERBOSE("Configured NNJvtEfficiency for systematic var. " << systConfig.name() );
     }
-  }
-  if (!m_jetFwdJvtEfficiencyTool.empty()) {
-    StatusCode ret = m_jetFwdJvtEfficiencyTool->applySystematicVariation(systConfig);
+  }  
+  if (!m_jetfJvtEfficiencyTool.empty()) {
+    StatusCode ret = m_jetfJvtEfficiencyTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
-      ATH_MSG_VERBOSE("Cannot configure FJVTEfficiency for systematic var. " << systConfig.name() );
+      ATH_MSG_VERBOSE("Cannot configure fJvtEfficiency for systematic var. " << systConfig.name() );
     } else {
-      ATH_MSG_VERBOSE("Configured FJVTEfficiency for systematic var. " << systConfig.name() );
+      ATH_MSG_VERBOSE("Configured fJvtEfficiency for systematic var. " << systConfig.name() );
     }
-  }
+  }  
   if (!m_muonCalibTool.empty()) {
     StatusCode ret =   m_muonCalibTool->applySystematicVariation(systConfig);
     if (ret != StatusCode::SUCCESS) {
@@ -2482,21 +2490,21 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
   sysInfo.affectedWeights.clear();
   sysInfo.systset.insert(sys);
 
-  if (!m_jetJvtEfficiencyTool.empty()) {
-    if ( m_jetJvtEfficiencyTool->isAffectedBySystematic( sys ) ) {
+  if (!m_jetNNJvtEfficiencyTool.empty()) {
+    if ( m_jetNNJvtEfficiencyTool->isAffectedBySystematic( sys ) ) {
       sysInfo.affectsWeights = true;
       sysInfo.affectsType = SystObjType::Jet;
       sysInfo.affectedWeights.insert(ST::Weights::Jet::JVT);
     }
-  }
-  if (!m_jetFwdJvtEfficiencyTool.empty()) {
-    if ( m_jetFwdJvtEfficiencyTool->isAffectedBySystematic( sys ) ) {
+  }  
+
+  if (!m_jetfJvtEfficiencyTool.empty()) {
+    if ( m_jetfJvtEfficiencyTool->isAffectedBySystematic( sys ) ) {
       sysInfo.affectsWeights = true;
       sysInfo.affectsType = SystObjType::Jet;
       sysInfo.affectedWeights.insert(ST::Weights::Jet::FJVT);
     }
   }
-
 
   if (sys.name().find("__2") == std::string::npos) {
     if (!m_jetUncertaintiesTool.empty()) {

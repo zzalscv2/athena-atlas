@@ -125,8 +125,13 @@ namespace ST {
       ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
     }
     
+    // Add isHS labels to jets (required for JvtEfficiencyTools) 
+    if (!isData()) {
+      ATH_CHECK(m_jetPileupLabelingTool->decorate(*copy));
+    }
+
     // Re-calculate NNJvt scores
-    if (m_applyJVTCut) ATH_CHECK(m_jetJvtEfficiencyTool->recalculateScores(*copy));
+    if (m_applyJVTCut) ATH_CHECK(m_jetNNJvtMomentTool->decorate(*copy));
 
     // Update the jets
     for (const auto& jet : *copy) {
@@ -135,7 +140,7 @@ namespace ST {
 
     for (const auto& jet : *copy) {
       // Update the JVT decorations if needed
-      if( m_doFwdJVT && std::abs(acc_DetEta(*jet)) > m_fJvtEtaMin ){
+      if( m_doFwdJVT){
         dec_passJvt(*jet) = acc_passFJvt(*jet) && acc_passJvt(*jet);
         dec_fjvt(*jet) = acc_fjvt(*jet);
 
@@ -352,7 +357,7 @@ namespace ST {
     
     for (const auto& jet : *copy) {
       // Update the JVT decorations if needed
-      if( m_doFwdJVT && std::abs(acc_DetEta(*jet)) > m_fJvtEtaMin ){
+      if( m_doFwdJVT){
         dec_passJvt(*jet) = acc_passFJvt(*jet) && acc_passJvt(*jet);
 
         //new state for OR   .  0=non-baseline objects, 1=for baseline jets not passing JVT, 2=for any other baseline object
@@ -528,8 +533,8 @@ namespace ST {
 
     ATH_MSG_VERBOSE(  "jet (pt,eta,phi) after JES correction " << input.pt() << " " << input.eta() << " " << input.phi() );
 
-    dec_passJvt(input) = !m_applyJVTCut || m_jetJvtEfficiencyTool->passesJvtCut(input);
-    dec_passFJvt(input) = m_jetFwdJvtEfficiencyTool->passesJvtCut(input);
+    dec_passJvt(input) = !m_applyJVTCut || m_jetNNJvtSelectionTool->accept(&input);
+    dec_passFJvt(input) = !m_doFwdJVT ||  m_jetfJvtSelectionTool->accept(&input);
     dec_baseline(input) = ( input.pt() > m_jetPt ) || ( input.pt() > 20e3 ); // Allows for setting m_jetPt < 20e3
     dec_bad(input) = false;
     dec_signal_less_JVT(input) = false;
@@ -610,7 +615,7 @@ namespace ST {
   }
 
   bool SUSYObjDef_xAOD::JetPassJVT(xAOD::Jet& input) {
-    char pass_jvt = !m_applyJVTCut || m_jetJvtEfficiencyTool->passesJvtCut(input);
+    char pass_jvt = !m_applyJVTCut || m_jetNNJvtSelectionTool->accept(&input);
     dec_passJvt(input) = pass_jvt;
     return pass_jvt;
   }
@@ -918,9 +923,6 @@ namespace ST {
     float totalSF = 1.;
     if (!m_applyJVTCut) return totalSF;
 
-    if(m_jetJvtEfficiencyTool->recalculateScores(*jets).isFailure())
-       ATH_MSG_ERROR("Couldn't recalculate JvtEfficiencyScores.");
-
     ConstDataVector<xAOD::JetContainer> jvtjets(SG::VIEW_ELEMENTS);
     for (const xAOD::Jet* jet : *jets) {
       // Only jets that were good for every cut except JVT
@@ -929,21 +931,36 @@ namespace ST {
       }
     }
 
-    CP::CorrectionCode ret = m_jetJvtEfficiencyTool->applyAllEfficiencyScaleFactor( jvtjets.asDataVector() , totalSF );
+    for (const xAOD::Jet* jet : jvtjets) {
+      float current_sf = 0;
 
-    switch (ret) {
-    case CP::CorrectionCode::Error:
-      ATH_MSG_ERROR( "Failed to retrieve SF for jet in SUSYTools_xAOD::JVT_SF" );
-      // this is probably not right, should report an error here
-      break;
-    case CP::CorrectionCode::OutOfValidityRange:
-      ATH_MSG_VERBOSE( "No valid SF for jet in SUSYTools_xAOD::JVT_SF" );
-      // this may or may not be right, may want to report that this
-      // jet doesn't have a valid scale factor
-      break;
-    default:
-      ATH_MSG_VERBOSE( "Retrieve SF for jet container in SUSYTools_xAOD::JVT_SF with value " << totalSF );
+      // the SF are only applied for HS jets and implicitely requires the presence of the isHS decoration
+      CP::CorrectionCode result;
+      if (acc_passJvt(*jet)) {
+        result = m_jetNNJvtEfficiencyTool->getEfficiencyScaleFactor(*jet,current_sf);
+      }
+      else {
+        result = m_jetNNJvtEfficiencyTool->getInefficiencyScaleFactor(*jet,current_sf);
+      }
+      
+      switch (result) {
+        case CP::CorrectionCode::Error:
+          // this is probably not right, should report an error here
+          ATH_MSG_ERROR("Inexplicably failed JVT calibration" );
+          break;
+        case CP::CorrectionCode::OutOfValidityRange:
+          // no NNJvt SF for jet, that is ok e.g. for jets with |eta| > 2.5
+          ATH_MSG_VERBOSE( "Skip SF application in SUSYTools_xAOD::JVT_SF as jet outside validate range" );
+          break;
+        default:
+          ATH_MSG_VERBOSE( "Retrieve SF for jet in SUSYTools_xAOD::JVT_SF with value " << current_sf );
+          totalSF *= current_sf;
+      }
+
     }
+
+    ATH_MSG_VERBOSE( "Retrieve total SF for jet container in SUSYTools_xAOD::JVT_SF with value " << totalSF );
+
     return totalSF;
   }
 
@@ -954,18 +971,19 @@ namespace ST {
     if (!m_applyJVTCut) return totalSF;
 
     //Set the new systematic variation
-    StatusCode ret = m_jetJvtEfficiencyTool->applySystematicVariation(systConfig);
+    StatusCode ret = m_jetNNJvtEfficiencyTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot configure JVTEfficiencyTool for systematic var. " << systConfig.name() );
+      ATH_MSG_ERROR("Cannot configure NNjvtEfficiencyTool for systematic var. " << systConfig.name() );
     }
 
     // Delegate
     totalSF = SUSYObjDef_xAOD::JVT_SF( jets );
 
+    // }
     if (m_applyJVTCut) {
-      ret = m_jetJvtEfficiencyTool->applySystematicVariation(m_currentSyst);
+      ret = m_jetNNJvtEfficiencyTool->applySystematicVariation(m_currentSyst);
       if ( ret != StatusCode::SUCCESS) {
-        ATH_MSG_ERROR("Cannot configure JVTEfficiencyTool for systematic var. " << systConfig.name() );
+        ATH_MSG_ERROR("Cannot configure NNjvtEfficiencyTool for systematic var. " << systConfig.name() );
       }
     }
 
@@ -975,30 +993,45 @@ namespace ST {
   double SUSYObjDef_xAOD::FJVT_SF(const xAOD::JetContainer* jets) {
 
     float totalSF = 1.;
+    if (!m_doFwdJVT) return totalSF;
 
     ConstDataVector<xAOD::JetContainer> fjvtjets(SG::VIEW_ELEMENTS);
     for (const xAOD::Jet* jet : *jets) {
       // Only jets that were good for every cut except JVT
-      if (acc_signal_less_JVT(*jet) && acc_passOR(*jet) && std::abs(acc_DetEta(*jet))>m_fJvtEtaMin) {
+      if (acc_signal_less_JVT(*jet) && acc_passOR(*jet)) {
         fjvtjets.push_back(jet);
       }
     }
 
-    CP::CorrectionCode ret = m_jetFwdJvtEfficiencyTool->applyAllEfficiencyScaleFactor( fjvtjets.asDataVector() , totalSF );
+    for (const xAOD::Jet* jet : fjvtjets) {
+      float current_sf = 0;
 
-    switch (ret) {
-    case CP::CorrectionCode::Error:
-      ATH_MSG_ERROR( "Failed to retrieve SF for jet in SUSYTools_xAOD::FJVT_SF" );
-      // this is probably not right, should report an error here
-      break;
-    case CP::CorrectionCode::OutOfValidityRange:
-      ATH_MSG_VERBOSE( "No valid SF for jet in SUSYTools_xAOD::FJVT_SF" );
-      // this may or may not be right, may want to report that this
-      // jet doesn't have a valid scale factor
-      break;
-    default:
-      ATH_MSG_VERBOSE( "Retrieve SF for jet container in SUSYTools_xAOD::FJVT_SF with value " << totalSF );
+      // the SF are only applied for HS jets and implicitely requires the presense of the isHS decoration
+      CP::CorrectionCode result;
+      if (acc_passJvt(*jet)) {
+        result = m_jetfJvtEfficiencyTool->getEfficiencyScaleFactor(*jet,current_sf);
+      }
+      else {
+        result = m_jetfJvtEfficiencyTool->getInefficiencyScaleFactor(*jet,current_sf);
+      }
+      
+      switch (result) {
+        case CP::CorrectionCode::Error:
+          // this is probably not right, should report an error here
+          ATH_MSG_ERROR("Inexplicably failed fJVT calibration" );
+          break;
+        case CP::CorrectionCode::OutOfValidityRange:
+          // no fJvt SF for jet, that is ok e.g. for jets with |eta| < 2.5
+          ATH_MSG_VERBOSE( "Skip SF application in SUSYTools_xAOD::FJVT_SF as jet outside validate range" );
+          break;
+        default:
+          ATH_MSG_VERBOSE( "Retrieve SF for jet in SUSYTools_xAOD::FJVT_SF with value " << current_sf );
+          totalSF *= current_sf;
+      }
+
     }
+
+    ATH_MSG_VERBOSE( "Retrieve total SF for jet container in SUSYTools_xAOD::FJVT_SF with value " << totalSF );
 
     return totalSF;
   }
@@ -1006,20 +1039,21 @@ namespace ST {
   double SUSYObjDef_xAOD::FJVT_SFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) {
 
     float totalSF = 1.;
+    if (!m_doFwdJVT) return totalSF;
 
     //Set the new systematic variation
-    StatusCode ret = m_jetFwdJvtEfficiencyTool->applySystematicVariation(systConfig);
+    StatusCode ret = m_jetfJvtEfficiencyTool->applySystematicVariation(systConfig);
     if ( ret != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot configure FJVTEfficiencyTool for systematic var. " << systConfig.name() );
+      ATH_MSG_ERROR("Cannot configure fJvtEfficiencyTool for systematic var. " << systConfig.name() );
     }
 
     // Delegate
     totalSF = SUSYObjDef_xAOD::FJVT_SF( jets );
 
-    if (m_applyJVTCut) {
-      ret = m_jetFwdJvtEfficiencyTool->applySystematicVariation(m_currentSyst);
+    if (m_doFwdJVT) {
+      ret = m_jetfJvtEfficiencyTool->applySystematicVariation(m_currentSyst);
       if ( ret != StatusCode::SUCCESS) {
-        ATH_MSG_ERROR("Cannot configure FJVTEfficiencyTool for systematic var. " << systConfig.name() );
+        ATH_MSG_ERROR("Cannot configure fJvtEfficiencyTool for systematic var. " << systConfig.name() );
       }
     }
 

@@ -55,7 +55,11 @@
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "ParticleJetTools/JetTruthLabelingTool.h"
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
+#include "ParticleJetTools/JetPileupLabelingTool.h"
+#include "JetMomentTools/JetVertexNNTagger.h"
+#include "JetAnalysisInterfaces/IJvtEfficiencyTool.h"
+#include "PATCore/IAsgSelectionTool.h"
+
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
@@ -96,7 +100,7 @@ namespace CP {
   class IIsolationCloseByCorrectionTool;
   class IIsolationCorrectionTool;
   class IPileupReweightingTool;
-  class IJetJvtEfficiency;
+  class IJvtEfficiencyTool;
 }
 
 namespace InDet {
@@ -805,8 +809,13 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_fatjetUncertaintiesTool;
     asg::AnaToolHandle<IJetSelector> m_jetCleaningTool;
     asg::AnaToolHandle<IJetUpdateJvt> m_jetJvtUpdateTool;
-    asg::AnaToolHandle<CP::IJetJvtEfficiency> m_jetJvtEfficiencyTool;
-    asg::AnaToolHandle<CP::IJetJvtEfficiency> m_jetFwdJvtEfficiencyTool;
+
+    asg::AnaToolHandle<JetPileupLabelingTool>  m_jetPileupLabelingTool;
+    asg::AnaToolHandle<JetPileupTag::JetVertexNNTagger>  m_jetNNJvtMomentTool;
+    asg::AnaToolHandle<IAsgSelectionTool> m_jetNNJvtSelectionTool;
+    asg::AnaToolHandle<CP::IJvtEfficiencyTool> m_jetNNJvtEfficiencyTool;
+    asg::AnaToolHandle<IAsgSelectionTool> m_jetfJvtSelectionTool;
+    asg::AnaToolHandle<CP::IJvtEfficiencyTool> m_jetfJvtEfficiencyTool;
 
     asg::AnaToolHandle<SmoothedWZTagger> m_WTaggerTool;
     asg::AnaToolHandle<SmoothedWZTagger> m_ZTaggerTool;
