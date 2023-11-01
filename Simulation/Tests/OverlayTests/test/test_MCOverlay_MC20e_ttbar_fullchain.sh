@@ -25,7 +25,7 @@ Reco_tf.py \
 --conditionsTag default:OFLCOND-MC16-SDR-RUN2-09 RDOtoRDOTrigger:OFLCOND-MC16-SDR-RUN2-08-02 \
 --geometryVersion default:ATLAS-R2-2016-01-00-01 \
 --maxEvents ${events} --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---preInclude "all:Campaigns.MC20e" \
+--preInclude "default:Campaigns.MC20e" "RDOtoRDOTrigger:Campaigns/MC20e.py" \
 --postInclude "default:PyJobTransforms.UseFrontier" \
 --runNumber 410470 \
 --steering "doOverlay" "doRDO_TRIG" \
