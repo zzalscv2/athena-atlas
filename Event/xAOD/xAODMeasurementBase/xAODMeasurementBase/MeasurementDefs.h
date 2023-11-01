@@ -91,7 +91,7 @@ template <int N> AmgSymMatrix(N) toEigen(const ConstMatrixMap<N>& xAODmat) {
 
 template <int N> AmgVector(N) toEigen(const ConstVectorMap<N>& xAODvec) {
     AmgVector(N) v{AmgVector(N)::Zero()};
-    for (int i = 0 ; i <= N; ++i) {
+    for (int i = 0 ; i < N; ++i) {
         v[i] = xAODvec[i];
     }
     return v;
