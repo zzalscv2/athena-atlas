@@ -56,6 +56,18 @@ def LArBadFebCfg(configFlags, tag=None):
     result.addCondAlgo(CompFactory.LArBadFebCondAlg(ReadKey=rekey))
     return result
 
+def LArMaskedSCCfg(configFlags):
+    result=ComponentAccumulator()
+    result.merge(LArOnOffIdMappingSCCfg(configFlags))
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    result.merge(addFolders(configFlags,"/LAR/BadChannels/MaskedSC","LAR_ONL",
+                            tag="LARBadChannelsMaskedSC-RUN3-UPD1-00",
+                            className="CondAttrListCollection",
+                            extensible=configFlags.Common.isOnline )) # when run online, need folder to be extensible to force reload each event         
+    condAlgo = CompFactory.LArBadChannelCondAlg(name="MaskedSCCondAlg",ReadKey="/LAR/BadChannels/MaskedSC",isSC=True,
+                                                CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC",ReloadEveryEvent=configFlags.Common.isOnline)         
+    result.addCondAlgo(condAlgo)
+    return result
 
 
 if __name__=="__main__":

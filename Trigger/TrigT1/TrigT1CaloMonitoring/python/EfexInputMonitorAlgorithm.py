@@ -10,6 +10,10 @@ def EfexInputMonitoringConfig(inputFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
+    from LArBadChannelTool.LArBadChannelConfig import LArMaskedSCCfg
+
+    result.merge(LArMaskedSCCfg(inputFlags))
+
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'EfexInputMonitoringCfg')

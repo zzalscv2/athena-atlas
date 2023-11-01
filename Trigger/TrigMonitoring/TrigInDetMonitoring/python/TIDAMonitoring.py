@@ -343,8 +343,9 @@ def TIDAbjet( flags, key, toolkey, tools, monlevel, mcTruth ) :
 
         if len(chains)==0 : 
                 chains = getchains( flags, 
-                            [ "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_FTF",
-                              "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_IDTrig", 
+                            [ 
+#                             "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_FTF",
+#                             "HLT_j(?!0).*:key=HLT_IDTrack_Bjet_IDTrig", 
                               "HLT_j(?!0).*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
                             ], None )
         
