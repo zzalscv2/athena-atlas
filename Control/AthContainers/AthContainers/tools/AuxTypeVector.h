@@ -68,10 +68,11 @@ protected:
 public:
   /**
    * @brief Constructor.
+   * @param auxid The auxid of the variable this vector represents.
    * @param vecPtr Pointer to the object (of type @c CONT).
    * @param ownFlag If true, take ownership of the object.
    */
-  AuxTypeVectorHolder (vector_type* vecPtr, bool ownFlag);
+  AuxTypeVectorHolder (auxid_t auxid, vector_type* vecPtr, bool ownFlag);
 
 
   /**
@@ -117,6 +118,12 @@ public:
    * @brief Make a copy of this vector.
    */
   virtual std::unique_ptr<IAuxTypeVector> clone() const override;
+
+
+  /**
+   * @brief Return the auxid of the variable this vector represents.
+   */
+  virtual auxid_t auxid() const override;
 
 
   /**
@@ -313,6 +320,10 @@ private:
 
   /// True if we need to delete the object.
   bool m_ownFlag;
+
+protected:
+  /// The auxid of the variable this vector represents.
+  auxid_t m_auxid;
 };
 
 
@@ -339,10 +350,11 @@ public:
 
   /**
    * @brief Constructor.  Makes a new vector.
+   * @param auxid The auxid of the variable this vector represents.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
    */
-  AuxTypeVector (size_t size, size_t capacity);
+  AuxTypeVector (auxid_t auxid, size_t size, size_t capacity);
 
 
 

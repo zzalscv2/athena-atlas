@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/RootAuxVectorFactory.h
@@ -50,16 +50,20 @@ public:
   /**
    * @brief Constructor.  Makes a new vector.
    * @param factory The factory object for this type.
+   * @param auxid The auxid of the variable this vector represents.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
    */
   RootAuxVector (const RootAuxVectorFactory* factory,
+                 SG::auxid_t auxid,
                  size_t size,
                  size_t capacity);
 
 
   /**
    * @brief Constructor, from a pointer to a vector object.
+   * @param factory The factory object for this type.
+   * @param auxid The auxid of the variable this vector represents.
    * @param data The vector object.
    * @param isPacked If true, @c data is a @c PackedContainer.
    * @param ownFlag If true, then take ownership of @c data.
@@ -71,6 +75,7 @@ public:
    * must be false.
    */
   RootAuxVector (const RootAuxVectorFactory* factory,
+                 SG::auxid_t auxid,
                  void* data,
                  bool isPacked,
                  bool ownFlag);
@@ -100,6 +105,12 @@ public:
    * @brief Make a copy of this vector.
    */
   virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override;
+
+
+  /**
+   * @brief Return the auxid of the variable this vector represents.
+   */
+  SG::auxid_t auxid() const override;
 
 
   /**
@@ -214,6 +225,9 @@ private:
 
   /// Should be delete the vector object?
   bool m_ownFlag;
+
+  /// The auxid of the variable this vector represents.
+  auxid_t m_auxid;
 };
 
 
@@ -281,18 +295,22 @@ public:
 
   /**
    * @brief Create a vector object of this type.
+   * @param auxid ID for the variable being created.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
    *
    * Returns a newly-allocated object.
    */
   virtual
-  std::unique_ptr<SG::IAuxTypeVector> create (size_t size, size_t capacity) const
+  std::unique_ptr<SG::IAuxTypeVector> create (SG::auxid_t auxid,
+                                              size_t size,
+                                              size_t capacity) const
     override;
 
 
   /**
    * @brief Create a vector object of this type from a data blob.
+   * @param auxid ID for the variable being created.
    * @param data The vector object.
    * @param isPacked If true, @c data is a @c PackedContainer.
    * @param ownFlag If true, the newly-created IAuxTypeVector object
@@ -306,7 +324,8 @@ public:
    *
    * Returns a newly-allocated object.
    */
-  virtual std::unique_ptr<SG::IAuxTypeVector> createFromData (void* data,
+  virtual std::unique_ptr<SG::IAuxTypeVector> createFromData (SG::auxid_t auxid,
+                                                              void* data,
                                                               bool isPacked,
                                                               bool ownFlag) const
     override;

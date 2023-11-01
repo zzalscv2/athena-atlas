@@ -34,6 +34,7 @@ namespace xAOD {
    public:
       /// Constructor
       TAuxVector( const SG::IAuxTypeVectorFactory* factory,
+                  SG::auxid_t auxid,
                   const ::TClass* cl, size_t size, size_t capacity );
       /// Copy constructor
       TAuxVector( const TAuxVector& parent );
@@ -49,6 +50,8 @@ namespace xAOD {
       /// Copy the managed vector
       virtual std::unique_ptr< SG::IAuxTypeVector > clone() const override;
 
+      /// Return the auxid of the variable this vector represents.
+      virtual SG::auxid_t auxid() const override;
       /// Return a pointer to the start of the vector's data
       virtual void* toPtr() override;
       /// Return a pointer to the STL vector itself
@@ -80,6 +83,8 @@ namespace xAOD {
       ::TVirtualCollectionProxy* m_proxy;
       /// Pointer to the vector object
       void* m_vec;
+      /// ID of the variable we represent.
+      SG::auxid_t m_auxid;
 
    }; // class TAuxVector
 

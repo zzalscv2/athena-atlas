@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/src/AuxStoreInternal.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -121,18 +119,17 @@ void* AuxStoreInternal::getData (auxid_t auxid, size_t size, size_t capacity)
 
 /**
  * @brief Explicitly add a vector to the store.
- * @param auxid The identifier of the aux data item being added.
  * @param vec Vector data being added.
  * @param isDecoration Should this variable be marked as a decoration?
  *
  * For internal use.  The @c auxid must not already exist in the store.
  */
 void
-AuxStoreInternal::addVector (auxid_t auxid,
-                             std::unique_ptr<IAuxTypeVector> vec,
+AuxStoreInternal::addVector (std::unique_ptr<IAuxTypeVector> vec,
                              bool isDecoration)
 {
   guard_t guard (m_mutex);
+  auxid_t auxid = vec->auxid();
   if (m_locked)
     throw ExcStoreLocked (auxid);
 

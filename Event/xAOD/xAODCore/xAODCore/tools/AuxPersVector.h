@@ -1,10 +1,8 @@
 // Dear emacs, this is -*- c++ -*-
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: AuxPersVector.h 793737 2017-01-24 20:11:10Z ssnyder $
 #ifndef XAODCORE_AUXPERSVECTOR_H
 #define XAODCORE_AUXPERSVECTOR_H
 
@@ -34,8 +32,8 @@ namespace xAOD {
       typedef VEC& vector_type;
 
       /// Constructor
-      AuxPersVector( vector_type vec )
-        : SG::AuxTypeVectorHolder<T, VEC> (&vec, false) {}
+      AuxPersVector( SG::auxid_t auxid, vector_type vec )
+        : SG::AuxTypeVectorHolder<T, VEC> (auxid, &vec, false) {}
 
       virtual std::unique_ptr<SG::IAuxTypeVector> clone() const {
         return std::make_unique<AuxPersVector<T, VEC> >(*this);

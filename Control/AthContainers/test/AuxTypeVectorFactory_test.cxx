@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeVectorFactory_test.cxx
@@ -45,12 +45,14 @@ void test_vector()
   else
     assert (fac.tiVec() == &typeid (std::vector<T, ALLOC<T> >));
 
-  std::unique_ptr<SG::IAuxTypeVector> v = fac.create (10, 20);
+  std::unique_ptr<SG::IAuxTypeVector> v = fac.create (1, 10, 20);
+  assert (v->auxid() == 1);
   T* ptr = reinterpret_cast<T*> (v->toPtr());
   ptr[0] = makeT(20);
   ptr[1] = makeT(2);
 
-  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.create (10, 20);
+  std::unique_ptr<SG::IAuxTypeVector> v2 = fac.create (1, 10, 20);
+  assert (v2->auxid() == 1);
   T* ptr2 = reinterpret_cast<T*> (v2->toPtr());
   fac.copy (ptr2, 0, ptr, 1);
   fac.copy (ptr2, 1, ptr, 0);
@@ -75,7 +77,8 @@ void test_vector()
   vec3->push_back (makeT(3));
   vec3->push_back (makeT(2));
   vec3->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v3 = fac.createFromData (vec3, false, true);
+  std::unique_ptr<SG::IAuxTypeVector> v3 = fac.createFromData (1, vec3, false, true);
+  assert (v3->auxid() == 1);
   assert (v3->size() == 3);
   T* ptr3 = reinterpret_cast<T*> (v3->toPtr());
   assert (ptr3[0] == makeT(3));
@@ -95,7 +98,8 @@ void test_vector2()
   vec4->push_back (makeT(3));
   vec4->push_back (makeT(2));
   vec4->push_back (makeT(1));
-  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (vec4, true, true);
+  std::unique_ptr<SG::IAuxTypeVector> v4 = fac.createFromData (1, vec4, true, true);
+  assert (v4->auxid() == 1);
   assert (v4->size() == 4);
   T* ptr4 = reinterpret_cast<T*> (v4->toPtr());
   assert (ptr4[0] == makeT(4));

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: AuxPersInfo.h 793737 2017-01-24 20:11:10Z ssnyder $
@@ -35,50 +35,57 @@ namespace xAOD {
       typedef T& info_type;
 
       /// Constructor
-      AuxPersInfo( info_type info ) : m_info( info ) {}
+      AuxPersInfo( SG::auxid_t auxid, info_type info ) :
+         m_info( info ), m_auxid( auxid ) {}
 
-      virtual std::unique_ptr<SG::IAuxTypeVector> clone() const {
+      virtual SG::auxid_t auxid() const override {
+         return m_auxid;
+      }
+
+      virtual std::unique_ptr<SG::IAuxTypeVector> clone() const override {
         return std::make_unique<AuxPersInfo<T> >(*this);
       }
 
-      virtual void* toPtr() {
+      virtual void* toPtr() override {
          return &m_info;
       }
-      virtual void* toVector() {
+      virtual void* toVector() override {
          return &m_info;
       }
-      virtual size_t size() const {
+      virtual size_t size() const override {
          return 1;
       }
-      virtual bool resize( size_t sz ) {
+      virtual bool resize( size_t sz ) override {
          if( sz != 1 ) {
             throw std::runtime_error( "Calling resize with != 1 on a "
                                       "non-vector" );
          }
          return true;
       }
-      virtual void reserve( size_t sz ) {
+      virtual void reserve( size_t sz ) override {
          if( sz != 1 ) {
             throw std::runtime_error( "Calling reserve with != 1 on a "
                                       "non-vector" );
          }
       }
-      virtual void shift( size_t /*pos*/, ptrdiff_t /*offs*/ ) {
+      virtual void shift( size_t /*pos*/, ptrdiff_t /*offs*/ ) override {
          throw std::runtime_error( "Calling shift on a non-vector" );
       }
 
-      virtual bool insertMove (size_t /*pos*/, void* /*beg*/, void* /*end*/)
+      virtual bool insertMove (size_t /*pos*/, void* /*beg*/, void* /*end*/) override
       {
         throw std::runtime_error( "Calling insertMove on a non-vector" );
       }
      
-      virtual const std::type_info* objType() const {
+      virtual const std::type_info* objType() const override {
          return &typeid(T);
       }
 
    private:
       /// Reference to the info being handled
       info_type m_info;
+
+      SG::auxid_t m_auxid;
 
    }; // class AuxPersInfo
 

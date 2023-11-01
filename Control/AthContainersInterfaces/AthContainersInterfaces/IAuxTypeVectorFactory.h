@@ -15,6 +15,7 @@
 #define ATHCONTAINERSINTERFACES_IAUXTYPEVECTORFACTORY_H
 
 
+#include "AthContainersInterfaces/AuxTypes.h"
 #include <cstddef>
 #include <typeinfo>
 #include <memory>
@@ -55,17 +56,21 @@ public:
 
   /**
    * @brief Create a vector object of this type.
+   * @param auxid ID for the variable being created.
    * @param size Initial size of the new vector.
    * @param capacity Initial capacity of the new vector.
    *
    * Returns a newly-allocated object.
    */
   virtual
-  std::unique_ptr<IAuxTypeVector> create (size_t size, size_t capacity) const = 0;
+  std::unique_ptr<IAuxTypeVector> create (SG::auxid_t auxid,
+                                          size_t size,
+                                          size_t capacity) const = 0;
 
 
   /**
    * @brief Create a vector object of this type from a data blob.
+   * @param auxid ID for the variable being created.
    * @param data The vector object.
    * @param isPacked If true, @c data is a @c PackedContainer.
    * @param ownFlag If true, the newly-created IAuxTypeVector object
@@ -79,7 +84,8 @@ public:
    * Returns a newly-allocated object.
    */
   virtual
-  std::unique_ptr<IAuxTypeVector> createFromData (void* data,
+  std::unique_ptr<IAuxTypeVector> createFromData (SG::auxid_t auxid,
+                                                  void* data,
                                                   bool isPacked,
                                                   bool ownFlag) const = 0;
 

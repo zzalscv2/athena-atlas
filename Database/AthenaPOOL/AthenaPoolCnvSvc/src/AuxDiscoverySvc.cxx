@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AuxDiscoverySvc.cxx
@@ -73,7 +73,7 @@ bool AuxDiscoverySvc::setData(SG::auxid_t auxid, void* data, const RootType& typ
    } else {
       // Move the data to the dynamic store.
       std::unique_ptr<SG::IAuxTypeVector> vec(registry.makeVectorFromData(auxid, data, false, true));
-      m_storeInt->addVector(auxid, std::move(vec), false);
+      m_storeInt->addVector(std::move(vec), false);
    }
    return true;
 }

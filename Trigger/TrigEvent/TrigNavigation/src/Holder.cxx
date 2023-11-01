@@ -526,7 +526,7 @@ IHolder::deserializeDynVars (const std::vector<uint32_t>& dataBlob,
     bool isPacked = (strncmp (tname.c_str(), packed_pref, packed_preflen) == 0);
     std::unique_ptr<SG::IAuxTypeVector> vec
       (r.makeVectorFromData (id, obj, isPacked, true));
-    store->addVector (id, std::move(vec), false);
+    store->addVector (std::move(vec), false);
   }
 
   return std::unique_ptr<SG::IAuxStore> (std::move(store));

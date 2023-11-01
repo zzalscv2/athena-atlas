@@ -15,9 +15,11 @@
 namespace xAOD {
 
    TAuxVector::TAuxVector( const SG::IAuxTypeVectorFactory* factory,
+                           SG::auxid_t auxid,
                            const ::TClass* cl, size_t size, size_t )
       : m_factory( factory ),
-        m_proxy( cl->GetCollectionProxy() ), m_vec( cl->New() ) {
+        m_proxy( cl->GetCollectionProxy() ), m_vec( cl->New() ),
+        m_auxid( auxid ) {
 
       // A little sanity check:
       if( ! m_proxy ) {
@@ -32,7 +34,8 @@ namespace xAOD {
 
    TAuxVector::TAuxVector( const TAuxVector& parent )
       : m_factory( parent.m_factory ), m_proxy( parent.m_proxy ),
-        m_vec( parent.m_proxy->GetCollectionClass()->New() ) {
+        m_vec( parent.m_proxy->GetCollectionClass()->New() ),
+        m_auxid( parent.m_auxid ) {
 
       // Check the size of the parent object:
       const size_t size = parent.size();
@@ -73,6 +76,7 @@ namespace xAOD {
       // Get the information from the other object:
       m_factory = other.m_factory;
       m_proxy   = other.m_proxy;
+      m_auxid = other.m_auxid;
 
       // Create a new vector:
       m_vec = m_proxy->GetCollectionClass()->New();
@@ -102,6 +106,13 @@ namespace xAOD {
 
       return std::make_unique< TAuxVector >( *this );
    }
+
+
+   SG::auxid_t TAuxVector::auxid() const
+   {
+      return m_auxid;
+   }
+
 
    void* TAuxVector::toPtr() {
 

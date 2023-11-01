@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: IAuxTypeVector.h 793692 2017-01-24 16:27:09Z ssnyder $
 /**
  * @file AthContainersInterfaces/IAuxTypeVector.h
  * @author scott snyder <snyder@bnl.gov>
@@ -17,6 +14,7 @@
 #define ATHCONTAINERSINTERFACES_IAUXTYPEVECTOR_H
 
 
+#include "AthContainersInterfaces/AuxTypes.h"
 #include <cstddef>
 #include <memory>
 #include <typeinfo>
@@ -48,6 +46,12 @@ public:
    * @brief Make a copy of this vector.
    */
   virtual std::unique_ptr<IAuxTypeVector> clone() const = 0;
+
+  
+  /**
+   * @brief Return the auxid of the variable this vector represents.
+   */
+  virtual auxid_t auxid() const = 0;
 
 
   /**
