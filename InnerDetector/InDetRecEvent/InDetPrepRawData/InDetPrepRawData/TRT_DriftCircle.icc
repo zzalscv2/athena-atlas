@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace InDet {
@@ -13,13 +13,23 @@ TRT_DriftCircle::getWord() const
 inline int
 TRT_DriftCircle::driftTimeBin() const
 {
-  return TRT_LoLumRawData::driftTimeBin(m_word);
+  if (!m_island.isValid()) {
+    Island tmpIsland;
+    TRT_LoLumRawData::findLargestIsland(m_word, tmpIsland);
+    m_island.set(tmpIsland);
+  }
+  return m_island.ptr()->m_leadingEdge;
 }
 
 inline int
 TRT_DriftCircle::trailingEdge() const
 {
-  return TRT_LoLumRawData::trailingEdge(m_word);
+  if (!m_island.isValid()) {
+    Island tmpIsland;
+    TRT_LoLumRawData::findLargestIsland(m_word, tmpIsland);
+    m_island.set(tmpIsland);
+  }
+  return m_island.ptr()->m_trailingEdge;
 }
 
 inline bool
@@ -41,15 +51,19 @@ TRT_DriftCircle::lastBinHigh() const
 }
 
 inline double
-TRT_DriftCircle::timeOverThreshold() const
-{
-  return TRT_LoLumRawData::timeOverThreshold(m_word);
+TRT_DriftCircle::timeOverThreshold() const {
+  unsigned int leadingEdge = driftTimeBin();
+  unsigned int trailingEdge = this->trailingEdge();
+  if (leadingEdge && trailingEdge) {
+    return (trailingEdge - leadingEdge + 1) *
+           TRT_LoLumRawData::getDriftTimeBinWidth();
+  };
+  return 0.;
 }
 
 inline double
-TRT_DriftCircle::rawDriftTime() const
-{
-    return (TRT_LoLumRawData::driftTimeBin(m_word)+0.5) * TRT_LoLumRawData::getDriftTimeBinWidth();
+TRT_DriftCircle::rawDriftTime() const {
+  return (driftTimeBin() + 0.5) * TRT_LoLumRawData::getDriftTimeBinWidth();
 }
 
 inline bool

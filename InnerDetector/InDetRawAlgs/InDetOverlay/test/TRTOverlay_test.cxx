@@ -701,9 +701,6 @@ namespace OverlayTesting {
     for(unsigned int i=0; i<32; ++i) {
       outBits[i]=std::max(sigBits[i], bkgBits[i]);
     }
-    const unsigned int outWord = encodeDigit(outBits);
-    const double outputTOT = TRT_LoLumRawData::timeOverThreshold(outWord);
-    const unsigned int outputDriftTimeBin = TRT_LoLumRawData::driftTimeBin(outWord);
 
     std::vector<HepMC::GenParticlePtr> genPartList;
     initMcEventCollection(genPartList);
@@ -733,8 +730,8 @@ namespace OverlayTesting {
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
     ASSERT_EQ( outputDigit1->highLevel(), sigHT );
-    ASSERT_EQ( outputDigit1->timeOverThreshold(), outputTOT );
-    ASSERT_EQ( outputDigit1->driftTimeBin(), static_cast<int>(outputDriftTimeBin) );
+    ASSERT_EQ( outputDigit1->timeOverThreshold(), 46.875 );
+    ASSERT_EQ( outputDigit1->driftTimeBin(), 5 );
   }
 
   TEST_F(TRTOverlay_test, containers_with_matching_collections_with_differing_LT_RDOs_same_strawID) {
@@ -797,10 +794,6 @@ namespace OverlayTesting {
     for(unsigned int i=0; i<32; ++i) {
       outBits[i]=std::max(sigBits[i], bkgBits[i]);
     }
-    const unsigned int outWord = encodeDigit(outBits);
-    const double outputTOT = TRT_LoLumRawData::timeOverThreshold(outWord);
-    const unsigned int outputDriftTimeBin = TRT_LoLumRawData::driftTimeBin(outWord);
-
     std::vector<HepMC::GenParticlePtr> genPartList;
     initMcEventCollection(genPartList);
     SG::WriteHandle<InDetSimDataCollection> inputSigSDODataHandle{"StoreGateSvc+TRT_SDO_Map_SIG"};
@@ -827,8 +820,8 @@ namespace OverlayTesting {
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
     ASSERT_EQ( outputDigit1->highLevel(), sigHT );
-    ASSERT_EQ( outputDigit1->timeOverThreshold(), outputTOT );
-    ASSERT_EQ( outputDigit1->driftTimeBin(), static_cast<int>(outputDriftTimeBin) );
+    ASSERT_EQ( outputDigit1->timeOverThreshold(), 46.875 );
+    ASSERT_EQ( outputDigit1->driftTimeBin(), 5 );
   }
 
   TEST_F(TRTOverlay_test, containers_with_matching_collections_with_differing_LT_RDOs_same_strawID_ForceHTbit) {
@@ -867,10 +860,6 @@ namespace OverlayTesting {
       outBits[i]=std::max(sigBits[i], bkgBits[i]);
     }
     outBits[17]=1;    // force in-time HT bit to be true
-
-    const unsigned int outWord = encodeDigit(outBits);
-    const double outputTOT = TRT_LoLumRawData::timeOverThreshold(outWord);
-    const unsigned int outputDriftTimeBin = TRT_LoLumRawData::driftTimeBin(outWord);
 
     inputSigDataHandle = std::make_unique<TRT_RDO_Container>(containerSize);
     std::unique_ptr<TRT_RDO_Collection> sigCollection = std::make_unique<TRT_RDO_Collection>(sigElementHash);
@@ -920,8 +909,8 @@ namespace OverlayTesting {
     const TRT_LoLumRawData* outputDigit1 = dynamic_cast<const TRT_LoLumRawData*>(outputCollection1->at(0));
     ASSERT_NE( outputDigit1, nullptr );
     ASSERT_EQ( outputDigit1->highLevel(), true );
-    ASSERT_EQ( outputDigit1->timeOverThreshold(), outputTOT );
-    ASSERT_EQ( outputDigit1->driftTimeBin(), static_cast<int>(outputDriftTimeBin) );
+    ASSERT_EQ( outputDigit1->timeOverThreshold(), 46.875 );
+    ASSERT_EQ( outputDigit1->driftTimeBin(), 5 );
   }
 
 } // <-- namespace OverlayTesting

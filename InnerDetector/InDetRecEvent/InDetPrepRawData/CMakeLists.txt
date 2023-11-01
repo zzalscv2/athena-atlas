@@ -7,7 +7,8 @@ atlas_subdir( InDetPrepRawData )
 atlas_add_library( InDetPrepRawData
                    src/*.cxx
                    PUBLIC_HEADERS InDetPrepRawData
-                   LINK_LIBRARIES AthLinks AthenaKernel GeoPrimitives Identifier EventContainers EventPrimitives GaudiKernel InDetReadoutGeometry TRT_ReadoutGeometry TrkSurfaces TrkEventPrimitives TrkPrepRawData InDetRawData )
+                   LINK_LIBRARIES AthLinks AthenaKernel GeoPrimitives Identifier EventContainers EventPrimitives GaudiKernel
+                   InDetReadoutGeometry TRT_ReadoutGeometry TrkSurfaces TrkEventPrimitives TrkPrepRawData InDetRawData CxxUtils)
 
 atlas_add_dictionary( InDetPrepRawDataDict
                       InDetPrepRawData/InDetPrepRawDataDict.h

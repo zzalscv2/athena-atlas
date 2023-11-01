@@ -30,28 +30,7 @@ TRT_LoLumRawData::TRT_LoLumRawData(const Identifier rdoId,
   TRT_RDORawData( rdoId, word) //call base-class constructor
 {}
 
-
-unsigned int TRT_LoLumRawData::driftTimeBin(unsigned int word) {
-  unsigned int leadingEdge=0, trailingEdge=0;
-  findLargestIsland(word, leadingEdge, trailingEdge);
-  return leadingEdge;
-}
-
-unsigned int TRT_LoLumRawData::trailingEdge(unsigned int word) {
-  unsigned int leadingEdge=0, trailingEdge=0;
-  findLargestIsland(word, leadingEdge, trailingEdge);
-  return trailingEdge;
-}
-
-double TRT_LoLumRawData::timeOverThreshold(unsigned int word) {
-  unsigned int leadingEdge=0, trailingEdge=0;
-  if (findLargestIsland(word, leadingEdge, trailingEdge)) {
-    return (trailingEdge - leadingEdge + 1) * m_driftTimeBinWidth;
-  };
-  return 0.;
-}
-
-bool TRT_LoLumRawData::findLargestIsland(unsigned int word, unsigned int& leadingEdge, unsigned int& trailingEdge) {
+void TRT_LoLumRawData::findLargestIsland(unsigned int word, Island& island) {
   unsigned long mask = 0x02000000;  // 0 0 10000000 0 00000000 0 00000000
   unsigned int bestLength = 0;
   unsigned int currentLength = 0;
@@ -62,7 +41,7 @@ bool TRT_LoLumRawData::findLargestIsland(unsigned int word, unsigned int& leadin
   mask >>=1;  // 0 0 01000000 0 00000000 0 00000000
   bool SawZero = false;
   unsigned int k = 1;
-  leadingEdge=0, trailingEdge=0;
+  island.m_leadingEdge=0, island.m_trailingEdge=0;
   unsigned int currentLeadingEdge=0, currentTrailingEdge=0;
 
   // shift bitmask to the right until end
@@ -76,8 +55,8 @@ bool TRT_LoLumRawData::findLargestIsland(unsigned int word, unsigned int& leadin
       } else { // remember longest island, ignore islands of length 1 which are very likely noise
         if (currentLength >= bestLength && currentLeadingEdge<18 && currentLength > 1) {
           bestLength = currentLength;
-          leadingEdge = currentLeadingEdge;
-          trailingEdge = currentTrailingEdge;
+          island.m_leadingEdge = currentLeadingEdge;
+          island.m_trailingEdge = currentTrailingEdge;
         }
         currentLength = 0;
       }
@@ -90,6 +69,5 @@ bool TRT_LoLumRawData::findLargestIsland(unsigned int word, unsigned int& leadin
   }
   assert(k == 20);
   // avoid very early TE, most likely from previous BX. Hit will still be used for tracking if it has a valid LE
-  if (trailingEdge < 8) trailingEdge = 0;
-  return leadingEdge && trailingEdge;
+  if (island.m_trailingEdge < 8) island.m_trailingEdge = 0;
 }
