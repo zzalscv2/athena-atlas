@@ -40,7 +40,7 @@ namespace CP {
         // The template AcceptInfo object
         asg::AcceptInfo m_info;
         // The index to set in the info. I suspect that this is always 0 but better to be safe
-        int m_cutPos;
+        int m_cutPos = 0;
         // The accessor for the jet eta
         std::optional<SG::AuxElement::ConstAccessor<float>> m_etaAcc;
         // Check the range
