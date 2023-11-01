@@ -187,6 +187,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
           } else {
             errorWrongChannel(frag, channel);
           }
+          break;
 
 
         case COMMON_ADC1_FRAG:
