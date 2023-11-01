@@ -3,11 +3,15 @@
 # art-description: Tests implementation of FastCaloSimV2 as a Geant4 fast simulation engine with Run 3 geometry and conditions
 # art-include: 23.0/Athena
 # art-include: main/Athena
+# art-athena-mt: 8
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: test.HITS.pool.root
 
+export ATHENA_CORE_NUMBER=8
+
 AtlasG4_tf.py \
+    --multithreaded \
     --randomSeed '10' \
     --maxEvents '20' \
     --skipEvents '0' \
@@ -28,7 +32,7 @@ if [ $rc -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed
+    art.py compare grid --entries 20 ${ArtPackage} ${ArtJobName} --mode=semi-detailed --order-trees
     rc2=$?
 fi
 
