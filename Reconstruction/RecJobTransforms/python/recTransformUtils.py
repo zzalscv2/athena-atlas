@@ -96,7 +96,7 @@ def addRecoSubsteps(executorSet):
                                    substep = 'r2b', inData = ['RDO'], outData = ['BS']))
     executorSet.add(athenaExecutor(name = 'RDOtoRDOTrigger', skeletonFile = 'RecJobTransforms/skeleton.RDOtoRDOtrigger.py',
                                    skeletonCA = 'RecJobTransforms.RDOtoRDO_TRIG_Skeleton',
-                                   substep = 'r2t', inData = ['RDO'], outData = ['RDO_TRIG'], onlyMT = True))
+                                   substep = 'r2t', inData = ['RDO'], outData = ['RDO_TRIG']))
     executorSet.add(athenaExecutor(name = 'RAWtoALL', skeletonFile = 'RecJobTransforms/skeleton.RAWtoALL_tf.py',
                                    skeletonCA = 'RecJobTransforms.RAWtoALL_Skeleton',
                                    substep = 'r2a', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
