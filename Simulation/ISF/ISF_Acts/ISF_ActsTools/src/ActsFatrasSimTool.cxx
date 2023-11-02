@@ -20,7 +20,7 @@ ISF::ActsFatrasSimTool::~ActsFatrasSimTool() {}
 
 StatusCode ISF::ActsFatrasSimTool::initialize() {
   ATH_CHECK(BaseSimulatorTool::initialize());
-
+  ATH_MSG_INFO("ISF::ActsFatrasSimTool update with ACTS 32.2.0");
   // Retrieve particle filter
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
@@ -87,14 +87,20 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   auto neutralStepper = NeutralStepper();
   auto chargedPropagator = ChargedPropagator(chargedStepper, navigator, m_logger->clone(Acts::Logging::Level::FATAL));
   auto neutralPropagator = NeutralPropagator(neutralStepper, navigator, m_logger->clone(Acts::Logging::Level::FATAL));
-  ChargedSimulation simulatorCharged(std::move(chargedPropagator), m_logger);
-  NeutralSimulation simulatorNeutral(std::move(neutralPropagator), m_logger);
+  ChargedSimulation simulatorCharged(std::move(chargedPropagator), m_logger->clone());
+  NeutralSimulation simulatorNeutral(std::move(neutralPropagator), m_logger->clone());
   Simulation simulator=Simulation(std::move(simulatorCharged),std::move(simulatorNeutral));
   ATH_MSG_VERBOSE(name() << " Min pT for interaction " << m_interact_minPt * Acts::UnitConstants::MeV << " GeV");
-  simulator.charged.maxStepSize=m_maxStepSize;
-  simulator.charged.maxStep=m_maxStep;
-  simulator.charged.pathLimit=m_pathLimit;
-  simulator.charged.ptLoopers=m_ptLoopers;
+  // Acts propagater options
+  simulator.charged.maxStepSize = m_maxStepSize;
+  simulator.charged.maxStep = m_maxStep;
+  simulator.charged.pathLimit = m_pathLimit;
+  simulator.charged.maxRungeKuttaStepTrials = m_maxRungeKuttaStepTrials;
+  simulator.charged.loopProtection = m_loopProtection;
+  simulator.charged.loopFraction = m_loopFraction;
+  simulator.charged.targetTolerance = m_tolerance;
+  simulator.charged.stepSizeCutOff = m_stepSizeCutOff;
+  // Create interaction list
   simulator.charged.interactions = ActsFatras::makeStandardChargedElectroMagneticInteractions(m_interact_minPt * Acts::UnitConstants::MeV);
   // get Geo and Mag map
   ATH_MSG_VERBOSE(name() << " Getting per event Geo and Mag map");
@@ -183,7 +189,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
 Acts::MagneticFieldContext ISF::ActsFatrasSimTool::getMagneticFieldContext(const EventContext& ctx) const {
   SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
   if (!readHandle.isValid()) {
-     throw std::runtime_error(name() + ": Failed to retrieve magnetic field condition data " + m_fieldCacheCondObjInputKey.key() + ".");
+    ATH_MSG_ERROR(name() + ": Failed to retrieve magnetic field condition data " + m_fieldCacheCondObjInputKey.key() + ".");
   }
   else ATH_MSG_DEBUG(name() << "retrieved magnetic field condition data "<< m_fieldCacheCondObjInputKey.key());
   const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};

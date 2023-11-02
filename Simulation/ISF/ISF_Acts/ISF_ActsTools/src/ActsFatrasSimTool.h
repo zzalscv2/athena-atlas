@@ -31,13 +31,14 @@
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 #include "Acts/Propagator/ActionList.hpp"
 #include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Definitions/ParticleData.hpp"
+#include "ActsFatras/EventData/ProcessType.hpp"
 #include "ActsFatras/Kernel/InteractionList.hpp"
 #include "ActsFatras/Kernel/Simulation.hpp"
 #include "ActsFatras/Kernel/SimulationResult.hpp"
 #include "ActsFatras/Physics/Decay/NoDecay.hpp"
 #include "ActsFatras/Physics/StandardInteractions.hpp"
 #include "ActsFatras/Selectors/SurfaceSelectors.hpp"
-#include "Acts/Definitions/ParticleData.hpp"
 // Tracking
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -93,8 +94,16 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
     /// parameters for propagator options
     double maxStepSize = 3.0; // leght in m
     double maxStep = 1000;
+    double maxRungeKuttaStepTrials = 10000;
     double pathLimit = 100.0; // lenght in cm
-    double ptLoopers = 300.0; // pT in MeV
+    bool   loopProtection = true;
+    double loopFraction = 0.5;
+    double targetTolerance = 0.0001;
+    double stepSizeCutOff = 0.;
+    // parameters for densEnv propagator options
+    double meanEnergyLoss = true;
+    bool   includeGgradient = true;
+    double momentumCutOff = 0.;
 
     /// Local logger for debug output.
     std::shared_ptr<const Acts::Logger> localLogger = nullptr;
@@ -106,7 +115,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
     /// Provide access to the local logger instance, e.g. for logging macros.
     const Acts::Logger &logger() const { return *localLogger; }
-    
+
     /// Simulate a single particle without secondaries.
     ///
     /// @tparam generator_t is the type of the random number generator
@@ -146,8 +155,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
           particle.fourPosition(), particle.direction(),
           particle.qOverP(), std::nullopt, particle.hypothesis());
       options.pathLimit = pathLimit * Acts::UnitConstants::cm;
-      options.loopProtection = Acts::VectorHelpers::perp(startPoint.momentum()) 
-                              < ptLoopers * Acts::UnitConstants::MeV;
+      options.loopProtection = loopProtection;
       options.maxStepSize = maxStepSize * Acts::UnitConstants::m;
       options.maxSteps = maxStep;
 
@@ -164,7 +172,11 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   // Use default navigator
   using Navigator = Acts::Navigator;
   // Propagate charged particles numerically in the B-field
-  using ChargedStepper = Acts::EigenStepper<>;
+  using ChargedStepper = Acts::EigenStepper<Acts::StepperExtensionList<
+                                            Acts::DefaultExtension,
+                                            Acts::DenseEnvironmentExtension
+                                          >
+                        >;
   using ChargedPropagator = Acts::Propagator<ChargedStepper, Navigator>;
   // Propagate neutral particles in straight lines
   using NeutralStepper = Acts::StraightLineStepper;
@@ -225,7 +237,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   // Random number service
   ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGServec", "AthRNGSvc"};
-  ATHRNG::RNGWrapper* m_randomEngine {};
+  ATHRNG::RNGWrapper* m_randomEngine ATLAS_THREAD_SAFE {};
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomEngineName",
     "RandomEngineName", "Name of random number stream"};
 
@@ -246,15 +258,33 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   Gaudi::Property<double> m_interact_minPt{this, "Interact_MinPt", 50.0,
       "Min pT of the interactions (MeV)"};
-  Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 3.0,
-      "Max step size (converted to Acts::UnitConstants::m)"};
+
+  // DensEnviroment Propergator option
+  Gaudi::Property<bool> m_meanEnergyLoss{this, "MeanEnergyLoss", true, "Toggle between mean and mode evaluation of energy loss"};
+  Gaudi::Property<bool> m_includeGgradient{this, "IncludeGgradient", true, "Boolean flag for inclusion of d(dEds)d(q/p) into energy loss"};
+  Gaudi::Property<double> m_momentumCutOff{this, "MomentumCutOff", 0., "Cut-off value for the momentum in SI units"};
+  // Propergator option
   Gaudi::Property<double> m_maxStep{this, "MaxSteps", 1000,
        "Max number of steps"};
+  Gaudi::Property<double> m_maxRungeKuttaStepTrials{this, "MaxRungeKuttaStepTrials", 10000,
+       "Maximum number of Runge-Kutta steps for the stepper step call"};
+  Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 3.0,
+      "Max step size (converted to Acts::UnitConstants::m)"};
   Gaudi::Property<double> m_pathLimit{this, "PathLimit", 100.0,
       "Track path limit (converted to Acts::UnitConstants::cm)"};
-  Gaudi::Property<double> m_ptLoopers{this, "PtLoopers", 300.0,
-      "pT loop protection threshold; adapts to pathLimit (converted to "
-      "Acts::UnitConstants::MeV)"};
+  Gaudi::Property<bool> m_loopProtection{this, "LoopProtection", true,
+      "Loop protection, it adapts the pathLimit"};
+  Gaudi::Property<double> m_loopFraction{this, "LoopFraction", 0.5,
+      "Allowed loop fraction, 1 is a full loop"};
+  Gaudi::Property<double> m_tolerance{this, "Tolerance", 0.0001,
+       "Tolerance for the error of the integration"};
+  Gaudi::Property<double> m_stepSizeCutOff{this, "StepSizeCutOff", 0.,
+       "Cut-off value for the step size"};
+
+  Gaudi::Property<std::map<int,int>> m_processTypeMap{this, "ProcessTypeMap",
+      {{0,0}, {1,201}, {2,14}, {3,3}, {4,121}}, "proessType map <ActsFatras,G4>"};
+      //{{ActsProcessType::eUndefined,0}, {ActsProcessType::eDecay,201}, {ActsProcessType::ePhotonConversion,14}, {ActsProcessType::eBremsstrahlung,3}, {ActsProcessType::eNuclearInteraction,121}}
+  inline int getATLASProcessCode(ActsFatras::ProcessType actspt){return m_processTypeMap[static_cast<uint32_t>(actspt)];};
 };
 
 }  // namespace ISF
