@@ -36,5 +36,4 @@ print StreamBS
 
 # add stream
 theApp.addOutputStream( StreamBS )
-theApp.OutStreamType ="AthenaOutputStream"
 

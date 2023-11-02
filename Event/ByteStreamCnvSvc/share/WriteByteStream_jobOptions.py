@@ -25,4 +25,3 @@ oStream = AthenaOutputStream(
     OutputFile = "ByteStreamFileOutputSvc"
     )
 theApp.addOutputStream( oStream )
-theApp.OutStreamType ="AthenaOutputStream"; 

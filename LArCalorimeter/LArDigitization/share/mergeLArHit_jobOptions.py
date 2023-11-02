@@ -128,9 +128,6 @@ ServiceMgr += minBiasEvtSel
 minBiasCache.EventSelector="minBiasEventSelector"
 pileUpEventLoopMgr.bkgCaches += [ minBiasCache ]
 
-#define output stream
-pileUpEventLoopMgr.OutStreamType = "AthenaOutputStream"
-
 #define time range to be studied. t0 at t=0, xing=0
 pileUpEventLoopMgr.XingFrequency=25;
 pileUpEventLoopMgr.firstXing=0

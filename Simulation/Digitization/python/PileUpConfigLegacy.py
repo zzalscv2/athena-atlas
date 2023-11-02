@@ -233,8 +233,6 @@ def getPileUpEventLoopMgr(name="PileUpEventLoopMgr", **kwargs):
         BackgroundCaches += [ getPrivateTool("BeamHaloCache", checkType=True) ]
 
     kwargs.setdefault('bkgCaches', BackgroundCaches )
-    #define output stream
-    kwargs.setdefault('OutStreamType', "AthenaOutputStream" )
 
     #xing frequency in ns
     kwargs.setdefault('XingFrequency', digitizationFlags.bunchSpacing() )

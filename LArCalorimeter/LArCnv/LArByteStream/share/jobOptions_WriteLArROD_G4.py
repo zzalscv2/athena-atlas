@@ -77,7 +77,6 @@ oStream = AthenaOutputStream(
     OutputFile = "ByteStreamEventStorageOutputSvc"
     )
 theApp.addOutputStream( oStream )
-theApp.OutStreamType ="AthenaOutputStream"; 
 # Define the output as follows: 
 ByteStreamEventStorageOutputSvc = svcMgr.ByteStreamEventStorageOutputSvc
 ByteStreamEventStorageOutputSvc.OutputDirectory = "./" 

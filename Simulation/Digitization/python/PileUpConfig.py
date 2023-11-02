@@ -281,8 +281,6 @@ def PileUpEventLoopMgrCfg(flags, name="PileUpEventLoopMgr", **kwargs):
     if flags.Digitization.PU.BeamHaloInputCols:
         BackgroundCaches += [acc.popToolsAndMerge(BeamHaloCacheCfg(flags))]
     kwargs.setdefault("bkgCaches", BackgroundCaches)
-    # string output stream
-    kwargs.setdefault("OutStreamType", "AthenaOutputStream")
     # xing frequency in ns
     kwargs.setdefault("XingFrequency", flags.Digitization.PU.BunchSpacing)
     # define time range to be studied. t0 at t" ,0, xing" ,0

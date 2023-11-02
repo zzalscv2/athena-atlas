@@ -126,7 +126,6 @@ multipleELM = Service("MultipleEventLoopMgr")
 #multipleELM.ToBeReinitialized = ["StoreGateSvc", "DetectorStore"]
 
 #theApp.OutStream     =["Stream1"]
-#theApp.OutStreamType ="AthenaOutputStream"
 #Stream1 = Algorithm( "Stream1" )
 #Stream1.EvtConversionSvc     ="AthenaPoolCnvSvc"
 #Stream1.OutputFile = "MultiplePassFile.root"; # ** mandatory parameter ** 

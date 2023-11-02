@@ -85,8 +85,7 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
     elmgr = CompFactory.AthenaHiveEventLoopMgr(
         WhiteboardSvc = "EventDataSvc",
-        SchedulerSvc = scheduler.getName(),
-        OutStreamType = 'AthenaOutputStream')
+        SchedulerSvc = scheduler.getName())
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
@@ -282,7 +281,6 @@ def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
     cfg.addService(CompFactory.ExceptionSvc(Catch="NONE"))
 
     # ApplicationMgr properties:
-    cfg.setAppProperty('OutStreamType', 'AthenaOutputStream')
     cfg.setAppProperty('AuditAlgorithms', True)
     cfg.setAppProperty('InitializationLoopCheck', False)
     cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)

@@ -54,7 +54,6 @@ print (oStream)
 
 # add stream
 theApp.addOutputStream( oStream )
-theApp.OutStreamType ="AthenaOutputStream"
 
 ByteStreamEventStorageOutputSvc = svcMgr.ByteStreamEventStorageOutputSvc
 ByteStreamEventStorageOutputSvc.OutputDirectory = "./"
