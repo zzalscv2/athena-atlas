@@ -45,9 +45,8 @@ atlas_add_library( FlavorTagDiscriminants
   PUBLIC_HEADERS FlavorTagDiscriminants
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils
+  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PathResolver CxxUtils nlohmann_json::nlohmann_json
   LINK_LIBRARIES ${Boost_LIBRARIES} ${LWTNN_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
-    nlohmann_json::nlohmann_json
     AsgTools
     AthContainers
     AthLinks
