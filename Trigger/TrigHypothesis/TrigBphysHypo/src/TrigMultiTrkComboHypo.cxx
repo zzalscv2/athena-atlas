@@ -729,6 +729,7 @@ StatusCode TrigMultiTrkComboHypo::processMergedElectrons(TrigMultiTrkState<xAOD:
       const auto electronFromView = electronContainer->at(i);
       if (electronFromView == electron) continue;
       if (!electronFromView->trackParticle()) continue;
+      if (!electronFromView->caloCluster() || electronFromView->caloCluster()->et() < m_caloClusterEtThreshold) continue;
       tracklist[1] = electronFromView->trackParticleLink();
 
       auto fitterState = m_vertexFitter->makeState(state.context());
