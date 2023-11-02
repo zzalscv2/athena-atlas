@@ -147,7 +147,7 @@ def EGAM2JpsieeMassTool2Cfg(flags):
     return acc
 
 
-def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
+def EGAM2KernelCfg(flags, name="EGAM2Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for EGAM2"""
     acc = ComponentAccumulator()
@@ -157,7 +157,7 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
 
     acc.merge(
         PhysCommonAugmentationsCfg(
-            ConfigFlags, TriggerListsHelper=kwargs["TriggerListsHelper"]
+            flags, TriggerListsHelper=kwargs["TriggerListsHelper"]
         )
     )
 
@@ -167,11 +167,11 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
     # ====================================================================
     # ee invariant masses
     # ====================================================================
-    EGAM2JpsieeMassTool1 = acc.popToolsAndMerge(EGAM2JpsieeMassTool1Cfg(ConfigFlags))
+    EGAM2JpsieeMassTool1 = acc.popToolsAndMerge(EGAM2JpsieeMassTool1Cfg(flags))
     acc.addPublicTool(EGAM2JpsieeMassTool1)
     augmentationTools.append(EGAM2JpsieeMassTool1)
 
-    EGAM2JpsieeMassTool2 = acc.popToolsAndMerge(EGAM2JpsieeMassTool2Cfg(ConfigFlags))
+    EGAM2JpsieeMassTool2 = acc.popToolsAndMerge(EGAM2JpsieeMassTool2Cfg(flags))
     acc.addPublicTool(EGAM2JpsieeMassTool2)
     augmentationTools.append(EGAM2JpsieeMassTool2)
 
@@ -179,33 +179,15 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
     # Gain and cluster energies per layer decoration tool
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        GainDecoratorCfg,
-        ClusterEnergyPerLayerDecoratorCfg,
-    )
-
-    EGAM2_GainDecoratorTool = acc.popToolsAndMerge(
-        GainDecoratorCfg(ConfigFlags, name="EGAM2_GainDecoratorTool")
-    )
-    acc.addPublicTool(EGAM2_GainDecoratorTool)
-    augmentationTools.append(EGAM2_GainDecoratorTool)
-
-    cluster_sizes = (3, 7), (5, 5), (7, 11)
-    for neta, nphi in cluster_sizes:
-        cename = "EGAM2_ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
-        EGAM2_ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
-            ClusterEnergyPerLayerDecoratorCfg(
-                ConfigFlags, neta=neta, nphi=nphi, name=cename
-            )
-        )
-        acc.addPublicTool(EGAM2_ClusterEnergyPerLayerDecorator)
-        augmentationTools.append(EGAM2_ClusterEnergyPerLayerDecorator)
+        CaloDecoratorKernelCfg)
+    acc.merge(CaloDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
 
     # Track thinning
-    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+    if flags.Derivation.Egamma.doTrackThinning:
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg,
             MuonTrackParticleThinningCfg,
@@ -290,7 +272,7 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
         if TrackThinningKeepMuonTracks:
             EGAM2MuonTPThinningTool = acc.getPrimaryAndMerge(
                 MuonTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM2MuonTPThinningTool",
                     StreamName=streamName,
                     MuonKey="Muons",
@@ -303,7 +285,7 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
         if TrackThinningKeepTauTracks:
             EGAM2TauTPThinningTool = acc.getPrimaryAndMerge(
                 TauTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM2TauTPThinningTool",
                     StreamName=streamName,
                     TauKey="TauJets",
@@ -326,7 +308,7 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
         if TrackThinningKeepPVTracks:
             EGAM2TPThinningTool = acc.getPrimaryAndMerge(
                 TrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM2TPThinningTool",
                     StreamName=streamName,
                     SelectionString=thinning_expression,
@@ -336,7 +318,7 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
             thinningTools.append(EGAM2TPThinningTool)
 
     # skimming
-    skimmingTool = acc.getPrimaryAndMerge(EGAM2SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.getPrimaryAndMerge(EGAM2SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -351,7 +333,7 @@ def EGAM2KernelCfg(ConfigFlags, name="EGAM2Kernel", **kwargs):
     return acc
 
 
-def EGAM2Cfg(ConfigFlags):
+def EGAM2Cfg(flags):
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -363,12 +345,12 @@ def EGAM2Cfg(ConfigFlags):
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 
-    EGAM2TriggerListsHelper = TriggerListsHelper(ConfigFlags)
+    EGAM2TriggerListsHelper = TriggerListsHelper(flags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM2KernelCfg(
-            ConfigFlags,
+            flags,
             name="EGAM2Kernel",
             StreamName="StreamDAOD_EGAM2",
             TriggerListsHelper=EGAM2TriggerListsHelper,
@@ -382,8 +364,8 @@ def EGAM2Cfg(ConfigFlags):
 
     EGAM2SlimmingHelper = SlimmingHelper(
         "EGAM2SlimmingHelper",
-        NamesAndTypes=ConfigFlags.Input.TypedCollections,
-        ConfigFlags=ConfigFlags,
+        NamesAndTypes=flags.Input.TypedCollections,
+        ConfigFlags=flags,
     )
 
     # ------------------------------------------
@@ -399,9 +381,9 @@ def EGAM2Cfg(ConfigFlags):
 
     # for trigger studies we also add:
     MenuType = None
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
-    elif ConfigFlags.Trigger.EDMVersion == 3:
+    elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
     else:
         MenuType = ""
@@ -409,7 +391,7 @@ def EGAM2Cfg(ConfigFlags):
     EGAM2SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 
     # and on MC we also add:
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM2SlimmingHelper.AllVariables += [
             "TruthEvents",
             "TruthParticles",
@@ -438,7 +420,7 @@ def EGAM2Cfg(ConfigFlags):
         "MET_Baseline_AntiKt4EMPFlow",
         "BTagging_AntiKt4EMPFlow",
     ]
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM2SlimmingHelper.SmartCollections += [
             "AntiKt4TruthJets",
             "AntiKt4TruthDressedWZJets",
@@ -485,7 +467,7 @@ def EGAM2Cfg(ConfigFlags):
     ]
 
     # truth
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM2SlimmingHelper.ExtraVariables += [
             "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
         ]
@@ -495,7 +477,7 @@ def EGAM2Cfg(ConfigFlags):
         ]
 
     # Add event info
-    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+    if flags.Derivation.Egamma.doEventInfoSlimming:
         EGAM2SlimmingHelper.SmartCollections.append("EventInfo")
     else:
         EGAM2SlimmingHelper.AllVariables += ["EventInfo"]
@@ -505,7 +487,7 @@ def EGAM2Cfg(ConfigFlags):
 
     # Add trigger matching info
     # Run 2
-    if ConfigFlags.Trigger.EDMVersion == 2:
+    if flags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper,
         )
@@ -516,7 +498,7 @@ def EGAM2Cfg(ConfigFlags):
             TriggerList=EGAM2TriggerListsHelper.Run2TriggerNamesNoTau,
         )
     # Run 3
-    if ConfigFlags.Trigger.EDMVersion == 3:
+    if flags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
             AddRun3TrigNavSlimmingCollectionsToSlimmingHelper,
         )
@@ -526,7 +508,7 @@ def EGAM2Cfg(ConfigFlags):
     EGAM2ItemList = EGAM2SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM2",
             ItemList=EGAM2ItemList,
             AcceptAlgs=["EGAM2Kernel"],
@@ -534,7 +516,7 @@ def EGAM2Cfg(ConfigFlags):
     )
     acc.merge(
         SetupMetaDataForStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM2",
             AcceptAlgs=["EGAM2Kernel"],
             createMetadata=[

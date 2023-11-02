@@ -19,8 +19,7 @@ from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
 
 
 # some info missing to calculate extra decorations
-addGainDecorations = False
-addMaxCellDecorations = False
+addCaloDecorations = False
 
 
 def EGAM12SkimmingToolCfg(flags):
@@ -39,7 +38,7 @@ def EGAM12SkimmingToolCfg(flags):
     return acc
 
 
-def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
+def EGAM12KernelCfg(flags, name="EGAM12Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for EGAM12"""
     acc = ComponentAccumulator()
@@ -56,7 +55,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
     jetList = [AntiKt4EMTopo, AntiKt4PV0Track, AntiKt4Truth]
     jetInternalFlags.isRecoJob = True
     for jd in jetList:
-        acc.merge(JetRecCfg(ConfigFlags, jd))
+        acc.merge(JetRecCfg(flags, jd))
     JetKey = "AntiKt4EMTopoJets"
 
     # Common augmentations
@@ -68,11 +67,11 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
     from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
 
-    TrackingFlags = ConfigFlags.Tracking
+    TrackingFlags = flags.Tracking
 
     acc.merge(
         InDetCommonCfg(
-            ConfigFlags,
+            flags,
             DoVertexFinding=TrackingFlags.doVertexFinding,
             AddPseudoTracks=TrackingFlags.doPseudoTracking,
             DecoLRTTTVA=False,
@@ -81,8 +80,8 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
             MergeLRT=False,
         )
     )
-    acc.merge(MuonsCommonCfg(ConfigFlags))
-    acc.merge(EGammaCommonCfg(ConfigFlags))
+    acc.merge(MuonsCommonCfg(flags))
+    acc.merge(EGammaCommonCfg(flags))
     # jet cleaning
     # standard way in PhysCommon is
     # - calculate tau ID (needed for default jet OR)
@@ -94,7 +93,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
     from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
 
     algName = "DFJet_EventCleaning_passJvtAlg"
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, "AntiKt4EMTopo"))
+    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(flags, "AntiKt4EMTopo"))
     passJvtTool.PassJVTKey = "AntiKt4EMTopoJets.DFCommonJets_passJvt"
     acc.addEventAlgo(
         CompFactory.JetDecorationAlg(
@@ -112,7 +111,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
     tauKey = ""  # workaround for missing taus
     orTool = acc.popToolsAndMerge(
         OverlapRemovalToolCfg(
-            ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel, doTaus=False
+            flags, outputLabel=outputLabel, bJetLabel=bJetLabel, doTaus=False
         )
     )
     algOR = CompFactory.OverlapRemovalGenUseAlg(
@@ -142,7 +141,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
 
         jetCleaningTool = acc.popToolsAndMerge(
             JetCleaningToolCfg(
-                ConfigFlags,
+                flags,
                 "JetCleaningTool_" + cleaningLevel,
                 "AntiKt4EMTopoJets",
                 cleaningLevel,
@@ -152,7 +151,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
         acc.addPublicTool(jetCleaningTool)
 
         ecTool = acc.popToolsAndMerge(
-            EventCleaningToolCfg(ConfigFlags, "EventCleaningTool_" + wp, cleaningLevel)
+            EventCleaningToolCfg(flags, "EventCleaningTool_" + wp, cleaningLevel)
         )
         ecTool.JetCleanPrefix = prefix
         ecTool.JetContainer = "AntiKt4EMTopoJets"
@@ -175,50 +174,19 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
     augmentationTools = []
 
     # ====================================================================
-    # Max Cell energy and time
+    # Common calo decoration tools
     # ====================================================================
-    if addMaxCellDecorations:
+    if addCaloDecorations:
         from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-            MaxCellDecoratorCfg,
-        )
-
-        MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(ConfigFlags))
-        acc.addPublicTool(MaxCellDecorator)
-        augmentationTools.append(MaxCellDecorator)
-
-    # ====================================================================
-    # Gain and cluster energies per layer decoration tool
-    # ====================================================================
-    if addGainDecorations:
-        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-            GainDecoratorCfg,
-            ClusterEnergyPerLayerDecoratorCfg,
-        )
-
-        EGAM12_GainDecoratorTool = acc.popToolsAndMerge(
-            GainDecoratorCfg(ConfigFlags, name="EGAM12_GainDecoratorTool")
-        )
-        acc.addPublicTool(EGAM12_GainDecoratorTool)
-        augmentationTools.append(EGAM12_GainDecoratorTool)
-
-        # might need some modification if cell-level reweighting is implemented
-        cluster_sizes = (3, 7), (5, 5), (7, 11)
-        for neta, nphi in cluster_sizes:
-            cename = "EGAM12_ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
-            EGAM12_ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
-                ClusterEnergyPerLayerDecoratorCfg(
-                    ConfigFlags, neta=neta, nphi=nphi, name=cename
-                )
-            )
-            acc.addPublicTool(EGAM12_ClusterEnergyPerLayerDecorator)
-            augmentationTools.append(EGAM12_ClusterEnergyPerLayerDecorator)
+            CaloDecoratorKernelCfg)
+        acc.merge(CaloDecoratorKernelCfg(flags))
 
     # thinning tools
     thinningTools = []
     streamName = kwargs["StreamName"]
 
     # Track thinning
-    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+    if flags.Derivation.Egamma.doTrackThinning:
         from DerivationFrameworkInDet.InDetToolsConfig import (
             TrackParticleThinningCfg,
             MuonTrackParticleThinningCfg,
@@ -303,7 +271,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
         if TrackThinningKeepMuonTracks:
             EGAM12MuonTPThinningTool = acc.getPrimaryAndMerge(
                 MuonTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM12MuonTPThinningTool",
                     StreamName=streamName,
                     MuonKey="Muons",
@@ -316,7 +284,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
         if TrackThinningKeepTauTracks:
             EGAM12TauTPThinningTool = acc.getPrimaryAndMerge(
                 TauTrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM12TauTPThinningTool",
                     StreamName=streamName,
                     TauKey="TauJets",
@@ -339,7 +307,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
         if TrackThinningKeepPVTracks:
             EGAM12TPThinningTool = acc.getPrimaryAndMerge(
                 TrackParticleThinningCfg(
-                    ConfigFlags,
+                    flags,
                     name="EGAM12TPThinningTool",
                     StreamName=streamName,
                     SelectionString=thinning_expression,
@@ -349,7 +317,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
             thinningTools.append(EGAM12TPThinningTool)
 
     # truth thinning
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         # W, Z and Higgs
         truth_cond_WZH = " && ".join(
             ["(abs(TruthParticles.pdgId) >= 23)", "(abs(TruthParticles.pdgId) <= 25)"]
@@ -399,7 +367,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
         thinningTools.append(EGAM12TruthThinningTool)
 
     # skimming
-    skimmingTool = acc.getPrimaryAndMerge(EGAM12SkimmingToolCfg(ConfigFlags))
+    skimmingTool = acc.getPrimaryAndMerge(EGAM12SkimmingToolCfg(flags))
 
     # setup the kernel
     acc.addEventAlgo(
@@ -414,7 +382,7 @@ def EGAM12KernelCfg(ConfigFlags, name="EGAM12Kernel", **kwargs):
     return acc
 
 
-def EGAM12Cfg(ConfigFlags):
+def EGAM12Cfg(flags):
     acc = ComponentAccumulator()
 
     JetKey = "AntiKt4EMTopoJets"
@@ -423,7 +391,7 @@ def EGAM12Cfg(ConfigFlags):
     # configure skimming/thinning/augmentation tools
     acc.merge(
         EGAM12KernelCfg(
-            ConfigFlags,
+            flags,
             name="EGAM12Kernel",
             StreamName="StreamDAOD_EGAM12",
             TriggerListsHelper=EGAM12TriggerListsHelper,
@@ -437,8 +405,8 @@ def EGAM12Cfg(ConfigFlags):
 
     EGAM12SlimmingHelper = SlimmingHelper(
         "EGAM12SlimmingHelper",
-        NamesAndTypes=ConfigFlags.Input.TypedCollections,
-        ConfigFlags=ConfigFlags,
+        NamesAndTypes=flags.Input.TypedCollections,
+        ConfigFlags=flags,
     )
 
     # ------------------------------------------
@@ -453,7 +421,7 @@ def EGAM12Cfg(ConfigFlags):
     ]
 
     # on MC we also add:
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM12SlimmingHelper.AllVariables += [
             "TruthEvents",
             "TruthParticles",
@@ -481,7 +449,7 @@ def EGAM12Cfg(ConfigFlags):
         JetKey,
     ]
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM12SlimmingHelper.SmartCollections += [
             "AntiKt4TruthJets",
             "AntiKt4TruthDressedWZJets",
@@ -512,7 +480,7 @@ def EGAM12Cfg(ConfigFlags):
     EGAM12SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
     # photons: gain and cluster energy per layer
-    if addGainDecorations:
+    if addCaloDecorations:
         from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
             getGainDecorations,
             getClusterEnergyPerLayerDecorations,
@@ -534,7 +502,7 @@ def EGAM12Cfg(ConfigFlags):
     ]
 
     # truth
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         EGAM12SlimmingHelper.ExtraVariables += [
             "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
         ]
@@ -544,7 +512,7 @@ def EGAM12Cfg(ConfigFlags):
         ]
 
     # Add event info
-    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+    if flags.Derivation.Egamma.doEventInfoSlimming:
         EGAM12SlimmingHelper.SmartCollections.append("EventInfo")
     else:
         EGAM12SlimmingHelper.AllVariables += ["EventInfo"]
@@ -556,7 +524,7 @@ def EGAM12Cfg(ConfigFlags):
     EGAM12ItemList = EGAM12SlimmingHelper.GetItemList()
     acc.merge(
         OutputStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM12",
             ItemList=EGAM12ItemList,
             AcceptAlgs=["EGAM12Kernel"],
@@ -564,7 +532,7 @@ def EGAM12Cfg(ConfigFlags):
     )
     acc.merge(
         SetupMetaDataForStreamCfg(
-            ConfigFlags,
+            flags,
             "DAOD_EGAM12",
             AcceptAlgs=["EGAM12Kernel"],
             createMetadata=[

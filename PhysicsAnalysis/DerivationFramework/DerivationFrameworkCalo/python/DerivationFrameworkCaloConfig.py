@@ -5,51 +5,89 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def MaxCellDecoratorCfg(ConfigFlags,**kwargs):
+def MaxCellDecoratorCfg(flags,**kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("SGKey_electrons", ConfigFlags.Egamma.Keys.Output.Electrons)
-    kwargs.setdefault("SGKey_photons", ConfigFlags.Egamma.Keys.Output.Photons)
+    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
     acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(**kwargs))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
+    acc.merge(LArOnOffIdMappingCfg(flags))
     return acc
 
-def GainDecoratorCfg(ConfigFlags,**kwargs):
+def GainDecoratorCfg(flags,**kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("SGKey_electrons", ConfigFlags.Egamma.Keys.Output.Electrons)
-    kwargs.setdefault("SGKey_photons", ConfigFlags.Egamma.Keys.Output.Photons)
+    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
     kwargs.setdefault("name", "GainDecor")
     acc.setPrivateTools(CompFactory.DerivationFramework.GainDecorator(**kwargs))
     return acc
 
-def EgammaCoreCellRecoveryCfg(ConfigFlags,**kwargs):
+def EgammaCoreCellRecoveryCfg(flags,**kwargs):
     acc = ComponentAccumulator()
     acc.setPrivateTools(
         CompFactory.DerivationFramework.EGammaClusterCoreCellRecovery(**kwargs))
     return acc
 
-def CaloFillRectangularClusterCfg(ConfigFlags,**kwargs):
+def CaloFillRectangularClusterCfg(flags,**kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("cells_name", ConfigFlags.Egamma.Keys.Input.CaloCells)
+    kwargs.setdefault("cells_name", flags.Egamma.Keys.Input.CaloCells)
     kwargs.setdefault("fill_cluster", True)
     acc.setPrivateTools(CompFactory.CaloFillRectangularCluster(**kwargs))
     return acc
 
-def ClusterEnergyPerLayerDecoratorCfg(ConfigFlags,**kwargs):
+def ClusterEnergyPerLayerDecoratorCfg(flags,**kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("SGKey_electrons", ConfigFlags.Egamma.Keys.Output.Electrons)
-    kwargs.setdefault("SGKey_photons", ConfigFlags.Egamma.Keys.Output.Photons)
-    kwargs.setdefault("SGKey_caloCells", ConfigFlags.Egamma.Keys.Input.CaloCells)
+    kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
+    kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
+    kwargs.setdefault("SGKey_caloCells", flags.Egamma.Keys.Input.CaloCells)
     kwargs.setdefault("neta", 5)
     kwargs.setdefault("nphi", 5)
     toolArgs = {}
     toolArgs.update({"eta_size": kwargs["neta"]})
     toolArgs.update({"phi_size": kwargs["nphi"]})
-    kwargs.setdefault("CaloFillRectangularClusterTool", acc.popToolsAndMerge(CaloFillRectangularClusterCfg(ConfigFlags,**toolArgs) ) )
+    kwargs.setdefault("CaloFillRectangularClusterTool", acc.popToolsAndMerge(CaloFillRectangularClusterCfg(flags,**toolArgs) ) )
     acc.setPrivateTools(CompFactory.DerivationFramework.ClusterEnergyPerLayerDecorator(**kwargs))
     return acc
 
-def CaloClusterThinningCfg(ConfigFlags,**kwargs):
+def MaxCellDecoratorKernelCfg(flags, name="MaxCellDecoratorKernel", **kwargs):
+    acc = ComponentAccumulator()
+
+    augmentationTools = [
+        acc.addPublicTool(acc.popToolsAndMerge(MaxCellDecoratorCfg(flags)))
+    ]
+
+    kwargs.setdefault("AugmentationTools", augmentationTools)
+
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
+    return acc
+
+def CaloDecoratorKernelCfg(flags, name="CaloDecoratorKernel", **kwargs):
+    acc = MaxCellDecoratorKernelCfg(flags)
+
+    augmentationTools = [
+        acc.addPublicTool(acc.popToolsAndMerge(GainDecoratorCfg(flags)))
+    ]
+
+    # might need some modification if cell-level reweighting is implemented
+    cluster_sizes = (3, 7), (5, 5), (7, 11)
+    for neta, nphi in cluster_sizes:
+        cename = "ClusterEnergyPerLayerDecorator_%sx%s" % (neta, nphi)
+        ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
+            ClusterEnergyPerLayerDecoratorCfg(
+                flags, neta=neta, nphi=nphi, name=cename
+            )
+        )
+        augmentationTools.append(acc.addPublicTool(
+            ClusterEnergyPerLayerDecorator))
+
+    kwargs.setdefault("AugmentationTools", augmentationTools)
+
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.DerivationKernel(name, **kwargs))
+    return acc
+
+def CaloClusterThinningCfg(flags,**kwargs):
     acc = ComponentAccumulator()
     CaloClusterThinning = CompFactory.DerivationFramework.CaloClusterThinning
     acc.addPublicTool(CaloClusterThinning(**kwargs),primary=True)
